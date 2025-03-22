@@ -1,4 +1,3 @@
-
 #ifndef ASYNC_JSON_H_
 #define ASYNC_JSON_H_
 
@@ -6,7 +5,8 @@
 
 #include "ESPAsyncWebServer.h"
 
-#define DYNAMIC_JSON_DOCUMENT_SIZE 1024
+// treat MessagePack as normal JSON responses
+#define AsyncMessagePackResponse AsyncJsonResponse
 
 constexpr const char * JSON_MIMETYPE = "application/json";
 
@@ -42,65 +42,17 @@ class ChunkPrint : public Print {
     }
 };
 
-// class PrettyAsyncJsonResponse {
-//   protected:
-//     JsonDocument _jsonBuffer;
-
-//     JsonVariant _root;
-//     bool        _isValid;
-
-//   public:
-//     PrettyAsyncJsonResponse(bool isArray = false)
-//         : _isValid{false} {
-//         if (isArray)
-//             _root = _jsonBuffer.to<JsonArray>();
-//         else
-//             _root = _jsonBuffer.add<JsonObject>();
-//     }
-
-//     ~PrettyAsyncJsonResponse() {
-//     }
-
-//     JsonVariant getRoot() {
-//         return _root;
-//     }
-
-//     bool _sourceValid() const {
-//         return _isValid;
-//     }
-
-//     size_t setLength() {
-//         return 0;
-//     }
-
-//     void setContentType(const char * s) {
-//     }
-
-//     size_t getSize() {
-//         return _jsonBuffer.size();
-//     }
-
-//     size_t _fillBuffer(uint8_t * data, size_t len) {
-//         return len;
-//     }
-
-//     void setCode(uint16_t) {
-//     }
-// };
-
 class AsyncJsonResponse {
   protected:
     JsonDocument _jsonBuffer;
     JsonVariant  _root;
     bool         _isValid;
-    bool         _isMsgPack;
     int          _code;
     size_t       _contentLength;
 
   public:
-    AsyncJsonResponse(bool isArray = false, bool isMsgPack = false)
-        : _isValid{false}
-        , _isMsgPack{isMsgPack} {
+    AsyncJsonResponse(bool isArray = false)
+        : _isValid{false} {
         _code = 200;
         if (isArray)
             _root = _jsonBuffer.to<JsonArray>();
@@ -120,7 +72,7 @@ class AsyncJsonResponse {
     }
 
     size_t setLength() {
-        _contentLength = _isMsgPack ? measureMsgPack(_root) : measureJson(_root);
+        _contentLength = measureJson(_root);
 
         if (_contentLength) {
             _isValid = true;
@@ -133,7 +85,7 @@ class AsyncJsonResponse {
     }
 
     size_t _fillBuffer(uint8_t * data, size_t len) {
-        // _isMsgPack ? serializeMsgPack(_root, data) : serializeJson(_root, data);
+        // serializeJson(_root, data);
         return len;
     }
 
@@ -155,10 +107,9 @@ class AsyncCallbackJsonWebHandler : public AsyncWebHandler {
     ArJsonRequestHandlerFunction _onRequest;
     size_t                       _contentLength;
     size_t                       _maxContentLength;
-    size_t                       _maxJsonBufferSize;
 
   public:
-    AsyncCallbackJsonWebHandler(const String & uri, ArJsonRequestHandlerFunction onRequest, size_t maxJsonBufferSize = DYNAMIC_JSON_DOCUMENT_SIZE)
+    AsyncCallbackJsonWebHandler(const String & uri, ArJsonRequestHandlerFunction onRequest = nullptr)
         : _uri(uri)
         , _method(HTTP_POST | HTTP_PUT | HTTP_PATCH)
         , _onRequest(onRequest)
@@ -170,9 +121,6 @@ class AsyncCallbackJsonWebHandler : public AsyncWebHandler {
     }
     void setMaxContentLength(int maxContentLength) {
         _maxContentLength = maxContentLength;
-    }
-    void setMaxJsonBufferSize(int maxJsonBufferSize) {
-        _maxJsonBufferSize = maxJsonBufferSize;
     }
     void onRequest(ArJsonRequestHandlerFunction fn) {
         _onRequest = fn;

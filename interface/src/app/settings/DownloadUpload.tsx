@@ -2,15 +2,14 @@ import { useState } from 'react';
 import { toast } from 'react-toastify';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
-import { Box, Button, Typography } from '@mui/material';
-import Grid from '@mui/material/Grid2';
+import { Box, Button, Grid2 as Grid, Typography } from '@mui/material';
 
 import * as SystemApi from 'api/system';
 import { API, callAction } from 'api/app';
 
 import { useRequest } from 'alova/client';
 import type { APIcall } from 'app/main/types';
-import RestartMonitor from 'app/status/RestartMonitor';
+import SystemMonitor from 'app/status/SystemMonitor';
 import {
   FormLoader,
   SectionContent,
@@ -109,6 +108,15 @@ const DownloadUpload = () => {
             {LL.SCHEDULE(0)}
           </Button>
         </Grid>
+        <Button
+          sx={{ ml: 2, mt: 2 }}
+          startIcon={<DownloadIcon />}
+          variant="outlined"
+          color="primary"
+          onClick={() => sendExportData('allvalues')}
+        >
+          {LL.ALLVALUES()}
+        </Button>
 
         <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
           {LL.UPLOAD()}
@@ -118,13 +126,13 @@ const DownloadUpload = () => {
           <Typography variant="body1">{LL.UPLOAD_TEXT()}.</Typography>
         </Box>
 
-        <SingleUpload doRestart={doRestart} />
+        <SingleUpload text={LL.UPLOAD_DRAG()} doRestart={doRestart} />
       </>
     );
   };
 
   return (
-    <SectionContent>{restarting ? <RestartMonitor /> : content()}</SectionContent>
+    <SectionContent>{restarting ? <SystemMonitor /> : content()}</SectionContent>
   );
 };
 

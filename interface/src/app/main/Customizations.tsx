@@ -16,6 +16,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Grid2 as Grid,
   InputAdornment,
   Link,
   MenuItem,
@@ -24,7 +25,6 @@ import {
   ToggleButtonGroup,
   Typography
 } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 
 import {
   Body,
@@ -38,7 +38,7 @@ import {
 import { useTheme } from '@table-library/react-table-library/theme';
 import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova/client';
-import RestartMonitor from 'app/status/RestartMonitor';
+import SystemMonitor from 'app/status/SystemMonitor';
 import {
   BlockNavigation,
   ButtonRow,
@@ -593,7 +593,7 @@ const Customizations = () => {
             </Button>
           </Grid>
           <Grid>
-            <Typography variant="subtitle2" color="primary">
+            <Typography variant="subtitle2" color="grey">
               {LL.SHOWING()}&nbsp;{shown_data.length}/{deviceEntities.length}
               &nbsp;{LL.ENTITIES(deviceEntities.length)}
             </Typography>
@@ -737,7 +737,7 @@ const Customizations = () => {
   return (
     <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
-      {restarting ? <RestartMonitor /> : renderContent()}
+      {restarting ? <SystemMonitor /> : renderContent()}
       {selectedDeviceEntity && (
         <SettingsCustomizationsDialog
           open={dialogOpen}

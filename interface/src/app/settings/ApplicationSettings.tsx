@@ -9,17 +9,17 @@ import {
   Button,
   Checkbox,
   Divider,
+  Grid2 as Grid,
   InputAdornment,
   MenuItem,
   TextField,
   Typography
 } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 
 import { readSystemStatus } from 'api/system';
 
 import { useRequest } from 'alova/client';
-import RestartMonitor from 'app/status/RestartMonitor';
+import SystemMonitor from 'app/status/SystemMonitor';
 import type { ValidateFieldsError } from 'async-validator';
 import {
   BlockFormControlLabel,
@@ -126,9 +126,6 @@ const ApplicationSettings = () => {
   const SecondsInputProps = {
     endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
   };
-  const MilliSecondsInputProps = {
-    endAdornment: <InputAdornment position="end">ms</InputAdornment>
-  };
   const MinutesInputProps = {
     endAdornment: <InputAdornment position="end">{LL.MINUTES()}</InputAdornment>
   };
@@ -207,7 +204,16 @@ const ApplicationSettings = () => {
               disabled={!hardwareData.psram}
             />
           }
-          label={LL.ENABLE_MODBUS()}
+          label={
+            <Typography color={!hardwareData.psram ? 'grey' : 'default'}>
+              {LL.ENABLE_MODBUS()}
+              {!hardwareData.psram && (
+                <Typography variant="caption">
+                  &nbsp; &#40;{LL.IS_REQUIRED('PSRAM')}&#41;
+                </Typography>
+              )}
+            </Typography>
+          }
         />
         {data.modbus_enabled && (
           <Grid container spacing={2} rowSpacing={0}>
@@ -241,7 +247,7 @@ const ApplicationSettings = () => {
                 name="modbus_timeout"
                 label="Timeout"
                 slotProps={{
-                  input: MilliSecondsInputProps
+                  input: SecondsInputProps
                 }}
                 variant="outlined"
                 value={numberValue(data.modbus_timeout)}
@@ -544,6 +550,23 @@ const ApplicationSettings = () => {
                   margin="normal"
                 />
               </Grid>
+              {data.led_gpio !== 0 && (
+                <Grid>
+                  <TextField
+                    name="led_type"
+                    label={'LED ' + LL.TYPE()}
+                    value={data.led_type}
+                    fullWidth
+                    variant="outlined"
+                    onChange={updateFormValue}
+                    margin="normal"
+                    select
+                  >
+                    <MenuItem value={0}>LED</MenuItem>
+                    <MenuItem value={1}>RGB-LED</MenuItem>
+                  </TextField>
+                </Grid>
+              )}
               <Grid>
                 <TextField
                   name="phy_type"
@@ -853,7 +876,7 @@ const ApplicationSettings = () => {
   return (
     <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
-      {restarting ? <RestartMonitor /> : content()}
+      {restarting ? <SystemMonitor /> : content()}
     </SectionContent>
   );
 };

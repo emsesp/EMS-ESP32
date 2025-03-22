@@ -382,10 +382,7 @@ export const entityItemValidation = (entity: EntityItem[], entityItem: EntityIte
       { required: true, message: 'Offset is required' },
       { type: 'number', min: 0, max: 255, message: 'Must be between 0 and 255' }
     ],
-    factor: [
-      { required: true, message: 'is required' },
-      { type: 'number', message: 'Must be a number' }
-    ]
+    factor: [{ required: true, message: 'is required' }]
   });
 
 export const uniqueTemperatureNameValidator = (

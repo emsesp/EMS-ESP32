@@ -16,12 +16,22 @@ T := $(shell $(MAKE) $(MAKECMDGOALS) --no-print-directory \
       ECHO="COUNTTHIS" | grep -c "COUNTTHIS")
 N := x
 C = $(words $N)$(eval N := x $N)
-ECHO = python $(I)/echo_progress.py --stepno=$C --nsteps=$T
+ECHO = python3 $(I)/scripts/echo_progress.py --stepno=$C --nsteps=$T
 endif
 
-# number of parallel compiles
-JOBS ?= $(shell nproc)
+# determine number of parallel compiles based on OS
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+    EXTRA_CPPFLAGS = -D LINUX
+	JOBS ?= $(shell nproc)
+endif
+ifeq ($(UNAME_S),Darwin)
+    EXTRA_CPPFLAGS = -D OSX -Wno-tautological-constant-out-of-range-compare
+	JOBS ?= $(shell sysctl -n hw.ncpu)
+endif
 MAKEFLAGS += -j $(JOBS) -l $(JOBS)
+
+# $(info Number of jobs: $(JOBS))
 
 #----------------------------------------------------------------------
 # Project Structure
@@ -32,26 +42,20 @@ MAKEFLAGS += -j $(JOBS) -l $(JOBS)
 # INCLUDES  is a list of directories containing header files
 # LIBRARIES is a list of directories containing libraries, this must be the top level containing include and lib
 #----------------------------------------------------------------------
-
-#TARGET    := $(notdir $(CURDIR))
 TARGET    := emsesp
 BUILD     := build
-SOURCES   := src src/* lib_standalone lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src src/devices lib/ArduinoJson/src lib/PButton lib/semver lib/espMqttClient/src lib/espMqttClient/src/*
-INCLUDES  := src lib_standalone lib/espMqttClient/src lib/espMqttClient/src/Transport lib/ArduinoJson/src lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src lib/uuid-telnet/src lib/uuid-syslog/src lib/semver lib/* src/devices
+SOURCES   := src/core src/devices src/web src/test       lib_standalone lib/semver lib/espMqttClient/src lib/espMqttClient/src/*         lib/ArduinoJson/src lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src   lib/PButton 
+INCLUDES  := src/core src/devices src/web src/test lib/* lib_standalone lib/semver lib/espMqttClient/src lib/espMqttClient/src/Transport lib/ArduinoJson/src lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src   lib/uuid-telnet/src lib/uuid-syslog/src
 LIBRARIES :=
 
 CPPCHECK = cppcheck
-# CHECKFLAGS = -q --force --std=c++17
-CHECKFLAGS = -q --force --std=c++11
+CHECKFLAGS = -q --force --std=gnu++17
 
 #----------------------------------------------------------------------
 # Languages Standard
 #----------------------------------------------------------------------
 C_STANDARD   := -std=c17
-CXX_STANDARD := -std=gnu++14
-
-# C_STANDARD   := -std=c11
-# CXX_STANDARD := -std=c++11
+CXX_STANDARD := -std=gnu++17
 
 #----------------------------------------------------------------------
 # Defined Symbols
@@ -60,7 +64,7 @@ DEFINES += -DARDUINOJSON_ENABLE -DARDUINOJSON_ENABLE_ARDUINO_STRING -DARDUINOJSO
 DEFINES += -DEMSESP_STANDALONE -DEMSESP_TEST -DEMSESP_DEBUG -DEMC_RX_BUFFER_SIZE=1500
 DEFINES += $(ARGS)
 
-DEFAULTS = -DEMSESP_DEFAULT_LOCALE=\"en\" -DEMSESP_DEFAULT_TX_MODE=8 -DEMSESP_DEFAULT_VERSION=\"3.7.1-dev\" -DEMSESP_DEFAULT_BOARD_PROFILE=\"S3\"
+DEFAULTS = -DEMSESP_DEFAULT_LOCALE=\"en\" -DEMSESP_DEFAULT_TX_MODE=8 -DEMSESP_DEFAULT_VERSION=\"3.7.3-dev\" -DEMSESP_DEFAULT_BOARD_PROFILE=\"S32S3\"
 
 #----------------------------------------------------------------------
 # Sources & Files
@@ -94,14 +98,19 @@ CXX := /usr/bin/g++
 # LDFLAGS   Linker Flags
 #----------------------------------------------------------------------
 CPPFLAGS  += $(DEFINES) $(DEFAULTS) $(INCLUDE)
-CPPFLAGS  += -ggdb
-CPPFLAGS  += -g3
-CPPFLAGS  += -Os
+CPPFLAGS  += -ggdb -g3 -O3
+CPPFLAGS  += -MMD
+CPPFLAGS  += -flto=auto -fno-lto
+CPPFLAGS  += -Wall -Wextra -Werror
+CPPFLAGS  += -Wswitch-enum
+CPPFLAGS  += -Wno-unused-parameter
+CPPFLAGS  += -Wno-missing-braces
+
+CPPFLAGS  += $(EXTRA_CPPFLAGS)
 
 CFLAGS    += $(CPPFLAGS)
-CFLAGS    += -Wall -Wextra -Werror -Wswitch-enum
-CFLAGS    += -Wno-tautological-constant-out-of-range-compare -Wno-unused-parameter -Wno-inconsistent-missing-override -Wno-missing-braces -Wno-unused-lambda-capture -Wno-sign-compare
-CXXFLAGS  += $(CFLAGS) -MMD
+CXXFLAGS  += $(CPPFLAGS)
+LDFLAGS =
 
 #----------------------------------------------------------------------
 # Compiler & Linker Commands
@@ -142,7 +151,7 @@ COMPILE.cpp = $(CXX) $(CXX_STANDARD) $(CXXFLAGS) $(DEPFLAGS) -c $< -o $@
 .SILENT: $(OUTPUT)
 
 all: $(OUTPUT)
-	@$(ECHO) All done
+	@$(ECHO) Build complete.
 
 $(OUTPUT): $(OBJS)
 	@mkdir -p $(@D)

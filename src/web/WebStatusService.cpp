@@ -27,15 +27,22 @@ namespace emsesp {
 WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager) {
     // GET
-    server->on(EMSESP_SYSTEM_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { systemStatus(request); });
+    securityManager->addEndpoint(server, EMSESP_SYSTEM_STATUS_SERVICE_PATH, AuthenticationPredicates::IS_AUTHENTICATED, [this](AsyncWebServerRequest * request) {
+        systemStatus(request);
+    });
 
-    // POST - generic action handler
-    server->on(EMSESP_ACTION_SERVICE_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { action(request, json); });
+    // POST - generic action handler, handles both GET and POST
+    securityManager->addEndpoint(
+        server,
+        EMSESP_ACTION_SERVICE_PATH,
+        AuthenticationPredicates::IS_AUTHENTICATED,
+        [this](AsyncWebServerRequest * request, JsonVariant json) { action(request, json); },
+        HTTP_ANY);
 }
 
 // /rest/systemStatus
 // This contains both system & hardware Status to avoid having multiple costly endpoints
-// This is also used for polling during the RestartMonitor to see if EMS-ESP is alive
+// This is also used for polling during the SystemMonitor to see if EMS-ESP is alive
 void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     EMSESP::system_.refreshHeapMem(); // refresh free heap and max alloc heap
 
@@ -58,19 +65,23 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     root["mqtt_status"]    = EMSESP::mqtt_.connected();
 
 #ifndef EMSESP_STANDALONE
-    root["ntp_status"] = [] {
-        if (esp_sntp_enabled()) {
-            if (emsesp::EMSESP::system_.ntp_connected()) {
-                return 2;
-            } else {
-                return 1;
-            }
+    uint8_t ntp_status = 0; // 0=disabled, 1=enabled, 2=connected
+    if (esp_sntp_enabled()) {
+        ntp_status = (emsesp::EMSESP::system_.ntp_connected()) ? 2 : 1;
+    }
+    root["ntp_status"] = ntp_status;
+    if (ntp_status == 2) {
+        // send back actual time if NTP enabled and active
+        time_t now = time(nullptr);
+        if (now > 1500000000L) {
+            char t[25];
+            strftime(t, sizeof(t), "%FT%T", localtime(&now));
+            root["ntp_time"] = t; // optional string
         }
-        return 0;
-    }();
+    }
 #endif
 
-    root["ap_status"] = EMSESP::esp8266React.apStatus();
+    root["ap_status"] = EMSESP::esp32React.apStatus();
 
     if (emsesp::EMSESP::system_.ethernet_connected()) {
         root["network_status"] = 10; // custom code #10 - ETHERNET_STATUS_CONNECTED
@@ -119,8 +130,8 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
         root["free_psram"] = ESP.getFreePsram() / 1024;
     }
     root["model"] = EMSESP::system_.getBBQKeesGatewayDetails();
-#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
-    root["temperature"] = EMSESP::system_.temperature();
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32
+    root["temperature"] = Helpers::transformNumFloat(EMSESP::system_.temperature(), 0, EMSESP::system_.fahrenheit() ? 2 : 0); // only 2 decimal places
 #endif
 
     // check for a factory partition first
@@ -135,12 +146,11 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
         root["has_partition"] = false;
     }
 
-    // Matches status codes in RestartMonitor.tsx
-    if (EMSESP::system_.restart_pending()) {
-        root["status"] = "restarting";
-        EMSESP::system_.restart_requested(true); // tell emsesp loop to start restart
-    } else {
-        root["status"] = EMSESP::system_.upload_isrunning() ? "uploading" : "ready";
+    // Also used in SystemMonitor.tsx
+    root["status"] = EMSESP::system_.systemStatus(); // send the status. See System.h for status codes
+    if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_PENDING_RESTART) {
+        // we're ready to do the actual restart ASAP
+        EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED);
     }
 
 #endif
@@ -183,6 +193,8 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
         ok = getCustomSupport(root);
     } else if (action == "uploadURL" && is_admin) {
         ok = uploadURL(param.c_str());
+    } else if (action == "systemStatus" && is_admin) {
+        ok = setSystemStatus(param.c_str());
     }
 
 #if defined(EMSESP_STANDALONE) && !defined(EMSESP_UNITY)
@@ -192,12 +204,14 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
     Serial.println(COLOR_RESET);
 #endif
 
-    // send response
+    // check for error
     if (!ok) {
-        request->send(400);
+        emsesp::EMSESP::logger().err("Action '%s' failed", action.c_str());
+        request->send(400); // bad request
         return;
     }
 
+    // send response
     response->setLength();
     request->send(response);
 }
@@ -211,7 +225,7 @@ bool WebStatusService::checkUpgrade(JsonObject root, std::string & versions) {
 #else
     // for testing only - see api3 test in test.cpp
     // current_version_s = "3.6.5";
-    current_version_s = "3.7.1-dev.8";
+    current_version_s = "3.7.2-dev.1";
 #endif
 
     if (!versions.empty()) {
@@ -244,7 +258,7 @@ bool WebStatusService::checkUpgrade(JsonObject root, std::string & versions) {
 }
 
 // action = allvalues
-// output all the devices and the values
+// output all the devices and their values, including custom entities, scheduler and sensors
 void WebStatusService::allvalues(JsonObject output) {
     JsonObject device_output;
     auto       value = F_(values);
@@ -345,6 +359,13 @@ bool WebStatusService::getCustomSupport(JsonObject root) {
 bool WebStatusService::uploadURL(const char * url) {
     // this will keep a copy of the URL, but won't initiate the download yet
     emsesp::EMSESP::system_.uploadFirmwareURL(url);
+    return true;
+}
+
+// action = systemStatus
+// sets the system status
+bool WebStatusService::setSystemStatus(const char * status) {
+    emsesp::EMSESP::system_.systemStatus(Helpers::atoint(status));
     return true;
 }
 

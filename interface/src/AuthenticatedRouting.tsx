@@ -15,7 +15,6 @@ import DownloadUpload from 'app/settings/DownloadUpload';
 import MqttSettings from 'app/settings/MqttSettings';
 import NTPSettings from 'app/settings/NTPSettings';
 import Settings from 'app/settings/Settings';
-import Version from 'app/settings/Version';
 import Network from 'app/settings/network/Network';
 import Security from 'app/settings/security/Security';
 import APStatus from 'app/status/APStatus';
@@ -26,6 +25,7 @@ import NTPStatus from 'app/status/NTPStatus';
 import NetworkStatus from 'app/status/NetworkStatus';
 import Status from 'app/status/Status';
 import SystemLog from 'app/status/SystemLog';
+import Version from 'app/status/Version';
 import { Layout } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 
@@ -48,17 +48,17 @@ const AuthenticatedRouting = () => {
         <Route path="/status/ntp" element={<NTPStatus />} />
         <Route path="/status/ap" element={<APStatus />} />
         <Route path="/status/network" element={<NetworkStatus />} />
+        <Route path="/status/version" element={<Version />} />
 
         {me.admin && (
           <>
             <Route path="/settings" element={<Settings />} />
-            <Route path="/settings/version" element={<Version />} />
             <Route path="/settings/application" element={<ApplicationSettings />} />
             <Route path="/settings/mqtt" element={<MqttSettings />} />
             <Route path="/settings/ntp" element={<NTPSettings />} />
             <Route path="/settings/ap" element={<APSettings />} />
             <Route path="/settings/modules" element={<Modules />} />
-            <Route path="/settings/upload" element={<DownloadUpload />} />
+            <Route path="/settings/downloadUpload" element={<DownloadUpload />} />
 
             <Route path="/settings/network/*" element={<Network />} />
             <Route path="/settings/security/*" element={<Security />} />

@@ -1,27 +1,44 @@
 import { useEffect, useState } from 'react';
-import { Slide, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.min.css';
+import { ToastContainer, Zoom } from 'react-toastify';
 
 import AppRouting from 'AppRouting';
 import CustomTheme from 'CustomTheme';
 import TypesafeI18n from 'i18n/i18n-react';
-import { detectLocale } from 'i18n/i18n-util';
+import type { Locales } from 'i18n/i18n-types';
 import { loadLocaleAsync } from 'i18n/i18n-util.async';
-import { localStorageDetector } from 'typesafe-i18n/detectors';
+import { detectLocale, navigatorDetector } from 'typesafe-i18n/detectors';
 
-const detectedLocale = detectLocale(localStorageDetector);
+const availableLocales = [
+  'de',
+  'en',
+  'it',
+  'fr',
+  'nl',
+  'no',
+  'pl',
+  'sk',
+  'sv',
+  'tr',
+  'cz'
+];
 
 const App = () => {
   const [wasLoaded, setWasLoaded] = useState(false);
+  const [locale, setLocale] = useState<Locales>('en');
 
   useEffect(() => {
-    void loadLocaleAsync(detectedLocale).then(() => setWasLoaded(true));
+    // determine locale, take from session if set other default to browser language
+    const browserLocale = detectLocale('en', availableLocales, navigatorDetector);
+    const newLocale = (localStorage.getItem('lang') || browserLocale) as Locales;
+    localStorage.setItem('lang', newLocale);
+    setLocale(newLocale);
+    void loadLocaleAsync(newLocale).then(() => setWasLoaded(true));
   }, []);
 
   if (!wasLoaded) return null;
 
   return (
-    <TypesafeI18n locale={detectedLocale}>
+    <TypesafeI18n locale={locale}>
       <CustomTheme>
         <AppRouting />
         <ToastContainer
@@ -29,14 +46,17 @@ const App = () => {
           autoClose={3000}
           hideProgressBar={false}
           newestOnTop={false}
-          closeOnClick={true}
+          closeOnClick
           rtl={false}
-          pauseOnFocusLoss={false}
+          pauseOnFocusLoss
           draggable={false}
           pauseOnHover={false}
-          transition={Slide}
+          transition={Zoom}
           closeButton={false}
-          theme="light"
+          theme="dark"
+          toastStyle={{
+            border: '1px solid #177ac9'
+          }}
         />
       </CustomTheme>
     </TypesafeI18n>

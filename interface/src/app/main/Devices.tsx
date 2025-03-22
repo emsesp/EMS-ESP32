@@ -10,15 +10,16 @@ import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
 
 import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
+import ConstructionIcon from '@mui/icons-material/Construction';
 import EditIcon from '@mui/icons-material/Edit';
 import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
-import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import DownloadIcon from '@mui/icons-material/GetApp';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import SearchIcon from '@mui/icons-material/Search';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
 import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
@@ -30,17 +31,16 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Grid2 as Grid,
   IconButton,
+  InputAdornment,
   List,
   ListItem,
   ListItemText,
-  Tooltip,
-  type TooltipProps,
-  Typography,
-  styled,
-  tooltipClasses
+  TextField,
+  ToggleButton,
+  Typography
 } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 
 import { useRowSelect } from '@table-library/react-table-library/select';
 import { SortToggleType, useSort } from '@table-library/react-table-library/sort';
@@ -57,7 +57,12 @@ import { useTheme } from '@table-library/react-table-library/theme';
 import type { Action, State } from '@table-library/react-table-library/types/common';
 import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova/client';
-import { MessageBox, SectionContent, useLayoutTitle } from 'components';
+import {
+  ButtonTooltip,
+  MessageBox,
+  SectionContent,
+  useLayoutTitle
+} from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { useInterval } from 'utils';
@@ -80,6 +85,7 @@ const Devices = () => {
   const [deviceValueDialogOpen, setDeviceValueDialogOpen] = useState(false);
   const [showDeviceInfo, setShowDeviceInfo] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState<number>();
+  const [search, setSearch] = useState('');
 
   const navigate = useNavigate();
 
@@ -221,20 +227,6 @@ const Devices = () => {
     }
   ]);
 
-  const ButtonTooltip = styled(({ className, ...props }: TooltipProps) => (
-    <Tooltip {...props} arrow classes={{ popper: className }} />
-  ))(({ theme }) => ({
-    [`& .${tooltipClasses.arrow}`]: {
-      color: theme.palette.success.main
-    },
-    [`& .${tooltipClasses.tooltip}`]: {
-      backgroundColor: theme.palette.success.main,
-      color: 'rgba(0, 0, 0, 0.87)',
-      boxShadow: theme.shadows[1],
-      fontSize: 10
-    }
-  }));
-
   const getSortIcon = (state: State, sortKey: unknown) => {
     if (state.sortKey === sortKey && state.reverse) {
       return <KeyboardArrowDownOutlinedIcon />;
@@ -284,6 +276,7 @@ const Devices = () => {
 
   const resetDeviceSelect = () => {
     device_select.fns.onRemoveAll();
+    setSearch('');
   };
 
   const escFunction = useCallback(
@@ -419,7 +412,7 @@ const Devices = () => {
     if (!deviceValueDialogOpen) {
       selectedDevice ? void sendDeviceData(selectedDevice) : void sendCoreData();
     }
-  }, 3000);
+  });
 
   const deviceValueDialogSave = async (devicevalue: DeviceValue) => {
     const id = Number(device_select.state.id);
@@ -522,7 +515,7 @@ const Devices = () => {
       <IconContext.Provider
         value={{
           color: 'lightblue',
-          size: '16',
+          size: '18',
           style: { verticalAlign: 'middle' }
         }}
       >
@@ -604,8 +597,12 @@ const Devices = () => {
     );
 
     const shown_data = onlyFav
-      ? deviceData.nodes.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE))
-      : deviceData.nodes;
+      ? deviceData.nodes.filter(
+          (dv) =>
+            hasMask(dv.id, DeviceEntityMask.DV_FAVORITE) &&
+            dv.id.slice(2).includes(search)
+        )
+      : deviceData.nodes.filter((dv) => dv.id.slice(2).includes(search));
 
     const deviceIndex = coreData.devices.findIndex(
       (d) => d.id === device_select.state.id
@@ -628,56 +625,84 @@ const Devices = () => {
           border: '1px solid #177ac9'
         }}
       >
-        <Box sx={{ border: '1px solid #177ac9' }}>
-          <Typography noWrap variant="subtitle1" color="warning.main" sx={{ ml: 1 }}>
-            {coreData.devices[deviceIndex].n}&nbsp;(
-            {coreData.devices[deviceIndex].tn})
-          </Typography>
-
+        <Box sx={{ p: 1 }}>
           <Grid container justifyContent="space-between">
-            <Typography sx={{ ml: 1 }} variant="subtitle2" color="grey">
-              {LL.SHOWING() +
-                ' ' +
-                shown_data.length +
-                '/' +
-                coreData.devices[deviceIndex].e +
-                ' ' +
-                LL.ENTITIES(shown_data.length)}
-              <ButtonTooltip title="Info">
-                <IconButton onClick={() => setShowDeviceInfo(true)}>
-                  <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
-                </IconButton>
-              </ButtonTooltip>
-              {me.admin && (
-                <ButtonTooltip title={LL.CUSTOMIZATIONS()}>
-                  <IconButton onClick={customize}>
-                    <FormatListNumberedIcon color="primary" sx={{ fontSize: 18 }} />
-                  </IconButton>
-                </ButtonTooltip>
-              )}
-              <ButtonTooltip title={LL.EXPORT()}>
-                <IconButton onClick={handleDownloadCsv}>
-                  <DownloadIcon color="primary" sx={{ fontSize: 18 }} />
-                </IconButton>
-              </ButtonTooltip>
-              <ButtonTooltip title={LL.FAVORITES()}>
-                <IconButton onClick={() => setOnlyFav(!onlyFav)}>
-                  {onlyFav ? (
-                    <StarIcon color="primary" sx={{ fontSize: 18 }} />
-                  ) : (
-                    <StarBorderOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
-                  )}
-                </IconButton>
-              </ButtonTooltip>
+            <Typography noWrap variant="subtitle1" color="warning.main">
+              {coreData.devices[deviceIndex].n}&nbsp;(
+              {coreData.devices[deviceIndex].tn})
             </Typography>
             <Grid justifyContent="flex-end">
-              <ButtonTooltip title={LL.CANCEL()}>
+              <ButtonTooltip title={LL.CLOSE()}>
                 <IconButton onClick={resetDeviceSelect}>
                   <HighlightOffIcon color="primary" sx={{ fontSize: 18 }} />
                 </IconButton>
               </ButtonTooltip>
             </Grid>
           </Grid>
+
+          <TextField
+            size="small"
+            variant="outlined"
+            sx={{ width: '22ch' }}
+            placeholder={LL.SEARCH()}
+            onChange={(event) => {
+              setSearch(event.target.value);
+            }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon color="primary" sx={{ fontSize: 16 }} />
+                  </InputAdornment>
+                )
+              }
+            }}
+          />
+          <ButtonTooltip title={LL.DEVICE_DETAILS()}>
+            <IconButton onClick={() => setShowDeviceInfo(true)}>
+              <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
+            </IconButton>
+          </ButtonTooltip>
+          {me.admin && (
+            <ButtonTooltip title={LL.CUSTOMIZATIONS()}>
+              <IconButton onClick={customize}>
+                <ConstructionIcon color="primary" sx={{ fontSize: 18 }} />
+              </IconButton>
+            </ButtonTooltip>
+          )}
+          <ButtonTooltip title={LL.EXPORT()}>
+            <IconButton onClick={handleDownloadCsv}>
+              <DownloadIcon color="primary" sx={{ fontSize: 18 }} />
+            </IconButton>
+          </ButtonTooltip>
+
+          <ButtonTooltip title={LL.FAVORITES()}>
+            <ToggleButton
+              value="1"
+              size="small"
+              selected={onlyFav}
+              onChange={() => {
+                setOnlyFav(!onlyFav);
+              }}
+            >
+              {onlyFav ? (
+                <StarIcon color="primary" sx={{ fontSize: 18 }} />
+              ) : (
+                <StarBorderOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
+              )}{' '}
+            </ToggleButton>
+          </ButtonTooltip>
+
+          <span style={{ color: 'grey', fontSize: '12px' }}>
+            &nbsp;
+            {LL.SHOWING() +
+              ' ' +
+              shown_data.length +
+              '/' +
+              coreData.devices[deviceIndex].e +
+              ' ' +
+              LL.ENTITIES(shown_data.length)}
+          </span>
         </Box>
 
         <Table

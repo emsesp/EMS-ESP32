@@ -2,6 +2,15 @@ import type { busConnectionStatus } from 'app/main/types';
 
 import type { NetworkConnectionStatus } from './network';
 
+export enum SystemStatusCodes {
+  SYSTEM_STATUS_NORMAL = 0,
+  SYSTEM_STATUS_PENDING_UPLOAD = 1,
+  SYSTEM_STATUS_UPLOADING = 100,
+  SYSTEM_STATUS_ERROR_UPLOAD = 3,
+  SYSTEM_STATUS_PENDING_RESTART = 4,
+  SYSTEM_STATUS_RESTART_REQUESTED = 5
+}
+
 export interface SystemStatus {
   emsesp_version: string;
   bus_status: busConnectionStatus;
@@ -11,6 +20,7 @@ export interface SystemStatus {
   num_sensors: number;
   num_analogs: number;
   ntp_status: number;
+  ntp_time?: string;
   mqtt_status: boolean;
   ap_status: boolean;
   network_status: NetworkConnectionStatus;
@@ -40,7 +50,7 @@ export interface SystemStatus {
   model: string;
   has_loader: boolean;
   has_partition: boolean;
-  status: string;
+  status: number; // SystemStatusCodes which matches SYSTEM_STATUS in System.h
   temperature?: number;
 }
 

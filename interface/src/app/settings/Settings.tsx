@@ -1,7 +1,6 @@
 import { useState } from 'react';
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import BuildIcon from '@mui/icons-material/Build';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import ImportExportIcon from '@mui/icons-material/ImportExport';
@@ -21,7 +20,7 @@ import {
   List
 } from '@mui/material';
 
-import { API, callAction } from 'api/app';
+import { API } from 'api/app';
 
 import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova/client';
@@ -38,11 +37,6 @@ const Settings = () => {
 
   const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
     immediate: false
-  });
-
-  // call checkUpgrade with no param to fetch EMS-ESP version
-  const { data } = useRequest(() => callAction({ action: 'checkUpgrade' }), {
-    initialData: { emsesp_version: '...' }
   });
 
   const doFormat = async () => {
@@ -83,14 +77,6 @@ const Settings = () => {
   const content = () => (
     <>
       <List sx={{ borderRadius: 3, border: '2px solid grey' }}>
-        <ListMenuItem
-          icon={BuildIcon}
-          bgcolor="#72caf9"
-          label="EMS-ESP Firmware"
-          text={'v' + data.emsesp_version}
-          to="version"
-        />
-
         <ListMenuItem
           icon={TuneIcon}
           bgcolor="#134ba2"
@@ -151,7 +137,7 @@ const Settings = () => {
           bgcolor="#5d89f7"
           label={LL.DOWNLOAD_UPLOAD()}
           text={LL.DOWNLOAD_UPLOAD_1()}
-          to="upload"
+          to="downloadUpload"
         />
       </List>
 

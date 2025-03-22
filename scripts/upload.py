@@ -19,6 +19,8 @@ import requests
 import hashlib
 from urllib.parse import urlparse
 import time
+import os
+
 Import("env")
 
 try:
@@ -65,7 +67,7 @@ def on_upload(source, target, env):
         'Host': host_ip,
         'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/118.0',
         'Accept': '*/*',
-        'Accept-Language': 'de,en-US;q=0.7,en;q=0.3',
+        'Accept-Language': 'en-US',
         'Accept-Encoding': 'gzip, deflate',
         'Referer': f'{emsesp_url}',
         'Content-Type': 'application/json',
@@ -116,7 +118,7 @@ def on_upload(source, target, env):
             'Host': host_ip,
             'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/118.0',
             'Accept': '*/*',
-            'Accept-Language': 'de,en-US;q=0.7,en;q=0.3',
+            'Accept-Language': 'en-US',
             'Accept-Encoding': 'gzip, deflate',
             'Referer': f'{emsesp_url}',
             'Connection': 'keep-alive',
@@ -144,7 +146,7 @@ def on_upload(source, target, env):
                 'Host': host_ip,
                 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/118.0',
                 'Accept': '*/*',
-                'Accept-Language': 'de,en-US;q=0.7,en;q=0.3',
+                'Accept-Language': 'en-US',
                 'Accept-Encoding': 'gzip, deflate',
                 'Referer': f'{emsesp_url}',
                 'Content-Type': 'application/json',
@@ -160,4 +162,5 @@ def on_upload(source, target, env):
         print()
 
 
-env.Replace(UPLOADCMD=on_upload)
+if env.get('UPLOAD_PROTOCOL') == 'custom':
+    env.Replace(UPLOADCMD=on_upload)

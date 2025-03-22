@@ -28,6 +28,10 @@
     "**/i18n/**", 
     "/project-words.txt",
     "Makefile",
-    "src/modbus_entity_parameters.hpp"
+    "**/*.ini",
+    "**/*.json",
+    "src/core/modbus_entity_parameters.hpp",
+    "sdkconfig.*",
+    "managed_components/**"
   ]
   }

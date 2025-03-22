@@ -1,23 +1,8 @@
 import { Encoder } from '@msgpack/msgpack';
-import { AutoRouter, type ResponseHandler, error, status } from 'itty-router';
+import { AutoRouter, status } from 'itty-router';
 
 const encoder = new Encoder();
-
-const logger: ResponseHandler = (response, request) => {
-  console.log(
-    response.status,
-    request.url,
-    request.method,
-    'at',
-    new Date().toLocaleString()
-  );
-};
-
-const router = AutoRouter({
-  port: 3080,
-  missing: () => error(404, 'Error, endpoint not found')
-  // finally: [logger]
-});
+const router = AutoRouter();
 
 const REST_ENDPOINT_ROOT = '/rest/';
 const API_ENDPOINT_ROOT = '/api/';
@@ -29,16 +14,117 @@ const headers = {
   'Content-type': 'application/msgpack'
 };
 
-let VERSION_IS_UPGRADEABLE;
+// EMS-ESP Application Settings
+let settings = {
+  locale: 'en',
+  tx_mode: 1,
+  ems_bus_id: 11,
+  syslog_enabled: false,
+  syslog_level: 3,
+  trace_raw: false,
+  syslog_mark_interval: 0,
+  syslog_host: '192.168.1.8',
+  syslog_port: 514,
+  boiler_heatingoff: false,
+  remote_timeout: 24,
+  remote_timeout_en: false,
+  shower_timer: true,
+  shower_alert: false,
+  shower_alert_coldshot: 10,
+  shower_alert_trigger: 7,
+  shower_min_duration: 180,
+  rx_gpio: 4,
+  tx_gpio: 5,
+  dallas_gpio: 14,
+  dallas_parasite: false,
+  led_gpio: 2,
+  hide_led: true,
+  low_clock: false,
+  telnet_enabled: true,
+  notoken_api: false,
+  readonly_mode: false,
+  analog_enabled: true,
+  pbutton_gpio: 34,
+  solar_maxflow: 30,
+  board_profile: 'E32V2',
+  fahrenheit: false,
+  bool_format: 1,
+  bool_dashboard: 1,
+  enum_format: 1,
+  weblog_level: 6,
+  weblog_buffer: 50,
+  weblog_compact: true,
+  phy_type: 1,
+  eth_power: 15,
+  eth_phy_addr: 0,
+  eth_clock_mode: 1,
+  platform: 'ESP32',
+  modbus_enabled: false,
+  modbus_port: 502,
+  modbus_max_clients: 10,
+  modbus_timeout: 10000,
+  developer_mode: true
+};
+
+// EMS-ESP System Settings
+let system_status = {
+  emsesp_version: 'XX.XX.XX', // defined later
+  bus_status: 0,
+  uptime: 77186,
+  bus_uptime: 77121,
+  num_devices: 2,
+  num_sensors: 1,
+  num_analogs: 1,
+  free_heap: 143,
+  ntp_status: 2,
+  ntp_time: '2021-04-01T14:25:42Z',
+  mqtt_status: true,
+  ap_status: false,
+  network_status: 3, // wifi connected
+  // network_status: 10, // ethernet connected
+  // network_status: 6, // wifi disconnected
+  wifi_rssi: -41,
+  esp_platform: 'ESP32S3',
+  build_flags: 'DEMO',
+  cpu_type: 'ESP32-S3',
+  cpu_rev: 0,
+  cpu_cores: 2,
+  cpu_freq_mhz: 240,
+  max_alloc_heap: 191,
+  arduino_version: 'ESP32 Arduino v2.0.17',
+  sdk_version: 'v4.4.7',
+  partition: 'app0',
+  flash_chip_size: 16384,
+  flash_chip_speed: 80000000,
+  app_used: 2258,
+  app_free: 3438,
+  fs_used: 24,
+  fs_free: 2024,
+  free_caps: 8376,
+  psram: true,
+  psram_size: 8189,
+  free_psram: 8166,
+  has_loader: true,
+  model: '',
+  // model: 'BBQKees Electronics EMS Gateway E32 V2 (E32 V2.0 P3/2024011)',
+  // status: 0,
+  status: 3
+};
+
+let VERSION_IS_UPGRADEABLE: boolean;
 
 // Versions
-// default - on latest stable, no upgrades
-let THIS_VERSION = '3.7.1';
-let LATEST_STABLE_VERSION = '3.7.1';
-let LATEST_DEV_VERSION = '3.7.2-dev.1';
+// default - on latest stable, no stable upgrades
+let THIS_VERSION = '3.7.2';
+let LATEST_STABLE_VERSION = '3.7.2';
+let LATEST_DEV_VERSION = '3.7.3-dev.9';
 
-// scenarios for testing, overriding the default
-const version_test = 0;
+// scenarios for testing versioning
+let version_test = 0;
+version_test = 0; // on latest stable, no upgrades, but can switch
+// version_test = 1; // on latest dev, no update
+// version_test = 2; // on stable, upgrade stable to latest stable
+// version_test = 3; // on dev, upgrade dev to latest dev
 
 switch (version_test as number) {
   case 0:
@@ -48,26 +134,63 @@ switch (version_test as number) {
     break;
   case 1:
     // on latest dev, no update
-    THIS_VERSION = '3.7.2-dev.12';
-    LATEST_STABLE_VERSION = '3.7.1';
-    LATEST_DEV_VERSION = '3.7.2-dev.12';
+    THIS_VERSION = '3.7.2-dev.9';
+    LATEST_STABLE_VERSION = '3.7.2';
+    LATEST_DEV_VERSION = '3.7.3-dev.9';
     VERSION_IS_UPGRADEABLE = false;
     break;
   case 2:
     // upgrade stable to latest stable
     THIS_VERSION = '3.6.5';
-    LATEST_STABLE_VERSION = '3.7.1';
-    LATEST_DEV_VERSION = '3.7.2-dev.12';
+    LATEST_STABLE_VERSION = '3.7.2';
+    LATEST_DEV_VERSION = '3.7.3-dev.12';
     VERSION_IS_UPGRADEABLE = true;
     break;
   case 3:
     // upgrade dev to latest dev
-    THIS_VERSION = '3.7.1-dev-1';
-    LATEST_STABLE_VERSION = '3.7.1';
-    LATEST_DEV_VERSION = '3.7.2-dev.12';
+    THIS_VERSION = '3.7.2-dev-1';
+    LATEST_STABLE_VERSION = '3.7.2';
+    LATEST_DEV_VERSION = '3.7.3-dev.12';
     VERSION_IS_UPGRADEABLE = true;
     break;
 }
+
+// set the version
+system_status.emsesp_version = THIS_VERSION;
+
+const emulate_esp = 'ESP32S3';
+// const emulate_esp = 'ESP32';
+
+switch (emulate_esp as string) {
+  // ESP32 4MB
+  case 'ESP32':
+    system_status.esp_platform = 'ESP32';
+    system_status.cpu_type = 'ESP32';
+    system_status.arduino_version = 'Tasmota Arduino v2.0.17';
+    system_status.sdk_version = 'v4.4.7';
+    system_status.psram = false;
+    system_status.psram_size = 0;
+    system_status.free_psram = 0;
+    settings.board_profile = 'E32V2';
+    settings.platform = 'ESP32';
+    break;
+
+  // ESP32S3
+  case 'ESP32S3':
+  default:
+    system_status.esp_platform = 'ESP32S3';
+    system_status.cpu_type = 'ESP32-S3';
+    system_status.arduino_version = 'ESP32 Arduino v2.0.18';
+    system_status.sdk_version = 'v4.4.7';
+    system_status.psram = true;
+    system_status.psram_size = 8189;
+    system_status.free_psram = 8166;
+    settings.board_profile = 'S3';
+    settings.platform = 'ESP32S3';
+    break;
+}
+
+// simulate different ESP32 chips
 
 // GLOBAL VARIABLES
 let countWifiScanPoll = 0; // wifi network scan
@@ -146,10 +269,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-          old_custom_name +
-          ') with new (' +
-          new_custom_name +
-          ')'
+        old_custom_name +
+        ') with new (' +
+        new_custom_name +
+        ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -244,15 +367,15 @@ function check_upgrade(version: string) {
     const stable_version = version.split(',')[1];
     console.log(
       'latest dev version: ' +
-        dev_version +
-        ', latest stable version: ' +
-        stable_version
+      dev_version +
+      ', latest stable version: ' +
+      stable_version
     );
     console.log(
       'Version upgrade check from version ' +
-        THIS_VERSION +
-        ', upgradable: ' +
-        VERSION_IS_UPGRADEABLE
+      THIS_VERSION +
+      ', upgradable: ' +
+      VERSION_IS_UPGRADEABLE
     );
     data = {
       emsesp_version: THIS_VERSION,
@@ -266,60 +389,6 @@ function check_upgrade(version: string) {
   }
   return data;
 }
-
-// START DATA
-
-// EMS-ESP Application Settings
-let settings = {
-  locale: 'en',
-  tx_mode: 1,
-  ems_bus_id: 11,
-  syslog_enabled: false,
-  syslog_level: 3,
-  trace_raw: false,
-  syslog_mark_interval: 0,
-  syslog_host: '192.168.1.8',
-  syslog_port: 514,
-  boiler_heatingoff: false,
-  remote_timeout: 24,
-  remote_timeout_en: false,
-  shower_timer: true,
-  shower_alert: false,
-  shower_alert_coldshot: 10,
-  shower_alert_trigger: 7,
-  shower_min_duration: 180,
-  rx_gpio: 4,
-  tx_gpio: 5,
-  dallas_gpio: 14,
-  dallas_parasite: false,
-  led_gpio: 2,
-  hide_led: true,
-  low_clock: false,
-  telnet_enabled: true,
-  notoken_api: false,
-  readonly_mode: false,
-  analog_enabled: true,
-  pbutton_gpio: 34,
-  solar_maxflow: 30,
-  board_profile: 'E32V2',
-  fahrenheit: false,
-  bool_format: 1,
-  bool_dashboard: 1,
-  enum_format: 1,
-  weblog_level: 6,
-  weblog_buffer: 50,
-  weblog_compact: true,
-  phy_type: 1,
-  eth_power: 15,
-  eth_phy_addr: 0,
-  eth_clock_mode: 1,
-  platform: 'ESP32',
-  modbus_enabled: false,
-  modbus_port: 502,
-  modbus_max_clients: 10,
-  modbus_timeout: 10000,
-  developer_mode: true
-};
 
 // LOG
 const LOG_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'logSettings';
@@ -521,50 +590,6 @@ const SECURITY_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'securitySettings';
 const VERIFY_AUTHORIZATION_ENDPOINT = REST_ENDPOINT_ROOT + 'verifyAuthorization';
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn';
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken';
-
-let system_status = {
-  emsesp_version: THIS_VERSION,
-  bus_status: 0,
-  // status: 2,
-  uptime: 77186,
-  bus_uptime: 77121,
-  num_devices: 2,
-  num_sensors: 1,
-  num_analogs: 1,
-  free_heap: 143,
-  ntp_status: 2,
-  mqtt_status: true,
-  ap_status: false,
-  network_status: 3, // wifi connected
-  // network_status: 10, // ethernet connected
-  // network_status: 6, // wifi disconnected
-  wifi_rssi: -41,
-  esp_platform: 'ESP32S3',
-  build_flags: 'DEMO',
-  cpu_type: 'ESP32-S3',
-  cpu_rev: 0,
-  cpu_cores: 2,
-  cpu_freq_mhz: 240,
-  max_alloc_heap: 191,
-  arduino_version: 'ESP32 Arduino v2.0.17',
-  sdk_version: 'v4.4.7-dirty',
-  partition: 'app0',
-  flash_chip_size: 16384,
-  flash_chip_speed: 80000000,
-  app_used: 2258,
-  app_free: 3438,
-  fs_used: 24,
-  fs_free: 2024,
-  free_caps: 8376,
-  // psram: false,
-  psram: true,
-  psram_size: 8189,
-  free_psram: 8166,
-  has_loader: true,
-  model: '',
-  // model: 'BBQKees Electronics EMS Gateway E32 V2 (E32 V2.0 P3/2024011)',
-  status: 'downloading'
-};
 
 let security_settings = {
   jwt_secret: 'naughty!',
@@ -897,6 +922,18 @@ const emsesp_coredata = {
       v: '73.03',
       e: 63,
       url: 'thermostat'
+    },
+    {
+      id: 11,
+      tn: 'Ventilation',
+      t: 18,
+      b: '',
+      n: 'Vent4000CC',
+      d: 81,
+      p: 231,
+      v: '53.02',
+      e: 10,
+      url: 'ventilation'
     }
   ]
 };
@@ -951,6 +988,10 @@ const activity = {
 // 5 - MM10 mixer
 // 6 - SM10 solar
 // 7 - Nefit Trendline boiler
+// 8 - Bosch Compress 7000i AW Heat Pump
+// 9 - RC100H thermostat
+// 10 - Thermostat RC310
+// 11 - Ventilation
 // 99 - Custom
 
 const emsesp_devicedata_1 = {
@@ -3791,6 +3832,71 @@ const emsesp_devicedata_10 = {
   ]
 };
 
+const emsesp_devicedata_11 = {
+  nodes: [
+    {
+      v: 11,
+      u: 1,
+      id: '00outdoor fresh air'
+    },
+    {
+      v: 13.699999809265137,
+      u: 1,
+      id: '00indoor fresh air'
+    },
+    {
+      v: 11.399999618530273,
+      u: 1,
+      id: '00outdoor exhaust air'
+    },
+    {
+      v: 14.800000190734863,
+      u: 1,
+      id: '00indoor exhaust air'
+    },
+    {
+      v: 0,
+      u: 3,
+      id: '00in blower speed'
+    },
+    {
+      v: 0,
+      u: 3,
+      id: '00out blower speed'
+    },
+    {
+      v: 'auto',
+      u: 0,
+      id: '00ventilation mode',
+      c: 'ventmode',
+      l: [
+        'auto',
+        'off',
+        'L1',
+        'L2',
+        'L3',
+        'L4',
+        'demand',
+        'sleep',
+        'intense',
+        'bypass',
+        'party',
+        'fireplace'
+      ]
+    },
+    {
+      v: 1770,
+      u: 0,
+      id: '00air quality (voc)'
+    },
+    {
+      v: 53,
+      u: 3,
+      id: '00relative air humidity'
+    }
+  ]
+};
+
 const emsesp_devicedata_99 = {
   nodes: [
     {
@@ -3955,7 +4061,7 @@ let emsesp_modules = {
 const dummy_deviceentities = [
   {
     v: 'unknown',
-    n: 'no entities for this device',
+    n: 'sorry, no demo entities for this device!',
     id: 'unknown',
     m: 0,
     w: false
@@ -3970,6 +4076,7 @@ const emsesp_deviceentities_6 = dummy_deviceentities;
 const emsesp_deviceentities_8 = dummy_deviceentities;
 const emsesp_deviceentities_9 = dummy_deviceentities;
 const emsesp_deviceentities_10 = dummy_deviceentities;
+const emsesp_deviceentities_11 = dummy_deviceentities;
 const emsesp_deviceentities_none = dummy_deviceentities;
 
 const emsesp_deviceentities_2 = [
@@ -4162,8 +4269,6 @@ const emsesp_deviceentities_7 = [
   { v: 102151, n: 'dhw active time', id: 'dhw/workm', m: 0, w: false }
 ];
 
-// END DATA
-
 // LOG
 router
   .get(LOG_SETTINGS_ENDPOINT, () => log_settings)
@@ -4234,7 +4339,7 @@ router
   .get(SYSTEM_STATUS_ENDPOINT, () => {
     if (countHardwarePoll >= 2) {
       countHardwarePoll = 0;
-      system_status.status = 'ready';
+      system_status.status = 0; // SYSTEM_STATUS_NORMAL
     }
     countHardwarePoll++;
 
@@ -4286,6 +4391,9 @@ function deviceData(id: number) {
   }
   if (id == 10) {
     return new Response(encoder.encode(emsesp_devicedata_10), { headers });
+  }
+  if (id == 11) {
+    return new Response(encoder.encode(emsesp_devicedata_11), { headers });
   }
   if (id == 99) {
     return new Response(encoder.encode(emsesp_devicedata_99), { headers });
@@ -4340,6 +4448,7 @@ function getDashboardEntityData(id: number) {
   else if (id == 8) device_data = emsesp_devicedata_8;
   else if (id == 9) device_data = emsesp_devicedata_9;
   else if (id == 10) device_data = emsesp_devicedata_10;
+  else if (id == 11) device_data = emsesp_devicedata_11;
   else if (id == 99) device_data = emsesp_devicedata_99;
 
   // filter device_data on
@@ -4392,14 +4501,14 @@ router
     params.id ? deviceEntities(Number(params.id)) : status(404)
   )
   .get(EMSESP_DASHBOARD_DATA_ENDPOINT, () => {
-    let dashboard_data: { id?: number; n?: string; t?: number; nodes?: any[] }[] =
+    let dashboard_nodes: { id?: number; n?: string; t?: number; nodes?: any[] }[] =
       [];
     let dashboard_object: { id?: number; n?: string; t?: number; nodes?: any[] } =
       {};
 
     let fake = false;
 
-    // fake = true; // for testing
+    // fake = true; // for testing, shows a subset of data
 
     if (!fake) {
       // pick EMS devices from coredata
@@ -4414,7 +4523,7 @@ router
         };
         // only add to dashboard if we have values
         if ((dashboard_object.nodes ?? []).length > 0) {
-          dashboard_data.push(dashboard_object);
+          dashboard_nodes.push(dashboard_object);
         }
       }
 
@@ -4426,7 +4535,7 @@ router
       };
       // only add to dashboard if we have values
       if ((dashboard_object.nodes ?? []).length > 0) {
-        dashboard_data.push(dashboard_object);
+        dashboard_nodes.push(dashboard_object);
       }
 
       // add temperature sensor data. no command c
@@ -4446,7 +4555,7 @@ router
       };
       // only add to dashboard if we have values
       if ((dashboard_object.nodes ?? []).length > 0) {
-        dashboard_data.push(dashboard_object);
+        dashboard_nodes.push(dashboard_object);
       }
 
       // add analog sensor data. no command c
@@ -4467,7 +4576,7 @@ router
       };
       // only add to dashboard if we have values
       if ((dashboard_object.nodes ?? []).length > 0) {
-        dashboard_data.push(dashboard_object);
+        dashboard_nodes.push(dashboard_object);
       }
 
       // add the scheduler data
@@ -4489,47 +4598,51 @@ router
       };
       // only add to dashboard if we have values
       if ((dashboard_object.nodes ?? []).length > 0) {
-        dashboard_data.push(dashboard_object);
+        dashboard_nodes.push(dashboard_object);
       }
     } else {
       // for testing only
 
       // add the custom entity data
+      dashboard_object = {
+        id: DeviceTypeUniqueID.CUSTOM_UID, // unique ID for custom entities
+        t: DeviceType.CUSTOM,
+        nodes: getDashboardEntityData(DeviceTypeUniqueID.CUSTOM_UID)
+      };
+      if ((dashboard_object.nodes ?? []).length > 0) {
+        dashboard_nodes.push(dashboard_object);
+      }
+
+      // add the scheduler data
+      // let scheduler_data = emsesp_schedule.schedule.filter((item) => item.name);
+      // let scheduler_data2 = scheduler_data.map((item, index) => ({
+      //   id: DeviceTypeUniqueID.SCHEDULER_UID * 100 + index,
+      //   dv: {
+      //     id: '00' + item.name,
+      //     v: item.active ? 'on' : 'off',
+      //     c: item.name,
+      //     l: ['off', 'on']
+      //   }
+      // }));
       // dashboard_object = {
-      //   id: DeviceTypeUniqueID.CUSTOM_UID, // unique ID for custom entities
-      //   t: DeviceType.CUSTOM,
-      //   nodes: getDashboardEntityData(99)
+      //   id: DeviceTypeUniqueID.SCHEDULER_UID,
+      //   t: DeviceType.SCHEDULER,
+      //   nodes: scheduler_data2
       // };
-      // // only add to dashboard if we have values
       // if ((dashboard_object.nodes ?? []).length > 0) {
       //   dashboard_data.push(dashboard_object);
       // }
-
-      let scheduler_data = emsesp_schedule.schedule.filter((item) => item.name);
-      let scheduler_data2 = scheduler_data.map((item, index) => ({
-        id: DeviceTypeUniqueID.SCHEDULER_UID * 100 + index,
-        dv: {
-          id: '00' + item.name,
-          v: item.active ? 'on' : 'off',
-          c: item.name,
-          l: ['off', 'on']
-        }
-      }));
-      dashboard_object = {
-        id: DeviceTypeUniqueID.SCHEDULER_UID,
-        t: DeviceType.SCHEDULER,
-        nodes: scheduler_data2
-      };
-      // only add to dashboard if we have values
-      if ((dashboard_object.nodes ?? []).length > 0) {
-        dashboard_data.push(dashboard_object);
-      }
     }
 
-    // console.log('dashboard_data: ', dashboard_data);
+    const dashboardData = {
+      // connect: false,
+      connected: true,
+      nodes: dashboard_nodes
+    };
+    // console.log('dashboardData: ', dashboardData);
 
     // return dashboard_data; // if not using msgpack
-    return new Response(encoder.encode(dashboard_data), { headers }); // msgpack it
+    return new Response(encoder.encode(dashboardData), { headers }); // msgpack it
   })
 
   // Customizations
@@ -4556,7 +4669,9 @@ router
       } else if (id === 9) {
         updateMask(entity, emsesp_deviceentities_9, emsesp_devicedata_9);
       } else if (id === 10) {
-        updateMask(entity, emsesp_deviceentities_9, emsesp_devicedata_10);
+        updateMask(entity, emsesp_deviceentities_10, emsesp_devicedata_10);
+      } else if (id === 11) {
+        updateMask(entity, emsesp_deviceentities_11, emsesp_devicedata_11);
       }
     }
     console.log('customization saved', content);
@@ -4660,6 +4775,10 @@ router
     if (id === 10) {
       objIndex = emsesp_devicedata_10.nodes.findIndex((obj) => obj.c == command);
       emsesp_devicedata_10.nodes[objIndex].v = value;
+    }
+    if (id === 10) {
+      objIndex = emsesp_devicedata_11.nodes.findIndex((obj) => obj.c == command);
+      emsesp_devicedata_11.nodes[objIndex].v = value;
     }
     if (id === DeviceTypeUniqueID.CUSTOM_UID) {
       // custom entities
@@ -4918,7 +5037,7 @@ router
         return status(200);
       } else if (cmd === 'restart') {
         console.log('restarting...');
-        system_status.status = 'restarting';
+        system_status.status = 5;
         countHardwarePoll = 0;
         return status(200);
       } else if (cmd === 'read') {
@@ -4930,18 +5049,42 @@ router
   });
 
 // Mock GitHub API
+// https://api.github.com/repos/emsesp/EMS-ESP32/releases
 
 router
   .get(GH_ENDPOINT_ROOT + '/tags/latest', () => {
-    console.log('returning latest development version: ' + LATEST_DEV_VERSION);
-    return { name: 'v' + LATEST_DEV_VERSION };
+    const data = {
+      name: 'v' + LATEST_DEV_VERSION,
+      published_at: new Date().toISOString() // use todays date
+    };
+    console.log('returning latest development version (today): ', data);
+    return data;
   })
   .get(GH_ENDPOINT_ROOT + '/latest', () => {
-    console.log('returning latest stable version: ' + LATEST_STABLE_VERSION);
-    return { name: 'v' + LATEST_STABLE_VERSION };
+    const data = {
+      name: 'v' + LATEST_STABLE_VERSION,
+      published_at: '2025-03-01T13:29:13.999Z'
+    };
+    console.log('returning latest stable version: ', data);
+    return data;
   });
 
-export default router;
+// const logger: ResponseHandler = (response, request) => {
+//   console.log(
+//     response.status,
+//     request.url,
+//     request.method,
+//     'at',
+//     new Date().toLocaleString()
+//   );
+// };
+
+export default {
+  port: 3080,
+  fetch: router.fetch
+  // missing: () => error(404, 'Error, endpoint not found'),
+  // finally: [logger]
+};
 
 // use this with cloudflare workers instead
 // export default { ...router };

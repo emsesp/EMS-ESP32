@@ -57,7 +57,7 @@ const CustomEntities = () => {
     if (!dialogOpen && !numChanges) {
       void fetchEntities();
     }
-  }, 3000);
+  });
 
   const { send: writeEntities } = useRequest(
     (data: Entities) => writeCustomEntities(data),
@@ -83,7 +83,7 @@ const CustomEntities = () => {
 
   const entity_theme = useTheme({
     Table: `
-      --data-table-library_grid-template-columns: repeat(1, minmax(60px, 1fr)) minmax(80px, auto) 80px 80px 80px 90px;
+      --data-table-library_grid-template-columns: repeat(1, minmax(60px, 1fr)) minmax(80px, auto) 80px 80px 80px 120px;
     `,
     BaseRow: `
       font-size: 14px;
@@ -195,6 +195,25 @@ const CustomEntities = () => {
     });
   };
 
+  const onDialogDup = (item: EntityItem) => {
+    setCreating(true);
+    setSelectedEntityItem({
+      id: Math.floor(Math.random() * (Math.floor(200) - 100) + 100),
+      name: item.name + '_',
+      ram: item.ram,
+      device_id: item.device_id,
+      type_id: item.type_id,
+      offset: item.offset,
+      factor: item.factor,
+      uom: item.uom,
+      value_type: item.value_type,
+      writeable: item.writeable,
+      deleted: false,
+      value: item.value
+    });
+    setDialogOpen(true);
+  };
+
   const addEntityItem = () => {
     setCreating(true);
     setSelectedEntityItem({
@@ -220,7 +239,7 @@ const CustomEntities = () => {
       : typeof value === 'number'
         ? new Intl.NumberFormat().format(value) +
           (uom === 0 ? '' : ' ' + DeviceValueUOM_s[uom])
-        : (value as string);
+        : (value as string) + (uom === 0 ? '' : ' ' + DeviceValueUOM_s[uom]);
   }
 
   function showHex(value: number, digit: number) {
@@ -296,6 +315,7 @@ const CustomEntities = () => {
           creating={creating}
           onClose={onDialogClose}
           onSave={onDialogSave}
+          onDup={onDialogDup}
           selectedItem={selectedEntityItem}
           validator={entityItemValidation(entities, selectedEntityItem)}
         />

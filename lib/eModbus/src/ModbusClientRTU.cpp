@@ -54,20 +54,20 @@ ModbusClientRTU::~ModbusClientRTU() {
 }
 
 // begin: start worker task - general version
-void ModbusClientRTU::begin(Stream& serial, uint32_t baudRate, int coreID) {
+void ModbusClientRTU::begin(Stream& serial, uint32_t baudRate, int coreID, uint32_t userInterval) {
   MR_serial = &serial;
-  doBegin(baudRate, coreID);
+  doBegin(baudRate, coreID, userInterval);
 }
 
 // begin: start worker task - HardwareSerial version
-void ModbusClientRTU::begin(HardwareSerial& serial, int coreID) {
+void ModbusClientRTU::begin(HardwareSerial& serial, int coreID, uint32_t userInterval) {
   MR_serial = &serial;
   uint32_t baudRate = serial.baudRate();
   serial.setRxFIFOFull(1);
-  doBegin(baudRate, coreID);
+  doBegin(baudRate, coreID, userInterval);
 }
 
-void ModbusClientRTU::doBegin(uint32_t baudRate, int coreID) {
+void ModbusClientRTU::doBegin(uint32_t baudRate, int coreID, uint32_t userInterval) {
   // Task already running? End it in case
   end();
 
@@ -76,6 +76,11 @@ void ModbusClientRTU::doBegin(uint32_t baudRate, int coreID) {
 
   // Set minimum interval time
   MR_interval = RTUutils::calculateInterval(baudRate);
+
+  // If user defined interval is longer, use that
+  if (MR_interval < userInterval) {
+    MR_interval = userInterval;
+  }
 
   // Create unique task name
   char taskName[18];

@@ -1,0 +1,37 @@
+{
+    "build": {
+      "arduino":{
+        "memory_type": "opi_opi"
+      },
+      "core": "esp32",
+      "extra_flags": "-DBOARD_HAS_PSRAM",
+      "f_cpu": "240000000L",
+      "f_flash": "80000000L",
+      "flash_mode": "opi",
+      "mcu": "esp32s3",
+      "variant": "esp32s3"
+    },
+    "connectivity": [
+      "wifi"
+    ],
+    "debug": {
+      "openocd_target": "esp32s3.cfg"
+    },
+    "frameworks": [
+      "arduino",
+      "espidf"
+    ],
+    "name": "Espressif ESP32-S3 32M Flash OPI PSRAM, 4608KB Code/OTA, 2MB FS",
+    "upload": {
+      "flash_size": "32MB",
+      "maximum_ram_size": 327680,
+      "maximum_size": 16777216,
+      "require_upload_port": true,
+      "speed": 460800
+    },
+    "download": {
+      "speed": 230400
+    },
+    "url": "https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/hw-reference/esp32s3/",
+    "vendor": "Espressif"
+  }

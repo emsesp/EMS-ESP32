@@ -90,7 +90,7 @@ const Sensors = () => {
     if (!temperatureDialogOpen && !analogDialogOpen) {
       void fetchSensorData();
     }
-  }, 3000);
+  });
 
   const common_theme = useTheme({
     BaseRow: `

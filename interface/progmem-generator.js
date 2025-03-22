@@ -12,7 +12,7 @@ import zlib from 'zlib';
 
 const ARDUINO_INCLUDES = '#include <Arduino.h>\n\n';
 const INDENT = '  ';
-const outputPath = '../lib/framework/WWWData.h';
+const outputPath = '../src/ESP32React/WWWData.h';
 const sourcePath = './dist';
 const bytesPerLine = 20;
 var totalSize = 0;

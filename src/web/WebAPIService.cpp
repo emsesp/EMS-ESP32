@@ -25,7 +25,10 @@ uint16_t WebAPIService::api_fails_ = 0;
 
 WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager) {
-    server->on(EMSESP_API_SERVICE_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { webAPIService(request, json); });
+    AsyncCallbackJsonWebHandler * jsonHandler = new AsyncCallbackJsonWebHandler(EMSESP_API_SERVICE_PATH);
+    jsonHandler->setMethod(HTTP_POST | HTTP_GET);
+    jsonHandler->onRequest([this](AsyncWebServerRequest * request, JsonVariant json) { webAPIService(request, json); });
+    server->addHandler(jsonHandler);
 }
 
 // POST|GET api/
@@ -131,12 +134,13 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     }
 
     // send the json that came back from the command call
-    // sequence is FAIL, OK, NOT_FOUND, ERROR, NOT_ALLOWED, INVALID
+    // sequence matches CommandRet in command.h (FAIL, OK, NOT_FOUND, ERROR, NOT_ALLOWED, INVALID, NO_VALUE)
     // 400 (bad request)
     // 200 (OK)
     // 404 (not found)
     // 401 (unauthorized)
-    int ret_codes[6] = {400, 200, 404, 400, 401, 400};
+    // 400 (invalid)
+    int ret_codes[7] = {400, 200, 404, 400, 401, 400, 404};
     response->setCode(ret_codes[return_code]);
     response->setLength();
     response->setContentType("application/json; charset=utf-8");

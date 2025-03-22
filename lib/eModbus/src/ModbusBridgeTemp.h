@@ -29,8 +29,8 @@ public:
   ModbusBridge();
 
   // Constructors for the RTU variant. Parameters as are for ModbusServerRTU
-  ModbusBridge(HardwareSerial& serial, uint32_t timeout, int rtsPin = -1);
-  ModbusBridge(HardwareSerial& serial, uint32_t timeout, RTScallback rts);
+  ModbusBridge(uint32_t timeout, int rtsPin = -1);
+  ModbusBridge(uint32_t timeout, RTScallback rts);
 
   // Destructor
   ~ModbusBridge();
@@ -43,6 +43,12 @@ public:
 
   // Block a function code (respond with ILLEGAL_FUNCTION error)
   bool denyFunctionCode(uint8_t aliasID, uint8_t functionCode);
+  
+  // Add/remove request/response filters
+  bool addRequestFilter(uint8_t aliasID, MBSworker rF);
+  bool removeRequestFilter(uint8_t aliasID);
+  bool addResponseFilter(uint8_t aliasID, MBSworker rF);
+  bool removeResponseFilter(uint8_t aliasID);
 
 protected:
   // ServerData holds all data necessary to address a single server
@@ -52,6 +58,8 @@ protected:
     ServerType serverType;        // TCP_SERVER or RTU_SERVER
     IPAddress host;               // TCP: host IP address, else 0.0.0.0
     uint16_t port;                // TCP: host port number, else 0
+    MBSworker requestFilter;      // optional filter requests before forwarding them
+    MBSworker responseFilter;     // optional filter responses before forwarding them
 
     // RTU constructor
     ServerData(uint8_t sid, ModbusClient *c) :
@@ -59,7 +67,9 @@ protected:
       client(c),
       serverType(RTU_SERVER),
       host(IPAddress(0, 0, 0, 0)),
-      port(0) {}
+      port(0),
+      requestFilter(nullptr),
+      responseFilter(nullptr) {}
     
     // TCP constructor
     ServerData(uint8_t sid, ModbusClient *c, IPAddress h, uint16_t p) :
@@ -67,7 +77,9 @@ protected:
       client(c),
       serverType(TCP_SERVER),
       host(h),
-      port(p) {}
+      port(p),
+      requestFilter(nullptr),
+      responseFilter(nullptr) {}
   };
 
   // Default worker functions
@@ -85,13 +97,13 @@ ModbusBridge<SERVERCLASS>::ModbusBridge() :
 
 // Constructors for RTU variant
 template<typename SERVERCLASS>
-ModbusBridge<SERVERCLASS>::ModbusBridge(HardwareSerial& serial, uint32_t timeout, int rtsPin) :
-  SERVERCLASS(serial, timeout, rtsPin) { }
+ModbusBridge<SERVERCLASS>::ModbusBridge(uint32_t timeout, int rtsPin) :
+  SERVERCLASS(timeout, rtsPin) { }
 
 // Alternate constructors for RTU variant
 template<typename SERVERCLASS>
-ModbusBridge<SERVERCLASS>::ModbusBridge(HardwareSerial& serial, uint32_t timeout, RTScallback rts) :
-  SERVERCLASS(serial, timeout, rts) { }
+ModbusBridge<SERVERCLASS>::ModbusBridge(uint32_t timeout, RTScallback rts) :
+  SERVERCLASS(timeout, rts) { }
 
 // Destructor
 template<typename SERVERCLASS>
@@ -156,6 +168,62 @@ bool ModbusBridge<SERVERCLASS>::denyFunctionCode(uint8_t aliasID, uint8_t functi
   return true;
 }
 
+template<typename SERVERCLASS>
+bool ModbusBridge<SERVERCLASS>::addRequestFilter(uint8_t aliasID, MBSworker rF) {
+  // Is there already an entry for the aliasID?
+  if (servers.find(aliasID) != servers.end()) {
+    // Yes. Chain in filter function
+    servers[aliasID]->requestFilter = rF;
+    LOG_D("Request filter added for server %02X\n", aliasID);
+  } else {
+    LOG_E("Server %d not attached to bridge, no request filter set!\n", aliasID);
+    return false;
+  }
+  return true;
+}
+
+template<typename SERVERCLASS>
+bool ModbusBridge<SERVERCLASS>::removeRequestFilter(uint8_t aliasID) {
+  // Is there already an entry for the aliasID?
+  if (servers.find(aliasID) != servers.end()) {
+    // Yes. Chain in filter function
+    servers[aliasID]->requestFilter = nullptr;
+    LOG_D("Request filter removed for server %02X\n", aliasID);
+  } else {
+    LOG_E("Server %d not attached to bridge, no request filter set!\n", aliasID);
+    return false;
+  }
+  return true;
+}
+
+template<typename SERVERCLASS>
+bool ModbusBridge<SERVERCLASS>::addResponseFilter(uint8_t aliasID, MBSworker rF) {
+  // Is there already an entry for the aliasID?
+  if (servers.find(aliasID) != servers.end()) {
+    // Yes. Chain in filter function
+    servers[aliasID]->responseFilter = rF;
+    LOG_D("Response filter added for server %02X\n", aliasID);
+  } else {
+    LOG_E("Server %d not attached to bridge, no response filter set!\n", aliasID);
+    return false;
+  }
+  return true;
+}
+
+template<typename SERVERCLASS>
+bool ModbusBridge<SERVERCLASS>::removeResponseFilter(uint8_t aliasID) {
+  // Is there already an entry for the aliasID?
+  if (servers.find(aliasID) != servers.end()) {
+    // Yes. Chain in filter function
+    servers[aliasID]->responseFilter = nullptr;
+    LOG_D("Response filter removed for server %02X\n", aliasID);
+  } else {
+    LOG_E("Server %d not attached to bridge, no response filter set!\n", aliasID);
+    return false;
+  }
+  return true;
+}
+
 // bridgeWorker: default worker function to process bridge requests
 template<typename SERVERCLASS>
 ModbusMessage ModbusBridge<SERVERCLASS>::bridgeWorker(ModbusMessage msg) {
@@ -167,11 +235,17 @@ ModbusMessage ModbusBridge<SERVERCLASS>::bridgeWorker(ModbusMessage msg) {
   if (servers.find(aliasID) != servers.end()) {
     // Found it. We may use servers[aliasID] now without allocating a new map slot
 
+    // Request filter hook to be called here
+    if (servers[aliasID]->requestFilter) {
+      LOG_D("Calling request filter\n");
+      msg = servers[aliasID]->requestFilter(msg);
+    }
+
     // Set real target server ID
     msg.setServerID(servers[aliasID]->serverID);
 
     // Issue the request
-    LOG_D("Request (%02X/%02X) sent\n", servers[aliasID]->serverID, functionCode);
+    LOG_D("Request (%02X/%02X) sent\n", servers[aliasID]->serverID, msg.getFunctionCode());
     // TCP servers have a target host/port that needs to be set in the client
     if (servers[aliasID]->serverType == TCP_SERVER) {
       response = reinterpret_cast<ModbusClientTCP *>(servers[aliasID]->client)->syncRequestMT(msg, (uint32_t)millis(), servers[aliasID]->host, servers[aliasID]->port);
@@ -179,8 +253,19 @@ ModbusMessage ModbusBridge<SERVERCLASS>::bridgeWorker(ModbusMessage msg) {
       response = servers[aliasID]->client->syncRequestM(msg, (uint32_t)millis());
     }
 
-    // Re-set the requested server ID
+    // Response filter hook to be called here
+    if (servers[aliasID]->responseFilter) {
+      LOG_D("Calling response filter\n");
+      response = servers[aliasID]->responseFilter(response);
+    }
+
+    // Re-set the requested server ID and function code (may have been modified by filters)
     response.setServerID(aliasID);
+    if (response.getError() != SUCCESS) {
+      response.setFunctionCode(functionCode | 0x80);
+    } else {
+      response.setFunctionCode(functionCode);
+    }
   } else {
     // If we get here, something has gone wrong internally. We send back an error response anyway.
     response.setError(aliasID, functionCode, INVALID_SERVER);

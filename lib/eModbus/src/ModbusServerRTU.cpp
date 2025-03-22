@@ -64,25 +64,30 @@ ModbusServerRTU::~ModbusServerRTU() {
 }
 
 // start: create task with RTU server - general version
-void ModbusServerRTU::begin(Stream& serial, uint32_t baudRate, int coreID) {
+void ModbusServerRTU::begin(Stream& serial, uint32_t baudRate, int coreID, uint32_t userInterval) {
   MSRserial = &serial;
-  doBegin(baudRate, coreID);
+  doBegin(baudRate, coreID, userInterval);
 }
 
 // start: create task with RTU server - HardwareSerial versions
-void ModbusServerRTU::begin(HardwareSerial& serial, int coreID) {
+void ModbusServerRTU::begin(HardwareSerial& serial, int coreID, uint32_t userInterval) {
   MSRserial = &serial;
   uint32_t baudRate = serial.baudRate();
   serial.setRxFIFOFull(1);
-  doBegin(baudRate, coreID);
+  doBegin(baudRate, coreID, userInterval);
 }
 
-void ModbusServerRTU::doBegin(uint32_t baudRate, int coreID) {
+void ModbusServerRTU::doBegin(uint32_t baudRate, int coreID, uint32_t userInterval) {
   // Task already running? Stop it in case.
   end();
 
   // Set minimum interval time
   MSRinterval = RTUutils::calculateInterval(baudRate);
+
+  // If user defined interval is longer, use that
+  if (MSRinterval < userInterval) {
+    MSRinterval = userInterval;
+  }
 
   // Create unique task name
   char taskName[18];
@@ -180,10 +185,12 @@ void ModbusServerRTU::serve(ModbusServerRTU *myServer) {
       }
       // Is it a broadcast?
       if (request[0] == 0) {
+        LOG_D("Broadcast!\n");
         // Yes. Do we have a listener?
         if (myServer->listener) {
           // Yes. call it
           myServer->listener(request);
+          LOG_D("Broadcast served.\n");
         }
         // else we simply ignore it
       } else {

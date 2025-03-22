@@ -5,12 +5,12 @@ import WarningIcon from '@mui/icons-material/Warning';
 import {
   Button,
   Checkbox,
+  Grid2 as Grid,
   InputAdornment,
   MenuItem,
   TextField,
   Typography
 } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 
 import * as MqttApi from 'api/mqtt';
 

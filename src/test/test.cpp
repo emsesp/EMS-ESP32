@@ -99,9 +99,10 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
     if (cmd == "2thermostats") {
         EMSESP::logger().notice("Testing with multiple thermostats...");
 
-        add_device(0x08, 123); // GB072
+        add_device(0x08, 123); // GB072 boiler
+
         add_device(0x10, 158); // RC310
-        add_device(0x18, 157); // Bosch CR100
+        add_device(0x19, 157); // RC200
 
         // Boiler -> Me, UBAMonitorFast(0x18), telegram: 08 00 18 00 00 02 5A 73 3D 0A 10 65 40 02 1A 80 00 01 E1 01 76 0E 3D 48 00 C9 44 02 00 (#data=25)
         uart_telegram({0x08, 0x00, 0x18, 0x00, 0x00, 0x02, 0x5A, 0x73, 0x3D, 0x0A, 0x10, 0x65, 0x40, 0x02, 0x1A,
@@ -122,7 +123,7 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
 
         // 2nd thermostat on HC2
         // Thermostat RC300Monitor(0x02A6)
-        uart_telegram({0x98, 0x00, 0xFF, 0x00, 0x01, 0xA6, 0x00, 0xCF, 0x21, 0x2E, 0x00, 0x00, 0x2E, 0x24,
+        uart_telegram({0x99, 0x00, 0xFF, 0x00, 0x01, 0xA6, 0x00, 0xCF, 0x21, 0x2E, 0x00, 0x00, 0x2E, 0x24,
                        0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03});
 
         return true;
@@ -287,8 +288,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     // extract params
-    int8_t id1 = -1;
-    int8_t id2 = -1;
+    int16_t id1 = -1;
+    int16_t id2 = -1;
     if (!id1_s.empty()) {
         if (id1_s[0] == '0' && id1_s[1] == 'x') {
             id1 = Helpers::hextoint(id1_s.c_str());
@@ -306,7 +307,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             shell.printfln("Usage: test add <device_id> <product_id>");
             return;
         }
-        shell.printfln("Testing Adding a device (product_id %d), with all values...", id2);
+        shell.printfln("Testing adding a device (deviceID 0x%02X, product_id %d), with all values...", id1, id2);
         test("add", id1, id2);
         shell.invoke_command("show devices");
         ok = true;
@@ -323,20 +324,15 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     if (command == "general") {
         shell.printfln("Testing adding a boiler, thermostat, all sensors, scheduler and custom entities...");
 
-        // setup fake data
-        // EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
-
         // add devices
         test("general");
 
-        // EMSESP::webCustomEntityService.test();  // add custom entities
-        // EMSESP::temperaturesensor_.test();      // add temperature sensors
-        // EMSESP::webSchedulerService.test();     // add scheduler items
+        EMSESP::webCustomEntityService.test();  // custom entities
+        EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
+        EMSESP::temperaturesensor_.test();      // add temperature sensors
+        EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
 
-        // shell.invoke_command("show devices");
-        // shell.invoke_command("show values");
-        // shell.invoke_command("call system publish");
-        // shell.invoke_command("show mqtt");
+        shell.invoke_command("show values");
         ok = true;
     }
 
@@ -424,10 +420,12 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "upload") {
         // S3 has 16MB flash
-        // EMSESP::system_.uploadFirmwareURL("https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_0-dev_32-ESP32S3-16MB+.bin");
+        // EMSESP::system_.uploadFirmwareURL("https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_0-dev_32-ESP32S3-16MB+.bin"); // S3
 
         // Test for 4MB Tasmota builds
-        EMSESP::system_.uploadFirmwareURL("https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_0-dev_32-ESP32-16MB.bin");
+        // EMSESP::system_.uploadFirmwareURL("https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_2-dev_8-ESP32-4MB.bin"); // S32
+        EMSESP::system_.uploadFirmwareURL("https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_2-dev_8-ESP32-16MB.bin"); // E32
+
         ok = true;
     }
 #endif
@@ -614,9 +612,30 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "2thermostats") {
         shell.printfln("Testing multiple thermostats...");
+        // adds hc1=(0x10, 158) RC310 and hc2=(0x19, 157) RC200
         test("2thermostats");
-        // shell.invoke_command("show values");
+        shell.invoke_command("show values");
         // shell.invoke_command("show devices");
+
+        AsyncWebServerRequest request;
+        request.method(HTTP_GET);
+
+        request.url("/api/thermostat");
+        EMSESP::webAPIService.webAPIService(&request);
+        Serial.println();
+
+        request.url("/api/thermostat/hc1/entities");
+        EMSESP::webAPIService.webAPIService(&request);
+        Serial.println();
+
+
+        request.url("/api/thermostat/hc2/entities");
+        EMSESP::webAPIService.webAPIService(&request);
+        Serial.println();
+
+        request.url("/api/thermostat/entities");
+        EMSESP::webAPIService.webAPIService(&request);
+
         ok = true;
     }
 
@@ -835,10 +854,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Testing adding Analog sensor");
         Mqtt::ha_enabled(true);
         // Mqtt::ha_enabled(false);
-
         Mqtt::nested_format(1);
         // Mqtt::nested_format(0);
-
         // Mqtt::send_response(false);
 
         // load some EMS data
@@ -860,6 +877,23 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         request.url("/api/analogsensor/test_analogsensor1");
         request.url("/api/analogsensor/36");
         EMSESP::webAPIService.webAPIService(&request);
+
+        // test setting a value
+        request.method(HTTP_POST);
+        JsonDocument doc;
+
+        char data[] = "{\"value\":10,\"id\":33}";
+        deserializeJson(doc, data);
+        request.url("/api/analogsensor/setvalue");
+        EMSESP::webAPIService.webAPIService(&request, doc.as<JsonVariant>());
+        shell.invoke_command("call analogsensor test_analogsensor4");
+
+        char data2[] = "{\"value\":11}";
+        deserializeJson(doc, data2);
+        request.url("/api/analogsensor/test_analogsensor4");
+        EMSESP::webAPIService.webAPIService(&request, doc.as<JsonVariant>());
+
+        shell.invoke_command("call analogsensor test_analogsensor4");
 
         // test renaming it
         // bool update(uint8_t id, const std::string & name, int16_t offset, float factor, uint8_t uom, uint8_t type);
@@ -958,6 +992,48 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         ok = true;
     }
 
+    if (command == "api4") {
+        shell.printfln("Testing API writing values...");
+        EMSESP::system_.bool_format(BOOL_FORMAT_ONOFF_STR);
+        // EMSESP::system_.bool_format(BOOL_FORMAT_ONOFF_STR_CAP);
+
+        // load devices
+        test("boiler");
+        test("thermostat");
+
+        ok = true;
+        AsyncWebServerRequest request;
+        JsonDocument          doc;
+        JsonVariant           json;
+        request.method(HTTP_POST);
+
+        shell.invoke_command("call boiler circpump/value"); // initial state is off
+
+        //  call boiler circpump on
+        char data1[] = "{\"device\":\"boiler\", \"cmd\":\"circpump\",\"value\":\"on\"}";
+        deserializeJson(doc, data1);
+        request.url("/api");
+        EMSESP::webAPIService.webAPIService(&request, doc.as<JsonVariant>());
+        shell.invoke_command("call boiler circpump/value");
+
+        // switch to german
+        EMSESP::system_.locale("de");
+
+        //  call boiler circpump off, but using value in DE
+        char data2[] = "{\"device\":\"boiler\", \"cmd\":\"circpump\",\"value\":\"aus\"}";
+        deserializeJson(doc, data2);
+        request.url("/api");
+        EMSESP::webAPIService.webAPIService(&request, doc.as<JsonVariant>());
+        shell.invoke_command("call boiler circpump/value");
+
+        //  call boiler circpump on, but using value in DE
+        char data3[] = "{\"device\":\"boiler\", \"cmd\":\"circpump\",\"value\":\"an\"}";
+        deserializeJson(doc, data3);
+        request.url("/api");
+        EMSESP::webAPIService.webAPIService(&request, doc.as<JsonVariant>());
+        shell.invoke_command("call boiler circpump/value");
+    }
+
     if (command == "api3") {
         shell.printfln("Testing API getting values from system");
         EMSESP::system_.bool_format(BOOL_FORMAT_TRUEFALSE); // BOOL_FORMAT_TRUEFALSE_STR
@@ -1005,6 +1081,12 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             // EMSESP::webAPIService.webAPIService(&request);
             // request.url("/api/thermostat/hc1");
             // EMSESP::webAPIService.webAPIService(&request);
+            // request.url("/api/boiler/comfort/value");
+            // EMSESP::webAPIService.webAPIService(&request);
+
+            // this should fail but it doesn't
+            // request.url("/api/boiler/bad/value");
+            // EMSESP::webAPIService.webAPIService(&request);
 
             // POST COMMANDS
             request.method(HTTP_POST);
@@ -1014,10 +1096,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             // request.url("/api");
             // EMSESP::webAPIService.webAPIService(&request, doc.as<JsonVariant>());
 
-            char data2[] = "{\"action\":\"getCustomSupport\", \"param\":\"hello\"}";
-            deserializeJson(doc, data2);
-            request.url("/rest/action");
-            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+            // char data2[] = "{\"action\":\"getCustomSupport\", \"param\":\"hello\"}";
+            // deserializeJson(doc, data2);
+            // request.url("/rest/action");
+            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
             // char data3[] = "{\"action\":\"export\", \"param\":\"schedule\"}";
             // deserializeJson(doc, data3);
@@ -2369,7 +2451,7 @@ void Test::add_device(uint8_t device_id, uint8_t product_id) {
 #ifndef EMSESP_STANDALONE
 void Test::listDir(fs::FS & fs, const char * dirname, uint8_t levels) {
     Serial.println();
-    Serial.printf("Listing directory: %s\r\n", dirname);
+    Serial.printf("%s\r\n", dirname);
 
     File root = fs.open(dirname);
     if (!root) {
@@ -2384,12 +2466,11 @@ void Test::listDir(fs::FS & fs, const char * dirname, uint8_t levels) {
     File file = root.openNextFile();
     while (file) {
         if (file.isDirectory()) {
-            Serial.print(" DIR: ");
-            Serial.println(file.name());
+            Serial.print(file.name());
+            Serial.println("/");
             if (levels) {
                 // prefix a / to the name to make it a full path
                 listDir(fs, ("/" + String(file.name())).c_str(), levels - 1);
-                // listDir(fs, file.name(), levels - 1);
             }
             Serial.println();
         } else {
@@ -2401,7 +2482,6 @@ void Test::listDir(fs::FS & fs, const char * dirname, uint8_t levels) {
         }
         file = root.openNextFile();
     }
-    Serial.println();
 }
 #endif
 #endif

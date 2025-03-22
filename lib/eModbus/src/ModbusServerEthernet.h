@@ -12,8 +12,15 @@
 #undef SERVER_END
 #define SERVER_END // NIL for Ethernet
 
+// Create own non-virtual EthernetServer class
+class EthernetServerEM : public EthernetServer {
+public:
+  EthernetServerEM(uint16_t port) : EthernetServer(port) { }
+  void begin(uint16_t port = 0) { }
+};
+
 #include "ModbusServerTCPtemp.h"
-using ModbusServerEthernet = ModbusServerTCP<EthernetServer, EthernetClient>;
+using ModbusServerEthernet = ModbusServerTCP<EthernetServerEM, EthernetClient>;
 #endif
 
 #endif

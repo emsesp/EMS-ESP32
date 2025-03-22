@@ -2,7 +2,6 @@
 #define SecurityManager_h
 
 #include "Arduino.h"
-#include "Features.h"
 #include "ESPAsyncWebServer.h"
 #include "AsyncJson.h"
 
@@ -70,6 +69,21 @@ class SecurityManager {
     virtual ArRequestFilterFunction      filterRequest(AuthenticationPredicate predicate)                                        = 0;
     virtual ArRequestHandlerFunction     wrapRequest(ArRequestHandlerFunction onRequest, AuthenticationPredicate predicate)      = 0;
     virtual ArJsonRequestHandlerFunction wrapCallback(ArJsonRequestHandlerFunction onRequest, AuthenticationPredicate predicate) = 0;
+
+    void addEndpoint(AsyncWebServer *             server,
+                     const String &               path,
+                     AuthenticationPredicate      predicate,
+                     ArJsonRequestHandlerFunction function,
+                     WebRequestMethodComposite    method = HTTP_POST) {
+    }
+
+    // non-Json endpoints - default GET
+    void addEndpoint(AsyncWebServer *          server,
+                     const String &            path,
+                     AuthenticationPredicate   predicate,
+                     ArRequestHandlerFunction  function,
+                     WebRequestMethodComposite method = HTTP_GET) {
+    }
 };
 
 #endif

@@ -21,6 +21,7 @@ export interface Settings {
   dallas_gpio: number;
   dallas_parasite: boolean;
   led_gpio: number;
+  led_type: number;
   hide_led: boolean;
   low_clock: boolean;
   notoken_api: boolean;
@@ -71,7 +72,7 @@ export interface Device {
   d: number; // deviceid
   p: number; // productid
   v: string; // version
-  e: number; // entities
+  e: number; // total number of entities
   url?: string; // lowercase type name used in API URL
 }
 
@@ -121,6 +122,11 @@ export interface DashboardItem {
   n?: string; // name, optional
   dv?: DeviceValue; // device value, optional
   nodes?: DashboardItem[]; // children nodes, optional
+}
+
+export interface DashboardData {
+  connected: boolean; // true if connected to EMS bus
+  nodes: DashboardItem[];
 }
 
 export interface DeviceValue {
@@ -262,6 +268,7 @@ export const BOARD_PROFILES: BoardProfiles = {
 export interface BoardProfile {
   board_profile: string;
   led_gpio: number;
+  led_type: number;
   dallas_gpio: number;
   rx_gpio: number;
   tx_gpio: number;
@@ -368,7 +375,7 @@ export interface EntityItem {
   device_id: number | string;
   type_id: number | string;
   offset: number;
-  factor: number;
+  factor: number | string;
   uom: number;
   value_type: number;
   value?: unknown;
@@ -380,7 +387,7 @@ export interface EntityItem {
   o_device_id?: number | string;
   o_type_id?: number | string;
   o_offset?: number;
-  o_factor?: number;
+  o_factor?: number | string;
   o_uom?: number;
   o_value_type?: number;
   o_deleted?: boolean;

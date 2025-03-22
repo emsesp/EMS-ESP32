@@ -18,30 +18,48 @@ void ModbusServer::registerWorker(uint8_t serverID, uint8_t functionCode, MBSwor
 
 // getWorker: if a worker function is registered, return its address, nullptr otherwise
 MBSworker ModbusServer::getWorker(uint8_t serverID, uint8_t functionCode) {
+  bool serverFound = false;
+  LOG_D("Need worker for %02X-%02X : ", serverID, functionCode);
   // Search the FC map associated with the serverID
   auto svmap = workerMap.find(serverID);
   // Is there one?
   if (svmap != workerMap.end()) {
+    serverFound = true;
+  // No explicit serverID entry found, but we may have one for ANY_SERVER
+  } else {
+    svmap = workerMap.find(ANY_SERVER);
+    if (svmap != workerMap.end()) {
+      serverFound = true;
+      serverID = ANY_SERVER;
+    }
+  }
+  // Did we find a serverID?
+  if (serverFound) {
     // Yes. Now look for the function code in the inner map
+    bool functionCodeFound = false;
     auto fcmap = svmap->second.find(functionCode);;
     // Found it?
     if (fcmap != svmap->second.end()) {
       // Yes. Return the function pointer for it.
-      LOG_D("Worker found for %02X/%02X\n", serverID, functionCode);
-      return fcmap->second;
+      functionCodeFound = true;
       // No, no explicit worker found, but may be there is one for ANY_FUNCTION_CODE?
     } else {
       fcmap = svmap->second.find(ANY_FUNCTION_CODE);;
       // Found it?
       if (fcmap != svmap->second.end()) {
         // Yes. Return the function pointer for it.
-        LOG_D("Worker found for %02X/ANY\n", serverID);
-        return fcmap->second;
+        functionCodeFound = true;
+        functionCode = ANY_FUNCTION_CODE;
       }
+    }
+    if (functionCodeFound) {
+      // Yes. Return the function pointer for it.
+      LOGRAW_D("Worker found for %02X/%02X\n", serverID, functionCode);
+      return fcmap->second;
     }
   }
   // No matching function pointer found
-  LOG_D("No matching worker found\n");
+  LOGRAW_D("No matching worker found\n");
   return nullptr;
 }
 
@@ -68,15 +86,28 @@ bool ModbusServer::unregisterWorker(uint8_t serverID, uint8_t functionCode) {
   return (numEntries ? true : false);
 }
 
-// isServerFor: if any worker function is registered for the given serverID, return true
-bool ModbusServer::isServerFor(uint8_t serverID) {
-  // Search the FC map for the serverID
-  auto svmap = workerMap.find(serverID);
-  // Is it there? Then return true
-  if (svmap != workerMap.end()) return true;
-  // No, serverID was not found. Return false
+// isServerFor: if a worker function is registered for the given serverID, return true
+//              functionCode defaults to ANY_FUNCTION_CODE and will yield true for any function code,
+//              including ANY_FUNCTION_CODE :D
+bool ModbusServer::isServerFor(uint8_t serverID, uint8_t functionCode) {
+  // Check if there is a non-nullptr function for the given combination
+  if (getWorker(serverID, functionCode)) {
+    return true;
+  }
   return false;
 }
+
+// isServerFor: short version to look up if the server is known at all
+bool ModbusServer::isServerFor(uint8_t serverID) {
+  // Check if there is a non-nullptr function for the given combination
+  auto svmap = workerMap.find(serverID);
+  // Is there one?
+  if (svmap != workerMap.end()) {
+    return true;
+  }
+  return false;
+}
+
 
 // getMessageCount: read number of messages processed
 uint32_t ModbusServer::getMessageCount() { 

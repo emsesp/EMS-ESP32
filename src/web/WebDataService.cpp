@@ -21,32 +21,38 @@
 namespace emsesp {
 
 WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securityManager) {
-    // write endpoints
-    server->on(EMSESP_WRITE_DEVICE_VALUE_SERVICE_PATH,
-               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_device_value(request, json); },
-                                             AuthenticationPredicates::IS_ADMIN));
-    server->on(EMSESP_WRITE_TEMPERATURE_SENSOR_SERVICE_PATH,
-               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_temperature_sensor(request, json); },
-                                             AuthenticationPredicates::IS_ADMIN));
-    server->on(EMSESP_WRITE_ANALOG_SENSOR_SERVICE_PATH,
-               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_analog_sensor(request, json); },
-                                             AuthenticationPredicates::IS_ADMIN));
+    // write endpoints - POSTs
+    securityManager->addEndpoint(server,
+                                 EMSESP_WRITE_DEVICE_VALUE_SERVICE_PATH,
+                                 AuthenticationPredicates::IS_ADMIN,
+                                 [this](AsyncWebServerRequest * request, JsonVariant json) { write_device_value(request, json); });
+
+    securityManager->addEndpoint(server,
+                                 EMSESP_WRITE_TEMPERATURE_SENSOR_SERVICE_PATH,
+                                 AuthenticationPredicates::IS_ADMIN,
+                                 [this](AsyncWebServerRequest * request, JsonVariant json) { write_temperature_sensor(request, json); });
+
+    securityManager->addEndpoint(server,
+                                 EMSESP_WRITE_ANALOG_SENSOR_SERVICE_PATH,
+                                 AuthenticationPredicates::IS_ADMIN,
+                                 [this](AsyncWebServerRequest * request, JsonVariant json) { write_analog_sensor(request, json); });
+
     // GET's
-    server->on(EMSESP_DEVICE_DATA_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { device_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+    securityManager->addEndpoint(server, EMSESP_DEVICE_DATA_SERVICE_PATH, AuthenticationPredicates::IS_AUTHENTICATED, [this](AsyncWebServerRequest * request) {
+        device_data(request);
+    });
 
-    server->on(EMSESP_CORE_DATA_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { core_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+    securityManager->addEndpoint(server, EMSESP_CORE_DATA_SERVICE_PATH, AuthenticationPredicates::IS_AUTHENTICATED, [this](AsyncWebServerRequest * request) {
+        core_data(request);
+    });
 
-    server->on(EMSESP_SENSOR_DATA_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { sensor_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+    securityManager->addEndpoint(server, EMSESP_SENSOR_DATA_SERVICE_PATH, AuthenticationPredicates::IS_AUTHENTICATED, [this](AsyncWebServerRequest * request) {
+        sensor_data(request);
+    });
 
-    server->on(EMSESP_DASHBOARD_DATA_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { dashboard_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+    securityManager->addEndpoint(server, EMSESP_DASHBOARD_DATA_SERVICE_PATH, AuthenticationPredicates::IS_AUTHENTICATED, [this](AsyncWebServerRequest * request) {
+        dashboard_data(request);
+    });
 }
 
 // this is used in the Devices page and contains all EMS device information
@@ -139,7 +145,7 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
             obj["t"]       = sensor.type();
 
             if (sensor.type() != AnalogSensor::AnalogType::NOTUSED) {
-                obj["v"] = Helpers::transformNumFloat(sensor.value(), 0); // is optional and is a float
+                obj["v"] = Helpers::transformNumFloat(sensor.value()); // is optional and is a float
             } else {
                 obj["v"] = 0; // must have a value for web sorting to work
             }
@@ -161,7 +167,7 @@ void WebDataService::device_data(AsyncWebServerRequest * request) {
     if (request->hasParam(F_(id))) {
         id = Helpers::atoint(request->getParam(F_(id))->value().c_str()); // get id from url
 
-        auto * response = new AsyncJsonResponse(false, true); // use msgPack
+        auto * response = new AsyncMessagePackResponse();
 
         // check size
         // while (!response) {
@@ -267,10 +273,10 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
         if (data.is<const char *>()) {
             return_code = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
         } else if (data.is<int>()) {
-            char s[10];
+            char s[20];
             return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int32_t>(), 0), true, id, output);
         } else if (data.is<float>()) {
-            char s[10];
+            char s[20];
             return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<float>(), 1), true, id, output);
         } else if (data.is<bool>()) {
             return_code = Command::call(device_type, cmd, data.as<bool>() ? "true" : "false", true, id, output);
@@ -346,19 +352,25 @@ void WebDataService::write_analog_sensor(AsyncWebServerRequest * request, JsonVa
 // this is used in the dashboard and contains all ems device information
 // /dashboardData endpoint
 void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
-    auto * response = new AsyncJsonResponse(true, true); // its an Array and also msgpack'd
+    auto * response = new AsyncMessagePackResponse();
 
 #if defined(EMSESP_STANDALONE)
     JsonDocument doc;
-    JsonArray    root = doc.to<JsonArray>();
+    JsonObject   root = doc.to<JsonObject>();
 #else
-    JsonArray root = response->getRoot();
+    JsonObject root = response->getRoot();
 #endif
 
-    // first do all the recognized devices
+    // add state of EMS bus
+    root["connected"] = EMSESP::bus_status() != 2;
+
+    // add all the data
+    JsonArray nodes = root["nodes"].to<JsonArray>();
+
+    // first fetch all the recognized devices
     for (const auto & emsdevice : EMSESP::emsdevices) {
         if (emsdevice->count_entities_fav()) {
-            JsonObject obj = root.add<JsonObject>();
+            JsonObject obj = nodes.add<JsonObject>();
             obj["id"]      = emsdevice->unique_id();   // it's unique id
             obj["n"]       = emsdevice->name();        // custom name
             obj["t"]       = emsdevice->device_type(); // device type number
@@ -368,15 +380,15 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
 
     // add custom entities, if we have any
     if (EMSESP::webCustomEntityService.count_entities()) {
-        JsonObject obj = root.add<JsonObject>();
+        JsonObject obj = nodes.add<JsonObject>();
         obj["id"]      = EMSdevice::DeviceTypeUniqueID::CUSTOM_UID; // it's unique id
         obj["t"]       = EMSdevice::DeviceType::CUSTOM;             // device type number
         EMSESP::webCustomEntityService.generate_value_web(obj, true);
     }
 
-    // add temperature sensors
+    // add temperature sensors, if we have any
     if (EMSESP::temperaturesensor_.have_sensors()) {
-        JsonObject obj  = root.add<JsonObject>();
+        JsonObject obj  = nodes.add<JsonObject>();
         obj["id"]       = EMSdevice::DeviceTypeUniqueID::TEMPERATURESENSOR_UID; // it's unique id
         obj["t"]        = EMSdevice::DeviceType::TEMPERATURESENSOR;             // device type number
         JsonArray nodes = obj["nodes"].to<JsonArray>();
@@ -403,7 +415,7 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
 
     // add analog sensors, count excludes disabled entries
     if (EMSESP::analog_enabled() && EMSESP::analogsensor_.count_entities(false)) {
-        JsonObject obj  = root.add<JsonObject>();
+        JsonObject obj  = nodes.add<JsonObject>();
         obj["id"]       = EMSdevice::DeviceTypeUniqueID::ANALOGSENSOR_UID; // it's unique id
         obj["t"]        = EMSdevice::DeviceType::ANALOGSENSOR;             // device type number
         JsonArray nodes = obj["nodes"].to<JsonArray>();
@@ -417,11 +429,11 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
                 dv["id"]      = "00" + sensor.name();
 #if CONFIG_IDF_TARGET_ESP32
                 if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT && (sensor.gpio() == 25 || sensor.gpio() == 26)) {
-                    obj["v"] = Helpers::transformNumFloat(sensor.value(), 0);
+                    obj["v"] = Helpers::transformNumFloat(sensor.value());
                 } else
 #elif CONFIG_IDF_TARGET_ESP32S2
                 if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT && (sensor.gpio() == 17 || sensor.gpio() == 18)) {
-                    obj["v"] = Helpers::transformNumFloat(sensor.value(), 0);
+                    obj["v"] = Helpers::transformNumFloat(sensor.value());
                 } else
 #endif
                     if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT || sensor.type() == AnalogSensor::AnalogType::DIGITAL_IN) {
@@ -431,7 +443,7 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
                     l.add(Helpers::render_boolean(s, false, true));
                     l.add(Helpers::render_boolean(s, true, true));
                 } else {
-                    dv["v"] = Helpers::transformNumFloat(sensor.value(), 0);
+                    dv["v"] = Helpers::transformNumFloat(sensor.value());
                     dv["u"] = sensor.uom();
                 }
                 if (sensor.type() == AnalogSensor::AnalogType::COUNTER || sensor.type() >= AnalogSensor::AnalogType::DIGITAL_OUT) {
@@ -443,7 +455,7 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
 
     // show scheduler, with name, on/off
     if (EMSESP::webSchedulerService.count_entities(true)) {
-        JsonObject obj  = root.add<JsonObject>();
+        JsonObject obj  = nodes.add<JsonObject>();
         obj["id"]       = EMSdevice::DeviceTypeUniqueID::SCHEDULER_UID; // it's unique id
         obj["t"]        = EMSdevice::DeviceType::SCHEDULER;             // device type number
         JsonArray nodes = obj["nodes"].to<JsonArray>();

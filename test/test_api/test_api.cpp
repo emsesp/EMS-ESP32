@@ -22,8 +22,8 @@
 
 #include <emsesp.h>
 #include "ESPAsyncWebServer.h"
-#include "ESP8266React.h"
 #include "web/WebAPIService.h"
+#include "test_shuntingYard.hpp"
 
 using namespace emsesp;
 
@@ -32,7 +32,7 @@ void         run_tests();
 const char * call_url(const char * url);
 
 AsyncWebServer * webServer;
-ESP8266React *   esp8266React;
+ESP32React *     esp32React;
 WebAPIService *  webAPIService;
 EMSESP           application;
 FS               dummyFS;
@@ -67,13 +67,13 @@ static TestStream stream;
 // load the tests
 // this is generated from this file when compiled with -DEMSESP_UNITY_CREATE
 // copy the output to the test_api.h file
-#include "test_api.h" // generated test functions
+#include "test_api.h"
 
-// Unity's setup call - is called before each test
+// Unity's setup call - is called before each test - empty for now
 void setUp() {
 }
 
-// Unity's teardown call - is called after each test
+// Unity's teardown call - is called after each test - empty for now
 void tearDown() {
 }
 
@@ -171,7 +171,6 @@ const char * call_url(const char * url) {
     request.method(HTTP_GET);
     request.url(url);
     webAPIService->webAPIService(&request);
-
     return webAPIService->getResponse();
 }
 
@@ -187,7 +186,6 @@ const char * call_url(const char * url, const char * data) {
     request.method(HTTP_POST);
     request.url(url);
     webAPIService->webAPIService(&request, json);
-
     return webAPIService->getResponse();
 }
 
@@ -268,23 +266,43 @@ void manual_test4() {
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/thermostat", data));
 }
 
+void manual_test5() {
+    auto expected_response = "[{}]"; // empty is good
+    char data[]            = "{\"value\":11}";
+
+    TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor/test_analogsensor4", data));
+}
+
+void manual_test6() {
+    auto expected_response = "[{}]"; // empty is good
+    char data[]            = "{\"value\":10,\"id\":33}";
+
+    TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor/setvalue", data));
+}
+
+
 void run_manual_tests() {
     RUN_TEST(manual_test1);
     RUN_TEST(manual_test2);
     RUN_TEST(manual_test3);
     RUN_TEST(manual_test4);
+    RUN_TEST(manual_test5);
+    RUN_TEST(manual_test6);
 }
 
 const char * run_console_command(const char * command) {
     output_buffer[0] = '\0'; // empty the temp buffer
     shell->invoke_command(command);
-    // remove everything before \r\n
+
+    // The buffer now contains a prompt, the command, the output and a \r\n
+    // remove the \r\n at the end
     char * p = strstr(output_buffer, "\r\n");
     if (p) {
-        p += 2; // skip the \r\n
+        *p = '\0';
     }
-    // remove the \r\n at the end
-    p[strlen(p) - 2] = '\0';
+
+    // Now go to just after the prompt and command
+    p = output_buffer + 7 + strlen(command);
 
     // Serial.println("Output:");
     // Serial.print(p);
@@ -318,8 +336,10 @@ void run_console_tests() {
 
 // auto-generate the tests
 void create_tests() {
-    // These tests should all pass....
+    // These match the calls in test_api.h
+    // They are all READ calls, no POST or PUT. We use the manual tests for those.
 
+    // this first section should all pass
     capture("/api/boiler");
     capture("/api/boiler/commands");
     capture("/api/boiler/values");
@@ -406,8 +426,8 @@ void create_tests() {
 // Main entry point
 int main() {
     webServer     = new AsyncWebServer(80);
-    esp8266React  = new ESP8266React(webServer, &dummyFS);
-    webAPIService = new WebAPIService(webServer, esp8266React->getSecurityManager());
+    esp32React    = new ESP32React(webServer, &dummyFS);
+    webAPIService = new WebAPIService(webServer, esp32React->getSecurityManager());
 
     // Serial console for commands
     Serial.begin(115200);
@@ -433,9 +453,10 @@ int main() {
     //
     UNITY_BEGIN();
 
-    run_tests();         // execute the generated tests
-    run_manual_tests();  // execute some other manual tests from this file
-    run_console_tests(); // execute some console tests
+    run_tests();              // execute the generated tests
+    run_manual_tests();       // execute some other manual tests from this file
+    run_console_tests();      // execute some console tests
+    run_shuntingYard_tests(); // execute the shuntingYard tests
 
     return UNITY_END();
 }

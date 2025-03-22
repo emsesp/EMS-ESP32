@@ -187,7 +187,7 @@ const cz: Translation = {
   COMPACT: 'Kompaktní',
   DOWNLOAD_SETTINGS_TEXT: 'Vytvořte zálohu svého nastavení a konfigurace',
   UPLOAD_TEXT: 'Nahrajte nový soubor firmwaru (.bin) nebo záložní soubor (.json)',
-  UPLOAD_DROP_TEXT: 'Přetáhněte soubor nebo klikněte sem',
+  UPLOAD_DROP_TEXT: 'Drop a firmware .bin file or click here', // TODO translate
   ERROR: 'Neočekávaná chyba, zkuste to prosím znovu',
   TIME_SET: 'Čas nastaven',
   MANAGE_USERS: 'Spravovat uživatele',
@@ -332,18 +332,27 @@ const cz: Translation = {
   SPECIAL_FUNCTIONS: 'Speciální funkce',
   WAIT_FIRMWARE: 'Firmware se nahrává a instaluje',
   INSTALL_VERSION: 'Tímto se instalovat verze {0}. Jste si jistí?',
-  SWITCH_DEV: 'přepnout na vývojovou verzi',
   UPGRADE_AVAILABLE: 'Je k dispozici aktualizace firmwaru!',
-  LATEST_VERSION: 'Používáte nejnovější verzi firmwaru.',
+  LATEST_VERSION: 'Používáte nejnovější verzi firmwaru',
   PLEASE_WAIT: 'Prosím čekejte',
   RESTARTING_PRE: 'Inicializace',
   RESTARTING_POST: 'Příprava',
   AUTO_SCROLL: 'Automatické rolování',
   DASHBOARD: 'Dashboard',
-  NO_DATA: 'Žádná data nejsou k dispozici',
-  DASHBOARD_1: 'Přizpůsobte si dashboard označením EMS entit jako Oblíbené pomocí modulu Přizpůsobení',
   DEVELOPER_MODE: 'Režim vývojáře',
-  UPGRADE: 'Upgrade' // TODO translate
+  BYTES: 'Bytes', // TODO translate
+  BITMASK: 'Bit Mask',// TODO translate
+  DUPLICATE: 'Duplikát',
+  UPGRADE: 'Upgrade',
+  DASHBOARD_1: 'Všechny aktivní entity EMS jsou označené jako oblíbené. Všechny vlastní entity, harmonogramy a externí sensory jsou zobrazeny níže.',
+  NO_DATA_1: 'Nebyly nalezeny žádné oblíbené entity. Použijte',
+  NO_DATA_2: 'modul sloužící k jejich výběru.',
+  NO_DATA_3: 'Pro zobrazení všech dostupných entit navštivte',
+  THIS_VERSION: 'Tato verze',
+  PLATFORM: 'Platforma',
+  RELEASE_TYPE: 'Typ sestavení',
+  REINSTALL: 'Přeinstalovat',
+  INTERNET_CONNECTION_REQUIRED: 'Pro automatickou kontrolu a instalaci aktualizací je třeba internetové připojení',
 };
 
 export default cz;

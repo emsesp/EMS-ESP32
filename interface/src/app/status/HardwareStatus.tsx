@@ -17,9 +17,10 @@ import {
 
 import * as SystemApi from 'api/system';
 
-import { useAutoRequest } from 'alova/client';
+import { useRequest } from 'alova/client';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
+import { useInterval } from 'utils';
 
 import BBQKeesIcon from './bbqkees.svg';
 
@@ -32,11 +33,11 @@ const HardwareStatus = () => {
 
   useLayoutTitle(LL.HARDWARE());
 
-  const {
-    data,
-    send: loadData,
-    error
-  } = useAutoRequest(SystemApi.readSystemStatus, { pollingTime: 3000 });
+  const { data, send: loadData, error } = useRequest(SystemApi.readSystemStatus);
+
+  useInterval(() => {
+    void loadData();
+  });
 
   const content = () => {
     if (!data) {
@@ -98,7 +99,13 @@ const HardwareStatus = () => {
               ' @ ' +
               data.cpu_freq_mhz +
               ' Mhz' +
-              (data.temperature ? ', T: ' + data.temperature + ' °C' : '')
+              // bit of a hack : if the CPU temp is higher than 90 (=32 Fahrenheit if using Celsius), show F, otherwise C
+              (data.temperature
+                ? ', T: ' +
+                  data.temperature +
+                  ' °' +
+                  (data.temperature > 90 ? 'F' : 'C')
+                : '')
             }
           />
         </ListItem>

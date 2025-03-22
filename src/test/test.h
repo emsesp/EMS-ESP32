@@ -42,6 +42,7 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "render"
 // #define EMSESP_DEBUG_DEFAULT "api"
 // #define EMSESP_DEBUG_DEFAULT "api3"
+// #define EMSESP_DEBUG_DEFAULT "api4"
 // #define EMSESP_DEBUG_DEFAULT "crash"
 // #define EMSESP_DEBUG_DEFAULT "dv"
 // #define EMSESP_DEBUG_DEFAULT "lastcode"

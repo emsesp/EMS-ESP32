@@ -187,7 +187,7 @@ const no: Translation = {
   COMPACT: 'Komprimere',
   DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
   UPLOAD_TEXT: 'Upload a new firmware file (.bin) or a backup file (.json)', // TODO translate
-  UPLOAD_DROP_TEXT: 'Slipp fil eller klikk her',
+  UPLOAD_DROP_TEXT: 'Drop a firmware .bin file or click here', // TODO translate
   ERROR: 'Ukjent feil, prøv igjen',
   TIME_SET: 'Still in tid',
   MANAGE_USERS: 'Administrer Brukere',
@@ -332,18 +332,27 @@ const no: Translation = {
   SPECIAL_FUNCTIONS: 'Special Functions', // TODO translate
   WAIT_FIRMWARE: 'Firmware is uploading and installing', // TODO translate
   INSTALL_VERSION: 'This will install version {0}. Are you sure?', // TODO translate
-  SWITCH_DEV: 'switch to the development version', // TODO translate
   UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
-  LATEST_VERSION: 'You are using the latest firmware version.', // TODO translate
+  LATEST_VERSION: 'You are using the latest firmware version', // TODO translate
   PLEASE_WAIT: 'Please wait', // TODO translate
   RESTARTING_PRE: 'Initializing', // TODO translate
   RESTARTING_POST: 'Preparing', // TODO translate
   AUTO_SCROLL: 'Auto Scroll', // TODO translate
   DASHBOARD: 'Dashboard', // TODO translate
-  NO_DATA: 'No data available', // TODO translate
-  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module', // TODO translate
   DEVELOPER_MODE: 'Developer Mode', // TODO translate
-  UPGRADE: 'Upgrade' // TODO translate
+  BYTES: 'Bytes', // TODO translate
+  BITMASK: 'Bit Mask',// TODO translate
+  DUPLICATE: 'Duplicate', // TODO translate
+  UPGRADE: 'Upgrade', // TODO translate
+  DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.', // TODO translate
+  NO_DATA_1: 'No favorite EMS entities found yet. Use the', // TODO translate
+  NO_DATA_2: 'module to mark them.', // TODO translate
+  NO_DATA_3: 'To see all available entities go to', // TODO translate
+  THIS_VERSION: 'This Version', // TODO translate
+  PLATFORM: 'Platform', // TODO translate
+  RELEASE_TYPE: 'Release Type', // TODO translate
+  REINSTALL: 'Re-install', // TODO translate
+  INTERNET_CONNECTION_REQUIRED: 'Internet connection required for automatic version checking and upgrading',
 };
 
 export default no;

@@ -2,6 +2,7 @@ import { useContext, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import BuildIcon from '@mui/icons-material/Build';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
@@ -30,15 +31,17 @@ import { API } from 'api/app';
 import { readSystemStatus } from 'api/system';
 
 import { dialogStyle } from 'CustomTheme';
-import { useAutoRequest, useRequest } from 'alova/client';
+import { useRequest } from 'alova/client';
 import { type APIcall, busConnectionStatus } from 'app/main/types';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import ListMenuItem from 'components/layout/ListMenuItem';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { NTPSyncStatus, NetworkConnectionStatus } from 'types';
+import { useInterval } from 'utils';
+import { formatDateTime } from 'utils/time';
 
-import RestartMonitor from './RestartMonitor';
+import SystemMonitor from './SystemMonitor';
 
 const SystemStatus = () => {
   const { LL } = useI18nContext();
@@ -58,14 +61,17 @@ const SystemStatus = () => {
     data,
     send: loadData,
     error
-  } = useAutoRequest(readSystemStatus, {
+  } = useRequest(readSystemStatus, {
     initialData: [],
-    pollingTime: 3000,
     async middleware(_, next) {
       if (!restarting) {
         await next();
       }
     }
+  });
+
+  useInterval(() => {
+    void loadData();
   });
 
   const theme = useTheme();
@@ -134,7 +140,12 @@ const SystemStatus = () => {
       case NTPSyncStatus.NTP_INACTIVE:
         return LL.INACTIVE(0);
       case NTPSyncStatus.NTP_ACTIVE:
-        return LL.ACTIVE();
+        return (
+          LL.ACTIVE() +
+          (data.ntp_time !== undefined
+            ? ' (' + formatDateTime(data.ntp_time) + ')'
+            : '')
+        );
       default:
         return LL.UNKNOWN();
     }
@@ -243,6 +254,14 @@ const SystemStatus = () => {
     return (
       <>
         <List sx={{ borderRadius: 3, border: '2px solid grey' }}>
+          <ListMenuItem
+            icon={BuildIcon}
+            bgcolor="#72caf9"
+            label="EMS-ESP Firmware"
+            text={'v' + data.emsesp_version}
+            to="version"
+          />
+
           <ListItem>
             <ListItemAvatar>
               <Avatar sx={{ bgcolor: '#c5572c', color: 'white' }}>
@@ -301,7 +320,7 @@ const SystemStatus = () => {
             icon={DeviceHubIcon}
             bgcolor={activeHighlight(data.mqtt_status)}
             label="MQTT"
-            text={data.mqtt_status ? LL.ACTIVE() : LL.INACTIVE(0)}
+            text={data.mqtt_status ? LL.CONNECTED(0) : LL.INACTIVE(0)}
             to="/status/mqtt"
           />
 
@@ -339,7 +358,7 @@ const SystemStatus = () => {
   };
 
   return (
-    <SectionContent>{restarting ? <RestartMonitor /> : content()}</SectionContent>
+    <SectionContent>{restarting ? <SystemMonitor /> : content()}</SectionContent>
   );
 };
 

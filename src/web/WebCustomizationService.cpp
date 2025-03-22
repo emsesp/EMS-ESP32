@@ -25,20 +25,27 @@ bool WebCustomization::_start = true;
 WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _fsPersistence(WebCustomization::read, WebCustomization::update, this, fs, EMSESP_CUSTOMIZATION_FILE) {
     // GET
-    server->on(EMSESP_DEVICE_ENTITIES_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { device_entities(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+    securityManager->addEndpoint(server, EMSESP_DEVICE_ENTITIES_PATH, AuthenticationPredicates::IS_AUTHENTICATED, [this](AsyncWebServerRequest * request) {
+        device_entities(request);
+    });
 
     // POST
-    server->on(EMSESP_RESET_CUSTOMIZATION_SERVICE_PATH,
-               HTTP_POST,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { reset_customization(request); }, AuthenticationPredicates::IS_ADMIN));
-    server->on(EMSESP_WRITE_DEVICE_NAME_PATH,
-               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { writeDeviceName(request, json); },
-                                             AuthenticationPredicates::IS_AUTHENTICATED));
-    server->on(EMSESP_CUSTOMIZATION_ENTITIES_PATH,
-               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { customization_entities(request, json); },
-                                             AuthenticationPredicates::IS_AUTHENTICATED));
+    securityManager->addEndpoint(
+        server,
+        EMSESP_RESET_CUSTOMIZATION_SERVICE_PATH,
+        AuthenticationPredicates::IS_ADMIN,
+        [this](AsyncWebServerRequest * request) { reset_customization(request); },
+        HTTP_POST); // force POST
+
+    securityManager->addEndpoint(server,
+                                 EMSESP_WRITE_DEVICE_NAME_PATH,
+                                 AuthenticationPredicates::IS_AUTHENTICATED,
+                                 [this](AsyncWebServerRequest * request, JsonVariant json) { writeDeviceName(request, json); });
+
+    securityManager->addEndpoint(server,
+                                 EMSESP_CUSTOMIZATION_ENTITIES_PATH,
+                                 AuthenticationPredicates::IS_AUTHENTICATED,
+                                 [this](AsyncWebServerRequest * request, JsonVariant json) { customization_entities(request, json); });
 }
 
 // this creates the customization file, saving it to the FS
@@ -87,7 +94,8 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
     // Temperature Sensor customization
     customizations.sensorCustomizations.clear();
     if (root["ts"].is<JsonArray>()) {
-        for (const JsonObject sensorJson : root["ts"].as<JsonArray>()) {
+        auto sensorsJsons = root["ts"].as<JsonArray>();
+        for (const JsonObject sensorJson : sensorsJsons) {
             // create each of the sensor, overwriting any previous settings
             auto sensor   = SensorCustomization();
             sensor.id     = sensorJson["id"].as<std::string>();
@@ -104,7 +112,8 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
     // Analog Sensor customization
     customizations.analogCustomizations.clear();
     if (root["as"].is<JsonArray>()) {
-        for (const JsonObject analogJson : root["as"].as<JsonArray>()) {
+        auto analogJsons = root["as"].as<JsonArray>();
+        for (const JsonObject analogJson : analogJsons) {
             // create each of the sensor, overwriting any previous settings
             auto analog   = AnalogCustomization();
             analog.gpio   = analogJson["gpio"];
@@ -124,13 +133,15 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
     // load array of entities id's with masks, building up the object class
     customizations.entityCustomizations.clear();
     if (root["masked_entities"].is<JsonArray>()) {
-        for (const JsonObject masked_entities : root["masked_entities"].as<JsonArray>()) {
+        auto masked_entities = root["masked_entities"].as<JsonArray>();
+        for (const JsonObject masked_entity : masked_entities) {
             auto emsEntity        = EntityCustomization();
-            emsEntity.product_id  = masked_entities["product_id"];
-            emsEntity.device_id   = masked_entities["device_id"];
-            emsEntity.custom_name = masked_entities["custom_name"] | "";
+            emsEntity.product_id  = masked_entity["product_id"];
+            emsEntity.device_id   = masked_entity["device_id"];
+            emsEntity.custom_name = masked_entity["custom_name"] | "";
 
-            for (const JsonVariant masked_entity_id : masked_entities["entity_ids"].as<JsonArray>()) {
+            auto masked_entity_ids = masked_entity["entity_ids"].as<JsonArray>();
+            for (const JsonVariant masked_entity_id : masked_entity_ids) {
                 if (masked_entity_id.is<std::string>()) {
                     emsEntity.entity_ids.push_back(masked_entity_id.as<std::string>()); // add entity list
                 }
@@ -149,7 +160,8 @@ void WebCustomizationService::reset_customization(AsyncWebServerRequest * reques
     if (LittleFS.remove(EMSESP_CUSTOMIZATION_FILE)) {
         AsyncWebServerResponse * response = request->beginResponse(205); // restart needed
         request->send(response);
-        EMSESP::system_.restart_pending(true);
+        emsesp::EMSESP::system_.systemStatus(
+            emsesp::SYSTEM_STATUS::SYSTEM_STATUS_PENDING_RESTART); // will be handled by the main loop. We use pending for the Web's SystemMonitor
         return;
     }
 
@@ -172,7 +184,7 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request) {
         id = Helpers::atoint(request->getParam(F_(id))->value().c_str()); // get id from url
 #endif
 
-        auto * response = new AsyncJsonResponse(true, true); // array and msgpack
+        auto * response = new AsyncMessagePackResponse(true); // array and msgpack
 
         // while (!response) {
         //     delete response;
@@ -379,7 +391,7 @@ void WebCustomizationService::test() {
         analog.offset = 0;
         analog.factor = 0.1;
         analog.uom    = 17;
-        analog.type   = 3;
+        analog.type   = 3; // ADC
         webCustomization.analogCustomizations.push_back(analog);
 
         analog        = AnalogCustomization();
@@ -388,7 +400,7 @@ void WebCustomizationService::test() {
         analog.offset = 0;
         analog.factor = 1;
         analog.uom    = 0;
-        analog.type   = 1;
+        analog.type   = 1; // DIGITAL_IN
         webCustomization.analogCustomizations.push_back(analog);
 
         analog        = AnalogCustomization();
@@ -398,6 +410,15 @@ void WebCustomizationService::test() {
         analog.factor = 1;
         analog.uom    = 0;
         analog.type   = 0; // disabled, not-used
+        webCustomization.analogCustomizations.push_back(analog);
+
+        analog        = AnalogCustomization();
+        analog.gpio   = 33;
+        analog.name   = "test_analogsensor4";
+        analog.offset = 0;
+        analog.factor = 1;
+        analog.uom    = 0;
+        analog.type   = 2; // COUNTER
         webCustomization.analogCustomizations.push_back(analog);
 
         // EMS entities, mark some as favorites

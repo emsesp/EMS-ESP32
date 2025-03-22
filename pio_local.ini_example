@@ -11,81 +11,61 @@
 ;  -DEMSESP_DE_ONLY ; only DE translated entity names
 ;  -DEMSESP_EN_ONLY ; only EN translated entity names
 ;  -DEMSESP_PINGTEST ; send log message every 1/2 second
+
 ; my_build_flags = -DEMSESP_TEST -DEMSESP_DEBUG
-; my_build_flags = -DEMSESP_DEBUG
 ; my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST -DEMSESP_PINGTEST
+; my_build_flags = -DEMSESP_DEBUG -DCORE_DEBUG_LEVEL=5
+my_build_flags =
 
 [platformio]
-default_envs = s_16M_P ; BBQKees E32V2
+; default_envs = s_16M_P ; BBQKees E32V2
 ; default_envs = s3_16M_P ; BBQKees S3
-; default_envs = s_4M ; BBQKees S32
-; default_envs = native
-; default_envs = debug
-; default_envs = s2_4M
+; default_envs = s_4M ; BBQKees older S32, 4MB no psram
+default_envs = s_16M ; BBQKees newer S32 V2, 16MB no psram
 
 [env]
-; set the username and password for the admin account (default both admin)
+
+; uncomment this section to enable extra debug
+; build_type = debug
+; monitor_filters = colorize, esp32_exception_decoder
+
+; uncomment if you want to upload the firmware via OTA (must have upload_protocol = custom)
+; extra_scripts =
+;   pre:scripts/build_interface.py ; builds the WebUI (unless NO_BUILD_WEBUI is set) - comment out if you don't want to build each time
+;   scripts/rename_fw.py ; renames the firmware .bin file - comment out if not needed
+;   scripts/upload.py ; optionally upload the firmware via OTA (must have upload_protocol = custom)
+
+; set the username and password for the admin account (default password is admin)
 custom_username = admin
 custom_password = admin
 
 ; ** upload settings **
-; for direct USB set:
-;  upload_protocol = esptool
-;  upload_port = /dev/ttyUSB*
+; for direct USB, which is the default you can set an optional port for example:
+;  upload_port = /dev/ttyUSB0 or COM3
 ;
-; for direct via URL (OTA) set:
+; for direct via HTTP (OTA) set:
 ;  upload_protocol = custom
 ;  custom_emsesp_ip = <ip address> or ems-esp.local
-;  custom_password = admin
 
-; upload_protocol = esptool
-; upload_port = /dev/ttyUSB*
+; upload_protocol = custom
+; custom_emsesp_ip = 10.10.10.93
 
-upload_protocol = custom
-; custom_emsesp_ip = 10.10.10.175 ; S3
-custom_emsesp_ip = 192.168.1.225 ; E32V2
+; example override for lib_deps and using locally built modules
+lib_deps =
+ bblanchon/ArduinoJson
+ ESP32Async/AsyncTCP
+ ESP32Async/ESPAsyncWebServer
+ file://${PROJECT_DIR}/../modules/EMS-ESP-Modules
 
-; build_type = debug
-; monitor_filters = esp32_exception_decoder
-
-; ** modules **
-; example below is using a locally built version of EMS-ESP-Modules. You can also test with:
-;    rm -rf .pio/libdeps/native/EMS-ESP-Modules; pio run -e native -t clean; pio run -e native -t exec
-; lib_deps =
-;   file://../modules/EMS-ESP-Modules
-
-[env:native]
-extra_scripts = 
-;   pre:scripts/refresh_module_library_native.py
-  ; post:scripts/run_native.py
-
-[env:s_16M_P]
-extra_scripts =
-  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
-  scripts/rename_fw.py
-  scripts/upload.py
-; platform = https://github.com/pioarduino/platform-espressif32/releases/download/53.03.10-rc2/platform-espressif32.zip
-
-[env:s3_16M_P]
-extra_scripts =
-  ; pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
-  scripts/rename_fw.py
-  scripts/upload.py
-
-[env:s_4M]
-extra_scripts =
-  ; pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
-  scripts/rename_fw.py
-  ; scripts/upload.py
-  
+; ** debug settings **
+; to be used with esp-prog/JTAG hardware device like https://docs.espressif.com/projects/esp-dev-kits/en/latest/other/esp-prog/user_guide.html   
 ; pio run -e debug
-; or from Visual Studio Code do PIO -> Project Tasks -> debug -> General -> Upload and Monitor
-; options for debugging are: EMSESP_DEBUG EMSESP_UART_DEBUG EMSESP_DEBUG_SENSOR
+; add to build_flags these additional options: EMSESP_DEBUG EMSESP_UART_DEBUG EMSESP_DEBUG_SENSOR
 [env:debug]
 board = esp32dev
 framework = arduino
 platform = espressif32
-board_build.partitions = esp32_partition_debug.csv
+board_build.partitions = partitions/esp32_partition_debug.csv
 board_upload.flash_size = 4MB
 board_build.filesystem = littlefs
 upload_protocol = esptool

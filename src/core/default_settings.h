@@ -1,0 +1,300 @@
+/*
+ * EMS-ESP - https://github.com/emsesp/EMS-ESP
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef EMSESP_DEFAULT_SETTINGS_H
+#define EMSESP_DEFAULT_SETTINGS_H
+
+// GENERAL SETTINGS
+
+#ifndef EMSESP_DEFAULT_LOCALE
+#define EMSESP_DEFAULT_LOCALE EMSESP_LOCALE_EN // English
+#endif
+
+#ifndef EMSESP_DEFAULT_VERSION
+#define EMSESP_DEFAULT_VERSION ""
+#endif
+
+#ifndef EMSESP_DEFAULT_TX_MODE
+#define EMSESP_DEFAULT_TX_MODE 1 // EMS1.0
+#endif
+
+#ifndef EMSESP_DEFAULT_EMS_BUS_ID
+#define EMSESP_DEFAULT_EMS_BUS_ID 0x0B // service key
+#endif
+
+#ifndef EMSESP_DEFAULT_SYSLOG_ENABLED
+#define EMSESP_DEFAULT_SYSLOG_ENABLED false
+#endif
+
+#ifndef EMSESP_DEFAULT_SYSLOG_LEVEL
+#define EMSESP_DEFAULT_SYSLOG_LEVEL 3 // ERR
+#endif
+
+#ifndef EMSESP_DEFAULT_SYSLOG_MARK_INTERVAL
+#define EMSESP_DEFAULT_SYSLOG_MARK_INTERVAL 0
+#endif
+
+#ifndef EMSESP_DEFAULT_SYSLOG_HOST
+#define EMSESP_DEFAULT_SYSLOG_HOST ""
+#endif
+
+#ifndef EMSESP_DEFAULT_SYSLOG_PORT
+#define EMSESP_DEFAULT_SYSLOG_PORT 514
+#endif
+
+#ifndef EMSESP_DEFAULT_TRACELOG_RAW
+#define EMSESP_DEFAULT_TRACELOG_RAW false
+#endif
+
+#ifndef EMSESP_DEFAULT_BOILER_HEATINGOFF
+#define EMSESP_DEFAULT_BOILER_HEATINGOFF false
+#endif
+
+#ifndef EMSESP_DEFAULT_REMOTE_TIMEOUT
+#define EMSESP_DEFAULT_REMOTE_TIMEOUT 24
+#endif
+
+#ifndef EMSESP_DEFAULT_REMOTE_TIMEOUT_EN
+#define EMSESP_DEFAULT_REMOTE_TIMEOUT_EN false
+#endif
+
+#ifndef EMSESP_DEFAULT_SHOWER_TIMER
+#define EMSESP_DEFAULT_SHOWER_TIMER false
+#endif
+
+#ifndef EMSESP_DEFAULT_SHOWER_ALERT
+#define EMSESP_DEFAULT_SHOWER_ALERT false
+#endif
+
+#ifndef EMSESP_DEFAULT_SHOWER_ALERT_TRIGGER
+#define EMSESP_DEFAULT_SHOWER_ALERT_TRIGGER 7
+#endif
+
+#ifndef EMSESP_DEFAULT_SHOWER_MIN_DURATION
+#define EMSESP_DEFAULT_SHOWER_MIN_DURATION 180
+#endif
+
+#ifndef EMSESP_DEFAULT_SHOWER_ALERT_COLDSHOT
+#define EMSESP_DEFAULT_SHOWER_ALERT_COLDSHOT 10
+#endif
+
+#ifndef EMSESP_DEFAULT_HIDE_LED
+#define EMSESP_DEFAULT_HIDE_LED false
+#endif
+
+#ifndef EMSESP_DEFAULT_DALLAS_PARASITE
+#define EMSESP_DEFAULT_DALLAS_PARASITE false
+#endif
+
+#ifndef EMSESP_DEFAULT_NOTOKEN_API
+#define EMSESP_DEFAULT_NOTOKEN_API false
+#endif
+
+#ifndef EMSESP_DEFAULT_BOOL_FORMAT
+#define EMSESP_DEFAULT_BOOL_FORMAT 1 // on/off
+#endif
+
+#ifndef EMSESP_DEFAULT_ENUM_FORMAT
+#define EMSESP_DEFAULT_ENUM_FORMAT 1 // Text
+#endif
+
+#ifndef EMSESP_DEFAULT_ANALOG_ENABLED
+#define EMSESP_DEFAULT_ANALOG_ENABLED true
+#endif
+
+#ifndef EMSESP_DEFAULT_TELNET_ENABLED
+#define EMSESP_DEFAULT_TELNET_ENABLED true
+#endif
+
+#ifndef EMSESP_DEFAULT_MODBUS_ENABLED
+#define EMSESP_DEFAULT_MODBUS_ENABLED false
+#endif
+
+#ifndef EMSESP_DEFAULT_MODBUS_PORT
+#define EMSESP_DEFAULT_MODBUS_PORT 502
+#endif
+
+#ifndef EMSESP_DEFAULT_MODBUS_MAX_CLIENTS
+#define EMSESP_DEFAULT_MODBUS_MAX_CLIENTS 10
+#endif
+
+#ifndef EMSESP_DEFAULT_MODBUS_TIMEOUT
+#define EMSESP_DEFAULT_MODBUS_TIMEOUT 300
+#endif
+
+#ifndef EMSESP_DEFAULT_BOARD_PROFILE
+#define EMSESP_DEFAULT_BOARD_PROFILE "default"
+#endif
+
+// Default GPIO PIN definitions
+
+#ifndef EMSESP_DEFAULT_RX_GPIO
+#define EMSESP_DEFAULT_RX_GPIO 23 // D7
+#endif
+
+#ifndef EMSESP_DEFAULT_TX_GPIO
+#define EMSESP_DEFAULT_TX_GPIO 5 // D8
+#endif
+
+#ifndef EMSESP_DEFAULT_DALLAS_GPIO
+#define EMSESP_DEFAULT_DALLAS_GPIO 18
+#endif
+
+#ifndef EMSESP_DEFAULT_LED_GPIO
+#define EMSESP_DEFAULT_LED_GPIO 2
+#endif
+
+#ifndef EMSESP_DEFAULT_PBUTTON_GPIO
+#define EMSESP_DEFAULT_PBUTTON_GPIO 0
+#endif
+
+#ifndef EMSESP_DEFAULT_PHY_TYPE
+#define EMSESP_DEFAULT_PHY_TYPE 0 // No Ethernet, just Wifi. PHY_type::PHY_TYPE_NONE,
+#endif
+
+// MQTT
+
+#ifndef EMSESP_DEFAULT_BOOL_FORMAT
+#define EMSESP_DEFAULT_BOOL_FORMAT 1 // on/off
+#endif
+
+#ifndef EMSESP_DEFAULT_MQTT_QOS
+#define EMSESP_DEFAULT_MQTT_QOS 0
+#endif
+
+#ifndef EMSESP_DEFAULT_MQTT_RETAIN
+#define EMSESP_DEFAULT_MQTT_RETAIN false
+#endif
+
+#ifndef EMSESP_DEFAULT_HA_ENABLED
+#define EMSESP_DEFAULT_HA_ENABLED false
+#endif
+
+#ifndef EMSESP_DEFAULT_PUBLISH_TIME
+#define EMSESP_DEFAULT_PUBLISH_TIME 10
+#endif
+
+// default for scheduler etc
+#ifndef EMSESP_DEFAULT_PUBLISH_TIME_OTHER
+#define EMSESP_DEFAULT_PUBLISH_TIME_OTHER 60
+#endif
+
+#ifndef EMSESP_DEFAULT_PUBLISH_HEARTBEAT
+#define EMSESP_DEFAULT_PUBLISH_HEARTBEAT 60
+#endif
+
+#ifndef EMSESP_DEFAULT_NESTED_FORMAT
+#define EMSESP_DEFAULT_NESTED_FORMAT 1
+#endif
+
+#ifndef EMSESP_DEFAULT_DISCOVERY_PREFIX
+#define EMSESP_DEFAULT_DISCOVERY_PREFIX "homeassistant"
+#endif
+
+#ifndef EMSESP_DEFAULT_DISCOVERY_TYPE
+#define EMSESP_DEFAULT_DISCOVERY_TYPE 0 // HA
+#endif
+
+#ifndef EMSESP_DEFAULT_PUBLISH_SINGLE
+#define EMSESP_DEFAULT_PUBLISH_SINGLE false
+#endif
+
+#ifndef EMSESP_DEFAULT_PUBLISH_SINGLE2CMD
+#define EMSESP_DEFAULT_PUBLISH_SINGLE2CMD false
+#endif
+
+#ifndef EMSESP_DEFAULT_SEND_RESPONSE
+#define EMSESP_DEFAULT_SEND_RESPONSE false
+#endif
+
+#ifndef EMSESP_DEFAULT_SOLAR_MAXFLOW
+#define EMSESP_DEFAULT_SOLAR_MAXFLOW 30
+#endif
+
+#ifndef EMSESP_DEFAULT_SENSOR_NAME
+#define EMSESP_DEFAULT_SENSOR_NAME ""
+#endif
+
+#ifndef EMSESP_DEFAULT_ANALOG_NAME
+#define EMSESP_DEFAULT_ANALOG_NAME ""
+#endif
+
+#ifndef EMSESP_DEFAULT_ANALOG_UOM
+#define EMSESP_DEFAULT_ANALOG_UOM "mV"
+#endif
+
+#ifndef EMSESP_DEFAULT_WEBLOG_LEVEL
+#define EMSESP_DEFAULT_WEBLOG_LEVEL 6 // INFO
+#endif
+
+#ifndef EMSESP_DEFAULT_WEBLOG_BUFFER
+#define EMSESP_DEFAULT_WEBLOG_BUFFER 50
+#endif
+
+#ifndef EMSESP_DEFAULT_WEBLOG_COMPACT
+#define EMSESP_DEFAULT_WEBLOG_COMPACT true
+#endif
+
+#ifndef EMSESP_DEFAULT_ENTITY_FORMAT
+#define EMSESP_DEFAULT_ENTITY_FORMAT 1 // in MQTT discovery, single instance, shortname (EntityFormat::SINGLE_SHORT)
+#endif
+
+// matches Web UI settings
+enum {
+
+    BOOL_FORMAT_ONOFF_STR = 1, // 1
+    BOOL_FORMAT_ONOFF_STR_CAP, // 2
+    BOOL_FORMAT_TRUEFALSE_STR, // 3
+    BOOL_FORMAT_TRUEFALSE,     // 4
+    BOOL_FORMAT_10_STR,        // 5
+    BOOL_FORMAT_10             // 6
+
+};
+
+enum {
+
+    ENUM_FORMAT_VALUE = 1, // 1
+    ENUM_FORMAT_INDEX      // 2
+
+};
+
+#if CONFIG_IDF_TARGET_ESP32C3
+#define EMSESP_PLATFORM "ESP32C3"
+#elif CONFIG_IDF_TARGET_ESP32S2
+#define EMSESP_PLATFORM "ESP32S2"
+#elif CONFIG_IDF_TARGET_ESP32S3
+#define EMSESP_PLATFORM "ESP32S3"
+#elif CONFIG_IDF_TARGET_ESP32 || EMSESP_STANDALONE
+#define EMSESP_PLATFORM "ESP32"
+#else
+#error Target CONFIG_IDF_TARGET is not supported
+#endif
+
+#ifndef ARDUINO_VERSION
+#ifndef STRINGIZE
+#define STRINGIZE(s) #s
+#endif
+#if TASMOTA_SDK
+#define ARDUINO_VERSION_STR(major, minor, patch) "Tasmota Arduino v" STRINGIZE(major) "." STRINGIZE(minor) "." STRINGIZE(patch)
+#else
+#define ARDUINO_VERSION_STR(major, minor, patch) "ESP32 Arduino v" STRINGIZE(major) "." STRINGIZE(minor) "." STRINGIZE(patch)
+#endif
+#define ARDUINO_VERSION ARDUINO_VERSION_STR(ESP_ARDUINO_VERSION_MAJOR, ESP_ARDUINO_VERSION_MINOR, ESP_ARDUINO_VERSION_PATCH)
+#endif
+
+#endif

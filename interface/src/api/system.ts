@@ -2,7 +2,7 @@ import type { LogSettings, SystemStatus } from 'types';
 
 import { alovaInstance, alovaInstanceGH } from './endpoints';
 
-// systemStatus - also used to ping in Restart monitor for pinging
+// systemStatus - also used to ping in System Monitor for pinging
 export const readSystemStatus = () =>
   alovaInstance.Get<SystemStatus>('/rest/systemStatus');
 
@@ -14,16 +14,25 @@ export const updateLogSettings = (data: LogSettings) =>
 export const fetchLogES = () => alovaInstance.Get('/es/log');
 
 // Get versions from GitHub
+// cache for 10 minutes to stop getting the IP blocked by GitHub
 export const getStableVersion = () =>
   alovaInstanceGH.Get('latest', {
-    transform(response: { data: { name: string } }) {
-      return response.data.name.substring(1);
+    cacheFor: 60 * 10 * 1000,
+    transform(response: { data: { name: string; published_at: string } }) {
+      return {
+        name: response.data.name.substring(1),
+        published_at: response.data.published_at
+      };
     }
   });
 export const getDevVersion = () =>
   alovaInstanceGH.Get('tags/latest', {
-    transform(response: { data: { name: string } }) {
-      return response.data.name.split(/\s+/).splice(-1)[0].substring(1);
+    cacheFor: 60 * 10 * 1000,
+    transform(response: { data: { name: string; published_at: string } }) {
+      return {
+        name: response.data.name.split(/\s+/).splice(-1)[0].substring(1),
+        published_at: response.data.published_at
+      };
     }
   });
 

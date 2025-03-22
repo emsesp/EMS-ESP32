@@ -34,7 +34,12 @@ export function formatValue(
     if (value === undefined || typeof value === 'boolean') {
       return '';
     }
-    return value as string;
+    return (
+      (value as string) +
+      (value === '' || uom === undefined || uom === 0
+        ? ''
+        : ' ' + DeviceValueUOM_s[uom])
+    );
   }
 
   switch (uom) {

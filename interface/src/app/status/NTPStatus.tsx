@@ -28,19 +28,20 @@ import type { Theme } from '@mui/material';
 import * as NTPApi from 'api/ntp';
 
 import { dialogStyle } from 'CustomTheme';
-import { useAutoRequest, useRequest } from 'alova/client';
+import { useRequest } from 'alova/client';
 import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { NTPStatusType, Time } from 'types';
 import { NTPSyncStatus } from 'types';
+import { useInterval } from 'utils';
 import { formatDateTime, formatLocalDateTime } from 'utils';
 
 const NTPStatus = () => {
-  const {
-    data,
-    send: loadData,
-    error
-  } = useAutoRequest(NTPApi.readNTPStatus, { pollingTime: 3000 });
+  const { data, send: loadData, error } = useRequest(NTPApi.readNTPStatus);
+
+  useInterval(() => {
+    void loadData();
+  });
 
   const [localTime, setLocalTime] = useState<string>('');
   const [settingTime, setSettingTime] = useState<boolean>(false);
