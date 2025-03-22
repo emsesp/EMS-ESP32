@@ -102,6 +102,9 @@ std::deque<Token> exprToTokens(const std::string & expr) {
         } else if (strncmp(p, "hex", 3) == 0) {
             p += 2;
             tokens.emplace_back(Token::Type::Unary, "h", 5);
+        } else if (strncmp(p, "rnd", 3) == 0) {
+            p += 2;
+            tokens.emplace_back(Token::Type::Unary, "d", 5);
         } else if ((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') || (*p == '_') || (*p & 0x80)) {
             const auto * b = p;
             while ((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') || (*p == '_') || (*p & 0x80)) {
@@ -525,6 +528,9 @@ std::string calculate(const std::string & expr) {
                 break;
             case 'x':
                 stack.push_back(to_hex(static_cast<int>(rhd)));
+                break;
+            case 'd':
+                stack.push_back(to_string(rhd * esp_random() / UINT32_MAX));
                 break;
             }
         } break;
