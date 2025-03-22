@@ -30,7 +30,7 @@ void AnalogSensor::start() {
         return;
     }
 
-    analogSetAttenuation(ADC_2_5db); // for all channels 1.5V
+    analogSetAttenuation(ADC_11db); // for all channels 3.3V
 
     LOG_INFO("Starting Analog Sensor service");
 
@@ -110,13 +110,15 @@ void AnalogSensor::reload(bool get_nvs) {
                     sensors_.back().set_value(0); // reset value only for new sensors
                 }
             }
-            if (sensor.type == AnalogType::COUNTER || sensor.type >= AnalogType::DIGITAL_OUT) {
+            if (sensor.type == AnalogType::COUNTER || (sensor.type >= AnalogType::DIGITAL_OUT && sensor.type <= AnalogType::PWM_2)
+                || sensor.type == AnalogType::RGB) {
                 Command::add(
                     EMSdevice::DeviceType::ANALOGSENSOR,
                     sensor.name.c_str(),
                     [&](const char * value, const int8_t id) { return command_setvalue(value, sensor.gpio); },
                     sensor.type == AnalogType::COUNTER       ? FL_(counter)
                     : sensor.type == AnalogType::DIGITAL_OUT ? FL_(digital_out)
+                    : sensor.type == AnalogType::RGB         ? FL_(RGB)
                                                              : FL_(pwm),
                     CommandFlag::ADMIN_ONLY);
             }
@@ -157,6 +159,10 @@ void AnalogSensor::reload(bool get_nvs) {
             // analogSetPinAttenuation does not work with analogReadMilliVolts
             sensor.analog_       = 0; // initialize
             sensor.last_reading_ = 0;
+        } else if (sensor.type() == AnalogType::NTC) {
+            LOG_DEBUG("NTC Sensor on GPIO %02d", sensor.gpio());
+            // analogSetPinAttenuation(sensor.gpio(), ADC_11db); //does not work with analogReadMilliVolts
+            sensor.set_uom(DeviceValueUOM::DEGREES);
         } else if (sensor.type() == AnalogType::COUNTER) {
             LOG_DEBUG("I/O Counter on GPIO %02d", sensor.gpio());
             pinMode(sensor.gpio(), INPUT_PULLUP);
@@ -183,6 +189,18 @@ void AnalogSensor::reload(bool get_nvs) {
             sensor.polltime_ = 0;
             sensor.poll_     = digitalRead(sensor.gpio());
             publish_sensor(sensor);
+        } else if (sensor.type() == AnalogType::RGB) {
+            LOG_DEBUG("RGB on GPIO %02d", sensor.gpio());
+            uint32_t v = sensor.value();
+            uint8_t  r = v / 10000;
+            uint8_t  g = (v - r * 10000) / 100;
+            uint8_t  b = v % 100;
+#if ESP_ARDUINO_VERSION_MAJOR < 3
+            neopixelWrite(sensor.gpio(), 2 * r, 2 * g, 2 * b);
+#else
+            rgbLedWrite(sensor.gpio(), 2 * r, 2 * g, 2 * b);
+#endif
+            LOG_DEBUG("RGB set to %d, %d, %d", r, g, b);
         } else if (sensor.type() == AnalogType::DIGITAL_OUT) {
             LOG_DEBUG("Digital Write on GPIO %02d", sensor.gpio());
             pinMode(sensor.gpio(), OUTPUT);
@@ -272,6 +290,23 @@ void AnalogSensor::measure() {
                     changed_ = true;
                     publish_sensor(sensor);
                 }
+            } else if (sensor.type() == AnalogType::NTC) {
+                auto a = analogReadMilliVolts(sensor.gpio());
+                if (!sensor.analog_) { // init first time
+                    sensor.analog_ = a;
+                    sensor.sum_    = a * 16;
+                } else { // simple moving average filter
+                    sensor.sum_    = (sensor.sum_ * 15 + a * 16) / 16;
+                    sensor.analog_ = sensor.sum_ / 16;
+                }
+                if (sensor.analog_ > 0 && sensor.analog_ < 3300 && (sensor.last_reading_ + 1 < sensor.analog_ || sensor.last_reading_ > sensor.analog_ + 1)) {
+                    sensor.set_value(sensor.offset() + 1 / (1 / T25 + log((double)sensor.analog_ / (3300 - sensor.analog_) * (Rt / R0)) / Beta)
+                                     - T0); // Temperature in Celsius
+                    sensor.last_reading_ = sensor.analog_;
+                    sensorreads_++;
+                    changed_ = true;
+                    publish_sensor(sensor);
+                }
             }
         }
     }
@@ -350,12 +385,14 @@ bool AnalogSensor::update(uint8_t gpio, std::string & name, double offset, doubl
     bool found_sensor = false;
     EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
         for (auto & AnalogCustomization : settings.analogCustomizations) {
-            if (AnalogCustomization.type == AnalogType::COUNTER || AnalogCustomization.type >= AnalogType::DIGITAL_OUT) {
+            if (AnalogCustomization.type == AnalogType::COUNTER
+                || (AnalogCustomization.type >= AnalogType::DIGITAL_OUT && AnalogCustomization.type <= AnalogType::PWM_2)
+                || AnalogCustomization.type >= AnalogType::RGB) {
                 Command::erase_command(EMSdevice::DeviceType::ANALOGSENSOR, AnalogCustomization.name.c_str());
             }
             if (name.empty()) {
                 char n[20];
-                snprintf(n, sizeof(n), "%s_%02d", FL_(AnalogTypeName)[type], gpio);
+                snprintf(n, sizeof(n), "%s_%02d", FL_(list_sensortype)[type], gpio);
                 name = n;
             }
             if (AnalogCustomization.gpio == gpio) {
@@ -430,8 +467,13 @@ void AnalogSensor::publish_sensor(const Sensor & sensor) const {
         } else {
             snprintf(topic, sizeof(topic), "%s%s/%s", F_(analogsensor), "_data", sensor.name().c_str());
         }
-        char payload[10];
-        Mqtt::queue_publish(topic, Helpers::render_value(payload, sensor.value(), 2)); // always publish as doubles
+        char result[12];
+        if (sensor.type() == AnalogType::DIGITAL_IN || sensor.type() == AnalogType::DIGITAL_OUT) {
+            Helpers::render_boolean(result, sensor.value() != 0);
+        } else {
+            Helpers::render_value(result, sensor.value(), 2); // double
+        }
+        Mqtt::queue_publish(topic, result); // always publish as doubles
     }
     char cmd[COMMAND_MAX_LENGTH];
     snprintf(cmd, sizeof(cmd), "%s/%s", F_(analogsensor), sensor.name().c_str());
@@ -455,7 +497,9 @@ void AnalogSensor::remove_ha_topic(const int8_t type, const uint8_t gpio) const 
         snprintf(topic, sizeof(topic), "switch/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), gpio);
     } else if (type == AnalogType::DIGITAL_OUT) { // DAC
         snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), gpio);
-    } else if (type >= AnalogType::PWM_0) {
+    } else if (type >= AnalogType::PWM_0 && type <= AnalogType::PWM_2) {
+        snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), gpio);
+    } else if (type >= AnalogType::RGB) {
         snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), gpio);
     } else if (type == AnalogType::DIGITAL_IN) {
         snprintf(topic, sizeof(topic), "binary_sensor/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), gpio);
@@ -495,6 +539,8 @@ void AnalogSensor::publish_values(const bool force) {
                 case AnalogType::PWM_0:
                 case AnalogType::PWM_1:
                 case AnalogType::PWM_2:
+                case AnalogType::RGB:
+                case AnalogType::NTC:
                     dataSensor["value"] = serialized(Helpers::render_value(s, sensor.value(), 2)); // double
                     break;
                 case AnalogType::DIGITAL_IN:
@@ -597,6 +643,14 @@ void AnalogSensor::publish_values(const bool force) {
                     config["max"]   = 100;
                     config["mode"]  = "box"; // auto, slider or box
                     config["step"]  = 0.1;
+                } else if (sensor.type() == AnalogType::RGB) {
+                    snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
+                    snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(analogsensor), sensor.name().c_str());
+                    config["cmd_t"] = command_topic;
+                    config["min"]   = 0;
+                    config["max"]   = 999999;
+                    config["mode"]  = "box"; // auto, slider or box
+                    config["step"]  = 1;
                 } else if (sensor.type() == AnalogType::COUNTER) {
                     snprintf(topic, sizeof(topic), "sensor/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
                     snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(analogsensor), sensor.name().c_str());
@@ -679,8 +733,9 @@ void AnalogSensor::get_value_json(JsonObject output, const Sensor & sensor) {
     output["analog"]    = FL_(list_sensortype)[sensor.type()];
     output["value"]     = sensor.value();
     output["readable"]  = true;
-    output["writeable"] = sensor.type() == AnalogType::COUNTER || (sensor.type() >= AnalogType::DIGITAL_OUT && sensor.type() <= AnalogType::PWM_2);
-    output["visible"]   = true;
+    output["writeable"] = sensor.type() == AnalogType::COUNTER || sensor.type() >= AnalogType::RGB
+                          || (sensor.type() >= AnalogType::DIGITAL_OUT && sensor.type() <= AnalogType::PWM_2);
+    output["visible"] = true;
     if (sensor.type() == AnalogType::COUNTER) {
         output["min"]         = 0;
         output["max"]         = 4000000;
@@ -733,10 +788,10 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
             double oldoffset = sensor.offset();
             if (sensor.type() == AnalogType::COUNTER) {
                 if (val < 0 || value[0] == '+') { // sign corrects values
-                    sensor.set_offset(sensor.value() + val);
+                    // sensor.set_offset(sensor.value() + val);
                     sensor.set_value(sensor.value() + val);
                 } else { // positive values are set
-                    sensor.set_offset(val);
+                    // sensor.set_offset(val);
                     sensor.set_value(val);
                 }
                 if (oldoffset != sensor.offset() && sensor.offset() != EMSESP::nvs_.getDouble(sensor.name().c_str())) {
@@ -744,6 +799,19 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                 }
             } else if (sensor.type() == AnalogType::ADC) {
                 sensor.set_offset(val);
+            } else if (sensor.type() == AnalogType::RGB) {
+                uint32_t v = val;
+                sensor.set_offset(v);
+                sensor.set_value(v);
+                uint8_t r = v / 10000;
+                uint8_t g = (v - r * 10000) / 100;
+                uint8_t b = v % 100;
+#if ESP_ARDUINO_VERSION_MAJOR < 3
+                neopixelWrite(sensor.gpio(), 2 * r, 2 * g, 2 * b);
+#else
+                rgbLedWrite(sensor.gpio(), 2 * r, 2 * g, 2 * b);
+#endif
+                LOG_DEBUG("RGB set to %d, %d, %d", r, g, b);
             } else if (sensor.type() == AnalogType::DIGITAL_OUT) {
                 uint8_t v = val;
 #if CONFIG_IDF_TARGET_ESP32

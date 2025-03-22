@@ -232,20 +232,24 @@ export enum AnalogType {
   DIGITAL_OUT = 6,
   PWM_0 = 7,
   PWM_1 = 8,
-  PWM_2 = 9
+  PWM_2 = 9,
+  NTC = 10,
+  RGB = 11
 }
 
 export const AnalogTypeNames = [
   '(disabled)',
   'Digital In',
   'Counter',
-  'ADC',
+  'ADC In',
   'Timer',
   'Rate',
   'Digital Out',
   'PWM 0',
   'PWM 1',
-  'PWM 2'
+  'PWM 2',
+  'NTC Temp.',
+  'RGB Led'
 ];
 
 type BoardProfiles = Record<string, string>;

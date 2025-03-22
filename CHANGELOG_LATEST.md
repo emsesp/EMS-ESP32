@@ -20,6 +20,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - support nested conditions in scheduler [#2451](https://github.com/emsesp/EMS-ESP32/issues/2451)
 - allow mixed case in scheduler expressions [#2457](https://github.com/emsesp/EMS-ESP32/issues/2457)
 - Suprapur-o [#2470](https://github.com/emsesp/EMS-ESP32/issues/2470)
+- analogsensor types: NTC and RGB-Led
 
 ## Fixed
 

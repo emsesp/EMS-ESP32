@@ -171,6 +171,27 @@ const SensorsAnalogDialog = ({
               />
             </Grid>
           )}
+          {editItem.t === AnalogType.NTC && (
+            <Grid>
+              <TextField
+                name="o"
+                label={LL.OFFSET()}
+                value={numberValue(editItem.o)}
+                sx={{ width: '11ch' }}
+                type="number"
+                variant="outlined"
+                onChange={updateFormValue}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">°C</InputAdornment>
+                    )
+                  },
+                  htmlInput: { min: '-20', max: '20', step: '0.1' }
+                }}
+              />
+            </Grid>
+          )}
           {editItem.t === AnalogType.COUNTER && (
             <Grid>
               <TextField
@@ -184,6 +205,19 @@ const SensorsAnalogDialog = ({
                 slotProps={{
                   htmlInput: { step: '0.001' }
                 }}
+              />
+            </Grid>
+          )}
+          {editItem.t === AnalogType.RGB && (
+            <Grid>
+              <TextField
+                name="o"
+                label={'RGB ' + LL.VALUE(0)}
+                value={numberValue(editItem.o)}
+                type="number"
+                sx={{ width: '11ch' }}
+                variant="outlined"
+                onChange={updateFormValue}
               />
             </Grid>
           )}

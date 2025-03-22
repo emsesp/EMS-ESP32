@@ -27,8 +27,8 @@
 
 namespace emsesp {
 
-// names, same order as AnalogType
-MAKE_ENUM_FIXED(AnalogTypeName, "disabled", "dig_in", "counter", "adc", "timer", "rate", "dig_out", "pwm0", "pwm1", "pwm2")
+// names, same order as AnalogType, see list_sensortype in local_common.h
+// MAKE_ENUM_FIXED(AnalogTypeName, "disabled", "dig_in", "counter", "adc", "timer", "rate", "dig_out", "pwm0", "pwm1", "pwm2")
 
 class AnalogSensor {
   public:
@@ -122,7 +122,9 @@ class AnalogSensor {
         DIGITAL_OUT = 6,
         PWM_0       = 7,
         PWM_1       = 8,
-        PWM_2       = 9
+        PWM_2       = 9,
+        NTC         = 10,
+        RGB         = 11
     };
 
     void start();
@@ -166,6 +168,11 @@ class AnalogSensor {
     void store_counters();
 
   private:
+    static constexpr double   Beta                    = 3380;
+    static constexpr double   T0                      = 273.15;
+    static constexpr double   T25                     = 298.15;
+    static constexpr double   R0                      = 10000;
+    static constexpr double   Rt                      = 10000;
     static constexpr uint8_t  MAX_SENSORS             = 20;
     static constexpr uint32_t MEASURE_ANALOG_INTERVAL = 500;
 
