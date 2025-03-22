@@ -187,7 +187,7 @@ const sk: Translation = {
   COMPACT: 'Kompaktné',
   DOWNLOAD_SETTINGS_TEXT: 'Vytvorte zálohu svojej konfigurácie a nastavení',
   UPLOAD_TEXT: 'Nahrajte nový súbor firmvéru (.bin) alebo súbor zálohy (.json)',
-  UPLOAD_DROP_TEXT: 'Drop a firmware .bin file or click here', // TODO translate
+  UPLOAD_DROP_TEXT: 'Presuňte súbor .bin firmvéru alebo kliknite sem',
   ERROR: 'Neočakávaná chyba, prosím skúste to znova',
   TIME_SET: 'Nastavený čas',
   MANAGE_USERS: 'Správa používateľov',
@@ -340,8 +340,8 @@ const sk: Translation = {
   AUTO_SCROLL: 'Automatické rolovanie',
   DASHBOARD: 'Panel',
   DEVELOPER_MODE: 'Režim vývojára',
-  BYTES: 'Bytes', // TODO translate
-  BITMASK: 'Bit Mask',// TODO translate
+  BYTES: 'Bytov',
+  BITMASK: 'Bitová maska',
   DUPLICATE: 'Duplicitné',
   UPGRADE: 'Inovovať',
   DASHBOARD_1: 'Všetky entity EMS, ktoré sú aktívne a označené ako obľúbené, plus všetky vlastné entity, plány a údaje externých senzorov sú zobrazené nižšie.',
