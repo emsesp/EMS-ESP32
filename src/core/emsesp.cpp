@@ -1314,6 +1314,10 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
         flags        = DeviceFlags::EMS_DEVICE_FLAG_CR120;
         default_name = "CR120";
     }
+    if (product_id == 158 && strncmp(version,"73",2) == 0) {
+        flags        = DeviceFlags::EMS_DEVICE_FLAG_BC400;
+        default_name = "HMC310";
+    }
 
     // empty reply to version, read a generic device from database
     if (product_id == 0) {
