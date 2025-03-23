@@ -554,7 +554,7 @@ const ApplicationSettings = () => {
                 <Grid>
                   <TextField
                     name="led_type"
-                    label={'LED ' + LL.TYPE()}
+                    label={'LED ' + LL.TYPE(0)}
                     value={data.led_type}
                     fullWidth
                     variant="outlined"
