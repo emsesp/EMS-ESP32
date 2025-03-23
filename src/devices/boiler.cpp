@@ -1848,10 +1848,11 @@ void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
     uint32_t        date          = (year - 2000) * 535680UL + month * 44640UL + day * 1440UL + hour * 60 + min + duration;
     // check valid https://github.com/emsesp/EMS-ESP32/issues/2189
     if (day == 0 || day > 31 || month == 0 || month > 12 || !std::isprint(code[0]) || !std::isprint(code[1])) {
-        if (!lastCodeDate_) {
+        if (!lastCodeDate_ && std::isprint(code[0]) && std::isprint(code[1])) {
             char newCode[sizeof(lastCode_)];
             snprintf(newCode, sizeof(lastCode_), "%s(%d)", code, codeNo);
             has_update(lastCode_, newCode, sizeof(lastCode_));
+            lastCodeDate_ = 1;
         }
         return;
     }
