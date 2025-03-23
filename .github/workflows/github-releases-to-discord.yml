@@ -1,4 +1,4 @@
-name: 'github-releases-to-discord'
+name: 'Publish releases to discord'
 
 on:
   release:
