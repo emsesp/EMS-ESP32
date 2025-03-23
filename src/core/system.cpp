@@ -1821,7 +1821,7 @@ bool System::command_test(const char * value, const int8_t id) {
 // takes a board profile and populates a data array with GPIO configurations
 // returns false if profile is unknown
 //
-// data = led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
+// data = led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode, led_type
 //
 // clock modes:
 //  0 = RMII clock input to GPIO0
