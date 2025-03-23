@@ -1,4 +1,4 @@
-name: 'pr_check'
+name: 'Pre-check on PR'
 
 on:
   workflow_dispatch:

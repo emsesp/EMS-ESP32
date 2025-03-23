@@ -58,6 +58,7 @@ let settings = {
   eth_power: 15,
   eth_phy_addr: 0,
   eth_clock_mode: 1,
+  led_type: 0,
   platform: 'ESP32',
   modbus_enabled: false,
   modbus_port: 502,
@@ -175,7 +176,7 @@ switch (emulate_esp as string) {
     settings.platform = 'ESP32';
     break;
 
-  // ESP32S3
+  // ESP32 S3
   case 'ESP32S3':
   default:
     system_status.esp_platform = 'ESP32S3';
@@ -185,7 +186,7 @@ switch (emulate_esp as string) {
     system_status.psram = true;
     system_status.psram_size = 8189;
     system_status.free_psram = 8166;
-    settings.board_profile = 'S3';
+    settings.board_profile = 'S32S3';
     settings.platform = 'ESP32S3';
     break;
 }
@@ -269,10 +270,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-        old_custom_name +
-        ') with new (' +
-        new_custom_name +
-        ')'
+          old_custom_name +
+          ') with new (' +
+          new_custom_name +
+          ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -367,15 +368,15 @@ function check_upgrade(version: string) {
     const stable_version = version.split(',')[1];
     console.log(
       'latest dev version: ' +
-      dev_version +
-      ', latest stable version: ' +
-      stable_version
+        dev_version +
+        ', latest stable version: ' +
+        stable_version
     );
     console.log(
       'Version upgrade check from version ' +
-      THIS_VERSION +
-      ', upgradable: ' +
-      VERSION_IS_UPGRADEABLE
+        THIS_VERSION +
+        ', upgradable: ' +
+        VERSION_IS_UPGRADEABLE
     );
     data = {
       emsesp_version: THIS_VERSION,
@@ -4864,7 +4865,8 @@ router
       phy_type: settings.phy_type,
       eth_power: settings.eth_power,
       eth_phy_addr: settings.eth_phy_addr,
-      eth_clock_mode: settings.eth_clock_mode
+      eth_clock_mode: settings.eth_clock_mode,
+      led_type: settings.led_type
     };
 
     if (board_profile == 'S32') {
@@ -4878,6 +4880,19 @@ router
       data.eth_power = 0;
       data.eth_phy_addr = 0;
       data.eth_clock_mode = 0;
+      data.led_type = 0;
+    } else if (board_profile == 'S32S3') {
+      // BBQKees Gateway S3
+      data.led_gpio = 2;
+      data.dallas_gpio = 18;
+      data.rx_gpio = 5;
+      data.tx_gpio = 17;
+      data.pbutton_gpio = 0;
+      data.phy_type = 0;
+      data.eth_power = 0;
+      data.eth_phy_addr = 0;
+      data.eth_clock_mode = 0;
+      data.led_type = 0;
     } else if (board_profile == 'E32') {
       // BBQKees Gateway E32
       data.led_gpio = 2;
@@ -4889,6 +4904,19 @@ router
       data.eth_power = 16;
       data.eth_phy_addr = 1;
       data.eth_clock_mode = 0;
+      data.led_type = 0;
+    } else if (board_profile == 'E32V2') {
+      // BBQKees Gateway E32 V2
+      data.led_gpio = 2;
+      data.dallas_gpio = 14;
+      data.rx_gpio = 4;
+      data.tx_gpio = 5;
+      data.pbutton_gpio = 34;
+      data.phy_type = 1;
+      data.eth_power = 15;
+      data.eth_phy_addr = 0;
+      data.eth_clock_mode = 1;
+      data.led_type = 0;
     } else if (board_profile == 'MH-ET') {
       // MH-ET Live D1 Mini
       data.led_gpio = 2;
@@ -4900,6 +4928,7 @@ router
       data.eth_power = 0;
       data.eth_phy_addr = 0;
       data.eth_clock_mode = 0;
+      data.led_type = 0;
     } else if (board_profile == 'NODEMCU') {
       // NodeMCU 32S
       data.led_gpio = 2;
@@ -4911,6 +4940,7 @@ router
       data.eth_power = 0;
       data.eth_phy_addr = 0;
       data.eth_clock_mode = 0;
+      data.led_type = 0;
     } else if (board_profile == 'LOLIN') {
       // Lolin D32
       data.led_gpio = 2;
@@ -4922,6 +4952,7 @@ router
       data.eth_power = 0;
       data.eth_phy_addr = 0;
       data.eth_clock_mode = 0;
+      data.led_type = 0;
     } else if (board_profile == 'OLIMEX') {
       // Olimex ESP32-EVB (uses U1TXD/U1RXD/BUTTON, no LED or Dallas)
       data.led_gpio = 0;
@@ -4933,6 +4964,7 @@ router
       data.eth_power = -1;
       data.eth_phy_addr = 0;
       data.eth_clock_mode = 0;
+      data.led_type = 0;
     } else if (board_profile == 'OLIMEXPOE') {
       // Olimex ESP32-POE
       data.led_gpio = 0;
@@ -4944,6 +4976,7 @@ router
       data.eth_power = 12;
       data.eth_phy_addr = 0;
       data.eth_clock_mode = 3;
+      data.led_type = 0;
     } else if (board_profile == 'C3MINI') {
       // Lolin C3 mini
       data.led_gpio = 7;
@@ -4955,6 +4988,7 @@ router
       data.eth_power = 0;
       data.eth_phy_addr = 0;
       data.eth_clock_mode = 0;
+      data.led_type = 0;
     } else if (board_profile == 'S2MINI') {
       // Lolin C3 mini
       data.led_gpio = 15;
@@ -4966,6 +5000,7 @@ router
       data.eth_power = 0;
       data.eth_phy_addr = 0;
       data.eth_clock_mode = 0;
+      data.led_type = 0;
     } else if (board_profile == 'S3MINI') {
       // Liligo S3 mini
       data.led_gpio = 17;
@@ -4977,6 +5012,7 @@ router
       data.eth_power = 0;
       data.eth_phy_addr = 0;
       data.eth_clock_mode = 0;
+      data.led_type = 0;
     }
 
     data.board_profile =

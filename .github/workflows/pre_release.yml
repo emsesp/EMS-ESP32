@@ -1,4 +1,4 @@
-name: 'pre-release'
+name: 'Build dev release'
 
 on:
   workflow_dispatch:
