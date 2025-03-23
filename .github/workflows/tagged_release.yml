@@ -1,4 +1,4 @@
-name: 'tagged-release'
+name: 'Build stable release'
 
 on:
   workflow_dispatch:
