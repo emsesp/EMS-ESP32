@@ -4371,7 +4371,7 @@
 | dhw.disinfecthour | disinfection hour | uint8 (>=0<=23) |   | true | DHW | 14 | 1 | 1 | 
 | dhw.maxtemp | maximum temperature | uint8 (>=0<=254) | C | true | DHW | 15 | 1 | 1 | 
 | dhw.onetimekey | one time key function | boolean |   | true | DHW | 16 | 1 | 1 | 
-| dhw.switchtimeWW | program switchtime warm water | string |   | true | DHW | 17 | 11 | 1 | 
+| dhw.switchtime | program switchtime | string |   | true | DHW | 17 | 11 | 1 | 
 | dhw.circswitchtime | circulation program switchtime | string |   | true | DHW | 28 | 8 | 1 | 
 | dhw.holidays | holiday dates | string |   | true | DHW | 36 | 13 | 1 | 
 | dhw.vacations | vacation dates | string |   | true | DHW | 49 | 13 | 1 | 
@@ -4437,7 +4437,7 @@
 | dhw.disinfecthour | disinfection hour | uint8 (>=0<=23) |   | true | DHW | 14 | 1 | 1 | 
 | dhw.maxtemp | maximum temperature | uint8 (>=60<=80) | C | true | DHW | 15 | 1 | 1 | 
 | dhw.onetimekey | one time key function | boolean |   | true | DHW | 16 | 1 | 1 | 
-| dhw.switchtimeWW | program switchtime warm water | string |   | true | DHW | 17 | 11 | 1 | 
+| dhw.switchtime | program switchtime | string |   | true | DHW | 17 | 11 | 1 | 
 | dhw.circswitchtime | circulation program switchtime | string |   | true | DHW | 28 | 8 | 1 | 
 | dhw.holidays | holiday dates | string |   | true | DHW | 36 | 13 | 1 | 
 | dhw.vacations | vacation dates | string |   | true | DHW | 49 | 13 | 1 | 
@@ -5344,7 +5344,7 @@
 | dhw.disinfecthour | disinfection hour | uint8 (>=0<=23) |   | true | DHW | 14 | 1 | 1 | 
 | dhw.maxtemp | maximum temperature | uint8 (>=0<=254) | C | true | DHW | 15 | 1 | 1 | 
 | dhw.onetimekey | one time key function | boolean |   | true | DHW | 16 | 1 | 1 | 
-| dhw.switchtimeWW | program switchtime warm water | string |   | true | DHW | 17 | 11 | 1 | 
+| dhw.switchtime | program switchtime | string |   | true | DHW | 17 | 11 | 1 | 
 | dhw.circswitchtime | circulation program switchtime | string |   | true | DHW | 28 | 8 | 1 | 
 | dhw.holidays | holiday dates | string |   | true | DHW | 36 | 13 | 1 | 
 | dhw.vacations | vacation dates | string |   | true | DHW | 49 | 13 | 1 | 
@@ -5410,7 +5410,7 @@
 | dhw.disinfecthour | disinfection hour | uint8 (>=0<=23) |   | true | DHW | 14 | 1 | 1 | 
 | dhw.maxtemp | maximum temperature | uint8 (>=60<=80) | C | true | DHW | 15 | 1 | 1 | 
 | dhw.onetimekey | one time key function | boolean |   | true | DHW | 16 | 1 | 1 | 
-| dhw.switchtimeWW | program switchtime warm water | string |   | true | DHW | 17 | 11 | 1 | 
+| dhw.switchtime | program switchtime | string |   | true | DHW | 17 | 11 | 1 | 
 | dhw.circswitchtime | circulation program switchtime | string |   | true | DHW | 28 | 8 | 1 | 
 | dhw.holidays | holiday dates | string |   | true | DHW | 36 | 13 | 1 | 
 | dhw.vacations | vacation dates | string |   | true | DHW | 49 | 13 | 1 | 
