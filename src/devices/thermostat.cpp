@@ -3619,7 +3619,7 @@ bool Thermostat::set_wwCircSwitchTime(const char * value, const int8_t id) {
 // sets a single switchtime in the thermostat circulation program for RC35
 bool Thermostat::set_wwSwitchTime(const char * value, const int8_t id) {
     auto dhw = dhw_circuit(id2dhw(id));
-    if (dhw != nullptr) {
+    if (dhw == nullptr) {
         return false;
     }
     char out[sizeof(dhw->wwSwitchTime_)] = {'\0'};
