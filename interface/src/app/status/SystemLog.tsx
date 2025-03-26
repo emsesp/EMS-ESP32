@@ -8,7 +8,7 @@ import {
   Box,
   Button,
   Checkbox,
-  Grid2 as Grid,
+  Grid,
   IconButton,
   MenuItem,
   TextField,
