@@ -908,12 +908,12 @@ void Thermostat::process_IBASettings(std::shared_ptr<const Telegram> telegram) {
 // Settings WW 0x37 - RC35
 void Thermostat::process_RC35wwSettings(std::shared_ptr<const Telegram> telegram) {
     auto dhw = dhw_circuit(0, true);
-    has_update(telegram, dhw->wwProgMode_, 0);     // 0-like hc, 0xFF own prog
-    has_update(telegram, dhw->wwCircProg_, 1);     // 0-like hc, 0xFF own prog
-    has_update(telegram, dhw->wwMode_, 2);         // 0-off, 1-on, 2-auto
-    has_update(telegram, dhw->wwCircMode_, 3);     // 0-off, 1-on, 2-auto
-    has_update(telegram, dhw->wwDisinfecting_, 4); // 0-off, 0xFF on
-    has_update(telegram, dhw->wwDisinfectDay_, 5); // 0-6 Day of week, 7 every day
+    has_bitupdate(telegram, dhw->wwProgMode_, 0, 0); // 0-like hc, 0xFF own prog
+    has_bitupdate(telegram, dhw->wwCircProg_, 1, 0); // 0-like hc, 0xFF own prog
+    has_update(telegram, dhw->wwMode_, 2);           // 0-off, 1-on, 2-auto
+    has_update(telegram, dhw->wwCircMode_, 3);       // 0-off, 1-on, 2-auto
+    has_update(telegram, dhw->wwDisinfecting_, 4);   // 0-off, 0xFF on
+    has_update(telegram, dhw->wwDisinfectDay_, 5);   // 0-6 Day of week, 7 every day
     has_update(telegram, dhw->wwDisinfectHour_, 6);
     has_update(telegram, dhw->wwMaxTemp_, 8);    // Limiter 60 degrees
     has_update(telegram, dhw->wwOneTimeKey_, 9); // 0-off, 0xFF on
