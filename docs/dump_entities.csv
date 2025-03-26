@@ -3753,10 +3753,10 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC30",thermostat,67,dhw.disinfecthour,disinfection hour,uint8 (>=0<=23), ,true,number.thermostat_dhw_disinfection_hour,number.thermostat_dhw_disinfecthour,6,9,1,14,1
 "RC30",thermostat,67,dhw.maxtemp,maximum temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_maximum_temperature,number.thermostat_dhw_maxtemp,6,9,1,15,1
 "RC30",thermostat,67,dhw.onetimekey,one time key function,boolean, ,true,switch.thermostat_dhw_one_time_key_function,switch.thermostat_dhw_onetimekey,6,9,1,16,1
-"RC30",thermostat,67,dhw.switchtime,program switchtime,string, ,true,sensor.thermostat_dhw_program_switchtime,sensor.thermostat_dhw_switchtime,6,9,1,17,11
-"RC30",thermostat,67,dhw.circswitchtime,circulation program switchtime,string, ,true,sensor.thermostat_dhw_circulation_program_switchtime,sensor.thermostat_dhw_circswitchtime,6,9,1,28,8
-"RC30",thermostat,67,dhw.holidays,holiday dates,string, ,true,sensor.thermostat_dhw_holiday_dates,sensor.thermostat_dhw_holidays,6,9,1,36,13
-"RC30",thermostat,67,dhw.vacations,vacation dates,string, ,true,sensor.thermostat_dhw_vacation_dates,sensor.thermostat_dhw_vacations,6,9,1,49,13
+"RC30",thermostat,67,dhw.switchtime,program switchtime,string, ,true,sensor.thermostat_dhw_program_switchtime,sensor.thermostat_dhw_switchtime,6,9,1,17,8
+"RC30",thermostat,67,dhw.circswitchtime,circulation program switchtime,string, ,true,sensor.thermostat_dhw_circulation_program_switchtime,sensor.thermostat_dhw_circswitchtime,6,9,1,25,8
+"RC30",thermostat,67,dhw.holidays,holiday dates,string, ,true,sensor.thermostat_dhw_holiday_dates,sensor.thermostat_dhw_holidays,6,9,1,33,13
+"RC30",thermostat,67,dhw.vacations,vacation dates,string, ,true,sensor.thermostat_dhw_vacation_dates,sensor.thermostat_dhw_vacations,6,9,1,46,13
 "RC20, Moduline 300",thermostat,77,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "RC20, Moduline 300",thermostat,77,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "RC20, Moduline 300",thermostat,77,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -3809,7 +3809,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Moduline 400",thermostat,78,hc1.manualtemp,manual temperature,uint8 (>=0<=127),C,true,number.thermostat_hc1_manual_temperature,number.thermostat_hc1_manualtemp,6,1,1/2,6,1
 "Moduline 400",thermostat,78,hc1.offtemp,temperature when mode is off,uint8 (>=0<=127),C,true,number.thermostat_hc1_temperature_when_mode_is_off,number.thermostat_hc1_offtemp,6,1,1/2,107,1
 "Moduline 400",thermostat,78,dhw.mode,operating mode,enum [on\|off\|auto], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
-"Moduline 400",thermostat,78,dhw.whenmodeoff,when thermostat mode off,boolean, ,true,switch.thermostat_dhw_when_thermostat_mode_off,switch.thermostat_dhw_whenmodeoff,6,9,1,62,1
+"Moduline 400",thermostat,78,dhw.whenmodeoff,when thermostat mode off,boolean, ,true,switch.thermostat_dhw_when_thermostat_mode_off,switch.thermostat_dhw_whenmodeoff,6,9,1,59,1
 "Moduline 400",thermostat,78,dhw.disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,7,1
 "Moduline 400",thermostat,78,dhw.disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,8,1
 "Moduline 400",thermostat,78,dhw.disinfecthour,disinfection hour,uint8 (>=0<=23), ,true,number.thermostat_dhw_disinfection_hour,number.thermostat_dhw_disinfecthour,6,9,1,14,1
@@ -3899,10 +3899,10 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC35",thermostat,86,dhw.disinfecthour,disinfection hour,uint8 (>=0<=23), ,true,number.thermostat_dhw_disinfection_hour,number.thermostat_dhw_disinfecthour,6,9,1,14,1
 "RC35",thermostat,86,dhw.maxtemp,maximum temperature,uint8 (>=60<=80),C,true,number.thermostat_dhw_maximum_temperature,number.thermostat_dhw_maxtemp,6,9,1,15,1
 "RC35",thermostat,86,dhw.onetimekey,one time key function,boolean, ,true,switch.thermostat_dhw_one_time_key_function,switch.thermostat_dhw_onetimekey,6,9,1,16,1
-"RC35",thermostat,86,dhw.switchtimeWW,program switchtime warm water,string, ,true,sensor.thermostat_dhw_program_switchtime_warm_water,sensor.thermostat_dhw_switchtimeWW,6,9,1,17,11
-"RC35",thermostat,86,dhw.circswitchtime,circulation program switchtime,string, ,true,sensor.thermostat_dhw_circulation_program_switchtime,sensor.thermostat_dhw_circswitchtime,6,9,1,28,8
-"RC35",thermostat,86,dhw.holidays,holiday dates,string, ,true,sensor.thermostat_dhw_holiday_dates,sensor.thermostat_dhw_holidays,6,9,1,36,13
-"RC35",thermostat,86,dhw.vacations,vacation dates,string, ,true,sensor.thermostat_dhw_vacation_dates,sensor.thermostat_dhw_vacations,6,9,1,49,13
+"RC35",thermostat,86,dhw.switchtime,program switchtime,string, ,true,sensor.thermostat_dhw_program_switchtime,sensor.thermostat_dhw_switchtime,6,9,1,17,8
+"RC35",thermostat,86,dhw.circswitchtime,circulation program switchtime,string, ,true,sensor.thermostat_dhw_circulation_program_switchtime,sensor.thermostat_dhw_circswitchtime,6,9,1,25,8
+"RC35",thermostat,86,dhw.holidays,holiday dates,string, ,true,sensor.thermostat_dhw_holiday_dates,sensor.thermostat_dhw_holidays,6,9,1,33,13
+"RC35",thermostat,86,dhw.vacations,vacation dates,string, ,true,sensor.thermostat_dhw_vacation_dates,sensor.thermostat_dhw_vacations,6,9,1,46,13
 "RC10, Moduline 100",thermostat,90,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "RC10, Moduline 100",thermostat,90,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "RC10, Moduline 100",thermostat,90,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -4433,10 +4433,10 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "ES73",thermostat,76,dhw.disinfecthour,disinfection hour,uint8 (>=0<=23), ,true,number.thermostat_dhw_disinfection_hour,number.thermostat_dhw_disinfecthour,6,9,1,14,1
 "ES73",thermostat,76,dhw.maxtemp,maximum temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_maximum_temperature,number.thermostat_dhw_maxtemp,6,9,1,15,1
 "ES73",thermostat,76,dhw.onetimekey,one time key function,boolean, ,true,switch.thermostat_dhw_one_time_key_function,switch.thermostat_dhw_onetimekey,6,9,1,16,1
-"ES73",thermostat,76,dhw.switchtimeWW,program switchtime warm water,string, ,true,sensor.thermostat_dhw_program_switchtime_warm_water,sensor.thermostat_dhw_switchtimeWW,6,9,1,17,11
-"ES73",thermostat,76,dhw.circswitchtime,circulation program switchtime,string, ,true,sensor.thermostat_dhw_circulation_program_switchtime,sensor.thermostat_dhw_circswitchtime,6,9,1,28,8
-"ES73",thermostat,76,dhw.holidays,holiday dates,string, ,true,sensor.thermostat_dhw_holiday_dates,sensor.thermostat_dhw_holidays,6,9,1,36,13
-"ES73",thermostat,76,dhw.vacations,vacation dates,string, ,true,sensor.thermostat_dhw_vacation_dates,sensor.thermostat_dhw_vacations,6,9,1,49,13
+"ES73",thermostat,76,dhw.switchtime,program switchtime,string, ,true,sensor.thermostat_dhw_program_switchtime,sensor.thermostat_dhw_switchtime,6,9,1,17,8
+"ES73",thermostat,76,dhw.circswitchtime,circulation program switchtime,string, ,true,sensor.thermostat_dhw_circulation_program_switchtime,sensor.thermostat_dhw_circswitchtime,6,9,1,25,8
+"ES73",thermostat,76,dhw.holidays,holiday dates,string, ,true,sensor.thermostat_dhw_holiday_dates,sensor.thermostat_dhw_holidays,6,9,1,33,13
+"ES73",thermostat,76,dhw.vacations,vacation dates,string, ,true,sensor.thermostat_dhw_vacation_dates,sensor.thermostat_dhw_vacations,6,9,1,46,13
 "ES72, RC20",thermostat,113,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "ES72, RC20",thermostat,113,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "ES72, RC20",thermostat,113,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -4513,10 +4513,10 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "ES79",thermostat,156,dhw.disinfecthour,disinfection hour,uint8 (>=0<=23), ,true,number.thermostat_dhw_disinfection_hour,number.thermostat_dhw_disinfecthour,6,9,1,14,1
 "ES79",thermostat,156,dhw.maxtemp,maximum temperature,uint8 (>=60<=80),C,true,number.thermostat_dhw_maximum_temperature,number.thermostat_dhw_maxtemp,6,9,1,15,1
 "ES79",thermostat,156,dhw.onetimekey,one time key function,boolean, ,true,switch.thermostat_dhw_one_time_key_function,switch.thermostat_dhw_onetimekey,6,9,1,16,1
-"ES79",thermostat,156,dhw.switchtimeWW,program switchtime warm water,string, ,true,sensor.thermostat_dhw_program_switchtime_warm_water,sensor.thermostat_dhw_switchtimeWW,6,9,1,17,11
-"ES79",thermostat,156,dhw.circswitchtime,circulation program switchtime,string, ,true,sensor.thermostat_dhw_circulation_program_switchtime,sensor.thermostat_dhw_circswitchtime,6,9,1,28,8
-"ES79",thermostat,156,dhw.holidays,holiday dates,string, ,true,sensor.thermostat_dhw_holiday_dates,sensor.thermostat_dhw_holidays,6,9,1,36,13
-"ES79",thermostat,156,dhw.vacations,vacation dates,string, ,true,sensor.thermostat_dhw_vacation_dates,sensor.thermostat_dhw_vacations,6,9,1,49,13
+"ES79",thermostat,156,dhw.switchtime,program switchtime,string, ,true,sensor.thermostat_dhw_program_switchtime,sensor.thermostat_dhw_switchtime,6,9,1,17,8
+"ES79",thermostat,156,dhw.circswitchtime,circulation program switchtime,string, ,true,sensor.thermostat_dhw_circulation_program_switchtime,sensor.thermostat_dhw_circswitchtime,6,9,1,25,8
+"ES79",thermostat,156,dhw.holidays,holiday dates,string, ,true,sensor.thermostat_dhw_holiday_dates,sensor.thermostat_dhw_holidays,6,9,1,33,13
+"ES79",thermostat,156,dhw.vacations,vacation dates,string, ,true,sensor.thermostat_dhw_vacation_dates,sensor.thermostat_dhw_vacations,6,9,1,46,13
 "FW100",thermostat,105,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "FW100",thermostat,105,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "FW100",thermostat,105,datetime,date/time,string, ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13

@@ -9,7 +9,7 @@ import {
   Button,
   Checkbox,
   Divider,
-  Grid2 as Grid,
+  Grid,
   InputAdornment,
   MenuItem,
   TextField,

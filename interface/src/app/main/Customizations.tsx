@@ -16,7 +16,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid2 as Grid,
+  Grid,
   InputAdornment,
   Link,
   MenuItem,
