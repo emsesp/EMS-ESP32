@@ -3753,7 +3753,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC30",thermostat,67,dhw.disinfecthour,disinfection hour,uint8 (>=0<=23), ,true,number.thermostat_dhw_disinfection_hour,number.thermostat_dhw_disinfecthour,6,9,1,14,1
 "RC30",thermostat,67,dhw.maxtemp,maximum temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_maximum_temperature,number.thermostat_dhw_maxtemp,6,9,1,15,1
 "RC30",thermostat,67,dhw.onetimekey,one time key function,boolean, ,true,switch.thermostat_dhw_one_time_key_function,switch.thermostat_dhw_onetimekey,6,9,1,16,1
-"RC30",thermostat,67,dhw.switchtimeWW,program switchtime warm water,string, ,true,sensor.thermostat_dhw_program_switchtime_warm_water,sensor.thermostat_dhw_switchtimeWW,6,9,1,17,11
+"RC30",thermostat,67,dhw.switchtime,program switchtime,string, ,true,sensor.thermostat_dhw_program_switchtime,sensor.thermostat_dhw_switchtime,6,9,1,17,11
 "RC30",thermostat,67,dhw.circswitchtime,circulation program switchtime,string, ,true,sensor.thermostat_dhw_circulation_program_switchtime,sensor.thermostat_dhw_circswitchtime,6,9,1,28,8
 "RC30",thermostat,67,dhw.holidays,holiday dates,string, ,true,sensor.thermostat_dhw_holiday_dates,sensor.thermostat_dhw_holidays,6,9,1,36,13
 "RC30",thermostat,67,dhw.vacations,vacation dates,string, ,true,sensor.thermostat_dhw_vacation_dates,sensor.thermostat_dhw_vacations,6,9,1,49,13

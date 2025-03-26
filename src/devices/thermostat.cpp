@@ -513,7 +513,8 @@ uint8_t Thermostat::HeatingCircuit::get_mode() const {
         } else if (mode_new == 2) {
             return HeatingCircuit::Mode::AUTO;
         }
-    } else if ((model == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model == EMSdevice::EMS_DEVICE_FLAG_R3000) || (model == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
+    } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC300 || model == EMSdevice::EMS_DEVICE_FLAG_R3000 || model == EMSdevice::EMS_DEVICE_FLAG_RC100
+               || model == EMSdevice::EMS_DEVICE_FLAG_HMC310) {
         if (mode == 0) {
             return HeatingCircuit::Mode::MANUAL;
         } else if (mode == 1) {
@@ -565,7 +566,8 @@ uint8_t Thermostat::HeatingCircuit::get_mode_type() const {
         } else if (modetype == 1) {
             return HeatingCircuit::Mode::ON;
         }
-    } else if ((model == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model == EMSdevice::EMS_DEVICE_FLAG_R3000) || (model == EMSdevice::EMS_DEVICE_FLAG_BC400)) {
+    } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC300 || model == EMSdevice::EMS_DEVICE_FLAG_R3000 || model == EMSdevice::EMS_DEVICE_FLAG_BC400
+               || model == EMSdevice::EMS_DEVICE_FLAG_HMC310) {
         if (modetype == 0) {
             return HeatingCircuit::Mode::ECO;
         } else if (modetype == 1) {
@@ -906,12 +908,12 @@ void Thermostat::process_IBASettings(std::shared_ptr<const Telegram> telegram) {
 // Settings WW 0x37 - RC35
 void Thermostat::process_RC35wwSettings(std::shared_ptr<const Telegram> telegram) {
     auto dhw = dhw_circuit(0, true);
-    has_update(telegram, dhw->wwProgMode_, 0);     // 0-like hc, 0xFF own prog
-    has_update(telegram, dhw->wwCircProg_, 1);     // 0-like hc, 0xFF own prog
-    has_update(telegram, dhw->wwMode_, 2);         // 0-off, 1-on, 2-auto
-    has_update(telegram, dhw->wwCircMode_, 3);     // 0-off, 1-on, 2-auto
-    has_update(telegram, dhw->wwDisinfecting_, 4); // 0-off, 0xFF on
-    has_update(telegram, dhw->wwDisinfectDay_, 5); // 0-6 Day of week, 7 every day
+    has_bitupdate(telegram, dhw->wwProgMode_, 0, 0); // 0-like hc, 0xFF own prog
+    has_bitupdate(telegram, dhw->wwCircProg_, 1, 0); // 0-like hc, 0xFF own prog
+    has_update(telegram, dhw->wwMode_, 2);           // 0-off, 1-on, 2-auto
+    has_update(telegram, dhw->wwCircMode_, 3);       // 0-off, 1-on, 2-auto
+    has_update(telegram, dhw->wwDisinfecting_, 4);   // 0-off, 0xFF on
+    has_update(telegram, dhw->wwDisinfectDay_, 5);   // 0-6 Day of week, 7 every day
     has_update(telegram, dhw->wwDisinfectHour_, 6);
     has_update(telegram, dhw->wwMaxTemp_, 8);    // Limiter 60 degrees
     has_update(telegram, dhw->wwOneTimeKey_, 9); // 0-off, 0xFF on
@@ -1265,7 +1267,7 @@ void Thermostat::process_RC300WWmode(std::shared_ptr<const Telegram> telegram) {
     // circulation pump see: https://github.com/Th3M3/buderus_ems-wiki/blob/master/Einstellungen%20der%20Bedieneinheit%20RC310.md
     has_update(telegram, dhw->wwCircPump_, 1); // FF=off, 0=on ?
 
-    if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400) {
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400 || model() == EMSdevice::EMS_DEVICE_FLAG_HMC310) {
         const uint8_t modes[] = {0, 5, 1, 2, 4}; // off, eco+, eco, comfort, auto
         uint8_t       wwmode  = dhw->wwMode_ < sizeof(modes) ? modes[dhw->wwMode_] : EMS_VALUE_UINT8_NOTSET;
         telegram->read_value(wwmode, 2);
@@ -2235,7 +2237,7 @@ bool Thermostat::set_wwmode(const char * value, const int8_t id) {
             return false;
         }
         write_command(0xB0, 2, set, 0xB0);
-    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400) {
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400 || model() == EMSdevice::EMS_DEVICE_FLAG_HMC310) {
         if (!Helpers::value2enum(value, set, FL_(enum_wwMode4))) { // off, eco+, eco, comfort, auto
             return false;
         }
@@ -2946,6 +2948,7 @@ bool Thermostat::set_mode(const char * value, const int8_t id) {
     case EMSdevice::EMS_DEVICE_FLAG_RC300:
     case EMSdevice::EMS_DEVICE_FLAG_RC100:
     case EMSdevice::EMS_DEVICE_FLAG_R3000:
+    case EMSdevice::EMS_DEVICE_FLAG_HMC310:
         mode_list = FL_(enum_mode);
         break;
     case EMSdevice::EMS_DEVICE_FLAG_JUNKERS:
@@ -3071,6 +3074,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const int8_t id) {
     case EMSdevice::EMS_DEVICE_FLAG_RC300:
     case EMSdevice::EMS_DEVICE_FLAG_RC100:
     case EMSdevice::EMS_DEVICE_FLAG_R3000:
+    case EMSdevice::EMS_DEVICE_FLAG_HMC310:
         offset         = EMS_OFFSET_RCPLUSSet_mode;
         set_mode_value = set_mode_value == 2 ? 0xFF : 0;
         break;
@@ -3105,7 +3109,8 @@ bool Thermostat::set_mode_n(const uint8_t mode, const int8_t id) {
         hc->mode = set_mode_value >> 1;
     } else if (model_ == EMSdevice::EMS_DEVICE_FLAG_BC400 || model_ == EMSdevice::EMS_DEVICE_FLAG_CR120) {
         hc->mode_new = set_mode_value;
-    } else if (model_ == EMSdevice::EMS_DEVICE_FLAG_RC300 || model_ == EMSdevice::EMS_DEVICE_FLAG_R3000 || model_ == EMSdevice::EMS_DEVICE_FLAG_RC100) {
+    } else if (model_ == EMSdevice::EMS_DEVICE_FLAG_RC300 || model_ == EMSdevice::EMS_DEVICE_FLAG_R3000 || model_ == EMSdevice::EMS_DEVICE_FLAG_HMC310
+               || model_ == EMSdevice::EMS_DEVICE_FLAG_RC100) {
         hc->mode = set_mode_value == 0xFF ? 1 : 0;
     } else if (model_ == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
         hc->mode = set_mode_value - 1;
@@ -3614,7 +3619,7 @@ bool Thermostat::set_wwCircSwitchTime(const char * value, const int8_t id) {
 // sets a single switchtime in the thermostat circulation program for RC35
 bool Thermostat::set_wwSwitchTime(const char * value, const int8_t id) {
     auto dhw = dhw_circuit(id2dhw(id));
-    if (dhw != nullptr) {
+    if (dhw == nullptr) {
         return false;
     }
     char out[sizeof(dhw->wwSwitchTime_)] = {'\0'};
@@ -4188,6 +4193,7 @@ void Thermostat::register_device_values() {
     case EMSdevice::EMS_DEVICE_FLAG_R3000:
     case EMSdevice::EMS_DEVICE_FLAG_BC400:
     case EMSdevice::EMS_DEVICE_FLAG_CR120:
+    case EMSdevice::EMS_DEVICE_FLAG_HMC310:
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &dateTime_,
                               DeviceValueType::STRING,
@@ -4619,6 +4625,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
     case EMSdevice::EMS_DEVICE_FLAG_R3000:
     case EMSdevice::EMS_DEVICE_FLAG_BC400:
     case EMSdevice::EMS_DEVICE_FLAG_CR120:
+    case EMSdevice::EMS_DEVICE_FLAG_HMC310:
         if (model == EMSdevice::EMS_DEVICE_FLAG_BC400 || model == EMSdevice::EMS_DEVICE_FLAG_CR120) {
             register_device_value(tag, &hc->mode_new, DeviceValueType::ENUM, FL_(enum_mode2), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
         } else {
@@ -5058,7 +5065,8 @@ void Thermostat::register_device_values_dhw(std::shared_ptr<Thermostat::DhwCircu
     case EMSdevice::EMS_DEVICE_FLAG_R3000:
     case EMSdevice::EMS_DEVICE_FLAG_BC400:
     case EMSdevice::EMS_DEVICE_FLAG_CR120:
-        if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400) {
+    case EMSdevice::EMS_DEVICE_FLAG_HMC310:
+        if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400 || model() == EMSdevice::EMS_DEVICE_FLAG_HMC310) {
             register_device_value(tag, &dhw->wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode4), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
         } else if (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) {
             register_device_value(tag, &dhw->wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode5), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
@@ -5134,7 +5142,7 @@ void Thermostat::register_device_values_dhw(std::shared_ptr<Thermostat::DhwCircu
         register_device_value(tag, &dhw->wwMaxTemp_, DeviceValueType::UINT8, FL_(wwMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwMaxTemp));
         register_device_value(tag, &dhw->wwOneTimeKey_, DeviceValueType::BOOL, FL_(wwOneTimeKey), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwOneTimeKey));
         register_device_value(
-            tag, &dhw->wwSwitchTime_, DeviceValueType::STRING, FL_(tpl_switchtime), FL_(wwswitchtime), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwSwitchTime));
+            tag, &dhw->wwSwitchTime_, DeviceValueType::STRING, FL_(tpl_switchtime), FL_(switchtime), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwSwitchTime));
         register_device_value(tag,
                               &dhw->wwCircSwitchTime_,
                               DeviceValueType::STRING,
@@ -5157,7 +5165,7 @@ void Thermostat::register_device_values_dhw(std::shared_ptr<Thermostat::DhwCircu
         register_device_value(tag, &dhw->wwMaxTemp_, DeviceValueType::UINT8, FL_(wwMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwMaxTemp), 60, 80);
         register_device_value(tag, &dhw->wwOneTimeKey_, DeviceValueType::BOOL, FL_(wwOneTimeKey), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwOneTimeKey));
         register_device_value(
-            tag, &dhw->wwSwitchTime_, DeviceValueType::STRING, FL_(tpl_switchtime), FL_(wwswitchtime), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwSwitchTime));
+            tag, &dhw->wwSwitchTime_, DeviceValueType::STRING, FL_(tpl_switchtime), FL_(switchtime), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwSwitchTime));
         register_device_value(tag,
                               &dhw->wwCircSwitchTime_,
                               DeviceValueType::STRING,

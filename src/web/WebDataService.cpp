@@ -446,7 +446,9 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
                     dv["v"] = Helpers::transformNumFloat(sensor.value());
                     dv["u"] = sensor.uom();
                 }
-                if (sensor.type() == AnalogSensor::AnalogType::COUNTER || sensor.type() >= AnalogSensor::AnalogType::DIGITAL_OUT) {
+                if (sensor.type() == AnalogSensor::AnalogType::COUNTER
+                    || (sensor.type() >= AnalogSensor::AnalogType::DIGITAL_OUT && sensor.type() <= AnalogSensor::AnalogType::PWM_2)
+                    || sensor.type() == AnalogSensor::AnalogType::RGB) {
                     dv["c"] = sensor.name();
                 }
             }

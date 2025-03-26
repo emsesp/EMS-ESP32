@@ -393,7 +393,7 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwDisinfectHour), 14, 1), // disinfecthour
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwMaxTemp), 15, 1), // maxtemp
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwOneTimeKey), 16, 1), // onetimekey
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwswitchtime), 17, 11), // switchtimeWW
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(switchtime), 17, 11), // switchtime
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwcircswitchtime), 28, 8), // circswitchtime
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(holidays), 36, 13), // holidays
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(vacations), 49, 13), // vacations
