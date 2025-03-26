@@ -530,7 +530,11 @@ std::string calculate(const std::string & expr) {
                 stack.push_back(to_hex(static_cast<int>(rhd)));
                 break;
             case 'd':
+#ifndef EMSESP_STANDALONE
                 stack.push_back(to_string(rhd * esp_random() / UINT32_MAX));
+#else
+                stack.push_back(to_string(rhd * random()));
+#endif
                 break;
             }
         } break;

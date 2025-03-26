@@ -15,7 +15,7 @@ import {
   DialogContent,
   DialogTitle,
   FormControlLabel,
-  Grid2 as Grid,
+  Grid,
   Link,
   Typography
 } from '@mui/material';

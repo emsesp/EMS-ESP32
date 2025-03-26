@@ -31,7 +31,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid2 as Grid,
+  Grid,
   IconButton,
   InputAdornment,
   List,
