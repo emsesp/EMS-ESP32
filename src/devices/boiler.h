@@ -259,10 +259,10 @@ class Boiler : public EMSdevice {
     uint8_t powerReduction_;
 
     uint8_t  pvCooling_;
-    uint8_t  manDefrost_;
     uint8_t  auxHeatMode_;
     uint8_t  auxMaxLimit_;
     uint8_t  auxLimitStart_;
+    uint8_t  auxHeaterSource_;
     uint8_t  auxHeaterOnly_;
     uint8_t  auxHeaterOff_;
     uint8_t  auxHeaterStatus_;
@@ -475,7 +475,7 @@ class Boiler : public EMSdevice {
     bool set_additionalHeaterDelay(const char * value, const int8_t id);
     bool set_tempParMode(const char * value, const int8_t id);
     bool set_auxHeatMode(const char * value, const int8_t id);
-    bool set_manDefrost(const char * value, const int8_t id);
+    bool set_auxHeaterSource(const char * value, const int8_t id);
     bool set_pvCooling(const char * value, const int8_t id);
     bool set_hpCircPumpWw(const char * value, const int8_t id);
     bool set_hpPumpMode(const char * value, const int8_t id);

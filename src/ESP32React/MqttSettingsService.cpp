@@ -34,7 +34,7 @@ void MqttSettingsService::startClient() {
     static bool isSecure = false;
     if (_mqttClient != nullptr) {
         // do we need to change the client?
-        if ((isSecure && _state.enableTLS) || (!isSecure && _state.enableTLS)) {
+        if ((isSecure && _state.enableTLS) || (!isSecure && !_state.enableTLS)) {
             return;
         }
         delete _mqttClient;
@@ -48,11 +48,9 @@ void MqttSettingsService::startClient() {
         } else {
             _mqttClient = new espMqttClientSecure(espMqttClientTypes::UseInternalTask::NO);
         }
-        if (_state.rootCA == "insecure") {
-            static_cast<espMqttClientSecure *>(_mqttClient)->setInsecure();
-        } else {
-            String certificate = "-----BEGIN CERTIFICATE-----\n" + _state.rootCA + "\n-----END CERTIFICATE-----\n";
-            static_cast<espMqttClientSecure *>(_mqttClient)->setCACert(certificate.c_str());
+        if (!_mqttClient) {
+            emsesp::EMSESP::logger().warning("MQTT Client alloc failed");
+            return;
         }
         static_cast<espMqttClientSecure *>(_mqttClient)->onConnect([this](bool sessionPresent) { onMqttConnect(sessionPresent); });
         static_cast<espMqttClientSecure *>(_mqttClient)->onDisconnect([this](espMqttClientTypes::DisconnectReason reason) { onMqttDisconnect(reason); });
@@ -185,9 +183,14 @@ bool MqttSettingsService::configureMqtt() {
         _reconfigureMqtt = false;
 #ifndef TASMOTA_SDK
         if (_state.enableTLS) {
-#if defined(EMSESP_DEBUG)
-            emsesp::EMSESP::logger().debug("Start secure MQTT with rootCA");
-#endif
+            if (_state.rootCA == "insecure") {
+                emsesp::EMSESP::logger().debug("Start insecure MQTT");
+                static_cast<espMqttClientSecure *>(_mqttClient)->setInsecure();
+            } else {
+                emsesp::EMSESP::logger().debug("Start secure MQTT with rootCA");
+                String certificate = "-----BEGIN CERTIFICATE-----\n" + _state.rootCA + "\n-----END CERTIFICATE-----\n";
+                static_cast<espMqttClientSecure *>(_mqttClient)->setCACert(certificate.c_str());
+            }
             static_cast<espMqttClientSecure *>(_mqttClient)->setServer(_state.host.c_str(), _state.port);
             if (_state.username.length() > 0) {
                 static_cast<espMqttClientSecure *>(_mqttClient)

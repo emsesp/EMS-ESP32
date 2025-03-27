@@ -675,7 +675,13 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(maxHeatDhw),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_maxHeatDhw));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &manDefrost_, DeviceValueType::BOOL, FL_(manDefrost), DeviceValueUOM::NONE, MAKE_CF_CB(set_manDefrost));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &auxHeaterSource_,
+                              DeviceValueType::ENUM,
+                              FL_(enum_auxHeaterSource),
+                              FL_(auxHeaterSource),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_auxHeaterSource));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pvCooling_, DeviceValueType::BOOL, FL_(pvCooling), DeviceValueUOM::NONE, MAKE_CF_CB(set_pvCooling));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &auxHeaterOnly_,
@@ -2004,7 +2010,7 @@ void Boiler::process_HpPump2(std::shared_ptr<const Telegram> telegram) {
 
 // Boiler(0x08) -> All(0x00), ?(0x0491), data: 03 01 00 00 00 02 64 00 00 14 01 2C 00 0A 00 1E 00 1E 00 00 1E 0A 1E 05 05
 void Boiler::process_HpAdditionalHeater(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram, manDefrost_, 0); // off/on
+    has_update(telegram, auxHeaterSource_, 0); // https://github.com/emsesp/EMS-ESP32/discussions/2489
     has_update(telegram, auxHeaterOnly_, 1);
     has_update(telegram, auxHeaterOff_, 2);
     has_update(telegram, auxHeatMode_, 4); // eco/comfort
@@ -3085,9 +3091,9 @@ bool Boiler::set_auxLimit(const char * value, const int8_t id) {
     return false;
 }
 
-bool Boiler::set_manDefrost(const char * value, const int8_t id) {
-    bool v;
-    if (Helpers::value2bool(value, v)) {
+bool Boiler::set_auxHeaterSource(const char * value, const int8_t id) {
+    uint8_t v;
+    if (Helpers::value2enum(value, v, FL_(enum_auxHeaterSource))) {
         write_command(0x491, 0, v ? 1 : 0, 0x491);
         return true;
     }
