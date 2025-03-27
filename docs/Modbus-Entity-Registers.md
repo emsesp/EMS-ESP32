@@ -4371,10 +4371,10 @@
 | dhw.disinfecthour | disinfection hour | uint8 (>=0<=23) |   | true | DHW | 14 | 1 | 1 | 
 | dhw.maxtemp | maximum temperature | uint8 (>=0<=254) | C | true | DHW | 15 | 1 | 1 | 
 | dhw.onetimekey | one time key function | boolean |   | true | DHW | 16 | 1 | 1 | 
-| dhw.switchtime | program switchtime | string |   | true | DHW | 17 | 11 | 1 | 
-| dhw.circswitchtime | circulation program switchtime | string |   | true | DHW | 28 | 8 | 1 | 
-| dhw.holidays | holiday dates | string |   | true | DHW | 36 | 13 | 1 | 
-| dhw.vacations | vacation dates | string |   | true | DHW | 49 | 13 | 1 | 
+| dhw.switchtime | program switchtime | string |   | true | DHW | 17 | 8 | 1 | 
+| dhw.circswitchtime | circulation program switchtime | string |   | true | DHW | 25 | 8 | 1 | 
+| dhw.holidays | holiday dates | string |   | true | DHW | 33 | 13 | 1 | 
+| dhw.vacations | vacation dates | string |   | true | DHW | 46 | 13 | 1 | 
 
 ### ES79
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -4437,10 +4437,10 @@
 | dhw.disinfecthour | disinfection hour | uint8 (>=0<=23) |   | true | DHW | 14 | 1 | 1 | 
 | dhw.maxtemp | maximum temperature | uint8 (>=60<=80) | C | true | DHW | 15 | 1 | 1 | 
 | dhw.onetimekey | one time key function | boolean |   | true | DHW | 16 | 1 | 1 | 
-| dhw.switchtime | program switchtime | string |   | true | DHW | 17 | 11 | 1 | 
-| dhw.circswitchtime | circulation program switchtime | string |   | true | DHW | 28 | 8 | 1 | 
-| dhw.holidays | holiday dates | string |   | true | DHW | 36 | 13 | 1 | 
-| dhw.vacations | vacation dates | string |   | true | DHW | 49 | 13 | 1 | 
+| dhw.switchtime | program switchtime | string |   | true | DHW | 17 | 8 | 1 | 
+| dhw.circswitchtime | circulation program switchtime | string |   | true | DHW | 25 | 8 | 1 | 
+| dhw.holidays | holiday dates | string |   | true | DHW | 33 | 13 | 1 | 
+| dhw.vacations | vacation dates | string |   | true | DHW | 46 | 13 | 1 | 
 
 ### EasyControl, CT200
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -4950,7 +4950,7 @@
 | hc1.manualtemp | manual temperature | uint8 (>=0<=127) | C | true | HC | 6 | 1 | 1/2 | 
 | hc1.offtemp | temperature when mode is off | uint8 (>=0<=127) | C | true | HC | 107 | 1 | 1/2 | 
 | dhw.mode | operating mode | enum [on\|off\|auto] |   | true | DHW | 0 | 1 | 1 | 
-| dhw.whenmodeoff | when thermostat mode off | boolean |   | true | DHW | 62 | 1 | 1 | 
+| dhw.whenmodeoff | when thermostat mode off | boolean |   | true | DHW | 59 | 1 | 1 | 
 | dhw.disinfecting | disinfecting | boolean |   | true | DHW | 7 | 1 | 1 | 
 | dhw.disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 8 | 1 | 1 | 
 | dhw.disinfecthour | disinfection hour | uint8 (>=0<=23) |   | true | DHW | 14 | 1 | 1 | 
@@ -5344,10 +5344,10 @@
 | dhw.disinfecthour | disinfection hour | uint8 (>=0<=23) |   | true | DHW | 14 | 1 | 1 | 
 | dhw.maxtemp | maximum temperature | uint8 (>=0<=254) | C | true | DHW | 15 | 1 | 1 | 
 | dhw.onetimekey | one time key function | boolean |   | true | DHW | 16 | 1 | 1 | 
-| dhw.switchtime | program switchtime | string |   | true | DHW | 17 | 11 | 1 | 
-| dhw.circswitchtime | circulation program switchtime | string |   | true | DHW | 28 | 8 | 1 | 
-| dhw.holidays | holiday dates | string |   | true | DHW | 36 | 13 | 1 | 
-| dhw.vacations | vacation dates | string |   | true | DHW | 49 | 13 | 1 | 
+| dhw.switchtime | program switchtime | string |   | true | DHW | 17 | 8 | 1 | 
+| dhw.circswitchtime | circulation program switchtime | string |   | true | DHW | 25 | 8 | 1 | 
+| dhw.holidays | holiday dates | string |   | true | DHW | 33 | 13 | 1 | 
+| dhw.vacations | vacation dates | string |   | true | DHW | 46 | 13 | 1 | 
 
 ### RC35
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5410,10 +5410,10 @@
 | dhw.disinfecthour | disinfection hour | uint8 (>=0<=23) |   | true | DHW | 14 | 1 | 1 | 
 | dhw.maxtemp | maximum temperature | uint8 (>=60<=80) | C | true | DHW | 15 | 1 | 1 | 
 | dhw.onetimekey | one time key function | boolean |   | true | DHW | 16 | 1 | 1 | 
-| dhw.switchtime | program switchtime | string |   | true | DHW | 17 | 11 | 1 | 
-| dhw.circswitchtime | circulation program switchtime | string |   | true | DHW | 28 | 8 | 1 | 
-| dhw.holidays | holiday dates | string |   | true | DHW | 36 | 13 | 1 | 
-| dhw.vacations | vacation dates | string |   | true | DHW | 49 | 13 | 1 | 
+| dhw.switchtime | program switchtime | string |   | true | DHW | 17 | 8 | 1 | 
+| dhw.circswitchtime | circulation program switchtime | string |   | true | DHW | 25 | 8 | 1 | 
+| dhw.holidays | holiday dates | string |   | true | DHW | 33 | 13 | 1 | 
+| dhw.vacations | vacation dates | string |   | true | DHW | 46 | 13 | 1 | 
 
 ### RFM20 Remote
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |

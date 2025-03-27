@@ -393,11 +393,11 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwDisinfectHour), 14, 1), // disinfecthour
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwMaxTemp), 15, 1), // maxtemp
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwOneTimeKey), 16, 1), // onetimekey
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(switchtime), 17, 11), // switchtime
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwcircswitchtime), 28, 8), // circswitchtime
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(holidays), 36, 13), // holidays
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(vacations), 49, 13), // vacations
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwWhenModeOff), 62, 1), // whenmodeoff
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(switchtime), 17, 8), // switchtime
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwcircswitchtime), 25, 8), // circswitchtime
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(holidays), 33, 13), // holidays
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(vacations), 46, 13), // vacations
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwWhenModeOff), 59, 1), // whenmodeoff
     REGISTER_MAPPING(dt::MIXER, TAG_TYPE_HC, FL_(flowTempHc), 0, 1), // flowtemphc
     REGISTER_MAPPING(dt::MIXER, TAG_TYPE_HC, FL_(valveStatus), 1, 1), // valvestatus
     REGISTER_MAPPING(dt::MIXER, TAG_TYPE_HC, FL_(flowSetTemp), 2, 1), // flowsettemp
