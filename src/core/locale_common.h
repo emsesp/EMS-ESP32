@@ -369,6 +369,7 @@ MAKE_ENUM(enum_lowNoiseMode, FL_(off), FL_(reduced_output), FL_(switchoff), FL_(
 MAKE_ENUM(enum_hpactivity, FL_(off), FL_(heating), FL_(cooling), FL_(hot_water), FL_(pool), FL_(pool_heating), FL_(defrost), FL_(compressor_alarm)) // BV name COMPRESSOR_E21_STATUS
 MAKE_ENUM(enum_silentMode, FL_(off), FL_(auto), FL_(on))
 MAKE_ENUM(enum_4way, FL_(cool_defrost), FL_(heat_ww))
+MAKE_ENUM(enum_auxHeaterSource, FL_(not_installed), FL_(el_heater), FL_(exclusive), FL_(parallel), FL_(hybrid))
 
 // solar
 MAKE_ENUM(enum_solarmode, FL_(constant), FL_(pwm), FL_(analog))

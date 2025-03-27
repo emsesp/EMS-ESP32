@@ -231,6 +231,11 @@ MAKE_WORD_TRANSLATION(perm, "perm. reduced", "perm. reduziert", "permanent gered
 MAKE_WORD_TRANSLATION(heat_ww, "heating & dhw", "Heizen & Warmwasser", "", "Uppvärmning & Varmvatten", "ogrzewanie i c.w.u.", "", "", "", "", "kúrenie a TÚV", "topení a TUV")
 MAKE_WORD_TRANSLATION(cool_defrost, "cooling & defrost", "Kühlen & Abtauen", "", "Kyla & Avfrostning", "chłodzenie i odladzanie", "", "", "", "", "chladenie a rozmrazovanie", "chlazení a odmrazování")
 MAKE_WORD_TRANSLATION(compressor_alarm, "compressor alarm", "Alarm Kompressor", "", "", "", "", "", "", "", "alarm kompresora", "")
+MAKE_WORD_TRANSLATION(not_installed, "not installed", "Nicht installiert") // TODO translate
+MAKE_WORD_TRANSLATION(el_heater, "electric heater", "Elektroheizer") // TODO translate
+MAKE_WORD_TRANSLATION(exclusive, "exclusive", "Exklusiv") // TODO translate
+MAKE_WORD_TRANSLATION(parallel, "parallel", "Parallel") // TODO translate
+MAKE_WORD_TRANSLATION(hybrid, "hybrid", "Hybrid") // TODO translate
 
 // thermostat
 MAKE_WORD_TRANSLATION(seltemp, "selTemp", "Solltemperatur", "doeltemperatuur", "Börtemperatur", "temperatura zadana", "innstilt temperatur", "consigne température", "ayarlanmış sıcaklık", "temperatura di consegna", "zadaná teplota", "zvolená teplota")
@@ -483,7 +488,7 @@ MAKE_TRANSLATION(wwEcoPlusStopTemp, "ecoplusstop", "eco+ stop temp", "ECO+ Stopp
 MAKE_TRANSLATION(auxHeatMode, "auxheatrmode", "aux heater mode", "Zusatzheizungsmodus", "Modus bijverwarmer", "Eltillskott Läge", "tryb pracy dogrzewacza po blokadzie z Zakładu Energetycznego", "tilleggsvarmer modus", "", "ilave ısıtıcı modu", "modalità riscaldatore addizionale", "režim pomocného ohrievača", "režim pomocného topení") // TODO translate
 MAKE_TRANSLATION(auxMaxLimit, "auxmaxlimit", "aux heater max limit", "Zusatzheizer max. Grenze", "Bijverwarmer grensinstelling maximaal", "Eltillskott max begränsning", "dogrzewacz, maksymalny limit", "tillegsvarme maksgrense", "ilave ısıtıcı maks limit", "limite massimo riscaldatore addizionale", "maximálny limit pomocného ohrievača", "maximální limit pomocného topení")
 MAKE_TRANSLATION(auxLimitStart, "auxlimitstart", "aux heater limit start", "Zusatzheizer Grenze Start", "Bijverwarmer grens voor start", "Eltillskott begränsningsstart", "dogrzewacz, początek ograniczenia", "tillegsvarme startgrense", "ilave ısıtıcı limir başlangıcı", "avvio limite massimo riscaldatore addizionale", "spustenie limitu pomocného ohrievača", "startovací limit pomocného topení")
-MAKE_TRANSLATION(manDefrost, "mandefrost", "manual defrost", "Manuelle Enteisung", "Handmatige ontdooicyclus", "Manuell avfrostning", "ręczne odladzanie", "manuell avisning", "", "manuel buz çözme", "sbrinamento manuale", "manuálne odmrazovanie", "ruční odmrazování") // TODO translate
+MAKE_TRANSLATION(auxHeaterSource, "auxheatersource", "aux heater source", "Quelle Zusatzheizer") // TODO translate
 MAKE_TRANSLATION(pvCooling, "pvcooling", "cooling only with PV", "Kühlen nur mit PV", "Koelen alleen met solar PV", "Kyla endast med solpanel", "chłodzenie tylko z PV", "kjøling med solpanel", "", "sadece PV ile soğutma", "solo raffrescamento con solare", "Chladenie len s FV", "chlazení pouze s FV") // TODO translate
 MAKE_TRANSLATION(hpCircPumpWw, "hpcircpump", "circulation pump available during dhw", "Zirkulation möglich bei WW-Bereitung", "Circulatiepomp WP beschikbaar tijdens ww", "Värmebärarpump på vid varmvattenberedning", "pompa cyrkulacji dostępna w trakcie c.w.u.", "sirkulasjonspumpe tilgjengelig under varmtvann", "", "SKS esnasında sirkülasyon pompasu uygun", "pompa di circolazione disponibile durante ACS", "obehové čerpadlo k dispozícii počas TÚV", "oběhové čerpadlo dostupné během TUV") // TODO translate
 MAKE_TRANSLATION(vp_cooling, "vpcooling", "valve/pump cooling", "Ventil/Pumpe für Kühlen", "Klep koeling", "Ventil/Pump kyla", "zawór/pompa chłodzenia", "varmepumpe kjøling", "", "vana/pompa soğuyor", "valvola/pompa raffrescamento", "chladenie ventilu/čerpadla", "ventil/čerpadlo chlazení") // TODO translate

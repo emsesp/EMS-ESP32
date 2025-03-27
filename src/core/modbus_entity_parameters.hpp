@@ -127,7 +127,7 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(hpIn4Opt), 198, 8), // hpin4opt
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(maxHeatComp), 206, 1), // maxheatcomp
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(maxHeatHeat), 207, 1), // maxheatheat
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(manDefrost), 208, 1), // mandefrost
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(auxHeaterSource), 208, 1), // auxheatersource
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(pvCooling), 209, 1), // pvcooling
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(auxHeaterOnly), 210, 1), // auxheateronly
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(auxHeaterOff), 211, 1), // auxheateroff
