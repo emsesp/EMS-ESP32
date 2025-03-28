@@ -44,6 +44,7 @@ const Version = () => {
   const [restarting, setRestarting] = useState<boolean>(false);
   const [openInstallDialog, setOpenInstallDialog] = useState<boolean>(false);
   const [usingDevVersion, setUsingDevVersion] = useState<boolean>(false);
+  const [fetchDevVersion, setFetchDevVersion] = useState<boolean>(false);
   const [upgradeAvailable, setUpgradeAvailable] = useState<boolean>(false);
   const [internetLive, setInternetLive] = useState<boolean>(false);
   const [downloadOnly, setDownloadOnly] = useState<boolean>(false);
@@ -144,14 +145,14 @@ const Version = () => {
     }
     const filename =
       'EMS-ESP-' +
-      (usingDevVersion ? latestDevVersion.name : latestVersion.name).replaceAll(
+      (fetchDevVersion ? latestDevVersion.name : latestVersion.name).replaceAll(
         '.',
         '_'
       ) +
       '-' +
       getPlatform() +
       '.bin';
-    return usingDevVersion
+    return fetchDevVersion
       ? DEV_URL + filename
       : STABLE_URL + 'v' + latestVersion.name + '/' + filename;
   };
@@ -181,13 +182,13 @@ const Version = () => {
       <DialogTitle>
         {LL.INSTALL() +
           ' ' +
-          (usingDevVersion ? LL.DEVELOPMENT() : LL.STABLE()) +
+          (fetchDevVersion ? LL.DEVELOPMENT() : LL.STABLE()) +
           ' Firmware'}
       </DialogTitle>
       <DialogContent dividers>
         <Typography mb={2}>
           {LL.INSTALL_VERSION(
-            usingDevVersion ? latestDevVersion?.name : latestVersion?.name
+            fetchDevVersion ? latestDevVersion?.name : latestVersion?.name
           )}
         </Typography>
       </DialogContent>
@@ -223,13 +224,12 @@ const Version = () => {
   );
 
   const showFirmwareDialog = (useDevVersion?: boolean) => {
-    setUsingDevVersion(useDevVersion || usingDevVersion);
+    setFetchDevVersion(useDevVersion || usingDevVersion);
     setOpenInstallDialog(true);
   };
 
   const closeInstallDialog = () => {
     setOpenInstallDialog(false);
-    setUsingDevVersion(data.emsesp_version.includes('dev'));
   };
 
   const showButtons = (showDev?: boolean) => {
@@ -260,7 +260,9 @@ const Version = () => {
         variant="outlined"
         color="warning"
         size="small"
-        onClick={() => showFirmwareDialog()}
+        onClick={() =>
+          showFirmwareDialog(upgradeAvailable || (!usingDevVersion && showDev))
+        }
       >
         {upgradeAvailable || (!usingDevVersion && showDev)
           ? LL.UPGRADE()
