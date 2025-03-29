@@ -13,7 +13,7 @@ telegram_type_id,name,is_fetched
 0x19,UBAMonitorSlow, 
 0x1A,UBASetPoints, 
 0x1C,UBAMaintenanceStatus, 
-0x1E,HydrTemp, 
+0x1E,WM10TempMessage, 
 0x23,JunkersSetMixer,fetched
 0x26,UBASettingsWW,fetched
 0x28,WeatherComp,fetched
@@ -109,10 +109,10 @@ telegram_type_id,name,is_fetched
 0x02A0,RC300Curves, 
 0x02A1,RC300Curves, 
 0x02A2,RC300Curves, 
-0x02A5,CRFMonitor, 
+0x02A5,RC300Monitor,fetched
 0x02A6,RC300Monitor, 
-0x02A7,RC300Monitor, 
-0x02A8,CRFMonitor, 
+0x02A7,CRFMonitor, 
+0x02A8,RC300Monitor, 
 0x02A9,RC300Monitor, 
 0x02AA,RC300Monitor, 
 0x02AB,RC300Monitor, 
@@ -133,7 +133,7 @@ telegram_type_id,name,is_fetched
 0x02BE,RC300Set, 
 0x02BF,RC300Set, 
 0x02C0,RC300Set, 
-0x02CC,RC300Set2, 
+0x02CC,HPPressure,fetched
 0x02CD,MMPLUSConfigMessage,fetched
 0x02CE,RC300Set2, 
 0x02D0,RC300Set2, 

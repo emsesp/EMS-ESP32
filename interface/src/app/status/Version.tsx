@@ -172,55 +172,59 @@ const Version = () => {
 
   useLayoutTitle('EMS-ESP Firmware');
 
-  const renderInstallDialog = () => (
-    <Dialog
-      sx={dialogStyle}
-      open={openInstallDialog}
-      onClose={() => closeInstallDialog()}
-    >
-      <DialogTitle>
-        {LL.INSTALL() +
-          ' ' +
-          (usingDevVersion ? LL.DEVELOPMENT() : LL.STABLE()) +
-          ' Firmware'}
-      </DialogTitle>
-      <DialogContent dividers>
-        <Typography mb={2}>
-          {LL.INSTALL_VERSION(
-            usingDevVersion ? latestDevVersion?.name : latestVersion?.name
-          )}
-        </Typography>
-      </DialogContent>
-      <DialogActions>
-        <Button
-          startIcon={<CancelIcon />}
-          variant="outlined"
-          onClick={() => closeInstallDialog()}
-          color="secondary"
-        >
-          {LL.CANCEL()}
-        </Button>
-        <Button
-          startIcon={<DownloadIcon />}
-          variant="outlined"
-          onClick={() => closeInstallDialog()}
-          color="primary"
-        >
-          <Link underline="none" target="_blank" href={getBinURL()} color="primary">
-            {LL.DOWNLOAD(1)}
-          </Link>
-        </Button>
-        <Button
-          startIcon={<WarningIcon color="warning" />}
-          variant="outlined"
-          onClick={() => installFirmwareURL(getBinURL())}
-          color="primary"
-        >
-          {LL.INSTALL()}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
+  const renderInstallDialog = () => {
+    const binURL = getBinURL();
+
+    return (
+      <Dialog
+        sx={dialogStyle}
+        open={openInstallDialog}
+        onClose={() => closeInstallDialog()}
+      >
+        <DialogTitle>
+          {LL.INSTALL() +
+            ' ' +
+            (usingDevVersion ? LL.DEVELOPMENT() : LL.STABLE()) +
+            ' Firmware'}
+        </DialogTitle>
+        <DialogContent dividers>
+          <Typography mb={2}>
+            {LL.INSTALL_VERSION(
+              usingDevVersion ? latestDevVersion?.name : latestVersion?.name
+            )}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            startIcon={<CancelIcon />}
+            variant="outlined"
+            onClick={() => closeInstallDialog()}
+            color="secondary"
+          >
+            {LL.CANCEL()}
+          </Button>
+          <Button
+            startIcon={<DownloadIcon />}
+            variant="outlined"
+            onClick={() => closeInstallDialog()}
+            color="primary"
+          >
+            <Link underline="none" target="_blank" href={binURL} color="primary">
+              {LL.DOWNLOAD(1)}
+            </Link>
+          </Button>
+          <Button
+            startIcon={<WarningIcon color="warning" />}
+            variant="outlined"
+            onClick={() => installFirmwareURL(binURL)}
+            color="primary"
+          >
+            {LL.INSTALL()}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
+  };
 
   const showFirmwareDialog = (useDevVersion?: boolean) => {
     setUsingDevVersion(useDevVersion || usingDevVersion);
@@ -260,7 +264,7 @@ const Version = () => {
         variant="outlined"
         color="warning"
         size="small"
-        onClick={() => showFirmwareDialog()}
+        onClick={() => showFirmwareDialog(showDev)}
       >
         {upgradeAvailable || (!usingDevVersion && showDev)
           ? LL.UPGRADE()
