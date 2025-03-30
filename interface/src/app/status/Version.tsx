@@ -223,8 +223,8 @@ const Version = () => {
     </Dialog>
   );
 
-  const showFirmwareDialog = (useDevVersion?: boolean) => {
-    setFetchDevVersion(useDevVersion || usingDevVersion);
+  const showFirmwareDialog = (useDevVersion: boolean) => {
+    setFetchDevVersion(useDevVersion);
     setOpenInstallDialog(true);
   };
 
@@ -232,7 +232,7 @@ const Version = () => {
     setOpenInstallDialog(false);
   };
 
-  const showButtons = (showDev?: boolean) => {
+  const showButtons = (showDev: boolean) => {
     if (!me.admin) {
       return;
     }
@@ -260,13 +260,13 @@ const Version = () => {
         variant="outlined"
         color="warning"
         size="small"
-        onClick={() =>
-          showFirmwareDialog(upgradeAvailable || (!usingDevVersion && showDev))
-        }
+        onClick={() => showFirmwareDialog(showDev)}
       >
         {upgradeAvailable || (!usingDevVersion && showDev)
           ? LL.UPGRADE()
-          : LL.REINSTALL()}
+          : !showDev && usingDevVersion
+            ? LL.STABLE()
+            : LL.REINSTALL()}
         &hellip;
       </Button>
     );
@@ -397,7 +397,7 @@ const Version = () => {
                         {formatTimeAgo(new Date(latestVersion.published_at))})
                       </Typography>
                     )}
-                    {!usingDevVersion && showButtons(false)}
+                    {showButtons(false)}
                   </Typography>
                 </Grid>
 
