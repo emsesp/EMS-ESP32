@@ -1112,19 +1112,30 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
             // test version checks
-            // test with "current_version_s = "3.7.1-dev.8" in WebStatusService::checkUpgrade()
-            // request.url("/rest/action");
-            // deserializeJson(doc, "{\"action\":\"checkUpgrade\", \"param\":\"3.7.1-dev.9,3.7.0\"}"); // is upgradable
-            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
-            // deserializeJson(doc, "{\"action\":\"checkUpgrade\", \"param\":\"3.7.1-dev.7,3.7.0\"}"); // is not upgradable
-            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+            // use same data as in rest_server.ts
+            // log shows first if you can upgrade to dev, and then if you can upgrade to stable
+            request.url("/rest/action");
+            std::string LATEST_STABLE_VERSION = "3.7.2";
+            std::string LATEST_DEV_VERSION    = "3.7.3-dev.3";
+            std::string param                 = LATEST_DEV_VERSION + "," + LATEST_STABLE_VERSION;
+            std::string action                = "{\"action\":\"checkUpgrade\", \"param\":\"" + param + "\"}";
+            deserializeJson(doc, action);
 
-            // test with "current_version_s = "3.6.5" in WebStatusService::checkUpgrade()
-            // request.url("/rest/action");
-            // deserializeJson(doc, "{\"action\":\"checkUpgrade\", \"param\":\"3.7.1-dev.9,3.6.5\"}"); // is noy upgradable
-            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
-            // deserializeJson(doc, "{\"action\":\"checkUpgrade\", \"param\":\"3.7.1-dev.7,3.7.0\"}"); // is upgradable
-            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+            // case 0: on latest stable, can upgrade to dev only. So true, false
+            EMSESP::webStatusService.set_current_version(LATEST_STABLE_VERSION);
+            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+
+            // case 1: on latest dev, no updates to either dev or stable. So false, false
+            EMSESP::webStatusService.set_current_version(LATEST_DEV_VERSION);
+            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+
+            // case 2: upgrade an older stable to latest stable or the latest dev. So true, true
+            EMSESP::webStatusService.set_current_version("3.6.5");
+            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+
+            // case 3: upgrade an older dev to latest dev, no stable upgrades available. So true, false
+            EMSESP::webStatusService.set_current_version("3.7.3-dev.2");
+            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
             // char data6[] = "{\"device\":\"system\", \"cmd\":\"read\",\"value\":\"8 2 27 1\"}";
             // deserializeJson(doc, data6);
