@@ -73,14 +73,17 @@ void EMSuart::uart_event_task(void * pvParameters) {
  */
 void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t tx_gpio) {
     if (tx_mode_ == 0xFF) {
-        uart_config_t uart_config = {
-            .baud_rate           = EMSUART_BAUD,
-            .data_bits           = UART_DATA_8_BITS,
-            .parity              = UART_PARITY_DISABLE,
-            .stop_bits           = UART_STOP_BITS_1,
-            .flow_ctrl           = UART_HW_FLOWCTRL_DISABLE,
-            .rx_flow_ctrl_thresh = 0, // not used - https://docs.espressif.com/projects/esp-idf/en/v3.3.6/api-reference/peripherals/uart.html
-            .source_clk          = UART_SCLK_APB,
+        uart_config_t uart_config = {.baud_rate           = EMSUART_BAUD,
+                                     .data_bits           = UART_DATA_8_BITS,
+                                     .parity              = UART_PARITY_DISABLE,
+                                     .stop_bits           = UART_STOP_BITS_1,
+                                     .flow_ctrl           = UART_HW_FLOWCTRL_DISABLE,
+                                     .rx_flow_ctrl_thresh = 0,
+                                     .source_clk          = UART_SCLK_APB
+#if ESP_ARDUINO_VERSION_MAJOR >= 3
+                                     ,
+                                     .flags = {0, 0}
+#endif
         };
 #if defined(EMSUART_RX_INVERT)
         inverse_mask |= UART_SIGNAL_RXD_INV;
