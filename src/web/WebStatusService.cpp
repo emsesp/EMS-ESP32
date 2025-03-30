@@ -219,19 +219,17 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
 // action = checkUpgrade
 // versions holds the latest development version and stable version in one string, comma separated
 bool WebStatusService::checkUpgrade(JsonObject root, std::string & versions) {
-
     if (!versions.empty()) {
         version::Semver200_version current_version(current_version_s);
         version::Semver200_version latest_dev_version(versions.substr(0, versions.find(',')));
         version::Semver200_version latest_stable_version(versions.substr(versions.find(',') + 1));
 
-        // look for dev in the name to determine if we're using a dev release
-        bool using_dev_version = !current_version.prerelease().find("dev");
-
         bool dev_upgradeable    = latest_dev_version > current_version;
         bool stable_upgradeable = latest_stable_version > current_version;
 
 #if defined(EMSESP_DEBUG)
+        // look for dev in the name to determine if we're using a dev release
+        bool using_dev_version = !current_version.prerelease().find("dev");
         emsesp::EMSESP::logger()
             .debug("Checking version upgrade. This version=%d.%d.%d-%s (%s),latest dev=%d.%d.%d-%s (%s upgradeable),latest stable=%d.%d.%d-%s (%s upgradeable)",
                    current_version.major(),
