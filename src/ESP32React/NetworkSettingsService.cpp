@@ -37,7 +37,7 @@ void NetworkSettingsService::begin() {
 
     WiFi.mode(WIFI_MODE_MAX);
     WiFi.mode(WIFI_MODE_NULL);
-    // WiFi.setScanMethod(WIFI_ALL_CHANNEL_SCAN);     // default is FAST_SCAN, connect issues in 2.0.14
+    WiFi.setScanMethod(WIFI_ALL_CHANNEL_SCAN); // default is FAST_SCAN, connect issues in 2.0.14
     // WiFi.setSortMethod(WIFI_CONNECT_AP_BY_SIGNAL); // is default, no need to set
 
     _fsPersistence.readFromFS();
