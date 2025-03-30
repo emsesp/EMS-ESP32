@@ -333,7 +333,7 @@ const sk: Translation = {
   WAIT_FIRMWARE: 'Firmvér sa nahráva a inštaluje',
   INSTALL_VERSION: 'Týmto sa inštalovať verzia {0}. Si si istý?',
   UPGRADE_AVAILABLE: 'K dispozícii je aktualizácia firmvéru!',
-  LATEST_VERSION: 'Používate poslednú verziu firmvéru',
+  LATEST_VERSION: 'Používate poslednú {0} verziu firmvéru',
   PLEASE_WAIT: 'Čakajte prosím',
   RESTARTING_PRE: 'Prebieha inicializácia',
   RESTARTING_POST: 'Príprava',
@@ -351,8 +351,8 @@ const sk: Translation = {
   THIS_VERSION: 'Táto verzia',
   PLATFORM: 'Platforma',
   RELEASE_TYPE: 'Typ vydania',
-  REINSTALL: 'Preinštalovať',
   INTERNET_CONNECTION_REQUIRED: 'Internetové pripojenie je potrebné pre automatickú kontrolu a aktualizáciu',
+  SWITCH_RELEASE_TYPE: 'Prepnúť na vývojovú verziu'
 };
 
 export default sk;

@@ -333,7 +333,7 @@ const de: Translation = {
   WAIT_FIRMWARE: 'Die Firmware wird hochgeladen und installiert.',
   INSTALL_VERSION: 'Dadurch wird die Version {0} heruntergeladen. Sind Sie sicher?',
   UPGRADE_AVAILABLE: 'Es ist ein Firmware-Upgrade verfügbar.',
-  LATEST_VERSION: 'Sie verwenden die neueste Firmware-Version',
+  LATEST_VERSION: 'Sie verwenden die neueste {0} Firmware-Version',
   PLEASE_WAIT: 'Bitte warten',
   RESTARTING_PRE: 'Initialisierung',
   RESTARTING_POST: 'Vorbereitung',
@@ -351,8 +351,8 @@ const de: Translation = {
   THIS_VERSION: 'Diese Version',
   PLATFORM: 'Plattform',
   RELEASE_TYPE: 'Release Typ',
-  REINSTALL: 'Neu installieren',
   INTERNET_CONNECTION_REQUIRED: 'Internetverbindung erforderlich für automatische Version-Überprüfung und -Aktualisierung',
+  SWITCH_RELEASE_TYPE: 'Zum Entwickler-Release wechseln'
 };
 
 export default de;

@@ -333,15 +333,15 @@ const nl: Translation = {
   WAIT_FIRMWARE: 'Firmware wordt geüpload en geïnstalleerd',
   INSTALL_VERSION: 'Hiermee wordt versie {0} geïnstalleerd. Weet je het zeker?',
   UPGRADE_AVAILABLE: 'Er is een firmware-upgrade beschikbaar!',
-  LATEST_VERSION: 'U gebruikt de nieuwste firmwareversie',
+  LATEST_VERSION: 'U gebruikt de nieuwste {0} firmwareversie',
   PLEASE_WAIT: 'Een ogenblik geduld',
   RESTARTING_PRE: 'Initialiseren',
   RESTARTING_POST: 'Voorbereiding',
   AUTO_SCROLL: 'Automatisch Scrollen',
   DASHBOARD: 'Dashboard',
   DEVELOPER_MODE: 'Ontwikkelaarsmodus',
-  BYTES: 'Bytes', // TODO translate
-  BITMASK: 'Bit Mask',// TODO translate
+  BYTES: 'Bytes',
+  BITMASK: 'Bit Mask',
   DUPLICATE: 'Duplicaat',
   UPGRADE: 'Upgraden',
   DASHBOARD_1: 'Alle EMS-entiteiten die actief zijn en als favoriet zijn gemarkeerd, plus alle aangepaste entiteiten en externe sensorgegevens worden hieronder weergegeven.',
@@ -351,8 +351,8 @@ const nl: Translation = {
   THIS_VERSION: 'Deze Versie',
   PLATFORM: 'Platform',
   RELEASE_TYPE: 'Release Typ',
-  REINSTALL: 'Opnieuw Installeren',
   INTERNET_CONNECTION_REQUIRED: 'Internetverbinding vereist voor automatische versiecontrole en -upgrade',
+  SWITCH_RELEASE_TYPE: 'Switch naar Development release'
 };
 
 export default nl;

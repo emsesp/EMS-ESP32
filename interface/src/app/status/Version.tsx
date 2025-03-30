@@ -44,7 +44,9 @@ const Version = () => {
   const [restarting, setRestarting] = useState<boolean>(false);
   const [openInstallDialog, setOpenInstallDialog] = useState<boolean>(false);
   const [usingDevVersion, setUsingDevVersion] = useState<boolean>(false);
-  const [upgradeAvailable, setUpgradeAvailable] = useState<boolean>(false);
+  const [devUpgradeAvailable, setDevUpgradeAvailable] = useState<boolean>(false);
+  const [stableUpgradeAvailable, setStableUpgradeAvailable] =
+    useState<boolean>(false);
   const [internetLive, setInternetLive] = useState<boolean>(false);
   const [downloadOnly, setDownloadOnly] = useState<boolean>(false);
 
@@ -62,8 +64,13 @@ const Version = () => {
       immediate: false
     }
   ).onSuccess((event) => {
-    const data = event.data as { emsesp_version: string; upgradeable: boolean };
-    setUpgradeAvailable(data.upgradeable);
+    const data = event.data as {
+      emsesp_version: string;
+      dev_upgradeable: boolean;
+      stable_upgradeable: boolean;
+    };
+    setDevUpgradeAvailable(data.dev_upgradeable);
+    setStableUpgradeAvailable(data.stable_upgradeable);
   });
 
   const {
@@ -236,8 +243,12 @@ const Version = () => {
     setUsingDevVersion(data.emsesp_version.includes('dev'));
   };
 
-  const showButtons = (showDev?: boolean) => {
-    if (!me.admin) {
+  const showButtons = (showDev: boolean) => {
+    if (
+      !me.admin ||
+      (showDev && !devUpgradeAvailable) ||
+      (!showDev && !stableUpgradeAvailable)
+    ) {
       return;
     }
 
@@ -266,10 +277,11 @@ const Version = () => {
         size="small"
         onClick={() => showFirmwareDialog(showDev)}
       >
-        {upgradeAvailable || (!usingDevVersion && showDev)
-          ? LL.UPGRADE()
-          : LL.REINSTALL()}
-        &hellip;
+        {(devUpgradeAvailable && showDev) || (stableUpgradeAvailable && !showDev)
+          ? showDev && !usingDevVersion
+            ? LL.SWITCH_RELEASE_TYPE()
+            : LL.UPGRADE()
+          : LL.INSTALL()}
       </Button>
     );
   };
@@ -421,8 +433,8 @@ const Version = () => {
                   </Typography>
                 </Grid>
               </Grid>
-
-              {upgradeAvailable ? (
+              {(devUpgradeAvailable && usingDevVersion) ||
+              (stableUpgradeAvailable && !usingDevVersion) ? (
                 <Typography mt={2} color="warning">
                   <InfoOutlinedIcon
                     color="warning"
@@ -436,7 +448,9 @@ const Version = () => {
                     color="success"
                     sx={{ verticalAlign: 'middle', mr: 2 }}
                   />
-                  {LL.LATEST_VERSION()}
+                  {LL.LATEST_VERSION(
+                    usingDevVersion ? LL.DEVELOPMENT() : LL.STABLE()
+                  )}
                 </Typography>
               )}
             </>
