@@ -42,7 +42,7 @@ const de: Translation = {
   CANCEL: 'Abbrechen',
   RESET: 'Zurücksetzen',
   APPLY_CHANGES: 'Änderungen anwenden ({0})',
-  UPDATE: 'Update',
+  UPDATE: 'Update', // TODO translate
   EXECUTE: 'Ausführen',
   REMOVE: 'Entfernen',
   PROBLEM_UPDATING: 'Problem beim Aktualisieren',
@@ -332,7 +332,7 @@ const de: Translation = {
   SPECIAL_FUNCTIONS: 'Sonderfunktionen',
   WAIT_FIRMWARE: 'Die Firmware wird hochgeladen und installiert.',
   INSTALL_VERSION: 'Dadurch wird die Version {0} heruntergeladen. Sind Sie sicher?',
-  UPGRADE_AVAILABLE: 'Es ist ein Firmware-Upgrade verfügbar.',
+  UPDATE_AVAILABLE: 'Firmware-Update verfügbar',
   LATEST_VERSION: 'Sie verwenden die neueste {0} Firmware-Version',
   PLEASE_WAIT: 'Bitte warten',
   RESTARTING_PRE: 'Initialisierung',
@@ -343,7 +343,6 @@ const de: Translation = {
   BYTES: 'Bytes',
   BITMASK: 'Bit Maske',
   DUPLICATE: 'Kopieren',
-  UPGRADE: 'Aktualisieren',
   DASHBOARD_1: 'Alle EMS-Entitäten, die aktiv und als Favorit markiert sind, sowie alle benutzerdefinierten Entitäten, Zeitpläne und externen Sensordaten werden unten angezeigt.',
   NO_DATA_1: 'Keine favorisierten EMS-Entitäten gefunden! Verwenden Sie das Modul',
   NO_DATA_2: ', um sie zu markieren.',
@@ -352,7 +351,7 @@ const de: Translation = {
   PLATFORM: 'Plattform',
   RELEASE_TYPE: 'Release Typ',
   INTERNET_CONNECTION_REQUIRED: 'Internetverbindung erforderlich für automatische Version-Überprüfung und -Aktualisierung',
-  SWITCH_RELEASE_TYPE: 'Zum Entwickler-Release wechseln'
+  SWITCH_RELEASE_TYPE: 'Zum {0}-Release wechseln'
 };
 
 export default de;

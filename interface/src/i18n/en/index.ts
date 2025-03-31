@@ -332,7 +332,7 @@ const en: Translation = {
   SPECIAL_FUNCTIONS: 'Special Functions',
   WAIT_FIRMWARE: 'Firmware is uploading and installing',
   INSTALL_VERSION: 'This will install version {0}. Are you sure?',
-  UPGRADE_AVAILABLE: 'There is a firmware upgrade available!',
+  UPDATE_AVAILABLE: 'update available',
   LATEST_VERSION: 'You are using the latest {0} firmware version',
   PLEASE_WAIT: 'Please wait',
   RESTARTING_PRE: 'Initializing',
@@ -344,7 +344,6 @@ const en: Translation = {
   BYTES: 'Bytes',
   BITMASK: 'Bit Mask',
   DUPLICATE: 'Duplicate',
-  UPGRADE: 'Upgrade',
   NO_DATA_1: 'No favorite EMS entities found yet. Use the',
   NO_DATA_2: 'module to mark them.',
   NO_DATA_3: 'To see all available entities go to',
@@ -352,7 +351,7 @@ const en: Translation = {
   PLATFORM: 'Platform',
   RELEASE_TYPE: 'Release Type',
   INTERNET_CONNECTION_REQUIRED: 'Internet connection required for automatic version checking and upgrading',
-  SWITCH_RELEASE_TYPE: 'Switch to Development release'
+  SWITCH_RELEASE_TYPE: 'Switch to {0} release'
 };
 
 export default en;

@@ -332,7 +332,7 @@ const sv: Translation = {
   SPECIAL_FUNCTIONS: 'Specialfunktioner',
   WAIT_FIRMWARE: 'Firmware laddas upp och installeras',
   INSTALL_VERSION: 'Det här kommer installera version {0}. Är du säker?',
-  UPGRADE_AVAILABLE: 'Det finns en tillgänglig firmwareupgradering!',
+  UPDATE_AVAILABLE: 'update available', // TODO translate
   LATEST_VERSION: 'Du använder den senaste {0} firmwareversionen.',
   PLEASE_WAIT: 'Var god vänta',
   RESTARTING_PRE: 'Initialiserar',
@@ -343,7 +343,6 @@ const sv: Translation = {
   BYTES: 'Bytes', // TODO translate
   BITMASK: 'Bit Mask',// TODO translate
   DUPLICATE: 'Dublett',
-  UPGRADE: 'Uppgradera',
   DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.', // TODO translate
   NO_DATA_1: 'No favorite EMS entities found yet. Use the', // TODO translate
   NO_DATA_2: 'module to mark them.', // TODO translate
@@ -352,7 +351,7 @@ const sv: Translation = {
   PLATFORM: 'Platform', // TODO translate
   RELEASE_TYPE: 'Release Type', // TODO translate
   INTERNET_CONNECTION_REQUIRED: 'Internetanslutning krävs för automatisk version kontroll och uppdatering',
-  SWITCH_RELEASE_TYPE: 'Byt till utvecklingsversion'
+  SWITCH_RELEASE_TYPE: 'Byt till {0} version'
 };
 
 export default sv;

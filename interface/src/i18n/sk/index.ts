@@ -155,7 +155,7 @@ const sk: Translation = {
   NAME: 'Názov',
   CUSTOMIZATIONS_RESET: 'Naozaj chcete odstrániť všetky prispôsobenia vrátane vlastných nastavení snímačov teploty a analógových snímačov?',
   SUPPORT_INFORMATION: 'Informácie pre podporu',
-  HELP_INFORMATION_1:  'Navštívte online wiki, kde nájdete pokyny na konfiguráciu EMS-ESP',
+  HELP_INFORMATION_1: 'Navštívte online wiki, kde nájdete pokyny na konfiguráciu EMS-ESP',
   HELP_INFORMATION_2: 'Pre živý komunitný chat sa pripojte na náš Discord server',
   HELP_INFORMATION_3: 'Ak chcete požiadať o funkciu alebo nahlásiť chybu',
   HELP_INFORMATION_4: 'nezabudnite si stiahnuť a pripojiť informácie o vašom systéme, aby ste mohli rýchlejšie reagovať pri nahlasovaní problému',
@@ -323,7 +323,7 @@ const sk: Translation = {
   MODULES_UPDATED: 'Aktualizované moduly',
   MODULES_DESCRIPTION: 'Kliknutím na modul aktivujete alebo deaktivujete moduly knižnice EMS-ESP',
   MODULES_NONE: 'Neboli zistené žiadne externé moduly',
-  RENAME: 'Premenovať', 
+  RENAME: 'Premenovať',
   ENABLE_MODBUS: 'Povoliť Modbus',
   VIEW_LOG: 'Zobrazte log na diagnostiku problémov',
   UPLOAD_DRAG: 'presuňte sem súbor alebo ho kliknutím vyberte',
@@ -332,7 +332,7 @@ const sk: Translation = {
   SPECIAL_FUNCTIONS: 'Špeciálne funkcie',
   WAIT_FIRMWARE: 'Firmvér sa nahráva a inštaluje',
   INSTALL_VERSION: 'Týmto sa inštalovať verzia {0}. Si si istý?',
-  UPGRADE_AVAILABLE: 'K dispozícii je aktualizácia firmvéru!',
+  UPDATE_AVAILABLE: 'update available', // TODO translate
   LATEST_VERSION: 'Používate poslednú {0} verziu firmvéru',
   PLEASE_WAIT: 'Čakajte prosím',
   RESTARTING_PRE: 'Prebieha inicializácia',
@@ -343,7 +343,6 @@ const sk: Translation = {
   BYTES: 'Bytov',
   BITMASK: 'Bitová maska',
   DUPLICATE: 'Duplicitné',
-  UPGRADE: 'Inovovať',
   DASHBOARD_1: 'Všetky entity EMS, ktoré sú aktívne a označené ako obľúbené, plus všetky vlastné entity, plány a údaje externých senzorov sú zobrazené nižšie.',
   NO_DATA_1: 'Nenašli sa žiadne obľúbené entity EMS. Použite',
   NO_DATA_2: 'modul na ich označenie.',
@@ -352,7 +351,7 @@ const sk: Translation = {
   PLATFORM: 'Platforma',
   RELEASE_TYPE: 'Typ vydania',
   INTERNET_CONNECTION_REQUIRED: 'Internetové pripojenie je potrebné pre automatickú kontrolu a aktualizáciu',
-  SWITCH_RELEASE_TYPE: 'Prepnúť na vývojovú verziu'
+  SWITCH_RELEASE_TYPE: 'Prepnúť na {0} verziu'
 };
 
 export default sk;

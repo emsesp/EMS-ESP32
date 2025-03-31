@@ -273,7 +273,7 @@ const nl: Translation = {
   NETWORK_SUBNET: 'Subnetmasker',
   NETWORK_DNS: 'DNS Servers',
   ADDRESS_OF: '{0} Address',
-  ADMINISTRATOR: 'Administrator', 
+  ADMINISTRATOR: 'Administrator',
   GUEST: 'Gast',
   NEW: 'Nieuwe',
   NEW_NAME_OF: 'Hernoem {0}',
@@ -320,7 +320,7 @@ const nl: Translation = {
   DOWNLOAD_UPLOAD_1: 'Download en upload instellingen en firmware',
   MODULES: 'Module',
   MODULES_1: 'Externe modules activeren of deactiveren',
-  MODULES_UPDATED: 'Modules geüpdatet', 
+  MODULES_UPDATED: 'Modules geüpdatet',
   MODULES_DESCRIPTION: 'Klik op de module om EMS-ESP library modules te activeren of te deactiveren',
   MODULES_NONE: 'Geen externe modules gedetecteerd',
   RENAME: 'Hernoemen',
@@ -332,7 +332,7 @@ const nl: Translation = {
   SPECIAL_FUNCTIONS: 'Speciale functies',
   WAIT_FIRMWARE: 'Firmware wordt geüpload en geïnstalleerd',
   INSTALL_VERSION: 'Hiermee wordt versie {0} geïnstalleerd. Weet je het zeker?',
-  UPGRADE_AVAILABLE: 'Er is een firmware-upgrade beschikbaar!',
+  UPDATE_AVAILABLE: 'update beschikbaar',
   LATEST_VERSION: 'U gebruikt de nieuwste {0} firmwareversie',
   PLEASE_WAIT: 'Een ogenblik geduld',
   RESTARTING_PRE: 'Initialiseren',
@@ -343,7 +343,6 @@ const nl: Translation = {
   BYTES: 'Bytes',
   BITMASK: 'Bit Mask',
   DUPLICATE: 'Duplicaat',
-  UPGRADE: 'Upgraden',
   DASHBOARD_1: 'Alle EMS-entiteiten die actief zijn en als favoriet zijn gemarkeerd, plus alle aangepaste entiteiten en externe sensorgegevens worden hieronder weergegeven.',
   NO_DATA_1: 'Er zijn nog geen favoriete EMS-entiteiten gevonden. Gebruik de',
   NO_DATA_2: 'module om ze te markeren.',
@@ -352,7 +351,7 @@ const nl: Translation = {
   PLATFORM: 'Platform',
   RELEASE_TYPE: 'Release Typ',
   INTERNET_CONNECTION_REQUIRED: 'Internetverbinding vereist voor automatische versiecontrole en -upgrade',
-  SWITCH_RELEASE_TYPE: 'Switch naar Development release'
+  SWITCH_RELEASE_TYPE: 'Switch naar {0} release'
 };
 
 export default nl;
