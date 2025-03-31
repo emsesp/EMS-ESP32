@@ -122,10 +122,10 @@ let LATEST_STABLE_VERSION = '3.7.2';
 let LATEST_DEV_VERSION = '3.7.3-dev.3';
 
 // scenarios for testing versioning
-version_test = 0; // on latest stable, can upgrade to dev only
-// version_test = 1; // on latest dev, no updates to either dev or stable
-// version_test = 2; // upgrade an older stable to latest stable or the latest dev
-// version_test = 3; // upgrade an older dev to latest dev, no stable upgrades available
+version_test = 0; // on latest stable, can switch to dev only
+// version_test = 1; // on latest dev, can switch back to stable only or reinstall
+// version_test = 2; // upgrade an older stable to latest stable or switch to latest dev
+// version_test = 3; // upgrade an older dev to latest dev, switch to stable available
 
 switch (version_test as number) {
   case 0:
@@ -269,10 +269,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-          old_custom_name +
-          ') with new (' +
-          new_custom_name +
-          ')'
+        old_custom_name +
+        ') with new (' +
+        new_custom_name +
+        ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -367,16 +367,16 @@ function check_upgrade(version: string) {
     const stable_version = version.split(',')[1];
 
     console.log(
-      'Version upgrade check from this version (' +
-        THIS_VERSION +
-        ') to dev (' +
-        dev_version +
-        ') is ' +
-        (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-        ' and to stable (' +
-        stable_version +
-        ') is ' +
-        (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
+      'Version upgrade check. This version (' +
+      THIS_VERSION +
+      ') to dev (' +
+      dev_version +
+      ') is ' +
+      (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+      ' and to stable (' +
+      stable_version +
+      ') is ' +
+      (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
     );
     data = {
       emsesp_version: THIS_VERSION,
