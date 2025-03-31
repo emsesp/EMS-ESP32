@@ -9,10 +9,10 @@ OUTPUT_DIR = "build{}".format(os.path.sep)
 
 def bin_copy(source, target, env):
 
-    # get the application version from version.h
+    # get the application version from emsesp_version.h
     bag = {}
     exprs = [(re.compile(r'^#define EMSESP_APP_VERSION\s+"(\S+)"'), 'app_version')]
-    with open('./src/version.h', 'r') as f:
+    with open('./src/emsesp_version.h', 'r') as f:
         for l in f.readlines():
             for expr, var in exprs:
                 m = expr.match(l)

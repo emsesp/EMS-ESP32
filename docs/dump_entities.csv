@@ -118,7 +118,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "CS*800i, Logatherm WLW*",boiler,8,maxheatcomp,heat limit compressor,enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW], ,true,select.boiler_heat_limit_compressor,select.boiler_maxheatcomp,5,0,1,206,1
 "CS*800i, Logatherm WLW*",boiler,8,maxheatheat,heat limit heating,enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW], ,true,select.boiler_heat_limit_heating,select.boiler_maxheatheat,5,0,1,207,1
 "CS*800i, Logatherm WLW*",boiler,8,dhw.maxheat,heat limit,enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW], ,true,select.boiler_dhw_heat_limit,select.boiler_dhw_maxheat,5,9,1,14,1
-"CS*800i, Logatherm WLW*",boiler,8,mandefrost,manual defrost,boolean, ,true,switch.boiler_manual_defrost,switch.boiler_mandefrost,5,0,1,208,1
+"CS*800i, Logatherm WLW*",boiler,8,auxheatersource,aux heater source,enum [not installed\|electric heater\|exclusive\|parallel\|hybrid], ,true,select.boiler_aux_heater_source,select.boiler_auxheatersource,5,0,1,208,1
 "CS*800i, Logatherm WLW*",boiler,8,pvcooling,cooling only with PV,boolean, ,true,switch.boiler_cooling_only_with_PV,switch.boiler_pvcooling,5,0,1,209,1
 "CS*800i, Logatherm WLW*",boiler,8,auxheateronly,aux heater only,boolean, ,true,switch.boiler_aux_heater_only,switch.boiler_auxheateronly,5,0,1,210,1
 "CS*800i, Logatherm WLW*",boiler,8,auxheateroff,disable aux heater,boolean, ,true,switch.boiler_disable_aux_heater,switch.boiler_auxheateroff,5,0,1,211,1
@@ -2377,7 +2377,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,maxheatcomp,heat limit compressor,enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW], ,true,select.boiler_heat_limit_compressor,select.boiler_maxheatcomp,5,0,1,206,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,maxheatheat,heat limit heating,enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW], ,true,select.boiler_heat_limit_heating,select.boiler_maxheatheat,5,0,1,207,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.maxheat,heat limit,enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW], ,true,select.boiler_dhw_heat_limit,select.boiler_dhw_maxheat,5,9,1,14,1
-"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,mandefrost,manual defrost,boolean, ,true,switch.boiler_manual_defrost,switch.boiler_mandefrost,5,0,1,208,1
+"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,auxheatersource,aux heater source,enum [not installed\|electric heater\|exclusive\|parallel\|hybrid], ,true,select.boiler_aux_heater_source,select.boiler_auxheatersource,5,0,1,208,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,pvcooling,cooling only with PV,boolean, ,true,switch.boiler_cooling_only_with_PV,switch.boiler_pvcooling,5,0,1,209,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,auxheateronly,aux heater only,boolean, ,true,switch.boiler_aux_heater_only,switch.boiler_auxheateronly,5,0,1,210,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,auxheateroff,disable aux heater,boolean, ,true,switch.boiler_disable_aux_heater,switch.boiler_auxheateroff,5,0,1,211,1
@@ -2584,7 +2584,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Geo 5xx",boiler,173,maxheatcomp,heat limit compressor,enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW], ,true,select.boiler_heat_limit_compressor,select.boiler_maxheatcomp,5,0,1,206,1
 "Geo 5xx",boiler,173,maxheatheat,heat limit heating,enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW], ,true,select.boiler_heat_limit_heating,select.boiler_maxheatheat,5,0,1,207,1
 "Geo 5xx",boiler,173,dhw.maxheat,heat limit,enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW], ,true,select.boiler_dhw_heat_limit,select.boiler_dhw_maxheat,5,9,1,14,1
-"Geo 5xx",boiler,173,mandefrost,manual defrost,boolean, ,true,switch.boiler_manual_defrost,switch.boiler_mandefrost,5,0,1,208,1
+"Geo 5xx",boiler,173,auxheatersource,aux heater source,enum [not installed\|electric heater\|exclusive\|parallel\|hybrid], ,true,select.boiler_aux_heater_source,select.boiler_auxheatersource,5,0,1,208,1
 "Geo 5xx",boiler,173,pvcooling,cooling only with PV,boolean, ,true,switch.boiler_cooling_only_with_PV,switch.boiler_pvcooling,5,0,1,209,1
 "Geo 5xx",boiler,173,auxheateronly,aux heater only,boolean, ,true,switch.boiler_aux_heater_only,switch.boiler_auxheateronly,5,0,1,210,1
 "Geo 5xx",boiler,173,auxheateroff,disable aux heater,boolean, ,true,switch.boiler_disable_aux_heater,switch.boiler_auxheateroff,5,0,1,211,1

@@ -551,7 +551,11 @@ void System::led_init(bool refresh) {
     if (refresh) {
         // disabled old led port before setting new one
         if ((led_gpio_ != 0) && is_valid_gpio(led_gpio_)) {
+#if ESP_ARDUINO_VERSION_MAJOR < 3
             led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
+#else
+            led_type_ ? rgbLedWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
+#endif
             pinMode(led_gpio_, INPUT);
         }
         reload_settings();
@@ -560,7 +564,11 @@ void System::led_init(bool refresh) {
     if ((led_gpio_ != 0) && is_valid_gpio(led_gpio_)) { // 0 means disabled
         if (led_type_) {
             // rgb LED WS2812B, use Neopixel
+#if ESP_ARDUINO_VERSION_MAJOR < 3
             neopixelWrite(led_gpio_, 0, 0, 0);
+#else
+            rgbLedWrite(led_gpio_, 0, 0, 0);
+#endif
         } else {
             pinMode(led_gpio_, OUTPUT);
             digitalWrite(led_gpio_, !LED_ON); // start with LED off
@@ -817,12 +825,20 @@ void System::system_check() {
             if (healthcheck_ == 0) {
                 // everything is healthy, show LED permanently on or off depending on setting
                 if (led_gpio_) {
+#if ESP_ARDUINO_VERSION_MAJOR < 3
                     led_type_ ? neopixelWrite(led_gpio_, 0, hide_led_ ? 0 : 128, 0) : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
+#else
+                    led_type_ ? rgbLedWrite(led_gpio_, 0, hide_led_ ? 0 : 128, 0) : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
+#endif
                 }
             } else {
                 // turn off LED so we're ready to the flashes
                 if (led_gpio_) {
+#if ESP_ARDUINO_VERSION_MAJOR < 3
                     led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
+#else
+                    led_type_ ? rgbLedWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
+#endif
                 }
             }
         }
@@ -882,7 +898,11 @@ void System::led_monitor() {
             // reset the whole sequence
             led_long_timer_ = uuid::get_uptime();
             led_flash_step_ = 0;
+#if ESP_ARDUINO_VERSION_MAJOR < 3
             led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON); // LED off
+#else
+            led_type_ ? rgbLedWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON); // LED off
+#endif
         } else if (led_flash_step_ % 2) {
             // handle the step events (on odd numbers 3,5,7,etc). see if we need to turn on a LED
             //  1 flash is the EMS bus is not connected
@@ -892,17 +912,33 @@ void System::led_monitor() {
             if (led_type_) {
                 if (led_flash_step_ == 3) {
                     if ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
+#if ESP_ARDUINO_VERSION_MAJOR < 3
                         neopixelWrite(led_gpio_, 128, 0, 0); // red
+#else
+                        rgbLedWrite(led_gpio_, 128, 0, 0); // red
+#endif
                     } else if ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS) {
+#if ESP_ARDUINO_VERSION_MAJOR < 3
                         neopixelWrite(led_gpio_, 0, 0, 128); // blue
+#else
+                        rgbLedWrite(led_gpio_, 0, 0, 128); // blue
+#endif
                     }
                 }
                 if (led_flash_step_ == 5 && (healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
+#if ESP_ARDUINO_VERSION_MAJOR < 3
                     neopixelWrite(led_gpio_, 128, 0, 0); // red
+#else
+                    rgbLedWrite(led_gpio_, 128, 0, 0); // red
+#endif
                 }
                 if ((led_flash_step_ == 7) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)
                     && ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS)) {
+#if ESP_ARDUINO_VERSION_MAJOR < 3
                     neopixelWrite(led_gpio_, 0, 0, 128); // blue
+#else
+                    rgbLedWrite(led_gpio_, 0, 0, 128); // blue
+#endif
                 }
             } else {
                 if ((led_flash_step_ == 3)
@@ -926,7 +962,11 @@ void System::led_monitor() {
         } else {
             // turn the led off after the flash, on even number count
             if (led_on_) {
+#if ESP_ARDUINO_VERSION_MAJOR < 3
                 led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
+#else
+                led_type_ ? rgbLedWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
+#endif
                 led_on_ = false;
             }
         }

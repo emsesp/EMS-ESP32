@@ -332,8 +332,8 @@ const cz: Translation = {
   SPECIAL_FUNCTIONS: 'Speciální funkce',
   WAIT_FIRMWARE: 'Firmware se nahrává a instaluje',
   INSTALL_VERSION: 'Tímto se instalovat verze {0}. Jste si jistí?',
-  UPGRADE_AVAILABLE: 'Je k dispozici aktualizace firmwaru!',
-  LATEST_VERSION: 'Používáte nejnovější verzi firmwaru',
+  UPDATE_AVAILABLE: 'update available', // TODO translate
+  LATEST_VERSION: 'Používáte nejnovější verzi {0}firmwaru',
   PLEASE_WAIT: 'Prosím čekejte',
   RESTARTING_PRE: 'Inicializace',
   RESTARTING_POST: 'Příprava',
@@ -343,7 +343,6 @@ const cz: Translation = {
   BYTES: 'Bytes', // TODO translate
   BITMASK: 'Bit Mask',// TODO translate
   DUPLICATE: 'Duplikát',
-  UPGRADE: 'Upgrade',
   DASHBOARD_1: 'Všechny aktivní entity EMS jsou označené jako oblíbené. Všechny vlastní entity, harmonogramy a externí sensory jsou zobrazeny níže.',
   NO_DATA_1: 'Nebyly nalezeny žádné oblíbené entity. Použijte',
   NO_DATA_2: 'modul sloužící k jejich výběru.',
@@ -351,8 +350,8 @@ const cz: Translation = {
   THIS_VERSION: 'Tato verze',
   PLATFORM: 'Platforma',
   RELEASE_TYPE: 'Typ sestavení',
-  REINSTALL: 'Přeinstalovat',
   INTERNET_CONNECTION_REQUIRED: 'Pro automatickou kontrolu a instalaci aktualizací je třeba internetové připojení',
+  SWITCH_RELEASE_TYPE: 'Přepnout na {0} verzi'
 };
 
 export default cz;
