@@ -4,7 +4,6 @@ import { toast } from 'react-toastify';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckIcon from '@mui/icons-material/Done';
 import DownloadIcon from '@mui/icons-material/GetApp';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
@@ -45,7 +44,9 @@ const Version = () => {
   const [openInstallDialog, setOpenInstallDialog] = useState<boolean>(false);
   const [usingDevVersion, setUsingDevVersion] = useState<boolean>(false);
   const [fetchDevVersion, setFetchDevVersion] = useState<boolean>(false);
-  const [upgradeAvailable, setUpgradeAvailable] = useState<boolean>(false);
+  const [devUpgradeAvailable, setDevUpgradeAvailable] = useState<boolean>(false);
+  const [stableUpgradeAvailable, setStableUpgradeAvailable] =
+    useState<boolean>(false);
   const [internetLive, setInternetLive] = useState<boolean>(false);
   const [downloadOnly, setDownloadOnly] = useState<boolean>(false);
 
@@ -63,8 +64,13 @@ const Version = () => {
       immediate: false
     }
   ).onSuccess((event) => {
-    const data = event.data as { emsesp_version: string; upgradeable: boolean };
-    setUpgradeAvailable(data.upgradeable);
+    const data = event.data as {
+      emsesp_version: string;
+      dev_upgradeable: boolean;
+      stable_upgradeable: boolean;
+    };
+    setDevUpgradeAvailable(data.dev_upgradeable);
+    setStableUpgradeAvailable(data.stable_upgradeable);
   });
 
   const {
@@ -173,55 +179,59 @@ const Version = () => {
 
   useLayoutTitle('EMS-ESP Firmware');
 
-  const renderInstallDialog = () => (
-    <Dialog
-      sx={dialogStyle}
-      open={openInstallDialog}
-      onClose={() => closeInstallDialog()}
-    >
-      <DialogTitle>
-        {LL.INSTALL() +
-          ' ' +
-          (fetchDevVersion ? LL.DEVELOPMENT() : LL.STABLE()) +
-          ' Firmware'}
-      </DialogTitle>
-      <DialogContent dividers>
-        <Typography mb={2}>
-          {LL.INSTALL_VERSION(
-            fetchDevVersion ? latestDevVersion?.name : latestVersion?.name
-          )}
-        </Typography>
-      </DialogContent>
-      <DialogActions>
-        <Button
-          startIcon={<CancelIcon />}
-          variant="outlined"
-          onClick={() => closeInstallDialog()}
-          color="secondary"
-        >
-          {LL.CANCEL()}
-        </Button>
-        <Button
-          startIcon={<DownloadIcon />}
-          variant="outlined"
-          onClick={() => closeInstallDialog()}
-          color="primary"
-        >
-          <Link underline="none" target="_blank" href={getBinURL()} color="primary">
-            {LL.DOWNLOAD(1)}
-          </Link>
-        </Button>
-        <Button
-          startIcon={<WarningIcon color="warning" />}
-          variant="outlined"
-          onClick={() => installFirmwareURL(getBinURL())}
-          color="primary"
-        >
-          {LL.INSTALL()}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
+  const renderInstallDialog = () => {
+    const binURL = getBinURL();
+
+    return (
+      <Dialog
+        sx={dialogStyle}
+        open={openInstallDialog}
+        onClose={() => closeInstallDialog()}
+      >
+        <DialogTitle>
+          {LL.INSTALL() +
+            ' ' +
+            (fetchDevVersion ? LL.DEVELOPMENT() : LL.STABLE()) +
+            ' Firmware'}
+        </DialogTitle>
+        <DialogContent dividers>
+          <Typography mb={2}>
+            {LL.INSTALL_VERSION(
+              fetchDevVersion ? latestDevVersion?.name : latestVersion?.name
+            )}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            startIcon={<CancelIcon />}
+            variant="outlined"
+            onClick={() => closeInstallDialog()}
+            color="secondary"
+          >
+            {LL.CANCEL()}
+          </Button>
+          <Button
+            startIcon={<DownloadIcon />}
+            variant="outlined"
+            onClick={() => closeInstallDialog()}
+            color="primary"
+          >
+            <Link underline="none" target="_blank" href={binURL} color="primary">
+              {LL.DOWNLOAD(1)}
+            </Link>
+          </Button>
+          <Button
+            startIcon={<WarningIcon color="warning" />}
+            variant="outlined"
+            onClick={() => installFirmwareURL(binURL)}
+            color="primary"
+          >
+            {LL.INSTALL()}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
+  };
 
   const showFirmwareDialog = (useDevVersion: boolean) => {
     setFetchDevVersion(useDevVersion);
@@ -232,7 +242,33 @@ const Version = () => {
     setOpenInstallDialog(false);
   };
 
-  const showButtons = (showDev: boolean) => {
+  const showButtons = (showingDev: boolean) => {
+    const choice = showingDev
+      ? !usingDevVersion
+        ? LL.SWITCH_RELEASE_TYPE(LL.DEVELOPMENT())
+        : devUpgradeAvailable
+          ? LL.UPDATE_AVAILABLE()
+          : undefined
+      : usingDevVersion
+        ? LL.SWITCH_RELEASE_TYPE(LL.STABLE())
+        : stableUpgradeAvailable
+          ? LL.UPDATE_AVAILABLE()
+          : undefined;
+
+    if (!choice) {
+      return (
+        <>
+          <CheckIcon
+            color="success"
+            sx={{ verticalAlign: 'middle', ml: 0.5, mr: 0.5 }}
+          />
+          <span style={{ color: '#66bb6a', fontSize: '0.8em' }}>
+            {LL.LATEST_VERSION(usingDevVersion ? LL.DEVELOPMENT() : LL.STABLE())}
+          </span>
+        </>
+      );
+    }
+
     if (!me.admin) {
       return;
     }
@@ -258,16 +294,11 @@ const Version = () => {
       <Button
         sx={{ ml: 2 }}
         variant="outlined"
-        color="warning"
+        color={choice === LL.UPDATE_AVAILABLE() ? 'success' : 'warning'}
         size="small"
-        onClick={() => showFirmwareDialog(showDev)}
+        onClick={() => showFirmwareDialog(showingDev)}
       >
-        {upgradeAvailable || (!usingDevVersion && showDev)
-          ? LL.UPGRADE()
-          : !showDev && usingDevVersion
-            ? LL.STABLE()
-            : LL.REINSTALL()}
-        &hellip;
+        {choice}
       </Button>
     );
   };
@@ -419,24 +450,6 @@ const Version = () => {
                   </Typography>
                 </Grid>
               </Grid>
-
-              {upgradeAvailable ? (
-                <Typography mt={2} color="warning">
-                  <InfoOutlinedIcon
-                    color="warning"
-                    sx={{ verticalAlign: 'middle', mr: 2 }}
-                  />
-                  {LL.UPGRADE_AVAILABLE()}
-                </Typography>
-              ) : (
-                <Typography mt={2} color="success">
-                  <CheckIcon
-                    color="success"
-                    sx={{ verticalAlign: 'middle', mr: 2 }}
-                  />
-                  {LL.LATEST_VERSION()}
-                </Typography>
-              )}
             </>
           ) : (
             <Typography mt={2} color="warning">

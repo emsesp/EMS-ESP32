@@ -71,7 +71,7 @@
 #include "roomcontrol.h"
 #include "command.h"
 
-#include "../version.h"
+#include "../emsesp_version.h"
 
 // Load external modules
 class Module {}; // forward declaration

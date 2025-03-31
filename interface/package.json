@@ -24,18 +24,18 @@
     "@alova/adapter-xhr": "2.1.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
-    "@mui/icons-material": "^7.0.0",
-    "@mui/material": "^7.0.0",
+    "@mui/icons-material": "^7.0.1",
+    "@mui/material": "^7.0.1",
     "@table-library/react-table-library": "4.1.12",
     "alova": "3.2.10",
     "async-validator": "^4.2.5",
     "jwt-decode": "^4.0.0",
-    "mime-types": "^2.1.35",
+    "mime-types": "^3.0.1",
     "preact": "^10.26.4",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "react-icons": "^5.5.0",
-    "react-router": "^7.4.0",
+    "react-router": "^7.4.1",
     "react-toastify": "^11.0.5",
     "typesafe-i18n": "^5.26.2",
     "typescript": "^5.8.2"
@@ -47,7 +47,7 @@
     "@preact/preset-vite": "^2.10.1",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/formidable": "^3",
-    "@types/node": "^22.13.13",
+    "@types/node": "^22.13.14",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
     "concurrently": "^9.1.2",
@@ -62,5 +62,5 @@
     "vite-plugin-imagemin": "^0.6.1",
     "vite-tsconfig-paths": "^5.1.4"
   },
-  "packageManager": "yarn@4.7.0"
+  "packageManager": "yarn@4.8.1"
 }

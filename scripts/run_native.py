@@ -11,7 +11,7 @@ def move_file(source, target, env):
     # get the build info
     bag = {}
     exprs = [(re.compile(r'^#define EMSESP_APP_VERSION\s+"(\S+)"'), 'app_version')]
-    with open('./src/version.h', 'r') as f:
+    with open('./src/emsesp_version.h', 'r') as f:
         for l in f.readlines():
             for expr, var in exprs:
                 m = expr.match(l)

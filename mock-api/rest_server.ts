@@ -112,47 +112,46 @@ let system_status = {
   status: 3
 };
 
-let VERSION_IS_UPGRADEABLE: boolean;
+// Testing Versioning
+let DEV_VERSION_IS_UPGRADEABLE: boolean;
+let STABLE_VERSION_IS_UPGRADEABLE: boolean;
+let THIS_VERSION: string;
+let version_test: number;
 
-// Versions
-// default - on latest stable, no stable upgrades
-let THIS_VERSION = '3.7.2';
 let LATEST_STABLE_VERSION = '3.7.2';
-let LATEST_DEV_VERSION = '3.7.3-dev.9';
+let LATEST_DEV_VERSION = '3.7.3-dev.3';
 
 // scenarios for testing versioning
-let version_test = 0;
-version_test = 0; // on latest stable, no upgrades, but can switch
-// version_test = 1; // on latest dev, no update
-// version_test = 2; // on stable, upgrade stable to latest stable
-// version_test = 3; // on dev, upgrade dev to latest dev
+version_test = 0; // on latest stable, can switch to dev only
+// version_test = 1; // on latest dev, can switch back to stable only or reinstall
+// version_test = 2; // upgrade an older stable to latest stable or switch to latest dev
+// version_test = 3; // upgrade an older dev to latest dev, switch to stable available
 
 switch (version_test as number) {
   case 0:
   default:
-    // use default - on latest stable, no upgrades, but can switch
-    VERSION_IS_UPGRADEABLE = false;
+    // on latest stable, can upgrade to dev only
+    THIS_VERSION = LATEST_STABLE_VERSION;
+    STABLE_VERSION_IS_UPGRADEABLE = false;
+    DEV_VERSION_IS_UPGRADEABLE = true;
     break;
   case 1:
-    // on latest dev, no update
-    THIS_VERSION = '3.7.2-dev.9';
-    LATEST_STABLE_VERSION = '3.7.2';
-    LATEST_DEV_VERSION = '3.7.3-dev.9';
-    VERSION_IS_UPGRADEABLE = false;
+    // on latest dev, no updates to either dev or stable
+    THIS_VERSION = LATEST_DEV_VERSION;
+    STABLE_VERSION_IS_UPGRADEABLE = false;
+    DEV_VERSION_IS_UPGRADEABLE = false;
     break;
   case 2:
-    // upgrade stable to latest stable
+    // upgrade an older stable to latest stable or the latest dev
     THIS_VERSION = '3.6.5';
-    LATEST_STABLE_VERSION = '3.7.2';
-    LATEST_DEV_VERSION = '3.7.3-dev.12';
-    VERSION_IS_UPGRADEABLE = true;
+    STABLE_VERSION_IS_UPGRADEABLE = true;
+    DEV_VERSION_IS_UPGRADEABLE = true;
     break;
   case 3:
-    // upgrade dev to latest dev
-    THIS_VERSION = '3.7.2-dev-1';
-    LATEST_STABLE_VERSION = '3.7.2';
-    LATEST_DEV_VERSION = '3.7.3-dev.12';
-    VERSION_IS_UPGRADEABLE = true;
+    // upgrade an older dev to latest dev, no stable upgrades available
+    THIS_VERSION = '3.7.3-dev.2';
+    STABLE_VERSION_IS_UPGRADEABLE = false;
+    DEV_VERSION_IS_UPGRADEABLE = true;
     break;
 }
 
@@ -270,10 +269,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-          old_custom_name +
-          ') with new (' +
-          new_custom_name +
-          ')'
+        old_custom_name +
+        ') with new (' +
+        new_custom_name +
+        ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -366,21 +365,23 @@ function check_upgrade(version: string) {
   if (version) {
     const dev_version = version.split(',')[0];
     const stable_version = version.split(',')[1];
+
     console.log(
-      'latest dev version: ' +
-        dev_version +
-        ', latest stable version: ' +
-        stable_version
-    );
-    console.log(
-      'Version upgrade check from version ' +
-        THIS_VERSION +
-        ', upgradable: ' +
-        VERSION_IS_UPGRADEABLE
+      'Version upgrade check. This version (' +
+      THIS_VERSION +
+      ') to dev (' +
+      dev_version +
+      ') is ' +
+      (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+      ' and to stable (' +
+      stable_version +
+      ') is ' +
+      (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
     );
     data = {
       emsesp_version: THIS_VERSION,
-      upgradeable: VERSION_IS_UPGRADEABLE
+      dev_upgradeable: DEV_VERSION_IS_UPGRADEABLE,
+      stable_upgradeable: STABLE_VERSION_IS_UPGRADEABLE
     };
   } else {
     console.log('requesting ems-esp version (' + THIS_VERSION + ')');

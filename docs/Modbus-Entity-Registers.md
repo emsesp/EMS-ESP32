@@ -377,7 +377,7 @@
 | maxheatcomp | heat limit compressor | enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 206 | 1 | 1 | 
 | maxheatheat | heat limit heating | enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 207 | 1 | 1 | 
 | dhw.maxheat | heat limit | enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] |   | true | DHW | 14 | 1 | 1 | 
-| mandefrost | manual defrost | boolean |   | true | DEVICE_DATA | 208 | 1 | 1 | 
+| auxheatersource | aux heater source | enum [not installed\|electric heater\|exclusive\|parallel\|hybrid] |   | true | DEVICE_DATA | 208 | 1 | 1 | 
 | pvcooling | cooling only with PV | boolean |   | true | DEVICE_DATA | 209 | 1 | 1 | 
 | auxheateronly | aux heater only | boolean |   | true | DEVICE_DATA | 210 | 1 | 1 | 
 | auxheateroff | disable aux heater | boolean |   | true | DEVICE_DATA | 211 | 1 | 1 | 
@@ -1532,7 +1532,7 @@
 | maxheatcomp | heat limit compressor | enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 206 | 1 | 1 | 
 | maxheatheat | heat limit heating | enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 207 | 1 | 1 | 
 | dhw.maxheat | heat limit | enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] |   | true | DHW | 14 | 1 | 1 | 
-| mandefrost | manual defrost | boolean |   | true | DEVICE_DATA | 208 | 1 | 1 | 
+| auxheatersource | aux heater source | enum [not installed\|electric heater\|exclusive\|parallel\|hybrid] |   | true | DEVICE_DATA | 208 | 1 | 1 | 
 | pvcooling | cooling only with PV | boolean |   | true | DEVICE_DATA | 209 | 1 | 1 | 
 | auxheateronly | aux heater only | boolean |   | true | DEVICE_DATA | 210 | 1 | 1 | 
 | auxheateroff | disable aux heater | boolean |   | true | DEVICE_DATA | 211 | 1 | 1 | 
@@ -2097,7 +2097,7 @@
 | maxheatcomp | heat limit compressor | enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 206 | 1 | 1 | 
 | maxheatheat | heat limit heating | enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 207 | 1 | 1 | 
 | dhw.maxheat | heat limit | enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] |   | true | DHW | 14 | 1 | 1 | 
-| mandefrost | manual defrost | boolean |   | true | DEVICE_DATA | 208 | 1 | 1 | 
+| auxheatersource | aux heater source | enum [not installed\|electric heater\|exclusive\|parallel\|hybrid] |   | true | DEVICE_DATA | 208 | 1 | 1 | 
 | pvcooling | cooling only with PV | boolean |   | true | DEVICE_DATA | 209 | 1 | 1 | 
 | auxheateronly | aux heater only | boolean |   | true | DEVICE_DATA | 210 | 1 | 1 | 
 | auxheateroff | disable aux heater | boolean |   | true | DEVICE_DATA | 211 | 1 | 1 | 

@@ -97,7 +97,7 @@ const SystemMonitor = () => {
                 color="error"
                 onClick={onCancel}
               >
-                {LL.RESET(0)}
+                {LL.RESTART()}
               </Button>
             </MessageBox>
           ) : (
