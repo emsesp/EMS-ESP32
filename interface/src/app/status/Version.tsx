@@ -4,7 +4,6 @@ import { toast } from 'react-toastify';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckIcon from '@mui/icons-material/Done';
 import DownloadIcon from '@mui/icons-material/GetApp';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
@@ -44,6 +43,7 @@ const Version = () => {
   const [restarting, setRestarting] = useState<boolean>(false);
   const [openInstallDialog, setOpenInstallDialog] = useState<boolean>(false);
   const [usingDevVersion, setUsingDevVersion] = useState<boolean>(false);
+  const [fetchDevVersion, setFetchDevVersion] = useState<boolean>(false);
   const [devUpgradeAvailable, setDevUpgradeAvailable] = useState<boolean>(false);
   const [stableUpgradeAvailable, setStableUpgradeAvailable] =
     useState<boolean>(false);
@@ -151,14 +151,14 @@ const Version = () => {
     }
     const filename =
       'EMS-ESP-' +
-      (usingDevVersion ? latestDevVersion.name : latestVersion.name).replaceAll(
+      (fetchDevVersion ? latestDevVersion.name : latestVersion.name).replaceAll(
         '.',
         '_'
       ) +
       '-' +
       getPlatform() +
       '.bin';
-    return usingDevVersion
+    return fetchDevVersion
       ? DEV_URL + filename
       : STABLE_URL + 'v' + latestVersion.name + '/' + filename;
   };
@@ -191,13 +191,13 @@ const Version = () => {
         <DialogTitle>
           {LL.INSTALL() +
             ' ' +
-            (usingDevVersion ? LL.DEVELOPMENT() : LL.STABLE()) +
+            (fetchDevVersion ? LL.DEVELOPMENT() : LL.STABLE()) +
             ' Firmware'}
         </DialogTitle>
         <DialogContent dividers>
           <Typography mb={2}>
             {LL.INSTALL_VERSION(
-              usingDevVersion ? latestDevVersion?.name : latestVersion?.name
+              fetchDevVersion ? latestDevVersion?.name : latestVersion?.name
             )}
           </Typography>
         </DialogContent>
@@ -233,22 +233,43 @@ const Version = () => {
     );
   };
 
-  const showFirmwareDialog = (useDevVersion?: boolean) => {
-    setUsingDevVersion(useDevVersion || usingDevVersion);
+  const showFirmwareDialog = (useDevVersion: boolean) => {
+    setFetchDevVersion(useDevVersion);
     setOpenInstallDialog(true);
   };
 
   const closeInstallDialog = () => {
     setOpenInstallDialog(false);
-    setUsingDevVersion(data.emsesp_version.includes('dev'));
   };
 
-  const showButtons = (showDev: boolean) => {
-    if (
-      !me.admin ||
-      (showDev && !devUpgradeAvailable) ||
-      (!showDev && !stableUpgradeAvailable)
-    ) {
+  const showButtons = (showingDev: boolean) => {
+    const choice = showingDev
+      ? !usingDevVersion
+        ? LL.SWITCH_RELEASE_TYPE(LL.DEVELOPMENT())
+        : devUpgradeAvailable
+          ? LL.UPDATE_AVAILABLE()
+          : undefined
+      : usingDevVersion
+        ? LL.SWITCH_RELEASE_TYPE(LL.STABLE())
+        : stableUpgradeAvailable
+          ? LL.UPDATE_AVAILABLE()
+          : undefined;
+
+    if (!choice) {
+      return (
+        <>
+          <CheckIcon
+            color="success"
+            sx={{ verticalAlign: 'middle', ml: 0.5, mr: 0.5 }}
+          />
+          <span style={{ color: '#66bb6a', fontSize: '0.8em' }}>
+            {LL.LATEST_VERSION(usingDevVersion ? LL.DEVELOPMENT() : LL.STABLE())}
+          </span>
+        </>
+      );
+    }
+
+    if (!me.admin) {
       return;
     }
 
@@ -273,15 +294,11 @@ const Version = () => {
       <Button
         sx={{ ml: 2 }}
         variant="outlined"
-        color="warning"
+        color={choice === LL.UPDATE_AVAILABLE() ? 'success' : 'warning'}
         size="small"
-        onClick={() => showFirmwareDialog(showDev)}
+        onClick={() => showFirmwareDialog(showingDev)}
       >
-        {(devUpgradeAvailable && showDev) || (stableUpgradeAvailable && !showDev)
-          ? showDev && !usingDevVersion
-            ? LL.SWITCH_RELEASE_TYPE()
-            : LL.UPGRADE()
-          : LL.INSTALL()}
+        {choice}
       </Button>
     );
   };
@@ -411,7 +428,7 @@ const Version = () => {
                         {formatTimeAgo(new Date(latestVersion.published_at))})
                       </Typography>
                     )}
-                    {!usingDevVersion && showButtons(false)}
+                    {showButtons(false)}
                   </Typography>
                 </Grid>
 
@@ -433,26 +450,6 @@ const Version = () => {
                   </Typography>
                 </Grid>
               </Grid>
-              {(devUpgradeAvailable && usingDevVersion) ||
-              (stableUpgradeAvailable && !usingDevVersion) ? (
-                <Typography mt={2} color="warning">
-                  <InfoOutlinedIcon
-                    color="warning"
-                    sx={{ verticalAlign: 'middle', mr: 2 }}
-                  />
-                  {LL.UPGRADE_AVAILABLE()}
-                </Typography>
-              ) : (
-                <Typography mt={2} color="success">
-                  <CheckIcon
-                    color="success"
-                    sx={{ verticalAlign: 'middle', mr: 2 }}
-                  />
-                  {LL.LATEST_VERSION(
-                    usingDevVersion ? LL.DEVELOPMENT() : LL.STABLE()
-                  )}
-                </Typography>
-              )}
             </>
           ) : (
             <Typography mt={2} color="warning">
