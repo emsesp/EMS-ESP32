@@ -37,9 +37,11 @@ void NetworkSettingsService::begin() {
 
     WiFi.mode(WIFI_MODE_MAX);
     WiFi.mode(WIFI_MODE_NULL);
-    WiFi.setScanMethod(WIFI_ALL_CHANNEL_SCAN); // default is FAST_SCAN, connect issues in 2.0.14
-    // WiFi.setSortMethod(WIFI_CONNECT_AP_BY_SIGNAL); // is default, no need to set
-
+// scan settings give connect issues with arduino 2.0.14 and arduino 3.x.x
+#if ESP_ARDUINO_VERSION_MAJOR < 3
+    WiFi.setScanMethod(WIFI_ALL_CHANNEL_SCAN); // default is FAST_SCAN
+// WiFi.setSortMethod(WIFI_CONNECT_AP_BY_SIGNAL); // is default, no need to set
+#endif
     _fsPersistence.readFromFS();
 }
 
