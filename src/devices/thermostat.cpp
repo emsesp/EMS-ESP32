@@ -195,6 +195,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         }
         register_telegram_type(0x16E, "Absent", true, MAKE_PF_CB(process_Absent));
         register_telegram_type(0xC0, "RCErrorMessage", false, MAKE_PF_CB(process_RCErrorMessage2));
+        EMSESP::send_read_request(0xC0, device_id); // read last errorcode on start (only published on errors)
 
         // JUNKERS/HT3
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
