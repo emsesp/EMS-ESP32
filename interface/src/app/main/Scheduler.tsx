@@ -27,6 +27,7 @@ import {
   useLayoutTitle
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
+import { useInterval } from 'utils';
 
 import { readSchedule, writeSchedule } from '../../api/app';
 import SettingsSchedulerDialog from './SchedulerDialog';
@@ -72,6 +73,12 @@ const Scheduler = () => {
       si.value !== si.o_value
     );
   }
+
+  useInterval(() => {
+    if (numChanges === 0) {
+      void fetchSchedule();
+    }
+  });
 
   useEffect(() => {
     const formatter = new Intl.DateTimeFormat(locale, {
