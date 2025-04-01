@@ -411,6 +411,7 @@ class Thermostat : public EMSdevice {
     void process_RCTime(std::shared_ptr<const Telegram> telegram);
     void process_RCError(std::shared_ptr<const Telegram> telegram);
     void process_RCErrorMessage(std::shared_ptr<const Telegram> telegram);
+    void process_RCErrorMessage2(std::shared_ptr<const Telegram> telegram);
     void process_RC35wwSettings(std::shared_ptr<const Telegram> telegram);
     void process_RC35wwTimer(std::shared_ptr<const Telegram> telegram);
     void process_RC35Monitor(std::shared_ptr<const Telegram> telegram);
