@@ -40,6 +40,9 @@ class Shower {
     void shower_alert(bool enable) {
         shower_alert_ = enable;
     }
+    void ha_reset() {
+        ha_configdone_ = false;
+    }
 
   private:
     static uuid::log::Logger logger_;
