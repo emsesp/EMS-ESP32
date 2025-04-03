@@ -634,6 +634,9 @@ void EMSESP::reset_mqtt_ha() {
     // force the re-creating of the temperature and analog sensor topics (for HA)
     temperaturesensor_.reload();
     analogsensor_.reload();
+    shower_.ha_reset();
+    webSchedulerService.ha_reset();
+    webCustomEntityService.ha_reset();
 }
 
 // create json doc for the devices values and add to MQTT publish queue
@@ -974,8 +977,10 @@ void EMSESP::process_deviceName(std::shared_ptr<const Telegram> telegram) {
     if (telegram->offset > 27 || (telegram->offset + telegram->message_length) < 29) {
         return;
     }
-    char    name[16];
-    uint8_t len = telegram->offset + telegram->message_length - 27;
+    char name[16];
+    // len including zero terminator, if there is one, otherwise copy to end of telegram
+    // https://github.com/emsesp/EMS-ESP32/discussions/2482#discussioncomment-12649817
+    uint8_t len = telegram->offset + telegram->message_length - 26;
     strlcpy(name, (const char *)&telegram->message_data[27 - telegram->offset], len < 16 ? len : 16);
     char * c = name;
     while (isprint(*c)) {
@@ -1314,7 +1319,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
         flags        = DeviceFlags::EMS_DEVICE_FLAG_CR120;
         default_name = "CR120";
     }
-    if (product_id == 158 && strncmp(version,"73",2) == 0) {
+    if (product_id == 158 && strncmp(version, "73", 2) == 0) {
         flags        = DeviceFlags::EMS_DEVICE_FLAG_HMC310;
         default_name = "HMC310";
     }

@@ -194,6 +194,8 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(0x269, "RC300Holiday", true, MAKE_PF_CB(process_RC300Holiday));
         }
         register_telegram_type(0x16E, "Absent", true, MAKE_PF_CB(process_Absent));
+        register_telegram_type(0xC0, "RCErrorMessage", false, MAKE_PF_CB(process_RCErrorMessage2));
+        EMSESP::send_read_request(0xC0, device_id); // read last errorcode on start (only published on errors)
 
         // JUNKERS/HT3
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
@@ -1749,6 +1751,49 @@ void Thermostat::process_RCErrorMessage(std::shared_ptr<const Telegram> telegram
             snprintf(&code[2], sizeof(code) - 2, "(%d) %02d.%02d.%d %02d:%02d (%d min)", codeNo, day, month, year, hour, min, duration);
             has_update(lastCode_, code, sizeof(lastCode_));
         }
+    }
+}
+// 0xC0 error log for RC300
+void Thermostat::process_RCErrorMessage2(std::shared_ptr<const Telegram> telegram) {
+    if (telegram->offset > 0 || telegram->message_length < 20) {
+        return;
+    }
+    uint8_t  code[4] = {telegram->message_data[5], telegram->message_data[6], telegram->message_data[7], 0};
+    uint16_t codeNo  = telegram->message_data[8] * 256 + telegram->message_data[9];
+    uint16_t year    = (telegram->message_data[10] & 0x7F) + 2000;
+    uint8_t  month   = telegram->message_data[11];
+    uint8_t  day     = telegram->message_data[13];
+    uint8_t  hour    = telegram->message_data[12];
+    uint8_t  min     = telegram->message_data[14];
+    uint16_t year1   = (telegram->message_data[15] & 0x7F) + 2000;
+    uint8_t  month1  = telegram->message_data[16];
+    uint8_t  day1    = telegram->message_data[18];
+    uint8_t  hour1   = telegram->message_data[17];
+    uint8_t  min1    = telegram->message_data[19];
+    if (isprint(code[0]) && isprint(code[1]) && isprint(code[2])) {
+        if (year == 2000) { // no clock
+            uint32_t min2 = 65536 * telegram->message_data[11] + 256 * telegram->message_data[12] + telegram->message_data[13];
+            snprintf(lastCode_, sizeof(lastCode_), "%s(%d) %d min", code, codeNo, min2);
+        } else if (year1 == 2000) {
+            snprintf(lastCode_, sizeof(lastCode_), "%s(%d) %02d.%02d.%d %02d:%02d", code, codeNo, day, month, year, hour, min);
+        } else {
+            snprintf(lastCode_,
+                     sizeof(lastCode_),
+                     "%s(%d) %02d.%02d.%d %02d:%02d-%02d.%02d.%d %02d:%02d",
+                     code,
+                     codeNo,
+                     day,
+                     month,
+                     year,
+                     hour,
+                     min,
+                     day1,
+                     month1,
+                     year1,
+                     hour1,
+                     min1);
+        }
+        has_update(lastCode_);
     }
 }
 
