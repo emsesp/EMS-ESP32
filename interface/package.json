@@ -47,7 +47,7 @@
     "@preact/preset-vite": "^2.10.1",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/formidable": "^3",
-    "@types/node": "^22.13.17",
+    "@types/node": "^22.14.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.1",
     "concurrently": "^9.1.2",
@@ -58,7 +58,7 @@
     "rollup-plugin-visualizer": "^5.14.0",
     "terser": "^5.39.0",
     "typescript-eslint": "8.29.0",
-    "vite": "^6.2.4",
+    "vite": "^6.2.5",
     "vite-plugin-imagemin": "^0.6.1",
     "vite-tsconfig-paths": "^5.1.4"
   },
