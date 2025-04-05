@@ -331,7 +331,7 @@ const sv: Translation = {
   ALLVALUES: 'Alla värden',
   SPECIAL_FUNCTIONS: 'Specialfunktioner',
   WAIT_FIRMWARE: 'Firmware laddas upp och installeras',
-  INSTALL_VERSION: 'Det här kommer installera version {0}. Är du säker?',
+  INSTALL_VERSION: 'Det här kommer {0} version {1}. Är du säker?',
   UPDATE_AVAILABLE: 'update available', // TODO translate
   LATEST_VERSION: 'Du använder den senaste {0} firmwareversionen.',
   PLEASE_WAIT: 'Var god vänta',

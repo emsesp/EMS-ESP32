@@ -112,14 +112,14 @@ let system_status = {
   status: 3
 };
 
-// Testing Versioning
+// Test Versioning
 let DEV_VERSION_IS_UPGRADEABLE: boolean;
 let STABLE_VERSION_IS_UPGRADEABLE: boolean;
 let THIS_VERSION: string;
 let version_test: number;
 
 let LATEST_STABLE_VERSION = '3.7.2';
-let LATEST_DEV_VERSION = '3.7.3-dev.3';
+let LATEST_DEV_VERSION = '3.7.3-dev.6';
 
 // scenarios for testing versioning
 version_test = 0; // on latest stable, can switch to dev only
@@ -158,10 +158,12 @@ switch (version_test as number) {
 // set the version
 system_status.emsesp_version = THIS_VERSION;
 
-const emulate_esp = 'ESP32S3';
-// const emulate_esp = 'ESP32';
+let emulate_esp: string;
 
-switch (emulate_esp as string) {
+emulate_esp = 'ESP32S3';
+// emulate_esp = 'ESP32';
+
+switch (emulate_esp) {
   // ESP32 4MB
   case 'ESP32':
     system_status.esp_platform = 'ESP32';
@@ -269,10 +271,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-        old_custom_name +
-        ') with new (' +
-        new_custom_name +
-        ')'
+          old_custom_name +
+          ') with new (' +
+          new_custom_name +
+          ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -367,16 +369,16 @@ function check_upgrade(version: string) {
     const stable_version = version.split(',')[1];
 
     console.log(
-      'Version upgrade check. This version (' +
-      THIS_VERSION +
-      ') to dev (' +
-      dev_version +
-      ') is ' +
-      (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-      ' and to stable (' +
-      stable_version +
-      ') is ' +
-      (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
+      'Upgrade this version (' +
+        THIS_VERSION +
+        ') to dev (' +
+        dev_version +
+        ') is ' +
+        (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+        ' and to stable (' +
+        stable_version +
+        ') is ' +
+        (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
     );
     data = {
       emsesp_version: THIS_VERSION,

@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
+import CloseIcon from '@mui/icons-material/Close';
 import CheckIcon from '@mui/icons-material/Done';
 import DownloadIcon from '@mui/icons-material/GetApp';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -78,7 +79,7 @@ const Version = () => {
     send: loadData,
     error
   } = useRequest(SystemApi.readSystemStatus).onSuccess((event) => {
-    // older version of EMS-ESP on 4MB boards, can't use OTA because of SSL support in HttpClient
+    // older version of EMS-ESP using ESP32 (not S3) and no PSRAM, can't use OTA because of SSL support in HttpClient
     if (event.data.arduino_version.startsWith('Tasmota')) {
       setDownloadOnly(true);
     }
@@ -145,20 +146,21 @@ const Version = () => {
     );
   };
 
-  const getBinURL = () => {
+  const getBinURL = (showingDev: boolean) => {
     if (!internetLive) {
       return '';
     }
+
     const filename =
       'EMS-ESP-' +
-      (fetchDevVersion ? latestDevVersion.name : latestVersion.name).replaceAll(
+      (showingDev ? latestDevVersion.name : latestVersion.name).replaceAll(
         '.',
         '_'
       ) +
       '-' +
       getPlatform() +
       '.bin';
-    return fetchDevVersion
+    return showingDev
       ? DEV_URL + filename
       : STABLE_URL + 'v' + latestVersion.name + '/' + filename;
   };
@@ -180,7 +182,7 @@ const Version = () => {
   useLayoutTitle('EMS-ESP Firmware');
 
   const renderInstallDialog = () => {
-    const binURL = getBinURL();
+    const binURL = getBinURL(fetchDevVersion);
 
     return (
       <Dialog
@@ -189,7 +191,7 @@ const Version = () => {
         onClose={() => closeInstallDialog()}
       >
         <DialogTitle>
-          {LL.INSTALL() +
+          {LL.UPDATE() +
             ' ' +
             (fetchDevVersion ? LL.DEVELOPMENT() : LL.STABLE()) +
             ' Firmware'}
@@ -197,6 +199,7 @@ const Version = () => {
         <DialogContent dividers>
           <Typography mb={2}>
             {LL.INSTALL_VERSION(
+              downloadOnly ? LL.DOWNLOAD(1) : LL.INSTALL(),
               fetchDevVersion ? latestDevVersion?.name : latestVersion?.name
             )}
           </Typography>
@@ -220,14 +223,16 @@ const Version = () => {
               {LL.DOWNLOAD(1)}
             </Link>
           </Button>
-          <Button
-            startIcon={<WarningIcon color="warning" />}
-            variant="outlined"
-            onClick={() => installFirmwareURL(binURL)}
-            color="primary"
-          >
-            {LL.INSTALL()}
-          </Button>
+          {!downloadOnly && (
+            <Button
+              startIcon={<WarningIcon color="warning" />}
+              variant="outlined"
+              onClick={() => installFirmwareURL(binURL)}
+              color="primary"
+            >
+              {LL.INSTALL()}
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
     );
@@ -271,23 +276,6 @@ const Version = () => {
 
     if (!me.admin) {
       return;
-    }
-
-    if (downloadOnly) {
-      return (
-        <Button
-          sx={{ ml: 2 }}
-          startIcon={<DownloadIcon />}
-          variant="outlined"
-          onClick={() => setOpenInstallDialog(false)}
-          color="warning"
-          size="small"
-        >
-          <Link underline="none" target="_blank" href={getBinURL()} color="warning">
-            {LL.DOWNLOAD(1)}
-          </Link>
-        </Button>
-      );
     }
 
     return (
@@ -347,7 +335,25 @@ const Version = () => {
               <Typography>
                 {getPlatform()}
                 <Typography variant="caption">
-                  &nbsp; &#40;{data.psram ? '+PSRAM' : '-PSRAM'}&#41;
+                  &nbsp; &#40;
+                  {data.psram ? (
+                    <CheckIcon
+                      color="success"
+                      sx={{
+                        fontSize: '1.5em',
+                        verticalAlign: 'middle'
+                      }}
+                    />
+                  ) : (
+                    <CloseIcon
+                      color="error"
+                      sx={{
+                        fontSize: '1.5em',
+                        verticalAlign: 'middle'
+                      }}
+                    />
+                  )}
+                  PSRAM&#41;
                 </Typography>
               </Typography>
             </Grid>

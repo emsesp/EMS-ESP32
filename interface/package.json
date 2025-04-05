@@ -35,14 +35,14 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-icons": "^5.5.0",
-    "react-router": "^7.4.1",
+    "react-router": "^7.5.0",
     "react-toastify": "^11.0.5",
     "typesafe-i18n": "^5.26.2",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.3"
   },
   "devDependencies": {
     "@babel/core": "^7.26.10",
-    "@eslint/js": "^9.23.0",
+    "@eslint/js": "^9.24.0",
     "@preact/compat": "^18.3.1",
     "@preact/preset-vite": "^2.10.1",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
@@ -51,7 +51,7 @@
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.1",
     "concurrently": "^9.1.2",
-    "eslint": "^9.23.0",
+    "eslint": "^9.24.0",
     "eslint-config-prettier": "^10.1.1",
     "formidable": "^3.5.2",
     "prettier": "^3.5.3",

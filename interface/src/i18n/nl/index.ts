@@ -331,7 +331,7 @@ const nl: Translation = {
   ALLVALUES: 'All waarden',
   SPECIAL_FUNCTIONS: 'Speciale functies',
   WAIT_FIRMWARE: 'Firmware wordt geüpload en geïnstalleerd',
-  INSTALL_VERSION: 'Hiermee wordt versie {0} geïnstalleerd. Weet je het zeker?',
+  INSTALL_VERSION: 'Hiermee wordt versie {1} {0}. Weet je het zeker?',
   UPDATE_AVAILABLE: 'update beschikbaar',
   LATEST_VERSION: 'U gebruikt de nieuwste {0} firmwareversie',
   PLEASE_WAIT: 'Een ogenblik geduld',
