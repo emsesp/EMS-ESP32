@@ -331,7 +331,7 @@ const cz: Translation = {
   ALLVALUES: 'Všechny hodnoty',
   SPECIAL_FUNCTIONS: 'Speciální funkce',
   WAIT_FIRMWARE: 'Firmware se nahrává a instaluje',
-  INSTALL_VERSION: 'Tímto se instalovat verze {0}. Jste si jistí?',
+  INSTALL_VERSION: 'Tímto se {0} verze {1}. Jste si jistí?',
   UPDATE_AVAILABLE: 'update available', // TODO translate
   LATEST_VERSION: 'Používáte nejnovější verzi {0}firmwaru',
   PLEASE_WAIT: 'Prosím čekejte',
