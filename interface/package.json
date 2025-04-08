@@ -31,7 +31,7 @@
     "async-validator": "^4.2.5",
     "jwt-decode": "^4.0.0",
     "mime-types": "^3.0.1",
-    "preact": "^10.26.4",
+    "preact": "^10.26.5",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-icons": "^5.5.0",
@@ -57,7 +57,7 @@
     "prettier": "^3.5.3",
     "rollup-plugin-visualizer": "^5.14.0",
     "terser": "^5.39.0",
-    "typescript-eslint": "8.29.0",
+    "typescript-eslint": "8.29.1",
     "vite": "^6.2.5",
     "vite-plugin-imagemin": "^0.6.1",
     "vite-tsconfig-paths": "^5.1.4"

@@ -201,8 +201,8 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
         if (device_id >= 0x18 && device_id <= 0x1B) { // remote hc1-hc4
             register_telegram_type(0x123, "JunkersRemote", false, MAKE_PF_CB(process_JunkersRemoteMonitor));
-            register_device_values(); // register device values for common values (not heating circuit)
-            return;                   // no values to add
+            // register_device_values(); // register device values for common values (not heating circuit)
+            // return;                   // no values to add
         }
 
         monitor_typeids = {0x016F, 0x0170, 0x0171, 0x0172};
