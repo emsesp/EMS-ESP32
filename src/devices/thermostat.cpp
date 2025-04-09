@@ -272,6 +272,10 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(const in
 // returns pointer to the HeatingCircuit or nullptr if it can't be found
 // if its a new one, the heating circuit object will be created and also the fetch flags set
 std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::shared_ptr<const Telegram> telegram) {
+    // do not create a hc on empty messages
+    if (telegram->message_length == 0) {
+        return nullptr;
+    }
     // look through the Monitor and Set arrays to see if there is a match
     uint8_t hc_num  = 0; // 0 means we haven't found it yet
     bool    toggle_ = false;
