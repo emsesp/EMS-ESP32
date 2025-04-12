@@ -237,6 +237,7 @@ void Shower::set_shower_state(bool state, bool force) {
         //
         // shower timestamp
         //
+        /* commented out as the publish of timestamp
         doc.clear();
 
         snprintf(str, sizeof(str), "%s_shower_timestamp", Mqtt::basename().c_str());
@@ -255,6 +256,7 @@ void Shower::set_shower_state(bool state, bool force) {
 
         snprintf(topic, sizeof(topic), "sensor/%s/shower_timestamp/config", Mqtt::basename().c_str());
         Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
+        */
     }
 }
 

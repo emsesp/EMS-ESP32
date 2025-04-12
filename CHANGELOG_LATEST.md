@@ -18,6 +18,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - update link buttons [#2497](https://github.com/emsesp/EMS-ESP32/issues/2497)
 - refresh scheduler states [#2502](https://github.com/emsesp/EMS-ESP32/discussions/2502)
 - also rebuild HA config on mqtt connect for scheduler, custom and shower
+- FB100 controls the hc, not the master [#2510](https://github.com/emsesp/EMS-ESP32/issues/2510)
 
 ## Changed
 

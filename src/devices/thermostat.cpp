@@ -201,8 +201,8 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
         if (device_id >= 0x18 && device_id <= 0x1B) { // remote hc1-hc4
             register_telegram_type(0x123, "JunkersRemote", false, MAKE_PF_CB(process_JunkersRemoteMonitor));
-            register_device_values(); // register device values for common values (not heating circuit)
-            return;                   // no values to add
+            // register_device_values(); // register device values for common values (not heating circuit)
+            // return;                   // no values to add
         }
 
         monitor_typeids = {0x016F, 0x0170, 0x0171, 0x0172};
@@ -272,6 +272,10 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(const in
 // returns pointer to the HeatingCircuit or nullptr if it can't be found
 // if its a new one, the heating circuit object will be created and also the fetch flags set
 std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::shared_ptr<const Telegram> telegram) {
+    // do not create a hc on empty messages
+    if (telegram->message_length == 0) {
+        return nullptr;
+    }
     // look through the Monitor and Set arrays to see if there is a match
     uint8_t hc_num  = 0; // 0 means we haven't found it yet
     bool    toggle_ = false;

@@ -393,7 +393,7 @@ bool EMSdevice::has_tags(const int8_t tag) const {
 // check if the device has a command with this tag.
 bool EMSdevice::has_cmd(const char * cmd, const int8_t id) const {
     for (const auto & dv : devicevalues_) {
-        if ((id < 1 || dv.tag == id) && dv.has_cmd && strcmp(dv.short_name, cmd) == 0) {
+        if ((id < 1 || dv.tag == id) && dv.has_cmd && strcmp(dv.short_name, cmd) == 0 && (dv.hasValue() || dv.type == DeviceValueType::CMD)) {
             return true;
         }
     }
@@ -1675,7 +1675,7 @@ void EMSdevice::get_value_json(JsonObject json, DeviceValue & dv) {
     // add uom, state class and device class
     Mqtt::add_ha_uom(json, dv.type, dv.uom, dv.short_name, false); // no icon
 
-    json["readable"]  = !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE);
+    json["readable"]  = dv.type != DeviceValueType::CMD && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE);
     json["writeable"] = dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY);
     json["visible"]   = !dv.has_state(DeviceValueState::DV_WEB_EXCLUDE);
 }
