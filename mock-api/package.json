@@ -15,5 +15,5 @@
     "itty-router": "^5.0.18",
     "prettier": "^3.5.3"
   },
-  "packageManager": "yarn@4.9.0"
+  "packageManager": "yarn@4.9.1"
 }

@@ -47,20 +47,20 @@
     "@preact/preset-vite": "^2.10.1",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/formidable": "^3",
-    "@types/node": "^22.14.0",
-    "@types/react": "^19.1.0",
+    "@types/node": "^22.14.1",
+    "@types/react": "^19.1.1",
     "@types/react-dom": "^19.1.2",
     "concurrently": "^9.1.2",
     "eslint": "^9.24.0",
-    "eslint-config-prettier": "^10.1.1",
+    "eslint-config-prettier": "^10.1.2",
     "formidable": "^3.5.2",
     "prettier": "^3.5.3",
     "rollup-plugin-visualizer": "^5.14.0",
     "terser": "^5.39.0",
     "typescript-eslint": "8.29.1",
-    "vite": "^6.2.5",
+    "vite": "^6.2.6",
     "vite-plugin-imagemin": "^0.6.1",
     "vite-tsconfig-paths": "^5.1.4"
   },
-  "packageManager": "yarn@4.9.0"
+  "packageManager": "yarn@4.9.1"
 }
