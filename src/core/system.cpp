@@ -1631,6 +1631,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["server"]  = settings.server;
         node["tzLabel"] = settings.tzLabel;
     });
+    node["timestamp"] = time(nullptr);
 #endif
 
     // MQTT Status
