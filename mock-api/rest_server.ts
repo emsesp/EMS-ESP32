@@ -414,8 +414,8 @@ let ntp_settings = {
   tz_label: 'Europe/Amsterdam',
   tz_format: 'CET-1CEST,M3.5.0,M10.5.0/3'
 };
-const ntp_status = {
-  status: 2,
+let ntp_status = {
+  status: 0, // 0 = disabled, 1 = inactive, 2 = active
   utc_time: '2021-04-01T14:25:42Z',
   local_time: '2021-04-01T16:25:42',
   server: 'time.google.com',
@@ -4330,7 +4330,15 @@ router
 router
   .get(NTP_SETTINGS_ENDPOINT, () => ntp_settings)
   .get(NTP_STATUS_ENDPOINT, () => ntp_status)
-  .post(TIME_ENDPOINT, () => status(200))
+  .post(TIME_ENDPOINT, async (request: any) => {
+    const rsp = await request.json();
+    const local_time = rsp.local_time;
+    ntp_status.status = 1;
+    ntp_status.local_time = local_time;
+    ntp_status.utc_time = local_time;
+    console.log('ntp time set to', local_time);
+    return status(200);
+  })
   .post(NTP_SETTINGS_ENDPOINT, async (request: any) => {
     ntp_settings = await request.json();
     console.log('ntp settings saved', ntp_settings);
