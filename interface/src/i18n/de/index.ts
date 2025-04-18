@@ -42,7 +42,7 @@ const de: Translation = {
   CANCEL: 'Abbrechen',
   RESET: 'Zurücksetzen',
   APPLY_CHANGES: 'Änderungen anwenden ({0})',
-  UPDATE: 'Update', // TODO translate
+  UPDATE: 'Aktualisieren',
   EXECUTE: 'Ausführen',
   REMOVE: 'Entfernen',
   PROBLEM_UPDATING: 'Problem beim Aktualisieren',
@@ -160,7 +160,7 @@ const de: Translation = {
   HELP_INFORMATION_3: 'Um neue Funktionen anzufragen oder Fehler zu melden, eröffnen Sie ein Issue auf GitHub',
   HELP_INFORMATION_4: 'Bitte laden Sie die Systemdetails und hängen Sie sie an das Support-Issue an',
   UPLOAD: 'Hochladen',
-  DOWNLOAD: '{{H|h|h}}erunterladen',
+  DOWNLOAD: '{{Herunterladen|heruntergeladen|}}',
   INSTALL: 'Installieren',
   ABORTED: 'abgebrochen',
   FAILED: 'gescheitert',
@@ -350,7 +350,7 @@ const de: Translation = {
   THIS_VERSION: 'Diese Version',
   PLATFORM: 'Plattform',
   RELEASE_TYPE: 'Release Typ',
-  INTERNET_CONNECTION_REQUIRED: 'Internetverbindung erforderlich für automatische Version-Überprüfung und -Aktualisierung',
+  INTERNET_CONNECTION_REQUIRED: 'Für die automatische Versionsprüfung und Aktualisierung ist eine Internetverbindung erforderlich',
   SWITCH_RELEASE_TYPE: 'Zum {0}-Release wechseln'
 };
 
