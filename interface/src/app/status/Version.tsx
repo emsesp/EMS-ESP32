@@ -220,7 +220,7 @@ const Version = () => {
             color="primary"
           >
             <Link underline="none" target="_blank" href={binURL} color="primary">
-              {LL.DOWNLOAD(1)}
+              {LL.DOWNLOAD(0)}
             </Link>
           </Button>
           {!downloadOnly && (

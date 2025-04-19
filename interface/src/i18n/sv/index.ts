@@ -187,7 +187,7 @@ const sv: Translation = {
   COMPACT: 'Komprimerad',
   DOWNLOAD_SETTINGS_TEXT: 'Skapa en säkerhetskopia av din konfiguration och inställningar',
   UPLOAD_TEXT: 'Ladda upp en ny firmwarefil (.bin) eller en säkerhetskopiafil (.json)',
-  UPLOAD_DROP_TEXT: 'Drop a firmware .bin file or click here', // TODO translate
+  UPLOAD_DROP_TEXT: 'Droppa en firmware .bin fil eller klicka här',
   ERROR: 'Okänt fel, var god försök igen',
   TIME_SET: 'Ställ in tid',
   MANAGE_USERS: 'Användare',
@@ -332,7 +332,7 @@ const sv: Translation = {
   SPECIAL_FUNCTIONS: 'Specialfunktioner',
   WAIT_FIRMWARE: 'Firmware laddas upp och installeras',
   INSTALL_VERSION: 'Det här kommer {0} version {1}. Är du säker?',
-  UPDATE_AVAILABLE: 'update available', // TODO translate
+  UPDATE_AVAILABLE: 'uppdatering tillgänglig',
   LATEST_VERSION: 'Du använder den senaste {0} firmwareversionen.',
   PLEASE_WAIT: 'Var god vänta',
   RESTARTING_PRE: 'Initialiserar',
@@ -340,16 +340,16 @@ const sv: Translation = {
   AUTO_SCROLL: 'Autoskrolla',
   DASHBOARD: 'Kontrollpanel',
   DEVELOPER_MODE: 'Utvecklarläge',
-  BYTES: 'Bytes', // TODO translate
-  BITMASK: 'Bit Mask',// TODO translate
+  BYTES: 'Bytes',
+  BITMASK: 'Bit Mask',
   DUPLICATE: 'Dublett',
-  DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.', // TODO translate
-  NO_DATA_1: 'No favorite EMS entities found yet. Use the', // TODO translate
-  NO_DATA_2: 'module to mark them.', // TODO translate
-  NO_DATA_3: 'To see all available entities go to', // TODO translate
-  THIS_VERSION: 'This Version', // TODO translate
-  PLATFORM: 'Platform', // TODO translate
-  RELEASE_TYPE: 'Release Type', // TODO translate
+  DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.',
+  NO_DATA_1: 'Inga favorit EMS enheter hittade än. Använd',
+  NO_DATA_2: 'modul för att markera dem.',
+  NO_DATA_3: 'För att se alla tillgängliga enheter, gå till',
+  THIS_VERSION: 'Denna version',
+  PLATFORM: 'Platform',
+  RELEASE_TYPE: 'Release Type',
   INTERNET_CONNECTION_REQUIRED: 'Internetanslutning krävs för automatisk version kontroll och uppdatering',
   SWITCH_RELEASE_TYPE: 'Byt till {0} version'
 };

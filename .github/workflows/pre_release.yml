@@ -3,6 +3,8 @@ name: 'Build dev release'
 on:
   workflow_dispatch:
   push:
+    paths:
+      - 'src/emsesp_version.h'
     branches:
       - 'dev'
 

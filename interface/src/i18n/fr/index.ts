@@ -41,9 +41,9 @@ const fr: Translation = {
   CHANGE_VALUE: 'Changer la valeur',
   CANCEL: 'Annuler',
   RESET: 'Réinitialiser',
-  APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
-  UPDATE: 'Update', // TODO translate
-  EXECUTE: 'Execute', // TODO translate
+  APPLY_CHANGES: 'Appliquer les changements ({0})',
+  UPDATE: 'Update',
+  EXECUTE: 'Execute',
   REMOVE: 'Enlever',
   PROBLEM_UPDATING: 'Problème lors de la mise à jour',
   PROBLEM_LOADING: 'Problème lors du chargement',
@@ -72,7 +72,7 @@ const fr: Translation = {
   TX_ISSUES: 'Problèmes de transmission (Tx) - Essayez un autre mode Tx',
   DISCONNECTED: 'Déconnecté',
   EMS_SCAN: 'Etes-vous sûr de vouloir lancer un scan complet du bus EMS ?',
-  DATA_TRAFFIC: 'Data Traffic', // TODO translate
+  DATA_TRAFFIC: 'Traffic des données',
   EMS_DEVICE: 'Appareils EMS',
   SUCCESS: 'SUCCÈS',
   FAIL: 'ÉCHEC',
@@ -114,9 +114,9 @@ const fr: Translation = {
   BYPASS_TOKEN: "Contourner l'autorisation du jeton d'accès sur les appels API",
   READONLY: 'Activer le mode lecture uniquement (bloque toutes les commandes EMS sortantes en écriture Tx)',
   UNDERCLOCK_CPU: 'Underclock du CPU',
-  HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
+  HEATINGOFF: 'Démarrer le chauffage avec le chauffage forcé éteint',
   REMOTE_TIMEOUT: 'Remote timeout',
-  REMOTE_TIMEOUT_EN: 'Disable remote on missing room temperature', // TODO translate
+  REMOTE_TIMEOUT_EN: 'Disable remote on missing room temperature',
   MIN_DURATION: 'Wait time',
   ENABLE_SHOWER_TIMER: 'Activer la minuterie de la douche',
   ENABLE_SHOWER_ALERT: 'Activer les alertes de durée de douche',
@@ -148,7 +148,7 @@ const fr: Translation = {
   CUSTOMIZATIONS_HELP_3: "désactiver l'action d'écriture",
   CUSTOMIZATIONS_HELP_4: "exclure de MQTT et de l'API",
   CUSTOMIZATIONS_HELP_5: 'cacher des appareils',
-  CUSTOMIZATIONS_HELP_6: 'remove from memory', // TODO translate
+  CUSTOMIZATIONS_HELP_6: 'supprimer de la mémoire',
   SELECT_DEVICE: 'Sélectionnez un appareil',
   SET_ALL: 'tout régler',
   OPTIONS: 'Options',
@@ -168,14 +168,14 @@ const fr: Translation = {
   SYSTEM: 'Système',
   LOG_OF: '{0} Log',
   STATUS_OF: 'Statut {0}',
-  DOWNLOAD_UPLOAD: 'Download/Upload', // TODO translate
+  DOWNLOAD_UPLOAD: 'Télécharger/Mettre à jour',
   CLOSE: 'Fermer',
   USE: 'Utiliser',
   FACTORY_RESET: 'Réinitialisation',
   SYSTEM_FACTORY_TEXT: "L'appareil a été réinitialisé et va maintenant redémarrer",
   SYSTEM_FACTORY_TEXT_DIALOG: "Êtes-vous sûr de vouloir réinitialiser l'appareil à ses paramètres d'usine ?",
-  AVAILABLE_VERSION: 'Latest Available Versions', // TODO translate
-  STABLE: 'Stable', // TODO translate
+  AVAILABLE_VERSION: 'Versions disponibles',
+  STABLE: 'Stable',
   DEVELOPMENT: 'Développement',
   UPTIME: 'Durée de fonctionnement du système',
   FREE_MEMORY: 'Libre Memory',
@@ -185,9 +185,9 @@ const fr: Translation = {
   FILESYSTEM: 'File System (Utilisée / Libre)',
   BUFFER_SIZE: 'Max taille du buffer',
   COMPACT: 'Compact',
-  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
-  UPLOAD_TEXT: 'Upload a new firmware file (.bin) or a backup file (.json)', // TODO translate
-  UPLOAD_DROP_TEXT: 'Drop a firmware .bin file or click here', // TODO translate
+  DOWNLOAD_SETTINGS_TEXT: 'Créer une sauvegarde de vos paramètres et configurations',
+  UPLOAD_TEXT: 'Télécharger un nouveau fichier firmware (.bin) ou une sauvegarde (.json)',
+  UPLOAD_DROP_TEXT: 'Drop a firmware .bin file or click here',
   ERROR: 'Erreur inattendue, veuillez réessayer',
   TIME_SET: 'Time set',
   MANAGE_USERS: 'Gérer les utilisateurs',
@@ -217,7 +217,7 @@ const fr: Translation = {
   MQTT_PUBLISH_TEXT_2: 'Publier vers des topics de commande (ioBroker)',
   MQTT_PUBLISH_TEXT_3: 'Activer la découverte MQTT',
   MQTT_PUBLISH_TEXT_4: 'Préfixe pour les topics découverte',
-  MQTT_PUBLISH_TEXT_5: 'Discovery type', // TODO translate
+  MQTT_PUBLISH_TEXT_5: 'Type de découverte',
   MQTT_PUBLISH_INTERVALS: 'Intervalles de publication',
   MQTT_INT_BOILER: 'Chaudières et pompes à chaleur',
   MQTT_INT_THERMOSTATS: 'Thermostats',
@@ -226,10 +226,10 @@ const fr: Translation = {
   MQTT_INT_WATER: 'Modules eau',
   MQTT_QUEUE: 'Queue MQTT',
   DEFAULT: 'Défaut',
-  MQTT_ENTITY_FORMAT: 'Entity ID format', // TODO translate
-  MQTT_ENTITY_FORMAT_0: 'Single instance, long name (v3.4)', // TODO translate
-  MQTT_ENTITY_FORMAT_1: 'Single instance, short name', // TODO translate
-  MQTT_ENTITY_FORMAT_2: 'Multiple instances, short name', // TODO translate
+  MQTT_ENTITY_FORMAT: 'Format de l\'ID de l\'entité',
+  MQTT_ENTITY_FORMAT_0: 'Instance unique, nom long (v3.4)',
+  MQTT_ENTITY_FORMAT_1: 'Instance unique, nom court',
+  MQTT_ENTITY_FORMAT_2: 'Instances multiples, nom court',
   MQTT_CLEAN_SESSION: 'Flag Clean Session',
   MQTT_RETAIN_FLAG: 'Toujours activer le Retain Flag',
   INACTIVE: 'Inactif',
@@ -260,7 +260,7 @@ const fr: Translation = {
   NETWORK_SCANNER: 'Scan réseau',
   NETWORK_NO_WIFI: 'Pas de réseau WiFi trouvé',
   NETWORK_BLANK_SSID: 'laisser vide pour désactiver le WiFi',
-  NETWORK_BLANK_BSSID: 'leave blank to use only SSID', // TODO translate
+  NETWORK_BLANK_BSSID: 'laisser vide pour utiliser uniquement le SSID',
   TX_POWER: 'Puissance Tx',
   HOSTNAME: "Nom d'hôte",
   NETWORK_DISABLE_SLEEP: 'Désactiver le mode veille du WiFi',
@@ -280,78 +280,78 @@ const fr: Translation = {
   ENTITY: 'entité',
   MIN: 'min',
   MAX: 'max',
-  BLOCK_NAVIGATE_1: 'You have unsaved changes', // TODO translate
-  BLOCK_NAVIGATE_2: 'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?', // TODO translate
-  STAY: 'Stay', // TODO translate
-  LEAVE: 'Leave', // TODO translate
-  SCHEDULER: 'Scheduler', // TODO translate
-  SCHEDULER_HELP_1: 'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT', // TODO translate
-  SCHEDULER_HELP_2: 'Use 00:00 to trigger once on start-up', // TODO translate
-  SCHEDULE: 'Schedule', // TODO translate
-  TIME: 'Time', // TODO translate
-  TIMER: 'Timer', // TODO translate
-  ONCHANGE: 'Sur le changement', // TODO translate
-  CONDITION: 'Condition', // TODO translate
-  IMMEDIATE: 'Immédiate', // TODO translate
-  SCHEDULE_UPDATED: 'Schedule updated', // TODO translate
-  SCHEDULE_TIMER_1: 'on startup', // TODO translate
-  SCHEDULE_TIMER_2: 'every minute', // TODO translate
-  SCHEDULE_TIMER_3: 'every hour', // TODO translate
-  CUSTOM_ENTITIES: 'Custom Entities', // TODO translate
-  ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus', // TODO translate
-  ENTITIES_UPDATED: 'Entities Updated', // TODO translate
-  WRITEABLE: 'Writeable', // TODO translate
-  SHOWING: 'Showing', // TODO translate
-  SEARCH: 'Search', // TODO translate
-  CERT: 'TLS root certificate (leave blank for insecure)', // TODO translate
+  BLOCK_NAVIGATE_1: 'Vous avez des modifications non enregistrées',
+  BLOCK_NAVIGATE_2: 'Si vous naviguez vers une autre page, vos modifications non enregistrées seront perdues. Êtes-vous sûr de vouloir quitter cette page ?',
+  STAY: 'Rester',
+  LEAVE: 'Quitter',
+  SCHEDULER: 'Scheduler',
+  SCHEDULER_HELP_1: 'Automatiser les commandes en ajoutant des événements programmés ci-dessous. Définissez un nom unique pour activer/désactiver l\'activation via API/MQTT',
+  SCHEDULER_HELP_2: 'Utiliser 00:00 pour déclencher une fois au démarrage',
+  SCHEDULE: 'Programme',
+  TIME: 'Temps',
+  TIMER: 'Minuteur',
+  ONCHANGE: 'Sur le changement',
+  CONDITION: 'Condition',
+  IMMEDIATE: 'Immédiat',
+  SCHEDULE_UPDATED: 'Programme mis à jour',
+  SCHEDULE_TIMER_1: 'au démarrage',
+  SCHEDULE_TIMER_2: 'toutes les minutes',
+  SCHEDULE_TIMER_3: 'toutes les heures',
+  CUSTOM_ENTITIES: 'Entités personnalisées',
+  ENTITIES_HELP_1: 'Récupérer les entités personnalisées du bus EMS',
+  ENTITIES_UPDATED: 'Entités mises à jour',
+  WRITEABLE: 'Écriture',
+  SHOWING: 'Affichage',
+  SEARCH: 'Rechercher',
+  CERT: 'Certificat racine TLS (laisser vide pour l\'insecurité)',
   ENABLE_TLS: 'Activer TLS',
-  ON: 'On', // TODO translate
-  OFF: 'Off', // TODO translate
-  POLARITY: 'Polarity', // TODO translate
-  ACTIVEHIGH: 'Active High', // TODO translate
-  ACTIVELOW: 'Active Low', // TODO translate
-  UNCHANGED: 'Unchanged', // TODO translate
-  ALWAYS: 'Always', // TODO translate
-  ACTIVITY: 'Activity', // TODO translate
-  CONFIGURE: 'Configure {0}', // TODO translate
-  SYSTEM_MEMORY: 'System Memory', // TODO translate
-  APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
-  SECURITY_1: 'Add or remove users', // TODO translate
-  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings and Firmware', // TODO translate
-  MODULES: 'Module', // TODO translate
+  ON: 'On',
+  OFF: 'Off',
+  POLARITY: 'Polarity',
+  ACTIVEHIGH: 'Active High',
+  ACTIVELOW: 'Active Low',
+  UNCHANGED: 'Unchanged',
+  ALWAYS: 'Toujours',
+  ACTIVITY: 'Activité',
+  CONFIGURE: 'Configurer {0}',
+  SYSTEM_MEMORY: 'Mémoire système',
+  APPLICATION_SETTINGS_1: 'Modifier les paramètres de l\'application EMS-ESP',
+  SECURITY_1: 'Ajouter ou supprimer des utilisateurs',
+  DOWNLOAD_UPLOAD_1: 'Télécharger et mettre à jour les paramètres et le firmware',
+  MODULES: 'Module',
   MODULES_1: 'Activer ou désactiver les modules externes',
-  MODULES_UPDATED: 'Modules updated', // TODO translate
-  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
-  MODULES_NONE: 'No external modules detected', // TODO translate
-  RENAME: 'Rename', // TODO translate
+  MODULES_UPDATED: 'Modules mis à jour',
+  MODULES_DESCRIPTION: 'Cliquer sur le module pour activer ou désactiver les modules EMS-ESP',
+  MODULES_NONE: 'Aucun module externe détecté',
+  RENAME: 'Renommer',
   ENABLE_MODBUS: 'Activer Modbus',
-  VIEW_LOG: 'View log to diagnose issues', // TODO translate
-  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
-  SERVICES: 'Services', // TODO translate
-  ALLVALUES: 'All Values', // TODO translate
-  SPECIAL_FUNCTIONS: 'Special Functions',
-  WAIT_FIRMWARE: 'Firmware is uploading and installing', // TODO translate
-  INSTALL_VERSION: 'This will {0} version {1}. Are you sure?', // TODO translate
-  UPDATE_AVAILABLE: 'update available', // TODO translate
-  LATEST_VERSION: 'You are using the latest {0} firmware version', // TODO translate
-  PLEASE_WAIT: 'Please wait', // TODO translate
-  RESTARTING_PRE: 'Initializing', // TODO translate
-  RESTARTING_POST: 'Preparing', // TODO translate
-  AUTO_SCROLL: 'Auto Scroll', // TODO translate
-  DASHBOARD: 'Dashboard', // TODO translate
-  DEVELOPER_MODE: 'Developer Mode', // TODO translate
-  BYTES: 'Bytes', // TODO translate
-  BITMASK: 'Bit Mask',// TODO translate
-  DUPLICATE: 'Duplicate', // TODO translate
-  DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.', // TODO translate
-  NO_DATA_1: 'No favorite EMS entities found yet. Use the', // TODO translate
-  NO_DATA_2: 'module to mark them.', // TODO translate
-  NO_DATA_3: 'To see all available entities go to', // TODO translate
-  THIS_VERSION: 'This Version', // TODO translate
-  PLATFORM: 'Platform', // TODO translate
-  RELEASE_TYPE: 'Release Type', // TODO translate
-  INTERNET_CONNECTION_REQUIRED: 'Internet connection required for automatic version checking and upgrading', // TODO translate
-  SWITCH_RELEASE_TYPE: 'Switch to {0} release' // TODO translate
+  VIEW_LOG: 'Voir le journal pour diagnostiquer les problèmes',
+  UPLOAD_DRAG: 'glisser-déposer un fichier ici ou cliquer pour en sélectionner un',
+  SERVICES: 'Services',
+  ALLVALUES: 'Toutes les valeurs',
+  SPECIAL_FUNCTIONS: 'Fonctions spéciales',
+  WAIT_FIRMWARE: 'Firmware is uploading and installing',
+  INSTALL_VERSION: 'This will {0} version {1}. Are you sure?',
+  UPDATE_AVAILABLE: 'update available',
+  LATEST_VERSION: 'You are using the latest {0} firmware version',
+  PLEASE_WAIT: 'Please wait',
+  RESTARTING_PRE: 'Initializing',
+  RESTARTING_POST: 'Preparing',
+  AUTO_SCROLL: 'Auto Scroll',
+  DASHBOARD: 'Dashboard',
+  DEVELOPER_MODE: 'Mode développeur',
+  BYTES: 'Bytes',
+  BITMASK: 'Bit Mask',
+  DUPLICATE: 'Duplicate',
+  DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.',
+  NO_DATA_1: 'No favorite EMS entities found yet. Use the',
+  NO_DATA_2: 'module to mark them.',
+  NO_DATA_3: 'To see all available entities go to',
+  THIS_VERSION: 'This Version',
+  PLATFORM: 'Platform',
+  RELEASE_TYPE: 'Release Type',
+  INTERNET_CONNECTION_REQUIRED: 'Internet connection required for automatic version checking and upgrading',
+  SWITCH_RELEASE_TYPE: 'Switch to {0} release'
 };
 
 export default fr;

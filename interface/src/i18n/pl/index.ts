@@ -72,7 +72,7 @@ const pl: BaseTranslation = {
   TX_ISSUES: 'problem z zapisem na magistralę EMS, spróbuj wybrać inny "Tryb transmisji (Tx)"',
   DISCONNECTED: 'brak połączenia',
   EMS_SCAN: 'Czy na pewno wykonać pełne skanowanie magistrali EMS?',
-  DATA_TRAFFIC: 'Data Traffic', // TODO translate
+  DATA_TRAFFIC: 'Ruch Danych',
   EMS_DEVICE: 'Urządzenie EMS',
   SUCCESS: 'Udane',
   FAIL: 'Nieudane',
@@ -115,7 +115,7 @@ const pl: BaseTranslation = {
   READONLY: 'Tryb pracy "tylko do odczytu" (blokuje wszystkie komendy zapisu na magistralę EMS)',
   UNDERCLOCK_CPU: 'Obniż taktowanie CPU',
   REMOTE_TIMEOUT: 'Remote timeout',
-  REMOTE_TIMEOUT_EN: 'Disable remote control on missing room temperature', // TODO translate
+  REMOTE_TIMEOUT_EN: 'Wyłącz kontrolę zdalną przy braku temperatury pomieszczenia',
   HEATINGOFF: 'Uruchom kocioł z wymuszonym wyłączonym grzaniem',
   MIN_DURATION: 'Wait time',
   ENABLE_SHOWER_TIMER: 'Aktywuj minutnik prysznica',
@@ -174,9 +174,9 @@ const pl: BaseTranslation = {
   FACTORY_RESET: 'Ustawienia fabryczne',
   SYSTEM_FACTORY_TEXT: 'Interfejs EMS-ESP został przywrócony do ustawień fabrycznych i zostanie teraz ponownie uruchomiony.',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Na pewno chcesz przywrócić ustawienia fabryczne interfejsu EMS-ESP?',
-  AVAILABLE_VERSION: 'Latest Available Versions', // TODO translate
-  STABLE: 'Stable', // TODO translate
-  DEVELOPMENT: 'Testowe',
+  AVAILABLE_VERSION: 'Najnowsze dostępne wersje',
+  STABLE: 'Stabilna',
+  DEVELOPMENT: 'Testowa',
   UPTIME: 'Czas działania systemu',
   FREE_MEMORY: 'Wolne Memory',
   PSRAM: 'PSRAM (rozmiar / wolne)',
@@ -185,9 +185,9 @@ const pl: BaseTranslation = {
   FILESYSTEM: 'System plików (wykorzystane / wolne)',
   BUFFER_SIZE: 'Maksymalna pojemność bufora (ilość wpisów)',
   COMPACT: 'Kompaktowy',
-  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
-  UPLOAD_TEXT: 'Upload a new firmware file (.bin) or a backup file (.json)', // TODO translate
-  UPLOAD_DROP_TEXT: 'Drop a firmware .bin file or click here', // TODO translate
+  DOWNLOAD_SETTINGS_TEXT: 'Utwórz kopię swoich ustawień i konfiguracji',
+  UPLOAD_TEXT: 'Wgraj nowy plik firmware (.bin) lub kopię ustawień (.json)',
+  UPLOAD_DROP_TEXT: 'Upuść plik firmware .bin lub kliknij tutaj',
   ERROR: 'Nieoczekiwany błąd, spróbuj ponownie!',
   TIME_SET: 'Zegar został ustawiony.',
   MANAGE_USERS: 'Zarządzanie użytkownikami',
@@ -318,40 +318,40 @@ const pl: BaseTranslation = {
   APPLICATION_SETTINGS_1: 'Modyfikacja ustawień aplikacji EMS-ESP',
   SECURITY_1: 'Dodawanie i usuwanie użytkowników',
   DOWNLOAD_UPLOAD_1: 'Pobieranie/wysyłanie ustawień i firmware',
-  MODULES: 'Module', // TODO translate
+  MODULES: 'Moduł',
   MODULES_1: 'Aktywuj lub dezaktywuj moduły zewnętrzne',
-  MODULES_UPDATED: 'Modules updated', // TODO translate
-  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
-  MODULES_NONE: 'No external modules detected', // TODO translate
-  RENAME: 'Rename', // TODO translate 
+  MODULES_UPDATED: 'Zaktualizowano moduły',
+  MODULES_DESCRIPTION: 'Kliknij na moduł aby aktywować lub dezaktywować bibliotekę modułów EMS-ESP',
+  MODULES_NONE: 'Brak wykrytych modułów zewnętrznych',
+  RENAME: 'Zmień nazwę',
   ENABLE_MODBUS: 'Aktywuj Modbus',
-  VIEW_LOG: 'View log to diagnose issues', // TODO translate
-  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
-  SERVICES: 'Services', // TODO translate
-  ALLVALUES: 'All Values', // TODO translate
-  SPECIAL_FUNCTIONS: 'Special Functions', // TODO translate
-  WAIT_FIRMWARE: 'Firmware is uploading and installing', // TODO translate
-  INSTALL_VERSION: 'This will {0} version {1}. Are you sure?', // TODO translate
-  UPDATE_AVAILABLE: 'update available', // TODO translate
-  LATEST_VERSION: 'You are using the latest {0} firmware version', // TODO translate
-  PLEASE_WAIT: 'Please wait', // TODO translate
-  RESTARTING_PRE: 'Initializing', // TODO translate
-  RESTARTING_POST: 'Preparing', // TODO translate
-  AUTO_SCROLL: 'Auto Scroll', // TODO translate
-  DASHBOARD: 'Dashboard', // TODO translate
-  DEVELOPER_MODE: 'Developer Mode', // TODO translate
-  BYTES: 'Bytes', // TODO translate
-  BITMASK: 'Bit Mask',// TODO translate
-  DUPLICATE: 'Duplicate', // TODO translate
-  DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.', // TODO translate
-  NO_DATA_1: 'No favorite EMS entities found yet. Use the', // TODO translate
-  NO_DATA_2: 'module to mark them.', // TODO translate
-  NO_DATA_3: 'To see all available entities go to', // TODO translate
-  THIS_VERSION: 'This Version', // TODO translate
-  PLATFORM: 'Platform', // TODO translate
-  RELEASE_TYPE: 'Release Type', // TODO translate
-  INTERNET_CONNECTION_REQUIRED: 'Internet connection required for automatic version checking and upgrading', // TODO translate
-  SWITCH_RELEASE_TYPE: 'Switch to {0} release' // TODO translate
+  VIEW_LOG: 'Zdiagnozuj problemy',
+  UPLOAD_DRAG: 'przeciągnij i upuść plik lub kliknij tutaj',
+  SERVICES: 'Usługi',
+  ALLVALUES: 'Wszystkie wartości',
+  SPECIAL_FUNCTIONS: 'Specjalne funkcje',
+  WAIT_FIRMWARE: 'Firma jest wysyłana i instaluje się',
+  INSTALL_VERSION: 'To zainstaluje wersję {1} {0}. Jesteś pewny?',
+  UPDATE_AVAILABLE: 'aktualizacja dostępna',
+  LATEST_VERSION: 'Jesteś używając najnowszej wersji firmware {0}',
+  PLEASE_WAIT: 'Proszę czekać',
+  RESTARTING_PRE: 'Inicjalizacja',
+  RESTARTING_POST: 'Przygotowanie',
+  AUTO_SCROLL: 'Auto Scroll',
+  DASHBOARD: 'Pulpit',
+  DEVELOPER_MODE: 'Tryb programisty',
+  BYTES: 'Bajty',
+  BITMASK: 'Bit Mask',
+  DUPLICATE: 'Duplicate',
+  DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.',
+  NO_DATA_1: 'Brak ulubionych encji EMS. Użyj',
+  NO_DATA_2: 'moduł do ich oznaczenia.',
+  NO_DATA_3: 'Aby zobaczyć wszystkie dostępne encje przejdź do',
+  THIS_VERSION: 'Ta wersja',
+  PLATFORM: 'Platforma',
+  RELEASE_TYPE: 'Typ wydania',
+  INTERNET_CONNECTION_REQUIRED: 'Połączenie internetowe jest wymagane do automatycznej kontroli wersji i aktualizacji',
+  SWITCH_RELEASE_TYPE: 'Zmień na {0} wydanie'
 };
 
 export default pl;

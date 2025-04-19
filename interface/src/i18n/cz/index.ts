@@ -187,7 +187,7 @@ const cz: Translation = {
   COMPACT: 'Kompaktní',
   DOWNLOAD_SETTINGS_TEXT: 'Vytvořte zálohu svého nastavení a konfigurace',
   UPLOAD_TEXT: 'Nahrajte nový soubor firmwaru (.bin) nebo záložní soubor (.json)',
-  UPLOAD_DROP_TEXT: 'Drop a firmware .bin file or click here', // TODO translate
+  UPLOAD_DROP_TEXT: 'Přetáhněte soubor sem nebo klikněte pro výběr',
   ERROR: 'Neočekávaná chyba, zkuste to prosím znovu',
   TIME_SET: 'Čas nastaven',
   MANAGE_USERS: 'Spravovat uživatele',
@@ -332,7 +332,7 @@ const cz: Translation = {
   SPECIAL_FUNCTIONS: 'Speciální funkce',
   WAIT_FIRMWARE: 'Firmware se nahrává a instaluje',
   INSTALL_VERSION: 'Tímto se {0} verze {1}. Jste si jistí?',
-  UPDATE_AVAILABLE: 'update available', // TODO translate
+  UPDATE_AVAILABLE: 'aktualizace dostupná',
   LATEST_VERSION: 'Používáte nejnovější verzi {0}firmwaru',
   PLEASE_WAIT: 'Prosím čekejte',
   RESTARTING_PRE: 'Inicializace',
@@ -340,8 +340,8 @@ const cz: Translation = {
   AUTO_SCROLL: 'Automatické rolování',
   DASHBOARD: 'Dashboard',
   DEVELOPER_MODE: 'Režim vývojáře',
-  BYTES: 'Bytes', // TODO translate
-  BITMASK: 'Bit Mask',// TODO translate
+  BYTES: 'Bajty',
+  BITMASK: 'Bit Mask',
   DUPLICATE: 'Duplikát',
   DASHBOARD_1: 'Všechny aktivní entity EMS jsou označené jako oblíbené. Všechny vlastní entity, harmonogramy a externí sensory jsou zobrazeny níže.',
   NO_DATA_1: 'Nebyly nalezeny žádné oblíbené entity. Použijte',
