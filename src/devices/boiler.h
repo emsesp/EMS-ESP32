@@ -149,6 +149,7 @@ class Boiler : public EMSdevice {
     char     lastCode_[55];      // last error code
     char     serviceCode_[4];    // 3 character status/service code
     uint16_t serviceCodeNumber_; // error/service code
+    uint32_t lastCodeDate_ = 0; // last code date
     uint8_t  emergencyOps_;
     uint8_t  emergencyTemp_;
     uint16_t headertemp_; // see #1317
@@ -355,6 +356,7 @@ class Boiler : public EMSdevice {
     void process_ErrorMessage(std::shared_ptr<const Telegram> telegram);
     void process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram);
     void process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram);
+    void process_UBAErrorMessage3(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorWWPlus(std::shared_ptr<const Telegram> telegram);
     void process_UBAInformation(std::shared_ptr<const Telegram> telegram);
     void process_UBAEnergySupplied(std::shared_ptr<const Telegram> telegram);

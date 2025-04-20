@@ -34,6 +34,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_telegram_type(0x10, "UBAErrorMessage1", false, MAKE_PF_CB(process_UBAErrorMessage));
     register_telegram_type(0x11, "UBAErrorMessage2", false, MAKE_PF_CB(process_UBAErrorMessage));
     register_telegram_type(0xC2, "UBAErrorMessage3", false, MAKE_PF_CB(process_UBAErrorMessage2));
+    register_telegram_type(0xC6, "UBAErrorMessage3", false, MAKE_PF_CB(process_UBAErrorMessage3));
     register_telegram_type(0x14, "UBATotalUptime", true, MAKE_PF_CB(process_UBATotalUptime));
     register_telegram_type(0x15, "UBAMaintenanceData", false, MAKE_PF_CB(process_UBAMaintenanceData));
     register_telegram_type(0x1C, "UBAMaintenanceStatus", false, MAKE_PF_CB(process_UBAMaintenanceStatus));
@@ -1063,6 +1064,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     EMSESP::send_read_request(0x15, device_id); // read maintenance data on start (only published on change)
     EMSESP::send_read_request(0x1C, device_id); // read maintenance status on start (only published on change)
     EMSESP::send_read_request(0xC2, device_id); // read last errorcode on start (only published on errors)
+    EMSESP::send_read_request(0xC6, device_id); // read last errorcode on start (only published on errors)
 
 
     if (model() != EMSdevice::EMS_DEVICE_FLAG_HEATPUMP && model() != EMSdevice::EMS_DEVICE_FLAG_HIU) {
@@ -1834,6 +1836,7 @@ void Boiler::process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegr
 // 0xBF
 void Boiler::process_ErrorMessage(std::shared_ptr<const Telegram> telegram) {
     EMSESP::send_read_request(0xC2, device_id()); // read last errorcode
+    EMSESP::send_read_request(0xC6, device_id()); // read last errorcode
 }
 
 // 0x10, 0x11
@@ -1873,13 +1876,11 @@ void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
 
 // 0xC2, without clock in system it stores 3 bytes uptime in 11 and 16, with clock date in 10-14, and 15-19
 // date is marked with 0x80 to year-field
-// also C6, C7 https://github.com/emsesp/EMS-ESP32/issues/938#issuecomment-1425813815
 void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) {
     if (telegram->offset > 0 || telegram->message_length < 20) {
         return;
     }
 
-    static uint32_t lastCodeDate_           = 0; // last code date
     uint32_t        date                    = 0;
     char            code[sizeof(lastCode_)] = {0};
     uint16_t        codeNo                  = EMS_VALUE_INT16_NOTSET;
@@ -1930,6 +1931,72 @@ void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) 
         uint32_t endtime   = 0;
         telegram->read_value(starttime, 11, 3);
         telegram->read_value(endtime, 16, 3);
+        snprintf(&code[3], sizeof(code) - 3, "(%d) @uptime %lu - %lu min", codeNo, starttime, endtime);
+        date = starttime;
+    }
+    if (date > lastCodeDate_) {
+        lastCodeDate_ = date;
+        has_update(lastCode_, code, sizeof(lastCode_));
+    }
+}
+
+// C6, C7 https://github.com/emsesp/EMS-ESP32/issues/938#issuecomment-1425813815
+// as C2, but offset shifted one byte
+void Boiler::process_UBAErrorMessage3(std::shared_ptr<const Telegram> telegram) {
+    if (telegram->offset > 0 || telegram->message_length < 21) {
+        return;
+    }
+
+    uint32_t        date                    = 0;
+    char            code[sizeof(lastCode_)] = {0};
+    uint16_t        codeNo                  = EMS_VALUE_INT16_NOTSET;
+    code[0]                                 = telegram->message_data[6];
+    code[1]                                 = telegram->message_data[7];
+    code[2]                                 = telegram->message_data[8];
+    code[3]                                 = 0;
+    telegram->read_value(codeNo, 9);
+    if (!std::isprint(code[0]) || !std::isprint(code[1]) || !std::isprint(code[2])) {
+        return;
+    }
+
+    // check for valid date, https://github.com/emsesp/EMS-ESP32/issues/204
+    if (telegram->message_data[11] & 0x80) {
+        uint16_t start_year  = (telegram->message_data[11] & 0x7F) + 2000;
+        uint8_t  start_month = telegram->message_data[12];
+        uint8_t  start_day   = telegram->message_data[14];
+        uint8_t  start_hour  = telegram->message_data[13];
+        uint8_t  start_min   = telegram->message_data[15];
+        uint16_t end_year    = (telegram->message_data[16] & 0x7F) + 2000;
+        uint8_t  end_month   = telegram->message_data[17];
+        uint8_t  end_day     = telegram->message_data[19];
+        uint8_t  end_hour    = telegram->message_data[18];
+        uint8_t  end_min     = telegram->message_data[20];
+
+        if (telegram->message_data[16] & 0x80) { //valid end date
+            date = (end_year - 2000) * 535680UL + end_month * 44640UL + end_day * 1440UL + end_hour * 60 + end_min;
+            snprintf(&code[3],
+                     sizeof(code) - 3,
+                     "(%d) %02d.%02d.%04d %02d:%02d - %02d.%02d.%04d %02d:%02d",
+                     codeNo,
+                     start_day,
+                     start_month,
+                     start_year,
+                     start_hour,
+                     start_min,
+                     end_day,
+                     end_month,
+                     end_year,
+                     end_hour,
+                     end_min);
+        } else { // no valid end date means error still persists
+            date = (start_year - 2000) * 535680UL + start_month * 44640UL + start_day * 1440UL + start_hour * 60 + start_min;
+            snprintf(&code[3], sizeof(code) - 3, "(%d) %02d.%02d.%04d %02d:%02d - now", codeNo, start_day, start_month, start_year, start_hour, start_min);
+        }
+    } else { // no clock, the uptime is stored https://github.com/emsesp/EMS-ESP32/issues/121
+        uint32_t starttime = 0;
+        uint32_t endtime   = 0;
+        telegram->read_value(starttime, 12, 3);
+        telegram->read_value(endtime, 17, 3);
         snprintf(&code[3], sizeof(code) - 3, "(%d) @uptime %lu - %lu min", codeNo, starttime, endtime);
         date = starttime;
     }
