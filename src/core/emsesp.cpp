@@ -1303,7 +1303,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
         }
     }
 
-    if (device_id >= EMSdevice::EMS_DEVICE_ID_DHW1 && device_id <= EMSdevice::EMS_DEVICE_ID_DHW8) {
+    if ((device_id >= EMSdevice::EMS_DEVICE_ID_DHW1 && device_id <= EMSdevice::EMS_DEVICE_ID_DHW8) || device_id == EMSdevice::EMS_DEVICE_ID_IPM_DHW) {
         device_type = DeviceType::WATER;
     }
 
