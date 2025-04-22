@@ -1881,13 +1881,13 @@ void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) 
         return;
     }
 
-    uint32_t        date                    = 0;
-    char            code[sizeof(lastCode_)] = {0};
-    uint16_t        codeNo                  = EMS_VALUE_INT16_NOTSET;
-    code[0]                                 = telegram->message_data[5];
-    code[1]                                 = telegram->message_data[6];
-    code[2]                                 = telegram->message_data[7];
-    code[3]                                 = 0;
+    uint32_t date                    = 0;
+    char     code[sizeof(lastCode_)] = {0};
+    uint16_t codeNo                  = EMS_VALUE_INT16_NOTSET;
+    code[0]                          = telegram->message_data[5];
+    code[1]                          = telegram->message_data[6];
+    code[2]                          = telegram->message_data[7];
+    code[3]                          = 0;
     telegram->read_value(codeNo, 8);
     if (!std::isprint(code[0]) || !std::isprint(code[1]) || !std::isprint(code[2])) {
         return;
@@ -1947,13 +1947,13 @@ void Boiler::process_UBAErrorMessage3(std::shared_ptr<const Telegram> telegram) 
         return;
     }
 
-    uint32_t        date                    = 0;
-    char            code[sizeof(lastCode_)] = {0};
-    uint16_t        codeNo                  = EMS_VALUE_INT16_NOTSET;
-    code[0]                                 = telegram->message_data[6];
-    code[1]                                 = telegram->message_data[7];
-    code[2]                                 = telegram->message_data[8];
-    code[3]                                 = 0;
+    uint32_t date                    = 0;
+    char     code[sizeof(lastCode_)] = {0};
+    uint16_t codeNo                  = EMS_VALUE_INT16_NOTSET;
+    code[0]                          = telegram->message_data[6];
+    code[1]                          = telegram->message_data[7];
+    code[2]                          = telegram->message_data[8];
+    code[3]                          = 0;
     telegram->read_value(codeNo, 9);
     if (!std::isprint(code[0]) || !std::isprint(code[1]) || !std::isprint(code[2])) {
         return;

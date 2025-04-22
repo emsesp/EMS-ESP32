@@ -399,7 +399,12 @@ void WebCustomEntityService::publish(const bool force) {
             char val_cond[65];
             snprintf(val_obj, sizeof(val_obj), "value_json['%s']", entityItem.name.c_str());
             snprintf(val_cond, sizeof(val_cond), "%s is defined", val_obj);
-            config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + "}}";
+            // don't bother with value template conditions if using Domoticz which doesn't fully support MQTT Discovery
+            if (Mqtt::discovery_type() == Mqtt::discoveryType::HOMEASSISTANT) {
+                config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + "}}";
+            } else {
+                config["val_tpl"] = (std::string) "{{" + val_obj + "}}";
+            }
 
             char uniq_s[70];
             snprintf(uniq_s, sizeof(uniq_s), "%s_%s", F_(custom), entityItem.name.c_str());

@@ -222,8 +222,15 @@ void Shower::set_shower_state(bool state, bool force) {
         snprintf(stat_t, sizeof(stat_t), "%s/shower_data", Mqtt::base().c_str());
         doc["stat_t"] = stat_t;
 
-        doc["name"]         = "Shower Duration";
-        doc["val_tpl"]      = "{{value_json.duration if value_json.duration is defined else 0}}";
+        doc["name"] = "Shower Duration";
+
+        // don't bother with value template conditions if using Domoticz which doesn't fully support MQTT Discovery
+        if (Mqtt::discovery_type() == Mqtt::discoveryType::HOMEASSISTANT) {
+            doc["val_tpl"] = "{{value_json.duration if value_json.duration is defined else 0}}";
+        } else {
+            doc["val_tpl"] = "{{value_json.duration}}";
+        }
+
         doc["unit_of_meas"] = "s";
         doc["stat_cla"]     = "measurement";
         doc["dev_cla"]      = "duration";

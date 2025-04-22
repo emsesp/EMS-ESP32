@@ -239,11 +239,11 @@
 #define ARDUINOJSON_BIN2ALPHA_1111() P
 #define ARDUINOJSON_BIN2ALPHA_(A, B, C, D) ARDUINOJSON_BIN2ALPHA_##A##B##C##D()
 #define ARDUINOJSON_BIN2ALPHA(A, B, C, D) ARDUINOJSON_BIN2ALPHA_(A, B, C, D)
-#define ARDUINOJSON_VERSION "7.4.0"
+#define ARDUINOJSON_VERSION "7.4.1"
 #define ARDUINOJSON_VERSION_MAJOR 7
 #define ARDUINOJSON_VERSION_MINOR 4
-#define ARDUINOJSON_VERSION_REVISION 0
-#define ARDUINOJSON_VERSION_MACRO V740
+#define ARDUINOJSON_VERSION_REVISION 1
+#define ARDUINOJSON_VERSION_MACRO V741
 #ifndef ARDUINOJSON_VERSION_NAMESPACE
 #  define ARDUINOJSON_VERSION_NAMESPACE                               \
     ARDUINOJSON_CONCAT5(                                              \
@@ -2549,12 +2549,17 @@ class VariantData {
     type_ = VariantType::LinkedString;
     content_.asLinkedString = s;
   }
-  void setTinyString(const char* s, uint8_t n) {
+  template <typename TAdaptedString>
+  void setTinyString(const TAdaptedString& s) {
     ARDUINOJSON_ASSERT(type_ == VariantType::Null);  // must call clear() first
-    ARDUINOJSON_ASSERT(s);
+    ARDUINOJSON_ASSERT(s.size() <= tinyStringMaxLength);
     type_ = VariantType::TinyString;
-    for (uint8_t i = 0; i < n; i++)
-      content_.asTinyString[i] = s[i];
+    auto n = uint8_t(s.size());
+    for (uint8_t i = 0; i < n; i++) {
+      char c = s[i];
+      ARDUINOJSON_ASSERT(c != 0);  // no NUL in tiny string
+      content_.asTinyString[i] = c;
+    }
     content_.asTinyString[n] = 0;
   }
   void setOwnedString(StringNode* s) {
@@ -5423,7 +5428,7 @@ class StringBuilder {
     ARDUINOJSON_ASSERT(node_ != nullptr);
     char* p = node_->data;
     if (isTinyString(p, size_)) {
-      variant->setTinyString(p, static_cast<uint8_t>(size_));
+      variant->setTinyString(adaptString(p, size_));
       return;
     }
     p[size_] = 0;
@@ -5829,7 +5834,7 @@ inline bool VariantData::setString(TAdaptedString value,
     return true;
   }
   if (isTinyString(value, value.size())) {
-    setTinyString(value.data(), uint8_t(value.size()));
+    setTinyString(value);
     return true;
   }
   auto dup = resources->saveString(value);
@@ -7490,7 +7495,7 @@ class StringBuffer {
     ARDUINOJSON_ASSERT(node_ != nullptr);
     const char* s = node_->data;
     if (isTinyString(s, size_))
-      data->setTinyString(s, static_cast<uint8_t>(size_));
+      data->setTinyString(adaptString(s, size_));
     else
       data->setOwnedString(commitStringNode());
   }
