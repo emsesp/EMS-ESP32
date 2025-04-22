@@ -594,7 +594,12 @@ void AnalogSensor::publish_values(const bool force) {
                 if (sensor.type() == AnalogType::DIGITAL_IN || sensor.type() == AnalogType::DIGITAL_OUT) {
                     Helpers::render_boolean(sample_val, false);
                 }
-                config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else " + sample_val + "}}";
+                // don't bother with value template conditions if using Domoticz which doesn't fully support MQTT Discovery
+                if (Mqtt::discovery_type() == Mqtt::discoveryType::HOMEASSISTANT) {
+                    config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + "}}";
+                } else {
+                    config["val_tpl"] = (std::string) "{{" + val_obj + "}}";
+                }
 
                 char uniq_s[70];
                 if (Mqtt::entity_format() == Mqtt::entityFormat::MULTI_SHORT) {

@@ -149,7 +149,7 @@ class Boiler : public EMSdevice {
     char     lastCode_[55];      // last error code
     char     serviceCode_[4];    // 3 character status/service code
     uint16_t serviceCodeNumber_; // error/service code
-    uint32_t lastCodeDate_ = 0; // last code date
+    uint32_t lastCodeDate_ = 0;  // last code date
     uint8_t  emergencyOps_;
     uint8_t  emergencyTemp_;
     uint16_t headertemp_; // see #1317
