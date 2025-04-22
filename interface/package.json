@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.26.10",
-    "@eslint/js": "^9.25.0",
+    "@eslint/js": "^9.25.1",
     "@preact/compat": "^18.3.1",
     "@preact/preset-vite": "^2.10.1",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
@@ -51,12 +51,12 @@
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "concurrently": "^9.1.2",
-    "eslint": "^9.25.0",
+    "eslint": "^9.25.1",
     "eslint-config-prettier": "^10.1.2",
     "prettier": "^3.5.3",
     "rollup-plugin-visualizer": "^5.14.0",
     "terser": "^5.39.0",
-    "typescript-eslint": "8.30.1",
+    "typescript-eslint": "8.31.0",
     "vite": "^6.3.2",
     "vite-plugin-imagemin": "^0.6.1",
     "vite-tsconfig-paths": "^5.1.4"
