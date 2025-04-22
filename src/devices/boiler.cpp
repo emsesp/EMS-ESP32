@@ -3161,7 +3161,7 @@ bool Boiler::set_auxLimit(const char * value, const int8_t id) {
 bool Boiler::set_auxHeaterSource(const char * value, const int8_t id) {
     uint8_t v;
     if (Helpers::value2enum(value, v, FL_(enum_auxHeaterSource))) {
-        write_command(0x491, 0, v ? 1 : 0, 0x491);
+        write_command(0x491, 0, v, 0x491);
         return true;
     }
     return false;
