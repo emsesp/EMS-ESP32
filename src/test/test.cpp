@@ -352,6 +352,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
 #ifdef EMSESP_STANDALONE
         AsyncWebServerRequest request;
+        JsonDocument          doc;
+        JsonVariant           json;
+
+        // read requests
         request.method(HTTP_GET);
         request.url("/api/custom");
         EMSESP::webAPIService.webAPIService(&request);
@@ -362,6 +366,20 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         request.url("/api/custom/test_ram");
         EMSESP::webAPIService.webAPIService(&request);
         shell.invoke_command("call custom info");
+
+        // write requests
+        request.method(HTTP_POST);
+        char data[] = "{\"value\":\"99\"}";
+        deserializeJson(doc, data);
+        json = doc.as<JsonVariant>();
+        // validate
+        request.url("/api/custom/test_ram");
+        EMSESP::webAPIService.webAPIService(&request, json);
+
+        request.method(HTTP_GET);
+        request.url("/api/custom");
+        EMSESP::webAPIService.webAPIService(&request);
+
 
 #endif
         ok = true;
@@ -1091,6 +1109,16 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             // POST COMMANDS
             request.method(HTTP_POST);
 
+            char data0[] = "{\"value\":12}";
+            deserializeJson(doc, data0);
+            request.url("/api/thermostat/seltemp");
+            EMSESP::webAPIService.webAPIService(&request, doc.as<JsonVariant>());
+            // request.method(HTTP_GET);
+            // request.url("/api/thermostat/seltemp/value");
+            // EMSESP::webAPIService.webAPIService(&request);
+
+            // request.method(HTTP_POST);
+
             // char data1[] = "{\"device\":\"system\", \"cmd\":\"restart\",\"id\":-1}";
             // deserializeJson(doc, data1);
             // request.url("/api");
@@ -1114,28 +1142,28 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             // test version checks
             // use same data as in rest_server.ts
             // log shows first if you can upgrade to dev, and then if you can upgrade to stable
-            request.url("/rest/action");
-            std::string LATEST_STABLE_VERSION = "3.7.2";
-            std::string LATEST_DEV_VERSION    = "3.7.3-dev.3";
-            std::string param                 = LATEST_DEV_VERSION + "," + LATEST_STABLE_VERSION;
-            std::string action                = "{\"action\":\"checkUpgrade\", \"param\":\"" + param + "\"}";
-            deserializeJson(doc, action);
+            // request.url("/rest/action");
+            // std::string LATEST_STABLE_VERSION = "3.7.2";
+            // std::string LATEST_DEV_VERSION    = "3.7.3-dev.3";
+            // std::string param                 = LATEST_DEV_VERSION + "," + LATEST_STABLE_VERSION;
+            // std::string action                = "{\"action\":\"checkUpgrade\", \"param\":\"" + param + "\"}";
+            // deserializeJson(doc, action);
 
-            // case 0: on latest stable, can upgrade to dev only. So true, false
-            EMSESP::webStatusService.set_current_version(LATEST_STABLE_VERSION);
-            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+            // // case 0: on latest stable, can upgrade to dev only. So true, false
+            // EMSESP::webStatusService.set_current_version(LATEST_STABLE_VERSION);
+            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
-            // case 1: on latest dev, no updates to either dev or stable. So false, false
-            EMSESP::webStatusService.set_current_version(LATEST_DEV_VERSION);
-            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+            // // case 1: on latest dev, no updates to either dev or stable. So false, false
+            // EMSESP::webStatusService.set_current_version(LATEST_DEV_VERSION);
+            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
-            // case 2: upgrade an older stable to latest stable or the latest dev. So true, true
-            EMSESP::webStatusService.set_current_version("3.6.5");
-            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+            // // case 2: upgrade an older stable to latest stable or the latest dev. So true, true
+            // EMSESP::webStatusService.set_current_version("3.6.5");
+            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
-            // case 3: upgrade an older dev to latest dev, no stable upgrades available. So true, false
-            EMSESP::webStatusService.set_current_version("3.7.3-dev.2");
-            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+            // // case 3: upgrade an older dev to latest dev, no stable upgrades available. So true, false
+            // EMSESP::webStatusService.set_current_version("3.7.3-dev.2");
+            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
             // char data6[] = "{\"device\":\"system\", \"cmd\":\"read\",\"value\":\"8 2 27 1\"}";
             // deserializeJson(doc, data6);

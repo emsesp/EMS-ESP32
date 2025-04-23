@@ -666,6 +666,7 @@ bool WebCustomEntityService::get_value(std::shared_ptr<const Telegram> telegram)
 }
 
 // hard coded tests
+// add the entity and also add the command for writeable entities
 #ifdef EMSESP_TEST
 void WebCustomEntityService::test() {
     update([&](WebCustomEntity & webCustomEntity) {
@@ -685,6 +686,14 @@ void WebCustomEntityService::test() {
         entityItem.writeable  = true;
         entityItem.data       = "70";
         webCustomEntity.customEntityItems.push_back(entityItem);
+        Command::add(
+            EMSdevice::DeviceType::CUSTOM,
+            webCustomEntity.customEntityItems.back().name.c_str(),
+            [webCustomEntity](const char * value, const int8_t id) {
+                return EMSESP::webCustomEntityService.command_setvalue(value, id, webCustomEntity.customEntityItems.back().name.c_str());
+            },
+            FL_(entity_cmd),
+            CommandFlag::ADMIN_ONLY);
 
         // test 2
         entityItem.id         = 2;
@@ -713,6 +722,14 @@ void WebCustomEntityService::test() {
         entityItem.writeable  = true;
         entityItem.data       = "14";
         webCustomEntity.customEntityItems.push_back(entityItem);
+        Command::add(
+            EMSdevice::DeviceType::CUSTOM,
+            webCustomEntity.customEntityItems.back().name.c_str(),
+            [webCustomEntity](const char * value, const int8_t id) {
+                return EMSESP::webCustomEntityService.command_setvalue(value, id, webCustomEntity.customEntityItems.back().name.c_str());
+            },
+            FL_(entity_cmd),
+            CommandFlag::ADMIN_ONLY);
 
         // test 4
         entityItem.id         = 4;
@@ -728,6 +745,14 @@ void WebCustomEntityService::test() {
         entityItem.data       = "14";
         entityItem.value      = 12;
         webCustomEntity.customEntityItems.push_back(entityItem);
+        Command::add(
+            EMSdevice::DeviceType::CUSTOM,
+            webCustomEntity.customEntityItems.back().name.c_str(),
+            [webCustomEntity](const char * value, const int8_t id) {
+                return EMSESP::webCustomEntityService.command_setvalue(value, id, webCustomEntity.customEntityItems.back().name.c_str());
+            },
+            FL_(entity_cmd),
+            CommandFlag::ADMIN_ONLY);
 
         return StateUpdateResult::CHANGED; // persist the changes
     });

@@ -74,6 +74,20 @@ Authorization: Bearer {{token}}
 
 GET {{host}}/api/boiler/commands
 
+###
+
+POST {{host}}/api/custom/test_custom
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "value" : 22.0
+}
+
+###
+
+GET {{host}}/api/custom/test_custom
+
 #
 # Test on dev
 #
