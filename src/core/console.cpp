@@ -670,9 +670,9 @@ void EMSESPShell::end_of_transmission() {
 void EMSESPShell::main_help_function(Shell & shell, const std::vector<std::string> & arguments) {
     shell.println();
 #if defined(EMSESP_DEBUG)
-    shell.printfln("%s%sEMS-ESP version %s%s", COLOR_BRIGHT_GREEN, COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_RESET);
-#else
     shell.printfln("%s%sEMS-ESP version %s%s (DEBUG)", COLOR_BRIGHT_GREEN, COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_RESET);
+#else
+    shell.printfln("%s%sEMS-ESP version %s%s", COLOR_BRIGHT_GREEN, COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_RESET);
 #endif
     shell.println();
     shell.print_all_available_commands();
