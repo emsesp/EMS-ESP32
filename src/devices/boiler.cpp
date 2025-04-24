@@ -1059,12 +1059,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(DeviceValueTAG::TAG_DHW1, &wwWorkM_, DeviceValueType::TIME, FL_(wwWorkM), DeviceValueUOM::MINUTES);
 
     // fetch some initial data
-    EMSESP::send_read_request(0x10, device_id); // read last errorcode on start (only published on errors)
-    EMSESP::send_read_request(0x11, device_id); // read last errorcode on start (only published on errors)
-    EMSESP::send_read_request(0x15, device_id); // read maintenance data on start (only published on change)
-    EMSESP::send_read_request(0x1C, device_id); // read maintenance status on start (only published on change)
-    EMSESP::send_read_request(0xC2, device_id); // read last errorcode on start (only published on errors)
-    EMSESP::send_read_request(0xC6, device_id); // read last errorcode on start (only published on errors)
+    EMSESP::send_read_request(0x10, device_id, 0, 11); // read last errorcode on start (only published on errors)
+    EMSESP::send_read_request(0x11, device_id, 0, 11); // read last errorcode on start (only published on errors)
+    EMSESP::send_read_request(0x15, device_id);        // read maintenance data on start (only published on change)
+    EMSESP::send_read_request(0x1C, device_id);        // read maintenance status on start (only published on change)
+    EMSESP::send_read_request(0xC2, device_id, 0, 20); // read last errorcode on start (not broadcasted)
+    EMSESP::send_read_request(0xC6, device_id, 0, 21); // read last errorcode on start (not broadcasted)
 
 
     if (model() != EMSdevice::EMS_DEVICE_FLAG_HEATPUMP && model() != EMSdevice::EMS_DEVICE_FLAG_HIU) {
@@ -1835,8 +1835,8 @@ void Boiler::process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegr
 
 // 0xBF
 void Boiler::process_ErrorMessage(std::shared_ptr<const Telegram> telegram) {
-    EMSESP::send_read_request(0xC2, device_id()); // read last errorcode
-    EMSESP::send_read_request(0xC6, device_id()); // read last errorcode
+    EMSESP::send_read_request(0xC2, device_id(), 0, 20); // read last errorcode
+    EMSESP::send_read_request(0xC6, device_id(), 0, 21); // read last errorcode
 }
 
 // 0x10, 0x11
