@@ -24,4 +24,4 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 
 ## Changed
 
--
+- show console log with ISO date/time [#2533](https://github.com/emsesp/EMS-ESP32/discussions/2533)
