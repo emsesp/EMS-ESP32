@@ -124,18 +124,6 @@ void WebLogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
     }
 
     log_messages_.emplace_back(++log_message_id_, std::move(message));
-
-    EMSESP::esp32React.getNTPSettingsService()->read([&](NTPSettings & settings) {
-        if (!settings.enabled || (time(nullptr) < 1500000000L)) {
-            time_offset_ = 0;
-        } else {
-            uint32_t offset = time(nullptr) - uuid::get_uptime_sec();
-            // if NTP is more that 1 sec apart, correct setting
-            if (time_offset_ < offset - 1 || time_offset_ > offset + 1) {
-                time_offset_ = offset;
-            }
-        }
-    });
 }
 
 // dumps out the contents of log buffer to shell console
@@ -151,7 +139,8 @@ void WebLogService::show(Shell & shell) {
     for (const auto & message : log_messages_) {
         log_message_id_tail_ = message.id_;
 
-        shell.print(uuid::log::format_timestamp_ms(message.content_->uptime_ms, 3));
+        char time_string[26];
+        shell.print(messagetime(time_string, message.content_->uptime_ms, sizeof(time_string)));
         shell.printf(" %c %lu: [%s] ", uuid::log::format_level_char(message.content_->level), message.id_, message.content_->name);
 
         if ((message.content_->level == uuid::log::Level::ERR) || (message.content_->level == uuid::log::Level::WARNING)) {
@@ -204,12 +193,13 @@ void WebLogService::loop() {
 
 // convert time to real offset
 char * WebLogService::messagetime(char * out, const uint64_t t, const size_t bufsize) {
-    if (!time_offset_) {
+    time_t offset = time(nullptr) - uuid::get_uptime_sec();
+    if (offset < 1500000000L) {
         strlcpy(out, uuid::log::format_timestamp_ms(t, 3).c_str(), bufsize);
     } else {
-        time_t t1 = time_offset_ + t / 1000ULL;
+        time_t t1 = offset + (time_t)(t / 1000);
         char   timestr[bufsize];
-        strftime(timestr, bufsize, "%F %T", localtime(&t1));
+        strftime(timestr, bufsize, "%FT%T", localtime(&t1));
         snprintf(out, bufsize, "%s.%03d", timestr, (uint16_t)(t % 1000));
     }
     return out;
