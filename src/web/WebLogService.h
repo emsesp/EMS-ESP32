@@ -70,8 +70,7 @@ class WebLogService : public uuid::log::Handler {
     unsigned long                log_message_id_       = 0;                // The next identifier to use for queued log messages
     unsigned long                log_message_id_tail_  = 0;                // last event shown on the screen after fetch
     std::deque<QueuedLogMessage> log_messages_;                            // Queued log messages, in the order they were received
-    time_t                       time_offset_ = 0;
-    bool                         compact_     = true;
+    bool                         compact_ = true;
 };
 
 } // namespace emsesp
