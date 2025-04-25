@@ -42,9 +42,7 @@ jobs:
 
       - name: Build WebUI
         run: |
-          cd mock-api
-          yarn install
-          cd ../interface
+          cd interface
           yarn install
           yarn typesafe-i18n --no-watch
           sed -i "s/= 'pl'/= 'en'/" ./src/i18n/i18n-util.ts
