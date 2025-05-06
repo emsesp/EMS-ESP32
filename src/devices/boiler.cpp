@@ -1043,6 +1043,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(DeviceValueTAG::TAG_DHW1, &wwTempOK_, DeviceValueType::BOOL, FL_(wwTempOK), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DHW1, &wwActive_, DeviceValueType::BOOL, FL_(wwActive), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DHW1, &ww3wayValve_, DeviceValueType::BOOL, FL_(ww3wayValve), DeviceValueUOM::NONE);
+    register_device_value(DeviceValueTAG::TAG_DHW1, &wwChargePump_, DeviceValueType::BOOL, FL_(wwChargePump), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DHW1,
                           &wwMixerTemp_,
                           DeviceValueType::UINT16,
@@ -1297,6 +1298,7 @@ void Boiler::process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram) {
         has_update(curBurnPow_, curBurnPow);
 
         check_active(); // do a quick check to see if the hot water or heating is active
+        has_bitupdate(telegram, wwChargePump_, 23, 0);
     }
 }
 
@@ -1348,11 +1350,11 @@ void Boiler::process_UBAParameterWW(std::shared_ptr<const Telegram> telegram) {
     // has_bitupdate(telegram, wwEquipt_,0,3);  //  8=boiler has ww
     has_update(telegram, wwActivated_, 1); // 0xFF means on
     has_update(telegram, wwSelTemp_, 2);
-    has_update(telegram, wwHystOn_, 3);         // Hyst on (default -5)
-    has_update(telegram, wwHystOff_, 4);        // Hyst off (default -1)
-    has_update(telegram, wwFlowTempOffset_, 5); // default 40
-    has_update(telegram, wwCircPump_, 6);       // 0xFF means on
-    has_update(telegram, wwCircMode_, 7);       // 0=off, 1=1x3min 6=6x3min 7=continuous
+    has_update(telegram, wwHystOn_, 3);             // Hyst on (default -5)
+    has_update(telegram, wwChargeOptimization_, 4); // bool
+    has_update(telegram, wwFlowTempOffset_, 5);     // default 40
+    has_update(telegram, wwCircPump_, 6);           // 0xFF means on
+    has_update(telegram, wwCircMode_, 7);           // 0=off, 1=1x3min 6=6x3min 7=continuous
     has_update(telegram, wwDisinfectionTemp_, 8);
     has_bitupdate(telegram, wwChargeType_, 10, 0); // 0 = charge pump, 0xff = 3-way valve
 

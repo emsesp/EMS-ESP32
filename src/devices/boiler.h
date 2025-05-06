@@ -81,6 +81,7 @@ class Boiler : public EMSdevice {
     uint8_t  wwTempOK_;             // DHW temperature ok on/off
     uint8_t  wwActive_;             //
     uint8_t  ww3wayValve_;          // 3-way valve on WW
+    uint8_t  wwChargePump_;
     uint8_t  wwFlowTempOffset_;     // Boiler offset for ww heating
     uint8_t  wwMaxPower_;           // DHW maximum power
     uint8_t  wwMaxTemp_;            // DHW maximum temperature
