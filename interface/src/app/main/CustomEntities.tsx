@@ -76,6 +76,7 @@ const CustomEntities = () => {
       ei.factor !== ei.o_factor ||
       ei.value_type !== ei.o_value_type ||
       ei.writeable !== ei.o_writeable ||
+      ei.hide !== ei.o_hide ||
       ei.deleted !== ei.o_deleted ||
       (ei.value || '') !== (ei.o_value || '')
     );
@@ -147,6 +148,7 @@ const CustomEntities = () => {
           factor: condensed_ei.factor,
           uom: condensed_ei.uom,
           writeable: condensed_ei.writeable,
+          hide: condensed_ei.hide,
           value_type: condensed_ei.value_type,
           value: condensed_ei.value
         }))
@@ -209,6 +211,7 @@ const CustomEntities = () => {
       value_type: item.value_type,
       writeable: item.writeable,
       deleted: false,
+      hide: item.hide,
       value: item.value
     });
     setDialogOpen(true);

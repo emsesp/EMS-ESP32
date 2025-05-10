@@ -72,7 +72,9 @@ class Helpers {
     static bool value2bool(const char * value, bool & value_b);
     static bool value2string(const char * value, std::string & value_s);
     static bool value2enum(const char * value, uint8_t & value_ui, const char * const ** strs);
+    static bool value2enum(const char * value, uint8_t & value_ui, const char * const ** strs, const std::vector<uint8_t> & mask);
     static bool value2enum(const char * value, uint8_t & value_ui, const char * const * strs);
+    static bool value2enum(const char * value, uint8_t & value_ui, const char * const * strs, const std::vector<uint8_t> & mask);
     static bool value2temperature(const char * value, float & value_f, bool relative = false);
     static bool value2temperature(const char * value, int & value_i, const bool relative = false, const int min = -2147483648, const int max = 2147483647);
 

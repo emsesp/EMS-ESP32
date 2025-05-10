@@ -59,6 +59,7 @@ void WebCustomEntity::read(WebCustomEntity & webEntity, JsonObject root) {
         ei["uom"]        = entityItem.value_type == DeviceValueType::BOOL ? 0 : entityItem.uom;
         ei["value_type"] = entityItem.value_type;
         ei["writeable"]  = entityItem.writeable;
+        ei["hide"]       = entityItem.hide;
         EMSESP::webCustomEntityService.render_value(ei, entityItem, true, true);
     }
 }
@@ -94,6 +95,7 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
             entityItem.uom        = ei["uom"];
             entityItem.value_type = ei["value_type"];
             entityItem.writeable  = ei["writeable"];
+            entityItem.hide       = ei["hide"] | false;
             entityItem.data       = ei["value"].as<std::string>();
             if (entityItem.ram == 1) {
                 entityItem.device_id  = 0;
@@ -295,7 +297,9 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
     if (!strlen(cmd) || !strcmp(cmd, F_(values)) || !strcmp(cmd, F_(info))) {
         // list all names
         for (CustomEntityItem & entity : *customEntityItems_) {
-            render_value(output, entity);
+            if (!entity.hide) {
+                render_value(output, entity);
+            }
         }
         return true;
     }
@@ -346,7 +350,7 @@ void WebCustomEntityService::get_value_json(JsonObject output, CustomEntityItem 
 
 // publish single value
 void WebCustomEntityService::publish_single(CustomEntityItem & entity) {
-    if (!Mqtt::enabled() || !Mqtt::publish_single()) {
+    if (!Mqtt::enabled() || !Mqtt::publish_single() || entity.hide) {
         return;
     }
 
@@ -387,6 +391,9 @@ void WebCustomEntityService::publish(const bool force) {
     bool         ha_created = ha_registered_;
 
     for (CustomEntityItem & entityItem : *customEntityItems_) {
+        if (entityItem.hide) {
+            continue;
+        }
         render_value(output, entityItem);
         // create HA config
         if (Mqtt::ha_enabled() && !ha_registered_) {
@@ -445,6 +452,9 @@ void WebCustomEntityService::publish(const bool force) {
 
             Mqtt::add_ha_sections_to_doc(F_(custom), stat_t, config, !ha_created, val_cond);
 
+            if (Mqtt::ha_optimistic()) {
+                config["optimistic"] = true;
+            }
             ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
         }
     }
@@ -470,7 +480,7 @@ uint8_t WebCustomEntityService::count_entities() {
 
     for (CustomEntityItem & entity : *customEntityItems_) {
         render_value(output, entity);
-        if (output[entity.name].is<JsonVariantConst>() || entity.writeable) {
+        if (!entity.hide && (output[entity.name].is<JsonVariantConst>() || entity.writeable)) {
             count++;
         }
     }
@@ -484,6 +494,9 @@ void WebCustomEntityService::generate_value_web(JsonObject output, const bool is
     uint8_t   index = 0;
 
     for (const CustomEntityItem & entity : *customEntityItems_) {
+        if (entity.hide) {
+            continue;
+        }
         bool       include  = false;
         JsonObject root_obj = nodes.add<JsonObject>(); // create the object, we know there is a value
 

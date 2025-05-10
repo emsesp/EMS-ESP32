@@ -197,6 +197,19 @@ class EMSdevice {
         }
     }
 
+    void has_enumupdate(std::shared_ptr<const Telegram> telegram,
+                        uint8_t &                       value,
+                        const uint8_t                   index,
+                        const std::vector<uint8_t> &    maskIn,
+                        const std::vector<uint8_t> &    maskOut) {
+        uint8_t val = value < maskIn.size() ? maskIn[value] : EMS_VALUE_UINT8_NOTSET;
+        if (telegram->read_value(val, index)) {
+            value       = val < maskOut.size() ? maskOut[val] : EMS_VALUE_UINT8_NOTSET;
+            has_update_ = true;
+            publish_value((void *)&value);
+        }
+    }
+
     template <typename Value>
     void has_update(std::shared_ptr<const Telegram> telegram, Value & value, const uint8_t index, uint8_t s = 0) {
         if (telegram->read_value(value, index, s)) {
@@ -434,9 +447,10 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_EMS      = 1;
     static constexpr uint8_t EMS_DEVICE_FLAG_EMSPLUS  = 2;
     static constexpr uint8_t EMS_DEVICE_FLAG_HT3      = 3;
-    static constexpr uint8_t EMS_DEVICE_FLAG_HEATPUMP = 4;
-    static constexpr uint8_t EMS_DEVICE_FLAG_HYBRID   = 5;
-    static constexpr uint8_t EMS_DEVICE_FLAG_HIU      = 6;
+    static constexpr uint8_t EMS_DEVICE_FLAG_HYBRID   = 4;
+    static constexpr uint8_t EMS_DEVICE_FLAG_HIU      = 5;
+    static constexpr uint8_t EMS_DEVICE_FLAG_HEATPUMP = 8; // use bit for subtypes
+    static constexpr uint8_t EMS_DEVICE_FLAG_CS6800   = 9; // subtype of heatpump
 
     // Solar Module
     static constexpr uint8_t EMS_DEVICE_FLAG_SM10  = 1;

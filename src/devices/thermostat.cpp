@@ -1275,30 +1275,14 @@ void Thermostat::process_RC300WWmode(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, dhw->wwCircPump_, 1); // FF=off, 0=on ?
 
     if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400 || model() == EMSdevice::EMS_DEVICE_FLAG_HMC310) {
-        const uint8_t modes[] = {0, 5, 1, 2, 4}; // off, eco+, eco, comfort, auto
-        uint8_t       wwmode  = dhw->wwMode_ < sizeof(modes) ? modes[dhw->wwMode_] : EMS_VALUE_UINT8_NOTSET;
-        telegram->read_value(wwmode, 2);
-        const uint8_t modes1[] = {0, 2, 3, 0, 4, 1};
-        has_update(dhw->wwMode_, wwmode < sizeof(modes1) ? modes1[wwmode] : EMS_VALUE_UINT8_NOTSET);
+        has_enumupdate(telegram, dhw->wwMode_, 2, {0, 5, 1, 2, 4}, {0, 2, 3, 0, 4, 1});
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) {
         // https://github.com/emsesp/EMS-ESP32/pull/1722#discussion_r1582823521
-        const uint8_t modes[] = {1, 2, 5}; // normal, comfort, eco+
-        uint8_t       wwmode  = dhw->wwMode_ < sizeof(modes) ? modes[dhw->wwMode_] : EMS_VALUE_UINT8_NOTSET;
-        telegram->read_value(wwmode, 2);
-        const uint8_t modes1[] = {0, 0, 1, 0, 0, 2}; // 0=normal (1), 1=comfort(2), 2=eco+(5)
-        has_update(dhw->wwMode_, wwmode < sizeof(modes1) ? modes1[wwmode] : EMS_VALUE_UINT8_NOTSET);
+        has_enumupdate(telegram, dhw->wwMode_, 2, {1, 2, 5}, {0, 0, 1, 0, 0, 2}); // normal, comfort, eco+
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_CR120) {
-        const uint8_t modes[] = {1, 2, 4}; //// 0=normal (1), 1=comfort(2), 2=auto(4)
-        uint8_t       wwmode  = dhw->wwMode_ < sizeof(modes) ? modes[dhw->wwMode_] : EMS_VALUE_UINT8_NOTSET;
-        telegram->read_value(wwmode, 2);
-        const uint8_t modes1[] = {0, 0, 1, 0, 2, 0};
-        has_update(dhw->wwMode_, wwmode < sizeof(modes1) ? modes1[wwmode] : EMS_VALUE_UINT8_NOTSET);
+        has_enumupdate(telegram, dhw->wwMode_, 2, {1, 2, 4}, {0, 0, 1, 0, 2, 0}); // normal, comfort, auto
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
-        const uint8_t modes[] = {0, 2, 3}; //// 0=off(0), 1=on(2), 2=auto(3)
-        uint8_t       wwmode  = dhw->wwMode_ < sizeof(modes) ? modes[dhw->wwMode_] : EMS_VALUE_UINT8_NOTSET;
-        telegram->read_value(wwmode, 2);
-        const uint8_t modes1[] = {0, 0, 1, 2, 0, 0};
-        has_update(dhw->wwMode_, wwmode < sizeof(modes1) ? modes1[wwmode] : EMS_VALUE_UINT8_NOTSET);
+        has_enumupdate(telegram, dhw->wwMode_, 2, {0, 2, 3}, {0, 0, 1, 2, 0, 0}); // normal, on, auto
     } else {
         has_update(telegram, dhw->wwMode_, 2); // 0=off, 1=low, 2=high, 3=auto, 4=own prog
     }
@@ -2294,29 +2278,25 @@ bool Thermostat::set_wwmode(const char * value, const int8_t id) {
         }
         write_command(0xB0, 2, set, 0xB0);
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400 || model() == EMSdevice::EMS_DEVICE_FLAG_HMC310) {
-        if (!Helpers::value2enum(value, set, FL_(enum_wwMode4))) { // off, eco+, eco, comfort, auto
+        if (!Helpers::value2enum(value, set, FL_(enum_wwMode4), {0, 5, 1, 2, 4})) { // off, eco+, eco, comfort, auto
             return false;
         }
-        const uint8_t modes[] = {0, 5, 1, 2, 4};
-        write_command(0x02F5 + dhw->offset(), 2, modes[set], 0x02F5 + dhw->offset());
+        write_command(0x02F5 + dhw->offset(), 2, set, 0x02F5 + dhw->offset());
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_CR120) {
-        if (!Helpers::value2enum(value, set, FL_(enum_wwMode6))) { // normal, comfort, auto
+        if (!Helpers::value2enum(value, set, FL_(enum_wwMode6), {0, 2, 4})) { // normal, comfort, auto
             return false;
         }
-        const uint8_t modes[] = {0, 2, 4};
-        write_command(0x02F5 + dhw->offset(), 2, modes[set], 0x02F5 + dhw->offset());
+        write_command(0x02F5 + dhw->offset(), 2, set, 0x02F5 + dhw->offset());
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
-        if (!Helpers::value2enum(value, set, FL_(enum_wwMode2))) { // off, on, auto
+        if (!Helpers::value2enum(value, set, FL_(enum_wwMode2), {0, 2, 3})) { // off, on, auto
             return false;
         }
-        const uint8_t modes[] = {0, 2, 3};
-        write_command(0x02F5 + dhw->offset(), 2, modes[set], 0x02F5 + dhw->offset());
+        write_command(0x02F5 + dhw->offset(), 2, set, 0x02F5 + dhw->offset());
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) { // Rego3000 - https://github.com/emsesp/EMS-ESP32/issues/1692
-        if (!Helpers::value2enum(value, set, FL_(enum_wwMode5))) {
+        if (!Helpers::value2enum(value, set, FL_(enum_wwMode5), {1, 2, 5})) {
             return false;
         }
-        const uint8_t modes[] = {1, 2, 5};
-        write_command(0x02F5 + dhw->offset(), 2, modes[set], 0x02F5 + dhw->offset());
+        write_command(0x02F5 + dhw->offset(), 2, set, 0x02F5 + dhw->offset());
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC300) {
         if (!Helpers::value2enum(value, set, FL_(enum_wwMode))) {
             return false;

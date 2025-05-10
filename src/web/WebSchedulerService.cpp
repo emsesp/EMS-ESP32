@@ -154,8 +154,6 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
         return true;
     }
 
-    const char * attribute_s = Command::get_attribute(cmd);
-
     if (!strcmp(cmd, F_(entities))) {
         uint8_t i = 0;
         char    name[30];
@@ -166,6 +164,7 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
         return true;
     }
 
+    const char * attribute_s = Command::get_attribute(cmd);
     for (const ScheduleItem & scheduleItem : *scheduleItems_) {
         if (Helpers::toLower(scheduleItem.name) == cmd) {
             get_value_json(output, scheduleItem);
@@ -291,6 +290,9 @@ void WebSchedulerService::publish(const bool force) {
                 Mqtt::add_ha_bool(config);
                 Mqtt::add_ha_sections_to_doc(F_(scheduler), stat_t, config, !ha_created, val_cond);
 
+                if (Mqtt::ha_optimistic()) {
+                    config["optimistic"] = true;
+                }
                 ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
             }
         }

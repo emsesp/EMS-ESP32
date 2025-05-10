@@ -34,6 +34,9 @@ class Boiler : public EMSdevice {
     inline uint8_t model() const {
         return (flags() & 0x0F);
     }
+    inline bool isHeatPump() const {
+        return flags() & 0x08;
+    }
 
     void check_active();
     void store_energy();
@@ -45,6 +48,7 @@ class Boiler : public EMSdevice {
     static constexpr uint8_t  EMS_TYPE_UBAFunctionTest    = 0x1D;
     static constexpr uint8_t  EMS_TYPE_UBAFlags           = 0x35;
     static constexpr uint8_t  EMS_TYPE_UBASetPoints       = 0x1A;
+    static constexpr uint16_t EMS_TYPE_UBASetPoints2      = 0x2E0;
     static constexpr uint8_t  EMS_TYPE_UBAParameters      = 0x16;
     static constexpr uint8_t  EMS_TYPE_UBAParametersPlus  = 0xE6;
     static constexpr uint8_t  EMS_TYPE_UBAParameterWWPlus = 0xEA;
@@ -82,12 +86,12 @@ class Boiler : public EMSdevice {
     uint8_t  wwActive_;             //
     uint8_t  ww3wayValve_;          // 3-way valve on WW
     uint8_t  wwChargePump_;
-    uint8_t  wwFlowTempOffset_;     // Boiler offset for ww heating
-    uint8_t  wwMaxPower_;           // DHW maximum power
-    uint8_t  wwMaxTemp_;            // DHW maximum temperature
-    uint32_t wwStarts_;             // DHW starts
-    uint32_t wwStartsHp_;           // DHW starts Heatpump
-    uint32_t wwWorkM_;              // DHW minutes
+    uint8_t  wwFlowTempOffset_; // Boiler offset for ww heating
+    uint8_t  wwMaxPower_;       // DHW maximum power
+    uint8_t  wwMaxTemp_;        // DHW maximum temperature
+    uint32_t wwStarts_;         // DHW starts
+    uint32_t wwStartsHp_;       // DHW starts Heatpump
+    uint32_t wwWorkM_;          // DHW minutes
     int8_t   wwHystOn_;
     int8_t   wwHystOff_;
     uint16_t wwMixerTemp_;     // mixing temperature

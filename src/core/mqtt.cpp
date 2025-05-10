@@ -40,6 +40,7 @@ uint32_t    Mqtt::publish_time_heartbeat_;
 bool        Mqtt::mqtt_enabled_;
 uint8_t     Mqtt::entity_format_;
 bool        Mqtt::ha_enabled_;
+bool        Mqtt::ha_optimistic_;
 uint8_t     Mqtt::nested_format_;
 std::string Mqtt::discovery_prefix_;
 uint8_t     Mqtt::discovery_type_;
@@ -340,6 +341,7 @@ void Mqtt::load_settings() {
         mqtt_retain_        = mqttSettings.mqtt_retain;
         mqtt_enabled_       = mqttSettings.enabled;
         ha_enabled_         = mqttSettings.ha_enabled;
+        ha_optimistic_      = mqttSettings.ha_optimistic;
         nested_format_      = mqttSettings.nested_format;
         publish_single_     = mqttSettings.publish_single;
         publish_single2cmd_ = mqttSettings.publish_single2cmd;
@@ -1114,6 +1116,9 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     doc["dev"] = dev_json;
 
+    if (ha_optimistic_) {
+        doc["optimistic"] = true;
+    }
     return queue_ha(topic, doc.as<JsonObject>());
 }
 
@@ -1343,6 +1348,9 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
     // device name must be different to the entity name, take the ids value we just created
     add_ha_sections_to_doc("thermostat", topic_t, doc, false, seltemp_cond, has_roomtemp ? currtemp_cond : nullptr, hc_mode_cond);
 
+    if (ha_optimistic_) {
+        doc["optimistic"] = true;
+    }
     return queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 }
 

@@ -244,6 +244,7 @@ void MqttSettings::read(MqttSettings & settings, JsonObject root) {
     root["mqtt_qos"]                = settings.mqtt_qos;
     root["mqtt_retain"]             = settings.mqtt_retain;
     root["ha_enabled"]              = settings.ha_enabled;
+    root["ha_optimistic"]           = settings.ha_optimistic;
     root["nested_format"]           = settings.nested_format;
     root["discovery_prefix"]        = settings.discovery_prefix;
     root["discovery_type"]          = settings.discovery_type;
@@ -284,6 +285,7 @@ StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings)
     newSettings.publish_time_heartbeat  = static_cast<uint16_t>(root["publish_time_heartbeat"] | EMSESP_DEFAULT_PUBLISH_HEARTBEAT);
 
     newSettings.ha_enabled         = root["ha_enabled"] | EMSESP_DEFAULT_HA_ENABLED;
+    newSettings.ha_optimistic      = root["ha_optimistic"] | EMSESP_DEFAULT_HA_OPTIMISTIC;
     newSettings.nested_format      = static_cast<uint8_t>(root["nested_format"] | EMSESP_DEFAULT_NESTED_FORMAT);
     newSettings.discovery_prefix   = root["discovery_prefix"] | EMSESP_DEFAULT_DISCOVERY_PREFIX;
     newSettings.discovery_type     = static_cast<uint8_t>(root["discovery_type"] | EMSESP_DEFAULT_DISCOVERY_TYPE);
@@ -342,6 +344,14 @@ StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings)
         if (newSettings.ha_enabled) {
             newSettings.publish_single = false;
         }
+        changed = true;
+    }
+
+    if (newSettings.discovery_type != 0) {
+        newSettings.ha_optimistic = false;
+    }
+    if (newSettings.ha_optimistic != settings.ha_optimistic) {
+        emsesp::EMSESP::mqtt_.ha_optimistic(newSettings.ha_optimistic);
         changed = true;
     }
 

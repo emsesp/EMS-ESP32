@@ -143,7 +143,8 @@ export const readCustomEntities = () =>
         o_name: ei.name,
         o_writeable: ei.writeable,
         o_value: ei.value,
-        o_deleted: ei.deleted
+        o_deleted: ei.deleted,
+        o_hide: ei.hide
       }));
     }
   });

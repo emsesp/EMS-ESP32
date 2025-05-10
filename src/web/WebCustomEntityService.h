@@ -40,6 +40,7 @@ class CustomEntityItem {
     std::string data;
     uint8_t     ram;
     uint8_t *   raw;
+    bool        hide;
 };
 
 class WebCustomEntity {
