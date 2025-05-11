@@ -68,7 +68,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x28, "WeatherComp", true, MAKE_PF_CB(process_WeatherComp));
     }
 
-    if (!isHeatPump()) {
+    if (isHeatPump()) {
         register_telegram_type(0x494, "UBAEnergySupplied", false, MAKE_PF_CB(process_UBAEnergySupplied));
         register_telegram_type(0x495, "UBAInformation", false, MAKE_PF_CB(process_UBAInformation));
         register_telegram_type(0x48D, "HpPower", true, MAKE_PF_CB(process_HpPower));
