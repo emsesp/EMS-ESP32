@@ -452,7 +452,7 @@ const MqttSettings = () => {
           <Grid>
             <TextField
               name="publish_time_sensor"
-              label={LL.TEMP_SENSORS()}
+              label={LL.SENSORS()}
               variant="outlined"
               value={numberValue(data.publish_time_sensor)}
               type="number"
