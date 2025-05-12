@@ -452,7 +452,7 @@ void WebCustomEntityService::publish(const bool force) {
 
             Mqtt::add_ha_sections_to_doc(F_(custom), stat_t, config, !ha_created, val_cond);
 
-            if (Mqtt::ha_optimistic()) {
+            if (Mqtt::ha_optimistic() && (entityItem.writeable || entityItem.ram > 0)) {
                 config["optimistic"] = true;
             }
             ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());

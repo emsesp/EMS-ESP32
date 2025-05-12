@@ -1116,7 +1116,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     doc["dev"] = dev_json;
 
-    if (ha_optimistic_) {
+    if (ha_optimistic_ && has_cmd) {
         doc["optimistic"] = true;
     }
     return queue_ha(topic, doc.as<JsonObject>());
@@ -1406,7 +1406,7 @@ void Mqtt::add_ha_sections_to_doc(const char *   name,
 
     // make local copy of state, as the pointer will get derefenced
     char state[50];
-    strcpy(state, state_t);
+    strlcpy(state, state_t, sizeof(state));
 
     // skip conditional Jinja2 templates if not home assistant
     if (discovery_type() == discoveryType::HOMEASSISTANT) {
