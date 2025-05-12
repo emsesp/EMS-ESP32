@@ -2564,6 +2564,8 @@ bool Boiler::set_ww_chargeOptimization(const char * value, const int8_t id) {
 
     if (is_received(EMS_TYPE_UBAParameterWWPlus)) {
         write_command(EMS_TYPE_UBAParameterWWPlus, 25, v ? 1 : 0, EMS_TYPE_UBAParameterWWPlus);
+    } else {
+        write_command(EMS_TYPE_UBAParameterWW, 4, v ? 0xFF : 0, EMS_TYPE_UBAParameterWW);
     }
 
     return true;
