@@ -249,13 +249,14 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwTempOK), 60, 1), // tempok
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwActive), 61, 1), // active
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(ww3wayValve), 62, 1), // 3wayvalve
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwMixerTemp), 63, 1), // mixertemp
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(cylMiddleTemp), 64, 1), // cylmiddletemp
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwStarts), 65, 2), // starts
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwWorkM), 67, 2), // workm
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(gasMeterWw), 69, 2), // gasmeter
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(nrgWw2), 71, 2), // nrg2
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwValve), 73, 1), // dhwvalve
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwChargePump), 63, 1), // chargepump
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwMixerTemp), 64, 1), // mixertemp
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(cylMiddleTemp), 65, 1), // cylmiddletemp
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwStarts), 66, 2), // starts
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwWorkM), 68, 2), // workm
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(gasMeterWw), 70, 2), // gasmeter
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(nrgWw2), 72, 2), // nrg2
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwValve), 74, 1), // dhwvalve
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(errorCode), 0, 8), // errorcode
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(lastCode), 8, 25), // lastcode
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(dateTime), 33, 13), // datetime

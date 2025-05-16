@@ -90,9 +90,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -128,10 +128,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -208,9 +209,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -246,16 +247,17 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 | 
 
-### CS*800i, Logatherm WLW*
+### CS5800i, CS6800i, WLW176i, WLW186i
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 | 
@@ -374,9 +376,9 @@
 | hpin3opt | input 3 options | string |   | true | DEVICE_DATA | 189 | 8 | 1 | 
 | hpin4 | input 4 state | boolean |   | false | DEVICE_DATA | 197 | 1 | 1 | 
 | hpin4opt | input 4 options | string |   | true | DEVICE_DATA | 198 | 8 | 1 | 
-| maxheatcomp | heat limit compressor | enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 206 | 1 | 1 | 
-| maxheatheat | heat limit heating | enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 207 | 1 | 1 | 
-| dhw.maxheat | heat limit | enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] |   | true | DHW | 14 | 1 | 1 | 
+| maxheatcomp | heat limit compressor | enum [0 kW\|3 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 206 | 1 | 1 | 
+| maxheatheat | heat limit heating | enum [3 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 207 | 1 | 1 | 
+| dhw.maxheat | heat limit | enum [3 kW\|6 kW\|9 kW] |   | true | DHW | 14 | 1 | 1 | 
 | auxheatersource | aux heater source | enum [not installed\|electric heater\|exclusive\|parallel\|hybrid] |   | true | DEVICE_DATA | 208 | 1 | 1 | 
 | pvcooling | cooling only with PV | boolean |   | true | DEVICE_DATA | 209 | 1 | 1 | 
 | auxheateronly | aux heater only | boolean |   | true | DEVICE_DATA | 210 | 1 | 1 | 
@@ -461,10 +463,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 
 ### Cascade CM10
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -537,9 +540,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -575,10 +578,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -655,9 +659,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -693,10 +697,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -773,9 +778,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -811,10 +816,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -891,9 +897,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -929,10 +935,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -1009,9 +1016,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -1047,10 +1054,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -1127,9 +1135,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -1165,10 +1173,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -1245,9 +1254,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -1283,10 +1292,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -1363,9 +1373,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -1401,10 +1411,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -1616,10 +1627,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 
 ### GB*72, Trendline, Cerapur, Greenstar Si
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -1692,9 +1704,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -1730,10 +1742,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -1810,9 +1823,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -1848,10 +1861,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -1928,9 +1942,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -1966,10 +1980,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -2181,10 +2196,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 
 ### Greenstar 30Ri Compact
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -2257,9 +2273,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -2295,10 +2311,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -2309,7 +2326,7 @@
 |-|-|-|-|-|-|-|-|-|
 | netflowtemp | heat network flow temp | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 271 | 1 | 1/10 | 
 | heatvalve | heating valve | uint8 (>=0<=100) | % | false | DEVICE_DATA | 272 | 1 | 1 | 
-| dhw.dhwvalve | valve | uint8 (>=0<=100) | % | false | DHW | 73 | 1 | 1 | 
+| dhw.dhwvalve | valve | uint8 (>=0<=100) | % | false | DHW | 74 | 1 | 1 | 
 | keepwarmtemp | keep warm temperature | uint8 (>=0<=254) | C | true | DEVICE_DATA | 273 | 1 | 1 | 
 | setreturntemp | set temp return | uint8 (>=0<=254) | C | true | DEVICE_DATA | 274 | 1 | 1 | 
 | heating | heating | boolean |   | false | DEVICE_DATA | 275 | 1 | 1 | 
@@ -2359,9 +2376,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -2397,10 +2414,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 
 ### Hybrid Heatpump
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -2473,9 +2491,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -2511,10 +2529,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -2591,9 +2610,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -2629,10 +2648,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -2709,9 +2729,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -2747,10 +2767,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -2827,9 +2848,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -2865,10 +2886,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -2945,9 +2967,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -2983,10 +3005,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -3063,9 +3086,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -3101,10 +3124,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -3181,9 +3205,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -3219,10 +3243,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -3299,9 +3324,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -3337,10 +3362,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -3417,9 +3443,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -3455,10 +3481,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -3535,9 +3562,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -3573,10 +3600,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
@@ -3653,9 +3681,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 69 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -3691,10 +3719,11 @@
 | dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 | 
 | dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 | 
 | dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 | 
-| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 63 | 1 | 1/10 | 
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 65 | 2 | 1 | 
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 67 | 2 | 1 | 
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 | 
+| dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 | 
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
