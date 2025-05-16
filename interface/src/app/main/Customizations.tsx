@@ -306,7 +306,7 @@ const Customizations = () => {
 
   const filter_entity = (de: DeviceEntity) =>
     (de.m & selectedFilters || !selectedFilters) &&
-    formatName(de, true).includes(search);
+    formatName(de, true).toLowerCase().includes(search.toLowerCase());
 
   const maskDisabled = (set: boolean) => {
     setDeviceEntities(

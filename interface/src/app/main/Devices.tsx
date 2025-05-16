@@ -600,9 +600,11 @@ const Devices = () => {
       ? deviceData.nodes.filter(
           (dv) =>
             hasMask(dv.id, DeviceEntityMask.DV_FAVORITE) &&
-            dv.id.slice(2).includes(search)
+            dv.id.slice(2).toLowerCase().includes(search.toLowerCase())
         )
-      : deviceData.nodes.filter((dv) => dv.id.slice(2).includes(search));
+      : deviceData.nodes.filter((dv) =>
+          dv.id.slice(2).toLowerCase().includes(search.toLowerCase())
+        );
 
     const deviceIndex = coreData.devices.findIndex(
       (d) => d.id === device_select.state.id

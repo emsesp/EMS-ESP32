@@ -627,8 +627,16 @@ bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * co
         }
     }
     value_ui = 0;
-
     return false;
+}
+
+bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * const ** strs, const std::vector<uint8_t> & mask) {
+    uint8_t v = value_ui;
+    if (!value2enum(value, v, strs) || v >= mask.size()) {
+        return false;
+    }
+    value_ui = mask[v];
+    return true;
 }
 
 // finds the string (value) of a list vector (strs)
@@ -656,6 +664,15 @@ bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * co
     }
 
     return false;
+}
+
+bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * const * strs, const std::vector<uint8_t> & mask) {
+    uint8_t v = value_ui;
+    if (!value2enum(value, v, strs) || v >= mask.size()) {
+        return false;
+    }
+    value_ui = mask[v];
+    return true;
 }
 
 // https://stackoverflow.com/questions/313970/how-to-convert-stdstring-to-lower-case

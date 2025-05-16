@@ -384,6 +384,7 @@ export interface EntityItem {
   value_type: number;
   value?: unknown;
   writeable: boolean;
+  hide: boolean;
   deleted?: boolean;
   o_id?: number;
   o_ram?: number;
@@ -397,6 +398,7 @@ export interface EntityItem {
   o_deleted?: boolean;
   o_writeable?: boolean;
   o_value?: unknown;
+  o_hide?: boolean;
 }
 
 export interface Entities {

@@ -76,6 +76,7 @@ class MqttSettings {
     uint8_t  mqtt_qos;
     bool     mqtt_retain;
     bool     ha_enabled;
+    bool     ha_optimistic;
     uint8_t  nested_format;
     String   discovery_prefix;
     uint8_t  discovery_type;

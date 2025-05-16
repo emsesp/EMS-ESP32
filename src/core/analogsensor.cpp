@@ -682,6 +682,9 @@ void AnalogSensor::publish_values(const bool force) {
 
                 Mqtt::add_ha_sections_to_doc("analog", stat_t, config, !is_ha_device_created, val_cond);
 
+                if (Mqtt::ha_optimistic() && config["cmd_t"].is<const char*>()) {
+                    config["optimistic"] = true;
+                }
                 sensor.ha_registered = Mqtt::queue_ha(topic, config.as<JsonObject>());
             }
         }

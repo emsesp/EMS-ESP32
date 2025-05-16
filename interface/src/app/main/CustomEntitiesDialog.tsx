@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react';
 
 import AddIcon from '@mui/icons-material/Add';
 import CancelIcon from '@mui/icons-material/Cancel';
+import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
 import DoneIcon from '@mui/icons-material/Done';
+import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import InsertCommentOutlinedIcon from '@mui/icons-material/InsertCommentOutlined';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
 import {
   Box,
@@ -128,6 +132,20 @@ const CustomEntitiesDialog = ({
               onChange={updateFormValue}
             />
           </Grid>
+          <Grid mt={3}>
+            <BlockFormControlLabel
+              control={
+                <Checkbox
+                  icon={<InsertCommentOutlinedIcon htmlColor="white" />}
+                  checkedIcon={<CommentsDisabledOutlinedIcon color="primary" />}
+                  checked={editItem.hide}
+                  onChange={updateFormValue}
+                  name="hide"
+                />
+              }
+              label="API/Mqtt"
+            />
+          </Grid>
           <Grid>
             <TextField
               name="ram"
@@ -177,10 +195,12 @@ const CustomEntitiesDialog = ({
           )}
           {editItem.ram === 0 && (
             <>
-              <Grid mt={3} size={9}>
+              <Grid mt={3}>
                 <BlockFormControlLabel
                   control={
                     <Checkbox
+                      icon={<EditOffOutlinedIcon color="primary" />}
+                      checkedIcon={<EditOutlinedIcon htmlColor="white" />}
                       checked={editItem.writeable}
                       onChange={updateFormValue}
                       name="writeable"

@@ -254,102 +254,112 @@ const MqttSettings = () => {
           }
           label={LL.MQTT_RESPONSE()}
         />
-        {!data.ha_enabled && (
-          <Grid container spacing={2} rowSpacing={0}>
+        <Grid container spacing={2} rowSpacing={0}>
+          <Grid>
+            <BlockFormControlLabel
+              control={
+                <Checkbox
+                  name="publish_single"
+                  checked={data.publish_single}
+                  onChange={updateFormValue}
+                  disabled={data.ha_enabled}
+                />
+              }
+              label={LL.MQTT_PUBLISH_TEXT_1()}
+            />
+          </Grid>
+          {data.publish_single && (
             <Grid>
               <BlockFormControlLabel
                 control={
                   <Checkbox
-                    name="publish_single"
-                    checked={data.publish_single}
+                    name="publish_single2cmd"
+                    checked={data.publish_single2cmd}
                     onChange={updateFormValue}
                   />
                 }
-                label={LL.MQTT_PUBLISH_TEXT_1()}
+                label={LL.MQTT_PUBLISH_TEXT_2()}
               />
             </Grid>
-            {data.publish_single && (
+          )}
+        </Grid>
+        <Grid container spacing={2} rowSpacing={0}>
+          <Grid>
+            <BlockFormControlLabel
+              control={
+                <Checkbox
+                  name="ha_enabled"
+                  checked={data.ha_enabled}
+                  onChange={updateFormValue}
+                  disabled={data.publish_single}
+                />
+              }
+              label={LL.MQTT_PUBLISH_TEXT_3()}
+            />
+            {data.ha_enabled && data.discovery_type === 0 && (
+              <BlockFormControlLabel
+                control={
+                  <Checkbox
+                    name="ha_optimistic"
+                    checked={data.ha_optimistic}
+                    onChange={updateFormValue}
+                  />
+                }
+                label="Optimistic"
+              />
+            )}
+          </Grid>
+          {data.ha_enabled && (
+            <Grid container spacing={2} rowSpacing={0}>
               <Grid>
-                <BlockFormControlLabel
-                  control={
-                    <Checkbox
-                      name="publish_single2cmd"
-                      checked={data.publish_single2cmd}
-                      onChange={updateFormValue}
-                    />
-                  }
-                  label={LL.MQTT_PUBLISH_TEXT_2()}
+                <TextField
+                  name="discovery_type"
+                  label={LL.MQTT_PUBLISH_TEXT_5()}
+                  value={data.discovery_type}
+                  variant="outlined"
+                  onChange={updateFormValue}
+                  margin="normal"
+                  select
+                >
+                  <MenuItem value={0}>Home Assistant</MenuItem>
+                  <MenuItem value={1}>Domoticz</MenuItem>
+                  <MenuItem value={2}>Domoticz (latest)</MenuItem>
+                </TextField>
+              </Grid>
+              <Grid>
+                <TextField
+                  name="discovery_prefix"
+                  label={LL.MQTT_PUBLISH_TEXT_4()}
+                  variant="outlined"
+                  value={data.discovery_prefix}
+                  onChange={updateFormValue}
+                  margin="normal"
                 />
               </Grid>
-            )}
-          </Grid>
-        )}
-        {!data.publish_single && (
-          <Grid container spacing={2} rowSpacing={0}>
-            <Grid>
-              <BlockFormControlLabel
-                control={
-                  <Checkbox
-                    name="ha_enabled"
-                    checked={data.ha_enabled}
-                    onChange={updateFormValue}
-                  />
-                }
-                label={LL.MQTT_PUBLISH_TEXT_3()}
-              />
-            </Grid>
-            {data.ha_enabled && (
-              <Grid container spacing={2} rowSpacing={0}>
-                <Grid>
-                  <TextField
-                    name="discovery_type"
-                    label={LL.MQTT_PUBLISH_TEXT_5()}
-                    value={data.discovery_type}
-                    variant="outlined"
-                    onChange={updateFormValue}
-                    margin="normal"
-                    select
-                  >
-                    <MenuItem value={0}>Home Assistant</MenuItem>
-                    <MenuItem value={1}>Domoticz</MenuItem>
-                    <MenuItem value={2}>Domoticz (latest)</MenuItem>
-                  </TextField>
-                </Grid>
-                <Grid>
-                  <TextField
-                    name="discovery_prefix"
-                    label={LL.MQTT_PUBLISH_TEXT_4()}
-                    variant="outlined"
-                    value={data.discovery_prefix}
-                    onChange={updateFormValue}
-                    margin="normal"
-                  />
-                </Grid>
-                <Grid>
-                  <TextField
-                    name="entity_format"
-                    label={LL.MQTT_ENTITY_FORMAT()}
-                    value={data.entity_format}
-                    variant="outlined"
-                    onChange={updateFormValue}
-                    margin="normal"
-                    select
-                  >
-                    <MenuItem value={0}>{LL.MQTT_ENTITY_FORMAT_0()}</MenuItem>
-                    <MenuItem value={3}>
-                      {LL.MQTT_ENTITY_FORMAT_1()}&nbsp;(v3.6)
-                    </MenuItem>
-                    <MenuItem value={4}>
-                      {LL.MQTT_ENTITY_FORMAT_2()}&nbsp;(v3.6)
-                    </MenuItem>
-                    <MenuItem value={1}>{LL.MQTT_ENTITY_FORMAT_1()}</MenuItem>
-                    <MenuItem value={2}>{LL.MQTT_ENTITY_FORMAT_2()}</MenuItem>
-                  </TextField>
-                </Grid>
+              <Grid>
+                <TextField
+                  name="entity_format"
+                  label={LL.MQTT_ENTITY_FORMAT()}
+                  value={data.entity_format}
+                  variant="outlined"
+                  onChange={updateFormValue}
+                  margin="normal"
+                  select
+                >
+                  <MenuItem value={0}>{LL.MQTT_ENTITY_FORMAT_0()}</MenuItem>
+                  <MenuItem value={3}>
+                    {LL.MQTT_ENTITY_FORMAT_1()}&nbsp;(v3.6)
+                  </MenuItem>
+                  <MenuItem value={4}>
+                    {LL.MQTT_ENTITY_FORMAT_2()}&nbsp;(v3.6)
+                  </MenuItem>
+                  <MenuItem value={1}>{LL.MQTT_ENTITY_FORMAT_1()}</MenuItem>
+                  <MenuItem value={2}>{LL.MQTT_ENTITY_FORMAT_2()}</MenuItem>
+                </TextField>
               </Grid>
-            )}
-          </Grid>
-        )}
+            </Grid>
+          )}
+        </Grid>
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           {LL.MQTT_PUBLISH_INTERVALS()}&nbsp;(0=auto)
         </Typography>
@@ -442,7 +452,7 @@ const MqttSettings = () => {
           <Grid>
             <TextField
               name="publish_time_sensor"
-              label={LL.TEMP_SENSORS()}
+              label={LL.SENSORS()}
               variant="outlined"
               value={numberValue(data.publish_time_sensor)}
               type="number"
