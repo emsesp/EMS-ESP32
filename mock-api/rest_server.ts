@@ -122,10 +122,10 @@ let LATEST_STABLE_VERSION = '3.7.2';
 let LATEST_DEV_VERSION = '3.7.3-dev.6';
 
 // scenarios for testing versioning
-version_test = 0; // on latest stable, can switch to dev only
+// version_test = 0; // on latest stable, can switch to dev only
 // version_test = 1; // on latest dev, can switch back to stable only or reinstall
 // version_test = 2; // upgrade an older stable to latest stable or switch to latest dev
-// version_test = 3; // upgrade an older dev to latest dev, switch to stable available
+version_test = 3; // upgrade an older dev to latest dev, switch to stable available
 
 switch (version_test as number) {
   case 0:
@@ -158,8 +158,8 @@ switch (version_test as number) {
 // set the version
 system_status.emsesp_version = THIS_VERSION;
 
+// set the ESP platform - using ESP32 will disable OTA and automatic version downloading
 let emulate_esp: string;
-
 emulate_esp = 'ESP32S3';
 // emulate_esp = 'ESP32';
 
