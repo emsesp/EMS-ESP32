@@ -516,7 +516,7 @@ void Mqtt::on_connect() {
     resubscribe();
 
     // publish to the last will topic (see Mqtt::start() function) to say we're alive
-    queue_publish_retain("status", "online", true); // retain: https://github.com/emsesp/EMS-ESP32/discussions/2086
+    queue_publish_retain("status", "online"); // retain: https://github.com/emsesp/EMS-ESP32/discussions/2086
 }
 
 // Home Assistant Discovery - the main master Device called EMS-ESP
@@ -656,56 +656,67 @@ bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
     return (packet_id != 0);
 }
 
-// add MQTT message to queue, payload is a string
-bool Mqtt::queue_publish_message(const std::string & topic, const std::string & payload, const bool retain) {
-    return queue_message(Operation::PUBLISH, topic, payload, retain);
-}
-
 // add MQTT subscribe message to queue
 void Mqtt::queue_subscribe_message(const std::string & topic) {
-    queue_message(Operation::SUBSCRIBE, topic, "", false); // no payload
+    queue_message(Operation::SUBSCRIBE, topic, "", false); // no payload, no retain
 }
 
 // add MQTT unsubscribe message to queue
 void Mqtt::queue_unsubscribe_message(const std::string & topic) {
-    queue_message(Operation::UNSUBSCRIBE, topic, "", false); // no payload
+    queue_message(Operation::UNSUBSCRIBE, topic, "", false); // no payload, no retain
 }
 
-// MQTT Publish, using a user's retain flag
+// internal function to add MQTT message to queue, payload is a string
+bool Mqtt::queue_publish_message(const std::string & topic, const std::string & payload, const bool retain) {
+    return queue_message(Operation::PUBLISH, topic, payload, retain);
+}
+
+// MQTT Publish, using the user's retain flag
 bool Mqtt::queue_publish(const std::string & topic, const std::string & payload) {
     return queue_publish_message(topic, payload, mqtt_retain_);
 }
 
-// MQTT Publish, using a user's retain flag - except for char * strings payload
+// MQTT Publish, using the user's retain flag - except for char * strings payload
 bool Mqtt::queue_publish(const char * topic, const char * payload) {
     return queue_publish_message(topic, payload, mqtt_retain_);
 }
 
-// MQTT Publish, using a user's retain flag - std::string payload
+// MQTT Publish, using the user's retain flag - std::string payload
 bool Mqtt::queue_publish(const char * topic, const std::string & payload) {
     return queue_publish_message(topic, payload, mqtt_retain_);
 }
 
 bool Mqtt::queue_publish(const char * topic, const JsonObjectConst payload) {
-    return queue_publish_retain(topic, payload, mqtt_retain_);
+    return queue_publish(topic, payload, mqtt_retain_);
 }
 
-// publish json doc, only if its not empty
+// MQTT Publish, for json doc, only if its not empty - with retain flag set
 bool Mqtt::queue_publish(const std::string & topic, const JsonObjectConst payload) {
-    return queue_publish_retain(topic, payload, mqtt_retain_);
+    return queue_publish_retain(topic, payload);
 }
 
-// MQTT Publish, using a specific retain flag, topic is a flash string, forcing retain flag
-bool Mqtt::queue_publish_retain(const char * topic, const std::string & payload, const bool retain) {
-    return queue_publish_message(topic, payload, retain);
+// MQTT Publish, topic and payload are strings, forcing retain flag
+bool Mqtt::queue_publish_retain(const char * topic, const std::string & payload) {
+    return queue_publish_message(topic, payload, true);
 }
 
-// publish json doc, only if its not empty, using the retain flag
-bool Mqtt::queue_publish_retain(const std::string & topic, const JsonObjectConst payload, const bool retain) {
-    return queue_publish_retain(topic.c_str(), payload, retain);
+// publish json doc, only if its not empty, forcing retain flag
+bool Mqtt::queue_publish_retain(const std::string & topic, const JsonObjectConst payload) {
+    return queue_publish(topic.c_str(), payload, true);
 }
 
-bool Mqtt::queue_publish_retain(const char * topic, const JsonObjectConst payload, const bool retain) {
+// publish json doc, only if its not empty, forcing retain flag
+bool Mqtt::queue_publish_retain(const char * topic, const JsonObjectConst payload) {
+    return queue_publish(topic, payload, true);
+}
+
+// MQTT Publish, for char * strings payload, forcing retain flag
+bool Mqtt::queue_publish_retain(const char * topic, const char * payload) {
+    return queue_publish_message(topic, payload, true);
+}
+
+// converts json payload to string, uses any retain flag
+bool Mqtt::queue_publish(const char * topic, const JsonObjectConst payload, const bool retain) {
     if (payload.size()) {
         std::string payload_text;
         payload_text.reserve(measureJson(payload) + 1);
@@ -1381,6 +1392,11 @@ void Mqtt::add_ha_sections_to_doc(const char *   name,
                                   const char *   cond1,
                                   const char *   cond2,
                                   const char *   negcond) {
+    // only for HA
+    if (discovery_type() != discoveryType::HOMEASSISTANT) {
+        return;
+    }
+
     // adds dev section to HA Discovery config
     if (name != nullptr) {
         JsonObject dev      = config["dev"].to<JsonObject>();
@@ -1398,49 +1414,50 @@ void Mqtt::add_ha_sections_to_doc(const char *   name,
         free(cap_name);
     }
 
+    // skip availability section if no conditions set
+    if (!cond1 && !cond2 && !negcond) {
+        return;
+    }
+
     // adds "availability" section to HA Discovery config
     JsonArray    avty = config["avty"].to<JsonArray>();
     JsonDocument avty_json;
 
-    char tpl[150];
-
-    // make local copy of state, as the pointer will get derefenced
+    // make local copy of state, as the pointer will get de-referenced
     char state[50];
     strlcpy(state, state_t, sizeof(state));
 
-    // skip conditional Jinja2 templates if not home assistant
-    if (discovery_type() == discoveryType::HOMEASSISTANT) {
-        const char * tpl_draft = "{{'online' if %s else 'offline'}}";
+    char         tpl[150];
+    const char * tpl_draft = "{{'online' if %s else 'offline'}}";
 
-        // condition 1
-        if (cond1 != nullptr) {
-            avty_json.clear();
-            avty_json["t"] = state;
-            snprintf(tpl, sizeof(tpl), tpl_draft, cond1);
-            avty_json["val_tpl"] = tpl;
-            avty.add(avty_json); // returns 0 if no mem
-        }
-
-        // condition 2
-        if (cond2 != nullptr) {
-            avty_json.clear();
-            avty_json["t"] = state;
-            snprintf(tpl, sizeof(tpl), tpl_draft, cond2);
-            avty_json["val_tpl"] = tpl;
-            avty.add(avty_json); // returns 0 if no mem
-        }
-
-        // negative condition
-        if (negcond != nullptr) {
-            avty_json.clear();
-            avty_json["t"] = state;
-            snprintf(tpl, sizeof(tpl), "{{'offline' if %s else 'online'}}", negcond);
-            avty_json["val_tpl"] = tpl;
-            avty.add(avty_json); // returns 0 if no mem
-        }
-
-        config["avty_mode"] = "all";
+    // condition 1
+    if (cond1 != nullptr) {
+        avty_json.clear();
+        avty_json["t"] = state;
+        snprintf(tpl, sizeof(tpl), tpl_draft, cond1);
+        avty_json["val_tpl"] = tpl;
+        avty.add(avty_json); // returns 0 if no mem
     }
+
+    // condition 2
+    if (cond2 != nullptr) {
+        avty_json.clear();
+        avty_json["t"] = state;
+        snprintf(tpl, sizeof(tpl), tpl_draft, cond2);
+        avty_json["val_tpl"] = tpl;
+        avty.add(avty_json); // returns 0 if no mem
+    }
+
+    // negative condition
+    if (negcond != nullptr) {
+        avty_json.clear();
+        avty_json["t"] = state;
+        snprintf(tpl, sizeof(tpl), "{{'offline' if %s else 'online'}}", negcond);
+        avty_json["val_tpl"] = tpl;
+        avty.add(avty_json); // returns 0 if no mem
+    }
+
+    config["avty_mode"] = "all";
 }
 
 void Mqtt::add_ha_bool(JsonDocument & config) {
