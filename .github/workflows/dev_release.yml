@@ -8,6 +8,9 @@ on:
     branches:
       - 'dev'
 
+permissions:
+  contents: write
+
 jobs:
   pre-release:
     name: 'Build Dev Release'
