@@ -4,5 +4,4 @@ dist/
 src/i18n/*
 
 .prettierrc
-.yarn/
 .typesafe-i18n.json
