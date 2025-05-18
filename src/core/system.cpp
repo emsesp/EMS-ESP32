@@ -598,6 +598,7 @@ void System::loop() {
 }
 
 // send MQTT info topic appended with the version information as JSON, as a retained flag
+// this is only done once when the connection is established
 void System::send_info_mqtt() {
     static uint8_t _connection = 0;
     uint8_t        connection  = (ethernet_connected() ? 1 : 0) + ((WiFi.status() == WL_CONNECTED) ? 2 : 0) + (ntp_connected_ ? 4 : 0) + (has_ipv6_ ? 8 : 0);
@@ -616,7 +617,7 @@ void System::send_info_mqtt() {
         char   time_string[25];
         time_t now = time(nullptr) - uuid::get_uptime_sec();
         strftime(time_string, 25, "%FT%T%z", localtime(&now));
-        doc["boot time"] = time_string;
+        doc["bootTime"] = time_string;
     }
 
 #ifndef EMSESP_STANDALONE
@@ -655,7 +656,7 @@ void System::send_info_mqtt() {
 #endif
     }
 #endif
-    Mqtt::queue_publish_retain(F_(info), doc.as<JsonObject>(), true); // topic called "info" and it's Retained
+    Mqtt::queue_publish_retain(F_(info), doc.as<JsonObject>()); // topic called "info" and it's Retained
 }
 
 // create the json for heartbeat

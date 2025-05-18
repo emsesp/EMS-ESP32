@@ -50,15 +50,22 @@ void Shower::start() {
         },
         FL_(coldshot_cmd),
         CommandFlag::ADMIN_ONLY);
-
-    if (shower_timer_) {
-        set_shower_state(false, true); // turns shower to off and creates HA topic if not already done
-    }
 }
 
 void Shower::loop() {
     if (!shower_timer_) {
         return;
+    }
+
+    // if haven't done already send the MQTT topic shower_active with the current state
+    // which creates the HA Discovery topic
+    static bool mqtt_sent_ = false;
+    if (!mqtt_sent_) {
+        if (Mqtt::connected()) {
+            create_ha_discovery();
+            set_shower_state(shower_state_, true); // force publish initial state
+            mqtt_sent_ = true;
+        }
     }
 
     auto time_now = uuid::get_uptime_sec(); // in sec
@@ -161,9 +168,7 @@ void Shower::shower_alert_stop() {
     }
 }
 
-// send status of shower to MQTT topic called shower_active - which is determined by the state parameter
-// and creates the HA config topic if HA enabled
-// force is used by EMSESP::publish_all_loop()
+// sets the state and publishes the state to the MQTT topic shower_active
 void Shower::set_shower_state(bool state, bool force) {
     // sets the state
     shower_state_ = state;
@@ -173,22 +178,26 @@ void Shower::set_shower_state(bool state, bool force) {
     if ((shower_state_ == old_shower_state_) && !force) {
         return;
     }
-    old_shower_state_ = shower_state_; // copy current state
+    old_shower_state_ = shower_state_;
 
-    // always publish as a string
+    // always publish as a string - see https://github.com/emsesp/EMS-ESP/issues/369
+    // and with retain flag set so HA will pick it up when EMS-ESP reboots
     char s[12];
-    Mqtt::queue_publish("shower_active", Helpers::render_boolean(s, shower_state_)); // https://github.com/emsesp/EMS-ESP/issues/369
+    Mqtt::queue_publish_retain("shower_active", Helpers::render_boolean(s, shower_state_));
+}
 
-    // send out HA MQTT Discovery config topic
-    if ((Mqtt::ha_enabled()) && (!ha_configdone_ || force)) {
+// send status of shower to MQTT topic called shower_active - which is determined by the state parameter
+// and creates the HA config topic if HA enabled
+void Shower::create_ha_discovery() {
+    // first create the HA MQTT Discovery config topic
+    // this has to be done before the state is published
+    if (Mqtt::ha_enabled() && !ha_configdone_) {
         JsonDocument doc;
         char         topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         char         str[70];
         char         stat_t[50];
 
-        //
         // shower active
-        //
         doc["name"] = "Shower Active";
 
         if (Mqtt::entity_format() == Mqtt::entityFormat::MULTI_SHORT) {
@@ -196,8 +205,8 @@ void Shower::set_shower_state(bool state, bool force) {
         } else {
             snprintf(str, sizeof(str), "shower_active"); // v3.4 compatible
         }
-        doc["uniq_id"]   = str;
-        doc["object_id"] = str;
+        doc["uniq_id"] = str;
+        doc["obj_id"]  = str;
 
         snprintf(stat_t, sizeof(stat_t), "%s/shower_active", Mqtt::base().c_str());
         doc["stat_t"] = stat_t;
@@ -209,9 +218,7 @@ void Shower::set_shower_state(bool state, bool force) {
         snprintf(topic, sizeof(topic), "binary_sensor/%s/shower_active/config", Mqtt::basename().c_str());
         ha_configdone_ = Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
-        //
         // shower duration
-        //
         doc.clear();
 
         snprintf(str, sizeof(str), "%s_shower_duration", Mqtt::basename().c_str());

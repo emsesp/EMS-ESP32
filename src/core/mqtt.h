@@ -72,12 +72,16 @@ class Mqtt {
 
     static bool queue_publish(const std::string & topic, const std::string & payload);
     static bool queue_publish(const char * topic, const char * payload);
+    static bool queue_publish(const char * topic, const JsonObjectConst payload, const bool retain);
     static bool queue_publish(const std::string & topic, const JsonObjectConst payload);
     static bool queue_publish(const char * topic, const JsonObjectConst payload);
     static bool queue_publish(const char * topic, const std::string & payload);
-    static bool queue_publish_retain(const std::string & topic, const JsonObjectConst payload, const bool retain);
-    static bool queue_publish_retain(const char * topic, const std::string & payload, const bool retain);
-    static bool queue_publish_retain(const char * topic, const JsonObjectConst payload, const bool retain);
+
+    static bool queue_publish_retain(const std::string & topic, const JsonObjectConst payload);
+    static bool queue_publish_retain(const char * topic, const std::string & payload);
+    static bool queue_publish_retain(const char * topic, const JsonObjectConst payload);
+    static bool queue_publish_retain(const char * topic, const char * payload);
+
     static bool queue_ha(const char * topic, const JsonObjectConst payload);
     static bool queue_remove_topic(const char * topic);
 
