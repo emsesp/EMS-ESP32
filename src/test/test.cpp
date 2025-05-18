@@ -1140,7 +1140,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
             // test version checks
-            // use same data as in rest_server.ts
+            // use same data as in restServer.ts
             // log shows first if you can upgrade to dev, and then if you can upgrade to stable
             // request.url("/rest/action");
             // std::string LATEST_STABLE_VERSION = "3.7.2";

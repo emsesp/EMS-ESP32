@@ -88,7 +88,7 @@ If you like **EMS-ESP**, please give it a ✨ on GitHub, or even better fork it 
 - [uuid-\*](https://github.com/nomis/mcu-uuid-console) from @nomis. The console, syslog, telnet and logging are based off these awesome open source libraries
 - [ArduinoJson](https://github.com/bblanchon/ArduinoJson) for all the JSON processing
 - [espMqttClient](https://github.com/bertmelis/espMqttClient) for the MQTT client
-- ESPAsyncWebServer and AsyncTCP for the Web server and TCP backends, with custom modifications for performance
+- [ESPAsyncWebServer](https://github.com/ESP32Async/ESPAsyncWebServer) and [AsyncTCP](https://github.com/ESP32Async/AsyncTCP) for the Web server and TCP backends
 
 ## 📜&nbsp; **License**
 

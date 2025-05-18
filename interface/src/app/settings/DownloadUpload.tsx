@@ -35,7 +35,7 @@ const DownloadUpload = () => {
       toast.info(LL.DOWNLOAD_SUCCESSFUL());
     })
     .onError((error) => {
-      toast.error(error.message);
+      toast.error(String(error.error?.message || 'An error occurred'));
     });
 
   const { send: sendAPI } = useRequest((data: APIcall) => API(data), {

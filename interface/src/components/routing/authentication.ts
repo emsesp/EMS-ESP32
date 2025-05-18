@@ -20,8 +20,8 @@ export function getStorage() {
 
 export function storeLoginRedirect(location?: H.Location) {
   if (location) {
-    getStorage().setItem(SIGN_IN_PATHNAME, location.pathname);
-    getStorage().setItem(SIGN_IN_SEARCH, location.search);
+    getStorage().setItem(SIGN_IN_PATHNAME, location.pathname as string);
+    getStorage().setItem(SIGN_IN_SEARCH, location.search as string);
   }
 }
 

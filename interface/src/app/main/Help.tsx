@@ -41,7 +41,8 @@ const Help = () => {
 
   useRequest(() => callAction({ action: 'getCustomSupport' })).onSuccess((event) => {
     if (event && event.data && Object.keys(event.data).length !== 0) {
-      const data = event.data.Support;
+      const data = (event.data as { Support: { img_url?: string; html?: string[] } })
+        .Support;
       if (data.img_url) {
         setCustomSupportIMG(data.img_url);
       }
@@ -59,7 +60,7 @@ const Help = () => {
       toast.info(LL.DOWNLOAD_SUCCESSFUL());
     })
     .onError((error) => {
-      toast.error(error.message);
+      toast.error(String(error.error?.message || 'An error occurred'));
     });
 
   return (
