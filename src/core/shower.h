@@ -29,6 +29,7 @@ class Shower {
     void loop();
 
     void set_shower_state(bool state, bool force = false);
+    void create_ha_discovery();
 
     // commands
     static bool command_coldshot(const char * value, const int8_t id);
