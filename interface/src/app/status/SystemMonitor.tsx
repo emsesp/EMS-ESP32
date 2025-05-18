@@ -51,7 +51,7 @@ const SystemMonitor = () => {
       }
     })
     .onError((error) => {
-      setErrorMessage(error.message);
+      setErrorMessage(String(error.error?.message || 'An error occurred'));
     });
 
   useInterval(() => {

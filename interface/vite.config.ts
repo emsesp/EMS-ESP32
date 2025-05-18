@@ -1,7 +1,7 @@
 import preact from '@preact/preset-vite';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
-import viteImagemin from 'vite-plugin-imagemin';
+// import viteImagemin from 'vite-plugin-imagemin';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 
 import mockServer from '../mock-api/mockServer.js';
@@ -43,37 +43,37 @@ export default defineConfig(({ command, mode }) => {
     plugins: [
       preact(),
       viteTsconfigPaths(),
-      {
-        ...viteImagemin({
-          verbose: false,
-          gifsicle: {
-            optimizationLevel: 7,
-            interlaced: false
-          },
-          optipng: {
-            optimizationLevel: 7
-          },
-          mozjpeg: {
-            quality: 20
-          },
-          pngquant: {
-            quality: [0.8, 0.9],
-            speed: 4
-          },
-          svgo: {
-            plugins: [
-              {
-                name: 'removeViewBox'
-              },
-              {
-                name: 'removeEmptyAttrs',
-                active: false
-              }
-            ]
-          }
-        }),
-        enforce: 'pre'
-      },
+      // {
+      //   ...viteImagemin({
+      //     verbose: false,
+      //     gifsicle: {
+      //       optimizationLevel: 7,
+      //       interlaced: false
+      //     },
+      //     optipng: {
+      //       optimizationLevel: 7
+      //     },
+      //     mozjpeg: {
+      //       quality: 20
+      //     },
+      //     pngquant: {
+      //       quality: [0.8, 0.9],
+      //       speed: 4
+      //     },
+      //     svgo: {
+      //       plugins: [
+      //         {
+      //           name: 'removeViewBox'
+      //         },
+      //         {
+      //           name: 'removeEmptyAttrs',
+      //           active: false
+      //         }
+      //       ]
+      //     }
+      //   }),
+      //   enforce: 'pre'
+      // },
       visualizer({
         template: 'treemap', // or sunburst
         open: false,
@@ -108,7 +108,6 @@ export default defineConfig(({ command, mode }) => {
         keep_fnames: false,
         ie8: false,
         module: false,
-        nameCache: null,
         safari10: false,
         toplevel: false
       },

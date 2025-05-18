@@ -5,27 +5,24 @@
 # as well as GNUMake (make) and python3
 
 cd interface
-rm -rf yarn.lock node_modules
-touch yarn.lock
+rm -rf node_modules
 ncu -u
-yarn set version stable
-yarn
-yarn format
-yarn lint
+pnpm install
+pnpm format
+pnpm lint
 
 cd ../mock-api
-rm -rf yarn.lock node_modules
-touch yarn.lock
+rm -rf node_modules
 ncu -u
-yarn set version stable
-yarn
-yarn format
+pnpm install
+pnpm format
 
 cd ..
 cd interface
-yarn build; yarn webUI
+pnpm build
+pnpm webUI
 
 cd ..
-npx cspell "**" 
+npx cspell "**"
 
 sh ./scripts/generate_csv_and_headers.sh
