@@ -25,6 +25,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - FB100 controls the hc, not the master [#2510](https://github.com/emsesp/EMS-ESP32/issues/2510)
 - IPM DHW module, [#2524](https://github.com/emsesp/EMS-ESP32/issues/2524)
 - charge optimization [#2543](https://github.com/emsesp/EMS-ESP32/issues/2543)
+- shower active state retained, shows correctly in HA
 
 ## Changed
 
