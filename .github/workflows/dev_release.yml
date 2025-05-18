@@ -10,7 +10,7 @@ on:
 
 jobs:
   pre-release:
-    name: 'Automatic pre-release build'
+    name: 'Build Dev Release'
     runs-on: ubuntu-latest
     steps:
         
@@ -19,10 +19,10 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Install Node.js 20
+      - name: Install Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: 22
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -50,7 +50,7 @@ jobs:
           pnpm build
           pnpm webUI
 
-      - name: Build all PIO target environments from default_envs
+      - name: Build all PIO target environments
         run: |
           platformio run
         env:
