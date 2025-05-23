@@ -290,9 +290,6 @@ void WebSchedulerService::publish(const bool force) {
                 Mqtt::add_ha_bool(config);
                 Mqtt::add_ha_sections_to_doc(F_(scheduler), stat_t, config, !ha_created, val_cond);
 
-                if (Mqtt::ha_optimistic()) {
-                    config["optimistic"] = true;
-                }
                 ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
             }
         }

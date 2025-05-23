@@ -1805,9 +1805,9 @@ void Boiler::process_HpCooling(std::shared_ptr<const Telegram> telegram) {
 // Boiler(0x08) -W-> Me(0x0B), HpHeaterConfig(0x0492), data: 03 00 00 04 00
 void Boiler::process_HpHeaterConfig(std::shared_ptr<const Telegram> telegram) {
     if (model() == EMSdevice::EMS_DEVICE_FLAG_CS6800) {
-        has_enumupdate(telegram, maxHeatComp_, 2, {0, 2, 4, 5}, {0, 0, 1, 0, 2, 3});
-        has_enumupdate(telegram, maxHeatHeat_, 3, {2, 4, 5}, {0, 0, 0, 0, 1, 2});
-        has_enumupdate(telegram, maxHeatDhw_, 4, {2, 4, 5}, {0, 0, 0, 0, 1, 2});
+        has_enumupdate(telegram, maxHeatComp_, 2, {0, 2, 4, 5});
+        has_enumupdate(telegram, maxHeatHeat_, 3, {2, 4, 5});
+        has_enumupdate(telegram, maxHeatDhw_, 4, {2, 4, 5});
         return;
     }
     has_update(telegram, maxHeatComp_, 2);
