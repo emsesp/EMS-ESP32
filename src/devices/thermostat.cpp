@@ -1275,14 +1275,14 @@ void Thermostat::process_RC300WWmode(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, dhw->wwCircPump_, 1); // FF=off, 0=on ?
 
     if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400 || model() == EMSdevice::EMS_DEVICE_FLAG_HMC310) {
-        has_enumupdate(telegram, dhw->wwMode_, 2, {0, 5, 1, 2, 4}, {0, 2, 3, 0, 4, 1});
+        has_enumupdate(telegram, dhw->wwMode_, 2, {0, 5, 1, 2, 4});
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) {
         // https://github.com/emsesp/EMS-ESP32/pull/1722#discussion_r1582823521
-        has_enumupdate(telegram, dhw->wwMode_, 2, {1, 2, 5}, {0, 0, 1, 0, 0, 2}); // normal, comfort, eco+
+        has_enumupdate(telegram, dhw->wwMode_, 2, {1, 2, 5}); // normal, comfort, eco+
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_CR120) {
-        has_enumupdate(telegram, dhw->wwMode_, 2, {1, 2, 4}, {0, 0, 1, 0, 2, 0}); // normal, comfort, auto
+        has_enumupdate(telegram, dhw->wwMode_, 2, {1, 2, 4}); // normal, comfort, auto
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
-        has_enumupdate(telegram, dhw->wwMode_, 2, {0, 2, 3}, {0, 0, 1, 2, 0, 0}); // normal, on, auto
+        has_enumupdate(telegram, dhw->wwMode_, 2, {0, 2, 3}); // normal, on, auto
     } else {
         has_update(telegram, dhw->wwMode_, 2); // 0=off, 1=low, 2=high, 3=auto, 4=own prog
     }
@@ -4171,6 +4171,10 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
         // add the write command to the Tx queue. value is *2
         // post validate is the corresponding monitor or set type IDs as they can differ per model
         write_command(set_typeid, offset, (uint8_t)(temperature * (float)factor), validate_typeid);
+        // update selTemp now, readback from monitor telegram takes a while
+        if (mode == HeatingCircuit::Mode::AUTO) {
+            has_update(hc->selTemp,(int16_t)(temperature * factor));
+        }
         return true;
     }
     LOG_DEBUG("temperature mode %d not found", mode);
