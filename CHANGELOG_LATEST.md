@@ -11,7 +11,6 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - boiler auxheatersource [#2489](https://github.com/emsesp/EMS-ESP32/discussions/2489)
 - thermostat last error for RC100/300 [#2501](https://github.com/emsesp/EMS-ESP32/issues/2501)
 - boiler 0xC6 telegram [#1963](https://github.com/emsesp/EMS-ESP32/issues/1963)
-- HA optimistic [#2551](https://github.com/emsesp/EMS-ESP32/issues/2551)
 - CS6800i changes [#2448](https://github.com/emsesp/EMS-ESP32/issues/2448), [#2449](https://github.com/emsesp/EMS-ESP32/issues/2449)
 - charging pump [#2544](https://github.com/emsesp/EMS-ESP32/issues/2544)
 

@@ -296,18 +296,6 @@ const MqttSettings = () => {
               }
               label={LL.MQTT_PUBLISH_TEXT_3()}
             />
-            {data.ha_enabled && data.discovery_type === 0 && (
-              <BlockFormControlLabel
-                control={
-                  <Checkbox
-                    name="ha_optimistic"
-                    checked={data.ha_optimistic}
-                    onChange={updateFormValue}
-                  />
-                }
-                label="Optimistic"
-              />
-            )}
           </Grid>
           {data.ha_enabled && (
             <Grid container spacing={2} rowSpacing={0}>

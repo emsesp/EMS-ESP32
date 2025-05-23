@@ -567,7 +567,6 @@ let mqtt_settings = {
   rootCA: '',
   mqtt_retain: false,
   ha_enabled: true,
-  ha_optimistic: false,
   nested_format: 1,
   discovery_type: 0,
   discovery_prefix: 'homeassistant',
