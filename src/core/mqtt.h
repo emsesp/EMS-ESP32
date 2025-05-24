@@ -210,14 +210,6 @@ class Mqtt {
         ha_enabled_ = ha_enabled;
     }
 
-    static bool ha_optimistic() {
-        return ha_optimistic_;
-    }
-
-    static void ha_optimistic(bool ha_optimistic) {
-        ha_optimistic_ = ha_optimistic;
-    }
-
     static bool ha_climate_reset() {
         return ha_climate_reset_;
     }
@@ -321,7 +313,6 @@ class Mqtt {
     static uint32_t    publish_time_heartbeat_;
     static bool        mqtt_enabled_;
     static bool        ha_enabled_;
-    static bool        ha_optimistic_;
     static uint8_t     nested_format_;
     static uint8_t     entity_format_;
     static std::string discovery_prefix_;

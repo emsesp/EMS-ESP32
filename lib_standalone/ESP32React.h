@@ -36,7 +36,6 @@ class DummySettings {
     String   discovery_prefix   = "homeassistant";
     uint8_t  discovery_type     = 0; // HA
     bool     ha_enabled         = true;
-    bool     ha_optimistic      = false;
     String   base               = "ems-esp";
     bool     publish_single     = false;
     bool     publish_single2cmd = false;
