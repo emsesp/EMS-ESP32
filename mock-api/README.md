@@ -3,6 +3,7 @@ When developing and testing the web interface, it's handy not to bother with re-
 # prerequisites
 
 - Install the latest LTS of NodeJS
+- install corepack `npm install -g corepack@latest` and `orepack enable`
 - Install pnpm (`corepack use pnpm@latest-10` on linux or `winget install -e --id pnpm.pnpm` on windows). See <https://pnpm.io/installation>
 - Install bun (<https://bun.sh/docs/installation>)
 - type `pnpm install` from this `mock-api` folder to build
