@@ -53,7 +53,7 @@ custom_password = admin
 ; example override for lib_deps and using locally built modules
 ; lib_deps =
 ;   bblanchon/ArduinoJson @ 7.4.1
-;   ESP32Async/AsyncTCP @ 3.4.2
+;   ESP32Async/AsyncTCP @ 3.4.3
 ;   ESP32Async/ESPAsyncWebServer @ 3.7.7
 ;   file://${PROJECT_DIR}/../modules/EMS-ESP-Modules
 ;   ; https://github.com/emsesp/EMS-ESP-Modules.git @ 1.0.7
