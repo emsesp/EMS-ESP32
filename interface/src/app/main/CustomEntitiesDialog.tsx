@@ -143,7 +143,7 @@ const CustomEntitiesDialog = ({
                   name="hide"
                 />
               }
-              label="API/Mqtt"
+              label="API/MQTT"
             />
           </Grid>
           <Grid>
