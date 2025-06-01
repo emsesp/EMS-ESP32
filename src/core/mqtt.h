@@ -144,6 +144,13 @@ class Mqtt {
         return mqtt_basename_;
     }
 
+    // create basename from the mqtt base
+    // and replacing all / with underscores, in case it's a path
+    static void basename(const std::string & base) {
+        mqtt_basename_ = base;
+        std::replace(mqtt_basename_.begin(), mqtt_basename_.end(), '/', '_');
+    }
+
     // returns the discovery MQTT topic prefix and adds a /
     static std::string discovery_prefix() {
         if (discovery_prefix_.empty()) {
@@ -299,7 +306,7 @@ class Mqtt {
 
     // settings, copied over
     static std::string mqtt_base_;
-    static std::string mqtt_basename_;
+    static std::string mqtt_basename_; // base name for MQTT topics with / replaced with _
     static uint8_t     mqtt_qos_;
     static bool        mqtt_retain_;
     static uint32_t    publish_time_;
