@@ -433,7 +433,7 @@ void WebCustomEntityService::publish(const bool force) {
                     snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name.c_str());
                 }
                 char command_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-                snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::basename().c_str(), F_(custom), entityItem.name.c_str());
+                snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(custom), entityItem.name.c_str());
                 config["cmd_t"] = command_topic;
             } else {
                 if (entityItem.value_type == DeviceValueType::BOOL) {
