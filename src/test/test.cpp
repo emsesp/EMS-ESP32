@@ -921,6 +921,27 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         ok = true;
     }
 
+    if (command == "hpmode") {
+        shell.printfln("Testing MQTT with hpmode...");
+
+        Mqtt::ha_enabled(false);
+        Mqtt::enabled(true);
+
+        Mqtt::entity_format(Mqtt::entityFormat::SINGLE_LONG); // SINGLE_LONG, SINGLE_SHORT, MULTI_SHORT
+        System::test_set_all_active(true);                    // include all entities and give them fake values
+        add_device(10, 158);
+
+        // EMSESP::mqtt_.incoming("ems-esp/thermostat/hc1/hpmode", "cooling");
+        EMSESP::mqtt_.incoming("ems-esp/thermostat/hc1/hpmode", "heating & cooling");
+
+        EMSESP::publish_all(true);
+
+        Mqtt::resubscribe();
+        Mqtt::show_mqtt(shell); // show queue
+
+        ok = true;
+    }
+
     if (command == "healthcheck") {
         // n=1 = EMSESP::system_.HEALTHCHECK_NO_BUS
         // n=2 = EMSESP::system_.HEALTHCHECK_NO_NETWORK

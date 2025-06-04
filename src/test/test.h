@@ -56,11 +56,12 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "telegram_dump"
 // #define EMSESP_DEBUG_DEFAULT "memory"
 // #define EMSESP_DEBUG_DEFAULT "coldshot"
-#define EMSESP_DEBUG_DEFAULT "custom"
+// #define EMSESP_DEBUG_DEFAULT "custom"
 // #define EMSESP_DEBUG_DEFAULT "scheduler"
 // #define EMSESP_DEBUG_DEFAULT "heat_exchange"
 // #define EMSESP_DEBUG_DEFAULT "ls"
 // #define EMSESP_DEBUG_DEFAULT "upload"
+#define EMSESP_DEBUG_DEFAULT "hpmode"
 
 #ifndef EMSESP_DEBUG_DEFAULT
 #define EMSESP_DEBUG_DEFAULT "general"
