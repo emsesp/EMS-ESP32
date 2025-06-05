@@ -25,6 +25,8 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - IPM DHW module, [#2524](https://github.com/emsesp/EMS-ESP32/issues/2524)
 - charge optimization [#2543](https://github.com/emsesp/EMS-ESP32/issues/2543)
 - shower active state retained, shows correctly in HA
+- MQTT Command Topic with slashes [#2571](https://github.com/emsesp/EMS-ESP32/issues/2571)
+- Add pulsed water meter input to V1.3 gateway with Lilygo S3 [#2550](https://github.com/emsesp/EMS-ESP32/issues/2550)
 
 ## Changed
 
