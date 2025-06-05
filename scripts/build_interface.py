@@ -9,7 +9,7 @@ def buildWeb():
     print("Building web interface...")
     try:
         env.Execute("pnpm install")
-        env.Execute("pnpm typesafe-i18n --no-watch")
+        env.Execute("pnpm typesafe-i18n")
         with open("./src/i18n/i18n-util.ts") as r:
             text = r.read().replace("Locales = 'pl'", "Locales = 'en'")
         with open("./src/i18n/i18n-util.ts", "w") as w:

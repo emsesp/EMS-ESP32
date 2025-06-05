@@ -26,7 +26,7 @@ MqttClient * Mqtt::mqttClient_;
 
 // static parameters we make global
 std::string Mqtt::mqtt_base_;
-std::string Mqtt::mqtt_basename_;
+std::string Mqtt::mqtt_basename_; // base name for MQTT topics with / replaced with _. Used for uniq_id in HA
 uint8_t     Mqtt::mqtt_qos_;
 bool        Mqtt::mqtt_retain_;
 uint32_t    Mqtt::publish_time_boiler_;
@@ -359,10 +359,8 @@ void Mqtt::load_settings() {
         publish_time_heartbeat_  = mqttSettings.publish_time_heartbeat * 1000;
     });
 
-    // create basename from the mqtt base
-    // and replacing all / with underscores, in case it's a path
-    mqtt_basename_ = mqtt_base_;
-    std::replace(mqtt_basename_.begin(), mqtt_basename_.end(), '/', '_');
+    // create unique ID from the mqtt base replacing all / with underscores, in case it's a path
+    basename(mqtt_base_);
 }
 
 // start mqtt
@@ -494,7 +492,7 @@ void Mqtt::on_connect() {
     load_settings(); // reload MQTT settings - in case they have changes
 
     if (ha_enabled_) {
-        queue_unsubscribe_message(discovery_prefix_ + "/+/" + mqtt_basename_ + "/#");
+        queue_unsubscribe_message(discovery_prefix_ + "/+/" + Mqtt::basename() + "/#");
         EMSESP::reset_mqtt_ha(); // re-create all HA devices if there are any
         ha_status();             // create the EMS-ESP device in HA, which is MQTT retained
         ha_climate_reset(true);
@@ -504,7 +502,7 @@ void Mqtt::on_connect() {
         // If HA is enabled the subscriptions are removed.
         // As described in the doc (https://docs.emsesp.org/Troubleshooting?id=home-assistant):
         // disable HA, wait 5 minutes (to allow the broker to send all), than reenable HA again.
-        queue_subscribe_message(discovery_prefix_ + "/+/" + mqtt_basename_ + "/#");
+        queue_subscribe_message(discovery_prefix_ + "/+/" + Mqtt::basename() + "/#");
     }
 
     // send initial MQTT messages for some of our services
@@ -556,7 +554,7 @@ void Mqtt::ha_status() {
     ids.add(Mqtt::basename());
 
     char topic[MQTT_TOPIC_MAX_SIZE];
-    snprintf(topic, sizeof(topic), "binary_sensor/%s/system_status/config", mqtt_basename_.c_str());
+    snprintf(topic, sizeof(topic), "binary_sensor/%s/system_status/config", Mqtt::basename().c_str());
     Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
 // create the HA sensors - must match the MQTT payload keys in the heartbeat topic
@@ -733,7 +731,7 @@ bool Mqtt::queue_remove_topic(const char * topic) {
     }
 }
 
-// queue a Home Assistant config topic and payload, with retain flag off.
+// queue a Home Assistant config topic and payload, with retain flag set
 bool Mqtt::queue_ha(const char * topic, const JsonObjectConst payload) {
     if (!enabled()) {
         return false;
@@ -861,7 +859,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // create the uniq_d based on the entity format
     if (Mqtt::entity_format() == entityFormat::MULTI_SHORT) {
         // base name + shortname
-        snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
+        snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", Mqtt::basename().c_str(), device_name, entity_with_tag);
     } else if (Mqtt::entity_format() == entityFormat::SINGLE_SHORT) {
         // shortname only (=default)
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, entity_with_tag);
@@ -895,15 +893,15 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
                     snprintf(entity_with_tag, sizeof(entity_with_tag), "%sww", dhw_old[i]);
                 }
             }
-            snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
+            snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", Mqtt::basename().c_str(), device_name, entity_with_tag);
         } else if (has_tag && device_type == EMSdevice::DeviceType::WATER && tag >= DeviceValue::DeviceValueTAG::TAG_DHW3) {
             snprintf(entity_with_tag, sizeof(entity_with_tag), "wwc%d_%s", tag - DeviceValue::DeviceValueTAG::TAG_DHW1 + 1, entity);
-            snprintf(uniq_id, sizeof(uniq_id), "%s_solar_%s", mqtt_basename_.c_str(), entity_with_tag);
+            snprintf(uniq_id, sizeof(uniq_id), "%s_solar_%s", Mqtt::basename().c_str(), entity_with_tag);
         } else if (has_tag && device_type == EMSdevice::DeviceType::WATER && tag >= DeviceValue::DeviceValueTAG::TAG_DHW1) {
             snprintf(entity_with_tag, sizeof(entity_with_tag), "wwc%d_%s", tag - DeviceValue::DeviceValueTAG::TAG_DHW1 + 1, entity);
-            snprintf(uniq_id, sizeof(uniq_id), "%s_mixer_%s", mqtt_basename_.c_str(), entity_with_tag);
+            snprintf(uniq_id, sizeof(uniq_id), "%s_mixer_%s", Mqtt::basename().c_str(), entity_with_tag);
         } else {
-            snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
+            snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", Mqtt::basename().c_str(), device_name, entity_with_tag);
         }
     } else {
         // entity_format is 0, the old v3.4 style
@@ -936,7 +934,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // build a config topic that will be prefix onto a HA type (e.g. number, switch)
     char config_topic[70];
-    snprintf(config_topic, sizeof(config_topic), "%s/%s_%s/config", mqtt_basename_.c_str(), device_name, entity_with_tag);
+    snprintf(config_topic, sizeof(config_topic), "%s/%s_%s/config", Mqtt::base().c_str(), device_name, entity_with_tag);
 
     // create the topic
     // depending on the type and whether the device entity is writable (i.e. a command)
@@ -1012,9 +1010,9 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         char command_topic[MQTT_TOPIC_MAX_SIZE];
         // add command topic
         if (tag >= DeviceValueTAG::TAG_HC1) {
-            snprintf(command_topic, sizeof(command_topic), "%s/%s/%s/%s", mqtt_basename_.c_str(), device_name, EMSdevice::tag_to_mqtt(tag), entity);
+            snprintf(command_topic, sizeof(command_topic), "%s/%s/%s/%s", Mqtt::base().c_str(), device_name, EMSdevice::tag_to_mqtt(tag), entity);
         } else {
-            snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", mqtt_basename_.c_str(), device_name, entity);
+            snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), device_name, entity);
         }
         doc["cmd_t"] = command_topic;
 
@@ -1343,6 +1341,10 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
     doc["max_temp"]   = Helpers::render_value(max_s, max, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
     doc["temp_step"]  = "0.5";
     doc["mode_cmd_t"] = mode_cmd_s;
+
+    // add hvac_action - https://github.com/emsesp/EMS-ESP32/discussions/2562
+    doc["action_topic"]    = "~/boiler_data";
+    doc["action_template"] = "{% if value_json.heatingactive=='on'%}heating{%else%}idle{%endif%}";
 
     // the HA climate component only responds to auto, heat and off
     JsonArray modes = doc["modes"].to<JsonArray>();

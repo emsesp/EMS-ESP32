@@ -187,7 +187,7 @@ class AnalogSensor {
     std::vector<Sensor> sensors_; // our list of sensors
 
     bool     analog_enabled_;
-    bool     changed_     = false;
+    bool     changed_     = true; // this will force a publish of all sensors when initialising
     uint32_t sensorfails_ = 0;
     uint32_t sensorreads_ = 0;
 };

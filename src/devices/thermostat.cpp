@@ -4171,12 +4171,15 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
         // add the write command to the Tx queue. value is *2
         // post validate is the corresponding monitor or set type IDs as they can differ per model
         write_command(set_typeid, offset, (uint8_t)(temperature * (float)factor), validate_typeid);
+
         // update selTemp now, readback from monitor telegram takes a while
         if (mode == HeatingCircuit::Mode::AUTO) {
-            has_update(hc->selTemp,(int16_t)(temperature * factor));
+            has_update(hc->selTemp, (int16_t)(temperature * factor));
+            // read_command(0x08, 0x18); // UBAMonitorFast
         }
         return true;
     }
+
     LOG_DEBUG("temperature mode %d not found", mode);
     return false;
 }
