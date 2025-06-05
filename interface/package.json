@@ -57,7 +57,7 @@
     "eslint-config-prettier": "^10.1.5",
     "prettier": "^3.5.3",
     "rollup-plugin-visualizer": "^5.14.0",
-    "terser": "^5.40.0",
+    "terser": "^5.41.0",
     "typescript-eslint": "8.32.1",
     "vite": "^6.3.5",
     "vite-plugin-imagemin": "^0.6.1",
