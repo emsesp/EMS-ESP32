@@ -26,7 +26,7 @@
 // Boilers - 0x08
 {  8, DeviceType::BOILER, "CS5800i, CS6800i, WLW176i, WLW186i", DeviceFlags::EMS_DEVICE_FLAG_CS6800},
 { 12, DeviceType::BOILER, "C1200W", DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{ 16, DeviceType::BOILER, "CS5800iG", DeviceFlags::EMS_DEVICE_FLAG_CS6800},
+{ 16, DeviceType::BOILER, "CS5800iG", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 64, DeviceType::BOILER, "BK13/BK15, Smartline, GB1*2", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 72, DeviceType::BOILER, "Logano GB1*5, Logamatic MC10", DeviceFlags::EMS_DEVICE_FLAG_EMS},
 { 81, DeviceType::BOILER, "Cascade CM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
@@ -154,6 +154,7 @@
 
 // Heat Pumps - 0x53
 {248, DeviceType::HEATPUMP, "Hybrid Manager HM200", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{16, DeviceType::HEATPUMP, "CSH5800iG", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Ventilation - 0x51
 {231, DeviceType::VENTILATION, "Logavent HRV176", DeviceFlags::EMS_DEVICE_FLAG_NONE},
