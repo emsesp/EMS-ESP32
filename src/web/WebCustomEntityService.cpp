@@ -326,15 +326,14 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
 
 // build the json for specific entity
 void WebCustomEntityService::get_value_json(JsonObject output, CustomEntityItem & entity) {
-    output["name"]     = entity.name;
-    output["fullname"] = entity.name;
-    output["storage"]  = entity.ram ? "ram" : "ems";
-    output["type"]     = entity.value_type == DeviceValueType::BOOL ? "boolean" : entity.value_type == DeviceValueType::STRING ? "string" : F_(number);
-    // add uom state class and device class
-    Mqtt::add_ha_uom(output, entity.value_type, entity.uom, nullptr, false);
+    output["name"]      = entity.name;
+    output["fullname"]  = entity.name;
+    output["storage"]   = entity.ram ? "ram" : "ems";
+    output["type"]      = entity.value_type == DeviceValueType::BOOL ? "boolean" : entity.value_type == DeviceValueType::STRING ? "string" : F_(number);
     output["readable"]  = true;
     output["writeable"] = entity.writeable;
     output["visible"]   = true;
+
     if (entity.ram == 0) {
         output["device_id"] = Helpers::hextoa(entity.device_id);
         output["type_id"]   = Helpers::hextoa(entity.type_id);
@@ -345,6 +344,10 @@ void WebCustomEntityService::get_value_json(JsonObject output, CustomEntityItem 
             output["bytes"] = (uint8_t)entity.factor;
         }
     }
+
+    // add uom state class and device class
+    Mqtt::add_ha_classes(output, EMSdevice::DeviceType::SYSTEM, entity.value_type, entity.uom, nullptr, false);
+
     render_value(output, entity, true); // create the "value" field
 }
 
@@ -445,12 +448,12 @@ void WebCustomEntityService::publish(const bool force) {
 
             if (entityItem.value_type == DeviceValueType::BOOL) {
                 // applies to both Binary Sensor (read only) and a Switch (for a command)
-                Mqtt::add_ha_bool(config);
+                Mqtt::add_ha_bool(config.as<JsonObject>());
             }
 
-            Mqtt::add_ha_uom(config.as<JsonObject>(), entityItem.value_type, entityItem.uom); // add uom
-
-            Mqtt::add_ha_sections_to_doc(F_(custom), stat_t, config, !ha_created, val_cond);
+            Mqtt::add_ha_classes(config.as<JsonObject>(), EMSdevice::DeviceType::SYSTEM, entityItem.value_type, entityItem.uom);
+            Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Custom Entities", nullptr, nullptr, false);
+            Mqtt::add_ha_avail_section(config.as<JsonObject>(), stat_t, !ha_created, val_cond);
 
             ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
         }
