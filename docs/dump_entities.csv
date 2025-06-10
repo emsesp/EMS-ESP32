@@ -322,6 +322,214 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "C1200W",boiler,12,nrgtotal,total energy,uint24 (>=0<=167772),kWh,false,sensor.boiler_total_energy,sensor.boiler_nrgtotal,5,0,1/100,83,2
 "C1200W",boiler,12,nrgheat,energy heating,uint24 (>=0<=10000000),kWh,true,number.boiler_energy_heating,number.boiler_nrgheat,5,0,1/100,85,2
 "C1200W",boiler,12,dhw.nrg,energy,uint24 (>=0<=10000000),kWh,true,number.boiler_dhw_energy,number.boiler_dhw_nrg,5,9,1/100,0,2
+"CS5800iG",boiler,16,reset,reset,cmd [-\|maintenance\|error\|history\|message], ,true,sensor.boiler_reset,sensor.boiler_reset,5,0,1,0,1
+"CS5800iG",boiler,16,heatingoff,force heating off,boolean, ,true,switch.boiler_force_heating_off,switch.boiler_heatingoff,5,0,1,1,1
+"CS5800iG",boiler,16,heatingactive,heating active,boolean, ,false,binary_sensor.boiler_heating_active,binary_sensor.boiler_heatingactive,5,0,1,2,1
+"CS5800iG",boiler,16,tapwateractive,tapwater active,boolean, ,false,binary_sensor.boiler_tapwater_active,binary_sensor.boiler_tapwateractive,5,0,1,3,1
+"CS5800iG",boiler,16,selflowtemp,selected flow temperature,uint8 (>=0<=90),C,true,number.boiler_selected_flow_temperature,number.boiler_selflowtemp,5,0,1,4,1
+"CS5800iG",boiler,16,heatingpumpmod,heating pump modulation,uint8 (>=0<=100),%,false,sensor.boiler_heating_pump_modulation,sensor.boiler_heatingpumpmod,5,0,1,5,1
+"CS5800iG",boiler,16,outdoortemp,outside temperature,int16 (>=-3199<=3199),C,false,sensor.boiler_outside_temperature,sensor.boiler_outdoortemp,5,0,1/10,6,1
+"CS5800iG",boiler,16,curflowtemp,current flow temperature,uint16 (>=0<=3199),C,false,sensor.boiler_current_flow_temperature,sensor.boiler_curflowtemp,5,0,1/10,7,1
+"CS5800iG",boiler,16,rettemp,return temperature,uint16 (>=0<=3199),C,false,sensor.boiler_return_temperature,sensor.boiler_rettemp,5,0,1/10,8,1
+"CS5800iG",boiler,16,switchtemp,mixing switch temperature,uint16 (>=0<=3199),C,false,sensor.boiler_mixing_switch_temperature,sensor.boiler_switchtemp,5,0,1/10,9,1
+"CS5800iG",boiler,16,syspress,system pressure,uint8 (>=0<=25),bar,false,sensor.boiler_system_pressure,sensor.boiler_syspress,5,0,1/10,10,1
+"CS5800iG",boiler,16,boiltemp,actual boiler temperature,uint16 (>=0<=3199),C,false,sensor.boiler_actual_boiler_temperature,sensor.boiler_boiltemp,5,0,1/10,11,1
+"CS5800iG",boiler,16,headertemp,low loss header,uint16 (>=0<=3199),C,false,sensor.boiler_low_loss_header,sensor.boiler_headertemp,5,0,1/10,12,1
+"CS5800iG",boiler,16,heatingactivated,heating activated,boolean, ,true,switch.boiler_heating_activated,switch.boiler_heatingactivated,5,0,1,13,1
+"CS5800iG",boiler,16,heatingtemp,heating temperature,uint8 (>=0<=90),C,true,number.boiler_heating_temperature,number.boiler_heatingtemp,5,0,1,14,1
+"CS5800iG",boiler,16,heatingpump,heating pump,boolean, ,false,binary_sensor.boiler_heating_pump,binary_sensor.boiler_heatingpump,5,0,1,15,1
+"CS5800iG",boiler,16,pumpmodmax,boiler pump max power,uint8 (>=0<=100),%,true,number.boiler_boiler_pump_max_power,number.boiler_pumpmodmax,5,0,1,16,1
+"CS5800iG",boiler,16,pumpmodmin,boiler pump min power,uint8 (>=0<=100),%,true,number.boiler_boiler_pump_min_power,number.boiler_pumpmodmin,5,0,1,17,1
+"CS5800iG",boiler,16,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
+"CS5800iG",boiler,16,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
+"CS5800iG",boiler,16,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
+"CS5800iG",boiler,16,pumpontemp,pump logic temperature,uint8 (>=0<=60),C,true,number.boiler_pump_logic_temperature,number.boiler_pumpontemp,5,0,1,21,1
+"CS5800iG",boiler,16,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,22,1
+"CS5800iG",boiler,16,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,23,1
+"CS5800iG",boiler,16,burnstarts,burner starts,uint24 (>=0<=16777214), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,24,2
+"CS5800iG",boiler,16,burnworkmin,total burner operating time,time (>=0<=16777214),minutes,false,sensor.boiler_total_burner_operating_time,sensor.boiler_burnworkmin,5,0,1,26,2
+"CS5800iG",boiler,16,burn2workmin,burner stage 2 operating time,time (>=0<=16777214),minutes,false,sensor.boiler_burner_stage_2_operating_time,sensor.boiler_burn2workmin,5,0,1,28,2
+"CS5800iG",boiler,16,heatworkmin,total heat operating time,time (>=0<=16777214),minutes,false,sensor.boiler_total_heat_operating_time,sensor.boiler_heatworkmin,5,0,1,30,2
+"CS5800iG",boiler,16,heatstarts,burner starts heating,uint24 (>=0<=16777214), ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,5,0,1,32,2
+"CS5800iG",boiler,16,ubauptime,total UBA operating time,time (>=0<=16777214),minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,5,0,1,34,2
+"CS5800iG",boiler,16,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,5,0,1,36,28
+"CS5800iG",boiler,16,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,5,0,1,64,2
+"CS5800iG",boiler,16,servicecodenumber,service code number,uint16 (>=0<=31999), ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,5,0,1,66,1
+"CS5800iG",boiler,16,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,5,0,1,67,2
+"CS5800iG",boiler,16,maintenance,maintenance scheduled,enum [off\|time\|date\|manual], ,true,select.boiler_maintenance_scheduled,select.boiler_maintenance,5,0,1,69,1
+"CS5800iG",boiler,16,maintenancetime,time to next maintenance,uint16 (>=0<=31999),hours,true,number.boiler_time_to_next_maintenance,number.boiler_maintenancetime,5,0,1,70,1
+"CS5800iG",boiler,16,maintenancedate,next maintenance date,string, ,true,sensor.boiler_next_maintenance_date,sensor.boiler_maintenancedate,5,0,1,71,6
+"CS5800iG",boiler,16,emergencyops,emergency operation,boolean, ,true,switch.boiler_emergency_operation,switch.boiler_emergencyops,5,0,1,77,1
+"CS5800iG",boiler,16,emergencytemp,emergency temperature,uint8 (>=15<=70),C,true,number.boiler_emergency_temperature,number.boiler_emergencytemp,5,0,1,78,1
+"CS5800iG",boiler,16,pc0flow,Flow PC0,int16 (>=-31999<=31999),l/h,false,sensor.boiler_Flow_PC0,sensor.boiler_pc0flow,5,0,1,79,1
+"CS5800iG",boiler,16,pc1flow,Flow PC1,int16 (>=-31999<=31999),l/h,false,sensor.boiler_Flow_PC1,sensor.boiler_pc1flow,5,0,1,80,1
+"CS5800iG",boiler,16,pc1on,PC1,boolean, ,false,binary_sensor.boiler_PC1,binary_sensor.boiler_pc1on,5,0,1,81,1
+"CS5800iG",boiler,16,pc1rate,PC1 rate,uint8 (>=0<=100),%,false,sensor.boiler_PC1_rate,sensor.boiler_pc1rate,5,0,1,82,1
+"CS5800iG",boiler,16,nrgtotal,total energy,uint24 (>=0<=167772),kWh,false,sensor.boiler_total_energy,sensor.boiler_nrgtotal,5,0,1/100,83,2
+"CS5800iG",boiler,16,dhw.nrg,energy,uint24 (>=0<=167772),kWh,false,sensor.boiler_dhw_energy,sensor.boiler_dhw_nrg,5,9,1/100,0,2
+"CS5800iG",boiler,16,nrgheat,energy heating,uint24 (>=0<=167772),kWh,false,sensor.boiler_energy_heating,sensor.boiler_nrgheat,5,0,1/100,85,2
+"CS5800iG",boiler,16,nrgcool,energy cooling,uint24 (>=0<=167772),kWh,false,sensor.boiler_energy_cooling,sensor.boiler_nrgcool,5,0,1/100,87,2
+"CS5800iG",boiler,16,metertotal,meter total,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_total,sensor.boiler_metertotal,5,0,1/100,89,2
+"CS5800iG",boiler,16,metercomp,meter compressor,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_compressor,sensor.boiler_metercomp,5,0,1/100,91,2
+"CS5800iG",boiler,16,metereheat,meter e-heater,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_e-heater,sensor.boiler_metereheat,5,0,1/100,93,2
+"CS5800iG",boiler,16,meterheat,meter heating,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_heating,sensor.boiler_meterheat,5,0,1/100,95,2
+"CS5800iG",boiler,16,metercool,meter cooling,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_cooling,sensor.boiler_metercool,5,0,1/100,97,2
+"CS5800iG",boiler,16,dhw.meter,meter,uint24 (>=0<=167772),kWh,false,sensor.boiler_dhw_meter,sensor.boiler_dhw_meter,5,9,1/100,2,2
+"CS5800iG",boiler,16,uptimetotal,heatpump total uptime,time (>=0<=279620),minutes,false,sensor.boiler_heatpump_total_uptime,sensor.boiler_uptimetotal,5,0,1/60,99,2
+"CS5800iG",boiler,16,uptimecontrol,total operating time heat,time (>=0<=279620),minutes,false,sensor.boiler_total_operating_time_heat,sensor.boiler_uptimecontrol,5,0,1/60,101,2
+"CS5800iG",boiler,16,uptimecompheating,operating time compressor heating,time (>=0<=279620),minutes,false,sensor.boiler_operating_time_compressor_heating,sensor.boiler_uptimecompheating,5,0,1/60,103,2
+"CS5800iG",boiler,16,uptimecompcooling,operating time compressor cooling,time (>=0<=279620),minutes,false,sensor.boiler_operating_time_compressor_cooling,sensor.boiler_uptimecompcooling,5,0,1/60,105,2
+"CS5800iG",boiler,16,dhw.uptimecomp,operating time compressor,time (>=0<=279620),minutes,false,sensor.boiler_dhw_operating_time_compressor,sensor.boiler_dhw_uptimecomp,5,9,1/60,4,2
+"CS5800iG",boiler,16,uptimecomppool,operating time compressor pool,time (>=0<=279620),minutes,false,sensor.boiler_operating_time_compressor_pool,sensor.boiler_uptimecomppool,5,0,1/60,107,2
+"CS5800iG",boiler,16,totalcompstarts,total compressor control starts,uint24 (>=0<=16777214), ,false,sensor.boiler_total_compressor_control_starts,sensor.boiler_totalcompstarts,5,0,1,109,2
+"CS5800iG",boiler,16,heatingstarts,heating control starts,uint24 (>=0<=16777214), ,false,sensor.boiler_heating_control_starts,sensor.boiler_heatingstarts,5,0,1,111,2
+"CS5800iG",boiler,16,coolingstarts,cooling control starts,uint24 (>=0<=16777214), ,false,sensor.boiler_cooling_control_starts,sensor.boiler_coolingstarts,5,0,1,113,2
+"CS5800iG",boiler,16,dhw.startshp,starts hp,uint24 (>=0<=16777214), ,false,sensor.boiler_dhw_starts_hp,sensor.boiler_dhw_startshp,5,9,1,6,2
+"CS5800iG",boiler,16,poolstarts,pool control starts,uint24 (>=0<=16777214), ,false,sensor.boiler_pool_control_starts,sensor.boiler_poolstarts,5,0,1,115,2
+"CS5800iG",boiler,16,nrgconstotal,total energy consumption,uint24 (>=0<=16777214),kWh,false,sensor.boiler_total_energy_consumption,sensor.boiler_nrgconstotal,5,0,1,117,2
+"CS5800iG",boiler,16,nrgconscomptotal,total energy consumption compressor,uint24 (>=0<=16777214),kWh,false,sensor.boiler_total_energy_consumption_compressor,sensor.boiler_nrgconscomptotal,5,0,1,119,2
+"CS5800iG",boiler,16,nrgconscompheating,energy consumption compressor heating,uint24 (>=0<=16777214),kWh,false,sensor.boiler_energy_consumption_compressor_heating,sensor.boiler_nrgconscompheating,5,0,1,121,2
+"CS5800iG",boiler,16,dhw.nrgconscomp,energy consumption compressor,uint24 (>=0<=16777214),kWh,false,sensor.boiler_dhw_energy_consumption_compressor,sensor.boiler_dhw_nrgconscomp,5,9,1,8,2
+"CS5800iG",boiler,16,nrgconscompcooling,energy consumption compressor cooling,uint24 (>=0<=16777214),kWh,false,sensor.boiler_energy_consumption_compressor_cooling,sensor.boiler_nrgconscompcooling,5,0,1,123,2
+"CS5800iG",boiler,16,nrgconscomppool,energy consumption compressor pool,uint24 (>=0<=16777214),kWh,false,sensor.boiler_energy_consumption_compressor_pool,sensor.boiler_nrgconscomppool,5,0,1,125,2
+"CS5800iG",boiler,16,auxelecheatnrgconstotal,total aux elec. heater energy consumption,uint24 (>=0<=16777214),kWh,false,sensor.boiler_total_aux_elec._heater_energy_consumption,sensor.boiler_auxelecheatnrgconstotal,5,0,1,127,2
+"CS5800iG",boiler,16,auxelecheatnrgconsheating,aux elec. heater energy consumption heating,uint24 (>=0<=16777214),kWh,false,sensor.boiler_aux_elec._heater_energy_consumption_heating,sensor.boiler_auxelecheatnrgconsheating,5,0,1,129,2
+"CS5800iG",boiler,16,dhw.auxelecheatnrgcons,aux elec. heater energy consumption,uint24 (>=0<=16777214),kWh,false,sensor.boiler_dhw_aux_elec._heater_energy_consumption,sensor.boiler_dhw_auxelecheatnrgcons,5,9,1,10,2
+"CS5800iG",boiler,16,auxelecheatnrgconspool,aux elec. heater energy consumption pool,uint24 (>=0<=16777214),kWh,false,sensor.boiler_aux_elec._heater_energy_consumption_pool,sensor.boiler_auxelecheatnrgconspool,5,0,1,131,2
+"CS5800iG",boiler,16,nrgsupptotal,total energy supplied,uint24 (>=0<=16777214),kWh,false,sensor.boiler_total_energy_supplied,sensor.boiler_nrgsupptotal,5,0,1,133,2
+"CS5800iG",boiler,16,nrgsuppheating,total energy supplied heating,uint24 (>=0<=16777214),kWh,false,sensor.boiler_total_energy_supplied_heating,sensor.boiler_nrgsuppheating,5,0,1,135,2
+"CS5800iG",boiler,16,dhw.nrgsupp,total energy warm supplied,uint24 (>=0<=16777214),kWh,false,sensor.boiler_dhw_total_energy_warm_supplied,sensor.boiler_dhw_nrgsupp,5,9,1,12,2
+"CS5800iG",boiler,16,nrgsuppcooling,total energy supplied cooling,uint24 (>=0<=16777214),kWh,false,sensor.boiler_total_energy_supplied_cooling,sensor.boiler_nrgsuppcooling,5,0,1,137,2
+"CS5800iG",boiler,16,nrgsupppool,total energy supplied pool,uint24 (>=0<=16777214),kWh,false,sensor.boiler_total_energy_supplied_pool,sensor.boiler_nrgsupppool,5,0,1,139,2
+"CS5800iG",boiler,16,hppower,compressor power output,uint16 (>=0<=3199),kW,false,sensor.boiler_compressor_power_output,sensor.boiler_hppower,5,0,1/10,141,1
+"CS5800iG",boiler,16,hpmaxpower,compressor max power,uint8 (>=0<=100),%,true,number.boiler_compressor_max_power,number.boiler_hpmaxpower,5,0,1,142,1
+"CS5800iG",boiler,16,pvmaxcomp,pv compressor max power,uint8 (>=0<=25),kW,true,number.boiler_pv_compressor_max_power,number.boiler_pvmaxcomp,5,0,1/10,143,1
+"CS5800iG",boiler,16,powerreduction,power reduction,uint8 (>=30<=60),%,true,number.boiler_power_reduction,number.boiler_powerreduction,5,0,10,144,1
+"CS5800iG",boiler,16,hpsetdiffpress,set differential pressure,uint8 (>=150<=750),mbar,true,number.boiler_set_differential_pressure,number.boiler_hpsetdiffpress,5,0,50,145,1
+"CS5800iG",boiler,16,hpcompon,hp compressor,boolean, ,false,binary_sensor.boiler_hp_compressor,binary_sensor.boiler_hpcompon,5,0,1,146,1
+"CS5800iG",boiler,16,hpactivity,compressor activity,enum [off\|heating\|cooling\|hot water\|pool\|pool heating\|defrost\|compressor alarm], ,false,sensor.boiler_compressor_activity,sensor.boiler_hpactivity,5,0,1,147,1
+"CS5800iG",boiler,16,hpbrinepumpspd,brine pump speed,uint8 (>=0<=100),%,false,sensor.boiler_brine_pump_speed,sensor.boiler_hpbrinepumpspd,5,0,1,148,1
+"CS5800iG",boiler,16,hpswitchvalve,switch valve,boolean, ,false,binary_sensor.boiler_switch_valve,binary_sensor.boiler_hpswitchvalve,5,0,1,149,1
+"CS5800iG",boiler,16,hpcompspd,compressor speed,uint8 (>=0<=100),%,false,sensor.boiler_compressor_speed,sensor.boiler_hpcompspd,5,0,1,150,1
+"CS5800iG",boiler,16,hpcircspd,circulation pump speed,uint8 (>=0<=100),%,false,sensor.boiler_circulation_pump_speed,sensor.boiler_hpcircspd,5,0,1,151,1
+"CS5800iG",boiler,16,hpbrinein,brine in/evaporator,int16 (>=-3199<=3199),C,false,sensor.boiler_brine_in/evaporator,sensor.boiler_hpbrinein,5,0,1/10,152,1
+"CS5800iG",boiler,16,hpbrineout,brine out/condenser,int16 (>=-3199<=3199),C,false,sensor.boiler_brine_out/condenser,sensor.boiler_hpbrineout,5,0,1/10,153,1
+"CS5800iG",boiler,16,hptc0,heat carrier return (TC0),int16 (>=-3199<=3199),C,false,sensor.boiler_heat_carrier_return_(TC0),sensor.boiler_hptc0,5,0,1/10,154,1
+"CS5800iG",boiler,16,hptc1,heat carrier forward (TC1),int16 (>=-3199<=3199),C,false,sensor.boiler_heat_carrier_forward_(TC1),sensor.boiler_hptc1,5,0,1/10,155,1
+"CS5800iG",boiler,16,hptc3,condenser temperature (TC3),int16 (>=-3199<=3199),C,false,sensor.boiler_condenser_temperature_(TC3),sensor.boiler_hptc3,5,0,1/10,156,1
+"CS5800iG",boiler,16,hptr1,compressor temperature (TR1),int16 (>=-3199<=3199),C,false,sensor.boiler_compressor_temperature_(TR1),sensor.boiler_hptr1,5,0,1/10,157,1
+"CS5800iG",boiler,16,hptr3,refrigerant temperature liquid side (condenser output) (TR3),int16 (>=-3199<=3199),C,false,sensor.boiler_refrigerant_temperature_liquid_side_(condenser_output)_(TR3),sensor.boiler_hptr3,5,0,1/10,158,1
+"CS5800iG",boiler,16,hptr4,evaporator inlet temperature (TR4),int16 (>=-3199<=3199),C,false,sensor.boiler_evaporator_inlet_temperature_(TR4),sensor.boiler_hptr4,5,0,1/10,159,1
+"CS5800iG",boiler,16,hptr5,compressor inlet temperature (TR5),int16 (>=-3199<=3199),C,false,sensor.boiler_compressor_inlet_temperature_(TR5),sensor.boiler_hptr5,5,0,1/10,160,1
+"CS5800iG",boiler,16,hptr6,compressor outlet temperature (TR6),int16 (>=-3199<=3199),C,false,sensor.boiler_compressor_outlet_temperature_(TR6),sensor.boiler_hptr6,5,0,1/10,161,1
+"CS5800iG",boiler,16,hptr7,refrigerant temperature gas side (condenser input) (TR7),int16 (>=-3199<=3199),C,false,sensor.boiler_refrigerant_temperature_gas_side_(condenser_input)_(TR7),sensor.boiler_hptr7,5,0,1/10,162,1
+"CS5800iG",boiler,16,hptl2,air inlet temperature (TL2),int16 (>=-3199<=3199),C,false,sensor.boiler_air_inlet_temperature_(TL2),sensor.boiler_hptl2,5,0,1/10,163,1
+"CS5800iG",boiler,16,hppl1,low pressure side temperature (PL1),int16 (>=-3199<=3199),C,false,sensor.boiler_low_pressure_side_temperature_(PL1),sensor.boiler_hppl1,5,0,1/10,164,1
+"CS5800iG",boiler,16,hpph1,high pressure side temperature (PH1),int16 (>=-3199<=3199),C,false,sensor.boiler_high_pressure_side_temperature_(PH1),sensor.boiler_hpph1,5,0,1/10,165,1
+"CS5800iG",boiler,16,hpta4,drain pan temp (TA4),int16 (>=-3199<=3199),C,false,sensor.boiler_drain_pan_temp_(TA4),sensor.boiler_hpta4,5,0,1/10,166,1
+"CS5800iG",boiler,16,hptw1,reservoir temp (TW1),int16 (>=-3199<=3199),C,false,sensor.boiler_reservoir_temp_(TW1),sensor.boiler_hptw1,5,0,1/10,167,1
+"CS5800iG",boiler,16,poolsettemp,pool set temperature,uint8 (>=0<=127),C,true,number.boiler_pool_set_temperature,number.boiler_poolsettemp,5,0,1/2,168,1
+"CS5800iG",boiler,16,hp4way,4-way valve (VR4),enum [cooling & defrost\|heating & dhw], ,false,sensor.boiler_4-way_valve_(VR4),sensor.boiler_hp4way,5,0,1,169,1
+"CS5800iG",boiler,16,hpin1,input 1 state,boolean, ,false,binary_sensor.boiler_input_1_state,binary_sensor.boiler_hpin1,5,0,1,170,1
+"CS5800iG",boiler,16,hpin1opt,input 1 options,string, ,true,sensor.boiler_input_1_options,sensor.boiler_hpin1opt,5,0,1,171,8
+"CS5800iG",boiler,16,hpin2,input 2 state,boolean, ,false,binary_sensor.boiler_input_2_state,binary_sensor.boiler_hpin2,5,0,1,179,1
+"CS5800iG",boiler,16,hpin2opt,input 2 options,string, ,true,sensor.boiler_input_2_options,sensor.boiler_hpin2opt,5,0,1,180,8
+"CS5800iG",boiler,16,hpin3,input 3 state,boolean, ,false,binary_sensor.boiler_input_3_state,binary_sensor.boiler_hpin3,5,0,1,188,1
+"CS5800iG",boiler,16,hpin3opt,input 3 options,string, ,true,sensor.boiler_input_3_options,sensor.boiler_hpin3opt,5,0,1,189,8
+"CS5800iG",boiler,16,hpin4,input 4 state,boolean, ,false,binary_sensor.boiler_input_4_state,binary_sensor.boiler_hpin4,5,0,1,197,1
+"CS5800iG",boiler,16,hpin4opt,input 4 options,string, ,true,sensor.boiler_input_4_options,sensor.boiler_hpin4opt,5,0,1,198,8
+"CS5800iG",boiler,16,maxheatcomp,heat limit compressor,enum [0 kW\|3 kW\|6 kW\|9 kW], ,true,select.boiler_heat_limit_compressor,select.boiler_maxheatcomp,5,0,1,206,1
+"CS5800iG",boiler,16,maxheatheat,heat limit heating,enum [3 kW\|6 kW\|9 kW], ,true,select.boiler_heat_limit_heating,select.boiler_maxheatheat,5,0,1,207,1
+"CS5800iG",boiler,16,dhw.maxheat,heat limit,enum [3 kW\|6 kW\|9 kW], ,true,select.boiler_dhw_heat_limit,select.boiler_dhw_maxheat,5,9,1,14,1
+"CS5800iG",boiler,16,auxheatersource,aux heater source,enum [not installed\|electric heater\|exclusive\|parallel\|hybrid], ,true,select.boiler_aux_heater_source,select.boiler_auxheatersource,5,0,1,208,1
+"CS5800iG",boiler,16,pvcooling,cooling only with PV,boolean, ,true,switch.boiler_cooling_only_with_PV,switch.boiler_pvcooling,5,0,1,209,1
+"CS5800iG",boiler,16,auxheateronly,aux heater only,boolean, ,true,switch.boiler_aux_heater_only,switch.boiler_auxheateronly,5,0,1,210,1
+"CS5800iG",boiler,16,auxheateroff,disable aux heater,boolean, ,true,switch.boiler_disable_aux_heater,switch.boiler_auxheateroff,5,0,1,211,1
+"CS5800iG",boiler,16,auxheaterstatus,aux heater status,enum [off\|heating\|cooling\|hot water\|pool\|pool heating\|defrost\|compressor alarm], ,false,sensor.boiler_aux_heater_status,sensor.boiler_auxheaterstatus,5,0,1,212,1
+"CS5800iG",boiler,16,auxheaterlevel,aux heater level,uint8 (>=0<=100),%,false,sensor.boiler_aux_heater_level,sensor.boiler_auxheaterlevel,5,0,1,213,1
+"CS5800iG",boiler,16,auxheaterdelay,aux heater on delay,uint16 (>=10<=1000),K*min,true,number.boiler_aux_heater_on_delay,number.boiler_auxheaterdelay,5,0,10,214,1
+"CS5800iG",boiler,16,auxmaxlimit,aux heater max limit,uint8 (>=0<=10),K,true,number.boiler_aux_heater_max_limit,number.boiler_auxmaxlimit,5,0,1/10,215,1
+"CS5800iG",boiler,16,auxlimitstart,aux heater limit start,uint8 (>=0<=10),K,true,number.boiler_aux_heater_limit_start,number.boiler_auxlimitstart,5,0,1/10,216,1
+"CS5800iG",boiler,16,auxheatrmode,aux heater mode,enum [eco\|comfort], ,true,select.boiler_aux_heater_mode,select.boiler_auxheatrmode,5,0,1,217,1
+"CS5800iG",boiler,16,hphystheat,on/off hyst heat,uint16 (>=50<=1500),K*min,true,number.boiler_on/off_hyst_heat,number.boiler_hphystheat,5,0,5,218,1
+"CS5800iG",boiler,16,hphystcool,on/off hyst cool,uint16 (>=50<=1500),K*min,true,number.boiler_on/off_hyst_cool,number.boiler_hphystcool,5,0,5,219,1
+"CS5800iG",boiler,16,hphystpool,on/off hyst pool,uint16 (>=50<=1500),K*min,true,number.boiler_on/off_hyst_pool,number.boiler_hphystpool,5,0,5,220,1
+"CS5800iG",boiler,16,silentmode,silent mode,enum [off\|auto\|on], ,true,select.boiler_silent_mode,select.boiler_silentmode,5,0,1,221,1
+"CS5800iG",boiler,16,silentfrom,silent mode from,uint8 (>=0<=3810),minutes,true,number.boiler_silent_mode_from,number.boiler_silentfrom,5,0,15,222,1
+"CS5800iG",boiler,16,silentto,silent mode to,uint8 (>=0<=3810),minutes,true,number.boiler_silent_mode_to,number.boiler_silentto,5,0,15,223,1
+"CS5800iG",boiler,16,mintempsilent,min outside temp for silent mode,int8 (>=-126<=126),C,true,number.boiler_min_outside_temp_for_silent_mode,number.boiler_mintempsilent,5,0,1,224,1
+"CS5800iG",boiler,16,tempparmode,outside temp parallel mode,int8 (>=-126<=126),C,true,number.boiler_outside_temp_parallel_mode,number.boiler_tempparmode,5,0,1,225,1
+"CS5800iG",boiler,16,auxheatmix,aux heater mixing valve,int8 (>=-100<=100),%,false,sensor.boiler_aux_heater_mixing_valve,sensor.boiler_auxheatmix,5,0,1,226,1
+"CS5800iG",boiler,16,tempdiffheat,temp diff TC3/TC0 heat,uint8 (>=2<=10),K,true,number.boiler_temp_diff_TC3/TC0_heat,number.boiler_tempdiffheat,5,0,1/10,227,1
+"CS5800iG",boiler,16,tempdiffcool,temp diff TC3/TC0 cool,uint8 (>=2<=10),K,true,number.boiler_temp_diff_TC3/TC0_cool,number.boiler_tempdiffcool,5,0,1/10,228,1
+"CS5800iG",boiler,16,vpcooling,valve/pump cooling,boolean, ,true,switch.boiler_valve/pump_cooling,switch.boiler_vpcooling,5,0,1,229,1
+"CS5800iG",boiler,16,heatcable,heating cable,boolean, ,true,switch.boiler_heating_cable,switch.boiler_heatcable,5,0,1,230,1
+"CS5800iG",boiler,16,vc0valve,VC0 valve,boolean, ,true,switch.boiler_VC0_valve,switch.boiler_vc0valve,5,0,1,231,1
+"CS5800iG",boiler,16,primepump,primary heatpump,boolean, ,true,switch.boiler_primary_heatpump,switch.boiler_primepump,5,0,1,232,1
+"CS5800iG",boiler,16,primepumpmod,primary heatpump modulation,uint8 (>=0<=100),%,true,number.boiler_primary_heatpump_modulation,number.boiler_primepumpmod,5,0,1,233,1
+"CS5800iG",boiler,16,hp3way,3-way valve,boolean, ,true,switch.boiler_3-way_valve,switch.boiler_hp3way,5,0,1,234,1
+"CS5800iG",boiler,16,elheatstep1,el. heater step 1,boolean, ,true,switch.boiler_el._heater_step_1,switch.boiler_elheatstep1,5,0,1,235,1
+"CS5800iG",boiler,16,elheatstep2,el. heater step 2,boolean, ,true,switch.boiler_el._heater_step_2,switch.boiler_elheatstep2,5,0,1,236,1
+"CS5800iG",boiler,16,elheatstep3,el. heater step 3,boolean, ,true,switch.boiler_el._heater_step_3,switch.boiler_elheatstep3,5,0,1,237,1
+"CS5800iG",boiler,16,hpea0,condensate reservoir heating (EA0),boolean, ,false,binary_sensor.boiler_condensate_reservoir_heating_(EA0),binary_sensor.boiler_hpea0,5,0,1,238,1
+"CS5800iG",boiler,16,hppumpmode,primary heatpump mode,enum [auto\|continuous], ,true,select.boiler_primary_heatpump_mode,select.boiler_hppumpmode,5,0,1,239,1
+"CS5800iG",boiler,16,fan,fan,uint8 (>=20<=100),%,true,number.boiler_fan,number.boiler_fan,5,0,1,240,1
+"CS5800iG",boiler,16,shutdown,shutdown,cmd [off\|on], ,true,sensor.boiler_shutdown,sensor.boiler_shutdown,5,0,1,241,1
+"CS5800iG",boiler,16,hpcurrpower,compressor current power,uint16 (>=0<=31999),W,false,sensor.boiler_compressor_current_power,sensor.boiler_hpcurrpower,5,0,1,242,1
+"CS5800iG",boiler,16,hppowerlimit,power limit,uint16 (>=0<=31999),W,true,number.boiler_power_limit,number.boiler_hppowerlimit,5,0,1,243,1
+"CS5800iG",boiler,16,dhw.alternatingop,alternating operation,boolean, ,true,switch.boiler_dhw_alternating_operation,switch.boiler_dhw_alternatingop,5,9,1,15,1
+"CS5800iG",boiler,16,dhw.altopprioheat,prioritise heating during dhw,uint8 (>=20<=120),minutes,true,number.boiler_dhw_prioritise_heating_during_dhw,number.boiler_dhw_altopprioheat,5,9,1,16,1
+"CS5800iG",boiler,16,dhw.altopprio,prioritise dhw during heating,uint8 (>=30<=120),minutes,true,number.boiler_dhw_prioritise_dhw_during_heating,number.boiler_dhw_altopprio,5,9,1,17,1
+"CS5800iG",boiler,16,dhw.comfoff,comfort switch off,uint8 (>=15<=65),C,true,number.boiler_dhw_comfort_switch_off,number.boiler_dhw_comfoff,5,9,1,18,1
+"CS5800iG",boiler,16,dhw.ecooff,eco switch off,uint8 (>=15<=65),C,true,number.boiler_dhw_eco_switch_off,number.boiler_dhw_ecooff,5,9,1,19,1
+"CS5800iG",boiler,16,dhw.ecoplusoff,eco+ switch off,uint8 (>=48<=63),C,true,number.boiler_dhw_eco+_switch_off,number.boiler_dhw_ecoplusoff,5,9,1,20,1
+"CS5800iG",boiler,16,dhw.comfdiff,comfort diff,uint8 (>=6<=12),K,true,number.boiler_dhw_comfort_diff,number.boiler_dhw_comfdiff,5,9,1,21,1
+"CS5800iG",boiler,16,dhw.ecodiff,eco diff,uint8 (>=6<=12),K,true,number.boiler_dhw_eco_diff,number.boiler_dhw_ecodiff,5,9,1,22,1
+"CS5800iG",boiler,16,dhw.ecoplusdiff,eco+ diff,uint8 (>=6<=12),K,true,number.boiler_dhw_eco+_diff,number.boiler_dhw_ecoplusdiff,5,9,1,23,1
+"CS5800iG",boiler,16,dhw.comfstop,comfort stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_comfort_stop_temp,number.boiler_dhw_comfstop,5,9,1,24,1
+"CS5800iG",boiler,16,dhw.ecostop,eco stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_eco_stop_temp,number.boiler_dhw_ecostop,5,9,1,25,1
+"CS5800iG",boiler,16,dhw.ecoplusstop,eco+ stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_eco+_stop_temp,number.boiler_dhw_ecoplusstop,5,9,1,26,1
+"CS5800iG",boiler,16,dhw.hpcircpump,circulation pump available during dhw,boolean, ,true,switch.boiler_dhw_circulation_pump_available_during_dhw,switch.boiler_dhw_hpcircpump,5,9,1,27,1
+"CS5800iG",boiler,16,dhw.tapactivated,turn on/off,boolean, ,true,switch.boiler_dhw_turn_on/off,switch.boiler_dhw_tapactivated,5,9,1,28,1
+"CS5800iG",boiler,16,dhw.settemp,set temperature,uint8 (>=0<=254),C,false,sensor.boiler_dhw_set_temperature,sensor.boiler_dhw_settemp,5,9,1,29,1
+"CS5800iG",boiler,16,dhw.seltemp,selected temperature,uint8 (>=0<=254),C,true,number.boiler_dhw_selected_temperature,number.boiler_dhw_seltemp,5,9,1,30,1
+"CS5800iG",boiler,16,dhw.seltemplow,selected lower temperature,uint8 (>=0<=254),C,true,number.boiler_dhw_selected_lower_temperature,number.boiler_dhw_seltemplow,5,9,1,31,1
+"CS5800iG",boiler,16,dhw.tempecoplus,selected eco+ temperature,uint8 (>=0<=254),C,true,number.boiler_dhw_selected_eco+_temperature,number.boiler_dhw_tempecoplus,5,9,1,32,1
+"CS5800iG",boiler,16,dhw.seltempoff,selected temperature for off,uint8 (>=0<=254),C,false,sensor.boiler_dhw_selected_temperature_for_off,sensor.boiler_dhw_seltempoff,5,9,1,33,1
+"CS5800iG",boiler,16,dhw.seltempsingle,single charge temperature,uint8 (>=0<=254),C,true,number.boiler_dhw_single_charge_temperature,number.boiler_dhw_seltempsingle,5,9,1,34,1
+"CS5800iG",boiler,16,dhw.solartemp,solar boiler temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_solar_boiler_temperature,sensor.boiler_dhw_solartemp,5,9,1/10,35,1
+"CS5800iG",boiler,16,dhw.type,type,enum [off\|flow\|buffered flow\|buffer\|layered buffer], ,false,sensor.boiler_dhw_type,sensor.boiler_dhw_type,5,9,1,36,1
+"CS5800iG",boiler,16,dhw.comfort,comfort,enum [hot\|eco\|intelligent], ,true,select.boiler_dhw_comfort,select.boiler_dhw_comfort,5,9,1,37,1
+"CS5800iG",boiler,16,dhw.comfort1,comfort mode,enum [high comfort\|eco], ,true,select.boiler_dhw_comfort_mode,select.boiler_dhw_comfort1,5,9,1,38,1
+"CS5800iG",boiler,16,dhw.flowtempoffset,flow temperature offset,uint8 (>=0<=100),C,true,number.boiler_dhw_flow_temperature_offset,number.boiler_dhw_flowtempoffset,5,9,1,39,1
+"CS5800iG",boiler,16,dhw.chargeoptimization,charge optimization,boolean, ,true,switch.boiler_dhw_charge_optimization,switch.boiler_dhw_chargeoptimization,5,9,1,40,1
+"CS5800iG",boiler,16,dhw.maxpower,max power,uint8 (>=0<=254),%,true,number.boiler_dhw_max_power,number.boiler_dhw_maxpower,5,9,1,41,1
+"CS5800iG",boiler,16,dhw.maxtemp,maximum temperature,uint8 (>=0<=80),C,true,number.boiler_dhw_maximum_temperature,number.boiler_dhw_maxtemp,5,9,1,42,1
+"CS5800iG",boiler,16,dhw.circpump,circulation pump available,boolean, ,true,switch.boiler_dhw_circulation_pump_available,switch.boiler_dhw_circpump,5,9,1,43,1
+"CS5800iG",boiler,16,dhw.chargetype,charging type,enum [chargepump\|3-way valve], ,false,sensor.boiler_dhw_charging_type,sensor.boiler_dhw_chargetype,5,9,1,44,1
+"CS5800iG",boiler,16,dhw.hyston,hysteresis on temperature,int8 (>=-126<=126),C,true,number.boiler_dhw_hysteresis_on_temperature,number.boiler_dhw_hyston,5,9,1,45,1
+"CS5800iG",boiler,16,dhw.hystoff,hysteresis off temperature,int8 (>=-126<=126),C,true,number.boiler_dhw_hysteresis_off_temperature,number.boiler_dhw_hystoff,5,9,1,46,1
+"CS5800iG",boiler,16,dhw.disinfectiontemp,disinfection temperature,uint8 (>=60<=80),C,true,number.boiler_dhw_disinfection_temperature,number.boiler_dhw_disinfectiontemp,5,9,1,47,1
+"CS5800iG",boiler,16,dhw.circmode,circulation pump mode,enum [off\|1x3min\|2x3min\|3x3min\|4x3min\|5x3min\|6x3min\|continuous], ,true,select.boiler_dhw_circulation_pump_mode,select.boiler_dhw_circmode,5,9,1,48,1
+"CS5800iG",boiler,16,dhw.circ,circulation active,boolean, ,true,switch.boiler_dhw_circulation_active,switch.boiler_dhw_circ,5,9,1,49,1
+"CS5800iG",boiler,16,dhw.curtemp,current intern temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_current_intern_temperature,sensor.boiler_dhw_curtemp,5,9,1/10,50,1
+"CS5800iG",boiler,16,dhw.curtemp2,current extern temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_current_extern_temperature,sensor.boiler_dhw_curtemp2,5,9,1/10,51,1
+"CS5800iG",boiler,16,dhw.curflow,current tap water flow,uint8 (>=0<=25),l/min,false,sensor.boiler_dhw_current_tap_water_flow,sensor.boiler_dhw_curflow,5,9,1/10,52,1
+"CS5800iG",boiler,16,dhw.storagetemp1,storage intern temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_storage_intern_temperature,sensor.boiler_dhw_storagetemp1,5,9,1/10,53,1
+"CS5800iG",boiler,16,dhw.storagetemp2,storage extern temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_storage_extern_temperature,sensor.boiler_dhw_storagetemp2,5,9,1/10,54,1
+"CS5800iG",boiler,16,dhw.activated,activated,boolean, ,true,switch.boiler_dhw_activated,switch.boiler_dhw_activated,5,9,1,55,1
+"CS5800iG",boiler,16,dhw.onetime,one time charging,boolean, ,true,switch.boiler_dhw_one_time_charging,switch.boiler_dhw_onetime,5,9,1,56,1
+"CS5800iG",boiler,16,dhw.disinfecting,disinfecting,boolean, ,true,switch.boiler_dhw_disinfecting,switch.boiler_dhw_disinfecting,5,9,1,57,1
+"CS5800iG",boiler,16,dhw.charging,charging,boolean, ,false,binary_sensor.boiler_dhw_charging,binary_sensor.boiler_dhw_charging,5,9,1,58,1
+"CS5800iG",boiler,16,dhw.recharging,recharging,boolean, ,false,binary_sensor.boiler_dhw_recharging,binary_sensor.boiler_dhw_recharging,5,9,1,59,1
+"CS5800iG",boiler,16,dhw.tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
+"CS5800iG",boiler,16,dhw.active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
+"CS5800iG",boiler,16,dhw.3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
+"CS5800iG",boiler,16,dhw.chargepump,charge pump,boolean, ,false,binary_sensor.boiler_dhw_charge_pump,binary_sensor.boiler_dhw_chargepump,5,9,1,63,1
+"CS5800iG",boiler,16,dhw.mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
+"CS5800iG",boiler,16,dhw.cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
+"CS5800iG",boiler,16,dhw.starts,starts,uint24 (>=0<=16777214), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
+"CS5800iG",boiler,16,dhw.workm,active time,time (>=0<=16777214),minutes,false,sensor.boiler_dhw_active_time,sensor.boiler_dhw_workm,5,9,1,68,2
 "BK13/BK15, Smartline, GB1*2",boiler,64,reset,reset,cmd [-\|maintenance\|error\|history\|message], ,true,sensor.boiler_reset,sensor.boiler_reset,5,0,1,0,1
 "BK13/BK15, Smartline, GB1*2",boiler,64,heatingoff,force heating off,boolean, ,true,switch.boiler_force_heating_off,switch.boiler_heatingoff,5,0,1,1,1
 "BK13/BK15, Smartline, GB1*2",boiler,64,heatingactive,heating active,boolean, ,false,binary_sensor.boiler_heating_active,binary_sensor.boiler_heatingactive,5,0,1,2,1
