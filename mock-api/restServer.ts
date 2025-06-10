@@ -122,36 +122,43 @@ let LATEST_STABLE_VERSION = '3.7.2';
 let LATEST_DEV_VERSION = '3.7.3-dev.6';
 
 // scenarios for testing versioning
-// version_test = 0; // on latest stable, can switch to dev only
-// version_test = 1; // on latest dev, can switch back to stable only or reinstall
+version_test = 0; // on latest stable, or switch to dev
+// version_test = 1; // on latest dev, or switch back to stable
 // version_test = 2; // upgrade an older stable to latest stable or switch to latest dev
-version_test = 3; // upgrade an older dev to latest dev, switch to stable available
+// version_test = 3; // upgrade dev to latest, or switch to stable
+// version_test = 4; // downgrade to an older dev, or switch back to stable
 
 switch (version_test as number) {
   case 0:
   default:
-    // on latest stable, can upgrade to dev only
+    // on latest stable, or switch to dev
     THIS_VERSION = LATEST_STABLE_VERSION;
     STABLE_VERSION_IS_UPGRADEABLE = false;
     DEV_VERSION_IS_UPGRADEABLE = true;
     break;
   case 1:
-    // on latest dev, no updates to either dev or stable
+    // on latest dev, or switch back to stable
     THIS_VERSION = LATEST_DEV_VERSION;
     STABLE_VERSION_IS_UPGRADEABLE = false;
     DEV_VERSION_IS_UPGRADEABLE = false;
     break;
   case 2:
-    // upgrade an older stable to latest stable or the latest dev
+    // upgrade an older stable to latest stable or switch to latest dev
     THIS_VERSION = '3.6.5';
     STABLE_VERSION_IS_UPGRADEABLE = true;
     DEV_VERSION_IS_UPGRADEABLE = true;
     break;
   case 3:
-    // upgrade an older dev to latest dev, no stable upgrades available
+    // upgrade dev to latest, or switch to stable
     THIS_VERSION = '3.7.3-dev.2';
     STABLE_VERSION_IS_UPGRADEABLE = false;
     DEV_VERSION_IS_UPGRADEABLE = true;
+    break;
+  case 4:
+    // downgrade to an older dev, or switch back to stable
+    THIS_VERSION = '3.7.3-dev.9';
+    STABLE_VERSION_IS_UPGRADEABLE = true;
+    DEV_VERSION_IS_UPGRADEABLE = false;
     break;
 }
 
@@ -271,10 +278,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-          old_custom_name +
-          ') with new (' +
-          new_custom_name +
-          ')'
+        old_custom_name +
+        ') with new (' +
+        new_custom_name +
+        ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -370,15 +377,15 @@ function check_upgrade(version: string) {
 
     console.log(
       'Upgrade this version (' +
-        THIS_VERSION +
-        ') to dev (' +
-        dev_version +
-        ') is ' +
-        (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-        ' and to stable (' +
-        stable_version +
-        ') is ' +
-        (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
+      THIS_VERSION +
+      ') to dev (' +
+      dev_version +
+      ') is ' +
+      (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+      ' and to stable (' +
+      stable_version +
+      ') is ' +
+      (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
     );
     data = {
       emsesp_version: THIS_VERSION,
