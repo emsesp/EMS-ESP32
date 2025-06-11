@@ -287,8 +287,9 @@ void WebSchedulerService::publish(const bool force) {
                 snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(scheduler), scheduleItem.name.c_str());
                 config["cmd_t"] = command_topic;
 
-                Mqtt::add_ha_bool(config);
-                Mqtt::add_ha_sections_to_doc(F_(scheduler), stat_t, config, !ha_created, val_cond);
+                Mqtt::add_ha_bool(config.as<JsonObject>());
+                Mqtt::add_ha_dev_section(config.as<JsonObject>(), F_(scheduler), nullptr, nullptr, false);
+                Mqtt::add_ha_avail_section(config.as<JsonObject>(), stat_t, !ha_created, val_cond);
 
                 ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
             }

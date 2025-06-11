@@ -340,18 +340,18 @@ const tr: Translation = {
   AUTO_SCROLL: 'Otomatik kaydırma',
   DASHBOARD: 'Kontrol Paneli',
   DEVELOPER_MODE: 'Geliştirici Modu',
-  BYTES: 'Bytes',
-  BITMASK: 'Bit Mask',
-  DUPLICATE: 'Duplicate',
+  BYTES: 'Bayt',
+  BITMASK: 'Bit Maskesi',
+  DUPLICATE: 'Çift',
   DASHBOARD_1: 'Tüm aktif ve Favori olarak işaretlenmiş EMS varlıkları, artı tüm özel varlıklar, zamanlayıcılar ve harici sensör verileri aşağıda görüntüleniyor.',
   NO_DATA_1: 'Henüz bir favori EMS varlığı bulunamadı. Kullanın',
   NO_DATA_2: 'modülünü kullanın.',
   NO_DATA_3: 'Tüm kullanılabilir varlıkları görmek için git',
   THIS_VERSION: 'Bu Sürüm',
-  PLATFORM: 'Platform',
-  RELEASE_TYPE: 'Release Type',
-  INTERNET_CONNECTION_REQUIRED: 'Internet connection required for automatic version checking and upgrading',
-  SWITCH_RELEASE_TYPE: 'Switch to {0} release'
+  PLATFORM: 'Platforma',
+  RELEASE_TYPE: 'Sürüm Tipi',
+  INTERNET_CONNECTION_REQUIRED: 'Otomatik sürüm kontrolü ve güncelleme için internet bağlantısı gereklidir',
+  SWITCH_RELEASE_TYPE: '{0} sürümüne geç'
 };
 
 export default tr;

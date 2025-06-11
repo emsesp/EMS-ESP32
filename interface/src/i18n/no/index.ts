@@ -337,21 +337,21 @@ const no: Translation = {
   PLEASE_WAIT: 'Vennligst vent',
   RESTARTING_PRE: 'Initialiserer',
   RESTARTING_POST: 'Forbereder',
-  AUTO_SCROLL: 'Auto Scroll',
+  AUTO_SCROLL: 'Automatisk rulling',
   DASHBOARD: 'Dashboard',
-  DEVELOPER_MODE: 'Developer Mode',
+  DEVELOPER_MODE: 'Utvikler modus',
   BYTES: 'Bytes',
-  BITMASK: 'Bit Mask',
-  DUPLICATE: 'Duplicate',
-  DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.',
+  BITMASK: 'Bitmask',
+  DUPLICATE: 'Duplikat',
+  DASHBOARD_1: 'Alle EMS enheter som er aktive og merket som favoritt, pluss alle personlige enheter, planlegg og eksterne sensor data er vist nedenfor.',
   NO_DATA_1: 'Ingen favoritte EMS enheter funnet enda. Bruk',
   NO_DATA_2: 'modul for å markere dem.',
   NO_DATA_3: 'For å se alle tilgjengelige enheter, gå til',
   THIS_VERSION: 'Denne versjonen',
-  PLATFORM: 'Platform',
-  RELEASE_TYPE: 'Release Type',
-  INTERNET_CONNECTION_REQUIRED: 'Internet connection required for automatic version checking and upgrading',
-  SWITCH_RELEASE_TYPE: 'Switch to {0} release'
+  PLATFORM: 'Plattform',
+  RELEASE_TYPE: 'Utgivelses type',
+  INTERNET_CONNECTION_REQUIRED: 'Internettilkobling kreves for automatisk versjonskontroll og oppgradering',
+  SWITCH_RELEASE_TYPE: 'Bytt til {0} utgivelse'
 };
 
 export default no;

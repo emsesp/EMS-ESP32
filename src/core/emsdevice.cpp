@@ -1221,7 +1221,7 @@ void EMSdevice::setCustomizationEntity(const std::string & entity_id) {
             if (Mqtt::ha_enabled() && (has_custom_name || ((current_mask ^ new_mask) & (DeviceValueState::DV_READONLY >> 4)))) {
                 // remove ha config on change of dv_readonly flag
                 dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
-                Mqtt::publish_ha_sensor_config(dv, "", "", true); // delete topic (remove = true)
+                Mqtt::publish_ha_sensor_config_dv(dv, "", "", true); // delete topic (remove = true)
             }
 
             // always write the mask
@@ -1673,7 +1673,7 @@ void EMSdevice::get_value_json(JsonObject json, DeviceValue & dv) {
     }
 
     // add uom, state class and device class
-    Mqtt::add_ha_uom(json, dv.type, dv.uom, dv.short_name, false); // no icon
+    Mqtt::add_ha_classes(json, device_type(), dv.type, dv.uom, dv.short_name, false); // no icon
 
     json["readable"]  = dv.type != DeviceValueType::CMD && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE);
     json["writeable"] = dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY);
@@ -1886,7 +1886,7 @@ void EMSdevice::mqtt_ha_entity_config_create() {
         if (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) && dv.has_state(DeviceValueState::DV_ACTIVE)
             && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE)) {
             // create_device_config is only done once for the EMS device. It can added to any entity, so we take the first
-            if (Mqtt::publish_ha_sensor_config(dv, name().c_str(), brand_to_char(), false, create_device_config)) {
+            if (Mqtt::publish_ha_sensor_config_dv(dv, name().c_str(), brand_to_char(), false, create_device_config)) {
                 dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
                 create_device_config = false; // only create the main config once
                 count++;

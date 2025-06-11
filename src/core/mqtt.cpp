@@ -744,39 +744,17 @@ bool Mqtt::queue_ha(const char * topic, const JsonObjectConst payload) {
     return queue_publish_message(Mqtt::discovery_prefix() + topic, payload_text, true); // with retain true
 }
 
-// create's a ha sensor config topic from a device value object
+// create's a ha sensor config topic from a device value object (dev)
+// adds ids, name, mf, mdl, via_device
 // and also takes a flag (create_device_config) used to also create the main HA device config. This is only needed for one entity
-bool Mqtt::publish_ha_sensor_config(DeviceValue & dv, const char * model, const char * brand, const bool remove, const bool create_device_config) {
-    JsonDocument dev_json;
-
-    // always create the ids (discovery identifiers)
-    // with the name always
-    // and the manufacturer and model if we're creating the device config for the first entity
-    JsonArray ids = dev_json["ids"].to<JsonArray>();
-    char      ha_device[40];
-    auto      device_type_name = EMSdevice::device_type_2_device_name(dv.device_type);
-    snprintf(ha_device, sizeof(ha_device), "%s-%s", Mqtt::basename().c_str(), device_type_name);
-    ids.add(ha_device);
-
-    auto cap_name = strdup(device_type_name);
-    Helpers::CharToUpperUTF8(cap_name); // capitalize first letter
-    dev_json["name"] = Mqtt::basename() + " " + cap_name;
-    free(cap_name);
-
-    // create only once per category
-    if (create_device_config) {
-        dev_json["mf"]         = brand;
-        dev_json["mdl"]        = model;
-        dev_json["via_device"] = Mqtt::basename();
-    }
-
+bool Mqtt::publish_ha_sensor_config_dv(DeviceValue & dv, const char * model, const char * brand, const bool remove, const bool create_device_config) {
     // calculate the min and max
     int16_t  dv_set_min;
     uint32_t dv_set_max;
     (void)dv.get_min_max(dv_set_min, dv_set_max);
 
     // determine if we're creating the command topics which we use special HA configs
-    // unless the entity has been marked as read-only and so it'll default to using the sensor/ type
+    // if the entity has been marked as read-only it'll be created as a binary_sensor or sensor
     // or we're dealing with Energy sensors that must have "diagnostic" as an entity category (e.g. negheat & nrgww)
     bool has_cmd = dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY) && (dv.uom != DeviceValueUOM::KWH);
 
@@ -794,20 +772,14 @@ bool Mqtt::publish_ha_sensor_config(DeviceValue & dv, const char * model, const 
                                     dv_set_min,
                                     dv_set_max,
                                     dv.numeric_operator,
-                                    dev_json.as<JsonObject>());
+                                    model,
+                                    brand,
+                                    create_device_config);
 }
 
-// publish HA sensor for System using the heartbeat tag
+// publish HA sensor specific for System using the heartbeat tag
 bool Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, const char * entity, const uint8_t uom) {
-    JsonDocument doc;
-    JsonObject   dev_json = doc["dev"].to<JsonObject>();
-
-    dev_json["name"] = Mqtt::basename();
-    JsonArray ids    = dev_json["ids"].to<JsonArray>();
-    ids.add(Mqtt::basename());
-
-    return publish_ha_sensor_config(
-        type, DeviceValueTAG::TAG_DEVICE_DATA, name, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, 0, dev_json);
+    return publish_ha_sensor_config(type, DeviceValueTAG::TAG_DEVICE_DATA, name, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, 0);
 }
 
 // MQTT discovery configs
@@ -827,7 +799,9 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
                                     const int16_t         dv_set_min,
                                     const uint32_t        dv_set_max,
                                     const int8_t          num_op,
-                                    const JsonObjectConst dev_json) {
+                                    const char * const    model,
+                                    const char * const    brand,
+                                    const bool            create_device_config) {
     // ignore if name (fullname) is empty
     if (!fullname || !en_name) {
         return false;
@@ -984,8 +958,10 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     }
 
     // if at this point we don't have a topic created yet, create a default sensor one. We always need a topic.
+    bool is_sensor = false;
     if (!strnlen(topic, sizeof(topic))) {
         snprintf(topic, sizeof(topic), (type == DeviceValueType::BOOL) ? "binary_sensor/%s" : "sensor/%s", config_topic); // binary sensor (for booleans)
+        is_sensor = true;
     }
 
     // if we're asking to remove this topic, send an empty payload and exit
@@ -995,7 +971,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         return queue_remove_topic(topic);
     }
 
-    // build the payload
+    // build the full payload
     JsonDocument doc;
     doc["uniq_id"] = uniq_id;
     doc["obj_id"]  = uniq_id; // same as unique_id
@@ -1065,8 +1041,8 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     free(F_name); // very important!
     doc["name"] = ha_name;
 
-    // not needed for commands
-    if (type != DeviceValueType::CMD) {
+    // add state_topic and it's value_template. This is not needed for commands, only sensors
+    if (type != DeviceValueType::CMD || is_sensor) {
         // state topic, except for commands
         char stat_t[MQTT_TOPIC_MAX_SIZE];
 
@@ -1095,7 +1071,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         // applies to both Binary Sensor (read only) and a Switch (for a command)
         // has no unit of measure or icon, and must be true/false (not on/off or 1/0)
         if (type == DeviceValueType::BOOL) {
-            add_ha_bool(doc);
+            add_ha_bool(doc.as<JsonObject>());
             strlcpy(sample_val, "false", sizeof(sample_val)); // default is "false"
         }
 
@@ -1105,7 +1081,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
             // adds availability, dev, ids to the config section to HA Discovery config
             // except for commands
-            add_ha_sections_to_doc(nullptr, stat_t, doc, false, val_cond); // no name, since the "dev" has already been added
+            add_ha_avail_section(doc.as<JsonObject>(), stat_t, false, val_cond);
         } else {
             // Domoticz doesn't support value templates, so we just use the value directly
             // Also omit the uom and other state classes
@@ -1116,18 +1092,24 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // Add the state class, device class and an optional icon based on the uom
     // first set the catagory for System entities
     // https://github.com/emsesp/EMS-ESP32/discussions/1459#discussioncomment-7694873
-    if (device_type == EMSdevice::DeviceType::SYSTEM) {
-        doc["ent_cat"] = "diagnostic"; // instead of config
-    }
-    add_ha_uom(doc.as<JsonObject>(), type, uom, entity);
+    add_ha_classes(doc.as<JsonObject>(), device_type, type, uom, entity);
 
-    doc["dev"] = dev_json;
+    // add dev section
+    if (device_type == EMSdevice::DeviceType::SYSTEM) {
+        add_ha_dev_section(doc.as<JsonObject>(), nullptr, nullptr, nullptr, false);
+    } else {
+        add_ha_dev_section(doc.as<JsonObject>(), EMSdevice::device_type_2_device_name(device_type), model, brand, create_device_config);
+    }
 
     return queue_ha(topic, doc.as<JsonObject>());
 }
 
 // Add the uom, state class, device class and an optional icon based on the uom
-void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, const char * entity, bool is_discovery) {
+void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8_t type, const uint8_t uom, const char * entity, bool is_discovery) {
+    if (device_type == EMSdevice::DeviceType::SYSTEM) {
+        doc["ent_cat"] = "diagnostic"; // instead of 'config'
+    }
+
     // for HA discovery we use different namings
     const char * dc_ha  = is_discovery ? "dev_cla" : "device_class"; // device class
     const char * sc_ha  = is_discovery ? "stat_cla" : "state_class"; // state class
@@ -1145,8 +1127,7 @@ void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, con
         } else if (uom != DeviceValueUOM::NONE) {
             doc[uom_ha] = EMSdevice::uom_to_string(uom); // use default
         } else if (discovery_type() != discoveryType::HOMEASSISTANT) {
-            // Domoticz use " " for a no-uom
-            doc[uom_ha] = " ";
+            doc[uom_ha] = " "; // Domoticz uses " " for a no-uom
         }
     }
 
@@ -1353,8 +1334,8 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
     modes.add("heat");
     modes.add("off");
 
-    // device name must be different to the entity name, take the ids value we just created
-    add_ha_sections_to_doc("thermostat", topic_t, doc, false, seltemp_cond, has_roomtemp ? currtemp_cond : nullptr, hc_mode_cond);
+    add_ha_dev_section(doc.as<JsonObject>(), "thermostat", nullptr, nullptr, false);                                                // add dev section
+    add_ha_avail_section(doc.as<JsonObject>(), topic_t, false, seltemp_cond, has_roomtemp ? currtemp_cond : nullptr, hc_mode_cond); // add availability section
 
     return queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 }
@@ -1378,34 +1359,52 @@ std::string Mqtt::tag_to_topic(uint8_t device_type, int8_t tag) {
     }
 }
 
-// adds availability, dev, ids to the config section to HA Discovery config
-void Mqtt::add_ha_sections_to_doc(const char *   name,
-                                  const char *   state_t,
-                                  JsonDocument & config,
-                                  const bool     is_first,
-                                  const char *   cond1,
-                                  const char *   cond2,
-                                  const char *   negcond) {
-    // only for HA
+// add devs section to an existing doc, only for HA
+// under devs node it will create ids and name and optional mf, mdl, via_device
+// name could be EMSdevice::device_type_2_device_name(dv.device_type));
+void Mqtt::add_ha_dev_section(JsonObject doc, const char * name, const char * model, const char * brand, const bool create_model) {
+    // only works for HA
     if (discovery_type() != discoveryType::HOMEASSISTANT) {
         return;
     }
 
-    // adds dev section to HA Discovery config
+    // create dev section
+    JsonObject dev_json = doc["dev"].to<JsonObject>();
+
+    // add ids and name - with capitalize first letter
+    JsonArray ids = dev_json["ids"].to<JsonArray>(); // ids, it is an array with a single element
     if (name != nullptr) {
-        JsonObject dev      = config["dev"].to<JsonObject>();
-        char *     cap_name = strdup(name);
-        cap_name[0]         = toupper(name[0]); // capitalize first letter
-        dev["name"]         = std::string(Mqtt::basename()) + " " + cap_name;
-        // if it's the first in the category, attach the group to the main HA device
-        if (is_first) {
-            dev["mf"]         = "EMS-ESP";
-            dev["mdl"]        = cap_name;
-            dev["via_device"] = Mqtt::basename();
-        }
-        JsonArray ids = dev["ids"].to<JsonArray>();
-        ids.add(Mqtt::basename() + "-" + Helpers::toLower(name));
+        // for ids, replace all spaces with -
+        std::string lower_name_str(name);
+        std::replace(lower_name_str.begin(), lower_name_str.end(), ' ', '-');
+        ids.add(Mqtt::basename() + "-" + Helpers::toLower(lower_name_str));
+
+        auto cap_name = strdup(name);
+        Helpers::CharToUpperUTF8(cap_name); // capitalize first letter
+        dev_json["name"] = Mqtt::basename() + " " + cap_name;
         free(cap_name);
+    } else {
+        ids.add(Mqtt::basename());
+        dev_json["name"] = Mqtt::basename();
+    }
+
+    // this is used to only create it once when entities are dynamically added
+    if (create_model) {
+        dev_json["mf"] = brand != nullptr ? brand : "EMS-ESP";
+        if (model != nullptr) {
+            dev_json["mdl"] = model;
+        }
+        dev_json["via_device"] = Mqtt::basename();
+    }
+}
+
+// adds sections for HA Discovery to an existing JSON doc
+//  adds dev section with ids, name, mf, mdl, via_device
+//  adds optional availability section
+void Mqtt::add_ha_avail_section(JsonObject doc, const char * state_t, const bool is_first, const char * cond1, const char * cond2, const char * negcond) {
+    // only works for HA
+    if (discovery_type() != discoveryType::HOMEASSISTANT) {
+        return;
     }
 
     // skip availability section if no conditions set
@@ -1414,7 +1413,7 @@ void Mqtt::add_ha_sections_to_doc(const char *   name,
     }
 
     // adds "availability" section to HA Discovery config
-    JsonArray    avty = config["avty"].to<JsonArray>();
+    JsonArray    avty = doc["avty"].to<JsonArray>();
     JsonDocument avty_json;
 
     // make local copy of state, as the pointer will get de-referenced
@@ -1451,22 +1450,23 @@ void Mqtt::add_ha_sections_to_doc(const char *   name,
         avty.add(avty_json); // returns 0 if no mem
     }
 
-    config["avty_mode"] = "all";
+    doc["avty_mode"] = "all";
 }
 
-void Mqtt::add_ha_bool(JsonDocument & config) {
+// adds the pl_on and pl_off sections to the doc
+void Mqtt::add_ha_bool(JsonObject doc) {
     const char * pl_on  = "pl_on";
     const char * pl_off = "pl_off";
     if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-        config[pl_on]  = true;
-        config[pl_off] = false;
+        doc[pl_on]  = true;
+        doc[pl_off] = false;
     } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-        config[pl_on]  = 1;
-        config[pl_off] = 0;
+        doc[pl_on]  = 1;
+        doc[pl_off] = 0;
     } else {
         char result[12];
-        config[pl_on]  = Helpers::render_boolean(result, true);
-        config[pl_off] = Helpers::render_boolean(result, false);
+        doc[pl_on]  = Helpers::render_boolean(result, true);
+        doc[pl_off] = Helpers::render_boolean(result, false);
     }
 }
 

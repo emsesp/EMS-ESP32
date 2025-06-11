@@ -341,17 +341,17 @@ const sv: Translation = {
   DASHBOARD: 'Kontrollpanel',
   DEVELOPER_MODE: 'Utvecklarläge',
   BYTES: 'Bytes',
-  BITMASK: 'Bit Mask',
+  BITMASK: 'Bitmask',
   DUPLICATE: 'Dublett',
-  DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.',
+  DASHBOARD_1: 'Alla EMS-enheter som är aktiva och markerade som favorit, plus alla anpassade entiteter, scheman och externa sensor-data visas nedan.',
   NO_DATA_1: 'Inga favorit EMS enheter hittade än. Använd',
   NO_DATA_2: 'modul för att markera dem.',
   NO_DATA_3: 'För att se alla tillgängliga enheter, gå till',
   THIS_VERSION: 'Denna version',
-  PLATFORM: 'Platform',
-  RELEASE_TYPE: 'Release Type',
+  PLATFORM: 'Plattform',
+  RELEASE_TYPE: 'Utgivelsestyp',
   INTERNET_CONNECTION_REQUIRED: 'Internetanslutning krävs för automatisk version kontroll och uppdatering',
-  SWITCH_RELEASE_TYPE: 'Byt till {0} version'
+  SWITCH_RELEASE_TYPE: 'Byt till {0} utgåva'
 };
 
 export default sv;

@@ -85,7 +85,7 @@ class Mqtt {
     static bool queue_ha(const char * topic, const JsonObjectConst payload);
     static bool queue_remove_topic(const char * topic);
 
-    static bool publish_ha_sensor_config(DeviceValue & dv, const char * model, const char * brand, const bool remove, const bool create_device_config = false);
+    static bool publish_ha_sensor_config_dv(DeviceValue & dv, const char * model, const char * brand, const bool remove, const bool create_device_config = false);
     static bool publish_ha_sensor_config(uint8_t               type,
                                          int8_t                tag,
                                          const char * const    fullname,
@@ -100,7 +100,9 @@ class Mqtt {
                                          const int16_t         dv_set_min,
                                          const uint32_t        dv_set_max,
                                          const int8_t          num_op,
-                                         const JsonObjectConst dev_json);
+                                         const char * const    model                = nullptr,
+                                         const char * const    brand                = nullptr,
+                                         const bool            create_device_config = false);
 
     static bool publish_system_ha_sensor_config(uint8_t type, const char * name, const char * entity, const uint8_t uom);
     static bool publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, const bool remove = false, const int16_t min = 5, const uint32_t max = 30);
@@ -243,16 +245,16 @@ class Mqtt {
 
     static std::string tag_to_topic(uint8_t device_type, int8_t tag);
 
-    static void add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, const char * entity = nullptr, bool is_discovery = true);
-
-    static void add_ha_sections_to_doc(const char *   name,
-                                       const char *   state_t,
-                                       JsonDocument & config,
-                                       const bool     is_first = false,
-                                       const char *   cond1    = nullptr,
-                                       const char *   cond2    = nullptr,
-                                       const char *   negcond  = nullptr);
-    static void add_ha_bool(JsonDocument & config);
+    static void
+    add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8_t type, const uint8_t uom, const char * entity = nullptr, bool is_discovery = true);
+    static void add_ha_dev_section(JsonObject doc, const char * name, const char * model, const char * brand, const bool create_model);
+    static void add_ha_avail_section(JsonObject   doc,
+                                     const char * state_t,
+                                     const bool   is_first,
+                                     const char * cond1   = nullptr,
+                                     const char * cond2   = nullptr,
+                                     const char * negcond = nullptr);
+    static void add_ha_bool(JsonObject doc);
 
   private:
     static uuid::log::Logger logger_;

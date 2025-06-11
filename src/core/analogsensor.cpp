@@ -636,7 +636,7 @@ void AnalogSensor::publish_values(const bool force) {
                     snprintf(topic, sizeof(topic), "switch/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
                     snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(analogsensor), sensor.name().c_str());
                     config["cmd_t"] = command_topic;
-                    Mqtt::add_ha_bool(config);
+                    Mqtt::add_ha_bool(config.as<JsonObject>());
                 } else if (sensor.type() == AnalogType::DIGITAL_OUT) { // DAC
                     snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
                     snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(analogsensor), sensor.name().c_str());
@@ -670,7 +670,7 @@ void AnalogSensor::publish_values(const bool force) {
                     // config["step"]  = sensor.factor();
                 } else if (sensor.type() == AnalogType::DIGITAL_IN) {
                     snprintf(topic, sizeof(topic), "binary_sensor/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
-                    Mqtt::add_ha_bool(config);
+                    Mqtt::add_ha_bool(config.as<JsonObject>());
                 } else {
                     snprintf(topic, sizeof(topic), "sensor/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
                     config["stat_cla"] = "measurement";
@@ -685,7 +685,8 @@ void AnalogSensor::publish_values(const bool force) {
                     }
                 }
 
-                Mqtt::add_ha_sections_to_doc("analog", stat_t, config, !is_ha_device_created, val_cond);
+                Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Analog Sensors", nullptr, nullptr, false);
+                Mqtt::add_ha_avail_section(config.as<JsonObject>(), stat_t, !is_ha_device_created, val_cond);
 
                 sensor.ha_registered = Mqtt::queue_ha(topic, config.as<JsonObject>());
             }
