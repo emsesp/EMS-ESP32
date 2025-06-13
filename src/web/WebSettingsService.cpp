@@ -116,7 +116,7 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
         String nvs_boot = EMSESP::nvs_.getString("boot");
         if (!nvs_boot.isEmpty()) {
 #if defined(EMSESP_DEBUG)
-            EMSESP::logger().debug("Overriding board profile with NVS boot value %s");
+            EMSESP::logger().debug("Overriding board profile with NVS boot value %s", nvs_boot.c_str());
 #endif
             settings.board_profile = nvs_boot;
         }

@@ -63,7 +63,7 @@ void AnalogSensor::reload(bool get_nvs) {
         sensors_.clear();
         return;
     }
-
+    changed_ = true;
     // load the list of analog sensors from the customization service
     // and store them locally and then activate them
     EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
@@ -74,8 +74,13 @@ void AnalogSensor::reload(bool get_nvs) {
             for (const auto & sensor : settings.analogCustomizations) { // search customlist
                 if (sensor_.gpio() == sensor.gpio) {
                     // for output sensors set value to new start-value
-                    if ((sensor.type == AnalogType::COUNTER || sensor.type >= AnalogType::DIGITAL_OUT)
+                    if (sensor.type >= AnalogType::DIGITAL_OUT
                         && (sensor_.type() != sensor.type || sensor_.offset() != sensor.offset || sensor_.factor() != sensor.factor)) {
+                        sensor_.set_value(sensor.offset);
+                    }
+                    if (sensor.type == AnalogType::COUNTER && sensor_.offset() != sensor.offset
+                        && sensor.offset != EMSESP::nvs_.getDouble(sensor.name.c_str(), 0)) {
+                        EMSESP::nvs_.putDouble(sensor.name.c_str(), sensor.offset);
                         sensor_.set_value(sensor.offset);
                     }
                     sensor_.set_name(sensor.name);
@@ -800,7 +805,8 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                     // sensor.set_offset(val);
                     sensor.set_value(val);
                 }
-                if (oldoffset != sensor.offset() && sensor.offset() != EMSESP::nvs_.getDouble(sensor.name().c_str())) {
+                sensor.set_offset(sensor.value());
+                if (sensor.value() != EMSESP::nvs_.getDouble(sensor.name().c_str(), 0)) {
                     EMSESP::nvs_.putDouble(sensor.name().c_str(), sensor.value());
                 }
             } else if (sensor.type() == AnalogType::ADC) {

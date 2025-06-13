@@ -1002,11 +1002,16 @@ void EMSESP::process_deviceName(std::shared_ptr<const Telegram> telegram) {
 // e.g. 09 0B 02 00 PP V1 V2
 void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
     // check for valid telegram, just in case
-    if (telegram->message_length < 3) {
-        // for empty telegram add device with empty product, version and brand
-        if (!telegram->message_length) {
-            (void)add_device(telegram->src, 0, "00.00", 0);
-        }
+    if (telegram->offset != 0) {
+        return;
+    }
+    // for empty telegram add device with empty product, version and brand
+    if (telegram->message_length == 0) {
+        (void)add_device(telegram->src, 0, "00.00", 0);
+        return;
+    } else if (telegram->message_length < 3) {
+        (void)add_device(telegram->src, telegram->message_data[0], "00.00", 0);
+        send_read_request(EMSdevice::EMS_TYPE_NAME, telegram->src, 27);
         return;
     }
 
@@ -1014,7 +1019,7 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
     uint8_t offset = 0;
     if (telegram->message_data[0] == 0x00) {
         // see if we have a 2nd subscriber
-        if (telegram->message_data[3] != 0x00) {
+        if (telegram->message_length > 5 && telegram->message_data[3] != 0x00) {
             offset = 3;
         } else {
             return; // ignore whole telegram
