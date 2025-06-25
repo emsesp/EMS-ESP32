@@ -2,6 +2,7 @@
 #define HttpEndpoint_h
 
 #include <functional>
+#include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 
 #include "SecurityManager.h"

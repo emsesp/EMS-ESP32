@@ -139,6 +139,7 @@
 {164, DeviceType::SOLAR, "SM200, MS200", DeviceFlags::EMS_DEVICE_FLAG_SM100},
 
 // Mixer Modules - 0x20-0x27 for HC, 0x28-0x29 for WWC and 0x11 for the MP100
+{  8, DeviceType::MIXER, "XCUMixer", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS}, // integrated in XCU_THH (CS6800, etc.)
 { 69, DeviceType::MIXER, "MM10", DeviceFlags::EMS_DEVICE_FLAG_MM10},
 {100, DeviceType::MIXER, "IPM", DeviceFlags::EMS_DEVICE_FLAG_IPM},
 {102, DeviceType::MIXER, "IPM2", DeviceFlags::EMS_DEVICE_FLAG_IPM},
@@ -157,7 +158,7 @@
 {16, DeviceType::HEATPUMP, "CSH5800iG", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Ventilation - 0x51
-{231, DeviceType::VENTILATION, "Logavent HRV176", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{231, DeviceType::VENTILATION, "HRV176, HRV156, 5000c, MV200", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Heatsource - 0x60
 {228, DeviceType::HEATSOURCE, "AM200", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // alternative heatsource
