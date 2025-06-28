@@ -74,7 +74,7 @@ MqttClient::MqttClient(espMqttClientTypes::UseInternalTask useInternalTask, uint
 
 MqttClient::~MqttClient() {
   disconnect(true);
-  _clearQueue(2);
+  clearQueue(true);
 #if defined(ARDUINO_ARCH_ESP32)
   vSemaphoreDelete(_xSemaphore);
   if (_useInternalTask == espMqttClientTypes::UseInternalTask::YES) {

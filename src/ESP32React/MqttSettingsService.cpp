@@ -44,7 +44,7 @@ void MqttSettingsService::startClient() {
     if (_state.enableTLS) {
         isSecure = true;
         if (emsesp::EMSESP::system_.PSram() > 0) {
-            _mqttClient = new espMqttClientSecure(espMqttClientTypes::UseInternalTask::YES);
+            _mqttClient = new espMqttClientSecure(EMSESP_MQTT_PRIORITY, EMSESP_MQTT_RUNNING_CORE);
         } else {
             _mqttClient = new espMqttClientSecure(espMqttClientTypes::UseInternalTask::NO);
         }
@@ -64,7 +64,7 @@ void MqttSettingsService::startClient() {
 #endif
     isSecure = false;
     if (emsesp::EMSESP::system_.PSram() > 0) {
-        _mqttClient = new espMqttClient(espMqttClientTypes::UseInternalTask::YES);
+        _mqttClient = new espMqttClient(EMSESP_MQTT_PRIORITY, EMSESP_MQTT_RUNNING_CORE);
     } else {
         _mqttClient = new espMqttClient(espMqttClientTypes::UseInternalTask::NO);
     }

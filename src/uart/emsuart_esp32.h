@@ -24,6 +24,17 @@
 #ifndef EMSESP_EMSUART_H
 #define EMSESP_EMSUART_H
 
+#ifndef EMSESP_UART_RUNNING_CORE
+#define EMSESP_UART_RUNNING_CORE -1
+#endif
+
+#ifndef EMSESP_UART_STACKSIZE
+#define EMSESP_UART_STACKSIZE 2560
+#endif
+
+#ifndef EMSESP_UART_PRIORITY
+#define EMSESP_UART_PRIORITY configMAX_PRIORITIES - 1
+#endif
 #define EMS_MAXBUFFERSIZE 33 // max size of the buffer. EMS packets are max 32 bytes, plus extra for BRK
 
 #define EMSUART_NUM UART_NUM_1 // on C3 and S2 there is no UART2, use UART1 for all
@@ -61,11 +72,11 @@ class EMSuart {
     EMSuart()  = default;
     ~EMSuart() = default;
 
-    static void     start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t tx_gpio);
-    static void     send_poll(const uint8_t data);
-    static void     stop();
-    static uint16_t transmit(const uint8_t * buf, const uint8_t len);
-    static uint8_t  last_tx_src() {
+    static void    start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t tx_gpio);
+    static void    send_poll(const uint8_t data);
+    static void    stop();
+    static uint8_t transmit(const uint8_t * buf, const uint8_t len);
+    static uint8_t last_tx_src() {
         return last_tx_src_;
     }
 

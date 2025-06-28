@@ -22,6 +22,18 @@
 #define EMSESP_SCHEDULER_FILE "/config/emsespScheduler.json"
 #define EMSESP_SCHEDULER_SERVICE_PATH "/rest/schedule" // GET and POST
 
+#ifndef EMSESP_SCHEDULER_RUNNING_CORE
+#define EMSESP_SCHEDULER_RUNNING_CORE 1
+#endif
+
+#ifndef EMSESP_SCHEDULER_STACKSIZE
+#define EMSESP_SCHEDULER_STACKSIZE 5120
+#endif
+
+#ifndef EMSESP_SCHEDULER_PRIORITY
+#define EMSESP_SCHEDULER_PRIORITY 1
+#endif
+
 // bit flags for the schedule items. Matches those in interface/src/app/main/SchedulerDialog.tsx
 // 0-127 (0->0x7F) is day schedule
 // 128/0x80 is timer
