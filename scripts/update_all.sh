@@ -5,6 +5,7 @@
 
 cd interface
 rm -rf node_modules
+corepack use pnpm@latest-10
 pnpm update
 pnpm install
 pnpm format
@@ -12,6 +13,7 @@ pnpm lint
 
 cd ../mock-api
 rm -rf node_modules
+corepack use pnpm@latest-10
 pnpm update
 pnpm install
 pnpm format
