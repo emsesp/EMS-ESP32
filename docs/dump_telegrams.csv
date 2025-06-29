@@ -103,7 +103,7 @@ telegram_type_id,name,is_fetched
 0x0292,HPMode,fetched
 0x0293,HPMode,fetched
 0x0294,HPMode,fetched
-0x029B,RC300Curves, 
+0x029B,RC300Curves,fetched
 0x029C,RC300Curves, 
 0x029D,RC300Curves, 
 0x029E,RC300Curves, 
@@ -111,7 +111,7 @@ telegram_type_id,name,is_fetched
 0x02A0,RC300Curves, 
 0x02A1,RC300Curves, 
 0x02A2,RC300Curves, 
-0x02A5,RC300Monitor, 
+0x02A5,CRFMonitor, 
 0x02A6,RC300Monitor, 
 0x02A7,RC300Monitor, 
 0x02A8,CRFMonitor, 
