@@ -520,7 +520,7 @@ void TemperatureSensor::publish_values(const bool force) {
                     }
                 }
 
-                Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Temperature Sensors", nullptr, nullptr, false);
+                Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Temperature Sensors", nullptr, nullptr, nullptr, false);
                 Mqtt::add_ha_avail_section(config.as<JsonObject>(), stat_t, !is_ha_device_created, val_cond);
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];

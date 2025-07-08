@@ -62,6 +62,7 @@ class EMSdevice {
     const char * brand_to_char();
     std::string  to_string();
     std::string  to_string_short();
+    std::string  to_string_version();
     std::string  name(); // returns either default or custom name of a device (if defined)
 
     bool is_device_id(uint8_t device_id) const {
