@@ -747,7 +747,12 @@ bool Mqtt::queue_ha(const char * topic, const JsonObjectConst payload) {
 // create's a ha sensor config topic from a device value object (dev)
 // adds ids, name, mf, mdl, via_device
 // and also takes a flag (create_device_config) used to also create the main HA device config. This is only needed for one entity
-bool Mqtt::publish_ha_sensor_config_dv(DeviceValue & dv, const char * model, const char * brand, const bool remove, const bool create_device_config) {
+bool Mqtt::publish_ha_sensor_config_dv(DeviceValue & dv,
+                                       const char *  model,
+                                       const char *  brand,
+                                       const char *  version,
+                                       const bool    remove,
+                                       const bool    create_device_config) {
     // calculate the min and max
     int16_t  dv_set_min;
     uint32_t dv_set_max;
@@ -774,6 +779,7 @@ bool Mqtt::publish_ha_sensor_config_dv(DeviceValue & dv, const char * model, con
                                     dv.numeric_operator,
                                     model,
                                     brand,
+                                    version,
                                     create_device_config);
 }
 
@@ -801,6 +807,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
                                     const int8_t          num_op,
                                     const char * const    model,
                                     const char * const    brand,
+                                    const char * const    version,
                                     const bool            create_device_config) {
     // ignore if name (fullname) is empty
     if (!fullname || !en_name) {
@@ -1096,9 +1103,9 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // add dev section
     if (device_type == EMSdevice::DeviceType::SYSTEM) {
-        add_ha_dev_section(doc.as<JsonObject>(), nullptr, nullptr, nullptr, false);
+        add_ha_dev_section(doc.as<JsonObject>(), nullptr, nullptr, nullptr, nullptr, false);
     } else {
-        add_ha_dev_section(doc.as<JsonObject>(), EMSdevice::device_type_2_device_name(device_type), model, brand, create_device_config);
+        add_ha_dev_section(doc.as<JsonObject>(), EMSdevice::device_type_2_device_name(device_type), model, brand, version, create_device_config);
     }
 
     return queue_ha(topic, doc.as<JsonObject>());
@@ -1334,7 +1341,7 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
     modes.add("heat");
     modes.add("off");
 
-    add_ha_dev_section(doc.as<JsonObject>(), "thermostat", nullptr, nullptr, false);                                                // add dev section
+    add_ha_dev_section(doc.as<JsonObject>(), "thermostat", nullptr, nullptr, nullptr, false);                                       // add dev section
     add_ha_avail_section(doc.as<JsonObject>(), topic_t, false, seltemp_cond, has_roomtemp ? currtemp_cond : nullptr, hc_mode_cond); // add availability section
 
     return queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
@@ -1362,7 +1369,7 @@ std::string Mqtt::tag_to_topic(uint8_t device_type, int8_t tag) {
 // add devs section to an existing doc, only for HA
 // under devs node it will create ids and name and optional mf, mdl, via_device
 // name could be EMSdevice::device_type_2_device_name(dv.device_type));
-void Mqtt::add_ha_dev_section(JsonObject doc, const char * name, const char * model, const char * brand, const bool create_model) {
+void Mqtt::add_ha_dev_section(JsonObject doc, const char * name, const char * model, const char * brand, const char * version, const bool create_model) {
     // only works for HA
     if (discovery_type() != discoveryType::HOMEASSISTANT) {
         return;
@@ -1393,6 +1400,9 @@ void Mqtt::add_ha_dev_section(JsonObject doc, const char * name, const char * mo
         dev_json["mf"] = brand != nullptr ? brand : "EMS-ESP";
         if (model != nullptr) {
             dev_json["mdl"] = model;
+        }
+        if (version != nullptr) {
+            dev_json["sw"] = version;
         }
         dev_json["via_device"] = Mqtt::basename();
     }

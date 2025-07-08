@@ -85,7 +85,13 @@ class Mqtt {
     static bool queue_ha(const char * topic, const JsonObjectConst payload);
     static bool queue_remove_topic(const char * topic);
 
-    static bool publish_ha_sensor_config_dv(DeviceValue & dv, const char * model, const char * brand, const bool remove, const bool create_device_config = false);
+    static bool publish_ha_sensor_config_dv(DeviceValue & dv,
+                                            const char *  model,
+                                            const char *  brand,
+                                            const char *  version,
+                                            const bool    remove,
+                                            const bool    create_device_config = false);
+
     static bool publish_ha_sensor_config(uint8_t               type,
                                          int8_t                tag,
                                          const char * const    fullname,
@@ -102,6 +108,7 @@ class Mqtt {
                                          const int8_t          num_op,
                                          const char * const    model                = nullptr,
                                          const char * const    brand                = nullptr,
+                                         const char * const    version              = nullptr,
                                          const bool            create_device_config = false);
 
     static bool publish_system_ha_sensor_config(uint8_t type, const char * name, const char * entity, const uint8_t uom);
@@ -247,7 +254,7 @@ class Mqtt {
 
     static void
     add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8_t type, const uint8_t uom, const char * entity = nullptr, bool is_discovery = true);
-    static void add_ha_dev_section(JsonObject doc, const char * name, const char * model, const char * brand, const bool create_model);
+    static void add_ha_dev_section(JsonObject doc, const char * name, const char * model, const char * brand, const char * version, const bool create_model);
     static void add_ha_avail_section(JsonObject   doc,
                                      const char * state_t,
                                      const bool   is_first,

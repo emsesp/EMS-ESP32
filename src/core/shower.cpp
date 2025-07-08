@@ -212,7 +212,7 @@ void Shower::create_ha_discovery() {
         doc["stat_t"] = stat_t;
 
         Mqtt::add_ha_bool(doc.as<JsonObject>());
-        Mqtt::add_ha_dev_section(doc.as<JsonObject>(), "Shower Sensor", nullptr, nullptr, false);
+        Mqtt::add_ha_dev_section(doc.as<JsonObject>(), "Shower Sensor", nullptr, nullptr, nullptr, false);
         Mqtt::add_ha_avail_section(doc.as<JsonObject>(), stat_t, true); // no conditions
 
         snprintf(topic, sizeof(topic), "binary_sensor/%s/shower_active/config", Mqtt::basename().c_str());
@@ -243,7 +243,7 @@ void Shower::create_ha_discovery() {
         doc["dev_cla"]      = "duration";
         // doc["ent_cat"]      = "diagnostic";
 
-        Mqtt::add_ha_dev_section(doc.as<JsonObject>(), "Shower Sensor", nullptr, nullptr, false);
+        Mqtt::add_ha_dev_section(doc.as<JsonObject>(), "Shower Sensor", nullptr, nullptr, nullptr, false);
         Mqtt::add_ha_avail_section(doc.as<JsonObject>(), stat_t, false, "value_json.duration is defined");
 
         snprintf(topic, sizeof(topic), "sensor/%s/shower_duration/config", Mqtt::basename().c_str());
