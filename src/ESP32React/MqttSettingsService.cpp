@@ -23,6 +23,7 @@ static String generateClientId() {
 
 MqttSettingsService::~MqttSettingsService() {
     delete _mqttClient;
+    _mqttClient = nullptr;
 }
 
 void MqttSettingsService::begin() {
@@ -34,7 +35,7 @@ void MqttSettingsService::startClient() {
     static bool isSecure = false;
     if (_mqttClient != nullptr) {
         // do we need to change the client?
-        if ((isSecure && _state.enableTLS) || (!isSecure && !_state.enableTLS)) {
+        if (_state.enabled && ((isSecure && _state.enableTLS) || (!isSecure && !_state.enableTLS))) {
             return;
         }
         delete _mqttClient;
@@ -43,10 +44,10 @@ void MqttSettingsService::startClient() {
 #ifndef TASMOTA_SDK
     if (_state.enableTLS) {
         isSecure = true;
-        if (emsesp::EMSESP::system_.PSram() > 0) {
-            _mqttClient = new espMqttClientSecure(EMSESP_MQTT_PRIORITY, EMSESP_MQTT_RUNNING_CORE);
-        } else {
+        if (emsesp::EMSESP::system_.PSram() == 0) {
             _mqttClient = new espMqttClientSecure(espMqttClientTypes::UseInternalTask::NO);
+        } else {
+            _mqttClient = new espMqttClientSecure(EMSESP_MQTT_PRIORITY, EMSESP_MQTT_RUNNING_CORE);
         }
         if (!_mqttClient) {
             emsesp::EMSESP::logger().warning("MQTT Client alloc failed");
@@ -63,10 +64,10 @@ void MqttSettingsService::startClient() {
     }
 #endif
     isSecure = false;
-    if (emsesp::EMSESP::system_.PSram() > 0) {
-        _mqttClient = new espMqttClient(EMSESP_MQTT_PRIORITY, EMSESP_MQTT_RUNNING_CORE);
-    } else {
+    if (emsesp::EMSESP::system_.PSram() == 0) {
         _mqttClient = new espMqttClient(espMqttClientTypes::UseInternalTask::NO);
+    } else {
+        _mqttClient = new espMqttClient(EMSESP_MQTT_PRIORITY, EMSESP_MQTT_RUNNING_CORE);
     }
     static_cast<espMqttClient *>(_mqttClient)->onConnect([this](bool sessionPresent) { onMqttConnect(sessionPresent); });
     static_cast<espMqttClient *>(_mqttClient)->onDisconnect([this](espMqttClientTypes::DisconnectReason reason) { onMqttDisconnect(reason); });
@@ -78,6 +79,9 @@ void MqttSettingsService::startClient() {
 }
 
 void MqttSettingsService::loop() {
+    if (!_state.enabled || _mqttClient == nullptr || emsesp::EMSESP::system_.systemStatus() != 0) {
+        return;
+    }
     if (_reconfigureMqtt || (_disconnectedAt && static_cast<uint32_t>(uuid::get_uptime() - _disconnectedAt) >= MQTT_RECONNECTION_DELAY)) {
         // reconfigure MQTT client
         _disconnectedAt  = configureMqtt() ? 0 : uuid::get_uptime();
@@ -93,11 +97,11 @@ bool MqttSettingsService::isEnabled() {
 }
 
 bool MqttSettingsService::isConnected() {
-    return _mqttClient->connected();
+    return _mqttClient ? _mqttClient->connected() : false;
 }
 
 const char * MqttSettingsService::getClientId() {
-    return _mqttClient->getClientId();
+    return _mqttClient ? _mqttClient->getClientId() : "";
 }
 
 void MqttSettingsService::onMqttMessage(const espMqttClientTypes::MessageProperties & properties,
