@@ -485,6 +485,28 @@
 | syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 | 
 | boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 | 
 | headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 | 
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 244 | 1 | 1/10 | 
+| burngas | gas | boolean |   | false | DEVICE_DATA | 245 | 1 | 1 | 
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 246 | 1 | 1 | 
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 247 | 1 | 1/10 | 
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 248 | 1 | 1 | 
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 | 
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 | 
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 251 | 1 | 1 | 
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 252 | 1 | 1 | 
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 253 | 1 | 1 | 
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 254 | 1 | 1 | 
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 255 | 1 | 1/10 | 
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 256 | 1 | 1 | 
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 257 | 1 | 1 | 
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 258 | 1 | 1 | 
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 259 | 1 | 1 | 
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 260 | 1 | 1 | 
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 261 | 1 | 1 | 
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 262 | 1 | 1 | 
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 263 | 1 | 1 | 
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 | 
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 265 | 1 | 1 | 
 | heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 | 
 | heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 | 
 | heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 | 
@@ -515,131 +537,12 @@
 | pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 | 
 | pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 | 
 | pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 | 
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
-| dhw.nrg | energy | uint24 (>=0<=167772) | kWh | false | DHW | 0 | 2 | 1/100 | 
-| nrgheat | energy heating | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 | 
-| nrgcool | energy cooling | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 87 | 2 | 1/100 | 
-| metertotal | meter total | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 | 
-| metercomp | meter compressor | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 91 | 2 | 1/100 | 
-| metereheat | meter e-heater | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 93 | 2 | 1/100 | 
-| meterheat | meter heating | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 95 | 2 | 1/100 | 
-| metercool | meter cooling | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 97 | 2 | 1/100 | 
-| dhw.meter | meter | uint24 (>=0<=167772) | kWh | false | DHW | 2 | 2 | 1/100 | 
-| uptimetotal | heatpump total uptime | time (>=0<=279620) | minutes | false | DEVICE_DATA | 99 | 2 | 1/60 | 
-| uptimecontrol | total operating time heat | time (>=0<=279620) | minutes | false | DEVICE_DATA | 101 | 2 | 1/60 | 
-| uptimecompheating | operating time compressor heating | time (>=0<=279620) | minutes | false | DEVICE_DATA | 103 | 2 | 1/60 | 
-| uptimecompcooling | operating time compressor cooling | time (>=0<=279620) | minutes | false | DEVICE_DATA | 105 | 2 | 1/60 | 
-| dhw.uptimecomp | operating time compressor | time (>=0<=279620) | minutes | false | DHW | 4 | 2 | 1/60 | 
-| uptimecomppool | operating time compressor pool | time (>=0<=279620) | minutes | false | DEVICE_DATA | 107 | 2 | 1/60 | 
-| totalcompstarts | total compressor control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 109 | 2 | 1 | 
-| heatingstarts | heating control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 111 | 2 | 1 | 
-| coolingstarts | cooling control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 113 | 2 | 1 | 
-| dhw.startshp | starts hp | uint24 (>=0<=16777214) |   | false | DHW | 6 | 2 | 1 | 
-| poolstarts | pool control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 115 | 2 | 1 | 
-| nrgconstotal | total energy consumption | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 117 | 2 | 1 | 
-| nrgconscomptotal | total energy consumption compressor | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 119 | 2 | 1 | 
-| nrgconscompheating | energy consumption compressor heating | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 121 | 2 | 1 | 
-| dhw.nrgconscomp | energy consumption compressor | uint24 (>=0<=16777214) | kWh | false | DHW | 8 | 2 | 1 | 
-| nrgconscompcooling | energy consumption compressor cooling | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 123 | 2 | 1 | 
-| nrgconscomppool | energy consumption compressor pool | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 125 | 2 | 1 | 
-| auxelecheatnrgconstotal | total aux elec. heater energy consumption | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 127 | 2 | 1 | 
-| auxelecheatnrgconsheating | aux elec. heater energy consumption heating | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 129 | 2 | 1 | 
-| dhw.auxelecheatnrgcons | aux elec. heater energy consumption | uint24 (>=0<=16777214) | kWh | false | DHW | 10 | 2 | 1 | 
-| auxelecheatnrgconspool | aux elec. heater energy consumption pool | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 131 | 2 | 1 | 
-| nrgsupptotal | total energy supplied | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 133 | 2 | 1 | 
-| nrgsuppheating | total energy supplied heating | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 135 | 2 | 1 | 
-| dhw.nrgsupp | total energy warm supplied | uint24 (>=0<=16777214) | kWh | false | DHW | 12 | 2 | 1 | 
-| nrgsuppcooling | total energy supplied cooling | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 137 | 2 | 1 | 
-| nrgsupppool | total energy supplied pool | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 139 | 2 | 1 | 
-| hppower | compressor power output | uint16 (>=0<=3199) | kW | false | DEVICE_DATA | 141 | 1 | 1/10 | 
-| hpmaxpower | compressor max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 142 | 1 | 1 | 
-| pvmaxcomp | pv compressor max power | uint8 (>=0<=25) | kW | true | DEVICE_DATA | 143 | 1 | 1/10 | 
-| powerreduction | power reduction | uint8 (>=30<=60) | % | true | DEVICE_DATA | 144 | 1 | 10 | 
-| hpsetdiffpress | set differential pressure | uint8 (>=150<=750) | mbar | true | DEVICE_DATA | 145 | 1 | 50 | 
-| hpcompon | hp compressor | boolean |   | false | DEVICE_DATA | 146 | 1 | 1 | 
-| hpactivity | compressor activity | enum [off\|heating\|cooling\|hot water\|pool\|pool heating\|defrost\|compressor alarm] |   | false | DEVICE_DATA | 147 | 1 | 1 | 
-| hpbrinepumpspd | brine pump speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 148 | 1 | 1 | 
-| hpswitchvalve | switch valve | boolean |   | false | DEVICE_DATA | 149 | 1 | 1 | 
-| hpcompspd | compressor speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 150 | 1 | 1 | 
-| hpcircspd | circulation pump speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 151 | 1 | 1 | 
-| hpbrinein | brine in/evaporator | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 152 | 1 | 1/10 | 
-| hpbrineout | brine out/condenser | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 153 | 1 | 1/10 | 
-| hptc0 | heat carrier return (TC0) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 154 | 1 | 1/10 | 
-| hptc1 | heat carrier forward (TC1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 155 | 1 | 1/10 | 
-| hptc3 | condenser temperature (TC3) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 156 | 1 | 1/10 | 
-| hptr1 | compressor temperature (TR1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 157 | 1 | 1/10 | 
-| hptr3 | refrigerant temperature liquid side (condenser output) (TR3) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 158 | 1 | 1/10 | 
-| hptr4 | evaporator inlet temperature (TR4) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 159 | 1 | 1/10 | 
-| hptr5 | compressor inlet temperature (TR5) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 160 | 1 | 1/10 | 
-| hptr6 | compressor outlet temperature (TR6) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 161 | 1 | 1/10 | 
-| hptr7 | refrigerant temperature gas side (condenser input) (TR7) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 162 | 1 | 1/10 | 
-| hptl2 | air inlet temperature (TL2) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 163 | 1 | 1/10 | 
-| hppl1 | low pressure side temperature (PL1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 164 | 1 | 1/10 | 
-| hpph1 | high pressure side temperature (PH1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 165 | 1 | 1/10 | 
-| hpta4 | drain pan temp (TA4) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 166 | 1 | 1/10 | 
-| hptw1 | reservoir temp (TW1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 167 | 1 | 1/10 | 
-| poolsettemp | pool set temperature | uint8 (>=0<=127) | C | true | DEVICE_DATA | 168 | 1 | 1/2 | 
-| hp4way | 4-way valve (VR4) | enum [cooling & defrost\|heating & dhw] |   | false | DEVICE_DATA | 169 | 1 | 1 | 
-| hpin1 | input 1 state | boolean |   | false | DEVICE_DATA | 170 | 1 | 1 | 
-| hpin1opt | input 1 options | string |   | true | DEVICE_DATA | 171 | 8 | 1 | 
-| hpin2 | input 2 state | boolean |   | false | DEVICE_DATA | 179 | 1 | 1 | 
-| hpin2opt | input 2 options | string |   | true | DEVICE_DATA | 180 | 8 | 1 | 
-| hpin3 | input 3 state | boolean |   | false | DEVICE_DATA | 188 | 1 | 1 | 
-| hpin3opt | input 3 options | string |   | true | DEVICE_DATA | 189 | 8 | 1 | 
-| hpin4 | input 4 state | boolean |   | false | DEVICE_DATA | 197 | 1 | 1 | 
-| hpin4opt | input 4 options | string |   | true | DEVICE_DATA | 198 | 8 | 1 | 
-| maxheatcomp | heat limit compressor | enum [0 kW\|3 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 206 | 1 | 1 | 
-| maxheatheat | heat limit heating | enum [3 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 207 | 1 | 1 | 
-| dhw.maxheat | heat limit | enum [3 kW\|6 kW\|9 kW] |   | true | DHW | 14 | 1 | 1 | 
-| auxheatersource | aux heater source | enum [not installed\|electric heater\|exclusive\|parallel\|hybrid] |   | true | DEVICE_DATA | 208 | 1 | 1 | 
-| pvcooling | cooling only with PV | boolean |   | true | DEVICE_DATA | 209 | 1 | 1 | 
-| auxheateronly | aux heater only | boolean |   | true | DEVICE_DATA | 210 | 1 | 1 | 
-| auxheateroff | disable aux heater | boolean |   | true | DEVICE_DATA | 211 | 1 | 1 | 
-| auxheaterstatus | aux heater status | enum [off\|heating\|cooling\|hot water\|pool\|pool heating\|defrost\|compressor alarm] |   | false | DEVICE_DATA | 212 | 1 | 1 | 
-| auxheaterlevel | aux heater level | uint8 (>=0<=100) | % | false | DEVICE_DATA | 213 | 1 | 1 | 
-| auxheaterdelay | aux heater on delay | uint16 (>=10<=1000) | K*min | true | DEVICE_DATA | 214 | 1 | 10 | 
-| auxmaxlimit | aux heater max limit | uint8 (>=0<=10) | K | true | DEVICE_DATA | 215 | 1 | 1/10 | 
-| auxlimitstart | aux heater limit start | uint8 (>=0<=10) | K | true | DEVICE_DATA | 216 | 1 | 1/10 | 
-| auxheatrmode | aux heater mode | enum [eco\|comfort] |   | true | DEVICE_DATA | 217 | 1 | 1 | 
-| hphystheat | on/off hyst heat | uint16 (>=50<=1500) | K*min | true | DEVICE_DATA | 218 | 1 | 5 | 
-| hphystcool | on/off hyst cool | uint16 (>=50<=1500) | K*min | true | DEVICE_DATA | 219 | 1 | 5 | 
-| hphystpool | on/off hyst pool | uint16 (>=50<=1500) | K*min | true | DEVICE_DATA | 220 | 1 | 5 | 
-| silentmode | silent mode | enum [off\|auto\|on] |   | true | DEVICE_DATA | 221 | 1 | 1 | 
-| silentfrom | silent mode from | uint8 (>=0<=3810) | minutes | true | DEVICE_DATA | 222 | 1 | 15 | 
-| silentto | silent mode to | uint8 (>=0<=3810) | minutes | true | DEVICE_DATA | 223 | 1 | 15 | 
-| mintempsilent | min outside temp for silent mode | int8 (>=-126<=126) | C | true | DEVICE_DATA | 224 | 1 | 1 | 
-| tempparmode | outside temp parallel mode | int8 (>=-126<=126) | C | true | DEVICE_DATA | 225 | 1 | 1 | 
-| auxheatmix | aux heater mixing valve | int8 (>=-100<=100) | % | false | DEVICE_DATA | 226 | 1 | 1 | 
-| tempdiffheat | temp diff TC3/TC0 heat | uint8 (>=2<=10) | K | true | DEVICE_DATA | 227 | 1 | 1/10 | 
-| tempdiffcool | temp diff TC3/TC0 cool | uint8 (>=2<=10) | K | true | DEVICE_DATA | 228 | 1 | 1/10 | 
-| vpcooling | valve/pump cooling | boolean |   | true | DEVICE_DATA | 229 | 1 | 1 | 
-| heatcable | heating cable | boolean |   | true | DEVICE_DATA | 230 | 1 | 1 | 
-| vc0valve | VC0 valve | boolean |   | true | DEVICE_DATA | 231 | 1 | 1 | 
-| primepump | primary heatpump | boolean |   | true | DEVICE_DATA | 232 | 1 | 1 | 
-| primepumpmod | primary heatpump modulation | uint8 (>=0<=100) | % | true | DEVICE_DATA | 233 | 1 | 1 | 
-| hp3way | 3-way valve | boolean |   | true | DEVICE_DATA | 234 | 1 | 1 | 
-| elheatstep1 | el. heater step 1 | boolean |   | true | DEVICE_DATA | 235 | 1 | 1 | 
-| elheatstep2 | el. heater step 2 | boolean |   | true | DEVICE_DATA | 236 | 1 | 1 | 
-| elheatstep3 | el. heater step 3 | boolean |   | true | DEVICE_DATA | 237 | 1 | 1 | 
-| hpea0 | condensate reservoir heating (EA0) | boolean |   | false | DEVICE_DATA | 238 | 1 | 1 | 
-| hppumpmode | primary heatpump mode | enum [auto\|continuous] |   | true | DEVICE_DATA | 239 | 1 | 1 | 
-| fan | fan | uint8 (>=20<=100) | % | true | DEVICE_DATA | 240 | 1 | 1 | 
-| shutdown | shutdown | cmd [off\|on] |   | true | DEVICE_DATA | 241 | 1 | 1 | 
-| hpcurrpower | compressor current power | uint16 (>=0<=31999) | W | false | DEVICE_DATA | 242 | 1 | 1 | 
-| hppowerlimit | power limit | uint16 (>=0<=31999) | W | true | DEVICE_DATA | 243 | 1 | 1 | 
-| dhw.alternatingop | alternating operation | boolean |   | true | DHW | 15 | 1 | 1 | 
-| dhw.altopprioheat | prioritise heating during dhw | uint8 (>=20<=120) | minutes | true | DHW | 16 | 1 | 1 | 
-| dhw.altopprio | prioritise dhw during heating | uint8 (>=30<=120) | minutes | true | DHW | 17 | 1 | 1 | 
-| dhw.comfoff | comfort switch off | uint8 (>=15<=65) | C | true | DHW | 18 | 1 | 1 | 
-| dhw.ecooff | eco switch off | uint8 (>=15<=65) | C | true | DHW | 19 | 1 | 1 | 
-| dhw.ecoplusoff | eco+ switch off | uint8 (>=48<=63) | C | true | DHW | 20 | 1 | 1 | 
-| dhw.comfdiff | comfort diff | uint8 (>=6<=12) | K | true | DHW | 21 | 1 | 1 | 
-| dhw.ecodiff | eco diff | uint8 (>=6<=12) | K | true | DHW | 22 | 1 | 1 | 
-| dhw.ecoplusdiff | eco+ diff | uint8 (>=6<=12) | K | true | DHW | 23 | 1 | 1 | 
-| dhw.comfstop | comfort stop temp | uint8 (>=0<=254) | C | true | DHW | 24 | 1 | 1 | 
-| dhw.ecostop | eco stop temp | uint8 (>=0<=254) | C | true | DHW | 25 | 1 | 1 | 
-| dhw.ecoplusstop | eco+ stop temp | uint8 (>=0<=254) | C | true | DHW | 26 | 1 | 1 | 
-| dhw.hpcircpump | circulation pump available during dhw | boolean |   | true | DHW | 27 | 1 | 1 | 
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 | 
+| dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 | 
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 266 | 2 | 1/10 | 
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 | 
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 268 | 2 | 1/10 | 
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 | 
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 | 
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 | 
@@ -680,6 +583,10 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 | 
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 | 
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 | 
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 270 | 1 | 1 | 
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 | 
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
+| dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 | 
 
 ### Cascade CM10
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -3977,6 +3884,57 @@
 | mode | operating mode | uint8 (>=0<=254) |   | false | DEVICE_DATA | 9 | 1 | 1 | 
 
 ## Devices of type *heatpump*
+### CSH5800iG
+| shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
+|-|-|-|-|-|-|-|-|-|
+| airhumidity | relative air humidity | uint8 (>=0<=100) | % | false | DEVICE_DATA | 0 | 1 | 1 | 
+| dewtemperature | dew point temperature | uint8 (>=0<=254) | C | false | DEVICE_DATA | 1 | 1 | 1 | 
+| curflowtemp | current flow temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 2 | 1 | 1/10 | 
+| rettemp | return temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 3 | 1 | 1/10 | 
+| sysrettemp | system return temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 4 | 1 | 1/10 | 
+| hpta4 | drain pan temp (TA4) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 5 | 1 | 1/10 | 
+| hptr1 | compressor temperature (TR1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 | 
+| hptr3 | refrigerant temperature liquid side (condenser output) (TR3) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 | 
+| hptr4 | evaporator inlet temperature (TR4) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 | 
+| hptr5 | compressor inlet temperature (TR5) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 | 
+| hptr6 | compressor outlet temperature (TR6) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 | 
+| hptl2 | air inlet temperature (TL2) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 | 
+| hppl1 | low pressure side temperature (PL1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 | 
+| hpph1 | high pressure side temperature (PH1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 | 
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 14 | 1 | 1 | 
+| hpcompspd | compressor speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 15 | 1 | 1 | 
+| hybridstrategy | hybrid control strategy | enum [cost optimized\|co2 optimized\|outside temperature alt.\|outside temperature parallel\|heatpump preferred\|boiler only] |   | true | DEVICE_DATA | 16 | 1 | 1 | 
+| lownoisemode | low noise mode | enum [off\|reduced output\|switch off hp\|perm. reduced] |   | true | DEVICE_DATA | 17 | 1 | 1 | 
+| lownoisestart | low noise starttime | uint8 (>=0<=23) | hours | true | DEVICE_DATA | 18 | 1 | 1 | 
+| lownoisestop | low noise stoptime | uint8 (>=0<=23) | hours | true | DEVICE_DATA | 19 | 1 | 1 | 
+| dhw.hybriddhw | hybrid DHW | enum [eco\|high comfort] |   | true | DHW | 0 | 1 | 1 | 
+| energypricegas | energy price gas | uint8 (>=0<=254) | ct/kWh | true | DEVICE_DATA | 20 | 1 | 1 | 
+| energypriceel | energy price electric | uint8 (>=0<=254) | ct/kWh | true | DEVICE_DATA | 21 | 1 | 1 | 
+| energyfeedpv | feed in PV | uint8 (>=0<=254) | ct/kWh | true | DEVICE_DATA | 22 | 1 | 1 | 
+| switchovertemp | outside switchover temperature | int8 (>=-126<=126) | C | true | DEVICE_DATA | 23 | 1 | 1 | 
+| airpurgemode | air purge mode | boolean |   | true | DEVICE_DATA | 24 | 1 | 1 | 
+| heatpumpoutput | heatpump output | uint8 (>=0<=100) | % | true | DEVICE_DATA | 25 | 1 | 1 | 
+| coolingcircuit | cooling circuit | boolean |   | true | DEVICE_DATA | 26 | 1 | 1 | 
+| compstartmod | compressor start modulation | uint8 (>=0<=100) | % | true | DEVICE_DATA | 27 | 1 | 1 | 
+| heatdrainpan | heat drain pan | boolean |   | true | DEVICE_DATA | 28 | 1 | 1 | 
+| heatcable | heating cable | boolean |   | true | DEVICE_DATA | 29 | 1 | 1 | 
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 30 | 2 | 1/100 | 
+| dhw.nrg | energy | uint24 (>=0<=167772) | kWh | false | DHW | 1 | 2 | 1/100 | 
+| nrgheat | energy heating | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 32 | 2 | 1/100 | 
+| metertotal | meter total | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 34 | 2 | 1/100 | 
+| metercomp | meter compressor | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 36 | 2 | 1/100 | 
+| metereheat | meter e-heater | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 38 | 2 | 1/100 | 
+| meterheat | meter heating | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 40 | 2 | 1/100 | 
+| dhw.meter | meter | uint24 (>=0<=167772) | kWh | false | DHW | 3 | 2 | 1/100 | 
+| heatingstarts | heating control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 42 | 2 | 1 | 
+| dhw.startshp | starts hp | uint24 (>=0<=16777214) |   | false | DHW | 5 | 2 | 1 | 
+| fuelheat | fuel consumption heating | uint32 (>=0<=1677721) | kWh | false | DEVICE_DATA | 44 | 2 | 1/10 | 
+| dhw.fueldhw | fuel consumption | uint32 (>=0<=1677721) | kWh | false | DHW | 7 | 2 | 1/10 | 
+| elheat | el. consumption heating | uint32 (>=0<=1677721) | kWh | false | DEVICE_DATA | 46 | 2 | 1/10 | 
+| dhw.eldhw | el. consumption | uint32 (>=0<=1677721) | kWh | false | DHW | 9 | 2 | 1/10 | 
+| elgenheat | el. generation heating | uint32 (>=0<=1677721) | kWh | false | DEVICE_DATA | 48 | 2 | 1/10 | 
+| dhw.elgendhw | el generation | uint32 (>=0<=1677721) | kWh | false | DHW | 11 | 2 | 1/10 | 
+
 ### HP Module
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
