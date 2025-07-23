@@ -259,6 +259,7 @@ export const BOARD_PROFILES: BoardProfiles = {
   S32S3: 'BBQKees Gateway S3',
   E32: 'BBQKees Gateway E32',
   E32V2: 'BBQKees Gateway E32 V2',
+  E32V3: 'BBQKees Gateway E32 V3',
   NODEMCU: 'NodeMCU 32S',
   'MH-ET': 'MH-ET Live D1 Mini',
   LOLIN: 'Lolin D32',

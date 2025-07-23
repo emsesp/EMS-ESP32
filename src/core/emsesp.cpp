@@ -1711,8 +1711,8 @@ void EMSESP::start() {
     mqtt_.start();              // mqtt init
     system_.start();            // starts commands, led, adc, button, network (sets hostname), syslog & uart
     shower_.start();            // initialize shower timer and shower alert
-    temperaturesensor_.start(); // Temperature external sensors
-    analogsensor_.start();      // Analog external sensors
+    temperaturesensor_.start(factory_settings); // Temperature external sensors
+    analogsensor_.start(factory_settings);      // Analog external sensors
 
     // start web services
     webLogService.start();     // apply settings to weblog service

@@ -127,7 +127,7 @@ class AnalogSensor {
         RGB         = 11
     };
 
-    void start();
+    void start(const bool factory_settings = false);
     void loop();
     void publish_sensor(const Sensor & sensor) const;
     void publish_values(const bool force);

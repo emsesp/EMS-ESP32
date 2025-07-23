@@ -23,7 +23,25 @@ namespace emsesp {
 
 uuid::log::Logger AnalogSensor::logger_{F_(analogsensor), uuid::log::Facility::DAEMON};
 
-void AnalogSensor::start() {
+void AnalogSensor::start(const bool factory_settings) {
+    // if (factory_settings && EMSESP::nvs_.getString("boot").equals("E32V3") && EMSESP::nvs_.getString("hwrevision").equals("3.0")) {
+    if (factory_settings && analogReadMilliVolts(35) > 800) { // core voltage > 3V
+        EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
+            auto newSensor   = AnalogCustomization();
+            newSensor.gpio   = 39;
+            newSensor.name   = "core_voltage";
+            newSensor.offset = 0;
+            newSensor.factor = 0.00377136; // Divider 24k - 8,66k
+            newSensor.uom    = DeviceValueUOM::VOLTS;
+            newSensor.type   = AnalogType::ADC;
+            settings.analogCustomizations.push_back(newSensor);
+            newSensor.gpio = 36;
+            newSensor.name = "supply_voltage";
+            newSensor.factor = 0.017; // Divider 24k - 1,5k
+            settings.analogCustomizations.push_back(newSensor);
+            return StateUpdateResult::CHANGED; // persist the change
+        });
+    }
     reload(true); // fetch the list of sensors from our customization service
 
     if (!analog_enabled_) {
