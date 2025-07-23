@@ -34,7 +34,7 @@ uuid::log::Logger TemperatureSensor::logger_{F_(temperaturesensor), uuid::log::F
 // start the 1-wire
 void TemperatureSensor::start(const bool factory_settings) {
     // set_internal_ = factory_settings && EMSESP::nvs_.getString("boot").equals("E32V3") && EMSESP::nvs_.getString("hwrevision").equals("3.0");
-    set_internal_ = factory_settings && analogReadMilliVolts(35) > 800; // core voltage > 3V
+    set_internal_ = factory_settings && analogReadMilliVolts(39) > 800; // core voltage > 3V
     reload();
 
     if (!dallas_gpio_) {

@@ -25,7 +25,7 @@ uuid::log::Logger AnalogSensor::logger_{F_(analogsensor), uuid::log::Facility::D
 
 void AnalogSensor::start(const bool factory_settings) {
     // if (factory_settings && EMSESP::nvs_.getString("boot").equals("E32V3") && EMSESP::nvs_.getString("hwrevision").equals("3.0")) {
-    if (factory_settings && analogReadMilliVolts(35) > 800) { // core voltage > 3V
+    if (factory_settings && analogReadMilliVolts(39) > 800) { // core voltage > 3V
         EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
             auto newSensor   = AnalogCustomization();
             newSensor.gpio   = 39;
