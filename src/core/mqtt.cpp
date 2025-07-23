@@ -1332,7 +1332,7 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
 
     // add hvac_action - https://github.com/emsesp/EMS-ESP32/discussions/2562
     doc["action_topic"]    = "~/boiler_data";
-    doc["action_template"] = "{% if value_json.heatingactive=='on'%}heating{%else%}idle{%endif%}";
+    doc["action_template"] = "{% if value_json.hpactivity=='cooling'%}cooling{%elif value_json.heatingactive=='on'%}heating{%else%}idle{%endif%}";
 
     // the HA climate component only responds to auto, heat and off
     JsonArray modes = doc["modes"].to<JsonArray>();
