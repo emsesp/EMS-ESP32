@@ -33,8 +33,8 @@ uuid::log::Logger TemperatureSensor::logger_{F_(temperaturesensor), uuid::log::F
 
 // start the 1-wire
 void TemperatureSensor::start(const bool factory_settings) {
-    // set_internal_ = factory_settings && EMSESP::nvs_.getString("boot").equals("E32V3") && EMSESP::nvs_.getString("hwrevision").equals("3.0");
-    set_internal_ = factory_settings && analogReadMilliVolts(39) > 800; // core voltage > 3V
+    // set_internal_ = factory_settings && EMSESP::nvs_.getString("boot").equals("E32V2_2") && EMSESP::nvs_.getString("hwrevision").equals("3.0");
+    set_internal_ = factory_settings && analogReadMilliVolts(39) > 700; // core voltage > 2.6V
     reload();
 
     if (!dallas_gpio_) {
@@ -205,9 +205,11 @@ void TemperatureSensor::loop() {
                         set_internal_ = false;
                         Sensor * s    = &sensors_[0];
                         if (firstscan_ > 1) {
-                            for (auto s1 : sensors_) {
-                                if (EMSESP::nvs_.getString("intTemp").equals(s1.id().c_str())) {
-                                    s = &s1;
+                            std::string s_nvs = EMSESP::nvs_.getString("intTemp").c_str();
+                            for (uint8_t i = 0; i < firstscan_; i++) {
+                                if (s_nvs == sensors_[i].id()) {
+                                    s = &sensors_[i];
+                                    break;
                                 }
                             }
                         }

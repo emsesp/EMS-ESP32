@@ -24,8 +24,8 @@ namespace emsesp {
 uuid::log::Logger AnalogSensor::logger_{F_(analogsensor), uuid::log::Facility::DAEMON};
 
 void AnalogSensor::start(const bool factory_settings) {
-    // if (factory_settings && EMSESP::nvs_.getString("boot").equals("E32V3") && EMSESP::nvs_.getString("hwrevision").equals("3.0")) {
-    if (factory_settings && analogReadMilliVolts(39) > 800) { // core voltage > 3V
+    // if (factory_settings && EMSESP::nvs_.getString("boot").equals("E32V2_2") && EMSESP::nvs_.getString("hwrevision").equals("3.0")) {
+    if (factory_settings && analogReadMilliVolts(39) > 700) { // core voltage > 2.6V
         EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
             auto newSensor   = AnalogCustomization();
             newSensor.gpio   = 39;
@@ -35,8 +35,8 @@ void AnalogSensor::start(const bool factory_settings) {
             newSensor.uom    = DeviceValueUOM::VOLTS;
             newSensor.type   = AnalogType::ADC;
             settings.analogCustomizations.push_back(newSensor);
-            newSensor.gpio = 36;
-            newSensor.name = "supply_voltage";
+            newSensor.gpio   = 36;
+            newSensor.name   = "supply_voltage";
             newSensor.factor = 0.017; // Divider 24k - 1,5k
             settings.analogCustomizations.push_back(newSensor);
             return StateUpdateResult::CHANGED; // persist the change

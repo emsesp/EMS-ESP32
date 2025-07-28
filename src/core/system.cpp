@@ -50,6 +50,8 @@
 
 #include <HTTPClient.h>
 
+#include "esp_efuse.h"
+
 namespace emsesp {
 
 // Languages supported. Note: the order is important
@@ -1423,6 +1425,13 @@ bool System::command_service(const char * cmd, const char * value) {
             ok = true;
         }
     }
+    int n;
+    if (!ok && Helpers::value2number(value, n)) {
+        if (!strcmp(cmd, "fuse/mfg")) { // && esp_efuse_read_reg(EFUSE_BLK3, 0) == 0) {
+            ok = esp_efuse_write_reg(EFUSE_BLK3, 0, (uint32_t)n) == ESP_OK;
+            LOG_INFO("fuse programed with value '%X': %s", n, ok ? "successful" : "failed");
+        }
+    }
 
     if (ok) {
         LOG_INFO("System command '%s' with value '%s'", cmd, value);
@@ -1877,8 +1886,8 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
         data = {2, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720, 16, 1, 0, 0}; // BBQKees Gateway E32
     } else if (board_profile == "E32V2") {
         data = {2, 14, 4, 5, 34, PHY_type::PHY_TYPE_LAN8720, 15, 0, 1, 0}; // BBQKees Gateway E32 V2
-    } else if (board_profile == "E32V3") {
-        data = {32, 14, 4, 5, 34, PHY_type::PHY_TYPE_LAN8720, 15, 0, 1, 1}; // BBQKees Gateway E32 V3
+    } else if (board_profile == "E32V2_2") {
+        data = {32, 14, 4, 5, 34, PHY_type::PHY_TYPE_LAN8720, 15, 0, 1, 1}; // BBQKees Gateway E32 V2.2, rgb led
     } else if (board_profile == "MH-ET") {
         data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // MH-ET Live D1 Mini
     } else if (board_profile == "NODEMCU") {
@@ -2029,6 +2038,7 @@ bool System::ntp_connected() {
 // see if its a BBQKees Gateway by checking the nvs values
 String System::getBBQKeesGatewayDetails() {
 #ifndef EMSESP_STANDALONE
+    /*
     if (!EMSESP::nvs_.isKey("mfg")) {
         return "";
     }
@@ -2042,6 +2052,26 @@ String System::getBBQKeesGatewayDetails() {
     }
 
     return "BBQKees Gateway Model " + EMSESP::nvs_.getString("model") + " v" + EMSESP::nvs_.getString("hwrevision") + "/" + EMSESP::nvs_.getString("batch");
+*/
+    union {
+        struct {
+            uint32_t no : 4;
+            uint32_t month : 4;
+            uint32_t year : 8;
+            uint32_t rev_minor : 4;
+            uint32_t rev_major : 4;
+            uint32_t model : 4;
+            uint32_t mfg : 4;
+        };
+        uint32_t reg;
+    } gw;
+    gw.reg               = esp_efuse_read_reg(EFUSE_BLK3, 0);
+    const char * mfg[]   = {"unknown", "BBQKees Electronics", "", "", "", "", "", ""};
+    const char * model[] = {"unknown", "S3", "E32V2", "E32V2.2", "S32", "E32", "", "", ""};
+
+    return gw.reg ? String(mfg[gw.mfg]) + " " + String(model[gw.model]) + " rev." + String(gw.rev_major) + "." + String(gw.rev_minor) + "/"
+                        + String(2000 + gw.year) + "-" + String(gw.month) + "-" + String(gw.no) + " (fuse 0x" + String(gw.reg, 16) + ")"
+                  : "";
 #else
     return "";
 #endif
@@ -2160,7 +2190,7 @@ bool System::readCommand(const char * data) {
 
     // first check deviceID
     if ((p = strtok(data_args, " ,"))) {               // delimiter comma or space
-        strlcpy(value, p, 10);                         // get string
+        strlcpy(value, p, sizeof(value));              // get string
         device_id = (uint8_t)Helpers::hextoint(value); // convert hex to int
         if (!EMSESP::valid_device(device_id)) {
             LOG_ERROR("Invalid device ID (0x%02X) in read command", device_id);
@@ -2171,8 +2201,8 @@ bool System::readCommand(const char * data) {
     // iterate until end
     uint8_t num_args = 0;
     while (p != 0) {
-        if ((p = strtok(nullptr, " ,"))) { // delimiter comma or space
-            strlcpy(value, p, 10);         // get string
+        if ((p = strtok(nullptr, " ,"))) {    // delimiter comma or space
+            strlcpy(value, p, sizeof(value)); // get string
             if (num_args == 0) {
                 type_id = (uint16_t)Helpers::hextoint(value); // convert hex to int
             } else if (num_args == 1) {
