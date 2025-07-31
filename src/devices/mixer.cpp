@@ -31,7 +31,7 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
         register_telegram_type(device_id - 0x20 + 0x02D7, "MMPLUSStatusMessage", false, MAKE_PF_CB(process_MMPLUSStatusMessage_HC));
         // register_telegram_type(device_id - 0x20 + 0x02E1, "MMPLUSSetMessage", true, MAKE_PF_CB(process_MMPLUSSetMessage_HC));
-        register_telegram_type(device_id - 0x20 + 0x02CD, "MMPLUSConfigMessage", false, MAKE_PF_CB(process_MMPLUSConfigMessage_HC));
+        register_telegram_type(device_id - 0x20 + 0x02CD, "MMPLUSConfigMessage", true, MAKE_PF_CB(process_MMPLUSConfigMessage_HC));
         register_device_value(tag, &flowTempHc_, DeviceValueType::UINT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(flowTempHc), DeviceValueUOM::DEGREES);
         register_device_value(tag, &status_, DeviceValueType::UINT8, FL_(mixerStatus), DeviceValueUOM::PERCENT);
         register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT8, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
@@ -47,7 +47,7 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
                               10,
                               600);
         register_device_value(tag, &flowTempOffset_, DeviceValueType::UINT8, FL_(flowtempoffset), DeviceValueUOM::K, MAKE_CF_CB(set_flowTempOffset), 0, 20);
-        EMSESP::send_read_request(device_id - 0x20 + 0x02CD, device_id, 0, 3);
+        // EMSESP::send_read_request(device_id - 0x20 + 0x02CD, device_id, 0, 3);
     }
 
     // EMS 1.0
