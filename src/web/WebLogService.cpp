@@ -164,7 +164,7 @@ void WebLogService::show(Shell & shell) {
 }
 
 void WebLogService::loop() {
-    if (!events_.count() || log_messages_.empty()) {
+    if (!events_.count() || log_messages_.empty() || events_.avgPacketsWaiting() >= SSE_MAX_QUEUED_MESSAGES) {
         return;
     }
 
