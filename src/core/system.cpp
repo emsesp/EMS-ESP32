@@ -50,7 +50,9 @@
 
 #include <HTTPClient.h>
 
+#ifndef EMSESP_STANDALONE
 #include "esp_efuse.h"
+#endif
 
 namespace emsesp {
 
@@ -1427,10 +1429,12 @@ bool System::command_service(const char * cmd, const char * value) {
     }
     int n;
     if (!ok && Helpers::value2number(value, n)) {
+#ifndef EMSESP_STANDALONE
         if (!strcmp(cmd, "fuse/mfg")) { // && esp_efuse_read_reg(EFUSE_BLK3, 0) == 0) {
             ok = esp_efuse_write_reg(EFUSE_BLK3, 0, (uint32_t)n) == ESP_OK;
             LOG_INFO("fuse programed with value '%X': %s", n, ok ? "successful" : "failed");
         }
+#endif
     }
 
     if (ok) {
