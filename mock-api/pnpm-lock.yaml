@@ -18,8 +18,8 @@ importers:
         specifier: ^3.5.4
         version: 3.5.4
       itty-router:
-        specifier: ^5.0.18
-        version: 5.0.18
+        specifier: ^5.0.20
+        version: 5.0.20
       prettier:
         specifier: ^3.6.2
         version: 3.6.2
@@ -59,8 +59,8 @@ packages:
     resolution: {integrity: sha512-mGe7UK5wWyh0bKRfupsUchrQGqvDbZDbKJw+kcRGSmdHVYrv+ltd0pnpDTVpiTqnaBru9iEvA8pz8W46v0Amwg==}
     engines: {node: '>=6.9.0'}
 
-  '@babel/types@7.28.0':
-    resolution: {integrity: sha512-jYnje+JyZG5YThjHiF28oT4SIZLnYOcSBb6+SDaFIyzDVSkXQmQQYclJ2R+YxcdmK0AX6x1E5OQNtuh3jHDrUg==}
+  '@babel/types@7.28.2':
+    resolution: {integrity: sha512-ruv7Ae4J5dUYULmeXw1gmb7rYRz57OWCPM57pHojnLq/3Z1CK2lNSLTCVjxVk1F/TZHwOZZrOWi0ur95BbLxNQ==}
     engines: {node: '>=6.9.0'}
 
   '@jridgewell/gen-mapping@0.3.12':
@@ -122,8 +122,8 @@ packages:
     resolution: {integrity: sha512-YikH+7CUTOtP44ZTnUhR7Ic2UASBPOqmaRkRKxRbywPTe5VxF7RRCck4af9wutiZ/QKM5nME9Bie2fFaPz5Gug==}
     engines: {node: '>=14.0.0'}
 
-  itty-router@5.0.18:
-    resolution: {integrity: sha512-mK3ReOt4ARAGy0V0J7uHmArG2USN2x0zprZ+u+YgmeRjXTDbaowDy3kPcsmQY6tH+uHhDgpWit9Vqmv/4rTXwA==}
+  itty-router@5.0.20:
+    resolution: {integrity: sha512-D27Q+6D3q4Fho3ixmbE+qbu+7N/OqO7ty8Eh62PkyEhg4oBRPV3+HBU3GBXneuc430sRql9Az6qTdCiJKFbHtw==}
 
   javascript-natural-sort@0.7.1:
     resolution: {integrity: sha512-nO6jcEfZWQXDhOiBtG2KvKyEptz7RVbpGP4vTD2hLBdmNQSsCiicO2Ioinv6UI4y9ukqnBpy+XZ9H6uLNgJTlw==}
@@ -167,7 +167,7 @@ snapshots:
   '@babel/generator@7.28.0':
     dependencies:
       '@babel/parser': 7.28.0
-      '@babel/types': 7.28.0
+      '@babel/types': 7.28.2
       '@jridgewell/gen-mapping': 0.3.12
       '@jridgewell/trace-mapping': 0.3.29
       jsesc: 3.1.0
@@ -180,13 +180,13 @@ snapshots:
 
   '@babel/parser@7.28.0':
     dependencies:
-      '@babel/types': 7.28.0
+      '@babel/types': 7.28.2
 
   '@babel/template@7.27.2':
     dependencies:
       '@babel/code-frame': 7.27.1
       '@babel/parser': 7.28.0
-      '@babel/types': 7.28.0
+      '@babel/types': 7.28.2
 
   '@babel/traverse@7.28.0':
     dependencies:
@@ -195,12 +195,12 @@ snapshots:
       '@babel/helper-globals': 7.28.0
       '@babel/parser': 7.28.0
       '@babel/template': 7.27.2
-      '@babel/types': 7.28.0
+      '@babel/types': 7.28.2
       debug: 4.4.1
     transitivePeerDependencies:
       - supports-color
 
-  '@babel/types@7.28.0':
+  '@babel/types@7.28.2':
     dependencies:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.27.1
@@ -232,7 +232,7 @@ snapshots:
       '@babel/generator': 7.28.0
       '@babel/parser': 7.28.0
       '@babel/traverse': 7.28.0
-      '@babel/types': 7.28.0
+      '@babel/types': 7.28.2
       javascript-natural-sort: 0.7.1
       lodash: 4.17.21
       prettier: 3.6.2
@@ -256,7 +256,7 @@ snapshots:
       dezalgo: 1.0.4
       once: 1.4.0
 
-  itty-router@5.0.18: {}
+  itty-router@5.0.20: {}
 
   javascript-natural-sort@0.7.1: {}
 
