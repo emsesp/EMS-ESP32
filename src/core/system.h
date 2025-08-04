@@ -351,10 +351,10 @@ class System {
     static void               button_OnDblClick(PButton & b);
     static void               button_OnLongPress(PButton & b);
     static void               button_OnVLongPress(PButton & b);
-    static constexpr uint32_t BUTTON_Debounce        = 40;   // Debounce period to prevent flickering when pressing or releasing the button (in ms)
-    static constexpr uint32_t BUTTON_DblClickDelay   = 250;  // Max period between clicks for a double click event (in ms)
-    static constexpr uint32_t BUTTON_LongPressDelay  = 750;  // Hold period for a long press event (in ms)
-    static constexpr uint32_t BUTTON_VLongPressDelay = 9000; // Hold period for a very long press event (in ms)
+    static constexpr uint32_t BUTTON_Debounce        = 40;    // Debounce period to prevent flickering when pressing or releasing the button (in ms)
+    static constexpr uint32_t BUTTON_DblClickDelay   = 250;   // Max period between clicks for a double click event (in ms)
+    static constexpr uint32_t BUTTON_LongPressDelay  = 9500;  // Hold period for a long press event (in ms) - 10 seconds
+    static constexpr uint32_t BUTTON_VLongPressDelay = 20000; // Hold period for a very long press event (in ms) - 20 seconds
 
     // healthcheck
 #ifdef EMSESP_PINGTEST
