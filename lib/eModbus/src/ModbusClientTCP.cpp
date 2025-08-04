@@ -18,7 +18,8 @@ ModbusClientTCP::ModbusClientTCP(Client& client, uint16_t queueLimit) :
   MT_target(IPAddress(0, 0, 0, 0), 0, DEFAULTTIMEOUT, TARGETHOSTINTERVAL),
   MT_defaultTimeout(DEFAULTTIMEOUT),
   MT_defaultInterval(TARGETHOSTINTERVAL),
-  MT_qLimit(queueLimit)
+  MT_qLimit(queueLimit),
+  MT_timeoutsToClose(0)
   { }
 
 // Alternative Constructor takes reference to Client (EthernetClient or WiFiClient) plus initial target host
@@ -29,7 +30,8 @@ ModbusClientTCP::ModbusClientTCP(Client& client, IPAddress host, uint16_t port, 
   MT_target(host, port, DEFAULTTIMEOUT, TARGETHOSTINTERVAL),
   MT_defaultTimeout(DEFAULTTIMEOUT),
   MT_defaultInterval(TARGETHOSTINTERVAL),
-  MT_qLimit(queueLimit)
+  MT_qLimit(queueLimit),
+  MT_timeoutsToClose(0)
   { }
 
 // Destructor: clean up queue, task etc.
@@ -64,7 +66,7 @@ void ModbusClientTCP::end() {
 // begin: start worker task
 #if IS_LINUX
 void *ModbusClientTCP::pHandle(void *p) {
-  handleConnection((ModbusClientTCP *)p);
+  handleConnection(static_cast<ModbusClientTCP *>(p));
   return nullptr;
 }
 #endif
@@ -84,7 +86,7 @@ void ModbusClientTCP::begin(int coreID) {
     char taskName[18];
     snprintf(taskName, 18, "Modbus%02XTCP", instanceCounter);
     // Start task to handle the queue
-    xTaskCreatePinnedToCore((TaskFunction_t)&handleConnection, taskName, CLIENT_TASK_STACK, this, 5, &worker, coreID >= 0 ? coreID : NULL);
+    xTaskCreatePinnedToCore((TaskFunction_t)&handleConnection, taskName, CLIENT_TASK_STACK, this, 5, &worker, coreID >= 0 ? coreID : tskNO_AFFINITY);
     LOG_D("TCP client worker %s started\n", taskName);
 #endif
   } else {
@@ -119,7 +121,23 @@ uint32_t ModbusClientTCP::pendingRequests() {
 void ModbusClientTCP::clearQueue() {
   std::queue<RequestEntry *> empty;
   LOCK_GUARD(lockGuard, qLock);
+  // Delete queue entries if still on the queue
+  while (!requests.empty()) {
+    RequestEntry *re = requests.front();
+    delete re;
+    requests.pop();
+  }
+  // Now flush the queue
   std::swap(requests, empty);
+}
+
+// Set number of timeouts to tolerate before a connection is forcibly closed.
+// 0: never, 1..255: desired number
+// Returns previous value.
+uint8_t ModbusClientTCP::closeConnectionOnTimeouts(uint8_t n) {
+  uint8_t oldValue = MT_timeoutsToClose;
+  MT_timeoutsToClose = n;
+  return oldValue;
 }
 
 // Base addRequest for preformatted ModbusMessage and last set target
@@ -225,6 +243,7 @@ bool ModbusClientTCP::addToQueue(uint32_t token, ModbusMessage request, TargetHo
 void ModbusClientTCP::handleConnection(ModbusClientTCP *instance) {
   bool doNotPop;
   unsigned long lastRequest = millis();
+  uint16_t timeoutCount = 0;       // Run time counter of consecutive timeouts.
 
   // Loop forever - or until task is killed
   while (1) {
@@ -273,6 +292,8 @@ void ModbusClientTCP::handleConnection(ModbusClientTCP *instance) {
         // Did we get a normal response?
         if (response.getError()==SUCCESS) {
           LOG_D("Data response.\n");
+          // Reset timeout counter 
+          timeoutCount = 0;
           // Yes. Is it a synchronous request?
           if (request->isSyncRequest) {
             // Yes. Put the response into the response map
@@ -298,6 +319,25 @@ void ModbusClientTCP::handleConnection(ModbusClientTCP *instance) {
           {
             LOCK_GUARD(responseCnt, instance->countAccessM);
             instance->errorCount++;
+          }
+          // Is it a TIMEOUT and do we need to track it?
+          if (response.getError()==TIMEOUT && instance->MT_timeoutsToClose) {
+            LOG_D("Checking timeout sequence\n");
+            // Yes. First count timeout conter up
+            timeoutCount++;
+            // Is the count above the limit?
+            if (timeoutCount > instance->MT_timeoutsToClose) {
+              LOG_D("Timeouts: %d exceeding limit (%d), closing connection\n", 
+                timeoutCount, instance->MT_timeoutsToClose);
+              // Yes. We need to cut the connection
+              instance->MT_client.stop();
+              delay(1);
+              // reset timeout count
+              timeoutCount = 0;
+            }
+          } else {
+            // No TIMEOUT or no limit: reset timeout count
+            timeoutCount = 0;
           }
           // Is it a synchronous request?
           if (request->isSyncRequest) {
@@ -345,8 +385,11 @@ void ModbusClientTCP::handleConnection(ModbusClientTCP *instance) {
       {
         // Safely lock the queue
         LOCK_GUARD(lockGuard, instance->qLock);
-        // Remove the front queue entry
-        instance->requests.pop();
+
+        // Remove the front queue entry if the queue is not empty
+        if (!instance->requests.empty()) {
+          instance->requests.pop();
+        }
         // Delete request
         delete request;
         LOG_D("Request popped from queue.\n");
