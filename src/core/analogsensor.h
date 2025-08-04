@@ -168,11 +168,11 @@ class AnalogSensor {
     void store_counters();
 
   private:
-    static constexpr double   Beta                    = 3380;
+    static constexpr double   Beta                    = 4260;
     static constexpr double   T0                      = 273.15;
     static constexpr double   T25                     = 298.15;
-    static constexpr double   R0                      = 10000;
-    static constexpr double   Rt                      = 10000;
+    static constexpr double   R0                      = 100000;
+    static constexpr double   Rt                      = 60000;
     static constexpr uint8_t  MAX_SENSORS             = 20;
     static constexpr uint32_t MEASURE_ANALOG_INTERVAL = 500;
 
