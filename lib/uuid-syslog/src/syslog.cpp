@@ -122,7 +122,6 @@ void SyslogService::remove_queued_messages(uuid::log::Level level) {
     }
 
     log_message_id_ -= offset;
-    log_message_fails_ += offset;
 }
 
 void SyslogService::log_level(uuid::log::Level level) {
