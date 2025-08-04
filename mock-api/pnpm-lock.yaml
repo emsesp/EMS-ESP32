@@ -18,8 +18,8 @@ importers:
         specifier: ^3.5.4
         version: 3.5.4
       itty-router:
-        specifier: ^5.0.20
-        version: 5.0.20
+        specifier: ^5.0.21
+        version: 5.0.21
       prettier:
         specifier: ^3.6.2
         version: 3.6.2
@@ -122,8 +122,8 @@ packages:
     resolution: {integrity: sha512-YikH+7CUTOtP44ZTnUhR7Ic2UASBPOqmaRkRKxRbywPTe5VxF7RRCck4af9wutiZ/QKM5nME9Bie2fFaPz5Gug==}
     engines: {node: '>=14.0.0'}
 
-  itty-router@5.0.20:
-    resolution: {integrity: sha512-D27Q+6D3q4Fho3ixmbE+qbu+7N/OqO7ty8Eh62PkyEhg4oBRPV3+HBU3GBXneuc430sRql9Az6qTdCiJKFbHtw==}
+  itty-router@5.0.21:
+    resolution: {integrity: sha512-SrmsBfXtdoIkuDMTMXqCT0kYSl9OlQZLC7llHs4fE26dZlGfi0Cm4adNL7q/ygpWyoTZobZ547h5SZu/PwB+cg==}
 
   javascript-natural-sort@0.7.1:
     resolution: {integrity: sha512-nO6jcEfZWQXDhOiBtG2KvKyEptz7RVbpGP4vTD2hLBdmNQSsCiicO2Ioinv6UI4y9ukqnBpy+XZ9H6uLNgJTlw==}
@@ -256,7 +256,7 @@ snapshots:
       dezalgo: 1.0.4
       once: 1.4.0
 
-  itty-router@5.0.20: {}
+  itty-router@5.0.21: {}
 
   javascript-natural-sort@0.7.1: {}
 
