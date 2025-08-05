@@ -516,13 +516,16 @@ void System::button_OnDblClick(PButton & b) {
 
 // button long press
 void System::button_OnLongPress(PButton & b) {
-    LOG_NOTICE("Button pressed - long press - restart from factory/boot partition");
-    EMSESP::system_.system_restart("boot"); // this is default when first installed. it may contain the bootloader code.
+    LOG_NOTICE("Button pressed - long press - perform factory reset");
+#ifndef EMSESP_STANDALONE
+    System::command_format(nullptr, 0);
+#endif
 }
 
 // button indefinite press - do nothing for now
 void System::button_OnVLongPress(PButton & b) {
-    LOG_NOTICE("Button pressed - very long press");
+    LOG_NOTICE("Button pressed - very long press - restart from factory/boot partition");
+    EMSESP::system_.system_restart("boot");
 }
 
 // push button
@@ -1935,7 +1938,7 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
     return true;
 }
 
-// format command - factory reset, removing all config fi`les
+// format command - factory reset, removing all config files
 bool System::command_format(const char * value, const int8_t id) {
     LOG_INFO("Removing all config files");
 #ifndef EMSESP_STANDALONE
