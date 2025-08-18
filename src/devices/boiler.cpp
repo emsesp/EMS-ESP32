@@ -52,7 +52,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
 
     // not ems1.0, but HT3
     if (model() != EMSdevice::EMS_DEVICE_FLAG_EMS) {
-        register_telegram_type(0x26, "UBASettingsWW", true, MAKE_PF_CB(process_UBASettingsWW));
+        register_telegram_type(0x27, "UBASettingsWW", true, MAKE_PF_CB(process_UBASettingsWW));
         register_telegram_type(0x2A, "MC110Status", false, MAKE_PF_CB(process_MC110Status));
     }
 
@@ -1365,7 +1365,7 @@ void Boiler::process_UBAParameters(std::shared_ptr<const Telegram> telegram) {
  * Boiler(0x08) -> Me(0x0B), ?(0x26), data: 01 05 00 0F 00 1E 58 5A
  */
 void Boiler::process_UBASettingsWW(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram, wwMaxPower_, 7);
+    has_update(telegram, wwMaxPower_, 10);
 }
 
 // 0x33
@@ -2578,7 +2578,7 @@ bool Boiler::set_ww_maxpower(const char * value, const int8_t id) {
         return false;
     }
 
-    write_command(EMS_TYPE_UBASettingsWW, 7, v, EMS_TYPE_UBASettingsWW);
+    write_command(EMS_TYPE_UBASettingsWW, 10, v, EMS_TYPE_UBASettingsWW);
 
     return true;
 }
@@ -2839,7 +2839,7 @@ bool Boiler::set_ww_disinfect(const char * value, const int8_t id) {
     }
 
     if (is_received(EMS_TYPE_UBAParameterWWPlus)) {
-        write_command(EMS_TYPE_UBAFlags, 0, (v ? 0x44 : 0x04), 0xE9); // not sure if this is in flags
+        write_command(0x05, 44, (v ? 0xFF : 0xFE), 0xE9); // https://github.com/emsesp/EMS-ESP32/discussions/2601
     } else {
         write_command(EMS_TYPE_UBAFlags, 0, (v ? 0x44 : 0x04), 0x34);
     }
@@ -2916,11 +2916,11 @@ bool Boiler::set_reset(const char * value, const int8_t id) {
         return true; // dash
     } else if (num == 1) {
         // LOG_INFO("Reset boiler maintenance message");
-        write_command(0x05, 0x08, 0xFF, 0x1C);
+        write_command(0x05, 8, 0xFF, 0x1C);
         return true;
     } else if (num == 2) {
         // LOG_INFO("Reset boiler error message");
-        write_command(0x05, 0x00, 0x5A); // error reset
+        write_command(0x05, 0, 0x5A); // error reset
         return true;
     } else if (num == 3) {
         // LOG_INFO("Reset boiler history");
@@ -2928,7 +2928,11 @@ bool Boiler::set_reset(const char * value, const int8_t id) {
         return true;
     } else if (num == 4) {
         // LOG_INFO("Reset boiler message");
-        write_command(0x05, 0x08, 0xFF); // same as maintenance
+        write_command(0x05, 8, 0xFF); // same as maintenance
+        return true;
+    } else if (num == 5) {
+        // LOG_INFO("Factory Reset");
+        write_command(0x05, 6, 154);
         return true;
     }
     return false;
