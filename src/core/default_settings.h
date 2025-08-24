@@ -293,7 +293,7 @@ enum {
 #ifndef STRINGIZE
 #define STRINGIZE(s) #s
 #endif
-#if TASMOTA_SDK
+#ifdef TASMOTA_SDK
 #define ARDUINO_VERSION_STR(major, minor, patch) "Tasmota Arduino v" STRINGIZE(major) "." STRINGIZE(minor) "." STRINGIZE(patch)
 #else
 #define ARDUINO_VERSION_STR(major, minor, patch) "ESP32 Arduino v" STRINGIZE(major) "." STRINGIZE(minor) "." STRINGIZE(patch)

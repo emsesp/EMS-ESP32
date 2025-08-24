@@ -649,7 +649,7 @@ uint16_t TxService::read_next_tx(const uint8_t offset, const uint8_t length) {
         return 0;
     }
     // we request all and get a short telegram with requested offset
-    if ((next_length + next_offset) == 0xFF && old_length < max_length - 1 && offset <= telegram_last_->offset) {
+    if ((next_length + next_offset) == 0xFF && old_length < max_length - 4 && offset <= telegram_last_->offset) {
         return 0;
     }
     if (offset >= telegram_last_->offset && old_length > 0 && next_length > 0) {

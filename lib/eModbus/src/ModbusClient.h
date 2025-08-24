@@ -37,8 +37,8 @@ public:
   uint32_t getMessageCount();             // Informative: return number of messages created
   uint32_t getErrorCount();              // Informative: return number of errors received
   void resetCounts();                    // Set both message and error counts to zero
-  inline Error addRequest(ModbusMessage m, uint32_t token) { return addRequestM(m, token); }
-  inline ModbusMessage syncRequest(ModbusMessage m, uint32_t token) { return syncRequestM(m, token); }
+  inline Error addRequest(const ModbusMessage& m, uint32_t token) { return addRequestM(m, token); }
+  inline ModbusMessage syncRequest(const ModbusMessage& m, uint32_t token) { return syncRequestM(m, token); }
 
   // Template function to generate syncRequest functions as long as there is a 
   // matching ModbusMessage::setMessage() call
@@ -85,7 +85,7 @@ public:
 
 protected:
   ModbusClient();             // Default constructor
-  virtual void isInstance() = 0;   // Make class abstract
+  virtual ~ModbusClient();            // Destructor
   ModbusMessage waitSync(uint8_t serverID, uint8_t functionCode, uint32_t token); // wait for syncRequest response to arrive
   // Virtual addRequest variant needed internally. All others done by template!
   virtual Error addRequestM(ModbusMessage msg, uint32_t token) = 0;

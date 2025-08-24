@@ -54,7 +54,15 @@ bool PButton::init(uint8_t pin, bool pullMode) {
     pullMode_ = pullMode; // 1=HIGH (pullup) 0=LOW (pulldown)
 
 #if defined(ESP32)
+#if CONFIG_IDF_TARGET_ESP32
+    if (pin_ == 34 || pin_ == 35 || pin_ == 36 || pin_ == 39) {
+        pinMode(pin_, INPUT);
+    } else {
+        pinMode(pin_, pullMode ? INPUT_PULLUP : INPUT_PULLDOWN);
+    }
+#else
     pinMode(pin_, pullMode ? INPUT_PULLUP : INPUT_PULLDOWN);
+#endif
 #else // esp8266 and standalone
     pinMode(pin_, pullMode ? INPUT_PULLUP : INPUT);
 #endif
@@ -93,7 +101,15 @@ bool PButton::check(void) {
 
     // make sure the pin is still input
 #if defined(ESP32)
+#if CONFIG_IDF_TARGET_ESP32
+    if (pin_ == 34 || pin_ == 35 || pin_ == 36 || pin_ == 39) {
+        pinMode(pin_, INPUT);
+    } else {
+        pinMode(pin_, pullMode_ ? INPUT_PULLUP : INPUT_PULLDOWN);
+    }
+#else
     pinMode(pin_, pullMode_ ? INPUT_PULLUP : INPUT_PULLDOWN);
+#endif
 #else // esp8266 and standalone
     pinMode(pin_, pullMode_ ? INPUT_PULLUP : INPUT);
 #endif

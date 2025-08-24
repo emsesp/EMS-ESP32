@@ -40,7 +40,12 @@ void WebSchedulerService::begin() {
     Mqtt::subscribe(EMSdevice::DeviceType::SCHEDULER, topic, nullptr); // use empty function callback
 #ifndef EMSESP_STANDALONE
     if (EMSESP::system_.PSram()) {
-        xTaskCreate((TaskFunction_t)scheduler_task, "scheduler_task", 5120, NULL, 1, NULL);
+#if defined(CONFIG_FREERTOS_UNICORE) || (EMSESP_SCHEDULER_RUNNING_CORE < 0)
+        xTaskCreate((TaskFunction_t)scheduler_task, "scheduler_task", EMSESP_SCHEDULER_STACKSIZE, NULL, EMSESP_SCHEDULER_PRIORITY, NULL);
+#else
+        xTaskCreatePinnedToCore(
+            (TaskFunction_t)scheduler_task, "scheduler_task", EMSESP_SCHEDULER_STACKSIZE, NULL, EMSESP_SCHEDULER_PRIORITY, NULL, EMSESP_SCHEDULER_RUNNING_CORE);
+#endif
     }
 #endif
 }

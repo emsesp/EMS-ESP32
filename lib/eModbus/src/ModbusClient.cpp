@@ -21,6 +21,13 @@ ModbusClient::ModbusClient() :
   onError(nullptr),
   onResponse(nullptr) { instanceCounter++; }
 
+// Default destructor: reduce number of clients by one
+ModbusClient::~ModbusClient() {
+  if (instanceCounter) {
+    instanceCounter--;
+  }
+}
+
 // onDataHandler: register callback for data responses
 bool ModbusClient::onDataHandler(MBOnData handler) {
   if (onData) {

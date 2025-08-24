@@ -32,7 +32,9 @@ namespace emsesp {
 uuid::log::Logger TemperatureSensor::logger_{F_(temperaturesensor), uuid::log::Facility::DAEMON};
 
 // start the 1-wire
-void TemperatureSensor::start() {
+void TemperatureSensor::start(const bool factory_settings) {
+    // set_internal_ = factory_settings && EMSESP::nvs_.getString("boot").equals("E32V2_2") && EMSESP::nvs_.getString("hwrevision").equals("3.0");
+    set_internal_ = factory_settings && analogReadMilliVolts(39) > 700; // core voltage > 2.6V
     reload();
 
     if (!dallas_gpio_) {
@@ -199,6 +201,31 @@ void TemperatureSensor::loop() {
                     scancnt_ = 0;
                 } else if (scancnt_ == SCAN_START + 1) { // startup
                     firstscan_ = sensors_.size();
+                    if (firstscan_ > 0 && set_internal_) {
+                        set_internal_ = false;
+                        Sensor * s    = &sensors_[0];
+                        if (firstscan_ > 1) {
+                            std::string s_nvs = EMSESP::nvs_.getString("intTemp").c_str();
+                            for (uint8_t i = 0; i < firstscan_; i++) {
+                                if (s_nvs == sensors_[i].id()) {
+                                    s = &sensors_[i];
+                                    break;
+                                }
+                            }
+                        }
+                        s->set_name("gateway_temperature");
+                        if (!EMSESP::nvs_.isKey("intTemp")) {
+                            EMSESP::nvs_.putString("intTemp", s->id().c_str());
+                        }
+                        EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
+                            auto newSensor   = SensorCustomization();
+                            newSensor.id     = s->id();
+                            newSensor.name   = s->name();
+                            newSensor.offset = 0;
+                            settings.sensorCustomizations.push_back(newSensor);
+                            return StateUpdateResult::CHANGED;
+                        });
+                    }
                     // LOG_DEBUG("Adding %d sensor(s) from first scan", firstscan_);
                 } else if ((scancnt_ <= 0) && (firstscan_ != sensors_.size())) { // check 2 times for no change of sensor #
                     scancnt_ = SCAN_START;

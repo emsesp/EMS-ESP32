@@ -50,6 +50,19 @@
 #define FACTORY_MQTT_MAX_TOPIC_LENGTH 128
 #endif
 
+#ifndef EMSESP_MQTT_RUNNING_CORE
+#define EMSESP_MQTT_RUNNING_CORE 1
+#endif
+
+#ifdef EMSESP_MQTT_STACKSIZE
+#undef EMC_TASK_STACK_SIZE
+#define EMC_TASK_STACK_SIZE EMSESP_MQTT_STACKSIZE
+#endif
+
+#ifndef EMSESP_MQTT_PRIORITY
+#define EMSESP_MQTT_PRIORITY 1
+#endif
+
 class MqttSettings {
   public:
     bool     enabled;

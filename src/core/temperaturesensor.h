@@ -77,7 +77,7 @@ class TemperatureSensor {
     TemperatureSensor()  = default;
     ~TemperatureSensor() = default;
 
-    void start();
+    void start(const bool factory_settings = false);
     void loop();
     void publish_sensor(const Sensor & sensor);
     void publish_values(const bool force);
@@ -165,11 +165,12 @@ class TemperatureSensor {
     int8_t   scanretry_     = 0;
 #endif
 
-    uint8_t  dallas_gpio_ = 0;
-    bool     parasite_    = false;
-    bool     changed_     = false;
-    uint32_t sensorfails_ = 0;
-    uint32_t sensorreads_ = 0;
+    uint8_t  dallas_gpio_  = 0;
+    bool     parasite_     = false;
+    bool     changed_      = false;
+    uint32_t sensorfails_  = 0;
+    uint32_t sensorreads_  = 0;
+    bool     set_internal_ = false;
 };
 
 } // namespace emsesp

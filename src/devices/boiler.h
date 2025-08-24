@@ -43,7 +43,7 @@ class Boiler : public EMSdevice {
 
     uint8_t boilerState_ = EMS_VALUE_UINT8_NOTSET; // Boiler state flag - FOR INTERNAL USE
 
-    static constexpr uint8_t  EMS_TYPE_UBASettingsWW      = 0x26;
+    static constexpr uint8_t  EMS_TYPE_UBASettingsWW      = 0x27;
     static constexpr uint8_t  EMS_TYPE_UBAParameterWW     = 0x33;
     static constexpr uint8_t  EMS_TYPE_UBAFunctionTest    = 0x1D;
     static constexpr uint8_t  EMS_TYPE_UBAFlags           = 0x35;

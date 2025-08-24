@@ -524,7 +524,12 @@ bool Helpers::value2number(const char * value, int & value_i, const int min, con
         return false;
     }
 
-    value_i = atoi(value);
+    if (strlen(value) > 2 && value[0] == '0' && value[1] == 'x') {
+        value_i = hextoint(value);
+    } else {
+        value_i = atoi(value);
+    }
+
     if (value_i >= min && value_i <= max) {
         return true;
     }

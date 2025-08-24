@@ -33,6 +33,7 @@
 namespace emsesp {
 uint8_t EMSuart::last_tx_src_ = 0;
 
+static TaskHandle_t  xHandle;
 static QueueHandle_t uart_queue;
 uint8_t              tx_mode_     = 0xFF;
 uint32_t             inverse_mask = 0;
@@ -94,12 +95,18 @@ void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t 
         uart_param_config(EMSUART_NUM, &uart_config);
         uart_set_pin(EMSUART_NUM, tx_gpio, rx_gpio, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
         uart_set_line_inverse(EMSUART_NUM, inverse_mask);
-        uart_driver_install(EMSUART_NUM, 129, 0, (EMS_MAXBUFFERSIZE + 1) * 2, &uart_queue, 0); // buffer must be > fifo
+        uart_driver_install(EMSUART_NUM, UART_FIFO_LEN + 1, 0, (EMS_MAXBUFFERSIZE + 1) * 2, &uart_queue, 0); // buffer must be > fifo
         uart_set_rx_full_threshold(EMSUART_NUM, 1);
         uart_set_rx_timeout(EMSUART_NUM, 0); // disable
 
         // note esp32s3 crashes with 2k stacksize, stack overflow here sometimes wipes settingsfiles.
-        xTaskCreate(uart_event_task, "uart_event_task", 2560, NULL, configMAX_PRIORITIES - 1, NULL);
+#if defined(CONFIG_FREERTOS_UNICORE) || (EMSESP_UART_RUNNING_CORE < 0)
+        xTaskCreate(uart_event_task, "uart_event_task", EMSESP_UART_STACKSIZE, NULL, EMSESP_UART_PRIORITY, &xHandle);
+#else
+        xTaskCreatePinnedToCore(uart_event_task, "uart_event_task", EMSESP_UART_STACKSIZE, NULL, EMSESP_UART_PRIORITY, &xHandle, EMSESP_UART_RUNNING_CORE);
+#endif
+    } else {
+        vTaskResume(xHandle);
     }
     tx_mode_ = tx_mode;
     uart_enable_intr_mask(EMSUART_NUM, UART_BRK_DET_INT_ENA | UART_RXFIFO_FULL_INT_ENA);
@@ -111,7 +118,7 @@ void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t 
 void EMSuart::stop() {
     if (tx_mode_ != 0xFF) { // only call after driver initialisation
         uart_disable_intr_mask(EMSUART_NUM, UART_BRK_DET_INT_ENA | UART_RXFIFO_FULL_INT_ENA);
-        // TODO should we xTaskSuspend() the event task here?
+        vTaskSuspend(xHandle);
     }
 };
 
@@ -139,7 +146,7 @@ void EMSuart::send_poll(const uint8_t data) {
  * buf contains the CRC and len is #bytes including the CRC
  * returns code, 1=success
  */
-uint16_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
+uint8_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
     if (len == 0 || len >= EMS_MAXBUFFERSIZE) {
         return EMS_TX_STATUS_ERR;
     }

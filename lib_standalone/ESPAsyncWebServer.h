@@ -243,6 +243,9 @@ class AsyncWebServer {
     void on(const char * uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest) {};
 };
 
+#ifndef SSE_MAX_QUEUED_MESSAGES
+#define SSE_MAX_QUEUED_MESSAGES 32
+#endif
 
 class AsyncEventSource : public AsyncWebHandler {
   public:
@@ -252,6 +255,9 @@ class AsyncEventSource : public AsyncWebHandler {
     size_t count() const {
         return 1;
     }
+    size_t avgPacketsWaiting() const {
+        return 0;
+    };
 
     void send(const char * message, const char * event = NULL, uint32_t id = 0, uint32_t reconnect = 0) {};
 };
