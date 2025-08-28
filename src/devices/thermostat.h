@@ -458,6 +458,7 @@ class Thermostat : public EMSdevice {
     void process_Absent(std::shared_ptr<const Telegram> telegram);
     void process_JunkersSetMixer(std::shared_ptr<const Telegram> telegram);
     void process_JunkersWW(std::shared_ptr<const Telegram> telegram);
+    void process_JunkersDisp(std::shared_ptr<const Telegram> telegram);
     void process_RemoteTemp(std::shared_ptr<const Telegram> telegram);
     void process_RemoteHumidity(std::shared_ptr<const Telegram> telegram);
     void process_RemoteCorrection(std::shared_ptr<const Telegram> telegram);
