@@ -5064,57 +5064,76 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "TR120RF, CR20RF",thermostat,249,hc1.seltemp,selected room temperature,int16 (>=0<=30),C,true,number.thermostat_hc1_selected_room_temperature,number.thermostat_hc1_seltemp,6,1,1/2,0,1
 "TR120RF, CR20RF",thermostat,249,hc1.currtemp,current room temperature,int16 (>=-3199<=3199),C,false,sensor.thermostat_hc1_current_room_temperature,sensor.thermostat_hc1_currtemp,6,1,1/10,1,1
 "TR120RF, CR20RF",thermostat,249,hc1.haclimate,mqtt discovery current room temperature,enum [selTemp\|roomTemp] (>=5<=30), ,false,sensor.thermostat_hc1_mqtt_discovery_current_room_temperature,sensor.thermostat_hc1_haclimate,6,1,1,2,1
+"XCUMixer",mixer,8,hc1.flowtemphc,flow temperature (TC1),uint16 (>=0<=3199),C,false,sensor.mixer_hc1_flow_temperature_(TC1),sensor.mixer_hc1_flowtemphc,7,1,1/10,0,1
+"XCUMixer",mixer,8,hc1.valvestatus,mixing valve actuator (VC1),uint8 (>=0<=100),%,false,sensor.mixer_hc1_mixing_valve_actuator_(VC1),sensor.mixer_hc1_valvestatus,7,1,1,1,1
+"XCUMixer",mixer,8,hc1.flowsettemp,setpoint flow temperature,uint8 (>=0<=254),C,true,number.mixer_hc1_setpoint_flow_temperature,number.mixer_hc1_flowsettemp,7,1,1,2,1
+"XCUMixer",mixer,8,hc1.pumpstatus,pump status (PC1),boolean, ,true,switch.mixer_hc1_pump_status_(PC1),switch.mixer_hc1_pumpstatus,7,1,1,3,1
+"XCUMixer",mixer,8,hc1.activated,activated,boolean, ,true,switch.mixer_hc1_activated,switch.mixer_hc1_activated,7,1,1,4,1
+"XCUMixer",mixer,8,hc1.flow,Durchfluss,uint16 (>=0<=31999),l/h,false,sensor.mixer_hc1_Durchfluss,sensor.mixer_hc1_flow,7,1,1,5,1
+"XCUMixer",mixer,8,hc1.setdiffpress,set differential pressure,uint8 (>=0<=12700),mbar,true,number.mixer_hc1_set_differential_pressure,number.mixer_hc1_setdiffpress,7,1,50,6,1
+"XCUMixer",mixer,8,hc1.valvesettime,time to set valve,uint8 (>=10<=600),seconds,true,number.mixer_hc1_time_to_set_valve,number.mixer_hc1_valvesettime,7,1,10,7,1
+"XCUMixer",mixer,8,hc1.flowtempoffset,flow temperature offset for mixer,uint8 (>=0<=20),K,true,number.mixer_hc1_flow_temperature_offset_for_mixer,number.mixer_hc1_flowtempoffset,7,1,1,8,1
 "MM10",mixer,69,hc1.flowtemphc,flow temperature (TC1),uint16 (>=0<=3199),C,false,sensor.mixer_hc1_flow_temperature_(TC1),sensor.mixer_hc1_flowtemphc,7,1,1/10,0,1
 "MM10",mixer,69,hc1.valvestatus,mixing valve actuator (VC1),int8 (>=-100<=100),%,false,sensor.mixer_hc1_mixing_valve_actuator_(VC1),sensor.mixer_hc1_valvestatus,7,1,1,1,1
 "MM10",mixer,69,hc1.flowsettemp,setpoint flow temperature,uint8 (>=0<=254),C,true,number.mixer_hc1_setpoint_flow_temperature,number.mixer_hc1_flowsettemp,7,1,1,2,1
 "MM10",mixer,69,hc1.pumpstatus,pump status (PC1),boolean, ,true,switch.mixer_hc1_pump_status_(PC1),switch.mixer_hc1_pumpstatus,7,1,1,3,1
 "MM10",mixer,69,hc1.activated,activated,boolean, ,true,switch.mixer_hc1_activated,switch.mixer_hc1_activated,7,1,1,4,1
-"MM10",mixer,69,hc1.valvesettime,time to set valve,uint8 (>=10<=600),seconds,true,number.mixer_hc1_time_to_set_valve,number.mixer_hc1_valvesettime,7,1,10,5,1
+"MM10",mixer,69,hc1.valvesettime,time to set valve,uint8 (>=10<=600),seconds,true,number.mixer_hc1_time_to_set_valve,number.mixer_hc1_valvesettime,7,1,10,7,1
 "IPM",mixer,100,hc1.flowtemphc,flow temperature (TC1),uint16 (>=0<=3199),C,false,sensor.mixer_hc1_flow_temperature_(TC1),sensor.mixer_hc1_flowtemphc,7,1,1/10,0,1
 "IPM",mixer,100,hc1.valvestatus,mixing valve actuator (VC1),uint8 (>=0<=100),%,false,sensor.mixer_hc1_mixing_valve_actuator_(VC1),sensor.mixer_hc1_valvestatus,7,1,1,1,1
 "IPM",mixer,100,hc1.flowsettemp,setpoint flow temperature,uint8 (>=0<=254),C,true,number.mixer_hc1_setpoint_flow_temperature,number.mixer_hc1_flowsettemp,7,1,1,2,1
 "IPM",mixer,100,hc1.pumpstatus,pump status (PC1),boolean, ,true,switch.mixer_hc1_pump_status_(PC1),switch.mixer_hc1_pumpstatus,7,1,1,3,1
-"IPM",mixer,100,hc1.flowtempvf,flow temperature in header (T0/Vf),uint16 (>=0<=3199),C,false,sensor.mixer_hc1_flow_temperature_in_header_(T0/Vf),sensor.mixer_hc1_flowtempvf,7,1,1/10,6,1
+"IPM",mixer,100,hc1.flowtempvf,flow temperature in header (T0/Vf),uint16 (>=0<=3199),C,false,sensor.mixer_hc1_flow_temperature_in_header_(T0/Vf),sensor.mixer_hc1_flowtempvf,7,1,1/10,9,1
 "IPM2",mixer,102,hc1.flowtemphc,flow temperature (TC1),uint16 (>=0<=3199),C,false,sensor.mixer_hc1_flow_temperature_(TC1),sensor.mixer_hc1_flowtemphc,7,1,1/10,0,1
 "IPM2",mixer,102,hc1.valvestatus,mixing valve actuator (VC1),uint8 (>=0<=100),%,false,sensor.mixer_hc1_mixing_valve_actuator_(VC1),sensor.mixer_hc1_valvestatus,7,1,1,1,1
 "IPM2",mixer,102,hc1.flowsettemp,setpoint flow temperature,uint8 (>=0<=254),C,true,number.mixer_hc1_setpoint_flow_temperature,number.mixer_hc1_flowsettemp,7,1,1,2,1
 "IPM2",mixer,102,hc1.pumpstatus,pump status (PC1),boolean, ,true,switch.mixer_hc1_pump_status_(PC1),switch.mixer_hc1_pumpstatus,7,1,1,3,1
-"IPM2",mixer,102,hc1.flowtempvf,flow temperature in header (T0/Vf),uint16 (>=0<=3199),C,false,sensor.mixer_hc1_flow_temperature_in_header_(T0/Vf),sensor.mixer_hc1_flowtempvf,7,1,1/10,6,1
+"IPM2",mixer,102,hc1.flowtempvf,flow temperature in header (T0/Vf),uint16 (>=0<=3199),C,false,sensor.mixer_hc1_flow_temperature_in_header_(T0/Vf),sensor.mixer_hc1_flowtempvf,7,1,1/10,9,1
 "MM50",mixer,159,hc1.flowtemphc,flow temperature (TC1),uint16 (>=0<=3199),C,false,sensor.mixer_hc1_flow_temperature_(TC1),sensor.mixer_hc1_flowtemphc,7,1,1/10,0,1
 "MM50",mixer,159,hc1.valvestatus,mixing valve actuator (VC1),uint8 (>=0<=100),%,false,sensor.mixer_hc1_mixing_valve_actuator_(VC1),sensor.mixer_hc1_valvestatus,7,1,1,1,1
 "MM50",mixer,159,hc1.flowsettemp,setpoint flow temperature,uint8 (>=0<=254),C,true,number.mixer_hc1_setpoint_flow_temperature,number.mixer_hc1_flowsettemp,7,1,1,2,1
 "MM50",mixer,159,hc1.pumpstatus,pump status (PC1),boolean, ,true,switch.mixer_hc1_pump_status_(PC1),switch.mixer_hc1_pumpstatus,7,1,1,3,1
 "MM50",mixer,159,hc1.activated,activated,boolean, ,true,switch.mixer_hc1_activated,switch.mixer_hc1_activated,7,1,1,4,1
-"MM50",mixer,159,hc1.valvesettime,time to set valve,uint8 (>=10<=600),seconds,true,number.mixer_hc1_time_to_set_valve,number.mixer_hc1_valvesettime,7,1,10,5,1
-"MM50",mixer,159,hc1.flowtempoffset,flow temperature offset for mixer,uint8 (>=0<=20),K,true,number.mixer_hc1_flow_temperature_offset_for_mixer,number.mixer_hc1_flowtempoffset,7,1,1,7,1
+"MM50",mixer,159,hc1.flow,Durchfluss,uint16 (>=0<=31999),l/h,false,sensor.mixer_hc1_Durchfluss,sensor.mixer_hc1_flow,7,1,1,5,1
+"MM50",mixer,159,hc1.setdiffpress,set differential pressure,uint8 (>=0<=12700),mbar,true,number.mixer_hc1_set_differential_pressure,number.mixer_hc1_setdiffpress,7,1,50,6,1
+"MM50",mixer,159,hc1.valvesettime,time to set valve,uint8 (>=10<=600),seconds,true,number.mixer_hc1_time_to_set_valve,number.mixer_hc1_valvesettime,7,1,10,7,1
+"MM50",mixer,159,hc1.flowtempoffset,flow temperature offset for mixer,uint8 (>=0<=20),K,true,number.mixer_hc1_flow_temperature_offset_for_mixer,number.mixer_hc1_flowtempoffset,7,1,1,8,1
 "MM100",mixer,160,hc1.flowtemphc,flow temperature (TC1),uint16 (>=0<=3199),C,false,sensor.mixer_hc1_flow_temperature_(TC1),sensor.mixer_hc1_flowtemphc,7,1,1/10,0,1
 "MM100",mixer,160,hc1.valvestatus,mixing valve actuator (VC1),uint8 (>=0<=100),%,false,sensor.mixer_hc1_mixing_valve_actuator_(VC1),sensor.mixer_hc1_valvestatus,7,1,1,1,1
 "MM100",mixer,160,hc1.flowsettemp,setpoint flow temperature,uint8 (>=0<=254),C,true,number.mixer_hc1_setpoint_flow_temperature,number.mixer_hc1_flowsettemp,7,1,1,2,1
 "MM100",mixer,160,hc1.pumpstatus,pump status (PC1),boolean, ,true,switch.mixer_hc1_pump_status_(PC1),switch.mixer_hc1_pumpstatus,7,1,1,3,1
 "MM100",mixer,160,hc1.activated,activated,boolean, ,true,switch.mixer_hc1_activated,switch.mixer_hc1_activated,7,1,1,4,1
-"MM100",mixer,160,hc1.valvesettime,time to set valve,uint8 (>=10<=600),seconds,true,number.mixer_hc1_time_to_set_valve,number.mixer_hc1_valvesettime,7,1,10,5,1
-"MM100",mixer,160,hc1.flowtempoffset,flow temperature offset for mixer,uint8 (>=0<=20),K,true,number.mixer_hc1_flow_temperature_offset_for_mixer,number.mixer_hc1_flowtempoffset,7,1,1,7,1
+"MM100",mixer,160,hc1.flow,Durchfluss,uint16 (>=0<=31999),l/h,false,sensor.mixer_hc1_Durchfluss,sensor.mixer_hc1_flow,7,1,1,5,1
+"MM100",mixer,160,hc1.setdiffpress,set differential pressure,uint8 (>=0<=12700),mbar,true,number.mixer_hc1_set_differential_pressure,number.mixer_hc1_setdiffpress,7,1,50,6,1
+"MM100",mixer,160,hc1.valvesettime,time to set valve,uint8 (>=10<=600),seconds,true,number.mixer_hc1_time_to_set_valve,number.mixer_hc1_valvesettime,7,1,10,7,1
+"MM100",mixer,160,hc1.flowtempoffset,flow temperature offset for mixer,uint8 (>=0<=20),K,true,number.mixer_hc1_flow_temperature_offset_for_mixer,number.mixer_hc1_flowtempoffset,7,1,1,8,1
 "MM200",mixer,161,hc1.flowtemphc,flow temperature (TC1),uint16 (>=0<=3199),C,false,sensor.mixer_hc1_flow_temperature_(TC1),sensor.mixer_hc1_flowtemphc,7,1,1/10,0,1
 "MM200",mixer,161,hc1.valvestatus,mixing valve actuator (VC1),uint8 (>=0<=100),%,false,sensor.mixer_hc1_mixing_valve_actuator_(VC1),sensor.mixer_hc1_valvestatus,7,1,1,1,1
 "MM200",mixer,161,hc1.flowsettemp,setpoint flow temperature,uint8 (>=0<=254),C,true,number.mixer_hc1_setpoint_flow_temperature,number.mixer_hc1_flowsettemp,7,1,1,2,1
 "MM200",mixer,161,hc1.pumpstatus,pump status (PC1),boolean, ,true,switch.mixer_hc1_pump_status_(PC1),switch.mixer_hc1_pumpstatus,7,1,1,3,1
 "MM200",mixer,161,hc1.activated,activated,boolean, ,true,switch.mixer_hc1_activated,switch.mixer_hc1_activated,7,1,1,4,1
-"MM200",mixer,161,hc1.valvesettime,time to set valve,uint8 (>=10<=600),seconds,true,number.mixer_hc1_time_to_set_valve,number.mixer_hc1_valvesettime,7,1,10,5,1
-"MM200",mixer,161,hc1.flowtempoffset,flow temperature offset for mixer,uint8 (>=0<=20),K,true,number.mixer_hc1_flow_temperature_offset_for_mixer,number.mixer_hc1_flowtempoffset,7,1,1,7,1
+"MM200",mixer,161,hc1.flow,Durchfluss,uint16 (>=0<=31999),l/h,false,sensor.mixer_hc1_Durchfluss,sensor.mixer_hc1_flow,7,1,1,5,1
+"MM200",mixer,161,hc1.setdiffpress,set differential pressure,uint8 (>=0<=12700),mbar,true,number.mixer_hc1_set_differential_pressure,number.mixer_hc1_setdiffpress,7,1,50,6,1
+"MM200",mixer,161,hc1.valvesettime,time to set valve,uint8 (>=10<=600),seconds,true,number.mixer_hc1_time_to_set_valve,number.mixer_hc1_valvesettime,7,1,10,7,1
+"MM200",mixer,161,hc1.flowtempoffset,flow temperature offset for mixer,uint8 (>=0<=20),K,true,number.mixer_hc1_flow_temperature_offset_for_mixer,number.mixer_hc1_flowtempoffset,7,1,1,8,1
 "MZ100",mixer,193,hc1.flowtemphc,flow temperature (TC1),uint16 (>=0<=3199),C,false,sensor.mixer_hc1_flow_temperature_(TC1),sensor.mixer_hc1_flowtemphc,7,1,1/10,0,1
 "MZ100",mixer,193,hc1.valvestatus,mixing valve actuator (VC1),uint8 (>=0<=100),%,false,sensor.mixer_hc1_mixing_valve_actuator_(VC1),sensor.mixer_hc1_valvestatus,7,1,1,1,1
 "MZ100",mixer,193,hc1.flowsettemp,setpoint flow temperature,uint8 (>=0<=254),C,true,number.mixer_hc1_setpoint_flow_temperature,number.mixer_hc1_flowsettemp,7,1,1,2,1
 "MZ100",mixer,193,hc1.pumpstatus,pump status (PC1),boolean, ,true,switch.mixer_hc1_pump_status_(PC1),switch.mixer_hc1_pumpstatus,7,1,1,3,1
 "MZ100",mixer,193,hc1.activated,activated,boolean, ,true,switch.mixer_hc1_activated,switch.mixer_hc1_activated,7,1,1,4,1
-"MZ100",mixer,193,hc1.valvesettime,time to set valve,uint8 (>=10<=600),seconds,true,number.mixer_hc1_time_to_set_valve,number.mixer_hc1_valvesettime,7,1,10,5,1
-"MZ100",mixer,193,hc1.flowtempoffset,flow temperature offset for mixer,uint8 (>=0<=20),K,true,number.mixer_hc1_flow_temperature_offset_for_mixer,number.mixer_hc1_flowtempoffset,7,1,1,7,1
+"MZ100",mixer,193,hc1.flow,Durchfluss,uint16 (>=0<=31999),l/h,false,sensor.mixer_hc1_Durchfluss,sensor.mixer_hc1_flow,7,1,1,5,1
+"MZ100",mixer,193,hc1.setdiffpress,set differential pressure,uint8 (>=0<=12700),mbar,true,number.mixer_hc1_set_differential_pressure,number.mixer_hc1_setdiffpress,7,1,50,6,1
+"MZ100",mixer,193,hc1.valvesettime,time to set valve,uint8 (>=10<=600),seconds,true,number.mixer_hc1_time_to_set_valve,number.mixer_hc1_valvesettime,7,1,10,7,1
+"MZ100",mixer,193,hc1.flowtempoffset,flow temperature offset for mixer,uint8 (>=0<=20),K,true,number.mixer_hc1_flow_temperature_offset_for_mixer,number.mixer_hc1_flowtempoffset,7,1,1,8,1
 "HM210",mixer,248,hc1.flowtemphc,flow temperature (TC1),uint16 (>=0<=3199),C,false,sensor.mixer_hc1_flow_temperature_(TC1),sensor.mixer_hc1_flowtemphc,7,1,1/10,0,1
 "HM210",mixer,248,hc1.valvestatus,mixing valve actuator (VC1),uint8 (>=0<=100),%,false,sensor.mixer_hc1_mixing_valve_actuator_(VC1),sensor.mixer_hc1_valvestatus,7,1,1,1,1
 "HM210",mixer,248,hc1.flowsettemp,setpoint flow temperature,uint8 (>=0<=254),C,true,number.mixer_hc1_setpoint_flow_temperature,number.mixer_hc1_flowsettemp,7,1,1,2,1
 "HM210",mixer,248,hc1.pumpstatus,pump status (PC1),boolean, ,true,switch.mixer_hc1_pump_status_(PC1),switch.mixer_hc1_pumpstatus,7,1,1,3,1
 "HM210",mixer,248,hc1.activated,activated,boolean, ,true,switch.mixer_hc1_activated,switch.mixer_hc1_activated,7,1,1,4,1
-"HM210",mixer,248,hc1.valvesettime,time to set valve,uint8 (>=10<=600),seconds,true,number.mixer_hc1_time_to_set_valve,number.mixer_hc1_valvesettime,7,1,10,5,1
-"HM210",mixer,248,hc1.flowtempoffset,flow temperature offset for mixer,uint8 (>=0<=20),K,true,number.mixer_hc1_flow_temperature_offset_for_mixer,number.mixer_hc1_flowtempoffset,7,1,1,7,1
+"HM210",mixer,248,hc1.flow,Durchfluss,uint16 (>=0<=31999),l/h,false,sensor.mixer_hc1_Durchfluss,sensor.mixer_hc1_flow,7,1,1,5,1
+"HM210",mixer,248,hc1.setdiffpress,set differential pressure,uint8 (>=0<=12700),mbar,true,number.mixer_hc1_set_differential_pressure,number.mixer_hc1_setdiffpress,7,1,50,6,1
+"HM210",mixer,248,hc1.valvesettime,time to set valve,uint8 (>=10<=600),seconds,true,number.mixer_hc1_time_to_set_valve,number.mixer_hc1_valvesettime,7,1,10,7,1
+"HM210",mixer,248,hc1.flowtempoffset,flow temperature offset for mixer,uint8 (>=0<=20),K,true,number.mixer_hc1_flow_temperature_offset_for_mixer,number.mixer_hc1_flowtempoffset,7,1,1,8,1
 "SM10",solar,73,collectortemp,collector temperature (TS1),int16 (>=-3199<=3199),C,false,sensor.solar_collector_temperature_(TS1),sensor.solar_collectortemp,8,0,1/10,0,1
 "SM10",solar,73,cylbottomtemp,cylinder bottom temperature (TS2),int16 (>=-3199<=3199),C,false,sensor.solar_cylinder_bottom_temperature_(TS2),sensor.solar_cylbottomtemp,8,0,1/10,1,1
 "SM10",solar,73,solarpump,pump (PS1),boolean, ,false,binary_sensor.solar_pump_(PS1),binary_sensor.solar_solarpump,8,0,1,2,1
@@ -5529,16 +5548,16 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "AM200",heatsource,228,ahs1.heatrequest,heat request,uint8 (>=0<=100),%,false,sensor.heatsource_ahs1_heat_request,sensor.heatsource_ahs1_heatrequest,17,19,1,29,1
 "AM200",heatsource,228,ahs1.blockremain,remaining blocktime,uint8 (>=0<=254),minutes,false,sensor.heatsource_ahs1_remaining_blocktime,sensor.heatsource_ahs1_blockremain,17,19,1,30,1
 "AM200",heatsource,228,ahs1.blockremaindhw,remaining blocktime dhw,uint8 (>=0<=254),minutes,false,sensor.heatsource_ahs1_remaining_blocktime_dhw,sensor.heatsource_ahs1_blockremaindhw,17,19,1,31,1
-"Logavent HRV176",ventilation,231,outfresh,outdoor fresh air,int16 (>=-3199<=3199),C,false,sensor.ventilation_outdoor_fresh_air,sensor.ventilation_outfresh,18,0,1/10,0,1
-"Logavent HRV176",ventilation,231,infresh,indoor fresh air,int16 (>=-3199<=3199),C,false,sensor.ventilation_indoor_fresh_air,sensor.ventilation_infresh,18,0,1/10,1,1
-"Logavent HRV176",ventilation,231,outexhaust,outdoor exhaust air,int16 (>=-3199<=3199),C,false,sensor.ventilation_outdoor_exhaust_air,sensor.ventilation_outexhaust,18,0,1/10,2,1
-"Logavent HRV176",ventilation,231,inexhaust,indoor exhaust air,int16 (>=-3199<=3199),C,false,sensor.ventilation_indoor_exhaust_air,sensor.ventilation_inexhaust,18,0,1/10,3,1
-"Logavent HRV176",ventilation,231,ventinspeed,in blower speed,uint8 (>=0<=100),%,false,sensor.ventilation_in_blower_speed,sensor.ventilation_ventinspeed,18,0,1,4,1
-"Logavent HRV176",ventilation,231,ventoutspeed,out blower speed,uint8 (>=0<=100),%,false,sensor.ventilation_out_blower_speed,sensor.ventilation_ventoutspeed,18,0,1,5,1
-"Logavent HRV176",ventilation,231,ventmode,ventilation mode,enum [auto\|off\|L1\|L2\|L3\|L4\|demand\|sleep\|intense\|bypass\|party\|fireplace], ,true,select.ventilation_ventilation_mode,select.ventilation_ventmode,18,0,1,6,1
-"Logavent HRV176",ventilation,231,airquality,air quality (voc),uint16 (>=0<=31999), ,false,sensor.ventilation_air_quality_(voc),sensor.ventilation_airquality,18,0,1,7,1
-"Logavent HRV176",ventilation,231,airhumidity,relative air humidity,uint8 (>=0<=100),%,false,sensor.ventilation_relative_air_humidity,sensor.ventilation_airhumidity,18,0,1,8,1
-"Logavent HRV176",ventilation,231,bypass,bypass,boolean, ,true,switch.ventilation_bypass,switch.ventilation_bypass,18,0,1,9,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,outfresh,outdoor fresh air,int16 (>=-3199<=3199),C,false,sensor.ventilation_outdoor_fresh_air,sensor.ventilation_outfresh,18,0,1/10,0,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,infresh,indoor fresh air,int16 (>=-3199<=3199),C,false,sensor.ventilation_indoor_fresh_air,sensor.ventilation_infresh,18,0,1/10,1,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,outexhaust,outdoor exhaust air,int16 (>=-3199<=3199),C,false,sensor.ventilation_outdoor_exhaust_air,sensor.ventilation_outexhaust,18,0,1/10,2,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,inexhaust,indoor exhaust air,int16 (>=-3199<=3199),C,false,sensor.ventilation_indoor_exhaust_air,sensor.ventilation_inexhaust,18,0,1/10,3,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,ventinspeed,in blower speed,uint8 (>=0<=100),%,false,sensor.ventilation_in_blower_speed,sensor.ventilation_ventinspeed,18,0,1,4,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,ventoutspeed,out blower speed,uint8 (>=0<=100),%,false,sensor.ventilation_out_blower_speed,sensor.ventilation_ventoutspeed,18,0,1,5,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,ventmode,ventilation mode,enum [auto\|off\|L1\|L2\|L3\|L4\|demand\|sleep\|intense\|bypass\|party\|fireplace], ,true,select.ventilation_ventilation_mode,select.ventilation_ventmode,18,0,1,6,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,airquality,air quality (voc),uint16 (>=0<=31999), ,false,sensor.ventilation_air_quality_(voc),sensor.ventilation_airquality,18,0,1,7,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,airhumidity,relative air humidity,uint8 (>=0<=100),%,false,sensor.ventilation_relative_air_humidity,sensor.ventilation_airhumidity,18,0,1,8,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,bypass,bypass,boolean, ,true,switch.ventilation_bypass,switch.ventilation_bypass,18,0,1,9,1
 "IPM",water,100,dhw.seltemp,selected temperature,uint8 (>=0<=254),C,true,number.water_dhw_selected_temperature,number.water_dhw_seltemp,19,9,1,0,1
 "IPM",water,100,dhw.temp,current temperature,uint16 (>=0<=3199),C,false,sensor.water_dhw_current_temperature,sensor.water_dhw_temp,19,9,1/10,1,1
 "IPM",water,100,dhw.curtemp2,current extern temperature,uint16 (>=0<=3199),C,false,sensor.water_dhw_current_extern_temperature,sensor.water_dhw_curtemp2,19,9,1/10,2,1
