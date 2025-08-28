@@ -56,7 +56,7 @@ custom_emsesp_ip = 192.168.1.223 ; E32V2
 lib_deps =
   bblanchon/ArduinoJson @ 7.4.2
   ESP32Async/AsyncTCP @ 3.4.7
-  ESP32Async/ESPAsyncWebServer @ 3.7.10
+  ESP32Async/ESPAsyncWebServer @ 3.8.0
   file://${PROJECT_DIR}/../modules/EMS-ESP-Modules
 ;   ; https://github.com/emsesp/EMS-ESP-Modules.git @ 1.0.8
 
@@ -65,7 +65,7 @@ framework = arduino
 board_build.partitions = partitions/esp32_partition_16M.csv
 board_upload.flash_size = 16MB
 board_build.app_partition_name = app0
-; platform = espressif32@6.11.0 ; Arduino Core v2.0.17 / IDF v4.4.7
+; platform = espressif32@6.12.0 ; Arduino Core v2.0.17 / IDF v4.4.7
 ; platform = https://github.com/pioarduino/platform-espressif32/releases/download/54.03.20/platform-espressif32.zip ; Arduino Core v3.2.0 / ESP-IDF v5.4.1
 platform = https://github.com/pioarduino/platform-espressif32/releases/download/55.03.30/platform-espressif32.zip ; Arduino Core 3.3.0, IDF 5.5.0
 

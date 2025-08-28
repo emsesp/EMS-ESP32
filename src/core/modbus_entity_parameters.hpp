@@ -404,9 +404,11 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::MIXER, TAG_TYPE_HC, FL_(flowSetTemp), 2, 1), // flowsettemp
     REGISTER_MAPPING(dt::MIXER, TAG_TYPE_HC, FL_(wwPumpStatus), 3, 1), // pumpstatus
     REGISTER_MAPPING(dt::MIXER, TAG_TYPE_HC, FL_(activated), 4, 1), // activated
-    REGISTER_MAPPING(dt::MIXER, TAG_TYPE_HC, FL_(mixerSetTime), 5, 1), // valvesettime
-    REGISTER_MAPPING(dt::MIXER, TAG_TYPE_HC, FL_(flowTempVf), 6, 1), // flowtempvf
-    REGISTER_MAPPING(dt::MIXER, TAG_TYPE_HC, FL_(flowtempoffset), 7, 1), // flowtempoffset
+    REGISTER_MAPPING(dt::MIXER, TAG_TYPE_HC, FL_(wwFlow), 5, 1), // flow
+    REGISTER_MAPPING(dt::MIXER, TAG_TYPE_HC, FL_(setDiffPress), 6, 1), // setdiffpress
+    REGISTER_MAPPING(dt::MIXER, TAG_TYPE_HC, FL_(mixerSetTime), 7, 1), // valvesettime
+    REGISTER_MAPPING(dt::MIXER, TAG_TYPE_HC, FL_(flowtempoffset), 8, 1), // flowtempoffset
+    REGISTER_MAPPING(dt::MIXER, TAG_TYPE_HC, FL_(flowTempVf), 9, 1), // flowtempvf
     REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(collectorTemp), 0, 1), // collectortemp
     REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(cylBottomTemp), 1, 1), // cylbottomtemp
     REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(solarPump), 2, 1), // solarpump

@@ -180,7 +180,7 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
             if (ETH.begin(ETH_PHY_LAN8720, 0, 23, 18, 15, ETH_CLOCK_GPIO0_OUT)) {
 #endif
 
-                if (analogReadMilliVolts(39) > 700) { // core voltage > 2.6V
+                if (analogReadMilliVolts(39) > 700) {   // core voltage > 2.6V
                     settings.board_profile = "E32V2_2"; // Ethernet, PSRAM, internal sensors
                 } else {
                     settings.board_profile = "E32V2"; // Ethernet and PSRAM

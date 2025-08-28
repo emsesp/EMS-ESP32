@@ -4083,8 +4083,10 @@
 | hc1.flowsettemp | setpoint flow temperature | uint8 (>=0<=254) | C | true | HC | 2 | 1 | 1 | 
 | hc1.pumpstatus | pump status (PC1) | boolean |   | true | HC | 3 | 1 | 1 | 
 | hc1.activated | activated | boolean |   | true | HC | 4 | 1 | 1 | 
-| hc1.valvesettime | time to set valve | uint8 (>=10<=600) | seconds | true | HC | 5 | 1 | 10 | 
-| hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | K | true | HC | 7 | 1 | 1 | 
+| hc1.flow | Durchfluss | uint16 (>=0<=31999) | l/h | false | HC | 5 | 1 | 1 | 
+| hc1.setdiffpress | set differential pressure | uint8 (>=0<=12700) | mbar | true | HC | 6 | 1 | 50 | 
+| hc1.valvesettime | time to set valve | uint8 (>=10<=600) | seconds | true | HC | 7 | 1 | 10 | 
+| hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | K | true | HC | 8 | 1 | 1 | 
 
 ### IPM
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -4093,7 +4095,7 @@
 | hc1.valvestatus | mixing valve actuator (VC1) | uint8 (>=0<=100) | % | false | HC | 1 | 1 | 1 | 
 | hc1.flowsettemp | setpoint flow temperature | uint8 (>=0<=254) | C | true | HC | 2 | 1 | 1 | 
 | hc1.pumpstatus | pump status (PC1) | boolean |   | true | HC | 3 | 1 | 1 | 
-| hc1.flowtempvf | flow temperature in header (T0/Vf) | uint16 (>=0<=3199) | C | false | HC | 6 | 1 | 1/10 | 
+| hc1.flowtempvf | flow temperature in header (T0/Vf) | uint16 (>=0<=3199) | C | false | HC | 9 | 1 | 1/10 | 
 
 ### IPM2
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -4102,7 +4104,7 @@
 | hc1.valvestatus | mixing valve actuator (VC1) | uint8 (>=0<=100) | % | false | HC | 1 | 1 | 1 | 
 | hc1.flowsettemp | setpoint flow temperature | uint8 (>=0<=254) | C | true | HC | 2 | 1 | 1 | 
 | hc1.pumpstatus | pump status (PC1) | boolean |   | true | HC | 3 | 1 | 1 | 
-| hc1.flowtempvf | flow temperature in header (T0/Vf) | uint16 (>=0<=3199) | C | false | HC | 6 | 1 | 1/10 | 
+| hc1.flowtempvf | flow temperature in header (T0/Vf) | uint16 (>=0<=3199) | C | false | HC | 9 | 1 | 1/10 | 
 
 ### MM10
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -4112,7 +4114,7 @@
 | hc1.flowsettemp | setpoint flow temperature | uint8 (>=0<=254) | C | true | HC | 2 | 1 | 1 | 
 | hc1.pumpstatus | pump status (PC1) | boolean |   | true | HC | 3 | 1 | 1 | 
 | hc1.activated | activated | boolean |   | true | HC | 4 | 1 | 1 | 
-| hc1.valvesettime | time to set valve | uint8 (>=10<=600) | seconds | true | HC | 5 | 1 | 10 | 
+| hc1.valvesettime | time to set valve | uint8 (>=10<=600) | seconds | true | HC | 7 | 1 | 10 | 
 
 ### MM100
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -4122,8 +4124,10 @@
 | hc1.flowsettemp | setpoint flow temperature | uint8 (>=0<=254) | C | true | HC | 2 | 1 | 1 | 
 | hc1.pumpstatus | pump status (PC1) | boolean |   | true | HC | 3 | 1 | 1 | 
 | hc1.activated | activated | boolean |   | true | HC | 4 | 1 | 1 | 
-| hc1.valvesettime | time to set valve | uint8 (>=10<=600) | seconds | true | HC | 5 | 1 | 10 | 
-| hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | K | true | HC | 7 | 1 | 1 | 
+| hc1.flow | Durchfluss | uint16 (>=0<=31999) | l/h | false | HC | 5 | 1 | 1 | 
+| hc1.setdiffpress | set differential pressure | uint8 (>=0<=12700) | mbar | true | HC | 6 | 1 | 50 | 
+| hc1.valvesettime | time to set valve | uint8 (>=10<=600) | seconds | true | HC | 7 | 1 | 10 | 
+| hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | K | true | HC | 8 | 1 | 1 | 
 
 ### MM200
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -4133,8 +4137,10 @@
 | hc1.flowsettemp | setpoint flow temperature | uint8 (>=0<=254) | C | true | HC | 2 | 1 | 1 | 
 | hc1.pumpstatus | pump status (PC1) | boolean |   | true | HC | 3 | 1 | 1 | 
 | hc1.activated | activated | boolean |   | true | HC | 4 | 1 | 1 | 
-| hc1.valvesettime | time to set valve | uint8 (>=10<=600) | seconds | true | HC | 5 | 1 | 10 | 
-| hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | K | true | HC | 7 | 1 | 1 | 
+| hc1.flow | Durchfluss | uint16 (>=0<=31999) | l/h | false | HC | 5 | 1 | 1 | 
+| hc1.setdiffpress | set differential pressure | uint8 (>=0<=12700) | mbar | true | HC | 6 | 1 | 50 | 
+| hc1.valvesettime | time to set valve | uint8 (>=10<=600) | seconds | true | HC | 7 | 1 | 10 | 
+| hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | K | true | HC | 8 | 1 | 1 | 
 
 ### MM50
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -4144,8 +4150,10 @@
 | hc1.flowsettemp | setpoint flow temperature | uint8 (>=0<=254) | C | true | HC | 2 | 1 | 1 | 
 | hc1.pumpstatus | pump status (PC1) | boolean |   | true | HC | 3 | 1 | 1 | 
 | hc1.activated | activated | boolean |   | true | HC | 4 | 1 | 1 | 
-| hc1.valvesettime | time to set valve | uint8 (>=10<=600) | seconds | true | HC | 5 | 1 | 10 | 
-| hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | K | true | HC | 7 | 1 | 1 | 
+| hc1.flow | Durchfluss | uint16 (>=0<=31999) | l/h | false | HC | 5 | 1 | 1 | 
+| hc1.setdiffpress | set differential pressure | uint8 (>=0<=12700) | mbar | true | HC | 6 | 1 | 50 | 
+| hc1.valvesettime | time to set valve | uint8 (>=10<=600) | seconds | true | HC | 7 | 1 | 10 | 
+| hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | K | true | HC | 8 | 1 | 1 | 
 
 ### MZ100
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -4155,8 +4163,23 @@
 | hc1.flowsettemp | setpoint flow temperature | uint8 (>=0<=254) | C | true | HC | 2 | 1 | 1 | 
 | hc1.pumpstatus | pump status (PC1) | boolean |   | true | HC | 3 | 1 | 1 | 
 | hc1.activated | activated | boolean |   | true | HC | 4 | 1 | 1 | 
-| hc1.valvesettime | time to set valve | uint8 (>=10<=600) | seconds | true | HC | 5 | 1 | 10 | 
-| hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | K | true | HC | 7 | 1 | 1 | 
+| hc1.flow | Durchfluss | uint16 (>=0<=31999) | l/h | false | HC | 5 | 1 | 1 | 
+| hc1.setdiffpress | set differential pressure | uint8 (>=0<=12700) | mbar | true | HC | 6 | 1 | 50 | 
+| hc1.valvesettime | time to set valve | uint8 (>=10<=600) | seconds | true | HC | 7 | 1 | 10 | 
+| hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | K | true | HC | 8 | 1 | 1 | 
+
+### XCUMixer
+| shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
+|-|-|-|-|-|-|-|-|-|
+| hc1.flowtemphc | flow temperature (TC1) | uint16 (>=0<=3199) | C | false | HC | 0 | 1 | 1/10 | 
+| hc1.valvestatus | mixing valve actuator (VC1) | uint8 (>=0<=100) | % | false | HC | 1 | 1 | 1 | 
+| hc1.flowsettemp | setpoint flow temperature | uint8 (>=0<=254) | C | true | HC | 2 | 1 | 1 | 
+| hc1.pumpstatus | pump status (PC1) | boolean |   | true | HC | 3 | 1 | 1 | 
+| hc1.activated | activated | boolean |   | true | HC | 4 | 1 | 1 | 
+| hc1.flow | Durchfluss | uint16 (>=0<=31999) | l/h | false | HC | 5 | 1 | 1 | 
+| hc1.setdiffpress | set differential pressure | uint8 (>=0<=12700) | mbar | true | HC | 6 | 1 | 50 | 
+| hc1.valvesettime | time to set valve | uint8 (>=10<=600) | seconds | true | HC | 7 | 1 | 10 | 
+| hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | K | true | HC | 8 | 1 | 1 | 
 
 ## Devices of type *pool*
 ### MP100
@@ -5928,7 +5951,7 @@
 | dhw.dailyheattime | daily heating time | uint8 (>=0<=1431) | minutes | true | DHW | 11 | 1 | 15 | 
 
 ## Devices of type *ventilation*
-### Logavent HRV176
+### HRV176, HRV156, 5000c, MV200
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | outfresh | outdoor fresh air | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 0 | 1 | 1/10 | 

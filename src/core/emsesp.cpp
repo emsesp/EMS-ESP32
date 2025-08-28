@@ -1708,9 +1708,9 @@ void EMSESP::start() {
         modbus_->start(1, system_.modbus_port(), system_.modbus_max_clients(), system_.modbus_timeout() * 1000);
     }
 
-    mqtt_.start();              // mqtt init
-    system_.start();            // starts commands, led, adc, button, network (sets hostname), syslog & uart
-    shower_.start();            // initialize shower timer and shower alert
+    mqtt_.start();                              // mqtt init
+    system_.start();                            // starts commands, led, adc, button, network (sets hostname), syslog & uart
+    shower_.start();                            // initialize shower timer and shower alert
     temperaturesensor_.start(factory_settings); // Temperature external sensors
     analogsensor_.start(factory_settings);      // Analog external sensors
 

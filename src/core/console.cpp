@@ -302,7 +302,8 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
             std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
             std::string         board_profile = Helpers::toUpper(arguments.front());
             if (!EMSESP::system_.load_board_profile(data, board_profile)) {
-                shell.println("Invalid board profile (S32, E32, E32V2, E32V2_2, MH-ET, NODEMCU, LOLIN, OLIMEX, OLIMEXPOE, C3MINI, S2MINI, S3MINI, S32S3, CUSTOM)");
+                shell.println(
+                    "Invalid board profile (S32, E32, E32V2, E32V2_2, MH-ET, NODEMCU, LOLIN, OLIMEX, OLIMEXPOE, C3MINI, S2MINI, S3MINI, S32S3, CUSTOM)");
                 return;
             }
 
