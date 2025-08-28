@@ -15,6 +15,10 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - charging pump [#2544](https://github.com/emsesp/EMS-ESP32/issues/2544)
 - Hybrid CSH5800iG [#2569](https://github.com/emsesp/EMS-ESP32/issues/2569)
 - Add EMS Device details to Home Assistant MQTT Discovery
+- Internal sensors of E32V2_2
+- FW200 display options
+- CR11 mode settings OFF/MANUAL depends on selTemp
+- Fuse settings for BBQKees boards
 
 ## Fixed
 
@@ -34,3 +38,4 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 ## Changed
 
 - show console log with ISO date/time [#2533](https://github.com/emsesp/EMS-ESP32/discussions/2533)
+- remove ESP32 CPU temperature

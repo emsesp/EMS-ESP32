@@ -428,7 +428,7 @@ void System::reload_settings() {
 // See https://diyprojects.io/esp32-how-to-use-gpio-digital-io-arduino-code/#.YFpVEq9KhjG
 // and https://nodemcu.readthedocs.io/en/dev-esp32/modules/gpio/
 bool System::is_valid_gpio(uint8_t pin, bool has_psram) {
-#if CONFIG_IDF_TARGET_ESP32 || EMSESP_STANDALONE
+#if CONFIG_IDF_TARGET_ESP32 || defined(EMSESP_STANDALONE)
     if ((pin == 1) || (pin >= 6 && pin <= 11) || (pin == 20) || (pin == 24) || (pin >= 28 && pin <= 31) || (pin > 40)
         || ((EMSESP::system_.PSram() > 0 || has_psram) && pin >= 16 && pin <= 17)) {
 #elif CONFIG_IDF_TARGET_ESP32S2
@@ -791,10 +791,7 @@ void System::system_check() {
         last_system_check_ = uuid::get_uptime();
 
 #ifndef EMSESP_STANDALONE
-#if defined(CONFIG_IDF_TARGET_ESP32)
-        uint8_t raw  = temprature_sens_read();
-        temperature_ = (raw - 32) / 1.8f; // convert to Celsius
-#elif CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
 #if ESP_IDF_VERSION_MAJOR < 5
         temp_sensor_read_celsius(&temperature_);
 #else
@@ -1433,9 +1430,18 @@ bool System::command_service(const char * cmd, const char * value) {
     int n;
     if (!ok && Helpers::value2number(value, n)) {
 #ifndef EMSESP_STANDALONE
-        if (!strcmp(cmd, "fuse/mfg")) { // && esp_efuse_read_reg(EFUSE_BLK3, 0) == 0) {
+        if (!strcmp(cmd, "fuse/mfg")) {
             ok = esp_efuse_write_reg(EFUSE_BLK3, 0, (uint32_t)n) == ESP_OK;
-            LOG_INFO("fuse programed with value '%X': %s", n, ok ? "successful" : "failed");
+            ok ? LOG_INFO("fuse programed with value '%X': successful", n) : LOG_ERROR("fuse programed with value '%X': failed", n);
+
+        }
+        if (!strcmp(cmd, "fuse/mfgadd")) {
+            uint8_t reg = 0;
+            while (esp_efuse_read_reg(EFUSE_BLK3, reg) != 0 && reg < 7)
+                reg++;
+            ok = esp_efuse_write_reg(EFUSE_BLK3, reg, (uint32_t)n) == ESP_OK;
+            ok ? LOG_INFO("fuse %d programed with value '%X': successful", reg, n) : LOG_ERROR("fuse %d programed with value '%X': failed", reg, n);
+            return true;
         }
 #endif
     }
@@ -1532,12 +1538,12 @@ void System::get_value_json(JsonObject output, const std::string & circuit, cons
     if (val.is<bool>()) {
         output["value"] = val.as<bool>();
         output["type"]  = "boolean";
-    } else if (val.is<String>() || val.is<const char *>() || val.is<std::string>()) {
-        output["value"] = val.as<std::string>();
-        output["type"]  = "string";
-    } else {
+    } else if (val.is<float>() || val.is<int>()) {
         output["value"] = val.as<float>();
         output["type"]  = "number";
+    } else {
+        output["value"] = val.as<std::string>();
+        output["type"]  = "string";
     }
 }
 
@@ -2043,7 +2049,7 @@ bool System::ntp_connected() {
 }
 
 // see if its a BBQKees Gateway by checking the nvs values
-String System::getBBQKeesGatewayDetails() {
+String System::getBBQKeesGatewayDetails(uint8_t detail) {
 #ifndef EMSESP_STANDALONE
     /*
     if (!EMSESP::nvs_.isKey("mfg")) {
@@ -2072,12 +2078,30 @@ String System::getBBQKeesGatewayDetails() {
         };
         uint32_t reg;
     } gw;
-    gw.reg               = esp_efuse_read_reg(EFUSE_BLK3, 0);
+    for (uint8_t reg = 0; reg < 8; reg++) {
+        gw.reg = esp_efuse_read_reg(EFUSE_BLK3, reg);
+        if (reg == 7 || esp_efuse_read_reg(EFUSE_BLK3, reg + 1) == 0)
+            break;
+    }
     const char * mfg[]   = {"unknown", "BBQKees Electronics", "", "", "", "", "", ""};
-    const char * model[] = {"unknown", "S3", "E32V2", "E32V2.2", "S32", "E32", "", "", ""};
-
+    const char * model[] = {"unknown", "S3", "E32V2", "E32V2_2", "S32", "E32", "", "", ""};
+    switch (detail) {
+    case FUSE_VALUE::MFG:
+        return String(mfg[gw.mfg]);
+    case FUSE_VALUE::BOARD:
+        return gw.model ? String(model[gw.model]) : board_profile_;
+    case FUSE_VALUE::REV:
+        return String(gw.rev_major) + "." + String(gw.rev_minor);
+    case FUSE_VALUE::BATCH:
+        return String(2000 + gw.year) + (gw.month < 10 ? "0" : "") + String(gw.month) + String(gw.no);
+    case FUSE_VALUE::FUSE:
+        return "0x" + String(gw.reg, 16);
+    case FUSE_VALUE::ALL:
+    default:
+        break;
+    }
     return gw.reg ? String(mfg[gw.mfg]) + " " + String(model[gw.model]) + " rev." + String(gw.rev_major) + "." + String(gw.rev_minor) + "/"
-                        + String(2000 + gw.year) + "-" + String(gw.month) + "-" + String(gw.no) + " (fuse 0x" + String(gw.reg, 16) + ")"
+                        + String(2000 + gw.year) + (gw.month < 10 ? "0" : "") + String(gw.month) + String(gw.no) + " (fuse 0x" + String(gw.reg, 16) + ")"
                   : "";
 #else
     return "";

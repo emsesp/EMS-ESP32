@@ -68,6 +68,8 @@ enum SYSTEM_STATUS : uint8_t {
     SYSTEM_STATUS_RESTART_REQUESTED = 5
 };
 
+enum FUSE_VALUE : uint8_t { ALL = 0, MFG = 1, BOARD = 2, REV = 3, BATCH = 4, FUSE = 5 };
+
 class System {
   public:
     void start();
@@ -121,7 +123,7 @@ class System {
     }
 #endif
 
-    String getBBQKeesGatewayDetails();
+    String getBBQKeesGatewayDetails(uint8_t detail = 0);
 
     static bool uploadFirmwareURL(const char * url = nullptr);
 
@@ -330,7 +332,7 @@ class System {
         test_set_all_active_ = n;
     }
 
-#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
     float temperature() {
         return temperature_;
     }
