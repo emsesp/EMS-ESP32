@@ -13,8 +13,12 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - boiler 0xC6 telegram [#1963](https://github.com/emsesp/EMS-ESP32/issues/1963)
 - CS6800i changes [#2448](https://github.com/emsesp/EMS-ESP32/issues/2448), [#2449](https://github.com/emsesp/EMS-ESP32/issues/2449)
 - charging pump [#2544](https://github.com/emsesp/EMS-ESP32/issues/2544)
-- Hybrid CSH5800iG [#2569](https://github.com/emsesp/EMS-ESP32/issues/2569)
-- Add EMS Device details to Home Assistant MQTT Discovery
+- hybrid CSH5800iG [#2569](https://github.com/emsesp/EMS-ESP32/issues/2569)
+- add EMS Device details to Home Assistant MQTT Discovery
+- disinfection command [#2601](https://github.com/emsesp/EMS-ESP32/issues/2601)
+- added new board profile for upcoming BBQKees E32V2.2
+- set differential pressure entity in Mixer device
+- set set climate action cooling/heating in HA
 
 ## Fixed
 
@@ -29,8 +33,10 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - shower active state retained, shows correctly in HA
 - MQTT Command Topic with slashes [#2571](https://github.com/emsesp/EMS-ESP32/issues/2571)
 - Add pulsed water meter input to V1.3 gateway with Lilygo S3 [#2550](https://github.com/emsesp/EMS-ESP32/issues/2550)
-- Fix missing long 10-second press of Button to perform a factory reset
+- fix missing long 10-second press of Button to perform a factory reset
+- fix wwMaxPower on Junkers ZBS14 [#2609](https://github.com/emsesp/EMS-ESP32/issues/2609)
 
 ## Changed
 
 - show console log with ISO date/time [#2533](https://github.com/emsesp/EMS-ESP32/discussions/2533)
+- updated core libraries like AsyncTCP, AsyncWebServer and Modbus
