@@ -2101,7 +2101,7 @@ String System::getBBQKeesGatewayDetails(uint8_t detail) {
         break;
     }
     return gw.reg ? String(mfg[gw.mfg]) + " " + String(model[gw.model]) + " rev." + String(gw.rev_major) + "." + String(gw.rev_minor) + "/"
-                        + String(2000 + gw.year) + (gw.month < 10 ? "0" : "") + String(gw.month) + String(gw.no) + " (fuse 0x" + String(gw.reg, 16) + ")"
+                        + String(2000 + gw.year) + (gw.month < 10 ? "0" : "") + String(gw.month) + String(gw.no)
                   : "";
 #else
     return "";
