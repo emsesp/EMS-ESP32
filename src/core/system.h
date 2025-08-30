@@ -68,7 +68,7 @@ enum SYSTEM_STATUS : uint8_t {
     SYSTEM_STATUS_RESTART_REQUESTED = 5
 };
 
-enum FUSE_VALUE : uint8_t { ALL = 0, MFG = 1, BOARD = 2, REV = 3, BATCH = 4, FUSE = 5 };
+enum FUSE_VALUE : uint8_t { ALL = 0, MFG = 1, MODEL = 2, BOARD = 3, REV = 4, BATCH = 5, FUSE = 6 };
 
 class System {
   public:

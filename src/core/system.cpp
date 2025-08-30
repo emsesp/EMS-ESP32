@@ -2084,12 +2084,15 @@ String System::getBBQKeesGatewayDetails(uint8_t detail) {
             break;
     }
     const char * mfg[]   = {"unknown", "BBQKees Electronics", "", "", "", "", "", ""};
-    const char * model[] = {"unknown", "S3", "E32V2", "E32V2_2", "S32", "E32", "", "", ""};
+    const char * model[] = {"unknown", "S3", "E32V2", "E32V2.2", "S32", "E32", "", "", ""};
+    const char * board[] = {"CUSTOM", "S32S3", "E32V2", "E32V2_2", "S32", "E32", "", "", ""};
     switch (detail) {
     case FUSE_VALUE::MFG:
-        return String(mfg[gw.mfg]);
+        return gw.mfg < 2 ? String(mfg[gw.mfg]) : "unknown";
+    case FUSE_VALUE::MODEL:
+        return gw.model < 6 ? String(model[gw.model]) : "unknown";
     case FUSE_VALUE::BOARD:
-        return gw.model ? String(model[gw.model]) : board_profile_;
+        return gw.model < 6 ? String(board[gw.model]) : board_profile_;
     case FUSE_VALUE::REV:
         return String(gw.rev_major) + "." + String(gw.rev_minor);
     case FUSE_VALUE::BATCH:
@@ -2100,9 +2103,11 @@ String System::getBBQKeesGatewayDetails(uint8_t detail) {
     default:
         break;
     }
-    return gw.reg ? String(mfg[gw.mfg]) + " " + String(model[gw.model]) + " rev." + String(gw.rev_major) + "." + String(gw.rev_minor) + "/"
-                        + String(2000 + gw.year) + (gw.month < 10 ? "0" : "") + String(gw.month) + String(gw.no)
-                  : "";
+    if (!gw.reg || gw.mfg > 1 || gw.model > 5) {
+        return "";
+    }
+    return String(mfg[gw.mfg]) + " " + String(model[gw.model]) + " rev." + String(gw.rev_major) + "." + String(gw.rev_minor) + "/" + String(2000 + gw.year)
+           + (gw.month < 10 ? "0" : "") + String(gw.month) + String(gw.no);
 #else
     return "";
 #endif
