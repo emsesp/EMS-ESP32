@@ -112,13 +112,13 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     // We only do this for BBQKees boards
     // Note 1: we never set the NVS boot value in the code - this is done on initial pre-loading
     // Note 2: The board profile is dynamically changed for the session, but the value in the settings file on the FS remains untouched
-    if (!EMSESP::system_.getBBQKeesGatewayDetails().isEmpty()) {
-        String nvs_boot = EMSESP::nvs_.getString("boot");
-        if (!nvs_boot.isEmpty()) {
+    if (EMSESP::system_.getBBQKeesGatewayDetails(FUSE_VALUE::MFG).startsWith("BBQKees")) {
+        String bbq_board = EMSESP::system_.getBBQKeesGatewayDetails(FUSE_VALUE::BOARD);
+        if (!bbq_board.isEmpty()) {
 #if defined(EMSESP_DEBUG)
-            EMSESP::logger().debug("Overriding board profile with NVS boot value %s", nvs_boot.c_str());
+            EMSESP::logger().info("Overriding board profile with fuse value %s", bbq_board.c_str());
 #endif
-            settings.board_profile = nvs_boot;
+            settings.board_profile = bbq_board;
         }
     }
 

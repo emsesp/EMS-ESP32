@@ -19,6 +19,10 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - added new board profile for upcoming BBQKees E32V2.2
 - set differential pressure entity in Mixer device
 - set set climate action cooling/heating in HA
+- Internal sensors of E32V2_2
+- FW200 display options
+- CR11 mode settings OFF/MANUAL depends on selTemp
+- Fuse settings for BBQKees boards
 
 ## Fixed
 
@@ -39,4 +43,5 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 ## Changed
 
 - show console log with ISO date/time [#2533](https://github.com/emsesp/EMS-ESP32/discussions/2533)
+- remove ESP32 CPU temperature
 - updated core libraries like AsyncTCP, AsyncWebServer and Modbus

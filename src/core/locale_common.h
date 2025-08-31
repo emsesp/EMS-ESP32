@@ -306,7 +306,9 @@ MAKE_ENUM(enum_hpPumpMode, FL_(auto), FL_(continuous))
 
 // thermostat lists
 MAKE_ENUM(enum_ibaMainDisplay, FL_(internal_temperature), FL_(internal_setpoint), FL_(external_temperature), FL_(burner_temperature), FL_(ww_temperature), FL_(functioning_mode), FL_(time), FL_(date), FL_(smoke_temperature))
+MAKE_ENUM(enum_ibaMainDisplayJ, FL_(ww_temperature), FL_(date), FL_(external_temperature))
 MAKE_ENUM(enum_ibaLanguage, FL_(german), FL_(dutch), FL_(french), FL_(italian))
+MAKE_ENUM(enum_ibaLanguageJ, FL_(german), FL_(italian), FL_(french), FL_(dutch))
 MAKE_ENUM(enum_ibaLanguage_RC30, FL_(german), FL_(dutch))
 MAKE_ENUM(enum_floordrystatus, FL_(off), FL_(start), FL_(heat), FL_(hold), FL_(cool), FL_(end))
 MAKE_ENUM(enum_ibaBuildingType, FL_(light), FL_(medium), FL_(heavy))
@@ -334,6 +336,7 @@ MAKE_ENUM(enum_mode3, FL_(night), FL_(day), FL_(auto))              // RC35, RC3
 MAKE_ENUM(enum_mode4, FL_(nofrost), FL_(eco), FL_(heat), FL_(auto)) // JUNKERS
 MAKE_ENUM(enum_mode5, FL_(auto), FL_(off))                          // CRF
 MAKE_ENUM(enum_mode6, FL_(nofrost), FL_(night), FL_(day))           // RC10
+MAKE_ENUM(enum_mode7, FL_(off), FL_(manual))                        // CR11
 MAKE_ENUM(enum_mode_ha, FL_(off), FL_(heat), FL_(auto))             // HA climate
 
 MAKE_ENUM(enum_modetype, FL_(eco), FL_(comfort))
