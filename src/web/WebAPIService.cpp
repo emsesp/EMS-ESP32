@@ -38,12 +38,15 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request, JsonVariant j
     JsonDocument input_doc; // has no body JSON so create dummy as empty input object
     JsonObject   input;
     // if no body then treat it as a secure GET
-    if ((request->method() == HTTP_GET) || (!json.is<JsonObject>())) {
+    if (request->method() == HTTP_GET) {
         // HTTP GET
         input = input_doc.to<JsonObject>();
-    } else {
+    } else if (json.is<JsonObject>()) {
         // HTTP_POST
         input = json.as<JsonObject>(); // extract values from the json. these will be used as default values
+    } else {
+        input         = input_doc.to<JsonObject>();
+        input["data"] = json.as<std::string>();
     }
     parse(request, input);
 }
