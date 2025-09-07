@@ -697,7 +697,7 @@ std::string compute(const std::string & expr) {
         JsonDocument doc;
         if (DeserializationError::Ok == deserializeJson(doc, cmd)) {
             HTTPClient  http;
-            std::string url, header_s, value_s, method_s, key_s;
+            std::string url, header_s, value_s, method_s, key_s, keys_s;
             // search keys lower case
             for (JsonPair p : doc.as<JsonObject>()) {
                 if (emsesp::Helpers::toLower(p.key().c_str()) == "url") {
@@ -709,7 +709,11 @@ std::string compute(const std::string & expr) {
                 } else if (emsesp::Helpers::toLower(p.key().c_str()) == "method") {
                     method_s = p.key().c_str();
                 } else if (emsesp::Helpers::toLower(p.key().c_str()) == "key") {
-                    key_s = p.key().c_str();
+                    keys_s = "";
+                    key_s  = p.key().c_str();
+                } else if (emsesp::Helpers::toLower(p.key().c_str()) == "keys") {
+                    key_s  = "";
+                    keys_s = p.key().c_str();
                 }
             }
             if (http.begin(url.c_str())) {
@@ -731,12 +735,33 @@ std::string compute(const std::string & expr) {
                 }
 
                 if (httpResult > 0) {
-                    std::string result = http.getString().c_str();
-                    std::string key    = doc[key_s] | "";
+                    std::string  result = http.getString().c_str();
+                    std::string  key    = doc[key_s] | "";
+                    JsonDocument keys_doc; // JsonDocument to hold "keys" after doc is parsed with HTTP body
+                    if (doc[keys_s].is<JsonArray>()) {
+                        keys_doc.set(doc[keys_s].as<JsonArray>());
+                    }
+                    JsonArray keys = keys_doc.as<JsonArray>();
 
-                    doc.clear();
-                    if (key.length() && DeserializationError::Ok == deserializeJson(doc, result)) {
-                        result = doc[key.c_str()].as<std::string>();
+                    if (key.length() || !keys.isNull()) {
+                        doc.clear();
+                        if (DeserializationError::Ok == deserializeJson(doc, result)) {
+                            if (key.length()) {
+                                result = doc[key.c_str()].as<std::string>();
+                            } else {
+                                JsonVariant json = doc.as<JsonVariant>();
+                                for (JsonVariant keys_key : keys) {
+                                    if (keys_key.is<std::string>() && json.is<JsonObject>()) {
+                                        json = json[keys_key.as<std::string>()].as<JsonVariant>();
+                                    } else if (keys_key.is<int>() && json.is<JsonArray>()) {
+                                        json = json[keys_key.as<int>()].as<JsonVariant>();
+                                    } else {
+                                        break; // type mismatch
+                                    }
+                                }
+                                result = json.as<std::string>();
+                            }
+                        }
                     }
                     expr_new.replace(f, e - f, result.c_str());
                 }
