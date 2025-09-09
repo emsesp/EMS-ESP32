@@ -60,7 +60,7 @@ It requires a small circuit to interface with the EMS bus which can be purchased
 
 ## 🚀&nbsp; **Installing**
 
-Head over to [download.emsesp.org](https://download.emsesp.org) for instructions on how to install EMS-ESP. There is also further details on which boards are supported in [this section](https://docs.emsesp.org/Getting-Started/#first-time-install) of the documentation.
+Head over to [download.emsesp.org](https://download.emsesp.org) for instructions on how to install EMS-ESP. There is also further details on which boards are supported in [this section](https://docs.emsesp.org/Installing/) of the documentation.
 
 ## 📋&nbsp; **Documentation**
 
