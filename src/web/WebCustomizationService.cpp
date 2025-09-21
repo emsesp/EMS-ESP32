@@ -366,7 +366,7 @@ void WebCustomizationService::begin() {
 
 // hard coded tests
 #ifdef EMSESP_TEST
-void WebCustomizationService::test() {
+void WebCustomizationService::load_test_data() {
     update([&](WebCustomization & webCustomization) {
         // Temperature sensors
         webCustomization.sensorCustomizations.clear();

@@ -73,7 +73,7 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
     }
 
 #if defined(EMSESP_TEST)
-    void test();
+    void load_test_data();
 #endif
 
   private:

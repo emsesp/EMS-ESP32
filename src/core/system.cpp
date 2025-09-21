@@ -19,6 +19,8 @@
 #include "system.h"
 #include "emsesp.h" // for send_raw_telegram() command
 
+#include "shuntingYard.h"
+
 #ifndef EMSESP_STANDALONE
 #include "esp_ota_ops.h"
 #endif
@@ -47,8 +49,6 @@
 #endif
 #include <esp_mac.h>
 #endif
-
-#include <HTTPClient.h>
 
 #ifndef EMSESP_STANDALONE
 #include "esp_efuse.h"
@@ -205,14 +205,15 @@ bool System::command_syslog_level(const char * value, const int8_t id) {
 }
 */
 
-// send message - to log and MQTT
+// send message - to system log and MQTT
 bool System::command_message(const char * value, const int8_t id) {
     if (value == nullptr || value[0] == '\0') {
         return false; // must have a string value
     }
 
-    LOG_INFO("Message: %s", value);
-    Mqtt::queue_publish(F_(message), value);
+    auto computed_value = compute(value);
+    LOG_INFO("Message: %s", computed_value.c_str());
+    Mqtt::queue_publish(F_(message), computed_value);
 
     return true;
 }
@@ -1433,7 +1434,6 @@ bool System::command_service(const char * cmd, const char * value) {
         if (!strcmp(cmd, "fuse/mfg")) {
             ok = esp_efuse_write_reg(EFUSE_BLK3, 0, (uint32_t)n) == ESP_OK;
             ok ? LOG_INFO("fuse programed with value '%X': successful", n) : LOG_ERROR("fuse programed with value '%X': failed", n);
-
         }
         if (!strcmp(cmd, "fuse/mfgadd")) {
             uint8_t reg = 0;
