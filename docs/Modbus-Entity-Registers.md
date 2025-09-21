@@ -4446,7 +4446,7 @@
 | hc1.seltemp | selected room temperature | int16 (>=0<=30) | C | true | HC | 0 | 1 | 1/2 | 
 | hc1.currtemp | current room temperature | int16 (>=-3199<=3199) | C | false | HC | 1 | 1 | 1/10 | 
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
-| hc1.mode | operating mode | enum [manual\|auto] |   | false | HC | 3 | 1 | 1 | 
+| hc1.mode | operating mode | enum [off\|manual] |   | true | HC | 3 | 1 | 1 | 
 | hc1.targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 | 
 | hc1.heatingtype | heating type | enum [off\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 | 
 
@@ -4680,6 +4680,8 @@
 | errorcode | error code | string |   | false | DEVICE_DATA | 0 | 8 | 1 | 
 | lastcode | last error code | string |   | false | DEVICE_DATA | 8 | 25 | 1 | 
 | datetime | date/time | string |   | true | DEVICE_DATA | 33 | 13 | 1 | 
+| display | display | enum [dhw temperature\|date\|external temperature] |   | true | DEVICE_DATA | 65 | 1 | 1 | 
+| language | language | enum [german\|italian\|french\|dutch] |   | true | DEVICE_DATA | 66 | 1 | 1 | 
 | hybridstrategy | hybrid control strategy | enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix] |   | true | DEVICE_DATA | 54 | 1 | 1 | 
 | switchovertemp | outside switchover temperature | int8 (>=-20<=20) | C | true | DEVICE_DATA | 55 | 1 | 1 | 
 | energycostratio | energy cost ratio | uint8 (>=0<=20) |   | true | DEVICE_DATA | 56 | 1 | 1/10 | 
@@ -4719,6 +4721,8 @@
 | errorcode | error code | string |   | false | DEVICE_DATA | 0 | 8 | 1 | 
 | lastcode | last error code | string |   | false | DEVICE_DATA | 8 | 25 | 1 | 
 | datetime | date/time | string |   | true | DEVICE_DATA | 33 | 13 | 1 | 
+| display | display | enum [dhw temperature\|date\|external temperature] |   | true | DEVICE_DATA | 65 | 1 | 1 | 
+| language | language | enum [german\|italian\|french\|dutch] |   | true | DEVICE_DATA | 66 | 1 | 1 | 
 | hybridstrategy | hybrid control strategy | enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix] |   | true | DEVICE_DATA | 54 | 1 | 1 | 
 | switchovertemp | outside switchover temperature | int8 (>=-20<=20) | C | true | DEVICE_DATA | 55 | 1 | 1 | 
 | energycostratio | energy cost ratio | uint8 (>=0<=20) |   | true | DEVICE_DATA | 56 | 1 | 1/10 | 
@@ -4953,6 +4957,8 @@
 | errorcode | error code | string |   | false | DEVICE_DATA | 0 | 8 | 1 | 
 | lastcode | last error code | string |   | false | DEVICE_DATA | 8 | 25 | 1 | 
 | datetime | date/time | string |   | true | DEVICE_DATA | 33 | 13 | 1 | 
+| display | display | enum [dhw temperature\|date\|external temperature] |   | true | DEVICE_DATA | 65 | 1 | 1 | 
+| language | language | enum [german\|italian\|french\|dutch] |   | true | DEVICE_DATA | 66 | 1 | 1 | 
 | hybridstrategy | hybrid control strategy | enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix] |   | true | DEVICE_DATA | 54 | 1 | 1 | 
 | switchovertemp | outside switchover temperature | int8 (>=-20<=20) | C | true | DEVICE_DATA | 55 | 1 | 1 | 
 | energycostratio | energy cost ratio | uint8 (>=0<=20) |   | true | DEVICE_DATA | 56 | 1 | 1/10 | 
@@ -4992,6 +4998,8 @@
 | errorcode | error code | string |   | false | DEVICE_DATA | 0 | 8 | 1 | 
 | lastcode | last error code | string |   | false | DEVICE_DATA | 8 | 25 | 1 | 
 | datetime | date/time | string |   | true | DEVICE_DATA | 33 | 13 | 1 | 
+| display | display | enum [dhw temperature\|date\|external temperature] |   | true | DEVICE_DATA | 65 | 1 | 1 | 
+| language | language | enum [german\|italian\|french\|dutch] |   | true | DEVICE_DATA | 66 | 1 | 1 | 
 | hybridstrategy | hybrid control strategy | enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix] |   | true | DEVICE_DATA | 54 | 1 | 1 | 
 | switchovertemp | outside switchover temperature | int8 (>=-20<=20) | C | true | DEVICE_DATA | 55 | 1 | 1 | 
 | energycostratio | energy cost ratio | uint8 (>=0<=20) |   | true | DEVICE_DATA | 56 | 1 | 1/10 | 
@@ -5031,6 +5039,8 @@
 | errorcode | error code | string |   | false | DEVICE_DATA | 0 | 8 | 1 | 
 | lastcode | last error code | string |   | false | DEVICE_DATA | 8 | 25 | 1 | 
 | datetime | date/time | string |   | true | DEVICE_DATA | 33 | 13 | 1 | 
+| display | display | enum [dhw temperature\|date\|external temperature] |   | true | DEVICE_DATA | 65 | 1 | 1 | 
+| language | language | enum [german\|italian\|french\|dutch] |   | true | DEVICE_DATA | 66 | 1 | 1 | 
 | hybridstrategy | hybrid control strategy | enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix] |   | true | DEVICE_DATA | 54 | 1 | 1 | 
 | switchovertemp | outside switchover temperature | int8 (>=-20<=20) | C | true | DEVICE_DATA | 55 | 1 | 1 | 
 | energycostratio | energy cost ratio | uint8 (>=0<=20) |   | true | DEVICE_DATA | 56 | 1 | 1/10 | 
@@ -5070,6 +5080,8 @@
 | errorcode | error code | string |   | false | DEVICE_DATA | 0 | 8 | 1 | 
 | lastcode | last error code | string |   | false | DEVICE_DATA | 8 | 25 | 1 | 
 | datetime | date/time | string |   | true | DEVICE_DATA | 33 | 13 | 1 | 
+| display | display | enum [dhw temperature\|date\|external temperature] |   | true | DEVICE_DATA | 65 | 1 | 1 | 
+| language | language | enum [german\|italian\|french\|dutch] |   | true | DEVICE_DATA | 66 | 1 | 1 | 
 | hybridstrategy | hybrid control strategy | enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix] |   | true | DEVICE_DATA | 54 | 1 | 1 | 
 | switchovertemp | outside switchover temperature | int8 (>=-20<=20) | C | true | DEVICE_DATA | 55 | 1 | 1 | 
 | energycostratio | energy cost ratio | uint8 (>=0<=20) |   | true | DEVICE_DATA | 56 | 1 | 1/10 | 
@@ -5243,7 +5255,7 @@
 | hc1.seltemp | selected room temperature | int16 (>=0<=30) | C | true | HC | 0 | 1 | 1/2 | 
 | hc1.currtemp | current room temperature | int16 (>=-3199<=3199) | C | false | HC | 1 | 1 | 1/10 | 
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
-| hc1.mode | operating mode | enum [manual\|auto] |   | false | HC | 3 | 1 | 1 | 
+| hc1.mode | operating mode | enum [off\|manual] |   | true | HC | 3 | 1 | 1 | 
 | hc1.targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 | 
 | hc1.heatingtype | heating type | enum [off\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 | 
 

@@ -3815,7 +3815,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "CR11",thermostat,10,hc1.seltemp,selected room temperature,int16 (>=0<=30),C,true,number.thermostat_hc1_selected_room_temperature,number.thermostat_hc1_seltemp,6,1,1/2,0,1
 "CR11",thermostat,10,hc1.currtemp,current room temperature,int16 (>=-3199<=3199),C,false,sensor.thermostat_hc1_current_room_temperature,sensor.thermostat_hc1_currtemp,6,1,1/10,1,1
 "CR11",thermostat,10,hc1.haclimate,mqtt discovery current room temperature,enum [selTemp\|roomTemp] (>=5<=30), ,false,sensor.thermostat_hc1_mqtt_discovery_current_room_temperature,sensor.thermostat_hc1_haclimate,6,1,1,2,1
-"CR11",thermostat,10,hc1.mode,operating mode,enum [manual\|auto], ,false,sensor.thermostat_hc1_operating_mode,sensor.thermostat_hc1_mode,6,1,1,3,1
+"CR11",thermostat,10,hc1.mode,operating mode,enum [off\|manual], ,true,select.thermostat_hc1_operating_mode,select.thermostat_hc1_mode,6,1,1,3,1
 "CR11",thermostat,10,hc1.targetflowtemp,target flow temperature,uint8 (>=0<=254),C,false,sensor.thermostat_hc1_target_flow_temperature,sensor.thermostat_hc1_targetflowtemp,6,1,1,18,1
 "CR11",thermostat,10,hc1.heatingtype,heating type,enum [off\|radiator\|convector\|floor], ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,6,1,1,19,1
 "RC10",thermostat,65,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
@@ -4287,7 +4287,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC100, CR10, Moduline 1000/1010",thermostat,165,hc1.seltemp,selected room temperature,int16 (>=0<=30),C,true,number.thermostat_hc1_selected_room_temperature,number.thermostat_hc1_seltemp,6,1,1/2,0,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,hc1.currtemp,current room temperature,int16 (>=-3199<=3199),C,false,sensor.thermostat_hc1_current_room_temperature,sensor.thermostat_hc1_currtemp,6,1,1/10,1,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,hc1.haclimate,mqtt discovery current room temperature,enum [selTemp\|roomTemp] (>=5<=30), ,false,sensor.thermostat_hc1_mqtt_discovery_current_room_temperature,sensor.thermostat_hc1_haclimate,6,1,1,2,1
-"RC100, CR10, Moduline 1000/1010",thermostat,165,hc1.mode,operating mode,enum [manual\|auto], ,false,sensor.thermostat_hc1_operating_mode,sensor.thermostat_hc1_mode,6,1,1,3,1
+"RC100, CR10, Moduline 1000/1010",thermostat,165,hc1.mode,operating mode,enum [off\|manual], ,true,select.thermostat_hc1_operating_mode,select.thermostat_hc1_mode,6,1,1,3,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,hc1.targetflowtemp,target flow temperature,uint8 (>=0<=254),C,false,sensor.thermostat_hc1_target_flow_temperature,sensor.thermostat_hc1_targetflowtemp,6,1,1,18,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,hc1.heatingtype,heating type,enum [off\|radiator\|convector\|floor], ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,6,1,1,19,1
 "Rego 2000/3000",thermostat,172,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
@@ -4664,6 +4664,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FW100",thermostat,105,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "FW100",thermostat,105,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "FW100",thermostat,105,datetime,date/time,string, ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
+"FW100",thermostat,105,display,display,enum [dhw temperature\|date\|external temperature], ,true,select.thermostat_display,select.thermostat_display,6,0,1,65,1
+"FW100",thermostat,105,language,language,enum [german\|italian\|french\|dutch], ,true,select.thermostat_language,select.thermostat_language,6,0,1,66,1
 "FW100",thermostat,105,hybridstrategy,hybrid control strategy,enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix], ,true,select.thermostat_hybrid_control_strategy,select.thermostat_hybridstrategy,6,0,1,54,1
 "FW100",thermostat,105,switchovertemp,outside switchover temperature,int8 (>=-20<=20),C,true,number.thermostat_outside_switchover_temperature,number.thermostat_switchovertemp,6,0,1,55,1
 "FW100",thermostat,105,energycostratio,energy cost ratio,uint8 (>=0<=20), ,true,number.thermostat_energy_cost_ratio,number.thermostat_energycostratio,6,0,1/10,56,1
@@ -4699,6 +4701,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FW200",thermostat,106,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "FW200",thermostat,106,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "FW200",thermostat,106,datetime,date/time,string, ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
+"FW200",thermostat,106,display,display,enum [dhw temperature\|date\|external temperature], ,true,select.thermostat_display,select.thermostat_display,6,0,1,65,1
+"FW200",thermostat,106,language,language,enum [german\|italian\|french\|dutch], ,true,select.thermostat_language,select.thermostat_language,6,0,1,66,1
 "FW200",thermostat,106,hybridstrategy,hybrid control strategy,enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix], ,true,select.thermostat_hybrid_control_strategy,select.thermostat_hybridstrategy,6,0,1,54,1
 "FW200",thermostat,106,switchovertemp,outside switchover temperature,int8 (>=-20<=20),C,true,number.thermostat_outside_switchover_temperature,number.thermostat_switchovertemp,6,0,1,55,1
 "FW200",thermostat,106,energycostratio,energy cost ratio,uint8 (>=0<=20), ,true,number.thermostat_energy_cost_ratio,number.thermostat_energycostratio,6,0,1/10,56,1
@@ -4804,6 +4808,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FB10",thermostat,109,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "FB10",thermostat,109,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "FB10",thermostat,109,datetime,date/time,string, ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
+"FB10",thermostat,109,display,display,enum [dhw temperature\|date\|external temperature], ,true,select.thermostat_display,select.thermostat_display,6,0,1,65,1
+"FB10",thermostat,109,language,language,enum [german\|italian\|french\|dutch], ,true,select.thermostat_language,select.thermostat_language,6,0,1,66,1
 "FB10",thermostat,109,hybridstrategy,hybrid control strategy,enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix], ,true,select.thermostat_hybrid_control_strategy,select.thermostat_hybridstrategy,6,0,1,54,1
 "FB10",thermostat,109,switchovertemp,outside switchover temperature,int8 (>=-20<=20),C,true,number.thermostat_outside_switchover_temperature,number.thermostat_switchovertemp,6,0,1,55,1
 "FB10",thermostat,109,energycostratio,energy cost ratio,uint8 (>=0<=20), ,true,number.thermostat_energy_cost_ratio,number.thermostat_energycostratio,6,0,1/10,56,1
@@ -4839,6 +4845,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FB100",thermostat,110,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "FB100",thermostat,110,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "FB100",thermostat,110,datetime,date/time,string, ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
+"FB100",thermostat,110,display,display,enum [dhw temperature\|date\|external temperature], ,true,select.thermostat_display,select.thermostat_display,6,0,1,65,1
+"FB100",thermostat,110,language,language,enum [german\|italian\|french\|dutch], ,true,select.thermostat_language,select.thermostat_language,6,0,1,66,1
 "FB100",thermostat,110,hybridstrategy,hybrid control strategy,enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix], ,true,select.thermostat_hybrid_control_strategy,select.thermostat_hybridstrategy,6,0,1,54,1
 "FB100",thermostat,110,switchovertemp,outside switchover temperature,int8 (>=-20<=20),C,true,number.thermostat_outside_switchover_temperature,number.thermostat_switchovertemp,6,0,1,55,1
 "FB100",thermostat,110,energycostratio,energy cost ratio,uint8 (>=0<=20), ,true,number.thermostat_energy_cost_ratio,number.thermostat_energycostratio,6,0,1/10,56,1
@@ -4909,6 +4917,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FW500",thermostat,116,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "FW500",thermostat,116,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "FW500",thermostat,116,datetime,date/time,string, ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
+"FW500",thermostat,116,display,display,enum [dhw temperature\|date\|external temperature], ,true,select.thermostat_display,select.thermostat_display,6,0,1,65,1
+"FW500",thermostat,116,language,language,enum [german\|italian\|french\|dutch], ,true,select.thermostat_language,select.thermostat_language,6,0,1,66,1
 "FW500",thermostat,116,hybridstrategy,hybrid control strategy,enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix], ,true,select.thermostat_hybrid_control_strategy,select.thermostat_hybridstrategy,6,0,1,54,1
 "FW500",thermostat,116,switchovertemp,outside switchover temperature,int8 (>=-20<=20),C,true,number.thermostat_outside_switchover_temperature,number.thermostat_switchovertemp,6,0,1,55,1
 "FW500",thermostat,116,energycostratio,energy cost ratio,uint8 (>=0<=20), ,true,number.thermostat_energy_cost_ratio,number.thermostat_energycostratio,6,0,1/10,56,1
@@ -5014,6 +5024,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FW120",thermostat,192,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "FW120",thermostat,192,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "FW120",thermostat,192,datetime,date/time,string, ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
+"FW120",thermostat,192,display,display,enum [dhw temperature\|date\|external temperature], ,true,select.thermostat_display,select.thermostat_display,6,0,1,65,1
+"FW120",thermostat,192,language,language,enum [german\|italian\|french\|dutch], ,true,select.thermostat_language,select.thermostat_language,6,0,1,66,1
 "FW120",thermostat,192,hybridstrategy,hybrid control strategy,enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix], ,true,select.thermostat_hybrid_control_strategy,select.thermostat_hybridstrategy,6,0,1,54,1
 "FW120",thermostat,192,switchovertemp,outside switchover temperature,int8 (>=-20<=20),C,true,number.thermostat_outside_switchover_temperature,number.thermostat_switchovertemp,6,0,1,55,1
 "FW120",thermostat,192,energycostratio,energy cost ratio,uint8 (>=0<=20), ,true,number.thermostat_energy_cost_ratio,number.thermostat_energycostratio,6,0,1/10,56,1
