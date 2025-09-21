@@ -28,6 +28,7 @@ class WebAPIService {
     WebAPIService(AsyncWebServer * server, SecurityManager * securityManager);
 
     void webAPIService(AsyncWebServerRequest * request, JsonVariant input);
+    void webAPIService(AsyncWebServerRequest * request, const char * data); // for plain text data
 
 #if defined(EMSESP_TEST)
     // for test.cpp and running unit tests
