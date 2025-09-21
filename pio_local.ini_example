@@ -55,8 +55,8 @@ custom_emsesp_ip = 192.168.1.223 ; E32V2
 
 lib_deps =
   bblanchon/ArduinoJson @ 7.4.2
-  ESP32Async/AsyncTCP @ 3.4.7
-  ESP32Async/ESPAsyncWebServer @ 3.8.0
+  ESP32Async/AsyncTCP @ 3.4.8
+  ESP32Async/ESPAsyncWebServer @ 3.8.1
   file://${PROJECT_DIR}/../modules/EMS-ESP-Modules
 ;   ; https://github.com/emsesp/EMS-ESP-Modules.git @ 1.0.8
 
