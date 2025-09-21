@@ -327,10 +327,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // add devices
         test("general");
 
-        EMSESP::webCustomEntityService.test();  // custom entities
-        EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
-        EMSESP::temperaturesensor_.test();      // add temperature sensors
-        EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
+        EMSESP::webCustomEntityService.load_test_data();  // custom entities
+        EMSESP::webCustomizationService.load_test_data(); // set customizations - this will overwrite any settings in the FS
+        EMSESP::temperaturesensor_.load_test_data();      // add temperature sensors
+        EMSESP::webSchedulerService.load_test_data();     // add scheduler data
 
         shell.invoke_command("show values");
         ok = true;
@@ -348,7 +348,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Adding custom entities...");
 
         // add some dummy entities
-        EMSESP::webCustomEntityService.test();
+        EMSESP::webCustomEntityService.load_test_data();
 
 #ifdef EMSESP_STANDALONE
         AsyncWebServerRequest request;
@@ -372,14 +372,13 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         char data[] = "{\"value\":\"99\"}";
         deserializeJson(doc, data);
         json = doc.as<JsonVariant>();
-        // validate
         request.url("/api/custom/test_ram");
         EMSESP::webAPIService.webAPIService(&request, json);
 
+        // validate by showing values
         request.method(HTTP_GET);
         request.url("/api/custom");
         EMSESP::webAPIService.webAPIService(&request);
-
 
 #endif
         ok = true;
@@ -389,7 +388,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Adding Scheduler items...");
 
         // add some dummy entities
-        EMSESP::webSchedulerService.test();
+        EMSESP::webSchedulerService.load_test_data();
 
 #ifdef EMSESP_STANDALONE
         AsyncWebServerRequest request;
@@ -832,7 +831,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // load some EMS data
         // test("general");
 
-        emsesp::EMSESP::temperaturesensor_.test();
+        emsesp::EMSESP::temperaturesensor_.load_test_data();
 
         shell.invoke_command("call temperaturesensor");
         shell.invoke_command("show values");
@@ -857,7 +856,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         Mqtt::nested_format(1);
         // Mqtt::nested_format(0);
 
-        emsesp::EMSESP::temperaturesensor_.test();
+        emsesp::EMSESP::temperaturesensor_.load_test_data();
         shell.invoke_command("show values");
         shell.invoke_command("call system publish");
 
@@ -879,7 +878,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // load some EMS data
         test("general");
 
-        EMSESP::webCustomizationService.test(); // load the analog sensors
+        EMSESP::webCustomizationService.load_test_data(); // load the analog sensors
 
         shell.invoke_command("call analogsensor");
         shell.invoke_command("show values");
@@ -1073,6 +1072,129 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.invoke_command("call boiler circpump/value");
     }
 
+    if (command == "shuntingyard") {
+        shell.printfln("Testing shunting yard...");
+
+        // load devices
+        test("general");
+
+        EMSESP::webCustomEntityService.load_test_data();  // custom entities
+        EMSESP::webCustomizationService.load_test_data(); // set customizations - this will overwrite any settings in the FS
+        EMSESP::temperaturesensor_.load_test_data();      // add temperature sensors
+        EMSESP::webSchedulerService.load_test_data();     // run scheduler tests, and conditions
+
+        JsonDocument          doc;
+        AsyncWebServerRequest request;
+
+        // request.method(HTTP_GET);
+        // request.url("/api/custom/test_seltemp/val");
+        // EMSESP::webAPIService.webAPIService(&request);
+
+        // // set a custom value
+        // request.method(HTTP_POST);
+        // char data0[] = "{\"value\":\"99\"}";
+        // deserializeJson(doc, data0);
+        // JsonVariant json = doc.as<JsonVariant>();
+        // request.url("/api/custom/test_seltemp");
+        // EMSESP::webAPIService.webAPIService(&request, json);
+
+        request.method(HTTP_POST);
+        request.url("/api/system/message");
+
+        // output: hello world
+        EMSESP::webAPIService.webAPIService(&request, "'hello world'");
+
+        // output: locale is en
+        EMSESP::webAPIService.webAPIService(&request, "'locale is 'system/settings/locale");
+
+        // output: locale is en
+        EMSESP::webAPIService.webAPIService(&request, "'locale is '(system/settings/locale)");
+
+        // output: rssi is -23
+        EMSESP::webAPIService.webAPIService(&request, "'rssi is '0+system/network/rssi");
+
+        // output: rssi is -23 dBm
+        EMSESP::webAPIService.webAPIService(&request, "'rssi is '(system/network/rssi)' dBm'");
+
+        // output: 14
+        EMSESP::webAPIService.webAPIService(&request, "custom/test_seltemp");
+
+        // output: 14
+        EMSESP::webAPIService.webAPIService(&request, "custom/test_seltemp/value");
+
+        // output: seltemp=14
+        EMSESP::webAPIService.webAPIService(&request, "'seltemp='custom/test_seltemp/value");
+
+        // output: 14
+        EMSESP::webAPIService.webAPIService(&request, "custom/test_seltemp");
+
+        // output: 40
+        EMSESP::webAPIService.webAPIService(&request, "boiler/flowtempoffset");
+
+        // output: 40
+        EMSESP::webAPIService.webAPIService(&request, "boiler/flowtempoffset/value");
+
+        // output: 53.8
+        EMSESP::webAPIService.webAPIService(&request, "boiler/storagetemp1/value");
+
+        // output: -67.8
+        EMSESP::webAPIService.webAPIService(&request, "(custom/test_seltemp - boiler/flowtempoffset) * 2.8 + 5");
+
+        // output: 1
+        EMSESP::webAPIService.webAPIService(&request, "thermostat/hc1/modetype == 'comfort'");
+
+        // output: 1
+        EMSESP::webAPIService.webAPIService(&request, "thermostat/hc1/modetype == 'Comfort'");
+
+        // output: 0
+        EMSESP::webAPIService.webAPIService(&request, "thermostat/hc1/modetype == 'unknown'");
+
+        // output: 53.8
+        EMSESP::webAPIService.webAPIService(&request, "boiler/storagetemp1/value");
+
+        // check when entity has no value, should pass (storagetemp2 has no value set)
+        // output: 1 (true)
+        EMSESP::webAPIService.webAPIService(&request, "boiler/storagetemp2 == \"\"");
+
+        // check when entity has no value, should pass (storagetemp2 has no value set)
+        // output: 1 (true)
+        EMSESP::webAPIService.webAPIService(&request, "boiler/storagetemp2 == ''");
+
+        //
+        // these next tests should fail or give warnings or strange results, but not crash
+        //
+
+        // Output is "comfort" == Comfort (because missing closing quote)
+        EMSESP::webAPIService.webAPIService(&request, "'thermostat/hc1/modetype == 'Comfort'");
+
+        // can't find entity, should fail with no entity 'storagetemp' in boiler
+        // output: ""
+        EMSESP::webAPIService.webAPIService(&request, "boiler/storagetemp/value1");
+
+        // can't find entity, should fail with no attribute 'value1' in storagetemp1
+        // output: ""
+        EMSESP::webAPIService.webAPIService(&request, "boiler/storagetemp1/value1");
+
+        // check when entity has no value, should pass (storagetemp2 has no value set)
+        // output: ""
+        EMSESP::webAPIService.webAPIService(&request, "boiler/storagetemp2/value");
+
+        // can't set empty value!
+        EMSESP::webAPIService.webAPIService(&request, "/api/custom/test_seltemp/val");
+
+        // this should work
+        // output: 14
+        EMSESP::webAPIService.webAPIService(&request, "custom/test_seltemp");
+
+        // test HTTP POST to call HA script
+        // test_cmd = "{\"method\":\"POST\",\"url\":\"http://192.168.1.42:8123/api/services/script/test_notify2\", \"header\":{\"authorization\":\"Bearer "
+        //            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhMmNlYWI5NDgzMmI0ODE2YWQ2NzU4MjkzZDE2YWMxZSIsImlhdCI6MTcyMTM5MTI0NCwiZXhwIjoyMDM2NzUxMjQ0fQ."
+        //            "S5sago1tEI6lNhrDCO0dM_WsVQHkD_laAjcks8tWAqo\"}}";
+        // command("test99", test_cmd.c_str(), "");
+
+        ok = true;
+    }
+
     if (command == "api3") {
         shell.printfln("Testing API getting values from system");
         EMSESP::system_.bool_format(BOOL_FORMAT_TRUEFALSE); // BOOL_FORMAT_TRUEFALSE_STR
@@ -1081,8 +1203,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         bool single;
 
-        single = true;
-        // single = false;
+        // single = true;
+        single = false;
 
         AsyncWebServerRequest request;
         JsonDocument          doc;
@@ -1096,10 +1218,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         if (single) {
             // run dedicated tests only
 
-            // EMSESP::webCustomEntityService.test();  // custom entities
-            // EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
-            // EMSESP::temperaturesensor_.test();      // add temperature sensors
-            // EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
+            // EMSESP::webCustomEntityService.load_test_data();  // custom entities
+            // EMSESP::webCustomizationService.load_test_data(); // set customizations - this will overwrite any settings in the FS
+            // EMSESP::temperaturesensor_.load_test_data();      // add temperature sensors
+            // EMSESP::webSchedulerService.load_test_data();     // run scheduler tests, and conditions
 
             // request.url("/rest/deviceEntities");
             // EMSESP::webCustomizationService.device_entities(&request);
@@ -1134,6 +1256,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             deserializeJson(doc, data0);
             request.url("/api/thermostat/seltemp");
             EMSESP::webAPIService.webAPIService(&request, doc.as<JsonVariant>());
+
             // request.method(HTTP_GET);
             // request.url("/api/thermostat/seltemp/value");
             // EMSESP::webAPIService.webAPIService(&request);
@@ -1201,10 +1324,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             // shell.invoke_command("call system read \"8 2 27 1\"");
 
         } else {
-            EMSESP::webCustomEntityService.test();  // custom entities
-            EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
-            EMSESP::temperaturesensor_.test();      // add temperature sensors
-            EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
+            EMSESP::webCustomEntityService.load_test_data();  // custom entities
+            EMSESP::webCustomizationService.load_test_data(); // set customizations - this will overwrite any settings in the FS
+            EMSESP::temperaturesensor_.load_test_data();      // add temperature sensors
+            EMSESP::webSchedulerService.load_test_data();     // run scheduler tests, and conditions
 
             request.method(HTTP_GET);
 
@@ -1249,7 +1372,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/custom/info");
             EMSESP::webAPIService.webAPIService(&request);
-            request.url("/api/custom/seltemp");
+            request.url("/api/custom/test_seltemp");
             EMSESP::webAPIService.webAPIService(&request);
 
             // system
@@ -1358,9 +1481,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             EMSESP::webAPIService.webAPIService(&request);
 
             // custom
-            request.url("/api/custom/seltemp2");
+            request.url("/api/custom/test_seltemp2");
             EMSESP::webAPIService.webAPIService(&request);
-            request.url("/api/custom/seltemp/val");
+            request.url("/api/custom/test_seltemp/val");
             EMSESP::webAPIService.webAPIService(&request);
 
             // temperaturesensor

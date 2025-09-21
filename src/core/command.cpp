@@ -143,7 +143,8 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     }
 
     // check if data is entity like device/hc/name/value
-    if (data.is<const char *>()) {
+    // unless the command is system/message
+    if ((strcmp(command_p, "message") != 0) && data.is<const char *>()) {
         const char * d = data.as<const char *>();
         if (strlen(d)) {
             char * device_end = (char *)strchr(d, '/');
@@ -183,9 +184,9 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         }
     }
 
-    // call the command based on the type
     uint8_t return_code = CommandRet::OK;
 
+    // call the command based on the type
     if (data.is<const char *>()) {
         return_code = Command::call(device_type, command_p, data.as<const char *>(), is_admin, id_n, output);
     } else if (data.is<int>()) {
@@ -289,7 +290,7 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
     return command;
 }
 
-// check if command contains an attribute
+// check if command string contains an attribute and returns it
 const char * Command::get_attribute(const char * cmd) {
     char * breakp = (char *)strchr(cmd, '/');
     if (breakp) {
@@ -299,9 +300,9 @@ const char * Command::get_attribute(const char * cmd) {
     return nullptr;
 }
 
-// returns the attribute in the given JSON object as a key/value pair called api_data
+// get the attribute in the given JSON object as a key/value pair called api_data
 // or errors if the attribute is not found
-bool Command::set_attribute(JsonObject output, const char * cmd, const char * attribute) {
+bool Command::get_attribute(JsonObject output, const char * cmd, const char * attribute) {
     if (attribute == nullptr) {
         return true;
     }
@@ -325,7 +326,7 @@ bool Command::set_attribute(JsonObject output, const char * cmd, const char * at
     char error[100];
     snprintf(error, sizeof(error), "no attribute '%s' in %s", attribute, cmd);
     output["message"] = error;
-    return false;
+    return false; // fail
 }
 
 // calls a command directly

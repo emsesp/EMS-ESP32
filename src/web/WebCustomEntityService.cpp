@@ -153,6 +153,12 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
 
 // set value by api command
 bool WebCustomEntityService::command_setvalue(const char * value, const int8_t id, const char * name) {
+    // don't write if there is no value, to prevent setting an empty value by mistake when parsing attributes
+    if (!strlen(value)) {
+        EMSESP::logger().debug("can't set empty value!");
+        return false;
+    }
+
     for (CustomEntityItem & entityItem : *customEntityItems_) {
         if (Helpers::toLower(entityItem.name) == Helpers::toLower(name)) {
             if (entityItem.ram == 1) {
@@ -318,7 +324,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
     for (auto & entity : *customEntityItems_) {
         if (Helpers::toLower(entity.name) == cmd) {
             get_value_json(output, entity);
-            return Command::set_attribute(output, cmd, attribute_s);
+            return Command::get_attribute(output, cmd, attribute_s);
         }
     }
     return false; // not found
@@ -681,7 +687,7 @@ bool WebCustomEntityService::get_value(std::shared_ptr<const Telegram> telegram)
 // hard coded tests
 // add the entity and also add the command for writeable entities
 #ifdef EMSESP_TEST
-void WebCustomEntityService::test() {
+void WebCustomEntityService::load_test_data() {
     update([&](WebCustomEntity & webCustomEntity) {
         webCustomEntity.customEntityItems.clear();
         auto entityItem = CustomEntityItem();
@@ -698,6 +704,7 @@ void WebCustomEntityService::test() {
         entityItem.value_type = 1;
         entityItem.writeable  = true;
         entityItem.data       = "70";
+        entityItem.value      = 70;
         webCustomEntity.customEntityItems.push_back(entityItem);
         Command::add(
             EMSdevice::DeviceType::CUSTOM,
@@ -751,12 +758,12 @@ void WebCustomEntityService::test() {
         entityItem.type_id    = 0;
         entityItem.offset     = 0;
         entityItem.factor     = 1;
-        entityItem.name       = "seltemp";
+        entityItem.name       = "test_seltemp";
         entityItem.uom        = 0;
         entityItem.value_type = 8;
         entityItem.writeable  = true;
         entityItem.data       = "14";
-        entityItem.value      = 12;
+        entityItem.value      = 14;
         webCustomEntity.customEntityItems.push_back(entityItem);
         Command::add(
             EMSdevice::DeviceType::CUSTOM,
