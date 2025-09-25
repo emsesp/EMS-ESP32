@@ -1572,7 +1572,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["freeCaps"]        = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024; // includes heap and psram
     node["usedApp"]         = EMSESP::system_.appUsed();                       // kilobytes
     node["freeApp"]         = EMSESP::system_.appFree();                       // kilobytes
-    node["partition"]       = esp_ota_get_running_partition()->label;          // active partition
+    node["partition"]       = (const char *)esp_ota_get_running_partition()->label;          // active partition
     node["flash_chip_size"] = ESP.getFlashChipSize() / 1024;                   // kilobytes
 #endif
     node["resetReason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);

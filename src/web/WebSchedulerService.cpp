@@ -351,7 +351,7 @@ bool WebSchedulerService::command(const char * name, const std::string & command
             }
             std::string value  = doc["value"] | data.c_str(); // extract value if its in the command, or take the data
             std::string method = doc["method"] | "GET";       // default GET
-
+            commands(value, false);
             // if there is data, force a POST
             int httpResult = 0;
             if (value.length() || method == "post") { // we have all lowercase

@@ -115,7 +115,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     root["max_alloc_heap"]   = EMSESP::system_.getMaxAllocMem();
     root["arduino_version"]  = ARDUINO_VERSION;
     root["sdk_version"]      = ESP.getSdkVersion();
-    root["partition"]        = esp_ota_get_running_partition()->label; // active partition
+    root["partition"]        = (const char *)esp_ota_get_running_partition()->label; // active partition
     root["flash_chip_size"]  = ESP.getFlashChipSize() / 1024;
     root["flash_chip_speed"] = ESP.getFlashChipSpeed();
     root["app_used"]         = EMSESP::system_.appUsed();
