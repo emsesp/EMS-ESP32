@@ -124,7 +124,11 @@ class AnalogSensor {
         PWM_1       = 8,
         PWM_2       = 9,
         NTC         = 10,
-        RGB         = 11
+        RGB         = 11,
+        PULSE       = 12,
+        FREQ_0      = 13,
+        FREQ_1      = 14,
+        FREQ_2      = 15
     };
 
     void start(const bool factory_settings = false);
@@ -190,6 +194,13 @@ class AnalogSensor {
     bool     changed_     = true; // this will force a publish of all sensors when initialising
     uint32_t sensorfails_ = 0;
     uint32_t sensorreads_ = 0;
+
+    static void IRAM_ATTR freqIrq0();
+    static void IRAM_ATTR freqIrq1();
+    static void IRAM_ATTR freqIrq2();
+    static unsigned long  edge[3];
+    static unsigned long  edgecnt[3];
+    unsigned long         lastedge[3] = {0, 0, 0};
 };
 
 } // namespace emsesp

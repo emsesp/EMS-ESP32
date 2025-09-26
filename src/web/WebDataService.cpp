@@ -436,7 +436,8 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
                     obj["v"] = Helpers::transformNumFloat(sensor.value());
                 } else
 #endif
-                    if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT || sensor.type() == AnalogSensor::AnalogType::DIGITAL_IN) {
+                    if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT || sensor.type() == AnalogSensor::AnalogType::DIGITAL_IN
+                        || sensor.type() == AnalogSensor::AnalogType::PULSE) {
                     char s[12];
                     dv["v"]     = Helpers::render_boolean(s, sensor.value() != 0, true);
                     JsonArray l = dv["l"].to<JsonArray>();
@@ -448,7 +449,7 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
                 }
                 if (sensor.type() == AnalogSensor::AnalogType::COUNTER
                     || (sensor.type() >= AnalogSensor::AnalogType::DIGITAL_OUT && sensor.type() <= AnalogSensor::AnalogType::PWM_2)
-                    || sensor.type() == AnalogSensor::AnalogType::RGB) {
+                    || sensor.type() == AnalogSensor::AnalogType::RGB || sensor.type() == AnalogSensor::AnalogType::PULSE) {
                     dv["c"] = sensor.name();
                 }
             }
