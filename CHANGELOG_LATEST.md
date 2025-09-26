@@ -18,11 +18,12 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - disinfection command [#2601](https://github.com/emsesp/EMS-ESP32/issues/2601)
 - added new board profile for upcoming BBQKees E32V2.2
 - set differential pressure entity in Mixer device
-- set set climate action cooling/heating in HA
+- set set climate action cooling/heating in HA [#2583](https://github.com/emsesp/EMS-ESP32/issues/2583)
 - Internal sensors of E32V2_2
-- FW200 display options
-- CR11 mode settings OFF/MANUAL depends on selTemp
+- FW200 display options [#2610](https://github.com/emsesp/EMS-ESP32/discussions/2610)
+- CR11 mode settings OFF/MANUAL depends on selTemp [#2437](https://github.com/emsesp/EMS-ESP32/issues/3437)
 - Fuse settings for BBQKees boards
+- Analogsensors for pulse output [#2624](https://github.com/emsesp/EMS-ESP32/discussions/2624) and frequency input [#2631](https://github.com/emsesp/EMS-ESP32/discussions/2631)
 
 ## Fixed
 
@@ -39,6 +40,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - Add pulsed water meter input to V1.3 gateway with Lilygo S3 [#2550](https://github.com/emsesp/EMS-ESP32/issues/2550)
 - fix missing long 10-second press of Button to perform a factory reset
 - fix wwMaxPower on Junkers ZBS14 [#2609](https://github.com/emsesp/EMS-ESP32/issues/2609)
+- ventilation bypass state from telegram 0x55C [#1197](https://github.com/emsesp/EMS-ESP32/issues/1197)
 
 ## Changed
 
