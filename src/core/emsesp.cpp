@@ -1307,7 +1307,11 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
             default_name = "Wireless sensor base";
         }
     }
-
+    // map MX400 also to RF Base
+    if (device_id == EMSdevice::EMS_DEVICE_ID_RFBASE) {
+        device_type  = DeviceType::CONNECT;
+        default_name = "Wireless base";
+    }
     if ((device_id >= EMSdevice::EMS_DEVICE_ID_DHW1 && device_id <= EMSdevice::EMS_DEVICE_ID_DHW8) || device_id == EMSdevice::EMS_DEVICE_ID_IPM_DHW) {
         device_type = DeviceType::WATER;
     }

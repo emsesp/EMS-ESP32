@@ -27,7 +27,39 @@ class Connect : public EMSdevice {
   public:
     Connect(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand);
 
+    class RoomCircuit {
+      public:
+        RoomCircuit(const uint8_t num)
+            : room_(num) {
+        }
+        ~RoomCircuit() = default;
+        int16_t     temp_;
+        uint8_t     humidity_;
+        uint8_t     seltemp_;
+        uint8_t     mode_;
+        char        name_[25];
+
+        uint8_t     room() {
+            return room_;
+        }
+
+      private:
+        uint8_t room_; // dhw circuit number 0..10
+    };
+
   private:
+    std::shared_ptr<Connect::RoomCircuit> room_circuit(const uint8_t num, const bool create = false);
+
+    void register_device_values_room(std::shared_ptr<Connect::RoomCircuit> room);
+    void process_roomThermostat(std::shared_ptr<const Telegram> telegram);
+    void process_roomThermostatName(std::shared_ptr<const Telegram> telegram);
+    void process_roomThermostatMode(std::shared_ptr<const Telegram> telegram);
+    bool set_mode(const char * value, const int8_t id);
+    bool set_seltemp(const char * value, const int8_t id);
+    bool set_name(const char * value, const int8_t id);
+
+    std::vector<std::shared_ptr<Connect::RoomCircuit>> room_circuits_;
+
     void    process_OutdoorTemp(std::shared_ptr<const Telegram> telegram);
     int16_t outdoorTemp_;
 };
