@@ -339,6 +339,7 @@ MAKE_ENUM(enum_mode4, FL_(nofrost), FL_(eco), FL_(heat), FL_(auto)) // JUNKERS
 MAKE_ENUM(enum_mode5, FL_(auto), FL_(off))                          // CRF
 MAKE_ENUM(enum_mode6, FL_(nofrost), FL_(night), FL_(day))           // RC10
 MAKE_ENUM(enum_mode7, FL_(off), FL_(manual))                        // CR11
+MAKE_ENUM(enum_mode8, FL_(auto), FL_(heat), FL_(cool), FL_(off))    // SRC room thermostats
 MAKE_ENUM(enum_mode_ha, FL_(off), FL_(heat), FL_(auto))             // HA climate
 
 MAKE_ENUM(enum_modetype, FL_(eco), FL_(comfort))

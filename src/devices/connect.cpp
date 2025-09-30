@@ -37,10 +37,8 @@ Connect::Connect(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
             register_telegram_type(0x0BDD + i, "Room", false, MAKE_PF_CB(process_roomThermostat));
             register_telegram_type(0x0B3D + i, "Roomname", true, MAKE_PF_CB(process_roomThermostatName));
             register_telegram_type(0x0BB5 + i, "Roomsettings", true, MAKE_PF_CB(process_roomThermostatMode));
-
-            // 1230..123F read,  unknown, 16 bytes long?
-            // register_telegram_type(0x1230 + i, "unknown", true, MAKE_PF_CB(process_unknown));
-            // 1244..1253 broadcast, unknown, 14 bytes long
+            register_telegram_type(0x1230 + i, "Roomparams", true, MAKE_PF_CB(process_roomThermostatParam));
+            register_telegram_type(0x1244 + i, "Roomdata", false, MAKE_PF_CB(process_roomThermostatData));
         }
         // register_telegram_type(0xDB65, "Roomschedule", true, MAKE_PF_CB(process_roomSchedule));
         // 0x2040, broadcast 36 bytes:
@@ -63,9 +61,11 @@ void Connect::process_OutdoorTemp(std::shared_ptr<const Telegram> telegram) {
 void Connect::register_device_values_room(std::shared_ptr<Connect::RoomCircuit> room) {
     auto tag = DeviceValueTAG::TAG_HS1 + room->room();
     register_device_value(tag, &room->temp_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(roomTemp), DeviceValueUOM::DEGREES);
-    register_device_value(tag, &room->humidity_, DeviceValueType::UINT8, FL_(airHumidity), DeviceValueUOM::PERCENT);
-    register_device_value(tag, &room->seltemp_, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(seltemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_seltemp));
-    register_device_value(tag, &room->mode_, DeviceValueType::ENUM, FL_(enum_mode2), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
+    register_device_value(tag, &room->humidity_, DeviceValueType::INT8, FL_(airHumidity), DeviceValueUOM::PERCENT);
+    register_device_value(tag, &room->dewtemp_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(dewTemperature), DeviceValueUOM::DEGREES);
+    register_device_value(
+        tag, &room->seltemp_, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(seltemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_seltemp));
+    register_device_value(tag, &room->mode_, DeviceValueType::ENUM, FL_(enum_mode8), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
     register_device_value(tag, &room->name_, DeviceValueType::STRING, FL_(name), DeviceValueUOM::NONE, MAKE_CF_CB(set_name));
 }
 
@@ -90,16 +90,22 @@ std::shared_ptr<Connect::RoomCircuit> Connect::room_circuit(const uint8_t num, c
 
 // gateway(0x50) B all(0x00), ?(0x0BDD), data: 00 E6 36 2A
 void Connect::process_roomThermostat(std::shared_ptr<const Telegram> telegram) {
-    auto    rc       = room_circuit(telegram->type_id - 0xBDD, true);
-    uint8_t humidity = EMS_VALUE_UINT8_NOTSET;
-    uint8_t seltemp  = EMS_VALUE_UINT8_NOTSET;
-    has_update(telegram, rc->temp_, 0);
-    if (Helpers::hasValue(rc->temp_)) {
-        telegram->read_value(humidity, 2);
-        telegram->read_value(seltemp, 3);
+    bool create = telegram->offset == 0 && telegram->message_data[0] < 0x80;
+    auto rc     = room_circuit(telegram->type_id - 0xBDD, create);
+    if (rc == nullptr) {
+        return;
     }
-    has_update(rc->humidity_, humidity);
-    has_update(rc->seltemp_, seltemp);
+    has_update(telegram, rc->temp_, 0);
+    has_update(telegram, rc->humidity_, 2); // could show -3 if not set
+    has_update(telegram, rc->seltemp_, 3);
+
+    // calculate dew temperature
+    const float k2 = 17.62;
+    const float k3 = 243.12;
+    const float t  = (float)rc->temp_ / 10;
+    const float h  = (float)rc->humidity_ / 100;
+    int16_t     dt = (10 * k3 * (((k2 * t) / (k3 + t)) + log(h)) / (((k2 * k3) / (k3 + t)) - log(h)));
+    has_update(rc->dewtemp_, dt);
 }
 
 // gateway(0x48) W gateway(0x50), ?(0x0B42), data: 01
@@ -113,14 +119,11 @@ void Connect::process_roomThermostatName(std::shared_ptr<const Telegram> telegra
         return;
     }
     std::string s;
-    char        c;
-    uint8_t     i = 3 - telegram->offset;
-    while ((i < telegram->message_length) && ((c = telegram->message_data[i]) != 0)) {
-        s += c;
-        i += 2;
+    for (uint8_t i = 2 - telegram->offset; (i < telegram->message_length) && (telegram->message_data[i] != 0); i += 2) {
+        s += (char)telegram->message_data[i];
     }
     if (s.length()) {
-        has_update(rc->name_, s.c_str(), s.length());
+        has_update(rc->name_, s.c_str(), s.length() + 1);
     }
 }
 
@@ -130,7 +133,14 @@ void Connect::process_roomThermostatMode(std::shared_ptr<const Telegram> telegra
     if (rc == nullptr) {
         return;
     }
-    has_enumupdate(telegram, rc->mode_, 0, {3, 1, 0});
+    // has_enumupdate(telegram, rc->mode_, 0, {3, 1, 0});
+    has_update(telegram, rc->mode_, 0);
+}
+
+void Connect::process_roomThermostatParam(std::shared_ptr<const Telegram> telegram) {
+}
+
+void Connect::process_roomThermostatData(std::shared_ptr<const Telegram> telegram) {
 }
 
 // Settings:
@@ -141,7 +151,8 @@ bool Connect::set_mode(const char * value, const int8_t id) {
         return false;
     }
     uint8_t v;
-    if (Helpers::value2enum(value, v, FL_(enum_mode2), {3, 1, 0})) {
+    // if (Helpers::value2enum(value, v, FL_(enum_mode2), {3, 1, 0})) {
+    if (Helpers::value2enum(value, v, FL_(enum_mode8))) {
         write_command(0xBB5 + rc->room(), 0, v); // no validate, mode change is broadcasted
         return true;
     }
@@ -155,7 +166,8 @@ bool Connect::set_seltemp(const char * value, const int8_t id) {
     }
     float v;
     if (Helpers::value2float(value, v)) {
-        write_command(0xBB5 + rc->room(), rc->mode_ == 2 ? 1 : 3, v * 2);
+        // write_command(0xBB5 + rc->room(), rc->mode_ == 2 ? 1 : 3, v == -1 ? 0xFF : uint8_t(v * 2));
+        write_command(0xBB5 + rc->room(), rc->mode_ == 0 ? 1 : 3, v == -1 ? 0xFF : uint8_t(v * 2));
         return true;
     }
     return false;
@@ -166,7 +178,7 @@ bool Connect::set_name(const char * value, const int8_t id) {
     if (rc == nullptr || value == nullptr || strlen(value) > 12) {
         return false;
     }
-    uint8_t      data[strlen(value) * 2];    
+    uint8_t      data[strlen(value) * 2];
     uint8_t *    d = data;
     const char * c = value;
     while (*c != 0) {
