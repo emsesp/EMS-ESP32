@@ -34,11 +34,11 @@ Connect::Connect(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
                               DeviceValueUOM::DEGREES);
         // Roomthermostats
         for (uint8_t i = 0; i < 16; i++) {
-            register_telegram_type(0x0BDD + i, "Room", false, MAKE_PF_CB(process_roomThermostat));
-            register_telegram_type(0x0B3D + i, "Roomname", true, MAKE_PF_CB(process_roomThermostatName));
-            register_telegram_type(0x0BB5 + i, "Roomsettings", true, MAKE_PF_CB(process_roomThermostatMode));
-            register_telegram_type(0x1230 + i, "Roomparams", true, MAKE_PF_CB(process_roomThermostatParam));
-            register_telegram_type(0x1244 + i, "Roomdata", false, MAKE_PF_CB(process_roomThermostatData));
+            register_telegram_type(0x0BDD + i, "Room", false, MAKE_PF_CB(process_roomThermostat));             // broadcasted
+            register_telegram_type(0x0B3D + i, "Roomname", false, MAKE_PF_CB(process_roomThermostatName));     // fetch for active circuits
+            register_telegram_type(0x0BB5 + i, "Roomsettings", false, MAKE_PF_CB(process_roomThermostatMode)); // fetch for active circuits
+            register_telegram_type(0x1230 + i, "Roomparams", false, MAKE_PF_CB(process_roomThermostatParam));  // fetch for active circuits
+            register_telegram_type(0x1244 + i, "Roomdata", false, MAKE_PF_CB(process_roomThermostatData));     // broadcasted
         }
         // register_telegram_type(0xDB65, "Roomschedule", true, MAKE_PF_CB(process_roomSchedule));
         // 0x2040, broadcast 36 bytes:
@@ -84,6 +84,9 @@ std::shared_ptr<Connect::RoomCircuit> Connect::room_circuit(const uint8_t num, c
     room_circuits_.push_back(new_room);
     // register the device values
     register_device_values_room(new_room);
+    toggle_fetch(0x0B3D + num, true); // name
+    toggle_fetch(0x0BB5 + num, true); // mode
+    toggle_fetch(0x1230 + num, true); // unknown
 
     return new_room; // return back point to new HC object
 }
@@ -115,16 +118,13 @@ void Connect::process_roomThermostatName(std::shared_ptr<const Telegram> telegra
     if (rc == nullptr) {
         return;
     }
-    if (telegram->offset > 1 || telegram->message_length < 3) {
-        return;
+
+    for (uint8_t i = telegram->offset; i < telegram->message_length + telegram->offset && i < 100; i++) {
+        if ((i > 1) && (i % 2) == 0) {
+            rc->name_[(i - 2) / 2] = telegram->message_data[i];
+        }
     }
-    std::string s;
-    for (uint8_t i = 2 - telegram->offset; (i < telegram->message_length) && (telegram->message_data[i] != 0); i += 2) {
-        s += (char)telegram->message_data[i];
-    }
-    if (s.length()) {
-        has_update(rc->name_, s.c_str(), s.length() + 1);
-    }
+    rc->name_[50] = ' \0'; // make sure name is terminated
 }
 
 // settings 0-mode, 1-tempautotemp, 3 - manualtemp, 6,7 - ?
@@ -137,10 +137,20 @@ void Connect::process_roomThermostatMode(std::shared_ptr<const Telegram> telegra
     has_update(telegram, rc->mode_, 0);
 }
 
+// unknown telegrams, needs fetch
 void Connect::process_roomThermostatParam(std::shared_ptr<const Telegram> telegram) {
+    auto rc = room_circuit(telegram->type_id - 0x1230);
+    if (rc == nullptr) {
+        return;
+    }
 }
 
+// unknown broadcasted telegrams
 void Connect::process_roomThermostatData(std::shared_ptr<const Telegram> telegram) {
+    auto rc = room_circuit(telegram->type_id - 0x1244);
+    if (rc == nullptr) {
+        return;
+    }
 }
 
 // Settings:
@@ -175,17 +185,22 @@ bool Connect::set_seltemp(const char * value, const int8_t id) {
 
 bool Connect::set_name(const char * value, const int8_t id) {
     auto rc = room_circuit(id - DeviceValueTAG::TAG_HS1);
-    if (rc == nullptr || value == nullptr || strlen(value) > 12) {
+    if (rc == nullptr || value == nullptr || strlen(value) > 50) {
         return false;
     }
-    uint8_t      data[strlen(value) * 2];
-    uint8_t *    d = data;
-    const char * c = value;
-    while (*c != 0) {
-        *d++ = 0;
-        *d++ = *c++;
+    uint8_t len = strlen(value) * 2 + 2;
+    uint8_t data[len];
+    for (uint8_t i = 0; i < strlen(value) + 1; i++) { // include terminating '\0'
+        data[2 * i]     = 0;
+        data[2 * i + 1] = value[i];
     }
-    write_command(0x0B3D + rc->room(), 1, data, sizeof(data), 0x0B3D + rc->room());
+    uint8_t ofs = 0;
+    while (len > 0) {
+        uint8_t part = len > 25 ? 25 : len;
+        write_command(0x0B3D + rc->room(), ofs + 1, &data[ofs], part, 0);
+        ofs += part;
+        len -= part;
+    }
     return true;
 }
 

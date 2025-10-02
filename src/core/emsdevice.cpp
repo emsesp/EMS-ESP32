@@ -1896,7 +1896,12 @@ void EMSdevice::mqtt_ha_entity_config_create() {
                 create_device_config = false; // only create the main config once
                 count++;
             }
-#ifndef EMSESP_STANDALONE
+            // SRC thermostats mapped to connect/hs1/...
+            if (dv.tag >= DeviceValueTAG::TAG_HS1 && !strcmp(dv.short_name, FL_(roomtemp)[0])) {
+                Mqtt::publish_ha_climate_config(dv.tag, true, false, dv.min, dv.max);
+            }
+
+            #ifndef EMSESP_STANDALONE
             // always create minimum one config
             if (count && (heap_caps_get_free_size(MALLOC_CAP_8BIT) < 65 * 1024)) { // checks free Heap+PSRAM
                 break;

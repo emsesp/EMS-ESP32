@@ -528,8 +528,8 @@ void Mqtt::ha_status() {
         strcpy(uniq, "system_status");
     }
 
-    doc["uniq_id"] = uniq;
-    doc["obj_id"]  = uniq;
+    doc["uniq_id"]           = uniq;
+    doc["default_entity_id"] = uniq;
 
     doc["stat_t"]   = Mqtt::base() + "/status";
     doc["name"]     = "System status";
@@ -827,7 +827,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         snprintf(entity_with_tag, sizeof(entity_with_tag), "%s", entity);
     }
 
-    // build unique identifier also used as object_id which also becomes the Entity ID in HA
+    // build unique identifier also used as default_entity_id which also becomes the Entity ID in HA
     char uniq_id[80];
 
     // list of boiler entities that need conversion for 3.6 compatibility, add ww suffix
@@ -980,8 +980,8 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // build the full payload
     JsonDocument doc;
-    doc["uniq_id"] = uniq_id;
-    doc["obj_id"]  = uniq_id; // same as unique_id
+    doc["uniq_id"]           = uniq_id;
+    doc["default_entity_id"] = uniq_id; // same as unique_id
 
     char sample_val[30] = "0"; // sample, correct(!) entity value, used only to prevent warning/error in HA if real value is not published yet
 
@@ -1235,7 +1235,9 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
 }
 
 bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, const bool remove, const int16_t min, const uint32_t max) {
-    uint8_t hc_num = tag;
+    uint8_t      hc_num     = tag < DeviceValueTAG::TAG_HS1 ? tag : tag - DeviceValueTAG::TAG_HS1 + 1;
+    const char * devicename = tag < DeviceValueTAG::TAG_HS1 ? "thermostat" : "connect";
+    const char * tagname    = tag < DeviceValueTAG::TAG_HS1 ? "hc" : "hs";
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     char topic_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
@@ -1253,21 +1255,21 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
     char min_s[10];
     char max_s[10];
 
-    snprintf(topic, sizeof(topic), "climate/%s/thermostat_hc%d/config", Mqtt::basename().c_str(), hc_num);
+    snprintf(topic, sizeof(topic), "climate/%s/%s_%s%d/config", Mqtt::basename().c_str(), devicename, tagname, hc_num);
     if (remove) {
         return queue_remove_topic(topic); // publish empty payload with retain flag
     }
 
     if (Mqtt::is_nested()) {
         // nested format
-        snprintf(hc_mode_s, sizeof(hc_mode_s), "value_json.hc%d.mode", hc_num);
-        snprintf(hc_mode_cond, sizeof(hc_mode_cond), "value_json.hc%d is undefined or %s is undefined", hc_num, hc_mode_s);
-        snprintf(seltemp_s, sizeof(seltemp_s), "value_json.hc%d.seltemp", hc_num);
-        snprintf(seltemp_cond, sizeof(seltemp_cond), "value_json.hc%d is defined and %s is defined", hc_num, seltemp_s);
+        snprintf(hc_mode_s, sizeof(hc_mode_s), "value_json.%s%d.mode", tagname, hc_num);
+        snprintf(hc_mode_cond, sizeof(hc_mode_cond), "value_json.%s%d is undefined or %s is undefined", tagname, hc_num, hc_mode_s);
+        snprintf(seltemp_s, sizeof(seltemp_s), "value_json.%s%d.seltemp", tagname, hc_num);
+        snprintf(seltemp_cond, sizeof(seltemp_cond), "value_json.%s%d is defined and %s is defined", tagname, hc_num, seltemp_s);
 
         if (has_roomtemp) {
-            snprintf(currtemp_s, sizeof(currtemp_s), "value_json.hc%d.currtemp", hc_num);
-            snprintf(currtemp_cond, sizeof(currtemp_cond), "value_json.hc%d is defined and %s is defined", hc_num, currtemp_s);
+            snprintf(currtemp_s, sizeof(currtemp_s), "value_json.%s%d.currtemp", tagname, hc_num);
+            snprintf(currtemp_cond, sizeof(currtemp_cond), "value_json.%s%d is defined and %s is defined", tagname, hc_num, currtemp_s);
         }
         snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(EMSdevice::DeviceType::THERMOSTAT, DeviceValueTAG::TAG_NONE).c_str());
     } else {
@@ -1281,7 +1283,10 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
             snprintf(currtemp_s, sizeof(currtemp_s), "value_json.currtemp");
             snprintf(currtemp_cond, sizeof(currtemp_cond), "%s is defined", currtemp_s);
         }
-        snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(EMSdevice::DeviceType::THERMOSTAT, DeviceValueTAG::TAG_HC1 + hc_num - 1).c_str());
+        snprintf(topic_t,
+                 sizeof(topic_t),
+                 "~/%s",
+                 Mqtt::tag_to_topic(tag < DeviceValueTAG::TAG_HS1 ? EMSdevice::DeviceType::THERMOSTAT : EMSdevice::DeviceType::CONNECT, tag).c_str());
     }
 
     snprintf(mode_str_tpl,
@@ -1297,28 +1302,28 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
              hc_mode_s,
              Helpers::translated_word(FL_(off)));
 
-    snprintf(name_s, sizeof(name_s), "Hc%d", hc_num);
+    snprintf(name_s, sizeof(name_s), "%s%d", tag < DeviceValueTAG::TAG_HS1 ? "Hc" : "Hs", hc_num);
 
     if (Mqtt::entity_format() == entityFormat::MULTI_SHORT) {
-        snprintf(uniq_id_s, sizeof(uniq_id_s), "%s_thermostat_hc%d", Mqtt::basename().c_str(), hc_num); // add basename
+        snprintf(uniq_id_s, sizeof(uniq_id_s), "%s_%s%s%d", Mqtt::basename().c_str(), devicename, tagname, hc_num); // add basename
     } else {
-        snprintf(uniq_id_s, sizeof(uniq_id_s), "thermostat_hc%d", hc_num); // backward compatible with v3.4
+        snprintf(uniq_id_s, sizeof(uniq_id_s), "%s%d", devicename, hc_num); // backward compatible with v3.4
     }
 
-    snprintf(temp_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/seltemp", hc_num);
-    snprintf(mode_cmd_s, sizeof(mode_cmd_s), "~/thermostat/hc%d/mode", hc_num);
+    snprintf(temp_cmd_s, sizeof(temp_cmd_s), "~/%s/%s%d/seltemp", devicename, tagname, hc_num);
+    snprintf(mode_cmd_s, sizeof(mode_cmd_s), "~/%s/%s%d/mode", devicename, tagname, hc_num);
 
     JsonDocument doc;
 
-    doc["~"]             = Mqtt::base();
-    doc["uniq_id"]       = uniq_id_s;
-    doc["obj_id"]        = uniq_id_s; // same as uniq_id
-    doc["name"]          = name_s;
-    doc["mode_stat_t"]   = topic_t;
-    doc["mode_stat_tpl"] = mode_str_tpl;
-    doc["temp_cmd_t"]    = temp_cmd_s;
-    doc["temp_stat_t"]   = topic_t;
-    doc["temp_stat_tpl"] = (std::string) "{{" + seltemp_s + " if " + seltemp_cond + " else 0}}";
+    doc["~"]                 = Mqtt::base();
+    doc["uniq_id"]           = uniq_id_s;
+    doc["default_entity_id"] = uniq_id_s; // same as uniq_id
+    doc["name"]              = name_s;
+    doc["mode_stat_t"]       = topic_t;
+    doc["mode_stat_tpl"]     = mode_str_tpl;
+    doc["temp_cmd_t"]        = temp_cmd_s;
+    doc["temp_stat_t"]       = topic_t;
+    doc["temp_stat_tpl"]     = (std::string) "{{" + seltemp_s + " if " + seltemp_cond + " else 0}}";
 
     if (has_roomtemp) {
         doc["curr_temp_t"]   = topic_t;
@@ -1341,7 +1346,7 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
     modes.add("heat");
     modes.add("off");
 
-    add_ha_dev_section(doc.as<JsonObject>(), "thermostat", nullptr, nullptr, nullptr, false);                                       // add dev section
+    add_ha_dev_section(doc.as<JsonObject>(), devicename, nullptr, nullptr, nullptr, false);                                         // add dev section
     add_ha_avail_section(doc.as<JsonObject>(), topic_t, false, seltemp_cond, has_roomtemp ? currtemp_cond : nullptr, hc_mode_cond); // add availability section
 
     return queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag

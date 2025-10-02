@@ -37,7 +37,7 @@ class Connect : public EMSdevice {
         int8_t  humidity_;
         uint8_t seltemp_;
         uint8_t mode_;
-        char    name_[25];
+        char    name_[51];
         int16_t dewtemp_;
 
         uint8_t room() {
