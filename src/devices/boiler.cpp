@@ -2419,7 +2419,8 @@ bool Boiler::set_flow_temp(const char * value, const int8_t id) {
     // no verify if value is unchanged, put it  to end of tx-queue, no priority
     // see https://github.com/emsesp/EMS-ESP32/issues/654, https://github.com/emsesp/EMS-ESP32/issues/954
     if (v == selFlowTemp_) {
-        EMSESP::txservice_.add(Telegram::Operation::TX_WRITE, device_id(), EMS_TYPE_UBASetPoints, 0, (uint8_t *)&v, 1, 0, false);
+        uint8_t v1 = v;
+        EMSESP::txservice_.add(Telegram::Operation::TX_WRITE, device_id(), EMS_TYPE_UBASetPoints, 0, &v1, 1, 0, false);
         return true;
     }
 

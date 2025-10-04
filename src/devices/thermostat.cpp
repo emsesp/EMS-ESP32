@@ -2010,7 +2010,7 @@ bool Thermostat::set_calinttemp(const char * value, const int8_t id) {
         write_command(0xB0, 0, t, 0xB0);
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC30) {
         write_command(EMS_TYPE_RC30Settings, 1, t, EMS_TYPE_RC30Settings);
-    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100H) {
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100H || model() == EMSdevice::EMS_DEVICE_FLAG_CR11) {
         write_command(0x273, 0, t, 0x273);
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
         write_command(0x241, 7, t, 0x241);
