@@ -83,7 +83,7 @@ class System {
     static bool command_restart(const char * value, const int8_t id);
     static bool command_format(const char * value, const int8_t id);
     static bool command_watch(const char * value, const int8_t id);
-    static bool command_message(const char * value, const int8_t id);
+    static bool command_message(const char * value, const int8_t id, JsonObject output);
     static bool command_info(const char * value, const int8_t id, JsonObject output);
     static bool command_response(const char * value, const int8_t id, JsonObject output);
     static bool command_service(const char * cmd, const char * value);

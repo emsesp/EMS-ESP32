@@ -206,14 +206,22 @@ bool System::command_syslog_level(const char * value, const int8_t id) {
 */
 
 // send message - to system log and MQTT
-bool System::command_message(const char * value, const int8_t id) {
+bool System::command_message(const char * value, const int8_t id, JsonObject output) {
     if (value == nullptr || value[0] == '\0') {
+        LOG_WARNING("Message is empty");
         return false; // must have a string value
     }
 
-    auto computed_value = compute(value);
-    LOG_INFO("Message: %s", computed_value.c_str());
-    Mqtt::queue_publish(F_(message), computed_value);
+    auto computed_value = compute(value); // process the message via Shunting Yard
+
+    if (computed_value.length() == 0) {
+        LOG_WARNING("Message result is empty");
+        return false;
+    }
+
+    LOG_INFO("Message: %s", computed_value.c_str());  // send to log
+    Mqtt::queue_publish(F_(message), computed_value); // send to MQTT if enabled
+    output["api_data"] = computed_value;              // send to API
 
     return true;
 }
@@ -1521,7 +1529,7 @@ bool System::get_value_info(JsonObject output, const char * cmd) {
                         return true;
                     }
                 }
-            } // else skipt, but we don't have value pairs in system root
+            } // else skip, but we don't have value pairs in system root
         }
     }
     return false;
@@ -1569,11 +1577,11 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["sdk"]             = ESP.getSdkVersion();
     node["freeMem"]         = getHeapMem();
     node["maxAlloc"]        = getMaxAllocMem();
-    node["freeCaps"]        = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024; // includes heap and psram
-    node["usedApp"]         = EMSESP::system_.appUsed();                       // kilobytes
-    node["freeApp"]         = EMSESP::system_.appFree();                       // kilobytes
-    node["partition"]       = esp_ota_get_running_partition()->label;          // active partition
-    node["flash_chip_size"] = ESP.getFlashChipSize() / 1024;                   // kilobytes
+    node["freeCaps"]        = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024;      // includes heap and psram
+    node["usedApp"]         = EMSESP::system_.appUsed();                            // kilobytes
+    node["freeApp"]         = EMSESP::system_.appFree();                            // kilobytes
+    node["partition"]       = (const char *)esp_ota_get_running_partition()->label; // active partition
+    node["flash_chip_size"] = ESP.getFlashChipSize() / 1024;                        // kilobytes
 #endif
     node["resetReason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 #ifndef EMSESP_STANDALONE
@@ -1842,6 +1850,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
             }
         }
     }
+
     // Also show EMSESP devices if we have any
     if (EMSESP::temperaturesensor_.count_entities()) {
         JsonObject obj  = devices.add<JsonObject>();
