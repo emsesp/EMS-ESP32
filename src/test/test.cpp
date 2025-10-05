@@ -379,7 +379,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         request.method(HTTP_GET);
         request.url("/api/custom");
         EMSESP::webAPIService.webAPIService(&request);
-
 #endif
         ok = true;
     }
@@ -1090,7 +1089,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // request.url("/api/custom/test_seltemp/val");
         // EMSESP::webAPIService.webAPIService(&request);
 
-        // // set a custom value
+        // set a custom value
         // request.method(HTTP_POST);
         // char data0[] = "{\"value\":\"99\"}";
         // deserializeJson(doc, data0);
@@ -1098,11 +1097,33 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // request.url("/api/custom/test_seltemp");
         // EMSESP::webAPIService.webAPIService(&request, json);
 
+        // Note, works in test not in production - causes a crash!
+        // request.method(HTTP_POST);
+        // char data1[] = "{\"value\":\"system/settings/locale\"}";
+        // deserializeJson(doc, data1);
+        // JsonVariant json = doc.as<JsonVariant>();
+        // request.url("/api/system/message");
+        // EMSESP::webAPIService.webAPIService(&request, json);
+
+        request.method(HTTP_POST);
+        char data1[] = "{\"value\":\"custom/test_custom\"}";
+        deserializeJson(doc, data1);
+        JsonVariant json = doc.as<JsonVariant>();
+        request.url("/api/system/message");
+        EMSESP::webAPIService.webAPIService(&request, json);
+
         request.method(HTTP_POST);
         request.url("/api/system/message");
 
-        // output: hello world
-        EMSESP::webAPIService.webAPIService(&request, "'hello world'");
+        // output: hello world!
+        EMSESP::webAPIService.webAPIService(&request, "'hello world!'");
+        EMSESP::webAPIService.webAPIService(&request, "\"hello world!\"");
+
+        // output: helloworld
+        EMSESP::webAPIService.webAPIService(&request, "hello world");
+
+        // output: en
+        EMSESP::webAPIService.webAPIService(&request, "system/settings/locale");
 
         // output: locale is en
         EMSESP::webAPIService.webAPIService(&request, "'locale is 'system/settings/locale");
