@@ -353,6 +353,7 @@ bool WebSchedulerService::command(const char * name, const std::string & command
             std::string value  = doc["value"] | data.c_str(); // extract value if its in the command, or take the data
             std::string method = doc["method"] | "GET";       // default GET
 
+            commands(value, false);
             // if there is data, force a POST
             int httpResult = 0;
             if (value.length() || method == "post") { // we have all lowercase
@@ -546,40 +547,37 @@ void WebSchedulerService::scheduler_task(void * pvParameters) {
 // hard coded tests
 #if defined(EMSESP_TEST)
 void WebSchedulerService::load_test_data() {
-    static bool already_added = false;
-    if (!already_added) {
-        update([&](WebScheduler & webScheduler) {
-            // webScheduler.scheduleItems.clear();
-            // test 1
-            auto si        = ScheduleItem();
-            si.active      = true;
-            si.flags       = 1;
-            si.time        = "12:00";
-            si.cmd         = "system/fetch";
-            si.value       = "10";
-            si.name        = "test_scheduler";
-            si.elapsed_min = 0;
-            si.retry_cnt   = 0xFF; // no startup retries
+    update([&](WebScheduler & webScheduler) {
+        webScheduler.scheduleItems.clear(); // delete all existing schedules
 
-            webScheduler.scheduleItems.push_back(si);
+        // test 1
+        auto si        = ScheduleItem();
+        si.active      = true;
+        si.flags       = 1;
+        si.time        = "12:00";
+        si.cmd         = "system/fetch";
+        si.value       = "10";
+        si.name        = "test_scheduler";
+        si.elapsed_min = 0;
+        si.retry_cnt   = 0xFF; // no startup retries
 
-            // test 2
-            si             = ScheduleItem();
-            si.active      = false;
-            si.flags       = 1;
-            si.time        = "13:00";
-            si.cmd         = "system/message";
-            si.value       = "20";
-            si.name        = ""; // to make sure its excluded from Dashboard
-            si.elapsed_min = 0;
-            si.retry_cnt   = 0xFF; // no startup retries
+        webScheduler.scheduleItems.push_back(si);
 
-            webScheduler.scheduleItems.push_back(si);
-            already_added = true;
+        // test 2
+        si             = ScheduleItem();
+        si.active      = false;
+        si.flags       = 1;
+        si.time        = "13:00";
+        si.cmd         = "system/message";
+        si.value       = "20";
+        si.name        = ""; // to make sure its excluded from Dashboard
+        si.elapsed_min = 0;
+        si.retry_cnt   = 0xFF; // no startup retries
 
-            return StateUpdateResult::CHANGED; // persist the changes
-        });
-    }
+        webScheduler.scheduleItems.push_back(si);
+
+        return StateUpdateResult::CHANGED; // persist the changes
+    });
 }
 #endif
 
