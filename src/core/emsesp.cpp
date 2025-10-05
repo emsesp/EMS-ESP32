@@ -29,7 +29,7 @@ static_assert(uuid::console::thread_safe, "uuid-console must be thread-safe");
 namespace emsesp {
 
 // Static member definitions
-std::deque<std::unique_ptr<EMSdevice>> EMSESP::emsdevices;
+std::deque<std::unique_ptr<EMSdevice>> EMSESP::emsdevices{};
 std::vector<EMSESP::Device_record>     EMSESP::device_library_;
 uuid::log::Logger                      EMSESP::logger_{F_(emsesp), uuid::log::Facility::KERN};
 uint16_t                               EMSESP::watch_id_         = WATCH_ID_NONE;
@@ -1615,7 +1615,7 @@ void EMSESP::start() {
     serial_console_.begin(SERIAL_CONSOLE_BAUD_RATE);
 
     // always start a serial console if we're running standalone, except if we're running unit tests
-#if defined(EMSESP_STANDALONE) || defined(EMSESP_DEBUG)
+#if defined(EMSESP_STANDALONE) || defined(EMSESP_TEST) || defined(EMSESP_DEBUG)
 #ifndef EMSESP_UNITY
     start_serial_console();
 #endif
@@ -1723,7 +1723,11 @@ void EMSESP::start() {
 
 void EMSESP::start_serial_console() {
     shell_ = std::make_shared<EMSESPConsole>(*this, serial_console_, true);
+#if defined(EMSESP_STANDALONE)
+    shell_->maximum_log_messages(500);
+#else
     shell_->maximum_log_messages(100);
+#endif
     shell_->start();
 #if defined(EMSESP_DEBUG)
     shell_->log_level(uuid::log::Level::DEBUG);
