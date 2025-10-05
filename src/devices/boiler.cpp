@@ -1208,8 +1208,13 @@ void Boiler::check_active() {
     static uint32_t lastSendHeatingOff = 0;
     if (forceHeatingOff_ == EMS_VALUE_BOOL_ON && (uuid::get_uptime_sec() - lastSendHeatingOff) >= 60) {
         lastSendHeatingOff = uuid::get_uptime_sec();
-        uint8_t data[]     = {0, 0, 0, 0};
-        write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
+        if (has_telegram_id(0xE4)) {
+            uint8_t data[] = {1, 0, 0, 1, 1};
+            write_command(EMS_TYPE_UBASetPoints2, 0, data, sizeof(data), 0);
+        } else {
+            uint8_t data[] = {0, 0, 0, 0};
+            write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
+        }
     }
 
     // calculate energy for boiler 0x08 from stored modulation an time in units of 0.01 Wh
@@ -1841,8 +1846,13 @@ void Boiler::process_UBASetPoints(std::shared_ptr<const Telegram> telegram) {
 
     // overwrite other settings on receive?
     if (forceHeatingOff_ == EMS_VALUE_BOOL_ON && telegram->dest == 0x08 && (setFlowTemp_ + setBurnPow_ + wwSetBurnPow_) != 0) {
-        uint8_t data[] = {0, 0, 0, 0};
-        write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
+        if (has_telegram_id(0xE4)) {
+            uint8_t data[] = {1, 0, 0, 1, 1};
+            write_command(EMS_TYPE_UBASetPoints2, 0, data, sizeof(data), 0);
+        } else {
+            uint8_t data[] = {0, 0, 0, 0};
+            write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
+        }
     }
 }
 
@@ -2420,12 +2430,16 @@ bool Boiler::set_flow_temp(const char * value, const int8_t id) {
     // see https://github.com/emsesp/EMS-ESP32/issues/654, https://github.com/emsesp/EMS-ESP32/issues/954
     if (v == selFlowTemp_) {
         uint8_t v1 = v;
-        EMSESP::txservice_.add(Telegram::Operation::TX_WRITE, device_id(), EMS_TYPE_UBASetPoints, 0, &v1, 1, 0, false);
+        if (has_telegram_id(0xE4)) {
+            EMSESP::txservice_.add(Telegram::Operation::TX_WRITE, device_id(), EMS_TYPE_UBASetPoints2, 1, &v1, 1, 0, false);
+        } else {
+            EMSESP::txservice_.add(Telegram::Operation::TX_WRITE, device_id(), EMS_TYPE_UBASetPoints, 0, &v1, 1, 0, false);
+        }
         return true;
     }
 
     if (has_telegram_id(0xE4)) {
-        write_command(EMS_TYPE_UBASetPoints, 0, v, 0xE4);
+        write_command(EMS_TYPE_UBASetPoints2, 1, v, 0xE4);
     } else {
         write_command(EMS_TYPE_UBASetPoints, 0, v, 0x18);
     }
@@ -2439,8 +2453,11 @@ bool Boiler::set_burn_power(const char * value, const int8_t id) {
         return false;
     }
 
-    write_command(EMS_TYPE_UBASetPoints, 1, v, EMS_TYPE_UBASetPoints);
-
+    if (has_telegram_id(0xE4)) {
+        write_command(EMS_TYPE_UBASetPoints2, 2, v);
+    } else {
+        write_command(EMS_TYPE_UBASetPoints, 1, v);
+    }
     return true;
 }
 
@@ -3418,11 +3435,16 @@ bool Boiler::set_forceHeatingOff(const char * value, const int8_t id) {
     if (Helpers::value2bool(value, v)) {
         has_update(forceHeatingOff_, v);
         if (!v && Helpers::hasValue(heatingTemp_)) {
-            uint8_t data[] = {heatingTemp_,
-                              (Helpers::hasValue(burnMaxPower_) ? burnMaxPower_ : (uint8_t)100),
-                              (Helpers::hasValue(pumpModMax_) ? pumpModMax_ : (uint8_t)0),
-                              0};
-            write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
+            if (has_telegram_id(0xE4)) {
+                uint8_t data[] = {1, heatingTemp_, (Helpers::hasValue(burnMaxPower_) ? burnMaxPower_ : (uint8_t)100), 1, 1};
+                write_command(EMS_TYPE_UBASetPoints2, 0, data, sizeof(data), 0);
+            } else {
+                uint8_t data[] = {heatingTemp_,
+                                  (Helpers::hasValue(burnMaxPower_) ? burnMaxPower_ : (uint8_t)100),
+                                  (Helpers::hasValue(pumpModMax_) ? pumpModMax_ : (uint8_t)0),
+                                  0};
+                write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
+            }
         }
         return true;
     }
