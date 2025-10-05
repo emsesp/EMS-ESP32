@@ -55,6 +55,8 @@ using uuid::console::Shell;
 
 #define EMSESP_CUSTOMSUPPORT_FILE "/config/customSupport.json"
 
+#define RGB_LED_BRIGHTNESS 20
+
 namespace emsesp {
 
 enum PHY_type : uint8_t { PHY_TYPE_NONE = 0, PHY_TYPE_LAN8720, PHY_TYPE_TLK110 };

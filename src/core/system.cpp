@@ -840,9 +840,9 @@ void System::system_check() {
                 // everything is healthy, show LED permanently on or off depending on setting
                 if (led_gpio_) {
 #if ESP_ARDUINO_VERSION_MAJOR < 3
-                    led_type_ ? neopixelWrite(led_gpio_, 0, hide_led_ ? 0 : 128, 0) : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
+                    led_type_ ? neopixelWrite(led_gpio_, 0, hide_led_ ? 0 : RGB_LED_BRIGHTNESS, 0) : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
 #else
-                    led_type_ ? rgbLedWrite(led_gpio_, 0, hide_led_ ? 0 : 128, 0) : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
+                    led_type_ ? rgbLedWrite(led_gpio_, 0, hide_led_ ? 0 : RGB_LED_BRIGHTNESS, 0) : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
 #endif
                 }
             } else {
@@ -922,36 +922,35 @@ void System::led_monitor() {
             //  1 flash is the EMS bus is not connected
             //  2 flashes if the network (wifi or ethernet) is not connected
             //  3 flashes is both the bus and the network are not connected. Then you know you're truly f*cked.
-
             if (led_type_) {
                 if (led_flash_step_ == 3) {
                     if ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
 #if ESP_ARDUINO_VERSION_MAJOR < 3
-                        neopixelWrite(led_gpio_, 128, 0, 0); // red
+                        neopixelWrite(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
 #else
-                        rgbLedWrite(led_gpio_, 128, 0, 0); // red
+                        rgbLedWrite(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
 #endif
                     } else if ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS) {
 #if ESP_ARDUINO_VERSION_MAJOR < 3
-                        neopixelWrite(led_gpio_, 0, 0, 128); // blue
+                        neopixelWrite(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
 #else
-                        rgbLedWrite(led_gpio_, 0, 0, 128); // blue
+                        rgbLedWrite(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
 #endif
                     }
                 }
                 if (led_flash_step_ == 5 && (healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
 #if ESP_ARDUINO_VERSION_MAJOR < 3
-                    neopixelWrite(led_gpio_, 128, 0, 0); // red
+                    neopixelWrite(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
 #else
-                    rgbLedWrite(led_gpio_, 128, 0, 0); // red
+                    rgbLedWrite(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
 #endif
                 }
                 if ((led_flash_step_ == 7) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)
                     && ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS)) {
 #if ESP_ARDUINO_VERSION_MAJOR < 3
-                    neopixelWrite(led_gpio_, 0, 0, 128); // blue
+                    neopixelWrite(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
 #else
-                    rgbLedWrite(led_gpio_, 0, 0, 128); // blue
+                    rgbLedWrite(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
 #endif
                 }
             } else {
