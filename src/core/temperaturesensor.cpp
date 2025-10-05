@@ -619,6 +619,8 @@ bool TemperatureSensor::Sensor::apply_customization() {
 // hard coded tests
 #if defined(EMSESP_TEST)
 void TemperatureSensor::load_test_data() {
+    sensors_.clear(); // delete all existing sensors
+
     // add 2 temperature sensors
     // Sensor ID: 01_0203_0405_0607
     uint8_t addr[ADDR_LEN] = {1, 2, 3, 4, 5, 6, 7, 8};
