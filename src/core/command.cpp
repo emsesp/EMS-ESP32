@@ -292,6 +292,10 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
 
 // check if command string contains an attribute and returns it
 const char * Command::get_attribute(const char * cmd) {
+    if (cmd == nullptr) {
+        return nullptr;
+    }
+
     char * breakp = (char *)strchr(cmd, '/');
     if (breakp) {
         *breakp = '\0';
@@ -318,7 +322,7 @@ bool Command::get_attribute(JsonObject output, const char * cmd, const char * at
 
     // attribute isn't found
     // it could be a value command, but the value doesn't exist?
-    if (strcmp(attribute, "value") == 0) {
+    if (strncmp(attribute, "value", 5) == 0) {
         LOG_DEBUG("%s has no value set", cmd);
         return false; // fail
     }
@@ -326,6 +330,7 @@ bool Command::get_attribute(JsonObject output, const char * cmd, const char * at
     char error[100];
     snprintf(error, sizeof(error), "no attribute '%s' in %s", attribute, cmd);
     output["message"] = error;
+
     return false; // fail
 }
 
