@@ -223,7 +223,7 @@ bool WebCustomEntityService::command_setvalue(const char * value, const int8_t i
 
 // output of a single value
 // if add_uom is true it will add the UOM string to the value
-void WebCustomEntityService::render_value(JsonObject output, CustomEntityItem & entity, const bool useVal, const bool web, const bool add_uom) {
+void WebCustomEntityService::render_value(JsonObject output, CustomEntityItem const & entity, const bool useVal, const bool web, const bool add_uom) {
     char        payload[20];
     std::string name = useVal ? "value" : entity.name;
     switch (entity.value_type) {
@@ -292,6 +292,10 @@ void WebCustomEntityService::show_values(JsonObject output) {
 
 // process json output for info/commands and value_info
 bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd) {
+    if (cmd == nullptr || strlen(cmd) == 0) {
+        return false;
+    }
+
     // if no custom entries, return empty json
     // even if we're looking for a specific entity
     // https://github.com/emsesp/EMS-ESP32/issues/1297
@@ -321,7 +325,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
 
     // specific value info
     const char * attribute_s = Command::get_attribute(cmd);
-    for (auto & entity : *customEntityItems_) {
+    for (auto const & entity : *customEntityItems_) {
         if (Helpers::toLower(entity.name) == cmd) {
             get_value_json(output, entity);
             return Command::get_attribute(output, cmd, attribute_s);
@@ -331,7 +335,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
 }
 
 // build the json for specific entity
-void WebCustomEntityService::get_value_json(JsonObject output, CustomEntityItem & entity) {
+void WebCustomEntityService::get_value_json(JsonObject output, CustomEntityItem const & entity) {
     output["name"]      = entity.name;
     output["fullname"]  = entity.name;
     output["storage"]   = entity.ram ? "ram" : "ems";
@@ -689,7 +693,8 @@ bool WebCustomEntityService::get_value(std::shared_ptr<const Telegram> telegram)
 #ifdef EMSESP_TEST
 void WebCustomEntityService::load_test_data() {
     update([&](WebCustomEntity & webCustomEntity) {
-        webCustomEntity.customEntityItems.clear();
+        webCustomEntity.customEntityItems.clear(); // delete all existing entities
+
         auto entityItem = CustomEntityItem();
 
         // test 1
