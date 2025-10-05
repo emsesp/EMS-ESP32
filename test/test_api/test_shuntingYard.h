@@ -99,6 +99,14 @@ void shuntingYard_test23() {
     run_shuntingYard_test("9", "custom/test_ram");
 }
 
+void shuntingYard_test24() {
+    run_shuntingYard_test("hello world!", "\"hello world!\"");
+}
+
+void shuntingYard_test25() {
+    run_shuntingYard_test("hello world!", "'hello world!'");
+}
+
 void run_shuntingYard_tests() {
     RUN_TEST(shuntingYard_test1);
     RUN_TEST(shuntingYard_test2);
@@ -123,4 +131,6 @@ void run_shuntingYard_tests() {
     RUN_TEST(shuntingYard_test21);
     RUN_TEST(shuntingYard_test22);
     RUN_TEST(shuntingYard_test23);
+    RUN_TEST(shuntingYard_test24);
+    RUN_TEST(shuntingYard_test25);
 }
