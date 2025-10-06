@@ -549,7 +549,7 @@ class EMSdevice {
     std::vector<uint16_t> handlers_ignored_;
 
 #if defined(EMSESP_STANDALONE) || defined(EMSESP_TEST)
-  public: // so we can call it from WebCustomizationService::test() and EMSESP::dump_all_entities()
+  public: // so we can call it from WebCustomizationService::load_test_data() and EMSESP::dump_all_entities()
 #endif
     std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
     std::vector<DeviceValue>      devicevalues_;       // all the device values

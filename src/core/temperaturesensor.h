@@ -113,7 +113,7 @@ class TemperatureSensor {
     bool update(const std::string & id, const std::string & name, int16_t offset);
 
 #if defined(EMSESP_TEST)
-    void test();
+    void load_test_data();
 #endif
 
   private:

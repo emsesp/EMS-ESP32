@@ -125,12 +125,12 @@ void Mqtt::resubscribe() {
 
 // Main MQTT loop - sends out top item on publish queue
 void Mqtt::loop() {
-    queuecount_ = mqttClient_->queueSize();
-
     // exit if MQTT is not enabled or if there is no network connection
     if (!connected()) {
         return;
     }
+
+    queuecount_ = mqttClient_->queueSize();
 
     uint32_t currentMillis = uuid::get_uptime();
 

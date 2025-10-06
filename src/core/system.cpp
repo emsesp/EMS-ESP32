@@ -19,6 +19,8 @@
 #include "system.h"
 #include "emsesp.h" // for send_raw_telegram() command
 
+#include "shuntingYard.h"
+
 #ifndef EMSESP_STANDALONE
 #include "esp_ota_ops.h"
 #endif
@@ -47,8 +49,6 @@
 #endif
 #include <esp_mac.h>
 #endif
-
-#include <HTTPClient.h>
 
 #ifndef EMSESP_STANDALONE
 #include "esp_efuse.h"
@@ -205,14 +205,23 @@ bool System::command_syslog_level(const char * value, const int8_t id) {
 }
 */
 
-// send message - to log and MQTT
-bool System::command_message(const char * value, const int8_t id) {
+// send message - to system log and MQTT
+bool System::command_message(const char * value, const int8_t id, JsonObject output) {
     if (value == nullptr || value[0] == '\0') {
+        LOG_WARNING("Message is empty");
         return false; // must have a string value
     }
 
-    LOG_INFO("Message: %s", value);
-    Mqtt::queue_publish(F_(message), value);
+    auto computed_value = compute(value); // process the message via Shunting Yard
+
+    if (computed_value.length() == 0) {
+        LOG_WARNING("Message result is empty");
+        return false;
+    }
+
+    LOG_INFO("Message: %s", computed_value.c_str());  // send to log
+    Mqtt::queue_publish(F_(message), computed_value); // send to MQTT if enabled
+    output["api_data"] = computed_value;              // send to API
 
     return true;
 }
@@ -831,9 +840,9 @@ void System::system_check() {
                 // everything is healthy, show LED permanently on or off depending on setting
                 if (led_gpio_) {
 #if ESP_ARDUINO_VERSION_MAJOR < 3
-                    led_type_ ? neopixelWrite(led_gpio_, 0, hide_led_ ? 0 : 128, 0) : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
+                    led_type_ ? neopixelWrite(led_gpio_, 0, hide_led_ ? 0 : RGB_LED_BRIGHTNESS, 0) : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
 #else
-                    led_type_ ? rgbLedWrite(led_gpio_, 0, hide_led_ ? 0 : 128, 0) : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
+                    led_type_ ? rgbLedWrite(led_gpio_, 0, hide_led_ ? 0 : RGB_LED_BRIGHTNESS, 0) : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
 #endif
                 }
             } else {
@@ -913,36 +922,35 @@ void System::led_monitor() {
             //  1 flash is the EMS bus is not connected
             //  2 flashes if the network (wifi or ethernet) is not connected
             //  3 flashes is both the bus and the network are not connected. Then you know you're truly f*cked.
-
             if (led_type_) {
                 if (led_flash_step_ == 3) {
                     if ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
 #if ESP_ARDUINO_VERSION_MAJOR < 3
-                        neopixelWrite(led_gpio_, 128, 0, 0); // red
+                        neopixelWrite(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
 #else
-                        rgbLedWrite(led_gpio_, 128, 0, 0); // red
+                        rgbLedWrite(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
 #endif
                     } else if ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS) {
 #if ESP_ARDUINO_VERSION_MAJOR < 3
-                        neopixelWrite(led_gpio_, 0, 0, 128); // blue
+                        neopixelWrite(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
 #else
-                        rgbLedWrite(led_gpio_, 0, 0, 128); // blue
+                        rgbLedWrite(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
 #endif
                     }
                 }
                 if (led_flash_step_ == 5 && (healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
 #if ESP_ARDUINO_VERSION_MAJOR < 3
-                    neopixelWrite(led_gpio_, 128, 0, 0); // red
+                    neopixelWrite(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
 #else
-                    rgbLedWrite(led_gpio_, 128, 0, 0); // red
+                    rgbLedWrite(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
 #endif
                 }
                 if ((led_flash_step_ == 7) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)
                     && ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS)) {
 #if ESP_ARDUINO_VERSION_MAJOR < 3
-                    neopixelWrite(led_gpio_, 0, 0, 128); // blue
+                    neopixelWrite(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
 #else
-                    rgbLedWrite(led_gpio_, 0, 0, 128); // blue
+                    rgbLedWrite(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
 #endif
                 }
             } else {
@@ -1433,7 +1441,6 @@ bool System::command_service(const char * cmd, const char * value) {
         if (!strcmp(cmd, "fuse/mfg")) {
             ok = esp_efuse_write_reg(EFUSE_BLK3, 0, (uint32_t)n) == ESP_OK;
             ok ? LOG_INFO("fuse programed with value '%X': successful", n) : LOG_ERROR("fuse programed with value '%X': failed", n);
-
         }
         if (!strcmp(cmd, "fuse/mfgadd")) {
             uint8_t reg = 0;
@@ -1521,7 +1528,7 @@ bool System::get_value_info(JsonObject output, const char * cmd) {
                         return true;
                     }
                 }
-            } // else skipt, but we don't have value pairs in system root
+            } // else skip, but we don't have value pairs in system root
         }
     }
     return false;
@@ -1569,11 +1576,11 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["sdk"]             = ESP.getSdkVersion();
     node["freeMem"]         = getHeapMem();
     node["maxAlloc"]        = getMaxAllocMem();
-    node["freeCaps"]        = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024; // includes heap and psram
-    node["usedApp"]         = EMSESP::system_.appUsed();                       // kilobytes
-    node["freeApp"]         = EMSESP::system_.appFree();                       // kilobytes
-    node["partition"]       = esp_ota_get_running_partition()->label;          // active partition
-    node["flash_chip_size"] = ESP.getFlashChipSize() / 1024;                   // kilobytes
+    node["freeCaps"]        = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024;      // includes heap and psram
+    node["usedApp"]         = EMSESP::system_.appUsed();                            // kilobytes
+    node["freeApp"]         = EMSESP::system_.appFree();                            // kilobytes
+    node["partition"]       = (const char *)esp_ota_get_running_partition()->label; // active partition
+    node["flash_chip_size"] = ESP.getFlashChipSize() / 1024;                        // kilobytes
 #endif
     node["resetReason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 #ifndef EMSESP_STANDALONE
@@ -1842,6 +1849,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
             }
         }
     }
+
     // Also show EMSESP devices if we have any
     if (EMSESP::temperaturesensor_.count_entities()) {
         JsonObject obj  = devices.add<JsonObject>();

@@ -1534,7 +1534,7 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
             get_value_json(output, dv);
             // if we're filtering on an attribute, go find it
             // if we can't find it, maybe it exists but doesn't not have a value assigned yet
-            return Command::set_attribute(output, cmd_s, attribute_s);
+            return Command::get_attribute(output, cmd_s, attribute_s);
         }
     }
     return false; // not found, but don't return a message error yet

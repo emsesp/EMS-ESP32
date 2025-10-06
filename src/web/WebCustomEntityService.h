@@ -60,10 +60,10 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
     void publish(const bool force = false);
     bool command_setvalue(const char * value, const int8_t id, const char * name);
     bool get_value_info(JsonObject output, const char * cmd);
-    void get_value_json(JsonObject output, CustomEntityItem & entity);
+    void get_value_json(JsonObject output, CustomEntityItem const & entity);
     bool get_value(std::shared_ptr<const Telegram> telegram);
     void fetch();
-    void render_value(JsonObject output, CustomEntityItem & entity, const bool useVal = false, const bool web = false, const bool add_uom = false);
+    void render_value(JsonObject output, CustomEntityItem const & entity, const bool useVal = false, const bool web = false, const bool add_uom = false);
     void show_values(JsonObject output);
     void generate_value_web(JsonObject output, const bool is_dashboard = false);
 
@@ -73,7 +73,7 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
     }
 
 #if defined(EMSESP_TEST)
-    void test();
+    void load_test_data();
 #endif
 
   private:
