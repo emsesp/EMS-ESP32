@@ -322,7 +322,7 @@ bool Command::get_attribute(JsonObject output, const char * cmd, const char * at
 
     // attribute isn't found
     // it could be a value command, but the value doesn't exist?
-    if (strncmp(attribute, "value", 5) == 0) {
+    if (strcmp(attribute, "value") == 0) {
         LOG_DEBUG("%s has no value set", cmd);
         return false; // fail
     }
