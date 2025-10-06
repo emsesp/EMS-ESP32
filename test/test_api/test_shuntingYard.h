@@ -88,11 +88,11 @@ void shuntingYard_test20() {
 }
 
 void shuntingYard_test21() {
-    run_shuntingYard_test("1", "boiler/storagetemp2 == \"\"");
+    run_shuntingYard_test("", "boiler/storagetemp2 == \"\"");
 }
 
 void shuntingYard_test22() {
-    run_shuntingYard_test("1", "boiler/storagetemp2 == ''");
+    run_shuntingYard_test("", "boiler/storagetemp2 == ''");
 }
 
 void shuntingYard_test23() {

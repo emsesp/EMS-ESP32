@@ -1105,6 +1105,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // request.url("/api/system/message");
         // EMSESP::webAPIService.webAPIService(&request, json);
 
+        // output: 70.00
         request.method(HTTP_POST);
         char data1[] = "{\"value\":\"custom/test_custom\"}";
         deserializeJson(doc, data1);
@@ -1117,6 +1118,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         // output: hello world!
         EMSESP::webAPIService.webAPIService(&request, "'hello world!'");
+
+        // output: hello world!
         EMSESP::webAPIService.webAPIService(&request, "\"hello world!\"");
 
         // output: helloworld
@@ -1155,9 +1158,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // output: 40
         EMSESP::webAPIService.webAPIService(&request, "boiler/flowtempoffset/value");
 
-        // output: 53.8
-        EMSESP::webAPIService.webAPIService(&request, "boiler/storagetemp1/value");
-
         // output: -67.8
         EMSESP::webAPIService.webAPIService(&request, "(custom/test_seltemp - boiler/flowtempoffset) * 2.8 + 5");
 
@@ -1173,39 +1173,44 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // output: 53.8
         EMSESP::webAPIService.webAPIService(&request, "boiler/storagetemp1/value");
 
-        // check when entity has no value, should pass (storagetemp2 has no value set)
-        // output: 1 (true)
-        EMSESP::webAPIService.webAPIService(&request, "boiler/storagetemp2 == \"\"");
-
-        // check when entity has no value, should pass (storagetemp2 has no value set)
-        // output: 1 (true)
-        EMSESP::webAPIService.webAPIService(&request, "boiler/storagetemp2 == ''");
-
-        //
-        // these next tests should fail or give warnings or strange results, but not crash
-        //
+        // output: 53.8
+        EMSESP::webAPIService.webAPIService(&request, "boiler/storagetemp1");
 
         // Output is "comfort" == Comfort (because missing closing quote)
         EMSESP::webAPIService.webAPIService(&request, "'thermostat/hc1/modetype == 'Comfort'");
 
+        // output: 14
+        EMSESP::webAPIService.webAPIService(&request, "custom/test_seltemp");
+
+        //
+        // these next tests should fail or give warnings or strange results
+        //
+
+        // check when entity has no value, should pass (storagetemp2 has no value set)
+        // failed with no entity 'storagetemp' in boiler, Message result is empty
+        EMSESP::webAPIService.webAPIService(&request, "boiler/storagetemp2 == \"\"");
+
+        // check when entity has no value, should pass (storagetemp2 has no value set)
+        // failed with no entity 'storagetemp' in boiler, Message result is empty
+        EMSESP::webAPIService.webAPIService(&request, "boiler/storagetemp2 == ''");
+
+        // storagetemp2 has no value set
+        EMSESP::webAPIService.webAPIService(&request, "boiler/storagetemp2");
+
         // can't find entity, should fail with no entity 'storagetemp' in boiler
-        // output: ""
+        // output: "" Message result is empty
         EMSESP::webAPIService.webAPIService(&request, "boiler/storagetemp/value1");
 
         // can't find entity, should fail with no attribute 'value1' in storagetemp1
-        // output: ""
+        // output: "" Message result is empty
         EMSESP::webAPIService.webAPIService(&request, "boiler/storagetemp1/value1");
 
         // check when entity has no value, should pass (storagetemp2 has no value set)
-        // output: ""
+        // output: "" Message result is empty
         EMSESP::webAPIService.webAPIService(&request, "boiler/storagetemp2/value");
 
-        // can't set empty value!
+        // can't set empty value! Message result is empty
         EMSESP::webAPIService.webAPIService(&request, "/api/custom/test_seltemp/val");
-
-        // this should work
-        // output: 14
-        EMSESP::webAPIService.webAPIService(&request, "custom/test_seltemp");
 
         // test HTTP POST to call HA script
         // test_cmd = "{\"method\":\"POST\",\"url\":\"http://192.168.1.42:8123/api/services/script/test_notify2\", \"header\":{\"authorization\":\"Bearer "
