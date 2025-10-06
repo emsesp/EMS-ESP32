@@ -124,7 +124,7 @@ void Connect::process_roomThermostatName(std::shared_ptr<const Telegram> telegra
             rc->name_[(i - 2) / 2] = telegram->message_data[i];
         }
     }
-    rc->name_[50] = ' \0'; // make sure name is terminated
+    rc->name_[50] = '\0'; // make sure name is terminated
 }
 
 // settings 0-mode, 1-tempautotemp, 3 - manualtemp, 6,7 - ?
