@@ -21,9 +21,12 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - set set climate action cooling/heating in HA [#2583](https://github.com/emsesp/EMS-ESP32/issues/2583)
 - Internal sensors of E32V2_2
 - FW200 display options [#2610](https://github.com/emsesp/EMS-ESP32/discussions/2610)
-- CR11 mode settings OFF/MANUAL depends on selTemp [#2437](https://github.com/emsesp/EMS-ESP32/issues/3437)
+- CR11 mode settings OFF/MANUAL depends on selTemp [#2437](https://github.com/emsesp/EMS-ESP32/issues/2437)
 - Fuse settings for BBQKees boards
-- Analogsensors for pulse output [#2624](https://github.com/emsesp/EMS-ESP32/discussions/2624) and frequency input [#2631](https://github.com/emsesp/EMS-ESP32/discussions/2631)
+- Analogsensors for pulse output [#2624](https://github.com/emsesp/EMS-ESP32/discussions/2624)
+- Analogsensors frequency input [#2631](https://github.com/emsesp/EMS-ESP32/discussions/2631)
+- SRC plus thermostats [#2636](https://github.com/emsesp/EMS-ESP32/issues/2636)
+- Greenstar 2000 [#2645](https://github.com/emsesp/EMS-ESP32/issues/2645)
 
 ## Fixed
 
@@ -41,9 +44,11 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - fix missing long 10-second press of Button to perform a factory reset
 - fix wwMaxPower on Junkers ZBS14 [#2609](https://github.com/emsesp/EMS-ESP32/issues/2609)
 - ventilation bypass state from telegram 0x55C [#1197](https://github.com/emsesp/EMS-ESP32/issues/1197)
+- set selflowtemp for ems+ boilers [#2641](https://github.com/emsesp/EMS-ESP32/discussions/2641)
 
 ## Changed
 
 - show console log with ISO date/time [#2533](https://github.com/emsesp/EMS-ESP32/discussions/2533)
 - remove ESP32 CPU temperature
 - updated core libraries like AsyncTCP, AsyncWebServer and Modbus
+- remove command `scan deep`

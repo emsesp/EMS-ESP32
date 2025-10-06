@@ -25,6 +25,7 @@
 
 // Boilers - 0x08
 {  8, DeviceType::BOILER, "CS5800i, CS6800i, WLW176i, WLW186i", DeviceFlags::EMS_DEVICE_FLAG_CS6800},
+{ 11, DeviceType::BOILER, "Greenstar 2000", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 12, DeviceType::BOILER, "C1200W", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 16, DeviceType::BOILER, "CS5800iG", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 64, DeviceType::BOILER, "BK13/BK15, Smartline, GB1*2", DeviceFlags::EMS_DEVICE_FLAG_NONE},
