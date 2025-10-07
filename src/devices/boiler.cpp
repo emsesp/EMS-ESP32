@@ -3433,6 +3433,9 @@ bool Boiler::set_wwAltOpPrio(const char * value, const int8_t id) {
 bool Boiler::set_forceHeatingOff(const char * value, const int8_t id) {
     bool v;
     if (Helpers::value2bool(value, v)) {
+        if (v == (forceHeatingOff_ > 0)) { // no change, ignore
+            return true;
+        }
         has_update(forceHeatingOff_, v);
         if (!v && Helpers::hasValue(heatingTemp_)) {
             if (has_telegram_id(0xE4)) {
