@@ -66,6 +66,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0xE9, "UBAMonitorWWPlus", false, MAKE_PF_CB(process_UBAMonitorWWPlus));
         register_telegram_type(0xEA, "UBAParameterWWPlus", true, MAKE_PF_CB(process_UBAParameterWWPlus));
         register_telegram_type(0x28, "WeatherComp", true, MAKE_PF_CB(process_WeatherComp));
+        register_telegram_type(0x2E0, "UBASetPoints", false, MAKE_PF_CB(process_UBASetPoints2));
     }
 
     if (isHeatPump()) {
@@ -1837,22 +1838,31 @@ void Boiler::process_UBAOutdoorTemp(std::shared_ptr<const Telegram> telegram) {
 
 // UBASetPoint 0x1A
 void Boiler::process_UBASetPoints(std::shared_ptr<const Telegram> telegram) {
-    uint8_t setFlowTemp_  = 0;
-    uint8_t setBurnPow_   = 0;
-    uint8_t wwSetBurnPow_ = 0;
+    uint8_t setFlowTemp_ = 0;
+    uint8_t setBurnPow_  = 0;
+    uint8_t setPumpMod_  = 0;
     telegram->read_value(setFlowTemp_, 0);
     telegram->read_value(setBurnPow_, 1);
-    telegram->read_value(wwSetBurnPow_, 2);
+    telegram->read_value(setPumpMod_, 2);
 
-    // overwrite other settings on receive?
-    if (forceHeatingOff_ == EMS_VALUE_BOOL_ON && telegram->dest == 0x08 && (setFlowTemp_ + setBurnPow_ + wwSetBurnPow_) != 0) {
-        if (has_telegram_id(0xE4)) {
-            uint8_t data[] = {1, 0, 0, 1, 1};
-            write_command(EMS_TYPE_UBASetPoints2, 0, data, sizeof(data), 0);
-        } else {
-            uint8_t data[] = {0, 0, 0, 0};
-            write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
-        }
+    // forceHeatingOff overwrite to zero
+    if (forceHeatingOff_ == EMS_VALUE_BOOL_ON && telegram->dest == 0x08 && (setFlowTemp_ + setBurnPow_ + setPumpMod_) != 0) {
+        uint8_t data[] = {0, 0, 0, 0};
+        write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
+    }
+}
+
+// UBASetPoints ems+ 0x2E0
+void Boiler::process_UBASetPoints2(std::shared_ptr<const Telegram> telegram) {
+    uint8_t setFlowTemp_ = 0;
+    uint8_t setBurnPow_  = 0;
+    telegram->read_value(setFlowTemp_, 0);
+    telegram->read_value(setBurnPow_, 1);
+
+    // forceHeatingOff overwrite to zero
+    if (forceHeatingOff_ == EMS_VALUE_BOOL_ON && telegram->dest == 0x08 && (setFlowTemp_ + setBurnPow_) != 0) {
+        uint8_t data[] = {1, 0, 0, 1, 1};
+        write_command(EMS_TYPE_UBASetPoints2, 0, data, sizeof(data), 0);
     }
 }
 
@@ -3433,22 +3443,20 @@ bool Boiler::set_wwAltOpPrio(const char * value, const int8_t id) {
 bool Boiler::set_forceHeatingOff(const char * value, const int8_t id) {
     bool v;
     if (Helpers::value2bool(value, v)) {
-        if (v == (forceHeatingOff_ > 0)) { // no change, ignore
-            return true;
-        }
-        has_update(forceHeatingOff_, v);
-        if (!v && Helpers::hasValue(heatingTemp_)) {
+        // set only on change on->off
+        if (!v && forceHeatingOff_ && Helpers::hasValue(heatingTemp_)) {
             if (has_telegram_id(0xE4)) {
                 uint8_t data[] = {1, heatingTemp_, (Helpers::hasValue(burnMaxPower_) ? burnMaxPower_ : (uint8_t)100), 1, 1};
                 write_command(EMS_TYPE_UBASetPoints2, 0, data, sizeof(data), 0);
             } else {
                 uint8_t data[] = {heatingTemp_,
                                   (Helpers::hasValue(burnMaxPower_) ? burnMaxPower_ : (uint8_t)100),
-                                  (Helpers::hasValue(pumpModMax_) ? pumpModMax_ : (uint8_t)0),
+                                  (Helpers::hasValue(pumpModMax_) ? pumpModMax_ : (uint8_t)100),
                                   0};
                 write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
             }
         }
+        has_update(forceHeatingOff_, v);
         return true;
     }
     return false;
