@@ -23,6 +23,7 @@ namespace emsesp {
 
 uuid::log::Logger AnalogSensor::logger_{F_(analogsensor), uuid::log::Facility::DAEMON};
 
+#ifndef EMSESP_STANDALONE
 portMUX_TYPE  mux                     = portMUX_INITIALIZER_UNLOCKED;
 unsigned long AnalogSensor::edge[]    = {0, 0, 0};
 unsigned long AnalogSensor::edgecnt[] = {0, 0, 0};
@@ -45,6 +46,7 @@ void IRAM_ATTR AnalogSensor::freqIrq2() {
     edge[2] = micros();
     portEXIT_CRITICAL_ISR(&mux);
 }
+#endif
 
 void AnalogSensor::start(const bool factory_settings) {
     // if (factory_settings && EMSESP::nvs_.getString("boot").equals("E32V2_2") && EMSESP::nvs_.getString("hwrevision").equals("3.0")) {
@@ -228,6 +230,7 @@ void AnalogSensor::reload(bool get_nvs) {
             sensor.set_offset(0);
             sensor.set_value(0);
             publish_sensor(sensor);
+#ifndef EMSESP_STANDALONE
         } else if (sensor.type() >= AnalogType::FREQ_0 && sensor.type() <= AnalogType::FREQ_2) {
             LOG_DEBUG("Frequency on GPIO %02d", sensor.gpio());
             pinMode(sensor.gpio(), INPUT_PULLUP);
@@ -238,6 +241,7 @@ void AnalogSensor::reload(bool get_nvs) {
             attachInterrupt(sensor.gpio(), index == 0 ? freqIrq0 : index == 1 ? freqIrq1 : freqIrq2, FALLING);
             lastedge[index] = edge[index] = micros();
             edgecnt[index]                = 0;
+#endif
         } else if (sensor.type() == AnalogType::DIGITAL_IN) {
             LOG_DEBUG("Digital Read on GPIO %02d", sensor.gpio());
             pinMode(sensor.gpio(), INPUT_PULLUP);
@@ -369,6 +373,7 @@ void AnalogSensor::measure() {
                     changed_ = true;
                     publish_sensor(sensor);
                 }
+#ifndef EMSESP_STANDALONE
             } else if (sensor.type() >= AnalogType::FREQ_0 && sensor.type() <= AnalogType::FREQ_2) {
                 auto index  = sensor.type() - AnalogType::FREQ_0;
                 auto oldval = sensor.value();
@@ -386,6 +391,7 @@ void AnalogSensor::measure() {
                     changed_ = true;
                     publish_sensor(sensor);
                 }
+#endif
             }
         }
     }

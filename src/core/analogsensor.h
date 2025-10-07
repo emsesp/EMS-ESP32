@@ -195,12 +195,14 @@ class AnalogSensor {
     uint32_t sensorfails_ = 0;
     uint32_t sensorreads_ = 0;
 
+#ifndef EMSESP_STANDALONE
     static void IRAM_ATTR freqIrq0();
     static void IRAM_ATTR freqIrq1();
     static void IRAM_ATTR freqIrq2();
     static unsigned long  edge[3];
     static unsigned long  edgecnt[3];
     unsigned long         lastedge[3] = {0, 0, 0};
+#endif
 };
 
 } // namespace emsesp
