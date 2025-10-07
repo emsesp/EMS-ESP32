@@ -366,10 +366,11 @@ void WebCustomizationService::begin() {
 
 // hard coded tests
 #ifdef EMSESP_TEST
-void WebCustomizationService::test() {
+void WebCustomizationService::load_test_data() {
     update([&](WebCustomization & webCustomization) {
         // Temperature sensors
-        webCustomization.sensorCustomizations.clear();
+        webCustomization.sensorCustomizations.clear(); // delete all existing sensors
+
         auto sensor   = SensorCustomization();
         sensor.id     = "01_0203_0405_0607";
         sensor.name   = "test_tempsensor1";

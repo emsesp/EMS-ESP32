@@ -55,6 +55,8 @@ using uuid::console::Shell;
 
 #define EMSESP_CUSTOMSUPPORT_FILE "/config/customSupport.json"
 
+#define RGB_LED_BRIGHTNESS 20
+
 namespace emsesp {
 
 enum PHY_type : uint8_t { PHY_TYPE_NONE = 0, PHY_TYPE_LAN8720, PHY_TYPE_TLK110 };
@@ -83,7 +85,7 @@ class System {
     static bool command_restart(const char * value, const int8_t id);
     static bool command_format(const char * value, const int8_t id);
     static bool command_watch(const char * value, const int8_t id);
-    static bool command_message(const char * value, const int8_t id);
+    static bool command_message(const char * value, const int8_t id, JsonObject output);
     static bool command_info(const char * value, const int8_t id, JsonObject output);
     static bool command_response(const char * value, const int8_t id, JsonObject output);
     static bool command_service(const char * cmd, const char * value);

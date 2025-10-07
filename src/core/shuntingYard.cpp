@@ -17,37 +17,10 @@
 // copy from https://gist.github.com/t-mat/b9f681b7591cdae712f6
 // modified MDvP, 06.2024
 //
-#include <string>
-#include <vector>
-#include <deque>
-#include <math.h>
 
-class Token {
-  public:
-    enum class Type : uint8_t {
-        Unknown,
-        Number,
-        String,
-        Operator,
-        Compare,
-        Logic,
-        Unary,
-        LeftParen,
-        RightParen,
-    };
+#include "emsesp.h"
 
-    Token(Type type, const std::string & s, int8_t precedence = -1, bool rightAssociative = false)
-        : type{type}
-        , str(s)
-        , precedence{precedence}
-        , rightAssociative{rightAssociative} {
-    }
-
-    const Type        type;
-    const std::string str;
-    const int8_t      precedence;
-    const bool        rightAssociative;
-};
+#include "shuntingYard.h"
 
 // find tokens
 std::deque<Token> exprToTokens(const std::string & expr) {
@@ -362,7 +335,7 @@ bool isnum(const std::string & s) {
 
 
 // replace commands like "<device>/<hc>/<cmd>" with its value"
-std::string commands(std::string & expr, bool quotes = true) {
+std::string commands(std::string & expr, bool quotes) {
     auto expr_new = emsesp::Helpers::toLower(expr);
     for (uint8_t device = 0; device < emsesp::EMSdevice::DeviceType::UNKNOWN; device++) {
         std::string d = (std::string)emsesp::EMSdevice::device_type_2_device_name(device) + "/";
@@ -380,6 +353,7 @@ std::string commands(std::string & expr, bool quotes = true) {
             }
             expr_new.copy(cmd, l, f);
             cmd[l] = '\0';
+
             if (strstr(cmd, "/value") == nullptr) {
                 strlcat(cmd, "/value", sizeof(cmd) - 6);
             }
@@ -458,22 +432,20 @@ std::string calculate(const std::string & expr) {
     // commands(expr_new);
 
     const auto tokens = exprToTokens(expr_new);
+    // for debugging only
+    // for (const auto & t : tokens) {
+    //     emsesp::EMSESP::logger().debug("shunt token: %s(%d)", t.str.c_str(), t.type);
+    //     Serial.printf("shunt token: %s(%d)\n", t.str.c_str(), t.type);
+    //     Serial.println();
+    // }
     if (tokens.empty()) {
         return "";
     }
+
     auto queue = shuntingYard(tokens);
     if (queue.empty()) {
         return "";
     }
-
-    /*
-    // debug only print tokens
-    #ifdef EMSESP_STANDALONE
-    for (const auto & t : queue) {
-        emsesp::EMSESP::logger().debug("shunt token: %s(%d)", t.str.c_str(), t.type);
-    }
-    #endif
-    */
 
     std::vector<std::string> stack;
 

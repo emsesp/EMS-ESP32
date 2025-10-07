@@ -18,7 +18,8 @@
 
 #include "emsesp.h"
 #include "WebSchedulerService.h"
-#include <HTTPClient.h>
+
+#include "shuntingYard.h"
 
 namespace emsesp {
 
@@ -173,7 +174,7 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
     for (const ScheduleItem & scheduleItem : *scheduleItems_) {
         if (Helpers::toLower(scheduleItem.name) == cmd) {
             get_value_json(output, scheduleItem);
-            return Command::set_attribute(output, cmd, attribute_s);
+            return Command::get_attribute(output, cmd, attribute_s);
         }
     }
 
@@ -321,14 +322,14 @@ uint8_t WebSchedulerService::count_entities(bool cmd_only) {
     return count;
 }
 
-#include "shuntingYard.hpp"
+
 
 // execute scheduled command
 bool WebSchedulerService::command(const char * name, const std::string & command, const std::string & data) {
     std::string cmd = Helpers::toLower(command);
 
     // check http commands. e.g.
-    // tasmota(get): http://<tasmotsIP>/cm?cmnd=power%20ON
+    // tasmota(get): http://<tasmotaIP>/cm?cmnd=power%20ON
     // shelly(get): http://<shellyIP>/relais/0?turn=on
     // parse json
     JsonDocument doc;
@@ -351,6 +352,7 @@ bool WebSchedulerService::command(const char * name, const std::string & command
             }
             std::string value  = doc["value"] | data.c_str(); // extract value if its in the command, or take the data
             std::string method = doc["method"] | "GET";       // default GET
+
             commands(value, false);
             // if there is data, force a POST
             int httpResult = 0;
@@ -544,110 +546,38 @@ void WebSchedulerService::scheduler_task(void * pvParameters) {
 
 // hard coded tests
 #if defined(EMSESP_TEST)
-void WebSchedulerService::test() {
-    static bool already_added = false;
-    if (!already_added) {
-        update([&](WebScheduler & webScheduler) {
-            // webScheduler.scheduleItems.clear();
-            // test 1
-            auto si        = ScheduleItem();
-            si.active      = true;
-            si.flags       = 1;
-            si.time        = "12:00";
-            si.cmd         = "system/fetch";
-            si.value       = "10";
-            si.name        = "test_scheduler";
-            si.elapsed_min = 0;
-            si.retry_cnt   = 0xFF; // no startup retries
+void WebSchedulerService::load_test_data() {
+    update([&](WebScheduler & webScheduler) {
+        webScheduler.scheduleItems.clear(); // delete all existing schedules
 
-            webScheduler.scheduleItems.push_back(si);
+        // test 1
+        auto si        = ScheduleItem();
+        si.active      = true;
+        si.flags       = 1;
+        si.time        = "12:00";
+        si.cmd         = "system/fetch";
+        si.value       = "10";
+        si.name        = "test_scheduler";
+        si.elapsed_min = 0;
+        si.retry_cnt   = 0xFF; // no startup retries
 
-            // test 2
-            si             = ScheduleItem();
-            si.active      = false;
-            si.flags       = 1;
-            si.time        = "13:00";
-            si.cmd         = "system/message";
-            si.value       = "20";
-            si.name        = ""; // to make sure its excluded from Dashboard
-            si.elapsed_min = 0;
-            si.retry_cnt   = 0xFF; // no startup retries
+        webScheduler.scheduleItems.push_back(si);
 
-            webScheduler.scheduleItems.push_back(si);
-            already_added = true;
+        // test 2
+        si             = ScheduleItem();
+        si.active      = false;
+        si.flags       = 1;
+        si.time        = "13:00";
+        si.cmd         = "system/message";
+        si.value       = "20";
+        si.name        = ""; // to make sure its excluded from Dashboard
+        si.elapsed_min = 0;
+        si.retry_cnt   = 0xFF; // no startup retries
 
-            return StateUpdateResult::CHANGED; // persist the changes
-        });
-    }
+        webScheduler.scheduleItems.push_back(si);
 
-    // test shunting yard
-    std::string test_cmd = "system/message";
-    std::string test_value;
-
-    // should output 'locale is en'
-    test_value = "\"locale is \"system/settings/locale";
-    command("test", test_cmd.c_str(), compute(test_value).c_str());
-
-    // test with negative value
-    // should output 'rssi is -23'
-    test_value = "\"rssi is \"0+system/network/rssi";
-    command("test1", test_cmd.c_str(), compute(test_value).c_str());
-
-    // should output 'rssi is -23 dbm'
-    test_value = "\"rssi is \"(system/network/rssi)\" dBm\"";
-    command("test2", test_cmd.c_str(), compute(test_value).c_str());
-
-    test_value = "(custom/seltemp/value)";
-    command("test3", test_cmd.c_str(), compute(test_value).c_str());
-
-    test_value = "\"seltemp=\"(custom/seltemp/value)";
-    command("test4", test_cmd.c_str(), compute(test_value).c_str());
-
-    test_value = "(custom/seltemp)";
-    command("test5", test_cmd.c_str(), compute(test_value).c_str());
-
-    test_value = "boiler/flowtempoffset";
-    command("test7", test_cmd.c_str(), compute(test_value).c_str());
-
-    test_value = "(boiler/flowtempoffset/value)";
-    command("test8", test_cmd.c_str(), compute(test_value).c_str());
-
-    test_value = "(boiler/storagetemp1/value)";
-    command("test9", test_cmd.c_str(), compute(test_value).c_str());
-
-    // (14 - 40) * 2.8 + 5 = -67.8
-    test_value = "(custom/seltemp - boiler/flowtempoffset) * 2.8 + 5";
-    command("test10", test_cmd.c_str(), compute(test_value).c_str());
-
-    // test case conversion
-    test_value = "(thermostat/hc1/modetype == \"comfort\")";
-    command("test11a", test_cmd.c_str(), compute(test_value).c_str()); // should be 1 true
-    test_value = "(thermostat/hc1/modetype == \"Comfort\")";
-    command("test11b", test_cmd.c_str(), compute(test_value).c_str()); // should be 1 true
-    test_value = "(thermostat/hc1/modetype == \"unknown\")";
-    command("test11c", test_cmd.c_str(), compute(test_value).c_str()); // should be 0 false
-
-    // can't find entity, should fail
-    test_value = "(boiler/storagetemp/value1)";
-    command("test12", test_cmd.c_str(), compute(test_value).c_str());
-
-    // can't find attribute, should fail
-    test_value = "(boiler/storagetemp1/value1)";
-    command("test13", test_cmd.c_str(), compute(test_value).c_str());
-
-    // check when entity has no value, should pass
-    test_value = "(boiler/storagetemp2/value)";
-    command("test14", test_cmd.c_str(), compute(test_value).c_str());
-
-    // should pass
-    test_value = "(boiler/storagetemp1/value)";
-    command("test15", test_cmd.c_str(), compute(test_value).c_str());
-
-    // test HTTP POST to call HA script
-    // test_cmd = "{\"method\":\"POST\",\"url\":\"http://192.168.1.42:8123/api/services/script/test_notify2\", \"header\":{\"authorization\":\"Bearer "
-    //            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhMmNlYWI5NDgzMmI0ODE2YWQ2NzU4MjkzZDE2YWMxZSIsImlhdCI6MTcyMTM5MTI0NCwiZXhwIjoyMDM2NzUxMjQ0fQ."
-    //            "S5sago1tEI6lNhrDCO0dM_WsVQHkD_laAjcks8tWAqo\"}}";
-    // command("test99", test_cmd.c_str(), "");
+        return StateUpdateResult::CHANGED; // persist the changes
+    });
 }
 #endif
 
