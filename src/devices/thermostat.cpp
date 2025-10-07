@@ -2006,12 +2006,12 @@ bool Thermostat::set_calinttemp(const char * value, const int8_t id) {
     auto t = (int8_t)(ct * 10);
     LOG_DEBUG("Calibrating internal temperature to %d.%d C", t / 10, t < 0 ? -t % 10 : t % 10);
 
-    if (model() == EMSdevice::EMS_DEVICE_FLAG_RC10) {
+    if (device_id() >= 0x38 && device_id() <= 0x3F) { // remote thermostats RC100H, CR10, ...
+        write_command(0x273 + device_id() - 0x38, 0, t, 0x273 + device_id() - 0x38);
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC10) {
         write_command(0xB0, 0, t, 0xB0);
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC30) {
         write_command(EMS_TYPE_RC30Settings, 1, t, EMS_TYPE_RC30Settings);
-    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100H || model() == EMSdevice::EMS_DEVICE_FLAG_CR11) {
-        write_command(0x273, 0, t, 0x273);
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
         write_command(0x241, 7, t, 0x241);
     } else if (isRC300()) {
