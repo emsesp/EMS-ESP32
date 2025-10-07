@@ -33,9 +33,9 @@ void MqttSettingsService::begin() {
 
 void MqttSettingsService::startClient() {
     static bool isSecure = false;
-    if (_mqttClient != nullptr) {
+    if (_mqttClient) {
         // do we need to change the client?
-        if (_state.enabled && ((isSecure && _state.enableTLS) || (!isSecure && !_state.enableTLS))) {
+        if ((isSecure && _state.enableTLS) || (!isSecure && !_state.enableTLS)) {
             return;
         }
         delete _mqttClient;
@@ -79,9 +79,6 @@ void MqttSettingsService::startClient() {
 }
 
 void MqttSettingsService::loop() {
-    if (!_state.enabled || _mqttClient == nullptr || emsesp::EMSESP::system_.systemStatus() != 0) {
-        return;
-    }
     if (_reconfigureMqtt || (_disconnectedAt && static_cast<uint32_t>(uuid::get_uptime() - _disconnectedAt) >= MQTT_RECONNECTION_DELAY)) {
         // reconfigure MQTT client
         _disconnectedAt  = configureMqtt() ? 0 : uuid::get_uptime();

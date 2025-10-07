@@ -264,6 +264,7 @@ MAKE_WORD_CUSTOM(uom_volts, "V")
 MAKE_WORD_CUSTOM(uom_mbar, "mbar")
 MAKE_WORD_CUSTOM(uom_lh, "l/h")
 MAKE_WORD_CUSTOM(uom_ctkwh, "ct/kWh")
+MAKE_WORD_CUSTOM(uom_hz, "Hz")
 
 // MQTT topics and prefixes
 MAKE_WORD_CUSTOM(heating_active, "heating_active")
@@ -277,7 +278,8 @@ MAKE_ENUM_FIXED(list_syslog_level, "off", "emerg", "alert", "crit", "error", "wa
 MAKE_ENUM_FIXED(counter, "counter")
 MAKE_ENUM_FIXED(digital_out, "digital_out")
 MAKE_ENUM_FIXED(RGB, "RGB")
-MAKE_ENUM_FIXED(list_sensortype, "disabled", "digital in", "counter", "adc", "timer", "rate", "digital out", "pwm 0", "pwm 1", "pwm 2", "NTC Temp", "RGB Led")
+MAKE_ENUM_FIXED(pulse, "pulse")
+MAKE_ENUM_FIXED(list_sensortype, "disabled", "digital in", "counter", "adc", "timer", "rate", "digital out", "pwm 0", "pwm 1", "pwm 2", "NTC Temp", "RGB Led", "pulse", "freq 0", "freq 1", "freq 2")
 
 // watch
 MAKE_ENUM_FIXED(list_watch, "off", "on", "raw", "unknown")
@@ -337,6 +339,7 @@ MAKE_ENUM(enum_mode4, FL_(nofrost), FL_(eco), FL_(heat), FL_(auto)) // JUNKERS
 MAKE_ENUM(enum_mode5, FL_(auto), FL_(off))                          // CRF
 MAKE_ENUM(enum_mode6, FL_(nofrost), FL_(night), FL_(day))           // RC10
 MAKE_ENUM(enum_mode7, FL_(off), FL_(manual))                        // CR11
+MAKE_ENUM(enum_mode8, FL_(auto), FL_(heat), FL_(cool), FL_(off))    // SRC room thermostats
 MAKE_ENUM(enum_mode_ha, FL_(off), FL_(heat), FL_(auto))             // HA climate
 
 MAKE_ENUM(enum_modetype, FL_(eco), FL_(comfort))

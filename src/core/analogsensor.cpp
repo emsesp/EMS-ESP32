@@ -23,6 +23,31 @@ namespace emsesp {
 
 uuid::log::Logger AnalogSensor::logger_{F_(analogsensor), uuid::log::Facility::DAEMON};
 
+#ifndef EMSESP_STANDALONE
+portMUX_TYPE  mux                     = portMUX_INITIALIZER_UNLOCKED;
+unsigned long AnalogSensor::edge[]    = {0, 0, 0};
+unsigned long AnalogSensor::edgecnt[] = {0, 0, 0};
+
+void IRAM_ATTR AnalogSensor::freqIrq0() {
+    portENTER_CRITICAL_ISR(&mux);
+    edgecnt[0]++;
+    edge[0] = micros();
+    portEXIT_CRITICAL_ISR(&mux);
+}
+void IRAM_ATTR AnalogSensor::freqIrq1() {
+    portENTER_CRITICAL_ISR(&mux);
+    edgecnt[1]++;
+    edge[1] = micros();
+    portEXIT_CRITICAL_ISR(&mux);
+}
+void IRAM_ATTR AnalogSensor::freqIrq2() {
+    portENTER_CRITICAL_ISR(&mux);
+    edgecnt[2]++;
+    edge[2] = micros();
+    portEXIT_CRITICAL_ISR(&mux);
+}
+#endif
+
 void AnalogSensor::start(const bool factory_settings) {
     // if (factory_settings && EMSESP::nvs_.getString("boot").equals("E32V2_2") && EMSESP::nvs_.getString("hwrevision").equals("3.0")) {
     if (factory_settings && analogReadMilliVolts(39) > 700) { // core voltage > 2.6V
@@ -92,7 +117,7 @@ void AnalogSensor::reload(bool get_nvs) {
             for (const auto & sensor : settings.analogCustomizations) { // search customlist
                 if (sensor_.gpio() == sensor.gpio) {
                     // for output sensors set value to new start-value
-                    if (sensor.type >= AnalogType::DIGITAL_OUT
+                    if (sensor.type >= AnalogType::DIGITAL_OUT && sensor.type <= AnalogType::PWM_2
                         && (sensor_.type() != sensor.type || sensor_.offset() != sensor.offset || sensor_.factor() != sensor.factor)) {
                         sensor_.set_value(sensor.offset);
                     }
@@ -134,7 +159,7 @@ void AnalogSensor::reload(bool get_nvs) {
                 }
             }
             if (sensor.type == AnalogType::COUNTER || (sensor.type >= AnalogType::DIGITAL_OUT && sensor.type <= AnalogType::PWM_2)
-                || sensor.type == AnalogType::RGB) {
+                || sensor.type == AnalogType::RGB || sensor.type == AnalogType::PULSE) {
                 Command::add(
                     EMSdevice::DeviceType::ANALOGSENSOR,
                     sensor.name.c_str(),
@@ -142,6 +167,7 @@ void AnalogSensor::reload(bool get_nvs) {
                     sensor.type == AnalogType::COUNTER       ? FL_(counter)
                     : sensor.type == AnalogType::DIGITAL_OUT ? FL_(digital_out)
                     : sensor.type == AnalogType::RGB         ? FL_(RGB)
+                    : sensor.type == AnalogType::PULSE       ? FL_(pulse)
                                                              : FL_(pwm),
                     CommandFlag::ADMIN_ONLY);
             }
@@ -204,6 +230,18 @@ void AnalogSensor::reload(bool get_nvs) {
             sensor.set_offset(0);
             sensor.set_value(0);
             publish_sensor(sensor);
+#ifndef EMSESP_STANDALONE
+        } else if (sensor.type() >= AnalogType::FREQ_0 && sensor.type() <= AnalogType::FREQ_2) {
+            LOG_DEBUG("Frequency on GPIO %02d", sensor.gpio());
+            pinMode(sensor.gpio(), INPUT_PULLUP);
+            sensor.set_offset(0);
+            sensor.set_value(0);
+            publish_sensor(sensor);
+            auto index = sensor.type() - AnalogType::FREQ_0;
+            attachInterrupt(sensor.gpio(), index == 0 ? freqIrq0 : index == 1 ? freqIrq1 : freqIrq2, FALLING);
+            lastedge[index] = edge[index] = micros();
+            edgecnt[index]                = 0;
+#endif
         } else if (sensor.type() == AnalogType::DIGITAL_IN) {
             LOG_DEBUG("Digital Read on GPIO %02d", sensor.gpio());
             pinMode(sensor.gpio(), INPUT_PULLUP);
@@ -260,6 +298,11 @@ void AnalogSensor::reload(bool get_nvs) {
                 sensor.set_value(sensor.offset());
             }
             publish_sensor(sensor);
+        } else if (sensor.type() == AnalogType::PULSE) {
+            LOG_DEBUG("Pulse on GPIO %02d", sensor.gpio());
+            pinMode(sensor.gpio(), OUTPUT);
+            digitalWrite(sensor.gpio(), (sensor.offset() == 1) ^ (sensor.value() == 1));
+            sensor.polltime_ = sensor.value() != 0 ? uuid::get_uptime() + (sensor.factor() * 1000) : 0;
         } else if (sensor.type() >= AnalogType::PWM_0 && sensor.type() <= AnalogType::PWM_2) {
             LOG_DEBUG("PWM output on GPIO %02d", sensor.gpio());
 #if ESP_IDF_VERSION_MAJOR >= 5
@@ -330,6 +373,25 @@ void AnalogSensor::measure() {
                     changed_ = true;
                     publish_sensor(sensor);
                 }
+#ifndef EMSESP_STANDALONE
+            } else if (sensor.type() >= AnalogType::FREQ_0 && sensor.type() <= AnalogType::FREQ_2) {
+                auto index  = sensor.type() - AnalogType::FREQ_0;
+                auto oldval = sensor.value();
+                if (edge[index] != lastedge[index] && edgecnt[index] > 0) {
+                    portENTER_CRITICAL_ISR(&mux);
+                    auto t          = (edge[index] - lastedge[index]) / edgecnt[index];
+                    lastedge[index] = edge[index];
+                    edgecnt[index]  = 0;
+                    portEXIT_CRITICAL_ISR(&mux);
+                    sensor.set_value(sensor.factor() * 1000000.0 / t);
+                } else if (micros() - edge[index] > 10000000ul && sensor.value() > 0) {
+                    sensor.set_value(0);
+                }
+                if (sensor.value() != oldval) {
+                    changed_ = true;
+                    publish_sensor(sensor);
+                }
+#endif
             }
         }
     }
@@ -337,9 +399,9 @@ void AnalogSensor::measure() {
     // poll digital io every time with debounce
     // go through the list of digital sensors
     for (auto & sensor : sensors_) {
+        auto old_value = sensor.value(); // remember current value before reading
         if (sensor.type() == AnalogType::DIGITAL_IN || sensor.type() == AnalogType::COUNTER || sensor.type() == AnalogType::TIMER
             || sensor.type() == AnalogType::RATE) {
-            auto old_value       = sensor.value(); // remember current value before reading
             auto current_reading = digitalRead(sensor.gpio());
             if (sensor.poll_ != current_reading) {     // check for pinchange
                 sensor.polltime_ = uuid::get_uptime(); // remember time of pinchange
@@ -362,13 +424,17 @@ void AnalogSensor::measure() {
                     sensor.last_polltime_ = sensor.polltime_;
                 }
             }
-
-            // see if there is a change and increment # reads
-            if (old_value != sensor.value()) {
-                sensorreads_++;
-                changed_ = true;
-                publish_sensor(sensor);
-            }
+        }
+        if (sensor.type() == AnalogType::PULSE && sensor.value() && sensor.polltime_ && sensor.polltime_ < uuid::get_uptime()) {
+            sensor.set_value(0);
+            digitalWrite(sensor.gpio(), sensor.offset());
+            sensor.polltime_ = 0;
+        }
+        // see if there is a change and increment # reads
+        if (old_value != sensor.value()) {
+            sensorreads_++;
+            changed_ = true;
+            publish_sensor(sensor);
         }
     }
 
@@ -562,6 +628,9 @@ void AnalogSensor::publish_values(const bool force) {
                 case AnalogType::PWM_0:
                 case AnalogType::PWM_1:
                 case AnalogType::PWM_2:
+                case AnalogType::FREQ_0:
+                case AnalogType::FREQ_1:
+                case AnalogType::FREQ_2:
                 case AnalogType::RGB:
                 case AnalogType::NTC:
                     dataSensor["value"] = serialized(Helpers::render_value(s, sensor.value(), 2)); // double
@@ -762,7 +831,7 @@ void AnalogSensor::get_value_json(JsonObject output, const Sensor & sensor) {
     output["analog"]    = FL_(list_sensortype)[sensor.type()];
     output["value"]     = sensor.value();
     output["readable"]  = true;
-    output["writeable"] = sensor.type() == AnalogType::COUNTER || sensor.type() >= AnalogType::RGB
+    output["writeable"] = sensor.type() == AnalogType::COUNTER || sensor.type() == AnalogType::RGB || sensor.type() == AnalogType::PULSE
                           || (sensor.type() >= AnalogType::DIGITAL_OUT && sensor.type() <= AnalogType::PWM_2);
     output["visible"] = true;
     if (sensor.type() == AnalogType::COUNTER) {
@@ -842,6 +911,12 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                 rgbLedWrite(sensor.gpio(), 2 * r, 2 * g, 2 * b);
 #endif
                 LOG_DEBUG("RGB set to %d, %d, %d", r, g, b);
+            } else if (sensor.type() == AnalogType::PULSE) {
+                uint8_t v = val;
+                sensor.set_value(v);
+                pinMode(sensor.gpio(), OUTPUT);
+                digitalWrite(sensor.gpio(), (sensor.offset() != 0) ^ (sensor.value() != 0));
+                sensor.polltime_ = sensor.value() != 0 ? uuid::get_uptime() + (sensor.factor() * 1000) : 0;
             } else if (sensor.type() == AnalogType::DIGITAL_OUT) {
                 uint8_t v = val;
 #if CONFIG_IDF_TARGET_ESP32

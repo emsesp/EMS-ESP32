@@ -364,6 +364,10 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
     // EMS device commands
     //
 
+    commands->add_command(ShellContext::MAIN, CommandFlags::ADMIN, {F_(scan)}, [](Shell & shell, const std::vector<std::string> & arguments) {
+        EMSESP::scan_devices();
+    });
+    /* removed scan deep
     commands->add_command(ShellContext::MAIN, CommandFlags::ADMIN, {F_(scan)}, {F_(deep_optional)}, [](Shell & shell, const std::vector<std::string> & arguments) {
         if (arguments.empty()) {
             EMSESP::scan_devices();
@@ -379,7 +383,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
             }
         }
     });
-
+    */
     // read <deviceID> <type ID> [offset] [length]
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,

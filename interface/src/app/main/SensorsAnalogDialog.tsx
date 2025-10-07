@@ -132,7 +132,9 @@ const SensorsAnalogDialog = ({
               ))}
             </TextField>
           </Grid>
-          {editItem.t >= AnalogType.COUNTER && editItem.t <= AnalogType.RATE && (
+          {((editItem.t >= AnalogType.COUNTER && editItem.t <= AnalogType.RATE) ||
+            (editItem.t >= AnalogType.FREQ_0 &&
+              editItem.t <= AnalogType.FREQ_2)) && (
             <Grid>
               <TextField
                 name="u"
@@ -343,6 +345,42 @@ const SensorsAnalogDialog = ({
                       )
                     },
                     htmlInput: { min: '0', max: '100', step: '0.1' }
+                  }}
+                />
+              </Grid>
+            </>
+          )}
+          {editItem.t === AnalogType.PULSE && (
+            <>
+              <Grid>
+                <TextField
+                  name="o"
+                  label={LL.POLARITY()}
+                  value={editItem.o}
+                  sx={{ width: '11ch' }}
+                  select
+                  onChange={updateFormValue}
+                >
+                  <MenuItem value={0}>{LL.ACTIVEHIGH()}</MenuItem>
+                  <MenuItem value={1}>{LL.ACTIVELOW()}</MenuItem>
+                </TextField>
+              </Grid>
+              <Grid>
+                <TextField
+                  name="f"
+                  label="Pulse"
+                  value={numberValue(editItem.f)}
+                  type="number"
+                  sx={{ width: '15ch' }}
+                  variant="outlined"
+                  onChange={updateFormValue}
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">s</InputAdornment>
+                      )
+                    },
+                    htmlInput: { min: '0', max: '10000', step: '0.1' }
                   }}
                 />
               </Grid>

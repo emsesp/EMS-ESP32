@@ -354,6 +354,7 @@ class Boiler : public EMSdevice {
     void process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram);
     void process_UBAOutdoorTemp(std::shared_ptr<const Telegram> telegram);
     void process_UBASetPoints(std::shared_ptr<const Telegram> telegram);
+    void process_UBASetPoints2(std::shared_ptr<const Telegram> telegram);
     void process_UBAFlags(std::shared_ptr<const Telegram> telegram);
     void process_MC110Status(std::shared_ptr<const Telegram> telegram);
     void process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegram);

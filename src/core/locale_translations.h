@@ -915,6 +915,9 @@ MAKE_TRANSLATION(status, "status", "status", "Status", "Status", "Status", "stat
 // RF sensor, id 0x40, telegram 0x435
 MAKE_TRANSLATION(RFTemp, "rftemp", "RF room temperature sensor", "RF Raumtemperatursensor", "RF ruimtetemperatuur sensor", "RF Rumsgivare Temperatur", "bezprzewodowy czujnik temperatury pomieszczenia", "RF romsgiver temp", "capteur de température de pièce RF", "RF oda sıcaklık sensörü", "Sensore di temperatura ambiente RF", "RF snímač izbovej teploty", "RF senzor teploty místnosti")
 
+// gateway thermostat
+MAKE_TRANSLATION(name, "name", "name", "Name")
+
 // ventilation
 MAKE_TRANSLATION(outFresh, "outfresh", "outdoor fresh air", "Außenlufttemp.", "temperatuur buitenlucht", "Utelufttemperatur", "świeże powietrze z zewnątrz", "", "", "dış ortam taze hava", "aria fresca esterna", "čerstvý vzduch vonku", "venkovní čerstvý vzduch") // TODO translate
 MAKE_TRANSLATION(inFresh, "infresh", "indoor fresh air", "Zulufttemp.", "temperatuur aanvoer", "Tillufttemperatur", "nawiew", "", "", "iç ortam taze hava", "aria fresca interna", "čerstvý vzduch v interiéri", "vnitřní čerstvý vzduch") // TODO translate

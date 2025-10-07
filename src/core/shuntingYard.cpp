@@ -518,7 +518,7 @@ std::string calculate(const std::string & expr) {
 #ifndef EMSESP_STANDALONE
                 stack.push_back(to_string(rhd * esp_random() / UINT32_MAX));
 #else
-                stack.push_back(to_string(rhd * random()));
+                stack.push_back(to_string(rhd * rand() / RAND_MAX));
 #endif
                 break;
             }

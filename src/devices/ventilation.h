@@ -41,7 +41,7 @@ class Ventilation : public EMSdevice {
     uint8_t ventOutSpeed_;
 
     // handlers: 0x056B 0x0575 0x0583 0x0585 0x0586 0x0587 0x0588 0x058D 0x058E 0x058F 0x0590 0x05CF 0x05D9 0x05E3
-    void process_SetMessage(std::shared_ptr<const Telegram> telegram);
+    void process_SetMessage(std::shared_ptr<const Telegram> telegram); // 0x55C
     void process_MonitorMessage(std::shared_ptr<const Telegram> telegram);
     void process_ModeMessage(std::shared_ptr<const Telegram> telegram);   // 0x56B
     void process_BlowerMessage(std::shared_ptr<const Telegram> telegram); // 0x56B

@@ -439,7 +439,8 @@ const Sensors = () => {
                 <Cell>{a.n}</Cell>
                 <Cell stiff>{AnalogTypeNames[a.t]} </Cell>
                 {(a.t === AnalogType.DIGITAL_OUT && a.g !== 25 && a.g !== 26) ||
-                a.t === AnalogType.DIGITAL_IN ? (
+                a.t === AnalogType.DIGITAL_IN ||
+                a.t === AnalogType.PULSE ? (
                   <Cell stiff>{a.v ? LL.ON() : LL.OFF()}</Cell>
                 ) : (
                   <Cell stiff>{a.t ? formatValue(a.v, a.u) : ''}</Cell>
