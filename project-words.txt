@@ -1419,3 +1419,10 @@ shuntingyard
 XIAO
 zadig
 devkitc
+Roomthermostats
+Roomname
+Roomsettings
+Roomparams
+Roomdata
+Roomschedule
+dewtemp
