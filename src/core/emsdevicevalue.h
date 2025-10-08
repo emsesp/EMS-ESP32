@@ -117,7 +117,24 @@ class DeviceValue {
         TAG_HS13,
         TAG_HS14,
         TAG_HS15,
-        TAG_HS16
+        TAG_HS16,
+        TAG_SRC1,
+        TAG_SRC2,
+        TAG_SRC3,
+        TAG_SRC4,
+        TAG_SRC5,
+        TAG_SRC6,
+        TAG_SRC7,
+        TAG_SRC8,
+        TAG_SRC9,
+        TAG_SRC10,
+        TAG_SRC11,
+        TAG_SRC12,
+        TAG_SRC13,
+        TAG_SRC14,
+        TAG_SRC15,
+        TAG_SRC16
+
     };
 
     // states of a device value

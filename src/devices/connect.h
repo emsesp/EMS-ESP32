@@ -64,7 +64,9 @@ class Connect : public EMSdevice {
     std::vector<std::shared_ptr<Connect::RoomCircuit>> room_circuits_;
 
     void    process_OutdoorTemp(std::shared_ptr<const Telegram> telegram);
+    void    process_RCTime(std::shared_ptr<const Telegram> telegram);
     int16_t outdoorTemp_;
+    char    dateTime_[30]; // date and time stamp
 };
 
 } // namespace emsesp

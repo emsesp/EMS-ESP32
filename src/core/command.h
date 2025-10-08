@@ -36,6 +36,7 @@ enum CommandFlag : uint8_t {
     CMD_FLAG_DHW     = (1 << 1), // 2 TAG_DHW1 - TAG_DHW4
     CMD_FLAG_AHS     = (1 << 2), // 4 TAG_AHS1
     CMD_FLAG_HS      = (1 << 3), // 8 TAG_HS1 - TAG_HS16
+    CMD_FLAG_SRC     = (1 << 4), // 16 TAG_SRC1 - TAG_SRC16
     HIDDEN           = (1 << 6), // 64 do not show in API or Web
     ADMIN_ONLY       = (1 << 7)  // 128 requires authentication
 

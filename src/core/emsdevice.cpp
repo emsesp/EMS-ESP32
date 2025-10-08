@@ -644,6 +644,8 @@ void EMSdevice::add_device_value(int8_t                tag,              // to b
             flags |= CommandFlag::CMD_FLAG_HS;
         } else if (tag >= DeviceValueTAG::TAG_AHS1 && tag <= DeviceValueTAG::TAG_AHS1) {
             flags |= CommandFlag::CMD_FLAG_AHS;
+        } else if (tag >= DeviceValueTAG::TAG_SRC1 && tag <= DeviceValueTAG::TAG_SRC16) {
+            flags |= CommandFlag::CMD_FLAG_SRC;
         }
 
         // add the command to our library
@@ -905,7 +907,7 @@ bool EMSdevice::export_values(uint8_t device_type, JsonObject output, const int8
     }
 
     // for nested output add for each tag
-    for (int8_t tag = DeviceValueTAG::TAG_DEVICE_DATA; tag <= DeviceValueTAG::TAG_HS16; tag++) {
+    for (int8_t tag = DeviceValueTAG::TAG_DEVICE_DATA; tag <= DeviceValueTAG::TAG_SRC16; tag++) {
         JsonObject output_hc    = output;
         bool       nest_created = false;
         for (const auto & emsdevice : EMSESP::emsdevices) {
@@ -1899,8 +1901,8 @@ void EMSdevice::mqtt_ha_entity_config_create() {
                 create_device_config = false; // only create the main config once
                 count++;
             }
-            // SRC thermostats mapped to connect/hs1/...
-            if (dv.tag >= DeviceValueTAG::TAG_HS1 && !strcmp(dv.short_name, FL_(roomtemp)[0])) {
+            // SRC thermostats mapped to connect/src1/...
+            if (dv.tag >= DeviceValueTAG::TAG_SRC1 && !strcmp(dv.short_name, FL_(roomtemp)[0])) {
                 Mqtt::publish_ha_climate_config(dv.tag, true, false, dv.min, dv.max);
             }
 

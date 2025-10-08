@@ -26,6 +26,9 @@ Connect::Connect(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     if (device_id == 0x50) { // RF Base
         register_telegram_type(0xD1, "RFOutdoorTemp", false, MAKE_PF_CB(process_OutdoorTemp));
+        register_telegram_type(0x06, "RCTime", false, MAKE_PF_CB(process_RCTime));
+
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dateTime_, DeviceValueType::STRING, FL_(tpl_datetime), FL_(dateTime), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &outdoorTemp_,
                               DeviceValueType::INT16,
@@ -53,13 +56,31 @@ void Connect::process_OutdoorTemp(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, outdoorTemp_, 0);
 }
 
+// sent if thermostat is connected
+// https://github.com/emsesp/EMS-ESP32/issues/2277
+void Connect::process_RCTime(std::shared_ptr<const Telegram> telegram) {
+    if (telegram->offset || telegram->message_length < 10) {
+        return;
+    }
+    char time[sizeof(dateTime_)];
+    snprintf(time,
+             sizeof(time),
+             "%02d.%02d.%04d %02d:%02d",
+             telegram->message_data[3],
+             telegram->message_data[1],
+             telegram->message_data[0] + 2000,
+             telegram->message_data[2],
+             telegram->message_data[4]);
+    has_update(dateTime_, time, sizeof(dateTime_));
+}
+
 /* other values from 0x50 RF base
 (0x087F), data: 00 00
 (0x0880), data: 01 04
 (0x0889), data: 00 80 80 01
 */
 void Connect::register_device_values_room(std::shared_ptr<Connect::RoomCircuit> room) {
-    auto tag = DeviceValueTAG::TAG_HS1 + room->room();
+    auto tag = DeviceValueTAG::TAG_SRC1 + room->room();
     register_device_value(tag, &room->temp_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(roomTemp), DeviceValueUOM::DEGREES);
     register_device_value(tag, &room->humidity_, DeviceValueType::INT8, FL_(airHumidity), DeviceValueUOM::PERCENT);
     register_device_value(tag, &room->dewtemp_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(dewTemperature), DeviceValueUOM::DEGREES);
@@ -156,7 +177,7 @@ void Connect::process_roomThermostatData(std::shared_ptr<const Telegram> telegra
 // Settings:
 
 bool Connect::set_mode(const char * value, const int8_t id) {
-    auto rc = room_circuit(id - DeviceValueTAG::TAG_HS1);
+    auto rc = room_circuit(id - DeviceValueTAG::TAG_SRC1);
     if (rc == nullptr) {
         return false;
     }
@@ -170,7 +191,7 @@ bool Connect::set_mode(const char * value, const int8_t id) {
 }
 
 bool Connect::set_seltemp(const char * value, const int8_t id) {
-    auto rc = room_circuit(id - DeviceValueTAG::TAG_HS1);
+    auto rc = room_circuit(id - DeviceValueTAG::TAG_SRC1);
     if (rc == nullptr) {
         return false;
     }
@@ -184,7 +205,7 @@ bool Connect::set_seltemp(const char * value, const int8_t id) {
 }
 
 bool Connect::set_name(const char * value, const int8_t id) {
-    auto rc = room_circuit(id - DeviceValueTAG::TAG_HS1);
+    auto rc = room_circuit(id - DeviceValueTAG::TAG_SRC1);
     if (rc == nullptr || value == nullptr || strlen(value) > 50) {
         return false;
     }

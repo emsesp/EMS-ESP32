@@ -649,7 +649,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
     bool         nested       = (Mqtt::is_nested());
 
     // group by device type
-    for (int8_t tag = DeviceValueTAG::TAG_DEVICE_DATA; tag <= DeviceValueTAG::TAG_HS16; tag++) {
+    for (int8_t tag = DeviceValueTAG::TAG_DEVICE_DATA; tag <= DeviceValueTAG::TAG_SRC16; tag++) {
         JsonObject json_tag     = json;
         bool       nest_created = false;
         for (const auto & emsdevice : emsdevices) {
