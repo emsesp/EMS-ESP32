@@ -2071,7 +2071,7 @@ bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
         hc->remotetemp = (int16_t)(f * 10);
     }
 
-    if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS && !has_flags(EMSdevice::EMS_DEVICE_FLAG_JUNKERS_OLD)) {
         Roomctrl::set_remotetemp(Roomctrl::FB10, hc->hc(), hc->remotetemp); // FB10
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC35 || model() == EMSdevice::EMS_DEVICE_FLAG_RC30_N) {
         Roomctrl::set_remotetemp(Roomctrl::RC20, hc->hc(), hc->remotetemp); // RC20
