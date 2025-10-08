@@ -131,6 +131,9 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         } else if (input["hs"].is<int>()) {
             id_n = input["hs"];
             id_n += DeviceValueTAG::TAG_HS1 - DeviceValueTAG::TAG_HC1; // hs1 has id 20
+        } else if (input["src"].is<int>()) {
+            id_n = input["src"];
+            id_n += DeviceValueTAG::TAG_SRC1 - DeviceValueTAG::TAG_HC1; // src1 has id 36
         }
     }
 
@@ -268,6 +271,12 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
     } else if (!strncmp(lowerCmd, "hs", 2) && command[2] >= '1' && command[2] <= '9') {
         id = command[2] - '1' + DeviceValueTAG::TAG_HS1; //20;
         command += 3;
+    } else if (!strncmp(lowerCmd, "src", 3) && command[2] == '1' && command[3] >= '0' && command[3] <= '6') {
+        id = command[3] - '0' + DeviceValueTAG::TAG_SRC10; //46;
+        command += 4;
+    } else if (!strncmp(lowerCmd, "src", 3) && command[2] >= '1' && command[2] <= '9') {
+        id = command[2] - '1' + DeviceValueTAG::TAG_SRC1; //36;
+        command += 3;
     } else if (!strncmp(lowerCmd, "dhw", 3)) { // no number
         id = DeviceValueTAG::TAG_DHW1;
         command += 3;
@@ -387,13 +396,15 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
         flag = CommandFlag::CMD_FLAG_HS;
     } else if (id >= DeviceValueTAG::TAG_AHS1 && id <= DeviceValueTAG::TAG_AHS1) {
         flag = CommandFlag::CMD_FLAG_AHS;
+    } else if (id >= DeviceValueTAG::TAG_SRC1 && id <= DeviceValueTAG::TAG_SRC16) {
+        flag = CommandFlag::CMD_FLAG_SRC;
     }
 
     // see if there is a command registered for this EMS device
     auto cf = find_command(device_type, device_id, cmd, flag);
     if (!cf) {
         // if we don't already have a message set, set it to invalid command
-        if (output["message"]) {
+        if (output["message"].is<const char *>()) {
             LOG_WARNING("Command failed: %s", output["message"].as<const char *>());
             return CommandRet::ERROR;
         } else {
@@ -662,6 +673,9 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                     shell.print(' ');
                 } else if (cf.has_flags(CommandFlag::CMD_FLAG_HS)) {
                     shell.print(Helpers::translated_word(FL_(tag_hsx)));
+                    shell.print(' ');
+                } else if (cf.has_flags(CommandFlag::CMD_FLAG_SRC)) {
+                    shell.print(Helpers::translated_word(FL_(tag_srcx)));
                     shell.print(' ');
                 }
                 shell.print(Helpers::translated_word(cf.description_));
