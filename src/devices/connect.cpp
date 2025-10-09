@@ -24,30 +24,31 @@ REGISTER_FACTORY(Connect, EMSdevice::DeviceType::CONNECT);
 
 Connect::Connect(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    if (device_id == 0x50) { // RF Base
-        register_telegram_type(0xD1, "RFOutdoorTemp", false, MAKE_PF_CB(process_OutdoorTemp));
-        register_telegram_type(0x06, "RCTime", false, MAKE_PF_CB(process_RCTime));
-
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dateTime_, DeviceValueType::STRING, FL_(tpl_datetime), FL_(dateTime), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &outdoorTemp_,
-                              DeviceValueType::INT16,
-                              DeviceValueNumOp::DV_NUMOP_DIV10,
-                              FL_(outdoorTemp),
-                              DeviceValueUOM::DEGREES);
-        // Roomthermostats
-        for (uint8_t i = 0; i < 16; i++) {
-            register_telegram_type(0x0BDD + i, "Room", false, MAKE_PF_CB(process_roomThermostat));             // broadcasted
-            register_telegram_type(0x0B3D + i, "Roomname", false, MAKE_PF_CB(process_roomThermostatName));     // fetch for active circuits
-            register_telegram_type(0x0BB5 + i, "Roomsettings", false, MAKE_PF_CB(process_roomThermostatMode)); // fetch for active circuits
-            register_telegram_type(0x1230 + i, "Roomparams", false, MAKE_PF_CB(process_roomThermostatParam));  // fetch for active circuits
-            register_telegram_type(0x1244 + i, "Roomdata", false, MAKE_PF_CB(process_roomThermostatData));     // broadcasted
-        }
-        // register_telegram_type(0xDB65, "Roomschedule", true, MAKE_PF_CB(process_roomSchedule));
-        // 0x2040, broadcast 36 bytes:
-        // data: 0E 60 00 DF 0D AF 0A 46 0A 46 02 9A 1C 53 1C 53 12 AD 12 AD 00 00 13 C2
-        // data: 1F 37 1F 37 00 00 00 00 18 97 11 27 (offset 24)
+    if (device_id == 0x02) { // Modems have no entities
+        return;
     }
+    register_telegram_type(0xD1, "RFOutdoorTemp", false, MAKE_PF_CB(process_OutdoorTemp));
+    register_telegram_type(0x06, "RCTime", false, MAKE_PF_CB(process_RCTime));
+
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dateTime_, DeviceValueType::STRING, FL_(tpl_datetime), FL_(dateTime), DeviceValueUOM::NONE);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &outdoorTemp_,
+                          DeviceValueType::INT16,
+                          DeviceValueNumOp::DV_NUMOP_DIV10,
+                          FL_(outdoorTemp),
+                          DeviceValueUOM::DEGREES);
+    // Roomthermostats
+    for (uint8_t i = 0; i < 16; i++) {
+        register_telegram_type(0x0BDD + i, "Room", false, MAKE_PF_CB(process_roomThermostat));                 // broadcasted
+        register_telegram_type(0x0B3D + i, "Roomname", false, MAKE_PF_CB(process_roomThermostatName));         // fetch for active circuits
+        register_telegram_type(0x0BB5 + i, "Roomsettings", false, MAKE_PF_CB(process_roomThermostatSettings)); // fetch for active circuits
+        register_telegram_type(0x1230 + i, "Roomparams", false, MAKE_PF_CB(process_roomThermostatParam));      // fetch for active circuits
+        register_telegram_type(0x1244 + i, "Roomdata", false, MAKE_PF_CB(process_roomThermostatData));         // broadcasted
+    }
+    register_telegram_type(0xDB65, "Roomschedule", true, MAKE_PF_CB(process_roomSchedule));
+    // 0x2040, broadcast 36 bytes:
+    // data: 0E 60 00 DF 0D AF 0A 46 0A 46 02 9A 1C 53 1C 53 12 AD 12 AD 00 00 13 C2
+    // data: 1F 37 1F 37 00 00 00 00 18 97 11 27 (offset 24)
 }
 /*
  * OutdoorTemp - type 0xD1 - external temperature
@@ -85,9 +86,11 @@ void Connect::register_device_values_room(std::shared_ptr<Connect::RoomCircuit> 
     register_device_value(tag, &room->humidity_, DeviceValueType::INT8, FL_(airHumidity), DeviceValueUOM::PERCENT);
     register_device_value(tag, &room->dewtemp_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(dewTemperature), DeviceValueUOM::DEGREES);
     register_device_value(
-        tag, &room->seltemp_, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(seltemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_seltemp));
+        tag, &room->seltemp_, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(seltemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_seltemp), 5, 30);
     register_device_value(tag, &room->mode_, DeviceValueType::ENUM, FL_(enum_mode8), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
     register_device_value(tag, &room->name_, DeviceValueType::STRING, FL_(name), DeviceValueUOM::NONE, MAKE_CF_CB(set_name));
+    register_device_value(tag, &room->childlock_, DeviceValueType::BOOL, FL_(childlock), DeviceValueUOM::NONE, MAKE_CF_CB(set_childlock));
+    register_device_value(tag, &room->icon_, DeviceValueType::ENUM, FL_(enum_icons), FL_(icon), DeviceValueUOM::NONE, MAKE_CF_CB(set_icon), 0, 12);
 }
 
 std::shared_ptr<Connect::RoomCircuit> Connect::room_circuit(const uint8_t num, const bool create) {
@@ -132,30 +135,34 @@ void Connect::process_roomThermostat(std::shared_ptr<const Telegram> telegram) {
     has_update(rc->dewtemp_, dt);
 }
 
-// gateway(0x48) W gateway(0x50), ?(0x0B42), data: 01
+// gateway(0x48) W gateway(0x50), ?(0x0B42), data: 01 // icon in ofset 0
 // gateway(0x48) W gateway(0x50), ?(0x0B42), data: 00 4B 00 FC 00 63 00 68 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 (offset 1)
 void Connect::process_roomThermostatName(std::shared_ptr<const Telegram> telegram) {
     auto rc = room_circuit(telegram->type_id - 0xB3D);
     if (rc == nullptr) {
         return;
     }
-
+    has_update(rc->icon_, 0);
     for (uint8_t i = telegram->offset; i < telegram->message_length + telegram->offset && i < 100; i++) {
         if ((i > 1) && (i % 2) == 0) {
-            rc->name_[(i - 2) / 2] = telegram->message_data[i];
+            rc->name_[(i - 2) / 2] = telegram->message_data[i - telegram->offset];
         }
     }
     rc->name_[50] = '\0'; // make sure name is terminated
 }
 
-// settings 0-mode, 1-tempautotemp, 3 - manualtemp, 6,7 - ?
-void Connect::process_roomThermostatMode(std::shared_ptr<const Telegram> telegram) {
+// settings 0-mode, 1-tempautotemp, 3 - manualtemp, 6 - ?, 7 - childlock
+// 0x0BB5, ff: data: 00 FF 00 24 01 FF 24 00
+void Connect::process_roomThermostatSettings(std::shared_ptr<const Telegram> telegram) {
     auto rc = room_circuit(telegram->type_id - 0xBB5);
     if (rc == nullptr) {
         return;
     }
-    // has_enumupdate(telegram, rc->mode_, 0, {3, 1, 0});
+    // has_enumupdate(telegram, rc->mode_, 0, {3, 1, 0}); // modes off, manual auto
     has_update(telegram, rc->mode_, 0);
+    // has_update(telegram, rc->tempautotemp_, 1); // FF means off
+    // has_update(telegram, rc->manualtemp_, 3);
+    has_update(telegram, rc->childlock_, 7);
 }
 
 // unknown telegrams, needs fetch
@@ -172,6 +179,13 @@ void Connect::process_roomThermostatData(std::shared_ptr<const Telegram> telegra
     if (rc == nullptr) {
         return;
     }
+}
+
+// schedule for all thermostats
+void Connect::process_roomSchedule(std::shared_ptr<const Telegram> telegram) {
+    toggle_fetch(telegram->type_id, false); // fetch only once
+    auto length = ((telegram->offset + telegram->message_length) > 126) ? 126 - telegram->offset : telegram->message_length;
+    memcpy(&schedule_[telegram->offset], telegram->message_data, length);
 }
 
 // Settings:
@@ -225,5 +239,30 @@ bool Connect::set_name(const char * value, const int8_t id) {
     return true;
 }
 
+bool Connect::set_childlock(const char * value, const int8_t id) {
+    auto rc = room_circuit(id - DeviceValueTAG::TAG_SRC1);
+    if (rc == nullptr) {
+        return false;
+    }
+    bool b;
+    if (Helpers::value2bool(value, b)) {
+        write_command(0xBB5 + rc->room(), b ? 1 : 0, 7, 0xBB5 + rc->room());
+        return true;
+    }
+    return false;
+}
+
+bool Connect::set_icon(const char * value, const int8_t id) {
+    auto rc = room_circuit(id - DeviceValueTAG::TAG_SRC1);
+    if (rc == nullptr) {
+        return false;
+    }
+    uint8_t v;
+    if (Helpers::value2enum(value, v, FL_(enum_icons))) {
+        write_command(0x0B3D + rc->room(), 0, v, 0x0B3D + rc->room());
+        return true;
+    }
+    return false;
+}
 
 } // namespace emsesp

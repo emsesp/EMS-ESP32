@@ -336,6 +336,20 @@ MAKE_WORD_TRANSLATION(sleep, "sleep", "Einschlafen", "slaapmodus", "sova", "sen"
 MAKE_WORD_TRANSLATION(partymode, "party", "Party", "party", "party", "impreza", "", "", "parti", "festa", "párty režim", "") // TODO translate
 MAKE_WORD_TRANSLATION(fireplace, "fireplace", "Kamin", "haard", "Kamin", "kominek", "", "", "şömine", "camino", "krb", "") // TODO translate
 
+// SRC plus
+MAKE_WORD_TRANSLATION(chefhat, "mdi:chef-hat")
+MAKE_WORD_TRANSLATION(sofasingle, "mdi:sofa-single-outline")
+MAKE_WORD_TRANSLATION(bowlmix, "mdi:bowl-mix-outline")
+MAKE_WORD_TRANSLATION(bedsingle, "mdi:bed-single-outline")
+MAKE_WORD_TRANSLATION(beddouble, "mdi:bed-double-outline")
+MAKE_WORD_TRANSLATION(teddybear, "mdi:teddy-bear")
+MAKE_WORD_TRANSLATION(shower, "mdi:shower")
+MAKE_WORD_TRANSLATION(laptop, "mdi:laptop")
+MAKE_WORD_TRANSLATION(door, "mdi:door")
+MAKE_WORD_TRANSLATION(palette, "mdi:palette-outline")
+MAKE_WORD_TRANSLATION(washingmachine, "mdi:washing-machine")
+MAKE_WORD_TRANSLATION(bookshelf, "mdi:bookshelf")
+
 // MQTT Discovery - this is special device entity for 'climate'
 MAKE_TRANSLATION(haclimate, "haclimate", "mqtt discovery current room temperature", "Discovery aktuelle Raumtemperatur", "Discovery huidige kamertemperatuur", "MQTT Discovery för aktuell rumstemperatur", "termostat w HA", "HA Avlest temp", "", "Güncel osa sıcaklığı", "verifica temperatura ambiente attuale", "mqtt discovery aktuálna teplota v miestnosti", "mqtt discovery aktuální pokojová teplota") // TODO translate
 
@@ -933,8 +947,10 @@ MAKE_TRANSLATION(status, "status", "status", "Status", "Status", "Status", "stat
 // RF sensor, id 0x40, telegram 0x435
 MAKE_TRANSLATION(RFTemp, "rftemp", "RF room temperature sensor", "RF Raumtemperatursensor", "RF ruimtetemperatuur sensor", "RF Rumsgivare Temperatur", "bezprzewodowy czujnik temperatury pomieszczenia", "RF romsgiver temp", "capteur de température de pièce RF", "RF oda sıcaklık sensörü", "Sensore di temperatura ambiente RF", "RF snímač izbovej teploty", "RF senzor teploty místnosti")
 
-// gateway thermostat
+// connect SRC plus thermostat
 MAKE_TRANSLATION(name, "name", "name", "Name")
+MAKE_TRANSLATION(childlock, "childlock", "child lock", "Kindersicherung")
+MAKE_TRANSLATION(icon, "icon", "icon", "Icon")
 
 // ventilation
 MAKE_TRANSLATION(outFresh, "outfresh", "outdoor fresh air", "Außenlufttemp.", "temperatuur buitenlucht", "Utelufttemperatur", "świeże powietrze z zewnątrz", "", "", "dış ortam taze hava", "aria fresca esterna", "čerstvý vzduch vonku", "venkovní čerstvý vzduch") // TODO translate

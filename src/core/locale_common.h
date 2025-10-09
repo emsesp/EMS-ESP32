@@ -402,6 +402,9 @@ MAKE_ENUM(enum_ventMode, FL_(auto), FL_(off), FL_(L1), FL_(L2), FL_(L3), FL_(L4)
 // water
 MAKE_ENUM(enum_errorDisp, FL_(off), FL_(normal), FL_(inverted))
 
+// SRC plus
+MAKE_ENUM(enum_icons, FL_(none), FL_(chefhat), FL_(sofasingle), FL_(bowlmix), FL_(bedsingle), FL_(beddouble), FL_(teddybear), FL_(shower), FL_(laptop), FL_(door), FL_(palette), FL_(washingmachine), FL_(bookshelf))
+
 #pragma GCC diagnostic pop
 
 // clang-format on
