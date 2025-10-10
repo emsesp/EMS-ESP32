@@ -700,8 +700,7 @@ void AnalogSensor::publish_values(const bool force) {
                     snprintf(uniq_s, sizeof(uniq_s), "%s_%02d", F_(analogsensor), sensor.gpio());
                 }
 
-                config["obj_id"]  = uniq_s;
-                config["uniq_id"] = uniq_s; // same as object_id
+                config["uniq_id"] = uniq_s;
 
                 char name[50];
                 snprintf(name, sizeof(name), "%s", sensor.name().c_str());
@@ -771,6 +770,10 @@ void AnalogSensor::publish_values(const bool force) {
                         break;
                     }
                 }
+
+                // add default_entity_id
+                std::string topic_str(topic);
+                doc["default_entity_id"] = topic_str.substr(0, topic_str.find("/")) + "." + uniq_s;
 
                 Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Analog Sensors", nullptr, nullptr, nullptr, false);
                 Mqtt::add_ha_avail_section(config.as<JsonObject>(), stat_t, !is_ha_device_created, val_cond);

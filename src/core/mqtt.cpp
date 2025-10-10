@@ -529,15 +529,14 @@ void Mqtt::ha_status() {
     }
 
     doc["uniq_id"]           = uniq;
-    doc["default_entity_id"] = uniq;
-
-    doc["stat_t"]   = Mqtt::base() + "/status";
-    doc["name"]     = "System status";
-    doc["pl_on"]    = "online";
-    doc["pl_off"]   = "offline";
-    doc["stat_cla"] = "measurement";
-    doc["dev_cla"]  = "connectivity";
-    doc["ent_cat"]  = "diagnostic";
+    doc["default_entity_id"] = (std::string) "binary_sensor." + uniq;
+    doc["stat_t"]            = Mqtt::base() + "/status";
+    doc["name"]              = "System status";
+    doc["pl_on"]             = "online";
+    doc["pl_off"]            = "offline";
+    doc["stat_cla"]          = "measurement";
+    doc["dev_cla"]           = "connectivity";
+    doc["ent_cat"]           = "diagnostic";
 
     // doc["avty_t"]      = "~/status"; // commented out, as it causes errors in HA sometimes
     // doc["json_attr_t"] = "~/heartbeat"; // store also as HA attributes
@@ -827,7 +826,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         snprintf(entity_with_tag, sizeof(entity_with_tag), "%s", entity);
     }
 
-    // build unique identifier also used as default_entity_id which also becomes the Entity ID in HA
+    // build unique identifier also used to build the default_entity_id which also becomes the Entity ID in HA
     char uniq_id[80];
 
     // list of boiler entities that need conversion for 3.6 compatibility, add ww suffix
@@ -980,8 +979,12 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // build the full payload
     JsonDocument doc;
-    doc["uniq_id"]           = uniq_id;
-    doc["default_entity_id"] = uniq_id; // same as unique_id
+    doc["uniq_id"] = uniq_id;
+
+    // set the entity_id. This is breaking change in HA 2025.10.0 - see https://github.com/home-assistant/core/pull/151775
+    // extract the string from topic up to the / using std::string
+    std::string topic_str(topic);
+    doc["default_entity_id"] = topic_str.substr(0, topic_str.find("/")) + "." + uniq_id;
 
     char sample_val[30] = "0"; // sample, correct(!) entity value, used only to prevent warning/error in HA if real value is not published yet
 
@@ -1302,12 +1305,12 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
              hc_mode_s,
              Helpers::translated_word(FL_(off)));
 
-    snprintf(name_s, sizeof(name_s), "%s%d", tag < DeviceValueTAG::TAG_HS1 ? "Hc" : "Hs", hc_num);
+    snprintf(name_s, sizeof(name_s), "%s%d", tagname, hc_num);
 
     if (Mqtt::entity_format() == entityFormat::MULTI_SHORT) {
-        snprintf(uniq_id_s, sizeof(uniq_id_s), "%s_%s%s%d", Mqtt::basename().c_str(), devicename, tagname, hc_num); // add basename
+        snprintf(uniq_id_s, sizeof(uniq_id_s), "%s_%s_%s%d", Mqtt::basename().c_str(), devicename, tagname, hc_num); // add basename
     } else {
-        snprintf(uniq_id_s, sizeof(uniq_id_s), "%s%d", devicename, hc_num); // backward compatible with v3.4
+        snprintf(uniq_id_s, sizeof(uniq_id_s), "%s_%s%d", devicename, tagname, hc_num); // backward compatible with v3.4
     }
 
     snprintf(temp_cmd_s, sizeof(temp_cmd_s), "~/%s/%s%d/seltemp", devicename, tagname, hc_num);
@@ -1317,7 +1320,7 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
 
     doc["~"]                 = Mqtt::base();
     doc["uniq_id"]           = uniq_id_s;
-    doc["default_entity_id"] = uniq_id_s; // same as uniq_id
+    doc["default_entity_id"] = (std::string) "climate." + uniq_id_s;
     doc["name"]              = name_s;
     doc["mode_stat_t"]       = topic_t;
     doc["mode_stat_tpl"]     = mode_str_tpl;
