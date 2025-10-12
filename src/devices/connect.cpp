@@ -24,7 +24,7 @@ REGISTER_FACTORY(Connect, EMSdevice::DeviceType::CONNECT);
 
 Connect::Connect(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    if (device_id == 0x02) { // Modems have no entities
+    if (device_id != EMSdevice::EMS_DEVICE_ID_RFBASE) { // Modems have no entities
         return;
     }
     register_telegram_type(0xD1, "RFOutdoorTemp", false, MAKE_PF_CB(process_OutdoorTemp));

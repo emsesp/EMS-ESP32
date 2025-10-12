@@ -203,6 +203,7 @@
 {163, DeviceType::WATER, "SM100, MS100", DeviceFlags::EMS_DEVICE_FLAG_SM100},
 {164, DeviceType::WATER, "SM200, MS200", DeviceFlags::EMS_DEVICE_FLAG_SM100},
 {248, DeviceType::MIXER, "HM210", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS}
+{17, DeviceType::CONNECT, "MX400", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x50 Wirelss Base
 // {157, DeviceType::THERMOSTAT, "RC120", DeviceFlags::EMS_DEVICE_FLAG_CR120}
 #endif
 
