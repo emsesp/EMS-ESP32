@@ -570,6 +570,8 @@ std::string Command::tagged_cmd(const std::string & cmd, const uint8_t flag) {
         return "hs<n>." + cmd;
     case CommandFlag::CMD_FLAG_AHS:
         return "ahs<n>." + cmd;
+    case CommandFlag::CMD_FLAG_SRC:
+        return "src<n>." + cmd;
     default:
         return cmd;
     }

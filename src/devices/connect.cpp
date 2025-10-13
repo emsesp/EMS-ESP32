@@ -86,7 +86,7 @@ void Connect::register_device_values_room(std::shared_ptr<Connect::RoomCircuit> 
     register_device_value(tag, &room->humidity_, DeviceValueType::INT8, FL_(airHumidity), DeviceValueUOM::PERCENT);
     register_device_value(tag, &room->dewtemp_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(dewTemperature), DeviceValueUOM::DEGREES);
     register_device_value(
-        tag, &room->seltemp_, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(seltemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_seltemp), 5, 30);
+        tag, &room->seltemp_, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(selRoomTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_seltemp), 5, 30);
     register_device_value(tag, &room->mode_, DeviceValueType::ENUM, FL_(enum_mode8), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
     register_device_value(tag, &room->name_, DeviceValueType::STRING, FL_(name), DeviceValueUOM::NONE, MAKE_CF_CB(set_name));
     register_device_value(tag, &room->childlock_, DeviceValueType::BOOL, FL_(childlock), DeviceValueUOM::NONE, MAKE_CF_CB(set_childlock));
