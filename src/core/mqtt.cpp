@@ -1238,9 +1238,10 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
 }
 
 bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, const bool remove, const int16_t min, const uint32_t max) {
-    uint8_t      hc_num     = tag < DeviceValueTAG::TAG_HS1 ? tag : tag - DeviceValueTAG::TAG_HS1 + 1;
-    const char * devicename = tag < DeviceValueTAG::TAG_HS1 ? "thermostat" : "connect";
-    const char * tagname    = tag < DeviceValueTAG::TAG_HS1 ? "hc" : "hs";
+    uint8_t      hc_num      = tag < DeviceValueTAG::TAG_SRC1 ? tag : tag - DeviceValueTAG::TAG_SRC1 + 1;
+    const char * tagname     = tag < DeviceValueTAG::TAG_SRC1 ? "hc" : "src";
+    const uint   device_type = tag < DeviceValueTAG::TAG_SRC1 ? EMSdevice::DeviceType::THERMOSTAT : EMSdevice::DeviceType::CONNECT;
+    const char * devicename  = EMSdevice::device_type_2_device_name(device_type);
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     char topic_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
@@ -1274,7 +1275,7 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
             snprintf(currtemp_s, sizeof(currtemp_s), "value_json.%s%d.currtemp", tagname, hc_num);
             snprintf(currtemp_cond, sizeof(currtemp_cond), "value_json.%s%d is defined and %s is defined", tagname, hc_num, currtemp_s);
         }
-        snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(EMSdevice::DeviceType::THERMOSTAT, DeviceValueTAG::TAG_NONE).c_str());
+        snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_NONE).c_str());
     } else {
         // single format
         snprintf(hc_mode_s, sizeof(hc_mode_s), "value_json.mode");
@@ -1286,10 +1287,7 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
             snprintf(currtemp_s, sizeof(currtemp_s), "value_json.currtemp");
             snprintf(currtemp_cond, sizeof(currtemp_cond), "%s is defined", currtemp_s);
         }
-        snprintf(topic_t,
-                 sizeof(topic_t),
-                 "~/%s",
-                 Mqtt::tag_to_topic(tag < DeviceValueTAG::TAG_HS1 ? EMSdevice::DeviceType::THERMOSTAT : EMSdevice::DeviceType::CONNECT, tag).c_str());
+        snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(device_type, tag).c_str());
     }
 
     snprintf(mode_str_tpl,
