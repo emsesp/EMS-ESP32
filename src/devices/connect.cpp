@@ -90,7 +90,7 @@ void Connect::register_device_values_room(std::shared_ptr<Connect::RoomCircuit> 
     register_device_value(tag, &room->mode_, DeviceValueType::ENUM, FL_(enum_mode8), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
     register_device_value(tag, &room->name_, DeviceValueType::STRING, FL_(name), DeviceValueUOM::NONE, MAKE_CF_CB(set_name));
     register_device_value(tag, &room->childlock_, DeviceValueType::BOOL, FL_(childlock), DeviceValueUOM::NONE, MAKE_CF_CB(set_childlock));
-    register_device_value(tag, &room->icon_, DeviceValueType::ENUM, FL_(enum_icons), FL_(icon), DeviceValueUOM::NONE, MAKE_CF_CB(set_icon), 0, 12);
+    register_device_value(tag, &room->icon_, DeviceValueType::ENUM, FL_(enum_icons), FL_(icon), DeviceValueUOM::NONE, MAKE_CF_CB(set_icon));
 }
 
 std::shared_ptr<Connect::RoomCircuit> Connect::room_circuit(const uint8_t num, const bool create) {
@@ -142,7 +142,7 @@ void Connect::process_roomThermostatName(std::shared_ptr<const Telegram> telegra
     if (rc == nullptr) {
         return;
     }
-    has_update(rc->icon_, 0);
+    has_update(telegram, rc->icon_, 0);
     for (uint8_t i = telegram->offset; i < telegram->message_length + telegram->offset && i < 100; i++) {
         if ((i > 1) && (i % 2) == 0) {
             rc->name_[(i - 2) / 2] = telegram->message_data[i - telegram->offset];

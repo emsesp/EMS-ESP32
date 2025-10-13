@@ -1902,7 +1902,7 @@ void EMSdevice::mqtt_ha_entity_config_create() {
                 count++;
             }
             // SRC thermostats mapped to connect/src1/...
-            if (dv.tag >= DeviceValueTAG::TAG_SRC1 && !strcmp(dv.short_name, FL_(roomtemp)[0])) {
+            if (dv.tag >= DeviceValueTAG::TAG_SRC1 && dv.tag <= DeviceValueTAG::TAG_SRC16 && !strcmp(dv.short_name, FL_(roomtemp)[0])) {
                 Mqtt::publish_ha_climate_config(dv.tag, true, false, dv.min, dv.max);
             }
 

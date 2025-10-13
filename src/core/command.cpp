@@ -271,12 +271,12 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
     } else if (!strncmp(lowerCmd, "hs", 2) && command[2] >= '1' && command[2] <= '9') {
         id = command[2] - '1' + DeviceValueTAG::TAG_HS1; //20;
         command += 3;
-    } else if (!strncmp(lowerCmd, "src", 3) && command[2] == '1' && command[3] >= '0' && command[3] <= '6') {
-        id = command[3] - '0' + DeviceValueTAG::TAG_SRC10; //46;
+    } else if (!strncmp(lowerCmd, "src", 3) && command[3] == '1' && command[4] >= '0' && command[4] <= '6') {
+        id = command[4] - '0' + DeviceValueTAG::TAG_SRC10; //46;
+        command += 5;
+    } else if (!strncmp(lowerCmd, "src", 3) && command[3] >= '1' && command[3] <= '9') {
+        id = command[3] - '1' + DeviceValueTAG::TAG_SRC1; //36;
         command += 4;
-    } else if (!strncmp(lowerCmd, "src", 3) && command[2] >= '1' && command[2] <= '9') {
-        id = command[2] - '1' + DeviceValueTAG::TAG_SRC1; //36;
-        command += 3;
     } else if (!strncmp(lowerCmd, "dhw", 3)) { // no number
         id = DeviceValueTAG::TAG_DHW1;
         command += 3;

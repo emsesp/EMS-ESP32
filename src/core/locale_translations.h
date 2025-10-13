@@ -337,18 +337,18 @@ MAKE_WORD_TRANSLATION(partymode, "party", "Party", "party", "party", "impreza", 
 MAKE_WORD_TRANSLATION(fireplace, "fireplace", "Kamin", "haard", "Kamin", "kominek", "", "", "şömine", "camino", "krb", "") // TODO translate
 
 // SRC plus
-MAKE_WORD_TRANSLATION(chefhat, "mdi:chef-hat")
-MAKE_WORD_TRANSLATION(sofasingle, "mdi:sofa-single-outline")
-MAKE_WORD_TRANSLATION(bowlmix, "mdi:bowl-mix-outline")
-MAKE_WORD_TRANSLATION(bedsingle, "mdi:bed-single-outline")
-MAKE_WORD_TRANSLATION(beddouble, "mdi:bed-double-outline")
-MAKE_WORD_TRANSLATION(teddybear, "mdi:teddy-bear")
-MAKE_WORD_TRANSLATION(shower, "mdi:shower")
-MAKE_WORD_TRANSLATION(laptop, "mdi:laptop")
-MAKE_WORD_TRANSLATION(door, "mdi:door")
-MAKE_WORD_TRANSLATION(palette, "mdi:palette-outline")
-MAKE_WORD_TRANSLATION(washingmachine, "mdi:washing-machine")
-MAKE_WORD_TRANSLATION(bookshelf, "mdi:bookshelf")
+MAKE_WORD_TRANSLATION(chefhat, "mdi:chef-hat", "mdi:chef-hat")
+MAKE_WORD_TRANSLATION(sofasingle, "mdi:sofa-single-outline", "mdi:sofa-single-outline")
+MAKE_WORD_TRANSLATION(bowlmix, "mdi:bowl-mix-outline", "mdi:bowl-mix-outline")
+MAKE_WORD_TRANSLATION(bedsingle, "mdi:bed-single-outline", "mdi:bed-single-outline")
+MAKE_WORD_TRANSLATION(beddouble, "mdi:bed-double-outline", "mdi:bed-double-outline")
+MAKE_WORD_TRANSLATION(teddybear, "mdi:teddy-bear", "mdi:teddy-bear")
+MAKE_WORD_TRANSLATION(shower, "mdi:shower", "mdi:shower")
+MAKE_WORD_TRANSLATION(laptop, "mdi:laptop", "mdi:laptop")
+MAKE_WORD_TRANSLATION(door, "mdi:door", "mdi:door")
+MAKE_WORD_TRANSLATION(palette, "mdi:palette-outline", "mdi:palette-outline")
+MAKE_WORD_TRANSLATION(washingmachine, "mdi:washing-machine", "mdi:washing-machine")
+MAKE_WORD_TRANSLATION(bookshelf, "mdi:bookshelf", "mdi:bookshelf")
 
 // MQTT Discovery - this is special device entity for 'climate'
 MAKE_TRANSLATION(haclimate, "haclimate", "mqtt discovery current room temperature", "Discovery aktuelle Raumtemperatur", "Discovery huidige kamertemperatuur", "MQTT Discovery för aktuell rumstemperatur", "termostat w HA", "HA Avlest temp", "", "Güncel osa sıcaklığı", "verifica temperatura ambiente attuale", "mqtt discovery aktuálna teplota v miestnosti", "mqtt discovery aktuální pokojová teplota") // TODO translate
