@@ -1240,10 +1240,10 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
 }
 
 bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, const bool remove, const int16_t min, const uint32_t max) {
-    uint8_t      hc_num      = tag < DeviceValueTAG::TAG_SRC1 ? tag : tag - DeviceValueTAG::TAG_SRC1 + 1;
-    const char * tagname     = tag < DeviceValueTAG::TAG_SRC1 ? "hc" : "src";
-    const uint   device_type = tag < DeviceValueTAG::TAG_SRC1 ? EMSdevice::DeviceType::THERMOSTAT : EMSdevice::DeviceType::CONNECT;
-    const char * devicename  = EMSdevice::device_type_2_device_name(device_type);
+    uint8_t       hc_num      = tag < DeviceValueTAG::TAG_SRC1 ? tag : tag - DeviceValueTAG::TAG_SRC1 + 1;
+    const char *  tagname     = tag < DeviceValueTAG::TAG_SRC1 ? "hc" : "src";
+    const uint8_t device_type = tag < DeviceValueTAG::TAG_SRC1 ? EMSdevice::DeviceType::THERMOSTAT : EMSdevice::DeviceType::CONNECT;
+    const char *  devicename  = EMSdevice::device_type_2_device_name(device_type);
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     char topic_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
