@@ -430,6 +430,7 @@ void WebCustomEntityService::publish(const bool force) {
             snprintf(uniq_s, sizeof(uniq_s), "%s_%s", F_(custom), entityItem.name.c_str());
 
             config["uniq_id"] = uniq_s;
+            config["obj_id"]  = uniq_s;
             config["name"]    = entityItem.name.c_str();
 
             char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
@@ -462,7 +463,7 @@ void WebCustomEntityService::publish(const bool force) {
 
             // add default_entity_id
             std::string topic_str(topic);
-            config["default_entity_id"] = topic_str.substr(0, topic_str.find("/")) + "." + uniq_s;
+            config["def_ent_id"] = topic_str.substr(0, topic_str.find("/")) + "." + uniq_s;
 
             Mqtt::add_ha_classes(config.as<JsonObject>(), EMSdevice::DeviceType::SYSTEM, entityItem.value_type, entityItem.uom);
             Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Custom Entities", nullptr, nullptr, nullptr, false);

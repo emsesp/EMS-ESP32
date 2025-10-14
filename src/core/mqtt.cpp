@@ -528,15 +528,16 @@ void Mqtt::ha_status() {
         strcpy(uniq, "system_status");
     }
 
-    doc["uniq_id"]           = uniq;
-    doc["default_entity_id"] = (std::string) "binary_sensor." + uniq;
-    doc["stat_t"]            = Mqtt::base() + "/status";
-    doc["name"]              = "System status";
-    doc["pl_on"]             = "online";
-    doc["pl_off"]            = "offline";
-    doc["stat_cla"]          = "measurement";
-    doc["dev_cla"]           = "connectivity";
-    doc["ent_cat"]           = "diagnostic";
+    doc["uniq_id"]    = uniq;
+    doc["onj_id"]     = uniq;
+    doc["def_ent_id"] = (std::string) "binary_sensor." + uniq;
+    doc["stat_t"]     = Mqtt::base() + "/status";
+    doc["name"]       = "System status";
+    doc["pl_on"]      = "online";
+    doc["pl_off"]     = "offline";
+    doc["stat_cla"]   = "measurement";
+    doc["dev_cla"]    = "connectivity";
+    doc["ent_cat"]    = "diagnostic";
 
     // doc["avty_t"]      = "~/status"; // commented out, as it causes errors in HA sometimes
     // doc["json_attr_t"] = "~/heartbeat"; // store also as HA attributes
@@ -980,11 +981,12 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // build the full payload
     JsonDocument doc;
     doc["uniq_id"] = uniq_id;
+    doc["onj_id"]  = uniq_id;
 
     // set the entity_id. This is breaking change in HA 2025.10.0 - see https://github.com/home-assistant/core/pull/151775
     // extract the string from topic up to the / using std::string
     std::string topic_str(topic);
-    doc["default_entity_id"] = topic_str.substr(0, topic_str.find("/")) + "." + uniq_id;
+    doc["def_ent_id"] = topic_str.substr(0, topic_str.find("/")) + "." + uniq_id;
 
     char sample_val[30] = "0"; // sample, correct(!) entity value, used only to prevent warning/error in HA if real value is not published yet
 
@@ -1316,15 +1318,16 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
 
     JsonDocument doc;
 
-    doc["~"]                 = Mqtt::base();
-    doc["uniq_id"]           = uniq_id_s;
-    doc["default_entity_id"] = (std::string) "climate." + uniq_id_s;
-    doc["name"]              = name_s;
-    doc["mode_stat_t"]       = topic_t;
-    doc["mode_stat_tpl"]     = mode_str_tpl;
-    doc["temp_cmd_t"]        = temp_cmd_s;
-    doc["temp_stat_t"]       = topic_t;
-    doc["temp_stat_tpl"]     = (std::string) "{{" + seltemp_s + " if " + seltemp_cond + " else 0}}";
+    doc["~"]             = Mqtt::base();
+    doc["uniq_id"]       = uniq_id_s;
+    doc["obj_id"]        = uniq_id_s;
+    doc["def_ent_id"]    = (std::string) "climate." + uniq_id_s;
+    doc["name"]          = name_s;
+    doc["mode_stat_t"]   = topic_t;
+    doc["mode_stat_tpl"] = mode_str_tpl;
+    doc["temp_cmd_t"]    = temp_cmd_s;
+    doc["temp_stat_t"]   = topic_t;
+    doc["temp_stat_tpl"] = (std::string) "{{" + seltemp_s + " if " + seltemp_cond + " else 0}}";
 
     if (has_roomtemp) {
         doc["curr_temp_t"]   = topic_t;
@@ -1337,8 +1340,8 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
     doc["mode_cmd_t"] = mode_cmd_s;
 
     // add hvac_action - https://github.com/emsesp/EMS-ESP32/discussions/2562
-    doc["action_topic"]    = "~/boiler_data";
-    doc["action_template"] = "{% if value_json.hpactivity=='cooling'%}cooling{%elif value_json.heatingactive=='on'%}heating{%else%}idle{%endif%}";
+    doc["act_t"]   = "~/boiler_data";
+    doc["act_tpl"] = "{% if value_json.hpactivity=='cooling'%}cooling{%elif value_json.heatingactive=='on'%}heating{%else%}idle{%endif%}";
 
     // the HA climate component only responds to auto, heat and off
     JsonArray modes = doc["modes"].to<JsonArray>();

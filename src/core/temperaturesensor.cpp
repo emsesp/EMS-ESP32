@@ -531,8 +531,9 @@ void TemperatureSensor::publish_values(const bool force) {
                     snprintf(uniq_s, sizeof(uniq_s), "%s_%s", F_(temperaturesensor), sensor.id().c_str());
                 }
 
-                config["uniq_id"]           = uniq_s;
-                config["default_entity_id"] = (std::string) "sensor." + uniq_s;
+                config["uniq_id"]    = uniq_s;
+                config["obj_id"]     = uniq_s;
+                config["def_ent_id"] = (std::string) "sensor." + uniq_s;
 
                 char name[50];
                 snprintf(name, sizeof(name), "%s", sensor.name().c_str());

@@ -282,9 +282,10 @@ void WebSchedulerService::publish(const bool force) {
                 char uniq_s[70];
                 snprintf(uniq_s, sizeof(uniq_s), "%s_%s", F_(scheduler), scheduleItem.name.c_str());
 
-                config["uniq_id"]           = uniq_s;
-                config["name"]              = scheduleItem.name.c_str();
-                config["default_entity_id"] = (std::string) "switch." + uniq_s;
+                config["uniq_id"]    = uniq_s;
+                config["obj_id"]     = uniq_s;
+                config["name"]       = scheduleItem.name.c_str();
+                config["def_ent_id"] = (std::string) "switch." + uniq_s;
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 char command_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
