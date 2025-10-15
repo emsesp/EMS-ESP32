@@ -27,6 +27,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - Analogsensors frequency input [#2631](https://github.com/emsesp/EMS-ESP32/discussions/2631)
 - SRC plus thermostats [#2636](https://github.com/emsesp/EMS-ESP32/issues/2636)
 - Greenstar 2000 [#2645](https://github.com/emsesp/EMS-ESP32/issues/2645)
+- RC3xx `dhw modetype` [#2659](https://github.com/emsesp/EMS-ESP32/discussions/2659)
 
 ## Fixed
 

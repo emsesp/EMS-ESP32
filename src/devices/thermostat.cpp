@@ -1326,7 +1326,8 @@ void Thermostat::process_RC300WWmode2(std::shared_ptr<const Telegram> telegram) 
     // pos 1 = holiday mode
     // pos 2 = current status of DHW setpoint
     // pos 3 = current status of DHW circulation pump
-    has_update(telegram, dhw->wwExtra_, 0); // 0=no, 1=yes
+    has_update(telegram, dhw->wwExtra_, 0);    // 0=no, 1=yes
+    has_update(telegram, dhw->wwModeType_, 8); //  0-off, 1-eco, 2-comfort, 3-eco+
 }
 
 // 0x23A damped outdoor temp
@@ -5179,6 +5180,7 @@ void Thermostat::register_device_values_dhw(std::shared_ptr<Thermostat::DhwCircu
         } else {
             register_device_value(tag, &dhw->wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
         }
+        register_device_value(tag, &dhw->wwModeType_, DeviceValueType::ENUM, FL_(enum_wwModeType), FL_(modetype), DeviceValueUOM::NONE);
         register_device_value(tag, &dhw->wwSetTemp_, DeviceValueType::UINT8, FL_(wwSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwtemp));
         register_device_value(tag, &dhw->wwSetTempLow_, DeviceValueType::UINT8, FL_(wwSetTempLow), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwtemplow));
         register_device_value(tag, &dhw->wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcircmode));
