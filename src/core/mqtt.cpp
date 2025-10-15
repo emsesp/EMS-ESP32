@@ -529,7 +529,7 @@ void Mqtt::ha_status() {
     }
 
     doc["uniq_id"]    = uniq;
-    doc["onj_id"]     = uniq;
+    doc["obj_id"]     = uniq;
     doc["def_ent_id"] = (std::string) "binary_sensor." + uniq;
     doc["stat_t"]     = Mqtt::base() + "/status";
     doc["name"]       = "System status";
@@ -981,7 +981,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // build the full payload
     JsonDocument doc;
     doc["uniq_id"] = uniq_id;
-    doc["onj_id"]  = uniq_id;
+    doc["obj_id"]  = uniq_id;
 
     // set the entity_id. This is breaking change in HA 2025.10.0 - see https://github.com/home-assistant/core/pull/151775
     // extract the string from topic up to the / using std::string
