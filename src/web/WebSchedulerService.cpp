@@ -283,7 +283,6 @@ void WebSchedulerService::publish(const bool force) {
                 snprintf(uniq_s, sizeof(uniq_s), "%s_%s", F_(scheduler), scheduleItem.name.c_str());
 
                 config["uniq_id"]    = uniq_s;
-                config["obj_id"]     = uniq_s;
                 config["name"]       = scheduleItem.name.c_str();
                 config["def_ent_id"] = (std::string) "switch." + uniq_s;
 

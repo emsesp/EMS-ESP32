@@ -430,7 +430,6 @@ void WebCustomEntityService::publish(const bool force) {
             snprintf(uniq_s, sizeof(uniq_s), "%s_%s", F_(custom), entityItem.name.c_str());
 
             config["uniq_id"] = uniq_s;
-            config["obj_id"]  = uniq_s;
             config["name"]    = entityItem.name.c_str();
 
             char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];

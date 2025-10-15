@@ -532,7 +532,6 @@ void TemperatureSensor::publish_values(const bool force) {
                 }
 
                 config["uniq_id"]    = uniq_s;
-                config["obj_id"]     = uniq_s;
                 config["def_ent_id"] = (std::string) "sensor." + uniq_s;
 
                 char name[50];

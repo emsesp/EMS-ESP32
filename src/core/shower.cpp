@@ -206,7 +206,6 @@ void Shower::create_ha_discovery() {
             snprintf(str, sizeof(str), "shower_active"); // v3.4 compatible
         }
         doc["uniq_id"]    = str;
-        doc["obj_id"]     = str;
         doc["def_ent_id"] = (std::string) "binary_sensor." + str;
 
         snprintf(stat_t, sizeof(stat_t), "%s/shower_active", Mqtt::base().c_str());
@@ -225,7 +224,6 @@ void Shower::create_ha_discovery() {
         snprintf(str, sizeof(str), "%s_shower_duration", Mqtt::basename().c_str());
 
         doc["uniq_id"]    = str;
-        doc["obj_id"]     = str;
         doc["def_ent_id"] = (std::string) "sensor." + str;
 
         snprintf(stat_t, sizeof(stat_t), "%s/shower_data", Mqtt::base().c_str());

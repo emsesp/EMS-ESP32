@@ -701,7 +701,6 @@ void AnalogSensor::publish_values(const bool force) {
                 }
 
                 config["uniq_id"] = uniq_s;
-                config["obj_id"]  = uniq_s;
 
                 char name[50];
                 snprintf(name, sizeof(name), "%s", sensor.name().c_str());
