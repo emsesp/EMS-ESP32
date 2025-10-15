@@ -246,7 +246,7 @@ bool Connect::set_childlock(const char * value, const int8_t id) {
     }
     bool b;
     if (Helpers::value2bool(value, b)) {
-        write_command(0xBB5 + rc->room(), b ? 1 : 0, 7, 0xBB5 + rc->room());
+        write_command(0xBB5 + rc->room(), 7, b ? 1 : 0, 0xBB5 + rc->room());
         return true;
     }
     return false;
