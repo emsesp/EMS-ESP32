@@ -528,15 +528,15 @@ void Mqtt::ha_status() {
         strcpy(uniq, "system_status");
     }
 
-    doc["uniq_id"]           = uniq;
-    doc["default_entity_id"] = (std::string) "binary_sensor." + uniq;
-    doc["stat_t"]            = Mqtt::base() + "/status";
-    doc["name"]              = "System status";
-    doc["pl_on"]             = "online";
-    doc["pl_off"]            = "offline";
-    doc["stat_cla"]          = "measurement";
-    doc["dev_cla"]           = "connectivity";
-    doc["ent_cat"]           = "diagnostic";
+    doc["uniq_id"]    = uniq;
+    doc["def_ent_id"] = (std::string) "binary_sensor." + uniq;
+    doc["stat_t"]     = Mqtt::base() + "/status";
+    doc["name"]       = "System status";
+    doc["pl_on"]      = "online";
+    doc["pl_off"]     = "offline";
+    doc["stat_cla"]   = "measurement";
+    doc["dev_cla"]    = "connectivity";
+    doc["ent_cat"]    = "diagnostic";
 
     // doc["avty_t"]      = "~/status"; // commented out, as it causes errors in HA sometimes
     // doc["json_attr_t"] = "~/heartbeat"; // store also as HA attributes
@@ -984,7 +984,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // set the entity_id. This is breaking change in HA 2025.10.0 - see https://github.com/home-assistant/core/pull/151775
     // extract the string from topic up to the / using std::string
     std::string topic_str(topic);
-    doc["default_entity_id"] = topic_str.substr(0, topic_str.find("/")) + "." + uniq_id;
+    doc["def_ent_id"] = topic_str.substr(0, topic_str.find("/")) + "." + uniq_id;
 
     char sample_val[30] = "0"; // sample, correct(!) entity value, used only to prevent warning/error in HA if real value is not published yet
 
@@ -1238,9 +1238,10 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
 }
 
 bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, const bool remove, const int16_t min, const uint32_t max) {
-    uint8_t      hc_num     = tag < DeviceValueTAG::TAG_HS1 ? tag : tag - DeviceValueTAG::TAG_HS1 + 1;
-    const char * devicename = tag < DeviceValueTAG::TAG_HS1 ? "thermostat" : "connect";
-    const char * tagname    = tag < DeviceValueTAG::TAG_HS1 ? "hc" : "hs";
+    uint8_t       hc_num      = tag < DeviceValueTAG::TAG_SRC1 ? tag : tag - DeviceValueTAG::TAG_SRC1 + 1;
+    const char *  tagname     = tag < DeviceValueTAG::TAG_SRC1 ? "hc" : "src";
+    const uint8_t device_type = tag < DeviceValueTAG::TAG_SRC1 ? EMSdevice::DeviceType::THERMOSTAT : EMSdevice::DeviceType::CONNECT;
+    const char *  devicename  = EMSdevice::device_type_2_device_name(device_type);
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     char topic_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
@@ -1274,7 +1275,7 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
             snprintf(currtemp_s, sizeof(currtemp_s), "value_json.%s%d.currtemp", tagname, hc_num);
             snprintf(currtemp_cond, sizeof(currtemp_cond), "value_json.%s%d is defined and %s is defined", tagname, hc_num, currtemp_s);
         }
-        snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(EMSdevice::DeviceType::THERMOSTAT, DeviceValueTAG::TAG_NONE).c_str());
+        snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_NONE).c_str());
     } else {
         // single format
         snprintf(hc_mode_s, sizeof(hc_mode_s), "value_json.mode");
@@ -1286,10 +1287,7 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
             snprintf(currtemp_s, sizeof(currtemp_s), "value_json.currtemp");
             snprintf(currtemp_cond, sizeof(currtemp_cond), "%s is defined", currtemp_s);
         }
-        snprintf(topic_t,
-                 sizeof(topic_t),
-                 "~/%s",
-                 Mqtt::tag_to_topic(tag < DeviceValueTAG::TAG_HS1 ? EMSdevice::DeviceType::THERMOSTAT : EMSdevice::DeviceType::CONNECT, tag).c_str());
+        snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(device_type, tag).c_str());
     }
 
     snprintf(mode_str_tpl,
@@ -1318,15 +1316,15 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
 
     JsonDocument doc;
 
-    doc["~"]                 = Mqtt::base();
-    doc["uniq_id"]           = uniq_id_s;
-    doc["default_entity_id"] = (std::string) "climate." + uniq_id_s;
-    doc["name"]              = name_s;
-    doc["mode_stat_t"]       = topic_t;
-    doc["mode_stat_tpl"]     = mode_str_tpl;
-    doc["temp_cmd_t"]        = temp_cmd_s;
-    doc["temp_stat_t"]       = topic_t;
-    doc["temp_stat_tpl"]     = (std::string) "{{" + seltemp_s + " if " + seltemp_cond + " else 0}}";
+    doc["~"]             = Mqtt::base();
+    doc["uniq_id"]       = uniq_id_s;
+    doc["def_ent_id"]    = (std::string) "climate." + uniq_id_s;
+    doc["name"]          = name_s;
+    doc["mode_stat_t"]   = topic_t;
+    doc["mode_stat_tpl"] = mode_str_tpl;
+    doc["temp_cmd_t"]    = temp_cmd_s;
+    doc["temp_stat_t"]   = topic_t;
+    doc["temp_stat_tpl"] = (std::string) "{{" + seltemp_s + " if " + seltemp_cond + " else 0}}";
 
     if (has_roomtemp) {
         doc["curr_temp_t"]   = topic_t;
@@ -1339,8 +1337,8 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
     doc["mode_cmd_t"] = mode_cmd_s;
 
     // add hvac_action - https://github.com/emsesp/EMS-ESP32/discussions/2562
-    doc["action_topic"]    = "~/boiler_data";
-    doc["action_template"] = "{% if value_json.hpactivity=='cooling'%}cooling{%elif value_json.heatingactive=='on'%}heating{%else%}idle{%endif%}";
+    doc["act_t"]   = "~/boiler_data";
+    doc["act_tpl"] = "{% if value_json.hpactivity=='cooling'%}cooling{%elif value_json.heatingactive=='on'%}heating{%else%}idle{%endif%}";
 
     // the HA climate component only responds to auto, heat and off
     JsonArray modes = doc["modes"].to<JsonArray>();

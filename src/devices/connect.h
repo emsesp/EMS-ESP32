@@ -39,6 +39,10 @@ class Connect : public EMSdevice {
         uint8_t mode_;
         char    name_[51];
         int16_t dewtemp_;
+        uint8_t childlock_;
+        uint8_t icon_;
+        // uint8_t tempautotemp_;
+        // uint8_t manualtemp_;
 
         uint8_t room() {
             return room_;
@@ -54,12 +58,15 @@ class Connect : public EMSdevice {
     void register_device_values_room(std::shared_ptr<Connect::RoomCircuit> room);
     void process_roomThermostat(std::shared_ptr<const Telegram> telegram);
     void process_roomThermostatName(std::shared_ptr<const Telegram> telegram);
-    void process_roomThermostatMode(std::shared_ptr<const Telegram> telegram);
+    void process_roomThermostatSettings(std::shared_ptr<const Telegram> telegram);
     void process_roomThermostatParam(std::shared_ptr<const Telegram> telegram);
     void process_roomThermostatData(std::shared_ptr<const Telegram> telegram);
+    void process_roomSchedule(std::shared_ptr<const Telegram> telegram);
     bool set_mode(const char * value, const int8_t id);
     bool set_seltemp(const char * value, const int8_t id);
     bool set_name(const char * value, const int8_t id);
+    bool set_childlock(const char * value, const int8_t id);
+    bool set_icon(const char * value, const int8_t id);
 
     std::vector<std::shared_ptr<Connect::RoomCircuit>> room_circuits_;
 
@@ -67,6 +74,7 @@ class Connect : public EMSdevice {
     void    process_RCTime(std::shared_ptr<const Telegram> telegram);
     int16_t outdoorTemp_;
     char    dateTime_[30]; // date and time stamp
+    uint8_t schedule_[126]; // telegram copy
 };
 
 } // namespace emsesp

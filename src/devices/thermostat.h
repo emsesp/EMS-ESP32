@@ -183,6 +183,7 @@ class Thermostat : public EMSdevice {
         ~DhwCircuit() = default;
         uint8_t wwExtra_;
         uint8_t wwMode_;
+        uint8_t wwModeType_;
         uint8_t wwCircPump_;
         uint8_t wwCircMode_;
         uint8_t wwSetTemp_;

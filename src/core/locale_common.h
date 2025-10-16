@@ -323,6 +323,7 @@ MAKE_ENUM(enum_wwMode3, FL_(on), FL_(off), FL_(auto))
 MAKE_ENUM(enum_wwMode4, FL_(off), FL_(ecoplus), FL_(eco), FL_(comfort), FL_(auto))
 MAKE_ENUM(enum_wwMode5, FL_(normal), FL_(comfort), FL_(ecoplus)) // Rego3000
 MAKE_ENUM(enum_wwMode6, FL_(off), FL_(comfort), FL_(auto)) // CR120
+MAKE_ENUM(enum_wwModeType, FL_(off), FL_(eco), FL_(comfort), FL_(ecoplus))
 MAKE_ENUM(enum_heatingtype, FL_(off), FL_(radiator), FL_(convector), FL_(floor))
 MAKE_ENUM(enum_heatingtype1, FL_(off), FL_(curve), FL_(radiator), FL_(convector), FL_(floor))
 MAKE_ENUM(enum_heatingtype2, FL_(off), FL_(radiator), FL_(convector), FL_(floor), FL_(roomflow), FL_(roomload))
@@ -401,6 +402,9 @@ MAKE_ENUM(enum_ventMode, FL_(auto), FL_(off), FL_(L1), FL_(L2), FL_(L3), FL_(L4)
 
 // water
 MAKE_ENUM(enum_errorDisp, FL_(off), FL_(normal), FL_(inverted))
+
+// SRC plus
+MAKE_ENUM(enum_icons, FL_(none), FL_(chefhat), FL_(sofasingle), FL_(bowlmix), FL_(bedsingle), FL_(beddouble), FL_(teddybear), FL_(shower), FL_(laptop), FL_(door), FL_(palette), FL_(washingmachine), FL_(bookshelf))
 
 #pragma GCC diagnostic pop
 

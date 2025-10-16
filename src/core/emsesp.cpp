@@ -362,6 +362,10 @@ void EMSESP::dump_all_entities(uuid::console::Shell & shell) {
                 if (device.device_type == DeviceType::HEATSOURCE) {
                     device_id = EMSdevice::EMS_DEVICE_ID_AHS1;
                 }
+                // For MX400 SRC plus base
+                if (device.device_type == DeviceType::CONNECT && device.product_id == 17) {
+                    device_id = EMSdevice::EMS_DEVICE_ID_RFBASE;
+                }
 
                 // add the device and print out all the entities
                 // for testing the mixer use ... if (device.product_id == 69) {
@@ -1414,8 +1418,8 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     LOG_INFO("Detected EMS device: %s (0x%02X)", EMSdevice::device_type_2_device_name(device_type), device_id);
 
     // register the MQTT subscribe topic for this device
-    // except for connect, controller and gateway
-    if ((device_type == DeviceType::CONNECT) || (device_type == DeviceType::CONTROLLER) || (device_type == DeviceType::GATEWAY)) {
+    // except for controller and gateway
+    if ((device_type == DeviceType::CONTROLLER) || (device_type == DeviceType::GATEWAY)) {
         return true;
     }
 

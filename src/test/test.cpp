@@ -260,6 +260,26 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
         return true;
     }
 
+    if (cmd == "src") {
+        EMSESP::logger().notice("Adding SRC plus thermostat...");
+
+        add_device(0x50, 17); // MX400 module
+        uart_telegram("50 00 FF 00 0A DD 00 E6 36 2A"); // monitor, temperatures
+        uart_telegram("50 00 FF 00 0A B5 00 FF 00 24 01 FF 24 00"); // mode, childlock
+        // switchprogram
+        uart_telegram("50 00 FF 00 0A 65 2A 00 3C 2A FF FF 2A FF FF 2A FF FF 2A FF FF 2A FF FF");
+        uart_telegram("50 00 FF 12 0A 65 2A 00 3C 2A FF FF 2A FF FF 2A FF FF 2A FF FF 2A FF FF");
+        uart_telegram("50 00 FF 24 0A 65 2A 00 3C 2A FF FF 2A FF FF 2A FF FF 2A FF FF 2A FF FF");
+        uart_telegram("50 00 FF 36 0A 65 2A 00 3C 2A FF FF 2A FF FF 2A FF FF 2A FF FF 2A FF FF");
+        uart_telegram("50 00 FF 48 0A 65 2A 00 3C 2A FF FF 2A FF FF 2A FF FF 2A FF FF 2A FF FF");
+        uart_telegram("50 00 FF 5A 0A 65 2A 00 3C 2A FF FF 2A FF FF 2A FF FF 2A FF FF 2A FF FF");
+        uart_telegram("50 00 FF 6C 0A 65 2A 00 3C 20 01 08 2A FF FF 2A FF FF 2A FF FF 2A FF FF");
+        // icon ,name
+        uart_telegram("50 00 FF 00 0A 3D 01 00 4B 00 FC 00 63 00 68 00 65 00 00 00 00 00 00 00 00 00");
+
+        return true;
+    }
+
 #endif
 
     return false;
