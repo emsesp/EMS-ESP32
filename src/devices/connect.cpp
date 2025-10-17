@@ -145,7 +145,8 @@ void Connect::process_roomThermostatName(std::shared_ptr<const Telegram> telegra
     has_update(telegram, rc->icon_, 0);
     for (uint8_t i = telegram->offset; i < telegram->message_length + telegram->offset && i < 100; i++) {
         if ((i > 1) && (i % 2) == 0) {
-            rc->name_[(i - 2) / 2] = telegram->message_data[i - telegram->offset];
+            // replace ISOLatin1 characters with questionmark
+            rc->name_[(i - 2) / 2] = telegram->message_data[i - telegram->offset] & 0x80 ? '?' : telegram->message_data[i - telegram->offset];
         }
     }
     rc->name_[50] = '\0'; // make sure name is terminated
@@ -183,9 +184,14 @@ void Connect::process_roomThermostatData(std::shared_ptr<const Telegram> telegra
 
 // schedule for all thermostats
 void Connect::process_roomSchedule(std::shared_ptr<const Telegram> telegram) {
-    toggle_fetch(telegram->type_id, false); // fetch only once
-    auto length = ((telegram->offset + telegram->message_length) > 126) ? 126 - telegram->offset : telegram->message_length;
+    uint8_t length = ((telegram->offset + telegram->message_length) > 126) ? 126 - telegram->offset : telegram->message_length;
     memcpy(&schedule_[telegram->offset], telegram->message_data, length);
+    for (uint8_t c : schedule_) {
+        if (c == 0xFE) {
+            return;
+        }
+    }
+    toggle_fetch(telegram->type_id, false); // fetch only once if all is initialized
 }
 
 // Settings:
@@ -228,6 +234,9 @@ bool Connect::set_name(const char * value, const int8_t id) {
     for (uint8_t i = 0; i < strlen(value) + 1; i++) { // include terminating '\0'
         data[2 * i]     = 0;
         data[2 * i + 1] = value[i];
+        if (value[i] & 0x80) { // accept only ascii names
+            return false;
+        }
     }
     uint8_t ofs = 0;
     while (len > 0) {
