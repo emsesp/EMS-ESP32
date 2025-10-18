@@ -135,7 +135,7 @@ void Connect::process_roomThermostat(std::shared_ptr<const Telegram> telegram) {
     has_update(rc->dewtemp_, dt);
 }
 
-// gateway(0x48) W gateway(0x50), ?(0x0B42), data: 01 // icon in ofset 0
+// gateway(0x48) W gateway(0x50), ?(0x0B42), data: 01 // icon in offset 0
 // gateway(0x48) W gateway(0x50), ?(0x0B42), data: 00 4B 00 FC 00 63 00 68 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 (offset 1)
 void Connect::process_roomThermostatName(std::shared_ptr<const Telegram> telegram) {
     auto rc = room_circuit(telegram->type_id - 0xB3D);
