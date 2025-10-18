@@ -39,6 +39,8 @@ rm -f ./src/core/modbus_entity_parameters.hpp ./docs/dump_entities.csv
 echo "test entity_dump" | ./emsesp | python3 ./scripts/strip_csv.py > ./docs/dump_entities.csv
 cat ./docs/dump_entities.csv | python3 ./scripts/update_modbus_registers.py > ./src/core/modbus_entity_parameters.hpp
 
+exit 0
+
 # regenerate dump_entities.csv but without the Modbus entity parameters
 make clean
 make -s ARGS=-DEMSESP_STANDALONE
