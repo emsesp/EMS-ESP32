@@ -87,7 +87,7 @@ void Connect::register_device_values_room(std::shared_ptr<Connect::RoomCircuit> 
     register_device_value(tag, &room->dewtemp_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(dewTemperature), DeviceValueUOM::DEGREES);
     register_device_value(
         tag, &room->seltemp_, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(selRoomTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_seltemp), 5, 30);
-    register_device_value(tag, &room->mode_, DeviceValueType::ENUM, FL_(enum_mode8), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
+    register_device_value(tag, &room->mode_, DeviceValueType::ENUM, FL_(enum_mode2), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
     register_device_value(tag, &room->name_, DeviceValueType::STRING, FL_(name), DeviceValueUOM::NONE, MAKE_CF_CB(set_name));
     register_device_value(tag, &room->childlock_, DeviceValueType::BOOL, FL_(childlock), DeviceValueUOM::NONE, MAKE_CF_CB(set_childlock));
     register_device_value(tag, &room->icon_, DeviceValueType::ENUM, FL_(enum_icons), FL_(icon), DeviceValueUOM::NONE, MAKE_CF_CB(set_icon));
@@ -159,8 +159,8 @@ void Connect::process_roomThermostatSettings(std::shared_ptr<const Telegram> tel
     if (rc == nullptr) {
         return;
     }
-    // has_enumupdate(telegram, rc->mode_, 0, {3, 1, 0}); // modes off, manual auto
-    has_update(telegram, rc->mode_, 0);
+    has_enumupdate(telegram, rc->mode_, 0, {3, 1, 0}); // modes off, manual auto
+    // has_update(telegram, rc->mode_, 0); // modes: auto, heat, cool, off
     // has_update(telegram, rc->tempautotemp_, 1); // FF means off
     // has_update(telegram, rc->manualtemp_, 3);
     has_update(telegram, rc->childlock_, 7);
@@ -202,8 +202,8 @@ bool Connect::set_mode(const char * value, const int8_t id) {
         return false;
     }
     uint8_t v;
-    // if (Helpers::value2enum(value, v, FL_(enum_mode2), {3, 1, 0})) {
-    if (Helpers::value2enum(value, v, FL_(enum_mode8))) {
+    if (Helpers::value2enum(value, v, FL_(enum_mode2), {3, 1, 0})) {
+    // if (Helpers::value2enum(value, v, FL_(enum_mode8))) {
         write_command(0xBB5 + rc->room(), 0, v); // no validate, mode change is broadcasted
         return true;
     }
