@@ -263,8 +263,8 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
     if (cmd == "src") {
         EMSESP::logger().notice("Adding SRC plus thermostat...");
 
-        add_device(0x50, 17); // MX400 module
-        uart_telegram("50 00 FF 00 0A DD 00 E6 36 2A"); // monitor, temperatures
+        add_device(0x50, 17);                                       // MX400 module
+        uart_telegram("50 00 FF 00 0A DD 00 E6 36 2A");             // monitor, temperatures
         uart_telegram("50 00 FF 00 0A B5 00 FF 00 24 01 FF 24 00"); // mode, childlock
         // switchprogram
         uart_telegram("50 00 FF 00 0A 65 2A 00 3C 2A FF FF 2A FF FF 2A FF FF 2A FF FF 2A FF FF");
@@ -764,7 +764,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         test("boiler");
 
         // device type, command, data
-        Command::call(EMSdevice::DeviceType::BOILER, "tapactivated", "false", 9);
+        Command::call(EMSdevice::DeviceType::BOILER, "tapactivated", "false", DeviceValueTAG::TAG_DHW1);
         ok = true;
     }
 
