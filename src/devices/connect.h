@@ -73,7 +73,7 @@ class Connect : public EMSdevice {
     void    process_OutdoorTemp(std::shared_ptr<const Telegram> telegram);
     void    process_RCTime(std::shared_ptr<const Telegram> telegram);
     int16_t outdoorTemp_;
-    char    dateTime_[30]; // date and time stamp
+    char    dateTime_[30];  // date and time stamp
     uint8_t schedule_[126]; // telegram copy
 };
 
