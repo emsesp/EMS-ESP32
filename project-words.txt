@@ -1426,3 +1426,10 @@ Roomparams
 Roomdata
 Roomschedule
 dewtemp
+chefhat
+sofasingle
+bowlmix
+bedsingle
+beddouble
+teddybear
+washingmachine
