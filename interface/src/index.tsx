@@ -13,7 +13,7 @@ const router = createBrowserRouter(
   createRoutesFromElements(<Route path="/*" element={<App />} />)
 );
 
-createRoot(document.getElementById('root') as HTMLElement).render(
+createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <RouterProvider router={router} />
   </StrictMode>
