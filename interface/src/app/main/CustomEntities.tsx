@@ -137,8 +137,8 @@ const CustomEntities = () => {
   const saveEntities = async () => {
     await writeEntities({
       entities: entities
-        .filter((ei) => !ei.deleted)
-        .map((condensed_ei) => ({
+        .filter((ei: EntityItem) => !ei.deleted)
+        .map((condensed_ei: EntityItem) => ({
           id: condensed_ei.id,
           ram: condensed_ei.ram,
           name: condensed_ei.name,
@@ -231,6 +231,7 @@ const CustomEntities = () => {
       value_type: 0,
       writeable: false,
       deleted: false,
+      hide: false,
       value: ''
     });
     setDialogOpen(true);
@@ -251,15 +252,17 @@ const CustomEntities = () => {
 
   const renderEntity = () => {
     if (!entities) {
-      return <FormLoader onRetry={fetchEntities} errorMessage={error?.message} />;
+      return (
+        <FormLoader onRetry={fetchEntities} errorMessage={error?.message || ''} />
+      );
     }
 
     return (
       <Table
         data={{
           nodes: entities
-            .filter((ei) => !ei.deleted)
-            .sort((a, b) => a.name.localeCompare(b.name))
+            .filter((ei: EntityItem) => !ei.deleted)
+            .sort((a: EntityItem, b: EntityItem) => a.name.localeCompare(b.name))
         }}
         theme={entity_theme}
         layout={{ custom: true }}

@@ -329,13 +329,16 @@ const Devices = () => {
 
   const handleDownloadCsv = () => {
     const deviceIndex = coreData.devices.findIndex(
-      (d) => d.id === device_select.state.id
+      (d: Device) => d.id === device_select.state.id
     );
     if (deviceIndex === -1) {
       return;
     }
-    const filename =
-      coreData.devices[deviceIndex].tn + '_' + coreData.devices[deviceIndex].n;
+    const selectedDevice = coreData.devices[deviceIndex];
+    if (!selectedDevice) {
+      return;
+    }
+    const filename = selectedDevice.tn + '_' + selectedDevice.n;
 
     const columns = [
       {
@@ -350,7 +353,7 @@ const Devices = () => {
       {
         accessor: (dv: DeviceValue) =>
           dv.u !== undefined && DeviceValueUOM_s[dv.u]
-            ? DeviceValueUOM_s[dv.u].replace(/[^a-zA-Z0-9]/g, '')
+            ? DeviceValueUOM_s[dv.u]?.replace(/[^a-zA-Z0-9]/g, '')
             : '',
         name: 'UoM'
       },
@@ -373,7 +376,9 @@ const Devices = () => {
     ];
 
     const data = onlyFav
-      ? deviceData.nodes.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE))
+      ? deviceData.nodes.filter((dv: DeviceValue) =>
+          hasMask(dv.id, DeviceEntityMask.DV_FAVORITE)
+        )
       : deviceData.nodes;
 
     const csvData = data.reduce(
@@ -433,10 +438,14 @@ const Devices = () => {
   const renderDeviceDetails = () => {
     if (showDeviceInfo) {
       const deviceIndex = coreData.devices.findIndex(
-        (d) => d.id === device_select.state.id
+        (d: Device) => d.id === device_select.state.id
       );
       if (deviceIndex === -1) {
-        return;
+        return null;
+      }
+      const deviceDetails = coreData.devices[deviceIndex];
+      if (!deviceDetails) {
+        return null;
       }
 
       return (
@@ -449,47 +458,35 @@ const Devices = () => {
           <DialogContent dividers>
             <List dense={true}>
               <ListItem>
-                <ListItemText
-                  primary={LL.TYPE(0)}
-                  secondary={coreData.devices[deviceIndex].tn}
-                />
+                <ListItemText primary={LL.TYPE(0)} secondary={deviceDetails.tn} />
               </ListItem>
               <ListItem>
-                <ListItemText
-                  primary={LL.NAME(0)}
-                  secondary={coreData.devices[deviceIndex].n}
-                />
+                <ListItemText primary={LL.NAME(0)} secondary={deviceDetails.n} />
               </ListItem>
-              {coreData.devices[deviceIndex].t !== DeviceType.CUSTOM && (
+              {deviceDetails.t !== DeviceType.CUSTOM && (
                 <>
                   <ListItem>
-                    <ListItemText
-                      primary={LL.BRAND()}
-                      secondary={coreData.devices[deviceIndex].b}
-                    />
+                    <ListItemText primary={LL.BRAND()} secondary={deviceDetails.b} />
                   </ListItem>
                   <ListItem>
                     <ListItemText
                       primary={LL.ID_OF(LL.DEVICE())}
                       secondary={
                         '0x' +
-                        (
-                          '00' +
-                          coreData.devices[deviceIndex].d.toString(16).toUpperCase()
-                        ).slice(-2)
+                        ('00' + deviceDetails.d.toString(16).toUpperCase()).slice(-2)
                       }
                     />
                   </ListItem>
                   <ListItem>
                     <ListItemText
                       primary={LL.ID_OF(LL.PRODUCT())}
-                      secondary={coreData.devices[deviceIndex].p}
+                      secondary={deviceDetails.p}
                     />
                   </ListItem>
                   <ListItem>
                     <ListItemText
                       primary={LL.VERSION()}
-                      secondary={coreData.devices[deviceIndex].v}
+                      secondary={deviceDetails.v}
                     />
                   </ListItem>
                 </>
@@ -508,6 +505,7 @@ const Devices = () => {
         </Dialog>
       );
     }
+    return null;
   };
 
   const renderCoreData = () => (
@@ -598,21 +596,26 @@ const Devices = () => {
 
     const shown_data = onlyFav
       ? deviceData.nodes.filter(
-          (dv) =>
+          (dv: DeviceValue) =>
             hasMask(dv.id, DeviceEntityMask.DV_FAVORITE) &&
             dv.id.slice(2).toLowerCase().includes(search.toLowerCase())
         )
-      : deviceData.nodes.filter((dv) =>
+      : deviceData.nodes.filter((dv: DeviceValue) =>
           dv.id.slice(2).toLowerCase().includes(search.toLowerCase())
         );
 
     const deviceIndex = coreData.devices.findIndex(
-      (d) => d.id === device_select.state.id
+      (d: Device) => d.id === device_select.state.id
     );
     if (deviceIndex === -1) {
       return;
     }
+    const deviceInfo = coreData.devices[deviceIndex];
+    if (!deviceInfo) {
+      return;
+    }
 
+    const [, height] = size;
     return (
       <Box
         sx={{
@@ -623,15 +626,15 @@ const Devices = () => {
           bottom: 0,
           top: 64,
           zIndex: 'modal',
-          maxHeight: () => size[1] - 126,
+          maxHeight: () => (height || 0) - 126,
           border: '1px solid #177ac9'
         }}
       >
         <Box sx={{ p: 1 }}>
           <Grid container justifyContent="space-between">
             <Typography noWrap variant="subtitle1" color="warning.main">
-              {coreData.devices[deviceIndex].n}&nbsp;(
-              {coreData.devices[deviceIndex].tn})
+              {deviceInfo.n}&nbsp;(
+              {deviceInfo.tn})
             </Typography>
             <Grid justifyContent="flex-end">
               <ButtonTooltip title={LL.CLOSE()}>
@@ -701,7 +704,7 @@ const Devices = () => {
               ' ' +
               shown_data.length +
               '/' +
-              coreData.devices[deviceIndex].e +
+              deviceInfo.e +
               ' ' +
               LL.ENTITIES(shown_data.length)}
           </span>

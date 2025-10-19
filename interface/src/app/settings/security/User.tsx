@@ -82,7 +82,7 @@ const User: FC<UserFormProps> = ({
           </DialogTitle>
           <DialogContent dividers>
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="username"
               label={LL.USERNAME(1)}
               fullWidth
@@ -93,7 +93,7 @@ const User: FC<UserFormProps> = ({
               margin="normal"
             />
             <ValidatedPasswordField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="password"
               label={LL.PASSWORD()}
               fullWidth

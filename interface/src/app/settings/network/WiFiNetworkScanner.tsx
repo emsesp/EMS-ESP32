@@ -50,9 +50,7 @@ const WiFiNetworkScanner = () => {
 
   const renderNetworkScanner = () => {
     if (!networkList) {
-      return (
-        <FormLoader message={LL.SCANNING() + '...'} errorMessage={errorMessage} />
-      );
+      return <FormLoader errorMessage={errorMessage || ''} />;
     }
     return <WiFiNetworkSelector networkList={networkList} />;
   };

@@ -13,7 +13,7 @@ import type {
 
 export const GPIO_VALIDATOR = {
   validator(
-    rule: InternalRuleItem,
+    _rule: InternalRuleItem,
     value: number,
     callback: (error?: string) => void
   ) {
@@ -36,7 +36,7 @@ export const GPIO_VALIDATOR = {
 
 export const GPIO_VALIDATORR = {
   validator(
-    rule: InternalRuleItem,
+    _rule: InternalRuleItem,
     value: number,
     callback: (error?: string) => void
   ) {
@@ -60,7 +60,7 @@ export const GPIO_VALIDATORR = {
 
 export const GPIO_VALIDATORC3 = {
   validator(
-    rule: InternalRuleItem,
+    _rule: InternalRuleItem,
     value: number,
     callback: (error?: string) => void
   ) {
@@ -74,7 +74,7 @@ export const GPIO_VALIDATORC3 = {
 
 export const GPIO_VALIDATORS2 = {
   validator(
-    rule: InternalRuleItem,
+    _rule: InternalRuleItem,
     value: number,
     callback: (error?: string) => void
   ) {
@@ -94,7 +94,7 @@ export const GPIO_VALIDATORS2 = {
 
 export const GPIO_VALIDATORS3 = {
   validator(
-    rule: InternalRuleItem,
+    _rule: InternalRuleItem,
     value: number,
     callback: (error?: string) => void
   ) {
@@ -279,7 +279,7 @@ export const createSettingsValidator = (settings: Settings) =>
 
 export const uniqueNameValidator = (schedule: ScheduleItem[], o_name?: string) => ({
   validator(
-    rule: InternalRuleItem,
+    _rule: InternalRuleItem,
     name: string,
     callback: (error?: string) => void
   ) {
@@ -324,7 +324,7 @@ export const uniqueCustomNameValidator = (
   o_name?: string
 ) => ({
   validator(
-    rule: InternalRuleItem,
+    _rule: InternalRuleItem,
     name: string,
     callback: (error?: string) => void
   ) {
@@ -353,7 +353,7 @@ export const entityItemValidation = (entity: EntityItem[], entityItem: EntityIte
     device_id: [
       {
         validator(
-          rule: InternalRuleItem,
+          _rule: InternalRuleItem,
           value: string,
           callback: (error?: string) => void
         ) {
@@ -367,7 +367,7 @@ export const entityItemValidation = (entity: EntityItem[], entityItem: EntityIte
     type_id: [
       {
         validator(
-          rule: InternalRuleItem,
+          _rule: InternalRuleItem,
           value: string,
           callback: (error?: string) => void
         ) {
@@ -389,7 +389,7 @@ export const uniqueTemperatureNameValidator = (
   sensors: TemperatureSensor[],
   o_name?: string
 ) => ({
-  validator(rule: InternalRuleItem, n: string, callback: (error?: string) => void) {
+  validator(_rule: InternalRuleItem, n: string, callback: (error?: string) => void) {
     if (
       (o_name === undefined || o_name.toLowerCase() !== n.toLowerCase()) &&
       n !== '' &&
@@ -419,7 +419,7 @@ export const temperatureSensorItemValidation = (
 
 export const isGPIOUniqueValidator = (sensors: AnalogSensor[]) => ({
   validator(
-    rule: InternalRuleItem,
+    _rule: InternalRuleItem,
     gpio: number,
     callback: (error?: string) => void
   ) {
@@ -435,7 +435,7 @@ export const uniqueAnalogNameValidator = (
   sensors: AnalogSensor[],
   o_name?: string
 ) => ({
-  validator(rule: InternalRuleItem, n: string, callback: (error?: string) => void) {
+  validator(_rule: InternalRuleItem, n: string, callback: (error?: string) => void) {
     if (
       (o_name === undefined || o_name.toLowerCase() !== n.toLowerCase()) &&
       n !== '' &&
@@ -482,7 +482,7 @@ export const deviceValueItemValidation = (dv: DeviceValue) =>
       { required: true, message: 'Value is required' },
       {
         validator(
-          rule: InternalRuleItem,
+          _rule: InternalRuleItem,
           value: unknown,
           callback: (error?: string) => void
         ) {

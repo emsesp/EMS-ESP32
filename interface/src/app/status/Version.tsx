@@ -110,7 +110,7 @@ const Version = () => {
   }, [latestVersion, latestDevVersion]);
 
   const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
-  const DIVISIONS = [
+  const DIVISIONS: Array<{ amount: number; name: string }> = [
     { amount: 60, name: 'seconds' },
     { amount: 60, name: 'minutes' },
     { amount: 24, name: 'hours' },
@@ -119,18 +119,21 @@ const Version = () => {
     { amount: 12, name: 'months' },
     { amount: Number.POSITIVE_INFINITY, name: 'years' }
   ];
-  function formatTimeAgo(date) {
+  function formatTimeAgo(date: Date) {
     let duration = (date.getTime() - new Date().getTime()) / 1000;
     for (let i = 0; i < DIVISIONS.length; i++) {
       const division = DIVISIONS[i];
-      if (Math.abs(duration) < division.amount) {
+      if (division && Math.abs(duration) < division.amount) {
         return rtf.format(
           Math.round(duration),
           division.name as Intl.RelativeTimeFormatUnit
         );
       }
-      duration /= division.amount;
+      if (division) {
+        duration /= division.amount;
+      }
     }
+    return rtf.format(0, 'seconds');
   }
 
   const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
@@ -293,7 +296,7 @@ const Version = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
+      return <FormLoader onRetry={loadData} errorMessage={error?.message || ''} />;
     }
 
     const isDev = data.emsesp_version.includes('dev');

@@ -125,6 +125,7 @@ const Customizations = () => {
 
   const setOriginalSettings = (data: DeviceEntity[]) => {
     setDeviceEntities(
+      // @ts-expect-error - exactOptionalPropertyTypes compatibility issue
       data.map((de) => ({
         ...de,
         o_m: de.m,
@@ -239,15 +240,20 @@ const Customizations = () => {
   useEffect(() => {
     if (devices && selectedDevice !== -1) {
       void sendDeviceEntities(selectedDevice);
-      const index = devices.devices.findIndex((d) => d.id === selectedDevice);
+      const index = devices.devices.findIndex(
+        (d: Device) => d.id === selectedDevice
+      );
       if (index === -1) {
         setSelectedDevice(-1);
         setSelectedDeviceTypeNameURL('');
       } else {
-        setSelectedDeviceTypeNameURL(devices.devices[index].url || '');
-        setSelectedDeviceName(devices.devices[index].n);
-        setNumChanges(0);
-        setRestartNeeded(false);
+        const device = devices.devices[index];
+        if (device) {
+          setSelectedDeviceTypeNameURL(device.url || '');
+          setSelectedDeviceName(device.n);
+          setNumChanges(0);
+          setRestartNeeded(false);
+        }
       }
     }
   }, [devices, selectedDevice]);
@@ -545,7 +551,7 @@ const Customizations = () => {
               size="small"
               color="secondary"
               value={getMaskString(selectedFilters)}
-              onChange={(event, mask: string[]) => {
+              onChange={(_event, mask: string[]) => {
                 setSelectedFilters(getMaskNumber(mask));
               }}
             >

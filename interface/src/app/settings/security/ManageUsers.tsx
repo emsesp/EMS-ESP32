@@ -97,7 +97,7 @@ const ManageUsers = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
     }
 
     const noAdminConfigured = () => !data.users.find((u) => u.admin);
@@ -260,15 +260,20 @@ const ManageUsers = () => {
           </Box>
         </Box>
 
-        <GenerateToken username={generatingToken} onClose={closeGenerateToken} />
-        <User
-          user={user}
-          setUser={setUser}
-          creating={creating}
-          onDoneEditing={doneEditingUser}
-          onCancelEditing={cancelEditingUser}
-          validator={createUserValidator(data.users, creating)}
+        <GenerateToken
+          username={generatingToken || ''}
+          onClose={closeGenerateToken}
         />
+        {user && (
+          <User
+            user={user}
+            setUser={setUser}
+            creating={creating}
+            onDoneEditing={doneEditingUser}
+            onCancelEditing={cancelEditingUser}
+            validator={createUserValidator(data.users, creating)}
+          />
+        )}
       </>
     );
   };

@@ -35,7 +35,7 @@ const Network = () => {
     ],
     useLocation()
   );
-  const routerTab = matchedRoutes?.[0].route.path || false;
+  const routerTab = matchedRoutes?.[0]?.route.path || false;
 
   const navigate = useNavigate();
 
@@ -56,7 +56,7 @@ const Network = () => {
   return (
     <WiFiConnectionContext.Provider
       value={{
-        selectedNetwork,
+        ...(selectedNetwork && { selectedNetwork }),
         selectNetwork,
         deselectNetwork
       }}

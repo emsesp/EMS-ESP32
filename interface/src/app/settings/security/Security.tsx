@@ -19,7 +19,7 @@ const Security = () => {
     ],
     useLocation()
   );
-  const routerTab = matchedRoutes?.[0].route.path || false;
+  const routerTab = matchedRoutes?.[0]?.route.path || false;
 
   return (
     <>

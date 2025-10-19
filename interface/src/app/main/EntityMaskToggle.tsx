@@ -43,7 +43,7 @@ const EntityMaskToggle = ({ onUpdate, de }: EntityMaskToggleProps) => {
       size="small"
       color="secondary"
       value={getMaskString(de.m)}
-      onChange={(event, mask: string[]) => {
+      onChange={(_event, mask: string[]) => {
         de.m = getMaskNumber(mask);
         if (de.n === '' && de.m & DeviceEntityMask.DV_READONLY) {
           de.m = de.m | DeviceEntityMask.DV_WEB_EXCLUDE;

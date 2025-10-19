@@ -29,10 +29,10 @@ export const updateValue =
 
 export const updateValueDirty =
   (
-    origData,
+    origData: unknown,
     dirtyFlags: string[],
     setDirtyFlags: React.Dispatch<React.SetStateAction<string[]>>,
-    updateDataValue: (unknown) => void
+    updateDataValue: (value: unknown) => void
   ) =>
   (event: React.ChangeEvent<HTMLInputElement>) => {
     const updated_value = extractEventValue(event);
