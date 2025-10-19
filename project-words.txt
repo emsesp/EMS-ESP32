@@ -1433,3 +1433,4 @@ bedsingle
 beddouble
 teddybear
 washingmachine
+switchprogram
