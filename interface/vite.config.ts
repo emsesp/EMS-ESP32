@@ -166,6 +166,7 @@ export default defineConfig(
                   }
                   return 'vendor';
                 }
+                return undefined;
               }
             }
           }
@@ -228,7 +229,7 @@ export default defineConfig(
       build: {
         // Target modern browsers for smaller bundles
         target: 'es2020',
-        chunkSizeWarningLimit: 512, // Reduced warning threshold
+        chunkSizeWarningLimit: 512,
         minify: 'terser',
         // Enable CSS minification
         cssMinify: true,
@@ -236,31 +237,31 @@ export default defineConfig(
         assetsInlineLimit: 4096, // Inline small assets
         terserOptions: {
           compress: {
-            passes: 6, // Increased passes for better compression
+            passes: 6,
             arrows: true,
             drop_console: true,
             drop_debugger: true,
-            sequences: true,
+            sequences: true
             // Additional aggressive compression options
-            dead_code: true,
-            hoist_funs: true,
-            hoist_vars: true,
-            if_return: true,
-            join_vars: true,
-            loops: true,
-            pure_getters: true,
-            reduce_vars: true,
-            side_effects: false,
-            switches: true,
-            unsafe: true,
-            unsafe_arrows: true,
-            unsafe_comps: true,
-            unsafe_Function: true,
-            unsafe_math: true,
-            unsafe_proto: true,
-            unsafe_regexp: true,
-            unsafe_undefined: true,
-            unused: true
+            // dead_code: true,
+            // hoist_funs: true,
+            // hoist_vars: true,
+            // if_return: true,
+            // join_vars: true,
+            // loops: true,
+            // pure_getters: true,
+            // reduce_vars: true,
+            // side_effects: false,
+            // switches: true,
+            // unsafe: true,
+            // unsafe_arrows: true,
+            // unsafe_comps: true,
+            // unsafe_Function: true,
+            // unsafe_math: true,
+            // unsafe_proto: true,
+            // unsafe_regexp: true,
+            // unsafe_undefined: true,
+            // unused: true
           },
           mangle: {
             toplevel: true, // Enable top-level mangling
