@@ -37,10 +37,9 @@ const AuthenticatedRouting = () => {
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="/devices/*" element={<Devices />} />
         <Route path="/sensors/*" element={<Sensors />} />
-        <Route path="/status/*" element={<Status />} />
         <Route path="/help/*" element={<Help />} />
-        <Route path="/*" element={<Navigate to="/" />} />
 
+        <Route path="/status/*" element={<Status />} />
         <Route path="/status/hardwarestatus/*" element={<HardwareStatus />} />
         <Route path="/status/activity" element={<Activity />} />
         <Route path="/status/log" element={<SystemLog />} />
@@ -68,6 +67,8 @@ const AuthenticatedRouting = () => {
             <Route path="/customentities" element={<CustomEntities />} />
           </>
         )}
+
+        <Route path="/*" element={<Navigate to="/" />} />
       </Routes>
     </Layout>
   );
