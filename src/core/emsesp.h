@@ -222,7 +222,7 @@ class EMSESP {
     static void scan_devices();
     static void clear_all_devices();
 
-    static std::deque<std::unique_ptr<EMSdevice>> emsdevices;
+    static std::vector<std::unique_ptr<EMSdevice>> emsdevices;
 
     // services
     static Mqtt              mqtt_;
