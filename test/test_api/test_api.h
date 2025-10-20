@@ -176,8 +176,8 @@ void test_21() {
         "\"maxWebLogBuffer\":25,\"modbusEnabled\":false,\"forceHeatingOff\":false,\"developerMode\":false},\"devices\":[{\"type\":\"boiler\",\"name\":\"My "
         "Custom "
         "Boiler\",\"deviceID\":\"0x08\",\"productID\":123,\"brand\":\"\",\"version\":\"01.00\",\"entities\":38,\"handlersReceived\":\"0x18\","
-        "\"handlersFetched\":\"0x14 0x33\",\"handlersPending\":\"0xBF 0x10 0x11 0xC2 0xC6 0x15 0x1C 0x19 0x1A 0x35 0x34 0x2A 0xD1 0xE3 0xE4 0xE5 0xE9 0x2E "
-        "0x3B\"},{\"type\":\"thermostat\",\"name\":\"FW120\",\"deviceID\":\"0x10\",\"productID\":192,\"brand\":\"\",\"version\":\"01.00\",\"entities\":15,"
+        "\"handlersFetched\":\"0x14 0x33\",\"handlersPending\":\"0xBF 0x10 0x11 0xC2 0xC6 0x15 0x1C 0x19 0x1A 0x35 0x34 0x2A 0xD1 0xE3 0xE4 0xE5 0xE9 0x02E0 "
+        "0x2E 0x3B\"},{\"type\":\"thermostat\",\"name\":\"FW120\",\"deviceID\":\"0x10\",\"productID\":192,\"brand\":\"\",\"version\":\"01.00\",\"entities\":15,"
         "\"handlersReceived\":\"0x016F\",\"handlersFetched\":\"0x0170 0x0171\",\"handlersPending\":\"0xA3 0x06 0xA2 0x12 0x13 0x0172 0x0165 "
         "0x0168\"},{\"type\":\"temperaturesensor\",\"name\":\"temperaturesensor\",\"entities\":2},{\"type\":\"analogsensor\",\"name\":\"analogsensor\","
         "\"entities\":4},{\"type\":\"scheduler\",\"name\":\"scheduler\",\"entities\":2},{\"type\":\"custom\",\"name\":\"custom\",\"entities\":4}]}]";
@@ -202,8 +202,8 @@ void test_22() {
         "\"maxWebLogBuffer\":25,\"modbusEnabled\":false,\"forceHeatingOff\":false,\"developerMode\":false},\"devices\":[{\"type\":\"boiler\",\"name\":\"My "
         "Custom "
         "Boiler\",\"deviceID\":\"0x08\",\"productID\":123,\"brand\":\"\",\"version\":\"01.00\",\"entities\":38,\"handlersReceived\":\"0x18\","
-        "\"handlersFetched\":\"0x14 0x33\",\"handlersPending\":\"0xBF 0x10 0x11 0xC2 0xC6 0x15 0x1C 0x19 0x1A 0x35 0x34 0x2A 0xD1 0xE3 0xE4 0xE5 0xE9 0x2E "
-        "0x3B\"},{\"type\":\"thermostat\",\"name\":\"FW120\",\"deviceID\":\"0x10\",\"productID\":192,\"brand\":\"\",\"version\":\"01.00\",\"entities\":15,"
+        "\"handlersFetched\":\"0x14 0x33\",\"handlersPending\":\"0xBF 0x10 0x11 0xC2 0xC6 0x15 0x1C 0x19 0x1A 0x35 0x34 0x2A 0xD1 0xE3 0xE4 0xE5 0xE9 0x02E0 "
+        "0x2E 0x3B\"},{\"type\":\"thermostat\",\"name\":\"FW120\",\"deviceID\":\"0x10\",\"productID\":192,\"brand\":\"\",\"version\":\"01.00\",\"entities\":15,"
         "\"handlersReceived\":\"0x016F\",\"handlersFetched\":\"0x0170 0x0171\",\"handlersPending\":\"0xA3 0x06 0xA2 0x12 0x13 0x0172 0x0165 "
         "0x0168\"},{\"type\":\"temperaturesensor\",\"name\":\"temperaturesensor\",\"entities\":2},{\"type\":\"analogsensor\",\"name\":\"analogsensor\","
         "\"entities\":4},{\"type\":\"scheduler\",\"name\":\"scheduler\",\"entities\":2},{\"type\":\"custom\",\"name\":\"custom\",\"entities\":4}]}]";

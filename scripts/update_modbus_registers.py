@@ -42,7 +42,9 @@ string_sizes = {
     "thermostat/switchtime2": 16,
     "thermostat/switchtime": 16,
     "thermostat/switchtimeww": 21,
-    "controller/datetime": 25
+    "controller/datetime": 25,
+    "connect/datetime": 25,
+    "connect/name": 51
 }
 
 tag_to_tagtype = {
@@ -82,7 +84,23 @@ tag_to_tagtype = {
     32: "TAG_TYPE_HS",
     33: "TAG_TYPE_HS",
     34: "TAG_TYPE_HS",
-    35: "TAG_TYPE_HS"
+    35: "TAG_TYPE_HS",
+    36: "TAG_TYPE_SRC",
+    37: "TAG_TYPE_SRC",
+    38: "TAG_TYPE_SRC",
+    39: "TAG_TYPE_SRC",
+    40: "TAG_TYPE_SRC",
+    41: "TAG_TYPE_SRC",
+    42: "TAG_TYPE_SRC",
+    43: "TAG_TYPE_SRC",
+    44: "TAG_TYPE_SRC",
+    45: "TAG_TYPE_SRC",
+    46: "TAG_TYPE_SRC",
+    47: "TAG_TYPE_SRC",
+    48: "TAG_TYPE_SRC",
+    49: "TAG_TYPE_SRC",
+    50: "TAG_TYPE_SRC",
+    50: "TAG_TYPE_SRC"
 }
 
 device_type_names = [

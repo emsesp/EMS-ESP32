@@ -52,9 +52,6 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         return json_message(CommandRet::ERROR, "missing command in path", output);
     }
 
-    std::string cmd_s;
-    int8_t      id_n = -1; // default hc
-
     // check for a device as first item in the path
     const char * device_s = nullptr;
     if (!num_paths) {
@@ -79,16 +76,15 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
 
     // the next value on the path should be the command or entity name
     const char * command_p = nullptr;
+    char         command[COMMAND_MAX_LENGTH];
     if (num_paths == 2) {
         command_p = p.paths()[1].c_str();
     } else if (num_paths == 3) {
         // concatenate the path into one string as it could be in the format 'hc/XXX'
-        char command[COMMAND_MAX_LENGTH];
         snprintf(command, sizeof(command), "%s/%s", p.paths()[1].c_str(), p.paths()[2].c_str());
         command_p = command;
     } else if (num_paths > 3) {
         // concatenate the path into one string as it could be in the format 'hc/XXX/attribute'
-        char command[COMMAND_MAX_LENGTH];
         snprintf(command, sizeof(command), "%s/%s/%s", p.paths()[1].c_str(), p.paths()[2].c_str(), p.paths()[3].c_str());
         command_p = command;
     } else {
@@ -100,6 +96,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         }
     }
 
+    int8_t id_n = -1; // default hc
     // some commands may be prefixed with hc. dhw. or hc/ or dhw/ so extract these if they exist
     // parse_command_string returns the extracted command
     if (device_type >= EMSdevice::DeviceType::BOILER) {
