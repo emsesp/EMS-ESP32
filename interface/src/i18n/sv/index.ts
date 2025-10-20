@@ -162,6 +162,7 @@ const sv: Translation = {
   UPLOAD: 'Uppladdning',
   DOWNLOAD: '{{N|n|n}}edladdning',
   INSTALL: 'Installera',
+  REINSTALL: 'Återinstallera',
   ABORTED: 'Avbruten',
   FAILED: 'Misslyckades',
   SUCCESSFUL: 'Lyckades',

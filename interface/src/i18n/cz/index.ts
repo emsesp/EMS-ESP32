@@ -162,6 +162,7 @@ const cz: Translation = {
   UPLOAD: 'Nahrát',
   DOWNLOAD: '{{S|s|s}}táhnout',
   INSTALL: 'Instalovat',
+  REINSTALL: 'Znovu instalovat',
   ABORTED: 'přerušeno',
   FAILED: 'neúspěšné',
   SUCCESSFUL: 'úspěšné',
