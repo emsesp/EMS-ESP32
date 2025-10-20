@@ -273,6 +273,14 @@ const Version = () => {
           <span style={{ color: '#66bb6a', fontSize: '0.8em' }}>
             {LL.LATEST_VERSION(usingDevVersion ? LL.DEVELOPMENT() : LL.STABLE())}
           </span>
+          <Button
+            sx={{ ml: 2 }}
+            variant="outlined"
+            size="small"
+            onClick={() => showFirmwareDialog(showingDev)}
+          >
+            {LL.REINSTALL()}
+          </Button>
         </>
       );
     }
