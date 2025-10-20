@@ -54,7 +54,10 @@ const CustomizationsDialog = ({
     }
   }, [open, selectedItem]);
 
-  const handleClose = (_event, reason: 'backdropClick' | 'escapeKeyDown') => {
+  const handleClose = (
+    _event: React.SyntheticEvent,
+    reason: 'backdropClick' | 'escapeKeyDown'
+  ) => {
     if (reason !== 'backdropClick') {
       onClose();
     }
