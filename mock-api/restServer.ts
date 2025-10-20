@@ -276,10 +276,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-        old_custom_name +
-        ') with new (' +
-        new_custom_name +
-        ')'
+          old_custom_name +
+          ') with new (' +
+          new_custom_name +
+          ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -375,15 +375,15 @@ function check_upgrade(version: string) {
 
     console.log(
       'Upgrade this version (' +
-      THIS_VERSION +
-      ') to dev (' +
-      dev_version +
-      ') is ' +
-      (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-      ' and to stable (' +
-      stable_version +
-      ') is ' +
-      (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
+        THIS_VERSION +
+        ') to dev (' +
+        dev_version +
+        ') is ' +
+        (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+        ' and to stable (' +
+        stable_version +
+        ') is ' +
+        (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
     );
     data = {
       emsesp_version: THIS_VERSION,
@@ -4378,78 +4378,124 @@ router
 
 function deviceData(id: number) {
   if (id == 1) {
-    return new Response(encoder.encode(emsesp_devicedata_1) as BodyInit, { headers });
+    return new Response(encoder.encode(emsesp_devicedata_1) as BodyInit, {
+      headers
+    });
   }
   if (id == 2) {
-    return new Response(encoder.encode(emsesp_devicedata_2) as BodyInit, { headers });
+    return new Response(encoder.encode(emsesp_devicedata_2) as BodyInit, {
+      headers
+    });
   }
   if (id == 3) {
-    return new Response(encoder.encode(emsesp_devicedata_3) as BodyInit, { headers });
+    return new Response(encoder.encode(emsesp_devicedata_3) as BodyInit, {
+      headers
+    });
   }
   if (id == 4) {
-    return new Response(encoder.encode(emsesp_devicedata_4) as BodyInit, { headers });
+    return new Response(encoder.encode(emsesp_devicedata_4) as BodyInit, {
+      headers
+    });
   }
   if (id == 5) {
-    return new Response(encoder.encode(emsesp_devicedata_5) as BodyInit, { headers });
+    return new Response(encoder.encode(emsesp_devicedata_5) as BodyInit, {
+      headers
+    });
   }
   if (id == 6) {
-    return new Response(encoder.encode(emsesp_devicedata_6) as BodyInit, { headers });
+    return new Response(encoder.encode(emsesp_devicedata_6) as BodyInit, {
+      headers
+    });
   }
   if (id == 7) {
-    return new Response(encoder.encode(emsesp_devicedata_7) as BodyInit, { headers });
+    return new Response(encoder.encode(emsesp_devicedata_7) as BodyInit, {
+      headers
+    });
   }
   if (id == 8) {
     // test changing the selected flow temp on a Bosch Compress 7000i AW Heat Pump (Boiler/HP)
     emsesp_devicedata_8.nodes[4].v = Math.floor(Math.random() * 100);
-    return new Response(encoder.encode(emsesp_devicedata_8) as BodyInit, { headers });
+    return new Response(encoder.encode(emsesp_devicedata_8) as BodyInit, {
+      headers
+    });
   }
   if (id == 9) {
-    return new Response(encoder.encode(emsesp_devicedata_9) as BodyInit, { headers });
+    return new Response(encoder.encode(emsesp_devicedata_9) as BodyInit, {
+      headers
+    });
   }
   if (id == 10) {
-    return new Response(encoder.encode(emsesp_devicedata_10) as BodyInit, { headers });
+    return new Response(encoder.encode(emsesp_devicedata_10) as BodyInit, {
+      headers
+    });
   }
   if (id == 11) {
-    return new Response(encoder.encode(emsesp_devicedata_11) as BodyInit, { headers });
+    return new Response(encoder.encode(emsesp_devicedata_11) as BodyInit, {
+      headers
+    });
   }
   if (id == 99) {
-    return new Response(encoder.encode(emsesp_devicedata_99) as BodyInit, { headers });
+    return new Response(encoder.encode(emsesp_devicedata_99) as BodyInit, {
+      headers
+    });
   }
 }
 
 function deviceEntities(id: number) {
   if (id == 1) {
-    return new Response(encoder.encode(emsesp_deviceentities_1) as BodyInit, { headers });
+    return new Response(encoder.encode(emsesp_deviceentities_1) as BodyInit, {
+      headers
+    });
   }
   if (id == 2) {
-    return new Response(encoder.encode(emsesp_deviceentities_2) as BodyInit, { headers });
+    return new Response(encoder.encode(emsesp_deviceentities_2) as BodyInit, {
+      headers
+    });
   }
   if (id == 3) {
-    return new Response(encoder.encode(emsesp_deviceentities_3) as BodyInit, { headers });
+    return new Response(encoder.encode(emsesp_deviceentities_3) as BodyInit, {
+      headers
+    });
   }
   if (id == 4) {
-    return new Response(encoder.encode(emsesp_deviceentities_4) as BodyInit, { headers });
+    return new Response(encoder.encode(emsesp_deviceentities_4) as BodyInit, {
+      headers
+    });
   }
   if (id == 5) {
-    return new Response(encoder.encode(emsesp_deviceentities_5) as BodyInit, { headers });
+    return new Response(encoder.encode(emsesp_deviceentities_5) as BodyInit, {
+      headers
+    });
   }
   if (id == 6) {
-    return new Response(encoder.encode(emsesp_deviceentities_6) as BodyInit, { headers });
+    return new Response(encoder.encode(emsesp_deviceentities_6) as BodyInit, {
+      headers
+    });
   }
   if (id == 7) {
-    return new Response(encoder.encode(emsesp_deviceentities_7) as BodyInit, { headers });
+    return new Response(encoder.encode(emsesp_deviceentities_7) as BodyInit, {
+      headers
+    });
   }
   if (id == 8) {
-    return new Response(encoder.encode(emsesp_deviceentities_8) as BodyInit, { headers });
+    return new Response(encoder.encode(emsesp_deviceentities_8) as BodyInit, {
+      headers
+    });
   }
   if (id == 9) {
-    return new Response(encoder.encode(emsesp_deviceentities_9) as BodyInit, { headers });
+    return new Response(encoder.encode(emsesp_deviceentities_9) as BodyInit, {
+      headers
+    });
   }
   if (id == 10) {
-    return new Response(encoder.encode(emsesp_deviceentities_10) as BodyInit, { headers });
+    return new Response(encoder.encode(emsesp_deviceentities_10) as BodyInit, {
+      headers
+    });
   }
   // not found, return empty
-  return new Response(encoder.encode(emsesp_deviceentities_none) as BodyInit, { headers });
+  return new Response(encoder.encode(emsesp_deviceentities_none) as BodyInit, {
+    headers
+  });
 }
 
 // prepare dashboard data
@@ -4575,7 +4621,9 @@ router
 
       // add analog sensor data. no command c
       // remove disabled sensors first (t = 0) and create data in one pass
-      const enabledAnalogSensors = emsesp_sensordata.as.filter((item) => item.t !== 0);
+      const enabledAnalogSensors = emsesp_sensordata.as.filter(
+        (item) => item.t !== 0
+      );
       if (enabledAnalogSensors.length > 0) {
         const sensor_data = enabledAnalogSensors.map((item, index) => ({
           id: DeviceTypeUniqueID.ANALOGSENSOR_UID * 100 + index,

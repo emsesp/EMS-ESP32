@@ -1,17 +1,42 @@
 // @ts-nocheck - Optimized MessagePack unpacking library for EMS-ESP32
-let decoder, src, srcEnd, position = 0, strings = [], stringPosition = 0, currentUnpackr = {}, currentStructures, srcString, srcStringStart = 0, srcStringEnd = 0, bundledStrings, referenceMap, dataView;
-const EMPTY_ARRAY = [], currentExtensions = [];
+let decoder,
+  src,
+  srcEnd,
+  position = 0,
+  strings = [],
+  stringPosition = 0,
+  currentUnpackr = {},
+  currentStructures,
+  srcString,
+  srcStringStart = 0,
+  srcStringEnd = 0,
+  bundledStrings,
+  referenceMap,
+  dataView;
+const EMPTY_ARRAY = [],
+  currentExtensions = [];
 const defaultOptions = { useRecords: false, mapsAsObjects: true };
-try { decoder = new TextDecoder(); } catch (error) { }
-class C1Type { }
+try {
+  decoder = new TextDecoder();
+} catch (error) {}
+class C1Type {}
 const C1 = new C1Type();
 C1.name = 'MessagePack 0xC1';
-let sequentialMode = false, inlineObjectReadThreshold = 2, readStruct, onLoadedStructures, onSaveState;
-try { new Function(''); } catch (error) { inlineObjectReadThreshold = Infinity; }
+let sequentialMode = false,
+  inlineObjectReadThreshold = 2,
+  readStruct,
+  onLoadedStructures,
+  onSaveState;
+try {
+  new Function('');
+} catch (error) {
+  inlineObjectReadThreshold = Infinity;
+}
 export class Unpackr {
   constructor(options) {
     if (options) {
-      if (options.useRecords === false && options.mapsAsObjects === undefined) options.mapsAsObjects = true;
+      if (options.useRecords === false && options.mapsAsObjects === undefined)
+        options.mapsAsObjects = true;
       if (options.sequential && options.trusted !== false) {
         options.trusted = true;
         if (!options.structures && options.useRecords != false) {
@@ -19,7 +44,8 @@ export class Unpackr {
           if (!options.maxSharedStructures) options.maxSharedStructures = 0;
         }
       }
-      if (options.structures) options.structures.sharedLength = options.structures.length;
+      if (options.structures)
+        options.structures.sharedLength = options.structures.length;
       else if (options.getStructures) {
         (options.structures = []).uninitialized = true;
         options.structures.sharedLength = 0;
@@ -67,9 +93,9 @@ export class Unpackr {
       if (source instanceof Uint8Array) throw error;
       throw new Error(
         'Source must be a Uint8Array or Buffer but was a ' +
-        (source && typeof source == 'object'
-          ? source.constructor.name
-          : typeof source)
+          (source && typeof source == 'object'
+            ? source.constructor.name
+            : typeof source)
       );
     }
     if (this instanceof Unpackr) {
@@ -506,18 +532,18 @@ function createStructureReader(structure, firstId) {
       const readObject = (structure.read = new Function(
         'r',
         'return function(){return ' +
-        (currentUnpackr.freezeData ? 'Object.freeze' : '') +
-        '({' +
-        structure
-          .map((key) =>
-            key === '__proto__'
-              ? '__proto_:r()'
-              : validName.test(key)
-                ? key + ':r()'
-                : '[' + JSON.stringify(key) + ']:r()'
-          )
-          .join(',') +
-        '})}'
+          (currentUnpackr.freezeData ? 'Object.freeze' : '') +
+          '({' +
+          structure
+            .map((key) =>
+              key === '__proto__'
+                ? '__proto_:r()'
+                : validName.test(key)
+                  ? key + ':r()'
+                  : '[' + JSON.stringify(key) + ']:r()'
+            )
+            .join(',') +
+          '})}'
       )(read));
       if (structure.highByte === 0)
         structure.read = createSecondByteReader(firstId, structure.read);
@@ -881,7 +907,7 @@ function readOnlyJSString() {
 function readBin(length) {
   return currentUnpackr.copyBuffers
     ? // specifically use the copying slice (not the node one)
-    Uint8Array.prototype.slice.call(src, position, (position += length))
+      Uint8Array.prototype.slice.call(src, position, (position += length))
     : src.subarray(position, (position += length));
 }
 function readExt(length) {
@@ -989,7 +1015,7 @@ const recordDefinition = (id, highByte) => {
   structure.read = createStructureReader(structure, firstByte);
   return structure.read();
 };
-currentExtensions[0] = () => { }; // notepack defines extension 0 to mean undefined, so use that as the default here
+currentExtensions[0] = () => {}; // notepack defines extension 0 to mean undefined, so use that as the default here
 currentExtensions[0].noBuffer = true;
 
 const glbl = typeof globalThis === 'object' ? globalThis : window;
@@ -1077,25 +1103,25 @@ currentExtensions[0xff] = (data) => {
   else if (data.length == 8)
     return new Date(
       ((data[0] << 22) + (data[1] << 14) + (data[2] << 6) + (data[3] >> 2)) /
-      1000000 +
-      ((data[3] & 0x3) * 0x100000000 +
-        data[4] * 0x1000000 +
-        (data[5] << 16) +
-        (data[6] << 8) +
-        data[7]) *
-      1000
+        1000000 +
+        ((data[3] & 0x3) * 0x100000000 +
+          data[4] * 0x1000000 +
+          (data[5] << 16) +
+          (data[6] << 8) +
+          data[7]) *
+          1000
     );
   else if (data.length == 12)
     return new Date(
       ((data[0] << 24) + (data[1] << 16) + (data[2] << 8) + data[3]) / 1000000 +
-      ((data[4] & 0x80 ? -0x1000000000000 : 0) +
-        data[6] * 0x10000000000 +
-        data[7] * 0x100000000 +
-        data[8] * 0x1000000 +
-        (data[9] << 16) +
-        (data[10] << 8) +
-        data[11]) *
-      1000
+        ((data[4] & 0x80 ? -0x1000000000000 : 0) +
+          data[6] * 0x10000000000 +
+          data[7] * 0x100000000 +
+          data[8] * 0x1000000 +
+          (data[9] << 16) +
+          (data[10] << 8) +
+          data[11]) *
+          1000
     );
   else return new Date('invalid');
 }; // notepack defines extension 0 to mean undefined, so use that as the default here
