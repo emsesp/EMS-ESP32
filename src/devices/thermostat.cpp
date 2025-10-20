@@ -1070,7 +1070,7 @@ void Thermostat::process_JunkersWW(std::shared_ptr<const Telegram> telegram) {
 
 // 0x11E
 void Thermostat::process_JunkersDisp(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram, ibaMainDisplay_, 1);
+    has_enumupdate(telegram, ibaMainDisplay_, 1, 1);
     has_update(telegram, ibaLanguage_, 3);
 }
 
@@ -2029,7 +2029,7 @@ bool Thermostat::set_display(const char * value, const int8_t id) {
     uint8_t ds;
     if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
         if (Helpers::value2enum(value, ds, FL_(enum_ibaMainDisplayJ))) {
-            write_command(0x11E, 1, ds, 0x11E);
+            write_command(0x11E, 1, ds + 1, 0x11E);
             return true;
         }
     } else {
