@@ -125,7 +125,6 @@ const Customizations = () => {
 
   const setOriginalSettings = (data: DeviceEntity[]) => {
     setDeviceEntities(
-      // @ts-expect-error - exactOptionalPropertyTypes compatibility issue
       data.map((de) => ({
         ...de,
         o_m: de.m,
@@ -240,20 +239,15 @@ const Customizations = () => {
   useEffect(() => {
     if (devices && selectedDevice !== -1) {
       void sendDeviceEntities(selectedDevice);
-      const index = devices.devices.findIndex(
-        (d: Device) => d.id === selectedDevice
-      );
+      const index = devices.devices.findIndex((d) => d.id === selectedDevice);
       if (index === -1) {
         setSelectedDevice(-1);
         setSelectedDeviceTypeNameURL('');
       } else {
-        const device = devices.devices[index];
-        if (device) {
-          setSelectedDeviceTypeNameURL(device.url || '');
-          setSelectedDeviceName(device.n);
-          setNumChanges(0);
-          setRestartNeeded(false);
-        }
+        setSelectedDeviceTypeNameURL(devices.devices[index].url || '');
+        setSelectedDeviceName(devices.devices[index].n);
+        setNumChanges(0);
+        setRestartNeeded(false);
       }
     }
   }, [devices, selectedDevice]);
@@ -402,14 +396,20 @@ const Customizations = () => {
       await sendCustomizationEntities({
         id: selectedDevice,
         entity_ids: masked_entities
-      }).catch((error: Error) => {
-        if (error.message === 'Reboot required') {
-          setRestartNeeded(true);
-        } else {
-          toast.error(error.message);
-        }
-      });
-      setOriginalSettings(deviceEntities);
+      })
+        .then(() => {
+          toast.success(LL.CUSTOMIZATIONS_SAVED());
+        })
+        .catch((error: Error) => {
+          if (error.message === 'Reboot required') {
+            setRestartNeeded(true);
+          } else {
+            toast.error(error.message);
+          }
+        })
+        .finally(() => {
+          setOriginalSettings(deviceEntities);
+        });
     }
   };
 
@@ -551,7 +551,7 @@ const Customizations = () => {
               size="small"
               color="secondary"
               value={getMaskString(selectedFilters)}
-              onChange={(_event, mask: string[]) => {
+              onChange={(event, mask: string[]) => {
                 setSelectedFilters(getMaskNumber(mask));
               }}
             >
