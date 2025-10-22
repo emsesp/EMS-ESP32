@@ -246,6 +246,9 @@ class Boiler : public EMSdevice {
     uint8_t  hpSetDiffPress_;
     uint8_t  fan_;
     uint8_t  hpshutdown_;
+    uint8_t receiverValveVr0_;
+    uint8_t expansionValveVr1_;
+    uint8_t hpTargetSpd_;
 
     // Pool unit
     int8_t poolSetTemp_;
