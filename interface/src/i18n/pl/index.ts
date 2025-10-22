@@ -162,6 +162,7 @@ const pl: BaseTranslation = {
   UPLOAD: 'Wysyłanie',
   DOWNLOAD: '{{P|p||P}}obier{{anie|z||z}}',
   INSTALL: 'Zainstalować',
+  REINSTALL: 'Zainstalować ponownie',
   ABORTED: 'zostało przerwane!',
   FAILED: 'nie powiodł{{o|a|}} się!',
   SUCCESSFUL: 'powiodło się.',

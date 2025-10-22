@@ -1,7 +1,12 @@
 import { Tooltip, type TooltipProps, styled, tooltipClasses } from '@mui/material';
 
 export const ButtonTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} placement="top" arrow classes={{ popper: className }} />
+  <Tooltip
+    {...props}
+    placement="top"
+    arrow
+    classes={{ ...(className && { popper: className }) }}
+  />
 ))(({ theme }) => ({
   [`& .${tooltipClasses.arrow}`]: {
     color: theme.palette.success.main

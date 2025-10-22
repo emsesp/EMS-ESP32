@@ -116,17 +116,15 @@ let system_status = {
 let DEV_VERSION_IS_UPGRADEABLE: boolean;
 let STABLE_VERSION_IS_UPGRADEABLE: boolean;
 let THIS_VERSION: string;
-let version_test: number;
-
 let LATEST_STABLE_VERSION = '3.7.2';
 let LATEST_DEV_VERSION = '3.7.3-dev.6';
 
 // scenarios for testing versioning
-version_test = 0; // on latest stable, or switch to dev
-// version_test = 1; // on latest dev, or switch back to stable
-// version_test = 2; // upgrade an older stable to latest stable or switch to latest dev
-// version_test = 3; // upgrade dev to latest, or switch to stable
-// version_test = 4; // downgrade to an older dev, or switch back to stable
+let version_test = 0; // on latest stable, or switch to dev
+// let version_test = 1; // on latest dev, or switch back to stable
+// let version_test = 2; // upgrade an older stable to latest stable or switch to latest dev
+// let version_test = 3; // upgrade dev to latest, or switch to stable
+// let version_test = 4; // downgrade to an older dev, or switch back to stable
 
 switch (version_test as number) {
   case 0:
@@ -4380,78 +4378,124 @@ router
 
 function deviceData(id: number) {
   if (id == 1) {
-    return new Response(encoder.encode(emsesp_devicedata_1), { headers });
+    return new Response(encoder.encode(emsesp_devicedata_1) as BodyInit, {
+      headers
+    });
   }
   if (id == 2) {
-    return new Response(encoder.encode(emsesp_devicedata_2), { headers });
+    return new Response(encoder.encode(emsesp_devicedata_2) as BodyInit, {
+      headers
+    });
   }
   if (id == 3) {
-    return new Response(encoder.encode(emsesp_devicedata_3), { headers });
+    return new Response(encoder.encode(emsesp_devicedata_3) as BodyInit, {
+      headers
+    });
   }
   if (id == 4) {
-    return new Response(encoder.encode(emsesp_devicedata_4), { headers });
+    return new Response(encoder.encode(emsesp_devicedata_4) as BodyInit, {
+      headers
+    });
   }
   if (id == 5) {
-    return new Response(encoder.encode(emsesp_devicedata_5), { headers });
+    return new Response(encoder.encode(emsesp_devicedata_5) as BodyInit, {
+      headers
+    });
   }
   if (id == 6) {
-    return new Response(encoder.encode(emsesp_devicedata_6), { headers });
+    return new Response(encoder.encode(emsesp_devicedata_6) as BodyInit, {
+      headers
+    });
   }
   if (id == 7) {
-    return new Response(encoder.encode(emsesp_devicedata_7), { headers });
+    return new Response(encoder.encode(emsesp_devicedata_7) as BodyInit, {
+      headers
+    });
   }
   if (id == 8) {
     // test changing the selected flow temp on a Bosch Compress 7000i AW Heat Pump (Boiler/HP)
     emsesp_devicedata_8.nodes[4].v = Math.floor(Math.random() * 100);
-    return new Response(encoder.encode(emsesp_devicedata_8), { headers });
+    return new Response(encoder.encode(emsesp_devicedata_8) as BodyInit, {
+      headers
+    });
   }
   if (id == 9) {
-    return new Response(encoder.encode(emsesp_devicedata_9), { headers });
+    return new Response(encoder.encode(emsesp_devicedata_9) as BodyInit, {
+      headers
+    });
   }
   if (id == 10) {
-    return new Response(encoder.encode(emsesp_devicedata_10), { headers });
+    return new Response(encoder.encode(emsesp_devicedata_10) as BodyInit, {
+      headers
+    });
   }
   if (id == 11) {
-    return new Response(encoder.encode(emsesp_devicedata_11), { headers });
+    return new Response(encoder.encode(emsesp_devicedata_11) as BodyInit, {
+      headers
+    });
   }
   if (id == 99) {
-    return new Response(encoder.encode(emsesp_devicedata_99), { headers });
+    return new Response(encoder.encode(emsesp_devicedata_99) as BodyInit, {
+      headers
+    });
   }
 }
 
 function deviceEntities(id: number) {
   if (id == 1) {
-    return new Response(encoder.encode(emsesp_deviceentities_1), { headers });
+    return new Response(encoder.encode(emsesp_deviceentities_1) as BodyInit, {
+      headers
+    });
   }
   if (id == 2) {
-    return new Response(encoder.encode(emsesp_deviceentities_2), { headers });
+    return new Response(encoder.encode(emsesp_deviceentities_2) as BodyInit, {
+      headers
+    });
   }
   if (id == 3) {
-    return new Response(encoder.encode(emsesp_deviceentities_3), { headers });
+    return new Response(encoder.encode(emsesp_deviceentities_3) as BodyInit, {
+      headers
+    });
   }
   if (id == 4) {
-    return new Response(encoder.encode(emsesp_deviceentities_4), { headers });
+    return new Response(encoder.encode(emsesp_deviceentities_4) as BodyInit, {
+      headers
+    });
   }
   if (id == 5) {
-    return new Response(encoder.encode(emsesp_deviceentities_5), { headers });
+    return new Response(encoder.encode(emsesp_deviceentities_5) as BodyInit, {
+      headers
+    });
   }
   if (id == 6) {
-    return new Response(encoder.encode(emsesp_deviceentities_6), { headers });
+    return new Response(encoder.encode(emsesp_deviceentities_6) as BodyInit, {
+      headers
+    });
   }
   if (id == 7) {
-    return new Response(encoder.encode(emsesp_deviceentities_7), { headers });
+    return new Response(encoder.encode(emsesp_deviceentities_7) as BodyInit, {
+      headers
+    });
   }
   if (id == 8) {
-    return new Response(encoder.encode(emsesp_deviceentities_8), { headers });
+    return new Response(encoder.encode(emsesp_deviceentities_8) as BodyInit, {
+      headers
+    });
   }
   if (id == 9) {
-    return new Response(encoder.encode(emsesp_deviceentities_9), { headers });
+    return new Response(encoder.encode(emsesp_deviceentities_9) as BodyInit, {
+      headers
+    });
   }
   if (id == 10) {
-    return new Response(encoder.encode(emsesp_deviceentities_10), { headers });
+    return new Response(encoder.encode(emsesp_deviceentities_10) as BodyInit, {
+      headers
+    });
   }
   // not found, return empty
-  return new Response(encoder.encode(emsesp_deviceentities_none), { headers });
+  return new Response(encoder.encode(emsesp_deviceentities_none) as BodyInit, {
+    headers
+  });
 }
 
 // prepare dashboard data
@@ -4558,65 +4602,63 @@ router
       }
 
       // add temperature sensor data. no command c
-      let sensor_data: any[] = [];
-      sensor_data = emsesp_sensordata.ts.map((item, index) => ({
-        id: DeviceTypeUniqueID.TEMPERATURESENSOR_UID * 100 + index,
-        dv: {
-          id: '00' + item.n,
-          v: item.t, // value is called t in ts (temperature)
-          u: item.u
-        }
-      }));
-      dashboard_object = {
-        id: DeviceTypeUniqueID.TEMPERATURESENSOR_UID,
-        t: DeviceType.TEMPERATURESENSOR,
-        nodes: sensor_data
-      };
-      // only add to dashboard if we have values
-      if ((dashboard_object.nodes ?? []).length > 0) {
+      if (emsesp_sensordata.ts.length > 0) {
+        const sensor_data = emsesp_sensordata.ts.map((item, index) => ({
+          id: DeviceTypeUniqueID.TEMPERATURESENSOR_UID * 100 + index,
+          dv: {
+            id: '00' + item.n,
+            v: item.t, // value is called t in ts (temperature)
+            u: item.u
+          }
+        }));
+        dashboard_object = {
+          id: DeviceTypeUniqueID.TEMPERATURESENSOR_UID,
+          t: DeviceType.TEMPERATURESENSOR,
+          nodes: sensor_data
+        };
         dashboard_nodes.push(dashboard_object);
       }
 
       // add analog sensor data. no command c
-      // remove disabled sensors first (t = 0)
-      sensor_data = emsesp_sensordata.as.filter((item) => item.t !== 0);
-      sensor_data = sensor_data.map((item, index) => ({
-        id: DeviceTypeUniqueID.ANALOGSENSOR_UID * 100 + index,
-        dv: {
-          id: '00' + item.n,
-          v: item.v,
-          u: item.u
-        }
-      }));
-      dashboard_object = {
-        id: DeviceTypeUniqueID.ANALOGSENSOR_UID,
-        t: DeviceType.ANALOGSENSOR,
-        nodes: sensor_data
-      };
-      // only add to dashboard if we have values
-      if ((dashboard_object.nodes ?? []).length > 0) {
+      // remove disabled sensors first (t = 0) and create data in one pass
+      const enabledAnalogSensors = emsesp_sensordata.as.filter(
+        (item) => item.t !== 0
+      );
+      if (enabledAnalogSensors.length > 0) {
+        const sensor_data = enabledAnalogSensors.map((item, index) => ({
+          id: DeviceTypeUniqueID.ANALOGSENSOR_UID * 100 + index,
+          dv: {
+            id: '00' + item.n,
+            v: item.v,
+            u: item.u
+          }
+        }));
+        dashboard_object = {
+          id: DeviceTypeUniqueID.ANALOGSENSOR_UID,
+          t: DeviceType.ANALOGSENSOR,
+          nodes: sensor_data
+        };
         dashboard_nodes.push(dashboard_object);
       }
 
       // add the scheduler data
-      // filter emsesp_schedule with only if it has a name
-      let scheduler_data = emsesp_schedule.schedule.filter((item) => item.name);
-      let scheduler_data2 = scheduler_data.map((item, index) => ({
-        id: DeviceTypeUniqueID.SCHEDULER_UID * 100 + index,
-        dv: {
-          id: '00' + item.name,
-          v: item.active ? 'on' : 'off',
-          c: item.name,
-          l: ['off', 'on']
-        }
-      }));
-      dashboard_object = {
-        id: DeviceTypeUniqueID.SCHEDULER_UID,
-        t: DeviceType.SCHEDULER,
-        nodes: scheduler_data2
-      };
-      // only add to dashboard if we have values
-      if ((dashboard_object.nodes ?? []).length > 0) {
+      // filter emsesp_schedule with only if it has a name and create data in one pass
+      const namedSchedules = emsesp_schedule.schedule.filter((item) => item.name);
+      if (namedSchedules.length > 0) {
+        const scheduler_data = namedSchedules.map((item, index) => ({
+          id: DeviceTypeUniqueID.SCHEDULER_UID * 100 + index,
+          dv: {
+            id: '00' + item.name,
+            v: item.active ? 'on' : 'off',
+            c: item.name,
+            l: ['off', 'on']
+          }
+        }));
+        dashboard_object = {
+          id: DeviceTypeUniqueID.SCHEDULER_UID,
+          t: DeviceType.SCHEDULER,
+          nodes: scheduler_data
+        };
         dashboard_nodes.push(dashboard_object);
       }
     } else {
@@ -4660,8 +4702,12 @@ router
     };
     // console.log('dashboardData: ', dashboardData);
 
+    // Clear references to help with garbage collection
+    dashboard_nodes = [];
+    dashboard_object = {};
+
     // return dashboard_data; // if not using msgpack
-    return new Response(encoder.encode(dashboardData), { headers }); // msgpack it
+    return new Response(encoder.encode(dashboardData) as BodyInit, { headers }); // msgpack it
   })
 
   // Customizations
@@ -4852,10 +4898,12 @@ router
     } else {
       if (as.deleted) {
         emsesp_sensordata.as[objIndex].d = true;
-        var filtered = emsesp_sensordata.as.filter(function (value, index, arr) {
-          return !value.d;
-        });
-        emsesp_sensordata.as = filtered;
+        // Remove deleted items in-place to avoid creating new arrays
+        for (let i = emsesp_sensordata.as.length - 1; i >= 0; i--) {
+          if (emsesp_sensordata.as[i].d) {
+            emsesp_sensordata.as.splice(i, 1);
+          }
+        }
       } else {
         emsesp_sensordata.as[objIndex].n = as.name;
         emsesp_sensordata.as[objIndex].f = as.factor;

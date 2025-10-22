@@ -162,6 +162,7 @@ const nl: Translation = {
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
   INSTALL: 'Installeren',
+  REINSTALL: 'Opnieuw installeren',
   ABORTED: 'afgebroken',
   FAILED: 'mislukt',
   SUCCESSFUL: 'successvol',

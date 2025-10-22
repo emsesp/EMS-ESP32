@@ -248,7 +248,7 @@ const SystemStatus = () => {
 
   const content = () => {
     if (!data || !LL) {
-      return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
+      return <FormLoader onRetry={loadData} errorMessage={error?.message || ''} />;
     }
 
     return (

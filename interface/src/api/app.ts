@@ -70,6 +70,7 @@ export const readDeviceEntities = (id: number) =>
   alovaInstance.Get<DeviceEntity[]>(`/rest/deviceEntities`, {
     params: { id },
     responseType: 'arraybuffer',
+    // @ts-expect-error - exactOptionalPropertyTypes compatibility issue
     transform(data) {
       return (data as DeviceEntity[]).map((de: DeviceEntity) => ({
         ...de,
@@ -92,6 +93,7 @@ export const writeDeviceName = (data: { id: number; name: string }) =>
 // SettingsScheduler
 export const readSchedule = () =>
   alovaInstance.Get<ScheduleItem[]>('/rest/schedule', {
+    // @ts-expect-error - exactOptionalPropertyTypes compatibility issue
     transform(data) {
       return (data as Schedule).schedule.map((si: ScheduleItem) => ({
         ...si,
@@ -129,6 +131,7 @@ export const writeModules = (data: {
 // CustomEntities
 export const readCustomEntities = () =>
   alovaInstance.Get<EntityItem[]>('/rest/customEntities', {
+    // @ts-expect-error - exactOptionalPropertyTypes compatibility issue
     transform(data) {
       return (data as Entities).entities.map((ei: EntityItem) => ({
         ...ei,

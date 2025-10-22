@@ -47,12 +47,12 @@ const SecuritySettings = () => {
     origData,
     dirtyFlags,
     setDirtyFlags,
-    updateDataValue
+    updateDataValue as (value: unknown) => void
   );
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
     }
 
     const validateAndSubmit = async () => {
@@ -69,7 +69,7 @@ const SecuritySettings = () => {
     return (
       <>
         <ValidatedPasswordField
-          fieldErrors={fieldErrors}
+          fieldErrors={fieldErrors || {}}
           name="jwt_secret"
           label={LL.SU_PASSWORD()}
           fullWidth

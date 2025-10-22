@@ -69,7 +69,7 @@ Format: `<type>(<scope>): <subject>`
 
 ## Example
 
-```
+```text
 feat: add hat wobble
 ^--^  ^------------^
 |     |
@@ -96,7 +96,7 @@ References:
 
 ## Contributor License Agreement (CLA)
 
-```
+```text
 By making a contribution to this project, I certify that:
 
 (a) The contribution was created in whole or in part by me and I

@@ -98,7 +98,7 @@ const SignIn = () => {
 
         <Box display="flex" flexDirection="column" alignItems="center">
           <ValidatedTextField
-            fieldErrors={fieldErrors}
+            fieldErrors={fieldErrors || {}}
             disabled={processing}
             sx={{
               width: 240
@@ -117,7 +117,7 @@ const SignIn = () => {
             }}
           />
           <ValidatedPasswordField
-            fieldErrors={fieldErrors}
+            fieldErrors={fieldErrors || {}}
             disabled={processing}
             sx={{
               width: 240

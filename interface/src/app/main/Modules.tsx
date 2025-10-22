@@ -133,13 +133,15 @@ const Modules = () => {
   };
 
   const saveModules = async () => {
-    await updateModules({
-      modules: modules.map((condensed_mi) => ({
-        key: condensed_mi.key,
-        enabled: condensed_mi.enabled,
-        license: condensed_mi.license
-      }))
-    })
+    await Promise.all(
+      modules.map((condensed_mi: ModuleItem) =>
+        updateModules({
+          key: condensed_mi.key,
+          enabled: condensed_mi.enabled,
+          license: condensed_mi.license
+        })
+      )
+    )
       .then(() => {
         toast.success(LL.MODULES_UPDATED());
       })
@@ -154,7 +156,9 @@ const Modules = () => {
 
   const renderContent = () => {
     if (!modules) {
-      return <FormLoader onRetry={fetchModules} errorMessage={error?.message} />;
+      return (
+        <FormLoader onRetry={fetchModules} errorMessage={error?.message || ''} />
+      );
     }
 
     if (modules.length === 0) {

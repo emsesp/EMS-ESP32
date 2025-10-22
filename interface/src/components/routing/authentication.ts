@@ -1,6 +1,5 @@
 import type { Path } from 'react-router';
 
-import type * as H from 'history';
 import { jwtDecode } from 'jwt-decode';
 import type { Me, SignInRequest, SignInResponse } from 'types';
 
@@ -18,10 +17,10 @@ export function getStorage() {
   return localStorage || sessionStorage;
 }
 
-export function storeLoginRedirect(location?: H.Location) {
+export function storeLoginRedirect(location?: { pathname: string; search: string }) {
   if (location) {
-    getStorage().setItem(SIGN_IN_PATHNAME, location.pathname as string);
-    getStorage().setItem(SIGN_IN_SEARCH, location.search as string);
+    getStorage().setItem(SIGN_IN_PATHNAME, location.pathname);
+    getStorage().setItem(SIGN_IN_SEARCH, location.search);
   }
 }
 
@@ -36,7 +35,7 @@ export function fetchLoginRedirect(): Partial<Path> {
   clearLoginRedirect();
   return {
     pathname: signInPathname || `/dashboard`,
-    search: (signInPathname && signInSearch) || undefined
+    ...(signInPathname && signInSearch && { search: signInSearch })
   };
 }
 

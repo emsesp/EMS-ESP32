@@ -162,6 +162,7 @@ const de: Translation = {
   UPLOAD: 'Hochladen',
   DOWNLOAD: '{{Herunterladen|heruntergeladen|}}',
   INSTALL: 'Installieren',
+  REINSTALL: 'Neu installieren',
   ABORTED: 'abgebrochen',
   FAILED: 'gescheitert',
   SUCCESSFUL: 'erfolgreich',

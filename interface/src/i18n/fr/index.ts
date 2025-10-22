@@ -162,6 +162,7 @@ const fr: Translation = {
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
   INSTALL: 'Installer',
+  REINSTALL: 'Réinstaller',
   ABORTED: 'annulé',
   FAILED: 'échoué',
   SUCCESSFUL: 'réussi',

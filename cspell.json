@@ -33,6 +33,7 @@
     "src/core/modbus_entity_parameters.hpp",
     "sdkconfig.*",
     "managed_components/**",
-    "pnpm-*.yaml"
+    "pnpm-*.yaml",
+    "vite.config.ts"
   ]
   }

@@ -162,6 +162,7 @@ const no: Translation = {
   UPLOAD: 'Opplasning',
   DOWNLOAD: '{{N|n|n}}edlasting',
   INSTALL: 'Installer',
+  REINSTALL: 'Ominstaller',
   ABORTED: 'avbrutt',
   FAILED: 'feilet',
   SUCCESSFUL: 'vellykket',

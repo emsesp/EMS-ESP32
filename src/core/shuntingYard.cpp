@@ -22,7 +22,7 @@
 
 #include "shuntingYard.h"
 
-// find tokens
+// find tokens - optimized to reduce string allocations
 std::deque<Token> exprToTokens(const std::string & expr) {
     std::deque<Token> tokens;
 
@@ -40,13 +40,14 @@ std::deque<Token> exprToTokens(const std::string & expr) {
             if (*p) {
                 ++p;
             }
-            auto s = std::string(b, p);
-            auto n = s.find("\"\"");
-            while (n != std::string::npos) {
-                s.erase(n, 2);
+            // Use string_view to avoid unnecessary string copies
+            std::string_view s(b, p - b);
+            auto             n = s.find("\"\"");
+            while (n != std::string_view::npos) {
+                s.remove_prefix(n + 2);
                 n = s.find("\"\"");
             }
-            tokens.emplace_back(Token::Type::String, s, -3);
+            tokens.emplace_back(Token::Type::String, std::string(s), -3);
             if (*p == '\0') {
                 --p;
             }
@@ -225,10 +226,13 @@ std::deque<Token> exprToTokens(const std::string & expr) {
     return tokens;
 }
 
-// sort tokens to RPN form
+// sort tokens to RPN form - optimized for memory usage
 std::deque<Token> shuntingYard(const std::deque<Token> & tokens) {
     std::deque<Token>  queue;
     std::vector<Token> stack;
+
+    // Reserve space for vector to reduce reallocations
+    stack.reserve(tokens.size() / 2);
 
     // While there are tokens to be read:
     for (auto const & token : tokens) {

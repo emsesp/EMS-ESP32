@@ -144,7 +144,10 @@ const SchedulerDialog = ({
     </Typography>
   );
 
-  const handleClose = (_event, reason: 'backdropClick' | 'escapeKeyDown') => {
+  const handleClose = (
+    _event: React.SyntheticEvent,
+    reason: 'backdropClick' | 'escapeKeyDown'
+  ) => {
     if (reason !== 'backdropClick') {
       onClose();
     }
@@ -325,7 +328,7 @@ const SchedulerDialog = ({
           </>
         )}
         <ValidatedTextField
-          fieldErrors={fieldErrors}
+          fieldErrors={fieldErrors || {}}
           name="cmd"
           label={LL.COMMAND(0)}
           multiline
@@ -344,7 +347,7 @@ const SchedulerDialog = ({
           onChange={updateFormValue}
         />
         <ValidatedTextField
-          fieldErrors={fieldErrors}
+          fieldErrors={fieldErrors || {}}
           name="name"
           label={LL.NAME(0) + ' (' + LL.OPTIONAL() + ')'}
           value={editItem.name}

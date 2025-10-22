@@ -31,13 +31,14 @@ import type { LogEntry, LogSettings } from 'types';
 import { LogLevel } from 'types';
 import { updateValueDirty, useRest } from 'utils';
 
-const TextColors = {
+const TextColors: Record<LogLevel, string> = {
   [LogLevel.ERROR]: '#ff0000', // red
   [LogLevel.WARNING]: '#ff0000', // red
   [LogLevel.NOTICE]: '#ffffff', // white
   [LogLevel.INFO]: '#ffcc00', // yellow
   [LogLevel.DEBUG]: '#00ffff', // cyan
-  [LogLevel.TRACE]: '#00ffff' // cyan
+  [LogLevel.TRACE]: '#00ffff', // cyan
+  [LogLevel.ALL]: '#ffffff' // white
 };
 
 const LogEntryLine = styled('span')(
@@ -109,7 +110,7 @@ const SystemLog = () => {
     origData,
     dirtyFlags,
     setDirtyFlags,
-    updateDataValue
+    updateDataValue as (value: unknown) => void
   );
 
   useSSE(fetchLogES, {
@@ -190,7 +191,7 @@ const SystemLog = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
     }
 
     return (

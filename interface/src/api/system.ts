@@ -30,7 +30,7 @@ export const getDevVersion = () =>
     cacheFor: 60 * 10 * 1000,
     transform(response: { data: { name: string; published_at: string } }) {
       return {
-        name: response.data.name.split(/\s+/).splice(-1)[0].substring(1),
+        name: response.data.name.split(/\s+/).splice(-1)[0]?.substring(1) || '',
         published_at: response.data.published_at
       };
     }
