@@ -145,8 +145,7 @@ void Connect::process_roomThermostatName(std::shared_ptr<const Telegram> telegra
     has_update(telegram, rc->icon_, 0);
     for (uint8_t i = telegram->offset; i < telegram->message_length + telegram->offset && i < 100; i++) {
         if ((i > 1) && (i % 2) == 0) {
-            // replace ISOLatin1 characters with questionmark
-            rc->name_[(i - 2) / 2] = telegram->message_data[i - telegram->offset] & 0x80 ? '?' : telegram->message_data[i - telegram->offset];
+            rc->name_[(i - 2) / 2] = telegram->message_data[i - telegram->offset];
         }
     }
     rc->name_[50] = '\0'; // make sure name is terminated
@@ -229,14 +228,12 @@ bool Connect::set_name(const char * value, const int8_t id) {
     if (rc == nullptr || value == nullptr || strlen(value) > 50) {
         return false;
     }
-    uint8_t len = strlen(value) * 2 + 2;
+    Helpers::utf8tolatin1(rc->name_, value, sizeof(rc->name_));
+    uint8_t len = strlen(rc->name_) * 2 + 2;
     uint8_t data[len];
-    for (uint8_t i = 0; i < strlen(value) + 1; i++) { // include terminating '\0'
+    for (uint8_t i = 0; i < strlen(rc->name_) + 1; i++) { // include terminating '\0'
         data[2 * i]     = 0;
-        data[2 * i + 1] = value[i];
-        if (value[i] & 0x80) { // accept only ascii names
-            return false;
-        }
+        data[2 * i + 1] = rc->name_[i];
     }
     uint8_t ofs = 0;
     while (len > 0) {

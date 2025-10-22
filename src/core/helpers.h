@@ -34,6 +34,8 @@ class Helpers {
     static char * render_value(char * result, const int16_t value, const int8_t format, const uint8_t fahrenheit = 0);
     static char * render_value(char * result, const int32_t value, const int8_t format, const uint8_t fahrenheit = 0);
     static char * render_boolean(char * result, const bool value, const bool dashboard = false);
+    static char * render_string(char * result, const char * s, const uint8_t len);
+    static char * utf8tolatin1(char * result, const char * s, const uint8_t len);
 
     static char *      hextoa(char * result, const uint8_t value);
     static char *      hextoa(char * result, const uint16_t value);

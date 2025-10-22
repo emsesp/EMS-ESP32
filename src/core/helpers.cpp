@@ -381,6 +381,91 @@ char * Helpers::render_value(char * result, const uint32_t value, const int8_t f
     return result;
 }
 
+// convert special Latin1 characters to UTF8
+char * Helpers::render_string(char * result, const char * c, const uint8_t len) {
+    char * p = result;
+    while (*c != '\0' && (p - result < len)) {
+        switch (*c) {
+        case 0xC4: // Ä
+            *p     = 0xC3;
+            *(++p) = 0x84;
+            break;
+        case 0xD6: // Ö
+            *p     = 0xC3;
+            *(++p) = 0x96;
+            break;
+        case 0xDC: // Ü
+            *p     = 0xC3;
+            *(++p) = 0x9C;
+            break;
+        case 0xDF: // ß
+            *p     = 0xC3;
+            *(++p) = 0x9F;
+            break;
+        case 0xE4: // ä
+            *p     = 0xC3;
+            *(++p) = 0xA4;
+            break;
+        case 0xF6: // ö
+            *p     = 0xC3;
+            *(++p) = 0xB6;
+            break;
+        case 0xFC: // ü
+            *p     = 0xC3;
+            *(++p) = 0xBC;
+            break;
+        default:
+            *p = (*c & 0x80) ? '?' : *c;
+            break;
+        }
+        c++;
+        p++;
+    }
+    *p = '\0'; // terminat result
+    return result;
+}
+
+char * Helpers::utf8tolatin1(char * result, const char * c, const uint8_t len) {
+    char * p = result;
+    while (*c != '\0' && (p - result < len)) {
+        if (*c == 0xC3) {
+            c++;
+            switch (*c) {
+            case 0x84: // Ä
+                *p = 0xC4;
+                break;
+            case 0x96: // Ö
+                *p = 0xD6;
+                break;
+            case 0x9C: // Ü
+                *p = 0xDC;
+                break;
+            case 0x9F: // ß
+                *p = 0xDF;
+                break;
+            case 0xA4: // ä
+                *p = 0xE4;
+                break;
+            case 0xB6: // ö
+                *p = 0xF6;
+                break;
+            case 0xBC: // ü
+                *p = 0xFC;
+                break;
+            default:
+                break;
+            }
+        } else if (*c > 127) {
+            *p = '?';
+        } else {
+            *p = *c;
+        }
+        c++;
+        p++;
+    }
+    *p = '\0'; // terminat result
+    return result;
+}
 // creates string of hex values from an array of bytes
 std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
     if (length == 0) {
