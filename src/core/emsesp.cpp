@@ -698,9 +698,9 @@ void EMSESP::publish_other_values() {
     publish_device_values(EMSdevice::DeviceType::EXTENSION);
     publish_device_values(EMSdevice::DeviceType::ALERT);
     publish_device_values(EMSdevice::DeviceType::POOL);
+    publish_device_values(EMSdevice::DeviceType::CONNECT);
     // other EMS devices without values yet
     // publish_device_values(EMSdevice::DeviceType::GATEWAY);
-    // publish_device_values(EMSdevice::DeviceType::CONNECT);
     // publish_device_values(EMSdevice::DeviceType::GENERIC);
 
     webSchedulerService.publish();

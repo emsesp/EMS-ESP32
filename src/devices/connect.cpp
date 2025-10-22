@@ -87,7 +87,7 @@ void Connect::register_device_values_room(std::shared_ptr<Connect::RoomCircuit> 
     register_device_value(tag, &room->dewtemp_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(dewTemperature), DeviceValueUOM::DEGREES);
     register_device_value(
         tag, &room->seltemp_, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(selRoomTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_seltemp), 5, 30);
-    register_device_value(tag, &room->mode_, DeviceValueType::ENUM, FL_(enum_mode8), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
+    register_device_value(tag, &room->mode_, DeviceValueType::ENUM, FL_(enum_mode2), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
     register_device_value(tag, &room->name_, DeviceValueType::STRING, FL_(name), DeviceValueUOM::NONE, MAKE_CF_CB(set_name));
     register_device_value(tag, &room->childlock_, DeviceValueType::BOOL, FL_(childlock), DeviceValueUOM::NONE, MAKE_CF_CB(set_childlock));
     register_device_value(tag, &room->icon_, DeviceValueType::ENUM, FL_(enum_icons), FL_(icon), DeviceValueUOM::NONE, MAKE_CF_CB(set_icon));
@@ -145,7 +145,8 @@ void Connect::process_roomThermostatName(std::shared_ptr<const Telegram> telegra
     has_update(telegram, rc->icon_, 0);
     for (uint8_t i = telegram->offset; i < telegram->message_length + telegram->offset && i < 100; i++) {
         if ((i > 1) && (i % 2) == 0) {
-            rc->name_[(i - 2) / 2] = telegram->message_data[i - telegram->offset];
+            // replace ISOLatin1 characters with questionmark
+            rc->name_[(i - 2) / 2] = telegram->message_data[i - telegram->offset] & 0x80 ? '?' : telegram->message_data[i - telegram->offset];
         }
     }
     rc->name_[50] = '\0'; // make sure name is terminated
@@ -158,8 +159,8 @@ void Connect::process_roomThermostatSettings(std::shared_ptr<const Telegram> tel
     if (rc == nullptr) {
         return;
     }
-    // has_enumupdate(telegram, rc->mode_, 0, {3, 1, 0}); // modes off, manual auto
-    has_update(telegram, rc->mode_, 0);
+    has_enumupdate(telegram, rc->mode_, 0, {3, 1, 0}); // modes off, manual auto
+    // has_update(telegram, rc->mode_, 0); // modes: auto, heat, cool, off
     // has_update(telegram, rc->tempautotemp_, 1); // FF means off
     // has_update(telegram, rc->manualtemp_, 3);
     has_update(telegram, rc->childlock_, 7);
@@ -183,9 +184,14 @@ void Connect::process_roomThermostatData(std::shared_ptr<const Telegram> telegra
 
 // schedule for all thermostats
 void Connect::process_roomSchedule(std::shared_ptr<const Telegram> telegram) {
-    toggle_fetch(telegram->type_id, false); // fetch only once
-    auto length = ((telegram->offset + telegram->message_length) > 126) ? 126 - telegram->offset : telegram->message_length;
+    uint8_t length = ((telegram->offset + telegram->message_length) > 126) ? 126 - telegram->offset : telegram->message_length;
     memcpy(&schedule_[telegram->offset], telegram->message_data, length);
+    for (uint8_t c : schedule_) {
+        if (c == 0xFE) {
+            return;
+        }
+    }
+    toggle_fetch(telegram->type_id, false); // fetch only once if all is initialized
 }
 
 // Settings:
@@ -196,8 +202,8 @@ bool Connect::set_mode(const char * value, const int8_t id) {
         return false;
     }
     uint8_t v;
-    // if (Helpers::value2enum(value, v, FL_(enum_mode2), {3, 1, 0})) {
-    if (Helpers::value2enum(value, v, FL_(enum_mode8))) {
+    if (Helpers::value2enum(value, v, FL_(enum_mode2), {3, 1, 0})) {
+    // if (Helpers::value2enum(value, v, FL_(enum_mode8))) {
         write_command(0xBB5 + rc->room(), 0, v); // no validate, mode change is broadcasted
         return true;
     }
@@ -228,6 +234,9 @@ bool Connect::set_name(const char * value, const int8_t id) {
     for (uint8_t i = 0; i < strlen(value) + 1; i++) { // include terminating '\0'
         data[2 * i]     = 0;
         data[2 * i + 1] = value[i];
+        if (value[i] & 0x80) { // accept only ascii names
+            return false;
+        }
     }
     uint8_t ofs = 0;
     while (len > 0) {
