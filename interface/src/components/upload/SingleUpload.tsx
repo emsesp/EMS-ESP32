@@ -51,7 +51,7 @@ const SingleUpload = ({ text, doRestart }: SingleUploadProps) => {
         });
       }
     };
-    uploadFile();
+    void uploadFile();
   }, [file]);
 
   return (
