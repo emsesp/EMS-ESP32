@@ -524,8 +524,8 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::SWITCH, TAG_TYPE_DEVICE_DATA, FL_(flowTempHc), 1, 1), // flowtemphc
     REGISTER_MAPPING(dt::SWITCH, TAG_TYPE_DEVICE_DATA, FL_(status), 2, 1), // status
     REGISTER_MAPPING(dt::CONTROLLER, TAG_TYPE_DEVICE_DATA, FL_(dateTime), 0, 13), // datetime
-    REGISTER_MAPPING(dt::CONNECT, TAG_TYPE_DEVICE_DATA, FL_(dateTime), 0, 15), // datetime
-    REGISTER_MAPPING(dt::CONNECT, TAG_TYPE_DEVICE_DATA, FL_(outdoorTemp), 15, 1), // outdoortemp
+    REGISTER_MAPPING(dt::CONNECT, TAG_TYPE_DEVICE_DATA, FL_(dateTime), 0, 13), // datetime
+    REGISTER_MAPPING(dt::CONNECT, TAG_TYPE_DEVICE_DATA, FL_(outdoorTemp), 13, 1), // outdoortemp
     REGISTER_MAPPING(dt::ALERT, TAG_TYPE_DEVICE_DATA, FL_(setFlowTemp), 0, 1), // setflowtemp
     REGISTER_MAPPING(dt::ALERT, TAG_TYPE_DEVICE_DATA, FL_(setBurnPow), 1, 1), // setburnpow
     REGISTER_MAPPING(dt::EXTENSION, TAG_TYPE_DEVICE_DATA, FL_(flowTempVf), 0, 1), // flowtempvf
