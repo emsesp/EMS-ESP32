@@ -80,7 +80,7 @@ importers:
         version: 18.3.1(preact@10.27.2)
       '@preact/preset-vite':
         specifier: ^2.10.2
-        version: 2.10.2(@babel/core@7.28.4)(preact@10.27.2)(vite@7.1.11(@types/node@24.9.1)(terser@5.44.0))
+        version: 2.10.2(@babel/core@7.28.4)(preact@10.27.2)(vite@7.1.12(@types/node@24.9.1)(terser@5.44.0))
       '@trivago/prettier-plugin-sort-imports':
         specifier: ^5.2.2
         version: 5.2.2(prettier@3.6.2)
@@ -115,14 +115,14 @@ importers:
         specifier: ^8.46.2
         version: 8.46.2(eslint@9.38.0)(typescript@5.9.3)
       vite:
-        specifier: ^7.1.11
-        version: 7.1.11(@types/node@24.9.1)(terser@5.44.0)
+        specifier: ^7.1.12
+        version: 7.1.12(@types/node@24.9.1)(terser@5.44.0)
       vite-plugin-imagemin:
         specifier: ^0.6.1
-        version: 0.6.1(vite@7.1.11(@types/node@24.9.1)(terser@5.44.0))
+        version: 0.6.1(vite@7.1.12(@types/node@24.9.1)(terser@5.44.0))
       vite-tsconfig-paths:
         specifier: ^5.1.4
-        version: 5.1.4(typescript@5.9.3)(vite@7.1.11(@types/node@24.9.1)(terser@5.44.0))
+        version: 5.1.4(typescript@5.9.3)(vite@7.1.12(@types/node@24.9.1)(terser@5.44.0))
 
 packages:
 
@@ -1014,8 +1014,8 @@ packages:
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
 
-  baseline-browser-mapping@2.8.19:
-    resolution: {integrity: sha512-zoKGUdu6vb2jd3YOq0nnhEDQVbPcHhco3UImJrv5dSkvxTc2pl2WjOPsjZXDwPDSl5eghIMuY3R6J9NDKF3KcQ==}
+  baseline-browser-mapping@2.8.20:
+    resolution: {integrity: sha512-JMWsdF+O8Orq3EMukbUN1QfbLK9mX2CkUmQBcW2T0s8OmdAUL5LLM/6wFwSrqXzlXB13yhyK9gTKS1rIizOduQ==}
     hasBin: true
 
   bin-build@3.0.0:
@@ -2976,8 +2976,8 @@ packages:
       vite:
         optional: true
 
-  vite@7.1.11:
-    resolution: {integrity: sha512-uzcxnSDVjAopEUjljkWh8EIrg6tlzrjFUfMcR1EVsRDGwf/ccef0qQPRyOrROwhrTDaApueq+ja+KLPlzR/zdg==}
+  vite@7.1.12:
+    resolution: {integrity: sha512-ZWyE8YXEXqJrrSLvYgrRP7p62OziLW7xI5HYGWFzOvupfAlrLvURSzv/FyGyy0eidogEM3ujU+kUG1zuHgb6Ug==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -3575,18 +3575,18 @@ snapshots:
     dependencies:
       preact: 10.27.2
 
-  '@preact/preset-vite@2.10.2(@babel/core@7.28.4)(preact@10.27.2)(vite@7.1.11(@types/node@24.9.1)(terser@5.44.0))':
+  '@preact/preset-vite@2.10.2(@babel/core@7.28.4)(preact@10.27.2)(vite@7.1.12(@types/node@24.9.1)(terser@5.44.0))':
     dependencies:
       '@babel/core': 7.28.4
       '@babel/plugin-transform-react-jsx': 7.27.1(@babel/core@7.28.4)
       '@babel/plugin-transform-react-jsx-development': 7.27.1(@babel/core@7.28.4)
-      '@prefresh/vite': 2.4.10(preact@10.27.2)(vite@7.1.11(@types/node@24.9.1)(terser@5.44.0))
+      '@prefresh/vite': 2.4.10(preact@10.27.2)(vite@7.1.12(@types/node@24.9.1)(terser@5.44.0))
       '@rollup/pluginutils': 4.2.1
       babel-plugin-transform-hook-names: 1.0.2(@babel/core@7.28.4)
       debug: 4.4.3
       picocolors: 1.1.1
-      vite: 7.1.11(@types/node@24.9.1)(terser@5.44.0)
-      vite-prerender-plugin: 0.5.12(vite@7.1.11(@types/node@24.9.1)(terser@5.44.0))
+      vite: 7.1.12(@types/node@24.9.1)(terser@5.44.0)
+      vite-prerender-plugin: 0.5.12(vite@7.1.12(@types/node@24.9.1)(terser@5.44.0))
     transitivePeerDependencies:
       - preact
       - supports-color
@@ -3599,7 +3599,7 @@ snapshots:
 
   '@prefresh/utils@1.2.1': {}
 
-  '@prefresh/vite@2.4.10(preact@10.27.2)(vite@7.1.11(@types/node@24.9.1)(terser@5.44.0))':
+  '@prefresh/vite@2.4.10(preact@10.27.2)(vite@7.1.12(@types/node@24.9.1)(terser@5.44.0))':
     dependencies:
       '@babel/core': 7.28.4
       '@prefresh/babel-plugin': 0.5.2
@@ -3607,7 +3607,7 @@ snapshots:
       '@prefresh/utils': 1.2.1
       '@rollup/pluginutils': 4.2.1
       preact: 10.27.2
-      vite: 7.1.11(@types/node@24.9.1)(terser@5.44.0)
+      vite: 7.1.12(@types/node@24.9.1)(terser@5.44.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -3936,7 +3936,7 @@ snapshots:
 
   base64-js@1.5.1: {}
 
-  baseline-browser-mapping@2.8.19: {}
+  baseline-browser-mapping@2.8.20: {}
 
   bin-build@3.0.0:
     dependencies:
@@ -3993,7 +3993,7 @@ snapshots:
 
   browserslist@4.27.0:
     dependencies:
-      baseline-browser-mapping: 2.8.19
+      baseline-browser-mapping: 2.8.20
       caniuse-lite: 1.0.30001751
       electron-to-chromium: 1.5.239
       node-releases: 2.0.26
@@ -5935,7 +5935,7 @@ snapshots:
       spdx-correct: 3.2.0
       spdx-expression-parse: 3.0.1
 
-  vite-plugin-imagemin@0.6.1(vite@7.1.11(@types/node@24.9.1)(terser@5.44.0)):
+  vite-plugin-imagemin@0.6.1(vite@7.1.12(@types/node@24.9.1)(terser@5.44.0)):
     dependencies:
       '@types/imagemin': 7.0.1
       '@types/imagemin-gifsicle': 7.0.4
@@ -5960,11 +5960,11 @@ snapshots:
       imagemin-webp: 6.1.0
       jpegtran-bin: 6.0.1
       pathe: 0.2.0
-      vite: 7.1.11(@types/node@24.9.1)(terser@5.44.0)
+      vite: 7.1.12(@types/node@24.9.1)(terser@5.44.0)
     transitivePeerDependencies:
       - supports-color
 
-  vite-prerender-plugin@0.5.12(vite@7.1.11(@types/node@24.9.1)(terser@5.44.0)):
+  vite-prerender-plugin@0.5.12(vite@7.1.12(@types/node@24.9.1)(terser@5.44.0)):
     dependencies:
       kolorist: 1.8.0
       magic-string: 0.30.19
@@ -5972,20 +5972,20 @@ snapshots:
       simple-code-frame: 1.3.0
       source-map: 0.7.6
       stack-trace: 1.0.0-pre2
-      vite: 7.1.11(@types/node@24.9.1)(terser@5.44.0)
+      vite: 7.1.12(@types/node@24.9.1)(terser@5.44.0)
 
-  vite-tsconfig-paths@5.1.4(typescript@5.9.3)(vite@7.1.11(@types/node@24.9.1)(terser@5.44.0)):
+  vite-tsconfig-paths@5.1.4(typescript@5.9.3)(vite@7.1.12(@types/node@24.9.1)(terser@5.44.0)):
     dependencies:
       debug: 4.4.3
       globrex: 0.1.2
       tsconfck: 3.1.6(typescript@5.9.3)
     optionalDependencies:
-      vite: 7.1.11(@types/node@24.9.1)(terser@5.44.0)
+      vite: 7.1.12(@types/node@24.9.1)(terser@5.44.0)
     transitivePeerDependencies:
       - supports-color
       - typescript
 
-  vite@7.1.11(@types/node@24.9.1)(terser@5.44.0):
+  vite@7.1.12(@types/node@24.9.1)(terser@5.44.0):
     dependencies:
       esbuild: 0.25.11
       fdir: 6.5.0(picomatch@4.0.3)
