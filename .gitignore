@@ -72,3 +72,5 @@ CMakeLists.txt
 logs/*
 sdkconfig.*
 sdkconfig_tasmota_esp32
+pnpm-lock.yaml
+package.json
