@@ -77,7 +77,7 @@ telegram_type_id,name,is_fetched
 0x0104,ISM2StatusMessage, 
 0x010C,IPMStatusMessage, 
 0x011E,JunkersDisp,fetched
-0x012E,HPEnergy1, 
+0x012E,HPEnergy1XXX, 
 0x013B,HPEnergy2, 
 0x0165,JunkersSet, 
 0x0166,JunkersSet, 
