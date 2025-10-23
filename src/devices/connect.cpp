@@ -49,6 +49,12 @@ Connect::Connect(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
     // 0x2040, broadcast 36 bytes:
     // data: 0E 60 00 DF 0D AF 0A 46 0A 46 02 9A 1C 53 1C 53 12 AD 12 AD 00 00 13 C2
     // data: 1F 37 1F 37 00 00 00 00 18 97 11 27 (offset 24)
+#if defined(EMSESP_STANDALONE)
+    // if we're just dumping out values, create a single dummy SRC
+    auto new_room = std::make_shared<Connect::RoomCircuit>(0);
+    room_circuits_.push_back(new_room);
+    register_device_values_room(new_room);
+#endif
 }
 /*
  * OutdoorTemp - type 0xD1 - external temperature
