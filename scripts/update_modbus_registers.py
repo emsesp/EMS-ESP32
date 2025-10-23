@@ -211,7 +211,7 @@ for entity in entities:
 
     if int(entity["modbus count"]) <= 0:
         raise Exception('Entity "' + entity_dev_name + ' (' + entity_shortname + ')' +
-                        '" does not have a size - string sizes need to be added manually to update_modbus_registers.py/string_sizes')
+                        '" does not have a size - string sizes need to be added manually to update_modbus_registers.py/string_sizes[]')
 
     #    if entity["modbus count"] == "0":
     #        print("ignoring " + entity_dev_name + " - it has a register length of zero")

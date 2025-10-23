@@ -58,12 +58,22 @@ const LayoutMenuItem = ({
         }
       >
         <ListItemButton component={Link} to={to}>
-          <RenderIcon icon={icon} bgcolor={bgcolor} label={label} text={text} />
+          <RenderIcon
+            icon={icon}
+            {...(bgcolor && { bgcolor })}
+            label={label}
+            text={text}
+          />
         </ListItemButton>
       </ListItem>
     ) : (
       <ListItem>
-        <RenderIcon icon={icon} bgcolor={bgcolor} label={label} text={text} />
+        <RenderIcon
+          icon={icon}
+          {...(bgcolor && { bgcolor })}
+          label={label}
+          text={text}
+        />
       </ListItem>
     )}
   </>

@@ -54,12 +54,12 @@ const APSettings = () => {
     origData,
     dirtyFlags,
     setDirtyFlags,
-    updateDataValue
+    updateDataValue as (value: unknown) => void
   );
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
     }
 
     const validateAndSubmit = async () => {
@@ -80,7 +80,7 @@ const APSettings = () => {
     return (
       <>
         <ValidatedTextField
-          fieldErrors={fieldErrors}
+          fieldErrors={fieldErrors || {}}
           name="provision_mode"
           label={LL.AP_PROVIDE() + '...'}
           value={data.provision_mode}
@@ -103,7 +103,7 @@ const APSettings = () => {
         {isAPEnabled(data) && (
           <>
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="ssid"
               label={LL.ACCESS_POINT(2) + ' SSID'}
               fullWidth
@@ -113,7 +113,7 @@ const APSettings = () => {
               margin="normal"
             />
             <ValidatedPasswordField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="password"
               label={LL.ACCESS_POINT(2) + ' ' + LL.PASSWORD()}
               fullWidth
@@ -123,7 +123,7 @@ const APSettings = () => {
               margin="normal"
             />
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="channel"
               label={LL.AP_PREFERRED_CHANNEL()}
               value={numberValue(data.channel)}
@@ -151,7 +151,7 @@ const APSettings = () => {
               label={LL.AP_HIDE_SSID()}
             />
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="max_clients"
               label={LL.AP_MAX_CLIENTS()}
               value={numberValue(data.max_clients)}
@@ -169,7 +169,7 @@ const APSettings = () => {
               ))}
             </ValidatedTextField>
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="local_ip"
               label={LL.AP_LOCAL_IP()}
               fullWidth
@@ -179,7 +179,7 @@ const APSettings = () => {
               margin="normal"
             />
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="gateway_ip"
               label={LL.NETWORK_GATEWAY()}
               fullWidth
@@ -189,7 +189,7 @@ const APSettings = () => {
               margin="normal"
             />
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="subnet_mask"
               label={LL.NETWORK_SUBNET()}
               fullWidth

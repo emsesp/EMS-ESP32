@@ -74,7 +74,10 @@ const CustomEntitiesDialog = ({
     }
   }, [open, selectedItem]);
 
-  const handleClose = (_event, reason: 'backdropClick' | 'escapeKeyDown') => {
+  const handleClose = (
+    _event: React.SyntheticEvent,
+    reason: 'backdropClick' | 'escapeKeyDown'
+  ) => {
     if (reason !== 'backdropClick') {
       onClose();
     }
@@ -123,7 +126,7 @@ const CustomEntitiesDialog = ({
         <Grid container spacing={2} rowSpacing={0}>
           <Grid size={12}>
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="name"
               label={LL.NAME(0)}
               value={editItem.name}
@@ -211,7 +214,7 @@ const CustomEntitiesDialog = ({
               </Grid>
               <Grid>
                 <ValidatedTextField
-                  fieldErrors={fieldErrors}
+                  fieldErrors={fieldErrors || {}}
                   name="device_id"
                   label={LL.ID_OF(LL.DEVICE())}
                   margin="normal"
@@ -231,7 +234,7 @@ const CustomEntitiesDialog = ({
               </Grid>
               <Grid>
                 <ValidatedTextField
-                  fieldErrors={fieldErrors}
+                  fieldErrors={fieldErrors || {}}
                   name="type_id"
                   label={LL.ID_OF(LL.TYPE(1))}
                   margin="normal"
@@ -251,7 +254,7 @@ const CustomEntitiesDialog = ({
               </Grid>
               <Grid>
                 <ValidatedTextField
-                  fieldErrors={fieldErrors}
+                  fieldErrors={fieldErrors || {}}
                   name="offset"
                   label={LL.OFFSET()}
                   margin="normal"
@@ -343,7 +346,7 @@ const CustomEntitiesDialog = ({
                 editItem.device_id !== '0' && (
                   <Grid>
                     <ValidatedTextField
-                      fieldErrors={fieldErrors}
+                      fieldErrors={fieldErrors || {}}
                       name="factor"
                       label={LL.BYTES()}
                       value={numberValue(editItem.factor as number)}
@@ -361,7 +364,7 @@ const CustomEntitiesDialog = ({
               {editItem.value_type === DeviceValueType.BOOL && (
                 <Grid>
                   <ValidatedTextField
-                    fieldErrors={fieldErrors}
+                    fieldErrors={fieldErrors || {}}
                     name="factor"
                     label={LL.BITMASK()}
                     value={editItem.factor as string}

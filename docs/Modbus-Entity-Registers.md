@@ -421,8 +421,8 @@
 | dhw.comfoff | comfort switch off | uint8 (>=15<=65) | C | true | DHW | 18 | 1 | 1 | 
 | dhw.ecooff | eco switch off | uint8 (>=15<=65) | C | true | DHW | 19 | 1 | 1 | 
 | dhw.ecoplusoff | eco+ switch off | uint8 (>=48<=63) | C | true | DHW | 20 | 1 | 1 | 
-| dhw.comfdiff | comfort diff | uint8 (>=6<=12) | K | true | DHW | 21 | 1 | 1 | 
-| dhw.ecodiff | eco diff | uint8 (>=6<=12) | K | true | DHW | 22 | 1 | 1 | 
+| dhw.comfdiff | comfort diff | uint8 (>=4<=12) | K | true | DHW | 21 | 1 | 1 | 
+| dhw.ecodiff | eco diff | uint8 (>=4<=12) | K | true | DHW | 22 | 1 | 1 | 
 | dhw.ecoplusdiff | eco+ diff | uint8 (>=6<=12) | K | true | DHW | 23 | 1 | 1 | 
 | dhw.comfstop | comfort stop temp | uint8 (>=0<=254) | C | true | DHW | 24 | 1 | 1 | 
 | dhw.ecostop | eco stop temp | uint8 (>=0<=254) | C | true | DHW | 25 | 1 | 1 | 
@@ -1704,8 +1704,8 @@
 | dhw.comfoff | comfort switch off | uint8 (>=15<=65) | C | true | DHW | 18 | 1 | 1 | 
 | dhw.ecooff | eco switch off | uint8 (>=15<=65) | C | true | DHW | 19 | 1 | 1 | 
 | dhw.ecoplusoff | eco+ switch off | uint8 (>=48<=63) | C | true | DHW | 20 | 1 | 1 | 
-| dhw.comfdiff | comfort diff | uint8 (>=6<=12) | K | true | DHW | 21 | 1 | 1 | 
-| dhw.ecodiff | eco diff | uint8 (>=6<=12) | K | true | DHW | 22 | 1 | 1 | 
+| dhw.comfdiff | comfort diff | uint8 (>=4<=12) | K | true | DHW | 21 | 1 | 1 | 
+| dhw.ecodiff | eco diff | uint8 (>=4<=12) | K | true | DHW | 22 | 1 | 1 | 
 | dhw.ecoplusdiff | eco+ diff | uint8 (>=6<=12) | K | true | DHW | 23 | 1 | 1 | 
 | dhw.comfstop | comfort stop temp | uint8 (>=0<=254) | C | true | DHW | 24 | 1 | 1 | 
 | dhw.ecostop | eco stop temp | uint8 (>=0<=254) | C | true | DHW | 25 | 1 | 1 | 
@@ -2273,8 +2273,8 @@
 | dhw.comfoff | comfort switch off | uint8 (>=15<=65) | C | true | DHW | 18 | 1 | 1 | 
 | dhw.ecooff | eco switch off | uint8 (>=15<=65) | C | true | DHW | 19 | 1 | 1 | 
 | dhw.ecoplusoff | eco+ switch off | uint8 (>=48<=63) | C | true | DHW | 20 | 1 | 1 | 
-| dhw.comfdiff | comfort diff | uint8 (>=6<=12) | K | true | DHW | 21 | 1 | 1 | 
-| dhw.ecodiff | eco diff | uint8 (>=6<=12) | K | true | DHW | 22 | 1 | 1 | 
+| dhw.comfdiff | comfort diff | uint8 (>=4<=12) | K | true | DHW | 21 | 1 | 1 | 
+| dhw.ecodiff | eco diff | uint8 (>=4<=12) | K | true | DHW | 22 | 1 | 1 | 
 | dhw.ecoplusdiff | eco+ diff | uint8 (>=6<=12) | K | true | DHW | 23 | 1 | 1 | 
 | dhw.comfstop | comfort stop temp | uint8 (>=0<=254) | C | true | DHW | 24 | 1 | 1 | 
 | dhw.ecostop | eco stop temp | uint8 (>=0<=254) | C | true | DHW | 25 | 1 | 1 | 
@@ -3967,6 +3967,13 @@
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 | 
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 | 
 
+## Devices of type *connect*
+### MX400
+| shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
+|-|-|-|-|-|-|-|-|-|
+| datetime | date/time | string |   | false | DEVICE_DATA | 0 | 13 | 1 | 
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 | 
+
 ## Devices of type *controller*
 ### Rego 3000
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -4704,18 +4711,18 @@
 | hc1.switchtime1 | own1 program switchtime | string |   | true | HC | 91 | 8 | 1 | 
 | hc1.switchtime2 | own2 program switchtime | string |   | true | HC | 99 | 8 | 1 | 
 | dhw.mode | operating mode | enum [off\|on\|auto] |   | true | DHW | 0 | 1 | 1 | 
-| dhw.circmode | circulation pump mode | enum [off\|on\|auto] |   | true | DHW | 3 | 1 | 1 | 
-| dhw.progmode | program | enum [std prog\|own prog] |   | true | DHW | 12 | 1 | 1 | 
-| dhw.circprog | circulation program | enum [std prog\|own prog] |   | true | DHW | 13 | 1 | 1 | 
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 7 | 1 | 1 | 
-| dhw.disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 8 | 1 | 1 | 
-| dhw.disinfecthour | disinfection hour | uint8 (>=0<=23) |   | true | DHW | 14 | 1 | 1 | 
-| dhw.maxtemp | maximum temperature | uint8 (>=0<=254) | C | true | DHW | 15 | 1 | 1 | 
-| dhw.onetimekey | one time key function | boolean |   | true | DHW | 16 | 1 | 1 | 
-| dhw.switchtime | program switchtime | string |   | true | DHW | 17 | 8 | 1 | 
-| dhw.circswitchtime | circulation program switchtime | string |   | true | DHW | 25 | 8 | 1 | 
-| dhw.holidays | holiday dates | string |   | true | DHW | 33 | 13 | 1 | 
-| dhw.vacations | vacation dates | string |   | true | DHW | 46 | 13 | 1 | 
+| dhw.circmode | circulation pump mode | enum [off\|on\|auto] |   | true | DHW | 4 | 1 | 1 | 
+| dhw.progmode | program | enum [std prog\|own prog] |   | true | DHW | 13 | 1 | 1 | 
+| dhw.circprog | circulation program | enum [std prog\|own prog] |   | true | DHW | 14 | 1 | 1 | 
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 8 | 1 | 1 | 
+| dhw.disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 9 | 1 | 1 | 
+| dhw.disinfecthour | disinfection hour | uint8 (>=0<=23) |   | true | DHW | 15 | 1 | 1 | 
+| dhw.maxtemp | maximum temperature | uint8 (>=0<=254) | C | true | DHW | 16 | 1 | 1 | 
+| dhw.onetimekey | one time key function | boolean |   | true | DHW | 17 | 1 | 1 | 
+| dhw.switchtime | program switchtime | string |   | true | DHW | 18 | 8 | 1 | 
+| dhw.circswitchtime | circulation program switchtime | string |   | true | DHW | 26 | 8 | 1 | 
+| dhw.holidays | holiday dates | string |   | true | DHW | 34 | 13 | 1 | 
+| dhw.vacations | vacation dates | string |   | true | DHW | 47 | 13 | 1 | 
 
 ### ES79
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -4770,18 +4777,18 @@
 | hc1.switchtime1 | own1 program switchtime | string |   | true | HC | 91 | 8 | 1 | 
 | hc1.switchtime2 | own2 program switchtime | string |   | true | HC | 99 | 8 | 1 | 
 | dhw.mode | operating mode | enum [off\|on\|auto] |   | true | DHW | 0 | 1 | 1 | 
-| dhw.circmode | circulation pump mode | enum [off\|on\|auto] |   | true | DHW | 3 | 1 | 1 | 
-| dhw.progmode | program | enum [std prog\|own prog] |   | true | DHW | 12 | 1 | 1 | 
-| dhw.circprog | circulation program | enum [std prog\|own prog] |   | true | DHW | 13 | 1 | 1 | 
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 7 | 1 | 1 | 
-| dhw.disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 8 | 1 | 1 | 
-| dhw.disinfecthour | disinfection hour | uint8 (>=0<=23) |   | true | DHW | 14 | 1 | 1 | 
-| dhw.maxtemp | maximum temperature | uint8 (>=60<=80) | C | true | DHW | 15 | 1 | 1 | 
-| dhw.onetimekey | one time key function | boolean |   | true | DHW | 16 | 1 | 1 | 
-| dhw.switchtime | program switchtime | string |   | true | DHW | 17 | 8 | 1 | 
-| dhw.circswitchtime | circulation program switchtime | string |   | true | DHW | 25 | 8 | 1 | 
-| dhw.holidays | holiday dates | string |   | true | DHW | 33 | 13 | 1 | 
-| dhw.vacations | vacation dates | string |   | true | DHW | 46 | 13 | 1 | 
+| dhw.circmode | circulation pump mode | enum [off\|on\|auto] |   | true | DHW | 4 | 1 | 1 | 
+| dhw.progmode | program | enum [std prog\|own prog] |   | true | DHW | 13 | 1 | 1 | 
+| dhw.circprog | circulation program | enum [std prog\|own prog] |   | true | DHW | 14 | 1 | 1 | 
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 8 | 1 | 1 | 
+| dhw.disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 9 | 1 | 1 | 
+| dhw.disinfecthour | disinfection hour | uint8 (>=0<=23) |   | true | DHW | 15 | 1 | 1 | 
+| dhw.maxtemp | maximum temperature | uint8 (>=60<=80) | C | true | DHW | 16 | 1 | 1 | 
+| dhw.onetimekey | one time key function | boolean |   | true | DHW | 17 | 1 | 1 | 
+| dhw.switchtime | program switchtime | string |   | true | DHW | 18 | 8 | 1 | 
+| dhw.circswitchtime | circulation program switchtime | string |   | true | DHW | 26 | 8 | 1 | 
+| dhw.holidays | holiday dates | string |   | true | DHW | 34 | 13 | 1 | 
+| dhw.vacations | vacation dates | string |   | true | DHW | 47 | 13 | 1 | 
 
 ### EasyControl, CT200
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -4832,7 +4839,7 @@
 | hc1.roominflfactor | room influence factor | uint8 (>=0<=100) | % | true | HC | 14 | 1 | 10 | 
 | hc1.heatingtype | heating type | enum [off\|heatingcurve\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 | 
 | hc1.controlmode | control mode | enum [off\|unmixed\|unmixed IPM\|mixed IPM] |   | true | HC | 25 | 1 | 1 | 
-| dhw.charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
+| dhw.charge | charge | boolean |   | true | DHW | 6 | 1 | 1 | 
 
 ### FB100
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -4873,7 +4880,7 @@
 | hc1.roominflfactor | room influence factor | uint8 (>=0<=100) | % | true | HC | 14 | 1 | 10 | 
 | hc1.heatingtype | heating type | enum [off\|heatingcurve\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 | 
 | hc1.controlmode | control mode | enum [off\|unmixed\|unmixed IPM\|mixed IPM] |   | true | HC | 25 | 1 | 1 | 
-| dhw.charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
+| dhw.charge | charge | boolean |   | true | DHW | 6 | 1 | 1 | 
 
 ### FR10
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -4912,7 +4919,7 @@
 | hc1.roominflfactor | room influence factor | uint8 (>=0<=100) | % | true | HC | 14 | 1 | 10 | 
 | hc1.heatingtype | heating type | enum [off\|heatingcurve\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 | 
 | hc1.controlmode | control mode | enum [off\|unmixed\|unmixed IPM\|mixed IPM] |   | true | HC | 25 | 1 | 1 | 
-| dhw.charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
+| dhw.charge | charge | boolean |   | true | DHW | 6 | 1 | 1 | 
 
 ### FR100
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -4951,7 +4958,7 @@
 | hc1.roominflfactor | room influence factor | uint8 (>=0<=100) | % | true | HC | 14 | 1 | 10 | 
 | hc1.heatingtype | heating type | enum [off\|heatingcurve\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 | 
 | hc1.controlmode | control mode | enum [off\|unmixed\|unmixed IPM\|mixed IPM] |   | true | HC | 25 | 1 | 1 | 
-| dhw.charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
+| dhw.charge | charge | boolean |   | true | DHW | 6 | 1 | 1 | 
 
 ### FR110
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -4990,7 +4997,7 @@
 | hc1.roominflfactor | room influence factor | uint8 (>=0<=100) | % | true | HC | 14 | 1 | 10 | 
 | hc1.heatingtype | heating type | enum [off\|heatingcurve\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 | 
 | hc1.controlmode | control mode | enum [off\|unmixed\|unmixed IPM\|mixed IPM] |   | true | HC | 25 | 1 | 1 | 
-| dhw.charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
+| dhw.charge | charge | boolean |   | true | DHW | 6 | 1 | 1 | 
 
 ### FR120
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5029,7 +5036,7 @@
 | hc1.roominflfactor | room influence factor | uint8 (>=0<=100) | % | true | HC | 14 | 1 | 10 | 
 | hc1.heatingtype | heating type | enum [off\|heatingcurve\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 | 
 | hc1.controlmode | control mode | enum [off\|unmixed\|unmixed IPM\|mixed IPM] |   | true | HC | 25 | 1 | 1 | 
-| dhw.charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
+| dhw.charge | charge | boolean |   | true | DHW | 6 | 1 | 1 | 
 
 ### FR50
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5068,7 +5075,7 @@
 | hc1.roominflfactor | room influence factor | uint8 (>=0<=100) | % | true | HC | 14 | 1 | 10 | 
 | hc1.heatingtype | heating type | enum [off\|heatingcurve\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 | 
 | hc1.controlmode | control mode | enum [off\|unmixed\|unmixed IPM\|mixed IPM] |   | true | HC | 25 | 1 | 1 | 
-| dhw.charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
+| dhw.charge | charge | boolean |   | true | DHW | 6 | 1 | 1 | 
 
 ### FW100
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5109,7 +5116,7 @@
 | hc1.roominflfactor | room influence factor | uint8 (>=0<=100) | % | true | HC | 14 | 1 | 10 | 
 | hc1.heatingtype | heating type | enum [off\|heatingcurve\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 | 
 | hc1.controlmode | control mode | enum [off\|unmixed\|unmixed IPM\|mixed IPM] |   | true | HC | 25 | 1 | 1 | 
-| dhw.charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
+| dhw.charge | charge | boolean |   | true | DHW | 6 | 1 | 1 | 
 
 ### FW120
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5150,7 +5157,7 @@
 | hc1.roominflfactor | room influence factor | uint8 (>=0<=100) | % | true | HC | 14 | 1 | 10 | 
 | hc1.heatingtype | heating type | enum [off\|heatingcurve\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 | 
 | hc1.controlmode | control mode | enum [off\|unmixed\|unmixed IPM\|mixed IPM] |   | true | HC | 25 | 1 | 1 | 
-| dhw.charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
+| dhw.charge | charge | boolean |   | true | DHW | 6 | 1 | 1 | 
 
 ### FW200
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5191,7 +5198,7 @@
 | hc1.roominflfactor | room influence factor | uint8 (>=0<=100) | % | true | HC | 14 | 1 | 10 | 
 | hc1.heatingtype | heating type | enum [off\|heatingcurve\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 | 
 | hc1.controlmode | control mode | enum [off\|unmixed\|unmixed IPM\|mixed IPM] |   | true | HC | 25 | 1 | 1 | 
-| dhw.charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
+| dhw.charge | charge | boolean |   | true | DHW | 6 | 1 | 1 | 
 
 ### FW500
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5232,7 +5239,7 @@
 | hc1.roominflfactor | room influence factor | uint8 (>=0<=100) | % | true | HC | 14 | 1 | 10 | 
 | hc1.heatingtype | heating type | enum [off\|heatingcurve\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 | 
 | hc1.controlmode | control mode | enum [off\|unmixed\|unmixed IPM\|mixed IPM] |   | true | HC | 25 | 1 | 1 | 
-| dhw.charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
+| dhw.charge | charge | boolean |   | true | DHW | 6 | 1 | 1 | 
 
 ### Logamatic TC100, Moduline Easy
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5303,10 +5310,10 @@
 | hc1.manualtemp | manual temperature | uint8 (>=0<=127) | C | true | HC | 6 | 1 | 1/2 | 
 | hc1.offtemp | temperature when mode is off | uint8 (>=0<=127) | C | true | HC | 107 | 1 | 1/2 | 
 | dhw.mode | operating mode | enum [on\|off\|auto] |   | true | DHW | 0 | 1 | 1 | 
-| dhw.whenmodeoff | when thermostat mode off | boolean |   | true | DHW | 59 | 1 | 1 | 
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 7 | 1 | 1 | 
-| dhw.disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 8 | 1 | 1 | 
-| dhw.disinfecthour | disinfection hour | uint8 (>=0<=23) |   | true | DHW | 14 | 1 | 1 | 
+| dhw.whenmodeoff | when thermostat mode off | boolean |   | true | DHW | 60 | 1 | 1 | 
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 8 | 1 | 1 | 
+| dhw.disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 9 | 1 | 1 | 
+| dhw.disinfecthour | disinfection hour | uint8 (>=0<=23) |   | true | DHW | 15 | 1 | 1 | 
 
 ### RC10
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5487,17 +5494,18 @@
 | hc1.solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 54 | 1 | 1 | 
 | hc1.currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 55 | 1 | 1/10 | 
 | dhw.mode | operating mode | enum [off\|on\|auto] |   | true | DHW | 0 | 1 | 1 | 
-| dhw.settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 1 | 1 | 1 | 
-| dhw.settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
-| dhw.circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 3 | 1 | 1 | 
-| dhw.chargeduration | charge duration | uint8 (>=0<=3810) | minutes | true | DHW | 4 | 1 | 15 | 
-| dhw.charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
-| dhw.extra | extra | boolean |   | false | DHW | 6 | 1 | 1 | 
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 7 | 1 | 1 | 
-| dhw.disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 8 | 1 | 1 | 
-| dhw.disinfecttime | disinfection time | uint8 (>=0<=1431) | minutes | true | DHW | 9 | 1 | 15 | 
-| dhw.dailyheating | daily heating | boolean |   | true | DHW | 10 | 1 | 1 | 
-| dhw.dailyheattime | daily heating time | uint8 (>=0<=1431) | minutes | true | DHW | 11 | 1 | 15 | 
+| dhw.modetype | mode type | enum [off\|eco\|comfort\|eco+] |   | false | DHW | 1 | 1 | 1 | 
+| dhw.settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
+| dhw.settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 3 | 1 | 1 | 
+| dhw.circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 4 | 1 | 1 | 
+| dhw.chargeduration | charge duration | uint8 (>=0<=3810) | minutes | true | DHW | 5 | 1 | 15 | 
+| dhw.charge | charge | boolean |   | true | DHW | 6 | 1 | 1 | 
+| dhw.extra | extra | boolean |   | false | DHW | 7 | 1 | 1 | 
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 8 | 1 | 1 | 
+| dhw.disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 9 | 1 | 1 | 
+| dhw.disinfecttime | disinfection time | uint8 (>=0<=1431) | minutes | true | DHW | 10 | 1 | 15 | 
+| dhw.dailyheating | daily heating | boolean |   | true | DHW | 11 | 1 | 1 | 
+| dhw.dailyheattime | daily heating time | uint8 (>=0<=1431) | minutes | true | DHW | 12 | 1 | 15 | 
 
 ### RC20RF
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5621,17 +5629,18 @@
 | hc1.solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 54 | 1 | 1 | 
 | hc1.currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 55 | 1 | 1/10 | 
 | dhw.mode | operating mode | enum [off\|normal\|comfort\|auto\|own prog] |   | true | DHW | 0 | 1 | 1 | 
-| dhw.settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 1 | 1 | 1 | 
-| dhw.settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
-| dhw.circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 3 | 1 | 1 | 
-| dhw.chargeduration | charge duration | uint8 (>=0<=3810) | minutes | true | DHW | 4 | 1 | 15 | 
-| dhw.charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
-| dhw.extra | extra | boolean |   | false | DHW | 6 | 1 | 1 | 
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 7 | 1 | 1 | 
-| dhw.disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 8 | 1 | 1 | 
-| dhw.disinfecttime | disinfection time | uint8 (>=0<=1431) | minutes | true | DHW | 9 | 1 | 15 | 
-| dhw.dailyheating | daily heating | boolean |   | true | DHW | 10 | 1 | 1 | 
-| dhw.dailyheattime | daily heating time | uint8 (>=0<=1431) | minutes | true | DHW | 11 | 1 | 15 | 
+| dhw.modetype | mode type | enum [off\|eco\|comfort\|eco+] |   | false | DHW | 1 | 1 | 1 | 
+| dhw.settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
+| dhw.settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 3 | 1 | 1 | 
+| dhw.circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 4 | 1 | 1 | 
+| dhw.chargeduration | charge duration | uint8 (>=0<=3810) | minutes | true | DHW | 5 | 1 | 15 | 
+| dhw.charge | charge | boolean |   | true | DHW | 6 | 1 | 1 | 
+| dhw.extra | extra | boolean |   | false | DHW | 7 | 1 | 1 | 
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 8 | 1 | 1 | 
+| dhw.disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 9 | 1 | 1 | 
+| dhw.disinfecttime | disinfection time | uint8 (>=0<=1431) | minutes | true | DHW | 10 | 1 | 15 | 
+| dhw.dailyheating | daily heating | boolean |   | true | DHW | 11 | 1 | 1 | 
+| dhw.dailyheattime | daily heating time | uint8 (>=0<=1431) | minutes | true | DHW | 12 | 1 | 15 | 
 
 ### RC30
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5689,18 +5698,18 @@
 | hc1.switchtime1 | own1 program switchtime | string |   | true | HC | 91 | 8 | 1 | 
 | hc1.switchtime2 | own2 program switchtime | string |   | true | HC | 99 | 8 | 1 | 
 | dhw.mode | operating mode | enum [off\|on\|auto] |   | true | DHW | 0 | 1 | 1 | 
-| dhw.circmode | circulation pump mode | enum [off\|on\|auto] |   | true | DHW | 3 | 1 | 1 | 
-| dhw.progmode | program | enum [std prog\|own prog] |   | true | DHW | 12 | 1 | 1 | 
-| dhw.circprog | circulation program | enum [std prog\|own prog] |   | true | DHW | 13 | 1 | 1 | 
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 7 | 1 | 1 | 
-| dhw.disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 8 | 1 | 1 | 
-| dhw.disinfecthour | disinfection hour | uint8 (>=0<=23) |   | true | DHW | 14 | 1 | 1 | 
-| dhw.maxtemp | maximum temperature | uint8 (>=0<=254) | C | true | DHW | 15 | 1 | 1 | 
-| dhw.onetimekey | one time key function | boolean |   | true | DHW | 16 | 1 | 1 | 
-| dhw.switchtime | program switchtime | string |   | true | DHW | 17 | 8 | 1 | 
-| dhw.circswitchtime | circulation program switchtime | string |   | true | DHW | 25 | 8 | 1 | 
-| dhw.holidays | holiday dates | string |   | true | DHW | 33 | 13 | 1 | 
-| dhw.vacations | vacation dates | string |   | true | DHW | 46 | 13 | 1 | 
+| dhw.circmode | circulation pump mode | enum [off\|on\|auto] |   | true | DHW | 4 | 1 | 1 | 
+| dhw.progmode | program | enum [std prog\|own prog] |   | true | DHW | 13 | 1 | 1 | 
+| dhw.circprog | circulation program | enum [std prog\|own prog] |   | true | DHW | 14 | 1 | 1 | 
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 8 | 1 | 1 | 
+| dhw.disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 9 | 1 | 1 | 
+| dhw.disinfecthour | disinfection hour | uint8 (>=0<=23) |   | true | DHW | 15 | 1 | 1 | 
+| dhw.maxtemp | maximum temperature | uint8 (>=0<=254) | C | true | DHW | 16 | 1 | 1 | 
+| dhw.onetimekey | one time key function | boolean |   | true | DHW | 17 | 1 | 1 | 
+| dhw.switchtime | program switchtime | string |   | true | DHW | 18 | 8 | 1 | 
+| dhw.circswitchtime | circulation program switchtime | string |   | true | DHW | 26 | 8 | 1 | 
+| dhw.holidays | holiday dates | string |   | true | DHW | 34 | 13 | 1 | 
+| dhw.vacations | vacation dates | string |   | true | DHW | 47 | 13 | 1 | 
 
 ### RC35
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5755,18 +5764,18 @@
 | hc1.switchtime1 | own1 program switchtime | string |   | true | HC | 91 | 8 | 1 | 
 | hc1.switchtime2 | own2 program switchtime | string |   | true | HC | 99 | 8 | 1 | 
 | dhw.mode | operating mode | enum [off\|on\|auto] |   | true | DHW | 0 | 1 | 1 | 
-| dhw.circmode | circulation pump mode | enum [off\|on\|auto] |   | true | DHW | 3 | 1 | 1 | 
-| dhw.progmode | program | enum [std prog\|own prog] |   | true | DHW | 12 | 1 | 1 | 
-| dhw.circprog | circulation program | enum [std prog\|own prog] |   | true | DHW | 13 | 1 | 1 | 
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 7 | 1 | 1 | 
-| dhw.disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 8 | 1 | 1 | 
-| dhw.disinfecthour | disinfection hour | uint8 (>=0<=23) |   | true | DHW | 14 | 1 | 1 | 
-| dhw.maxtemp | maximum temperature | uint8 (>=60<=80) | C | true | DHW | 15 | 1 | 1 | 
-| dhw.onetimekey | one time key function | boolean |   | true | DHW | 16 | 1 | 1 | 
-| dhw.switchtime | program switchtime | string |   | true | DHW | 17 | 8 | 1 | 
-| dhw.circswitchtime | circulation program switchtime | string |   | true | DHW | 25 | 8 | 1 | 
-| dhw.holidays | holiday dates | string |   | true | DHW | 33 | 13 | 1 | 
-| dhw.vacations | vacation dates | string |   | true | DHW | 46 | 13 | 1 | 
+| dhw.circmode | circulation pump mode | enum [off\|on\|auto] |   | true | DHW | 4 | 1 | 1 | 
+| dhw.progmode | program | enum [std prog\|own prog] |   | true | DHW | 13 | 1 | 1 | 
+| dhw.circprog | circulation program | enum [std prog\|own prog] |   | true | DHW | 14 | 1 | 1 | 
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 8 | 1 | 1 | 
+| dhw.disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 9 | 1 | 1 | 
+| dhw.disinfecthour | disinfection hour | uint8 (>=0<=23) |   | true | DHW | 15 | 1 | 1 | 
+| dhw.maxtemp | maximum temperature | uint8 (>=60<=80) | C | true | DHW | 16 | 1 | 1 | 
+| dhw.onetimekey | one time key function | boolean |   | true | DHW | 17 | 1 | 1 | 
+| dhw.switchtime | program switchtime | string |   | true | DHW | 18 | 8 | 1 | 
+| dhw.circswitchtime | circulation program switchtime | string |   | true | DHW | 26 | 8 | 1 | 
+| dhw.holidays | holiday dates | string |   | true | DHW | 34 | 13 | 1 | 
+| dhw.vacations | vacation dates | string |   | true | DHW | 47 | 13 | 1 | 
 
 ### RFM20 Remote
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5871,17 +5880,18 @@
 | hc1.solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 54 | 1 | 1 | 
 | hc1.currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 55 | 1 | 1/10 | 
 | dhw.mode | operating mode | enum [normal\|comfort\|eco+] |   | true | DHW | 0 | 1 | 1 | 
-| dhw.settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 1 | 1 | 1 | 
-| dhw.settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
-| dhw.circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 3 | 1 | 1 | 
-| dhw.chargeduration | charge duration | uint8 (>=0<=3810) | minutes | true | DHW | 4 | 1 | 15 | 
-| dhw.charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
-| dhw.extra | extra | boolean |   | false | DHW | 6 | 1 | 1 | 
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 7 | 1 | 1 | 
-| dhw.disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 8 | 1 | 1 | 
-| dhw.disinfecttime | disinfection time | uint8 (>=0<=1431) | minutes | true | DHW | 9 | 1 | 15 | 
-| dhw.dailyheating | daily heating | boolean |   | true | DHW | 10 | 1 | 1 | 
-| dhw.dailyheattime | daily heating time | uint8 (>=0<=1431) | minutes | true | DHW | 11 | 1 | 15 | 
+| dhw.modetype | mode type | enum [off\|eco\|comfort\|eco+] |   | false | DHW | 1 | 1 | 1 | 
+| dhw.settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
+| dhw.settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 3 | 1 | 1 | 
+| dhw.circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 4 | 1 | 1 | 
+| dhw.chargeduration | charge duration | uint8 (>=0<=3810) | minutes | true | DHW | 5 | 1 | 15 | 
+| dhw.charge | charge | boolean |   | true | DHW | 6 | 1 | 1 | 
+| dhw.extra | extra | boolean |   | false | DHW | 7 | 1 | 1 | 
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 8 | 1 | 1 | 
+| dhw.disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 9 | 1 | 1 | 
+| dhw.disinfecttime | disinfection time | uint8 (>=0<=1431) | minutes | true | DHW | 10 | 1 | 15 | 
+| dhw.dailyheating | daily heating | boolean |   | true | DHW | 11 | 1 | 1 | 
+| dhw.dailyheattime | daily heating time | uint8 (>=0<=1431) | minutes | true | DHW | 12 | 1 | 15 | 
 
 ### Rego 3000, UI800, Logamatic BC400
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5965,17 +5975,18 @@
 | hc1.solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 54 | 1 | 1 | 
 | hc1.currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 55 | 1 | 1/10 | 
 | dhw.mode | operating mode | enum [off\|eco+\|eco\|comfort\|auto] |   | true | DHW | 0 | 1 | 1 | 
-| dhw.settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 1 | 1 | 1 | 
-| dhw.settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
-| dhw.circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 3 | 1 | 1 | 
-| dhw.chargeduration | charge duration | uint8 (>=0<=3810) | minutes | true | DHW | 4 | 1 | 15 | 
-| dhw.charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
-| dhw.extra | extra | boolean |   | false | DHW | 6 | 1 | 1 | 
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 7 | 1 | 1 | 
-| dhw.disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 8 | 1 | 1 | 
-| dhw.disinfecttime | disinfection time | uint8 (>=0<=1431) | minutes | true | DHW | 9 | 1 | 15 | 
-| dhw.dailyheating | daily heating | boolean |   | true | DHW | 10 | 1 | 1 | 
-| dhw.dailyheattime | daily heating time | uint8 (>=0<=1431) | minutes | true | DHW | 11 | 1 | 15 | 
+| dhw.modetype | mode type | enum [off\|eco\|comfort\|eco+] |   | false | DHW | 1 | 1 | 1 | 
+| dhw.settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
+| dhw.settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 3 | 1 | 1 | 
+| dhw.circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 4 | 1 | 1 | 
+| dhw.chargeduration | charge duration | uint8 (>=0<=3810) | minutes | true | DHW | 5 | 1 | 15 | 
+| dhw.charge | charge | boolean |   | true | DHW | 6 | 1 | 1 | 
+| dhw.extra | extra | boolean |   | false | DHW | 7 | 1 | 1 | 
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 8 | 1 | 1 | 
+| dhw.disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 9 | 1 | 1 | 
+| dhw.disinfecttime | disinfection time | uint8 (>=0<=1431) | minutes | true | DHW | 10 | 1 | 15 | 
+| dhw.dailyheating | daily heating | boolean |   | true | DHW | 11 | 1 | 1 | 
+| dhw.dailyheattime | daily heating time | uint8 (>=0<=1431) | minutes | true | DHW | 12 | 1 | 15 | 
 
 ### TR120RF, CR20RF
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -6069,17 +6080,18 @@
 | hc1.solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 54 | 1 | 1 | 
 | hc1.currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 55 | 1 | 1/10 | 
 | dhw.mode | operating mode | enum [off\|eco+\|eco\|comfort\|auto] |   | true | DHW | 0 | 1 | 1 | 
-| dhw.settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 1 | 1 | 1 | 
-| dhw.settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
-| dhw.circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 3 | 1 | 1 | 
-| dhw.chargeduration | charge duration | uint8 (>=0<=3810) | minutes | true | DHW | 4 | 1 | 15 | 
-| dhw.charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
-| dhw.extra | extra | boolean |   | false | DHW | 6 | 1 | 1 | 
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 7 | 1 | 1 | 
-| dhw.disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 8 | 1 | 1 | 
-| dhw.disinfecttime | disinfection time | uint8 (>=0<=1431) | minutes | true | DHW | 9 | 1 | 15 | 
-| dhw.dailyheating | daily heating | boolean |   | true | DHW | 10 | 1 | 1 | 
-| dhw.dailyheattime | daily heating time | uint8 (>=0<=1431) | minutes | true | DHW | 11 | 1 | 15 | 
+| dhw.modetype | mode type | enum [off\|eco\|comfort\|eco+] |   | false | DHW | 1 | 1 | 1 | 
+| dhw.settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
+| dhw.settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 3 | 1 | 1 | 
+| dhw.circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 4 | 1 | 1 | 
+| dhw.chargeduration | charge duration | uint8 (>=0<=3810) | minutes | true | DHW | 5 | 1 | 15 | 
+| dhw.charge | charge | boolean |   | true | DHW | 6 | 1 | 1 | 
+| dhw.extra | extra | boolean |   | false | DHW | 7 | 1 | 1 | 
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 8 | 1 | 1 | 
+| dhw.disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 9 | 1 | 1 | 
+| dhw.disinfecttime | disinfection time | uint8 (>=0<=1431) | minutes | true | DHW | 10 | 1 | 15 | 
+| dhw.dailyheating | daily heating | boolean |   | true | DHW | 11 | 1 | 1 | 
+| dhw.dailyheattime | daily heating time | uint8 (>=0<=1431) | minutes | true | DHW | 12 | 1 | 15 | 
 
 ## Devices of type *ventilation*
 ### HRV176, HRV156, 5000c, MV200

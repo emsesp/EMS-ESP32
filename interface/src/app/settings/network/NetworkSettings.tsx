@@ -104,7 +104,7 @@ const NetworkSettings = () => {
     origData,
     dirtyFlags,
     setDirtyFlags,
-    updateDataValue
+    updateDataValue as (value: unknown) => void
   );
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
@@ -113,7 +113,7 @@ const NetworkSettings = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
     }
 
     const validateAndSubmit = async () => {
@@ -172,7 +172,7 @@ const NetworkSettings = () => {
           </List>
         ) : (
           <ValidatedTextField
-            fieldErrors={fieldErrors}
+            fieldErrors={fieldErrors || {}}
             name="ssid"
             label={'SSID (' + LL.NETWORK_BLANK_SSID() + ')'}
             fullWidth
@@ -183,7 +183,7 @@ const NetworkSettings = () => {
           />
         )}
         <ValidatedTextField
-          fieldErrors={fieldErrors}
+          fieldErrors={fieldErrors || {}}
           name="bssid"
           label={'BSSID (' + LL.NETWORK_BLANK_BSSID() + ')'}
           fullWidth
@@ -194,7 +194,7 @@ const NetworkSettings = () => {
         />
         {(!selectedNetwork || !isNetworkOpen(selectedNetwork)) && (
           <ValidatedPasswordField
-            fieldErrors={fieldErrors}
+            fieldErrors={fieldErrors || {}}
             name="password"
             label={LL.PASSWORD()}
             fullWidth
@@ -251,7 +251,7 @@ const NetworkSettings = () => {
           {LL.GENERAL_OPTIONS()}
         </Typography>
         <ValidatedTextField
-          fieldErrors={fieldErrors}
+          fieldErrors={fieldErrors || {}}
           name="hostname"
           label={LL.HOSTNAME()}
           fullWidth
@@ -304,7 +304,7 @@ const NetworkSettings = () => {
         {data.static_ip_config && (
           <>
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="local_ip"
               label={LL.AP_LOCAL_IP()}
               fullWidth
@@ -314,7 +314,7 @@ const NetworkSettings = () => {
               margin="normal"
             />
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="gateway_ip"
               label={LL.NETWORK_GATEWAY()}
               fullWidth
@@ -324,7 +324,7 @@ const NetworkSettings = () => {
               margin="normal"
             />
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="subnet_mask"
               label={LL.NETWORK_SUBNET()}
               fullWidth
@@ -334,7 +334,7 @@ const NetworkSettings = () => {
               margin="normal"
             />
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="dns_ip_1"
               label="DNS #1"
               fullWidth
@@ -344,7 +344,7 @@ const NetworkSettings = () => {
               margin="normal"
             />
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="dns_ip_2"
               label="DNS #2"
               fullWidth

@@ -56,7 +56,7 @@ const MqttSettings = () => {
     origData,
     dirtyFlags,
     setDirtyFlags,
-    updateDataValue
+    updateDataValue as (value: unknown) => void
   );
 
   const SecondsInputProps = {
@@ -65,7 +65,7 @@ const MqttSettings = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
     }
 
     const validateAndSubmit = async () => {
@@ -93,7 +93,7 @@ const MqttSettings = () => {
         <Grid container spacing={2} rowSpacing={0}>
           <Grid>
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="host"
               label={LL.ADDRESS_OF(LL.BROKER())}
               multiline
@@ -105,7 +105,7 @@ const MqttSettings = () => {
           </Grid>
           <Grid>
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="port"
               label="Port"
               variant="outlined"
@@ -117,7 +117,7 @@ const MqttSettings = () => {
           </Grid>
           <Grid>
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="base"
               label={LL.BASE_TOPIC()}
               variant="outlined"
@@ -158,7 +158,7 @@ const MqttSettings = () => {
           </Grid>
           <Grid>
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="keep_alive"
               label="Keep Alive"
               slotProps={{
@@ -354,7 +354,7 @@ const MqttSettings = () => {
         <Grid container spacing={2} rowSpacing={0}>
           <Grid>
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="publish_time_heartbeat"
               label="Heartbeat"
               slotProps={{

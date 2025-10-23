@@ -135,8 +135,8 @@ const Scheduler = () => {
   const saveSchedule = async () => {
     await updateSchedule({
       schedule: schedule
-        .filter((si) => !si.deleted)
-        .map((condensed_si) => ({
+        .filter((si: ScheduleItem) => !si.deleted)
+        .map((condensed_si: ScheduleItem) => ({
           id: condensed_si.id,
           active: condensed_si.active,
           flags: condensed_si.flags,
@@ -212,7 +212,9 @@ const Scheduler = () => {
 
   const renderSchedule = () => {
     if (!schedule) {
-      return <FormLoader onRetry={fetchSchedule} errorMessage={error?.message} />;
+      return (
+        <FormLoader onRetry={fetchSchedule} errorMessage={error?.message || ''} />
+      );
     }
 
     const dayBox = (si: ScheduleItem, flag: number) => (
@@ -251,8 +253,8 @@ const Scheduler = () => {
       <Table
         data={{
           nodes: schedule
-            .filter((si) => !si.deleted)
-            .sort((a, b) => a.flags - b.flags)
+            .filter((si: ScheduleItem) => !si.deleted)
+            .sort((a: ScheduleItem, b: ScheduleItem) => a.flags - b.flags)
         }}
         theme={schedule_theme}
         layout={{ custom: true }}

@@ -162,6 +162,7 @@ const it: Translation = {
   UPLOAD: 'Carica',
   DOWNLOAD: 'Scarica',
   INSTALL: 'Installare {0}',
+  REINSTALL: 'Riavviare',
   ABORTED: 'Annullato',
   FAILED: 'Fallito',
   SUCCESSFUL: 'Riuscito',

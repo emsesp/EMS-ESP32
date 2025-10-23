@@ -120,7 +120,7 @@ const DevicesDialog = ({
             {editItem.l ? (
               <TextField
                 name="v"
-                label={LL.VALUE(0)}
+                // label={LL.VALUE(0)}
                 value={editItem.v}
                 disabled={!writeable}
                 sx={{ width: '30ch' }}
@@ -135,7 +135,7 @@ const DevicesDialog = ({
               </TextField>
             ) : editItem.s || editItem.u !== DeviceValueUOM.NONE ? (
               <ValidatedTextField
-                fieldErrors={fieldErrors}
+                fieldErrors={fieldErrors || {}}
                 name="v"
                 label={LL.VALUE(0)}
                 value={numberValue(Math.round((editItem.v as number) * 10) / 10)}
@@ -159,7 +159,7 @@ const DevicesDialog = ({
               />
             ) : (
               <ValidatedTextField
-                fieldErrors={fieldErrors}
+                fieldErrors={fieldErrors || {}}
                 name="v"
                 label={LL.VALUE(0)}
                 value={editItem.v}

@@ -162,6 +162,7 @@ const sk: Translation = {
   UPLOAD: 'Nahrať',
   DOWNLOAD: '{{S|s|s}}tiahnuť',
   INSTALL: 'Inštalovať',
+  REINSTALL: 'Inštalovať znova',
   ABORTED: 'zrušené',
   FAILED: 'chybné',
   SUCCESSFUL: 'úspešné',

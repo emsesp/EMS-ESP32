@@ -76,7 +76,7 @@ const NTPSettings = () => {
     origData,
     dirtyFlags,
     setDirtyFlags,
-    updateDataValue
+    updateDataValue as (value: unknown) => void
   );
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
@@ -155,7 +155,7 @@ const NTPSettings = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
     }
 
     const validateAndSubmit = async () => {
@@ -190,7 +190,7 @@ const NTPSettings = () => {
           label={LL.ENABLE_NTP()}
         />
         <ValidatedTextField
-          fieldErrors={fieldErrors}
+          fieldErrors={fieldErrors || {}}
           name="server"
           label={LL.NTP_SERVER()}
           fullWidth
@@ -200,7 +200,7 @@ const NTPSettings = () => {
           margin="normal"
         />
         <ValidatedTextField
-          fieldErrors={fieldErrors}
+          fieldErrors={fieldErrors || {}}
           name="tz_label"
           label={LL.TIME_ZONE()}
           fullWidth

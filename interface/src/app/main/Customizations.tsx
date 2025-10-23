@@ -125,13 +125,22 @@ const Customizations = () => {
 
   const setOriginalSettings = (data: DeviceEntity[]) => {
     setDeviceEntities(
-      data.map((de) => ({
-        ...de,
-        o_m: de.m,
-        o_cn: de.cn,
-        o_mi: de.mi,
-        o_ma: de.ma
-      }))
+      data.map((de) => {
+        const result: DeviceEntity = {
+          ...de,
+          o_m: de.m
+        };
+        if (de.cn !== undefined) {
+          result.o_cn = de.cn;
+        }
+        if (de.mi !== undefined) {
+          result.o_mi = de.mi;
+        }
+        if (de.ma !== undefined) {
+          result.o_ma = de.ma;
+        }
+        return result;
+      })
     );
   };
 
@@ -244,8 +253,11 @@ const Customizations = () => {
         setSelectedDevice(-1);
         setSelectedDeviceTypeNameURL('');
       } else {
-        setSelectedDeviceTypeNameURL(devices.devices[index].url || '');
-        setSelectedDeviceName(devices.devices[index].n);
+        const device = devices.devices[index];
+        if (device) {
+          setSelectedDeviceTypeNameURL(device.url || '');
+          setSelectedDeviceName(device.n);
+        }
         setNumChanges(0);
         setRestartNeeded(false);
       }
@@ -396,14 +408,20 @@ const Customizations = () => {
       await sendCustomizationEntities({
         id: selectedDevice,
         entity_ids: masked_entities
-      }).catch((error: Error) => {
-        if (error.message === 'Reboot required') {
-          setRestartNeeded(true);
-        } else {
-          toast.error(error.message);
-        }
-      });
-      setOriginalSettings(deviceEntities);
+      })
+        .then(() => {
+          toast.success(LL.CUSTOMIZATIONS_SAVED());
+        })
+        .catch((error: Error) => {
+          if (error.message === 'Reboot required') {
+            setRestartNeeded(true);
+          } else {
+            toast.error(error.message);
+          }
+        })
+        .finally(() => {
+          setOriginalSettings(deviceEntities);
+        });
     }
   };
 
@@ -545,7 +563,7 @@ const Customizations = () => {
               size="small"
               color="secondary"
               value={getMaskString(selectedFilters)}
-              onChange={(event, mask: string[]) => {
+              onChange={(_, mask: string[]) => {
                 setSelectedFilters(getMaskNumber(mask));
               }}
             >

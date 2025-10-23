@@ -787,8 +787,8 @@ std::string Helpers::toUpper(std::string const & s) {
 }
 
 // capitalizes one UTF-8 character in char array
-// works with Latin1 (1 byte), Polish amd some other (2 bytes) characters
-// TODO add special characters that occur in other supported languages
+// works with Latin1 (1 byte), Polish and other (2 bytes) characters
+// supports special characters for all 11 supported languages: EN, DE, NL, SV, PL, NO, FR, TR, IT, SK, CZ
 #if defined(EMSESP_STANDALONE)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wtype-limits"
@@ -803,23 +803,77 @@ void Helpers::CharToUpperUTF8(char * c) {
         if ((p_v >= (char)0xA0) && (p_v <= (char)0xBE)) {
             *p -= 0x20;
         }
+        // Additional special characters for supported languages
+        switch (p_v) {
+        case (char)0xA0: // à -> À
+        case (char)0xA1: // á -> Á
+        case (char)0xA2: // â -> Â
+        case (char)0xA3: // ã -> Ã
+        case (char)0xA4: // ä -> Ä (German, Swedish)
+        case (char)0xA5: // å -> Å (Swedish, Norwegian)
+        case (char)0xA6: // æ -> Æ (Norwegian)
+        case (char)0xA7: // ç -> Ç (French, Turkish)
+        case (char)0xA8: // è -> È (French, Italian)
+        case (char)0xA9: // é -> É (French, Italian)
+        case (char)0xAA: // ê -> Ê (French)
+        case (char)0xAB: // ë -> Ë (French)
+        case (char)0xAC: // ì -> Ì (Italian)
+        case (char)0xAD: // í -> Í (Slovak, Czech)
+        case (char)0xAE: // î -> Î (French)
+        case (char)0xAF: // ï -> Ï (French)
+        case (char)0xB0: // ð -> Ð (Icelandic)
+        case (char)0xB1: // ñ -> Ñ (Spanish)
+        case (char)0xB2: // ò -> Ò (Italian)
+        case (char)0xB3: // ó -> Ó (Slovak, Czech)
+        case (char)0xB4: // ô -> Ô (French, Slovak)
+        case (char)0xB5: // õ -> Õ (Portuguese)
+        case (char)0xB6: // ö -> Ö (German, Swedish, Turkish)
+        case (char)0xB8: // ø -> Ø (Norwegian)
+        case (char)0xB9: // ù -> Ù (French, Italian)
+        case (char)0xBA: // ú -> Ú (Slovak, Czech)
+        case (char)0xBB: // û -> Û (French)
+        case (char)0xBC: // ü -> Ü (German, French, Turkish)
+        case (char)0xBD: // ý -> Ý (Slovak, Czech)
+        case (char)0xBE: // þ -> Þ (Icelandic)
+        case (char)0xBF: // ÿ -> Ÿ (French)
+            *p -= 0x20;
+            break;
+        }
         break;
     case (char)0xC4:
         switch (p_v) {
-        case (char)0x85: //ą (0xC4,0x85) -> Ą (0xC4,0x84)
-        case (char)0x87: //ć (0xC4,0x87) -> Ć (0xC4,0x86)
-        case (char)0x99: //ę (0xC4,0x99) -> Ę (0xC4,0x98)
+        case (char)0x85: //ą (0xC4,0x85) -> Ą (0xC4,0x84) (Polish)
+        case (char)0x87: //ć (0xC4,0x87) -> Ć (0xC4,0x86) (Polish)
+        case (char)0x8D: //č (0xC4,0x8D) -> Č (0xC4,0x8C) (Slovak, Czech)
+        case (char)0x8F: //ď (0xC4,0x8F) -> Ď (0xC4,0x8E) (Slovak, Czech)
+        case (char)0x9F: //ğ (0xC4,0x9F) -> Ğ (0xC4,0x9E) (Turkish)
+        case (char)0x99: //ę (0xC4,0x99) -> Ę (0xC4,0x98) (Polish)
+        case (char)0x9B: //ě (0xC4,0x9B) -> Ě (0xC4,0x9A) (Czech)
+        case (char)0xAF: //ı (0xC4,0xAF) -> I (0xC4,0xAE) (Turkish)
+        case (char)0xB1: //ı (0xC4,0xB1) -> I (0xC4,0xB0) (Turkish)
+        case (char)0xB3: //ĳ (0xC4,0xB3) -> Ĳ (0xC4,0xB2) (Dutch)
             *p -= 1;
             break;
         }
         break;
     case (char)0xC5:
         switch (p_v) {
-        case (char)0x82: //ł (0xC5,0x82) -> Ł (0xC5,0x81)
-        case (char)0x84: //ń (0xC5,0x84) -> Ń (0xC5,0x83)
-        case (char)0x9B: //ś (0xC5,0x9B) -> Ś (0xC5,0x9A)
-        case (char)0xBA: //ź (0xC5,0xBA) -> Ź (0xC5,0xB9)
-        case (char)0xBC: //ż (0xC5,0xBC) -> Ż (0xC5,0xBB)
+        case (char)0x81: //ł (0xC5,0x81) -> Ł (0xC5,0x80) (Polish)
+        case (char)0x82: //ł (0xC5,0x82) -> Ł (0xC5,0x81) (Polish)
+        case (char)0x83: //ń (0xC5,0x83) -> Ń (0xC5,0x82) (Polish)
+        case (char)0x84: //ń (0xC5,0x84) -> Ń (0xC5,0x83) (Polish)
+        case (char)0x88: //ň (0xC5,0x88) -> Ň (0xC5,0x87) (Slovak, Czech)
+        case (char)0x95: //ŕ (0xC5,0x95) -> Ŕ (0xC5,0x94) (Slovak)
+        case (char)0x99: //ř (0xC5,0x99) -> Ř (0xC5,0x98) (Czech)
+        case (char)0x9A: //ś (0xC5,0x9A) -> Ś (0xC5,0x99) (Polish)
+        case (char)0x9B: //ś (0xC5,0x9B) -> Ś (0xC5,0x9A) (Polish)
+        case (char)0x9F: //ş (0xC5,0x9F) -> Ş (0xC5,0x9E) (Turkish)
+        case (char)0xA1: //š (0xC5,0xA1) -> Š (0xC5,0xA0) (Slovak, Czech)
+        case (char)0xA5: //ť (0xC5,0xA5) -> Ť (0xC5,0xA4) (Slovak, Czech)
+        case (char)0xAF: //ů (0xC5,0xAF) -> Ů (0xC5,0xAE) (Czech)
+        case (char)0xBA: //ź (0xC5,0xBA) -> Ź (0xC5,0xB9) (Polish)
+        case (char)0xBC: //ż (0xC5,0xBC) -> Ż (0xC5,0xBB) (Polish)
+        case (char)0xBE: //ž (0xC5,0xBE) -> Ž (0xC5,0xBD) (Slovak, Czech)
             *p -= 1;
             break;
         }

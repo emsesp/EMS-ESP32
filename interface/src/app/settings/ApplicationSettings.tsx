@@ -75,7 +75,7 @@ const ApplicationSettings = () => {
     origData,
     dirtyFlags,
     setDirtyFlags,
-    updateDataValue
+    updateDataValue as (value: unknown) => void
   );
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
@@ -135,7 +135,7 @@ const ApplicationSettings = () => {
 
   const content = () => {
     if (!data || !hardwareData) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
     }
 
     const validateAndSubmit = async () => {
@@ -219,7 +219,7 @@ const ApplicationSettings = () => {
           <Grid container spacing={2} rowSpacing={0}>
             <Grid>
               <ValidatedTextField
-                fieldErrors={fieldErrors}
+                fieldErrors={fieldErrors || {}}
                 name="modbus_max_clients"
                 label={LL.AP_MAX_CLIENTS()}
                 variant="outlined"
@@ -231,7 +231,7 @@ const ApplicationSettings = () => {
             </Grid>
             <Grid>
               <ValidatedTextField
-                fieldErrors={fieldErrors}
+                fieldErrors={fieldErrors || {}}
                 name="modbus_port"
                 label="Port"
                 variant="outlined"
@@ -243,7 +243,7 @@ const ApplicationSettings = () => {
             </Grid>
             <Grid>
               <ValidatedTextField
-                fieldErrors={fieldErrors}
+                fieldErrors={fieldErrors || {}}
                 name="modbus_timeout"
                 label="Timeout"
                 slotProps={{
@@ -273,7 +273,7 @@ const ApplicationSettings = () => {
           <Grid container spacing={2} rowSpacing={0}>
             <Grid>
               <ValidatedTextField
-                fieldErrors={fieldErrors}
+                fieldErrors={fieldErrors || {}}
                 name="syslog_host"
                 label="Host"
                 variant="outlined"
@@ -284,7 +284,7 @@ const ApplicationSettings = () => {
             </Grid>
             <Grid>
               <ValidatedTextField
-                fieldErrors={fieldErrors}
+                fieldErrors={fieldErrors || {}}
                 name="syslog_port"
                 label="Port"
                 variant="outlined"
@@ -315,7 +315,7 @@ const ApplicationSettings = () => {
             </Grid>
             <Grid>
               <ValidatedTextField
-                fieldErrors={fieldErrors}
+                fieldErrors={fieldErrors || {}}
                 name="syslog_mark_interval"
                 label={LL.MARK_INTERVAL()}
                 slotProps={{
@@ -485,7 +485,7 @@ const ApplicationSettings = () => {
             <Grid container spacing={2} rowSpacing={0}>
               <Grid>
                 <ValidatedTextField
-                  fieldErrors={fieldErrors}
+                  fieldErrors={fieldErrors || {}}
                   name="rx_gpio"
                   label={LL.GPIO_OF('Rx')}
                   fullWidth
@@ -498,7 +498,7 @@ const ApplicationSettings = () => {
               </Grid>
               <Grid>
                 <ValidatedTextField
-                  fieldErrors={fieldErrors}
+                  fieldErrors={fieldErrors || {}}
                   name="tx_gpio"
                   label={LL.GPIO_OF('Tx')}
                   fullWidth
@@ -511,7 +511,7 @@ const ApplicationSettings = () => {
               </Grid>
               <Grid>
                 <ValidatedTextField
-                  fieldErrors={fieldErrors}
+                  fieldErrors={fieldErrors || {}}
                   name="pbutton_gpio"
                   label={LL.GPIO_OF(LL.BUTTON())}
                   fullWidth
@@ -524,7 +524,7 @@ const ApplicationSettings = () => {
               </Grid>
               <Grid>
                 <ValidatedTextField
-                  fieldErrors={fieldErrors}
+                  fieldErrors={fieldErrors || {}}
                   name="dallas_gpio"
                   label={
                     LL.GPIO_OF(LL.TEMPERATURE()) + ' (0=' + LL.DISABLED(1) + ')'
@@ -539,7 +539,7 @@ const ApplicationSettings = () => {
               </Grid>
               <Grid>
                 <ValidatedTextField
-                  fieldErrors={fieldErrors}
+                  fieldErrors={fieldErrors || {}}
                   name="led_gpio"
                   label={LL.GPIO_OF('LED') + ' (0=' + LL.DISABLED(1) + ')'}
                   fullWidth
@@ -743,7 +743,7 @@ const ApplicationSettings = () => {
         {data.remote_timeout_en && (
           <Box mt={2}>
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="remote_timeout"
               label={LL.REMOTE_TIMEOUT()}
               slotProps={{
@@ -783,7 +783,7 @@ const ApplicationSettings = () => {
           {data.shower_timer && (
             <Grid>
               <ValidatedTextField
-                fieldErrors={fieldErrors}
+                fieldErrors={fieldErrors || {}}
                 name="shower_min_duration"
                 label={LL.MIN_DURATION()}
                 slotProps={{
@@ -801,7 +801,7 @@ const ApplicationSettings = () => {
             <>
               <Grid>
                 <ValidatedTextField
-                  fieldErrors={fieldErrors}
+                  fieldErrors={fieldErrors || {}}
                   name="shower_alert_trigger"
                   label={LL.TRIGGER_TIME()}
                   slotProps={{
@@ -817,7 +817,7 @@ const ApplicationSettings = () => {
               </Grid>
               <Grid>
                 <ValidatedTextField
-                  fieldErrors={fieldErrors}
+                  fieldErrors={fieldErrors || {}}
                   name="shower_alert_coldshot"
                   label={LL.COLD_SHOT_DURATION()}
                   slotProps={{

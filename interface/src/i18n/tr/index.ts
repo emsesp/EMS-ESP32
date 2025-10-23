@@ -162,6 +162,7 @@ const tr: Translation = {
   UPLOAD: 'Yükleme',
   DOWNLOAD: '{{İ|i|i}}İndirme',
   INSTALL: 'Düzenlemek',
+  REINSTALL: 'Yeniden düzenlemek',
   ABORTED: 'iptal edildi',
   FAILED: 'başarısız',
   SUCCESSFUL: 'başarılı',

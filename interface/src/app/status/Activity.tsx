@@ -67,7 +67,8 @@ const SystemActivity = () => {
   });
 
   const showName = (id: number) => {
-    const name: keyof Translation['STATUS_NAMES'] = id;
+    const name: keyof Translation['STATUS_NAMES'] =
+      id.toString() as keyof Translation['STATUS_NAMES'];
     return LL.STATUS_NAMES[name]();
   };
 
@@ -87,7 +88,7 @@ const SystemActivity = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
+      return <FormLoader onRetry={loadData} errorMessage={error?.message || ''} />;
     }
 
     return (

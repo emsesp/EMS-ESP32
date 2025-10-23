@@ -23,7 +23,12 @@ const LayoutMenuItem = ({
   const selected = routeMatches(to, pathname);
 
   return (
-    <ListItemButton component={Link} to={to} disabled={disabled} selected={selected}>
+    <ListItemButton
+      component={Link}
+      to={to}
+      disabled={disabled || false}
+      selected={selected}
+    >
       <ListItemIcon sx={{ color: selected ? '#90caf9' : '#9e9e9e' }}>
         <Icon />
       </ListItemIcon>

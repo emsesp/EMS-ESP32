@@ -52,7 +52,10 @@ const SensorsTemperatureDialog = ({
     }
   }, [open, selectedItem]);
 
-  const handleClose = (_event, reason: 'backdropClick' | 'escapeKeyDown') => {
+  const handleClose = (
+    _event: React.SyntheticEvent,
+    reason: 'backdropClick' | 'escapeKeyDown'
+  ) => {
     if (reason !== 'backdropClick') {
       onClose();
     }
@@ -82,7 +85,7 @@ const SensorsTemperatureDialog = ({
         <Grid container spacing={2}>
           <Grid>
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="n"
               label={LL.NAME(0)}
               value={editItem.n}

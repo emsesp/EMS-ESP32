@@ -160,8 +160,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.comfoff,comfort switch off,uint8 (>=15<=65),C,true,number.boiler_dhw_comfort_switch_off,number.boiler_dhw_comfoff,5,9,1,18,1
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.ecooff,eco switch off,uint8 (>=15<=65),C,true,number.boiler_dhw_eco_switch_off,number.boiler_dhw_ecooff,5,9,1,19,1
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.ecoplusoff,eco+ switch off,uint8 (>=48<=63),C,true,number.boiler_dhw_eco+_switch_off,number.boiler_dhw_ecoplusoff,5,9,1,20,1
-"CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.comfdiff,comfort diff,uint8 (>=6<=12),K,true,number.boiler_dhw_comfort_diff,number.boiler_dhw_comfdiff,5,9,1,21,1
-"CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.ecodiff,eco diff,uint8 (>=6<=12),K,true,number.boiler_dhw_eco_diff,number.boiler_dhw_ecodiff,5,9,1,22,1
+"CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.comfdiff,comfort diff,uint8 (>=4<=12),K,true,number.boiler_dhw_comfort_diff,number.boiler_dhw_comfdiff,5,9,1,21,1
+"CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.ecodiff,eco diff,uint8 (>=4<=12),K,true,number.boiler_dhw_eco_diff,number.boiler_dhw_ecodiff,5,9,1,22,1
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.ecoplusdiff,eco+ diff,uint8 (>=6<=12),K,true,number.boiler_dhw_eco+_diff,number.boiler_dhw_ecoplusdiff,5,9,1,23,1
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.comfstop,comfort stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_comfort_stop_temp,number.boiler_dhw_comfstop,5,9,1,24,1
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.ecostop,eco stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_eco_stop_temp,number.boiler_dhw_ecostop,5,9,1,25,1
@@ -2668,8 +2668,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.comfoff,comfort switch off,uint8 (>=15<=65),C,true,number.boiler_dhw_comfort_switch_off,number.boiler_dhw_comfoff,5,9,1,18,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.ecooff,eco switch off,uint8 (>=15<=65),C,true,number.boiler_dhw_eco_switch_off,number.boiler_dhw_ecooff,5,9,1,19,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.ecoplusoff,eco+ switch off,uint8 (>=48<=63),C,true,number.boiler_dhw_eco+_switch_off,number.boiler_dhw_ecoplusoff,5,9,1,20,1
-"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.comfdiff,comfort diff,uint8 (>=6<=12),K,true,number.boiler_dhw_comfort_diff,number.boiler_dhw_comfdiff,5,9,1,21,1
-"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.ecodiff,eco diff,uint8 (>=6<=12),K,true,number.boiler_dhw_eco_diff,number.boiler_dhw_ecodiff,5,9,1,22,1
+"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.comfdiff,comfort diff,uint8 (>=4<=12),K,true,number.boiler_dhw_comfort_diff,number.boiler_dhw_comfdiff,5,9,1,21,1
+"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.ecodiff,eco diff,uint8 (>=4<=12),K,true,number.boiler_dhw_eco_diff,number.boiler_dhw_ecodiff,5,9,1,22,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.ecoplusdiff,eco+ diff,uint8 (>=6<=12),K,true,number.boiler_dhw_eco+_diff,number.boiler_dhw_ecoplusdiff,5,9,1,23,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.comfstop,comfort stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_comfort_stop_temp,number.boiler_dhw_comfstop,5,9,1,24,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.ecostop,eco stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_eco_stop_temp,number.boiler_dhw_ecostop,5,9,1,25,1
@@ -2876,8 +2876,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Geo 5xx",boiler,173,dhw.comfoff,comfort switch off,uint8 (>=15<=65),C,true,number.boiler_dhw_comfort_switch_off,number.boiler_dhw_comfoff,5,9,1,18,1
 "Geo 5xx",boiler,173,dhw.ecooff,eco switch off,uint8 (>=15<=65),C,true,number.boiler_dhw_eco_switch_off,number.boiler_dhw_ecooff,5,9,1,19,1
 "Geo 5xx",boiler,173,dhw.ecoplusoff,eco+ switch off,uint8 (>=48<=63),C,true,number.boiler_dhw_eco+_switch_off,number.boiler_dhw_ecoplusoff,5,9,1,20,1
-"Geo 5xx",boiler,173,dhw.comfdiff,comfort diff,uint8 (>=6<=12),K,true,number.boiler_dhw_comfort_diff,number.boiler_dhw_comfdiff,5,9,1,21,1
-"Geo 5xx",boiler,173,dhw.ecodiff,eco diff,uint8 (>=6<=12),K,true,number.boiler_dhw_eco_diff,number.boiler_dhw_ecodiff,5,9,1,22,1
+"Geo 5xx",boiler,173,dhw.comfdiff,comfort diff,uint8 (>=4<=12),K,true,number.boiler_dhw_comfort_diff,number.boiler_dhw_comfdiff,5,9,1,21,1
+"Geo 5xx",boiler,173,dhw.ecodiff,eco diff,uint8 (>=4<=12),K,true,number.boiler_dhw_eco_diff,number.boiler_dhw_ecodiff,5,9,1,22,1
 "Geo 5xx",boiler,173,dhw.ecoplusdiff,eco+ diff,uint8 (>=6<=12),K,true,number.boiler_dhw_eco+_diff,number.boiler_dhw_ecoplusdiff,5,9,1,23,1
 "Geo 5xx",boiler,173,dhw.comfstop,comfort stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_comfort_stop_temp,number.boiler_dhw_comfstop,5,9,1,24,1
 "Geo 5xx",boiler,173,dhw.ecostop,eco stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_eco_stop_temp,number.boiler_dhw_ecostop,5,9,1,25,1
@@ -3914,17 +3914,18 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "UI800, BC400",thermostat,4,hc1.solarinfl,solar influence,uint8 (>=-5<=4294967295),C,true,number.thermostat_hc1_solar_influence,number.thermostat_hc1_solarinfl,6,1,1,54,1
 "UI800, BC400",thermostat,4,hc1.currsolarinfl,curent solar influence,uint8 (>=0<=25),C,false,sensor.thermostat_hc1_curent_solar_influence,sensor.thermostat_hc1_currsolarinfl,6,1,1/10,55,1
 "UI800, BC400",thermostat,4,dhw.mode,operating mode,enum [off\|eco+\|eco\|comfort\|auto], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
-"UI800, BC400",thermostat,4,dhw.settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
-"UI800, BC400",thermostat,4,dhw.settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
-"UI800, BC400",thermostat,4,dhw.circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,3,1
-"UI800, BC400",thermostat,4,dhw.chargeduration,charge duration,uint8 (>=0<=3810),minutes,true,number.thermostat_dhw_charge_duration,number.thermostat_dhw_chargeduration,6,9,15,4,1
-"UI800, BC400",thermostat,4,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
-"UI800, BC400",thermostat,4,dhw.extra,extra,boolean, ,false,binary_sensor.thermostat_dhw_extra,binary_sensor.thermostat_dhw_extra,6,9,1,6,1
-"UI800, BC400",thermostat,4,dhw.disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,7,1
-"UI800, BC400",thermostat,4,dhw.disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,8,1
-"UI800, BC400",thermostat,4,dhw.disinfecttime,disinfection time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_disinfection_time,number.thermostat_dhw_disinfecttime,6,9,15,9,1
-"UI800, BC400",thermostat,4,dhw.dailyheating,daily heating,boolean, ,true,switch.thermostat_dhw_daily_heating,switch.thermostat_dhw_dailyheating,6,9,1,10,1
-"UI800, BC400",thermostat,4,dhw.dailyheattime,daily heating time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_daily_heating_time,number.thermostat_dhw_dailyheattime,6,9,15,11,1
+"UI800, BC400",thermostat,4,dhw.modetype,mode type,enum [off\|eco\|comfort\|eco+], ,false,sensor.thermostat_dhw_mode_type,sensor.thermostat_dhw_modetype,6,9,1,1,1
+"UI800, BC400",thermostat,4,dhw.settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,2,1
+"UI800, BC400",thermostat,4,dhw.settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,3,1
+"UI800, BC400",thermostat,4,dhw.circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,4,1
+"UI800, BC400",thermostat,4,dhw.chargeduration,charge duration,uint8 (>=0<=3810),minutes,true,number.thermostat_dhw_charge_duration,number.thermostat_dhw_chargeduration,6,9,15,5,1
+"UI800, BC400",thermostat,4,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,6,1
+"UI800, BC400",thermostat,4,dhw.extra,extra,boolean, ,false,binary_sensor.thermostat_dhw_extra,binary_sensor.thermostat_dhw_extra,6,9,1,7,1
+"UI800, BC400",thermostat,4,dhw.disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,8,1
+"UI800, BC400",thermostat,4,dhw.disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,9,1
+"UI800, BC400",thermostat,4,dhw.disinfecttime,disinfection time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_disinfection_time,number.thermostat_dhw_disinfecttime,6,9,15,10,1
+"UI800, BC400",thermostat,4,dhw.dailyheating,daily heating,boolean, ,true,switch.thermostat_dhw_daily_heating,switch.thermostat_dhw_dailyheating,6,9,1,11,1
+"UI800, BC400",thermostat,4,dhw.dailyheattime,daily heating time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_daily_heating_time,number.thermostat_dhw_dailyheattime,6,9,15,12,1
 "CR11",thermostat,10,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "CR11",thermostat,10,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "CR11",thermostat,10,hc1.seltemp,selected room temperature,int16 (>=0<=30),C,true,number.thermostat_hc1_selected_room_temperature,number.thermostat_hc1_seltemp,6,1,1/2,0,1
@@ -4004,18 +4005,18 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC30",thermostat,67,hc1.switchtime1,own1 program switchtime,string, ,true,sensor.thermostat_hc1_own1_program_switchtime,sensor.thermostat_hc1_switchtime1,6,1,1,91,8
 "RC30",thermostat,67,hc1.switchtime2,own2 program switchtime,string, ,true,sensor.thermostat_hc1_own2_program_switchtime,sensor.thermostat_hc1_switchtime2,6,1,1,99,8
 "RC30",thermostat,67,dhw.mode,operating mode,enum [off\|on\|auto], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
-"RC30",thermostat,67,dhw.circmode,circulation pump mode,enum [off\|on\|auto], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,3,1
-"RC30",thermostat,67,dhw.progmode,program,enum [std prog\|own prog], ,true,select.thermostat_dhw_program,select.thermostat_dhw_progmode,6,9,1,12,1
-"RC30",thermostat,67,dhw.circprog,circulation program,enum [std prog\|own prog], ,true,select.thermostat_dhw_circulation_program,select.thermostat_dhw_circprog,6,9,1,13,1
-"RC30",thermostat,67,dhw.disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,7,1
-"RC30",thermostat,67,dhw.disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,8,1
-"RC30",thermostat,67,dhw.disinfecthour,disinfection hour,uint8 (>=0<=23), ,true,number.thermostat_dhw_disinfection_hour,number.thermostat_dhw_disinfecthour,6,9,1,14,1
-"RC30",thermostat,67,dhw.maxtemp,maximum temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_maximum_temperature,number.thermostat_dhw_maxtemp,6,9,1,15,1
-"RC30",thermostat,67,dhw.onetimekey,one time key function,boolean, ,true,switch.thermostat_dhw_one_time_key_function,switch.thermostat_dhw_onetimekey,6,9,1,16,1
-"RC30",thermostat,67,dhw.switchtime,program switchtime,string, ,true,sensor.thermostat_dhw_program_switchtime,sensor.thermostat_dhw_switchtime,6,9,1,17,8
-"RC30",thermostat,67,dhw.circswitchtime,circulation program switchtime,string, ,true,sensor.thermostat_dhw_circulation_program_switchtime,sensor.thermostat_dhw_circswitchtime,6,9,1,25,8
-"RC30",thermostat,67,dhw.holidays,holiday dates,string, ,true,sensor.thermostat_dhw_holiday_dates,sensor.thermostat_dhw_holidays,6,9,1,33,13
-"RC30",thermostat,67,dhw.vacations,vacation dates,string, ,true,sensor.thermostat_dhw_vacation_dates,sensor.thermostat_dhw_vacations,6,9,1,46,13
+"RC30",thermostat,67,dhw.circmode,circulation pump mode,enum [off\|on\|auto], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,4,1
+"RC30",thermostat,67,dhw.progmode,program,enum [std prog\|own prog], ,true,select.thermostat_dhw_program,select.thermostat_dhw_progmode,6,9,1,13,1
+"RC30",thermostat,67,dhw.circprog,circulation program,enum [std prog\|own prog], ,true,select.thermostat_dhw_circulation_program,select.thermostat_dhw_circprog,6,9,1,14,1
+"RC30",thermostat,67,dhw.disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,8,1
+"RC30",thermostat,67,dhw.disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,9,1
+"RC30",thermostat,67,dhw.disinfecthour,disinfection hour,uint8 (>=0<=23), ,true,number.thermostat_dhw_disinfection_hour,number.thermostat_dhw_disinfecthour,6,9,1,15,1
+"RC30",thermostat,67,dhw.maxtemp,maximum temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_maximum_temperature,number.thermostat_dhw_maxtemp,6,9,1,16,1
+"RC30",thermostat,67,dhw.onetimekey,one time key function,boolean, ,true,switch.thermostat_dhw_one_time_key_function,switch.thermostat_dhw_onetimekey,6,9,1,17,1
+"RC30",thermostat,67,dhw.switchtime,program switchtime,string, ,true,sensor.thermostat_dhw_program_switchtime,sensor.thermostat_dhw_switchtime,6,9,1,18,8
+"RC30",thermostat,67,dhw.circswitchtime,circulation program switchtime,string, ,true,sensor.thermostat_dhw_circulation_program_switchtime,sensor.thermostat_dhw_circswitchtime,6,9,1,26,8
+"RC30",thermostat,67,dhw.holidays,holiday dates,string, ,true,sensor.thermostat_dhw_holiday_dates,sensor.thermostat_dhw_holidays,6,9,1,34,13
+"RC30",thermostat,67,dhw.vacations,vacation dates,string, ,true,sensor.thermostat_dhw_vacation_dates,sensor.thermostat_dhw_vacations,6,9,1,47,13
 "RC20, Moduline 300",thermostat,77,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "RC20, Moduline 300",thermostat,77,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "RC20, Moduline 300",thermostat,77,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -4068,10 +4069,10 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Moduline 400",thermostat,78,hc1.manualtemp,manual temperature,uint8 (>=0<=127),C,true,number.thermostat_hc1_manual_temperature,number.thermostat_hc1_manualtemp,6,1,1/2,6,1
 "Moduline 400",thermostat,78,hc1.offtemp,temperature when mode is off,uint8 (>=0<=127),C,true,number.thermostat_hc1_temperature_when_mode_is_off,number.thermostat_hc1_offtemp,6,1,1/2,107,1
 "Moduline 400",thermostat,78,dhw.mode,operating mode,enum [on\|off\|auto], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
-"Moduline 400",thermostat,78,dhw.whenmodeoff,when thermostat mode off,boolean, ,true,switch.thermostat_dhw_when_thermostat_mode_off,switch.thermostat_dhw_whenmodeoff,6,9,1,59,1
-"Moduline 400",thermostat,78,dhw.disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,7,1
-"Moduline 400",thermostat,78,dhw.disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,8,1
-"Moduline 400",thermostat,78,dhw.disinfecthour,disinfection hour,uint8 (>=0<=23), ,true,number.thermostat_dhw_disinfection_hour,number.thermostat_dhw_disinfecthour,6,9,1,14,1
+"Moduline 400",thermostat,78,dhw.whenmodeoff,when thermostat mode off,boolean, ,true,switch.thermostat_dhw_when_thermostat_mode_off,switch.thermostat_dhw_whenmodeoff,6,9,1,60,1
+"Moduline 400",thermostat,78,dhw.disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,8,1
+"Moduline 400",thermostat,78,dhw.disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,9,1
+"Moduline 400",thermostat,78,dhw.disinfecthour,disinfection hour,uint8 (>=0<=23), ,true,number.thermostat_dhw_disinfection_hour,number.thermostat_dhw_disinfecthour,6,9,1,15,1
 "RC10, Moduline 100",thermostat,79,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "RC10, Moduline 100",thermostat,79,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "RC10, Moduline 100",thermostat,79,intoffset,internal temperature offset,int8 (>=-12<=12),C,true,number.thermostat_internal_temperature_offset,number.thermostat_intoffset,6,0,1/10,46,1
@@ -4150,18 +4151,18 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC35",thermostat,86,hc1.switchtime1,own1 program switchtime,string, ,true,sensor.thermostat_hc1_own1_program_switchtime,sensor.thermostat_hc1_switchtime1,6,1,1,91,8
 "RC35",thermostat,86,hc1.switchtime2,own2 program switchtime,string, ,true,sensor.thermostat_hc1_own2_program_switchtime,sensor.thermostat_hc1_switchtime2,6,1,1,99,8
 "RC35",thermostat,86,dhw.mode,operating mode,enum [off\|on\|auto], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
-"RC35",thermostat,86,dhw.circmode,circulation pump mode,enum [off\|on\|auto], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,3,1
-"RC35",thermostat,86,dhw.progmode,program,enum [std prog\|own prog], ,true,select.thermostat_dhw_program,select.thermostat_dhw_progmode,6,9,1,12,1
-"RC35",thermostat,86,dhw.circprog,circulation program,enum [std prog\|own prog], ,true,select.thermostat_dhw_circulation_program,select.thermostat_dhw_circprog,6,9,1,13,1
-"RC35",thermostat,86,dhw.disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,7,1
-"RC35",thermostat,86,dhw.disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,8,1
-"RC35",thermostat,86,dhw.disinfecthour,disinfection hour,uint8 (>=0<=23), ,true,number.thermostat_dhw_disinfection_hour,number.thermostat_dhw_disinfecthour,6,9,1,14,1
-"RC35",thermostat,86,dhw.maxtemp,maximum temperature,uint8 (>=60<=80),C,true,number.thermostat_dhw_maximum_temperature,number.thermostat_dhw_maxtemp,6,9,1,15,1
-"RC35",thermostat,86,dhw.onetimekey,one time key function,boolean, ,true,switch.thermostat_dhw_one_time_key_function,switch.thermostat_dhw_onetimekey,6,9,1,16,1
-"RC35",thermostat,86,dhw.switchtime,program switchtime,string, ,true,sensor.thermostat_dhw_program_switchtime,sensor.thermostat_dhw_switchtime,6,9,1,17,8
-"RC35",thermostat,86,dhw.circswitchtime,circulation program switchtime,string, ,true,sensor.thermostat_dhw_circulation_program_switchtime,sensor.thermostat_dhw_circswitchtime,6,9,1,25,8
-"RC35",thermostat,86,dhw.holidays,holiday dates,string, ,true,sensor.thermostat_dhw_holiday_dates,sensor.thermostat_dhw_holidays,6,9,1,33,13
-"RC35",thermostat,86,dhw.vacations,vacation dates,string, ,true,sensor.thermostat_dhw_vacation_dates,sensor.thermostat_dhw_vacations,6,9,1,46,13
+"RC35",thermostat,86,dhw.circmode,circulation pump mode,enum [off\|on\|auto], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,4,1
+"RC35",thermostat,86,dhw.progmode,program,enum [std prog\|own prog], ,true,select.thermostat_dhw_program,select.thermostat_dhw_progmode,6,9,1,13,1
+"RC35",thermostat,86,dhw.circprog,circulation program,enum [std prog\|own prog], ,true,select.thermostat_dhw_circulation_program,select.thermostat_dhw_circprog,6,9,1,14,1
+"RC35",thermostat,86,dhw.disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,8,1
+"RC35",thermostat,86,dhw.disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,9,1
+"RC35",thermostat,86,dhw.disinfecthour,disinfection hour,uint8 (>=0<=23), ,true,number.thermostat_dhw_disinfection_hour,number.thermostat_dhw_disinfecthour,6,9,1,15,1
+"RC35",thermostat,86,dhw.maxtemp,maximum temperature,uint8 (>=60<=80),C,true,number.thermostat_dhw_maximum_temperature,number.thermostat_dhw_maxtemp,6,9,1,16,1
+"RC35",thermostat,86,dhw.onetimekey,one time key function,boolean, ,true,switch.thermostat_dhw_one_time_key_function,switch.thermostat_dhw_onetimekey,6,9,1,17,1
+"RC35",thermostat,86,dhw.switchtime,program switchtime,string, ,true,sensor.thermostat_dhw_program_switchtime,sensor.thermostat_dhw_switchtime,6,9,1,18,8
+"RC35",thermostat,86,dhw.circswitchtime,circulation program switchtime,string, ,true,sensor.thermostat_dhw_circulation_program_switchtime,sensor.thermostat_dhw_circswitchtime,6,9,1,26,8
+"RC35",thermostat,86,dhw.holidays,holiday dates,string, ,true,sensor.thermostat_dhw_holiday_dates,sensor.thermostat_dhw_holidays,6,9,1,34,13
+"RC35",thermostat,86,dhw.vacations,vacation dates,string, ,true,sensor.thermostat_dhw_vacation_dates,sensor.thermostat_dhw_vacations,6,9,1,47,13
 "RC10, Moduline 100",thermostat,90,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "RC10, Moduline 100",thermostat,90,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "RC10, Moduline 100",thermostat,90,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -4296,17 +4297,18 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC200, CW100, CR120, CR50",thermostat,157,hc1.solarinfl,solar influence,uint8 (>=-5<=4294967295),C,true,number.thermostat_hc1_solar_influence,number.thermostat_hc1_solarinfl,6,1,1,54,1
 "RC200, CW100, CR120, CR50",thermostat,157,hc1.currsolarinfl,curent solar influence,uint8 (>=0<=25),C,false,sensor.thermostat_hc1_curent_solar_influence,sensor.thermostat_hc1_currsolarinfl,6,1,1/10,55,1
 "RC200, CW100, CR120, CR50",thermostat,157,dhw.mode,operating mode,enum [off\|on\|auto], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
-"RC200, CW100, CR120, CR50",thermostat,157,dhw.settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
-"RC200, CW100, CR120, CR50",thermostat,157,dhw.settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
-"RC200, CW100, CR120, CR50",thermostat,157,dhw.circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,3,1
-"RC200, CW100, CR120, CR50",thermostat,157,dhw.chargeduration,charge duration,uint8 (>=0<=3810),minutes,true,number.thermostat_dhw_charge_duration,number.thermostat_dhw_chargeduration,6,9,15,4,1
-"RC200, CW100, CR120, CR50",thermostat,157,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
-"RC200, CW100, CR120, CR50",thermostat,157,dhw.extra,extra,boolean, ,false,binary_sensor.thermostat_dhw_extra,binary_sensor.thermostat_dhw_extra,6,9,1,6,1
-"RC200, CW100, CR120, CR50",thermostat,157,dhw.disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,7,1
-"RC200, CW100, CR120, CR50",thermostat,157,dhw.disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,8,1
-"RC200, CW100, CR120, CR50",thermostat,157,dhw.disinfecttime,disinfection time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_disinfection_time,number.thermostat_dhw_disinfecttime,6,9,15,9,1
-"RC200, CW100, CR120, CR50",thermostat,157,dhw.dailyheating,daily heating,boolean, ,true,switch.thermostat_dhw_daily_heating,switch.thermostat_dhw_dailyheating,6,9,1,10,1
-"RC200, CW100, CR120, CR50",thermostat,157,dhw.dailyheattime,daily heating time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_daily_heating_time,number.thermostat_dhw_dailyheattime,6,9,15,11,1
+"RC200, CW100, CR120, CR50",thermostat,157,dhw.modetype,mode type,enum [off\|eco\|comfort\|eco+], ,false,sensor.thermostat_dhw_mode_type,sensor.thermostat_dhw_modetype,6,9,1,1,1
+"RC200, CW100, CR120, CR50",thermostat,157,dhw.settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,2,1
+"RC200, CW100, CR120, CR50",thermostat,157,dhw.settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,3,1
+"RC200, CW100, CR120, CR50",thermostat,157,dhw.circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,4,1
+"RC200, CW100, CR120, CR50",thermostat,157,dhw.chargeduration,charge duration,uint8 (>=0<=3810),minutes,true,number.thermostat_dhw_charge_duration,number.thermostat_dhw_chargeduration,6,9,15,5,1
+"RC200, CW100, CR120, CR50",thermostat,157,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,6,1
+"RC200, CW100, CR120, CR50",thermostat,157,dhw.extra,extra,boolean, ,false,binary_sensor.thermostat_dhw_extra,binary_sensor.thermostat_dhw_extra,6,9,1,7,1
+"RC200, CW100, CR120, CR50",thermostat,157,dhw.disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,8,1
+"RC200, CW100, CR120, CR50",thermostat,157,dhw.disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,9,1
+"RC200, CW100, CR120, CR50",thermostat,157,dhw.disinfecttime,disinfection time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_disinfection_time,number.thermostat_dhw_disinfecttime,6,9,15,10,1
+"RC200, CW100, CR120, CR50",thermostat,157,dhw.dailyheating,daily heating,boolean, ,true,switch.thermostat_dhw_daily_heating,switch.thermostat_dhw_dailyheating,6,9,1,11,1
+"RC200, CW100, CR120, CR50",thermostat,157,dhw.dailyheattime,daily heating time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_daily_heating_time,number.thermostat_dhw_dailyheattime,6,9,15,12,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,datetime,date/time,string, ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -4386,17 +4388,18 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,hc1.solarinfl,solar influence,uint8 (>=-5<=4294967295),C,true,number.thermostat_hc1_solar_influence,number.thermostat_hc1_solarinfl,6,1,1,54,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,hc1.currsolarinfl,curent solar influence,uint8 (>=0<=25),C,false,sensor.thermostat_hc1_curent_solar_influence,sensor.thermostat_hc1_currsolarinfl,6,1,1/10,55,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.mode,operating mode,enum [off\|normal\|comfort\|auto\|own prog], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
-"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
-"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
-"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,3,1
-"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.chargeduration,charge duration,uint8 (>=0<=3810),minutes,true,number.thermostat_dhw_charge_duration,number.thermostat_dhw_chargeduration,6,9,15,4,1
-"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
-"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.extra,extra,boolean, ,false,binary_sensor.thermostat_dhw_extra,binary_sensor.thermostat_dhw_extra,6,9,1,6,1
-"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,7,1
-"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,8,1
-"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.disinfecttime,disinfection time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_disinfection_time,number.thermostat_dhw_disinfecttime,6,9,15,9,1
-"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.dailyheating,daily heating,boolean, ,true,switch.thermostat_dhw_daily_heating,switch.thermostat_dhw_dailyheating,6,9,1,10,1
-"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.dailyheattime,daily heating time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_daily_heating_time,number.thermostat_dhw_dailyheattime,6,9,15,11,1
+"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.modetype,mode type,enum [off\|eco\|comfort\|eco+], ,false,sensor.thermostat_dhw_mode_type,sensor.thermostat_dhw_modetype,6,9,1,1,1
+"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,2,1
+"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,3,1
+"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,4,1
+"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.chargeduration,charge duration,uint8 (>=0<=3810),minutes,true,number.thermostat_dhw_charge_duration,number.thermostat_dhw_chargeduration,6,9,15,5,1
+"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,6,1
+"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.extra,extra,boolean, ,false,binary_sensor.thermostat_dhw_extra,binary_sensor.thermostat_dhw_extra,6,9,1,7,1
+"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,8,1
+"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,9,1
+"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.disinfecttime,disinfection time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_disinfection_time,number.thermostat_dhw_disinfecttime,6,9,15,10,1
+"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.dailyheating,daily heating,boolean, ,true,switch.thermostat_dhw_daily_heating,switch.thermostat_dhw_dailyheating,6,9,1,11,1
+"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,dhw.dailyheattime,daily heating time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_daily_heating_time,number.thermostat_dhw_dailyheattime,6,9,15,12,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "RC100, CR10, Moduline 1000/1010",thermostat,165,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "RC100, CR10, Moduline 1000/1010",thermostat,165,hc1.seltemp,selected room temperature,int16 (>=0<=30),C,true,number.thermostat_hc1_selected_room_temperature,number.thermostat_hc1_seltemp,6,1,1/2,0,1
@@ -4485,17 +4488,18 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Rego 2000/3000",thermostat,172,hc1.solarinfl,solar influence,uint8 (>=-5<=4294967295),C,true,number.thermostat_hc1_solar_influence,number.thermostat_hc1_solarinfl,6,1,1,54,1
 "Rego 2000/3000",thermostat,172,hc1.currsolarinfl,curent solar influence,uint8 (>=0<=25),C,false,sensor.thermostat_hc1_curent_solar_influence,sensor.thermostat_hc1_currsolarinfl,6,1,1/10,55,1
 "Rego 2000/3000",thermostat,172,dhw.mode,operating mode,enum [normal\|comfort\|eco+], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
-"Rego 2000/3000",thermostat,172,dhw.settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
-"Rego 2000/3000",thermostat,172,dhw.settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
-"Rego 2000/3000",thermostat,172,dhw.circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,3,1
-"Rego 2000/3000",thermostat,172,dhw.chargeduration,charge duration,uint8 (>=0<=3810),minutes,true,number.thermostat_dhw_charge_duration,number.thermostat_dhw_chargeduration,6,9,15,4,1
-"Rego 2000/3000",thermostat,172,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
-"Rego 2000/3000",thermostat,172,dhw.extra,extra,boolean, ,false,binary_sensor.thermostat_dhw_extra,binary_sensor.thermostat_dhw_extra,6,9,1,6,1
-"Rego 2000/3000",thermostat,172,dhw.disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,7,1
-"Rego 2000/3000",thermostat,172,dhw.disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,8,1
-"Rego 2000/3000",thermostat,172,dhw.disinfecttime,disinfection time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_disinfection_time,number.thermostat_dhw_disinfecttime,6,9,15,9,1
-"Rego 2000/3000",thermostat,172,dhw.dailyheating,daily heating,boolean, ,true,switch.thermostat_dhw_daily_heating,switch.thermostat_dhw_dailyheating,6,9,1,10,1
-"Rego 2000/3000",thermostat,172,dhw.dailyheattime,daily heating time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_daily_heating_time,number.thermostat_dhw_dailyheattime,6,9,15,11,1
+"Rego 2000/3000",thermostat,172,dhw.modetype,mode type,enum [off\|eco\|comfort\|eco+], ,false,sensor.thermostat_dhw_mode_type,sensor.thermostat_dhw_modetype,6,9,1,1,1
+"Rego 2000/3000",thermostat,172,dhw.settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,2,1
+"Rego 2000/3000",thermostat,172,dhw.settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,3,1
+"Rego 2000/3000",thermostat,172,dhw.circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,4,1
+"Rego 2000/3000",thermostat,172,dhw.chargeduration,charge duration,uint8 (>=0<=3810),minutes,true,number.thermostat_dhw_charge_duration,number.thermostat_dhw_chargeduration,6,9,15,5,1
+"Rego 2000/3000",thermostat,172,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,6,1
+"Rego 2000/3000",thermostat,172,dhw.extra,extra,boolean, ,false,binary_sensor.thermostat_dhw_extra,binary_sensor.thermostat_dhw_extra,6,9,1,7,1
+"Rego 2000/3000",thermostat,172,dhw.disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,8,1
+"Rego 2000/3000",thermostat,172,dhw.disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,9,1
+"Rego 2000/3000",thermostat,172,dhw.disinfecttime,disinfection time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_disinfection_time,number.thermostat_dhw_disinfecttime,6,9,15,10,1
+"Rego 2000/3000",thermostat,172,dhw.dailyheating,daily heating,boolean, ,true,switch.thermostat_dhw_daily_heating,switch.thermostat_dhw_dailyheating,6,9,1,11,1
+"Rego 2000/3000",thermostat,172,dhw.dailyheattime,daily heating time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_daily_heating_time,number.thermostat_dhw_dailyheattime,6,9,15,12,1
 "Comfort RF",thermostat,215,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "Comfort RF",thermostat,215,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "Comfort RF",thermostat,215,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -4602,17 +4606,18 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,hc1.solarinfl,solar influence,uint8 (>=-5<=4294967295),C,true,number.thermostat_hc1_solar_influence,number.thermostat_hc1_solarinfl,6,1,1,54,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,hc1.currsolarinfl,curent solar influence,uint8 (>=0<=25),C,false,sensor.thermostat_hc1_curent_solar_influence,sensor.thermostat_hc1_currsolarinfl,6,1,1/10,55,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.mode,operating mode,enum [off\|eco+\|eco\|comfort\|auto], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,3,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.chargeduration,charge duration,uint8 (>=0<=3810),minutes,true,number.thermostat_dhw_charge_duration,number.thermostat_dhw_chargeduration,6,9,15,4,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.extra,extra,boolean, ,false,binary_sensor.thermostat_dhw_extra,binary_sensor.thermostat_dhw_extra,6,9,1,6,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,7,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,8,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.disinfecttime,disinfection time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_disinfection_time,number.thermostat_dhw_disinfecttime,6,9,15,9,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.dailyheating,daily heating,boolean, ,true,switch.thermostat_dhw_daily_heating,switch.thermostat_dhw_dailyheating,6,9,1,10,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.dailyheattime,daily heating time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_daily_heating_time,number.thermostat_dhw_dailyheattime,6,9,15,11,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.modetype,mode type,enum [off\|eco\|comfort\|eco+], ,false,sensor.thermostat_dhw_mode_type,sensor.thermostat_dhw_modetype,6,9,1,1,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,2,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,3,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,4,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.chargeduration,charge duration,uint8 (>=0<=3810),minutes,true,number.thermostat_dhw_charge_duration,number.thermostat_dhw_chargeduration,6,9,15,5,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,6,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.extra,extra,boolean, ,false,binary_sensor.thermostat_dhw_extra,binary_sensor.thermostat_dhw_extra,6,9,1,7,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,8,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,9,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.disinfecttime,disinfection time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_disinfection_time,number.thermostat_dhw_disinfecttime,6,9,15,10,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.dailyheating,daily heating,boolean, ,true,switch.thermostat_dhw_daily_heating,switch.thermostat_dhw_dailyheating,6,9,1,11,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.dailyheattime,daily heating time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_daily_heating_time,number.thermostat_dhw_dailyheattime,6,9,15,12,1
 "ES72, RC20",thermostat,66,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "ES72, RC20",thermostat,66,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "ES72, RC20",thermostat,66,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -4684,18 +4689,18 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "ES73",thermostat,76,hc1.switchtime1,own1 program switchtime,string, ,true,sensor.thermostat_hc1_own1_program_switchtime,sensor.thermostat_hc1_switchtime1,6,1,1,91,8
 "ES73",thermostat,76,hc1.switchtime2,own2 program switchtime,string, ,true,sensor.thermostat_hc1_own2_program_switchtime,sensor.thermostat_hc1_switchtime2,6,1,1,99,8
 "ES73",thermostat,76,dhw.mode,operating mode,enum [off\|on\|auto], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
-"ES73",thermostat,76,dhw.circmode,circulation pump mode,enum [off\|on\|auto], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,3,1
-"ES73",thermostat,76,dhw.progmode,program,enum [std prog\|own prog], ,true,select.thermostat_dhw_program,select.thermostat_dhw_progmode,6,9,1,12,1
-"ES73",thermostat,76,dhw.circprog,circulation program,enum [std prog\|own prog], ,true,select.thermostat_dhw_circulation_program,select.thermostat_dhw_circprog,6,9,1,13,1
-"ES73",thermostat,76,dhw.disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,7,1
-"ES73",thermostat,76,dhw.disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,8,1
-"ES73",thermostat,76,dhw.disinfecthour,disinfection hour,uint8 (>=0<=23), ,true,number.thermostat_dhw_disinfection_hour,number.thermostat_dhw_disinfecthour,6,9,1,14,1
-"ES73",thermostat,76,dhw.maxtemp,maximum temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_maximum_temperature,number.thermostat_dhw_maxtemp,6,9,1,15,1
-"ES73",thermostat,76,dhw.onetimekey,one time key function,boolean, ,true,switch.thermostat_dhw_one_time_key_function,switch.thermostat_dhw_onetimekey,6,9,1,16,1
-"ES73",thermostat,76,dhw.switchtime,program switchtime,string, ,true,sensor.thermostat_dhw_program_switchtime,sensor.thermostat_dhw_switchtime,6,9,1,17,8
-"ES73",thermostat,76,dhw.circswitchtime,circulation program switchtime,string, ,true,sensor.thermostat_dhw_circulation_program_switchtime,sensor.thermostat_dhw_circswitchtime,6,9,1,25,8
-"ES73",thermostat,76,dhw.holidays,holiday dates,string, ,true,sensor.thermostat_dhw_holiday_dates,sensor.thermostat_dhw_holidays,6,9,1,33,13
-"ES73",thermostat,76,dhw.vacations,vacation dates,string, ,true,sensor.thermostat_dhw_vacation_dates,sensor.thermostat_dhw_vacations,6,9,1,46,13
+"ES73",thermostat,76,dhw.circmode,circulation pump mode,enum [off\|on\|auto], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,4,1
+"ES73",thermostat,76,dhw.progmode,program,enum [std prog\|own prog], ,true,select.thermostat_dhw_program,select.thermostat_dhw_progmode,6,9,1,13,1
+"ES73",thermostat,76,dhw.circprog,circulation program,enum [std prog\|own prog], ,true,select.thermostat_dhw_circulation_program,select.thermostat_dhw_circprog,6,9,1,14,1
+"ES73",thermostat,76,dhw.disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,8,1
+"ES73",thermostat,76,dhw.disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,9,1
+"ES73",thermostat,76,dhw.disinfecthour,disinfection hour,uint8 (>=0<=23), ,true,number.thermostat_dhw_disinfection_hour,number.thermostat_dhw_disinfecthour,6,9,1,15,1
+"ES73",thermostat,76,dhw.maxtemp,maximum temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_maximum_temperature,number.thermostat_dhw_maxtemp,6,9,1,16,1
+"ES73",thermostat,76,dhw.onetimekey,one time key function,boolean, ,true,switch.thermostat_dhw_one_time_key_function,switch.thermostat_dhw_onetimekey,6,9,1,17,1
+"ES73",thermostat,76,dhw.switchtime,program switchtime,string, ,true,sensor.thermostat_dhw_program_switchtime,sensor.thermostat_dhw_switchtime,6,9,1,18,8
+"ES73",thermostat,76,dhw.circswitchtime,circulation program switchtime,string, ,true,sensor.thermostat_dhw_circulation_program_switchtime,sensor.thermostat_dhw_circswitchtime,6,9,1,26,8
+"ES73",thermostat,76,dhw.holidays,holiday dates,string, ,true,sensor.thermostat_dhw_holiday_dates,sensor.thermostat_dhw_holidays,6,9,1,34,13
+"ES73",thermostat,76,dhw.vacations,vacation dates,string, ,true,sensor.thermostat_dhw_vacation_dates,sensor.thermostat_dhw_vacations,6,9,1,47,13
 "ES72, RC20",thermostat,113,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "ES72, RC20",thermostat,113,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "ES72, RC20",thermostat,113,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -4764,18 +4769,18 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "ES79",thermostat,156,hc1.switchtime1,own1 program switchtime,string, ,true,sensor.thermostat_hc1_own1_program_switchtime,sensor.thermostat_hc1_switchtime1,6,1,1,91,8
 "ES79",thermostat,156,hc1.switchtime2,own2 program switchtime,string, ,true,sensor.thermostat_hc1_own2_program_switchtime,sensor.thermostat_hc1_switchtime2,6,1,1,99,8
 "ES79",thermostat,156,dhw.mode,operating mode,enum [off\|on\|auto], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
-"ES79",thermostat,156,dhw.circmode,circulation pump mode,enum [off\|on\|auto], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,3,1
-"ES79",thermostat,156,dhw.progmode,program,enum [std prog\|own prog], ,true,select.thermostat_dhw_program,select.thermostat_dhw_progmode,6,9,1,12,1
-"ES79",thermostat,156,dhw.circprog,circulation program,enum [std prog\|own prog], ,true,select.thermostat_dhw_circulation_program,select.thermostat_dhw_circprog,6,9,1,13,1
-"ES79",thermostat,156,dhw.disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,7,1
-"ES79",thermostat,156,dhw.disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,8,1
-"ES79",thermostat,156,dhw.disinfecthour,disinfection hour,uint8 (>=0<=23), ,true,number.thermostat_dhw_disinfection_hour,number.thermostat_dhw_disinfecthour,6,9,1,14,1
-"ES79",thermostat,156,dhw.maxtemp,maximum temperature,uint8 (>=60<=80),C,true,number.thermostat_dhw_maximum_temperature,number.thermostat_dhw_maxtemp,6,9,1,15,1
-"ES79",thermostat,156,dhw.onetimekey,one time key function,boolean, ,true,switch.thermostat_dhw_one_time_key_function,switch.thermostat_dhw_onetimekey,6,9,1,16,1
-"ES79",thermostat,156,dhw.switchtime,program switchtime,string, ,true,sensor.thermostat_dhw_program_switchtime,sensor.thermostat_dhw_switchtime,6,9,1,17,8
-"ES79",thermostat,156,dhw.circswitchtime,circulation program switchtime,string, ,true,sensor.thermostat_dhw_circulation_program_switchtime,sensor.thermostat_dhw_circswitchtime,6,9,1,25,8
-"ES79",thermostat,156,dhw.holidays,holiday dates,string, ,true,sensor.thermostat_dhw_holiday_dates,sensor.thermostat_dhw_holidays,6,9,1,33,13
-"ES79",thermostat,156,dhw.vacations,vacation dates,string, ,true,sensor.thermostat_dhw_vacation_dates,sensor.thermostat_dhw_vacations,6,9,1,46,13
+"ES79",thermostat,156,dhw.circmode,circulation pump mode,enum [off\|on\|auto], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,4,1
+"ES79",thermostat,156,dhw.progmode,program,enum [std prog\|own prog], ,true,select.thermostat_dhw_program,select.thermostat_dhw_progmode,6,9,1,13,1
+"ES79",thermostat,156,dhw.circprog,circulation program,enum [std prog\|own prog], ,true,select.thermostat_dhw_circulation_program,select.thermostat_dhw_circprog,6,9,1,14,1
+"ES79",thermostat,156,dhw.disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,8,1
+"ES79",thermostat,156,dhw.disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,9,1
+"ES79",thermostat,156,dhw.disinfecthour,disinfection hour,uint8 (>=0<=23), ,true,number.thermostat_dhw_disinfection_hour,number.thermostat_dhw_disinfecthour,6,9,1,15,1
+"ES79",thermostat,156,dhw.maxtemp,maximum temperature,uint8 (>=60<=80),C,true,number.thermostat_dhw_maximum_temperature,number.thermostat_dhw_maxtemp,6,9,1,16,1
+"ES79",thermostat,156,dhw.onetimekey,one time key function,boolean, ,true,switch.thermostat_dhw_one_time_key_function,switch.thermostat_dhw_onetimekey,6,9,1,17,1
+"ES79",thermostat,156,dhw.switchtime,program switchtime,string, ,true,sensor.thermostat_dhw_program_switchtime,sensor.thermostat_dhw_switchtime,6,9,1,18,8
+"ES79",thermostat,156,dhw.circswitchtime,circulation program switchtime,string, ,true,sensor.thermostat_dhw_circulation_program_switchtime,sensor.thermostat_dhw_circswitchtime,6,9,1,26,8
+"ES79",thermostat,156,dhw.holidays,holiday dates,string, ,true,sensor.thermostat_dhw_holiday_dates,sensor.thermostat_dhw_holidays,6,9,1,34,13
+"ES79",thermostat,156,dhw.vacations,vacation dates,string, ,true,sensor.thermostat_dhw_vacation_dates,sensor.thermostat_dhw_vacations,6,9,1,47,13
 "FW100",thermostat,105,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "FW100",thermostat,105,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "FW100",thermostat,105,datetime,date/time,string, ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -4812,7 +4817,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FW100",thermostat,105,hc1.roominflfactor,room influence factor,uint8 (>=0<=100),%,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,6,1,10,14,1
 "FW100",thermostat,105,hc1.heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor], ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,6,1,1,19,1
 "FW100",thermostat,105,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM], ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,6,1,1,25,1
-"FW100",thermostat,105,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
+"FW100",thermostat,105,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,6,1
 "FW200",thermostat,106,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "FW200",thermostat,106,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "FW200",thermostat,106,datetime,date/time,string, ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -4849,7 +4854,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FW200",thermostat,106,hc1.roominflfactor,room influence factor,uint8 (>=0<=100),%,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,6,1,10,14,1
 "FW200",thermostat,106,hc1.heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor], ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,6,1,1,19,1
 "FW200",thermostat,106,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM], ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,6,1,1,25,1
-"FW200",thermostat,106,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
+"FW200",thermostat,106,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,6,1
 "FR100",thermostat,107,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "FR100",thermostat,107,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "FR100",thermostat,107,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -4884,7 +4889,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FR100",thermostat,107,hc1.roominflfactor,room influence factor,uint8 (>=0<=100),%,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,6,1,10,14,1
 "FR100",thermostat,107,hc1.heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor], ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,6,1,1,19,1
 "FR100",thermostat,107,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM], ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,6,1,1,25,1
-"FR100",thermostat,107,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
+"FR100",thermostat,107,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,6,1
 "FR110",thermostat,108,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "FR110",thermostat,108,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "FR110",thermostat,108,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -4919,7 +4924,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FR110",thermostat,108,hc1.roominflfactor,room influence factor,uint8 (>=0<=100),%,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,6,1,10,14,1
 "FR110",thermostat,108,hc1.heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor], ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,6,1,1,19,1
 "FR110",thermostat,108,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM], ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,6,1,1,25,1
-"FR110",thermostat,108,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
+"FR110",thermostat,108,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,6,1
 "FB10",thermostat,109,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "FB10",thermostat,109,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "FB10",thermostat,109,datetime,date/time,string, ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -4956,7 +4961,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FB10",thermostat,109,hc1.roominflfactor,room influence factor,uint8 (>=0<=100),%,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,6,1,10,14,1
 "FB10",thermostat,109,hc1.heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor], ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,6,1,1,19,1
 "FB10",thermostat,109,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM], ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,6,1,1,25,1
-"FB10",thermostat,109,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
+"FB10",thermostat,109,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,6,1
 "FB100",thermostat,110,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "FB100",thermostat,110,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "FB100",thermostat,110,datetime,date/time,string, ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -4993,7 +4998,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FB100",thermostat,110,hc1.roominflfactor,room influence factor,uint8 (>=0<=100),%,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,6,1,10,14,1
 "FB100",thermostat,110,hc1.heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor], ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,6,1,1,19,1
 "FB100",thermostat,110,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM], ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,6,1,1,25,1
-"FB100",thermostat,110,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
+"FB100",thermostat,110,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,6,1
 "FR10",thermostat,111,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "FR10",thermostat,111,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "FR10",thermostat,111,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -5028,7 +5033,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FR10",thermostat,111,hc1.roominflfactor,room influence factor,uint8 (>=0<=100),%,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,6,1,10,14,1
 "FR10",thermostat,111,hc1.heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor], ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,6,1,1,19,1
 "FR10",thermostat,111,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM], ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,6,1,1,25,1
-"FR10",thermostat,111,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
+"FR10",thermostat,111,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,6,1
 "FW500",thermostat,116,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "FW500",thermostat,116,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "FW500",thermostat,116,datetime,date/time,string, ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -5065,7 +5070,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FW500",thermostat,116,hc1.roominflfactor,room influence factor,uint8 (>=0<=100),%,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,6,1,10,14,1
 "FW500",thermostat,116,hc1.heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor], ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,6,1,1,19,1
 "FW500",thermostat,116,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM], ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,6,1,1,25,1
-"FW500",thermostat,116,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
+"FW500",thermostat,116,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,6,1
 "FR50",thermostat,147,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "FR50",thermostat,147,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "FR50",thermostat,147,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -5100,7 +5105,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FR50",thermostat,147,hc1.roominflfactor,room influence factor,uint8 (>=0<=100),%,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,6,1,10,14,1
 "FR50",thermostat,147,hc1.heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor], ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,6,1,1,19,1
 "FR50",thermostat,147,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM], ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,6,1,1,25,1
-"FR50",thermostat,147,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
+"FR50",thermostat,147,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,6,1
 "FR120",thermostat,191,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "FR120",thermostat,191,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "FR120",thermostat,191,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -5135,7 +5140,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FR120",thermostat,191,hc1.roominflfactor,room influence factor,uint8 (>=0<=100),%,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,6,1,10,14,1
 "FR120",thermostat,191,hc1.heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor], ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,6,1,1,19,1
 "FR120",thermostat,191,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM], ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,6,1,1,25,1
-"FR120",thermostat,191,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
+"FR120",thermostat,191,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,6,1
 "FW120",thermostat,192,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "FW120",thermostat,192,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "FW120",thermostat,192,datetime,date/time,string, ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -5172,7 +5177,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FW120",thermostat,192,hc1.roominflfactor,room influence factor,uint8 (>=0<=100),%,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,6,1,10,14,1
 "FW120",thermostat,192,hc1.heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor], ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,6,1,1,19,1
 "FW120",thermostat,192,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM], ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,6,1,1,25,1
-"FW120",thermostat,192,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
+"FW120",thermostat,192,dhw.charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,6,1
 "RT800, RC220",thermostat,3,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "RT800, RC220",thermostat,3,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "RT800, RC220",thermostat,3,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -5621,6 +5626,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "WM10",switch,71,flowtemphc,flow temperature (TC1),uint16 (>=0<=3199),C,false,sensor.switch_flow_temperature_(TC1),sensor.switch_flowtemphc,11,0,1/10,1,1
 "WM10",switch,71,status,status,int8 (>=-126<=126), ,false,sensor.switch_status,sensor.switch_status,11,0,1,2,1
 "Rego 3000",controller,240,datetime,date/time,string, ,false,sensor.controller_date/time,sensor.controller_datetime,12,0,1,0,13
+"MX400",connect,17,datetime,date/time,string, ,false,sensor.connect_date/time,sensor.connect_datetime,13,0,1,0,13
+"MX400",connect,17,outdoortemp,outside temperature,int16 (>=-3199<=3199),C,false,sensor.connect_outside_temperature,sensor.connect_outdoortemp,13,0,1/10,13,1
 "EM10",alert,74,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.alert_set_flow_temperature,sensor.alert_setflowtemp,14,0,1,0,1
 "EM10",alert,74,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.alert_burner_set_power,sensor.alert_setburnpow,14,0,1,1,1
 "EM10, EM100",extension,243,flowtempvf,flow temperature in header (T0/Vf),int16 (>=-3199<=3199),C,false,sensor.extension_flow_temperature_in_header_(T0/Vf),sensor.extension_flowtempvf,15,0,1/10,0,1

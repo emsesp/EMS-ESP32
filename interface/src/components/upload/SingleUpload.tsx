@@ -12,7 +12,12 @@ import { useI18nContext } from 'i18n/i18n-react';
 import DragNdrop from './DragNdrop';
 import { LinearProgressWithLabel } from './LinearProgressWithLabel';
 
-const SingleUpload = ({ text, doRestart }) => {
+interface SingleUploadProps {
+  text: string;
+  doRestart: () => void;
+}
+
+const SingleUpload = ({ text, doRestart }: SingleUploadProps) => {
   const [md5, setMd5] = useState<string>();
   const [file, setFile] = useState<File>();
   const { LL } = useI18nContext();
@@ -25,8 +30,8 @@ const SingleUpload = ({ text, doRestart }) => {
   } = useRequest(SystemApi.uploadFile, {
     immediate: false
   }).onSuccess(({ data }) => {
-    if (data) {
-      setMd5(data.md5 as string);
+    if (data && typeof data === 'object' && 'md5' in data) {
+      setMd5((data as { md5: string }).md5);
       toast.success(LL.UPLOAD() + ' MD5 ' + LL.SUCCESSFUL());
       setFile(undefined);
     } else {
@@ -34,16 +39,19 @@ const SingleUpload = ({ text, doRestart }) => {
     }
   });
 
-  useEffect(async () => {
-    if (file) {
-      await sendUpload(file).catch((error: Error) => {
-        if (error.message === 'The user aborted a request') {
-          toast.warning(LL.UPLOAD() + ' ' + LL.ABORTED());
-        } else {
-          toast.warning('Invalid file extension or incompatible bin file');
-        }
-      });
-    }
+  useEffect(() => {
+    const uploadFile = async () => {
+      if (file) {
+        await sendUpload(file).catch((error: Error) => {
+          if (error.message.includes('The user aborted a request')) {
+            toast.warning(LL.UPLOAD() + ' ' + LL.ABORTED());
+          } else {
+            toast.warning('Invalid file extension or incompatible bin file');
+          }
+        });
+      }
+    };
+    void uploadFile();
   }, [file]);
 
   return (

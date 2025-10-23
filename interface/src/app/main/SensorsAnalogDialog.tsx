@@ -57,7 +57,10 @@ const SensorsAnalogDialog = ({
     }
   }, [open, selectedItem]);
 
-  const handleClose = (_event, reason: 'backdropClick' | 'escapeKeyDown') => {
+  const handleClose = (
+    _event: React.SyntheticEvent,
+    reason: 'backdropClick' | 'escapeKeyDown'
+  ) => {
     if (reason !== 'backdropClick') {
       onClose();
     }
@@ -88,7 +91,7 @@ const SensorsAnalogDialog = ({
         <Grid container spacing={2}>
           <Grid>
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="g"
               label="GPIO"
               sx={{ width: '11ch' }}
@@ -107,7 +110,7 @@ const SensorsAnalogDialog = ({
           )}
           <Grid>
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="n"
               label={LL.NAME(0)}
               value={editItem.n}
