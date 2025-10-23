@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - 'dev2'
+      - 'test'
 
 permissions:
   contents: read
@@ -18,17 +18,17 @@ jobs:
     steps:
 
       - name: Install python 3.13
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.13'
 
-      - name: Install Node.js 22
-        uses: actions/setup-node@v4
+      - name: Install Node.js 24
+        uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Enable Corepack
         run: corepack enable pnpm
@@ -45,20 +45,21 @@ jobs:
           pip install -U platformio
           python -m pip install intelhex
 
-      - name: Build the WebUI
+      - name: Build webUI
         run: |
-          cd interface
-          pnpm install
-          pnpm typesafe-i18n --no-watch
-          sed -i "s/= 'pl'/= 'en'/" ./src/i18n/i18n-util.ts
-          pnpm build
-          pnpm webUI
+          platformio run -e build_webUI
 
-      - name: Build all target environments
+      - name: Build modbus
+        run: |
+          platformio run -e build_modbus
+
+      - name: Build standalone
+        run: |
+          platformio run -e build_standalone
+          
+      - name: Build all PIO target environments, from default_envs
         run: |
           platformio run
-        env:
-          NO_BUILD_WEBUI: true
 
       - name: Create GitHub Release
         id: 'automatic_releases'

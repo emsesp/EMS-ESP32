@@ -228,10 +228,12 @@ void RxService::add(uint8_t * data, uint8_t length) {
     // create the telegram
     auto telegram = std::make_shared<Telegram>(operation, src, dest, type_id, offset, message_data, message_length);
 
-    // check if queue is full, if so remove top item to make space
+// check if queue is full, if so remove top item to make space, except if we're in standalone mode
+#ifndef EMSESP_STANDALONE
     if (rx_telegrams_.size() >= MAX_RX_TELEGRAMS) {
         rx_telegrams_.pop_front();
     }
+#endif
 
     rx_telegrams_.emplace_back(rx_telegram_id_++, std::move(telegram)); // add to queue
 }
@@ -239,7 +241,7 @@ void RxService::add(uint8_t * data, uint8_t length) {
 // add empty telegram to rx-queue
 void RxService::add_empty(const uint8_t src, const uint8_t dest, const uint16_t type_id, uint8_t offset) {
     auto telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, offset, nullptr, 0);
-    // only if queue is  not full
+    // only if queue is not full
     if (rx_telegrams_.size() < MAX_RX_TELEGRAMS) {
         rx_telegrams_.emplace_back(rx_telegram_id_++, std::move(telegram)); // add to queue
     }
@@ -442,6 +444,7 @@ void TxService::add(const uint8_t  operation,
 
     LOG_DEBUG("New Tx [#%d] telegram, length %d", tx_telegram_id_, message_length);
 
+#ifndef EMSESP_STANDALONE
     // if the queue is full, make room by removing the last one
     if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
         LOG_WARNING("Tx queue overflow, skip one message");
@@ -452,6 +455,7 @@ void TxService::add(const uint8_t  operation,
         }
         tx_telegrams_.pop_front();
     }
+#endif
 
     if (front) {
         tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram), false, validateid); // add to front of queue
