@@ -414,6 +414,10 @@ char * Helpers::render_string(char * result, const char * c, const uint8_t len) 
             *p     = 0xC3;
             *(++p) = 0xBC;
             break;
+        case 0xF0: // greek capital Xi, used for boiler servicecode dhw+heat
+            *p     = 0xCE;
+            *(++p) = 0x9E;
+            break;
         default:
             *p = (*c & 0x80) ? '?' : *c;
             break;

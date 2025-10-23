@@ -1308,7 +1308,8 @@ void Boiler::process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram) {
     if ((telegram->message_length > 18) && (telegram->offset == 0)) {
         char serviceCode[4];
         telegram->read_value(serviceCode[0], 18);
-        serviceCode[0] = (serviceCode[0] == (char)0xF0) ? '~' : serviceCode[0];
+        // 0xF0 for 3 stacked horizontal lines like greek capital Xi
+        // serviceCode[0] = (serviceCode[0] == (char)0xF0) ? '~' : serviceCode[0];
         telegram->read_value(serviceCode[1], 19);
         serviceCode[2] = '\0'; // null terminate string
         has_update(serviceCode_, serviceCode, sizeof(serviceCode_));
@@ -1474,9 +1475,9 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
     if ((telegram->message_length > 3) && (telegram->offset == 0)) {
         char serviceCode[4] = {0};
         telegram->read_value(serviceCode[0], 1);
-        serviceCode[0] = (serviceCode[0] == (char)0xF0) ? '~' : serviceCode[0];
+        // serviceCode[0] = (serviceCode[0] == (char)0xF0) ? '~' : serviceCode[0];
         telegram->read_value(serviceCode[1], 2);
-        serviceCode[1] = (serviceCode[1] == (char)0xF0) ? '~' : serviceCode[1];
+        // serviceCode[1] = (serviceCode[1] == (char)0xF0) ? '~' : serviceCode[1];
         telegram->read_value(serviceCode[2], 3);
         serviceCode[3] = '\0';
         has_update(serviceCode_, serviceCode, sizeof(serviceCode_));
