@@ -1,4 +1,8 @@
 name: "Mark or close stale issues and PRs"
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
  
 on:
   schedule:
