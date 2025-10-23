@@ -26,4 +26,3 @@ pnpm webUI
 cd ..
 npx cspell "**"
 
-sh ./scripts/generate_csv_and_headers.sh
