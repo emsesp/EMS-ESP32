@@ -36,7 +36,7 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
     register_telegram_type(0x4AE, "HPEnergy", true, MAKE_PF_CB(process_HpEnergy));
     register_telegram_type(0x4AF, "HPMeters", true, MAKE_PF_CB(process_HpMeters));
     register_telegram_type(0x99A, "HPStarts", false, MAKE_PF_CB(process_HpStarts));
-    register_telegram_type(0x12E, "HPEnergy1XXX", false, MAKE_PF_CB(process_HpEnergy1));
+    register_telegram_type(0x12E, "HPEnergy1", false, MAKE_PF_CB(process_HpEnergy1));
     register_telegram_type(0x13B, "HPEnergy2", false, MAKE_PF_CB(process_HpEnergy2));
 
     // device values
