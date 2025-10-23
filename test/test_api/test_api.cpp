@@ -318,7 +318,7 @@ const char * run_console_command(const char * command) {
 }
 
 void console_test1() {
-    auto expected_response = "Log level: DEBUG\n";
+    auto expected_response = "Log level: DEBUG";
     TEST_ASSERT_EQUAL_STRING(expected_response, run_console_command("log"));
 }
 
@@ -329,7 +329,7 @@ void console_test2() {
 
 void console_test3() {
     // test bad command
-    auto expected_response = "Bad syntax. Check arguments.\n";
+    auto expected_response = "Bad syntax. Check arguments.";
     TEST_ASSERT_EQUAL_STRING(expected_response, run_console_command("call thermostat mode bad"));
 }
 
