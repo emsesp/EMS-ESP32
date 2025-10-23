@@ -49,8 +49,6 @@ jobs:
       - name: Build all PIO target environments
         run: |
           platformio run
-        env:
-          NO_BUILD_WEBUI: true
 
       - name: Create GitHub Release
         uses: emsesp/action-automatic-releases@v1.0.0

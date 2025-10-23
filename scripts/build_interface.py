@@ -55,6 +55,9 @@ def buildWeb():
     interface_dir = Path("interface")
     pnpm_exe = get_pnpm_executable()
     
+    # Set CI environment variable to make pnpm use silent mode
+    os.environ['CI'] = 'true'
+    
     print("Building web interface...")
     
     # Check if interface directory exists
@@ -100,13 +103,18 @@ def buildWeb():
         return False
 
 
-# Don't build webUI if called from GitHub Actions
-if "NO_BUILD_WEBUI" in os.environ:
-    print("!! Skipping the build of the web interface !!")
-else:
-    if not (env.IsCleanTarget()):
-        success = buildWeb()
-        if not success:
-            print("Web interface build failed!")
-            # Optionally exit with error code
-            # sys.exit(1)
+def build_webUI(*args, **kwargs):
+    success = buildWeb()
+    if not success:
+        print("Web interface build failed!")
+        env.Exit(1)
+    env.Exit(0)            
+            
+# Create custom target that only runs the script
+env.AddCustomTarget(
+    name="build",
+    dependencies=None,
+    actions=[build_webUI],
+    title="build web interface",
+    description="installs pnpm packages, updates libraries and builds web UI"
+)

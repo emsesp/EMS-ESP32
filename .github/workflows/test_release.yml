@@ -57,8 +57,6 @@ jobs:
       - name: Build all target environments
         run: |
           platformio run
-        env:
-          NO_BUILD_WEBUI: true
 
       - name: Create GitHub Release
         id: 'automatic_releases'
