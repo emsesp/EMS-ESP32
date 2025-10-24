@@ -459,6 +459,9 @@ MAKE_TRANSLATION(hpBrineIn, "hpbrinein", "brine in/evaporator", "Sole in/Verdamp
 MAKE_TRANSLATION(hpBrineOut, "hpbrineout", "brine out/condenser", "Sole aus/Kondensator", "pekel uit/condensor", "Brine ut (kondensor)", "temperatura glikolu na wyjściu kolektora (TB1)", "Brine ut/kondensor", "sortie saumure/condenseur", "anahtar valfi", "salamoia nell uscita evaporatore", "výstup soľanky/kondenzátor", "solanka out/kondenzátor")
 MAKE_TRANSLATION(hpSwitchValve, "hpswitchvalve", "switch valve", "Schaltventil", "schakelklep", "Växelventil", "zawór przełączający", "skifteventil", "valve de commutation", "ısı pompası aktivitesi", "valvola commutazione pompa di calore", "prepínací ventil", "přepínací ventil")
 MAKE_TRANSLATION(hpActivity, "hpactivity", "compressor activity", "Kompressoraktivität", "Compressoractiviteit", "Kompressoraktivitet", "pompa ciepła, aktywność sprężarki", "kompressoraktivitet", "hp ısı pompası", "attività compressore", "činnosť kompresora", "činnost kompresoru")
+MAKE_TRANSLATION(hpTargetSpd, "hptargetspd", "compressor target speed", "Kompressorsolldrehzahl") // TODO translate
+MAKE_TRANSLATION(receiverValveVr0, "recvalve", "receiver valve VR0", "Eingangsventil VR0") // TODO translate
+MAKE_TRANSLATION(expansionValveVr1, "expvalve", "expansion valve VR1", "Ausdehnungsventil VR1") // TODO translate
 
 MAKE_TRANSLATION(hpMaxPower, "hpmaxpower", "compressor max power", "max. Kompressorleistung", "", "Max. Kompressoreffekt", "maksymalna wydajność sprężarki", "", "", "", "", "max výkon kompresora", "maximální výkon kompresoru") // TODO translate
 MAKE_TRANSLATION(pvMaxComp, "pvmaxcomp", "pv compressor max power", "PV max. Kompressorleistung", "", "PV Max. Kompressoreffekt", "maksymalna wydajność sprężarki", "", "", "", "", "pv max výkon kompresora", "maximální výkon PV kompresoru") // TODO translate

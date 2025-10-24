@@ -857,7 +857,7 @@ void EMSdevice::publish_value(void * value_p) const {
                 break;
             case DeviceValueType::STRING:
                 if (Helpers::hasValue((char *)(value_p))) {
-                    strlcpy(payload, (char *)(value_p), sizeof(payload));
+                    Helpers::render_string(payload, (char *)(value_p), sizeof(payload));
                 }
                 break;
             default:
@@ -967,7 +967,8 @@ void EMSdevice::generate_values_web(JsonObject output, const bool is_dashboard) 
 
             // handle TEXT strings
             else if (dv.type == DeviceValueType::STRING) {
-                obj["v"] = (char *)(dv.value_p);
+                char s[55];
+                obj["v"] = Helpers::render_string(s, (char *)(dv.value_p), sizeof(s));
             }
 
             // handle ENUMs
@@ -1079,7 +1080,8 @@ void EMSdevice::generate_values_web_customization(JsonArray output) {
 
             // handle TEXT strings
             else if (dv.type == DeviceValueType::STRING) {
-                obj["v"] = (char *)(dv.value_p);
+                char s[55];
+                obj["v"] = Helpers::render_string(s, (char *)(dv.value_p), sizeof(s));
             }
 
             // handle ENUMs
@@ -1648,7 +1650,8 @@ void EMSdevice::get_value_json(JsonObject json, DeviceValue & dv) {
 
     case DeviceValueType::STRING:
         if (Helpers::hasValue((char *)(dv.value_p))) {
-            json[value] = (char *)(dv.value_p);
+            char s[55];
+            json[value] = Helpers::render_string(s, (char *)(dv.value_p), sizeof(s));
         }
         json[type] = ("string");
         break;
@@ -1782,7 +1785,8 @@ bool EMSdevice::generate_values(JsonObject output, const int8_t tag_filter, cons
 
             // handle TEXT strings
             else if (dv.type == DeviceValueType::STRING) {
-                json[name] = (char *)(dv.value_p);
+                char s[55];
+                json[name] = Helpers::render_string(s, (char *)(dv.value_p), sizeof(s));
             }
 
             // handle ENUMs

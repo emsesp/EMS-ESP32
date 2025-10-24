@@ -589,7 +589,10 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpBrinePumpSpd_, DeviceValueType::UINT8, FL_(hpBrinePumpSpd), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpSwitchValve_, DeviceValueType::BOOL, FL_(hpSwitchValve), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpCompSpd_, DeviceValueType::UINT8, FL_(hpCompSpd), DeviceValueUOM::PERCENT);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTargetSpd_, DeviceValueType::UINT8, FL_(hpTargetSpd), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpCircSpd_, DeviceValueType::UINT8, FL_(hpCircSpd), DeviceValueUOM::PERCENT);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &receiverValveVr0_, DeviceValueType::UINT8, FL_(receiverValveVr0), DeviceValueUOM::PERCENT);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &expansionValveVr1_, DeviceValueType::UINT8, FL_(expansionValveVr1), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &hpBrineIn_,
                               DeviceValueType::INT16,
@@ -1305,7 +1308,8 @@ void Boiler::process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram) {
     if ((telegram->message_length > 18) && (telegram->offset == 0)) {
         char serviceCode[4];
         telegram->read_value(serviceCode[0], 18);
-        serviceCode[0] = (serviceCode[0] == (char)0xF0) ? '~' : serviceCode[0];
+        // 0xF0 for 3 stacked horizontal lines like greek capital Xi
+        // serviceCode[0] = (serviceCode[0] == (char)0xF0) ? '~' : serviceCode[0];
         telegram->read_value(serviceCode[1], 19);
         serviceCode[2] = '\0'; // null terminate string
         has_update(serviceCode_, serviceCode, sizeof(serviceCode_));
@@ -1471,9 +1475,9 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
     if ((telegram->message_length > 3) && (telegram->offset == 0)) {
         char serviceCode[4] = {0};
         telegram->read_value(serviceCode[0], 1);
-        serviceCode[0] = (serviceCode[0] == (char)0xF0) ? '~' : serviceCode[0];
+        // serviceCode[0] = (serviceCode[0] == (char)0xF0) ? '~' : serviceCode[0];
         telegram->read_value(serviceCode[1], 2);
-        serviceCode[1] = (serviceCode[1] == (char)0xF0) ? '~' : serviceCode[1];
+        // serviceCode[1] = (serviceCode[1] == (char)0xF0) ? '~' : serviceCode[1];
         telegram->read_value(serviceCode[2], 3);
         serviceCode[3] = '\0';
         has_update(serviceCode_, serviceCode, sizeof(serviceCode_));
@@ -1724,6 +1728,11 @@ void Boiler::process_HpPower(std::shared_ptr<const Telegram> telegram) {
     has_bitupdate(telegram, hpInput[1].state, 1, 5);
     has_bitupdate(telegram, hpInput[2].state, 1, 6);
     has_bitupdate(telegram, hpInput[3].state, 1, 7);
+
+    // from https://github.com/emsesp/EMS-ESP32/issues/2669
+    has_update(telegram, hpTargetSpd_, 22);
+    has_update(telegram, receiverValveVr0_, 15);
+    has_update(telegram, expansionValveVr1_, 16);
 
     // has_update(hpHeatingOn_, hpActivity_ == 1 ? 0xFF : 0);
     // has_update(hpCoolingOn_, hpActivity_ == 2 ? 0xFF : 0);
