@@ -45,7 +45,23 @@ tag_to_tagtype = {
     32: "HS",
     33: "HS",
     34: "HS",
-    35: "HS"
+    35: "HS",
+    36: "SRC",
+    37: "SRC",
+    38: "SRC",
+    39: "SRC",
+    40: "SRC",
+    41: "SRC",
+    42: "SRC",
+    43: "SRC",
+    44: "SRC",
+    45: "SRC",
+    46: "SRC",
+    47: "SRC",
+    48: "SRC",
+    49: "SRC",
+    50: "SRC",
+    52: "SRC"
 }
 
 # read entities csv from stdin
