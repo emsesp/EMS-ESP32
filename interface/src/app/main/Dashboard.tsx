@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { IconContext } from 'react-icons/lib';
 import { Link } from 'react-router';
 import { toast } from 'react-toastify';
@@ -44,7 +44,7 @@ import {
 } from './types';
 import { deviceValueItemValidation } from './validators';
 
-const Dashboard = () => {
+const Dashboard = memo(() => {
   const { LL } = useI18nContext();
   const { me } = useContext(AuthenticatedContext);
 
@@ -163,9 +163,14 @@ const Dashboard = () => {
     }
   });
 
+  const nodeIds = useMemo(
+    () => data.nodes.map((item: DashboardItem) => item.id),
+    [data.nodes]
+  );
+
   useEffect(() => {
     showAll
-      ? tree.fns.onAddAll(data.nodes.map((item: DashboardItem) => item.id)) // expand tree
+      ? tree.fns.onAddAll(nodeIds) // expand tree
       : tree.fns.onRemoveAll(); // collapse tree
   }, [parentNodes]);
 
@@ -195,27 +200,32 @@ const Dashboard = () => {
     [LL]
   );
 
-  const showName = (di: DashboardItem) => {
-    if (di.id < 100) {
-      // if its a device (parent node) and has entities
-      if (di.nodes?.length) {
-        return (
-          <span style={{ fontWeight: 'bold', fontSize: '14px' }}>
-            <DeviceIcon type_id={di.t ?? 0} />
-            &nbsp;&nbsp;{showType(di.n, di.t)}
-            <span style={{ color: 'lightblue' }}>&nbsp;({di.nodes?.length})</span>
-          </span>
-        );
+  const showName = useCallback(
+    (di: DashboardItem) => {
+      if (di.id < 100) {
+        // if its a device (parent node) and has entities
+        if (di.nodes?.length) {
+          return (
+            <span style={{ fontWeight: 'bold', fontSize: '14px' }}>
+              <DeviceIcon type_id={di.t ?? 0} />
+              &nbsp;&nbsp;{showType(di.n, di.t)}
+              <span style={{ color: 'lightblue' }}>&nbsp;({di.nodes?.length})</span>
+            </span>
+          );
+        }
       }
-    }
-    if (di.dv) {
-      return <span>{di.dv.id.slice(2)}</span>;
-    }
-    return null;
-  };
+      if (di.dv) {
+        return <span>{di.dv.id.slice(2)}</span>;
+      }
+      return null;
+    },
+    [showType]
+  );
 
-  const hasMask = (id: string, mask: number) =>
-    (parseInt(id.slice(0, 2), 16) & mask) === mask;
+  const hasMask = useCallback(
+    (id: string, mask: number) => (parseInt(id.slice(0, 2), 16) & mask) === mask,
+    []
+  );
 
   const editDashboardValue = useCallback(
     (di: DashboardItem) => {
@@ -237,16 +247,17 @@ const Dashboard = () => {
     }
   };
 
+  const hasFavEntities = useMemo(
+    () => data.nodes.filter((item: DashboardItem) => item.id <= 90).length,
+    [data.nodes]
+  );
+
   const renderContent = () => {
     if (!data) {
       return (
         <FormLoader onRetry={fetchDashboard} errorMessage={error?.message || ''} />
       );
     }
-
-    const hasFavEntities = data.nodes.filter(
-      (item: DashboardItem) => item.id <= 90
-    ).length;
 
     return (
       <>
@@ -391,6 +402,6 @@ const Dashboard = () => {
       )}
     </SectionContent>
   );
-};
+});
 
 export default Dashboard;

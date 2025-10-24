@@ -32,6 +32,6 @@ jobs:
           pip install wheel
           pip install -U platformio
 
-      - name: Build native
+      - name: Build standalone
         run: |
-          platformio run -e native
+          platformio run -e standalone

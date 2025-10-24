@@ -110,7 +110,7 @@ def build_webUI(*args, **kwargs):
         env.Exit(1)
     env.Exit(0)            
             
-# Create custom target that only runs the script
+# Create custom target that only runs the script and then exits, without continuing with the pio workflow
 env.AddCustomTarget(
     name="build",
     dependencies=None,
