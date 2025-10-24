@@ -118,10 +118,3 @@ env.AddCustomTarget(
     title="build web interface",
     description="installs pnpm packages, updates libraries and builds web UI"
 )
-
-# this is if its called with the target=build, so it will continue with the pio workflow
-if not (env.IsCleanTarget()):
-   success = buildWeb()
-   if not success:
-     print("Web interface build failed!")
-     
