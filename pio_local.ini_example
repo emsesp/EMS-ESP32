@@ -19,18 +19,17 @@
 my_build_flags =
 
 [platformio]
-; default_envs = s_16M_P ; BBQKees E32V2
+default_envs = s_16M_P ; BBQKees E32V2
 ; default_envs = s3_16M_P ; BBQKees S3
 ; default_envs = s_4M ; BBQKees older S32, 4MB no psram
 ; default_envs = s_16M ; BBQKees newer S32 V2, 16MB no psram
 ; default_envs = c6 ; XIAO ESP32C
-default_envs = debug
+; default_envs = debug
 
 [env]
 
-; uncomment if you want to upload the firmware via OTA (must have upload_protocol = custom)
 extra_scripts =
- pre:scripts/build_interface.py ; builds the WebUI - comment out if you don't want to build each time
+ pre:scripts/build_interface.py ; builds the WebUI
  scripts/rename_fw.py ; renames the firmware .bin file - comment out if not needed
  scripts/upload.py ; optionally upload the firmware via OTA (must have upload_protocol = custom)
 
@@ -45,28 +44,6 @@ custom_password = admin
 ; for direct via HTTP (OTA) set:
 ;  upload_protocol = custom
 ;  custom_emsesp_ip = <ip address> or ems-esp.local
-
-; upload_protocol = custom
-; custom_emsesp_ip = 10.10.10.93 ; S3
-custom_emsesp_ip = 192.168.1.223 ; E32V2
-; custom_emsesp_ip = 192.168.1.173 ; S32
-; custom_emsesp_ip = 192.168.1.59 ; S32 (old) 4MB blue board
-
-; lib_deps =
-;   bblanchon/ArduinoJson @ 7.4.2
-;   ESP32Async/AsyncTCP @ 3.4.9
-;   ESP32Async/ESPAsyncWebServer @ 3.8.1
-;   ; file://${PROJECT_DIR}/../modules/EMS-ESP-Modules
-;   https://github.com/emsesp/EMS-ESP-Modules.git @ 1.0.8
-
-; [espressif32_base_16M]
-; framework = arduino
-; board_build.partitions = partitions/esp32_partition_16M.csv
-; board_upload.flash_size = 16MB
-; board_build.app_partition_name = app0
-; ; platform = espressif32@6.12.0 ; Arduino Core v2.0.17 / IDF v4.4.7
-; ; platform = https://github.com/pioarduino/platform-espressif32/releases/download/54.03.20/platform-espressif32.zip ; Arduino Core v3.2.0 / ESP-IDF v5.4.1
-; platform = https://github.com/pioarduino/platform-espressif32/releases/download/55.03.30/platform-espressif32.zip ; Arduino Core 3.3.0, IDF 5.5.0
 
 ; ** debug settings **
 ; to be used with an ESP32-S3 which has an onboard JTAG, connect the OTG USB port to the PC
