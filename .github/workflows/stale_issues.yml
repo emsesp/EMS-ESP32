@@ -1,4 +1,8 @@
 name: "Mark or close stale issues and PRs"
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
  
 on:
   schedule:
@@ -8,7 +12,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v9
+      - uses: actions/stale@v10
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           days-before-stale: 30
