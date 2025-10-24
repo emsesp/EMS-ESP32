@@ -20,6 +20,7 @@ my_build_flags =
 
 [platformio]
 default_envs = s_16M_P ; BBQKees E32V2
+; default_envs = build_webUI ; build the web interface only
 ; default_envs = s3_16M_P ; BBQKees S3
 ; default_envs = s_4M ; BBQKees older S32, 4MB no psram
 ; default_envs = s_16M ; BBQKees newer S32 V2, 16MB no psram
