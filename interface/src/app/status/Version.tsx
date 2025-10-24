@@ -1,10 +1,11 @@
-import { useContext, useEffect, useState } from 'react';
+import { memo, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import CloseIcon from '@mui/icons-material/Close';
 import CheckIcon from '@mui/icons-material/Done';
 import DownloadIcon from '@mui/icons-material/GetApp';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
@@ -16,7 +17,11 @@ import {
   DialogTitle,
   FormControlLabel,
   Grid,
+  IconButton,
   Link,
+  List,
+  ListItem,
+  ListItemText,
   Typography
 } from '@mui/material';
 
@@ -36,168 +41,143 @@ import {
 } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
+import { prettyDateTime } from 'utils/time';
 
-const Version = () => {
-  const { LL, locale } = useI18nContext();
-  const { me } = useContext(AuthenticatedContext);
+// Constants moved outside component to avoid recreation
+const STABLE_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/';
+const STABLE_RELNOTES_URL =
+  'https://github.com/emsesp/EMS-ESP32/blob/main/CHANGELOG.md';
+const DEV_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/latest/';
+const DEV_RELNOTES_URL =
+  'https://github.com/emsesp/EMS-ESP32/blob/dev/CHANGELOG_LATEST.md';
 
-  const [restarting, setRestarting] = useState<boolean>(false);
-  const [openInstallDialog, setOpenInstallDialog] = useState<boolean>(false);
-  const [usingDevVersion, setUsingDevVersion] = useState<boolean>(false);
-  const [fetchDevVersion, setFetchDevVersion] = useState<boolean>(false);
-  const [devUpgradeAvailable, setDevUpgradeAvailable] = useState<boolean>(false);
-  const [stableUpgradeAvailable, setStableUpgradeAvailable] =
-    useState<boolean>(false);
-  const [internetLive, setInternetLive] = useState<boolean>(false);
-  const [downloadOnly, setDownloadOnly] = useState<boolean>(false);
+// Types for better type safety
+interface VersionData {
+  emsesp_version: string;
+  arduino_version: string;
+  esp_platform: string;
+  flash_chip_size: number;
+  psram: boolean;
+  build_flags?: string;
+}
 
-  const STABLE_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/';
-  const STABLE_RELNOTES_URL =
-    'https://github.com/emsesp/EMS-ESP32/blob/main/CHANGELOG.md';
+interface UpgradeCheckData {
+  emsesp_version: string;
+  dev_upgradeable: boolean;
+  stable_upgradeable: boolean;
+}
 
-  const DEV_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/latest/';
-  const DEV_RELNOTES_URL =
-    'https://github.com/emsesp/EMS-ESP32/blob/dev/CHANGELOG_LATEST.md';
+interface VersionInfo {
+  name: string;
+  published_at?: string;
+}
 
-  const { send: sendCheckUpgrade } = useRequest(
-    (versions: string) => callAction({ action: 'checkUpgrade', param: versions }),
-    {
-      immediate: false
-    }
-  ).onSuccess((event) => {
-    const data = event.data as {
-      emsesp_version: string;
-      dev_upgradeable: boolean;
-      stable_upgradeable: boolean;
-    };
-    setDevUpgradeAvailable(data.dev_upgradeable);
-    setStableUpgradeAvailable(data.stable_upgradeable);
-  });
+// Memoized components for better performance
+const VersionInfoDialog = memo(
+  ({
+    showVersionInfo,
+    latestVersion,
+    latestDevVersion,
+    locale,
+    LL,
+    onClose
+  }: {
+    showVersionInfo: number;
+    latestVersion?: VersionInfo;
+    latestDevVersion?: VersionInfo;
+    locale: string;
+    LL: any;
+    onClose: () => void;
+  }) => {
+    if (showVersionInfo === 0) return null;
 
-  const {
-    data: data,
-    send: loadData,
-    error
-  } = useRequest(SystemApi.readSystemStatus).onSuccess((event) => {
-    // older version of EMS-ESP using ESP32 (not S3) and no PSRAM, can't use OTA because of SSL support in HttpClient
-    if (event.data.arduino_version.startsWith('Tasmota')) {
-      setDownloadOnly(true);
-    }
-    setUsingDevVersion(event.data.emsesp_version.includes('dev'));
-  });
+    const isStable = showVersionInfo === 1;
+    const version = isStable ? latestVersion : latestDevVersion;
+    const relNotesUrl = isStable ? STABLE_RELNOTES_URL : DEV_RELNOTES_URL;
 
-  const { send: sendUploadURL } = useRequest(
-    (url: string) => callAction({ action: 'uploadURL', param: url }),
-    {
-      immediate: false
-    }
-  );
-
-  // called immediately to get the latest versions on page load
-  const { data: latestVersion } = useRequest(getStableVersion);
-  const { data: latestDevVersion } = useRequest(getDevVersion);
-
-  useEffect(() => {
-    if (latestVersion && latestDevVersion) {
-      sendCheckUpgrade(latestDevVersion.name + ',' + latestVersion.name)
-        .catch((error: Error) => {
-          toast.error('Failed to check for upgrades: ' + error.message);
-        })
-        .finally(() => {
-          setInternetLive(true);
-        });
-    }
-  }, [latestVersion, latestDevVersion]);
-
-  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
-  const DIVISIONS: Array<{ amount: number; name: string }> = [
-    { amount: 60, name: 'seconds' },
-    { amount: 60, name: 'minutes' },
-    { amount: 24, name: 'hours' },
-    { amount: 7, name: 'days' },
-    { amount: 4.34524, name: 'weeks' },
-    { amount: 12, name: 'months' },
-    { amount: Number.POSITIVE_INFINITY, name: 'years' }
-  ];
-  function formatTimeAgo(date: Date) {
-    let duration = (date.getTime() - new Date().getTime()) / 1000;
-    for (let i = 0; i < DIVISIONS.length; i++) {
-      const division = DIVISIONS[i];
-      if (division && Math.abs(duration) < division.amount) {
-        return rtf.format(
-          Math.round(duration),
-          division.name as Intl.RelativeTimeFormatUnit
-        );
-      }
-      if (division) {
-        duration /= division.amount;
-      }
-    }
-    return rtf.format(0, 'seconds');
+    return (
+      <Dialog sx={dialogStyle} open={showVersionInfo !== 0} onClose={onClose}>
+        <DialogTitle>Version Information</DialogTitle>
+        <DialogContent dividers>
+          <List dense>
+            <ListItem>
+              <ListItemText
+                primary={<span style={{ color: 'lightblue' }}>{LL.TYPE(0)}</span>}
+                secondary={isStable ? LL.STABLE() : LL.DEVELOPMENT()}
+              />
+            </ListItem>
+            <ListItem>
+              <ListItemText
+                primary={<span style={{ color: 'lightblue' }}>{LL.VERSION()}</span>}
+                secondary={version?.name}
+              />
+            </ListItem>
+            {version?.published_at && (
+              <ListItem>
+                <ListItemText
+                  primary={<span style={{ color: 'lightblue' }}>Release Date</span>}
+                  secondary={prettyDateTime(locale, new Date(version.published_at))}
+                />
+              </ListItem>
+            )}
+          </List>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="outlined"
+            component="a"
+            href={relNotesUrl}
+            target="_blank"
+            color="primary"
+          >
+            Changelog
+          </Button>
+          <Button variant="outlined" onClick={onClose} color="secondary">
+            {LL.CLOSE()}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
   }
+);
 
-  const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
-    immediate: false
-  });
+const InstallDialog = memo(
+  ({
+    openInstallDialog,
+    fetchDevVersion,
+    latestVersion,
+    latestDevVersion,
+    downloadOnly,
+    platform,
+    LL,
+    onClose,
+    onInstall
+  }: {
+    openInstallDialog: boolean;
+    fetchDevVersion: boolean;
+    latestVersion?: VersionInfo;
+    latestDevVersion?: VersionInfo;
+    downloadOnly: boolean;
+    platform: string;
+    LL: any;
+    onClose: () => void;
+    onInstall: (url: string) => void;
+  }) => {
+    const binURL = useMemo(() => {
+      if (!latestVersion || !latestDevVersion) return '';
 
-  const doRestart = async () => {
-    setRestarting(true);
-    await sendAPI({ device: 'system', cmd: 'restart', id: 0 }).catch(
-      (error: Error) => {
-        toast.error(error.message);
-      }
-    );
-  };
+      const version = fetchDevVersion ? latestDevVersion : latestVersion;
+      const filename = `EMS-ESP-${version.name.replaceAll('.', '_')}-${platform}.bin`;
 
-  const getBinURL = (showingDev: boolean) => {
-    if (!internetLive) {
-      return '';
-    }
-
-    const filename =
-      'EMS-ESP-' +
-      (showingDev ? latestDevVersion.name : latestVersion.name).replaceAll(
-        '.',
-        '_'
-      ) +
-      '-' +
-      getPlatform() +
-      '.bin';
-    return showingDev
-      ? DEV_URL + filename
-      : STABLE_URL + 'v' + latestVersion.name + '/' + filename;
-  };
-
-  const getPlatform = () => {
-    return (
-      [data.esp_platform, data.flash_chip_size >= 16384 ? '16MB' : '4MB'].join('-') +
-      (data.psram ? '+' : '')
-    );
-  };
-
-  const installFirmwareURL = async (url: string) => {
-    await sendUploadURL(url).catch((error: Error) => {
-      toast.error(error.message);
-    });
-    setRestarting(true);
-  };
-
-  useLayoutTitle('EMS-ESP Firmware');
-
-  const renderInstallDialog = () => {
-    const binURL = getBinURL(fetchDevVersion);
+      return fetchDevVersion
+        ? `${DEV_URL}${filename}`
+        : `${STABLE_URL}v${version.name}/${filename}`;
+    }, [fetchDevVersion, latestVersion, latestDevVersion, platform]);
 
     return (
-      <Dialog
-        sx={dialogStyle}
-        open={openInstallDialog}
-        onClose={() => closeInstallDialog()}
-      >
+      <Dialog sx={dialogStyle} open={openInstallDialog} onClose={onClose}>
         <DialogTitle>
-          {LL.UPDATE() +
-            ' ' +
-            (fetchDevVersion ? LL.DEVELOPMENT() : LL.STABLE()) +
-            ' Firmware'}
+          {`${LL.UPDATE()} ${fetchDevVersion ? LL.DEVELOPMENT() : LL.STABLE()} Firmware`}
         </DialogTitle>
         <DialogContent dividers>
           <Typography mb={2}>
@@ -211,7 +191,7 @@ const Version = () => {
           <Button
             startIcon={<CancelIcon />}
             variant="outlined"
-            onClick={() => closeInstallDialog()}
+            onClick={onClose}
             color="secondary"
           >
             {LL.CANCEL()}
@@ -219,7 +199,7 @@ const Version = () => {
           <Button
             startIcon={<DownloadIcon />}
             variant="outlined"
-            onClick={() => closeInstallDialog()}
+            onClick={onClose}
             color="primary"
           >
             <Link underline="none" target="_blank" href={binURL} color="primary">
@@ -230,7 +210,7 @@ const Version = () => {
             <Button
               startIcon={<WarningIcon color="warning" />}
               variant="outlined"
-              onClick={() => installFirmwareURL(binURL)}
+              onClick={() => onInstall(binURL)}
               color="primary"
             >
               {LL.INSTALL()}
@@ -239,75 +219,184 @@ const Version = () => {
         </DialogActions>
       </Dialog>
     );
-  };
+  }
+);
 
-  const showFirmwareDialog = (useDevVersion: boolean) => {
+// Helper function moved outside component
+const getPlatform = (data: VersionData): string => {
+  return `${data.esp_platform}-${data.flash_chip_size >= 16384 ? '16MB' : '4MB'}${data.psram ? '+' : ''}`;
+};
+
+const Version = () => {
+  const { LL, locale } = useI18nContext();
+  const { me } = useContext(AuthenticatedContext);
+
+  // State management
+  const [restarting, setRestarting] = useState<boolean>(false);
+  const [openInstallDialog, setOpenInstallDialog] = useState<boolean>(false);
+  const [usingDevVersion, setUsingDevVersion] = useState<boolean>(false);
+  const [fetchDevVersion, setFetchDevVersion] = useState<boolean>(false);
+  const [devUpgradeAvailable, setDevUpgradeAvailable] = useState<boolean>(false);
+  const [stableUpgradeAvailable, setStableUpgradeAvailable] =
+    useState<boolean>(false);
+  const [internetLive, setInternetLive] = useState<boolean>(false);
+  const [downloadOnly, setDownloadOnly] = useState<boolean>(false);
+  const [showVersionInfo, setShowVersionInfo] = useState<number>(0);
+
+  // API calls with optimized error handling
+  const { send: sendCheckUpgrade } = useRequest(
+    (versions: string) => callAction({ action: 'checkUpgrade', param: versions }),
+    { immediate: false }
+  ).onSuccess((event) => {
+    const data = event.data as UpgradeCheckData;
+    setDevUpgradeAvailable(data.dev_upgradeable);
+    setStableUpgradeAvailable(data.stable_upgradeable);
+  });
+
+  const {
+    data,
+    send: loadData,
+    error
+  } = useRequest(SystemApi.readSystemStatus).onSuccess((event) => {
+    const systemData = event.data as VersionData;
+    if (systemData.arduino_version.startsWith('Tasmota')) {
+      setDownloadOnly(true);
+    }
+    setUsingDevVersion(systemData.emsesp_version.includes('dev'));
+  });
+
+  const { send: sendUploadURL } = useRequest(
+    (url: string) => callAction({ action: 'uploadURL', param: url }),
+    { immediate: false }
+  );
+
+  const { data: latestVersion } = useRequest(getStableVersion);
+  const { data: latestDevVersion } = useRequest(getDevVersion);
+
+  const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
+    immediate: false
+  });
+
+  // Memoized values
+  const platform = useMemo(() => (data ? getPlatform(data) : ''), [data]);
+  const isDev = useMemo(
+    () => data?.emsesp_version.includes('dev') ?? false,
+    [data?.emsesp_version]
+  );
+
+  const doRestart = useCallback(async () => {
+    setRestarting(true);
+    await sendAPI({ device: 'system', cmd: 'restart', id: 0 }).catch(
+      (error: Error) => {
+        toast.error(error.message);
+      }
+    );
+  }, [sendAPI]);
+
+  const installFirmwareURL = useCallback(
+    async (url: string) => {
+      await sendUploadURL(url).catch((error: Error) => {
+        toast.error(error.message);
+      });
+      setRestarting(true);
+    },
+    [sendUploadURL]
+  );
+
+  const showFirmwareDialog = useCallback((useDevVersion: boolean) => {
     setFetchDevVersion(useDevVersion);
     setOpenInstallDialog(true);
-  };
+  }, []);
 
-  const closeInstallDialog = () => {
+  const closeInstallDialog = useCallback(() => {
     setOpenInstallDialog(false);
-  };
+  }, []);
 
-  const showButtons = (showingDev: boolean) => {
-    const choice = showingDev
-      ? !usingDevVersion
-        ? LL.SWITCH_RELEASE_TYPE(LL.DEVELOPMENT())
-        : devUpgradeAvailable
-          ? LL.UPDATE_AVAILABLE()
-          : undefined
-      : usingDevVersion
-        ? LL.SWITCH_RELEASE_TYPE(LL.STABLE())
-        : stableUpgradeAvailable
-          ? LL.UPDATE_AVAILABLE()
-          : undefined;
+  const handleVersionInfoClose = useCallback(() => {
+    setShowVersionInfo(0);
+  }, []);
 
-    if (!choice) {
+  // Effect for checking upgrades
+  useEffect(() => {
+    if (latestVersion && latestDevVersion) {
+      const versions = `${latestDevVersion.name},${latestVersion.name}`;
+      sendCheckUpgrade(versions)
+        .catch((error: Error) => {
+          toast.error(`Failed to check for upgrades: ${error.message}`);
+        })
+        .finally(() => {
+          setInternetLive(true);
+        });
+    }
+  }, [latestVersion, latestDevVersion, sendCheckUpgrade]);
+
+  useLayoutTitle('EMS-ESP Firmware');
+
+  // Memoized button rendering logic
+  const showButtons = useCallback(
+    (showingDev: boolean) => {
+      const choice = showingDev
+        ? !usingDevVersion
+          ? LL.SWITCH_RELEASE_TYPE(LL.DEVELOPMENT())
+          : devUpgradeAvailable
+            ? LL.UPDATE_AVAILABLE()
+            : undefined
+        : usingDevVersion
+          ? LL.SWITCH_RELEASE_TYPE(LL.STABLE())
+          : stableUpgradeAvailable
+            ? LL.UPDATE_AVAILABLE()
+            : undefined;
+
+      if (!choice) {
+        return (
+          <>
+            <CheckIcon
+              color="success"
+              sx={{ verticalAlign: 'middle', ml: 0.5, mr: 0.5 }}
+            />
+            <span style={{ color: '#66bb6a', fontSize: '0.8em' }}>
+              {LL.LATEST_VERSION(usingDevVersion ? LL.DEVELOPMENT() : LL.STABLE())}
+            </span>
+            <Button
+              sx={{ ml: 2 }}
+              variant="outlined"
+              size="small"
+              onClick={() => showFirmwareDialog(showingDev)}
+            >
+              {LL.REINSTALL()}
+            </Button>
+          </>
+        );
+      }
+
+      if (!me.admin) return null;
+
       return (
-        <>
-          <CheckIcon
-            color="success"
-            sx={{ verticalAlign: 'middle', ml: 0.5, mr: 0.5 }}
-          />
-          <span style={{ color: '#66bb6a', fontSize: '0.8em' }}>
-            {LL.LATEST_VERSION(usingDevVersion ? LL.DEVELOPMENT() : LL.STABLE())}
-          </span>
-          <Button
-            sx={{ ml: 2 }}
-            variant="outlined"
-            size="small"
-            onClick={() => showFirmwareDialog(showingDev)}
-          >
-            {LL.REINSTALL()}
-          </Button>
-        </>
+        <Button
+          sx={{ ml: 2 }}
+          variant="outlined"
+          color={choice === LL.UPDATE_AVAILABLE() ? 'success' : 'warning'}
+          size="small"
+          onClick={() => showFirmwareDialog(showingDev)}
+        >
+          {choice}
+        </Button>
       );
-    }
+    },
+    [
+      usingDevVersion,
+      devUpgradeAvailable,
+      stableUpgradeAvailable,
+      me.admin,
+      LL,
+      showFirmwareDialog
+    ]
+  );
 
-    if (!me.admin) {
-      return;
-    }
-
-    return (
-      <Button
-        sx={{ ml: 2 }}
-        variant="outlined"
-        color={choice === LL.UPDATE_AVAILABLE() ? 'success' : 'warning'}
-        size="small"
-        onClick={() => showFirmwareDialog(showingDev)}
-      >
-        {choice}
-      </Button>
-    );
-  };
-
-  const content = () => {
+  const content = useMemo(() => {
     if (!data) {
       return <FormLoader onRetry={loadData} errorMessage={error?.message || ''} />;
     }
-
-    const isDev = data.emsesp_version.includes('dev');
 
     return (
       <>
@@ -344,7 +433,7 @@ const Version = () => {
             </Grid>
             <Grid size={{ xs: 8, md: 10 }}>
               <Typography>
-                {getPlatform()}
+                {platform}
                 <Typography variant="caption">
                   &nbsp; &#40;
                   {data.psram ? (
@@ -436,15 +525,10 @@ const Version = () => {
                 </Grid>
                 <Grid size={{ xs: 8, md: 10 }}>
                   <Typography>
-                    <Link target="_blank" href={STABLE_RELNOTES_URL} color="primary">
-                      {latestVersion.name}
-                    </Link>
-                    {latestVersion.published_at && (
-                      <Typography component="span" variant="caption">
-                        &nbsp;(
-                        {formatTimeAgo(new Date(latestVersion.published_at))})
-                      </Typography>
-                    )}
+                    {latestVersion?.name}
+                    <IconButton onClick={() => setShowVersionInfo(1)}>
+                      <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
+                    </IconButton>
                     {showButtons(false)}
                   </Typography>
                 </Grid>
@@ -454,15 +538,10 @@ const Version = () => {
                 </Grid>
                 <Grid size={{ xs: 8, md: 10 }}>
                   <Typography>
-                    <Link target="_blank" href={DEV_RELNOTES_URL} color="primary">
-                      {latestDevVersion.name}
-                    </Link>
-                    {latestDevVersion.published_at && (
-                      <Typography component="span" variant="caption">
-                        &nbsp;(
-                        {formatTimeAgo(new Date(latestDevVersion.published_at))})
-                      </Typography>
-                    )}
+                    {latestDevVersion?.name}
+                    <IconButton onClick={() => setShowVersionInfo(2)}>
+                      <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
+                    </IconButton>
                     {showButtons(true)}
                   </Typography>
                 </Grid>
@@ -476,7 +555,25 @@ const Version = () => {
           )}
           {me.admin && (
             <>
-              {renderInstallDialog()}
+              <VersionInfoDialog
+                showVersionInfo={showVersionInfo}
+                latestVersion={latestVersion}
+                latestDevVersion={latestDevVersion}
+                locale={locale}
+                LL={LL}
+                onClose={handleVersionInfoClose}
+              />
+              <InstallDialog
+                openInstallDialog={openInstallDialog}
+                fetchDevVersion={fetchDevVersion}
+                latestVersion={latestVersion}
+                latestDevVersion={latestDevVersion}
+                downloadOnly={downloadOnly}
+                platform={platform}
+                LL={LL}
+                onClose={closeInstallDialog}
+                onInstall={installFirmwareURL}
+              />
               <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
                 {LL.UPLOAD()}
               </Typography>
@@ -486,11 +583,30 @@ const Version = () => {
         </Box>
       </>
     );
-  };
+  }, [
+    data,
+    error,
+    loadData,
+    LL,
+    platform,
+    isDev,
+    internetLive,
+    latestVersion,
+    latestDevVersion,
+    showVersionInfo,
+    locale,
+    openInstallDialog,
+    fetchDevVersion,
+    downloadOnly,
+    me.admin,
+    showButtons,
+    handleVersionInfoClose,
+    closeInstallDialog,
+    installFirmwareURL,
+    doRestart
+  ]);
 
-  return (
-    <SectionContent>{restarting ? <SystemMonitor /> : content()}</SectionContent>
-  );
+  return <SectionContent>{restarting ? <SystemMonitor /> : content}</SectionContent>;
 };
 
-export default Version;
+export default memo(Version);
