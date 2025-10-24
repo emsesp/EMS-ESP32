@@ -385,7 +385,7 @@ char * Helpers::render_value(char * result, const uint32_t value, const int8_t f
 char * Helpers::render_string(char * result, const char * c, const uint8_t len) {
     char * p = result;
     while (*c != '\0' && (p - result < len)) {
-        switch (*c) {
+        switch ((uint8_t)*c) {
         case 0xC4: // Ä
             *p     = 0xC3;
             *(++p) = 0x84;
@@ -432,9 +432,9 @@ char * Helpers::render_string(char * result, const char * c, const uint8_t len) 
 char * Helpers::utf8tolatin1(char * result, const char * c, const uint8_t len) {
     char * p = result;
     while (*c != '\0' && (p - result < len)) {
-        if (*c == 0xC3) {
+        if ((uint8_t)*c == 0xC3) {
             c++;
-            switch (*c) {
+            switch ((uint8_t)*c) {
             case 0x84: // Ä
                 *p = 0xC4;
                 break;
@@ -459,7 +459,7 @@ char * Helpers::utf8tolatin1(char * result, const char * c, const uint8_t len) {
             default:
                 break;
             }
-        } else if (*c > 127) {
+        } else if ((uint8_t)*c > 127) {
             *p = '?';
         } else {
             *p = *c;
