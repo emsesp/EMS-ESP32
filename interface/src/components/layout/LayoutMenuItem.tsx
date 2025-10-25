@@ -65,7 +65,7 @@ const LayoutMenuItem = ({
         sx={{
           color: selected ? '#90caf9' : '#f5f5f5',
           transition: 'color 0.05s cubic-bezier(0.55, 0.085, 0.68, 0.53)',
-          fontWeight: selected ? '600' : '400',
+          // fontWeight: selected ? '600' : '400',
           transitionProperty: 'color, font-weight'
         }}
       >
