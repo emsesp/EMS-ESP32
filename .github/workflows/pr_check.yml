@@ -1,4 +1,6 @@
 name: 'Pre-check on PR'
+permissions:
+  contents: read
 
 on:
   workflow_dispatch:
