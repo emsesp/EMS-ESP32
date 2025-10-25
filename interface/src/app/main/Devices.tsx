@@ -176,6 +176,12 @@ const Devices = memo(() => {
       useTheme([
         common_theme,
         {
+          BaseRow: `
+          font-size: 15px;
+          .td {
+           height: 28px;
+          }
+        `,
           Table: `
         --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 130px;
       `,
@@ -184,9 +190,12 @@ const Devices = memo(() => {
           padding: 8px;
       `,
           Row: `
-        font-weight: bold;
+        &:nth-of-type(odd) .td {
+            background-color: #303030;
+        },
         &:hover .td {
           background-color: #177ac9;
+        },
       `
         }
       ]),
@@ -526,55 +535,65 @@ const Devices = memo(() => {
 
   const renderCoreData = () => (
     <>
-      <IconContext.Provider
-        value={{
-          color: 'lightblue',
-          size: '18',
-          style: { verticalAlign: 'middle' }
+      <Box
+        padding={1}
+        justifyContent="center"
+        flexDirection="column"
+        sx={{
+          borderRadius: 1,
+          border: '1px solid rgb(65, 65, 65)'
         }}
       >
-        {!coreData.connected && (
-          <MessageBox my={2} level="error" message={LL.EMS_BUS_WARNING()} />
-        )}
+        <IconContext.Provider
+          value={{
+            color: 'lightblue',
+            size: '18',
+            style: { verticalAlign: 'middle' }
+          }}
+        >
+          {!coreData.connected && (
+            <MessageBox my={2} level="error" message={LL.EMS_BUS_WARNING()} />
+          )}
 
-        {coreData.connected && (
-          <Table
-            data={{ nodes: coreData.devices }}
-            select={device_select}
-            theme={device_theme}
-            layout={{ custom: true }}
-          >
-            {(tableList: Device[]) => (
-              <>
-                <Header>
-                  <HeaderRow>
-                    <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
-                    <HeaderCell stiff>{LL.TYPE(0)}</HeaderCell>
-                  </HeaderRow>
-                </Header>
-                <Body>
-                  {tableList.length === 0 && (
-                    <CircularProgress sx={{ margin: 1 }} size={18} />
-                  )}
-                  {tableList.map((device: Device) => (
-                    <Row key={device.id} item={device}>
-                      <Cell>
-                        <DeviceIcon type_id={device.t} />
-                        &nbsp;&nbsp;
-                        {device.n}
-                        <span style={{ color: 'lightblue' }}>
-                          &nbsp;&nbsp;({device.e})
-                        </span>
-                      </Cell>
-                      <Cell stiff>{device.tn}</Cell>
-                    </Row>
-                  ))}
-                </Body>
-              </>
-            )}
-          </Table>
-        )}
-      </IconContext.Provider>
+          {coreData.connected && (
+            <Table
+              data={{ nodes: coreData.devices }}
+              select={device_select}
+              theme={device_theme}
+              layout={{ custom: true }}
+            >
+              {(tableList: Device[]) => (
+                <>
+                  <Header>
+                    <HeaderRow>
+                      <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
+                      <HeaderCell stiff>{LL.TYPE(0)}</HeaderCell>
+                    </HeaderRow>
+                  </Header>
+                  <Body>
+                    {tableList.length === 0 && (
+                      <CircularProgress sx={{ margin: 1 }} size={18} />
+                    )}
+                    {tableList.map((device: Device) => (
+                      <Row key={device.id} item={device}>
+                        <Cell>
+                          <DeviceIcon type_id={device.t} />
+                          &nbsp;&nbsp;
+                          {device.n}
+                          <span style={{ color: 'lightblue' }}>
+                            &nbsp;&nbsp;({device.e})
+                          </span>
+                        </Cell>
+                        <Cell stiff>{device.tn}</Cell>
+                      </Row>
+                    ))}
+                  </Body>
+                </>
+              )}
+            </Table>
+          )}
+        </IconContext.Provider>
+      </Box>
     </>
   );
 
