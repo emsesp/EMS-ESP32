@@ -76,7 +76,7 @@ telegram_type_id,name,is_fetched
 0x0103,ISM1StatusMessage,fetched
 0x0104,ISM2StatusMessage, 
 0x010C,IPMStatusMessage, 
-0x011E,JunkersDisp,fetched
+0x011E,IPMTempMessage, 
 0x012E,HPEnergy1, 
 0x013B,HPEnergy2, 
 0x0165,JunkersSet, 
@@ -113,7 +113,7 @@ telegram_type_id,name,is_fetched
 0x02A2,RC300Curves, 
 0x02A5,RC300Monitor, 
 0x02A6,RC300Monitor, 
-0x02A7,RC300Monitor, 
+0x02A7,CRFMonitor, 
 0x02A8,RC300Monitor, 
 0x02A9,RC300Monitor, 
 0x02AA,RC300Monitor, 
