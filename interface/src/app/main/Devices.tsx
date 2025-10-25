@@ -1,8 +1,10 @@
 import {
+  memo,
   useCallback,
   useContext,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useState
 } from 'react';
 import { IconContext } from 'react-icons';
@@ -75,7 +77,7 @@ import { DeviceEntityMask, DeviceType, DeviceValueUOM_s } from './types';
 import type { Device, DeviceValue } from './types';
 import { deviceValueItemValidation } from './validators';
 
-const Devices = () => {
+const Devices = memo(() => {
   const { LL } = useI18nContext();
   const { me } = useContext(AuthenticatedContext);
 
@@ -141,11 +143,13 @@ const Devices = () => {
     return left + (right - left < 400 ? 0 : 200);
   };
 
-  const common_theme = useTheme({
-    BaseRow: `
+  const common_theme = useMemo(
+    () =>
+      useTheme({
+        BaseRow: `
       font-size: 14px;
     `,
-    HeaderRow: `
+        HeaderRow: `
       text-transform: uppercase;
       background-color: black;
       color: #90CAF9;
@@ -153,7 +157,7 @@ const Devices = () => {
         border-bottom: 1px solid #565656;
       }
     `,
-    Row: `
+        Row: `
       cursor: pointer;
       background-color: #1E1E1E;
       .td {
@@ -163,30 +167,38 @@ const Devices = () => {
         background-color: #177ac9;
       }
     `
-  });
+      }),
+    []
+  );
 
-  const device_theme = useTheme([
-    common_theme,
-    {
-      Table: `
+  const device_theme = useMemo(
+    () =>
+      useTheme([
+        common_theme,
+        {
+          Table: `
         --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 130px;
       `,
-      HeaderRow: `
+          HeaderRow: `
         .th {
           padding: 8px;
       `,
-      Row: `
+          Row: `
         font-weight: bold;
         &:hover .td {
           background-color: #177ac9;
       `
-    }
-  ]);
+        }
+      ]),
+    [common_theme]
+  );
 
-  const data_theme = useTheme([
-    common_theme,
-    {
-      Table: `
+  const data_theme = useMemo(
+    () =>
+      useTheme([
+        common_theme,
+        {
+          Table: `
         --data-table-library_grid-template-columns: minmax(200px, auto) minmax(150px, auto) 40px;
         height: auto;
         max-height: 100%;
@@ -195,12 +207,12 @@ const Devices = () => {
           display:none;
         }
       `,
-      BaseRow: `
+          BaseRow: `
       .td {
         height: 32px;
       }
      `,
-      BaseCell: `
+          BaseCell: `
         &:nth-of-type(1) {
           border-left: 1px solid #177ac9;
         },
@@ -211,12 +223,12 @@ const Devices = () => {
           border-right: 1px solid #177ac9;
         }
       `,
-      HeaderRow: `
+          HeaderRow: `
         .th {
           border-top: 1px solid #565656;
         }
       `,
-      Row: `
+          Row: `
         &:nth-of-type(odd) .td {
           background-color: #303030;
         },
@@ -224,8 +236,10 @@ const Devices = () => {
           background-color: #177ac9;
       }
       `
-    }
-  ]);
+        }
+      ]),
+    [common_theme]
+  );
 
   const getSortIcon = (state: State, sortKey: unknown) => {
     if (state.sortKey === sortKey && state.reverse) {
@@ -324,8 +338,10 @@ const Devices = () => {
     return sc;
   };
 
-  const hasMask = (id: string, mask: number) =>
-    (parseInt(id.slice(0, 2), 16) & mask) === mask;
+  const hasMask = useCallback(
+    (id: string, mask: number) => (parseInt(id.slice(0, 2), 16) & mask) === mask,
+    []
+  );
 
   const handleDownloadCsv = () => {
     const deviceIndex = coreData.devices.findIndex(
@@ -574,35 +590,41 @@ const Devices = () => {
       return;
     }
 
-    const showDeviceValue = (dv: DeviceValue) => {
+    const showDeviceValue = useCallback((dv: DeviceValue) => {
       setSelectedDeviceValue(dv);
       setDeviceValueDialogOpen(true);
-    };
+    }, []);
 
-    const renderNameCell = (dv: DeviceValue) => (
-      <>
-        {dv.id.slice(2)}&nbsp;
-        {hasMask(dv.id, DeviceEntityMask.DV_FAVORITE) && (
-          <StarIcon color="primary" sx={{ fontSize: 12 }} />
-        )}
-        {hasMask(dv.id, DeviceEntityMask.DV_READONLY) && (
-          <EditOffOutlinedIcon color="primary" sx={{ fontSize: 12 }} />
-        )}
-        {hasMask(dv.id, DeviceEntityMask.DV_API_MQTT_EXCLUDE) && (
-          <CommentsDisabledOutlinedIcon color="primary" sx={{ fontSize: 12 }} />
-        )}
-      </>
+    const renderNameCell = useCallback(
+      (dv: DeviceValue) => (
+        <>
+          {dv.id.slice(2)}&nbsp;
+          {hasMask(dv.id, DeviceEntityMask.DV_FAVORITE) && (
+            <StarIcon color="primary" sx={{ fontSize: 12 }} />
+          )}
+          {hasMask(dv.id, DeviceEntityMask.DV_READONLY) && (
+            <EditOffOutlinedIcon color="primary" sx={{ fontSize: 12 }} />
+          )}
+          {hasMask(dv.id, DeviceEntityMask.DV_API_MQTT_EXCLUDE) && (
+            <CommentsDisabledOutlinedIcon color="primary" sx={{ fontSize: 12 }} />
+          )}
+        </>
+      ),
+      [hasMask]
     );
 
-    const shown_data = onlyFav
-      ? deviceData.nodes.filter(
+    const shown_data = useMemo(() => {
+      if (onlyFav) {
+        return deviceData.nodes.filter(
           (dv: DeviceValue) =>
             hasMask(dv.id, DeviceEntityMask.DV_FAVORITE) &&
             dv.id.slice(2).toLowerCase().includes(search.toLowerCase())
-        )
-      : deviceData.nodes.filter((dv: DeviceValue) =>
-          dv.id.slice(2).toLowerCase().includes(search.toLowerCase())
         );
+      }
+      return deviceData.nodes.filter((dv: DeviceValue) =>
+        dv.id.slice(2).toLowerCase().includes(search.toLowerCase())
+      );
+    }, [deviceData.nodes, onlyFav, search]);
 
     const deviceIndex = coreData.devices.findIndex(
       (d: Device) => d.id === device_select.state.id
@@ -795,6 +817,6 @@ const Devices = () => {
       )}
     </SectionContent>
   );
-};
+});
 
 export default Devices;
