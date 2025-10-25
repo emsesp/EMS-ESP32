@@ -73,19 +73,6 @@ const LayoutMenu = () => {
           >
             <ListItemText
               primary={LL.MODULES()}
-              // secondary={
-              //   LL.CUSTOMIZATIONS() +
-              //   ', ' +
-              //   LL.SCHEDULER() +
-              //   ', ' +
-              //   LL.CUSTOM_ENTITIES(0) +
-              //   '...'
-              // }
-              // secondaryTypographyProps={{
-              //   noWrap: true,
-              //   fontSize: 12,
-              //   color: menuOpen ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0.5)'
-              // }}
               sx={{ my: 0 }}
               slotProps={{
                 primary: {

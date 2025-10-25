@@ -33,6 +33,18 @@ const theme = responsiveFontSizes(
       text: {
         disabled: '#eee' // white
       }
+    },
+    components: {
+      MuiListItemText: {
+        styleOverrides: {
+          primary: {
+            fontSize: 14
+          },
+          secondary: {
+            color: '#9e9e9e' // grey[500]
+          }
+        }
+      }
     }
   })
 );
