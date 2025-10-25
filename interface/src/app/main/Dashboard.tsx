@@ -206,7 +206,7 @@ const Dashboard = memo(() => {
         // if its a device (parent node) and has entities
         if (di.nodes?.length) {
           return (
-            <span style={{ fontWeight: 'bold', fontSize: '14px' }}>
+            <span style={{ fontSize: '15px' }}>
               <DeviceIcon type_id={di.t ?? 0} />
               &nbsp;&nbsp;{showType(di.n, di.t)}
               <span style={{ color: 'lightblue' }}>&nbsp;({di.nodes?.length})</span>
@@ -312,7 +312,7 @@ const Dashboard = memo(() => {
               flexDirection="column"
               sx={{
                 borderRadius: 1,
-                border: '1px solid grey'
+                border: '1px solid rgb(65, 65, 65)'
               }}
             >
               <IconContext.Provider

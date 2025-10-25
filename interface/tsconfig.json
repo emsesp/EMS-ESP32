@@ -54,6 +54,7 @@
     "skipDefaultLibCheck": true,
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo",
+    "assumeChangesOnlyAffectDirectDependencies": true,
 
     // Path mapping for cleaner imports
     "baseUrl": ".",

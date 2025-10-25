@@ -425,7 +425,7 @@ char * Helpers::render_string(char * result, const char * c, const uint8_t len) 
         c++;
         p++;
     }
-    *p = '\0'; // terminat result
+    *p = '\0'; // terminate result
     return result;
 }
 
@@ -467,7 +467,7 @@ char * Helpers::utf8tolatin1(char * result, const char * c, const uint8_t len) {
         c++;
         p++;
     }
-    *p = '\0'; // terminat result
+    *p = '\0'; // terminate result
     return result;
 }
 // creates string of hex values from an array of bytes

@@ -352,7 +352,8 @@ const tr: Translation = {
   PLATFORM: 'Platforma',
   RELEASE_TYPE: 'Sürüm Tipi',
   INTERNET_CONNECTION_REQUIRED: 'Otomatik sürüm kontrolü ve güncelleme için internet bağlantısı gereklidir',
-  SWITCH_RELEASE_TYPE: '{0} sürümüne geç'
+  SWITCH_RELEASE_TYPE: '{0} sürümüne geç',
+  FIRMWARE_VERSION_INFO: 'Firmware Sürüm Bilgisi'
 };
 
 export default tr;

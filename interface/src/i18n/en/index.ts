@@ -180,10 +180,10 @@ const en: Translation = {
   DEVELOPMENT: 'Development',
   UPTIME: 'System Uptime',
   FREE_MEMORY: 'Free Memory',
-  PSRAM: 'PSRAM (Size / Free)',
-  FLASH: 'Flash Chip (Size , Speed)',
-  APPSIZE: 'Application (Partition: Used / Free)',
-  FILESYSTEM: 'File System (Used / Free)',
+  PSRAM: 'PSRAM (size / free)',
+  FLASH: 'Flash Chip (size , speed)',
+  APPSIZE: 'Application (partition: used / free)',
+  FILESYSTEM: 'File System (used / free)',
   BUFFER_SIZE: 'Max Buffer Size',
   COMPACT: 'Compact',
   DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings',
@@ -352,7 +352,8 @@ const en: Translation = {
   PLATFORM: 'Platform',
   RELEASE_TYPE: 'Release Type',
   INTERNET_CONNECTION_REQUIRED: 'Internet connection required for automatic version checking and upgrading',
-  SWITCH_RELEASE_TYPE: 'Switch to {0} release'
+  SWITCH_RELEASE_TYPE: 'Switch to {0} release',
+  FIRMWARE_VERSION_INFO: 'Firmware Version Information'
 };
 
 export default en;

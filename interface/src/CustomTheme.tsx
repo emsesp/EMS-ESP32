@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { FC } from 'react';
 
 import { CssBaseline, ThemeProvider, responsiveFontSizes } from '@mui/material';
@@ -5,6 +6,7 @@ import { createTheme } from '@mui/material/styles';
 
 import type { RequiredChildrenProps } from 'utils';
 
+// Memoize dialog style to prevent recreation
 export const dialogStyle = {
   '& .MuiDialog-paper': {
     borderRadius: '8px',
@@ -12,8 +14,9 @@ export const dialogStyle = {
     borderStyle: 'solid',
     borderWidth: '1px'
   }
-};
+} as const;
 
+// Memoize theme creation to prevent recreation
 const theme = responsiveFontSizes(
   createTheme({
     typography: {
@@ -30,15 +33,27 @@ const theme = responsiveFontSizes(
       text: {
         disabled: '#eee' // white
       }
+    },
+    components: {
+      MuiListItemText: {
+        styleOverrides: {
+          primary: {
+            fontSize: 14
+          },
+          secondary: {
+            color: '#9e9e9e' // grey[500]
+          }
+        }
+      }
     }
   })
 );
 
-const CustomTheme: FC<RequiredChildrenProps> = ({ children }) => (
+const CustomTheme: FC<RequiredChildrenProps> = memo(({ children }) => (
   <ThemeProvider theme={theme}>
     <CssBaseline />
     {children}
   </ThemeProvider>
-);
+));
 
 export default CustomTheme;

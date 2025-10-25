@@ -352,7 +352,8 @@ const it: Translation = {
   PLATFORM: 'Piattaforma',
   RELEASE_TYPE: 'Tipo di rilascio',
   INTERNET_CONNECTION_REQUIRED: 'Connessione internet richiesta per il controllo automatico delle versioni e l\'aggiornamento',
-  SWITCH_RELEASE_TYPE: 'Cambia in {0} rilascio'
+  SWITCH_RELEASE_TYPE: 'Cambia in {0} rilascio',
+  FIRMWARE_VERSION_INFO: 'Informazioni sulla versione del firmware'
 };
 
 export default it;

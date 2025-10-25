@@ -352,7 +352,8 @@ const sk: Translation = {
   PLATFORM: 'Platforma',
   RELEASE_TYPE: 'Typ vydania',
   INTERNET_CONNECTION_REQUIRED: 'Internetové pripojenie je potrebné pre automatickú kontrolu a aktualizáciu',
-  SWITCH_RELEASE_TYPE: 'Prepnúť na {0} verziu'
+  SWITCH_RELEASE_TYPE: 'Prepnúť na {0} verziu',
+  FIRMWARE_VERSION_INFO: 'Informácie o verzii firmware'
 };
 
 export default sk;
