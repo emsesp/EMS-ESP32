@@ -1,4 +1,6 @@
 name: 'Pre-check on PR'
+permissions:
+  contents: read
 
 on:
   workflow_dispatch:
@@ -32,6 +34,6 @@ jobs:
           pip install wheel
           pip install -U platformio
 
-      - name: Build standalone
+      - name: Run unit tests
         run: |
-          platformio run -e standalone
+          platformio run -e native-test -t exec
