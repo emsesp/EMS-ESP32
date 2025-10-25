@@ -1,6 +1,8 @@
+import { memo } from 'react';
+
 import { Box, CircularProgress } from '@mui/material';
 
-const LazyLoader = () => (
+const LazyLoader = memo(() => (
   <Box
     display="flex"
     justifyContent="center"
@@ -15,6 +17,6 @@ const LazyLoader = () => (
   >
     <CircularProgress size={40} />
   </Box>
-);
+));
 
 export default LazyLoader;
