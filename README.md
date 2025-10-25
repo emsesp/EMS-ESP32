@@ -70,7 +70,7 @@ Visit [emsesp.org](https://docs.emsesp.org) for more details on how to install a
 
 To chat with the community reach out on our [Discord Server](https://discord.gg/3J3GgnzpyT).
 
-If you find an issue or have a request, see [here](https://docs.emsesp.org/Support/) on how to submit a bug report or feature request.
+If you find an issue or have a request, see [how to request support](https://docs.emsesp.org/Support/) on how to submit a bug report or feature request.
 
 ## 🎥&nbsp; **Live Demo**
 
