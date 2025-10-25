@@ -19,9 +19,10 @@ import {
   Grid,
   IconButton,
   Link,
-  List,
-  ListItem,
-  ListItemText,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
   Typography
 } from '@mui/material';
 
@@ -41,6 +42,7 @@ import {
 } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
+import type { TranslationFunctions } from 'i18n/i18n-types';
 import { prettyDateTime } from 'utils/time';
 
 // Constants moved outside component to avoid recreation
@@ -86,7 +88,7 @@ const VersionInfoDialog = memo(
     latestVersion?: VersionInfo;
     latestDevVersion?: VersionInfo;
     locale: string;
-    LL: any;
+    LL: TranslationFunctions;
     onClose: () => void;
   }) => {
     if (showVersionInfo === 0) return null;
@@ -97,30 +99,69 @@ const VersionInfoDialog = memo(
 
     return (
       <Dialog sx={dialogStyle} open={showVersionInfo !== 0} onClose={onClose}>
-        <DialogTitle>Version Information</DialogTitle>
+        <DialogTitle>{LL.FIRMWARE_VERSION_INFO()}</DialogTitle>
         <DialogContent dividers>
-          <List dense>
-            <ListItem>
-              <ListItemText
-                primary={<span style={{ color: 'lightblue' }}>{LL.TYPE(0)}</span>}
-                secondary={isStable ? LL.STABLE() : LL.DEVELOPMENT()}
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemText
-                primary={<span style={{ color: 'lightblue' }}>{LL.VERSION()}</span>}
-                secondary={version?.name}
-              />
-            </ListItem>
-            {version?.published_at && (
-              <ListItem>
-                <ListItemText
-                  primary={<span style={{ color: 'lightblue' }}>Release Date</span>}
-                  secondary={prettyDateTime(locale, new Date(version.published_at))}
-                />
-              </ListItem>
-            )}
-          </List>
+          <Table size="small" sx={{ borderCollapse: 'collapse', minWidth: 0 }}>
+            <TableBody>
+              <TableRow sx={{ height: 24, borderBottom: 'none' }}>
+                <TableCell
+                  component="th"
+                  scope="row"
+                  sx={{
+                    color: 'lightblue',
+                    borderBottom: 'none',
+                    pr: 1,
+                    py: 0.5,
+                    fontSize: 13,
+                    width: 90
+                  }}
+                >
+                  {LL.TYPE(0)}
+                </TableCell>
+                <TableCell sx={{ borderBottom: 'none', py: 0.5, fontSize: 13 }}>
+                  {isStable ? LL.STABLE() : LL.DEVELOPMENT()}
+                </TableCell>
+              </TableRow>
+              <TableRow sx={{ height: 24, borderBottom: 'none' }}>
+                <TableCell
+                  component="th"
+                  scope="row"
+                  sx={{
+                    color: 'lightblue',
+                    borderBottom: 'none',
+                    pr: 1,
+                    py: 0.5,
+                    fontSize: 13
+                  }}
+                >
+                  {LL.VERSION()}
+                </TableCell>
+                <TableCell sx={{ borderBottom: 'none', py: 0.5, fontSize: 13 }}>
+                  {version?.name}
+                </TableCell>
+              </TableRow>
+              {version?.published_at && (
+                <TableRow sx={{ height: 24, borderBottom: 'none' }}>
+                  <TableCell
+                    component="th"
+                    scope="row"
+                    sx={{
+                      color: 'lightblue',
+                      borderBottom: 'none',
+                      pr: 1,
+                      py: 0.5,
+                      fontSize: 13
+                    }}
+                  >
+                    Build Date
+                  </TableCell>
+                  <TableCell sx={{ borderBottom: 'none', py: 0.5, fontSize: 13 }}>
+                    {prettyDateTime(locale, new Date(version.published_at))}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </DialogContent>
         <DialogActions>
           <Button
@@ -159,7 +200,7 @@ const InstallDialog = memo(
     latestDevVersion?: VersionInfo;
     downloadOnly: boolean;
     platform: string;
-    LL: any;
+    LL: TranslationFunctions;
     onClose: () => void;
     onInstall: (url: string) => void;
   }) => {

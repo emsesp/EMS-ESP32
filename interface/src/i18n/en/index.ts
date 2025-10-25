@@ -352,7 +352,8 @@ const en: Translation = {
   PLATFORM: 'Platform',
   RELEASE_TYPE: 'Release Type',
   INTERNET_CONNECTION_REQUIRED: 'Internet connection required for automatic version checking and upgrading',
-  SWITCH_RELEASE_TYPE: 'Switch to {0} release'
+  SWITCH_RELEASE_TYPE: 'Switch to {0} release',
+  FIRMWARE_VERSION_INFO: 'Firmware Version Information'
 };
 
 export default en;

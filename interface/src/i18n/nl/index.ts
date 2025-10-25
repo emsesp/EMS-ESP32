@@ -352,7 +352,8 @@ const nl: Translation = {
   PLATFORM: 'Platform',
   RELEASE_TYPE: 'Release Typ',
   INTERNET_CONNECTION_REQUIRED: 'Internetverbinding vereist voor automatische versiecontrole en -upgrade',
-  SWITCH_RELEASE_TYPE: 'Switch naar {0} release'
+  SWITCH_RELEASE_TYPE: 'Switch naar {0} release',
+  FIRMWARE_VERSION_INFO: 'Informatie over firmwareversie'
 };
 
 export default nl;

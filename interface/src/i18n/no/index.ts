@@ -352,7 +352,8 @@ const no: Translation = {
   PLATFORM: 'Plattform',
   RELEASE_TYPE: 'Utgivelses type',
   INTERNET_CONNECTION_REQUIRED: 'Internettilkobling kreves for automatisk versjonskontroll og oppgradering',
-  SWITCH_RELEASE_TYPE: 'Bytt til {0} utgivelse'
+  SWITCH_RELEASE_TYPE: 'Bytt til {0} utgivelse',
+  FIRMWARE_VERSION_INFO: 'Informasjon om firmwareversjon'
 };
 
 export default no;

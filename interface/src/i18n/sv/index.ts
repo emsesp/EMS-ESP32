@@ -352,7 +352,8 @@ const sv: Translation = {
   PLATFORM: 'Plattform',
   RELEASE_TYPE: 'Utgivelsestyp',
   INTERNET_CONNECTION_REQUIRED: 'Internetanslutning krävs för automatisk version kontroll och uppdatering',
-  SWITCH_RELEASE_TYPE: 'Byt till {0} utgåva'
+  SWITCH_RELEASE_TYPE: 'Byt till {0} utgåva',
+  FIRMWARE_VERSION_INFO: 'Information om firmwareversion'
 };
 
 export default sv;
