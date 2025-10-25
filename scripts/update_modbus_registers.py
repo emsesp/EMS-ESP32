@@ -100,7 +100,7 @@ tag_to_tagtype = {
     48: "TAG_TYPE_SRC",
     49: "TAG_TYPE_SRC",
     50: "TAG_TYPE_SRC",
-    50: "TAG_TYPE_SRC"
+    51: "TAG_TYPE_SRC"
 }
 
 device_type_names = [

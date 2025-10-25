@@ -28,7 +28,7 @@ def get_tag_type(modbus_block):
         return "DHW"
     if 20 <= block <= 35:
         return "HS"
-    if 36 <= block <= 50 or block == 52:
+    if 36 <= block <= 51:
         return "SRC"
 
     # Default fallback
