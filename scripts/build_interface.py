@@ -109,12 +109,14 @@ def build_webUI(*args, **kwargs):
         print("Web interface build failed!")
         env.Exit(1)
     env.Exit(0)            
-            
+           
 # Create custom target that only runs the script and then exits, without continuing with the pio workflow
 env.AddCustomTarget(
     name="build",
     dependencies=None,
     actions=[build_webUI],
     title="build web interface",
-    description="installs pnpm packages, updates libraries and builds web UI"
+    description="installs pnpm packages, updates libraries and builds web UI",
+    always_build=True
 )
+
