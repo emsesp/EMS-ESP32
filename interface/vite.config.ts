@@ -281,11 +281,12 @@ export default defineConfig(
         },
 
         rollupOptions: {
-          // Enable tree shaking
+          // Enable aggressive tree shaking
           treeshake: {
             moduleSideEffects: false,
             propertyReadSideEffects: false,
-            tryCatchDeoptimization: false
+            tryCatchDeoptimization: false,
+            unknownGlobalSideEffects: false
           },
           output: {
             // Optimize chunk naming for better caching
@@ -300,6 +301,24 @@ export default defineConfig(
                 }
                 if (id.includes('preact')) {
                   return '@preact';
+                }
+                if (id.includes('@mui/material')) {
+                  return '@mui-material';
+                }
+                if (id.includes('@mui/icons-material')) {
+                  return '@mui-icons';
+                }
+                if (id.includes('alova')) {
+                  return '@alova';
+                }
+                if (id.includes('typesafe-i18n')) {
+                  return '@i18n';
+                }
+                if (id.includes('react-toastify')) {
+                  return '@toastify';
+                }
+                if (id.includes('@table-library')) {
+                  return '@table-library';
                 }
                 if (id.includes('uuid')) {
                   return '@uuid';
@@ -316,8 +335,14 @@ export default defineConfig(
               if (id.includes('components/')) {
                 return 'components';
               }
-              if (id.includes('pages/') || id.includes('routes/')) {
-                return 'pages';
+              if (id.includes('app/')) {
+                return 'app';
+              }
+              if (id.includes('utils/')) {
+                return 'utils';
+              }
+              if (id.includes('api/')) {
+                return 'api';
               }
               return undefined;
             },
