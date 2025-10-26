@@ -1,12 +1,14 @@
 # see https://github.com/marketplace/actions/sonarcloud-scan-for-c-and-c#usage
 name: Sonar Check
-
+permissions:
+  contents: read
+  
 on:
   push:
     branches:
       - dev
-  # pull_request:
-  #   types: [opened, synchronize, reopened]
+    paths:
+      - 'src/**'
 
 jobs:
   build:

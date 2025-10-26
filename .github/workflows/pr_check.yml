@@ -7,15 +7,8 @@ on:
   pull_request:
     branches: dev
     paths:
-     - '**.c'
-     - '**.cpp'
-     - '**.h'
-     - '**.hpp'
-     - '**.json'
-     - '**.py'
-     - '**.md'
-     - '.github/workflows/pr_check.yml'
-
+      - 'src/**'
+      
 jobs:
   pre-release:
     name: 'Automatic pre-release build'
