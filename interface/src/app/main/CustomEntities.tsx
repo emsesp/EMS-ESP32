@@ -327,7 +327,7 @@ const CustomEntities = () => {
         />
       )}
 
-      <Box mt={1} display="flex" flexWrap="wrap">
+      <Box mt={2} display="flex" flexWrap="wrap">
         <Box flexGrow={1}>
           {numChanges > 0 && (
             <ButtonRow>

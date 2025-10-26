@@ -73,7 +73,7 @@ const Help = () => {
           divider={<Divider orientation="vertical" flexItem />}
           sx={{
             borderRadius: 3,
-            border: '2px solid grey',
+            border: '1px solid lightblue',
             justifyContent: 'space-evenly',
             alignItems: 'center'
           }}
@@ -99,7 +99,7 @@ const Help = () => {
       )}
 
       {me.admin && (
-        <List sx={{ borderRadius: 3, border: '2px solid grey' }}>
+        <List>
           <ListItem>
             <ListItemButton
               component="a"
