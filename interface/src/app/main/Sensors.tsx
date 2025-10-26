@@ -105,8 +105,6 @@ const Sensors = () => {
       color: #90CAF9;
       .th {
         border-bottom: 1px solid #565656;
-      }
-      .th {
         height: 36px;
       }
     `,
@@ -491,7 +489,7 @@ const Sensors = () => {
         />
       )}
       {sensorData?.analog_enabled === true && me.admin && (
-        <Box mt={1} display="flex" flexWrap="wrap" justifyContent="flex-end">
+        <Box mt={2} display="flex" flexWrap="wrap" justifyContent="flex-end">
           <Button
             variant="outlined"
             color="primary"

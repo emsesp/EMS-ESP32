@@ -17,6 +17,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   List
 } from '@mui/material';
 
@@ -74,9 +75,9 @@ const Settings = () => {
     </Dialog>
   );
 
-  const content = () => (
-    <>
-      <List sx={{ borderRadius: 3, border: '2px solid grey' }}>
+  return (
+    <SectionContent>
+      <List>
         <ListMenuItem
           icon={TuneIcon}
           bgcolor="#134ba2"
@@ -143,7 +144,15 @@ const Settings = () => {
 
       {renderFactoryResetDialog()}
 
-      <Box mt={2} display="flex" flexWrap="wrap">
+      <Divider />
+
+      <Box
+        mt={2}
+        display="flex"
+        justifyContent="flex-end"
+        flexWrap="nowrap"
+        whiteSpace="nowrap"
+      >
         <Button
           startIcon={<SettingsBackupRestoreIcon />}
           variant="outlined"
@@ -153,10 +162,8 @@ const Settings = () => {
           {LL.FACTORY_RESET()}
         </Button>
       </Box>
-    </>
+    </SectionContent>
   );
-
-  return <SectionContent>{content()}</SectionContent>;
 };
 
 export default Settings;

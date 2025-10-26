@@ -535,15 +535,7 @@ const Devices = memo(() => {
 
   const renderCoreData = () => (
     <>
-      <Box
-        padding={1}
-        justifyContent="center"
-        flexDirection="column"
-        sx={{
-          borderRadius: 1,
-          border: '1px solid rgb(65, 65, 65)'
-        }}
-      >
+      <Box justifyContent="center" flexDirection="column">
         <IconContext.Provider
           value={{
             color: 'lightblue',

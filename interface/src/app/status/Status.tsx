@@ -253,7 +253,7 @@ const SystemStatus = () => {
 
     return (
       <>
-        <List sx={{ borderRadius: 3, border: '2px solid grey' }}>
+        <List>
           <ListMenuItem
             icon={BuildIcon}
             bgcolor="#72caf9"
