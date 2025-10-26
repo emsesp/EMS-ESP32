@@ -130,9 +130,14 @@ void Mqtt::loop() {
         return;
     }
 
-    queuecount_ = mqttClient_->queueSize();
-
+    static uint32_t last_queue_check = 0;
     uint32_t currentMillis = uuid::get_uptime();
+    
+    // Only check queue size every 100ms to reduce overhead
+    if (currentMillis - last_queue_check >= 100) {
+        queuecount_ = mqttClient_->queueSize();
+        last_queue_check = currentMillis;
+    }
 
     // send heartbeat
     if (currentMillis - last_publish_heartbeat_ > publish_time_heartbeat_) {
@@ -602,13 +607,19 @@ bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
     }
 // check free mem
 #ifndef EMSESP_STANDALONE
-    // if (ESP.getFreeHeap() < 60 * 1024 || ESP.getMaxAllocHeap() < 40 * 1024) {
-    if (heap_caps_get_free_size(MALLOC_CAP_8BIT) < 60 * 1024) { // checks free Heap+PSRAM
+    // More aggressive memory management - check both heap and max alloc
+    size_t free_heap = heap_caps_get_free_size(MALLOC_CAP_8BIT);
+    size_t max_alloc = heap_caps_get_largest_free_block(MALLOC_CAP_8BIT);
+    
+    // Require at least 40KB free and 20KB contiguous for MQTT operations
+    if (free_heap < 40 * 1024 || max_alloc < 20 * 1024) {
         if (operation == Operation::PUBLISH) {
             mqtt_message_id_++;
             mqtt_publish_fails_++;
         }
-        LOG_WARNING("%s failed: low memory", operation == Operation::PUBLISH ? "Publish" : operation == Operation::SUBSCRIBE ? "Subscribe" : "Unsubscribe");
+        LOG_WARNING("%s failed: low memory (free: %zu, max: %zu)", 
+                   operation == Operation::PUBLISH ? "Publish" : operation == Operation::SUBSCRIBE ? "Subscribe" : "Unsubscribe",
+                   free_heap, max_alloc);
         return false; // quit
     }
     if (queuecount_ >= MQTT_QUEUE_MAX_SIZE) {

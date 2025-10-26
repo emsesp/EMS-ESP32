@@ -1755,23 +1755,38 @@ void EMSESP::shell_prompt() {
 
 // main loop calling all services
 void EMSESP::loop() {
+    static uint32_t last_loop_time = 0;
+    static uint32_t loop_counter = 0;
+    uint32_t current_time = uuid::get_uptime();
+    
     esp32React.loop(); // web services
     system_.loop();    // does LED and checks system health, and syslog service
 
     // run the loop, unless we're in the middle of an OTA upload
     if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_NORMAL) {
-        webLogService.loop();       // log in Web UI
+        // Critical services - run every loop
         rxservice_.loop();          // process any incoming Rx telegrams
-        shower_.loop();             // check for shower on/off
-        temperaturesensor_.loop();  // read sensor temperatures
-        analogsensor_.loop();       // read analog sensor values
-        publish_all_loop();         // with HA messages in parts to avoid flooding the MQTT queue
         mqtt_.loop();               // sends out anything in the MQTT queue
-        webModulesService.loop();   // loop through the external library modules
-        if (system_.PSram() == 0) { // run non-async if there is no PSRAM available
-            webSchedulerService.loop();
+        
+        // Less critical services - run every 10ms
+        if (current_time - last_loop_time >= 10) {
+            webLogService.loop();       // log in Web UI
+            shower_.loop();             // check for shower on/off
+            temperaturesensor_.loop();  // read sensor temperatures
+            analogsensor_.loop();       // read analog sensor values
+            publish_all_loop();         // with HA messages in parts to avoid flooding the MQTT queue
+            webModulesService.loop();   // loop through the external library modules
+            if (system_.PSram() == 0) { // run non-async if there is no PSRAM available
+                webSchedulerService.loop();
+            }
+            last_loop_time = current_time;
         }
-        scheduled_fetch_values(); // force a query on the EMS devices to fetch latest data at a set interval (1 min)
+        
+        // Scheduled services - run every 100 loops (approximately every second)
+        if (++loop_counter >= 100) {
+            scheduled_fetch_values(); // force a query on the EMS devices to fetch latest data at a set interval (1 min)
+            loop_counter = 0;
+        }
     }
 
     if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_PENDING_UPLOAD) {
