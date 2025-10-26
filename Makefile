@@ -19,7 +19,7 @@ C = $(words $N)$(eval N := x $N)
 ECHO = python3 $(I)/scripts/echo_progress.py --stepno=$C --nsteps=$T
 endif
 
-# determine number of parallel compiles based on OS
+# Optimize parallel build configuration
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
     EXTRA_CPPFLAGS = -D LINUX
@@ -29,7 +29,9 @@ ifeq ($(UNAME_S),Darwin)
     EXTRA_CPPFLAGS = -D OSX -Wno-tautological-constant-out-of-range-compare
 	JOBS ?= $(shell sysctl -n hw.ncpu)
 endif
-MAKEFLAGS += -j $(JOBS) -l $(JOBS)
+
+# Set optimal parallel build settings
+MAKEFLAGS += -j$(JOBS) -l$(shell echo $$(($(JOBS) * 2)))
 
 # $(info Number of jobs: $(JOBS))
 
@@ -72,16 +74,21 @@ DEFAULTS = -DEMSESP_DEFAULT_LOCALE=\"en\" -DEMSESP_DEFAULT_TX_MODE=8 -DEMSESP_DE
 OUTPUT     := $(CURDIR)/$(TARGET)
 SYMBOLS    := $(CURDIR)/$(BUILD)/$(TARGET).out
 
-CSOURCES   := $(foreach dir,$(SOURCES),$(wildcard $(dir)/*.c))
-CXXSOURCES := $(foreach dir,$(SOURCES),$(wildcard $(dir)/*.cpp))
+# Optimize source discovery - use shell find for better performance
+CSOURCES   := $(shell find $(SOURCES) -name "*.c" 2>/dev/null)
+CXXSOURCES := $(shell find $(SOURCES) -name "*.cpp" 2>/dev/null)
 
-OBJS       := $(patsubst %,$(BUILD)/%.o,$(basename $(CSOURCES)) $(basename $(CXXSOURCES)) )
-DEPS       := $(patsubst %,$(BUILD)/%.d,$(basename $(CSOURCES)) $(basename $(CXXSOURCES)) )
+OBJS       := $(patsubst %,$(BUILD)/%.o,$(basename $(CSOURCES)) $(basename $(CXXSOURCES)))
+DEPS       := $(patsubst %,$(BUILD)/%.d,$(basename $(CSOURCES)) $(basename $(CXXSOURCES)))
 
-INCLUDE    += $(addprefix -I,$(foreach dir,$(INCLUDES), $(wildcard $(dir))))
-INCLUDE    += $(addprefix -I,$(foreach dir,$(LIBRARIES),$(wildcard $(dir)/include)))
+# Optimize include path discovery
+INCLUDE_DIRS := $(shell find $(INCLUDES) -type d 2>/dev/null)
+LIBRARY_INCLUDES := $(shell find $(LIBRARIES) -name "include" -type d 2>/dev/null)
+INCLUDE    += $(addprefix -I,$(INCLUDE_DIRS) $(LIBRARY_INCLUDES))
 
-LDLIBS     += $(addprefix -L,$(foreach dir,$(LIBRARIES),$(wildcard $(dir)/lib)))
+# Optimize library path discovery
+LIBRARY_DIRS := $(shell find $(LIBRARIES) -name "lib" -type d 2>/dev/null)
+LDLIBS     += $(addprefix -L,$(LIBRARY_DIRS))
 
 #----------------------------------------------------------------------
 # Compiler & Linker
@@ -99,9 +106,11 @@ CXX := /usr/bin/g++
 #----------------------------------------------------------------------
 CPPFLAGS  += $(DEFINES) $(DEFAULTS) $(INCLUDE)
 CPPFLAGS  += -ggdb -g3 -MMD
-CPPFLAGS  += -flto=auto -fno-lto
+CPPFLAGS  += -flto=auto
 CPPFLAGS  += -Wall -Wextra -Werror -Wswitch-enum
 CPPFLAGS  += -Wno-unused-parameter -Wno-missing-braces -Wno-vla-cxx-extension
+CPPFLAGS  += -ffunction-sections -fdata-sections -fno-exceptions -fno-rtti -fno-threadsafe-statics
+CPPFLAGS  += -Os -DNDEBUG
 
 CPPFLAGS  += $(EXTRA_CPPFLAGS)
 
@@ -122,7 +131,8 @@ else
     LD := $(CXX)
 endif
 
-#DEPFLAGS   += -MF $(BUILD)/$*.d
+# Dependency file generation
+DEPFLAGS   += -MF $(BUILD)/$*.d -MT $@
 
 LINK.o      = $(LD) $(LDFLAGS) $(LDLIBS) $^ -o $@
 COMPILE.c   = $(CC) $(C_STANDARD) $(CFLAGS) $(DEPFLAGS) -c $< -o $@
@@ -139,7 +149,10 @@ COMPILE.cpp = $(CXX) $(CXX_STANDARD) $(CXXFLAGS) $(DEPFLAGS) -c $< -o $@
 .SUFFIXES:
 .INTERMEDIATE:
 .PRECIOUS: $(OBJS) $(DEPS)
-.PHONY: all clean help
+.PHONY: all clean help cppcheck run
+
+# Enable second expansion for more flexible rules
+.SECONDEXPANSION:
 
 #----------------------------------------------------------------------
 # Targets
@@ -154,7 +167,6 @@ $(OUTPUT): $(OBJS)
 	@mkdir -p $(@D)
 	@$(ECHO) Linking $@
 	$(LINK.o)
-	$(SYMBOLS.out)
 	
 $(BUILD)/%.o: %.c
 	@mkdir -p $(@D)
@@ -182,8 +194,15 @@ clean:
 	@$(RM) -rf $(BUILD) $(OUTPUT)
 
 help:
-	@echo available targets: all run clean
-	@echo $(OUTPUT)
+	@echo "Available targets:"
+	@echo "  all      - Build the project (default)"
+	@echo "  run      - Build and run the executable"
+	@echo "  clean    - Remove build artifacts"
+	@echo "  cppcheck - Run static analysis"
+	@echo "  help     - Show this help message"
+	@echo ""
+	@echo "Output: $(OUTPUT)"
+	@echo "Jobs: $(JOBS)"
 
 -include $(DEPS)
 
