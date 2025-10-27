@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useBlocker } from 'react-router';
 import { toast } from 'react-toastify';
 
@@ -35,20 +35,26 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
     setDirtyFlags([]);
   });
 
-  const updateDataValue = (new_data: D) => {
-    updateData({ data: new_data });
-  };
+  // Memoize updateDataValue to prevent unnecessary re-renders
+  const updateDataValue = useCallback(
+    (new_data: D) => {
+      updateData({ data: new_data });
+    },
+    [updateData]
+  );
 
-  const loadData = async () => {
+  // Memoize loadData to prevent unnecessary re-renders
+  const loadData = useCallback(async () => {
     setDirtyFlags([]);
     setErrorMessage(undefined);
     await readData().catch((error: Error) => {
       toast.error(error.message);
       setErrorMessage(error.message);
     });
-  };
+  }, [readData]);
 
-  const saveData = async () => {
+  // Memoize saveData to prevent unnecessary re-renders
+  const saveData = useCallback(async () => {
     if (!data) {
       return;
     }
@@ -64,14 +70,15 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
         setErrorMessage(error.message);
       }
     });
-  };
+  }, [data, writeData]);
+
   return {
     loadData,
     saveData,
     saving: saving as boolean,
     updateDataValue,
-    data: data as D, // Explicitly define the type of 'data'
-    origData: origData as D, // Explicitly define the type of 'origData' to 'D'
+    data: data as D,
+    origData: origData as D,
     dirtyFlags,
     setDirtyFlags,
     setOrigData,

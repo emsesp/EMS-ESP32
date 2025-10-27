@@ -70,7 +70,7 @@ Visit [emsesp.org](https://docs.emsesp.org) for more details on how to install a
 
 To chat with the community reach out on our [Discord Server](https://discord.gg/3J3GgnzpyT).
 
-If you find an issue or have a request, see [here](https://docs.emsesp.org/Support/) on how to submit a bug report or feature request.
+If you find an issue or have a request, see [how to request support](https://docs.emsesp.org/Support/) on how to submit a bug report or feature request.
 
 ## 🎥&nbsp; **Live Demo**
 
@@ -82,13 +82,19 @@ EMS-ESP is a project created by [proddy](https://github.com/proddy) and owned an
 
 If you like **EMS-ESP**, please give it a ✨ on GitHub, or even better fork it and contribute. You can also offer a small donation. This is an open-source project maintained by volunteers, and your support is greatly appreciated.
 
+## 📦&nbsp; **Building**
+
+To build the web interface only, run `platformio run -e build_webUI`. This will install the necessary dependencies and build the web interface and also create the embedded code used need to build the firmware. You can run the web interface locally by going to the `interface` directory and running `pnpm standalone`.
+
+To build the firmware, run `platformio run`. This will build the firmware for all ESP32 modules and place the binaries in the `build/firmware` folder. If you want to configure the build for a single platform create a local `pio_local.ni` file in the root directory (see example in `pio_local.ini_example`).
+
 ## 📢&nbsp; **Libraries used**
 
-- [esp8266-react](https://github.com/rjwats/esp8266-react) by @rjwats for the core framework that provides the Web UI, which has been heavily modified
+- [esp8266-react](https://github.com/rjwats/esp8266-react) originally by @rjwats for the core framework that provides the Web UI, which has been heavily modified
 - [uuid-\*](https://github.com/nomis/mcu-uuid-console) from @nomis. The console, syslog, telnet and logging are based off these awesome open source libraries
 - [ArduinoJson](https://github.com/bblanchon/ArduinoJson) for all the JSON processing
 - [espMqttClient](https://github.com/bertmelis/espMqttClient) for the MQTT client
-- [ESPAsyncWebServer](https://github.com/ESP32Async/ESPAsyncWebServer) and [AsyncTCP](https://github.com/ESP32Async/AsyncTCP) for the Web server and TCP backends
+- [ESPAsyncWebServer](https://github.com/ESP32Async/ESPAsyncWebServer) and [AsyncTCP](https://github.com/ESP32Async/AsyncTCP) for the Web server
 
 ## 📜&nbsp; **License**
 

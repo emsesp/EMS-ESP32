@@ -352,7 +352,8 @@ const cz: Translation = {
   PLATFORM: 'Platforma',
   RELEASE_TYPE: 'Typ sestavení',
   INTERNET_CONNECTION_REQUIRED: 'Pro automatickou kontrolu a instalaci aktualizací je třeba internetové připojení',
-  SWITCH_RELEASE_TYPE: 'Přepnout na {0} verzi'
+  SWITCH_RELEASE_TYPE: 'Přepnout na {0} verzi',
+  FIRMWARE_VERSION_INFO: 'Informace o verzi firmwaru'
 };
 
 export default cz;

@@ -14,6 +14,7 @@ import {
   IconButton,
   ToggleButton,
   ToggleButtonGroup,
+  Tooltip,
   Typography
 } from '@mui/material';
 
@@ -206,7 +207,7 @@ const Dashboard = memo(() => {
         // if its a device (parent node) and has entities
         if (di.nodes?.length) {
           return (
-            <span style={{ fontWeight: 'bold', fontSize: '14px' }}>
+            <span style={{ fontSize: '15px' }}>
               <DeviceIcon type_id={di.t ?? 0} />
               &nbsp;&nbsp;{showType(di.n, di.t)}
               <span style={{ color: 'lightblue' }}>&nbsp;({di.nodes?.length})</span>
@@ -284,37 +285,44 @@ const Dashboard = memo(() => {
 
         {data.nodes.length > 0 && (
           <>
-            <ToggleButtonGroup
-              color="primary"
-              size="small"
-              value={showAll}
-              exclusive
-              onChange={handleShowAll}
-            >
-              <ButtonTooltip title={LL.ALLVALUES()} arrow>
-                <ToggleButton value={true}>
-                  <UnfoldMoreIcon sx={{ fontSize: 18 }} />
-                </ToggleButton>
-              </ButtonTooltip>
-              <ButtonTooltip title={LL.COMPACT()} arrow>
-                <ToggleButton value={false}>
-                  <UnfoldLessIcon sx={{ fontSize: 18 }} />
-                </ToggleButton>
-              </ButtonTooltip>
-            </ToggleButtonGroup>
-            <ButtonTooltip title={LL.DASHBOARD_1()} arrow>
-              <HelpOutlineIcon color="primary" sx={{ ml: 1, fontSize: 20 }} />
-            </ButtonTooltip>
-
             <Box
-              padding={1}
-              justifyContent="center"
-              flexDirection="column"
-              sx={{
-                borderRadius: 1,
-                border: '1px solid grey'
-              }}
+              display="flex"
+              justifyContent="flex-end"
+              flexWrap="nowrap"
+              whiteSpace="nowrap"
             >
+              <ToggleButtonGroup
+                size="small"
+                color="primary"
+                value={showAll}
+                exclusive
+                onChange={handleShowAll}
+              >
+                <ButtonTooltip title={LL.ALLVALUES()}>
+                  <ToggleButton value={true}>
+                    <UnfoldMoreIcon sx={{ fontSize: 18 }} />
+                  </ToggleButton>
+                </ButtonTooltip>
+                <ButtonTooltip title={LL.COMPACT()}>
+                  <ToggleButton value={false}>
+                    <UnfoldLessIcon sx={{ fontSize: 18 }} />
+                  </ToggleButton>
+                </ButtonTooltip>
+              </ToggleButtonGroup>
+              <Tooltip title={LL.DASHBOARD_1()}>
+                <HelpOutlineIcon
+                  sx={{
+                    ml: 1,
+                    mt: 1,
+                    fontSize: 20,
+                    verticalAlign: 'middle'
+                  }}
+                  color="primary"
+                />
+              </Tooltip>
+            </Box>
+
+            <Box mt={1} justifyContent="center" flexDirection="column">
               <IconContext.Provider
                 value={{
                   color: 'lightblue',
