@@ -82,7 +82,7 @@ const Dashboard = memo(() => {
       if (!selectedDashboardItem) {
         return;
       }
-      const id = selectedDashboardItem.id; // this is the parent ID
+      const id = selectedDashboardItem.parentNode.id; // this is the parent ID
       await sendDeviceValue({ id, c: devicevalue.c ?? '', v: devicevalue.v })
         .then(() => {
           toast.success(LL.WRITE_CMD_SENT());
