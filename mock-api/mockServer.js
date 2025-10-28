@@ -134,7 +134,7 @@ export default () => {
           sendLogMessage();
 
           // Set up interval for periodic messages
-          const interval = setInterval(sendLogMessage, 1000);
+          const interval = setInterval(sendLogMessage, 500);
 
           // Clean up on connection close
           const cleanup = () => {
