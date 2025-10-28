@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import { memo, useContext, useEffect } from 'react';
 import type { FC } from 'react';
 import { Navigate, useLocation } from 'react-router';
 
@@ -18,7 +18,7 @@ const RequireAuthenticated: FC<RequiredChildrenProps> = ({ children }) => {
     if (!authenticationContext.me) {
       storeLoginRedirect(location);
     }
-  });
+  }, [authenticationContext.me, location]);
 
   return authenticationContext.me ? (
     <AuthenticatedContext.Provider
@@ -31,4 +31,4 @@ const RequireAuthenticated: FC<RequiredChildrenProps> = ({ children }) => {
   );
 };
 
-export default RequireAuthenticated;
+export default memo(RequireAuthenticated);

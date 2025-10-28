@@ -7,66 +7,54 @@ export const validate = <T extends object>(
   options?: ValidateOption
 ): Promise<T> =>
   new Promise((resolve, reject) => {
-    void validator.validate(source, options || {}, (errors, fieldErrors) => {
-      if (errors) {
-        reject(fieldErrors as Error);
-      } else {
-        resolve(source as T);
-      }
+    void validator.validate(source, options ?? {}, (errors, fieldErrors) => {
+      errors ? reject(fieldErrors as Error) : resolve(source as T);
     });
   });
 
-//  updated to support both IPv4 and IPv6
-const IP_ADDRESS_REGEXP =
-  /((^\s*((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\s*$)|(^\s*((([0-9a-f]{1,4}:){7}([0-9a-f]{1,4}|:))|(([0-9a-f]{1,4}:){6}(:[0-9a-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9a-f]{1,4}:){5}(((:[0-9a-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9a-f]{1,4}:){4}(((:[0-9a-f]{1,4}){1,3})|((:[0-9a-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){3}(((:[0-9a-f]{1,4}){1,4})|((:[0-9a-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){2}(((:[0-9a-f]{1,4}){1,5})|((:[0-9a-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){1}(((:[0-9a-f]{1,4}){1,6})|((:[0-9a-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9a-f]{1,4}){1,7})|((:[0-9a-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$))/;
+// IPv4 pattern: matches 0.0.0.0 to 255.255.255.255
+const IPV4_PATTERN =
+  /^((25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)\.){3}(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)$/;
 
-const isValidIpAddress = (value: string) => IP_ADDRESS_REGEXP.test(value);
+// IPv6 pattern: matches full and compressed IPv6 addresses (including IPv4-mapped)
+const IPV6_PATTERN =
+  /^(([0-9a-f]{1,4}:){7}[0-9a-f]{1,4}|([0-9a-f]{1,4}:){1,7}:|([0-9a-f]{1,4}:){1,6}:[0-9a-f]{1,4}|([0-9a-f]{1,4}:){1,5}(:[0-9a-f]{1,4}){1,2}|([0-9a-f]{1,4}:){1,4}(:[0-9a-f]{1,4}){1,3}|([0-9a-f]{1,4}:){1,3}(:[0-9a-f]{1,4}){1,4}|([0-9a-f]{1,4}:){1,2}(:[0-9a-f]{1,4}){1,5}|[0-9a-f]{1,4}:((:[0-9a-f]{1,4}){1,6})|:((:[0-9a-f]{1,4}){1,7}|:)|::)$/i;
 
-export const IP_ADDRESS_VALIDATOR = {
+// Hostname pattern: RFC 1123 compliant (max 200 chars)
+const HOSTNAME_PATTERN =
+  /^(?=.{1,200}$)(([a-z0-9]|[a-z0-9][a-z0-9-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9-]*[a-z0-9])$/i;
+
+const isValidIpAddress = (value: string): boolean =>
+  IPV4_PATTERN.test(value.trim()) || IPV6_PATTERN.test(value.trim());
+
+const isValidHostname = (value: string): boolean =>
+  HOSTNAME_PATTERN.test(value.trim());
+
+// Factory function to create validators with consistent structure
+const createValidator = (
+  validatorFn: (value: string) => boolean,
+  errorMessage: string
+) => ({
   validator(
-    rule: InternalRuleItem,
+    _rule: InternalRuleItem,
     value: string,
     callback: (error?: string) => void
   ) {
-    if (value && !isValidIpAddress(value)) {
-      callback('Must be an IP address');
-    } else {
-      callback();
-    }
+    callback(value && !validatorFn(value) ? errorMessage : undefined);
   }
-};
+});
 
-const HOSTNAME_LENGTH_REGEXP = /^.{0,200}$/;
-const HOSTNAME_PATTERN_REGEXP =
-  /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9-]*[A-Za-z0-9])$/;
+export const IP_ADDRESS_VALIDATOR = createValidator(
+  isValidIpAddress,
+  'Must be an IP address'
+);
 
-const isValidHostname = (value: string) =>
-  HOSTNAME_LENGTH_REGEXP.test(value) && HOSTNAME_PATTERN_REGEXP.test(value);
+export const HOSTNAME_VALIDATOR = createValidator(
+  isValidHostname,
+  'Must be a valid hostname'
+);
 
-export const HOSTNAME_VALIDATOR = {
-  validator(
-    rule: InternalRuleItem,
-    value: string,
-    callback: (error?: string) => void
-  ) {
-    if (value && !isValidHostname(value)) {
-      callback('Must be a valid hostname');
-    } else {
-      callback();
-    }
-  }
-};
-
-export const IP_OR_HOSTNAME_VALIDATOR = {
-  validator(
-    rule: InternalRuleItem,
-    value: string,
-    callback: (error?: string) => void
-  ) {
-    if (value && !(isValidIpAddress(value) || isValidHostname(value))) {
-      callback('Must be a valid IP address or hostname');
-    } else {
-      callback();
-    }
-  }
-};
+export const IP_OR_HOSTNAME_VALIDATOR = createValidator(
+  (value) => isValidIpAddress(value) || isValidHostname(value),
+  'Must be a valid IP address or hostname'
+);

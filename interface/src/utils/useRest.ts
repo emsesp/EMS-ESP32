@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useBlocker } from 'react-router';
 import { toast } from 'react-toastify';
 
@@ -11,10 +11,12 @@ export interface RestRequestOptions<D> {
   update: (value: D) => Method<AlovaGenerics>;
 }
 
+const REBOOT_ERROR_MESSAGE = 'Reboot required';
+
 export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
   const { LL } = useI18nContext();
   const [errorMessage, setErrorMessage] = useState<string>();
-  const [restartNeeded, setRestartNeeded] = useState<boolean>(false);
+  const [restartNeeded, setRestartNeeded] = useState(false);
   const [origData, setOrigData] = useState<D>();
   const [dirtyFlags, setDirtyFlags] = useState<string[]>([]);
   const blocker = useBlocker(dirtyFlags.length !== 0);
@@ -35,55 +37,71 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
     setDirtyFlags([]);
   });
 
-  // Memoize updateDataValue to prevent unnecessary re-renders
   const updateDataValue = useCallback(
-    (new_data: D) => {
-      updateData({ data: new_data });
-    },
+    (new_data: D) => updateData({ data: new_data }),
     [updateData]
   );
 
-  // Memoize loadData to prevent unnecessary re-renders
   const loadData = useCallback(async () => {
     setDirtyFlags([]);
     setErrorMessage(undefined);
-    await readData().catch((error: Error) => {
-      toast.error(error.message);
-      setErrorMessage(error.message);
-    });
+    try {
+      await readData();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      toast.error(message);
+      setErrorMessage(message);
+    }
   }, [readData]);
 
-  // Memoize saveData to prevent unnecessary re-renders
   const saveData = useCallback(async () => {
-    if (!data) {
-      return;
-    }
+    if (!data) return;
+
+    // Reset states before saving
     setRestartNeeded(false);
     setErrorMessage(undefined);
     setDirtyFlags([]);
     setOrigData(data as D);
-    await writeData(data as D).catch((error: Error) => {
-      if (error.message === 'Reboot required') {
+
+    try {
+      await writeData(data as D);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message === REBOOT_ERROR_MESSAGE) {
         setRestartNeeded(true);
       } else {
-        toast.error(error.message);
-        setErrorMessage(error.message);
+        toast.error(message);
+        setErrorMessage(message);
       }
-    });
+    }
   }, [data, writeData]);
 
-  return {
-    loadData,
-    saveData,
-    saving: saving as boolean,
-    updateDataValue,
-    data: data as D,
-    origData: origData as D,
-    dirtyFlags,
-    setDirtyFlags,
-    setOrigData,
-    blocker,
-    errorMessage,
-    restartNeeded
-  } as const;
+  return useMemo(
+    () => ({
+      loadData,
+      saveData,
+      saving: !!saving,
+      updateDataValue,
+      data: data as D,
+      origData: origData as D,
+      dirtyFlags,
+      setDirtyFlags,
+      setOrigData,
+      blocker,
+      errorMessage,
+      restartNeeded
+    }),
+    [
+      loadData,
+      saveData,
+      saving,
+      updateDataValue,
+      data,
+      origData,
+      dirtyFlags,
+      blocker,
+      errorMessage,
+      restartNeeded
+    ]
+  );
 };

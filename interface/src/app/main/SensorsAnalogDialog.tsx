@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
@@ -50,6 +50,42 @@ const SensorsAnalogDialog = ({
   const [editItem, setEditItem] = useState<AnalogSensor>(selectedItem);
   const updateFormValue = updateValue(setEditItem);
 
+  // Helper functions to check sensor type conditions
+  const isCounterOrRate =
+    editItem.t >= AnalogType.COUNTER && editItem.t <= AnalogType.RATE;
+  const isFreqType =
+    editItem.t >= AnalogType.FREQ_0 && editItem.t <= AnalogType.FREQ_2;
+  const isPWM =
+    editItem.t === AnalogType.PWM_0 ||
+    editItem.t === AnalogType.PWM_1 ||
+    editItem.t === AnalogType.PWM_2;
+  const isDigitalOutGPIO =
+    editItem.t === AnalogType.DIGITAL_OUT &&
+    (editItem.g === 25 || editItem.g === 26);
+  const isDigitalOutNonGPIO =
+    editItem.t === AnalogType.DIGITAL_OUT && editItem.g !== 25 && editItem.g !== 26;
+
+  // Memoize menu items to avoid recreation on each render
+  const analogTypeMenuItems = useMemo(
+    () =>
+      AnalogTypeNames.map((val, i) => (
+        <MenuItem key={val} value={i}>
+          {val}
+        </MenuItem>
+      )),
+    []
+  );
+
+  const uomMenuItems = useMemo(
+    () =>
+      DeviceValueUOM_s.map((val, i) => (
+        <MenuItem key={val} value={i}>
+          {val}
+        </MenuItem>
+      )),
+    []
+  );
+
   useEffect(() => {
     if (open) {
       setFieldErrors(undefined);
@@ -57,16 +93,16 @@ const SensorsAnalogDialog = ({
     }
   }, [open, selectedItem]);
 
-  const handleClose = (
-    _event: React.SyntheticEvent,
-    reason: 'backdropClick' | 'escapeKeyDown'
-  ) => {
-    if (reason !== 'backdropClick') {
-      onClose();
-    }
-  };
+  const handleClose = useCallback(
+    (_event: React.SyntheticEvent, reason: 'backdropClick' | 'escapeKeyDown') => {
+      if (reason !== 'backdropClick') {
+        onClose();
+      }
+    },
+    [onClose]
+  );
 
-  const save = async () => {
+  const save = useCallback(async () => {
     try {
       setFieldErrors(undefined);
       await validate(validator, editItem);
@@ -74,12 +110,12 @@ const SensorsAnalogDialog = ({
     } catch (error) {
       setFieldErrors(error as ValidateFieldsError);
     }
-  };
+  }, [validator, editItem, onSave]);
 
-  const remove = () => {
+  const remove = useCallback(() => {
     editItem.d = true;
     onSave(editItem);
-  };
+  }, [editItem, onSave]);
 
   return (
     <Dialog sx={dialogStyle} open={open} onClose={handleClose}>
@@ -128,16 +164,10 @@ const SensorsAnalogDialog = ({
               select
               onChange={updateFormValue}
             >
-              {AnalogTypeNames.map((val, i) => (
-                <MenuItem key={val} value={i}>
-                  {val}
-                </MenuItem>
-              ))}
+              {analogTypeMenuItems}
             </TextField>
           </Grid>
-          {((editItem.t >= AnalogType.COUNTER && editItem.t <= AnalogType.RATE) ||
-            (editItem.t >= AnalogType.FREQ_0 &&
-              editItem.t <= AnalogType.FREQ_2)) && (
+          {(isCounterOrRate || isFreqType) && (
             <Grid>
               <TextField
                 name="u"
@@ -147,11 +177,7 @@ const SensorsAnalogDialog = ({
                 select
                 onChange={updateFormValue}
               >
-                {DeviceValueUOM_s.map((val, i) => (
-                  <MenuItem key={val} value={i}>
-                    {val}
-                  </MenuItem>
-                ))}
+                {uomMenuItems}
               </TextField>
             </Grid>
           )}
@@ -226,7 +252,7 @@ const SensorsAnalogDialog = ({
               />
             </Grid>
           )}
-          {editItem.t >= AnalogType.COUNTER && editItem.t <= AnalogType.RATE && (
+          {isCounterOrRate && (
             <Grid>
               <TextField
                 name="f"
@@ -242,76 +268,71 @@ const SensorsAnalogDialog = ({
               />
             </Grid>
           )}
-          {editItem.t === AnalogType.DIGITAL_OUT &&
-            (editItem.g === 25 || editItem.g === 26) && (
+          {isDigitalOutGPIO && (
+            <Grid>
+              <TextField
+                name="o"
+                label={LL.VALUE(0)}
+                value={numberValue(editItem.o)}
+                sx={{ width: '11ch' }}
+                type="number"
+                variant="outlined"
+                onChange={updateFormValue}
+                slotProps={{
+                  htmlInput: { min: '0', max: '255', step: '1' }
+                }}
+              />
+            </Grid>
+          )}
+          {isDigitalOutNonGPIO && (
+            <>
               <Grid>
                 <TextField
                   name="o"
                   label={LL.VALUE(0)}
                   value={numberValue(editItem.o)}
-                  sx={{ width: '11ch' }}
-                  type="number"
+                  select
                   variant="outlined"
                   onChange={updateFormValue}
-                  slotProps={{
-                    htmlInput: { min: '0', max: '255', step: '1' }
-                  }}
-                />
+                >
+                  <MenuItem value={0}>{LL.OFF()}</MenuItem>
+                  <MenuItem value={1}>{LL.ON()}</MenuItem>
+                </TextField>
               </Grid>
-            )}
-          {editItem.t === AnalogType.DIGITAL_OUT &&
-            editItem.g !== 25 &&
-            editItem.g !== 26 && (
-              <>
-                <Grid>
-                  <TextField
-                    name="o"
-                    label={LL.VALUE(0)}
-                    value={numberValue(editItem.o)}
-                    select
-                    variant="outlined"
-                    onChange={updateFormValue}
-                  >
-                    <MenuItem value={0}>{LL.OFF()}</MenuItem>
-                    <MenuItem value={1}>{LL.ON()}</MenuItem>
-                  </TextField>
-                </Grid>
-                <Grid>
-                  <TextField
-                    name="f"
-                    label={LL.POLARITY()}
-                    value={editItem.f}
-                    sx={{ width: '15ch' }}
-                    select
-                    onChange={updateFormValue}
-                  >
-                    <MenuItem value={1}>{LL.ACTIVEHIGH()}</MenuItem>
-                    <MenuItem value={-1}>{LL.ACTIVELOW()}</MenuItem>
-                  </TextField>
-                </Grid>
-                <Grid>
-                  <TextField
-                    name="u"
-                    label={LL.STARTVALUE()}
-                    sx={{ width: '15ch' }}
-                    value={editItem.u}
-                    select
-                    onChange={updateFormValue}
-                  >
-                    <MenuItem value={0}>{LL.UNCHANGED()}</MenuItem>
-                    <MenuItem value={1}>
-                      {LL.ALWAYS()}&nbsp;{LL.OFF()}
-                    </MenuItem>
-                    <MenuItem value={2}>
-                      {LL.ALWAYS()}&nbsp;{LL.ON()}
-                    </MenuItem>
-                  </TextField>
-                </Grid>
-              </>
-            )}
-          {(editItem.t === AnalogType.PWM_0 ||
-            editItem.t === AnalogType.PWM_1 ||
-            editItem.t === AnalogType.PWM_2) && (
+              <Grid>
+                <TextField
+                  name="f"
+                  label={LL.POLARITY()}
+                  value={editItem.f}
+                  sx={{ width: '15ch' }}
+                  select
+                  onChange={updateFormValue}
+                >
+                  <MenuItem value={1}>{LL.ACTIVEHIGH()}</MenuItem>
+                  <MenuItem value={-1}>{LL.ACTIVELOW()}</MenuItem>
+                </TextField>
+              </Grid>
+              <Grid>
+                <TextField
+                  name="u"
+                  label={LL.STARTVALUE()}
+                  sx={{ width: '15ch' }}
+                  value={editItem.u}
+                  select
+                  onChange={updateFormValue}
+                >
+                  <MenuItem value={0}>{LL.UNCHANGED()}</MenuItem>
+                  <MenuItem value={1}>
+                    {LL.ALWAYS()}&nbsp;{LL.OFF()}
+                  </MenuItem>
+                  <MenuItem value={2}>
+                    {LL.ALWAYS()}&nbsp;{LL.ON()}
+                  </MenuItem>
+                </TextField>
+              </Grid>
+            </>
+          )}
+          {isPWM && (
             <>
               <Grid>
                 <TextField

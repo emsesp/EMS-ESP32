@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -52,16 +52,16 @@ const SensorsTemperatureDialog = ({
     }
   }, [open, selectedItem]);
 
-  const handleClose = (
-    _event: React.SyntheticEvent,
-    reason: 'backdropClick' | 'escapeKeyDown'
-  ) => {
-    if (reason !== 'backdropClick') {
-      onClose();
-    }
-  };
+  const handleClose = useCallback(
+    (_event: React.SyntheticEvent, reason: 'backdropClick' | 'escapeKeyDown') => {
+      if (reason !== 'backdropClick') {
+        onClose();
+      }
+    },
+    [onClose]
+  );
 
-  const save = async () => {
+  const save = useCallback(async () => {
     try {
       setFieldErrors(undefined);
       await validate(validator, editItem);
@@ -69,7 +69,7 @@ const SensorsTemperatureDialog = ({
     } catch (error) {
       setFieldErrors(error as ValidateFieldsError);
     }
-  };
+  }, [validator, editItem, onSave]);
 
   return (
     <Dialog sx={dialogStyle} open={open} onClose={handleClose}>

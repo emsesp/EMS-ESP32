@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { memo, useCallback, useRef, useState } from 'react';
 
 import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
 import { Button } from '@mui/material';
@@ -48,12 +48,12 @@ const WiFiNetworkScanner = () => {
     }
   });
 
-  const renderNetworkScanner = () => {
+  const renderNetworkScanner = useCallback(() => {
     if (!networkList) {
       return <FormLoader errorMessage={errorMessage || ''} />;
     }
     return <WiFiNetworkSelector networkList={networkList} />;
-  };
+  }, [networkList, errorMessage]);
 
   return (
     <SectionContent>
@@ -73,4 +73,4 @@ const WiFiNetworkScanner = () => {
   );
 };
 
-export default WiFiNetworkScanner;
+export default memo(WiFiNetworkScanner);

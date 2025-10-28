@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import { Box, Button, Dialog, DialogContent, Typography } from '@mui/material';
@@ -17,10 +17,8 @@ import { LinearProgressWithLabel } from '../../components/upload/LinearProgressW
 
 const SystemMonitor = () => {
   const [errorMessage, setErrorMessage] = useState<string>();
-
+  const hasInitialized = useRef(false);
   const { LL } = useI18nContext();
-
-  let count = 0;
 
   const { send: setSystemStatus } = useRequest(
     (status: string) => callAction({ action: 'systemStatus', param: status }),
@@ -32,10 +30,12 @@ const SystemMonitor = () => {
   const { data, send } = useRequest(readSystemStatus, {
     force: true,
     async middleware(_, next) {
-      if (count++ >= 1) {
-        // skip first request (1 second) to allow AsyncWS to send its response
-        await next();
+      // Skip first request to allow AsyncWS to send its response
+      if (!hasInitialized.current) {
+        hasInitialized.current = true;
+        return; // Don't await next() on first call
       }
+      await next();
     }
   })
     .onSuccess((event) => {
@@ -58,13 +58,41 @@ const SystemMonitor = () => {
     void send();
   }, 1000); // check every 1 second
 
-  const onCancel = async () => {
+  const { statusMessage, isUploading, progressValue } = useMemo(() => {
+    const status = data?.status;
+
+    let message = '';
+    if (status && status >= SystemStatusCodes.SYSTEM_STATUS_UPLOADING) {
+      message = LL.WAIT_FIRMWARE();
+    } else if (status === SystemStatusCodes.SYSTEM_STATUS_PENDING_RESTART) {
+      message = LL.APPLICATION_RESTARTING();
+    } else if (status === SystemStatusCodes.SYSTEM_STATUS_NORMAL) {
+      message = LL.RESTARTING_PRE();
+    } else if (status === SystemStatusCodes.SYSTEM_STATUS_ERROR_UPLOAD) {
+      message = 'Upload Failed';
+    } else {
+      message = LL.RESTARTING_POST();
+    }
+
+    const uploading =
+      status !== undefined && status >= SystemStatusCodes.SYSTEM_STATUS_UPLOADING;
+    const progress =
+      uploading && status
+        ? Math.round(status - SystemStatusCodes.SYSTEM_STATUS_UPLOADING)
+        : 0;
+
+    return {
+      statusMessage: message,
+      isUploading: uploading,
+      progressValue: progress
+    };
+  }, [data?.status, LL]);
+
+  const onCancel = useCallback(async () => {
     setErrorMessage(undefined);
-    await setSystemStatus(
-      SystemStatusCodes.SYSTEM_STATUS_NORMAL as unknown as string
-    );
+    await setSystemStatus(String(SystemStatusCodes.SYSTEM_STATUS_NORMAL));
     document.location.href = '/';
-  };
+  }, [setSystemStatus]);
 
   return (
     <Dialog fullWidth={true} sx={dialogStyle} open={true}>
@@ -76,15 +104,7 @@ const SystemMonitor = () => {
             fontWeight={400}
             textAlign="center"
           >
-            {data?.status >= SystemStatusCodes.SYSTEM_STATUS_UPLOADING
-              ? LL.WAIT_FIRMWARE()
-              : data?.status === SystemStatusCodes.SYSTEM_STATUS_PENDING_RESTART
-                ? LL.APPLICATION_RESTARTING()
-                : data?.status === SystemStatusCodes.SYSTEM_STATUS_NORMAL
-                  ? LL.RESTARTING_PRE()
-                  : data?.status === SystemStatusCodes.SYSTEM_STATUS_ERROR_UPLOAD
-                    ? 'Upload Failed'
-                    : LL.RESTARTING_POST()}
+            {statusMessage}
           </Typography>
 
           {errorMessage ? (
@@ -105,13 +125,9 @@ const SystemMonitor = () => {
               <Typography mt={2} variant="h6" fontWeight={400} textAlign="center">
                 {LL.PLEASE_WAIT()}&hellip;
               </Typography>
-              {data && data.status >= SystemStatusCodes.SYSTEM_STATUS_UPLOADING && (
+              {isUploading && (
                 <Box width="100%" pl={2} pr={2} py={2}>
-                  <LinearProgressWithLabel
-                    value={Math.round(
-                      data?.status - SystemStatusCodes.SYSTEM_STATUS_UPLOADING
-                    )}
-                  />
+                  <LinearProgressWithLabel value={progressValue} />
                 </Box>
               )}
             </>

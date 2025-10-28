@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { FC } from 'react';
 
 import { FormHelperText, TextField } from '@mui/material';
@@ -28,4 +29,4 @@ const ValidatedTextField: FC<ValidatedTextFieldProps> = ({
   );
 };
 
-export default ValidatedTextField;
+export default memo(ValidatedTextField);

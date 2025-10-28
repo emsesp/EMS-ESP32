@@ -39,19 +39,12 @@ const ModulesDialog = ({
 
   const updateFormValue = updateValue(setEditItem);
 
+  // Sync form state when dialog opens or selected item changes
   useEffect(() => {
     if (open) {
       setEditItem(selectedItem);
     }
   }, [open, selectedItem]);
-
-  const close = () => {
-    onClose();
-  };
-
-  const save = () => {
-    onSave(editItem);
-  };
 
   return (
     <Dialog sx={dialogStyle} fullWidth maxWidth="xs" open={open} onClose={onClose}>
@@ -85,7 +78,7 @@ const ModulesDialog = ({
         <Button
           startIcon={<CancelIcon />}
           variant="outlined"
-          onClick={close}
+          onClick={onClose}
           color="secondary"
         >
           {LL.CANCEL()}
@@ -93,7 +86,7 @@ const ModulesDialog = ({
         <Button
           startIcon={<DoneIcon />}
           variant="outlined"
-          onClick={save}
+          onClick={() => onSave(editItem)}
           color="primary"
         >
           {LL.UPDATE()}

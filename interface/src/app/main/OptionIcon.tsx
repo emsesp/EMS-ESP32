@@ -32,10 +32,11 @@ const OPTION_ICONS: {
 
 const OptionIcon = ({ type, isSet }: { type: OptionType; isSet: boolean }) => {
   const Icon = OPTION_ICONS[type][isSet ? 0 : 1];
-  return isSet ? (
-    <Icon color="primary" sx={{ fontSize: 16, verticalAlign: 'middle' }} />
-  ) : (
-    <Icon sx={{ fontSize: 16, verticalAlign: 'middle' }} />
+  return (
+    <Icon
+      {...(isSet && { color: 'primary' })}
+      sx={{ fontSize: 16, verticalAlign: 'middle' }}
+    />
   );
 };
 

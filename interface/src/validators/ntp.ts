@@ -7,8 +7,5 @@ export const NTP_SETTINGS_VALIDATOR = new Schema({
     { required: true, message: 'Server is required' },
     IP_OR_HOSTNAME_VALIDATOR
   ],
-  tz_label: {
-    required: true,
-    message: 'Time zone is required'
-  }
+  tz_label: [{ required: true, message: 'Time zone is required' }]
 });

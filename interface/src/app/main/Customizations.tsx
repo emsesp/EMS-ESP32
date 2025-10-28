@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useBlocker, useLocation } from 'react-router';
 import { toast } from 'react-toastify';
 
@@ -63,6 +63,15 @@ import { DeviceEntityMask } from './types';
 import type { APIcall, Device, DeviceEntity } from './types';
 
 export const APIURL = window.location.origin + '/api/';
+
+// Helper function to create masked entity ID - extracted to avoid duplication
+const createMaskedEntityId = (de: DeviceEntity): string =>
+  de.m.toString(16).padStart(2, '0') +
+  de.id +
+  (de.cn || de.mi || de.ma ? '|' : '') +
+  (de.cn ? de.cn : '') +
+  (de.mi ? '>' + de.mi : '') +
+  (de.ma ? '<' + de.ma : '');
 
 const Customizations = () => {
   const { LL } = useI18nContext();
@@ -153,17 +162,19 @@ const Customizations = () => {
     );
   };
 
-  const entities_theme = useTheme({
-    Table: `
+  const entities_theme = useMemo(
+    () =>
+      useTheme({
+        Table: `
       --data-table-library_grid-template-columns: 156px repeat(1, minmax(80px, 1fr)) 45px minmax(45px, auto) minmax(120px, auto);
     `,
-    BaseRow: `
+        BaseRow: `
       font-size: 14px;
       .td {
         height: 32px;
       }
     `,
-    BaseCell: `
+        BaseCell: `
       &:nth-of-type(3) {
         text-align: right;
       }
@@ -174,7 +185,7 @@ const Customizations = () => {
         text-align: right;
       }
     `,
-    HeaderRow: `
+        HeaderRow: `
       text-transform: uppercase;
       background-color: black;
       color: #90CAF9;
@@ -186,7 +197,7 @@ const Customizations = () => {
         text-align: center;
       }
     `,
-    Row: `
+        Row: `
       background-color: #1e1e1e;
       position: relative;
       cursor: pointer;
@@ -202,7 +213,7 @@ const Customizations = () => {
         background-color: #177ac9;
       }
     `,
-    Cell: `
+        Cell: `
       &:nth-of-type(2) {
         padding: 8px;
       }
@@ -216,7 +227,9 @@ const Customizations = () => {
         padding-right: 8px;
       }
     `
-  });
+      }),
+    []
+  );
 
   function hasEntityChanged(de: DeviceEntity) {
     return (
@@ -229,19 +242,8 @@ const Customizations = () => {
 
   useEffect(() => {
     if (deviceEntities.length) {
-      setNumChanges(
-        deviceEntities
-          .filter((de) => hasEntityChanged(de))
-          .map(
-            (new_de) =>
-              new_de.m.toString(16).padStart(2, '0') +
-              new_de.id +
-              (new_de.cn || new_de.mi || new_de.ma ? '|' : '') +
-              (new_de.cn ? new_de.cn : '') +
-              (new_de.mi ? '>' + new_de.mi : '') +
-              (new_de.ma ? '<' + new_de.ma : '')
-          ).length
-      );
+      const changedEntities = deviceEntities.filter((de) => hasEntityChanged(de));
+      setNumChanges(changedEntities.length);
     }
   }, [deviceEntities]);
 
@@ -316,9 +318,12 @@ const Customizations = () => {
     return new_masks;
   };
 
-  const filter_entity = (de: DeviceEntity) =>
-    (de.m & selectedFilters || !selectedFilters) &&
-    formatName(de, true).toLowerCase().includes(search.toLowerCase());
+  const filter_entity = useCallback(
+    (de: DeviceEntity) =>
+      (de.m & selectedFilters || !selectedFilters) &&
+      formatName(de, true).toLowerCase().includes(search.toLowerCase()),
+    [selectedFilters, search]
+  );
 
   const maskDisabled = (set: boolean) => {
     setDeviceEntities(
@@ -388,15 +393,7 @@ const Customizations = () => {
     if (devices && deviceEntities && selectedDevice !== -1) {
       const masked_entities = deviceEntities
         .filter((de: DeviceEntity) => hasEntityChanged(de))
-        .map(
-          (new_de) =>
-            new_de.m.toString(16).padStart(2, '0') +
-            new_de.id +
-            (new_de.cn || new_de.mi || new_de.ma ? '|' : '') +
-            (new_de.cn ? new_de.cn : '') +
-            (new_de.mi ? '>' + new_de.mi : '') +
-            (new_de.ma ? '<' + new_de.ma : '')
-        );
+        .map((new_de) => createMaskedEntityId(new_de));
 
       // check size in bytes to match buffer in CPP, which is 2048
       const bytes = new TextEncoder().encode(JSON.stringify(masked_entities)).length;
@@ -512,9 +509,12 @@ const Customizations = () => {
     </>
   );
 
-  const renderDeviceData = () => {
-    const shown_data = deviceEntities.filter((de) => filter_entity(de));
+  const filteredEntities = useMemo(
+    () => deviceEntities.filter((de) => filter_entity(de)),
+    [deviceEntities, filter_entity]
+  );
 
+  const renderDeviceData = () => {
     return (
       <>
         <Box color="warning.main">
@@ -612,13 +612,13 @@ const Customizations = () => {
           </Grid>
           <Grid>
             <Typography variant="subtitle2" color="grey">
-              {LL.SHOWING()}&nbsp;{shown_data.length}/{deviceEntities.length}
+              {LL.SHOWING()}&nbsp;{filteredEntities.length}/{deviceEntities.length}
               &nbsp;{LL.ENTITIES(deviceEntities.length)}
             </Typography>
           </Grid>
         </Grid>
         <Table
-          data={{ nodes: shown_data }}
+          data={{ nodes: filteredEntities }}
           theme={entities_theme}
           layout={{ custom: true }}
         >

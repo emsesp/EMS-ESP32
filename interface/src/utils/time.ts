@@ -1,8 +1,10 @@
-// Cache for formatters to avoid recreation
+// Cache for formatters to avoid recreation (with size limits to prevent memory leaks)
+const MAX_CACHE_SIZE = 50;
 const formatterCache = new Map<string, Intl.DateTimeFormat>();
 const rtfCache = new Map<string, Intl.RelativeTimeFormat>();
 
-// Pre-computed time divisions for relative time formatting
+// Pre-computed constants
+const MS_TO_MINUTES = 60000; // 60 * 1000
 const TIME_DIVISIONS = [
   { amount: 60, name: 'seconds' as const },
   { amount: 60, name: 'minutes' as const },
@@ -13,30 +15,79 @@ const TIME_DIVISIONS = [
   { amount: Number.POSITIVE_INFINITY, name: 'years' as const }
 ] as const;
 
+// Cached navigator languages to avoid repeated array spreads
+let cachedLanguages: readonly string[] | null = null;
+
 /**
- * Get or create a cached DateTimeFormat instance
+ * Get navigator languages with caching
+ */
+function getNavigatorLanguages(): readonly string[] {
+  if (!cachedLanguages) {
+    cachedLanguages = window.navigator.languages;
+  }
+  return cachedLanguages;
+}
+
+/**
+ * Create a fast cache key from DateTimeFormat options
+ */
+function createFormatterKey(options: Intl.DateTimeFormatOptions): string {
+  // Build key from most common properties for better performance than JSON.stringify
+  return `${options.day}-${options.month}-${options.year}-${options.hour}-${options.minute}-${options.second}-${options.hour12}`;
+}
+
+/**
+ * Get or create a cached DateTimeFormat instance with LRU-like cache management
  */
 function getDateTimeFormatter(
   options: Intl.DateTimeFormatOptions
 ): Intl.DateTimeFormat {
-  const key = JSON.stringify(options);
-  if (!formatterCache.has(key)) {
-    formatterCache.set(
-      key,
-      new Intl.DateTimeFormat([...window.navigator.languages], options)
-    );
+  const key = createFormatterKey(options);
+
+  if (formatterCache.has(key)) {
+    // Move to end for LRU behavior
+    const formatter = formatterCache.get(key)!;
+    formatterCache.delete(key);
+    formatterCache.set(key, formatter);
+    return formatter;
   }
-  return formatterCache.get(key)!;
+
+  // Limit cache size
+  if (formatterCache.size >= MAX_CACHE_SIZE) {
+    const firstKey = formatterCache.keys().next().value;
+    if (firstKey) {
+      formatterCache.delete(firstKey);
+    }
+  }
+
+  const formatter = new Intl.DateTimeFormat(getNavigatorLanguages(), options);
+  formatterCache.set(key, formatter);
+  return formatter;
 }
 
 /**
- * Get or create a cached RelativeTimeFormat instance
+ * Get or create a cached RelativeTimeFormat instance with cache size management
  */
 function getRelativeTimeFormatter(locale: string): Intl.RelativeTimeFormat {
-  if (!rtfCache.has(locale)) {
-    rtfCache.set(locale, new Intl.RelativeTimeFormat(locale, { numeric: 'auto' }));
+  if (rtfCache.has(locale)) {
+    // Move to end for LRU behavior
+    const formatter = rtfCache.get(locale)!;
+    rtfCache.delete(locale);
+    rtfCache.set(locale, formatter);
+    return formatter;
   }
-  return rtfCache.get(locale)!;
+
+  // Limit cache size
+  if (rtfCache.size >= MAX_CACHE_SIZE) {
+    const firstKey = rtfCache.keys().next().value;
+    if (firstKey) {
+      rtfCache.delete(firstKey);
+    }
+  }
+
+  const formatter = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+  rtfCache.set(locale, formatter);
+  return formatter;
 }
 
 /**
@@ -49,7 +100,7 @@ function formatTimeAgo(locale: string, date: Date): string {
 
   const rtf = getRelativeTimeFormatter(locale);
 
-  // Use for...of for better performance and readability
+  // Find the appropriate time division
   for (const division of TIME_DIVISIONS) {
     if (Math.abs(duration) < division.amount) {
       return rtf.format(Math.round(duration), division.name);
@@ -57,7 +108,8 @@ function formatTimeAgo(locale: string, date: Date): string {
     duration /= division.amount;
   }
 
-  return rtf.format(0, 'seconds');
+  // This should never be reached due to POSITIVE_INFINITY in divisions
+  return rtf.format(Math.round(duration), 'years');
 }
 
 /**
@@ -102,8 +154,8 @@ export const formatLocalDateTime = (date: Date): string => {
     return 'Invalid date';
   }
 
-  // Calculate local time offset in milliseconds
-  const offsetMs = date.getTimezoneOffset() * 60000;
+  // Calculate local time offset using pre-computed constant
+  const offsetMs = date.getTimezoneOffset() * MS_TO_MINUTES;
   const localTime = date.getTime() - offsetMs;
 
   // Convert to ISO string and remove timezone info

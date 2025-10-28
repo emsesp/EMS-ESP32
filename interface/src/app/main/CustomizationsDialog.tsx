@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import CloseIcon from '@mui/icons-material/Close';
@@ -30,6 +30,20 @@ interface SettingsCustomizationsDialogProps {
   selectedItem: DeviceEntity;
 }
 
+interface LabelValueProps {
+  label: string;
+  value: React.ReactNode;
+}
+
+const LabelValue = ({ label, value }: LabelValueProps) => (
+  <Grid container direction="row">
+    <Typography variant="body2" color="warning.main">
+      {label}:&nbsp;
+    </Typography>
+    <Typography variant="body2">{value}</Typography>
+  </Grid>
+);
+
 const CustomizationsDialog = ({
   open,
   onClose,
@@ -42,10 +56,13 @@ const CustomizationsDialog = ({
 
   const updateFormValue = updateValue(setEditItem);
 
-  const isWriteableNumber =
-    typeof editItem.v === 'number' &&
-    editItem.w &&
-    !(editItem.m & DeviceEntityMask.DV_READONLY);
+  const isWriteableNumber = useMemo(
+    () =>
+      typeof editItem.v === 'number' &&
+      editItem.w &&
+      !(editItem.m & DeviceEntityMask.DV_READONLY),
+    [editItem.v, editItem.w, editItem.m]
+  );
 
   useEffect(() => {
     if (open) {
@@ -54,66 +71,59 @@ const CustomizationsDialog = ({
     }
   }, [open, selectedItem]);
 
-  const handleClose = (
-    _event: React.SyntheticEvent,
-    reason: 'backdropClick' | 'escapeKeyDown'
-  ) => {
-    if (reason !== 'backdropClick') {
-      onClose();
-    }
-  };
+  const handleClose = useCallback(
+    (_event: React.SyntheticEvent, reason: 'backdropClick' | 'escapeKeyDown') => {
+      if (reason !== 'backdropClick') {
+        onClose();
+      }
+    },
+    [onClose]
+  );
 
-  const save = () => {
+  const save = useCallback(() => {
     if (
       isWriteableNumber &&
       editItem.mi &&
       editItem.ma &&
-      editItem.mi > editItem?.ma
+      editItem.mi > editItem.ma
     ) {
       setError(true);
     } else {
       onSave(editItem);
     }
-  };
+  }, [isWriteableNumber, editItem, onSave]);
 
-  const updateDeviceEntity = (updatedItem: DeviceEntity) => {
-    setEditItem({ ...editItem, m: updatedItem.m });
-  };
+  const updateDeviceEntity = useCallback(
+    (updatedItem: DeviceEntity) => {
+      setEditItem({ ...editItem, m: updatedItem.m });
+    },
+    [editItem]
+  );
 
   return (
     <Dialog sx={dialogStyle} open={open} onClose={handleClose}>
       <DialogTitle>{LL.EDIT() + ' ' + LL.ENTITY()}</DialogTitle>
       <DialogContent dividers>
-        <Grid container>
-          <Typography variant="body2" color="warning.main">
-            {LL.ID_OF(LL.ENTITY())}:&nbsp;
-          </Typography>
-          <Typography variant="body2">{editItem.id}</Typography>
-        </Grid>
-
-        <Grid container direction="row">
-          <Typography variant="body2" color="warning.main">
-            {LL.DEFAULT(1) + ' ' + LL.ENTITY_NAME(1)}:&nbsp;
-          </Typography>
-          <Typography variant="body2">{editItem.n}</Typography>
-        </Grid>
-
-        <Grid container direction="row">
-          <Typography variant="body2" color="warning.main">
-            {LL.WRITEABLE()}:&nbsp;
-          </Typography>
-          <Typography variant="body2">
-            {editItem.w ? (
+        <LabelValue label={LL.ID_OF(LL.ENTITY())} value={editItem.id} />
+        <LabelValue
+          label={LL.DEFAULT(1) + ' ' + LL.ENTITY_NAME(1)}
+          value={editItem.n}
+        />
+        <LabelValue
+          label={LL.WRITEABLE()}
+          value={
+            editItem.w ? (
               <DoneIcon color="success" sx={{ fontSize: 16 }} />
             ) : (
               <CloseIcon color="error" sx={{ fontSize: 16 }} />
-            )}
-          </Typography>
-        </Grid>
+            )
+          }
+        />
 
         <Box mt={1} mb={2}>
           <EntityMaskToggle onUpdate={updateDeviceEntity} de={editItem} />
         </Box>
+
         <Grid container spacing={2}>
           <Grid>
             <TextField
@@ -149,12 +159,14 @@ const CustomizationsDialog = ({
             </>
           )}
         </Grid>
+
         {error && (
           <Typography variant="body2" color="error" mt={2}>
             Error: Check min and max values
           </Typography>
         )}
       </DialogContent>
+
       <DialogActions>
         <Button
           startIcon={<CancelIcon />}

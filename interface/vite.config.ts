@@ -95,12 +95,19 @@ export default defineConfig(
           preact({
             // Keep dev tools enabled for development
             devToolsEnabled: true,
-            prefreshEnabled: true
+            prefreshEnabled: false
           }),
           viteTsconfigPaths(),
           bundleSizeReporter(), // Add bundle size reporting
           mockServer()
         ],
+        resolve: {
+          alias: {
+            react: 'preact/compat',
+            'react-dom': 'preact/compat',
+            'react/jsx-runtime': 'preact/jsx-runtime'
+          }
+        },
         server: {
           open: true,
           port: mode == 'production' ? 4173 : 3000,
@@ -135,6 +142,13 @@ export default defineConfig(
           viteTsconfigPaths(),
           bundleSizeReporter() // Add bundle size reporting
         ],
+        resolve: {
+          alias: {
+            react: 'preact/compat',
+            'react-dom': 'preact/compat',
+            'react/jsx-runtime': 'preact/jsx-runtime'
+          }
+        },
         build: {
           target: 'es2020',
           chunkSizeWarningLimit: 512,
@@ -225,6 +239,14 @@ export default defineConfig(
         }),
         bundleSizeReporter() // Add bundle size reporting
       ],
+
+      resolve: {
+        alias: {
+          react: 'preact/compat',
+          'react-dom': 'preact/compat',
+          'react/jsx-runtime': 'preact/jsx-runtime'
+        }
+      },
 
       build: {
         // Target modern browsers for smaller bundles

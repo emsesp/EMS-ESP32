@@ -93,7 +93,7 @@ const Devices = memo(() => {
 
   useLayoutTitle(LL.DEVICES());
 
-  const { data: coreData, send: sendCoreData } = useRequest(() => readCoreData(), {
+  const { data: coreData, send: sendCoreData } = useRequest(readCoreData, {
     initialData: {
       connected: true,
       devices: []

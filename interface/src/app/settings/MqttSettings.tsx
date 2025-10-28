@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -52,33 +52,67 @@ const MqttSettings = () => {
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const updateFormValue = updateValueDirty(
-    origData,
-    dirtyFlags,
-    setDirtyFlags,
-    updateDataValue as (value: unknown) => void
+  const updateFormValue = useMemo(
+    () =>
+      updateValueDirty(
+        origData as unknown as Record<string, unknown>,
+        dirtyFlags,
+        setDirtyFlags,
+        updateDataValue as (value: unknown) => void
+      ),
+    [origData, dirtyFlags, setDirtyFlags, updateDataValue]
   );
 
-  const SecondsInputProps = {
-    endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
-  };
+  const SecondsInputProps = useMemo(
+    () => ({
+      endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+    }),
+    [LL]
+  );
 
-  const content = () => {
-    if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
+  const emptyFieldErrors = useMemo(() => ({}), []);
+
+  const validateAndSubmit = useCallback(async () => {
+    if (!data) return;
+    try {
+      setFieldErrors(undefined);
+      await validate(createMqttSettingsValidator(data), data);
+      await saveData();
+    } catch (error) {
+      setFieldErrors(error as ValidateFieldsError);
     }
+  }, [data, saveData]);
 
-    const validateAndSubmit = async () => {
-      try {
-        setFieldErrors(undefined);
-        await validate(createMqttSettingsValidator(data), data);
-        await saveData();
-      } catch (error) {
-        setFieldErrors(error as ValidateFieldsError);
-      }
-    };
+  const publishIntervalFields = useMemo(
+    () => [
+      { name: 'publish_time_heartbeat', label: 'Heartbeat', validated: true },
+      { name: 'publish_time_boiler', label: LL.MQTT_INT_BOILER(), validated: false },
+      {
+        name: 'publish_time_thermostat',
+        label: LL.MQTT_INT_THERMOSTATS(),
+        validated: false
+      },
+      { name: 'publish_time_solar', label: LL.MQTT_INT_SOLAR(), validated: false },
+      { name: 'publish_time_mixer', label: LL.MQTT_INT_MIXER(), validated: false },
+      { name: 'publish_time_water', label: LL.MQTT_INT_WATER(), validated: false },
+      { name: 'publish_time_sensor', label: LL.SENSORS(), validated: false },
+      { name: 'publish_time_other', label: LL.DEFAULT(0), validated: false }
+    ],
+    [LL]
+  );
 
+  if (!data) {
     return (
+      <SectionContent>
+        {blocker ? <BlockNavigation blocker={blocker} /> : null}
+        <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />
+      </SectionContent>
+    );
+  }
+
+  return (
+    <SectionContent>
+      {blocker ? <BlockNavigation blocker={blocker} /> : null}
       <>
         <BlockFormControlLabel
           control={
@@ -93,7 +127,7 @@ const MqttSettings = () => {
         <Grid container spacing={2} rowSpacing={0}>
           <Grid>
             <ValidatedTextField
-              fieldErrors={fieldErrors || {}}
+              fieldErrors={fieldErrors ?? emptyFieldErrors}
               name="host"
               label={LL.ADDRESS_OF(LL.BROKER())}
               multiline
@@ -105,7 +139,7 @@ const MqttSettings = () => {
           </Grid>
           <Grid>
             <ValidatedTextField
-              fieldErrors={fieldErrors || {}}
+              fieldErrors={fieldErrors ?? emptyFieldErrors}
               name="port"
               label="Port"
               variant="outlined"
@@ -117,7 +151,7 @@ const MqttSettings = () => {
           </Grid>
           <Grid>
             <ValidatedTextField
-              fieldErrors={fieldErrors || {}}
+              fieldErrors={fieldErrors ?? emptyFieldErrors}
               name="base"
               label={LL.BASE_TOPIC()}
               variant="outlined"
@@ -129,7 +163,7 @@ const MqttSettings = () => {
           <Grid>
             <TextField
               name="client_id"
-              label={LL.ID_OF(LL.CLIENT()) + ' (' + LL.OPTIONAL() + ')'}
+              label={`${LL.ID_OF(LL.CLIENT())} (${LL.OPTIONAL()})`}
               variant="outlined"
               value={data.client_id}
               onChange={updateFormValue}
@@ -158,7 +192,7 @@ const MqttSettings = () => {
           </Grid>
           <Grid>
             <ValidatedTextField
-              fieldErrors={fieldErrors || {}}
+              fieldErrors={fieldErrors ?? emptyFieldErrors}
               name="keep_alive"
               label="Keep Alive"
               slotProps={{
@@ -352,119 +386,42 @@ const MqttSettings = () => {
           {LL.MQTT_PUBLISH_INTERVALS()}&nbsp;(0=auto)
         </Typography>
         <Grid container spacing={2} rowSpacing={0}>
-          <Grid>
-            <ValidatedTextField
-              fieldErrors={fieldErrors || {}}
-              name="publish_time_heartbeat"
-              label="Heartbeat"
-              slotProps={{
-                input: SecondsInputProps
-              }}
-              variant="outlined"
-              value={numberValue(data.publish_time_heartbeat)}
-              type="number"
-              onChange={updateFormValue}
-              margin="normal"
-            />
-          </Grid>
-          <Grid>
-            <TextField
-              name="publish_time_boiler"
-              label={LL.MQTT_INT_BOILER()}
-              variant="outlined"
-              value={numberValue(data.publish_time_boiler)}
-              type="number"
-              onChange={updateFormValue}
-              margin="normal"
-              slotProps={{
-                input: SecondsInputProps
-              }}
-            />
-          </Grid>
-          <Grid>
-            <TextField
-              name="publish_time_thermostat"
-              label={LL.MQTT_INT_THERMOSTATS()}
-              variant="outlined"
-              value={numberValue(data.publish_time_thermostat)}
-              type="number"
-              onChange={updateFormValue}
-              margin="normal"
-              slotProps={{
-                input: SecondsInputProps
-              }}
-            />
-          </Grid>
-          <Grid>
-            <TextField
-              name="publish_time_solar"
-              label={LL.MQTT_INT_SOLAR()}
-              variant="outlined"
-              value={numberValue(data.publish_time_solar)}
-              type="number"
-              onChange={updateFormValue}
-              margin="normal"
-              slotProps={{
-                input: SecondsInputProps
-              }}
-            />
-          </Grid>
-          <Grid>
-            <TextField
-              name="publish_time_mixer"
-              label={LL.MQTT_INT_MIXER()}
-              variant="outlined"
-              value={numberValue(data.publish_time_mixer)}
-              type="number"
-              onChange={updateFormValue}
-              margin="normal"
-              slotProps={{
-                input: SecondsInputProps
-              }}
-            />
-          </Grid>
-          <Grid>
-            <TextField
-              name="publish_time_water"
-              label={LL.MQTT_INT_WATER()}
-              variant="outlined"
-              value={numberValue(data.publish_time_water)}
-              type="number"
-              onChange={updateFormValue}
-              margin="normal"
-              slotProps={{
-                input: SecondsInputProps
-              }}
-            />
-          </Grid>
-          <Grid>
-            <TextField
-              name="publish_time_sensor"
-              label={LL.SENSORS()}
-              variant="outlined"
-              value={numberValue(data.publish_time_sensor)}
-              type="number"
-              onChange={updateFormValue}
-              margin="normal"
-              slotProps={{
-                input: SecondsInputProps
-              }}
-            />
-          </Grid>
-          <Grid>
-            <TextField
-              name="publish_time_other"
-              label={LL.DEFAULT(0)}
-              variant="outlined"
-              value={numberValue(data.publish_time_other)}
-              type="number"
-              onChange={updateFormValue}
-              margin="normal"
-              slotProps={{
-                input: SecondsInputProps
-              }}
-            />
-          </Grid>
+          {publishIntervalFields.map((field) => (
+            <Grid key={field.name}>
+              {field.validated ? (
+                <ValidatedTextField
+                  fieldErrors={fieldErrors ?? emptyFieldErrors}
+                  name={field.name}
+                  label={field.label}
+                  slotProps={{
+                    input: SecondsInputProps
+                  }}
+                  variant="outlined"
+                  value={numberValue(
+                    data[field.name as keyof MqttSettingsType] as number
+                  )}
+                  type="number"
+                  onChange={updateFormValue}
+                  margin="normal"
+                />
+              ) : (
+                <TextField
+                  name={field.name}
+                  label={field.label}
+                  variant="outlined"
+                  value={numberValue(
+                    data[field.name as keyof MqttSettingsType] as number
+                  )}
+                  type="number"
+                  onChange={updateFormValue}
+                  margin="normal"
+                  slotProps={{
+                    input: SecondsInputProps
+                  }}
+                />
+              )}
+            </Grid>
+          ))}
         </Grid>
         {dirtyFlags && dirtyFlags.length !== 0 && (
           <ButtonRow>
@@ -491,13 +448,6 @@ const MqttSettings = () => {
           </ButtonRow>
         )}
       </>
-    );
-  };
-
-  return (
-    <SectionContent>
-      {blocker ? <BlockNavigation blocker={blocker} /> : null}
-      {content()}
     </SectionContent>
   );
 };

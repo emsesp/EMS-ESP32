@@ -2,27 +2,30 @@ import type { TranslationFunctions } from 'i18n/i18n-types';
 
 import { DeviceValueUOM, DeviceValueUOM_s } from './types';
 
+// Cache NumberFormat instances for better performance
+const numberFormatter = new Intl.NumberFormat();
+const numberFormatterWithDecimal = new Intl.NumberFormat(undefined, {
+  minimumFractionDigits: 1
+});
+
 const formatDurationMin = (LL: TranslationFunctions, duration_min: number) => {
-  const days = Math.trunc((duration_min * 60000) / 86400000);
-  const hours = Math.trunc((duration_min * 60000) / 3600000) % 24;
-  const minutes = Math.trunc((duration_min * 60000) / 60000) % 60;
+  const totalMs = duration_min * 60000;
+  const days = Math.trunc(totalMs / 86400000);
+  const hours = Math.trunc(totalMs / 3600000) % 24;
+  const minutes = Math.trunc(duration_min) % 60;
 
-  let formatted = '';
+  const parts: string[] = [];
   if (days) {
-    formatted += LL.NUM_DAYS({ num: days });
+    parts.push(LL.NUM_DAYS({ num: days }));
   }
-
   if (hours) {
-    if (formatted) formatted += ' ';
-    formatted += LL.NUM_HOURS({ num: hours });
+    parts.push(LL.NUM_HOURS({ num: hours }));
   }
-
   if (minutes) {
-    if (formatted) formatted += ' ';
-    formatted += LL.NUM_MINUTES({ num: minutes });
+    parts.push(LL.NUM_MINUTES({ num: minutes }));
   }
 
-  return formatted;
+  return parts.join(' ');
 };
 
 export function formatValue(
@@ -30,18 +33,21 @@ export function formatValue(
   value?: unknown,
   uom?: DeviceValueUOM
 ) {
+  // Handle non-numeric values or missing data
   if (typeof value !== 'number' || uom === undefined || value === undefined) {
     if (value === undefined || typeof value === 'boolean') {
       return '';
     }
+    // Type assertion is safe here since we know it's not a number, boolean, or undefined
     return (
       (value as string) +
-      (value === '' || uom === undefined || uom === 0
+      (value === '' || uom === undefined || uom === DeviceValueUOM.NONE
         ? ''
         : ' ' + DeviceValueUOM_s[uom])
     );
   }
 
+  // Handle numeric values
   switch (uom) {
     case DeviceValueUOM.HOURS:
       return value ? formatDurationMin(LL, value * 60) : LL.NUM_HOURS({ num: 0 });
@@ -50,18 +56,12 @@ export function formatValue(
     case DeviceValueUOM.SECONDS:
       return LL.NUM_SECONDS({ num: value });
     case DeviceValueUOM.NONE:
-      return new Intl.NumberFormat().format(value);
+      return numberFormatter.format(value);
     case DeviceValueUOM.DEGREES:
     case DeviceValueUOM.DEGREES_R:
     case DeviceValueUOM.FAHRENHEIT:
-      return (
-        new Intl.NumberFormat(undefined, {
-          minimumFractionDigits: 1
-        }).format(value) +
-        ' ' +
-        DeviceValueUOM_s[uom]
-      );
+      return numberFormatterWithDecimal.format(value) + ' ' + DeviceValueUOM_s[uom];
     default:
-      return new Intl.NumberFormat().format(value) + ' ' + DeviceValueUOM_s[uom];
+      return numberFormatter.format(value) + ' ' + DeviceValueUOM_s[uom];
   }
 }

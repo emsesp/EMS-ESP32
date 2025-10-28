@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { memo, useCallback, useContext, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -109,37 +109,36 @@ const NetworkSettings = () => {
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  useEffect(() => deselectNetwork, [deselectNetwork]);
+  const validateAndSubmit = useCallback(async () => {
+    if (!data) return;
+    try {
+      setFieldErrors(undefined);
+      await validate(createNetworkSettingsValidator(data), data);
+      await saveData();
+    } catch (error) {
+      setFieldErrors(error as ValidateFieldsError);
+    }
+    deselectNetwork();
+  }, [data, saveData, deselectNetwork]);
+
+  const setCancel = useCallback(async () => {
+    deselectNetwork();
+    await loadData();
+  }, [deselectNetwork, loadData]);
+
+  const doRestart = useCallback(async () => {
+    setRestarting(true);
+    await sendAPI({ device: 'system', cmd: 'restart', id: 0 }).catch(
+      (error: Error) => {
+        toast.error(error.message);
+      }
+    );
+  }, [sendAPI]);
 
   const content = () => {
     if (!data) {
       return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
     }
-
-    const validateAndSubmit = async () => {
-      try {
-        setFieldErrors(undefined);
-        await validate(createNetworkSettingsValidator(data), data);
-        await saveData();
-      } catch (error) {
-        setFieldErrors(error as ValidateFieldsError);
-      }
-      deselectNetwork();
-    };
-
-    const setCancel = async () => {
-      deselectNetwork();
-      await loadData();
-    };
-
-    const doRestart = async () => {
-      setRestarting(true);
-      await sendAPI({ device: 'system', cmd: 'restart', id: 0 }).catch(
-        (error: Error) => {
-          toast.error(error.message);
-        }
-      );
-    };
 
     return (
       <>
@@ -405,4 +404,4 @@ const NetworkSettings = () => {
   );
 };
 
-export default NetworkSettings;
+export default memo(NetworkSettings);

@@ -13,7 +13,7 @@ import { LayoutContext } from './context';
 
 export const DRAWER_WIDTH = 210;
 
-const Layout: FC<RequiredChildrenProps> = memo(({ children }) => {
+const LayoutComponent: FC<RequiredChildrenProps> = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [title, setTitle] = useState(PROJECT_NAME);
   const { pathname } = useLocation();
@@ -41,6 +41,8 @@ const Layout: FC<RequiredChildrenProps> = memo(({ children }) => {
       </Box>
     </LayoutContext.Provider>
   );
-});
+};
+
+const Layout = memo(LayoutComponent);
 
 export default Layout;

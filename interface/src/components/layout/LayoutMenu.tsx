@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { memo, useCallback, useContext, useMemo, useState } from 'react';
 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AssessmentIcon from '@mui/icons-material/Assessment';
@@ -30,24 +30,31 @@ import LayoutMenuItem from 'components/layout/LayoutMenuItem';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 
-const LayoutMenu = () => {
+const LayoutMenuComponent = () => {
   const { me, signOut } = useContext(AuthenticatedContext);
   const { LL } = useI18nContext();
 
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-
-  const open = Boolean(anchorEl);
-  const id = anchorEl ? 'app-menu-popover' : undefined;
-
   const [menuOpen, setMenuOpen] = useState(true);
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+  const open = useMemo(() => Boolean(anchorEl), [anchorEl]);
+  const id = useMemo(() => (anchorEl ? 'app-menu-popover' : undefined), [anchorEl]);
 
-  const handleClose = () => {
+  const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  }, []);
+
+  const handleClose = useCallback(() => {
     setAnchorEl(null);
-  };
+  }, []);
+
+  const handleSignOut = useCallback(() => {
+    signOut(true);
+  }, [signOut]);
+
+  const handleMenuToggle = useCallback(() => {
+    setMenuOpen((prev) => !prev);
+  }, []);
 
   return (
     <>
@@ -64,7 +71,7 @@ const LayoutMenu = () => {
         >
           <ListItemButton
             alignItems="flex-start"
-            onClick={() => setMenuOpen(!menuOpen)}
+            onClick={handleMenuToggle}
             sx={{
               pt: 2.5,
               pb: menuOpen ? 0 : 2.5,
@@ -173,7 +180,7 @@ const LayoutMenu = () => {
             variant="outlined"
             fullWidth
             color="primary"
-            onClick={() => signOut(true)}
+            onClick={handleSignOut}
           >
             {LL.SIGN_OUT()}
           </Button>
@@ -195,5 +202,7 @@ const LayoutMenu = () => {
     </>
   );
 };
+
+const LayoutMenu = memo(LayoutMenuComponent);
 
 export default LayoutMenu;

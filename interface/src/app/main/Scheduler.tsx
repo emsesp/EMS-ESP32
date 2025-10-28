@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useBlocker } from 'react-router';
 import { toast } from 'react-toastify';
 
@@ -61,7 +61,7 @@ const Scheduler = () => {
     }
   );
 
-  function hasScheduleChanged(si: ScheduleItem) {
+  const hasScheduleChanged = useCallback((si: ScheduleItem) => {
     return (
       si.id !== si.o_id ||
       (si.name || '') !== (si.o_name || '') ||
@@ -72,13 +72,13 @@ const Scheduler = () => {
       si.cmd !== si.o_cmd ||
       si.value !== si.o_value
     );
-  }
+  }, []);
 
   useInterval(() => {
     if (numChanges === 0) {
       void fetchSchedule();
     }
-  });
+  }, 30000);
 
   useEffect(() => {
     const formatter = new Intl.DateTimeFormat(locale, {
@@ -92,17 +92,19 @@ const Scheduler = () => {
     setDow(days.map((date) => formatter.format(date)));
   }, [locale]);
 
-  const schedule_theme = useTheme({
-    Table: `
+  const schedule_theme = useTheme(
+    useMemo(
+      () => ({
+        Table: `
       --data-table-library_grid-template-columns: 36px 210px 100px 192px repeat(1, minmax(100px, 1fr)) 160px;
     `,
-    BaseRow: `
+        BaseRow: `
       font-size: 14px;
       .td {
         height: 32px;
       }
     `,
-    BaseCell: `
+        BaseCell: `
       &:nth-of-type(2) {
         text-align: center;
       }
@@ -110,7 +112,7 @@ const Scheduler = () => {
         text-align: center;
       }
     `,
-    HeaderRow: `
+        HeaderRow: `
       text-transform: uppercase;
       background-color: black;
       color: #90CAF9;
@@ -119,7 +121,7 @@ const Scheduler = () => {
         height: 36px;
       }
     `,
-    Row: `
+        Row: `
       background-color: #1e1e1e;
       position: relative;
       cursor: pointer;
@@ -130,9 +132,12 @@ const Scheduler = () => {
         background-color: #177ac9;
       }
     `
-  });
+      }),
+      []
+    )
+  );
 
-  const saveSchedule = async () => {
+  const saveSchedule = useCallback(async () => {
     await updateSchedule({
       schedule: schedule
         .filter((si: ScheduleItem) => !si.deleted)
@@ -156,7 +161,7 @@ const Scheduler = () => {
         await fetchSchedule();
         setNumChanges(0);
       });
-  };
+  }, [LL, schedule, updateSchedule, fetchSchedule]);
 
   const editScheduleItem = useCallback((si: ScheduleItem) => {
     setCreating(false);
@@ -167,35 +172,38 @@ const Scheduler = () => {
     }
   }, []);
 
-  const onDialogClose = () => {
+  const onDialogClose = useCallback(() => {
     setDialogOpen(false);
-  };
+  }, []);
 
-  const onDialogCancel = async () => {
+  const onDialogCancel = useCallback(async () => {
     await fetchSchedule().then(() => {
       setNumChanges(0);
     });
-  };
+  }, [fetchSchedule]);
 
-  const onDialogSave = (updatedItem: ScheduleItem) => {
-    setDialogOpen(false);
-    void updateState(readSchedule(), (data: ScheduleItem[]) => {
-      const new_data = creating
-        ? [
-            ...data.filter((si) => creating || si.o_id !== updatedItem.o_id),
-            updatedItem
-          ]
-        : data.map((si) =>
-            si.id === updatedItem.id ? { ...si, ...updatedItem } : si
-          );
+  const onDialogSave = useCallback(
+    (updatedItem: ScheduleItem) => {
+      setDialogOpen(false);
+      void updateState(readSchedule(), (data: ScheduleItem[]) => {
+        const new_data = creating
+          ? [
+              ...data.filter((si) => creating || si.o_id !== updatedItem.o_id),
+              updatedItem
+            ]
+          : data.map((si) =>
+              si.id === updatedItem.id ? { ...si, ...updatedItem } : si
+            );
 
-      setNumChanges(new_data.filter((si) => hasScheduleChanged(si)).length);
+        setNumChanges(new_data.filter((si) => hasScheduleChanged(si)).length);
 
-      return new_data;
-    });
-  };
+        return new_data;
+      });
+    },
+    [creating, hasScheduleChanged]
+  );
 
-  const addScheduleItem = () => {
+  const addScheduleItem = useCallback(() => {
     setCreating(true);
     setSelectedScheduleItem({
       id: Math.floor(Math.random() * (Math.floor(200) - 100) + 100),
@@ -208,16 +216,18 @@ const Scheduler = () => {
       name: ''
     });
     setDialogOpen(true);
-  };
+  }, []);
 
-  const renderSchedule = () => {
-    if (!schedule) {
-      return (
-        <FormLoader onRetry={fetchSchedule} errorMessage={error?.message || ''} />
-      );
-    }
+  const filteredAndSortedSchedule = useMemo(
+    () =>
+      schedule
+        .filter((si: ScheduleItem) => !si.deleted)
+        .sort((a: ScheduleItem, b: ScheduleItem) => a.flags - b.flags),
+    [schedule]
+  );
 
-    const dayBox = (si: ScheduleItem, flag: number) => (
+  const dayBox = useCallback(
+    (si: ScheduleItem, flag: number) => (
       <>
         <Box>
           <Typography
@@ -229,9 +239,12 @@ const Scheduler = () => {
         </Box>
         <Divider orientation="vertical" flexItem />
       </>
-    );
+    ),
+    [dow]
+  );
 
-    const scheduleType = (si: ScheduleItem) => (
+  const scheduleType = useCallback(
+    (si: ScheduleItem) => (
       <Box>
         <Typography sx={{ fontSize: 11 }} color="primary">
           {si.flags === ScheduleFlag.SCHEDULE_IMMEDIATE ? (
@@ -247,15 +260,20 @@ const Scheduler = () => {
           )}
         </Typography>
       </Box>
-    );
+    ),
+    []
+  );
+
+  const renderSchedule = () => {
+    if (!schedule) {
+      return (
+        <FormLoader onRetry={fetchSchedule} errorMessage={error?.message || ''} />
+      );
+    }
 
     return (
       <Table
-        data={{
-          nodes: schedule
-            .filter((si: ScheduleItem) => !si.deleted)
-            .sort((a: ScheduleItem, b: ScheduleItem) => a.flags - b.flags)
-        }}
+        data={{ nodes: filteredAndSortedSchedule }}
         theme={schedule_theme}
         layout={{ custom: true }}
       >

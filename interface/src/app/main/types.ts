@@ -122,6 +122,7 @@ export interface DashboardItem {
   n?: string; // name, optional
   dv?: DeviceValue; // device value, optional
   nodes?: DashboardItem[]; // children nodes, optional
+  parentNode: DashboardItem; // to stop lint errors
 }
 
 export interface DashboardData {
