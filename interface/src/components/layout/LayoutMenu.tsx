@@ -73,8 +73,6 @@ const LayoutMenuComponent = () => {
             alignItems="flex-start"
             onClick={handleMenuToggle}
             sx={{
-              pt: 2.5,
-              pb: menuOpen ? 0 : 2.5,
               '&:hover, &:focus': { '& svg': { opacity: 1 } }
             }}
           >
