@@ -2459,6 +2459,8 @@ bool Boiler::set_flow_temp(const char * value, const int8_t id) {
 
     if (has_telegram_id(0xE4)) {
         write_command(EMS_TYPE_UBASetPoints2, 1, v, 0xE4);
+        // some ems+ boilers uses ems1 setting telegram, see https://github.com/emsesp/EMS-ESP32/discussions/2641
+        write_command(EMS_TYPE_UBASetPoints, 0, v);
     } else {
         write_command(EMS_TYPE_UBASetPoints, 0, v, 0x18);
     }

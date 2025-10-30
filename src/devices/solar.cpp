@@ -196,6 +196,8 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(retHeatAssist),
                               DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &ts8_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(ts8), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &ts16_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(ts16), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &m1Valve_, DeviceValueType::BOOL, FL_(m1Valve), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &m1Power_, DeviceValueType::UINT8, FL_(m1Power), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &solarPump2_, DeviceValueType::BOOL, FL_(solarPump2), DeviceValueUOM::NONE);
@@ -598,6 +600,7 @@ void Solar::process_SM100Monitor(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, collector2Temp_, 6);  // is *10 - TS7: Temperature sensor for collector array 2
     has_update(telegram, cylMiddleTemp_, 8);   // is *10 - TS14: cylinder middle temperature
     has_update(telegram, retHeatAssist_, 10);  // is *10 - TS15: return temperature heating assistance
+    has_update(telegram, ts8_, 22);            // is *10 - TS8: ?
     has_update(telegram, cylBottomTemp3_, 24); // is *10 - TS5: Temperature sensor cylinder 3, bottom
 }
 
@@ -611,6 +614,7 @@ void Solar::process_SM100Monitor2(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, swapRetTemp_, 6);  // is *10
     has_update(telegram, swapFlowTemp_, 8); // is *10
     has_update(telegram, cylTopTemp_, 10);  // is *10 - TS10: cylinder top temperature
+    has_update(telegram, ts16_, 13);        // is *10 - TS16, see https://github.com/emsesp/EMS-ESP32/issues/2690
 }
 
 // SM100Config - 0x0366
