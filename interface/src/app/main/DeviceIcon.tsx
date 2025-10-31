@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { AiOutlineAlert, AiOutlineControl, AiOutlineGateway } from 'react-icons/ai';
 import { CgSmartHomeBoiler } from 'react-icons/cg';
 import { FaSolarPanel } from 'react-icons/fa';
@@ -50,9 +51,9 @@ interface DeviceIconProps {
   type_id: DeviceType;
 }
 
-const DeviceIcon = ({ type_id }: DeviceIconProps) => {
+const DeviceIcon = memo(({ type_id }: DeviceIconProps) => {
   const Icon = deviceIconLookup[type_id];
   return Icon ? <Icon /> : null;
-};
+});
 
 export default DeviceIcon;

@@ -133,7 +133,7 @@ const Dashboard = memo(() => {
   );
 
   const tree = useTree(
-    { nodes: data.nodes },
+    { nodes: [...data.nodes] },
     {
       onChange: () => {} // not used but needed
     },

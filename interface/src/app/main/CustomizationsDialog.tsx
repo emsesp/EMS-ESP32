@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import CloseIcon from '@mui/icons-material/Close';
@@ -35,14 +35,17 @@ interface LabelValueProps {
   value: React.ReactNode;
 }
 
-const LabelValue = ({ label, value }: LabelValueProps) => (
+const LabelValue = memo(({ label, value }: LabelValueProps) => (
   <Grid container direction="row">
     <Typography variant="body2" color="warning.main">
       {label}:&nbsp;
     </Typography>
     <Typography variant="body2">{value}</Typography>
   </Grid>
-);
+));
+LabelValue.displayName = 'LabelValue';
+
+const ICON_SIZE = 16;
 
 const CustomizationsDialog = ({
   open,
@@ -54,7 +57,15 @@ const CustomizationsDialog = ({
   const [editItem, setEditItem] = useState<DeviceEntity>(selectedItem);
   const [error, setError] = useState<boolean>(false);
 
-  const updateFormValue = updateValue(setEditItem);
+  const updateFormValue = useMemo(
+    () =>
+      updateValue(
+        setEditItem as unknown as React.Dispatch<
+          React.SetStateAction<Record<string, unknown>>
+        >
+      ),
+    []
+  );
 
   const isWriteableNumber = useMemo(
     () =>
@@ -93,32 +104,32 @@ const CustomizationsDialog = ({
     }
   }, [isWriteableNumber, editItem, onSave]);
 
-  const updateDeviceEntity = useCallback(
-    (updatedItem: DeviceEntity) => {
-      setEditItem({ ...editItem, m: updatedItem.m });
-    },
-    [editItem]
+  const updateDeviceEntity = useCallback((updatedItem: DeviceEntity) => {
+    setEditItem((prev) => ({ ...prev, m: updatedItem.m }));
+  }, []);
+
+  const dialogTitle = useMemo(() => `${LL.EDIT()} ${LL.ENTITY()}`, [LL]);
+
+  const writeableIcon = useMemo(
+    () =>
+      editItem.w ? (
+        <DoneIcon color="success" sx={{ fontSize: ICON_SIZE }} />
+      ) : (
+        <CloseIcon color="error" sx={{ fontSize: ICON_SIZE }} />
+      ),
+    [editItem.w]
   );
 
   return (
     <Dialog sx={dialogStyle} open={open} onClose={handleClose}>
-      <DialogTitle>{LL.EDIT() + ' ' + LL.ENTITY()}</DialogTitle>
+      <DialogTitle>{dialogTitle}</DialogTitle>
       <DialogContent dividers>
         <LabelValue label={LL.ID_OF(LL.ENTITY())} value={editItem.id} />
         <LabelValue
-          label={LL.DEFAULT(1) + ' ' + LL.ENTITY_NAME(1)}
+          label={`${LL.DEFAULT(1)} ${LL.ENTITY_NAME(1)}`}
           value={editItem.n}
         />
-        <LabelValue
-          label={LL.WRITEABLE()}
-          value={
-            editItem.w ? (
-              <DoneIcon color="success" sx={{ fontSize: 16 }} />
-            ) : (
-              <CloseIcon color="error" sx={{ fontSize: 16 }} />
-            )
-          }
-        />
+        <LabelValue label={LL.WRITEABLE()} value={writeableIcon} />
 
         <Box mt={1} mb={2}>
           <EntityMaskToggle onUpdate={updateDeviceEntity} de={editItem} />

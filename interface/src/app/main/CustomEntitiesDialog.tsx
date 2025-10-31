@@ -68,32 +68,51 @@ const CustomEntitiesDialog = ({
   const { LL } = useI18nContext();
   const [editItem, setEditItem] = useState<EntityItem>(selectedItem);
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
-  const updateFormValue = updateValue(setEditItem);
+  const updateFormValue = useMemo(
+    () =>
+      updateValue(
+        setEditItem as unknown as React.Dispatch<
+          React.SetStateAction<Record<string, unknown>>
+        >
+      ),
+    []
+  );
 
   useEffect(() => {
     if (open) {
       setFieldErrors(undefined);
       // Convert to hex strings - combined into single setEditItem call
+      const deviceIdHex =
+        typeof selectedItem.device_id === 'number'
+          ? selectedItem.device_id.toString(16).toUpperCase()
+          : selectedItem.device_id;
+      const typeIdHex =
+        typeof selectedItem.type_id === 'number'
+          ? selectedItem.type_id.toString(16).toUpperCase()
+          : selectedItem.type_id;
+      const factorValue =
+        selectedItem.value_type === DeviceValueType.BOOL &&
+        typeof selectedItem.factor === 'number'
+          ? selectedItem.factor.toString(16).toUpperCase()
+          : selectedItem.factor;
+
       setEditItem({
         ...selectedItem,
-        device_id: selectedItem.device_id.toString(16).toUpperCase(),
-        type_id: selectedItem.type_id.toString(16).toUpperCase(),
-        factor:
-          selectedItem.value_type === DeviceValueType.BOOL
-            ? selectedItem.factor.toString(16).toUpperCase()
-            : selectedItem.factor
+        device_id: deviceIdHex,
+        type_id: typeIdHex,
+        factor: factorValue
       });
     }
   }, [open, selectedItem]);
 
-  const handleClose = (
-    _event: React.SyntheticEvent,
-    reason: 'backdropClick' | 'escapeKeyDown'
-  ) => {
-    if (reason !== 'backdropClick') {
-      onClose();
-    }
-  };
+  const handleClose = useCallback(
+    (_event: React.SyntheticEvent, reason: 'backdropClick' | 'escapeKeyDown') => {
+      if (reason !== 'backdropClick') {
+        onClose();
+      }
+    },
+    [onClose]
+  );
 
   const save = useCallback(async () => {
     try {
@@ -104,16 +123,16 @@ const CustomEntitiesDialog = ({
       const processedItem: EntityItem = { ...editItem };
 
       if (typeof processedItem.device_id === 'string') {
-        processedItem.device_id = parseInt(processedItem.device_id, 16);
+        processedItem.device_id = Number.parseInt(processedItem.device_id, 16);
       }
       if (typeof processedItem.type_id === 'string') {
-        processedItem.type_id = parseInt(processedItem.type_id, 16);
+        processedItem.type_id = Number.parseInt(processedItem.type_id, 16);
       }
       if (
         processedItem.value_type === DeviceValueType.BOOL &&
         typeof processedItem.factor === 'string'
       ) {
-        processedItem.factor = parseInt(processedItem.factor, 16);
+        processedItem.factor = Number.parseInt(processedItem.factor, 16);
       }
       onSave(processedItem);
     } catch (error) {

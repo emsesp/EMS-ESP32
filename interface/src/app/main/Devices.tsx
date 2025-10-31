@@ -118,30 +118,28 @@ const Devices = memo(() => {
   );
 
   useLayoutEffect(() => {
-    function updateSize() {
-      setSize([window.innerWidth, window.innerHeight]);
-    }
+    let raf = 0;
+    const updateSize = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        setSize([window.innerWidth, window.innerHeight]);
+      });
+    };
     window.addEventListener('resize', updateSize);
     updateSize();
-    return () => window.removeEventListener('resize', updateSize);
+    return () => {
+      window.removeEventListener('resize', updateSize);
+      cancelAnimationFrame(raf);
+    };
   }, []);
 
-  const leftOffset = () => {
+  const leftOffset = useCallback(() => {
     const devicesWindow = document.getElementById('devices-window');
-    if (!devicesWindow) {
-      return 0;
-    }
-
-    const clientRect = devicesWindow.getBoundingClientRect();
-    const left = clientRect.left;
-    const right = clientRect.right;
-
-    if (!left || !right) {
-      return 0;
-    }
-
+    if (!devicesWindow) return 0;
+    const { left, right } = devicesWindow.getBoundingClientRect();
+    if (!left || !right) return 0;
     return left + (right - left < 400 ? 0 : 200);
-  };
+  }, []);
 
   const common_theme = useMemo(
     () =>
@@ -261,7 +259,7 @@ const Devices = memo(() => {
   };
 
   const dv_sort = useSort(
-    { nodes: deviceData.nodes },
+    { nodes: [...deviceData.nodes] },
     {},
     {
       sortIcon: {
@@ -291,7 +289,7 @@ const Devices = memo(() => {
   }
 
   const device_select = useRowSelect(
-    { nodes: coreData.devices },
+    { nodes: [...coreData.devices] },
     {
       onChange: onSelectChange
     }
@@ -549,7 +547,7 @@ const Devices = memo(() => {
 
           {coreData.connected && (
             <Table
-              data={{ nodes: coreData.devices }}
+              data={{ nodes: [...coreData.devices] }}
               select={device_select}
               theme={device_theme}
               layout={{ custom: true }}
@@ -654,7 +652,7 @@ const Devices = memo(() => {
         sx={{
           backgroundColor: 'black',
           position: 'absolute',
-          left: () => leftOffset(),
+          left: leftOffset,
           right: 0,
           bottom: 0,
           top: 64,
@@ -744,7 +742,7 @@ const Devices = memo(() => {
         </Box>
 
         <Table
-          data={{ nodes: shown_data }}
+          data={{ nodes: Array.from(shown_data) }}
           theme={data_theme}
           sort={dv_sort}
           layout={{ custom: true, fixedHeader: true }}

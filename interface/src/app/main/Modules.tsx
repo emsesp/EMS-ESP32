@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { useBlocker } from 'react-router';
 import { toast } from 'react-toastify';
 
@@ -34,16 +34,15 @@ import type { ModuleItem } from './types';
 const PENDING_COLOR = 'red';
 const ACTIVATED_COLOR = '#00FF7F';
 
-function hasModulesChanged(mi: ModuleItem): boolean {
-  return mi.enabled !== mi.o_enabled || mi.license !== mi.o_license;
-}
+const hasModulesChanged = (mi: ModuleItem): boolean =>
+  mi.enabled !== mi.o_enabled || mi.license !== mi.o_license;
 
-const colorStatus = (status: number) => {
+const ColorStatus = memo(({ status }: { status: number }) => {
   if (status === 1) {
     return <div style={{ color: PENDING_COLOR }}>Pending Activation</div>;
   }
   return <div style={{ color: ACTIVATED_COLOR }}>Activated</div>;
-};
+});
 
 const Modules = () => {
   const { LL } = useI18nContext();
@@ -151,25 +150,23 @@ const Modules = () => {
   }, [fetchModules]);
 
   const saveModules = useCallback(async () => {
-    await Promise.all(
-      modules.map((condensed_mi: ModuleItem) =>
-        updateModules({
-          key: condensed_mi.key,
-          enabled: condensed_mi.enabled,
-          license: condensed_mi.license
-        })
-      )
-    )
-      .then(() => {
-        toast.success(LL.MODULES_UPDATED());
-      })
-      .catch((error: Error) => {
-        toast.error(error.message);
-      })
-      .finally(async () => {
-        await fetchModules();
-        setNumChanges(0);
-      });
+    try {
+      await Promise.all(
+        modules.map((condensed_mi: ModuleItem) =>
+          updateModules({
+            key: condensed_mi.key,
+            enabled: condensed_mi.enabled,
+            license: condensed_mi.license
+          })
+        )
+      );
+      toast.success(LL.MODULES_UPDATED());
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : String(error));
+    } finally {
+      await fetchModules();
+      setNumChanges(0);
+    }
   }, [modules, updateModules, LL, fetchModules]);
 
   const content = useMemo(() => {
@@ -229,7 +226,9 @@ const Modules = () => {
                     <Cell>{mi.author}</Cell>
                     <Cell>{mi.version}</Cell>
                     <Cell>{mi.message}</Cell>
-                    <Cell>{colorStatus(mi.status)}</Cell>
+                    <Cell>
+                      <ColorStatus status={mi.status} />
+                    </Cell>
                   </Row>
                 ))}
               </Body>

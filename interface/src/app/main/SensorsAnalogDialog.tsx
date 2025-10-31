@@ -48,22 +48,49 @@ const SensorsAnalogDialog = ({
   const { LL } = useI18nContext();
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
   const [editItem, setEditItem] = useState<AnalogSensor>(selectedItem);
-  const updateFormValue = updateValue(setEditItem);
 
-  // Helper functions to check sensor type conditions
-  const isCounterOrRate =
-    editItem.t >= AnalogType.COUNTER && editItem.t <= AnalogType.RATE;
-  const isFreqType =
-    editItem.t >= AnalogType.FREQ_0 && editItem.t <= AnalogType.FREQ_2;
-  const isPWM =
-    editItem.t === AnalogType.PWM_0 ||
-    editItem.t === AnalogType.PWM_1 ||
-    editItem.t === AnalogType.PWM_2;
-  const isDigitalOutGPIO =
-    editItem.t === AnalogType.DIGITAL_OUT &&
-    (editItem.g === 25 || editItem.g === 26);
-  const isDigitalOutNonGPIO =
-    editItem.t === AnalogType.DIGITAL_OUT && editItem.g !== 25 && editItem.g !== 26;
+  const updateFormValue = useMemo(
+    () =>
+      updateValue((updater) =>
+        setEditItem(
+          (prev) =>
+            updater(
+              prev as unknown as Record<string, unknown>
+            ) as unknown as AnalogSensor
+        )
+      ),
+    [setEditItem]
+  );
+
+  // Memoize helper functions to check sensor type conditions
+  const isCounterOrRate = useMemo(
+    () => editItem.t >= AnalogType.COUNTER && editItem.t <= AnalogType.RATE,
+    [editItem.t]
+  );
+  const isFreqType = useMemo(
+    () => editItem.t >= AnalogType.FREQ_0 && editItem.t <= AnalogType.FREQ_2,
+    [editItem.t]
+  );
+  const isPWM = useMemo(
+    () =>
+      editItem.t === AnalogType.PWM_0 ||
+      editItem.t === AnalogType.PWM_1 ||
+      editItem.t === AnalogType.PWM_2,
+    [editItem.t]
+  );
+  const isDigitalOutGPIO = useMemo(
+    () =>
+      editItem.t === AnalogType.DIGITAL_OUT &&
+      (editItem.g === 25 || editItem.g === 26),
+    [editItem.t, editItem.g]
+  );
+  const isDigitalOutNonGPIO = useMemo(
+    () =>
+      editItem.t === AnalogType.DIGITAL_OUT &&
+      editItem.g !== 25 &&
+      editItem.g !== 26,
+    [editItem.t, editItem.g]
+  );
 
   // Memoize menu items to avoid recreation on each render
   const analogTypeMenuItems = useMemo(
@@ -86,6 +113,7 @@ const SensorsAnalogDialog = ({
     []
   );
 
+  // Reset form when dialog opens or selectedItem changes
   useEffect(() => {
     if (open) {
       setFieldErrors(undefined);
@@ -113,16 +141,18 @@ const SensorsAnalogDialog = ({
   }, [validator, editItem, onSave]);
 
   const remove = useCallback(() => {
-    editItem.d = true;
-    onSave(editItem);
+    onSave({ ...editItem, d: true });
   }, [editItem, onSave]);
+
+  const dialogTitle = useMemo(
+    () =>
+      `${creating ? LL.ADD(1) + ' ' + LL.NEW(0) : LL.EDIT()}&nbsp;${LL.ANALOG_SENSOR(0)}`,
+    [creating, LL]
+  );
 
   return (
     <Dialog sx={dialogStyle} open={open} onClose={handleClose}>
-      <DialogTitle>
-        {creating ? LL.ADD(1) + ' ' + LL.NEW(0) : LL.EDIT()}&nbsp;
-        {LL.ANALOG_SENSOR(0)}
-      </DialogTitle>
+      <DialogTitle>{dialogTitle}</DialogTitle>
       <DialogContent dividers>
         <Grid container spacing={2}>
           <Grid>

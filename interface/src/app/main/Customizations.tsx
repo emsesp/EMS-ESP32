@@ -62,16 +62,24 @@ import OptionIcon from './OptionIcon';
 import { DeviceEntityMask } from './types';
 import type { APIcall, Device, DeviceEntity } from './types';
 
-export const APIURL = window.location.origin + '/api/';
+export const APIURL = `${window.location.origin}/api/`;
+
+const MAX_BUFFER_SIZE = 2000;
 
 // Helper function to create masked entity ID - extracted to avoid duplication
-const createMaskedEntityId = (de: DeviceEntity): string =>
-  de.m.toString(16).padStart(2, '0') +
-  de.id +
-  (de.cn || de.mi || de.ma ? '|' : '') +
-  (de.cn ? de.cn : '') +
-  (de.mi ? '>' + de.mi : '') +
-  (de.ma ? '<' + de.ma : '');
+const createMaskedEntityId = (de: DeviceEntity): string => {
+  const maskHex = de.m.toString(16).padStart(2, '0');
+  const hasCustomizations = !!(de.cn || de.mi || de.ma);
+  const customizations = [
+    de.cn || '',
+    de.mi ? `>${de.mi}` : '',
+    de.ma ? `<${de.ma}` : ''
+  ]
+    .filter(Boolean)
+    .join('');
+
+  return `${maskHex}${de.id}${hasCustomizations ? `|${customizations}` : ''}`;
+};
 
 const Customizations = () => {
   const { LL } = useI18nContext();
@@ -277,18 +285,22 @@ const Customizations = () => {
     return value as string;
   }
 
-  const formatName = (de: DeviceEntity, withShortname: boolean) =>
-    (de.n && de.n[0] === '!'
-      ? de.t
-        ? LL.COMMAND(1) + ': ' + de.t + ' ' + de.n.slice(1)
-        : LL.COMMAND(1) + ': ' + de.n.slice(1)
-      : de.cn && de.cn !== ''
-        ? de.t
-          ? de.t + ' ' + de.cn
-          : de.cn
-        : de.t
-          ? de.t + ' ' + de.n
-          : de.n) + (withShortname ? ' ' + de.id : '');
+  const formatName = useCallback(
+    (de: DeviceEntity, withShortname: boolean) => {
+      let name: string;
+      if (de.n && de.n[0] === '!') {
+        name = de.t
+          ? `${LL.COMMAND(1)}: ${de.t} ${de.n.slice(1)}`
+          : `${LL.COMMAND(1)}: ${de.n.slice(1)}`;
+      } else if (de.cn && de.cn !== '') {
+        name = de.t ? `${de.t} ${de.cn}` : de.cn;
+      } else {
+        name = de.t ? `${de.t} ${de.n}` : de.n || '';
+      }
+      return withShortname ? `${name} ${de.id}` : name;
+    },
+    [LL]
+  );
 
   const getMaskNumber = (newMask: string[]) => {
     let new_mask = 0;
@@ -322,33 +334,29 @@ const Customizations = () => {
     (de: DeviceEntity) =>
       (de.m & selectedFilters || !selectedFilters) &&
       formatName(de, true).toLowerCase().includes(search.toLowerCase()),
-    [selectedFilters, search]
+    [selectedFilters, search, formatName]
   );
 
-  const maskDisabled = (set: boolean) => {
-    setDeviceEntities(
-      deviceEntities.map(function (de) {
-        if (filter_entity(de)) {
-          return {
-            ...de,
-            m: set
-              ? de.m |
-                (DeviceEntityMask.DV_API_MQTT_EXCLUDE |
-                  DeviceEntityMask.DV_WEB_EXCLUDE)
-              : de.m &
-                ~(
-                  DeviceEntityMask.DV_API_MQTT_EXCLUDE |
-                  DeviceEntityMask.DV_WEB_EXCLUDE
-                )
-          };
-        } else {
+  const maskDisabled = useCallback(
+    (set: boolean) => {
+      setDeviceEntities((prev) =>
+        prev.map((de) => {
+          if (filter_entity(de)) {
+            const excludeMask =
+              DeviceEntityMask.DV_API_MQTT_EXCLUDE | DeviceEntityMask.DV_WEB_EXCLUDE;
+            return {
+              ...de,
+              m: set ? de.m | excludeMask : de.m & ~excludeMask
+            };
+          }
           return de;
-        }
-      })
-    );
-  };
+        })
+      );
+    },
+    [filter_entity]
+  );
 
-  const resetCustomization = async () => {
+  const resetCustomization = useCallback(async () => {
     try {
       await sendResetCustomizations();
       toast.info(LL.CUSTOMIZATIONS_RESTART());
@@ -357,24 +365,28 @@ const Customizations = () => {
     } finally {
       setConfirmReset(false);
     }
-  };
+  }, [sendResetCustomizations, LL]);
 
   const onDialogClose = () => {
     setDialogOpen(false);
   };
 
-  const updateDeviceEntity = (updatedItem: DeviceEntity) => {
+  const updateDeviceEntity = useCallback((updatedItem: DeviceEntity) => {
     setDeviceEntities(
-      deviceEntities?.map((de) =>
-        de.id === updatedItem.id ? { ...de, ...updatedItem } : de
-      )
+      (prev) =>
+        prev?.map((de) =>
+          de.id === updatedItem.id ? { ...de, ...updatedItem } : de
+        ) ?? []
     );
-  };
+  }, []);
 
-  const onDialogSave = (updatedItem: DeviceEntity) => {
-    setDialogOpen(false);
-    updateDeviceEntity(updatedItem);
-  };
+  const onDialogSave = useCallback(
+    (updatedItem: DeviceEntity) => {
+      setDialogOpen(false);
+      updateDeviceEntity(updatedItem);
+    },
+    [updateDeviceEntity]
+  );
 
   const editDeviceEntity = useCallback((de: DeviceEntity) => {
     if (de.n === undefined || (de.n && de.n[0] === '!')) {
@@ -389,52 +401,54 @@ const Customizations = () => {
     setDialogOpen(true);
   }, []);
 
-  const saveCustomization = async () => {
-    if (devices && deviceEntities && selectedDevice !== -1) {
-      const masked_entities = deviceEntities
-        .filter((de: DeviceEntity) => hasEntityChanged(de))
-        .map((new_de) => createMaskedEntityId(new_de));
-
-      // check size in bytes to match buffer in CPP, which is 2048
-      const bytes = new TextEncoder().encode(JSON.stringify(masked_entities)).length;
-      if (bytes > 2000) {
-        toast.warning(LL.CUSTOMIZATIONS_FULL());
-        return;
-      }
-
-      await sendCustomizationEntities({
-        id: selectedDevice,
-        entity_ids: masked_entities
-      })
-        .then(() => {
-          toast.success(LL.CUSTOMIZATIONS_SAVED());
-        })
-        .catch((error: Error) => {
-          if (error.message === 'Reboot required') {
-            setRestartNeeded(true);
-          } else {
-            toast.error(error.message);
-          }
-        })
-        .finally(() => {
-          setOriginalSettings(deviceEntities);
-        });
+  const saveCustomization = useCallback(async () => {
+    if (!devices || !deviceEntities || selectedDevice === -1) {
+      return;
     }
-  };
 
-  const renameDevice = async () => {
+    const masked_entities = deviceEntities
+      .filter((de: DeviceEntity) => hasEntityChanged(de))
+      .map((new_de) => createMaskedEntityId(new_de));
+
+    // check size in bytes to match buffer in CPP, which is 2048
+    const bytes = new TextEncoder().encode(JSON.stringify(masked_entities)).length;
+    if (bytes > MAX_BUFFER_SIZE) {
+      toast.warning(LL.CUSTOMIZATIONS_FULL());
+      return;
+    }
+
+    await sendCustomizationEntities({
+      id: selectedDevice,
+      entity_ids: masked_entities
+    })
+      .then(() => {
+        toast.success(LL.CUSTOMIZATIONS_SAVED());
+      })
+      .catch((error: Error) => {
+        if (error.message === 'Reboot required') {
+          setRestartNeeded(true);
+        } else {
+          toast.error(error.message);
+        }
+      })
+      .finally(() => {
+        setOriginalSettings(deviceEntities);
+      });
+  }, [devices, deviceEntities, selectedDevice, sendCustomizationEntities, LL]);
+
+  const renameDevice = useCallback(async () => {
     await sendDeviceName({ id: selectedDevice, name: selectedDeviceName })
       .then(() => {
         toast.success(LL.UPDATED_OF(LL.NAME(1)));
       })
       .catch(() => {
-        toast.error(LL.UPDATE_OF(LL.NAME(1)) + ' ' + LL.FAILED(1));
+        toast.error(`${LL.UPDATE_OF(LL.NAME(1))} ${LL.FAILED(1)}`);
       })
       .finally(async () => {
         setRename(false);
         await fetchCoreData();
       });
-  };
+  }, [selectedDevice, selectedDeviceName, sendDeviceName, LL, fetchCoreData]);
 
   const renderDeviceList = () => (
     <>

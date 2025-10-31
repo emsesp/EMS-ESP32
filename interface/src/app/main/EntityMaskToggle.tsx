@@ -1,3 +1,5 @@
+import { useCallback, useMemo } from 'react';
+
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 
 import OptionIcon from './OptionIcon';
@@ -40,80 +42,101 @@ const getMaskString = (mask: number): string[] => {
 const hasMask = (mask: number, flag: number): boolean => (mask & flag) === flag;
 
 const EntityMaskToggle = ({ onUpdate, de }: EntityMaskToggleProps) => {
-  const handleChange = (_event: unknown, mask: string[]) => {
-    // Convert selected masks to a number
-    const newMask = getMaskNumber(mask);
+  const handleChange = useCallback(
+    (_event: unknown, mask: string[]) => {
+      // Convert selected masks to a number
+      const newMask = getMaskNumber(mask);
+      const updatedDe = { ...de };
 
-    // Apply business logic for mask interactions
-    // If entity has no name and is set to readonly, also exclude from web
-    if (de.n === '' && hasMask(newMask, DeviceEntityMask.DV_READONLY)) {
-      de.m = newMask | DeviceEntityMask.DV_WEB_EXCLUDE;
-    } else {
-      de.m = newMask;
-    }
+      // Apply business logic for mask interactions
+      // If entity has no name and is set to readonly, also exclude from web
+      if (updatedDe.n === '' && hasMask(newMask, DeviceEntityMask.DV_READONLY)) {
+        updatedDe.m = newMask | DeviceEntityMask.DV_WEB_EXCLUDE;
+      } else {
+        updatedDe.m = newMask;
+      }
 
-    // If excluded from web, cannot be favorite
-    if (hasMask(de.m, DeviceEntityMask.DV_WEB_EXCLUDE)) {
-      de.m = de.m & ~DeviceEntityMask.DV_FAVORITE;
-    }
+      // If excluded from web, cannot be favorite
+      if (hasMask(updatedDe.m, DeviceEntityMask.DV_WEB_EXCLUDE)) {
+        updatedDe.m = updatedDe.m & ~DeviceEntityMask.DV_FAVORITE;
+      }
 
-    onUpdate(de);
-  };
+      onUpdate(updatedDe);
+    },
+    [de, onUpdate]
+  );
 
-  // Check if favorite button should be disabled
-  const isFavoriteDisabled =
-    hasMask(de.m, DeviceEntityMask.DV_WEB_EXCLUDE | DeviceEntityMask.DV_DELETED) ||
-    de.n === undefined;
+  // Memoize mask string value
+  const maskStringValue = useMemo(() => getMaskString(de.m), [de.m]);
 
-  // Check if readonly button should be disabled
-  const isReadonlyDisabled =
-    !de.w ||
-    hasMask(de.m, DeviceEntityMask.DV_WEB_EXCLUDE | DeviceEntityMask.DV_FAVORITE);
+  // Memoize disabled states
+  const isFavoriteDisabled = useMemo(
+    () =>
+      hasMask(de.m, DeviceEntityMask.DV_WEB_EXCLUDE | DeviceEntityMask.DV_DELETED) ||
+      de.n === undefined,
+    [de.m, de.n]
+  );
 
-  // Check if api/mqtt exclude button should be disabled
-  const isApiMqttExcludeDisabled =
-    de.n === '' || hasMask(de.m, DeviceEntityMask.DV_DELETED);
+  const isReadonlyDisabled = useMemo(
+    () =>
+      !de.w ||
+      hasMask(de.m, DeviceEntityMask.DV_WEB_EXCLUDE | DeviceEntityMask.DV_FAVORITE),
+    [de.w, de.m]
+  );
 
-  // Check if web exclude button should be disabled
-  const isWebExcludeDisabled =
-    de.n === undefined || hasMask(de.m, DeviceEntityMask.DV_DELETED);
+  const isApiMqttExcludeDisabled = useMemo(
+    () => de.n === '' || hasMask(de.m, DeviceEntityMask.DV_DELETED),
+    [de.n, de.m]
+  );
+
+  const isWebExcludeDisabled = useMemo(
+    () => de.n === undefined || hasMask(de.m, DeviceEntityMask.DV_DELETED),
+    [de.n, de.m]
+  );
+
+  // Memoize mask flag checks
+  const isFavoriteSet = useMemo(
+    () => hasMask(de.m, DeviceEntityMask.DV_FAVORITE),
+    [de.m]
+  );
+  const isReadonlySet = useMemo(
+    () => hasMask(de.m, DeviceEntityMask.DV_READONLY),
+    [de.m]
+  );
+  const isApiMqttExcludeSet = useMemo(
+    () => hasMask(de.m, DeviceEntityMask.DV_API_MQTT_EXCLUDE),
+    [de.m]
+  );
+  const isWebExcludeSet = useMemo(
+    () => hasMask(de.m, DeviceEntityMask.DV_WEB_EXCLUDE),
+    [de.m]
+  );
+  const isDeletedSet = useMemo(
+    () => hasMask(de.m, DeviceEntityMask.DV_DELETED),
+    [de.m]
+  );
 
   return (
     <ToggleButtonGroup
       size="small"
       color="secondary"
-      value={getMaskString(de.m)}
+      value={maskStringValue}
       onChange={handleChange}
     >
       <ToggleButton value="8" disabled={isFavoriteDisabled}>
-        <OptionIcon
-          type="favorite"
-          isSet={hasMask(de.m, DeviceEntityMask.DV_FAVORITE)}
-        />
+        <OptionIcon type="favorite" isSet={isFavoriteSet} />
       </ToggleButton>
       <ToggleButton value="4" disabled={isReadonlyDisabled}>
-        <OptionIcon
-          type="readonly"
-          isSet={hasMask(de.m, DeviceEntityMask.DV_READONLY)}
-        />
+        <OptionIcon type="readonly" isSet={isReadonlySet} />
       </ToggleButton>
       <ToggleButton value="2" disabled={isApiMqttExcludeDisabled}>
-        <OptionIcon
-          type="api_mqtt_exclude"
-          isSet={hasMask(de.m, DeviceEntityMask.DV_API_MQTT_EXCLUDE)}
-        />
+        <OptionIcon type="api_mqtt_exclude" isSet={isApiMqttExcludeSet} />
       </ToggleButton>
       <ToggleButton value="1" disabled={isWebExcludeDisabled}>
-        <OptionIcon
-          type="web_exclude"
-          isSet={hasMask(de.m, DeviceEntityMask.DV_WEB_EXCLUDE)}
-        />
+        <OptionIcon type="web_exclude" isSet={isWebExcludeSet} />
       </ToggleButton>
       <ToggleButton value="128">
-        <OptionIcon
-          type="deleted"
-          isSet={hasMask(de.m, DeviceEntityMask.DV_DELETED)}
-        />
+        <OptionIcon type="deleted" isSet={isDeletedSet} />
       </ToggleButton>
     </ToggleButtonGroup>
   );

@@ -11,6 +11,40 @@ import type {
   TemperatureSensor
 } from './types';
 
+// Constants
+const ERROR_MESSAGES = {
+  GPIO_INVALID: 'Must be an valid GPIO port',
+  NAME_DUPLICATE: 'Name already in use',
+  GPIO_DUPLICATE: 'GPIO already in use',
+  VALUE_OUT_OF_RANGE: 'Value out of range',
+  HEX_REQUIRED: 'Is required and must be in hex format'
+} as const;
+
+const VALIDATION_LIMITS = {
+  PORT_MIN: 0,
+  PORT_MAX: 65535,
+  MODBUS_MAX_CLIENTS_MIN: 0,
+  MODBUS_MAX_CLIENTS_MAX: 50,
+  MODBUS_TIMEOUT_MIN: 100,
+  MODBUS_TIMEOUT_MAX: 20000,
+  SYSLOG_MARK_INTERVAL_MIN: 0,
+  SYSLOG_MARK_INTERVAL_MAX: 10,
+  SHOWER_MIN_DURATION_MIN: 10,
+  SHOWER_MIN_DURATION_MAX: 360,
+  SHOWER_ALERT_TRIGGER_MIN: 1,
+  SHOWER_ALERT_TRIGGER_MAX: 20,
+  SHOWER_ALERT_COLDSHOT_MIN: 1,
+  SHOWER_ALERT_COLDSHOT_MAX: 10,
+  REMOTE_TIMEOUT_MIN: 1,
+  REMOTE_TIMEOUT_MAX: 240,
+  OFFSET_MIN: 0,
+  OFFSET_MAX: 255,
+  COMMAND_MIN: 1,
+  COMMAND_MAX: 300,
+  NAME_MAX_LENGTH: 19,
+  HEX_BASE: 16
+} as const;
+
 // Helper to create GPIO validator from invalid ranges
 const createGPIOValidator = (
   invalidRanges: Array<number | [number, number]>,
@@ -27,20 +61,20 @@ const createGPIOValidator = (
     }
 
     if (value < 0 || value > maxValue) {
-      callback('Must be an valid GPIO port');
+      callback(ERROR_MESSAGES.GPIO_INVALID);
       return;
     }
 
     for (const range of invalidRanges) {
       if (typeof range === 'number') {
         if (value === range) {
-          callback('Must be an valid GPIO port');
+          callback(ERROR_MESSAGES.GPIO_INVALID);
           return;
         }
       } else {
         const [start, end] = range;
         if (value >= start && value <= end) {
-          callback('Must be an valid GPIO port');
+          callback(ERROR_MESSAGES.GPIO_INVALID);
           return;
         }
       }
@@ -93,9 +127,9 @@ const createGPIOValidations = (
 ): Record<string, ValidationRules> =>
   GPIO_FIELD_NAMES.reduce(
     (acc, field) => {
-      const fieldName = field.replace('_gpio', '');
+      const fieldName = field.replace('_gpio', '').toUpperCase();
       acc[field] = [
-        { required: true, message: `${fieldName.toUpperCase()} GPIO is required` },
+        { required: true, message: `${fieldName} GPIO is required` },
         validator
       ];
       return acc;
@@ -134,11 +168,21 @@ export const createSettingsValidator = (settings: Settings) => {
     ];
     schema.syslog_port = [
       { required: true, message: 'Port is required' },
-      { type: 'number', min: 0, max: 65535, message: 'Invalid Port' }
+      {
+        type: 'number',
+        min: VALIDATION_LIMITS.PORT_MIN,
+        max: VALIDATION_LIMITS.PORT_MAX,
+        message: 'Invalid Port'
+      }
     ];
     schema.syslog_mark_interval = [
       { required: true, message: 'Mark interval is required' },
-      { type: 'number', min: 0, max: 10, message: 'Must be between 0 and 10' }
+      {
+        type: 'number',
+        min: VALIDATION_LIMITS.SYSLOG_MARK_INTERVAL_MIN,
+        max: VALIDATION_LIMITS.SYSLOG_MARK_INTERVAL_MAX,
+        message: `Must be between ${VALIDATION_LIMITS.SYSLOG_MARK_INTERVAL_MIN} and ${VALIDATION_LIMITS.SYSLOG_MARK_INTERVAL_MAX}`
+      }
     ];
   }
 
@@ -146,19 +190,29 @@ export const createSettingsValidator = (settings: Settings) => {
   if (settings.modbus_enabled) {
     schema.modbus_max_clients = [
       { required: true, message: 'Max clients is required' },
-      { type: 'number', min: 0, max: 50, message: 'Invalid number' }
+      {
+        type: 'number',
+        min: VALIDATION_LIMITS.MODBUS_MAX_CLIENTS_MIN,
+        max: VALIDATION_LIMITS.MODBUS_MAX_CLIENTS_MAX,
+        message: 'Invalid number'
+      }
     ];
     schema.modbus_port = [
       { required: true, message: 'Port is required' },
-      { type: 'number', min: 0, max: 65535, message: 'Invalid Port' }
+      {
+        type: 'number',
+        min: VALIDATION_LIMITS.PORT_MIN,
+        max: VALIDATION_LIMITS.PORT_MAX,
+        message: 'Invalid Port'
+      }
     ];
     schema.modbus_timeout = [
       { required: true, message: 'Timeout is required' },
       {
         type: 'number',
-        min: 100,
-        max: 20000,
-        message: 'Must be between 100 and 20000'
+        min: VALIDATION_LIMITS.MODBUS_TIMEOUT_MIN,
+        max: VALIDATION_LIMITS.MODBUS_TIMEOUT_MAX,
+        message: `Must be between ${VALIDATION_LIMITS.MODBUS_TIMEOUT_MIN} and ${VALIDATION_LIMITS.MODBUS_TIMEOUT_MAX}`
       }
     ];
   }
@@ -168,9 +222,9 @@ export const createSettingsValidator = (settings: Settings) => {
     schema.shower_min_duration = [
       {
         type: 'number',
-        min: 10,
-        max: 360,
-        message: 'Time must be between 10 and 360 seconds'
+        min: VALIDATION_LIMITS.SHOWER_MIN_DURATION_MIN,
+        max: VALIDATION_LIMITS.SHOWER_MIN_DURATION_MAX,
+        message: `Time must be between ${VALIDATION_LIMITS.SHOWER_MIN_DURATION_MIN} and ${VALIDATION_LIMITS.SHOWER_MIN_DURATION_MAX} seconds`
       }
     ];
   }
@@ -180,17 +234,17 @@ export const createSettingsValidator = (settings: Settings) => {
     schema.shower_alert_trigger = [
       {
         type: 'number',
-        min: 1,
-        max: 20,
-        message: 'Time must be between 1 and 20 minutes'
+        min: VALIDATION_LIMITS.SHOWER_ALERT_TRIGGER_MIN,
+        max: VALIDATION_LIMITS.SHOWER_ALERT_TRIGGER_MAX,
+        message: `Time must be between ${VALIDATION_LIMITS.SHOWER_ALERT_TRIGGER_MIN} and ${VALIDATION_LIMITS.SHOWER_ALERT_TRIGGER_MAX} minutes`
       }
     ];
     schema.shower_alert_coldshot = [
       {
         type: 'number',
-        min: 1,
-        max: 10,
-        message: 'Time must be between 1 and 10 seconds'
+        min: VALIDATION_LIMITS.SHOWER_ALERT_COLDSHOT_MIN,
+        max: VALIDATION_LIMITS.SHOWER_ALERT_COLDSHOT_MAX,
+        message: `Time must be between ${VALIDATION_LIMITS.SHOWER_ALERT_COLDSHOT_MIN} and ${VALIDATION_LIMITS.SHOWER_ALERT_COLDSHOT_MAX} seconds`
       }
     ];
   }
@@ -200,9 +254,9 @@ export const createSettingsValidator = (settings: Settings) => {
     schema.remote_timeout = [
       {
         type: 'number',
-        min: 1,
-        max: 240,
-        message: 'Timeout must be between 1 and 240 hours'
+        min: VALIDATION_LIMITS.REMOTE_TIMEOUT_MIN,
+        max: VALIDATION_LIMITS.REMOTE_TIMEOUT_MAX,
+        message: `Timeout must be between ${VALIDATION_LIMITS.REMOTE_TIMEOUT_MIN} and ${VALIDATION_LIMITS.REMOTE_TIMEOUT_MAX} hours`
       }
     ];
   }
@@ -226,10 +280,10 @@ const createUniqueNameValidator = <T extends { name: string }>(
         originalName.toLowerCase() !== name.toLowerCase()) &&
       items.find((item) => item.name.toLowerCase() === name.toLowerCase())
     ) {
-      callback('Name already in use');
-    } else {
-      callback();
+      callback(ERROR_MESSAGES.NAME_DUPLICATE);
+      return;
     }
+    callback();
   }
 });
 
@@ -250,23 +304,30 @@ const createUniqueFieldNameValidator = <T>(
         originalName.toLowerCase() !== name.toLowerCase()) &&
       items.find((item) => getName(item).toLowerCase() === name.toLowerCase())
     ) {
-      callback('Name already in use');
-    } else {
-      callback();
+      callback(ERROR_MESSAGES.NAME_DUPLICATE);
+      return;
     }
+    callback();
   }
 });
 
+const NAME_PATTERN_BASE = '[a-zA-Z0-9_]';
+const NAME_PATTERN_MESSAGE = `Must be <${VALIDATION_LIMITS.NAME_MAX_LENGTH + 1} characters: alphanumeric or '_'`;
+
 const NAME_PATTERN = {
   type: 'string' as const,
-  pattern: /^[a-zA-Z0-9_]{0,19}$/,
-  message: "Must be <20 characters: alphanumeric or '_'"
+  pattern: new RegExp(
+    `^${NAME_PATTERN_BASE}{0,${VALIDATION_LIMITS.NAME_MAX_LENGTH}}$`
+  ),
+  message: NAME_PATTERN_MESSAGE
 };
 
 const NAME_PATTERN_REQUIRED = {
   type: 'string' as const,
-  pattern: /^[a-zA-Z0-9_]{1,19}$/,
-  message: "Must be <20 characters: alphanumeric or '_'"
+  pattern: new RegExp(
+    `^${NAME_PATTERN_BASE}{1,${VALIDATION_LIMITS.NAME_MAX_LENGTH}}$`
+  ),
+  message: NAME_PATTERN_MESSAGE
 };
 
 export const uniqueNameValidator = (schedule: ScheduleItem[], o_name?: string) =>
@@ -282,9 +343,9 @@ export const schedulerItemValidation = (
       { required: true, message: 'Command is required' },
       {
         type: 'string',
-        min: 1,
-        max: 300,
-        message: 'Command must be 1-300 characters'
+        min: VALIDATION_LIMITS.COMMAND_MIN,
+        max: VALIDATION_LIMITS.COMMAND_MAX,
+        message: `Command must be ${VALIDATION_LIMITS.COMMAND_MIN}-${VALIDATION_LIMITS.COMMAND_MAX} characters`
       }
     ]
   });
@@ -298,11 +359,11 @@ const hexValidator = {
     value: string,
     callback: (error?: string) => void
   ) {
-    if (!value || isNaN(parseInt(value, 16))) {
-      callback('Is required and must be in hex format');
-    } else {
-      callback();
+    if (!value || Number.isNaN(Number.parseInt(value, VALIDATION_LIMITS.HEX_BASE))) {
+      callback(ERROR_MESSAGES.HEX_REQUIRED);
+      return;
     }
+    callback();
   }
 };
 
@@ -317,7 +378,12 @@ export const entityItemValidation = (entity: EntityItem[], entityItem: EntityIte
     type_id: [hexValidator],
     offset: [
       { required: true, message: 'Offset is required' },
-      { type: 'number', min: 0, max: 255, message: 'Must be between 0 and 255' }
+      {
+        type: 'number',
+        min: VALIDATION_LIMITS.OFFSET_MIN,
+        max: VALIDATION_LIMITS.OFFSET_MAX,
+        message: `Must be between ${VALIDATION_LIMITS.OFFSET_MIN} and ${VALIDATION_LIMITS.OFFSET_MAX}`
+      }
     ],
     factor: [{ required: true, message: 'is required' }]
   });
@@ -341,11 +407,11 @@ export const isGPIOUniqueValidator = (sensors: AnalogSensor[]) => ({
     gpio: number,
     callback: (error?: string) => void
   ) {
-    if (sensors.find((as) => as.g === gpio)) {
-      callback('GPIO already in use');
-    } else {
-      callback();
+    if (sensors.some((as) => as.g === gpio)) {
+      callback(ERROR_MESSAGES.GPIO_DUPLICATE);
+      return;
     }
+    callback();
   }
 });
 
@@ -354,20 +420,26 @@ export const uniqueAnalogNameValidator = (
   o_name?: string
 ) => createUniqueFieldNameValidator(sensors, (s) => s.n, o_name);
 
+const getPlatformGPIOValidator = (platform: string) => {
+  switch (platform) {
+    case 'ESP32S3':
+      return GPIO_VALIDATORS3;
+    case 'ESP32S2':
+      return GPIO_VALIDATORS2;
+    case 'ESP32C3':
+      return GPIO_VALIDATORC3;
+    default:
+      return GPIO_VALIDATOR;
+  }
+};
+
 export const analogSensorItemValidation = (
   sensors: AnalogSensor[],
   sensor: AnalogSensor,
   creating: boolean,
   platform: string
 ) => {
-  const gpioValidator =
-    platform === 'ESP32S3'
-      ? GPIO_VALIDATORS3
-      : platform === 'ESP32S2'
-        ? GPIO_VALIDATORS2
-        : platform === 'ESP32C3'
-          ? GPIO_VALIDATORC3
-          : GPIO_VALIDATOR;
+  const gpioValidator = getPlatformGPIOValidator(platform);
 
   return new Schema({
     n: [NAME_PATTERN, uniqueAnalogNameValidator(sensors, sensor.o_n)],
@@ -395,10 +467,10 @@ export const deviceValueItemValidation = (dv: DeviceValue) =>
             dv.x !== undefined &&
             (value < dv.m || value > dv.x)
           ) {
-            callback('Value out of range');
-          } else {
-            callback();
+            callback(ERROR_MESSAGES.VALUE_OUT_OF_RANGE);
+            return;
           }
+          callback();
         }
       }
     ]

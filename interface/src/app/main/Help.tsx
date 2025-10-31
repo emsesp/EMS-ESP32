@@ -101,9 +101,12 @@ const HelpComponent = () => {
       toast.error(String(error.error?.message || 'An error occurred'));
     });
 
+  // Optimize API call memoization
+  const apiCall = useMemo(() => ({ device: 'system', cmd: 'info', id: 0 }), []);
+
   const handleDownloadSystemInfo = useCallback(() => {
-    void sendAPI({ device: 'system', cmd: 'info', id: 0 });
-  }, [sendAPI]);
+    void sendAPI(apiCall);
+  }, [sendAPI, apiCall]);
 
   const handleImageError = useCallback(() => {
     setImgError(true);
@@ -130,6 +133,8 @@ const HelpComponent = () => {
     ],
     [LL]
   );
+
+  const isAdmin = useMemo(() => me?.admin ?? false, [me?.admin]);
 
   // Memoize image source computation
   const imageSrc = useMemo(
@@ -161,7 +166,7 @@ const HelpComponent = () => {
         </Stack>
       )}
 
-      {me.admin && (
+      {isAdmin && (
         <List>
           {helpLinks.map(({ href, icon, label }) => (
             <ListItem key={href}>

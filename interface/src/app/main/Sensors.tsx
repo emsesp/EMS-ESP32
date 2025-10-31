@@ -49,6 +49,27 @@ import {
   temperatureSensorItemValidation
 } from './validators';
 
+// Constants
+const MS_PER_SECOND = 1000;
+const MS_PER_MINUTE = 60 * MS_PER_SECOND;
+const MS_PER_HOUR = 60 * MS_PER_MINUTE;
+const MS_PER_DAY = 24 * MS_PER_HOUR;
+const DEFAULT_GPIO = 21; // Safe GPIO for all platforms
+const MIN_TEMP_ID = -100;
+const MAX_TEMP_ID = 100;
+const GPIO_25 = 25;
+const GPIO_26 = 26;
+
+const HEADER_BUTTON_STYLE: React.CSSProperties = {
+  fontSize: '14px',
+  justifyContent: 'flex-start'
+};
+
+const HEADER_BUTTON_STYLE_END: React.CSSProperties = {
+  fontSize: '14px',
+  justifyContent: 'flex-end'
+};
+
 const common_theme = {
   BaseRow: `
     font-size: 14px;
@@ -130,11 +151,13 @@ const Sensors = () => {
     }
   );
 
-  useInterval(() => {
+  const intervalCallback = useCallback(() => {
     if (!temperatureDialogOpen && !analogDialogOpen) {
       void fetchSensorData();
     }
-  });
+  }, [temperatureDialogOpen, analogDialogOpen, fetchSensorData]);
+
+  useInterval(intervalCallback);
 
   const temperature_theme = useTheme([common_theme, temperature_theme_config]);
   const analog_theme = useTheme([common_theme, analog_theme_config]);
@@ -160,11 +183,16 @@ const Sensors = () => {
       },
       sortToggleType: SortToggleType.AlternateWithReset,
       sortFns: {
-        GPIO: (array) => array.sort((a, b) => a.g - b.g),
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        NAME: (array) => array.sort((a, b) => a.n.localeCompare(b.n)),
-        TYPE: (array) => array.sort((a, b) => a.t - b.t),
-        VALUE: (array) => array.sort((a, b) => a.v - b.v)
+        GPIO: (array) =>
+          [...array].sort((a, b) => (a as AnalogSensor).g - (b as AnalogSensor).g),
+        NAME: (array) =>
+          [...array].sort((a, b) =>
+            (a as AnalogSensor).n.localeCompare((b as AnalogSensor).n)
+          ),
+        TYPE: (array) =>
+          [...array].sort((a, b) => (a as AnalogSensor).t - (b as AnalogSensor).t),
+        VALUE: (array) =>
+          [...array].sort((a, b) => (a as AnalogSensor).v - (b as AnalogSensor).v)
       }
     }
   );
@@ -180,9 +208,15 @@ const Sensors = () => {
       },
       sortToggleType: SortToggleType.AlternateWithReset,
       sortFns: {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        NAME: (array) => array.sort((a, b) => a.n.localeCompare(b.n)),
-        VALUE: (array) => array.sort((a, b) => a.t - b.t)
+        NAME: (array) =>
+          [...array].sort((a, b) =>
+            (a as TemperatureSensor).n.localeCompare((b as TemperatureSensor).n)
+          ),
+        VALUE: (array) =>
+          [...array].sort(
+            (a, b) =>
+              ((a as TemperatureSensor).t ?? 0) - ((b as TemperatureSensor).t ?? 0)
+          )
       }
     }
   );
@@ -191,21 +225,22 @@ const Sensors = () => {
 
   const formatDurationMin = useCallback(
     (duration_min: number) => {
-      const days = Math.trunc((duration_min * 60000) / 86400000);
-      const hours = Math.trunc((duration_min * 60000) / 3600000) % 24;
-      const minutes = Math.trunc((duration_min * 60000) / 60000) % 60;
+      const totalMs = duration_min * MS_PER_MINUTE;
+      const days = Math.trunc(totalMs / MS_PER_DAY);
+      const hours = Math.trunc(totalMs / MS_PER_HOUR) % 24;
+      const minutes = Math.trunc(totalMs / MS_PER_MINUTE) % 60;
 
-      let formatted = '';
-      if (days) {
-        formatted += LL.NUM_DAYS({ num: days }) + ' ';
+      const parts: string[] = [];
+      if (days > 0) {
+        parts.push(LL.NUM_DAYS({ num: days }));
       }
-      if (hours) {
-        formatted += LL.NUM_HOURS({ num: hours }) + ' ';
+      if (hours > 0) {
+        parts.push(LL.NUM_HOURS({ num: hours }));
       }
-      if (minutes) {
-        formatted += LL.NUM_MINUTES({ num: minutes });
+      if (minutes > 0) {
+        parts.push(LL.NUM_MINUTES({ num: minutes }));
       }
-      return formatted;
+      return parts.join(' ');
     },
     [LL]
   );
@@ -298,9 +333,9 @@ const Sensors = () => {
   const addAnalogSensor = useCallback(() => {
     setCreating(true);
     setSelectedAnalogSensor({
-      id: Math.floor(Math.random() * (Math.floor(200) - 100) + 100),
+      id: Math.floor(Math.random() * (MAX_TEMP_ID - MIN_TEMP_ID) + MIN_TEMP_ID),
       n: '',
-      g: 21, // default GPIO 21 which is safe for all platforms
+      g: DEFAULT_GPIO,
       u: 0,
       v: 0,
       o: 0,
@@ -354,7 +389,7 @@ const Sensors = () => {
                 <HeaderCell stiff>
                   <Button
                     fullWidth
-                    style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                    style={HEADER_BUTTON_STYLE}
                     endIcon={getSortIcon(analog_sort.state, 'GPIO')}
                     onClick={() => analog_sort.fns.onToggleSort({ sortKey: 'GPIO' })}
                   >
@@ -364,7 +399,7 @@ const Sensors = () => {
                 <HeaderCell resize>
                   <Button
                     fullWidth
-                    style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                    style={HEADER_BUTTON_STYLE}
                     endIcon={getSortIcon(analog_sort.state, 'NAME')}
                     onClick={() => analog_sort.fns.onToggleSort({ sortKey: 'NAME' })}
                   >
@@ -374,7 +409,7 @@ const Sensors = () => {
                 <HeaderCell stiff>
                   <Button
                     fullWidth
-                    style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                    style={HEADER_BUTTON_STYLE}
                     endIcon={getSortIcon(analog_sort.state, 'TYPE')}
                     onClick={() => analog_sort.fns.onToggleSort({ sortKey: 'TYPE' })}
                   >
@@ -384,7 +419,7 @@ const Sensors = () => {
                 <HeaderCell stiff>
                   <Button
                     fullWidth
-                    style={{ fontSize: '14px', justifyContent: 'flex-end' }}
+                    style={HEADER_BUTTON_STYLE_END}
                     endIcon={getSortIcon(analog_sort.state, 'VALUE')}
                     onClick={() =>
                       analog_sort.fns.onToggleSort({ sortKey: 'VALUE' })
@@ -401,12 +436,16 @@ const Sensors = () => {
                   <Cell stiff>{a.g}</Cell>
                   <Cell>{a.n}</Cell>
                   <Cell stiff>{AnalogTypeNames[a.t]} </Cell>
-                  {(a.t === AnalogType.DIGITAL_OUT && a.g !== 25 && a.g !== 26) ||
+                  {(a.t === AnalogType.DIGITAL_OUT &&
+                    a.g !== GPIO_25 &&
+                    a.g !== GPIO_26) ||
                   a.t === AnalogType.DIGITAL_IN ||
                   a.t === AnalogType.PULSE ? (
                     <Cell stiff>{a.v ? LL.ON() : LL.OFF()}</Cell>
                   ) : (
-                    <Cell stiff>{a.t ? formatValue(a.v, a.u) : ''}</Cell>
+                    <Cell stiff>
+                      {a.t !== AnalogType.NOTUSED ? formatValue(a.v, a.u) : ''}
+                    </Cell>
                   )}
                 </Row>
               ))}
@@ -441,7 +480,7 @@ const Sensors = () => {
                 <HeaderCell resize>
                   <Button
                     fullWidth
-                    style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                    style={HEADER_BUTTON_STYLE}
                     endIcon={getSortIcon(temperature_sort.state, 'NAME')}
                     onClick={() =>
                       temperature_sort.fns.onToggleSort({ sortKey: 'NAME' })
@@ -453,7 +492,7 @@ const Sensors = () => {
                 <HeaderCell stiff>
                   <Button
                     fullWidth
-                    style={{ fontSize: '14px', justifyContent: 'flex-end' }}
+                    style={HEADER_BUTTON_STYLE_END}
                     endIcon={getSortIcon(temperature_sort.state, 'VALUE')}
                     onClick={() =>
                       temperature_sort.fns.onToggleSort({ sortKey: 'VALUE' })
