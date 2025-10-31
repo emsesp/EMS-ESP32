@@ -17,7 +17,7 @@
     "preview-standalone": "typesafe-i18n --no-watch && vite build && concurrently -c \"auto\" \"pnpm:mock-rest\" \"vite preview\"",
     "standalone": "concurrently -c \"auto\" \"typesafe-i18n\" \"pnpm:mock-rest\" \"vite dev\"",
     "typesafe-i18n": "typesafe-i18n --no-watch",
-    "webUI": "node progmem-generator.js",
+    "webUI": "vite build && node progmem-generator.js",
     "format": "prettier -l -w '**/*.{ts,tsx,js,css,json,md}'",
     "lint": "eslint . --fix"
   },
