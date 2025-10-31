@@ -20,7 +20,6 @@ pnpm format
 
 cd ..
 cd interface
-pnpm build
 pnpm webUI
 
 cd ..
