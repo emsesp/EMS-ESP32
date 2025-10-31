@@ -2,8 +2,25 @@
 // Simulates file uploads and EventSource (SSE) for log messages
 import formidable from 'formidable';
 
+// Constants reused across requests
+const VALID_EXTENSIONS = new Set(['bin', 'json', 'md5']);
+const ONE_SECOND_MS = 1000;
+const TEN_PERCENT = 10;
+
 // Optimized padding function
 const pad = (number) => String(number).padStart(2, '0');
+
+// Simple throttle helper (time-based)
+const throttle = (fn, intervalMs) => {
+  let last = 0;
+  return (...args) => {
+    const now = Date.now();
+    if (now - last >= intervalMs) {
+      last = now;
+      fn(...args);
+    }
+  };
+};
 
 // Cached date formatter to avoid prototype pollution
 const formatDate = (date) => {
@@ -28,22 +45,50 @@ export default () => {
       server.middlewares.use(async (req, res, next) => {
         // Handle file uploads
         if (req.url.startsWith('/rest/uploadFile')) {
+          // CORS preflight support
+          if (req.method === 'OPTIONS') {
+            res.writeHead(204, {
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Methods': 'POST, OPTIONS',
+              'Access-Control-Allow-Headers': 'Content-Type, Cache-Control',
+              'Access-Control-Max-Age': '600'
+            });
+            res.end();
+            return;
+          }
+
+          if (req.method !== 'POST') {
+            res.statusCode = 405;
+            res.setHeader('Allow', 'POST, OPTIONS');
+            res.end('Method Not Allowed');
+            return;
+          }
+
           const fileSize = parseInt(req.headers['content-length'] || '0', 10);
           let progress = 0;
 
           // Track upload progress
+          const logThrottled = throttle((percentage) => {
+            console.log(`Upload progress: ${percentage}%`);
+          }, ONE_SECOND_MS);
+
           req.on('data', (chunk) => {
             progress += chunk.length;
             if (fileSize > 0) {
               const percentage = Math.round((progress / fileSize) * 100);
-              console.log(`Upload progress: ${percentage}%`);
+              // Only log every ~1s and for meaningful changes (>=10%)
+              if (percentage % TEN_PERCENT === 0) {
+                logThrottled(percentage);
+              }
             }
           });
 
           try {
             const form = formidable({
               maxFileSize: 50 * 1024 * 1024, // 50MB limit
-              keepExtensions: true
+              keepExtensions: true,
+              multiples: false,
+              allowEmptyFiles: false
             });
 
             const [fields, files] = await form.parse(req);
@@ -54,7 +99,9 @@ export default () => {
               return;
             }
 
-            const uploadedFile = files.file[0];
+            const uploadedFile = Array.isArray(files.file)
+              ? files.file[0]
+              : files.file;
             const fileName = uploadedFile.originalFilename;
             const fileExtension = fileName
               .substring(fileName.lastIndexOf('.') + 1)
@@ -65,8 +112,7 @@ export default () => {
             );
 
             // Validate file extension
-            const validExtensions = new Set(['bin', 'json', 'md5']);
-            if (!validExtensions.has(fileExtension)) {
+            if (!VALID_EXTENSIONS.has(fileExtension)) {
               res.statusCode = 406;
               res.end('Invalid file extension');
               return;
@@ -85,10 +131,10 @@ export default () => {
               res.end();
             }
           } catch (err) {
-            console.error('Upload error:', err.message);
+            console.error('Upload error:', err && err.message ? err.message : err);
             res.statusCode = err.httpCode || 400;
             res.setHeader('Content-Type', 'text/plain');
-            res.end(err.message);
+            res.end(err && err.message ? err.message : 'Upload error');
           }
         }
 
@@ -97,11 +143,17 @@ export default () => {
           // Set SSE headers
           res.writeHead(200, {
             Connection: 'keep-alive',
-            'Cache-Control': 'no-cache',
+            'Cache-Control': 'no-cache, no-transform',
             'Content-Type': 'text/event-stream',
             'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Headers': 'Cache-Control'
+            'Access-Control-Allow-Headers': 'Cache-Control',
+            'X-Accel-Buffering': 'no' // disable proxy buffering (nginx, etc.)
           });
+
+          // Flush headers early when supported
+          if (typeof res.flushHeaders === 'function') {
+            res.flushHeaders();
+          }
 
           let messageCount = 0;
           const logLevels = [3, 4, 5, 6, 7, 8]; // Different log levels
@@ -131,15 +183,24 @@ export default () => {
           };
 
           // Send initial message
+          res.write(`retry: 2000\n\n`); // client reconnection delay
           sendLogMessage();
 
           // Set up interval for periodic messages
-          const interval = setInterval(sendLogMessage, 500);
+          const messageInterval = setInterval(sendLogMessage, 500);
+          if (typeof messageInterval.unref === 'function') messageInterval.unref();
+
+          // Heartbeat to keep connections alive through proxies
+          const heartbeat = setInterval(() => {
+            res.write(`:keep-alive ${Date.now()}\n\n`);
+          }, 15 * ONE_SECOND_MS);
+          if (typeof heartbeat.unref === 'function') heartbeat.unref();
 
           // Clean up on connection close
           const cleanup = () => {
             console.log('SSE connection closed');
-            clearInterval(interval);
+            clearInterval(messageInterval);
+            clearInterval(heartbeat);
             if (!res.destroyed) {
               res.end();
             }
@@ -147,6 +208,7 @@ export default () => {
 
           res.on('close', cleanup);
           res.on('error', cleanup);
+          res.on('finish', cleanup);
         } else {
           next(); // Continue to next middleware
         }
