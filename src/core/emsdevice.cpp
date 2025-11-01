@@ -990,11 +990,11 @@ void EMSdevice::generate_values_web(JsonObject output, const bool is_dashboard) 
                 } else if ((dv.type == DeviceValueType::UINT16) && Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
                     obj["v"] = Helpers::transformNumFloat(*(uint16_t *)(dv.value_p), dv.numeric_operator, fahrenheit);
                 } else if ((dv.type == DeviceValueType::UINT24) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    obj["v"] = dv.numeric_operator > 0 ? *(uint32_t *)(dv.value_p) / dv.numeric_operator : *(uint32_t *)(dv.value_p);
+                    obj["v"] = dv.numeric_operator > 0 ? Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), dv.numeric_operator) : *(uint32_t *)(dv.value_p);
                 } else if ((dv.type == DeviceValueType::TIME) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
                     obj["v"] = dv.numeric_operator > 0 ? *(uint32_t *)(dv.value_p) / dv.numeric_operator : *(uint32_t *)(dv.value_p);
                 } else if ((dv.type == DeviceValueType::UINT32) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    obj["v"] = dv.numeric_operator > 0 ? *(uint32_t *)(dv.value_p) / dv.numeric_operator : *(uint32_t *)(dv.value_p);
+                    obj["v"] = dv.numeric_operator > 0 ? Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), dv.numeric_operator) : *(uint32_t *)(dv.value_p);
                 } else {
                     obj["v"] = ""; // must have a value for sorting to work
                 }
@@ -1100,7 +1100,7 @@ void EMSdevice::generate_values_web_customization(JsonArray output) {
                 } else if (dv.type == DeviceValueType::UINT16) {
                     obj["v"] = Helpers::transformNumFloat(*(uint16_t *)(dv.value_p), dv.numeric_operator, fahrenheit);
                 } else if (dv.type == DeviceValueType::UINT24 || dv.type == DeviceValueType::UINT32) {
-                    obj["v"] = dv.numeric_operator > 0 ? *(uint32_t *)(dv.value_p) / dv.numeric_operator : *(uint32_t *)(dv.value_p);
+                    obj["v"] = dv.numeric_operator > 0 ? Helpers::transformNumFloat(*(uint32_t *)(dv.value_p), dv.numeric_operator) : *(uint32_t *)(dv.value_p);
                 } else if (dv.type == DeviceValueType::TIME) {
                     obj["v"] = dv.numeric_operator > 0 ? *(uint32_t *)(dv.value_p) / dv.numeric_operator : *(uint32_t *)(dv.value_p);
                 }
