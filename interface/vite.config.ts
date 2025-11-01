@@ -2,7 +2,7 @@ import preact from '@preact/preset-vite';
 import fs from 'fs';
 import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
-import { defineConfig, Plugin } from 'vite';
+import { Plugin, defineConfig } from 'vite';
 import viteImagemin from 'vite-plugin-imagemin';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 import zlib from 'zlib';
@@ -80,7 +80,9 @@ const bundleSizeReporter = (): Plugin => {
 
       console.log(REPEAT_CHAR.repeat(REPEAT_COUNT));
       console.log(`📊 Total Bundle Size: ${(totalSize / KB_DIVISOR).toFixed(2)} KB`);
-      console.log(`🗜️  Total Gzipped Size: ${(totalGzipSize / KB_DIVISOR).toFixed(2)} KB`);
+      console.log(
+        `🗜️  Total Gzipped Size: ${(totalGzipSize / KB_DIVISOR).toFixed(2)} KB`
+      );
       console.log(`📈 Compression Ratio: ${compressionRatio.toFixed(1)}%`);
       console.log(REPEAT_CHAR.repeat(REPEAT_COUNT));
     }
@@ -95,11 +97,11 @@ const createPreactPlugin = (devToolsEnabled: boolean) =>
   });
 
 // Common base plugins
-const createBasePlugins = (devToolsEnabled: boolean, includeBundleReporter = true) => {
-  const plugins = [
-    createPreactPlugin(devToolsEnabled),
-    viteTsconfigPaths()
-  ];
+const createBasePlugins = (
+  devToolsEnabled: boolean,
+  includeBundleReporter = true
+) => {
+  const plugins = [createPreactPlugin(devToolsEnabled), viteTsconfigPaths()];
   if (includeBundleReporter) {
     plugins.push(bundleSizeReporter());
   }
@@ -214,10 +216,7 @@ export default defineConfig(
     if (command === 'serve') {
       console.log(`Preparing for standalone build with server, mode=${mode}`);
       return {
-        plugins: [
-          ...createBasePlugins(true, true),
-          mockServer()
-        ],
+        plugins: [...createBasePlugins(true, true), mockServer()],
         resolve: {
           alias: RESOLVE_ALIASES
         },
