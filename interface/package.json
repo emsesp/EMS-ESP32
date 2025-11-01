@@ -31,6 +31,7 @@
     "@table-library/react-table-library": "4.1.15",
     "alova": "3.3.4",
     "async-validator": "^4.2.5",
+    "etag": "^1.8.1",
     "formidable": "^3.5.4",
     "jwt-decode": "^4.0.0",
     "magic-string": "^0.30.21",
