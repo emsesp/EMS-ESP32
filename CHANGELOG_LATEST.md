@@ -48,6 +48,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - fix wwMaxPower on Junkers ZBS14 [#2609](https://github.com/emsesp/EMS-ESP32/issues/2609)
 - ventilation bypass state from telegram 0x55C [#1197](https://github.com/emsesp/EMS-ESP32/issues/1197)
 - set selflowtemp for ems+ boilers [#2641](https://github.com/emsesp/EMS-ESP32/discussions/2641)
+- syslog timestamp [#2704](https://github.com/emsesp/EMS-ESP32/issues/2704)
 
 ## Changed
 

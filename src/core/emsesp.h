@@ -38,7 +38,7 @@
 #endif
 
 #ifndef EMSESP_STANDALONE
-#include "ESP32React/ESP32React.h"
+#include "../ESP32React/ESP32React.h"
 #else
 #include "../lib_standalone/ESP32React.h"
 #endif
