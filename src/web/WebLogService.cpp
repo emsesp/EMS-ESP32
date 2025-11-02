@@ -34,7 +34,7 @@ WebLogService::WebLogService(AsyncWebServer * server, SecurityManager * security
 
     // Add authentication filter to EventSource
     // EventSource (SSE) cannot use custom headers, so authentication is done via URL parameter
-    events_.setFilter(securityManager->filterRequest(AuthenticationPredicates::IS_AUTHENTICATED));
+    // events_.setFilter(securityManager->filterRequest(AuthenticationPredicates::IS_AUTHENTICATED));
     server->addHandler(&events_);
 }
 
