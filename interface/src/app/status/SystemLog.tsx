@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
@@ -206,15 +206,14 @@ const SystemLog = () => {
     }
   }, [readValue, readOpen, send]);
 
-  // Memoize box positioning to avoid recalculating on every render
-  const boxPosition = useMemo(() => {
+  const boxPosition = () => {
     const logWindow = document.getElementById('log-window');
     if (!logWindow) {
       return { top: 0, left: 0 };
     }
     const rect = logWindow.getBoundingClientRect();
     return { top: rect.bottom, left: rect.left };
-  }, [data]); // Recalculate only when data changes (settings may affect layout)
+  };
 
   const content = () => {
     if (!data) {
@@ -359,8 +358,8 @@ const SystemLog = () => {
             position: 'absolute',
             right: 18,
             bottom: 18,
-            left: boxPosition.left,
-            top: boxPosition.top - 110,
+            left: boxPosition().left,
+            top: boxPosition().top,
             p: 1
           }}
         >
