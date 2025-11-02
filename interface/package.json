@@ -19,7 +19,8 @@
     "typesafe-i18n": "typesafe-i18n --no-watch",
     "webUI": "node progmem-generator.js",
     "format": "prettier -l -w '**/*.{ts,tsx,js,css,json,md}'",
-    "lint": "eslint . --fix"
+    "lint": "eslint . --fix",
+    "standalone-devcontainer": "concurrently -c \"auto\" \"typesafe-i18n\" \"pnpm:mock-rest\" \"vite --host\""
   },
   "dependencies": {
     "@alova/adapter-xhr": "2.2.1",
