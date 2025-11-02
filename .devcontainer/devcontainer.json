@@ -1,0 +1,27 @@
+{
+	"name": "EMS-ESP Devcontainer",
+	"image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+	"features": {
+		"ghcr.io/devcontainers/features/node:1": {},
+		"ghcr.io/devcontainers-extra/features/pnpm:2": {},
+		"ghcr.io/devcontainers/features/python:1": {},
+		"ghcr.io/shyim/devcontainers-features/bun:0": {}
+	},
+
+	"forwardPorts": [
+		3000,
+		3080
+	],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "cd mock-api && pnpm install && cd .. && cd interface && pnpm install",
+
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"platformio.platformio-ide"
+			]
+		}
+	}
+}
