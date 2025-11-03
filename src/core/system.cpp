@@ -214,7 +214,7 @@ bool System::command_message(const char * value, const int8_t id, JsonObject out
 
     EMSESP::webSchedulerService.computed_value.clear();
     EMSESP::webSchedulerService.raw_value = value;
-    for (uint8_t wait = 0; wait < 2000 && !EMSESP::webSchedulerService.raw_value.empty(); wait++) {
+    for (uint16_t wait = 0; wait < 2000 && !EMSESP::webSchedulerService.raw_value.empty(); wait++) {
         delay(1);
     }
 
