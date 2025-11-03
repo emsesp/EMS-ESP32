@@ -19,7 +19,8 @@
     "typesafe-i18n": "typesafe-i18n --no-watch",
     "webUI": "vite build && node progmem-generator.js",
     "format": "prettier -l -w '**/*.{ts,tsx,js,css,json,md}'",
-    "lint": "eslint . --fix"
+    "lint": "eslint . --fix",
+    "standalone-devcontainer": "concurrently -c \"auto\" \"typesafe-i18n\" \"pnpm:mock-rest\" \"vite --host\""
   },
   "dependencies": {
     "@alova/adapter-xhr": "2.2.1",
@@ -48,6 +49,7 @@
   "devDependencies": {
     "@babel/core": "^7.28.5",
     "@eslint/js": "^9.39.0",
+    "@preact/compat": "^18.3.1",
     "@preact/preset-vite": "^2.10.2",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/node": "^24.10.0",
@@ -64,5 +66,5 @@
     "vite-plugin-imagemin": "^0.6.1",
     "vite-tsconfig-paths": "^5.1.4"
   },
-  "packageManager": "pnpm@10.20.0+sha512.cf9998222162dd85864d0a8102e7892e7ba4ceadebbf5a31f9c2fce48dfce317a9c53b9f6464d1ef9042cba2e02ae02a9f7c143a2b438cd93c91840f0192b9dd"
+  "packageManager": "pnpm@10.20.0"
 }

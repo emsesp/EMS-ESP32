@@ -887,6 +887,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_hpPumpMode));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &fan_, DeviceValueType::UINT8, FL_(hpFan), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_fan), 20, 100);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &fanspd_, DeviceValueType::UINT8, FL_(fanSpd), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &hpshutdown_,
                               DeviceValueType::CMD,
@@ -1215,10 +1216,9 @@ void Boiler::check_active() {
         if (has_telegram_id(0xE4)) {
             uint8_t data[] = {1, 0, 0, 1, 1};
             write_command(EMS_TYPE_UBASetPoints2, 0, data, sizeof(data), 0);
-        } else {
-            uint8_t data[] = {0, 0, 0, 0};
-            write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
         }
+        uint8_t data[] = {0, 0, 0, 0};
+        write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
     }
 
     // calculate energy for boiler 0x08 from stored modulation an time in units of 0.01 Wh
@@ -1733,6 +1733,7 @@ void Boiler::process_HpPower(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hpTargetSpd_, 22);
     has_update(telegram, receiverValveVr0_, 15);
     has_update(telegram, expansionValveVr1_, 16);
+    has_update(telegram, fanspd_, 19);
 
     // has_update(hpHeatingOn_, hpActivity_ == 1 ? 0xFF : 0);
     // has_update(hpCoolingOn_, hpActivity_ == 2 ? 0xFF : 0);
@@ -2476,6 +2477,7 @@ bool Boiler::set_burn_power(const char * value, const int8_t id) {
 
     if (has_telegram_id(0xE4)) {
         write_command(EMS_TYPE_UBASetPoints2, 2, v);
+        write_command(EMS_TYPE_UBASetPoints, 1, v);
     } else {
         write_command(EMS_TYPE_UBASetPoints, 1, v);
     }
@@ -3459,13 +3461,12 @@ bool Boiler::set_forceHeatingOff(const char * value, const int8_t id) {
             if (has_telegram_id(0xE4)) {
                 uint8_t data[] = {1, heatingTemp_, (Helpers::hasValue(burnMaxPower_) ? burnMaxPower_ : (uint8_t)100), 1, 1};
                 write_command(EMS_TYPE_UBASetPoints2, 0, data, sizeof(data), 0);
-            } else {
-                uint8_t data[] = {heatingTemp_,
-                                  (Helpers::hasValue(burnMaxPower_) ? burnMaxPower_ : (uint8_t)100),
-                                  (Helpers::hasValue(pumpModMax_) ? pumpModMax_ : (uint8_t)100),
-                                  0};
-                write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
             }
+            uint8_t data[] = {heatingTemp_,
+                              (Helpers::hasValue(burnMaxPower_) ? burnMaxPower_ : (uint8_t)100),
+                              (Helpers::hasValue(pumpModMax_) ? pumpModMax_ : (uint8_t)100),
+                              0};
+            write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
         }
         has_update(forceHeatingOff_, v);
         return true;

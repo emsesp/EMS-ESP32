@@ -81,6 +81,9 @@ importers:
       '@eslint/js':
         specifier: ^9.39.0
         version: 9.39.0
+      '@preact/compat':
+        specifier: ^18.3.1
+        version: 18.3.1(preact@10.27.2)
       '@preact/preset-vite':
         specifier: ^2.10.2
         version: 2.10.2(@babel/core@7.28.5)(preact@10.27.2)(vite@7.1.12(@types/node@24.10.0)(terser@5.44.0))

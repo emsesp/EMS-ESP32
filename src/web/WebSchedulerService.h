@@ -86,6 +86,9 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
     uint8_t count_entities(bool cmd_only = false);
     bool    onChange(const char * cmd);
 
+    std::string raw_value;
+    std::string computed_value;
+
 #if defined(EMSESP_TEST)
     void load_test_data();
 #endif
