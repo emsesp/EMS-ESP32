@@ -733,7 +733,11 @@ const Customizations = () => {
                   startIcon={<CancelIcon />}
                   variant="outlined"
                   color="secondary"
-                  onClick={() => devices && sendDeviceEntities(selectedDevice)}
+                  onClick={() => {
+                    if (devices) {
+                      void sendDeviceEntities(selectedDevice);
+                    }
+                  }}
                 >
                   {LL.CANCEL()}
                 </Button>
