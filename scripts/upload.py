@@ -36,8 +36,34 @@ except ImportError:
     from termcolor import cprint
 
 
-def print_success(x): return cprint(x, 'green')
-def print_fail(x): return cprint('Error: '+x, 'red')
+def print_success(x):
+    cprint(x, 'green')
+
+
+def print_fail(x):
+    cprint(f'Error: {x}', 'red')
+
+
+def build_headers(host_ip, emsesp_url, content_type='application/json', access_token=None, extra_headers=None):
+    """Build common HTTP headers with optional overrides."""
+    headers = {
+        'Host': host_ip,
+        'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/118.0',
+        'Accept': '*/*',
+        'Accept-Language': 'en-US',
+        'Accept-Encoding': 'gzip, deflate',
+        'Referer': emsesp_url,
+        'Content-Type': content_type,
+        'Connection': 'keep-alive'
+    }
+    
+    if access_token:
+        headers['Authorization'] = f'Bearer {access_token}'
+    
+    if extra_headers:
+        headers.update(extra_headers)
+    
+    return headers
 
 
 def on_upload(source, target, env):
@@ -53,26 +79,16 @@ def on_upload(source, target, env):
         username = env.GetProjectOption('custom_username')
         password = env.GetProjectOption('custom_password')
         emsesp_ip = env.GetProjectOption('custom_emsesp_ip')
-    except:
-        print_fail('Missing settings. Add these to your pio_local.ini file: \n\ncustom_username=username\ncustom_password=password\ncustom_emsesp_ip=ems-esp.local\n')
+    except Exception as e:
+        print_fail(f'Missing settings. Add these to your pio_local.ini file:\n\ncustom_username=username\ncustom_password=password\ncustom_emsesp_ip=ems-esp.local\n')
         return
 
-    emsesp_url = "http://" + env.GetProjectOption('custom_emsesp_ip')
+    emsesp_url = f"http://{emsesp_ip}"
     parsed_url = urlparse(emsesp_url)
     host_ip = parsed_url.netloc
 
     signon_url = f"{emsesp_url}/rest/signIn"
-
-    signon_headers = {
-        'Host': host_ip,
-        'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/118.0',
-        'Accept': '*/*',
-        'Accept-Language': 'en-US',
-        'Accept-Encoding': 'gzip, deflate',
-        'Referer': f'{emsesp_url}',
-        'Content-Type': 'application/json',
-        'Connection': 'keep-alive'
-    }
+    signon_headers = build_headers(host_ip, emsesp_url)
 
     username_password = {
         "username": username,
@@ -114,19 +130,16 @@ def on_upload(source, target, env):
         monitor = MultipartEncoderMonitor(
             encoder, lambda monitor: bar.update(monitor.bytes_read - bar.n))
 
-        post_headers = {
-            'Host': host_ip,
-            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/118.0',
-            'Accept': '*/*',
-            'Accept-Language': 'en-US',
-            'Accept-Encoding': 'gzip, deflate',
-            'Referer': f'{emsesp_url}',
-            'Connection': 'keep-alive',
-            'Content-Type': monitor.content_type,
-            'Content-Length': str(monitor.len),
-            'Origin': f'{emsesp_url}',
-            'Authorization': 'Bearer ' + f'{access_token}'
-        }
+        post_headers = build_headers(
+            host_ip,
+            emsesp_url,
+            content_type=monitor.content_type,
+            access_token=access_token,
+            extra_headers={
+                'Content-Length': str(monitor.len),
+                'Origin': emsesp_url
+            }
+        )
 
         upload_url = f"{emsesp_url}/rest/uploadFile"
 
@@ -139,25 +152,15 @@ def on_upload(source, target, env):
         print()
 
         if response.status_code != 200:
-            print_fail("Upload failed (code " + response.status.code + ").")
+            print_fail(f"Upload failed (code {response.status_code}).")
         else:
             print_success("Upload successful. Rebooting device.")
-            restart_headers = {
-                'Host': host_ip,
-                'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/118.0',
-                'Accept': '*/*',
-                'Accept-Language': 'en-US',
-                'Accept-Encoding': 'gzip, deflate',
-                'Referer': f'{emsesp_url}',
-                'Content-Type': 'application/json',
-                'Connection': 'keep-alive',
-                'Authorization': 'Bearer ' + f'{access_token}'
-            }
+            restart_headers = build_headers(
+                host_ip, emsesp_url, access_token=access_token)
             restart_url = f"{emsesp_url}/api/system/restart"
             response = requests.get(restart_url, headers=restart_headers)
             if response.status_code != 200:
-                print_fail("Restart failed (code " +
-                           str(response.status_code) + ")")
+                print_fail(f"Restart failed (code {response.status_code})")
 
         print()
 
