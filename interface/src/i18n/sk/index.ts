@@ -187,6 +187,7 @@ const sk: Translation = {
   BUFFER_SIZE: 'Buffer-max. veľkosť',
   COMPACT: 'Kompaktné',
   DOWNLOAD_SETTINGS_TEXT: 'Vytvorte zálohu svojej konfigurácie a nastavení',
+  DOWNLOAD_SETTINGS_TEXT2: 'Exportovať všetky dáta',
   UPLOAD_TEXT: 'Nahrajte nový súbor firmvéru (.bin) alebo súbor zálohy (.json)',
   UPLOAD_DROP_TEXT: 'Presuňte súbor .bin firmvéru alebo kliknite sem',
   ERROR: 'Neočakávaná chyba, prosím skúste to znova',

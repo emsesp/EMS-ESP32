@@ -187,6 +187,7 @@ const no: Translation = {
   BUFFER_SIZE: 'Max Buffer Størrelse',
   COMPACT: 'Komprimere',
   DOWNLOAD_SETTINGS_TEXT: 'Lag en sikkerhetskopi av dine konfigurasjon og innstillinger',
+  DOWNLOAD_SETTINGS_TEXT2: 'Eksporter alle data',
   UPLOAD_TEXT: 'Last opp en ny firmware fil (.bin) eller en sikkerhetskopi fil (.json)',
   UPLOAD_DROP_TEXT: 'Dropp en firmware fil (.bin) eller klikk her',
   ERROR: 'Ukjent feil, prøv igjen',

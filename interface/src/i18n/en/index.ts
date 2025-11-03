@@ -187,6 +187,7 @@ const en: Translation = {
   BUFFER_SIZE: 'Max Buffer Size',
   COMPACT: 'Compact',
   DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings',
+  DOWNLOAD_SETTINGS_TEXT2: 'Export all data',
   UPLOAD_TEXT: 'Upload a new firmware file (.bin) or a backup file (.json)',
   UPLOAD_DROP_TEXT: 'Drop a firmware .bin file or click here',
   ERROR: 'Unexpected Error, please try again',

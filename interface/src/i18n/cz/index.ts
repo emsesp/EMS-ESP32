@@ -187,6 +187,7 @@ const cz: Translation = {
   BUFFER_SIZE: 'Maximální velikost vyrovnávací paměti',
   COMPACT: 'Kompaktní',
   DOWNLOAD_SETTINGS_TEXT: 'Vytvořte zálohu svého nastavení a konfigurace',
+  DOWNLOAD_SETTINGS_TEXT2: 'Exportovat všechna data',
   UPLOAD_TEXT: 'Nahrajte nový soubor firmwaru (.bin) nebo záložní soubor (.json)',
   UPLOAD_DROP_TEXT: 'Přetáhněte soubor sem nebo klikněte pro výběr',
   ERROR: 'Neočekávaná chyba, zkuste to prosím znovu',

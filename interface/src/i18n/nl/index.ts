@@ -187,6 +187,7 @@ const nl: Translation = {
   BUFFER_SIZE: 'Max buffer grootte',
   COMPACT: 'Compact',
   DOWNLOAD_SETTINGS_TEXT: 'Maak een back-up van uw configuratie en instellingen',
+  DOWNLOAD_SETTINGS_TEXT2: 'Exporteer alle data',
   UPLOAD_TEXT: 'Upload een nieuw firmwarebestand (.bin) of een back-upbestand (.json)',
   UPLOAD_DROP_TEXT: 'Sleep en firmware .bin bestand hierheen of klik hier',
   ERROR: 'Onverwachte fout, probeer opnieuw',
