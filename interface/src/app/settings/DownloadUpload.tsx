@@ -150,9 +150,12 @@ const DownloadUpload = () => {
         ))}
       </Grid>
 
+      <Typography mt={2} mb={1} variant="body1" color="warning">
+        {LL.DOWNLOAD_SETTINGS_TEXT2()}.
+      </Typography>
+
       {standaloneButton && (
         <Button
-          sx={{ mt: 2 }}
           startIcon={<DownloadIcon />}
           variant="outlined"
           color="primary"
