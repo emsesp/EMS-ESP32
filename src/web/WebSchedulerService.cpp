@@ -459,6 +459,11 @@ void WebSchedulerService::loop() {
     static uint32_t last_uptime_min = 0;
     static uint32_t last_uptime_sec = 0;
 
+    if (!raw_value.empty()) { // process a value from system/message command
+        computed_value = compute(raw_value);
+        raw_value.clear();
+    }
+
     // get list of scheduler events and exit if it's empty
     if (scheduleItems_->empty()) {
         return;

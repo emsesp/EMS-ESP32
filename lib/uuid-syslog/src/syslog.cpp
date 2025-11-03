@@ -17,6 +17,7 @@
  */
 
 #include "uuid/syslog.h"
+#include "../../src/core/emsesp.h"
 
 #ifndef UUID_SYSLOG_HAVE_GETTIMEOFDAY
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
@@ -230,8 +231,7 @@ SyslogService::QueuedLogMessage::QueuedLogMessage(unsigned long id, std::shared_
     : id_(id)
     , content_(std::move(content)) {
     // Added for EMS-ESP
-    // if (time_good_ || emsesp::EMSESP::system_.network_connected()) {
-    if (time_good_) {
+    if (time_good_ || emsesp::EMSESP::system_.network_connected()) {
 #if UUID_SYSLOG_HAVE_GETTIMEOFDAY
         if (gettimeofday(&time_, nullptr) != 0) {
             time_.tv_sec = (time_t)-1;
@@ -523,7 +523,7 @@ bool SyslogService::transmit(const QueuedLogMessage & message) {
         //               (unsigned long)message.time_.tv_usec);
 
         // added for EMS-ESP
-        udp_.printf("%04u-%02u-%02uT%02u:%02u:%02u.%06lu%+02d:%02d",
+        udp_.printf("%04u-%02u-%02uT%02u:%02u:%02u.%06lu%+03d:%02d",
                     tm.tm_year + 1900,
                     tm.tm_mon + 1,
                     tm.tm_mday,
@@ -537,7 +537,7 @@ bool SyslogService::transmit(const QueuedLogMessage & message) {
         udp_.print('-');
     }
 
-    udp_.printf(" %s %s - - - ", hostname_.c_str(), message.content_->name);
+    udp_.printf(" %s %s - - - ", hostname_.c_str(), message.content_->name ? message.content_->name : "emsesp");
 
     char id_c_str[15];
     snprintf(id_c_str, sizeof(id_c_str), " %lu: ", message.id_);

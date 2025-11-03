@@ -547,6 +547,7 @@ MAKE_TRANSLATION(heatondelay, "heatondelay", "heat-on delay", "Einschaltverzöge
 MAKE_TRANSLATION(heatoffdelay, "heatoffdelay", "heat-off delay", "Ausschaltverzögerung Heizen", "", "Frånkopplingsfördröjning värme", "opóźnienie włączania ogrzewania", "", "", "", "", "Oneskorenie vypnutia kúrenia", "zpoždění vypnutí topení") // TODO translate
 MAKE_TRANSLATION(hpSetDiffPress, "hpsetdiffpress", "set differential pressure", "Pumpensolldruck", "", "VP Tryckskillnad", "różnica ciśnień", "", "", "", "", "nastaviť diferenčný tlak", "nastavení rozdílového tlaku") // TODO translate
 MAKE_TRANSLATION(hpFan, "fan", "fan", "Lüfter", "", "Fläkt", "wentylator", "", "", "", "", "ventilátor", "ventilátor") // TODO translate
+MAKE_TRANSLATION(fanSpd, "fanspd", "fan speed", "Lüfter Geschw.", "", "Fläkt", "wentylator", "", "", "", "", "ventilátor", "ventilátor") // TODO translate
 MAKE_TRANSLATION(hpShutdown, "shutdown", "shutdown", "Abschalten", "", "Stäng av", "wyłączenie", "", "", "", "", "vypnutie", "vypnutí") // TODO translate
 MAKE_TRANSLATION(pc0Flow, "pc0flow", "Flow PC0", "Durchfluss PC0", "", "Flöde värmebärarpump", "", "", "", "", "", "prietok PC0", "průtok PC0") // TODO translate
 MAKE_TRANSLATION(pc1Flow, "pc1flow", "Flow PC1", "Durchfluss PC1", "", "Flöde cirkulationspump", "", "", "", "", "", "prietok PC1", "průtok PC1") // TODO translate

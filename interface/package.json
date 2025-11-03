@@ -39,22 +39,22 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-icons": "^5.5.0",
-    "react-router": "^7.9.4",
+    "react-router": "^7.9.5",
     "react-toastify": "^11.0.5",
     "typesafe-i18n": "^5.26.2",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
     "@babel/core": "^7.28.5",
-    "@eslint/js": "^9.38.0",
+    "@eslint/js": "^9.39.0",
     "@preact/compat": "^18.3.1",
     "@preact/preset-vite": "^2.10.2",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
-    "@types/node": "^24.9.1",
+    "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "concurrently": "^9.2.1",
-    "eslint": "^9.38.0",
+    "eslint": "^9.39.0",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.6.2",
     "rollup-plugin-visualizer": "^6.0.5",
@@ -64,5 +64,5 @@
     "vite-plugin-imagemin": "^0.6.1",
     "vite-tsconfig-paths": "^5.1.4"
   },
-  "packageManager": "pnpm@10.19.0+sha512.c9fc7236e92adf5c8af42fd5bf1612df99c2ceb62f27047032f4720b33f8eacdde311865e91c411f2774f618d82f320808ecb51718bfa82c060c4ba7c76a32b8"
+  "packageManager": "pnpm@10.20.0"
 }
