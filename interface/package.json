@@ -50,7 +50,7 @@
     "@eslint/js": "^9.39.0",
     "@preact/preset-vite": "^2.10.2",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
-    "@types/node": "^24.9.2",
+    "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "concurrently": "^9.2.1",
