@@ -1435,3 +1435,4 @@ teddybear
 washingmachine
 switchprogram
 brotlin
+fanspd
