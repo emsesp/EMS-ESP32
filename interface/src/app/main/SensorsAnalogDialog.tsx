@@ -146,7 +146,7 @@ const SensorsAnalogDialog = ({
 
   const dialogTitle = useMemo(
     () =>
-      `${creating ? LL.ADD(1) + ' ' + LL.NEW(0) : LL.EDIT()}&nbsp;${LL.ANALOG_SENSOR(0)}`,
+      `${creating ? LL.ADD(1) + ' ' + LL.NEW(0) : LL.EDIT()} ${LL.ANALOG_SENSOR(0)}`,
     [creating, LL]
   );
 
