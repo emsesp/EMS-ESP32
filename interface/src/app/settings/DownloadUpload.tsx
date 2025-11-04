@@ -107,11 +107,7 @@ const DownloadUpload = () => {
   );
 
   if (restarting) {
-    return (
-      <SectionContent>
-        <SystemMonitor />
-      </SectionContent>
-    );
+    return <SystemMonitor />;
   }
 
   if (!data) {
