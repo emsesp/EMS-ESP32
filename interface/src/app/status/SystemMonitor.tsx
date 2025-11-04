@@ -95,7 +95,12 @@ const SystemMonitor = () => {
   }, [setSystemStatus]);
 
   return (
-    <Dialog fullWidth={true} sx={dialogStyle} open={true}>
+    <Dialog
+      fullWidth={false}
+      maxWidth="sm"
+      sx={{ ...dialogStyle, '& .MuiDialog-paper': { width: '30%' } }}
+      open={true}
+    >
       <DialogContent dividers>
         <Box m={0} py={0} display="flex" alignItems="center" flexDirection="column">
           <Typography
