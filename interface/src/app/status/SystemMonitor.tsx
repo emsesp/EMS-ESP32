@@ -1,12 +1,11 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
-import { Box, Button, Dialog, DialogContent, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 
 import { callAction } from 'api/app';
 import { readSystemStatus } from 'api/system';
 
-import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova/client';
 import MessageBox from 'components/MessageBox';
 import { useI18nContext } from 'i18n/i18n-react';
@@ -95,14 +94,38 @@ const SystemMonitor = () => {
   }, [setSystemStatus]);
 
   return (
-    <Dialog
-      fullWidth={false}
-      maxWidth="sm"
-      sx={{ ...dialogStyle, '& .MuiDialog-paper': { width: '30%' } }}
-      open={true}
+    <Box
+      sx={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backdropFilter: 'blur(8px)'
+      }}
     >
-      <DialogContent dividers>
-        <Box m={0} py={0} display="flex" alignItems="center" flexDirection="column">
+      <Box
+        sx={{
+          width: '30%',
+          minWidth: '300px',
+          maxWidth: '500px',
+          backgroundColor: '#393939',
+          border: 3,
+          borderColor: '#565656',
+          borderRadius: '8px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+          p: 3
+        }}
+      >
+        <Box display="flex" alignItems="center" flexDirection="column">
+          <img
+            src="/app/icon.png"
+            alt="EMS-ESP"
+            style={{ width: '40px', height: '40px', marginBottom: '16px' }}
+          />
           <Typography
             color="secondary"
             variant="h6"
@@ -138,8 +161,8 @@ const SystemMonitor = () => {
             </>
           )}
         </Box>
-      </DialogContent>
-    </Dialog>
+      </Box>
+    </Box>
   );
 };
 
