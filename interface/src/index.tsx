@@ -23,12 +23,12 @@ const errorPageStyles = {
     color: '#eee'
   },
   logo: {
-    width: '120px',
-    height: '120px',
+    width: '100px',
+    height: '100px',
     marginBottom: '2rem'
   },
   title: {
-    fontSize: '3rem',
+    fontSize: '2rem',
     margin: '0 0 1rem 0',
     color: '#90CAF9',
     fontWeight: 500 as const
@@ -40,8 +40,15 @@ const errorPageStyles = {
     margin: '0 0 1rem 0'
   },
   message: {
+    fontFamily: 'monospace, monospace',
     fontSize: '1.1rem',
     color: '#9e9e9e',
+    maxWidth: '600px',
+    margin: '0 0 2rem 0'
+  },
+  message2: {
+    fontSize: '1.1rem',
+    color: '#2196f3',
     maxWidth: '600px',
     margin: '0 0 2rem 0'
   }
@@ -77,9 +84,21 @@ function ErrorPage() {
   return (
     <div style={errorPageStyles.container}>
       <img src="/app/icon.png" alt="EMS-ESP Logo" style={errorPageStyles.logo} />
-      <h1 style={errorPageStyles.title}>WebUI broke!</h1>
-      <h2 style={errorPageStyles.status}>{getErrorStatus(error)}</h2>
-      <p style={errorPageStyles.message}>{getErrorMessage(error)}</p>
+      <h1 style={errorPageStyles.title}>The WebUI is having problems</h1>
+      <p style={errorPageStyles.message}>
+        {getErrorStatus(error)}: {getErrorMessage(error)}
+      </p>
+      <p style={errorPageStyles.message2}>
+        Please report on{' '}
+        <a
+          href="https://docs.emsesp.org/Support"
+          target="_blank"
+          rel="noreferrer"
+          style={{ color: 'inherit', textDecoration: 'underline' }}
+        >
+          https://docs.emsesp.org/Support
+        </a>
+      </p>
     </div>
   );
 }
