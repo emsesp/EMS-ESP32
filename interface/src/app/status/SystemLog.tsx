@@ -94,7 +94,7 @@ const paddedIDLabel = (id: number, compact: boolean) => {
 const LogEntryItem = memo(
   ({ entry, compact }: { entry: LogEntry; compact: boolean }) => {
     return (
-      <div style={{ font: '14px monospace', whiteSpace: 'nowrap' }}>
+      <div style={{ font: '13px monospace', whiteSpace: 'nowrap' }}>
         <span>{entry.t}</span>
         <span>{paddedLevelLabel(entry.l, compact)}&nbsp;</span>
         <span>{paddedIDLabel(entry.i, compact)} </span>
