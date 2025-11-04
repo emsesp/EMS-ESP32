@@ -276,10 +276,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-          old_custom_name +
-          ') with new (' +
-          new_custom_name +
-          ')'
+        old_custom_name +
+        ') with new (' +
+        new_custom_name +
+        ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -375,15 +375,15 @@ function check_upgrade(version: string) {
 
     console.log(
       'Upgrade this version (' +
-        THIS_VERSION +
-        ') to dev (' +
-        dev_version +
-        ') is ' +
-        (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-        ' and to stable (' +
-        stable_version +
-        ') is ' +
-        (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
+      THIS_VERSION +
+      ') to dev (' +
+      dev_version +
+      ') is ' +
+      (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+      ' and to stable (' +
+      stable_version +
+      ') is ' +
+      (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
     );
     data = {
       emsesp_version: THIS_VERSION,
@@ -4353,12 +4353,18 @@ router
 // SYSTEM and SETTINGS
 router
   .get(ACTIVITY_ENDPOINT, () => activity)
-  .get(SYSTEM_STATUS_ENDPOINT, () => {
+  .get(SYSTEM_STATUS_ENDPOINT, async () => {
     if (countHardwarePoll >= 2) {
       countHardwarePoll = 0;
       system_status.status = 0; // SYSTEM_STATUS_NORMAL
     }
     countHardwarePoll++;
+
+    // Add a small artificial delay to better simulate a real network, to see if flash is fixed
+    // await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    system_status.uptime += 3; // simulate 3 seconds of uptime
+    system_status.bus_uptime += 3;
 
     return system_status;
   })

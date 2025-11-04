@@ -84,7 +84,6 @@ const SystemStatus = () => {
     send: loadData,
     error
   } = useRequest(readSystemStatus, {
-    initialData: [],
     async middleware(_, next) {
       if (!restarting) {
         await next();
