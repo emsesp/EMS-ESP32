@@ -367,6 +367,7 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
     // or a special command like 'info', 'values', 'commands', 'entities' etc
     bool single_command = (!value || !strlen(value));
     if (single_command) {
+        Serial.println("single_command");
         if (!strcmp(cmd, F_(commands))) {
             return Command::list(device_type, output);
         }
@@ -583,15 +584,13 @@ bool Command::list(const uint8_t device_type, JsonObject output) {
     output[F_(entities)] = Helpers::translated_word(FL_(entities_cmd));
 
     if (device_type == EMSdevice::DeviceType::SYSTEM) {
-        output["settings/showertimer"]   = Helpers::translated_word(FL_(system_cmd));
-        output["settings/showeralert"]   = Helpers::translated_word(FL_(system_cmd));
-        output["settings/hideled"]       = Helpers::translated_word(FL_(system_cmd));
-        output["settings/analogenabled"] = Helpers::translated_word(FL_(system_cmd));
-        output["mqtt/enabled"]           = Helpers::translated_word(FL_(system_cmd));
-        output["ntp/enabled"]            = Helpers::translated_word(FL_(system_cmd));
-        output["ap/enabled"]             = Helpers::translated_word(FL_(system_cmd));
-        output["syslog/enabled"]         = Helpers::translated_word(FL_(system_cmd));
+        output["settings"] = Helpers::translated_word(FL_(system_cmd));
+        output["mqtt"]     = Helpers::translated_word(FL_(system_cmd));
+        output["ntp"]      = Helpers::translated_word(FL_(system_cmd));
+        output["ap"]       = Helpers::translated_word(FL_(system_cmd));
+        output["syslog"]   = Helpers::translated_word(FL_(system_cmd));
     }
+
     // create a list of commands we have registered, and sort them
     std::list<std::string> sorted_cmds;
     for (const auto & cf : cmdfunctions_) {
@@ -621,14 +620,11 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
         }
     }
     if (device_type == EMSdevice::DeviceType::SYSTEM) {
-        sorted_cmds.emplace_back("settings/showertimer");
-        sorted_cmds.emplace_back("settings/showeralert");
-        sorted_cmds.emplace_back("settings/hideled");
-        sorted_cmds.emplace_back("settings/analogenabled");
-        sorted_cmds.emplace_back("mqtt/enabled");
-        sorted_cmds.emplace_back("ntp/enabled");
-        sorted_cmds.emplace_back("ap/enabled");
-        sorted_cmds.emplace_back("syslog/enabled");
+        sorted_cmds.emplace_back("settings");
+        sorted_cmds.emplace_back("mqtt");
+        sorted_cmds.emplace_back("ntp");
+        sorted_cmds.emplace_back("ap");
+        sorted_cmds.emplace_back("syslog");
     }
     sorted_cmds.sort(); // sort them
 

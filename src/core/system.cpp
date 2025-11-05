@@ -1668,6 +1668,21 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["timestamp"] = time(nullptr);
 #endif
 
+    // AP Status
+    node = output["ap"].to<JsonObject>();
+    EMSESP::esp32React.getAPSettingsService()->read([&](const APSettings & settings) {
+        node["provisionMode"] = settings.provisionMode; // 0 is on, 2 is off
+        node["ssid"]          = settings.ssid;
+#ifndef EMSESP_STANDALONE
+        node["channel"]    = settings.channel;
+        node["ssidHidden"] = settings.ssidHidden;
+        node["maxClients"] = settings.maxClients;
+        node["localIP"]    = settings.localIP.toString();
+        node["gatewayIP"]  = settings.gatewayIP.toString();
+        node["subnetMask"] = settings.subnetMask.toString();
+#endif
+    });
+
     // MQTT Status
     node               = output["mqtt"].to<JsonObject>();
     node["MQTTStatus"] = Mqtt::connected() ? F_(connected) : F_(disconnected);
