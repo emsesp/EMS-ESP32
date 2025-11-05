@@ -1248,9 +1248,11 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
     char hc_mode_s[30];
     char seltemp_s[30];
     char currtemp_s[30];
+    char currhum_s[30];
     char hc_mode_cond[80];
     char seltemp_cond[100];
     char currtemp_cond[100];
+    char currhum_cond[100];
     char mode_str_tpl[400];
     char name_s[10];
     char uniq_id_s[60];
@@ -1275,6 +1277,10 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
             snprintf(currtemp_s, sizeof(currtemp_s), "value_json.%s%d.currtemp", tagname, hc_num);
             snprintf(currtemp_cond, sizeof(currtemp_cond), "value_json.%s%d is defined and %s is defined", tagname, hc_num, currtemp_s);
         }
+        if (tag >= DeviceValueTAG::TAG_SRC1) {
+            snprintf(currhum_s, sizeof(currhum_s), "value_json.%s%d.airhumidity", tagname, hc_num);
+            snprintf(currhum_cond, sizeof(currhum_cond), "value_json.%s%d is defined and %s is defined", tagname, hc_num, currhum_s);
+        }
         snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_NONE).c_str());
     } else {
         // single format
@@ -1286,6 +1292,10 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
         if (has_roomtemp) {
             snprintf(currtemp_s, sizeof(currtemp_s), "value_json.currtemp");
             snprintf(currtemp_cond, sizeof(currtemp_cond), "%s is defined", currtemp_s);
+        }
+        if (tag >= DeviceValueTAG::TAG_SRC1) {
+            snprintf(currhum_s, sizeof(currhum_s), "value_json.airhumidity");
+            snprintf(currhum_cond, sizeof(currhum_cond), "%s is defined", currhum_s);
         }
         snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(device_type, tag).c_str());
     }
@@ -1329,6 +1339,10 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
     if (has_roomtemp) {
         doc["curr_temp_t"]   = topic_t;
         doc["curr_temp_tpl"] = (std::string) "{{" + currtemp_s + " if " + currtemp_cond + " else 0}}";
+    }
+    if (tag >= DeviceValueTAG::TAG_SRC1) {
+        doc["curr_hum_t"]   = topic_t;
+        doc["curr_hum_tpl"] = (std::string) "{{" + currhum_s + " if " + currhum_cond + " else 0}}";
     }
 
     doc["min_temp"]   = Helpers::render_value(min_s, min, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
