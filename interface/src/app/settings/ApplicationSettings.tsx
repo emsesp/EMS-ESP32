@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -72,7 +72,7 @@ const ApplicationSettings = () => {
   const { LL } = useI18nContext();
 
   const updateFormValue = updateValueDirty(
-    origData,
+    origData as unknown as Record<string, unknown>,
     dirtyFlags,
     setDirtyFlags,
     updateDataValue as (value: unknown) => void
@@ -106,50 +106,61 @@ const ApplicationSettings = () => {
     });
   });
 
-  const doRestart = async () => {
+  // Memoized input props to prevent recreation on every render
+  const SecondsInputProps = useMemo(
+    () => ({
+      endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+    }),
+    [LL]
+  );
+
+  const MinutesInputProps = useMemo(
+    () => ({
+      endAdornment: <InputAdornment position="end">{LL.MINUTES()}</InputAdornment>
+    }),
+    [LL]
+  );
+
+  const HoursInputProps = useMemo(
+    () => ({
+      endAdornment: <InputAdornment position="end">{LL.HOURS()}</InputAdornment>
+    }),
+    [LL]
+  );
+
+  const doRestart = useCallback(async () => {
     setRestarting(true);
     await sendAPI({ device: 'system', cmd: 'restart', id: 0 }).catch(
       (error: Error) => {
         toast.error(error.message);
       }
     );
-  };
+  }, [sendAPI]);
 
-  const updateBoardProfile = async (board_profile: string) => {
-    await readBoardProfile(board_profile).catch((error: Error) => {
-      toast.error(error.message);
-    });
-  };
+  const updateBoardProfile = useCallback(
+    async (board_profile: string) => {
+      await readBoardProfile(board_profile).catch((error: Error) => {
+        toast.error(error.message);
+      });
+    },
+    [readBoardProfile]
+  );
 
   useLayoutTitle(LL.APPLICATION());
 
-  const SecondsInputProps = {
-    endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
-  };
-  const MinutesInputProps = {
-    endAdornment: <InputAdornment position="end">{LL.MINUTES()}</InputAdornment>
-  };
-  const HoursInputProps = {
-    endAdornment: <InputAdornment position="end">{LL.HOURS()}</InputAdornment>
-  };
-
-  const content = () => {
-    if (!data || !hardwareData) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
+  const validateAndSubmit = useCallback(async () => {
+    try {
+      setFieldErrors(undefined);
+      await validate(createSettingsValidator(data), data);
+    } catch (error) {
+      setFieldErrors(error as ValidateFieldsError);
+    } finally {
+      await saveData();
     }
+  }, [data, saveData]);
 
-    const validateAndSubmit = async () => {
-      try {
-        setFieldErrors(undefined);
-        await validate(createSettingsValidator(data), data);
-      } catch (error) {
-        setFieldErrors(error as ValidateFieldsError);
-      } finally {
-        await saveData();
-      }
-    };
-
-    const changeBoardProfile = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const changeBoardProfile = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
       const boardProfile = event.target.value;
       updateFormValue(event);
       if (boardProfile === 'CUSTOM') {
@@ -160,12 +171,22 @@ const ApplicationSettings = () => {
       } else {
         void updateBoardProfile(boardProfile);
       }
-    };
+    },
+    [data, updateBoardProfile, updateFormValue, updateDataValue]
+  );
 
-    const restart = async () => {
-      await validateAndSubmit();
-      await doRestart();
-    };
+  const restart = useCallback(async () => {
+    await validateAndSubmit();
+    await doRestart();
+  }, [validateAndSubmit, doRestart]);
+
+  // Memoize board profile select items to prevent recreation
+  const boardProfileItems = useMemo(() => boardProfileSelectItems(), []);
+
+  const content = () => {
+    if (!data || !hardwareData) {
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
+    }
 
     return (
       <>
@@ -474,7 +495,7 @@ const ApplicationSettings = () => {
           margin="normal"
           select
         >
-          {boardProfileSelectItems()}
+          {boardProfileItems}
           <Divider />
           <MenuItem key={'CUSTOM'} value={'CUSTOM'}>
             {LL.CUSTOM()}&hellip;

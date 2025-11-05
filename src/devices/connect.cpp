@@ -208,7 +208,7 @@ bool Connect::set_mode(const char * value, const int8_t id) {
     }
     uint8_t v;
     if (Helpers::value2enum(value, v, FL_(enum_mode2), {3, 1, 0})) {
-    // if (Helpers::value2enum(value, v, FL_(enum_mode8))) {
+        // if (Helpers::value2enum(value, v, FL_(enum_mode8))) {
         write_command(0xBB5 + rc->room(), 0, v); // no validate, mode change is broadcasted
         return true;
     }

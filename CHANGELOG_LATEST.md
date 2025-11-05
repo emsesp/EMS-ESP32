@@ -57,3 +57,4 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - updated core libraries like AsyncTCP, AsyncWebServer and Modbus
 - remove command `scan deep`
 - ignore repeated `forceheatingoff` commands [#2641](https://github.com/emsesp/EMS-ESP32/discussions/2641)
+- optimized web for performance

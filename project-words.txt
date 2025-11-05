@@ -1434,3 +1434,5 @@ beddouble
 teddybear
 washingmachine
 switchprogram
+brotlin
+fanspd

@@ -93,7 +93,7 @@ const Devices = memo(() => {
 
   useLayoutTitle(LL.DEVICES());
 
-  const { data: coreData, send: sendCoreData } = useRequest(() => readCoreData(), {
+  const { data: coreData, send: sendCoreData } = useRequest(readCoreData, {
     initialData: {
       connected: true,
       devices: []
@@ -118,30 +118,28 @@ const Devices = memo(() => {
   );
 
   useLayoutEffect(() => {
-    function updateSize() {
-      setSize([window.innerWidth, window.innerHeight]);
-    }
+    let raf = 0;
+    const updateSize = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        setSize([window.innerWidth, window.innerHeight]);
+      });
+    };
     window.addEventListener('resize', updateSize);
     updateSize();
-    return () => window.removeEventListener('resize', updateSize);
+    return () => {
+      window.removeEventListener('resize', updateSize);
+      cancelAnimationFrame(raf);
+    };
   }, []);
 
-  const leftOffset = () => {
+  const leftOffset = useCallback(() => {
     const devicesWindow = document.getElementById('devices-window');
-    if (!devicesWindow) {
-      return 0;
-    }
-
-    const clientRect = devicesWindow.getBoundingClientRect();
-    const left = clientRect.left;
-    const right = clientRect.right;
-
-    if (!left || !right) {
-      return 0;
-    }
-
+    if (!devicesWindow) return 0;
+    const { left, right } = devicesWindow.getBoundingClientRect();
+    if (!left || !right) return 0;
     return left + (right - left < 400 ? 0 : 200);
-  };
+  }, []);
 
   const common_theme = useMemo(
     () =>
@@ -261,7 +259,7 @@ const Devices = memo(() => {
   };
 
   const dv_sort = useSort(
-    { nodes: deviceData.nodes },
+    { nodes: [...deviceData.nodes] },
     {},
     {
       sortIcon: {
@@ -291,7 +289,7 @@ const Devices = memo(() => {
   }
 
   const device_select = useRowSelect(
-    { nodes: coreData.devices },
+    { nodes: [...coreData.devices] },
     {
       onChange: onSelectChange
     }
@@ -549,7 +547,7 @@ const Devices = memo(() => {
 
           {coreData.connected && (
             <Table
-              data={{ nodes: coreData.devices }}
+              data={{ nodes: [...coreData.devices] }}
               select={device_select}
               theme={device_theme}
               layout={{ custom: true }}
@@ -654,7 +652,7 @@ const Devices = memo(() => {
         sx={{
           backgroundColor: 'black',
           position: 'absolute',
-          left: () => leftOffset(),
+          left: leftOffset,
           right: 0,
           bottom: 0,
           top: 64,
@@ -671,7 +669,7 @@ const Devices = memo(() => {
             </Typography>
             <Grid justifyContent="flex-end">
               <ButtonTooltip title={LL.CLOSE()}>
-                <IconButton onClick={resetDeviceSelect}>
+                <IconButton onClick={resetDeviceSelect} aria-label={LL.CLOSE()}>
                   <HighlightOffIcon color="primary" sx={{ fontSize: 18 }} />
                 </IconButton>
               </ButtonTooltip>
@@ -683,6 +681,7 @@ const Devices = memo(() => {
             variant="outlined"
             sx={{ width: '22ch' }}
             placeholder={LL.SEARCH()}
+            aria-label={LL.SEARCH()}
             onChange={(event) => {
               setSearch(event.target.value);
             }}
@@ -697,19 +696,22 @@ const Devices = memo(() => {
             }}
           />
           <ButtonTooltip title={LL.DEVICE_DETAILS()}>
-            <IconButton onClick={() => setShowDeviceInfo(true)}>
+            <IconButton
+              onClick={() => setShowDeviceInfo(true)}
+              aria-label={LL.DEVICE_DETAILS()}
+            >
               <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
             </IconButton>
           </ButtonTooltip>
           {me.admin && (
             <ButtonTooltip title={LL.CUSTOMIZATIONS()}>
-              <IconButton onClick={customize}>
+              <IconButton onClick={customize} aria-label={LL.CUSTOMIZATIONS()}>
                 <ConstructionIcon color="primary" sx={{ fontSize: 18 }} />
               </IconButton>
             </ButtonTooltip>
           )}
           <ButtonTooltip title={LL.EXPORT()}>
-            <IconButton onClick={handleDownloadCsv}>
+            <IconButton onClick={handleDownloadCsv} aria-label={LL.EXPORT()}>
               <DownloadIcon color="primary" sx={{ fontSize: 18 }} />
             </IconButton>
           </ButtonTooltip>
@@ -744,7 +746,7 @@ const Devices = memo(() => {
         </Box>
 
         <Table
-          data={{ nodes: shown_data }}
+          data={{ nodes: Array.from(shown_data) }}
           theme={data_theme}
           sort={dv_sort}
           layout={{ custom: true, fixedHeader: true }}

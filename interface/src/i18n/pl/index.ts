@@ -187,6 +187,7 @@ const pl: BaseTranslation = {
   BUFFER_SIZE: 'Maksymalna pojemność bufora (ilość wpisów)',
   COMPACT: 'Kompaktowy',
   DOWNLOAD_SETTINGS_TEXT: 'Utwórz kopię swoich ustawień i konfiguracji',
+  DOWNLOAD_SETTINGS_TEXT2: 'Eksportuj wszystkie dane',
   UPLOAD_TEXT: 'Wgraj nowy plik firmware (.bin) lub kopię ustawień (.json)',
   UPLOAD_DROP_TEXT: 'Upuść plik firmware .bin lub kliknij tutaj',
   ERROR: 'Nieoczekiwany błąd, spróbuj ponownie!',

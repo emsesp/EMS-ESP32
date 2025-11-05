@@ -567,7 +567,10 @@ const Version = () => {
                 <Grid size={{ xs: 8, md: 10 }}>
                   <Typography>
                     {latestVersion?.name}
-                    <IconButton onClick={() => setShowVersionInfo(1)}>
+                    <IconButton
+                      onClick={() => setShowVersionInfo(1)}
+                      aria-label={LL.FIRMWARE_VERSION_INFO()}
+                    >
                       <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
                     </IconButton>
                     {showButtons(false)}
@@ -580,7 +583,10 @@ const Version = () => {
                 <Grid size={{ xs: 8, md: 10 }}>
                   <Typography>
                     {latestDevVersion?.name}
-                    <IconButton onClick={() => setShowVersionInfo(2)}>
+                    <IconButton
+                      onClick={() => setShowVersionInfo(2)}
+                      aria-label={LL.FIRMWARE_VERSION_INFO()}
+                    >
                       <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
                     </IconButton>
                     {showButtons(true)}

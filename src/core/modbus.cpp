@@ -455,7 +455,7 @@ int Modbus::getRegisterCount(const DeviceValue & dv) {
             uint32_t num_values    = std::max(dv.max, (uint32_t)abs(dv.min));
             int      num_registers = 0;
 
-           if (num_values < (1L << 16))
+            if (num_values < (1L << 16))
                 num_registers = 1;
             else if (num_values <= (0xFFFFFFFF))
                 num_registers = 2;

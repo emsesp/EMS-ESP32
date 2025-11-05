@@ -4353,12 +4353,18 @@ router
 // SYSTEM and SETTINGS
 router
   .get(ACTIVITY_ENDPOINT, () => activity)
-  .get(SYSTEM_STATUS_ENDPOINT, () => {
+  .get(SYSTEM_STATUS_ENDPOINT, async () => {
     if (countHardwarePoll >= 2) {
       countHardwarePoll = 0;
       system_status.status = 0; // SYSTEM_STATUS_NORMAL
     }
     countHardwarePoll++;
+
+    // Add a small artificial delay to better simulate a real network, to see if flash is fixed
+    // await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    system_status.uptime += 3; // simulate 3 seconds of uptime
+    system_status.bus_uptime += 3;
 
     return system_status;
   })
@@ -4376,143 +4382,55 @@ router
 //  EMS-ESP Project stuff
 //
 
+// Lookup maps to avoid repetitive branching per request
+const DEVICE_DATA_MAP: Record<number, any> = {
+  1: emsesp_devicedata_1,
+  2: emsesp_devicedata_2,
+  3: emsesp_devicedata_3,
+  4: emsesp_devicedata_4,
+  5: emsesp_devicedata_5,
+  6: emsesp_devicedata_6,
+  7: emsesp_devicedata_7,
+  8: emsesp_devicedata_8,
+  9: emsesp_devicedata_9,
+  10: emsesp_devicedata_10,
+  11: emsesp_devicedata_11,
+  99: emsesp_devicedata_99
+};
+
+const DEVICE_ENTITIES_MAP: Record<number, any> = {
+  1: emsesp_deviceentities_1,
+  2: emsesp_deviceentities_2,
+  3: emsesp_deviceentities_3,
+  4: emsesp_deviceentities_4,
+  5: emsesp_deviceentities_5,
+  6: emsesp_deviceentities_6,
+  7: emsesp_deviceentities_7,
+  8: emsesp_deviceentities_8,
+  9: emsesp_deviceentities_9,
+  10: emsesp_deviceentities_10
+};
+
 function deviceData(id: number) {
-  if (id == 1) {
-    return new Response(encoder.encode(emsesp_devicedata_1) as BodyInit, {
-      headers
-    });
-  }
-  if (id == 2) {
-    return new Response(encoder.encode(emsesp_devicedata_2) as BodyInit, {
-      headers
-    });
-  }
-  if (id == 3) {
-    return new Response(encoder.encode(emsesp_devicedata_3) as BodyInit, {
-      headers
-    });
-  }
-  if (id == 4) {
-    return new Response(encoder.encode(emsesp_devicedata_4) as BodyInit, {
-      headers
-    });
-  }
-  if (id == 5) {
-    return new Response(encoder.encode(emsesp_devicedata_5) as BodyInit, {
-      headers
-    });
-  }
-  if (id == 6) {
-    return new Response(encoder.encode(emsesp_devicedata_6) as BodyInit, {
-      headers
-    });
-  }
-  if (id == 7) {
-    return new Response(encoder.encode(emsesp_devicedata_7) as BodyInit, {
-      headers
-    });
-  }
-  if (id == 8) {
+  if (id === 8) {
     // test changing the selected flow temp on a Bosch Compress 7000i AW Heat Pump (Boiler/HP)
     emsesp_devicedata_8.nodes[4].v = Math.floor(Math.random() * 100);
-    return new Response(encoder.encode(emsesp_devicedata_8) as BodyInit, {
-      headers
-    });
   }
-  if (id == 9) {
-    return new Response(encoder.encode(emsesp_devicedata_9) as BodyInit, {
-      headers
-    });
-  }
-  if (id == 10) {
-    return new Response(encoder.encode(emsesp_devicedata_10) as BodyInit, {
-      headers
-    });
-  }
-  if (id == 11) {
-    return new Response(encoder.encode(emsesp_devicedata_11) as BodyInit, {
-      headers
-    });
-  }
-  if (id == 99) {
-    return new Response(encoder.encode(emsesp_devicedata_99) as BodyInit, {
-      headers
-    });
+
+  const data = DEVICE_DATA_MAP[id];
+  if (data) {
+    return new Response(encoder.encode(data) as BodyInit, { headers });
   }
 }
 
 function deviceEntities(id: number) {
-  if (id == 1) {
-    return new Response(encoder.encode(emsesp_deviceentities_1) as BodyInit, {
-      headers
-    });
-  }
-  if (id == 2) {
-    return new Response(encoder.encode(emsesp_deviceentities_2) as BodyInit, {
-      headers
-    });
-  }
-  if (id == 3) {
-    return new Response(encoder.encode(emsesp_deviceentities_3) as BodyInit, {
-      headers
-    });
-  }
-  if (id == 4) {
-    return new Response(encoder.encode(emsesp_deviceentities_4) as BodyInit, {
-      headers
-    });
-  }
-  if (id == 5) {
-    return new Response(encoder.encode(emsesp_deviceentities_5) as BodyInit, {
-      headers
-    });
-  }
-  if (id == 6) {
-    return new Response(encoder.encode(emsesp_deviceentities_6) as BodyInit, {
-      headers
-    });
-  }
-  if (id == 7) {
-    return new Response(encoder.encode(emsesp_deviceentities_7) as BodyInit, {
-      headers
-    });
-  }
-  if (id == 8) {
-    return new Response(encoder.encode(emsesp_deviceentities_8) as BodyInit, {
-      headers
-    });
-  }
-  if (id == 9) {
-    return new Response(encoder.encode(emsesp_deviceentities_9) as BodyInit, {
-      headers
-    });
-  }
-  if (id == 10) {
-    return new Response(encoder.encode(emsesp_deviceentities_10) as BodyInit, {
-      headers
-    });
-  }
-  // not found, return empty
-  return new Response(encoder.encode(emsesp_deviceentities_none) as BodyInit, {
-    headers
-  });
+  const data = DEVICE_ENTITIES_MAP[id] || emsesp_deviceentities_none;
+  return new Response(encoder.encode(data) as BodyInit, { headers });
 }
 
 // prepare dashboard data
 function getDashboardEntityData(id: number) {
-  let device_data = {};
-  if (id == 1) device_data = emsesp_devicedata_1;
-  else if (id == 2) device_data = emsesp_devicedata_2;
-  else if (id == 3) device_data = emsesp_devicedata_3;
-  else if (id == 4) device_data = emsesp_devicedata_4;
-  else if (id == 5) device_data = emsesp_devicedata_5;
-  else if (id == 6) device_data = emsesp_devicedata_6;
-  else if (id == 7) device_data = emsesp_devicedata_7;
-  else if (id == 8) device_data = emsesp_devicedata_8;
-  else if (id == 9) device_data = emsesp_devicedata_9;
-  else if (id == 10) device_data = emsesp_devicedata_10;
-  else if (id == 11) device_data = emsesp_devicedata_11;
-  else if (id == 99) device_data = emsesp_devicedata_99;
+  const device_data = DEVICE_DATA_MAP[id] || { nodes: [] };
 
   // filter device_data on
   //  - only add favorite (mask has bit 8 set) except for Custom Entities (type 99)

@@ -54,7 +54,7 @@ export class Unpackr {
     }
     Object.assign(this, options);
   }
-  unpack(source, options?: any) {
+  unpack(source, options?: { start?: number; end?: number; lazy?: boolean }) {
     if (src) {
       return saveState(() => {
         clearSource();
@@ -184,7 +184,7 @@ export class Unpackr {
 function getPosition() {
   return position;
 }
-function checkedRead(options: any) {
+function checkedRead(options?: { lazy?: boolean }) {
   try {
     if (!currentUnpackr.trusted && !sequentialMode) {
       const sharedLength = currentStructures.sharedLength || 0;

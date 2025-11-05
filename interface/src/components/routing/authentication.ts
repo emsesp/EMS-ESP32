@@ -13,8 +13,14 @@ export const verifyAuthorization = () =>
 export const signIn = (request: SignInRequest) =>
   alovaInstance.Post<SignInResponse>('/rest/signIn', request);
 
+// Cache storage reference to avoid repeated checks
+let cachedStorage: Storage | undefined;
+
 export function getStorage() {
-  return localStorage || sessionStorage;
+  if (!cachedStorage) {
+    cachedStorage = localStorage || sessionStorage;
+  }
+  return cachedStorage;
 }
 
 export function storeLoginRedirect(location?: { pathname: string; search: string }) {

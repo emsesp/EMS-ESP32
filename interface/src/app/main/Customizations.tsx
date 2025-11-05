@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useBlocker, useLocation } from 'react-router';
 import { toast } from 'react-toastify';
 
@@ -62,7 +62,24 @@ import OptionIcon from './OptionIcon';
 import { DeviceEntityMask } from './types';
 import type { APIcall, Device, DeviceEntity } from './types';
 
-export const APIURL = window.location.origin + '/api/';
+export const APIURL = `${window.location.origin}/api/`;
+
+const MAX_BUFFER_SIZE = 2000;
+
+// Helper function to create masked entity ID - extracted to avoid duplication
+const createMaskedEntityId = (de: DeviceEntity): string => {
+  const maskHex = de.m.toString(16).padStart(2, '0');
+  const hasCustomizations = !!(de.cn || de.mi || de.ma);
+  const customizations = [
+    de.cn || '',
+    de.mi ? `>${de.mi}` : '',
+    de.ma ? `<${de.ma}` : ''
+  ]
+    .filter(Boolean)
+    .join('');
+
+  return `${maskHex}${de.id}${hasCustomizations ? `|${customizations}` : ''}`;
+};
 
 const Customizations = () => {
   const { LL } = useI18nContext();
@@ -153,17 +170,19 @@ const Customizations = () => {
     );
   };
 
-  const entities_theme = useTheme({
-    Table: `
+  const entities_theme = useMemo(
+    () =>
+      useTheme({
+        Table: `
       --data-table-library_grid-template-columns: 156px repeat(1, minmax(80px, 1fr)) 45px minmax(45px, auto) minmax(120px, auto);
     `,
-    BaseRow: `
+        BaseRow: `
       font-size: 14px;
       .td {
         height: 32px;
       }
     `,
-    BaseCell: `
+        BaseCell: `
       &:nth-of-type(3) {
         text-align: right;
       }
@@ -174,7 +193,7 @@ const Customizations = () => {
         text-align: right;
       }
     `,
-    HeaderRow: `
+        HeaderRow: `
       text-transform: uppercase;
       background-color: black;
       color: #90CAF9;
@@ -186,7 +205,7 @@ const Customizations = () => {
         text-align: center;
       }
     `,
-    Row: `
+        Row: `
       background-color: #1e1e1e;
       position: relative;
       cursor: pointer;
@@ -202,7 +221,7 @@ const Customizations = () => {
         background-color: #177ac9;
       }
     `,
-    Cell: `
+        Cell: `
       &:nth-of-type(2) {
         padding: 8px;
       }
@@ -216,7 +235,9 @@ const Customizations = () => {
         padding-right: 8px;
       }
     `
-  });
+      }),
+    []
+  );
 
   function hasEntityChanged(de: DeviceEntity) {
     return (
@@ -229,19 +250,8 @@ const Customizations = () => {
 
   useEffect(() => {
     if (deviceEntities.length) {
-      setNumChanges(
-        deviceEntities
-          .filter((de) => hasEntityChanged(de))
-          .map(
-            (new_de) =>
-              new_de.m.toString(16).padStart(2, '0') +
-              new_de.id +
-              (new_de.cn || new_de.mi || new_de.ma ? '|' : '') +
-              (new_de.cn ? new_de.cn : '') +
-              (new_de.mi ? '>' + new_de.mi : '') +
-              (new_de.ma ? '<' + new_de.ma : '')
-          ).length
-      );
+      const changedEntities = deviceEntities.filter((de) => hasEntityChanged(de));
+      setNumChanges(changedEntities.length);
     }
   }, [deviceEntities]);
 
@@ -275,18 +285,22 @@ const Customizations = () => {
     return value as string;
   }
 
-  const formatName = (de: DeviceEntity, withShortname: boolean) =>
-    (de.n && de.n[0] === '!'
-      ? de.t
-        ? LL.COMMAND(1) + ': ' + de.t + ' ' + de.n.slice(1)
-        : LL.COMMAND(1) + ': ' + de.n.slice(1)
-      : de.cn && de.cn !== ''
-        ? de.t
-          ? de.t + ' ' + de.cn
-          : de.cn
-        : de.t
-          ? de.t + ' ' + de.n
-          : de.n) + (withShortname ? ' ' + de.id : '');
+  const formatName = useCallback(
+    (de: DeviceEntity, withShortname: boolean) => {
+      let name: string;
+      if (de.n && de.n[0] === '!') {
+        name = de.t
+          ? `${LL.COMMAND(1)}: ${de.t} ${de.n.slice(1)}`
+          : `${LL.COMMAND(1)}: ${de.n.slice(1)}`;
+      } else if (de.cn && de.cn !== '') {
+        name = de.t ? `${de.t} ${de.cn}` : de.cn;
+      } else {
+        name = de.t ? `${de.t} ${de.n}` : de.n || '';
+      }
+      return withShortname ? `${name} ${de.id}` : name;
+    },
+    [LL]
+  );
 
   const getMaskNumber = (newMask: string[]) => {
     let new_mask = 0;
@@ -316,34 +330,33 @@ const Customizations = () => {
     return new_masks;
   };
 
-  const filter_entity = (de: DeviceEntity) =>
-    (de.m & selectedFilters || !selectedFilters) &&
-    formatName(de, true).toLowerCase().includes(search.toLowerCase());
+  const filter_entity = useCallback(
+    (de: DeviceEntity) =>
+      (de.m & selectedFilters || !selectedFilters) &&
+      formatName(de, true).toLowerCase().includes(search.toLowerCase()),
+    [selectedFilters, search, formatName]
+  );
 
-  const maskDisabled = (set: boolean) => {
-    setDeviceEntities(
-      deviceEntities.map(function (de) {
-        if (filter_entity(de)) {
-          return {
-            ...de,
-            m: set
-              ? de.m |
-                (DeviceEntityMask.DV_API_MQTT_EXCLUDE |
-                  DeviceEntityMask.DV_WEB_EXCLUDE)
-              : de.m &
-                ~(
-                  DeviceEntityMask.DV_API_MQTT_EXCLUDE |
-                  DeviceEntityMask.DV_WEB_EXCLUDE
-                )
-          };
-        } else {
+  const maskDisabled = useCallback(
+    (set: boolean) => {
+      setDeviceEntities((prev) =>
+        prev.map((de) => {
+          if (filter_entity(de)) {
+            const excludeMask =
+              DeviceEntityMask.DV_API_MQTT_EXCLUDE | DeviceEntityMask.DV_WEB_EXCLUDE;
+            return {
+              ...de,
+              m: set ? de.m | excludeMask : de.m & ~excludeMask
+            };
+          }
           return de;
-        }
-      })
-    );
-  };
+        })
+      );
+    },
+    [filter_entity]
+  );
 
-  const resetCustomization = async () => {
+  const resetCustomization = useCallback(async () => {
     try {
       await sendResetCustomizations();
       toast.info(LL.CUSTOMIZATIONS_RESTART());
@@ -352,24 +365,28 @@ const Customizations = () => {
     } finally {
       setConfirmReset(false);
     }
-  };
+  }, [sendResetCustomizations, LL]);
 
   const onDialogClose = () => {
     setDialogOpen(false);
   };
 
-  const updateDeviceEntity = (updatedItem: DeviceEntity) => {
+  const updateDeviceEntity = useCallback((updatedItem: DeviceEntity) => {
     setDeviceEntities(
-      deviceEntities?.map((de) =>
-        de.id === updatedItem.id ? { ...de, ...updatedItem } : de
-      )
+      (prev) =>
+        prev?.map((de) =>
+          de.id === updatedItem.id ? { ...de, ...updatedItem } : de
+        ) ?? []
     );
-  };
+  }, []);
 
-  const onDialogSave = (updatedItem: DeviceEntity) => {
-    setDialogOpen(false);
-    updateDeviceEntity(updatedItem);
-  };
+  const onDialogSave = useCallback(
+    (updatedItem: DeviceEntity) => {
+      setDialogOpen(false);
+      updateDeviceEntity(updatedItem);
+    },
+    [updateDeviceEntity]
+  );
 
   const editDeviceEntity = useCallback((de: DeviceEntity) => {
     if (de.n === undefined || (de.n && de.n[0] === '!')) {
@@ -384,60 +401,54 @@ const Customizations = () => {
     setDialogOpen(true);
   }, []);
 
-  const saveCustomization = async () => {
-    if (devices && deviceEntities && selectedDevice !== -1) {
-      const masked_entities = deviceEntities
-        .filter((de: DeviceEntity) => hasEntityChanged(de))
-        .map(
-          (new_de) =>
-            new_de.m.toString(16).padStart(2, '0') +
-            new_de.id +
-            (new_de.cn || new_de.mi || new_de.ma ? '|' : '') +
-            (new_de.cn ? new_de.cn : '') +
-            (new_de.mi ? '>' + new_de.mi : '') +
-            (new_de.ma ? '<' + new_de.ma : '')
-        );
-
-      // check size in bytes to match buffer in CPP, which is 2048
-      const bytes = new TextEncoder().encode(JSON.stringify(masked_entities)).length;
-      if (bytes > 2000) {
-        toast.warning(LL.CUSTOMIZATIONS_FULL());
-        return;
-      }
-
-      await sendCustomizationEntities({
-        id: selectedDevice,
-        entity_ids: masked_entities
-      })
-        .then(() => {
-          toast.success(LL.CUSTOMIZATIONS_SAVED());
-        })
-        .catch((error: Error) => {
-          if (error.message === 'Reboot required') {
-            setRestartNeeded(true);
-          } else {
-            toast.error(error.message);
-          }
-        })
-        .finally(() => {
-          setOriginalSettings(deviceEntities);
-        });
+  const saveCustomization = useCallback(async () => {
+    if (!devices || !deviceEntities || selectedDevice === -1) {
+      return;
     }
-  };
 
-  const renameDevice = async () => {
+    const masked_entities = deviceEntities
+      .filter((de: DeviceEntity) => hasEntityChanged(de))
+      .map((new_de) => createMaskedEntityId(new_de));
+
+    // check size in bytes to match buffer in CPP, which is 2048
+    const bytes = new TextEncoder().encode(JSON.stringify(masked_entities)).length;
+    if (bytes > MAX_BUFFER_SIZE) {
+      toast.warning(LL.CUSTOMIZATIONS_FULL());
+      return;
+    }
+
+    await sendCustomizationEntities({
+      id: selectedDevice,
+      entity_ids: masked_entities
+    })
+      .then(() => {
+        toast.success(LL.CUSTOMIZATIONS_SAVED());
+      })
+      .catch((error: Error) => {
+        if (error.message === 'Reboot required') {
+          setRestartNeeded(true);
+        } else {
+          toast.error(error.message);
+        }
+      })
+      .finally(() => {
+        setOriginalSettings(deviceEntities);
+      });
+  }, [devices, deviceEntities, selectedDevice, sendCustomizationEntities, LL]);
+
+  const renameDevice = useCallback(async () => {
     await sendDeviceName({ id: selectedDevice, name: selectedDeviceName })
       .then(() => {
         toast.success(LL.UPDATED_OF(LL.NAME(1)));
       })
       .catch(() => {
-        toast.error(LL.UPDATE_OF(LL.NAME(1)) + ' ' + LL.FAILED(1));
+        toast.error(`${LL.UPDATE_OF(LL.NAME(1))} ${LL.FAILED(1)}`);
       })
       .finally(async () => {
         setRename(false);
         await fetchCoreData();
       });
-  };
+  }, [selectedDevice, selectedDeviceName, sendDeviceName, LL, fetchCoreData]);
 
   const renderDeviceList = () => (
     <>
@@ -512,9 +523,12 @@ const Customizations = () => {
     </>
   );
 
-  const renderDeviceData = () => {
-    const shown_data = deviceEntities.filter((de) => filter_entity(de));
+  const filteredEntities = useMemo(
+    () => deviceEntities.filter((de) => filter_entity(de)),
+    [deviceEntities, filter_entity]
+  );
 
+  const renderDeviceData = () => {
     return (
       <>
         <Box color="warning.main">
@@ -544,6 +558,7 @@ const Customizations = () => {
               size="small"
               variant="outlined"
               placeholder={LL.SEARCH()}
+              aria-label={LL.SEARCH()}
               onChange={(event) => {
                 setSearch(event.target.value);
               }}
@@ -612,13 +627,13 @@ const Customizations = () => {
           </Grid>
           <Grid>
             <Typography variant="subtitle2" color="grey">
-              {LL.SHOWING()}&nbsp;{shown_data.length}/{deviceEntities.length}
+              {LL.SHOWING()}&nbsp;{filteredEntities.length}/{deviceEntities.length}
               &nbsp;{LL.ENTITIES(deviceEntities.length)}
             </Typography>
           </Grid>
         </Grid>
         <Table
-          data={{ nodes: shown_data }}
+          data={{ nodes: filteredEntities }}
           theme={entities_theme}
           layout={{ custom: true }}
         >
@@ -719,7 +734,11 @@ const Customizations = () => {
                   startIcon={<CancelIcon />}
                   variant="outlined"
                   color="secondary"
-                  onClick={() => devices && sendDeviceEntities(selectedDevice)}
+                  onClick={() => {
+                    if (devices) {
+                      void sendDeviceEntities(selectedDevice);
+                    }
+                  }}
                 >
                   {LL.CANCEL()}
                 </Button>

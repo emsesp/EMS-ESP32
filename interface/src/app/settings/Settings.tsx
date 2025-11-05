@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -34,46 +34,25 @@ const Settings = () => {
   const { LL } = useI18nContext();
   useLayoutTitle(LL.SETTINGS(0));
 
-  const [confirmFactoryReset, setConfirmFactoryReset] = useState<boolean>(false);
+  const [confirmFactoryReset, setConfirmFactoryReset] = useState(false);
 
   const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
     immediate: false
   });
 
-  const doFormat = async () => {
+  const doFormat = useCallback(async () => {
     await sendAPI({ device: 'system', cmd: 'format', id: 0 }).then(() => {
       setConfirmFactoryReset(false);
     });
-  };
+  }, [sendAPI]);
 
-  const renderFactoryResetDialog = () => (
-    <Dialog
-      sx={dialogStyle}
-      open={confirmFactoryReset}
-      onClose={() => setConfirmFactoryReset(false)}
-    >
-      <DialogTitle>{LL.FACTORY_RESET()}</DialogTitle>
-      <DialogContent dividers>{LL.SYSTEM_FACTORY_TEXT_DIALOG()}</DialogContent>
-      <DialogActions>
-        <Button
-          startIcon={<CancelIcon />}
-          variant="outlined"
-          onClick={() => setConfirmFactoryReset(false)}
-          color="secondary"
-        >
-          {LL.CANCEL()}
-        </Button>
-        <Button
-          startIcon={<SettingsBackupRestoreIcon />}
-          variant="outlined"
-          onClick={doFormat}
-          color="error"
-        >
-          {LL.FACTORY_RESET()}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
+  const handleFactoryResetClose = useCallback(() => {
+    setConfirmFactoryReset(false);
+  }, []);
+
+  const handleFactoryResetClick = useCallback(() => {
+    setConfirmFactoryReset(true);
+  }, []);
 
   return (
     <SectionContent>
@@ -142,7 +121,32 @@ const Settings = () => {
         />
       </List>
 
-      {renderFactoryResetDialog()}
+      <Dialog
+        sx={dialogStyle}
+        open={confirmFactoryReset}
+        onClose={handleFactoryResetClose}
+      >
+        <DialogTitle>{LL.FACTORY_RESET()}</DialogTitle>
+        <DialogContent dividers>{LL.SYSTEM_FACTORY_TEXT_DIALOG()}</DialogContent>
+        <DialogActions>
+          <Button
+            startIcon={<CancelIcon />}
+            variant="outlined"
+            onClick={handleFactoryResetClose}
+            color="secondary"
+          >
+            {LL.CANCEL()}
+          </Button>
+          <Button
+            startIcon={<SettingsBackupRestoreIcon />}
+            variant="outlined"
+            onClick={doFormat}
+            color="error"
+          >
+            {LL.FACTORY_RESET()}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Divider />
 
@@ -156,7 +160,7 @@ const Settings = () => {
         <Button
           startIcon={<SettingsBackupRestoreIcon />}
           variant="outlined"
-          onClick={() => setConfirmFactoryReset(true)}
+          onClick={handleFactoryResetClick}
           color="error"
         >
           {LL.FACTORY_RESET()}

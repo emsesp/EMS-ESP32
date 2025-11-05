@@ -187,6 +187,7 @@ const sv: Translation = {
   BUFFER_SIZE: 'Max bufferstorlek',
   COMPACT: 'Komprimerad',
   DOWNLOAD_SETTINGS_TEXT: 'Skapa en säkerhetskopia av din konfiguration och inställningar',
+  DOWNLOAD_SETTINGS_TEXT2: 'Exportera alla data',
   UPLOAD_TEXT: 'Ladda upp en ny firmwarefil (.bin) eller en säkerhetskopiafil (.json)',
   UPLOAD_DROP_TEXT: 'Droppa en firmware .bin fil eller klicka här',
   ERROR: 'Okänt fel, var god försök igen',

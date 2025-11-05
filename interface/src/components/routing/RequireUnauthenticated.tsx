@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { memo, useContext } from 'react';
 import type { FC } from 'react';
 import { Navigate } from 'react-router';
 
@@ -16,4 +16,4 @@ const RequireUnauthenticated: FC<RequiredChildrenProps> = ({ children }) => {
   );
 };
 
-export default RequireUnauthenticated;
+export default memo(RequireUnauthenticated);

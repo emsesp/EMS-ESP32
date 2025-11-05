@@ -60,7 +60,7 @@ export interface Stat {
 }
 
 export interface Activity {
-  stats: Stat[];
+  readonly stats: readonly Stat[];
 }
 
 export interface Device {
@@ -112,8 +112,8 @@ export interface SensorData {
 }
 
 export interface CoreData {
-  connected: boolean;
-  devices: Device[];
+  readonly connected: boolean;
+  readonly devices: readonly Device[];
 }
 
 export interface DashboardItem {
@@ -122,11 +122,12 @@ export interface DashboardItem {
   n?: string; // name, optional
   dv?: DeviceValue; // device value, optional
   nodes?: DashboardItem[]; // children nodes, optional
+  parentNode: DashboardItem; // to stop lint errors
 }
 
 export interface DashboardData {
-  connected: boolean; // true if connected to EMS bus
-  nodes: DashboardItem[];
+  readonly connected: boolean; // true if connected to EMS bus
+  readonly nodes: readonly DashboardItem[];
 }
 
 export interface DeviceValue {
@@ -139,10 +140,11 @@ export interface DeviceValue {
   s?: string; // steps for up/down, optional
   m?: number; // min, optional
   x?: number; // max, optional
+  [key: string]: unknown;
 }
 
 export interface DeviceData {
-  nodes: DeviceValue[];
+  readonly nodes: readonly DeviceValue[];
 }
 
 export interface DeviceEntity {
@@ -221,7 +223,7 @@ export const DeviceValueUOM_s = [
   'l/h',
   'ct/kWh',
   'Hz'
-];
+] as const;
 
 export enum AnalogType {
   REMOVED = -1,
@@ -260,11 +262,9 @@ export const AnalogTypeNames = [
   'Freq 0',
   'Freq 1',
   'Freq 2'
-];
+] as const;
 
-type BoardProfiles = Record<string, string>;
-
-export const BOARD_PROFILES: BoardProfiles = {
+export const BOARD_PROFILES = {
   S32: 'BBQKees Gateway S32',
   S32S3: 'BBQKees Gateway S3',
   E32: 'BBQKees Gateway E32',
@@ -278,7 +278,9 @@ export const BOARD_PROFILES: BoardProfiles = {
   C3MINI: 'Wemos C3 Mini',
   S2MINI: 'Wemos S2 Mini',
   S3MINI: 'Liligo S3'
-};
+} as const;
+
+export type BoardProfileKey = keyof typeof BOARD_PROFILES;
 
 export interface BoardProfile {
   board_profile: string;
@@ -346,7 +348,7 @@ export interface ScheduleItem {
 }
 
 export interface Schedule {
-  schedule: ScheduleItem[];
+  readonly schedule: readonly ScheduleItem[];
 }
 
 export interface ModuleItem {
@@ -364,7 +366,7 @@ export interface ModuleItem {
 }
 
 export interface Modules {
-  modules: ModuleItem[];
+  readonly modules: readonly ModuleItem[];
 }
 
 export enum ScheduleFlag {
@@ -413,7 +415,7 @@ export interface EntityItem {
 }
 
 export interface Entities {
-  entities: EntityItem[];
+  readonly entities: readonly EntityItem[];
 }
 
 // matches emsdevice.h DeviceType
@@ -469,4 +471,4 @@ export const DeviceValueTypeNames = [
   'ENUM',
   'RAW',
   'CMD'
-];
+] as const;

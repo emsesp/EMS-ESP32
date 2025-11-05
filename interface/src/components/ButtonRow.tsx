@@ -19,6 +19,4 @@ const ButtonRow = memo<BoxProps>(({ children, ...rest }) => (
   </Box>
 ));
 
-ButtonRow.displayName = 'ButtonRow';
-
 export default ButtonRow;

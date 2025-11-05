@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -10,33 +12,39 @@ import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import type { SvgIconProps } from '@mui/material';
 
-type OptionType =
+export type OptionType =
   | 'deleted'
   | 'readonly'
   | 'web_exclude'
   | 'api_mqtt_exclude'
   | 'favorite';
 
-const OPTION_ICONS: {
-  [type in OptionType]: [
-    React.ComponentType<SvgIconProps>,
-    React.ComponentType<SvgIconProps>
-  ];
-} = {
+type IconPair = [
+  React.ComponentType<SvgIconProps>,
+  React.ComponentType<SvgIconProps>
+];
+
+const OPTION_ICONS: Record<OptionType, IconPair> = {
   deleted: [DeleteForeverIcon, DeleteOutlineIcon],
   readonly: [EditOffOutlinedIcon, EditOutlinedIcon],
   web_exclude: [VisibilityOffOutlinedIcon, VisibilityOutlinedIcon],
   api_mqtt_exclude: [CommentsDisabledOutlinedIcon, InsertCommentOutlinedIcon],
   favorite: [StarIcon, StarOutlineIcon]
+} as const;
+
+const ICON_SIZE = 16;
+const ICON_SX = { fontSize: ICON_SIZE, verticalAlign: 'middle' } as const;
+
+export interface OptionIconProps {
+  readonly type: OptionType;
+  readonly isSet: boolean;
+}
+
+const OptionIcon = ({ type, isSet }: OptionIconProps) => {
+  const [SetIcon, UnsetIcon] = OPTION_ICONS[type];
+  const Icon = isSet ? SetIcon : UnsetIcon;
+
+  return <Icon {...(isSet && { color: 'primary' })} sx={ICON_SX} />;
 };
 
-const OptionIcon = ({ type, isSet }: { type: OptionType; isSet: boolean }) => {
-  const Icon = OPTION_ICONS[type][isSet ? 0 : 1];
-  return isSet ? (
-    <Icon color="primary" sx={{ fontSize: 16, verticalAlign: 'middle' }} />
-  ) : (
-    <Icon sx={{ fontSize: 16, verticalAlign: 'middle' }} />
-  );
-};
-
-export default OptionIcon;
+export default memo(OptionIcon);

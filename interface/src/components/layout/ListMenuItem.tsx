@@ -1,3 +1,5 @@
+import { memo } from 'react';
+import type { CSSProperties } from 'react';
 import { Link } from 'react-router';
 
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
@@ -20,8 +22,15 @@ interface ListMenuItemProps {
   disabled?: boolean;
 }
 
-function RenderIcon({ icon: Icon, bgcolor, label, text }: ListMenuItemProps) {
-  return (
+// Extract styles to prevent recreation
+const iconStyles: CSSProperties = {
+  justifyContent: 'right',
+  color: 'lightblue',
+  verticalAlign: 'middle'
+};
+
+const RenderIcon = memo(
+  ({ icon: Icon, bgcolor, label, text }: ListMenuItemProps) => (
     <>
       <ListItemAvatar>
         <Avatar sx={{ bgcolor, color: 'white' }}>
@@ -30,8 +39,8 @@ function RenderIcon({ icon: Icon, bgcolor, label, text }: ListMenuItemProps) {
       </ListItemAvatar>
       <ListItemText primary={label} secondary={text} />
     </>
-  );
-}
+  )
+);
 
 const LayoutMenuItem = ({
   icon,
@@ -46,13 +55,7 @@ const LayoutMenuItem = ({
       <ListItem
         disablePadding
         secondaryAction={
-          <ListItemIcon
-            style={{
-              justifyContent: 'right',
-              color: 'lightblue',
-              verticalAlign: 'middle'
-            }}
-          >
+          <ListItemIcon style={iconStyles}>
             <NavigateNextIcon />
           </ListItemIcon>
         }
@@ -79,4 +82,4 @@ const LayoutMenuItem = ({
   </>
 );
 
-export default LayoutMenuItem;
+export default memo(LayoutMenuItem);

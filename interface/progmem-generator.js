@@ -1,10 +1,9 @@
-import crypto from 'crypto';
+import etag from 'etag';
 import {
   createWriteStream,
   existsSync,
   readFileSync,
   readdirSync,
-  statSync,
   unlinkSync
 } from 'fs';
 import mime from 'mime-types';
@@ -36,7 +35,7 @@ const generateWWWClass =
 class WWWData {
 ${INDENT}public:
 ${INDENT.repeat(2)}static void registerRoutes(RouteRegistrationHandler handler) {
-${fileInfo.map((f) => `${INDENT.repeat(3)}handler("${f.uri}", "${f.mimeType}", ${f.variable}, ${f.size}, "${f.hash}");`).join('\n')}
+${fileInfo.map((f) => `${INDENT.repeat(3)}handler("${f.uri}", "${f.mimeType}", ${f.variable}, ${f.size}, ${f.hash});`).join('\n')}
 ${INDENT.repeat(2)}}
 };
 `;
@@ -71,7 +70,8 @@ const writeFile = (relativeFilePath, buffer) => {
   writeStream.write(`const uint8_t ${variable}[] = {`);
 
   const zipBuffer = zlib.gzipSync(buffer, { level: 9 });
-  const hash = crypto.createHash('sha256').update(zipBuffer).digest('hex');
+  // const hash = crypto.createHash('sha256').update(zipBuffer).digest('hex');
+  const hash = etag(zipBuffer); // use smaller md5 instead of sha256
 
   zipBuffer.forEach((b) => {
     if (!(size % bytesPerLine)) {
