@@ -66,13 +66,13 @@ const bundleSizeReporter = (): Plugin => {
 
       files.sort((a, b) => b.size - a.size);
 
-      files.forEach((file) => {
-        const sizeKB = (file.size / KB_DIVISOR).toFixed(2);
-        const gzipKB = (file.gzipSize / KB_DIVISOR).toFixed(2);
-        console.log(
-          `📄 ${file.name.padEnd(30)} ${sizeKB.padStart(8)} KB (${gzipKB} KB gzipped)`
-        );
-      });
+      // files.forEach((file) => {
+      //   const sizeKB = (file.size / KB_DIVISOR).toFixed(2);
+      //   const gzipKB = (file.gzipSize / KB_DIVISOR).toFixed(2);
+      //   console.log(
+      //     `📄 ${file.name.padEnd(30)} ${sizeKB.padStart(8)} KB (${gzipKB} KB gzipped)`
+      //   );
+      // });
 
       const totalSize = files.reduce((sum, file) => sum + file.size, 0);
       const totalGzipSize = files.reduce((sum, file) => sum + file.gzipSize, 0);
