@@ -669,7 +669,7 @@ const Devices = memo(() => {
             </Typography>
             <Grid justifyContent="flex-end">
               <ButtonTooltip title={LL.CLOSE()}>
-                <IconButton onClick={resetDeviceSelect}>
+                <IconButton onClick={resetDeviceSelect} aria-label={LL.CLOSE()}>
                   <HighlightOffIcon color="primary" sx={{ fontSize: 18 }} />
                 </IconButton>
               </ButtonTooltip>
@@ -681,6 +681,7 @@ const Devices = memo(() => {
             variant="outlined"
             sx={{ width: '22ch' }}
             placeholder={LL.SEARCH()}
+            aria-label={LL.SEARCH()}
             onChange={(event) => {
               setSearch(event.target.value);
             }}
@@ -695,19 +696,22 @@ const Devices = memo(() => {
             }}
           />
           <ButtonTooltip title={LL.DEVICE_DETAILS()}>
-            <IconButton onClick={() => setShowDeviceInfo(true)}>
+            <IconButton
+              onClick={() => setShowDeviceInfo(true)}
+              aria-label={LL.DEVICE_DETAILS()}
+            >
               <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
             </IconButton>
           </ButtonTooltip>
           {me.admin && (
             <ButtonTooltip title={LL.CUSTOMIZATIONS()}>
-              <IconButton onClick={customize}>
+              <IconButton onClick={customize} aria-label={LL.CUSTOMIZATIONS()}>
                 <ConstructionIcon color="primary" sx={{ fontSize: 18 }} />
               </IconButton>
             </ButtonTooltip>
           )}
           <ButtonTooltip title={LL.EXPORT()}>
-            <IconButton onClick={handleDownloadCsv}>
+            <IconButton onClick={handleDownloadCsv} aria-label={LL.EXPORT()}>
               <DownloadIcon color="primary" sx={{ fontSize: 18 }} />
             </IconButton>
           </ButtonTooltip>

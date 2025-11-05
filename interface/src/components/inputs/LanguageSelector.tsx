@@ -44,7 +44,7 @@ const LANGUAGE_OPTIONS: LanguageOption[] = [
 ];
 
 const LanguageSelector = () => {
-  const { setLocale, locale } = useContext(I18nContext);
+  const { setLocale, locale, LL } = useContext(I18nContext);
 
   const onLocaleSelected: ChangeEventHandler<HTMLInputElement> = useCallback(
     async ({ target }) => {
@@ -72,6 +72,7 @@ const LanguageSelector = () => {
     <TextField
       name="locale"
       variant="outlined"
+      aria-label={LL.LANGUAGE()}
       value={locale}
       onChange={onLocaleSelected}
       size="small"

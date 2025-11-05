@@ -164,7 +164,7 @@ const NetworkSettings = () => {
                   selectedNetwork.bssid
                 }
               />
-              <IconButton onClick={setCancel}>
+              <IconButton onClick={setCancel} aria-label={LL.CANCEL()}>
                 <DeleteIcon />
               </IconButton>
             </ListItem>

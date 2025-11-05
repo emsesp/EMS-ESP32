@@ -364,6 +364,9 @@ const Dashboard = memo(() => {
                                   ) && (
                                     <IconButton
                                       size="small"
+                                      aria-label={
+                                        LL.CHANGE_VALUE() + ' ' + LL.VALUE(0)
+                                      }
                                       onClick={() => editDashboardValue(di)}
                                     >
                                       <EditIcon

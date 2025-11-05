@@ -211,15 +211,24 @@ const ManageUsers = () => {
                     <Cell stiff>
                       <IconButton
                         size="small"
+                        aria-label={LL.GENERATING_TOKEN()}
                         disabled={!authenticatedContext.me.admin}
                         onClick={() => generateTokenForUser(u.username)}
                       >
                         <VpnKeyIcon />
                       </IconButton>
-                      <IconButton size="small" onClick={() => removeUser(u)}>
+                      <IconButton
+                        size="small"
+                        onClick={() => removeUser(u)}
+                        aria-label={LL.REMOVE()}
+                      >
                         <DeleteIcon />
                       </IconButton>
-                      <IconButton size="small" onClick={() => editUser(u)}>
+                      <IconButton
+                        size="small"
+                        onClick={() => editUser(u)}
+                        aria-label={LL.EDIT()}
+                      >
                         <EditIcon />
                       </IconButton>
                     </Cell>

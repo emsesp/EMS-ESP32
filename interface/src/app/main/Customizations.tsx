@@ -558,6 +558,7 @@ const Customizations = () => {
               size="small"
               variant="outlined"
               placeholder={LL.SEARCH()}
+              aria-label={LL.SEARCH()}
               onChange={(event) => {
                 setSearch(event.target.value);
               }}

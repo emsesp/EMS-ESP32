@@ -25,7 +25,11 @@ const ValidatedPasswordField: FC<ValidatedPasswordFieldProps> = ({ ...props }) =
         input: {
           endAdornment: (
             <InputAdornment position="end">
-              <IconButton onClick={togglePasswordVisibility} edge="end">
+              <IconButton
+                onClick={togglePasswordVisibility}
+                edge="end"
+                aria-label="Password visibility"
+              >
                 {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
               </IconButton>
             </InputAdornment>

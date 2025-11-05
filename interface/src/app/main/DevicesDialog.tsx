@@ -137,6 +137,7 @@ const DevicesDialog = ({
               <TextField
                 name="v"
                 value={editItem.v}
+                aria-label={valueLabel}
                 disabled={!writeable}
                 sx={{ width: '30ch' }}
                 select

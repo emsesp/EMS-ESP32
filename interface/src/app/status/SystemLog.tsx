@@ -355,6 +355,7 @@ const SystemLog = () => {
             >
               <IconButton
                 disableRipple
+                aria-label={LL.CANCEL()}
                 onClick={() => {
                   setReadOpen(false);
                   setReadValue('');
@@ -380,7 +381,7 @@ const SystemLog = () => {
           ) : (
             <>
               {data.developer_mode && (
-                <IconButton onClick={sendReadCommand}>
+                <IconButton onClick={sendReadCommand} aria-label={LL.EXECUTE()}>
                   <PlayArrowIcon color="primary" />
                 </IconButton>
               )}
