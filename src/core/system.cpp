@@ -107,6 +107,19 @@ bool System::command_send(const char * value, const int8_t id) {
     return EMSESP::txservice_.send_raw(value); // ignore id
 }
 
+// return string of languages and count
+std::string System::languages_string() {
+    std::string languages_string = std::to_string(NUM_LANGUAGES) + " languages (";
+    for (uint8_t i = 0; i < NUM_LANGUAGES; i++) {
+        languages_string += languages[i];
+        if (i != NUM_LANGUAGES - 1) {
+            languages_string += ",";
+        }
+    }
+    languages_string += ")";
+    return languages_string;
+}
+
 // returns last response from MQTT
 bool System::command_response(const char * value, const int8_t id, JsonObject output) {
     JsonDocument doc;
@@ -1779,7 +1792,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["busReadsFailed"]         = EMSESP::txservice_.telegram_read_fail_count();
     node["busWritesFailed"]        = EMSESP::txservice_.telegram_write_fail_count();
     node["busRxLineQuality"]       = EMSESP::rxservice_.quality();
-    node["busTxLineQuality"]       = (EMSESP::txservice_.read_quality() + EMSESP::txservice_.read_quality()) / 2;
+    node["busTxLineQuality"]       = (EMSESP::txservice_.read_quality() + EMSESP::txservice_.write_quality()) / 2;
 
     // Settings
     node = output["settings"].to<JsonObject>();

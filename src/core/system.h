@@ -291,6 +291,8 @@ class System {
     void wifi_reconnect();
     void show_users(uuid::console::Shell & shell);
 
+    static std::string languages_string();
+
     uint32_t FStotal() {
         return fstotal_;
     }

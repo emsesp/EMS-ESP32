@@ -26,6 +26,9 @@ static_assert(uuid::thread_safe, "uuid-common must be thread-safe");
 static_assert(uuid::log::thread_safe, "uuid-log must be thread-safe");
 static_assert(uuid::console::thread_safe, "uuid-console must be thread-safe");
 
+// Translation counter - incremented by MAKE_TRANSLATION macro (must be global, not in namespace)
+uint32_t translation_count_ = 0;
+
 namespace emsesp {
 
 // Static member definitions
@@ -288,7 +291,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
         shell.printfln("  #read fails (after %d retries): %d", TxService::MAXIMUM_TX_RETRIES, txservice_.telegram_read_fail_count());
         shell.printfln("  #write fails (after %d retries): %d", TxService::MAXIMUM_TX_RETRIES, txservice_.telegram_write_fail_count());
         shell.printfln("  Rx line quality: %d%%", rxservice_.quality());
-        shell.printfln("  Tx line quality: %d%%", (txservice_.read_quality() + txservice_.read_quality()) / 2);
+        shell.printfln("  Tx line quality: %d%%", (txservice_.read_quality() + txservice_.write_quality()) / 2);
         shell.println();
     }
 
@@ -1691,7 +1694,7 @@ void EMSESP::start() {
     device_library_ = {
 #include "device_library.h"
     };
-    LOG_INFO("Loaded EMS device library (%d entries)", device_library_.size());
+    LOG_INFO("Library loaded: %d EMS devices, %d device entities, %s", device_library_.size(), ::translation_count_, system_.languages_string().c_str());
 
     system_.reload_settings(); // ... and store some of the settings locally
 

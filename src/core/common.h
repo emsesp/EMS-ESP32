@@ -52,22 +52,39 @@ using string_vector = std::vector<const char *>;
 #define F_(string_name) (__pstr__##string_name)
 #define FL_(list_name) (__pstr__L_##list_name)
 
+// Counter for translations created by MAKE_TRANSLATION
+extern uint32_t translation_count_;
+#include <set>
+#include <string>
+inline void increment_translation_count_impl(const char * translation_name) {
+    // Use a static set to track which translations we've already counted by name
+    // Using std::string ensures we compare by value, not by pointer address
+    // This ensures we only count each unique translation once, even if included in multiple files
+    static std::set<std::string> counted_translations;
+    std::string name(translation_name);
+    if (counted_translations.find(name) == counted_translations.end()) {
+        extern uint32_t translation_count_;
+        translation_count_++;
+        counted_translations.insert(name);
+    }
+}
+
 // The language settings below must match system.cpp
 #if defined(EMSESP_TEST)
 // in Test mode use two languages (en & de) to save flash memory needed for the tests
 #define MAKE_WORD_TRANSLATION(list_name, en, de, ...)       static const char * const __pstr__L_##list_name[] = {en, de, nullptr};
-#define MAKE_TRANSLATION(list_name, shortname, en, de, ...) static const char * const __pstr__L_##list_name[] = {shortname, en, de, nullptr};
+#define MAKE_TRANSLATION(list_name, shortname, en, de, ...) static const char * const __pstr__L_##list_name[] = {shortname, en, de, nullptr}; static int __translation_counter_##list_name = (increment_translation_count_impl(#list_name), 0);
 #elif defined(EMSESP_EN_ONLY)
 // EN only
 #define MAKE_WORD_TRANSLATION(list_name, en, ...)       static const char * const __pstr__L_##list_name[] = {en, nullptr};
-#define MAKE_TRANSLATION(list_name, shortname, en, ...) static const char * const __pstr__L_##list_name[] = {shortname, en, nullptr};
+#define MAKE_TRANSLATION(list_name, shortname, en, ...) static const char * const __pstr__L_##list_name[] = {shortname, en, nullptr}; static int __translation_counter_##list_name = (increment_translation_count_impl(#list_name), 0);
 #elif defined(EMSESP_DE_ONLY)
 // EN + DE
 #define MAKE_WORD_TRANSLATION(list_name, en, de, ...)       static const char * const __pstr__L_##list_name[] = {en, de, nullptr};
-#define MAKE_TRANSLATION(list_name, shortname, en, de, ...) static const char * const __pstr__L_##list_name[] = {shortname, en, de, nullptr};
+#define MAKE_TRANSLATION(list_name, shortname, en, de, ...) static const char * const __pstr__L_##list_name[] = {shortname, en, de, nullptr}; static int __translation_counter_##list_name = (increment_translation_count_impl(#list_name), 0);
 #else
 #define MAKE_WORD_TRANSLATION(list_name, ...) static const char * const __pstr__L_##list_name[] = {__VA_ARGS__, nullptr};
-#define MAKE_TRANSLATION(list_name, ...)      static const char * const __pstr__L_##list_name[] = {__VA_ARGS__, nullptr};
+#define MAKE_TRANSLATION(list_name, ...)      static const char * const __pstr__L_##list_name[] = {__VA_ARGS__, nullptr}; static int __translation_counter_##list_name = (increment_translation_count_impl(#list_name), 0);
 #endif
 
 #define MAKE_NOTRANSLATION(list_name, ...) static const char * const __pstr__L_##list_name[] = {__VA_ARGS__, nullptr};
