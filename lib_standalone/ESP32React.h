@@ -75,8 +75,8 @@ class DummySettings {
     uint8_t  provisionMode      = 0;
     uint32_t publish_time_water = 0;
 
-    static void read(DummySettings & settings, JsonObject root){};
-    static void read(DummySettings & settings){};
+    static void read(DummySettings & settings, JsonObject root) {};
+    static void read(DummySettings & settings) {};
 
     static StateUpdateResult update(JsonObject root, DummySettings & settings) {
         return StateUpdateResult::CHANGED;
@@ -85,7 +85,7 @@ class DummySettings {
 
 class DummySettingsService : public StatefulService<DummySettings> {
   public:
-    DummySettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager){};
+    DummySettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager) {};
 
     void begin();
     void loop();
@@ -101,12 +101,12 @@ class ESP32React {
   public:
     ESP32React(AsyncWebServer * server, FS * fs)
         : _settings(server, fs, nullptr)
-        , _securitySettingsService(server, fs){};
+        , _securitySettingsService(server, fs) {};
 
     void begin() {
         _mqttClient = new espMqttClient();
     };
-    void loop(){};
+    void loop() {};
 
     SecurityManager * getSecurityManager() {
         return &_securitySettingsService;
