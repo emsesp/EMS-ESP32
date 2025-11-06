@@ -1452,6 +1452,7 @@ bool System::command_service(const char * cmd, const char * value) {
             ok = true;
         }
     }
+    
     int n;
     if (!ok && Helpers::value2number(value, n)) {
 #ifndef EMSESP_STANDALONE
@@ -1671,15 +1672,19 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
 
     // NTP status
     node = output["ntp"].to<JsonObject>();
-#ifndef EMSESP_STANDALONE
-    node["NTPStatus"] = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
     EMSESP::esp32React.getNTPSettingsService()->read([&](const NTPSettings & settings) {
+#ifndef EMSESP_STANDALONE
         node["enabled"] = settings.enabled;
+#else
+        node["enabled"] = true;
+#endif
         node["server"]  = settings.server;
         node["tzLabel"] = settings.tzLabel;
     });
+#ifndef EMSESP_STANDALONE
     node["timestamp"] = time(nullptr);
 #endif
+    node["NTPStatus"] = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
 
     // AP Status
     node = output["ap"].to<JsonObject>();
