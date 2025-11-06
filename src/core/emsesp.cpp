@@ -917,10 +917,10 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
         }
     }
 
-    // Fallback for type name if not found - try src or dest
+    // Fallback for type name if not found - try dest
     if (!type_found && telegram->operation != Telegram::Operation::RX_READ) {
         for (const auto & emsdevice : emsdevices) {
-            if (emsdevice->is_device_id(src) || emsdevice->is_device_id(dest)) {
+            if (emsdevice->is_device_id(dest)) {
                 type_name = emsdevice->telegram_type_name(telegram);
                 if (!type_name.empty()) {
                     break;
