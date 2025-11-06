@@ -337,7 +337,7 @@ const tr: Translation = {
   UPDATE_AVAILABLE: 'güncellendi!',
   LATEST_VERSION: 'En son {0} firmware sürümünü kullanıyorsunuz.',
   PLEASE_WAIT: 'Lütfen bekleyin',
-  RESTARTING_PRE: 'Başlatılıyor',
+  RESTARTING_PRE: 'Yükleniyor',
   RESTARTING_POST: 'Hazırlanıyor',
   AUTO_SCROLL: 'Otomatik kaydırma',
   DASHBOARD: 'Kontrol Paneli',

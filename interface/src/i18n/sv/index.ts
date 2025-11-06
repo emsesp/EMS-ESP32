@@ -337,7 +337,7 @@ const sv: Translation = {
   UPDATE_AVAILABLE: 'uppdatering tillgänglig',
   LATEST_VERSION: 'Du använder den senaste {0} firmwareversionen.',
   PLEASE_WAIT: 'Var god vänta',
-  RESTARTING_PRE: 'Initialiserar',
+  RESTARTING_PRE: 'Bootar',
   RESTARTING_POST: 'Förbereder',
   AUTO_SCROLL: 'Autoskrolla',
   DASHBOARD: 'Kontrollpanel',

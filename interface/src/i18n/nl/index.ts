@@ -337,7 +337,7 @@ const nl: Translation = {
   UPDATE_AVAILABLE: 'update beschikbaar',
   LATEST_VERSION: 'U gebruikt de nieuwste {0} firmwareversie',
   PLEASE_WAIT: 'Een ogenblik geduld',
-  RESTARTING_PRE: 'Initialiseren',
+  RESTARTING_PRE: 'Booten',
   RESTARTING_POST: 'Voorbereiding',
   AUTO_SCROLL: 'Automatisch Scrollen',
   DASHBOARD: 'Dashboard',

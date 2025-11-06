@@ -337,7 +337,7 @@ const it: Translation = {
   UPDATE_AVAILABLE: 'aggiornamento disponibile',
   LATEST_VERSION: 'Stai usando la versione più recente del firmware {0}',
   PLEASE_WAIT: 'Attendere',
-  RESTARTING_PRE: 'Inizializzazione',
+  RESTARTING_PRE: 'Avviamento',
   RESTARTING_POST: 'Preparazione',
   AUTO_SCROLL: 'Scorrimento automatico',
   DASHBOARD: 'Pannello di controllo',
