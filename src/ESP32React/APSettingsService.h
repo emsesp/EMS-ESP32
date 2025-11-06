@@ -58,7 +58,7 @@ enum APNetworkStatus { ACTIVE = 0, INACTIVE, LINGERING };
 
 class APSettings {
   public:
-    uint8_t provisionMode;
+    uint8_t provisionMode; // 0 = on, 2 = off
     String  ssid;
     String  password;
     uint8_t channel;
