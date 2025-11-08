@@ -143,6 +143,7 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
             obj["o"]       = sensor.offset();
             obj["f"]       = sensor.factor();
             obj["t"]       = sensor.type();
+            obj["s"]       = sensor.is_system();
 
             if (sensor.type() != AnalogSensor::AnalogType::NOTUSED) {
                 obj["v"] = Helpers::transformNumFloat(sensor.value()); // is optional and is a float

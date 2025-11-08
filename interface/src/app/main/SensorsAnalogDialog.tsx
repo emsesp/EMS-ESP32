@@ -447,6 +447,7 @@ const SensorsAnalogDialog = ({
           <Box flexGrow={1} sx={{ '& button': { mt: 0 } }}>
             <Button
               startIcon={<RemoveIcon />}
+              disabled={editItem.s}
               variant="outlined"
               color="warning"
               onClick={remove}

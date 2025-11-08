@@ -63,13 +63,14 @@ void WebCustomization::read(WebCustomization & customizations, JsonObject root) 
     // Analog Sensor customization
     JsonArray analogJson = root["as"].to<JsonArray>();
     for (const AnalogCustomization & sensor : customizations.analogCustomizations) {
-        JsonObject sensorJson = analogJson.add<JsonObject>();
-        sensorJson["gpio"]    = sensor.gpio;   // g
-        sensorJson["name"]    = sensor.name;   // n
-        sensorJson["offset"]  = sensor.offset; // o
-        sensorJson["factor"]  = sensor.factor; // f
-        sensorJson["uom"]     = sensor.uom;    // u
-        sensorJson["type"]    = sensor.type;   // t
+        JsonObject sensorJson   = analogJson.add<JsonObject>();
+        sensorJson["gpio"]      = sensor.gpio;      // g
+        sensorJson["name"]      = sensor.name;      // n
+        sensorJson["offset"]    = sensor.offset;    // o
+        sensorJson["factor"]    = sensor.factor;    // f
+        sensorJson["uom"]       = sensor.uom;       // u
+        sensorJson["type"]      = sensor.type;      // t
+        sensorJson["is_system"] = sensor.is_system; // s
     }
 
     // Masked entities customization and custom device name (optional)
@@ -115,13 +116,14 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
         auto analogJsons = root["as"].as<JsonArray>();
         for (const JsonObject analogJson : analogJsons) {
             // create each of the sensor, overwriting any previous settings
-            auto analog   = AnalogCustomization();
-            analog.gpio   = analogJson["gpio"];
-            analog.name   = analogJson["name"].as<std::string>();
-            analog.offset = analogJson["offset"];
-            analog.factor = analogJson["factor"];
-            analog.uom    = analogJson["uom"];
-            analog.type   = analogJson["type"];
+            auto analog      = AnalogCustomization();
+            analog.gpio      = analogJson["gpio"];
+            analog.name      = analogJson["name"].as<std::string>();
+            analog.offset    = analogJson["offset"];
+            analog.factor    = analogJson["factor"];
+            analog.uom       = analogJson["uom"];
+            analog.type      = analogJson["type"];
+            analog.is_system = analogJson["is_system"];
             if (_start && analog.type == EMSESP::analogsensor_.AnalogType::DIGITAL_OUT && analog.uom > DeviceValue::DeviceValueUOM::NONE) {
                 analog.offset = analog.uom - 1;
             }
