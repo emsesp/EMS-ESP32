@@ -284,8 +284,9 @@ void test_35() {
 }
 
 void test_36() {
-    auto expected_response = "[{\"name\":\"test_analogsensor1\",\"fullname\":\"test_analogsensor1\",\"gpio\":36,\"type\":\"number\",\"analog\":\"adc\","
-                             "\"value\":0,\"readable\":true,\"writeable\":false,\"visible\":true,\"offset\":0,\"factor\":0.1,\"uom\":\"mV\"}]";
+    auto expected_response =
+        "[{\"name\":\"test_analogsensor1\",\"fullname\":\"test_analogsensor1\",\"gpio\":36,\"type\":\"number\",\"analog\":\"adc\",\"value\":0,\"readable\":"
+        "true,\"writeable\":false,\"visible\":true,\"is_system\":true,\"offset\":0,\"factor\":0.1,\"uom\":\"mV\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor/test_analogsensor1"));
 }
 
