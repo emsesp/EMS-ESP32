@@ -21,6 +21,7 @@
 #define NTP_SETTINGS_FILE "/config/ntpSettings.json"
 #define EMSESP_SETTINGS_FILE "/config/emsespSettings.json"
 
+#define AP_MODE_ALWAYS 0
 class DummySettings {
   public:
     // SYSTEM
