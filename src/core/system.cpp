@@ -536,8 +536,18 @@ void System::button_OnClick(PButton & b) {
 
 // button double click
 void System::button_OnDblClick(PButton & b) {
-    LOG_NOTICE("Button pressed - double click - wifi reconnect");
-    EMSESP::system_.wifi_reconnect();
+    LOG_NOTICE("Button pressed - double click - wifi reconnect to AP");
+    // set AP mode to always so will join AP if wifi ssid fails to connect
+    EMSESP::esp32React.getAPSettingsService()->update([&](APSettings & apSettings) {
+        apSettings.provisionMode = AP_MODE_ALWAYS;
+        return StateUpdateResult::CHANGED;
+    });
+    // remove SSID from network settings
+    EMSESP::esp32React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
+        networkSettings.ssid = "";
+        return StateUpdateResult::CHANGED;
+    });
+    EMSESP::esp32React.getNetworkSettingsService()->callUpdateHandlers(); // in case we've changed ssid or password
 }
 
 // button long press
