@@ -23,10 +23,10 @@
 // Constructor
 PButton::PButton() {
     // Initialization of default properties
-    Debounce_        = 40;   // Debounce period to prevent flickering when pressing or releasing the button (in ms)
-    DblClickDelay_   = 250;  // Max period between clicks for a double click event (in ms)
-    LongPressDelay_  = 750;  // Hold period for a long press event (in ms)
-    VLongPressDelay_ = 3000; // Hold period for a very long press event (in ms)
+    Debounce_        = 40;    // Debounce period to prevent flickering when pressing or releasing the button (in ms)
+    DblClickDelay_   = 250;   // Max period between clicks for a double click event (in ms)
+    LongPressDelay_  = 9500;  // Hold period for a long press event (in ms)
+    VLongPressDelay_ = 20000; // Hold period for a very long press event (in ms)
 
     cb_onClick      = nullptr;
     cb_onDblClick   = nullptr;
