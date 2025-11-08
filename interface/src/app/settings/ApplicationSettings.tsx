@@ -37,13 +37,13 @@ import { validate } from 'validators';
 
 import { API, getBoardProfile, readSettings, writeSettings } from '../../api/app';
 import { BOARD_PROFILES } from '../main/types';
-import type { APIcall, Settings } from '../main/types';
+import type { APIcall, BoardProfileKey, Settings } from '../main/types';
 import { createSettingsValidator } from '../main/validators';
 
 export function boardProfileSelectItems() {
   return Object.keys(BOARD_PROFILES).map((code) => (
     <MenuItem key={code} value={code}>
-      {BOARD_PROFILES[code]}
+      {BOARD_PROFILES[code as BoardProfileKey]}
     </MenuItem>
   ));
 }
