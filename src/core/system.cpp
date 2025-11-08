@@ -1452,7 +1452,7 @@ bool System::command_service(const char * cmd, const char * value) {
             ok = true;
         }
     }
-    
+
     int n;
     if (!ok && Helpers::value2number(value, n)) {
 #ifndef EMSESP_STANDALONE
@@ -1661,15 +1661,6 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         }
     });
 
-#ifndef EMSESP_STANDALONE
-    EMSESP::esp32React.getAPSettingsService()->read([&](const APSettings & settings) {
-        const char * pM[]       = {"always", "disconnected", "never"};
-        node["APProvisionMode"] = pM[settings.provisionMode];
-        node["APSecurity"]      = settings.password.length() ? "wpa2" : "open";
-        node["APSSID"]          = settings.ssid;
-    });
-#endif
-
     // NTP status
     node = output["ntp"].to<JsonObject>();
     EMSESP::esp32React.getNTPSettingsService()->read([&](const NTPSettings & settings) {
@@ -1689,9 +1680,11 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     // AP Status
     node = output["ap"].to<JsonObject>();
     EMSESP::esp32React.getAPSettingsService()->read([&](const APSettings & settings) {
-        node["provisionMode"] = settings.provisionMode; // 0 is on, 2 is off
+        const char * pM[]     = {"always", "disconnected", "never"};
+        node["provisionMode"] = pM[settings.provisionMode];
         node["ssid"]          = settings.ssid;
 #ifndef EMSESP_STANDALONE
+        node["security"]   = settings.password.length() ? "wpa2" : "open";
         node["channel"]    = settings.channel;
         node["ssidHidden"] = settings.ssidHidden;
         node["maxClients"] = settings.maxClients;
@@ -1991,15 +1984,12 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
 
 // format command - factory reset, removing all config files
 bool System::command_format(const char * value, const int8_t id) {
-    LOG_INFO("Removing all config files");
+    LOG_INFO("Formatting FS, removing all config files");
 #ifndef EMSESP_STANDALONE
-    // TODO To replaced with LittleFS.rmdir(FS_CONFIG_DIRECTORY) now we're using IDF 4.2+
-    File root = LittleFS.open(EMSESP_FS_CONFIG_DIRECTORY);
-    File file;
-    while ((file = root.openNextFile())) {
-        String path = file.path();
-        file.close();
-        LittleFS.remove(path);
+    if (LittleFS.format()) {
+        LOG_INFO("FS formatted successfully");
+    } else {
+        LOG_ERROR("Format failed");
     }
 #endif
 
