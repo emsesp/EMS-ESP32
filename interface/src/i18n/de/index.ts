@@ -337,7 +337,7 @@ const de: Translation = {
   UPDATE_AVAILABLE: 'Firmware-Update verfügbar',
   LATEST_VERSION: 'Sie verwenden die neueste {0} Firmware-Version',
   PLEASE_WAIT: 'Bitte warten',
-  RESTARTING_PRE: 'Initialisierung',
+  RESTARTING_PRE: 'Booten',
   RESTARTING_POST: 'Vorbereitung',
   AUTO_SCROLL: 'Automatisches Scrollen',
   DASHBOARD: 'Dashboard',

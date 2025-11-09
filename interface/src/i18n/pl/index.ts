@@ -337,7 +337,7 @@ const pl: BaseTranslation = {
   UPDATE_AVAILABLE: 'aktualizacja dostępna',
   LATEST_VERSION: 'Jesteś używając najnowszej wersji firmware {0}',
   PLEASE_WAIT: 'Proszę czekać',
-  RESTARTING_PRE: 'Inicjalizacja',
+  RESTARTING_PRE: 'Uruchamianie',
   RESTARTING_POST: 'Przygotowanie',
   AUTO_SCROLL: 'Auto Scroll',
   DASHBOARD: 'Pulpit',

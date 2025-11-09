@@ -23,7 +23,9 @@ const ValidatedTextField: FC<ValidatedTextFieldProps> = ({
     <>
       <TextField error={!!errors} {...rest} aria-label="Error" />
       {errors?.map((e) => (
-        <FormHelperText key={e.message}>{e.message}</FormHelperText>
+        <FormHelperText key={e.message} sx={{ color: 'rgb(250, 95, 84)' }}>
+          {e.message}
+        </FormHelperText>
       ))}
     </>
   );

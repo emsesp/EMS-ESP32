@@ -592,6 +592,7 @@ bool Command::list(const uint8_t device_type, JsonObject output) {
         output["ap/enabled"]             = Helpers::translated_word(FL_(system_cmd));
         output["syslog/enabled"]         = Helpers::translated_word(FL_(system_cmd));
     }
+
     // create a list of commands we have registered, and sort them
     std::list<std::string> sorted_cmds;
     for (const auto & cf : cmdfunctions_) {

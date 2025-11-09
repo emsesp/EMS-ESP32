@@ -1,4 +1,3 @@
-
 // ---------- START - CUT HERE ----------
 
 void test_1() {
@@ -162,22 +161,24 @@ void test_21() {
     auto expected_response =
         "[{\"system\":{\"version\":\"dev\",\"uptime\":\"000+00:00:00.000\",\"uptimeSec\":0,\"resetReason\":\"Unknown / "
         "Unknown\"},\"network\":{\"network\":\"WiFi\",\"hostname\":\"ems-esp\",\"RSSI\":-23,\"TxPowerSetting\":0,\"staticIP\":false,\"lowBandwidth\":false,"
-        "\"disableSleep\":true,\"enableMDNS\":true,\"enableCORS\":false},\"ntp\":{},\"mqtt\":{\"MQTTStatus\":\"disconnected\",\"MQTTPublishes\":0,"
-        "\"MQTTQueued\":0,\"MQTTPublishFails\":0,\"MQTTReconnects\":0,\"enabled\":true,\"clientID\":\"ems-esp\",\"keepAlive\":60,\"cleanSession\":false,"
-        "\"entityFormat\":1,\"base\":\"ems-esp\",\"discoveryPrefix\":\"homeassistant\",\"discoveryType\":0,\"nestedFormat\":1,\"haEnabled\":true,\"mqttQos\":0,"
-        "\"mqttRetain\":false,\"publishTimeHeartbeat\":60,\"publishTimeBoiler\":10,\"publishTimeThermostat\":10,\"publishTimeSolar\":10,\"publishTimeMixer\":"
-        "10,\"publishTimeWater\":0,\"publishTimeOther\":10,\"publishTimeSensor\":10,\"publishSingle\":false,\"publish2command\":false,\"sendResponse\":false},"
-        "\"syslog\":{\"enabled\":false},\"sensor\":{\"temperatureSensors\":2,\"temperatureSensorReads\":0,\"temperatureSensorFails\":0,\"analogSensors\":4,"
-        "\"analogSensorReads\":0,\"analogSensorFails\":0},\"api\":{\"APICalls\":0,\"APIFails\":0},\"bus\":{\"busStatus\":\"connected\",\"busProtocol\":"
-        "\"Buderus\",\"busTelegramsReceived\":8,\"busReads\":0,\"busWrites\":0,\"busIncompleteTelegrams\":0,\"busReadsFailed\":0,\"busWritesFailed\":0,"
-        "\"busRxLineQuality\":100,\"busTxLineQuality\":100},\"settings\":{\"boardProfile\":\"S32\",\"locale\":\"en\",\"txMode\":8,\"emsBusID\":11,"
-        "\"showerTimer\":false,\"showerMinDuration\":180,\"showerAlert\":false,\"hideLed\":false,\"noTokenApi\":false,\"readonlyMode\":false,\"fahrenheit\":"
-        "false,\"dallasParasite\":false,\"boolFormat\":1,\"boolDashboard\":1,\"enumFormat\":1,\"analogEnabled\":true,\"telnetEnabled\":true,"
-        "\"maxWebLogBuffer\":25,\"modbusEnabled\":false,\"forceHeatingOff\":false,\"developerMode\":false},\"devices\":[{\"type\":\"boiler\",\"name\":\"My "
-        "Custom "
+        "\"disableSleep\":true,\"enableMDNS\":true,\"enableCORS\":false},\"ntp\":{\"enabled\":true,\"server\":\"pool.ntp.org\",\"tzLabel\":\"Europe/"
+        "London\",\"NTPStatus\":\"disconnected\"},\"ap\":{\"provisionMode\":\"always\",\"ssid\":\"ems-esp\"},\"mqtt\":{\"MQTTStatus\":\"disconnected\","
+        "\"MQTTPublishes\":0,\"MQTTQueued\":0,\"MQTTPublishFails\":0,\"MQTTReconnects\":0,\"enabled\":true,\"clientID\":\"ems-esp\",\"keepAlive\":60,"
+        "\"cleanSession\":false,\"entityFormat\":1,\"base\":\"ems-esp\",\"discoveryPrefix\":\"homeassistant\",\"discoveryType\":0,\"nestedFormat\":1,"
+        "\"haEnabled\":true,\"mqttQos\":0,\"mqttRetain\":false,\"publishTimeHeartbeat\":60,\"publishTimeBoiler\":10,\"publishTimeThermostat\":10,"
+        "\"publishTimeSolar\":10,\"publishTimeMixer\":10,\"publishTimeWater\":0,\"publishTimeOther\":10,\"publishTimeSensor\":10,\"publishSingle\":false,"
+        "\"publish2command\":false,\"sendResponse\":false},\"syslog\":{\"enabled\":false},\"sensor\":{\"temperatureSensors\":2,\"temperatureSensorReads\":0,"
+        "\"temperatureSensorFails\":0,\"analogSensors\":4,\"analogSensorReads\":0,\"analogSensorFails\":0},\"api\":{\"APICalls\":0,\"APIFails\":0},\"bus\":{"
+        "\"busStatus\":\"connected\",\"busProtocol\":\"Buderus\",\"busTelegramsReceived\":8,\"busReads\":0,\"busWrites\":0,\"busIncompleteTelegrams\":0,"
+        "\"busReadsFailed\":0,\"busWritesFailed\":0,\"busRxLineQuality\":100,\"busTxLineQuality\":100},\"settings\":{\"boardProfile\":\"S32\",\"locale\":"
+        "\"en\",\"txMode\":8,\"emsBusID\":11,\"showerTimer\":false,\"showerMinDuration\":180,\"showerAlert\":false,\"hideLed\":false,\"noTokenApi\":false,"
+        "\"readonlyMode\":false,\"fahrenheit\":false,\"dallasParasite\":false,\"boolFormat\":1,\"boolDashboard\":1,\"enumFormat\":1,\"analogEnabled\":true,"
+        "\"telnetEnabled\":true,\"maxWebLogBuffer\":25,\"modbusEnabled\":false,\"forceHeatingOff\":false,\"developerMode\":false},\"devices\":[{\"type\":"
+        "\"boiler\",\"name\":\"My Custom "
         "Boiler\",\"deviceID\":\"0x08\",\"productID\":123,\"brand\":\"\",\"version\":\"01.00\",\"entities\":38,\"handlersReceived\":\"0x18\","
         "\"handlersFetched\":\"0x14 0x33\",\"handlersPending\":\"0xBF 0x10 0x11 0xC2 0xC6 0x15 0x1C 0x19 0x1A 0x35 0x34 0x2A 0xD1 0xE3 0xE4 0xE5 0xE9 0x02E0 "
-        "0x2E 0x3B\"},{\"type\":\"thermostat\",\"name\":\"FW120\",\"deviceID\":\"0x10\",\"productID\":192,\"brand\":\"\",\"version\":\"01.00\",\"entities\":15,"
+        "0x2E "
+        "0x3B\"},{\"type\":\"thermostat\",\"name\":\"FW120\",\"deviceID\":\"0x10\",\"productID\":192,\"brand\":\"\",\"version\":\"01.00\",\"entities\":15,"
         "\"handlersReceived\":\"0x016F\",\"handlersFetched\":\"0x0170 0x0171\",\"handlersPending\":\"0xA3 0x06 0xA2 0x12 0x13 0x0172 0x0165 "
         "0x0168\"},{\"type\":\"temperaturesensor\",\"name\":\"temperaturesensor\",\"entities\":2},{\"type\":\"analogsensor\",\"name\":\"analogsensor\","
         "\"entities\":4},{\"type\":\"scheduler\",\"name\":\"scheduler\",\"entities\":2},{\"type\":\"custom\",\"name\":\"custom\",\"entities\":4}]}]";
@@ -188,22 +189,24 @@ void test_22() {
     auto expected_response =
         "[{\"system\":{\"version\":\"dev\",\"uptime\":\"000+00:00:00.000\",\"uptimeSec\":0,\"resetReason\":\"Unknown / "
         "Unknown\"},\"network\":{\"network\":\"WiFi\",\"hostname\":\"ems-esp\",\"RSSI\":-23,\"TxPowerSetting\":0,\"staticIP\":false,\"lowBandwidth\":false,"
-        "\"disableSleep\":true,\"enableMDNS\":true,\"enableCORS\":false},\"ntp\":{},\"mqtt\":{\"MQTTStatus\":\"disconnected\",\"MQTTPublishes\":0,"
-        "\"MQTTQueued\":0,\"MQTTPublishFails\":0,\"MQTTReconnects\":0,\"enabled\":true,\"clientID\":\"ems-esp\",\"keepAlive\":60,\"cleanSession\":false,"
-        "\"entityFormat\":1,\"base\":\"ems-esp\",\"discoveryPrefix\":\"homeassistant\",\"discoveryType\":0,\"nestedFormat\":1,\"haEnabled\":true,\"mqttQos\":0,"
-        "\"mqttRetain\":false,\"publishTimeHeartbeat\":60,\"publishTimeBoiler\":10,\"publishTimeThermostat\":10,\"publishTimeSolar\":10,\"publishTimeMixer\":"
-        "10,\"publishTimeWater\":0,\"publishTimeOther\":10,\"publishTimeSensor\":10,\"publishSingle\":false,\"publish2command\":false,\"sendResponse\":false},"
-        "\"syslog\":{\"enabled\":false},\"sensor\":{\"temperatureSensors\":2,\"temperatureSensorReads\":0,\"temperatureSensorFails\":0,\"analogSensors\":4,"
-        "\"analogSensorReads\":0,\"analogSensorFails\":0},\"api\":{\"APICalls\":0,\"APIFails\":0},\"bus\":{\"busStatus\":\"connected\",\"busProtocol\":"
-        "\"Buderus\",\"busTelegramsReceived\":8,\"busReads\":0,\"busWrites\":0,\"busIncompleteTelegrams\":0,\"busReadsFailed\":0,\"busWritesFailed\":0,"
-        "\"busRxLineQuality\":100,\"busTxLineQuality\":100},\"settings\":{\"boardProfile\":\"S32\",\"locale\":\"en\",\"txMode\":8,\"emsBusID\":11,"
-        "\"showerTimer\":false,\"showerMinDuration\":180,\"showerAlert\":false,\"hideLed\":false,\"noTokenApi\":false,\"readonlyMode\":false,\"fahrenheit\":"
-        "false,\"dallasParasite\":false,\"boolFormat\":1,\"boolDashboard\":1,\"enumFormat\":1,\"analogEnabled\":true,\"telnetEnabled\":true,"
-        "\"maxWebLogBuffer\":25,\"modbusEnabled\":false,\"forceHeatingOff\":false,\"developerMode\":false},\"devices\":[{\"type\":\"boiler\",\"name\":\"My "
-        "Custom "
+        "\"disableSleep\":true,\"enableMDNS\":true,\"enableCORS\":false},\"ntp\":{\"enabled\":true,\"server\":\"pool.ntp.org\",\"tzLabel\":\"Europe/"
+        "London\",\"NTPStatus\":\"disconnected\"},\"ap\":{\"provisionMode\":\"always\",\"ssid\":\"ems-esp\"},\"mqtt\":{\"MQTTStatus\":\"disconnected\","
+        "\"MQTTPublishes\":0,\"MQTTQueued\":0,\"MQTTPublishFails\":0,\"MQTTReconnects\":0,\"enabled\":true,\"clientID\":\"ems-esp\",\"keepAlive\":60,"
+        "\"cleanSession\":false,\"entityFormat\":1,\"base\":\"ems-esp\",\"discoveryPrefix\":\"homeassistant\",\"discoveryType\":0,\"nestedFormat\":1,"
+        "\"haEnabled\":true,\"mqttQos\":0,\"mqttRetain\":false,\"publishTimeHeartbeat\":60,\"publishTimeBoiler\":10,\"publishTimeThermostat\":10,"
+        "\"publishTimeSolar\":10,\"publishTimeMixer\":10,\"publishTimeWater\":0,\"publishTimeOther\":10,\"publishTimeSensor\":10,\"publishSingle\":false,"
+        "\"publish2command\":false,\"sendResponse\":false},\"syslog\":{\"enabled\":false},\"sensor\":{\"temperatureSensors\":2,\"temperatureSensorReads\":0,"
+        "\"temperatureSensorFails\":0,\"analogSensors\":4,\"analogSensorReads\":0,\"analogSensorFails\":0},\"api\":{\"APICalls\":0,\"APIFails\":0},\"bus\":{"
+        "\"busStatus\":\"connected\",\"busProtocol\":\"Buderus\",\"busTelegramsReceived\":8,\"busReads\":0,\"busWrites\":0,\"busIncompleteTelegrams\":0,"
+        "\"busReadsFailed\":0,\"busWritesFailed\":0,\"busRxLineQuality\":100,\"busTxLineQuality\":100},\"settings\":{\"boardProfile\":\"S32\",\"locale\":"
+        "\"en\",\"txMode\":8,\"emsBusID\":11,\"showerTimer\":false,\"showerMinDuration\":180,\"showerAlert\":false,\"hideLed\":false,\"noTokenApi\":false,"
+        "\"readonlyMode\":false,\"fahrenheit\":false,\"dallasParasite\":false,\"boolFormat\":1,\"boolDashboard\":1,\"enumFormat\":1,\"analogEnabled\":true,"
+        "\"telnetEnabled\":true,\"maxWebLogBuffer\":25,\"modbusEnabled\":false,\"forceHeatingOff\":false,\"developerMode\":false},\"devices\":[{\"type\":"
+        "\"boiler\",\"name\":\"My Custom "
         "Boiler\",\"deviceID\":\"0x08\",\"productID\":123,\"brand\":\"\",\"version\":\"01.00\",\"entities\":38,\"handlersReceived\":\"0x18\","
         "\"handlersFetched\":\"0x14 0x33\",\"handlersPending\":\"0xBF 0x10 0x11 0xC2 0xC6 0x15 0x1C 0x19 0x1A 0x35 0x34 0x2A 0xD1 0xE3 0xE4 0xE5 0xE9 0x02E0 "
-        "0x2E 0x3B\"},{\"type\":\"thermostat\",\"name\":\"FW120\",\"deviceID\":\"0x10\",\"productID\":192,\"brand\":\"\",\"version\":\"01.00\",\"entities\":15,"
+        "0x2E "
+        "0x3B\"},{\"type\":\"thermostat\",\"name\":\"FW120\",\"deviceID\":\"0x10\",\"productID\":192,\"brand\":\"\",\"version\":\"01.00\",\"entities\":15,"
         "\"handlersReceived\":\"0x016F\",\"handlersFetched\":\"0x0170 0x0171\",\"handlersPending\":\"0xA3 0x06 0xA2 0x12 0x13 0x0172 0x0165 "
         "0x0168\"},{\"type\":\"temperaturesensor\",\"name\":\"temperaturesensor\",\"entities\":2},{\"type\":\"analogsensor\",\"name\":\"analogsensor\","
         "\"entities\":4},{\"type\":\"scheduler\",\"name\":\"scheduler\",\"entities\":2},{\"type\":\"custom\",\"name\":\"custom\",\"entities\":4}]}]";
@@ -281,8 +284,9 @@ void test_35() {
 }
 
 void test_36() {
-    auto expected_response = "[{\"name\":\"test_analogsensor1\",\"fullname\":\"test_analogsensor1\",\"gpio\":36,\"type\":\"number\",\"analog\":\"adc\","
-                             "\"value\":0,\"readable\":true,\"writeable\":false,\"visible\":true,\"offset\":0,\"factor\":0.1,\"uom\":\"mV\"}]";
+    auto expected_response =
+        "[{\"name\":\"test_analogsensor1\",\"fullname\":\"test_analogsensor1\",\"gpio\":36,\"type\":\"number\",\"analog\":\"adc\",\"value\":0,\"readable\":"
+        "true,\"writeable\":false,\"visible\":true,\"is_system\":true,\"offset\":0,\"factor\":0.1,\"uom\":\"mV\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor/test_analogsensor1"));
 }
 

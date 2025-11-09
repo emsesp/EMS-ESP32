@@ -965,14 +965,72 @@ const emsesp_sensordata = {
     { id: '28-233D-9497-0C03', n: 'Dallas 1', t: 25.7, o: 1.2, u: 1 },
     { id: '28-243D-7437-1E3A', n: 'Dallas 2 outside', t: 26.1, o: 0, u: 1 },
     { id: '28-243E-7437-1E3B', n: 'Zolder', t: 27.1, o: 0, u: 1 },
-    { id: '28-183D-1892-0C33', n: 'Roof', o: 2, u: 1 } // no temperature
+    { id: '28-183D-1892-0C33', n: 'Roof', o: 2, u: 1 }, // no temperature
+    { id: '28_1767_7B13_2502', n: 'gateway_temperature', t: 28.1, o: 0, u: 1 } // internal system temp
   ],
   // as: [],
   as: [
-    { id: 1, g: 36, n: 'motor', v: 0, u: 0, o: 17, f: 0, t: 0, d: false },
-    { id: 2, g: 37, n: 'External switch', v: 13, u: 0, o: 17, f: 0, t: 1, d: false },
-    { id: 3, g: 39, n: 'Pulse count', v: 144, u: 0, o: 0, f: 0, t: 2, d: false },
-    { id: 4, g: 40, n: 'Pressure', v: 16, u: 17, o: 0, f: 0, t: 3, d: false }
+    { id: 1, g: 35, n: 'motor', v: 0, u: 0, o: 17, f: 0, t: 0, d: false, s: false },
+    {
+      id: 2,
+      g: 37,
+      n: 'External switch',
+      v: 13,
+      u: 0,
+      o: 17,
+      f: 0,
+      t: 1,
+      d: false,
+      s: false
+    },
+    {
+      id: 3,
+      g: 39,
+      n: 'Pulse count',
+      v: 144,
+      u: 0,
+      o: 0,
+      f: 0,
+      t: 2,
+      d: false,
+      s: false
+    },
+    {
+      id: 4,
+      g: 40,
+      n: 'Pressure',
+      v: 16,
+      u: 17,
+      o: 0,
+      f: 0,
+      t: 3,
+      d: false,
+      s: false
+    },
+    {
+      id: 6,
+      g: 39,
+      n: 'core_voltage',
+      v: 3.34,
+      u: 23,
+      o: 0,
+      f: 0.003771,
+      t: 3,
+      d: false,
+      s: true
+    },
+    {
+      id: 7,
+      g: 36,
+      n: 'supply_voltage',
+      v: 12.21,
+      u: 23,
+      o: 0,
+      f: 0.017,
+      t: 3,
+      d: false,
+      s: true
+    }
   ],
   analog_enabled: true
 };
@@ -4811,6 +4869,7 @@ router
         u: as.uom,
         t: as.type,
         d: as.deleted,
+        s: as.is_system,
         v: 0 // must be added for demo only
       });
     } else {

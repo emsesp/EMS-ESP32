@@ -52,18 +52,23 @@ void AnalogSensor::start(const bool factory_settings) {
     // if (factory_settings && EMSESP::nvs_.getString("boot").equals("E32V2_2") && EMSESP::nvs_.getString("hwrevision").equals("3.0")) {
     if (factory_settings && analogReadMilliVolts(39) > 700) { // core voltage > 2.6V
         EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
-            auto newSensor   = AnalogCustomization();
-            newSensor.gpio   = 39;
-            newSensor.name   = "core_voltage";
-            newSensor.offset = 0;
-            newSensor.factor = 0.00377136; // Divider 24k - 8,66k
-            newSensor.uom    = DeviceValueUOM::VOLTS;
-            newSensor.type   = AnalogType::ADC;
+            auto newSensor = AnalogCustomization();
+
+            newSensor.gpio      = 39;
+            newSensor.name      = "core_voltage";
+            newSensor.offset    = 0;
+            newSensor.factor    = 0.00377136; // Divider 24k - 8,66k
+            newSensor.uom       = DeviceValueUOM::VOLTS;
+            newSensor.type      = AnalogType::ADC;
+            newSensor.is_system = true;
             settings.analogCustomizations.push_back(newSensor);
-            newSensor.gpio   = 36;
-            newSensor.name   = "supply_voltage";
-            newSensor.factor = 0.017; // Divider 24k - 1,5k
+
+            newSensor.gpio      = 36;
+            newSensor.name      = "supply_voltage";
+            newSensor.factor    = 0.017; // Divider 24k - 1,5k
+            newSensor.is_system = true;
             settings.analogCustomizations.push_back(newSensor);
+
             return StateUpdateResult::CHANGED; // persist the change
         });
     }
@@ -469,7 +474,7 @@ void AnalogSensor::loop() {
 
 // update analog information name and offset
 // a type value of -1 is used to delete the sensor
-bool AnalogSensor::update(uint8_t gpio, std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted) {
+bool AnalogSensor::update(uint8_t gpio, std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted, bool is_system) {
     // first see if we can find the sensor in our customization list
     bool found_sensor = false;
     EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
@@ -496,11 +501,12 @@ bool AnalogSensor::update(uint8_t gpio, std::string & name, double offset, doubl
                     if (name != AnalogCustomization.name) {
                         EMSESP::nvs_.remove(AnalogCustomization.name.c_str());
                     }
-                    AnalogCustomization.name   = name;
-                    AnalogCustomization.offset = offset;
-                    AnalogCustomization.factor = factor;
-                    AnalogCustomization.uom    = uom;
-                    AnalogCustomization.type   = type;
+                    AnalogCustomization.name      = name;
+                    AnalogCustomization.offset    = offset;
+                    AnalogCustomization.factor    = factor;
+                    AnalogCustomization.uom       = uom;
+                    AnalogCustomization.type      = type;
+                    AnalogCustomization.is_system = is_system;
                     LOG_DEBUG("Customizing existing analog GPIO %02d", gpio);
                 }
                 return StateUpdateResult::CHANGED; // persist the change
@@ -517,13 +523,14 @@ bool AnalogSensor::update(uint8_t gpio, std::string & name, double offset, doubl
     // we didn't find it, it's new, so create and store it in the customization list
     if (!found_sensor) {
         EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
-            auto newSensor   = AnalogCustomization();
-            newSensor.gpio   = gpio;
-            newSensor.name   = name;
-            newSensor.offset = offset;
-            newSensor.factor = factor;
-            newSensor.uom    = uom;
-            newSensor.type   = type;
+            auto newSensor      = AnalogCustomization();
+            newSensor.gpio      = gpio;
+            newSensor.name      = name;
+            newSensor.offset    = offset;
+            newSensor.factor    = factor;
+            newSensor.uom       = uom;
+            newSensor.type      = type;
+            newSensor.is_system = false;
             settings.analogCustomizations.push_back(newSensor);
             LOG_DEBUG("Adding new customization for analog sensor GPIO %02d", gpio);
             return StateUpdateResult::CHANGED; // persist the change
@@ -836,7 +843,8 @@ void AnalogSensor::get_value_json(JsonObject output, const Sensor & sensor) {
     output["readable"]  = true;
     output["writeable"] = sensor.type() == AnalogType::COUNTER || sensor.type() == AnalogType::RGB || sensor.type() == AnalogType::PULSE
                           || (sensor.type() >= AnalogType::DIGITAL_OUT && sensor.type() <= AnalogType::PWM_2);
-    output["visible"] = true;
+    output["visible"]   = true;
+    output["is_system"] = sensor.is_system();
     if (sensor.type() == AnalogType::COUNTER) {
         output["min"]         = 0;
         output["max"]         = 4000000;

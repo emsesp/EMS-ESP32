@@ -337,7 +337,7 @@ const sk: Translation = {
   UPDATE_AVAILABLE: 'dostupná aktualizácia',
   LATEST_VERSION: 'Používate poslednú {0} verziu firmvéru',
   PLEASE_WAIT: 'Čakajte prosím',
-  RESTARTING_PRE: 'Prebieha inicializácia',
+  RESTARTING_PRE: 'Bootovanie',
   RESTARTING_POST: 'Príprava',
   AUTO_SCROLL: 'Automatické rolovanie',
   DASHBOARD: 'Panel',

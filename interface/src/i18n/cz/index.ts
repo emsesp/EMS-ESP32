@@ -337,7 +337,7 @@ const cz: Translation = {
   UPDATE_AVAILABLE: 'aktualizace dostupná',
   LATEST_VERSION: 'Používáte nejnovější verzi {0}firmwaru',
   PLEASE_WAIT: 'Prosím čekejte',
-  RESTARTING_PRE: 'Inicializace',
+  RESTARTING_PRE: 'Bootování',
   RESTARTING_POST: 'Příprava',
   AUTO_SCROLL: 'Automatické rolování',
   DASHBOARD: 'Dashboard',

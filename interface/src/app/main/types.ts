@@ -95,6 +95,7 @@ export interface AnalogSensor {
   f: number;
   t: number;
   d: boolean; // deleted flag
+  s: boolean; // system customization flag
   o_n?: string;
 }
 

@@ -337,7 +337,7 @@ const no: Translation = {
   UPDATE_AVAILABLE: 'oppdatering tilgjengelig',
   LATEST_VERSION: 'Du bruker den nyeste {0} firmware versjonen',
   PLEASE_WAIT: 'Vennligst vent',
-  RESTARTING_PRE: 'Initialiserer',
+  RESTARTING_PRE: 'Starte',
   RESTARTING_POST: 'Forbereder',
   AUTO_SCROLL: 'Automatisk rulling',
   DASHBOARD: 'Dashboard',

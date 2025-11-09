@@ -107,6 +107,19 @@ bool System::command_send(const char * value, const int8_t id) {
     return EMSESP::txservice_.send_raw(value); // ignore id
 }
 
+// return string of languages and count
+std::string System::languages_string() {
+    std::string languages_string = std::to_string(NUM_LANGUAGES) + " languages (";
+    for (uint8_t i = 0; i < NUM_LANGUAGES; i++) {
+        languages_string += languages[i];
+        if (i != NUM_LANGUAGES - 1) {
+            languages_string += ",";
+        }
+    }
+    languages_string += ")";
+    return languages_string;
+}
+
 // returns last response from MQTT
 bool System::command_response(const char * value, const int8_t id, JsonObject output) {
     JsonDocument doc;
@@ -523,8 +536,18 @@ void System::button_OnClick(PButton & b) {
 
 // button double click
 void System::button_OnDblClick(PButton & b) {
-    LOG_NOTICE("Button pressed - double click - wifi reconnect");
-    EMSESP::system_.wifi_reconnect();
+    LOG_NOTICE("Button pressed - double click - wifi reconnect to AP");
+    // set AP mode to always so will join AP if wifi ssid fails to connect
+    EMSESP::esp32React.getAPSettingsService()->update([&](APSettings & apSettings) {
+        apSettings.provisionMode = AP_MODE_ALWAYS;
+        return StateUpdateResult::CHANGED;
+    });
+    // remove SSID from network settings
+    EMSESP::esp32React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
+        networkSettings.ssid = "";
+        return StateUpdateResult::CHANGED;
+    });
+    EMSESP::esp32React.getNetworkSettingsService()->callUpdateHandlers(); // in case we've changed ssid or password
 }
 
 // button long press
@@ -1439,6 +1462,7 @@ bool System::command_service(const char * cmd, const char * value) {
             ok = true;
         }
     }
+
     int n;
     if (!ok && Helpers::value2number(value, n)) {
 #ifndef EMSESP_STANDALONE
@@ -1647,26 +1671,38 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         }
     });
 
-#ifndef EMSESP_STANDALONE
-    EMSESP::esp32React.getAPSettingsService()->read([&](const APSettings & settings) {
-        const char * pM[]       = {"always", "disconnected", "never"};
-        node["APProvisionMode"] = pM[settings.provisionMode];
-        node["APSecurity"]      = settings.password.length() ? "wpa2" : "open";
-        node["APSSID"]          = settings.ssid;
-    });
-#endif
-
     // NTP status
     node = output["ntp"].to<JsonObject>();
-#ifndef EMSESP_STANDALONE
-    node["NTPStatus"] = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
     EMSESP::esp32React.getNTPSettingsService()->read([&](const NTPSettings & settings) {
+#ifndef EMSESP_STANDALONE
         node["enabled"] = settings.enabled;
+#else
+        node["enabled"] = true;
+#endif
         node["server"]  = settings.server;
         node["tzLabel"] = settings.tzLabel;
     });
+#ifndef EMSESP_STANDALONE
     node["timestamp"] = time(nullptr);
 #endif
+    node["NTPStatus"] = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
+
+    // AP Status
+    node = output["ap"].to<JsonObject>();
+    EMSESP::esp32React.getAPSettingsService()->read([&](const APSettings & settings) {
+        const char * pM[]     = {"always", "disconnected", "never"};
+        node["provisionMode"] = pM[settings.provisionMode];
+        node["ssid"]          = settings.ssid;
+#ifndef EMSESP_STANDALONE
+        node["security"]   = settings.password.length() ? "wpa2" : "open";
+        node["channel"]    = settings.channel;
+        node["ssidHidden"] = settings.ssidHidden;
+        node["maxClients"] = settings.maxClients;
+        node["localIP"]    = settings.localIP.toString();
+        node["gatewayIP"]  = settings.gatewayIP.toString();
+        node["subnetMask"] = settings.subnetMask.toString();
+#endif
+    });
 
     // MQTT Status
     node               = output["mqtt"].to<JsonObject>();
@@ -1764,7 +1800,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["busReadsFailed"]         = EMSESP::txservice_.telegram_read_fail_count();
     node["busWritesFailed"]        = EMSESP::txservice_.telegram_write_fail_count();
     node["busRxLineQuality"]       = EMSESP::rxservice_.quality();
-    node["busTxLineQuality"]       = (EMSESP::txservice_.read_quality() + EMSESP::txservice_.read_quality()) / 2;
+    node["busTxLineQuality"]       = (EMSESP::txservice_.read_quality() + EMSESP::txservice_.write_quality()) / 2;
 
     // Settings
     node = output["settings"].to<JsonObject>();
@@ -1958,15 +1994,12 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
 
 // format command - factory reset, removing all config files
 bool System::command_format(const char * value, const int8_t id) {
-    LOG_INFO("Removing all config files");
+    LOG_INFO("Formatting FS, removing all config files");
 #ifndef EMSESP_STANDALONE
-    // TODO To replaced with LittleFS.rmdir(FS_CONFIG_DIRECTORY) now we're using IDF 4.2+
-    File root = LittleFS.open(EMSESP_FS_CONFIG_DIRECTORY);
-    File file;
-    while ((file = root.openNextFile())) {
-        String path = file.path();
-        file.close();
-        LittleFS.remove(path);
+    if (LittleFS.format()) {
+        LOG_INFO("FS formatted successfully");
+    } else {
+        LOG_ERROR("Format failed");
     }
 #endif
 

@@ -21,6 +21,7 @@
 #define NTP_SETTINGS_FILE "/config/ntpSettings.json"
 #define EMSESP_SETTINGS_FILE "/config/emsespSettings.json"
 
+#define AP_MODE_ALWAYS 0
 class DummySettings {
   public:
     // SYSTEM
@@ -55,6 +56,7 @@ class DummySettings {
     uint16_t publish_time_other      = 10;
     uint16_t publish_time_sensor     = 10;
     uint16_t publish_time_heartbeat  = 60;
+    uint32_t publish_time_water      = 0;
 
     String  hostname       = "ems-esp";
     String  jwtSecret      = "ems-esp";
@@ -72,11 +74,15 @@ class DummySettings {
     String  CORSOrigin     = "*";
     uint8_t tx_power       = 0;
 
-    uint8_t  provisionMode      = 0;
-    uint32_t publish_time_water = 0;
+    // AP
+    uint8_t provisionMode = 0;
 
-    static void read(DummySettings & settings, JsonObject root){};
-    static void read(DummySettings & settings){};
+    // NTP
+    String server  = "pool.ntp.org";
+    String tzLabel = "Europe/London";
+
+    static void read(DummySettings & settings, JsonObject root) {};
+    static void read(DummySettings & settings) {};
 
     static StateUpdateResult update(JsonObject root, DummySettings & settings) {
         return StateUpdateResult::CHANGED;
@@ -85,7 +91,7 @@ class DummySettings {
 
 class DummySettingsService : public StatefulService<DummySettings> {
   public:
-    DummySettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager){};
+    DummySettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager) {};
 
     void begin();
     void loop();
@@ -101,12 +107,12 @@ class ESP32React {
   public:
     ESP32React(AsyncWebServer * server, FS * fs)
         : _settings(server, fs, nullptr)
-        , _securitySettingsService(server, fs){};
+        , _securitySettingsService(server, fs) {};
 
     void begin() {
         _mqttClient = new espMqttClient();
     };
-    void loop(){};
+    void loop() {};
 
     SecurityManager * getSecurityManager() {
         return &_securitySettingsService;

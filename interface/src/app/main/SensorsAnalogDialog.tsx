@@ -288,7 +288,7 @@ const SensorsAnalogDialog = ({
                 name="f"
                 label={LL.FACTOR()}
                 value={numberValue(editItem.f)}
-                sx={{ width: '11ch' }}
+                sx={{ width: '14ch' }}
                 type="number"
                 variant="outlined"
                 onChange={updateFormValue}
@@ -447,6 +447,7 @@ const SensorsAnalogDialog = ({
           <Box flexGrow={1} sx={{ '& button': { mt: 0 } }}>
             <Button
               startIcon={<RemoveIcon />}
+              disabled={editItem.s}
               variant="outlined"
               color="warning"
               onClick={remove}

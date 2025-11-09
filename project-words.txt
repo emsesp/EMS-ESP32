@@ -1436,3 +1436,4 @@ washingmachine
 switchprogram
 brotlin
 fanspd
+currhum

@@ -337,7 +337,7 @@ const en: Translation = {
   UPDATE_AVAILABLE: 'update available',
   LATEST_VERSION: 'You are using the latest {0} firmware version',
   PLEASE_WAIT: 'Please wait',
-  RESTARTING_PRE: 'Initializing',
+  RESTARTING_PRE: 'Booting',
   RESTARTING_POST: 'Preparing',
   AUTO_SCROLL: 'Auto Scroll',
   DASHBOARD: 'Dashboard',

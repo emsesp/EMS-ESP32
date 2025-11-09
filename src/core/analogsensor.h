@@ -61,6 +61,10 @@ class AnalogSensor {
             value_ = value;
         }
 
+        bool is_system() const {
+            return is_system_;
+        }
+
         double factor() const {
             return factor_;
         }
@@ -105,8 +109,9 @@ class AnalogSensor {
         double      offset_;
         double      factor_;
         uint8_t     uom_;
-        double      value_; // double because of the factor is a double
-        int8_t      type_;  // one of the AnalogType enum
+        double      value_;     // double because of the factor is a double
+        int8_t      type_;      // one of the AnalogType enum
+        bool        is_system_; // if true, the sensor is a system sensor
     };
 
     AnalogSensor()  = default;
@@ -167,7 +172,7 @@ class AnalogSensor {
         return sensors_.size();
     }
 
-    bool update(uint8_t gpio, std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted = false);
+    bool update(uint8_t gpio, std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted = false, bool is_system = false);
     bool get_value_info(JsonObject output, const char * cmd, const int8_t id = -1);
     void store_counters();
 
