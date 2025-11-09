@@ -52,12 +52,12 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
 void WebCustomization::read(WebCustomization & customizations, JsonObject root) {
     // Temperature Sensor customization
     JsonArray sensorsJson = root["ts"].to<JsonArray>();
-
     for (const SensorCustomization & sensor : customizations.sensorCustomizations) {
-        JsonObject sensorJson = sensorsJson.add<JsonObject>();
-        sensorJson["id"]      = sensor.id;     // ID of chip
-        sensorJson["name"]    = sensor.name;   // n
-        sensorJson["offset"]  = sensor.offset; // o
+        JsonObject sensorJson   = sensorsJson.add<JsonObject>();
+        sensorJson["id"]        = sensor.id;        // ID of chip
+        sensorJson["name"]      = sensor.name;      // n
+        sensorJson["offset"]    = sensor.offset;    // o
+        sensorJson["is_system"] = sensor.is_system; // s for core_voltage, supply_voltage
     }
 
     // Analog Sensor customization
@@ -70,7 +70,7 @@ void WebCustomization::read(WebCustomization & customizations, JsonObject root) 
         sensorJson["factor"]    = sensor.factor;    // f
         sensorJson["uom"]       = sensor.uom;       // u
         sensorJson["type"]      = sensor.type;      // t
-        sensorJson["is_system"] = sensor.is_system; // s
+        sensorJson["is_system"] = sensor.is_system; // s for core_voltage, supply_voltage
     }
 
     // Masked entities customization and custom device name (optional)
@@ -105,6 +105,7 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
             if (sensor.id == sensor.name) {
                 sensor.name = ""; // no need to store id as name
             }
+            sensor.is_system = sensorJson["is_system"];
             std::replace(sensor.id.begin(), sensor.id.end(), '-', '_'); // change old ids to v3.7 style
             customizations.sensorCustomizations.push_back(sensor);      // add to list
         }
@@ -373,55 +374,78 @@ void WebCustomizationService::load_test_data() {
         // Temperature sensors
         webCustomization.sensorCustomizations.clear(); // delete all existing sensors
 
-        auto sensor   = SensorCustomization();
-        sensor.id     = "01_0203_0405_0607";
-        sensor.name   = "test_tempsensor1";
-        sensor.offset = 0;
-        webCustomization.sensorCustomizations.push_back(sensor);
+        auto sensor1      = SensorCustomization();
+        sensor1.id        = "01_0203_0405_0607";
+        sensor1.name      = "test_tempsensor1";
+        sensor1.offset    = 0;
+        sensor1.is_system = false;
+        webCustomization.sensorCustomizations.push_back(sensor1);
 
-        auto sensor2   = SensorCustomization();
-        sensor2.id     = "0B_0C0D_0E0F_1011";
-        sensor2.name   = "test_tempsensor2";
-        sensor2.offset = 4;
+        auto sensor2      = SensorCustomization();
+        sensor2.id        = "0B_0C0D_0E0F_1011";
+        sensor2.name      = "test_tempsensor2";
+        sensor2.offset    = 4;
+        sensor2.is_system = false;
         webCustomization.sensorCustomizations.push_back(sensor2);
+
+        auto sensor3      = SensorCustomization();
+        sensor3.id        = "28_1767_7B13_2502";
+        sensor3.name      = "gateway_temperature";
+        sensor3.offset    = 0;
+        sensor3.is_system = true;
+        webCustomization.sensorCustomizations.push_back(sensor3);
 
         // Analog sensors
         // This actually adds the sensors as we use customizations to store them
         webCustomization.analogCustomizations.clear();
-        auto analog   = AnalogCustomization();
-        analog.gpio   = 36;
-        analog.name   = "test_analogsensor1";
-        analog.offset = 0;
-        analog.factor = 0.1;
-        analog.uom    = 17;
-        analog.type   = 3; // ADC
+        auto analog      = AnalogCustomization();
+        analog.gpio      = 36;
+        analog.name      = "test_analogsensor1";
+        analog.offset    = 0;
+        analog.factor    = 0.2;
+        analog.uom       = 17;
+        analog.type      = 3; // ADC
+        analog.is_system = false;
         webCustomization.analogCustomizations.push_back(analog);
 
-        analog        = AnalogCustomization();
-        analog.gpio   = 37;
-        analog.name   = "test_analogsensor2";
-        analog.offset = 0;
-        analog.factor = 1;
-        analog.uom    = 0;
-        analog.type   = 1; // DIGITAL_IN
+        analog           = AnalogCustomization();
+        analog.gpio      = 37;
+        analog.name      = "test_analogsensor2";
+        analog.offset    = 0;
+        analog.factor    = 1;
+        analog.uom       = 0;
+        analog.type      = 1; // DIGITAL_IN
+        analog.is_system = false;
         webCustomization.analogCustomizations.push_back(analog);
 
-        analog        = AnalogCustomization();
-        analog.gpio   = 38;
-        analog.name   = "test_analogsensor3";
-        analog.offset = 0;
-        analog.factor = 1;
-        analog.uom    = 0;
-        analog.type   = 0; // disabled, not-used
+        analog           = AnalogCustomization();
+        analog.gpio      = 38;
+        analog.name      = "test_analogsensor3";
+        analog.offset    = 0;
+        analog.factor    = 1;
+        analog.uom       = 0;
+        analog.type      = 0; // disabled, not-used
+        analog.is_system = false;
         webCustomization.analogCustomizations.push_back(analog);
 
-        analog        = AnalogCustomization();
-        analog.gpio   = 33;
-        analog.name   = "test_analogsensor4";
-        analog.offset = 0;
-        analog.factor = 1;
-        analog.uom    = 0;
-        analog.type   = 2; // COUNTER
+        analog           = AnalogCustomization();
+        analog.gpio      = 33;
+        analog.name      = "test_analogsensor4";
+        analog.offset    = 0;
+        analog.factor    = 1;
+        analog.uom       = 0;
+        analog.type      = 2; // COUNTER
+        analog.is_system = false;
+        webCustomization.analogCustomizations.push_back(analog);
+
+        analog           = AnalogCustomization();
+        analog.gpio      = 39;
+        analog.name      = "test_analogsensor5"; // core_voltage
+        analog.offset    = 0;
+        analog.factor    = 0.003771;
+        analog.uom       = 23;
+        analog.type      = 3; // ADC
+        analog.is_system = true;
         webCustomization.analogCustomizations.push_back(analog);
 
         // EMS entities, mark some as favorites

@@ -34,7 +34,7 @@ class AnalogSensor {
   public:
     class Sensor {
       public:
-        Sensor(const uint8_t gpio, const std::string & name, const double offset, const double factor, const uint8_t uom, const int8_t type);
+        Sensor(const uint8_t gpio, const std::string & name, const double offset, const double factor, const uint8_t uom, const int8_t type, const bool is_system);
         ~Sensor() = default;
 
         void set_offset(const double offset) {
@@ -44,7 +44,6 @@ class AnalogSensor {
         std::string name() const {
             return name_;
         }
-
         void set_name(const std::string & name) {
             name_ = name;
         }
@@ -64,11 +63,13 @@ class AnalogSensor {
         bool is_system() const {
             return is_system_;
         }
+        void set_is_system(const bool is_system) {
+            is_system_ = is_system;
+        }
 
         double factor() const {
             return factor_;
         }
-
         void set_factor(const double factor) {
             factor_ = factor;
         }
@@ -80,7 +81,6 @@ class AnalogSensor {
         void set_uom(const uint8_t uom) {
             uom_ = uom;
         }
-
         uint8_t uom() const {
             return uom_;
         }
@@ -166,13 +166,15 @@ class AnalogSensor {
 
     size_t count_entities(bool include_disabled = true) const {
         if (!include_disabled) {
-            // count number of items in sensors_ where type is not set to disabled
-            return std::count_if(sensors_.begin(), sensors_.end(), [](const Sensor & sensor) { return sensor.type() != AnalogSensor::AnalogType::NOTUSED; });
+            // count number of items in sensors_ where type is not set to disabled and not a system sensor
+            return std::count_if(sensors_.begin(), sensors_.end(), [](const Sensor & sensor) {
+                return sensor.type() != AnalogSensor::AnalogType::NOTUSED && !sensor.is_system();
+            });
         }
         return sensors_.size();
     }
 
-    bool update(uint8_t gpio, std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted = false, bool is_system = false);
+    bool update(uint8_t gpio, std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted, bool is_system);
     bool get_value_info(JsonObject output, const char * cmd, const int8_t id = -1);
     void store_counters();
 

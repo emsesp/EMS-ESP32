@@ -217,11 +217,13 @@ void TemperatureSensor::loop() {
                         if (!EMSESP::nvs_.isKey("intTemp")) {
                             EMSESP::nvs_.putString("intTemp", s->id().c_str());
                         }
+                        s->set_is_system(true); // mark as internal system temperature sensor
                         EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
-                            auto newSensor   = SensorCustomization();
-                            newSensor.id     = s->id();
-                            newSensor.name   = s->name();
-                            newSensor.offset = 0;
+                            auto newSensor      = SensorCustomization();
+                            newSensor.id        = s->id();
+                            newSensor.name      = s->name();
+                            newSensor.offset    = 0;
+                            newSensor.is_system = s->is_system(); // always true
                             settings.sensorCustomizations.push_back(newSensor);
                             return StateUpdateResult::CHANGED;
                         });
@@ -313,7 +315,7 @@ int16_t TemperatureSensor::get_temperature_c(const uint8_t addr[]) {
 }
 
 // update temperature sensor information name and offset
-bool TemperatureSensor::update(const std::string & id, const std::string & name, int16_t offset) {
+bool TemperatureSensor::update(const std::string & id, const std::string & name, int16_t offset, bool is_system) {
     // find the sensor
     for (auto & sensor : sensors_) {
         if (sensor.id() == id) {
@@ -329,23 +331,25 @@ bool TemperatureSensor::update(const std::string & id, const std::string & name,
             sensor.set_offset(offset);
 
             // store the new name and offset in our configuration
-            EMSESP::webCustomizationService.update([&id, &name, &offset, &sensor](WebCustomization & settings) {
+            EMSESP::webCustomizationService.update([&id, &name, &offset, &is_system, &sensor](WebCustomization & settings) {
                 // look it up to see if it exists
                 bool found = false;
                 for (auto & SensorCustomization : settings.sensorCustomizations) {
                     if (SensorCustomization.id == id) {
-                        SensorCustomization.name   = name;
-                        SensorCustomization.offset = offset;
-                        found                      = true;
+                        SensorCustomization.name      = name;
+                        SensorCustomization.offset    = offset;
+                        SensorCustomization.is_system = is_system;
+                        found                         = true;
                         LOG_DEBUG("Customizing existing sensor ID %s", id.c_str());
                         break;
                     }
                 }
                 if (!found) {
-                    auto newSensor   = SensorCustomization();
-                    newSensor.id     = id;
-                    newSensor.name   = name;
-                    newSensor.offset = offset;
+                    auto newSensor      = SensorCustomization();
+                    newSensor.id        = id;
+                    newSensor.name      = name;
+                    newSensor.offset    = offset;
+                    newSensor.is_system = false; // is user defined, not system
                     settings.sensorCustomizations.push_back(newSensor);
                     LOG_DEBUG("Adding new customization for sensor ID %s", id.c_str());
                 }
@@ -628,6 +632,7 @@ void TemperatureSensor::load_test_data() {
     sensors_.back().apply_customization();
     sensors_.back().temperature_c = 123; // 12.3
     sensors_.back().read          = true;
+    sensors_.back().set_is_system(false);
     publish_sensor(sensors_.back()); // call publish single
 
     // Sensor ID: 0B_0C0D_0E0F_1011
@@ -636,6 +641,16 @@ void TemperatureSensor::load_test_data() {
     sensors_.back().apply_customization();
     sensors_.back().temperature_c = 456; // 45.6
     sensors_.back().read          = true;
+    sensors_.back().set_is_system(false);
+    publish_sensor(sensors_.back()); // call publish single
+
+    // Sensor ID: 28_1767_7B13_2502
+    uint8_t addr3[ADDR_LEN] = {0x28, 0x17, 0x67, 0x7B, 0x13, 0x25, 0x02};
+    sensors_.emplace_back(addr3);
+    sensors_.back().apply_customization();
+    sensors_.back().temperature_c = 281; // 28.1
+    sensors_.back().read          = true;
+    sensors_.back().set_is_system(true);
     publish_sensor(sensors_.back()); // call publish single
 }
 #endif

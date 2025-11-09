@@ -276,10 +276,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-          old_custom_name +
-          ') with new (' +
-          new_custom_name +
-          ')'
+        old_custom_name +
+        ') with new (' +
+        new_custom_name +
+        ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -375,15 +375,15 @@ function check_upgrade(version: string) {
 
     console.log(
       'Upgrade this version (' +
-        THIS_VERSION +
-        ') to dev (' +
-        dev_version +
-        ') is ' +
-        (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-        ' and to stable (' +
-        stable_version +
-        ') is ' +
-        (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
+      THIS_VERSION +
+      ') to dev (' +
+      dev_version +
+      ') is ' +
+      (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+      ' and to stable (' +
+      stable_version +
+      ') is ' +
+      (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
     );
     data = {
       emsesp_version: THIS_VERSION,
@@ -962,11 +962,25 @@ const emsesp_coredata_custom = {
 const emsesp_sensordata = {
   // ts: [],
   ts: [
-    { id: '28-233D-9497-0C03', n: 'Dallas 1', t: 25.7, o: 1.2, u: 1 },
-    { id: '28-243D-7437-1E3A', n: 'Dallas 2 outside', t: 26.1, o: 0, u: 1 },
-    { id: '28-243E-7437-1E3B', n: 'Zolder', t: 27.1, o: 0, u: 1 },
-    { id: '28-183D-1892-0C33', n: 'Roof', o: 2, u: 1 }, // no temperature
-    { id: '28_1767_7B13_2502', n: 'gateway_temperature', t: 28.1, o: 0, u: 1 } // internal system temp
+    { id: '28-233D-9497-0C03', n: 'Dallas 1', t: 25.7, o: 1.2, u: 1, s: false },
+    {
+      id: '28-243D-7437-1E3A',
+      n: 'Dallas 2 outside',
+      t: 26.1,
+      o: 0,
+      u: 1,
+      s: false
+    },
+    { id: '28-243E-7437-1E3B', n: 'Zolder', t: 27.1, o: 0, u: 1, s: false },
+    { id: '28-183D-1892-0C33', n: 'Roof', o: 2, u: 1, s: false }, // no temperature
+    {
+      id: '28_1767_7B13_2502',
+      n: 'gateway_temperature',
+      t: 28.1,
+      o: 0,
+      u: 1,
+      s: true
+    } // internal system temp
   ],
   // as: [],
   as: [
@@ -4578,8 +4592,12 @@ router
       }
 
       // add temperature sensor data. no command c
-      if (emsesp_sensordata.ts.length > 0) {
-        const sensor_data = emsesp_sensordata.ts.map((item, index) => ({
+      // remove system sensors first
+      const enabledTemperatureSensors = emsesp_sensordata.ts.filter(
+        (item) => !item.s
+      );
+      if (enabledTemperatureSensors.length > 0) {
+        const sensor_data = enabledTemperatureSensors.map((item, index) => ({
           id: DeviceTypeUniqueID.TEMPERATURESENSOR_UID * 100 + index,
           dv: {
             id: '00' + item.n,
@@ -4597,8 +4615,9 @@ router
 
       // add analog sensor data. no command c
       // remove disabled sensors first (t = 0) and create data in one pass
+      // remove system sensors first
       const enabledAnalogSensors = emsesp_sensordata.as.filter(
-        (item) => item.t !== 0
+        (item) => item.t !== 0 && !item.s
       );
       if (enabledAnalogSensors.length > 0) {
         const sensor_data = enabledAnalogSensors.map((item, index) => ({
@@ -4852,6 +4871,7 @@ router
     if (objIndex !== -1) {
       emsesp_sensordata.ts[objIndex].n = ts.name;
       emsesp_sensordata.ts[objIndex].o = ts.offset;
+      emsesp_sensordata.ts[objIndex].s = ts.is_system;
     }
     console.log('temp sensor saved', ts);
     return status(200);
@@ -4887,6 +4907,7 @@ router
         emsesp_sensordata.as[objIndex].o = as.offset;
         emsesp_sensordata.as[objIndex].u = as.uom;
         emsesp_sensordata.as[objIndex].t = as.type;
+        emsesp_sensordata.as[objIndex].s = as.is_system;
       }
     }
     console.log('analog sensor saved', as);

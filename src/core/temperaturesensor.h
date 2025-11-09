@@ -44,6 +44,13 @@ class TemperatureSensor {
             return internal_id_;
         }
 
+        bool is_system() const {
+            return is_system_;
+        }
+        void set_is_system(const bool is_system) {
+            is_system_ = is_system;
+        }
+
         std::string id() const {
             return id_;
         }
@@ -72,6 +79,7 @@ class TemperatureSensor {
         std::string id_;
         std::string name_;
         int16_t     offset_;
+        bool        is_system_;
     };
 
     TemperatureSensor()  = default;
@@ -106,11 +114,13 @@ class TemperatureSensor {
         return (!sensors_.empty());
     }
 
-    size_t count_entities() const {
-        return sensors_.size();
+    size_t count_entities(bool include_system = true) const {
+        return std::count_if(sensors_.begin(), sensors_.end(), [include_system](const Sensor & sensor) {
+            return include_system ? sensor.is_system() : !sensor.is_system();
+        });
     }
 
-    bool update(const std::string & id, const std::string & name, int16_t offset);
+    bool update(const std::string & id, const std::string & name, int16_t offset, bool is_system);
 
 #if defined(EMSESP_TEST)
     void load_test_data();

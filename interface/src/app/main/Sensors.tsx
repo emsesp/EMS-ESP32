@@ -96,6 +96,7 @@ const common_theme = {
     }
     &:hover .td {
       background-color: #177ac9;
+      color: white;
     }
   `,
   Cell: `
@@ -297,7 +298,12 @@ const Sensors = () => {
 
   const onTemperatureDialogSave = useCallback(
     async (ts: TemperatureSensor) => {
-      await sendTemperatureSensor({ id: ts.id, name: ts.n, offset: ts.o })
+      await sendTemperatureSensor({
+        id: ts.id,
+        name: ts.n,
+        offset: ts.o,
+        is_system: ts.s
+      })
         .then(() => {
           toast.success(LL.UPDATED_OF(LL.SENSOR(1)));
         })
@@ -342,7 +348,8 @@ const Sensors = () => {
       t: 0,
       f: 1,
       d: false,
-      o_n: ''
+      o_n: '',
+      s: false
     });
     setAnalogDialogOpen(true);
   }, []);
@@ -357,7 +364,8 @@ const Sensors = () => {
         factor: as.f,
         uom: as.u,
         type: as.t,
-        deleted: as.d
+        deleted: as.d,
+        is_system: as.s
       })
         .then(() => {
           toast.success(LL.UPDATED_OF(LL.ANALOG_SENSOR(2)));
@@ -431,20 +439,25 @@ const Sensors = () => {
               </HeaderRow>
             </Header>
             <Body>
-              {tableList.map((a: AnalogSensor) => (
-                <Row key={a.id} item={a} onClick={() => updateAnalogSensor(a)}>
-                  <Cell stiff>{a.g}</Cell>
-                  <Cell>{a.n}</Cell>
-                  <Cell stiff>{AnalogTypeNames[a.t]} </Cell>
-                  {(a.t === AnalogType.DIGITAL_OUT &&
-                    a.g !== GPIO_25 &&
-                    a.g !== GPIO_26) ||
-                  a.t === AnalogType.DIGITAL_IN ||
-                  a.t === AnalogType.PULSE ? (
-                    <Cell stiff>{a.v ? LL.ON() : LL.OFF()}</Cell>
+              {tableList.map((as: AnalogSensor) => (
+                <Row
+                  style={{ color: as.s ? 'grey' : 'inherit' }}
+                  key={as.id}
+                  item={as}
+                  onClick={() => updateAnalogSensor(as)}
+                >
+                  <Cell stiff>{as.g}</Cell>
+                  <Cell>{as.n}</Cell>
+                  <Cell stiff>{AnalogTypeNames[as.t]} </Cell>
+                  {(as.t === AnalogType.DIGITAL_OUT &&
+                    as.g !== GPIO_25 &&
+                    as.g !== GPIO_26) ||
+                  as.t === AnalogType.DIGITAL_IN ||
+                  as.t === AnalogType.PULSE ? (
+                    <Cell stiff>{as.v ? LL.ON() : LL.OFF()}</Cell>
                   ) : (
                     <Cell stiff>
-                      {a.t !== AnalogType.NOTUSED ? formatValue(a.v, a.u) : ''}
+                      {as.t !== AnalogType.NOTUSED ? formatValue(as.v, as.u) : ''}
                     </Cell>
                   )}
                 </Row>
@@ -506,6 +519,7 @@ const Sensors = () => {
             <Body>
               {tableList.map((ts: TemperatureSensor) => (
                 <Row
+                  style={{ color: ts.s ? 'grey' : 'inherit' }}
                   key={ts.id}
                   item={ts}
                   onClick={() => updateTemperatureSensor(ts)}
