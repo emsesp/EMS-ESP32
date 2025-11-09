@@ -49,6 +49,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - ventilation bypass state from telegram 0x55C [#1197](https://github.com/emsesp/EMS-ESP32/issues/1197)
 - set selflowtemp for ems+ boilers [#2641](https://github.com/emsesp/EMS-ESP32/discussions/2641)
 - syslog timestamp [#2704](https://github.com/emsesp/EMS-ESP32/issues/2704)
+- fixed FS format command [#2720](https://github.com/emsesp/EMS-ESP32/discussions/2720)
 
 ## Changed
 
@@ -57,4 +58,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - updated core libraries like AsyncTCP, AsyncWebServer and Modbus
 - remove command `scan deep`
 - ignore repeated `forceheatingoff` commands [#2641](https://github.com/emsesp/EMS-ESP32/discussions/2641)
-- optimized web for performance
+- optimized web for better performance by adding lazy loading and caching
+- internal system analog sensors (core_voltage, supply_voltage and gateway_temperature) cannot be accidentally removed
+- double click button reconnects EMS-ESP to AP
+- place system message command in side scheduler loop to reduce stack memory usage by 2KB
