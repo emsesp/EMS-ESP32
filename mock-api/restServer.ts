@@ -276,10 +276,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-        old_custom_name +
-        ') with new (' +
-        new_custom_name +
-        ')'
+          old_custom_name +
+          ') with new (' +
+          new_custom_name +
+          ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -375,15 +375,15 @@ function check_upgrade(version: string) {
 
     console.log(
       'Upgrade this version (' +
-      THIS_VERSION +
-      ') to dev (' +
-      dev_version +
-      ') is ' +
-      (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-      ' and to stable (' +
-      stable_version +
-      ') is ' +
-      (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
+        THIS_VERSION +
+        ') to dev (' +
+        dev_version +
+        ') is ' +
+        (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+        ' and to stable (' +
+        stable_version +
+        ') is ' +
+        (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
     );
     data = {
       emsesp_version: THIS_VERSION,
@@ -971,11 +971,66 @@ const emsesp_sensordata = {
   // as: [],
   as: [
     { id: 1, g: 35, n: 'motor', v: 0, u: 0, o: 17, f: 0, t: 0, d: false, s: false },
-    { id: 2, g: 37, n: 'External switch', v: 13, u: 0, o: 17, f: 0, t: 1, d: false, s: false },
-    { id: 3, g: 39, n: 'Pulse count', v: 144, u: 0, o: 0, f: 0, t: 2, d: false, s: false },
-    { id: 4, g: 40, n: 'Pressure', v: 16, u: 17, o: 0, f: 0, t: 3, d: false, s: false },
-    { id: 6, g: 39, n: 'core_voltage', v: 3.34, u: 23, o: 0, f: 0, t: 3, d: false, s: true },
-    { id: 7, g: 36, n: 'supply_voltage', v: 12.21, u: 23, o: 0, f: 0, t: 3, d: false, s: true }
+    {
+      id: 2,
+      g: 37,
+      n: 'External switch',
+      v: 13,
+      u: 0,
+      o: 17,
+      f: 0,
+      t: 1,
+      d: false,
+      s: false
+    },
+    {
+      id: 3,
+      g: 39,
+      n: 'Pulse count',
+      v: 144,
+      u: 0,
+      o: 0,
+      f: 0,
+      t: 2,
+      d: false,
+      s: false
+    },
+    {
+      id: 4,
+      g: 40,
+      n: 'Pressure',
+      v: 16,
+      u: 17,
+      o: 0,
+      f: 0,
+      t: 3,
+      d: false,
+      s: false
+    },
+    {
+      id: 6,
+      g: 39,
+      n: 'core_voltage',
+      v: 3.34,
+      u: 23,
+      o: 0,
+      f: 0.003771,
+      t: 3,
+      d: false,
+      s: true
+    },
+    {
+      id: 7,
+      g: 36,
+      n: 'supply_voltage',
+      v: 12.21,
+      u: 23,
+      o: 0,
+      f: 0.017,
+      t: 3,
+      d: false,
+      s: true
+    }
   ],
   analog_enabled: true
 };
