@@ -155,7 +155,7 @@ void AnalogSensor::reload(bool get_nvs) {
                 }
             }
             if (!found) {
-                sensors_.emplace_back(sensor.gpio, sensor.name, sensor.offset, sensor.factor, sensor.uom, sensor.type);
+                sensors_.emplace_back(sensor.gpio, sensor.name, sensor.offset, sensor.factor, sensor.uom, sensor.type, sensor.is_system);
                 sensors_.back().ha_registered = false; // this will trigger recreate of the HA config
                 if (sensor.type == AnalogType::COUNTER || sensor.type >= AnalogType::DIGITAL_OUT) {
                     sensors_.back().set_value(sensor.offset);
@@ -530,7 +530,7 @@ bool AnalogSensor::update(uint8_t gpio, std::string & name, double offset, doubl
             newSensor.factor    = factor;
             newSensor.uom       = uom;
             newSensor.type      = type;
-            newSensor.is_system = false;
+            newSensor.is_system = is_system;
             settings.analogCustomizations.push_back(newSensor);
             LOG_DEBUG("Adding new customization for analog sensor GPIO %02d", gpio);
             return StateUpdateResult::CHANGED; // persist the change
@@ -871,13 +871,20 @@ void AnalogSensor::get_value_json(JsonObject output, const Sensor & sensor) {
 }
 
 // this creates the sensor, initializing everything
-AnalogSensor::Sensor::Sensor(const uint8_t gpio, const std::string & name, const double offset, const double factor, const uint8_t uom, const int8_t type)
+AnalogSensor::Sensor::Sensor(const uint8_t       gpio,
+                             const std::string & name,
+                             const double        offset,
+                             const double        factor,
+                             const uint8_t       uom,
+                             const int8_t        type,
+                             const bool          is_system)
     : gpio_(gpio)
     , name_(name)
     , offset_(offset)
     , factor_(factor)
     , uom_(uom)
-    , type_(type) {
+    , type_(type)
+    , is_system_(is_system) {
     value_ = 0; // init value to 0 always
 }
 

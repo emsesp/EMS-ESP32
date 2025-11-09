@@ -82,6 +82,7 @@ export interface TemperatureSensor {
   t?: number; // temp, optional
   o: number; // offset
   u: number; // uom
+  s: boolean; // system sensor flag
   o_n?: string;
 }
 
@@ -95,7 +96,7 @@ export interface AnalogSensor {
   f: number;
   t: number;
   d: boolean; // deleted flag
-  s: boolean; // system customization flag
+  s: boolean; // system sensor flag
   o_n?: string;
 }
 
@@ -103,6 +104,7 @@ export interface WriteTemperatureSensor {
   id: string;
   name: string;
   offset: number;
+  is_system: boolean;
 }
 
 export interface SensorData {
@@ -318,6 +320,7 @@ export interface WriteAnalogSensor {
   uom: number;
   type: number;
   deleted: boolean;
+  is_system: boolean;
 }
 
 export enum DeviceEntityMask {

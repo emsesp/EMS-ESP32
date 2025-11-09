@@ -167,8 +167,8 @@ void test_21() {
         "\"cleanSession\":false,\"entityFormat\":1,\"base\":\"ems-esp\",\"discoveryPrefix\":\"homeassistant\",\"discoveryType\":0,\"nestedFormat\":1,"
         "\"haEnabled\":true,\"mqttQos\":0,\"mqttRetain\":false,\"publishTimeHeartbeat\":60,\"publishTimeBoiler\":10,\"publishTimeThermostat\":10,"
         "\"publishTimeSolar\":10,\"publishTimeMixer\":10,\"publishTimeWater\":0,\"publishTimeOther\":10,\"publishTimeSensor\":10,\"publishSingle\":false,"
-        "\"publish2command\":false,\"sendResponse\":false},\"syslog\":{\"enabled\":false},\"sensor\":{\"temperatureSensors\":2,\"temperatureSensorReads\":0,"
-        "\"temperatureSensorFails\":0,\"analogSensors\":4,\"analogSensorReads\":0,\"analogSensorFails\":0},\"api\":{\"APICalls\":0,\"APIFails\":0},\"bus\":{"
+        "\"publish2command\":false,\"sendResponse\":false},\"syslog\":{\"enabled\":false},\"sensor\":{\"temperatureSensors\":1,\"temperatureSensorReads\":0,"
+        "\"temperatureSensorFails\":0,\"analogSensors\":5,\"analogSensorReads\":0,\"analogSensorFails\":0},\"api\":{\"APICalls\":0,\"APIFails\":0},\"bus\":{"
         "\"busStatus\":\"connected\",\"busProtocol\":\"Buderus\",\"busTelegramsReceived\":8,\"busReads\":0,\"busWrites\":0,\"busIncompleteTelegrams\":0,"
         "\"busReadsFailed\":0,\"busWritesFailed\":0,\"busRxLineQuality\":100,\"busTxLineQuality\":100},\"settings\":{\"boardProfile\":\"S32\",\"locale\":"
         "\"en\",\"txMode\":8,\"emsBusID\":11,\"showerTimer\":false,\"showerMinDuration\":180,\"showerAlert\":false,\"hideLed\":false,\"noTokenApi\":false,"
@@ -180,8 +180,8 @@ void test_21() {
         "0x2E "
         "0x3B\"},{\"type\":\"thermostat\",\"name\":\"FW120\",\"deviceID\":\"0x10\",\"productID\":192,\"brand\":\"\",\"version\":\"01.00\",\"entities\":15,"
         "\"handlersReceived\":\"0x016F\",\"handlersFetched\":\"0x0170 0x0171\",\"handlersPending\":\"0xA3 0x06 0xA2 0x12 0x13 0x0172 0x0165 "
-        "0x0168\"},{\"type\":\"temperaturesensor\",\"name\":\"temperaturesensor\",\"entities\":2},{\"type\":\"analogsensor\",\"name\":\"analogsensor\","
-        "\"entities\":4},{\"type\":\"scheduler\",\"name\":\"scheduler\",\"entities\":2},{\"type\":\"custom\",\"name\":\"custom\",\"entities\":4}]}]";
+        "0x0168\"},{\"type\":\"temperaturesensor\",\"name\":\"temperaturesensor\",\"entities\":1},{\"type\":\"analogsensor\",\"name\":\"analogsensor\","
+        "\"entities\":5},{\"type\":\"scheduler\",\"name\":\"scheduler\",\"entities\":2},{\"type\":\"custom\",\"name\":\"custom\",\"entities\":4}]}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/system"));
 }
 
@@ -195,8 +195,8 @@ void test_22() {
         "\"cleanSession\":false,\"entityFormat\":1,\"base\":\"ems-esp\",\"discoveryPrefix\":\"homeassistant\",\"discoveryType\":0,\"nestedFormat\":1,"
         "\"haEnabled\":true,\"mqttQos\":0,\"mqttRetain\":false,\"publishTimeHeartbeat\":60,\"publishTimeBoiler\":10,\"publishTimeThermostat\":10,"
         "\"publishTimeSolar\":10,\"publishTimeMixer\":10,\"publishTimeWater\":0,\"publishTimeOther\":10,\"publishTimeSensor\":10,\"publishSingle\":false,"
-        "\"publish2command\":false,\"sendResponse\":false},\"syslog\":{\"enabled\":false},\"sensor\":{\"temperatureSensors\":2,\"temperatureSensorReads\":0,"
-        "\"temperatureSensorFails\":0,\"analogSensors\":4,\"analogSensorReads\":0,\"analogSensorFails\":0},\"api\":{\"APICalls\":0,\"APIFails\":0},\"bus\":{"
+        "\"publish2command\":false,\"sendResponse\":false},\"syslog\":{\"enabled\":false},\"sensor\":{\"temperatureSensors\":1,\"temperatureSensorReads\":0,"
+        "\"temperatureSensorFails\":0,\"analogSensors\":5,\"analogSensorReads\":0,\"analogSensorFails\":0},\"api\":{\"APICalls\":0,\"APIFails\":0},\"bus\":{"
         "\"busStatus\":\"connected\",\"busProtocol\":\"Buderus\",\"busTelegramsReceived\":8,\"busReads\":0,\"busWrites\":0,\"busIncompleteTelegrams\":0,"
         "\"busReadsFailed\":0,\"busWritesFailed\":0,\"busRxLineQuality\":100,\"busTxLineQuality\":100},\"settings\":{\"boardProfile\":\"S32\",\"locale\":"
         "\"en\",\"txMode\":8,\"emsBusID\":11,\"showerTimer\":false,\"showerMinDuration\":180,\"showerAlert\":false,\"hideLed\":false,\"noTokenApi\":false,"
@@ -208,8 +208,8 @@ void test_22() {
         "0x2E "
         "0x3B\"},{\"type\":\"thermostat\",\"name\":\"FW120\",\"deviceID\":\"0x10\",\"productID\":192,\"brand\":\"\",\"version\":\"01.00\",\"entities\":15,"
         "\"handlersReceived\":\"0x016F\",\"handlersFetched\":\"0x0170 0x0171\",\"handlersPending\":\"0xA3 0x06 0xA2 0x12 0x13 0x0172 0x0165 "
-        "0x0168\"},{\"type\":\"temperaturesensor\",\"name\":\"temperaturesensor\",\"entities\":2},{\"type\":\"analogsensor\",\"name\":\"analogsensor\","
-        "\"entities\":4},{\"type\":\"scheduler\",\"name\":\"scheduler\",\"entities\":2},{\"type\":\"custom\",\"name\":\"custom\",\"entities\":4}]}]";
+        "0x0168\"},{\"type\":\"temperaturesensor\",\"name\":\"temperaturesensor\",\"entities\":1},{\"type\":\"analogsensor\",\"name\":\"analogsensor\","
+        "\"entities\":5},{\"type\":\"scheduler\",\"name\":\"scheduler\",\"entities\":2},{\"type\":\"custom\",\"name\":\"custom\",\"entities\":4}]}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/system/info"));
 }
 
@@ -247,12 +247,12 @@ void test_28() {
 }
 
 void test_29() {
-    auto expected_response = "[{\"test_tempsensor1\":12.3,\"test_tempsensor2\":45.6}]";
+    auto expected_response = "[{\"test_tempsensor1\":12.3,\"test_tempsensor2\":45.6,\"gateway_temperature\":28.1}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/temperaturesensor"));
 }
 
 void test_30() {
-    auto expected_response = "[{\"test_tempsensor1\":12.3,\"test_tempsensor2\":45.6}]";
+    auto expected_response = "[{\"test_tempsensor1\":12.3,\"test_tempsensor2\":45.6,\"gateway_temperature\":28.1}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/temperaturesensor/info"));
 }
 
@@ -274,19 +274,19 @@ void test_33() {
 }
 
 void test_34() {
-    auto expected_response = "[{\"test_analogsensor1\":0,\"test_analogsensor2\":1,\"test_analogsensor3\":0,\"test_analogsensor4\":0}]";
+    auto expected_response = "[{\"test_analogsensor1\":0,\"test_analogsensor2\":1,\"test_analogsensor3\":0,\"test_analogsensor4\":0,\"test_analogsensor5\":0}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor"));
 }
 
 void test_35() {
-    auto expected_response = "[{\"test_analogsensor1\":0,\"test_analogsensor2\":1,\"test_analogsensor3\":0,\"test_analogsensor4\":0}]";
+    auto expected_response = "[{\"test_analogsensor1\":0,\"test_analogsensor2\":1,\"test_analogsensor3\":0,\"test_analogsensor4\":0,\"test_analogsensor5\":0}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor/info"));
 }
 
 void test_36() {
     auto expected_response =
         "[{\"name\":\"test_analogsensor1\",\"fullname\":\"test_analogsensor1\",\"gpio\":36,\"type\":\"number\",\"analog\":\"adc\",\"value\":0,\"readable\":"
-        "true,\"writeable\":false,\"visible\":true,\"is_system\":true,\"offset\":0,\"factor\":0.1,\"uom\":\"mV\"}]";
+        "true,\"writeable\":false,\"visible\":true,\"is_system\":false,\"offset\":0,\"factor\":0.2,\"uom\":\"mV\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor/test_analogsensor1"));
 }
 

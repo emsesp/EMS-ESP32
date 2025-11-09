@@ -545,16 +545,21 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
 
         for (const auto & sensor : temperaturesensor_.sensors()) {
             if (Helpers::hasValue(sensor.temperature_c)) {
-                shell.printfln("  %s: %s%s °%c%s (offset %s, ID: %s)",
+                shell.printfln("  %s: %s%s °%c%s (Offset: %s, ID: %s, System: %s)",
                                sensor.name().c_str(),
                                COLOR_BRIGHT_GREEN,
                                Helpers::render_value(s, sensor.temperature_c, 10, fahrenheit),
                                (fahrenheit == 0) ? 'C' : 'F',
                                COLOR_RESET,
                                Helpers::render_value(s2, sensor.offset(), 10, fahrenheit),
-                               sensor.id().c_str());
+                               sensor.id().c_str(),
+                               sensor.is_system() ? "Yes" : "No");
             } else {
-                shell.printfln("  %s (offset %s, ID: %s)", sensor.name().c_str(), Helpers::render_value(s, sensor.offset(), 10, fahrenheit), sensor.id().c_str());
+                shell.printfln("  %s (Offset: %s, ID: %s, System: %s)",
+                               sensor.name().c_str(),
+                               Helpers::render_value(s, sensor.offset(), 10, fahrenheit),
+                               sensor.id().c_str(),
+                               sensor.is_system() ? "Yes" : "No");
             }
         }
         shell.println();
@@ -563,18 +568,20 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
     if (analogsensor_.have_sensors()) {
         char s[10];
         char s2[10];
+        char s3[10];
         shell.printfln("Analog sensors:");
         for (const auto & sensor : analogsensor_.sensors()) {
             switch (sensor.type()) {
             case AnalogSensor::AnalogType::ADC:
-                shell.printfln("  %s: %s%s %s%s (Type: ADC, Factor: %s, Offset: %d)",
+                shell.printfln("  %s: %s%s %s%s (Type: ADC, Factor: %s, Offset: %s, System: %s)",
                                sensor.name().c_str(),
                                COLOR_BRIGHT_GREEN,
                                Helpers::render_value(s, sensor.value(), 2),
                                EMSdevice::uom_to_string(sensor.uom()),
                                COLOR_RESET,
                                Helpers::render_value(s2, sensor.factor(), 4),
-                               sensor.offset());
+                               Helpers::render_value(s3, sensor.offset(), 2),
+                               sensor.is_system() ? "Yes" : "No");
                 break;
             default:
                 // case AnalogSensor::AnalogType::DIGITAL_IN:

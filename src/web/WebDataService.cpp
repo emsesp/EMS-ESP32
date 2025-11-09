@@ -127,6 +127,7 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
                 obj["u"] = DeviceValueUOM::DEGREES;
                 obj["o"] = (float)(sensor.offset()) / 10;
             }
+            obj["s"] = sensor.is_system();
         }
     }
 
@@ -323,7 +324,9 @@ void WebDataService::write_temperature_sensor(AsyncWebServerRequest * request, J
             offset10 = offset / 0.18;
         }
 
-        ok = EMSESP::temperaturesensor_.update(id, name, offset10);
+        bool is_system = sensor["is_system"];
+
+        ok = EMSESP::temperaturesensor_.update(id, name, offset10, is_system);
     }
 
     AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 400); // bad request
@@ -336,14 +339,15 @@ void WebDataService::write_analog_sensor(AsyncWebServerRequest * request, JsonVa
     if (json.is<JsonObject>()) {
         JsonObject analog = json;
 
-        uint8_t     gpio    = analog["gpio"];
-        std::string name    = analog["name"];
-        double      factor  = analog["factor"];
-        double      offset  = analog["offset"];
-        uint8_t     uom     = analog["uom"];
-        int8_t      type    = analog["type"];
-        bool        deleted = analog["deleted"];
-        ok                  = EMSESP::analogsensor_.update(gpio, name, offset, factor, uom, type, deleted);
+        uint8_t     gpio      = analog["gpio"];
+        std::string name      = analog["name"];
+        double      factor    = analog["factor"];
+        double      offset    = analog["offset"];
+        uint8_t     uom       = analog["uom"];
+        int8_t      type      = analog["type"];
+        bool        deleted   = analog["deleted"];
+        bool        is_system = analog["is_system"];
+        ok                    = EMSESP::analogsensor_.update(gpio, name, offset, factor, uom, type, deleted, is_system);
     }
 
     AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 400); // ok or bad request
@@ -388,13 +392,17 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
     }
 
     // add temperature sensors, if we have any
-    if (EMSESP::temperaturesensor_.have_sensors()) {
+    if (EMSESP::temperaturesensor_.count_entities(true)) { // no system sensors
         JsonObject obj  = nodes.add<JsonObject>();
         obj["id"]       = EMSdevice::DeviceTypeUniqueID::TEMPERATURESENSOR_UID; // it's unique id
         obj["t"]        = EMSdevice::DeviceType::TEMPERATURESENSOR;             // device type number
         JsonArray nodes = obj["nodes"].to<JsonArray>();
         uint8_t   count = 0;
         for (const auto & sensor : EMSESP::temperaturesensor_.sensors()) {
+            // ignore system sensors
+            if (sensor.is_system()) {
+                continue;
+            }
             JsonObject node = nodes.add<JsonObject>();
             node["id"]      = (EMSdevice::DeviceTypeUniqueID::TEMPERATURESENSOR_UID * 100) + count++;
 
@@ -422,6 +430,10 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
         JsonArray nodes = obj["nodes"].to<JsonArray>();
         uint8_t   count = 0;
         for (const auto & sensor : EMSESP::analogsensor_.sensors()) {
+            // ignore system sensors
+            if (sensor.is_system()) {
+                continue;
+            }
             if (sensor.type() != AnalogSensor::AnalogType::NOTUSED) { // ignore disabled
                 JsonObject node = nodes.add<JsonObject>();
                 node["id"]      = (EMSdevice::DeviceTypeUniqueID::ANALOGSENSOR_UID * 100) + count++;

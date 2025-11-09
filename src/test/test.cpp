@@ -880,7 +880,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.invoke_command("call system publish");
 
         // rename
-        EMSESP::temperaturesensor_.update("01_0203_0405_0607", "testtemperature", 2);
+        EMSESP::temperaturesensor_.update("01_0203_0405_0607", "testtemperature", 2, false);
         shell.invoke_command("show values");
         shell.invoke_command("call system publish");
         ok = true;

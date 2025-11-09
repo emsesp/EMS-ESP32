@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
+import DoneIcon from '@mui/icons-material/Done';
 import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
@@ -139,6 +140,18 @@ const SensorsTemperatureDialog = ({
             />
           </Grid>
         </Grid>
+        {editItem.s && (
+          <Grid>
+            <Typography mt={1} color="warning.main" variant="body2">
+              <WarningIcon
+                fontSize="small"
+                sx={{ mr: 1, verticalAlign: 'middle' }}
+                color="warning"
+              />
+              {LL.SYSTEM(0)} {LL.SENSOR(0)}
+            </Typography>
+          </Grid>
+        )}
       </DialogContent>
       <DialogActions>
         <Button
@@ -150,7 +163,7 @@ const SensorsTemperatureDialog = ({
           {LL.CANCEL()}
         </Button>
         <Button
-          startIcon={<WarningIcon color="warning" />}
+          startIcon={<DoneIcon />}
           variant="outlined"
           onClick={save}
           color="primary"

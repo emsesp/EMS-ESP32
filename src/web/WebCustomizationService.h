@@ -37,6 +37,7 @@ class SensorCustomization {
     std::string id;
     std::string name;
     uint16_t    offset;
+    bool        is_system; // if true, the customization is a system customization
 };
 
 class AnalogCustomization {
@@ -45,9 +46,9 @@ class AnalogCustomization {
     std::string name;
     double      offset;
     double      factor;
-    uint8_t     uom;               // 0 is none
-    int8_t      type;              // -1 is for deletion
-    bool        is_system = false; // if true, the customization is a system customization
+    uint8_t     uom;       // 0 is none
+    int8_t      type;      // -1 is for deletion
+    bool        is_system; // if true, the customization is a system customization
 
     // used for removing from a list
     bool operator==(const AnalogCustomization & a) const {
