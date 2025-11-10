@@ -40,7 +40,7 @@ const nl: Translation = {
   RUN_COMMAND: 'Call commando',
   CHANGE_VALUE: 'Wijzig waarde',
   CANCEL: 'Annuleren',
-  RESET: 'Reset',
+  REMOVE_ALL: 'Verwijderen alles',
   APPLY_CHANGES: 'Aanpassen ({0})',
   UPDATE: 'Update',
   EXECUTE: 'Uitvoeren',
@@ -153,7 +153,7 @@ const nl: Translation = {
   SET_ALL: 'Alles aanzetten',
   OPTIONS: 'Opties',
   NAME: 'Naam',
-  CUSTOMIZATIONS_RESET: 'Weet je zeker dat je alle custom aanpassingen wilt verwijderen inclusief de custom instellingen voor analoge temperatuursensoren?',
+  CUSTOMIZATIONS_RESET: 'Weet je zeker dat je alle custom aanpassingen wilt verwijderen?',
   SUPPORT_INFORMATION: 'Support Informatie',
   HELP_INFORMATION_1: 'Bezoek de online wiki om instructies te vinden om EMS-ESP te configureren',
   HELP_INFORMATION_2: 'Voor de live community ga naar de Discord server',
@@ -354,7 +354,8 @@ const nl: Translation = {
   RELEASE_TYPE: 'Release Typ',
   INTERNET_CONNECTION_REQUIRED: 'Internetverbinding vereist voor automatische versiecontrole en -upgrade',
   SWITCH_RELEASE_TYPE: 'Switch naar {0} release',
-  FIRMWARE_VERSION_INFO: 'Informatie over firmwareversie'
+  FIRMWARE_VERSION_INFO: 'Informatie over firmwareversie',
+  NO_DATA: 'Geen data'
 };
 
 export default nl;

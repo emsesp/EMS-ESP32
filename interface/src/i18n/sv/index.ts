@@ -40,7 +40,7 @@ const sv: Translation = {
   RUN_COMMAND: 'Kör kommando',
   CHANGE_VALUE: 'Ändra värde',
   CANCEL: 'Avbryt',
-  RESET: 'Nollställ',
+  REMOVE_ALL: 'Ta bort allt',
   APPLY_CHANGES: 'Utför ändringar ({0})',
   UPDATE: 'Uppdatera',
   EXECUTE: 'Utför',
@@ -153,7 +153,7 @@ const sv: Translation = {
   SET_ALL: 'ställ in alla',
   OPTIONS: 'Alternativ',
   NAME: 'Namn',
-  CUSTOMIZATIONS_RESET: 'Är du säker på att du vill ta bort alla anpassningar, inklusive inställningar för Temperatursensorer och Analoga sensorer?',
+  CUSTOMIZATIONS_RESET: 'Är du säker på att du vill ta bort alla anpassningar?',
   SUPPORT_INFORMATION: 'Supportinformation',
   HELP_INFORMATION_1: 'Besök Wikin för instruktioner om hur du kan konfigurera EMS-ESP',
   HELP_INFORMATION_2: 'För community-support besök vår Discord-server',
@@ -354,7 +354,8 @@ const sv: Translation = {
   RELEASE_TYPE: 'Utgivelsestyp',
   INTERNET_CONNECTION_REQUIRED: 'Internetanslutning krävs för automatisk version kontroll och uppdatering',
   SWITCH_RELEASE_TYPE: 'Byt till {0} utgåva',
-  FIRMWARE_VERSION_INFO: 'Information om firmwareversion'
+  FIRMWARE_VERSION_INFO: 'Information om firmwareversion',
+  NO_DATA: 'Ingen data'
 };
 
 export default sv;

@@ -40,7 +40,7 @@ const cz: Translation = {
   RUN_COMMAND: 'Zavolat příkaz',
   CHANGE_VALUE: 'Změnit hodnotu',
   CANCEL: 'Zrušit',
-  RESET: 'Resetovat',
+  REMOVE_ALL: 'Odebrat vše',
   APPLY_CHANGES: 'Použít změny ({0})',
   UPDATE: 'Aktualizovat',
   EXECUTE: 'Provést',
@@ -153,7 +153,7 @@ const cz: Translation = {
   SET_ALL: 'nastavit vše',
   OPTIONS: 'Možnosti',
   NAME: 'Název',
-  CUSTOMIZATIONS_RESET: 'Opravdu chcete odstranit všechna přizpůsobení včetně vlastních nastavení teplotních a analogových senzorů?',
+  CUSTOMIZATIONS_RESET: 'Opravdu chcete odstranit všechna přizpůsobení?',
   SUPPORT_INFORMATION: 'Podpora',
   HELP_INFORMATION_1: 'Navštivte online wiki pro pokyny, jak konfigurovat EMS-ESP',
   HELP_INFORMATION_2: 'Pro živý chat s komunitou se připojte k našemu serveru Discord',
@@ -354,7 +354,8 @@ const cz: Translation = {
   RELEASE_TYPE: 'Typ sestavení',
   INTERNET_CONNECTION_REQUIRED: 'Pro automatickou kontrolu a instalaci aktualizací je třeba internetové připojení',
   SWITCH_RELEASE_TYPE: 'Přepnout na {0} verzi',
-  FIRMWARE_VERSION_INFO: 'Informace o verzi firmwaru'
+  FIRMWARE_VERSION_INFO: 'Informace o verzi firmwaru',
+  NO_DATA: 'Žádná data'
 };
 
 export default cz;

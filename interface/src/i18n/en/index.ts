@@ -40,7 +40,7 @@ const en: Translation = {
   RUN_COMMAND: 'Call Command',
   CHANGE_VALUE: 'Change Value',
   CANCEL: 'Cancel',
-  RESET: 'Reset',
+  REMOVE_ALL: 'Remove All',
   APPLY_CHANGES: 'Apply Changes ({0})',
   UPDATE: 'Update',
   EXECUTE: 'Execute',
@@ -153,7 +153,7 @@ const en: Translation = {
   SET_ALL: 'set all',
   OPTIONS: 'Options',
   NAME: 'Name',
-  CUSTOMIZATIONS_RESET: 'Are you sure you want remove all customizations including the custom settings of the Temperature and Analog sensors?',
+  CUSTOMIZATIONS_RESET: 'Are you sure you want remove all the customizations?',
   SUPPORT_INFORMATION: 'Support Information',
   HELP_INFORMATION_1: 'Visit the online wiki to get instructions on how to configure EMS-ESP',
   HELP_INFORMATION_2: 'For live community chat join our Discord server',
@@ -354,7 +354,8 @@ const en: Translation = {
   RELEASE_TYPE: 'Release Type',
   INTERNET_CONNECTION_REQUIRED: 'Internet connection required for automatic version checking and upgrading',
   SWITCH_RELEASE_TYPE: 'Switch to {0} release',
-  FIRMWARE_VERSION_INFO: 'Firmware Version Information'
+  FIRMWARE_VERSION_INFO: 'Firmware Version Information',
+  NO_DATA: 'No data'
 };
 
 export default en;

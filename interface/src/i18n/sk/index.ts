@@ -40,7 +40,7 @@ const sk: Translation = {
   RUN_COMMAND: 'Volať príkaz',
   CHANGE_VALUE: 'Zmena hodnoty',
   CANCEL: 'Zrušiť',
-  RESET: 'Reset',
+  REMOVE_ALL: 'Odstrániť všetko',
   APPLY_CHANGES: 'Aplikovať zmeny ({0})',
   UPDATE: 'Aktualizovať',
   EXECUTE: 'Spustiť',
@@ -153,7 +153,7 @@ const sk: Translation = {
   SET_ALL: 'nastaviť všetko',
   OPTIONS: 'Možnosti',
   NAME: 'Názov',
-  CUSTOMIZATIONS_RESET: 'Naozaj chcete odstrániť všetky prispôsobenia vrátane vlastných nastavení snímačov teploty a analógových snímačov?',
+  CUSTOMIZATIONS_RESET: 'Naozaj chcete odstrániť všetky prispôsobenia?',
   SUPPORT_INFORMATION: 'Informácie pre podporu',
   HELP_INFORMATION_1: 'Navštívte online wiki, kde nájdete pokyny na konfiguráciu EMS-ESP',
   HELP_INFORMATION_2: 'Pre živý komunitný chat sa pripojte na náš Discord server',
@@ -354,7 +354,8 @@ const sk: Translation = {
   RELEASE_TYPE: 'Typ vydania',
   INTERNET_CONNECTION_REQUIRED: 'Internetové pripojenie je potrebné pre automatickú kontrolu a aktualizáciu',
   SWITCH_RELEASE_TYPE: 'Prepnúť na {0} verziu',
-  FIRMWARE_VERSION_INFO: 'Informácie o verzii firmware'
+  FIRMWARE_VERSION_INFO: 'Informácie o verzii firmware',
+  NO_DATA: 'Žiadne dáta'
 };
 
 export default sk;

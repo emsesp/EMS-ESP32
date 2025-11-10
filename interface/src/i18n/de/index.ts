@@ -40,7 +40,7 @@ const de: Translation = {
   RUN_COMMAND: 'Befehl ausführen',
   CHANGE_VALUE: 'Wert ändern',
   CANCEL: 'Abbrechen',
-  RESET: 'Zurücksetzen',
+  REMOVE_ALL: 'Entfernen alles',
   APPLY_CHANGES: 'Änderungen anwenden ({0})',
   UPDATE: 'Aktualisieren',
   EXECUTE: 'Ausführen',
@@ -153,7 +153,7 @@ const de: Translation = {
   SET_ALL: 'Setzen Sie alle',
   OPTIONS: 'Optionen',
   NAME: 'Name',
-  CUSTOMIZATIONS_RESET: 'Möchten Sie wirklich alle Anpassungen entfernen, einschließlich der benutzerdefinierten Einstellungen der Temperatur- und Analogsensoren?',
+  CUSTOMIZATIONS_RESET: 'Möchten Sie wirklich alle Anpassungen entfernen?',
   SUPPORT_INFORMATION: 'Unterstützende Informationen',
   HELP_INFORMATION_1: 'EMS-ESP Konfigurationsanweisungen und mehr finden Sie im Online-Wiki',
   HELP_INFORMATION_2: 'Für einen Live-Community-Chat besuchen Sie unseren Discord-Server',
@@ -354,7 +354,8 @@ const de: Translation = {
   RELEASE_TYPE: 'Release Typ',
   INTERNET_CONNECTION_REQUIRED: 'Für die automatische Versionsprüfung und Aktualisierung ist eine Internetverbindung erforderlich',
   SWITCH_RELEASE_TYPE: 'Zum {0}-Release wechseln',
-  FIRMWARE_VERSION_INFO: 'Firmware-Versionsinformation'
+  FIRMWARE_VERSION_INFO: 'Firmware-Versionsinformation',
+  NO_DATA: 'Keine Daten'
 };
 
 export default de;
