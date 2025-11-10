@@ -305,6 +305,7 @@ MAKE_ENUM(enum_maxHeat2, FL_(3kW), FL_(6kW), FL_(9kW))
 MAKE_ENUM(enum_pumpMode, FL_(proportional), FL_(deltaP1), FL_(deltaP2), FL_(deltaP3), FL_(deltaP4))
 MAKE_ENUM(enum_pumpCharacter, FL_(proportional), FL_(pressure1), FL_(pressure2), FL_(pressure3), FL_(pressure4), FL_(pressure5), FL_(pressure6))
 MAKE_ENUM(enum_hpPumpMode, FL_(auto), FL_(continuous))
+MAKE_ENUM(enum_pumpMode2, FL_(pumpstep), FL_(consthigh), FL_(constmed), FL_(constlow), FL_(prophigh), FL_(proplow))
 
 // thermostat lists
 MAKE_ENUM(enum_ibaMainDisplay, FL_(internal_temperature), FL_(internal_setpoint), FL_(external_temperature), FL_(burner_temperature), FL_(ww_temperature), FL_(functioning_mode), FL_(time), FL_(date), FL_(smoke_temperature))
