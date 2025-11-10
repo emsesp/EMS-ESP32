@@ -364,6 +364,7 @@ const Customizations = () => {
       toast.error((error as Error).message);
     } finally {
       setConfirmReset(false);
+      setRestarting(true);
     }
   }, [sendResetCustomizations, LL]);
 
@@ -519,6 +520,14 @@ const Customizations = () => {
               {LL.RENAME()}
             </Button>
           ))}
+        <Button
+          startIcon={<SettingsBackupRestoreIcon />}
+          variant="outlined"
+          color="error"
+          onClick={() => setConfirmReset(true)}
+        >
+          {LL.REMOVE_ALL()}
+        </Button>
       </Box>
     </>
   );
@@ -687,7 +696,7 @@ const Customizations = () => {
       open={confirmReset}
       onClose={() => setConfirmReset(false)}
     >
-      <DialogTitle>{LL.RESET(1)}</DialogTitle>
+      <DialogTitle>{LL.REMOVE_ALL()}</DialogTitle>
       <DialogContent dividers>{LL.CUSTOMIZATIONS_RESET()}</DialogContent>
       <DialogActions>
         <Button
@@ -704,7 +713,7 @@ const Customizations = () => {
           onClick={resetCustomization}
           color="error"
         >
-          {LL.RESET(0)}
+          {LL.REMOVE_ALL()}
         </Button>
       </DialogActions>
     </Dialog>
@@ -753,18 +762,6 @@ const Customizations = () => {
               </ButtonRow>
             )}
           </Box>
-          {!rename && (
-            <ButtonRow mt={1}>
-              <Button
-                startIcon={<SettingsBackupRestoreIcon />}
-                variant="outlined"
-                color="error"
-                onClick={() => setConfirmReset(true)}
-              >
-                {LL.RESET(0)}
-              </Button>
-            </ButtonRow>
-          )}
         </Box>
       )}
       {renderResetDialog()}
