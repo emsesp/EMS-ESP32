@@ -27,13 +27,11 @@ const LayoutMenuItemComponent = ({
   const buttonStyles: SxProps<Theme> = useMemo(
     () => ({
       transition: 'all 0.05s cubic-bezier(0.55, 0.085, 0.68, 0.53)',
-      transform: selected ? 'scale(1.02)' : 'scale(1)',
       backgroundColor: selected ? 'rgba(144, 202, 249, 0.1)' : 'transparent',
       borderRadius: '8px',
       margin: '2px 8px',
       '&:hover': {
-        backgroundColor: 'rgba(68, 82, 211, 0.39)',
-        transform: selected ? 'scale(1.02)' : 'scale(1.01)'
+        backgroundColor: 'rgba(68, 82, 211, 0.39)'
       },
       '&::before': {
         content: '""',
