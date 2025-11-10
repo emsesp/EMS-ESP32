@@ -258,13 +258,13 @@ void test_30() {
 
 void test_31() {
     auto expected_response = "[{\"id\":\"0B_0C0D_0E0F_1011\",\"name\":\"test_tempsensor2\",\"fullname\":\"test_tempsensor2\",\"value\":45.6,\"type\":"
-                             "\"number\",\"uom\":\"°C\",\"readable\":true,\"writeable\":false,\"visible\":true}]";
+                             "\"number\",\"uom\":\"°C\",\"readable\":true,\"writeable\":false,\"visible\":true,\"is_system\":false}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/temperaturesensor/test_tempsensor2"));
 }
 
 void test_32() {
     auto expected_response = "[{\"id\":\"0B_0C0D_0E0F_1011\",\"name\":\"test_tempsensor2\",\"fullname\":\"test_tempsensor2\",\"value\":45.6,\"type\":"
-                             "\"number\",\"uom\":\"°C\",\"readable\":true,\"writeable\":false,\"visible\":true}]";
+                             "\"number\",\"uom\":\"°C\",\"readable\":true,\"writeable\":false,\"visible\":true,\"is_system\":false}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/temperaturesensor/0B_0C0D_0E0F_1011"));
 }
 
