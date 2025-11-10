@@ -1715,7 +1715,7 @@ void EMSESP::start() {
     esp32React.begin();
 
 #ifndef EMSESP_STANDALONE
-    if (!root) {
+    if (factory_settings) {
         LOG_WARNING("No settings found on filesystem. Using factory settings.");
     }
 #endif
