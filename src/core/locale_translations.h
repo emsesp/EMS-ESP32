@@ -233,6 +233,12 @@ MAKE_WORD_TRANSLATION(pressure3, "250mbar", "250mbar", "250mbar", "250mbar", "25
 MAKE_WORD_TRANSLATION(pressure4, "300mbar", "300mbar", "300mbar", "300mbar", "300mbar", "300mbar", "300mbar", "300mbar", "300mbar", "300mbar", "300mbar") // TODO translate
 MAKE_WORD_TRANSLATION(pressure5, "350mbar", "350mbar", "350mbar", "350mbar", "350mbar", "350mbar", "350mbar", "350mbar", "350mbar", "350mbar", "350mbar") // TODO translate
 MAKE_WORD_TRANSLATION(pressure6, "400mbar", "400mbar", "400mbar", "400mbar", "400mbar", "400mbar", "400mbar", "400mbar", "400mbar", "400mbar", "400mbar") // TODO translate
+MAKE_WORD_TRANSLATION(pumpstep, "pumpstep", "Stufen")
+MAKE_WORD_TRANSLATION(consthigh, "const.high", "konst.hoch")
+MAKE_WORD_TRANSLATION(constmed, "const.medium", "konst.mittel")
+MAKE_WORD_TRANSLATION(constlow, "const.low", "konst.niedrig")
+MAKE_WORD_TRANSLATION(prophigh, "prop.high", "prop.hoch")
+MAKE_WORD_TRANSLATION(proplow, "propo.low", "prop.niedrig")
 
 // heatpump
 MAKE_WORD_TRANSLATION(none, "none", "keine", "geen", "ingen", "brak", "ingen", "aucun", "hiçbiri", "nessuno", "žiadny", "žádné")
@@ -355,6 +361,7 @@ MAKE_TRANSLATION(haclimate, "haclimate", "mqtt discovery current room temperatur
 
 // Entity translations: tag, mqtt, en, de, nl, sv, pl, no, fr, tr, it, sk, cz
 // Boiler
+MAKE_TRANSLATION(chimneysweeper, "chimneysweeper", "chimney sweeper", "Schornsteinfeger", "", "", "", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(reset, "reset", "reset", "Reset", "Reset", "Återställ", "kasowanie komunikatu", "nullstill", "reset", "Sıfırla", "Reset", "reset", "reset")
 MAKE_TRANSLATION(forceHeatingOff, "heatingoff", "force heating off", "Heizen abschalten", "", "Uppvärmning avstängd", "wymuś wyłączenie grzania", "", "", "", "", "vynútené vypnutie kúrenia", "vynutit vypnutí vytápění") // TODO translate
 MAKE_TRANSLATION(wwtapactivated, "tapactivated", "turn on/off", "Durchlauferhitzer aktiv", "zet aan/uit", "på/av", "system przygotowywania", "Varmtvann active", "ecs activée", "aç/kapa", "commuta on/off", "zapnúť/vypnúť", "zapnout/vypnout")
@@ -524,6 +531,7 @@ MAKE_TRANSLATION(auxHeatMode, "auxheatrmode", "aux heater mode", "Zusatzheizungs
 MAKE_TRANSLATION(auxMaxLimit, "auxmaxlimit", "aux heater max limit", "Zusatzheizer max. Grenze", "Bijverwarmer grensinstelling maximaal", "Eltillskott max begränsning", "dogrzewacz, maksymalny limit", "tillegsvarme maksgrense", "ilave ısıtıcı maks limit", "limite massimo riscaldatore addizionale", "maximálny limit pomocného ohrievača", "maximální limit pomocného topení")
 MAKE_TRANSLATION(auxLimitStart, "auxlimitstart", "aux heater limit start", "Zusatzheizer Grenze Start", "Bijverwarmer grens voor start", "Eltillskott begränsningsstart", "dogrzewacz, początek ograniczenia", "tillegsvarme startgrense", "ilave ısıtıcı limir başlangıcı", "avvio limite massimo riscaldatore addizionale", "spustenie limitu pomocného ohrievača", "startovací limit pomocného topení")
 MAKE_TRANSLATION(auxHeaterSource, "auxheatersource", "aux heater source", "Quelle Zusatzheizer", "", "", "", "", "", "", "", "pomocný zdroj tepla", "") // TODO translate
+MAKE_TRANSLATION(manDefrost, "mandefrost", "manual defrost", "Manuelle Enteisung", "Handmatige ontdooicyclus", "Manuell avfrostning", "ręczne odladzanie", "manuell avisning", "", "manuel buz çözme", "sbrinamento manuale", "manuálne odmrazovanie", "ruční odmrazování") // TODO translate
 MAKE_TRANSLATION(pvCooling, "pvcooling", "cooling only with PV", "Kühlen nur mit PV", "Koelen alleen met solar PV", "Kyla endast med solpanel", "chłodzenie tylko z PV", "kjøling med solpanel", "", "sadece PV ile soğutma", "solo raffrescamento con solare", "Chladenie len s FV", "chlazení pouze s FV") // TODO translate
 MAKE_TRANSLATION(hpCircPumpWw, "hpcircpump", "circulation pump available during dhw", "Zirkulation möglich bei WW-Bereitung", "Circulatiepomp WP beschikbaar tijdens ww", "Värmebärarpump på vid varmvattenberedning", "pompa cyrkulacji dostępna w trakcie c.w.u.", "sirkulasjonspumpe tilgjengelig under varmtvann", "", "SKS esnasında sirkülasyon pompasu uygun", "pompa di circolazione disponibile durante ACS", "obehové čerpadlo k dispozícii počas TÚV", "oběhové čerpadlo dostupné během TUV") // TODO translate
 MAKE_TRANSLATION(vp_cooling, "vpcooling", "valve/pump cooling", "Ventil/Pumpe für Kühlen", "Klep koeling", "Ventil/Pump kyla", "zawór/pompa chłodzenia", "varmepumpe kjøling", "", "vana/pompa soğuyor", "valvola/pompa raffrescamento", "chladenie ventilu/čerpadla", "ventil/čerpadlo chlazení") // TODO translate
