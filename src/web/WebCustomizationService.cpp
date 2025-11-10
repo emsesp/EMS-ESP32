@@ -105,7 +105,7 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
             if (sensor.id == sensor.name) {
                 sensor.name = ""; // no need to store id as name
             }
-            sensor.is_system = sensorJson["is_system"];
+            sensor.is_system = sensorJson["is_system"] | false;
             std::replace(sensor.id.begin(), sensor.id.end(), '-', '_'); // change old ids to v3.7 style
             customizations.sensorCustomizations.push_back(sensor);      // add to list
         }
@@ -124,7 +124,7 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
             analog.factor    = analogJson["factor"];
             analog.uom       = analogJson["uom"];
             analog.type      = analogJson["type"];
-            analog.is_system = analogJson["is_system"];
+            analog.is_system = analogJson["is_system"] | false;
             if (_start && analog.type == EMSESP::analogsensor_.AnalogType::DIGITAL_OUT && analog.uom > DeviceValue::DeviceValueUOM::NONE) {
                 analog.offset = analog.uom - 1;
             }

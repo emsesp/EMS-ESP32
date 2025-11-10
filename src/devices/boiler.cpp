@@ -142,7 +142,14 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
 
     // reset is a command uses a dummy variable which is always zero, shown as blank, but provides command enum options
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &reset_, DeviceValueType::CMD, FL_(enum_reset), FL_(reset), DeviceValueUOM::NONE, MAKE_CF_CB(set_reset));
-    has_update(reset_, 0);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &reset_,
+                          DeviceValueType::CMD,
+                          FL_(enum_modetype5),
+                          FL_(chimneysweeper),
+                          DeviceValueUOM::NONE,
+                          MAKE_CF_CB(set_chimneysweeper));
+    has_update(reset_, 0); // set reset to zero
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &forceHeatingOff_,
                           DeviceValueType::BOOL,
@@ -277,8 +284,13 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatingPump_, DeviceValueType::BOOL, FL_(heatingPump), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pumpModMax_, DeviceValueType::UINT8, FL_(pumpModMax), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_max_pump));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pumpModMin_, DeviceValueType::UINT8, FL_(pumpModMin), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_min_pump));
-    register_device_value(
-        DeviceValueTAG::TAG_DEVICE_DATA, &pumpMode_, DeviceValueType::ENUM, FL_(enum_pumpMode), FL_(pumpMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_pumpMode));
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &pumpMode_,
+                          DeviceValueType::ENUM,
+                          model() == EMSdevice::EMS_DEVICE_FLAG_HT3 ? FL_(enum_pumpMode2) : FL_(enum_pumpMode),
+                          FL_(pumpMode),
+                          DeviceValueUOM::NONE,
+                          MAKE_CF_CB(set_pumpMode));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &pumpCharacter_,
                           DeviceValueType::ENUM,
@@ -438,6 +450,13 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
 
     // heatpump info
     if (isHeatPump()) {
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &reset_,
+                              DeviceValueType::CMD,
+                              FL_(enum_modetype5),
+                              FL_(manDefrost),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_manDefrost));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &nrgTotal_,
                               DeviceValueType::UINT24,
@@ -2670,16 +2689,9 @@ bool Boiler::set_max_pump(const char * value, const int8_t id) {
 
 bool Boiler::set_pumpMode(const char * value, const int8_t id) {
     uint8_t v;
-    if (is_received(EMS_TYPE_UBAParametersPlus)) {
-        if (Helpers::value2enum(value, v, FL_(enum_pumpCharacter))) {
-            write_command(EMS_TYPE_UBAParametersPlus, 15, v, EMS_TYPE_UBAParametersPlus);
-            return true;
-        }
-    } else {
-        if (Helpers::value2enum(value, v, FL_(enum_pumpMode))) {
-            write_command(EMS_TYPE_UBAParameters, 11, v, EMS_TYPE_UBAParameters);
-            return true;
-        }
+    if (Helpers::value2enum(value, v, model() == EMSdevice::EMS_DEVICE_FLAG_HT3 ? FL_(enum_pumpMode2) : FL_(enum_pumpMode))) {
+        write_command(EMS_TYPE_UBAParameters, 11, v, EMS_TYPE_UBAParameters);
+        return true;
     }
     return false;
 }
@@ -2977,6 +2989,24 @@ bool Boiler::set_reset(const char * value, const int8_t id) {
         return true;
     }
     return false;
+}
+
+bool Boiler::set_manDefrost(const char * value, const int8_t id) {
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
+        return false;
+    }
+    write_command(0x05, 52, b ? 1 : 0);
+    return true;
+}
+
+bool Boiler::set_chimneysweeper(const char * value, const int8_t id) {
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
+        return false;
+    }
+    write_command(0x05, 0x04, b ? 100 : 0);
+    return true;
 }
 
 // maintenance

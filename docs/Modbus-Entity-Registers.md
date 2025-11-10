@@ -16,164 +16,166 @@
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| mandefrost | manual defrost | cmd [off\|on] |   | true | DEVICE_DATA | 84 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=167772) | kWh | false | DHW | 0 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
-| nrgcool | energy cooling | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 87 | 2 | 1/100 |
-| metertotal | meter total | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
-| metercomp | meter compressor | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 91 | 2 | 1/100 |
-| metereheat | meter e-heater | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 93 | 2 | 1/100 |
-| meterheat | meter heating | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 95 | 2 | 1/100 |
-| metercool | meter cooling | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 97 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 87 | 2 | 1/100 |
+| nrgcool | energy cooling | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
+| metertotal | meter total | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 91 | 2 | 1/100 |
+| metercomp | meter compressor | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 93 | 2 | 1/100 |
+| metereheat | meter e-heater | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 95 | 2 | 1/100 |
+| meterheat | meter heating | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 97 | 2 | 1/100 |
+| metercool | meter cooling | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 99 | 2 | 1/100 |
 | dhw.meter | meter | uint24 (>=0<=167772) | kWh | false | DHW | 2 | 2 | 1/100 |
-| uptimetotal | heatpump total uptime | time (>=0<=279620) | minutes | false | DEVICE_DATA | 99 | 2 | 1/60 |
-| uptimecontrol | total operating time heat | time (>=0<=279620) | minutes | false | DEVICE_DATA | 101 | 2 | 1/60 |
-| uptimecompheating | operating time compressor heating | time (>=0<=279620) | minutes | false | DEVICE_DATA | 103 | 2 | 1/60 |
-| uptimecompcooling | operating time compressor cooling | time (>=0<=279620) | minutes | false | DEVICE_DATA | 105 | 2 | 1/60 |
+| uptimetotal | heatpump total uptime | time (>=0<=279620) | minutes | false | DEVICE_DATA | 101 | 2 | 1/60 |
+| uptimecontrol | total operating time heat | time (>=0<=279620) | minutes | false | DEVICE_DATA | 103 | 2 | 1/60 |
+| uptimecompheating | operating time compressor heating | time (>=0<=279620) | minutes | false | DEVICE_DATA | 105 | 2 | 1/60 |
+| uptimecompcooling | operating time compressor cooling | time (>=0<=279620) | minutes | false | DEVICE_DATA | 107 | 2 | 1/60 |
 | dhw.uptimecomp | operating time compressor | time (>=0<=279620) | minutes | false | DHW | 4 | 2 | 1/60 |
-| uptimecomppool | operating time compressor pool | time (>=0<=279620) | minutes | false | DEVICE_DATA | 107 | 2 | 1/60 |
-| totalcompstarts | total compressor control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 109 | 2 | 1 |
-| heatingstarts | heating control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 111 | 2 | 1 |
-| coolingstarts | cooling control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 113 | 2 | 1 |
+| uptimecomppool | operating time compressor pool | time (>=0<=279620) | minutes | false | DEVICE_DATA | 109 | 2 | 1/60 |
+| totalcompstarts | total compressor control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 111 | 2 | 1 |
+| heatingstarts | heating control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 113 | 2 | 1 |
+| coolingstarts | cooling control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 115 | 2 | 1 |
 | dhw.startshp | starts hp | uint24 (>=0<=16777214) |   | false | DHW | 6 | 2 | 1 |
-| poolstarts | pool control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 115 | 2 | 1 |
-| nrgconstotal | total energy consumption | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 117 | 2 | 1 |
-| nrgconscomptotal | total energy consumption compressor | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 119 | 2 | 1 |
-| nrgconscompheating | energy consumption compressor heating | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 121 | 2 | 1 |
+| poolstarts | pool control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 117 | 2 | 1 |
+| nrgconstotal | total energy consumption | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 119 | 2 | 1 |
+| nrgconscomptotal | total energy consumption compressor | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 121 | 2 | 1 |
+| nrgconscompheating | energy consumption compressor heating | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 123 | 2 | 1 |
 | dhw.nrgconscomp | energy consumption compressor | uint24 (>=0<=16777214) | kWh | false | DHW | 8 | 2 | 1 |
-| nrgconscompcooling | energy consumption compressor cooling | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 123 | 2 | 1 |
-| nrgconscomppool | energy consumption compressor pool | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 125 | 2 | 1 |
-| auxelecheatnrgconstotal | total aux elec. heater energy consumption | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 127 | 2 | 1 |
-| auxelecheatnrgconsheating | aux elec. heater energy consumption heating | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 129 | 2 | 1 |
+| nrgconscompcooling | energy consumption compressor cooling | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 125 | 2 | 1 |
+| nrgconscomppool | energy consumption compressor pool | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 127 | 2 | 1 |
+| auxelecheatnrgconstotal | total aux elec. heater energy consumption | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 129 | 2 | 1 |
+| auxelecheatnrgconsheating | aux elec. heater energy consumption heating | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 131 | 2 | 1 |
 | dhw.auxelecheatnrgcons | aux elec. heater energy consumption | uint24 (>=0<=16777214) | kWh | false | DHW | 10 | 2 | 1 |
-| auxelecheatnrgconspool | aux elec. heater energy consumption pool | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 131 | 2 | 1 |
-| nrgsupptotal | total energy supplied | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 133 | 2 | 1 |
-| nrgsuppheating | total energy supplied heating | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 135 | 2 | 1 |
+| auxelecheatnrgconspool | aux elec. heater energy consumption pool | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 133 | 2 | 1 |
+| nrgsupptotal | total energy supplied | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 135 | 2 | 1 |
+| nrgsuppheating | total energy supplied heating | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 137 | 2 | 1 |
 | dhw.nrgsupp | total energy warm supplied | uint24 (>=0<=16777214) | kWh | false | DHW | 12 | 2 | 1 |
-| nrgsuppcooling | total energy supplied cooling | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 137 | 2 | 1 |
-| nrgsupppool | total energy supplied pool | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 139 | 2 | 1 |
-| hppower | compressor power output | uint16 (>=0<=3199) | kW | false | DEVICE_DATA | 141 | 1 | 1/10 |
-| hpmaxpower | compressor max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 142 | 1 | 1 |
-| pvmaxcomp | pv compressor max power | uint8 (>=0<=25) | kW | true | DEVICE_DATA | 143 | 1 | 1/10 |
-| powerreduction | power reduction | uint8 (>=30<=60) | % | true | DEVICE_DATA | 144 | 1 | 10 |
-| hpsetdiffpress | set differential pressure | uint8 (>=150<=750) | mbar | true | DEVICE_DATA | 145 | 1 | 50 |
-| hpcompon | hp compressor | boolean |   | false | DEVICE_DATA | 146 | 1 | 1 |
-| hpactivity | compressor activity | enum [off\|heating\|cooling\|hot water\|pool\|pool heating\|defrost\|compressor alarm] |   | false | DEVICE_DATA | 147 | 1 | 1 |
-| hpbrinepumpspd | brine pump speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 148 | 1 | 1 |
-| hpswitchvalve | switch valve | boolean |   | false | DEVICE_DATA | 149 | 1 | 1 |
-| hpcompspd | compressor speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 150 | 1 | 1 |
-| hptargetspd | compressor target speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 151 | 1 | 1 |
-| hpcircspd | circulation pump speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 152 | 1 | 1 |
-| recvalve | receiver valve VR0 | uint8 (>=0<=100) | % | false | DEVICE_DATA | 153 | 1 | 1 |
-| expvalve | expansion valve VR1 | uint8 (>=0<=100) | % | false | DEVICE_DATA | 154 | 1 | 1 |
-| hpbrinein | brine in/evaporator | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 155 | 1 | 1/10 |
-| hpbrineout | brine out/condenser | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 156 | 1 | 1/10 |
-| hptc0 | heat carrier return (TC0) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 157 | 1 | 1/10 |
-| hptc1 | heat carrier forward (TC1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 158 | 1 | 1/10 |
-| hptc3 | condenser temperature (TC3) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 159 | 1 | 1/10 |
-| hptr1 | compressor temperature (TR1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 160 | 1 | 1/10 |
-| hptr3 | refrigerant temperature liquid side (condenser output) (TR3) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 161 | 1 | 1/10 |
-| hptr4 | evaporator inlet temperature (TR4) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 162 | 1 | 1/10 |
-| hptr5 | compressor inlet temperature (TR5) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 163 | 1 | 1/10 |
-| hptr6 | compressor outlet temperature (TR6) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 164 | 1 | 1/10 |
-| hptr7 | refrigerant temperature gas side (condenser input) (TR7) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 165 | 1 | 1/10 |
-| hptl2 | air inlet temperature (TL2) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 166 | 1 | 1/10 |
-| hppl1 | low pressure side temperature (PL1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 167 | 1 | 1/10 |
-| hpph1 | high pressure side temperature (PH1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 168 | 1 | 1/10 |
-| hpta4 | drain pan temp (TA4) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 169 | 1 | 1/10 |
-| hptw1 | reservoir temp (TW1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 170 | 1 | 1/10 |
-| poolsettemp | pool set temperature | uint8 (>=0<=127) | C | true | DEVICE_DATA | 171 | 1 | 1/2 |
-| hp4way | 4-way valve (VR4) | enum [cooling & defrost\|heating & dhw] |   | false | DEVICE_DATA | 172 | 1 | 1 |
-| hpin1 | input 1 state | boolean |   | false | DEVICE_DATA | 173 | 1 | 1 |
-| hpin1opt | input 1 options | string |   | true | DEVICE_DATA | 174 | 8 | 1 |
-| hpin2 | input 2 state | boolean |   | false | DEVICE_DATA | 182 | 1 | 1 |
-| hpin2opt | input 2 options | string |   | true | DEVICE_DATA | 183 | 8 | 1 |
-| hpin3 | input 3 state | boolean |   | false | DEVICE_DATA | 191 | 1 | 1 |
-| hpin3opt | input 3 options | string |   | true | DEVICE_DATA | 192 | 8 | 1 |
-| hpin4 | input 4 state | boolean |   | false | DEVICE_DATA | 200 | 1 | 1 |
-| hpin4opt | input 4 options | string |   | true | DEVICE_DATA | 201 | 8 | 1 |
-| maxheatcomp | heat limit compressor | enum [0 kW\|3 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 209 | 1 | 1 |
-| maxheatheat | heat limit heating | enum [3 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 210 | 1 | 1 |
+| nrgsuppcooling | total energy supplied cooling | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 139 | 2 | 1 |
+| nrgsupppool | total energy supplied pool | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 141 | 2 | 1 |
+| hppower | compressor power output | uint16 (>=0<=3199) | kW | false | DEVICE_DATA | 143 | 1 | 1/10 |
+| hpmaxpower | compressor max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 144 | 1 | 1 |
+| pvmaxcomp | pv compressor max power | uint8 (>=0<=25) | kW | true | DEVICE_DATA | 145 | 1 | 1/10 |
+| powerreduction | power reduction | uint8 (>=30<=60) | % | true | DEVICE_DATA | 146 | 1 | 10 |
+| hpsetdiffpress | set differential pressure | uint8 (>=150<=750) | mbar | true | DEVICE_DATA | 147 | 1 | 50 |
+| hpcompon | hp compressor | boolean |   | false | DEVICE_DATA | 148 | 1 | 1 |
+| hpactivity | compressor activity | enum [off\|heating\|cooling\|hot water\|pool\|pool heating\|defrost\|compressor alarm] |   | false | DEVICE_DATA | 149 | 1 | 1 |
+| hpbrinepumpspd | brine pump speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 150 | 1 | 1 |
+| hpswitchvalve | switch valve | boolean |   | false | DEVICE_DATA | 151 | 1 | 1 |
+| hpcompspd | compressor speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 152 | 1 | 1 |
+| hptargetspd | compressor target speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 153 | 1 | 1 |
+| hpcircspd | circulation pump speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 154 | 1 | 1 |
+| recvalve | receiver valve VR0 | uint8 (>=0<=100) | % | false | DEVICE_DATA | 155 | 1 | 1 |
+| expvalve | expansion valve VR1 | uint8 (>=0<=100) | % | false | DEVICE_DATA | 156 | 1 | 1 |
+| hpbrinein | brine in/evaporator | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 157 | 1 | 1/10 |
+| hpbrineout | brine out/condenser | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 158 | 1 | 1/10 |
+| hptc0 | heat carrier return (TC0) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 159 | 1 | 1/10 |
+| hptc1 | heat carrier forward (TC1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 160 | 1 | 1/10 |
+| hptc3 | condenser temperature (TC3) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 161 | 1 | 1/10 |
+| hptr1 | compressor temperature (TR1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 162 | 1 | 1/10 |
+| hptr3 | refrigerant temperature liquid side (condenser output) (TR3) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 163 | 1 | 1/10 |
+| hptr4 | evaporator inlet temperature (TR4) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 164 | 1 | 1/10 |
+| hptr5 | compressor inlet temperature (TR5) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 165 | 1 | 1/10 |
+| hptr6 | compressor outlet temperature (TR6) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 166 | 1 | 1/10 |
+| hptr7 | refrigerant temperature gas side (condenser input) (TR7) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 167 | 1 | 1/10 |
+| hptl2 | air inlet temperature (TL2) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 168 | 1 | 1/10 |
+| hppl1 | low pressure side temperature (PL1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 169 | 1 | 1/10 |
+| hpph1 | high pressure side temperature (PH1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 170 | 1 | 1/10 |
+| hpta4 | drain pan temp (TA4) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 171 | 1 | 1/10 |
+| hptw1 | reservoir temp (TW1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 172 | 1 | 1/10 |
+| poolsettemp | pool set temperature | uint8 (>=0<=127) | C | true | DEVICE_DATA | 173 | 1 | 1/2 |
+| hp4way | 4-way valve (VR4) | enum [cooling & defrost\|heating & dhw] |   | false | DEVICE_DATA | 174 | 1 | 1 |
+| hpin1 | input 1 state | boolean |   | false | DEVICE_DATA | 175 | 1 | 1 |
+| hpin1opt | input 1 options | string |   | true | DEVICE_DATA | 176 | 8 | 1 |
+| hpin2 | input 2 state | boolean |   | false | DEVICE_DATA | 184 | 1 | 1 |
+| hpin2opt | input 2 options | string |   | true | DEVICE_DATA | 185 | 8 | 1 |
+| hpin3 | input 3 state | boolean |   | false | DEVICE_DATA | 193 | 1 | 1 |
+| hpin3opt | input 3 options | string |   | true | DEVICE_DATA | 194 | 8 | 1 |
+| hpin4 | input 4 state | boolean |   | false | DEVICE_DATA | 202 | 1 | 1 |
+| hpin4opt | input 4 options | string |   | true | DEVICE_DATA | 203 | 8 | 1 |
+| maxheatcomp | heat limit compressor | enum [0 kW\|3 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 211 | 1 | 1 |
+| maxheatheat | heat limit heating | enum [3 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 212 | 1 | 1 |
 | dhw.maxheat | heat limit | enum [3 kW\|6 kW\|9 kW] |   | true | DHW | 14 | 1 | 1 |
-| auxheatersource | aux heater source | enum [not installed\|electric heater\|exclusive\|parallel\|hybrid] |   | true | DEVICE_DATA | 211 | 1 | 1 |
-| pvcooling | cooling only with PV | boolean |   | true | DEVICE_DATA | 212 | 1 | 1 |
-| auxheateronly | aux heater only | boolean |   | true | DEVICE_DATA | 213 | 1 | 1 |
-| auxheateroff | disable aux heater | boolean |   | true | DEVICE_DATA | 214 | 1 | 1 |
-| auxheaterstatus | aux heater status | enum [off\|heating\|cooling\|hot water\|pool\|pool heating\|defrost\|compressor alarm] |   | false | DEVICE_DATA | 215 | 1 | 1 |
-| auxheaterlevel | aux heater level | uint8 (>=0<=100) | % | false | DEVICE_DATA | 216 | 1 | 1 |
-| auxheaterdelay | aux heater on delay | uint16 (>=10<=1000) | K*min | true | DEVICE_DATA | 217 | 1 | 10 |
-| auxmaxlimit | aux heater max limit | uint8 (>=0<=10) | K | true | DEVICE_DATA | 218 | 1 | 1/10 |
-| auxlimitstart | aux heater limit start | uint8 (>=0<=10) | K | true | DEVICE_DATA | 219 | 1 | 1/10 |
-| auxheatrmode | aux heater mode | enum [eco\|comfort] |   | true | DEVICE_DATA | 220 | 1 | 1 |
-| hphystheat | on/off hyst heat | uint16 (>=50<=1500) | K*min | true | DEVICE_DATA | 221 | 1 | 5 |
-| hphystcool | on/off hyst cool | uint16 (>=50<=1500) | K*min | true | DEVICE_DATA | 222 | 1 | 5 |
-| hphystpool | on/off hyst pool | uint16 (>=50<=1500) | K*min | true | DEVICE_DATA | 223 | 1 | 5 |
-| silentmode | silent mode | enum [off\|auto\|on] |   | true | DEVICE_DATA | 224 | 1 | 1 |
-| silentfrom | silent mode from | uint8 (>=0<=3810) | minutes | true | DEVICE_DATA | 225 | 1 | 15 |
-| silentto | silent mode to | uint8 (>=0<=3810) | minutes | true | DEVICE_DATA | 226 | 1 | 15 |
-| mintempsilent | min outside temp for silent mode | int8 (>=-126<=126) | C | true | DEVICE_DATA | 227 | 1 | 1 |
-| tempparmode | outside temp parallel mode | int8 (>=-126<=126) | C | true | DEVICE_DATA | 228 | 1 | 1 |
-| auxheatmix | aux heater mixing valve | int8 (>=-100<=100) | % | false | DEVICE_DATA | 229 | 1 | 1 |
-| tempdiffheat | temp diff TC3/TC0 heat | uint8 (>=2<=10) | K | true | DEVICE_DATA | 230 | 1 | 1/10 |
-| tempdiffcool | temp diff TC3/TC0 cool | uint8 (>=2<=10) | K | true | DEVICE_DATA | 231 | 1 | 1/10 |
-| vpcooling | valve/pump cooling | boolean |   | true | DEVICE_DATA | 232 | 1 | 1 |
-| heatcable | heating cable | boolean |   | true | DEVICE_DATA | 233 | 1 | 1 |
-| vc0valve | VC0 valve | boolean |   | true | DEVICE_DATA | 234 | 1 | 1 |
-| primepump | primary heatpump | boolean |   | true | DEVICE_DATA | 235 | 1 | 1 |
-| primepumpmod | primary heatpump modulation | uint8 (>=0<=100) | % | true | DEVICE_DATA | 236 | 1 | 1 |
-| hp3way | 3-way valve | boolean |   | true | DEVICE_DATA | 237 | 1 | 1 |
-| elheatstep1 | el. heater step 1 | boolean |   | true | DEVICE_DATA | 238 | 1 | 1 |
-| elheatstep2 | el. heater step 2 | boolean |   | true | DEVICE_DATA | 239 | 1 | 1 |
-| elheatstep3 | el. heater step 3 | boolean |   | true | DEVICE_DATA | 240 | 1 | 1 |
-| hpea0 | condensate reservoir heating (EA0) | boolean |   | false | DEVICE_DATA | 241 | 1 | 1 |
-| hppumpmode | primary heatpump mode | enum [auto\|continuous] |   | true | DEVICE_DATA | 242 | 1 | 1 |
-| fan | fan | uint8 (>=20<=100) | % | true | DEVICE_DATA | 243 | 1 | 1 |
-| fanspd | fan speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 244 | 1 | 1 |
-| shutdown | shutdown | cmd [off\|on] |   | true | DEVICE_DATA | 245 | 1 | 1 |
-| hpcurrpower | compressor current power | uint16 (>=0<=31999) | W | false | DEVICE_DATA | 246 | 1 | 1 |
-| hppowerlimit | power limit | uint16 (>=0<=31999) | W | true | DEVICE_DATA | 247 | 1 | 1 |
+| auxheatersource | aux heater source | enum [not installed\|electric heater\|exclusive\|parallel\|hybrid] |   | true | DEVICE_DATA | 213 | 1 | 1 |
+| pvcooling | cooling only with PV | boolean |   | true | DEVICE_DATA | 214 | 1 | 1 |
+| auxheateronly | aux heater only | boolean |   | true | DEVICE_DATA | 215 | 1 | 1 |
+| auxheateroff | disable aux heater | boolean |   | true | DEVICE_DATA | 216 | 1 | 1 |
+| auxheaterstatus | aux heater status | enum [off\|heating\|cooling\|hot water\|pool\|pool heating\|defrost\|compressor alarm] |   | false | DEVICE_DATA | 217 | 1 | 1 |
+| auxheaterlevel | aux heater level | uint8 (>=0<=100) | % | false | DEVICE_DATA | 218 | 1 | 1 |
+| auxheaterdelay | aux heater on delay | uint16 (>=10<=1000) | K*min | true | DEVICE_DATA | 219 | 1 | 10 |
+| auxmaxlimit | aux heater max limit | uint8 (>=0<=10) | K | true | DEVICE_DATA | 220 | 1 | 1/10 |
+| auxlimitstart | aux heater limit start | uint8 (>=0<=10) | K | true | DEVICE_DATA | 221 | 1 | 1/10 |
+| auxheatrmode | aux heater mode | enum [eco\|comfort] |   | true | DEVICE_DATA | 222 | 1 | 1 |
+| hphystheat | on/off hyst heat | uint16 (>=50<=1500) | K*min | true | DEVICE_DATA | 223 | 1 | 5 |
+| hphystcool | on/off hyst cool | uint16 (>=50<=1500) | K*min | true | DEVICE_DATA | 224 | 1 | 5 |
+| hphystpool | on/off hyst pool | uint16 (>=50<=1500) | K*min | true | DEVICE_DATA | 225 | 1 | 5 |
+| silentmode | silent mode | enum [off\|auto\|on] |   | true | DEVICE_DATA | 226 | 1 | 1 |
+| silentfrom | silent mode from | uint8 (>=0<=3810) | minutes | true | DEVICE_DATA | 227 | 1 | 15 |
+| silentto | silent mode to | uint8 (>=0<=3810) | minutes | true | DEVICE_DATA | 228 | 1 | 15 |
+| mintempsilent | min outside temp for silent mode | int8 (>=-126<=126) | C | true | DEVICE_DATA | 229 | 1 | 1 |
+| tempparmode | outside temp parallel mode | int8 (>=-126<=126) | C | true | DEVICE_DATA | 230 | 1 | 1 |
+| auxheatmix | aux heater mixing valve | int8 (>=-100<=100) | % | false | DEVICE_DATA | 231 | 1 | 1 |
+| tempdiffheat | temp diff TC3/TC0 heat | uint8 (>=2<=10) | K | true | DEVICE_DATA | 232 | 1 | 1/10 |
+| tempdiffcool | temp diff TC3/TC0 cool | uint8 (>=2<=10) | K | true | DEVICE_DATA | 233 | 1 | 1/10 |
+| vpcooling | valve/pump cooling | boolean |   | true | DEVICE_DATA | 234 | 1 | 1 |
+| heatcable | heating cable | boolean |   | true | DEVICE_DATA | 235 | 1 | 1 |
+| vc0valve | VC0 valve | boolean |   | true | DEVICE_DATA | 236 | 1 | 1 |
+| primepump | primary heatpump | boolean |   | true | DEVICE_DATA | 237 | 1 | 1 |
+| primepumpmod | primary heatpump modulation | uint8 (>=0<=100) | % | true | DEVICE_DATA | 238 | 1 | 1 |
+| hp3way | 3-way valve | boolean |   | true | DEVICE_DATA | 239 | 1 | 1 |
+| elheatstep1 | el. heater step 1 | boolean |   | true | DEVICE_DATA | 240 | 1 | 1 |
+| elheatstep2 | el. heater step 2 | boolean |   | true | DEVICE_DATA | 241 | 1 | 1 |
+| elheatstep3 | el. heater step 3 | boolean |   | true | DEVICE_DATA | 242 | 1 | 1 |
+| hpea0 | condensate reservoir heating (EA0) | boolean |   | false | DEVICE_DATA | 243 | 1 | 1 |
+| hppumpmode | primary heatpump mode | enum [auto\|continuous] |   | true | DEVICE_DATA | 244 | 1 | 1 |
+| fan | fan | uint8 (>=20<=100) | % | true | DEVICE_DATA | 245 | 1 | 1 |
+| fanspd | fan speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 246 | 1 | 1 |
+| shutdown | shutdown | cmd [off\|on] |   | true | DEVICE_DATA | 247 | 1 | 1 |
+| hpcurrpower | compressor current power | uint16 (>=0<=31999) | W | false | DEVICE_DATA | 248 | 1 | 1 |
+| hppowerlimit | power limit | uint16 (>=0<=31999) | W | true | DEVICE_DATA | 249 | 1 | 1 |
 | dhw.alternatingop | alternating operation | boolean |   | true | DHW | 15 | 1 | 1 |
 | dhw.altopprioheat | prioritise heating during dhw | uint8 (>=20<=120) | minutes | true | DHW | 16 | 1 | 1 |
 | dhw.altopprio | prioritise dhw during heating | uint8 (>=30<=120) | minutes | true | DHW | 17 | 1 | 1 |
@@ -232,75 +234,76 @@
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -342,84 +345,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### C1200W
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -461,84 +465,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### CS5800iG
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -580,84 +585,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### BK13/BK15, Smartline, GB1*2
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -699,84 +705,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### Logano GB1*5, Logamatic MC10
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -818,84 +825,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### Cascade CM10
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -937,84 +945,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### Logamax Plus GB022
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -1056,84 +1065,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### Condens, Logamax/Logomatic, Cerapur Top, Greenstar, Generic HT3
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [pumpstep\|const.high\|const.medium\|const.low\|prop.high\|propo.low] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -1175,84 +1185,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### Topline, GB162
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -1294,84 +1305,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### Cascade MCM10
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -1413,84 +1425,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### Proline
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -1532,84 +1545,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### GB*72, Trendline, Cerapur, Greenstar Si
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -1651,84 +1665,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### GB212
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -1770,84 +1785,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### GC7000F
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -1889,84 +1905,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### Logano GB125/KB195i, Logamatic MC110
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -2008,84 +2025,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### Greenstar 30Ri Compact
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -2127,84 +2145,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### Suprapur-o
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -2246,84 +2265,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### Cerapur Aero
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -2365,84 +2385,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### Hybrid Heatpump
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -2484,84 +2505,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### Logano GB212
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -2603,173 +2625,175 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| mandefrost | manual defrost | cmd [off\|on] |   | true | DEVICE_DATA | 84 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=167772) | kWh | false | DHW | 0 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
-| nrgcool | energy cooling | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 87 | 2 | 1/100 |
-| metertotal | meter total | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
-| metercomp | meter compressor | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 91 | 2 | 1/100 |
-| metereheat | meter e-heater | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 93 | 2 | 1/100 |
-| meterheat | meter heating | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 95 | 2 | 1/100 |
-| metercool | meter cooling | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 97 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 87 | 2 | 1/100 |
+| nrgcool | energy cooling | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
+| metertotal | meter total | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 91 | 2 | 1/100 |
+| metercomp | meter compressor | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 93 | 2 | 1/100 |
+| metereheat | meter e-heater | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 95 | 2 | 1/100 |
+| meterheat | meter heating | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 97 | 2 | 1/100 |
+| metercool | meter cooling | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 99 | 2 | 1/100 |
 | dhw.meter | meter | uint24 (>=0<=167772) | kWh | false | DHW | 2 | 2 | 1/100 |
-| uptimetotal | heatpump total uptime | time (>=0<=279620) | minutes | false | DEVICE_DATA | 99 | 2 | 1/60 |
-| uptimecontrol | total operating time heat | time (>=0<=279620) | minutes | false | DEVICE_DATA | 101 | 2 | 1/60 |
-| uptimecompheating | operating time compressor heating | time (>=0<=279620) | minutes | false | DEVICE_DATA | 103 | 2 | 1/60 |
-| uptimecompcooling | operating time compressor cooling | time (>=0<=279620) | minutes | false | DEVICE_DATA | 105 | 2 | 1/60 |
+| uptimetotal | heatpump total uptime | time (>=0<=279620) | minutes | false | DEVICE_DATA | 101 | 2 | 1/60 |
+| uptimecontrol | total operating time heat | time (>=0<=279620) | minutes | false | DEVICE_DATA | 103 | 2 | 1/60 |
+| uptimecompheating | operating time compressor heating | time (>=0<=279620) | minutes | false | DEVICE_DATA | 105 | 2 | 1/60 |
+| uptimecompcooling | operating time compressor cooling | time (>=0<=279620) | minutes | false | DEVICE_DATA | 107 | 2 | 1/60 |
 | dhw.uptimecomp | operating time compressor | time (>=0<=279620) | minutes | false | DHW | 4 | 2 | 1/60 |
-| uptimecomppool | operating time compressor pool | time (>=0<=279620) | minutes | false | DEVICE_DATA | 107 | 2 | 1/60 |
-| totalcompstarts | total compressor control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 109 | 2 | 1 |
-| heatingstarts | heating control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 111 | 2 | 1 |
-| coolingstarts | cooling control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 113 | 2 | 1 |
+| uptimecomppool | operating time compressor pool | time (>=0<=279620) | minutes | false | DEVICE_DATA | 109 | 2 | 1/60 |
+| totalcompstarts | total compressor control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 111 | 2 | 1 |
+| heatingstarts | heating control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 113 | 2 | 1 |
+| coolingstarts | cooling control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 115 | 2 | 1 |
 | dhw.startshp | starts hp | uint24 (>=0<=16777214) |   | false | DHW | 6 | 2 | 1 |
-| poolstarts | pool control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 115 | 2 | 1 |
-| nrgconstotal | total energy consumption | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 117 | 2 | 1 |
-| nrgconscomptotal | total energy consumption compressor | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 119 | 2 | 1 |
-| nrgconscompheating | energy consumption compressor heating | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 121 | 2 | 1 |
+| poolstarts | pool control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 117 | 2 | 1 |
+| nrgconstotal | total energy consumption | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 119 | 2 | 1 |
+| nrgconscomptotal | total energy consumption compressor | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 121 | 2 | 1 |
+| nrgconscompheating | energy consumption compressor heating | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 123 | 2 | 1 |
 | dhw.nrgconscomp | energy consumption compressor | uint24 (>=0<=16777214) | kWh | false | DHW | 8 | 2 | 1 |
-| nrgconscompcooling | energy consumption compressor cooling | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 123 | 2 | 1 |
-| nrgconscomppool | energy consumption compressor pool | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 125 | 2 | 1 |
-| auxelecheatnrgconstotal | total aux elec. heater energy consumption | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 127 | 2 | 1 |
-| auxelecheatnrgconsheating | aux elec. heater energy consumption heating | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 129 | 2 | 1 |
+| nrgconscompcooling | energy consumption compressor cooling | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 125 | 2 | 1 |
+| nrgconscomppool | energy consumption compressor pool | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 127 | 2 | 1 |
+| auxelecheatnrgconstotal | total aux elec. heater energy consumption | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 129 | 2 | 1 |
+| auxelecheatnrgconsheating | aux elec. heater energy consumption heating | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 131 | 2 | 1 |
 | dhw.auxelecheatnrgcons | aux elec. heater energy consumption | uint24 (>=0<=16777214) | kWh | false | DHW | 10 | 2 | 1 |
-| auxelecheatnrgconspool | aux elec. heater energy consumption pool | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 131 | 2 | 1 |
-| nrgsupptotal | total energy supplied | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 133 | 2 | 1 |
-| nrgsuppheating | total energy supplied heating | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 135 | 2 | 1 |
+| auxelecheatnrgconspool | aux elec. heater energy consumption pool | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 133 | 2 | 1 |
+| nrgsupptotal | total energy supplied | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 135 | 2 | 1 |
+| nrgsuppheating | total energy supplied heating | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 137 | 2 | 1 |
 | dhw.nrgsupp | total energy warm supplied | uint24 (>=0<=16777214) | kWh | false | DHW | 12 | 2 | 1 |
-| nrgsuppcooling | total energy supplied cooling | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 137 | 2 | 1 |
-| nrgsupppool | total energy supplied pool | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 139 | 2 | 1 |
-| hppower | compressor power output | uint16 (>=0<=3199) | kW | false | DEVICE_DATA | 141 | 1 | 1/10 |
-| hpmaxpower | compressor max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 142 | 1 | 1 |
-| pvmaxcomp | pv compressor max power | uint8 (>=0<=25) | kW | true | DEVICE_DATA | 143 | 1 | 1/10 |
-| powerreduction | power reduction | uint8 (>=30<=60) | % | true | DEVICE_DATA | 144 | 1 | 10 |
-| hpsetdiffpress | set differential pressure | uint8 (>=150<=750) | mbar | true | DEVICE_DATA | 145 | 1 | 50 |
-| hpcompon | hp compressor | boolean |   | false | DEVICE_DATA | 146 | 1 | 1 |
-| hpactivity | compressor activity | enum [off\|heating\|cooling\|hot water\|pool\|pool heating\|defrost\|compressor alarm] |   | false | DEVICE_DATA | 147 | 1 | 1 |
-| hpbrinepumpspd | brine pump speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 148 | 1 | 1 |
-| hpswitchvalve | switch valve | boolean |   | false | DEVICE_DATA | 149 | 1 | 1 |
-| hpcompspd | compressor speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 150 | 1 | 1 |
-| hptargetspd | compressor target speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 151 | 1 | 1 |
-| hpcircspd | circulation pump speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 152 | 1 | 1 |
-| recvalve | receiver valve VR0 | uint8 (>=0<=100) | % | false | DEVICE_DATA | 153 | 1 | 1 |
-| expvalve | expansion valve VR1 | uint8 (>=0<=100) | % | false | DEVICE_DATA | 154 | 1 | 1 |
-| hpbrinein | brine in/evaporator | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 155 | 1 | 1/10 |
-| hpbrineout | brine out/condenser | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 156 | 1 | 1/10 |
-| hptc0 | heat carrier return (TC0) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 157 | 1 | 1/10 |
-| hptc1 | heat carrier forward (TC1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 158 | 1 | 1/10 |
-| hptc3 | condenser temperature (TC3) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 159 | 1 | 1/10 |
-| hptr1 | compressor temperature (TR1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 160 | 1 | 1/10 |
-| hptr3 | refrigerant temperature liquid side (condenser output) (TR3) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 161 | 1 | 1/10 |
-| hptr4 | evaporator inlet temperature (TR4) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 162 | 1 | 1/10 |
-| hptr5 | compressor inlet temperature (TR5) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 163 | 1 | 1/10 |
-| hptr6 | compressor outlet temperature (TR6) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 164 | 1 | 1/10 |
-| hptr7 | refrigerant temperature gas side (condenser input) (TR7) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 165 | 1 | 1/10 |
-| hptl2 | air inlet temperature (TL2) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 166 | 1 | 1/10 |
-| hppl1 | low pressure side temperature (PL1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 167 | 1 | 1/10 |
-| hpph1 | high pressure side temperature (PH1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 168 | 1 | 1/10 |
-| hpta4 | drain pan temp (TA4) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 169 | 1 | 1/10 |
-| hptw1 | reservoir temp (TW1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 170 | 1 | 1/10 |
-| poolsettemp | pool set temperature | uint8 (>=0<=127) | C | true | DEVICE_DATA | 171 | 1 | 1/2 |
-| hp4way | 4-way valve (VR4) | enum [cooling & defrost\|heating & dhw] |   | false | DEVICE_DATA | 172 | 1 | 1 |
-| hpin1 | input 1 state | boolean |   | false | DEVICE_DATA | 173 | 1 | 1 |
-| hpin1opt | input 1 options | string |   | true | DEVICE_DATA | 174 | 8 | 1 |
-| hpin2 | input 2 state | boolean |   | false | DEVICE_DATA | 182 | 1 | 1 |
-| hpin2opt | input 2 options | string |   | true | DEVICE_DATA | 183 | 8 | 1 |
-| hpin3 | input 3 state | boolean |   | false | DEVICE_DATA | 191 | 1 | 1 |
-| hpin3opt | input 3 options | string |   | true | DEVICE_DATA | 192 | 8 | 1 |
-| hpin4 | input 4 state | boolean |   | false | DEVICE_DATA | 200 | 1 | 1 |
-| hpin4opt | input 4 options | string |   | true | DEVICE_DATA | 201 | 8 | 1 |
-| maxheatcomp | heat limit compressor | enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 209 | 1 | 1 |
-| maxheatheat | heat limit heating | enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 210 | 1 | 1 |
+| nrgsuppcooling | total energy supplied cooling | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 139 | 2 | 1 |
+| nrgsupppool | total energy supplied pool | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 141 | 2 | 1 |
+| hppower | compressor power output | uint16 (>=0<=3199) | kW | false | DEVICE_DATA | 143 | 1 | 1/10 |
+| hpmaxpower | compressor max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 144 | 1 | 1 |
+| pvmaxcomp | pv compressor max power | uint8 (>=0<=25) | kW | true | DEVICE_DATA | 145 | 1 | 1/10 |
+| powerreduction | power reduction | uint8 (>=30<=60) | % | true | DEVICE_DATA | 146 | 1 | 10 |
+| hpsetdiffpress | set differential pressure | uint8 (>=150<=750) | mbar | true | DEVICE_DATA | 147 | 1 | 50 |
+| hpcompon | hp compressor | boolean |   | false | DEVICE_DATA | 148 | 1 | 1 |
+| hpactivity | compressor activity | enum [off\|heating\|cooling\|hot water\|pool\|pool heating\|defrost\|compressor alarm] |   | false | DEVICE_DATA | 149 | 1 | 1 |
+| hpbrinepumpspd | brine pump speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 150 | 1 | 1 |
+| hpswitchvalve | switch valve | boolean |   | false | DEVICE_DATA | 151 | 1 | 1 |
+| hpcompspd | compressor speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 152 | 1 | 1 |
+| hptargetspd | compressor target speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 153 | 1 | 1 |
+| hpcircspd | circulation pump speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 154 | 1 | 1 |
+| recvalve | receiver valve VR0 | uint8 (>=0<=100) | % | false | DEVICE_DATA | 155 | 1 | 1 |
+| expvalve | expansion valve VR1 | uint8 (>=0<=100) | % | false | DEVICE_DATA | 156 | 1 | 1 |
+| hpbrinein | brine in/evaporator | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 157 | 1 | 1/10 |
+| hpbrineout | brine out/condenser | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 158 | 1 | 1/10 |
+| hptc0 | heat carrier return (TC0) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 159 | 1 | 1/10 |
+| hptc1 | heat carrier forward (TC1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 160 | 1 | 1/10 |
+| hptc3 | condenser temperature (TC3) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 161 | 1 | 1/10 |
+| hptr1 | compressor temperature (TR1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 162 | 1 | 1/10 |
+| hptr3 | refrigerant temperature liquid side (condenser output) (TR3) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 163 | 1 | 1/10 |
+| hptr4 | evaporator inlet temperature (TR4) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 164 | 1 | 1/10 |
+| hptr5 | compressor inlet temperature (TR5) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 165 | 1 | 1/10 |
+| hptr6 | compressor outlet temperature (TR6) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 166 | 1 | 1/10 |
+| hptr7 | refrigerant temperature gas side (condenser input) (TR7) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 167 | 1 | 1/10 |
+| hptl2 | air inlet temperature (TL2) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 168 | 1 | 1/10 |
+| hppl1 | low pressure side temperature (PL1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 169 | 1 | 1/10 |
+| hpph1 | high pressure side temperature (PH1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 170 | 1 | 1/10 |
+| hpta4 | drain pan temp (TA4) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 171 | 1 | 1/10 |
+| hptw1 | reservoir temp (TW1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 172 | 1 | 1/10 |
+| poolsettemp | pool set temperature | uint8 (>=0<=127) | C | true | DEVICE_DATA | 173 | 1 | 1/2 |
+| hp4way | 4-way valve (VR4) | enum [cooling & defrost\|heating & dhw] |   | false | DEVICE_DATA | 174 | 1 | 1 |
+| hpin1 | input 1 state | boolean |   | false | DEVICE_DATA | 175 | 1 | 1 |
+| hpin1opt | input 1 options | string |   | true | DEVICE_DATA | 176 | 8 | 1 |
+| hpin2 | input 2 state | boolean |   | false | DEVICE_DATA | 184 | 1 | 1 |
+| hpin2opt | input 2 options | string |   | true | DEVICE_DATA | 185 | 8 | 1 |
+| hpin3 | input 3 state | boolean |   | false | DEVICE_DATA | 193 | 1 | 1 |
+| hpin3opt | input 3 options | string |   | true | DEVICE_DATA | 194 | 8 | 1 |
+| hpin4 | input 4 state | boolean |   | false | DEVICE_DATA | 202 | 1 | 1 |
+| hpin4opt | input 4 options | string |   | true | DEVICE_DATA | 203 | 8 | 1 |
+| maxheatcomp | heat limit compressor | enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 211 | 1 | 1 |
+| maxheatheat | heat limit heating | enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 212 | 1 | 1 |
 | dhw.maxheat | heat limit | enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] |   | true | DHW | 14 | 1 | 1 |
-| auxheatersource | aux heater source | enum [not installed\|electric heater\|exclusive\|parallel\|hybrid] |   | true | DEVICE_DATA | 211 | 1 | 1 |
-| pvcooling | cooling only with PV | boolean |   | true | DEVICE_DATA | 212 | 1 | 1 |
-| auxheateronly | aux heater only | boolean |   | true | DEVICE_DATA | 213 | 1 | 1 |
-| auxheateroff | disable aux heater | boolean |   | true | DEVICE_DATA | 214 | 1 | 1 |
-| auxheaterstatus | aux heater status | enum [off\|heating\|cooling\|hot water\|pool\|pool heating\|defrost\|compressor alarm] |   | false | DEVICE_DATA | 215 | 1 | 1 |
-| auxheaterlevel | aux heater level | uint8 (>=0<=100) | % | false | DEVICE_DATA | 216 | 1 | 1 |
-| auxheaterdelay | aux heater on delay | uint16 (>=10<=1000) | K*min | true | DEVICE_DATA | 217 | 1 | 10 |
-| auxmaxlimit | aux heater max limit | uint8 (>=0<=10) | K | true | DEVICE_DATA | 218 | 1 | 1/10 |
-| auxlimitstart | aux heater limit start | uint8 (>=0<=10) | K | true | DEVICE_DATA | 219 | 1 | 1/10 |
-| auxheatrmode | aux heater mode | enum [eco\|comfort] |   | true | DEVICE_DATA | 220 | 1 | 1 |
-| hphystheat | on/off hyst heat | uint16 (>=50<=1500) | K*min | true | DEVICE_DATA | 221 | 1 | 5 |
-| hphystcool | on/off hyst cool | uint16 (>=50<=1500) | K*min | true | DEVICE_DATA | 222 | 1 | 5 |
-| hphystpool | on/off hyst pool | uint16 (>=50<=1500) | K*min | true | DEVICE_DATA | 223 | 1 | 5 |
-| silentmode | silent mode | enum [off\|auto\|on] |   | true | DEVICE_DATA | 224 | 1 | 1 |
-| silentfrom | silent mode from | uint8 (>=0<=3810) | minutes | true | DEVICE_DATA | 225 | 1 | 15 |
-| silentto | silent mode to | uint8 (>=0<=3810) | minutes | true | DEVICE_DATA | 226 | 1 | 15 |
-| mintempsilent | min outside temp for silent mode | int8 (>=-126<=126) | C | true | DEVICE_DATA | 227 | 1 | 1 |
-| tempparmode | outside temp parallel mode | int8 (>=-126<=126) | C | true | DEVICE_DATA | 228 | 1 | 1 |
-| auxheatmix | aux heater mixing valve | int8 (>=-100<=100) | % | false | DEVICE_DATA | 229 | 1 | 1 |
-| tempdiffheat | temp diff TC3/TC0 heat | uint8 (>=2<=10) | K | true | DEVICE_DATA | 230 | 1 | 1/10 |
-| tempdiffcool | temp diff TC3/TC0 cool | uint8 (>=2<=10) | K | true | DEVICE_DATA | 231 | 1 | 1/10 |
-| vpcooling | valve/pump cooling | boolean |   | true | DEVICE_DATA | 232 | 1 | 1 |
-| heatcable | heating cable | boolean |   | true | DEVICE_DATA | 233 | 1 | 1 |
-| vc0valve | VC0 valve | boolean |   | true | DEVICE_DATA | 234 | 1 | 1 |
-| primepump | primary heatpump | boolean |   | true | DEVICE_DATA | 235 | 1 | 1 |
-| primepumpmod | primary heatpump modulation | uint8 (>=0<=100) | % | true | DEVICE_DATA | 236 | 1 | 1 |
-| hp3way | 3-way valve | boolean |   | true | DEVICE_DATA | 237 | 1 | 1 |
-| elheatstep1 | el. heater step 1 | boolean |   | true | DEVICE_DATA | 238 | 1 | 1 |
-| elheatstep2 | el. heater step 2 | boolean |   | true | DEVICE_DATA | 239 | 1 | 1 |
-| elheatstep3 | el. heater step 3 | boolean |   | true | DEVICE_DATA | 240 | 1 | 1 |
-| hpea0 | condensate reservoir heating (EA0) | boolean |   | false | DEVICE_DATA | 241 | 1 | 1 |
-| hppumpmode | primary heatpump mode | enum [auto\|continuous] |   | true | DEVICE_DATA | 242 | 1 | 1 |
-| fan | fan | uint8 (>=20<=100) | % | true | DEVICE_DATA | 243 | 1 | 1 |
-| fanspd | fan speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 244 | 1 | 1 |
-| shutdown | shutdown | cmd [off\|on] |   | true | DEVICE_DATA | 245 | 1 | 1 |
-| hpcurrpower | compressor current power | uint16 (>=0<=31999) | W | false | DEVICE_DATA | 246 | 1 | 1 |
-| hppowerlimit | power limit | uint16 (>=0<=31999) | W | true | DEVICE_DATA | 247 | 1 | 1 |
+| auxheatersource | aux heater source | enum [not installed\|electric heater\|exclusive\|parallel\|hybrid] |   | true | DEVICE_DATA | 213 | 1 | 1 |
+| pvcooling | cooling only with PV | boolean |   | true | DEVICE_DATA | 214 | 1 | 1 |
+| auxheateronly | aux heater only | boolean |   | true | DEVICE_DATA | 215 | 1 | 1 |
+| auxheateroff | disable aux heater | boolean |   | true | DEVICE_DATA | 216 | 1 | 1 |
+| auxheaterstatus | aux heater status | enum [off\|heating\|cooling\|hot water\|pool\|pool heating\|defrost\|compressor alarm] |   | false | DEVICE_DATA | 217 | 1 | 1 |
+| auxheaterlevel | aux heater level | uint8 (>=0<=100) | % | false | DEVICE_DATA | 218 | 1 | 1 |
+| auxheaterdelay | aux heater on delay | uint16 (>=10<=1000) | K*min | true | DEVICE_DATA | 219 | 1 | 10 |
+| auxmaxlimit | aux heater max limit | uint8 (>=0<=10) | K | true | DEVICE_DATA | 220 | 1 | 1/10 |
+| auxlimitstart | aux heater limit start | uint8 (>=0<=10) | K | true | DEVICE_DATA | 221 | 1 | 1/10 |
+| auxheatrmode | aux heater mode | enum [eco\|comfort] |   | true | DEVICE_DATA | 222 | 1 | 1 |
+| hphystheat | on/off hyst heat | uint16 (>=50<=1500) | K*min | true | DEVICE_DATA | 223 | 1 | 5 |
+| hphystcool | on/off hyst cool | uint16 (>=50<=1500) | K*min | true | DEVICE_DATA | 224 | 1 | 5 |
+| hphystpool | on/off hyst pool | uint16 (>=50<=1500) | K*min | true | DEVICE_DATA | 225 | 1 | 5 |
+| silentmode | silent mode | enum [off\|auto\|on] |   | true | DEVICE_DATA | 226 | 1 | 1 |
+| silentfrom | silent mode from | uint8 (>=0<=3810) | minutes | true | DEVICE_DATA | 227 | 1 | 15 |
+| silentto | silent mode to | uint8 (>=0<=3810) | minutes | true | DEVICE_DATA | 228 | 1 | 15 |
+| mintempsilent | min outside temp for silent mode | int8 (>=-126<=126) | C | true | DEVICE_DATA | 229 | 1 | 1 |
+| tempparmode | outside temp parallel mode | int8 (>=-126<=126) | C | true | DEVICE_DATA | 230 | 1 | 1 |
+| auxheatmix | aux heater mixing valve | int8 (>=-100<=100) | % | false | DEVICE_DATA | 231 | 1 | 1 |
+| tempdiffheat | temp diff TC3/TC0 heat | uint8 (>=2<=10) | K | true | DEVICE_DATA | 232 | 1 | 1/10 |
+| tempdiffcool | temp diff TC3/TC0 cool | uint8 (>=2<=10) | K | true | DEVICE_DATA | 233 | 1 | 1/10 |
+| vpcooling | valve/pump cooling | boolean |   | true | DEVICE_DATA | 234 | 1 | 1 |
+| heatcable | heating cable | boolean |   | true | DEVICE_DATA | 235 | 1 | 1 |
+| vc0valve | VC0 valve | boolean |   | true | DEVICE_DATA | 236 | 1 | 1 |
+| primepump | primary heatpump | boolean |   | true | DEVICE_DATA | 237 | 1 | 1 |
+| primepumpmod | primary heatpump modulation | uint8 (>=0<=100) | % | true | DEVICE_DATA | 238 | 1 | 1 |
+| hp3way | 3-way valve | boolean |   | true | DEVICE_DATA | 239 | 1 | 1 |
+| elheatstep1 | el. heater step 1 | boolean |   | true | DEVICE_DATA | 240 | 1 | 1 |
+| elheatstep2 | el. heater step 2 | boolean |   | true | DEVICE_DATA | 241 | 1 | 1 |
+| elheatstep3 | el. heater step 3 | boolean |   | true | DEVICE_DATA | 242 | 1 | 1 |
+| hpea0 | condensate reservoir heating (EA0) | boolean |   | false | DEVICE_DATA | 243 | 1 | 1 |
+| hppumpmode | primary heatpump mode | enum [auto\|continuous] |   | true | DEVICE_DATA | 244 | 1 | 1 |
+| fan | fan | uint8 (>=20<=100) | % | true | DEVICE_DATA | 245 | 1 | 1 |
+| fanspd | fan speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 246 | 1 | 1 |
+| shutdown | shutdown | cmd [off\|on] |   | true | DEVICE_DATA | 247 | 1 | 1 |
+| hpcurrpower | compressor current power | uint16 (>=0<=31999) | W | false | DEVICE_DATA | 248 | 1 | 1 |
+| hppowerlimit | power limit | uint16 (>=0<=31999) | W | true | DEVICE_DATA | 249 | 1 | 1 |
 | dhw.alternatingop | alternating operation | boolean |   | true | DHW | 15 | 1 | 1 |
 | dhw.altopprioheat | prioritise heating during dhw | uint8 (>=20<=120) | minutes | true | DHW | 16 | 1 | 1 |
 | dhw.altopprio | prioritise dhw during heating | uint8 (>=30<=120) | minutes | true | DHW | 17 | 1 | 1 |
@@ -2828,164 +2852,166 @@
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| mandefrost | manual defrost | cmd [off\|on] |   | true | DEVICE_DATA | 84 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=167772) | kWh | false | DHW | 0 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
-| nrgcool | energy cooling | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 87 | 2 | 1/100 |
-| metertotal | meter total | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
-| metercomp | meter compressor | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 91 | 2 | 1/100 |
-| metereheat | meter e-heater | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 93 | 2 | 1/100 |
-| meterheat | meter heating | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 95 | 2 | 1/100 |
-| metercool | meter cooling | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 97 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 87 | 2 | 1/100 |
+| nrgcool | energy cooling | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
+| metertotal | meter total | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 91 | 2 | 1/100 |
+| metercomp | meter compressor | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 93 | 2 | 1/100 |
+| metereheat | meter e-heater | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 95 | 2 | 1/100 |
+| meterheat | meter heating | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 97 | 2 | 1/100 |
+| metercool | meter cooling | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 99 | 2 | 1/100 |
 | dhw.meter | meter | uint24 (>=0<=167772) | kWh | false | DHW | 2 | 2 | 1/100 |
-| uptimetotal | heatpump total uptime | time (>=0<=279620) | minutes | false | DEVICE_DATA | 99 | 2 | 1/60 |
-| uptimecontrol | total operating time heat | time (>=0<=279620) | minutes | false | DEVICE_DATA | 101 | 2 | 1/60 |
-| uptimecompheating | operating time compressor heating | time (>=0<=279620) | minutes | false | DEVICE_DATA | 103 | 2 | 1/60 |
-| uptimecompcooling | operating time compressor cooling | time (>=0<=279620) | minutes | false | DEVICE_DATA | 105 | 2 | 1/60 |
+| uptimetotal | heatpump total uptime | time (>=0<=279620) | minutes | false | DEVICE_DATA | 101 | 2 | 1/60 |
+| uptimecontrol | total operating time heat | time (>=0<=279620) | minutes | false | DEVICE_DATA | 103 | 2 | 1/60 |
+| uptimecompheating | operating time compressor heating | time (>=0<=279620) | minutes | false | DEVICE_DATA | 105 | 2 | 1/60 |
+| uptimecompcooling | operating time compressor cooling | time (>=0<=279620) | minutes | false | DEVICE_DATA | 107 | 2 | 1/60 |
 | dhw.uptimecomp | operating time compressor | time (>=0<=279620) | minutes | false | DHW | 4 | 2 | 1/60 |
-| uptimecomppool | operating time compressor pool | time (>=0<=279620) | minutes | false | DEVICE_DATA | 107 | 2 | 1/60 |
-| totalcompstarts | total compressor control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 109 | 2 | 1 |
-| heatingstarts | heating control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 111 | 2 | 1 |
-| coolingstarts | cooling control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 113 | 2 | 1 |
+| uptimecomppool | operating time compressor pool | time (>=0<=279620) | minutes | false | DEVICE_DATA | 109 | 2 | 1/60 |
+| totalcompstarts | total compressor control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 111 | 2 | 1 |
+| heatingstarts | heating control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 113 | 2 | 1 |
+| coolingstarts | cooling control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 115 | 2 | 1 |
 | dhw.startshp | starts hp | uint24 (>=0<=16777214) |   | false | DHW | 6 | 2 | 1 |
-| poolstarts | pool control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 115 | 2 | 1 |
-| nrgconstotal | total energy consumption | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 117 | 2 | 1 |
-| nrgconscomptotal | total energy consumption compressor | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 119 | 2 | 1 |
-| nrgconscompheating | energy consumption compressor heating | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 121 | 2 | 1 |
+| poolstarts | pool control starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 117 | 2 | 1 |
+| nrgconstotal | total energy consumption | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 119 | 2 | 1 |
+| nrgconscomptotal | total energy consumption compressor | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 121 | 2 | 1 |
+| nrgconscompheating | energy consumption compressor heating | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 123 | 2 | 1 |
 | dhw.nrgconscomp | energy consumption compressor | uint24 (>=0<=16777214) | kWh | false | DHW | 8 | 2 | 1 |
-| nrgconscompcooling | energy consumption compressor cooling | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 123 | 2 | 1 |
-| nrgconscomppool | energy consumption compressor pool | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 125 | 2 | 1 |
-| auxelecheatnrgconstotal | total aux elec. heater energy consumption | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 127 | 2 | 1 |
-| auxelecheatnrgconsheating | aux elec. heater energy consumption heating | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 129 | 2 | 1 |
+| nrgconscompcooling | energy consumption compressor cooling | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 125 | 2 | 1 |
+| nrgconscomppool | energy consumption compressor pool | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 127 | 2 | 1 |
+| auxelecheatnrgconstotal | total aux elec. heater energy consumption | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 129 | 2 | 1 |
+| auxelecheatnrgconsheating | aux elec. heater energy consumption heating | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 131 | 2 | 1 |
 | dhw.auxelecheatnrgcons | aux elec. heater energy consumption | uint24 (>=0<=16777214) | kWh | false | DHW | 10 | 2 | 1 |
-| auxelecheatnrgconspool | aux elec. heater energy consumption pool | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 131 | 2 | 1 |
-| nrgsupptotal | total energy supplied | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 133 | 2 | 1 |
-| nrgsuppheating | total energy supplied heating | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 135 | 2 | 1 |
+| auxelecheatnrgconspool | aux elec. heater energy consumption pool | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 133 | 2 | 1 |
+| nrgsupptotal | total energy supplied | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 135 | 2 | 1 |
+| nrgsuppheating | total energy supplied heating | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 137 | 2 | 1 |
 | dhw.nrgsupp | total energy warm supplied | uint24 (>=0<=16777214) | kWh | false | DHW | 12 | 2 | 1 |
-| nrgsuppcooling | total energy supplied cooling | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 137 | 2 | 1 |
-| nrgsupppool | total energy supplied pool | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 139 | 2 | 1 |
-| hppower | compressor power output | uint16 (>=0<=3199) | kW | false | DEVICE_DATA | 141 | 1 | 1/10 |
-| hpmaxpower | compressor max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 142 | 1 | 1 |
-| pvmaxcomp | pv compressor max power | uint8 (>=0<=25) | kW | true | DEVICE_DATA | 143 | 1 | 1/10 |
-| powerreduction | power reduction | uint8 (>=30<=60) | % | true | DEVICE_DATA | 144 | 1 | 10 |
-| hpsetdiffpress | set differential pressure | uint8 (>=150<=750) | mbar | true | DEVICE_DATA | 145 | 1 | 50 |
-| hpcompon | hp compressor | boolean |   | false | DEVICE_DATA | 146 | 1 | 1 |
-| hpactivity | compressor activity | enum [off\|heating\|cooling\|hot water\|pool\|pool heating\|defrost\|compressor alarm] |   | false | DEVICE_DATA | 147 | 1 | 1 |
-| hpbrinepumpspd | brine pump speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 148 | 1 | 1 |
-| hpswitchvalve | switch valve | boolean |   | false | DEVICE_DATA | 149 | 1 | 1 |
-| hpcompspd | compressor speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 150 | 1 | 1 |
-| hptargetspd | compressor target speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 151 | 1 | 1 |
-| hpcircspd | circulation pump speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 152 | 1 | 1 |
-| recvalve | receiver valve VR0 | uint8 (>=0<=100) | % | false | DEVICE_DATA | 153 | 1 | 1 |
-| expvalve | expansion valve VR1 | uint8 (>=0<=100) | % | false | DEVICE_DATA | 154 | 1 | 1 |
-| hpbrinein | brine in/evaporator | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 155 | 1 | 1/10 |
-| hpbrineout | brine out/condenser | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 156 | 1 | 1/10 |
-| hptc0 | heat carrier return (TC0) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 157 | 1 | 1/10 |
-| hptc1 | heat carrier forward (TC1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 158 | 1 | 1/10 |
-| hptc3 | condenser temperature (TC3) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 159 | 1 | 1/10 |
-| hptr1 | compressor temperature (TR1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 160 | 1 | 1/10 |
-| hptr3 | refrigerant temperature liquid side (condenser output) (TR3) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 161 | 1 | 1/10 |
-| hptr4 | evaporator inlet temperature (TR4) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 162 | 1 | 1/10 |
-| hptr5 | compressor inlet temperature (TR5) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 163 | 1 | 1/10 |
-| hptr6 | compressor outlet temperature (TR6) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 164 | 1 | 1/10 |
-| hptr7 | refrigerant temperature gas side (condenser input) (TR7) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 165 | 1 | 1/10 |
-| hptl2 | air inlet temperature (TL2) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 166 | 1 | 1/10 |
-| hppl1 | low pressure side temperature (PL1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 167 | 1 | 1/10 |
-| hpph1 | high pressure side temperature (PH1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 168 | 1 | 1/10 |
-| hpta4 | drain pan temp (TA4) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 169 | 1 | 1/10 |
-| hptw1 | reservoir temp (TW1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 170 | 1 | 1/10 |
-| poolsettemp | pool set temperature | uint8 (>=0<=127) | C | true | DEVICE_DATA | 171 | 1 | 1/2 |
-| hp4way | 4-way valve (VR4) | enum [cooling & defrost\|heating & dhw] |   | false | DEVICE_DATA | 172 | 1 | 1 |
-| hpin1 | input 1 state | boolean |   | false | DEVICE_DATA | 173 | 1 | 1 |
-| hpin1opt | input 1 options | string |   | true | DEVICE_DATA | 174 | 8 | 1 |
-| hpin2 | input 2 state | boolean |   | false | DEVICE_DATA | 182 | 1 | 1 |
-| hpin2opt | input 2 options | string |   | true | DEVICE_DATA | 183 | 8 | 1 |
-| hpin3 | input 3 state | boolean |   | false | DEVICE_DATA | 191 | 1 | 1 |
-| hpin3opt | input 3 options | string |   | true | DEVICE_DATA | 192 | 8 | 1 |
-| hpin4 | input 4 state | boolean |   | false | DEVICE_DATA | 200 | 1 | 1 |
-| hpin4opt | input 4 options | string |   | true | DEVICE_DATA | 201 | 8 | 1 |
-| maxheatcomp | heat limit compressor | enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 209 | 1 | 1 |
-| maxheatheat | heat limit heating | enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 210 | 1 | 1 |
+| nrgsuppcooling | total energy supplied cooling | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 139 | 2 | 1 |
+| nrgsupppool | total energy supplied pool | uint24 (>=0<=16777214) | kWh | false | DEVICE_DATA | 141 | 2 | 1 |
+| hppower | compressor power output | uint16 (>=0<=3199) | kW | false | DEVICE_DATA | 143 | 1 | 1/10 |
+| hpmaxpower | compressor max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 144 | 1 | 1 |
+| pvmaxcomp | pv compressor max power | uint8 (>=0<=25) | kW | true | DEVICE_DATA | 145 | 1 | 1/10 |
+| powerreduction | power reduction | uint8 (>=30<=60) | % | true | DEVICE_DATA | 146 | 1 | 10 |
+| hpsetdiffpress | set differential pressure | uint8 (>=150<=750) | mbar | true | DEVICE_DATA | 147 | 1 | 50 |
+| hpcompon | hp compressor | boolean |   | false | DEVICE_DATA | 148 | 1 | 1 |
+| hpactivity | compressor activity | enum [off\|heating\|cooling\|hot water\|pool\|pool heating\|defrost\|compressor alarm] |   | false | DEVICE_DATA | 149 | 1 | 1 |
+| hpbrinepumpspd | brine pump speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 150 | 1 | 1 |
+| hpswitchvalve | switch valve | boolean |   | false | DEVICE_DATA | 151 | 1 | 1 |
+| hpcompspd | compressor speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 152 | 1 | 1 |
+| hptargetspd | compressor target speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 153 | 1 | 1 |
+| hpcircspd | circulation pump speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 154 | 1 | 1 |
+| recvalve | receiver valve VR0 | uint8 (>=0<=100) | % | false | DEVICE_DATA | 155 | 1 | 1 |
+| expvalve | expansion valve VR1 | uint8 (>=0<=100) | % | false | DEVICE_DATA | 156 | 1 | 1 |
+| hpbrinein | brine in/evaporator | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 157 | 1 | 1/10 |
+| hpbrineout | brine out/condenser | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 158 | 1 | 1/10 |
+| hptc0 | heat carrier return (TC0) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 159 | 1 | 1/10 |
+| hptc1 | heat carrier forward (TC1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 160 | 1 | 1/10 |
+| hptc3 | condenser temperature (TC3) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 161 | 1 | 1/10 |
+| hptr1 | compressor temperature (TR1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 162 | 1 | 1/10 |
+| hptr3 | refrigerant temperature liquid side (condenser output) (TR3) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 163 | 1 | 1/10 |
+| hptr4 | evaporator inlet temperature (TR4) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 164 | 1 | 1/10 |
+| hptr5 | compressor inlet temperature (TR5) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 165 | 1 | 1/10 |
+| hptr6 | compressor outlet temperature (TR6) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 166 | 1 | 1/10 |
+| hptr7 | refrigerant temperature gas side (condenser input) (TR7) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 167 | 1 | 1/10 |
+| hptl2 | air inlet temperature (TL2) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 168 | 1 | 1/10 |
+| hppl1 | low pressure side temperature (PL1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 169 | 1 | 1/10 |
+| hpph1 | high pressure side temperature (PH1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 170 | 1 | 1/10 |
+| hpta4 | drain pan temp (TA4) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 171 | 1 | 1/10 |
+| hptw1 | reservoir temp (TW1) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 172 | 1 | 1/10 |
+| poolsettemp | pool set temperature | uint8 (>=0<=127) | C | true | DEVICE_DATA | 173 | 1 | 1/2 |
+| hp4way | 4-way valve (VR4) | enum [cooling & defrost\|heating & dhw] |   | false | DEVICE_DATA | 174 | 1 | 1 |
+| hpin1 | input 1 state | boolean |   | false | DEVICE_DATA | 175 | 1 | 1 |
+| hpin1opt | input 1 options | string |   | true | DEVICE_DATA | 176 | 8 | 1 |
+| hpin2 | input 2 state | boolean |   | false | DEVICE_DATA | 184 | 1 | 1 |
+| hpin2opt | input 2 options | string |   | true | DEVICE_DATA | 185 | 8 | 1 |
+| hpin3 | input 3 state | boolean |   | false | DEVICE_DATA | 193 | 1 | 1 |
+| hpin3opt | input 3 options | string |   | true | DEVICE_DATA | 194 | 8 | 1 |
+| hpin4 | input 4 state | boolean |   | false | DEVICE_DATA | 202 | 1 | 1 |
+| hpin4opt | input 4 options | string |   | true | DEVICE_DATA | 203 | 8 | 1 |
+| maxheatcomp | heat limit compressor | enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 211 | 1 | 1 |
+| maxheatheat | heat limit heating | enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] |   | true | DEVICE_DATA | 212 | 1 | 1 |
 | dhw.maxheat | heat limit | enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] |   | true | DHW | 14 | 1 | 1 |
-| auxheatersource | aux heater source | enum [not installed\|electric heater\|exclusive\|parallel\|hybrid] |   | true | DEVICE_DATA | 211 | 1 | 1 |
-| pvcooling | cooling only with PV | boolean |   | true | DEVICE_DATA | 212 | 1 | 1 |
-| auxheateronly | aux heater only | boolean |   | true | DEVICE_DATA | 213 | 1 | 1 |
-| auxheateroff | disable aux heater | boolean |   | true | DEVICE_DATA | 214 | 1 | 1 |
-| auxheaterstatus | aux heater status | enum [off\|heating\|cooling\|hot water\|pool\|pool heating\|defrost\|compressor alarm] |   | false | DEVICE_DATA | 215 | 1 | 1 |
-| auxheaterlevel | aux heater level | uint8 (>=0<=100) | % | false | DEVICE_DATA | 216 | 1 | 1 |
-| auxheaterdelay | aux heater on delay | uint16 (>=10<=1000) | K*min | true | DEVICE_DATA | 217 | 1 | 10 |
-| auxmaxlimit | aux heater max limit | uint8 (>=0<=10) | K | true | DEVICE_DATA | 218 | 1 | 1/10 |
-| auxlimitstart | aux heater limit start | uint8 (>=0<=10) | K | true | DEVICE_DATA | 219 | 1 | 1/10 |
-| auxheatrmode | aux heater mode | enum [eco\|comfort] |   | true | DEVICE_DATA | 220 | 1 | 1 |
-| hphystheat | on/off hyst heat | uint16 (>=50<=1500) | K*min | true | DEVICE_DATA | 221 | 1 | 5 |
-| hphystcool | on/off hyst cool | uint16 (>=50<=1500) | K*min | true | DEVICE_DATA | 222 | 1 | 5 |
-| hphystpool | on/off hyst pool | uint16 (>=50<=1500) | K*min | true | DEVICE_DATA | 223 | 1 | 5 |
-| silentmode | silent mode | enum [off\|auto\|on] |   | true | DEVICE_DATA | 224 | 1 | 1 |
-| silentfrom | silent mode from | uint8 (>=0<=3810) | minutes | true | DEVICE_DATA | 225 | 1 | 15 |
-| silentto | silent mode to | uint8 (>=0<=3810) | minutes | true | DEVICE_DATA | 226 | 1 | 15 |
-| mintempsilent | min outside temp for silent mode | int8 (>=-126<=126) | C | true | DEVICE_DATA | 227 | 1 | 1 |
-| tempparmode | outside temp parallel mode | int8 (>=-126<=126) | C | true | DEVICE_DATA | 228 | 1 | 1 |
-| auxheatmix | aux heater mixing valve | int8 (>=-100<=100) | % | false | DEVICE_DATA | 229 | 1 | 1 |
-| tempdiffheat | temp diff TC3/TC0 heat | uint8 (>=2<=10) | K | true | DEVICE_DATA | 230 | 1 | 1/10 |
-| tempdiffcool | temp diff TC3/TC0 cool | uint8 (>=2<=10) | K | true | DEVICE_DATA | 231 | 1 | 1/10 |
-| vpcooling | valve/pump cooling | boolean |   | true | DEVICE_DATA | 232 | 1 | 1 |
-| heatcable | heating cable | boolean |   | true | DEVICE_DATA | 233 | 1 | 1 |
-| vc0valve | VC0 valve | boolean |   | true | DEVICE_DATA | 234 | 1 | 1 |
-| primepump | primary heatpump | boolean |   | true | DEVICE_DATA | 235 | 1 | 1 |
-| primepumpmod | primary heatpump modulation | uint8 (>=0<=100) | % | true | DEVICE_DATA | 236 | 1 | 1 |
-| hp3way | 3-way valve | boolean |   | true | DEVICE_DATA | 237 | 1 | 1 |
-| elheatstep1 | el. heater step 1 | boolean |   | true | DEVICE_DATA | 238 | 1 | 1 |
-| elheatstep2 | el. heater step 2 | boolean |   | true | DEVICE_DATA | 239 | 1 | 1 |
-| elheatstep3 | el. heater step 3 | boolean |   | true | DEVICE_DATA | 240 | 1 | 1 |
-| hpea0 | condensate reservoir heating (EA0) | boolean |   | false | DEVICE_DATA | 241 | 1 | 1 |
-| hppumpmode | primary heatpump mode | enum [auto\|continuous] |   | true | DEVICE_DATA | 242 | 1 | 1 |
-| fan | fan | uint8 (>=20<=100) | % | true | DEVICE_DATA | 243 | 1 | 1 |
-| fanspd | fan speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 244 | 1 | 1 |
-| shutdown | shutdown | cmd [off\|on] |   | true | DEVICE_DATA | 245 | 1 | 1 |
-| hpcurrpower | compressor current power | uint16 (>=0<=31999) | W | false | DEVICE_DATA | 246 | 1 | 1 |
-| hppowerlimit | power limit | uint16 (>=0<=31999) | W | true | DEVICE_DATA | 247 | 1 | 1 |
+| auxheatersource | aux heater source | enum [not installed\|electric heater\|exclusive\|parallel\|hybrid] |   | true | DEVICE_DATA | 213 | 1 | 1 |
+| pvcooling | cooling only with PV | boolean |   | true | DEVICE_DATA | 214 | 1 | 1 |
+| auxheateronly | aux heater only | boolean |   | true | DEVICE_DATA | 215 | 1 | 1 |
+| auxheateroff | disable aux heater | boolean |   | true | DEVICE_DATA | 216 | 1 | 1 |
+| auxheaterstatus | aux heater status | enum [off\|heating\|cooling\|hot water\|pool\|pool heating\|defrost\|compressor alarm] |   | false | DEVICE_DATA | 217 | 1 | 1 |
+| auxheaterlevel | aux heater level | uint8 (>=0<=100) | % | false | DEVICE_DATA | 218 | 1 | 1 |
+| auxheaterdelay | aux heater on delay | uint16 (>=10<=1000) | K*min | true | DEVICE_DATA | 219 | 1 | 10 |
+| auxmaxlimit | aux heater max limit | uint8 (>=0<=10) | K | true | DEVICE_DATA | 220 | 1 | 1/10 |
+| auxlimitstart | aux heater limit start | uint8 (>=0<=10) | K | true | DEVICE_DATA | 221 | 1 | 1/10 |
+| auxheatrmode | aux heater mode | enum [eco\|comfort] |   | true | DEVICE_DATA | 222 | 1 | 1 |
+| hphystheat | on/off hyst heat | uint16 (>=50<=1500) | K*min | true | DEVICE_DATA | 223 | 1 | 5 |
+| hphystcool | on/off hyst cool | uint16 (>=50<=1500) | K*min | true | DEVICE_DATA | 224 | 1 | 5 |
+| hphystpool | on/off hyst pool | uint16 (>=50<=1500) | K*min | true | DEVICE_DATA | 225 | 1 | 5 |
+| silentmode | silent mode | enum [off\|auto\|on] |   | true | DEVICE_DATA | 226 | 1 | 1 |
+| silentfrom | silent mode from | uint8 (>=0<=3810) | minutes | true | DEVICE_DATA | 227 | 1 | 15 |
+| silentto | silent mode to | uint8 (>=0<=3810) | minutes | true | DEVICE_DATA | 228 | 1 | 15 |
+| mintempsilent | min outside temp for silent mode | int8 (>=-126<=126) | C | true | DEVICE_DATA | 229 | 1 | 1 |
+| tempparmode | outside temp parallel mode | int8 (>=-126<=126) | C | true | DEVICE_DATA | 230 | 1 | 1 |
+| auxheatmix | aux heater mixing valve | int8 (>=-100<=100) | % | false | DEVICE_DATA | 231 | 1 | 1 |
+| tempdiffheat | temp diff TC3/TC0 heat | uint8 (>=2<=10) | K | true | DEVICE_DATA | 232 | 1 | 1/10 |
+| tempdiffcool | temp diff TC3/TC0 cool | uint8 (>=2<=10) | K | true | DEVICE_DATA | 233 | 1 | 1/10 |
+| vpcooling | valve/pump cooling | boolean |   | true | DEVICE_DATA | 234 | 1 | 1 |
+| heatcable | heating cable | boolean |   | true | DEVICE_DATA | 235 | 1 | 1 |
+| vc0valve | VC0 valve | boolean |   | true | DEVICE_DATA | 236 | 1 | 1 |
+| primepump | primary heatpump | boolean |   | true | DEVICE_DATA | 237 | 1 | 1 |
+| primepumpmod | primary heatpump modulation | uint8 (>=0<=100) | % | true | DEVICE_DATA | 238 | 1 | 1 |
+| hp3way | 3-way valve | boolean |   | true | DEVICE_DATA | 239 | 1 | 1 |
+| elheatstep1 | el. heater step 1 | boolean |   | true | DEVICE_DATA | 240 | 1 | 1 |
+| elheatstep2 | el. heater step 2 | boolean |   | true | DEVICE_DATA | 241 | 1 | 1 |
+| elheatstep3 | el. heater step 3 | boolean |   | true | DEVICE_DATA | 242 | 1 | 1 |
+| hpea0 | condensate reservoir heating (EA0) | boolean |   | false | DEVICE_DATA | 243 | 1 | 1 |
+| hppumpmode | primary heatpump mode | enum [auto\|continuous] |   | true | DEVICE_DATA | 244 | 1 | 1 |
+| fan | fan | uint8 (>=20<=100) | % | true | DEVICE_DATA | 245 | 1 | 1 |
+| fanspd | fan speed | uint8 (>=0<=100) | % | false | DEVICE_DATA | 246 | 1 | 1 |
+| shutdown | shutdown | cmd [off\|on] |   | true | DEVICE_DATA | 247 | 1 | 1 |
+| hpcurrpower | compressor current power | uint16 (>=0<=31999) | W | false | DEVICE_DATA | 248 | 1 | 1 |
+| hppowerlimit | power limit | uint16 (>=0<=31999) | W | true | DEVICE_DATA | 249 | 1 | 1 |
 | dhw.alternatingop | alternating operation | boolean |   | true | DHW | 15 | 1 | 1 |
 | dhw.altopprioheat | prioritise heating during dhw | uint8 (>=20<=120) | minutes | true | DHW | 16 | 1 | 1 |
 | dhw.altopprio | prioritise dhw during heating | uint8 (>=30<=120) | minutes | true | DHW | 17 | 1 | 1 |
@@ -3044,75 +3070,76 @@
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -3154,84 +3181,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### Logamax U122, Cerapur
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -3273,84 +3301,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### Ecomline Excellent
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -3392,84 +3421,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### Logamax Plus, GB192, Condens GC9000, Greenstar ErP
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -3511,84 +3541,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### Cascade MC400
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -3630,84 +3661,85 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### EasyControl Adapter
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -3749,68 +3781,69 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ### Greenstar HIU, Logamax kompakt WS170
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
-| netflowtemp | heat network flow temp | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 275 | 1 | 1/10 |
-| heatvalve | heating valve | uint8 (>=0<=100) | % | false | DEVICE_DATA | 276 | 1 | 1 |
+| netflowtemp | heat network flow temp | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 277 | 1 | 1/10 |
+| heatvalve | heating valve | uint8 (>=0<=100) | % | false | DEVICE_DATA | 278 | 1 | 1 |
 | dhw.dhwvalve | valve | uint8 (>=0<=100) | % | false | DHW | 74 | 1 | 1 |
-| keepwarmtemp | keep warm temperature | uint8 (>=0<=254) | C | true | DEVICE_DATA | 277 | 1 | 1 |
-| setreturntemp | set temp return | uint8 (>=0<=254) | C | true | DEVICE_DATA | 278 | 1 | 1 |
-| heating | heating | boolean |   | false | DEVICE_DATA | 279 | 1 | 1 |
+| keepwarmtemp | keep warm temperature | uint8 (>=0<=254) | C | true | DEVICE_DATA | 279 | 1 | 1 |
+| setreturntemp | set temp return | uint8 (>=0<=254) | C | true | DEVICE_DATA | 280 | 1 | 1 |
+| heating | heating | boolean |   | false | DEVICE_DATA | 281 | 1 | 1 |
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -3857,75 +3890,76 @@
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | reset | reset | cmd [-\|maintenance\|error\|history\|message] |   | true | DEVICE_DATA | 0 | 1 | 1 |
-| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 1 | 1 | 1 |
-| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 2 | 1 | 1 |
-| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
-| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 4 | 1 | 1 |
-| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 5 | 1 | 1 |
-| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 6 | 1 | 1/10 |
-| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
-| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
-| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
-| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 10 | 1 | 1/10 |
-| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 11 | 1 | 1/10 |
-| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
-| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 248 | 1 | 1/10 |
-| burngas | gas | boolean |   | false | DEVICE_DATA | 249 | 1 | 1 |
-| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 250 | 1 | 1 |
-| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 251 | 1 | 1/10 |
-| fanwork | fan | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
-| ignwork | ignition | boolean |   | false | DEVICE_DATA | 253 | 1 | 1 |
-| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
-| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 255 | 1 | 1 |
-| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 256 | 1 | 1 |
-| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 257 | 1 | 1 |
-| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 258 | 1 | 1 |
-| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 259 | 1 | 1/10 |
-| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 260 | 1 | 1 |
-| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 261 | 1 | 1 |
-| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
-| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
-| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 264 | 1 | 1 |
-| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 265 | 1 | 1 |
-| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 266 | 1 | 1 |
-| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 267 | 1 | 1 |
-| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 268 | 1 | 1 |
-| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 269 | 1 | 1 |
-| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 13 | 1 | 1 |
-| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 14 | 1 | 1 |
-| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 15 | 1 | 1 |
-| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
-| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 18 | 1 | 1 |
-| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 20 | 1 | 1 |
-| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 21 | 1 | 1 |
-| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 22 | 1 | 1 |
-| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 |
-| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 24 | 2 | 1 |
-| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 26 | 2 | 1 |
-| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 28 | 2 | 1 |
-| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 30 | 2 | 1 |
-| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 32 | 2 | 1 |
-| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 34 | 2 | 1 |
-| lastcode | last error code | string |   | false | DEVICE_DATA | 36 | 28 | 1 |
-| servicecode | service code | string |   | false | DEVICE_DATA | 64 | 2 | 1 |
-| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 66 | 1 | 1 |
-| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 67 | 2 | 1 |
-| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 69 | 1 | 1 |
-| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 70 | 1 | 1 |
-| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 71 | 6 | 1 |
-| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 77 | 1 | 1 |
-| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 78 | 1 | 1 |
-| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 79 | 1 | 1 |
-| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
-| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 81 | 1 | 1 |
-| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 82 | 1 | 1 |
-| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 95 | 2 | 1/10 |
+| chimneysweeper | chimney sweeper | cmd [off\|on] |   | true | DEVICE_DATA | 1 | 1 | 1 |
+| heatingoff | force heating off | boolean |   | true | DEVICE_DATA | 2 | 1 | 1 |
+| heatingactive | heating active | boolean |   | false | DEVICE_DATA | 3 | 1 | 1 |
+| tapwateractive | tapwater active | boolean |   | false | DEVICE_DATA | 4 | 1 | 1 |
+| selflowtemp | selected flow temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 5 | 1 | 1 |
+| heatingpumpmod | heating pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 6 | 1 | 1 |
+| outdoortemp | outside temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 7 | 1 | 1/10 |
+| curflowtemp | current flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 8 | 1 | 1/10 |
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 9 | 1 | 1/10 |
+| switchtemp | mixing switch temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 10 | 1 | 1/10 |
+| syspress | system pressure | uint8 (>=0<=25) | bar | false | DEVICE_DATA | 11 | 1 | 1/10 |
+| boiltemp | actual boiler temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 12 | 1 | 1/10 |
+| headertemp | low loss header | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 13 | 1 | 1/10 |
+| exhausttemp | exhaust temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 250 | 1 | 1/10 |
+| burngas | gas | boolean |   | false | DEVICE_DATA | 251 | 1 | 1 |
+| burngas2 | gas stage 2 | boolean |   | false | DEVICE_DATA | 252 | 1 | 1 |
+| flamecurr | flame current | uint16 (>=0<=3199) | µA | false | DEVICE_DATA | 253 | 1 | 1/10 |
+| fanwork | fan | boolean |   | false | DEVICE_DATA | 254 | 1 | 1 |
+| ignwork | ignition | boolean |   | false | DEVICE_DATA | 255 | 1 | 1 |
+| oilpreheat | oil preheating | boolean |   | false | DEVICE_DATA | 256 | 1 | 1 |
+| burnminpower | burner min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 257 | 1 | 1 |
+| burnmaxpower | burner max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 258 | 1 | 1 |
+| burnminperiod | burner min period | uint8 (>=0<=120) | minutes | true | DEVICE_DATA | 259 | 1 | 1 |
+| absburnpow | burner current power (absolute) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 260 | 1 | 1 |
+| heatblock | heating block | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 261 | 1 | 1/10 |
+| boilhyston | hysteresis on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 262 | 1 | 1 |
+| boilhystoff | hysteresis off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 263 | 1 | 1 |
+| boil2hyston | hysteresis stage 2 on temperature | int8 (>=-20<=0) | C | true | DEVICE_DATA | 264 | 1 | 1 |
+| boil2hystoff | hysteresis stage 2 off temperature | int8 (>=0<=20) | C | true | DEVICE_DATA | 265 | 1 | 1 |
+| curveon | heatingcurve on | boolean |   | true | DEVICE_DATA | 266 | 1 | 1 |
+| curvebase | heatingcurve base | uint8 (>=20<=90) | C | true | DEVICE_DATA | 267 | 1 | 1 |
+| curveend | heatingcurve end | uint8 (>=20<=90) | C | true | DEVICE_DATA | 268 | 1 | 1 |
+| summertemp | summer temperature | uint8 (>=0<=45) | C | true | DEVICE_DATA | 269 | 1 | 1 |
+| nofrostmode | nofrost mode | boolean |   | true | DEVICE_DATA | 270 | 1 | 1 |
+| nofrosttemp | nofrost temperature | uint8 (>=0<=10) | C | true | DEVICE_DATA | 271 | 1 | 1 |
+| heatingactivated | heating activated | boolean |   | true | DEVICE_DATA | 14 | 1 | 1 |
+| heatingtemp | heating temperature | uint8 (>=0<=90) | C | true | DEVICE_DATA | 15 | 1 | 1 |
+| heatingpump | heating pump | boolean |   | false | DEVICE_DATA | 16 | 1 | 1 |
+| pumpmodmax | boiler pump max power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+| pumpmodmin | boiler pump min power | uint8 (>=0<=100) | % | true | DEVICE_DATA | 18 | 1 | 1 |
+| pumpmode | boiler pump mode | enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4] |   | true | DEVICE_DATA | 19 | 1 | 1 |
+| pumpcharacter | boiler pump characteristic | enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar] |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| pumpdelay | pump delay | uint8 (>=0<=60) | minutes | true | DEVICE_DATA | 21 | 1 | 1 |
+| pumpontemp | pump logic temperature | uint8 (>=0<=60) | C | true | DEVICE_DATA | 22 | 1 | 1 |
+| selburnpow | burner selected max power | uint8 (>=0<=254) | % | true | DEVICE_DATA | 23 | 1 | 1 |
+| curburnpow | burner current power | uint8 (>=0<=100) | % | false | DEVICE_DATA | 24 | 1 | 1 |
+| burnstarts | burner starts | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 25 | 2 | 1 |
+| burnworkmin | total burner operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 27 | 2 | 1 |
+| burn2workmin | burner stage 2 operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 29 | 2 | 1 |
+| heatworkmin | total heat operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 31 | 2 | 1 |
+| heatstarts | burner starts heating | uint24 (>=0<=16777214) |   | false | DEVICE_DATA | 33 | 2 | 1 |
+| ubauptime | total UBA operating time | time (>=0<=16777214) | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
+| lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
+| servicecodenumber | service code number | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 67 | 1 | 1 |
+| maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
+| maintenance | maintenance scheduled | enum [off\|time\|date\|manual] |   | true | DEVICE_DATA | 70 | 1 | 1 |
+| maintenancetime | time to next maintenance | uint16 (>=0<=31999) | hours | true | DEVICE_DATA | 71 | 1 | 1 |
+| maintenancedate | next maintenance date | string |   | true | DEVICE_DATA | 72 | 6 | 1 |
+| emergencyops | emergency operation | boolean |   | true | DEVICE_DATA | 78 | 1 | 1 |
+| emergencytemp | emergency temperature | uint8 (>=15<=70) | C | true | DEVICE_DATA | 79 | 1 | 1 |
+| pc0flow | Flow PC0 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 80 | 1 | 1 |
+| pc1flow | Flow PC1 | int16 (>=-31999<=31999) | l/h | false | DEVICE_DATA | 81 | 1 | 1 |
+| pc1on | PC1 | boolean |   | false | DEVICE_DATA | 82 | 1 | 1 |
+| pc1rate | PC1 rate | uint8 (>=0<=100) | % | false | DEVICE_DATA | 83 | 1 | 1 |
+| meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
-| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 270 | 2 | 1/10 |
+| gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
 | dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
-| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
+| nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
 | dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
@@ -3967,9 +4001,9 @@
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
 | dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
 | dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
-| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 274 | 1 | 1 |
-| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 83 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 85 | 2 | 1/100 |
+| nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
+| nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 (>=0<=10000000) | kWh | true | DHW | 0 | 2 | 1/100 |
 
 ## Devices of type *thermostat*
