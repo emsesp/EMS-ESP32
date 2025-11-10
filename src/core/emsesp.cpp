@@ -1703,9 +1703,6 @@ void EMSESP::start() {
 #ifndef EMSESP_STANDALONE
     File root             = LittleFS.open(EMSESP_SETTINGS_FILE);
     bool factory_settings = !root;
-    if (!root) {
-        LOG_WARNING("No settings found on filesystem. Using factory settings.");
-    }
     root.close();
 #else
     bool factory_settings = false;
@@ -1716,6 +1713,10 @@ void EMSESP::start() {
 
     // loads core system services settings (network, mqtt, ap, ntp etc)
     esp32React.begin();
+
+    if (!root) {
+        LOG_WARNING("No settings found on filesystem. Using factory settings.");
+    }
 
 #ifndef EMSESP_STANDALONE
     LOG_INFO("EMS-ESP version %s", EMSESP_APP_VERSION);
