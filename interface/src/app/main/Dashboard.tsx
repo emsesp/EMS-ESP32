@@ -283,115 +283,121 @@ const Dashboard = memo(() => {
           </MessageBox>
         )}
 
-        {data.nodes.length > 0 && (
-          <>
-            <Box
-              display="flex"
-              justifyContent="flex-end"
-              flexWrap="nowrap"
-              whiteSpace="nowrap"
+        <Box
+          display="flex"
+          justifyContent="flex-end"
+          flexWrap="nowrap"
+          whiteSpace="nowrap"
+        >
+          <ToggleButtonGroup
+            size="small"
+            color="primary"
+            value={showAll}
+            exclusive
+            onChange={handleShowAll}
+          >
+            <ButtonTooltip title={LL.ALLVALUES()}>
+              <ToggleButton value={true}>
+                <UnfoldMoreIcon sx={{ fontSize: 18 }} />
+              </ToggleButton>
+            </ButtonTooltip>
+            <ButtonTooltip title={LL.COMPACT()}>
+              <ToggleButton value={false}>
+                <UnfoldLessIcon sx={{ fontSize: 18 }} />
+              </ToggleButton>
+            </ButtonTooltip>
+          </ToggleButtonGroup>
+        </Box>
+
+        {data.nodes.length > 0 ? (
+          <Box mt={1} justifyContent="center" flexDirection="column">
+            <IconContext.Provider
+              value={{
+                color: 'lightblue',
+                size: '18',
+                style: { verticalAlign: 'middle' }
+              }}
             >
-              <ToggleButtonGroup
-                size="small"
-                color="primary"
-                value={showAll}
-                exclusive
-                onChange={handleShowAll}
+              <Table
+                data={{ nodes: data.nodes }}
+                theme={dashboard_theme}
+                layout={{ custom: true }}
+                tree={tree}
               >
-                <ButtonTooltip title={LL.ALLVALUES()}>
-                  <ToggleButton value={true}>
-                    <UnfoldMoreIcon sx={{ fontSize: 18 }} />
-                  </ToggleButton>
-                </ButtonTooltip>
-                <ButtonTooltip title={LL.COMPACT()}>
-                  <ToggleButton value={false}>
-                    <UnfoldLessIcon sx={{ fontSize: 18 }} />
-                  </ToggleButton>
-                </ButtonTooltip>
-              </ToggleButtonGroup>
-              <Tooltip title={LL.DASHBOARD_1()}>
-                <HelpOutlineIcon
-                  sx={{
-                    ml: 1,
-                    mt: 1,
-                    fontSize: 20,
-                    verticalAlign: 'middle'
-                  }}
-                  color="primary"
-                />
-              </Tooltip>
-            </Box>
+                {(tableList: DashboardItem[]) => (
+                  <Body>
+                    {tableList.map((di: DashboardItem) => (
+                      <Row
+                        key={di.id}
+                        item={di}
+                        onClick={() => editDashboardValue(di)}
+                      >
+                        {di.id > 99 ? (
+                          <>
+                            <Cell>{showName(di)}</Cell>
+                            <Cell>
+                              <ButtonTooltip
+                                title={formatValue(LL, di.dv?.v, di.dv?.u)}
+                              >
+                                <span>{formatValue(LL, di.dv?.v, di.dv?.u)}</span>
+                              </ButtonTooltip>
+                            </Cell>
 
-            <Box mt={1} justifyContent="center" flexDirection="column">
-              <IconContext.Provider
-                value={{
-                  color: 'lightblue',
-                  size: '18',
-                  style: { verticalAlign: 'middle' }
+                            <Cell>
+                              {me.admin &&
+                                di.dv?.c &&
+                                !hasMask(di.dv.id, DeviceEntityMask.DV_READONLY) && (
+                                  <IconButton
+                                    size="small"
+                                    aria-label={
+                                      LL.CHANGE_VALUE() + ' ' + LL.VALUE(0)
+                                    }
+                                    onClick={() => editDashboardValue(di)}
+                                  >
+                                    <EditIcon
+                                      color="primary"
+                                      sx={{ fontSize: 16 }}
+                                    />
+                                  </IconButton>
+                                )}
+                            </Cell>
+                          </>
+                        ) : (
+                          <>
+                            <CellTree item={di}>{showName(di)}</CellTree>
+                            <Cell />
+                            <Cell />
+                          </>
+                        )}
+                      </Row>
+                    ))}
+                  </Body>
+                )}
+              </Table>
+            </IconContext.Provider>
+          </Box>
+        ) : (
+          <Box
+            display="flex"
+            // justifyContent="flex-end"
+            // flexWrap="nowrap"
+            // whiteSpace="nowrap"
+          >
+            <Typography mt={1} color="warning.main" variant="body1">
+              no data
+            </Typography>
+            <Tooltip title={LL.DASHBOARD_1()}>
+              <HelpOutlineIcon
+                sx={{
+                  ml: 1,
+                  mt: 1,
+                  fontSize: 20,
+                  verticalAlign: 'middle'
                 }}
-              >
-                <Table
-                  data={{ nodes: data.nodes }}
-                  theme={dashboard_theme}
-                  layout={{ custom: true }}
-                  tree={tree}
-                >
-                  {(tableList: DashboardItem[]) => (
-                    <Body>
-                      {tableList.map((di: DashboardItem) => (
-                        <Row
-                          key={di.id}
-                          item={di}
-                          onClick={() => editDashboardValue(di)}
-                        >
-                          {di.id > 99 ? (
-                            <>
-                              <Cell>{showName(di)}</Cell>
-                              <Cell>
-                                <ButtonTooltip
-                                  title={formatValue(LL, di.dv?.v, di.dv?.u)}
-                                >
-                                  <span>{formatValue(LL, di.dv?.v, di.dv?.u)}</span>
-                                </ButtonTooltip>
-                              </Cell>
-
-                              <Cell>
-                                {me.admin &&
-                                  di.dv?.c &&
-                                  !hasMask(
-                                    di.dv.id,
-                                    DeviceEntityMask.DV_READONLY
-                                  ) && (
-                                    <IconButton
-                                      size="small"
-                                      aria-label={
-                                        LL.CHANGE_VALUE() + ' ' + LL.VALUE(0)
-                                      }
-                                      onClick={() => editDashboardValue(di)}
-                                    >
-                                      <EditIcon
-                                        color="primary"
-                                        sx={{ fontSize: 16 }}
-                                      />
-                                    </IconButton>
-                                  )}
-                              </Cell>
-                            </>
-                          ) : (
-                            <>
-                              <CellTree item={di}>{showName(di)}</CellTree>
-                              <Cell />
-                              <Cell />
-                            </>
-                          )}
-                        </Row>
-                      ))}
-                    </Body>
-                  )}
-                </Table>
-              </IconContext.Provider>
-            </Box>
-          </>
+                color="primary"
+              />
+            </Tooltip>
+          </Box>
         )}
       </>
     );
