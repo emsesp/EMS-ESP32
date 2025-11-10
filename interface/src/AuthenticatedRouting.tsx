@@ -13,6 +13,7 @@ const Customizations = lazy(() => import('app/main/Customizations'));
 const Scheduler = lazy(() => import('app/main/Scheduler'));
 const CustomEntities = lazy(() => import('app/main/CustomEntities'));
 const Modules = lazy(() => import('app/main/Modules'));
+const UserProfile = lazy(() => import('app/main/UserProfile'));
 
 const Status = lazy(() => import('app/status/Status'));
 const HardwareStatus = lazy(() => import('app/status/HardwareStatus'));
@@ -43,6 +44,7 @@ const AuthenticatedRouting = memo(() => {
           <Route path="/devices/*" element={<Devices />} />
           <Route path="/sensors/*" element={<Sensors />} />
           <Route path="/help/*" element={<Help />} />
+          <Route path="/user/*" element={<UserProfile />} />
 
           <Route path="/status/*" element={<Status />} />
           <Route path="/status/hardwarestatus/*" element={<HardwareStatus />} />
