@@ -1,13 +1,14 @@
 // ---------- START - CUT HERE ----------
 
 void test_1() {
-    auto expected_response = "[{\"reset\":\"\",\"heatingoff\":\"off\",\"heatingactive\":\"off\",\"tapwateractive\":\"on\",\"selflowtemp\":0,\"curflowtemp\":60."
-                             "2,\"rettemp\":48.1,\"syspress\":1.4,\"burngas\":\"on\",\"burngas2\":\"off\",\"flamecurr\":37.4,\"fanwork\":\"on\",\"ignwork\":"
-                             "\"off\",\"oilpreheat\":\"off\",\"heatingpump\":\"on\",\"selburnpow\":115,\"curburnpow\":61,\"ubauptime\":3940268,\"servicecode\":"
-                             "\"=H\",\"servicecodenumber\":201,\"nompower\":0,\"nrgtotal\":0.0,\"nrgheat\":0.0,\"dhw\":{\"seltemp\":52,\"comfort\":\"hot\","
-                             "\"flowtempoffset\":40,\"chargeoptimization\":\"off\",\"circpump\":\"off\",\"chargetype\":\"3-way "
-                             "valve\",\"hyston\":-5,\"disinfectiontemp\":70,\"circmode\":\"off\",\"circ\":\"off\",\"storagetemp1\":53.8,\"activated\":\"on\","
-                             "\"3wayvalve\":\"on\",\"chargepump\":\"off\",\"nrg\":0.0}}]";
+    auto expected_response =
+        "[{\"reset\":\"\",\"chimneysweeper\":\"\",\"heatingoff\":\"off\",\"heatingactive\":\"off\",\"tapwateractive\":\"on\",\"selflowtemp\":0,\"curflowtemp\":"
+        "60.2,\"rettemp\":48.1,\"syspress\":1.4,\"burngas\":\"on\",\"burngas2\":\"off\",\"flamecurr\":37.4,\"fanwork\":\"on\",\"ignwork\":\"off\","
+        "\"oilpreheat\":\"off\",\"heatingpump\":\"on\",\"selburnpow\":115,\"curburnpow\":61,\"ubauptime\":3940268,\"servicecode\":\"=H\",\"servicecodenumber\":"
+        "201,\"nompower\":0,\"nrgtotal\":0.0,\"nrgheat\":0.0,\"dhw\":{\"seltemp\":52,\"comfort\":\"hot\",\"flowtempoffset\":40,\"chargeoptimization\":\"off\","
+        "\"circpump\":\"off\",\"chargetype\":\"3-way "
+        "valve\",\"hyston\":-5,\"disinfectiontemp\":70,\"circmode\":\"off\",\"circ\":\"off\",\"storagetemp1\":53.8,\"activated\":\"on\",\"3wayvalve\":\"on\","
+        "\"chargepump\":\"off\",\"nrg\":0.0}}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/boiler"));
 }
 
@@ -16,9 +17,10 @@ void test_2() {
         "[{\"info\":\"list all values (verbose)\",\"values\":\"list all values\",\"commands\":\"list all commands\",\"entities\":\"list all "
         "entities\",\"boil2hystoff\":\"hysteresis stage 2 off temperature\",\"boil2hyston\":\"hysteresis stage 2 on temperature\",\"boilhystoff\":\"hysteresis "
         "off temperature\",\"boilhyston\":\"hysteresis on temperature\",\"burnmaxpower\":\"burner max power\",\"burnminperiod\":\"burner min "
-        "period\",\"burnminpower\":\"burner min power\",\"coldshot\":\"send a cold shot of water\",\"curvebase\":\"heatingcurve "
-        "base\",\"curveend\":\"heatingcurve end\",\"curveon\":\"heatingcurve on\",\"dhw[n].activated\":\"activated\",\"dhw[n].chargeoptimization\":\"charge "
-        "optimization\",\"dhw[n].circ\":\"circulation active\",\"dhw[n].circmode\":\"circulation pump mode\",\"dhw[n].circpump\":\"circulation pump "
+        "period\",\"burnminpower\":\"burner min power\",\"chimneysweeper\":\"chimney sweeper\",\"coldshot\":\"send a cold shot of "
+        "water\",\"curvebase\":\"heatingcurve base\",\"curveend\":\"heatingcurve end\",\"curveon\":\"heatingcurve "
+        "on\",\"dhw[n].activated\":\"activated\",\"dhw[n].chargeoptimization\":\"charge optimization\",\"dhw[n].circ\":\"circulation "
+        "active\",\"dhw[n].circmode\":\"circulation pump mode\",\"dhw[n].circpump\":\"circulation pump "
         "available\",\"dhw[n].comfort\":\"comfort\",\"dhw[n].comfort1\":\"comfort "
         "mode\",\"dhw[n].disinfecting\":\"disinfecting\",\"dhw[n].disinfectiontemp\":\"disinfection temperature\",\"dhw[n].flowtempoffset\":\"flow temperature "
         "offset\",\"dhw[n].hystoff\":\"hysteresis off temperature\",\"dhw[n].hyston\":\"hysteresis on temperature\",\"dhw[n].maxpower\":\"max "
@@ -36,30 +38,31 @@ void test_2() {
 }
 
 void test_3() {
-    auto expected_response = "[{\"reset\":\"\",\"heatingoff\":\"off\",\"heatingactive\":\"off\",\"tapwateractive\":\"on\",\"selflowtemp\":0,\"curflowtemp\":60."
-                             "2,\"rettemp\":48.1,\"syspress\":1.4,\"burngas\":\"on\",\"burngas2\":\"off\",\"flamecurr\":37.4,\"fanwork\":\"on\",\"ignwork\":"
-                             "\"off\",\"oilpreheat\":\"off\",\"heatingpump\":\"on\",\"selburnpow\":115,\"curburnpow\":61,\"ubauptime\":3940268,\"servicecode\":"
-                             "\"=H\",\"servicecodenumber\":201,\"nompower\":0,\"nrgtotal\":0.0,\"nrgheat\":0.0,\"dhw\":{\"seltemp\":52,\"comfort\":\"hot\","
-                             "\"flowtempoffset\":40,\"chargeoptimization\":\"off\",\"circpump\":\"off\",\"chargetype\":\"3-way "
-                             "valve\",\"hyston\":-5,\"disinfectiontemp\":70,\"circmode\":\"off\",\"circ\":\"off\",\"storagetemp1\":53.8,\"activated\":\"on\","
-                             "\"3wayvalve\":\"on\",\"chargepump\":\"off\",\"nrg\":0.0}}]";
+    auto expected_response =
+        "[{\"reset\":\"\",\"chimneysweeper\":\"\",\"heatingoff\":\"off\",\"heatingactive\":\"off\",\"tapwateractive\":\"on\",\"selflowtemp\":0,\"curflowtemp\":"
+        "60.2,\"rettemp\":48.1,\"syspress\":1.4,\"burngas\":\"on\",\"burngas2\":\"off\",\"flamecurr\":37.4,\"fanwork\":\"on\",\"ignwork\":\"off\","
+        "\"oilpreheat\":\"off\",\"heatingpump\":\"on\",\"selburnpow\":115,\"curburnpow\":61,\"ubauptime\":3940268,\"servicecode\":\"=H\",\"servicecodenumber\":"
+        "201,\"nompower\":0,\"nrgtotal\":0.0,\"nrgheat\":0.0,\"dhw\":{\"seltemp\":52,\"comfort\":\"hot\",\"flowtempoffset\":40,\"chargeoptimization\":\"off\","
+        "\"circpump\":\"off\",\"chargetype\":\"3-way "
+        "valve\",\"hyston\":-5,\"disinfectiontemp\":70,\"circmode\":\"off\",\"circ\":\"off\",\"storagetemp1\":53.8,\"activated\":\"on\",\"3wayvalve\":\"on\","
+        "\"chargepump\":\"off\",\"nrg\":0.0}}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/boiler/values"));
 }
 
 void test_4() {
     auto expected_response =
-        "[{\"reset (reset)\":\"\",\"force heating off (heatingoff)\":\"off\",\"is my heating on? (heatingactive)\":\"off\",\"tapwater active "
-        "(tapwateractive)\":\"on\",\"selected flow temperature (selflowtemp)\":0,\"current flow temperature (curflowtemp)\":60.2,\"return temperature "
-        "(rettemp)\":48.1,\"system pressure (syspress)\":1.4,\"gas (burngas)\":\"on\",\"gas stage 2 (burngas2)\":\"off\",\"flame current "
-        "(flamecurr)\":37.4,\"fan (fanwork)\":\"on\",\"ignition (ignwork)\":\"off\",\"oil preheating (oilpreheat)\":\"off\",\"heating pump "
-        "(heatingpump)\":\"on\",\"burner selected max power (selburnpow)\":115,\"burner current power (curburnpow)\":61,\"total UBA operating time "
-        "(ubauptime)\":\"2736 days 7 hours 8 minutes\",\"service code (servicecode)\":\"=H\",\"service code number (servicecodenumber)\":201,\"dhw selected "
-        "temperature (seltemp)\":52,\"dhw comfort (comfort)\":\"hot\",\"dhw flow temperature offset (flowtempoffset)\":40,\"dhw charge optimization "
-        "(chargeoptimization)\":\"off\",\"dhw circulation pump available (circpump)\":\"off\",\"dhw charging type (chargetype)\":\"3-way valve\",\"dhw "
-        "hysteresis on temperature (hyston)\":-5,\"dhw disinfection temperature (disinfectiontemp)\":70,\"dhw circulation pump mode (circmode)\":\"off\",\"dhw "
-        "circulation active (circ)\":\"off\",\"dhw storage intern temperature (storagetemp1)\":53.8,\"dhw activated (activated)\":\"on\",\"dhw 3-way valve "
-        "active (3wayvalve)\":\"on\",\"dhw charge pump (chargepump)\":\"off\",\"nominal Power (nompower)\":0,\"total energy (nrgtotal)\":0.0,\"energy heating "
-        "(nrgheat)\":0.0,\"dhw energy (nrg)\":0.0}]";
+        "[{\"reset (reset)\":\"\",\"chimney sweeper (chimneysweeper)\":\"\",\"force heating off (heatingoff)\":\"off\",\"is my heating on? "
+        "(heatingactive)\":\"off\",\"tapwater active (tapwateractive)\":\"on\",\"selected flow temperature (selflowtemp)\":0,\"current flow temperature "
+        "(curflowtemp)\":60.2,\"return temperature (rettemp)\":48.1,\"system pressure (syspress)\":1.4,\"gas (burngas)\":\"on\",\"gas stage 2 "
+        "(burngas2)\":\"off\",\"flame current (flamecurr)\":37.4,\"fan (fanwork)\":\"on\",\"ignition (ignwork)\":\"off\",\"oil preheating "
+        "(oilpreheat)\":\"off\",\"heating pump (heatingpump)\":\"on\",\"burner selected max power (selburnpow)\":115,\"burner current power "
+        "(curburnpow)\":61,\"total UBA operating time (ubauptime)\":\"2736 days 7 hours 8 minutes\",\"service code (servicecode)\":\"=H\",\"service code "
+        "number (servicecodenumber)\":201,\"dhw selected temperature (seltemp)\":52,\"dhw comfort (comfort)\":\"hot\",\"dhw flow temperature offset "
+        "(flowtempoffset)\":40,\"dhw charge optimization (chargeoptimization)\":\"off\",\"dhw circulation pump available (circpump)\":\"off\",\"dhw charging "
+        "type (chargetype)\":\"3-way valve\",\"dhw hysteresis on temperature (hyston)\":-5,\"dhw disinfection temperature (disinfectiontemp)\":70,\"dhw "
+        "circulation pump mode (circmode)\":\"off\",\"dhw circulation active (circ)\":\"off\",\"dhw storage intern temperature (storagetemp1)\":53.8,\"dhw "
+        "activated (activated)\":\"on\",\"dhw 3-way valve active (3wayvalve)\":\"on\",\"dhw charge pump (chargepump)\":\"off\",\"nominal Power "
+        "(nompower)\":0,\"total energy (nrgtotal)\":0.0,\"energy heating (nrgheat)\":0.0,\"dhw energy (nrg)\":0.0}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/boiler/info"));
 }
 
@@ -175,7 +178,7 @@ void test_21() {
         "\"readonlyMode\":false,\"fahrenheit\":false,\"dallasParasite\":false,\"boolFormat\":1,\"boolDashboard\":1,\"enumFormat\":1,\"analogEnabled\":true,"
         "\"telnetEnabled\":true,\"maxWebLogBuffer\":25,\"modbusEnabled\":false,\"forceHeatingOff\":false,\"developerMode\":false},\"devices\":[{\"type\":"
         "\"boiler\",\"name\":\"My Custom "
-        "Boiler\",\"deviceID\":\"0x08\",\"productID\":123,\"brand\":\"\",\"version\":\"01.00\",\"entities\":38,\"handlersReceived\":\"0x18\","
+        "Boiler\",\"deviceID\":\"0x08\",\"productID\":123,\"brand\":\"\",\"version\":\"01.00\",\"entities\":39,\"handlersReceived\":\"0x18\","
         "\"handlersFetched\":\"0x14 0x33\",\"handlersPending\":\"0xBF 0x10 0x11 0xC2 0xC6 0x15 0x1C 0x19 0x1A 0x35 0x34 0x2A 0xD1 0xE3 0xE4 0xE5 0xE9 0x02E0 "
         "0x2E "
         "0x3B\"},{\"type\":\"thermostat\",\"name\":\"FW120\",\"deviceID\":\"0x10\",\"productID\":192,\"brand\":\"\",\"version\":\"01.00\",\"entities\":15,"
@@ -203,7 +206,7 @@ void test_22() {
         "\"readonlyMode\":false,\"fahrenheit\":false,\"dallasParasite\":false,\"boolFormat\":1,\"boolDashboard\":1,\"enumFormat\":1,\"analogEnabled\":true,"
         "\"telnetEnabled\":true,\"maxWebLogBuffer\":25,\"modbusEnabled\":false,\"forceHeatingOff\":false,\"developerMode\":false},\"devices\":[{\"type\":"
         "\"boiler\",\"name\":\"My Custom "
-        "Boiler\",\"deviceID\":\"0x08\",\"productID\":123,\"brand\":\"\",\"version\":\"01.00\",\"entities\":38,\"handlersReceived\":\"0x18\","
+        "Boiler\",\"deviceID\":\"0x08\",\"productID\":123,\"brand\":\"\",\"version\":\"01.00\",\"entities\":39,\"handlersReceived\":\"0x18\","
         "\"handlersFetched\":\"0x14 0x33\",\"handlersPending\":\"0xBF 0x10 0x11 0xC2 0xC6 0x15 0x1C 0x19 0x1A 0x35 0x34 0x2A 0xD1 0xE3 0xE4 0xE5 0xE9 0x02E0 "
         "0x2E "
         "0x3B\"},{\"type\":\"thermostat\",\"name\":\"FW120\",\"deviceID\":\"0x10\",\"productID\":192,\"brand\":\"\",\"version\":\"01.00\",\"entities\":15,"
@@ -258,13 +261,13 @@ void test_30() {
 
 void test_31() {
     auto expected_response = "[{\"id\":\"0B_0C0D_0E0F_1011\",\"name\":\"test_tempsensor2\",\"fullname\":\"test_tempsensor2\",\"value\":45.6,\"type\":"
-                             "\"number\",\"uom\":\"°C\",\"readable\":true,\"writeable\":false,\"visible\":true}]";
+                             "\"number\",\"uom\":\"°C\",\"readable\":true,\"writeable\":false,\"visible\":true,\"is_system\":false}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/temperaturesensor/test_tempsensor2"));
 }
 
 void test_32() {
     auto expected_response = "[{\"id\":\"0B_0C0D_0E0F_1011\",\"name\":\"test_tempsensor2\",\"fullname\":\"test_tempsensor2\",\"value\":45.6,\"type\":"
-                             "\"number\",\"uom\":\"°C\",\"readable\":true,\"writeable\":false,\"visible\":true}]";
+                             "\"number\",\"uom\":\"°C\",\"readable\":true,\"writeable\":false,\"visible\":true,\"is_system\":false}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/temperaturesensor/0B_0C0D_0E0F_1011"));
 }
 

@@ -40,8 +40,8 @@ const tr: Translation = {
   RUN_COMMAND: 'Çalıştırma Komutu',
   CHANGE_VALUE: 'Değeri Değiştir',
   CANCEL: 'İptal',
-  RESET: 'Reset',
-  APPLY_CHANGES: 'Apply Changes ({0})',
+  REMOVE_ALL: 'Tümünü Kaldır',
+  APPLY_CHANGES: 'Değişiklikleri Uygula ({0})',
   UPDATE: 'Update',
   EXECUTE: 'Uygulamak',
   REMOVE: 'Kaldır',
@@ -153,7 +153,7 @@ const tr: Translation = {
   SET_ALL: 'hepsini ayarla',
   OPTIONS: 'Seçenekler',
   NAME: 'İsim',
-  CUSTOMIZATIONS_RESET: 'Sıcaklık ve Analog Sensörlerin özelleştirilmiş seçenekleri dahil bütün özelleştirmeleri kaldırmak istediğinizden emin misiniz?',
+  CUSTOMIZATIONS_RESET: 'Bütün özelleştirmeleri kaldırmak istediğinizden emin misiniz?',
   SUPPORT_INFORMATION: 'Destek Bilgileri',
   HELP_INFORMATION_1: 'EMS-ESPnin nasıl ayarlanacağı ile ilgili bilgileri edinmek için çevrimiçi WIKI sayfasını ziyaret edin',
   HELP_INFORMATION_2: 'Canlı topluluk sohbeti için Discord sunucumuza katılın',
@@ -354,7 +354,8 @@ const tr: Translation = {
   RELEASE_TYPE: 'Sürüm Tipi',
   INTERNET_CONNECTION_REQUIRED: 'Otomatik sürüm kontrolü ve güncelleme için internet bağlantısı gereklidir',
   SWITCH_RELEASE_TYPE: '{0} sürümüne geç',
-  FIRMWARE_VERSION_INFO: 'Firmware Sürüm Bilgisi'
+  FIRMWARE_VERSION_INFO: 'Firmware Sürüm Bilgisi',
+  NO_DATA: 'Hiçbir veri yok'
 };
 
 export default tr;

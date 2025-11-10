@@ -160,9 +160,11 @@ void TemperatureSensor::loop() {
                             }
                             // add new sensor. this will create the id string, empty name and offset
                             if (!found && (sensors_.size() < (MAX_SENSORS - 1))) {
+                                // LOG_NOTICE("Adding new sensor for %s", Sensor(addr).id().c_str());
                                 sensors_.emplace_back(addr);
                                 sensors_.back().read = true;
-                                changed_             = true;
+                                sensors_.back().set_is_system(false);
+                                changed_ = true;
                                 // look in the customization service for an optional alias or offset for that particular sensor
                                 sensors_.back().apply_customization();
                                 sensors_.back().temperature_c = t + sensors_.back().offset();
@@ -189,7 +191,6 @@ void TemperatureSensor::loop() {
                     bus_.depower();
                 }
                 // check for missing sensors after some samples
-                // but don't do this if running in test mode where we simulate sensors
                 if (++scancnt_ > SCAN_MAX) {
                     for (auto & sensor : sensors_) {
                         if (!sensor.read) {
@@ -214,10 +215,11 @@ void TemperatureSensor::loop() {
                             }
                         }
                         s->set_name("gateway_temperature");
+                        s->set_is_system(true); // mark as internal system temperature sensor
                         if (!EMSESP::nvs_.isKey("intTemp")) {
                             EMSESP::nvs_.putString("intTemp", s->id().c_str());
                         }
-                        s->set_is_system(true); // mark as internal system temperature sensor
+                        // LOG_NOTICE("Adding system sensor for gateway temperature %s", s->id().c_str());
                         EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
                             auto newSensor      = SensorCustomization();
                             newSensor.id        = s->id();
@@ -228,7 +230,7 @@ void TemperatureSensor::loop() {
                             return StateUpdateResult::CHANGED;
                         });
                     }
-                    // LOG_DEBUG("Adding %d sensor(s) from first scan", firstscan_);
+                    // LOG_NOTICE("Adding %d sensor(s) from first scan", firstscan_);
                 } else if ((scancnt_ <= 0) && (firstscan_ != sensors_.size())) { // check 2 times for no change of sensor #
                     scancnt_ = SCAN_START;
                     sensors_.clear(); // restart scanning and clear to get correct numbering
@@ -329,6 +331,7 @@ bool TemperatureSensor::update(const std::string & id, const std::string & name,
 
             sensor.set_name(name);
             sensor.set_offset(offset);
+            sensor.set_is_system(is_system);
 
             // store the new name and offset in our configuration
             EMSESP::webCustomizationService.update([&id, &name, &offset, &is_system, &sensor](WebCustomization & settings) {
@@ -349,7 +352,7 @@ bool TemperatureSensor::update(const std::string & id, const std::string & name,
                     newSensor.id        = id;
                     newSensor.name      = name;
                     newSensor.offset    = offset;
-                    newSensor.is_system = false; // is user defined, not system
+                    newSensor.is_system = is_system; // is user defined, not system
                     settings.sensorCustomizations.push_back(newSensor);
                     LOG_DEBUG("Adding new customization for sensor ID %s", id.c_str());
                 }
@@ -425,6 +428,7 @@ void TemperatureSensor::get_value_json(JsonObject output, const Sensor & sensor)
     output["readable"]  = true;
     output["writeable"] = false;
     output["visible"]   = true;
+    output["is_system"] = sensor.is_system();
 }
 
 // publish a single sensor to MQTT
@@ -610,6 +614,7 @@ bool TemperatureSensor::Sensor::apply_customization() {
                     LOG_DEBUG("Loading customization for temperature sensor %s", sensor.id.c_str());
                     set_name(sensor.name);
                     set_offset(sensor.offset);
+                    set_is_system(sensor.is_system);
                     return true;
                 }
             }

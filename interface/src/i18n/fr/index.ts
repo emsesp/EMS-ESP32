@@ -40,7 +40,7 @@ const fr: Translation = {
   RUN_COMMAND: 'Lancer une commande',
   CHANGE_VALUE: 'Changer la valeur',
   CANCEL: 'Annuler',
-  RESET: 'Réinitialiser',
+  REMOVE_ALL: 'Supprimer tout',
   APPLY_CHANGES: 'Appliquer les changements ({0})',
   UPDATE: 'Update',
   EXECUTE: 'Execute',
@@ -153,7 +153,7 @@ const fr: Translation = {
   SET_ALL: 'tout régler',
   OPTIONS: 'Options',
   NAME: 'Nom',
-  CUSTOMIZATIONS_RESET: 'Êtes-vous sûr de vouloir supprimer toutes les personnalisations, y compris les paramètres personnalisés des capteurs de température et analogiques ?',
+  CUSTOMIZATIONS_RESET: 'Êtes-vous sûr de vouloir supprimer toutes les personnalisations?',
   SUPPORT_INFORMATION: 'Information de support',
   HELP_INFORMATION_1: 'Visitez le wiki en ligne pour obtenir des instructions sur la façon de configurer EMS-ESP',
   HELP_INFORMATION_2: 'Pour une discussion en direct avec la communauté, rejoignez notre serveur Discord',
@@ -354,7 +354,8 @@ const fr: Translation = {
   RELEASE_TYPE: 'Type de version',
   INTERNET_CONNECTION_REQUIRED: 'Connexion Internet requise pour la vérification automatique des versions et la mise à niveau',
   SWITCH_RELEASE_TYPE: 'Passer à la version {0}',
-  FIRMWARE_VERSION_INFO: 'Informations sur la version du firmware'
+  FIRMWARE_VERSION_INFO: 'Informations sur la version du firmware',
+  NO_DATA: 'Aucune donnée'
 };
 
 export default fr;

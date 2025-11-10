@@ -30,6 +30,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - RC3xx `dhw modetype` [#2659](https://github.com/emsesp/EMS-ESP32/discussions/2659)
 - new boiler entities VR0,VR1, compressor speed [#2669](https://github.com/emsesp/EMS-ESP32/issues/2669)
 - solar temperature TS16 [#2690](https://github.com/emsesp/EMS-ESP32/issues/2690)
+- pumpmode enum for HT3 boilers, add commands for manual defrost, chimneysweeper [#2727](https://github.com/emsesp/EMS-ESP32/issues/2727)
 
 ## Fixed
 

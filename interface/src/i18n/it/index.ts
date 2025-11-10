@@ -40,14 +40,14 @@ const it: Translation = {
   RUN_COMMAND: 'Esegui',
   CHANGE_VALUE: 'Cambia Valore',
   CANCEL: 'Annulla',
-  RESET: 'Reset',
+  REMOVE_ALL: 'Rimuovi tutto',
   APPLY_CHANGES: 'Applica Cambiamenti ({0})',
   UPDATE: 'Update',
   EXECUTE: 'Execute',
   REMOVE: 'Elimina',
   PROBLEM_UPDATING: 'Problema aggiornamento',
   PROBLEM_LOADING: 'Problema caricamento',
-  ANALOG_SENSOR: 'Sensore Analogico',
+  ANALOG_SENSOR: 'Sensore Analogico', 
   ANALOG_SENSORS: 'Sensori Analogici',
   SETTINGS: 'Settings',
   UPDATED_OF: '{0} Aggiornati',
@@ -153,7 +153,7 @@ const it: Translation = {
   SET_ALL: 'imposta tutto',
   OPTIONS: 'Opzioni',
   NAME: 'Nome',
-  CUSTOMIZATIONS_RESET: 'Sei sicuro di voler rimuovere tutte le personalizzazioni incluse le impostazioni personalizzate dei sensori di temperatura e analogici?',
+  CUSTOMIZATIONS_RESET: 'Sei sicuro di voler rimuovere tutte le personalizzazioni?',
   SUPPORT_INFORMATION: 'Informazioni di Supporto',
   HELP_INFORMATION_1: 'Visita il wiki online per ottenere istruzioni su come configurare EMS-ESP',
   HELP_INFORMATION_2: 'Per la chat della community dal vivo unisciti al nostro server Discord',
@@ -354,7 +354,8 @@ const it: Translation = {
   RELEASE_TYPE: 'Tipo di rilascio',
   INTERNET_CONNECTION_REQUIRED: 'Connessione internet richiesta per il controllo automatico delle versioni e l\'aggiornamento',
   SWITCH_RELEASE_TYPE: 'Cambia in {0} rilascio',
-  FIRMWARE_VERSION_INFO: 'Informazioni sulla versione del firmware'
+  FIRMWARE_VERSION_INFO: 'Informazioni sulla versione del firmware',
+  NO_DATA: 'Nessun dato'
 };
 
 export default it;

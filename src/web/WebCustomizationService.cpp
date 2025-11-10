@@ -160,17 +160,19 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
 // deletes the customization file
 void WebCustomizationService::reset_customization(AsyncWebServerRequest * request) {
 #ifndef EMSESP_STANDALONE
-    if (LittleFS.remove(EMSESP_CUSTOMIZATION_FILE)) {
-        AsyncWebServerResponse * response = request->beginResponse(205); // restart needed
-        request->send(response);
-        emsesp::EMSESP::system_.systemStatus(
-            emsesp::SYSTEM_STATUS::SYSTEM_STATUS_PENDING_RESTART); // will be handled by the main loop. We use pending for the Web's SystemMonitor
-        return;
-    }
 
-    // failed
-    AsyncWebServerResponse * response = request->beginResponse(400); // bad request
+    EMSESP::webCustomizationService.update([](WebCustomization & settings) {
+        // remove entityCustomizations
+        settings.entityCustomizations.clear(); // clear the masked_entities list
+        return StateUpdateResult::CHANGED;
+    });
+
+    AsyncWebServerResponse * response = request->beginResponse(200);
     request->send(response);
+    emsesp::EMSESP::system_.systemStatus(
+        emsesp::SYSTEM_STATUS::SYSTEM_STATUS_PENDING_RESTART); // will be handled by the main loop. We use pending for the Web's SystemMonitor
+    return;
+
 #endif
 }
 

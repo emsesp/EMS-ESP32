@@ -40,7 +40,7 @@ const pl: BaseTranslation = {
   RUN_COMMAND: 'Wykonaj komendę',
   CHANGE_VALUE: 'Zmiana wartości',
   CANCEL: 'Anuluj',
-  RESET: 'Reset{{uj|owanie|}}',
+  REMOVE_ALL: 'Usuń wszystko',
   APPLY_CHANGES: 'Zapisz zmiany ({0})',
   UPDATE: 'Zmień',
   EXECUTE: 'Wykonaj',
@@ -153,7 +153,7 @@ const pl: BaseTranslation = {
   SET_ALL: 'Ustaw wszystko jako',
   OPTIONS: 'Opcje',
   NAME: '{{Nazwa|nazwa|}}',
-  CUSTOMIZATIONS_RESET: 'Na pewno chcesz usunąć wszystkie personalizacje łącznie z ustawieniami dla czujników temperatury 1-Wire® i urządzeń podłączonych do EMS-ESP?',
+  CUSTOMIZATIONS_RESET: 'Na pewno chcesz usunąć wszystkie personalizacje?',
   SUPPORT_INFORMATION: '{{I|i|}}nformacj{{e|i|}} o systemie',
   HELP_INFORMATION_1: 'Skorzystaj z wiki w internecie aby uzyskać instrukcje dotyczące konfiguracji EMS-ESP',
   HELP_INFORMATION_2: 'Dołącz do naszego serwera Discord by komunikować się na żywo ze społecznością',
@@ -354,7 +354,8 @@ const pl: BaseTranslation = {
   RELEASE_TYPE: 'Typ wydania',
   INTERNET_CONNECTION_REQUIRED: 'Połączenie internetowe jest wymagane do automatycznej kontroli wersji i aktualizacji',
   SWITCH_RELEASE_TYPE: 'Zmień na {0} wydanie',
-  FIRMWARE_VERSION_INFO: 'Informacje o wersji firmware'
+  FIRMWARE_VERSION_INFO: 'Informacje o wersji firmware',
+  NO_DATA: 'Brak danych'
 };
 
 export default pl;

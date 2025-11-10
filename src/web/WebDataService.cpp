@@ -423,7 +423,7 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
     }
 
     // add analog sensors, count excludes disabled entries
-    if (EMSESP::analog_enabled() && EMSESP::analogsensor_.count_entities(false)) {
+    if (EMSESP::analog_enabled() && EMSESP::analogsensor_.count_entities(true)) {
         JsonObject obj  = nodes.add<JsonObject>();
         obj["id"]       = EMSdevice::DeviceTypeUniqueID::ANALOGSENSOR_UID; // it's unique id
         obj["t"]        = EMSdevice::DeviceType::ANALOGSENSOR;             // device type number

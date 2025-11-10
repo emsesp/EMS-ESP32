@@ -40,7 +40,7 @@ const no: Translation = {
   RUN_COMMAND: 'Kjør kommando',
   CHANGE_VALUE: 'Endre Verdi',
   CANCEL: 'Avbryt',
-  RESET: 'Nullstill',
+  REMOVE_ALL: 'Fjern alles',
   APPLY_CHANGES: 'Utfør endringer({0})',
   UPDATE: 'Oppdater',
   EXECUTE: 'Utfør',
@@ -153,7 +153,7 @@ const no: Translation = {
   SET_ALL: 'sett alle',
   OPTIONS: 'Alternativ',
   NAME: 'Navn',
-  CUSTOMIZATIONS_RESET: 'Er du sikker på att du vil fjerne tilpassninger inkludert innstillinger for Temperatur og Analoge sensorer?',
+  CUSTOMIZATIONS_RESET: 'Er du sikker på att du vil fjerne tilpassninger?',
   SUPPORT_INFORMATION: 'Supportinformasjon',
   HELP_INFORMATION_1: 'Besøk wiki for instruksjoner for å konfigurere EMS-ESP',
   HELP_INFORMATION_2: 'For community-support besøk vår Discord-server',
@@ -354,7 +354,8 @@ const no: Translation = {
   RELEASE_TYPE: 'Utgivelses type',
   INTERNET_CONNECTION_REQUIRED: 'Internettilkobling kreves for automatisk versjonskontroll og oppgradering',
   SWITCH_RELEASE_TYPE: 'Bytt til {0} utgivelse',
-  FIRMWARE_VERSION_INFO: 'Informasjon om firmwareversjon'
+  FIRMWARE_VERSION_INFO: 'Informasjon om firmwareversjon',
+  NO_DATA: 'Ingen data'
 };
 
 export default no;

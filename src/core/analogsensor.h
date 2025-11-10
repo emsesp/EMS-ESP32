@@ -164,8 +164,8 @@ class AnalogSensor {
         return (!sensors_.empty());
     }
 
-    size_t count_entities(bool include_disabled = true) const {
-        if (!include_disabled) {
+    size_t count_entities(bool exclude_disabled_system = false) const {
+        if (exclude_disabled_system) {
             // count number of items in sensors_ where type is not set to disabled and not a system sensor
             return std::count_if(sensors_.begin(), sensors_.end(), [](const Sensor & sensor) {
                 return sensor.type() != AnalogSensor::AnalogType::NOTUSED && !sensor.is_system();
