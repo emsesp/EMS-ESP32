@@ -4524,7 +4524,7 @@ router
     settings = await request.json();
     console.log('application settings saved', settings);
     return status(200); // no restart needed
-    // return status(205); // restart needed
+    // return status(205); // reboot required
   })
 
   // Device Data
@@ -4559,9 +4559,8 @@ router
     let dashboard_object: { id?: number; n?: string; t?: number; nodes?: any[] } =
       {};
 
-    let fake = false;
-
-    // fake = true; // for testing, shows a subset of data
+    // let fake = false;
+    let fake = true; // toggle for testing, shows a subset of data
 
     if (!fake) {
       // pick EMS devices from coredata
@@ -4614,8 +4613,7 @@ router
       }
 
       // add analog sensor data. no command c
-      // remove disabled sensors first (t = 0) and create data in one pass
-      // remove system sensors first
+      // remove disabled and system sensors first (t = 0) and create data in one pass
       const enabledAnalogSensors = emsesp_sensordata.as.filter(
         (item) => item.t !== 0 && !item.s
       );
@@ -4658,17 +4656,15 @@ router
       }
     } else {
       // for testing only
-
       // add the custom entity data
-      dashboard_object = {
-        id: DeviceTypeUniqueID.CUSTOM_UID, // unique ID for custom entities
-        t: DeviceType.CUSTOM,
-        nodes: getDashboardEntityData(DeviceTypeUniqueID.CUSTOM_UID)
-      };
-      if ((dashboard_object.nodes ?? []).length > 0) {
-        dashboard_nodes.push(dashboard_object);
-      }
-
+      // dashboard_object = {
+      //   id: DeviceTypeUniqueID.CUSTOM_UID, // unique ID for custom entities
+      //   t: DeviceType.CUSTOM,
+      //   nodes: getDashboardEntityData(DeviceTypeUniqueID.CUSTOM_UID)
+      // };
+      // if ((dashboard_object.nodes ?? []).length > 0) {
+      //   dashboard_nodes.push(dashboard_object);
+      // }
       // add the scheduler data
       // let scheduler_data = emsesp_schedule.schedule.filter((item) => item.name);
       // let scheduler_data2 = scheduler_data.map((item, index) => ({
