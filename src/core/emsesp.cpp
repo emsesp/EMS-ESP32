@@ -1714,9 +1714,11 @@ void EMSESP::start() {
     // loads core system services settings (network, mqtt, ap, ntp etc)
     esp32React.begin();
 
+#ifndef EMSESP_STANDALONE
     if (!root) {
         LOG_WARNING("No settings found on filesystem. Using factory settings.");
     }
+#endif
 
 #ifndef EMSESP_STANDALONE
     LOG_INFO("EMS-ESP version %s", EMSESP_APP_VERSION);
