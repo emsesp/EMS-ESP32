@@ -114,9 +114,9 @@ class TemperatureSensor {
         return (!sensors_.empty());
     }
 
-    size_t count_entities(bool include_system = true) const {
-        return std::count_if(sensors_.begin(), sensors_.end(), [include_system](const Sensor & sensor) {
-            return include_system ? sensor.is_system() : !sensor.is_system();
+    size_t count_entities(bool exclude_disabled_system = false) const {
+        return std::count_if(sensors_.begin(), sensors_.end(), [exclude_disabled_system](const Sensor & sensor) {
+            return exclude_disabled_system ? !sensor.is_system() : sensor.is_system();
         });
     }
 
