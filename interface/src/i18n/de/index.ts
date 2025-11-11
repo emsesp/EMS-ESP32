@@ -40,7 +40,7 @@ const de: Translation = {
   RUN_COMMAND: 'Befehl ausführen',
   CHANGE_VALUE: 'Wert ändern',
   CANCEL: 'Abbrechen',
-  REMOVE_ALL: 'Entfernen alles',
+  REMOVE_ALL: 'Alles entfernen',
   APPLY_CHANGES: 'Änderungen anwenden ({0})',
   UPDATE: 'Aktualisieren',
   EXECUTE: 'Ausführen',
