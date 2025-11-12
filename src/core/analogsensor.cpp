@@ -481,7 +481,7 @@ bool AnalogSensor::update(uint8_t gpio, std::string & name, double offset, doubl
         for (auto & AnalogCustomization : settings.analogCustomizations) {
             if (AnalogCustomization.type == AnalogType::COUNTER
                 || (AnalogCustomization.type >= AnalogType::DIGITAL_OUT && AnalogCustomization.type <= AnalogType::PWM_2)
-                || AnalogCustomization.type >= AnalogType::RGB) {
+                || AnalogCustomization.type == AnalogType::RGB || AnalogCustomization.type == AnalogType::PULSE) {
                 Command::erase_command(EMSdevice::DeviceType::ANALOGSENSOR, AnalogCustomization.name.c_str());
             }
             if (name.empty()) {
@@ -586,9 +586,9 @@ void AnalogSensor::remove_ha_topic(const int8_t type, const uint8_t gpio) const 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
 
 #if CONFIG_IDF_TARGET_ESP32
-    if (type == AnalogType::DIGITAL_OUT && gpio != 25 && gpio != 26) {
+    if (type == AnalogType::PULSE || (type == AnalogType::DIGITAL_OUT && gpio != 25 && gpio != 26)) {
 #else
-    if (type == AnalogType::DIGITAL_OUT) {
+    if (type == AnalogType::PULSE || type == AnalogType::DIGITAL_OUT) {
 #endif
         snprintf(topic, sizeof(topic), "switch/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), gpio);
     } else if (type == AnalogType::DIGITAL_OUT) { // DAC
@@ -627,23 +627,11 @@ void AnalogSensor::publish_values(const bool force) {
                 char       s[10];
                 JsonObject dataSensor = doc[Helpers::smallitoa(s, sensor.gpio())].to<JsonObject>();
                 dataSensor["name"]    = sensor.name();
-                switch (sensor.type()) {
-                case AnalogType::COUNTER:
-                case AnalogType::TIMER:
-                case AnalogType::RATE:
-                case AnalogType::ADC:
-                case AnalogType::PWM_0:
-                case AnalogType::PWM_1:
-                case AnalogType::PWM_2:
-                case AnalogType::FREQ_0:
-                case AnalogType::FREQ_1:
-                case AnalogType::FREQ_2:
-                case AnalogType::RGB:
-                case AnalogType::NTC:
-                    dataSensor["value"] = serialized(Helpers::render_value(s, sensor.value(), 2)); // double
-                    break;
-                case AnalogType::DIGITAL_IN:
-                case AnalogType::DIGITAL_OUT:
+#if CONFIG_IDF_TARGET_ESP32
+                if (sensor.type() == AnalogType::PULSE || (sensor.type() == AnalogType::DIGITAL_OUT && sensor.gpio() != 25 && sensor.gpio() != 26)) {
+#else
+                if (sensor.type() == AnalogType::PULSE || sensor.type() == AnalogType::DIGITAL_OUT) {
+#endif
                     if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
                         dataSensor["value"] = sensor.value() != 0;
                     } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
@@ -652,11 +640,10 @@ void AnalogSensor::publish_values(const bool force) {
                         char result[12];
                         dataSensor["value"] = Helpers::render_boolean(result, sensor.value() != 0);
                     }
-                    break;
-                default:
-                    break;
+                } else {
+                    dataSensor["value"] = serialized(Helpers::render_value(s, sensor.value(), 2)); // double
                 }
-            } else if (sensor.type() == AnalogType::DIGITAL_IN || sensor.type() == AnalogType::DIGITAL_OUT) {
+            } else if (sensor.type() == AnalogType::DIGITAL_IN || sensor.type() == AnalogType::DIGITAL_OUT || sensor.type() == AnalogType::PULSE) {
                 if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
                     doc[sensor.name()] = sensor.value() != 0;
                 } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
@@ -690,7 +677,7 @@ void AnalogSensor::publish_values(const bool force) {
                     snprintf(val_cond, sizeof(val_cond), "%s is defined", val_obj);
                 }
                 char sample_val[12] = "0";
-                if (sensor.type() == AnalogType::DIGITAL_IN || sensor.type() == AnalogType::DIGITAL_OUT) {
+                if (sensor.type() == AnalogType::DIGITAL_IN || sensor.type() == AnalogType::DIGITAL_OUT || sensor.type() == AnalogType::PULSE) {
                     Helpers::render_boolean(sample_val, false);
                 }
                 // don't bother with value template conditions if using Domoticz which doesn't fully support MQTT Discovery
@@ -713,7 +700,7 @@ void AnalogSensor::publish_values(const bool force) {
                 snprintf(name, sizeof(name), "%s", sensor.name().c_str());
                 config["name"] = name;
 
-                if (sensor.uom() != DeviceValueUOM::NONE) {
+                if (sensor.uom() != DeviceValueUOM::NONE && sensor.type() != AnalogType::DIGITAL_OUT) {
                     config["unit_of_meas"] = EMSdevice::uom_to_string(sensor.uom());
                 }
 
@@ -722,9 +709,9 @@ void AnalogSensor::publish_values(const bool force) {
                 // Set commands for some analog types
                 char command_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
 #if CONFIG_IDF_TARGET_ESP32
-                if (sensor.type() == AnalogType::DIGITAL_OUT && sensor.gpio() != 25 && sensor.gpio() != 26) {
+                if (sensor.type() == AnalogType::PULSE || (sensor.type() == AnalogType::DIGITAL_OUT && sensor.gpio() != 25 && sensor.gpio() != 26)) {
 #else
-                if (sensor.type() == AnalogType::DIGITAL_OUT) {
+                if (sensor.type() == AnalogType::PULSE || sensor.type() == AnalogType::DIGITAL_OUT) {
 #endif
                     snprintf(topic, sizeof(topic), "switch/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
                     snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(analogsensor), sensor.name().c_str());
@@ -863,10 +850,16 @@ void AnalogSensor::get_value_json(JsonObject output, const Sensor & sensor) {
         output["max"]       = 100;
         output["uom"]       = EMSdevice::uom_to_string(sensor.uom());
     } else if (sensor.type() == AnalogType::DIGITAL_OUT) {
-        output["min"]   = 0;
-        output["max"]   = sensor.gpio() == 25 || sensor.gpio() == 26 ? 255 : 1;
-        char state[][2] = {"?", "0", "1"};
-        output["start"] = state[sensor.uom()];
+        output["min"] = 0;
+#if CONFIG_IDF_TARGET_ESP32
+        output["max"] = sensor.gpio() == 25 || sensor.gpio() == 26 ? 255 : 1;
+#else
+        output["max"] = 1;
+#endif
+        output["start"] = sensor.uom() == 1 ? "0" : sensor.uom() == 2 ? "1" : "?";
+    } else if (sensor.type() == AnalogType::PULSE) {
+        output["min"] = 0;
+        output["max"] = 1;
     }
 }
 
