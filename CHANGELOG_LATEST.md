@@ -22,7 +22,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - Internal sensors of E32V2_2
 - FW200 display options [#2610](https://github.com/emsesp/EMS-ESP32/discussions/2610)
 - CR11 mode settings OFF/MANUAL depends on selTemp [#2437](https://github.com/emsesp/EMS-ESP32/issues/2437)
-- Fuse settings for BBQKees boards
+- implemented eFuse settings for BBQKees boards to store model type and ESP chipset
 - Analogsensors for pulse output [#2624](https://github.com/emsesp/EMS-ESP32/discussions/2624)
 - Analogsensors frequency input [#2631](https://github.com/emsesp/EMS-ESP32/discussions/2631)
 - SRC plus thermostats [#2636](https://github.com/emsesp/EMS-ESP32/issues/2636)
@@ -63,3 +63,4 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - internal system analog sensors (core_voltage, supply_voltage and gateway_temperature) cannot be accidentally removed
 - double click button reconnects EMS-ESP to AP
 - place system message command in side scheduler loop to reduce stack memory usage by 2KB
+- syslog mark interval set to 60 seconds

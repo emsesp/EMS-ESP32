@@ -47,7 +47,7 @@ const it: Translation = {
   REMOVE: 'Elimina',
   PROBLEM_UPDATING: 'Problema aggiornamento',
   PROBLEM_LOADING: 'Problema caricamento',
-  ANALOG_SENSOR: 'Sensore Analogico', 
+  ANALOG_SENSOR: 'Sensore Analogico',
   ANALOG_SENSORS: 'Sensori Analogici',
   SETTINGS: 'Settings',
   UPDATED_OF: '{0} Aggiornati',
@@ -355,7 +355,8 @@ const it: Translation = {
   INTERNET_CONNECTION_REQUIRED: 'Connessione internet richiesta per il controllo automatico delle versioni e l\'aggiornamento',
   SWITCH_RELEASE_TYPE: 'Cambia in {0} rilascio',
   FIRMWARE_VERSION_INFO: 'Informazioni sulla versione del firmware',
-  NO_DATA: 'Nessun dato'
+  NO_DATA: 'Nessun dato',
+  USER_PROFILE: 'Profilo utente'
 };
 
 export default it;

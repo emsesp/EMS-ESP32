@@ -284,7 +284,6 @@ const Version = () => {
   const [downloadOnly, setDownloadOnly] = useState<boolean>(false);
   const [showVersionInfo, setShowVersionInfo] = useState<number>(0);
 
-  // API calls with optimized error handling
   const { send: sendCheckUpgrade } = useRequest(
     (versions: string) => callAction({ action: 'checkUpgrade', param: versions }),
     { immediate: false }

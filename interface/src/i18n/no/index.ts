@@ -355,7 +355,8 @@ const no: Translation = {
   INTERNET_CONNECTION_REQUIRED: 'Internettilkobling kreves for automatisk versjonskontroll og oppgradering',
   SWITCH_RELEASE_TYPE: 'Bytt til {0} utgivelse',
   FIRMWARE_VERSION_INFO: 'Informasjon om firmwareversjon',
-  NO_DATA: 'Ingen data'
+  NO_DATA: 'Ingen data',
+  USER_PROFILE: 'Brukerprofil'
 };
 
 export default no;

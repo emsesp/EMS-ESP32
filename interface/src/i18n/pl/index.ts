@@ -355,7 +355,8 @@ const pl: BaseTranslation = {
   INTERNET_CONNECTION_REQUIRED: 'Połączenie internetowe jest wymagane do automatycznej kontroli wersji i aktualizacji',
   SWITCH_RELEASE_TYPE: 'Zmień na {0} wydanie',
   FIRMWARE_VERSION_INFO: 'Informacje o wersji firmware',
-  NO_DATA: 'Brak danych'
+  NO_DATA: 'Brak danych',
+  USER_PROFILE: 'Profil użytkownika'
 };
 
 export default pl;
