@@ -1,4 +1,4 @@
-// Optimized exports - use direct exports to reduce bundle size
+// use direct exports to reduce bundle size
 export { default as SectionContent } from './SectionContent';
 export { default as ButtonRow } from './ButtonRow';
 export { default as MessageBox } from './MessageBox';

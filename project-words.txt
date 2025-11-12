@@ -1437,3 +1437,9 @@ switchprogram
 brotlin
 fanspd
 currhum
+pumpstep
+constmed
+constlow
+proplow
+chimneysweeper
+ 

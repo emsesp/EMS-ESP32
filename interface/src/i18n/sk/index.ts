@@ -355,7 +355,8 @@ const sk: Translation = {
   INTERNET_CONNECTION_REQUIRED: 'Internetové pripojenie je potrebné pre automatickú kontrolu a aktualizáciu',
   SWITCH_RELEASE_TYPE: 'Prepnúť na {0} verziu',
   FIRMWARE_VERSION_INFO: 'Informácie o verzii firmware',
-  NO_DATA: 'Žiadne dáta'
+  NO_DATA: 'Žiadne dáta',
+  USER_PROFILE: 'Profil používateľa'
 };
 
 export default sk;

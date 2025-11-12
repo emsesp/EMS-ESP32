@@ -11,9 +11,29 @@ export const numberValue = (value?: number): string =>
 export const extractEventValue = (
   event: React.ChangeEvent<HTMLInputElement>
 ): string | number | boolean => {
-  const { type, valueAsNumber, checked, value } = event.target;
+  const { type, checked, value } = event.target;
 
-  if (type === 'number') return valueAsNumber;
+  if (type === 'number') {
+    if (value === '') return NaN;
+
+    const normalizedValue = value.replace(',', '.');
+
+    // For incomplete number entries, keep the raw string to allow smooth typing
+    // This includes: "0.", "1.0", "0.00", "-", "-.", "-.5", etc.
+    const endsWithDecimalAndZeros = /\.\d*0$/.test(normalizedValue);
+    const isIncomplete =
+      normalizedValue.endsWith('.') ||
+      normalizedValue === '-' ||
+      normalizedValue === '-.' ||
+      endsWithDecimalAndZeros;
+
+    if (isIncomplete) {
+      return normalizedValue;
+    }
+
+    const parsedValue = parseFloat(normalizedValue);
+    return parsedValue;
+  }
   if (type === 'checkbox') return checked;
   return value;
 };

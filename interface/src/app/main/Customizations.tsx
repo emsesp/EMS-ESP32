@@ -512,22 +512,24 @@ const Customizations = () => {
               </Button>
             </>
           ) : (
-            <Button
-              startIcon={<EditIcon />}
-              variant="outlined"
-              onClick={() => setRename(true)}
-            >
-              {LL.RENAME()}
-            </Button>
+            <>
+              <Button
+                startIcon={<EditIcon />}
+                variant="outlined"
+                onClick={() => setRename(true)}
+              >
+                {LL.RENAME()}
+              </Button>
+              <Button
+                startIcon={<SettingsBackupRestoreIcon />}
+                variant="outlined"
+                color="error"
+                onClick={() => setConfirmReset(true)}
+              >
+                {LL.REMOVE_ALL()}
+              </Button>
+            </>
           ))}
-        <Button
-          startIcon={<SettingsBackupRestoreIcon />}
-          variant="outlined"
-          color="error"
-          onClick={() => setConfirmReset(true)}
-        >
-          {LL.REMOVE_ALL()}
-        </Button>
       </Box>
     </>
   );

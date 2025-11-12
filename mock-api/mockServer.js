@@ -7,7 +7,7 @@ const VALID_EXTENSIONS = new Set(['bin', 'json', 'md5']);
 const ONE_SECOND_MS = 1000;
 const TEN_PERCENT = 10;
 
-// Optimized padding function
+// padding function
 const pad = (number) => String(number).padStart(2, '0');
 
 // Simple throttle helper (time-based)
