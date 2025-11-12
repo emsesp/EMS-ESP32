@@ -100,6 +100,7 @@ class Boiler : public EMSdevice {
     uint8_t  wwAlternatingOper_; // alternating operation on/off
     uint8_t  wwAltOpPrioHeat_;   // alternating operation, prioritize heat time
     uint8_t  wwAltOpPrioWw_;     // alternating operation, prioritize dhw time
+    uint8_t wwPrio_;
 
     // special function
     uint8_t forceHeatingOff_;
@@ -424,6 +425,7 @@ class Boiler : public EMSdevice {
     bool        set_ww_maxtemp(const char * value, const int8_t id);
     bool        set_ww_flowTempOffset(const char * value, const int8_t id);
     bool        set_ww_chargeOptimization(const char * value, const int8_t id);
+    bool        set_ww_prio(const char * value, const int8_t id);
     bool        set_flow_temp(const char * value, const int8_t id);
     bool        set_burn_power(const char * value, const int8_t id);
     bool        set_heating_activated(const char * value, const int8_t id);

@@ -31,7 +31,7 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
         register_telegram_type(device_id - 0x20 + 0x02D7, "MMPLUSStatusMessage", false, MAKE_PF_CB(process_MMPLUSStatusMessage_HC));
         // register_telegram_type(device_id - 0x20 + 0x02E1, "MMPLUSSetMessage", true, MAKE_PF_CB(process_MMPLUSSetMessage_HC));
-        register_telegram_type(device_id - 0x20 + 0x02CD, "MMPLUSConfigMessage", true, MAKE_PF_CB(process_MMPLUSConfigMessage_HC));
+        register_telegram_type(device_id - 0x20 + 0x02CD, "MMPLUSConfigMessage", false, MAKE_PF_CB(process_MMPLUSConfigMessage_HC));
         register_device_value(tag, &flowTempHc_, DeviceValueType::UINT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(flowTempHc), DeviceValueUOM::DEGREES);
         register_device_value(tag, &status_, DeviceValueType::UINT8, FL_(mixerStatus), DeviceValueUOM::PERCENT);
         register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT8, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
@@ -50,7 +50,8 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
                               10,
                               600);
         register_device_value(tag, &flowTempOffset_, DeviceValueType::UINT8, FL_(flowtempoffset), DeviceValueUOM::K, MAKE_CF_CB(set_flowTempOffset), 0, 20);
-        // EMSESP::send_read_request(device_id - 0x20 + 0x02CD, device_id, 0, 3);
+        register_device_value(tag, &wwprio_, DeviceValueType::BOOL, FL_(wwprio), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwprio));
+        EMSESP::send_read_request(device_id - 0x20 + 0x02CD, device_id, 0, 3);
     }
 
     // EMS 1.0
@@ -157,6 +158,7 @@ void Mixer::process_MMPLUSConfigMessage_HC(std::shared_ptr<const Telegram> teleg
     has_update(telegram, activated_, 0);      // on = 0xFF
     has_update(telegram, setValveTime_, 1);   // valve runtime in 10 sec, default 120 s, max 600 s
     has_update(telegram, flowTempOffset_, 2); // Mixer increase [0-20 K]
+    has_update(telegram, wwprio_, 3);
     has_update(telegram, pressure_, 9);
 }
 
@@ -283,6 +285,16 @@ bool Mixer::set_pressure(const char * value, const int8_t id) {
     }
     uint8_t hc = device_id() - 0x20;
     write_command(0x2CD + hc, 9, v / 50, 0x2CD + hc);
+    return true;
+}
+
+bool Mixer::set_wwprio(const char * value, const int8_t id) {
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
+        return false;
+    }
+    uint8_t hc = device_id() - 0x20;
+    write_command(0x2CD + hc, 3, b ? 0xFF: 0, 0x2CD + hc);
     return true;
 }
 
