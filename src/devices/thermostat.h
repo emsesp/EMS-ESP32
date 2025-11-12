@@ -113,6 +113,11 @@ class Thermostat : public EMSdevice {
         int8_t  currSolarInfl;
         int8_t  solarInfl;
 
+        uint8_t heatingpid;
+        uint8_t pumpopt;
+        uint8_t inttimefloor;
+        uint8_t inttime;
+
         uint8_t hc_num() const {
             return hc_num_;
         }
@@ -466,6 +471,7 @@ class Thermostat : public EMSdevice {
     void process_RemoteBattery(std::shared_ptr<const Telegram> telegram);
     void process_HPSet(std::shared_ptr<const Telegram> telegram);
     void process_HPMode(std::shared_ptr<const Telegram> telegram);
+    void process_PID(std::shared_ptr<const Telegram> telegram);
 
     // internal helper functions
     bool set_mode_n(const uint8_t mode, const int8_t id);
@@ -643,6 +649,9 @@ class Thermostat : public EMSdevice {
     bool set_reducehours(const char * value, const int8_t id);
     bool set_backlight(const char * value, const int8_t id);
     bool set_heatingpid(const char * value, const int8_t id);
+    bool set_pumpopt(const char * value, const int8_t id);
+    bool set_inttime(const char * value, const int8_t id);
+    bool set_inttimefloor(const char * value, const int8_t id);
     bool set_brightness(const char * value, const int8_t id);
     bool set_autodst(const char * value, const int8_t id);
     bool set_preheating(const char * value, const int8_t id);

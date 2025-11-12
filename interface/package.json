@@ -53,7 +53,7 @@
     "@preact/preset-vite": "^2.10.2",
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",
     "@types/node": "^24.10.1",
-    "@types/react": "^19.2.3",
+    "@types/react": "^19.2.4",
     "@types/react-dom": "^19.2.3",
     "axe-core": "^4.11.0",
     "concurrently": "^9.2.1",
@@ -67,5 +67,5 @@
     "vite-plugin-imagemin": "^0.6.1",
     "vite-tsconfig-paths": "^5.1.4"
   },
-  "packageManager": "pnpm@10.21.0+sha512.da3337267e400fdd3d479a6c68079ac6db01d8ca4f67572083e722775a796788a7a9956613749e000fac20d424b594f7a791a5f4e2e13581c5ef947f26968a40"
+  "packageManager": "pnpm@10.22.0"
 }

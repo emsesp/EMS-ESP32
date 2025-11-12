@@ -227,8 +227,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 
 ### Greenstar 2000
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -302,9 +303,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -343,8 +344,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -422,9 +424,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -463,8 +465,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -542,9 +545,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -583,8 +586,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -662,9 +666,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -703,8 +707,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -782,9 +787,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -823,8 +828,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -902,9 +908,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -943,8 +949,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -1022,9 +1029,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -1063,8 +1070,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -1142,9 +1150,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -1183,8 +1191,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -1262,9 +1271,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -1303,8 +1312,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -1382,9 +1392,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -1423,8 +1433,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -1502,9 +1513,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -1543,8 +1554,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -1622,9 +1634,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -1663,8 +1675,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -1742,9 +1755,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -1783,8 +1796,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -1862,9 +1876,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -1903,8 +1917,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -1982,9 +1997,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -2023,8 +2038,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -2102,9 +2118,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -2143,8 +2159,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -2222,9 +2239,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -2263,8 +2280,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -2342,9 +2360,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -2383,8 +2401,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -2462,9 +2481,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -2503,8 +2522,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -2582,9 +2602,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -2623,8 +2643,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -2845,8 +2866,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 
 ### Geo 5xx
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -3063,8 +3085,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 
 ### Condens 5000i, Greenstar 8000/GC9800IW, GB192i*2
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -3138,9 +3161,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -3179,8 +3202,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -3258,9 +3282,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -3299,8 +3323,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -3378,9 +3403,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -3419,8 +3444,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -3498,9 +3524,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -3539,8 +3565,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -3618,9 +3645,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -3659,8 +3686,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -3738,9 +3766,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -3779,8 +3807,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -3791,7 +3820,7 @@
 |-|-|-|-|-|-|-|-|-|
 | netflowtemp | heat network flow temp | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 277 | 1 | 1/10 |
 | heatvalve | heating valve | uint8 (>=0<=100) | % | false | DEVICE_DATA | 278 | 1 | 1 |
-| dhw.dhwvalve | valve | uint8 (>=0<=100) | % | false | DHW | 74 | 1 | 1 |
+| dhw.dhwvalve | valve | uint8 (>=0<=100) | % | false | DHW | 75 | 1 | 1 |
 | keepwarmtemp | keep warm temperature | uint8 (>=0<=254) | C | true | DEVICE_DATA | 279 | 1 | 1 |
 | setreturntemp | set temp return | uint8 (>=0<=254) | C | true | DEVICE_DATA | 280 | 1 | 1 |
 | heating | heating | boolean |   | false | DEVICE_DATA | 281 | 1 | 1 |
@@ -3842,9 +3871,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -3883,8 +3912,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 
 ### Logamax Plus GB122, Condense 2300, Junkers Cerapur GC2200W
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -3958,9 +3988,9 @@
 | meterheat | meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 97 | 2 | 1/10 |
 | dhw.meter | meter | uint24 (>=0<=1677721) | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 272 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 70 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 (>=0<=1677721) | kWh | false | DHW | 71 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 274 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 72 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 (>=0<=1677721) | kWh | false | DHW | 73 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | false | DHW | 29 | 1 | 1 |
 | dhw.seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 30 | 1 | 1 |
@@ -3999,8 +4029,9 @@
 | dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
 | dhw.mixertemp | mixer temperature | uint16 (>=0<=3199) | C | false | DHW | 64 | 1 | 1/10 |
 | dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 (>=0<=3199) | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 66 | 2 | 1 |
-| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 68 | 2 | 1 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
+| dhw.starts | starts | uint24 (>=0<=16777214) |   | false | DHW | 67 | 2 | 1 |
+| dhw.workm | active time | time (>=0<=16777214) | minutes | false | DHW | 69 | 2 | 1 |
 | nompower | nominal Power | uint8 (>=0<=254) | kW | true | DEVICE_DATA | 276 | 1 | 1 |
 | nrgtotal | total energy | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 85 | 2 | 1/100 |
 | nrgheat | energy heating | uint24 (>=0<=10000000) | kWh | true | DEVICE_DATA | 87 | 2 | 1/100 |
@@ -4108,6 +4139,10 @@
 | hc1.redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 53 | 1 | 1/2 |
 | hc1.solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 54 | 1 | 1 |
 | hc1.currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 55 | 1 | 1/10 |
+| hc1.heatingpid | heating PID | enum [fast\|medium\|slow] |   | true | HC | 56 | 1 | 1 |
+| hc1.pumpopt | pump optimization | boolean |   | true | HC | 57 | 1 | 1 |
+| hc1.inttimefloor | integral time floor | uint8 (>=160<=320) | minutes | true | HC | 58 | 1 | 10 |
+| hc1.inttime | integral time | uint8 (>=3<=80) | minutes | true | HC | 59 | 1 | 1 |
 | dhw.mode | operating mode | enum [off\|eco+\|eco\|comfort\|auto] |   | true | DHW | 0 | 1 | 1 |
 | dhw.modetype | mode type | enum [off\|eco\|comfort\|eco+] |   | false | DHW | 1 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 |
@@ -4146,8 +4181,8 @@
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [night\|day\|auto] |   | true | HC | 3 | 1 | 1 |
 | hc1.modetype | mode type | enum [night\|day] |   | false | HC | 4 | 1 | 1 |
-| hc1.daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 56 | 1 | 1/2 |
-| hc1.nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 57 | 1 | 1/2 |
+| hc1.daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 60 | 1 | 1/2 |
+| hc1.nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 61 | 1 | 1/2 |
 | hc1.program | program | enum [family\|morning\|evening\|am\|pm\|midday\|singles\|seniors] |   | true | HC | 26 | 1 | 1 |
 | hc1.minflowtemp | min flow temperature | uint8 (>=0<=254) | C | true | HC | 11 | 1 | 1 |
 | hc1.maxflowtemp | max flow temperature | uint8 (>=0<=254) | C | true | HC | 12 | 1 | 1 |
@@ -4177,40 +4212,40 @@
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [night\|day\|auto] |   | true | HC | 3 | 1 | 1 |
 | hc1.modetype | mode type | enum [night\|day] |   | false | HC | 4 | 1 | 1 |
-| hc1.daytemp | day temperature | uint8 (>=10<=30) | C | true | HC | 56 | 1 | 1/2 |
-| hc1.nighttemp | night temperature | uint8 (>=10<=30) | C | true | HC | 57 | 1 | 1/2 |
+| hc1.daytemp | day temperature | uint8 (>=10<=30) | C | true | HC | 60 | 1 | 1/2 |
+| hc1.nighttemp | night temperature | uint8 (>=10<=30) | C | true | HC | 61 | 1 | 1/2 |
 | hc1.designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 |
 | hc1.offsettemp | offset temperature | int8 (>=-5<=5) | C | true | HC | 10 | 1 | 1/2 |
-| hc1.holidaytemp | holiday temperature | uint8 (>=5<=30) | C | true | HC | 58 | 1 | 1/2 |
+| hc1.holidaytemp | holiday temperature | uint8 (>=5<=30) | C | true | HC | 62 | 1 | 1/2 |
 | hc1.targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 |
 | hc1.summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1 |
 | hc1.summermode | summer mode | enum [winter\|summer] |   | false | HC | 22 | 1 | 1 |
-| hc1.holidaymode | holiday mode | boolean |   | false | HC | 59 | 1 | 1 |
+| hc1.holidaymode | holiday mode | boolean |   | false | HC | 63 | 1 | 1 |
 | hc1.nofrosttemp | nofrost temperature | int8 (>=-20<=10) | C | true | HC | 17 | 1 | 1 |
 | hc1.nofrostmode | nofrost mode | enum [off\|outdoor\|room] |   | true | HC | 16 | 1 | 1 |
 | hc1.roominfluence | room influence | uint8 (>=0<=10) | C | true | HC | 13 | 1 | 1 |
 | hc1.minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 |
 | hc1.maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 |
-| hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | C | true | HC | 60 | 1 | 1 |
+| hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | C | true | HC | 64 | 1 | 1 |
 | hc1.heatingtype | heating type | enum [off\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 |
 | hc1.reducemode | reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 31 | 1 | 1 |
 | hc1.controlmode | control mode | enum [outdoor\|room] |   | true | HC | 25 | 1 | 1 |
 | hc1.control | control device | enum [off\|RC20\|RC3x] |   | true | HC | 41 | 1 | 1 |
-| hc1.holidays | holiday dates | string |   | true | HC | 61 | 13 | 1 |
-| hc1.vacations | vacation dates | string |   | true | HC | 74 | 13 | 1 |
+| hc1.holidays | holiday dates | string |   | true | HC | 65 | 13 | 1 |
+| hc1.vacations | vacation dates | string |   | true | HC | 78 | 13 | 1 |
 | hc1.program | program | enum [own 1\|family\|morning\|evening\|am\|pm\|midday\|singles\|seniors\|new\|own 2] |   | true | HC | 26 | 1 | 1 |
-| hc1.pause | pause time | uint8 (>=0<=99) | hours | true | HC | 87 | 1 | 1 |
-| hc1.party | party time | uint8 (>=0<=99) | hours | true | HC | 88 | 1 | 1 |
+| hc1.pause | pause time | uint8 (>=0<=99) | hours | true | HC | 91 | 1 | 1 |
+| hc1.party | party time | uint8 (>=0<=99) | hours | true | HC | 92 | 1 | 1 |
 | hc1.tempautotemp | temporary set temperature automode | uint8 (>=0<=30) | C | true | HC | 27 | 1 | 1/2 |
 | hc1.noreducetemp | no reduce below temperature | int8 (>=-31<=10) | C | true | HC | 32 | 1 | 1 |
 | hc1.reducetemp | off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 33 | 1 | 1 |
-| hc1.vacreducetemp | vacations off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 89 | 1 | 1 |
-| hc1.vacreducemode | vacations reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 90 | 1 | 1 |
+| hc1.vacreducetemp | vacations off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 93 | 1 | 1 |
+| hc1.vacreducemode | vacations reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 94 | 1 | 1 |
 | hc1.remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 42 | 1 | 1/10 |
 | hc1.dhwprio | dhw priority | boolean |   | true | HC | 34 | 1 | 1 |
 | hc1.switchonoptimization | switch-on optimization | boolean |   | true | HC | 30 | 1 | 1 |
-| hc1.switchtime1 | own1 program switchtime | string |   | true | HC | 91 | 8 | 1 |
-| hc1.switchtime2 | own2 program switchtime | string |   | true | HC | 99 | 8 | 1 |
+| hc1.switchtime1 | own1 program switchtime | string |   | true | HC | 95 | 8 | 1 |
+| hc1.switchtime2 | own2 program switchtime | string |   | true | HC | 103 | 8 | 1 |
 | dhw.mode | operating mode | enum [off\|on\|auto] |   | true | DHW | 0 | 1 | 1 |
 | dhw.circmode | circulation pump mode | enum [off\|on\|auto] |   | true | DHW | 4 | 1 | 1 |
 | dhw.progmode | program | enum [std prog\|own prog] |   | true | DHW | 13 | 1 | 1 |
@@ -4236,12 +4271,12 @@
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [off\|manual\|auto] |   | true | HC | 3 | 1 | 1 |
 | hc1.manualtemp | manual temperature | uint8 (>=0<=127) | C | true | HC | 6 | 1 | 1/2 |
-| hc1.offtemp | temperature when mode is off | uint8 (>=0<=127) | C | true | HC | 107 | 1 | 1/2 |
-| hc1.daytemp2 | day temperature T2 | uint8 (>=0<=127) | C | true | HC | 108 | 1 | 1/2 |
-| hc1.daytemp3 | day temperature T3 | uint8 (>=0<=127) | C | true | HC | 109 | 1 | 1/2 |
-| hc1.daytemp4 | day temperature T4 | uint8 (>=0<=127) | C | true | HC | 110 | 1 | 1/2 |
-| hc1.nighttemp | night temperature T1 | uint8 (>=0<=127) | C | true | HC | 57 | 1 | 1/2 |
-| hc1.switchtime | program switchtime | string |   | true | HC | 111 | 8 | 1 |
+| hc1.offtemp | temperature when mode is off | uint8 (>=0<=127) | C | true | HC | 111 | 1 | 1/2 |
+| hc1.daytemp2 | day temperature T2 | uint8 (>=0<=127) | C | true | HC | 112 | 1 | 1/2 |
+| hc1.daytemp3 | day temperature T3 | uint8 (>=0<=127) | C | true | HC | 113 | 1 | 1/2 |
+| hc1.daytemp4 | day temperature T4 | uint8 (>=0<=127) | C | true | HC | 114 | 1 | 1/2 |
+| hc1.nighttemp | night temperature T1 | uint8 (>=0<=127) | C | true | HC | 61 | 1 | 1/2 |
+| hc1.switchtime | program switchtime | string |   | true | HC | 115 | 8 | 1 |
 
 ### Moduline 400
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -4263,26 +4298,26 @@
 | hc1.currtemp | current room temperature | int16 (>=-3199<=3199) | C | false | HC | 1 | 1 | 1/10 |
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [off\|manual\|auto] |   | true | HC | 3 | 1 | 1 |
-| hc1.pause | pause time | uint8 (>=0<=254) | hours | true | HC | 87 | 1 | 1 |
-| hc1.party | party time | uint8 (>=0<=254) | hours | true | HC | 88 | 1 | 1 |
-| hc1.vacations1 | vacation dates 1 | string |   | true | HC | 119 | 11 | 1 |
-| hc1.vacations2 | vacation dates 2 | string |   | true | HC | 130 | 11 | 1 |
-| hc1.vacations3 | vacation dates 3 | string |   | true | HC | 141 | 11 | 1 |
-| hc1.vacations4 | vacation dates 4 | string |   | true | HC | 152 | 11 | 1 |
-| hc1.vacations5 | vacation dates 5 | string |   | true | HC | 163 | 11 | 1 |
-| hc1.vacations6 | vacation dates 6 | string |   | true | HC | 174 | 11 | 1 |
-| hc1.vacations7 | vacation dates 7 | string |   | true | HC | 185 | 11 | 1 |
+| hc1.pause | pause time | uint8 (>=0<=254) | hours | true | HC | 91 | 1 | 1 |
+| hc1.party | party time | uint8 (>=0<=254) | hours | true | HC | 92 | 1 | 1 |
+| hc1.vacations1 | vacation dates 1 | string |   | true | HC | 123 | 11 | 1 |
+| hc1.vacations2 | vacation dates 2 | string |   | true | HC | 134 | 11 | 1 |
+| hc1.vacations3 | vacation dates 3 | string |   | true | HC | 145 | 11 | 1 |
+| hc1.vacations4 | vacation dates 4 | string |   | true | HC | 156 | 11 | 1 |
+| hc1.vacations5 | vacation dates 5 | string |   | true | HC | 167 | 11 | 1 |
+| hc1.vacations6 | vacation dates 6 | string |   | true | HC | 178 | 11 | 1 |
+| hc1.vacations7 | vacation dates 7 | string |   | true | HC | 189 | 11 | 1 |
 | hc1.program | program | enum [own 1\|family\|morning\|evening\|am\|pm\|midday\|singles\|seniors\|new\|own 2] |   | true | HC | 26 | 1 | 1 |
-| hc1.switchtime1 | own1 program switchtime | string |   | true | HC | 91 | 8 | 1 |
+| hc1.switchtime1 | own1 program switchtime | string |   | true | HC | 95 | 8 | 1 |
 | hc1.heatingtype | heating type | enum [off\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 |
 | hc1.controlmode | control mode | enum [outdoor\|room] |   | true | HC | 25 | 1 | 1 |
-| hc1.holidaytemp | holiday temperature | uint8 (>=0<=127) | C | true | HC | 58 | 1 | 1/2 |
-| hc1.nighttemp | night temperature T1 | uint8 (>=0<=127) | C | true | HC | 57 | 1 | 1/2 |
-| hc1.daytemp2 | day temperature T2 | uint8 (>=0<=127) | C | true | HC | 108 | 1 | 1/2 |
-| hc1.daytemp3 | day temperature T3 | uint8 (>=0<=127) | C | true | HC | 109 | 1 | 1/2 |
-| hc1.daytemp4 | day temperature T4 | uint8 (>=0<=127) | C | true | HC | 110 | 1 | 1/2 |
+| hc1.holidaytemp | holiday temperature | uint8 (>=0<=127) | C | true | HC | 62 | 1 | 1/2 |
+| hc1.nighttemp | night temperature T1 | uint8 (>=0<=127) | C | true | HC | 61 | 1 | 1/2 |
+| hc1.daytemp2 | day temperature T2 | uint8 (>=0<=127) | C | true | HC | 112 | 1 | 1/2 |
+| hc1.daytemp3 | day temperature T3 | uint8 (>=0<=127) | C | true | HC | 113 | 1 | 1/2 |
+| hc1.daytemp4 | day temperature T4 | uint8 (>=0<=127) | C | true | HC | 114 | 1 | 1/2 |
 | hc1.manualtemp | manual temperature | uint8 (>=0<=127) | C | true | HC | 6 | 1 | 1/2 |
-| hc1.offtemp | temperature when mode is off | uint8 (>=0<=127) | C | true | HC | 107 | 1 | 1/2 |
+| hc1.offtemp | temperature when mode is off | uint8 (>=0<=127) | C | true | HC | 111 | 1 | 1/2 |
 | dhw.mode | operating mode | enum [on\|off\|auto] |   | true | DHW | 0 | 1 | 1 |
 | dhw.whenmodeoff | when thermostat mode off | boolean |   | true | DHW | 60 | 1 | 1 |
 | dhw.disinfecting | disinfecting | boolean |   | true | DHW | 8 | 1 | 1 |
@@ -4301,10 +4336,10 @@
 | hc1.currtemp | current room temperature | int16 (>=-3199<=3199) | C | false | HC | 1 | 1 | 1/10 |
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [nofrost\|night\|day] |   | true | HC | 3 | 1 | 1 |
-| hc1.daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 56 | 1 | 1/2 |
-| hc1.nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 57 | 1 | 1/2 |
-| hc1.reducehours | duration for nighttemp | uint8 (>=0<=254) | hours | true | HC | 196 | 1 | 1 |
-| hc1.reduceminutes | remaining time for nightmode | uint16 (>=0<=31999) | minutes | false | HC | 197 | 1 | 1 |
+| hc1.daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 60 | 1 | 1/2 |
+| hc1.nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 61 | 1 | 1/2 |
+| hc1.reducehours | duration for nighttemp | uint8 (>=0<=254) | hours | true | HC | 200 | 1 | 1 |
+| hc1.reduceminutes | remaining time for nightmode | uint16 (>=0<=31999) | minutes | false | HC | 201 | 1 | 1 |
 | dhw.mode | operating mode | enum [on\|off\|auto] |   | true | DHW | 0 | 1 | 1 |
 | errorcode | error code | string |   | false | DEVICE_DATA | 0 | 8 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 8 | 25 | 1 |
@@ -4315,8 +4350,8 @@
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [night\|day\|auto] |   | true | HC | 3 | 1 | 1 |
 | hc1.modetype | mode type | enum [night\|day] |   | false | HC | 4 | 1 | 1 |
-| hc1.daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 56 | 1 | 1/2 |
-| hc1.nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 57 | 1 | 1/2 |
+| hc1.daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 60 | 1 | 1/2 |
+| hc1.nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 61 | 1 | 1/2 |
 | hc1.program | program | enum [family\|morning\|evening\|am\|pm\|midday\|singles\|seniors] |   | true | HC | 26 | 1 | 1 |
 | hc1.minflowtemp | min flow temperature | uint8 (>=0<=254) | C | true | HC | 11 | 1 | 1 |
 | hc1.maxflowtemp | max flow temperature | uint8 (>=0<=254) | C | true | HC | 12 | 1 | 1 |
@@ -4337,10 +4372,10 @@
 | hc1.currtemp | current room temperature | int16 (>=-3199<=3199) | C | false | HC | 1 | 1 | 1/10 |
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [nofrost\|night\|day] |   | true | HC | 3 | 1 | 1 |
-| hc1.daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 56 | 1 | 1/2 |
-| hc1.nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 57 | 1 | 1/2 |
-| hc1.reducehours | duration for nighttemp | uint8 (>=0<=254) | hours | true | HC | 196 | 1 | 1 |
-| hc1.reduceminutes | remaining time for nightmode | uint16 (>=0<=31999) | minutes | false | HC | 197 | 1 | 1 |
+| hc1.daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 60 | 1 | 1/2 |
+| hc1.nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 61 | 1 | 1/2 |
+| hc1.reducehours | duration for nighttemp | uint8 (>=0<=254) | hours | true | HC | 200 | 1 | 1 |
+| hc1.reduceminutes | remaining time for nightmode | uint16 (>=0<=31999) | minutes | false | HC | 201 | 1 | 1 |
 | dhw.mode | operating mode | enum [on\|off\|auto] |   | true | DHW | 0 | 1 | 1 |
 
 ### RC35
@@ -4361,40 +4396,40 @@
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [night\|day\|auto] |   | true | HC | 3 | 1 | 1 |
 | hc1.modetype | mode type | enum [night\|day] |   | false | HC | 4 | 1 | 1 |
-| hc1.daytemp | day temperature | uint8 (>=10<=30) | C | true | HC | 56 | 1 | 1/2 |
-| hc1.nighttemp | night temperature | uint8 (>=10<=30) | C | true | HC | 57 | 1 | 1/2 |
+| hc1.daytemp | day temperature | uint8 (>=10<=30) | C | true | HC | 60 | 1 | 1/2 |
+| hc1.nighttemp | night temperature | uint8 (>=10<=30) | C | true | HC | 61 | 1 | 1/2 |
 | hc1.designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 |
 | hc1.offsettemp | offset temperature | int8 (>=-5<=5) | C | true | HC | 10 | 1 | 1/2 |
-| hc1.holidaytemp | holiday temperature | uint8 (>=5<=30) | C | true | HC | 58 | 1 | 1/2 |
+| hc1.holidaytemp | holiday temperature | uint8 (>=5<=30) | C | true | HC | 62 | 1 | 1/2 |
 | hc1.targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 |
 | hc1.summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1 |
 | hc1.summermode | summer mode | enum [winter\|summer] |   | false | HC | 22 | 1 | 1 |
-| hc1.holidaymode | holiday mode | boolean |   | false | HC | 59 | 1 | 1 |
+| hc1.holidaymode | holiday mode | boolean |   | false | HC | 63 | 1 | 1 |
 | hc1.nofrosttemp | nofrost temperature | int8 (>=-20<=10) | C | true | HC | 17 | 1 | 1 |
 | hc1.nofrostmode | nofrost mode | enum [off\|outdoor\|room] |   | true | HC | 16 | 1 | 1 |
 | hc1.roominfluence | room influence | uint8 (>=0<=10) | C | true | HC | 13 | 1 | 1 |
 | hc1.minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 |
 | hc1.maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 |
-| hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | C | true | HC | 60 | 1 | 1 |
+| hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | C | true | HC | 64 | 1 | 1 |
 | hc1.heatingtype | heating type | enum [off\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 |
 | hc1.reducemode | reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 31 | 1 | 1 |
 | hc1.controlmode | control mode | enum [outdoor\|room] |   | true | HC | 25 | 1 | 1 |
 | hc1.control | control device | enum [off\|RC20\|RC3x] |   | true | HC | 41 | 1 | 1 |
-| hc1.holidays | holiday dates | string |   | true | HC | 61 | 13 | 1 |
-| hc1.vacations | vacation dates | string |   | true | HC | 74 | 13 | 1 |
+| hc1.holidays | holiday dates | string |   | true | HC | 65 | 13 | 1 |
+| hc1.vacations | vacation dates | string |   | true | HC | 78 | 13 | 1 |
 | hc1.program | program | enum [own 1\|family\|morning\|evening\|am\|pm\|midday\|singles\|seniors\|new\|own 2] |   | true | HC | 26 | 1 | 1 |
-| hc1.pause | pause time | uint8 (>=0<=99) | hours | true | HC | 87 | 1 | 1 |
-| hc1.party | party time | uint8 (>=0<=99) | hours | true | HC | 88 | 1 | 1 |
+| hc1.pause | pause time | uint8 (>=0<=99) | hours | true | HC | 91 | 1 | 1 |
+| hc1.party | party time | uint8 (>=0<=99) | hours | true | HC | 92 | 1 | 1 |
 | hc1.tempautotemp | temporary set temperature automode | uint8 (>=0<=30) | C | true | HC | 27 | 1 | 1/2 |
 | hc1.noreducetemp | no reduce below temperature | int8 (>=-31<=10) | C | true | HC | 32 | 1 | 1 |
 | hc1.reducetemp | off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 33 | 1 | 1 |
-| hc1.vacreducetemp | vacations off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 89 | 1 | 1 |
-| hc1.vacreducemode | vacations reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 90 | 1 | 1 |
+| hc1.vacreducetemp | vacations off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 93 | 1 | 1 |
+| hc1.vacreducemode | vacations reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 94 | 1 | 1 |
 | hc1.remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 42 | 1 | 1/10 |
 | hc1.dhwprio | dhw priority | boolean |   | true | HC | 34 | 1 | 1 |
 | hc1.switchonoptimization | switch-on optimization | boolean |   | true | HC | 30 | 1 | 1 |
-| hc1.switchtime1 | own1 program switchtime | string |   | true | HC | 91 | 8 | 1 |
-| hc1.switchtime2 | own2 program switchtime | string |   | true | HC | 99 | 8 | 1 |
+| hc1.switchtime1 | own1 program switchtime | string |   | true | HC | 95 | 8 | 1 |
+| hc1.switchtime2 | own2 program switchtime | string |   | true | HC | 103 | 8 | 1 |
 | dhw.mode | operating mode | enum [off\|on\|auto] |   | true | DHW | 0 | 1 | 1 |
 | dhw.circmode | circulation pump mode | enum [off\|on\|auto] |   | true | DHW | 4 | 1 | 1 |
 | dhw.progmode | program | enum [std prog\|own prog] |   | true | DHW | 13 | 1 | 1 |
@@ -4420,12 +4455,12 @@
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [off\|manual\|auto] |   | true | HC | 3 | 1 | 1 |
 | hc1.manualtemp | manual temperature | uint8 (>=0<=127) | C | true | HC | 6 | 1 | 1/2 |
-| hc1.offtemp | temperature when mode is off | uint8 (>=0<=127) | C | true | HC | 107 | 1 | 1/2 |
-| hc1.daytemp2 | day temperature T2 | uint8 (>=0<=127) | C | true | HC | 108 | 1 | 1/2 |
-| hc1.daytemp3 | day temperature T3 | uint8 (>=0<=127) | C | true | HC | 109 | 1 | 1/2 |
-| hc1.daytemp4 | day temperature T4 | uint8 (>=0<=127) | C | true | HC | 110 | 1 | 1/2 |
-| hc1.nighttemp | night temperature T1 | uint8 (>=0<=127) | C | true | HC | 57 | 1 | 1/2 |
-| hc1.switchtime | program switchtime | string |   | true | HC | 111 | 8 | 1 |
+| hc1.offtemp | temperature when mode is off | uint8 (>=0<=127) | C | true | HC | 111 | 1 | 1/2 |
+| hc1.daytemp2 | day temperature T2 | uint8 (>=0<=127) | C | true | HC | 112 | 1 | 1/2 |
+| hc1.daytemp3 | day temperature T3 | uint8 (>=0<=127) | C | true | HC | 113 | 1 | 1/2 |
+| hc1.daytemp4 | day temperature T4 | uint8 (>=0<=127) | C | true | HC | 114 | 1 | 1/2 |
+| hc1.nighttemp | night temperature T1 | uint8 (>=0<=127) | C | true | HC | 61 | 1 | 1/2 |
+| hc1.switchtime | program switchtime | string |   | true | HC | 115 | 8 | 1 |
 
 ### RFM20 Remote
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -4449,8 +4484,8 @@
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [night\|day\|auto] |   | true | HC | 3 | 1 | 1 |
 | hc1.modetype | mode type | enum [night\|day] |   | false | HC | 4 | 1 | 1 |
-| hc1.daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 56 | 1 | 1/2 |
-| hc1.nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 57 | 1 | 1/2 |
+| hc1.daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 60 | 1 | 1/2 |
+| hc1.nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 61 | 1 | 1/2 |
 | hc1.program | program | enum [family\|morning\|evening\|am\|pm\|midday\|singles\|seniors] |   | true | HC | 26 | 1 | 1 |
 | hc1.minflowtemp | min flow temperature | uint8 (>=0<=254) | C | true | HC | 11 | 1 | 1 |
 | hc1.maxflowtemp | max flow temperature | uint8 (>=0<=254) | C | true | HC | 12 | 1 | 1 |
@@ -4539,6 +4574,10 @@
 | hc1.redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 53 | 1 | 1/2 |
 | hc1.solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 54 | 1 | 1 |
 | hc1.currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 55 | 1 | 1/10 |
+| hc1.heatingpid | heating PID | enum [fast\|medium\|slow] |   | true | HC | 56 | 1 | 1 |
+| hc1.pumpopt | pump optimization | boolean |   | true | HC | 57 | 1 | 1 |
+| hc1.inttimefloor | integral time floor | uint8 (>=160<=320) | minutes | true | HC | 58 | 1 | 10 |
+| hc1.inttime | integral time | uint8 (>=3<=80) | minutes | true | HC | 59 | 1 | 1 |
 | dhw.mode | operating mode | enum [off\|on\|auto] |   | true | DHW | 0 | 1 | 1 |
 | dhw.modetype | mode type | enum [off\|eco\|comfort\|eco+] |   | false | DHW | 1 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 |
@@ -4634,6 +4673,10 @@
 | hc1.redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 53 | 1 | 1/2 |
 | hc1.solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 54 | 1 | 1 |
 | hc1.currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 55 | 1 | 1/10 |
+| hc1.heatingpid | heating PID | enum [fast\|medium\|slow] |   | true | HC | 56 | 1 | 1 |
+| hc1.pumpopt | pump optimization | boolean |   | true | HC | 57 | 1 | 1 |
+| hc1.inttimefloor | integral time floor | uint8 (>=160<=320) | minutes | true | HC | 58 | 1 | 10 |
+| hc1.inttime | integral time | uint8 (>=3<=80) | minutes | true | HC | 59 | 1 | 1 |
 | dhw.mode | operating mode | enum [off\|normal\|comfort\|auto\|own prog] |   | true | DHW | 0 | 1 | 1 |
 | dhw.modetype | mode type | enum [off\|eco\|comfort\|eco+] |   | false | DHW | 1 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 |
@@ -4742,6 +4785,10 @@
 | hc1.redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 53 | 1 | 1/2 |
 | hc1.solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 54 | 1 | 1 |
 | hc1.currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 55 | 1 | 1/10 |
+| hc1.heatingpid | heating PID | enum [fast\|medium\|slow] |   | true | HC | 56 | 1 | 1 |
+| hc1.pumpopt | pump optimization | boolean |   | true | HC | 57 | 1 | 1 |
+| hc1.inttimefloor | integral time floor | uint8 (>=160<=320) | minutes | true | HC | 58 | 1 | 10 |
+| hc1.inttime | integral time | uint8 (>=3<=80) | minutes | true | HC | 59 | 1 | 1 |
 | dhw.mode | operating mode | enum [normal\|comfort\|eco+] |   | true | DHW | 0 | 1 | 1 |
 | dhw.modetype | mode type | enum [off\|eco\|comfort\|eco+] |   | false | DHW | 1 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 |
@@ -4876,6 +4923,10 @@
 | hc1.redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 53 | 1 | 1/2 |
 | hc1.solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 54 | 1 | 1 |
 | hc1.currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 55 | 1 | 1/10 |
+| hc1.heatingpid | heating PID | enum [fast\|medium\|slow] |   | true | HC | 56 | 1 | 1 |
+| hc1.pumpopt | pump optimization | boolean |   | true | HC | 57 | 1 | 1 |
+| hc1.inttimefloor | integral time floor | uint8 (>=160<=320) | minutes | true | HC | 58 | 1 | 10 |
+| hc1.inttime | integral time | uint8 (>=3<=80) | minutes | true | HC | 59 | 1 | 1 |
 | dhw.mode | operating mode | enum [off\|eco+\|eco\|comfort\|auto] |   | true | DHW | 0 | 1 | 1 |
 | dhw.modetype | mode type | enum [off\|eco\|comfort\|eco+] |   | false | DHW | 1 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 |
@@ -4902,8 +4953,8 @@
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [night\|day\|auto] |   | true | HC | 3 | 1 | 1 |
 | hc1.modetype | mode type | enum [night\|day] |   | false | HC | 4 | 1 | 1 |
-| hc1.daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 56 | 1 | 1/2 |
-| hc1.nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 57 | 1 | 1/2 |
+| hc1.daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 60 | 1 | 1/2 |
+| hc1.nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 61 | 1 | 1/2 |
 | hc1.program | program | enum [family\|morning\|evening\|am\|pm\|midday\|singles\|seniors] |   | true | HC | 26 | 1 | 1 |
 | hc1.minflowtemp | min flow temperature | uint8 (>=0<=254) | C | true | HC | 11 | 1 | 1 |
 | hc1.maxflowtemp | max flow temperature | uint8 (>=0<=254) | C | true | HC | 12 | 1 | 1 |
@@ -4920,8 +4971,8 @@
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [night\|day\|auto] |   | true | HC | 3 | 1 | 1 |
 | hc1.modetype | mode type | enum [night\|day] |   | false | HC | 4 | 1 | 1 |
-| hc1.daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 56 | 1 | 1/2 |
-| hc1.nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 57 | 1 | 1/2 |
+| hc1.daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 60 | 1 | 1/2 |
+| hc1.nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 61 | 1 | 1/2 |
 | hc1.program | program | enum [family\|morning\|evening\|am\|pm\|midday\|singles\|seniors] |   | true | HC | 26 | 1 | 1 |
 | hc1.minflowtemp | min flow temperature | uint8 (>=0<=254) | C | true | HC | 11 | 1 | 1 |
 | hc1.maxflowtemp | max flow temperature | uint8 (>=0<=254) | C | true | HC | 12 | 1 | 1 |
@@ -4951,40 +5002,40 @@
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [night\|day\|auto] |   | true | HC | 3 | 1 | 1 |
 | hc1.modetype | mode type | enum [night\|day] |   | false | HC | 4 | 1 | 1 |
-| hc1.daytemp | day temperature | uint8 (>=10<=30) | C | true | HC | 56 | 1 | 1/2 |
-| hc1.nighttemp | night temperature | uint8 (>=10<=30) | C | true | HC | 57 | 1 | 1/2 |
+| hc1.daytemp | day temperature | uint8 (>=10<=30) | C | true | HC | 60 | 1 | 1/2 |
+| hc1.nighttemp | night temperature | uint8 (>=10<=30) | C | true | HC | 61 | 1 | 1/2 |
 | hc1.designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 |
 | hc1.offsettemp | offset temperature | int8 (>=-5<=5) | C | true | HC | 10 | 1 | 1/2 |
-| hc1.holidaytemp | holiday temperature | uint8 (>=5<=30) | C | true | HC | 58 | 1 | 1/2 |
+| hc1.holidaytemp | holiday temperature | uint8 (>=5<=30) | C | true | HC | 62 | 1 | 1/2 |
 | hc1.targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 |
 | hc1.summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1 |
 | hc1.summermode | summer mode | enum [winter\|summer] |   | false | HC | 22 | 1 | 1 |
-| hc1.holidaymode | holiday mode | boolean |   | false | HC | 59 | 1 | 1 |
+| hc1.holidaymode | holiday mode | boolean |   | false | HC | 63 | 1 | 1 |
 | hc1.nofrosttemp | nofrost temperature | int8 (>=-20<=10) | C | true | HC | 17 | 1 | 1 |
 | hc1.nofrostmode | nofrost mode | enum [off\|outdoor\|room] |   | true | HC | 16 | 1 | 1 |
 | hc1.roominfluence | room influence | uint8 (>=0<=10) | C | true | HC | 13 | 1 | 1 |
 | hc1.minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 |
 | hc1.maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 |
-| hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | C | true | HC | 60 | 1 | 1 |
+| hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | C | true | HC | 64 | 1 | 1 |
 | hc1.heatingtype | heating type | enum [off\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 |
 | hc1.reducemode | reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 31 | 1 | 1 |
 | hc1.controlmode | control mode | enum [outdoor\|room] |   | true | HC | 25 | 1 | 1 |
 | hc1.control | control device | enum [off\|RC20\|RC3x] |   | true | HC | 41 | 1 | 1 |
-| hc1.holidays | holiday dates | string |   | true | HC | 61 | 13 | 1 |
-| hc1.vacations | vacation dates | string |   | true | HC | 74 | 13 | 1 |
+| hc1.holidays | holiday dates | string |   | true | HC | 65 | 13 | 1 |
+| hc1.vacations | vacation dates | string |   | true | HC | 78 | 13 | 1 |
 | hc1.program | program | enum [own 1\|family\|morning\|evening\|am\|pm\|midday\|singles\|seniors\|new\|own 2] |   | true | HC | 26 | 1 | 1 |
-| hc1.pause | pause time | uint8 (>=0<=99) | hours | true | HC | 87 | 1 | 1 |
-| hc1.party | party time | uint8 (>=0<=99) | hours | true | HC | 88 | 1 | 1 |
+| hc1.pause | pause time | uint8 (>=0<=99) | hours | true | HC | 91 | 1 | 1 |
+| hc1.party | party time | uint8 (>=0<=99) | hours | true | HC | 92 | 1 | 1 |
 | hc1.tempautotemp | temporary set temperature automode | uint8 (>=0<=30) | C | true | HC | 27 | 1 | 1/2 |
 | hc1.noreducetemp | no reduce below temperature | int8 (>=-31<=10) | C | true | HC | 32 | 1 | 1 |
 | hc1.reducetemp | off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 33 | 1 | 1 |
-| hc1.vacreducetemp | vacations off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 89 | 1 | 1 |
-| hc1.vacreducemode | vacations reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 90 | 1 | 1 |
+| hc1.vacreducetemp | vacations off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 93 | 1 | 1 |
+| hc1.vacreducemode | vacations reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 94 | 1 | 1 |
 | hc1.remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 42 | 1 | 1/10 |
 | hc1.dhwprio | dhw priority | boolean |   | true | HC | 34 | 1 | 1 |
 | hc1.switchonoptimization | switch-on optimization | boolean |   | true | HC | 30 | 1 | 1 |
-| hc1.switchtime1 | own1 program switchtime | string |   | true | HC | 91 | 8 | 1 |
-| hc1.switchtime2 | own2 program switchtime | string |   | true | HC | 99 | 8 | 1 |
+| hc1.switchtime1 | own1 program switchtime | string |   | true | HC | 95 | 8 | 1 |
+| hc1.switchtime2 | own2 program switchtime | string |   | true | HC | 103 | 8 | 1 |
 | dhw.mode | operating mode | enum [off\|on\|auto] |   | true | DHW | 0 | 1 | 1 |
 | dhw.circmode | circulation pump mode | enum [off\|on\|auto] |   | true | DHW | 4 | 1 | 1 |
 | dhw.progmode | program | enum [std prog\|own prog] |   | true | DHW | 13 | 1 | 1 |
@@ -5017,40 +5068,40 @@
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [night\|day\|auto] |   | true | HC | 3 | 1 | 1 |
 | hc1.modetype | mode type | enum [night\|day] |   | false | HC | 4 | 1 | 1 |
-| hc1.daytemp | day temperature | uint8 (>=10<=30) | C | true | HC | 56 | 1 | 1/2 |
-| hc1.nighttemp | night temperature | uint8 (>=10<=30) | C | true | HC | 57 | 1 | 1/2 |
+| hc1.daytemp | day temperature | uint8 (>=10<=30) | C | true | HC | 60 | 1 | 1/2 |
+| hc1.nighttemp | night temperature | uint8 (>=10<=30) | C | true | HC | 61 | 1 | 1/2 |
 | hc1.designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 |
 | hc1.offsettemp | offset temperature | int8 (>=-5<=5) | C | true | HC | 10 | 1 | 1/2 |
-| hc1.holidaytemp | holiday temperature | uint8 (>=5<=30) | C | true | HC | 58 | 1 | 1/2 |
+| hc1.holidaytemp | holiday temperature | uint8 (>=5<=30) | C | true | HC | 62 | 1 | 1/2 |
 | hc1.targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 |
 | hc1.summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1 |
 | hc1.summermode | summer mode | enum [winter\|summer] |   | false | HC | 22 | 1 | 1 |
-| hc1.holidaymode | holiday mode | boolean |   | false | HC | 59 | 1 | 1 |
+| hc1.holidaymode | holiday mode | boolean |   | false | HC | 63 | 1 | 1 |
 | hc1.nofrosttemp | nofrost temperature | int8 (>=-20<=10) | C | true | HC | 17 | 1 | 1 |
 | hc1.nofrostmode | nofrost mode | enum [off\|outdoor\|room] |   | true | HC | 16 | 1 | 1 |
 | hc1.roominfluence | room influence | uint8 (>=0<=10) | C | true | HC | 13 | 1 | 1 |
 | hc1.minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 |
 | hc1.maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 |
-| hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | C | true | HC | 60 | 1 | 1 |
+| hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | C | true | HC | 64 | 1 | 1 |
 | hc1.heatingtype | heating type | enum [off\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 |
 | hc1.reducemode | reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 31 | 1 | 1 |
 | hc1.controlmode | control mode | enum [outdoor\|room] |   | true | HC | 25 | 1 | 1 |
 | hc1.control | control device | enum [off\|RC20\|RC3x] |   | true | HC | 41 | 1 | 1 |
-| hc1.holidays | holiday dates | string |   | true | HC | 61 | 13 | 1 |
-| hc1.vacations | vacation dates | string |   | true | HC | 74 | 13 | 1 |
+| hc1.holidays | holiday dates | string |   | true | HC | 65 | 13 | 1 |
+| hc1.vacations | vacation dates | string |   | true | HC | 78 | 13 | 1 |
 | hc1.program | program | enum [own 1\|family\|morning\|evening\|am\|pm\|midday\|singles\|seniors\|new\|own 2] |   | true | HC | 26 | 1 | 1 |
-| hc1.pause | pause time | uint8 (>=0<=99) | hours | true | HC | 87 | 1 | 1 |
-| hc1.party | party time | uint8 (>=0<=99) | hours | true | HC | 88 | 1 | 1 |
+| hc1.pause | pause time | uint8 (>=0<=99) | hours | true | HC | 91 | 1 | 1 |
+| hc1.party | party time | uint8 (>=0<=99) | hours | true | HC | 92 | 1 | 1 |
 | hc1.tempautotemp | temporary set temperature automode | uint8 (>=0<=30) | C | true | HC | 27 | 1 | 1/2 |
 | hc1.noreducetemp | no reduce below temperature | int8 (>=-31<=10) | C | true | HC | 32 | 1 | 1 |
 | hc1.reducetemp | off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 33 | 1 | 1 |
-| hc1.vacreducetemp | vacations off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 89 | 1 | 1 |
-| hc1.vacreducemode | vacations reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 90 | 1 | 1 |
+| hc1.vacreducetemp | vacations off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 93 | 1 | 1 |
+| hc1.vacreducemode | vacations reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 94 | 1 | 1 |
 | hc1.remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 42 | 1 | 1/10 |
 | hc1.dhwprio | dhw priority | boolean |   | true | HC | 34 | 1 | 1 |
 | hc1.switchonoptimization | switch-on optimization | boolean |   | true | HC | 30 | 1 | 1 |
-| hc1.switchtime1 | own1 program switchtime | string |   | true | HC | 91 | 8 | 1 |
-| hc1.switchtime2 | own2 program switchtime | string |   | true | HC | 99 | 8 | 1 |
+| hc1.switchtime1 | own1 program switchtime | string |   | true | HC | 95 | 8 | 1 |
+| hc1.switchtime2 | own2 program switchtime | string |   | true | HC | 103 | 8 | 1 |
 | dhw.mode | operating mode | enum [off\|on\|auto] |   | true | DHW | 0 | 1 | 1 |
 | dhw.circmode | circulation pump mode | enum [off\|on\|auto] |   | true | DHW | 4 | 1 | 1 |
 | dhw.progmode | program | enum [std prog\|own prog] |   | true | DHW | 13 | 1 | 1 |
@@ -5085,7 +5136,7 @@
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 3 | 1 | 1 |
 | hc1.modetype | mode type | enum [nofrost\|eco\|heat] |   | false | HC | 4 | 1 | 1 |
-| hc1.heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 198 | 1 | 1/2 |
+| hc1.heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 202 | 1 | 1/2 |
 | hc1.ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 |
 | hc1.nofrosttemp | nofrost temperature | int8 (>=-63<=63) | C | true | HC | 17 | 1 | 1/2 |
 | hc1.control | control device | enum [off\|FB10\|FB100] |   | true | HC | 41 | 1 | 1 |
@@ -5093,10 +5144,10 @@
 | hc1.remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 42 | 1 | 1/10 |
 | hc1.targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 |
 | hc1.summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1/2 |
-| hc1.roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 199 | 1 | 1 |
-| hc1.holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 59 | 1 | 1 |
+| hc1.roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 203 | 1 | 1 |
+| hc1.holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 63 | 1 | 1 |
 | hc1.switchonoptimization | switch-on optimization | boolean |   | true | HC | 30 | 1 | 1 |
-| hc1.heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 200 | 1 | 1 |
+| hc1.heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 204 | 1 | 1 |
 | hc1.minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 |
 | hc1.maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 |
 | hc1.designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 |
@@ -5126,7 +5177,7 @@
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 3 | 1 | 1 |
 | hc1.modetype | mode type | enum [nofrost\|eco\|heat] |   | false | HC | 4 | 1 | 1 |
-| hc1.heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 198 | 1 | 1/2 |
+| hc1.heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 202 | 1 | 1/2 |
 | hc1.ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 |
 | hc1.nofrosttemp | nofrost temperature | int8 (>=-63<=63) | C | true | HC | 17 | 1 | 1/2 |
 | hc1.control | control device | enum [off\|FB10\|FB100] |   | true | HC | 41 | 1 | 1 |
@@ -5134,10 +5185,10 @@
 | hc1.remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 42 | 1 | 1/10 |
 | hc1.targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 |
 | hc1.summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1/2 |
-| hc1.roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 199 | 1 | 1 |
-| hc1.holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 59 | 1 | 1 |
+| hc1.roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 203 | 1 | 1 |
+| hc1.holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 63 | 1 | 1 |
 | hc1.switchonoptimization | switch-on optimization | boolean |   | true | HC | 30 | 1 | 1 |
-| hc1.heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 200 | 1 | 1 |
+| hc1.heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 204 | 1 | 1 |
 | hc1.minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 |
 | hc1.maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 |
 | hc1.designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 |
@@ -5165,7 +5216,7 @@
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 3 | 1 | 1 |
 | hc1.modetype | mode type | enum [nofrost\|eco\|heat] |   | false | HC | 4 | 1 | 1 |
-| hc1.heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 198 | 1 | 1/2 |
+| hc1.heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 202 | 1 | 1/2 |
 | hc1.ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 |
 | hc1.nofrosttemp | nofrost temperature | int8 (>=-63<=63) | C | true | HC | 17 | 1 | 1/2 |
 | hc1.control | control device | enum [off\|FB10\|FB100] |   | true | HC | 41 | 1 | 1 |
@@ -5173,10 +5224,10 @@
 | hc1.remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 42 | 1 | 1/10 |
 | hc1.targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 |
 | hc1.summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1/2 |
-| hc1.roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 199 | 1 | 1 |
-| hc1.holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 59 | 1 | 1 |
+| hc1.roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 203 | 1 | 1 |
+| hc1.holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 63 | 1 | 1 |
 | hc1.switchonoptimization | switch-on optimization | boolean |   | true | HC | 30 | 1 | 1 |
-| hc1.heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 200 | 1 | 1 |
+| hc1.heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 204 | 1 | 1 |
 | hc1.minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 |
 | hc1.maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 |
 | hc1.designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 |
@@ -5204,7 +5255,7 @@
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 3 | 1 | 1 |
 | hc1.modetype | mode type | enum [nofrost\|eco\|heat] |   | false | HC | 4 | 1 | 1 |
-| hc1.heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 198 | 1 | 1/2 |
+| hc1.heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 202 | 1 | 1/2 |
 | hc1.ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 |
 | hc1.nofrosttemp | nofrost temperature | int8 (>=-63<=63) | C | true | HC | 17 | 1 | 1/2 |
 | hc1.control | control device | enum [off\|FB10\|FB100] |   | true | HC | 41 | 1 | 1 |
@@ -5212,10 +5263,10 @@
 | hc1.remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 42 | 1 | 1/10 |
 | hc1.targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 |
 | hc1.summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1/2 |
-| hc1.roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 199 | 1 | 1 |
-| hc1.holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 59 | 1 | 1 |
+| hc1.roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 203 | 1 | 1 |
+| hc1.holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 63 | 1 | 1 |
 | hc1.switchonoptimization | switch-on optimization | boolean |   | true | HC | 30 | 1 | 1 |
-| hc1.heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 200 | 1 | 1 |
+| hc1.heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 204 | 1 | 1 |
 | hc1.minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 |
 | hc1.maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 |
 | hc1.designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 |
@@ -5245,7 +5296,7 @@
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 3 | 1 | 1 |
 | hc1.modetype | mode type | enum [nofrost\|eco\|heat] |   | false | HC | 4 | 1 | 1 |
-| hc1.heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 198 | 1 | 1/2 |
+| hc1.heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 202 | 1 | 1/2 |
 | hc1.ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 |
 | hc1.nofrosttemp | nofrost temperature | int8 (>=-63<=63) | C | true | HC | 17 | 1 | 1/2 |
 | hc1.control | control device | enum [off\|FB10\|FB100] |   | true | HC | 41 | 1 | 1 |
@@ -5253,10 +5304,10 @@
 | hc1.remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 42 | 1 | 1/10 |
 | hc1.targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 |
 | hc1.summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1/2 |
-| hc1.roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 199 | 1 | 1 |
-| hc1.holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 59 | 1 | 1 |
+| hc1.roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 203 | 1 | 1 |
+| hc1.holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 63 | 1 | 1 |
 | hc1.switchonoptimization | switch-on optimization | boolean |   | true | HC | 30 | 1 | 1 |
-| hc1.heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 200 | 1 | 1 |
+| hc1.heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 204 | 1 | 1 |
 | hc1.minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 |
 | hc1.maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 |
 | hc1.designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 |
@@ -5286,7 +5337,7 @@
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 3 | 1 | 1 |
 | hc1.modetype | mode type | enum [nofrost\|eco\|heat] |   | false | HC | 4 | 1 | 1 |
-| hc1.heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 198 | 1 | 1/2 |
+| hc1.heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 202 | 1 | 1/2 |
 | hc1.ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 |
 | hc1.nofrosttemp | nofrost temperature | int8 (>=-63<=63) | C | true | HC | 17 | 1 | 1/2 |
 | hc1.control | control device | enum [off\|FB10\|FB100] |   | true | HC | 41 | 1 | 1 |
@@ -5294,10 +5345,10 @@
 | hc1.remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 42 | 1 | 1/10 |
 | hc1.targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 |
 | hc1.summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1/2 |
-| hc1.roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 199 | 1 | 1 |
-| hc1.holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 59 | 1 | 1 |
+| hc1.roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 203 | 1 | 1 |
+| hc1.holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 63 | 1 | 1 |
 | hc1.switchonoptimization | switch-on optimization | boolean |   | true | HC | 30 | 1 | 1 |
-| hc1.heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 200 | 1 | 1 |
+| hc1.heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 204 | 1 | 1 |
 | hc1.minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 |
 | hc1.maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 |
 | hc1.designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 |
@@ -5325,7 +5376,7 @@
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 3 | 1 | 1 |
 | hc1.modetype | mode type | enum [nofrost\|eco\|heat] |   | false | HC | 4 | 1 | 1 |
-| hc1.heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 198 | 1 | 1/2 |
+| hc1.heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 202 | 1 | 1/2 |
 | hc1.ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 |
 | hc1.nofrosttemp | nofrost temperature | int8 (>=-63<=63) | C | true | HC | 17 | 1 | 1/2 |
 | hc1.control | control device | enum [off\|FB10\|FB100] |   | true | HC | 41 | 1 | 1 |
@@ -5333,10 +5384,10 @@
 | hc1.remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 42 | 1 | 1/10 |
 | hc1.targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 |
 | hc1.summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1/2 |
-| hc1.roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 199 | 1 | 1 |
-| hc1.holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 59 | 1 | 1 |
+| hc1.roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 203 | 1 | 1 |
+| hc1.holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 63 | 1 | 1 |
 | hc1.switchonoptimization | switch-on optimization | boolean |   | true | HC | 30 | 1 | 1 |
-| hc1.heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 200 | 1 | 1 |
+| hc1.heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 204 | 1 | 1 |
 | hc1.minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 |
 | hc1.maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 |
 | hc1.designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 |
@@ -5366,7 +5417,7 @@
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 3 | 1 | 1 |
 | hc1.modetype | mode type | enum [nofrost\|eco\|heat] |   | false | HC | 4 | 1 | 1 |
-| hc1.heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 198 | 1 | 1/2 |
+| hc1.heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 202 | 1 | 1/2 |
 | hc1.ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 |
 | hc1.nofrosttemp | nofrost temperature | int8 (>=-63<=63) | C | true | HC | 17 | 1 | 1/2 |
 | hc1.control | control device | enum [off\|FB10\|FB100] |   | true | HC | 41 | 1 | 1 |
@@ -5374,10 +5425,10 @@
 | hc1.remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 42 | 1 | 1/10 |
 | hc1.targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 |
 | hc1.summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1/2 |
-| hc1.roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 199 | 1 | 1 |
-| hc1.holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 59 | 1 | 1 |
+| hc1.roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 203 | 1 | 1 |
+| hc1.holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 63 | 1 | 1 |
 | hc1.switchonoptimization | switch-on optimization | boolean |   | true | HC | 30 | 1 | 1 |
-| hc1.heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 200 | 1 | 1 |
+| hc1.heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 204 | 1 | 1 |
 | hc1.minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 |
 | hc1.maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 |
 | hc1.designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 |
@@ -5405,7 +5456,7 @@
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 3 | 1 | 1 |
 | hc1.modetype | mode type | enum [nofrost\|eco\|heat] |   | false | HC | 4 | 1 | 1 |
-| hc1.heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 198 | 1 | 1/2 |
+| hc1.heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 202 | 1 | 1/2 |
 | hc1.ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 |
 | hc1.nofrosttemp | nofrost temperature | int8 (>=-63<=63) | C | true | HC | 17 | 1 | 1/2 |
 | hc1.control | control device | enum [off\|FB10\|FB100] |   | true | HC | 41 | 1 | 1 |
@@ -5413,10 +5464,10 @@
 | hc1.remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 42 | 1 | 1/10 |
 | hc1.targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 |
 | hc1.summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1/2 |
-| hc1.roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 199 | 1 | 1 |
-| hc1.holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 59 | 1 | 1 |
+| hc1.roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 203 | 1 | 1 |
+| hc1.holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 63 | 1 | 1 |
 | hc1.switchonoptimization | switch-on optimization | boolean |   | true | HC | 30 | 1 | 1 |
-| hc1.heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 200 | 1 | 1 |
+| hc1.heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 204 | 1 | 1 |
 | hc1.minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 |
 | hc1.maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 |
 | hc1.designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 |
@@ -5444,7 +5495,7 @@
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 3 | 1 | 1 |
 | hc1.modetype | mode type | enum [nofrost\|eco\|heat] |   | false | HC | 4 | 1 | 1 |
-| hc1.heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 198 | 1 | 1/2 |
+| hc1.heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 202 | 1 | 1/2 |
 | hc1.ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 |
 | hc1.nofrosttemp | nofrost temperature | int8 (>=-63<=63) | C | true | HC | 17 | 1 | 1/2 |
 | hc1.control | control device | enum [off\|FB10\|FB100] |   | true | HC | 41 | 1 | 1 |
@@ -5452,10 +5503,10 @@
 | hc1.remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 42 | 1 | 1/10 |
 | hc1.targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 |
 | hc1.summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1/2 |
-| hc1.roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 199 | 1 | 1 |
-| hc1.holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 59 | 1 | 1 |
+| hc1.roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 203 | 1 | 1 |
+| hc1.holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 63 | 1 | 1 |
 | hc1.switchonoptimization | switch-on optimization | boolean |   | true | HC | 30 | 1 | 1 |
-| hc1.heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 200 | 1 | 1 |
+| hc1.heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 204 | 1 | 1 |
 | hc1.minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 |
 | hc1.maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 |
 | hc1.designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 |
@@ -5485,7 +5536,7 @@
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 | hc1.mode | operating mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 3 | 1 | 1 |
 | hc1.modetype | mode type | enum [nofrost\|eco\|heat] |   | false | HC | 4 | 1 | 1 |
-| hc1.heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 198 | 1 | 1/2 |
+| hc1.heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 202 | 1 | 1/2 |
 | hc1.ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 |
 | hc1.nofrosttemp | nofrost temperature | int8 (>=-63<=63) | C | true | HC | 17 | 1 | 1/2 |
 | hc1.control | control device | enum [off\|FB10\|FB100] |   | true | HC | 41 | 1 | 1 |
@@ -5493,10 +5544,10 @@
 | hc1.remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 42 | 1 | 1/10 |
 | hc1.targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 |
 | hc1.summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1/2 |
-| hc1.roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 199 | 1 | 1 |
-| hc1.holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 59 | 1 | 1 |
+| hc1.roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 203 | 1 | 1 |
+| hc1.holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 63 | 1 | 1 |
 | hc1.switchonoptimization | switch-on optimization | boolean |   | true | HC | 30 | 1 | 1 |
-| hc1.heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 200 | 1 | 1 |
+| hc1.heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 204 | 1 | 1 |
 | hc1.minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 |
 | hc1.maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 |
 | hc1.designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 |
@@ -5549,6 +5600,7 @@
 | hc1.setdiffpress | set differential pressure | uint8 (>=0<=12700) | mbar | true | HC | 6 | 1 | 50 |
 | hc1.valvesettime | time to set valve | uint8 (>=10<=600) | seconds | true | HC | 7 | 1 | 10 |
 | hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | K | true | HC | 8 | 1 | 1 |
+| hc1.dhwprio | dhw priority | boolean |   | true | HC | 9 | 1 | 1 |
 
 ### MM10
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5567,7 +5619,7 @@
 | hc1.valvestatus | mixing valve actuator (VC1) | uint8 (>=0<=100) | % | false | HC | 1 | 1 | 1 |
 | hc1.flowsettemp | setpoint flow temperature | uint8 (>=0<=254) | C | true | HC | 2 | 1 | 1 |
 | hc1.pumpstatus | pump status (PC1) | boolean |   | true | HC | 3 | 1 | 1 |
-| hc1.flowtempvf | flow temperature in header (T0/Vf) | uint16 (>=0<=3199) | C | false | HC | 9 | 1 | 1/10 |
+| hc1.flowtempvf | flow temperature in header (T0/Vf) | uint16 (>=0<=3199) | C | false | HC | 10 | 1 | 1/10 |
 
 ### IPM2
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5576,7 +5628,7 @@
 | hc1.valvestatus | mixing valve actuator (VC1) | uint8 (>=0<=100) | % | false | HC | 1 | 1 | 1 |
 | hc1.flowsettemp | setpoint flow temperature | uint8 (>=0<=254) | C | true | HC | 2 | 1 | 1 |
 | hc1.pumpstatus | pump status (PC1) | boolean |   | true | HC | 3 | 1 | 1 |
-| hc1.flowtempvf | flow temperature in header (T0/Vf) | uint16 (>=0<=3199) | C | false | HC | 9 | 1 | 1/10 |
+| hc1.flowtempvf | flow temperature in header (T0/Vf) | uint16 (>=0<=3199) | C | false | HC | 10 | 1 | 1/10 |
 
 ### MM50
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5590,6 +5642,7 @@
 | hc1.setdiffpress | set differential pressure | uint8 (>=0<=12700) | mbar | true | HC | 6 | 1 | 50 |
 | hc1.valvesettime | time to set valve | uint8 (>=10<=600) | seconds | true | HC | 7 | 1 | 10 |
 | hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | K | true | HC | 8 | 1 | 1 |
+| hc1.dhwprio | dhw priority | boolean |   | true | HC | 9 | 1 | 1 |
 
 ### MM100
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5603,6 +5656,7 @@
 | hc1.setdiffpress | set differential pressure | uint8 (>=0<=12700) | mbar | true | HC | 6 | 1 | 50 |
 | hc1.valvesettime | time to set valve | uint8 (>=10<=600) | seconds | true | HC | 7 | 1 | 10 |
 | hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | K | true | HC | 8 | 1 | 1 |
+| hc1.dhwprio | dhw priority | boolean |   | true | HC | 9 | 1 | 1 |
 
 ### MM200
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5616,6 +5670,7 @@
 | hc1.setdiffpress | set differential pressure | uint8 (>=0<=12700) | mbar | true | HC | 6 | 1 | 50 |
 | hc1.valvesettime | time to set valve | uint8 (>=10<=600) | seconds | true | HC | 7 | 1 | 10 |
 | hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | K | true | HC | 8 | 1 | 1 |
+| hc1.dhwprio | dhw priority | boolean |   | true | HC | 9 | 1 | 1 |
 
 ### MZ100
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5629,6 +5684,7 @@
 | hc1.setdiffpress | set differential pressure | uint8 (>=0<=12700) | mbar | true | HC | 6 | 1 | 50 |
 | hc1.valvesettime | time to set valve | uint8 (>=10<=600) | seconds | true | HC | 7 | 1 | 10 |
 | hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | K | true | HC | 8 | 1 | 1 |
+| hc1.dhwprio | dhw priority | boolean |   | true | HC | 9 | 1 | 1 |
 
 ### HM210
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5642,6 +5698,7 @@
 | hc1.setdiffpress | set differential pressure | uint8 (>=0<=12700) | mbar | true | HC | 6 | 1 | 50 |
 | hc1.valvesettime | time to set valve | uint8 (>=10<=600) | seconds | true | HC | 7 | 1 | 10 |
 | hc1.flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | K | true | HC | 8 | 1 | 1 |
+| hc1.dhwprio | dhw priority | boolean |   | true | HC | 9 | 1 | 1 |
 
 ## Devices of type *solar*
 ### SM10

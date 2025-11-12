@@ -13,7 +13,7 @@ telegram_type_id,name,is_fetched
 0x19,UBAMonitorSlow, 
 0x1A,UBASetPoints, 
 0x1C,UBAMaintenanceStatus, 
-0x1E,HydrTemp, 
+0x1E,WM10TempMessage, 
 0x23,JunkersSetMixer,fetched
 0x27,UBASettingsWW,fetched
 0x28,WeatherComp,fetched
@@ -111,7 +111,7 @@ telegram_type_id,name,is_fetched
 0x02A0,RC300Curves, 
 0x02A1,RC300Curves, 
 0x02A2,RC300Curves, 
-0x02A5,RC300Monitor, 
+0x02A5,RC300Monitor,fetched
 0x02A6,RC300Monitor, 
 0x02A7,RC300Monitor, 
 0x02A8,RC300Monitor, 
@@ -136,10 +136,7 @@ telegram_type_id,name,is_fetched
 0x02BF,RC300Set, 
 0x02C0,RC300Set, 
 0x02CC,HPPressure,fetched
-0x02CD,MMPLUSConfigMessage,fetched
-0x02CE,RC300Set2, 
-0x02D0,RC300Set2, 
-0x02D2,RC300Set2, 
+0x02CD,MMPLUSConfigMessage, 
 0x02D6,HPPump2,fetched
 0x02D7,MMPLUSStatusMessage, 
 0x02E0,UBASetPoints, 
@@ -164,6 +161,10 @@ telegram_type_id,name,is_fetched
 0x0380,SM100CollectorConfig,fetched
 0x038E,SM100Energy,fetched
 0x0391,SM100Time,fetched
+0x0421,RC300Set2, 
+0x0422,RC300Set2, 
+0x0423,RC300Set2, 
+0x0424,RC300Set2, 
 0x043F,CRHolidays,fetched
 0x0467,HPSet, 
 0x0468,HPSet, 

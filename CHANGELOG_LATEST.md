@@ -31,6 +31,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - new boiler entities VR0,VR1, compressor speed [#2669](https://github.com/emsesp/EMS-ESP32/issues/2669)
 - solar temperature TS16 [#2690](https://github.com/emsesp/EMS-ESP32/issues/2690)
 - pumpmode enum for HT3 boilers, add commands for manual defrost, chimneysweeper [#2727](https://github.com/emsesp/EMS-ESP32/issues/2727)
+- pid settings [#2735](https://github.com/emsesp/EMS-ESP32/issues/2735)
 
 ## Fixed
 
@@ -51,6 +52,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - set selflowtemp for ems+ boilers [#2641](https://github.com/emsesp/EMS-ESP32/discussions/2641)
 - syslog timestamp [#2704](https://github.com/emsesp/EMS-ESP32/issues/2704)
 - fixed FS format command [#2720](https://github.com/emsesp/EMS-ESP32/discussions/2720)
+- dhw priority setting to boiler and mixer, telegrams 0x2CC, 0x2CD, etc.
 
 ## Changed
 
@@ -63,4 +65,4 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - internal system analog sensors (core_voltage, supply_voltage and gateway_temperature) cannot be accidentally removed
 - double click button reconnects EMS-ESP to AP
 - place system message command in side scheduler loop to reduce stack memory usage by 2KB
-- syslog mark interval set to 60 seconds
+- syslog mark interval set to 1 hour

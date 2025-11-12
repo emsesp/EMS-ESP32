@@ -46,6 +46,7 @@ class Mixer : public EMSdevice {
     bool set_setValveTime(const char * value, const int8_t id);
     bool set_flowTempOffset(const char * value, const int8_t id);
     bool set_pressure(const char * value, const int8_t id);
+    bool set_wwprio(const char * value, const int8_t id);
 
   private:
     uint16_t flowTempHc_;
@@ -58,6 +59,7 @@ class Mixer : public EMSdevice {
     uint8_t  flowTempOffset_;
     uint16_t flowRate_; // l/h
     uint8_t  pressure_; // setting 150-750mbar, scale 50
+    uint8_t  wwprio_;
 };
 
 } // namespace emsesp

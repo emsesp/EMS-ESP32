@@ -67,6 +67,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0xEA, "UBAParameterWWPlus", true, MAKE_PF_CB(process_UBAParameterWWPlus));
         register_telegram_type(0x28, "WeatherComp", true, MAKE_PF_CB(process_WeatherComp));
         register_telegram_type(0x2E0, "UBASetPoints", false, MAKE_PF_CB(process_UBASetPoints2));
+        register_telegram_type(0x2CC, "HPPressure", true, MAKE_PF_CB(process_HpPressure));
     }
 
     if (isHeatPump()) {
@@ -89,7 +90,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x49D, "HPSettings3", true, MAKE_PF_CB(process_HpSettings3));
         register_telegram_type(0x4AE, "HPEnergy", true, MAKE_PF_CB(process_HpEnergy));
         register_telegram_type(0x4AF, "HPMeters", true, MAKE_PF_CB(process_HpMeters));
-        register_telegram_type(0x2CC, "HPPressure", true, MAKE_PF_CB(process_HpPressure));
         register_telegram_type(0x4A5, "HPFan", true, MAKE_PF_CB(process_HpFan));
         register_telegram_type(0x4AA, "HPPower2", true, MAKE_PF_CB(process_HpPower2));
         register_telegram_type(0x4A7, "HPPowerLimit", true, MAKE_PF_CB(process_HpPowerLimit));
@@ -1104,6 +1104,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           DeviceValueNumOp::DV_NUMOP_DIV10,
                           FL_(wwCylMiddleTemp),
                           DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DHW1, &wwPrio_, DeviceValueType::BOOL, FL_(wwprio), DeviceValueUOM::NONE, MAKE_CF_CB(set_ww_prio));
     register_device_value(DeviceValueTAG::TAG_DHW1, &wwStarts_, DeviceValueType::UINT24, FL_(wwStarts), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DHW1, &wwWorkM_, DeviceValueType::TIME, FL_(wwWorkM), DeviceValueUOM::MINUTES);
 
@@ -2225,6 +2226,7 @@ void Boiler::process_HpMeters(std::shared_ptr<const Telegram> telegram) {
 }
 
 void Boiler::process_HpPressure(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, wwPrio_, 3);
     has_update(telegram, hpSetDiffPress_, 9);
 }
 
@@ -2455,6 +2457,16 @@ bool Boiler::set_ww_disinfect_temp(const char * value, const int8_t id) {
         write_command(EMS_TYPE_UBAParameterWW, 8, v, EMS_TYPE_UBAParameterWW);
     }
 
+    return true;
+}
+
+// Set the dhw priority
+bool Boiler::set_ww_prio(const char * value, const int8_t id) {
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
+        return false;
+    }
+    write_command(0x2CC, 3, b ? 0xFF : 0, 0x2CC);
     return true;
 }
 
