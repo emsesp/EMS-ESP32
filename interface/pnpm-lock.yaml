@@ -83,19 +83,19 @@ importers:
         version: 9.39.1
       '@preact/preset-vite':
         specifier: ^2.10.2
-        version: 2.10.2(@babel/core@7.28.5)(preact@10.27.2)(vite@7.2.2(@types/node@24.10.0)(terser@5.44.1))
+        version: 2.10.2(@babel/core@7.28.5)(preact@10.27.2)(vite@7.2.2(@types/node@24.10.1)(terser@5.44.1))
       '@trivago/prettier-plugin-sort-imports':
         specifier: ^6.0.0
         version: 6.0.0(prettier@3.6.2)
       '@types/node':
-        specifier: ^24.10.0
-        version: 24.10.0
+        specifier: ^24.10.1
+        version: 24.10.1
       '@types/react':
         specifier: ^19.2.3
         version: 19.2.3
       '@types/react-dom':
-        specifier: ^19.2.2
-        version: 19.2.2(@types/react@19.2.3)
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.3)
       axe-core:
         specifier: ^4.11.0
         version: 4.11.0
@@ -122,13 +122,13 @@ importers:
         version: 8.46.4(eslint@9.39.1)(typescript@5.9.3)
       vite:
         specifier: ^7.2.2
-        version: 7.2.2(@types/node@24.10.0)(terser@5.44.1)
+        version: 7.2.2(@types/node@24.10.1)(terser@5.44.1)
       vite-plugin-imagemin:
         specifier: ^0.6.1
-        version: 0.6.1(vite@7.2.2(@types/node@24.10.0)(terser@5.44.1))
+        version: 0.6.1(vite@7.2.2(@types/node@24.10.1)(terser@5.44.1))
       vite-tsconfig-paths:
         specifier: ^5.1.4
-        version: 5.1.4(typescript@5.9.3)(vite@7.2.2(@types/node@24.10.0)(terser@5.44.1))
+        version: 5.1.4(typescript@5.9.3)(vite@7.2.2(@types/node@24.10.1)(terser@5.44.1))
 
 packages:
 
@@ -860,8 +860,8 @@ packages:
     resolution: {integrity: sha512-zmPitbQ8+6zNutpwgcQuLcsEpn/Cj54Kbn7L5pX0Os5kdWplB7xPgEh/g+SWOB/qmows2gpuCaPyduq8ZZRnxA==}
     deprecated: This is a stub types definition. minimatch provides its own type definitions, so you do not need this installed.
 
-  '@types/node@24.10.0':
-    resolution: {integrity: sha512-qzQZRBqkFsYyaSWXuEHc2WR9c0a0CXwiE5FWUvn7ZM+vdy1uZLfCunD38UzhuB7YN/J11ndbDBcTmOdxJo9Q7A==}
+  '@types/node@24.10.1':
+    resolution: {integrity: sha512-GNWcUTRBgIRJD5zj+Tq0fKOJ5XZajIiBroOF0yvj2bSU1WvNdYS/dn9UxwsujGW4JX06dnHyjV2y9rRaybH0iQ==}
 
   '@types/parse-json@4.0.2':
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}
@@ -869,8 +869,8 @@ packages:
   '@types/prop-types@15.7.15':
     resolution: {integrity: sha512-F6bEyamV9jKGAFBEmlQnesRPGOQqS2+Uwi0Em15xenOxHaf2hv6L8YCVn3rPdPJOiJfPiCnLIRyvwVaqMY3MIw==}
 
-  '@types/react-dom@19.2.2':
-    resolution: {integrity: sha512-9KQPoO6mZCi7jcIStSnlOWn2nEF3mNmyr3rIAsGnAbQKYbRLyqmeSc39EVgtxXVia+LMT8j3knZLAZAh+xLmrw==}
+  '@types/react-dom@19.2.3':
+    resolution: {integrity: sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==}
     peerDependencies:
       '@types/react': ^19.2.0
 
@@ -3598,18 +3598,18 @@ snapshots:
     dependencies:
       preact: 10.27.2
 
-  '@preact/preset-vite@2.10.2(@babel/core@7.28.5)(preact@10.27.2)(vite@7.2.2(@types/node@24.10.0)(terser@5.44.1))':
+  '@preact/preset-vite@2.10.2(@babel/core@7.28.5)(preact@10.27.2)(vite@7.2.2(@types/node@24.10.1)(terser@5.44.1))':
     dependencies:
       '@babel/core': 7.28.5
       '@babel/plugin-transform-react-jsx': 7.27.1(@babel/core@7.28.5)
       '@babel/plugin-transform-react-jsx-development': 7.27.1(@babel/core@7.28.5)
-      '@prefresh/vite': 2.4.11(preact@10.27.2)(vite@7.2.2(@types/node@24.10.0)(terser@5.44.1))
+      '@prefresh/vite': 2.4.11(preact@10.27.2)(vite@7.2.2(@types/node@24.10.1)(terser@5.44.1))
       '@rollup/pluginutils': 4.2.1
       babel-plugin-transform-hook-names: 1.0.2(@babel/core@7.28.5)
       debug: 4.4.3
       picocolors: 1.1.1
-      vite: 7.2.2(@types/node@24.10.0)(terser@5.44.1)
-      vite-prerender-plugin: 0.5.12(vite@7.2.2(@types/node@24.10.0)(terser@5.44.1))
+      vite: 7.2.2(@types/node@24.10.1)(terser@5.44.1)
+      vite-prerender-plugin: 0.5.12(vite@7.2.2(@types/node@24.10.1)(terser@5.44.1))
     transitivePeerDependencies:
       - preact
       - supports-color
@@ -3622,7 +3622,7 @@ snapshots:
 
   '@prefresh/utils@1.2.1': {}
 
-  '@prefresh/vite@2.4.11(preact@10.27.2)(vite@7.2.2(@types/node@24.10.0)(terser@5.44.1))':
+  '@prefresh/vite@2.4.11(preact@10.27.2)(vite@7.2.2(@types/node@24.10.1)(terser@5.44.1))':
     dependencies:
       '@babel/core': 7.28.5
       '@prefresh/babel-plugin': 0.5.2
@@ -3630,7 +3630,7 @@ snapshots:
       '@prefresh/utils': 1.2.1
       '@rollup/pluginutils': 4.2.1
       preact: 10.27.2
-      vite: 7.2.2(@types/node@24.10.0)(terser@5.44.1)
+      vite: 7.2.2(@types/node@24.10.1)(terser@5.44.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -3737,7 +3737,7 @@ snapshots:
   '@types/glob@7.2.0':
     dependencies:
       '@types/minimatch': 6.0.0
-      '@types/node': 24.10.0
+      '@types/node': 24.10.1
 
   '@types/imagemin-gifsicle@7.0.4':
     dependencies:
@@ -3766,19 +3766,19 @@ snapshots:
 
   '@types/imagemin@7.0.1':
     dependencies:
-      '@types/node': 24.10.0
+      '@types/node': 24.10.1
 
   '@types/json-schema@7.0.15': {}
 
   '@types/keyv@3.1.4':
     dependencies:
-      '@types/node': 24.10.0
+      '@types/node': 24.10.1
 
   '@types/minimatch@6.0.0':
     dependencies:
       minimatch: 10.1.1
 
-  '@types/node@24.10.0':
+  '@types/node@24.10.1':
     dependencies:
       undici-types: 7.16.0
 
@@ -3786,7 +3786,7 @@ snapshots:
 
   '@types/prop-types@15.7.15': {}
 
-  '@types/react-dom@19.2.2(@types/react@19.2.3)':
+  '@types/react-dom@19.2.3(@types/react@19.2.3)':
     dependencies:
       '@types/react': 19.2.3
 
@@ -3800,11 +3800,11 @@ snapshots:
 
   '@types/responselike@1.0.3':
     dependencies:
-      '@types/node': 24.10.0
+      '@types/node': 24.10.1
 
   '@types/svgo@2.6.4':
     dependencies:
-      '@types/node': 24.10.0
+      '@types/node': 24.10.1
 
   '@typescript-eslint/eslint-plugin@8.46.4(@typescript-eslint/parser@8.46.4(eslint@9.39.1)(typescript@5.9.3))(eslint@9.39.1)(typescript@5.9.3)':
     dependencies:
@@ -5970,7 +5970,7 @@ snapshots:
       spdx-correct: 3.2.0
       spdx-expression-parse: 3.0.1
 
-  vite-plugin-imagemin@0.6.1(vite@7.2.2(@types/node@24.10.0)(terser@5.44.1)):
+  vite-plugin-imagemin@0.6.1(vite@7.2.2(@types/node@24.10.1)(terser@5.44.1)):
     dependencies:
       '@types/imagemin': 7.0.1
       '@types/imagemin-gifsicle': 7.0.4
@@ -5995,11 +5995,11 @@ snapshots:
       imagemin-webp: 6.1.0
       jpegtran-bin: 6.0.1
       pathe: 0.2.0
-      vite: 7.2.2(@types/node@24.10.0)(terser@5.44.1)
+      vite: 7.2.2(@types/node@24.10.1)(terser@5.44.1)
     transitivePeerDependencies:
       - supports-color
 
-  vite-prerender-plugin@0.5.12(vite@7.2.2(@types/node@24.10.0)(terser@5.44.1)):
+  vite-prerender-plugin@0.5.12(vite@7.2.2(@types/node@24.10.1)(terser@5.44.1)):
     dependencies:
       kolorist: 1.8.0
       magic-string: 0.30.21
@@ -6007,20 +6007,20 @@ snapshots:
       simple-code-frame: 1.3.0
       source-map: 0.7.6
       stack-trace: 1.0.0-pre2
-      vite: 7.2.2(@types/node@24.10.0)(terser@5.44.1)
+      vite: 7.2.2(@types/node@24.10.1)(terser@5.44.1)
 
-  vite-tsconfig-paths@5.1.4(typescript@5.9.3)(vite@7.2.2(@types/node@24.10.0)(terser@5.44.1)):
+  vite-tsconfig-paths@5.1.4(typescript@5.9.3)(vite@7.2.2(@types/node@24.10.1)(terser@5.44.1)):
     dependencies:
       debug: 4.4.3
       globrex: 0.1.2
       tsconfck: 3.1.6(typescript@5.9.3)
     optionalDependencies:
-      vite: 7.2.2(@types/node@24.10.0)(terser@5.44.1)
+      vite: 7.2.2(@types/node@24.10.1)(terser@5.44.1)
     transitivePeerDependencies:
       - supports-color
       - typescript
 
-  vite@7.2.2(@types/node@24.10.0)(terser@5.44.1):
+  vite@7.2.2(@types/node@24.10.1)(terser@5.44.1):
     dependencies:
       esbuild: 0.25.12
       fdir: 6.5.0(picomatch@4.0.3)
@@ -6029,7 +6029,7 @@ snapshots:
       rollup: 4.53.2
       tinyglobby: 0.2.15
     optionalDependencies:
-      '@types/node': 24.10.0
+      '@types/node': 24.10.1
       fsevents: 2.3.3
       terser: 5.44.1
 
