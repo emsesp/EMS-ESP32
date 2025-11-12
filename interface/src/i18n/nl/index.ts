@@ -355,7 +355,8 @@ const nl: Translation = {
   INTERNET_CONNECTION_REQUIRED: 'Internetverbinding vereist voor automatische versiecontrole en -upgrade',
   SWITCH_RELEASE_TYPE: 'Switch naar {0} release',
   FIRMWARE_VERSION_INFO: 'Informatie over firmwareversie',
-  NO_DATA: 'Geen data'
+  NO_DATA: 'Geen data',
+  USER_PROFILE: 'Gebruikersprofiel'
 };
 
 export default nl;

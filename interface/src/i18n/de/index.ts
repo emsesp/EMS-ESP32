@@ -355,7 +355,8 @@ const de: Translation = {
   INTERNET_CONNECTION_REQUIRED: 'Für die automatische Versionsprüfung und Aktualisierung ist eine Internetverbindung erforderlich',
   SWITCH_RELEASE_TYPE: 'Zum {0}-Release wechseln',
   FIRMWARE_VERSION_INFO: 'Firmware-Versionsinformation',
-  NO_DATA: 'Keine Daten'
+  NO_DATA: 'Keine Daten',
+  USER_PROFILE: 'Benutzerprofil'
 };
 
 export default de;
