@@ -1183,7 +1183,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     uint8_t     device_found   = 0;
     EMSdevice * found_device   = nullptr;
 
-    // Combined loop: check all conditions in a single pass
+    // check all conditions
     for (const auto & emsdevice : emsdevices) {
         // broadcast or send to us
         if (emsdevice->is_device_id(telegram->src) && (telegram->dest == 0 || telegram->dest == EMSbus::ems_bus_id())) {
@@ -1191,17 +1191,25 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
             found_device   = emsdevice.get();
             break;
         }
-        // check for command to the device
-        if (!telegram_found && emsdevice->is_device_id(telegram->dest) && telegram->src != EMSbus::ems_bus_id()) {
-            telegram_found = emsdevice->handle_telegram(telegram);
-            found_device   = emsdevice.get();
-            break;
+    }
+    if (!telegram_found) {
+        for (const auto & emsdevice : emsdevices) {
+            // check for command to the device
+            if (emsdevice->is_device_id(telegram->dest) && telegram->src != EMSbus::ems_bus_id()) {
+                telegram_found = emsdevice->handle_telegram(telegram);
+                found_device   = emsdevice.get();
+                break;
+            }
         }
-        // check for sends to master thermostat
-        if (!telegram_found && emsdevice->is_device_id(telegram->src) && telegram->dest == 0x10) {
-            telegram_found = emsdevice->handle_telegram(telegram);
-            found_device   = emsdevice.get();
-            break;
+    }
+    if (!telegram_found) {
+        for (const auto & emsdevice : emsdevices) {
+            // check for sends to master thermostat
+            if (emsdevice->is_device_id(telegram->src) && telegram->dest == 0x10) {
+                telegram_found = emsdevice->handle_telegram(telegram);
+                found_device   = emsdevice.get();
+                break;
+            }
         }
     }
 
