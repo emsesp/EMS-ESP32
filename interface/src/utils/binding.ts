@@ -24,7 +24,7 @@ export const extractEventValue = (
     const isIncomplete =
       normalizedValue.endsWith('.') ||
       normalizedValue === '-' ||
-      normalizedValue === '-.' ||
+      normalizedValue === '-0' ||
       endsWithDecimalAndZeros;
 
     if (isIncomplete) {
