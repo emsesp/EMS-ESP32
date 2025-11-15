@@ -54,7 +54,7 @@ const MS_PER_SECOND = 1000;
 const MS_PER_MINUTE = 60 * MS_PER_SECOND;
 const MS_PER_HOUR = 60 * MS_PER_MINUTE;
 const MS_PER_DAY = 24 * MS_PER_HOUR;
-const DEFAULT_GPIO = -1; // not set
+const DEFAULT_GPIO = 99; // not set
 const MIN_TEMP_ID = -100;
 const MAX_TEMP_ID = 100;
 const GPIO_25 = 25;
@@ -575,11 +575,7 @@ const Sensors = () => {
           creating={creating}
           selectedItem={selectedAnalogSensor}
           analogGPIOList={sensorData.valid_gpio_list}
-          validator={analogSensorItemValidation(
-            sensorData.as,
-            selectedAnalogSensor,
-            sensorData.platform
-          )}
+          validator={analogSensorItemValidation(sensorData.as, selectedAnalogSensor)}
         />
       )}
       {sensorData?.analog_enabled === true && me.admin && (

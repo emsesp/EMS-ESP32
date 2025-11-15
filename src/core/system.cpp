@@ -19,11 +19,12 @@
 #include "system.h"
 #include "emsesp.h" // for send_raw_telegram() command
 
-#include "shuntingYard.h"
 
 #ifndef EMSESP_STANDALONE
 #include "esp_ota_ops.h"
 #endif
+
+#include <HTTPClient.h>
 
 #include <semver200.h>
 
@@ -2298,32 +2299,58 @@ uint8_t System::systemStatus() {
     return systemStatus_;
 }
 
-// take a string range like "6-11, 1, 23, 24-48" which has optional ranges and single values convert to a vector of ints
+// takes a string range like "6-11, 1, 23, 24-48" which has optional ranges and single values and converts to a vector of ints
 std::vector<uint8_t> System::string_range_to_vector(const std::string & range) {
     std::vector<uint8_t>   valid_gpios;
     std::string::size_type pos  = 0;
     std::string::size_type prev = 0;
+
+    auto process_part = [&valid_gpios](std::string part) {
+        // trim whitespace
+        part.erase(0, part.find_first_not_of(" \t"));
+        part.erase(part.find_last_not_of(" \t") + 1);
+
+        // check if it's a range (contains '-')
+        std::string::size_type dash_pos = part.find('-');
+        if (dash_pos != std::string::npos) {
+            // it's a range like "6-11"
+            int start = std::stoi(part.substr(0, dash_pos));
+            int end   = std::stoi(part.substr(dash_pos + 1));
+            for (int i = start; i <= end; i++) {
+                valid_gpios.push_back(static_cast<uint8_t>(i));
+            }
+        } else {
+            valid_gpios.push_back(static_cast<uint8_t>(std::stoi(part)));
+        }
+    };
+
     while ((pos = range.find(',', prev)) != std::string::npos) {
-        valid_gpios.push_back(std::stoi(range.substr(prev, pos - prev)));
+        process_part(range.substr(prev, pos - prev));
         prev = pos + 1;
     }
-    valid_gpios.push_back(std::stoi(range.substr(prev)));
+
+    // handle the last part
+    process_part(range.substr(prev));
+
     return valid_gpios;
 }
 
-// return the list of valid GPIOs
-// note: we do not allow 0, which is used sometimes to indicate a disabled pin
+// return a list of valid GPIOs for the ESP32 board
+// notes:
+//  - we allow 0, which is used sometimes to indicate a disabled pin
+//  - also allow input only pins are accepted (34-39) on some boards
+//  - and allow pins 33-38 for octal SPI for 32M vchip version on some boards
 std::vector<uint8_t> System::valid_gpio_list() {
     // get free gpios based on board/platform type
 #if CONFIG_IDF_TARGET_ESP32C3
     // https://www.wemos.cc/en/latest/c3/c3_mini.html
-    std::vector<uint8_t> valid_gpios = string_range_to_vector("11-19, 21"); // can go higher than 21 on some boards
+    std::vector<uint8_t> valid_gpios = string_range_to_vector("0-10");
 #elif CONFIG_IDF_TARGET_ESP32S2
-    std::vector<uint8_t> valid_gpios = string_range_to_vector("19-20, 22-32, 40");
+    std::vector<uint8_t> valid_gpios = string_range_to_vector("0-14, 19, 20, 21, 33-38, 45, 46");
 #elif CONFIG_IDF_TARGET_ESP32S3
-    std::vector<uint8_t> valid_gpios = string_range_to_vector("19-20, 22-37, 39-42, 48");
+    std::vector<uint8_t> valid_gpios = string_range_to_vector("2, 4-14, 17, 18, 21, 33-38, 45, 46");
 #elif CONFIG_IDF_TARGET_ESP32 || defined(EMSESP_STANDALONE)
-    std::vector<uint8_t> valid_gpios = string_range_to_vector("1, 6-11, 16-17, 20, 24, 28-31, 40");
+    std::vector<uint8_t> valid_gpios = string_range_to_vector("0, 2, 4, 5, 12-15, 18, 19, 23, 25-27, 32-39");
 #else
     std::vector<uint8_t> valid_gpios = {};
 #endif
