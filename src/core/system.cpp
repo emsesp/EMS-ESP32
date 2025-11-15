@@ -2320,4 +2320,41 @@ uint8_t System::systemStatus() {
     return systemStatus_;
 }
 
+// return the list of valid GPIOs
+std::vector<uint8_t> System::valid_gpio_list() const {
+    // get free gpios based on board type
+#if CONFIG_IDF_TARGET_ESP32C3
+    std::vector<uint8_t> valid_gpios = {11, 19, 21};
+#elif CONFIG_IDF_TARGET_ESP32S2
+    std::vector<uint8_t> valid_gpios = {19, 20, 22, 32, 40};
+#elif CONFIG_IDF_TARGET_ESP32S3
+    std::vector<uint8_t> valid_gpios = {19, 20, 22, 37, 39, 42, 48};
+#elif CONFIG_IDF_TARGET_ESP32
+    std::vector<uint8_t> valid_gpios = {6, 11, 20, 24, 28, 31, 1, 40};
+#else
+    std::vector<uint8_t> valid_gpios = {};
+#endif
+
+    // filter out GPIOs already used in application settings
+    for (const auto & gpio : valid_gpios) {
+        if (gpio == pbutton_gpio_ || gpio == led_gpio_ || gpio == dallas_gpio_ || gpio == rx_gpio_ || gpio == tx_gpio_) {
+            valid_gpios.erase(std::remove(valid_gpios.begin(), valid_gpios.end(), gpio), valid_gpios.end());
+        }
+    }
+
+    // filter out GPIOs already used in analog sensors, if enabled
+    if (analog_enabled_) {
+        for (const auto & sensor : EMSESP::analogsensor_.sensors()) {
+            if (std::find(valid_gpios.begin(), valid_gpios.end(), sensor.gpio()) != valid_gpios.end()) {
+                valid_gpios.erase(std::find(valid_gpios.begin(), valid_gpios.end(), sensor.gpio()));
+            }
+        }
+    }
+
+    // sort the list of valid GPIOs
+    std::sort(valid_gpios.begin(), valid_gpios.end());
+
+    return valid_gpios;
+}
+
 } // namespace emsesp

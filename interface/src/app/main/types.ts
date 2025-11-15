@@ -111,6 +111,7 @@ export interface SensorData {
   ts: TemperatureSensor[];
   as: AnalogSensor[];
   analog_enabled: boolean;
+  valid_gpio_list: number[];
   platform: string;
 }
 

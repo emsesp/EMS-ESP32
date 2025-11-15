@@ -60,7 +60,6 @@ const sk: Translation = {
   DUTY_CYCLE: 'Pracovný cyklus',
   UNIT: 'UoM',
   STARTVALUE: 'Počiatočná hodnota',
-  WARN_GPIO: 'Upozornenie: Buďte opatrní pri priraďovaní GPIO!',
   EDIT: 'Editovať',
   SENSOR: 'Snímač',
   TEMP_SENSOR: 'Snímač teploty',

@@ -60,7 +60,6 @@ const nl: Translation = {
   DUTY_CYCLE: 'Duty Cycle',
   UNIT: 'UoM',
   STARTVALUE: 'Startwaarde',
-  WARN_GPIO: 'Waarschuwing: let op met het koppelen van de juiste GPIO pin!',
   EDIT: 'Wijzigen',
   SENSOR: 'Sensor',
   TEMP_SENSOR: 'Temperatuur sensor',

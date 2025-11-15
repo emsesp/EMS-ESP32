@@ -137,6 +137,8 @@ class System {
     void    systemStatus(uint8_t status_code);
     uint8_t systemStatus();
 
+    std::vector<uint8_t> valid_gpio_list() const;
+
     static void extractSettings(const char * filename, const char * section, JsonObject output);
     static bool saveSettings(const char * filename, const char * section, JsonObject input);
 
