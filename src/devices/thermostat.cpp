@@ -766,8 +766,12 @@ void Thermostat::process_RC20Remote(std::shared_ptr<const Telegram> telegram) {
 
 // 0x42B - for reading the roomtemperature from the RC100H remote thermostat (0x38, 0x39, ..)
 // e.g. "38 10 FF 00 03 2B 00 D1 08 2A 01"
+// also RF temp from 0x435
 void Thermostat::process_RemoteTemp(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, tempsensor1_, 0);
+    if (telegram->type_id >= 0x435) {
+        return;
+    }
     uint8_t hc = telegram->type_id - 0x42B;
     if (Roomctrl::is_remote(hc)) {
         toggle_fetch(0x273 + hc, false);
