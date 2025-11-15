@@ -100,7 +100,7 @@ class Boiler : public EMSdevice {
     uint8_t  wwAlternatingOper_; // alternating operation on/off
     uint8_t  wwAltOpPrioHeat_;   // alternating operation, prioritize heat time
     uint8_t  wwAltOpPrioWw_;     // alternating operation, prioritize dhw time
-    uint8_t wwPrio_;
+    uint8_t  wwPrio_;
 
     // special function
     uint8_t forceHeatingOff_;

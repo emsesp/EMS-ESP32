@@ -294,7 +294,7 @@ bool Mixer::set_wwprio(const char * value, const int8_t id) {
         return false;
     }
     uint8_t hc = device_id() - 0x20;
-    write_command(0x2CD + hc, 3, b ? 0xFF: 0, 0x2CD + hc);
+    write_command(0x2CD + hc, 3, b ? 0xFF : 0, 0x2CD + hc);
     return true;
 }
 
