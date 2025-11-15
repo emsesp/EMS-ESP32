@@ -17,7 +17,7 @@
     "preview-standalone": "typesafe-i18n --no-watch && vite build && concurrently -c \"auto\" \"pnpm:mock-rest\" \"vite preview\"",
     "standalone": "concurrently -c \"auto\" \"typesafe-i18n\" \"pnpm:mock-rest\" \"vite dev\"",
     "typesafe-i18n": "typesafe-i18n --no-watch",
-    "webUI": "vite build && node progmem-generator.js",
+    "build_webUI": "typesafe-i18n --no-watch && vite build && node progmem-generator.js",
     "format": "prettier -l -w '**/*.{ts,tsx,js,css,json,md}'",
     "lint": "eslint . --fix",
     "standalone-devcontainer": "concurrently -c \"auto\" \"typesafe-i18n\" \"pnpm:mock-rest\" \"vite --host\""
@@ -53,7 +53,7 @@
     "@preact/preset-vite": "^2.10.2",
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",
     "@types/node": "^24.10.1",
-    "@types/react": "^19.2.4",
+    "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "axe-core": "^4.11.0",
     "concurrently": "^9.2.1",

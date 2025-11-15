@@ -35,6 +35,7 @@ interface DashboardSensorsAnalogDialogProps {
   onSave: (as: AnalogSensor) => void;
   creating: boolean;
   selectedItem: AnalogSensor;
+  analogGPIOList: number[];
   validator: Schema;
 }
 
@@ -44,6 +45,7 @@ const SensorsAnalogDialog = ({
   onSave,
   creating,
   selectedItem,
+  analogGPIOList,
   validator
 }: DashboardSensorsAnalogDialogProps) => {
   const { LL } = useI18nContext();
@@ -151,33 +153,51 @@ const SensorsAnalogDialog = ({
     [creating, LL]
   );
 
+  // Ensure the current GPIO is in the list when no creating
+  // note GPIO 99 means not set
+  const availableGPIOs = useMemo(() => {
+    const filteredList = analogGPIOList.filter((gpio) => gpio !== 99);
+    if (
+      editItem.g !== undefined &&
+      editItem.g !== 99 &&
+      !filteredList.includes(editItem.g)
+    ) {
+      return [...filteredList, editItem.g].sort((a, b) => a - b);
+    }
+    return filteredList;
+  }, [analogGPIOList, editItem.g]);
+
   return (
     <Dialog sx={dialogStyle} open={open} onClose={handleClose}>
       <DialogTitle>{dialogTitle}</DialogTitle>
       <DialogContent dividers>
         <Grid container spacing={2}>
-          <Grid>
-            <ValidatedTextField
-              fieldErrors={fieldErrors || {}}
+          {editItem.s ? (
+            <TextField
               name="g"
               label="GPIO"
-              sx={{ width: '11ch' }}
-              value={numberValue(editItem.g)}
-              type="number"
-              variant="outlined"
+              value={editItem.g}
+              sx={{ width: '8ch' }}
+              disabled={true}
+            ></TextField>
+          ) : (
+            <ValidatedTextField
+              name="g"
+              label="GPIO"
+              value={editItem.g}
+              sx={{ width: '8ch' }}
+              select
               onChange={updateFormValue}
-            />
-          </Grid>
-          {creating && (
-            <Grid>
-              <Box color="warning.main" mt={2}>
-                <Typography variant="body2">{LL.WARN_GPIO()}</Typography>
-              </Box>
-            </Grid>
+            >
+              {availableGPIOs?.map((gpio: number) => (
+                <MenuItem key={gpio} value={gpio}>
+                  {gpio}
+                </MenuItem>
+              ))}
+            </ValidatedTextField>
           )}
           <Grid>
             <ValidatedTextField
-              fieldErrors={fieldErrors || {}}
               name="n"
               label={LL.NAME(0)}
               value={editItem.n}
@@ -194,6 +214,7 @@ const SensorsAnalogDialog = ({
               fullWidth
               select
               onChange={updateFormValue}
+              disabled={editItem.s}
             >
               {analogTypeMenuItems}
             </TextField>
@@ -207,6 +228,7 @@ const SensorsAnalogDialog = ({
                 sx={{ width: '15ch' }}
                 select
                 onChange={updateFormValue}
+                disabled={editItem.s}
               >
                 {uomMenuItems}
               </TextField>
@@ -222,6 +244,7 @@ const SensorsAnalogDialog = ({
                 sx={{ width: '11ch' }}
                 variant="outlined"
                 onChange={updateFormValue}
+                disabled={editItem.s}
                 slotProps={{
                   input: {
                     startAdornment: (
@@ -243,6 +266,7 @@ const SensorsAnalogDialog = ({
                 type="number"
                 variant="outlined"
                 onChange={updateFormValue}
+                disabled={editItem.s}
                 slotProps={{
                   input: {
                     startAdornment: (
@@ -264,6 +288,7 @@ const SensorsAnalogDialog = ({
                 sx={{ width: '11ch' }}
                 variant="outlined"
                 onChange={updateFormValue}
+                disabled={editItem.s}
                 slotProps={{
                   htmlInput: { step: '0.001' }
                 }}
@@ -280,6 +305,7 @@ const SensorsAnalogDialog = ({
                 sx={{ width: '11ch' }}
                 variant="outlined"
                 onChange={updateFormValue}
+                disabled={editItem.s}
               />
             </Grid>
           )}
@@ -293,6 +319,7 @@ const SensorsAnalogDialog = ({
                 type="number"
                 variant="outlined"
                 onChange={updateFormValue}
+                disabled={editItem.s}
                 slotProps={{
                   htmlInput: { step: '0.001' }
                 }}
@@ -309,6 +336,7 @@ const SensorsAnalogDialog = ({
                 type="number"
                 variant="outlined"
                 onChange={updateFormValue}
+                disabled={editItem.s}
                 slotProps={{
                   htmlInput: { min: '0', max: '255', step: '1' }
                 }}
@@ -325,6 +353,7 @@ const SensorsAnalogDialog = ({
                   select
                   variant="outlined"
                   onChange={updateFormValue}
+                  disabled={editItem.s}
                 >
                   <MenuItem value={0}>{LL.OFF()}</MenuItem>
                   <MenuItem value={1}>{LL.ON()}</MenuItem>
@@ -338,6 +367,7 @@ const SensorsAnalogDialog = ({
                   sx={{ width: '15ch' }}
                   select
                   onChange={updateFormValue}
+                  disabled={editItem.s}
                 >
                   <MenuItem value={1}>{LL.ACTIVEHIGH()}</MenuItem>
                   <MenuItem value={-1}>{LL.ACTIVELOW()}</MenuItem>
@@ -351,6 +381,7 @@ const SensorsAnalogDialog = ({
                   value={editItem.u}
                   select
                   onChange={updateFormValue}
+                  disabled={editItem.s}
                 >
                   <MenuItem value={0}>{LL.UNCHANGED()}</MenuItem>
                   <MenuItem value={1}>
@@ -374,6 +405,7 @@ const SensorsAnalogDialog = ({
                   variant="outlined"
                   sx={{ width: '11ch' }}
                   onChange={updateFormValue}
+                  disabled={editItem.s}
                   slotProps={{
                     input: {
                       startAdornment: (
@@ -393,6 +425,7 @@ const SensorsAnalogDialog = ({
                   sx={{ width: '11ch' }}
                   variant="outlined"
                   onChange={updateFormValue}
+                  disabled={editItem.s}
                   slotProps={{
                     input: {
                       startAdornment: (
@@ -415,6 +448,7 @@ const SensorsAnalogDialog = ({
                   sx={{ width: '11ch' }}
                   select
                   onChange={updateFormValue}
+                  disabled={editItem.s}
                 >
                   <MenuItem value={0}>{LL.ACTIVEHIGH()}</MenuItem>
                   <MenuItem value={1}>{LL.ACTIVELOW()}</MenuItem>
@@ -429,6 +463,7 @@ const SensorsAnalogDialog = ({
                   sx={{ width: '15ch' }}
                   variant="outlined"
                   onChange={updateFormValue}
+                  disabled={editItem.s}
                   slotProps={{
                     input: {
                       startAdornment: (
@@ -442,6 +477,24 @@ const SensorsAnalogDialog = ({
             </>
           )}
         </Grid>
+        {fieldErrors && Object.keys(fieldErrors).length > 0 && (
+          <Box mt={1}>
+            {Object.values(fieldErrors).map((errArr, idx) =>
+              Array.isArray(errArr)
+                ? errArr.map((err, j) => (
+                    <Typography
+                      key={`${idx}-${j}`}
+                      color="error"
+                      variant="caption"
+                      display="block"
+                    >
+                      {err.message}
+                    </Typography>
+                  ))
+                : null
+            )}
+          </Box>
+        )}
         {editItem.s && (
           <Grid>
             <Typography mt={1} color="warning.main" variant="body2">

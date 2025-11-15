@@ -157,6 +157,11 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
     root["analog_enabled"] = EMSESP::analog_enabled();
     root["platform"]       = EMSESP_PLATFORM;
 
+    JsonArray valid_gpio_list = root["valid_gpio_list"].to<JsonArray>();
+    for (const auto & gpio : EMSESP::system_.valid_gpio_list()) {
+        valid_gpio_list.add(gpio);
+    }
+
     response->setLength();
     request->send(response);
 }

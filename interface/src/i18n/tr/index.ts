@@ -60,7 +60,6 @@ const tr: Translation = {
   DUTY_CYCLE: 'Görev Çevrimi',
   UNIT: 'ÖB',
   STARTVALUE: 'Başlangıç değeri',
-  WARN_GPIO: 'Uyarı: bir GPIO atarken dikkatli olun!',
   EDIT: 'Değiştir',
   SENSOR: 'Sensör',
   TEMP_SENSOR: 'Sıcaklık Sensörü',

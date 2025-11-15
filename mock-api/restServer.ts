@@ -988,7 +988,7 @@ const emsesp_sensordata = {
     {
       id: 2,
       g: 37,
-      n: 'External switch',
+      n: 'External_switch',
       v: 13,
       u: 0,
       o: 17,
@@ -999,8 +999,8 @@ const emsesp_sensordata = {
     },
     {
       id: 3,
-      g: 39,
-      n: 'Pulse count',
+      g: 37,
+      n: 'Pulse_count',
       v: 144,
       u: 0,
       o: 0,
@@ -1011,7 +1011,7 @@ const emsesp_sensordata = {
     },
     {
       id: 4,
-      g: 40,
+      g: 23,
       n: 'Pressure',
       v: 16,
       u: 17,
@@ -1046,7 +1046,8 @@ const emsesp_sensordata = {
       s: true
     }
   ],
-  analog_enabled: true
+  analog_enabled: true,
+  valid_gpio_list: [0, 2, 5, 12, 13, 15, 18, 19, 23, 25, 26, 27, 33, 37, 38]
 };
 
 const activity = {

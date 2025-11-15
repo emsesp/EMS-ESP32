@@ -60,7 +60,6 @@ const pl: BaseTranslation = {
   DUTY_CYCLE: 'Wypełnienie',
   UNIT: 'J.m.',
   STARTVALUE: 'Wartość początkowa',
-  WARN_GPIO: 'Uwaga! Zachowaj ostrożność przypisując GPIO do urządzenia!',
   EDIT: 'Edycja',
   SENSOR: '{{c|ustawienia c||ustawień c|}}zujnika',
   TEMP_SENSOR: 'czujnika temperatury',

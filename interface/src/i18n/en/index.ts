@@ -60,7 +60,6 @@ const en: Translation = {
   DUTY_CYCLE: 'Duty Cycle',
   UNIT: 'UoM',
   STARTVALUE: 'Start Value',
-  WARN_GPIO: 'Warning: be careful when assigning a GPIO!',
   EDIT: 'Edit',
   SENSOR: 'Sensor',
   TEMP_SENSOR: 'Temperature Sensor',

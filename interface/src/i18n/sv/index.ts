@@ -60,7 +60,6 @@ const sv: Translation = {
   DUTY_CYCLE: 'Pulskvot',
   UNIT: 'Måttenhet',
   STARTVALUE: 'Startvärde',
-  WARN_GPIO: 'Varning: Var försiktig vid aktivering av GPIO!',
   EDIT: 'Ändra',
   SENSOR: 'Sensor',
   TEMP_SENSOR: 'Temperatursensor',

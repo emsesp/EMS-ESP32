@@ -45,120 +45,14 @@ const VALIDATION_LIMITS = {
   HEX_BASE: 16
 } as const;
 
-// Helper to create GPIO validator from invalid ranges
-const createGPIOValidator = (
-  invalidRanges: Array<number | [number, number]>,
-  maxValue: number
-) => ({
-  validator(
-    _rule: InternalRuleItem,
-    value: number,
-    callback: (error?: string) => void
-  ) {
-    if (!value) {
-      callback();
-      return;
-    }
-
-    if (value < 0 || value > maxValue) {
-      callback(ERROR_MESSAGES.GPIO_INVALID);
-      return;
-    }
-
-    for (const range of invalidRanges) {
-      if (typeof range === 'number') {
-        if (value === range) {
-          callback(ERROR_MESSAGES.GPIO_INVALID);
-          return;
-        }
-      } else {
-        const [start, end] = range;
-        if (value >= start && value <= end) {
-          callback(ERROR_MESSAGES.GPIO_INVALID);
-          return;
-        }
-      }
-    }
-
-    callback();
-  }
-});
-
-export const GPIO_VALIDATOR = createGPIOValidator(
-  [[6, 11], 1, 20, 24, [28, 31]],
-  40
-);
-
-export const GPIO_VALIDATORC3 = createGPIOValidator([[11, 19]], 21);
-
-export const GPIO_VALIDATORS2 = createGPIOValidator(
-  [
-    [19, 20],
-    [22, 32]
-  ],
-  40
-);
-
-export const GPIO_VALIDATORS3 = createGPIOValidator(
-  [
-    [19, 20],
-    [22, 37],
-    [39, 42]
-  ],
-  48
-);
-
-const GPIO_FIELD_NAMES = [
-  'led_gpio',
-  'dallas_gpio',
-  'pbutton_gpio',
-  'tx_gpio',
-  'rx_gpio'
-] as const;
-
 type ValidationRules = Array<{
   required?: boolean;
   message?: string;
   [key: string]: unknown;
 }>;
 
-const createGPIOValidations = (
-  validator: typeof GPIO_VALIDATOR
-): Record<string, ValidationRules> =>
-  GPIO_FIELD_NAMES.reduce(
-    (acc, field) => {
-      const fieldName = field.replace('_gpio', '').toUpperCase();
-      acc[field] = [
-        { required: true, message: `${fieldName} GPIO is required` },
-        validator
-      ];
-      return acc;
-    },
-    {} as Record<string, ValidationRules>
-  );
-
-const PLATFORM_VALIDATORS = {
-  ESP32: GPIO_VALIDATOR,
-  ESP32C3: GPIO_VALIDATORC3,
-  ESP32S2: GPIO_VALIDATORS2,
-  ESP32S3: GPIO_VALIDATORS3
-} as const;
-
 export const createSettingsValidator = (settings: Settings) => {
   const schema: Record<string, ValidationRules> = {};
-
-  // Add GPIO validations for CUSTOM board profiles
-  if (
-    settings.board_profile === 'CUSTOM' &&
-    settings.platform in PLATFORM_VALIDATORS
-  ) {
-    Object.assign(
-      schema,
-      createGPIOValidations(
-        PLATFORM_VALIDATORS[settings.platform as keyof typeof PLATFORM_VALIDATORS]
-      )
-    );
-  }
 
   // Syslog validations
   if (settings.syslog_enabled) {
@@ -401,52 +295,29 @@ export const temperatureSensorItemValidation = (
     n: [NAME_PATTERN, uniqueTemperatureNameValidator(sensors, sensor.o_n)]
   });
 
-export const isGPIOUniqueValidator = (sensors: AnalogSensor[]) => ({
-  validator(
-    _rule: InternalRuleItem,
-    gpio: number,
-    callback: (error?: string) => void
-  ) {
-    if (sensors.some((as) => as.g === gpio)) {
-      callback(ERROR_MESSAGES.GPIO_DUPLICATE);
-      return;
-    }
-    callback();
-  }
-});
-
 export const uniqueAnalogNameValidator = (
   sensors: AnalogSensor[],
   o_name?: string
 ) => createUniqueFieldNameValidator(sensors, (s) => s.n, o_name);
 
-const getPlatformGPIOValidator = (platform: string) => {
-  switch (platform) {
-    case 'ESP32S3':
-      return GPIO_VALIDATORS3;
-    case 'ESP32S2':
-      return GPIO_VALIDATORS2;
-    case 'ESP32C3':
-      return GPIO_VALIDATORC3;
-    default:
-      return GPIO_VALIDATOR;
-  }
-};
-
 export const analogSensorItemValidation = (
   sensors: AnalogSensor[],
-  sensor: AnalogSensor,
-  creating: boolean,
-  platform: string
+  sensor: AnalogSensor
 ) => {
-  const gpioValidator = getPlatformGPIOValidator(platform);
-
   return new Schema({
-    n: [NAME_PATTERN, uniqueAnalogNameValidator(sensors, sensor.o_n)],
+    // name is required and must be unique
+    n: [
+      { required: true, message: 'Name is required' },
+      NAME_PATTERN,
+      uniqueAnalogNameValidator(sensors, sensor.o_n)
+    ],
     g: [
-      { required: true, message: 'GPIO is required' },
-      gpioValidator,
-      ...(creating ? [isGPIOUniqueValidator(sensors)] : [])
+      {
+        required: true,
+        type: 'number',
+        min: 1,
+        message: 'GPIO is required'
+      }
     ]
   });
 };
