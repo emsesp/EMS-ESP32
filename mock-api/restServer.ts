@@ -1047,7 +1047,7 @@ const emsesp_sensordata = {
     }
   ],
   analog_enabled: true,
-  valid_gpio_list: [6, 11, 20, 24, 28, 31, 1, 40]
+  valid_gpio_list: [0, 2, 5, 12, 13, 15, 18, 19, 23, 25, 26, 27, 33, 35, 37, 38]
 };
 
 const activity = {
