@@ -1157,6 +1157,10 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
         return false;
     }
 
+    if (wait_validate_ == telegram->type_id) {
+        wait_validate_ = 0;
+    }
+
     // Check for custom entities reding this telegram
     webCustomEntityService.get_value(telegram);
 
@@ -1180,72 +1184,47 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     // returns false if the device_id doesn't recognize it
     // after the telegram has been processed, see if there have been values changed and we need to do a MQTT publish
     bool        telegram_found = false;
-    uint8_t     device_found   = 0;
     EMSdevice * found_device   = nullptr;
 
-    // check all conditions
+    // check all conditions in one loop
     for (const auto & emsdevice : emsdevices) {
-        // broadcast or send to us
-        if (emsdevice->is_device_id(telegram->src) && (telegram->dest == 0 || telegram->dest == EMSbus::ems_bus_id())) {
-            telegram_found = emsdevice->handle_telegram(telegram);
-            found_device   = emsdevice.get();
-            break;
-        }
-    }
-    if (!telegram_found) {
-        for (const auto & emsdevice : emsdevices) {
-            // check for command to the device
-            if (emsdevice->is_device_id(telegram->dest) && telegram->src != EMSbus::ems_bus_id()) {
-                telegram_found = emsdevice->handle_telegram(telegram);
-                found_device   = emsdevice.get();
-                break;
+        if ((emsdevice->is_device_id(telegram->src) && (telegram->dest == 0 || telegram->dest == EMSbus::ems_bus_id() || telegram->dest == 0x10))
+            || (emsdevice->is_device_id(telegram->dest) && telegram->src != EMSbus::ems_bus_id())) {
+            found_device = emsdevice.get();
+            if (emsdevice->handle_telegram(telegram)) {
+                telegram_found = true;
+                if (Mqtt::connected()
+                    && ((mqtt_.get_publish_onchange(found_device->device_type()) && found_device->has_update())
+                        || (telegram->type_id == publish_id_ && telegram->dest == EMSbus::ems_bus_id()))) {
+                    if (telegram->type_id == publish_id_) {
+                        publish_id_ = 0;
+                    }
+                    found_device->has_update(false); // reset flag
+                    if (!Mqtt::publish_single()) {
+                        publish_device_values(found_device->device_type()); // publish to MQTT if we explicitly have too
+                    }
+                }
+                break; // remove this to handle same telegrams on multiple devices
             }
         }
     }
+    // handle unknown telegrams
     if (!telegram_found) {
-        for (const auto & emsdevice : emsdevices) {
-            // check for sends to master thermostat
-            if (emsdevice->is_device_id(telegram->src) && telegram->dest == 0x10) {
-                telegram_found = emsdevice->handle_telegram(telegram);
-                found_device   = emsdevice.get();
-                break;
-            }
-        }
-    }
-
-    if (found_device) {
-        device_found = found_device->unique_id();
-
-        // Process the found device directly without another loop
-        if (!telegram_found && telegram->message_length > 0) {
+        // mark nonempty telegrams as ignored
+        if (found_device && telegram->message_length > 0) {
             found_device->add_handlers_ignored(telegram->type_id);
         }
-        if (wait_validate_ == telegram->type_id) {
-            wait_validate_ = 0;
-        }
-        if (Mqtt::connected() && telegram_found
-            && ((mqtt_.get_publish_onchange(found_device->device_type()) && found_device->has_update())
-                || (telegram->type_id == publish_id_ && telegram->dest == EMSbus::ems_bus_id()))) {
-            if (telegram->type_id == publish_id_) {
-                publish_id_ = 0;
+        // handle unknown broadcasted telegrams (or send to us)
+        if (telegram->dest == 0 || telegram->dest == EMSbus::ems_bus_id()) {
+            LOG_DEBUG("No telegram type handler found for ID 0x%02X (src 0x%02X)", telegram->type_id, telegram->src);
+            if (watch() == WATCH_UNKNOWN) {
+                LOG_NOTICE("%s", pretty_telegram(telegram).c_str());
             }
-            found_device->has_update(false); // reset flag
-            if (!Mqtt::publish_single()) {
-                publish_device_values(found_device->device_type()); // publish to MQTT if we explicitly have too
+            if (!wait_km_ && !found_device && (telegram->src != EMSbus::ems_bus_id()) && (telegram->message_length > 0)) {
+                send_read_request(EMSdevice::EMS_TYPE_VERSION, telegram->src);
             }
         }
     }
-    // handle unknown broadcasted telegrams (or send to us)
-    if (!telegram_found && (telegram->dest == 0 || telegram->dest == EMSbus::ems_bus_id())) {
-        LOG_DEBUG("No telegram type handler found for ID 0x%02X (src 0x%02X)", telegram->type_id, telegram->src);
-        if (watch() == WATCH_UNKNOWN) {
-            LOG_NOTICE("%s", pretty_telegram(telegram).c_str());
-        }
-        if (!wait_km_ && !device_found && (telegram->src != EMSbus::ems_bus_id()) && (telegram->message_length > 0)) {
-            send_read_request(EMSdevice::EMS_TYPE_VERSION, telegram->src);
-        }
-    }
-
     return telegram_found;
 }
 
