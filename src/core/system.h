@@ -137,12 +137,10 @@ class System {
     void    systemStatus(uint8_t status_code);
     uint8_t systemStatus();
 
-    std::vector<uint8_t> valid_gpio_list() const;
-
     static void extractSettings(const char * filename, const char * section, JsonObject output);
     static bool saveSettings(const char * filename, const char * section, JsonObject input);
 
-    static bool is_valid_gpio(uint8_t pin, bool has_psram = false);
+    bool        is_valid_gpio(uint8_t pin);
     static bool load_board_profile(std::vector<int8_t> & data, const std::string & board_profile);
 
     static bool readCommand(const char * data);
@@ -305,6 +303,7 @@ class System {
     uint32_t PSram() {
         return psram_;
     }
+
     uint32_t appFree() {
         return appfree_;
     }
@@ -337,6 +336,8 @@ class System {
 #endif
         test_set_all_active_ = n;
     }
+
+    static std::vector<uint8_t> valid_gpio_list();
 
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
     float temperature() {
@@ -382,6 +383,8 @@ class System {
 
     void led_monitor();
     void system_check();
+
+    static std::vector<uint8_t> string_range_to_vector(const std::string & range);
 
     int8_t wifi_quality(int8_t dBm);
 

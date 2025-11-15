@@ -255,7 +255,7 @@ void EMSESP::uart_init() {
     EMSuart::stop();
 
     // don't start UART if we have invalid GPIOs
-    if (System::is_valid_gpio(rx_gpio) && System::is_valid_gpio(tx_gpio)) {
+    if (EMSESP::system_.is_valid_gpio(rx_gpio) && EMSESP::system_.is_valid_gpio(tx_gpio)) {
         EMSuart::start(tx_mode, rx_gpio, tx_gpio); // start UART
     } else {
         LOG_WARNING("Invalid UART Rx/Tx GPIOs. Check config.");

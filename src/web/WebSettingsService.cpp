@@ -90,12 +90,6 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     // load the version from the settings config. This can be blank and later used in System::check_upgrade()
     settings.version = root["version"] | EMSESP_DEFAULT_VERSION;
 
-#ifndef EMSESP_STANDALONE
-    bool psram = ESP.getPsramSize() > 0; // System::PSram() is initialized later
-#else
-    bool psram = false;
-#endif
-
 #if defined(EMSESP_DEBUG)
     EMSESP::logger().debug("NVS boot value=[%s], board profile=[%s], EMSESP_DEFAULT_BOARD_PROFILE=[%s]",
                            EMSESP::nvs_.getString("boot").c_str(),
@@ -143,8 +137,8 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
 #endif
             }
             // check valid pins in this board profile
-            if (!System::is_valid_gpio(data[0], psram) || !System::is_valid_gpio(data[1], psram) || !System::is_valid_gpio(data[2], psram)
-                || !System::is_valid_gpio(data[3], psram) || !System::is_valid_gpio(data[4], psram) || !System::is_valid_gpio(data[6], psram)) {
+            if (!EMSESP::system_.is_valid_gpio(data[0]) || !EMSESP::system_.is_valid_gpio(data[1]) || !EMSESP::system_.is_valid_gpio(data[2])
+                || !EMSESP::system_.is_valid_gpio(data[3]) || !EMSESP::system_.is_valid_gpio(data[4]) || !EMSESP::system_.is_valid_gpio(data[6])) {
                 settings.board_profile = "default"; // reset to factory default
             }
         } else {
@@ -161,8 +155,8 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
 #if defined(EMSESP_STANDALONE)
         settings.board_profile = "S32";
 #elif CONFIG_IDF_TARGET_ESP32
-        // check for no PSRAM, could be a E32 or S32
-        if (!psram) {
+        // check for no PSRAM, could be a E32 or S32?
+        if (!ESP.getPsramSize()) {
 #if ESP_ARDUINO_VERSION_MAJOR < 3
             if (ETH.begin(1, 16, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_IN)) {
 #else

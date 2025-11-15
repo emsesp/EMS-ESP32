@@ -448,31 +448,9 @@ void System::reload_settings() {
     });
 }
 
-// check for valid ESP32 pins. This is very dependent on which ESP32 board is being used.
-// Typically you can't use 1, 6-11, 20, 24, 28-31 and 40+
-// we allow 0 as it has a special function on the NodeMCU apparently
-// See https://diyprojects.io/esp32-how-to-use-gpio-digital-io-arduino-code/#.YFpVEq9KhjG
-// and https://nodemcu.readthedocs.io/en/dev-esp32/modules/gpio/
-bool System::is_valid_gpio(uint8_t pin, bool has_psram) {
-#if CONFIG_IDF_TARGET_ESP32 || defined(EMSESP_STANDALONE)
-    if ((pin == 1) || (pin >= 6 && pin <= 11) || (pin == 20) || (pin == 24) || (pin >= 28 && pin <= 31) || (pin > 40)
-        || ((EMSESP::system_.PSram() > 0 || has_psram) && pin >= 16 && pin <= 17)) {
-#elif CONFIG_IDF_TARGET_ESP32S2
-    if ((pin >= 19 && pin <= 20) || (pin >= 22 && pin <= 32) || (pin > 40)) {
-#elif CONFIG_IDF_TARGET_ESP32C3
-    // https://www.wemos.cc/en/latest/c3/c3_mini.html
-    if ((pin >= 11 && pin <= 19) || (pin > 21)) {
-#elif CONFIG_IDF_TARGET_ESP32S3
-    if ((pin >= 19 && pin <= 20) || (pin >= 22 && pin <= 37) || (pin >= 39 && pin <= 42) || (pin > 48)) {
-#endif
-        return false; // bad pin
-    }
-
-    // extra check for pins 21 and 22 (I2C) when ethernet is onboard
-    if ((EMSESP::system_.ethernet_connected() || EMSESP::system_.phy_type_ != PHY_type::PHY_TYPE_NONE) && (pin >= 21 && pin <= 22)) {
-        return false; // bad pin
-    }
-    return true;
+// check for valid ESP32 pins
+bool System::is_valid_gpio(uint8_t pin) {
+    return std::find(valid_gpio_list().begin(), valid_gpio_list().end(), pin) != valid_gpio_list().end();
 }
 
 // Starts up the UART Serial bridge
@@ -2320,30 +2298,60 @@ uint8_t System::systemStatus() {
     return systemStatus_;
 }
 
+// take a string range like "6-11, 1, 23, 24-48" which has optional ranges and single values convert to a vector of ints
+std::vector<uint8_t> System::string_range_to_vector(const std::string & range) {
+    std::vector<uint8_t>   valid_gpios;
+    std::string::size_type pos  = 0;
+    std::string::size_type prev = 0;
+    while ((pos = range.find(',', prev)) != std::string::npos) {
+        valid_gpios.push_back(std::stoi(range.substr(prev, pos - prev)));
+        prev = pos + 1;
+    }
+    valid_gpios.push_back(std::stoi(range.substr(prev)));
+    return valid_gpios;
+}
+
 // return the list of valid GPIOs
-std::vector<uint8_t> System::valid_gpio_list() const {
-    // get free gpios based on board type
+// note: we do not allow 0, which is used sometimes to indicate a disabled pin
+std::vector<uint8_t> System::valid_gpio_list() {
+    // get free gpios based on board/platform type
 #if CONFIG_IDF_TARGET_ESP32C3
-    std::vector<uint8_t> valid_gpios = {11, 19, 21};
+    // https://www.wemos.cc/en/latest/c3/c3_mini.html
+    std::vector<uint8_t> valid_gpios = string_range_to_vector("11-19, 21"); // can go higher than 21 on some boards
 #elif CONFIG_IDF_TARGET_ESP32S2
-    std::vector<uint8_t> valid_gpios = {19, 20, 22, 32, 40};
+    std::vector<uint8_t> valid_gpios = string_range_to_vector("19-20, 22-32, 40");
 #elif CONFIG_IDF_TARGET_ESP32S3
-    std::vector<uint8_t> valid_gpios = {19, 20, 22, 37, 39, 42, 48};
-#elif CONFIG_IDF_TARGET_ESP32
-    std::vector<uint8_t> valid_gpios = {6, 11, 20, 24, 28, 31, 1, 40};
+    std::vector<uint8_t> valid_gpios = string_range_to_vector("19-20, 22-37, 39-42, 48");
+#elif CONFIG_IDF_TARGET_ESP32 || defined(EMSESP_STANDALONE)
+    std::vector<uint8_t> valid_gpios = string_range_to_vector("1, 6-11, 16-17, 20, 24, 28-31, 40");
 #else
     std::vector<uint8_t> valid_gpios = {};
 #endif
 
+#if CONFIG_IDF_TARGET_ESP32
+    // if psram is enabled remove pins 16 and 17 from the list
+    if (ESP.getPsramSize() > 0) {
+        valid_gpios.erase(std::remove(valid_gpios.begin(), valid_gpios.end(), 16), valid_gpios.end());
+        valid_gpios.erase(std::remove(valid_gpios.begin(), valid_gpios.end(), 17), valid_gpios.end());
+    }
+#endif
+
+    // if ethernet is enabled, remove pins 21 and 22 (I2C)
+    if ((EMSESP::system_.ethernet_connected() || EMSESP::system_.phy_type_ != PHY_type::PHY_TYPE_NONE)) {
+        valid_gpios.erase(std::remove(valid_gpios.begin(), valid_gpios.end(), 21), valid_gpios.end());
+        valid_gpios.erase(std::remove(valid_gpios.begin(), valid_gpios.end(), 22), valid_gpios.end());
+    }
+
     // filter out GPIOs already used in application settings
     for (const auto & gpio : valid_gpios) {
-        if (gpio == pbutton_gpio_ || gpio == led_gpio_ || gpio == dallas_gpio_ || gpio == rx_gpio_ || gpio == tx_gpio_) {
+        if (gpio == EMSESP::system_.pbutton_gpio_ || gpio == EMSESP::system_.led_gpio_ || gpio == EMSESP::system_.dallas_gpio_
+            || gpio == EMSESP::system_.rx_gpio_ || gpio == EMSESP::system_.tx_gpio_) {
             valid_gpios.erase(std::remove(valid_gpios.begin(), valid_gpios.end(), gpio), valid_gpios.end());
         }
     }
 
     // filter out GPIOs already used in analog sensors, if enabled
-    if (analog_enabled_) {
+    if (EMSESP::system_.analog_enabled_) {
         for (const auto & sensor : EMSESP::analogsensor_.sensors()) {
             if (std::find(valid_gpios.begin(), valid_gpios.end(), sensor.gpio()) != valid_gpios.end()) {
                 valid_gpios.erase(std::find(valid_gpios.begin(), valid_gpios.end(), sensor.gpio()));
