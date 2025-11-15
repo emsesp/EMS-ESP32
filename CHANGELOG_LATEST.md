@@ -66,3 +66,4 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - double click button reconnects EMS-ESP to AP
 - place system message command in side scheduler loop to reduce stack memory usage by 2KB
 - syslog mark interval set to 1 hour
+- handle process_telegram in oneloop
