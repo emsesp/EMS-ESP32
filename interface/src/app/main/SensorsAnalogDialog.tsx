@@ -158,21 +158,31 @@ const SensorsAnalogDialog = ({
       <DialogTitle>{dialogTitle}</DialogTitle>
       <DialogContent dividers>
         <Grid container spacing={2}>
-          <ValidatedTextField
-            name="g"
-            label="GPIO"
-            value={editItem.g}
-            sx={{ width: '8ch' }}
-            select
-            onChange={updateFormValue}
-            disabled={editItem.s}
-          >
-            {analogGPIOList?.map((gpio: number) => (
-              <MenuItem key={gpio} value={gpio}>
-                {gpio}
-              </MenuItem>
-            ))}
-          </ValidatedTextField>
+          {editItem.s ? (
+            <TextField
+              name="g"
+              label="GPIO"
+              value={editItem.g}
+              sx={{ width: '8ch' }}
+              disabled={true}
+            ></TextField>
+          ) : (
+            <ValidatedTextField
+              name="g"
+              label="GPIO"
+              value={editItem.g}
+              sx={{ width: '8ch' }}
+              select
+              onChange={updateFormValue}
+              disabled={editItem.s}
+            >
+              {analogGPIOList?.map((gpio: number) => (
+                <MenuItem key={gpio} value={gpio}>
+                  {gpio}
+                </MenuItem>
+              ))}
+            </ValidatedTextField>
+          )}
           <Grid>
             <ValidatedTextField
               name="n"
