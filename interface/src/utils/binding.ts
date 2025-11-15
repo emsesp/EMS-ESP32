@@ -46,15 +46,15 @@ type UpdateEntity<S> = (state: (prevState: Readonly<S>) => S) => void;
  */
 export const updateValue =
   <S extends Record<string, unknown>>(updateEntity: UpdateEntity<S>) =>
-    (event: React.ChangeEvent<HTMLInputElement>): void => {
-      const { name } = event.target;
-      const value = extractEventValue(event);
+  (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const { name } = event.target;
+    const value = extractEventValue(event);
 
-      updateEntity((prevState) => ({
-        ...prevState,
-        [name]: value
-      }));
-    };
+    updateEntity((prevState) => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
 
 /**
  * Creates an event handler that tracks dirty flags for modified fields.
@@ -67,22 +67,22 @@ export const updateValueDirty =
     setDirtyFlags: React.Dispatch<React.SetStateAction<string[]>>,
     updateDataValue: (updater: (prevState: T) => T) => void
   ) =>
-    (event: React.ChangeEvent<HTMLInputElement>): void => {
-      const { name } = event.target;
-      const updatedValue = extractEventValue(event);
+  (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const { name } = event.target;
+    const updatedValue = extractEventValue(event);
 
-      updateDataValue((prevState) => ({
-        ...prevState,
-        [name]: updatedValue
-      }));
+    updateDataValue((prevState) => ({
+      ...prevState,
+      [name]: updatedValue
+    }));
 
-      const isDirty = origData[name] !== updatedValue;
-      const wasDirty = dirtyFlags.includes(name);
+    const isDirty = origData[name] !== updatedValue;
+    const wasDirty = dirtyFlags.includes(name);
 
-      // Only update dirty flags if the state changed
-      if (isDirty !== wasDirty) {
-        setDirtyFlags(
-          isDirty ? [...dirtyFlags, name] : dirtyFlags.filter((f) => f !== name)
-        );
-      }
-    };
+    // Only update dirty flags if the state changed
+    if (isDirty !== wasDirty) {
+      setDirtyFlags(
+        isDirty ? [...dirtyFlags, name] : dirtyFlags.filter((f) => f !== name)
+      );
+    }
+  };
