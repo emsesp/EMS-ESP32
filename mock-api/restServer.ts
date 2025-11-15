@@ -988,7 +988,7 @@ const emsesp_sensordata = {
     {
       id: 2,
       g: 37,
-      n: 'External switch',
+      n: 'External_switch',
       v: 13,
       u: 0,
       o: 17,
@@ -999,8 +999,8 @@ const emsesp_sensordata = {
     },
     {
       id: 3,
-      g: 39,
-      n: 'Pulse count',
+      g: 37,
+      n: 'Pulse_count',
       v: 144,
       u: 0,
       o: 0,
@@ -1011,7 +1011,7 @@ const emsesp_sensordata = {
     },
     {
       id: 4,
-      g: 40,
+      g: 23,
       n: 'Pressure',
       v: 16,
       u: 17,
