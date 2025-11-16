@@ -147,8 +147,6 @@ class EMSESP {
     static void dump_all_entities(uuid::console::Shell & shell);
     static void dump_all_telegrams(uuid::console::Shell & shell);
 
-    static void uart_init();
-
     static void incoming_telegram(uint8_t * data, const uint8_t length);
 
     static bool sensor_enabled() {

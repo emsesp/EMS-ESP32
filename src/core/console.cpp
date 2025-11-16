@@ -357,7 +357,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                                   shell.printfln(F_(tx_mode_fmt), settings.tx_mode);
                                   return StateUpdateResult::CHANGED;
                               });
-                              EMSESP::uart_init();
+                              EMSESP::system_.uart_init(false);
                           });
 
     //

@@ -409,7 +409,7 @@ void WebSettingsService::onUpdate() {
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::UART)) {
-        EMSESP::uart_init();
+        EMSESP::system_.uart_init(true);
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::SYSLOG)) {
