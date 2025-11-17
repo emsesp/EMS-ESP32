@@ -240,36 +240,6 @@ void EMSESP::watch_id(uint16_t watch_id) {
     watch_id_ = watch_id;
 }
 
-// resets all counters and bumps the UART
-// this is called when the tx_mode is persisted in the FS either via Web UI or the console
-void EMSESP::uart_init() {
-    uint8_t tx_mode = 0;
-    uint8_t rx_gpio = 0;
-    uint8_t tx_gpio = 0;
-    EMSESP::webSettingsService.read([&](WebSettings const & settings) {
-        tx_mode = settings.tx_mode;
-        rx_gpio = settings.rx_gpio;
-        tx_gpio = settings.tx_gpio;
-    });
-
-    EMSuart::stop();
-
-    // don't start UART if we have invalid GPIOs
-    if (EMSESP::system_.is_valid_gpio(rx_gpio) && EMSESP::system_.is_valid_gpio(tx_gpio)) {
-        EMSuart::start(tx_mode, rx_gpio, tx_gpio); // start UART
-    } else {
-        LOG_WARNING("Invalid UART Rx/Tx GPIOs. Check config.");
-    }
-
-    txservice_.start(); // sends out request to EMS bus for all devices
-    txservice_.tx_mode(tx_mode);
-
-    // force a fetch for all new values, unless Tx is set to off
-    // if (tx_mode != 0) {
-    // EMSESP::fetch_device_values();
-    // }
-}
-
 // return status of bus: connected (0), connected but Tx is broken (1), disconnected (2)
 uint8_t EMSESP::bus_status() {
     if (!rxservice_.bus_connected()) {

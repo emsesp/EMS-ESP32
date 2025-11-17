@@ -406,15 +406,21 @@ void System::syslog_init() {
 
 // read some specific system settings to store locally for faster access
 void System::reload_settings() {
+    // set gpios to zero for valid check
+    led_gpio_     = 0;
+    rx_gpio_      = 0;
+    tx_gpio_      = 0;
+    pbutton_gpio_ = 0;
+    dallas_gpio_  = 0;
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         version_ = settings.version;
 
-        pbutton_gpio_   = settings.pbutton_gpio;
+        pbutton_gpio_   = is_valid_gpio(settings.pbutton_gpio) ? settings.pbutton_gpio : 0;
         analog_enabled_ = settings.analog_enabled;
         low_clock_      = settings.low_clock;
         hide_led_       = settings.hide_led;
         led_type_       = settings.led_type;
-        led_gpio_       = settings.led_gpio;
+        led_gpio_       = is_valid_gpio(settings.led_gpio) ? settings.led_gpio : 0;
         board_profile_  = settings.board_profile;
         telnet_enabled_ = settings.telnet_enabled;
 
@@ -423,10 +429,10 @@ void System::reload_settings() {
         modbus_max_clients_ = settings.modbus_max_clients;
         modbus_timeout_     = settings.modbus_timeout;
 
-        rx_gpio_     = settings.rx_gpio;
-        tx_gpio_     = settings.tx_gpio;
-        dallas_gpio_ = settings.dallas_gpio;
-
+        tx_mode_              = settings.tx_mode;
+        rx_gpio_              = is_valid_gpio(settings.rx_gpio) ? settings.rx_gpio : 0;
+        tx_gpio_              = is_valid_gpio(settings.tx_gpio) ? settings.tx_gpio : 0;
+        dallas_gpio_          = is_valid_gpio(settings.dallas_gpio) ? settings.dallas_gpio : 0;
         syslog_enabled_       = settings.syslog_enabled;
         syslog_level_         = settings.syslog_level;
         syslog_mark_interval_ = settings.syslog_mark_interval;
@@ -497,7 +503,7 @@ void System::start() {
     led_init(false);     // init LED
     button_init(false);  // the special button
     network_init(false); // network
-    EMSESP::uart_init(); // start UART
+    uart_init(false);    // start UART
     syslog_init();       // start syslog
 }
 
@@ -550,11 +556,6 @@ void System::button_init(bool refresh) {
     }
 
 #ifndef EMSESP_STANDALONE
-    if (!is_valid_gpio(pbutton_gpio_)) {
-        LOG_WARNING("Invalid button GPIO. Check config.");
-        myPButton_.init(255, HIGH); // disable
-        return;
-    }
     if (!myPButton_.init(pbutton_gpio_, HIGH)) {
         LOG_WARNING("Multi-functional button not detected");
         return;
@@ -572,18 +573,17 @@ void System::button_init(bool refresh) {
 void System::led_init(bool refresh) {
     if (refresh) {
         // disabled old led port before setting new one
-        if ((led_gpio_ != 0) && is_valid_gpio(led_gpio_)) {
+        if (led_gpio_) {
 #if ESP_ARDUINO_VERSION_MAJOR < 3
             led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
 #else
             led_type_ ? rgbLedWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
 #endif
-            pinMode(led_gpio_, INPUT);
         }
         reload_settings();
     }
 
-    if ((led_gpio_ != 0) && is_valid_gpio(led_gpio_)) { // 0 means disabled
+    if ((led_gpio_)) { // 0 means disabled
         if (led_type_) {
             // rgb LED WS2812B, use Neopixel
 #if ESP_ARDUINO_VERSION_MAJOR < 3
@@ -595,7 +595,25 @@ void System::led_init(bool refresh) {
             pinMode(led_gpio_, OUTPUT);
             digitalWrite(led_gpio_, !LED_ON); // start with LED off
         }
+    } else {
+        LOG_INFO("LED disabled");
     }
+}
+
+void System::uart_init(bool refresh) {
+    if (refresh) {
+        reload_settings();
+    }
+    EMSuart::stop();
+
+    // don't start UART if we have invalid GPIOs
+    if (rx_gpio_ && tx_gpio_) {
+        EMSuart::start(tx_mode_, rx_gpio_, tx_gpio_); // start UART
+    } else {
+        LOG_WARNING("Invalid UART Rx/Tx GPIOs. Check config.");
+    }
+
+    EMSESP::txservice_.start(); // reset counters and send devices request
 }
 
 // checks system health and handles LED flashing wizardry
@@ -1802,11 +1820,12 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
                 node["ethPhyAddr"]    = settings.eth_phy_addr;
                 node["ethClockMmode"] = settings.eth_clock_mode;
             }
-            node["rxGPIO"]      = settings.rx_gpio;
-            node["txGPIO"]      = settings.tx_gpio;
-            node["dallasGPIO"]  = settings.dallas_gpio;
-            node["pbuttonGPIO"] = settings.pbutton_gpio;
-            node["ledGPIO"]     = settings.led_gpio;
+            node["rxGPIO"]      = EMSESP::system_.rx_gpio_;
+            node["txGPIO"]      = EMSESP::system_.tx_gpio_;
+            node["dallasGPIO"]  = EMSESP::system_.dallas_gpio_;
+            node["pbuttonGPIO"] = EMSESP::system_.pbutton_gpio_;
+            node["ledGPIO"]     = EMSESP::system_.led_gpio_;
+            node["ledType"]     = settings.led_type;
             node["ledType"]     = settings.led_type;
         }
         node["hideLed"]         = settings.hide_led;
@@ -2369,10 +2388,12 @@ std::vector<uint8_t> System::valid_gpio_list() {
         valid_gpios.erase(std::remove(valid_gpios.begin(), valid_gpios.end(), 22), valid_gpios.end());
     }
 
-    // filter out GPIOs already used in application settings
+    // filter out GPIOs already used in application settings, gpio 0 means disabled, except for pbutton
     for (const auto & gpio : valid_gpios) {
-        if (gpio == EMSESP::system_.pbutton_gpio_ || gpio == EMSESP::system_.led_gpio_ || gpio == EMSESP::system_.dallas_gpio_
-            || gpio == EMSESP::system_.rx_gpio_ || gpio == EMSESP::system_.tx_gpio_) {
+        if (gpio == EMSESP::system_.pbutton_gpio_
+            || (gpio
+                && (gpio == EMSESP::system_.led_gpio_ || gpio == EMSESP::system_.dallas_gpio_ || gpio == EMSESP::system_.rx_gpio_
+                    || gpio == EMSESP::system_.tx_gpio_))) {
             valid_gpios.erase(std::remove(valid_gpios.begin(), valid_gpios.end(), gpio), valid_gpios.end());
         }
     }

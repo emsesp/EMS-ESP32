@@ -133,6 +133,7 @@ class System {
     void network_init(bool refresh);
     void button_init(bool refresh);
     void commands_init();
+    void uart_init(bool refresh);
 
     void    systemStatus(uint8_t status_code);
     uint8_t systemStatus();
@@ -144,6 +145,10 @@ class System {
     static bool load_board_profile(std::vector<int8_t> & data, const std::string & board_profile);
 
     static bool readCommand(const char * data);
+
+    void dallas_gpio(uint8_t gpio) {
+        dallas_gpio_ = gpio;
+    }
 
     bool telnet_enabled() {
         return telnet_enabled_;
@@ -413,6 +418,7 @@ class System {
     uint8_t     pbutton_gpio_;
     uint8_t     rx_gpio_;
     uint8_t     tx_gpio_;
+    uint8_t     tx_mode_;
     uint8_t     dallas_gpio_;
     bool        telnet_enabled_;
     bool        syslog_enabled_;
