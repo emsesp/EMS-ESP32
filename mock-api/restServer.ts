@@ -276,10 +276,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-        old_custom_name +
-        ') with new (' +
-        new_custom_name +
-        ')'
+          old_custom_name +
+          ') with new (' +
+          new_custom_name +
+          ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -375,15 +375,15 @@ function check_upgrade(version: string) {
 
     console.log(
       'Upgrade this version (' +
-      THIS_VERSION +
-      ') to dev (' +
-      dev_version +
-      ') is ' +
-      (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-      ' and to stable (' +
-      stable_version +
-      ') is ' +
-      (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
+        THIS_VERSION +
+        ') to dev (' +
+        dev_version +
+        ') is ' +
+        (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+        ' and to stable (' +
+        stable_version +
+        ') is ' +
+        (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
     );
     data = {
       emsesp_version: THIS_VERSION,
@@ -4543,7 +4543,10 @@ router
 
     // Build list of available GPIOs (S3 board pins) excluding used ones
     // and sort it
-    const allGPIOs = [2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 18, 21, 33, 34, 35, 36, 37, 38, 45, 46];
+    const allGPIOs = [
+      2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 18, 21, 33, 34, 35, 36, 37, 38,
+      45, 46
+    ];
     const usedGPIOs = new Set([
       settings.led_gpio,
       settings.dallas_gpio,
