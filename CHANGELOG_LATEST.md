@@ -32,6 +32,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - solar temperature TS16 [#2690](https://github.com/emsesp/EMS-ESP32/issues/2690)
 - pumpmode enum for HT3 boilers, add commands for manual defrost, chimneysweeper [#2727](https://github.com/emsesp/EMS-ESP32/issues/2727)
 - pid settings [#2735](https://github.com/emsesp/EMS-ESP32/issues/2735)
+- refresh MQTT button added to MQTT Settings page
 
 ## Fixed
 
