@@ -146,7 +146,7 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
             obj["t"]       = sensor.type();
             obj["s"]       = sensor.is_system();
 
-            if (sensor.type() != AnalogSensor::AnalogType::NOTUSED) {
+            if (sensor.type() != AnalogSensor::AnalogType::NOTUSED && sensor.gpio() != 99) {
                 obj["v"] = Helpers::transformNumFloat(sensor.value()); // is optional and is a float
             } else {
                 obj["v"] = 0; // must have a value for web sorting to work
@@ -435,41 +435,39 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
         JsonArray nodes = obj["nodes"].to<JsonArray>();
         uint8_t   count = 0;
         for (const auto & sensor : EMSESP::analogsensor_.sensors()) {
-            // ignore system sensors
-            if (sensor.is_system()) {
+            // ignore system and disabled sensors
+            if (sensor.is_system() || sensor.type() == AnalogSensor::AnalogType::NOTUSED || sensor.gpio() == 99) {
                 continue;
             }
-            if (sensor.type() != AnalogSensor::AnalogType::NOTUSED) { // ignore disabled
-                JsonObject node = nodes.add<JsonObject>();
-                node["id"]      = (EMSdevice::DeviceTypeUniqueID::ANALOGSENSOR_UID * 100) + count++;
+            JsonObject node = nodes.add<JsonObject>();
+            node["id"]      = (EMSdevice::DeviceTypeUniqueID::ANALOGSENSOR_UID * 100) + count++;
 
-                JsonObject dv = node["dv"].to<JsonObject>();
-                dv["id"]      = "00" + sensor.name();
+            JsonObject dv = node["dv"].to<JsonObject>();
+            dv["id"]      = "00" + sensor.name();
 #if CONFIG_IDF_TARGET_ESP32
-                if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT && (sensor.gpio() == 25 || sensor.gpio() == 26)) {
-                    obj["v"] = Helpers::transformNumFloat(sensor.value());
-                } else
+            if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT && (sensor.gpio() == 25 || sensor.gpio() == 26)) {
+                obj["v"] = Helpers::transformNumFloat(sensor.value());
+            } else
 #elif CONFIG_IDF_TARGET_ESP32S2
-                if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT && (sensor.gpio() == 17 || sensor.gpio() == 18)) {
-                    obj["v"] = Helpers::transformNumFloat(sensor.value());
-                } else
+            if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT && (sensor.gpio() == 17 || sensor.gpio() == 18)) {
+                obj["v"] = Helpers::transformNumFloat(sensor.value());
+            } else
 #endif
-                    if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT || sensor.type() == AnalogSensor::AnalogType::DIGITAL_IN
-                        || sensor.type() == AnalogSensor::AnalogType::PULSE) {
-                    char s[12];
-                    dv["v"]     = Helpers::render_boolean(s, sensor.value() != 0, true);
-                    JsonArray l = dv["l"].to<JsonArray>();
-                    l.add(Helpers::render_boolean(s, false, true));
-                    l.add(Helpers::render_boolean(s, true, true));
-                } else {
-                    dv["v"] = Helpers::transformNumFloat(sensor.value());
-                    dv["u"] = sensor.uom();
-                }
-                if (sensor.type() == AnalogSensor::AnalogType::COUNTER
-                    || (sensor.type() >= AnalogSensor::AnalogType::DIGITAL_OUT && sensor.type() <= AnalogSensor::AnalogType::PWM_2)
-                    || sensor.type() == AnalogSensor::AnalogType::RGB || sensor.type() == AnalogSensor::AnalogType::PULSE) {
-                    dv["c"] = sensor.name();
-                }
+                if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT || sensor.type() == AnalogSensor::AnalogType::DIGITAL_IN
+                    || sensor.type() == AnalogSensor::AnalogType::PULSE) {
+                char s[12];
+                dv["v"]     = Helpers::render_boolean(s, sensor.value() != 0, true);
+                JsonArray l = dv["l"].to<JsonArray>();
+                l.add(Helpers::render_boolean(s, false, true));
+                l.add(Helpers::render_boolean(s, true, true));
+            } else {
+                dv["v"] = Helpers::transformNumFloat(sensor.value());
+                dv["u"] = sensor.uom();
+            }
+            if (sensor.type() == AnalogSensor::AnalogType::COUNTER
+                || (sensor.type() >= AnalogSensor::AnalogType::DIGITAL_OUT && sensor.type() <= AnalogSensor::AnalogType::PWM_2)
+                || sensor.type() == AnalogSensor::AnalogType::RGB || sensor.type() == AnalogSensor::AnalogType::PULSE) {
+                dv["c"] = sensor.name();
             }
         }
     }

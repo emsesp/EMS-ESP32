@@ -414,13 +414,17 @@ void System::reload_settings() {
     dallas_gpio_  = 0;
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         version_ = settings.version;
+        // first check gpios, prioriy to rx and tx
+        rx_gpio_      = is_valid_gpio(settings.rx_gpio) ? settings.rx_gpio : 0;
+        tx_gpio_      = is_valid_gpio(settings.tx_gpio) ? settings.tx_gpio : 0;
+        pbutton_gpio_ = is_valid_gpio(settings.pbutton_gpio) ? settings.pbutton_gpio : 0;
+        dallas_gpio_  = is_valid_gpio(settings.dallas_gpio) ? settings.dallas_gpio : 0;
+        led_gpio_     = is_valid_gpio(settings.led_gpio) ? settings.led_gpio : 0;
 
-        pbutton_gpio_   = is_valid_gpio(settings.pbutton_gpio) ? settings.pbutton_gpio : 0;
         analog_enabled_ = settings.analog_enabled;
         low_clock_      = settings.low_clock;
         hide_led_       = settings.hide_led;
         led_type_       = settings.led_type;
-        led_gpio_       = is_valid_gpio(settings.led_gpio) ? settings.led_gpio : 0;
         board_profile_  = settings.board_profile;
         telnet_enabled_ = settings.telnet_enabled;
 
@@ -430,9 +434,6 @@ void System::reload_settings() {
         modbus_timeout_     = settings.modbus_timeout;
 
         tx_mode_              = settings.tx_mode;
-        rx_gpio_              = is_valid_gpio(settings.rx_gpio) ? settings.rx_gpio : 0;
-        tx_gpio_              = is_valid_gpio(settings.tx_gpio) ? settings.tx_gpio : 0;
-        dallas_gpio_          = is_valid_gpio(settings.dallas_gpio) ? settings.dallas_gpio : 0;
         syslog_enabled_       = settings.syslog_enabled;
         syslog_level_         = settings.syslog_level;
         syslog_mark_interval_ = settings.syslog_mark_interval;
@@ -457,7 +458,8 @@ void System::reload_settings() {
 
 // check for valid ESP32 pins
 bool System::is_valid_gpio(uint8_t pin) {
-    return std::find(valid_gpio_list().begin(), valid_gpio_list().end(), pin) != valid_gpio_list().end();
+    auto valid_gpios = valid_gpio_list();
+    return std::find(valid_gpios.begin(), valid_gpios.end(), pin) != valid_gpios.end();
 }
 
 // Starts up the UART Serial bridge
