@@ -321,8 +321,12 @@ void Mqtt::on_publish(uint16_t packetId) const {
     LOG_DEBUG("Packet %d sent successful", packetId);
 }
 
-// called when MQTT settings have changed via the Web forms
+// called when MQTT settings have changed via the MQTT Settings or Application Settings Web pages
 void Mqtt::reset_mqtt() {
+    if (!enabled()) {
+        return;
+    }
+
     if (!mqttClient_) {
         return;
     }

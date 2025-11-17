@@ -5106,6 +5106,10 @@ router
         // upload URL
         console.log('upload File from URL', content.param);
         return status(200);
+      } else if (action === 'resetMQTT') {
+        // reset MQTT
+        console.log('resetting MQTT...');
+        return status(200);
       }
     }
     return status(404); // cmd not found

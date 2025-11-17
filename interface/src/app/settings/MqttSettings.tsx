@@ -1,8 +1,11 @@
 import { useCallback, useMemo, useState } from 'react';
+import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
+import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import WarningIcon from '@mui/icons-material/Warning';
 import {
+  Box,
   Button,
   Checkbox,
   Grid,
@@ -30,6 +33,8 @@ import type { MqttSettingsType } from 'types';
 import { numberValue, updateValueDirty, useRest } from 'utils';
 import { createMqttSettingsValidator, validate } from 'validators';
 
+import { callAction } from '../../api/app';
+
 const MqttSettings = () => {
   const {
     loadData,
@@ -51,6 +56,16 @@ const MqttSettings = () => {
   useLayoutTitle('MQTT');
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
+
+  const sendResetMQTT = useCallback(() => {
+    void callAction({ action: 'resetMQTT' })
+      .then(() => {
+        toast.success('MQTT ' + LL.REFRESH() + ' successful');
+      })
+      .catch((error) => {
+        toast.error(String(error.error?.message || 'An error occurred'));
+      });
+  }, []);
 
   const updateFormValue = useMemo(
     () =>
@@ -114,16 +129,28 @@ const MqttSettings = () => {
     <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       <>
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              name="enabled"
-              checked={data.enabled}
-              onChange={updateFormValue}
-            />
-          }
-          label={LL.ENABLE_MQTT()}
-        />
+        <Box display="flex" gap={2} mb={1}>
+          <BlockFormControlLabel
+            control={
+              <Checkbox
+                name="enabled"
+                checked={data.enabled}
+                onChange={updateFormValue}
+              />
+            }
+            label={LL.ENABLE_MQTT()}
+          />
+          {data.enabled && (
+            <Button
+              startIcon={<SettingsBackupRestoreIcon />}
+              color="secondary"
+              variant="outlined"
+              onClick={sendResetMQTT}
+            >
+              {LL.REFRESH() + ' MQTT'}
+            </Button>
+          )}
+        </Box>
         <Grid container spacing={2} rowSpacing={0}>
           <Grid>
             <ValidatedTextField
