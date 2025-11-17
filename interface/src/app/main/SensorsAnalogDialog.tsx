@@ -14,7 +14,6 @@ import {
   Grid,
   InputAdornment,
   MenuItem,
-  TextField,
   Typography
 } from '@mui/material';
 
@@ -193,12 +192,11 @@ const SensorsAnalogDialog = ({
               label={LL.NAME(0)}
               value={editItem.n}
               fullWidth
-              variant="outlined"
               onChange={updateFormValue}
             />
           </Grid>
           <Grid>
-            <TextField
+            <ValidatedTextField
               name="t"
               label={LL.TYPE(0)}
               value={editItem.t}
@@ -208,11 +206,11 @@ const SensorsAnalogDialog = ({
               disabled={editItem.s}
             >
               {analogTypeMenuItems}
-            </TextField>
+            </ValidatedTextField>
           </Grid>
           {(isCounterOrRate || isFreqType) && (
             <Grid>
-              <TextField
+              <ValidatedTextField
                 name="u"
                 label={LL.UNIT()}
                 value={editItem.u}
@@ -222,18 +220,17 @@ const SensorsAnalogDialog = ({
                 disabled={editItem.s}
               >
                 {uomMenuItems}
-              </TextField>
+              </ValidatedTextField>
             </Grid>
           )}
           {editItem.t === AnalogType.ADC && (
             <Grid>
-              <TextField
+              <ValidatedTextField
                 name="o"
                 label={LL.OFFSET()}
                 value={numberValue(editItem.o)}
                 type="number"
                 sx={{ width: '11ch' }}
-                variant="outlined"
                 onChange={updateFormValue}
                 disabled={editItem.s}
                 slotProps={{
@@ -249,13 +246,12 @@ const SensorsAnalogDialog = ({
           )}
           {editItem.t === AnalogType.NTC && (
             <Grid>
-              <TextField
+              <ValidatedTextField
                 name="o"
                 label={LL.OFFSET()}
                 value={numberValue(editItem.o)}
                 sx={{ width: '11ch' }}
                 type="number"
-                variant="outlined"
                 onChange={updateFormValue}
                 disabled={editItem.s}
                 slotProps={{
@@ -271,13 +267,12 @@ const SensorsAnalogDialog = ({
           )}
           {editItem.t === AnalogType.COUNTER && (
             <Grid>
-              <TextField
+              <ValidatedTextField
                 name="o"
                 label={LL.STARTVALUE()}
                 value={numberValue(editItem.o)}
                 type="number"
                 sx={{ width: '11ch' }}
-                variant="outlined"
                 onChange={updateFormValue}
                 disabled={editItem.s}
                 slotProps={{
@@ -288,13 +283,12 @@ const SensorsAnalogDialog = ({
           )}
           {editItem.t === AnalogType.RGB && (
             <Grid>
-              <TextField
+              <ValidatedTextField
                 name="o"
                 label={'RGB ' + LL.VALUE(0)}
                 value={numberValue(editItem.o)}
                 type="number"
                 sx={{ width: '11ch' }}
-                variant="outlined"
                 onChange={updateFormValue}
                 disabled={editItem.s}
               />
@@ -302,13 +296,12 @@ const SensorsAnalogDialog = ({
           )}
           {isCounterOrRate && (
             <Grid>
-              <TextField
+              <ValidatedTextField
                 name="f"
                 label={LL.FACTOR()}
                 value={numberValue(editItem.f)}
                 sx={{ width: '14ch' }}
                 type="number"
-                variant="outlined"
                 onChange={updateFormValue}
                 disabled={editItem.s}
                 slotProps={{
@@ -319,13 +312,12 @@ const SensorsAnalogDialog = ({
           )}
           {isDigitalOutGPIO && (
             <Grid>
-              <TextField
+              <ValidatedTextField
                 name="o"
                 label={LL.VALUE(0)}
                 value={numberValue(editItem.o)}
                 sx={{ width: '11ch' }}
                 type="number"
-                variant="outlined"
                 onChange={updateFormValue}
                 disabled={editItem.s}
                 slotProps={{
@@ -337,21 +329,20 @@ const SensorsAnalogDialog = ({
           {isDigitalOutNonGPIO && (
             <>
               <Grid>
-                <TextField
+                <ValidatedTextField
                   name="o"
                   label={LL.VALUE(0)}
                   value={numberValue(editItem.o)}
                   select
-                  variant="outlined"
                   onChange={updateFormValue}
                   disabled={editItem.s}
                 >
                   <MenuItem value={0}>{LL.OFF()}</MenuItem>
                   <MenuItem value={1}>{LL.ON()}</MenuItem>
-                </TextField>
+                </ValidatedTextField>
               </Grid>
               <Grid>
-                <TextField
+                <ValidatedTextField
                   name="f"
                   label={LL.POLARITY()}
                   value={editItem.f}
@@ -362,10 +353,10 @@ const SensorsAnalogDialog = ({
                 >
                   <MenuItem value={1}>{LL.ACTIVEHIGH()}</MenuItem>
                   <MenuItem value={-1}>{LL.ACTIVELOW()}</MenuItem>
-                </TextField>
+                </ValidatedTextField>
               </Grid>
               <Grid>
-                <TextField
+                <ValidatedTextField
                   name="u"
                   label={LL.STARTVALUE()}
                   sx={{ width: '15ch' }}
@@ -381,19 +372,18 @@ const SensorsAnalogDialog = ({
                   <MenuItem value={2}>
                     {LL.ALWAYS()}&nbsp;{LL.ON()}
                   </MenuItem>
-                </TextField>
+                </ValidatedTextField>
               </Grid>
             </>
           )}
           {isPWM && (
             <>
               <Grid>
-                <TextField
+                <ValidatedTextField
                   name="f"
                   label={LL.FREQ()}
                   value={numberValue(editItem.f)}
                   type="number"
-                  variant="outlined"
                   sx={{ width: '11ch' }}
                   onChange={updateFormValue}
                   disabled={editItem.s}
@@ -408,13 +398,12 @@ const SensorsAnalogDialog = ({
                 />
               </Grid>
               <Grid>
-                <TextField
+                <ValidatedTextField
                   name="o"
                   label={LL.DUTY_CYCLE()}
                   value={numberValue(editItem.o)}
                   type="number"
                   sx={{ width: '11ch' }}
-                  variant="outlined"
                   onChange={updateFormValue}
                   disabled={editItem.s}
                   slotProps={{
@@ -432,7 +421,7 @@ const SensorsAnalogDialog = ({
           {editItem.t === AnalogType.PULSE && (
             <>
               <Grid>
-                <TextField
+                <ValidatedTextField
                   name="o"
                   label={LL.POLARITY()}
                   value={editItem.o}
@@ -443,16 +432,15 @@ const SensorsAnalogDialog = ({
                 >
                   <MenuItem value={0}>{LL.ACTIVEHIGH()}</MenuItem>
                   <MenuItem value={1}>{LL.ACTIVELOW()}</MenuItem>
-                </TextField>
+                </ValidatedTextField>
               </Grid>
               <Grid>
-                <TextField
+                <ValidatedTextField
                   name="f"
                   label="Pulse"
                   value={numberValue(editItem.f)}
                   type="number"
                   sx={{ width: '15ch' }}
-                  variant="outlined"
                   onChange={updateFormValue}
                   disabled={editItem.s}
                   slotProps={{
