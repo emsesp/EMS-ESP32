@@ -21,7 +21,16 @@ const ValidatedTextField: FC<ValidatedTextFieldProps> = ({
 
   return (
     <>
-      <TextField error={!!errors} {...rest} aria-label="Error" />
+      <TextField
+        error={!!errors}
+        {...rest}
+        aria-label="Error"
+        slotProps={{
+          inputLabel: {
+            style: rest.disabled ? { color: 'grey' } : undefined
+          }
+        }}
+      />
       {errors?.map((e) => (
         <FormHelperText key={e.message} sx={{ color: 'rgb(250, 95, 84)' }}>
           {e.message}

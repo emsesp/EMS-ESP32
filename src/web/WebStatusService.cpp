@@ -195,6 +195,9 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
         ok = uploadURL(param.c_str());
     } else if (action == "systemStatus" && is_admin) {
         ok = setSystemStatus(param.c_str());
+    } else if (action == "resetMQTT" && is_admin) {
+        emsesp::EMSESP::mqtt_.reset_mqtt();
+        ok = true;
     }
 
 #if defined(EMSESP_STANDALONE) && !defined(EMSESP_UNITY)

@@ -167,7 +167,7 @@ void MqttSettingsService::WiFiEvent(WiFiEvent_t event) {
 bool MqttSettingsService::configureMqtt() {
     // disconnect if already connected
     if (_mqttClient->connected()) {
-        emsesp::EMSESP::logger().info("Disconnecting to configure");
+        // emsesp::EMSESP::logger().info("Disconnecting to configure");
         _mqttClient->disconnect(true);
     }
 
