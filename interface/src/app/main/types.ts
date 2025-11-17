@@ -201,7 +201,7 @@ export enum DeviceValueUOM {
 export const DeviceValueUOM_s = [
   '',
   '°C',
-  '°C',
+  '°C Rel',
   '%',
   'l/min',
   'kWh',

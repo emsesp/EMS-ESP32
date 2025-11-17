@@ -472,8 +472,9 @@ void AnalogSensor::loop() {
     measure(); // take the measurements
 }
 
-// update analog information name and offset
+// update analog information name, offset, factor, uom, type, deleted, is_system
 // a type value of -1 is used to delete the sensor
+// the gpio is the key
 bool AnalogSensor::update(uint8_t gpio, std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted, bool is_system) {
     // first see if we can find the sensor in our customization list
     bool found_sensor = false;
@@ -521,7 +522,7 @@ bool AnalogSensor::update(uint8_t gpio, std::string & name, double offset, doubl
     }
 
     // we didn't find it, it's new, so create and store it in the customization list
-    // gpio is already checked in web interface, should never trigger.
+    // gpio is already checked in web interface
     if (!found_sensor && EMSESP::system_.is_valid_gpio(gpio)) {
         found_sensor = true;
         EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
@@ -534,7 +535,7 @@ bool AnalogSensor::update(uint8_t gpio, std::string & name, double offset, doubl
             newSensor.type      = type;
             newSensor.is_system = is_system;
             settings.analogCustomizations.push_back(newSensor);
-            LOG_DEBUG("Adding new customization for analog sensor GPIO %02d", gpio);
+            LOG_DEBUG("Adding customization for analog sensor GPIO %02d", gpio);
             return StateUpdateResult::CHANGED; // persist the change
         });
     }

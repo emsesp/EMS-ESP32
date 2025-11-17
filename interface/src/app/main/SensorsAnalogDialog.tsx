@@ -115,6 +115,23 @@ const SensorsAnalogDialog = ({
     []
   );
 
+  const analogGPIOMenuItems = () =>
+    // add selectedItem.g to the list
+    [
+      ...(analogGPIOList?.includes(selectedItem.g) || selectedItem.g === undefined
+        ? analogGPIOList
+        : [selectedItem.g, ...analogGPIOList])
+    ]
+      .filter((gpio, idx, arr) => arr.indexOf(gpio) === idx)
+      .sort((a, b) => a - b)
+      .map((gpio: number) => {
+        return (
+          <MenuItem key={gpio} value={gpio}>
+            {gpio}
+          </MenuItem>
+        );
+      });
+
   // Reset form when dialog opens or selectedItem changes
   useEffect(() => {
     if (open) {
@@ -162,15 +179,11 @@ const SensorsAnalogDialog = ({
             label="GPIO"
             value={editItem.g}
             sx={{ width: '9ch' }}
-            disabled={editItem.s}
+            disabled={editItem.s || !creating}
             select
             onChange={updateFormValue}
           >
-            {analogGPIOList?.map((gpio: number) => (
-              <MenuItem key={gpio} value={gpio}>
-                {gpio}
-              </MenuItem>
-            ))}
+            {analogGPIOMenuItems()}
           </ValidatedTextField>
           <Grid>
             <ValidatedTextField

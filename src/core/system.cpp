@@ -415,8 +415,8 @@ void System::reload_settings() {
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         version_ = settings.version;
         // first check gpios, priority to rx and tx
-        rx_gpio_      = is_valid_gpio(settings.rx_gpio) ? settings.rx_gpio : 0;
-        tx_gpio_      = is_valid_gpio(settings.tx_gpio) ? settings.tx_gpio : 0;
+        rx_gpio_      = is_valid_gpio(settings.rx_gpio);
+        tx_gpio_      = is_valid_gpio(settings.tx_gpio);
         pbutton_gpio_ = is_valid_gpio(settings.pbutton_gpio) ? settings.pbutton_gpio : 0;
         dallas_gpio_  = is_valid_gpio(settings.dallas_gpio) ? settings.dallas_gpio : 0;
         led_gpio_     = is_valid_gpio(settings.led_gpio) ? settings.led_gpio : 0;
@@ -456,9 +456,9 @@ void System::reload_settings() {
     });
 }
 
-// check for valid ESP32 pins
-bool System::is_valid_gpio(uint8_t pin) {
-    auto valid_gpios = valid_gpio_list();
+// check if a pin is valid ESP32 pin and not used by application settings
+bool System::is_valid_gpio(uint8_t pin, bool exclude_used) {
+    auto valid_gpios = valid_gpio_list(exclude_used);
     return std::find(valid_gpios.begin(), valid_gpios.end(), pin) != valid_gpios.end();
 }
 
@@ -2356,12 +2356,12 @@ std::vector<uint8_t> System::string_range_to_vector(const std::string & range) {
     return valid_gpios;
 }
 
-// return a list of valid GPIOs for the ESP32 board
+// return a list of valid GPIOs for the ESP32 board that can be used
 // notes:
-//  - we allow 0, which is used sometimes to indicate a disabled pin
-//  - also allow input only pins are accepted (34-39) on some boards
+//  - we allow 0, which is used sometimes to indicate a disabled pin (e.g. button, led)
+//  - we also allow input only pins are accepted (34-39) on some boards, excluding 39
 //  - and allow pins 33-38 for octal SPI for 32M vchip version on some boards
-std::vector<uint8_t> System::valid_gpio_list() {
+std::vector<uint8_t> System::valid_gpio_list(bool exclude_used) {
     // get free gpios based on board/platform type
 #if CONFIG_IDF_TARGET_ESP32C3
     // https://www.wemos.cc/en/latest/c3/c3_mini.html
@@ -2390,21 +2390,25 @@ std::vector<uint8_t> System::valid_gpio_list() {
         valid_gpios.erase(std::remove(valid_gpios.begin(), valid_gpios.end(), 22), valid_gpios.end());
     }
 
-    // filter out GPIOs already used in application settings, gpio 0 means disabled, except for pbutton
-    for (const auto & gpio : valid_gpios) {
-        if (gpio == EMSESP::system_.pbutton_gpio_
-            || (gpio
-                && (gpio == EMSESP::system_.led_gpio_ || gpio == EMSESP::system_.dallas_gpio_ || gpio == EMSESP::system_.rx_gpio_
-                    || gpio == EMSESP::system_.tx_gpio_))) {
-            valid_gpios.erase(std::remove(valid_gpios.begin(), valid_gpios.end(), gpio), valid_gpios.end());
+    // filter out GPIOs already used in application settings and analog sensors, if enabled
+    if (exclude_used) {
+        // application settings
+        for (const auto & gpio : valid_gpios) {
+            if (gpio == EMSESP::system_.pbutton_gpio_
+                || (gpio
+                    && (gpio == EMSESP::system_.led_gpio_ || gpio == EMSESP::system_.dallas_gpio_ || gpio == EMSESP::system_.rx_gpio_
+                        || gpio == EMSESP::system_.tx_gpio_))) {
+                valid_gpios.erase(std::remove(valid_gpios.begin(), valid_gpios.end(), gpio), valid_gpios.end());
+            }
         }
-    }
 
-    // filter out GPIOs already used in analog sensors, if enabled
-    if (EMSESP::system_.analog_enabled_) {
-        for (const auto & sensor : EMSESP::analogsensor_.sensors()) {
-            if (std::find(valid_gpios.begin(), valid_gpios.end(), sensor.gpio()) != valid_gpios.end()) {
-                valid_gpios.erase(std::find(valid_gpios.begin(), valid_gpios.end(), sensor.gpio()));
+        // analog sensors
+        if (EMSESP::system_.analog_enabled_) {
+            // TODO: check if core_voltage and supply_voltage are already used
+            for (const auto & sensor : EMSESP::analogsensor_.sensors()) {
+                if (std::find(valid_gpios.begin(), valid_gpios.end(), sensor.gpio()) != valid_gpios.end()) {
+                    valid_gpios.erase(std::find(valid_gpios.begin(), valid_gpios.end(), sensor.gpio()));
+                }
             }
         }
     }

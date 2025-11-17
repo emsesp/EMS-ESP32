@@ -157,8 +157,9 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
     root["analog_enabled"] = EMSESP::analog_enabled();
     root["platform"]       = EMSESP_PLATFORM;
 
+    // send back a list of valid GPIOs that can be used for analog sensors, excluding those already used
     JsonArray valid_gpio_list = root["valid_gpio_list"].to<JsonArray>();
-    for (const auto & gpio : EMSESP::system_.valid_gpio_list()) {
+    for (const auto & gpio : EMSESP::system_.valid_gpio_list(true)) {
         valid_gpio_list.add(gpio);
     }
 
