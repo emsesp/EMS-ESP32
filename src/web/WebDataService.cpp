@@ -146,7 +146,7 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
             obj["t"]       = sensor.type();
             obj["s"]       = sensor.is_system();
 
-            if (sensor.type() != AnalogSensor::AnalogType::NOTUSED && sensor.gpio() != 99) {
+            if (sensor.type() != AnalogSensor::AnalogType::NOTUSED) {
                 obj["v"] = Helpers::transformNumFloat(sensor.value()); // is optional and is a float
             } else {
                 obj["v"] = 0; // must have a value for web sorting to work
@@ -436,7 +436,7 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
         uint8_t   count = 0;
         for (const auto & sensor : EMSESP::analogsensor_.sensors()) {
             // ignore system and disabled sensors
-            if (sensor.is_system() || sensor.type() == AnalogSensor::AnalogType::NOTUSED || sensor.gpio() == 99) {
+            if (sensor.is_system() || sensor.type() == AnalogSensor::AnalogType::NOTUSED) {
                 continue;
             }
             JsonObject node = nodes.add<JsonObject>();

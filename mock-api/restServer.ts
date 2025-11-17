@@ -276,10 +276,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-          old_custom_name +
-          ') with new (' +
-          new_custom_name +
-          ')'
+        old_custom_name +
+        ') with new (' +
+        new_custom_name +
+        ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -375,15 +375,15 @@ function check_upgrade(version: string) {
 
     console.log(
       'Upgrade this version (' +
-        THIS_VERSION +
-        ') to dev (' +
-        dev_version +
-        ') is ' +
-        (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-        ' and to stable (' +
-        stable_version +
-        ') is ' +
-        (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
+      THIS_VERSION +
+      ') to dev (' +
+      dev_version +
+      ') is ' +
+      (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+      ' and to stable (' +
+      stable_version +
+      ') is ' +
+      (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
     );
     data = {
       emsesp_version: THIS_VERSION,
@@ -987,7 +987,7 @@ const emsesp_sensordata = {
     { id: 1, g: 35, n: 'motor', v: 0, u: 0, o: 17, f: 0, t: 0, d: false, s: false },
     {
       id: 2,
-      g: 37,
+      g: 34,
       n: 'External_switch',
       v: 13,
       u: 0,
@@ -1047,7 +1047,7 @@ const emsesp_sensordata = {
     }
   ],
   analog_enabled: true,
-  valid_gpio_list: [0, 2, 5, 12, 13, 15, 18, 19, 23, 25, 26, 27, 33, 37, 38]
+  valid_gpio_list: [] as number[]
 };
 
 const activity = {
@@ -4540,6 +4540,25 @@ router
   .get(EMSESP_SENSOR_DATA_ENDPOINT, () => {
     // random change the zolder temperature 0-100
     emsesp_sensordata.ts[2].t = Math.floor(Math.random() * 100);
+
+    // Build list of available GPIOs (S3 board pins) excluding used ones
+    // and sort it
+    const allGPIOs = [2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 18, 21, 33, 34, 35, 36, 37, 38, 45, 46];
+    const usedGPIOs = new Set([
+      settings.led_gpio,
+      settings.dallas_gpio,
+      settings.pbutton_gpio,
+      settings.rx_gpio,
+      settings.tx_gpio,
+      ...emsesp_sensordata.as.map((item) => item.g)
+    ]);
+
+    emsesp_sensordata.valid_gpio_list = allGPIOs
+      .filter((gpio) => !usedGPIOs.has(gpio))
+      .sort((a, b) => a - b);
+
+    // console.log('valid_gpio_list', emsesp_sensordata.valid_gpio_list);
+
     return emsesp_sensordata;
   })
   .get(EMSESP_DEVICEDATA_ENDPOINT1, (request) =>

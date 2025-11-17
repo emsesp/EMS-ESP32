@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo, useState } from 'react';
+import { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
@@ -54,7 +54,6 @@ const MS_PER_SECOND = 1000;
 const MS_PER_MINUTE = 60 * MS_PER_SECOND;
 const MS_PER_HOUR = 60 * MS_PER_MINUTE;
 const MS_PER_DAY = 24 * MS_PER_HOUR;
-const DEFAULT_GPIO = 99; // not set
 const MIN_TEMP_ID = -100;
 const MAX_TEMP_ID = 100;
 const GPIO_25 = 25;
@@ -128,14 +127,20 @@ const Sensors = () => {
   const [temperatureDialogOpen, setTemperatureDialogOpen] = useState<boolean>(false);
   const [analogDialogOpen, setAnalogDialogOpen] = useState<boolean>(false);
   const [creating, setCreating] = useState<boolean>(false);
+  const firstAvailableGPIO = useRef<number>(undefined);
 
   const { data: sensorData, send: fetchSensorData } = useRequest(readSensorData, {
     initialData: {
       ts: [],
       as: [],
       analog_enabled: false,
-      valid_gpio_list: [],
+      valid_gpio_list: [] as number[],
       platform: 'ESP32'
+    }
+  }).onSuccess((event) => {
+    // store the first available GPIO in a ref
+    if (event.data.valid_gpio_list.length > 0) {
+      firstAvailableGPIO.current = event.data.valid_gpio_list[0];
     }
   });
 
@@ -186,10 +191,14 @@ const Sensors = () => {
       sortToggleType: SortToggleType.AlternateWithReset,
       sortFns: {
         GPIO: (array) =>
-          [...array].sort((a, b) => (a as AnalogSensor).g - (b as AnalogSensor).g),
+          [...array].sort(
+            (a, b) => ((a as AnalogSensor)?.g ?? 0) - ((b as AnalogSensor)?.g ?? 0)
+          ),
         NAME: (array) =>
           [...array].sort((a, b) =>
-            (a as AnalogSensor).n.localeCompare((b as AnalogSensor).n)
+            ((a as AnalogSensor)?.n ?? '').localeCompare(
+              (b as AnalogSensor)?.n ?? ''
+            )
           ),
         TYPE: (array) =>
           [...array].sort((a, b) => (a as AnalogSensor).t - (b as AnalogSensor).t),
@@ -338,19 +347,23 @@ const Sensors = () => {
   }, [fetchSensorData]);
 
   const addAnalogSensor = useCallback(() => {
+    if (firstAvailableGPIO.current === undefined) {
+      toast.error('No available GPIO found');
+      return;
+    }
     setCreating(true);
     setSelectedAnalogSensor({
       id: Math.floor(Math.random() * (MAX_TEMP_ID - MIN_TEMP_ID) + MIN_TEMP_ID),
       n: '',
-      g: DEFAULT_GPIO,
-      u: 0,
+      g: firstAvailableGPIO.current,
+      u: DeviceValueUOM.NONE,
       v: 0,
       o: 0,
-      t: 0,
       f: 1,
+      t: AnalogType.NOTUSED,
       d: false,
-      o_n: '',
-      s: false
+      s: false,
+      o_n: ''
     });
     setAnalogDialogOpen(true);
   }, []);
@@ -447,7 +460,7 @@ const Sensors = () => {
                   item={as}
                   onClick={() => updateAnalogSensor(as)}
                 >
-                  <Cell stiff>{as.g !== 99 ? as.g : ''}</Cell>
+                  <Cell stiff>{as.g}</Cell>
                   <Cell>{as.n}</Cell>
                   <Cell stiff>{AnalogTypeNames[as.t]} </Cell>
                   {(as.t === AnalogType.DIGITAL_OUT &&
@@ -455,14 +468,10 @@ const Sensors = () => {
                     as.g !== GPIO_26) ||
                   as.t === AnalogType.DIGITAL_IN ||
                   as.t === AnalogType.PULSE ? (
-                    <Cell stiff>
-                      {as.g !== 99 ? (as.v ? LL.ON() : LL.OFF()) : ''}
-                    </Cell>
+                    <Cell stiff>{as.v ? LL.ON() : LL.OFF()}</Cell>
                   ) : (
                     <Cell stiff>
-                      {as.t !== AnalogType.NOTUSED && as.g !== 99
-                        ? formatValue(as.v, as.u)
-                        : ''}
+                      {as.t !== AnalogType.NOTUSED ? formatValue(as.v, as.u) : ''}
                     </Cell>
                   )}
                 </Row>

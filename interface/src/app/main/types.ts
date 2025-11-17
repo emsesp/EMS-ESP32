@@ -89,15 +89,15 @@ export interface TemperatureSensor {
 export interface AnalogSensor {
   id: number;
   g: number; // GPIO
-  n: string;
-  v: number;
-  u: number;
-  o: number;
-  f: number;
-  t: number;
+  n: string; // name
+  v: number; // value
+  u: number; // uom
+  o: number; // offset
+  f: number; // factor
+  t: number; // type
   d: boolean; // deleted flag
   s: boolean; // system sensor flag
-  o_n?: string;
+  o_n?: string; // original name
 }
 
 export interface WriteTemperatureSensor {

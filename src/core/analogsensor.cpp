@@ -157,12 +157,13 @@ void AnalogSensor::reload(bool get_nvs) {
             if (!found) {
                 // check if the GPIO is valid before registering. If not, force set the sensor to disabled, but don't remove it
                 // should only trigger if uploading a customization file with invalid gpios.
+                AnalogType type = static_cast<AnalogType>(sensor.type);
                 if (!EMSESP::system_.is_valid_gpio(sensor.gpio)) {
                     LOG_WARNING("Bad GPIO %d for Sensor %s. Disabling.", sensor.gpio, sensor.name.c_str());
-                    sensors_.emplace_back(99, sensor.name, sensor.offset, sensor.factor, sensor.uom, sensor.type, sensor.is_system);
-                } else {
-                    sensors_.emplace_back(sensor.gpio, sensor.name, sensor.offset, sensor.factor, sensor.uom, sensor.type, sensor.is_system);
+                    type = AnalogType::NOTUSED;
                 }
+                sensors_.emplace_back(sensor.gpio, sensor.name, sensor.offset, sensor.factor, sensor.uom, type, sensor.is_system);
+
                 sensors_.back().ha_registered = false; // this will trigger recreate of the HA config
                 if (sensor.type == AnalogType::COUNTER || sensor.type >= AnalogType::DIGITAL_OUT) {
                     sensors_.back().set_value(sensor.offset);

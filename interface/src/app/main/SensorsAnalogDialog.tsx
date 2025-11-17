@@ -152,20 +152,6 @@ const SensorsAnalogDialog = ({
     [creating, LL]
   );
 
-  // Ensure the current GPIO is in the list when no creating
-  // note GPIO 99 means not set
-  const availableGPIOs = useMemo(() => {
-    const filteredList = analogGPIOList.filter((gpio) => gpio !== 99);
-    if (
-      editItem.g !== undefined &&
-      editItem.g !== 99 &&
-      !filteredList.includes(editItem.g)
-    ) {
-      return [...filteredList, editItem.g].sort((a, b) => a - b);
-    }
-    return filteredList;
-  }, [analogGPIOList, editItem.g]);
-
   return (
     <Dialog sx={dialogStyle} open={open} onClose={handleClose}>
       <DialogTitle>{dialogTitle}</DialogTitle>
@@ -175,12 +161,12 @@ const SensorsAnalogDialog = ({
             name="g"
             label="GPIO"
             value={editItem.g}
-            sx={{ width: '8ch' }}
+            sx={{ width: '9ch' }}
             disabled={editItem.s}
             select
             onChange={updateFormValue}
           >
-            {availableGPIOs?.map((gpio: number) => (
+            {analogGPIOList?.map((gpio: number) => (
               <MenuItem key={gpio} value={gpio}>
                 {gpio}
               </MenuItem>
