@@ -155,7 +155,14 @@ void AnalogSensor::reload(bool get_nvs) {
                 }
             }
             if (!found) {
-                sensors_.emplace_back(sensor.gpio, sensor.name, sensor.offset, sensor.factor, sensor.uom, sensor.type, sensor.is_system);
+                // check if the GPIO is valid before registering. If not, force set the sensor to disabled, but don't remove it
+                // should only trigger if uploading a customization file with invalid gpios.
+                if (!EMSESP::system_.is_valid_gpio(sensor.gpio)) {
+                    LOG_WARNING("Bad GPIO %d for Sensor %s. Disabling.", sensor.gpio, sensor.name.c_str());
+                    sensors_.emplace_back(99, sensor.name, sensor.offset, sensor.factor, sensor.uom, sensor.type, sensor.is_system);
+                } else {
+                    sensors_.emplace_back(sensor.gpio, sensor.name, sensor.offset, sensor.factor, sensor.uom, sensor.type, sensor.is_system);
+                }
                 sensors_.back().ha_registered = false; // this will trigger recreate of the HA config
                 if (sensor.type == AnalogType::COUNTER || sensor.type >= AnalogType::DIGITAL_OUT) {
                     sensors_.back().set_value(sensor.offset);
@@ -187,16 +194,8 @@ void AnalogSensor::reload(bool get_nvs) {
     for (auto & sensor : sensors_) {
         sensor.ha_registered = false; // force HA configs to be re-created
 
-        // first check if the GPIO is valid. If not, force set the sensor to disabled, but don't remove it
-        if (!EMSESP::system_.is_valid_gpio(sensor.gpio())) {
-            LOG_WARNING("Bad GPIO %d for Sensor %s. Disabling.", sensor.gpio(), sensor.name().c_str());
-            sensor.set_type(AnalogType::NOTUSED); // set disabled
-            continue;                             // skip this loop pass
-        }
-
-        if ((sensor.gpio() == 25 || sensor.gpio() == 26)
-            && (sensor.type() == AnalogType::COUNTER || sensor.type() == AnalogType::DIGITAL_IN || sensor.type() == AnalogType::RATE
-                || sensor.type() == AnalogType::TIMER)) {
+        if (sensor.type() == AnalogType::COUNTER || sensor.type() == AnalogType::DIGITAL_IN || sensor.type() == AnalogType::RATE
+            || sensor.type() == AnalogType::TIMER) {
             // pullup is mapped to DAC, so set to 3.3V
 #if CONFIG_IDF_TARGET_ESP32
             if (sensor.gpio() == 25 || sensor.gpio() == 26) {
@@ -521,7 +520,9 @@ bool AnalogSensor::update(uint8_t gpio, std::string & name, double offset, doubl
     }
 
     // we didn't find it, it's new, so create and store it in the customization list
-    if (!found_sensor) {
+    // gpio is already checked in web interface, should never trigger.
+    if (!found_sensor && EMSESP::system_.is_valid_gpio(gpio)) {
+        found_sensor = true;
         EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
             auto newSensor      = AnalogCustomization();
             newSensor.gpio      = gpio;
@@ -538,11 +539,12 @@ bool AnalogSensor::update(uint8_t gpio, std::string & name, double offset, doubl
     }
 
     // reloads the sensors in the customizations file into the sensors list
-    reload();
+    if (found_sensor) {
+        reload();
+        return true;
+    }
 
-    // return false if it's an invalid GPIO, an error will show in WebUI
-    // and reported as an error in the log
-    return EMSESP::system_.is_valid_gpio(gpio);
+    return false;
 }
 
 // check to see if values have been updated

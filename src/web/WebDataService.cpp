@@ -146,7 +146,7 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
             obj["t"]       = sensor.type();
             obj["s"]       = sensor.is_system();
 
-            if (sensor.type() != AnalogSensor::AnalogType::NOTUSED) {
+            if (sensor.type() != AnalogSensor::AnalogType::NOTUSED && sensor.gpio() != 99) {
                 obj["v"] = Helpers::transformNumFloat(sensor.value()); // is optional and is a float
             } else {
                 obj["v"] = 0; // must have a value for web sorting to work

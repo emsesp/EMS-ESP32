@@ -447,7 +447,7 @@ const Sensors = () => {
                   item={as}
                   onClick={() => updateAnalogSensor(as)}
                 >
-                  <Cell stiff>{as.g}</Cell>
+                  <Cell stiff>{as.g !== 99 ? as.g : ''}</Cell>
                   <Cell>{as.n}</Cell>
                   <Cell stiff>{AnalogTypeNames[as.t]} </Cell>
                   {(as.t === AnalogType.DIGITAL_OUT &&
@@ -455,10 +455,10 @@ const Sensors = () => {
                     as.g !== GPIO_26) ||
                   as.t === AnalogType.DIGITAL_IN ||
                   as.t === AnalogType.PULSE ? (
-                    <Cell stiff>{as.v ? LL.ON() : LL.OFF()}</Cell>
+                    <Cell stiff>{as.g !== 99 ? as.v ? LL.ON() : LL.OFF() : ''}</Cell>
                   ) : (
                     <Cell stiff>
-                      {as.t !== AnalogType.NOTUSED ? formatValue(as.v, as.u) : ''}
+                      {as.t !== AnalogType.NOTUSED && as.g !== 99 ? formatValue(as.v, as.u) : ''}
                     </Cell>
                   )}
                 </Row>
