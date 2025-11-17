@@ -414,7 +414,7 @@ void System::reload_settings() {
     dallas_gpio_  = 0;
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         version_ = settings.version;
-        // first check gpios, prioriy to rx and tx
+        // first check gpios, priority to rx and tx
         rx_gpio_      = is_valid_gpio(settings.rx_gpio) ? settings.rx_gpio : 0;
         tx_gpio_      = is_valid_gpio(settings.tx_gpio) ? settings.tx_gpio : 0;
         pbutton_gpio_ = is_valid_gpio(settings.pbutton_gpio) ? settings.pbutton_gpio : 0;
