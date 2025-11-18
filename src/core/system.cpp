@@ -408,12 +408,15 @@ void System::syslog_init() {
 void System::reload_settings() {
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         version_ = settings.version;
-        // first check gpios, priority to rx and tx
-        rx_gpio_      = is_valid_gpio(settings.rx_gpio);
-        tx_gpio_      = is_valid_gpio(settings.tx_gpio);
-        pbutton_gpio_ = is_valid_gpio(settings.pbutton_gpio);
-        dallas_gpio_  = is_valid_gpio(settings.dallas_gpio) ? settings.dallas_gpio : 0; // we use 0 for disabled
-        led_gpio_     = is_valid_gpio(settings.led_gpio) ? settings.led_gpio : 0;       // we use 0 for disabled
+
+        // rx and tx pins are validated in uart_init()
+        rx_gpio_ = settings.rx_gpio;
+        tx_gpio_ = settings.tx_gpio;
+
+        pbutton_gpio_ = settings.pbutton_gpio; // validated in System::button_init()
+
+        dallas_gpio_ = is_valid_gpio(settings.dallas_gpio) ? settings.dallas_gpio : 0; // we use 0 for disabled
+        led_gpio_    = is_valid_gpio(settings.led_gpio) ? settings.led_gpio : 0;       // we use 0 for disabled
 
         analog_enabled_ = settings.analog_enabled;
         low_clock_      = settings.low_clock;
@@ -551,6 +554,12 @@ void System::button_init(bool refresh) {
         reload_settings();
     }
 
+    // validate button gpio
+    if (!is_valid_gpio(pbutton_gpio_)) {
+        LOG_WARNING("Invalid button GPIO. Check config.");
+        return;
+    }
+
 #ifndef EMSESP_STANDALONE
     if (!myPButton_.init(pbutton_gpio_, HIGH)) {
         LOG_WARNING("Multi-functional button not detected");
@@ -602,8 +611,8 @@ void System::uart_init(bool refresh) {
     }
     EMSuart::stop();
 
-    // don't start UART if we have invalid GPIOs
-    if (rx_gpio_ && tx_gpio_) {
+    // start UART if we have valid rx and tx GPIOs
+    if (is_valid_gpio(rx_gpio_) && is_valid_gpio(tx_gpio_)) {
         EMSuart::start(tx_mode_, rx_gpio_, tx_gpio_); // start UART
     } else {
         LOG_WARNING("Invalid UART Rx/Tx GPIOs. Check config.");
@@ -2352,7 +2361,7 @@ std::vector<uint8_t> System::string_range_to_vector(const std::string & range) {
 
 // return a list of valid GPIOs for the ESP32 board that can be used
 // notes:
-//  - we allow 0, which is used sometimes to indicate a disabled pin (e.g. button, led)
+//  - we allow 0, which is used on some board for the button
 //  - we also allow input only pins are accepted (34-39) on some boards, excluding 39
 //  - and allow pins 33-38 for octal SPI for 32M vchip version on some boards
 std::vector<uint8_t> System::valid_gpio_list(bool exclude_used) {
@@ -2385,12 +2394,14 @@ std::vector<uint8_t> System::valid_gpio_list(bool exclude_used) {
     }
 
     // filter out GPIOs already used in application settings and analog sensors, if enabled
+    // if dallas_gpio or led_gpio is disabled (0), don't remove it from the list (as it could be gpio 0 and valid)
     if (exclude_used) {
         // application settings
         for (const auto & gpio : valid_gpios) {
             if (gpio == EMSESP::system_.pbutton_gpio_
                 || (gpio
-                    && (gpio == EMSESP::system_.led_gpio_ || gpio == EMSESP::system_.dallas_gpio_ || gpio == EMSESP::system_.rx_gpio_
+                    && ((EMSESP::system_.led_gpio_ != 0 && gpio == EMSESP::system_.led_gpio_)
+                        || (EMSESP::system_.dallas_gpio_ != 0 && gpio == EMSESP::system_.dallas_gpio_) || gpio == EMSESP::system_.rx_gpio_
                         || gpio == EMSESP::system_.tx_gpio_))) {
                 valid_gpios.erase(std::remove(valid_gpios.begin(), valid_gpios.end(), gpio), valid_gpios.end());
             }
