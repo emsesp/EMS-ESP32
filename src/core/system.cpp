@@ -406,20 +406,14 @@ void System::syslog_init() {
 
 // read some specific system settings to store locally for faster access
 void System::reload_settings() {
-    // set gpios to zero for valid check
-    led_gpio_     = 0;
-    rx_gpio_      = 0;
-    tx_gpio_      = 0;
-    pbutton_gpio_ = 0;
-    dallas_gpio_  = 0;
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         version_ = settings.version;
         // first check gpios, priority to rx and tx
         rx_gpio_      = is_valid_gpio(settings.rx_gpio);
         tx_gpio_      = is_valid_gpio(settings.tx_gpio);
-        pbutton_gpio_ = is_valid_gpio(settings.pbutton_gpio) ? settings.pbutton_gpio : 0;
-        dallas_gpio_  = is_valid_gpio(settings.dallas_gpio) ? settings.dallas_gpio : 0;
-        led_gpio_     = is_valid_gpio(settings.led_gpio) ? settings.led_gpio : 0;
+        pbutton_gpio_ = is_valid_gpio(settings.pbutton_gpio);
+        dallas_gpio_  = is_valid_gpio(settings.dallas_gpio) ? settings.dallas_gpio : 0; // we use 0 for disabled
+        led_gpio_     = is_valid_gpio(settings.led_gpio) ? settings.led_gpio : 0;       // we use 0 for disabled
 
         analog_enabled_ = settings.analog_enabled;
         low_clock_      = settings.low_clock;
@@ -2404,7 +2398,6 @@ std::vector<uint8_t> System::valid_gpio_list(bool exclude_used) {
 
         // analog sensors
         if (EMSESP::system_.analog_enabled_) {
-            // TODO: check if core_voltage and supply_voltage are already used
             for (const auto & sensor : EMSESP::analogsensor_.sensors()) {
                 if (std::find(valid_gpios.begin(), valid_gpios.end(), sensor.gpio()) != valid_gpios.end()) {
                     valid_gpios.erase(std::find(valid_gpios.begin(), valid_gpios.end(), sensor.gpio()));
@@ -2413,7 +2406,7 @@ std::vector<uint8_t> System::valid_gpio_list(bool exclude_used) {
         }
     }
 
-    // sort the list of valid GPIOs
+    // sort the list of valid GPIOs. This is also done in the web interface, so client side.
     std::sort(valid_gpios.begin(), valid_gpios.end());
 
     return valid_gpios;
