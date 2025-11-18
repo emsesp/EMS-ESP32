@@ -533,19 +533,17 @@ const Devices = memo(() => {
 
   const renderCoreData = () => (
     <>
-      <Box justifyContent="center" flexDirection="column">
-        <IconContext.Provider
-          value={{
-            color: 'lightblue',
-            size: '18',
-            style: { verticalAlign: 'middle' }
-          }}
-        >
-          {!coreData.connected && (
-            <MessageBox my={2} level="error" message={LL.EMS_BUS_WARNING()} />
-          )}
-
-          {coreData.connected && (
+      {!coreData.connected ? (
+        <MessageBox level="error" message={LL.EMS_BUS_WARNING()} />
+      ) : (
+        <Box justifyContent="center" flexDirection="column">
+          <IconContext.Provider
+            value={{
+              color: 'lightblue',
+              size: '18',
+              style: { verticalAlign: 'middle' }
+            }}
+          >
             <Table
               data={{ nodes: [...coreData.devices] }}
               select={device_select}
@@ -581,9 +579,9 @@ const Devices = memo(() => {
                 </>
               )}
             </Table>
-          )}
-        </IconContext.Provider>
-      </Box>
+          </IconContext.Provider>
+        </Box>
+      )}
     </>
   );
 
