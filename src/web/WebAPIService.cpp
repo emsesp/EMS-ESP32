@@ -152,11 +152,15 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     // 401 (unauthorized)
     // 400 (invalid)
     int ret_codes[7] = {400, 200, 404, 400, 401, 400, 404};
-    response->setCode(ret_codes[return_code]);
-    response->setLength();
-    response->setContentType("application/json; charset=utf-8");
-    request->send(response);
+
+    // serialize JSON to string to ensure correct content-length and avoid HTTP parsing errors (issue #2752)
+    std::string output_str;
+    serializeJson(output, output_str);
+
+    request->send(ret_codes[return_code], "application/json; charset=utf-8", output_str.c_str());
+
     api_count_++;
+    delete response;
 
 #if defined(EMSESP_UNITY)
     // store the result so we can test with Unity later
