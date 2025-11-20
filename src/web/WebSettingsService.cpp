@@ -136,9 +136,12 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
                         (int8_t)(root["led_type"] | 0)}; // 0 = LED, 1 = RGB-LED
 #endif
             }
-            // check valid pins in this board profile
-            if (!EMSESP::system_.is_valid_gpio(data[0]) || !EMSESP::system_.is_valid_gpio(data[1]) || !EMSESP::system_.is_valid_gpio(data[2])
-                || !EMSESP::system_.is_valid_gpio(data[3]) || !EMSESP::system_.is_valid_gpio(data[4]) || !EMSESP::system_.is_valid_gpio(data[6])) {
+            // check valid pins for this board profile
+            if (!EMSESP::system_.check_valid_gpio(data[0], "LED") || !EMSESP::system_.check_valid_gpio(data[1], "Dallas")
+                || !EMSESP::system_.check_valid_gpio(data[2], "UART Rx") || !EMSESP::system_.check_valid_gpio(data[3], "UART Tx")
+                || !EMSESP::system_.check_valid_gpio(data[4], "Button") || !EMSESP::system_.check_valid_gpio(data[6], "Ethernet")) {
+                // set status
+                EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_INVALID_GPIO);
                 settings.board_profile = "default"; // reset to factory default
             }
         } else {
@@ -417,7 +420,7 @@ void WebSettingsService::onUpdate() {
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::UART)) {
-        EMSESP::system_.uart_init(true);
+        EMSESP::system_.uart_init();
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::SYSLOG)) {
@@ -429,11 +432,11 @@ void WebSettingsService::onUpdate() {
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::BUTTON)) {
-        EMSESP::system_.button_init(true);
+        EMSESP::system_.button_init();
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::LED)) {
-        EMSESP::system_.led_init(true);
+        EMSESP::system_.led_init();
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::MQTT)) {

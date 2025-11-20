@@ -360,7 +360,7 @@ const Sensors = () => {
       v: 0,
       o: 0,
       f: 1,
-      t: AnalogType.NOTUSED,
+      t: AnalogType.DIGITAL_IN, // default to digital in 1
       d: false,
       s: false,
       o_n: ''
@@ -462,7 +462,7 @@ const Sensors = () => {
                 >
                   <Cell stiff>{as.g}</Cell>
                   <Cell>{as.n}</Cell>
-                  <Cell stiff>{AnalogTypeNames[as.t]} </Cell>
+                  <Cell stiff>{AnalogTypeNames[as.t - 1]} </Cell>
                   {(as.t === AnalogType.DIGITAL_OUT &&
                     as.g !== GPIO_25 &&
                     as.g !== GPIO_26) ||
@@ -470,9 +470,7 @@ const Sensors = () => {
                   as.t === AnalogType.PULSE ? (
                     <Cell stiff>{as.v ? LL.ON() : LL.OFF()}</Cell>
                   ) : (
-                    <Cell stiff>
-                      {as.t !== AnalogType.NOTUSED ? formatValue(as.v, as.u) : ''}
-                    </Cell>
+                    <Cell stiff>{formatValue(as.v, as.u)}</Cell>
                   )}
                 </Row>
               ))}

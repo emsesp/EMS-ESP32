@@ -87,10 +87,12 @@ static constexpr uint8_t NUM_LANGUAGES = sizeof(languages) / sizeof(const char *
 uuid::log::Logger System::logger_{F_(system), uuid::log::Facility::KERN};
 
 // init statics
-PButton  System::myPButton_;
-bool     System::test_set_all_active_ = false;
-uint32_t System::max_alloc_mem_;
-uint32_t System::heap_mem_;
+PButton              System::myPButton_;
+bool                 System::test_set_all_active_ = false;
+uint32_t             System::max_alloc_mem_;
+uint32_t             System::heap_mem_;
+std::vector<uint8_t> System::valid_system_gpios_;
+std::vector<uint8_t> System::used_gpios_;
 
 // find the index of the language
 // 0 = EN, 1 = DE, etc...
@@ -404,19 +406,18 @@ void System::syslog_init() {
 #endif
 }
 
-// read some specific system settings to store locally for faster access
-void System::reload_settings() {
+// read specific major system settings to store locally for faster access
+// this also verifies all the assigned GPIOs are valid
+void System::get_settings() {
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         version_ = settings.version;
 
-        // rx and tx pins are validated in uart_init()
-        rx_gpio_ = settings.rx_gpio;
-        tx_gpio_ = settings.tx_gpio;
-
-        pbutton_gpio_ = settings.pbutton_gpio; // validated in System::button_init()
-
-        dallas_gpio_ = is_valid_gpio(settings.dallas_gpio) ? settings.dallas_gpio : 0; // we use 0 for disabled
-        led_gpio_    = is_valid_gpio(settings.led_gpio) ? settings.led_gpio : 0;       // we use 0 for disabled
+        // GPIOs
+        rx_gpio_      = settings.rx_gpio;
+        tx_gpio_      = settings.tx_gpio;
+        pbutton_gpio_ = settings.pbutton_gpio;
+        dallas_gpio_  = settings.dallas_gpio;
+        led_gpio_     = settings.led_gpio;
 
         analog_enabled_ = settings.analog_enabled;
         low_clock_      = settings.low_clock;
@@ -451,225 +452,197 @@ void System::reload_settings() {
         locale_         = settings.locale;
         developer_mode_ = settings.developer_mode;
     });
-}
 
-// check if a pin is valid ESP32 pin and not used by application settings
-bool System::is_valid_gpio(uint8_t pin, bool exclude_used) {
-    auto valid_gpios = valid_gpio_list(exclude_used);
-    return std::find(valid_gpios.begin(), valid_gpios.end(), pin) != valid_gpios.end();
-}
 
-// Starts up the UART Serial bridge
-void System::start() {
+    // Starts up the UART Serial bridge
+    void System::start() {
 #ifndef EMSESP_STANDALONE
-    // disable bluetooth module
-    // periph_module_disable(PERIPH_BT_MODULE);
-    if (low_clock_) {
+        // disable bluetooth module
+        // periph_module_disable(PERIPH_BT_MODULE);
+        if (low_clock_) {
 #if CONFIG_IDF_TARGET_ESP32C3
-        setCpuFrequencyMhz(80);
+            setCpuFrequencyMhz(80);
 #else
-        setCpuFrequencyMhz(160);
+            setCpuFrequencyMhz(160);
 #endif
-    }
+        }
 
-    // get current memory values
-    fstotal_ = LittleFS.totalBytes() / 1024; // read only once, it takes 500 ms to read
-    appused_ = ESP.getSketchSize() / 1024;
-    appfree_ = esp_ota_get_running_partition()->size / 1024 - appused_;
-    refreshHeapMem(); // refresh free heap and max alloc heap
+        // get current memory values
+        fstotal_ = LittleFS.totalBytes() / 1024; // read only once, it takes 500 ms to read
+        appused_ = ESP.getSketchSize() / 1024;
+        appfree_ = esp_ota_get_running_partition()->size / 1024 - appused_;
+        refreshHeapMem(); // refresh free heap and max alloc heap
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
 #if ESP_IDF_VERSION_MAJOR < 5
-    temp_sensor_config_t temp_sensor = TSENS_CONFIG_DEFAULT();
-    temp_sensor_get_config(&temp_sensor);
-    temp_sensor.dac_offset = TSENS_DAC_DEFAULT; // DEFAULT: range:-10℃ ~  80℃, error < 1℃.
-    temp_sensor_set_config(temp_sensor);
-    temp_sensor_start();
-    temp_sensor_read_celsius(&temperature_);
+        temp_sensor_config_t temp_sensor = TSENS_CONFIG_DEFAULT();
+        temp_sensor_get_config(&temp_sensor);
+        temp_sensor.dac_offset = TSENS_DAC_DEFAULT; // DEFAULT: range:-10℃ ~  80℃, error < 1℃.
+        temp_sensor_set_config(temp_sensor);
+        temp_sensor_start();
+        temp_sensor_read_celsius(&temperature_);
 #else
-    temperature_sensor_config_t temp_sensor_config = TEMPERATURE_SENSOR_CONFIG_DEFAULT(-10, 80);
-    temperature_sensor_install(&temp_sensor_config, &temperature_handle_);
-    temperature_sensor_enable(temperature_handle_);
-    temperature_sensor_get_celsius(temperature_handle_, &temperature_);
+        temperature_sensor_config_t temp_sensor_config = TEMPERATURE_SENSOR_CONFIG_DEFAULT(-10, 80);
+        temperature_sensor_install(&temp_sensor_config, &temperature_handle_);
+        temperature_sensor_enable(temperature_handle_);
+        temperature_sensor_get_celsius(temperature_handle_, &temperature_);
 #endif
 #endif
 #endif
 
-    EMSESP::esp32React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
-        hostname(networkSettings.hostname.c_str()); // sets the hostname
-    });
+        EMSESP::esp32React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
+            hostname(networkSettings.hostname.c_str()); // sets the hostname
+        });
 
-    commands_init();     // console & api commands
-    led_init(false);     // init LED
-    button_init(false);  // the special button
-    network_init(false); // network
-    uart_init(false);    // start UART
-    syslog_init();       // start syslog
-}
+        commands_init(); // console & api commands
+        led_init();      // init LED
+        button_init();   // button
+        network_init();  // network
+        uart_init();     // start UART
+        syslog_init();   // start syslog
+    }
 
-// button single click
-void System::button_OnClick(PButton & b) {
-    LOG_NOTICE("Button pressed - single click");
+    // button single click
+    void System::button_OnClick(PButton & b) {
+        LOG_NOTICE("Button pressed - single click");
 
 #if defined(EMSESP_TEST)
 #ifndef EMSESP_STANDALONE
-    // show filesystem
-    Test::listDir(LittleFS, "/", 3);
+        // show filesystem
+        Test::listDir(LittleFS, "/", 3);
 #endif
 #endif
-}
+    }
 
-// button double click
-void System::button_OnDblClick(PButton & b) {
-    LOG_NOTICE("Button pressed - double click - wifi reconnect to AP");
-    // set AP mode to always so will join AP if wifi ssid fails to connect
-    EMSESP::esp32React.getAPSettingsService()->update([&](APSettings & apSettings) {
-        apSettings.provisionMode = AP_MODE_ALWAYS;
-        return StateUpdateResult::CHANGED;
-    });
-    // remove SSID from network settings
-    EMSESP::esp32React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
-        networkSettings.ssid = "";
-        return StateUpdateResult::CHANGED;
-    });
-    EMSESP::esp32React.getNetworkSettingsService()->callUpdateHandlers(); // in case we've changed ssid or password
-}
+    // button double click
+    void System::button_OnDblClick(PButton & b) {
+        LOG_NOTICE("Button pressed - double click - wifi reconnect to AP");
+        // set AP mode to always so will join AP if wifi ssid fails to connect
+        EMSESP::esp32React.getAPSettingsService()->update([&](APSettings & apSettings) {
+            apSettings.provisionMode = AP_MODE_ALWAYS;
+            return StateUpdateResult::CHANGED;
+        });
+        // remove SSID from network settings
+        EMSESP::esp32React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
+            networkSettings.ssid = "";
+            return StateUpdateResult::CHANGED;
+        });
+        EMSESP::esp32React.getNetworkSettingsService()->callUpdateHandlers(); // in case we've changed ssid or password
+    }
 
-// button long press
-void System::button_OnLongPress(PButton & b) {
-    LOG_NOTICE("Button pressed - long press - perform factory reset");
+    // button long press
+    void System::button_OnLongPress(PButton & b) {
+        LOG_NOTICE("Button pressed - long press - perform factory reset");
 #ifndef EMSESP_STANDALONE
-    System::command_format(nullptr, 0);
+        System::command_format(nullptr, 0);
 #endif
-}
-
-// button indefinite press - do nothing for now
-void System::button_OnVLongPress(PButton & b) {
-    LOG_NOTICE("Button pressed - very long press - restart from factory/boot partition");
-    EMSESP::system_.system_restart("boot");
-}
-
-// push button
-void System::button_init(bool refresh) {
-    if (refresh) {
-        reload_settings();
     }
 
-    // validate button gpio
-    if (!is_valid_gpio(pbutton_gpio_)) {
-        LOG_WARNING("Invalid button GPIO. Check config.");
-        return;
+    // button indefinite press - do nothing for now
+    void System::button_OnVLongPress(PButton & b) {
+        LOG_NOTICE("Button pressed - very long press - restart from factory/boot partition");
+        EMSESP::system_.system_restart("boot");
     }
 
+    // push button
+    void System::button_init() {
 #ifndef EMSESP_STANDALONE
-    if (!myPButton_.init(pbutton_gpio_, HIGH)) {
-        LOG_WARNING("Multi-functional button not detected");
-        return;
-    }
-    LOG_DEBUG("Multi-functional button enabled");
+        if (!myPButton_.init(pbutton_gpio_, HIGH)) {
+            LOG_WARNING("Multi-functional button not detected");
+            return;
+        }
+        LOG_DEBUG("Multi-functional button enabled");
 
-    myPButton_.onClick(BUTTON_Debounce, button_OnClick);
-    myPButton_.onDblClick(BUTTON_DblClickDelay, button_OnDblClick);
-    myPButton_.onLongPress(BUTTON_LongPressDelay, button_OnLongPress);
-    myPButton_.onVLongPress(BUTTON_VLongPressDelay, button_OnVLongPress);
+        myPButton_.onClick(BUTTON_Debounce, button_OnClick);
+        myPButton_.onDblClick(BUTTON_DblClickDelay, button_OnDblClick);
+        myPButton_.onLongPress(BUTTON_LongPressDelay, button_OnLongPress);
+        myPButton_.onVLongPress(BUTTON_VLongPressDelay, button_OnVLongPress);
 #endif
-}
+    }
 
-// set the LED to on or off when in normal operating mode
-void System::led_init(bool refresh) {
-    if (refresh) {
+    // set the LED to on or off when in normal operating mode
+    void System::led_init() {
         // disabled old led port before setting new one
-        if (led_gpio_) {
 #if ESP_ARDUINO_VERSION_MAJOR < 3
-            led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
+        led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
 #else
-            led_type_ ? rgbLedWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
+        led_type_ ? rgbLedWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
 #endif
-        }
-        reload_settings();
-    }
 
-    if ((led_gpio_)) { // 0 means disabled
-        if (led_type_) {
-            // rgb LED WS2812B, use Neopixel
+        if ((led_gpio_)) { // 0 means disabled
+            if (led_type_) {
+                // rgb LED WS2812B, use Neopixel
 #if ESP_ARDUINO_VERSION_MAJOR < 3
-            neopixelWrite(led_gpio_, 0, 0, 0);
+                neopixelWrite(led_gpio_, 0, 0, 0);
 #else
-            rgbLedWrite(led_gpio_, 0, 0, 0);
+                rgbLedWrite(led_gpio_, 0, 0, 0);
 #endif
+            } else {
+                pinMode(led_gpio_, OUTPUT);
+                digitalWrite(led_gpio_, !LED_ON); // start with LED off
+            }
         } else {
-            pinMode(led_gpio_, OUTPUT);
-            digitalWrite(led_gpio_, !LED_ON); // start with LED off
+            LOG_INFO("LED disabled");
         }
-    } else {
-        LOG_INFO("LED disabled");
-    }
-}
-
-void System::uart_init(bool refresh) {
-    if (refresh) {
-        reload_settings();
-    }
-    EMSuart::stop();
-
-    // start UART if we have valid rx and tx GPIOs
-    if (is_valid_gpio(rx_gpio_) && is_valid_gpio(tx_gpio_)) {
-        EMSuart::start(tx_mode_, rx_gpio_, tx_gpio_); // start UART
-    } else {
-        LOG_WARNING("Invalid UART Rx/Tx GPIOs. Check config.");
     }
 
-    EMSESP::txservice_.start(); // reset counters and send devices request
-}
+    void System::uart_init() {
+        EMSuart::stop();
 
-// checks system health and handles LED flashing wizardry
-void System::loop() {
-    // check if we're supposed to do a reset/restart
-    if (systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED) {
-        system_restart();
+        // start UART, GPIOs have already been checked
+        EMSuart::start(tx_mode_, rx_gpio_, tx_gpio_);
+
+        EMSESP::txservice_.start(); // reset counters and send devices request
     }
+
+    // checks system health and handles LED flashing wizardry
+    void System::loop() {
+        // check if we're supposed to do a reset/restart
+        if (systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED) {
+            system_restart();
+        }
 
 #ifndef EMSESP_STANDALONE
-    myPButton_.check(); // check button press
+        myPButton_.check(); // check button press
 
-    // syslog
-    if (syslog_enabled_) {
-        syslog_.loop();
-    }
+        // syslog
+        if (syslog_enabled_) {
+            syslog_.loop();
+        }
 
-    led_monitor();  // check status and report back using the LED
-    system_check(); // check system health
-    send_info_mqtt();
+        led_monitor();  // check status and report back using the LED
+        system_check(); // check system health
+        send_info_mqtt();
 #endif
-}
-
-// send MQTT info topic appended with the version information as JSON, as a retained flag
-// this is only done once when the connection is established
-void System::send_info_mqtt() {
-    static uint8_t _connection = 0;
-    uint8_t        connection  = (ethernet_connected() ? 1 : 0) + ((WiFi.status() == WL_CONNECTED) ? 2 : 0) + (ntp_connected_ ? 4 : 0) + (has_ipv6_ ? 8 : 0);
-    // check if connection status has changed
-    if (!Mqtt::connected() || connection == _connection) {
-        return;
     }
-    _connection = connection;
-    JsonDocument doc;
-    // doc["event"]   = "connected";
-    doc["version"] = EMSESP_APP_VERSION;
 
-    // if NTP is enabled send the boot_time in local time in ISO 8601 format (eg: 2022-11-15 20:46:38)
-    // https://github.com/emsesp/EMS-ESP32/issues/751
-    if (ntp_connected_) {
-        char   time_string[25];
-        time_t now = time(nullptr) - uuid::get_uptime_sec();
-        strftime(time_string, 25, "%FT%T%z", localtime(&now));
-        doc["bootTime"] = time_string;
-    }
+    // send MQTT info topic appended with the version information as JSON, as a retained flag
+    // this is only done once when the connection is established
+    void System::send_info_mqtt() {
+        static uint8_t _connection = 0;
+        uint8_t        connection = (ethernet_connected() ? 1 : 0) + ((WiFi.status() == WL_CONNECTED) ? 2 : 0) + (ntp_connected_ ? 4 : 0) + (has_ipv6_ ? 8 : 0);
+        // check if connection status has changed
+        if (!Mqtt::connected() || connection == _connection) {
+            return;
+        }
+        _connection = connection;
+        JsonDocument doc;
+        // doc["event"]   = "connected";
+        doc["version"] = EMSESP_APP_VERSION;
+
+        // if NTP is enabled send the boot_time in local time in ISO 8601 format (eg: 2022-11-15 20:46:38)
+        // https://github.com/emsesp/EMS-ESP32/issues/751
+        if (ntp_connected_) {
+            char   time_string[25];
+            time_t now = time(nullptr) - uuid::get_uptime_sec();
+            strftime(time_string, 25, "%FT%T%z", localtime(&now));
+            doc["bootTime"] = time_string;
+        }
 
 #ifndef EMSESP_STANDALONE
-    if (EMSESP::system_.ethernet_connected()) {
-        doc["network"]  = "ethernet";
-        doc["hostname"] = ETH.getHostname();
-        /*
+        if (EMSESP::system_.ethernet_connected()) {
+            doc["network"]  = "ethernet";
+            doc["hostname"] = ETH.getHostname();
+            /*
         doc["MAC"]             = ETH.macAddress();
         doc["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
         doc["IPv4 gateway"]    = uuid::printable_to_string(ETH.gatewayIP());
@@ -679,1427 +652,1423 @@ void System::send_info_mqtt() {
     }
             */
 
-    } else if (WiFi.status() == WL_CONNECTED) {
-        doc["network"]         = "wifi";
-        doc["hostname"]        = WiFi.getHostname();
-        doc["SSID"]            = WiFi.SSID();
-        doc["BSSID"]           = WiFi.BSSIDstr();
-        doc["MAC"]             = WiFi.macAddress();
-        doc["IPv4 address"]    = uuid::printable_to_string(WiFi.localIP()) + "/" + uuid::printable_to_string(WiFi.subnetMask());
-        doc["IPv4 gateway"]    = uuid::printable_to_string(WiFi.gatewayIP());
-        doc["IPv4 nameserver"] = uuid::printable_to_string(WiFi.dnsIP());
+        } else if (WiFi.status() == WL_CONNECTED) {
+            doc["network"]         = "wifi";
+            doc["hostname"]        = WiFi.getHostname();
+            doc["SSID"]            = WiFi.SSID();
+            doc["BSSID"]           = WiFi.BSSIDstr();
+            doc["MAC"]             = WiFi.macAddress();
+            doc["IPv4 address"]    = uuid::printable_to_string(WiFi.localIP()) + "/" + uuid::printable_to_string(WiFi.subnetMask());
+            doc["IPv4 gateway"]    = uuid::printable_to_string(WiFi.gatewayIP());
+            doc["IPv4 nameserver"] = uuid::printable_to_string(WiFi.dnsIP());
 
 #if ESP_IDF_VERSION_MAJOR < 5
-        if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000" && WiFi.localIPv6().toString() != "::") {
-            doc["IPv6 address"] = uuid::printable_to_string(WiFi.localIPv6());
-        }
+            if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000" && WiFi.localIPv6().toString() != "::") {
+                doc["IPv6 address"] = uuid::printable_to_string(WiFi.localIPv6());
+            }
 #else
-        if (WiFi.linkLocalIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000" && WiFi.linkLocalIPv6().toString() != "::") {
-            doc["IPv6 address"] = uuid::printable_to_string(WiFi.linkLocalIPv6());
+            if (WiFi.linkLocalIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000" && WiFi.linkLocalIPv6().toString() != "::") {
+                doc["IPv6 address"] = uuid::printable_to_string(WiFi.linkLocalIPv6());
+            }
+
+#endif
+        }
+#endif
+        Mqtt::queue_publish_retain(F_(info), doc.as<JsonObject>()); // topic called "info" and it's Retained
+    }
+
+    // create the json for heartbeat
+    void System::heartbeat_json(JsonObject output) {
+        switch (EMSESP::bus_status()) {
+        case EMSESP::BUS_STATUS_OFFLINE:
+            output["bus_status"] = "connecting"; // EMS-ESP is booting...
+            break;
+        case EMSESP::BUS_STATUS_TX_ERRORS:
+            output["bus_status"] = "txerror";
+            break;
+        case EMSESP::BUS_STATUS_CONNECTED:
+            output["bus_status"] = "connected";
+            break;
+        default:
+            output["bus_status"] = "disconnected";
+            break;
         }
 
-#endif
-    }
-#endif
-    Mqtt::queue_publish_retain(F_(info), doc.as<JsonObject>()); // topic called "info" and it's Retained
-}
+        output["uptime"]     = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
+        output["uptime_sec"] = uuid::get_uptime_sec();
 
-// create the json for heartbeat
-void System::heartbeat_json(JsonObject output) {
-    switch (EMSESP::bus_status()) {
-    case EMSESP::BUS_STATUS_OFFLINE:
-        output["bus_status"] = "connecting"; // EMS-ESP is booting...
-        break;
-    case EMSESP::BUS_STATUS_TX_ERRORS:
-        output["bus_status"] = "txerror";
-        break;
-    case EMSESP::BUS_STATUS_CONNECTED:
-        output["bus_status"] = "connected";
-        break;
-    default:
-        output["bus_status"] = "disconnected";
-        break;
-    }
+        output["rxreceived"] = EMSESP::rxservice_.telegram_count();
+        output["rxfails"]    = EMSESP::rxservice_.telegram_error_count();
+        output["txreads"]    = EMSESP::txservice_.telegram_read_count();
+        output["txwrites"]   = EMSESP::txservice_.telegram_write_count();
+        output["txfails"]    = EMSESP::txservice_.telegram_read_fail_count() + EMSESP::txservice_.telegram_write_fail_count();
 
-    output["uptime"]     = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
-    output["uptime_sec"] = uuid::get_uptime_sec();
+        if (Mqtt::enabled()) {
+            output["mqttcount"]      = Mqtt::publish_count();
+            output["mqttfails"]      = Mqtt::publish_fails();
+            output["mqttreconnects"] = Mqtt::connect_count();
+        }
+        output["apicalls"] = WebAPIService::api_count(); // + WebAPIService::api_fails();
+        output["apifails"] = WebAPIService::api_fails();
 
-    output["rxreceived"] = EMSESP::rxservice_.telegram_count();
-    output["rxfails"]    = EMSESP::rxservice_.telegram_error_count();
-    output["txreads"]    = EMSESP::txservice_.telegram_read_count();
-    output["txwrites"]   = EMSESP::txservice_.telegram_write_count();
-    output["txfails"]    = EMSESP::txservice_.telegram_read_fail_count() + EMSESP::txservice_.telegram_write_fail_count();
-
-    if (Mqtt::enabled()) {
-        output["mqttcount"]      = Mqtt::publish_count();
-        output["mqttfails"]      = Mqtt::publish_fails();
-        output["mqttreconnects"] = Mqtt::connect_count();
-    }
-    output["apicalls"] = WebAPIService::api_count(); // + WebAPIService::api_fails();
-    output["apifails"] = WebAPIService::api_fails();
-
-    if (EMSESP::sensor_enabled() || EMSESP::analog_enabled()) {
-        output["sensorreads"] = EMSESP::temperaturesensor_.reads() + EMSESP::analogsensor_.reads();
-        output["sensorfails"] = EMSESP::temperaturesensor_.fails() + EMSESP::analogsensor_.fails();
-    }
+        if (EMSESP::sensor_enabled() || EMSESP::analog_enabled()) {
+            output["sensorreads"] = EMSESP::temperaturesensor_.reads() + EMSESP::analogsensor_.reads();
+            output["sensorfails"] = EMSESP::temperaturesensor_.fails() + EMSESP::analogsensor_.fails();
+        }
 
 #ifndef EMSESP_STANDALONE
-    output["freemem"]   = getHeapMem();
-    output["max_alloc"] = getMaxAllocMem();
+        output["freemem"]   = getHeapMem();
+        output["max_alloc"] = getMaxAllocMem();
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
-    output["temperature"] = (int)temperature_;
+        output["temperature"] = (int)temperature_;
 #endif
 #endif
 
 #ifndef EMSESP_STANDALONE
-    if (!ethernet_connected_) {
-        int8_t rssi              = WiFi.RSSI();
-        output["rssi"]           = rssi;
-        output["wifistrength"]   = wifi_quality(rssi);
-        output["wifireconnects"] = EMSESP::esp32React.getWifiReconnects();
-    }
+        if (!ethernet_connected_) {
+            int8_t rssi              = WiFi.RSSI();
+            output["rssi"]           = rssi;
+            output["wifistrength"]   = wifi_quality(rssi);
+            output["wifireconnects"] = EMSESP::esp32React.getWifiReconnects();
+        }
 #endif
-}
-
-// send periodic MQTT message with system information
-void System::send_heartbeat() {
-    // don't send heartbeat if WiFi or MQTT is not connected
-    if (!Mqtt::connected()) {
-        return;
     }
 
-    refreshHeapMem(); // refresh free heap and max alloc heap
+    // send periodic MQTT message with system information
+    void System::send_heartbeat() {
+        // don't send heartbeat if WiFi or MQTT is not connected
+        if (!Mqtt::connected()) {
+            return;
+        }
 
-    JsonDocument doc;
-    JsonObject   json = doc.to<JsonObject>();
+        refreshHeapMem(); // refresh free heap and max alloc heap
 
-    heartbeat_json(json);
-    Mqtt::queue_publish(F_(heartbeat), json); // send to MQTT with retain off. This will add to MQTT queue.
-}
+        JsonDocument doc;
+        JsonObject   json = doc.to<JsonObject>();
 
-// initializes network
-void System::network_init(bool refresh) {
-    if (refresh) {
-        reload_settings();
+        heartbeat_json(json);
+        Mqtt::queue_publish(F_(heartbeat), json); // send to MQTT with retain off. This will add to MQTT queue.
     }
 
-    last_system_check_ = 0; // force the LED to go from fast flash to pulse
+    // initializes network
+    void System::network_init() {
+        last_system_check_ = 0; // force the LED to go from fast flash to pulse
 
 #if CONFIG_IDF_TARGET_ESP32
-    bool disableEth;
-    EMSESP::esp32React.getNetworkSettingsService()->read([&](NetworkSettings & settings) { disableEth = settings.ssid.length() > 0; });
+        bool disableEth;
+        EMSESP::esp32React.getNetworkSettingsService()->read([&](NetworkSettings & settings) { disableEth = settings.ssid.length() > 0; });
 
-    // no ethernet present or disabled
-    if (phy_type_ == PHY_type::PHY_TYPE_NONE || disableEth) {
-        return;
-    } // no ethernet present
+        // no ethernet present or disabled
+        if (phy_type_ == PHY_type::PHY_TYPE_NONE || disableEth) {
+            return;
+        } // no ethernet present
 
-    // configure Ethernet
-    int            mdc      = 23;            // Pin# of the I²C clock signal for the Ethernet PHY - hardcoded
-    int            mdio     = 18;            // Pin# of the I²C IO signal for the Ethernet PHY - hardcoded
-    uint8_t        phy_addr = eth_phy_addr_; // I²C-address of Ethernet PHY (0 or 1 for LAN8720, 31 for TLK110)
-    int8_t         power    = eth_power_;    // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
-    eth_phy_type_t type     = (phy_type_ == PHY_type::PHY_TYPE_LAN8720) ? ETH_PHY_LAN8720 : ETH_PHY_TLK110; // Type of the Ethernet PHY (LAN8720 or TLK110)
-    // clock mode:
-    //  ETH_CLOCK_GPIO0_IN   = 0  RMII clock input to GPIO0
-    //  ETH_CLOCK_GPIO0_OUT  = 1  RMII clock output from GPIO0
-    //  ETH_CLOCK_GPIO16_OUT = 2  RMII clock output from GPIO16
-    //  ETH_CLOCK_GPIO17_OUT = 3  RMII clock output from GPIO17, for 50hz inverted clock
-    auto clock_mode = (eth_clock_mode_t)eth_clock_mode_;
+        // configure Ethernet
+        int            mdc      = 23;            // Pin# of the I²C clock signal for the Ethernet PHY - hardcoded
+        int            mdio     = 18;            // Pin# of the I²C IO signal for the Ethernet PHY - hardcoded
+        uint8_t        phy_addr = eth_phy_addr_; // I²C-address of Ethernet PHY (0 or 1 for LAN8720, 31 for TLK110)
+        int8_t         power    = eth_power_;    // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
+        eth_phy_type_t type     = (phy_type_ == PHY_type::PHY_TYPE_LAN8720) ? ETH_PHY_LAN8720 : ETH_PHY_TLK110; // Type of the Ethernet PHY (LAN8720 or TLK110)
+        // clock mode:
+        //  ETH_CLOCK_GPIO0_IN   = 0  RMII clock input to GPIO0
+        //  ETH_CLOCK_GPIO0_OUT  = 1  RMII clock output from GPIO0
+        //  ETH_CLOCK_GPIO16_OUT = 2  RMII clock output from GPIO16
+        //  ETH_CLOCK_GPIO17_OUT = 3  RMII clock output from GPIO17, for 50hz inverted clock
+        auto clock_mode = (eth_clock_mode_t)eth_clock_mode_;
 
-    // reset power and add a delay as ETH doesn't not always start up correctly after a warm boot
-    if (eth_power_ != -1) {
-        pinMode(eth_power_, OUTPUT);
-        digitalWrite(eth_power_, LOW);
-        delay(500);
-        digitalWrite(eth_power_, HIGH);
-    }
+        // reset power and add a delay as ETH doesn't not always start up correctly after a warm boot
+        if (eth_power_ != -1) {
+            pinMode(eth_power_, OUTPUT);
+            digitalWrite(eth_power_, LOW);
+            delay(500);
+            digitalWrite(eth_power_, HIGH);
+        }
 
 #if ESP_IDF_VERSION_MAJOR < 5
-    eth_present_ = ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode);
+        eth_present_ = ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode);
 #else
-    eth_present_ = ETH.begin(type, phy_addr, mdc, mdio, power, clock_mode);
+        eth_present_ = ETH.begin(type, phy_addr, mdc, mdio, power, clock_mode);
 #endif
 #endif
-}
+    }
 
-// check health of system, done every 5 seconds
-void System::system_check() {
-    if (!last_system_check_ || ((uint32_t)(uuid::get_uptime() - last_system_check_) >= SYSTEM_CHECK_FREQUENCY)) {
-        last_system_check_ = uuid::get_uptime();
+    // check health of system, done every 5 seconds
+    void System::system_check() {
+        if (!last_system_check_ || ((uint32_t)(uuid::get_uptime() - last_system_check_) >= SYSTEM_CHECK_FREQUENCY)) {
+            last_system_check_ = uuid::get_uptime();
 
 #ifndef EMSESP_STANDALONE
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
 #if ESP_IDF_VERSION_MAJOR < 5
-        temp_sensor_read_celsius(&temperature_);
+            temp_sensor_read_celsius(&temperature_);
 #else
-        temperature_sensor_get_celsius(temperature_handle_, &temperature_);
+            temperature_sensor_get_celsius(temperature_handle_, &temperature_);
 #endif
 #endif
 #endif
 
 #ifdef EMSESP_PINGTEST
-        static uint64_t ping_count = 0;
-        LOG_NOTICE("Ping test, #%d", ping_count++);
+            static uint64_t ping_count = 0;
+            LOG_NOTICE("Ping test, #%d", ping_count++);
 #endif
 
-        // check if we have a valid network connection
-        if (!ethernet_connected() && (WiFi.status() != WL_CONNECTED)) {
-            healthcheck_ |= HEALTHCHECK_NO_NETWORK;
-        } else {
-            healthcheck_ &= ~HEALTHCHECK_NO_NETWORK;
-        }
-
-        // check if we have a bus connection
-        if (!EMSbus::bus_connected()) {
-            healthcheck_ |= HEALTHCHECK_NO_BUS;
-        } else {
-            healthcheck_ &= ~HEALTHCHECK_NO_BUS;
-        }
-
-        // see if the healthcheck state has changed
-        static uint8_t last_healthcheck_ = 0;
-        if (healthcheck_ != last_healthcheck_) {
-            last_healthcheck_ = healthcheck_;
-
-            EMSESP::system_.send_heartbeat(); // send MQTT heartbeat immediately when connected
-
-            // see if we're better now
-            if (healthcheck_ == 0) {
-                // everything is healthy, show LED permanently on or off depending on setting
-                if (led_gpio_) {
-#if ESP_ARDUINO_VERSION_MAJOR < 3
-                    led_type_ ? neopixelWrite(led_gpio_, 0, hide_led_ ? 0 : RGB_LED_BRIGHTNESS, 0) : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
-#else
-                    led_type_ ? rgbLedWrite(led_gpio_, 0, hide_led_ ? 0 : RGB_LED_BRIGHTNESS, 0) : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
-#endif
-                }
+            // check if we have a valid network connection
+            if (!ethernet_connected() && (WiFi.status() != WL_CONNECTED)) {
+                healthcheck_ |= HEALTHCHECK_NO_NETWORK;
             } else {
-                // turn off LED so we're ready to the flashes
-                if (led_gpio_) {
+                healthcheck_ &= ~HEALTHCHECK_NO_NETWORK;
+            }
+
+            // check if we have a bus connection
+            if (!EMSbus::bus_connected()) {
+                healthcheck_ |= HEALTHCHECK_NO_BUS;
+            } else {
+                healthcheck_ &= ~HEALTHCHECK_NO_BUS;
+            }
+
+            // see if the healthcheck state has changed
+            static uint8_t last_healthcheck_ = 0;
+            if (healthcheck_ != last_healthcheck_) {
+                last_healthcheck_ = healthcheck_;
+
+                EMSESP::system_.send_heartbeat(); // send MQTT heartbeat immediately when connected
+
+                // see if we're better now
+                if (healthcheck_ == 0) {
+                    // everything is healthy, show LED permanently on or off depending on setting
+                    if (led_gpio_) {
 #if ESP_ARDUINO_VERSION_MAJOR < 3
-                    led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
+                        led_type_ ? neopixelWrite(led_gpio_, 0, hide_led_ ? 0 : RGB_LED_BRIGHTNESS, 0) : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
 #else
-                    led_type_ ? rgbLedWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
+                        led_type_ ? rgbLedWrite(led_gpio_, 0, hide_led_ ? 0 : RGB_LED_BRIGHTNESS, 0) : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
 #endif
+                    }
+                } else {
+                    // turn off LED so we're ready to the flashes
+                    if (led_gpio_) {
+#if ESP_ARDUINO_VERSION_MAJOR < 3
+                        led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
+#else
+                        led_type_ ? rgbLedWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
+#endif
+                    }
                 }
             }
         }
     }
-}
 
-// commands - takes static function pointers
-// can be called via Console using 'call system <cmd>'
-void System::commands_init() {
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(read), System::command_read, FL_(read_cmd), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, FL_(send_cmd), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, FL_(fetch_cmd), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, FL_(restart_cmd), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(format), System::command_format, FL_(format_cmd), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, FL_(watch_cmd));
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(message), System::command_message, FL_(message_cmd));
+    // commands - takes static function pointers
+    // can be called via Console using 'call system <cmd>'
+    void System::commands_init() {
+        Command::add(EMSdevice::DeviceType::SYSTEM, F_(read), System::command_read, FL_(read_cmd), CommandFlag::ADMIN_ONLY);
+        Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, FL_(send_cmd), CommandFlag::ADMIN_ONLY);
+        Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, FL_(fetch_cmd), CommandFlag::ADMIN_ONLY);
+        Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, FL_(restart_cmd), CommandFlag::ADMIN_ONLY);
+        Command::add(EMSdevice::DeviceType::SYSTEM, F_(format), System::command_format, FL_(format_cmd), CommandFlag::ADMIN_ONLY);
+        Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, FL_(watch_cmd));
+        Command::add(EMSdevice::DeviceType::SYSTEM, F_(message), System::command_message, FL_(message_cmd));
 #if defined(EMSESP_TEST)
-    Command::add(EMSdevice::DeviceType::SYSTEM, ("test"), System::command_test, FL_(test_cmd));
+        Command::add(EMSdevice::DeviceType::SYSTEM, ("test"), System::command_test, FL_(test_cmd));
 #endif
 
-    // these commands will return data in JSON format
-    Command::add(EMSdevice::DeviceType::SYSTEM, F("response"), System::command_response, FL_(commands_response));
+        // these commands will return data in JSON format
+        Command::add(EMSdevice::DeviceType::SYSTEM, F("response"), System::command_response, FL_(commands_response));
 
-    // MQTT subscribe "ems-esp/system/#"
-    Mqtt::subscribe(EMSdevice::DeviceType::SYSTEM, "system/#", nullptr); // use empty function callback
-}
-
-// uses LED to show system health
-// 1 x flash = the EMS bus is not connected
-// 2 x flash = the network (wifi or ethernet) is not connected
-// 3 x flash = both EMS bus and network are failing. This is a critical error!
-void System::led_monitor() {
-    // we only need to run the LED healthcheck if there are errors
-    if (!healthcheck_ || !led_gpio_) {
-        return; // all good
+        // MQTT subscribe "ems-esp/system/#"
+        Mqtt::subscribe(EMSdevice::DeviceType::SYSTEM, "system/#", nullptr); // use empty function callback
     }
 
-    static uint32_t led_long_timer_  = 1; // 1 will kick it off immediately
-    static uint32_t led_short_timer_ = 0;
-    static uint8_t  led_flash_step_  = 0; // 0 means we're not in the short flash timer
-    auto            current_time     = uuid::get_uptime();
+    // uses LED to show system health
+    // 1 x flash = the EMS bus is not connected
+    // 2 x flash = the network (wifi or ethernet) is not connected
+    // 3 x flash = both EMS bus and network are failing. This is a critical error!
+    void System::led_monitor() {
+        // we only need to run the LED healthcheck if there are errors
+        if (!healthcheck_ || !led_gpio_) {
+            return; // all good
+        }
 
-    // first long pause before we start flashing
-    if (led_long_timer_ && (uint32_t)(current_time - led_long_timer_) >= HEALTHCHECK_LED_LONG_DUARATION) {
-        led_short_timer_ = current_time; // start the short timer
-        led_long_timer_  = 0;            // stop long timer
-        led_flash_step_  = 1;            // enable the short flash timer
-    }
+        static uint32_t led_long_timer_  = 1; // 1 will kick it off immediately
+        static uint32_t led_short_timer_ = 0;
+        static uint8_t  led_flash_step_  = 0; // 0 means we're not in the short flash timer
+        auto            current_time     = uuid::get_uptime();
 
-    // the flash timer which starts after the long pause
-    if (led_flash_step_ && (uint32_t)(current_time - led_short_timer_) >= HEALTHCHECK_LED_FLASH_DUARATION) {
-        led_long_timer_     = 0; // stop the long timer
-        led_short_timer_    = current_time;
-        static bool led_on_ = false;
+        // first long pause before we start flashing
+        if (led_long_timer_ && (uint32_t)(current_time - led_long_timer_) >= HEALTHCHECK_LED_LONG_DUARATION) {
+            led_short_timer_ = current_time; // start the short timer
+            led_long_timer_  = 0;            // stop long timer
+            led_flash_step_  = 1;            // enable the short flash timer
+        }
 
-        if (++led_flash_step_ == 8) {
-            // reset the whole sequence
-            led_long_timer_ = uuid::get_uptime();
-            led_flash_step_ = 0;
+        // the flash timer which starts after the long pause
+        if (led_flash_step_ && (uint32_t)(current_time - led_short_timer_) >= HEALTHCHECK_LED_FLASH_DUARATION) {
+            led_long_timer_     = 0; // stop the long timer
+            led_short_timer_    = current_time;
+            static bool led_on_ = false;
+
+            if (++led_flash_step_ == 8) {
+                // reset the whole sequence
+                led_long_timer_ = uuid::get_uptime();
+                led_flash_step_ = 0;
 #if ESP_ARDUINO_VERSION_MAJOR < 3
-            led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON); // LED off
+                led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON); // LED off
 #else
-            led_type_ ? rgbLedWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON); // LED off
+                led_type_ ? rgbLedWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON); // LED off
 #endif
-        } else if (led_flash_step_ % 2) {
-            // handle the step events (on odd numbers 3,5,7,etc). see if we need to turn on a LED
-            //  1 flash is the EMS bus is not connected
-            //  2 flashes if the network (wifi or ethernet) is not connected
-            //  3 flashes is both the bus and the network are not connected. Then you know you're truly f*cked.
-            if (led_type_) {
-                if (led_flash_step_ == 3) {
-                    if ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
+            } else if (led_flash_step_ % 2) {
+                // handle the step events (on odd numbers 3,5,7,etc). see if we need to turn on a LED
+                //  1 flash is the EMS bus is not connected
+                //  2 flashes if the network (wifi or ethernet) is not connected
+                //  3 flashes is both the bus and the network are not connected. Then you know you're truly f*cked.
+                if (led_type_) {
+                    if (led_flash_step_ == 3) {
+                        if ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
+#if ESP_ARDUINO_VERSION_MAJOR < 3
+                            neopixelWrite(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
+#else
+                            rgbLedWrite(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
+#endif
+                        } else if ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS) {
+#if ESP_ARDUINO_VERSION_MAJOR < 3
+                            neopixelWrite(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
+#else
+                            rgbLedWrite(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
+#endif
+                        }
+                    }
+                    if (led_flash_step_ == 5 && (healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
 #if ESP_ARDUINO_VERSION_MAJOR < 3
                         neopixelWrite(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
 #else
                         rgbLedWrite(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
 #endif
-                    } else if ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS) {
+                    }
+                    if ((led_flash_step_ == 7) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)
+                        && ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS)) {
 #if ESP_ARDUINO_VERSION_MAJOR < 3
                         neopixelWrite(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
 #else
                         rgbLedWrite(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
 #endif
                     }
-                }
-                if (led_flash_step_ == 5 && (healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
-#if ESP_ARDUINO_VERSION_MAJOR < 3
-                    neopixelWrite(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
-#else
-                    rgbLedWrite(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
-#endif
-                }
-                if ((led_flash_step_ == 7) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)
-                    && ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS)) {
-#if ESP_ARDUINO_VERSION_MAJOR < 3
-                    neopixelWrite(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
-#else
-                    rgbLedWrite(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
-#endif
-                }
-            } else {
-                if ((led_flash_step_ == 3)
-                    && (((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) || ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS))) {
-                    led_on_ = true;
-                }
-
-                if ((led_flash_step_ == 5) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)) {
-                    led_on_ = true;
-                }
-
-                if ((led_flash_step_ == 7) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)
-                    && ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS)) {
-                    led_on_ = true;
-                }
-
-                if (led_on_) {
-                    digitalWrite(led_gpio_, LED_ON); // LED off
-                }
-            }
-        } else {
-            // turn the led off after the flash, on even number count
-            if (led_on_) {
-#if ESP_ARDUINO_VERSION_MAJOR < 3
-                led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
-#else
-                led_type_ ? rgbLedWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
-#endif
-                led_on_ = false;
-            }
-        }
-    }
-}
-
-// Return the quality (Received Signal Strength Indicator) of the WiFi network as a %
-//  High quality: 90% ~= -55dBm
-//  Medium quality: 50% ~= -75dBm
-//  Low quality: 30% ~= -85dBm
-//  Unusable quality: 8% ~= -96dBm
-int8_t System::wifi_quality(int8_t dBm) {
-    if (dBm <= -100) {
-        return 0;
-    }
-
-    if (dBm >= -50) {
-        return 100;
-    }
-    return 2 * (dBm + 100);
-}
-
-// print users to console
-void System::show_users(uuid::console::Shell & shell) {
-    shell.printfln("Users:");
-
-#ifndef EMSESP_STANDALONE
-    EMSESP::esp32React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
-        for (const User & user : securitySettings.users) {
-            shell.printfln(" username: %s, password: %s, is_admin: %s", user.username.c_str(), user.password.c_str(), user.admin ? ("yes") : ("no"));
-        }
-    });
-#endif
-
-    shell.println();
-}
-
-// shell command 'show system'
-void System::show_system(uuid::console::Shell & shell) {
-    refreshHeapMem(); // refresh free heap and max alloc heap
-
-    shell.println();
-    shell.println("System:");
-    shell.printfln(" Version: %s", EMSESP_APP_VERSION);
-#ifndef EMSESP_STANDALONE
-    shell.printfln(" Platform: %s (%s)", EMSESP_PLATFORM, ESP.getChipModel());
-    shell.printfln(" Model: %s", getBBQKeesGatewayDetails().c_str());
-    shell.printfln(" Partition: %s", esp_ota_get_running_partition()->label);
-#endif
-    shell.printfln(" Language: %s", locale().c_str());
-    shell.printfln(" Board profile: %s", board_profile().c_str());
-    shell.printfln(" Uptime: %s", uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3).c_str());
-#ifndef EMSESP_STANDALONE
-    // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/misc_system_api.html
-    unsigned char mac_base[6] = {0};
-    esp_efuse_mac_get_default(mac_base);
-    esp_read_mac(mac_base, ESP_MAC_WIFI_STA);
-    shell.printfln(" Base MAC Address: %02X:%02X:%02X:%02X:%02X:%02X", mac_base[0], mac_base[1], mac_base[2], mac_base[3], mac_base[4], mac_base[5]);
-
-    shell.printfln(" SDK version: %s", ESP.getSdkVersion());
-    shell.printfln(" CPU frequency: %lu MHz", ESP.getCpuFreqMHz());
-#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
-    shell.printfln(" CPU temperature: %d °C", (int)temperature());
-#endif
-    shell.printfln(" Free heap/Max alloc: %lu KB / %lu KB", getHeapMem(), getMaxAllocMem());
-    shell.printfln(" App used/free: %lu KB / %lu KB", appUsed(), appFree());
-    uint32_t FSused = LittleFS.usedBytes() / 1024;
-    shell.printfln(" FS used/free: %lu KB / %lu KB", FSused, FStotal() - FSused);
-    shell.printfln(" Flash size: %lu KB", ESP.getFlashChipSize() / 1024);
-    if (PSram()) {
-        shell.printfln(" PSRAM size/free: %lu KB / %lu KB", PSram(), ESP.getFreePsram() / 1024);
-    } else {
-        shell.printfln(" PSRAM: not available");
-    }
-
-    shell.println();
-    shell.println("Network:");
-
-    switch (WiFi.status()) {
-    case WL_IDLE_STATUS:
-        shell.printfln(" Status: Idle");
-        break;
-
-    case WL_NO_SSID_AVAIL:
-        shell.printfln(" Status: Network not found");
-        break;
-
-    case WL_SCAN_COMPLETED:
-        shell.printfln(" Status: Network scan complete");
-        break;
-
-    case WL_CONNECTED:
-        shell.printfln(" Status: WiFi connected");
-        shell.printfln(" SSID: %s", WiFi.SSID().c_str());
-        shell.printfln(" BSSID: %s", WiFi.BSSIDstr().c_str());
-        shell.printfln(" RSSI: %d dBm (%d %%)", WiFi.RSSI(), wifi_quality(WiFi.RSSI()));
-        char result[10];
-        shell.printfln(" TxPower: %s dBm", emsesp::Helpers::render_value(result, (double)(WiFi.getTxPower() / 4), 1));
-        shell.printfln(" MAC address: %s", WiFi.macAddress().c_str());
-        shell.printfln(" Hostname: %s", WiFi.getHostname());
-        shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
-        shell.printfln(" IPv4 gateway: %s", uuid::printable_to_string(WiFi.gatewayIP()).c_str());
-        shell.printfln(" IPv4 nameserver: %s", uuid::printable_to_string(WiFi.dnsIP()).c_str());
-#if ESP_IDF_VERSION_MAJOR < 5
-        if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000" && WiFi.localIPv6().toString() != "::") {
-            shell.printfln(" IPv6 address: %s", uuid::printable_to_string(WiFi.localIPv6()).c_str());
-        }
-#else
-        if (WiFi.linkLocalIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000" && WiFi.linkLocalIPv6().toString() != "::") {
-            shell.printfln(" IPv6 address: %s", uuid::printable_to_string(WiFi.linkLocalIPv6()).c_str());
-        }
-#endif
-
-        break;
-
-    case WL_CONNECT_FAILED:
-        shell.printfln(" WiFi Network: Connection failed");
-        break;
-
-    case WL_CONNECTION_LOST:
-        shell.printfln(" WiFi Network: Connection lost");
-        break;
-
-    case WL_DISCONNECTED:
-        shell.printfln(" WiFi Network: Disconnected");
-        break;
-
-    // case WL_NO_SHIELD:
-    default:
-        shell.printfln(" WiFi MAC address: %s", WiFi.macAddress().c_str());
-        shell.printfln(" WiFi Network: not connected");
-        break;
-    }
-
-    // show Ethernet if connected
-    if (ethernet_connected_) {
-        shell.println();
-        shell.printfln(" Ethernet Status: connected");
-        shell.printfln(" Ethernet MAC address: %s", ETH.macAddress().c_str());
-        shell.printfln(" Hostname: %s", ETH.getHostname());
-        shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(ETH.localIP()).c_str(), uuid::printable_to_string(ETH.subnetMask()).c_str());
-        shell.printfln(" IPv4 gateway: %s", uuid::printable_to_string(ETH.gatewayIP()).c_str());
-        shell.printfln(" IPv4 nameserver: %s", uuid::printable_to_string(ETH.dnsIP()).c_str());
-#if ESP_IDF_VERSION_MAJOR < 5
-        if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000" && ETH.localIPv6().toString() != "::") {
-            shell.printfln(" IPv6 address: %s", uuid::printable_to_string(ETH.localIPv6()).c_str());
-        }
-#else
-        if (ETH.linkLocalIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000" && ETH.linkLocalIPv6().toString() != "::") {
-            shell.printfln(" IPv6 address: %s", uuid::printable_to_string(ETH.linkLocalIPv6()).c_str());
-        }
-#endif
-    }
-    shell.println();
-
-    shell.println("Syslog:");
-    if (!syslog_enabled_) {
-        shell.printfln(" Syslog: disabled");
-    } else {
-        shell.printfln(" Syslog: %s", syslog_.started() ? "started" : "stopped");
-        shell.print(" ");
-        shell.printfln(F_(host_fmt), !syslog_host_.isEmpty() ? syslog_host_.c_str() : F_(unset));
-        shell.printfln(" IP: %s", uuid::printable_to_string(syslog_.ip()).c_str());
-        shell.print(" ");
-        shell.printfln(F_(port_fmt), syslog_port_);
-        shell.print(" ");
-        shell.printfln(F_(log_level_fmt), uuid::log::format_level_lowercase(static_cast<uuid::log::Level>(syslog_level_)));
-        shell.print(" ");
-        shell.printfln(F_(mark_interval_fmt), syslog_mark_interval_);
-        shell.printfln(" Queued: %d", syslog_.queued());
-    }
-
-    shell.println();
-
-#endif
-}
-
-// see if there is a restore of an older settings file that needs to be applied
-// note there can be only one file at a time
-bool System::check_restore() {
-    bool reboot_required = false; // true if we need to reboot
-
-#ifndef EMSESP_STANDALONE
-    File new_file = LittleFS.open(TEMP_FILENAME_PATH);
-    if (new_file) {
-        JsonDocument         jsonDocument;
-        DeserializationError error = deserializeJson(jsonDocument, new_file);
-        if (error == DeserializationError::Ok && jsonDocument.is<JsonObject>()) {
-            JsonObject input = jsonDocument.as<JsonObject>();
-            // see what type of file it is, either settings or customization. anything else is ignored
-            std::string settings_type = input["type"];
-            if (settings_type == "settings") {
-                // It's a settings file. Parse each section separately. If it's system related it will require a reboot
-                reboot_required = saveSettings(NETWORK_SETTINGS_FILE, "Network", input);
-                reboot_required |= saveSettings(AP_SETTINGS_FILE, "AP", input);
-                reboot_required |= saveSettings(MQTT_SETTINGS_FILE, "MQTT", input);
-                reboot_required |= saveSettings(NTP_SETTINGS_FILE, "NTP", input);
-                reboot_required |= saveSettings(SECURITY_SETTINGS_FILE, "Security", input);
-                reboot_required |= saveSettings(EMSESP_SETTINGS_FILE, "Settings", input);
-            } else if (settings_type == "customizations") {
-                // it's a customization file, just replace it and there's no need to reboot
-                saveSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", input);
-            } else if (settings_type == "schedule") {
-                // it's a schedule file, just replace it and there's no need to reboot
-                saveSettings(EMSESP_SCHEDULER_FILE, "Schedule", input);
-            } else if (settings_type == "entities") {
-                // it's a entity file, just replace it and there's no need to reboot
-                saveSettings(EMSESP_CUSTOMENTITY_FILE, "Entities", input);
-            } else if (settings_type == "customSupport") {
-                // it's a custom support file - save it to /config
-                new_file.close();
-                if (LittleFS.rename(TEMP_FILENAME_PATH, EMSESP_CUSTOMSUPPORT_FILE)) {
-                    LOG_INFO("Custom support file stored");
-                    return false; // no need to reboot
                 } else {
-                    LOG_ERROR("Failed to save custom support file");
+                    if ((led_flash_step_ == 3)
+                        && (((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) || ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS))) {
+                        led_on_ = true;
+                    }
+
+                    if ((led_flash_step_ == 5) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)) {
+                        led_on_ = true;
+                    }
+
+                    if ((led_flash_step_ == 7) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)
+                        && ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS)) {
+                        led_on_ = true;
+                    }
+
+                    if (led_on_) {
+                        digitalWrite(led_gpio_, LED_ON); // LED off
+                    }
                 }
             } else {
-                LOG_ERROR("Unrecognized file uploaded");
+                // turn the led off after the flash, on even number count
+                if (led_on_) {
+#if ESP_ARDUINO_VERSION_MAJOR < 3
+                    led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
+#else
+                    led_type_ ? rgbLedWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
+#endif
+                    led_on_ = false;
+                }
             }
-        } else {
-            LOG_ERROR("Unrecognized file uploaded, not json.");
+        }
+    }
+
+    // Return the quality (Received Signal Strength Indicator) of the WiFi network as a %
+    //  High quality: 90% ~= -55dBm
+    //  Medium quality: 50% ~= -75dBm
+    //  Low quality: 30% ~= -85dBm
+    //  Unusable quality: 8% ~= -96dBm
+    int8_t System::wifi_quality(int8_t dBm) {
+        if (dBm <= -100) {
+            return 0;
         }
 
-        // close (just in case) and remove the temp file
-        new_file.close();
-        LittleFS.remove(TEMP_FILENAME_PATH);
+        if (dBm >= -50) {
+            return 100;
+        }
+        return 2 * (dBm + 100);
     }
+
+    // print users to console
+    void System::show_users(uuid::console::Shell & shell) {
+        shell.printfln("Users:");
+
+#ifndef EMSESP_STANDALONE
+        EMSESP::esp32React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
+            for (const User & user : securitySettings.users) {
+                shell.printfln(" username: %s, password: %s, is_admin: %s", user.username.c_str(), user.password.c_str(), user.admin ? ("yes") : ("no"));
+            }
+        });
 #endif
 
-    return reboot_required;
-}
-
-// handle upgrades from previous versions
-// this function will not be called on a clean install, with no settings files yet created
-// returns true if we need a reboot
-bool System::check_upgrade(bool factory_settings) {
-    bool        missing_version = true;
-    std::string settingsVersion;
-
-    if (!factory_settings) {
-        // fetch current version from settings file
-        EMSESP::webSettingsService.read([&](WebSettings const & settings) { settingsVersion = settings.version.c_str(); });
-
-        // see if we're missing a version, will be < 3.5.0b13 from Dec 23 2022
-        missing_version = (settingsVersion.empty() || (settingsVersion.length() < 5));
-        if (missing_version) {
-            LOG_WARNING("No version information found");
-            settingsVersion = "3.5.0"; // this was the last stable version without version info
-        }
-    } else {
-        settingsVersion = EMSESP_APP_VERSION; // use the current version
+        shell.println();
     }
 
-    version::Semver200_version settings_version(settingsVersion);
+    // shell command 'show system'
+    void System::show_system(uuid::console::Shell & shell) {
+        refreshHeapMem(); // refresh free heap and max alloc heap
 
-    if (!missing_version) {
-        LOG_DEBUG("Checking for version upgrades (settings file has v%d.%d.%d-%s)",
-                  settings_version.major(),
-                  settings_version.minor(),
-                  settings_version.patch(),
-                  settings_version.prerelease().c_str());
-    }
+        shell.println();
+        shell.println("System:");
+        shell.printfln(" Version: %s", EMSESP_APP_VERSION);
+#ifndef EMSESP_STANDALONE
+        shell.printfln(" Platform: %s (%s)", EMSESP_PLATFORM, ESP.getChipModel());
+        shell.printfln(" Model: %s", getBBQKeesGatewayDetails().c_str());
+        shell.printfln(" Partition: %s", esp_ota_get_running_partition()->label);
+#endif
+        shell.printfln(" Language: %s", locale().c_str());
+        shell.printfln(" Board profile: %s", board_profile().c_str());
+        shell.printfln(" Uptime: %s", uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3).c_str());
+#ifndef EMSESP_STANDALONE
+        // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/misc_system_api.html
+        unsigned char mac_base[6] = {0};
+        esp_efuse_mac_get_default(mac_base);
+        esp_read_mac(mac_base, ESP_MAC_WIFI_STA);
+        shell.printfln(" Base MAC Address: %02X:%02X:%02X:%02X:%02X:%02X", mac_base[0], mac_base[1], mac_base[2], mac_base[3], mac_base[4], mac_base[5]);
 
-    if (factory_settings) {
-        return false; // fresh install, do nothing
-    }
-
-    version::Semver200_version this_version(EMSESP_APP_VERSION);
-
-    bool save_version = true;
-
-    // compare versions
-    if (this_version > settings_version) {
-        // we need to do an upgrade
-        if (missing_version) {
-            LOG_NOTICE("Upgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
+        shell.printfln(" SDK version: %s", ESP.getSdkVersion());
+        shell.printfln(" CPU frequency: %lu MHz", ESP.getCpuFreqMHz());
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
+        shell.printfln(" CPU temperature: %d °C", (int)temperature());
+#endif
+        shell.printfln(" Free heap/Max alloc: %lu KB / %lu KB", getHeapMem(), getMaxAllocMem());
+        shell.printfln(" App used/free: %lu KB / %lu KB", appUsed(), appFree());
+        uint32_t FSused = LittleFS.usedBytes() / 1024;
+        shell.printfln(" FS used/free: %lu KB / %lu KB", FSused, FStotal() - FSused);
+        shell.printfln(" Flash size: %lu KB", ESP.getFlashChipSize() / 1024);
+        if (PSram()) {
+            shell.printfln(" PSRAM size/free: %lu KB / %lu KB", PSram(), ESP.getFreePsram() / 1024);
         } else {
-            LOG_NOTICE("Upgrading from version %d.%d.%d-%s to %d.%d.%d-%s",
-                       settings_version.major(),
-                       settings_version.minor(),
-                       settings_version.patch(),
-                       settings_version.prerelease().c_str(),
-                       this_version.major(),
-                       this_version.minor(),
-                       this_version.patch(),
-                       this_version.prerelease().c_str());
+            shell.printfln(" PSRAM: not available");
         }
 
-        // if we're coming from 3.4.4 or 3.5.0b14 which had no version stored then we need to apply new settings
-        if (missing_version) {
-            LOG_INFO("Upgrade: Setting MQTT Entity ID format to older v3.4 format (0)");
-            EMSESP::esp32React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
-                mqttSettings.entity_format = Mqtt::entityFormat::SINGLE_LONG; // use old Entity ID format from v3.4
+        shell.println();
+        shell.println("Network:");
+
+        switch (WiFi.status()) {
+        case WL_IDLE_STATUS:
+            shell.printfln(" Status: Idle");
+            break;
+
+        case WL_NO_SSID_AVAIL:
+            shell.printfln(" Status: Network not found");
+            break;
+
+        case WL_SCAN_COMPLETED:
+            shell.printfln(" Status: Network scan complete");
+            break;
+
+        case WL_CONNECTED:
+            shell.printfln(" Status: WiFi connected");
+            shell.printfln(" SSID: %s", WiFi.SSID().c_str());
+            shell.printfln(" BSSID: %s", WiFi.BSSIDstr().c_str());
+            shell.printfln(" RSSI: %d dBm (%d %%)", WiFi.RSSI(), wifi_quality(WiFi.RSSI()));
+            char result[10];
+            shell.printfln(" TxPower: %s dBm", emsesp::Helpers::render_value(result, (double)(WiFi.getTxPower() / 4), 1));
+            shell.printfln(" MAC address: %s", WiFi.macAddress().c_str());
+            shell.printfln(" Hostname: %s", WiFi.getHostname());
+            shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
+            shell.printfln(" IPv4 gateway: %s", uuid::printable_to_string(WiFi.gatewayIP()).c_str());
+            shell.printfln(" IPv4 nameserver: %s", uuid::printable_to_string(WiFi.dnsIP()).c_str());
+#if ESP_IDF_VERSION_MAJOR < 5
+            if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000" && WiFi.localIPv6().toString() != "::") {
+                shell.printfln(" IPv6 address: %s", uuid::printable_to_string(WiFi.localIPv6()).c_str());
+            }
+#else
+            if (WiFi.linkLocalIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000" && WiFi.linkLocalIPv6().toString() != "::") {
+                shell.printfln(" IPv6 address: %s", uuid::printable_to_string(WiFi.linkLocalIPv6()).c_str());
+            }
+#endif
+
+            break;
+
+        case WL_CONNECT_FAILED:
+            shell.printfln(" WiFi Network: Connection failed");
+            break;
+
+        case WL_CONNECTION_LOST:
+            shell.printfln(" WiFi Network: Connection lost");
+            break;
+
+        case WL_DISCONNECTED:
+            shell.printfln(" WiFi Network: Disconnected");
+            break;
+
+        // case WL_NO_SHIELD:
+        default:
+            shell.printfln(" WiFi MAC address: %s", WiFi.macAddress().c_str());
+            shell.printfln(" WiFi Network: not connected");
+            break;
+        }
+
+        // show Ethernet if connected
+        if (ethernet_connected_) {
+            shell.println();
+            shell.printfln(" Ethernet Status: connected");
+            shell.printfln(" Ethernet MAC address: %s", ETH.macAddress().c_str());
+            shell.printfln(" Hostname: %s", ETH.getHostname());
+            shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(ETH.localIP()).c_str(), uuid::printable_to_string(ETH.subnetMask()).c_str());
+            shell.printfln(" IPv4 gateway: %s", uuid::printable_to_string(ETH.gatewayIP()).c_str());
+            shell.printfln(" IPv4 nameserver: %s", uuid::printable_to_string(ETH.dnsIP()).c_str());
+#if ESP_IDF_VERSION_MAJOR < 5
+            if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000" && ETH.localIPv6().toString() != "::") {
+                shell.printfln(" IPv6 address: %s", uuid::printable_to_string(ETH.localIPv6()).c_str());
+            }
+#else
+            if (ETH.linkLocalIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000" && ETH.linkLocalIPv6().toString() != "::") {
+                shell.printfln(" IPv6 address: %s", uuid::printable_to_string(ETH.linkLocalIPv6()).c_str());
+            }
+#endif
+        }
+        shell.println();
+
+        shell.println("Syslog:");
+        if (!syslog_enabled_) {
+            shell.printfln(" Syslog: disabled");
+        } else {
+            shell.printfln(" Syslog: %s", syslog_.started() ? "started" : "stopped");
+            shell.print(" ");
+            shell.printfln(F_(host_fmt), !syslog_host_.isEmpty() ? syslog_host_.c_str() : F_(unset));
+            shell.printfln(" IP: %s", uuid::printable_to_string(syslog_.ip()).c_str());
+            shell.print(" ");
+            shell.printfln(F_(port_fmt), syslog_port_);
+            shell.print(" ");
+            shell.printfln(F_(log_level_fmt), uuid::log::format_level_lowercase(static_cast<uuid::log::Level>(syslog_level_)));
+            shell.print(" ");
+            shell.printfln(F_(mark_interval_fmt), syslog_mark_interval_);
+            shell.printfln(" Queued: %d", syslog_.queued());
+        }
+
+        shell.println();
+
+#endif
+    }
+
+    // see if there is a restore of an older settings file that needs to be applied
+    // note there can be only one file at a time
+    bool System::check_restore() {
+        bool reboot_required = false; // true if we need to reboot
+
+#ifndef EMSESP_STANDALONE
+        File new_file = LittleFS.open(TEMP_FILENAME_PATH);
+        if (new_file) {
+            JsonDocument         jsonDocument;
+            DeserializationError error = deserializeJson(jsonDocument, new_file);
+            if (error == DeserializationError::Ok && jsonDocument.is<JsonObject>()) {
+                JsonObject input = jsonDocument.as<JsonObject>();
+                // see what type of file it is, either settings or customization. anything else is ignored
+                std::string settings_type = input["type"];
+                if (settings_type == "settings") {
+                    // It's a settings file. Parse each section separately. If it's system related it will require a reboot
+                    reboot_required = saveSettings(NETWORK_SETTINGS_FILE, "Network", input);
+                    reboot_required |= saveSettings(AP_SETTINGS_FILE, "AP", input);
+                    reboot_required |= saveSettings(MQTT_SETTINGS_FILE, "MQTT", input);
+                    reboot_required |= saveSettings(NTP_SETTINGS_FILE, "NTP", input);
+                    reboot_required |= saveSettings(SECURITY_SETTINGS_FILE, "Security", input);
+                    reboot_required |= saveSettings(EMSESP_SETTINGS_FILE, "Settings", input);
+                } else if (settings_type == "customizations") {
+                    // it's a customization file, just replace it and there's no need to reboot
+                    saveSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", input);
+                } else if (settings_type == "schedule") {
+                    // it's a schedule file, just replace it and there's no need to reboot
+                    saveSettings(EMSESP_SCHEDULER_FILE, "Schedule", input);
+                } else if (settings_type == "entities") {
+                    // it's a entity file, just replace it and there's no need to reboot
+                    saveSettings(EMSESP_CUSTOMENTITY_FILE, "Entities", input);
+                } else if (settings_type == "customSupport") {
+                    // it's a custom support file - save it to /config
+                    new_file.close();
+                    if (LittleFS.rename(TEMP_FILENAME_PATH, EMSESP_CUSTOMSUPPORT_FILE)) {
+                        LOG_INFO("Custom support file stored");
+                        return false; // no need to reboot
+                    } else {
+                        LOG_ERROR("Failed to save custom support file");
+                    }
+                } else {
+                    LOG_ERROR("Unrecognized file uploaded");
+                }
+            } else {
+                LOG_ERROR("Unrecognized file uploaded, not json.");
+            }
+
+            // close (just in case) and remove the temp file
+            new_file.close();
+            LittleFS.remove(TEMP_FILENAME_PATH);
+        }
+#endif
+
+        return reboot_required;
+    }
+
+    // handle upgrades from previous versions
+    // this function will not be called on a clean install, with no settings files yet created
+    // returns true if we need a reboot
+    bool System::check_upgrade(bool factory_settings) {
+        bool        missing_version = true;
+        std::string settingsVersion;
+
+        if (!factory_settings) {
+            // fetch current version from settings file
+            EMSESP::webSettingsService.read([&](WebSettings const & settings) { settingsVersion = settings.version.c_str(); });
+
+            // see if we're missing a version, will be < 3.5.0b13 from Dec 23 2022
+            missing_version = (settingsVersion.empty() || (settingsVersion.length() < 5));
+            if (missing_version) {
+                LOG_WARNING("No version information found");
+                settingsVersion = "3.5.0"; // this was the last stable version without version info
+            }
+        } else {
+            settingsVersion = EMSESP_APP_VERSION; // use the current version
+        }
+
+        version::Semver200_version settings_version(settingsVersion);
+
+        if (!missing_version) {
+            LOG_DEBUG("Checking for version upgrades (settings file is from v%d.%d.%d-%s)",
+                      settings_version.major(),
+                      settings_version.minor(),
+                      settings_version.patch(),
+                      settings_version.prerelease().c_str());
+        }
+
+        if (factory_settings) {
+            return false; // fresh install, do nothing
+        }
+
+        version::Semver200_version this_version(EMSESP_APP_VERSION);
+
+        bool save_version = true;
+
+        // compare versions
+        if (this_version > settings_version) {
+            // we need to do an upgrade
+            if (missing_version) {
+                LOG_NOTICE("Upgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
+            } else {
+                LOG_NOTICE("Upgrading from version %d.%d.%d-%s to %d.%d.%d-%s",
+                           settings_version.major(),
+                           settings_version.minor(),
+                           settings_version.patch(),
+                           settings_version.prerelease().c_str(),
+                           this_version.major(),
+                           this_version.minor(),
+                           this_version.patch(),
+                           this_version.prerelease().c_str());
+            }
+
+            // if we're coming from 3.4.4 or 3.5.0b14 which had no version stored then we need to apply new settings
+            if (missing_version) {
+                LOG_INFO("Upgrade: Setting MQTT Entity ID format to older v3.4 format (0)");
+                EMSESP::esp32React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
+                    mqttSettings.entity_format = Mqtt::entityFormat::SINGLE_LONG; // use old Entity ID format from v3.4
+                    return StateUpdateResult::CHANGED;
+                });
+            } else if (settings_version.major() == 3 && settings_version.minor() <= 6) {
+                EMSESP::esp32React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
+                    if (mqttSettings.entity_format == 1) {
+                        mqttSettings.entity_format = Mqtt::entityFormat::SINGLE_OLD; // use old Entity ID format from v3.6
+                        LOG_INFO("Upgrade: Setting MQTT Entity ID format to v3.6 format (3)");
+                        return StateUpdateResult::CHANGED;
+                    } else if (mqttSettings.entity_format == 2) {
+                        mqttSettings.entity_format = Mqtt::entityFormat::MULTI_OLD; // use old Entity ID format from v3.6
+                        LOG_INFO("Upgrade: Setting MQTT Entity ID format to v3.6 format (4)");
+                        return StateUpdateResult::CHANGED;
+                    }
+                    return StateUpdateResult::UNCHANGED;
+                });
+            }
+
+            // changes to Network
+            EMSESP::esp32React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
+                // Network Settings Wifi tx_power is now using the value * 4.
+                if (networkSettings.tx_power == 20) {
+                    networkSettings.tx_power = WIFI_POWER_19_5dBm; // use 19.5 as we don't have 20 anymore
+                    LOG_INFO("Upgrade: Setting WiFi TX Power to Auto");
+                }
+
+                // force WiFi sleep to off (was default on < 3.7.0-dev-33)
+                networkSettings.nosleep = true;
+                LOG_INFO("Upgrade: Disabling WiFi nosleep");
+
                 return StateUpdateResult::CHANGED;
             });
-        } else if (settings_version.major() == 3 && settings_version.minor() <= 6) {
-            EMSESP::esp32React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
-                if (mqttSettings.entity_format == 1) {
-                    mqttSettings.entity_format = Mqtt::entityFormat::SINGLE_OLD; // use old Entity ID format from v3.6
-                    LOG_INFO("Upgrade: Setting MQTT Entity ID format to v3.6 format (3)");
-                    return StateUpdateResult::CHANGED;
-                } else if (mqttSettings.entity_format == 2) {
-                    mqttSettings.entity_format = Mqtt::entityFormat::MULTI_OLD; // use old Entity ID format from v3.6
-                    LOG_INFO("Upgrade: Setting MQTT Entity ID format to v3.6 format (4)");
+
+            // changes to application settings
+            EMSESP::webSettingsService.update([&](WebSettings & settings) {
+                // force web buffer to 25 for those boards without psram
+                if (EMSESP::system_.PSram() == 0) {
+                    settings.weblog_buffer = 25;
                     return StateUpdateResult::CHANGED;
                 }
                 return StateUpdateResult::UNCHANGED;
             });
+
+
+        } else if (this_version < settings_version) {
+            // need downgrade
+            LOG_NOTICE("Downgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
+        } else {
+            // same version, do nothing
+            save_version = false;
         }
 
-        // changes to Network
-        EMSESP::esp32React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
-            // Network Settings Wifi tx_power is now using the value * 4.
-            if (networkSettings.tx_power == 20) {
-                networkSettings.tx_power = WIFI_POWER_19_5dBm; // use 19.5 as we don't have 20 anymore
-                LOG_INFO("Upgrade: Setting WiFi TX Power to Auto");
-            }
-
-            // force WiFi sleep to off (was default on < 3.7.0-dev-33)
-            networkSettings.nosleep = true;
-            LOG_INFO("Upgrade: Disabling WiFi nosleep");
-
-            return StateUpdateResult::CHANGED;
-        });
-
-        // changes to application settings
-        EMSESP::webSettingsService.update([&](WebSettings & settings) {
-            // force web buffer to 25 for those boards without psram
-            if (EMSESP::system_.PSram() == 0) {
-                settings.weblog_buffer = 25;
-                return StateUpdateResult::CHANGED;
-            }
-            return StateUpdateResult::UNCHANGED;
-        });
-
-
-    } else if (this_version < settings_version) {
-        // need downgrade
-        LOG_NOTICE("Downgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
-    } else {
-        // same version, do nothing
-        save_version = false;
-    }
-
-    // if we did a change, set the new version and save it, then reboot
-    if (save_version) {
-        EMSESP::webSettingsService.update([&](WebSettings & settings) {
-            settings.version = EMSESP_APP_VERSION;
-            return StateUpdateResult::CHANGED;
-        });
-        // LOG_INFO("Upgrade: Setting version to %s", EMSESP_APP_VERSION);
-        return true; // need reboot
-    }
-
-    return false;
-}
-
-// convert settings file into json object
-void System::extractSettings(const char * filename, const char * section, JsonObject output) {
-#ifndef EMSESP_STANDALONE
-    File settingsFile = LittleFS.open(filename);
-    if (settingsFile) {
-        JsonDocument         jsonDocument;
-        DeserializationError error = deserializeJson(jsonDocument, settingsFile);
-        if (error == DeserializationError::Ok && jsonDocument.is<JsonObject>()) {
-            JsonObject jsonObject = jsonDocument.as<JsonObject>();
-            JsonObject node       = output[section].to<JsonObject>();
-            for (JsonPair kvp : jsonObject) {
-                node[kvp.key()] = kvp.value();
-            }
-        }
-    }
-    settingsFile.close();
-#endif
-}
-
-// save settings file using input from a json object
-bool System::saveSettings(const char * filename, const char * section, JsonObject input) {
-#ifndef EMSESP_STANDALONE
-    JsonObject section_json = input[section];
-    if (section_json) {
-        File section_file = LittleFS.open(filename, "w");
-        if (section_file) {
-            LOG_INFO("Applying new uploaded %s data", section);
-            serializeJson(section_json, section_file);
-            section_file.close();
-            return true; // reboot required
-        }
-    }
-#endif
-    return false; // not found
-}
-
-// set a entity of services 'network', 'settings', 'mqtt', etc.
-bool System::command_service(const char * cmd, const char * value) {
-    bool ok = false;
-    bool b;
-    if (Helpers::value2bool(value, b)) {
-        if (!strcmp(cmd, "settings/showertimer")) {
+        // if we did a change, set the new version and save it, then reboot
+        if (save_version) {
             EMSESP::webSettingsService.update([&](WebSettings & settings) {
-                settings.shower_timer = b;
+                settings.version = EMSESP_APP_VERSION;
                 return StateUpdateResult::CHANGED;
             });
-            EMSESP::shower_.shower_timer(b);
-            ok = true;
-        } else if (!strcmp(cmd, "settings/showeralert")) {
-            EMSESP::webSettingsService.update([&](WebSettings & settings) {
-                settings.shower_alert = b;
-                return StateUpdateResult::CHANGED;
-            });
-            EMSESP::shower_.shower_alert(b);
-            ok = true;
-        } else if (!strcmp(cmd, "settings/hideled")) {
-            EMSESP::webSettingsService.update([&](WebSettings & settings) {
-                settings.hide_led = b;
-                return StateUpdateResult::CHANGED;
-            });
-            EMSESP::system_.hide_led(b);
-            ok = true;
-        } else if (!strcmp(cmd, "settings/analogenabled")) {
-            EMSESP::webSettingsService.update([&](WebSettings & settings) {
-                settings.analog_enabled = b;
-                return StateUpdateResult::CHANGED;
-            });
-            EMSESP::system_.analog_enabled(b);
-            ok = true;
-        } else if (!strcmp(cmd, "mqtt/enabled")) {
-            EMSESP::esp32React.getMqttSettingsService()->update([&](MqttSettings & Settings) {
-                Settings.enabled = b;
-                return StateUpdateResult::CHANGED;
-            });
-            ok = true;
-        } else if (!strcmp(cmd, "ap/enabled")) {
-            EMSESP::esp32React.getAPSettingsService()->update([&](APSettings & Settings) {
-                Settings.provisionMode = b ? 0 : 2;
-                return StateUpdateResult::CHANGED;
-            });
-            ok = true;
-        } else if (!strcmp(cmd, "ntp/enabled")) {
-            EMSESP::esp32React.getNTPSettingsService()->update([&](NTPSettings & Settings) {
-                Settings.enabled = b;
-                return StateUpdateResult::CHANGED;
-            });
-            ok = true;
-        } else if (!strcmp(cmd, "syslog/enabled")) {
-            EMSESP::webSettingsService.update([&](WebSettings & settings) {
-                settings.syslog_enabled = b;
-                return StateUpdateResult::CHANGED;
-            });
-            EMSESP::system_.syslog_enabled_ = b;
-            EMSESP::system_.syslog_init();
-            ok = true;
+            // LOG_INFO("Upgrade: Setting version to %s", EMSESP_APP_VERSION);
+            return true; // need reboot
         }
-    }
 
-    int n;
-    if (!ok && Helpers::value2number(value, n)) {
-#ifndef EMSESP_STANDALONE
-        if (!strcmp(cmd, "fuse/mfg")) {
-            ok = esp_efuse_write_reg(EFUSE_BLK3, 0, (uint32_t)n) == ESP_OK;
-            ok ? LOG_INFO("fuse programed with value '%X': successful", n) : LOG_ERROR("fuse programed with value '%X': failed", n);
-        }
-        if (!strcmp(cmd, "fuse/mfgadd")) {
-            uint8_t reg = 0;
-            while (esp_efuse_read_reg(EFUSE_BLK3, reg) != 0 && reg < 7)
-                reg++;
-            ok = esp_efuse_write_reg(EFUSE_BLK3, reg, (uint32_t)n) == ESP_OK;
-            ok ? LOG_INFO("fuse %d programed with value '%X': successful", reg, n) : LOG_ERROR("fuse %d programed with value '%X': failed", reg, n);
-            return true;
-        }
-#endif
-    }
-
-    if (ok) {
-        LOG_INFO("System command '%s' with value '%s'", cmd, value);
-    }
-    return ok;
-}
-
-// return back a system value
-bool System::get_value_info(JsonObject output, const char * cmd) {
-    if (cmd == nullptr || strlen(cmd) == 0) {
-        LOG_ERROR("empty system command");
         return false;
     }
 
-    // check for hardcoded "info"/"value"
-    if (!strcmp(cmd, F_(info)) || !strcmp(cmd, F_(values))) {
-        return command_info("", 0, output);
-    }
-
-    // fetch all the data from the system in a different json
-    JsonDocument doc;
-    JsonObject   root = doc.to<JsonObject>();
-    (void)command_info("", 0, root);
-
-    // list all entities
-    if (!strcmp(cmd, F_(entities))) {
-        for (JsonPair p : root) {
-            if (p.value().is<JsonObject>()) {
-                for (JsonPair p1 : p.value().as<JsonObject>()) {
-                    JsonObject entity = output[std::string(p.key().c_str()) + "." + p1.key().c_str()].to<JsonObject>();
-                    get_value_json(entity, p.key().c_str(), p1.key().c_str(), p1.value());
+    // convert settings file into json object
+    void System::extractSettings(const char * filename, const char * section, JsonObject output) {
+#ifndef EMSESP_STANDALONE
+        File settingsFile = LittleFS.open(filename);
+        if (settingsFile) {
+            JsonDocument         jsonDocument;
+            DeserializationError error = deserializeJson(jsonDocument, settingsFile);
+            if (error == DeserializationError::Ok && jsonDocument.is<JsonObject>()) {
+                JsonObject jsonObject = jsonDocument.as<JsonObject>();
+                JsonObject node       = output[section].to<JsonObject>();
+                for (JsonPair kvp : jsonObject) {
+                    node[kvp.key()] = kvp.value();
                 }
             }
         }
-        return true;
+        settingsFile.close();
+#endif
     }
 
-    char * val = (char *)strstr(cmd, "/value");
-    if (val) {
-        *val = '\0';
+    // save settings file using input from a json object
+    bool System::saveSettings(const char * filename, const char * section, JsonObject input) {
+#ifndef EMSESP_STANDALONE
+        JsonObject section_json = input[section];
+        if (section_json) {
+            File section_file = LittleFS.open(filename, "w");
+            if (section_file) {
+                LOG_INFO("Applying new uploaded %s data", section);
+                serializeJson(section_json, section_file);
+                section_file.close();
+                return true; // reboot required
+            }
+        }
+#endif
+        return false; // not found
     }
 
-    char * slash = (char *)strchr(cmd, '/');
-    if (slash) {
-        *slash = '\0';
-        slash++;
-    }
+    // set a entity of services 'network', 'settings', 'mqtt', etc.
+    bool System::command_service(const char * cmd, const char * value) {
+        bool ok = false;
+        bool b;
+        if (Helpers::value2bool(value, b)) {
+            if (!strcmp(cmd, "settings/showertimer")) {
+                EMSESP::webSettingsService.update([&](WebSettings & settings) {
+                    settings.shower_timer = b;
+                    return StateUpdateResult::CHANGED;
+                });
+                EMSESP::shower_.shower_timer(b);
+                ok = true;
+            } else if (!strcmp(cmd, "settings/showeralert")) {
+                EMSESP::webSettingsService.update([&](WebSettings & settings) {
+                    settings.shower_alert = b;
+                    return StateUpdateResult::CHANGED;
+                });
+                EMSESP::shower_.shower_alert(b);
+                ok = true;
+            } else if (!strcmp(cmd, "settings/hideled")) {
+                EMSESP::webSettingsService.update([&](WebSettings & settings) {
+                    settings.hide_led = b;
+                    return StateUpdateResult::CHANGED;
+                });
+                EMSESP::system_.hide_led(b);
+                ok = true;
+            } else if (!strcmp(cmd, "settings/analogenabled")) {
+                EMSESP::webSettingsService.update([&](WebSettings & settings) {
+                    settings.analog_enabled = b;
+                    return StateUpdateResult::CHANGED;
+                });
+                EMSESP::system_.analog_enabled(b);
+                ok = true;
+            } else if (!strcmp(cmd, "mqtt/enabled")) {
+                EMSESP::esp32React.getMqttSettingsService()->update([&](MqttSettings & Settings) {
+                    Settings.enabled = b;
+                    return StateUpdateResult::CHANGED;
+                });
+                ok = true;
+            } else if (!strcmp(cmd, "ap/enabled")) {
+                EMSESP::esp32React.getAPSettingsService()->update([&](APSettings & Settings) {
+                    Settings.provisionMode = b ? 0 : 2;
+                    return StateUpdateResult::CHANGED;
+                });
+                ok = true;
+            } else if (!strcmp(cmd, "ntp/enabled")) {
+                EMSESP::esp32React.getNTPSettingsService()->update([&](NTPSettings & Settings) {
+                    Settings.enabled = b;
+                    return StateUpdateResult::CHANGED;
+                });
+                ok = true;
+            } else if (!strcmp(cmd, "syslog/enabled")) {
+                EMSESP::webSettingsService.update([&](WebSettings & settings) {
+                    settings.syslog_enabled = b;
+                    return StateUpdateResult::CHANGED;
+                });
+                EMSESP::system_.syslog_enabled_ = b;
+                EMSESP::system_.syslog_init();
+                ok = true;
+            }
+        }
 
-    // list values for a jsonObject in system, e.g. /api/system/network
-    if (!slash || !strcmp(slash, F_(info)) || !strcmp(slash, F_(values))) {
-        for (JsonPair p : root) {
-            if (Helpers::toLower(p.key().c_str()) == cmd && p.value().is<JsonObject>()) {
-                for (JsonPair p1 : p.value().as<JsonObject>()) {
-                    output[p1.key().c_str()] = p1.value().as<std::string>();
-                }
+        int n;
+        if (!ok && Helpers::value2number(value, n)) {
+#ifndef EMSESP_STANDALONE
+            if (!strcmp(cmd, "fuse/mfg")) {
+                ok = esp_efuse_write_reg(EFUSE_BLK3, 0, (uint32_t)n) == ESP_OK;
+                ok ? LOG_INFO("fuse programed with value '%X': successful", n) : LOG_ERROR("fuse programed with value '%X': failed", n);
+            }
+            if (!strcmp(cmd, "fuse/mfgadd")) {
+                uint8_t reg = 0;
+                while (esp_efuse_read_reg(EFUSE_BLK3, reg) != 0 && reg < 7)
+                    reg++;
+                ok = esp_efuse_write_reg(EFUSE_BLK3, reg, (uint32_t)n) == ESP_OK;
+                ok ? LOG_INFO("fuse %d programed with value '%X': successful", reg, n) : LOG_ERROR("fuse %d programed with value '%X': failed", reg, n);
                 return true;
             }
+#endif
+        }
+
+        if (ok) {
+            LOG_INFO("System command '%s' with value '%s'", cmd, value);
+        }
+        return ok;
+    }
+
+    // return back a system value
+    bool System::get_value_info(JsonObject output, const char * cmd) {
+        if (cmd == nullptr || strlen(cmd) == 0) {
+            LOG_ERROR("empty system command");
+            return false;
+        }
+
+        // check for hardcoded "info"/"value"
+        if (!strcmp(cmd, F_(info)) || !strcmp(cmd, F_(values))) {
+            return command_info("", 0, output);
+        }
+
+        // fetch all the data from the system in a different json
+        JsonDocument doc;
+        JsonObject   root = doc.to<JsonObject>();
+        (void)command_info("", 0, root);
+
+        // list all entities
+        if (!strcmp(cmd, F_(entities))) {
+            for (JsonPair p : root) {
+                if (p.value().is<JsonObject>()) {
+                    for (JsonPair p1 : p.value().as<JsonObject>()) {
+                        JsonObject entity = output[std::string(p.key().c_str()) + "." + p1.key().c_str()].to<JsonObject>();
+                        get_value_json(entity, p.key().c_str(), p1.key().c_str(), p1.value());
+                    }
+                }
+            }
+            return true;
+        }
+
+        char * val = (char *)strstr(cmd, "/value");
+        if (val) {
+            *val = '\0';
+        }
+
+        char * slash = (char *)strchr(cmd, '/');
+        if (slash) {
+            *slash = '\0';
+            slash++;
+        }
+
+        // list values for a jsonObject in system, e.g. /api/system/network
+        if (!slash || !strcmp(slash, F_(info)) || !strcmp(slash, F_(values))) {
+            for (JsonPair p : root) {
+                if (Helpers::toLower(p.key().c_str()) == cmd && p.value().is<JsonObject>()) {
+                    for (JsonPair p1 : p.value().as<JsonObject>()) {
+                        output[p1.key().c_str()] = p1.value().as<std::string>();
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // value info or api_data for a single value
+        // Loop through all the key-value pairs in root to find the key, case independent
+        if (slash) { // search the top level first
+            for (JsonPair p : root) {
+                if (p.value().is<JsonObject>() && Helpers::toLower(p.key().c_str()) == cmd) {
+                    for (JsonPair p1 : p.value().as<JsonObject>()) {
+                        if (Helpers::toLower(p1.key().c_str()) == slash && !p1.value().is<JsonObject>()) {
+                            if (val) {
+                                output["api_data"] = p1.value().as<std::string>();
+                                return true;
+                            }
+                            get_value_json(output, p.key().c_str(), p1.key().c_str(), p1.value());
+                            return true;
+                        }
+                    }
+                } // else skip, but we don't have value pairs in system root
+            }
         }
         return false;
     }
 
-    // value info or api_data for a single value
-    // Loop through all the key-value pairs in root to find the key, case independent
-    if (slash) { // search the top level first
-        for (JsonPair p : root) {
-            if (p.value().is<JsonObject>() && Helpers::toLower(p.key().c_str()) == cmd) {
-                for (JsonPair p1 : p.value().as<JsonObject>()) {
-                    if (Helpers::toLower(p1.key().c_str()) == slash && !p1.value().is<JsonObject>()) {
-                        if (val) {
-                            output["api_data"] = p1.value().as<std::string>();
-                            return true;
-                        }
-                        get_value_json(output, p.key().c_str(), p1.key().c_str(), p1.value());
-                        return true;
-                    }
-                }
-            } // else skip, but we don't have value pairs in system root
+    void System::get_value_json(JsonObject output, const std::string & circuit, const std::string & name, JsonVariant val) {
+        output["name"] = name;
+        if (circuit.length()) {
+            output["circuit"] = circuit;
+        }
+        output["readable"]  = true;
+        output["writeable"] = (name == "showerTimer" || name == "showerAlert" || name == "enabled" || name == "hideLed" || name == "analogEnabled");
+        output["visible"]   = true;
+        if (val.is<bool>()) {
+            output["value"] = val.as<bool>();
+            output["type"]  = "boolean";
+        } else if (val.is<float>() || val.is<int>()) {
+            output["value"] = val.as<float>();
+            output["type"]  = "number";
+        } else {
+            output["value"] = val.as<std::string>();
+            output["type"]  = "string";
         }
     }
-    return false;
-}
 
-void System::get_value_json(JsonObject output, const std::string & circuit, const std::string & name, JsonVariant val) {
-    output["name"] = name;
-    if (circuit.length()) {
-        output["circuit"] = circuit;
-    }
-    output["readable"]  = true;
-    output["writeable"] = (name == "showerTimer" || name == "showerAlert" || name == "enabled" || name == "hideLed" || name == "analogEnabled");
-    output["visible"]   = true;
-    if (val.is<bool>()) {
-        output["value"] = val.as<bool>();
-        output["type"]  = "boolean";
-    } else if (val.is<float>() || val.is<int>()) {
-        output["value"] = val.as<float>();
-        output["type"]  = "number";
-    } else {
-        output["value"] = val.as<std::string>();
-        output["type"]  = "string";
-    }
-}
+    // export status information including the device information
+    // http://ems-esp/api/system/info
+    bool System::command_info(const char * value, const int8_t id, JsonObject output) {
+        JsonObject node;
 
-// export status information including the device information
-// http://ems-esp/api/system/info
-bool System::command_info(const char * value, const int8_t id, JsonObject output) {
-    JsonObject node;
-
-    // System
-    node = output["system"].to<JsonObject>();
+        // System
+        node = output["system"].to<JsonObject>();
 // prevent false-negatives in Unity tests every time the version changes
 #if defined(EMSESP_UNITY)
-    node["version"] = "dev";
+        node["version"] = "dev";
 #else
-    node["version"] = EMSESP_APP_VERSION;
+        node["version"] = EMSESP_APP_VERSION;
 #endif
-    node["uptime"]    = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
-    node["uptimeSec"] = uuid::get_uptime_sec();
+        node["uptime"]    = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
+        node["uptimeSec"] = uuid::get_uptime_sec();
 #ifndef EMSESP_STANDALONE
-    node["platform"]        = EMSESP_PLATFORM;
-    node["cpuType"]         = ESP.getChipModel();
-    node["arduino"]         = ARDUINO_VERSION;
-    node["sdk"]             = ESP.getSdkVersion();
-    node["freeMem"]         = getHeapMem();
-    node["maxAlloc"]        = getMaxAllocMem();
-    node["freeCaps"]        = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024;      // includes heap and psram
-    node["usedApp"]         = EMSESP::system_.appUsed();                            // kilobytes
-    node["freeApp"]         = EMSESP::system_.appFree();                            // kilobytes
-    node["partition"]       = (const char *)esp_ota_get_running_partition()->label; // active partition
-    node["flash_chip_size"] = ESP.getFlashChipSize() / 1024;                        // kilobytes
+        node["platform"]        = EMSESP_PLATFORM;
+        node["cpuType"]         = ESP.getChipModel();
+        node["arduino"]         = ARDUINO_VERSION;
+        node["sdk"]             = ESP.getSdkVersion();
+        node["freeMem"]         = getHeapMem();
+        node["maxAlloc"]        = getMaxAllocMem();
+        node["freeCaps"]        = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024;      // includes heap and psram
+        node["usedApp"]         = EMSESP::system_.appUsed();                            // kilobytes
+        node["freeApp"]         = EMSESP::system_.appFree();                            // kilobytes
+        node["partition"]       = (const char *)esp_ota_get_running_partition()->label; // active partition
+        node["flash_chip_size"] = ESP.getFlashChipSize() / 1024;                        // kilobytes
 #endif
-    node["resetReason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
+        node["resetReason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 #ifndef EMSESP_STANDALONE
-    node["psram"] = (EMSESP::system_.PSram() > 0); // make boolean
-    if (EMSESP::system_.PSram()) {
-        node["psramSize"] = EMSESP::system_.PSram();
-        node["freePsram"] = ESP.getFreePsram() / 1024;
-    }
-    node["model"] = EMSESP::system_.getBBQKeesGatewayDetails();
+        node["psram"] = (EMSESP::system_.PSram() > 0); // make boolean
+        if (EMSESP::system_.PSram()) {
+            node["psramSize"] = EMSESP::system_.PSram();
+            node["freePsram"] = ESP.getFreePsram() / 1024;
+        }
+        node["model"] = EMSESP::system_.getBBQKeesGatewayDetails();
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
-    node["temperature"] = EMSESP::system_.temperature();
+        node["temperature"] = EMSESP::system_.temperature();
 #endif
 
 #endif
 
-    // Network Status
-    node = output["network"].to<JsonObject>();
+        // Network Status
+        node = output["network"].to<JsonObject>();
 #ifndef EMSESP_STANDALONE
-    if (EMSESP::system_.ethernet_connected()) {
-        node["network"]  = "Ethernet";
-        node["hostname"] = ETH.getHostname();
-        // node["MAC"]             = ETH.macAddress();
-        // node["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
-        // node["IPv4 gateway"]    = uuid::printable_to_string(ETH.gatewayIP());
-        // node["IPv4 nameserver"] = uuid::printable_to_string(ETH.dnsIP());
-        // if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
-        //     node["IPv6 address"] = uuid::printable_to_string(ETH.localIPv6());
-        // }
-    } else if (WiFi.status() == WL_CONNECTED) {
-        node["network"]        = "WiFi";
-        node["hostname"]       = WiFi.getHostname();
-        node["RSSI"]           = WiFi.RSSI();
-        node["WIFIReconnects"] = EMSESP::esp32React.getWifiReconnects();
-        // node["MAC"]             = WiFi.macAddress();
-        // node["IPv4 address"]    = uuid::printable_to_string(WiFi.localIP()) + "/" + uuid::printable_to_string(WiFi.subnetMask());
-        // node["IPv4 gateway"]    = uuid::printable_to_string(WiFi.gatewayIP());
-        // node["IPv4 nameserver"] = uuid::printable_to_string(WiFi.dnsIP());
-        // if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
-        //     node["IPv6 address"] = uuid::printable_to_string(WiFi.localIPv6());
-        // }
-    }
-#else
-    // for testing
-    node["network"]  = "WiFi";
-    node["hostname"] = "ems-esp";
-    node["RSSI"]     = -23;
-#endif
-    EMSESP::esp32React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
-        if (WiFi.status() == WL_CONNECTED && !settings.bssid.isEmpty()) {
-            node["BSSID"] = "set"; // we don't disclose the name
+        if (EMSESP::system_.ethernet_connected()) {
+            node["network"]  = "Ethernet";
+            node["hostname"] = ETH.getHostname();
+            // node["MAC"]             = ETH.macAddress();
+            // node["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
+            // node["IPv4 gateway"]    = uuid::printable_to_string(ETH.gatewayIP());
+            // node["IPv4 nameserver"] = uuid::printable_to_string(ETH.dnsIP());
+            // if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
+            //     node["IPv6 address"] = uuid::printable_to_string(ETH.localIPv6());
+            // }
+        } else if (WiFi.status() == WL_CONNECTED) {
+            node["network"]        = "WiFi";
+            node["hostname"]       = WiFi.getHostname();
+            node["RSSI"]           = WiFi.RSSI();
+            node["WIFIReconnects"] = EMSESP::esp32React.getWifiReconnects();
+            // node["MAC"]             = WiFi.macAddress();
+            // node["IPv4 address"]    = uuid::printable_to_string(WiFi.localIP()) + "/" + uuid::printable_to_string(WiFi.subnetMask());
+            // node["IPv4 gateway"]    = uuid::printable_to_string(WiFi.gatewayIP());
+            // node["IPv4 nameserver"] = uuid::printable_to_string(WiFi.dnsIP());
+            // if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
+            //     node["IPv6 address"] = uuid::printable_to_string(WiFi.localIPv6());
+            // }
         }
-        node["TxPowerSetting"] = settings.tx_power;
-        node["staticIP"]       = settings.staticIPConfig;
-        node["lowBandwidth"]   = settings.bandwidth20;
-        node["disableSleep"]   = settings.nosleep;
-        node["enableMDNS"]     = settings.enableMDNS;
-        node["enableCORS"]     = settings.enableCORS;
-        if (settings.enableCORS) {
-            node["CORSOrigin"] = settings.CORSOrigin;
-        }
-    });
-
-    // NTP status
-    node = output["ntp"].to<JsonObject>();
-    EMSESP::esp32React.getNTPSettingsService()->read([&](const NTPSettings & settings) {
-#ifndef EMSESP_STANDALONE
-        node["enabled"] = settings.enabled;
 #else
-        node["enabled"] = true;
+        // for testing
+        node["network"]  = "WiFi";
+        node["hostname"] = "ems-esp";
+        node["RSSI"]     = -23;
 #endif
-        node["server"]  = settings.server;
-        node["tzLabel"] = settings.tzLabel;
-    });
+        EMSESP::esp32React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
+            if (WiFi.status() == WL_CONNECTED && !settings.bssid.isEmpty()) {
+                node["BSSID"] = "set"; // we don't disclose the name
+            }
+            node["TxPowerSetting"] = settings.tx_power;
+            node["staticIP"]       = settings.staticIPConfig;
+            node["lowBandwidth"]   = settings.bandwidth20;
+            node["disableSleep"]   = settings.nosleep;
+            node["enableMDNS"]     = settings.enableMDNS;
+            node["enableCORS"]     = settings.enableCORS;
+            if (settings.enableCORS) {
+                node["CORSOrigin"] = settings.CORSOrigin;
+            }
+        });
+
+        // NTP status
+        node = output["ntp"].to<JsonObject>();
+        EMSESP::esp32React.getNTPSettingsService()->read([&](const NTPSettings & settings) {
 #ifndef EMSESP_STANDALONE
-    node["timestamp"] = time(nullptr);
+            node["enabled"] = settings.enabled;
+#else
+            node["enabled"] = true;
 #endif
-    node["NTPStatus"] = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
-
-    // AP Status
-    node = output["ap"].to<JsonObject>();
-    EMSESP::esp32React.getAPSettingsService()->read([&](const APSettings & settings) {
-        const char * pM[]     = {"always", "disconnected", "never"};
-        node["provisionMode"] = pM[settings.provisionMode];
-        node["ssid"]          = settings.ssid;
+            node["server"]  = settings.server;
+            node["tzLabel"] = settings.tzLabel;
+        });
 #ifndef EMSESP_STANDALONE
-        node["security"]   = settings.password.length() ? "wpa2" : "open";
-        node["channel"]    = settings.channel;
-        node["ssidHidden"] = settings.ssidHidden;
-        node["maxClients"] = settings.maxClients;
-        node["localIP"]    = settings.localIP.toString();
-        node["gatewayIP"]  = settings.gatewayIP.toString();
-        node["subnetMask"] = settings.subnetMask.toString();
+        node["timestamp"] = time(nullptr);
 #endif
-    });
+        node["NTPStatus"] = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
 
-    // MQTT Status
-    node               = output["mqtt"].to<JsonObject>();
-    node["MQTTStatus"] = Mqtt::connected() ? F_(connected) : F_(disconnected);
-    if (Mqtt::enabled()) {
-        node["MQTTPublishes"]    = Mqtt::publish_count();
-        node["MQTTQueued"]       = Mqtt::publish_queued();
-        node["MQTTPublishFails"] = Mqtt::publish_fails();
-        node["MQTTReconnects"]   = Mqtt::connect_count();
-    }
-    EMSESP::esp32React.getMqttSettingsService()->read([&](const MqttSettings & settings) {
-        node["enabled"]               = settings.enabled;
-        node["clientID"]              = settings.clientId;
-        node["keepAlive"]             = settings.keepAlive;
-        node["cleanSession"]          = settings.cleanSession;
-        node["entityFormat"]          = settings.entity_format;
-        node["base"]                  = settings.base;
-        node["discoveryPrefix"]       = settings.discovery_prefix;
-        node["discoveryType"]         = settings.discovery_type;
-        node["nestedFormat"]          = settings.nested_format;
-        node["haEnabled"]             = settings.ha_enabled;
-        node["mqttQos"]               = settings.mqtt_qos;
-        node["mqttRetain"]            = settings.mqtt_retain;
-        node["publishTimeHeartbeat"]  = settings.publish_time_heartbeat;
-        node["publishTimeBoiler"]     = settings.publish_time_boiler;
-        node["publishTimeThermostat"] = settings.publish_time_thermostat;
-        node["publishTimeSolar"]      = settings.publish_time_solar;
-        node["publishTimeMixer"]      = settings.publish_time_mixer;
-        node["publishTimeWater"]      = settings.publish_time_water;
-        node["publishTimeOther"]      = settings.publish_time_other;
-        node["publishTimeSensor"]     = settings.publish_time_sensor;
-        node["publishSingle"]         = settings.publish_single;
-        node["publish2command"]       = settings.publish_single2cmd;
-        node["sendResponse"]          = settings.send_response;
-    });
-
-    // Syslog Status
-    node            = output["syslog"].to<JsonObject>();
-    node["enabled"] = EMSESP::system_.syslog_enabled_;
+        // AP Status
+        node = output["ap"].to<JsonObject>();
+        EMSESP::esp32React.getAPSettingsService()->read([&](const APSettings & settings) {
+            const char * pM[]     = {"always", "disconnected", "never"};
+            node["provisionMode"] = pM[settings.provisionMode];
+            node["ssid"]          = settings.ssid;
 #ifndef EMSESP_STANDALONE
-    if (EMSESP::system_.syslog_enabled_) {
-        node["syslogStarted"] = syslog_.started();
-        node["syslogLevel"]   = FL_(list_syslog_level)[syslog_.log_level() + 1];
-        node["syslogIP"]      = syslog_.ip();
-        node["syslogQueue"]   = syslog_.queued();
-    }
+            node["security"]   = settings.password.length() ? "wpa2" : "open";
+            node["channel"]    = settings.channel;
+            node["ssidHidden"] = settings.ssidHidden;
+            node["maxClients"] = settings.maxClients;
+            node["localIP"]    = settings.localIP.toString();
+            node["gatewayIP"]  = settings.gatewayIP.toString();
+            node["subnetMask"] = settings.subnetMask.toString();
+#endif
+        });
+
+        // MQTT Status
+        node               = output["mqtt"].to<JsonObject>();
+        node["MQTTStatus"] = Mqtt::connected() ? F_(connected) : F_(disconnected);
+        if (Mqtt::enabled()) {
+            node["MQTTPublishes"]    = Mqtt::publish_count();
+            node["MQTTQueued"]       = Mqtt::publish_queued();
+            node["MQTTPublishFails"] = Mqtt::publish_fails();
+            node["MQTTReconnects"]   = Mqtt::connect_count();
+        }
+        EMSESP::esp32React.getMqttSettingsService()->read([&](const MqttSettings & settings) {
+            node["enabled"]               = settings.enabled;
+            node["clientID"]              = settings.clientId;
+            node["keepAlive"]             = settings.keepAlive;
+            node["cleanSession"]          = settings.cleanSession;
+            node["entityFormat"]          = settings.entity_format;
+            node["base"]                  = settings.base;
+            node["discoveryPrefix"]       = settings.discovery_prefix;
+            node["discoveryType"]         = settings.discovery_type;
+            node["nestedFormat"]          = settings.nested_format;
+            node["haEnabled"]             = settings.ha_enabled;
+            node["mqttQos"]               = settings.mqtt_qos;
+            node["mqttRetain"]            = settings.mqtt_retain;
+            node["publishTimeHeartbeat"]  = settings.publish_time_heartbeat;
+            node["publishTimeBoiler"]     = settings.publish_time_boiler;
+            node["publishTimeThermostat"] = settings.publish_time_thermostat;
+            node["publishTimeSolar"]      = settings.publish_time_solar;
+            node["publishTimeMixer"]      = settings.publish_time_mixer;
+            node["publishTimeWater"]      = settings.publish_time_water;
+            node["publishTimeOther"]      = settings.publish_time_other;
+            node["publishTimeSensor"]     = settings.publish_time_sensor;
+            node["publishSingle"]         = settings.publish_single;
+            node["publish2command"]       = settings.publish_single2cmd;
+            node["sendResponse"]          = settings.send_response;
+        });
+
+        // Syslog Status
+        node            = output["syslog"].to<JsonObject>();
+        node["enabled"] = EMSESP::system_.syslog_enabled_;
+#ifndef EMSESP_STANDALONE
+        if (EMSESP::system_.syslog_enabled_) {
+            node["syslogStarted"] = syslog_.started();
+            node["syslogLevel"]   = FL_(list_syslog_level)[syslog_.log_level() + 1];
+            node["syslogIP"]      = syslog_.ip();
+            node["syslogQueue"]   = syslog_.queued();
+        }
 #endif
 
-    // Sensor Status
-    node = output["sensor"].to<JsonObject>();
-    if (EMSESP::sensor_enabled()) {
-        node["temperatureSensors"]     = EMSESP::temperaturesensor_.count_entities();
-        node["temperatureSensorReads"] = EMSESP::temperaturesensor_.reads();
-        node["temperatureSensorFails"] = EMSESP::temperaturesensor_.fails();
-    }
-    if (EMSESP::analog_enabled()) {
-        node["analogSensors"]     = EMSESP::analogsensor_.count_entities();
-        node["analogSensorReads"] = EMSESP::analogsensor_.reads();
-        node["analogSensorFails"] = EMSESP::analogsensor_.fails();
-    }
+        // Sensor Status
+        node = output["sensor"].to<JsonObject>();
+        if (EMSESP::sensor_enabled()) {
+            node["temperatureSensors"]     = EMSESP::temperaturesensor_.count_entities();
+            node["temperatureSensorReads"] = EMSESP::temperaturesensor_.reads();
+            node["temperatureSensorFails"] = EMSESP::temperaturesensor_.fails();
+        }
+        if (EMSESP::analog_enabled()) {
+            node["analogSensors"]     = EMSESP::analogsensor_.count_entities();
+            node["analogSensorReads"] = EMSESP::analogsensor_.reads();
+            node["analogSensorFails"] = EMSESP::analogsensor_.fails();
+        }
 
-    // API Status
-    node = output["api"].to<JsonObject>();
+        // API Status
+        node = output["api"].to<JsonObject>();
 
 // if we're generating test data for Unit Tests we dont want to count these API calls as it will pollute the data response
 #if defined(EMSESP_UNITY)
-    node["APICalls"] = 0;
-    node["APIFails"] = 0;
+        node["APICalls"] = 0;
+        node["APIFails"] = 0;
 #else
-    node["APICalls"] = WebAPIService::api_count();
-    node["APIFails"] = WebAPIService::api_fails();
+        node["APICalls"] = WebAPIService::api_count();
+        node["APIFails"] = WebAPIService::api_fails();
 #endif
 
-    // EMS Bus Status
-    node = output["bus"].to<JsonObject>();
-    switch (EMSESP::bus_status()) {
-    case EMSESP::BUS_STATUS_OFFLINE:
-        node["busStatus"] = "disconnected";
-        break;
-    case EMSESP::BUS_STATUS_TX_ERRORS:
-        node["busStatus"] = "connected, tx issues - try a different Tx Mode";
-        break;
-    case EMSESP::BUS_STATUS_CONNECTED:
-        node["busStatus"] = "connected";
-        break;
-    default:
-        node["busStatus"] = "unknown";
-        break;
-    }
-    node["busProtocol"]            = EMSbus::is_ht3() ? "HT3" : "Buderus";
-    node["busTelegramsReceived"]   = EMSESP::rxservice_.telegram_count();
-    node["busReads"]               = EMSESP::txservice_.telegram_read_count();
-    node["busWrites"]              = EMSESP::txservice_.telegram_write_count();
-    node["busIncompleteTelegrams"] = EMSESP::rxservice_.telegram_error_count();
-    node["busReadsFailed"]         = EMSESP::txservice_.telegram_read_fail_count();
-    node["busWritesFailed"]        = EMSESP::txservice_.telegram_write_fail_count();
-    node["busRxLineQuality"]       = EMSESP::rxservice_.quality();
-    node["busTxLineQuality"]       = (EMSESP::txservice_.read_quality() + EMSESP::txservice_.write_quality()) / 2;
-
-    // Settings
-    node = output["settings"].to<JsonObject>();
-    EMSESP::webSettingsService.read([&](const WebSettings & settings) {
-        node["boardProfile"]      = settings.board_profile;
-        node["locale"]            = settings.locale;
-        node["txMode"]            = settings.tx_mode;
-        node["emsBusID"]          = settings.ems_bus_id;
-        node["showerTimer"]       = settings.shower_timer;
-        node["showerMinDuration"] = settings.shower_min_duration; // seconds
-        node["showerAlert"]       = settings.shower_alert;
-        if (settings.shower_alert) {
-            node["showerAlertColdshot"] = settings.shower_alert_coldshot; // seconds
-            node["showerAlertTrigger"]  = settings.shower_alert_trigger;  // minutes
+        // EMS Bus Status
+        node = output["bus"].to<JsonObject>();
+        switch (EMSESP::bus_status()) {
+        case EMSESP::BUS_STATUS_OFFLINE:
+            node["busStatus"] = "disconnected";
+            break;
+        case EMSESP::BUS_STATUS_TX_ERRORS:
+            node["busStatus"] = "connected, tx issues - try a different Tx Mode";
+            break;
+        case EMSESP::BUS_STATUS_CONNECTED:
+            node["busStatus"] = "connected";
+            break;
+        default:
+            node["busStatus"] = "unknown";
+            break;
         }
-        if (settings.board_profile == "CUSTOM") {
-            node["phyType"] = settings.phy_type;
-            if (settings.phy_type != PHY_type::PHY_TYPE_NONE) {
-                node["ethPower"]      = settings.eth_power;
-                node["ethPhyAddr"]    = settings.eth_phy_addr;
-                node["ethClockMmode"] = settings.eth_clock_mode;
+        node["busProtocol"]            = EMSbus::is_ht3() ? "HT3" : "Buderus";
+        node["busTelegramsReceived"]   = EMSESP::rxservice_.telegram_count();
+        node["busReads"]               = EMSESP::txservice_.telegram_read_count();
+        node["busWrites"]              = EMSESP::txservice_.telegram_write_count();
+        node["busIncompleteTelegrams"] = EMSESP::rxservice_.telegram_error_count();
+        node["busReadsFailed"]         = EMSESP::txservice_.telegram_read_fail_count();
+        node["busWritesFailed"]        = EMSESP::txservice_.telegram_write_fail_count();
+        node["busRxLineQuality"]       = EMSESP::rxservice_.quality();
+        node["busTxLineQuality"]       = (EMSESP::txservice_.read_quality() + EMSESP::txservice_.write_quality()) / 2;
+
+        // Settings
+        node = output["settings"].to<JsonObject>();
+        EMSESP::webSettingsService.read([&](const WebSettings & settings) {
+            node["boardProfile"]      = settings.board_profile;
+            node["locale"]            = settings.locale;
+            node["txMode"]            = settings.tx_mode;
+            node["emsBusID"]          = settings.ems_bus_id;
+            node["showerTimer"]       = settings.shower_timer;
+            node["showerMinDuration"] = settings.shower_min_duration; // seconds
+            node["showerAlert"]       = settings.shower_alert;
+            if (settings.shower_alert) {
+                node["showerAlertColdshot"] = settings.shower_alert_coldshot; // seconds
+                node["showerAlertTrigger"]  = settings.shower_alert_trigger;  // minutes
             }
-            node["rxGPIO"]      = EMSESP::system_.rx_gpio_;
-            node["txGPIO"]      = EMSESP::system_.tx_gpio_;
-            node["dallasGPIO"]  = EMSESP::system_.dallas_gpio_;
-            node["pbuttonGPIO"] = EMSESP::system_.pbutton_gpio_;
-            node["ledGPIO"]     = EMSESP::system_.led_gpio_;
-            node["ledType"]     = settings.led_type;
-            node["ledType"]     = settings.led_type;
-        }
-        node["hideLed"]         = settings.hide_led;
-        node["noTokenApi"]      = settings.notoken_api;
-        node["readonlyMode"]    = settings.readonly_mode;
-        node["fahrenheit"]      = settings.fahrenheit;
-        node["dallasParasite"]  = settings.dallas_parasite;
-        node["boolFormat"]      = settings.bool_format;
-        node["boolDashboard"]   = settings.bool_dashboard;
-        node["enumFormat"]      = settings.enum_format;
-        node["analogEnabled"]   = settings.analog_enabled;
-        node["telnetEnabled"]   = settings.telnet_enabled;
-        node["maxWebLogBuffer"] = settings.weblog_buffer;
+            if (settings.board_profile == "CUSTOM") {
+                node["phyType"] = settings.phy_type;
+                if (settings.phy_type != PHY_type::PHY_TYPE_NONE) {
+                    node["ethPower"]      = settings.eth_power;
+                    node["ethPhyAddr"]    = settings.eth_phy_addr;
+                    node["ethClockMmode"] = settings.eth_clock_mode;
+                }
+                node["rxGPIO"]      = EMSESP::system_.rx_gpio_;
+                node["txGPIO"]      = EMSESP::system_.tx_gpio_;
+                node["dallasGPIO"]  = EMSESP::system_.dallas_gpio_;
+                node["pbuttonGPIO"] = EMSESP::system_.pbutton_gpio_;
+                node["ledGPIO"]     = EMSESP::system_.led_gpio_;
+                node["ledType"]     = settings.led_type;
+                node["ledType"]     = settings.led_type;
+            }
+            node["hideLed"]         = settings.hide_led;
+            node["noTokenApi"]      = settings.notoken_api;
+            node["readonlyMode"]    = settings.readonly_mode;
+            node["fahrenheit"]      = settings.fahrenheit;
+            node["dallasParasite"]  = settings.dallas_parasite;
+            node["boolFormat"]      = settings.bool_format;
+            node["boolDashboard"]   = settings.bool_dashboard;
+            node["enumFormat"]      = settings.enum_format;
+            node["analogEnabled"]   = settings.analog_enabled;
+            node["telnetEnabled"]   = settings.telnet_enabled;
+            node["maxWebLogBuffer"] = settings.weblog_buffer;
 
-        /*
+            /*
 #if defined(EMSESP_UNITY)
         node["webLogBuffer"] = 0;
 #else
         node["webLogBuffer"] = EMSESP::webLogService.num_log_messages();
 #endif
 */
-        node["modbusEnabled"]   = settings.modbus_enabled;
-        node["forceHeatingOff"] = settings.boiler_heatingoff;
-        node["developerMode"]   = settings.developer_mode;
-    });
+            node["modbusEnabled"]   = settings.modbus_enabled;
+            node["forceHeatingOff"] = settings.boiler_heatingoff;
+            node["developerMode"]   = settings.developer_mode;
+        });
 
-    // Devices - show EMS devices if we have any
-    JsonArray devices = output["devices"].to<JsonArray>();
-    if (!EMSESP::emsdevices.empty()) {
-        for (const auto & device_class : EMSFactory::device_handlers()) {
-            for (const auto & emsdevice : EMSESP::emsdevices) {
-                if (emsdevice && (emsdevice->device_type() == device_class.first)) {
-                    JsonObject obj   = devices.add<JsonObject>();
-                    obj["type"]      = emsdevice->device_type_name(); // non translated name
-                    obj["name"]      = emsdevice->name();             // custom name
-                    obj["deviceID"]  = Helpers::hextoa(emsdevice->device_id());
-                    obj["productID"] = emsdevice->product_id();
-                    obj["brand"]     = emsdevice->brand_to_char();
-                    obj["version"]   = emsdevice->version();
-                    obj["entities"]  = emsdevice->count_entities();
-                    char result[1000];
-                    (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::RECEIVED);
-                    if (result[0] != '\0') {
-                        obj["handlersReceived"] = result; // don't show handlers if there aren't any
-                    }
-                    (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::FETCHED);
-                    if (result[0] != '\0') {
-                        obj["handlersFetched"] = result;
-                    }
-                    (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::PENDING);
-                    if (result[0] != '\0') {
-                        obj["handlersPending"] = result;
-                    }
-                    (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::IGNORED);
-                    if (result[0] != '\0') {
-                        obj["handlersIgnored"] = result;
+        // Devices - show EMS devices if we have any
+        JsonArray devices = output["devices"].to<JsonArray>();
+        if (!EMSESP::emsdevices.empty()) {
+            for (const auto & device_class : EMSFactory::device_handlers()) {
+                for (const auto & emsdevice : EMSESP::emsdevices) {
+                    if (emsdevice && (emsdevice->device_type() == device_class.first)) {
+                        JsonObject obj   = devices.add<JsonObject>();
+                        obj["type"]      = emsdevice->device_type_name(); // non translated name
+                        obj["name"]      = emsdevice->name();             // custom name
+                        obj["deviceID"]  = Helpers::hextoa(emsdevice->device_id());
+                        obj["productID"] = emsdevice->product_id();
+                        obj["brand"]     = emsdevice->brand_to_char();
+                        obj["version"]   = emsdevice->version();
+                        obj["entities"]  = emsdevice->count_entities();
+                        char result[1000];
+                        (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::RECEIVED);
+                        if (result[0] != '\0') {
+                            obj["handlersReceived"] = result; // don't show handlers if there aren't any
+                        }
+                        (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::FETCHED);
+                        if (result[0] != '\0') {
+                            obj["handlersFetched"] = result;
+                        }
+                        (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::PENDING);
+                        if (result[0] != '\0') {
+                            obj["handlersPending"] = result;
+                        }
+                        (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::IGNORED);
+                        if (result[0] != '\0') {
+                            obj["handlersIgnored"] = result;
+                        }
                     }
                 }
             }
         }
-    }
 
-    // Also show EMSESP devices if we have any
-    if (EMSESP::temperaturesensor_.count_entities()) {
-        JsonObject obj  = devices.add<JsonObject>();
-        obj["type"]     = F_(temperaturesensor);
-        obj["name"]     = F_(temperaturesensor);
-        obj["entities"] = EMSESP::temperaturesensor_.count_entities();
-    }
-    if (EMSESP::analogsensor_.count_entities()) {
-        JsonObject obj  = devices.add<JsonObject>();
-        obj["type"]     = F_(analogsensor);
-        obj["name"]     = F_(analogsensor);
-        obj["entities"] = EMSESP::analogsensor_.count_entities();
-    }
-    if (EMSESP::webSchedulerService.count_entities()) {
-        JsonObject obj  = devices.add<JsonObject>();
-        obj["type"]     = F_(scheduler);
-        obj["name"]     = F_(scheduler);
-        obj["entities"] = EMSESP::webSchedulerService.count_entities();
-    }
-    if (EMSESP::webCustomEntityService.count_entities()) {
-        JsonObject obj  = devices.add<JsonObject>();
-        obj["type"]     = F_(custom);
-        obj["name"]     = F_(custom);
-        obj["entities"] = EMSESP::webCustomEntityService.count_entities();
-    }
+        // Also show EMSESP devices if we have any
+        if (EMSESP::temperaturesensor_.count_entities()) {
+            JsonObject obj  = devices.add<JsonObject>();
+            obj["type"]     = F_(temperaturesensor);
+            obj["name"]     = F_(temperaturesensor);
+            obj["entities"] = EMSESP::temperaturesensor_.count_entities();
+        }
+        if (EMSESP::analogsensor_.count_entities()) {
+            JsonObject obj  = devices.add<JsonObject>();
+            obj["type"]     = F_(analogsensor);
+            obj["name"]     = F_(analogsensor);
+            obj["entities"] = EMSESP::analogsensor_.count_entities();
+        }
+        if (EMSESP::webSchedulerService.count_entities()) {
+            JsonObject obj  = devices.add<JsonObject>();
+            obj["type"]     = F_(scheduler);
+            obj["name"]     = F_(scheduler);
+            obj["entities"] = EMSESP::webSchedulerService.count_entities();
+        }
+        if (EMSESP::webCustomEntityService.count_entities()) {
+            JsonObject obj  = devices.add<JsonObject>();
+            obj["type"]     = F_(custom);
+            obj["name"]     = F_(custom);
+            obj["entities"] = EMSESP::webCustomEntityService.count_entities();
+        }
 
-    return true; // this function always returns true!
-}
+        return true; // this function always returns true!
+    }
 
 #if defined(EMSESP_TEST)
-// run a test, e.g. http://ems-esp/api?device=system&cmd=test&data=boiler
-bool System::command_test(const char * value, const int8_t id) {
-    if (value) {
-        return Test::test(value, id);
-    } else {
-        return false;
+    // run a test, e.g. http://ems-esp/api?device=system&cmd=test&data=boiler
+    bool System::command_test(const char * value, const int8_t id) {
+        if (value) {
+            return Test::test(value, id);
+        } else {
+            return false;
+        }
     }
-}
 #endif
 
-// takes a board profile and populates a data array with GPIO configurations
-// returns false if profile is unknown
-//
-// data = led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode, led_type
-//
-// clock modes:
-//  0 = RMII clock input to GPIO0
-//  1 = RMII clock output from GPIO0
-//  2 = RMII clock output from GPIO16
-//  3 = RMII clock output from GPIO17, for 50hz inverted clock
-bool System::load_board_profile(std::vector<int8_t> & data, const std::string & board_profile) {
-    if (board_profile == "S32") {
-        data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // BBQKees Gateway S32
-    } else if (board_profile == "E32") {
-        data = {2, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720, 16, 1, 0, 0}; // BBQKees Gateway E32
-    } else if (board_profile == "E32V2") {
-        data = {2, 14, 4, 5, 34, PHY_type::PHY_TYPE_LAN8720, 15, 0, 1, 0}; // BBQKees Gateway E32 V2
-    } else if (board_profile == "E32V2_2") {
-        data = {32, 14, 4, 5, 34, PHY_type::PHY_TYPE_LAN8720, 15, 0, 1, 1}; // BBQKees Gateway E32 V2.2, rgb led
-    } else if (board_profile == "MH-ET") {
-        data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // MH-ET Live D1 Mini
-    } else if (board_profile == "NODEMCU") {
-        data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // NodeMCU 32S
-    } else if (board_profile == "LOLIN") {
-        data = {2, 18, 17, 16, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // Lolin D32
-    } else if (board_profile == "OLIMEX") {
-        data = {0, 0, 36, 4, 34, PHY_type::PHY_TYPE_LAN8720, -1, 0, 0, 0}; // Olimex ESP32-EVB (uses U1TXD/U1RXD/BUTTON, no LED or Temperature sensor)
-    } else if (board_profile == "OLIMEXPOE") {
-        data = {0, 0, 36, 4, 34, PHY_type::PHY_TYPE_LAN8720, 12, 0, 3, 0}; // Olimex ESP32-POE
-    } else if (board_profile == "C3MINI") {
+    // takes a board profile and populates a data array with GPIO configurations
+    // returns false if profile is unknown
+    //
+    // data = led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode, led_type
+    //
+    // clock modes:
+    //  0 = RMII clock input to GPIO0
+    //  1 = RMII clock output from GPIO0
+    //  2 = RMII clock output from GPIO16
+    //  3 = RMII clock output from GPIO17, for 50hz inverted clock
+    bool System::load_board_profile(std::vector<int8_t> & data, const std::string & board_profile) {
+        if (board_profile == "S32") {
+            data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // BBQKees Gateway S32
+        } else if (board_profile == "E32") {
+            data = {2, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720, 16, 1, 0, 0}; // BBQKees Gateway E32
+        } else if (board_profile == "E32V2") {
+            data = {2, 14, 4, 5, 34, PHY_type::PHY_TYPE_LAN8720, 15, 0, 1, 0}; // BBQKees Gateway E32 V2
+        } else if (board_profile == "E32V2_2") {
+            data = {32, 14, 4, 5, 34, PHY_type::PHY_TYPE_LAN8720, 15, 0, 1, 1}; // BBQKees Gateway E32 V2.2, rgb led
+        } else if (board_profile == "MH-ET") {
+            data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // MH-ET Live D1 Mini
+        } else if (board_profile == "NODEMCU") {
+            data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // NodeMCU 32S
+        } else if (board_profile == "LOLIN") {
+            data = {2, 18, 17, 16, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // Lolin D32
+        } else if (board_profile == "OLIMEX") {
+            data = {0, 0, 36, 4, 34, PHY_type::PHY_TYPE_LAN8720, -1, 0, 0, 0}; // Olimex ESP32-EVB (uses U1TXD/U1RXD/BUTTON, no LED or Temperature sensor)
+        } else if (board_profile == "OLIMEXPOE") {
+            data = {0, 0, 36, 4, 34, PHY_type::PHY_TYPE_LAN8720, 12, 0, 3, 0}; // Olimex ESP32-POE
+        } else if (board_profile == "C3MINI") {
 #if defined(BOARD_C3_MINI_V1)
-        data = {7, 1, 4, 5, 9, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // Lolin C3 Mini V1
+            data = {7, 1, 4, 5, 9, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // Lolin C3 Mini V1
 #else
-        data = {7, 1, 4, 5, 9, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 1}; // Lolin C3 Mini with RGB Led
+            data = {7, 1, 4, 5, 9, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 1}; // Lolin C3 Mini with RGB Led
 #endif
-    } else if (board_profile == "S2MINI") {
-        data = {15, 7, 11, 12, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // Lolin S2 Mini
-    } else if (board_profile == "S3MINI") {
-        data = {17, 18, 8, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // Liligo S3
-    } else if (board_profile == "S32S3") {
-        data = {2, 18, 5, 17, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // BBQKees Gateway S3
-    } else if (board_profile == "CUSTOM") {
-        // send back current values
-        data = {(int8_t)EMSESP::system_.led_gpio_,
-                (int8_t)EMSESP::system_.dallas_gpio_,
-                (int8_t)EMSESP::system_.rx_gpio_,
-                (int8_t)EMSESP::system_.tx_gpio_,
-                (int8_t)EMSESP::system_.pbutton_gpio_,
-                (int8_t)EMSESP::system_.phy_type_,
-                EMSESP::system_.eth_power_,
-                (int8_t)EMSESP::system_.eth_phy_addr_,
-                (int8_t)EMSESP::system_.eth_clock_mode_,
-                (int8_t)EMSESP::system_.led_type_};
-    } else {
-        LOG_DEBUG("Couldn't identify board profile %s", board_profile.c_str());
-        return false; // unknown, return false
-    }
+        } else if (board_profile == "S2MINI") {
+            data = {15, 7, 11, 12, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // Lolin S2 Mini
+        } else if (board_profile == "S3MINI") {
+            data = {17, 18, 8, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // Liligo S3
+        } else if (board_profile == "S32S3") {
+            data = {2, 18, 5, 17, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // BBQKees Gateway S3
+        } else if (board_profile == "CUSTOM") {
+            // send back current values
+            data = {(int8_t)EMSESP::system_.led_gpio_,
+                    (int8_t)EMSESP::system_.dallas_gpio_,
+                    (int8_t)EMSESP::system_.rx_gpio_,
+                    (int8_t)EMSESP::system_.tx_gpio_,
+                    (int8_t)EMSESP::system_.pbutton_gpio_,
+                    (int8_t)EMSESP::system_.phy_type_,
+                    EMSESP::system_.eth_power_,
+                    (int8_t)EMSESP::system_.eth_phy_addr_,
+                    (int8_t)EMSESP::system_.eth_clock_mode_,
+                    (int8_t)EMSESP::system_.led_type_};
+        } else {
+            LOG_DEBUG("Couldn't identify board profile %s", board_profile.c_str());
+            return false; // unknown, return false
+        }
 
-    // LOG_DEBUG("Found data for board profile %s", board_profile.c_str());
-    return true;
-}
-
-// format command - factory reset, removing all config files
-bool System::command_format(const char * value, const int8_t id) {
-    LOG_INFO("Formatting FS, removing all config files");
-#ifndef EMSESP_STANDALONE
-    if (LittleFS.format()) {
-        LOG_INFO("FS formatted successfully");
-    } else {
-        LOG_ERROR("Format failed");
-    }
-#endif
-
-    // restart will be handled by the main loop
-    EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED);
-    return true;
-}
-
-// restart command - perform a hard reset (system reboot)
-bool System::command_restart(const char * value, const int8_t id) {
-    if (id == 0) {
-        // if it has an id then it's a web call and we need to queue the restart
-        // default id is -1 when calling /api/system/restart directly for example
-        LOG_INFO("Preparing to restart system");
-        EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_PENDING_RESTART);
+        // LOG_DEBUG("Found data for board profile %s", board_profile.c_str());
         return true;
     }
 
-    LOG_INFO("Restarting system immediately");
-    // restart will be handled by the main loop
-    EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED);
-    return true;
-}
+    // format command - factory reset, removing all config files
+    bool System::command_format(const char * value, const int8_t id) {
+        LOG_INFO("Formatting FS, removing all config files");
+#ifndef EMSESP_STANDALONE
+        if (LittleFS.format()) {
+            LOG_INFO("FS formatted successfully");
+        } else {
+            LOG_ERROR("Format failed");
+        }
+#endif
+
+        // restart will be handled by the main loop
+        EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED);
+        return true;
+    }
+
+    // restart command - perform a hard reset (system reboot)
+    bool System::command_restart(const char * value, const int8_t id) {
+        if (id == 0) {
+            // if it has an id then it's a web call and we need to queue the restart
+            // default id is -1 when calling /api/system/restart directly for example
+            LOG_INFO("Preparing to restart system");
+            EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_PENDING_RESTART);
+            return true;
+        }
+
+        LOG_INFO("Restarting system immediately");
+        // restart will be handled by the main loop
+        EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED);
+        return true;
+    }
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch"
 
-std::string System::reset_reason(uint8_t cpu) const {
+    std::string System::reset_reason(uint8_t cpu) const {
 #ifndef EMSESP_STANDALONE
-    switch (rtc_get_reset_reason(cpu)) {
-    case 1:
-        return ("Power on reset");
-    // case 2 :reset pin not on esp32
-    case 3:
-        return ("Software reset");
-    case 4: // not on S2, C3
-        return ("Legacy watch dog reset");
-    case 5:
-        return ("Deep sleep reset");
-    case 6: // not on S2, C3
-        return ("Reset by SDIO");
-    case 7:
-        return ("Timer group0 watch dog reset");
-    case 8:
-        return ("Timer group1 watch dog reset");
-    case 9:
-        return ("RTC watch dog reset");
-    case 10:
-        return ("Intrusion reset CPU");
-    case 11:
-        return ("Timer group reset CPU");
-    case 12:
-        return ("Software reset CPU");
-    case 13:
-        return ("RTC watch dog reset: CPU");
-    case 14: // not on S2, C3
-        return ("APP CPU reset by PRO CPU");
-    case 15:
-        return ("Brownout reset");
-    case 16:
-        return ("RTC watch dog reset: CPU+RTC");
-    default:
-        break;
-    }
+        switch (rtc_get_reset_reason(cpu)) {
+        case 1:
+            return ("Power on reset");
+        // case 2 :reset pin not on esp32
+        case 3:
+            return ("Software reset");
+        case 4: // not on S2, C3
+            return ("Legacy watch dog reset");
+        case 5:
+            return ("Deep sleep reset");
+        case 6: // not on S2, C3
+            return ("Reset by SDIO");
+        case 7:
+            return ("Timer group0 watch dog reset");
+        case 8:
+            return ("Timer group1 watch dog reset");
+        case 9:
+            return ("RTC watch dog reset");
+        case 10:
+            return ("Intrusion reset CPU");
+        case 11:
+            return ("Timer group reset CPU");
+        case 12:
+            return ("Software reset CPU");
+        case 13:
+            return ("RTC watch dog reset: CPU");
+        case 14: // not on S2, C3
+            return ("APP CPU reset by PRO CPU");
+        case 15:
+            return ("Brownout reset");
+        case 16:
+            return ("RTC watch dog reset: CPU+RTC");
+        default:
+            break;
+        }
 #endif
-    return "Unknown";
-}
+        return "Unknown";
+    }
 #pragma GCC diagnostic pop
 
-// set NTP status
-void System::ntp_connected(bool b) {
-    if (b != ntp_connected_) {
-        if (b) {
-            LOG_INFO("NTP connected");
-        } else {
-            LOG_WARNING("NTP disconnected"); // if turned off report it
+    // set NTP status
+    void System::ntp_connected(bool b) {
+        if (b != ntp_connected_) {
+            if (b) {
+                LOG_INFO("NTP connected");
+            } else {
+                LOG_WARNING("NTP disconnected"); // if turned off report it
+            }
         }
+
+        ntp_connected_  = b;
+        ntp_last_check_ = b ? uuid::get_uptime_sec() : 0;
     }
 
-    ntp_connected_  = b;
-    ntp_last_check_ = b ? uuid::get_uptime_sec() : 0;
-}
+    // get NTP status
+    bool System::ntp_connected() {
+        // timeout 2 hours, ntp sync is normally every hour.
+        if ((uuid::get_uptime_sec() - ntp_last_check_ > 7201) && ntp_connected_) {
+            ntp_connected(false);
+        }
 
-// get NTP status
-bool System::ntp_connected() {
-    // timeout 2 hours, ntp sync is normally every hour.
-    if ((uuid::get_uptime_sec() - ntp_last_check_ > 7201) && ntp_connected_) {
-        ntp_connected(false);
+        return ntp_connected_;
     }
 
-    return ntp_connected_;
-}
-
-// see if its a BBQKees Gateway by checking the nvs values
-String System::getBBQKeesGatewayDetails(uint8_t detail) {
+    // see if its a BBQKees Gateway by checking the nvs values
+    String System::getBBQKeesGatewayDetails(uint8_t detail) {
 #ifndef EMSESP_STANDALONE
-    /*
+        /*
     if (!EMSESP::nvs_.isKey("mfg")) {
         return "";
     }
@@ -2114,313 +2083,348 @@ String System::getBBQKeesGatewayDetails(uint8_t detail) {
 
     return "BBQKees Gateway Model " + EMSESP::nvs_.getString("model") + " v" + EMSESP::nvs_.getString("hwrevision") + "/" + EMSESP::nvs_.getString("batch");
 */
-    union {
-        struct {
-            uint32_t no : 4;
-            uint32_t month : 4;
-            uint32_t year : 8;
-            uint32_t rev_minor : 4;
-            uint32_t rev_major : 4;
-            uint32_t model : 4;
-            uint32_t mfg : 4;
-        };
-        uint32_t reg;
-    } gw;
-    for (uint8_t reg = 0; reg < 8; reg++) {
-        gw.reg = esp_efuse_read_reg(EFUSE_BLK3, reg);
-        if (reg == 7 || esp_efuse_read_reg(EFUSE_BLK3, reg + 1) == 0)
+        union {
+            struct {
+                uint32_t no : 4;
+                uint32_t month : 4;
+                uint32_t year : 8;
+                uint32_t rev_minor : 4;
+                uint32_t rev_major : 4;
+                uint32_t model : 4;
+                uint32_t mfg : 4;
+            };
+            uint32_t reg;
+        } gw;
+        for (uint8_t reg = 0; reg < 8; reg++) {
+            gw.reg = esp_efuse_read_reg(EFUSE_BLK3, reg);
+            if (reg == 7 || esp_efuse_read_reg(EFUSE_BLK3, reg + 1) == 0)
+                break;
+        }
+        const char * mfg[]   = {"unknown", "BBQKees Electronics", "", "", "", "", "", ""};
+        const char * model[] = {"unknown", "S3", "E32V2", "E32V2.2", "S32", "E32", "", "", ""};
+        const char * board[] = {"CUSTOM", "S32S3", "E32V2", "E32V2_2", "S32", "E32", "", "", ""};
+        switch (detail) {
+        case FUSE_VALUE::MFG:
+            return gw.mfg < 2 ? String(mfg[gw.mfg]) : "unknown";
+        case FUSE_VALUE::MODEL:
+            return gw.model < 6 ? String(model[gw.model]) : "unknown";
+        case FUSE_VALUE::BOARD:
+            return gw.model < 6 ? String(board[gw.model]) : board_profile_;
+        case FUSE_VALUE::REV:
+            return String(gw.rev_major) + "." + String(gw.rev_minor);
+        case FUSE_VALUE::BATCH:
+            return String(2000 + gw.year) + (gw.month < 10 ? "0" : "") + String(gw.month) + String(gw.no);
+        case FUSE_VALUE::FUSE:
+            return "0x" + String(gw.reg, 16);
+        case FUSE_VALUE::ALL:
+        default:
             break;
-    }
-    const char * mfg[]   = {"unknown", "BBQKees Electronics", "", "", "", "", "", ""};
-    const char * model[] = {"unknown", "S3", "E32V2", "E32V2.2", "S32", "E32", "", "", ""};
-    const char * board[] = {"CUSTOM", "S32S3", "E32V2", "E32V2_2", "S32", "E32", "", "", ""};
-    switch (detail) {
-    case FUSE_VALUE::MFG:
-        return gw.mfg < 2 ? String(mfg[gw.mfg]) : "unknown";
-    case FUSE_VALUE::MODEL:
-        return gw.model < 6 ? String(model[gw.model]) : "unknown";
-    case FUSE_VALUE::BOARD:
-        return gw.model < 6 ? String(board[gw.model]) : board_profile_;
-    case FUSE_VALUE::REV:
-        return String(gw.rev_major) + "." + String(gw.rev_minor);
-    case FUSE_VALUE::BATCH:
-        return String(2000 + gw.year) + (gw.month < 10 ? "0" : "") + String(gw.month) + String(gw.no);
-    case FUSE_VALUE::FUSE:
-        return "0x" + String(gw.reg, 16);
-    case FUSE_VALUE::ALL:
-    default:
-        break;
-    }
-    if (!gw.reg || gw.mfg > 1 || gw.model > 5) {
-        return "";
-    }
-    return String(mfg[gw.mfg]) + " " + String(model[gw.model]) + " rev." + String(gw.rev_major) + "." + String(gw.rev_minor) + "/" + String(2000 + gw.year)
-           + (gw.month < 10 ? "0" : "") + String(gw.month) + String(gw.no);
+        }
+        if (!gw.reg || gw.mfg > 1 || gw.model > 5) {
+            return "";
+        }
+        return String(mfg[gw.mfg]) + " " + String(model[gw.model]) + " rev." + String(gw.rev_major) + "." + String(gw.rev_minor) + "/" + String(2000 + gw.year)
+               + (gw.month < 10 ? "0" : "") + String(gw.month) + String(gw.no);
 #else
-    return "";
+        return "";
 #endif
-}
+    }
 
-// Stream from an URL and send straight to OTA uploader service.
-//
-// This function needs to be called twice, 1st pass once with a url to persist it, 2nd pass with no arguments to start the upload
-// This is to avoid timeouts in callback functions, like calling from a web hook.
-bool System::uploadFirmwareURL(const char * url) {
+    // Stream from an URL and send straight to OTA uploader service.
+    //
+    // This function needs to be called twice, 1st pass once with a url to persist it, 2nd pass with no arguments to start the upload
+    // This is to avoid timeouts in callback functions, like calling from a web hook.
+    bool System::uploadFirmwareURL(const char * url) {
 #ifndef EMSESP_STANDALONE
 
-    static String saved_url;
+        static String saved_url;
 
-    if (url && strlen(url) > 0) {
-        // if the passed URL is "reset" abort the current upload. This is called when an error happens during OTA
-        if (strncmp(url, "reset", 5) == 0) {
-            LOG_DEBUG("Firmware upload - resetting");
-            saved_url.clear();
+        if (url && strlen(url) > 0) {
+            // if the passed URL is "reset" abort the current upload. This is called when an error happens during OTA
+            if (strncmp(url, "reset", 5) == 0) {
+                LOG_DEBUG("Firmware upload - resetting");
+                saved_url.clear();
+                return true;
+            }
+
+            // given a URL to download from, save it ready for the 2nd pass
+            saved_url = url;
+            LOG_INFO("Firmware location: %s", saved_url.c_str());
+            EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_PENDING_UPLOAD); // we're ready to start the upload
             return true;
         }
 
-        // given a URL to download from, save it ready for the 2nd pass
-        saved_url = url;
-        LOG_INFO("Firmware location: %s", saved_url.c_str());
-        EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_PENDING_UPLOAD); // we're ready to start the upload
+        // check we have a valid URL from the 1st pass
+        if (saved_url.isEmpty()) {
+            LOG_ERROR("Firmware upload failed - invalid URL");
+            return false; // error
+        }
+
+        Shell::loop_all(); // flush log buffers so latest messages are shown in console
+
+        // Configure temporary client
+        HTTPClient http;
+        http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS); // important for GitHub 302's
+        http.setTimeout(8000);
+        http.useHTTP10(true); // use HTTP/1.0 for update since the update handler does not support any transfer Encoding
+        http.begin(saved_url);
+
+        // start a connection, returns -1 if fails
+        int httpCode = http.GET();
+        if (httpCode != HTTP_CODE_OK) {
+            LOG_ERROR("Firmware upload failed - HTTP code %d", httpCode);
+            http.end();
+            return false; // error
+        }
+
+        // check we have enough space for the upload in the ota partition
+        int firmware_size = http.getSize();
+        LOG_INFO("Firmware uploading (size: %d bytes). Please wait...", firmware_size);
+        if (!Update.begin(firmware_size)) {
+            LOG_ERROR("Firmware upload failed - no space");
+            http.end();
+            return false; // error
+        }
+
+        Shell::loop_all(); // flush log buffers so latest messages are shown in console
+
+        // we're about to start the upload, set the status so the Web System Monitor spots it
+        EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING);
+        // TODO do we need to stop the UART first with EMSuart::stop() ?
+
+        // set a callback so we can monitor progress in the WebUI
+        Update.onProgress([](size_t progress, size_t total) { EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING + (progress * 100 / total)); });
+
+        // get tcp stream and send it to Updater
+        WiFiClient * stream = http.getStreamPtr();
+        if (Update.writeStream(*stream) != firmware_size) {
+            LOG_ERROR("Firmware upload failed - size differences");
+            http.end();
+            EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
+            return false; // error
+        }
+
+        if (!Update.end(true)) {
+            LOG_ERROR("Firmware upload failed - general error");
+            http.end();
+            EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
+            return false; // error
+        }
+
+        // finished with upload
+        http.end();
+        saved_url.clear(); // prevent from downloading again
+        LOG_INFO("Firmware uploaded successfully. Restarting...");
+        EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_PENDING_RESTART);
+#endif
+
+        return true; // OK
+    }
+
+    // read command, e.g. read <deviceID> <type ID> [offset] [length] from console or API
+    // from Console use quotes so: call system read "<deviceID> <type ID> [offset] [length]"
+    bool System::readCommand(const char * data) {
+        if (!data) {
+            return false;
+        }
+
+        // extract <deviceID> <type ID> [offset] [length] from string
+        char * p;
+        char   value[11];
+
+        // make a copy so we can iterate, max 15 chars (XX XXXX XX XX)
+        char data_args[15];
+        strlcpy(data_args, data, sizeof(data_args));
+
+        uint8_t  device_id = 0; // is in hex
+        uint16_t type_id   = 0; // is in hex
+        uint8_t  length    = 0;
+        uint8_t  offset    = 0;
+
+        // first check deviceID
+        if ((p = strtok(data_args, " ,"))) {               // delimiter comma or space
+            strlcpy(value, p, sizeof(value));              // get string
+            device_id = (uint8_t)Helpers::hextoint(value); // convert hex to int
+            if (!EMSESP::valid_device(device_id)) {
+                LOG_ERROR("Invalid device ID (0x%02X) in read command", device_id);
+                return false; // invalid device
+            }
+        }
+
+        // iterate until end
+        uint8_t num_args = 0;
+        while (p != 0) {
+            if ((p = strtok(nullptr, " ,"))) {    // delimiter comma or space
+                strlcpy(value, p, sizeof(value)); // get string
+                if (num_args == 0) {
+                    type_id = (uint16_t)Helpers::hextoint(value); // convert hex to int
+                } else if (num_args == 1) {
+                    offset = Helpers::atoint(value); // decimal
+                } else if (num_args == 2) {
+                    length = Helpers::atoint(value); // decimal
+                }
+                num_args++;
+            }
+        }
+
+        if (num_args == 0) {
+            return false; // invalid number of arguments
+        }
+
+        EMSESP::send_read_request(type_id, device_id, offset, length, true);
+        EMSESP::set_read_id(type_id);
+
         return true;
     }
 
-    // check we have a valid URL from the 1st pass
-    if (saved_url.isEmpty()) {
-        LOG_ERROR("Firmware upload failed - invalid URL");
-        return false; // error
+    // system read command
+    bool System::command_read(const char * value, const int8_t id) {
+        return readCommand(value);
     }
 
-    Shell::loop_all(); // flush log buffers so latest messages are shown in console
-
-    // Configure temporary client
-    HTTPClient http;
-    http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS); // important for GitHub 302's
-    http.setTimeout(8000);
-    http.useHTTP10(true); // use HTTP/1.0 for update since the update handler does not support any transfer Encoding
-    http.begin(saved_url);
-
-    // start a connection, returns -1 if fails
-    int httpCode = http.GET();
-    if (httpCode != HTTP_CODE_OK) {
-        LOG_ERROR("Firmware upload failed - HTTP code %d", httpCode);
-        http.end();
-        return false; // error
+    // set the system status code - SYSTEM_STATUS in system.h
+    void System::systemStatus(uint8_t status_code) {
+        systemStatus_ = status_code;
+        // LOG_DEBUG("Setting System status code %d", status_code);
     }
 
-    // check we have enough space for the upload in the ota partition
-    int firmware_size = http.getSize();
-    LOG_INFO("Firmware uploading (size: %d bytes). Please wait...", firmware_size);
-    if (!Update.begin(firmware_size)) {
-        LOG_ERROR("Firmware upload failed - no space");
-        http.end();
-        return false; // error
+    uint8_t System::systemStatus() {
+        return systemStatus_;
     }
 
-    Shell::loop_all(); // flush log buffers so latest messages are shown in console
+    // takes a string range like "6-11, 1, 23, 24-48" which has optional ranges and single values and converts to a vector of ints
+    std::vector<uint8_t> System::string_range_to_vector(const std::string & range) {
+        std::vector<uint8_t>   gpios;
+        std::string::size_type pos  = 0;
+        std::string::size_type prev = 0;
 
-    // we're about to start the upload, set the status so the Web System Monitor spots it
-    EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING);
-    // TODO do we need to stop the UART first with EMSuart::stop() ?
+        auto process_part = [&gpios](std::string part) {
+            // trim whitespace
+            part.erase(0, part.find_first_not_of(" \t"));
+            part.erase(part.find_last_not_of(" \t") + 1);
 
-    // set a callback so we can monitor progress in the WebUI
-    Update.onProgress([](size_t progress, size_t total) { EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING + (progress * 100 / total)); });
-
-    // get tcp stream and send it to Updater
-    WiFiClient * stream = http.getStreamPtr();
-    if (Update.writeStream(*stream) != firmware_size) {
-        LOG_ERROR("Firmware upload failed - size differences");
-        http.end();
-        EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
-        return false; // error
-    }
-
-    if (!Update.end(true)) {
-        LOG_ERROR("Firmware upload failed - general error");
-        http.end();
-        EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
-        return false; // error
-    }
-
-    // finished with upload
-    http.end();
-    saved_url.clear(); // prevent from downloading again
-    LOG_INFO("Firmware uploaded successfully. Restarting...");
-    EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_PENDING_RESTART);
-#endif
-
-    return true; // OK
-}
-
-// read command, e.g. read <deviceID> <type ID> [offset] [length] from console or API
-// from Console use quotes so: call system read "<deviceID> <type ID> [offset] [length]"
-bool System::readCommand(const char * data) {
-    if (!data) {
-        return false;
-    }
-
-    // extract <deviceID> <type ID> [offset] [length] from string
-    char * p;
-    char   value[11];
-
-    // make a copy so we can iterate, max 15 chars (XX XXXX XX XX)
-    char data_args[15];
-    strlcpy(data_args, data, sizeof(data_args));
-
-    uint8_t  device_id = 0; // is in hex
-    uint16_t type_id   = 0; // is in hex
-    uint8_t  length    = 0;
-    uint8_t  offset    = 0;
-
-    // first check deviceID
-    if ((p = strtok(data_args, " ,"))) {               // delimiter comma or space
-        strlcpy(value, p, sizeof(value));              // get string
-        device_id = (uint8_t)Helpers::hextoint(value); // convert hex to int
-        if (!EMSESP::valid_device(device_id)) {
-            LOG_ERROR("Invalid device ID (0x%02X) in read command", device_id);
-            return false; // invalid device
-        }
-    }
-
-    // iterate until end
-    uint8_t num_args = 0;
-    while (p != 0) {
-        if ((p = strtok(nullptr, " ,"))) {    // delimiter comma or space
-            strlcpy(value, p, sizeof(value)); // get string
-            if (num_args == 0) {
-                type_id = (uint16_t)Helpers::hextoint(value); // convert hex to int
-            } else if (num_args == 1) {
-                offset = Helpers::atoint(value); // decimal
-            } else if (num_args == 2) {
-                length = Helpers::atoint(value); // decimal
+            // check if it's a range (contains '-')
+            std::string::size_type dash_pos = part.find('-');
+            if (dash_pos != std::string::npos) {
+                // it's a range like "6-11"
+                int start = std::stoi(part.substr(0, dash_pos));
+                int end   = std::stoi(part.substr(dash_pos + 1));
+                for (int i = start; i <= end; i++) {
+                    gpios.push_back(static_cast<uint8_t>(i));
+                }
+            } else {
+                gpios.push_back(static_cast<uint8_t>(std::stoi(part)));
             }
-            num_args++;
+        };
+
+        while ((pos = range.find(',', prev)) != std::string::npos) {
+            process_part(range.substr(prev, pos - prev));
+            prev = pos + 1;
         }
+
+        // handle the last part
+        process_part(range.substr(prev));
+
+        return gpios;
     }
 
-    if (num_args == 0) {
-        return false; // invalid number of arguments
-    }
+    // initialize a list of valid GPIOs based on the ESP32 board
+    // notes:
+    //  - we allow 0, which is used on some board for the button
+    //  - we also allow input only pins are accepted (34-39) on some boards
+    //  - and allow pins 33-38 for octal SPI for 32M vchip version on some boards
+    void System::set_valid_system_gpios(bool exclude_used) {
+        valid_system_gpios_.clear(); // reset system list
+        used_gpios_.clear();         // reset used list
 
-    EMSESP::send_read_request(type_id, device_id, offset, length, true);
-    EMSESP::set_read_id(type_id);
-
-    return true;
-}
-
-// system read command
-bool System::command_read(const char * value, const int8_t id) {
-    return readCommand(value);
-}
-
-// set the system status code - SYSTEM_STATUS in system.h
-void System::systemStatus(uint8_t status_code) {
-    systemStatus_ = status_code;
-    // LOG_DEBUG("Setting System status code %d", status_code);
-}
-
-uint8_t System::systemStatus() {
-    return systemStatus_;
-}
-
-// takes a string range like "6-11, 1, 23, 24-48" which has optional ranges and single values and converts to a vector of ints
-std::vector<uint8_t> System::string_range_to_vector(const std::string & range) {
-    std::vector<uint8_t>   valid_gpios;
-    std::string::size_type pos  = 0;
-    std::string::size_type prev = 0;
-
-    auto process_part = [&valid_gpios](std::string part) {
-        // trim whitespace
-        part.erase(0, part.find_first_not_of(" \t"));
-        part.erase(part.find_last_not_of(" \t") + 1);
-
-        // check if it's a range (contains '-')
-        std::string::size_type dash_pos = part.find('-');
-        if (dash_pos != std::string::npos) {
-            // it's a range like "6-11"
-            int start = std::stoi(part.substr(0, dash_pos));
-            int end   = std::stoi(part.substr(dash_pos + 1));
-            for (int i = start; i <= end; i++) {
-                valid_gpios.push_back(static_cast<uint8_t>(i));
-            }
-        } else {
-            valid_gpios.push_back(static_cast<uint8_t>(std::stoi(part)));
-        }
-    };
-
-    while ((pos = range.find(',', prev)) != std::string::npos) {
-        process_part(range.substr(prev, pos - prev));
-        prev = pos + 1;
-    }
-
-    // handle the last part
-    process_part(range.substr(prev));
-
-    return valid_gpios;
-}
-
-// return a list of valid GPIOs for the ESP32 board that can be used
-// notes:
-//  - we allow 0, which is used on some board for the button
-//  - we also allow input only pins are accepted (34-39) on some boards, excluding 39
-//  - and allow pins 33-38 for octal SPI for 32M vchip version on some boards
-std::vector<uint8_t> System::valid_gpio_list(bool exclude_used) {
-    // get free gpios based on board/platform type
+        // get free gpios based on board/platform type
 #if CONFIG_IDF_TARGET_ESP32C3
-    // https://www.wemos.cc/en/latest/c3/c3_mini.html
-    std::vector<uint8_t> valid_gpios = string_range_to_vector("0-10");
+        // https://www.wemos.cc/en/latest/c3/c3_mini.html
+        valid_gpios_ = string_range_to_vector("0-10");
 #elif CONFIG_IDF_TARGET_ESP32S2
-    std::vector<uint8_t> valid_gpios = string_range_to_vector("0-14, 19, 20, 21, 33-38, 45, 46");
+        valid_gpios_ = string_range_to_vector("0-14, 19, 20, 21, 33-38, 45, 46");
 #elif CONFIG_IDF_TARGET_ESP32S3
-    std::vector<uint8_t> valid_gpios = string_range_to_vector("2, 4-14, 17, 18, 21, 33-38, 45, 46");
+        valid_gpios_ = string_range_to_vector("0-2, 4-14, 17, 18, 21, 33-38, 45, 46");
 #elif CONFIG_IDF_TARGET_ESP32 || defined(EMSESP_STANDALONE)
-    std::vector<uint8_t> valid_gpios = string_range_to_vector("0, 2, 4, 5, 12-15, 18, 19, 23, 25-27, 32-39");
+        valid_system_gpios_ = string_range_to_vector("0, 2, 4, 5, 12-15, 18, 19, 23, 25-27, 32-39");
 #else
-    std::vector<uint8_t> valid_gpios = {};
 #endif
 
 #if CONFIG_IDF_TARGET_ESP32
-    // if psram is enabled remove pins 16 and 17 from the list
-    if (ESP.getPsramSize() > 0) {
-        valid_gpios.erase(std::remove(valid_gpios.begin(), valid_gpios.end(), 16), valid_gpios.end());
-        valid_gpios.erase(std::remove(valid_gpios.begin(), valid_gpios.end(), 17), valid_gpios.end());
-    }
+        if (ESP.getPsramSize() > 0) {
+            // if psram is enabled remove pins 16 and 17 from the list, if set
+            valid_system_gpios_.erase(std::remove(valid_system_gpios_.begin(), valid_system_gpios_.end(), 16), valid_system_gpios_.end());
+            valid_system_gpios_.erase(std::remove(valid_system_gpios_.begin(), valid_system_gpios_.end(), 17), valid_system_gpios_.end());
+        }
 #endif
-
-    // if ethernet is enabled, remove pins 21 and 22 (I2C)
-    if ((EMSESP::system_.ethernet_connected() || EMSESP::system_.phy_type_ != PHY_type::PHY_TYPE_NONE)) {
-        valid_gpios.erase(std::remove(valid_gpios.begin(), valid_gpios.end(), 21), valid_gpios.end());
-        valid_gpios.erase(std::remove(valid_gpios.begin(), valid_gpios.end(), 22), valid_gpios.end());
     }
 
-    // filter out GPIOs already used in application settings and analog sensors, if enabled
+    // check if a pin is valid ESP32 pin and if not already used, add to the used gpio list
+    bool System::check_valid_gpio(uint8_t pin, const char * source_name) {
+        bool ok = false;
+        // check if we're allowed to use this pin
+        if (std::find(valid_system_gpios_.begin(), valid_system_gpios_.end(), pin) != valid_system_gpios_.end()) {
+            // It's OK, now check if it's already in the used list
+            if (std::find(used_gpios_.begin(), used_gpios_.end(), pin) != used_gpios_.end()) {
+                LOG_DEBUG("GPIO %d for %s is already used", pin, source_name);
+                ok = false; // Pin is already used, not OK
+
+            } else {
+                ok = true;
+            }
+        }
+        if (ok) {
+            LOG_DEBUG("Adding GPIO %d for %s to used list", pin, source_name);
+            used_gpios_.push_back(pin); // add to used list
+        } else {
+            LOG_DEBUG("GPIO %d for %s is not valid", pin, source_name);
+        }
+        return ok;
+    }
+
+    // return a list of valid and unused GPIOs still available for use
+    std::vector<uint8_t> System::valid_gpio_list() {
+        std::vector<uint8_t> gpios;
+        for (const auto & gpio : valid_system_gpios_) {
+            if (std::find(used_gpios_.begin(), used_gpios_.end(), gpio) == used_gpios_.end()) {
+                gpios.push_back(gpio);
+            }
+        }
+        return gpios;
+    }
+
+} // namespace emsesp
+
+
+/*
+
+    // if ethernet is enabled, remove pins 21 and 22 (I2C) and 1 (ETH.power)
+    if ((EMSESP::system_.ethernet_connected() || EMSESP::system_.phy_type_ != PHY_type::PHY_TYPE_NONE)) {
+        gpios_to_remove.push_back(21);
+        gpios_to_remove.push_back(22);
+        gpios_to_remove.push_back(1);
+    }
+
+        // filter out GPIOs already used in application settings and analog sensors, if enabled
     // if dallas_gpio or led_gpio is disabled (0), don't remove it from the list (as it could be gpio 0 and valid)
     if (exclude_used) {
         // application settings
-        for (const auto & gpio : valid_gpios) {
-            if (gpio == EMSESP::system_.pbutton_gpio_
-                || (gpio
-                    && ((EMSESP::system_.led_gpio_ != 0 && gpio == EMSESP::system_.led_gpio_)
-                        || (EMSESP::system_.dallas_gpio_ != 0 && gpio == EMSESP::system_.dallas_gpio_) || gpio == EMSESP::system_.rx_gpio_
-                        || gpio == EMSESP::system_.tx_gpio_))) {
-                valid_gpios.erase(std::remove(valid_gpios.begin(), valid_gpios.end(), gpio), valid_gpios.end());
-            }
+        gpios_to_remove.push_back(EMSESP::system_.pbutton_gpio_);
+        if (EMSESP::system_.led_gpio_ != 0) {
+            gpios_to_remove.push_back(EMSESP::system_.led_gpio_);
         }
+        if (EMSESP::system_.dallas_gpio_ != 0) {
+            gpios_to_remove.push_back(EMSESP::system_.dallas_gpio_);
+        }
+        gpios_to_remove.push_back(EMSESP::system_.rx_gpio_);
+        gpios_to_remove.push_back(EMSESP::system_.tx_gpio_);
 
         // analog sensors
-        if (EMSESP::system_.analog_enabled_) {
-            for (const auto & sensor : EMSESP::analogsensor_.sensors()) {
-                if (std::find(valid_gpios.begin(), valid_gpios.end(), sensor.gpio()) != valid_gpios.end()) {
-                    valid_gpios.erase(std::find(valid_gpios.begin(), valid_gpios.end(), sensor.gpio()));
-                }
+        for (const auto & sensor : EMSESP::analogsensor_.sensors()) {
+            if (std::find(valid_system_gpios_.begin(), valid_system_gpios_.end(), sensor.gpio()) != valid_system_gpios_.end()) {
+                gpios_to_remove.push_back(sensor.gpio());
             }
         }
     }
 
-    // sort the list of valid GPIOs. This is also done in the web interface, so client side.
-    std::sort(valid_gpios.begin(), valid_gpios.end());
-
-    return valid_gpios;
-}
-
-} // namespace emsesp
+*/

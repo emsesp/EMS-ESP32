@@ -118,7 +118,6 @@ class AnalogSensor {
     ~AnalogSensor() = default;
 
     enum AnalogType : int8_t {
-        NOTUSED     = 0, // 0 = disabled
         DIGITAL_IN  = 1,
         COUNTER     = 2,
         ADC         = 3,
@@ -164,12 +163,10 @@ class AnalogSensor {
         return (!sensors_.empty());
     }
 
+    // count number of items in sensors_ where type is not set to disabled and not a system sensor
     size_t count_entities(bool exclude_disabled_system = false) const {
         if (exclude_disabled_system) {
-            // count number of items in sensors_ where type is not set to disabled and not a system sensor
-            return std::count_if(sensors_.begin(), sensors_.end(), [](const Sensor & sensor) {
-                return sensor.type() != AnalogSensor::AnalogType::NOTUSED && !sensor.is_system();
-            });
+            return std::count_if(sensors_.begin(), sensors_.end(), [](const Sensor & sensor) { return !sensor.is_system(); });
         }
         return sensors_.size();
     }

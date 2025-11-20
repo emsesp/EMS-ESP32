@@ -98,7 +98,7 @@ const SensorsAnalogDialog = ({
   const analogTypeMenuItems = useMemo(
     () =>
       AnalogTypeNames.map((val, i) => (
-        <MenuItem key={val} value={i}>
+        <MenuItem key={val} value={i + 1}>
           {val}
         </MenuItem>
       )),

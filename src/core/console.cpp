@@ -321,7 +321,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                 return StateUpdateResult::CHANGED;
             });
             shell.printfln("Loaded board profile %s", board_profile.c_str());
-            EMSESP::system_.network_init(true);
+            EMSESP::system_.network_init();
         });
 
     commands->add_command(
@@ -357,7 +357,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                                   shell.printfln(F_(tx_mode_fmt), settings.tx_mode);
                                   return StateUpdateResult::CHANGED;
                               });
-                              EMSESP::system_.uart_init(false);
+                              EMSESP::system_.uart_init();
                           });
 
     //

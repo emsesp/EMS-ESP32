@@ -145,21 +145,16 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
             obj["f"]       = sensor.factor();
             obj["t"]       = sensor.type();
             obj["s"]       = sensor.is_system();
-
-            if (sensor.type() != AnalogSensor::AnalogType::NOTUSED) {
-                obj["v"] = Helpers::transformNumFloat(sensor.value()); // is optional and is a float
-            } else {
-                obj["v"] = 0; // must have a value for web sorting to work
-            }
+            obj["v"]       = Helpers::transformNumFloat(sensor.value()); // is optional and is a float
         }
     }
 
     root["analog_enabled"] = EMSESP::analog_enabled();
     root["platform"]       = EMSESP_PLATFORM;
 
-    // send back a list of valid GPIOs that can be used for analog sensors, excluding those already used
+    // send back a list of valid and unused GPIOs still available for use
     JsonArray valid_gpio_list = root["valid_gpio_list"].to<JsonArray>();
-    for (const auto & gpio : EMSESP::system_.valid_gpio_list(true)) {
+    for (const auto & gpio : EMSESP::system_.valid_gpio_list()) {
         valid_gpio_list.add(gpio);
     }
 
@@ -437,7 +432,7 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
         uint8_t   count = 0;
         for (const auto & sensor : EMSESP::analogsensor_.sensors()) {
             // ignore system and disabled sensors
-            if (sensor.is_system() || sensor.type() == AnalogSensor::AnalogType::NOTUSED) {
+            if (sensor.is_system()) {
                 continue;
             }
             JsonObject node = nodes.add<JsonObject>();

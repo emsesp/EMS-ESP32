@@ -1665,6 +1665,9 @@ void EMSESP::start() {
     bool factory_settings = false;
 #endif
 
+    // set valid GPIOs list based on ESP32 board/platform type
+    system_.set_valid_system_gpios();
+
     // start web log service. now we can start capturing logs to the web log
     webLogService.begin();
 
@@ -1714,7 +1717,7 @@ void EMSESP::start() {
     };
     LOG_INFO("Library loaded: %d EMS devices, %d device entities, %s", device_library_.size(), EMSESP_TRANSLATION_COUNT, system_.languages_string().c_str());
 
-    system_.reload_settings(); // ... and store some of the settings locally
+    system_.get_settings(); // ... and store some of the settings locally
 
     webCustomizationService.begin(); // load the customizations
     webSchedulerService.begin();     // load the scheduler events
@@ -1803,6 +1806,14 @@ void EMSESP::loop() {
             Shell::loop_all(); // flush log buffers so latest error message are shown in console
             system_.uploadFirmwareURL("reset");
             EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
+        }
+    }
+
+    if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_INVALID_GPIO) {
+        static bool only_once = false;
+        if (!only_once) {
+            LOG_ERROR("Invalid GPIOs used in settings. Please check your settings.");
+            only_once = true;
         }
     }
 

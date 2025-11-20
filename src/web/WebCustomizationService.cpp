@@ -118,8 +118,8 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
         for (const JsonObject analogJson : analogJsons) {
             // create each of the sensor, overwriting any previous settings
             // if the gpio is invalid skip the sensor
-            if (!EMSESP::system_.is_valid_gpio(analogJson["gpio"].as<uint8_t>(), true)) {
-                EMSESP::logger().warning("Invalid GPIO %d for Sensor %s. Skipping.",
+            if (!EMSESP::system_.check_valid_gpio(analogJson["gpio"].as<uint8_t>(), "Analog Sensor")) {
+                EMSESP::logger().warning("Analog sensor: Invalid GPIO %d for %s. Skipping.",
                                          analogJson["gpio"].as<uint8_t>(),
                                          analogJson["name"].as<std::string>().c_str());
                 continue;
