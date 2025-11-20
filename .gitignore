@@ -76,3 +76,4 @@ pnpm-lock.yaml
 package.json
 .cache/
 interface/.tsbuildinfo
+test/test_api/package-lock.json
