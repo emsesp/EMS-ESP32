@@ -136,10 +136,10 @@ const SystemMonitor = () => {
           </Typography>
 
           {errorMessage ? (
-            <MessageBox my={2} level="error" message={errorMessage}>
+            <MessageBox level="error" message={errorMessage}>
               <Button
-                size="small"
                 sx={{ ml: 2 }}
+                size="small"
                 startIcon={<CancelIcon />}
                 variant="contained"
                 color="error"

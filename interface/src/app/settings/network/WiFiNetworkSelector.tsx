@@ -94,7 +94,7 @@ const WiFiNetworkSelector = ({ networkList }: { networkList: WiFiNetworkList }) 
   );
 
   if (networkList.networks.length === 0) {
-    return <MessageBox mt={2} mb={1} message={LL.NETWORK_NO_WIFI()} level="info" />;
+    return <MessageBox message={LL.NETWORK_NO_WIFI()} level="info" />;
   }
 
   return <List>{networkList.networks.map(renderNetwork)}</List>;
