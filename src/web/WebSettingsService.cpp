@@ -196,16 +196,18 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
         System::load_board_profile(data, settings.board_profile.c_str());
     }
 
+    int prev;
+    reset_flags();
+
+    // check if board profile has changed
     if (org_board_profile != settings.board_profile) {
         if (org_board_profile.isEmpty()) {
             EMSESP::logger().info("Setting board profile to %s", settings.board_profile.c_str());
         } else {
             EMSESP::logger().info("Setting board profile to %s (was %s)", settings.board_profile.c_str(), org_board_profile.c_str());
         }
+        add_flags(ChangeFlags::RESTART);
     }
-
-    int prev;
-    reset_flags();
 
     // pins
     prev              = settings.led_gpio;
@@ -213,7 +215,7 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     check_flag(prev, settings.led_gpio, ChangeFlags::LED);
     prev                 = settings.dallas_gpio;
     settings.dallas_gpio = data[1];
-    check_flag(prev, settings.dallas_gpio, ChangeFlags::SENSOR);
+    check_flag(prev, settings.dallas_gpio, ChangeFlags::TEMPERATURE_SENSOR);
     prev             = settings.rx_gpio;
     settings.rx_gpio = data[2];
     check_flag(prev, settings.rx_gpio, ChangeFlags::RESTART);
@@ -269,7 +271,7 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     // temperature sensor
     prev                     = settings.dallas_parasite;
     settings.dallas_parasite = root["dallas_parasite"] | EMSESP_DEFAULT_DALLAS_PARASITE;
-    check_flag(prev, settings.dallas_parasite, ChangeFlags::SENSOR);
+    check_flag(prev, settings.dallas_parasite, ChangeFlags::TEMPERATURE_SENSOR);
 
     // shower
     prev                  = settings.shower_timer;
@@ -296,7 +298,7 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     // adc
     prev                    = settings.analog_enabled;
     settings.analog_enabled = root["analog_enabled"] | EMSESP_DEFAULT_ANALOG_ENABLED;
-    check_flag(prev, settings.analog_enabled, ChangeFlags::ADC);
+    check_flag(prev, settings.analog_enabled, ChangeFlags::ANALOG_SENSOR);
 
     //
     // these need system restarts first before settings are activated...
@@ -400,11 +402,17 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
 // this is called after any of the settings have been persisted to the filesystem
 // either via the Web UI or via the Console
 void WebSettingsService::onUpdate() {
+    // skip if we're restarting anyway
+
+    if (WebSettings::has_flags(WebSettings::ChangeFlags::RESTART)) {
+        return;
+    }
+
     if (WebSettings::has_flags(WebSettings::ChangeFlags::SHOWER)) {
         EMSESP::shower_.start();
     }
 
-    if (WebSettings::has_flags(WebSettings::ChangeFlags::SENSOR)) {
+    if (WebSettings::has_flags(WebSettings::ChangeFlags::TEMPERATURE_SENSOR)) {
         EMSESP::temperaturesensor_.start();
     }
 
@@ -416,7 +424,7 @@ void WebSettingsService::onUpdate() {
         EMSESP::system_.syslog_init(); // re-start (or stop)
     }
 
-    if (WebSettings::has_flags(WebSettings::ChangeFlags::ADC)) {
+    if (WebSettings::has_flags(WebSettings::ChangeFlags::ANALOG_SENSOR)) {
         EMSESP::analogsensor_.start();
     }
 
@@ -453,7 +461,7 @@ void WebSettingsService::board_profile(AsyncWebServerRequest * request) {
         auto *     response = new AsyncJsonResponse(false);
         JsonObject root     = response->getRoot();
 
-        std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
+        std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode, led_type
         (void)System::load_board_profile(data, board_profile);
         root["board_profile"]  = board_profile;
         root["led_gpio"]       = data[0];
