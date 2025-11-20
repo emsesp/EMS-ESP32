@@ -156,19 +156,13 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     // serialize JSON to string to ensure correct content-length and avoid HTTP parsing errors (issue #2752)
     std::string output_str;
     serializeJson(output, output_str);
-
     request->send(ret_codes[return_code], "application/json; charset=utf-8", output_str.c_str());
-
-    api_count_++;
-    delete response;
 
 #if defined(EMSESP_UNITY)
     // store the result so we can test with Unity later
     storeResponse(output);
 #endif
 #if defined(EMSESP_STANDALONE) && !defined(EMSESP_UNITY)
-    std::string output_str;
-    serializeJson(output, output_str);
     Serial.printf("%sweb output: %s[%s] %s(%d)%s %s%s",
                   COLOR_WHITE,
                   COLOR_BRIGHT_CYAN,
@@ -181,6 +175,9 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     Serial.println();
     EMSESP::logger().debug("web output: %s %s", request->url().c_str(), output_str.c_str());
 #endif
+
+    api_count_++;
+    delete response;
 }
 
 #if defined(EMSESP_UNITY)
