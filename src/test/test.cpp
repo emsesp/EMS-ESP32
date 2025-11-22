@@ -1732,7 +1732,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         request.url("/api");
         EMSESP::webAPIService.webAPIService(&request, json);
 
-        emsesp::EMSESP::logger().warning("* these next ones should fail *");
+        EMSESP::logger().warning("* these next ones should fail *");
 
         // write value from web - testing hc9/seltemp - should fail!
         char data8[] = "{\"id\":2,\"devicevalue\":{\"v\":\"55\",\"u\":1,\"n\":\"hc2 selected room temperature\",\"c\":\"hc9/seltemp\"}";
