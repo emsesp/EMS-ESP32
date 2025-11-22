@@ -250,20 +250,20 @@ export enum AnalogType {
 
 export const AnalogTypeNames = [
   'Digital In', // 1
-  'Counter',    // 2
-  'ADC In',     // 3
-  'Timer',      // 4
-  'Rate',       // 5
+  'Counter', // 2
+  'ADC In', // 3
+  'Timer', // 4
+  'Rate', // 5
   'Digital Out', // 6
-  'PWM 0',      // 7
-  'PWM 1',      // 8
-  'PWM 2',      // 9
-  'NTC Temp.',  // 10
-  'RGB Led',    // 11
-  'Pulse',      // 12
-  'Freq 0',     // 13
-  'Freq 1',      // 14
-  'Freq 2',      // 15
+  'PWM 0', // 7
+  'PWM 1', // 8
+  'PWM 2', // 9
+  'NTC Temp.', // 10
+  'RGB Led', // 11
+  'Pulse', // 12
+  'Freq 0', // 13
+  'Freq 1', // 14
+  'Freq 2' // 15
 ] as const;
 
 export const BOARD_PROFILES = {
