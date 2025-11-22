@@ -1,4 +1,12 @@
-import { memo, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -356,9 +364,11 @@ const Version = () => {
     setShowVersionInfo(0);
   }, []);
 
-  // Effect for checking upgrades
+  // check upgrades - only once when both versions are available
+  const upgradeCheckedRef = useRef(false);
   useEffect(() => {
-    if (latestVersion && latestDevVersion) {
+    if (latestVersion && latestDevVersion && !upgradeCheckedRef.current) {
+      upgradeCheckedRef.current = true;
       const versions = `${latestDevVersion.name},${latestVersion.name}`;
       sendCheckUpgrade(versions)
         .catch((error: Error) => {
