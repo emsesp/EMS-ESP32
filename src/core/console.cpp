@@ -320,8 +320,8 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                 settings.eth_clock_mode = data[8];
                 return StateUpdateResult::CHANGED;
             });
-            shell.printfln("Loaded board profile %s", board_profile.c_str());
-            EMSESP::system_.network_init();
+            shell.printfln("Loaded board profile %s. Restarting...", board_profile.c_str());
+            EMSESP::system_.system_restart();
         });
 
     commands->add_command(
@@ -338,7 +338,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                     return StateUpdateResult::CHANGED;
                 });
             } else {
-                shell.println("Must be 0B, 0D, 0A, 0E, 0F, or 48 - 4D");
+                shell.println("Must be 0B, 0D, 0A, 0E, 0F or 48-4D");
             }
         },
         [](Shell & shell, const std::vector<std::string> & current_arguments, const std::string & next_argument) -> std::vector<std::string> {
