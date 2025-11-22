@@ -36,8 +36,8 @@ WebAPIService *  webAPIService;
 EMSESP           application;
 FS               dummyFS;
 
-std::shared_ptr<emsesp::EMSESPConsole> shell;
-char                                   output_buffer[4096];
+std::shared_ptr<EMSESPConsole> shell;
+char                           output_buffer[4096];
 
 class TestStream : public Stream {
   public:

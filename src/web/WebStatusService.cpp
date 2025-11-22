@@ -67,7 +67,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
 #ifndef EMSESP_STANDALONE
     uint8_t ntp_status = 0; // 0=disabled, 1=enabled, 2=connected
     if (esp_sntp_enabled()) {
-        ntp_status = (emsesp::EMSESP::system_.ntp_connected()) ? 2 : 1;
+        ntp_status = (EMSESP::system_.ntp_connected()) ? 2 : 1;
     }
     root["ntp_status"] = ntp_status;
     if (ntp_status == 2) {
@@ -83,7 +83,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
 
     root["ap_status"] = EMSESP::esp32React.apStatus();
 
-    if (emsesp::EMSESP::system_.ethernet_connected()) {
+    if (EMSESP::system_.ethernet_connected()) {
         root["network_status"] = 10; // custom code #10 - ETHERNET_STATUS_CONNECTED
         root["wifi_rssi"]      = 0;
     } else {
@@ -196,7 +196,7 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
     } else if (action == "systemStatus" && is_admin) {
         ok = setSystemStatus(param.c_str());
     } else if (action == "resetMQTT" && is_admin) {
-        emsesp::EMSESP::mqtt_.reset_mqtt();
+        EMSESP::mqtt_.reset_mqtt();
         ok = true;
     }
 
@@ -209,7 +209,7 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
 
     // check for error
     if (!ok) {
-        emsesp::EMSESP::logger().err("Action '%s' failed", action.c_str());
+        EMSESP::logger().err("Action '%s' failed", action.c_str());
         request->send(400); // bad request
         return;
     }
@@ -233,7 +233,7 @@ bool WebStatusService::checkUpgrade(JsonObject root, std::string & versions) {
 #if defined(EMSESP_DEBUG)
         // look for dev in the name to determine if we're using a dev release
         bool using_dev_version = !current_version.prerelease().find("dev");
-        emsesp::EMSESP::logger()
+        EMSESP::logger()
             .debug("Checking version upgrade. This version=%d.%d.%d-%s (%s),latest dev=%d.%d.%d-%s (%s upgradeable),latest stable=%d.%d.%d-%s (%s upgradeable)",
                    current_version.major(),
                    current_version.minor(),
@@ -334,7 +334,7 @@ bool WebStatusService::getCustomSupport(JsonObject root) {
     if (!file) {
         // there is no custom file, return empty object
 #if defined(EMSESP_DEBUG)
-        emsesp::EMSESP::logger().debug("No custom support file found");
+        EMSESP::logger().debug("No custom support file found");
 #endif
         return true;
     }
@@ -342,7 +342,7 @@ bool WebStatusService::getCustomSupport(JsonObject root) {
     // read the contents of the file into a json doc. We can't do this direct to object since 7.2.1
     DeserializationError error = deserializeJson(doc, file);
     if (error) {
-        emsesp::EMSESP::logger().err("Failed to read custom support file");
+        EMSESP::logger().err("Failed to read custom support file");
         return false;
     }
 
@@ -350,7 +350,7 @@ bool WebStatusService::getCustomSupport(JsonObject root) {
 #endif
 
 #if defined(EMSESP_DEBUG)
-    emsesp::EMSESP::logger().debug("Showing custom support page");
+    EMSESP::logger().debug("Showing custom support page");
 #endif
 
     root.set(doc.as<JsonObject>()); // add to web response root object
@@ -362,14 +362,14 @@ bool WebStatusService::getCustomSupport(JsonObject root) {
 // uploads a firmware file from a URL
 bool WebStatusService::uploadURL(const char * url) {
     // this will keep a copy of the URL, but won't initiate the download yet
-    emsesp::EMSESP::system_.uploadFirmwareURL(url);
+    EMSESP::system_.uploadFirmwareURL(url);
     return true;
 }
 
 // action = systemStatus
 // sets the system status
 bool WebStatusService::setSystemStatus(const char * status) {
-    emsesp::EMSESP::system_.systemStatus(Helpers::atoint(status));
+    EMSESP::system_.systemStatus(Helpers::atoint(status));
     return true;
 }
 
