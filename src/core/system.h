@@ -104,11 +104,12 @@ class System {
     void system_restart(const char * partition = nullptr);
 
     void show_mem(const char * note);
-    void get_settings();
+    void store_settings(class WebSettings & settings);
     void syslog_init();
     bool check_upgrade(bool factory_settings);
     bool check_restore();
     void heartbeat_json(JsonObject output);
+
     void send_heartbeat();
     void send_info_mqtt();
 
@@ -142,7 +143,7 @@ class System {
     static void extractSettings(const char * filename, const char * section, JsonObject output);
     static bool saveSettings(const char * filename, const char * section, JsonObject input);
 
-    static bool                 check_valid_gpio(uint8_t pin, const char * source_name);
+    static bool                 add_gpio(uint8_t pin, const char * source_name);
     static std::vector<uint8_t> valid_gpio_list();
     static bool                 load_board_profile(std::vector<int8_t> & data, const std::string & board_profile);
 
@@ -344,13 +345,15 @@ class System {
         test_set_all_active_ = n;
     }
 
-    static void set_valid_system_gpios(bool exclude_used = false);
+    static void set_valid_system_gpios();
 
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
     float temperature() {
         return temperature_;
     }
 #endif
+
+    static void remove_gpio(uint8_t pin); // remove a gpio from both valid and used lists
 
   private:
     static uuid::log::Logger logger_;

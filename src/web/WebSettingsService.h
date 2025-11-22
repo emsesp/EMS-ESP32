@@ -89,7 +89,6 @@ class WebSettings {
     static StateUpdateResult update(JsonObject root, WebSettings & settings);
 
     enum ChangeFlags : uint8_t {
-
         NONE               = 0,
         UART               = (1 << 0), // 1 - uart
         SYSLOG             = (1 << 1), // 2 - syslog
@@ -102,29 +101,15 @@ class WebSettings {
         RESTART            = 0xFF      // 255 - restart request (all changes)
     };
 
-    static void check_flag(int prev_v, int new_v, uint8_t flag) {
-        if (prev_v != new_v) {
-            add_flags(flag);
-        }
-    }
-
-    static void add_flags(uint8_t flags) {
-        flags_ |= flags;
-    }
-
-    static bool has_flags(uint8_t flags) {
-        return (flags_ & flags) == flags;
-    }
-
-    static void reset_flags() {
-        flags_ = ChangeFlags::NONE;
-    }
-
-    static uint8_t get_flags() {
-        return flags_;
-    }
+    static bool    check_flag(int prev_v, int new_v, uint8_t flag);
+    static void    add_flags(uint8_t flags);
+    static bool    has_flags(uint8_t flags);
+    static void    reset_flags();
+    static uint8_t get_flags();
 
   private:
+    static void set_board_profile(WebSettings & settings);
+
     static uint8_t flags_;
 };
 

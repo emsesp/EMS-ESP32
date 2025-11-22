@@ -118,7 +118,7 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
         for (const JsonObject analogJson : analogJsons) {
             // create each of the sensor, overwriting any previous settings
             // if the gpio is invalid skip the sensor
-            if (!EMSESP::system_.check_valid_gpio(analogJson["gpio"].as<uint8_t>(), "Analog Sensor")) {
+            if (!EMSESP::system_.add_gpio(analogJson["gpio"].as<uint8_t>(), "Analog Sensor")) {
                 EMSESP::logger().warning("Analog sensor: Invalid GPIO %d for %s. Skipping.",
                                          analogJson["gpio"].as<uint8_t>(),
                                          analogJson["name"].as<std::string>().c_str());
@@ -176,8 +176,7 @@ void WebCustomizationService::reset_customization(AsyncWebServerRequest * reques
 
     AsyncWebServerResponse * response = request->beginResponse(200);
     request->send(response);
-    emsesp::EMSESP::system_.systemStatus(
-        emsesp::SYSTEM_STATUS::SYSTEM_STATUS_PENDING_RESTART); // will be handled by the main loop. We use pending for the Web's SystemMonitor
+    EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_PENDING_RESTART); // will be handled by the main loop. We use pending for the Web's SystemMonitor
     return;
 
 #endif
