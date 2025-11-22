@@ -4,7 +4,7 @@
 #include "core/shuntingYard.h"
 
 void run_shuntingYard_test(const std::string & expected, const std::string & actual) {
-    TEST_ASSERT_EQUAL_STRING(expected.c_str(), compute(actual).c_str());
+    TEST_ASSERT_EQUAL_STRING(expected.c_str(), emsesp::compute(actual).c_str());
 }
 
 void shuntingYard_test1() {
