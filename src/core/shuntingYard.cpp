@@ -22,6 +22,8 @@
 
 #include "shuntingYard.h"
 
+namespace emsesp {
+
 // find tokens - optimized to reduce string allocations
 std::deque<Token> exprToTokens(const std::string & expr) {
     std::deque<Token> tokens;
@@ -340,9 +342,9 @@ bool isnum(const std::string & s) {
 
 // replace commands like "<device>/<hc>/<cmd>" with its value"
 std::string commands(std::string & expr, bool quotes) {
-    auto expr_new = emsesp::Helpers::toLower(expr);
-    for (uint8_t device = 0; device < emsesp::EMSdevice::DeviceType::UNKNOWN; device++) {
-        std::string d = (std::string)emsesp::EMSdevice::device_type_2_device_name(device) + "/";
+    auto expr_new = Helpers::toLower(expr);
+    for (uint8_t device = 0; device < EMSdevice::DeviceType::UNKNOWN; device++) {
+        std::string d = (std::string)EMSdevice::device_type_2_device_name(device) + "/";
         auto        f = expr_new.find(d);
         while (f != std::string::npos) {
             // entity names are alphanumeric or _
@@ -367,9 +369,9 @@ std::string commands(std::string & expr, bool quotes) {
             JsonObject   input  = doc_in.to<JsonObject>();
             std::string  cmd_s  = "api/" + std::string(cmd);
 
-            auto return_code = emsesp::Command::process(cmd_s.c_str(), true, input, output);
+            auto return_code = Command::process(cmd_s.c_str(), true, input, output);
             // check for no value (entity is valid but has no value set)
-            if (return_code != emsesp::CommandRet::OK && return_code != emsesp::CommandRet::NO_VALUE) {
+            if (return_code != CommandRet::OK && return_code != CommandRet::NO_VALUE) {
                 return expr = "";
             }
 
@@ -380,7 +382,7 @@ std::string commands(std::string & expr, bool quotes) {
             }
             expr.replace(f, l, data);
             e        = f + data.length();
-            expr_new = emsesp::Helpers::toLower(expr);
+            expr_new = Helpers::toLower(expr);
             f        = expr_new.find(d, e);
         }
     }
@@ -400,7 +402,7 @@ int to_logic(const std::string & s) {
     if (s.empty()) {
         return -1;
     }
-    auto l = emsesp::Helpers::toLower(s);
+    auto l = Helpers::toLower(s);
     if (s[0] == '1' || l == "on" || l == "true") {
         return 1;
     }
@@ -438,7 +440,7 @@ std::string calculate(const std::string & expr) {
     const auto tokens = exprToTokens(expr_new);
     // for debugging only
     // for (const auto & t : tokens) {
-    //     emsesp::EMSESP::logger().debug("shunt token: %s(%d)", t.str.c_str(), t.type);
+    //     EMSESP::logger().debug("shunt token: %s(%d)", t.str.c_str(), t.type);
     //     Serial.printf("shunt token: %s(%d)\n", t.str.c_str(), t.type);
     //     Serial.println();
     // }
@@ -475,7 +477,7 @@ std::string calculate(const std::string & expr) {
                 } else if (isnum(rhs)) {
                     stack.push_back(std::stod(rhs) == 0 ? "1" : "0");
                 } else {
-                    emsesp::EMSESP::logger().warning("missing operator");
+                    EMSESP::logger().warning("missing operator");
                     return "";
                 }
                 break;
@@ -573,7 +575,7 @@ std::string calculate(const std::string & expr) {
                     break;
                 }
                 // compare strings lower case
-                stack.push_back((emsesp::Helpers::toLower(lhs) == emsesp::Helpers::toLower(rhs)) ? "1" : "0");
+                stack.push_back((Helpers::toLower(lhs) == Helpers::toLower(rhs)) ? "1" : "0");
                 break;
             case '!':
                 if (isnum(rhs) && isnum(lhs)) {
@@ -581,7 +583,7 @@ std::string calculate(const std::string & expr) {
                     break;
                 }
                 // compare strings lower case
-                stack.push_back((emsesp::Helpers::toLower(lhs) != emsesp::Helpers::toLower(rhs)) ? "1" : "0");
+                stack.push_back((Helpers::toLower(lhs) != Helpers::toLower(rhs)) ? "1" : "0");
                 break;
             }
         } break;
@@ -690,18 +692,18 @@ std::string compute(const std::string & expr) {
             std::string url, header_s, value_s, method_s, key_s, keys_s;
             // search keys lower case
             for (JsonPair p : doc.as<JsonObject>()) {
-                if (emsesp::Helpers::toLower(p.key().c_str()) == "url") {
+                if (Helpers::toLower(p.key().c_str()) == "url") {
                     url = p.value().as<std::string>();
-                } else if (emsesp::Helpers::toLower(p.key().c_str()) == "header") {
+                } else if (Helpers::toLower(p.key().c_str()) == "header") {
                     header_s = p.key().c_str();
-                } else if (emsesp::Helpers::toLower(p.key().c_str()) == "value") {
+                } else if (Helpers::toLower(p.key().c_str()) == "value") {
                     value_s = p.key().c_str();
-                } else if (emsesp::Helpers::toLower(p.key().c_str()) == "method") {
+                } else if (Helpers::toLower(p.key().c_str()) == "method") {
                     method_s = p.key().c_str();
-                } else if (emsesp::Helpers::toLower(p.key().c_str()) == "key") {
+                } else if (Helpers::toLower(p.key().c_str()) == "key") {
                     keys_s = "";
                     key_s  = p.key().c_str();
-                } else if (emsesp::Helpers::toLower(p.key().c_str()) == "keys") {
+                } else if (Helpers::toLower(p.key().c_str()) == "keys") {
                     key_s  = "";
                     keys_s = p.key().c_str();
                 }
@@ -715,7 +717,7 @@ std::string compute(const std::string & expr) {
                 std::string method = doc[method_s] | "get";
 
                 // if there is data, force a POST
-                if (value.length() || emsesp::Helpers::toLower(method) == "post") {
+                if (value.length() || Helpers::toLower(method) == "post") {
                     if (value.find_first_of('{') != std::string::npos) {
                         http.addHeader("Content-Type", "application/json"); // auto-set to JSON
                     }
@@ -805,3 +807,5 @@ std::string compute(const std::string & expr) {
 
     return calculate(expr_new);
 }
+
+} // namespace emsesp

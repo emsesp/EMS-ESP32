@@ -697,7 +697,7 @@ bool Helpers::value2bool(const char * value, bool & value_b) {
     }
 
 #ifdef EMSESP_STANDALONE
-    emsesp::EMSESP::logger().debug("Error. value2bool: %s is not a boolean", value);
+    EMSESP::logger().debug("Error. value2bool: %s is not a boolean", value);
 #endif
 
     return false; // not a bool
