@@ -102,23 +102,27 @@ const SignIn = memo(() => {
           width: '100%'
         })}
       >
-        <Typography variant="h4">{PROJECT_NAME}</Typography>
-
+        <Typography mb={1} variant="h4">
+          {PROJECT_NAME}
+        </Typography>
         <LanguageSelector />
-
-        <Box display="flex" flexDirection="column" alignItems="center">
+        <Box
+          mt={1}
+          display="flex"
+          flexDirection="column"
+          gap={1}
+          alignItems="center"
+        >
           <ValidatedTextField
             fieldErrors={fieldErrors || {}}
             disabled={processing}
             sx={{
-              width: 240
+              width: '32ch'
             }}
             name="username"
             label={LL.USERNAME(0)}
             value={signInRequest.username}
             onChange={updateLoginRequestValue}
-            margin="normal"
-            variant="outlined"
             slotProps={{
               input: {
                 autoCapitalize: 'none',
@@ -130,14 +134,13 @@ const SignIn = memo(() => {
             fieldErrors={fieldErrors || {}}
             disabled={processing}
             sx={{
-              width: 240
+              width: '32ch'
             }}
             name="password"
             label={LL.PASSWORD()}
             value={signInRequest.password}
             onChange={updateLoginRequestValue}
             onKeyDown={submitOnEnter}
-            variant="outlined"
           />
         </Box>
 

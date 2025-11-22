@@ -15,6 +15,7 @@ export type ValidatedTextFieldProps = ValidatedFieldProps & TextFieldProps;
 
 const ValidatedTextField: FC<ValidatedTextFieldProps> = ({
   fieldErrors,
+  sx,
   ...rest
 }) => {
   const errors = fieldErrors?.[rest.name];
@@ -28,7 +29,8 @@ const ValidatedTextField: FC<ValidatedTextFieldProps> = ({
         sx={{
           '& .MuiInputBase-input.Mui-disabled': {
             WebkitTextFillColor: 'grey'
-          }
+          },
+          ...(sx || {})
         }}
         {...(rest.disabled && {
           slotProps: {
