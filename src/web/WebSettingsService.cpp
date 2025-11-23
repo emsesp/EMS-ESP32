@@ -86,9 +86,11 @@ void WebSettings::read(WebSettings & settings, JsonObject root) {
 }
 
 // call on initialization and also when settings are updated/saved via web or console
+// note, settings is empty when the service starts
 StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     // make a copy of the settings to compare to later
-    WebSettings original_settings = settings;
+    const WebSettings original_settings(settings);
+
     reset_flags();
 
     settings.version       = root["version"] | EMSESP_DEFAULT_VERSION; // save the version, we use it later in System::check_upgrade()
@@ -113,9 +115,9 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
                            settings.board_profile.c_str());
 #endif
 
-    // TODO: make sure board profile is loaded when EMS-ESP starts. it will because original_settings.board_profile is empty when EMS-ESP starts
     // see if the user has changed the board profile
     // this will set: led_gpio, dallas_gpio, rx_gpio, tx_gpio, pbutton_gpio, phy_type, eth_power, eth_phy_addr, eth_clock_mode, led_type
+    // this will always run when EMS-ESP starts since original_settings{} is empty
     if (original_settings.board_profile != settings.board_profile) {
         set_board_profile(settings);
         add_flags(ChangeFlags::RESTART);
@@ -356,8 +358,6 @@ void WebSettingsService::onUpdate() {
 
 void WebSettingsService::begin() {
     _fsPersistence.readFromFS();
-
-    WebSettings::reset_flags();
 }
 
 void WebSettingsService::save() {
@@ -411,6 +411,12 @@ void WebSettings::set_board_profile(WebSettings & settings) {
 #endif
             settings.board_profile = bbq_board;
         }
+    }
+
+    // if it's CUSTOM no need to load the board profile from the settings
+    // as it's already set
+    if (settings.board_profile == "CUSTOM") {
+        return;
     }
 
     // load the board profile into the data vector
