@@ -2308,6 +2308,7 @@ std::vector<uint8_t> System::string_range_to_vector(const std::string & range) {
 // initialize a list of valid GPIOs based on the ESP32 board
 // notes:
 //  - we always allow 0, which is used to indicate Dallas or LED is disabled
+//  - GPIO 1 and 3 are disabled for Serial (UART0's TX0, RX0)
 //  - we also allow input only pins are accepted (34-39) on some boards
 //  - and allow pins 33-38 for octal SPI for 32M vchip version on some boards
 void System::set_valid_system_gpios() {
@@ -2319,11 +2320,11 @@ void System::set_valid_system_gpios() {
     // https://www.wemos.cc/en/latest/c3/c3_mini.html
     valid_system_gpios_ = string_range_to_vector("0-10");
 #elif CONFIG_IDF_TARGET_ESP32S2
-    valid_system_gpios_ = string_range_to_vector("0-14, 19, 20, 21, 33-38, 45, 46");
+    valid_system_gpios_ = string_range_to_vector("0, 2, 4-14, 19, 20, 21, 33-38, 45, 46");
 #elif CONFIG_IDF_TARGET_ESP32S3
-    valid_system_gpios_ = string_range_to_vector("0-14, 17, 18, 21, 33-38, 45, 46");
+    valid_system_gpios_ = string_range_to_vector("0, 2, 4-14, 17, 18, 21, 33-38, 45, 46");
 #elif CONFIG_IDF_TARGET_ESP32 || defined(EMSESP_STANDALONE)
-    valid_system_gpios_ = string_range_to_vector("0-2, 4, 5, 12-19, 23, 25-27, 32-39");
+    valid_system_gpios_ = string_range_to_vector("0, 2, 4, 5, 12-19, 23, 25-27, 32-39");
 #else
 #endif
 
@@ -2362,26 +2363,28 @@ bool System::add_gpio(uint8_t pin, const char * source_name) {
 }
 
 // remove a gpio from both valid and used lists
-void System::remove_gpio(uint8_t pin) {
-    auto it = std::find(valid_system_gpios_.begin(), valid_system_gpios_.end(), pin);
-    if (it != valid_system_gpios_.end()) {
-        LOG_DEBUG("GPIO %d removed from valid gpio list", pin);
-        valid_system_gpios_.erase(it);
-    }
-
-    it = std::find(used_gpios_.begin(), used_gpios_.end(), pin);
+void System::remove_gpio(uint8_t pin, bool also_system) {
+    auto it = std::find(used_gpios_.begin(), used_gpios_.end(), pin);
     if (it != used_gpios_.end()) {
         LOG_DEBUG("GPIO %d removed from used gpio list", pin);
         used_gpios_.erase(it);
     }
+
+    if (also_system) {
+        it = std::find(valid_system_gpios_.begin(), valid_system_gpios_.end(), pin);
+        if (it != valid_system_gpios_.end()) {
+            LOG_DEBUG("GPIO %d removed from valid gpio list", pin);
+            valid_system_gpios_.erase(it);
+        }
+    }
 }
 
-// return a list of valid and unused GPIOs still available for use
-std::vector<uint8_t> System::valid_gpio_list() {
+// return a list of GPIO's available for use
+std::vector<uint8_t> System::available_gpios() {
     std::vector<uint8_t> gpios;
     for (const auto & gpio : valid_system_gpios_) {
         if (std::find(used_gpios_.begin(), used_gpios_.end(), gpio) == used_gpios_.end()) {
-            gpios.push_back(gpio);
+            gpios.push_back(gpio); // didn't find it in used_gpios_, so it's available
         }
     }
     return gpios;
