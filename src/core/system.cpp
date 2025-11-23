@@ -2317,11 +2317,11 @@ void System::set_valid_system_gpios() {
     // get free gpios based on board/platform type
 #if CONFIG_IDF_TARGET_ESP32C3
     // https://www.wemos.cc/en/latest/c3/c3_mini.html
-    valid_gpios_ = string_range_to_vector("0-10");
+    valid_system_gpios_ = string_range_to_vector("0-10");
 #elif CONFIG_IDF_TARGET_ESP32S2
-    valid_gpios_ = string_range_to_vector("0-14, 19, 20, 21, 33-38, 45, 46");
+    valid_system_gpios_ = string_range_to_vector("0-14, 19, 20, 21, 33-38, 45, 46");
 #elif CONFIG_IDF_TARGET_ESP32S3
-    valid_gpios_ = string_range_to_vector("0-14, 17, 18, 21, 33-38, 45, 46");
+    valid_system_gpios_ = string_range_to_vector("0-14, 17, 18, 21, 33-38, 45, 46");
 #elif CONFIG_IDF_TARGET_ESP32 || defined(EMSESP_STANDALONE)
     valid_system_gpios_ = string_range_to_vector("0-2, 4, 5, 12-19, 23, 25-27, 32-39");
 #else
