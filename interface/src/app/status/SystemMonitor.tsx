@@ -113,7 +113,7 @@ const SystemMonitor = () => {
           minWidth: '300px',
           maxWidth: '500px',
           backgroundColor: '#393939',
-          border: 3,
+          border: 2,
           borderColor: '#565656',
           borderRadius: '8px',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',

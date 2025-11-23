@@ -19,10 +19,8 @@ import { I18nContext } from 'i18n/i18n-react';
 import type { Locales } from 'i18n/i18n-types';
 import { loadLocaleAsync } from 'i18n/i18n-util.async';
 
-// Extract style to constant to prevent recreation
 const flagStyle: CSSProperties = { width: 16, verticalAlign: 'middle' };
 
-// Define language options outside component to prevent recreation
 interface LanguageOption {
   key: Locales;
   flag: string;
