@@ -285,13 +285,17 @@ const Customizations = () => {
     return value as string;
   }
 
+  const isCommand = useCallback((de: DeviceEntity) => {
+    return de.n && de.n[0] === '!';
+  }, []);
+
   const formatName = useCallback(
     (de: DeviceEntity, withShortname: boolean) => {
       let name: string;
-      if (de.n && de.n[0] === '!') {
+      if (isCommand(de)) {
         name = de.t
-          ? `${LL.COMMAND(1)}: ${de.t} ${de.n.slice(1)}`
-          : `${LL.COMMAND(1)}: ${de.n.slice(1)}`;
+          ? `${LL.COMMAND(1)}: ${de.t} ${de.n?.slice(1)}`
+          : `${LL.COMMAND(1)}: ${de.n?.slice(1)}`;
       } else if (de.cn && de.cn !== '') {
         name = de.t ? `${de.t} ${de.cn}` : de.cn;
       } else {
@@ -543,7 +547,7 @@ const Customizations = () => {
     return (
       <>
         <Box color="warning.main">
-          <Typography variant="body2" mt={1}>
+          <Typography variant="body2" mt={1} mb={1}>
             <OptionIcon type="favorite" isSet={true} />={LL.CUSTOMIZATIONS_HELP_2()}
             &nbsp;&nbsp;
             <OptionIcon type="readonly" isSet={true} />={LL.CUSTOMIZATIONS_HELP_3()}
@@ -666,14 +670,27 @@ const Customizations = () => {
                       <EntityMaskToggle onUpdate={updateDeviceEntity} de={de} />
                     </Cell>
                     <Cell>
-                      {formatName(de, false)}&nbsp;(
-                      <Link
-                        target="_blank"
-                        href={APIURL + selectedDeviceTypeNameURL + '/' + de.id}
+                      <span
+                        style={{
+                          color:
+                            de.v === undefined && !isCommand(de) ? 'grey' : 'inherit'
+                        }}
                       >
-                        {de.id}
-                      </Link>
-                      )
+                        {formatName(de, false)}&nbsp;(
+                        <Link
+                          style={{
+                            color:
+                              de.v === undefined && !isCommand(de)
+                                ? 'grey'
+                                : 'primary'
+                          }}
+                          target="_blank"
+                          href={APIURL + selectedDeviceTypeNameURL + '/' + de.id}
+                        >
+                          {de.id}
+                        </Link>
+                        )
+                      </span>
                     </Cell>
                     <Cell>
                       {!(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.mi)}
