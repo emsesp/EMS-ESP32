@@ -43,7 +43,7 @@ void WebCustomEntityService::begin() {
 }
 
 // this creates the entity file, saving it to the FS
-// and also calls when the Entity web page is refreshed
+// and also calls when the Custom Entity web page is refreshed
 void WebCustomEntity::read(WebCustomEntity & webEntity, JsonObject root) {
     JsonArray entity  = root["entities"].to<JsonArray>();
     uint8_t   counter = 0;
