@@ -170,7 +170,7 @@ void test_21() {
         "\"cleanSession\":false,\"entityFormat\":1,\"base\":\"ems-esp\",\"discoveryPrefix\":\"homeassistant\",\"discoveryType\":0,\"nestedFormat\":1,"
         "\"haEnabled\":true,\"mqttQos\":0,\"mqttRetain\":false,\"publishTimeHeartbeat\":60,\"publishTimeBoiler\":10,\"publishTimeThermostat\":10,"
         "\"publishTimeSolar\":10,\"publishTimeMixer\":10,\"publishTimeWater\":0,\"publishTimeOther\":10,\"publishTimeSensor\":10,\"publishSingle\":false,"
-        "\"publish2command\":false,\"sendResponse\":false},\"syslog\":{\"enabled\":false},\"sensor\":{\"temperatureSensors\":1,\"temperatureSensorReads\":0,"
+        "\"publish2command\":false,\"sendResponse\":false},\"syslog\":{\"enabled\":false},\"sensor\":{\"temperatureSensors\":3,\"temperatureSensorReads\":0,"
         "\"temperatureSensorFails\":0,\"analogSensors\":5,\"analogSensorReads\":0,\"analogSensorFails\":0},\"api\":{\"APICalls\":0,\"APIFails\":0},\"bus\":{"
         "\"busStatus\":\"connected\",\"busProtocol\":\"Buderus\",\"busTelegramsReceived\":8,\"busReads\":0,\"busWrites\":0,\"busIncompleteTelegrams\":0,"
         "\"busReadsFailed\":0,\"busWritesFailed\":0,\"busRxLineQuality\":100,\"busTxLineQuality\":100},\"settings\":{\"boardProfile\":\"default\",\"locale\":"
@@ -183,7 +183,7 @@ void test_21() {
         "0x2E "
         "0x3B\"},{\"type\":\"thermostat\",\"name\":\"FW120\",\"deviceID\":\"0x10\",\"productID\":192,\"brand\":\"\",\"version\":\"01.00\",\"entities\":15,"
         "\"handlersReceived\":\"0x016F\",\"handlersFetched\":\"0x0170 0x0171\",\"handlersPending\":\"0xA3 0x06 0xA2 0x12 0x13 0x0172 0x0165 "
-        "0x0168\"},{\"type\":\"temperaturesensor\",\"name\":\"temperaturesensor\",\"entities\":1},{\"type\":\"analogsensor\",\"name\":\"analogsensor\","
+        "0x0168\"},{\"type\":\"temperaturesensor\",\"name\":\"temperaturesensor\",\"entities\":3},{\"type\":\"analogsensor\",\"name\":\"analogsensor\","
         "\"entities\":5},{\"type\":\"scheduler\",\"name\":\"scheduler\",\"entities\":2},{\"type\":\"custom\",\"name\":\"custom\",\"entities\":4}]}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/system"));
 }
@@ -198,7 +198,7 @@ void test_22() {
         "\"cleanSession\":false,\"entityFormat\":1,\"base\":\"ems-esp\",\"discoveryPrefix\":\"homeassistant\",\"discoveryType\":0,\"nestedFormat\":1,"
         "\"haEnabled\":true,\"mqttQos\":0,\"mqttRetain\":false,\"publishTimeHeartbeat\":60,\"publishTimeBoiler\":10,\"publishTimeThermostat\":10,"
         "\"publishTimeSolar\":10,\"publishTimeMixer\":10,\"publishTimeWater\":0,\"publishTimeOther\":10,\"publishTimeSensor\":10,\"publishSingle\":false,"
-        "\"publish2command\":false,\"sendResponse\":false},\"syslog\":{\"enabled\":false},\"sensor\":{\"temperatureSensors\":1,\"temperatureSensorReads\":0,"
+        "\"publish2command\":false,\"sendResponse\":false},\"syslog\":{\"enabled\":false},\"sensor\":{\"temperatureSensors\":3,\"temperatureSensorReads\":0,"
         "\"temperatureSensorFails\":0,\"analogSensors\":5,\"analogSensorReads\":0,\"analogSensorFails\":0},\"api\":{\"APICalls\":0,\"APIFails\":0},\"bus\":{"
         "\"busStatus\":\"connected\",\"busProtocol\":\"Buderus\",\"busTelegramsReceived\":8,\"busReads\":0,\"busWrites\":0,\"busIncompleteTelegrams\":0,"
         "\"busReadsFailed\":0,\"busWritesFailed\":0,\"busRxLineQuality\":100,\"busTxLineQuality\":100},\"settings\":{\"boardProfile\":\"default\",\"locale\":"
@@ -211,7 +211,7 @@ void test_22() {
         "0x2E "
         "0x3B\"},{\"type\":\"thermostat\",\"name\":\"FW120\",\"deviceID\":\"0x10\",\"productID\":192,\"brand\":\"\",\"version\":\"01.00\",\"entities\":15,"
         "\"handlersReceived\":\"0x016F\",\"handlersFetched\":\"0x0170 0x0171\",\"handlersPending\":\"0xA3 0x06 0xA2 0x12 0x13 0x0172 0x0165 "
-        "0x0168\"},{\"type\":\"temperaturesensor\",\"name\":\"temperaturesensor\",\"entities\":1},{\"type\":\"analogsensor\",\"name\":\"analogsensor\","
+        "0x0168\"},{\"type\":\"temperaturesensor\",\"name\":\"temperaturesensor\",\"entities\":3},{\"type\":\"analogsensor\",\"name\":\"analogsensor\","
         "\"entities\":5},{\"type\":\"scheduler\",\"name\":\"scheduler\",\"entities\":2},{\"type\":\"custom\",\"name\":\"custom\",\"entities\":4}]}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/system/info"));
 }

@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// tip: use https://jsondiff.com/ to compare the expected and actual responses.
+
 #include <Arduino.h>
 #include <unity.h>
 #include <emsesp.h>
