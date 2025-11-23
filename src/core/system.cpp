@@ -1935,38 +1935,9 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
         data = {17, 18, 8, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // Liligo S3
     } else if (board_profile == "S32S3") {
         data = {2, 18, 5, 17, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // BBQKees Gateway S3
-    } else if (board_profile == "CUSTOM") {
-        // send back current values
-        data = {(int8_t)EMSESP::system_.led_gpio_,
-                (int8_t)EMSESP::system_.dallas_gpio_,
-                (int8_t)EMSESP::system_.rx_gpio_,
-                (int8_t)EMSESP::system_.tx_gpio_,
-                (int8_t)EMSESP::system_.pbutton_gpio_,
-                (int8_t)EMSESP::system_.phy_type_,
-                (int8_t)EMSESP::system_.eth_power_,
-                (int8_t)EMSESP::system_.eth_phy_addr_,
-                (int8_t)EMSESP::system_.eth_clock_mode_,
-                (int8_t)EMSESP::system_.led_type_};
     } else {
         return false; // unknown, return false
     }
-
-    // print out data to log with descriptions
-    LOG_DEBUG(
-        "load_board_profile: %s, led_gpio_=%d, dallas_gpio_=%d, rx_gpio_=%d, tx_gpio_=%d, pbutton_gpio_=%d, phy_type_=%d, eth_power_=%d, eth_phy_addr_=%d, "
-        "eth_clock_mode_=%d, "
-        "led_type_=%d",
-        board_profile.c_str(),
-        data[0],
-        data[1],
-        data[2],
-        data[3],
-        data[4],
-        data[5],
-        data[6],
-        data[7],
-        data[8],
-        data[9]);
 
     return true;
 }
@@ -2380,6 +2351,10 @@ bool System::add_gpio(uint8_t pin, const char * source_name) {
         LOG_DEBUG("GPIO %d for %s is not valid", pin, source_name);
         return false;
     }
+
+    // remove the old pin, if exists from used list
+    remove_gpio(pin);
+
     LOG_DEBUG("Adding GPIO %d for %s to used gpio list", pin, source_name);
     used_gpios_.push_back(pin); // add to used list
 
@@ -2388,9 +2363,17 @@ bool System::add_gpio(uint8_t pin, const char * source_name) {
 
 // remove a gpio from both valid and used lists
 void System::remove_gpio(uint8_t pin) {
-    LOG_DEBUG("Removing GPIO %d from valid and used gpio lists", pin);
-    valid_system_gpios_.erase(std::remove(valid_system_gpios_.begin(), valid_system_gpios_.end(), pin), valid_system_gpios_.end());
-    used_gpios_.erase(std::remove(used_gpios_.begin(), used_gpios_.end(), pin), used_gpios_.end());
+    auto it = std::find(valid_system_gpios_.begin(), valid_system_gpios_.end(), pin);
+    if (it != valid_system_gpios_.end()) {
+        LOG_DEBUG("GPIO %d removed from valid gpio list", pin);
+        valid_system_gpios_.erase(std::remove(valid_system_gpios_.begin(), valid_system_gpios_.end(), pin), valid_system_gpios_.end());
+    }
+
+    it = std::find(used_gpios_.begin(), used_gpios_.end(), pin);
+    if (it != used_gpios_.end()) {
+        LOG_DEBUG("GPIO %d removed from used gpio list", pin);
+        used_gpios_.erase(it);
+    }
 }
 
 // return a list of valid and unused GPIOs still available for use
