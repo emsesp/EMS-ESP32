@@ -1,4 +1,4 @@
-import { memo, useCallback, useContext, useMemo, useState } from 'react';
+import { memo, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import ForwardIcon from '@mui/icons-material/Forward';
@@ -80,6 +80,15 @@ const SignIn = memo(() => {
 
   // Memoize callback to prevent recreation on every render
   const submitOnEnter = useMemo(() => onEnterCallback(signIn), [signIn]);
+
+  // get rid of scrollbar
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
 
   return (
     <Box
