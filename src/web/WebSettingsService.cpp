@@ -416,6 +416,7 @@ void WebSettings::set_board_profile(WebSettings & settings) {
     // if it's CUSTOM no need to load the board profile from the settings
     // as it's already set
     if (settings.board_profile == "CUSTOM") {
+        EMSESP::logger().info("Using CUSTOM board profile");
         return;
     }
 
@@ -433,9 +434,7 @@ void WebSettings::set_board_profile(WebSettings & settings) {
 
     // we still don't have a valid board profile. Let's see if we can determine one from the build config or hardware
     if (settings.board_profile == "default") {
-#if defined(EMSESP_DEBUG)
-        EMSESP::logger().debug("Autodetecting board profile");
-#endif
+        EMSESP::logger().info("Autodetecting board profile");
 #if CONFIG_IDF_TARGET_ESP32
         // check for no PSRAM, could be a E32 or S32?
         if (!ESP.getPsramSize()) {
