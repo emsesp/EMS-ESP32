@@ -144,7 +144,7 @@ class System {
     static bool saveSettings(const char * filename, const char * section, JsonObject input);
 
     static bool                 add_gpio(uint8_t pin, const char * source_name);
-    static std::vector<uint8_t> valid_gpio_list();
+    static std::vector<uint8_t> available_gpios();
     static bool                 load_board_profile(std::vector<int8_t> & data, const std::string & board_profile);
 
     static bool readCommand(const char * data);
@@ -353,7 +353,7 @@ class System {
     }
 #endif
 
-    static void remove_gpio(uint8_t pin); // remove a gpio from both valid and used lists
+    static void remove_gpio(uint8_t pin, bool also_system = false); // remove a gpio from both valid (optional) and used lists
 
   private:
     static uuid::log::Logger logger_;

@@ -134,13 +134,13 @@ const Sensors = () => {
       ts: [],
       as: [],
       analog_enabled: false,
-      valid_gpio_list: [] as number[],
+      available_gpios: [] as number[],
       platform: 'ESP32'
     }
   }).onSuccess((event) => {
     // store the first available GPIO in a ref
-    if (event.data.valid_gpio_list.length > 0) {
-      firstAvailableGPIO.current = event.data.valid_gpio_list[0];
+    if (event.data.available_gpios.length > 0) {
+      firstAvailableGPIO.current = event.data.available_gpios[0];
     }
   });
 
@@ -585,7 +585,7 @@ const Sensors = () => {
           onSave={onAnalogDialogSave}
           creating={creating}
           selectedItem={selectedAnalogSensor}
-          analogGPIOList={sensorData.valid_gpio_list}
+          analogGPIOList={sensorData.available_gpios}
           validator={analogSensorItemValidation(sensorData.as, selectedAnalogSensor)}
         />
       )}

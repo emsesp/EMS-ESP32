@@ -1047,7 +1047,7 @@ const emsesp_sensordata = {
     }
   ],
   analog_enabled: true,
-  valid_gpio_list: [] as number[]
+  available_gpios: [] as number[]
 };
 
 const activity = {
@@ -4556,11 +4556,11 @@ router
       ...emsesp_sensordata.as.map((item) => item.g)
     ]);
 
-    emsesp_sensordata.valid_gpio_list = allGPIOs
+    emsesp_sensordata.available_gpios = allGPIOs
       .filter((gpio) => !usedGPIOs.has(gpio))
       .sort((a, b) => a - b);
 
-    // console.log('valid_gpio_list', emsesp_sensordata.valid_gpio_list);
+    // console.log('available_gpios', emsesp_sensordata.available_gpios);
 
     return emsesp_sensordata;
   })

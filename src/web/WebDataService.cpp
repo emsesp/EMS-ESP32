@@ -153,9 +153,9 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
     root["platform"]       = EMSESP_PLATFORM;
 
     // send back a list of valid and unused GPIOs still available for use
-    JsonArray valid_gpio_list = root["valid_gpio_list"].to<JsonArray>();
-    for (const auto & gpio : EMSESP::system_.valid_gpio_list()) {
-        valid_gpio_list.add(gpio);
+    JsonArray available_gpios = root["available_gpios"].to<JsonArray>();
+    for (const auto & gpio : EMSESP::system_.available_gpios()) {
+        available_gpios.add(gpio);
     }
 
     response->setLength();
