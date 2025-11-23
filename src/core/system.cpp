@@ -2343,12 +2343,12 @@ bool System::add_gpio(uint8_t pin, const char * source_name) {
     if (std::find(valid_system_gpios_.begin(), valid_system_gpios_.end(), pin) != valid_system_gpios_.end()) {
         // It's valid now check if it's already in the used list
         if (std::find(used_gpios_.begin(), used_gpios_.end(), pin) != used_gpios_.end()) {
-            LOG_DEBUG("GPIO %d for %s is already in use", pin, source_name);
+            LOG_WARNING("GPIO %d for %s is already in use", pin, source_name);
             return false; // Pin is already used
         }
     } else {
         // not valid
-        LOG_DEBUG("GPIO %d for %s is not valid", pin, source_name);
+        LOG_WARNING("GPIO %d for %s is not valid", pin, source_name);
         return false;
     }
 
@@ -2366,7 +2366,7 @@ void System::remove_gpio(uint8_t pin) {
     auto it = std::find(valid_system_gpios_.begin(), valid_system_gpios_.end(), pin);
     if (it != valid_system_gpios_.end()) {
         LOG_DEBUG("GPIO %d removed from valid gpio list", pin);
-        used_gpios_.erase(it);
+        valid_system_gpios_.erase(it);
     }
 
     it = std::find(used_gpios_.begin(), used_gpios_.end(), pin);
