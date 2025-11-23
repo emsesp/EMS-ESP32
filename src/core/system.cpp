@@ -2366,7 +2366,7 @@ void System::remove_gpio(uint8_t pin) {
     auto it = std::find(valid_system_gpios_.begin(), valid_system_gpios_.end(), pin);
     if (it != valid_system_gpios_.end()) {
         LOG_DEBUG("GPIO %d removed from valid gpio list", pin);
-        valid_system_gpios_.erase(std::remove(valid_system_gpios_.begin(), valid_system_gpios_.end(), pin), valid_system_gpios_.end());
+        used_gpios_.erase(it);
     }
 
     it = std::find(used_gpios_.begin(), used_gpios_.end(), pin);
