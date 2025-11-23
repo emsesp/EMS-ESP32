@@ -263,7 +263,7 @@ const Dashboard = memo(() => {
     return (
       <>
         {!data.connected && (
-          <MessageBox mb={2} level="error" message={LL.EMS_BUS_WARNING()} />
+          <MessageBox level="error" message={LL.EMS_BUS_WARNING()} />
         )}
 
         {data.connected && data.nodes.length > 0 && !hasFavEntities && (

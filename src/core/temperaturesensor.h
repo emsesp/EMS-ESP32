@@ -115,9 +115,10 @@ class TemperatureSensor {
     }
 
     size_t count_entities(bool exclude_disabled_system = false) const {
-        return std::count_if(sensors_.begin(), sensors_.end(), [exclude_disabled_system](const Sensor & sensor) {
-            return exclude_disabled_system ? !sensor.is_system() : sensor.is_system();
-        });
+        if (exclude_disabled_system) {
+            return std::count_if(sensors_.begin(), sensors_.end(), [](const Sensor & sensor) { return !sensor.is_system(); });
+        }
+        return sensors_.size();
     }
 
     bool update(const std::string & id, const std::string & name, int16_t offset, bool is_system);

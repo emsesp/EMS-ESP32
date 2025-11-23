@@ -57,7 +57,7 @@ void TemperatureSensor::reload() {
     // load the service settings
     EMSESP::system_.dallas_gpio(0); // reset in system to check valid sensor
     EMSESP::webSettingsService.read([&](WebSettings const & settings) {
-        dallas_gpio_ = EMSESP::system_.is_valid_gpio(settings.dallas_gpio) ? settings.dallas_gpio : 0;
+        dallas_gpio_ = settings.dallas_gpio;
         parasite_    = settings.dallas_parasite;
     });
     EMSESP::system_.dallas_gpio(dallas_gpio_); // set to system for checks

@@ -274,7 +274,7 @@ void TxService::send_poll() const {
     }
 }
 
-// get src id from next telegram to check poll in emsesp::incoming_telegram
+// get src id from next telegram to check poll in incoming_telegram() in emsesp.cpp
 uint8_t TxService::get_send_id() {
     static uint32_t count = 0;
     if (!tx_telegrams_.empty() && tx_telegrams_.front().telegram_->src != ems_bus_id()) {

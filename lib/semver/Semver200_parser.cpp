@@ -50,7 +50,7 @@ inline Transition mkx(const char c, Parser_state p, State_transition_hook pth) {
 }
 
 inline void Parse_error(const std::string & s) {
-    // emsesp::EMSESP::logger().err("parse error: %s", s.c_str());
+    // EMSESP::logger().err("parse error: %s", s.c_str());
 }
 
 /// Advance parser state machine by a single step.

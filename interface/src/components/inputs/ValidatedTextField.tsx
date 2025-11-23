@@ -15,6 +15,7 @@ export type ValidatedTextFieldProps = ValidatedFieldProps & TextFieldProps;
 
 const ValidatedTextField: FC<ValidatedTextFieldProps> = ({
   fieldErrors,
+  sx,
   ...rest
 }) => {
   const errors = fieldErrors?.[rest.name];
@@ -25,11 +26,23 @@ const ValidatedTextField: FC<ValidatedTextFieldProps> = ({
         error={!!errors}
         {...rest}
         aria-label="Error"
-        slotProps={{
-          inputLabel: {
-            style: rest.disabled ? { color: 'grey' } : undefined
-          }
+        sx={{
+          '& .MuiInputBase-input.Mui-disabled': {
+            WebkitTextFillColor: 'grey'
+          },
+          ...(sx || {})
         }}
+        {...(rest.disabled && {
+          slotProps: {
+            select: {
+              IconComponent: () => null
+            },
+            inputLabel: {
+              style: { color: 'grey' }
+            }
+          }
+        })}
+        color={rest.disabled ? 'secondary' : 'primary'}
       />
       {errors?.map((e) => (
         <FormHelperText key={e.message} sx={{ color: 'rgb(250, 95, 84)' }}>

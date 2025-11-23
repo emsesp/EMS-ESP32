@@ -98,7 +98,7 @@ const SensorsAnalogDialog = ({
   const analogTypeMenuItems = useMemo(
     () =>
       AnalogTypeNames.map((val, i) => (
-        <MenuItem key={val} value={i}>
+        <MenuItem key={val} value={i + 1}>
           {val}
         </MenuItem>
       )),
@@ -114,6 +114,23 @@ const SensorsAnalogDialog = ({
       )),
     []
   );
+
+  const analogGPIOMenuItems = () =>
+    // add selectedItem.g to the list
+    [
+      ...(analogGPIOList?.includes(selectedItem.g) || selectedItem.g === undefined
+        ? analogGPIOList
+        : [selectedItem.g, ...analogGPIOList])
+    ]
+      .filter((gpio, idx, arr) => arr.indexOf(gpio) === idx)
+      .sort((a, b) => a - b)
+      .map((gpio: number) => {
+        return (
+          <MenuItem key={gpio} value={gpio}>
+            {gpio}
+          </MenuItem>
+        );
+      });
 
   // Reset form when dialog opens or selectedItem changes
   useEffect(() => {
@@ -152,20 +169,6 @@ const SensorsAnalogDialog = ({
     [creating, LL]
   );
 
-  // Ensure the current GPIO is in the list when no creating
-  // note GPIO 99 means not set
-  const availableGPIOs = useMemo(() => {
-    const filteredList = analogGPIOList.filter((gpio) => gpio !== 99);
-    if (
-      editItem.g !== undefined &&
-      editItem.g !== 99 &&
-      !filteredList.includes(editItem.g)
-    ) {
-      return [...filteredList, editItem.g].sort((a, b) => a - b);
-    }
-    return filteredList;
-  }, [analogGPIOList, editItem.g]);
-
   return (
     <Dialog sx={dialogStyle} open={open} onClose={handleClose}>
       <DialogTitle>{dialogTitle}</DialogTitle>
@@ -175,16 +178,12 @@ const SensorsAnalogDialog = ({
             name="g"
             label="GPIO"
             value={editItem.g}
-            sx={{ width: '8ch' }}
-            disabled={editItem.s}
+            sx={{ width: '9ch' }}
+            disabled={editItem.s || !creating}
             select
             onChange={updateFormValue}
           >
-            {availableGPIOs?.map((gpio: number) => (
-              <MenuItem key={gpio} value={gpio}>
-                {gpio}
-              </MenuItem>
-            ))}
+            {analogGPIOMenuItems()}
           </ValidatedTextField>
           <Grid>
             <ValidatedTextField

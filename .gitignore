@@ -75,3 +75,5 @@ sdkconfig_tasmota_esp32
 pnpm-lock.yaml
 package.json
 .cache/
+interface/.tsbuildinfo
+test/test_api/package-lock.json

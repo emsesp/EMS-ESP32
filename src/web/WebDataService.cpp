@@ -145,21 +145,17 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
             obj["f"]       = sensor.factor();
             obj["t"]       = sensor.type();
             obj["s"]       = sensor.is_system();
-
-            if (sensor.type() != AnalogSensor::AnalogType::NOTUSED && sensor.gpio() != 99) {
-                obj["v"] = Helpers::transformNumFloat(sensor.value()); // is optional and is a float
-            } else {
-                obj["v"] = 0; // must have a value for web sorting to work
-            }
+            obj["v"]       = Helpers::transformNumFloat(sensor.value()); // is optional and is a float
         }
     }
 
     root["analog_enabled"] = EMSESP::analog_enabled();
     root["platform"]       = EMSESP_PLATFORM;
 
-    JsonArray valid_gpio_list = root["valid_gpio_list"].to<JsonArray>();
-    for (const auto & gpio : EMSESP::system_.valid_gpio_list()) {
-        valid_gpio_list.add(gpio);
+    // send back a list of valid and unused GPIOs still available for use
+    JsonArray available_gpios = root["available_gpios"].to<JsonArray>();
+    for (const auto & gpio : EMSESP::system_.available_gpios()) {
+        available_gpios.add(gpio);
     }
 
     response->setLength();
@@ -186,7 +182,7 @@ void WebDataService::device_data(AsyncWebServerRequest * request) {
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == id) {
                 // wait max 2.5 sec for updated data (post_send_delay is 2 sec)
-                for (uint16_t i = 0; i < (emsesp::TxService::POST_SEND_DELAY + 500) && EMSESP::wait_validate(); i++) {
+                for (uint16_t i = 0; i < (TxService::POST_SEND_DELAY + 500) && EMSESP::wait_validate(); i++) {
                     delay(1);
                 }
                 EMSESP::wait_validate(0); // reset in case of timeout
@@ -436,7 +432,7 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
         uint8_t   count = 0;
         for (const auto & sensor : EMSESP::analogsensor_.sensors()) {
             // ignore system and disabled sensors
-            if (sensor.is_system() || sensor.type() == AnalogSensor::AnalogType::NOTUSED || sensor.gpio() == 99) {
+            if (sensor.is_system()) {
                 continue;
             }
             JsonObject node = nodes.add<JsonObject>();

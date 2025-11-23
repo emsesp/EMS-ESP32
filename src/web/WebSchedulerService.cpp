@@ -371,13 +371,13 @@ bool WebSchedulerService::command(const char * name, const std::string & command
             if (httpResult != 200) {
                 char error[100];
                 snprintf(error, sizeof(error), "Schedule %s: URL command failed with http code %d", name, httpResult);
-                emsesp::EMSESP::logger().warning(error);
+                EMSESP::logger().warning(error);
                 return false;
             }
 #if defined(EMSESP_DEBUG)
             char msg[100];
             snprintf(msg, sizeof(msg), "Schedule %s: URL command successful with http code %d", name, httpResult);
-            emsesp::EMSESP::logger().debug(msg);
+            EMSESP::logger().debug(msg);
 #endif
             return true;
         }
@@ -416,7 +416,7 @@ bool WebSchedulerService::command(const char * name, const std::string & command
         snprintf(error, sizeof(error), "Schedule %s: command %s failed with error %s", name, cmd.c_str(), Command::return_code_string(return_code));
     }
 
-    emsesp::EMSESP::logger().warning(error);
+    EMSESP::logger().warning(error);
     return false;
 }
 
@@ -439,14 +439,14 @@ void WebSchedulerService::condition() {
         if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_CONDITION) {
             auto match = compute(scheduleItem.time);
 #ifdef EMESESP_DEBUG
-            // emsesp::EMSESP::logger().debug("condition match: %s", match.c_str());
+            // EMSESP::logger().debug("condition match: %s", match.c_str());
 #endif
             if (match.length() == 1 && match[0] == '1' && scheduleItem.retry_cnt == 0xFF) {
                 scheduleItem.retry_cnt = command(scheduleItem.name.c_str(), scheduleItem.cmd, compute(scheduleItem.value)) ? 1 : 0xFF;
             } else if (match.length() == 1 && match[0] == '0' && scheduleItem.retry_cnt == 1) {
                 scheduleItem.retry_cnt = 0xFF;
             } else if (match.length() != 1) { // the match is not boolean
-                emsesp::EMSESP::logger().debug("condition result: %s", match.c_str());
+                EMSESP::logger().debug("condition result: %s", match.c_str());
             }
         }
     }

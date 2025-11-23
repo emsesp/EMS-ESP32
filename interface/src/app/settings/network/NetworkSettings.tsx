@@ -355,8 +355,9 @@ const NetworkSettings = () => {
           </>
         )}
         {restartNeeded && (
-          <MessageBox my={2} level="warning" message={LL.RESTART_TEXT(0)}>
+          <MessageBox level="warning" message={LL.RESTART_TEXT(0)}>
             <Button
+              sx={{ ml: 2 }}
               startIcon={<PowerSettingsNewIcon />}
               variant="contained"
               color="error"

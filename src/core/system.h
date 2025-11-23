@@ -67,7 +67,8 @@ enum SYSTEM_STATUS : uint8_t {
     SYSTEM_STATUS_UPLOADING         = 100,
     SYSTEM_STATUS_ERROR_UPLOAD      = 3,
     SYSTEM_STATUS_PENDING_RESTART   = 4,
-    SYSTEM_STATUS_RESTART_REQUESTED = 5
+    SYSTEM_STATUS_RESTART_REQUESTED = 5,
+    SYSTEM_STATUS_INVALID_GPIO      = 6
 };
 
 enum FUSE_VALUE : uint8_t { ALL = 0, MFG = 1, MODEL = 2, BOARD = 3, REV = 4, BATCH = 5, FUSE = 6 };
@@ -103,11 +104,12 @@ class System {
     void system_restart(const char * partition = nullptr);
 
     void show_mem(const char * note);
-    void reload_settings();
+    void store_settings(class WebSettings & settings);
     void syslog_init();
     bool check_upgrade(bool factory_settings);
     bool check_restore();
     void heartbeat_json(JsonObject output);
+
     void send_heartbeat();
     void send_info_mqtt();
 
@@ -129,11 +131,11 @@ class System {
 
     static bool uploadFirmwareURL(const char * url = nullptr);
 
-    void led_init(bool refresh);
-    void network_init(bool refresh);
-    void button_init(bool refresh);
+    void led_init();
+    void network_init();
+    void button_init();
     void commands_init();
-    void uart_init(bool refresh);
+    void uart_init();
 
     void    systemStatus(uint8_t status_code);
     uint8_t systemStatus();
@@ -141,8 +143,9 @@ class System {
     static void extractSettings(const char * filename, const char * section, JsonObject output);
     static bool saveSettings(const char * filename, const char * section, JsonObject input);
 
-    bool        is_valid_gpio(uint8_t pin);
-    static bool load_board_profile(std::vector<int8_t> & data, const std::string & board_profile);
+    static bool                 add_gpio(uint8_t pin, const char * source_name);
+    static std::vector<uint8_t> available_gpios();
+    static bool                 load_board_profile(std::vector<int8_t> & data, const std::string & board_profile);
 
     static bool readCommand(const char * data);
 
@@ -342,13 +345,15 @@ class System {
         test_set_all_active_ = n;
     }
 
-    static std::vector<uint8_t> valid_gpio_list();
+    static void set_valid_system_gpios();
 
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
     float temperature() {
         return temperature_;
     }
 #endif
+
+    static void remove_gpio(uint8_t pin, bool also_system = false); // remove a gpio from both valid (optional) and used lists
 
   private:
     static uuid::log::Logger logger_;
@@ -391,6 +396,9 @@ class System {
 
     static std::vector<uint8_t> string_range_to_vector(const std::string & range);
 
+    static std::vector<uint8_t> valid_system_gpios_; // list of valid GPIOs for the ESP32 board that can be used
+    static std::vector<uint8_t> used_gpios_;         // list of GPIOs used by the application
+
     int8_t wifi_quality(int8_t dBm);
 
     uint8_t  healthcheck_       = HEALTHCHECK_NO_NETWORK | HEALTHCHECK_NO_BUS; // start with all flags set, no wifi and no ems bus connection
@@ -406,7 +414,6 @@ class System {
     bool eth_present_ = false;
 
     // EMS-ESP settings
-    // copies from WebSettings class in WebSettingsService.h and loaded with reload_settings()
     std::string hostname_;
     String      locale_;
     bool        hide_led_;

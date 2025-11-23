@@ -19,7 +19,6 @@
 #include "system.h"
 #include "emsesp.h" // for send_raw_telegram() command
 
-
 #ifndef EMSESP_STANDALONE
 #include "esp_ota_ops.h"
 #endif
@@ -87,10 +86,12 @@ static constexpr uint8_t NUM_LANGUAGES = sizeof(languages) / sizeof(const char *
 uuid::log::Logger System::logger_{F_(system), uuid::log::Facility::KERN};
 
 // init statics
-PButton  System::myPButton_;
-bool     System::test_set_all_active_ = false;
-uint32_t System::max_alloc_mem_;
-uint32_t System::heap_mem_;
+PButton              System::myPButton_;
+bool                 System::test_set_all_active_ = false;
+uint32_t             System::max_alloc_mem_;
+uint32_t             System::heap_mem_;
+std::vector<uint8_t> System::valid_system_gpios_;
+std::vector<uint8_t> System::used_gpios_;
 
 // find the index of the language
 // 0 = EN, 1 = DE, etc...
@@ -404,62 +405,48 @@ void System::syslog_init() {
 #endif
 }
 
-// read some specific system settings to store locally for faster access
-void System::reload_settings() {
-    // set gpios to zero for valid check
-    led_gpio_     = 0;
-    rx_gpio_      = 0;
-    tx_gpio_      = 0;
-    pbutton_gpio_ = 0;
-    dallas_gpio_  = 0;
-    EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        version_ = settings.version;
-        // first check gpios, priority to rx and tx
-        rx_gpio_      = is_valid_gpio(settings.rx_gpio) ? settings.rx_gpio : 0;
-        tx_gpio_      = is_valid_gpio(settings.tx_gpio) ? settings.tx_gpio : 0;
-        pbutton_gpio_ = is_valid_gpio(settings.pbutton_gpio) ? settings.pbutton_gpio : 0;
-        dallas_gpio_  = is_valid_gpio(settings.dallas_gpio) ? settings.dallas_gpio : 0;
-        led_gpio_     = is_valid_gpio(settings.led_gpio) ? settings.led_gpio : 0;
+// read specific major system settings to store locally for faster access
+void System::store_settings(WebSettings & settings) {
+    version_ = settings.version;
 
-        analog_enabled_ = settings.analog_enabled;
-        low_clock_      = settings.low_clock;
-        hide_led_       = settings.hide_led;
-        led_type_       = settings.led_type;
-        board_profile_  = settings.board_profile;
-        telnet_enabled_ = settings.telnet_enabled;
+    rx_gpio_      = settings.rx_gpio;
+    tx_gpio_      = settings.tx_gpio;
+    pbutton_gpio_ = settings.pbutton_gpio;
+    dallas_gpio_  = settings.dallas_gpio;
+    led_gpio_     = settings.led_gpio;
 
-        modbus_enabled_     = settings.modbus_enabled;
-        modbus_port_        = settings.modbus_port;
-        modbus_max_clients_ = settings.modbus_max_clients;
-        modbus_timeout_     = settings.modbus_timeout;
+    analog_enabled_ = settings.analog_enabled;
+    low_clock_      = settings.low_clock;
+    hide_led_       = settings.hide_led;
+    led_type_       = settings.led_type;
+    board_profile_  = settings.board_profile;
+    telnet_enabled_ = settings.telnet_enabled;
 
-        tx_mode_              = settings.tx_mode;
-        syslog_enabled_       = settings.syslog_enabled;
-        syslog_level_         = settings.syslog_level;
-        syslog_mark_interval_ = settings.syslog_mark_interval;
-        syslog_host_          = settings.syslog_host;
-        syslog_port_          = settings.syslog_port;
+    modbus_enabled_     = settings.modbus_enabled;
+    modbus_port_        = settings.modbus_port;
+    modbus_max_clients_ = settings.modbus_max_clients;
+    modbus_timeout_     = settings.modbus_timeout;
 
-        fahrenheit_     = settings.fahrenheit;
-        bool_format_    = settings.bool_format;
-        bool_dashboard_ = settings.bool_dashboard;
-        enum_format_    = settings.enum_format;
-        readonly_mode_  = settings.readonly_mode;
+    tx_mode_              = settings.tx_mode;
+    syslog_enabled_       = settings.syslog_enabled;
+    syslog_level_         = settings.syslog_level;
+    syslog_mark_interval_ = settings.syslog_mark_interval;
+    syslog_host_          = settings.syslog_host;
+    syslog_port_          = settings.syslog_port;
 
-        phy_type_       = settings.phy_type;
-        eth_power_      = settings.eth_power;
-        eth_phy_addr_   = settings.eth_phy_addr;
-        eth_clock_mode_ = settings.eth_clock_mode;
+    fahrenheit_     = settings.fahrenheit;
+    bool_format_    = settings.bool_format;
+    bool_dashboard_ = settings.bool_dashboard;
+    enum_format_    = settings.enum_format;
+    readonly_mode_  = settings.readonly_mode;
 
-        locale_         = settings.locale;
-        developer_mode_ = settings.developer_mode;
-    });
-}
+    phy_type_       = settings.phy_type;
+    eth_power_      = settings.eth_power;
+    eth_phy_addr_   = settings.eth_phy_addr;
+    eth_clock_mode_ = settings.eth_clock_mode;
 
-// check for valid ESP32 pins
-bool System::is_valid_gpio(uint8_t pin) {
-    auto valid_gpios = valid_gpio_list();
-    return std::find(valid_gpios.begin(), valid_gpios.end(), pin) != valid_gpios.end();
+    locale_         = settings.locale;
+    developer_mode_ = settings.developer_mode;
 }
 
 // Starts up the UART Serial bridge
@@ -501,12 +488,12 @@ void System::start() {
         hostname(networkSettings.hostname.c_str()); // sets the hostname
     });
 
-    commands_init();     // console & api commands
-    led_init(false);     // init LED
-    button_init(false);  // the special button
-    network_init(false); // network
-    uart_init(false);    // start UART
-    syslog_init();       // start syslog
+    commands_init(); // console & api commands
+    led_init();      // init LED
+    button_init();   // button
+    network_init();  // network
+    uart_init();     // start UART
+    syslog_init();   // start syslog
 }
 
 // button single click
@@ -552,11 +539,7 @@ void System::button_OnVLongPress(PButton & b) {
 }
 
 // push button
-void System::button_init(bool refresh) {
-    if (refresh) {
-        reload_settings();
-    }
-
+void System::button_init() {
 #ifndef EMSESP_STANDALONE
     if (!myPButton_.init(pbutton_gpio_, HIGH)) {
         LOG_WARNING("Multi-functional button not detected");
@@ -572,18 +555,13 @@ void System::button_init(bool refresh) {
 }
 
 // set the LED to on or off when in normal operating mode
-void System::led_init(bool refresh) {
-    if (refresh) {
-        // disabled old led port before setting new one
-        if (led_gpio_) {
+void System::led_init() {
+    // disabled old led port before setting new one
 #if ESP_ARDUINO_VERSION_MAJOR < 3
-            led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
+    led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
 #else
-            led_type_ ? rgbLedWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
+    led_type_ ? rgbLedWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
 #endif
-        }
-        reload_settings();
-    }
 
     if ((led_gpio_)) { // 0 means disabled
         if (led_type_) {
@@ -602,18 +580,11 @@ void System::led_init(bool refresh) {
     }
 }
 
-void System::uart_init(bool refresh) {
-    if (refresh) {
-        reload_settings();
-    }
+void System::uart_init() {
     EMSuart::stop();
 
-    // don't start UART if we have invalid GPIOs
-    if (rx_gpio_ && tx_gpio_) {
-        EMSuart::start(tx_mode_, rx_gpio_, tx_gpio_); // start UART
-    } else {
-        LOG_WARNING("Invalid UART Rx/Tx GPIOs. Check config.");
-    }
+    // start UART, GPIOs have already been checked
+    EMSuart::start(tx_mode_, rx_gpio_, tx_gpio_);
 
     EMSESP::txservice_.start(); // reset counters and send devices request
 }
@@ -775,11 +746,7 @@ void System::send_heartbeat() {
 }
 
 // initializes network
-void System::network_init(bool refresh) {
-    if (refresh) {
-        reload_settings();
-    }
-
+void System::network_init() {
     last_system_check_ = 0; // force the LED to go from fast flash to pulse
 
 #if CONFIG_IDF_TARGET_ESP32
@@ -1103,7 +1070,7 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.printfln(" BSSID: %s", WiFi.BSSIDstr().c_str());
         shell.printfln(" RSSI: %d dBm (%d %%)", WiFi.RSSI(), wifi_quality(WiFi.RSSI()));
         char result[10];
-        shell.printfln(" TxPower: %s dBm", emsesp::Helpers::render_value(result, (double)(WiFi.getTxPower() / 4), 1));
+        shell.printfln(" TxPower: %s dBm", Helpers::render_value(result, (double)(WiFi.getTxPower() / 4), 1));
         shell.printfln(" MAC address: %s", WiFi.macAddress().c_str());
         shell.printfln(" Hostname: %s", WiFi.getHostname());
         shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
@@ -1263,7 +1230,7 @@ bool System::check_upgrade(bool factory_settings) {
     version::Semver200_version settings_version(settingsVersion);
 
     if (!missing_version) {
-        LOG_DEBUG("Checking for version upgrades (settings file has v%d.%d.%d-%s)",
+        LOG_DEBUG("Checking for version upgrades (settings file is v%d.%d.%d-%s)",
                   settings_version.major(),
                   settings_version.minor(),
                   settings_version.patch(),
@@ -1933,15 +1900,12 @@ bool System::command_test(const char * value, const int8_t id) {
 // takes a board profile and populates a data array with GPIO configurations
 // returns false if profile is unknown
 //
-// data = led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode, led_type
+// 0=led, 1=dallas, 2=rx, 3=tx, 4=button, 5=phy_type, 6=eth_power, 7=eth_phy_addr, 8=eth_clock_mode, 9=led_type
 //
-// clock modes:
-//  0 = RMII clock input to GPIO0
-//  1 = RMII clock output from GPIO0
-//  2 = RMII clock output from GPIO16
-//  3 = RMII clock output from GPIO17, for 50hz inverted clock
 bool System::load_board_profile(std::vector<int8_t> & data, const std::string & board_profile) {
-    if (board_profile == "S32") {
+    if (board_profile == EMSESP_DEFAULT_BOARD_PROFILE) {
+        return false; // unknown, return false
+    } else if (board_profile == "S32") {
         data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // BBQKees Gateway S32
     } else if (board_profile == "E32") {
         data = {2, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720, 16, 1, 0, 0}; // BBQKees Gateway E32
@@ -1971,24 +1935,10 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
         data = {17, 18, 8, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // Liligo S3
     } else if (board_profile == "S32S3") {
         data = {2, 18, 5, 17, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // BBQKees Gateway S3
-    } else if (board_profile == "CUSTOM") {
-        // send back current values
-        data = {(int8_t)EMSESP::system_.led_gpio_,
-                (int8_t)EMSESP::system_.dallas_gpio_,
-                (int8_t)EMSESP::system_.rx_gpio_,
-                (int8_t)EMSESP::system_.tx_gpio_,
-                (int8_t)EMSESP::system_.pbutton_gpio_,
-                (int8_t)EMSESP::system_.phy_type_,
-                EMSESP::system_.eth_power_,
-                (int8_t)EMSESP::system_.eth_phy_addr_,
-                (int8_t)EMSESP::system_.eth_clock_mode_,
-                (int8_t)EMSESP::system_.led_type_};
     } else {
-        LOG_DEBUG("Couldn't identify board profile %s", board_profile.c_str());
         return false; // unknown, return false
     }
 
-    // LOG_DEBUG("Found data for board profile %s", board_profile.c_str());
     return true;
 }
 
@@ -2218,7 +2168,6 @@ bool System::uploadFirmwareURL(const char * url) {
 
     // we're about to start the upload, set the status so the Web System Monitor spots it
     EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING);
-    // TODO do we need to stop the UART first with EMSuart::stop() ?
 
     // set a callback so we can monitor progress in the WebUI
     Update.onProgress([](size_t progress, size_t total) { EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING + (progress * 100 / total)); });
@@ -2313,7 +2262,7 @@ bool System::command_read(const char * value, const int8_t id) {
 // set the system status code - SYSTEM_STATUS in system.h
 void System::systemStatus(uint8_t status_code) {
     systemStatus_ = status_code;
-    // LOG_DEBUG("Setting System status code %d", status_code);
+    LOG_DEBUG("Setting System status code %d", status_code);
 }
 
 uint8_t System::systemStatus() {
@@ -2322,11 +2271,11 @@ uint8_t System::systemStatus() {
 
 // takes a string range like "6-11, 1, 23, 24-48" which has optional ranges and single values and converts to a vector of ints
 std::vector<uint8_t> System::string_range_to_vector(const std::string & range) {
-    std::vector<uint8_t>   valid_gpios;
+    std::vector<uint8_t>   gpios;
     std::string::size_type pos  = 0;
     std::string::size_type prev = 0;
 
-    auto process_part = [&valid_gpios](std::string part) {
+    auto process_part = [&gpios](std::string part) {
         // trim whitespace
         part.erase(0, part.find_first_not_of(" \t"));
         part.erase(part.find_last_not_of(" \t") + 1);
@@ -2338,10 +2287,10 @@ std::vector<uint8_t> System::string_range_to_vector(const std::string & range) {
             int start = std::stoi(part.substr(0, dash_pos));
             int end   = std::stoi(part.substr(dash_pos + 1));
             for (int i = start; i <= end; i++) {
-                valid_gpios.push_back(static_cast<uint8_t>(i));
+                gpios.push_back(static_cast<uint8_t>(i));
             }
         } else {
-            valid_gpios.push_back(static_cast<uint8_t>(std::stoi(part)));
+            gpios.push_back(static_cast<uint8_t>(std::stoi(part)));
         }
     };
 
@@ -2353,66 +2302,92 @@ std::vector<uint8_t> System::string_range_to_vector(const std::string & range) {
     // handle the last part
     process_part(range.substr(prev));
 
-    return valid_gpios;
+    return gpios;
 }
 
-// return a list of valid GPIOs for the ESP32 board
+// initialize a list of valid GPIOs based on the ESP32 board
 // notes:
-//  - we allow 0, which is used sometimes to indicate a disabled pin
-//  - also allow input only pins are accepted (34-39) on some boards
+//  - we always allow 0, which is used to indicate Dallas or LED is disabled
+//  - GPIO 1 and 3 are disabled for Serial (UART0's TX0, RX0)
+//  - we also allow input only pins are accepted (34-39) on some boards
 //  - and allow pins 33-38 for octal SPI for 32M vchip version on some boards
-std::vector<uint8_t> System::valid_gpio_list() {
+void System::set_valid_system_gpios() {
+    valid_system_gpios_.clear(); // reset system list
+    used_gpios_.clear();         // reset used list
+
     // get free gpios based on board/platform type
 #if CONFIG_IDF_TARGET_ESP32C3
     // https://www.wemos.cc/en/latest/c3/c3_mini.html
-    std::vector<uint8_t> valid_gpios = string_range_to_vector("0-10");
+    valid_system_gpios_ = string_range_to_vector("0-10");
 #elif CONFIG_IDF_TARGET_ESP32S2
-    std::vector<uint8_t> valid_gpios = string_range_to_vector("0-14, 19, 20, 21, 33-38, 45, 46");
+    valid_system_gpios_ = string_range_to_vector("0, 2, 4-14, 19, 20, 21, 33-38, 45, 46");
 #elif CONFIG_IDF_TARGET_ESP32S3
-    std::vector<uint8_t> valid_gpios = string_range_to_vector("2, 4-14, 17, 18, 21, 33-38, 45, 46");
+    valid_system_gpios_ = string_range_to_vector("0, 2, 4-14, 17, 18, 21, 33-38, 45, 46");
 #elif CONFIG_IDF_TARGET_ESP32 || defined(EMSESP_STANDALONE)
-    std::vector<uint8_t> valid_gpios = string_range_to_vector("0, 2, 4, 5, 12-15, 18, 19, 23, 25-27, 32-39");
+    valid_system_gpios_ = string_range_to_vector("0, 2, 4, 5, 12-19, 23, 25-27, 32-39");
 #else
-    std::vector<uint8_t> valid_gpios = {};
 #endif
 
+    // if psram is enabled remove pins 16 and 17 from the list, if set
 #if CONFIG_IDF_TARGET_ESP32
-    // if psram is enabled remove pins 16 and 17 from the list
     if (ESP.getPsramSize() > 0) {
-        valid_gpios.erase(std::remove(valid_gpios.begin(), valid_gpios.end(), 16), valid_gpios.end());
-        valid_gpios.erase(std::remove(valid_gpios.begin(), valid_gpios.end(), 17), valid_gpios.end());
+        valid_system_gpios_.erase(std::remove(valid_system_gpios_.begin(), valid_system_gpios_.end(), 16), valid_system_gpios_.end());
+        valid_system_gpios_.erase(std::remove(valid_system_gpios_.begin(), valid_system_gpios_.end(), 17), valid_system_gpios_.end());
     }
 #endif
+}
 
-    // if ethernet is enabled, remove pins 21 and 22 (I2C)
-    if ((EMSESP::system_.ethernet_connected() || EMSESP::system_.phy_type_ != PHY_type::PHY_TYPE_NONE)) {
-        valid_gpios.erase(std::remove(valid_gpios.begin(), valid_gpios.end(), 21), valid_gpios.end());
-        valid_gpios.erase(std::remove(valid_gpios.begin(), valid_gpios.end(), 22), valid_gpios.end());
+// check if a pin is valid ESP32 pin and if not already used, add to the used gpio list
+// return false if not allowed or already used
+bool System::add_gpio(uint8_t pin, const char * source_name) {
+    // check if this is a valid user GPIO
+    if (std::find(valid_system_gpios_.begin(), valid_system_gpios_.end(), pin) != valid_system_gpios_.end()) {
+        // It's valid now check if it's already in the used list
+        if (std::find(used_gpios_.begin(), used_gpios_.end(), pin) != used_gpios_.end()) {
+            LOG_WARNING("GPIO %d for %s is already in use", pin, source_name);
+            return false; // Pin is already used
+        }
+    } else {
+        // not valid
+        LOG_WARNING("GPIO %d for %s is not valid", pin, source_name);
+        return false;
     }
 
-    // filter out GPIOs already used in application settings, gpio 0 means disabled, except for pbutton
-    for (const auto & gpio : valid_gpios) {
-        if (gpio == EMSESP::system_.pbutton_gpio_
-            || (gpio
-                && (gpio == EMSESP::system_.led_gpio_ || gpio == EMSESP::system_.dallas_gpio_ || gpio == EMSESP::system_.rx_gpio_
-                    || gpio == EMSESP::system_.tx_gpio_))) {
-            valid_gpios.erase(std::remove(valid_gpios.begin(), valid_gpios.end(), gpio), valid_gpios.end());
+    // remove the old pin, if exists from used list
+    remove_gpio(pin);
+
+    LOG_DEBUG("Adding GPIO %d for %s to used gpio list", pin, source_name);
+    used_gpios_.push_back(pin); // add to used list
+
+    return true;
+}
+
+// remove a gpio from both valid and used lists
+void System::remove_gpio(uint8_t pin, bool also_system) {
+    auto it = std::find(used_gpios_.begin(), used_gpios_.end(), pin);
+    if (it != used_gpios_.end()) {
+        LOG_DEBUG("GPIO %d removed from used gpio list", pin);
+        used_gpios_.erase(it);
+    }
+
+    if (also_system) {
+        it = std::find(valid_system_gpios_.begin(), valid_system_gpios_.end(), pin);
+        if (it != valid_system_gpios_.end()) {
+            LOG_DEBUG("GPIO %d removed from valid gpio list", pin);
+            valid_system_gpios_.erase(it);
         }
     }
+}
 
-    // filter out GPIOs already used in analog sensors, if enabled
-    if (EMSESP::system_.analog_enabled_) {
-        for (const auto & sensor : EMSESP::analogsensor_.sensors()) {
-            if (std::find(valid_gpios.begin(), valid_gpios.end(), sensor.gpio()) != valid_gpios.end()) {
-                valid_gpios.erase(std::find(valid_gpios.begin(), valid_gpios.end(), sensor.gpio()));
-            }
+// return a list of GPIO's available for use
+std::vector<uint8_t> System::available_gpios() {
+    std::vector<uint8_t> gpios;
+    for (const auto & gpio : valid_system_gpios_) {
+        if (std::find(used_gpios_.begin(), used_gpios_.end(), gpio) == used_gpios_.end()) {
+            gpios.push_back(gpio); // didn't find it in used_gpios_, so it's available
         }
     }
-
-    // sort the list of valid GPIOs
-    std::sort(valid_gpios.begin(), valid_gpios.end());
-
-    return valid_gpios;
+    return gpios;
 }
 
 } // namespace emsesp

@@ -310,14 +310,6 @@ export const analogSensorItemValidation = (
       { required: true, message: 'Name is required' },
       NAME_PATTERN,
       uniqueAnalogNameValidator(sensors, sensor.o_n)
-    ],
-    g: [
-      {
-        required: true,
-        type: 'number',
-        min: 1,
-        message: 'GPIO is required'
-      }
     ]
   });
 };

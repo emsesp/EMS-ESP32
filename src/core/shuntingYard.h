@@ -29,6 +29,8 @@
 #include <deque>
 #include <math.h>
 
+namespace emsesp {
+
 class Token {
   public:
     enum class Type : uint8_t {
@@ -84,3 +86,5 @@ std::string calculate(const std::string & expr);
 std::string compute(const std::string & expr);
 
 #endif
+
+} // namespace emsesp

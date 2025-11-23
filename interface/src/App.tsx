@@ -8,7 +8,6 @@ import type { Locales } from 'i18n/i18n-types';
 import { loadLocaleAsync } from 'i18n/i18n-util.async';
 import { detectLocale, navigatorDetector } from 'typesafe-i18n/detectors';
 
-// Memoize available locales to prevent recreation on every render
 const AVAILABLE_LOCALES = [
   'de',
   'en',

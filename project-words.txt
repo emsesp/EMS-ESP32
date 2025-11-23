@@ -831,7 +831,6 @@ notoken
 NOTOKEN
 NOTRANSLATION
 NOTSET
-NOTUSED
 NOTYPE
 nrgconscomp
 nrgconscompcooling

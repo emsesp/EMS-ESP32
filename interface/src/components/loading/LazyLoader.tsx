@@ -3,7 +3,6 @@ import { memo } from 'react';
 import { Box, CircularProgress } from '@mui/material';
 import type { SxProps, Theme } from '@mui/material';
 
-// Extract styles to prevent recreation on every render
 const containerStyles: SxProps<Theme> = {
   display: 'flex',
   justifyContent: 'center',

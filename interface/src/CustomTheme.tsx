@@ -11,17 +11,15 @@ import { createTheme } from '@mui/material/styles';
 
 import type { RequiredChildrenProps } from 'utils';
 
-// Memoize dialog style to prevent recreation
 export const dialogStyle = {
   '& .MuiDialog-paper': {
     borderRadius: '8px',
     borderColor: '#565656',
     borderStyle: 'solid',
-    borderWidth: '1px'
+    borderWidth: '2px'
   }
 } as const;
 
-// Memoize theme creation to prevent recreation
 const theme = responsiveFontSizes(
   createTheme({
     typography: {

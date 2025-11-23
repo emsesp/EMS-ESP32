@@ -22,7 +22,6 @@ interface ListMenuItemProps {
   disabled?: boolean;
 }
 
-// Extract styles to prevent recreation
 const iconStyles: CSSProperties = {
   justifyContent: 'right',
   color: 'lightblue',

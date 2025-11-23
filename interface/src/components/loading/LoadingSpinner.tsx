@@ -7,7 +7,6 @@ interface LoadingSpinnerProps {
   height?: number | string;
 }
 
-// Extract styles to prevent recreation on every render
 const circularProgressStyles: SxProps<Theme> = (theme: Theme) => ({
   margin: theme.spacing(4),
   color: theme.palette.text.secondary

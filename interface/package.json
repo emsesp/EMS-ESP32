@@ -36,7 +36,7 @@
     "formidable": "^3.5.4",
     "jwt-decode": "^4.0.0",
     "magic-string": "^0.30.21",
-    "mime-types": "^3.0.1",
+    "mime-types": "^3.0.2",
     "preact": "^10.27.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -53,7 +53,7 @@
     "@preact/preset-vite": "^2.10.2",
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",
     "@types/node": "^24.10.1",
-    "@types/react": "^19.2.5",
+    "@types/react": "^19.2.6",
     "@types/react-dom": "^19.2.3",
     "axe-core": "^4.11.0",
     "concurrently": "^9.2.1",
@@ -62,10 +62,10 @@
     "prettier": "^3.6.2",
     "rollup-plugin-visualizer": "^6.0.5",
     "terser": "^5.44.1",
-    "typescript-eslint": "^8.46.4",
-    "vite": "^7.2.2",
+    "typescript-eslint": "^8.47.0",
+    "vite": "^7.2.4",
     "vite-plugin-imagemin": "^0.6.1",
     "vite-tsconfig-paths": "^5.1.4"
   },
-  "packageManager": "pnpm@10.22.0+sha512.bf049efe995b28f527fd2b41ae0474ce29186f7edcb3bf545087bd61fbbebb2bf75362d1307fda09c2d288e1e499787ac12d4fcb617a974718a6051f2eee741c"
+  "packageManager": "pnpm@10.23.0+sha512.21c4e5698002ade97e4efe8b8b4a89a8de3c85a37919f957e7a0f30f38fbc5bbdd05980ffe29179b2fb6e6e691242e098d945d1601772cad0fef5fb6411e2a4b"
 }

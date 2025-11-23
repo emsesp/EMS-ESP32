@@ -16,7 +16,7 @@ const FormLoaderComponent = ({ errorMessage, onRetry }: FormLoaderProps) => {
 
   if (errorMessage) {
     return (
-      <MessageBox my={2} level="error" message={errorMessage}>
+      <MessageBox level="error" message={errorMessage}>
         {onRetry && (
           <Button
             sx={{ ml: 2 }}

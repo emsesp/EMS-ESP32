@@ -89,43 +89,27 @@ class WebSettings {
     static StateUpdateResult update(JsonObject root, WebSettings & settings);
 
     enum ChangeFlags : uint8_t {
-
-        NONE    = 0,
-        UART    = (1 << 0), // 1
-        SYSLOG  = (1 << 1), // 2
-        ADC     = (1 << 2), // 4 - analog
-        SENSOR  = (1 << 3), // 8
-        SHOWER  = (1 << 4), // 16
-        LED     = (1 << 5), // 32
-        BUTTON  = (1 << 6), // 64
-        MQTT    = (1 << 7), // 128
-        RESTART = 0xFF
-
+        NONE               = 0,
+        UART               = (1 << 0), // 1 - uart
+        SYSLOG             = (1 << 1), // 2 - syslog
+        ANALOG_SENSOR      = (1 << 2), // 4 - analog
+        TEMPERATURE_SENSOR = (1 << 3), // 8 - dallas sensor
+        SHOWER             = (1 << 4), // 16 - shower timer and alert
+        LED                = (1 << 5), // 32 - led
+        BUTTON             = (1 << 6), // 64 - button
+        MQTT               = (1 << 7), // 128 - mqtt
+        RESTART            = 0xFF      // 255 - restart request (all changes)
     };
 
-    static void check_flag(int prev_v, int new_v, uint8_t flag) {
-        if (prev_v != new_v) {
-            add_flags(flag);
-        }
-    }
-
-    static void add_flags(uint8_t flags) {
-        flags_ |= flags;
-    }
-
-    static bool has_flags(uint8_t flags) {
-        return (flags_ & flags) == flags;
-    }
-
-    static void reset_flags() {
-        flags_ = ChangeFlags::NONE;
-    }
-
-    static uint8_t get_flags() {
-        return flags_;
-    }
+    static bool    check_flag(int prev_v, int new_v, uint8_t flag);
+    static void    add_flags(uint8_t flags);
+    static bool    has_flags(uint8_t flags);
+    static void    reset_flags();
+    static uint8_t get_flags();
 
   private:
+    static void set_board_profile(WebSettings & settings);
+
     static uint8_t flags_;
 };
 

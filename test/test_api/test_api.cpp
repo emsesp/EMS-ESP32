@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// tip: use https://jsondiff.com/ to compare the expected and actual responses.
+
 #include <Arduino.h>
 #include <unity.h>
 #include <emsesp.h>
@@ -36,8 +38,8 @@ WebAPIService *  webAPIService;
 EMSESP           application;
 FS               dummyFS;
 
-std::shared_ptr<emsesp::EMSESPConsole> shell;
-char                                   output_buffer[4096];
+std::shared_ptr<EMSESPConsole> shell;
+char                           output_buffer[4096];
 
 class TestStream : public Stream {
   public:

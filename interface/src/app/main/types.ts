@@ -89,15 +89,15 @@ export interface TemperatureSensor {
 export interface AnalogSensor {
   id: number;
   g: number; // GPIO
-  n: string;
-  v: number;
-  u: number;
-  o: number;
-  f: number;
-  t: number;
+  n: string; // name
+  v: number; // value
+  u: number; // uom
+  o: number; // offset
+  f: number; // factor
+  t: number; // type
   d: boolean; // deleted flag
   s: boolean; // system sensor flag
-  o_n?: string;
+  o_n?: string; // original name
 }
 
 export interface WriteTemperatureSensor {
@@ -111,7 +111,7 @@ export interface SensorData {
   ts: TemperatureSensor[];
   as: AnalogSensor[];
   analog_enabled: boolean;
-  valid_gpio_list: number[];
+  available_gpios: number[];
   platform: string;
 }
 
@@ -201,7 +201,7 @@ export enum DeviceValueUOM {
 export const DeviceValueUOM_s = [
   '',
   '°C',
-  '°C',
+  '°C Rel',
   '%',
   'l/min',
   'kWh',
@@ -231,7 +231,6 @@ export const DeviceValueUOM_s = [
 
 export enum AnalogType {
   REMOVED = -1,
-  NOTUSED = 0,
   DIGITAL_IN = 1,
   COUNTER = 2,
   ADC = 3,
@@ -250,22 +249,21 @@ export enum AnalogType {
 }
 
 export const AnalogTypeNames = [
-  '(disabled)',
-  'Digital In',
-  'Counter',
-  'ADC In',
-  'Timer',
-  'Rate',
-  'Digital Out',
-  'PWM 0',
-  'PWM 1',
-  'PWM 2',
-  'NTC Temp.',
-  'RGB Led',
-  'Pulse',
-  'Freq 0',
-  'Freq 1',
-  'Freq 2'
+  'Digital In', // 1
+  'Counter', // 2
+  'ADC In', // 3
+  'Timer', // 4
+  'Rate', // 5
+  'Digital Out', // 6
+  'PWM 0', // 7
+  'PWM 1', // 8
+  'PWM 2', // 9
+  'NTC Temp.', // 10
+  'RGB Led', // 11
+  'Pulse', // 12
+  'Freq 0', // 13
+  'Freq 1', // 14
+  'Freq 2' // 15
 ] as const;
 
 export const BOARD_PROFILES = {
