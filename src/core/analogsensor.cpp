@@ -491,8 +491,9 @@ bool AnalogSensor::update(uint8_t gpio, std::string & name, double offset, doubl
                 found_sensor = true; // found the record
                 // see if it's marked for deletion
                 if (deleted) {
-                    EMSESP::nvs_.remove(AnalogCustomization.name.c_str());
                     LOG_DEBUG("Removing analog sensor GPIO %02d", gpio);
+                    EMSESP::system_.remove_gpio(gpio); // remove from used list only
+                    EMSESP::nvs_.remove(AnalogCustomization.name.c_str());
                     settings.analogCustomizations.remove(AnalogCustomization);
                 } else {
                     // update existing record
@@ -519,7 +520,6 @@ bool AnalogSensor::update(uint8_t gpio, std::string & name, double offset, doubl
     }
 
     // we didn't find it, it's new, so create and store it in the customization list
-    // gpio is already checked if valid in the webUI
     if (!found_sensor) {
         found_sensor = true;
         EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
@@ -532,18 +532,23 @@ bool AnalogSensor::update(uint8_t gpio, std::string & name, double offset, doubl
             newSensor.type      = type;
             newSensor.is_system = is_system;
             settings.analogCustomizations.push_back(newSensor);
-            LOG_DEBUG("Adding customization for analog sensor GPIO %02d", gpio);
-            return StateUpdateResult::CHANGED; // persist the change
+            // check the gpio again and add to used list
+            if (EMSESP::system_.add_gpio(gpio, "Analog Sensor")) {
+                LOG_DEBUG("Adding customization for analog sensor GPIO %02d", gpio);
+                return StateUpdateResult::CHANGED; // persist the change
+            } else {
+                found_sensor = false;
+                return StateUpdateResult::ERROR; // if we can't add the GPIO, return an error
+            }
         });
     }
 
     // reloads the sensors in the customizations file into the sensors list
     if (found_sensor) {
         reload();
-        return true;
     }
 
-    return false;
+    return found_sensor;
 }
 
 // check to see if values have been updated
