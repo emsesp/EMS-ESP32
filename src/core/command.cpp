@@ -413,7 +413,7 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
                 }
             }
 
-            std::string err   = "no entity '" + std::string(cmd) + "' in " + dname;
+            std::string err   = "no '" + std::string(cmd) + "' in " + dname;
             output["message"] = err;
             LOG_WARNING("Command failed: %s", err.c_str());
         }
