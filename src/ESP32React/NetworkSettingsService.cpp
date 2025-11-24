@@ -24,7 +24,6 @@ static bool formatBssid(const String & bssid, uint8_t (&mac)[6]) {
 }
 
 void NetworkSettingsService::begin() {
-    // TODO: may need to change this for Arduino Core 3.1 / IDF 5.x
     // We want the device to come up in opmode=0 (WIFI_OFF), when erasing the flash this is not the default.
     // If needed, we save opmode=0 before disabling persistence so the device boots with WiFi disabled in the future.
     if (WiFi.getMode() != WIFI_OFF) {
