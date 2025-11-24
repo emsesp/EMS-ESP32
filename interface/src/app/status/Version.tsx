@@ -18,12 +18,10 @@ import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
   Button,
-  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControlLabel,
   Grid,
   IconButton,
   Link,
