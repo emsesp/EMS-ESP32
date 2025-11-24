@@ -62,7 +62,7 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "ls"
 // #define EMSESP_DEBUG_DEFAULT "upload"
 // #define EMSESP_DEBUG_DEFAULT "hpmode"
-#define EMSESP_DEBUG_DEFAULT "shuntingyard"
+// #define EMSESP_DEBUG_DEFAULT "shuntingyard"
 // #define EMSESP_DEBUG_DEFAULT "src"
 
 #ifndef EMSESP_DEBUG_DEFAULT
