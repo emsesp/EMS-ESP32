@@ -632,6 +632,9 @@ void EMSdevice::add_device_value(int8_t                tag,              // to b
     devicevalues_.emplace_back(
         device_type_, tag, value_p, type, options, options_single, numeric_operator, short_name, fullname, custom_fullname, uom, has_cmd, min, max, state);
 
+    // add to index for fast lookup by (tag, short_name)
+    devicevalue_index_[{static_cast<uint8_t>(tag), short_name}] = devicevalues_.size() - 1;
+
     // add a new command if it has a function attached
     if (has_cmd) {
         uint8_t flags = CommandFlag::ADMIN_ONLY; // executing commands require admin privileges
@@ -2032,14 +2035,13 @@ std::string EMSdevice::name() {
 // copy a raw value (i.e. without applying the numeric_operator) to the output buffer.
 // returns true on success.
 int EMSdevice::get_modbus_value(uint8_t tag, const std::string & shortname, std::vector<uint16_t> & result) {
-    // find device value by shortname
-    // TODO replace linear search which is inefficient
-    const auto & it = std::find_if(devicevalues_.begin(), devicevalues_.end(), [&](const DeviceValue & x) { return x.tag == tag && x.short_name == shortname; });
-    if (it == devicevalues_.end() && (it->short_name != shortname || it->tag != tag)) {
+    // find device value by shortname using hash map index
+    auto index_it = devicevalue_index_.find({tag, shortname});
+    if (index_it == devicevalue_index_.end()) {
         return -1;
     }
 
-    auto & dv = *it;
+    auto & dv = devicevalues_[index_it->second];
 
     // check if it exists, there is a value for the entity. Set the flag to ACTIVE
     // not that this will override any previously removed states
@@ -2120,13 +2122,13 @@ int EMSdevice::get_modbus_value(uint8_t tag, const std::string & shortname, std:
 int EMSdevice::modbus_value_to_json(uint8_t tag, const std::string & shortname, const std::vector<uint8_t> & modbus_data, JsonObject jsonValue) {
     // LOG_DEBUG("modbus_value_to_json(%d,%s,[%d bytes])\n", tag, shortname.c_str(), modbus_data.size());
 
-    // find device value by shortname
-    const auto & it = std::find_if(devicevalues_.begin(), devicevalues_.end(), [&](const DeviceValue & x) { return x.tag == tag && x.short_name == shortname; });
-    if (it == devicevalues_.end() && (it->short_name != shortname || it->tag != tag)) {
+    // find device value by shortname using hash map index
+    auto index_it = devicevalue_index_.find({tag, shortname});
+    if (index_it == devicevalue_index_.end()) {
         return -1;
     }
 
-    auto & dv = *it;
+    auto & dv = devicevalues_[index_it->second];
 
     // handle Booleans
     if (dv.type == DeviceValueType::BOOL) {
