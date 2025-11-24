@@ -1444,3 +1444,5 @@ chimneysweeper
 pumpopt
 intergral
 vchip
+SPIIO
+SPIDQS
