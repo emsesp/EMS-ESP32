@@ -276,10 +276,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-        old_custom_name +
-        ') with new (' +
-        new_custom_name +
-        ')'
+          old_custom_name +
+          ') with new (' +
+          new_custom_name +
+          ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -375,15 +375,15 @@ function check_upgrade(version: string) {
 
     console.log(
       'Upgrade this version (' +
-      THIS_VERSION +
-      ') to dev (' +
-      dev_version +
-      ') is ' +
-      (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-      ' and to stable (' +
-      stable_version +
-      ') is ' +
-      (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
+        THIS_VERSION +
+        ') to dev (' +
+        dev_version +
+        ') is ' +
+        (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+        ' and to stable (' +
+        stable_version +
+        ') is ' +
+        (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
     );
     data = {
       emsesp_version: THIS_VERSION,
