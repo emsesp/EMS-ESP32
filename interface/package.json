@@ -53,7 +53,7 @@
     "@preact/preset-vite": "^2.10.2",
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",
     "@types/node": "^24.10.1",
-    "@types/react": "^19.2.6",
+    "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "axe-core": "^4.11.0",
     "concurrently": "^9.2.1",
