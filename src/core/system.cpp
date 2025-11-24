@@ -2308,7 +2308,6 @@ std::vector<uint8_t> System::string_range_to_vector(const std::string & range) {
 // initialize a list of valid GPIOs based on the ESP32 board
 // notes:
 //  - we always allow 0, which is used to indicate Dallas or LED is disabled
-//  - GPIO 1 and 3 are disabled for Serial (UART0's TX0, RX0)
 //  - we also allow input only pins are accepted (34-39) on some boards
 //  - and allow pins 33-38 for octal SPI for 32M vchip version on some boards
 void System::set_valid_system_gpios() {
@@ -2318,13 +2317,13 @@ void System::set_valid_system_gpios() {
     // get free gpios based on board/platform type
 #if CONFIG_IDF_TARGET_ESP32C3
     // https://www.wemos.cc/en/latest/c3/c3_mini.html
-    valid_system_gpios_ = string_range_to_vector("0-10");
+    valid_system_gpios_ = string_range_to_vector("0-10"); // UART0=20,21
 #elif CONFIG_IDF_TARGET_ESP32S2
-    valid_system_gpios_ = string_range_to_vector("0, 2, 4-14, 19, 20, 21, 33-38, 45, 46");
+    valid_system_gpios_ = string_range_to_vector("0-14, 19, 20, 21, 33-38, 45, 46"); // UART0=43,44
 #elif CONFIG_IDF_TARGET_ESP32S3
-    valid_system_gpios_ = string_range_to_vector("0, 2, 4-14, 17, 18, 21, 33-38, 45, 46");
+    valid_system_gpios_ = string_range_to_vector("0-14, 17, 18, 21, 33-38, 45, 46"); // UART0=43,44
 #elif CONFIG_IDF_TARGET_ESP32 || defined(EMSESP_STANDALONE)
-    valid_system_gpios_ = string_range_to_vector("0, 2, 4, 5, 12-19, 23, 25-27, 32-39");
+    valid_system_gpios_ = string_range_to_vector("0, 2, 4, 5, 12-19, 23, 25-27, 32-39"); // UART0=1,3
 #else
 #endif
 
