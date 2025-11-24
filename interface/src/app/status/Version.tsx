@@ -511,48 +511,11 @@ const Version = () => {
             <Grid size={{ xs: 4, md: 2 }}>
               <Typography color="secondary">{LL.RELEASE_TYPE()}</Typography>
             </Grid>
-            <Grid size={{ xs: 8, md: 10 }}>
-              <FormControlLabel
-                disabled={!isDev}
-                control={
-                  <Checkbox
-                    sx={{
-                      '&.Mui-checked': {
-                        color: 'lightblue'
-                      }
-                    }}
-                  />
-                }
-                slotProps={{
-                  typography: {
-                    color: 'grey'
-                  }
-                }}
-                checked={!isDev}
-                label={LL.STABLE()}
-                sx={{ '& .MuiSvgIcon-root': { fontSize: 16 } }}
-              />
-              <FormControlLabel
-                disabled={isDev}
-                control={
-                  <Checkbox
-                    sx={{
-                      '&.Mui-checked': {
-                        color: 'lightblue'
-                      }
-                    }}
-                  />
-                }
-                slotProps={{
-                  typography: {
-                    color: 'grey'
-                  }
-                }}
-                checked={isDev}
-                label={LL.DEVELOPMENT()}
-                sx={{ '& .MuiSvgIcon-root': { fontSize: 16 } }}
-              />
-            </Grid>
+            {isDev ? (
+              <Typography>{LL.DEVELOPMENT()}</Typography>
+            ) : (
+              <Typography>{LL.STABLE()}</Typography>
+            )}
           </Grid>
 
           {internetLive ? (
