@@ -154,8 +154,8 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
         // ETH has changed, so we need to check the ethernet pins. Only if ETH is being used.
         if (settings.phy_type != PHY_type::PHY_TYPE_NONE) {
             if (settings.eth_power != -1) {
-                // Ethernet Power -1 means disabled
-                have_valid_gpios = have_valid_gpios && EMSESP::system_.add_gpio(settings.eth_power, "Ethernet Power");
+                // Always remove Ethernet Power gpio unless disabled (-1)
+                EMSESP::system_.remove_gpio(settings.eth_power, true);
             }
             // all valid so far, now remove the ethernet pins from valid list, regardless of whether the GPIOs are valid or not
             EMSESP::system_.remove_gpio(23, true); // MDC
@@ -422,7 +422,7 @@ void WebSettings::set_board_profile(WebSettings & settings) {
 
     // load the board profile into the data vector
     // 0=led, 1=dallas, 2=rx, 3=tx, 4=button, 5=phy_type, 6=eth_power, 7=eth_phy_addr, 8=eth_clock_mode, 9=led_type
-    std::vector<int8_t> data(10, 0); // initialize with 0 for all values
+    std::vector<int8_t> data(99, 0); // initialize with 99 for all values, just as a safe guard to catch bad gpios
     if (settings.board_profile != "default") {
         if (!System::load_board_profile(data, settings.board_profile.c_str())) {
 #if defined(EMSESP_DEBUG)
