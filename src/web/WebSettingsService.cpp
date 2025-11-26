@@ -126,45 +126,52 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     // if any of the GPIOs have changed and re-validate them
     bool have_valid_gpios = true;
 
-    if (check_flag(original_settings.led_gpio, settings.led_gpio, ChangeFlags::LED)) {
-        if (settings.led_gpio != 0) { // 0 means disabled
-            have_valid_gpios = have_valid_gpios && EMSESP::system_.add_gpio(settings.led_gpio, "LED");
+    // free old gpios from used list to allow remapping
+    EMSESP::system_.remove_gpio(original_settings.led_gpio);
+    EMSESP::system_.remove_gpio(original_settings.dallas_gpio);
+    EMSESP::system_.remove_gpio(original_settings.pbutton_gpio);
+    EMSESP::system_.remove_gpio(original_settings.rx_gpio);
+    EMSESP::system_.remove_gpio(original_settings.tx_gpio);
+
+    // now add new gpio assignment, start with rx/tx
+    check_flag(original_settings.rx_gpio, settings.rx_gpio, ChangeFlags::RESTART);
+    have_valid_gpios = have_valid_gpios && EMSESP::system_.add_gpio(settings.rx_gpio, "UART Rx");
+
+    check_flag(original_settings.tx_gpio, settings.tx_gpio, ChangeFlags::RESTART);
+    have_valid_gpios = have_valid_gpios && EMSESP::system_.add_gpio(settings.tx_gpio, "UART Tx");
+
+    check_flag(original_settings.led_gpio, settings.led_gpio, ChangeFlags::LED);
+    if (settings.led_gpio != 0 && !EMSESP::system_.add_gpio(settings.led_gpio, "LED")) {
+        settings.led_gpio = 0; // 0 means disabled
+        have_valid_gpios  = false;
+    }
+
+    check_flag(original_settings.dallas_gpio, settings.dallas_gpio, ChangeFlags::TEMPERATURE_SENSOR);
+    if (settings.dallas_gpio != 0 && !EMSESP::system_.add_gpio(settings.dallas_gpio, "Dallas")) {
+        settings.dallas_gpio = 0; // 0 means disabled
+        have_valid_gpios     = false;
+    }
+
+    check_flag(original_settings.pbutton_gpio, settings.pbutton_gpio, ChangeFlags::BUTTON);
+    have_valid_gpios = have_valid_gpios && EMSESP::system_.add_gpio(settings.pbutton_gpio, "Button");
+
+    check_flag(original_settings.phy_type, settings.phy_type, ChangeFlags::RESTART);
+    // ETH has changed, so we need to check the ethernet pins. Only if ETH is being used.
+    if (settings.phy_type != PHY_type::PHY_TYPE_NONE) {
+        check_flag(original_settings.eth_power, settings.eth_power, ChangeFlags::RESTART);
+        check_flag(original_settings.eth_clock_mode, settings.eth_clock_mode, ChangeFlags::RESTART);
+        if (settings.eth_power != -1) { // Ethernet Power -1 means disabled
+            EMSESP::system_.remove_gpio(settings.eth_power, true);
         }
-    }
-
-    if (check_flag(original_settings.dallas_gpio, settings.dallas_gpio, ChangeFlags::TEMPERATURE_SENSOR)) {
-        if (settings.dallas_gpio != 0) { // 0 means disabled
-            have_valid_gpios = have_valid_gpios && EMSESP::system_.add_gpio(settings.dallas_gpio, "Dallas");
-        }
-    }
-
-    if (check_flag(original_settings.rx_gpio, settings.rx_gpio, ChangeFlags::RESTART)) {
-        have_valid_gpios = have_valid_gpios && EMSESP::system_.add_gpio(settings.rx_gpio, "UART Rx");
-    }
-
-    if (check_flag(original_settings.tx_gpio, settings.tx_gpio, ChangeFlags::RESTART)) {
-        have_valid_gpios = have_valid_gpios && EMSESP::system_.add_gpio(settings.tx_gpio, "UART Tx");
-    }
-
-    if (check_flag(original_settings.pbutton_gpio, settings.pbutton_gpio, ChangeFlags::BUTTON)) {
-        have_valid_gpios = have_valid_gpios && EMSESP::system_.add_gpio(settings.pbutton_gpio, "Button");
-    }
-
-    if (check_flag(original_settings.phy_type, settings.phy_type, ChangeFlags::RESTART)) {
-        // ETH has changed, so we need to check the ethernet pins. Only if ETH is being used.
-        if (settings.phy_type != PHY_type::PHY_TYPE_NONE) {
-            if (settings.eth_power != -1) {
-                // Always remove Ethernet Power gpio unless disabled (-1)
-                EMSESP::system_.remove_gpio(settings.eth_power, true);
-            }
-            // all valid so far, now remove the ethernet pins from valid list, regardless of whether the GPIOs are valid or not
-            EMSESP::system_.remove_gpio(23, true); // MDC
-            EMSESP::system_.remove_gpio(18, true); // MDIO
-            EMSESP::system_.remove_gpio(0, true);  // ETH.clock input
+        // remove the ethernet pins from valid list, regardless of whether the GPIOs are valid or not
+        EMSESP::system_.remove_gpio(23, true); // MDC
+        EMSESP::system_.remove_gpio(18, true); // MDIO
+        if (settings.eth_clock_mode < 2) {
+            EMSESP::system_.remove_gpio(0, true); // ETH.clock input
+        } else if (settings.eth_clock_mode == 2) {
             EMSESP::system_.remove_gpio(16, true); // ETH.clock output
+        } else if (settings.eth_clock_mode == 3) {
             EMSESP::system_.remove_gpio(17, true); // ETH.clock output
-            EMSESP::system_.remove_gpio(21, true); // I2C SDA
-            EMSESP::system_.remove_gpio(22, true); // I2C SCL
         }
     }
 
@@ -422,7 +429,7 @@ void WebSettings::set_board_profile(WebSettings & settings) {
 
     // load the board profile into the data vector
     // 0=led, 1=dallas, 2=rx, 3=tx, 4=button, 5=phy_type, 6=eth_power, 7=eth_phy_addr, 8=eth_clock_mode, 9=led_type
-    std::vector<int8_t> data(99, 0); // initialize with 99 for all values, just as a safe guard to catch bad gpios
+    std::vector<int8_t> data(10, 0); // initialize with 0 for all values
     if (settings.board_profile != "default") {
         if (!System::load_board_profile(data, settings.board_profile.c_str())) {
 #if defined(EMSESP_DEBUG)
