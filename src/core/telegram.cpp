@@ -633,7 +633,8 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
         EMSESP::wait_validate(0); // do not wait for validation
         return;
     }
-
+    // for the last try wait 2 sec before sending.
+    delayed_send_ = (retry_count_ < MAXIMUM_TX_RETRIES) ? 0 : (uuid::get_uptime() + POST_SEND_DELAY);
     tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram_last_), true, get_post_send_query());
 }
 
