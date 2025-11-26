@@ -158,6 +158,12 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
         available_gpios.add(gpio);
     }
 
+    // disable types that can only be used once
+    JsonArray exclude_types = root["exclude_types"].to<JsonArray>();
+    for (uint8_t type : EMSESP::analogsensor_.exclude_types()) {
+        exclude_types.add(type);
+    }
+
     response->setLength();
     request->send(response);
 }
@@ -462,7 +468,8 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
             }
             if (sensor.type() == AnalogSensor::AnalogType::COUNTER
                 || (sensor.type() >= AnalogSensor::AnalogType::DIGITAL_OUT && sensor.type() <= AnalogSensor::AnalogType::PWM_2)
-                || sensor.type() == AnalogSensor::AnalogType::RGB || sensor.type() == AnalogSensor::AnalogType::PULSE) {
+                || sensor.type() == AnalogSensor::AnalogType::RGB || sensor.type() == AnalogSensor::AnalogType::PULSE
+                || (sensor.type() >= AnalogSensor::AnalogType::CNT_0 && sensor.type() <= AnalogSensor::AnalogType::CNT_2)) {
                 dv["c"] = sensor.name();
             }
         }

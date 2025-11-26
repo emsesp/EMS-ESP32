@@ -112,6 +112,7 @@ export interface SensorData {
   as: AnalogSensor[];
   analog_enabled: boolean;
   available_gpios: number[];
+  exclude_types: number[];
   platform: string;
 }
 
@@ -245,7 +246,10 @@ export enum AnalogType {
   PULSE = 12,
   FREQ_0 = 13,
   FREQ_1 = 14,
-  FREQ_2 = 15
+  FREQ_2 = 15,
+  CNT_0 = 16,
+  CNT_1 = 17,
+  CNT_2 = 18
 }
 
 export const AnalogTypeNames = [
@@ -263,7 +267,10 @@ export const AnalogTypeNames = [
   'Pulse', // 12
   'Freq 0', // 13
   'Freq 1', // 14
-  'Freq 2' // 15
+  'Freq 2', // 15
+  'Counter 0', // 16
+  'Counter 1', // 17
+  'Counter2' // 18
 ] as const;
 
 export const BOARD_PROFILES = {

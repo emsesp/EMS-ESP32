@@ -35,6 +35,7 @@ interface DashboardSensorsAnalogDialogProps {
   creating: boolean;
   selectedItem: AnalogSensor;
   analogGPIOList: number[];
+  disabledTypeList: number[];
   validator: Schema;
 }
 
@@ -45,6 +46,7 @@ const SensorsAnalogDialog = ({
   creating,
   selectedItem,
   analogGPIOList,
+  disabledTypeList,
   validator
 }: DashboardSensorsAnalogDialogProps) => {
   const { LL } = useI18nContext();
@@ -66,7 +68,16 @@ const SensorsAnalogDialog = ({
 
   // Memoize helper functions to check sensor type conditions
   const isCounterOrRate = useMemo(
-    () => editItem.t >= AnalogType.COUNTER && editItem.t <= AnalogType.RATE,
+    () =>
+      editItem.t === AnalogType.COUNTER ||
+      editItem.t === AnalogType.RATE ||
+      (editItem.t >= AnalogType.CNT_0 && editItem.t <= AnalogType.CNT_2),
+    [editItem.t]
+  );
+  const isCounter = useMemo(
+    () =>
+      editItem.t === AnalogType.COUNTER ||
+      (editItem.t >= AnalogType.CNT_0 && editItem.t <= AnalogType.CNT_2),
     [editItem.t]
   );
   const isFreqType = useMemo(
@@ -80,13 +91,13 @@ const SensorsAnalogDialog = ({
       editItem.t === AnalogType.PWM_2,
     [editItem.t]
   );
-  const isDigitalOutGPIO = useMemo(
+  const isDACOutGPIO = useMemo(
     () =>
       editItem.t === AnalogType.DIGITAL_OUT &&
       (editItem.g === 25 || editItem.g === 26),
     [editItem.t, editItem.g]
   );
-  const isDigitalOutNonGPIO = useMemo(
+  const isDigitalOutGPIO = useMemo(
     () =>
       editItem.t === AnalogType.DIGITAL_OUT &&
       editItem.g !== 25 &&
@@ -98,7 +109,11 @@ const SensorsAnalogDialog = ({
   const analogTypeMenuItems = useMemo(
     () =>
       AnalogTypeNames.map((val, i) => (
-        <MenuItem key={val} value={i + 1}>
+        <MenuItem
+          key={val}
+          value={i + 1}
+          disabled={disabledTypeList.includes(i + 1)}
+        >
           {val}
         </MenuItem>
       )),
@@ -264,7 +279,7 @@ const SensorsAnalogDialog = ({
               />
             </Grid>
           )}
-          {editItem.t === AnalogType.COUNTER && (
+          {isCounter && (
             <Grid>
               <ValidatedTextField
                 name="o"
@@ -309,7 +324,7 @@ const SensorsAnalogDialog = ({
               />
             </Grid>
           )}
-          {isDigitalOutGPIO && (
+          {isDACOutGPIO && (
             <Grid>
               <ValidatedTextField
                 name="o"
@@ -325,7 +340,7 @@ const SensorsAnalogDialog = ({
               />
             </Grid>
           )}
-          {isDigitalOutNonGPIO && (
+          {isDigitalOutGPIO && (
             <>
               <Grid>
                 <ValidatedTextField

@@ -33,6 +33,8 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - pumpmode enum for HT3 boilers, add commands for manual defrost, chimneysweeper [#2727](https://github.com/emsesp/EMS-ESP32/issues/2727)
 - pid settings [#2735](https://github.com/emsesp/EMS-ESP32/issues/2735)
 - refresh MQTT button added to MQTT Settings page
+- heating assistance, rounding custum settings [#2763](https://github.com/emsesp/EMS-ESP32/discussions/2763)
+- add counter 0..2 for short pulses, high frequency [#2758](https://github.com/emsesp/EMS-ESP32/issues/2758)
 
 ## Fixed
 
