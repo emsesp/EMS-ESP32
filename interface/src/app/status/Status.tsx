@@ -8,10 +8,10 @@ import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import LogoDevIcon from '@mui/icons-material/LogoDev';
 import MemoryIcon from '@mui/icons-material/Memory';
+import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import RouterIcon from '@mui/icons-material/Router';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
-import TimerIcon from '@mui/icons-material/Timer';
 import WifiIcon from '@mui/icons-material/Wifi';
 import {
   Avatar,
@@ -37,7 +37,7 @@ import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import ListMenuItem from 'components/layout/ListMenuItem';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
-import { NTPSyncStatus, NetworkConnectionStatus } from 'types';
+import { NTPSyncStatus, NetworkConnectionStatus, SystemStatusCodes } from 'types';
 import { useInterval } from 'utils';
 import { formatDateTime } from 'utils/time';
 
@@ -112,6 +112,27 @@ const SystemStatus = () => {
         return 'EMS state unknown';
     }
   }, [data?.bus_status, data?.bus_uptime, LL]);
+
+  // Memoize derived status values to avoid recalculation on every render
+  const systemStatus = useMemo(() => {
+    if (!data) return '??';
+
+    switch (data.status) {
+      case SystemStatusCodes.SYSTEM_STATUS_PENDING_UPLOAD:
+      case SystemStatusCodes.SYSTEM_STATUS_UPLOADING:
+        return LL.WAIT_FIRMWARE();
+      case SystemStatusCodes.SYSTEM_STATUS_ERROR_UPLOAD:
+        return LL.ERROR();
+      case SystemStatusCodes.SYSTEM_STATUS_PENDING_RESTART:
+      case SystemStatusCodes.SYSTEM_STATUS_RESTART_REQUESTED:
+        return LL.RESTARTING_PRE();
+      case SystemStatusCodes.SYSTEM_STATUS_INVALID_GPIO:
+        return LL.GPIO_OF(LL.FAILED(0));
+      default:
+        // SystemStatusCodes.SYSTEM_STATUS_NORMAL
+        return 'OK';
+    }
+  }, [data?.status, LL]);
 
   const busStatusHighlight = useMemo(() => {
     if (!data) return theme.palette.warning.main;
@@ -313,10 +334,13 @@ const SystemStatus = () => {
           <ListItem>
             <ListItemAvatar>
               <Avatar sx={{ bgcolor: '#c5572c', color: 'white' }}>
-                <TimerIcon />
+                <MonitorHeartIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary={LL.UPTIME()} secondary={uptimeText} />
+            <ListItemText
+              primary={LL.STATUS_OF(LL.SYSTEM(0))}
+              secondary={`${systemStatus} (${LL.UPTIME()}: ${uptimeText})`}
+            />
             {me.admin && (
               <Button
                 startIcon={<PowerSettingsNewIcon />}
