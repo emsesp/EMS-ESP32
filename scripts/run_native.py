@@ -36,7 +36,6 @@ def move_file(source, target, env):
     print("app version: " + app_version)
     print("platform: " + platform)
 
-    # TODO do we need to add a .exe extension for windows? - need to test
     variant = "native"
 
     # check if output directories exist and create if necessary
