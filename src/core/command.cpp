@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -413,7 +413,7 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
                 }
             }
 
-            std::string err   = "no entity '" + std::string(cmd) + "' in " + dname;
+            std::string err   = "no '" + std::string(cmd) + "' in " + dname;
             output["message"] = err;
             LOG_WARNING("Command failed: %s", err.c_str());
         }

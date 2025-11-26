@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1777,12 +1777,23 @@ void EMSESP::shell_prompt() {
 
 // main loop calling all services
 void EMSESP::loop() {
+    uuid::loop();         // store system uptime
     esp32React.loop();    // web services
     system_.loop();       // does LED and checks system health, and syslog service
     webLogService.loop(); // log in Web UI
 
     // run the loop, unless we're in the middle of an OTA upload
-    if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_NORMAL) {
+    if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_NORMAL || EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_INVALID_GPIO) {
+        // check for GPIO Errors
+        if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_INVALID_GPIO) {
+            static bool only_once = false;
+            if (!only_once) {
+                LOG_ERROR("Invalid GPIOs used. Please check your settings and log");
+                only_once = true;
+            }
+        }
+
+        // loop through the services
         rxservice_.loop();          // process any incoming Rx telegrams
         shower_.loop();             // check for shower on/off
         temperaturesensor_.loop();  // read sensor temperatures
@@ -1807,28 +1818,19 @@ void EMSESP::loop() {
         }
     }
 
-    if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_INVALID_GPIO) {
-        static bool only_once = false;
-        if (!only_once) {
-            LOG_ERROR("Invalid GPIOs used. Please check your settings and log");
-            only_once = true;
-        }
-    }
-
-    uuid::loop();
-
+    // telnet service
 #ifndef EMSESP_STANDALONE
     if (system_.telnet_enabled()) {
         telnet_.loop();
     }
 #endif
 
+    // console service
     Shell::loop_all();
-
-    static bool show_prompt = true;
 
     // user has to CTRL-D to create a serial console stream, exit command will close it
     // this saves around 2kb of heap memory
+    static bool show_prompt = true;
     if (shell_) {
         if (!shell_->running()) {
             shell_.reset();

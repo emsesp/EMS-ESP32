@@ -116,8 +116,8 @@ let system_status = {
 let DEV_VERSION_IS_UPGRADEABLE: boolean;
 let STABLE_VERSION_IS_UPGRADEABLE: boolean;
 let THIS_VERSION: string;
-let LATEST_STABLE_VERSION = '3.7.2';
-let LATEST_DEV_VERSION = '3.7.3-dev.6';
+let LATEST_STABLE_VERSION = '3.7.3';
+let LATEST_DEV_VERSION = '3.7.4-dev.2';
 
 // scenarios for testing versioning
 let version_test = 0; // on latest stable, or switch to dev
@@ -142,19 +142,19 @@ switch (version_test as number) {
     break;
   case 2:
     // upgrade an older stable to latest stable or switch to latest dev
-    THIS_VERSION = '3.6.5';
+    THIS_VERSION = '3.7.2';
     STABLE_VERSION_IS_UPGRADEABLE = true;
     DEV_VERSION_IS_UPGRADEABLE = true;
     break;
   case 3:
     // upgrade dev to latest, or switch to stable
-    THIS_VERSION = '3.7.3-dev.2';
+    THIS_VERSION = '3.7.4-dev.3';
     STABLE_VERSION_IS_UPGRADEABLE = false;
     DEV_VERSION_IS_UPGRADEABLE = true;
     break;
   case 4:
     // downgrade to an older dev, or switch back to stable
-    THIS_VERSION = '3.7.3-dev.9';
+    THIS_VERSION = '3.7.3-dev.1';
     STABLE_VERSION_IS_UPGRADEABLE = true;
     DEV_VERSION_IS_UPGRADEABLE = false;
     break;

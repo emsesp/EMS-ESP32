@@ -68,4 +68,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - place system message command in side scheduler loop to reduce stack memory usage by 2KB
 - syslog mark interval set to 1 hour
 - handle process_telegram in oneloop
-- improved GPIO validation in Analog Sensors and System settings
+- improved GPIO validation for Analog Sensors and System GPIOs
+- entities with no values are greyed out in the Web UI in the Customization page
+- added System Status to Web Status page
+- show number on entities and supported languages in log on boot

@@ -173,7 +173,7 @@ void test_21() {
         "\"publish2command\":false,\"sendResponse\":false},\"syslog\":{\"enabled\":false},\"sensor\":{\"temperatureSensors\":3,\"temperatureSensorReads\":0,"
         "\"temperatureSensorFails\":0,\"analogSensors\":5,\"analogSensorReads\":0,\"analogSensorFails\":0},\"api\":{\"APICalls\":0,\"APIFails\":0},\"bus\":{"
         "\"busStatus\":\"connected\",\"busProtocol\":\"Buderus\",\"busTelegramsReceived\":8,\"busReads\":0,\"busWrites\":0,\"busIncompleteTelegrams\":0,"
-        "\"busReadsFailed\":0,\"busWritesFailed\":0,\"busRxLineQuality\":100,\"busTxLineQuality\":100},\"settings\":{\"boardProfile\":\"default\",\"locale\":"
+        "\"busReadsFailed\":0,\"busWritesFailed\":0,\"busRxLineQuality\":100,\"busTxLineQuality\":100},\"settings\":{\"boardProfile\":\"S32\",\"locale\":"
         "\"en\",\"txMode\":8,\"emsBusID\":11,\"showerTimer\":false,\"showerMinDuration\":180,\"showerAlert\":false,\"hideLed\":false,\"noTokenApi\":false,"
         "\"readonlyMode\":false,\"fahrenheit\":false,\"dallasParasite\":false,\"boolFormat\":1,\"boolDashboard\":1,\"enumFormat\":1,\"analogEnabled\":true,"
         "\"telnetEnabled\":true,\"maxWebLogBuffer\":25,\"modbusEnabled\":false,\"forceHeatingOff\":false,\"developerMode\":false},\"devices\":[{\"type\":"
@@ -201,7 +201,7 @@ void test_22() {
         "\"publish2command\":false,\"sendResponse\":false},\"syslog\":{\"enabled\":false},\"sensor\":{\"temperatureSensors\":3,\"temperatureSensorReads\":0,"
         "\"temperatureSensorFails\":0,\"analogSensors\":5,\"analogSensorReads\":0,\"analogSensorFails\":0},\"api\":{\"APICalls\":0,\"APIFails\":0},\"bus\":{"
         "\"busStatus\":\"connected\",\"busProtocol\":\"Buderus\",\"busTelegramsReceived\":8,\"busReads\":0,\"busWrites\":0,\"busIncompleteTelegrams\":0,"
-        "\"busReadsFailed\":0,\"busWritesFailed\":0,\"busRxLineQuality\":100,\"busTxLineQuality\":100},\"settings\":{\"boardProfile\":\"default\",\"locale\":"
+        "\"busReadsFailed\":0,\"busWritesFailed\":0,\"busRxLineQuality\":100,\"busTxLineQuality\":100},\"settings\":{\"boardProfile\":\"S32\",\"locale\":"
         "\"en\",\"txMode\":8,\"emsBusID\":11,\"showerTimer\":false,\"showerMinDuration\":180,\"showerAlert\":false,\"hideLed\":false,\"noTokenApi\":false,"
         "\"readonlyMode\":false,\"fahrenheit\":false,\"dallasParasite\":false,\"boolFormat\":1,\"boolDashboard\":1,\"enumFormat\":1,\"analogEnabled\":true,"
         "\"telnetEnabled\":true,\"maxWebLogBuffer\":25,\"modbusEnabled\":false,\"forceHeatingOff\":false,\"developerMode\":false},\"devices\":[{\"type\":"
@@ -314,22 +314,22 @@ void test_40() {
 }
 
 void test_41() {
-    auto expected_response = "[{\"message\":\"no entity 'settings' in system\"}]";
+    auto expected_response = "[{\"message\":\"no 'settings' in system\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/system/settings/locale2"));
 }
 
 void test_42() {
-    auto expected_response = "[{\"message\":\"no entity 'settings2' in system\"}]";
+    auto expected_response = "[{\"message\":\"no 'settings2' in system\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/system/settings2"));
 }
 
 void test_43() {
-    auto expected_response = "[{\"message\":\"no entity 'settings2' in system\"}]";
+    auto expected_response = "[{\"message\":\"no 'settings2' in system\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/system/settings2/locale2"));
 }
 
 void test_44() {
-    auto expected_response = "[{\"message\":\"no entity 'test_scheduler2' in scheduler\"}]";
+    auto expected_response = "[{\"message\":\"no 'test_scheduler2' in scheduler\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/scheduler/test_scheduler2"));
 }
 
@@ -339,12 +339,12 @@ void test_45() {
 }
 
 void test_46() {
-    auto expected_response = "[{\"message\":\"no entity 'test_scheduler2' in scheduler\"}]";
+    auto expected_response = "[{\"message\":\"no 'test_scheduler2' in scheduler\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/scheduler/test_scheduler2/val2"));
 }
 
 void test_47() {
-    auto expected_response = "[{\"message\":\"no entity 'test_seltemp2' in custom\"}]";
+    auto expected_response = "[{\"message\":\"no 'test_seltemp2' in custom\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/custom/test_seltemp2"));
 }
 
@@ -354,12 +354,12 @@ void test_48() {
 }
 
 void test_49() {
-    auto expected_response = "[{\"message\":\"no entity 'test_sensor20' in temperaturesensor\"}]";
+    auto expected_response = "[{\"message\":\"no 'test_sensor20' in temperaturesensor\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/temperaturesensor/test_sensor20"));
 }
 
 void test_50() {
-    auto expected_response = "[{\"message\":\"no entity '0b_0c0d_0e0f_xxxx' in temperaturesensor\"}]";
+    auto expected_response = "[{\"message\":\"no '0b_0c0d_0e0f_xxxx' in temperaturesensor\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/temperaturesensor/0B_0C0D_0E0F_XXXX"));
 }
 
@@ -374,12 +374,12 @@ void test_52() {
 }
 
 void test_53() {
-    auto expected_response = "[{\"message\":\"no entity 'test_analog10' in analogsensor\"}]";
+    auto expected_response = "[{\"message\":\"no 'test_analog10' in analogsensor\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor/test_analog10"));
 }
 
 void test_54() {
-    auto expected_response = "[{\"message\":\"no entity 'test_analog10' in analogsensor\"}]";
+    auto expected_response = "[{\"message\":\"no 'test_analog10' in analogsensor\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor/test_analog10/bad2"));
 }
 
