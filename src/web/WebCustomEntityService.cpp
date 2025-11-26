@@ -196,7 +196,7 @@ bool WebCustomEntityService::command_setvalue(const char * value, const int8_t i
                 if (!Helpers::value2float(value, f)) {
                     return false;
                 }
-                int v = f / entityItem.factor;
+                int v = (f / entityItem.factor + 0.5);
                 if (entityItem.value_type == DeviceValueType::UINT8 || entityItem.value_type == DeviceValueType::INT8) {
                     EMSESP::send_write_request(entityItem.type_id, entityItem.device_id, entityItem.offset, v, 0);
                 } else if (entityItem.value_type == DeviceValueType::UINT16 || entityItem.value_type == DeviceValueType::INT16) {

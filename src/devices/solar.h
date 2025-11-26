@@ -105,7 +105,8 @@ class Solar : public EMSdevice {
     uint8_t solarPump2Mode_;        // 00=off, 01=PWM, 02=10V
 
     // telegram 0x35C Heat assistance
-    uint8_t solarHeatAssist_; // is *10
+    int8_t heatAssistOn_;  // is *10
+    int8_t heatAssistOff_; // is *10
 
     // telegram 0x035F
     uint8_t cylPriority_; // 0 or 1
@@ -195,6 +196,8 @@ class Solar : public EMSdevice {
     bool set_cylPriority(const char * value, const int8_t id);
     bool set_heatAssist(const char * value, const int8_t id);
     bool set_diffControl(const char * value, const int8_t id);
+    bool set_solarHeatAssistOn(const char * value, const int8_t id);
+    bool set_solarHeatAssistOff(const char * value, const int8_t id);
 };
 
 } // namespace emsesp
