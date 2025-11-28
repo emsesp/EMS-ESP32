@@ -134,10 +134,10 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     EMSESP::system_.remove_gpio(original_settings.tx_gpio);
 
     // now add new gpio assignment, start with rx/tx
-    check_flag(original_settings.rx_gpio, settings.rx_gpio, ChangeFlags::RESTART);
+    check_flag(original_settings.rx_gpio, settings.rx_gpio, ChangeFlags::UART);
     have_valid_gpios = have_valid_gpios && EMSESP::system_.add_gpio(settings.rx_gpio, "UART Rx");
 
-    check_flag(original_settings.tx_gpio, settings.tx_gpio, ChangeFlags::RESTART);
+    check_flag(original_settings.tx_gpio, settings.tx_gpio, ChangeFlags::UART);
     have_valid_gpios = have_valid_gpios && EMSESP::system_.add_gpio(settings.tx_gpio, "UART Tx");
 
     check_flag(original_settings.led_gpio, settings.led_gpio, ChangeFlags::LED);

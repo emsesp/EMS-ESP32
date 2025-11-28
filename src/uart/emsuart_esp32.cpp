@@ -106,6 +106,7 @@ void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t 
         xTaskCreatePinnedToCore(uart_event_task, "uart_event_task", EMSESP_UART_STACKSIZE, NULL, EMSESP_UART_PRIORITY, &xHandle, EMSESP_UART_RUNNING_CORE);
 #endif
     } else {
+        uart_set_pin(EMSUART_NUM, tx_gpio, rx_gpio, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
         vTaskResume(xHandle);
     }
     tx_mode_ = tx_mode;
