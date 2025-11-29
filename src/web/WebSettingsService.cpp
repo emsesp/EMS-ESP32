@@ -422,7 +422,7 @@ void WebSettings::set_board_profile(WebSettings & settings) {
 
     // load the board profile into the data vector
     // 0=led, 1=dallas, 2=rx, 3=tx, 4=button, 5=phy_type, 6=eth_power, 7=eth_phy_addr, 8=eth_clock_mode, 9=led_type
-    std::vector<int8_t> data(99, 0); // initialize with 99 for all values, just as a safe guard to catch bad gpios
+    std::vector<int8_t> data(10, 99); // initialize with 99 for all values, just as a safe guard to catch bad gpios
     if (settings.board_profile != "default") {
         if (!System::load_board_profile(data, settings.board_profile.c_str())) {
 #if defined(EMSESP_DEBUG)
