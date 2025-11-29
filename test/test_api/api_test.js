@@ -29,7 +29,7 @@ async function testAPI(ip = "ems-esp.local", apiPath = "system") {
 }
 
 // Run the test
-testAPI("192.168.1.223", "system")
+testAPI("192.168.1.65", "system")
     .then(() => {
         console.log('Test completed successfully');
         process.exit(0);
