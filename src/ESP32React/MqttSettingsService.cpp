@@ -173,7 +173,7 @@ bool MqttSettingsService::configureMqtt() {
 
     // only connect if WiFi is connected and MQTT is enabled
     if (_state.enabled && emsesp::EMSESP::system_.network_connected() && !_state.host.isEmpty()) {
-        // create last will topic with the base prefixed. It has to be static because the client destroys the reference
+        // create the Last Will Testament topic (LWT) with the base prefixed. It has to be static because the client destroys the reference
         static char will_topic[FACTORY_MQTT_MAX_TOPIC_LENGTH];
         if (_state.base.isEmpty()) {
             snprintf(will_topic, sizeof(will_topic), "status");
