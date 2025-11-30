@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@alova/adapter-xhr':
-        specifier: 2.2.1
-        version: 2.2.1(alova@3.3.4)
+        specifier: 2.3.0
+        version: 2.3.0(alova@3.4.0)
       '@emotion/react':
         specifier: ^11.14.0
         version: 11.14.0(@types/react@19.2.7)(react@19.2.0)
@@ -30,8 +30,8 @@ importers:
         specifier: 4.1.15
         version: 4.1.15(@emotion/react@11.14.0(@types/react@19.2.7)(react@19.2.0))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       alova:
-        specifier: 3.3.4
-        version: 3.3.4
+        specifier: 3.4.0
+        version: 3.4.0
       async-validator:
         specifier: ^4.2.5
         version: 4.2.5
@@ -86,7 +86,7 @@ importers:
         version: 2.10.2(@babel/core@7.28.5)(preact@10.27.2)(vite@7.2.4(@types/node@24.10.1)(terser@5.44.1))
       '@trivago/prettier-plugin-sort-imports':
         specifier: ^6.0.0
-        version: 6.0.0(prettier@3.7.2)
+        version: 6.0.0(prettier@3.7.3)
       '@types/node':
         specifier: ^24.10.1
         version: 24.10.1
@@ -109,8 +109,8 @@ importers:
         specifier: ^10.1.8
         version: 10.1.8(eslint@9.39.1)
       prettier:
-        specifier: ^3.7.2
-        version: 3.7.2
+        specifier: ^3.7.3
+        version: 3.7.3
       rollup-plugin-visualizer:
         specifier: ^6.0.5
         version: 6.0.5(rollup@4.53.3)
@@ -132,8 +132,8 @@ importers:
 
 packages:
 
-  '@alova/adapter-xhr@2.2.1':
-    resolution: {integrity: sha512-0aPVdFmmMn4Z4KvG+DOyWhzQKaBGCe8yPQ4mJz1hQNPzbrIfqq+0flVF6ArFL4EtPbOJVnKropJNE691sjtq5A==}
+  '@alova/adapter-xhr@2.3.0':
+    resolution: {integrity: sha512-IegkchjfXFxXgn6JUZuVEHFQn+jojzrnNdzrGhX5ecEOIC8M/CQvLQzXjLeT6PbGiwnXwvZWL2ya4eqQz51+uQ==}
     peerDependencies:
       alova: ^3.0.20
 
@@ -960,8 +960,8 @@ packages:
   ajv@6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
 
-  alova@3.3.4:
-    resolution: {integrity: sha512-UKKqXdvf8aQ4C7m3brO77YWe5CDz8N59PdAUz7M8gowKUUXTutbk0Vk5DRBrCe0hMUyyNMUhdCZ38llGxCViyQ==}
+  alova@3.4.0:
+    resolution: {integrity: sha512-/vSvVbA45CHg34Y5erx+wVxy1B/n4UoGX7dKqSpLVz9cDSDSOhqCnRD/dV+AErjMmQeVpJrjmDT7SCkhQbnUeQ==}
     engines: {node: '>= 18.0.0'}
 
   ansi-regex@2.1.1:
@@ -2478,8 +2478,8 @@ packages:
     resolution: {integrity: sha512-ravE6m9Atw9Z/jjttRUZ+clIXogdghyZAuWJ3qEzjT+jI/dL1ifAqhZeC5VHzQp1MSt1+jxKkFNemj/iO7tVUA==}
     engines: {node: '>=4'}
 
-  prettier@3.7.2:
-    resolution: {integrity: sha512-n3HV2J6QhItCXndGa3oMWvWFAgN1ibnS7R9mt6iokScBOC0Ul9/iZORmU2IWUMcyAQaMPjTlY3uT34TqocUxMA==}
+  prettier@3.7.3:
+    resolution: {integrity: sha512-QgODejq9K3OzoBbuyobZlUhznP5SKwPqp+6Q6xw6o8gnhr4O85L2U915iM2IDcfF2NPXVaM9zlo9tdwipnYwzg==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -3098,10 +3098,10 @@ packages:
 
 snapshots:
 
-  '@alova/adapter-xhr@2.2.1(alova@3.3.4)':
+  '@alova/adapter-xhr@2.3.0(alova@3.4.0)':
     dependencies:
       '@alova/shared': 1.3.1
-      alova: 3.3.4
+      alova: 3.4.0
 
   '@alova/shared@1.3.1': {}
 
@@ -3716,7 +3716,7 @@ snapshots:
       react-virtualized-auto-sizer: 1.0.26(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react-window: 1.8.11(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
 
-  '@trivago/prettier-plugin-sort-imports@6.0.0(prettier@3.7.2)':
+  '@trivago/prettier-plugin-sort-imports@6.0.0(prettier@3.7.3)':
     dependencies:
       '@babel/generator': 7.28.5
       '@babel/parser': 7.28.5
@@ -3726,7 +3726,7 @@ snapshots:
       lodash-es: 4.17.21
       minimatch: 9.0.5
       parse-imports-exports: 0.2.4
-      prettier: 3.7.2
+      prettier: 3.7.3
     transitivePeerDependencies:
       - supports-color
 
@@ -3911,7 +3911,7 @@ snapshots:
       json-schema-traverse: 0.4.1
       uri-js: 4.4.1
 
-  alova@3.3.4:
+  alova@3.4.0:
     dependencies:
       '@alova/shared': 1.3.1
       rate-limiter-flexible: 5.0.5
@@ -5487,7 +5487,7 @@ snapshots:
 
   prepend-http@2.0.0: {}
 
-  prettier@3.7.2: {}
+  prettier@3.7.3: {}
 
   process-nextick-args@2.0.1: {}
 
