@@ -251,6 +251,7 @@ class EMSdevice {
     std::string get_value_uom(const std::string & shortname) const;
     bool        get_value_info(JsonObject root, const char * cmd, const int8_t id);
     void        get_value_json(JsonObject output, DeviceValue & dv);
+    std::string get_metrics_prometheus(const int8_t tag = -1);
     void        get_dv_info(JsonObject json);
 
     enum OUTPUT_TARGET : uint8_t { API_VERBOSE, API_SHORTNAMES, MQTT, CONSOLE };
