@@ -86,6 +86,7 @@ MAKE_WORD(info)
 MAKE_WORD(settings)
 MAKE_WORD(value)
 MAKE_WORD(entities)
+MAKE_WORD(metrics)
 MAKE_WORD(coldshot)
 
 // device types - lowercase, used in MQTT

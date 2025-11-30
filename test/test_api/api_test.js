@@ -2,34 +2,60 @@
 // node api_test.js
 const axios = require('axios');
 
-async function testAPI(ip = "ems-esp.local", apiPath = "system") {
+async function testAPI(ip = "ems-esp.local", apiPath = "system", loopCount = 1, delayMs = 1000) {
     const baseUrl = `http://${ip}/api`;
     const url = `${baseUrl}/${apiPath}`;
+    const results = [];
     
-    try {
-        const response = await axios.get(url, {
-            timeout: 5000,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        console.log('Status:', response.status);
-        console.log('Data:', JSON.stringify(response.data, null, 2));
-        
-        return response.data;
-    } catch (error) {
-        console.error('Error:', error.message);
-        if (error.response) {
-            console.error('Response status:', error.response.status);
-            console.error('Response data:', error.response.data);
+    for (let i = 0; i < loopCount; i++) {
+        let logMessage = '';
+        if (loopCount > 1) {
+            logMessage = `--- Request ${i + 1} of ${loopCount} ---`;
         }
-        throw error;
+        
+        try {
+            const response = await axios.get(url, {
+                timeout: 5000,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            // console.log('Status:', response.status);
+            // console.log('Data:', JSON.stringify(response.data, null, 2));
+            
+            // Extract and print freeMem
+            const freeMem = response.data?.freeMem || response.data?.system?.freeMem;
+            if (freeMem !== undefined) {
+                logMessage += (logMessage ? ' ' : '') + `System Free Memory: ${freeMem}`;
+            } else {
+                logMessage += (logMessage ? ' ' : '') + 'freeMem not found in response';
+            }
+            console.log(logMessage);
+            
+            // Delay before next request (except for the last one)
+            if (i < loopCount - 1) {
+                await new Promise(resolve => setTimeout(resolve, delayMs));
+            }
+        } catch (error) {
+            console.error('Error:', error.message);
+            if (error.response) {
+                console.error('Response status:', error.response.status);
+                console.error('Response data:', error.response.data);
+            }
+            throw error;
+        }
     }
+    
+    return loopCount === 1 ? results[0] : results;
 }
 
 // Run the test
-testAPI("192.168.1.223", "system")
+// Examples:
+// testAPI("192.168.1.65", "system") - single call
+// testAPI("192.168.1.65", "system", 5) - 5 calls with 1000ms delay
+// testAPI("192.168.1.65", "system", 10, 2000) - 10 calls with 2000ms delay
+testAPI("192.168.1.65", "system", 20000, 5)
     .then(() => {
         console.log('Test completed successfully');
         process.exit(0);

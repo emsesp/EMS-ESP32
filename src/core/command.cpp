@@ -763,6 +763,8 @@ void Command::show_all(uuid::console::Shell & shell) {
     shell.println(COLOR_RESET);
     shell.printf("  entities \t\t\t%slist all entities %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
     shell.println(COLOR_RESET);
+    shell.printf("  metrics \t\t\t%slist all prometheus metrics %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
+    shell.println(COLOR_RESET);
 
     // show system ones first
     show(shell, EMSdevice::DeviceType::SYSTEM, true);

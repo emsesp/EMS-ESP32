@@ -288,6 +288,36 @@ void manual_test7() {
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/custom/test_ram", data));
 }
 
+void manual_test8() {
+    const char * response = call_url("/api/boiler/metrics");
+
+    TEST_ASSERT_NOT_NULL(response);
+    TEST_ASSERT_TRUE(strlen(response) > 0);
+
+    TEST_ASSERT_TRUE(strstr(response, "# HELP") != nullptr);
+    TEST_ASSERT_TRUE(strstr(response, "# TYPE") != nullptr);
+    TEST_ASSERT_TRUE(strstr(response, "emsesp_") != nullptr);
+    TEST_ASSERT_TRUE(strstr(response, " gauge") != nullptr);
+
+    TEST_ASSERT_TRUE(strstr(response, "emsesp_tapwateractive") != nullptr || strstr(response, "emsesp_selflowtemp") != nullptr
+                     || strstr(response, "emsesp_curflowtemp") != nullptr);
+}
+
+void manual_test9() {
+    const char * response = call_url("/api/thermostat/metrics");
+
+    TEST_ASSERT_NOT_NULL(response);
+    TEST_ASSERT_TRUE(strlen(response) > 0);
+
+    TEST_ASSERT_TRUE(strstr(response, "# HELP") != nullptr);
+    TEST_ASSERT_TRUE(strstr(response, "# TYPE") != nullptr);
+    TEST_ASSERT_TRUE(strstr(response, "emsesp_") != nullptr);
+
+    if (strstr(response, "circuit=") != nullptr) {
+        TEST_ASSERT_TRUE(strstr(response, "{circuit=") != nullptr);
+    }
+}
+
 void run_manual_tests() {
     RUN_TEST(manual_test1);
     RUN_TEST(manual_test2);
@@ -296,6 +326,8 @@ void run_manual_tests() {
     RUN_TEST(manual_test5);
     RUN_TEST(manual_test6);
     RUN_TEST(manual_test7);
+    RUN_TEST(manual_test8);
+    RUN_TEST(manual_test9);
 }
 
 const char * run_console_command(const char * command) {
@@ -353,6 +385,7 @@ void create_tests() {
     capture("/api/boiler/values");
     capture("/api/boiler/info");
     // capture("/api/boiler/entities"); // skipping since payload is too large
+    capture("/api/boiler/metrics");
     capture("/api/boiler/comfort");
     capture("/api/boiler/comfort/value");
     capture("/api/boiler/comfort/fullname");
@@ -364,6 +397,7 @@ void create_tests() {
     // thermostat
     capture("/api/thermostat");
     capture("/api/thermostat/hc1/values");
+    capture("/api/thermostat/metrics");
     capture("/api/thermostat/hc1/seltemp");
     capture("/api/thermostat/hc2/seltemp");
 

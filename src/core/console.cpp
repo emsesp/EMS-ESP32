@@ -87,8 +87,8 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                 Command::show_all(shell);
             } else if (command == F_(system)) {
                 EMSESP::system_.show_system(shell);
-            } else if (command == F_(users) && (shell.has_flags(CommandFlags::ADMIN))) {
-                EMSESP::system_.show_users(shell); // admin only
+            } else if (command == F_(users)) {
+                EMSESP::system_.show_users(shell);
             } else if (command == F_(devices)) {
                 EMSESP::show_devices(shell);
             } else if (command == F_(log)) {
