@@ -1533,6 +1533,14 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
         }
         return true;
     }
+    if (!strcmp(cmd, F_(metrics))) {
+        std::string metrics = get_metrics_prometheus(tag);
+        if (!metrics.empty()) {
+            output["api_data"] = metrics;
+            return true;
+        }
+        return false;
+    }
 
     // search device value with this tag
     // make a copy of cmd and split attribute (leave cmd untouched for other devices)
@@ -1694,6 +1702,176 @@ void EMSdevice::get_value_json(JsonObject json, DeviceValue & dv) {
     json["readable"]  = dv.type != DeviceValueType::CMD && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE);
     json["writeable"] = dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY);
     json["visible"]   = !dv.has_state(DeviceValueState::DV_WEB_EXCLUDE);
+}
+
+// generate Prometheus metrics format from device values
+std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
+    std::string result;
+    std::unordered_map<std::string, bool> seen_metrics;
+
+    for (auto & dv : devicevalues_) {
+        if (tag >= 0 && tag != dv.tag) {
+            continue;
+        }
+
+        // only process number and boolean types for now
+        if (dv.type != DeviceValueType::BOOL && dv.type != DeviceValueType::UINT8 && dv.type != DeviceValueType::INT8
+            && dv.type != DeviceValueType::UINT16 && dv.type != DeviceValueType::INT16 && dv.type != DeviceValueType::UINT24
+            && dv.type != DeviceValueType::UINT32 && dv.type != DeviceValueType::TIME) {
+            continue;
+        }
+
+        bool has_value = false;
+        double metric_value = 0.0;
+
+        switch (dv.type) {
+        case DeviceValueType::BOOL:
+            if (Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
+                has_value = true;
+                metric_value = (bool)*(uint8_t *)(dv.value_p) ? 1.0 : 0.0;
+            }
+            break;
+        case DeviceValueType::UINT8:
+            if (Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
+                has_value = true;
+                metric_value = *(uint8_t *)(dv.value_p);
+            }
+            break;
+        case DeviceValueType::INT8:
+            if (Helpers::hasValue(*(int8_t *)(dv.value_p))) {
+                has_value = true;
+                metric_value = *(int8_t *)(dv.value_p);
+            }
+            break;
+        case DeviceValueType::UINT16:
+            if (Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
+                has_value = true;
+                metric_value = *(uint16_t *)(dv.value_p);
+            }
+            break;
+        case DeviceValueType::INT16:
+            if (Helpers::hasValue(*(int16_t *)(dv.value_p))) {
+                has_value = true;
+                metric_value = *(int16_t *)(dv.value_p);
+            }
+            break;
+        case DeviceValueType::UINT24:
+        case DeviceValueType::UINT32:
+        case DeviceValueType::TIME:
+            if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
+                has_value = true;
+                metric_value = *(uint32_t *)(dv.value_p);
+            }
+            break;
+        default:
+            break;
+        }
+
+        if (!has_value) {
+            continue;
+        }
+
+        std::string metric_name = dv.short_name;
+        size_t      last_dot    = metric_name.find_last_of('.');
+        if (last_dot != std::string::npos) {
+            metric_name = metric_name.substr(last_dot + 1);
+        }
+
+        for (char & c : metric_name) {
+            if (!isalnum(c) && c != '_') {
+                c = '_';
+            }
+        }
+
+        std::string full_metric_name = "emsesp_" + metric_name;
+
+        std::string circuit_label;
+        if (dv.tag != DeviceValueTAG::TAG_NONE) {
+            const char * circuit = tag_to_mqtt(dv.tag);
+            if (circuit && strlen(circuit) > 0) {
+                circuit_label = circuit;
+            }
+        }
+
+        auto fullname = dv.get_fullname();
+        std::string help_text;
+        if (!fullname.empty()) {
+            help_text = fullname;
+        } else {
+            help_text = metric_name;
+        }
+
+        std::string uom_str;
+        if (dv.type == DeviceValueType::BOOL) {
+            uom_str = "boolean";
+        } else if (dv.uom != DeviceValueUOM::NONE) {
+            uom_str = uom_to_string(dv.uom);
+        }
+
+        std::string help_line = help_text;
+        if (!uom_str.empty()) {
+            help_line += ", " + uom_str;
+        }
+
+        bool readable  = dv.type != DeviceValueType::CMD && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE);
+        bool writeable = dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY);
+        bool visible   = !dv.has_state(DeviceValueState::DV_WEB_EXCLUDE);
+
+        if (readable) {
+            help_line += ", readable";
+        }
+        if (writeable) {
+            help_line += ", writeable";
+        }
+        if (visible) {
+            help_line += ", visible";
+        }
+
+        std::string escaped_help;
+        for (char c : help_line) {
+            if (c == '\\') {
+                escaped_help += "\\\\";
+            } else if (c == '\n') {
+                escaped_help += "\\n";
+            } else {
+                escaped_help += c;
+            }
+        }
+
+        if (seen_metrics.find(full_metric_name) == seen_metrics.end()) {
+            result += "# HELP " + full_metric_name + " " + escaped_help + "\n";
+            result += "# TYPE " + full_metric_name + " gauge\n";
+            seen_metrics[full_metric_name] = true;
+        }
+
+        result += full_metric_name;
+        if (!circuit_label.empty()) {
+            result += "{circuit=\"" + circuit_label + "\"}";
+        }
+        result += " ";
+
+        char val_str[30];
+        double final_value = metric_value;
+        
+        if (dv.numeric_operator != 0) {
+            if (dv.numeric_operator > 0) {
+                final_value = metric_value / dv.numeric_operator;
+            } else {
+                final_value = metric_value * (-dv.numeric_operator);
+            }
+        }
+        
+        double rounded = (final_value >= 0) ? (double)((int64_t)(final_value + 0.5)) : (double)((int64_t)(final_value - 0.5));
+        if (dv.type == DeviceValueType::BOOL || (final_value == rounded)) {
+            snprintf(val_str, sizeof(val_str), "%.0f", final_value);
+        } else {
+            snprintf(val_str, sizeof(val_str), "%.2f", final_value);
+        }
+        result += val_str;
+        result += "\n";
+    }
+
+    return result;
 }
 
 // mqtt publish all single values from one device (used for time schedule)
