@@ -34,6 +34,8 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - pid settings [#2735](https://github.com/emsesp/EMS-ESP32/issues/2735)
 - refresh MQTT button added to MQTT Settings page
 - added LWT (Last Will and Testament) to MQTT entities in Home Assistant
+- added api/metrics endpoint for prometheus integration by @gr3enk
+ [#2774](https://github.com/emsesp/EMS-ESP32/pull/2774)
 
 ## Fixed
 
