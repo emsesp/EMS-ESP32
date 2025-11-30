@@ -667,9 +667,10 @@ void AnalogSensor::publish_values(const bool force) {
             LOG_DEBUG("Recreating HA config for analog sensor GPIO %02d", sensor.gpio());
 
             JsonDocument config;
+            config["~"]          = Mqtt::base();
 
             char stat_t[50];
-            snprintf(stat_t, sizeof(stat_t), "%s/%s_data", Mqtt::base().c_str(), F_(analogsensor)); // use base path
+            snprintf(stat_t, sizeof(stat_t), "~/%s_data", F_(analogsensor)); // use base path
             config["stat_t"] = stat_t;
 
             char val_obj[50];
@@ -699,6 +700,7 @@ void AnalogSensor::publish_values(const bool force) {
                 snprintf(uniq_s, sizeof(uniq_s), "%s_%02d", F_(analogsensor), sensor.gpio());
             }
 
+            config["~"] = Mqtt::base();
             config["uniq_id"] = uniq_s;
 
             char name[50];

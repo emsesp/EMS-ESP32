@@ -197,6 +197,8 @@ void Shower::create_ha_discovery() {
         char         str[70];
         char         stat_t[50];
 
+        doc["~"]          = Mqtt::base();
+
         // shower active
         doc["name"] = "Shower Active";
 
@@ -207,9 +209,7 @@ void Shower::create_ha_discovery() {
         }
         doc["uniq_id"]    = str;
         doc["def_ent_id"] = (std::string) "binary_sensor." + str;
-
-        snprintf(stat_t, sizeof(stat_t), "%s/shower_active", Mqtt::base().c_str());
-        doc["stat_t"] = stat_t;
+        doc["stat_t"] = "~/shower_active";
 
         Mqtt::add_ha_bool(doc.as<JsonObject>());
         Mqtt::add_ha_dev_section(doc.as<JsonObject>(), "Shower Sensor", nullptr, nullptr, nullptr, false);
@@ -225,10 +225,7 @@ void Shower::create_ha_discovery() {
 
         doc["uniq_id"]    = str;
         doc["def_ent_id"] = (std::string) "sensor." + str;
-
-        snprintf(stat_t, sizeof(stat_t), "%s/shower_data", Mqtt::base().c_str());
-        doc["stat_t"] = stat_t;
-
+        doc["stat_t"] = "~/shower_data",
         doc["name"] = "Shower Duration";
 
         // don't bother with value template conditions if using Domoticz which doesn't fully support MQTT Discovery
@@ -248,29 +245,6 @@ void Shower::create_ha_discovery() {
 
         snprintf(topic, sizeof(topic), "sensor/%s/shower_duration/config", Mqtt::basename().c_str());
         Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
-
-        //
-        // shower timestamp
-        //
-        /* commented out as the publish of timestamp
-        doc.clear();
-
-        snprintf(str, sizeof(str), "%s_shower_timestamp", Mqtt::basename().c_str());
-
-        doc["uniq_id"]   = str;
-
-        snprintf(stat_t, sizeof(stat_t), "%s/shower_data", Mqtt::base().c_str());
-        doc["stat_t"] = stat_t;
-
-        doc["name"]    = "Shower Timestamp";
-        doc["val_tpl"] = "{{value_json.timestamp if value_json.timestamp is defined else 0}}";
-        // doc["ent_cat"] = "diagnostic";
-
-        Mqtt::add_ha_sections_to_doc("shower", stat_t, doc, false, "value_json.timestamp is defined");
-
-        snprintf(topic, sizeof(topic), "sensor/%s/shower_timestamp/config", Mqtt::basename().c_str());
-        Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
-        */
     }
 }
 
