@@ -731,11 +731,6 @@ void System::heartbeat_json(JsonObject output) {
 
 // send periodic MQTT message with system information
 void System::send_heartbeat() {
-    // don't send heartbeat if WiFi or MQTT is not connected
-    if (!Mqtt::connected()) {
-        return;
-    }
-
     refreshHeapMem(); // refresh free heap and max alloc heap
 
     JsonDocument doc;
@@ -997,6 +992,11 @@ int8_t System::wifi_quality(int8_t dBm) {
 
 // print users to console
 void System::show_users(uuid::console::Shell & shell) {
+    if (!shell.has_flags(CommandFlags::ADMIN)) {
+        shell.printfln("Unauthorized. You need to be an admin to view users.");
+        return;
+    }
+
     shell.printfln("Users:");
 
 #ifndef EMSESP_STANDALONE

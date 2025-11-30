@@ -509,14 +509,14 @@ void Mqtt::on_connect() {
         queue_subscribe_message(discovery_prefix_ + "/+/" + Mqtt::basename() + "/#");
     }
 
-    // send initial MQTT messages for some of our services
-    EMSESP::system_.send_heartbeat(); // send heartbeat
-
     // re-subscribe to all custom registered MQTT topics
     resubscribe();
 
     // publish to the last will topic (see Mqtt::start() function) to say we're alive
     queue_publish_retain("status", "online"); // retain: https://github.com/emsesp/EMS-ESP32/discussions/2086
+
+    // send initial MQTT messages for some of our services
+    EMSESP::system_.send_heartbeat(); // send heartbeat
 }
 
 // Home Assistant Discovery - the main master Device called EMS-ESP
@@ -532,9 +532,10 @@ void Mqtt::ha_status() {
         strcpy(uniq, "system_status");
     }
 
+    doc["~"]          = Mqtt::base();
     doc["uniq_id"]    = uniq;
     doc["def_ent_id"] = (std::string) "binary_sensor." + uniq;
-    doc["stat_t"]     = Mqtt::base() + "/status";
+    doc["stat_t"]     = "~/status";
     doc["name"]       = "System status";
     doc["pl_on"]      = "online";
     doc["pl_off"]     = "offline";
@@ -981,8 +982,9 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         return queue_remove_topic(topic);
     }
 
-    // build the full payload
+    // build the full topic's payload
     JsonDocument doc;
+    doc["~"]       = Mqtt::base();
     doc["uniq_id"] = uniq_id;
 
     // set the entity_id. This is breaking change in HA 2025.10.0 - see https://github.com/home-assistant/core/pull/151775
@@ -1000,9 +1002,9 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         char command_topic[MQTT_TOPIC_MAX_SIZE];
         // add command topic
         if (tag >= DeviceValueTAG::TAG_HC1) {
-            snprintf(command_topic, sizeof(command_topic), "%s/%s/%s/%s", Mqtt::base().c_str(), device_name, EMSdevice::tag_to_mqtt(tag), entity);
+            snprintf(command_topic, sizeof(command_topic), "~/%s/%s/%s", device_name, EMSdevice::tag_to_mqtt(tag), entity);
         } else {
-            snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), device_name, entity);
+            snprintf(command_topic, sizeof(command_topic), "~/%s/%s", device_name, entity);
         }
         doc["cmd_t"] = command_topic;
 
@@ -1063,9 +1065,9 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         // This is where we determine which MQTT topic to pull the data from
         // There is one exception for DeviceType::SYSTEM, which uses the heartbeat topic, and when fetching the version we want to take this from the info topic instead
         if ((device_type == EMSdevice::DeviceType::SYSTEM) && (strncmp(entity, "version", 7) == 0)) {
-            snprintf(stat_t, sizeof(stat_t), "%s/%s", Mqtt::base().c_str(), F_(info));
+            snprintf(stat_t, sizeof(stat_t), "~/%s", F_(info));
         } else {
-            snprintf(stat_t, sizeof(stat_t), "%s/%s", Mqtt::base().c_str(), tag_to_topic(device_type, tag).c_str());
+            snprintf(stat_t, sizeof(stat_t), "~/%s", tag_to_topic(device_type, tag).c_str());
         }
         doc["stat_t"] = stat_t;
 
@@ -1483,6 +1485,11 @@ void Mqtt::add_ha_avail_section(JsonObject doc, const char * state_t, const bool
         avty_json["val_tpl"] = tpl;
         avty.add(avty_json); // returns 0 if no mem
     }
+
+    // add LWT (Last Will and Testament)
+    avty_json.clear();
+    avty_json["t"] = "~/status"; // as a topic
+    avty.add(avty_json);
 
     doc["avty_mode"] = "all";
 }

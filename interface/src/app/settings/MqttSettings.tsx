@@ -266,6 +266,7 @@ const MqttSettings = () => {
             label={LL.CERT()}
             variant="outlined"
             value={data.rootCA}
+            sx={{ width: '50ch' }}
             onChange={updateFormValue}
             margin="normal"
           />

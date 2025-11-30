@@ -569,14 +569,15 @@ let mqtt_settings = {
   publish_time_heartbeat: 60,
   publish_time_water: 60,
   mqtt_qos: 0,
-  rootCA: '',
   mqtt_retain: false,
   ha_enabled: true,
   nested_format: 1,
   discovery_type: 0,
   discovery_prefix: 'homeassistant',
   send_response: true,
-  publish_single: false
+  publish_single: false,
+  enableTLS: true,
+  rootCA: ''
 };
 const mqtt_status = {
   enabled: true,
