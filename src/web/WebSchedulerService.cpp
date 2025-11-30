@@ -263,9 +263,12 @@ void WebSchedulerService::publish(const bool force) {
 
             // create HA config
             if (Mqtt::ha_enabled() && !ha_registered_) {
+                
                 JsonDocument config;
+                config["~"]          = Mqtt::base();
+
                 char         stat_t[50];
-                snprintf(stat_t, sizeof(stat_t), "%s/%s_data", Mqtt::base().c_str(), F_(scheduler));
+                snprintf(stat_t, sizeof(stat_t), "~/%s_data", F_(scheduler));
                 config["stat_t"] = stat_t;
 
                 char val_obj[50];
@@ -290,7 +293,7 @@ void WebSchedulerService::publish(const bool force) {
                 char command_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
 
                 snprintf(topic, sizeof(topic), "switch/%s/%s_%s/config", Mqtt::basename().c_str(), F_(scheduler), scheduleItem.name.c_str());
-                snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(scheduler), scheduleItem.name.c_str());
+                snprintf(command_topic, sizeof(command_topic), "~/%s/%s", F_(scheduler), scheduleItem.name.c_str());
                 config["cmd_t"] = command_topic;
 
                 Mqtt::add_ha_bool(config.as<JsonObject>());

@@ -507,11 +507,12 @@ void TemperatureSensor::publish_values(const bool force) {
                 LOG_DEBUG("Recreating HA config for sensor ID %s", sensor.id().c_str());
 
                 JsonDocument config;
+                config["~"]          = Mqtt::base();
                 config["dev_cla"]  = "temperature";
                 config["stat_cla"] = "measurement";
 
                 char stat_t[50];
-                snprintf(stat_t, sizeof(stat_t), "%s/%s_data", Mqtt::base().c_str(), F_(temperaturesensor)); // use base path
+                snprintf(stat_t, sizeof(stat_t), "~/%s_data", F_(temperaturesensor)); // use base path
                 config["stat_t"] = stat_t;
 
                 config["unit_of_meas"] = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
