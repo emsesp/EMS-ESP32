@@ -1706,7 +1706,7 @@ void EMSdevice::get_value_json(JsonObject json, DeviceValue & dv) {
 
 // generate Prometheus metrics format from device values
 std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
-    std::string result;
+    std::string                           result;
     std::unordered_map<std::string, bool> seen_metrics;
 
     for (auto & dv : devicevalues_) {
@@ -1715,43 +1715,42 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
         }
 
         // only process number and boolean types for now
-        if (dv.type != DeviceValueType::BOOL && dv.type != DeviceValueType::UINT8 && dv.type != DeviceValueType::INT8
-            && dv.type != DeviceValueType::UINT16 && dv.type != DeviceValueType::INT16 && dv.type != DeviceValueType::UINT24
-            && dv.type != DeviceValueType::UINT32 && dv.type != DeviceValueType::TIME) {
+        if (dv.type != DeviceValueType::BOOL && dv.type != DeviceValueType::UINT8 && dv.type != DeviceValueType::INT8 && dv.type != DeviceValueType::UINT16
+            && dv.type != DeviceValueType::INT16 && dv.type != DeviceValueType::UINT24 && dv.type != DeviceValueType::UINT32 && dv.type != DeviceValueType::TIME) {
             continue;
         }
 
-        bool has_value = false;
+        bool   has_value    = false;
         double metric_value = 0.0;
 
         switch (dv.type) {
         case DeviceValueType::BOOL:
             if (Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
-                has_value = true;
+                has_value    = true;
                 metric_value = (bool)*(uint8_t *)(dv.value_p) ? 1.0 : 0.0;
             }
             break;
         case DeviceValueType::UINT8:
             if (Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
-                has_value = true;
+                has_value    = true;
                 metric_value = *(uint8_t *)(dv.value_p);
             }
             break;
         case DeviceValueType::INT8:
             if (Helpers::hasValue(*(int8_t *)(dv.value_p))) {
-                has_value = true;
+                has_value    = true;
                 metric_value = *(int8_t *)(dv.value_p);
             }
             break;
         case DeviceValueType::UINT16:
             if (Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
-                has_value = true;
+                has_value    = true;
                 metric_value = *(uint16_t *)(dv.value_p);
             }
             break;
         case DeviceValueType::INT16:
             if (Helpers::hasValue(*(int16_t *)(dv.value_p))) {
-                has_value = true;
+                has_value    = true;
                 metric_value = *(int16_t *)(dv.value_p);
             }
             break;
@@ -1759,7 +1758,7 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
         case DeviceValueType::UINT32:
         case DeviceValueType::TIME:
             if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                has_value = true;
+                has_value    = true;
                 metric_value = *(uint32_t *)(dv.value_p);
             }
             break;
@@ -1793,7 +1792,7 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
             }
         }
 
-        auto fullname = dv.get_fullname();
+        auto        fullname = dv.get_fullname();
         std::string help_text;
         if (!fullname.empty()) {
             help_text = fullname;
@@ -1850,9 +1849,9 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
         }
         result += " ";
 
-        char val_str[30];
+        char   val_str[30];
         double final_value = metric_value;
-        
+
         if (dv.numeric_operator != 0) {
             if (dv.numeric_operator > 0) {
                 final_value = metric_value / dv.numeric_operator;
@@ -1860,7 +1859,7 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
                 final_value = metric_value * (-dv.numeric_operator);
             }
         }
-        
+
         double rounded = (final_value >= 0) ? (double)((int64_t)(final_value + 0.5)) : (double)((int64_t)(final_value - 0.5));
         if (dv.type == DeviceValueType::BOOL || (final_value == rounded)) {
             snprintf(val_str, sizeof(val_str), "%.0f", final_value);
