@@ -509,14 +509,14 @@ void Mqtt::on_connect() {
         queue_subscribe_message(discovery_prefix_ + "/+/" + Mqtt::basename() + "/#");
     }
 
-    // send initial MQTT messages for some of our services
-    EMSESP::system_.send_heartbeat(); // send heartbeat
-
     // re-subscribe to all custom registered MQTT topics
     resubscribe();
 
     // publish to the last will topic (see Mqtt::start() function) to say we're alive
     queue_publish_retain("status", "online"); // retain: https://github.com/emsesp/EMS-ESP32/discussions/2086
+
+    // send initial MQTT messages for some of our services
+    EMSESP::system_.send_heartbeat(); // send heartbeat
 }
 
 // Home Assistant Discovery - the main master Device called EMS-ESP
