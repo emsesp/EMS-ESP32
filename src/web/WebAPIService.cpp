@@ -155,7 +155,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     // 400 (invalid)
     int ret_codes[7] = {400, 200, 404, 400, 401, 400, 404};
 
-    // TOOD add back when AsyncWebServer 3.9.3+ is released
+    // TODO add back when AsyncWebServer 3.9.3+ is released
     // response->setCode(ret_codes[return_code]);
     // response->setLength();
     // response->setContentType("application/json; charset=utf-8");
