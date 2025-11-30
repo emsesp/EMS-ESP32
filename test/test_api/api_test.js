@@ -8,8 +8,9 @@ async function testAPI(ip = "ems-esp.local", apiPath = "system", loopCount = 1, 
     const results = [];
     
     for (let i = 0; i < loopCount; i++) {
+        let logMessage = '';
         if (loopCount > 1) {
-            console.log(`\n--- Request ${i + 1} of ${loopCount} ---`);
+            logMessage = `--- Request ${i + 1} of ${loopCount} ---`;
         }
         
         try {
@@ -20,10 +21,17 @@ async function testAPI(ip = "ems-esp.local", apiPath = "system", loopCount = 1, 
                 }
             });
             
-            console.log('Status:', response.status);
-            console.log('Data:', JSON.stringify(response.data, null, 2));
+            // console.log('Status:', response.status);
+            // console.log('Data:', JSON.stringify(response.data, null, 2));
             
-            results.push(response.data);
+            // Extract and print freeMem
+            const freeMem = response.data?.freeMem || response.data?.system?.freeMem;
+            if (freeMem !== undefined) {
+                logMessage += (logMessage ? ' ' : '') + `System Free Memory: ${freeMem}`;
+            } else {
+                logMessage += (logMessage ? ' ' : '') + 'freeMem not found in response';
+            }
+            console.log(logMessage);
             
             // Delay before next request (except for the last one)
             if (i < loopCount - 1) {
@@ -47,7 +55,7 @@ async function testAPI(ip = "ems-esp.local", apiPath = "system", loopCount = 1, 
 // testAPI("192.168.1.65", "system") - single call
 // testAPI("192.168.1.65", "system", 5) - 5 calls with 1000ms delay
 // testAPI("192.168.1.65", "system", 10, 2000) - 10 calls with 2000ms delay
-testAPI("192.168.1.65", "system", 1000)
+testAPI("192.168.1.65", "system", 20000, 5)
     .then(() => {
         console.log('Test completed successfully');
         process.exit(0);
