@@ -290,30 +290,29 @@ void manual_test7() {
 
 void manual_test8() {
     const char * response = call_url("/api/boiler/metrics");
-    
+
     TEST_ASSERT_NOT_NULL(response);
     TEST_ASSERT_TRUE(strlen(response) > 0);
-    
+
     TEST_ASSERT_TRUE(strstr(response, "# HELP") != nullptr);
     TEST_ASSERT_TRUE(strstr(response, "# TYPE") != nullptr);
     TEST_ASSERT_TRUE(strstr(response, "emsesp_") != nullptr);
     TEST_ASSERT_TRUE(strstr(response, " gauge") != nullptr);
-    
-    TEST_ASSERT_TRUE(strstr(response, "emsesp_tapwateractive") != nullptr || 
-                     strstr(response, "emsesp_selflowtemp") != nullptr ||
-                     strstr(response, "emsesp_curflowtemp") != nullptr);
+
+    TEST_ASSERT_TRUE(strstr(response, "emsesp_tapwateractive") != nullptr || strstr(response, "emsesp_selflowtemp") != nullptr
+                     || strstr(response, "emsesp_curflowtemp") != nullptr);
 }
 
 void manual_test9() {
     const char * response = call_url("/api/thermostat/metrics");
-    
+
     TEST_ASSERT_NOT_NULL(response);
     TEST_ASSERT_TRUE(strlen(response) > 0);
-    
+
     TEST_ASSERT_TRUE(strstr(response, "# HELP") != nullptr);
     TEST_ASSERT_TRUE(strstr(response, "# TYPE") != nullptr);
     TEST_ASSERT_TRUE(strstr(response, "emsesp_") != nullptr);
-    
+
     if (strstr(response, "circuit=") != nullptr) {
         TEST_ASSERT_TRUE(strstr(response, "{circuit=") != nullptr);
     }
