@@ -155,24 +155,25 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     // 400 (invalid)
     int ret_codes[7] = {400, 200, 404, 400, 401, 400, 404};
 
-    response->setCode(ret_codes[return_code]);
-    response->setLength();
-    response->setContentType("application/json; charset=utf-8");
-    request->send(response);
+    // TOOD add back when AsyncWebServer 3.9.3+ is released
+    // response->setCode(ret_codes[return_code]);
+    // response->setLength();
+    // response->setContentType("application/json; charset=utf-8");
+    // request->send(response);
 
     // serialize JSON to string to ensure correct content-length and avoid HTTP parsing errors (issue #2752)
-    // std::string output_str;
-    // serializeJson(output, output_str);
-    // request->send(ret_codes[return_code], "application/json; charset=utf-8", output_str.c_str());
-    // delete response;
+    std::string output_str;
+    serializeJson(output, output_str);
+    request->send(ret_codes[return_code], "application/json; charset=utf-8", output_str.c_str());
 
 #if defined(EMSESP_UNITY)
     // store the result so we can test with Unity later
     storeResponse(output);
 #endif
 #if defined(EMSESP_STANDALONE) && !defined(EMSESP_UNITY)
-    std::string output_str;
-    serializeJson(output, output_str);
+    // add back when AsyncWebServer 3.9.3+ is released
+    // std::string output_str;
+    // serializeJson(output, output_str);
     Serial.printf("%sweb output: %s[%s] %s(%d)%s %s%s",
                   COLOR_WHITE,
                   COLOR_BRIGHT_CYAN,
@@ -185,6 +186,8 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     Serial.println();
     EMSESP::logger().debug("web output: %s %s", request->url().c_str(), output_str.c_str());
 #endif
+
+    delete response; // TODO remove when AsyncWebServer 3.9.3+ is released
 }
 
 #if defined(EMSESP_UNITY)
