@@ -37,7 +37,7 @@
     "jwt-decode": "^4.0.0",
     "magic-string": "^0.30.21",
     "mime-types": "^3.0.2",
-    "preact": "^10.27.2",
+    "preact": "^10.28.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-icons": "^5.5.0",
