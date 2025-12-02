@@ -41,7 +41,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-icons": "^5.5.0",
-    "react-router": "^7.9.6",
+    "react-router": "^7.10.0",
     "react-toastify": "^11.0.5",
     "typesafe-i18n": "^5.26.2",
     "typescript": "^5.9.3"
@@ -62,7 +62,7 @@
     "prettier": "^3.7.3",
     "rollup-plugin-visualizer": "^6.0.5",
     "terser": "^5.44.1",
-    "typescript-eslint": "^8.48.0",
+    "typescript-eslint": "^8.48.1",
     "vite": "^7.2.6",
     "vite-plugin-imagemin": "^0.6.1",
     "vite-tsconfig-paths": "^5.1.4"
