@@ -411,8 +411,10 @@ void WebCustomEntityService::publish(const bool force) {
         // create HA config
         if (Mqtt::ha_enabled() && !ha_registered_) {
             JsonDocument config;
+            config["~"]          = Mqtt::base();
+
             char         stat_t[50];
-            snprintf(stat_t, sizeof(stat_t), "%s/%s_data", Mqtt::base().c_str(), F_(custom));
+            snprintf(stat_t, sizeof(stat_t), "~/%s_data", F_(custom));
             config["stat_t"] = stat_t;
 
             char val_obj[50];
@@ -445,7 +447,7 @@ void WebCustomEntityService::publish(const bool force) {
                     snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name.c_str());
                 }
                 char command_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-                snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(custom), entityItem.name.c_str());
+                snprintf(command_topic, sizeof(command_topic), "~/%s/%s", F_(custom), entityItem.name.c_str());
                 config["cmd_t"] = command_topic;
             } else {
                 if (entityItem.value_type == DeviceValueType::BOOL) {

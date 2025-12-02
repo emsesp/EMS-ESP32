@@ -556,26 +556,6 @@ class EMSdevice {
 #endif
     std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
     std::vector<DeviceValue>      devicevalues_;       // all the device values
-
-    // added for modbus
-    // Hash map for O(1) lookup of device values by (tag, short_name) key
-    struct DeviceValueKey {
-        uint8_t     tag;
-        std::string short_name;
-
-        bool operator==(const DeviceValueKey & other) const {
-            return tag == other.tag && short_name == other.short_name;
-        }
-    };
-
-    struct DeviceValueKeyHash {
-        std::size_t operator()(const DeviceValueKey & key) const {
-            // Combine hash of tag and short_name
-            return std::hash<uint8_t>()(key.tag) ^ (std::hash<std::string>()(key.short_name) << 1);
-        }
-    };
-
-    std::unordered_map<DeviceValueKey, size_t, DeviceValueKeyHash> devicevalue_index_; // index: key -> devicevalues_ position
 };
 
 } // namespace emsesp
