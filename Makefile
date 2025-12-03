@@ -21,13 +21,14 @@ endif
 
 # Optimize parallel build configuration
 UNAME_S := $(shell uname -s)
+JOBS ?= 1
 ifeq ($(UNAME_S),Linux)
     EXTRA_CPPFLAGS = -D LINUX
-	JOBS ?= $(shell nproc)
+	JOBS := $(shell nproc)
 endif
 ifeq ($(UNAME_S),Darwin)
     EXTRA_CPPFLAGS = -D OSX -Wno-tautological-constant-out-of-range-compare
-	JOBS ?= $(shell sysctl -n hw.ncpu)
+	JOBS := $(shell sysctl -n hw.ncpu)
 endif
 
 # Set optimal parallel build settings
