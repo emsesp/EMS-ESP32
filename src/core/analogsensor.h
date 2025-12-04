@@ -25,6 +25,10 @@
 
 #include <uuid/log.h>
 
+#ifndef EMSESP_STANDALONE
+#include <esp32-psram.h>
+#endif
+
 namespace emsesp {
 
 // names, same order as AnalogType, see list_sensortype in local_common.h
@@ -146,7 +150,11 @@ class AnalogSensor {
     bool updated_values();
 
     // return back reference to the sensor list, used by other classes
+#ifndef EMSESP_STANDALONE
+    std::vector<Sensor, AllocatorPSRAM<Sensor>> sensors() const {
+#else
     std::vector<Sensor> sensors() const {
+#endif
         return sensors_;
     }
 
@@ -174,9 +182,9 @@ class AnalogSensor {
         return sensors_.size();
     }
 
-    bool update(uint8_t gpio, std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted, bool is_system);
-    bool get_value_info(JsonObject output, const char * cmd, const int8_t id = -1);
-    void store_counters();
+    bool                        update(uint8_t gpio, std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted, bool is_system);
+    bool                        get_value_info(JsonObject output, const char * cmd, const int8_t id = -1);
+    void                        store_counters();
     static std::vector<uint8_t> exclude_types() {
         return exclude_types_;
     }
@@ -191,13 +199,17 @@ class AnalogSensor {
     static constexpr uint32_t MEASURE_ANALOG_INTERVAL = 500;
 
     static uuid::log::Logger logger_;
-    void remove_ha_topic(const int8_t type, const uint8_t id) const;
-    bool command_setvalue(const char * value, const int8_t gpio);
-    void measure();
-    void addSensorJson(JsonObject output, const Sensor & sensor);
-    void get_value_json(JsonObject output, const Sensor & sensor);
+    void                     remove_ha_topic(const int8_t type, const uint8_t id) const;
+    bool                     command_setvalue(const char * value, const int8_t gpio);
+    void                     measure();
+    void                     addSensorJson(JsonObject output, const Sensor & sensor);
+    void                     get_value_json(JsonObject output, const Sensor & sensor);
 
+#ifndef EMSESP_STANDALONE
+    std::vector<Sensor, AllocatorPSRAM<Sensor>> sensors_; // our list of sensors
+#else
     std::vector<Sensor> sensors_; // our list of sensors
+#endif
     static std::vector<uint8_t> exclude_types_;
 
     bool     analog_enabled_;

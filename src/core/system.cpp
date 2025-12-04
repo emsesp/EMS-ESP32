@@ -83,15 +83,24 @@ const char * const languages[] = {EMSESP_LOCALE_EN,
 
 static constexpr uint8_t NUM_LANGUAGES = sizeof(languages) / sizeof(const char *);
 
+#ifndef EMSESP_STANDALONE
+uuid::syslog::SyslogService System::syslog_;
+#endif
+
 uuid::log::Logger System::logger_{F_(system), uuid::log::Facility::KERN};
 
 // init statics
-PButton              System::myPButton_;
-bool                 System::test_set_all_active_ = false;
-uint32_t             System::max_alloc_mem_;
-uint32_t             System::heap_mem_;
+PButton  System::myPButton_;
+bool     System::test_set_all_active_ = false;
+uint32_t System::max_alloc_mem_;
+uint32_t System::heap_mem_;
+#ifndef EMSESP_STANDALONE
+std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::valid_system_gpios_;
+std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::used_gpios_;
+#else
 std::vector<uint8_t> System::valid_system_gpios_;
 std::vector<uint8_t> System::used_gpios_;
+#endif
 
 // find the index of the language
 // 0 = EN, 1 = DE, etc...
@@ -366,21 +375,19 @@ void System::syslog_init() {
 #ifndef EMSESP_STANDALONE
     if (syslog_enabled_) {
         // start & configure syslog
-        EMSESP::logger().info("Starting Syslog service");
-        syslog_.start();
-
         syslog_.log_level((uuid::log::Level)syslog_level_);
         syslog_.mark_interval(syslog_mark_interval_);
         syslog_.destination(syslog_host_.c_str(), syslog_port_);
-        syslog_.hostname(hostname().c_str());
-
+        syslog_.hostname(hostname());
+        EMSESP::logger().info("Starting Syslog service");
     } else if (syslog_.started()) {
         // in case service is still running, this flushes the queue
         // https://github.com/emsesp/EMS-ESP/issues/496
         EMSESP::logger().info("Stopping Syslog");
-        syslog_.log_level((uuid::log::Level)-1); // stop server
+        syslog_.loop();
+        syslog_.log_level(uuid::log::Level::OFF); // stop server
         syslog_.mark_interval(0);
-        syslog_.destination("");
+        // syslog_.destination("");
     }
     if (Mqtt::publish_single()) {
         if (Mqtt::publish_single2cmd()) {
@@ -1638,7 +1645,8 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     });
 
     // NTP status
-    node = output["ntp"].to<JsonObject>();
+    node              = output["ntp"].to<JsonObject>();
+    node["NTPstatus"] = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
     EMSESP::esp32React.getNTPSettingsService()->read([&](const NTPSettings & settings) {
 #ifndef EMSESP_STANDALONE
         node["enabled"] = settings.enabled;
@@ -2270,8 +2278,13 @@ uint8_t System::systemStatus() {
 }
 
 // takes a string range like "6-11, 1, 23, 24-48" which has optional ranges and single values and converts to a vector of ints
+#ifndef EMSESP_STANDALONE
+std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::string_range_to_vector(const std::string & range) {
+    std::vector<uint8_t, AllocatorPSRAM<uint8_t>> gpios;
+#else
 std::vector<uint8_t> System::string_range_to_vector(const std::string & range) {
-    std::vector<uint8_t>   gpios;
+    std::vector<uint8_t> gpios;
+#endif
     std::string::size_type pos  = 0;
     std::string::size_type prev = 0;
 

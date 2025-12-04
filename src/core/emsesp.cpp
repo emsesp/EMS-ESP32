@@ -29,22 +29,28 @@ static_assert(uuid::console::thread_safe, "uuid-console must be thread-safe");
 namespace emsesp {
 
 // Static member definitions
+#ifndef EMSESP_STANDALONE
+std::vector<std::unique_ptr<EMSdevice>, AllocatorPSRAM<std::unique_ptr<EMSdevice>>> EMSESP::emsdevices{};
+std::vector<EMSESP::Device_record, AllocatorPSRAM<EMSESP::Device_record>>           EMSESP::device_library_;
+#else
 std::vector<std::unique_ptr<EMSdevice>> EMSESP::emsdevices{};
 std::vector<EMSESP::Device_record>      EMSESP::device_library_;
-uuid::log::Logger                       EMSESP::logger_{F_(emsesp), uuid::log::Facility::KERN};
-uint16_t                                EMSESP::watch_id_         = WATCH_ID_NONE;
-uint8_t                                 EMSESP::watch_            = 0;
-uint16_t                                EMSESP::read_id_          = WATCH_ID_NONE;
-bool                                    EMSESP::read_next_        = false;
-uint16_t                                EMSESP::publish_id_       = 0;
-uint16_t                                EMSESP::response_id_      = 0;
-bool                                    EMSESP::tap_water_active_ = false;
-uint8_t                                 EMSESP::publish_all_idx_  = 0;
-uint8_t                                 EMSESP::unique_id_count_  = 0;
-bool                                    EMSESP::trace_raw_        = false;
-uint16_t                                EMSESP::wait_validate_    = 0;
-bool                                    EMSESP::wait_km_          = false;
-uint32_t                                EMSESP::last_fetch_       = 0;
+#endif
+
+uuid::log::Logger EMSESP::logger_{F_(emsesp), uuid::log::Facility::KERN};
+uint16_t          EMSESP::watch_id_         = WATCH_ID_NONE;
+uint8_t           EMSESP::watch_            = 0;
+uint16_t          EMSESP::read_id_          = WATCH_ID_NONE;
+bool              EMSESP::read_next_        = false;
+uint16_t          EMSESP::publish_id_       = 0;
+uint16_t          EMSESP::response_id_      = 0;
+bool              EMSESP::tap_water_active_ = false;
+uint8_t           EMSESP::publish_all_idx_  = 0;
+uint8_t           EMSESP::unique_id_count_  = 0;
+bool              EMSESP::trace_raw_        = false;
+uint16_t          EMSESP::wait_validate_    = 0;
+bool              EMSESP::wait_km_          = false;
+uint32_t          EMSESP::last_fetch_       = 0;
 
 AsyncWebServer webServer(80);
 
@@ -77,10 +83,6 @@ using DeviceType  = EMSdevice::DeviceType;
 uuid::log::Logger EMSESP::logger() {
     return logger_;
 }
-
-#ifndef EMSESP_STANDALONE
-uuid::syslog::SyslogService System::syslog_;
-#endif
 
 // The services
 RxService         EMSESP::rxservice_;         // incoming Telegram Rx handler

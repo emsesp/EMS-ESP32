@@ -29,6 +29,7 @@
 
 #ifndef EMSESP_STANDALONE
 #include <OneWire.h>
+#include <esp32-psram.h>
 #endif
 
 namespace emsesp {
@@ -94,7 +95,11 @@ class TemperatureSensor {
     bool get_value_info(JsonObject output, const char * cmd, const int8_t id = -1);
 
     // return back reference to the sensor list, used by other classes
+#ifndef EMSESP_STANDALONE
+    std::vector<Sensor, AllocatorPSRAM<Sensor>> sensors() const {
+#else
     std::vector<Sensor> sensors() const {
+#endif
         return sensors_;
     }
 
@@ -165,15 +170,16 @@ class TemperatureSensor {
     void     get_value_json(JsonObject output, const Sensor & sensor);
     void     remove_ha_topic(const std::string & id);
 
-    std::vector<Sensor> sensors_; // our list of active sensors
-
 #ifndef EMSESP_STANDALONE
+    std::vector<Sensor, AllocatorPSRAM<Sensor>> sensors_; // our list of active sensors
     OneWire  bus_;
     uint32_t last_activity_ = uuid::get_uptime();
     State    state_         = State::IDLE;
     int8_t   scancnt_       = SCAN_START;
     uint8_t  firstscan_     = 0;
     int8_t   scanretry_     = 0;
+#else
+    std::vector<Sensor> sensors_; // our list of active sensors
 #endif
 
     uint8_t  dallas_gpio_  = 0;
