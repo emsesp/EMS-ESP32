@@ -64,29 +64,7 @@ jobs:
       - name: Commit the generated files
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: update generated files"
-
-      - name: Configure Git
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
-      - name: Check for changes and commit
-        run: |
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "Changes detected, committing..."
-            git add .
-            git commit -m "Auto-commit build artifacts and configuration updates
-
-            - Updated build configurations
-            - Generated build artifacts
-            - Version: ${{steps.build_info.outputs.VERSION}}"
-            
-            echo "Pushing changes to repository..."
-            git push origin dev
-          else
-            echo "No changes to commit"
-          fi
+          commit_message: "chore: update generated files for v${{steps.build_info.outputs.VERSION}}"
 
       - name: Create GitHub Release
         id: 'automatic_releases'

@@ -2,7 +2,6 @@
 .vscode/c_cpp_properties.json
 .vscode/extensions.json
 .vscode/launch.json
-.vscode/settings.json
 
 # c++ compiling
 .clang_complete
@@ -73,7 +72,6 @@ logs/*
 sdkconfig.*
 sdkconfig_tasmota_esp32
 pnpm-lock.yaml
-package.json
 .cache/
 interface/.tsbuildinfo
 test/test_api/package-lock.json
