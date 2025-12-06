@@ -164,7 +164,8 @@ void test_21() {
     auto expected_response =
         "[{\"system\":{\"version\":\"dev\",\"uptime\":\"000+00:00:00.000\",\"uptimeSec\":0,\"resetReason\":\"Unknown / "
         "Unknown\"},\"network\":{\"network\":\"WiFi\",\"hostname\":\"ems-esp\",\"RSSI\":-23,\"TxPowerSetting\":0,\"staticIP\":false,\"lowBandwidth\":false,"
-        "\"disableSleep\":true,\"enableMDNS\":true,\"enableCORS\":false},\"ntp\":{\"enabled\":true,\"server\":\"pool.ntp.org\",\"tzLabel\":\"Europe/"
+        "\"disableSleep\":true,\"enableMDNS\":true,\"enableCORS\":false},\"ntp\":{\"NTPstatus\":\"disconnected\",\"enabled\":true,\"server\":\"pool.ntp.org\","
+        "\"tzLabel\":\"Europe/"
         "London\",\"NTPStatus\":\"disconnected\"},\"ap\":{\"provisionMode\":\"always\",\"ssid\":\"ems-esp\"},\"mqtt\":{\"MQTTStatus\":\"disconnected\","
         "\"MQTTPublishes\":0,\"MQTTQueued\":0,\"MQTTPublishFails\":0,\"MQTTReconnects\":0,\"enabled\":true,\"clientID\":\"ems-esp\",\"keepAlive\":60,"
         "\"cleanSession\":false,\"entityFormat\":1,\"base\":\"ems-esp\",\"discoveryPrefix\":\"homeassistant\",\"discoveryType\":0,\"nestedFormat\":1,"
@@ -192,7 +193,8 @@ void test_22() {
     auto expected_response =
         "[{\"system\":{\"version\":\"dev\",\"uptime\":\"000+00:00:00.000\",\"uptimeSec\":0,\"resetReason\":\"Unknown / "
         "Unknown\"},\"network\":{\"network\":\"WiFi\",\"hostname\":\"ems-esp\",\"RSSI\":-23,\"TxPowerSetting\":0,\"staticIP\":false,\"lowBandwidth\":false,"
-        "\"disableSleep\":true,\"enableMDNS\":true,\"enableCORS\":false},\"ntp\":{\"enabled\":true,\"server\":\"pool.ntp.org\",\"tzLabel\":\"Europe/"
+        "\"disableSleep\":true,\"enableMDNS\":true,\"enableCORS\":false},\"ntp\":{\"NTPstatus\":\"disconnected\",\"enabled\":true,\"server\":\"pool.ntp.org\","
+        "\"tzLabel\":\"Europe/"
         "London\",\"NTPStatus\":\"disconnected\"},\"ap\":{\"provisionMode\":\"always\",\"ssid\":\"ems-esp\"},\"mqtt\":{\"MQTTStatus\":\"disconnected\","
         "\"MQTTPublishes\":0,\"MQTTQueued\":0,\"MQTTPublishFails\":0,\"MQTTReconnects\":0,\"enabled\":true,\"clientID\":\"ems-esp\",\"keepAlive\":60,"
         "\"cleanSession\":false,\"entityFormat\":1,\"base\":\"ems-esp\",\"discoveryPrefix\":\"homeassistant\",\"discoveryType\":0,\"nestedFormat\":1,"
