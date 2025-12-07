@@ -461,7 +461,7 @@ void TemperatureSensor::remove_ha_topic(const std::string & id) {
     std::string sensorid = id;
     std::replace(sensorid.begin(), sensorid.end(), '-', '_');
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    snprintf(topic, sizeof(topic), "sensor/%s/temperaturesensor_%s/config", Mqtt::basename().c_str(), sensorid.c_str());
+    snprintf(topic, sizeof(topic), "sensor/%s/temperaturesensor_%s/config", Mqtt::basename(), sensorid.c_str());
     Mqtt::queue_remove_topic(topic);
 }
 
@@ -537,7 +537,7 @@ void TemperatureSensor::publish_values(const bool force) {
 
                 char uniq_s[70];
                 if (Mqtt::entity_format() == Mqtt::entityFormat::MULTI_SHORT) {
-                    snprintf(uniq_s, sizeof(uniq_s), "%s_%s_%s", Mqtt::basename().c_str(), F_(temperaturesensor), sensor.id().c_str());
+                    snprintf(uniq_s, sizeof(uniq_s), "%s_%s_%s", Mqtt::basename(), F_(temperaturesensor), sensor.id().c_str());
                 } else {
                     snprintf(uniq_s, sizeof(uniq_s), "%s_%s", F_(temperaturesensor), sensor.id().c_str());
                 }
@@ -562,7 +562,7 @@ void TemperatureSensor::publish_values(const bool force) {
                 Mqtt::add_ha_avail_section(config.as<JsonObject>(), stat_t, !is_ha_device_created, val_cond);
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-                snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(temperaturesensor), sensor.id().c_str());
+                snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename(), F_(temperaturesensor), sensor.id().c_str());
 
                 sensor.ha_registered = Mqtt::queue_ha(topic, config.as<JsonObject>());
             }

@@ -596,17 +596,17 @@ void AnalogSensor::remove_ha_topic(const int8_t type, const uint8_t gpio) const 
 #else
     if (type == AnalogType::PULSE || type == AnalogType::DIGITAL_OUT) {
 #endif
-        snprintf(topic, sizeof(topic), "switch/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), gpio);
+        snprintf(topic, sizeof(topic), "switch/%s/%s_%02d/config", Mqtt::basename(), F_(analogsensor), gpio);
     } else if (type == AnalogType::DIGITAL_OUT) { // DAC
-        snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), gpio);
+        snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename(), F_(analogsensor), gpio);
     } else if (type >= AnalogType::PWM_0 && type <= AnalogType::PWM_2) {
-        snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), gpio);
+        snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename(), F_(analogsensor), gpio);
     } else if (type >= AnalogType::RGB) {
-        snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), gpio);
+        snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename(), F_(analogsensor), gpio);
     } else if (type == AnalogType::DIGITAL_IN) {
-        snprintf(topic, sizeof(topic), "binary_sensor/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), gpio);
+        snprintf(topic, sizeof(topic), "binary_sensor/%s/%s_%02d/config", Mqtt::basename(), F_(analogsensor), gpio);
     } else {
-        snprintf(topic, sizeof(topic), "sensor/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), gpio);
+        snprintf(topic, sizeof(topic), "sensor/%s/%s_%02d/config", Mqtt::basename(), F_(analogsensor), gpio);
     }
     Mqtt::queue_remove_topic(topic);
 }
@@ -695,7 +695,7 @@ void AnalogSensor::publish_values(const bool force) {
 
             char uniq_s[70];
             if (Mqtt::entity_format() == Mqtt::entityFormat::MULTI_SHORT) {
-                snprintf(uniq_s, sizeof(uniq_s), "%s_%s_%02d", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
+                snprintf(uniq_s, sizeof(uniq_s), "%s_%s_%02d", Mqtt::basename(), F_(analogsensor), sensor.gpio());
             } else {
                 snprintf(uniq_s, sizeof(uniq_s), "%s_%02d", F_(analogsensor), sensor.gpio());
             }
@@ -720,46 +720,46 @@ void AnalogSensor::publish_values(const bool force) {
 #else
             if (sensor.type() == AnalogType::PULSE || sensor.type() == AnalogType::DIGITAL_OUT) {
 #endif
-                snprintf(topic, sizeof(topic), "switch/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
-                snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(analogsensor), sensor.name().c_str());
+                snprintf(topic, sizeof(topic), "switch/%s/%s_%02d/config", Mqtt::basename(), F_(analogsensor), sensor.gpio());
+                snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base(), F_(analogsensor), sensor.name().c_str());
                 config["cmd_t"] = command_topic;
                 Mqtt::add_ha_bool(config.as<JsonObject>());
             } else if (sensor.type() == AnalogType::DIGITAL_OUT) { // DAC
-                snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
-                snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(analogsensor), sensor.name().c_str());
+                snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename(), F_(analogsensor), sensor.gpio());
+                snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base(), F_(analogsensor), sensor.name().c_str());
                 config["cmd_t"] = command_topic;
                 config["min"]   = 0;
                 config["max"]   = 255;
                 config["mode"]  = "box"; // auto, slider or box
                 config["step"]  = 1;
             } else if (sensor.type() >= AnalogType::PWM_0 && sensor.type() <= AnalogType::PWM_2) {
-                snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
-                snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(analogsensor), sensor.name().c_str());
+                snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename(), F_(analogsensor), sensor.gpio());
+                snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base(), F_(analogsensor), sensor.name().c_str());
                 config["cmd_t"] = command_topic;
                 config["min"]   = 0;
                 config["max"]   = 100;
                 config["mode"]  = "box"; // auto, slider or box
                 config["step"]  = 0.1;
             } else if (sensor.type() == AnalogType::RGB) {
-                snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
-                snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(analogsensor), sensor.name().c_str());
+                snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename(), F_(analogsensor), sensor.gpio());
+                snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base(), F_(analogsensor), sensor.name().c_str());
                 config["cmd_t"] = command_topic;
                 config["min"]   = 0;
                 config["max"]   = 999999;
                 config["mode"]  = "box"; // auto, slider or box
                 config["step"]  = 1;
             } else if (sensor.type() == AnalogType::COUNTER) {
-                snprintf(topic, sizeof(topic), "sensor/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
-                snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(analogsensor), sensor.name().c_str());
+                snprintf(topic, sizeof(topic), "sensor/%s/%s_%02d/config", Mqtt::basename(), F_(analogsensor), sensor.gpio());
+                snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base(), F_(analogsensor), sensor.name().c_str());
                 config["cmd_t"]    = command_topic;
                 config["stat_cla"] = "total_increasing";
                 // config["mode"]  = "box"; // auto, slider or box
                 // config["step"]  = sensor.factor();
             } else if (sensor.type() == AnalogType::DIGITAL_IN) {
-                snprintf(topic, sizeof(topic), "binary_sensor/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
+                snprintf(topic, sizeof(topic), "binary_sensor/%s/%s_%02d/config", Mqtt::basename(), F_(analogsensor), sensor.gpio());
                 Mqtt::add_ha_bool(config.as<JsonObject>());
             } else {
-                snprintf(topic, sizeof(topic), "sensor/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
+                snprintf(topic, sizeof(topic), "sensor/%s/%s_%02d/config", Mqtt::basename(), F_(analogsensor), sensor.gpio());
                 config["stat_cla"] = "measurement";
             }
 

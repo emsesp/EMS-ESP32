@@ -239,7 +239,7 @@ bool System::command_message(const char * value, const int8_t id, JsonObject out
     }
 
     LOG_INFO("Message: %s", EMSESP::webSchedulerService.computed_value.c_str());  // send to log
-    Mqtt::queue_publish(F_(message), EMSESP::webSchedulerService.computed_value); // send to MQTT if enabled
+    Mqtt::queue_publish(F_(message), EMSESP::webSchedulerService.computed_value.c_str()); // send to MQTT if enabled
     output["api_data"] = EMSESP::webSchedulerService.computed_value;              // send to API
 
     return true;
@@ -255,19 +255,30 @@ bool System::command_watch(const char * value, const int8_t id) {
         }
         if (Mqtt::publish_single() && w != EMSESP::watch()) {
             if (Mqtt::publish_single2cmd()) {
-                Mqtt::queue_publish("system/watch", EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(w) : (FL_(list_watch)[w]));
+                if (EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX) {
+                    std::string watch_str = Helpers::itoa(w);
+                    Mqtt::queue_publish("system/watch", watch_str.c_str());
+                } else {
+                    Mqtt::queue_publish("system/watch", FL_(list_watch)[w]);
+                }
             } else {
-                Mqtt::queue_publish("system_data/watch", EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(w) : (FL_(list_watch)[w]));
+                if (EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX) {
+                    std::string watch_str = Helpers::itoa(w);
+                    Mqtt::queue_publish("system_data/watch", watch_str.c_str());
+                } else {
+                    Mqtt::queue_publish("system_data/watch", FL_(list_watch)[w]);
+                }
             }
         }
         EMSESP::watch(w);
         return true;
     } else if (i) {
         if (Mqtt::publish_single() && i != EMSESP::watch_id()) {
+            std::string watch_id_str = Helpers::hextoa(i);
             if (Mqtt::publish_single2cmd()) {
-                Mqtt::queue_publish("system/watch", Helpers::hextoa(i));
+                Mqtt::queue_publish("system/watch", watch_id_str.c_str());
             } else {
-                Mqtt::queue_publish("system_data/watch", Helpers::hextoa(i));
+                Mqtt::queue_publish("system_data/watch", watch_id_str.c_str());
             }
         }
         EMSESP::watch_id(i);
@@ -386,19 +397,29 @@ void System::syslog_init() {
         if (Mqtt::publish_single2cmd()) {
             Mqtt::queue_publish("system/syslog", syslog_enabled_ ? (FL_(list_syslog_level)[syslog_level_ + 1]) : "off");
             if (EMSESP::watch_id() == 0 || EMSESP::watch() == 0) {
-                Mqtt::queue_publish("system/watch",
-                                    EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(EMSESP::watch()) : (FL_(list_watch)[EMSESP::watch()]));
+                if (EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX) {
+                    std::string watch_str = Helpers::itoa(EMSESP::watch());
+                    Mqtt::queue_publish("system/watch", watch_str.c_str());
+                } else {
+                    Mqtt::queue_publish("system/watch", FL_(list_watch)[EMSESP::watch()]);
+                }
             } else {
-                Mqtt::queue_publish("system/watch", Helpers::hextoa(EMSESP::watch_id()));
+                std::string watch_id_str = Helpers::hextoa(EMSESP::watch_id());
+                Mqtt::queue_publish("system/watch", watch_id_str.c_str());
             }
 
         } else {
             Mqtt::queue_publish("system_data/syslog", syslog_enabled_ ? (FL_(list_syslog_level)[syslog_level_ + 1]) : "off");
             if (EMSESP::watch_id() == 0 || EMSESP::watch() == 0) {
-                Mqtt::queue_publish("system_data/watch",
-                                    EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(EMSESP::watch()) : (FL_(list_watch)[EMSESP::watch()]));
+                if (EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX) {
+                    std::string watch_str = Helpers::itoa(EMSESP::watch());
+                    Mqtt::queue_publish("system_data/watch", watch_str.c_str());
+                } else {
+                    Mqtt::queue_publish("system_data/watch", FL_(list_watch)[EMSESP::watch()]);
+                }
             } else {
-                Mqtt::queue_publish("system_data/watch", Helpers::hextoa(EMSESP::watch_id()));
+                std::string watch_id_str = Helpers::hextoa(EMSESP::watch_id());
+                Mqtt::queue_publish("system_data/watch", watch_id_str.c_str());
             }
         }
     }

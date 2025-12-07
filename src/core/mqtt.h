@@ -66,19 +66,14 @@ class Mqtt {
     static void on_connect();
     static void on_disconnect(espMqttClientTypes::DisconnectReason reason);
     static void on_message(const char * topic, const uint8_t * payload, size_t len);
-    static void subscribe(const uint8_t device_type, const std::string & topic, mqtt_sub_function_p cb);
-    static void subscribe(const std::string & topic);
+    static void subscribe(const uint8_t device_type, const char * topic, mqtt_sub_function_p cb);
+    static void subscribe(const char * topic);
     static void resubscribe();
 
-    static bool queue_publish(const std::string & topic, const std::string & payload);
     static bool queue_publish(const char * topic, const char * payload);
     static bool queue_publish(const char * topic, const JsonObjectConst payload, const bool retain);
-    static bool queue_publish(const std::string & topic, const JsonObjectConst payload);
     static bool queue_publish(const char * topic, const JsonObjectConst payload);
-    static bool queue_publish(const char * topic, const std::string & payload);
 
-    static bool queue_publish_retain(const std::string & topic, const JsonObjectConst payload);
-    static bool queue_publish_retain(const char * topic, const std::string & payload);
     static bool queue_publish_retain(const char * topic, const JsonObjectConst payload);
     static bool queue_publish_retain(const char * topic, const char * payload);
 
@@ -145,27 +140,35 @@ class Mqtt {
         mqtt_enabled_ = mqtt_enabled;
     }
 
-    static std::string base() {
+    static const char * base() {
         return mqtt_base_;
     }
 
-    static std::string basename() {
+    static const char * basename() {
         return mqtt_basename_;
     }
 
     // create basename from the mqtt base
     // and replacing all / with underscores, in case it's a path
-    static void basename(const std::string & base) {
-        mqtt_basename_ = base;
-        std::replace(mqtt_basename_.begin(), mqtt_basename_.end(), '/', '_');
+    static void basename(const char * base) {
+        strlcpy(mqtt_basename_, base, sizeof(mqtt_basename_));
+        for (char * p = mqtt_basename_; *p; ++p) {
+            if (*p == '/') {
+                *p = '_';
+            }
+        }
     }
 
     // returns the discovery MQTT topic prefix and adds a /
-    static std::string discovery_prefix() {
-        if (discovery_prefix_.empty()) {
-            return std::string{};
+    // Note: returns pointer to static buffer, not thread-safe
+    static const char * discovery_prefix() {
+        static char prefix_buf[MQTT_TOPIC_MAX_SIZE];
+        if (discovery_prefix_[0] == '\0') {
+            prefix_buf[0] = '\0';
+            return prefix_buf;
         }
-        return discovery_prefix_ + "/";
+        snprintf(prefix_buf, sizeof(prefix_buf), "%s/", discovery_prefix_);
+        return prefix_buf;
     }
 
     static uint32_t publish_count() {
@@ -234,12 +237,12 @@ class Mqtt {
         ha_climate_reset_ = reset;
     }
 
-    static std::string get_response() {
+    static const char * get_response() {
         return lastresponse_;
     }
 
     static void clear_response() {
-        lastresponse_.clear();
+        lastresponse_[0] = '\0';
     }
 
     void set_qos(uint8_t mqtt_qos) const {
@@ -269,24 +272,23 @@ class Mqtt {
     static MqttClient * mqttClient_;
     static uint32_t     mqtt_message_id_;
 
-    static bool queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, const bool retain);
-    static bool queue_publish_message(const std::string & topic, const std::string & payload, const bool retain);
-    static void queue_subscribe_message(const std::string & topic);
-    static void queue_unsubscribe_message(const std::string & topic);
+    static bool queue_message(const uint8_t operation, const char * topic, const char * payload, const bool retain);
+    static bool queue_publish_message(const char * topic, const char * payload, const bool retain);
+    static void queue_subscribe_message(const char * topic);
+    static void queue_unsubscribe_message(const char * topic);
 
     void on_publish(uint16_t packetId) const;
 
     // function handlers for MQTT subscriptions
     struct MQTTSubFunction {
         uint8_t             device_type_;      // which device type, from DeviceType::
-        const std::string   topic_;            // short topic name
+        char                topic_[MQTT_TOPIC_MAX_SIZE]; // short topic name
         mqtt_sub_function_p mqtt_subfunction_; // can be empty
 
-        // replaced &&topic with &topic in 3.7.0-dev.43, so we prevent the std:move later
-        MQTTSubFunction(uint8_t device_type, const std::string & topic, mqtt_sub_function_p mqtt_subfunction)
+        MQTTSubFunction(uint8_t device_type, const char * topic, mqtt_sub_function_p mqtt_subfunction)
             : device_type_(device_type)
-            , topic_(topic)
             , mqtt_subfunction_(mqtt_subfunction) {
+            strlcpy(topic_, topic, sizeof(topic_));
         }
     };
 
@@ -309,13 +311,13 @@ class Mqtt {
     static uint8_t  connectcount_;
     static bool     ha_climate_reset_;
 
-    static std::string lasttopic_;
-    static std::string lastpayload_;
-    static std::string lastresponse_;
+    static char lasttopic_[MQTT_TOPIC_MAX_SIZE];
+    static char lastpayload_[512]; // max payload size for echo detection
+    static char lastresponse_[512]; // response buffer
 
     // settings, copied over
-    static std::string mqtt_base_;
-    static std::string mqtt_basename_; // base name for MQTT topics with / replaced with _
+    static char mqtt_base_[MQTT_TOPIC_MAX_SIZE];
+    static char mqtt_basename_[MQTT_TOPIC_MAX_SIZE]; // base name for MQTT topics with / replaced with _
     static uint8_t     mqtt_qos_;
     static bool        mqtt_retain_;
     static uint32_t    publish_time_;
@@ -331,7 +333,7 @@ class Mqtt {
     static bool        ha_enabled_;
     static uint8_t     nested_format_;
     static uint8_t     entity_format_;
-    static std::string discovery_prefix_;
+    static char        discovery_prefix_[MQTT_TOPIC_MAX_SIZE];
     static uint8_t     discovery_type_;
     static bool        publish_single_;
     static bool        publish_single2cmd_;

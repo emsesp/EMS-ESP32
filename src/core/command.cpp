@@ -32,8 +32,10 @@ std::vector<Command::CmdFunction> Command::cmdfunctions_;
 // returns a return code and json output
 uint8_t Command::process(const char * path, const bool is_admin, const JsonObject input, JsonObject output) {
     // check for MQTT, if so strip the "<base>" from the path
-    if (!strncmp(path, Mqtt::base().c_str(), Mqtt::base().length())) {
-        path += Mqtt::base().length();
+    const char * mqtt_base = Mqtt::base();
+    size_t base_len = strlen(mqtt_base);
+    if (!strncmp(path, mqtt_base, base_len)) {
+        path += base_len;
     }
     SUrlParser p; // parse URL for the path names
     p.parse(path);

@@ -203,7 +203,7 @@ void Shower::create_ha_discovery() {
         doc["name"] = "Shower Active";
 
         if (Mqtt::entity_format() == Mqtt::entityFormat::MULTI_SHORT) {
-            snprintf(str, sizeof(str), "%s_shower_active", Mqtt::basename().c_str());
+            snprintf(str, sizeof(str), "%s_shower_active", Mqtt::basename());
         } else {
             snprintf(str, sizeof(str), "shower_active"); // v3.4 compatible
         }
@@ -215,13 +215,13 @@ void Shower::create_ha_discovery() {
         Mqtt::add_ha_dev_section(doc.as<JsonObject>(), "Shower Sensor", nullptr, nullptr, nullptr, false);
         Mqtt::add_ha_avail_section(doc.as<JsonObject>(), stat_t, true); // no conditions
 
-        snprintf(topic, sizeof(topic), "binary_sensor/%s/shower_active/config", Mqtt::basename().c_str());
+        snprintf(topic, sizeof(topic), "binary_sensor/%s/shower_active/config", Mqtt::basename());
         ha_configdone_ = Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
         // shower duration
         doc.clear();
 
-        snprintf(str, sizeof(str), "%s_shower_duration", Mqtt::basename().c_str());
+        snprintf(str, sizeof(str), "%s_shower_duration", Mqtt::basename());
 
         doc["uniq_id"]    = str;
         doc["def_ent_id"] = (std::string) "sensor." + str;
@@ -243,7 +243,7 @@ void Shower::create_ha_discovery() {
         Mqtt::add_ha_dev_section(doc.as<JsonObject>(), "Shower Sensor", nullptr, nullptr, nullptr, false);
         Mqtt::add_ha_avail_section(doc.as<JsonObject>(), stat_t, false, "value_json.duration is defined");
 
-        snprintf(topic, sizeof(topic), "sensor/%s/shower_duration/config", Mqtt::basename().c_str());
+        snprintf(topic, sizeof(topic), "sensor/%s/shower_duration/config", Mqtt::basename());
         Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
     }
 }

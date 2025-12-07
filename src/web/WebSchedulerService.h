@@ -83,6 +83,9 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
     void ha_reset() {
         ha_registered_ = false;
     }
+    void clear_cmd_changed() {
+        cmd_changed_.clear();
+    }
     uint8_t count_entities(bool cmd_only = false);
     bool    onChange(const char * cmd);
 

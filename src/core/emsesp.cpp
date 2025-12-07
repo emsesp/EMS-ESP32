@@ -677,7 +677,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
             }
         }
         if (need_publish && !nested) {
-            Mqtt::queue_publish(Mqtt::tag_to_topic(device_type, tag), json);
+            Mqtt::queue_publish(Mqtt::tag_to_topic(device_type, tag).c_str(), json);
             json         = doc.to<JsonObject>();
             need_publish = false;
         }
@@ -687,7 +687,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
         if (doc.overflowed()) {
             LOG_WARNING("MQTT buffer overflow, please use individual topics");
         }
-        Mqtt::queue_publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_NONE), json);
+        Mqtt::queue_publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_NONE).c_str(), json);
     }
 
     // we want to create the /config topic after the data payload to prevent HA from throwing up a warning
@@ -1442,7 +1442,8 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     }
 
     // MQTT subscribe to the device e.g. "ems-esp/boiler/#"
-    auto topic = std::string(EMSdevice::device_type_2_device_name(device_type)) + "/#";
+    char topic[128]; // MQTT_TOPIC_MAX_SIZE
+    snprintf(topic, sizeof(topic), "%s/#", EMSdevice::device_type_2_device_name(device_type));
     Mqtt::subscribe(device_type, topic, nullptr);
 
     return true;

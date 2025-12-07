@@ -377,7 +377,10 @@ void WebCustomEntityService::publish_single(CustomEntityItem & entity) {
     JsonDocument doc;
     JsonObject   output = doc.to<JsonObject>();
     render_value(output, entity, true);
-    Mqtt::queue_publish(topic, output["value"].as<std::string>());
+    // Serialize value to avoid temporary string allocation
+    char value_buffer[256];
+    serializeJson(output["value"], value_buffer, sizeof(value_buffer));
+    Mqtt::queue_publish(topic, value_buffer);
 }
 
 // publish to Mqtt
@@ -438,22 +441,22 @@ void WebCustomEntityService::publish(const bool force) {
 
             if (entityItem.writeable) {
                 if (entityItem.value_type == DeviceValueType::BOOL) {
-                    snprintf(topic, sizeof(topic), "switch/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name.c_str());
+                    snprintf(topic, sizeof(topic), "switch/%s/%s_%s/config", Mqtt::basename(), F_(custom), entityItem.name.c_str());
                 } else if (entityItem.value_type == DeviceValueType::STRING) {
-                    snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name.c_str());
+                    snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename(), F_(custom), entityItem.name.c_str());
                 } else if (Mqtt::discovery_type() == Mqtt::discoveryType::HOMEASSISTANT || Mqtt::discovery_type() == Mqtt::discoveryType::DOMOTICZ_LATEST) {
-                    snprintf(topic, sizeof(topic), "number/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name.c_str());
+                    snprintf(topic, sizeof(topic), "number/%s/%s_%s/config", Mqtt::basename(), F_(custom), entityItem.name.c_str());
                 } else {
-                    snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name.c_str());
+                    snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename(), F_(custom), entityItem.name.c_str());
                 }
                 char command_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 snprintf(command_topic, sizeof(command_topic), "~/%s/%s", F_(custom), entityItem.name.c_str());
                 config["cmd_t"] = command_topic;
             } else {
                 if (entityItem.value_type == DeviceValueType::BOOL) {
-                    snprintf(topic, sizeof(topic), "binary_sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name.c_str());
+                    snprintf(topic, sizeof(topic), "binary_sensor/%s/%s_%s/config", Mqtt::basename(), F_(custom), entityItem.name.c_str());
                 } else {
-                    snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name.c_str());
+                    snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename(), F_(custom), entityItem.name.c_str());
                 }
             }
 

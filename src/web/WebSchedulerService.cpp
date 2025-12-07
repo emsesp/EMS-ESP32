@@ -73,6 +73,8 @@ void WebScheduler::read(WebScheduler & webScheduler, JsonObject root) {
 StateUpdateResult WebScheduler::update(JsonObject root, WebScheduler & webScheduler) {
     // reset the list
     Command::erase_device_commands(EMSdevice::DeviceType::SCHEDULER);
+    // Clear cmd_changed_ before clearing scheduleItems to prevent dangling pointers
+    EMSESP::webSchedulerService.clear_cmd_changed();
     webScheduler.scheduleItems.clear();
     EMSESP::webSchedulerService.ha_reset();
 
@@ -292,7 +294,7 @@ void WebSchedulerService::publish(const bool force) {
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 char command_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
 
-                snprintf(topic, sizeof(topic), "switch/%s/%s_%s/config", Mqtt::basename().c_str(), F_(scheduler), scheduleItem.name.c_str());
+                snprintf(topic, sizeof(topic), "switch/%s/%s_%s/config", Mqtt::basename(), F_(scheduler), scheduleItem.name.c_str());
                 snprintf(command_topic, sizeof(command_topic), "~/%s/%s", F_(scheduler), scheduleItem.name.c_str());
                 config["cmd_t"] = command_topic;
 
@@ -556,6 +558,7 @@ void WebSchedulerService::scheduler_task(void * pvParameters) {
 #if defined(EMSESP_TEST)
 void WebSchedulerService::load_test_data() {
     update([&](WebScheduler & webScheduler) {
+        cmd_changed_.clear(); // Clear cmd_changed_ before clearing scheduleItems to prevent dangling pointers
         webScheduler.scheduleItems.clear(); // delete all existing schedules
 
         // test 1
