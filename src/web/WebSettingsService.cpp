@@ -123,6 +123,30 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
         add_flags(ChangeFlags::RESTART);
     }
 
+    check_flag(original_settings.phy_type, settings.phy_type, ChangeFlags::RESTART);
+    // ETH has changed, so we need to check the ethernet pins. Only if ETH is being used.
+    if (settings.phy_type != PHY_type::PHY_TYPE_NONE) {
+        check_flag(original_settings.eth_power, settings.eth_power, ChangeFlags::RESTART);
+        check_flag(original_settings.eth_clock_mode, settings.eth_clock_mode, ChangeFlags::RESTART);
+        if (settings.eth_power != -1) { // Ethernet Power -1 means disabled
+            EMSESP::system_.remove_gpio(settings.eth_power, true);
+        }
+        // remove the ethernet pins from valid list, regardless of whether the GPIOs are valid or not
+        EMSESP::system_.remove_gpio(23, true); // MDC
+        EMSESP::system_.remove_gpio(18, true); // MDIO
+        if (settings.eth_clock_mode < 2) {
+            EMSESP::system_.remove_gpio(0, true); // ETH.clock input
+        } else if (settings.eth_clock_mode == 2) {
+            EMSESP::system_.remove_gpio(16, true); // ETH.clock output
+        } else if (settings.eth_clock_mode == 3) {
+            EMSESP::system_.remove_gpio(17, true); // ETH.clock output
+        }
+    }
+#if CONFIG_IDF_TARGET_ESP32
+    // Uart0 pins not allowed for all other gpio
+    EMSESP::system_.remove_gpio(1, true);
+    EMSESP::system_.remove_gpio(3, true);
+#endif
     // if any of the GPIOs have changed and re-validate them
     bool have_valid_gpios = true;
 
@@ -154,26 +178,6 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
 
     check_flag(original_settings.pbutton_gpio, settings.pbutton_gpio, ChangeFlags::BUTTON);
     have_valid_gpios = have_valid_gpios && EMSESP::system_.add_gpio(settings.pbutton_gpio, "Button");
-
-    check_flag(original_settings.phy_type, settings.phy_type, ChangeFlags::RESTART);
-    // ETH has changed, so we need to check the ethernet pins. Only if ETH is being used.
-    if (settings.phy_type != PHY_type::PHY_TYPE_NONE) {
-        check_flag(original_settings.eth_power, settings.eth_power, ChangeFlags::RESTART);
-        check_flag(original_settings.eth_clock_mode, settings.eth_clock_mode, ChangeFlags::RESTART);
-        if (settings.eth_power != -1) { // Ethernet Power -1 means disabled
-            EMSESP::system_.remove_gpio(settings.eth_power, true);
-        }
-        // remove the ethernet pins from valid list, regardless of whether the GPIOs are valid or not
-        EMSESP::system_.remove_gpio(23, true); // MDC
-        EMSESP::system_.remove_gpio(18, true); // MDIO
-        if (settings.eth_clock_mode < 2) {
-            EMSESP::system_.remove_gpio(0, true); // ETH.clock input
-        } else if (settings.eth_clock_mode == 2) {
-            EMSESP::system_.remove_gpio(16, true); // ETH.clock output
-        } else if (settings.eth_clock_mode == 3) {
-            EMSESP::system_.remove_gpio(17, true); // ETH.clock output
-        }
-    }
 
     // check if the LED type, eth_phy_addr or eth_clock_mode have changed
     check_flag(original_settings.led_type, settings.led_type, ChangeFlags::LED);

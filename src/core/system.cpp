@@ -375,6 +375,7 @@ void System::syslog_init() {
 #ifndef EMSESP_STANDALONE
     if (syslog_enabled_) {
         // start & configure syslog
+        syslog_.maximum_log_messages(10);
         syslog_.log_level((uuid::log::Level)syslog_level_);
         syslog_.mark_interval(syslog_mark_interval_);
         syslog_.destination(syslog_host_.c_str(), syslog_port_);
@@ -2338,19 +2339,17 @@ void System::set_valid_system_gpios() {
     // 38 and 39 are input only
     // 45 and 36 are strapping pins, input only
     valid_system_gpios_ = string_range_to_vector("0-14, 17, 18, 21, 33-39, 45, 46");
-#elif CONFIG_IDF_TARGET_ESP32 || defined(EMSESP_STANDALONE)
-    // 1 and 3 are UART0 pins
+#elif CONFIG_IDF_TARGET_ESP32
+    // 1 and 3 are UART0 pins, but used for some eth-boards (BBQKees-E32, OlimexPOE)
     // 32-39 is ADC1, input only
-    valid_system_gpios_ = string_range_to_vector("0, 2, 4, 5, 12-19, 23, 25-27, 32-39");
-#else
-#endif
-
-    // if psram is enabled remove pins 16 and 17 from the list, if set
-#if CONFIG_IDF_TARGET_ESP32
     if (ESP.getPsramSize() > 0) {
-        valid_system_gpios_.erase(std::remove(valid_system_gpios_.begin(), valid_system_gpios_.end(), 16), valid_system_gpios_.end());
-        valid_system_gpios_.erase(std::remove(valid_system_gpios_.begin(), valid_system_gpios_.end(), 17), valid_system_gpios_.end());
+        // if psram is enabled remove pins 16 and 17 from the list
+        valid_system_gpios_ = string_range_to_vector("0-5, 12-15, 18-19, 23, 25-27, 32-39");
+    } else {
+        valid_system_gpios_ = string_range_to_vector("0-5, 12-19, 23, 25-27, 32-39");
     }
+#elif defined(EMSESP_STANDALONE)
+    valid_system_gpios_ = string_range_to_vector("0-5, 12-19, 23, 25-27, 32-39");
 #endif
 }
 
