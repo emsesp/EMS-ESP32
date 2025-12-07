@@ -318,6 +318,32 @@ void manual_test9() {
     }
 }
 
+void manual_test10() {
+    const char * response = call_url("/api/system/metrics");
+
+    TEST_ASSERT_NOT_NULL(response);
+    TEST_ASSERT_TRUE(strlen(response) > 0);
+
+    TEST_ASSERT_TRUE(strstr(response, "# HELP") != nullptr);
+    TEST_ASSERT_TRUE(strstr(response, "# TYPE") != nullptr);
+    TEST_ASSERT_TRUE(strstr(response, "emsesp_") != nullptr);
+    TEST_ASSERT_TRUE(strstr(response, " gauge") != nullptr);
+
+    // Check for some expected system metrics
+    TEST_ASSERT_TRUE(strstr(response, "emsesp_system_") != nullptr || strstr(response, "emsesp_network_") != nullptr
+                     || strstr(response, "emsesp_api_") != nullptr);
+
+    // Check for _info metrics if present
+    if (strstr(response, "_info") != nullptr) {
+        TEST_ASSERT_TRUE(strstr(response, "_info{") != nullptr || strstr(response, "_info ") != nullptr);
+    }
+
+    // Check for device metrics if devices are present
+    if (strstr(response, "device") != nullptr) {
+        TEST_ASSERT_TRUE(strstr(response, "emsesp_device_") != nullptr);
+    }
+}
+
 void run_manual_tests() {
     RUN_TEST(manual_test1);
     RUN_TEST(manual_test2);
@@ -328,6 +354,7 @@ void run_manual_tests() {
     RUN_TEST(manual_test7);
     RUN_TEST(manual_test8);
     RUN_TEST(manual_test9);
+    RUN_TEST(manual_test10);
 }
 
 const char * run_console_command(const char * command) {
@@ -411,6 +438,7 @@ void create_tests() {
     // system
     capture("/api/system");
     capture("/api/system/info");
+    capture("/api/system/metrics");
     capture("/api/system/settings/locale");
     capture("/api/system/fetch");
     capture("/api/system/network/values");
