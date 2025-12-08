@@ -93,6 +93,7 @@ class System {
 
     static bool get_value_info(JsonObject root, const char * cmd);
     static void get_value_json(JsonObject output, const std::string & circuit, const std::string & name, JsonVariant val);
+    static std::string get_metrics_prometheus();
 
 #if defined(EMSESP_TEST)
     static bool command_test(const char * value, const int8_t id);

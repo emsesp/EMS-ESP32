@@ -1773,8 +1773,11 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
             metric_name = metric_name.substr(last_dot + 1);
         }
 
+        // sanitize metric name: convert to lowercase and replace non-alphanumeric with underscores
         for (char & c : metric_name) {
-            if (!isalnum(c) && c != '_') {
+            if (isupper(c)) {
+                c = tolower(c);
+            } else if (!isalnum(c) && c != '_') {
                 c = '_';
             }
         }
