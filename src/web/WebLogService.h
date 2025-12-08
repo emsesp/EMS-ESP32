@@ -21,10 +21,7 @@
 
 #define EMSESP_EVENT_SOURCE_LOG_PATH "/es/log"
 #define EMSESP_LOG_SETTINGS_PATH "/rest/logSettings"
-#ifndef EMSESP_STANDALONE
 #include <esp32-psram.h>
-using stringPSRAM = std::basic_string<char, std::char_traits<char>, AllocatorPSRAM<char>>;
-#endif
 
 using ::uuid::console::Shell;
 
@@ -59,11 +56,7 @@ class WebLogService : public uuid::log::Handler {
         uint64_t         uptime_;
         uuid::log::Level level_;
         const char *     name_;
-#ifndef EMSESP_STANDALONE
-        stringPSRAM text_;
-#else
-        std::string text_;
-#endif
+        stringPSRAM      text_;
     };
 
     void transmit(const QueuedLogMessage & message);
@@ -71,15 +64,11 @@ class WebLogService : public uuid::log::Handler {
 
     char * messagetime(char * out, const uint64_t t, const size_t bufsize);
 
-#ifndef EMSESP_STANDALONE
     std::deque<QueuedLogMessage, AllocatorPSRAM<QueuedLogMessage>> log_messages_; // Queued log messages, in the order they were received
-#else
-    std::deque<QueuedLogMessage> log_messages_; // Queued log messages, in the order they were received
-#endif
-    size_t           maximum_log_messages_ = MAX_LOG_MESSAGES; // Maximum number of log messages to buffer before they are output
-    size_t           limit_log_messages_   = 1;                // dynamic limit
-    unsigned long    log_message_id_       = 0;                // The next identifier to use for queued log messages
-    unsigned long    log_message_id_tail_  = 0;                // last event shown on the screen after fetch
+    size_t           maximum_log_messages_ = MAX_LOG_MESSAGES;                    // Maximum number of log messages to buffer before they are output
+    size_t           limit_log_messages_   = 1;                                   // dynamic limit
+    unsigned long    log_message_id_       = 0;                                   // The next identifier to use for queued log messages
+    unsigned long    log_message_id_tail_  = 0;                                   // last event shown on the screen after fetch
     bool             compact_              = true;
     uuid::log::Level level_                = uuid::log::Level::INFO;
 };

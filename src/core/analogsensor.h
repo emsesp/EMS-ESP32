@@ -25,9 +25,7 @@
 
 #include <uuid/log.h>
 
-#ifndef EMSESP_STANDALONE
 #include <esp32-psram.h>
-#endif
 
 namespace emsesp {
 
@@ -150,11 +148,7 @@ class AnalogSensor {
     bool updated_values();
 
     // return back reference to the sensor list, used by other classes
-#ifndef EMSESP_STANDALONE
     std::vector<Sensor, AllocatorPSRAM<Sensor>> sensors() const {
-#else
-    std::vector<Sensor> sensors() const {
-#endif
         return sensors_;
     }
 
@@ -205,12 +199,8 @@ class AnalogSensor {
     void                     addSensorJson(JsonObject output, const Sensor & sensor);
     void                     get_value_json(JsonObject output, const Sensor & sensor);
 
-#ifndef EMSESP_STANDALONE
     std::vector<Sensor, AllocatorPSRAM<Sensor>> sensors_; // our list of sensors
-#else
-    std::vector<Sensor> sensors_; // our list of sensors
-#endif
-    static std::vector<uint8_t> exclude_types_;
+    static std::vector<uint8_t>                 exclude_types_;
 
     bool     analog_enabled_;
     bool     changed_     = true; // this will force a publish of all sensors when initialising

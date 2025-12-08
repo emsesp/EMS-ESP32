@@ -18,9 +18,7 @@
 
 #ifndef WebCustomizationService_h
 #define WebCustomizationService_h
-#ifndef EMSESP_STANDALONE
 #include <esp32-psram.h>
-#endif
 
 #define EMSESP_CUSTOMIZATION_FILE "/config/emsespCustomization.json"
 
@@ -73,15 +71,10 @@ class EntityCustomization {
 
 class WebCustomization {
   public:
-#ifndef EMSESP_STANDALONE
     std::list<SensorCustomization, AllocatorPSRAM<SensorCustomization>> sensorCustomizations; // for sensor names and offsets
     std::list<AnalogCustomization, AllocatorPSRAM<AnalogCustomization>> analogCustomizations; // for analog sensors
     std::list<EntityCustomization, AllocatorPSRAM<EntityCustomization>> entityCustomizations; // for a list of entities that have a special mask set
-#else
-    std::list<SensorCustomization> sensorCustomizations; // for sensor names and offsets
-    std::list<AnalogCustomization> analogCustomizations; // for analog sensors
-    std::list<EntityCustomization> entityCustomizations; // for a list of entities that have a special mask set
-#endif
+
     static void              read(WebCustomization & customizations, JsonObject root);
     static StateUpdateResult update(JsonObject root, WebCustomization & customizations);
 

@@ -19,6 +19,8 @@
 #include "esp32-psram/RingBufferStream.h" // Stream-based ring buffer
 #include "esp32-psram/TypedRingBuffer.h" // Typed ring buffer for structured data
 
+#define stringPSRAM std::basic_string<char, std::char_traits<char>, AllocatorPSRAM<char>>
+
 #ifndef ESP32_PSRAM_NO_NAMESPACE
 using namespace esp32_psram;
 #endif

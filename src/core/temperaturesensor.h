@@ -27,9 +27,10 @@
 
 #include <uuid/log.h>
 
+#include <esp32-psram.h>
+
 #ifndef EMSESP_STANDALONE
 #include <OneWire.h>
-#include <esp32-psram.h>
 #endif
 
 namespace emsesp {
@@ -172,12 +173,12 @@ class TemperatureSensor {
 
 #ifndef EMSESP_STANDALONE
     std::vector<Sensor, AllocatorPSRAM<Sensor>> sensors_; // our list of active sensors
-    OneWire  bus_;
-    uint32_t last_activity_ = uuid::get_uptime();
-    State    state_         = State::IDLE;
-    int8_t   scancnt_       = SCAN_START;
-    uint8_t  firstscan_     = 0;
-    int8_t   scanretry_     = 0;
+    OneWire                                     bus_;
+    uint32_t                                    last_activity_ = uuid::get_uptime();
+    State                                       state_         = State::IDLE;
+    int8_t                                      scancnt_       = SCAN_START;
+    uint8_t                                     firstscan_     = 0;
+    int8_t                                      scanretry_     = 0;
 #else
     std::vector<Sensor> sensors_; // our list of active sensors
 #endif

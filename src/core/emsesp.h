@@ -72,9 +72,7 @@
 #include "command.h"
 
 #include "../emsesp_version.h"
-#ifndef EMSESP_STANDALONE
 #include <esp32-psram.h>
-#endif
 
 // Load external modules
 class Module {}; // forward declaration
@@ -223,11 +221,7 @@ class EMSESP {
     static void scan_devices();
     static void clear_all_devices();
 
-#ifndef EMSESP_STANDALONE
     static std::vector<std::unique_ptr<EMSdevice>, AllocatorPSRAM<std::unique_ptr<EMSdevice>>> emsdevices;
-#else
-    static std::vector<std::unique_ptr<EMSdevice>> emsdevices;
-#endif
     // services
     static Mqtt              mqtt_;
     static Modbus *          modbus_;
@@ -272,11 +266,8 @@ class EMSESP {
         const char *          default_name;
         uint8_t               flags;
     };
-#ifndef EMSESP_STANDALONE
     static std::vector<Device_record, AllocatorPSRAM<Device_record>> device_library_;
-#else
-    static std::vector<Device_record> device_library_;
-#endif
+
     static uint16_t watch_id_;
     static uint8_t  watch_;
     static uint16_t read_id_;

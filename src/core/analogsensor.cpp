@@ -130,7 +130,7 @@ void AnalogSensor::reload(bool get_nvs) {
             for (const auto & sensor : settings.analogCustomizations) { // search customlist
                 if (sensor_.gpio() == sensor.gpio) {
                     // for output sensors set value to new start-value
-                    if (sensor.type >= AnalogType::DIGITAL_OUT && sensor.type <= AnalogType::PWM_2
+                    if (((sensor.type >= AnalogType::DIGITAL_OUT && sensor.type <= AnalogType::PWM_2) || sensor.type >= AnalogType::RGB)
                         && (sensor_.type() != sensor.type || sensor_.offset() != sensor.offset || sensor_.factor() != sensor.factor)) {
                         sensor_.set_value(sensor.offset);
                     }
@@ -164,12 +164,11 @@ void AnalogSensor::reload(bool get_nvs) {
             }
             if (!found) {
                 // it's new, we assume it's valid
-                AnalogType type = static_cast<AnalogType>(sensor.type);
-                sensors_.emplace_back(sensor.gpio, sensor.name, sensor.offset, sensor.factor, sensor.uom, type, sensor.is_system);
+                sensors_.emplace_back(sensor.gpio, sensor.name, sensor.offset, sensor.factor, sensor.uom, sensor.type, sensor.is_system);
 
                 sensors_.back().ha_registered = false; // this will trigger recreate of the HA config
-                if (sensor.type == AnalogType::COUNTER || sensor.type >= AnalogType::DIGITAL_OUT
-                    || (sensor.type >= AnalogType::CNT_0 && sensor.type <= AnalogType::CNT_2)) {
+                if (sensor.type == AnalogType::COUNTER || (sensor.type >= AnalogType::DIGITAL_OUT && sensor.type <= AnalogType::PWM_2)
+                    || sensor.type == AnalogType::RGB || (sensor.type >= AnalogType::CNT_0 && sensor.type <= AnalogType::CNT_2)) {
                     sensors_.back().set_value(sensor.offset);
                 } else {
                     sensors_.back().set_value(0); // reset value only for new sensors
@@ -374,10 +373,10 @@ void AnalogSensor::measure() {
                 uint16_t a = analogReadMilliVolts(sensor.gpio()); // e.g. ADC1_CHANNEL_0_GPIO_NUM
                 if (!sensor.analog_) {                            // init first time
                     sensor.analog_ = a;
-                    sensor.sum_    = a * 512;
+                    sensor.sum_    = a * 128;
                 } else { // simple moving average filter
-                    sensor.sum_    = (sensor.sum_ * 511) / 512 + a;
-                    sensor.analog_ = sensor.sum_ / 512;
+                    sensor.sum_    = (sensor.sum_ * 127) / 128 + a;
+                    sensor.analog_ = sensor.sum_ / 128;
                 }
 
                 // detect change with little hysteresis on raw mV value
@@ -427,7 +426,7 @@ void AnalogSensor::measure() {
                 auto index  = sensor.type() - AnalogType::CNT_0;
                 auto oldval = sensor.value();
                 portENTER_CRITICAL_ISR(&mux);
-                auto c = edgecnt[index];
+                auto c         = edgecnt[index];
                 edgecnt[index] = 0;
                 portEXIT_CRITICAL_ISR(&mux);
                 sensor.set_value(oldval + sensor.factor() * c);
@@ -709,7 +708,7 @@ void AnalogSensor::publish_values(const bool force) {
             LOG_DEBUG("Recreating HA config for analog sensor GPIO %02d", sensor.gpio());
 
             JsonDocument config;
-            config["~"]          = Mqtt::base();
+            config["~"] = Mqtt::base();
 
             char stat_t[50];
             snprintf(stat_t, sizeof(stat_t), "~/%s_data", F_(analogsensor)); // use base path
@@ -742,7 +741,7 @@ void AnalogSensor::publish_values(const bool force) {
                 snprintf(uniq_s, sizeof(uniq_s), "%s_%02d", F_(analogsensor), sensor.gpio());
             }
 
-            config["~"] = Mqtt::base();
+            config["~"]       = Mqtt::base();
             config["uniq_id"] = uniq_s;
 
             char name[50];
@@ -877,10 +876,11 @@ void AnalogSensor::get_value_json(JsonObject output, const Sensor & sensor) {
     output["value"]     = sensor.value();
     output["readable"]  = true;
     output["writeable"] = sensor.type() == AnalogType::COUNTER || sensor.type() == AnalogType::RGB || sensor.type() == AnalogType::PULSE
-                          || (sensor.type() >= AnalogType::DIGITAL_OUT && sensor.type() <= AnalogType::PWM_2)|| (sensor.type() >= AnalogType::CNT_0 && sensor.type() <= AnalogType::CNT_2);
+                          || (sensor.type() >= AnalogType::DIGITAL_OUT && sensor.type() <= AnalogType::PWM_2)
+                          || (sensor.type() >= AnalogType::CNT_0 && sensor.type() <= AnalogType::CNT_2);
     output["visible"]   = true;
     output["is_system"] = sensor.is_system();
-    if (sensor.type() == AnalogType::COUNTER|| (sensor.type() >= AnalogType::CNT_0 && sensor.type() <= AnalogType::CNT_2)) {
+    if (sensor.type() == AnalogType::COUNTER || (sensor.type() >= AnalogType::CNT_0 && sensor.type() <= AnalogType::CNT_2)) {
         output["min"]         = 0;
         output["max"]         = 4000000;
         output["start_value"] = sensor.offset();

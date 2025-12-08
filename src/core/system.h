@@ -31,9 +31,9 @@
 #include <esp_wifi.h>
 #include <ETH.h>
 #include <uuid/syslog.h>
-#include <esp32-psram.h>
 #endif
 
+#include <esp32-psram.h>
 #include <uuid/log.h>
 #include <PButton.h>
 
@@ -395,17 +395,11 @@ class System {
     void led_monitor();
     void system_check();
 
-#ifndef EMSESP_STANDALONE
     static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> string_range_to_vector(const std::string & range);
 
     static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> valid_system_gpios_; // list of valid GPIOs for the ESP32 board that can be used
     static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> used_gpios_;         // list of GPIOs used by the application
-#else
-    static std::vector<uint8_t> string_range_to_vector(const std::string & range);
 
-    static std::vector<uint8_t> valid_system_gpios_; // list of valid GPIOs for the ESP32 board that can be used
-    static std::vector<uint8_t> used_gpios_;         // list of GPIOs used by the application
-#endif
     int8_t wifi_quality(int8_t dBm);
 
     uint8_t  healthcheck_       = HEALTHCHECK_NO_NETWORK | HEALTHCHECK_NO_BUS; // start with all flags set, no wifi and no ems bus connection
