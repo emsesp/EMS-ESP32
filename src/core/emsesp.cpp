@@ -950,10 +950,8 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
 
     // Optimized: Use stack buffer and build string once to avoid multiple temporary allocations
     char buf[250];
-    int pos = 0;
-    
     if (telegram->operation == Telegram::Operation::RX_READ) {
-        pos = snprintf(buf, sizeof(buf), "%s(%s) R %s(%s), %s(%s), length: %d", 
+        auto pos = snprintf(buf, sizeof(buf), "%s(%s) R %s(%s), %s(%s), length: %d", 
                       src_name.c_str(), Helpers::hextoa(src).c_str(), 
                       dest_name.c_str(), Helpers::hextoa(dest).c_str(), 
                       type_name.c_str(), Helpers::hextoa(telegram->type_id).c_str(),
