@@ -62,6 +62,7 @@ class Mqtt {
 
     static constexpr uint8_t  MQTT_TOPIC_MAX_SIZE = 128; // fixed, not a user setting anymore
     static constexpr uint16_t MQTT_QUEUE_MAX_SIZE = 300;
+    static constexpr uint16_t MQTT_PAYLOAD_MAX_SIZE = 512; // max payload size for internal buffers
 
     static void on_connect();
     static void on_disconnect(espMqttClientTypes::DisconnectReason reason);
@@ -312,8 +313,8 @@ class Mqtt {
     static bool     ha_climate_reset_;
 
     static char lasttopic_[MQTT_TOPIC_MAX_SIZE];
-    static char lastpayload_[512]; // max payload size for echo detection
-    static char lastresponse_[512]; // response buffer
+    static char lastpayload_[MQTT_PAYLOAD_MAX_SIZE]; // max payload size for echo detection
+    static char lastresponse_[MQTT_PAYLOAD_MAX_SIZE]; // response buffer
 
     // settings, copied over
     static char mqtt_base_[MQTT_TOPIC_MAX_SIZE];

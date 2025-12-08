@@ -239,11 +239,19 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
     const char * cmd_org = command;
     int8_t       id_org  = id;
 
-    // convert cmd to lowercase and compare
-    char * lowerCmd = strdup(command);
-    for (char * p = lowerCmd; *p; p++) {
-        *p = tolower(*p);
+    // Optimized: Use stack buffer instead of strdup() to avoid heap allocation
+    // Most command strings are short, 64 bytes is more than enough
+    char lowerCmd[64];
+    size_t len = strlen(command);
+    if (len >= sizeof(lowerCmd)) {
+        len = sizeof(lowerCmd) - 1; // truncate if too long (rare case)
     }
+    
+    // Convert to lowercase in place using stack buffer
+    for (size_t i = 0; i < len; i++) {
+        lowerCmd[i] = tolower(command[i]);
+    }
+    lowerCmd[len] = '\0';
 
     // check prefix and valid number range, also check 'id'
     if (!strncmp(lowerCmd, "hc", 2) && command[2] >= '1' && command[2] <= '8') {
@@ -281,7 +289,7 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
         command += 3;
     }
 
-    free(lowerCmd);
+    // No free() needed - stack buffer is automatically cleaned up
 
     // return original if no seperator
     if (command[0] != '/' && command[0] != '.') {
@@ -415,9 +423,11 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
                 }
             }
 
-            std::string err   = "no '" + std::string(cmd) + "' in " + dname;
+            // Optimized: Build error message directly in buffer to avoid string concatenation
+            char err[120];
+            snprintf(err, sizeof(err), "no '%s' in %s", cmd, dname);
             output["message"] = err;
-            LOG_WARNING("Command failed: %s", err.c_str());
+            LOG_WARNING("Command failed: %s", err);
         }
         return CommandRet::NOT_FOUND;
     }
@@ -796,7 +806,9 @@ void Command::show_all(uuid::console::Shell & shell) {
 uint8_t Command::json_message(uint8_t error_code, const char * message, const JsonObject output, const char * object) {
     output.clear();
     if (object) {
-        output["message"] = std::string(message) + " " + object;
+        char combined_message[150];
+        snprintf(combined_message, sizeof(combined_message), "%s %s", message, object);
+        output["message"] = combined_message;
     } else {
         output["message"] = message;
     }

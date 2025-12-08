@@ -34,12 +34,19 @@ char * Helpers::hextoa(char * result, const uint8_t value) {
 }
 
 // same as hextoa but uses to a hex std::string
+// Optimized: Avoid string concatenation to reduce temporary allocations
 std::string Helpers::hextoa(const uint8_t value, bool prefix) {
-    char buf[3];
     if (prefix) {
-        return std::string("0x") + hextoa(buf, value);
+        char buf[5]; // "0x" + 2 hex chars + null
+        buf[0] = '0';
+        buf[1] = 'x';
+        hextoa(&buf[2], value);
+        return std::string(buf);
+    } else {
+        char buf[3];
+        hextoa(buf, value);
+        return std::string(buf);
     }
-    return std::string(hextoa(buf, value));
 }
 
 // same for 16 bit values
@@ -53,12 +60,19 @@ char * Helpers::hextoa(char * result, const uint16_t value) {
 }
 
 // same as above but to a hex string
+// Optimized: Avoid string concatenation to reduce temporary allocations
 std::string Helpers::hextoa(const uint16_t value, bool prefix) {
-    char buf[5];
     if (prefix) {
-        return std::string("0x") + hextoa(buf, value);
+        char buf[7]; // "0x" + 4 hex chars + null
+        buf[0] = '0';
+        buf[1] = 'x';
+        hextoa(&buf[2], value);
+        return std::string(buf);
+    } else {
+        char buf[5];
+        hextoa(buf, value);
+        return std::string(buf);
     }
-    return std::string(hextoa(buf, value));
 }
 
 #ifdef EMSESP_STANDALONE
@@ -100,22 +114,27 @@ char * Helpers::ultostr(char * ptr, uint32_t value, const uint8_t base) {
 
 // fast itoa returning a std::string
 // http://www.strudel.org.uk/itoa/
+// Optimized: Use stack buffer to avoid heap allocation, then create string once
 std::string Helpers::itoa(int16_t value) {
-    std::string buf;
-    buf.reserve(25); // Pre-allocate enough space.
-    int quotient = value;
-
+    // int16_t max: -32768 to 32767 = max 6 chars + null
+    char buf[8];
+    char * p = buf + sizeof(buf) - 1;
+    *p = '\0';
+    
+    bool negative = value < 0;
+    int32_t abs_val = negative ? -(int32_t)value : value; // cast to int32 to handle -32768
+    
+    // Build string in reverse
     do {
-        buf += "0123456789abcdef"[std::abs(quotient % 10)];
-        quotient /= 10;
-    } while (quotient);
-
-    // Append the negative sign
-    if (value < 0)
-        buf += '-';
-
-    std::reverse(buf.begin(), buf.end());
-    return buf;
+        *--p = '0' + (abs_val % 10);
+        abs_val /= 10;
+    } while (abs_val > 0);
+    
+    if (negative) {
+        *--p = '-';
+    }
+    
+    return std::string(p);
 }
 
 /*

@@ -948,25 +948,42 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
         }
     }
 
-    std::string str;
-    str.reserve(200);
+    // Optimized: Use stack buffer and build string once to avoid multiple temporary allocations
+    char buf[250];
+    int pos = 0;
+    
     if (telegram->operation == Telegram::Operation::RX_READ) {
-        str = src_name + "(" + Helpers::hextoa(src) + ") R " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
-              + Helpers::hextoa(telegram->type_id) + "), length: " + Helpers::itoa(telegram->message_data[0])
-              + ((telegram->message_length > 1) ? ", data: " + Helpers::data_to_hex(telegram->message_data + 1, telegram->message_length - 1) : "");
+        pos = snprintf(buf, sizeof(buf), "%s(%s) R %s(%s), %s(%s), length: %d", 
+                      src_name.c_str(), Helpers::hextoa(src).c_str(), 
+                      dest_name.c_str(), Helpers::hextoa(dest).c_str(), 
+                      type_name.c_str(), Helpers::hextoa(telegram->type_id).c_str(),
+                      telegram->message_data[0]);
+        if (telegram->message_length > 1 && pos > 0 && pos < (int)sizeof(buf)) {
+            std::string data_hex = Helpers::data_to_hex(telegram->message_data + 1, telegram->message_length - 1);
+            snprintf(buf + pos, sizeof(buf) - pos, ", data: %s", data_hex.c_str());
+        }
     } else if (telegram->dest == 0) {
-        str = src_name + "(" + Helpers::hextoa(src) + ") B " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
-              + Helpers::hextoa(telegram->type_id) + "), data: " + telegram->to_string_message();
+        snprintf(buf, sizeof(buf), "%s(%s) B %s(%s), %s(%s), data: %s", 
+                src_name.c_str(), Helpers::hextoa(src).c_str(), 
+                dest_name.c_str(), Helpers::hextoa(dest).c_str(), 
+                type_name.c_str(), Helpers::hextoa(telegram->type_id).c_str(),
+                telegram->to_string_message().c_str());
     } else {
-        str = src_name + "(" + Helpers::hextoa(src) + ") W " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
-              + Helpers::hextoa(telegram->type_id) + "), data: " + telegram->to_string_message();
+        snprintf(buf, sizeof(buf), "%s(%s) W %s(%s), %s(%s), data: %s", 
+                src_name.c_str(), Helpers::hextoa(src).c_str(), 
+                dest_name.c_str(), Helpers::hextoa(dest).c_str(), 
+                type_name.c_str(), Helpers::hextoa(telegram->type_id).c_str(),
+                telegram->to_string_message().c_str());
     }
 
     if (offset) {
-        str += " (offset " + Helpers::itoa(offset) + ")";
+        size_t len = strlen(buf);
+        if (len < sizeof(buf) - 20) {
+            snprintf(buf + len, sizeof(buf) - len, " (offset %d)", offset);
+        }
     }
 
-    return str;
+    return std::string(buf);
 }
 
 /*

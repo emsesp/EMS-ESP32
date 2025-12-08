@@ -59,8 +59,8 @@ uint32_t Mqtt::mqtt_message_id_    = 0;
 char     will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
 
 char Mqtt::lasttopic_[MQTT_TOPIC_MAX_SIZE]    = "";
-char Mqtt::lastpayload_[512]  = "";
-char Mqtt::lastresponse_[512] = "";
+char Mqtt::lastpayload_[MQTT_PAYLOAD_MAX_SIZE]  = "";
+char Mqtt::lastresponse_[MQTT_PAYLOAD_MAX_SIZE] = "";
 
 // Home Assistant specific
 // icons from https://materialdesignicons.com used with the UOMs (unit of measurements)
@@ -222,9 +222,8 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) {
     // convert payload to a null-terminated char string
     // see https://www.emelis.net/espMqttClient/#code-samples
     // Use fixed-size buffer to avoid VLA (Variable Length Array) on stack
-    const size_t max_message_size = 512;
-    char message[max_message_size];
-    size_t copy_len = len < max_message_size - 1 ? len : max_message_size - 1;
+    char message[MQTT_PAYLOAD_MAX_SIZE];
+    size_t copy_len = len < MQTT_PAYLOAD_MAX_SIZE - 1 ? len : MQTT_PAYLOAD_MAX_SIZE - 1;
     memcpy(message, payload, copy_len);
     message[copy_len] = '\0';
 
@@ -259,7 +258,7 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) {
 
         if ((!strcmp(topic, full_topic)) && (mf.mqtt_subfunction_)) {
             if (!(mf.mqtt_subfunction_)(message)) {
-                LOG_ERROR("error: invalid payload %s for this topic %s", message, topic);
+                LOG_ERROR("Invalid payload for topic %s", topic);
                 Mqtt::queue_publish("response", "error: invalid data");
             }
             return;
@@ -287,20 +286,23 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) {
     uint8_t return_code = Command::process(topic, true, input, output); // mqtt is always authenticated
 
     if (return_code != CommandRet::OK) {
-        char error[100];
+        // Use smaller buffer for error messages
+        char error[120];
         if (output.size()) {
-            snprintf(error, sizeof(error), "MQTT command failed with error %s (%s)", (const char *)output["message"], Command::return_code_string(return_code));
+            snprintf(error, sizeof(error), "MQTT command failed: %s (%s)", (const char *)output["message"], Command::return_code_string(return_code));
         } else {
-            snprintf(error, sizeof(error), "MQTT command failed with error %s", Command::return_code_string(return_code));
+            snprintf(error, sizeof(error), "MQTT command failed: %s", Command::return_code_string(return_code));
         }
         LOG_ERROR(error);
         Mqtt::queue_publish("response", error);
     } else {
         // all good, send back json output from call
-        // Serialize JSON to string buffer to avoid temporary string allocation
-        char json_buffer[512];
-        serializeJson(output, json_buffer, sizeof(json_buffer));
-        Mqtt::queue_publish("response", json_buffer);
+        // Only send response if there's actual output to avoid unnecessary memory usage
+        if (output.size()) {
+            char json_buffer[MQTT_PAYLOAD_MAX_SIZE];
+            serializeJson(output, json_buffer, sizeof(json_buffer));
+            Mqtt::queue_publish("response", json_buffer);
+        }
     }
 }
 
@@ -606,32 +608,43 @@ void Mqtt::ha_status() {
 // add sub or pub task to the queue.
 // the base is not included in the topic
 bool Mqtt::queue_message(const uint8_t operation, const char * topic, const char * payload, const bool retain) {
+    
+    if (!mqtt_enabled_ || !topic || topic[0] == '\0' || !connected()) {
+        return false; // quit, not using MQTT
+    }
+    
     if (strcmp(topic, "response") == 0 && operation == Operation::PUBLISH) {
         strlcpy(lastresponse_, payload, sizeof(lastresponse_));
         if (!send_response_) {
             return true;
         }
     }
-    if (!mqtt_enabled_ || !topic || topic[0] == '\0' || !connected()) {
-        return false; // quit, not using MQTT
-    }
+
 // check free mem
 #ifndef EMSESP_STANDALONE
-    // if (ESP.getFreeHeap() < 60 * 1024 || ESP.getMaxAllocHeap() < 40 * 1024) {
-    if (heap_caps_get_free_size(MALLOC_CAP_8BIT) < 60 * 1024) { // checks free Heap+PSRAM
+    // Improved memory threshold: require 64KB free (increased from 60KB) to prevent fragmentation issues
+    // This provides a better safety margin for MQTT operations
+    constexpr uint32_t MQTT_MIN_FREE_HEAP = 64 * 1024;
+    if (heap_caps_get_free_size(MALLOC_CAP_8BIT) < MQTT_MIN_FREE_HEAP) { // checks free Heap+PSRAM
         if (operation == Operation::PUBLISH) {
             mqtt_message_id_++;
             mqtt_publish_fails_++;
         }
-        LOG_WARNING("%s failed: low memory", operation == Operation::PUBLISH ? "Publish" : operation == Operation::SUBSCRIBE ? "Subscribe" : "Unsubscribe");
+        LOG_WARNING("%s failed: low memory (%d KB free, need %d KB)", 
+                    operation == Operation::PUBLISH ? "Publish" : operation == Operation::SUBSCRIBE ? "Subscribe" : "Unsubscribe",
+                    heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024,
+                    MQTT_MIN_FREE_HEAP / 1024);
         return false; // quit
     }
+
     if (queuecount_ >= MQTT_QUEUE_MAX_SIZE) {
         if (operation == Operation::PUBLISH) {
             mqtt_message_id_++;
             mqtt_publish_fails_++;
         }
-        LOG_WARNING("%s failed: queue full", operation == Operation::PUBLISH ? "Publish" : operation == Operation::SUBSCRIBE ? "Subscribe" : "Unsubscribe");
+        LOG_WARNING("%s failed: queue full (%d/%d)", 
+                    operation == Operation::PUBLISH ? "Publish" : operation == Operation::SUBSCRIBE ? "Subscribe" : "Unsubscribe",
+                    queuecount_, MQTT_QUEUE_MAX_SIZE);
         return false; // quit
     }
 #endif
@@ -695,10 +708,12 @@ bool Mqtt::queue_publish(const char * topic, const JsonObjectConst payload, cons
     if (payload.size()) {
         // Use stack buffer instead of heap-allocated string
         size_t json_size = measureJson(payload) + 1;
-        if (json_size > 1024) {
-            // For very large payloads, still use heap but with reasonable limit
+        if (json_size > 768) {
+            // For very large payloads (>768 bytes), use heap but with reasonable limit
+            // Reduced from 1024 to 768 to encourage smaller payloads
             char * payload_buffer = (char *)malloc(json_size);
             if (!payload_buffer) {
+                LOG_WARNING("Failed to allocate %d bytes for MQTT payload", json_size);
                 return false; // allocation failed
             }
             serializeJson(payload, payload_buffer, json_size);
@@ -706,8 +721,8 @@ bool Mqtt::queue_publish(const char * topic, const JsonObjectConst payload, cons
             free(payload_buffer);
             return result;
         } else {
-            // Use stack buffer for smaller payloads
-            char payload_buffer[1024];
+            // Use stack buffer for smaller payloads (<=768 bytes)
+            char payload_buffer[768];
             serializeJson(payload, payload_buffer, sizeof(payload_buffer));
             return queue_publish_message(topic, payload_buffer, retain);
         }
@@ -750,10 +765,11 @@ bool Mqtt::queue_ha(const char * topic, const JsonObjectConst payload) {
 
     // Use stack buffer for JSON serialization
     size_t json_size = measureJson(payload) + 1;
-    if (json_size > 1024) {
-        // For very large payloads, use heap
+    if (json_size > 768) {
+        // For very large payloads (>768 bytes), use heap
         char * payload_buffer = (char *)malloc(json_size);
         if (!payload_buffer) {
+            LOG_WARNING("Failed to allocate %d bytes for HA config payload", json_size);
             return false;
         }
         serializeJson(payload, payload_buffer, json_size);
@@ -761,7 +777,8 @@ bool Mqtt::queue_ha(const char * topic, const JsonObjectConst payload) {
         free(payload_buffer);
         return result;
     } else {
-        char payload_buffer[1024];
+        // Use stack buffer for smaller payloads (<=768 bytes)
+        char payload_buffer[768];
         serializeJson(payload, payload_buffer, sizeof(payload_buffer));
         return queue_publish_message(full_topic, payload_buffer, true);
     }
@@ -851,7 +868,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     }
 
     // build unique identifier also used to build the default_entity_id which also becomes the Entity ID in HA
-    char uniq_id[80];
+    char uniq_id[70];
 
     // list of boiler entities that need conversion for 3.6 compatibility, add ww suffix
     // used when entity_format is SINGLE_OLD or MULTI_OLD to keep with 3.6.5
@@ -937,7 +954,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     }
 
     // build a config topic that will be prefix onto a HA type (e.g. number, switch)
-    char config_topic[70];
+    char config_topic[60];
     snprintf(config_topic, sizeof(config_topic), "%s/%s_%s/config", Mqtt::base(), device_name, entity_with_tag);
 
     // create the topic
@@ -1009,7 +1026,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // set the entity_id. This is breaking change in HA 2025.10.0 - see https://github.com/home-assistant/core/pull/151775
     // extract the string from topic up to the / using char buffer
     const char * slash_pos = strchr(topic, '/');
-    char def_ent_id[100];
+    char def_ent_id[80];
     if (slash_pos) {
         size_t prefix_len = slash_pos - topic;
         snprintf(def_ent_id, sizeof(def_ent_id), "%.*s.%s", (int)prefix_len, topic, uniq_id);
@@ -1071,7 +1088,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     }
 
     // friendly name = <tag> <name>
-    char   ha_name[70];
+    char   ha_name[60];
     char * F_name = strdup(fullname);
     Helpers::CharToUpperUTF8(F_name); // capitalize first letter
     if (has_tag) {
@@ -1099,8 +1116,8 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
         // value template
         // if its nested mqtt format then use the appended entity name, otherwise take the original name
-        char val_obj[100];
-        char val_cond[200];
+        char val_obj[80];
+        char val_cond[160];
         if (is_nested() && tag >= DeviceValueTAG::TAG_HC1) {
             snprintf(val_obj, sizeof(val_obj), "value_json['%s']['%s']", EMSdevice::tag_to_mqtt(tag), entity);
             snprintf(val_cond, sizeof(val_cond), "value_json.%s is defined and %s is defined", EMSdevice::tag_to_mqtt(tag), val_obj);
@@ -1277,19 +1294,19 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     char topic_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
-    char hc_mode_s[30];
-    char seltemp_s[30];
-    char currtemp_s[30];
-    char currhum_s[30];
-    char hc_mode_cond[80];
-    char seltemp_cond[100];
-    char currtemp_cond[100];
-    char currhum_cond[100];
-    char mode_str_tpl[400];
+    char hc_mode_s[25];
+    char seltemp_s[25];
+    char currtemp_s[25];
+    char currhum_s[25];
+    char hc_mode_cond[70];
+    char seltemp_cond[80];
+    char currtemp_cond[80];
+    char currhum_cond[80];
+    char mode_str_tpl[350];
     char name_s[10];
     char uniq_id_s[60];
-    char temp_cmd_s[30];
-    char mode_cmd_s[30];
+    char temp_cmd_s[25];
+    char mode_cmd_s[25];
     char min_s[10];
     char max_s[10];
 
@@ -1436,13 +1453,13 @@ void Mqtt::add_ha_dev_section(JsonObject doc, const char * name, const char * mo
         // for ids, replace all spaces with -
         std::string lower_name_str(name);
         std::replace(lower_name_str.begin(), lower_name_str.end(), ' ', '-');
-        char id_buf[MQTT_TOPIC_MAX_SIZE];
+        char id_buf[80];
         snprintf(id_buf, sizeof(id_buf), "%s-%s", Mqtt::basename(), Helpers::toLower(lower_name_str).c_str());
         ids.add(id_buf);
 
         auto cap_name = strdup(name);
         Helpers::CharToUpperUTF8(cap_name); // capitalize first letter
-        char name_buf[MQTT_TOPIC_MAX_SIZE];
+        char name_buf[80];
         snprintf(name_buf, sizeof(name_buf), "%s %s", Mqtt::basename(), cap_name);
         dev_json["name"] = name_buf;
         free(cap_name);
@@ -1483,28 +1500,31 @@ void Mqtt::add_ha_avail_section(JsonObject doc, const char * state_t, const bool
     JsonDocument avty_json;
 
     // make local copy of state, as the pointer will get de-referenced
-    char state[50];
+    char state[40];
     strlcpy(state, state_t, sizeof(state));
 
-    char         tpl[150];
-    const char * tpl_draft = "{{'online' if %s else 'offline'}}";
+    char tpl[120];
 
     // condition 1
     if (cond1 != nullptr) {
         avty_json.clear();
         avty_json["t"] = state;
-        snprintf(tpl, sizeof(tpl), tpl_draft, cond1);
+        snprintf(tpl, sizeof(tpl), "{{'online' if %s else 'offline'}}", cond1);
         avty_json["val_tpl"] = tpl;
-        avty.add(avty_json); // returns 0 if no mem
+        if (!avty.add(avty_json)) {
+            LOG_WARNING("Failed to add availability condition 1 (low memory)");
+        }
     }
 
     // condition 2
     if (cond2 != nullptr) {
         avty_json.clear();
         avty_json["t"] = state;
-        snprintf(tpl, sizeof(tpl), tpl_draft, cond2);
+        snprintf(tpl, sizeof(tpl), "{{'online' if %s else 'offline'}}", cond2);
         avty_json["val_tpl"] = tpl;
-        avty.add(avty_json); // returns 0 if no mem
+        if (!avty.add(avty_json)) {
+            LOG_WARNING("Failed to add availability condition 2 (low memory)");
+        }
     }
 
     // negative condition
@@ -1513,7 +1533,9 @@ void Mqtt::add_ha_avail_section(JsonObject doc, const char * state_t, const bool
         avty_json["t"] = state;
         snprintf(tpl, sizeof(tpl), "{{'offline' if %s else 'online'}}", negcond);
         avty_json["val_tpl"] = tpl;
-        avty.add(avty_json); // returns 0 if no mem
+        if (!avty.add(avty_json)) {
+            LOG_WARNING("Failed to add negative availability condition (low memory)");
+        }
     }
 
     // add LWT (Last Will and Testament)
