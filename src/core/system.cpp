@@ -1688,7 +1688,7 @@ std::string System::get_metrics_prometheus() {
                             }
 
                             // create productID metric
-                            if (device.containsKey("productID") && device["productID"].is<int>()) {
+                            if (device["productID"].is<int>()) {
                                 std::string metric = "emsesp_device_productid";
                                 if (seen_metrics.find(metric) == seen_metrics.end()) {
                                     result += "# HELP emsesp_device_productid productID\n";
@@ -1713,7 +1713,7 @@ std::string System::get_metrics_prometheus() {
                             }
 
                             // create entities metric
-                            if (device.containsKey("entities") && device["entities"].is<int>()) {
+                            if (device["entities"].is<int>()) {
                                 std::string metric = "emsesp_device_entities";
                                 if (seen_metrics.find(metric) == seen_metrics.end()) {
                                     result += "# HELP emsesp_device_entities entities\n";
