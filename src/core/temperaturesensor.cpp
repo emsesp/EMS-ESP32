@@ -507,7 +507,7 @@ void TemperatureSensor::publish_values(const bool force) {
                 LOG_DEBUG("Recreating HA config for sensor ID %s", sensor.id().c_str());
 
                 JsonDocument config;
-                config["~"]          = Mqtt::base();
+                config["~"]        = Mqtt::base();
                 config["dev_cla"]  = "temperature";
                 config["stat_cla"] = "measurement";
 
