@@ -52,7 +52,7 @@
     "@preact/compat": "^18.3.1",
     "@preact/preset-vite": "^2.10.2",
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",
-    "@types/node": "^24.10.1",
+    "@types/node": "^24.10.2",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "axe-core": "^4.11.0",
@@ -62,10 +62,10 @@
     "prettier": "^3.7.4",
     "rollup-plugin-visualizer": "^6.0.5",
     "terser": "^5.44.1",
-    "typescript-eslint": "^8.48.1",
-    "vite": "^7.2.6",
+    "typescript-eslint": "^8.49.0",
+    "vite": "^7.2.7",
     "vite-plugin-imagemin": "^0.6.1",
     "vite-tsconfig-paths": "^5.1.4"
   },
-  "packageManager": "pnpm@10.24.0+sha512.01ff8ae71b4419903b65c60fb2dc9d34cf8bb6e06d03bde112ef38f7a34d6904c424ba66bea5cdcf12890230bf39f9580473140ed9c946fef328b6e5238a345a"
+  "packageManager": "pnpm@10.25.0+sha512.5e82639027af37cf832061bcc6d639c219634488e0f2baebe785028a793de7b525ffcd3f7ff574f5e9860654e098fe852ba8ac5dd5cefe1767d23a020a92f501"
 }
