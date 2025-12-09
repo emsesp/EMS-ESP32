@@ -60,8 +60,8 @@ class Mqtt {
     enum Operation : uint8_t { PUBLISH, SUBSCRIBE, UNSUBSCRIBE };
     enum NestedFormat : uint8_t { NESTED = 1, SINGLE };
 
-    static constexpr uint8_t  MQTT_TOPIC_MAX_SIZE = 128; // fixed, not a user setting anymore
-    static constexpr uint16_t MQTT_QUEUE_MAX_SIZE = 300;
+    static constexpr uint8_t  MQTT_TOPIC_MAX_SIZE   = 128; // fixed, not a user setting anymore
+    static constexpr uint16_t MQTT_QUEUE_MAX_SIZE   = 300;
     static constexpr uint16_t MQTT_PAYLOAD_MAX_SIZE = 512; // max payload size for internal buffers
 
     static void on_connect();
@@ -238,12 +238,12 @@ class Mqtt {
         ha_climate_reset_ = reset;
     }
 
-    static const char * get_response() {
+    static std::string get_response() {
         return lastresponse_;
     }
 
     static void clear_response() {
-        lastresponse_[0] = '\0';
+        lastresponse_.clear();
     }
 
     void set_qos(uint8_t mqtt_qos) const {
@@ -259,12 +259,11 @@ class Mqtt {
     static void
     add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8_t type, const uint8_t uom, const char * entity = nullptr, bool is_discovery = true);
     static void add_ha_dev_section(JsonObject doc, const char * name, const char * model, const char * brand, const char * version, const bool create_model);
-    static void add_ha_avail_section(JsonObject   doc,
-                                     const char * state_t,
-                                     const bool   is_first,
-                                     const char * cond1   = nullptr,
-                                     const char * cond2   = nullptr,
-                                     const char * negcond = nullptr);
+    static void add_ha_avty_section(JsonObject   doc,
+                                    const char * state_t = nullptr,
+                                    const char * cond1   = nullptr,
+                                    const char * cond2   = nullptr,
+                                    const char * negcond = nullptr);
     static void add_ha_bool(JsonObject doc);
 
   private:
@@ -282,9 +281,9 @@ class Mqtt {
 
     // function handlers for MQTT subscriptions
     struct MQTTSubFunction {
-        uint8_t             device_type_;      // which device type, from DeviceType::
+        uint8_t             device_type_;                // which device type, from DeviceType::
         char                topic_[MQTT_TOPIC_MAX_SIZE]; // short topic name
-        mqtt_sub_function_p mqtt_subfunction_; // can be empty
+        mqtt_sub_function_p mqtt_subfunction_;           // can be empty
 
         MQTTSubFunction(uint8_t device_type, const char * topic, mqtt_sub_function_p mqtt_subfunction)
             : device_type_(device_type)
@@ -312,33 +311,32 @@ class Mqtt {
     static uint8_t  connectcount_;
     static bool     ha_climate_reset_;
 
-    static char lasttopic_[MQTT_TOPIC_MAX_SIZE];
-    static char lastpayload_[MQTT_PAYLOAD_MAX_SIZE]; // max payload size for echo detection
-    static char lastresponse_[MQTT_PAYLOAD_MAX_SIZE]; // response buffer
+    static char        lasttopic_[MQTT_TOPIC_MAX_SIZE];
+    static std::string lastresponse_; // response buffer
 
     // settings, copied over
-    static char mqtt_base_[MQTT_TOPIC_MAX_SIZE];
-    static char mqtt_basename_[MQTT_TOPIC_MAX_SIZE]; // base name for MQTT topics with / replaced with _
-    static uint8_t     mqtt_qos_;
-    static bool        mqtt_retain_;
-    static uint32_t    publish_time_;
-    static uint32_t    publish_time_boiler_;
-    static uint32_t    publish_time_thermostat_;
-    static uint32_t    publish_time_solar_;
-    static uint32_t    publish_time_mixer_;
-    static uint32_t    publish_time_water_;
-    static uint32_t    publish_time_other_;
-    static uint32_t    publish_time_sensor_;
-    static uint32_t    publish_time_heartbeat_;
-    static bool        mqtt_enabled_;
-    static bool        ha_enabled_;
-    static uint8_t     nested_format_;
-    static uint8_t     entity_format_;
-    static char        discovery_prefix_[MQTT_TOPIC_MAX_SIZE];
-    static uint8_t     discovery_type_;
-    static bool        publish_single_;
-    static bool        publish_single2cmd_;
-    static bool        send_response_;
+    static char     mqtt_base_[MQTT_TOPIC_MAX_SIZE];
+    static char     mqtt_basename_[MQTT_TOPIC_MAX_SIZE]; // base name for MQTT topics with / replaced with _
+    static uint8_t  mqtt_qos_;
+    static bool     mqtt_retain_;
+    static uint32_t publish_time_;
+    static uint32_t publish_time_boiler_;
+    static uint32_t publish_time_thermostat_;
+    static uint32_t publish_time_solar_;
+    static uint32_t publish_time_mixer_;
+    static uint32_t publish_time_water_;
+    static uint32_t publish_time_other_;
+    static uint32_t publish_time_sensor_;
+    static uint32_t publish_time_heartbeat_;
+    static bool     mqtt_enabled_;
+    static bool     ha_enabled_;
+    static uint8_t  nested_format_;
+    static uint8_t  entity_format_;
+    static char     discovery_prefix_[MQTT_TOPIC_MAX_SIZE];
+    static uint8_t  discovery_type_;
+    static bool     publish_single_;
+    static bool     publish_single2cmd_;
+    static bool     send_response_;
 };
 
 } // namespace emsesp
