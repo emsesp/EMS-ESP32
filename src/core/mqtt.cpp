@@ -25,7 +25,7 @@ namespace emsesp {
 MqttClient * Mqtt::mqttClient_;
 
 // static parameters we make global
-char     Mqtt::mqtt_base_[MQTT_TOPIC_MAX_SIZE] = "";
+char     Mqtt::mqtt_base_[MQTT_TOPIC_MAX_SIZE]     = "";
 char     Mqtt::mqtt_basename_[MQTT_TOPIC_MAX_SIZE] = ""; // base name for MQTT topics with / replaced with _. Used for uniq_id in HA
 uint8_t  Mqtt::mqtt_qos_;
 bool     Mqtt::mqtt_retain_;
@@ -58,9 +58,8 @@ uint8_t  Mqtt::connectcount_       = 0;
 uint32_t Mqtt::mqtt_message_id_    = 0;
 char     will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
 
-char Mqtt::lasttopic_[MQTT_TOPIC_MAX_SIZE]    = "";
-char Mqtt::lastpayload_[MQTT_PAYLOAD_MAX_SIZE]  = "";
-char Mqtt::lastresponse_[MQTT_PAYLOAD_MAX_SIZE] = "";
+char        Mqtt::lasttopic_[MQTT_TOPIC_MAX_SIZE] = "";
+std::string Mqtt::lastresponse_                   = "";
 
 // Home Assistant specific
 // icons from https://materialdesignicons.com used with the UOMs (unit of measurements)
@@ -222,7 +221,7 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) {
     // convert payload to a null-terminated char string
     // see https://www.emelis.net/espMqttClient/#code-samples
     // Use fixed-size buffer to avoid VLA (Variable Length Array) on stack
-    char message[MQTT_PAYLOAD_MAX_SIZE];
+    char   message[MQTT_PAYLOAD_MAX_SIZE];
     size_t copy_len = len < MQTT_PAYLOAD_MAX_SIZE - 1 ? len : MQTT_PAYLOAD_MAX_SIZE - 1;
     memcpy(message, payload, copy_len);
     message[copy_len] = '\0';
@@ -245,7 +244,7 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) {
     }
 
     // for misconfigured mqtt servers and publish2command ignore echos
-    if (publish_single_ && publish_single2cmd_ && strcmp(lasttopic_, topic) == 0 && strcmp(lastpayload_, message) == 0) {
+    if (publish_single_ && publish_single2cmd_ && strcmp(lasttopic_, topic) == 0) {
         LOG_DEBUG("Received echo message %s: %s", topic, message);
         return;
     }
@@ -357,8 +356,8 @@ void Mqtt::load_settings() {
         publish_single2cmd_ = mqttSettings.publish_single2cmd;
         send_response_      = mqttSettings.send_response;
         strlcpy(discovery_prefix_, mqttSettings.discovery_prefix.c_str(), sizeof(discovery_prefix_));
-        entity_format_      = mqttSettings.entity_format;
-        discovery_type_     = mqttSettings.discovery_type;
+        entity_format_  = mqttSettings.entity_format;
+        discovery_type_ = mqttSettings.discovery_type;
 
         // convert to milliseconds
         publish_time_boiler_     = mqttSettings.publish_time_boiler * 1000;
@@ -608,13 +607,12 @@ void Mqtt::ha_status() {
 // add sub or pub task to the queue.
 // the base is not included in the topic
 bool Mqtt::queue_message(const uint8_t operation, const char * topic, const char * payload, const bool retain) {
-    
     if (!mqtt_enabled_ || !topic || topic[0] == '\0' || !connected()) {
         return false; // quit, not using MQTT
     }
-    
+
     if (strcmp(topic, "response") == 0 && operation == Operation::PUBLISH) {
-        strlcpy(lastresponse_, payload, sizeof(lastresponse_));
+        lastresponse_ = payload;
         if (!send_response_) {
             return true;
         }
@@ -630,8 +628,10 @@ bool Mqtt::queue_message(const uint8_t operation, const char * topic, const char
             mqtt_message_id_++;
             mqtt_publish_fails_++;
         }
-        LOG_WARNING("%s failed: low memory (%d KB free, need %d KB)", 
-                    operation == Operation::PUBLISH ? "Publish" : operation == Operation::SUBSCRIBE ? "Subscribe" : "Unsubscribe",
+        LOG_WARNING("%s failed: low memory (%d KB free, need %d KB)",
+                    operation == Operation::PUBLISH     ? "Publish"
+                    : operation == Operation::SUBSCRIBE ? "Subscribe"
+                                                        : "Unsubscribe",
                     heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024,
                     MQTT_MIN_FREE_HEAP / 1024);
         return false; // quit
@@ -642,9 +642,12 @@ bool Mqtt::queue_message(const uint8_t operation, const char * topic, const char
             mqtt_message_id_++;
             mqtt_publish_fails_++;
         }
-        LOG_WARNING("%s failed: queue full (%d/%d)", 
-                    operation == Operation::PUBLISH ? "Publish" : operation == Operation::SUBSCRIBE ? "Subscribe" : "Unsubscribe",
-                    queuecount_, MQTT_QUEUE_MAX_SIZE);
+        LOG_WARNING("%s failed: queue full (%d/%d)",
+                    operation == Operation::PUBLISH     ? "Publish"
+                    : operation == Operation::SUBSCRIBE ? "Subscribe"
+                                                        : "Unsubscribe",
+                    queuecount_,
+                    MQTT_QUEUE_MAX_SIZE);
         return false; // quit
     }
 #endif
@@ -743,7 +746,7 @@ bool Mqtt::queue_publish_retain(const char * topic, const JsonObjectConst payloa
 // publish empty payload to remove the topic
 bool Mqtt::queue_remove_topic(const char * topic) {
     if (ha_enabled_) {
-        char full_topic[MQTT_TOPIC_MAX_SIZE];
+        char         full_topic[MQTT_TOPIC_MAX_SIZE];
         const char * disc_prefix = discovery_prefix();
         snprintf(full_topic, sizeof(full_topic), "%s%s", disc_prefix, topic);
         return queue_publish_message(full_topic, "", true); // publish with retain to remove from broker
@@ -759,7 +762,7 @@ bool Mqtt::queue_ha(const char * topic, const JsonObjectConst payload) {
     }
 
     // Build full topic with discovery prefix
-    char full_topic[MQTT_TOPIC_MAX_SIZE];
+    char         full_topic[MQTT_TOPIC_MAX_SIZE];
     const char * disc_prefix = discovery_prefix();
     snprintf(full_topic, sizeof(full_topic), "%s%s", disc_prefix, topic);
 
@@ -1026,7 +1029,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // set the entity_id. This is breaking change in HA 2025.10.0 - see https://github.com/home-assistant/core/pull/151775
     // extract the string from topic up to the / using char buffer
     const char * slash_pos = strchr(topic, '/');
-    char def_ent_id[80];
+    char         def_ent_id[80];
     if (slash_pos) {
         size_t prefix_len = slash_pos - topic;
         snprintf(def_ent_id, sizeof(def_ent_id), "%.*s.%s", (int)prefix_len, topic, uniq_id);
@@ -1140,7 +1143,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
             // adds availability, dev, ids to the config section to HA Discovery config
             // except for commands
-            add_ha_avail_section(doc.as<JsonObject>(), stat_t, false, val_cond);
+            add_ha_avty_section(doc.as<JsonObject>(), stat_t, val_cond);
         } else {
             // Domoticz doesn't support value templates, so we just use the value directly
             // Also omit the uom and other state classes
@@ -1410,8 +1413,8 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
     modes.add("heat");
     modes.add("off");
 
-    add_ha_dev_section(doc.as<JsonObject>(), devicename, nullptr, nullptr, nullptr, false);                                         // add dev section
-    add_ha_avail_section(doc.as<JsonObject>(), topic_t, false, seltemp_cond, has_roomtemp ? currtemp_cond : nullptr, hc_mode_cond); // add availability section
+    add_ha_dev_section(doc.as<JsonObject>(), devicename, nullptr, nullptr, nullptr, false);                                 // add dev section
+    add_ha_avty_section(doc.as<JsonObject>(), topic_t, seltemp_cond, has_roomtemp ? currtemp_cond : nullptr, hc_mode_cond); // add availability section
 
     return queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 }
@@ -1481,17 +1484,10 @@ void Mqtt::add_ha_dev_section(JsonObject doc, const char * name, const char * mo
     }
 }
 
-// adds sections for HA Discovery to an existing JSON doc
-//  adds dev section with ids, name, mf, mdl, via_device
-//  adds optional availability section
-void Mqtt::add_ha_avail_section(JsonObject doc, const char * state_t, const bool is_first, const char * cond1, const char * cond2, const char * negcond) {
+// adds avty section for HA Discovery to an existing JSON doc
+void Mqtt::add_ha_avty_section(JsonObject doc, const char * state_t, const char * cond1, const char * cond2, const char * negcond) {
     // only works for HA
     if (discovery_type() != discoveryType::HOMEASSISTANT) {
-        return;
-    }
-
-    // skip availability section if no conditions set
-    if (!cond1 && !cond2 && !negcond) {
         return;
     }
 
@@ -1499,42 +1495,44 @@ void Mqtt::add_ha_avail_section(JsonObject doc, const char * state_t, const bool
     JsonArray    avty = doc["avty"].to<JsonArray>();
     JsonDocument avty_json;
 
-    // make local copy of state, as the pointer will get de-referenced
-    char state[40];
-    strlcpy(state, state_t, sizeof(state));
+    if (state_t != nullptr) {
+        // make local copy of state, as the pointer will get de-referenced
+        char state[40];
+        strlcpy(state, state_t, sizeof(state));
 
-    char tpl[120];
+        char tpl[MQTT_PAYLOAD_MAX_SIZE];
 
-    // condition 1
-    if (cond1 != nullptr) {
-        avty_json.clear();
-        avty_json["t"] = state;
-        snprintf(tpl, sizeof(tpl), "{{'online' if %s else 'offline'}}", cond1);
-        avty_json["val_tpl"] = tpl;
-        if (!avty.add(avty_json)) {
-            LOG_WARNING("Failed to add availability condition 1 (low memory)");
+        // condition 1
+        if (cond1 != nullptr) {
+            avty_json.clear();
+            avty_json["t"] = state;
+            snprintf(tpl, sizeof(tpl), "{{'online' if %s else 'offline'}}", cond1);
+            avty_json["val_tpl"] = tpl;
+            if (!avty.add(avty_json)) {
+                LOG_WARNING("Failed to add availability condition 1 (low memory)");
+            }
         }
-    }
 
-    // condition 2
-    if (cond2 != nullptr) {
-        avty_json.clear();
-        avty_json["t"] = state;
-        snprintf(tpl, sizeof(tpl), "{{'online' if %s else 'offline'}}", cond2);
-        avty_json["val_tpl"] = tpl;
-        if (!avty.add(avty_json)) {
-            LOG_WARNING("Failed to add availability condition 2 (low memory)");
+        // condition 2
+        if (cond2 != nullptr) {
+            avty_json.clear();
+            avty_json["t"] = state;
+            snprintf(tpl, sizeof(tpl), "{{'online' if %s else 'offline'}}", cond2);
+            avty_json["val_tpl"] = tpl;
+            if (!avty.add(avty_json)) {
+                LOG_WARNING("Failed to add availability condition 2 (low memory)");
+            }
         }
-    }
 
-    // negative condition
-    if (negcond != nullptr) {
-        avty_json.clear();
-        avty_json["t"] = state;
-        snprintf(tpl, sizeof(tpl), "{{'offline' if %s else 'online'}}", negcond);
-        avty_json["val_tpl"] = tpl;
-        if (!avty.add(avty_json)) {
-            LOG_WARNING("Failed to add negative availability condition (low memory)");
+        // negative condition
+        if (negcond != nullptr) {
+            avty_json.clear();
+            avty_json["t"] = state;
+            snprintf(tpl, sizeof(tpl), "{{'offline' if %s else 'online'}}", negcond);
+            avty_json["val_tpl"] = tpl;
+            if (!avty.add(avty_json)) {
+                LOG_WARNING("Failed to add negative availability condition (low memory)");
+            }
         }
     }
 
