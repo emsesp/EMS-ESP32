@@ -507,12 +507,12 @@ void TemperatureSensor::publish_values(const bool force) {
                 LOG_DEBUG("Recreating HA config for sensor ID %s", sensor.id().c_str());
 
                 JsonDocument config;
-                config["~"]          = Mqtt::base();
+                config["~"]        = Mqtt::base();
                 config["dev_cla"]  = "temperature";
                 config["stat_cla"] = "measurement";
 
-                char stat_t[50];
-                snprintf(stat_t, sizeof(stat_t), "~/%s_data", F_(temperaturesensor)); // use base path
+                char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
+                snprintf(stat_t, sizeof(stat_t), "~/%s_data", F_(temperaturesensor));
                 config["stat_t"] = stat_t;
 
                 config["unit_of_meas"] = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
@@ -550,16 +550,15 @@ void TemperatureSensor::publish_values(const bool force) {
                 config["name"] = name;
 
                 // see if we need to create the [devs] discovery section, as this needs only to be done once for all sensors
-                bool is_ha_device_created = false;
                 for (const auto & sensor : sensors_) {
-                    if (sensor.ha_registered) {
-                        is_ha_device_created = true;
+                    if (!sensor.ha_registered) {
+                        Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Temperature Sensors", nullptr, nullptr, nullptr, false);
                         break;
                     }
                 }
 
-                Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Temperature Sensors", nullptr, nullptr, nullptr, false);
-                Mqtt::add_ha_avail_section(config.as<JsonObject>(), stat_t, !is_ha_device_created, val_cond);
+                // add avty section
+                Mqtt::add_ha_avty_section(config.as<JsonObject>(), stat_t, val_cond);
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename(), F_(temperaturesensor), sensor.id().c_str());

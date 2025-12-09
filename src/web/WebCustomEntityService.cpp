@@ -414,9 +414,9 @@ void WebCustomEntityService::publish(const bool force) {
         // create HA config
         if (Mqtt::ha_enabled() && !ha_registered_) {
             JsonDocument config;
-            config["~"]          = Mqtt::base();
+            config["~"] = Mqtt::base();
 
-            char         stat_t[50];
+            char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
             snprintf(stat_t, sizeof(stat_t), "~/%s_data", F_(custom));
             config["stat_t"] = stat_t;
 
@@ -470,8 +470,10 @@ void WebCustomEntityService::publish(const bool force) {
             config["def_ent_id"] = topic_str.substr(0, topic_str.find("/")) + "." + uniq_s;
 
             Mqtt::add_ha_classes(config.as<JsonObject>(), EMSdevice::DeviceType::SYSTEM, entityItem.value_type, entityItem.uom);
-            Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Custom Entities", nullptr, nullptr, nullptr, false);
-            Mqtt::add_ha_avail_section(config.as<JsonObject>(), stat_t, !ha_created, val_cond);
+            if (!ha_created) {
+                Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Custom Entities", nullptr, nullptr, nullptr, false);
+            }
+            Mqtt::add_ha_avty_section(config.as<JsonObject>(), stat_t, val_cond);
 
             ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
         }

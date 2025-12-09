@@ -265,11 +265,10 @@ void WebSchedulerService::publish(const bool force) {
 
             // create HA config
             if (Mqtt::ha_enabled() && !ha_registered_) {
-                
                 JsonDocument config;
-                config["~"]          = Mqtt::base();
+                config["~"] = Mqtt::base();
 
-                char         stat_t[50];
+                char stat_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 snprintf(stat_t, sizeof(stat_t), "~/%s_data", F_(scheduler));
                 config["stat_t"] = stat_t;
 
@@ -299,8 +298,10 @@ void WebSchedulerService::publish(const bool force) {
                 config["cmd_t"] = command_topic;
 
                 Mqtt::add_ha_bool(config.as<JsonObject>());
-                Mqtt::add_ha_dev_section(config.as<JsonObject>(), F_(scheduler), nullptr, nullptr, nullptr, false);
-                Mqtt::add_ha_avail_section(config.as<JsonObject>(), stat_t, !ha_created, val_cond);
+                if (!ha_created) {
+                    Mqtt::add_ha_dev_section(config.as<JsonObject>(), F_(scheduler), nullptr, nullptr, nullptr, false);
+                }
+                Mqtt::add_ha_avty_section(config.as<JsonObject>(), stat_t, val_cond);
 
                 ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
             }
@@ -558,7 +559,7 @@ void WebSchedulerService::scheduler_task(void * pvParameters) {
 #if defined(EMSESP_TEST)
 void WebSchedulerService::load_test_data() {
     update([&](WebScheduler & webScheduler) {
-        cmd_changed_.clear(); // Clear cmd_changed_ before clearing scheduleItems to prevent dangling pointers
+        cmd_changed_.clear();               // Clear cmd_changed_ before clearing scheduleItems to prevent dangling pointers
         webScheduler.scheduleItems.clear(); // delete all existing schedules
 
         // test 1
