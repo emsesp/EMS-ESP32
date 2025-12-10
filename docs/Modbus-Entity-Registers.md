@@ -182,9 +182,9 @@
 | dhw.comfoff | comfort switch off | uint8 (>=15<=65) | C | true | DHW | 18 | 1 | 1 |
 | dhw.ecooff | eco switch off | uint8 (>=15<=65) | C | true | DHW | 19 | 1 | 1 |
 | dhw.ecoplusoff | eco+ switch off | uint8 (>=48<=63) | C | true | DHW | 20 | 1 | 1 |
-| dhw.comfdiff | comfort diff | uint8 (>=4<=12) | K | true | DHW | 21 | 1 | 1 |
-| dhw.ecodiff | eco diff | uint8 (>=4<=12) | K | true | DHW | 22 | 1 | 1 |
-| dhw.ecoplusdiff | eco+ diff | uint8 (>=6<=12) | K | true | DHW | 23 | 1 | 1 |
+| dhw.comfdiff | comfort diff | uint8 (>=4<=15) | K | true | DHW | 21 | 1 | 1 |
+| dhw.ecodiff | eco diff | uint8 (>=4<=15) | K | true | DHW | 22 | 1 | 1 |
+| dhw.ecoplusdiff | eco+ diff | uint8 (>=4<=15) | K | true | DHW | 23 | 1 | 1 |
 | dhw.comfstop | comfort stop temp | uint8 (>=0<=254) | C | true | DHW | 24 | 1 | 1 |
 | dhw.ecostop | eco stop temp | uint8 (>=0<=254) | C | true | DHW | 25 | 1 | 1 |
 | dhw.ecoplusstop | eco+ stop temp | uint8 (>=0<=254) | C | true | DHW | 26 | 1 | 1 |
@@ -2821,9 +2821,9 @@
 | dhw.comfoff | comfort switch off | uint8 (>=15<=65) | C | true | DHW | 18 | 1 | 1 |
 | dhw.ecooff | eco switch off | uint8 (>=15<=65) | C | true | DHW | 19 | 1 | 1 |
 | dhw.ecoplusoff | eco+ switch off | uint8 (>=48<=63) | C | true | DHW | 20 | 1 | 1 |
-| dhw.comfdiff | comfort diff | uint8 (>=4<=12) | K | true | DHW | 21 | 1 | 1 |
-| dhw.ecodiff | eco diff | uint8 (>=4<=12) | K | true | DHW | 22 | 1 | 1 |
-| dhw.ecoplusdiff | eco+ diff | uint8 (>=6<=12) | K | true | DHW | 23 | 1 | 1 |
+| dhw.comfdiff | comfort diff | uint8 (>=4<=15) | K | true | DHW | 21 | 1 | 1 |
+| dhw.ecodiff | eco diff | uint8 (>=4<=15) | K | true | DHW | 22 | 1 | 1 |
+| dhw.ecoplusdiff | eco+ diff | uint8 (>=4<=15) | K | true | DHW | 23 | 1 | 1 |
 | dhw.comfstop | comfort stop temp | uint8 (>=0<=254) | C | true | DHW | 24 | 1 | 1 |
 | dhw.ecostop | eco stop temp | uint8 (>=0<=254) | C | true | DHW | 25 | 1 | 1 |
 | dhw.ecoplusstop | eco+ stop temp | uint8 (>=0<=254) | C | true | DHW | 26 | 1 | 1 |
@@ -3040,9 +3040,9 @@
 | dhw.comfoff | comfort switch off | uint8 (>=15<=65) | C | true | DHW | 18 | 1 | 1 |
 | dhw.ecooff | eco switch off | uint8 (>=15<=65) | C | true | DHW | 19 | 1 | 1 |
 | dhw.ecoplusoff | eco+ switch off | uint8 (>=48<=63) | C | true | DHW | 20 | 1 | 1 |
-| dhw.comfdiff | comfort diff | uint8 (>=4<=12) | K | true | DHW | 21 | 1 | 1 |
-| dhw.ecodiff | eco diff | uint8 (>=4<=12) | K | true | DHW | 22 | 1 | 1 |
-| dhw.ecoplusdiff | eco+ diff | uint8 (>=6<=12) | K | true | DHW | 23 | 1 | 1 |
+| dhw.comfdiff | comfort diff | uint8 (>=4<=15) | K | true | DHW | 21 | 1 | 1 |
+| dhw.ecodiff | eco diff | uint8 (>=4<=15) | K | true | DHW | 22 | 1 | 1 |
+| dhw.ecoplusdiff | eco+ diff | uint8 (>=4<=15) | K | true | DHW | 23 | 1 | 1 |
 | dhw.comfstop | comfort stop temp | uint8 (>=0<=254) | C | true | DHW | 24 | 1 | 1 |
 | dhw.ecostop | eco stop temp | uint8 (>=0<=254) | C | true | DHW | 25 | 1 | 1 |
 | dhw.ecoplusstop | eco+ stop temp | uint8 (>=0<=254) | C | true | DHW | 26 | 1 | 1 |

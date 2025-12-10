@@ -166,9 +166,9 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.comfoff,comfort switch off,uint8 (>=15<=65),C,true,number.boiler_dhw_comfort_switch_off,number.boiler_dhw_comfoff,5,9,1,18,1
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.ecooff,eco switch off,uint8 (>=15<=65),C,true,number.boiler_dhw_eco_switch_off,number.boiler_dhw_ecooff,5,9,1,19,1
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.ecoplusoff,eco+ switch off,uint8 (>=48<=63),C,true,number.boiler_dhw_eco+_switch_off,number.boiler_dhw_ecoplusoff,5,9,1,20,1
-"CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.comfdiff,comfort diff,uint8 (>=4<=12),K,true,number.boiler_dhw_comfort_diff,number.boiler_dhw_comfdiff,5,9,1,21,1
-"CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.ecodiff,eco diff,uint8 (>=4<=12),K,true,number.boiler_dhw_eco_diff,number.boiler_dhw_ecodiff,5,9,1,22,1
-"CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.ecoplusdiff,eco+ diff,uint8 (>=6<=12),K,true,number.boiler_dhw_eco+_diff,number.boiler_dhw_ecoplusdiff,5,9,1,23,1
+"CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.comfdiff,comfort diff,uint8 (>=4<=15),K,true,number.boiler_dhw_comfort_diff,number.boiler_dhw_comfdiff,5,9,1,21,1
+"CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.ecodiff,eco diff,uint8 (>=4<=15),K,true,number.boiler_dhw_eco_diff,number.boiler_dhw_ecodiff,5,9,1,22,1
+"CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.ecoplusdiff,eco+ diff,uint8 (>=4<=15),K,true,number.boiler_dhw_eco+_diff,number.boiler_dhw_ecoplusdiff,5,9,1,23,1
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.comfstop,comfort stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_comfort_stop_temp,number.boiler_dhw_comfstop,5,9,1,24,1
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.ecostop,eco stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_eco_stop_temp,number.boiler_dhw_ecostop,5,9,1,25,1
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.ecoplusstop,eco+ stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_eco+_stop_temp,number.boiler_dhw_ecoplusstop,5,9,1,26,1
@@ -2721,9 +2721,9 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.comfoff,comfort switch off,uint8 (>=15<=65),C,true,number.boiler_dhw_comfort_switch_off,number.boiler_dhw_comfoff,5,9,1,18,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.ecooff,eco switch off,uint8 (>=15<=65),C,true,number.boiler_dhw_eco_switch_off,number.boiler_dhw_ecooff,5,9,1,19,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.ecoplusoff,eco+ switch off,uint8 (>=48<=63),C,true,number.boiler_dhw_eco+_switch_off,number.boiler_dhw_ecoplusoff,5,9,1,20,1
-"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.comfdiff,comfort diff,uint8 (>=4<=12),K,true,number.boiler_dhw_comfort_diff,number.boiler_dhw_comfdiff,5,9,1,21,1
-"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.ecodiff,eco diff,uint8 (>=4<=12),K,true,number.boiler_dhw_eco_diff,number.boiler_dhw_ecodiff,5,9,1,22,1
-"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.ecoplusdiff,eco+ diff,uint8 (>=6<=12),K,true,number.boiler_dhw_eco+_diff,number.boiler_dhw_ecoplusdiff,5,9,1,23,1
+"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.comfdiff,comfort diff,uint8 (>=4<=15),K,true,number.boiler_dhw_comfort_diff,number.boiler_dhw_comfdiff,5,9,1,21,1
+"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.ecodiff,eco diff,uint8 (>=4<=15),K,true,number.boiler_dhw_eco_diff,number.boiler_dhw_ecodiff,5,9,1,22,1
+"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.ecoplusdiff,eco+ diff,uint8 (>=4<=15),K,true,number.boiler_dhw_eco+_diff,number.boiler_dhw_ecoplusdiff,5,9,1,23,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.comfstop,comfort stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_comfort_stop_temp,number.boiler_dhw_comfstop,5,9,1,24,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.ecostop,eco stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_eco_stop_temp,number.boiler_dhw_ecostop,5,9,1,25,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.ecoplusstop,eco+ stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_eco+_stop_temp,number.boiler_dhw_ecoplusstop,5,9,1,26,1
@@ -2936,9 +2936,9 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Geo 5xx",boiler,173,dhw.comfoff,comfort switch off,uint8 (>=15<=65),C,true,number.boiler_dhw_comfort_switch_off,number.boiler_dhw_comfoff,5,9,1,18,1
 "Geo 5xx",boiler,173,dhw.ecooff,eco switch off,uint8 (>=15<=65),C,true,number.boiler_dhw_eco_switch_off,number.boiler_dhw_ecooff,5,9,1,19,1
 "Geo 5xx",boiler,173,dhw.ecoplusoff,eco+ switch off,uint8 (>=48<=63),C,true,number.boiler_dhw_eco+_switch_off,number.boiler_dhw_ecoplusoff,5,9,1,20,1
-"Geo 5xx",boiler,173,dhw.comfdiff,comfort diff,uint8 (>=4<=12),K,true,number.boiler_dhw_comfort_diff,number.boiler_dhw_comfdiff,5,9,1,21,1
-"Geo 5xx",boiler,173,dhw.ecodiff,eco diff,uint8 (>=4<=12),K,true,number.boiler_dhw_eco_diff,number.boiler_dhw_ecodiff,5,9,1,22,1
-"Geo 5xx",boiler,173,dhw.ecoplusdiff,eco+ diff,uint8 (>=6<=12),K,true,number.boiler_dhw_eco+_diff,number.boiler_dhw_ecoplusdiff,5,9,1,23,1
+"Geo 5xx",boiler,173,dhw.comfdiff,comfort diff,uint8 (>=4<=15),K,true,number.boiler_dhw_comfort_diff,number.boiler_dhw_comfdiff,5,9,1,21,1
+"Geo 5xx",boiler,173,dhw.ecodiff,eco diff,uint8 (>=4<=15),K,true,number.boiler_dhw_eco_diff,number.boiler_dhw_ecodiff,5,9,1,22,1
+"Geo 5xx",boiler,173,dhw.ecoplusdiff,eco+ diff,uint8 (>=4<=15),K,true,number.boiler_dhw_eco+_diff,number.boiler_dhw_ecoplusdiff,5,9,1,23,1
 "Geo 5xx",boiler,173,dhw.comfstop,comfort stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_comfort_stop_temp,number.boiler_dhw_comfstop,5,9,1,24,1
 "Geo 5xx",boiler,173,dhw.ecostop,eco stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_eco_stop_temp,number.boiler_dhw_ecostop,5,9,1,25,1
 "Geo 5xx",boiler,173,dhw.ecoplusstop,eco+ stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_eco+_stop_temp,number.boiler_dhw_ecoplusstop,5,9,1,26,1
