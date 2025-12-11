@@ -464,8 +464,11 @@ void WebCustomEntityService::publish(const bool force) {
             config["def_ent_id"] = topic_str.substr(0, topic_str.find("/")) + "." + uniq_s;
 
             Mqtt::add_ha_classes(config.as<JsonObject>(), EMSdevice::DeviceType::SYSTEM, entityItem.value_type, entityItem.uom);
-            Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Custom Entities", nullptr, nullptr, nullptr, false);
-            Mqtt::add_ha_avail_section(config.as<JsonObject>(), stat_t, !ha_created, val_cond);
+
+            if (!ha_created) {
+                Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Custom Entities", nullptr, nullptr, nullptr, false);
+            }
+            Mqtt::add_ha_avty_section(config.as<JsonObject>(), stat_t, val_cond);
 
             ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
         }
@@ -700,13 +703,13 @@ void WebCustomEntityService::load_test_data() {
         auto entityItem = CustomEntityItem();
 
         // test 1
-        entityItem.id         = 1;
-        entityItem.ram        = 0;
-        entityItem.device_id  = 8;
-        entityItem.type_id    = 24;
-        entityItem.offset     = 0;
-        entityItem.factor     = 1;
-        strcpy(entityItem.name,"test_custom");
+        entityItem.id        = 1;
+        entityItem.ram       = 0;
+        entityItem.device_id = 8;
+        entityItem.type_id   = 24;
+        entityItem.offset    = 0;
+        entityItem.factor    = 1;
+        strcpy(entityItem.name, "test_custom");
         entityItem.uom        = 1;
         entityItem.value_type = 1;
         entityItem.writeable  = true;
@@ -723,12 +726,12 @@ void WebCustomEntityService::load_test_data() {
             CommandFlag::ADMIN_ONLY);
 
         // test 2
-        entityItem.id         = 2;
-        entityItem.ram        = 0;
-        entityItem.device_id  = 24;
-        entityItem.type_id    = 677;
-        entityItem.offset     = 3;
-        entityItem.factor     = 1;
+        entityItem.id        = 2;
+        entityItem.ram       = 0;
+        entityItem.device_id = 24;
+        entityItem.type_id   = 677;
+        entityItem.offset    = 3;
+        entityItem.factor    = 1;
         strcpy(entityItem.name, "test_read_only");
         entityItem.uom        = 0;
         entityItem.value_type = 2;
@@ -737,12 +740,12 @@ void WebCustomEntityService::load_test_data() {
         webCustomEntity.customEntityItems.push_back(entityItem);
 
         // test 3
-        entityItem.id         = 3;
-        entityItem.ram        = 1;
-        entityItem.device_id  = 0;
-        entityItem.type_id    = 0;
-        entityItem.offset     = 0;
-        entityItem.factor     = 1;
+        entityItem.id        = 3;
+        entityItem.ram       = 1;
+        entityItem.device_id = 0;
+        entityItem.type_id   = 0;
+        entityItem.offset    = 0;
+        entityItem.factor    = 1;
         strcpy(entityItem.name, "test_ram");
         entityItem.uom        = 0;
         entityItem.value_type = 8;
@@ -759,12 +762,12 @@ void WebCustomEntityService::load_test_data() {
             CommandFlag::ADMIN_ONLY);
 
         // test 4
-        entityItem.id         = 4;
-        entityItem.ram        = 1;
-        entityItem.device_id  = 0;
-        entityItem.type_id    = 0;
-        entityItem.offset     = 0;
-        entityItem.factor     = 1;
+        entityItem.id        = 4;
+        entityItem.ram       = 1;
+        entityItem.device_id = 0;
+        entityItem.type_id   = 0;
+        entityItem.offset    = 0;
+        entityItem.factor    = 1;
         strcpy(entityItem.name, "test_seltemp");
         entityItem.uom        = 0;
         entityItem.value_type = 8;

@@ -336,7 +336,7 @@ bool TemperatureSensor::update(const char * id, const char * name, int16_t offse
             sensor.set_is_system(is_system);
 
             // store the new name and offset in our configuration
-            EMSESP::webCustomizationService.update([&id, &name, &offset, &sensor, &hide, &is_system](WebCustomization & settings) {
+            EMSESP::webCustomizationService.update([&id, &name, &offset, &sensor, &is_system](WebCustomization & settings) {
                 // look it up to see if it exists
                 bool found = false;
                 for (auto & SensorCustomization : settings.sensorCustomizations) {
@@ -544,16 +544,11 @@ void TemperatureSensor::publish_values(const bool force) {
                 config["name"]       = sensor.name();
 
                 // see if we need to create the [devs] discovery section, as this needs only to be done once for all sensors
-                bool is_ha_device_created = false;
-                for (const auto & sensor : sensors_) {
-                    if (sensor.ha_registered) {
-                        is_ha_device_created = true;
-                        break;
-                    }
+                if (std::none_of(sensors_.begin(), sensors_.end(), [](const auto & sensor) { return sensor.ha_registered; })) {
+                    Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Temperature Sensors", nullptr, nullptr, nullptr, false);
                 }
 
-                Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Temperature Sensors", nullptr, nullptr, nullptr, false);
-                Mqtt::add_ha_avail_section(config.as<JsonObject>(), stat_t, !is_ha_device_created, val_cond);
+                Mqtt::add_ha_avty_section(config.as<JsonObject>(), stat_t, val_cond);
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(temperaturesensor), sensor.id());

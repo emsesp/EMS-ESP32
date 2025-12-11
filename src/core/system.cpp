@@ -1565,7 +1565,7 @@ void System::get_value_json(JsonObject output, const std::string & circuit, cons
 
 // generate Prometheus metrics format from system values
 std::string System::get_metrics_prometheus() {
-    std::string result;
+    std::string                           result;
     std::unordered_map<std::string, bool> seen_metrics;
 
     // get system data
@@ -1633,156 +1633,155 @@ std::string System::get_metrics_prometheus() {
     };
 
     // helper function to process a JSON object recursively
-    std::function<void(const JsonObject &, const std::string &)> process_object =
-        [&](const JsonObject & obj, const std::string & prefix) {
-            std::vector<std::pair<std::string, std::string>> local_info_labels;
-            bool has_nested_objects = false;
+    std::function<void(const JsonObject &, const std::string &)> process_object = [&](const JsonObject & obj, const std::string & prefix) {
+        std::vector<std::pair<std::string, std::string>> local_info_labels;
+        bool                                             has_nested_objects = false;
 
-            for (JsonPair p : obj) {
-                std::string key   = p.key().c_str();
-                std::string path  = prefix.empty() ? key : prefix + "." + key;
-                std::string metric_name = prefix.empty() ? key : prefix + "_" + key;
+        for (JsonPair p : obj) {
+            std::string key         = p.key().c_str();
+            std::string path        = prefix.empty() ? key : prefix + "." + key;
+            std::string metric_name = prefix.empty() ? key : prefix + "_" + key;
 
-                if (should_ignore(prefix, key)) {
-                    continue;
-                }
+            if (should_ignore(prefix, key)) {
+                continue;
+            }
 
-                if (p.value().is<JsonObject>()) {
-                    // recursive call for nested objects
-                    has_nested_objects = true;
-                    process_object(p.value().as<JsonObject>(), metric_name);
-                } else if (p.value().is<JsonArray>()) {
-                    // handle arrays (devices)
-                    if (key == "devices") {
-                        JsonArray devices = p.value().as<JsonArray>();
-                        for (JsonObject device : devices) {
-                            std::vector<std::pair<std::string, std::string>> device_labels;
+            if (p.value().is<JsonObject>()) {
+                // recursive call for nested objects
+                has_nested_objects = true;
+                process_object(p.value().as<JsonObject>(), metric_name);
+            } else if (p.value().is<JsonArray>()) {
+                // handle arrays (devices)
+                if (key == "devices") {
+                    JsonArray devices = p.value().as<JsonArray>();
+                    for (JsonObject device : devices) {
+                        std::vector<std::pair<std::string, std::string>> device_labels;
 
-                            // collect labels from device object
-                            for (JsonPair dp : device) {
-                                std::string dkey = dp.key().c_str();
-                                if (dkey == "type" || dkey == "name" || dkey == "deviceID" || dkey == "brand" || dkey == "version") {
-                                    if (dp.value().is<const char *>()) {
-                                        std::string val = dp.value().as<const char *>();
-                                        if (!val.empty()) {
-                                            device_labels.push_back({to_lowercase(dkey), val});
-                                        }
+                        // collect labels from device object
+                        for (JsonPair dp : device) {
+                            std::string dkey = dp.key().c_str();
+                            if (dkey == "type" || dkey == "name" || dkey == "deviceID" || dkey == "brand" || dkey == "version") {
+                                if (dp.value().is<const char *>()) {
+                                    std::string val = dp.value().as<const char *>();
+                                    if (!val.empty()) {
+                                        device_labels.push_back({to_lowercase(dkey), val});
                                     }
                                 }
                             }
+                        }
 
-                            // create productID metric
-                            if (device.containsKey("productID") && device["productID"].is<int>()) {
-                                std::string metric = "emsesp_device_productid";
-                                if (seen_metrics.find(metric) == seen_metrics.end()) {
-                                    result += "# HELP emsesp_device_productid productID\n";
-                                    result += "# TYPE emsesp_device_productid gauge\n";
-                                    seen_metrics[metric] = true;
-                                }
-
-                                result += metric;
-                                if (!device_labels.empty()) {
-                                    result += "{";
-                                    bool first = true;
-                                    for (const auto & label : device_labels) {
-                                        if (!first) {
-                                            result += ", ";
-                                        }
-                                        result += label.first + "=\"" + escape_label(label.second) + "\"";
-                                        first = false;
-                                    }
-                                    result += "}";
-                                }
-                                result += " " + std::to_string(device["productID"].as<int>()) + "\n";
+                        // create productID metric
+                        if (device["productID"].is<int>()) {
+                            std::string metric = "emsesp_device_productid";
+                            if (seen_metrics.find(metric) == seen_metrics.end()) {
+                                result += "# HELP emsesp_device_productid productID\n";
+                                result += "# TYPE emsesp_device_productid gauge\n";
+                                seen_metrics[metric] = true;
                             }
 
-                            // create entities metric
-                            if (device.containsKey("entities") && device["entities"].is<int>()) {
-                                std::string metric = "emsesp_device_entities";
-                                if (seen_metrics.find(metric) == seen_metrics.end()) {
-                                    result += "# HELP emsesp_device_entities entities\n";
-                                    result += "# TYPE emsesp_device_entities gauge\n";
-                                    seen_metrics[metric] = true;
-                                }
-
-                                result += metric;
-                                if (!device_labels.empty()) {
-                                    result += "{";
-                                    bool first = true;
-                                    for (const auto & label : device_labels) {
-                                        if (!first) {
-                                            result += ", ";
-                                        }
-                                        result += label.first + "=\"" + escape_label(label.second) + "\"";
-                                        first = false;
+                            result += metric;
+                            if (!device_labels.empty()) {
+                                result += "{";
+                                bool first = true;
+                                for (const auto & label : device_labels) {
+                                    if (!first) {
+                                        result += ", ";
                                     }
-                                    result += "}";
+                                    result += label.first + "=\"" + escape_label(label.second) + "\"";
+                                    first = false;
                                 }
-                                result += " " + std::to_string(device["entities"].as<int>()) + "\n";
+                                result += "}";
                             }
+                            result += " " + std::to_string(device["productID"].as<int>()) + "\n";
+                        }
+
+                        // create entities metric
+                        if (device["entities"].is<int>()) {
+                            std::string metric = "emsesp_device_entities";
+                            if (seen_metrics.find(metric) == seen_metrics.end()) {
+                                result += "# HELP emsesp_device_entities entities\n";
+                                result += "# TYPE emsesp_device_entities gauge\n";
+                                seen_metrics[metric] = true;
+                            }
+
+                            result += metric;
+                            if (!device_labels.empty()) {
+                                result += "{";
+                                bool first = true;
+                                for (const auto & label : device_labels) {
+                                    if (!first) {
+                                        result += ", ";
+                                    }
+                                    result += label.first + "=\"" + escape_label(label.second) + "\"";
+                                    first = false;
+                                }
+                                result += "}";
+                            }
+                            result += " " + std::to_string(device["entities"].as<int>()) + "\n";
                         }
                     }
-                } else {
-                    // handle primitive values
-                    bool is_number = p.value().is<int>() || p.value().is<float>();
-                    bool is_bool   = p.value().is<bool>();
-                    bool is_string = p.value().is<const char *>();
+                }
+            } else {
+                // handle primitive values
+                bool is_number = p.value().is<int>() || p.value().is<float>();
+                bool is_bool   = p.value().is<bool>();
+                bool is_string = p.value().is<const char *>();
 
-                    if (is_number || is_bool) {
-                        // add metric
-                        std::string full_metric_name = "emsesp_" + sanitize_name(metric_name);
-                        if (seen_metrics.find(full_metric_name) == seen_metrics.end()) {
-                            result += "# HELP emsesp_" + sanitize_name(metric_name) + " " + key + "\n";
-                            result += "# TYPE emsesp_" + sanitize_name(metric_name) + " gauge\n";
-                            seen_metrics[full_metric_name] = true;
-                        }
+                if (is_number || is_bool) {
+                    // add metric
+                    std::string full_metric_name = "emsesp_" + sanitize_name(metric_name);
+                    if (seen_metrics.find(full_metric_name) == seen_metrics.end()) {
+                        result += "# HELP emsesp_" + sanitize_name(metric_name) + " " + key + "\n";
+                        result += "# TYPE emsesp_" + sanitize_name(metric_name) + " gauge\n";
+                        seen_metrics[full_metric_name] = true;
+                    }
 
-                        result += full_metric_name + " ";
-                        if (is_bool) {
-                            result += p.value().as<bool>() ? "1" : "0";
-                        } else if (p.value().is<int>()) {
-                            result += std::to_string(p.value().as<int>());
-                        } else {
-                            char val_str[30];
-                            snprintf(val_str, sizeof(val_str), "%.2f", p.value().as<float>());
-                            result += val_str;
-                        }
-                        result += "\n";
-                    } else if (is_string) {
-                        // collect string for info metric (skip dynamic strings like uptime and timestamp)
-                        std::string val = p.value().as<const char *>();
-                        if (!val.empty() && key != "uptime" && key != "timestamp") {
-                            local_info_labels.push_back({to_lowercase(key), val});
-                        }
+                    result += full_metric_name + " ";
+                    if (is_bool) {
+                        result += p.value().as<bool>() ? "1" : "0";
+                    } else if (p.value().is<int>()) {
+                        result += std::to_string(p.value().as<int>());
+                    } else {
+                        char val_str[30];
+                        snprintf(val_str, sizeof(val_str), "%.2f", p.value().as<float>());
+                        result += val_str;
+                    }
+                    result += "\n";
+                } else if (is_string) {
+                    // collect string for info metric (skip dynamic strings like uptime and timestamp)
+                    std::string val = p.value().as<const char *>();
+                    if (!val.empty() && key != "uptime" && key != "timestamp") {
+                        local_info_labels.push_back({to_lowercase(key), val});
                     }
                 }
             }
+        }
 
-            // create _info metric for this object level if we have labels and this is a leaf node (no nested objects)
-            if (!local_info_labels.empty() && !prefix.empty() && !has_nested_objects) {
-                std::string info_metric = "emsesp_" + sanitize_name(prefix) + "_info";
-                if (seen_metrics.find(info_metric) == seen_metrics.end()) {
-                    result += "# HELP " + info_metric + " info\n";
-                    result += "# TYPE " + info_metric + " gauge\n";
-                    seen_metrics[info_metric] = true;
-                }
-
-                result += info_metric;
-                if (!local_info_labels.empty()) {
-                    result += "{";
-                    bool first = true;
-                    for (const auto & label : local_info_labels) {
-                        if (!first) {
-                            result += ", ";
-                        }
-                        result += label.first + "=\"" + escape_label(label.second) + "\"";
-                        first = false;
-                    }
-                    result += "}";
-                }
-                result += " 1\n";
+        // create _info metric for this object level if we have labels and this is a leaf node (no nested objects)
+        if (!local_info_labels.empty() && !prefix.empty() && !has_nested_objects) {
+            std::string info_metric = "emsesp_" + sanitize_name(prefix) + "_info";
+            if (seen_metrics.find(info_metric) == seen_metrics.end()) {
+                result += "# HELP " + info_metric + " info\n";
+                result += "# TYPE " + info_metric + " gauge\n";
+                seen_metrics[info_metric] = true;
             }
-        };
+
+            result += info_metric;
+            if (!local_info_labels.empty()) {
+                result += "{";
+                bool first = true;
+                for (const auto & label : local_info_labels) {
+                    if (!first) {
+                        result += ", ";
+                    }
+                    result += label.first + "=\"" + escape_label(label.second) + "\"";
+                    first = false;
+                }
+                result += "}";
+            }
+            result += " 1\n";
+        }
+    };
 
     // process root object
     process_object(root, "");

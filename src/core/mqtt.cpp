@@ -596,15 +596,17 @@ void Mqtt::ha_status() {
 // add sub or pub task to the queue.
 // the base is not included in the topic
 bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, const bool retain) {
+    if (!mqtt_enabled_ || topic.empty() || !connected()) {
+        return false; // quit, not using MQTT
+    }
+
     if (topic == "response" && operation == Operation::PUBLISH) {
         lastresponse_ = payload;
         if (!send_response_) {
             return true;
         }
     }
-    if (!mqtt_enabled_ || topic.empty() || !connected()) {
-        return false; // quit, not using MQTT
-    }
+
 // check free mem
 #ifndef EMSESP_STANDALONE
     // if (ESP.getFreeHeap() < 60 * 1024 || ESP.getMaxAllocHeap() < 40 * 1024) {
@@ -1094,10 +1096,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         // don't bother with value template conditions if using Domoticz which doesn't fully support MQTT Discovery
         if (discovery_type() == discoveryType::HOMEASSISTANT) {
             doc["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else " + sample_val + "}}";
-
-            // adds availability, dev, ids to the config section to HA Discovery config
-            // except for commands
-            add_ha_avail_section(doc.as<JsonObject>(), stat_t, false, val_cond);
+            add_ha_avty_section(doc.as<JsonObject>(), stat_t, val_cond); // adds availability section
         } else {
             // Domoticz doesn't support value templates, so we just use the value directly
             // Also omit the uom and other state classes
@@ -1367,8 +1366,8 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
     modes.add("heat");
     modes.add("off");
 
-    add_ha_dev_section(doc.as<JsonObject>(), devicename, nullptr, nullptr, nullptr, false);                                         // add dev section
-    add_ha_avail_section(doc.as<JsonObject>(), topic_t, false, seltemp_cond, has_roomtemp ? currtemp_cond : nullptr, hc_mode_cond); // add availability section
+    add_ha_dev_section(doc.as<JsonObject>(), devicename, nullptr, nullptr, nullptr, false);                                 // add dev section
+    add_ha_avty_section(doc.as<JsonObject>(), topic_t, seltemp_cond, has_roomtemp ? currtemp_cond : nullptr, hc_mode_cond); // add availability section
 
     return queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 }
@@ -1434,17 +1433,10 @@ void Mqtt::add_ha_dev_section(JsonObject doc, const char * name, const char * mo
     }
 }
 
-// adds sections for HA Discovery to an existing JSON doc
-//  adds dev section with ids, name, mf, mdl, via_device
-//  adds optional availability section
-void Mqtt::add_ha_avail_section(JsonObject doc, const char * state_t, const bool is_first, const char * cond1, const char * cond2, const char * negcond) {
+// adds avty section for HA Discovery to an existing JSON doc
+void Mqtt::add_ha_avty_section(JsonObject doc, const char * state_t, const char * cond1, const char * cond2, const char * negcond) {
     // only works for HA
     if (discovery_type() != discoveryType::HOMEASSISTANT) {
-        return;
-    }
-
-    // skip availability section if no conditions set
-    if (!cond1 && !cond2 && !negcond) {
         return;
     }
 
@@ -1452,41 +1444,48 @@ void Mqtt::add_ha_avail_section(JsonObject doc, const char * state_t, const bool
     JsonArray    avty = doc["avty"].to<JsonArray>();
     JsonDocument avty_json;
 
-    // make local copy of state, as the pointer will get de-referenced
-    char state[50];
-    strlcpy(state, state_t, sizeof(state));
+    if (state_t != nullptr) {
+        // make local copy of state, as the pointer will get de-referenced
+        char state[40];
+        strlcpy(state, state_t, sizeof(state));
 
-    char         tpl[150];
-    const char * tpl_draft = "{{'online' if %s else 'offline'}}";
+        char tpl[150];
 
-    // condition 1
-    if (cond1 != nullptr) {
-        avty_json.clear();
-        avty_json["t"] = state;
-        snprintf(tpl, sizeof(tpl), tpl_draft, cond1);
-        avty_json["val_tpl"] = tpl;
-        avty.add(avty_json); // returns 0 if no mem
+        // condition 1
+        if (cond1 != nullptr) {
+            avty_json.clear();
+            avty_json["t"] = state;
+            snprintf(tpl, sizeof(tpl), "{{'online' if %s else 'offline'}}", cond1);
+            avty_json["val_tpl"] = tpl;
+            if (!avty.add(avty_json)) {
+                LOG_WARNING("Failed to add availability condition 1 (low memory)");
+            }
+        }
+
+        // condition 2
+        if (cond2 != nullptr) {
+            avty_json.clear();
+            avty_json["t"] = state;
+            snprintf(tpl, sizeof(tpl), "{{'online' if %s else 'offline'}}", cond2);
+            avty_json["val_tpl"] = tpl;
+            if (!avty.add(avty_json)) {
+                LOG_WARNING("Failed to add availability condition 2 (low memory)");
+            }
+        }
+
+        // negative condition
+        if (negcond != nullptr) {
+            avty_json.clear();
+            avty_json["t"] = state;
+            snprintf(tpl, sizeof(tpl), "{{'offline' if %s else 'online'}}", negcond);
+            avty_json["val_tpl"] = tpl;
+            if (!avty.add(avty_json)) {
+                LOG_WARNING("Failed to add negative availability condition (low memory)");
+            }
+        }
     }
 
-    // condition 2
-    if (cond2 != nullptr) {
-        avty_json.clear();
-        avty_json["t"] = state;
-        snprintf(tpl, sizeof(tpl), tpl_draft, cond2);
-        avty_json["val_tpl"] = tpl;
-        avty.add(avty_json); // returns 0 if no mem
-    }
-
-    // negative condition
-    if (negcond != nullptr) {
-        avty_json.clear();
-        avty_json["t"] = state;
-        snprintf(tpl, sizeof(tpl), "{{'offline' if %s else 'online'}}", negcond);
-        avty_json["val_tpl"] = tpl;
-        avty.add(avty_json); // returns 0 if no mem
-    }
-
-    // add LWT (Last Will and Testament)
+    // always add LWT (Last Will and Testament)
     avty_json.clear();
     avty_json["t"] = "~/status"; // as a topic
     avty.add(avty_json);

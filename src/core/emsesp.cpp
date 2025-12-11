@@ -848,7 +848,7 @@ std::string EMSESP::device_tostring(const uint8_t device_id) {
     }
 }
 
-// created a pretty print telegram as a text string
+// create a pretty print telegram as a text string
 // e.g. Boiler(0x08) -> Me(0x0B), Version(0x02), data: 7B 06 01 00 00 00 00 00 00 04 (offset 1)
 std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     uint8_t src    = telegram->src & 0x7F;
@@ -950,26 +950,57 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
         }
     }
 
-    std::string str;
-    str.reserve(200);
+    // Optimized: Use stack buffer and build string once to avoid multiple temporary allocations
+    char buf[250];
     if (telegram->operation == Telegram::Operation::RX_READ) {
-        str = src_name + "(" + Helpers::hextoa(src) + ") R " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
-              + Helpers::hextoa(telegram->type_id) + "), length: " + Helpers::itoa(telegram->message_data[0])
-              + ((telegram->message_length > 1) ? ", data: " + Helpers::data_to_hex(telegram->message_data + 1, telegram->message_length - 1) : "");
+        auto pos = snprintf(buf,
+                            sizeof(buf),
+                            "%s(%s) R %s(%s), %s(%s), length: %d",
+                            src_name.c_str(),
+                            Helpers::hextoa(src).c_str(),
+                            dest_name.c_str(),
+                            Helpers::hextoa(dest).c_str(),
+                            type_name.c_str(),
+                            Helpers::hextoa(telegram->type_id).c_str(),
+                            telegram->message_data[0]);
+        if (telegram->message_length > 1 && pos > 0 && pos < (int)sizeof(buf)) {
+            std::string data_hex = Helpers::data_to_hex(telegram->message_data + 1, telegram->message_length - 1);
+            snprintf(buf + pos, sizeof(buf) - pos, ", data: %s", data_hex.c_str());
+        }
     } else if (telegram->dest == 0) {
-        str = src_name + "(" + Helpers::hextoa(src) + ") B " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
-              + Helpers::hextoa(telegram->type_id) + "), data: " + telegram->to_string_message();
+        snprintf(buf,
+                 sizeof(buf),
+                 "%s(%s) B %s(%s), %s(%s), data: %s",
+                 src_name.c_str(),
+                 Helpers::hextoa(src).c_str(),
+                 dest_name.c_str(),
+                 Helpers::hextoa(dest).c_str(),
+                 type_name.c_str(),
+                 Helpers::hextoa(telegram->type_id).c_str(),
+                 telegram->to_string_message().c_str());
     } else {
-        str = src_name + "(" + Helpers::hextoa(src) + ") W " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
-              + Helpers::hextoa(telegram->type_id) + "), data: " + telegram->to_string_message();
+        snprintf(buf,
+                 sizeof(buf),
+                 "%s(%s) W %s(%s), %s(%s), data: %s",
+                 src_name.c_str(),
+                 Helpers::hextoa(src).c_str(),
+                 dest_name.c_str(),
+                 Helpers::hextoa(dest).c_str(),
+                 type_name.c_str(),
+                 Helpers::hextoa(telegram->type_id).c_str(),
+                 telegram->to_string_message().c_str());
     }
 
     if (offset) {
-        str += " (offset " + Helpers::itoa(offset) + ")";
+        size_t len = strlen(buf);
+        if (len < sizeof(buf) - 20) {
+            snprintf(buf + len, sizeof(buf) - len, " (offset %d)", offset);
+        }
     }
 
-    return str;
+    return std::string(buf);
 }
+
 
 /*
  * Type 0x07 - UBADevices - shows us the connected EMS devices

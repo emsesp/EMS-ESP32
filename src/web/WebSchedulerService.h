@@ -109,7 +109,7 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
     bool                        ha_registered_ = false;
 
     std::list<ScheduleItem, AllocatorPSRAM<ScheduleItem>> *   scheduleItems_; // pointer to the list of schedule events
-    std::list<ScheduleItem *, AllocatorPSRAM<ScheduleItem *>> cmd_changed_;   // pointer to commands in list that are triggert by change
+    std::list<ScheduleItem *, AllocatorPSRAM<ScheduleItem *>> cmd_changed_;   // pointer to commands in list that are triggered by change
 };
 
 } // namespace emsesp
