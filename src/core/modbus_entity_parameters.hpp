@@ -486,6 +486,8 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(heatCnt), 67, 1), // heatcnt
     REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(swapFlowTemp), 68, 1), // swapflowtemp
     REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(swapRetTemp), 69, 1), // swaprettemp
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(heatAssistOn), 70, 1), // heatassiston
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(heatAssistOff), 71, 1), // heatassistoff
     REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DHW, FL_(wwMinTemp), 0, 1), // mintemp
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(airHumidity), 0, 1), // airhumidity
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(dewTemperature), 1, 1), // dewtemperature
