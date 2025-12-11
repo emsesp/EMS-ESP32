@@ -159,7 +159,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     response->setLength();
     response->setContentType("application/json; charset=utf-8");
     request->send(response);
-
+    api_count_++;
     // serialize JSON to string to ensure correct content-length and avoid HTTP parsing errors (issue #2752)
     // std::string output_str;
     // serializeJson(output, output_str);

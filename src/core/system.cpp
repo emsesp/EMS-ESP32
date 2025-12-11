@@ -83,15 +83,19 @@ const char * const languages[] = {EMSESP_LOCALE_EN,
 
 static constexpr uint8_t NUM_LANGUAGES = sizeof(languages) / sizeof(const char *);
 
+#ifndef EMSESP_STANDALONE
+uuid::syslog::SyslogService System::syslog_;
+#endif
+
 uuid::log::Logger System::logger_{F_(system), uuid::log::Facility::KERN};
 
 // init statics
-PButton              System::myPButton_;
-bool                 System::test_set_all_active_ = false;
-uint32_t             System::max_alloc_mem_;
-uint32_t             System::heap_mem_;
-std::vector<uint8_t> System::valid_system_gpios_;
-std::vector<uint8_t> System::used_gpios_;
+PButton                                       System::myPButton_;
+bool                                          System::test_set_all_active_ = false;
+uint32_t                                      System::max_alloc_mem_;
+uint32_t                                      System::heap_mem_;
+std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::valid_system_gpios_;
+std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::used_gpios_;
 
 // find the index of the language
 // 0 = EN, 1 = DE, etc...
@@ -366,21 +370,20 @@ void System::syslog_init() {
 #ifndef EMSESP_STANDALONE
     if (syslog_enabled_) {
         // start & configure syslog
-        EMSESP::logger().info("Starting Syslog service");
-        syslog_.start();
-
+        syslog_.maximum_log_messages(10);
         syslog_.log_level((uuid::log::Level)syslog_level_);
         syslog_.mark_interval(syslog_mark_interval_);
         syslog_.destination(syslog_host_.c_str(), syslog_port_);
-        syslog_.hostname(hostname().c_str());
-
+        syslog_.hostname(hostname());
+        EMSESP::logger().info("Starting Syslog service");
     } else if (syslog_.started()) {
         // in case service is still running, this flushes the queue
         // https://github.com/emsesp/EMS-ESP/issues/496
         EMSESP::logger().info("Stopping Syslog");
-        syslog_.log_level((uuid::log::Level)-1); // stop server
+        syslog_.loop();
+        syslog_.log_level(uuid::log::Level::OFF); // stop server
         syslog_.mark_interval(0);
-        syslog_.destination("");
+        // syslog_.destination("");
     }
     if (Mqtt::publish_single()) {
         if (Mqtt::publish_single2cmd()) {
@@ -758,7 +761,9 @@ void System::network_init() {
     int            mdio     = 18;            // Pin# of the I²C IO signal for the Ethernet PHY - hardcoded
     uint8_t        phy_addr = eth_phy_addr_; // I²C-address of Ethernet PHY (0 or 1 for LAN8720, 31 for TLK110)
     int8_t         power    = eth_power_;    // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
-    eth_phy_type_t type     = (phy_type_ == PHY_type::PHY_TYPE_LAN8720) ? ETH_PHY_LAN8720 : ETH_PHY_TLK110; // Type of the Ethernet PHY (LAN8720 or TLK110)
+    eth_phy_type_t type     = (phy_type_ == PHY_type::PHY_TYPE_LAN8720)  ? ETH_PHY_LAN8720
+                              : (phy_type_ == PHY_type::PHY_TYPE_TLK110) ? ETH_PHY_TLK110
+                                                                         : ETH_PHY_RTL8201; // Type of the Ethernet PHY (LAN8720 or TLK110)
     // clock mode:
     //  ETH_CLOCK_GPIO0_IN   = 0  RMII clock input to GPIO0
     //  ETH_CLOCK_GPIO0_OUT  = 1  RMII clock output from GPIO0
@@ -1875,7 +1880,8 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     });
 
     // NTP status
-    node = output["ntp"].to<JsonObject>();
+    node              = output["ntp"].to<JsonObject>();
+    node["NTPstatus"] = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
     EMSESP::esp32React.getNTPSettingsService()->read([&](const NTPSettings & settings) {
 #ifndef EMSESP_STANDALONE
         node["enabled"] = settings.enabled;
@@ -2507,10 +2513,10 @@ uint8_t System::systemStatus() {
 }
 
 // takes a string range like "6-11, 1, 23, 24-48" which has optional ranges and single values and converts to a vector of ints
-std::vector<uint8_t> System::string_range_to_vector(const std::string & range) {
-    std::vector<uint8_t>   gpios;
-    std::string::size_type pos  = 0;
-    std::string::size_type prev = 0;
+std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::string_range_to_vector(const std::string & range) {
+    std::vector<uint8_t, AllocatorPSRAM<uint8_t>> gpios;
+    std::string::size_type                        pos  = 0;
+    std::string::size_type                        prev = 0;
 
     auto process_part = [&gpios](std::string part) {
         // trim whitespace
@@ -2562,19 +2568,17 @@ void System::set_valid_system_gpios() {
     // 38 and 39 are input only
     // 45 and 36 are strapping pins, input only
     valid_system_gpios_ = string_range_to_vector("0-14, 17, 18, 21, 33-39, 45, 46");
-#elif CONFIG_IDF_TARGET_ESP32 || defined(EMSESP_STANDALONE)
-    // 1 and 3 are UART0 pins
+#elif CONFIG_IDF_TARGET_ESP32
+    // 1 and 3 are UART0 pins, but used for some eth-boards (BBQKees-E32, OlimexPOE)
     // 32-39 is ADC1, input only
-    valid_system_gpios_ = string_range_to_vector("0, 2, 4, 5, 12-19, 23, 25-27, 32-39");
-#else
-#endif
-
-    // if psram is enabled remove pins 16 and 17 from the list, if set
-#if CONFIG_IDF_TARGET_ESP32
     if (ESP.getPsramSize() > 0) {
-        valid_system_gpios_.erase(std::remove(valid_system_gpios_.begin(), valid_system_gpios_.end(), 16), valid_system_gpios_.end());
-        valid_system_gpios_.erase(std::remove(valid_system_gpios_.begin(), valid_system_gpios_.end(), 17), valid_system_gpios_.end());
+        // if psram is enabled remove pins 16 and 17 from the list
+        valid_system_gpios_ = string_range_to_vector("0-5, 12-15, 18-19, 23, 25-27, 32-39");
+    } else {
+        valid_system_gpios_ = string_range_to_vector("0-5, 12-19, 23, 25-27, 32-39");
     }
+#elif defined(EMSESP_STANDALONE)
+    valid_system_gpios_ = string_range_to_vector("0-5, 12-19, 23, 25-27, 32-39");
 #endif
 }
 

@@ -21,6 +21,7 @@
 
 #define EMSESP_EVENT_SOURCE_LOG_PATH "/es/log"
 #define EMSESP_LOG_SETTINGS_PATH "/rest/logSettings"
+#include <esp32-psram.h>
 
 using ::uuid::console::Shell;
 
@@ -33,17 +34,11 @@ class WebLogService : public uuid::log::Handler {
 
     WebLogService(AsyncWebServer * server, SecurityManager * securityManager);
 
-    void             begin();
-    void             start();
-    uuid::log::Level log_level() const;
-    void             log_level(uuid::log::Level level);
-    size_t           maximum_log_messages() const;
-    size_t           num_log_messages() const;
-    void             maximum_log_messages(size_t count);
-    bool             compact() const;
-    void             compact(bool compact);
-    void             loop();
-    void             show(Shell & shell);
+    void   begin();
+    void   start();
+    size_t num_log_messages() const;
+    void   loop();
+    void   show(Shell & shell);
 
     virtual void operator<<(std::shared_ptr<uuid::log::Message> message);
 
@@ -52,12 +47,16 @@ class WebLogService : public uuid::log::Handler {
 
     class QueuedLogMessage {
       public:
-        QueuedLogMessage(unsigned long id, std::shared_ptr<uuid::log::Message> && content);
+        QueuedLogMessage(unsigned long id, uint64_t uptime, uuid::log::Level level, const char * name, std::string text);
+
         ~QueuedLogMessage() = default;
 
-        unsigned long                                   id_;      // Sequential identifier for this log message
-        struct timeval                                  time_;    // Time message was received
-        const std::shared_ptr<const uuid::log::Message> content_; // Log message content
+        unsigned long    id_;   // Sequential identifier for this log message
+        struct timeval   time_; // Time message was received
+        uint64_t         uptime_;
+        uuid::log::Level level_;
+        const char *     name_;
+        stringPSRAM      text_;
     };
 
     void transmit(const QueuedLogMessage & message);
@@ -65,12 +64,13 @@ class WebLogService : public uuid::log::Handler {
 
     char * messagetime(char * out, const uint64_t t, const size_t bufsize);
 
-    size_t                       maximum_log_messages_ = MAX_LOG_MESSAGES; // Maximum number of log messages to buffer before they are output
-    size_t                       limit_log_messages_   = 1;                // dynamic limit
-    unsigned long                log_message_id_       = 0;                // The next identifier to use for queued log messages
-    unsigned long                log_message_id_tail_  = 0;                // last event shown on the screen after fetch
-    std::deque<QueuedLogMessage> log_messages_;                            // Queued log messages, in the order they were received
-    bool                         compact_ = true;
+    std::deque<QueuedLogMessage, AllocatorPSRAM<QueuedLogMessage>> log_messages_; // Queued log messages, in the order they were received
+    size_t           maximum_log_messages_ = MAX_LOG_MESSAGES;                    // Maximum number of log messages to buffer before they are output
+    size_t           limit_log_messages_   = 1;                                   // dynamic limit
+    unsigned long    log_message_id_       = 0;                                   // The next identifier to use for queued log messages
+    unsigned long    log_message_id_tail_  = 0;                                   // last event shown on the screen after fetch
+    bool             compact_              = true;
+    uuid::log::Level level_                = uuid::log::Level::INFO;
 };
 
 } // namespace emsesp

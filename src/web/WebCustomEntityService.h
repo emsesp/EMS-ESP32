@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../core/telegram.h"
+#include <esp32-psram.h>
 
 #ifndef WebCustomEntityService_h
 #define WebCustomEntityService_h
@@ -33,11 +34,11 @@ class CustomEntityItem {
     uint8_t     offset;
     int8_t      value_type;
     uint8_t     uom; // DeviceValueUOM
-    std::string name;
+    char        name[20];
     double      factor;
     bool        writeable;
     uint32_t    value;
-    std::string data;
+    stringPSRAM data;
     uint8_t     ram;
     uint8_t *   raw;
     bool        hide;
@@ -45,7 +46,7 @@ class CustomEntityItem {
 
 class WebCustomEntity {
   public:
-    std::list<CustomEntityItem> customEntityItems;
+    std::list<CustomEntityItem, AllocatorPSRAM<CustomEntityItem>> customEntityItems;
 
     static void              read(WebCustomEntity & webEntity, JsonObject root);
     static StateUpdateResult update(JsonObject root, WebCustomEntity & webEntity);
@@ -82,7 +83,7 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
 
     void getEntities(AsyncWebServerRequest * request);
 
-    std::list<CustomEntityItem> * customEntityItems_; // pointer to the list of entity items
+    std::list<CustomEntityItem, AllocatorPSRAM<CustomEntityItem>> * customEntityItems_; // pointer to the list of entity items
 
     bool ha_registered_ = false;
 };

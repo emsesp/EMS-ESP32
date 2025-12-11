@@ -33,6 +33,7 @@
 #include <uuid/syslog.h>
 #endif
 
+#include <esp32-psram.h>
 #include <uuid/log.h>
 #include <PButton.h>
 
@@ -59,7 +60,7 @@ using uuid::console::Shell;
 
 namespace emsesp {
 
-enum PHY_type : uint8_t { PHY_TYPE_NONE = 0, PHY_TYPE_LAN8720, PHY_TYPE_TLK110 };
+enum PHY_type : uint8_t { PHY_TYPE_NONE = 0, PHY_TYPE_LAN8720, PHY_TYPE_TLK110, PHY_TYPE_RTL8201 };
 
 enum SYSTEM_STATUS : uint8_t {
     SYSTEM_STATUS_NORMAL            = 0,
@@ -395,10 +396,10 @@ class System {
     void led_monitor();
     void system_check();
 
-    static std::vector<uint8_t> string_range_to_vector(const std::string & range);
+    static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> string_range_to_vector(const std::string & range);
 
-    static std::vector<uint8_t> valid_system_gpios_; // list of valid GPIOs for the ESP32 board that can be used
-    static std::vector<uint8_t> used_gpios_;         // list of GPIOs used by the application
+    static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> valid_system_gpios_; // list of valid GPIOs for the ESP32 board that can be used
+    static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> used_gpios_;         // list of GPIOs used by the application
 
     int8_t wifi_quality(int8_t dBm);
 

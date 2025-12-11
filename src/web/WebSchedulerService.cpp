@@ -87,19 +87,19 @@ StateUpdateResult WebScheduler::update(JsonObject root, WebScheduler & webSchedu
         si.time   = si.flags == SCHEDULEFLAG_SCHEDULE_IMMEDIATE ? "" : schedule["time"].as<std::string>();
         si.cmd    = schedule["cmd"].as<std::string>();
         si.value  = schedule["value"].as<std::string>();
-        si.name   = schedule["name"].as<std::string>();
+        strlcpy(si.name, schedule["name"].as<const char *>(), sizeof(si.name));
 
         // calculated elapsed minutes
-        si.elapsed_min = Helpers::string2minutes(si.time);
+        si.elapsed_min = Helpers::string2minutes(si.time.c_str());
         si.retry_cnt   = 0xFF; // no startup retries
 
         webScheduler.scheduleItems.push_back(si); // add to list
-        if (!webScheduler.scheduleItems.back().name.empty()) {
+        if (webScheduler.scheduleItems.back().name[0] != '\0') {
             Command::add(
                 EMSdevice::DeviceType::SCHEDULER,
-                webScheduler.scheduleItems.back().name.c_str(),
+                webScheduler.scheduleItems.back().name,
                 [webScheduler](const char * value, const int8_t id) {
-                    return EMSESP::webSchedulerService.command_setvalue(value, id, webScheduler.scheduleItems.back().name.c_str());
+                    return EMSESP::webSchedulerService.command_setvalue(value, id, webScheduler.scheduleItems.back().name);
                 },
                 FL_(schedule_cmd),
                 CommandFlag::ADMIN_ONLY);
@@ -146,15 +146,8 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
     if (!strlen(cmd) || !strcmp(cmd, F_(values)) || !strcmp(cmd, F_(info))) {
         // list all names
         for (const ScheduleItem & scheduleItem : *scheduleItems_) {
-            if (!scheduleItem.name.empty()) {
-                if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                    output[scheduleItem.name] = scheduleItem.active;
-                } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-                    output[scheduleItem.name] = scheduleItem.active ? 1 : 0;
-                } else {
-                    char result[12];
-                    output[scheduleItem.name] = Helpers::render_boolean(result, scheduleItem.active);
-                }
+            if (scheduleItem.name[0] != '\0') {
+                Mqtt::add_value_bool(output, scheduleItem.name, scheduleItem.active);
             }
         }
         return true;
@@ -162,9 +155,9 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
 
     if (!strcmp(cmd, F_(entities))) {
         uint8_t i = 0;
-        char    name[30];
+        char    name[20];
         for (const ScheduleItem & scheduleItem : *scheduleItems_) {
-            strlcpy(name, scheduleItem.name == "" ? Helpers::smallitoa(name, i++) : scheduleItem.name.c_str(), sizeof(name));
+            strlcpy(name, scheduleItem.name[0] == '\0' ? Helpers::smallitoa(name, i++) : scheduleItem.name, sizeof(name));
             get_value_json(output[name].to<JsonObject>(), scheduleItem);
         }
         return true;
@@ -183,17 +176,10 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
 
 // build the json for specific entity
 void WebSchedulerService::get_value_json(JsonObject output, const ScheduleItem & scheduleItem) {
-    output["name"]     = scheduleItem.name;
-    output["fullname"] = scheduleItem.name;
+    output["name"]     = (const char *)scheduleItem.name;
+    output["fullname"] = (const char *)scheduleItem.name;
     output["type"]     = "boolean";
-    if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-        output["value"] = scheduleItem.active;
-    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-        output["value"] = scheduleItem.active ? 1 : 0;
-    } else {
-        char result[12];
-        output["value"] = Helpers::render_boolean(result, scheduleItem.active);
-    }
+    Mqtt::add_value_bool(output, "value", scheduleItem.active);
     if (scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_CONDITION) {
         output["condition"] = scheduleItem.time;
     } else if (scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_ONCHANGE) {
@@ -205,7 +191,7 @@ void WebSchedulerService::get_value_json(JsonObject output, const ScheduleItem &
     }
     output["command"]   = scheduleItem.cmd;
     output["cmd_data"]  = scheduleItem.value;
-    bool hasName        = scheduleItem.name != "";
+    bool hasName        = scheduleItem.name[0] != '\0';
     output["readable"]  = hasName;
     output["writeable"] = hasName;
     output["visible"]   = hasName;
@@ -221,7 +207,7 @@ void WebSchedulerService::publish_single(const char * name, const bool state) {
     if (Mqtt::publish_single2cmd()) {
         snprintf(topic, sizeof(topic), "%s/%s", F_(scheduler), name);
     } else {
-        snprintf(topic, sizeof(topic), "%s%s/%s", F_(scheduler), "_data", name);
+        snprintf(topic, sizeof(topic), "%s_data/%s", F_(scheduler), name);
     }
 
     char payload[12];
@@ -244,36 +230,28 @@ void WebSchedulerService::publish(const bool force) {
 
     if (Mqtt::publish_single() && force) {
         for (const ScheduleItem & scheduleItem : *scheduleItems_) {
-            publish_single(scheduleItem.name.c_str(), scheduleItem.active);
+            publish_single(scheduleItem.name, scheduleItem.active);
         }
     }
 
     JsonDocument doc;
     bool         ha_created = ha_registered_;
     for (const ScheduleItem & scheduleItem : *scheduleItems_) {
-        if (!scheduleItem.name.empty() && !doc[scheduleItem.name].is<JsonVariantConst>()) {
-            if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                doc[scheduleItem.name] = scheduleItem.active;
-            } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-                doc[scheduleItem.name] = scheduleItem.active ? 1 : 0;
-            } else {
-                char result[12];
-                doc[scheduleItem.name] = Helpers::render_boolean(result, scheduleItem.active);
-            }
+        if (scheduleItem.name[0] != '\0' && !doc[scheduleItem.name].is<JsonVariantConst>()) {
+            Mqtt::add_value_bool(doc.as<JsonObject>(), scheduleItem.name, scheduleItem.active);
 
             // create HA config
             if (Mqtt::ha_enabled() && !ha_registered_) {
-                
                 JsonDocument config;
-                config["~"]          = Mqtt::base();
+                config["~"] = Mqtt::base();
 
-                char         stat_t[50];
+                char stat_t[50];
                 snprintf(stat_t, sizeof(stat_t), "~/%s_data", F_(scheduler));
                 config["stat_t"] = stat_t;
 
                 char val_obj[50];
                 char val_cond[65];
-                snprintf(val_obj, sizeof(val_obj), "value_json['%s']", scheduleItem.name.c_str());
+                snprintf(val_obj, sizeof(val_obj), "value_json['%s']", scheduleItem.name);
                 snprintf(val_cond, sizeof(val_cond), "%s is defined", val_obj);
 
                 if (Mqtt::discovery_type() == Mqtt::discoveryType::HOMEASSISTANT) {
@@ -283,17 +261,17 @@ void WebSchedulerService::publish(const bool force) {
                 }
 
                 char uniq_s[70];
-                snprintf(uniq_s, sizeof(uniq_s), "%s_%s", F_(scheduler), scheduleItem.name.c_str());
+                snprintf(uniq_s, sizeof(uniq_s), "%s_%s", F_(scheduler), scheduleItem.name);
 
                 config["uniq_id"]    = uniq_s;
-                config["name"]       = scheduleItem.name.c_str();
-                config["def_ent_id"] = (std::string) "switch." + uniq_s;
+                config["name"]       = scheduleItem.name;
+                config["def_ent_id"] = std::string("switch.") + uniq_s;
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 char command_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
 
-                snprintf(topic, sizeof(topic), "switch/%s/%s_%s/config", Mqtt::basename().c_str(), F_(scheduler), scheduleItem.name.c_str());
-                snprintf(command_topic, sizeof(command_topic), "~/%s/%s", F_(scheduler), scheduleItem.name.c_str());
+                snprintf(topic, sizeof(topic), "switch/%s/%s_%s/config", Mqtt::basename().c_str(), F_(scheduler), scheduleItem.name);
+                snprintf(command_topic, sizeof(command_topic), "~/%s/%s", F_(scheduler), scheduleItem.name);
                 config["cmd_t"] = command_topic;
 
                 Mqtt::add_ha_bool(config.as<JsonObject>());
@@ -318,14 +296,12 @@ void WebSchedulerService::publish(const bool force) {
 uint8_t WebSchedulerService::count_entities(bool cmd_only) {
     uint8_t count = 0;
     for (const ScheduleItem & scheduleItem : *scheduleItems_) {
-        if (!scheduleItem.name.empty() || !cmd_only) {
+        if (scheduleItem.name[0] != '\0' || !cmd_only) {
             count++;
         }
     }
     return count;
 }
-
-
 
 // execute scheduled command
 bool WebSchedulerService::command(const char * name, const std::string & command, const std::string & data) {
@@ -428,7 +404,7 @@ bool WebSchedulerService::command(const char * name, const std::string & command
 bool WebSchedulerService::onChange(const char * cmd) {
     for (ScheduleItem & scheduleItem : *scheduleItems_) {
         if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_ONCHANGE
-            && Helpers::toLower(scheduleItem.time).find(Helpers::toLower(cmd)) != std::string::npos) {
+            && Helpers::toLower(scheduleItem.time.c_str()).find(Helpers::toLower(cmd)) != std::string::npos) {
             cmd_changed_.push_back(&scheduleItem);
             return true;
         }
@@ -440,12 +416,12 @@ bool WebSchedulerService::onChange(const char * cmd) {
 void WebSchedulerService::condition() {
     for (ScheduleItem & scheduleItem : *scheduleItems_) {
         if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_CONDITION) {
-            auto match = compute(scheduleItem.time);
+            auto match = compute(scheduleItem.time.c_str());
 #ifdef EMESESP_DEBUG
             // EMSESP::logger().debug("condition match: %s", match.c_str());
 #endif
             if (match.length() == 1 && match[0] == '1' && scheduleItem.retry_cnt == 0xFF) {
-                scheduleItem.retry_cnt = command(scheduleItem.name.c_str(), scheduleItem.cmd, compute(scheduleItem.value)) ? 1 : 0xFF;
+                scheduleItem.retry_cnt = command(scheduleItem.name, scheduleItem.cmd.c_str(), compute(scheduleItem.value.c_str())) ? 1 : 0xFF;
             } else if (match.length() == 1 && match[0] == '0' && scheduleItem.retry_cnt == 1) {
                 scheduleItem.retry_cnt = 0xFF;
             } else if (match.length() != 1) { // the match is not boolean
@@ -475,13 +451,13 @@ void WebSchedulerService::loop() {
     // check if we have onChange events
     while (!cmd_changed_.empty()) {
         ScheduleItem si = *cmd_changed_.front();
-        command(si.name.c_str(), si.cmd, compute(si.value));
+        command(si.name, si.cmd.c_str(), compute(si.value.c_str()));
         cmd_changed_.pop_front();
     }
 
     for (ScheduleItem & scheduleItem : *scheduleItems_) {
         if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_IMMEDIATE) {
-            command(scheduleItem.name.c_str(), scheduleItem.cmd, compute(scheduleItem.value));
+            command(scheduleItem.name, scheduleItem.cmd.c_str(), compute(scheduleItem.value.c_str()));
             scheduleItem.active = false;
         }
     }
@@ -497,7 +473,7 @@ void WebSchedulerService::loop() {
     if (last_tm_min == -2) {
         for (ScheduleItem & scheduleItem : *scheduleItems_) {
             if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min == 0) {
-                scheduleItem.retry_cnt = command(scheduleItem.name.c_str(), scheduleItem.cmd, compute(scheduleItem.value)) ? 0xFF : 0;
+                scheduleItem.retry_cnt = command(scheduleItem.name, scheduleItem.cmd.c_str(), compute(scheduleItem.value.c_str())) ? 0xFF : 0;
             }
         }
         last_tm_min = -1; // startup done, now use for RTC
@@ -510,12 +486,12 @@ void WebSchedulerService::loop() {
             // retry startup commands not yet executed
             if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min == 0
                 && scheduleItem.retry_cnt < MAX_STARTUP_RETRIES) {
-                scheduleItem.retry_cnt = command(scheduleItem.name.c_str(), scheduleItem.cmd, scheduleItem.value) ? 0xFF : scheduleItem.retry_cnt + 1;
+                scheduleItem.retry_cnt = command(scheduleItem.name, scheduleItem.cmd.c_str(), scheduleItem.value.c_str()) ? 0xFF : scheduleItem.retry_cnt + 1;
             }
             // scheduled timer commands
             if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min > 0
                 && (uptime_min % scheduleItem.elapsed_min == 0)) {
-                command(scheduleItem.name.c_str(), scheduleItem.cmd, compute(scheduleItem.value));
+                command(scheduleItem.name, scheduleItem.cmd.c_str(), compute(scheduleItem.value.c_str()));
             }
         }
         last_uptime_min = uptime_min;
@@ -532,7 +508,7 @@ void WebSchedulerService::loop() {
         for (const ScheduleItem & scheduleItem : *scheduleItems_) {
             uint8_t dow = scheduleItem.flags & SCHEDULEFLAG_SCHEDULE_TIMER ? 0 : scheduleItem.flags;
             if (scheduleItem.active && (real_dow & dow) && real_min == scheduleItem.elapsed_min) {
-                command(scheduleItem.name.c_str(), scheduleItem.cmd, compute(scheduleItem.value));
+                command(scheduleItem.name, scheduleItem.cmd.c_str(), compute(scheduleItem.value.c_str()));
             }
         }
         last_tm_min = tm->tm_min;
@@ -559,26 +535,26 @@ void WebSchedulerService::load_test_data() {
         webScheduler.scheduleItems.clear(); // delete all existing schedules
 
         // test 1
-        auto si        = ScheduleItem();
-        si.active      = true;
-        si.flags       = 1;
-        si.time        = "12:00";
-        si.cmd         = "system/fetch";
-        si.value       = "10";
-        si.name        = "test_scheduler";
+        auto si   = ScheduleItem();
+        si.active = true;
+        si.flags  = 1;
+        si.time   = "12:00";
+        si.cmd    = "system/fetch";
+        si.value  = "10";
+        strcpy(si.name, "test_scheduler");
         si.elapsed_min = 0;
         si.retry_cnt   = 0xFF; // no startup retries
 
         webScheduler.scheduleItems.push_back(si);
 
         // test 2
-        si             = ScheduleItem();
-        si.active      = false;
-        si.flags       = 1;
-        si.time        = "13:00";
-        si.cmd         = "system/message";
-        si.value       = "20";
-        si.name        = ""; // to make sure its excluded from Dashboard
+        si        = ScheduleItem();
+        si.active = false;
+        si.flags  = 1;
+        si.time   = "13:00";
+        si.cmd    = "system/message";
+        si.value  = "20";
+        strcpy(si.name, ""); // to make sure its excluded from Dashboard
         si.elapsed_min = 0;
         si.retry_cnt   = 0xFF; // no startup retries
 

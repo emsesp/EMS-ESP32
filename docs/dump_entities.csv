@@ -166,9 +166,9 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.comfoff,comfort switch off,uint8 (>=15<=65),C,true,number.boiler_dhw_comfort_switch_off,number.boiler_dhw_comfoff,5,9,1,18,1
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.ecooff,eco switch off,uint8 (>=15<=65),C,true,number.boiler_dhw_eco_switch_off,number.boiler_dhw_ecooff,5,9,1,19,1
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.ecoplusoff,eco+ switch off,uint8 (>=48<=63),C,true,number.boiler_dhw_eco+_switch_off,number.boiler_dhw_ecoplusoff,5,9,1,20,1
-"CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.comfdiff,comfort diff,uint8 (>=4<=12),K,true,number.boiler_dhw_comfort_diff,number.boiler_dhw_comfdiff,5,9,1,21,1
-"CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.ecodiff,eco diff,uint8 (>=4<=12),K,true,number.boiler_dhw_eco_diff,number.boiler_dhw_ecodiff,5,9,1,22,1
-"CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.ecoplusdiff,eco+ diff,uint8 (>=6<=12),K,true,number.boiler_dhw_eco+_diff,number.boiler_dhw_ecoplusdiff,5,9,1,23,1
+"CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.comfdiff,comfort diff,uint8 (>=4<=15),K,true,number.boiler_dhw_comfort_diff,number.boiler_dhw_comfdiff,5,9,1,21,1
+"CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.ecodiff,eco diff,uint8 (>=4<=15),K,true,number.boiler_dhw_eco_diff,number.boiler_dhw_ecodiff,5,9,1,22,1
+"CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.ecoplusdiff,eco+ diff,uint8 (>=4<=15),K,true,number.boiler_dhw_eco+_diff,number.boiler_dhw_ecoplusdiff,5,9,1,23,1
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.comfstop,comfort stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_comfort_stop_temp,number.boiler_dhw_comfstop,5,9,1,24,1
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.ecostop,eco stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_eco_stop_temp,number.boiler_dhw_ecostop,5,9,1,25,1
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,dhw.ecoplusstop,eco+ stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_eco+_stop_temp,number.boiler_dhw_ecoplusstop,5,9,1,26,1
@@ -2721,9 +2721,9 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.comfoff,comfort switch off,uint8 (>=15<=65),C,true,number.boiler_dhw_comfort_switch_off,number.boiler_dhw_comfoff,5,9,1,18,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.ecooff,eco switch off,uint8 (>=15<=65),C,true,number.boiler_dhw_eco_switch_off,number.boiler_dhw_ecooff,5,9,1,19,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.ecoplusoff,eco+ switch off,uint8 (>=48<=63),C,true,number.boiler_dhw_eco+_switch_off,number.boiler_dhw_ecoplusoff,5,9,1,20,1
-"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.comfdiff,comfort diff,uint8 (>=4<=12),K,true,number.boiler_dhw_comfort_diff,number.boiler_dhw_comfdiff,5,9,1,21,1
-"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.ecodiff,eco diff,uint8 (>=4<=12),K,true,number.boiler_dhw_eco_diff,number.boiler_dhw_ecodiff,5,9,1,22,1
-"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.ecoplusdiff,eco+ diff,uint8 (>=6<=12),K,true,number.boiler_dhw_eco+_diff,number.boiler_dhw_ecoplusdiff,5,9,1,23,1
+"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.comfdiff,comfort diff,uint8 (>=4<=15),K,true,number.boiler_dhw_comfort_diff,number.boiler_dhw_comfdiff,5,9,1,21,1
+"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.ecodiff,eco diff,uint8 (>=4<=15),K,true,number.boiler_dhw_eco_diff,number.boiler_dhw_ecodiff,5,9,1,22,1
+"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.ecoplusdiff,eco+ diff,uint8 (>=4<=15),K,true,number.boiler_dhw_eco+_diff,number.boiler_dhw_ecoplusdiff,5,9,1,23,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.comfstop,comfort stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_comfort_stop_temp,number.boiler_dhw_comfstop,5,9,1,24,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.ecostop,eco stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_eco_stop_temp,number.boiler_dhw_ecostop,5,9,1,25,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.ecoplusstop,eco+ stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_eco+_stop_temp,number.boiler_dhw_ecoplusstop,5,9,1,26,1
@@ -2936,9 +2936,9 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Geo 5xx",boiler,173,dhw.comfoff,comfort switch off,uint8 (>=15<=65),C,true,number.boiler_dhw_comfort_switch_off,number.boiler_dhw_comfoff,5,9,1,18,1
 "Geo 5xx",boiler,173,dhw.ecooff,eco switch off,uint8 (>=15<=65),C,true,number.boiler_dhw_eco_switch_off,number.boiler_dhw_ecooff,5,9,1,19,1
 "Geo 5xx",boiler,173,dhw.ecoplusoff,eco+ switch off,uint8 (>=48<=63),C,true,number.boiler_dhw_eco+_switch_off,number.boiler_dhw_ecoplusoff,5,9,1,20,1
-"Geo 5xx",boiler,173,dhw.comfdiff,comfort diff,uint8 (>=4<=12),K,true,number.boiler_dhw_comfort_diff,number.boiler_dhw_comfdiff,5,9,1,21,1
-"Geo 5xx",boiler,173,dhw.ecodiff,eco diff,uint8 (>=4<=12),K,true,number.boiler_dhw_eco_diff,number.boiler_dhw_ecodiff,5,9,1,22,1
-"Geo 5xx",boiler,173,dhw.ecoplusdiff,eco+ diff,uint8 (>=6<=12),K,true,number.boiler_dhw_eco+_diff,number.boiler_dhw_ecoplusdiff,5,9,1,23,1
+"Geo 5xx",boiler,173,dhw.comfdiff,comfort diff,uint8 (>=4<=15),K,true,number.boiler_dhw_comfort_diff,number.boiler_dhw_comfdiff,5,9,1,21,1
+"Geo 5xx",boiler,173,dhw.ecodiff,eco diff,uint8 (>=4<=15),K,true,number.boiler_dhw_eco_diff,number.boiler_dhw_ecodiff,5,9,1,22,1
+"Geo 5xx",boiler,173,dhw.ecoplusdiff,eco+ diff,uint8 (>=4<=15),K,true,number.boiler_dhw_eco+_diff,number.boiler_dhw_ecoplusdiff,5,9,1,23,1
 "Geo 5xx",boiler,173,dhw.comfstop,comfort stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_comfort_stop_temp,number.boiler_dhw_comfstop,5,9,1,24,1
 "Geo 5xx",boiler,173,dhw.ecostop,eco stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_eco_stop_temp,number.boiler_dhw_ecostop,5,9,1,25,1
 "Geo 5xx",boiler,173,dhw.ecoplusstop,eco+ stop temp,uint8 (>=0<=254),C,true,number.boiler_dhw_eco+_stop_temp,number.boiler_dhw_ecoplusstop,5,9,1,26,1
@@ -5468,6 +5468,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "SM50",solar,162,heatcnt,heat counter impulses,uint8 (>=0<=254), ,false,sensor.solar_heat_counter_impulses,sensor.solar_heatcnt,8,0,1,67,1
 "SM50",solar,162,swapflowtemp,swap flow temperature (TS14),uint16 (>=0<=3199),C,false,sensor.solar_swap_flow_temperature_(TS14),sensor.solar_swapflowtemp,8,0,1/10,68,1
 "SM50",solar,162,swaprettemp,swap return temperature (TS15),uint16 (>=0<=3199),C,false,sensor.solar_swap_return_temperature_(TS15),sensor.solar_swaprettemp,8,0,1/10,69,1
+"SM50",solar,162,heatassiston,heat assistance on,int8 (>=-12<=12),K,true,number.solar_heat_assistance_on,number.solar_heatassiston,8,0,1/10,70,1
+"SM50",solar,162,heatassistoff,heat assistance off,int8 (>=-12<=12),K,true,number.solar_heat_assistance_off,number.solar_heatassistoff,8,0,1/10,71,1
 "SM100, MS100",solar,163,collectortemp,collector temperature (TS1),int16 (>=-3199<=3199),C,false,sensor.solar_collector_temperature_(TS1),sensor.solar_collectortemp,8,0,1/10,0,1
 "SM100, MS100",solar,163,cylbottomtemp,cylinder bottom temperature (TS2),int16 (>=-3199<=3199),C,false,sensor.solar_cylinder_bottom_temperature_(TS2),sensor.solar_cylbottomtemp,8,0,1/10,1,1
 "SM100, MS100",solar,163,solarpump,pump (PS1),boolean, ,false,binary_sensor.solar_pump_(PS1),binary_sensor.solar_solarpump,8,0,1,2,1
@@ -5529,6 +5531,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "SM100, MS100",solar,163,heatcnt,heat counter impulses,uint8 (>=0<=254), ,false,sensor.solar_heat_counter_impulses,sensor.solar_heatcnt,8,0,1,67,1
 "SM100, MS100",solar,163,swapflowtemp,swap flow temperature (TS14),uint16 (>=0<=3199),C,false,sensor.solar_swap_flow_temperature_(TS14),sensor.solar_swapflowtemp,8,0,1/10,68,1
 "SM100, MS100",solar,163,swaprettemp,swap return temperature (TS15),uint16 (>=0<=3199),C,false,sensor.solar_swap_return_temperature_(TS15),sensor.solar_swaprettemp,8,0,1/10,69,1
+"SM100, MS100",solar,163,heatassiston,heat assistance on,int8 (>=-12<=12),K,true,number.solar_heat_assistance_on,number.solar_heatassiston,8,0,1/10,70,1
+"SM100, MS100",solar,163,heatassistoff,heat assistance off,int8 (>=-12<=12),K,true,number.solar_heat_assistance_off,number.solar_heatassistoff,8,0,1/10,71,1
 "SM200, MS200",solar,164,collectortemp,collector temperature (TS1),int16 (>=-3199<=3199),C,false,sensor.solar_collector_temperature_(TS1),sensor.solar_collectortemp,8,0,1/10,0,1
 "SM200, MS200",solar,164,cylbottomtemp,cylinder bottom temperature (TS2),int16 (>=-3199<=3199),C,false,sensor.solar_cylinder_bottom_temperature_(TS2),sensor.solar_cylbottomtemp,8,0,1/10,1,1
 "SM200, MS200",solar,164,solarpump,pump (PS1),boolean, ,false,binary_sensor.solar_pump_(PS1),binary_sensor.solar_solarpump,8,0,1,2,1
@@ -5590,6 +5594,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "SM200, MS200",solar,164,heatcnt,heat counter impulses,uint8 (>=0<=254), ,false,sensor.solar_heat_counter_impulses,sensor.solar_heatcnt,8,0,1,67,1
 "SM200, MS200",solar,164,swapflowtemp,swap flow temperature (TS14),uint16 (>=0<=3199),C,false,sensor.solar_swap_flow_temperature_(TS14),sensor.solar_swapflowtemp,8,0,1/10,68,1
 "SM200, MS200",solar,164,swaprettemp,swap return temperature (TS15),uint16 (>=0<=3199),C,false,sensor.solar_swap_return_temperature_(TS15),sensor.solar_swaprettemp,8,0,1/10,69,1
+"SM200, MS200",solar,164,heatassiston,heat assistance on,int8 (>=-12<=12),K,true,number.solar_heat_assistance_on,number.solar_heatassiston,8,0,1/10,70,1
+"SM200, MS200",solar,164,heatassistoff,heat assistance off,int8 (>=-12<=12),K,true,number.solar_heat_assistance_off,number.solar_heatassistoff,8,0,1/10,71,1
 "HP Module",heatpump,252,airhumidity,relative air humidity,uint8 (>=0<=100),%,false,sensor.heatpump_relative_air_humidity,sensor.heatpump_airhumidity,9,0,1,0,1
 "HP Module",heatpump,252,dewtemperature,dew point temperature,uint8 (>=0<=254),C,false,sensor.heatpump_dew_point_temperature,sensor.heatpump_dewtemperature,9,0,1,1,1
 "HP Module",heatpump,252,curflowtemp,current flow temperature,int16 (>=-3199<=3199),C,false,sensor.heatpump_current_flow_temperature,sensor.heatpump_curflowtemp,9,0,1/10,2,1

@@ -586,6 +586,7 @@ const Sensors = () => {
           creating={creating}
           selectedItem={selectedAnalogSensor}
           analogGPIOList={sensorData.available_gpios}
+          disabledTypeList={sensorData.exclude_types}
           validator={analogSensorItemValidation(sensorData.as, selectedAnalogSensor)}
         />
       )}

@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <esp32-psram.h>
+
 #ifndef WebSchedulerService_h
 #define WebSchedulerService_h
 
@@ -54,16 +56,16 @@ class ScheduleItem {
     boolean     active;
     uint8_t     flags;
     uint16_t    elapsed_min; // total mins from 00:00
-    std::string time;        // HH:MM
-    std::string cmd;
-    std::string value;
-    std::string name;
+    stringPSRAM time;        // HH:MM
+    stringPSRAM cmd;
+    stringPSRAM value;
+    char        name[20];
     uint8_t     retry_cnt;
 };
 
 class WebScheduler {
   public:
-    std::list<ScheduleItem> scheduleItems;
+    std::list<ScheduleItem, AllocatorPSRAM<ScheduleItem>> scheduleItems;
 
     static void              read(WebScheduler & webScheduler, JsonObject root);
     static StateUpdateResult update(JsonObject root, WebScheduler & webScheduler);
@@ -104,10 +106,10 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
 
     HttpEndpoint<WebScheduler>  _httpEndpoint;
     FSPersistence<WebScheduler> _fsPersistence;
+    bool                        ha_registered_ = false;
 
-    std::list<ScheduleItem> *  scheduleItems_; // pointer to the list of schedule events
-    bool                       ha_registered_ = false;
-    std::deque<ScheduleItem *> cmd_changed_;
+    std::list<ScheduleItem, AllocatorPSRAM<ScheduleItem>> *   scheduleItems_; // pointer to the list of schedule events
+    std::list<ScheduleItem *, AllocatorPSRAM<ScheduleItem *>> cmd_changed_;   // pointer to commands in list that are triggert by change
 };
 
 } // namespace emsesp

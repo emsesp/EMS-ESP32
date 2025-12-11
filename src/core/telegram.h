@@ -31,6 +31,7 @@
 #endif
 
 #include "helpers.h"
+#include <esp32-psram.h>
 
 #define MAX_RX_TELEGRAMS 100 // size of Rx queue
 #define MAX_TX_TELEGRAMS 160 // size of Tx queue
@@ -287,7 +288,7 @@ class RxService : public EMSbus {
         }
     };
 
-    std::deque<QueuedRxTelegram> queue() const {
+    std::deque<QueuedRxTelegram, AllocatorPSRAM<QueuedRxTelegram>> queue() const {
         return rx_telegrams_;
     }
 
@@ -298,7 +299,8 @@ class RxService : public EMSbus {
     uint32_t                        telegram_count_       = 0; // # Rx received
     uint32_t                        telegram_error_count_ = 0; // # Rx CRC errors
     std::shared_ptr<const Telegram> rx_telegram;               // the incoming Rx telegram
-    std::deque<QueuedRxTelegram>    rx_telegrams_;             // the Rx Queue
+
+    std::deque<QueuedRxTelegram, AllocatorPSRAM<QueuedRxTelegram>> rx_telegrams_; // the Rx Queue
 };
 
 class TxService : public EMSbus {
@@ -419,7 +421,7 @@ class TxService : public EMSbus {
         }
     };
 
-    std::deque<QueuedTxTelegram> queue() const {
+    std::deque<QueuedTxTelegram, AllocatorPSRAM<QueuedTxTelegram>> queue() const {
         return tx_telegrams_;
     }
 
@@ -431,7 +433,7 @@ class TxService : public EMSbus {
     static constexpr uint32_t POST_SEND_DELAY    = 2000;
 
   private:
-    std::deque<QueuedTxTelegram> tx_telegrams_; // the Tx queue
+    std::deque<QueuedTxTelegram, AllocatorPSRAM<QueuedTxTelegram>> tx_telegrams_; // the Tx queue
 
     uint32_t telegram_read_count_       = 0; // # Tx successful reads
     uint32_t telegram_write_count_      = 0; // # Tx successful writes

@@ -470,26 +470,25 @@ char * Helpers::utf8tolatin1(char * result, const char * c, const uint8_t len) {
     *p = '\0'; // terminate result
     return result;
 }
+
 // creates string of hex values from an array of bytes
 std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
     if (length == 0) {
         return "<empty>";
     }
 
-    char str[length * 3];
-    memset(str, 0, sizeof(str));
+    std::string str;
+    str.reserve(length * 3 + 1);
 
-    char   buffer[4];
-    char * p = &str[0];
+    char buffer[4];
     for (uint8_t i = 0; i < length; i++) {
-        Helpers::hextoa(buffer, data[i]);
-        *p++ = buffer[0];
-        *p++ = buffer[1];
-        *p++ = ' '; // space
+        str.append(Helpers::hextoa(buffer, data[i]));
+        str.push_back(' ');
     }
-    *--p = '\0'; // null terminate just in case, loosing the trailing space
-
-    return std::string(str);
+    if (!str.empty()) {
+        str.pop_back();
+    }
+    return str;
 }
 
 // takes a hex string and convert it to an unsigned 32bit number (max 8 hex digits)

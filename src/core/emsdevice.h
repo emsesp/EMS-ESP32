@@ -25,6 +25,7 @@
 #include "helpers.h"
 #include "emsdevicevalue.h"
 
+#include <esp32-psram.h>
 #include <unordered_map>
 
 namespace emsesp {
@@ -549,13 +550,12 @@ class EMSdevice {
         }
     };
 
-    std::vector<uint16_t> handlers_ignored_;
-
+    std::vector<uint16_t, AllocatorPSRAM<uint16_t>> handlers_ignored_, handlers_broadcasted_, handlers_config_;
 #if defined(EMSESP_STANDALONE) || defined(EMSESP_TEST)
   public: // so we can call it from WebCustomizationService::load_test_data() and EMSESP::dump_all_entities()
 #endif
-    std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
-    std::vector<DeviceValue>      devicevalues_;       // all the device values
+    std::vector<TelegramFunction, AllocatorPSRAM<TelegramFunction>> telegram_functions_; // each EMS device has its own set of registered telegram types
+    std::vector<DeviceValue, AllocatorPSRAM<DeviceValue>>           devicevalues_;       // all the device values
 };
 
 } // namespace emsesp

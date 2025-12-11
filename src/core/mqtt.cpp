@@ -47,7 +47,7 @@ bool        Mqtt::send_response_;
 bool        Mqtt::publish_single_;
 bool        Mqtt::publish_single2cmd_;
 
-std::vector<Mqtt::MQTTSubFunction> Mqtt::mqtt_subfunctions_;
+std::vector<Mqtt::MQTTSubFunction, AllocatorPSRAM<Mqtt::MQTTSubFunction>> Mqtt::mqtt_subfunctions_;
 
 uint32_t Mqtt::mqtt_publish_fails_ = 0;
 bool     Mqtt::connecting_         = false;
@@ -119,7 +119,7 @@ void Mqtt::resubscribe() {
     }
 
     for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
-        queue_subscribe_message(mqtt_subfunction.topic_);
+        queue_subscribe_message(mqtt_subfunction.topic_.c_str());
     }
 }
 
@@ -1508,6 +1508,18 @@ void Mqtt::add_ha_bool(JsonObject doc) {
         char result[12];
         doc[pl_on]  = Helpers::render_boolean(result, true);
         doc[pl_off] = Helpers::render_boolean(result, false);
+    }
+}
+
+// adds the bool depending on bool setting
+void Mqtt::add_value_bool(JsonObject doc, const char * name, bool value) {
+    if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+        doc[name] = value;
+    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+        doc[name] = value ? 1 : 0;
+    } else {
+        char result[12];
+        doc[name] = Helpers::render_boolean(result, value);
     }
 }
 

@@ -328,9 +328,9 @@ const ApplicationSettings = () => {
               >
                 <MenuItem value={-1}>OFF</MenuItem>
                 <MenuItem value={3}>ERR</MenuItem>
+                <MenuItem value={4}>WARN</MenuItem>
                 <MenuItem value={5}>NOTICE</MenuItem>
                 <MenuItem value={6}>INFO</MenuItem>
-                <MenuItem value={7}>DEBUG</MenuItem>
                 <MenuItem value={9}>ALL</MenuItem>
               </TextField>
             </Grid>
@@ -602,6 +602,7 @@ const ApplicationSettings = () => {
                   <MenuItem value={0}>{LL.DISABLED(1)}</MenuItem>
                   <MenuItem value={1}>LAN8720</MenuItem>
                   <MenuItem value={2}>TLK110</MenuItem>
+                  <MenuItem value={3}>RTL8201</MenuItem>
                 </TextField>
               </Grid>
             </Grid>

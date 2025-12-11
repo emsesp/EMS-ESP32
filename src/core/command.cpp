@@ -24,7 +24,7 @@ namespace emsesp {
 
 uuid::log::Logger Command::logger_{F_(command), uuid::log::Facility::DAEMON};
 
-std::vector<Command::CmdFunction> Command::cmdfunctions_;
+std::vector<Command::CmdFunction, AllocatorPSRAM<Command::CmdFunction>> Command::cmdfunctions_;
 
 // takes a URI path and a json body, parses the data and calls the command
 // the path is leading so if duplicate keys are in the input JSON it will be ignored

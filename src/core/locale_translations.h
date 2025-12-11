@@ -896,6 +896,8 @@ MAKE_TRANSLATION(cyl3BottomTemp, "cyl3bottomtemp", "third cylinder bottom temper
 MAKE_TRANSLATION(cylTopTemp, "cyltoptemp", "cylinder top temperature (TS10)", "Speichertemperatur oben (TS10)", "", "Cylindertemperatur Toppen (TS10)", "", "", "", "", "", "horná teplota valca (TS10)", "") // TODO translate
 MAKE_TRANSLATION(transferPumpMod, "transferpumpmod", "transfer pump modulation", "Transferpumpenmodulation", "", "Överföringspumpmodulering", "", "", "", "", "", "modulácia prenosového čerpadla", "") // TODO translate
 MAKE_TRANSLATION(transferPump, "transferpump", "transfer pump", "Transferpumpe", "", "Överföringspump", "", "", "", "", "", "prenosové čerpadlo", "") // TODO translate
+MAKE_TRANSLATION(heatAssistOn, "heatassiston", "heat assistance on", "Einschaltdiff. Rücklaufanh.")
+MAKE_TRANSLATION(heatAssistOff, "heatassistoff", "heat assistance off", "Ausschaltdiff. Rücklaufanh.")
 
 // solar dhw
 MAKE_TRANSLATION(wwColdTemp, "coldtemp", "cold water", "Kaltwasser", "", "kallvatten", "zimna woda", "", "", "", "", "studená voda", "studená voda") // TODO translate

@@ -182,9 +182,9 @@
 | dhw.comfoff | comfort switch off | uint8 (>=15<=65) | C | true | DHW | 18 | 1 | 1 |
 | dhw.ecooff | eco switch off | uint8 (>=15<=65) | C | true | DHW | 19 | 1 | 1 |
 | dhw.ecoplusoff | eco+ switch off | uint8 (>=48<=63) | C | true | DHW | 20 | 1 | 1 |
-| dhw.comfdiff | comfort diff | uint8 (>=4<=12) | K | true | DHW | 21 | 1 | 1 |
-| dhw.ecodiff | eco diff | uint8 (>=4<=12) | K | true | DHW | 22 | 1 | 1 |
-| dhw.ecoplusdiff | eco+ diff | uint8 (>=6<=12) | K | true | DHW | 23 | 1 | 1 |
+| dhw.comfdiff | comfort diff | uint8 (>=4<=15) | K | true | DHW | 21 | 1 | 1 |
+| dhw.ecodiff | eco diff | uint8 (>=4<=15) | K | true | DHW | 22 | 1 | 1 |
+| dhw.ecoplusdiff | eco+ diff | uint8 (>=4<=15) | K | true | DHW | 23 | 1 | 1 |
 | dhw.comfstop | comfort stop temp | uint8 (>=0<=254) | C | true | DHW | 24 | 1 | 1 |
 | dhw.ecostop | eco stop temp | uint8 (>=0<=254) | C | true | DHW | 25 | 1 | 1 |
 | dhw.ecoplusstop | eco+ stop temp | uint8 (>=0<=254) | C | true | DHW | 26 | 1 | 1 |
@@ -2821,9 +2821,9 @@
 | dhw.comfoff | comfort switch off | uint8 (>=15<=65) | C | true | DHW | 18 | 1 | 1 |
 | dhw.ecooff | eco switch off | uint8 (>=15<=65) | C | true | DHW | 19 | 1 | 1 |
 | dhw.ecoplusoff | eco+ switch off | uint8 (>=48<=63) | C | true | DHW | 20 | 1 | 1 |
-| dhw.comfdiff | comfort diff | uint8 (>=4<=12) | K | true | DHW | 21 | 1 | 1 |
-| dhw.ecodiff | eco diff | uint8 (>=4<=12) | K | true | DHW | 22 | 1 | 1 |
-| dhw.ecoplusdiff | eco+ diff | uint8 (>=6<=12) | K | true | DHW | 23 | 1 | 1 |
+| dhw.comfdiff | comfort diff | uint8 (>=4<=15) | K | true | DHW | 21 | 1 | 1 |
+| dhw.ecodiff | eco diff | uint8 (>=4<=15) | K | true | DHW | 22 | 1 | 1 |
+| dhw.ecoplusdiff | eco+ diff | uint8 (>=4<=15) | K | true | DHW | 23 | 1 | 1 |
 | dhw.comfstop | comfort stop temp | uint8 (>=0<=254) | C | true | DHW | 24 | 1 | 1 |
 | dhw.ecostop | eco stop temp | uint8 (>=0<=254) | C | true | DHW | 25 | 1 | 1 |
 | dhw.ecoplusstop | eco+ stop temp | uint8 (>=0<=254) | C | true | DHW | 26 | 1 | 1 |
@@ -3040,9 +3040,9 @@
 | dhw.comfoff | comfort switch off | uint8 (>=15<=65) | C | true | DHW | 18 | 1 | 1 |
 | dhw.ecooff | eco switch off | uint8 (>=15<=65) | C | true | DHW | 19 | 1 | 1 |
 | dhw.ecoplusoff | eco+ switch off | uint8 (>=48<=63) | C | true | DHW | 20 | 1 | 1 |
-| dhw.comfdiff | comfort diff | uint8 (>=4<=12) | K | true | DHW | 21 | 1 | 1 |
-| dhw.ecodiff | eco diff | uint8 (>=4<=12) | K | true | DHW | 22 | 1 | 1 |
-| dhw.ecoplusdiff | eco+ diff | uint8 (>=6<=12) | K | true | DHW | 23 | 1 | 1 |
+| dhw.comfdiff | comfort diff | uint8 (>=4<=15) | K | true | DHW | 21 | 1 | 1 |
+| dhw.ecodiff | eco diff | uint8 (>=4<=15) | K | true | DHW | 22 | 1 | 1 |
+| dhw.ecoplusdiff | eco+ diff | uint8 (>=4<=15) | K | true | DHW | 23 | 1 | 1 |
 | dhw.comfstop | comfort stop temp | uint8 (>=0<=254) | C | true | DHW | 24 | 1 | 1 |
 | dhw.ecostop | eco stop temp | uint8 (>=0<=254) | C | true | DHW | 25 | 1 | 1 |
 | dhw.ecoplusstop | eco+ stop temp | uint8 (>=0<=254) | C | true | DHW | 26 | 1 | 1 |
@@ -5815,6 +5815,8 @@
 | heatcnt | heat counter impulses | uint8 (>=0<=254) |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | swapflowtemp | swap flow temperature (TS14) | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 68 | 1 | 1/10 |
 | swaprettemp | swap return temperature (TS15) | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 69 | 1 | 1/10 |
+| heatassiston | heat assistance on | int8 (>=-12<=12) | K | true | DEVICE_DATA | 70 | 1 | 1/10 |
+| heatassistoff | heat assistance off | int8 (>=-12<=12) | K | true | DEVICE_DATA | 71 | 1 | 1/10 |
 
 ### SM100, MS100
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5880,6 +5882,8 @@
 | heatcnt | heat counter impulses | uint8 (>=0<=254) |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | swapflowtemp | swap flow temperature (TS14) | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 68 | 1 | 1/10 |
 | swaprettemp | swap return temperature (TS15) | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 69 | 1 | 1/10 |
+| heatassiston | heat assistance on | int8 (>=-12<=12) | K | true | DEVICE_DATA | 70 | 1 | 1/10 |
+| heatassistoff | heat assistance off | int8 (>=-12<=12) | K | true | DEVICE_DATA | 71 | 1 | 1/10 |
 
 ### SM200, MS200
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5945,6 +5949,8 @@
 | heatcnt | heat counter impulses | uint8 (>=0<=254) |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | swapflowtemp | swap flow temperature (TS14) | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 68 | 1 | 1/10 |
 | swaprettemp | swap return temperature (TS15) | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 69 | 1 | 1/10 |
+| heatassiston | heat assistance on | int8 (>=-12<=12) | K | true | DEVICE_DATA | 70 | 1 | 1/10 |
+| heatassistoff | heat assistance off | int8 (>=-12<=12) | K | true | DEVICE_DATA | 71 | 1 | 1/10 |
 
 ## Devices of type *heatpump*
 ### HP Module

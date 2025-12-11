@@ -88,9 +88,7 @@ void WebActivityService::webActivityService(AsyncWebServerRequest * request) {
         statJson["id"] = 7;
         statJson["s"]  = EMSESP::system_.syslog_count();
         statJson["f"]  = EMSESP::system_.syslog_fails();
-        statJson["q"]  = (EMSESP::system_.syslog_count() + EMSESP::system_.syslog_fails()) == 0
-                             ? 100
-                             : 100 - (uint8_t)((100 * EMSESP::system_.syslog_fails()) / (EMSESP::system_.syslog_count() + EMSESP::system_.syslog_fails()));
+        statJson["q"]  = EMSESP::system_.syslog_count() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::system_.syslog_fails()) / EMSESP::system_.syslog_count());
     }
 #endif
 

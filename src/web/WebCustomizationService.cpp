@@ -54,23 +54,23 @@ void WebCustomization::read(WebCustomization & customizations, JsonObject root) 
     JsonArray sensorsJson = root["ts"].to<JsonArray>();
     for (const SensorCustomization & sensor : customizations.sensorCustomizations) {
         JsonObject sensorJson   = sensorsJson.add<JsonObject>();
-        sensorJson["id"]        = sensor.id;        // ID of chip
-        sensorJson["name"]      = sensor.name;      // n
-        sensorJson["offset"]    = sensor.offset;    // o
-        sensorJson["is_system"] = sensor.is_system; // s for core_voltage, supply_voltage
+        sensorJson["id"]        = (const char *)sensor.id;   // ID of chip
+        sensorJson["name"]      = (const char *)sensor.name; // n
+        sensorJson["offset"]    = sensor.offset;             // o
+        sensorJson["is_system"] = sensor.is_system;          // s for core_voltage, supply_voltage
     }
 
     // Analog Sensor customization
     JsonArray analogJson = root["as"].to<JsonArray>();
     for (const AnalogCustomization & sensor : customizations.analogCustomizations) {
         JsonObject sensorJson   = analogJson.add<JsonObject>();
-        sensorJson["gpio"]      = sensor.gpio;      // g
-        sensorJson["name"]      = sensor.name;      // n
-        sensorJson["offset"]    = sensor.offset;    // o
-        sensorJson["factor"]    = sensor.factor;    // f
-        sensorJson["uom"]       = sensor.uom;       // u
-        sensorJson["type"]      = sensor.type;      // t
-        sensorJson["is_system"] = sensor.is_system; // s for core_voltage, supply_voltage
+        sensorJson["gpio"]      = sensor.gpio;               // g
+        sensorJson["name"]      = (const char *)sensor.name; // n
+        sensorJson["offset"]    = sensor.offset;             // o
+        sensorJson["factor"]    = sensor.factor;             // f
+        sensorJson["uom"]       = sensor.uom;                // u
+        sensorJson["type"]      = sensor.type;               // t
+        sensorJson["is_system"] = sensor.is_system;          // s for core_voltage, supply_voltage
     }
 
     // Masked entities customization and custom device name (optional)
@@ -83,8 +83,8 @@ void WebCustomization::read(WebCustomization & customizations, JsonObject root) 
 
         // entries are in the form <XX><shortname>[optional customname] e.g "08heatingactive|heating is on"
         JsonArray masked_entityJson = entityJson["entity_ids"].to<JsonArray>();
-        for (const std::string & entity_id : entityCustomization.entity_ids) {
-            masked_entityJson.add(entity_id);
+        for (const auto & entity_id : entityCustomization.entity_ids) {
+            masked_entityJson.add(entity_id.c_str());
         }
     }
 }
@@ -98,16 +98,18 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
         auto sensorsJsons = root["ts"].as<JsonArray>();
         for (const JsonObject sensorJson : sensorsJsons) {
             // create each of the sensor, overwriting any previous settings
-            auto sensor   = SensorCustomization();
-            sensor.id     = sensorJson["id"].as<std::string>();
-            sensor.name   = sensorJson["name"].as<std::string>();
-            sensor.offset = sensorJson["offset"];
-            if (sensor.id == sensor.name) {
-                sensor.name = ""; // no need to store id as name
-            }
+            auto sensor = SensorCustomization();
+            strlcpy(sensor.id, sensorJson["id"].as<const char *>(), sizeof(sensor.id));
+            strlcpy(sensor.name, sensorJson["name"].as<const char *>(), sizeof(sensor.name));
+            sensor.offset    = sensorJson["offset"];
             sensor.is_system = sensorJson["is_system"] | false;
-            std::replace(sensor.id.begin(), sensor.id.end(), '-', '_'); // change old ids to v3.7 style
-            customizations.sensorCustomizations.push_back(sensor);      // add to list
+            // change old ids to v3.7 style
+            for (char * p = sensor.id; *p != '\0'; p++) {
+                if (*p == '-') {
+                    *p = '_';
+                }
+            }
+            customizations.sensorCustomizations.push_back(sensor); // add to list
         }
     }
 
@@ -121,12 +123,12 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
             if (!EMSESP::system_.add_gpio(analogJson["gpio"].as<uint8_t>(), "Analog Sensor")) {
                 EMSESP::logger().warning("Analog sensor: Invalid GPIO %d for %s. Skipping.",
                                          analogJson["gpio"].as<uint8_t>(),
-                                         analogJson["name"].as<std::string>().c_str());
+                                         analogJson["name"].as<const char *>());
                 continue;
             }
-            auto analog      = AnalogCustomization();
+            auto analog = AnalogCustomization();
+            strlcpy(analog.name, analogJson["name"].as<const char *>(), sizeof(analog.name));
             analog.gpio      = analogJson["gpio"];
-            analog.name      = analogJson["name"].as<std::string>();
             analog.offset    = analogJson["offset"];
             analog.factor    = analogJson["factor"];
             analog.uom       = analogJson["uom"];
@@ -153,7 +155,7 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
             auto masked_entity_ids = masked_entity["entity_ids"].as<JsonArray>();
             for (const JsonVariant masked_entity_id : masked_entity_ids) {
                 if (masked_entity_id.is<std::string>()) {
-                    emsEntity.entity_ids.push_back(masked_entity_id.as<std::string>()); // add entity list
+                    emsEntity.entity_ids.push_back(masked_entity_id.as<std::string>().c_str()); // add entity list
                 }
             }
 
@@ -312,9 +314,9 @@ void WebCustomizationService::customization_entities(AsyncWebServerRequest * req
                     read([&](WebCustomization & settings) {
                         for (EntityCustomization entityCustomization : settings.entityCustomizations) {
                             if (entityCustomization.device_id == device_id) {
-                                for (const std::string & entity_id : entityCustomization.entity_ids) {
+                                for (const auto & entity_id : entityCustomization.entity_ids) {
                                     uint8_t     mask = Helpers::hextoint(entity_id.substr(0, 2).c_str());
-                                    std::string name = DeviceValue::get_name(entity_id);
+                                    std::string name = DeviceValue::get_name(entity_id.c_str());
                                     if (mask & 0x80) {
                                         bool is_set = false;
                                         for (const JsonVariant id : entity_ids_json) {
@@ -382,23 +384,23 @@ void WebCustomizationService::load_test_data() {
         // Temperature sensors
         webCustomization.sensorCustomizations.clear(); // delete all existing sensors
 
-        auto sensor1      = SensorCustomization();
-        sensor1.id        = "01_0203_0405_0607";
-        sensor1.name      = "test_tempsensor1";
+        auto sensor1 = SensorCustomization();
+        strcpy(sensor1.id, "01_0203_0405_0607");
+        strcpy(sensor1.name, "test_tempsensor1");
         sensor1.offset    = 0;
         sensor1.is_system = false;
         webCustomization.sensorCustomizations.push_back(sensor1);
 
-        auto sensor2      = SensorCustomization();
-        sensor2.id        = "0B_0C0D_0E0F_1011";
-        sensor2.name      = "test_tempsensor2";
+        auto sensor2 = SensorCustomization();
+        strcpy(sensor2.id, "0B_0C0D_0E0F_1011");
+        strcpy(sensor2.name, "test_tempsensor2");
         sensor2.offset    = 4;
         sensor2.is_system = false;
         webCustomization.sensorCustomizations.push_back(sensor2);
 
-        auto sensor3      = SensorCustomization();
-        sensor3.id        = "28_1767_7B13_2502";
-        sensor3.name      = "gateway_temperature";
+        auto sensor3 = SensorCustomization();
+        strcpy(sensor3.id, "28_1767_7B13_2502");
+        strcpy(sensor3.name, "gateway_temperature");
         sensor3.offset    = 0;
         sensor3.is_system = true;
         webCustomization.sensorCustomizations.push_back(sensor3);
@@ -406,9 +408,9 @@ void WebCustomizationService::load_test_data() {
         // Analog sensors
         // This actually adds the sensors as we use customizations to store them
         webCustomization.analogCustomizations.clear();
-        auto analog      = AnalogCustomization();
-        analog.gpio      = 36;
-        analog.name      = "test_analogsensor1";
+        auto analog = AnalogCustomization();
+        analog.gpio = 36;
+        strcpy(analog.name, "test_analogsensor1");
         analog.offset    = 0;
         analog.factor    = 0.2;
         analog.uom       = 17;
@@ -416,9 +418,9 @@ void WebCustomizationService::load_test_data() {
         analog.is_system = false;
         webCustomization.analogCustomizations.push_back(analog);
 
-        analog           = AnalogCustomization();
-        analog.gpio      = 37;
-        analog.name      = "test_analogsensor2";
+        analog      = AnalogCustomization();
+        analog.gpio = 37;
+        strcpy(analog.name, "test_analogsensor2");
         analog.offset    = 0;
         analog.factor    = 1;
         analog.uom       = 0;
@@ -426,9 +428,9 @@ void WebCustomizationService::load_test_data() {
         analog.is_system = false;
         webCustomization.analogCustomizations.push_back(analog);
 
-        analog           = AnalogCustomization();
-        analog.gpio      = 38;
-        analog.name      = "test_analogsensor3";
+        analog      = AnalogCustomization();
+        analog.gpio = 38;
+        strcpy(analog.name, "test_analogsensor3");
         analog.offset    = 0;
         analog.factor    = 1;
         analog.uom       = 0;
@@ -436,9 +438,9 @@ void WebCustomizationService::load_test_data() {
         analog.is_system = false;
         webCustomization.analogCustomizations.push_back(analog);
 
-        analog           = AnalogCustomization();
-        analog.gpio      = 33;
-        analog.name      = "test_analogsensor4";
+        analog      = AnalogCustomization();
+        analog.gpio = 33;
+        strcpy(analog.name, "test_analogsensor4");
         analog.offset    = 0;
         analog.factor    = 1;
         analog.uom       = 0;
@@ -446,9 +448,9 @@ void WebCustomizationService::load_test_data() {
         analog.is_system = false;
         webCustomization.analogCustomizations.push_back(analog);
 
-        analog           = AnalogCustomization();
-        analog.gpio      = 39;
-        analog.name      = "test_analogsensor5"; // core_voltage
+        analog      = AnalogCustomization();
+        analog.gpio = 39;
+        strcpy(analog.name, "test_analogsensor5"); // core_voltage
         analog.offset    = 0;
         analog.factor    = 0.003771;
         analog.uom       = 23;

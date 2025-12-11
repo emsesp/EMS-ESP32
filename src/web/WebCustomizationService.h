@@ -18,6 +18,7 @@
 
 #ifndef WebCustomizationService_h
 #define WebCustomizationService_h
+#include <esp32-psram.h>
 
 #define EMSESP_CUSTOMIZATION_FILE "/config/emsespCustomization.json"
 
@@ -34,21 +35,21 @@ namespace emsesp {
 // Customization for temperature sensor
 class SensorCustomization {
   public:
-    std::string id;
-    std::string name;
-    uint16_t    offset;
-    bool        is_system; // if true, the customization is a system customization
+    char     id[18];
+    char     name[20];
+    uint16_t offset;
+    bool     is_system; // if true, the customization is a system customization
 };
 
 class AnalogCustomization {
   public:
-    uint8_t     gpio;
-    std::string name;
-    double      offset;
-    double      factor;
-    uint8_t     uom;       // 0 is none
-    int8_t      type;      // -1 is for deletion
-    bool        is_system; // if true, the customization is a system customization
+    uint8_t gpio;
+    char    name[20];
+    double  offset;
+    double  factor;
+    uint8_t uom;       // 0 is none
+    int8_t  type;      // -1 is for deletion
+    bool    is_system; // if true, the customization is a system customization
 
     // used for removing from a list
     bool operator==(const AnalogCustomization & a) const {
@@ -70,11 +71,12 @@ class EntityCustomization {
 
 class WebCustomization {
   public:
-    std::list<SensorCustomization> sensorCustomizations; // for sensor names and offsets
-    std::list<AnalogCustomization> analogCustomizations; // for analog sensors
-    std::list<EntityCustomization> entityCustomizations; // for a list of entities that have a special mask set
-    static void                    read(WebCustomization & customizations, JsonObject root);
-    static StateUpdateResult       update(JsonObject root, WebCustomization & customizations);
+    std::list<SensorCustomization, AllocatorPSRAM<SensorCustomization>> sensorCustomizations; // for sensor names and offsets
+    std::list<AnalogCustomization, AllocatorPSRAM<AnalogCustomization>> analogCustomizations; // for analog sensors
+    std::list<EntityCustomization, AllocatorPSRAM<EntityCustomization>> entityCustomizations; // for a list of entities that have a special mask set
+
+    static void              read(WebCustomization & customizations, JsonObject root);
+    static StateUpdateResult update(JsonObject root, WebCustomization & customizations);
 
   private:
     static bool _start;
