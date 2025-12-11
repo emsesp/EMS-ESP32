@@ -602,6 +602,7 @@ const ApplicationSettings = () => {
                   <MenuItem value={0}>{LL.DISABLED(1)}</MenuItem>
                   <MenuItem value={1}>LAN8720</MenuItem>
                   <MenuItem value={2}>TLK110</MenuItem>
+                  <MenuItem value={3}>RTL8201</MenuItem>
                 </TextField>
               </Grid>
             </Grid>

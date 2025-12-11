@@ -761,7 +761,9 @@ void System::network_init() {
     int            mdio     = 18;            // Pin# of the I²C IO signal for the Ethernet PHY - hardcoded
     uint8_t        phy_addr = eth_phy_addr_; // I²C-address of Ethernet PHY (0 or 1 for LAN8720, 31 for TLK110)
     int8_t         power    = eth_power_;    // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
-    eth_phy_type_t type     = (phy_type_ == PHY_type::PHY_TYPE_LAN8720) ? ETH_PHY_LAN8720 : ETH_PHY_TLK110; // Type of the Ethernet PHY (LAN8720 or TLK110)
+    eth_phy_type_t type     = (phy_type_ == PHY_type::PHY_TYPE_LAN8720)  ? ETH_PHY_LAN8720
+                              : (phy_type_ == PHY_type::PHY_TYPE_TLK110) ? ETH_PHY_TLK110
+                                                                         : ETH_PHY_RTL8201; // Type of the Ethernet PHY (LAN8720 or TLK110)
     // clock mode:
     //  ETH_CLOCK_GPIO0_IN   = 0  RMII clock input to GPIO0
     //  ETH_CLOCK_GPIO0_OUT  = 1  RMII clock output from GPIO0

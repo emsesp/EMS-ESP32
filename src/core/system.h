@@ -60,7 +60,7 @@ using uuid::console::Shell;
 
 namespace emsesp {
 
-enum PHY_type : uint8_t { PHY_TYPE_NONE = 0, PHY_TYPE_LAN8720, PHY_TYPE_TLK110 };
+enum PHY_type : uint8_t { PHY_TYPE_NONE = 0, PHY_TYPE_LAN8720, PHY_TYPE_TLK110, PHY_TYPE_RTL8201 };
 
 enum SYSTEM_STATUS : uint8_t {
     SYSTEM_STATUS_NORMAL            = 0,
