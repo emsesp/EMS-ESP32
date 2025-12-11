@@ -222,9 +222,11 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) {
     // the payload is not terminated
     // convert payload to a null-terminated char string
     // see https://www.emelis.net/espMqttClient/#code-samples
-    char message[len + 1];
-    memcpy(message, payload, len);
-    message[len] = '\0';
+    // fix variable-length arrays (VLAs) "char message[len + 1]" as they are not standard C++; they're a Clang/GCC extension.
+    std::vector<char> message_buffer(len + 1);
+    memcpy(message_buffer.data(), payload, len);
+    message_buffer[len] = '\0';
+    char * message      = message_buffer.data();
 
 #if defined(EMSESP_DEBUG)
     if (len) {

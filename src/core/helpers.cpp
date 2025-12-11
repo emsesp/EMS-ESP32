@@ -495,11 +495,11 @@ std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
         return "<empty>";
     }
 
-    char str[length * 3];
-    memset(str, 0, sizeof(str));
+    std::vector<char> str(length * 3);
+    memset(str.data(), 0, str.size());
 
     char   buffer[4];
-    char * p = &str[0];
+    char * p = str.data();
     for (uint8_t i = 0; i < length; i++) {
         Helpers::hextoa(buffer, data[i]);
         *p++ = buffer[0];
@@ -508,7 +508,7 @@ std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
     }
     *--p = '\0'; // null terminate just in case, loosing the trailing space
 
-    return std::string(str);
+    return std::string(str.data());
 }
 
 // takes a hex string and convert it to an unsigned 32bit number (max 8 hex digits)
