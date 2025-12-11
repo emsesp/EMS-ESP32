@@ -518,19 +518,19 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
         for (const auto & sensor : temperaturesensor_.sensors()) {
             if (Helpers::hasValue(sensor.temperature_c)) {
                 shell.printfln("  %s: %s%s °%c%s (Offset: %s, ID: %s, System: %s)",
-                               sensor.name().c_str(),
+                               sensor.name(),
                                COLOR_BRIGHT_GREEN,
                                Helpers::render_value(s, sensor.temperature_c, 10, fahrenheit),
                                (fahrenheit == 0) ? 'C' : 'F',
                                COLOR_RESET,
                                Helpers::render_value(s2, sensor.offset(), 10, fahrenheit),
-                               sensor.id().c_str(),
+                               sensor.id(),
                                sensor.is_system() ? "Yes" : "No");
             } else {
                 shell.printfln("  %s (Offset: %s, ID: %s, System: %s)",
-                               sensor.name().c_str(),
+                               sensor.name(),
                                Helpers::render_value(s, sensor.offset(), 10, fahrenheit),
-                               sensor.id().c_str(),
+                               sensor.id(),
                                sensor.is_system() ? "Yes" : "No");
             }
         }
@@ -546,7 +546,7 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
             switch (sensor.type()) {
             case AnalogSensor::AnalogType::ADC:
                 shell.printfln("  %s: %s%s %s%s (Type: ADC, Factor: %s, Offset: %s, System: %s)",
-                               sensor.name().c_str(),
+                               sensor.name(),
                                COLOR_BRIGHT_GREEN,
                                Helpers::render_value(s, sensor.value(), 2),
                                EMSdevice::uom_to_string(sensor.uom()),
@@ -559,7 +559,7 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
                 // case AnalogSensor::AnalogType::DIGITAL_IN:
                 // case AnalogSensor::AnalogType::COUNTER:
                 shell.printfln("  %s: %s%d%s (Type: %s)",
-                               sensor.name().c_str(),
+                               sensor.name(),
                                COLOR_BRIGHT_GREEN,
                                (uint16_t)sensor.value(), // as int
                                COLOR_RESET,

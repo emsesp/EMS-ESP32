@@ -27,11 +27,10 @@
 
 #include <uuid/log.h>
 
-#include <esp32-psram.h>
-
 #ifndef EMSESP_STANDALONE
 #include <OneWire.h>
 #endif
+#include <esp32-psram.h>
 
 namespace emsesp {
 
@@ -53,7 +52,7 @@ class TemperatureSensor {
             is_system_ = is_system;
         }
 
-        std::string id() const {
+        const char * id() const {
             return id_;
         }
 
@@ -64,9 +63,10 @@ class TemperatureSensor {
             offset_ = offset;
         }
 
-        std::string name() const;
-        void        set_name(const std::string & name) {
-            name_ = name;
+        const char * name() const;
+
+        void set_name(const char * name) {
+            strlcpy(name_, name, sizeof(name_));
         }
 
         bool apply_customization();
@@ -77,11 +77,12 @@ class TemperatureSensor {
         bool    ha_registered = false;
 
       private:
-        uint64_t    internal_id_;
-        std::string id_;
-        std::string name_;
-        int16_t     offset_;
-        bool        is_system_;
+        uint64_t internal_id_;
+        char     id_[18];
+        char     name_[20];
+        int16_t  offset_;
+
+        bool     is_system_;
     };
 
     TemperatureSensor()  = default;
@@ -96,11 +97,7 @@ class TemperatureSensor {
     bool get_value_info(JsonObject output, const char * cmd, const int8_t id = -1);
 
     // return back reference to the sensor list, used by other classes
-#ifndef EMSESP_STANDALONE
     std::vector<Sensor, AllocatorPSRAM<Sensor>> sensors() const {
-#else
-    std::vector<Sensor> sensors() const {
-#endif
         return sensors_;
     }
 
@@ -127,7 +124,7 @@ class TemperatureSensor {
         return sensors_.size();
     }
 
-    bool update(const std::string & id, const std::string & name, int16_t offset, bool is_system);
+    bool update(const char* id, const char* name, int16_t offset, bool hide = false, bool is_system = false);
 
 #if defined(EMSESP_TEST)
     void load_test_data();
@@ -165,22 +162,21 @@ class TemperatureSensor {
 
     static uuid::log::Logger logger_;
 
-    bool     temperature_convert_complete();
+    bool     temperature_convert_complete(const uint32_t time);
     int16_t  get_temperature_c(const uint8_t addr[]);
     uint64_t get_id(const uint8_t addr[]);
     void     get_value_json(JsonObject output, const Sensor & sensor);
-    void     remove_ha_topic(const std::string & id);
+    void     remove_ha_topic(const char* id);
+
+    std::vector<Sensor, AllocatorPSRAM<Sensor>> sensors_; // our list of active sensors
 
 #ifndef EMSESP_STANDALONE
-    std::vector<Sensor, AllocatorPSRAM<Sensor>> sensors_; // our list of active sensors
-    OneWire                                     bus_;
-    uint32_t                                    last_activity_ = uuid::get_uptime();
-    State                                       state_         = State::IDLE;
-    int8_t                                      scancnt_       = SCAN_START;
-    uint8_t                                     firstscan_     = 0;
-    int8_t                                      scanretry_     = 0;
-#else
-    std::vector<Sensor> sensors_; // our list of active sensors
+    OneWire  bus_;
+    uint32_t last_activity_ = uuid::get_uptime();
+    State    state_         = State::IDLE;
+    int8_t   scancnt_       = SCAN_START;
+    uint8_t  firstscan_     = 0;
+    int8_t   scanretry_     = 0;
 #endif
 
     uint8_t  dallas_gpio_  = 0;

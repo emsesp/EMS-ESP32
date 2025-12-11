@@ -1637,14 +1637,7 @@ void EMSdevice::get_value_json(JsonObject json, DeviceValue & dv) {
             auto value_b  = (bool)*(uint8_t *)(dv.value_p);
             json["bool"]  = value_b;
             json["index"] = value_b ? 1 : 0;
-            if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                json[value] = value_b;
-            } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-                json[value] = value_b ? 1 : 0;
-            } else {
-                char s[12];
-                json[value] = Helpers::render_boolean(s, value_b);
-            }
+            Mqtt::add_value_bool(json, value, value_b);
         }
         json[type] = ("boolean");
         break;
@@ -1950,13 +1943,8 @@ bool EMSdevice::generate_values(JsonObject output, const int8_t tag_filter, cons
                 if (output_target == OUTPUT_TARGET::CONSOLE) {
                     char s[12];
                     json[name] = Helpers::render_boolean(s, value_b, true); // console use web settings
-                } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                    json[name] = value_b;
-                } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-                    json[name] = value_b ? 1 : 0;
                 } else {
-                    char s[12];
-                    json[name] = Helpers::render_boolean(s, value_b);
+                    Mqtt::add_value_bool(json, name, value_b);
                 }
             }
 
@@ -2003,12 +1991,12 @@ bool EMSdevice::generate_values(JsonObject output, const int8_t tag_filter, cons
                         char time_s[60];
                         snprintf(time_s,
                                  sizeof(time_s),
-                                 "%lu %s %lu %s %lu %s",
-                                 (time_value / 1440),
+                                 "%d %s %d %s %d %s",
+                                 (int)(time_value / 1440),
                                  Helpers::translated_word(FL_(days)),
-                                 ((time_value % 1440) / 60),
+                                 (int)((time_value % 1440) / 60),
                                  Helpers::translated_word(FL_(hours)),
-                                 (time_value % 60),
+                                 (int)(time_value % 60),
                                  Helpers::translated_word(FL_(minutes)));
                         json[name] = time_s;
                     } else {

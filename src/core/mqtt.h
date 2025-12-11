@@ -26,6 +26,7 @@
 #include "console.h"
 #include "command.h"
 #include "emsdevicevalue.h"
+#include <esp32-psram.h>
 
 using uuid::console::Shell;
 
@@ -262,6 +263,7 @@ class Mqtt {
                                      const char * cond2   = nullptr,
                                      const char * negcond = nullptr);
     static void add_ha_bool(JsonObject doc);
+    static void add_value_bool(JsonObject doc, const char * name, bool value);
 
   private:
     static uuid::log::Logger logger_;
@@ -279,18 +281,18 @@ class Mqtt {
     // function handlers for MQTT subscriptions
     struct MQTTSubFunction {
         uint8_t             device_type_;      // which device type, from DeviceType::
-        const std::string   topic_;            // short topic name
+        const stringPSRAM   topic_;            // short topic name
         mqtt_sub_function_p mqtt_subfunction_; // can be empty
 
         // replaced &&topic with &topic in 3.7.0-dev.43, so we prevent the std:move later
         MQTTSubFunction(uint8_t device_type, const std::string & topic, mqtt_sub_function_p mqtt_subfunction)
             : device_type_(device_type)
-            , topic_(topic)
+            , topic_(topic.c_str())
             , mqtt_subfunction_(mqtt_subfunction) {
         }
     };
 
-    static std::vector<MQTTSubFunction> mqtt_subfunctions_; // list of mqtt subscribe callbacks for all devices
+    static std::vector<MQTTSubFunction, AllocatorPSRAM<MQTTSubFunction>> mqtt_subfunctions_; // list of mqtt subscribe callbacks for all devices
 
     uint32_t last_publish_boiler_     = 0;
     uint32_t last_publish_thermostat_ = 0;

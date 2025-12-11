@@ -34,11 +34,11 @@ class CustomEntityItem {
     uint8_t     offset;
     int8_t      value_type;
     uint8_t     uom; // DeviceValueUOM
-    std::string name;
+    char        name[20];
     double      factor;
     bool        writeable;
     uint32_t    value;
-    std::string data;
+    stringPSRAM data;
     uint8_t     ram;
     uint8_t *   raw;
     bool        hide;

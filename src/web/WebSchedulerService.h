@@ -56,20 +56,17 @@ class ScheduleItem {
     boolean     active;
     uint8_t     flags;
     uint16_t    elapsed_min; // total mins from 00:00
-    std::string time;        // HH:MM
-    std::string cmd;
-    std::string value;
-    std::string name;
+    stringPSRAM time;        // HH:MM
+    stringPSRAM cmd;
+    stringPSRAM value;
+    char        name[20];
     uint8_t     retry_cnt;
 };
 
 class WebScheduler {
   public:
-#ifndef EMSESP_STANDALONE
     std::list<ScheduleItem, AllocatorPSRAM<ScheduleItem>> scheduleItems;
-#else
-    std::list<ScheduleItem> scheduleItems;
-#endif
+
     static void              read(WebScheduler & webScheduler, JsonObject root);
     static StateUpdateResult update(JsonObject root, WebScheduler & webScheduler);
 };

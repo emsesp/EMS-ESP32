@@ -67,7 +67,7 @@ WebLogService::QueuedLogMessage::QueuedLogMessage(unsigned long id, uint64_t upt
     , uptime_(uptime)
     , level_(level)
     , name_(name)
-    , text_(text) {
+    , text_(text.c_str()) {
 }
 
 void WebLogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
@@ -88,7 +88,6 @@ void WebLogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
     }
 
     log_messages_.emplace_back(++log_message_id_, message->uptime_ms, message->level, message->name, message->text.c_str());
-
 }
 
 // dumps out the contents of log buffer to shell console
@@ -160,8 +159,8 @@ char * WebLogService::messagetime(char * out, const uint64_t t, const size_t buf
         strlcpy(out, uuid::log::format_timestamp_ms(t, 3).c_str(), bufsize);
     } else {
         time_t t1 = offset + (time_t)(t / 1000);
-        char   timestr[bufsize];
-        strftime(timestr, bufsize, "%FT%T", localtime(&t1));
+        char   timestr[25];
+        strftime(timestr, 25, "%FT%T", localtime(&t1));
         snprintf(out, bufsize, "%s.%03d", timestr, (uint16_t)(t % 1000));
     }
     return out;

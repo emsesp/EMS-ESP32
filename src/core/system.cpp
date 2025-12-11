@@ -90,17 +90,12 @@ uuid::syslog::SyslogService System::syslog_;
 uuid::log::Logger System::logger_{F_(system), uuid::log::Facility::KERN};
 
 // init statics
-PButton  System::myPButton_;
-bool     System::test_set_all_active_ = false;
-uint32_t System::max_alloc_mem_;
-uint32_t System::heap_mem_;
-#ifndef EMSESP_STANDALONE
+PButton                                       System::myPButton_;
+bool                                          System::test_set_all_active_ = false;
+uint32_t                                      System::max_alloc_mem_;
+uint32_t                                      System::heap_mem_;
 std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::valid_system_gpios_;
 std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::used_gpios_;
-#else
-std::vector<uint8_t> System::valid_system_gpios_;
-std::vector<uint8_t> System::used_gpios_;
-#endif
 
 // find the index of the language
 // 0 = EN, 1 = DE, etc...
@@ -2279,15 +2274,10 @@ uint8_t System::systemStatus() {
 }
 
 // takes a string range like "6-11, 1, 23, 24-48" which has optional ranges and single values and converts to a vector of ints
-#ifndef EMSESP_STANDALONE
 std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::string_range_to_vector(const std::string & range) {
     std::vector<uint8_t, AllocatorPSRAM<uint8_t>> gpios;
-#else
-std::vector<uint8_t> System::string_range_to_vector(const std::string & range) {
-    std::vector<uint8_t> gpios;
-#endif
-    std::string::size_type pos  = 0;
-    std::string::size_type prev = 0;
+    std::string::size_type                        pos  = 0;
+    std::string::size_type                        prev = 0;
 
     auto process_part = [&gpios](std::string part) {
         // trim whitespace

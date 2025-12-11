@@ -22,6 +22,7 @@
 #include <unordered_map>
 
 #include "console.h"
+#include <esp32-psram.h>
 
 using uuid::console::Shell;
 
@@ -97,7 +98,7 @@ class Command {
         }
     };
 
-    static std::vector<CmdFunction> commands() {
+    static std::vector<CmdFunction, AllocatorPSRAM<CmdFunction>> commands() {
         return cmdfunctions_;
     }
 
@@ -145,7 +146,7 @@ class Command {
   private:
     static uuid::log::Logger logger_;
 
-    static std::vector<CmdFunction> cmdfunctions_; // the list of commands
+    static std::vector<CmdFunction, AllocatorPSRAM<CmdFunction>> cmdfunctions_; // the list of commands
 
     static uint8_t json_message(uint8_t error_code, const char * message, JsonObject output, const char * object = nullptr);
 };

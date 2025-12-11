@@ -35,21 +35,21 @@ namespace emsesp {
 // Customization for temperature sensor
 class SensorCustomization {
   public:
-    std::string id;
-    std::string name;
-    uint16_t    offset;
-    bool        is_system; // if true, the customization is a system customization
+    char     id[18];
+    char     name[20];
+    uint16_t offset;
+    bool     is_system; // if true, the customization is a system customization
 };
 
 class AnalogCustomization {
   public:
-    uint8_t     gpio;
-    std::string name;
-    double      offset;
-    double      factor;
-    uint8_t     uom;       // 0 is none
-    int8_t      type;      // -1 is for deletion
-    bool        is_system; // if true, the customization is a system customization
+    uint8_t gpio;
+    char    name[20];
+    double  offset;
+    double  factor;
+    uint8_t uom;       // 0 is none
+    int8_t  type;      // -1 is for deletion
+    bool    is_system; // if true, the customization is a system customization
 
     // used for removing from a list
     bool operator==(const AnalogCustomization & a) const {

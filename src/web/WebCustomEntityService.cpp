@@ -55,7 +55,7 @@ void WebCustomEntity::read(WebCustomEntity & webEntity, JsonObject root) {
         ei["type_id"]    = entityItem.type_id;
         ei["offset"]     = entityItem.offset;
         ei["factor"]     = entityItem.factor;
-        ei["name"]       = entityItem.name;
+        ei["name"]       = (const char *)entityItem.name;
         ei["uom"]        = entityItem.value_type == DeviceValueType::BOOL ? 0 : entityItem.uom;
         ei["value_type"] = entityItem.value_type;
         ei["writeable"]  = entityItem.writeable;
@@ -91,12 +91,12 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
             entityItem.type_id    = ei["type_id"];
             entityItem.offset     = ei["offset"];
             entityItem.factor     = ei["factor"];
-            entityItem.name       = ei["name"].as<std::string>();
             entityItem.uom        = ei["uom"];
             entityItem.value_type = ei["value_type"];
             entityItem.writeable  = ei["writeable"];
             entityItem.hide       = ei["hide"] | false;
             entityItem.data       = ei["value"].as<std::string>();
+            strlcpy(entityItem.name, ei["name"].as<const char *>(), sizeof(entityItem.name));
             if (entityItem.ram == 1) {
                 entityItem.device_id  = 0;
                 entityItem.type_id    = 0;
@@ -130,12 +130,12 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
 
             webCustomEntity.customEntityItems.push_back(entityItem); // add to list
 
-            if (entityItem.writeable && !entityItem.name.empty()) {
+            if (entityItem.writeable && entityItem.name[0] != '\0') {
                 Command::add(
                     EMSdevice::DeviceType::CUSTOM,
-                    webCustomEntity.customEntityItems.back().name.c_str(),
+                    webCustomEntity.customEntityItems.back().name,
                     [webCustomEntity](const char * value, const int8_t id) {
-                        return EMSESP::webCustomEntityService.command_setvalue(value, id, webCustomEntity.customEntityItems.back().name.c_str());
+                        return EMSESP::webCustomEntityService.command_setvalue(value, id, webCustomEntity.customEntityItems.back().name);
                     },
                     FL_(entity_cmd),
                     CommandFlag::ADMIN_ONLY);
@@ -143,7 +143,7 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
 
             if (entityItem.ram && doc[entityItem.name].is<JsonVariantConst>() && doc[entityItem.name] != entityItem.value) {
                 char cmd[COMMAND_MAX_LENGTH];
-                snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), entityItem.name.c_str());
+                snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), entityItem.name);
                 EMSESP::webSchedulerService.onChange(cmd);
             }
         }
@@ -213,7 +213,7 @@ bool WebCustomEntityService::command_setvalue(const char * value, const int8_t i
                 publish();
             }
             char cmd[COMMAND_MAX_LENGTH];
-            snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), entityItem.name.c_str());
+            snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), entityItem.name);
             EMSESP::webSchedulerService.onChange(cmd);
             return true;
         }
@@ -224,19 +224,16 @@ bool WebCustomEntityService::command_setvalue(const char * value, const int8_t i
 // output of a single value
 // if add_uom is true it will add the UOM string to the value
 void WebCustomEntityService::render_value(JsonObject output, CustomEntityItem const & entity, const bool useVal, const bool web, const bool add_uom) {
-    char        payload[20];
-    std::string name = useVal ? "value" : entity.name;
+    char         payload[20];
+    const char * name = useVal ? "value" : entity.name;
+
     switch (entity.value_type) {
     case DeviceValueType::BOOL:
         if ((uint8_t)entity.value != EMS_VALUE_BOOL_NOTSET) {
             if (web) {
                 output[name] = Helpers::render_boolean(payload, (uint8_t)entity.value, true);
-            } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                output[name] = (uint8_t)entity.value ? true : false;
-            } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-                output[name] = (uint8_t)entity.value ? 1 : 0;
             } else {
-                output[name] = Helpers::render_boolean(payload, (uint8_t)entity.value);
+                Mqtt::add_value_bool(output, name, (uint8_t)entity.value != 0);
             }
         }
         break;
@@ -248,7 +245,7 @@ void WebCustomEntityService::render_value(JsonObject output, CustomEntityItem co
         break;
     case DeviceValueType::UINT8:
         if ((uint8_t)entity.value != EMS_VALUE_UINT8_NOTSET) {
-            std::string v = Helpers::render_value(payload, entity.factor * (uint8_t)entity.value, 2);
+            std::string v = Helpers::render_value(payload, entity.factor * (int8_t)entity.value, 2);
             output[name]  = add_uom ? serialized(v + ' ' + EMSdevice::uom_to_string(entity.uom)) : serialized(v);
         }
         break;
@@ -336,8 +333,8 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
 
 // build the json for specific entity
 void WebCustomEntityService::get_value_json(JsonObject output, CustomEntityItem const & entity) {
-    output["name"]      = entity.name;
-    output["fullname"]  = entity.name;
+    output["name"]      = (const char *)entity.name;
+    output["fullname"]  = (const char *)entity.name;
     output["storage"]   = entity.ram ? "ram" : "ems";
     output["type"]      = entity.value_type == DeviceValueType::BOOL ? "boolean" : entity.value_type == DeviceValueType::STRING ? "string" : F_(number);
     output["readable"]  = true;
@@ -369,9 +366,9 @@ void WebCustomEntityService::publish_single(CustomEntityItem & entity) {
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     if (Mqtt::publish_single2cmd()) {
-        snprintf(topic, sizeof(topic), "%s/%s", F_(custom), entity.name.c_str());
+        snprintf(topic, sizeof(topic), "%s/%s", F_(custom), entity.name);
     } else {
-        snprintf(topic, sizeof(topic), "%s_data/%s", F_(custom), entity.name.c_str());
+        snprintf(topic, sizeof(topic), "%s_data/%s", F_(custom), entity.name);
     }
 
     JsonDocument doc;
@@ -411,15 +408,15 @@ void WebCustomEntityService::publish(const bool force) {
         // create HA config
         if (Mqtt::ha_enabled() && !ha_registered_) {
             JsonDocument config;
-            config["~"]          = Mqtt::base();
+            config["~"] = Mqtt::base();
 
-            char         stat_t[50];
+            char stat_t[50];
             snprintf(stat_t, sizeof(stat_t), "~/%s_data", F_(custom));
             config["stat_t"] = stat_t;
 
             char val_obj[50];
             char val_cond[65];
-            snprintf(val_obj, sizeof(val_obj), "value_json['%s']", entityItem.name.c_str());
+            snprintf(val_obj, sizeof(val_obj), "value_json['%s']", entityItem.name);
             snprintf(val_cond, sizeof(val_cond), "%s is defined", val_obj);
             // don't bother with value template conditions if using Domoticz which doesn't fully support MQTT Discovery
             if (Mqtt::discovery_type() == Mqtt::discoveryType::HOMEASSISTANT) {
@@ -429,31 +426,31 @@ void WebCustomEntityService::publish(const bool force) {
             }
 
             char uniq_s[70];
-            snprintf(uniq_s, sizeof(uniq_s), "%s_%s", F_(custom), entityItem.name.c_str());
+            snprintf(uniq_s, sizeof(uniq_s), "%s_%s", F_(custom), entityItem.name);
 
             config["uniq_id"] = uniq_s;
-            config["name"]    = entityItem.name.c_str();
+            config["name"]    = (const char *)entityItem.name;
 
             char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
 
             if (entityItem.writeable) {
                 if (entityItem.value_type == DeviceValueType::BOOL) {
-                    snprintf(topic, sizeof(topic), "switch/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name.c_str());
+                    snprintf(topic, sizeof(topic), "switch/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name);
                 } else if (entityItem.value_type == DeviceValueType::STRING) {
-                    snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name.c_str());
+                    snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name);
                 } else if (Mqtt::discovery_type() == Mqtt::discoveryType::HOMEASSISTANT || Mqtt::discovery_type() == Mqtt::discoveryType::DOMOTICZ_LATEST) {
-                    snprintf(topic, sizeof(topic), "number/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name.c_str());
+                    snprintf(topic, sizeof(topic), "number/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name);
                 } else {
-                    snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name.c_str());
+                    snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name);
                 }
                 char command_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-                snprintf(command_topic, sizeof(command_topic), "~/%s/%s", F_(custom), entityItem.name.c_str());
+                snprintf(command_topic, sizeof(command_topic), "~/%s/%s", F_(custom), entityItem.name);
                 config["cmd_t"] = command_topic;
             } else {
                 if (entityItem.value_type == DeviceValueType::BOOL) {
-                    snprintf(topic, sizeof(topic), "binary_sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name.c_str());
+                    snprintf(topic, sizeof(topic), "binary_sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name);
                 } else {
-                    snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name.c_str());
+                    snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name);
                 }
             }
 
@@ -523,7 +520,7 @@ void WebCustomEntityService::generate_value_web(JsonObject output, const bool is
             obj = root_obj;
         }
 
-        obj["id"] = "00" + entity.name;
+        obj["id"] = std::string("00") + entity.name;
         if (entity.value_type != DeviceValueType::BOOL) {
             obj["u"] = entity.uom;
         }
@@ -648,15 +645,15 @@ bool WebCustomEntityService::get_value(std::shared_ptr<const Telegram> telegram)
             if (rest > 0) {
                 memcpy(&entity.raw[offset], message_data, rest);
                 auto data = Helpers::data_to_hex(entity.raw, (uint8_t)length);
-                if (entity.data != data && length == (int)entity.factor) {
-                    entity.data = data;
+                if (entity.data != data.c_str() && length == (int)entity.factor) {
+                    entity.data = data.c_str();
                     if (Mqtt::publish_single()) {
                         publish_single(entity);
                     } else if (EMSESP::mqtt_.get_publish_onchange(0)) {
                         has_change = true;
                     }
                     char cmd[COMMAND_MAX_LENGTH];
-                    snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), entity.name.c_str());
+                    snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), entity.name);
                     EMSESP::webSchedulerService.onChange(cmd);
                 }
             }
@@ -678,10 +675,10 @@ bool WebCustomEntityService::get_value(std::shared_ptr<const Telegram> telegram)
                     has_change = true;
                 }
                 char cmd[COMMAND_MAX_LENGTH];
-                snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), entity.name.c_str());
+                snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), entity.name);
                 EMSESP::webSchedulerService.onChange(cmd);
             }
-            // EMSESP::logger().debug("custom entity %s received with value %d", entity.name.c_str(), (int)entity.val);
+            // EMSESP::logger().debug("custom entity %s received with value %d", entity.name, (int)entity.val);
         }
     }
 
@@ -709,7 +706,7 @@ void WebCustomEntityService::load_test_data() {
         entityItem.type_id    = 24;
         entityItem.offset     = 0;
         entityItem.factor     = 1;
-        entityItem.name       = "test_custom";
+        strcpy(entityItem.name,"test_custom");
         entityItem.uom        = 1;
         entityItem.value_type = 1;
         entityItem.writeable  = true;
@@ -718,9 +715,9 @@ void WebCustomEntityService::load_test_data() {
         webCustomEntity.customEntityItems.push_back(entityItem);
         Command::add(
             EMSdevice::DeviceType::CUSTOM,
-            webCustomEntity.customEntityItems.back().name.c_str(),
+            webCustomEntity.customEntityItems.back().name,
             [webCustomEntity](const char * value, const int8_t id) {
-                return EMSESP::webCustomEntityService.command_setvalue(value, id, webCustomEntity.customEntityItems.back().name.c_str());
+                return EMSESP::webCustomEntityService.command_setvalue(value, id, webCustomEntity.customEntityItems.back().name);
             },
             FL_(entity_cmd),
             CommandFlag::ADMIN_ONLY);
@@ -732,7 +729,7 @@ void WebCustomEntityService::load_test_data() {
         entityItem.type_id    = 677;
         entityItem.offset     = 3;
         entityItem.factor     = 1;
-        entityItem.name       = "test_read_only";
+        strcpy(entityItem.name, "test_read_only");
         entityItem.uom        = 0;
         entityItem.value_type = 2;
         entityItem.writeable  = false;
@@ -746,7 +743,7 @@ void WebCustomEntityService::load_test_data() {
         entityItem.type_id    = 0;
         entityItem.offset     = 0;
         entityItem.factor     = 1;
-        entityItem.name       = "test_ram";
+        strcpy(entityItem.name, "test_ram");
         entityItem.uom        = 0;
         entityItem.value_type = 8;
         entityItem.writeable  = true;
@@ -754,9 +751,9 @@ void WebCustomEntityService::load_test_data() {
         webCustomEntity.customEntityItems.push_back(entityItem);
         Command::add(
             EMSdevice::DeviceType::CUSTOM,
-            webCustomEntity.customEntityItems.back().name.c_str(),
+            webCustomEntity.customEntityItems.back().name,
             [webCustomEntity](const char * value, const int8_t id) {
-                return EMSESP::webCustomEntityService.command_setvalue(value, id, webCustomEntity.customEntityItems.back().name.c_str());
+                return EMSESP::webCustomEntityService.command_setvalue(value, id, webCustomEntity.customEntityItems.back().name);
             },
             FL_(entity_cmd),
             CommandFlag::ADMIN_ONLY);
@@ -768,7 +765,7 @@ void WebCustomEntityService::load_test_data() {
         entityItem.type_id    = 0;
         entityItem.offset     = 0;
         entityItem.factor     = 1;
-        entityItem.name       = "test_seltemp";
+        strcpy(entityItem.name, "test_seltemp");
         entityItem.uom        = 0;
         entityItem.value_type = 8;
         entityItem.writeable  = true;
@@ -777,9 +774,9 @@ void WebCustomEntityService::load_test_data() {
         webCustomEntity.customEntityItems.push_back(entityItem);
         Command::add(
             EMSdevice::DeviceType::CUSTOM,
-            webCustomEntity.customEntityItems.back().name.c_str(),
+            webCustomEntity.customEntityItems.back().name,
             [webCustomEntity](const char * value, const int8_t id) {
-                return EMSESP::webCustomEntityService.command_setvalue(value, id, webCustomEntity.customEntityItems.back().name.c_str());
+                return EMSESP::webCustomEntityService.command_setvalue(value, id, webCustomEntity.customEntityItems.back().name);
             },
             FL_(entity_cmd),
             CommandFlag::ADMIN_ONLY);
