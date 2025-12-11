@@ -34,12 +34,19 @@ char * Helpers::hextoa(char * result, const uint8_t value) {
 }
 
 // same as hextoa but uses to a hex std::string
+// Optimized: Avoid string concatenation to reduce temporary allocations
 std::string Helpers::hextoa(const uint8_t value, bool prefix) {
-    char buf[3];
     if (prefix) {
-        return std::string("0x") + hextoa(buf, value);
+        char buf[5]; // "0x" + 2 hex chars + null
+        buf[0] = '0';
+        buf[1] = 'x';
+        hextoa(&buf[2], value);
+        return std::string(buf);
+    } else {
+        char buf[3];
+        hextoa(buf, value);
+        return std::string(buf);
     }
-    return std::string(hextoa(buf, value));
 }
 
 // same for 16 bit values
@@ -53,12 +60,19 @@ char * Helpers::hextoa(char * result, const uint16_t value) {
 }
 
 // same as above but to a hex string
+// Optimized: Avoid string concatenation to reduce temporary allocations
 std::string Helpers::hextoa(const uint16_t value, bool prefix) {
-    char buf[5];
     if (prefix) {
-        return std::string("0x") + hextoa(buf, value);
+        char buf[7]; // "0x" + 4 hex chars + null
+        buf[0] = '0';
+        buf[1] = 'x';
+        hextoa(&buf[2], value);
+        return std::string(buf);
+    } else {
+        char buf[5];
+        hextoa(buf, value);
+        return std::string(buf);
     }
-    return std::string(hextoa(buf, value));
 }
 
 #ifdef EMSESP_STANDALONE
@@ -100,29 +114,34 @@ char * Helpers::ultostr(char * ptr, uint32_t value, const uint8_t base) {
 
 // fast itoa returning a std::string
 // http://www.strudel.org.uk/itoa/
+// Optimized: Use stack buffer to avoid heap allocation, then create string once
 std::string Helpers::itoa(int16_t value) {
-    std::string buf;
-    buf.reserve(25); // Pre-allocate enough space.
-    int quotient = value;
+    // int16_t max: -32768 to 32767 = max 6 chars + null
+    char   buf[8];
+    char * p = buf + sizeof(buf) - 1;
+    *p       = '\0';
 
+    bool    negative = value < 0;
+    int32_t abs_val  = negative ? -(int32_t)value : value; // cast to int32 to handle -32768
+
+    // Build string in reverse
     do {
-        buf += "0123456789abcdef"[std::abs(quotient % 10)];
-        quotient /= 10;
-    } while (quotient);
+        *--p = '0' + (abs_val % 10);
+        abs_val /= 10;
+    } while (abs_val > 0);
 
-    // Append the negative sign
-    if (value < 0)
-        buf += '-';
+    if (negative) {
+        *--p = '-';
+    }
 
-    std::reverse(buf.begin(), buf.end());
-    return buf;
+    return std::string(p);
 }
 
 /*
- * fast itoa
- * written by Lukás Chmela, Released under GPLv3. http://www.strudel.org.uk/itoa/ version 0.4
- * optimized for ESP32
- */
+  * fast itoa
+  * written by Lukás Chmela, Released under GPLv3. http://www.strudel.org.uk/itoa/ version 0.4
+  * optimized for ESP32
+  */
 char * Helpers::itoa(int32_t value, char * result, const uint8_t base) {
     // check that the base if valid
     if (base < 2 || base > 36) {
@@ -470,25 +489,26 @@ char * Helpers::utf8tolatin1(char * result, const char * c, const uint8_t len) {
     *p = '\0'; // terminate result
     return result;
 }
-
 // creates string of hex values from an array of bytes
 std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
     if (length == 0) {
         return "<empty>";
     }
 
-    std::string str;
-    str.reserve(length * 3 + 1);
+    std::vector<char> str(length * 3);
+    memset(str.data(), 0, str.size());
 
-    char buffer[4];
+    char   buffer[4];
+    char * p = str.data();
     for (uint8_t i = 0; i < length; i++) {
-        str.append(Helpers::hextoa(buffer, data[i]));
-        str.push_back(' ');
+        Helpers::hextoa(buffer, data[i]);
+        *p++ = buffer[0];
+        *p++ = buffer[1];
+        *p++ = ' '; // space
     }
-    if (!str.empty()) {
-        str.pop_back();
-    }
-    return str;
+    *--p = '\0'; // null terminate just in case, loosing the trailing space
+
+    return std::string(str.data());
 }
 
 // takes a hex string and convert it to an unsigned 32bit number (max 8 hex digits)

@@ -34,6 +34,7 @@
     "sdkconfig.*",
     "managed_components/**",
     "pnpm-*.yaml",
-    "vite.config.ts"
+    "vite.config.ts",
+    "lib/esp32-psram/**"
   ]
   }

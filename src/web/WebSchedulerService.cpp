@@ -275,8 +275,10 @@ void WebSchedulerService::publish(const bool force) {
                 config["cmd_t"] = command_topic;
 
                 Mqtt::add_ha_bool(config.as<JsonObject>());
-                Mqtt::add_ha_dev_section(config.as<JsonObject>(), F_(scheduler), nullptr, nullptr, nullptr, false);
-                Mqtt::add_ha_avail_section(config.as<JsonObject>(), stat_t, !ha_created, val_cond);
+                if (!ha_created) {
+                    Mqtt::add_ha_dev_section(config.as<JsonObject>(), F_(scheduler), nullptr, nullptr, nullptr, false);
+                }
+                Mqtt::add_ha_avty_section(config.as<JsonObject>(), stat_t, val_cond);
 
                 ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
             }
