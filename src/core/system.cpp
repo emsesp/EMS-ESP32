@@ -1751,7 +1751,18 @@ std::string System::get_metrics_prometheus() {
                     // collect string for info metric (skip dynamic strings like uptime and timestamp)
                     std::string val = p.value().as<const char *>();
                     if (!val.empty() && key != "uptime" && key != "timestamp") {
-                        local_info_labels.push_back({to_lowercase(key), val});
+                        std::string lower_key = to_lowercase(key);
+                        // check if key already exists in local_info_labels
+                        bool key_exists = false;
+                        for (const auto & label : local_info_labels) {
+                            if (label.first == lower_key) {
+                                key_exists = true;
+                                break;
+                            }
+                        }
+                        if (!key_exists) {
+                            local_info_labels.push_back({lower_key, val});
+                        }
                     }
                 }
             }
