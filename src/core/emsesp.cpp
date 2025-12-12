@@ -29,13 +29,8 @@ static_assert(uuid::console::thread_safe, "uuid-console must be thread-safe");
 namespace emsesp {
 
 // Static member definitions
-#ifndef EMSESP_STANDALONE
 std::vector<std::unique_ptr<EMSdevice>, AllocatorPSRAM<std::unique_ptr<EMSdevice>>> EMSESP::emsdevices{};
 std::vector<EMSESP::Device_record, AllocatorPSRAM<EMSESP::Device_record>>           EMSESP::device_library_;
-#else
-std::vector<std::unique_ptr<EMSdevice>> EMSESP::emsdevices{};
-std::vector<EMSESP::Device_record>      EMSESP::device_library_;
-#endif
 
 uuid::log::Logger EMSESP::logger_{F_(emsesp), uuid::log::Facility::KERN};
 uint16_t          EMSESP::watch_id_         = WATCH_ID_NONE;
