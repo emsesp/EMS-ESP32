@@ -1713,7 +1713,7 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
             continue;
         }
         // only count supported types
-        if (is_supported_type(dv.type)) {
+        if (dv.hasValue() && is_supported_type(dv.type)) {
             entity_count++;
         }
     }
@@ -1725,7 +1725,7 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
         }
 
         // only process number, boolean and enum types
-        if (!is_supported_type(dv.type)) {
+        if (!dv.hasValue() || !is_supported_type(dv.type)) {
             continue;
         }
 
