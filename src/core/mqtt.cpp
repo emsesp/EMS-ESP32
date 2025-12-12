@@ -58,8 +58,6 @@ uint8_t  Mqtt::connectcount_       = 0;
 uint32_t Mqtt::mqtt_message_id_    = 0;
 char     will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
 
-std::string Mqtt::lasttopic_    = "";
-std::string Mqtt::lastpayload_  = "";
 std::string Mqtt::lastresponse_ = "";
 
 // Home Assistant specific
@@ -241,12 +239,6 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) {
             queue_publish_message(topic, "", true);
             LOG_DEBUG("Remove topic %s", topic);
         }
-        return;
-    }
-
-    // for misconfigured mqtt servers and publish2command ignore echos
-    if (publish_single_ && publish_single2cmd_ && lasttopic_ == topic && lastpayload_ == message) {
-        LOG_DEBUG("Received echo message %s: %s", topic, message);
         return;
     }
 
