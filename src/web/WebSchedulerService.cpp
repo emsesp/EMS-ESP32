@@ -64,7 +64,7 @@ void WebScheduler::read(WebScheduler & webScheduler, JsonObject root) {
         si["time"]    = scheduleItem.flags != SCHEDULEFLAG_SCHEDULE_IMMEDIATE ? scheduleItem.time : "";
         si["cmd"]     = scheduleItem.cmd;
         si["value"]   = scheduleItem.value;
-        si["name"]    = scheduleItem.name;
+        si["name"]    = (const char *)scheduleItem.name;
     }
 }
 
@@ -264,7 +264,7 @@ void WebSchedulerService::publish(const bool force) {
                 snprintf(uniq_s, sizeof(uniq_s), "%s_%s", F_(scheduler), scheduleItem.name);
 
                 config["uniq_id"]    = uniq_s;
-                config["name"]       = scheduleItem.name;
+                config["name"]       = (const char *)scheduleItem.name;
                 config["def_ent_id"] = std::string("switch.") + uniq_s;
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
