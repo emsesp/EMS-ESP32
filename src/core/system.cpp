@@ -1568,6 +1568,8 @@ std::string System::get_metrics_prometheus() {
     std::string                           result;
     std::unordered_map<std::string, bool> seen_metrics;
 
+    result.reserve(16000);
+
     // get system data
     JsonDocument doc;
     JsonObject   root = doc.to<JsonObject>();
@@ -1796,6 +1798,8 @@ std::string System::get_metrics_prometheus() {
 
     // process root object
     process_object(root, "");
+
+    result.shrink_to_fit();
 
     return result;
 }

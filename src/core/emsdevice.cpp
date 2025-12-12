@@ -1699,15 +1699,33 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
     std::string                           result;
     std::unordered_map<std::string, bool> seen_metrics;
 
+    // Helper function to check if a device value type is supported for Prometheus metrics
+    auto is_supported_type = [](uint8_t type) -> bool {
+        return type == DeviceValueType::BOOL || type == DeviceValueType::UINT8 || type == DeviceValueType::INT8
+            || type == DeviceValueType::UINT16 || type == DeviceValueType::INT16 || type == DeviceValueType::UINT24
+            || type == DeviceValueType::UINT32 || type == DeviceValueType::TIME || type == DeviceValueType::ENUM;
+    };
+
+    // Dynamically reserve memory for the result
+    size_t entity_count = 0;
+    for (const auto & dv : devicevalues_) {
+        if (tag >= 0 && tag != dv.tag) {
+            continue;
+        }
+        // only count supported types
+        if (is_supported_type(dv.type)) {
+            entity_count++;
+        }
+    }
+    result.reserve(160 * entity_count);
+
     for (auto & dv : devicevalues_) {
         if (tag >= 0 && tag != dv.tag) {
             continue;
         }
 
         // only process number, boolean and enum types
-        if (dv.type != DeviceValueType::BOOL && dv.type != DeviceValueType::UINT8 && dv.type != DeviceValueType::INT8 && dv.type != DeviceValueType::UINT16
-            && dv.type != DeviceValueType::INT16 && dv.type != DeviceValueType::UINT24 && dv.type != DeviceValueType::UINT32 && dv.type != DeviceValueType::TIME
-            && dv.type != DeviceValueType::ENUM) {
+        if (!is_supported_type(dv.type)) {
             continue;
         }
 
@@ -1883,6 +1901,8 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
         result += val_str;
         result += "\n";
     }
+
+    result.shrink_to_fit();
 
     return result;
 }
