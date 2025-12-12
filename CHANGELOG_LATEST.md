@@ -38,6 +38,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - added LWT (Last Will and Testament) to MQTT entities in Home Assistant
 - added api/metrics endpoint for prometheus integration by @gr3enk
  [#2774](https://github.com/emsesp/EMS-ESP32/pull/2774)
+- add RTL8201 to eth phy list [#2800](https://github.com/emsesp/EMS-ESP32/issues/2800)
 
 ## Fixed
 
@@ -77,3 +78,6 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - entities with no values are greyed out in the Web UI in the Customization page
 - added System Status to Web Status page
 - show number on entities and supported languages in log on boot
+- on tx read fail delay the 3rd. retry 2 sec
+- move vectors and lists to PSRAM
+-remove unused last topic/payload echo-check
