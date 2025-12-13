@@ -2041,24 +2041,40 @@ bool EMSdevice::generate_values(JsonObject output, const int8_t tag_filter, cons
 // create the Home Assistant configs for each device value / entity
 // this is called when an MQTT publish is done via an EMS Device in emsesp.cpp::publish_device_values()
 void EMSdevice::mqtt_ha_entity_config_create() {
-    bool     create_device_config = !ha_config_done(); // do we need to create the main Discovery device config with this entity?
-    uint16_t count                = 0;
+    bool                  create_device_config = !ha_config_done(); // do we need to create the main Discovery device config with this entity?
+    uint16_t              count                = 0;
+    const char * const ** mode_options         = nullptr;
+
+    // if it's a thermostat go fetch the list of modes
+    if (device_type() == EMSdevice::DeviceType::THERMOSTAT) {
+        for (auto & dv : devicevalues_) {
+            // make sure it's a type DeviceValueType::ENUM
+            if ((dv.type == DeviceValueType::ENUM) && !strcmp(dv.short_name, FL_(mode)[0])) {
+                // get options
+                mode_options = dv.options;
+                break;
+            }
+        }
+    }
 
     // check the state of each of the device values
     // create the discovery topic if if hasn't already been created, not a command (like reset) and is active and visible
     for (auto & dv : devicevalues_) {
         // create climate when we reach the haclimate entity
         if (!strcmp(dv.short_name, FL_(haclimate)[0]) && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE) && dv.has_state(DeviceValueState::DV_ACTIVE)) {
-            if (*(int8_t *)(dv.value_p) == 1 && (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) || dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT))) {
-                if (Mqtt::publish_ha_climate_config(dv, true, false)) { // roomTemp
-                    dv.remove_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
-                    dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
-                    count++;
-                }
-            } else if (*(int8_t *)(dv.value_p) == 0
-                       && (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) || !dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT))) {
-                if (Mqtt::publish_ha_climate_config(dv, false, false)) { // no roomTemp
-                    dv.add_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
+            int8_t haclimate_value    = *(int8_t *)(dv.value_p);
+            bool   has_config_created = dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED);
+            bool   has_climate_no_rt  = dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
+            bool   needs_update       = !has_config_created || (haclimate_value == 1 ? has_climate_no_rt : !has_climate_no_rt);
+
+            if (needs_update) {
+                bool has_room_temp = (haclimate_value == 1);
+                if (Mqtt::publish_ha_climate_config(dv, has_room_temp, mode_options, false)) {
+                    if (has_room_temp) {
+                        dv.remove_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
+                    } else {
+                        dv.add_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
+                    }
                     dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
                     count++;
                 }
@@ -2075,7 +2091,7 @@ void EMSdevice::mqtt_ha_entity_config_create() {
             }
             // SRC thermostats mapped to connect/src1/...
             if (dv.tag >= DeviceValueTAG::TAG_SRC1 && dv.tag <= DeviceValueTAG::TAG_SRC16 && !strcmp(dv.short_name, FL_(selRoomTemp)[0])) {
-                Mqtt::publish_ha_climate_config(dv, true, false);
+                Mqtt::publish_ha_climate_config(dv, true, mode_options, false);
             }
 
 #ifndef EMSESP_STANDALONE
