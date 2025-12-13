@@ -1792,6 +1792,7 @@ std::string System::get_metrics_prometheus() {
 // return IP or hostname of the EMS-ESP device
 String System::get_ip_or_hostname() {
     String result = "ems-esp";
+#ifndef EMSESP_STANDALONE
     EMSESP::esp32React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
         if (settings.enableMDNS) {
             if (EMSESP::system_.ethernet_connected()) {
@@ -1808,6 +1809,7 @@ String System::get_ip_or_hostname() {
             }
         }
     });
+#endif
     return result;
 }
 
