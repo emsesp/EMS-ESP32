@@ -331,7 +331,7 @@ const pl: BaseTranslation = {
   SERVICES: 'Usługi',
   ALLVALUES: 'Wszystkie wartości',
   SPECIAL_FUNCTIONS: 'Specjalne funkcje',
-  WAIT_FIRMWARE: 'Firma jest wysyłana i instaluje się',
+  WAIT_FIRMWARE: 'Firmware się ściąga i instaluje',
   INSTALL_VERSION: 'To zainstaluje wersję {1} {0}. Jesteś pewny?',
   UPDATE_AVAILABLE: 'aktualizacja dostępna',
   LATEST_VERSION: 'Jesteś używając najnowszej wersji firmware {0}',
