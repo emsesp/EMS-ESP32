@@ -104,14 +104,14 @@ class AnalogSensor {
         uint32_t last_polltime_ = 0; // for timer
 
       private:
-        uint8_t  gpio_;
-        char     name_[20];
-        double   offset_;
-        double   factor_;
-        uint8_t  uom_;
-        double   value_;     // double because of the factor is a double
-        int8_t   type_;      // one of the AnalogType enum
-        bool     is_system_; // if true, the sensor is a system sensor
+        uint8_t gpio_;
+        char    name_[20];
+        double  offset_;
+        double  factor_;
+        uint8_t uom_;
+        double  value_;     // double because of the factor is a double
+        int8_t  type_;      // one of the AnalogType enum
+        bool    is_system_; // if true, the sensor is a system sensor
     };
 
     AnalogSensor()  = default;
