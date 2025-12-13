@@ -1635,7 +1635,7 @@ std::string System::get_metrics_prometheus() {
     };
 
     // helper function to process a JSON object recursively
-    std::function<void(const JsonObject &, const std::string &)> process_object = [&](const JsonObject & obj, const std::string & prefix) {
+    std::function<void(const JsonObject, const std::string &)> process_object = [&](const JsonObject obj, const std::string & prefix) {
         std::vector<std::pair<std::string, std::string>> local_info_labels;
         bool                                             has_nested_objects = false;
 
