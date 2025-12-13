@@ -48,7 +48,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.28.5",
-    "@eslint/js": "^9.39.1",
+    "@eslint/js": "^9.39.2",
     "@preact/compat": "^18.3.1",
     "@preact/preset-vite": "^2.10.2",
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",
@@ -57,7 +57,7 @@
     "@types/react-dom": "^19.2.3",
     "axe-core": "^4.11.0",
     "concurrently": "^9.2.1",
-    "eslint": "^9.39.1",
+    "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.7.4",
     "rollup-plugin-visualizer": "^6.0.5",
