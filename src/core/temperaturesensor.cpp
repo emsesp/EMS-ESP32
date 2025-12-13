@@ -545,7 +545,7 @@ void TemperatureSensor::publish_values(const bool force) {
 
                 // see if we need to create the [devs] discovery section, as this needs only to be done once for all sensors
                 if (std::none_of(sensors_.begin(), sensors_.end(), [](const auto & sensor) { return sensor.ha_registered; })) {
-                    Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Temperature Sensors", nullptr, nullptr, nullptr, false);
+                    Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Temperature Sensors", nullptr, "EMS-ESP", EMSESP_APP_VERSION, true);
                 }
 
                 Mqtt::add_ha_avty_section(config.as<JsonObject>(), stat_t, val_cond);

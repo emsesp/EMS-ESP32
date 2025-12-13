@@ -276,7 +276,7 @@ void WebSchedulerService::publish(const bool force) {
 
                 Mqtt::add_ha_bool(config.as<JsonObject>());
                 if (!ha_created) {
-                    Mqtt::add_ha_dev_section(config.as<JsonObject>(), F_(scheduler), nullptr, nullptr, nullptr, false);
+                    Mqtt::add_ha_dev_section(config.as<JsonObject>(), F_(scheduler), nullptr, "EMS-ESP", EMSESP_APP_VERSION, true);
                 }
                 Mqtt::add_ha_avty_section(config.as<JsonObject>(), stat_t, val_cond);
 
