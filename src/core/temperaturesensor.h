@@ -82,7 +82,7 @@ class TemperatureSensor {
         char     name_[20];
         int16_t  offset_;
 
-        bool     is_system_;
+        bool is_system_;
     };
 
     TemperatureSensor()  = default;
@@ -124,7 +124,7 @@ class TemperatureSensor {
         return sensors_.size();
     }
 
-    bool update(const char* id, const char* name, int16_t offset, bool hide = false, bool is_system = false);
+    bool update(const char * id, const char * name, int16_t offset, bool hide = false, bool is_system = false);
 
 #if defined(EMSESP_TEST)
     void load_test_data();
@@ -166,7 +166,7 @@ class TemperatureSensor {
     int16_t  get_temperature_c(const uint8_t addr[]);
     uint64_t get_id(const uint8_t addr[]);
     void     get_value_json(JsonObject output, const Sensor & sensor);
-    void     remove_ha_topic(const char* id);
+    void     remove_ha_topic(const char * id);
 
     std::vector<Sensor, AllocatorPSRAM<Sensor>> sensors_; // our list of active sensors
 

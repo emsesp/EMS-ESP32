@@ -138,6 +138,7 @@ DEPFLAGS   += -MF $(BUILD)/$*.d -MT $@
 LINK.o      = $(LD) $(LDFLAGS) $(LDLIBS) $^ -o $@
 COMPILE.c   = $(CC) $(C_STANDARD) $(CFLAGS) $(DEPFLAGS) -c $< -o $@
 COMPILE.cpp = $(CXX) $(CXX_STANDARD) $(CXXFLAGS) $(DEPFLAGS) -c $< -o $@
+COMPILE.s   = $(CC) $(CFLAGS) $(DEPFLAGS) -c $< -o $@
 
 #----------------------------------------------------------------------
 # Special Built-in Target
@@ -181,6 +182,7 @@ $(BUILD)/%.o: %.cpp
 
 $(BUILD)/%.o: %.s
 	@mkdir -p $(@D)
+	@$(ECHO) Compiling $@
 	@$(COMPILE.s)
 
 cppcheck: $(SOURCES)
