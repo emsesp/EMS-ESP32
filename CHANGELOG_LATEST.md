@@ -14,7 +14,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - CS6800i changes [#2448](https://github.com/emsesp/EMS-ESP32/issues/2448), [#2449](https://github.com/emsesp/EMS-ESP32/issues/2449)
 - charging pump [#2544](https://github.com/emsesp/EMS-ESP32/issues/2544)
 - hybrid CSH5800iG [#2569](https://github.com/emsesp/EMS-ESP32/issues/2569)
-- add EMS Device details to Home Assistant MQTT Discovery
+- added EMS Device details to Home Assistant MQTT Discovery
 - disinfection command [#2601](https://github.com/emsesp/EMS-ESP32/issues/2601)
 - added new board profile for upcoming BBQKees E32V2.2
 - set differential pressure entity in Mixer device
@@ -34,11 +34,10 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - pid settings [#2735](https://github.com/emsesp/EMS-ESP32/issues/2735)
 - refresh MQTT button added to MQTT Settings page
 - heating assistance, rounding custum settings [#2763](https://github.com/emsesp/EMS-ESP32/discussions/2763)
-- add counter 0..2 for short pulses, high frequency [#2758](https://github.com/emsesp/EMS-ESP32/issues/2758)
+- added counter 0..2 for short pulses, high frequency [#2758](https://github.com/emsesp/EMS-ESP32/issues/2758)
 - added LWT (Last Will and Testament) to MQTT entities in Home Assistant
-- added api/metrics endpoint for prometheus integration by @gr3enk
- [#2774](https://github.com/emsesp/EMS-ESP32/pull/2774)
-- add RTL8201 to eth phy list [#2800](https://github.com/emsesp/EMS-ESP32/issues/2800)
+- added api/metrics endpoint for prometheus integration by @gr3enk [#2774](https://github.com/emsesp/EMS-ESP32/pull/2774)
+- added RTL8201 to eth phy list [#2800](https://github.com/emsesp/EMS-ESP32/issues/2800)
 
 ## Fixed
 
@@ -64,7 +63,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 ## Changed
 
 - show console log with ISO date/time [#2533](https://github.com/emsesp/EMS-ESP32/discussions/2533)
-- remove ESP32 CPU temperature
+- removed ESP32 CPU temperature
 - updated core libraries like AsyncTCP, AsyncWebServer and Modbus
 - remove command `scan deep`
 - ignore repeated `forceheatingoff` commands [#2641](https://github.com/emsesp/EMS-ESP32/discussions/2641)
@@ -80,4 +79,5 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - show number on entities and supported languages in log on boot
 - on tx read fail delay the 3rd. retry 2 sec
 - move vectors and lists to PSRAM
--remove unused last topic/payload echo-check
+- removed unused last topic/payload echo-check
+- added Home Assistant device details to MQTT Discovery for all devices

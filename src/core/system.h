@@ -92,8 +92,8 @@ class System {
     static bool command_response(const char * value, const int8_t id, JsonObject output);
     static bool command_service(const char * cmd, const char * value);
 
-    static bool get_value_info(JsonObject root, const char * cmd);
-    static void get_value_json(JsonObject output, const std::string & circuit, const std::string & name, JsonVariant val);
+    static bool        get_value_info(JsonObject root, const char * cmd);
+    static void        get_value_json(JsonObject output, const std::string & circuit, const std::string & name, JsonVariant val);
     static std::string get_metrics_prometheus();
 
 #if defined(EMSESP_TEST)
@@ -150,6 +150,8 @@ class System {
     static bool                 load_board_profile(std::vector<int8_t> & data, const std::string & board_profile);
 
     static bool readCommand(const char * data);
+
+    static String get_ip_or_hostname();
 
     void dallas_gpio(uint8_t gpio) {
         dallas_gpio_ = gpio;

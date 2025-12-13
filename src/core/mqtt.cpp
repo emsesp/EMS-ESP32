@@ -546,7 +546,7 @@ void Mqtt::ha_status() {
     dev["mf"]      = "EMS-ESP";
     dev["mdl"]     = "EMS-ESP";
 #ifndef EMSESP_STANDALONE
-    dev["cu"] = "http://" + (EMSESP::system_.ethernet_connected() ? ETH.localIP().toString() : WiFi.localIP().toString());
+    dev["cu"] = std::string("http://") + EMSESP::system_.get_ip_or_hostname().c_str();
 #endif
     JsonArray ids = dev["ids"].to<JsonArray>();
     ids.add(Mqtt::basename());
@@ -1103,6 +1103,12 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // https://github.com/emsesp/EMS-ESP32/discussions/1459#discussioncomment-7694873
     add_ha_classes(doc.as<JsonObject>(), device_type, type, uom, entity);
 
+    // add origin
+    JsonObject origin_json = doc["o"].to<JsonObject>();
+    origin_json["name"]    = "EMS-ESP";
+    origin_json["sw"]      = EMSESP_APP_VERSION;
+    origin_json["url"]     = "https://emsesp.org";
+
     // add dev section
     if (device_type == EMSdevice::DeviceType::SYSTEM) {
         add_ha_dev_section(doc.as<JsonObject>(), nullptr, nullptr, nullptr, nullptr, false);
@@ -1236,7 +1242,12 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
     }
 }
 
-bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, const bool remove, const int16_t min, const uint32_t max) {
+// publish the HA climate config
+// https://www.home-assistant.io/integrations/climate.mqtt/
+bool Mqtt::publish_ha_climate_config(const DeviceValue & dv, const bool has_roomtemp, const char * const ** mode_options, const bool remove) {
+    int8_t        tag         = dv.tag;
+    int16_t       min         = dv.min;
+    uint32_t      max         = dv.max;
     uint8_t       hc_num      = tag < DeviceValueTAG::TAG_SRC1 ? tag : tag - DeviceValueTAG::TAG_SRC1 + 1;
     const char *  tagname     = tag < DeviceValueTAG::TAG_SRC1 ? "hc" : "src";
     const uint8_t device_type = tag < DeviceValueTAG::TAG_SRC1 ? EMSdevice::DeviceType::THERMOSTAT : EMSdevice::DeviceType::CONNECT;
@@ -1353,12 +1364,45 @@ bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, 
     doc["act_t"]   = "~/boiler_data";
     doc["act_tpl"] = "{% if value_json.hpactivity=='cooling'%}cooling{%elif value_json.heatingactive=='on'%}heating{%else%}idle{%endif%}";
 
-    // the HA climate component only responds to auto, heat and off
-    JsonArray modes = doc["modes"].to<JsonArray>();
+    // map EMS modes to HA climate modes
+    // EMS modes: auto, manual, heat, off, night, day, nofrost, eco, comfort, cool)
+    // HA supports: auto, off, cool, heat, dry, fan_only
+    if (mode_options != nullptr) {
+        // scan through mode_options and add to modes
+        bool found_auto = false;
+        bool found_heat = false;
+        bool found_off  = false;
+        bool found_cool = false;
+        for (uint8_t i = 0; i < Helpers::count_items(mode_options); i++) {
+            const char * mode = mode_options[i][0]; // take EN
+            if (!strcmp(mode, FL_(auto)[0])) {
+                found_auto = true;
+            } else if (!strcmp(mode, FL_(heat)[0])) {
+                found_heat = true;
+            } else if (!strcmp(mode, FL_(off)[0])) {
+                found_off = true;
+            } else if (!strcmp(mode, FL_(cool)[0])) {
+                found_cool = true;
+            }
+        }
 
-    modes.add("auto");
-    modes.add("heat");
-    modes.add("off");
+        // only add modes if we found at least one
+        if (found_auto || found_heat || found_off || found_cool) {
+            JsonArray modes = doc["modes"].to<JsonArray>();
+            if (found_auto) {
+                modes.add("auto");
+            }
+            if (found_heat) {
+                modes.add("heat");
+            }
+            if (found_off) {
+                modes.add("off");
+            }
+            if (found_cool) {
+                modes.add("cool");
+            }
+        }
+    }
 
     add_ha_dev_section(doc.as<JsonObject>(), devicename, nullptr, nullptr, nullptr, false);                                 // add dev section
     add_ha_avty_section(doc.as<JsonObject>(), topic_t, seltemp_cond, has_roomtemp ? currtemp_cond : nullptr, hc_mode_cond); // add availability section

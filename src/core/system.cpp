@@ -1804,6 +1804,30 @@ std::string System::get_metrics_prometheus() {
     return result;
 }
 
+// return IP or hostname of the EMS-ESP device
+String System::get_ip_or_hostname() {
+    String result = "ems-esp";
+#ifndef EMSESP_STANDALONE
+    EMSESP::esp32React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
+        if (settings.enableMDNS) {
+            if (EMSESP::system_.ethernet_connected()) {
+                result = ETH.getHostname();
+            } else if (WiFi.status() == WL_CONNECTED) {
+                result = WiFi.getHostname();
+            }
+        } else {
+            // no DNS, use the IP
+            if (EMSESP::system_.ethernet_connected()) {
+                result = ETH.localIP().toString();
+            } else if (WiFi.status() == WL_CONNECTED) {
+                result = WiFi.localIP().toString();
+            }
+        }
+    });
+#endif
+    return result;
+}
+
 // export status information including the device information
 // http://ems-esp/api/system/info
 bool System::command_info(const char * value, const int8_t id, JsonObject output) {
@@ -2371,7 +2395,6 @@ String System::getBBQKeesGatewayDetails(uint8_t detail) {
 // This is to avoid timeouts in callback functions, like calling from a web hook.
 bool System::uploadFirmwareURL(const char * url) {
 #ifndef EMSESP_STANDALONE
-
     static String saved_url;
 
     if (url && strlen(url) > 0) {
