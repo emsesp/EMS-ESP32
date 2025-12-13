@@ -37,7 +37,7 @@
 #include <uuid/log.h>
 #include <PButton.h>
 
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if CONFIG_IDF_TARGET_ESP32
 // there is no official API available on the original ESP32
 extern "C" {
 uint8_t temprature_sens_read();
