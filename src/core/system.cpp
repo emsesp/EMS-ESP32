@@ -1568,6 +1568,8 @@ std::string System::get_metrics_prometheus() {
     std::string                           result;
     std::unordered_map<std::string, bool> seen_metrics;
 
+    result.reserve(16000);
+
     // get system data
     JsonDocument doc;
     JsonObject   root = doc.to<JsonObject>();
@@ -1633,7 +1635,7 @@ std::string System::get_metrics_prometheus() {
     };
 
     // helper function to process a JSON object recursively
-    std::function<void(const JsonObject &, const std::string &)> process_object = [&](const JsonObject & obj, const std::string & prefix) {
+    std::function<void(const JsonObject, const std::string &)> process_object = [&](const JsonObject obj, const std::string & prefix) {
         std::vector<std::pair<std::string, std::string>> local_info_labels;
         bool                                             has_nested_objects = false;
 
@@ -1751,7 +1753,18 @@ std::string System::get_metrics_prometheus() {
                     // collect string for info metric (skip dynamic strings like uptime and timestamp)
                     std::string val = p.value().as<const char *>();
                     if (!val.empty() && key != "uptime" && key != "timestamp") {
-                        local_info_labels.push_back({to_lowercase(key), val});
+                        std::string lower_key = to_lowercase(key);
+                        // check if key already exists in local_info_labels
+                        bool key_exists = false;
+                        for (const auto & label : local_info_labels) {
+                            if (label.first == lower_key) {
+                                key_exists = true;
+                                break;
+                            }
+                        }
+                        if (!key_exists) {
+                            local_info_labels.push_back({lower_key, val});
+                        }
                     }
                 }
             }
@@ -1785,6 +1798,8 @@ std::string System::get_metrics_prometheus() {
 
     // process root object
     process_object(root, "");
+
+    result.shrink_to_fit();
 
     return result;
 }

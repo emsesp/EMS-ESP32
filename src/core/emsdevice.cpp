@@ -1699,14 +1699,33 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
     std::string                           result;
     std::unordered_map<std::string, bool> seen_metrics;
 
+    // Helper function to check if a device value type is supported for Prometheus metrics
+    auto is_supported_type = [](uint8_t type) -> bool {
+        return type == DeviceValueType::BOOL || type == DeviceValueType::UINT8 || type == DeviceValueType::INT8
+            || type == DeviceValueType::UINT16 || type == DeviceValueType::INT16 || type == DeviceValueType::UINT24
+            || type == DeviceValueType::UINT32 || type == DeviceValueType::TIME || type == DeviceValueType::ENUM;
+    };
+
+    // Dynamically reserve memory for the result
+    size_t entity_count = 0;
+    for (const auto & dv : devicevalues_) {
+        if (tag >= 0 && tag != dv.tag) {
+            continue;
+        }
+        // only count supported types
+        if (dv.hasValue() && is_supported_type(dv.type)) {
+            entity_count++;
+        }
+    }
+    result.reserve(160 * entity_count);
+
     for (auto & dv : devicevalues_) {
         if (tag >= 0 && tag != dv.tag) {
             continue;
         }
 
-        // only process number and boolean types for now
-        if (dv.type != DeviceValueType::BOOL && dv.type != DeviceValueType::UINT8 && dv.type != DeviceValueType::INT8 && dv.type != DeviceValueType::UINT16
-            && dv.type != DeviceValueType::INT16 && dv.type != DeviceValueType::UINT24 && dv.type != DeviceValueType::UINT32 && dv.type != DeviceValueType::TIME) {
+        // only process number, boolean and enum types
+        if (!dv.hasValue() || !is_supported_type(dv.type)) {
             continue;
         }
 
@@ -1752,6 +1771,12 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
                 metric_value = *(uint32_t *)(dv.value_p);
             }
             break;
+        case DeviceValueType::ENUM:
+            if (*(uint8_t *)(dv.value_p) < dv.options_size) {
+                has_value    = true;
+                metric_value = *(uint8_t *)(dv.value_p);
+            }
+            break;
         default:
             break;
         }
@@ -1794,8 +1819,19 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
         }
 
         std::string uom_str;
+        std::string enum_mapping;
         if (dv.type == DeviceValueType::BOOL) {
             uom_str = "boolean";
+        } else if (dv.type == DeviceValueType::ENUM) {
+            // build enum mapping string: "(0: Wert1; 1: Wert2; ...)"
+            enum_mapping = "(";
+            for (uint8_t i = 0; i < dv.options_size; i++) {
+                if (i > 0) {
+                    enum_mapping += "; ";
+                }
+                enum_mapping += std::to_string(i) + ": " + std::string(Helpers::translated_word(dv.options[i]));
+            }
+            enum_mapping += ")";
         } else if (dv.uom != DeviceValueUOM::NONE) {
             uom_str = uom_to_string(dv.uom);
         }
@@ -1803,6 +1839,9 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
         std::string help_line = help_text;
         if (!uom_str.empty()) {
             help_line += ", " + uom_str;
+        }
+        if (!enum_mapping.empty()) {
+            help_line += ", enum, " + enum_mapping;
         }
 
         bool readable  = dv.type != DeviceValueType::CMD && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE);
@@ -1854,7 +1893,7 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
         }
 
         double rounded = (final_value >= 0) ? (double)((int64_t)(final_value + 0.5)) : (double)((int64_t)(final_value - 0.5));
-        if (dv.type == DeviceValueType::BOOL || (final_value == rounded)) {
+        if (dv.type == DeviceValueType::BOOL || dv.type == DeviceValueType::ENUM || (final_value == rounded)) {
             snprintf(val_str, sizeof(val_str), "%.0f", final_value);
         } else {
             snprintf(val_str, sizeof(val_str), "%.2f", final_value);
@@ -1862,6 +1901,8 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
         result += val_str;
         result += "\n";
     }
+
+    result.shrink_to_fit();
 
     return result;
 }
