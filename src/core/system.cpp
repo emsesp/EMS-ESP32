@@ -1015,6 +1015,22 @@ void System::show_users(uuid::console::Shell & shell) {
     shell.println();
 }
 
+// print GPIO available and used pins to console
+void System::show_gpio(uuid::console::Shell & shell) {
+    shell.printfln("GPIO:");
+    shell.printf(" In use (%d):", used_gpios_.size());
+    for (const auto & gpio : used_gpios_) {
+        shell.printf(" %d", gpio);
+    }
+    shell.println();
+    auto available = available_gpios();
+    shell.printf(" Available (%d):", available.size());
+    for (const auto & gpio : available) {
+        shell.printf(" %d", gpio);
+    }
+    shell.println();
+}
+
 // shell command 'show system'
 void System::show_system(uuid::console::Shell & shell) {
     refreshHeapMem(); // refresh free heap and max alloc heap
