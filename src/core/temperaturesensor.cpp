@@ -319,7 +319,7 @@ int16_t TemperatureSensor::get_temperature_c(const uint8_t addr[]) {
 }
 
 // update temperature sensor information name and offset
-bool TemperatureSensor::update(const char * id, const char * name, int16_t offset, bool hide, bool is_system) {
+bool TemperatureSensor::update(const char * id, const char * name, int16_t offset, bool is_system) {
     // find the sensor
     for (auto & sensor : sensors_) {
         if (!strcmp(id, sensor.id())) {
