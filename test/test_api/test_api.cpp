@@ -299,6 +299,10 @@ void manual_test8() {
     TEST_ASSERT_TRUE(strstr(response, "emsesp_") != nullptr);
     TEST_ASSERT_TRUE(strstr(response, " gauge") != nullptr);
 
+    if (strstr(response, ", enum, (") != nullptr) {
+        TEST_ASSERT_TRUE(strstr(response, ", enum, (") != nullptr);
+        TEST_ASSERT_TRUE(strstr(response, ")") != nullptr);
+    }
     TEST_ASSERT_TRUE(strstr(response, "emsesp_tapwateractive") != nullptr || strstr(response, "emsesp_selflowtemp") != nullptr
                      || strstr(response, "emsesp_curflowtemp") != nullptr);
 }
@@ -313,6 +317,10 @@ void manual_test9() {
     TEST_ASSERT_TRUE(strstr(response, "# TYPE") != nullptr);
     TEST_ASSERT_TRUE(strstr(response, "emsesp_") != nullptr);
 
+    if (strstr(response, ", enum, (") != nullptr) {
+        TEST_ASSERT_TRUE(strstr(response, ", enum, (") != nullptr);
+        TEST_ASSERT_TRUE(strstr(response, ")") != nullptr);
+    }
     if (strstr(response, "circuit=") != nullptr) {
         TEST_ASSERT_TRUE(strstr(response, "{circuit=") != nullptr);
     }
@@ -329,6 +337,10 @@ void manual_test10() {
     TEST_ASSERT_TRUE(strstr(response, "emsesp_") != nullptr);
     TEST_ASSERT_TRUE(strstr(response, " gauge") != nullptr);
 
+    if (strstr(response, ", enum, (") != nullptr) {
+        TEST_ASSERT_TRUE(strstr(response, ", enum, (") != nullptr);
+        TEST_ASSERT_TRUE(strstr(response, ")") != nullptr);
+    }
     // Check for some expected system metrics
     TEST_ASSERT_TRUE(strstr(response, "emsesp_system_") != nullptr || strstr(response, "emsesp_network_") != nullptr
                      || strstr(response, "emsesp_api_") != nullptr);
