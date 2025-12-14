@@ -1367,6 +1367,7 @@ bool Mqtt::publish_ha_climate_config(const DeviceValue & dv, const bool has_room
     // map EMS modes to HA climate modes
     // EMS modes: auto, manual, heat, off, night, day, nofrost, eco, comfort, cool)
     // HA supports: auto, off, cool, heat, dry, fan_only
+    // we map day and manual to heat
     if (mode_options != nullptr) {
         // scan through mode_options and add to modes
         bool found_auto = false;
@@ -1377,13 +1378,13 @@ bool Mqtt::publish_ha_climate_config(const DeviceValue & dv, const bool has_room
             const char * mode = mode_options[i][0]; // take EN
             if (!strcmp(mode, FL_(auto)[0])) {
                 found_auto = true;
-            } else if (!strcmp(mode, FL_(heat)[0])) {
+            } else if (!strcmp(mode, FL_(heat)[0]) || !strcmp(mode, FL_(day)[0]) || !strcmp(mode, FL_(manual)[0])) {
                 found_heat = true;
             } else if (!strcmp(mode, FL_(off)[0])) {
                 found_off = true;
             } else if (!strcmp(mode, FL_(cool)[0])) {
                 found_cool = true;
-            }
+            } 
         }
 
         // only add modes if we found at least one
