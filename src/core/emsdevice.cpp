@@ -1701,9 +1701,9 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
 
     // Helper function to check if a device value type is supported for Prometheus metrics
     auto is_supported_type = [](uint8_t type) -> bool {
-        return type == DeviceValueType::BOOL || type == DeviceValueType::UINT8 || type == DeviceValueType::INT8
-            || type == DeviceValueType::UINT16 || type == DeviceValueType::INT16 || type == DeviceValueType::UINT24
-            || type == DeviceValueType::UINT32 || type == DeviceValueType::TIME || type == DeviceValueType::ENUM;
+        return type == DeviceValueType::BOOL || type == DeviceValueType::UINT8 || type == DeviceValueType::INT8 || type == DeviceValueType::UINT16
+               || type == DeviceValueType::INT16 || type == DeviceValueType::UINT24 || type == DeviceValueType::UINT32 || type == DeviceValueType::TIME
+               || type == DeviceValueType::ENUM;
     };
 
     // Dynamically reserve memory for the result
@@ -2086,17 +2086,6 @@ void EMSdevice::mqtt_ha_entity_config_create() {
     uint16_t              count                = 0;
     const char * const ** mode_options         = nullptr;
 
-    // if it's a thermostat go fetch the list of modes
-    if (device_type() == EMSdevice::DeviceType::THERMOSTAT) {
-        for (auto & dv : devicevalues_) {
-            // make sure it's a type DeviceValueType::ENUM
-            if ((dv.type == DeviceValueType::ENUM) && !strcmp(dv.short_name, FL_(mode)[0])) {
-                // get options
-                mode_options = dv.options;
-                break;
-            }
-        }
-    }
 
     // check the state of each of the device values
     // create the discovery topic if if hasn't already been created, not a command (like reset) and is active and visible
@@ -2109,6 +2098,18 @@ void EMSdevice::mqtt_ha_entity_config_create() {
             bool   needs_update       = !has_config_created || (haclimate_value == 1 ? has_climate_no_rt : !has_climate_no_rt);
 
             if (needs_update) {
+                // if it's a thermostat go fetch the list of modes
+                if (device_type() == EMSdevice::DeviceType::THERMOSTAT) {
+                    for (auto & dv : devicevalues_) {
+                        // make sure it's a type DeviceValueType::ENUM
+                        if ((dv.type == DeviceValueType::ENUM) && !strcmp(dv.short_name, FL_(mode)[0])) {
+                            // get options
+                            mode_options = dv.options;
+                            break;
+                        }
+                    }
+                }
+
                 bool has_room_temp = (haclimate_value == 1);
                 if (Mqtt::publish_ha_climate_config(dv, has_room_temp, mode_options, false)) {
                     if (has_room_temp) {
@@ -2130,9 +2131,12 @@ void EMSdevice::mqtt_ha_entity_config_create() {
                 create_device_config = false; // only create the main config once
                 count++;
             }
+
             // SRC thermostats mapped to connect/src1/...
             if (dv.tag >= DeviceValueTAG::TAG_SRC1 && dv.tag <= DeviceValueTAG::TAG_SRC16 && !strcmp(dv.short_name, FL_(selRoomTemp)[0])) {
-                Mqtt::publish_ha_climate_config(dv, true, mode_options, false);
+                // add all modes - auto, heat, off, cool
+                // https://github.com/emsesp/EMS-ESP32/issues/2636
+                Mqtt::publish_ha_climate_config(dv, true, nullptr, false);
             }
 
 #ifndef EMSESP_STANDALONE

@@ -1367,42 +1367,39 @@ bool Mqtt::publish_ha_climate_config(const DeviceValue & dv, const bool has_room
     // map EMS modes to HA climate modes
     // EMS modes: auto, manual, heat, off, night, day, nofrost, eco, comfort, cool)
     // HA supports: auto, off, cool, heat, dry, fan_only
-    // we map day and manual to heat
+    bool found_auto = true;
+    bool found_heat = true;
+    bool found_off  = true;
+    bool found_cool = true;
     if (mode_options != nullptr) {
         // scan through mode_options and add to modes
-        bool found_auto = false;
-        bool found_heat = false;
-        bool found_off  = false;
-        bool found_cool = false;
         for (uint8_t i = 0; i < Helpers::count_items(mode_options); i++) {
             const char * mode = mode_options[i][0]; // take EN
             if (!strcmp(mode, FL_(auto)[0])) {
                 found_auto = true;
             } else if (!strcmp(mode, FL_(heat)[0]) || !strcmp(mode, FL_(day)[0]) || !strcmp(mode, FL_(manual)[0])) {
-                found_heat = true;
+                found_heat = true; // we map day and manual to heat
             } else if (!strcmp(mode, FL_(off)[0])) {
                 found_off = true;
             } else if (!strcmp(mode, FL_(cool)[0])) {
                 found_cool = true;
-            } 
+            }
         }
+    }
 
-        // only add modes if we found at least one
-        if (found_auto || found_heat || found_off || found_cool) {
-            JsonArray modes = doc["modes"].to<JsonArray>();
-            if (found_auto) {
-                modes.add("auto");
-            }
-            if (found_heat) {
-                modes.add("heat");
-            }
-            if (found_off) {
-                modes.add("off");
-            }
-            if (found_cool) {
-                modes.add("cool");
-            }
-        }
+    // only add modes if we found at least one
+    JsonArray modes = doc["modes"].to<JsonArray>();
+    if (found_auto) {
+        modes.add("auto");
+    }
+    if (found_heat) {
+        modes.add("heat");
+    }
+    if (found_off) {
+        modes.add("off");
+    }
+    if (found_cool) {
+        modes.add("cool");
     }
 
     add_ha_dev_section(doc.as<JsonObject>(), devicename, nullptr, nullptr, nullptr, false);                                 // add dev section
