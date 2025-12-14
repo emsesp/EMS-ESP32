@@ -124,7 +124,7 @@ class TemperatureSensor {
         return sensors_.size();
     }
 
-    bool update(const char * id, const char * name, int16_t offset, bool hide = false, bool is_system = false);
+    bool update(const char * id, const char * name, int16_t offset, bool is_system = false);
 
 #if defined(EMSESP_TEST)
     void load_test_data();
