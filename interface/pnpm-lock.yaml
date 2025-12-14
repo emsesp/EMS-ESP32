@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@alova/adapter-xhr':
-        specifier: 2.3.0
-        version: 2.3.0(alova@3.4.0)
+        specifier: 2.3.1
+        version: 2.3.1(alova@3.4.1)
       '@emotion/react':
         specifier: ^11.14.0
         version: 11.14.0(@types/react@19.2.7)(react@19.2.3)
@@ -30,8 +30,8 @@ importers:
         specifier: 4.1.15
         version: 4.1.15(@emotion/react@11.14.0(@types/react@19.2.7)(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       alova:
-        specifier: 3.4.0
-        version: 3.4.0
+        specifier: 3.4.1
+        version: 3.4.1
       async-validator:
         specifier: ^4.2.5
         version: 4.2.5
@@ -83,13 +83,13 @@ importers:
         version: 9.39.2
       '@preact/preset-vite':
         specifier: ^2.10.2
-        version: 2.10.2(@babel/core@7.28.5)(preact@10.28.0)(vite@7.2.7(@types/node@25.0.1)(terser@5.44.1))
+        version: 2.10.2(@babel/core@7.28.5)(preact@10.28.0)(vite@7.2.7(@types/node@25.0.2)(terser@5.44.1))
       '@trivago/prettier-plugin-sort-imports':
         specifier: ^6.0.0
         version: 6.0.0(prettier@3.7.4)
       '@types/node':
-        specifier: ^25.0.1
-        version: 25.0.1
+        specifier: ^25.0.2
+        version: 25.0.2
       '@types/react':
         specifier: ^19.2.7
         version: 19.2.7
@@ -122,23 +122,23 @@ importers:
         version: 8.49.0(eslint@9.39.2)(typescript@5.9.3)
       vite:
         specifier: ^7.2.7
-        version: 7.2.7(@types/node@25.0.1)(terser@5.44.1)
+        version: 7.2.7(@types/node@25.0.2)(terser@5.44.1)
       vite-plugin-imagemin:
         specifier: ^0.6.1
-        version: 0.6.1(vite@7.2.7(@types/node@25.0.1)(terser@5.44.1))
+        version: 0.6.1(vite@7.2.7(@types/node@25.0.2)(terser@5.44.1))
       vite-tsconfig-paths:
         specifier: ^5.1.4
-        version: 5.1.4(typescript@5.9.3)(vite@7.2.7(@types/node@25.0.1)(terser@5.44.1))
+        version: 5.1.4(typescript@5.9.3)(vite@7.2.7(@types/node@25.0.2)(terser@5.44.1))
 
 packages:
 
-  '@alova/adapter-xhr@2.3.0':
-    resolution: {integrity: sha512-IegkchjfXFxXgn6JUZuVEHFQn+jojzrnNdzrGhX5ecEOIC8M/CQvLQzXjLeT6PbGiwnXwvZWL2ya4eqQz51+uQ==}
+  '@alova/adapter-xhr@2.3.1':
+    resolution: {integrity: sha512-mhViueeSJ6yfyEUvHIWyZlb6V8+9GJCzwU1hUsvjXSZHpkzGCeNUefxjjFC++K9UBsvUzJ5KGeyeqoToUQg3gg==}
     peerDependencies:
       alova: ^3.0.20
 
-  '@alova/shared@1.3.1':
-    resolution: {integrity: sha512-ijSOaFLUFcVzMKSY3avoEE5C03/p9atjMDPBwvNkwnzaCrhv6/m4A121NdadF8YlHCRuifyYfz90IyEdMXTsJg==}
+  '@alova/shared@1.3.2':
+    resolution: {integrity: sha512-1XvDLWgYpVZ99MmLl1f3Fw4T6S6pPYk5afz5cwRVjuq8JXEGsDn9IygDKfvRyWqkqCBx7Jif07LIct1O+MVEow==}
 
   '@babel/code-frame@7.27.1':
     resolution: {integrity: sha512-cjQ7ZlQ0Mv3b47hABuTevyTuYN4i+loJKGeV9flcCgIK37cCXRh+L1bd3iBHlynerhQ7BhCkn2BPbQUL+rGqFg==}
@@ -860,8 +860,8 @@ packages:
     resolution: {integrity: sha512-zmPitbQ8+6zNutpwgcQuLcsEpn/Cj54Kbn7L5pX0Os5kdWplB7xPgEh/g+SWOB/qmows2gpuCaPyduq8ZZRnxA==}
     deprecated: This is a stub types definition. minimatch provides its own type definitions, so you do not need this installed.
 
-  '@types/node@25.0.1':
-    resolution: {integrity: sha512-czWPzKIAXucn9PtsttxmumiQ9N0ok9FrBwgRWrwmVLlp86BrMExzvXRLFYRJ+Ex3g6yqj+KuaxfX1JTgV2lpfg==}
+  '@types/node@25.0.2':
+    resolution: {integrity: sha512-gWEkeiyYE4vqjON/+Obqcoeffmk0NF15WSBwSs7zwVA2bAbTaE0SJ7P0WNGoJn8uE7fiaV5a7dKYIJriEqOrmA==}
 
   '@types/parse-json@4.0.2':
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}
@@ -960,8 +960,8 @@ packages:
   ajv@6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
 
-  alova@3.4.0:
-    resolution: {integrity: sha512-/vSvVbA45CHg34Y5erx+wVxy1B/n4UoGX7dKqSpLVz9cDSDSOhqCnRD/dV+AErjMmQeVpJrjmDT7SCkhQbnUeQ==}
+  alova@3.4.1:
+    resolution: {integrity: sha512-xGChKIiCHDqcMglF9RyuWAsk+ltwnja8Dp4MgRIRbUlhOi8XFiQnaoWwIQzJcODKeblmmiFAK7YrYnpskFZWLA==}
     engines: {node: '>= 18.0.0'}
 
   ansi-regex@2.1.1:
@@ -3095,12 +3095,12 @@ packages:
 
 snapshots:
 
-  '@alova/adapter-xhr@2.3.0(alova@3.4.0)':
+  '@alova/adapter-xhr@2.3.1(alova@3.4.1)':
     dependencies:
-      '@alova/shared': 1.3.1
-      alova: 3.4.0
+      '@alova/shared': 1.3.2
+      alova: 3.4.1
 
-  '@alova/shared@1.3.1': {}
+  '@alova/shared@1.3.2': {}
 
   '@babel/code-frame@7.27.1':
     dependencies:
@@ -3595,18 +3595,18 @@ snapshots:
     dependencies:
       preact: 10.28.0
 
-  '@preact/preset-vite@2.10.2(@babel/core@7.28.5)(preact@10.28.0)(vite@7.2.7(@types/node@25.0.1)(terser@5.44.1))':
+  '@preact/preset-vite@2.10.2(@babel/core@7.28.5)(preact@10.28.0)(vite@7.2.7(@types/node@25.0.2)(terser@5.44.1))':
     dependencies:
       '@babel/core': 7.28.5
       '@babel/plugin-transform-react-jsx': 7.27.1(@babel/core@7.28.5)
       '@babel/plugin-transform-react-jsx-development': 7.27.1(@babel/core@7.28.5)
-      '@prefresh/vite': 2.4.11(preact@10.28.0)(vite@7.2.7(@types/node@25.0.1)(terser@5.44.1))
+      '@prefresh/vite': 2.4.11(preact@10.28.0)(vite@7.2.7(@types/node@25.0.2)(terser@5.44.1))
       '@rollup/pluginutils': 4.2.1
       babel-plugin-transform-hook-names: 1.0.2(@babel/core@7.28.5)
       debug: 4.4.3
       picocolors: 1.1.1
-      vite: 7.2.7(@types/node@25.0.1)(terser@5.44.1)
-      vite-prerender-plugin: 0.5.12(vite@7.2.7(@types/node@25.0.1)(terser@5.44.1))
+      vite: 7.2.7(@types/node@25.0.2)(terser@5.44.1)
+      vite-prerender-plugin: 0.5.12(vite@7.2.7(@types/node@25.0.2)(terser@5.44.1))
     transitivePeerDependencies:
       - preact
       - supports-color
@@ -3619,7 +3619,7 @@ snapshots:
 
   '@prefresh/utils@1.2.1': {}
 
-  '@prefresh/vite@2.4.11(preact@10.28.0)(vite@7.2.7(@types/node@25.0.1)(terser@5.44.1))':
+  '@prefresh/vite@2.4.11(preact@10.28.0)(vite@7.2.7(@types/node@25.0.2)(terser@5.44.1))':
     dependencies:
       '@babel/core': 7.28.5
       '@prefresh/babel-plugin': 0.5.2
@@ -3627,7 +3627,7 @@ snapshots:
       '@prefresh/utils': 1.2.1
       '@rollup/pluginutils': 4.2.1
       preact: 10.28.0
-      vite: 7.2.7(@types/node@25.0.1)(terser@5.44.1)
+      vite: 7.2.7(@types/node@25.0.2)(terser@5.44.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -3734,7 +3734,7 @@ snapshots:
   '@types/glob@7.2.0':
     dependencies:
       '@types/minimatch': 6.0.0
-      '@types/node': 25.0.1
+      '@types/node': 25.0.2
 
   '@types/imagemin-gifsicle@7.0.4':
     dependencies:
@@ -3763,19 +3763,19 @@ snapshots:
 
   '@types/imagemin@7.0.1':
     dependencies:
-      '@types/node': 25.0.1
+      '@types/node': 25.0.2
 
   '@types/json-schema@7.0.15': {}
 
   '@types/keyv@3.1.4':
     dependencies:
-      '@types/node': 25.0.1
+      '@types/node': 25.0.2
 
   '@types/minimatch@6.0.0':
     dependencies:
       minimatch: 10.1.1
 
-  '@types/node@25.0.1':
+  '@types/node@25.0.2':
     dependencies:
       undici-types: 7.16.0
 
@@ -3797,11 +3797,11 @@ snapshots:
 
   '@types/responselike@1.0.3':
     dependencies:
-      '@types/node': 25.0.1
+      '@types/node': 25.0.2
 
   '@types/svgo@2.6.4':
     dependencies:
-      '@types/node': 25.0.1
+      '@types/node': 25.0.2
 
   '@typescript-eslint/eslint-plugin@8.49.0(@typescript-eslint/parser@8.49.0(eslint@9.39.2)(typescript@5.9.3))(eslint@9.39.2)(typescript@5.9.3)':
     dependencies:
@@ -3907,9 +3907,9 @@ snapshots:
       json-schema-traverse: 0.4.1
       uri-js: 4.4.1
 
-  alova@3.4.0:
+  alova@3.4.1:
     dependencies:
-      '@alova/shared': 1.3.1
+      '@alova/shared': 1.3.2
       rate-limiter-flexible: 5.0.5
 
   ansi-regex@2.1.1: {}
@@ -5963,7 +5963,7 @@ snapshots:
       spdx-correct: 3.2.0
       spdx-expression-parse: 3.0.1
 
-  vite-plugin-imagemin@0.6.1(vite@7.2.7(@types/node@25.0.1)(terser@5.44.1)):
+  vite-plugin-imagemin@0.6.1(vite@7.2.7(@types/node@25.0.2)(terser@5.44.1)):
     dependencies:
       '@types/imagemin': 7.0.1
       '@types/imagemin-gifsicle': 7.0.4
@@ -5988,11 +5988,11 @@ snapshots:
       imagemin-webp: 6.1.0
       jpegtran-bin: 6.0.1
       pathe: 0.2.0
-      vite: 7.2.7(@types/node@25.0.1)(terser@5.44.1)
+      vite: 7.2.7(@types/node@25.0.2)(terser@5.44.1)
     transitivePeerDependencies:
       - supports-color
 
-  vite-prerender-plugin@0.5.12(vite@7.2.7(@types/node@25.0.1)(terser@5.44.1)):
+  vite-prerender-plugin@0.5.12(vite@7.2.7(@types/node@25.0.2)(terser@5.44.1)):
     dependencies:
       kolorist: 1.8.0
       magic-string: 0.30.21
@@ -6000,20 +6000,20 @@ snapshots:
       simple-code-frame: 1.3.0
       source-map: 0.7.6
       stack-trace: 1.0.0-pre2
-      vite: 7.2.7(@types/node@25.0.1)(terser@5.44.1)
+      vite: 7.2.7(@types/node@25.0.2)(terser@5.44.1)
 
-  vite-tsconfig-paths@5.1.4(typescript@5.9.3)(vite@7.2.7(@types/node@25.0.1)(terser@5.44.1)):
+  vite-tsconfig-paths@5.1.4(typescript@5.9.3)(vite@7.2.7(@types/node@25.0.2)(terser@5.44.1)):
     dependencies:
       debug: 4.4.3
       globrex: 0.1.2
       tsconfck: 3.1.6(typescript@5.9.3)
     optionalDependencies:
-      vite: 7.2.7(@types/node@25.0.1)(terser@5.44.1)
+      vite: 7.2.7(@types/node@25.0.2)(terser@5.44.1)
     transitivePeerDependencies:
       - supports-color
       - typescript
 
-  vite@7.2.7(@types/node@25.0.1)(terser@5.44.1):
+  vite@7.2.7(@types/node@25.0.2)(terser@5.44.1):
     dependencies:
       esbuild: 0.25.12
       fdir: 6.5.0(picomatch@4.0.3)
@@ -6022,7 +6022,7 @@ snapshots:
       rollup: 4.53.3
       tinyglobby: 0.2.15
     optionalDependencies:
-      '@types/node': 25.0.1
+      '@types/node': 25.0.2
       fsevents: 2.3.3
       terser: 5.44.1
 
