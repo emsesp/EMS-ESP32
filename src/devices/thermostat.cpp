@@ -3104,11 +3104,10 @@ bool Thermostat::set_mode(const char * value, const int8_t id) {
     uint8_t enum_index = 0;
 
     // check for the mode being a full string name or single digit
+    // if not found, try the HA mode list if HA is enabled
     if (!Helpers::value2enum(value, enum_index, mode_list)) {
         mode_list = FL_(enum_mode_ha);
         if (!Mqtt::ha_enabled() || !Helpers::value2enum(value, enum_index, mode_list)) {
-            // We have logging on fail in command.cpp
-            // LOG_WARNING("wrong mode: %s", value);
             return false; // not found
         }
     }
