@@ -235,10 +235,11 @@ void WebSchedulerService::publish(const bool force) {
     }
 
     JsonDocument doc;
+    JsonObject   output     = doc.to<JsonObject>();
     bool         ha_created = ha_registered_;
     for (const ScheduleItem & scheduleItem : *scheduleItems_) {
-        if (scheduleItem.name[0] != '\0' && !doc[scheduleItem.name].is<JsonVariantConst>()) {
-            Mqtt::add_value_bool(doc.as<JsonObject>(), scheduleItem.name, scheduleItem.active);
+        if (scheduleItem.name[0] != '\0' && !output[scheduleItem.name].is<JsonVariantConst>()) {
+            Mqtt::add_value_bool(output, (const char *)scheduleItem.name, scheduleItem.active);
 
             // create HA config
             if (Mqtt::ha_enabled() && !ha_registered_) {
@@ -290,7 +291,7 @@ void WebSchedulerService::publish(const bool force) {
     if (!doc.isNull()) {
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         snprintf(topic, sizeof(topic), "%s_data", F_(scheduler));
-        Mqtt::queue_publish(topic, doc.as<JsonObject>());
+        Mqtt::queue_publish(topic, output);
     }
 }
 

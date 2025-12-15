@@ -2134,9 +2134,16 @@ void EMSdevice::mqtt_ha_entity_config_create() {
 
             // SRC thermostats mapped to connect/src1/...
             if (dv.tag >= DeviceValueTAG::TAG_SRC1 && dv.tag <= DeviceValueTAG::TAG_SRC16 && !strcmp(dv.short_name, FL_(selRoomTemp)[0])) {
+                const char * icon = nullptr;
+                for (auto & d : devicevalues_) {
+                    if (d.tag == dv.tag && !strcmp(d.short_name, FL_(icon)[0]) && *(uint8_t *)(d.value_p != 0)) {
+                        icon = d.options[*(uint8_t *)(d.value_p)][0];
+                        break;
+                    }
+                }
                 // add all modes - auto, heat, off, cool
                 // https://github.com/emsesp/EMS-ESP32/issues/2636
-                Mqtt::publish_ha_climate_config(dv, true, nullptr, false);
+                Mqtt::publish_ha_climate_config(dv, true, nullptr, false, icon);
             }
 
 #ifndef EMSESP_STANDALONE

@@ -1244,7 +1244,7 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
 
 // publish the HA climate config
 // https://www.home-assistant.io/integrations/climate.mqtt/
-bool Mqtt::publish_ha_climate_config(const DeviceValue & dv, const bool has_roomtemp, const char * const ** mode_options, const bool remove) {
+bool Mqtt::publish_ha_climate_config(const DeviceValue & dv, const bool has_roomtemp, const char * const ** mode_options, const bool remove, const char * icon) {
     int8_t        tag         = dv.tag;
     int16_t       min         = dv.min;
     uint32_t      max         = dv.max;
@@ -1402,6 +1402,9 @@ bool Mqtt::publish_ha_climate_config(const DeviceValue & dv, const bool has_room
         modes.add("cool");
     }
 
+    if (icon != nullptr) {
+        doc["ic"] = icon;
+    }
     add_ha_dev_section(doc.as<JsonObject>(), devicename, nullptr, nullptr, nullptr, false);                                 // add dev section
     add_ha_avty_section(doc.as<JsonObject>(), topic_t, seltemp_cond, has_roomtemp ? currtemp_cond : nullptr, hc_mode_cond); // add availability section
 
