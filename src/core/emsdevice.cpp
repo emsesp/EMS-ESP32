@@ -2086,7 +2086,6 @@ void EMSdevice::mqtt_ha_entity_config_create() {
     uint16_t              count                = 0;
     const char * const ** mode_options         = nullptr;
 
-
     // check the state of each of the device values
     // create the discovery topic if if hasn't already been created, not a command (like reset) and is active and visible
     for (auto & dv : devicevalues_) {
