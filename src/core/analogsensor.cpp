@@ -675,11 +675,12 @@ void AnalogSensor::publish_values(const bool force) {
     }
 
     JsonDocument doc;
+    JsonObject   obj = doc.to<JsonObject>();
 
     for (auto & sensor : sensors_) {
         if (Mqtt::is_nested()) {
             char       s[10];
-            JsonObject dataSensor = doc[Helpers::smallitoa(s, sensor.gpio())].to<JsonObject>();
+            JsonObject dataSensor = obj[Helpers::smallitoa(s, sensor.gpio())].to<JsonObject>();
             dataSensor["name"]    = sensor.name();
 #if CONFIG_IDF_TARGET_ESP32
             if (sensor.type() == AnalogType::PULSE || (sensor.type() == AnalogType::DIGITAL_OUT && sensor.gpio() != 25 && sensor.gpio() != 26)) {
@@ -691,10 +692,10 @@ void AnalogSensor::publish_values(const bool force) {
                 dataSensor["value"] = serialized(Helpers::render_value(s, sensor.value(), 2)); // double
             }
         } else if (sensor.type() == AnalogType::DIGITAL_IN || sensor.type() == AnalogType::DIGITAL_OUT || sensor.type() == AnalogType::PULSE) {
-            Mqtt::add_value_bool(doc.as<JsonObject>(), sensor.name(), sensor.value() != 0);
+            Mqtt::add_value_bool(obj, (const char *)sensor.name(), sensor.value() != 0);
         } else {
             char s[10];
-            doc[sensor.name()] = serialized(Helpers::render_value(s, sensor.value(), 2));
+            obj[sensor.name()] = serialized(Helpers::render_value(s, sensor.value(), 2));
         }
 
         // create HA config if hasn't already been done
@@ -804,7 +805,7 @@ void AnalogSensor::publish_values(const bool force) {
 
             // add default_entity_id
             std::string topic_str(topic);
-            doc["def_ent_id"] = topic_str.substr(0, topic_str.find("/")) + "." + uniq_s;
+            config["def_ent_id"] = topic_str.substr(0, topic_str.find("/")) + "." + uniq_s;
 
             Mqtt::add_ha_avty_section(config.as<JsonObject>(), stat_t, val_cond);
 
@@ -814,7 +815,7 @@ void AnalogSensor::publish_values(const bool force) {
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     snprintf(topic, sizeof(topic), "%s_data", F_(analogsensor));
-    Mqtt::queue_publish(topic, doc.as<JsonObject>());
+    Mqtt::queue_publish(topic, obj);
 }
 
 // called from emsesp.cpp for commands
