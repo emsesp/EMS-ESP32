@@ -62,10 +62,10 @@
     "prettier": "^3.7.4",
     "rollup-plugin-visualizer": "^6.0.5",
     "terser": "^5.44.1",
-    "typescript-eslint": "^8.49.0",
-    "vite": "^7.2.7",
+    "typescript-eslint": "^8.50.0",
+    "vite": "^7.3.0",
     "vite-plugin-imagemin": "^0.6.1",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^6.0.1"
   },
-  "packageManager": "pnpm@10.25.0+sha512.5e82639027af37cf832061bcc6d639c219634488e0f2baebe785028a793de7b525ffcd3f7ff574f5e9860654e098fe852ba8ac5dd5cefe1767d23a020a92f501"
+  "packageManager": "pnpm@10.26.0+sha512.3b3f6c725ebe712506c0ab1ad4133cf86b1f4b687effce62a9b38b4d72e3954242e643190fc51fa1642949c735f403debd44f5cb0edd657abe63a8b6a7e1e402"
 }
