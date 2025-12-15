@@ -113,7 +113,11 @@ class Mqtt {
                                          const bool            create_device_config = false);
 
     static bool publish_system_ha_sensor_config(uint8_t type, const char * name, const char * entity, const uint8_t uom);
-    static bool publish_ha_climate_config(const DeviceValue & dv, const bool has_roomtemp, const char * const ** mode_options, const bool remove = false);
+    static bool publish_ha_climate_config(const DeviceValue &   dv,
+                                          const bool            has_roomtemp,
+                                          const char * const ** mode_options,
+                                          const bool            remove = false,
+                                          const char *          icon   = nullptr);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
     static void show_mqtt(uuid::console::Shell & shell);
