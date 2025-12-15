@@ -112,6 +112,12 @@ void AnalogSensor::reload(bool get_nvs) {
     for (auto sensor : sensors_) {
         remove_ha_topic(sensor.type(), sensor.gpio());
         sensor.ha_registered = false;
+#ifndef EMSESP_STANDALONE
+        if ((sensor.type() >= AnalogType::CNT_0 && sensor.type() <= AnalogType::CNT_2)
+            || (sensor.type() >= AnalogType::FREQ_0 && sensor.type() <= AnalogType::FREQ_2)) {
+            detachInterrupt(sensor.gpio());
+        }
+#endif
     }
 
     if (!analog_enabled_) {
@@ -680,7 +686,7 @@ void AnalogSensor::publish_values(const bool force) {
 #else
             if (sensor.type() == AnalogType::PULSE || sensor.type() == AnalogType::DIGITAL_OUT) {
 #endif
-                Mqtt::add_value_bool(doc.as<JsonObject>(), sensor.name(), sensor.value() != 0);
+                Mqtt::add_value_bool(dataSensor, "value", sensor.value() != 0);
             } else {
                 dataSensor["value"] = serialized(Helpers::render_value(s, sensor.value(), 2)); // double
             }
