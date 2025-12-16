@@ -196,9 +196,8 @@ void Shower::create_ha_discovery() {
         char         topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         char         str[70];
 
-        doc["~"] = Mqtt::base();
-
         // shower active
+        doc["~"]    = Mqtt::base();
         doc["name"] = "Shower Active";
 
         if (Mqtt::entity_format() == Mqtt::entityFormat::MULTI_SHORT) {
@@ -219,13 +218,14 @@ void Shower::create_ha_discovery() {
 
         // shower duration
         doc.clear();
+        doc["~"]    = Mqtt::base();
+        doc["name"] = "Shower Duration";
 
         snprintf(str, sizeof(str), "%s_shower_duration", Mqtt::basename().c_str());
 
         doc["uniq_id"]    = str;
         doc["def_ent_id"] = (std::string) "sensor." + str;
         doc["stat_t"]     = "~/shower_data";
-        doc["name"]       = "Shower Duration";
 
         // don't bother with value template conditions if using Domoticz which doesn't fully support MQTT Discovery
         if (Mqtt::discovery_type() == Mqtt::discoveryType::HOMEASSISTANT) {
