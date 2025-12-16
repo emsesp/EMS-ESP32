@@ -600,7 +600,7 @@ bool AnalogSensor::update(uint8_t gpio, const char * org_name, double offset, do
 
 // check to see if values have been updated
 bool AnalogSensor::updated_values() {
-    if (changed_) {
+    if (changed_ && Mqtt::publish_queued() == 0) {
         changed_ = false;
         return true;
     }

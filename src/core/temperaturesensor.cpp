@@ -370,7 +370,7 @@ bool TemperatureSensor::update(const char * id, const char * name, int16_t offse
 
 // check to see if values have been updated
 bool TemperatureSensor::updated_values() {
-    if (changed_) {
+    if (changed_ && Mqtt::publish_queued() == 0) {
         changed_ = false;
         return true;
     }

@@ -1191,15 +1191,19 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
             found_device = emsdevice.get();
             if (emsdevice->handle_telegram(telegram)) {
                 telegram_found = true;
-                if (Mqtt::connected()
-                    && ((mqtt_.get_publish_onchange(found_device->device_type()) && found_device->has_update())
-                        || (telegram->type_id == publish_id_ && telegram->dest == EMSbus::ems_bus_id()))) {
-                    if (telegram->type_id == publish_id_) {
+                if (Mqtt::connected()) {
+                    // publish device data if it was a validate after write
+                    if (telegram->type_id == publish_id_ && telegram->dest == EMSbus::ems_bus_id()) {
                         publish_id_ = 0;
-                    }
-                    found_device->has_update(false); // reset flag
-                    if (!Mqtt::publish_single()) {
+                        found_device->has_update(false);                    // reset flag
                         publish_device_values(found_device->device_type()); // publish to MQTT if we explicitly have too
+                    }
+                    // auto publish: timeinterval 0 and publish single not set, only if queue is empty
+                    else if (mqtt_.get_publish_onchange(found_device->device_type()) && found_device->has_update() && mqtt_.publish_queued() == 0) {
+                        found_device->has_update(false); // reset flag
+                        if (!Mqtt::publish_single()) {
+                            publish_device_values(found_device->device_type());
+                        }
                     }
                 }
                 break; // remove this to handle same telegrams on multiple devices
