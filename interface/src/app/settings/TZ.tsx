@@ -2,9 +2,7 @@ import { useMemo } from 'react';
 
 import { MenuItem } from '@mui/material';
 
-type TimeZones = Record<string, string>;
-
-export const TIME_ZONES: Readonly<TimeZones> = {
+export const TIME_ZONES: Record<string, string> = {
   'Africa/Abidjan': 'GMT0',
   'Africa/Accra': 'GMT0',
   'Africa/Addis_Ababa': 'EAT-3',
