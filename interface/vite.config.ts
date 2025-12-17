@@ -26,6 +26,9 @@ const RESOLVE_ALIASES = {
   'react/jsx-runtime': 'preact/jsx-runtime'
 };
 
+// Common resolve extensions - prioritize TypeScript/React files for Windows compatibility
+const RESOLVE_EXTENSIONS = ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'];
+
 // Bundle file interface
 interface BundleFile {
   name: string;
@@ -101,7 +104,12 @@ const createBasePlugins = (
   devToolsEnabled: boolean,
   includeBundleReporter = true
 ) => {
-  const plugins = [createPreactPlugin(devToolsEnabled), viteTsconfigPaths()];
+  const plugins = [
+    createPreactPlugin(devToolsEnabled),
+    viteTsconfigPaths({
+      projects: ['./tsconfig.json']
+    })
+  ];
   if (includeBundleReporter) {
     plugins.push(bundleSizeReporter());
   }
@@ -218,7 +226,8 @@ export default defineConfig(
       return {
         plugins: [...createBasePlugins(true, true), mockServer()],
         resolve: {
-          alias: RESOLVE_ALIASES
+          alias: RESOLVE_ALIASES,
+          extensions: RESOLVE_EXTENSIONS
         },
         server: {
           open: true,
@@ -246,7 +255,8 @@ export default defineConfig(
       return {
         plugins: createBasePlugins(false, true),
         resolve: {
-          alias: RESOLVE_ALIASES
+          alias: RESOLVE_ALIASES,
+          extensions: RESOLVE_EXTENSIONS
         },
         build: {
           ...createBaseBuildConfig(),
@@ -279,7 +289,8 @@ export default defineConfig(
         })
       ],
       resolve: {
-        alias: RESOLVE_ALIASES
+        alias: RESOLVE_ALIASES,
+        extensions: RESOLVE_EXTENSIONS
       },
       build: {
         ...createBaseBuildConfig(),
