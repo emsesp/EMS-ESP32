@@ -681,7 +681,7 @@ void AnalogSensor::publish_values(const bool force) {
         if (Mqtt::is_nested()) {
             char       s[10];
             JsonObject dataSensor = obj[Helpers::smallitoa(s, sensor.gpio())].to<JsonObject>();
-            dataSensor["name"]    = sensor.name();
+            dataSensor["name"]    = (const char *)sensor.name();
 #if CONFIG_IDF_TARGET_ESP32
             if (sensor.type() == AnalogType::PULSE || (sensor.type() == AnalogType::DIGITAL_OUT && sensor.gpio() != 25 && sensor.gpio() != 26)) {
 #else
@@ -738,7 +738,7 @@ void AnalogSensor::publish_values(const bool force) {
 
             config["~"]       = Mqtt::base();
             config["uniq_id"] = uniq_s;
-            config["name"]    = sensor.name();
+            config["name"]    = (const char *)sensor.name();
 
             if (sensor.uom() != DeviceValueUOM::NONE && sensor.type() != AnalogType::DIGITAL_OUT) {
                 config["unit_of_meas"] = EMSdevice::uom_to_string(sensor.uom());
@@ -857,8 +857,8 @@ bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int
 
 // note we don't add the device and state classes here, as we do in the custom entity service
 void AnalogSensor::get_value_json(JsonObject output, const Sensor & sensor) {
-    output["name"]      = sensor.name();
-    output["fullname"]  = sensor.name();
+    output["name"]      = (const char *)sensor.name();
+    output["fullname"]  = (const char *)sensor.name();
     output["gpio"]      = sensor.gpio();
     output["type"]      = F_(number);
     output["analog"]    = FL_(list_sensortype)[sensor.type()];
