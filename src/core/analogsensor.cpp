@@ -650,7 +650,7 @@ void AnalogSensor::remove_ha_topic(const int8_t type, const uint8_t gpio) const 
         snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), gpio);
     } else if (type >= AnalogType::PWM_0 && type <= AnalogType::PWM_2) {
         snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), gpio);
-    } else if (type >= AnalogType::RGB) {
+    } else if (type == AnalogType::RGB) {
         snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), gpio);
     } else if (type == AnalogType::DIGITAL_IN) {
         snprintf(topic, sizeof(topic), "binary_sensor/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), gpio);
