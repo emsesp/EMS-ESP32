@@ -1468,7 +1468,7 @@ void Mqtt::add_ha_dev_section(JsonObject doc, const char * name, const char * mo
         dev_json["name"] = Mqtt::basename();
     }
 
-    // this is used to only create it once when entities are dynamically added
+    // create the model, manufacturer and version
     if (create_model) {
         dev_json["mf"] = brand != nullptr ? brand : "EMS-ESP";
         if (model != nullptr) {
