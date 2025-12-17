@@ -465,9 +465,7 @@ void WebCustomEntityService::publish(const bool force) {
 
             Mqtt::add_ha_classes(config.as<JsonObject>(), EMSdevice::DeviceType::SYSTEM, entityItem.value_type, entityItem.uom);
 
-            if (!ha_created) {
-                Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Custom Entities", nullptr, "EMS-ESP", EMSESP_APP_VERSION, true);
-            }
+            Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Custom Entities", nullptr, "EMS-ESP", EMSESP_APP_VERSION, !ha_created);
             Mqtt::add_ha_avty_section(config.as<JsonObject>(), stat_t, val_cond);
 
             ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
