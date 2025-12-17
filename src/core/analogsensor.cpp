@@ -799,11 +799,6 @@ void AnalogSensor::publish_values(const bool force) {
                 config["stat_cla"] = "measurement";
             }
 
-            // see if we need to create the [devs] discovery section, as this needs only to be done once for all sensors
-            if (std::none_of(sensors_.begin(), sensors_.end(), [](const auto & sensor) { return sensor.ha_registered; })) {
-                Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Analog Sensors", nullptr, "EMS-ESP", EMSESP_APP_VERSION, true);
-            }
-
             // add default_entity_id
             std::string topic_str(topic);
             config["def_ent_id"] = topic_str.substr(0, topic_str.find("/")) + "." + uniq_s;
@@ -813,7 +808,7 @@ void AnalogSensor::publish_values(const bool force) {
             Mqtt::add_ha_avty_section(config.as<JsonObject>(), stat_t, val_cond);
 
             sensor.ha_registered = Mqtt::queue_ha(topic, config.as<JsonObject>());
-            ha_dev_created       = sensor.ha_registered;
+            ha_dev_created |= sensor.ha_registered;
         }
     }
 
