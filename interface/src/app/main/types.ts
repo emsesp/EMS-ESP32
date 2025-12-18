@@ -262,7 +262,7 @@ export const AnalogTypeNames = [
   'PWM 0', // 7
   'PWM 1', // 8
   'PWM 2', // 9
-  'NTC Temp.', // 10
+  'NTC Temp', // 10
   'RGB Led', // 11
   'Pulse', // 12
   'Freq 0', // 13
@@ -270,7 +270,7 @@ export const AnalogTypeNames = [
   'Freq 2', // 15
   'Counter 0', // 16
   'Counter 1', // 17
-  'Counter2' // 18
+  'Counter 2' // 18
 ] as const;
 
 export const BOARD_PROFILES = {

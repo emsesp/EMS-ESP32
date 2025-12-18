@@ -1048,7 +1048,9 @@ const emsesp_sensordata = {
     }
   ],
   analog_enabled: true,
-  available_gpios: [] as number[]
+  available_gpios: [] as number[],
+  exclude_types: [] as number[],
+  platform: 'ESP32'
 };
 
 const activity = {
