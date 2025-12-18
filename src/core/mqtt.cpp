@@ -1448,27 +1448,31 @@ void Mqtt::add_ha_dev_section(JsonObject doc, const char * name, const char * mo
         return;
     }
 
-    // create dev section
-    JsonObject dev_json = doc["dev"].to<JsonObject>();
+    JsonObject dev_json = doc["dev"].to<JsonObject>(); // create dev section
 
-    // add ids and name - capitalize first letter of the name
+    // add ids - capitalize first letter of the name if there is one
     JsonArray ids = dev_json["ids"].to<JsonArray>(); // ids, it is an array with a single element
     if (name != nullptr) {
-        // for ids, replace all spaces with -
+        // for ids, replace all spaces with - and add to the basename
         std::string lower_name_str(name);
         std::replace(lower_name_str.begin(), lower_name_str.end(), ' ', '-');
         ids.add(Mqtt::basename() + "-" + Helpers::toLower(lower_name_str));
-
-        auto cap_name = strdup(name);
-        Helpers::CharToUpperUTF8(cap_name); // capitalize first letter
-        dev_json["name"] = Mqtt::basename() + " " + cap_name;
-        free(cap_name);
     } else {
         ids.add(Mqtt::basename()); // no name, assign it to the main EMS-ESP device in HA
     }
 
-    // create the model, manufacturer and version
+    // create the name, model, manufacturer and version
     if (create_model) {
+        if (name != nullptr) {
+            auto cap_name = strdup(name);
+            Helpers::CharToUpperUTF8(cap_name); // capitalize first letter
+            dev_json["name"] = Mqtt::basename() + " " + cap_name;
+            free(cap_name);
+        } else {
+            dev_json["name"] = Mqtt::basename();
+        }
+
+        // add mf, mdl, sw and via_device
         dev_json["mf"] = brand != nullptr ? brand : "EMS-ESP";
         if (model != nullptr) {
             dev_json["mdl"] = model;

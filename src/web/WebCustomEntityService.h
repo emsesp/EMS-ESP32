@@ -58,7 +58,7 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
 
     void begin();
     void publish_single(CustomEntityItem & entity);
-    void publish(const bool force = false);
+    void publish();
     bool command_setvalue(const char * value, const int8_t id, const char * name);
     bool get_value_info(JsonObject output, const char * cmd);
     void get_value_json(JsonObject output, CustomEntityItem const & entity);
@@ -70,7 +70,7 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
 
     uint8_t count_entities();
     void    ha_reset() {
-        ha_registered_ = false;
+        ha_configdone_ = false;
     }
 
 #if defined(EMSESP_TEST)
@@ -85,7 +85,7 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
 
     std::list<CustomEntityItem, AllocatorPSRAM<CustomEntityItem>> * customEntityItems_; // pointer to the list of entity items
 
-    bool ha_registered_ = false;
+    bool ha_configdone_ = false;
 };
 
 } // namespace emsesp
