@@ -2109,6 +2109,8 @@ bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
             Roomctrl::set_remotetemp(Roomctrl::RC100H, hc->hc(), hc->remotetemp); // RC100H
         } else if (hc->control == 2) {                                            // RC100(2)
             Roomctrl::set_remotetemp(Roomctrl::RC100, hc->hc(), hc->remotetemp);  // RC100
+        } else if (hc->control == 5) {
+            Roomctrl::set_remotetemp(Roomctrl::RC120RF, hc->hc(), hc->remotetemp);
         } else if (hc->control == 6) {
             Roomctrl::set_remotetemp(Roomctrl::RT800, hc->hc(), hc->remotetemp);
         } else {
@@ -2140,6 +2142,9 @@ bool Thermostat::set_remotehum(const char * value, const int8_t id) {
 
     if (hc->control == 3) {
         Roomctrl::set_remotehum(Roomctrl::RC100H, hc->hc(), hc->remotehum); // RC100H
+        return true;
+    } else if (hc->control == 5) {
+        Roomctrl::set_remotehum(Roomctrl::RC120RF, hc->hc(), hc->remotehum);
         return true;
     } else if (hc->control == 6) {
         Roomctrl::set_remotehum(Roomctrl::RT800, hc->hc(), hc->remotehum);
@@ -2310,6 +2315,8 @@ bool Thermostat::set_control(const char * value, const int8_t id) {
                     Roomctrl::set_remotetemp(Roomctrl::RC100, hc->hc(), hc->remotetemp);
                 } else if (ctrl == 3) {
                     Roomctrl::set_remotetemp(Roomctrl::RC100H, hc->hc(), hc->remotetemp);
+                } else if (ctrl == 5) {
+                    Roomctrl::set_remotetemp(Roomctrl::RC120RF, hc->hc(), hc->remotetemp); // RC120
                 } else if (ctrl == 6) {
                     Roomctrl::set_remotetemp(Roomctrl::RT800, hc->hc(), hc->remotetemp);
                 } else {

@@ -88,7 +88,7 @@ uint8_t Roomctrl::get_hc(uint8_t addr) {
  * if remote control is active send the temperature every 15 seconds
  */
 void Roomctrl::send(uint8_t addr) {
-    if (addr & 0x80) {
+    if ((addr & 0x80) || EMSESP::system_.readonly_mode()) {
         return;
     }
     uint8_t hc = get_hc(addr);
@@ -108,7 +108,7 @@ void Roomctrl::send(uint8_t addr) {
         EMSESP::logger().warning("remotetemp timeout hc%d, stop sending roomtemperature to thermostat", hc);
     }
     if (switch_off_[hc] || (uuid::get_uptime() - send_time_[hc]) > SEND_INTERVAL) { // check interval
-        if (type_[hc] == RC100H || type_[hc] == RT800) {
+        if (type_[hc] == RC100H || type_[hc] == RT800 || type_[hc] == RC120RF) {
             if (sendtype_[hc] == SendType::HUMI) { // send humidity
                 if (switch_off_[hc]) {
                     remotehum_[hc] = EMS_VALUE_UINT8_NOTSET;
@@ -145,6 +145,9 @@ void Roomctrl::send(uint8_t addr) {
  * check if there is a message for the remote room controller
  */
 void Roomctrl::check(uint8_t addr, const uint8_t * data, const uint8_t length) {
+    if (EMSESP::system_.readonly_mode()) {
+        return;
+    }
     uint8_t hc = get_hc(addr);
     if (hc >= HCS || length < 5) {
         return;
@@ -249,6 +252,14 @@ void Roomctrl::version(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[7] = EMSbus::calculate_crc(data, 7); // append CRC
         EMSuart::transmit(data, 8);
         return;
+    } else if (type_[hc] == RC120RF) {
+        data[5] = 16; // version 16.02
+        data[6] = 2;
+        data[7] = 0;
+        data[8] = 0xFF;
+        data[9] = EMSbus::calculate_crc(data, 9); // append CRC
+        EMSuart::transmit(data, 10);
+        return;
     }
 }
 
@@ -308,7 +319,7 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[5]     = 0x2B + hc;
         data[6]     = (uint8_t)(remotetemp_[hc] >> 8);
         data[7]     = (uint8_t)(remotetemp_[hc] & 0xFF);
-        uint16_t t1 = remotetemp_[hc] * 10 + 3;
+        uint16_t t1 = remotetemp_[hc] * 10;
         data[8]     = (uint8_t)(t1 >> 8);
         data[9]     = (uint8_t)(t1 & 0xFF);
         data[10]    = 1;                               // not sure what this is and if we need it, maybe mode?
@@ -339,11 +350,25 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[5]     = 0x2B + hc;
         data[6]     = (uint8_t)(remotetemp_[hc] >> 8);
         data[7]     = (uint8_t)(remotetemp_[hc] & 0xFF);
-        uint16_t t1 = remotetemp_[hc] * 10 + 3;
+        uint16_t t1 = remotetemp_[hc] * 10;
         data[8]     = (uint8_t)(t1 >> 8);
         data[9]     = (uint8_t)(t1 & 0xFF);
         data[10]    = 1;                               // not sure what this is and if we need it, maybe mode?
         data[11]    = 9;                               // not sure what this is and if we need it, maybe mode?
+        data[12]    = EMSbus::calculate_crc(data, 12); // append CRC
+        EMSuart::transmit(data, 13);
+    } else if (type_[hc] == RC120RF) {
+        data[2]     = 0xFF;
+        data[3]     = 0;
+        data[4]     = 3;
+        data[5]     = 0x2B + hc;
+        data[6]     = (uint8_t)(remotetemp_[hc] >> 8);
+        data[7]     = (uint8_t)(remotetemp_[hc] & 0xFF);
+        uint16_t t1 = remotetemp_[hc] * 10;
+        data[8]     = (uint8_t)(t1 >> 8);
+        data[9]     = (uint8_t)(t1 & 0xFF);
+        data[10]    = 0;                               // not sure what this is and if we need it
+        data[11]    = 0;                               // not sure what this is and if we need it
         data[12]    = EMSbus::calculate_crc(data, 12); // append CRC
         EMSuart::transmit(data, 13);
     }
