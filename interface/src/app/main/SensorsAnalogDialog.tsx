@@ -108,16 +108,18 @@ const SensorsAnalogDialog = ({
   // Memoize menu items to avoid recreation on each render
   const analogTypeMenuItems = useMemo(
     () =>
-      AnalogTypeNames.map((val, i) => (
-        <MenuItem
-          key={val}
-          value={i + 1}
-          disabled={disabledTypeList.includes(i + 1)}
-        >
-          {val}
-        </MenuItem>
-      )),
-    []
+      AnalogTypeNames.map((val, i) => ({ name: val, value: i + 1 }))
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map(({ name, value }) => (
+          <MenuItem
+            key={name}
+            value={value}
+            disabled={disabledTypeList?.includes(value)}
+          >
+            {name}
+          </MenuItem>
+        )),
+    [disabledTypeList]
   );
 
   const uomMenuItems = useMemo(
