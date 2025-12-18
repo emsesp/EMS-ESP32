@@ -378,19 +378,12 @@ void WebCustomEntityService::publish_single(CustomEntityItem & entity) {
 }
 
 // publish to Mqtt
-void WebCustomEntityService::publish(const bool force) {
-    if (force) {
-        ha_registered_ = false;
-    }
-
-    if (!Mqtt::enabled()) {
+void WebCustomEntityService::publish() {
+    if (!Mqtt::enabled() || customEntityItems_->empty()) {
         return;
     }
 
-    if (customEntityItems_->empty()) {
-        return;
-    }
-    if (Mqtt::publish_single() && force) {
+    if (Mqtt::publish_single()) {
         for (CustomEntityItem & entityItem : *customEntityItems_) {
             publish_single(entityItem);
         }
@@ -398,7 +391,7 @@ void WebCustomEntityService::publish(const bool force) {
 
     JsonDocument doc;
     JsonObject   output     = doc.to<JsonObject>();
-    bool         ha_created = ha_registered_;
+    bool         ha_created = ha_configdone_;
 
     for (CustomEntityItem & entityItem : *customEntityItems_) {
         if (entityItem.hide) {
@@ -406,7 +399,7 @@ void WebCustomEntityService::publish(const bool force) {
         }
         render_value(output, entityItem);
         // create HA config
-        if (Mqtt::ha_enabled() && !ha_registered_) {
+        if (!ha_configdone_) {
             JsonDocument config;
             config["~"] = Mqtt::base();
 
@@ -464,7 +457,6 @@ void WebCustomEntityService::publish(const bool force) {
             config["def_ent_id"] = topic_str.substr(0, topic_str.find("/")) + "." + uniq_s;
 
             Mqtt::add_ha_classes(config.as<JsonObject>(), EMSdevice::DeviceType::SYSTEM, entityItem.value_type, entityItem.uom);
-
             Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Custom Entities", nullptr, "EMS-ESP", EMSESP_APP_VERSION, !ha_created);
             Mqtt::add_ha_avty_section(config.as<JsonObject>(), stat_t, val_cond);
 
@@ -472,7 +464,8 @@ void WebCustomEntityService::publish(const bool force) {
         }
     }
 
-    ha_registered_ = ha_created;
+    ha_configdone_ = ha_created;
+
     if (output.size() > 0) {
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         snprintf(topic, sizeof(topic), "%s_data", F_(custom));
