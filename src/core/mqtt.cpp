@@ -1451,7 +1451,7 @@ void Mqtt::add_ha_dev_section(JsonObject doc, const char * name, const char * mo
     // create dev section
     JsonObject dev_json = doc["dev"].to<JsonObject>();
 
-    // add ids and name - with capitalize first letter
+    // add ids and name - capitalize first letter of the name
     JsonArray ids = dev_json["ids"].to<JsonArray>(); // ids, it is an array with a single element
     if (name != nullptr) {
         // for ids, replace all spaces with -
@@ -1464,8 +1464,7 @@ void Mqtt::add_ha_dev_section(JsonObject doc, const char * name, const char * mo
         dev_json["name"] = Mqtt::basename() + " " + cap_name;
         free(cap_name);
     } else {
-        ids.add(Mqtt::basename());
-        dev_json["name"] = Mqtt::basename();
+        ids.add(Mqtt::basename()); // no name, assign it to the main EMS-ESP device in HA
     }
 
     // create the model, manufacturer and version
