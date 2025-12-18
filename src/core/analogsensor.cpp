@@ -748,7 +748,8 @@ void AnalogSensor::publish_values(const bool force) {
             char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
 
             // Set commands for some analog types
-            char command_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+            char    command_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+            uint8_t valueType = DeviceValueType::INT16;
 #if CONFIG_IDF_TARGET_ESP32
             if (sensor.type() == AnalogType::PULSE || (sensor.type() == AnalogType::DIGITAL_OUT && sensor.gpio() != 25 && sensor.gpio() != 26)) {
 #elif CONFIG_IDF_TARGET_ESP32S2
@@ -760,6 +761,7 @@ void AnalogSensor::publish_values(const bool force) {
                 snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(analogsensor), sensor.name());
                 config["cmd_t"] = command_topic;
                 Mqtt::add_ha_bool(config.as<JsonObject>());
+                valueType = DeviceValueType::BOOL;
             } else if (sensor.type() == AnalogType::DIGITAL_OUT) { // DAC
                 snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
                 snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(analogsensor), sensor.name());
@@ -787,22 +789,22 @@ void AnalogSensor::publish_values(const bool force) {
             } else if (sensor.type() == AnalogType::COUNTER || (sensor.type() >= AnalogType::CNT_0 && sensor.type() <= AnalogType::CNT_2)) {
                 snprintf(topic, sizeof(topic), "sensor/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
                 snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(analogsensor), sensor.name());
-                config["cmd_t"]    = command_topic;
-                config["stat_cla"] = "total_increasing";
+                config["cmd_t"] = command_topic;
                 // config["mode"]  = "box"; // auto, slider or box
                 // config["step"]  = sensor.factor();
             } else if (sensor.type() == AnalogType::DIGITAL_IN) {
                 snprintf(topic, sizeof(topic), "binary_sensor/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
                 Mqtt::add_ha_bool(config.as<JsonObject>());
+                valueType = DeviceValueType::BOOL;
             } else {
                 snprintf(topic, sizeof(topic), "sensor/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
-                config["stat_cla"] = "measurement";
             }
 
             // add default_entity_id
             std::string topic_str(topic);
             config["def_ent_id"] = topic_str.substr(0, topic_str.find("/")) + "." + uniq_s;
 
+            Mqtt::add_ha_classes(config.as<JsonObject>(), EMSdevice::DeviceType::ANALOGSENSOR, valueType, sensor.uom());
             // dev section with model is only created on the 1st sensor
             Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Analog Sensors", nullptr, "EMS-ESP", EMSESP_APP_VERSION, !ha_dev_created);
             Mqtt::add_ha_avty_section(config.as<JsonObject>(), stat_t, val_cond);
