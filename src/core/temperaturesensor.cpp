@@ -543,6 +543,8 @@ void TemperatureSensor::publish_values(const bool force) {
                 config["uniq_id"]    = uniq_s;
                 config["def_ent_id"] = (std::string) "sensor." + uniq_s;
                 config["name"]       = (const char *)sensor.name();
+                config["stat_cla"]   = "measurement";
+                config["dev_cla"]    = "temperature";
 
                 // dev section with model is only created on the 1st sensor
                 Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Temperature Sensors", nullptr, "EMS-ESP", EMSESP_APP_VERSION, !ha_dev_created);
