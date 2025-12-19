@@ -511,6 +511,11 @@ void Mqtt::on_connect() {
 
     // send initial MQTT messages for some of our services
     EMSESP::system_.send_heartbeat(); // send heartbeat
+    // for publish on change publish the initial complete list
+    EMSESP::webCustomEntityService.publish(true);
+    EMSESP::webSchedulerService.publish(true);
+    EMSESP::analogsensor_.publish_values(true);
+    EMSESP::temperaturesensor_.publish_values(true);
 }
 
 // Home Assistant Discovery - the main master Device called EMS-ESP

@@ -473,9 +473,14 @@ void TemperatureSensor::publish_values(const bool force) {
         return;
     }
 
-    if (force && Mqtt::publish_single()) {
+    if (force) {
+        if (Mqtt::publish_single()) {
         for (const auto & sensor : sensors_) {
             publish_sensor(sensor);
+        }
+            return;
+        } else if (!EMSESP::mqtt_.get_publish_onchange(0)) {
+            return; // wait for first time periode
         }
     }
 

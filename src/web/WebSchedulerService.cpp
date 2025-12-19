@@ -105,10 +105,6 @@ StateUpdateResult WebScheduler::update(JsonObject root, WebScheduler & webSchedu
                 CommandFlag::ADMIN_ONLY);
         }
     }
-
-    EMSESP::webSchedulerService.ha_reset();
-    EMSESP::webSchedulerService.publish();
-
     return StateUpdateResult::CHANGED;
 }
 
@@ -217,17 +213,17 @@ void WebSchedulerService::publish_single(const char * name, const bool state) {
 
 // publish to Mqtt
 void WebSchedulerService::publish(const bool force) {
-    if (force) {
-        ha_configdone_ = false;
-    }
-
-    if (!Mqtt::enabled() || scheduleItems_->empty()) {
+    if (!Mqtt::connected() || scheduleItems_->empty()) {
         return;
     }
-
-    if (Mqtt::publish_single() && force) {
-        for (const ScheduleItem & scheduleItem : *scheduleItems_) {
-            publish_single(scheduleItem.name, scheduleItem.active);
+    if (force) {
+        if (Mqtt::publish_single()) {
+            for (const ScheduleItem & scheduleItem : *scheduleItems_) {
+                publish_single(scheduleItem.name, scheduleItem.active);
+            }
+            return;
+        } else if (!EMSESP::mqtt_.get_publish_onchange(0)) {
+            return; // wait for first time periode
         }
     }
 
