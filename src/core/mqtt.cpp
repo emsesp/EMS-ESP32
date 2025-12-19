@@ -595,15 +595,15 @@ void Mqtt::ha_status() {
 // add sub or pub task to the queue.
 // the base is not included in the topic
 bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, const bool retain) {
-    if (!mqtt_enabled_ || topic.empty() || !connected()) {
-        return false; // quit, not using MQTT
-    }
-
     if (topic == "response" && operation == Operation::PUBLISH) {
         lastresponse_ = payload;
         if (!send_response_) {
             return true;
         }
+    }
+
+    if (!mqtt_enabled_ || topic.empty() || !connected()) {
+        return false; // quit, not using MQTT
     }
 
 // check free mem
