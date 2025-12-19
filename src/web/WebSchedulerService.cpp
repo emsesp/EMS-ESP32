@@ -216,12 +216,16 @@ void WebSchedulerService::publish_single(const char * name, const bool state) {
 }
 
 // publish to Mqtt
-void WebSchedulerService::publish() {
+void WebSchedulerService::publish(const bool force) {
+    if (force) {
+        ha_configdone_ = false;
+    }
+
     if (!Mqtt::enabled() || scheduleItems_->empty()) {
         return;
     }
 
-    if (Mqtt::publish_single()) {
+    if (Mqtt::publish_single() && force) {
         for (const ScheduleItem & scheduleItem : *scheduleItems_) {
             publish_single(scheduleItem.name, scheduleItem.active);
         }
@@ -235,7 +239,7 @@ void WebSchedulerService::publish() {
             Mqtt::add_value_bool(output, (const char *)scheduleItem.name, scheduleItem.active);
 
             // create HA config
-            if (!ha_configdone_) {
+            if (Mqtt::ha_enabled() && !ha_configdone_) {
                 JsonDocument config;
                 config["~"] = Mqtt::base();
 
@@ -269,7 +273,7 @@ void WebSchedulerService::publish() {
                 config["cmd_t"] = command_topic;
 
                 Mqtt::add_ha_bool(config.as<JsonObject>());
-                Mqtt::add_ha_dev_section(config.as<JsonObject>(), F_(scheduler), nullptr, "EMS-ESP", EMSESP_APP_VERSION, !ha_created);
+                Mqtt::add_ha_dev_section(config.as<JsonObject>(), F_(scheduler), !ha_created);
                 Mqtt::add_ha_avty_section(config.as<JsonObject>(), stat_t, val_cond);
 
                 ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());

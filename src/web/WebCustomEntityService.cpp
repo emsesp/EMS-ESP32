@@ -383,12 +383,6 @@ void WebCustomEntityService::publish() {
         return;
     }
 
-    if (Mqtt::publish_single()) {
-        for (CustomEntityItem & entityItem : *customEntityItems_) {
-            publish_single(entityItem);
-        }
-    }
-
     JsonDocument doc;
     JsonObject   output     = doc.to<JsonObject>();
     bool         ha_created = ha_configdone_;
@@ -399,7 +393,7 @@ void WebCustomEntityService::publish() {
         }
         render_value(output, entityItem);
         // create HA config
-        if (!ha_configdone_) {
+        if (Mqtt::ha_enabled() && !ha_configdone_) {
             JsonDocument config;
             config["~"] = Mqtt::base();
 
@@ -457,7 +451,7 @@ void WebCustomEntityService::publish() {
             config["def_ent_id"] = topic_str.substr(0, topic_str.find("/")) + "." + uniq_s;
 
             Mqtt::add_ha_classes(config.as<JsonObject>(), EMSdevice::DeviceType::SYSTEM, entityItem.value_type, entityItem.uom);
-            Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Custom Entities", nullptr, "EMS-ESP", EMSESP_APP_VERSION, !ha_created);
+            Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Custom Entities", !ha_created);
             Mqtt::add_ha_avty_section(config.as<JsonObject>(), stat_t, val_cond);
 
             ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());

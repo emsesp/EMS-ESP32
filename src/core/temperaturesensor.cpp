@@ -545,7 +545,7 @@ void TemperatureSensor::publish_values(const bool force) {
                 config["name"]       = (const char *)sensor.name();
 
                 // dev section with model is only created on the 1st sensor
-                Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Temperature Sensors", nullptr, "EMS-ESP", EMSESP_APP_VERSION, !ha_dev_created);
+                Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Temperature Sensors", !ha_dev_created);
                 Mqtt::add_ha_avty_section(config.as<JsonObject>(), stat_t, val_cond);
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];

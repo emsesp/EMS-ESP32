@@ -259,7 +259,12 @@ class Mqtt {
 
     static void
     add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8_t type, const uint8_t uom, const char * entity = nullptr, bool is_discovery = true);
-    static void add_ha_dev_section(JsonObject doc, const char * name, const char * model, const char * brand, const char * version, const bool create_model);
+    static void add_ha_dev_section(JsonObject   doc,
+                                   const char * name         = nullptr,
+                                   const bool   create_model = false,
+                                   const char * model        = nullptr,
+                                   const char * brand        = nullptr,
+                                   const char * version      = nullptr);
     static void add_ha_avty_section(JsonObject   doc,
                                     const char * state_t = nullptr,
                                     const char * cond1   = nullptr,

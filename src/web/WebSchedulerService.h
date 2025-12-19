@@ -78,7 +78,7 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
     void begin();
     void loop();
     void publish_single(const char * name, const bool state);
-    void publish();
+    void publish(const bool force = false);
     bool command_setvalue(const char * value, const int8_t id, const char * name);
     bool get_value_info(JsonObject output, const char * cmd);
     void get_value_json(JsonObject output, const ScheduleItem & scheduleItem);
