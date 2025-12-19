@@ -1106,14 +1106,14 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // add origin
     JsonObject origin_json = doc["o"].to<JsonObject>();
     origin_json["name"]    = "EMS-ESP";
-    origin_json["sw"]      = EMSESP_APP_VERSION;
+    origin_json["sw"]      = "v" + std::string(EMSESP_APP_VERSION);
     origin_json["url"]     = "https://emsesp.org";
 
     // add dev section
     if (device_type == EMSdevice::DeviceType::SYSTEM) {
-        add_ha_dev_section(doc.as<JsonObject>(), nullptr, nullptr, nullptr, nullptr, false);
+        add_ha_dev_section(doc.as<JsonObject>());
     } else {
-        add_ha_dev_section(doc.as<JsonObject>(), EMSdevice::device_type_2_device_name(device_type), model, brand, version, create_device_config);
+        add_ha_dev_section(doc.as<JsonObject>(), EMSdevice::device_type_2_device_name(device_type), create_device_config, model, brand, version);
     }
 
     return queue_ha(topic, doc.as<JsonObject>());
@@ -1414,8 +1414,8 @@ bool Mqtt::publish_ha_climate_config(const DeviceValue & dv, const bool has_room
         doc["ic"] = icon;
     }
 
-    add_ha_dev_section(doc.as<JsonObject>(), devicename, nullptr, nullptr, nullptr, false);                                 // add dev section
-    add_ha_avty_section(doc.as<JsonObject>(), topic_t, seltemp_cond, has_roomtemp ? currtemp_cond : nullptr, hc_mode_cond); // add availability section
+    add_ha_dev_section(doc.as<JsonObject>(), devicename);
+    add_ha_avty_section(doc.as<JsonObject>(), topic_t, seltemp_cond, has_roomtemp ? currtemp_cond : nullptr, hc_mode_cond);
 
     return queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 }
@@ -1442,7 +1442,7 @@ std::string Mqtt::tag_to_topic(uint8_t device_type, int8_t tag) {
 // add devs section to an existing doc, only for HA
 // under devs node it will create ids and name and optional mf, mdl, via_device
 // name could be EMSdevice::device_type_2_device_name(dv.device_type));
-void Mqtt::add_ha_dev_section(JsonObject doc, const char * name, const char * model, const char * brand, const char * version, const bool create_model) {
+void Mqtt::add_ha_dev_section(JsonObject doc, const char * name, const bool create_model, const char * model, const char * brand, const char * version) {
     // only works for HA
     if (discovery_type() != discoveryType::HOMEASSISTANT) {
         return;
@@ -1472,14 +1472,12 @@ void Mqtt::add_ha_dev_section(JsonObject doc, const char * name, const char * mo
             dev_json["name"] = Mqtt::basename();
         }
 
-        // add mf, mdl, sw and via_device
+        // add mf (manufacturer/brand), mdl (model), sw (software version) and via_device
         dev_json["mf"] = brand != nullptr ? brand : "EMS-ESP";
         if (model != nullptr) {
             dev_json["mdl"] = model;
         }
-        if (version != nullptr) {
-            dev_json["sw"] = version;
-        }
+        dev_json["sw"]         = version != nullptr ? version : "v" + std::string(EMSESP_APP_VERSION);
         dev_json["via_device"] = Mqtt::basename();
     }
 }
