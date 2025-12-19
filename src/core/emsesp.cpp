@@ -646,6 +646,8 @@ void EMSESP::reset_mqtt_ha() {
     // force the re-creating of the temperature and analog sensor topics (for HA)
     temperaturesensor_.reload();
     analogsensor_.reload();
+
+    // rebuild MQTT HA config topics for shower, custom entities and scheduler
     shower_.ha_reset();
     webSchedulerService.ha_reset();
     webCustomEntityService.ha_reset();

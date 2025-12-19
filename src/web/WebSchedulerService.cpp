@@ -106,7 +106,8 @@ StateUpdateResult WebScheduler::update(JsonObject root, WebScheduler & webSchedu
         }
     }
 
-    EMSESP::webSchedulerService.publish(true);
+    EMSESP::webSchedulerService.ha_reset();
+    EMSESP::webSchedulerService.publish();
 
     return StateUpdateResult::CHANGED;
 }
@@ -217,14 +218,10 @@ void WebSchedulerService::publish_single(const char * name, const bool state) {
 // publish to Mqtt
 void WebSchedulerService::publish(const bool force) {
     if (force) {
-        ha_registered_ = false;
+        ha_configdone_ = false;
     }
 
-    if (!Mqtt::enabled()) {
-        return;
-    }
-
-    if (scheduleItems_->empty()) {
+    if (!Mqtt::enabled() || scheduleItems_->empty()) {
         return;
     }
 
@@ -236,13 +233,13 @@ void WebSchedulerService::publish(const bool force) {
 
     JsonDocument doc;
     JsonObject   output     = doc.to<JsonObject>();
-    bool         ha_created = ha_registered_;
+    bool         ha_created = ha_configdone_;
     for (const ScheduleItem & scheduleItem : *scheduleItems_) {
         if (scheduleItem.name[0] != '\0' && !output[scheduleItem.name].is<JsonVariantConst>()) {
             Mqtt::add_value_bool(output, (const char *)scheduleItem.name, scheduleItem.active);
 
             // create HA config
-            if (Mqtt::ha_enabled() && !ha_registered_) {
+            if (Mqtt::ha_enabled() && !ha_configdone_) {
                 JsonDocument config;
                 config["~"] = Mqtt::base();
 
@@ -276,7 +273,7 @@ void WebSchedulerService::publish(const bool force) {
                 config["cmd_t"] = command_topic;
 
                 Mqtt::add_ha_bool(config.as<JsonObject>());
-                Mqtt::add_ha_dev_section(config.as<JsonObject>(), F_(scheduler), nullptr, "EMS-ESP", EMSESP_APP_VERSION, !ha_created);
+                Mqtt::add_ha_dev_section(config.as<JsonObject>(), F_(scheduler), !ha_created);
                 Mqtt::add_ha_avty_section(config.as<JsonObject>(), stat_t, val_cond);
 
                 ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
@@ -284,7 +281,7 @@ void WebSchedulerService::publish(const bool force) {
         }
     }
 
-    ha_registered_ = ha_created;
+    ha_configdone_ = ha_created;
 
     if (!doc.isNull()) {
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];

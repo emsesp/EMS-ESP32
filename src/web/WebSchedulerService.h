@@ -83,7 +83,7 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
     bool get_value_info(JsonObject output, const char * cmd);
     void get_value_json(JsonObject output, const ScheduleItem & scheduleItem);
     void ha_reset() {
-        ha_registered_ = false;
+        ha_configdone_ = false;
     }
     uint8_t count_entities(bool cmd_only = false);
     bool    onChange(const char * cmd);
@@ -106,7 +106,7 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
 
     HttpEndpoint<WebScheduler>  _httpEndpoint;
     FSPersistence<WebScheduler> _fsPersistence;
-    bool                        ha_registered_ = false;
+    bool                        ha_configdone_ = false;
 
     std::list<ScheduleItem, AllocatorPSRAM<ScheduleItem>> *   scheduleItems_; // pointer to the list of schedule events
     std::list<ScheduleItem *, AllocatorPSRAM<ScheduleItem *>> cmd_changed_;   // pointer to commands in list that are triggered by change
