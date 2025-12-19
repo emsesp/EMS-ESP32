@@ -383,12 +383,6 @@ void WebCustomEntityService::publish() {
         return;
     }
 
-    if (Mqtt::publish_single()) {
-        for (CustomEntityItem & entityItem : *customEntityItems_) {
-            publish_single(entityItem);
-        }
-    }
-
     JsonDocument doc;
     JsonObject   output     = doc.to<JsonObject>();
     bool         ha_created = ha_configdone_;
@@ -399,7 +393,7 @@ void WebCustomEntityService::publish() {
         }
         render_value(output, entityItem);
         // create HA config
-        if (!ha_configdone_) {
+        if (Mqtt::ha_enabled() && !ha_configdone_) {
             JsonDocument config;
             config["~"] = Mqtt::base();
 
