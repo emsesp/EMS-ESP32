@@ -5287,12 +5287,12 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC100H, CR10H",thermostat,200,hc1.seltemp,selected room temperature,int16 (>=0<=30),C,true,number.thermostat_hc1_selected_room_temperature,number.thermostat_hc1_seltemp,6,1,1/2,0,1
 "RC100H, CR10H",thermostat,200,hc1.currtemp,current room temperature,int16 (>=-3199<=3199),C,false,sensor.thermostat_hc1_current_room_temperature,sensor.thermostat_hc1_currtemp,6,1,1/10,1,1
 "RC100H, CR10H",thermostat,200,hc1.haclimate,mqtt discovery current room temperature,enum [selTemp\|roomTemp] (>=5<=30), ,false,sensor.thermostat_hc1_mqtt_discovery_current_room_temperature,sensor.thermostat_hc1_haclimate,6,1,1,2,1
-"TR120RF, CR20RF",thermostat,249,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
-"TR120RF, CR20RF",thermostat,249,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
-"TR120RF, CR20RF",thermostat,249,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
-"TR120RF, CR20RF",thermostat,249,hc1.seltemp,selected room temperature,int16 (>=0<=30),C,true,number.thermostat_hc1_selected_room_temperature,number.thermostat_hc1_seltemp,6,1,1/2,0,1
-"TR120RF, CR20RF",thermostat,249,hc1.currtemp,current room temperature,int16 (>=-3199<=3199),C,false,sensor.thermostat_hc1_current_room_temperature,sensor.thermostat_hc1_currtemp,6,1,1/10,1,1
-"TR120RF, CR20RF",thermostat,249,hc1.haclimate,mqtt discovery current room temperature,enum [selTemp\|roomTemp] (>=5<=30), ,false,sensor.thermostat_hc1_mqtt_discovery_current_room_temperature,sensor.thermostat_hc1_haclimate,6,1,1,2,1
+"RC120RF, TR120RF, CR20RF",thermostat,249,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
+"RC120RF, TR120RF, CR20RF",thermostat,249,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
+"RC120RF, TR120RF, CR20RF",thermostat,249,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
+"RC120RF, TR120RF, CR20RF",thermostat,249,hc1.seltemp,selected room temperature,int16 (>=0<=30),C,true,number.thermostat_hc1_selected_room_temperature,number.thermostat_hc1_seltemp,6,1,1/2,0,1
+"RC120RF, TR120RF, CR20RF",thermostat,249,hc1.currtemp,current room temperature,int16 (>=-3199<=3199),C,false,sensor.thermostat_hc1_current_room_temperature,sensor.thermostat_hc1_currtemp,6,1,1/10,1,1
+"RC120RF, TR120RF, CR20RF",thermostat,249,hc1.haclimate,mqtt discovery current room temperature,enum [selTemp\|roomTemp] (>=5<=30), ,false,sensor.thermostat_hc1_mqtt_discovery_current_room_temperature,sensor.thermostat_hc1_haclimate,6,1,1,2,1
 "XCUMixer",mixer,8,hc1.flowtemphc,flow temperature (TC1),uint16 (>=0<=3199),C,false,sensor.mixer_hc1_flow_temperature_(TC1),sensor.mixer_hc1_flowtemphc,7,1,1/10,0,1
 "XCUMixer",mixer,8,hc1.valvestatus,mixing valve actuator (VC1),uint8 (>=0<=100),%,false,sensor.mixer_hc1_mixing_valve_actuator_(VC1),sensor.mixer_hc1_valvestatus,7,1,1,1,1
 "XCUMixer",mixer,8,hc1.flowsettemp,setpoint flow temperature,uint8 (>=0<=254),C,true,number.mixer_hc1_setpoint_flow_temperature,number.mixer_hc1_flowsettemp,7,1,1,2,1

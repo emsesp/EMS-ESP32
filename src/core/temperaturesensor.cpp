@@ -473,9 +473,14 @@ void TemperatureSensor::publish_values(const bool force) {
         return;
     }
 
-    if (force && Mqtt::publish_single()) {
+    if (force) {
+        if (Mqtt::publish_single()) {
         for (const auto & sensor : sensors_) {
             publish_sensor(sensor);
+        }
+            return;
+        } else if (!EMSESP::mqtt_.get_publish_onchange(0)) {
+            return; // wait for first time periode
         }
     }
 
@@ -543,6 +548,8 @@ void TemperatureSensor::publish_values(const bool force) {
                 config["uniq_id"]    = uniq_s;
                 config["def_ent_id"] = (std::string) "sensor." + uniq_s;
                 config["name"]       = (const char *)sensor.name();
+                config["stat_cla"]   = "measurement";
+                config["dev_cla"]    = "temperature";
 
                 // dev section with model is only created on the 1st sensor
                 Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Temperature Sensors", !ha_dev_created);

@@ -511,6 +511,11 @@ void Mqtt::on_connect() {
 
     // send initial MQTT messages for some of our services
     EMSESP::system_.send_heartbeat(); // send heartbeat
+    // for publish on change publish the initial complete list
+    EMSESP::webCustomEntityService.publish(true);
+    EMSESP::webSchedulerService.publish(true);
+    EMSESP::analogsensor_.publish_values(true);
+    EMSESP::temperaturesensor_.publish_values(true);
 }
 
 // Home Assistant Discovery - the main master Device called EMS-ESP
@@ -590,15 +595,15 @@ void Mqtt::ha_status() {
 // add sub or pub task to the queue.
 // the base is not included in the topic
 bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, const bool retain) {
-    if (!mqtt_enabled_ || topic.empty() || !connected()) {
-        return false; // quit, not using MQTT
-    }
-
     if (topic == "response" && operation == Operation::PUBLISH) {
         lastresponse_ = payload;
         if (!send_response_) {
             return true;
         }
+    }
+
+    if (!mqtt_enabled_ || topic.empty() || !connected()) {
+        return false; // quit, not using MQTT
     }
 
 // check free mem

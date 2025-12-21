@@ -378,9 +378,19 @@ void WebCustomEntityService::publish_single(CustomEntityItem & entity) {
 }
 
 // publish to Mqtt
-void WebCustomEntityService::publish() {
+void WebCustomEntityService::publish(const bool force) {
     if (!Mqtt::enabled() || customEntityItems_->empty()) {
         return;
+    }
+    if (force) {
+        if (Mqtt::publish_single()) {
+            for (CustomEntityItem & entityItem : *customEntityItems_) {
+                publish_single(entityItem);
+            }
+            return;
+        } else if (!EMSESP::mqtt_.get_publish_onchange(0)) {
+            return; // wait for first time periode
+        }
     }
 
     JsonDocument doc;

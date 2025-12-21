@@ -5577,7 +5577,7 @@
 | hc1.currtemp | current room temperature | int16 (>=-3199<=3199) | C | false | HC | 1 | 1 | 1/10 |
 | hc1.haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 |
 
-### TR120RF, CR20RF
+### RC120RF, TR120RF, CR20RF
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
 | errorcode | error code | string |   | false | DEVICE_DATA | 0 | 8 | 1 |
