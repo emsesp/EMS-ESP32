@@ -379,7 +379,7 @@ void WebCustomEntityService::publish_single(CustomEntityItem & entity) {
 
 // publish to Mqtt
 void WebCustomEntityService::publish(const bool force) {
-    if (!Mqtt::connected() || customEntityItems_->empty()) {
+    if (!Mqtt::enabled() || customEntityItems_->empty()) {
         return;
     }
     if (force) {

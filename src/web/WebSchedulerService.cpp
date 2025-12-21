@@ -213,7 +213,7 @@ void WebSchedulerService::publish_single(const char * name, const bool state) {
 
 // publish to Mqtt
 void WebSchedulerService::publish(const bool force) {
-    if (!Mqtt::connected() || scheduleItems_->empty()) {
+    if (!Mqtt::enabled() || scheduleItems_->empty()) {
         return;
     }
     if (force) {
