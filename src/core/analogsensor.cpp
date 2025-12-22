@@ -809,9 +809,9 @@ void AnalogSensor::publish_values(const bool force) {
             std::string topic_str(topic);
             config["def_ent_id"] = topic_str.substr(0, topic_str.find("/")) + "." + uniq_s;
 
+            // add HA Discovery config
             Mqtt::add_ha_classes(config.as<JsonObject>(), EMSdevice::DeviceType::ANALOGSENSOR, valueType, sensor.uom());
-            // dev section with model is only created on the 1st sensor
-            Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Analog Sensors", !ha_dev_created);
+            Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Analog Sensors", !ha_dev_created); // dev section with model is only created on the 1st sensor
             Mqtt::add_ha_avty_section(config.as<JsonObject>(), stat_t, val_cond);
 
             sensor.ha_registered = Mqtt::queue_ha(topic, config.as<JsonObject>());

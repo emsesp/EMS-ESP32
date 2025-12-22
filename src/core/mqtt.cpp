@@ -62,8 +62,6 @@ std::string Mqtt::lastresponse_ = "";
 
 // Home Assistant specific
 // icons from https://materialdesignicons.com used with the UOMs (unit of measurements)
-MAKE_WORD(measurement)
-MAKE_WORD(total_increasing)
 // MAKE_WORD_CUSTOM(icondegrees, "mdi:coolant-temperature") // DeviceValueUOM::DEGREES
 MAKE_WORD_CUSTOM(iconpercent, "mdi:percent-outline")  // DeviceValueUOM::PERCENT
 MAKE_WORD_CUSTOM(iconkb, "mdi:memory")                // DeviceValueUOM::KB
@@ -1124,18 +1122,29 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     return queue_ha(topic, doc.as<JsonObject>());
 }
 
-// Add the uom, state class, device class and an optional icon based on the uom
-void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8_t type, const uint8_t uom, const char * entity, bool is_discovery) {
+// Add the uom, state class, device class and an optional icon based on the uom (unless display_only is true)
+// https://developers.home-assistant.io/docs/core/entity/sensor/
+// Home Assistant tracks the min, max and mean value during the statistics period
+// For statistics, the sensor must have state_class set to either MEASUREMENT, TOTAL or TOTAL_INCREASING
+// When set to MEASUREMENT the device_class must cannot be DATE, ENUM, ENERGY, GAS, MONETARY, TIMESTAMP, VOLUME or WATER
+//
+void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8_t type, const uint8_t uom, const char * entity, bool display_only) {
     if (device_type == EMSdevice::DeviceType::SYSTEM) {
         doc["ent_cat"] = "diagnostic"; // instead of 'config'
     }
 
-    // for HA discovery we use different namings
-    const char * dc_ha  = is_discovery ? "dev_cla" : "device_class"; // device class
-    const char * sc_ha  = is_discovery ? "stat_cla" : "state_class"; // state class
-    const char * uom_ha = is_discovery ? "unit_of_meas" : "uom";     // unit of measure
+    // For display_only, we don't use the aliases, also we don't display the icon
+    const char * dc_ha  = display_only ? "device_class" : "dev_cla"; // device class, dev_cla
+    const char * sc_ha  = display_only ? "state_class" : "stat_cla"; // state class, stat_cla
+    const char * uom_ha = display_only ? "uom" : "unit_of_meas";     // unit of measure, unit_of_meas
+    const char * ic_ha  = display_only ? "icon" : "ic";              // icon, ic
 
-    // set uom, unless boolean
+    // state class constants
+    const char * sc_ha_measurement      = "measurement";
+    const char * sc_ha_total            = "total";
+    const char * sc_ha_total_increasing = "total_increasing";
+
+    // set uom, unless boolean - as HA is fussy with the naming
     // using HA uom specific codes from https://github.com/home-assistant/core/blob/dev/homeassistant/const.py
     if (type != DeviceValueType::BOOL) {
         if (uom == DeviceValueUOM::HOURS) {
@@ -1144,6 +1153,8 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
             doc[uom_ha] = "min";
         } else if (uom == DeviceValueUOM::SECONDS) {
             doc[uom_ha] = "s";
+        } else if (uom == DeviceValueUOM::KB) {
+            doc[uom_ha] = "kB";
         } else if (uom != DeviceValueUOM::NONE) {
             doc[uom_ha] = EMSdevice::uom_to_string(uom); // use default
         } else if (discovery_type() != discoveryType::HOMEASSISTANT) {
@@ -1151,98 +1162,135 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
         }
     }
 
-    // set state and device class
-    // also icon, when there is no device class that sets one
+    // set state and device class - always
+    // see https://developers.home-assistant.io/docs/core/entity/sensor/#available-device-classes
     switch (uom) {
     case DeviceValueUOM::DEGREES:
     case DeviceValueUOM::DEGREES_R:
     case DeviceValueUOM::K:
-        doc[sc_ha] = F_(measurement);
+        doc[sc_ha] = sc_ha_measurement;
         doc[dc_ha] = "temperature";
         // override uom if fahrenheit
         doc[uom_ha] = EMSESP::system_.fahrenheit() ? DeviceValue::DeviceValueUOM_s[DeviceValueUOM::FAHRENHEIT] : DeviceValue::DeviceValueUOM_s[uom];
         break;
     case DeviceValueUOM::PERCENT:
-        doc[sc_ha] = F_(measurement);
+        if (display_only) {
+            doc[ic_ha] = F_(iconpercent); // set icon
+        }
+        doc[sc_ha] = sc_ha_measurement;
         doc[dc_ha] = "power_factor";
-        if (is_discovery)
-            doc["ic"] = F_(iconpercent); // icon
         break;
     case DeviceValueUOM::SECONDS:
     case DeviceValueUOM::MINUTES:
     case DeviceValueUOM::HOURS:
         if (type == DeviceValueType::TIME) {
-            doc[sc_ha] = F_(total_increasing);
+            doc[sc_ha] = sc_ha_total_increasing;
         } else {
-            doc[sc_ha] = F_(measurement);
+            doc[sc_ha] = sc_ha_measurement;
         }
         doc[dc_ha] = "duration"; // https://github.com/emsesp/EMS-ESP32/issues/822
         break;
     case DeviceValueUOM::KB:
-        if (is_discovery)
-            doc["ic"] = F_(iconkb);
+        if (display_only) {
+            doc[ic_ha] = F_(iconkb);
+        }
+        doc[dc_ha] = "data_size";
         break;
     case DeviceValueUOM::LMIN:
     case DeviceValueUOM::LH:
-        if (is_discovery)
-            doc["ic"] = F_(iconlmin);
-        doc[sc_ha] = F_(measurement);
+        if (display_only) {
+            doc[ic_ha] = F_(iconlmin);
+        }
+        doc[sc_ha] = sc_ha_measurement;
+        doc[dc_ha] = "volume_flow_rate";
         break;
     case DeviceValueUOM::WH:
         // https://github.com/emsesp/EMS-ESP32/issues/1796
         if (entity == FL_(energyToday)[0]) {
-            doc[sc_ha] = F_(total_increasing);
+            doc[sc_ha] = sc_ha_total_increasing;
+            doc[dc_ha] = "energy";
         } else if (entity == FL_(energyLastHour)[0]) {
-            doc[sc_ha] = "total";
+            doc[sc_ha] = sc_ha_total;
+            doc[dc_ha] = "energy";
         } else {
-            doc[sc_ha] = F_(measurement);
+            doc[sc_ha] = sc_ha_measurement; // no device class for this
         }
-        doc[dc_ha] = "energy";
         break;
     case DeviceValueUOM::KWH:
-        doc[sc_ha] = F_(total_increasing);
+        doc[sc_ha] = sc_ha_total_increasing;
         doc[dc_ha] = "energy";
         break;
     case DeviceValueUOM::UA:
-        if (is_discovery)
-            doc["ic"] = F_(iconua);
-        doc[sc_ha] = F_(measurement);
+        if (display_only) {
+            doc[ic_ha] = F_(iconua);
+        }
+        doc[sc_ha] = sc_ha_measurement;
+        doc[dc_ha] = "current";
         break;
     case DeviceValueUOM::BAR:
-        doc[sc_ha] = F_(measurement);
+        doc[sc_ha] = sc_ha_measurement;
         doc[dc_ha] = "pressure";
         break;
     case DeviceValueUOM::W:
     case DeviceValueUOM::KW:
-        doc[sc_ha] = F_(measurement);
+        doc[sc_ha] = sc_ha_measurement;
         doc[dc_ha] = "power";
         break;
     case DeviceValueUOM::DBM:
-        doc[sc_ha] = F_(measurement);
+        doc[sc_ha] = sc_ha_measurement;
         doc[dc_ha] = "signal_strength";
         break;
     case DeviceValueUOM::CONNECTIVITY:
-        doc[sc_ha] = F_(measurement);
+        doc[sc_ha] = sc_ha_measurement;
         doc[dc_ha] = "connectivity";
         break;
-    case DeviceValueUOM::NONE:
+    case DeviceValueUOM::MV:
+    case DeviceValueUOM::VOLTS:
+        doc[sc_ha] = sc_ha_measurement;
+        doc[dc_ha] = "voltage";
+        break;
+    case DeviceValueUOM::MBAR:
+        doc[sc_ha] = sc_ha_measurement;
+        doc[dc_ha] = "atmospheric_pressure";
+        break;
+    case DeviceValueUOM::CTKWH:
+        doc[sc_ha] = sc_ha_total_increasing;
+        doc[dc_ha] = "monetary";
+        break;
+    case DeviceValueUOM::HZ:
+        doc[sc_ha] = sc_ha_measurement;
+        doc[dc_ha] = "frequency";
+        break;
+    case DeviceValueUOM::M3:
+    case DeviceValueUOM::L:
+        // this could be Gas or Water, so going with the generic 'volume' for now
+        // state_class can't be a Measurement
+        doc[sc_ha] = sc_ha_total_increasing;
+        doc[dc_ha] = "volume";
+        break;
+    case DeviceValueUOM::SQM:
+        doc[sc_ha] = sc_ha_measurement;
+        doc[dc_ha] = "area";
+        break;
+    default:
+        // DeviceValueUOM::NONE:
+        // DeviceValueUOM::KMIN:
         // for device entities which have numerical values, with no UOM
         if ((type != DeviceValueType::STRING)
             && (type == DeviceValueType::INT8 || type == DeviceValueType::UINT8 || type == DeviceValueType::INT16 || type == DeviceValueType::UINT16
                 || type == DeviceValueType::UINT24 || type == DeviceValueType::UINT32)) {
-            if (is_discovery)
-                doc["ic"] = F_(iconnum); // set icon
+            if (display_only) {
+                doc[ic_ha] = F_(iconnum); // set icon
+            }
             // determine if its a measurement or total increasing
             // most of the values are measurement. for example Tx Reads will increment but can be reset to 0 after a restart
             // all the starts are increasing, and they are ULONGs
             if (type == DeviceValueType::UINT24 || type == DeviceValueType::UINT32) {
-                doc[sc_ha] = F_(total_increasing);
+                doc[sc_ha] = sc_ha_total_increasing;
             } else {
-                doc[sc_ha] = F_(measurement); // default to measurement
+                doc[sc_ha] = sc_ha_measurement; // default to measurement
             }
         }
-        break;
-    default:
         break;
     }
 }
@@ -1444,9 +1492,8 @@ std::string Mqtt::tag_to_topic(uint8_t device_type, int8_t tag) {
     }
 }
 
-// add devs section to an existing doc, only for HA
-// under devs node it will create ids and name and optional mf, mdl, via_device
-// name could be EMSdevice::device_type_2_device_name(dv.device_type));
+// adds dev section for HA Discovery to an existing JSON doc
+// under devs node it will create ids and optional name, mf, mdl, sw and via_device
 void Mqtt::add_ha_dev_section(JsonObject doc, const char * name, const bool create_model, const char * model, const char * brand, const char * version) {
     // only works for HA
     if (discovery_type() != discoveryType::HOMEASSISTANT) {
@@ -1488,6 +1535,7 @@ void Mqtt::add_ha_dev_section(JsonObject doc, const char * name, const bool crea
 }
 
 // adds avty section for HA Discovery to an existing JSON doc
+// also adds LWT (Last Will and Testament)
 void Mqtt::add_ha_avty_section(JsonObject doc, const char * state_t, const char * cond1, const char * cond2, const char * negcond) {
     // only works for HA
     if (discovery_type() != discoveryType::HOMEASSISTANT) {

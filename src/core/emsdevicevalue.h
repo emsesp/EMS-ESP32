@@ -47,36 +47,37 @@ class DeviceValue {
 
     // Unit Of Measurement mapping - maps to DeviceValueUOM_s in emsdevicevalue.cpp. Sequence is important!!
     // also used with HA as uom
+    // shows also the HA device class being used
     enum DeviceValueUOM : uint8_t {
         NONE = 0,    // 0
-        DEGREES,     // 1 - °C
-        DEGREES_R,   // 2 - °C (relative temperature)
-        PERCENT,     // 3 - %
-        LMIN,        // 4 - l/min
-        KWH,         // 5 - kWh
-        WH,          // 6 - Wh
-        HOURS,       // 7 - h
-        MINUTES,     // 8 - m
-        UA,          // 9 - µA
-        BAR,         // 10 - bar
-        KW,          // 11 - kW
-        W,           // 12 - W
-        KB,          // 13 - kB
-        SECONDS,     // 14 - s
-        DBM,         // 15 - dBm
-        FAHRENHEIT,  // 16 - °F
-        MV,          // 17 - mV
-        SQM,         // 18 - m²
-        M3,          // 19 - m³
-        L,           // 20 - L
+        DEGREES,     // 1 - °C - temperature
+        DEGREES_R,   // 2 - °C (relative temperature) - temperature
+        PERCENT,     // 3 - % - power factor
+        LMIN,        // 4 - l/min - volume flow rate
+        KWH,         // 5 - kWh - energy
+        WH,          // 6 - Wh - energy
+        HOURS,       // 7 - h - duration
+        MINUTES,     // 8 - m - duration
+        UA,          // 9 - µA - current
+        BAR,         // 10 - bar - pressure
+        KW,          // 11 - kW - power
+        W,           // 12 - W - power
+        KB,          // 13 - kB - data size
+        SECONDS,     // 14 - s - duration
+        DBM,         // 15 - dBm - signal strength
+        FAHRENHEIT,  // 16 - °F - temperature
+        MV,          // 17 - mV - voltage
+        SQM,         // 18 - m² - area
+        M3,          // 19 - m³ - volume
+        L,           // 20 - L - volume
         KMIN,        // 21 - K*min
-        K,           // 22 - K
-        VOLTS,       // 23 - V
-        MBAR,        // 24 - mbar
-        LH,          // 25 - l/h
-        CTKWH,       // 26 - ct/kWh
-        HZ,          // 27 - Hz
-        CONNECTIVITY // 28 - used in HA
+        K,           // 22 - K - temperature
+        VOLTS,       // 23 - V - voltage
+        MBAR,        // 24 - mbar - atmospheric pressure
+        LH,          // 25 - l/h - volume flow rate
+        CTKWH,       // 26 - ct/kWh - monetary
+        HZ,          // 27 - Hz - frequency
+        CONNECTIVITY // 28 - used in HA - connectivity
     };
 
     // TAG mapping - maps to DeviceValueTAG_s in emsdevicevalue.cpp
