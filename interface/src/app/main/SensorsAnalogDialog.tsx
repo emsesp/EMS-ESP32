@@ -224,7 +224,10 @@ const SensorsAnalogDialog = ({
               {analogTypeMenuItems}
             </ValidatedTextField>
           </Grid>
-          {(isCounterOrRate || isFreqType) && (
+          {(isCounterOrRate ||
+            isFreqType ||
+            editItem.t === AnalogType.ADC ||
+            editItem.t === AnalogType.TIMER) && (
             <Grid>
               <ValidatedTextField
                 name="u"
@@ -310,7 +313,10 @@ const SensorsAnalogDialog = ({
               />
             </Grid>
           )}
-          {isCounterOrRate && (
+          {(isCounterOrRate ||
+            isFreqType ||
+            editItem.t === AnalogType.ADC ||
+            editItem.t === AnalogType.TIMER) && (
             <Grid>
               <ValidatedTextField
                 name="f"
