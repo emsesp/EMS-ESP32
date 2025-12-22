@@ -78,9 +78,8 @@ uint8_t Roomctrl::get_hc(uint8_t addr) {
     } else if (addr >= 0x38 && addr <= 0x3B
                && (type_[addr - 0x38] == RC100H || type_[addr - 0x38] == RC200 || type_[addr - 0x38] == RC100 || type_[addr - 0x38] == RT800
                    || type_[addr - 0x38] == RC120RF)) {
-            return addr - 0x38; // RC100H, RC200
-        }
-    else if (addr >= 0x18 && addr <= 0x1B && (type_[addr - 0x18] == RC20 || type_[addr - 0x18] == FB10)) {
+        return addr - 0x38; // RC100H, RC200
+    } else if (addr >= 0x18 && addr <= 0x1B && (type_[addr - 0x18] == RC20 || type_[addr - 0x18] == FB10)) {
         return addr - 0x18; // RC20, FB10
     }
     return 0xFF; // invalid

@@ -998,7 +998,6 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     return std::string(buf);
 }
 
-
 /*
  * Type 0x07 - UBADevices - shows us the connected EMS devices
  * e.g. 08 00 07 00 0B 80 00 00 00 00 00 00 00 00 00 00 00

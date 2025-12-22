@@ -223,7 +223,7 @@ void WebSchedulerService::publish(const bool force) {
             }
             return;
         } else if (!EMSESP::mqtt_.get_publish_onchange(0)) {
-            return; // wait for first time periode
+            return; // wait for first time period
         }
     }
 
