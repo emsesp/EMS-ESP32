@@ -145,9 +145,12 @@ class System {
     static void extractSettings(const char * filename, const char * section, JsonObject output);
     static bool saveSettings(const char * filename, const char * section, JsonObject input);
 
+    // GPIOs
     static bool                 add_gpio(uint8_t pin, const char * source_name);
     static std::vector<uint8_t> available_gpios();
     static bool                 load_board_profile(std::vector<int8_t> & data, const std::string & board_profile);
+    static void                 make_snapshot_gpios();
+    static void                 restore_snapshot_gpios();
 
     static bool readCommand(const char * data);
 
@@ -301,7 +304,6 @@ class System {
 
     void show_system(uuid::console::Shell & shell);
     void show_users(uuid::console::Shell & shell);
-    void show_gpio(uuid::console::Shell & shell);
 
     void wifi_reconnect();
 
@@ -402,8 +404,10 @@ class System {
 
     static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> string_range_to_vector(const std::string & range);
 
-    static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> valid_system_gpios_; // list of valid GPIOs for the ESP32 board that can be used
-    static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> used_gpios_;         // list of GPIOs used by the application
+    static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> valid_system_gpios_;          // list of valid GPIOs for the ESP32 board that can be used
+    static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> used_gpios_;                  // list of GPIOs used by the application
+    static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> snapshot_used_gpios_;         // snapshot of the used GPIOs
+    static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> snapshot_valid_system_gpios_; // snapshot of the valid GPIOs
 
     int8_t wifi_quality(int8_t dBm);
 

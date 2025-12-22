@@ -96,6 +96,8 @@ uint32_t                                      System::max_alloc_mem_;
 uint32_t                                      System::heap_mem_;
 std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::valid_system_gpios_;
 std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::used_gpios_;
+std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::snapshot_used_gpios_;
+std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::snapshot_valid_system_gpios_;
 
 // find the index of the language
 // 0 = EN, 1 = DE, etc...
@@ -1015,22 +1017,6 @@ void System::show_users(uuid::console::Shell & shell) {
     shell.println();
 }
 
-// print GPIO available and used pins to console
-void System::show_gpio(uuid::console::Shell & shell) {
-    shell.printfln("GPIO:");
-    shell.printf(" In use (%d):", used_gpios_.size());
-    for (const auto & gpio : used_gpios_) {
-        shell.printf(" %d", gpio);
-    }
-    shell.println();
-    auto available = available_gpios();
-    shell.printf(" Available (%d):", available.size());
-    for (const auto & gpio : available) {
-        shell.printf(" %d", gpio);
-    }
-    shell.println();
-}
-
 // shell command 'show system'
 void System::show_system(uuid::console::Shell & shell) {
     refreshHeapMem(); // refresh free heap and max alloc heap
@@ -1068,8 +1054,20 @@ void System::show_system(uuid::console::Shell & shell) {
     } else {
         shell.printfln(" PSRAM: not available");
     }
-
+    // GPIOs
+    shell.printf(" GPIO in use (%d):", used_gpios_.size());
+    for (const auto & gpio : used_gpios_) {
+        shell.printf(" %d", gpio);
+    }
     shell.println();
+    auto available = available_gpios();
+    shell.printf(" GPIO available (%d):", available.size());
+    for (const auto & gpio : available) {
+        shell.printf(" %d", gpio);
+    }
+    shell.println();
+    shell.println();
+
     shell.println("Network:");
 
     switch (WiFi.status()) {
@@ -2241,10 +2239,9 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
 
 // format command - factory reset, removing all config files
 bool System::command_format(const char * value, const int8_t id) {
-    LOG_INFO("Formatting FS, removing all config files");
 #ifndef EMSESP_STANDALONE
     if (LittleFS.format()) {
-        LOG_INFO("FS formatted successfully");
+        LOG_INFO("Filesystem formatted successfully. All config files removed.");
     } else {
         LOG_ERROR("Format failed");
     }
@@ -2686,6 +2683,32 @@ std::vector<uint8_t> System::available_gpios() {
         }
     }
     return gpios;
+}
+
+// make a snapshot of the current GPIOs
+void System::make_snapshot_gpios() {
+    snapshot_used_gpios_.clear();
+    for (const auto & gpio : used_gpios_) {
+        snapshot_used_gpios_.push_back(gpio);
+    }
+
+    snapshot_valid_system_gpios_.clear();
+    for (const auto & gpio : valid_system_gpios_) {
+        snapshot_valid_system_gpios_.push_back(gpio);
+    }
+}
+
+// restore the GPIOs from the snapshot
+void System::restore_snapshot_gpios() {
+    used_gpios_.clear();
+    for (const auto & gpio : snapshot_used_gpios_) {
+        used_gpios_.push_back(gpio);
+    }
+
+    valid_system_gpios_.clear();
+    for (const auto & gpio : snapshot_valid_system_gpios_) {
+        valid_system_gpios_.push_back(gpio);
+    }
 }
 
 } // namespace emsesp

@@ -100,8 +100,6 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                 EMSESP::show_sensor_values(shell);
             } else if (command == F_(mqtt)) {
                 Mqtt::show_mqtt(shell);
-            } else if (command == F_(gpio)) {
-                EMSESP::system_.show_gpio(shell);
             } else {
                 shell.printfln("Unknown show command");
             }
