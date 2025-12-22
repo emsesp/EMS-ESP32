@@ -152,9 +152,12 @@ void RxService::add(uint8_t * data, uint8_t length) {
     }
 
     // validate the CRC. if it fails then increment the number of corrupt/incomplete telegrams and only report to console/syslog
-    // if bus is not connected, do not count echos as errors
     uint8_t crc = calculate_crc(data, length - 1);
-    if ((data[length - 1] != crc) && bus_connected()) {
+    if (data[length - 1] != crc) {
+        // if bus is not connected, assume its just noise on the line and ignore it
+        if (!bus_connected()) {
+            return;
+        }
         if (data[0] != EMSuart::last_tx_src()) { // do not count echos as errors
             telegram_error_count_++;
             LOG_WARNING("Incomplete Rx: %s", Helpers::data_to_hex(data, length).c_str()); // include CRC
