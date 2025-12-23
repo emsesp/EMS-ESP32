@@ -157,6 +157,7 @@ class System {
     static bool                 load_board_profile(std::vector<int8_t> & data, const std::string & board_profile);
     static void                 make_snapshot_gpios();
     static void                 restore_snapshot_gpios();
+    static void                 clear_snapshot_gpios();
 
     static bool readCommand(const char * data);
 

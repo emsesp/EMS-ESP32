@@ -2819,6 +2819,14 @@ void System::restore_snapshot_gpios() {
     for (const auto & gpio : snapshot_valid_system_gpios_) {
         valid_system_gpios_.push_back(gpio);
     }
+
+    // clear the snapshot
+    clear_snapshot_gpios();
+}
+
+void System::clear_snapshot_gpios() {
+    snapshot_used_gpios_.clear();
+    snapshot_valid_system_gpios_.clear();
 }
 
 } // namespace emsesp

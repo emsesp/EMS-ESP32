@@ -322,6 +322,8 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
         return StateUpdateResult::ERROR; // don't save the settings if the GPIOs are invalid
     }
 
+    // clean up snapshot of the GPIOs
+    EMSESP::system_.clear_snapshot_gpios();
 
     // save the setting internally, for reference later
     EMSESP::system_.store_settings(settings);
