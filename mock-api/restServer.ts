@@ -117,9 +117,10 @@ let system_status = {
       partition: 'factory',
       version: '3.7.3-dev.39',
       size: 4672
-    },
+    }
   ],
-  developer_mode: true,
+  // partitions: [],
+  developer_mode: false,
   model: '',
   // model: 'BBQKees Electronics EMS Gateway E32 V2 (E32 V2.0 P3/2024011)',
   // status: 0,

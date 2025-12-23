@@ -354,7 +354,9 @@ const Version = () => {
   const { send: sendSetPartition } = useRequest(
     (partition: string) => callAction({ action: 'setPartition', param: partition }),
     { immediate: false }
-  );
+  ).onError((error) => {
+    toast.error(String(error.error?.message || 'An error occurred'));
+  });
 
   const {
     data,
@@ -401,7 +403,7 @@ const Version = () => {
       await sendUploadURL(url).catch((error: Error) => {
         toast.error(error.message);
       });
-      doRestart();
+      await doRestart();
     },
     [sendUploadURL]
   );
@@ -608,28 +610,37 @@ const Version = () => {
                   alignItems: 'baseline'
                 }}
               >
-                <Grid size={{ xs: 4, md: 2 }}>
-                  <Typography color="secondary">{LL.PREVIOUS_VERSIONS()}</Typography>
-                </Grid>
-                <Grid size={{ xs: 8, md: 10 }}>
-                  {data.partitions.map((partition) => (
-                    <Typography key={partition.partition} mb={1}>
-                      v{partition.version} ({partition.partition}: {partition.size}
-                      {' KB'})
-                      <Button
-                        sx={{ ml: 2 }}
-                        variant="outlined"
-                        size="small"
-                        onClick={() =>
-                          showPreviousDialog(partition.version, partition.partition)
-                        }
-                      >
-                        {LL.INSTALL()}
-                      </Button>
-                    </Typography>
-                  ))}
-                </Grid>
-
+                {data.partitions.length > 0 && data.developer_mode && (
+                  <>
+                    <Grid size={{ xs: 4, md: 2 }}>
+                      <Typography color="secondary">
+                        {LL.PREVIOUS_VERSIONS()}
+                      </Typography>
+                    </Grid>
+                    <Grid size={{ xs: 8, md: 10 }}>
+                      {data.partitions.map((partition) => (
+                        <Typography key={partition.partition} mb={1}>
+                          v{partition.version} ({partition.partition}:{' '}
+                          {partition.size}
+                          {' KB'})
+                          <Button
+                            sx={{ ml: 2 }}
+                            variant="outlined"
+                            size="small"
+                            onClick={() =>
+                              showPreviousDialog(
+                                partition.version,
+                                partition.partition
+                              )
+                            }
+                          >
+                            {LL.INSTALL()}
+                          </Button>
+                        </Typography>
+                      ))}
+                    </Grid>
+                  </>
+                )}
                 <Grid size={{ xs: 4, md: 2 }}>
                   <Typography color="secondary">{LL.STABLE()}</Typography>
                 </Grid>
