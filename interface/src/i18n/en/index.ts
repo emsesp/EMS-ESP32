@@ -355,7 +355,8 @@ const en: Translation = {
   SWITCH_RELEASE_TYPE: 'Switch to {0} release',
   FIRMWARE_VERSION_INFO: 'Firmware Version Information',
   NO_DATA: 'No data',
-  USER_PROFILE: 'User Profile'
+  USER_PROFILE: 'User Profile',
+  PREVIOUS_VERSIONS: 'Previous Versions'
 };
 
 export default en;

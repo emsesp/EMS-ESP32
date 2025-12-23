@@ -74,6 +74,11 @@ enum SYSTEM_STATUS : uint8_t {
 
 enum FUSE_VALUE : uint8_t { ALL = 0, MFG = 1, MODEL = 2, BOARD = 3, REV = 4, BATCH = 5, FUSE = 6 };
 
+struct PartitionInfo {
+    std::string version;
+    size_t      size;
+};
+
 class System {
   public:
     void start();
@@ -104,6 +109,7 @@ class System {
 
     void store_nvs_values();
     void system_restart(const char * partition = nullptr);
+    void get_partition_info();
 
     void show_mem(const char * note);
     void store_settings(class WebSettings & settings);
@@ -363,6 +369,10 @@ class System {
 
     static void remove_gpio(uint8_t pin, bool also_system = false); // remove a gpio from both valid (optional) and used lists
 
+    // Partition info map: partition name -> {version, size}
+    std::map<std::string, PartitionInfo, std::less<>, AllocatorPSRAM<std::pair<const std::string, PartitionInfo>>> partition_info_;
+    static bool                                                                                                    set_partition(const char * partitionname);
+
   private:
     static uuid::log::Logger logger_;
 
@@ -404,6 +414,7 @@ class System {
 
     static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> string_range_to_vector(const std::string & range);
 
+    // GPIOs
     static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> valid_system_gpios_;          // list of valid GPIOs for the ESP32 board that can be used
     static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> used_gpios_;                  // list of GPIOs used by the application
     static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> snapshot_used_gpios_;         // snapshot of the used GPIOs

@@ -106,6 +106,20 @@ let system_status = {
   psram_size: 8189,
   free_psram: 8166,
   has_loader: true,
+  has_partition: true,
+  partitions: [
+    {
+      partition: 'app1',
+      version: '3.7.3-dev.41',
+      size: 4672
+    },
+    {
+      partition: 'factory',
+      version: '3.7.3-dev.39',
+      size: 4672
+    },
+  ],
+  developer_mode: true,
   model: '',
   // model: 'BBQKees Electronics EMS Gateway E32 V2 (E32 V2.0 P3/2024011)',
   // status: 0,
@@ -276,10 +290,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-          old_custom_name +
-          ') with new (' +
-          new_custom_name +
-          ')'
+        old_custom_name +
+        ') with new (' +
+        new_custom_name +
+        ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -375,15 +389,15 @@ function check_upgrade(version: string) {
 
     console.log(
       'Upgrade this version (' +
-        THIS_VERSION +
-        ') to dev (' +
-        dev_version +
-        ') is ' +
-        (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-        ' and to stable (' +
-        stable_version +
-        ') is ' +
-        (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
+      THIS_VERSION +
+      ') to dev (' +
+      dev_version +
+      ') is ' +
+      (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+      ' and to stable (' +
+      stable_version +
+      ') is ' +
+      (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
     );
     data = {
       emsesp_version: THIS_VERSION,
@@ -5134,6 +5148,10 @@ router
       } else if (action === 'resetMQTT') {
         // reset MQTT
         console.log('resetting MQTT...');
+        return status(200);
+      } else if (action === 'setPartition') {
+        // set partition
+        console.log('setting partition to', content.param);
         return status(200);
       }
     }

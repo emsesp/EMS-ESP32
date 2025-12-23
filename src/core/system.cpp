@@ -21,9 +21,11 @@
 
 #ifndef EMSESP_STANDALONE
 #include "esp_ota_ops.h"
+#include "esp_partition.h"
 #endif
 
 #include <HTTPClient.h>
+#include <map>
 
 #include <semver200.h>
 
@@ -293,6 +295,100 @@ void System::store_nvs_values() {
     EMSESP::nvs_.end();
 }
 
+// Build up a list of all partitions and their version info
+void System::get_partition_info() {
+    partition_info_.clear(); // clear existing data
+
+#ifdef EMSESP_STANDALONE
+    // dummy data for standalone mode
+    partition_info_["app0"]    = {EMSESP_APP_VERSION, 0};
+    partition_info_["app1"]    = {"", 0};
+    partition_info_["factory"] = {"", 0};
+    partition_info_["boot"]    = {"", 0};
+#else
+
+    auto current_partition = (const char *)esp_ota_get_running_partition()->label;
+
+    // update the current version and partition name in NVS, if needed (to save on flash wearing)
+    if (EMSESP::nvs_.isKey(current_partition)) {
+        if (EMSESP::nvs_.getString(current_partition) != EMSESP_APP_VERSION) {
+            EMSESP::nvs_.putString(current_partition, EMSESP_APP_VERSION);
+        }
+    } else {
+        EMSESP::nvs_.putString(current_partition, EMSESP_APP_VERSION); // create new entry
+    }
+
+    // Loop through all available partitions and update map with the version info pulled from NVS
+    // Partitions can be app0, app1, factory, boot
+    esp_partition_iterator_t it = esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_ANY, nullptr);
+    uint64_t                 buffer;
+    bool                     is_valid;
+
+    while (it != nullptr) {
+        is_valid                     = true;
+        const esp_partition_t * part = esp_partition_get(it);
+
+        if (part->label != nullptr && part->label[0] != '\0') {
+            // check if part is valid and not empty
+            esp_partition_read(part, 0, &buffer, 8);
+            if (buffer == 0xFFFFFFFFFFFFFFFF) {
+                // skip this partition
+                is_valid = false;
+            }
+        }
+
+        // get the version from the NVS store, and add to map
+        if (is_valid) {
+            PartitionInfo info;
+            info.size = part->size / 1024; // in KB
+            if (EMSESP::nvs_.isKey(part->label)) {
+                info.version = EMSESP::nvs_.getString(part->label).c_str();
+            } else {
+                info.version = ""; // no version, empty string
+            }
+            partition_info_[part->label] = info;
+        }
+
+        it = esp_partition_next(it);
+    }
+    esp_partition_iterator_release(it);
+#endif
+}
+
+// sets the partition to use on the next restart
+bool System::set_partition(const char * partitionname) {
+#ifdef EMSESP_STANDALONE
+    return true;
+#else
+    if (partitionname == nullptr) {
+        return false;
+    }
+
+    // Find the partition by label
+    esp_partition_iterator_t it = esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_ANY, partitionname);
+    if (it == nullptr) {
+        return false; // partition not found
+    }
+
+    const esp_partition_t * partition = esp_partition_get(it);
+    esp_partition_iterator_release(it);
+
+    if (partition == nullptr) {
+        return false;
+    }
+
+    // Set the boot partition
+    esp_err_t err = esp_ota_set_boot_partition(partition);
+    if (err != ESP_OK) {
+        return false;
+    }
+
+    // initiate the restart
+    EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED);
+    return true;
+#endif
+}
+
 // restart EMS-ESP
 // app0 or app1
 // on 16MB we have the additional boot and factory partitions
@@ -302,24 +398,25 @@ void System::system_restart(const char * partitionname) {
     if (partitionname != nullptr) {
         // Factory partition - label will be "factory"
         const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
-        if (partition && strcmp(partition->label, partitionname) == 0) {
+        if (partition && !strcmp(partition->label, partitionname)) {
             esp_ota_set_boot_partition(partition);
         } else
             // try and find the partition by name
-            if (strcmp(esp_ota_get_running_partition()->label, partitionname) != 0) {
+            if (strcmp(esp_ota_get_running_partition()->label, partitionname)) {
+                // not found, get next one in cycle
                 partition = esp_ota_get_next_update_partition(nullptr);
                 if (!partition) {
                     LOG_ERROR("Partition '%s' not found", partitionname);
                     return;
                 }
-                if (strcmp(partition->label, partitionname) != 0 && strcmp(partitionname, "boot") != 0) {
+                if (strcmp(partition->label, partitionname) && strcmp(partitionname, "boot") != 0) {
                     partition = esp_ota_get_next_update_partition(partition);
                     if (!partition || strcmp(partition->label, partitionname)) {
                         LOG_ERROR("Partition '%s' not found", partitionname);
                         return;
                     }
                 }
-                // check if partition is empty
+                // error if partition is empty
                 uint64_t buffer;
                 esp_partition_read(partition, 0, &buffer, 8);
                 if (buffer == 0xFFFFFFFFFFFFFFFF) {
@@ -456,6 +553,8 @@ void System::store_settings(WebSettings & settings) {
 
 // Starts up the UART Serial bridge
 void System::start() {
+    get_partition_info(); // get the partition info
+
 #ifndef EMSESP_STANDALONE
     // disable bluetooth module
     // periph_module_disable(PERIPH_BT_MODULE);
@@ -916,7 +1015,7 @@ void System::led_monitor() {
             // handle the step events (on odd numbers 3,5,7,etc). see if we need to turn on a LED
             //  1 flash is the EMS bus is not connected
             //  2 flashes if the network (wifi or ethernet) is not connected
-            //  3 flashes is both the bus and the network are not connected. Then you know you're truly f*cked.
+            //  3 flashes is both the bus and the network are not connected
             if (led_type_) {
                 if (led_flash_step_ == 3) {
                     if ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
@@ -1027,7 +1126,6 @@ void System::show_system(uuid::console::Shell & shell) {
 #ifndef EMSESP_STANDALONE
     shell.printfln(" Platform: %s (%s)", EMSESP_PLATFORM, ESP.getChipModel());
     shell.printfln(" Model: %s", getBBQKeesGatewayDetails().c_str());
-    shell.printfln(" Partition: %s", esp_ota_get_running_partition()->label);
 #endif
     shell.printfln(" Language: %s", locale().c_str());
     shell.printfln(" Board profile: %s", board_profile().c_str());
@@ -1055,21 +1153,33 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.printfln(" PSRAM: not available");
     }
     // GPIOs
-    shell.printf(" GPIO in use (%d):", used_gpios_.size());
+    shell.println(" GPIOs:");
+    shell.printf("  in use:");
     for (const auto & gpio : used_gpios_) {
         shell.printf(" %d", gpio);
     }
-    shell.println();
+    shell.printfln(" (total %d)", used_gpios_.size());
     auto available = available_gpios();
-    shell.printf(" GPIO available (%d):", available.size());
+    shell.printf("  available:");
     for (const auto & gpio : available) {
         shell.printf(" %d", gpio);
     }
-    shell.println();
-    shell.println();
+    shell.printfln(" (total %d)", available.size());
+    // List all partitions and their version info
+    shell.println(" Partitions:");
+    for (const auto & partition : partition_info_) {
+        if (partition.second.version.empty()) {
+            continue; // no version, empty string
+        }
+        shell.printfln("  %s: v%s (%d KB) %s",
+                       partition.first.c_str(),
+                       partition.second.version.c_str(),
+                       partition.second.size,
+                       (esp_ota_get_running_partition()->label == partition.first) ? " ** active **" : "");
+    }
 
+    shell.println();
     shell.println("Network:");
-
     switch (WiFi.status()) {
     case WL_IDLE_STATUS:
         shell.printfln(" Status: Idle");

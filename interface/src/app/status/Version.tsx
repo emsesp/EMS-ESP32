@@ -269,6 +269,52 @@ const InstallDialog = memo(
   }
 );
 
+const InstallPreviousDialog = memo(
+  ({
+    openInstallPreviousDialog,
+    version,
+    partition,
+    LL,
+    onClose,
+    onInstall
+  }: {
+    openInstallPreviousDialog: boolean;
+    version: string;
+    partition: string;
+    LL: TranslationFunctions;
+    onClose: () => void;
+    onInstall: (partition: string) => void;
+  }) => {
+    return (
+      <Dialog sx={dialogStyle} open={openInstallPreviousDialog} onClose={onClose}>
+        <DialogTitle>Rollback Firmware</DialogTitle>
+        <DialogContent dividers>
+          <Typography mb={2}>{LL.INSTALL_VERSION(LL.INSTALL(), version)}</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            startIcon={<CancelIcon />}
+            variant="outlined"
+            onClick={onClose}
+            color="secondary"
+          >
+            {LL.CANCEL()}
+          </Button>
+
+          <Button
+            startIcon={<WarningIcon color="warning" />}
+            variant="outlined"
+            onClick={() => onInstall(partition)}
+            color="primary"
+          >
+            {LL.INSTALL()}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
+  }
+);
+
 // Helper function moved outside component
 const getPlatform = (data: VersionData): string => {
   return `${data.esp_platform}-${data.flash_chip_size >= 16384 ? '16MB' : '4MB'}${data.psram ? '+' : ''}`;
@@ -281,6 +327,12 @@ const Version = () => {
   // State management
   const [restarting, setRestarting] = useState<boolean>(false);
   const [openInstallDialog, setOpenInstallDialog] = useState<boolean>(false);
+
+  const [previousVersion, setPreviousVersion] = useState<string>('');
+  const [previousPartition, setPreviousPartition] = useState<string>('');
+  const [openInstallPreviousDialog, setOpenInstallPreviousDialog] =
+    useState<boolean>(false);
+
   const [usingDevVersion, setUsingDevVersion] = useState<boolean>(false);
   const [fetchDevVersion, setFetchDevVersion] = useState<boolean>(false);
   const [devUpgradeAvailable, setDevUpgradeAvailable] = useState<boolean>(false);
@@ -298,6 +350,11 @@ const Version = () => {
     setDevUpgradeAvailable(data.dev_upgradeable);
     setStableUpgradeAvailable(data.stable_upgradeable);
   });
+
+  const { send: sendSetPartition } = useRequest(
+    (partition: string) => callAction({ action: 'setPartition', param: partition }),
+    { immediate: false }
+  );
 
   const {
     data,
@@ -331,12 +388,12 @@ const Version = () => {
   );
 
   const doRestart = useCallback(async () => {
-    setRestarting(true);
     await sendAPI({ device: 'system', cmd: 'restart', id: 0 }).catch(
       (error: Error) => {
         toast.error(error.message);
       }
     );
+    setRestarting(true);
   }, [sendAPI]);
 
   const installFirmwareURL = useCallback(
@@ -344,10 +401,26 @@ const Version = () => {
       await sendUploadURL(url).catch((error: Error) => {
         toast.error(error.message);
       });
-      setRestarting(true);
+      doRestart();
     },
     [sendUploadURL]
   );
+
+  const installPreviousFirmware = useCallback(
+    async (partition: string) => {
+      await sendSetPartition(partition).catch((error: Error) => {
+        toast.error(error.message);
+      });
+      setRestarting(true);
+    },
+    [sendSetPartition]
+  );
+
+  const showPreviousDialog = useCallback((version: string, partition: string) => {
+    setOpenInstallPreviousDialog(true);
+    setPreviousVersion(version);
+    setPreviousPartition(partition);
+  }, []);
 
   const showFirmwareDialog = useCallback((useDevVersion: boolean) => {
     setFetchDevVersion(useDevVersion);
@@ -356,6 +429,10 @@ const Version = () => {
 
   const closeInstallDialog = useCallback(() => {
     setOpenInstallDialog(false);
+  }, []);
+
+  const closeInstallPreviousDialog = useCallback(() => {
+    setOpenInstallPreviousDialog(false);
   }, []);
 
   const handleVersionInfoClose = useCallback(() => {
@@ -532,6 +609,28 @@ const Version = () => {
                 }}
               >
                 <Grid size={{ xs: 4, md: 2 }}>
+                  <Typography color="secondary">{LL.PREVIOUS_VERSIONS()}</Typography>
+                </Grid>
+                <Grid size={{ xs: 8, md: 10 }}>
+                  {data.partitions.map((partition) => (
+                    <Typography key={partition.partition} mb={1}>
+                      v{partition.version} ({partition.partition}: {partition.size}
+                      {' KB'})
+                      <Button
+                        sx={{ ml: 2 }}
+                        variant="outlined"
+                        size="small"
+                        onClick={() =>
+                          showPreviousDialog(partition.version, partition.partition)
+                        }
+                      >
+                        {LL.INSTALL()}
+                      </Button>
+                    </Typography>
+                  ))}
+                </Grid>
+
+                <Grid size={{ xs: 4, md: 2 }}>
                   <Typography color="secondary">{LL.STABLE()}</Typography>
                 </Grid>
                 <Grid size={{ xs: 8, md: 10 }}>
@@ -590,6 +689,14 @@ const Version = () => {
                 LL={LL}
                 onClose={closeInstallDialog}
                 onInstall={installFirmwareURL}
+              />
+              <InstallPreviousDialog
+                openInstallPreviousDialog={openInstallPreviousDialog}
+                version={previousVersion}
+                partition={previousPartition}
+                LL={LL}
+                onClose={closeInstallPreviousDialog}
+                onInstall={installPreviousFirmware}
               />
               <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
                 {LL.UPLOAD()}

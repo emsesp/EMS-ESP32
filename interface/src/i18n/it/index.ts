@@ -355,7 +355,8 @@ const it: Translation = {
   SWITCH_RELEASE_TYPE: 'Cambia in {0} rilascio',
   FIRMWARE_VERSION_INFO: 'Informazioni sulla versione del firmware',
   NO_DATA: 'Nessun dato',
-  USER_PROFILE: 'Profilo utente'
+  USER_PROFILE: 'Profilo utente',
+  PREVIOUS_VERSIONS: 'Versioni precedenti'
 };
 
 export default it;

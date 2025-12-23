@@ -355,7 +355,8 @@ const nl: Translation = {
   SWITCH_RELEASE_TYPE: 'Switch naar {0} release',
   FIRMWARE_VERSION_INFO: 'Informatie over firmwareversie',
   NO_DATA: 'Geen data',
-  USER_PROFILE: 'Gebruikersprofiel'
+  USER_PROFILE: 'Gebruikersprofiel',
+  PREVIOUS_VERSIONS: 'Vorige versies'
 };
 
 export default nl;
