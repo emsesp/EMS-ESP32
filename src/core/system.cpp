@@ -322,18 +322,16 @@ void System::get_partition_info() {
     // Partitions can be app0, app1, factory, boot
     esp_partition_iterator_t it = esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_ANY, nullptr);
     uint64_t                 buffer;
-    bool                     is_valid;
 
     while (it != nullptr) {
-        is_valid                     = true;
-        const esp_partition_t * part = esp_partition_get(it);
+        bool                    is_valid = true;
+        const esp_partition_t * part     = esp_partition_get(it);
 
         if (part->label != nullptr && part->label[0] != '\0') {
             // check if part is valid and not empty
             esp_partition_read(part, 0, &buffer, 8);
             if (buffer == 0xFFFFFFFFFFFFFFFF) {
-                // skip this partition
-                is_valid = false;
+                is_valid = false; // skip this partition
             }
         }
 
@@ -1764,8 +1762,8 @@ std::string System::get_metrics_prometheus() {
         bool                                             has_nested_objects = false;
 
         for (JsonPair p : obj) {
-            std::string key         = p.key().c_str();
-            std::string path        = prefix.empty() ? key : prefix + "." + key;
+            std::string key = p.key().c_str();
+            // std::string path        = prefix.empty() ? key : prefix + "." + key;
             std::string metric_name = prefix.empty() ? key : prefix + "_" + key;
 
             if (should_ignore(prefix, key)) {
@@ -1898,25 +1896,23 @@ std::string System::get_metrics_prometheus() {
         if (!local_info_labels.empty() && !prefix.empty() && !has_nested_objects) {
             std::string info_metric = "emsesp_" + sanitize_name(prefix) + "_info";
             if (seen_metrics.find(info_metric) == seen_metrics.end()) {
-                result += "# HELP " + info_metric + " info\n";
-                result += "# TYPE " + info_metric + " gauge\n";
+                result += "# HELP " + info_metric + " info\n# TYPE " + info_metric + " gauge\n";
                 seen_metrics[info_metric] = true;
             }
 
             result += info_metric;
-            if (!local_info_labels.empty()) {
-                result += "{";
-                bool first = true;
-                for (const auto & label : local_info_labels) {
-                    if (!first) {
-                        result += ", ";
-                    }
-                    result += label.first + "=\"" + escape_label(label.second) + "\"";
-                    first = false;
+            result += '{';
+            for (size_t i = 0; i < local_info_labels.size(); ++i) {
+                if (i > 0) {
+                    result += ", ";
                 }
-                result += "}";
+                const auto & label = local_info_labels[i];
+                result += label.first;
+                result += "=\"";
+                result += escape_label(label.second);
+                result += '"';
             }
-            result += " 1\n";
+            result += "} 1\n";
         }
     };
 
