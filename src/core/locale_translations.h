@@ -362,7 +362,7 @@ MAKE_TRANSLATION(haclimate, "haclimate", "mqtt discovery current room temperatur
 
 // Entity translations: tag, mqtt, en, de, nl, sv, pl, no, fr, tr, it, sk, cz
 // Boiler
-MAKE_TRANSLATION(chimneysweeper, "chimneysweeper", "chimney sweeper", "Schornsteinfeger", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(chimneysweeper, "chimneysweeper", "chimney sweeper", "Schornsteinfeger", "", "", "", "", "", "", "kominár", "") // TODO translate
 MAKE_TRANSLATION(reset, "reset", "reset", "Reset", "Reset", "Återställ", "kasowanie komunikatu", "nullstill", "reset", "Sıfırla", "Reset", "reset", "reset")
 MAKE_TRANSLATION(forceHeatingOff, "heatingoff", "force heating off", "Heizen abschalten", "", "Uppvärmning avstängd", "wymuś wyłączenie grzania", "", "", "", "", "vynútené vypnutie kúrenia", "vynutit vypnutí vytápění") // TODO translate
 MAKE_TRANSLATION(wwtapactivated, "tapactivated", "turn on/off", "Durchlauferhitzer aktiv", "zet aan/uit", "på/av", "system przygotowywania", "Varmtvann active", "ecs activée", "aç/kapa", "commuta on/off", "zapnúť/vypnúť", "zapnout/vypnout")
