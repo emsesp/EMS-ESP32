@@ -60,6 +60,13 @@ const DEV_RELNOTES_URL =
   'https://github.com/emsesp/EMS-ESP32/blob/dev/CHANGELOG_LATEST.md';
 
 // Types for better type safety
+interface PartitionData {
+  partition: string;
+  version: string;
+  install_date?: string;
+  size: number;
+}
+
 interface VersionData {
   emsesp_version: string;
   arduino_version: string;
@@ -67,6 +74,9 @@ interface VersionData {
   flash_chip_size: number;
   psram: boolean;
   build_flags?: string;
+  partition: string;
+  partitions: PartitionData[];
+  developer_mode: boolean;
 }
 
 interface UpgradeCheckData {
@@ -294,7 +304,7 @@ const InstallDialog = memo(
     return (
       <Dialog sx={dialogStyle} open={openInstallDialog} onClose={onClose}>
         <DialogTitle>
-          {`${LL.UPDATE()} ${fetchDevVersion ? LL.DEVELOPMENT() : LL.STABLE()} Firmware`}
+          {`${LL.INSTALL()} ${fetchDevVersion ? LL.DEVELOPMENT() : LL.STABLE()} Firmware`}
         </DialogTitle>
         <DialogContent dividers>
           <Typography mb={2}>
@@ -357,7 +367,9 @@ const InstallPartitionDialog = memo(
   }) => {
     return (
       <Dialog sx={dialogStyle} open={openInstallPartitionDialog} onClose={onClose}>
-        <DialogTitle>Rollback Firmware</DialogTitle>
+        <DialogTitle>
+          {LL.INSTALL()} {LL.STORED_VERSIONS()}
+        </DialogTitle>
         <DialogContent dividers>
           <Typography mb={2}>{LL.INSTALL_VERSION(LL.INSTALL(), version)}</Typography>
         </DialogContent>
@@ -457,9 +469,11 @@ const Version = () => {
 
   // Memoized values
   const platform = useMemo(() => (data ? getPlatform(data) : ''), [data]);
-  const isDev = useMemo(
-    () => data?.emsesp_version.includes('dev') ?? false,
-    [data?.emsesp_version]
+
+  // Memoize filtered partitions to avoid recomputing on every render
+  const otherPartitions = useMemo(
+    () => data?.partitions.filter((p) => p.partition !== data.partition) ?? [],
+    [data]
   );
 
   const setPartitionVersionInfo = useCallback(
@@ -496,7 +510,7 @@ const Version = () => {
       });
       await doRestart();
     },
-    [sendUploadURL]
+    [sendUploadURL, doRestart]
   );
 
   const installPartitionFirmware = useCallback(
@@ -702,7 +716,7 @@ const Version = () => {
                   alignItems: 'baseline'
                 }}
               >
-                {data.partitions.length > 0 && data.developer_mode && (
+                {otherPartitions.length > 0 && data.developer_mode && (
                   <>
                     <Grid size={{ xs: 4, md: 2 }}>
                       <Typography color="secondary">
@@ -710,40 +724,36 @@ const Version = () => {
                       </Typography>
                     </Grid>
                     <Grid size={{ xs: 8, md: 10 }}>
-                      {data.partitions
-                        .filter(
-                          (partition) => partition.partition !== data.partition
-                        )
-                        .map((partition) => (
-                          <Typography key={partition.partition} mb={1}>
-                            {partition.version}
-                            <IconButton
-                              onClick={() =>
-                                setPartitionVersionInfo(partition.partition)
-                              }
-                              aria-label={LL.FIRMWARE_VERSION_INFO()}
-                            >
-                              <InfoOutlinedIcon
-                                color="primary"
-                                sx={{ fontSize: 18 }}
-                              />
-                            </IconButton>
-                            <Button
-                              sx={{ ml: 0 }}
-                              variant="outlined"
-                              size="small"
-                              onClick={() =>
-                                showPartitionDialog(
-                                  partition.version,
-                                  partition.partition,
-                                  partition.install_date ?? ''
-                                )
-                              }
-                            >
-                              {LL.INSTALL()}
-                            </Button>
-                          </Typography>
-                        ))}
+                      {otherPartitions.map((partition) => (
+                        <Typography key={partition.partition} mb={1}>
+                          {partition.version}
+                          <IconButton
+                            onClick={() =>
+                              setPartitionVersionInfo(partition.partition)
+                            }
+                            aria-label={LL.FIRMWARE_VERSION_INFO()}
+                          >
+                            <InfoOutlinedIcon
+                              color="primary"
+                              sx={{ fontSize: 18 }}
+                            />
+                          </IconButton>
+                          <Button
+                            sx={{ ml: 0 }}
+                            variant="outlined"
+                            size="small"
+                            onClick={() =>
+                              showPartitionDialog(
+                                partition.version,
+                                partition.partition,
+                                partition.install_date ?? ''
+                              )
+                            }
+                          >
+                            {LL.INSTALL()}
+                          </Button>
+                        </Typography>
+                      ))}
                     </Grid>
                   </>
                 )}
@@ -834,7 +844,6 @@ const Version = () => {
     loadData,
     LL,
     platform,
-    isDev,
     internetLive,
     latestVersion,
     latestDevVersion,
@@ -848,7 +857,15 @@ const Version = () => {
     handleVersionInfoClose,
     closeInstallDialog,
     installFirmwareURL,
-    doRestart
+    doRestart,
+    otherPartitions,
+    setPartitionVersionInfo,
+    showPartitionDialog,
+    partitionVersion,
+    partition,
+    firmwareSize,
+    closeInstallPartitionDialog,
+    installPartitionFirmware
   ]);
 
   return <SectionContent>{restarting ? <SystemMonitor /> : content}</SectionContent>;
