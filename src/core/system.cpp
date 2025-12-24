@@ -1820,8 +1820,8 @@ std::string System::get_metrics_prometheus() {
         bool                                             has_nested_objects = false;
 
         for (JsonPair p : obj) {
-            std::string key = p.key().c_str();
-            // std::string path        = prefix.empty() ? key : prefix + "." + key;
+            std::string key         = p.key().c_str();
+            std::string path        = prefix.empty() ? key : prefix + "." + key;
             std::string metric_name = prefix.empty() ? key : prefix + "_" + key;
 
             if (should_ignore(prefix, key)) {
@@ -1954,23 +1954,25 @@ std::string System::get_metrics_prometheus() {
         if (!local_info_labels.empty() && !prefix.empty() && !has_nested_objects) {
             std::string info_metric = "emsesp_" + sanitize_name(prefix) + "_info";
             if (seen_metrics.find(info_metric) == seen_metrics.end()) {
-                result += "# HELP " + info_metric + " info\n# TYPE " + info_metric + " gauge\n";
+                result += "# HELP " + info_metric + " info\n";
+                result += "# TYPE " + info_metric + " gauge\n";
                 seen_metrics[info_metric] = true;
             }
 
             result += info_metric;
-            result += '{';
-            for (size_t i = 0; i < local_info_labels.size(); ++i) {
-                if (i > 0) {
-                    result += ", ";
+            if (!local_info_labels.empty()) {
+                result += "{";
+                bool first = true;
+                for (const auto & label : local_info_labels) {
+                    if (!first) {
+                        result += ", ";
+                    }
+                    result += label.first + "=\"" + escape_label(label.second) + "\"";
+                    first = false;
                 }
-                const auto & label = local_info_labels[i];
-                result += label.first;
-                result += "=\"";
-                result += escape_label(label.second);
-                result += '"';
+                result += "}";
             }
-            result += "} 1\n";
+            result += " 1\n";
         }
     };
 
