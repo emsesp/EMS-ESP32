@@ -356,7 +356,7 @@ const no: Translation = {
   FIRMWARE_VERSION_INFO: 'Informasjon om firmwareversjon',
   NO_DATA: 'Ingen data',
   USER_PROFILE: 'Brukerprofil',
-  PREVIOUS_VERSIONS: 'Tidligere versjoner'
+  STORED_VERSIONS: 'Lagret versjoner'
 };
 
 export default no;

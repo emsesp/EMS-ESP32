@@ -146,12 +146,12 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
         root["has_partition"] = false;
     }
 
-    // get the partition info
+    // get the partition info for each partition, including the running one
     EMSESP::system_.get_partition_info();
     JsonArray partitions = root["partitions"].to<JsonArray>();
     for (const auto & partition : EMSESP::system_.partition_info_) {
-        // Skip partition if it's the running one, version is empty, or size is 0
-        if (partition.first == (const char *)esp_ota_get_running_partition()->label || partition.second.version.empty() || partition.second.size == 0) {
+        // Skip partition if it has no version, or it's size is 0
+        if (partition.second.version.empty() || partition.second.size == 0) {
             continue;
         }
         JsonObject part      = partitions.add<JsonObject>();

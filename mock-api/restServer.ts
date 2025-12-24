@@ -109,6 +109,12 @@ let system_status = {
   has_partition: true,
   partitions: [
     {
+      partition: 'app0', // this one is active
+      version: 'XX.XX.XX', // defined later
+      install_date: '2025-03-01T13:29:13.999Z',
+      size: 4672
+    },
+    {
       partition: 'app1',
       version: '3.7.3-dev.41',
       install_date: '2025-03-01T13:29:13.999Z',
@@ -179,6 +185,7 @@ switch (version_test as number) {
 
 // set the version
 system_status.emsesp_version = THIS_VERSION;
+system_status.partitions[0].version = THIS_VERSION; // app0
 
 // set the ESP platform - using ESP32 will disable OTA and automatic version downloading
 let emulate_esp: string;

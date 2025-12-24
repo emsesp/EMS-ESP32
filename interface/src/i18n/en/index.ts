@@ -356,7 +356,7 @@ const en: Translation = {
   FIRMWARE_VERSION_INFO: 'Firmware Version Information',
   NO_DATA: 'No data',
   USER_PROFILE: 'User Profile',
-  PREVIOUS_VERSIONS: 'Previous Versions'
+  STORED_VERSIONS: 'Stored Versions'
 };
 
 export default en;

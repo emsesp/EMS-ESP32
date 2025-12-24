@@ -356,7 +356,7 @@ const nl: Translation = {
   FIRMWARE_VERSION_INFO: 'Informatie over firmwareversie',
   NO_DATA: 'Geen data',
   USER_PROFILE: 'Gebruikersprofiel',
-  PREVIOUS_VERSIONS: 'Vorige versies'
+  STORED_VERSIONS: 'Opgeslagen versies'
 };
 
 export default nl;

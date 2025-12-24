@@ -356,7 +356,7 @@ const sk: Translation = {
   FIRMWARE_VERSION_INFO: 'Informácie o verzii firmware',
   NO_DATA: 'Žiadne dáta',
   USER_PROFILE: 'Profil používateľa',
-  PREVIOUS_VERSIONS: 'Predchádzajúce verzie'
+  STORED_VERSIONS: 'Uložené verzie'
 };
 
 export default sk;

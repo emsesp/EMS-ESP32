@@ -86,8 +86,9 @@ const VersionInfoDialog = memo(
     showVersionInfo,
     latestVersion,
     latestDevVersion,
-    previousVersion,
+    partitionVersion,
     partition,
+    currentPartition,
     size,
     locale,
     LL,
@@ -96,8 +97,9 @@ const VersionInfoDialog = memo(
     showVersionInfo: number;
     latestVersion?: VersionInfo;
     latestDevVersion?: VersionInfo;
-    previousVersion?: VersionInfo | undefined;
+    partitionVersion?: VersionInfo | undefined;
     partition: string;
+    currentPartition: string;
     size: number;
     locale: string;
     LL: TranslationFunctions;
@@ -107,13 +109,13 @@ const VersionInfoDialog = memo(
 
     const isStable = showVersionInfo === 1;
     const isDev = showVersionInfo === 2;
-    const isPrevious = showVersionInfo === 3;
+    const isPartition = showVersionInfo === 3;
 
     const version = isStable
       ? latestVersion
       : isDev
         ? latestDevVersion
-        : previousVersion;
+        : partitionVersion;
     const relNotesUrl = isStable
       ? STABLE_RELNOTES_URL
       : isDev
@@ -135,18 +137,17 @@ const VersionInfoDialog = memo(
                     borderBottom: 'none',
                     pr: 1,
                     py: 0.5,
-                    fontSize: 13,
-                    width: 140
+                    fontSize: 13
                   }}
                 >
-                  {isPrevious ? LL.TYPE(0) : LL.RELEASE_TYPE()}
+                  {LL.VERSION()}
                 </TableCell>
                 <TableCell sx={{ borderBottom: 'none', py: 0.5, fontSize: 13 }}>
-                  {isStable
-                    ? LL.STABLE()
-                    : isDev
-                      ? LL.DEVELOPMENT()
-                      : 'Partition ' + LL.VERSION()}
+                  {isPartition
+                    ? typeof version === 'string'
+                      ? version
+                      : version?.name
+                    : version?.name}
                 </TableCell>
               </TableRow>
               <TableRow sx={{ height: 24, borderBottom: 'none' }}>
@@ -158,20 +159,22 @@ const VersionInfoDialog = memo(
                     borderBottom: 'none',
                     pr: 1,
                     py: 0.5,
-                    fontSize: 13
+                    fontSize: 13,
+                    width: 140
                   }}
                 >
-                  {LL.VERSION()}
+                  {isPartition ? LL.TYPE(0) : LL.RELEASE_TYPE()}
                 </TableCell>
                 <TableCell sx={{ borderBottom: 'none', py: 0.5, fontSize: 13 }}>
-                  {isPrevious
-                    ? typeof version === 'string'
-                      ? version
-                      : version?.name
-                    : version?.name}
+                  {partition === currentPartition && LL.ACTIVE() + ' '}
+                  {isStable
+                    ? LL.STABLE()
+                    : isDev
+                      ? LL.DEVELOPMENT()
+                      : 'Partition ' + LL.VERSION()}
                 </TableCell>
               </TableRow>
-              {isPrevious && (
+              {isPartition && (
                 <TableRow sx={{ height: 24, borderBottom: 'none' }}>
                   <TableCell
                     component="th"
@@ -191,7 +194,7 @@ const VersionInfoDialog = memo(
                   </TableCell>
                 </TableRow>
               )}
-              {isPrevious && (
+              {isPartition && (
                 <TableRow sx={{ height: 24, borderBottom: 'none' }}>
                   <TableCell
                     component="th"
@@ -224,7 +227,7 @@ const VersionInfoDialog = memo(
                       fontSize: 13
                     }}
                   >
-                    {isPrevious ? 'Install Date' : 'Build Date'}
+                    {isPartition ? 'Install Date' : 'Build Date'}
                   </TableCell>
                   <TableCell sx={{ borderBottom: 'none', py: 0.5, fontSize: 13 }}>
                     {prettyDateTime(locale, new Date(version.published_at))}
@@ -235,7 +238,7 @@ const VersionInfoDialog = memo(
           </Table>
         </DialogContent>
         <DialogActions>
-          {!isPrevious && (
+          {!isPartition && (
             <Button
               variant="outlined"
               component="a"
@@ -336,16 +339,16 @@ const InstallDialog = memo(
   }
 );
 
-const InstallPreviousDialog = memo(
+const InstallPartitionDialog = memo(
   ({
-    openInstallPreviousDialog,
+    openInstallPartitionDialog,
     version,
     partition,
     LL,
     onClose,
     onInstall
   }: {
-    openInstallPreviousDialog: boolean;
+    openInstallPartitionDialog: boolean;
     version: string;
     partition: string;
     LL: TranslationFunctions;
@@ -353,7 +356,7 @@ const InstallPreviousDialog = memo(
     onInstall: (partition: string) => void;
   }) => {
     return (
-      <Dialog sx={dialogStyle} open={openInstallPreviousDialog} onClose={onClose}>
+      <Dialog sx={dialogStyle} open={openInstallPartitionDialog} onClose={onClose}>
         <DialogTitle>Rollback Firmware</DialogTitle>
         <DialogContent dividers>
           <Typography mb={2}>{LL.INSTALL_VERSION(LL.INSTALL(), version)}</Typography>
@@ -395,11 +398,11 @@ const Version = () => {
   const [restarting, setRestarting] = useState<boolean>(false);
   const [openInstallDialog, setOpenInstallDialog] = useState<boolean>(false);
 
-  const [previousVersion, setPreviousVersion] = useState<VersionInfo | undefined>(
+  const [partitionVersion, setPartitionVersion] = useState<VersionInfo | undefined>(
     undefined
   );
-  const [previousPartition, setPreviousPartition] = useState<string>('');
-  const [openInstallPreviousDialog, setOpenInstallPreviousDialog] =
+  const [partition, setPartition] = useState<string>('');
+  const [openInstallPartitionDialog, setOpenInstallPartitionDialog] =
     useState<boolean>(false);
 
   const [usingDevVersion, setUsingDevVersion] = useState<boolean>(false);
@@ -409,7 +412,7 @@ const Version = () => {
     useState<boolean>(false);
   const [internetLive, setInternetLive] = useState<boolean>(false);
   const [downloadOnly, setDownloadOnly] = useState<boolean>(false);
-  const [showVersionInfo, setShowVersionInfo] = useState<number>(0); // 1 = stable, 2 = dev, 3 = previous
+  const [showVersionInfo, setShowVersionInfo] = useState<number>(0); // 1 = stable, 2 = dev, 3 = partition
   const [firmwareSize, setFirmwareSize] = useState<number>(0);
 
   const { send: sendCheckUpgrade } = useRequest(
@@ -459,14 +462,22 @@ const Version = () => {
     [data?.emsesp_version]
   );
 
-  const setPreviousVersionInfo = useCallback(
-    (version: string, partition: string, size: number, install_date: string) => {
+  const setPartitionVersionInfo = useCallback(
+    (partition: string) => {
       setShowVersionInfo(3);
-      setPreviousVersion({ name: version, published_at: install_date });
-      setPreviousPartition(partition);
-      setFirmwareSize(size);
+
+      // search for the partition in the data.partitions array
+      const partitionData = data?.partitions.find((p) => p.partition === partition);
+      if (partitionData) {
+        setPartitionVersion({
+          name: partitionData.version,
+          published_at: partitionData.install_date ?? ''
+        });
+        setPartition(partitionData.partition);
+        setFirmwareSize(partitionData.size);
+      }
     },
-    []
+    [data]
   );
 
   const doRestart = useCallback(async () => {
@@ -488,7 +499,7 @@ const Version = () => {
     [sendUploadURL]
   );
 
-  const installPreviousFirmware = useCallback(
+  const installPartitionFirmware = useCallback(
     async (partition: string) => {
       await sendSetPartition(partition).catch((error: Error) => {
         toast.error(error.message);
@@ -498,11 +509,11 @@ const Version = () => {
     [sendSetPartition]
   );
 
-  const showPreviousDialog = useCallback(
+  const showPartitionDialog = useCallback(
     (version: string, partition: string, install_date: string) => {
-      setOpenInstallPreviousDialog(true);
-      setPreviousVersion({ name: version, published_at: install_date });
-      setPreviousPartition(partition);
+      setOpenInstallPartitionDialog(true);
+      setPartitionVersion({ name: version, published_at: install_date });
+      setPartition(partition);
     },
     []
   );
@@ -516,14 +527,14 @@ const Version = () => {
     setOpenInstallDialog(false);
   }, []);
 
-  const closeInstallPreviousDialog = useCallback(() => {
-    setOpenInstallPreviousDialog(false);
+  const closeInstallPartitionDialog = useCallback(() => {
+    setOpenInstallPartitionDialog(false);
   }, []);
 
   const handleVersionInfoClose = useCallback(() => {
     setShowVersionInfo(0);
-    setPreviousVersion(undefined);
-    setPreviousPartition('');
+    setPartitionVersion(undefined);
+    setPartition('');
   }, []);
 
   // check upgrades - only once when both versions are available
@@ -620,7 +631,6 @@ const Version = () => {
           <Grid
             container
             direction="row"
-            // rowSpacing={0}
             sx={{
               justifyContent: 'flex-start',
               alignItems: 'baseline'
@@ -638,7 +648,7 @@ const Version = () => {
                   </Typography>
                 )}
                 <IconButton
-                  onClick={() => setShowVersionInfo(isDev ? 2 : 1)}
+                  onClick={() => setPartitionVersionInfo(data.partition)}
                   aria-label={LL.FIRMWARE_VERSION_INFO()}
                 >
                   <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
@@ -696,45 +706,44 @@ const Version = () => {
                   <>
                     <Grid size={{ xs: 4, md: 2 }}>
                       <Typography color="secondary">
-                        {LL.PREVIOUS_VERSIONS()}
+                        {LL.STORED_VERSIONS()}
                       </Typography>
                     </Grid>
                     <Grid size={{ xs: 8, md: 10 }}>
-                      {data.partitions.map((partition) => (
-                        <Typography key={partition.partition} mb={1}>
-                          {partition.version}
-                          <IconButton
-                            onClick={() =>
-                              setPreviousVersionInfo(
-                                partition.version,
-                                partition.partition ?? '',
-                                partition.size ?? '',
-                                partition.install_date ?? ''
-                              )
-                            }
-                            aria-label={LL.FIRMWARE_VERSION_INFO()}
-                          >
-                            <InfoOutlinedIcon
-                              color="primary"
-                              sx={{ fontSize: 18 }}
-                            />
-                          </IconButton>
-                          <Button
-                            sx={{ ml: 0 }}
-                            variant="outlined"
-                            size="small"
-                            onClick={() =>
-                              showPreviousDialog(
-                                partition.version,
-                                partition.partition,
-                                partition.install_date ?? ''
-                              )
-                            }
-                          >
-                            {LL.INSTALL()}
-                          </Button>
-                        </Typography>
-                      ))}
+                      {data.partitions
+                        .filter(
+                          (partition) => partition.partition !== data.partition
+                        )
+                        .map((partition) => (
+                          <Typography key={partition.partition} mb={1}>
+                            {partition.version}
+                            <IconButton
+                              onClick={() =>
+                                setPartitionVersionInfo(partition.partition)
+                              }
+                              aria-label={LL.FIRMWARE_VERSION_INFO()}
+                            >
+                              <InfoOutlinedIcon
+                                color="primary"
+                                sx={{ fontSize: 18 }}
+                              />
+                            </IconButton>
+                            <Button
+                              sx={{ ml: 0 }}
+                              variant="outlined"
+                              size="small"
+                              onClick={() =>
+                                showPartitionDialog(
+                                  partition.version,
+                                  partition.partition,
+                                  partition.install_date ?? ''
+                                )
+                              }
+                            >
+                              {LL.INSTALL()}
+                            </Button>
+                          </Typography>
+                        ))}
                     </Grid>
                   </>
                 )}
@@ -783,9 +792,10 @@ const Version = () => {
                 showVersionInfo={showVersionInfo}
                 latestVersion={latestVersion}
                 latestDevVersion={latestDevVersion}
-                previousVersion={previousVersion}
+                partitionVersion={partitionVersion}
                 locale={locale}
-                partition={previousPartition}
+                partition={partition}
+                currentPartition={data?.partition ?? ''}
                 size={firmwareSize}
                 LL={LL}
                 onClose={handleVersionInfoClose}
@@ -801,13 +811,13 @@ const Version = () => {
                 onClose={closeInstallDialog}
                 onInstall={installFirmwareURL}
               />
-              <InstallPreviousDialog
-                openInstallPreviousDialog={openInstallPreviousDialog}
-                version={previousVersion?.name || ''}
-                partition={previousPartition}
+              <InstallPartitionDialog
+                openInstallPartitionDialog={openInstallPartitionDialog}
+                version={partitionVersion?.name || ''}
+                partition={partition}
                 LL={LL}
-                onClose={closeInstallPreviousDialog}
-                onInstall={installPreviousFirmware}
+                onClose={closeInstallPartitionDialog}
+                onInstall={installPartitionFirmware}
               />
               <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
                 {LL.UPLOAD()}
