@@ -116,7 +116,7 @@ let system_status = {
     },
     {
       partition: 'app1',
-      version: '3.7.3-dev.41',
+      version: '3.7.3-dev.40',
       install_date: '2025-03-01T13:29:13.999Z',
       size: 4672
     },
@@ -139,8 +139,8 @@ let system_status = {
 let DEV_VERSION_IS_UPGRADEABLE: boolean;
 let STABLE_VERSION_IS_UPGRADEABLE: boolean;
 let THIS_VERSION: string;
-let LATEST_STABLE_VERSION = '3.7.3';
-let LATEST_DEV_VERSION = '3.7.4-dev.2';
+let LATEST_STABLE_VERSION = '3.8.0';
+let LATEST_DEV_VERSION = '3.8.1-dev.2';
 
 // scenarios for testing versioning
 let version_test = 0; // on latest stable, or switch to dev
@@ -171,13 +171,13 @@ switch (version_test as number) {
     break;
   case 3:
     // upgrade dev to latest, or switch to stable
-    THIS_VERSION = '3.7.4-dev.3';
+    THIS_VERSION = '3.8.0-dev.3';
     STABLE_VERSION_IS_UPGRADEABLE = false;
     DEV_VERSION_IS_UPGRADEABLE = true;
     break;
   case 4:
     // downgrade to an older dev, or switch back to stable
-    THIS_VERSION = '3.7.3-dev.1';
+    THIS_VERSION = '3.8.0-dev.1';
     STABLE_VERSION_IS_UPGRADEABLE = true;
     DEV_VERSION_IS_UPGRADEABLE = false;
     break;
@@ -300,10 +300,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-          old_custom_name +
-          ') with new (' +
-          new_custom_name +
-          ')'
+        old_custom_name +
+        ') with new (' +
+        new_custom_name +
+        ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -399,15 +399,15 @@ function check_upgrade(version: string) {
 
     console.log(
       'Upgrade this version (' +
-        THIS_VERSION +
-        ') to dev (' +
-        dev_version +
-        ') is ' +
-        (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-        ' and to stable (' +
-        stable_version +
-        ') is ' +
-        (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
+      THIS_VERSION +
+      ') to dev (' +
+      dev_version +
+      ') is ' +
+      (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+      ' and to stable (' +
+      stable_version +
+      ') is ' +
+      (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
     );
     data = {
       emsesp_version: THIS_VERSION,

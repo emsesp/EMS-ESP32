@@ -2,7 +2,7 @@
 
 For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 
-## [3.7.3]
+## [3.8.0]
 
 ## Added
 
@@ -38,6 +38,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - added LWT (Last Will and Testament) to MQTT entities in Home Assistant
 - added api/metrics endpoint for prometheus integration by @gr3enk [#2774](https://github.com/emsesp/EMS-ESP32/pull/2774)
 - added RTL8201 to eth phy list [#2800](https://github.com/emsesp/EMS-ESP32/issues/2800)
+- added partitions to Web UI Version page, so previous firmware versions can be installed [#2837](https://github.com/emsesp/EMS-ESP32/issues/2837)
 
 ## Fixed
 
@@ -59,6 +60,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - syslog timestamp [#2704](https://github.com/emsesp/EMS-ESP32/issues/2704)
 - fixed FS format command [#2720](https://github.com/emsesp/EMS-ESP32/discussions/2720)
 - dhw priority setting to boiler and mixer, telegrams 0x2CC, 0x2CD, etc.
+- check for valid GPIOs when board profile is changed [#2841](https://github.com/emsesp/EMS-ESP32/issues/2841)
 
 ## Changed
 
@@ -81,3 +83,4 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - move vectors and lists to PSRAM
 - removed unused last topic/payload echo-check
 - added Home Assistant device details to MQTT Discovery for all devices
+- device_class and state_class changes for HA MQTT Discovery [#2825](https://github.com/emsesp/EMS-ESP32/issues/2825)
