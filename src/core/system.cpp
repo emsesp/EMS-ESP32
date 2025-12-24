@@ -301,10 +301,11 @@ void System::get_partition_info() {
 
 #ifdef EMSESP_STANDALONE
     // dummy data for standalone mode
-    partition_info_["app0"]    = {EMSESP_APP_VERSION, 0};
-    partition_info_["app1"]    = {"", 0};
-    partition_info_["factory"] = {"", 0};
-    partition_info_["boot"]    = {"", 0};
+    // version, size, install_date
+    partition_info_["app0"]    = {EMSESP_APP_VERSION, 0, ""};
+    partition_info_["app1"]    = {"", 0, ""};
+    partition_info_["factory"] = {"", 0, ""};
+    partition_info_["boot"]    = {"", 0, ""};
 #else
 
     auto current_partition = (const char *)esp_ota_get_running_partition()->label;
@@ -337,14 +338,27 @@ void System::get_partition_info() {
 
         // get the version from the NVS store, and add to map
         if (is_valid) {
-            PartitionInfo info;
-            info.size = part->size / 1024; // in KB
+            PartitionInfo p_info;
+            p_info.size = part->size / 1024; // set size in KB
+
+            // get version from NVS, if not found, use empty string
             if (EMSESP::nvs_.isKey(part->label)) {
-                info.version = EMSESP::nvs_.getString(part->label).c_str();
+                p_info.version = EMSESP::nvs_.getString(part->label).c_str();
             } else {
-                info.version = ""; // no version, empty string
+                p_info.version = "";
             }
-            partition_info_[part->label] = info;
+
+            // get install date from NTP if active and add
+            if (ntp_connected_) {
+                char   time_string[25];
+                time_t now = time(nullptr) - uuid::get_uptime_sec();
+                strftime(time_string, sizeof(time_string), "%FT%T%z", localtime(&now));
+                p_info.install_date = time_string;
+            } else {
+                p_info.install_date = "";
+            }
+
+            partition_info_[part->label] = p_info;
         }
 
         it = esp_partition_next(it);

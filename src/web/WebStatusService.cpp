@@ -154,10 +154,11 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
         if (partition.first == (const char *)esp_ota_get_running_partition()->label || partition.second.version.empty() || partition.second.size == 0) {
             continue;
         }
-        JsonObject part   = partitions.add<JsonObject>();
-        part["partition"] = partition.first;
-        part["version"]   = partition.second.version;
-        part["size"]      = partition.second.size;
+        JsonObject part      = partitions.add<JsonObject>();
+        part["partition"]    = partition.first;
+        part["version"]      = partition.second.version;
+        part["size"]         = partition.second.size;
+        part["install_date"] = partition.second.install_date;
     }
 
     root["developer_mode"] = EMSESP::system_.developer_mode();

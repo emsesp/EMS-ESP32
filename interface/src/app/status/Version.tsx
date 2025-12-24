@@ -86,6 +86,9 @@ const VersionInfoDialog = memo(
     showVersionInfo,
     latestVersion,
     latestDevVersion,
+    previousVersion,
+    partition,
+    size,
     locale,
     LL,
     onClose
@@ -93,6 +96,9 @@ const VersionInfoDialog = memo(
     showVersionInfo: number;
     latestVersion?: VersionInfo;
     latestDevVersion?: VersionInfo;
+    previousVersion?: VersionInfo | undefined;
+    partition: string;
+    size: number;
     locale: string;
     LL: TranslationFunctions;
     onClose: () => void;
@@ -100,8 +106,19 @@ const VersionInfoDialog = memo(
     if (showVersionInfo === 0) return null;
 
     const isStable = showVersionInfo === 1;
-    const version = isStable ? latestVersion : latestDevVersion;
-    const relNotesUrl = isStable ? STABLE_RELNOTES_URL : DEV_RELNOTES_URL;
+    const isDev = showVersionInfo === 2;
+    const isPrevious = showVersionInfo === 3;
+
+    const version = isStable
+      ? latestVersion
+      : isDev
+        ? latestDevVersion
+        : previousVersion;
+    const relNotesUrl = isStable
+      ? STABLE_RELNOTES_URL
+      : isDev
+        ? DEV_RELNOTES_URL
+        : '';
 
     return (
       <Dialog sx={dialogStyle} open={showVersionInfo !== 0} onClose={onClose}>
@@ -119,13 +136,17 @@ const VersionInfoDialog = memo(
                     pr: 1,
                     py: 0.5,
                     fontSize: 13,
-                    width: 90
+                    width: 140
                   }}
                 >
-                  {LL.TYPE(0)}
+                  {isPrevious ? LL.TYPE(0) : LL.RELEASE_TYPE()}
                 </TableCell>
                 <TableCell sx={{ borderBottom: 'none', py: 0.5, fontSize: 13 }}>
-                  {isStable ? LL.STABLE() : LL.DEVELOPMENT()}
+                  {isStable
+                    ? LL.STABLE()
+                    : isDev
+                      ? LL.DEVELOPMENT()
+                      : 'Partition ' + LL.VERSION()}
                 </TableCell>
               </TableRow>
               <TableRow sx={{ height: 24, borderBottom: 'none' }}>
@@ -143,9 +164,53 @@ const VersionInfoDialog = memo(
                   {LL.VERSION()}
                 </TableCell>
                 <TableCell sx={{ borderBottom: 'none', py: 0.5, fontSize: 13 }}>
-                  {version?.name}
+                  {isPrevious
+                    ? typeof version === 'string'
+                      ? version
+                      : version?.name
+                    : version?.name}
                 </TableCell>
               </TableRow>
+              {isPrevious && (
+                <TableRow sx={{ height: 24, borderBottom: 'none' }}>
+                  <TableCell
+                    component="th"
+                    scope="row"
+                    sx={{
+                      color: 'lightblue',
+                      borderBottom: 'none',
+                      pr: 1,
+                      py: 0.5,
+                      fontSize: 13
+                    }}
+                  >
+                    Partition
+                  </TableCell>
+                  <TableCell sx={{ borderBottom: 'none', py: 0.5, fontSize: 13 }}>
+                    {partition}
+                  </TableCell>
+                </TableRow>
+              )}
+              {isPrevious && (
+                <TableRow sx={{ height: 24, borderBottom: 'none' }}>
+                  <TableCell
+                    component="th"
+                    scope="row"
+                    sx={{
+                      color: 'lightblue',
+                      borderBottom: 'none',
+                      pr: 1,
+                      py: 0.5,
+                      fontSize: 13
+                    }}
+                  >
+                    Size
+                  </TableCell>
+                  <TableCell sx={{ borderBottom: 'none', py: 0.5, fontSize: 13 }}>
+                    {size} KB
+                  </TableCell>
+                </TableRow>
+              )}
               {version?.published_at && (
                 <TableRow sx={{ height: 24, borderBottom: 'none' }}>
                   <TableCell
@@ -159,7 +224,7 @@ const VersionInfoDialog = memo(
                       fontSize: 13
                     }}
                   >
-                    Build Date
+                    {isPrevious ? 'Install Date' : 'Build Date'}
                   </TableCell>
                   <TableCell sx={{ borderBottom: 'none', py: 0.5, fontSize: 13 }}>
                     {prettyDateTime(locale, new Date(version.published_at))}
@@ -170,15 +235,17 @@ const VersionInfoDialog = memo(
           </Table>
         </DialogContent>
         <DialogActions>
-          <Button
-            variant="outlined"
-            component="a"
-            href={relNotesUrl}
-            target="_blank"
-            color="primary"
-          >
-            Changelog
-          </Button>
+          {!isPrevious && (
+            <Button
+              variant="outlined"
+              component="a"
+              href={relNotesUrl}
+              target="_blank"
+              color="primary"
+            >
+              Changelog
+            </Button>
+          )}
           <Button variant="outlined" onClick={onClose} color="secondary">
             {LL.CLOSE()}
           </Button>
@@ -328,7 +395,9 @@ const Version = () => {
   const [restarting, setRestarting] = useState<boolean>(false);
   const [openInstallDialog, setOpenInstallDialog] = useState<boolean>(false);
 
-  const [previousVersion, setPreviousVersion] = useState<string>('');
+  const [previousVersion, setPreviousVersion] = useState<VersionInfo | undefined>(
+    undefined
+  );
   const [previousPartition, setPreviousPartition] = useState<string>('');
   const [openInstallPreviousDialog, setOpenInstallPreviousDialog] =
     useState<boolean>(false);
@@ -340,7 +409,8 @@ const Version = () => {
     useState<boolean>(false);
   const [internetLive, setInternetLive] = useState<boolean>(false);
   const [downloadOnly, setDownloadOnly] = useState<boolean>(false);
-  const [showVersionInfo, setShowVersionInfo] = useState<number>(0);
+  const [showVersionInfo, setShowVersionInfo] = useState<number>(0); // 1 = stable, 2 = dev, 3 = previous
+  const [firmwareSize, setFirmwareSize] = useState<number>(0);
 
   const { send: sendCheckUpgrade } = useRequest(
     (versions: string) => callAction({ action: 'checkUpgrade', param: versions }),
@@ -389,6 +459,16 @@ const Version = () => {
     [data?.emsesp_version]
   );
 
+  const setPreviousVersionInfo = useCallback(
+    (version: string, partition: string, size: number, install_date: string) => {
+      setShowVersionInfo(3);
+      setPreviousVersion({ name: version, published_at: install_date });
+      setPreviousPartition(partition);
+      setFirmwareSize(size);
+    },
+    []
+  );
+
   const doRestart = useCallback(async () => {
     await sendAPI({ device: 'system', cmd: 'restart', id: 0 }).catch(
       (error: Error) => {
@@ -418,11 +498,14 @@ const Version = () => {
     [sendSetPartition]
   );
 
-  const showPreviousDialog = useCallback((version: string, partition: string) => {
-    setOpenInstallPreviousDialog(true);
-    setPreviousVersion(version);
-    setPreviousPartition(partition);
-  }, []);
+  const showPreviousDialog = useCallback(
+    (version: string, partition: string, install_date: string) => {
+      setOpenInstallPreviousDialog(true);
+      setPreviousVersion({ name: version, published_at: install_date });
+      setPreviousPartition(partition);
+    },
+    []
+  );
 
   const showFirmwareDialog = useCallback((useDevVersion: boolean) => {
     setFetchDevVersion(useDevVersion);
@@ -439,6 +522,8 @@ const Version = () => {
 
   const handleVersionInfoClose = useCallback(() => {
     setShowVersionInfo(0);
+    setPreviousVersion(undefined);
+    setPreviousPartition('');
   }, []);
 
   // check upgrades - only once when both versions are available
@@ -485,7 +570,7 @@ const Version = () => {
               {LL.LATEST_VERSION(usingDevVersion ? LL.DEVELOPMENT() : LL.STABLE())}
             </span>
             <Button
-              sx={{ ml: 2 }}
+              sx={{ ml: 1 }}
               variant="outlined"
               size="small"
               onClick={() => showFirmwareDialog(showingDev)}
@@ -500,7 +585,7 @@ const Version = () => {
 
       return (
         <Button
-          sx={{ ml: 2 }}
+          sx={{ ml: 1 }}
           variant="outlined"
           color={choice === LL.UPDATE_AVAILABLE() ? 'success' : 'warning'}
           size="small"
@@ -528,14 +613,14 @@ const Version = () => {
     return (
       <>
         <Box p={2} border="1px solid grey" borderRadius={2}>
-          <Typography mb={2} variant="h6" color="primary">
+          <Typography mb={1} variant="h6" color="primary">
             {LL.THIS_VERSION()}
           </Typography>
 
           <Grid
             container
             direction="row"
-            rowSpacing={1}
+            // rowSpacing={0}
             sx={{
               justifyContent: 'flex-start',
               alignItems: 'baseline'
@@ -552,6 +637,12 @@ const Version = () => {
                     &nbsp; &#40;{data.build_flags}&#41;
                   </Typography>
                 )}
+                <IconButton
+                  onClick={() => setShowVersionInfo(isDev ? 2 : 1)}
+                  aria-label={LL.FIRMWARE_VERSION_INFO()}
+                >
+                  <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
+                </IconButton>
               </Typography>
             </Grid>
 
@@ -584,20 +675,11 @@ const Version = () => {
                 </Typography>
               </Typography>
             </Grid>
-
-            <Grid size={{ xs: 4, md: 2 }}>
-              <Typography color="secondary">{LL.RELEASE_TYPE()}</Typography>
-            </Grid>
-            {isDev ? (
-              <Typography>{LL.DEVELOPMENT()}</Typography>
-            ) : (
-              <Typography>{LL.STABLE()}</Typography>
-            )}
           </Grid>
 
           {internetLive ? (
             <>
-              <Typography mt={2} mb={2} variant="h6" color="primary">
+              <Typography mt={4} mb={1} variant="h6" color="primary">
                 {LL.AVAILABLE_VERSION()}
               </Typography>
 
@@ -620,17 +702,32 @@ const Version = () => {
                     <Grid size={{ xs: 8, md: 10 }}>
                       {data.partitions.map((partition) => (
                         <Typography key={partition.partition} mb={1}>
-                          v{partition.version} ({partition.partition}:{' '}
-                          {partition.size}
-                          {' KB'})
+                          {partition.version}
+                          <IconButton
+                            onClick={() =>
+                              setPreviousVersionInfo(
+                                partition.version,
+                                partition.partition ?? '',
+                                partition.size ?? '',
+                                partition.install_date ?? ''
+                              )
+                            }
+                            aria-label={LL.FIRMWARE_VERSION_INFO()}
+                          >
+                            <InfoOutlinedIcon
+                              color="primary"
+                              sx={{ fontSize: 18 }}
+                            />
+                          </IconButton>
                           <Button
-                            sx={{ ml: 2 }}
+                            sx={{ ml: 0 }}
                             variant="outlined"
                             size="small"
                             onClick={() =>
                               showPreviousDialog(
                                 partition.version,
-                                partition.partition
+                                partition.partition,
+                                partition.install_date ?? ''
                               )
                             }
                           >
@@ -686,7 +783,10 @@ const Version = () => {
                 showVersionInfo={showVersionInfo}
                 latestVersion={latestVersion}
                 latestDevVersion={latestDevVersion}
+                previousVersion={previousVersion}
                 locale={locale}
+                partition={previousPartition}
+                size={firmwareSize}
                 LL={LL}
                 onClose={handleVersionInfoClose}
               />
@@ -703,7 +803,7 @@ const Version = () => {
               />
               <InstallPreviousDialog
                 openInstallPreviousDialog={openInstallPreviousDialog}
-                version={previousVersion}
+                version={previousVersion?.name || ''}
                 partition={previousPartition}
                 LL={LL}
                 onClose={closeInstallPreviousDialog}

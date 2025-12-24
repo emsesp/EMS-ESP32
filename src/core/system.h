@@ -77,6 +77,7 @@ enum FUSE_VALUE : uint8_t { ALL = 0, MFG = 1, MODEL = 2, BOARD = 3, REV = 4, BAT
 struct PartitionInfo {
     std::string version;
     size_t      size;
+    std::string install_date; // optional, only available if NTP is connected
 };
 
 class System {
@@ -370,9 +371,10 @@ class System {
 
     static void remove_gpio(uint8_t pin, bool also_system = false); // remove a gpio from both valid (optional) and used lists
 
-    // Partition info map: partition name -> {version, size}
+    // Partition info map: partition name -> {version, size, install_date}
     std::map<std::string, PartitionInfo, std::less<>, AllocatorPSRAM<std::pair<const std::string, PartitionInfo>>> partition_info_;
-    static bool                                                                                                    set_partition(const char * partitionname);
+
+    static bool set_partition(const char * partitionname);
 
   private:
     static uuid::log::Logger logger_;

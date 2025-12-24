@@ -111,16 +111,18 @@ let system_status = {
     {
       partition: 'app1',
       version: '3.7.3-dev.41',
+      install_date: '2025-03-01T13:29:13.999Z',
       size: 4672
     },
     {
       partition: 'factory',
       version: '3.7.3-dev.39',
+      install_date: '2025-03-01T13:29:13.999Z',
       size: 4672
     }
   ],
   // partitions: [],
-  developer_mode: false,
+  developer_mode: true,
   model: '',
   // model: 'BBQKees Electronics EMS Gateway E32 V2 (E32 V2.0 P3/2024011)',
   // status: 0,
@@ -291,10 +293,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-        old_custom_name +
-        ') with new (' +
-        new_custom_name +
-        ')'
+          old_custom_name +
+          ') with new (' +
+          new_custom_name +
+          ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -390,15 +392,15 @@ function check_upgrade(version: string) {
 
     console.log(
       'Upgrade this version (' +
-      THIS_VERSION +
-      ') to dev (' +
-      dev_version +
-      ') is ' +
-      (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-      ' and to stable (' +
-      stable_version +
-      ') is ' +
-      (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
+        THIS_VERSION +
+        ') to dev (' +
+        dev_version +
+        ') is ' +
+        (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+        ' and to stable (' +
+        stable_version +
+        ') is ' +
+        (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
     );
     data = {
       emsesp_version: THIS_VERSION,
