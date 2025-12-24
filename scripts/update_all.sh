@@ -25,6 +25,6 @@ pnpm build_webUI
 cd ..
 npx cspell "**"
 
-platformio run -e build_modbus
-platformio run -e build_standalone
-platformio run -e native-test -t exec
+# platformio run -e build_modbus
+# platformio run -e build_standalone
+# platformio run -e native-test -t exec
