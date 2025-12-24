@@ -146,7 +146,7 @@ void RxService::add(uint8_t * data, uint8_t length) {
     }
 
     // ignore src==0, https://github.com/emsesp/EMS-ESP32/issues/2378
-    if (!(data[0] & 0x7F)) {
+    if (!(data[0] & 0x7F) && bus_connected()) {
         LOG_WARNING("Invalid source: %s", Helpers::data_to_hex(data, length).c_str()); // include CRC
         return;
     }

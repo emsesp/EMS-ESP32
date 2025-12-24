@@ -37,6 +37,12 @@
 #include <uuid/log.h>
 #include <PButton.h>
 
+#if ESP_ARDUINO_VERSION_MAJOR < 3
+#define EMSESP_RGB_WRITE neopixelWrite
+#else
+#define EMSESP_RGB_WRITE rgbLedWrite
+#endif
+
 #if CONFIG_IDF_TARGET_ESP32
 // there is no official API available on the original ESP32
 extern "C" {
@@ -56,7 +62,7 @@ using uuid::console::Shell;
 
 #define EMSESP_CUSTOMSUPPORT_FILE "/config/customSupport.json"
 
-#define RGB_LED_BRIGHTNESS 20
+#define RGB_LED_BRIGHTNESS 20 // 255 is max brightness
 
 namespace emsesp {
 
@@ -391,9 +397,26 @@ class System {
     static void               button_OnDblClick(PButton & b);
     static void               button_OnLongPress(PButton & b);
     static void               button_OnVLongPress(PButton & b);
-    static constexpr uint32_t BUTTON_Debounce        = 40;    // Debounce period to prevent flickering when pressing or releasing the button (in ms)
-    static constexpr uint32_t BUTTON_DblClickDelay   = 250;   // Max period between clicks for a double click event (in ms)
-    static constexpr uint32_t BUTTON_LongPressDelay  = 9500;  // Hold period for a long press event (in ms) - 10 seconds
+    static constexpr uint32_t BUTTON_Debounce      = 40;  // Debounce period to prevent flickering when pressing or releasing the button (in ms)
+    static constexpr uint32_t BUTTON_DblClickDelay = 250; // Max period between clicks for a double click event (in ms)
+
+// LED flash timer for factory reset
+#ifndef EMSESP_STANDALONE
+    static hw_timer_t * led_flash_timer_;
+#endif
+    static void IRAM_ATTR   led_flash_timer_isr();
+    static volatile uint8_t led_flash_count_;
+    static volatile bool    led_flash_state_;
+    static uint8_t          led_flash_gpio_;
+    static uint8_t          led_flash_type_;
+    static void             start_led_flash();
+    static void             stop_led_flash();
+
+#ifdef EMSESP_DEBUG
+    static constexpr uint32_t BUTTON_LongPressDelay = 2000; // Hold period for a long press event (in ms) - 2 seconds, for debugging
+#else
+    static constexpr uint32_t BUTTON_LongPressDelay = 9500; // Hold period for a long press event (in ms) - ~10 seconds
+#endif
     static constexpr uint32_t BUTTON_VLongPressDelay = 20000; // Hold period for a very long press event (in ms) - 20 seconds
 
     // healthcheck
@@ -402,8 +425,8 @@ class System {
 #else
     static constexpr uint32_t SYSTEM_CHECK_FREQUENCY = 5000; // do a system check every 5 seconds
 #endif
-    static constexpr uint32_t HEALTHCHECK_LED_LONG_DUARATION  = 1500;
-    static constexpr uint32_t HEALTHCHECK_LED_FLASH_DUARATION = 150;
+    static constexpr uint32_t HEALTHCHECK_LED_LONG_DUARATION  = 1500;     // 1.5 seconds
+    static constexpr uint32_t HEALTHCHECK_LED_FLASH_DUARATION = 150;      // 150ms
     static constexpr uint8_t  HEALTHCHECK_NO_BUS              = (1 << 0); // 1
     static constexpr uint8_t  HEALTHCHECK_NO_NETWORK          = (1 << 1); // 2
     static constexpr uint8_t  LED_ON                          = HIGH;     // LED on

@@ -92,10 +92,20 @@ uuid::syslog::SyslogService System::syslog_;
 uuid::log::Logger System::logger_{F_(system), uuid::log::Facility::KERN};
 
 // init statics
-PButton                                       System::myPButton_;
-bool                                          System::test_set_all_active_ = false;
-uint32_t                                      System::max_alloc_mem_;
-uint32_t                                      System::heap_mem_;
+PButton  System::myPButton_;
+bool     System::test_set_all_active_ = false;
+uint32_t System::max_alloc_mem_;
+uint32_t System::heap_mem_;
+
+// LED flash timer for factory reset
+volatile uint8_t System::led_flash_count_ = 0;
+volatile bool    System::led_flash_state_ = false;
+uint8_t          System::led_flash_gpio_  = 0;
+uint8_t          System::led_flash_type_  = 0;
+#ifndef EMSESP_STANDALONE
+hw_timer_t * System::led_flash_timer_ = nullptr;
+#endif
+
 std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::valid_system_gpios_;
 std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::used_gpios_;
 std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::snapshot_used_gpios_;
@@ -405,6 +415,11 @@ bool System::set_partition(const char * partitionname) {
 // app0 or app1
 // on 16MB we have the additional boot and factory partitions
 void System::system_restart(const char * partitionname) {
+#ifdef EMSESP_DEBUG
+    EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_NORMAL);
+    return;
+#endif
+
 #ifndef EMSESP_STANDALONE
     // see if we are forcing a partition to use
     if (partitionname != nullptr) {
@@ -449,8 +464,9 @@ void System::system_restart(const char * partitionname) {
     store_nvs_values(); // save any NVS values
     Shell::loop_all();  // flush log to output
     Mqtt::disconnect(); // gracefully disconnect MQTT, needed for QOS1
+    EMSuart::stop();    // stop UART so there is no interference
     delay(1000);        // wait 1 second
-    ESP.restart();
+    ESP.restart();      // ka-boom!
 #else
     EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_NORMAL);
     if (partitionname != nullptr) {
@@ -640,15 +656,71 @@ void System::button_OnDblClick(PButton & b) {
     EMSESP::esp32React.getNetworkSettingsService()->callUpdateHandlers(); // in case we've changed ssid or password
 }
 
+// LED flash timer interrupt service routine
+void IRAM_ATTR System::led_flash_timer_isr() {
+    led_flash_state_ = !led_flash_state_; // Toggle LED state
+
+    if (led_flash_state_) {
+        led_flash_type_ ? EMSESP_RGB_WRITE(led_flash_gpio_, 255, 255, 255) : digitalWrite(led_flash_gpio_, LED_ON); // white, on
+    } else {
+        led_flash_type_ ? EMSESP_RGB_WRITE(led_flash_gpio_, 0, 0, 0) : digitalWrite(led_flash_gpio_, !LED_ON); // off
+    }
+
+    // Increment flash count, 2 toggles = 1 flash cycle. And stop after 5 seconds (5000ms/100ms = 50)
+    if (led_flash_count_++ >= 50) {
+        stop_led_flash();
+    }
+}
+
+// Start the LED flash timer
+void System::start_led_flash() {
+#ifndef EMSESP_STANDALONE
+    // Don't start if already running
+    if (led_flash_timer_ != nullptr) {
+        return;
+    }
+
+    // Get LED settings
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
+        led_flash_type_ = settings.led_type;
+        led_flash_gpio_ = settings.led_gpio;
+    });
+
+    // Reset counter and state
+    led_flash_count_ = 0;
+    led_flash_state_ = false;
+
+    led_flash_timer_ = timerBegin(0, 80, true);                         // Create and start timer (prescaler 80 for 1us tick, counting up)
+    timerAttachInterrupt(led_flash_timer_, &led_flash_timer_isr, true); // Attach interrupt handler
+    timerAlarmWrite(led_flash_timer_, 100000, true);                    // Set alarm to trigger every 100ms
+    timerAlarmEnable(led_flash_timer_);                                 // Enable the alarm
+#endif
+}
+
+// Stop the LED flash timer
+void System::stop_led_flash() {
+#ifndef EMSESP_STANDALONE
+    if (led_flash_timer_ != nullptr) {
+        // Stop and detach timer
+        timerAlarmDisable(led_flash_timer_);
+        timerDetachInterrupt(led_flash_timer_);
+        timerEnd(led_flash_timer_);
+        led_flash_timer_ = nullptr;
+        led_flash_type_ ? EMSESP_RGB_WRITE(led_flash_gpio_, 0, 0, 0) : digitalWrite(led_flash_gpio_, !LED_ON); // Turn off LED
+    }
+#endif
+}
+
 // button long press
 void System::button_OnLongPress(PButton & b) {
     LOG_NOTICE("Button pressed - long press - perform factory reset");
+    start_led_flash(); // Start the non-blocking LED flash timer for 5 seconds
 #ifndef EMSESP_STANDALONE
     System::command_format(nullptr, 0);
 #endif
 }
 
-// button indefinite press - do nothing for now
+// button indefinite press - boots to boot partition
 void System::button_OnVLongPress(PButton & b) {
     LOG_NOTICE("Button pressed - very long press - restart from factory/boot partition");
     EMSESP::system_.system_restart("boot");
@@ -673,20 +745,12 @@ void System::button_init() {
 // set the LED to on or off when in normal operating mode
 void System::led_init() {
     // disabled old led port before setting new one
-#if ESP_ARDUINO_VERSION_MAJOR < 3
-    led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
-#else
-    led_type_ ? rgbLedWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
-#endif
+    led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
 
     if ((led_gpio_)) { // 0 means disabled
         if (led_type_) {
             // rgb LED WS2812B, use Neopixel
-#if ESP_ARDUINO_VERSION_MAJOR < 3
-            neopixelWrite(led_gpio_, 0, 0, 0);
-#else
-            rgbLedWrite(led_gpio_, 0, 0, 0);
-#endif
+            EMSESP_RGB_WRITE(led_gpio_, 0, 0, 0);
         } else {
             pinMode(led_gpio_, OUTPUT);
             digitalWrite(led_gpio_, !LED_ON); // start with LED off
@@ -945,20 +1009,12 @@ void System::system_check() {
             if (healthcheck_ == 0) {
                 // everything is healthy, show LED permanently on or off depending on setting
                 if (led_gpio_) {
-#if ESP_ARDUINO_VERSION_MAJOR < 3
-                    led_type_ ? neopixelWrite(led_gpio_, 0, hide_led_ ? 0 : RGB_LED_BRIGHTNESS, 0) : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
-#else
-                    led_type_ ? rgbLedWrite(led_gpio_, 0, hide_led_ ? 0 : RGB_LED_BRIGHTNESS, 0) : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
-#endif
+                    led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 0, hide_led_ ? 0 : RGB_LED_BRIGHTNESS, 0) : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
                 }
             } else {
                 // turn off LED so we're ready to the flashes
                 if (led_gpio_) {
-#if ESP_ARDUINO_VERSION_MAJOR < 3
-                    led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
-#else
-                    led_type_ ? rgbLedWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
-#endif
+                    led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
                 }
             }
         }
@@ -991,15 +1047,27 @@ void System::commands_init() {
 // 2 x flash = the network (wifi or ethernet) is not connected
 // 3 x flash = both EMS bus and network are failing. This is a critical error!
 void System::led_monitor() {
+    // check if button is busy or has been pressed - LED on to white
+    static bool button_busy_ = false;
+    if (button_busy_ != myPButton_.button_busy()) {
+        button_busy_ = myPButton_.button_busy();
+        if (button_busy_) {
+            led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 255, 255, 255) : digitalWrite(led_gpio_, LED_ON); // on
+        } else {
+            led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON); // off
+        }
+    }
+
     // we only need to run the LED healthcheck if there are errors
-    if (!healthcheck_ || !led_gpio_) {
+    if (!healthcheck_ || !led_gpio_ || button_busy_) {
         return; // all good
     }
 
     static uint32_t led_long_timer_  = 1; // 1 will kick it off immediately
     static uint32_t led_short_timer_ = 0;
     static uint8_t  led_flash_step_  = 0; // 0 means we're not in the short flash timer
-    auto            current_time     = uuid::get_uptime();
+
+    auto current_time = uuid::get_uptime();
 
     // first long pause before we start flashing
     if (led_long_timer_ && (uint32_t)(current_time - led_long_timer_) >= HEALTHCHECK_LED_LONG_DUARATION) {
@@ -1018,11 +1086,7 @@ void System::led_monitor() {
             // reset the whole sequence
             led_long_timer_ = uuid::get_uptime();
             led_flash_step_ = 0;
-#if ESP_ARDUINO_VERSION_MAJOR < 3
-            led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON); // LED off
-#else
-            led_type_ ? rgbLedWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON); // LED off
-#endif
+            led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON); // LED off
         } else if (led_flash_step_ % 2) {
             // handle the step events (on odd numbers 3,5,7,etc). see if we need to turn on a LED
             //  1 flash is the EMS bus is not connected
@@ -1031,33 +1095,17 @@ void System::led_monitor() {
             if (led_type_) {
                 if (led_flash_step_ == 3) {
                     if ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
-#if ESP_ARDUINO_VERSION_MAJOR < 3
-                        neopixelWrite(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
-#else
-                        rgbLedWrite(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
-#endif
+                        EMSESP_RGB_WRITE(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
                     } else if ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS) {
-#if ESP_ARDUINO_VERSION_MAJOR < 3
-                        neopixelWrite(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
-#else
-                        rgbLedWrite(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
-#endif
+                        EMSESP_RGB_WRITE(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
                     }
                 }
                 if (led_flash_step_ == 5 && (healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
-#if ESP_ARDUINO_VERSION_MAJOR < 3
-                    neopixelWrite(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
-#else
-                    rgbLedWrite(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
-#endif
+                    EMSESP_RGB_WRITE(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
                 }
                 if ((led_flash_step_ == 7) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)
                     && ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS)) {
-#if ESP_ARDUINO_VERSION_MAJOR < 3
-                    neopixelWrite(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
-#else
-                    rgbLedWrite(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
-#endif
+                    EMSESP_RGB_WRITE(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
                 }
             } else {
                 if ((led_flash_step_ == 3)
@@ -1075,17 +1123,13 @@ void System::led_monitor() {
                 }
 
                 if (led_on_) {
-                    digitalWrite(led_gpio_, LED_ON); // LED off
+                    digitalWrite(led_gpio_, LED_ON); // LED on
                 }
             }
         } else {
             // turn the led off after the flash, on even number count
             if (led_on_) {
-#if ESP_ARDUINO_VERSION_MAJOR < 3
-                led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
-#else
-                led_type_ ? rgbLedWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
-#endif
+                led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
                 led_on_ = false;
             }
         }
