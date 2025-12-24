@@ -26,7 +26,7 @@ class DummySettings {
   public:
     // SYSTEM
     bool bandwidth20 = false;
-    bool nosleep     = false;
+    bool nosleep     = true;
 
     // MQTT
     uint16_t publish_time       = 10;
