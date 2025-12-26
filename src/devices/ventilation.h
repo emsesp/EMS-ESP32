@@ -51,68 +51,6 @@ class Ventilation : public EMSdevice {
     bool set_ventMode(const char * value, const int8_t id);
     bool set_bypass(const char * value, const int8_t id);
     bool set_filter(const char * value, const int8_t id);
-
-
-    /* Sensors:
-    outdoor air temp (außenluft)
-    supply air temp (zuluft)
-    extract air temp (abluft)
-    away air temp (fortluft)
-    supply blower (zuluftgebläse)
-    supply blower mod (zuluftebläse drehzahl)
-    away blower (abluftgebläse)
-    away blower mod (abluftgebläse drehzahl)
-    Anschlussvariante
-    el. vorheizer
-    ext. el. vorheizreg.
-    nachheiz zulufttemp
-    mischer öffnen
-    mischer schließen
-    mischerposition
-    zuluft temp soll
-    zuluft temp ist
-    leistung nachheizreg.
-    erdwärmetauscher klappe
-    solekreispumpe
-    abluftfeuchte
-    abluftqualität
-    raumluftfechte
-    raumluftqualität
-    luftfeuchte fernbed. 1..4
-    */
-    /* Parameters:
-    Gerätetyp,
-    Nennvolumentstrom,
-    Filterlaufzeit 1-6-12 m
-    Filterwechsel confirm CMD
-    Lüftungsfrostschutz: _el._preheat_, Disballance | Interval
-    Ext. Frostschutz: on/_off_
-    Bypass _on_, off
-    min. outdoortemp 12 15 19 °C
-    max. outdoortemp 21-24-30 C
-    Enthalpie Wärmetauscher instaliert nein-ja
-    Feuchteschutz AUs/ 1-24 h
-    Lüfterstufe 1-4, Drehzahlanpassung
-    ext. Luftfeuchtefühler inst.? _nein_, ja
-    Abluftfeuchtefühler inst.? _nein_, ja
-    Luftfeuchte Fernbed. _nein_, ja
-    Luftfeuchte: trocken, _normal_, feucht
-    Abluftqualitätsfühler inst. _ja_, nein
-    ext. Luftqualfühl? _nein_, ja
-    Lufqualität: ausreichend, _normal_, hoch
-    el. Nachheizregister inst. _nein_, ja
-    Nachheiz-Zuluft temp: 10-22-30 °C
-    Erdwärmetauscher inst? _nein_, Luft, Sole
-    Taster Funktion: nein, einschlafen, intensiv, bypass, party, kamin
-    ext. Störung aktivieren: _nein_, ja, invertiert
-    Dauer einschlafen: 15-60-120 min
-    Dauer Intensiv: 5-15-60 min
-    Dauer Bypass Abluft: 1-8-12 h
-    Dauer Bypass: 1-8-12 h
-    Dauer PArty 1-8-12 h
-    Dauer Kamin: 5-10-15 min
-    Volumenstromabgleich 90-100-110 %
-    */
 };
 
 } // namespace emsesp

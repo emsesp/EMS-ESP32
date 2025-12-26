@@ -563,21 +563,19 @@ void Solar::process_SM100Differential(std::shared_ptr<const Telegram> telegram) 
     has_update(telegram, diffControl_, 0); // is *10
 }
 
-/* process_SM100ParamCfg - type 0xF9 EMS 1.0
- * This telegram is used to inquire the min, default, max, and current values of a value that is usually read and written with another telegram ID
- * The CS200 uses this method extensively to find out which values may be set in the SM100
- * e.g. B0 10 F9 00 FF 02 5A 03 17 00 00 00 14 00 00 00 3C 00 00 00 5A 00 00 00 59 29 - requested with 90 B0 F9 00 11 FF 02 5A 03 AF
- * byte 0 = 0xFF
- * byte 1-2 = telegram ID used to write this value
- * byte 3 = offset in telegram used to write this value
- * byte 4 = unknown
- * bytes 5..8 = minimum value
- * bytes 9..12 = default value
- * bytes 13..16 = maximum value
- * bytes 17..20 = current value
- *
- * e.g. B0 0B F9 00 00 02 5A 00 00 6E
- */
+// process_SM100ParamCfg - type 0xF9 EMS 1.0
+// This telegram is used to inquire the min, default, max, and current values of a value that is usually read and written with another telegram ID
+// The CS200 uses this method extensively to find out which values may be set in the SM100
+// e.g. B0 10 F9 00 FF 02 5A 03 17 00 00 00 14 00 00 00 3C 00 00 00 5A 00 00 00 59 29 - requested with 90 B0 F9 00 11 FF 02 5A 03 AF
+// byte 0 = 0xFF
+// byte 1-2 = telegram ID used to write this value
+// byte 3 = offset in telegram used to write this value
+// byte 4 = unknown
+// bytes 5..8 = minimum value
+// bytes 9..12 = default value
+// bytes 13..16 = maximum value
+// bytes 17..20 = current value
+// e.g. B0 0B F9 00 00 02 5A 00 00 6E
 void Solar::process_SM100ParamCfg(std::shared_ptr<const Telegram> telegram) {
     uint16_t t_id = EMS_VALUE_UINT16_NOTSET;
     uint8_t  of   = EMS_VALUE_UINT8_NOTSET;

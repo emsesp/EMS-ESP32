@@ -81,11 +81,10 @@ void Connect::process_RCTime(std::shared_ptr<const Telegram> telegram) {
     has_update(dateTime_, time, sizeof(dateTime_));
 }
 
-/* other values from 0x50 RF base
-(0x087F), data: 00 00
-(0x0880), data: 01 04
-(0x0889), data: 00 80 80 01
-*/
+// other values from 0x50 RF base
+// (0x087F), data: 00 00
+// (0x0880), data: 01 04
+// (0x0889), data: 00 80 80 01
 void Connect::register_device_values_room(std::shared_ptr<Connect::RoomCircuit> room) {
     auto tag = DeviceValueTAG::TAG_SRC1 + room->room();
     register_device_value(tag, &room->temp_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(roomTemp), DeviceValueUOM::DEGREES);
