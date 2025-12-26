@@ -318,7 +318,7 @@ void System::get_partition_info() {
 
     auto current_partition = (const char *)esp_ota_get_running_partition()->label;
 
-    // update the current version and partition name in NVS, if needed (to save on flash wearing)
+    // update the current version and partition name in NVS if not already set (saves on flash wearing)
     if (EMSESP::nvs_.isKey(current_partition)) {
         if (EMSESP::nvs_.getString(current_partition) != EMSESP_APP_VERSION) {
             EMSESP::nvs_.putString(current_partition, EMSESP_APP_VERSION);
@@ -347,30 +347,41 @@ void System::get_partition_info() {
         // get the version from the NVS store, and add to map
         if (is_valid) {
             PartitionInfo p_info;
-            // default partition info
             p_info.version      = "";
-            p_info.install_date = "";
-            p_info.size         = part->size / 1024; // set size in KB
+            p_info.install_date = ""; // this will be added later when NTP is connected
 
-            // if there is an entry for this partition in NVS, get the version from NVS, if not found, use empty string
+            p_info.size = part->size / 1024; // set size in KB
+
+            // if there is an entry for this partition in NVS, get it's version from NVS
             if (EMSESP::nvs_.isKey(part->label)) {
                 p_info.version = EMSESP::nvs_.getString(part->label).c_str();
-            }
-
-            // get install date from NTP if active and add
-            if (ntp_connected_) {
-                char   time_string[25];
-                time_t now = time(nullptr);
-                strftime(time_string, sizeof(time_string), "%FT%T", localtime(&now));
-                p_info.install_date = time_string;
             }
 
             partition_info_[part->label] = p_info;
         }
 
-        it = esp_partition_next(it);
+        it = esp_partition_next(it); // loop to next partition
     }
     esp_partition_iterator_release(it);
+#endif
+}
+
+// set NTP install time/date for the current partition
+// assumes NTP is connected and working
+void System::set_partition_install_date(bool override) {
+#ifndef EMSESP_STANDALONE
+    auto current_partition = (const char *)esp_ota_get_running_partition()->label;
+    // skip if it already has an install date
+    if (!partition_info_[current_partition].install_date.empty() && !override) {
+        return;
+    }
+
+    // set current date/time from NTP
+    char   time_string[25];
+    time_t now = time(nullptr);
+    strftime(time_string, sizeof(time_string), "%FT%T", localtime(&now));
+    partition_info_[current_partition].install_date = time_string;
+    LOG_DEBUG("Adding NTP install date %s to partition %s", time_string, current_partition);
 #endif
 }
 
@@ -570,7 +581,7 @@ void System::store_settings(WebSettings & settings) {
     developer_mode_ = settings.developer_mode;
 }
 
-// Starts up the UART Serial bridge
+// Starts up core services
 void System::start() {
     get_partition_info(); // get the partition info
 
@@ -1220,11 +1231,12 @@ void System::show_system(uuid::console::Shell & shell) {
         if (partition.second.version.empty()) {
             continue; // no version, empty string
         }
-        shell.printfln("  %s: v%s (%d KB) %s",
+        shell.printfln("  %s: v%s (%d KB%s) %s",
                        partition.first.c_str(),
                        partition.second.version.c_str(),
                        partition.second.size,
-                       (esp_ota_get_running_partition()->label == partition.first) ? "* active *" : "");
+                       partition.second.install_date.empty() ? "" : (std::string(", installed ") + partition.second.install_date).c_str(),
+                       (strcmp(esp_ota_get_running_partition()->label, partition.first.c_str()) == 0) ? "** active **" : "");
     }
 
     shell.println();
@@ -2515,6 +2527,11 @@ void System::ntp_connected(bool b) {
     if (b != ntp_connected_) {
         if (b) {
             LOG_INFO("NTP connected");
+#ifdef EMSESP_DEBUG // reset the install date on startup if in debug mode
+            set_partition_install_date(true);
+#else
+            set_partition_install_date(false);
+#endif
         } else {
             LOG_WARNING("NTP disconnected"); // if turned off report it
         }

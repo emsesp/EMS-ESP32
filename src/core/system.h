@@ -392,6 +392,8 @@ class System {
 
     uint8_t systemStatus_; // uses SYSTEM_STATUS enum
 
+    void set_partition_install_date(bool override = false);
+
     // button
     static PButton            myPButton_; // PButton instance
     static void               button_OnClick(PButton & b);
