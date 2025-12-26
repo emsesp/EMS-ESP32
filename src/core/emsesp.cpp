@@ -1720,6 +1720,11 @@ void EMSESP::start() {
 #else
     LOG_INFO("EMS-ESP version %s", EMSESP_APP_VERSION);
 #endif
+
+    if (!EMSESP::nvs_.getBool(EMSESP_NVS_BOOT_NEW_FIRMWARE)) {
+        LOG_DEBUG("Firmware is fresh");
+    }
+
     LOG_DEBUG("System is running in Debug mode");
     LOG_INFO("Last system reset reason Core0: %s, Core1: %s", system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
 

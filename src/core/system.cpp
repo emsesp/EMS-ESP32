@@ -371,9 +371,19 @@ void System::get_partition_info() {
 void System::set_partition_install_date(bool override) {
 #ifndef EMSESP_STANDALONE
     auto current_partition = (const char *)esp_ota_get_running_partition()->label;
-    // skip if it already has an install date
-    if (!partition_info_[current_partition].install_date.empty() && !override) {
+    auto is_fresh_firmware = EMSESP::nvs_.getBool(EMSESP_NVS_BOOT_NEW_FIRMWARE);
+
+    // reset flag after setting the install date
+    EMSESP::nvs_.putBool(EMSESP_NVS_BOOT_NEW_FIRMWARE, false);
+
+    // skip if it already has an install date, unless override is true or the firmware is new
+    // EMSESP_NVS_BOOT_NEW_FIRMWARE is set in UploadFileService::uploadComplete()
+    if (!partition_info_[current_partition].install_date.empty() && !override && !is_fresh_firmware) {
         return;
+    }
+
+    if (is_fresh_firmware) {
+        LOG_DEBUG("Firmware is fresh, setting the new install date");
     }
 
     // set current date/time from NTP
