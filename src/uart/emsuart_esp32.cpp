@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * ESP32 UART port by @ArwedL and improved by @MichaelDvP. See https://github.com/emsesp/EMS-ESP/issues/380
- */
+// ESP32 UART port by @ArwedL and improved by @MichaelDvP. See https://github.com/emsesp/EMS-ESP/issues/380
 
 #ifndef EMSESP_STANDALONE
 
@@ -35,12 +33,10 @@ uint8_t EMSuart::last_tx_src_ = 0;
 
 static TaskHandle_t  xHandle;
 static QueueHandle_t uart_queue;
-uint8_t              tx_mode_     = 0xFF;
+uint8_t              tx_mode_     = EMS_TXMODE_INIT;
 uint32_t             inverse_mask = 0;
 
-/*
-* receive task, wait for break and call incoming_telegram
-*/
+// receive task, wait for break and call incoming_telegram
 void EMSuart::uart_event_task(void * pvParameters) {
     uart_event_t event;
     uint8_t      telegram[EMS_MAXBUFFERSIZE];
@@ -69,11 +65,9 @@ void EMSuart::uart_event_task(void * pvParameters) {
     vTaskDelete(NULL);
 }
 
-/*
- * init UART driver
- */
+// initialize UART driver
 void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t tx_gpio) {
-    if (tx_mode_ == 0xFF) {
+    if (tx_mode_ == EMS_TXMODE_INIT) {
         uart_config_t uart_config = {.baud_rate           = EMSUART_BAUD,
                                      .data_bits           = UART_DATA_8_BITS,
                                      .parity              = UART_PARITY_DISABLE,
@@ -113,9 +107,7 @@ void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t 
     uart_enable_intr_mask(EMSUART_NUM, UART_BRK_DET_INT_ENA | UART_RXFIFO_FULL_INT_ENA);
 }
 
-/*
- * Stop, disable interrupt
- */
+// Stop, disable interrupt
 void EMSuart::stop() {
     if (tx_mode_ != 0xFF) { // only call after driver initialisation
         uart_disable_intr_mask(EMSUART_NUM, UART_BRK_DET_INT_ENA | UART_RXFIFO_FULL_INT_ENA);
@@ -123,9 +115,7 @@ void EMSuart::stop() {
     }
 };
 
-/*
- * generate <BRK> by inverting tx
- */
+// generate <BRK> by inverting tx
 void IRAM_ATTR EMSuart::uart_gen_break(uint32_t length_us) {
     portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
     portENTER_CRITICAL(&mux);
@@ -135,35 +125,34 @@ void IRAM_ATTR EMSuart::uart_gen_break(uint32_t length_us) {
     portEXIT_CRITICAL(&mux);
 }
 
-/*
- * Sends a 1-byte poll, ending with a <BRK>
- */
+// Sends a 1-byte poll, ending with a <BRK>
 void EMSuart::send_poll(const uint8_t data) {
     transmit(&data, 1);
 }
 
-/*
- * Send data to Tx line, ending with a <BRK>
- * buf contains the CRC and len is #bytes including the CRC
- * returns code, 1=success
- */
+// Send data to Tx line, ending with a <BRK>
+// buf contains the CRC and len is #bytes including the CRC
+// returns code, 1=success
 uint8_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
     if (len == 0 || len >= EMS_MAXBUFFERSIZE) {
         return EMS_TX_STATUS_ERR;
     }
 
-    if (tx_mode_ == 0) {
+    // TXMODE is OFF
+    if (tx_mode_ == EMS_TXMODE_OFF) {
         return EMS_TX_STATUS_OK;
     }
 
-    last_tx_src_ = len < 4 ? 0 : buf[0];
+    last_tx_src_ = len < 4 ? 0 : buf[0]; // update last tx source
 
-    if (tx_mode_ == EMS_TXMODE_HW) { // hardware controlled mode
+    // TXMODE is hardware controlled mode
+    if (tx_mode_ == EMS_TXMODE_HW) {
         uart_write_bytes_with_break(EMSUART_NUM, buf, len, 10);
         return EMS_TX_STATUS_OK;
     }
 
-    if (tx_mode_ == EMS_TXMODE_EMSPLUS) { // EMS+ with long delay
+    // TXMODE is EMS+ with long delay
+    if (tx_mode_ == EMS_TXMODE_EMSPLUS) {
         for (uint8_t i = 0; i < len; i++) {
             uart_write_bytes(EMSUART_NUM, &buf[i], 1);
             delayMicroseconds(EMSUART_TX_WAIT_PLUS);
@@ -172,7 +161,8 @@ uint8_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
         return EMS_TX_STATUS_OK;
     }
 
-    if (tx_mode_ == EMS_TXMODE_HT3) { // HT3 with 7 bittimes delay
+    // TXMODE is HT3 with 7 bittimes delay
+    if (tx_mode_ == EMS_TXMODE_HT3) {
         for (uint8_t i = 0; i < len; i++) {
             uart_write_bytes(EMSUART_NUM, &buf[i], 1);
             delayMicroseconds(EMSUART_TX_WAIT_HT3);
@@ -181,7 +171,7 @@ uint8_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
         return EMS_TX_STATUS_OK;
     }
 
-    // mode 1: wait for echo after each byte
+    // TXMODE default: wait for echo after each byte
     for (uint8_t i = 0; i < len; i++) {
         size_t rx0, rx1;
         uart_get_buffered_data_len(EMSUART_NUM, &rx0);
