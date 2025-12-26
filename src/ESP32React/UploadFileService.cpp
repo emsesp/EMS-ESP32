@@ -133,6 +133,7 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
         return;
     }
 
+    // add MD5 to the response
     if (strlen(_md5.data()) == _md5.size() - 1) {
         auto *     response = new AsyncJsonResponse(false);
         JsonObject root     = response->getRoot();
