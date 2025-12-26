@@ -347,23 +347,22 @@ void System::get_partition_info() {
         // get the version from the NVS store, and add to map
         if (is_valid) {
             PartitionInfo p_info;
-            p_info.size = part->size / 1024; // set size in KB
+            // default partition info
+            p_info.version      = "";
+            p_info.install_date = "";
+            p_info.size         = part->size / 1024; // set size in KB
 
             // if there is an entry for this partition in NVS, get the version from NVS, if not found, use empty string
             if (EMSESP::nvs_.isKey(part->label)) {
                 p_info.version = EMSESP::nvs_.getString(part->label).c_str();
-            } else {
-                p_info.version = "";
             }
 
             // get install date from NTP if active and add
             if (ntp_connected_) {
                 char   time_string[25];
-                time_t now = time(nullptr) - uuid::get_uptime_sec();
-                strftime(time_string, sizeof(time_string), "%FT%T%z", localtime(&now));
+                time_t now = time(nullptr);
+                strftime(time_string, sizeof(time_string), "%FT%T", localtime(&now));
                 p_info.install_date = time_string;
-            } else {
-                p_info.install_date = "";
             }
 
             partition_info_[part->label] = p_info;
