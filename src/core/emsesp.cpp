@@ -1818,7 +1818,8 @@ void EMSESP::loop() {
         return; // LED flashing is active, skip the rest of the loop
     }
 
-    esp32React.loop(); // web services
+    esp32React.loop();    // web services like network, AP, MQTT
+    webLogService.loop(); // log in Web UI
 
     // run the loop, unless we're in the middle of an OTA upload
     if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_NORMAL || EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_INVALID_GPIO) {
