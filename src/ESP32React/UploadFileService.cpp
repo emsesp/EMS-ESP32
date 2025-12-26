@@ -118,7 +118,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
 }
 
 void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
-    emsesp::EMSESP::logger().info("Upload complete");
+    emsesp::EMSESP::logger().info("Upload successful");
 
     // did we just complete uploading a json file?
     if (request->_tempFile) {
@@ -180,7 +180,7 @@ void UploadFileService::handleError(AsyncWebServerRequest * request, int code) {
 }
 
 void UploadFileService::handleEarlyDisconnect() {
-    emsesp::EMSESP::logger().info("Upload aborted");
+    emsesp::EMSESP::logger().info("Upload ended");
     emsesp::EMSESP::system_.uart_init(); // re-enable UART
 
     _is_firmware = false;
