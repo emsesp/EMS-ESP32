@@ -272,8 +272,8 @@ void TxService::start() {
 
 // sends a 1 byte poll which is our own deviceID
 void TxService::send_poll() const {
-    //LOG_DEBUG("Ack %02X",ems_bus_id() ^ ems_mask());
-    if (tx_mode()) {
+    // LOG_DEBUG("Ack %02X",ems_bus_id() ^ ems_mask());
+    if (tx_mode() != EMS_TXMODE_OFF) {
         EMSuart::send_poll(ems_bus_id() ^ ems_mask());
     }
 }
@@ -309,7 +309,7 @@ void TxService::send() {
     delayed_send_ = 0;
 
     // if we're in read-only mode (tx_mode 0) forget the Tx call
-    if (tx_mode() != 0) {
+    if (tx_mode() != EMS_TXMODE_OFF) {
         send_telegram(tx_telegrams_.front());
     }
 
