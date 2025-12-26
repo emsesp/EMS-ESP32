@@ -1721,6 +1721,9 @@ void EMSESP::start() {
     LOG_INFO("EMS-ESP version %s", EMSESP_APP_VERSION);
 #endif
 
+    // check if the firmware is fresh
+    // this is set in UploadFileService::uploadComplete()
+    // and reset in System::set_partition_install_date()
     if (!EMSESP::nvs_.getBool(EMSESP_NVS_BOOT_NEW_FIRMWARE)) {
         LOG_DEBUG("Firmware is fresh");
     }

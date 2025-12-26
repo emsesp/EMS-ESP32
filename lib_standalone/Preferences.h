@@ -12,8 +12,8 @@ class Preferences {
     bool     _readOnly;
 
   public:
-    Preferences(){};
-    ~Preferences(){};
+    Preferences() {};
+    ~Preferences() {};
 
     bool begin(const char * name, bool readOnly = false, const char * partition_label = NULL) {
         return true;
@@ -26,44 +26,49 @@ class Preferences {
         return true;
     }
 
+    int getChar(const char * key, uint8_t defaultValue = 0) {
+        return 0;
+    }
     size_t putChar(const char * key, int8_t value) {
-        return 0;
-    }
-    size_t putUChar(const char * key, uint8_t value) {
-        return 0;
-    }
-
-    size_t putDouble(const char * key, double value) {
         return 0;
     }
 
     uint8_t getUChar(const char * key, uint8_t defaultValue = 0) {
         return 0;
     }
-
-    int getChar(const char * key, uint8_t defaultValue = 0) {
+    size_t putUChar(const char * key, uint8_t value) {
         return 0;
     }
 
     double getDouble(const char * key, double defaultValue = NAN) {
         return 0;
     }
-
-    size_t putString(const char * key, const char * value) {
+    size_t putDouble(const char * key, double value) {
         return 0;
     }
-    size_t putString(const char * key, String value) {
+
+    bool getBool(const char * key, bool defaultValue = false) {
+        return true;
+    }
+    size_t putBool(const char * key, bool value) {
+        return 0;
+    }
+
+    String getString(const char * key, String defaultValue = String()) {
+        return "";
+    }
+    size_t putString(const char * key, const char * value) {
         return 0;
     }
 
     size_t getString(const char * key, char * value, size_t maxLen) {
         return 0;
     }
-    String getString(const char * key, String defaultValue = String()) {
-        return "";
+    size_t putString(const char * key, String value) {
+        return 0;
     }
 
-    // unused
+    // unused....
 
     // void           end();
     // bool           clear();
