@@ -133,8 +133,7 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
     // check if it was a firmware upgrade
     // if no error, send the success response as a JSON
     if (_is_firmware && !request->_tempObject) {
-        // set NVS to tell EMS-ESP this is a new firmware on next restart
-        // we do this by removing the install date
+        // set NVS to tell EMS-ESP this is a new fresh firmware on next restart
         emsesp::EMSESP::nvs_.putBool(emsesp::EMSESP_NVS_BOOT_NEW_FIRMWARE, true);
 
         AsyncWebServerResponse * response = request->beginResponse(200);
