@@ -147,7 +147,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     }
 
     // get the partition info for each partition, including the running one
-    EMSESP::system_.get_partition_info();
+    // the partition data is done once in System::start() and stored in partition_info_
     JsonArray partitions = root["partitions"].to<JsonArray>();
     for (const auto & partition : EMSESP::system_.partition_info_) {
         // Skip partition if it has no version, or it's size is 0
