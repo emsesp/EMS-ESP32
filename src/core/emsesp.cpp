@@ -1591,6 +1591,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
             connect_time = uuid::get_uptime_sec();
         }
         if (poll_id == EMSbus::ems_bus_id()) {
+            // TODO this could also be by coincidence, so we should add a counter to the EMSbus class to check if the poll_id is the same as the EMS_BUS_ID for a certain number of times
             EMSbus::last_bus_activity(uuid::get_uptime()); // set the flag indication the EMS bus is active
         }
         if (wait_km_) {
@@ -1810,10 +1811,14 @@ void EMSESP::shell_prompt() {
 
 // main loop calling all services
 void EMSESP::loop() {
-    uuid::loop();         // store system uptime
-    esp32React.loop();    // web services
-    system_.loop();       // does LED and checks system health, and syslog service
-    webLogService.loop(); // log in Web UI
+    uuid::loop(); // store system uptime
+
+    // does LED and checks system health, and syslog service
+    if (system_.loop()) {
+        return; // LED flashing is active
+    }
+
+    esp32React.loop(); // web services
 
     // run the loop, unless we're in the middle of an OTA upload
     if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_NORMAL || EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_INVALID_GPIO) {

@@ -89,7 +89,7 @@ struct PartitionInfo {
 class System {
   public:
     void start();
-    void loop();
+    bool loop(); // returns true if the LED flash is active
 
     // commands
     static bool command_read(const char * value, const int8_t id);
@@ -400,24 +400,18 @@ class System {
     static constexpr uint32_t BUTTON_Debounce      = 40;  // Debounce period to prevent flickering when pressing or releasing the button (in ms)
     static constexpr uint32_t BUTTON_DblClickDelay = 250; // Max period between clicks for a double click event (in ms)
 
-// LED flash timer for factory reset
-#ifndef EMSESP_STANDALONE
-    static hw_timer_t * led_flash_timer_;
-#endif
-    static void IRAM_ATTR   led_flash_timer_isr();
-    static volatile uint8_t led_flash_count_;
-    static volatile bool    led_flash_state_;
-    static uint8_t          led_flash_gpio_;
-    static uint8_t          led_flash_type_;
-    static void             start_led_flash();
-    static void             stop_led_flash();
+    // LED flash timer
+    static bool     led_flash_timer_;
+    static uint8_t  led_flash_gpio_;
+    static uint8_t  led_flash_type_;
+    static uint32_t led_flash_start_time_;
+    static uint32_t led_flash_duration_;
+    static void     start_led_flash(uint8_t duration);
+    static void     led_flash();
 
-#ifdef EMSESP_DEBUG
-    static constexpr uint32_t BUTTON_LongPressDelay = 2000; // Hold period for a long press event (in ms) - 2 seconds, for debugging
-#else
-    static constexpr uint32_t BUTTON_LongPressDelay = 9500; // Hold period for a long press event (in ms) - ~10 seconds
-#endif
-    static constexpr uint32_t BUTTON_VLongPressDelay = 20000; // Hold period for a very long press event (in ms) - 20 seconds
+    // button press delays
+    static constexpr uint32_t BUTTON_LongPressDelay  = 3000; // Hold period for a long press event (in ms) - ~3 seconds
+    static constexpr uint32_t BUTTON_VLongPressDelay = 9500; // Hold period for a very long press event (in ms) - !10 seconds
 
     // healthcheck
 #ifdef EMSESP_PINGTEST

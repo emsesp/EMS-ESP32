@@ -97,15 +97,14 @@ bool     System::test_set_all_active_ = false;
 uint32_t System::max_alloc_mem_;
 uint32_t System::heap_mem_;
 
-// LED flash timer for factory reset
-volatile uint8_t System::led_flash_count_ = 0;
-volatile bool    System::led_flash_state_ = false;
-uint8_t          System::led_flash_gpio_  = 0;
-uint8_t          System::led_flash_type_  = 0;
-#ifndef EMSESP_STANDALONE
-hw_timer_t * System::led_flash_timer_ = nullptr;
-#endif
+// LED flash timer
+uint8_t  System::led_flash_gpio_       = 0;
+uint8_t  System::led_flash_type_       = 0;
+uint32_t System::led_flash_start_time_ = 0;
+uint32_t System::led_flash_duration_   = 0;
+bool     System::led_flash_timer_      = false;
 
+// GPIOs
 std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::valid_system_gpios_;
 std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::used_gpios_;
 std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::snapshot_used_gpios_;
@@ -310,8 +309,7 @@ void System::get_partition_info() {
     partition_info_.clear(); // clear existing data
 
 #ifdef EMSESP_STANDALONE
-    // dummy data for standalone mode
-    // version, size, install_date
+    // dummy data for standalone mode - version, size, install_date
     partition_info_["app0"]    = {EMSESP_APP_VERSION, 0, ""};
     partition_info_["app1"]    = {"", 0, ""};
     partition_info_["factory"] = {"", 0, ""};
@@ -339,7 +337,7 @@ void System::get_partition_info() {
         const esp_partition_t * part     = esp_partition_get(it);
 
         if (part->label != nullptr && part->label[0] != '\0') {
-            // check if part is valid and not empty
+            // check if partition is valid and not empty
             esp_partition_read(part, 0, &buffer, 8);
             if (buffer == 0xFFFFFFFFFFFFFFFF) {
                 is_valid = false; // skip this partition
@@ -351,7 +349,7 @@ void System::get_partition_info() {
             PartitionInfo p_info;
             p_info.size = part->size / 1024; // set size in KB
 
-            // get version from NVS, if not found, use empty string
+            // if there is an entry for this partition in NVS, get the version from NVS, if not found, use empty string
             if (EMSESP::nvs_.isKey(part->label)) {
                 p_info.version = EMSESP::nvs_.getString(part->label).c_str();
             } else {
@@ -412,14 +410,8 @@ bool System::set_partition(const char * partitionname) {
 }
 
 // restart EMS-ESP
-// app0 or app1
-// on 16MB we have the additional boot and factory partitions
+// app0 or app1, or boot/factory on 16MB boards
 void System::system_restart(const char * partitionname) {
-#ifdef EMSESP_DEBUG
-    EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_NORMAL);
-    return;
-#endif
-
 #ifndef EMSESP_STANDALONE
     // see if we are forcing a partition to use
     if (partitionname != nullptr) {
@@ -656,27 +648,40 @@ void System::button_OnDblClick(PButton & b) {
     EMSESP::esp32React.getNetworkSettingsService()->callUpdateHandlers(); // in case we've changed ssid or password
 }
 
-// LED flash timer interrupt service routine
-void IRAM_ATTR System::led_flash_timer_isr() {
-    led_flash_state_ = !led_flash_state_; // Toggle LED state
+// LED flash white - every 70ms
+void System::led_flash() {
+    static bool     led_flash_state_  = false;
+    static uint32_t last_toggle_time_ = 0;
+    uint32_t        current_time      = uuid::get_uptime();
 
-    if (led_flash_state_) {
-        led_flash_type_ ? EMSESP_RGB_WRITE(led_flash_gpio_, 255, 255, 255) : digitalWrite(led_flash_gpio_, LED_ON); // white, on
-    } else {
-        led_flash_type_ ? EMSESP_RGB_WRITE(led_flash_gpio_, 0, 0, 0) : digitalWrite(led_flash_gpio_, !LED_ON); // off
+    if (current_time - last_toggle_time_ >= 70) {
+        led_flash_state_  = !led_flash_state_;
+        last_toggle_time_ = current_time;
+
+        if (led_flash_type_) {
+            uint8_t intensity = led_flash_state_ ? 100 : 0;
+            EMSESP_RGB_WRITE(led_flash_gpio_, intensity, intensity, intensity); // RGB LED
+        } else {
+            digitalWrite(led_flash_gpio_, led_flash_state_ ? LED_ON : !LED_ON); // Standard LED
+        }
     }
 
-    // Increment flash count, 2 toggles = 1 flash cycle. And stop after 5 seconds (5000ms/100ms = 50)
-    if (led_flash_count_++ >= 50) {
-        stop_led_flash();
+    // after duration, turn off the LED
+    if (current_time - led_flash_start_time_ >= led_flash_duration_) {
+        if (led_flash_type_) {
+            EMSESP_RGB_WRITE(led_flash_gpio_, 0, 0, 0);
+        } else {
+            digitalWrite(led_flash_gpio_, !LED_ON);
+        }
+        led_flash_timer_ = false;
+        command_format(nullptr, 0); // Execute format operation
     }
 }
 
-// Start the LED flash timer
-void System::start_led_flash() {
-#ifndef EMSESP_STANDALONE
+// Start the LED flash timer - duration in seconds
+void System::start_led_flash(uint8_t duration) {
     // Don't start if already running
-    if (led_flash_timer_ != nullptr) {
+    if (led_flash_timer_) {
         return;
     }
 
@@ -687,43 +692,21 @@ void System::start_led_flash() {
     });
 
     // Reset counter and state
-    led_flash_count_ = 0;
-    led_flash_state_ = false;
-
-    led_flash_timer_ = timerBegin(0, 80, true);                         // Create and start timer (prescaler 80 for 1us tick, counting up)
-    timerAttachInterrupt(led_flash_timer_, &led_flash_timer_isr, true); // Attach interrupt handler
-    timerAlarmWrite(led_flash_timer_, 100000, true);                    // Set alarm to trigger every 100ms
-    timerAlarmEnable(led_flash_timer_);                                 // Enable the alarm
-#endif
-}
-
-// Stop the LED flash timer
-void System::stop_led_flash() {
-#ifndef EMSESP_STANDALONE
-    if (led_flash_timer_ != nullptr) {
-        // Stop and detach timer
-        timerAlarmDisable(led_flash_timer_);
-        timerDetachInterrupt(led_flash_timer_);
-        timerEnd(led_flash_timer_);
-        led_flash_timer_ = nullptr;
-        led_flash_type_ ? EMSESP_RGB_WRITE(led_flash_gpio_, 0, 0, 0) : digitalWrite(led_flash_gpio_, !LED_ON); // Turn off LED
-    }
-#endif
+    led_flash_start_time_ = uuid::get_uptime(); // current time
+    led_flash_duration_   = duration * 1000;    // duration in milliseconds
+    led_flash_timer_      = true;               // it's active
 }
 
 // button long press
 void System::button_OnLongPress(PButton & b) {
-    LOG_NOTICE("Button pressed - long press - perform factory reset");
-    start_led_flash(); // Start the non-blocking LED flash timer for 5 seconds
-#ifndef EMSESP_STANDALONE
-    System::command_format(nullptr, 0);
-#endif
+    LOG_NOTICE("Button pressed - long press - restart EMS-ESP");
+    EMSESP::system_.system_restart("boot");
 }
 
-// button indefinite press - boots to boot partition
+// button indefinite press
 void System::button_OnVLongPress(PButton & b) {
-    LOG_NOTICE("Button pressed - very long press - restart from factory/boot partition");
-    EMSESP::system_.system_restart("boot");
+    LOG_NOTICE("Button pressed - very long press - perform factory reset");
+    start_led_flash(5); // Start LED flash timer for 5 seconds
 }
 
 // push button
@@ -762,32 +745,38 @@ void System::led_init() {
 
 void System::uart_init() {
     EMSuart::stop();
-
-    // start UART, GPIOs have already been checked
-    EMSuart::start(tx_mode_, rx_gpio_, tx_gpio_);
-
-    EMSESP::txservice_.start(); // reset counters and send devices request
+    EMSuart::start(tx_mode_, rx_gpio_, tx_gpio_); // start UART, GPIOs have already been checked
+    EMSESP::txservice_.start();                   // reset counters and send devices request
 }
 
 // checks system health and handles LED flashing wizardry
-void System::loop() {
+// returns true if the LED flash is active
+bool System::loop() {
     // check if we're supposed to do a reset/restart
     if (systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED) {
         system_restart();
     }
 
-#ifndef EMSESP_STANDALONE
-    myPButton_.check(); // check button press
+    // if LED flashing is active, run the LED flash
+    if (led_flash_timer_) {
+        led_flash();
+        return true; // is active
+    }
 
-    // syslog
+    led_monitor();      // check status and report back using the LED
+    myPButton_.check(); // check button press
+    system_check();     // check system health
+
+// syslog
+#ifndef EMSESP_STANDALONE
     if (syslog_enabled_) {
         syslog_.loop();
     }
-
-    led_monitor();  // check status and report back using the LED
-    system_check(); // check system health
-    send_info_mqtt();
 #endif
+
+    send_info_mqtt();
+
+    return false; // LED flashing is not active
 }
 
 // send MQTT info topic appended with the version information as JSON, as a retained flag
@@ -966,8 +955,9 @@ void System::network_init() {
 
 // check health of system, done every 5 seconds
 void System::system_check() {
-    if (!last_system_check_ || ((uint32_t)(uuid::get_uptime() - last_system_check_) >= SYSTEM_CHECK_FREQUENCY)) {
-        last_system_check_ = uuid::get_uptime();
+    uint32_t current_uptime = uuid::get_uptime();
+    if (!last_system_check_ || ((uint32_t)(current_uptime - last_system_check_) >= SYSTEM_CHECK_FREQUENCY)) {
+        last_system_check_ = current_uptime;
 
 #ifndef EMSESP_STANDALONE
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
@@ -1051,15 +1041,16 @@ void System::led_monitor() {
     static bool button_busy_ = false;
     if (button_busy_ != myPButton_.button_busy()) {
         button_busy_ = myPButton_.button_busy();
-        if (button_busy_) {
-            led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 255, 255, 255) : digitalWrite(led_gpio_, LED_ON); // on
+        if (led_type_) {
+            EMSESP_RGB_WRITE(led_gpio_, button_busy_ ? 100 : 0, button_busy_ ? 100 : 0, button_busy_ ? 100 : 0);
         } else {
-            led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON); // off
+            digitalWrite(led_gpio_, button_busy_ ? LED_ON : !LED_ON);
         }
     }
 
     // we only need to run the LED healthcheck if there are errors
-    if (!healthcheck_ || !led_gpio_ || button_busy_) {
+    // skip if we're in the led_flash_timer or if a button has been pressed
+    if (!healthcheck_ || !led_gpio_ || button_busy_ || led_flash_timer_) {
         return; // all good
     }
 
@@ -1092,33 +1083,35 @@ void System::led_monitor() {
             //  1 flash is the EMS bus is not connected
             //  2 flashes if the network (wifi or ethernet) is not connected
             //  3 flashes is both the bus and the network are not connected
+
+            // Cache healthcheck flags to avoid repeated bit operations
+            bool no_network = (healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK;
+            bool no_bus     = (healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS;
+
             if (led_type_) {
                 if (led_flash_step_ == 3) {
-                    if ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
+                    if (no_network) {
                         EMSESP_RGB_WRITE(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
-                    } else if ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS) {
+                    } else if (no_bus) {
                         EMSESP_RGB_WRITE(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
                     }
                 }
-                if (led_flash_step_ == 5 && (healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
+                if (led_flash_step_ == 5 && no_network) {
                     EMSESP_RGB_WRITE(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
                 }
-                if ((led_flash_step_ == 7) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)
-                    && ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS)) {
+                if ((led_flash_step_ == 7) && no_network && no_bus) {
                     EMSESP_RGB_WRITE(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
                 }
             } else {
-                if ((led_flash_step_ == 3)
-                    && (((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) || ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS))) {
+                if ((led_flash_step_ == 3) && (no_network || no_bus)) {
                     led_on_ = true;
                 }
 
-                if ((led_flash_step_ == 5) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)) {
+                if ((led_flash_step_ == 5) && no_network) {
                     led_on_ = true;
                 }
 
-                if ((led_flash_step_ == 7) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)
-                    && ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS)) {
+                if ((led_flash_step_ == 7) && no_network && no_bus) {
                     led_on_ = true;
                 }
 
@@ -1231,7 +1224,7 @@ void System::show_system(uuid::console::Shell & shell) {
                        partition.first.c_str(),
                        partition.second.version.c_str(),
                        partition.second.size,
-                       (esp_ota_get_running_partition()->label == partition.first) ? " ** active **" : "");
+                       (esp_ota_get_running_partition()->label == partition.first) ? "* active *" : "");
     }
 
     shell.println();
@@ -1423,12 +1416,13 @@ bool System::check_upgrade(bool factory_settings) {
     }
 
     if (factory_settings) {
-        return false; // fresh install, do nothing
+        return true; // fresh install, do nothing, no reboot required
     }
 
     version::Semver200_version this_version(EMSESP_APP_VERSION);
 
-    bool save_version = true;
+    bool save_version    = true;
+    bool reboot_required = false;
 
     // compare versions
     if (this_version > settings_version) {
@@ -1469,25 +1463,31 @@ bool System::check_upgrade(bool factory_settings) {
             });
         }
 
-        // changes to Network
-        EMSESP::esp32React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
-            // Network Settings Wifi tx_power is now using the value * 4.
-            if (networkSettings.tx_power == 20) {
-                networkSettings.tx_power = WIFI_POWER_19_5dBm; // use 19.5 as we don't have 20 anymore
-                LOG_INFO("Upgrade: Setting WiFi TX Power to Auto");
-            }
-
-            // force WiFi sleep to off (was default on < 3.7.0-dev-33)
-            networkSettings.nosleep = true;
-            LOG_INFO("Upgrade: Disabling WiFi nosleep");
-
-            return StateUpdateResult::CHANGED;
-        });
+        // changes pre < v3.7.0
+        if (settings_version.major() == 3 && settings_version.minor() < 7) {
+            // network changes
+            // 1) WiFi Tx Power is now using the value * 4 (was 20)
+            // 2) WiFi sleep is now off by default (was on)
+            EMSESP::esp32React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
+                auto changed = StateUpdateResult::UNCHANGED;
+                if (networkSettings.tx_power == 20) {
+                    networkSettings.tx_power = WIFI_POWER_19_5dBm; // use 19.5 as we don't have 20 anymore
+                    LOG_INFO("Upgrade: Setting WiFi TX Power to Auto");
+                    changed = StateUpdateResult::CHANGED;
+                }
+                if (networkSettings.nosleep != true) {
+                    networkSettings.nosleep = true;
+                    LOG_INFO("Upgrade: Disabling WiFi nosleep");
+                    changed = StateUpdateResult::CHANGED;
+                }
+                return changed;
+            });
+        }
 
         // changes to application settings
         EMSESP::webSettingsService.update([&](WebSettings & settings) {
             // force web buffer to 25 for those boards without psram
-            if (EMSESP::system_.PSram() == 0) {
+            if ((EMSESP::system_.PSram() == 0) && (settings.weblog_buffer != 25)) {
                 settings.weblog_buffer = 25;
                 return StateUpdateResult::CHANGED;
             }
@@ -1496,24 +1496,27 @@ bool System::check_upgrade(bool factory_settings) {
 
 
     } else if (this_version < settings_version) {
-        // need downgrade
+        // downgrading
         LOG_NOTICE("Downgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
     } else {
-        // same version, do nothing
-        save_version = false;
+        save_version = false; // same version, do nothing
     }
 
-    // if we did a change, set the new version and save it, then reboot
+    // if we did a change, set the new version and save it, no need to reboot
     if (save_version) {
         EMSESP::webSettingsService.update([&](WebSettings & settings) {
             settings.version = EMSESP_APP_VERSION;
+            LOG_DEBUG("Upgrade: Setting version to %s", EMSESP_APP_VERSION);
             return StateUpdateResult::CHANGED;
         });
-        // LOG_INFO("Upgrade: Setting version to %s", EMSESP_APP_VERSION);
+    }
+
+    if (reboot_required) {
+        LOG_INFO("Upgrade: Rebooting to apply changes");
         return true; // need reboot
     }
 
-    return false;
+    return false; // no reboot required
 }
 
 // convert settings file into json object
@@ -1584,6 +1587,16 @@ bool System::command_service(const char * cmd, const char * value) {
                 return StateUpdateResult::CHANGED;
             });
             EMSESP::system_.analog_enabled(b);
+            ok = true;
+        } else if (!strcmp(cmd, "settings/txmode")) { // TODO check
+            LOG_INFO("Setting TX mode to OFF");       // TODO remove this
+            EMSESP::webSettingsService.update([&](WebSettings & settings) {
+                // settings.tx_mode = EMS_TXMODE_OFF;
+                settings.tx_mode = 0; // TODO remove this
+
+                return StateUpdateResult::CHANGED;
+            });
+            EMSbus::tx_mode(EMS_TXMODE_OFF);
             ok = true;
         } else if (!strcmp(cmd, "mqtt/enabled")) {
             EMSESP::esp32React.getMqttSettingsService()->update([&](MqttSettings & Settings) {
@@ -1669,9 +1682,11 @@ bool System::get_value_info(JsonObject output, const char * cmd) {
     if (!strcmp(cmd, F_(entities))) {
         for (JsonPair p : root) {
             if (p.value().is<JsonObject>()) {
+                const char * p_key = p.key().c_str(); // Cache the key
                 for (JsonPair p1 : p.value().as<JsonObject>()) {
-                    JsonObject entity = output[std::string(p.key().c_str()) + "." + p1.key().c_str()].to<JsonObject>();
-                    get_value_json(entity, p.key().c_str(), p1.key().c_str(), p1.value());
+                    const char * p1_key = p1.key().c_str(); // Cache the key
+                    JsonObject   entity = output[std::string(p_key) + "." + p1_key].to<JsonObject>();
+                    get_value_json(entity, p_key, p1_key, p1.value());
                 }
             }
         }
@@ -1706,14 +1721,16 @@ bool System::get_value_info(JsonObject output, const char * cmd) {
     // Loop through all the key-value pairs in root to find the key, case independent
     if (slash) { // search the top level first
         for (JsonPair p : root) {
-            if (p.value().is<JsonObject>() && Helpers::toLower(p.key().c_str()) == cmd) {
+            const char * p_key = p.key().c_str(); // Cache the key
+            if (p.value().is<JsonObject>() && Helpers::toLower(p_key) == cmd) {
                 for (JsonPair p1 : p.value().as<JsonObject>()) {
-                    if (Helpers::toLower(p1.key().c_str()) == slash && !p1.value().is<JsonObject>()) {
+                    const char * p1_key = p1.key().c_str(); // Cache the key
+                    if (Helpers::toLower(p1_key) == slash && !p1.value().is<JsonObject>()) {
                         if (val) {
                             output["api_data"] = p1.value().as<std::string>();
                             return true;
                         }
-                        get_value_json(output, p.key().c_str(), p1.key().c_str(), p1.value());
+                        get_value_json(output, p_key, p1_key, p1.value());
                         return true;
                     }
                 }
@@ -2256,7 +2273,6 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
             node["pbuttonGPIO"] = EMSESP::system_.pbutton_gpio_;
             node["ledGPIO"]     = EMSESP::system_.led_gpio_;
             node["ledType"]     = settings.led_type;
-            node["ledType"]     = settings.led_type;
         }
         node["hideLed"]         = settings.hide_led;
         node["noTokenApi"]      = settings.notoken_api;
@@ -2405,12 +2421,15 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
 
 // format command - factory reset, removing all config files
 bool System::command_format(const char * value, const int8_t id) {
-#ifndef EMSESP_STANDALONE
+#if !defined(EMSESP_STANDALONE) && !defined(EMSESP_DEBUG)
+    // don't really format the filesystem in debug or standalone mode
     if (LittleFS.format()) {
         LOG_INFO("Filesystem formatted successfully. All config files removed.");
     } else {
         LOG_ERROR("Format failed");
     }
+#else
+    LOG_INFO("Format command not available in standalone or debug mode");
 #endif
 
     // restart will be handled by the main loop
