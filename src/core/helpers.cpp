@@ -696,6 +696,7 @@ bool Helpers::value2string(const char * value, std::string & value_s) {
 
 // checks to see if a string (usually a command or payload cmd) looks like a boolean
 // on, off, true, false, 1, 0
+// uses translated words for on/off
 bool Helpers::value2bool(const char * value, bool & value_b) {
     if ((value == nullptr) || (strlen(value) == 0)) {
         return false;

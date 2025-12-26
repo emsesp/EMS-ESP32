@@ -1813,9 +1813,9 @@ void EMSESP::shell_prompt() {
 void EMSESP::loop() {
     uuid::loop(); // store system uptime
 
-    // does LED and checks system health, and syslog service
+    // handles LED and checks system health, and syslog service
     if (system_.loop()) {
-        return; // LED flashing is active
+        return; // LED flashing is active, skip the rest of the loop
     }
 
     esp32React.loop(); // web services

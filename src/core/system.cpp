@@ -1019,6 +1019,7 @@ void System::commands_init() {
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, FL_(fetch_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, FL_(restart_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(format), System::command_format, FL_(format_cmd), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(txenabled), System::command_txenabled, FL_(txenabled_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, FL_(watch_cmd));
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(message), System::command_message, FL_(message_cmd));
 #if defined(EMSESP_TEST)
@@ -1587,16 +1588,6 @@ bool System::command_service(const char * cmd, const char * value) {
                 return StateUpdateResult::CHANGED;
             });
             EMSESP::system_.analog_enabled(b);
-            ok = true;
-        } else if (!strcmp(cmd, "settings/txmode")) { // TODO check
-            LOG_INFO("Setting TX mode to OFF");       // TODO remove this
-            EMSESP::webSettingsService.update([&](WebSettings & settings) {
-                // settings.tx_mode = EMS_TXMODE_OFF;
-                settings.tx_mode = 0; // TODO remove this
-
-                return StateUpdateResult::CHANGED;
-            });
-            EMSbus::tx_mode(EMS_TXMODE_OFF);
             ok = true;
         } else if (!strcmp(cmd, "mqtt/enabled")) {
             EMSESP::esp32React.getMqttSettingsService()->update([&](MqttSettings & Settings) {
@@ -2416,6 +2407,28 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
         return false; // unknown, return false
     }
 
+    return true;
+}
+
+// txenabled command - temporarily pause the TX, setting Txmode to 0
+bool System::command_txenabled(const char * value, const int8_t id) {
+    bool arg;
+    if (!Helpers::value2bool(value, arg)) {
+        return false; // argument not recognized
+    }
+    if (arg) {
+        // if the TX mode is already off, revert back to the saved setting
+        if (EMSbus::tx_mode() == EMS_TXMODE_OFF) {
+            EMSESP::webSettingsService.read([&](WebSettings & settings) {
+                EMSbus::tx_mode(settings.tx_mode);
+                LOG_INFO("TX mode restored");
+            });
+        } else {
+            // otherwise set it to off
+            EMSbus::tx_mode(EMS_TXMODE_OFF);
+            LOG_INFO("TX mode set to OFF");
+        }
+    }
     return true;
 }
 

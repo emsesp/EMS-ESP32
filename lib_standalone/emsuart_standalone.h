@@ -21,6 +21,12 @@
 
 #include "Arduino.h"
 
+#define EMS_TXMODE_OFF 0
+#define EMS_TXMODE_DEFAULT 1
+#define EMS_TXMODE_EMSPLUS 2
+#define EMS_TXMODE_HT3 3
+#define EMS_TXMODE_HW 4
+
 namespace emsesp {
 
 #define EMS_TX_STATUS_ERR 0
