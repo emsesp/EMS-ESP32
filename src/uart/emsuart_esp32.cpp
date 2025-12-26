@@ -109,7 +109,7 @@ void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t 
 
 // Stop, disable interrupt
 void EMSuart::stop() {
-    if (tx_mode_ != 0xFF) { // only call after driver initialisation
+    if (tx_mode_ != EMS_TXMODE_INIT) { // only call after driver initialisation
         uart_disable_intr_mask(EMSUART_NUM, UART_BRK_DET_INT_ENA | UART_RXFIFO_FULL_INT_ENA);
         vTaskSuspend(xHandle);
     }
