@@ -2441,17 +2441,21 @@ bool System::command_txenabled(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, arg)) {
         return false; // argument not recognized
     }
+
     if (arg) {
-        // if the TX mode is already off, revert back to the saved setting
+        // Tx mode on
+        // if the TX mode was off, revert back to the saved setting
         if (EMSbus::tx_mode() == EMS_TXMODE_OFF) {
             EMSESP::webSettingsService.read([&](WebSettings & settings) {
                 EMSbus::tx_mode(settings.tx_mode);
-                LOG_INFO("TX mode restored");
+                LOG_INFO("TX mode restored (value %d)", settings.tx_mode);
             });
-        } else {
-            // otherwise set it to off
+        }
+    } else {
+        // Tx mode off
+        if (EMSbus::tx_mode() != EMS_TXMODE_OFF) {
             EMSbus::tx_mode(EMS_TXMODE_OFF);
-            LOG_INFO("TX mode set to OFF");
+            LOG_INFO("TX mode set to OFF (value %d)", EMS_TXMODE_OFF);
         }
     }
     return true;
