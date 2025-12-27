@@ -40,6 +40,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - added RTL8201 to eth phy list [#2800](https://github.com/emsesp/EMS-ESP32/issues/2800)
 - added partitions to Web UI Version page, so previous firmware versions can be installed [#2837](https://github.com/emsesp/EMS-ESP32/issues/2837)
 - button pressures show LED. On a long press (10 seconds) the LED flashes for 5 seconds to indicate a factory reset is about to happen. [#2848](https://github.com/emsesp/EMS-ESP32/issues/2848)
+- added `txpause` command to pause the TX, by setting Txmode to 0 (disabled) [#2850](https://github.com/emsesp/EMS-ESP32/issues/2850)
 
 ## Fixed
 

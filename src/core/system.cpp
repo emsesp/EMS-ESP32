@@ -1047,7 +1047,7 @@ void System::commands_init() {
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, FL_(fetch_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, FL_(restart_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(format), System::command_format, FL_(format_cmd), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(txenabled), System::command_txenabled, FL_(txenabled_cmd), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(txpause), System::command_txpause, FL_(txpause_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, FL_(watch_cmd));
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(message), System::command_message, FL_(message_cmd));
 #if defined(EMSESP_TEST)
@@ -1107,9 +1107,8 @@ void System::led_monitor() {
         } else if (led_flash_step_ % 2) {
             // handle the step events (on odd numbers 3,5,7,etc). see if we need to turn on a LED
             //  1 flash (blue) is the EMS bus is not connected
-            //  2 flashes (red) if the network (wifi or ethernet) is not connected
+            //  2 flashes (red, red) if the network (wifi or ethernet) is not connected
             //  3 flashes (red, red, blue) is both the bus and the network are not connected
-
             bool no_network = (healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK;
             bool no_bus     = (healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS;
 
@@ -2435,27 +2434,34 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
     return true;
 }
 
-// txenabled command - temporarily pause the TX, setting Txmode to 0
-bool System::command_txenabled(const char * value, const int8_t id) {
+// txpause command - temporarily pause the TX, by setting Txmode to 0 (disabled)
+bool System::command_txpause(const char * value, const int8_t id) {
     bool arg;
     if (!Helpers::value2bool(value, arg)) {
         return false; // argument not recognized
     }
 
-    if (arg) {
-        // Tx mode on
-        // if the TX mode was off, revert back to the saved setting
+    if (!arg) {
+        // arg = false: Tx mode to 0 (disabled) to pause
         if (EMSbus::tx_mode() == EMS_TXMODE_OFF) {
             EMSESP::webSettingsService.read([&](WebSettings & settings) {
                 EMSbus::tx_mode(settings.tx_mode);
+#ifdef EMSESP_DEBUG
                 LOG_INFO("TX mode restored (value %d)", settings.tx_mode);
+#else
+                LOG_INFO("TX active");
+#endif
             });
         }
     } else {
-        // Tx mode off
+        // pause = true: Tx mode to 0 (disabled) to pause
         if (EMSbus::tx_mode() != EMS_TXMODE_OFF) {
             EMSbus::tx_mode(EMS_TXMODE_OFF);
+#ifdef EMSESP_DEBUG
             LOG_INFO("TX mode set to OFF (value %d)", EMS_TXMODE_OFF);
+#else
+            LOG_INFO("TX paused");
+#endif
         }
     }
     return true;

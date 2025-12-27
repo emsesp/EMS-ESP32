@@ -145,7 +145,7 @@ Authorization: Bearer {{token}}
 
 ###
 
-POST {{host_dev}}/api/system/txenabled
+POST {{host_dev}}/api/system/txpause
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -155,7 +155,7 @@ Authorization: Bearer {{token}}
 
 ###
 
-POST {{host_dev}}/api/system/txenabled
+POST {{host_dev}}/api/system/txpause
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
