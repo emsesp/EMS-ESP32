@@ -674,19 +674,19 @@ void System::button_OnDblClick(PButton & b) {
     EMSESP::esp32React.getNetworkSettingsService()->callUpdateHandlers(); // in case we've changed ssid or password
 }
 
-// LED flash white - every 70ms
+// LED flash every 100ms
 void System::led_flash() {
     static bool     led_flash_state_  = false;
     static uint32_t last_toggle_time_ = 0;
     uint32_t        current_time      = uuid::get_uptime();
 
-    if (current_time - last_toggle_time_ >= 70) {
+    if (current_time - last_toggle_time_ >= 100) { // every 100ms
         led_flash_state_  = !led_flash_state_;
         last_toggle_time_ = current_time;
 
         if (led_flash_type_) {
-            uint8_t intensity = led_flash_state_ ? 100 : 0;
-            EMSESP_RGB_WRITE(led_flash_gpio_, intensity, intensity, intensity); // RGB LED
+            uint8_t intensity = led_flash_state_ ? RGB_LED_BRIGHTNESS : 0;
+            EMSESP_RGB_WRITE(led_flash_gpio_, intensity, intensity, 0); // RGB LED - Yellow
         } else {
             digitalWrite(led_flash_gpio_, led_flash_state_ ? LED_ON : !LED_ON); // Standard LED
         }
@@ -1024,11 +1024,13 @@ void System::system_check() {
             // see if we're better now
             if (healthcheck_ == 0) {
                 // everything is healthy, show LED permanently on or off depending on setting
+                // Green on RGB LED, on/off on standard LED
                 if (led_gpio_) {
-                    led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 0, hide_led_ ? 0 : RGB_LED_BRIGHTNESS, 0) : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
+                    led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 0, hide_led_ ? 0 : RGB_LED_BRIGHTNESS, 0)
+                              : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON); // Green
                 }
             } else {
-                // turn off LED so we're ready to the flashes
+                // turn off LED so we're ready for the warning flashes
                 if (led_gpio_) {
                     led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
                 }
@@ -1060,16 +1062,13 @@ void System::commands_init() {
 }
 
 // uses LED to show system health
-// 1 x flash = the EMS bus is not connected
-// 2 x flash = the network (wifi or ethernet) is not connected
-// 3 x flash = both EMS bus and network are failing. This is a critical error!
 void System::led_monitor() {
-    // check if button is busy or has been pressed - LED on to white
+    // if button is pressed, show LED (yellow on RGB LED, on/off on standard LED)
     static bool button_busy_ = false;
     if (button_busy_ != myPButton_.button_busy()) {
         button_busy_ = myPButton_.button_busy();
         if (led_type_) {
-            EMSESP_RGB_WRITE(led_gpio_, button_busy_ ? 100 : 0, button_busy_ ? 100 : 0, button_busy_ ? 100 : 0);
+            EMSESP_RGB_WRITE(led_gpio_, button_busy_ ? RGB_LED_BRIGHTNESS : 0, button_busy_ ? RGB_LED_BRIGHTNESS : 0, 0); // Yellow
         } else {
             digitalWrite(led_gpio_, button_busy_ ? LED_ON : !LED_ON);
         }
@@ -1107,11 +1106,10 @@ void System::led_monitor() {
             led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON); // LED off
         } else if (led_flash_step_ % 2) {
             // handle the step events (on odd numbers 3,5,7,etc). see if we need to turn on a LED
-            //  1 flash is the EMS bus is not connected
-            //  2 flashes if the network (wifi or ethernet) is not connected
-            //  3 flashes is both the bus and the network are not connected
+            //  1 flash (blue) is the EMS bus is not connected
+            //  2 flashes (red) if the network (wifi or ethernet) is not connected
+            //  3 flashes (red, red, blue) is both the bus and the network are not connected
 
-            // Cache healthcheck flags to avoid repeated bit operations
             bool no_network = (healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK;
             bool no_bus     = (healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS;
 
