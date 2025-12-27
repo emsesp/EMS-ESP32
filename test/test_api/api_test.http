@@ -4,8 +4,8 @@
 # The response will be shown in the right panel
 
 # @host = http://ems-esp.local
-@host = http://192.168.1.65
-@host_dev = http://192.168.1.223
+@host = http://192.168.1.223
+@host_dev = http://192.168.1.65
 @host_standalone = http://localhost:3080
 @host_standalone2 = http://localhost:3082
 
@@ -142,6 +142,30 @@ Authorization: Bearer {{token}}
 {
     "value" : 21.0
 }
+
+###
+
+POST {{host_dev}}/api/system/txenabled
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "value" : "on"
+}
+
+###
+
+POST {{host_dev}}/api/system/txenabled
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "value" : "off"
+}
+
+###
+
+GET {{host_dev}}/api/system/settings/txMode/value
 
 ###
 
