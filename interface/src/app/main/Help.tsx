@@ -42,8 +42,7 @@ interface CustomSupport {
   html: string | null;
 }
 
-// Constants moved outside component to prevent recreation
-const DEFAULT_IMAGE_URL = 'https://docs.emsesp.org/_media/images/installer.jpeg';
+const DEFAULT_IMAGE_URL = 'https://emsesp.org/_media/images/installer.jpeg';
 
 const SUPPORT_BOX_STYLES: SxProps<Theme> = {
   borderRadius: 3,
@@ -116,7 +115,7 @@ const HelpComponent = () => {
   const helpLinks: HelpLink[] = useMemo(
     () => [
       {
-        href: 'https://docs.emsesp.org',
+        href: 'https://emsesp.org',
         icon: <MenuBookIcon />,
         label: () => LL.HELP_INFORMATION_1()
       },

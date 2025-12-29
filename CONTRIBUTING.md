@@ -6,7 +6,7 @@ Everybody is welcome and invited to contribute to the EMS-ESP Project by:
 
 - providing Pull Requests (Features, Fixes, suggestions)
 - testing new released features and report issues on your EMS equipment
-- contributing to missing [documentation](https://docs.emsesp.org)
+- contributing to missing [documentation](https://emsesp.org)
 
 This document describes rules that are in effect for this repository, meant for handling issues by contributors in the issue tracker and PRs.
 

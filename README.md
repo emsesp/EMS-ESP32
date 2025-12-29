@@ -15,7 +15,7 @@
   <a href="https://github.com/emsesp/EMS-ESP32/blob/dev/CONTRIBUTING.md">
     <img src="https://img.shields.io/badge/Contribute-ff4785?style=for-the-badge&logo=git&logoColor=white" alt="Contribute" />
   </a>
-  <a href="https://docs.emsesp.org">
+  <a href="https://emsesp.org">
     <img src="https://img.shields.io/badge/Documentation-0077b5?style=for-the-badge&logo=googledocs&logoColor=white" alt="Guides" />
   </a>
   <a href="https://discord.gg/3J3GgnzpyT">
@@ -60,17 +60,17 @@ It requires a small circuit to interface with the EMS bus which can be purchased
 
 ## 🚀&nbsp; **Installing**
 
-Head over to [download.emsesp.org](https://download.emsesp.org) for instructions on how to install EMS-ESP. There is also further details on which boards are supported in [this section](https://docs.emsesp.org/Installing/) of the documentation.
+Head over to the [Installation Guide](https://emsesp.org/Installing) section of the documentation for instructions on how to install EMS-ESP.
 
 ## 📋&nbsp; **Documentation**
 
-Visit [emsesp.org](https://docs.emsesp.org) for more details on how to install and configure EMS-ESP. There is also a collection of Frequently Asked Questions and Troubleshooting tips with example customizations from the community.
+Visit [emsesp.org](https://emsesp.org) for more details on how to install and configure EMS-ESP. There is also a collection of Frequently Asked Questions and Troubleshooting tips with example customizations from the community.
 
 ## 💬&nbsp; **Getting Support**
 
 To chat with the community reach out on our [Discord Server](https://discord.gg/3J3GgnzpyT).
 
-If you find an issue or have a request, see [how to request support](https://docs.emsesp.org/Support/) on how to submit a bug report or feature request.
+If you find an issue or have a request, see [how to request support](https://emsesp.org/Support/) on how to submit a bug report or feature request.
 
 ## 🎥&nbsp; **Live Demo**
 

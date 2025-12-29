@@ -21,7 +21,7 @@ _Make sure your have performed every step and checked the applicable boxes befor
 
 - [ ] Searched the issue in [issues](https://github.com/emsesp/EMS-ESP32/issues)
 - [ ] Searched the issue in [discussions](https://github.com/emsesp/EMS-ESP32/discussions)
-- [ ] Searched the issue in the [docs](https://docs.emsesp.org/Troubleshooting/)
+- [ ] Searched the issue in the [docs](https://emsesp.org/Troubleshooting/)
 - [ ] Searched the issue in the [chat](https://discord.gg/3J3GgnzpyT)
 - [ ] Provide the System information in the area below, taken from `http://<IP>/api/system`
 

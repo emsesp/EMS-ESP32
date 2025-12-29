@@ -91,12 +91,12 @@ function ErrorPage() {
       <p style={errorPageStyles.message2}>
         Please report on{' '}
         <a
-          href="https://docs.emsesp.org/Support"
+          href="https://emsesp.org/Support"
           target="_blank"
           rel="noreferrer"
           style={{ color: 'inherit', textDecoration: 'underline' }}
         >
-          https://docs.emsesp.org/Support
+          https://emsesp.org/Support
         </a>
       </p>
     </div>

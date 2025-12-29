@@ -384,7 +384,7 @@ function custom_support() {
         '',
         "For help and questions please <a target='_blank' href='https://emsesp.org'>contact</a> your installer."
       ],
-      img_url: 'https://docs.emsesp.org/_media/images/designer.png'
+      img_url: 'https://emsesp.org/_media/images/designer.png'
       // img_url: 'https://picsum.photos/200/300'
     }
   };

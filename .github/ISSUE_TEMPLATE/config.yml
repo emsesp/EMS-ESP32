@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: EMS-ESP Docs
-    url: https://docs.emsesp.org
+    url: https://emsesp.org
     about: All the information related to EMS-ESP.
   - name: EMS-ESP Discussions and Support
     url: https://github.com/emsesp/EMS-ESP32/discussions
