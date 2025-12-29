@@ -52,8 +52,7 @@ void EMSuart::uart_event_task(void * pvParameters) {
                     uart_read_bytes(EMSUART_NUM, telegram, length, portMAX_DELAY);
                     EMSESP::incoming_telegram(telegram, (uint8_t)(length - 1));
                 } else { // flush buffer up to break
-                    uint8_t buf[length];
-                    uart_read_bytes(EMSUART_NUM, buf, length, portMAX_DELAY);
+                    uart_flush_input(EMSUART_NUM);
                 }
                 length = 0;
             } else if (event.type == UART_BUFFER_FULL) {
