@@ -55,7 +55,6 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
         }
     } else if (wifi_status == WL_CONNECTED) {
         root["local_ip"] = WiFi.localIP().toString();
-// #if ESP_ARDUINO_VERSION_MAJOR < 3
 #if ESP_IDF_VERSION_MAJOR < 5
         root["local_ipv6"] = WiFi.localIPv6().toString();
 #else

@@ -355,7 +355,8 @@ const sk: Translation = {
   SWITCH_RELEASE_TYPE: 'Prepnúť na {0} verziu',
   FIRMWARE_VERSION_INFO: 'Informácie o verzii firmware',
   NO_DATA: 'Žiadne dáta',
-  USER_PROFILE: 'Profil používateľa'
+  USER_PROFILE: 'Profil používateľa',
+  STORED_VERSIONS: 'Uložené verzie'
 };
 
 export default sk;

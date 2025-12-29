@@ -37,6 +37,12 @@
 #include <uuid/log.h>
 #include <PButton.h>
 
+#if ESP_ARDUINO_VERSION_MAJOR < 3
+#define EMSESP_RGB_WRITE neopixelWrite
+#else
+#define EMSESP_RGB_WRITE rgbLedWrite
+#endif
+
 #if CONFIG_IDF_TARGET_ESP32
 // there is no official API available on the original ESP32
 extern "C" {
@@ -56,7 +62,7 @@ using uuid::console::Shell;
 
 #define EMSESP_CUSTOMSUPPORT_FILE "/config/customSupport.json"
 
-#define RGB_LED_BRIGHTNESS 20
+#define RGB_LED_BRIGHTNESS 20 // 255 is max brightness
 
 namespace emsesp {
 
@@ -74,10 +80,16 @@ enum SYSTEM_STATUS : uint8_t {
 
 enum FUSE_VALUE : uint8_t { ALL = 0, MFG = 1, MODEL = 2, BOARD = 3, REV = 4, BATCH = 5, FUSE = 6 };
 
+struct PartitionInfo {
+    std::string version;
+    size_t      size;
+    std::string install_date; // optional, only available if NTP is connected
+};
+
 class System {
   public:
     void start();
-    void loop();
+    bool loop(); // returns true if the LED flash is active
 
     // commands
     static bool command_read(const char * value, const int8_t id);
@@ -91,6 +103,7 @@ class System {
     static bool command_info(const char * value, const int8_t id, JsonObject output);
     static bool command_response(const char * value, const int8_t id, JsonObject output);
     static bool command_service(const char * cmd, const char * value);
+    static bool command_txpause(const char * value, const int8_t id);
 
     static bool        get_value_info(JsonObject root, const char * cmd);
     static void        get_value_json(JsonObject output, const std::string & circuit, const std::string & name, JsonVariant val);
@@ -104,6 +117,7 @@ class System {
 
     void store_nvs_values();
     void system_restart(const char * partition = nullptr);
+    void get_partition_info();
 
     void show_mem(const char * note);
     void store_settings(class WebSettings & settings);
@@ -145,9 +159,13 @@ class System {
     static void extractSettings(const char * filename, const char * section, JsonObject output);
     static bool saveSettings(const char * filename, const char * section, JsonObject input);
 
+    // GPIOs
     static bool                 add_gpio(uint8_t pin, const char * source_name);
     static std::vector<uint8_t> available_gpios();
     static bool                 load_board_profile(std::vector<int8_t> & data, const std::string & board_profile);
+    static void                 make_snapshot_gpios();
+    static void                 restore_snapshot_gpios();
+    static void                 clear_snapshot_gpios();
 
     static bool readCommand(const char * data);
 
@@ -301,7 +319,6 @@ class System {
 
     void show_system(uuid::console::Shell & shell);
     void show_users(uuid::console::Shell & shell);
-    void show_gpio(uuid::console::Shell & shell);
 
     void wifi_reconnect();
 
@@ -361,6 +378,11 @@ class System {
 
     static void remove_gpio(uint8_t pin, bool also_system = false); // remove a gpio from both valid (optional) and used lists
 
+    // Partition info map: partition name -> {version, size, install_date}
+    std::map<std::string, PartitionInfo, std::less<>, AllocatorPSRAM<std::pair<const std::string, PartitionInfo>>> partition_info_;
+
+    static bool set_partition(const char * partitionname);
+
   private:
     static uuid::log::Logger logger_;
 
@@ -370,16 +392,29 @@ class System {
 
     uint8_t systemStatus_; // uses SYSTEM_STATUS enum
 
+    void set_partition_install_date(bool override = false);
+
     // button
     static PButton            myPButton_; // PButton instance
     static void               button_OnClick(PButton & b);
     static void               button_OnDblClick(PButton & b);
     static void               button_OnLongPress(PButton & b);
     static void               button_OnVLongPress(PButton & b);
-    static constexpr uint32_t BUTTON_Debounce        = 40;    // Debounce period to prevent flickering when pressing or releasing the button (in ms)
-    static constexpr uint32_t BUTTON_DblClickDelay   = 250;   // Max period between clicks for a double click event (in ms)
-    static constexpr uint32_t BUTTON_LongPressDelay  = 9500;  // Hold period for a long press event (in ms) - 10 seconds
-    static constexpr uint32_t BUTTON_VLongPressDelay = 20000; // Hold period for a very long press event (in ms) - 20 seconds
+    static constexpr uint32_t BUTTON_Debounce      = 40;  // Debounce period to prevent flickering when pressing or releasing the button (in ms)
+    static constexpr uint32_t BUTTON_DblClickDelay = 250; // Max period between clicks for a double click event (in ms)
+
+    // LED flash timer
+    static bool     led_flash_timer_;
+    static uint8_t  led_flash_gpio_;
+    static uint8_t  led_flash_type_;
+    static uint32_t led_flash_start_time_;
+    static uint32_t led_flash_duration_;
+    static void     start_led_flash(uint8_t duration);
+    static void     led_flash();
+
+    // button press delays
+    static constexpr uint32_t BUTTON_LongPressDelay  = 3000; // Hold period for a long press event (in ms) - ~3 seconds
+    static constexpr uint32_t BUTTON_VLongPressDelay = 9500; // Hold period for a very long press event (in ms) - !10 seconds
 
     // healthcheck
 #ifdef EMSESP_PINGTEST
@@ -387,8 +422,8 @@ class System {
 #else
     static constexpr uint32_t SYSTEM_CHECK_FREQUENCY = 5000; // do a system check every 5 seconds
 #endif
-    static constexpr uint32_t HEALTHCHECK_LED_LONG_DUARATION  = 1500;
-    static constexpr uint32_t HEALTHCHECK_LED_FLASH_DUARATION = 150;
+    static constexpr uint32_t HEALTHCHECK_LED_LONG_DUARATION  = 1500;     // 1.5 seconds
+    static constexpr uint32_t HEALTHCHECK_LED_FLASH_DUARATION = 150;      // 150ms
     static constexpr uint8_t  HEALTHCHECK_NO_BUS              = (1 << 0); // 1
     static constexpr uint8_t  HEALTHCHECK_NO_NETWORK          = (1 << 1); // 2
     static constexpr uint8_t  LED_ON                          = HIGH;     // LED on
@@ -402,8 +437,11 @@ class System {
 
     static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> string_range_to_vector(const std::string & range);
 
-    static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> valid_system_gpios_; // list of valid GPIOs for the ESP32 board that can be used
-    static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> used_gpios_;         // list of GPIOs used by the application
+    // GPIOs
+    static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> valid_system_gpios_;          // list of valid GPIOs for the ESP32 board that can be used
+    static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> used_gpios_;                  // list of GPIOs used by the application
+    static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> snapshot_used_gpios_;         // snapshot of the used GPIOs
+    static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> snapshot_valid_system_gpios_; // snapshot of the valid GPIOs
 
     int8_t wifi_quality(int8_t dBm);
 

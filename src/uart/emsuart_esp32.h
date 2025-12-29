@@ -40,6 +40,8 @@
 #define EMSUART_NUM UART_NUM_1 // on C3 and S2 there is no UART2, use UART1 for all
 #define EMSUART_BAUD 9600      // uart baud rate for the EMS circuit
 
+#define EMS_TXMODE_INIT 0xFF
+#define EMS_TXMODE_OFF 0
 #define EMS_TXMODE_DEFAULT 1
 #define EMS_TXMODE_EMSPLUS 2
 #define EMS_TXMODE_HT3 3

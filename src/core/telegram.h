@@ -204,7 +204,6 @@ class EMSbus {
 #endif
     }
 
-
     // sets the flag for EMS bus connected
     static void last_bus_activity(uint32_t timestamp) {
         // record the first time we connected to the BUS, as this will be our uptime

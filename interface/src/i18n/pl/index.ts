@@ -355,7 +355,8 @@ const pl: BaseTranslation = {
   SWITCH_RELEASE_TYPE: 'Zmień na {0} wydanie',
   FIRMWARE_VERSION_INFO: 'Informacje o wersji firmware',
   NO_DATA: 'Brak danych',
-  USER_PROFILE: 'Profil użytkownika'
+  USER_PROFILE: 'Profil użytkownika',
+  STORED_VERSIONS: 'Zapisane wersje'
 };
 
 export default pl;

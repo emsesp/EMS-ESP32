@@ -1591,6 +1591,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
             connect_time = uuid::get_uptime_sec();
         }
         if (poll_id == EMSbus::ems_bus_id()) {
+            // TODO this could also be by coincidence, so we should add a counter to the EMSbus class to check if the poll_id is the same as the EMS_BUS_ID for a certain number of times
             EMSbus::last_bus_activity(uuid::get_uptime()); // set the flag indication the EMS bus is active
         }
         if (wait_km_) {
@@ -1719,6 +1720,14 @@ void EMSESP::start() {
 #else
     LOG_INFO("EMS-ESP version %s", EMSESP_APP_VERSION);
 #endif
+
+    // check if the firmware is fresh
+    // this is set in UploadFileService::uploadComplete()
+    // and reset in System::set_partition_install_date()
+    if (!EMSESP::nvs_.getBool(EMSESP_NVS_BOOT_NEW_FIRMWARE)) {
+        LOG_DEBUG("Firmware is fresh");
+    }
+
     LOG_DEBUG("System is running in Debug mode");
     LOG_INFO("Last system reset reason Core0: %s, Core1: %s", system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
 
@@ -1810,9 +1819,14 @@ void EMSESP::shell_prompt() {
 
 // main loop calling all services
 void EMSESP::loop() {
-    uuid::loop();         // store system uptime
-    esp32React.loop();    // web services
-    system_.loop();       // does LED and checks system health, and syslog service
+    uuid::loop(); // store system uptime
+
+    // handles LED and checks system health, and syslog service
+    if (system_.loop()) {
+        return; // LED flashing is active, skip the rest of the loop
+    }
+
+    esp32React.loop();    // web services like network, AP, MQTT
     webLogService.loop(); // log in Web UI
 
     // run the loop, unless we're in the middle of an OTA upload

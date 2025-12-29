@@ -355,7 +355,8 @@ const sv: Translation = {
   SWITCH_RELEASE_TYPE: 'Byt till {0} utgåva',
   FIRMWARE_VERSION_INFO: 'Information om firmwareversion',
   NO_DATA: 'Ingen data',
-  USER_PROFILE: 'Användarprofil'
+  USER_PROFILE: 'Användarprofil',
+  STORED_VERSIONS: 'Lagrad versioner'
 };
 
 export default sv;

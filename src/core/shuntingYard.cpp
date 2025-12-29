@@ -399,17 +399,23 @@ std::string commands(std::string & expr, bool quotes) {
 
 // checks for logic value
 int to_logic(const std::string & s) {
-    if (s.empty()) {
-        return -1;
+    bool value_b;
+    if (!Helpers::value2bool(s.c_str(), value_b)) {
+        return -1; // invalid
     }
-    auto l = Helpers::toLower(s);
-    if (s[0] == '1' || l == "on" || l == "true") {
-        return 1;
-    }
-    if (s[0] == '0' || l == "off" || l == "false") {
-        return 0;
-    }
-    return -1;
+    return value_b;
+
+    // if (s.empty()) {
+    //     return -1;
+    // }
+    // auto l = Helpers::toLower(s);
+    // if (s[0] == '1' || l == "on" || l == "true") {
+    //     return 1;
+    // }
+    // if (s[0] == '0' || l == "off" || l == "false") {
+    //     return 0;
+    // }
+    // return -1;
 }
 
 // number to string, remove trailing zeros

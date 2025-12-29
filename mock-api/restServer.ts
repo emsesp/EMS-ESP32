@@ -106,6 +106,29 @@ let system_status = {
   psram_size: 8189,
   free_psram: 8166,
   has_loader: true,
+  has_partition: true,
+  partitions: [
+    {
+      partition: 'app0', // this one is active
+      version: 'XX.XX.XX', // defined later
+      install_date: '2025-03-01T13:29:13.999Z',
+      size: 4672
+    },
+    {
+      partition: 'app1',
+      version: '3.7.3-dev.40',
+      install_date: '2025-03-01T13:29:13.999Z',
+      size: 4672
+    },
+    {
+      partition: 'factory',
+      version: '3.7.3-dev.39',
+      install_date: '2025-03-01T13:29:13.999Z',
+      size: 4672
+    }
+  ],
+  // partitions: [],
+  developer_mode: true,
   model: '',
   // model: 'BBQKees Electronics EMS Gateway E32 V2 (E32 V2.0 P3/2024011)',
   // status: 0,
@@ -116,8 +139,8 @@ let system_status = {
 let DEV_VERSION_IS_UPGRADEABLE: boolean;
 let STABLE_VERSION_IS_UPGRADEABLE: boolean;
 let THIS_VERSION: string;
-let LATEST_STABLE_VERSION = '3.7.3';
-let LATEST_DEV_VERSION = '3.7.4-dev.2';
+let LATEST_STABLE_VERSION = '3.8.0';
+let LATEST_DEV_VERSION = '3.8.1-dev.2';
 
 // scenarios for testing versioning
 let version_test = 0; // on latest stable, or switch to dev
@@ -148,13 +171,13 @@ switch (version_test as number) {
     break;
   case 3:
     // upgrade dev to latest, or switch to stable
-    THIS_VERSION = '3.7.4-dev.3';
+    THIS_VERSION = '3.8.0-dev.3';
     STABLE_VERSION_IS_UPGRADEABLE = false;
     DEV_VERSION_IS_UPGRADEABLE = true;
     break;
   case 4:
     // downgrade to an older dev, or switch back to stable
-    THIS_VERSION = '3.7.3-dev.1';
+    THIS_VERSION = '3.8.0-dev.1';
     STABLE_VERSION_IS_UPGRADEABLE = true;
     DEV_VERSION_IS_UPGRADEABLE = false;
     break;
@@ -162,6 +185,7 @@ switch (version_test as number) {
 
 // set the version
 system_status.emsesp_version = THIS_VERSION;
+system_status.partitions[0].version = THIS_VERSION; // app0
 
 // set the ESP platform - using ESP32 will disable OTA and automatic version downloading
 let emulate_esp: string;
@@ -5134,6 +5158,10 @@ router
       } else if (action === 'resetMQTT') {
         // reset MQTT
         console.log('resetting MQTT...');
+        return status(200);
+      } else if (action === 'setPartition') {
+        // set partition
+        console.log('setting partition to', content.param);
         return status(200);
       }
     }

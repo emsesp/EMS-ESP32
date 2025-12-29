@@ -100,8 +100,6 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                 EMSESP::show_sensor_values(shell);
             } else if (command == F_(mqtt)) {
                 Mqtt::show_mqtt(shell);
-            } else if (command == F_(gpio)) {
-                EMSESP::system_.show_gpio(shell);
             } else {
                 shell.printfln("Unknown show command");
             }
@@ -369,6 +367,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
     commands->add_command(ShellContext::MAIN, CommandFlags::ADMIN, {F_(scan)}, [](Shell & shell, const std::vector<std::string> & arguments) {
         EMSESP::scan_devices();
     });
+
     /* removed scan deep
     commands->add_command(ShellContext::MAIN, CommandFlags::ADMIN, {F_(scan)}, {F_(deep_optional)}, [](Shell & shell, const std::vector<std::string> & arguments) {
         if (arguments.empty()) {
@@ -386,6 +385,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
         }
     });
     */
+
     // read <deviceID> <type ID> [offset] [length]
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,

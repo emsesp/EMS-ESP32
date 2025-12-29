@@ -60,21 +60,28 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
     // Reset states before saving
     setRestartNeeded(false);
     setErrorMessage(undefined);
-    setDirtyFlags([]);
-    setOrigData(data as D);
 
     try {
       await writeData(data as D);
+      // Only update origData on successful save (dirtyFlags cleared by onSuccess handler)
+      setOrigData(data as D);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
+
       if (message === REBOOT_ERROR_MESSAGE) {
         setRestartNeeded(true);
-      } else {
-        toast.error(message);
-        setErrorMessage(message);
+        return; // Early return - save succeeded but needs reboot
       }
+
+      // Restore original data on validation error
+      if (origData) {
+        updateData({ data: origData });
+      }
+      toast.error(message);
+      setErrorMessage(message);
+      setDirtyFlags([]); // Clear flags so user can retry
     }
-  }, [data, writeData]);
+  }, [data, writeData, origData, updateData]);
 
   return useMemo(
     () => ({

@@ -352,8 +352,8 @@ void WebCustomEntityService::get_value_json(JsonObject output, CustomEntityItem 
         }
     }
 
-    // add uom state class and device class
-    Mqtt::add_ha_classes(output, EMSdevice::DeviceType::SYSTEM, entity.value_type, entity.uom, nullptr, false);
+    // add uom state class and device class to output json, excluding icon
+    Mqtt::add_ha_classes(output, EMSdevice::DeviceType::SYSTEM, entity.value_type, entity.uom, nullptr, true); // display only
 
     render_value(output, entity, true); // create the "value" field
 }

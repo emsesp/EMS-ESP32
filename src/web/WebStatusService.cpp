@@ -146,6 +146,23 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
         root["has_partition"] = false;
     }
 
+    // get the partition info for each partition, including the running one
+    // the partition data is done once in System::start() and stored in partition_info_
+    JsonArray partitions = root["partitions"].to<JsonArray>();
+    for (const auto & partition : EMSESP::system_.partition_info_) {
+        // Skip partition if it has no version, or it's size is 0
+        if (partition.second.version.empty() || partition.second.size == 0) {
+            continue;
+        }
+        JsonObject part      = partitions.add<JsonObject>();
+        part["partition"]    = partition.first;
+        part["version"]      = partition.second.version;
+        part["size"]         = partition.second.size;
+        part["install_date"] = partition.second.install_date;
+    }
+
+    root["developer_mode"] = EMSESP::system_.developer_mode();
+
     // Also used in SystemMonitor.tsx
     root["status"] = EMSESP::system_.systemStatus(); // send the status. See System.h for status codes
     if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_PENDING_RESTART) {
@@ -185,6 +202,8 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
 
     if (action == "checkUpgrade") {
         ok = checkUpgrade(root, param); // param could be empty, if so only send back version
+    } else if (action == "setPartition") {
+        ok = EMSESP::system_.set_partition(param.c_str());
     } else if (action == "export") {
         if (has_param) {
             ok = exportData(root, param);

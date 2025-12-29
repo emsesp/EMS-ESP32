@@ -355,7 +355,8 @@ const tr: Translation = {
   SWITCH_RELEASE_TYPE: '{0} sürümüne geç',
   FIRMWARE_VERSION_INFO: 'Firmware Sürüm Bilgisi',
   NO_DATA: 'Hiçbir veri yok',
-  USER_PROFILE: 'Kullanıcı Profili'
+  USER_PROFILE: 'Kullanıcı Profili',
+  STORED_VERSIONS: 'Kaydedilmiş Sürümler'
 };
 
 export default tr;

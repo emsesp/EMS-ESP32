@@ -91,6 +91,9 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     // make a copy of the settings to compare to later
     const WebSettings original_settings(settings);
 
+    // make a snapshot of the current GPIOs
+    EMSESP::system_.make_snapshot_gpios();
+
     reset_flags();
 
     settings.version       = root["version"] | EMSESP_DEFAULT_VERSION; // save the version, we use it later in System::check_upgrade()
@@ -147,8 +150,6 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     EMSESP::system_.remove_gpio(1, true);
     EMSESP::system_.remove_gpio(3, true);
 #endif
-    // if any of the GPIOs have changed and re-validate them
-    bool have_valid_gpios = true;
 
     // free old gpios from used list to allow remapping
     EMSESP::system_.remove_gpio(original_settings.led_gpio);
@@ -157,27 +158,32 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     EMSESP::system_.remove_gpio(original_settings.rx_gpio);
     EMSESP::system_.remove_gpio(original_settings.tx_gpio);
 
-    // now add new gpio assignment, start with rx/tx
+    // if any of the GPIOs have changed and re-validate them
+    bool have_valid_gpios = true;
+
+    // Helper lambda for optional GPIOs (can be 0 to disable)
+    auto add_optional_gpio = [&have_valid_gpios](uint8_t & gpio, const char * name) {
+        if (gpio != 0 && !EMSESP::system_.add_gpio(gpio, name)) {
+            gpio             = 0; // 0 means disabled
+            have_valid_gpios = false;
+        }
+    };
+
+    // add new gpio assignment
     check_flag(original_settings.rx_gpio, settings.rx_gpio, ChangeFlags::UART);
-    have_valid_gpios = have_valid_gpios && EMSESP::system_.add_gpio(settings.rx_gpio, "UART Rx");
+    have_valid_gpios &= EMSESP::system_.add_gpio(settings.rx_gpio, "UART Rx");
 
     check_flag(original_settings.tx_gpio, settings.tx_gpio, ChangeFlags::UART);
-    have_valid_gpios = have_valid_gpios && EMSESP::system_.add_gpio(settings.tx_gpio, "UART Tx");
+    have_valid_gpios &= EMSESP::system_.add_gpio(settings.tx_gpio, "UART Tx");
 
     check_flag(original_settings.led_gpio, settings.led_gpio, ChangeFlags::LED);
-    if (settings.led_gpio != 0 && !EMSESP::system_.add_gpio(settings.led_gpio, "LED")) {
-        settings.led_gpio = 0; // 0 means disabled
-        have_valid_gpios  = false;
-    }
+    add_optional_gpio(settings.led_gpio, "LED");
 
     check_flag(original_settings.dallas_gpio, settings.dallas_gpio, ChangeFlags::TEMPERATURE_SENSOR);
-    if (settings.dallas_gpio != 0 && !EMSESP::system_.add_gpio(settings.dallas_gpio, "Dallas")) {
-        settings.dallas_gpio = 0; // 0 means disabled
-        have_valid_gpios     = false;
-    }
+    add_optional_gpio(settings.dallas_gpio, "Dallas");
 
     check_flag(original_settings.pbutton_gpio, settings.pbutton_gpio, ChangeFlags::BUTTON);
-    have_valid_gpios = have_valid_gpios && EMSESP::system_.add_gpio(settings.pbutton_gpio, "Button");
+    have_valid_gpios &= EMSESP::system_.add_gpio(settings.pbutton_gpio, "Button");
 
     // check if the LED type, eth_phy_addr or eth_clock_mode have changed
     check_flag(original_settings.led_type, settings.led_type, ChangeFlags::LED);
@@ -303,18 +309,24 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
         settings.weblog_buffer = root["weblog_buffer"] | 25; // limit to 25 messages if no psram
     }
 
+    // save the settings if changed from the webUI
+    // if we encountered an invalid GPIO, rollback changes and don't save settings, and report the error to WebUI
+    if (!have_valid_gpios) {
+        // replace settings with original settings
+        settings = original_settings; // the original settings are still valid
+        // restore the GPIOs from the snapshot
+        EMSESP::system_.restore_snapshot_gpios();
+
+        // report the error to WebUI
+        EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_INVALID_GPIO);
+        return StateUpdateResult::ERROR; // don't save the settings if the GPIOs are invalid
+    }
+
+    // clean up snapshot of the GPIOs
+    EMSESP::system_.clear_snapshot_gpios();
+
     // save the setting internally, for reference later
     EMSESP::system_.store_settings(settings);
-
-    // save the settings if changed from the webUI
-    // if we encountered an invalid GPIO, don't save settings and report the error
-    if (!have_valid_gpios) {
-#if defined(EMSESP_DEBUG)
-        EMSESP::logger().debug("Warning: one or more GPIOs are invalid");
-#endif
-        EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_INVALID_GPIO);
-        return StateUpdateResult::CHANGED; // save the settings anyway, without restart
-    }
 
     if (has_flags(WebSettings::ChangeFlags::RESTART)) {
         return StateUpdateResult::CHANGED_RESTART;
@@ -502,7 +514,6 @@ void WebSettings::set_board_profile(WebSettings & settings) {
     settings.eth_clock_mode = data[8]; // Ethernet Clock Mode
     settings.led_type       = data[9]; // LED Type
 }
-
 
 // returns true if the value was changed
 bool WebSettings::check_flag(int prev_v, int new_v, uint8_t flag) {

@@ -96,6 +96,8 @@ using DeviceValueNumOp = DeviceValue::DeviceValueNumOp;
 class EMSESPShell;
 class Shower;
 
+static constexpr const char * EMSESP_NVS_BOOT_NEW_FIRMWARE = "fresh_firmware"; // max 15 characters
+
 class EMSESP {
   public:
     EMSESP();

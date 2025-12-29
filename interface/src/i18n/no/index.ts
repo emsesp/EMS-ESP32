@@ -355,7 +355,8 @@ const no: Translation = {
   SWITCH_RELEASE_TYPE: 'Bytt til {0} utgivelse',
   FIRMWARE_VERSION_INFO: 'Informasjon om firmwareversjon',
   NO_DATA: 'Ingen data',
-  USER_PROFILE: 'Brukerprofil'
+  USER_PROFILE: 'Brukerprofil',
+  STORED_VERSIONS: 'Lagret versjoner'
 };
 
 export default no;

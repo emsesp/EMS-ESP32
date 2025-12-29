@@ -258,7 +258,7 @@ class Mqtt {
     static std::string tag_to_topic(uint8_t device_type, int8_t tag);
 
     static void
-    add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8_t type, const uint8_t uom, const char * entity = nullptr, bool is_discovery = true);
+    add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8_t type, const uint8_t uom, const char * entity = nullptr, bool display_only = false);
     static void add_ha_dev_section(JsonObject   doc,
                                    const char * name         = nullptr,
                                    const bool   create_model = false,

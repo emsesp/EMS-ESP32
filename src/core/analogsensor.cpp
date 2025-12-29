@@ -289,11 +289,7 @@ void AnalogSensor::reload(bool get_nvs) {
             uint8_t  r = v / 10000;
             uint8_t  g = (v - r * 10000) / 100;
             uint8_t  b = v % 100;
-#if ESP_ARDUINO_VERSION_MAJOR < 3
-            neopixelWrite(sensor.gpio(), 2 * r, 2 * g, 2 * b);
-#else
-            rgbLedWrite(sensor.gpio(), 2 * r, 2 * g, 2 * b);
-#endif
+            EMSESP_RGB_WRITE(sensor.gpio(), 2 * r, 2 * g, 2 * b);
             LOG_DEBUG("RGB set to %d, %d, %d", r, g, b);
         } else if (sensor.type() == AnalogType::DIGITAL_OUT) {
             LOG_DEBUG("Digital Write on GPIO %02d", sensor.gpio());
@@ -809,9 +805,9 @@ void AnalogSensor::publish_values(const bool force) {
             std::string topic_str(topic);
             config["def_ent_id"] = topic_str.substr(0, topic_str.find("/")) + "." + uniq_s;
 
+            // add HA Discovery config
             Mqtt::add_ha_classes(config.as<JsonObject>(), EMSdevice::DeviceType::ANALOGSENSOR, valueType, sensor.uom());
-            // dev section with model is only created on the 1st sensor
-            Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Analog Sensors", !ha_dev_created);
+            Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Analog Sensors", !ha_dev_created); // dev section with model is only created on the 1st sensor
             Mqtt::add_ha_avty_section(config.as<JsonObject>(), stat_t, val_cond);
 
             sensor.ha_registered = Mqtt::queue_ha(topic, config.as<JsonObject>());
@@ -955,11 +951,7 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                 uint8_t r = v / 10000;
                 uint8_t g = (v - r * 10000) / 100;
                 uint8_t b = v % 100;
-#if ESP_ARDUINO_VERSION_MAJOR < 3
-                neopixelWrite(sensor.gpio(), 2 * r, 2 * g, 2 * b);
-#else
-                rgbLedWrite(sensor.gpio(), 2 * r, 2 * g, 2 * b);
-#endif
+                EMSESP_RGB_WRITE(sensor.gpio(), 2 * r, 2 * g, 2 * b);
                 LOG_DEBUG("RGB set to %d, %d, %d", r, g, b);
             } else if (sensor.type() == AnalogType::PULSE) {
                 uint8_t v = val;

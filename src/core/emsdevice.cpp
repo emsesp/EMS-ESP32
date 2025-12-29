@@ -1687,7 +1687,7 @@ void EMSdevice::get_value_json(JsonObject json, DeviceValue & dv) {
     }
 
     // add uom, state class and device class
-    Mqtt::add_ha_classes(json, device_type(), dv.type, dv.uom, dv.short_name, false); // no icon
+    Mqtt::add_ha_classes(json, device_type(), dv.type, dv.uom, dv.short_name, true); // display only
 
     json["readable"]  = dv.type != DeviceValueType::CMD && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE);
     json["writeable"] = dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY);

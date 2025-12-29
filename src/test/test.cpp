@@ -1334,7 +1334,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             // log shows first if you can upgrade to dev, and then if you can upgrade to stable
             // request.url("/rest/action");
             // std::string LATEST_STABLE_VERSION = "3.7.2";
-            // std::string LATEST_DEV_VERSION    = "3.7.3-dev.3";
+            // std::string LATEST_DEV_VERSION    = "3.8.0-dev.3";
             // std::string param                 = LATEST_DEV_VERSION + "," + LATEST_STABLE_VERSION;
             // std::string action                = "{\"action\":\"checkUpgrade\", \"param\":\"" + param + "\"}";
             // deserializeJson(doc, action);
@@ -1352,7 +1352,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
             // // case 3: upgrade an older dev to latest dev, no stable upgrades available. So true, false
-            // EMSESP::webStatusService.set_current_version("3.7.3-dev.2");
+            // EMSESP::webStatusService.set_current_version("3.8.0-dev.2");
             // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
             // char data6[] = "{\"device\":\"system\", \"cmd\":\"read\",\"value\":\"8 2 27 1\"}";

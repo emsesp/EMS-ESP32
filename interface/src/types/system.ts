@@ -52,7 +52,14 @@ export interface SystemStatus {
   model: string;
   has_loader: boolean;
   has_partition: boolean;
+  partitions: {
+    partition: string;
+    version: string;
+    size: number;
+    install_date?: string;
+  }[];
   status: number; // System Status Codes which matches SYSTEM_STATUS in System.h
+  developer_mode: boolean;
   temperature?: number;
 }
 
