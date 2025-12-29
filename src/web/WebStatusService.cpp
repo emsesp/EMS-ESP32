@@ -345,8 +345,7 @@ bool WebStatusService::getCustomSupport(JsonObject root) {
 
 #if defined(EMSESP_STANDALONE)
     // dummy test data for "test api3"
-    deserializeJson(
-        doc, "{\"type\":\"customSupport\",\"Support\":{\"html\":[\"html code\",\"here\"], \"img_url\": \"https://docs.emsesp.org/_media/images/designer.png\"}");
+    deserializeJson(doc, "{\"type\":\"customSupport\",\"Support\":{\"html\":[\"html code\",\"here\"], \"img_url\": \"https://emsesp.org/_media/images/designer.png\"}");
 #else
     // check if we have custom support file uploaded
     File file = LittleFS.open(EMSESP_CUSTOMSUPPORT_FILE, "r");
