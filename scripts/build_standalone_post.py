@@ -9,7 +9,8 @@ from pathlib import Path
 # - Modbus-Entity-Registers.md
 # - dump_telegrams.csv
 
-# Import the streaming function from the separate module
+# Modbus-Entity-Registers.md is used in the emsesp.org documentation. You can also create it manually with the generate-modbus-register-doc.py script.
+# cat ./docs/dump_entities.csv | python3 ./scripts/generate-modbus-register-doc.py    # Import the streaming function from the separate module
 from run_executable import run_with_streaming_input
 
 

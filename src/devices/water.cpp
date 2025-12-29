@@ -141,7 +141,7 @@ void Water::process_SM100wwParam2(std::shared_ptr<const Telegram> telegram) {
 void Water::process_SM100wwCirc(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, wwCirc_, 0);
     has_update(telegram, wwCircMode_, 3);
-    has_update(telegram, wwCircTc_, 4); // time controled on/off
+    has_update(telegram, wwCircTc_, 4); // time controlled on/off
 }
 
 // SM100wwKeepWarm - 0x7AE, keepWarm
@@ -351,7 +351,7 @@ bool Water::set_wwCircMode(const char * value, const int8_t id) {
     return true;
 }
 
-// set time controled mode on/off
+// set time controlled mode on/off
 bool Water::set_wwCircTc(const char * value, const int8_t id) {
     bool b;
     if (!Helpers::value2bool(value, b)) {

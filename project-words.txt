@@ -187,7 +187,6 @@ Connack
 CONNACK
 connectcb
 connectcount
-controled
 controlmode
 coolingcircuit
 coolingon

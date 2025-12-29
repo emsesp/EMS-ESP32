@@ -4,6 +4,12 @@ import subprocess
 import sys
 Import("env")
 
+# This script is used to build the program and run the test command.
+# It is used in the build_modbus and build_standalone targets.  
+# Reads configuration from platformio.ini (output file path and test command)
+# Runs the executable with streaming input, sending it the test command and capturing output to a file
+# Optionally runs a post-processing script if defined in the configuration
+
 # Import the streaming function from the separate module
 from run_executable import run_with_streaming_input
 

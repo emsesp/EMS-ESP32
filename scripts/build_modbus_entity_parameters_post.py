@@ -4,6 +4,9 @@ import sys
 import shutil
 from pathlib import Path
 
+# This script is used to update the modbus_entity_parameters.hpp file with the data from the dump_entities.csv file.
+# It is used in the build_modbus target.
+
 def get_python_executable():
     """Get the appropriate Python executable for the current platform."""
     # Try different Python executable names
