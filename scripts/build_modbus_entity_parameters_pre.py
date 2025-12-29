@@ -2,6 +2,9 @@ from pathlib import Path
 import os
 Import("env")
 
+# This script is used to create a dummy modbus_entity_parameters.hpp so the first pass compiles.
+# It is used in the build_modbus target.
+
 def create_dummy_modbus_header():
     """Create a dummy modbus_entity_parameters.hpp so the first pass compiles."""
     header_content = '''#include "modbus.h"
