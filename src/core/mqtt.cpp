@@ -918,7 +918,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // build a config topic that will be prefix onto a HA type (e.g. number, switch)
     char config_topic[70];
-    snprintf(config_topic, sizeof(config_topic), "%s/%s_%s/config", Mqtt::base().c_str(), device_name, entity_with_tag);
+    snprintf(config_topic, sizeof(config_topic), "%s/%s_%s/config", Mqtt::basename().c_str(), device_name, entity_with_tag);
 
     // create the topic
     // depending on the type and whether the device entity is writable (i.e. a command)
