@@ -80,12 +80,40 @@ def group_entities_by_device_type(entities):
 def print_device_entities(device_name, device_entities):
     """Print device entities table using f-strings for better performance."""
     print(f"### {device_name}")
+    print()
     print("| shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |")
     print("|-|-|-|-|-|-|-|-|-|")
 
     for entity in device_entities:
         tag_type = get_tag_type(entity["modbus block"])
-        print(f"| {entity['shortname']} | {entity['fullname']} | {entity['type [options...] \\| (min/max)']} | "
+        type_long = entity['type [options...] \\| (min/max)']
+        
+        # Split off type and the rest efficiently
+        split_type = type_long.split(" ", 1)
+        type_base = split_type[0]
+        type_suffix = split_type[1] if len(split_type) > 1 else ""
+
+        # Optimize type_rest extraction and int range detection
+        type_rest_str = type_suffix
+        if "int" in type_base and "(" in type_suffix:
+            try:
+                # Extract inner part of parentheses
+                range_inner = type_suffix[type_suffix.index("(")+1:type_suffix.index(")")]
+                min_value = max_value = None
+                if ">=" in range_inner and "<=" in range_inner:
+                    # >=0<=100 style
+                    min_value, max_value = range_inner.replace(">=", "").split("<=")
+                elif "/" in range_inner:
+                    min_value, max_value = range_inner.split("/")
+                if min_value is not None and max_value is not None:
+                    type_rest_str = f"(&gt;={min_value.strip()}&lt;={max_value.strip()})"
+                else:
+                    type_rest_str = ""
+            except Exception:
+                # fallback to original
+                pass
+
+        print(f"| {entity['shortname']} | {entity['fullname']} | {type_base} {type_rest_str} | "
               f"{entity['uom']} | {entity['writeable']} | {tag_type} | {entity['modbus offset']} | "
               f"{entity['modbus count']} | {entity['modbus scale factor']} |")
     print()
@@ -93,7 +121,8 @@ def print_device_entities(device_name, device_entities):
 
 def print_device_type_devices(device_type, devices):
     """Print all devices of a specific type."""
-    print(f"## Devices of type *{device_type}*")
+    print(f"## Devices of type \\_{device_type}")
+    print()
 
     # Group devices by name
     device_groups = defaultdict(list)
@@ -106,18 +135,11 @@ def print_device_type_devices(device_type, devices):
 
 def print_header():
     """Print the markdown document header."""
-    print("<!-- Use full browser width for this page, the tables are wide -->")
-    print("<style>")
-    print(".md-grid {")
-    print("    max-width: 100%; /* or 100%, if you want to stretch to full-width */")
-    print("}")
-    print("</style>")
+    print("# Modbus Entity/Register Mapping")
     print()
-    print("# Entity/Register Mapping")
-    print()
-    print("!!! note")
-    print()
-    print("    This file has been auto-generated. Do not modify.")
+    print(":::warning")
+    print("This file has been auto-generated. Do not modify.")
+    print(":::")
     print()
 
 
