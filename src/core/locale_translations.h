@@ -821,7 +821,7 @@ MAKE_TRANSLATION(vacations8, "vacations8", "vacation dates 8", "Urlaubstage 8", 
 MAKE_TRANSLATION(absent, "absent", "absent", "Abwesend", "", "Frånvarande", "", "", "", "", "", "chýbajúci", "chybějící") 
 MAKE_TRANSLATION(redthreshold, "redthreshold", "reduction threshold", "Absenkschwelle", "", "Tröskel för sänkning", "", "", "", "", "", "zníženie tresholdu", "práh snížení") 
 MAKE_TRANSLATION(solarinfl, "solarinfl", "solar influence", "Solareinfluß", "", "", "", "", "", "", "", "slnečný vplyv", "sluneční vliv") 
-MAKE_TRANSLATION(currsolarinfl, "currsolarinfl", "curent solar influence", "akt. Solareinfluß", "", "", "", "", "", "", "", "aktuálny slnečný vplyv", "aktuální sluneční vliv") 
+MAKE_TRANSLATION(currsolarinfl, "currsolarinfl", "current solar influence", "akt. Solareinfluß", "", "", "", "", "", "", "", "aktuálny slnečný vplyv", "aktuální sluneční vliv") 
 
 MAKE_TRANSLATION(hpmode, "hpmode", "HP Mode", "WP-Modus", "Modus warmtepomp", "Värmepumpsläge", "tryb pracy pompy ciepła", "", "", "yüksek güç modu", "Modalità Termopompa", "Režim TČ", "režim tepelného čerpadla") 
 MAKE_TRANSLATION(dewoffset, "dewoffset", "dew point offset", "Taupunktdifferenz", "Offset dauwpunt", "Daggpunktsförskjutning", "przesunięcie punktu rosy", "", "", "çiğ noktası göreli", "differenza del punto di rugiada", "posun rosného bodu", "offset rosného bodu") 
@@ -906,7 +906,7 @@ MAKE_TRANSLATION(wwTemp5, "temp5", "temperature 5", "Temperatur 5", "Temperatuur
 MAKE_TRANSLATION(wwTemp6, "temp6", "temperature 6", "Temperatur 6", "Temperatuur 6", "Temperatur 6", "temperatura 6", "temperatur 6", "température 6", "sıcaklık 6", "Temperatura 6", "teplota 6", "teplota 6")
 // MAKE_TRANSLATION(wwTemp7, "temp7", "temperature 7", "Temperatur 7", "Temperatuur 7", "Temperatur 7", "temperatura 7", "Temperatur 7", "température 7", "sıcaklık 7", "Temperatura 7", "teplota 7", "teplota 7")
 MAKE_TRANSLATION(wwPump, "pump", "pump", "Pumpe", "Pomp", "Pump", "pompa", "pumpe", "pompe", "pompa", "Pompa", "čerpadlo", "čerpadlo")
-MAKE_TRANSLATION(wwCircTc, "circtc", "circulation time controled", "zeitgesteuerte Zirkulation", "", "Tidsstyrd cirkulation", "", "", "", "", "", "riadená doba cirkulácie", "řízený čas cirkulace") 
+MAKE_TRANSLATION(wwCircTc, "circtc", "circulation time controlled", "zeitgesteuerte Zirkulation", "", "Tidsstyrd cirkulation", "", "", "", "", "", "riadená doba cirkulácie", "řízený čas cirkulace") 
 MAKE_TRANSLATION(errorDisp, "errordisp", "error display", "Fehleranzeige", "", "Feldisplay", "wyświetlanie błędów", "", "", "", "", "zobrazenie chyby", "zobrazení chyb") 
 MAKE_TRANSLATION(deltaTRet, "deltatret", "temp. diff. return valve", "Temperaturdifferenz Rücklaufventil", "", "Temperaturskillnad returventil", "różnica temp. zaworu powrotnego", "", "", "", "", "rozdiel teplôt spätného ventilu", "rozdíl teploty zpátečního ventilu") 
 

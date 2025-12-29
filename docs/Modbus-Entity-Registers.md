@@ -4138,7 +4138,7 @@
 | hc1.switchprogmode | switch program mode | enum [level\|absolute] |   | true | HC | 52 | 1 | 1 |
 | hc1.redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 53 | 1 | 1/2 |
 | hc1.solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 54 | 1 | 1 |
-| hc1.currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 55 | 1 | 1/10 |
+| hc1.currsolarinfl | current solar influence | uint8 (>=0<=25) | C | false | HC | 55 | 1 | 1/10 |
 | hc1.heatingpid | heating PID | enum [fast\|medium\|slow] |   | true | HC | 56 | 1 | 1 |
 | hc1.pumpopt | pump optimization | boolean |   | true | HC | 57 | 1 | 1 |
 | hc1.inttimefloor | integral time floor | uint8 (>=160<=320) | minutes | true | HC | 58 | 1 | 10 |
@@ -4573,7 +4573,7 @@
 | hc1.switchprogmode | switch program mode | enum [level\|absolute] |   | true | HC | 52 | 1 | 1 |
 | hc1.redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 53 | 1 | 1/2 |
 | hc1.solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 54 | 1 | 1 |
-| hc1.currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 55 | 1 | 1/10 |
+| hc1.currsolarinfl | current solar influence | uint8 (>=0<=25) | C | false | HC | 55 | 1 | 1/10 |
 | hc1.heatingpid | heating PID | enum [fast\|medium\|slow] |   | true | HC | 56 | 1 | 1 |
 | hc1.pumpopt | pump optimization | boolean |   | true | HC | 57 | 1 | 1 |
 | hc1.inttimefloor | integral time floor | uint8 (>=160<=320) | minutes | true | HC | 58 | 1 | 10 |
@@ -4672,7 +4672,7 @@
 | hc1.switchprogmode | switch program mode | enum [level\|absolute] |   | true | HC | 52 | 1 | 1 |
 | hc1.redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 53 | 1 | 1/2 |
 | hc1.solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 54 | 1 | 1 |
-| hc1.currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 55 | 1 | 1/10 |
+| hc1.currsolarinfl | current solar influence | uint8 (>=0<=25) | C | false | HC | 55 | 1 | 1/10 |
 | hc1.heatingpid | heating PID | enum [fast\|medium\|slow] |   | true | HC | 56 | 1 | 1 |
 | hc1.pumpopt | pump optimization | boolean |   | true | HC | 57 | 1 | 1 |
 | hc1.inttimefloor | integral time floor | uint8 (>=160<=320) | minutes | true | HC | 58 | 1 | 10 |
@@ -4784,7 +4784,7 @@
 | hc1.switchprogmode | switch program mode | enum [level\|absolute] |   | true | HC | 52 | 1 | 1 |
 | hc1.redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 53 | 1 | 1/2 |
 | hc1.solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 54 | 1 | 1 |
-| hc1.currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 55 | 1 | 1/10 |
+| hc1.currsolarinfl | current solar influence | uint8 (>=0<=25) | C | false | HC | 55 | 1 | 1/10 |
 | hc1.heatingpid | heating PID | enum [fast\|medium\|slow] |   | true | HC | 56 | 1 | 1 |
 | hc1.pumpopt | pump optimization | boolean |   | true | HC | 57 | 1 | 1 |
 | hc1.inttimefloor | integral time floor | uint8 (>=160<=320) | minutes | true | HC | 58 | 1 | 10 |
@@ -4922,7 +4922,7 @@
 | hc1.switchprogmode | switch program mode | enum [level\|absolute] |   | true | HC | 52 | 1 | 1 |
 | hc1.redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 53 | 1 | 1/2 |
 | hc1.solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 54 | 1 | 1 |
-| hc1.currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 55 | 1 | 1/10 |
+| hc1.currsolarinfl | current solar influence | uint8 (>=0<=25) | C | false | HC | 55 | 1 | 1/10 |
 | hc1.heatingpid | heating PID | enum [fast\|medium\|slow] |   | true | HC | 56 | 1 | 1 |
 | hc1.pumpopt | pump optimization | boolean |   | true | HC | 57 | 1 | 1 |
 | hc1.inttimefloor | integral time floor | uint8 (>=160<=320) | minutes | true | HC | 58 | 1 | 10 |
@@ -6299,7 +6299,7 @@
 | dhw.disinfectiontemp | disinfection temperature | uint8 (>=0<=254) | C | true | DHW | 8 | 1 | 1 |
 | dhw.circ | circulation active | boolean |   | true | DHW | 9 | 1 | 1 |
 | dhw.circmode | circulation pump mode | enum [off\|1x3min\|2x3min\|3x3min\|4x3min\|5x3min\|6x3min\|continuous] |   | true | DHW | 10 | 1 | 1 |
-| dhw.circtc | circulation time controled | boolean |   | true | DHW | 22 | 1 | 1 |
+| dhw.circtc | circulation time controlled | boolean |   | true | DHW | 22 | 1 | 1 |
 | dhw.keepwarm | keep warm | boolean |   | true | DHW | 23 | 1 | 1 |
 | dhw.status2 | status 2 | enum [\|\|\|no heat\|\|\|heat request\|\|disinfecting\|hold] |   | false | DHW | 24 | 1 | 1 |
 | dhw.pumpmod | pump modulation | uint8 (>=0<=100) | % | false | DHW | 25 | 1 | 1 |
@@ -6325,7 +6325,7 @@
 | dhw.disinfectiontemp | disinfection temperature | uint8 (>=0<=254) | C | true | DHW | 8 | 1 | 1 |
 | dhw.circ | circulation active | boolean |   | true | DHW | 9 | 1 | 1 |
 | dhw.circmode | circulation pump mode | enum [off\|1x3min\|2x3min\|3x3min\|4x3min\|5x3min\|6x3min\|continuous] |   | true | DHW | 10 | 1 | 1 |
-| dhw.circtc | circulation time controled | boolean |   | true | DHW | 22 | 1 | 1 |
+| dhw.circtc | circulation time controlled | boolean |   | true | DHW | 22 | 1 | 1 |
 | dhw.keepwarm | keep warm | boolean |   | true | DHW | 23 | 1 | 1 |
 | dhw.status2 | status 2 | enum [\|\|\|no heat\|\|\|heat request\|\|disinfecting\|hold] |   | false | DHW | 24 | 1 | 1 |
 | dhw.pumpmod | pump modulation | uint8 (>=0<=100) | % | false | DHW | 25 | 1 | 1 |
