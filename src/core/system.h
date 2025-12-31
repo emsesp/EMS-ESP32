@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,10 +33,17 @@
 #include <uuid/syslog.h>
 #endif
 
+#include <esp32-psram.h>
 #include <uuid/log.h>
 #include <PButton.h>
 
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if ESP_ARDUINO_VERSION_MAJOR < 3
+#define EMSESP_RGB_WRITE neopixelWrite
+#else
+#define EMSESP_RGB_WRITE rgbLedWrite
+#endif
+
+#if CONFIG_IDF_TARGET_ESP32
 // there is no official API available on the original ESP32
 extern "C" {
 uint8_t temprature_sens_read();
@@ -55,9 +62,11 @@ using uuid::console::Shell;
 
 #define EMSESP_CUSTOMSUPPORT_FILE "/config/customSupport.json"
 
+#define RGB_LED_BRIGHTNESS 20 // 255 is max brightness
+
 namespace emsesp {
 
-enum PHY_type : uint8_t { PHY_TYPE_NONE = 0, PHY_TYPE_LAN8720, PHY_TYPE_TLK110 };
+enum PHY_type : uint8_t { PHY_TYPE_NONE = 0, PHY_TYPE_LAN8720, PHY_TYPE_TLK110, PHY_TYPE_RTL8201 };
 
 enum SYSTEM_STATUS : uint8_t {
     SYSTEM_STATUS_NORMAL            = 0,
@@ -65,13 +74,22 @@ enum SYSTEM_STATUS : uint8_t {
     SYSTEM_STATUS_UPLOADING         = 100,
     SYSTEM_STATUS_ERROR_UPLOAD      = 3,
     SYSTEM_STATUS_PENDING_RESTART   = 4,
-    SYSTEM_STATUS_RESTART_REQUESTED = 5
+    SYSTEM_STATUS_RESTART_REQUESTED = 5,
+    SYSTEM_STATUS_INVALID_GPIO      = 6
+};
+
+enum FUSE_VALUE : uint8_t { ALL = 0, MFG = 1, MODEL = 2, BOARD = 3, REV = 4, BATCH = 5, FUSE = 6 };
+
+struct PartitionInfo {
+    std::string version;
+    size_t      size;
+    std::string install_date; // optional, only available if NTP is connected
 };
 
 class System {
   public:
     void start();
-    void loop();
+    bool loop(); // returns true if the LED flash is active
 
     // commands
     static bool command_read(const char * value, const int8_t id);
@@ -81,13 +99,15 @@ class System {
     static bool command_restart(const char * value, const int8_t id);
     static bool command_format(const char * value, const int8_t id);
     static bool command_watch(const char * value, const int8_t id);
-    static bool command_message(const char * value, const int8_t id);
+    static bool command_message(const char * value, const int8_t id, JsonObject output);
     static bool command_info(const char * value, const int8_t id, JsonObject output);
     static bool command_response(const char * value, const int8_t id, JsonObject output);
     static bool command_service(const char * cmd, const char * value);
+    static bool command_txpause(const char * value, const int8_t id);
 
-    static bool get_value_info(JsonObject root, const char * cmd);
-    static void get_value_json(JsonObject output, const std::string & circuit, const std::string & name, JsonVariant val);
+    static bool        get_value_info(JsonObject root, const char * cmd);
+    static void        get_value_json(JsonObject output, const std::string & circuit, const std::string & name, JsonVariant val);
+    static std::string get_metrics_prometheus();
 
 #if defined(EMSESP_TEST)
     static bool command_test(const char * value, const int8_t id);
@@ -97,13 +117,15 @@ class System {
 
     void store_nvs_values();
     void system_restart(const char * partition = nullptr);
+    void get_partition_info();
 
     void show_mem(const char * note);
-    void reload_settings();
+    void store_settings(class WebSettings & settings);
     void syslog_init();
-    bool check_upgrade(bool factory_settings);
+    bool check_upgrade();
     bool check_restore();
     void heartbeat_json(JsonObject output);
+
     void send_heartbeat();
     void send_info_mqtt();
 
@@ -121,14 +143,15 @@ class System {
     }
 #endif
 
-    String getBBQKeesGatewayDetails();
+    String getBBQKeesGatewayDetails(uint8_t detail = 0);
 
     static bool uploadFirmwareURL(const char * url = nullptr);
 
-    void led_init(bool refresh);
-    void network_init(bool refresh);
-    void button_init(bool refresh);
+    void led_init();
+    void network_init();
+    void button_init();
     void commands_init();
+    void uart_init();
 
     void    systemStatus(uint8_t status_code);
     uint8_t systemStatus();
@@ -136,10 +159,21 @@ class System {
     static void extractSettings(const char * filename, const char * section, JsonObject output);
     static bool saveSettings(const char * filename, const char * section, JsonObject input);
 
-    static bool is_valid_gpio(uint8_t pin, bool has_psram = false);
-    static bool load_board_profile(std::vector<int8_t> & data, const std::string & board_profile);
+    // GPIOs
+    static bool                 add_gpio(uint8_t pin, const char * source_name);
+    static std::vector<uint8_t> available_gpios();
+    static bool                 load_board_profile(std::vector<int8_t> & data, const std::string & board_profile);
+    static void                 make_snapshot_gpios();
+    static void                 restore_snapshot_gpios();
+    static void                 clear_snapshot_gpios();
 
     static bool readCommand(const char * data);
+
+    static String get_ip_or_hostname();
+
+    void dallas_gpio(uint8_t gpio) {
+        dallas_gpio_ = gpio;
+    }
 
     bool telnet_enabled() {
         return telnet_enabled_;
@@ -284,8 +318,11 @@ class System {
     }
 
     void show_system(uuid::console::Shell & shell);
-    void wifi_reconnect();
     void show_users(uuid::console::Shell & shell);
+
+    void wifi_reconnect();
+
+    static std::string languages_string();
 
     uint32_t FStotal() {
         return fstotal_;
@@ -297,6 +334,7 @@ class System {
     uint32_t PSram() {
         return psram_;
     }
+
     uint32_t appFree() {
         return appfree_;
     }
@@ -330,11 +368,20 @@ class System {
         test_set_all_active_ = n;
     }
 
-#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32
+    static void set_valid_system_gpios();
+
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
     float temperature() {
         return temperature_;
     }
 #endif
+
+    static void remove_gpio(uint8_t pin, bool also_system = false); // remove a gpio from both valid (optional) and used lists
+
+    // Partition info map: partition name -> {version, size, install_date}
+    std::map<std::string, PartitionInfo, std::less<>, AllocatorPSRAM<std::pair<const std::string, PartitionInfo>>> partition_info_;
+
+    static bool set_partition(const char * partitionname);
 
   private:
     static uuid::log::Logger logger_;
@@ -345,16 +392,29 @@ class System {
 
     uint8_t systemStatus_; // uses SYSTEM_STATUS enum
 
+    void set_partition_install_date(bool override = false);
+
     // button
     static PButton            myPButton_; // PButton instance
     static void               button_OnClick(PButton & b);
     static void               button_OnDblClick(PButton & b);
     static void               button_OnLongPress(PButton & b);
     static void               button_OnVLongPress(PButton & b);
-    static constexpr uint32_t BUTTON_Debounce        = 40;   // Debounce period to prevent flickering when pressing or releasing the button (in ms)
-    static constexpr uint32_t BUTTON_DblClickDelay   = 250;  // Max period between clicks for a double click event (in ms)
-    static constexpr uint32_t BUTTON_LongPressDelay  = 750;  // Hold period for a long press event (in ms)
-    static constexpr uint32_t BUTTON_VLongPressDelay = 9000; // Hold period for a very long press event (in ms)
+    static constexpr uint32_t BUTTON_Debounce      = 40;  // Debounce period to prevent flickering when pressing or releasing the button (in ms)
+    static constexpr uint32_t BUTTON_DblClickDelay = 250; // Max period between clicks for a double click event (in ms)
+
+    // LED flash timer
+    static bool     led_flash_timer_;
+    static uint8_t  led_flash_gpio_;
+    static uint8_t  led_flash_type_;
+    static uint32_t led_flash_start_time_;
+    static uint32_t led_flash_duration_;
+    static void     start_led_flash(uint8_t duration);
+    static void     led_flash();
+
+    // button press delays
+    static constexpr uint32_t BUTTON_LongPressDelay  = 3000; // Hold period for a long press event (in ms) - ~3 seconds
+    static constexpr uint32_t BUTTON_VLongPressDelay = 9500; // Hold period for a very long press event (in ms) - !10 seconds
 
     // healthcheck
 #ifdef EMSESP_PINGTEST
@@ -362,8 +422,8 @@ class System {
 #else
     static constexpr uint32_t SYSTEM_CHECK_FREQUENCY = 5000; // do a system check every 5 seconds
 #endif
-    static constexpr uint32_t HEALTHCHECK_LED_LONG_DUARATION  = 1500;
-    static constexpr uint32_t HEALTHCHECK_LED_FLASH_DUARATION = 150;
+    static constexpr uint32_t HEALTHCHECK_LED_LONG_DUARATION  = 1500;     // 1.5 seconds
+    static constexpr uint32_t HEALTHCHECK_LED_FLASH_DUARATION = 150;      // 150ms
     static constexpr uint8_t  HEALTHCHECK_NO_BUS              = (1 << 0); // 1
     static constexpr uint8_t  HEALTHCHECK_NO_NETWORK          = (1 << 1); // 2
     static constexpr uint8_t  LED_ON                          = HIGH;     // LED on
@@ -374,6 +434,14 @@ class System {
 
     void led_monitor();
     void system_check();
+
+    static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> string_range_to_vector(const std::string & range);
+
+    // GPIOs
+    static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> valid_system_gpios_;          // list of valid GPIOs for the ESP32 board that can be used
+    static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> used_gpios_;                  // list of GPIOs used by the application
+    static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> snapshot_used_gpios_;         // snapshot of the used GPIOs
+    static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> snapshot_valid_system_gpios_; // snapshot of the valid GPIOs
 
     int8_t wifi_quality(int8_t dBm);
 
@@ -390,7 +458,6 @@ class System {
     bool eth_present_ = false;
 
     // EMS-ESP settings
-    // copies from WebSettings class in WebSettingsService.h and loaded with reload_settings()
     std::string hostname_;
     String      locale_;
     bool        hide_led_;
@@ -402,6 +469,7 @@ class System {
     uint8_t     pbutton_gpio_;
     uint8_t     rx_gpio_;
     uint8_t     tx_gpio_;
+    uint8_t     tx_mode_;
     uint8_t     dallas_gpio_;
     bool        telnet_enabled_;
     bool        syslog_enabled_;

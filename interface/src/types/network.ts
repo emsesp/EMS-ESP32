@@ -54,6 +54,7 @@ export interface NetworkSettingsType {
   enableMDNS: boolean;
   enableCORS: boolean;
   CORSOrigin: string;
+  [key: string]: unknown;
 }
 
 export interface WiFiNetworkList {

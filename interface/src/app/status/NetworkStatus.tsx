@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import DnsIcon from '@mui/icons-material/Dns';
 import GiteIcon from '@mui/icons-material/Gite';
@@ -25,8 +27,15 @@ import type { NetworkStatusType } from 'types';
 import { NetworkConnectionStatus } from 'types';
 import { useInterval } from 'utils';
 
+// Utility functions
 const isConnected = ({ status }: NetworkStatusType) =>
   status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED ||
+  status === NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED;
+
+export const isWiFi = ({ status }: NetworkStatusType) =>
+  status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED;
+
+export const isEthernet = ({ status }: NetworkStatusType) =>
   status === NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED;
 
 const networkStatusHighlight = ({ status }: NetworkStatusType, theme: Theme) => {
@@ -55,11 +64,6 @@ const networkQualityHighlight = ({ rssi }: NetworkStatusType, theme: Theme) => {
   return theme.palette.success.main;
 };
 
-export const isWiFi = ({ status }: NetworkStatusType) =>
-  status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED;
-export const isEthernet = ({ status }: NetworkStatusType) =>
-  status === NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED;
-
 const dnsServers = ({ dns_ip_1, dns_ip_2 }: NetworkStatusType) => {
   if (!dns_ip_1) {
     return 'none';
@@ -81,6 +85,33 @@ const IPs = (status: NetworkStatusType) => {
   return status.local_ip + ', ' + status.local_ipv6;
 };
 
+const getNetworkStatusText = (
+  status: NetworkConnectionStatus,
+  reconnectCount: number,
+  LL: ReturnType<typeof useI18nContext>['LL']
+) => {
+  switch (status) {
+    case NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED:
+      return LL.CONNECTED(0) + ' (Ethernet)';
+    case NetworkConnectionStatus.WIFI_STATUS_NO_SHIELD:
+      return LL.INACTIVE(1);
+    case NetworkConnectionStatus.WIFI_STATUS_IDLE:
+      return LL.IDLE();
+    case NetworkConnectionStatus.WIFI_STATUS_NO_SSID_AVAIL:
+      return 'No SSID Available';
+    case NetworkConnectionStatus.WIFI_STATUS_CONNECTED:
+      return LL.CONNECTED(0) + ' (WiFi) (' + reconnectCount + ')';
+    case NetworkConnectionStatus.WIFI_STATUS_CONNECT_FAILED:
+      return LL.CONNECTED(1) + ' ' + LL.FAILED(0) + ' (' + reconnectCount + ')';
+    case NetworkConnectionStatus.WIFI_STATUS_CONNECTION_LOST:
+      return LL.CONNECTED(1) + ' ' + LL.LOST() + ' (' + reconnectCount + ')';
+    case NetworkConnectionStatus.WIFI_STATUS_DISCONNECTED:
+      return LL.DISCONNECTED();
+    default:
+      return LL.UNKNOWN();
+  }
+};
+
 const NetworkStatus = () => {
   const { data, send: loadData, error } = useRequest(NetworkApi.readNetworkStatus);
 
@@ -93,51 +124,30 @@ const NetworkStatus = () => {
 
   const theme = useTheme();
 
-  const networkStatus = ({ status }: NetworkStatusType) => {
-    switch (status) {
-      case NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED:
-        return LL.CONNECTED(0) + ' (Ethernet)';
-      case NetworkConnectionStatus.WIFI_STATUS_NO_SHIELD:
-        return LL.INACTIVE(1);
-      case NetworkConnectionStatus.WIFI_STATUS_IDLE:
-        return LL.IDLE();
-      case NetworkConnectionStatus.WIFI_STATUS_NO_SSID_AVAIL:
-        return 'No SSID Available';
-      case NetworkConnectionStatus.WIFI_STATUS_CONNECTED:
-        return LL.CONNECTED(0) + ' (WiFi) (' + data.reconnect_count + ')';
-      case NetworkConnectionStatus.WIFI_STATUS_CONNECT_FAILED:
-        return (
-          LL.CONNECTED(1) + ' ' + LL.FAILED(0) + ' (' + data.reconnect_count + ')'
-        );
-      case NetworkConnectionStatus.WIFI_STATUS_CONNECTION_LOST:
-        return LL.CONNECTED(1) + ' ' + LL.LOST() + ' (' + data.reconnect_count + ')';
-      case NetworkConnectionStatus.WIFI_STATUS_DISCONNECTED:
-        return LL.DISCONNECTED();
-      default:
-        return LL.UNKNOWN();
-    }
-  };
-
-  const content = () => {
+  const content = useMemo(() => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
+      return <FormLoader onRetry={loadData} errorMessage={error?.message || ''} />;
     }
+
+    const statusText = getNetworkStatusText(data.status, data.reconnect_count, LL);
+    const statusColor = networkStatusHighlight(data, theme);
+    const qualityColor = networkQualityHighlight(data, theme);
 
     return (
       <List>
         <ListItem>
           <ListItemAvatar>
-            <Avatar sx={{ bgcolor: networkStatusHighlight(data, theme) }}>
+            <Avatar sx={{ bgcolor: statusColor }}>
               {isWiFi(data) && <WifiIcon />}
               {isEthernet(data) && <RouterIcon />}
             </Avatar>
           </ListItemAvatar>
-          <ListItemText primary="Status" secondary={networkStatus(data)} />
+          <ListItemText primary="Status" secondary={statusText} />
         </ListItem>
         <Divider variant="inset" component="li" />
         <ListItem>
           <ListItemAvatar>
-            <Avatar sx={{ bgcolor: networkStatusHighlight(data, theme) }}>
+            <Avatar sx={{ bgcolor: statusColor }}>
               <GiteIcon />
             </Avatar>
           </ListItemAvatar>
@@ -148,13 +158,13 @@ const NetworkStatus = () => {
           <>
             <ListItem>
               <ListItemAvatar>
-                <Avatar sx={{ bgcolor: networkQualityHighlight(data, theme) }}>
+                <Avatar sx={{ bgcolor: qualityColor }}>
                   <SettingsInputAntennaIcon />
                 </Avatar>
               </ListItemAvatar>
               <ListItemText
                 primary="SSID (RSSI)"
-                secondary={data.ssid + ' (' + data.rssi + ' dBm)'}
+                secondary={`${data.ssid} (${data.rssi} dBm)`}
               />
             </ListItem>
             <Divider variant="inset" component="li" />
@@ -218,9 +228,9 @@ const NetworkStatus = () => {
         )}
       </List>
     );
-  };
+  }, [data, error, loadData, LL, theme]);
 
-  return <SectionContent>{content()}</SectionContent>;
+  return <SectionContent>{content}</SectionContent>;
 };
 
 export default NetworkStatus;

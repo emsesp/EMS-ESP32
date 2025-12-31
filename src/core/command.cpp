@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ namespace emsesp {
 
 uuid::log::Logger Command::logger_{F_(command), uuid::log::Facility::DAEMON};
 
-std::vector<Command::CmdFunction> Command::cmdfunctions_;
+std::vector<Command::CmdFunction, AllocatorPSRAM<Command::CmdFunction>> Command::cmdfunctions_;
 
 // takes a URI path and a json body, parses the data and calls the command
 // the path is leading so if duplicate keys are in the input JSON it will be ignored
@@ -52,9 +52,6 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         return json_message(CommandRet::ERROR, "missing command in path", output);
     }
 
-    std::string cmd_s;
-    int8_t      id_n = -1; // default hc
-
     // check for a device as first item in the path
     const char * device_s = nullptr;
     if (!num_paths) {
@@ -79,16 +76,15 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
 
     // the next value on the path should be the command or entity name
     const char * command_p = nullptr;
+    char         command[COMMAND_MAX_LENGTH];
     if (num_paths == 2) {
         command_p = p.paths()[1].c_str();
     } else if (num_paths == 3) {
         // concatenate the path into one string as it could be in the format 'hc/XXX'
-        char command[COMMAND_MAX_LENGTH];
         snprintf(command, sizeof(command), "%s/%s", p.paths()[1].c_str(), p.paths()[2].c_str());
         command_p = command;
     } else if (num_paths > 3) {
         // concatenate the path into one string as it could be in the format 'hc/XXX/attribute'
-        char command[COMMAND_MAX_LENGTH];
         snprintf(command, sizeof(command), "%s/%s/%s", p.paths()[1].c_str(), p.paths()[2].c_str(), p.paths()[3].c_str());
         command_p = command;
     } else {
@@ -100,6 +96,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         }
     }
 
+    int8_t id_n = -1; // default hc
     // some commands may be prefixed with hc. dhw. or hc/ or dhw/ so extract these if they exist
     // parse_command_string returns the extracted command
     if (device_type >= EMSdevice::DeviceType::BOILER) {
@@ -131,6 +128,9 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         } else if (input["hs"].is<int>()) {
             id_n = input["hs"];
             id_n += DeviceValueTAG::TAG_HS1 - DeviceValueTAG::TAG_HC1; // hs1 has id 20
+        } else if (input["src"].is<int>()) {
+            id_n = input["src"];
+            id_n += DeviceValueTAG::TAG_SRC1 - DeviceValueTAG::TAG_HC1; // src1 has id 36
         }
     }
 
@@ -143,7 +143,8 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     }
 
     // check if data is entity like device/hc/name/value
-    if (data.is<const char *>()) {
+    // unless the command is system/message
+    if ((strcmp(command_p, "message") != 0) && data.is<const char *>()) {
         const char * d = data.as<const char *>();
         if (strlen(d)) {
             char * device_end = (char *)strchr(d, '/');
@@ -183,9 +184,9 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         }
     }
 
-    // call the command based on the type
     uint8_t return_code = CommandRet::OK;
 
+    // call the command based on the type
     if (data.is<const char *>()) {
         return_code = Command::call(device_type, command_p, data.as<const char *>(), is_admin, id_n, output);
     } else if (data.is<int>()) {
@@ -236,11 +237,19 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
     const char * cmd_org = command;
     int8_t       id_org  = id;
 
-    // convert cmd to lowercase and compare
-    char * lowerCmd = strdup(command);
-    for (char * p = lowerCmd; *p; p++) {
-        *p = tolower(*p);
+    // Optimized: Use stack buffer instead of strdup() to avoid heap allocation
+    // Most command strings are short, 64 bytes is more than enough
+    char   lowerCmd[64];
+    size_t len = strlen(command);
+    if (len >= sizeof(lowerCmd)) {
+        len = sizeof(lowerCmd) - 1; // truncate if too long (rare case)
     }
+
+    // Convert to lowercase in place using stack buffer
+    for (size_t i = 0; i < len; i++) {
+        lowerCmd[i] = tolower(command[i]);
+    }
+    lowerCmd[len] = '\0';
 
     // check prefix and valid number range, also check 'id'
     if (!strncmp(lowerCmd, "hc", 2) && command[2] >= '1' && command[2] <= '8') {
@@ -267,12 +276,18 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
     } else if (!strncmp(lowerCmd, "hs", 2) && command[2] >= '1' && command[2] <= '9') {
         id = command[2] - '1' + DeviceValueTAG::TAG_HS1; //20;
         command += 3;
+    } else if (!strncmp(lowerCmd, "src", 3) && command[3] == '1' && command[4] >= '0' && command[4] <= '6') {
+        id = command[4] - '0' + DeviceValueTAG::TAG_SRC10; //46;
+        command += 5;
+    } else if (!strncmp(lowerCmd, "src", 3) && command[3] >= '1' && command[3] <= '9') {
+        id = command[3] - '1' + DeviceValueTAG::TAG_SRC1; //36;
+        command += 4;
     } else if (!strncmp(lowerCmd, "dhw", 3)) { // no number
         id = DeviceValueTAG::TAG_DHW1;
         command += 3;
     }
 
-    free(lowerCmd);
+    // No free() needed - stack buffer is automatically cleaned up
 
     // return original if no seperator
     if (command[0] != '/' && command[0] != '.') {
@@ -289,8 +304,12 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
     return command;
 }
 
-// check if command contains an attribute
+// check if command string contains an attribute and returns it
 const char * Command::get_attribute(const char * cmd) {
+    if (cmd == nullptr) {
+        return nullptr;
+    }
+
     char * breakp = (char *)strchr(cmd, '/');
     if (breakp) {
         *breakp = '\0';
@@ -299,9 +318,9 @@ const char * Command::get_attribute(const char * cmd) {
     return nullptr;
 }
 
-// returns the attribute in the given JSON object as a key/value pair called api_data
+// get the attribute in the given JSON object as a key/value pair called api_data
 // or errors if the attribute is not found
-bool Command::set_attribute(JsonObject output, const char * cmd, const char * attribute) {
+bool Command::get_attribute(JsonObject output, const char * cmd, const char * attribute) {
     if (attribute == nullptr) {
         return true;
     }
@@ -325,7 +344,8 @@ bool Command::set_attribute(JsonObject output, const char * cmd, const char * at
     char error[100];
     snprintf(error, sizeof(error), "no attribute '%s' in %s", attribute, cmd);
     output["message"] = error;
-    return false;
+
+    return false; // fail
 }
 
 // calls a command directly
@@ -381,13 +401,15 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
         flag = CommandFlag::CMD_FLAG_HS;
     } else if (id >= DeviceValueTAG::TAG_AHS1 && id <= DeviceValueTAG::TAG_AHS1) {
         flag = CommandFlag::CMD_FLAG_AHS;
+    } else if (id >= DeviceValueTAG::TAG_SRC1 && id <= DeviceValueTAG::TAG_SRC16) {
+        flag = CommandFlag::CMD_FLAG_SRC;
     }
 
     // see if there is a command registered for this EMS device
     auto cf = find_command(device_type, device_id, cmd, flag);
     if (!cf) {
         // if we don't already have a message set, set it to invalid command
-        if (output["message"]) {
+        if (output["message"].is<const char *>()) {
             LOG_WARNING("Command failed: %s", output["message"].as<const char *>());
             return CommandRet::ERROR;
         } else {
@@ -399,7 +421,7 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
                 }
             }
 
-            std::string err   = "no entity '" + std::string(cmd) + "' in " + dname;
+            std::string err   = "no '" + std::string(cmd) + "' in " + dname;
             output["message"] = err;
             LOG_WARNING("Command failed: %s", err.c_str());
         }
@@ -553,6 +575,8 @@ std::string Command::tagged_cmd(const std::string & cmd, const uint8_t flag) {
         return "hs<n>." + cmd;
     case CommandFlag::CMD_FLAG_AHS:
         return "ahs<n>." + cmd;
+    case CommandFlag::CMD_FLAG_SRC:
+        return "src<n>." + cmd;
     default:
         return cmd;
     }
@@ -576,6 +600,7 @@ bool Command::list(const uint8_t device_type, JsonObject output) {
         output["ap/enabled"]             = Helpers::translated_word(FL_(system_cmd));
         output["syslog/enabled"]         = Helpers::translated_word(FL_(system_cmd));
     }
+
     // create a list of commands we have registered, and sort them
     std::list<std::string> sorted_cmds;
     for (const auto & cf : cmdfunctions_) {
@@ -656,6 +681,9 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                     shell.print(' ');
                 } else if (cf.has_flags(CommandFlag::CMD_FLAG_HS)) {
                     shell.print(Helpers::translated_word(FL_(tag_hsx)));
+                    shell.print(' ');
+                } else if (cf.has_flags(CommandFlag::CMD_FLAG_SRC)) {
+                    shell.print(Helpers::translated_word(FL_(tag_srcx)));
                     shell.print(' ');
                 }
                 shell.print(Helpers::translated_word(cf.description_));
@@ -742,6 +770,8 @@ void Command::show_all(uuid::console::Shell & shell) {
     shell.printf("  values \t\t\t%slist all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
     shell.println(COLOR_RESET);
     shell.printf("  entities \t\t\t%slist all entities %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
+    shell.println(COLOR_RESET);
+    shell.printf("  metrics \t\t\t%slist all prometheus metrics %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
     shell.println(COLOR_RESET);
 
     // show system ones first

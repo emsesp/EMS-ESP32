@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ namespace emsesp {
 class Roomctrl {
   public:
     // Product-Id of the remote
-    enum RemoteType : uint8_t { NONE = 0, RC20 = 113, FB10 = 109, RC100H = 200, SENSOR = 0x40, RC200 = 157, RC100 = 165, RT800 = 3 };
+    enum RemoteType : uint8_t { NONE = 0, RC20 = 113, FB10 = 109, RC100H = 200, SENSOR = 0x40, RC200 = 157, RC100 = 165, RT800 = 3, RC120RF = 249 };
 
     static void send(uint8_t addr);
     static void check(uint8_t addr, const uint8_t * data, const uint8_t length);

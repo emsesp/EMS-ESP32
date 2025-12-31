@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -27,6 +27,19 @@ export const isAPEnabled = ({ provision_mode }: APSettingsType) =>
   provision_mode === APProvisionMode.AP_MODE_ALWAYS ||
   provision_mode === APProvisionMode.AP_MODE_DISCONNECTED;
 
+// Efficient range function without recursion
+const createRange = (start: number, end: number): number[] => {
+  const result: number[] = [];
+  for (let i = start; i <= end; i++) {
+    result.push(i);
+  }
+  return result;
+};
+
+// Pre-computed ranges for better performance
+const CHANNEL_RANGE = createRange(1, 14);
+const MAX_CLIENTS_RANGE = createRange(1, 9);
+
 const APSettings = () => {
   const {
     loadData,
@@ -50,37 +63,42 @@ const APSettings = () => {
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const updateFormValue = updateValueDirty(
-    origData,
-    dirtyFlags,
-    setDirtyFlags,
-    updateDataValue
+  const updateFormValue = useMemo(
+    () =>
+      updateValueDirty(
+        origData as unknown as Record<string, unknown>,
+        dirtyFlags,
+        setDirtyFlags,
+        updateDataValue as (value: unknown) => void
+      ),
+    [origData, dirtyFlags, setDirtyFlags, updateDataValue]
   );
+
+  // Memoize AP enabled state
+  const apEnabled = useMemo(() => (data ? isAPEnabled(data) : false), [data]);
+
+  // Memoize validation and submit handler
+  const validateAndSubmit = useCallback(async () => {
+    if (!data) return;
+
+    try {
+      setFieldErrors(undefined);
+      await validate(createAPSettingsValidator(data), data);
+      await saveData();
+    } catch (error) {
+      setFieldErrors(error as ValidateFieldsError);
+    }
+  }, [data, saveData]);
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
-    }
-
-    const validateAndSubmit = async () => {
-      try {
-        setFieldErrors(undefined);
-        await validate(createAPSettingsValidator(data), data);
-        await saveData();
-      } catch (error) {
-        setFieldErrors(error as ValidateFieldsError);
-      }
-    };
-
-    // no lodash - https://asleepace.com/blog/typescript-range-without-a-loop/
-    function range(a: number, b: number): number[] {
-      return a < b ? [a, ...range(a + 1, b)] : [b];
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
     }
 
     return (
       <>
         <ValidatedTextField
-          fieldErrors={fieldErrors}
+          fieldErrors={fieldErrors || {}}
           name="provision_mode"
           label={LL.AP_PROVIDE() + '...'}
           value={data.provision_mode}
@@ -100,10 +118,10 @@ const APSettings = () => {
             {LL.AP_PROVIDE_TEXT_3()}
           </MenuItem>
         </ValidatedTextField>
-        {isAPEnabled(data) && (
+        {apEnabled && (
           <>
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="ssid"
               label={LL.ACCESS_POINT(2) + ' SSID'}
               fullWidth
@@ -113,7 +131,7 @@ const APSettings = () => {
               margin="normal"
             />
             <ValidatedPasswordField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="password"
               label={LL.ACCESS_POINT(2) + ' ' + LL.PASSWORD()}
               fullWidth
@@ -123,7 +141,7 @@ const APSettings = () => {
               margin="normal"
             />
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="channel"
               label={LL.AP_PREFERRED_CHANNEL()}
               value={numberValue(data.channel)}
@@ -134,7 +152,7 @@ const APSettings = () => {
               onChange={updateFormValue}
               margin="normal"
             >
-              {range(1, 14).map((i) => (
+              {CHANNEL_RANGE.map((i) => (
                 <MenuItem key={i} value={i}>
                   {i}
                 </MenuItem>
@@ -151,7 +169,7 @@ const APSettings = () => {
               label={LL.AP_HIDE_SSID()}
             />
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="max_clients"
               label={LL.AP_MAX_CLIENTS()}
               value={numberValue(data.max_clients)}
@@ -162,14 +180,14 @@ const APSettings = () => {
               onChange={updateFormValue}
               margin="normal"
             >
-              {range(1, 9).map((i) => (
+              {MAX_CLIENTS_RANGE.map((i) => (
                 <MenuItem key={i} value={i}>
                   {i}
                 </MenuItem>
               ))}
             </ValidatedTextField>
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="local_ip"
               label={LL.AP_LOCAL_IP()}
               fullWidth
@@ -179,7 +197,7 @@ const APSettings = () => {
               margin="normal"
             />
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="gateway_ip"
               label={LL.NETWORK_GATEWAY()}
               fullWidth
@@ -189,7 +207,7 @@ const APSettings = () => {
               margin="normal"
             />
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="subnet_mask"
               label={LL.NETWORK_SUBNET()}
               fullWidth

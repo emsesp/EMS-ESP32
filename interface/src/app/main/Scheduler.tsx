@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useBlocker } from 'react-router';
 import { toast } from 'react-toastify';
 
@@ -27,12 +27,83 @@ import {
   useLayoutTitle
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
+import { useInterval } from 'utils';
 
 import { readSchedule, writeSchedule } from '../../api/app';
 import SettingsSchedulerDialog from './SchedulerDialog';
 import { ScheduleFlag } from './types';
 import type { Schedule, ScheduleItem } from './types';
 import { schedulerItemValidation } from './validators';
+
+// Constants
+const INTERVAL_DELAY = 30000; // 30 seconds
+const MIN_ID = -100;
+const MAX_ID = 100;
+const ICON_SIZE = 16;
+const SCHEDULE_FLAG_THRESHOLD = 127;
+const REFERENCE_YEAR = 2017;
+const REFERENCE_MONTH = '01';
+const LOG_2 = Math.log(2);
+
+// Days of week starting from Monday (1-7)
+const WEEK_DAYS = [1, 2, 3, 4, 5, 6, 7] as const;
+
+const DEFAULT_SCHEDULE_ITEM: Omit<ScheduleItem, 'id' | 'o_id'> = {
+  active: false,
+  deleted: false,
+  flags: ScheduleFlag.SCHEDULE_DAY,
+  time: '',
+  cmd: '',
+  value: '',
+  name: ''
+};
+
+const scheduleTheme = {
+  Table: `
+    --data-table-library_grid-template-columns: 36px 210px 100px 192px repeat(1, minmax(100px, 1fr)) 160px;
+  `,
+  BaseRow: `
+    font-size: 14px;
+    .td {
+      height: 32px;
+    }
+  `,
+  BaseCell: `
+    &:nth-of-type(2) {
+      text-align: center;
+    }
+    &:nth-of-type(1) {
+      text-align: center;
+    }
+  `,
+  HeaderRow: `
+    text-transform: uppercase;
+    background-color: black;
+    color: #90CAF9;
+    .th {
+      border-bottom: 1px solid #565656;
+      height: 36px;
+    }
+  `,
+  Row: `
+    background-color: #1e1e1e;
+    position: relative;
+    cursor: pointer;
+    .td {
+      border-bottom: 1px solid #565656;
+    }
+    &:hover .td {
+      background-color: #177ac9;
+    }
+  `
+};
+
+const scheduleTypeLabels: Record<number, string> = {
+  [ScheduleFlag.SCHEDULE_IMMEDIATE]: 'Immediate',
+  [ScheduleFlag.SCHEDULE_TIMER]: 'Timer',
+  [ScheduleFlag.SCHEDULE_CONDITION]: 'Condition',
+  [ScheduleFlag.SCHEDULE_ONCHANGE]: 'On Change'
+};
 
 const Scheduler = () => {
   const { LL, locale } = useI18nContext();
@@ -60,7 +131,7 @@ const Scheduler = () => {
     }
   );
 
-  function hasScheduleChanged(si: ScheduleItem) {
+  const hasScheduleChanged = useCallback((si: ScheduleItem) => {
     return (
       si.id !== si.o_id ||
       (si.name || '') !== (si.o_name || '') ||
@@ -71,85 +142,56 @@ const Scheduler = () => {
       si.cmd !== si.o_cmd ||
       si.value !== si.o_value
     );
-  }
+  }, []);
+
+  const intervalCallback = useCallback(() => {
+    if (numChanges === 0) {
+      void fetchSchedule();
+    }
+  }, [numChanges, fetchSchedule]);
+
+  useInterval(intervalCallback, INTERVAL_DELAY);
 
   useEffect(() => {
     const formatter = new Intl.DateTimeFormat(locale, {
       weekday: 'short',
       timeZone: 'UTC'
     });
-    const days = [1, 2, 3, 4, 5, 6, 7].map((day) => {
-      const dd = day < 10 ? `0${day}` : day;
-      return new Date(`2017-01-${dd}T00:00:00+00:00`);
+    const days = WEEK_DAYS.map((day) => {
+      const dayStr = String(day).padStart(2, '0');
+      return new Date(
+        `${REFERENCE_YEAR}-${REFERENCE_MONTH}-${dayStr}T00:00:00+00:00`
+      );
     });
     setDow(days.map((date) => formatter.format(date)));
   }, [locale]);
 
-  const schedule_theme = useTheme({
-    Table: `
-      --data-table-library_grid-template-columns: 36px 210px 100px 192px repeat(1, minmax(100px, 1fr)) 160px;
-    `,
-    BaseRow: `
-      font-size: 14px;
-      .td {
-        height: 32px;
-      }
-    `,
-    BaseCell: `
-      &:nth-of-type(2) {
-        text-align: center;
-      }
-      &:nth-of-type(1) {
-        text-align: center;
-      }
-    `,
-    HeaderRow: `
-      text-transform: uppercase;
-      background-color: black;
-      color: #90CAF9;
-      .th {
-        border-bottom: 1px solid #565656;
-        height: 36px;
-      }
-    `,
-    Row: `
-      background-color: #1e1e1e;
-      position: relative;
-      cursor: pointer;
-      .td {
-        border-bottom: 1px solid #565656;
-      }
-      &:hover .td {
-        background-color: #177ac9;
-      }
-    `
-  });
+  const schedule_theme = useTheme(scheduleTheme);
 
-  const saveSchedule = async () => {
-    await updateSchedule({
-      schedule: schedule
-        .filter((si) => !si.deleted)
-        .map((condensed_si) => ({
-          id: condensed_si.id,
-          active: condensed_si.active,
-          flags: condensed_si.flags,
-          time: condensed_si.time,
-          cmd: condensed_si.cmd,
-          value: condensed_si.value,
-          name: condensed_si.name
-        }))
-    })
-      .then(() => {
-        toast.success(LL.SCHEDULE_UPDATED());
-      })
-      .catch((error: Error) => {
-        toast.error(error.message);
-      })
-      .finally(async () => {
-        await fetchSchedule();
-        setNumChanges(0);
+  const saveSchedule = useCallback(async () => {
+    try {
+      await updateSchedule({
+        schedule: schedule
+          .filter((si: ScheduleItem) => !si.deleted)
+          .map((condensed_si: ScheduleItem) => ({
+            id: condensed_si.id,
+            active: condensed_si.active,
+            flags: condensed_si.flags,
+            time: condensed_si.time,
+            cmd: condensed_si.cmd,
+            value: condensed_si.value,
+            name: condensed_si.name
+          }))
       });
-  };
+      toast.success(LL.SCHEDULE_UPDATED());
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      toast.error(message);
+    } finally {
+      await fetchSchedule();
+      setNumChanges(0);
+    }
+  }, [LL, schedule, updateSchedule, fetchSchedule]);
 
   const editScheduleItem = useCallback((si: ScheduleItem) => {
     setCreating(false);
@@ -160,93 +202,93 @@ const Scheduler = () => {
     }
   }, []);
 
-  const onDialogClose = () => {
+  const onDialogClose = useCallback(() => {
     setDialogOpen(false);
-  };
+  }, []);
 
-  const onDialogCancel = async () => {
+  const onDialogCancel = useCallback(async () => {
     await fetchSchedule().then(() => {
       setNumChanges(0);
     });
-  };
+  }, [fetchSchedule]);
 
-  const onDialogSave = (updatedItem: ScheduleItem) => {
-    setDialogOpen(false);
-    void updateState(readSchedule(), (data: ScheduleItem[]) => {
-      const new_data = creating
-        ? [
-            ...data.filter((si) => creating || si.o_id !== updatedItem.o_id),
-            updatedItem
-          ]
-        : data.map((si) =>
-            si.id === updatedItem.id ? { ...si, ...updatedItem } : si
-          );
+  const onDialogSave = useCallback(
+    (updatedItem: ScheduleItem) => {
+      setDialogOpen(false);
+      void updateState(readSchedule(), (data: ScheduleItem[]) => {
+        const new_data = creating
+          ? [...data, updatedItem]
+          : data.map((si) =>
+              si.id === updatedItem.id ? { ...si, ...updatedItem } : si
+            );
 
-      setNumChanges(new_data.filter((si) => hasScheduleChanged(si)).length);
+        setNumChanges(new_data.filter((si) => hasScheduleChanged(si)).length);
 
-      return new_data;
-    });
-  };
+        return new_data;
+      });
+    },
+    [creating, hasScheduleChanged]
+  );
 
-  const addScheduleItem = () => {
+  const addScheduleItem = useCallback(() => {
     setCreating(true);
-    setSelectedScheduleItem({
-      id: Math.floor(Math.random() * (Math.floor(200) - 100) + 100),
-      active: false,
-      deleted: false,
-      flags: ScheduleFlag.SCHEDULE_DAY,
-      time: '',
-      cmd: '',
-      value: '',
-      name: ''
-    });
+    const newItem: ScheduleItem = {
+      id: Math.floor(Math.random() * (MAX_ID - MIN_ID) + MIN_ID),
+      ...DEFAULT_SCHEDULE_ITEM
+    };
+    setSelectedScheduleItem(newItem);
     setDialogOpen(true);
-  };
+  }, []);
 
-  const renderSchedule = () => {
-    if (!schedule) {
-      return <FormLoader onRetry={fetchSchedule} errorMessage={error?.message} />;
-    }
+  const filteredAndSortedSchedule = useMemo(
+    () =>
+      schedule
+        .filter((si: ScheduleItem) => !si.deleted)
+        .sort((a: ScheduleItem, b: ScheduleItem) => a.flags - b.flags),
+    [schedule]
+  );
 
-    const dayBox = (si: ScheduleItem, flag: number) => (
-      <>
-        <Box>
-          <Typography
-            sx={{ fontSize: 11 }}
-            color={(si.flags & flag) === flag ? 'primary' : 'grey'}
-          >
-            {dow[Math.log(flag) / Math.log(2)]}
-          </Typography>
-        </Box>
-        <Divider orientation="vertical" flexItem />
-      </>
-    );
+  const dayBox = useCallback(
+    (si: ScheduleItem, flag: number) => {
+      const dayIndex = Math.log(flag) / LOG_2;
+      const isActive = (si.flags & flag) === flag;
 
-    const scheduleType = (si: ScheduleItem) => (
+      return (
+        <>
+          <Box>
+            <Typography sx={{ fontSize: 11 }} color={isActive ? 'primary' : 'grey'}>
+              {dow[dayIndex]}
+            </Typography>
+          </Box>
+          <Divider orientation="vertical" flexItem />
+        </>
+      );
+    },
+    [dow]
+  );
+
+  const scheduleType = useCallback((si: ScheduleItem) => {
+    const label = scheduleTypeLabels[si.flags];
+
+    return (
       <Box>
         <Typography sx={{ fontSize: 11 }} color="primary">
-          {si.flags === ScheduleFlag.SCHEDULE_IMMEDIATE ? (
-            <>Immediate</>
-          ) : si.flags === ScheduleFlag.SCHEDULE_TIMER ? (
-            <>Timer</>
-          ) : si.flags === ScheduleFlag.SCHEDULE_CONDITION ? (
-            <>Condition</>
-          ) : si.flags === ScheduleFlag.SCHEDULE_ONCHANGE ? (
-            <>On Change</>
-          ) : (
-            <></>
-          )}
+          {label || ''}
         </Typography>
       </Box>
     );
+  }, []);
+
+  const renderSchedule = useCallback(() => {
+    if (!schedule) {
+      return (
+        <FormLoader onRetry={fetchSchedule} errorMessage={error?.message || ''} />
+      );
+    }
 
     return (
       <Table
-        data={{
-          nodes: schedule
-            .filter((si) => !si.deleted)
-            .sort((a, b) => a.flags - b.flags)
-        }}
+        data={{ nodes: filteredAndSortedSchedule }}
         theme={schedule_theme}
         layout={{ custom: true }}
       >
@@ -266,22 +308,15 @@ const Scheduler = () => {
               {tableList.map((si: ScheduleItem) => (
                 <Row key={si.id} item={si} onClick={() => editScheduleItem(si)}>
                   <Cell stiff>
-                    {si.active ? (
-                      <CircleIcon
-                        color="success"
-                        sx={{ fontSize: 16, verticalAlign: 'middle' }}
-                      />
-                    ) : (
-                      <CircleIcon
-                        color="error"
-                        sx={{ fontSize: 16, verticalAlign: 'middle' }}
-                      />
-                    )}
+                    <CircleIcon
+                      color={si.active ? 'success' : 'error'}
+                      sx={{ fontSize: ICON_SIZE, verticalAlign: 'middle' }}
+                    />
                   </Cell>
                   <Cell stiff>
                     <Stack spacing={0.5} direction="row">
                       <Divider orientation="vertical" flexItem />
-                      {si.flags > 127 ? (
+                      {si.flags > SCHEDULE_FLAG_THRESHOLD ? (
                         scheduleType(si)
                       ) : (
                         <>
@@ -307,7 +342,17 @@ const Scheduler = () => {
         )}
       </Table>
     );
-  };
+  }, [
+    schedule,
+    error,
+    fetchSchedule,
+    filteredAndSortedSchedule,
+    schedule_theme,
+    editScheduleItem,
+    LL,
+    dayBox,
+    scheduleType
+  ]);
 
   return (
     <SectionContent>
@@ -329,7 +374,7 @@ const Scheduler = () => {
         />
       )}
 
-      <Box mt={1} display="flex" flexWrap="wrap">
+      <Box display="flex" flexWrap="wrap">
         <Box flexGrow={1}>
           {numChanges !== 0 && (
             <ButtonRow>

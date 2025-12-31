@@ -1,4 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState
+} from 'react';
 import { toast } from 'react-toastify';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
@@ -8,7 +15,7 @@ import {
   Box,
   Button,
   Checkbox,
-  Grid2 as Grid,
+  Grid,
   IconButton,
   MenuItem,
   TextField,
@@ -31,13 +38,16 @@ import type { LogEntry, LogSettings } from 'types';
 import { LogLevel } from 'types';
 import { updateValueDirty, useRest } from 'utils';
 
-const TextColors = {
+const MAX_LOG_ENTRIES = 1000; // Limit log entries to prevent memory issues
+
+const TextColors: Record<LogLevel, string> = {
   [LogLevel.ERROR]: '#ff0000', // red
   [LogLevel.WARNING]: '#ff0000', // red
   [LogLevel.NOTICE]: '#ffffff', // white
   [LogLevel.INFO]: '#ffcc00', // yellow
   [LogLevel.DEBUG]: '#00ffff', // cyan
-  [LogLevel.TRACE]: '#00ffff' // cyan
+  [LogLevel.TRACE]: '#00ffff', // cyan
+  [LogLevel.ALL]: '#ffffff' // white
 };
 
 const LogEntryLine = styled('span')(
@@ -45,11 +55,6 @@ const LogEntryLine = styled('span')(
     color: TextColors[level]
   })
 );
-
-const topOffset = () =>
-  document.getElementById('log-window')?.getBoundingClientRect().bottom || 0;
-const leftOffset = () =>
-  document.getElementById('log-window')?.getBoundingClientRect().left || 0;
 
 const levelLabel = (level: LogLevel) => {
   switch (level) {
@@ -69,6 +74,39 @@ const levelLabel = (level: LogLevel) => {
       return '';
   }
 };
+
+const paddedLevelLabel = (level: LogLevel, compact: boolean) => {
+  const label = levelLabel(level);
+  return compact ? ' ' + label[0] : label.padStart(8, '\xa0');
+};
+
+const paddedNameLabel = (name: string, compact: boolean) => {
+  const label = '[' + name + ']';
+  return compact ? label : label.padEnd(12, '\xa0');
+};
+
+const paddedIDLabel = (id: number, compact: boolean) => {
+  const label = id + ':';
+  return compact ? label : label.padEnd(7, '\xa0');
+};
+
+// Memoized log entry component to prevent unnecessary re-renders
+const LogEntryItem = memo(
+  ({ entry, compact }: { entry: LogEntry; compact: boolean }) => {
+    return (
+      <div style={{ font: '13px monospace', whiteSpace: 'nowrap' }}>
+        <span>{entry.t}</span>
+        <span>{paddedLevelLabel(entry.l, compact)}&nbsp;</span>
+        <span>{paddedIDLabel(entry.i, compact)} </span>
+        <span>{paddedNameLabel(entry.n, compact)} </span>
+        <LogEntryLine details={{ level: entry.l }}>{entry.m}</LogEntryLine>
+      </div>
+    );
+  },
+  (prevProps, nextProps) =>
+    prevProps.entry.i === nextProps.entry.i &&
+    prevProps.compact === nextProps.compact
+);
 
 const SystemLog = () => {
   const { LL } = useI18nContext();
@@ -101,54 +139,89 @@ const SystemLog = () => {
   const [readOpen, setReadOpen] = useState(false);
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
   const [autoscroll, setAutoscroll] = useState(true);
-  const [lastId, setLastId] = useState<number>(-1);
+  const [boxPosition, setBoxPosition] = useState({ top: 0, left: 0 });
 
   const ALPHA_NUMERIC_DASH_REGEX = /^[a-fA-F0-9 ]+$/;
 
   const updateFormValue = updateValueDirty(
-    origData,
+    origData as unknown as Record<string, unknown>,
     dirtyFlags,
     setDirtyFlags,
-    updateDataValue
+    updateDataValue as (value: unknown) => void
   );
+
+  // Calculate box position after layout
+  useLayoutEffect(() => {
+    const logWindow = document.getElementById('log-window');
+    if (!logWindow) {
+      return;
+    }
+
+    const updatePosition = () => {
+      const windowElement = document.getElementById('log-window');
+      if (!windowElement) {
+        return;
+      }
+      const rect = windowElement.getBoundingClientRect();
+      setBoxPosition({ top: rect.bottom, left: rect.left });
+    };
+
+    updatePosition();
+
+    // Debounce resize events with requestAnimationFrame
+    let rafId: number;
+    const handleResize = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(updatePosition);
+    };
+
+    // Update position on window resize
+    window.addEventListener('resize', handleResize);
+    const resizeObserver = new ResizeObserver(handleResize);
+    resizeObserver.observe(logWindow);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      resizeObserver.disconnect();
+      cancelAnimationFrame(rafId);
+    };
+  }, [data]); // Recalculate when data changes (in case layout shifts)
+
+  // Memoize message handler to avoid recreating on every render
+  const handleLogMessage = useCallback((message: { data: string }) => {
+    const rawData = message.data;
+    const logentry = JSON.parse(rawData) as LogEntry;
+    setLogEntries((log) => {
+      // Skip if this is a duplicate entry (check last entry id)
+      if (log.length > 0) {
+        const lastEntry = log[log.length - 1];
+        if (lastEntry && logentry.i <= lastEntry.i) {
+          return log;
+        }
+      }
+      const newLog = [...log, logentry];
+      // Limit log entries to prevent memory issues - only slice when necessary
+      if (newLog.length > MAX_LOG_ENTRIES) {
+        return newLog.slice(-MAX_LOG_ENTRIES);
+      }
+      return newLog;
+    });
+  }, []);
 
   useSSE(fetchLogES, {
     immediate: true,
     interceptByGlobalResponded: false
   })
-    .onMessage((message: { data: string }) => {
-      const rawData = message.data;
-      const logentry = JSON.parse(rawData) as LogEntry;
-      if (lastId < logentry.i) {
-        setLogEntries((log) => [...log, logentry]);
-        setLastId(logentry.i);
-      }
-    })
+    .onMessage(handleLogMessage)
     .onError(() => {
       toast.error('No connection to Log service');
     });
 
-  const paddedLevelLabel = (level: LogLevel) => {
-    const label = levelLabel(level);
-    return data?.compact ? ' ' + label[0] : label.padStart(8, '\xa0');
-  };
+  const onDownload = useCallback(() => {
+    const result = logEntries
+      .map((i) => `${i.t} ${levelLabel(i.l)} ${i.i}: [${i.n}] ${i.m}`)
+      .join('\n');
 
-  const paddedNameLabel = (name: string) => {
-    const label = '[' + name + ']';
-    return data?.compact ? label : label.padEnd(12, '\xa0');
-  };
-
-  const paddedIDLabel = (id: number) => {
-    const label = id + ':';
-    return data?.compact ? label : label.padEnd(7, '\xa0');
-  };
-
-  const onDownload = () => {
-    let result = '';
-    for (const i of logEntries) {
-      result +=
-        i.t + ' ' + levelLabel(i.l) + ' ' + i.i + ': [' + i.n + '] ' + i.m + '\n';
-    }
     const a = document.createElement('a');
     a.setAttribute(
       'href',
@@ -158,24 +231,28 @@ const SystemLog = () => {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-  };
+  }, [logEntries]);
 
-  const saveSettings = async () => {
+  const saveSettings = useCallback(async () => {
     await saveData();
-  };
+  }, [saveData]);
 
-  // handle scrolling
+  // handle scrolling - optimized to only scroll when needed
   const ref = useRef<HTMLDivElement>(null);
+  const logWindowRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (logEntries.length && autoscroll) {
-      ref.current?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'end'
-      });
+      const container = logWindowRef.current;
+      if (container) {
+        requestAnimationFrame(() => {
+          container.scrollTop = container.scrollHeight;
+        });
+      }
     }
-  }, [logEntries.length]);
+  }, [logEntries.length, autoscroll]);
 
-  const sendReadCommand = () => {
+  const sendReadCommand = useCallback(() => {
     if (readValue === '') {
       setReadOpen(!readOpen);
       return;
@@ -186,11 +263,11 @@ const SystemLog = () => {
       setReadOpen(false);
       setReadValue('');
     }
-  };
+  }, [readValue, readOpen, send]);
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
     }
 
     return (
@@ -278,6 +355,7 @@ const SystemLog = () => {
             >
               <IconButton
                 disableRipple
+                aria-label={LL.CANCEL()}
                 onClick={() => {
                   setReadOpen(false);
                   setReadValue('');
@@ -303,7 +381,7 @@ const SystemLog = () => {
           ) : (
             <>
               {data.developer_mode && (
-                <IconButton onClick={sendReadCommand}>
+                <IconButton onClick={sendReadCommand} aria-label={LL.EXECUTE()}>
                   <PlayArrowIcon color="primary" />
                 </IconButton>
               )}
@@ -325,27 +403,20 @@ const SystemLog = () => {
         </Grid>
 
         <Box
+          ref={logWindowRef}
           sx={{
             backgroundColor: 'black',
             overflowY: 'scroll',
             position: 'absolute',
             right: 18,
             bottom: 18,
-            left: () => leftOffset(),
-            top: () => topOffset(),
+            left: boxPosition.left,
+            top: boxPosition.top,
             p: 1
           }}
         >
           {logEntries.map((e) => (
-            <div key={e.i} style={{ font: '14px monospace', whiteSpace: 'nowrap' }}>
-              <span>{e.t}</span>
-              <span>{paddedLevelLabel(e.l)}&nbsp;</span>
-              <span>{paddedIDLabel(e.i)} </span>
-              <span>{paddedNameLabel(e.n)} </span>
-              <LogEntryLine details={{ level: e.l }} key={e.i}>
-                {e.m}
-              </LogEntryLine>
-            </div>
+            <LogEntryItem key={e.i} entry={e} compact={data.compact} />
           ))}
 
           <div ref={ref} />

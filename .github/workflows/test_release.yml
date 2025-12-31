@@ -1,55 +1,65 @@
-name: 'test-release'
+name: 'Build test release'
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - 'dev2'
+      - 'test'
+
+permissions:
+  contents: read
 
 jobs:
   pre-release:
-    name: 'Automatic test-release build'
+    name: 'Build Test Release'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v4
+
+      - name: Install python 3.13
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Install Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Checkout repository
+        uses: actions/checkout@v5
 
       - name: Enable Corepack
-        run: corepack enable
+        run: corepack enable pnpm
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Use Node.js 20.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-
-      - name: Get EMS-ESP source code and version
+      - name: Get the EMS-ESP version
         id: build_info
         run: |
-          version=`grep -E '^#define EMSESP_APP_VERSION' ./src/version.h | awk -F'"' '{print $2}'`
+          version=`grep -E '^#define EMSESP_APP_VERSION' ./src/emsesp_version.h | awk -F'"' '{print $2}'`
           echo "VERSION=$version" >> $GITHUB_OUTPUT
 
       - name: Install PlatformIO
         run: |
           python -m pip install --upgrade pip
           pip install -U platformio
+          python -m pip install intelhex
 
-      - name: Build WebUI
+      - name: Build webUI
         run: |
-          cd interface
-          yarn install
-          yarn typesafe-i18n --no-watch
-          sed -i "s/= 'pl'/= 'en'/" ./src/i18n/i18n-util.ts
-          yarn build
-          yarn webUI
+          platformio run -e build_webUI
 
-      - name: Build all target environments from default_envs
+      - name: Build modbus
+        run: |
+          platformio run -e build_modbus
+
+      - name: Build standalone
+        run: |
+          platformio run -e build_standalone
+          
+      - name: Build all PIO target environments, from default_envs
         run: |
           platformio run
-        env:
-          NO_BUILD_WEBUI: true
 
       - name: Create GitHub Release
         id: 'automatic_releases'

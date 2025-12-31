@@ -223,19 +223,17 @@ void onAck(size_t len, uint32_t time) {
 }
 */
 void ModbusClientTCPasync::onPacket(uint8_t* data, size_t length) {
-  LOG_D("packet received (len:%d)\n", length);
+  LOG_D("packet received (len:%u)\n", length);
   // reset idle timeout
   MTA_lastActivity = millis();
 
   if (length) {
-    LOG_D("parsing (len:%d)\n", length + 1);
+    LOG_D("parsing (len:%u)\n", length + 1);
   }
   while (length > 0) {
     RequestEntry* request = nullptr;
     ModbusMessage* response = nullptr;
     uint16_t transactionID = 0;
-    uint16_t protocolID = 0;
-    uint16_t messageLength = 0;
     bool isOkay = false;
 
     // 1. Check for valid modbus message
@@ -244,8 +242,8 @@ void ModbusClientTCPasync::onPacket(uint8_t* data, size_t length) {
     // total message should fit MBAP plus remaining bytes (in data[4], data[5])
     if (length > 6) {
       transactionID = (data[0] << 8) | data[1];
-      protocolID = (data[2] << 8) | data[3];
-      messageLength = (data[4] << 8) | data[5];
+      uint16_t protocolID = (data[2] << 8) | data[3];
+      uint16_t messageLength = (data[4] << 8) | data[5];
       if (protocolID == 0 &&
         length >= (uint32_t)messageLength + 6 &&
         messageLength < 256) {

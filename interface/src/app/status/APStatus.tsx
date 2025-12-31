@@ -34,37 +34,43 @@ export const apStatusHighlight = ({ status }: APStatusType, theme: Theme) => {
   }
 };
 
+const getApStatusText = (
+  status: APNetworkStatus,
+  LL: ReturnType<typeof useI18nContext>['LL']
+) => {
+  switch (status) {
+    case APNetworkStatus.ACTIVE:
+      return LL.ACTIVE();
+    case APNetworkStatus.INACTIVE:
+      return LL.INACTIVE(0);
+    case APNetworkStatus.LINGERING:
+      return 'Lingering until idle';
+    default:
+      return LL.UNKNOWN();
+  }
+};
+
 const APStatus = () => {
   const { data, send: loadData, error } = useRequest(APApi.readAPStatus);
+  const { LL } = useI18nContext();
+  const theme = useTheme();
+
+  useLayoutTitle(LL.ACCESS_POINT(0));
 
   useInterval(() => {
     void loadData();
   });
 
-  const { LL } = useI18nContext();
-  useLayoutTitle(LL.ACCESS_POINT(0));
-
-  const theme = useTheme();
-
-  const apStatus = ({ status }: APStatusType) => {
-    switch (status) {
-      case APNetworkStatus.ACTIVE:
-        return LL.ACTIVE();
-      case APNetworkStatus.INACTIVE:
-        return LL.INACTIVE(0);
-      case APNetworkStatus.LINGERING:
-        return 'Lingering until idle';
-      default:
-        return LL.UNKNOWN();
-    }
-  };
-
-  const content = () => {
-    if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
-    }
-
+  if (!data) {
     return (
+      <SectionContent>
+        <FormLoader onRetry={loadData} errorMessage={error?.message || ''} />
+      </SectionContent>
+    );
+  }
+
+  return (
+    <SectionContent>
       <List>
         <ListItem>
           <ListItemAvatar>
@@ -72,19 +78,26 @@ const APStatus = () => {
               <SettingsInputAntennaIcon />
             </Avatar>
           </ListItemAvatar>
-          <ListItemText primary={LL.STATUS_OF('')} secondary={apStatus(data)} />
+          <ListItemText
+            primary={LL.STATUS_OF('')}
+            secondary={getApStatusText(data.status, LL)}
+          />
         </ListItem>
+
         <Divider variant="inset" component="li" />
+
         <ListItem>
           <ListItemAvatar>
-            <Avatar>IP</Avatar>
+            <Avatar sx={{ bgcolor: 'primary.main' }}>IP</Avatar>
           </ListItemAvatar>
           <ListItemText primary={LL.ADDRESS_OF('IP')} secondary={data.ip_address} />
         </ListItem>
+
         <Divider variant="inset" component="li" />
+
         <ListItem>
           <ListItemAvatar>
-            <Avatar>
+            <Avatar sx={{ bgcolor: 'primary.main' }}>
               <DeviceHubIcon />
             </Avatar>
           </ListItemAvatar>
@@ -93,21 +106,22 @@ const APStatus = () => {
             secondary={data.mac_address}
           />
         </ListItem>
+
         <Divider variant="inset" component="li" />
+
         <ListItem>
           <ListItemAvatar>
-            <Avatar>
+            <Avatar sx={{ bgcolor: 'primary.main' }}>
               <ComputerIcon />
             </Avatar>
           </ListItemAvatar>
           <ListItemText primary={LL.AP_CLIENTS()} secondary={data.station_num} />
         </ListItem>
+
         <Divider variant="inset" component="li" />
       </List>
-    );
-  };
-
-  return <SectionContent>{content()}</SectionContent>;
+    </SectionContent>
+  );
 };
 
 export default APStatus;

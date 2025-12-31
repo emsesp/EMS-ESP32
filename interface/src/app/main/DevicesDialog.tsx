@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -11,7 +11,7 @@ import {
   DialogContent,
   DialogTitle,
   FormHelperText,
-  Grid2 as Grid,
+  Grid,
   InputAdornment,
   MenuItem,
   TextField,
@@ -52,7 +52,7 @@ const DevicesDialog = ({
   const [editItem, setEditItem] = useState<DeviceValue>(selectedItem);
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const updateFormValue = updateValue(setEditItem);
+  const updateFormValue = useMemo(() => updateValue(setEditItem), [setEditItem]);
 
   useEffect(() => {
     if (open) {
@@ -61,11 +61,7 @@ const DevicesDialog = ({
     }
   }, [open, selectedItem]);
 
-  const close = () => {
-    onClose();
-  };
-
-  const save = async () => {
+  const save = useCallback(async () => {
     try {
       setFieldErrors(undefined);
       await validate(validator, editItem);
@@ -73,46 +69,66 @@ const DevicesDialog = ({
     } catch (error) {
       setFieldErrors(error as ValidateFieldsError);
     }
-  };
+  }, [validator, editItem, onSave]);
 
-  const setUom = (uom?: DeviceValueUOM) => {
-    if (uom === undefined) {
-      return;
-    }
-    switch (uom) {
-      case DeviceValueUOM.HOURS:
-        return LL.HOURS();
-      case DeviceValueUOM.MINUTES:
-        return LL.MINUTES();
-      case DeviceValueUOM.SECONDS:
-        return LL.SECONDS();
-      default:
-        return DeviceValueUOM_s[uom];
-    }
-  };
+  const setUom = useCallback(
+    (uom?: DeviceValueUOM) => {
+      if (uom === undefined) {
+        return;
+      }
+      switch (uom) {
+        case DeviceValueUOM.HOURS:
+          return LL.HOURS();
+        case DeviceValueUOM.MINUTES:
+          return LL.MINUTES();
+        case DeviceValueUOM.SECONDS:
+          return LL.SECONDS();
+        default:
+          return DeviceValueUOM_s[uom];
+      }
+    },
+    [LL]
+  );
 
-  const showHelperText = (dv: DeviceValue) =>
-    dv.h ? (
-      dv.h
-    ) : dv.l ? (
-      dv.l.join(' | ')
-    ) : dv.m !== undefined && dv.x !== undefined ? (
-      <>
-        {dv.m}&nbsp;&rarr;&nbsp;{dv.x}
-      </>
-    ) : undefined;
+  const showHelperText = useCallback((dv: DeviceValue) => {
+    if (dv.h) return dv.h;
+    if (dv.l) return dv.l.join(' | ');
+    if (dv.m !== undefined && dv.x !== undefined) {
+      return (
+        <>
+          {dv.m}&nbsp;&rarr;&nbsp;{dv.x}
+        </>
+      );
+    }
+    return undefined;
+  }, []);
+
+  const isCommand = useMemo(
+    () => selectedItem.v === '' && selectedItem.c,
+    [selectedItem.v, selectedItem.c]
+  );
+
+  const dialogTitle = useMemo(() => {
+    if (isCommand) return LL.RUN_COMMAND();
+    return writeable ? LL.CHANGE_VALUE() : LL.VALUE(0);
+  }, [isCommand, writeable, LL]);
+
+  const buttonLabel = useMemo(() => {
+    return isCommand ? LL.EXECUTE() : LL.UPDATE();
+  }, [isCommand, LL]);
+
+  const helperText = useMemo(
+    () => showHelperText(editItem),
+    [editItem, showHelperText]
+  );
+
+  const valueLabel = LL.VALUE(0);
 
   return (
-    <Dialog sx={dialogStyle} open={open} onClose={close}>
-      <DialogTitle>
-        {selectedItem.v === '' && selectedItem.c
-          ? LL.RUN_COMMAND()
-          : writeable
-            ? LL.CHANGE_VALUE()
-            : LL.VALUE(0)}
-      </DialogTitle>
+    <Dialog sx={dialogStyle} open={open} onClose={onClose}>
+      <DialogTitle>{dialogTitle}</DialogTitle>
       <DialogContent dividers>
-        <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
+        <Box color="warning.main" mb={2}>
           <Typography variant="body2">{editItem.id.slice(2)}</Typography>
         </Box>
         <Grid container>
@@ -120,8 +136,8 @@ const DevicesDialog = ({
             {editItem.l ? (
               <TextField
                 name="v"
-                label={LL.VALUE(0)}
                 value={editItem.v}
+                aria-label={valueLabel}
                 disabled={!writeable}
                 sx={{ width: '30ch' }}
                 select
@@ -135,9 +151,9 @@ const DevicesDialog = ({
               </TextField>
             ) : editItem.s || editItem.u !== DeviceValueUOM.NONE ? (
               <ValidatedTextField
-                fieldErrors={fieldErrors}
+                fieldErrors={fieldErrors || {}}
                 name="v"
-                label={LL.VALUE(0)}
+                label={valueLabel}
                 value={numberValue(Math.round((editItem.v as number) * 10) / 10)}
                 autoFocus
                 disabled={!writeable}
@@ -159,9 +175,9 @@ const DevicesDialog = ({
               />
             ) : (
               <ValidatedTextField
-                fieldErrors={fieldErrors}
+                fieldErrors={fieldErrors || {}}
                 name="v"
-                label={LL.VALUE(0)}
+                label={valueLabel}
                 value={editItem.v}
                 disabled={!writeable}
                 sx={{ width: '30ch' }}
@@ -170,9 +186,9 @@ const DevicesDialog = ({
               />
             )}
           </Grid>
-          {writeable && (
+          {writeable && helperText && (
             <Grid>
-              <FormHelperText>{showHelperText(editItem)}</FormHelperText>
+              <FormHelperText>{helperText}</FormHelperText>
             </Grid>
           )}
         </Grid>
@@ -191,7 +207,7 @@ const DevicesDialog = ({
             <Button
               startIcon={<CancelIcon />}
               variant="outlined"
-              onClick={close}
+              onClick={onClose}
               color="secondary"
             >
               {LL.CANCEL()}
@@ -202,7 +218,7 @@ const DevicesDialog = ({
               onClick={save}
               color="primary"
             >
-              {selectedItem.v === '' && selectedItem.c ? LL.EXECUTE() : LL.UPDATE()}
+              {buttonLabel}
             </Button>
             {progress && (
               <CircularProgress
@@ -217,7 +233,7 @@ const DevicesDialog = ({
             )}
           </Box>
         ) : (
-          <Button variant="outlined" onClick={close} color="secondary">
+          <Button variant="outlined" onClick={onClose} color="secondary">
             {LL.CLOSE()}
           </Button>
         )}

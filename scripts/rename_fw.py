@@ -2,133 +2,121 @@ import hashlib
 import shutil
 import re
 import os
+from pathlib import Path
 Import("env")
 
-OUTPUT_DIR = "build{}".format(os.path.sep)
+OUTPUT_DIR = Path("build")
 
 
 def bin_copy(source, target, env):
+    """Optimized firmware renaming and copying function."""
+    
+    # Get the application version from emsesp_version.h
+    version_file = Path('./src/emsesp_version.h')
+    if not version_file.exists():
+        print("Error: emsesp_version.h not found!")
+        return
+    
+    app_version = None
+    version_pattern = re.compile(r'^#define EMSESP_APP_VERSION\s+"(\S+)"')
+    
+    with version_file.open('r') as f:
+        for line in f:
+            match = version_pattern.match(line)
+            if match:
+                app_version = match.group(1)
+                break
+    
+    if not app_version:
+        print("Error: Could not find EMSESP_APP_VERSION in emsesp_version.h!")
+        return
 
-    # get the application version from version.h
-    bag = {}
-    exprs = [(re.compile(r'^#define EMSESP_APP_VERSION\s+"(\S+)"'), 'app_version')]
-    with open('./src/version.h', 'r') as f:
-        for l in f.readlines():
-            for expr, var in exprs:
-                m = expr.match(l)
-                if m and len(m.groups()) > 0:
-                    bag[var] = m.group(1)
+    # Get the chip type, in uppercase
+    mcu = env.get('BOARD_MCU', '').upper()
+    if not mcu:
+        print("Error: Could not determine MCU type!")
+        return
 
-    app_version = bag.get('app_version')
+    # Work out the flash memory from the PIO env name
+    flash_mem = "4MB"  # default
+    pio_env = env.get('PIOENV', '').upper()
+    if pio_env:
+        parts = pio_env.split('_')
+        # If it ends with _P skip (we use this to denote PSRAM)
+        index = -2 if parts[-1].endswith("P") else -1
+        
+        # If it has an M at the end, use it
+        if parts[index].endswith("M"):
+            flash_mem = parts[index] + "B"
 
-    # print(env.Dump())
+    # Check if BOARD_HAS_PSRAM is in the cppdefines
+    cppdefines = env.get("CPPDEFINES", [])
+    psram = 'BOARD_HAS_PSRAM' in cppdefines
 
-    # get the chip type, in uppercase
-    mcu = env.get('BOARD_MCU').upper()
-    # alternatively take platform from the pio target
-    # platform = str(target[0]).split(os.path.sep)[2]
+    print("=" * 90)
+    print(f"EMS-ESP version: {app_version}")
+    print(f"Has PSRAM: {'Yes' if psram else 'No'}")
+    print(f"MCU: {mcu}")
+    print(f"Flash Mem: {flash_mem}")
 
-    # work out the flash memory from the PIO env name (sloppy but works)
-    # unfortunately the board_upload.flash_size is not passed down
-    flash_mem = "4MB"
-    pio_env = env.get('PIOENV').upper()
-    parts = pio_env.split('_')
-    # if it ends with a _P skip (we use this to denote PSRAM)
-    if parts[-1].endswith("P"):
-        index = -2
-    else:
-        index = -1
-
-    # if doesn't have an M at the end
-    if parts[index].endswith("M"):
-        flash_mem = parts[index] + "B"
-
-    # find if BOARD_HAS_PSRAM is in the cppdefines
-    cppdefines = env.get("CPPDEFINES")
-    if 'BOARD_HAS_PSRAM' in cppdefines:
-        psram = True
-    else:
-        psram = False
-
-    print("*********************************************")
-    print("EMS-ESP version: " + app_version)
-
-    # show psram as Yes or No
-    psram_status = "Yes" if psram else "No"
-    print("Has PSRAM: " + psram_status)
-    print("MCU: "+str(mcu))
-    print("Flash Mem: " + flash_mem)
-
-    # convert . to _ so Windows doesn't complain
+    # Convert . to _ so Windows doesn't complain
     # Format is EMS-ESP-<version>-<mcu>-<flash> with + at the end if it has PSRAM
-    variant = "EMS-ESP-" + \
-        app_version.replace(".", "_") + "-" + mcu + "-" + \
-        flash_mem + ("+" if psram else "")
+    variant = f"EMS-ESP-{app_version.replace('.', '_')}-{mcu}-{flash_mem}{'+' if psram else ''}"
 
-    # check if output directories exist and create if necessary
-    if not os.path.isdir(OUTPUT_DIR):
-        os.mkdir(OUTPUT_DIR)
+    # Create output directories
+    firmware_dir = OUTPUT_DIR / "firmware"
+    firmware_dir.mkdir(parents=True, exist_ok=True)
 
-    for d in ['firmware']:
-        if not os.path.isdir("{}{}".format(OUTPUT_DIR, d)):
-            os.mkdir("{}{}".format(OUTPUT_DIR, d))
+    # Define file paths
+    bin_file = firmware_dir / f"{variant}.bin"
+    md5_file = firmware_dir / f"{variant}.md5"
 
-    # create string with location and file names based on variant
-    bin_file = "{}firmware{}{}.bin".format(OUTPUT_DIR, os.path.sep, variant)
-    md5_file = "{}firmware{}{}.md5".format(OUTPUT_DIR, os.path.sep, variant)
+    # Remove existing files if they exist
+    for file_path in [bin_file, md5_file]:
+        if file_path.exists():
+            file_path.unlink()
 
-    # check if new target files exist and remove if necessary
-    for f in [bin_file]:
-        if os.path.isfile(f):
-            os.remove(f)
+    print(f"Filename: {bin_file}")
 
-    # check if new target files exist and remove if necessary
-    for f in [md5_file]:
-        if os.path.isfile(f):
-            os.remove(f)
+    # Copy firmware.bin to firmware/<variant>.bin
+    shutil.copy2(str(target[0]), str(bin_file))
 
-    print("Filename: "+bin_file)
+    # Calculate and write MD5 hash
+    with bin_file.open("rb") as f:
+        md5_hash = hashlib.md5(f.read()).hexdigest()
+    
+    print(f"MD5: {md5_hash}")
+    md5_file.write_text(md5_hash)
 
-    # copy firmware.bin to firmware/<variant>.bin
-    shutil.copy(str(target[0]), bin_file)
-
-    with open(bin_file, "rb") as f:
-        result = hashlib.md5(f.read())
-        print("MD5: "+result.hexdigest())
-        file1 = open(md5_file, 'w')
-        file1.write(result.hexdigest())
-        file1.close()
-
-    # make a copy using the old 3.6.x filename format for backwards compatibility with the WebUI version check, e.g.
-    #  create a EMS-ESP-<version>-ESP32_S3.bin if target is s3_16M_P (16MB, PSRAM)
-    #  create a EMS-ESP-<version>-ESP32.bin    if target is s_4M (4MB, no PSRAM), compatible only with S32 V1 and E32 V1.0,1.4,1.5
-    #
-    # Note: there is a chance newer E32V2s (which use the 16MB partition table and PSRAM) are running a custom build
-    # of the 3.6.5 firmware as 3.6.5 was released before production of the gateway board. Updating via the WebUI will break the system and require a manual update.
-    #
-    extra_variant = ""
-    if env.get('PIOENV') == "s3_16M_P":
-        extra_variant = "EMS-ESP-" + \
-            app_version.replace(".", "_") + "-ESP32_S3"
-    elif env.get('PIOENV') == "s_4M":
-        extra_variant = "EMS-ESP-" + app_version.replace(".", "_") + "-ESP32"
+    # Make a copy using the old 3.6.x filename format for backwards compatibility
+    # Note: there is a chance newer E32V2s (which use the 16MB partition table and PSRAM) 
+    # are running a custom build of the 3.6.5 firmware as 3.6.5 was released before 
+    # production of the gateway board. Updating via the WebUI will break the system 
+    # and require a manual update.
+    
+    pio_env = env.get('PIOENV', '')
+    extra_variant = None
+    
+    if pio_env == "s3_16M_P":
+        extra_variant = f"EMS-ESP-{app_version.replace('.', '_')}-ESP32_S3"
+    elif pio_env == "s_4M":
+        extra_variant = f"EMS-ESP-{app_version.replace('.', '_')}-ESP32"
 
     if extra_variant:
-        extra_bin_file = "{}firmware{}{}.bin".format(
-            OUTPUT_DIR, os.path.sep, extra_variant)
-        if os.path.isfile(extra_bin_file):
-            os.remove(extra_bin_file)
+        extra_bin_file = firmware_dir / f"{extra_variant}.bin"
+        extra_md5_file = firmware_dir / f"{extra_variant}.md5"
+        
+        # Remove existing files if they exist
+        for file_path in [extra_bin_file, extra_md5_file]:
+            if file_path.exists():
+                file_path.unlink()
+        
+        # Copy files
+        shutil.copy2(str(bin_file), str(extra_bin_file))
+        shutil.copy2(str(md5_file), str(extra_md5_file))
+        print(f"Filename copy for 3.6.x: {extra_bin_file}")
 
-        extra_md5_file = "{}firmware{}{}.md5".format(
-            OUTPUT_DIR, os.path.sep, extra_variant)
-        if os.path.isfile(extra_md5_file):
-            os.remove(extra_md5_file)
-
-        shutil.copy(bin_file, extra_bin_file)
-        shutil.copy(md5_file, extra_md5_file)
-        print("Filename copy for 3.6.x: "+extra_bin_file)
-
-    print("*********************************************")
+    print("=" * 90)
 
 
 env.AddPostAction("$BUILD_DIR/${PROGNAME}.bin", [bin_copy])

@@ -1,3 +1,5 @@
+import { useCallback, useMemo } from 'react';
+
 import {
   Body,
   Cell,
@@ -17,6 +19,12 @@ import { useInterval } from 'utils';
 import { readActivity } from '../../api/app';
 import type { Stat } from '../main/types';
 
+const QUALITY_COLORS = {
+  PERFECT: '#00FF7F',
+  WARNING: 'orange',
+  POOR: 'red'
+} as const;
+
 const SystemActivity = () => {
   const { data, send: loadData, error } = useRequest(readActivity);
 
@@ -28,14 +36,16 @@ const SystemActivity = () => {
 
   useLayoutTitle(LL.DATA_TRAFFIC());
 
-  const stats_theme = tableTheme({
-    Table: `
+  const stats_theme = tableTheme(
+    useMemo(
+      () => ({
+        Table: `
       --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 90px 90px 80px;
     `,
-    BaseRow: `
+        BaseRow: `
       font-size: 14px;
     `,
-    HeaderRow: `
+        HeaderRow: `
       text-transform: uppercase;
       background-color: black;
       color: #90CAF9;
@@ -45,7 +55,7 @@ const SystemActivity = () => {
         border-bottom: 1px solid #565656;
       }
     `,
-    Row: `
+        Row: `
       .td {
         padding: 8px;
         border-top: 1px solid #565656;
@@ -59,35 +69,42 @@ const SystemActivity = () => {
         background-color: #1e1e1e;
       }
     `,
-    BaseCell: `
+        BaseCell: `
       &:not(:first-of-type) {
         text-align: center;
       }
     `
-  });
+      }),
+      []
+    )
+  );
 
-  const showName = (id: number) => {
-    const name: keyof Translation['STATUS_NAMES'] = id;
-    return LL.STATUS_NAMES[name]();
-  };
+  const showName = useCallback(
+    (id: number) => {
+      const name: keyof Translation['STATUS_NAMES'] =
+        id.toString() as keyof Translation['STATUS_NAMES'];
+      return LL.STATUS_NAMES[name]();
+    },
+    [LL]
+  );
 
-  const showQuality = (stat: Stat) => {
+  const showQuality = useCallback((stat: Stat) => {
     if (stat.q === 0 || stat.s + stat.f === 0) {
       return;
     }
     if (stat.q === 100) {
-      return <div style={{ color: '#00FF7F' }}>{stat.q}%</div>;
+      return <div style={{ color: QUALITY_COLORS.PERFECT }}>{stat.q}%</div>;
     }
     if (stat.q >= 95) {
-      return <div style={{ color: 'orange' }}>{stat.q}%</div>;
+      return <div style={{ color: QUALITY_COLORS.WARNING }}>{stat.q}%</div>;
     } else {
-      return <div style={{ color: 'red' }}>{stat.q}%</div>;
+      return <div style={{ color: QUALITY_COLORS.POOR }}>{stat.q}%</div>;
     }
-  };
+  }, []);
 
-  const content = () => {
+  const content = useMemo(() => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
+      return <FormLoader onRetry={loadData} errorMessage={error?.message || ''} />;
     }
 
     return (
@@ -120,9 +137,9 @@ const SystemActivity = () => {
         )}
       </Table>
     );
-  };
+  }, [data, loadData, error?.message, stats_theme, LL, showName, showQuality]);
 
-  return <SectionContent>{content()}</SectionContent>;
+  return <SectionContent>{content}</SectionContent>;
 };
 
 export default SystemActivity;

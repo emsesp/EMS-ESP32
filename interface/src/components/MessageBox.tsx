@@ -1,11 +1,11 @@
-import type { FC } from 'react';
+import { type FC, memo, useMemo } from 'react';
 
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import ErrorIcon from '@mui/icons-material/Error';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ReportProblemOutlinedIcon from '@mui/icons-material/ReportProblemOutlined';
 import { Box, Typography, useTheme } from '@mui/material';
-import type { BoxProps, SvgIconProps, Theme } from '@mui/material';
+import type { BoxProps, SvgIconProps } from '@mui/material';
 
 type MessageBoxLevel = 'warning' | 'success' | 'info' | 'error';
 
@@ -14,22 +14,18 @@ export interface MessageBoxProps extends BoxProps {
   message?: string;
 }
 
-const LEVEL_ICONS: {
-  [type in MessageBoxLevel]: React.ComponentType<SvgIconProps>;
-} = {
+const LEVEL_ICONS: Record<MessageBoxLevel, React.ComponentType<SvgIconProps>> = {
   success: CheckCircleOutlineOutlinedIcon,
   info: InfoOutlinedIcon,
   warning: ReportProblemOutlinedIcon,
   error: ErrorIcon
 };
 
-const LEVEL_BACKGROUNDS: {
-  [type in MessageBoxLevel]: (theme: Theme) => string;
-} = {
-  success: (theme: Theme) => theme.palette.success.dark,
-  info: (theme: Theme) => theme.palette.info.main,
-  warning: (theme: Theme) => theme.palette.warning.dark,
-  error: (theme: Theme) => theme.palette.error.dark
+const LEVEL_PALETTE_PATHS: Record<MessageBoxLevel, string> = {
+  success: 'success.dark',
+  info: 'info.main',
+  warning: 'warning.dark',
+  error: 'error.dark'
 };
 
 const MessageBox: FC<MessageBoxProps> = ({
@@ -40,25 +36,38 @@ const MessageBox: FC<MessageBoxProps> = ({
   ...rest
 }) => {
   const theme = useTheme();
-  const Icon = LEVEL_ICONS[level];
-  const backgroundColor = LEVEL_BACKGROUNDS[level](theme);
-  const color = 'white';
+
+  const { Icon, backgroundColor } = useMemo(() => {
+    const Icon = LEVEL_ICONS[level];
+    const palettePath = LEVEL_PALETTE_PATHS[level];
+    const [key, shade] = palettePath.split('.') as [
+      keyof typeof theme.palette,
+      string
+    ];
+    const paletteKey = theme.palette[key] as unknown as Record<string, string>;
+    const backgroundColor = paletteKey[shade];
+
+    return { Icon, backgroundColor };
+  }, [level, theme]);
+
   return (
     <Box
       p={2}
       display="flex"
       alignItems="center"
       borderRadius={1}
-      sx={{ backgroundColor, color, ...sx }}
+      sx={{ backgroundColor, color: 'white', ...sx }}
       {...rest}
     >
       <Icon />
-      <Typography sx={{ ml: 2 }} variant="body1">
-        {message ?? ''}
-      </Typography>
-      {children}
+      {(message || children) && (
+        <Typography sx={{ ml: 2 }} variant="body1">
+          {message}
+          {children}
+        </Typography>
+      )}
     </Box>
   );
 };
 
-export default MessageBox;
+export default memo(MessageBox);

@@ -59,6 +59,8 @@ typedef double double_t;
 
 #define snprintf snprintf_P // to keep backwards compatibility
 
+#define IRAM_ATTR
+
 void     pinMode(uint8_t pin, uint8_t mode);
 void     digitalWrite(uint8_t pin, uint8_t value);
 int      digitalRead(uint8_t pin);
@@ -72,6 +74,7 @@ double ledcSetup(uint8_t chan, double freq, uint8_t bit_num);
 void   ledcAttachPin(uint8_t pin, uint8_t chan);
 void   ledcWrite(uint8_t chan, uint32_t duty);
 void   neopixelWrite(uint8_t pin, uint8_t red_val, uint8_t green_val, uint8_t blue_val);
+void   rgbLedWrite(uint8_t pin, uint8_t red_val, uint8_t green_val, uint8_t blue_val);
 
 #define PROGMEM
 #define PGM_P const char *

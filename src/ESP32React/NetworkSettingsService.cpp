@@ -24,7 +24,6 @@ static bool formatBssid(const String & bssid, uint8_t (&mac)[6]) {
 }
 
 void NetworkSettingsService::begin() {
-    // TODO: may need to change this for Arduino Core 3.1 / IDF 5.x
     // We want the device to come up in opmode=0 (WIFI_OFF), when erasing the flash this is not the default.
     // If needed, we save opmode=0 before disabling persistence so the device boots with WiFi disabled in the future.
     if (WiFi.getMode() != WIFI_OFF) {
@@ -37,7 +36,9 @@ void NetworkSettingsService::begin() {
 
     WiFi.mode(WIFI_MODE_MAX);
     WiFi.mode(WIFI_MODE_NULL);
-    // WiFi.setScanMethod(WIFI_ALL_CHANNEL_SCAN);     // default is FAST_SCAN, connect issues in 2.0.14
+
+    // scan settings give connect issues since arduino 2.0.14 and arduino 3.x.x with some wifi systems
+    // WiFi.setScanMethod(WIFI_ALL_CHANNEL_SCAN); // default is FAST_SCAN
     // WiFi.setSortMethod(WIFI_CONNECT_AP_BY_SIGNAL); // is default, no need to set
 
     _fsPersistence.readFromFS();

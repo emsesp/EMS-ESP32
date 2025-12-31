@@ -1,0 +1,63 @@
+name: 'Build stable release'
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  tagged-release:
+    name: 'Build Stable Release'
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Install python 3.13
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Install Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Checkout repository
+        uses: actions/checkout@v5
+  
+      - name: Enable Corepack
+        run: corepack enable pnpm
+
+      - name: Install PlatformIO
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U platformio
+          python -m pip install intelhex
+
+      - name: Build webUI
+        run: |
+          platformio run -e build_webUI
+
+      - name: Build modbus
+        run: |
+          platformio run -e build_modbus
+
+      - name: Build standalone
+        run: |
+          platformio run -e build_standalone
+
+      - name: Build all PIO target environments, from default_envs
+        run: |
+          platformio run
+
+      - name: Create GitHub Release
+        uses: emsesp/action-automatic-releases@v1.0.0
+        with:
+          repo_token: '${{ secrets.GITHUB_TOKEN }}'
+          prerelease: false
+          files: |
+            CHANGELOG.md
+            ./build/firmware/*.*

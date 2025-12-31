@@ -40,7 +40,7 @@ const sv: Translation = {
   RUN_COMMAND: 'Kör kommando',
   CHANGE_VALUE: 'Ändra värde',
   CANCEL: 'Avbryt',
-  RESET: 'Nollställ',
+  REMOVE_ALL: 'Ta bort allt',
   APPLY_CHANGES: 'Utför ändringar ({0})',
   UPDATE: 'Uppdatera',
   EXECUTE: 'Utför',
@@ -60,7 +60,6 @@ const sv: Translation = {
   DUTY_CYCLE: 'Pulskvot',
   UNIT: 'Måttenhet',
   STARTVALUE: 'Startvärde',
-  WARN_GPIO: 'Varning: Var försiktig vid aktivering av GPIO!',
   EDIT: 'Ändra',
   SENSOR: 'Sensor',
   TEMP_SENSOR: 'Temperatursensor',
@@ -153,7 +152,7 @@ const sv: Translation = {
   SET_ALL: 'ställ in alla',
   OPTIONS: 'Alternativ',
   NAME: 'Namn',
-  CUSTOMIZATIONS_RESET: 'Är du säker på att du vill ta bort alla anpassningar, inklusive inställningar för Temperatursensorer och Analoga sensorer?',
+  CUSTOMIZATIONS_RESET: 'Är du säker på att du vill ta bort alla anpassningar?',
   SUPPORT_INFORMATION: 'Supportinformation',
   HELP_INFORMATION_1: 'Besök Wikin för instruktioner om hur du kan konfigurera EMS-ESP',
   HELP_INFORMATION_2: 'För community-support besök vår Discord-server',
@@ -162,6 +161,7 @@ const sv: Translation = {
   UPLOAD: 'Uppladdning',
   DOWNLOAD: '{{N|n|n}}edladdning',
   INSTALL: 'Installera',
+  REINSTALL: 'Återinstallera',
   ABORTED: 'Avbruten',
   FAILED: 'Misslyckades',
   SUCCESSFUL: 'Lyckades',
@@ -186,8 +186,9 @@ const sv: Translation = {
   BUFFER_SIZE: 'Max bufferstorlek',
   COMPACT: 'Komprimerad',
   DOWNLOAD_SETTINGS_TEXT: 'Skapa en säkerhetskopia av din konfiguration och inställningar',
+  DOWNLOAD_SETTINGS_TEXT2: 'Exportera alla data',
   UPLOAD_TEXT: 'Ladda upp en ny firmwarefil (.bin) eller en säkerhetskopiafil (.json)',
-  UPLOAD_DROP_TEXT: 'Drop a firmware .bin file or click here', // TODO translate
+  UPLOAD_DROP_TEXT: 'Droppa en firmware .bin fil eller klicka här',
   ERROR: 'Okänt fel, var god försök igen',
   TIME_SET: 'Ställ in tid',
   MANAGE_USERS: 'Användare',
@@ -331,28 +332,31 @@ const sv: Translation = {
   ALLVALUES: 'Alla värden',
   SPECIAL_FUNCTIONS: 'Specialfunktioner',
   WAIT_FIRMWARE: 'Firmware laddas upp och installeras',
-  INSTALL_VERSION: 'Det här kommer installera version {0}. Är du säker?',
-  UPGRADE_AVAILABLE: 'Det finns en tillgänglig firmwareupgradering!',
-  LATEST_VERSION: 'Du använder den senaste firmwareversionen.',
+  INSTALL_VERSION: 'Det här kommer {0} version {1}. Är du säker?',
+  UPDATE_AVAILABLE: 'uppdatering tillgänglig',
+  LATEST_VERSION: 'Du använder den senaste {0} firmwareversionen.',
   PLEASE_WAIT: 'Var god vänta',
-  RESTARTING_PRE: 'Initialiserar',
+  RESTARTING_PRE: 'Bootar',
   RESTARTING_POST: 'Förbereder',
   AUTO_SCROLL: 'Autoskrolla',
   DASHBOARD: 'Kontrollpanel',
   DEVELOPER_MODE: 'Utvecklarläge',
-  BYTES: 'Bytes', // TODO translate
-  BITMASK: 'Bit Mask',// TODO translate
+  BYTES: 'Bytes',
+  BITMASK: 'Bitmask',
   DUPLICATE: 'Dublett',
-  UPGRADE: 'Uppgradera',
-  DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.', // TODO translate
-  NO_DATA_1: 'No favorite EMS entities found yet. Use the', // TODO translate
-  NO_DATA_2: 'module to mark them.', // TODO translate
-  NO_DATA_3: 'To see all available entities go to', // TODO translate
-  THIS_VERSION: 'This Version', // TODO translate
-  PLATFORM: 'Platform', // TODO translate
-  RELEASE_TYPE: 'Release Type', // TODO translate
-  REINSTALL: 'Re-install', // TODO translate
+  DASHBOARD_1: 'Alla EMS-enheter som är aktiva och markerade som favorit, plus alla anpassade entiteter, scheman och externa sensor-data visas nedan.',
+  NO_DATA_1: 'Inga favorit EMS enheter hittade än. Använd',
+  NO_DATA_2: 'modul för att markera dem.',
+  NO_DATA_3: 'För att se alla tillgängliga enheter, gå till',
+  THIS_VERSION: 'Denna version',
+  PLATFORM: 'Plattform',
+  RELEASE_TYPE: 'Utgivelsestyp',
   INTERNET_CONNECTION_REQUIRED: 'Internetanslutning krävs för automatisk version kontroll och uppdatering',
+  SWITCH_RELEASE_TYPE: 'Byt till {0} utgåva',
+  FIRMWARE_VERSION_INFO: 'Information om firmwareversion',
+  NO_DATA: 'Ingen data',
+  USER_PROFILE: 'Användarprofil',
+  STORED_VERSIONS: 'Lagrad versioner'
 };
 
 export default sv;

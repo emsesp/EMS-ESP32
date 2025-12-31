@@ -20,19 +20,18 @@ import type {
   WriteTemperatureSensor
 } from '../app/main/types';
 
+const MSGPACK_CONFIG = { responseType: 'arraybuffer' as const };
+
 // Dashboard
 export const readDashboard = () =>
-  alovaInstance.Get<DashboardData>('/rest/dashboardData', {
-    responseType: 'arraybuffer' // uses msgpack
-  });
+  alovaInstance.Get<DashboardData>('/rest/dashboardData', MSGPACK_CONFIG);
 
 // Devices
-export const readCoreData = () => alovaInstance.Get<CoreData>(`/rest/coreData`);
+export const readCoreData = () => alovaInstance.Get<CoreData>('/rest/coreData');
 export const readDeviceData = (id: number) =>
   alovaInstance.Get<DeviceData>('/rest/deviceData', {
-    // alovaInstance.Get<DeviceData>(`/rest/deviceData/${id}`, {
     params: { id },
-    responseType: 'arraybuffer' // uses msgpack
+    ...MSGPACK_CONFIG
   });
 export const writeDeviceValue = (data: { id: number; c: string; v: unknown }) =>
   alovaInstance.Post('/rest/writeDeviceValue', data);
@@ -66,12 +65,13 @@ export const callAction = (action: Action) =>
 
 // SettingsCustomization
 export const readDeviceEntities = (id: number) =>
-  // alovaInstance.Get<DeviceEntity[]>(`/rest/deviceEntities/${id}`, {
-  alovaInstance.Get<DeviceEntity[]>(`/rest/deviceEntities`, {
+  alovaInstance.Get<DeviceEntity[]>('/rest/deviceEntities', {
     params: { id },
-    responseType: 'arraybuffer',
+    ...MSGPACK_CONFIG,
+    // @ts-expect-error - exactOptionalPropertyTypes compatibility issue
     transform(data) {
-      return (data as DeviceEntity[]).map((de: DeviceEntity) => ({
+      const entities = data as DeviceEntity[];
+      return entities.map((de) => ({
         ...de,
         o_m: de.m,
         o_cn: de.cn,
@@ -92,8 +92,10 @@ export const writeDeviceName = (data: { id: number; name: string }) =>
 // SettingsScheduler
 export const readSchedule = () =>
   alovaInstance.Get<ScheduleItem[]>('/rest/schedule', {
+    // @ts-expect-error - exactOptionalPropertyTypes compatibility issue
     transform(data) {
-      return (data as Schedule).schedule.map((si: ScheduleItem) => ({
+      const schedule = (data as Schedule).schedule;
+      return schedule.map((si) => ({
         ...si,
         o_id: si.id,
         o_active: si.active,
@@ -113,7 +115,8 @@ export const writeSchedule = (data: Schedule) =>
 export const readModules = () =>
   alovaInstance.Get<ModuleItem[]>('/rest/modules', {
     transform(data) {
-      return (data as Modules).modules.map((mi: ModuleItem) => ({
+      const modules = (data as Modules).modules;
+      return modules.map((mi) => ({
         ...mi,
         o_enabled: mi.enabled,
         o_license: mi.license
@@ -129,8 +132,10 @@ export const writeModules = (data: {
 // CustomEntities
 export const readCustomEntities = () =>
   alovaInstance.Get<EntityItem[]>('/rest/customEntities', {
+    // @ts-expect-error - exactOptionalPropertyTypes compatibility issue
     transform(data) {
-      return (data as Entities).entities.map((ei: EntityItem) => ({
+      const entities = (data as Entities).entities;
+      return entities.map((ei) => ({
         ...ei,
         o_id: ei.id,
         o_ram: ei.ram,
@@ -143,7 +148,8 @@ export const readCustomEntities = () =>
         o_name: ei.name,
         o_writeable: ei.writeable,
         o_value: ei.value,
-        o_deleted: ei.deleted
+        o_deleted: ei.deleted,
+        o_hide: ei.hide
       }));
     }
   });

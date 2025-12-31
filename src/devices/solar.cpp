@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -196,6 +196,8 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(retHeatAssist),
                               DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &ts8_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(ts8), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &ts16_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(ts16), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &m1Valve_, DeviceValueType::BOOL, FL_(m1Valve), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &m1Power_, DeviceValueType::UINT8, FL_(m1Power), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &solarPump2_, DeviceValueType::BOOL, FL_(solarPump2), DeviceValueUOM::NONE);
@@ -415,6 +417,20 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(swapRetTemp),
                               DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &heatAssistOn_,
+                              DeviceValueType::INT8,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(heatAssistOn),
+                              DeviceValueUOM::K,
+                              MAKE_CF_CB(set_solarHeatAssistOn));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &heatAssistOff_,
+                              DeviceValueType::INT8,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(heatAssistOff),
+                              DeviceValueUOM::K,
+                              MAKE_CF_CB(set_solarHeatAssistOn));
     }
 }
 
@@ -538,7 +554,8 @@ void Solar::process_SM100Circuit2Config(std::shared_ptr<const Telegram> telegram
 
 // type 0x35C Heat assistance
 void Solar::process_SM100HeatAssist(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram, solarHeatAssist_, 0); // is *10
+    has_update(telegram, heatAssistOn_, 0);  // is *10
+    has_update(telegram, heatAssistOff_, 1); // is *10
 }
 
 // type 0x361 differential control
@@ -546,21 +563,19 @@ void Solar::process_SM100Differential(std::shared_ptr<const Telegram> telegram) 
     has_update(telegram, diffControl_, 0); // is *10
 }
 
-/* process_SM100ParamCfg - type 0xF9 EMS 1.0
- * This telegram is used to inquire the min, default, max, and current values of a value that is usually read and written with another telegram ID
- * The CS200 uses this method extensively to find out which values may be set in the SM100
- * e.g. B0 10 F9 00 FF 02 5A 03 17 00 00 00 14 00 00 00 3C 00 00 00 5A 00 00 00 59 29 - requested with 90 B0 F9 00 11 FF 02 5A 03 AF
- * byte 0 = 0xFF
- * byte 1-2 = telegram ID used to write this value
- * byte 3 = offset in telegram used to write this value
- * byte 4 = unknown
- * bytes 5..8 = minimum value
- * bytes 9..12 = default value
- * bytes 13..16 = maximum value
- * bytes 17..20 = current value
- *
- * e.g. B0 0B F9 00 00 02 5A 00 00 6E
- */
+// process_SM100ParamCfg - type 0xF9 EMS 1.0
+// This telegram is used to inquire the min, default, max, and current values of a value that is usually read and written with another telegram ID
+// The CS200 uses this method extensively to find out which values may be set in the SM100
+// e.g. B0 10 F9 00 FF 02 5A 03 17 00 00 00 14 00 00 00 3C 00 00 00 5A 00 00 00 59 29 - requested with 90 B0 F9 00 11 FF 02 5A 03 AF
+// byte 0 = 0xFF
+// byte 1-2 = telegram ID used to write this value
+// byte 3 = offset in telegram used to write this value
+// byte 4 = unknown
+// bytes 5..8 = minimum value
+// bytes 9..12 = default value
+// bytes 13..16 = maximum value
+// bytes 17..20 = current value
+// e.g. B0 0B F9 00 00 02 5A 00 00 6E
 void Solar::process_SM100ParamCfg(std::shared_ptr<const Telegram> telegram) {
     uint16_t t_id = EMS_VALUE_UINT16_NOTSET;
     uint8_t  of   = EMS_VALUE_UINT8_NOTSET;
@@ -598,6 +613,7 @@ void Solar::process_SM100Monitor(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, collector2Temp_, 6);  // is *10 - TS7: Temperature sensor for collector array 2
     has_update(telegram, cylMiddleTemp_, 8);   // is *10 - TS14: cylinder middle temperature
     has_update(telegram, retHeatAssist_, 10);  // is *10 - TS15: return temperature heating assistance
+    has_update(telegram, ts8_, 22);            // is *10 - TS8: ?
     has_update(telegram, cylBottomTemp3_, 24); // is *10 - TS5: Temperature sensor cylinder 3, bottom
 }
 
@@ -611,6 +627,7 @@ void Solar::process_SM100Monitor2(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, swapRetTemp_, 6);  // is *10
     has_update(telegram, swapFlowTemp_, 8); // is *10
     has_update(telegram, cylTopTemp_, 10);  // is *10 - TS10: cylinder top temperature
+    has_update(telegram, ts16_, 13);        // is *10 - TS16, see https://github.com/emsesp/EMS-ESP32/issues/2690
 }
 
 // SM100Config - 0x0366
@@ -1096,6 +1113,24 @@ bool Solar::set_diffControl(const char * value, const int8_t id) {
         return false;
     }
     write_command(0x361, 4, (uint8_t)(temperature * 10), 0x361);
+    return true;
+}
+
+bool Solar::set_solarHeatAssistOn(const char * value, const int8_t id) {
+    float t;
+    if (!Helpers::value2float(value, t)) {
+        return false;
+    }
+    write_command(0x35C, 0, (uint8_t)(t * 10), 0x35C);
+    return true;
+}
+
+bool Solar::set_solarHeatAssistOff(const char * value, const int8_t id) {
+    float t;
+    if (!Helpers::value2float(value, t)) {
+        return false;
+    }
+    write_command(0x35C, 1, (uint8_t)(t * 10), 0x35C);
     return true;
 }
 

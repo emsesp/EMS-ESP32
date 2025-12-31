@@ -21,11 +21,12 @@
 #define NTP_SETTINGS_FILE "/config/ntpSettings.json"
 #define EMSESP_SETTINGS_FILE "/config/emsespSettings.json"
 
+#define AP_MODE_ALWAYS 0
 class DummySettings {
   public:
     // SYSTEM
     bool bandwidth20 = false;
-    bool nosleep     = false;
+    bool nosleep     = true;
 
     // MQTT
     uint16_t publish_time       = 10;
@@ -55,6 +56,7 @@ class DummySettings {
     uint16_t publish_time_other      = 10;
     uint16_t publish_time_sensor     = 10;
     uint16_t publish_time_heartbeat  = 60;
+    uint32_t publish_time_water      = 0;
 
     String  hostname       = "ems-esp";
     String  jwtSecret      = "ems-esp";
@@ -72,8 +74,12 @@ class DummySettings {
     String  CORSOrigin     = "*";
     uint8_t tx_power       = 0;
 
-    uint8_t  provisionMode      = 0;
-    uint32_t publish_time_water = 0;
+    // AP
+    uint8_t provisionMode = 0;
+
+    // NTP
+    String server  = "pool.ntp.org";
+    String tzLabel = "Europe/London";
 
     static void read(DummySettings & settings, JsonObject root) {};
     static void read(DummySettings & settings) {};

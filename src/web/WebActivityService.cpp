@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,9 +88,7 @@ void WebActivityService::webActivityService(AsyncWebServerRequest * request) {
         statJson["id"] = 7;
         statJson["s"]  = EMSESP::system_.syslog_count();
         statJson["f"]  = EMSESP::system_.syslog_fails();
-        statJson["q"]  = (EMSESP::system_.syslog_count() + EMSESP::system_.syslog_fails()) == 0
-                             ? 100
-                             : 100 - (uint8_t)((100 * EMSESP::system_.syslog_fails()) / (EMSESP::system_.syslog_count() + EMSESP::system_.syslog_fails()));
+        statJson["q"]  = EMSESP::system_.syslog_count() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::system_.syslog_fails()) / EMSESP::system_.syslog_count());
     }
 #endif
 

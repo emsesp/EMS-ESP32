@@ -67,15 +67,15 @@ protected:
     uint32_t token;
     ModbusMessage msg;
     bool isSyncRequest;
-    RequestEntry(uint32_t t, ModbusMessage m, bool syncReq = false) :
+    RequestEntry(uint32_t t, const ModbusMessage& m, bool syncReq = false) :
       token(t),
       msg(m),
       isSyncRequest(syncReq) {}
   };
 
   // Base addRequest and syncRequest must be present
-  Error addRequestM(ModbusMessage msg, uint32_t token);
-  ModbusMessage syncRequestM(ModbusMessage msg, uint32_t token);
+  Error addRequestM(ModbusMessage msg, uint32_t token) override;
+  ModbusMessage syncRequestM(ModbusMessage msg, uint32_t token) override;
 
   // addToQueue: send freshly created request to queue
   bool addToQueue(uint32_t token, ModbusMessage msg, bool syncReq = false);
@@ -89,7 +89,6 @@ protected:
   // start background task
   void doBegin(uint32_t baudRate, int coreID, uint32_t userInterval);
 
-  void isInstance() { return; }   // make class instantiable
   queue<RequestEntry> requests;   // Queue to hold requests to be processed
   #if USE_MUTEX
   mutex qLock;                    // Mutex to protect queue

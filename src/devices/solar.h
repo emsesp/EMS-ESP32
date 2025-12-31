@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,8 @@ class Solar : public EMSdevice {
     int16_t cylTopTemp_;        // TS10: Temperature sensor 1 cylinder, Top
     int16_t heatExchangerTemp_; // TS6: Heat exchanger temperature sensor
     int16_t collector2Temp_;    // TS7: Temperature sensor for collector array 2
+    int16_t ts8_;               // TS8: Temperature sensor for ?
+    int16_t ts16_;              // TS16: Temperature sensor for ?
     int16_t cylMiddleTemp_;     // TS14: Cylinder middle temp
     int16_t retHeatAssist_;     // TS15: return temperature heating assistance
     uint8_t solarPumpMod_;      // PS1: modulation solar pump
@@ -103,7 +105,8 @@ class Solar : public EMSdevice {
     uint8_t solarPump2Mode_;        // 00=off, 01=PWM, 02=10V
 
     // telegram 0x35C Heat assistance
-    uint8_t solarHeatAssist_; // is *10
+    int8_t heatAssistOn_;  // is *10
+    int8_t heatAssistOff_; // is *10
 
     // telegram 0x035F
     uint8_t cylPriority_; // 0 or 1
@@ -193,6 +196,8 @@ class Solar : public EMSdevice {
     bool set_cylPriority(const char * value, const int8_t id);
     bool set_heatAssist(const char * value, const int8_t id);
     bool set_diffControl(const char * value, const int8_t id);
+    bool set_solarHeatAssistOn(const char * value, const int8_t id);
+    bool set_solarHeatAssistOff(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

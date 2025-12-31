@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,13 +38,24 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request, JsonVariant j
     JsonDocument input_doc; // has no body JSON so create dummy as empty input object
     JsonObject   input;
     // if no body then treat it as a secure GET
-    if ((request->method() == HTTP_GET) || (!json.is<JsonObject>())) {
+    if (request->method() == HTTP_GET) {
         // HTTP GET
         input = input_doc.to<JsonObject>();
-    } else {
+    } else if (json.is<JsonObject>()) {
         // HTTP_POST
         input = json.as<JsonObject>(); // extract values from the json. these will be used as default values
+    } else {
+        input         = input_doc.to<JsonObject>();
+        input["data"] = json.as<std::string>();
     }
+    parse(request, input);
+}
+
+// for POSTS accepting plain text data
+void WebAPIService::webAPIService(AsyncWebServerRequest * request, const char * data) {
+    JsonDocument input_doc;
+    JsonObject   input = input_doc.to<JsonObject>();
+    input["data"]      = data;
     parse(request, input);
 }
 
@@ -94,10 +105,10 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     }
 
     // capture current heap memory before allocating the large return buffer
-    emsesp::EMSESP::system_.refreshHeapMem();
+    EMSESP::system_.refreshHeapMem();
 
     // output json buffer
-    auto response = new AsyncJsonResponse(false);
+    auto response = new AsyncJsonResponse();
 
     // add more mem if needed - won't be needed in ArduinoJson 7
     // while (!response->getSize()) {
@@ -133,6 +144,8 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
         return;
     }
 
+    api_count_++;
+
     // send the json that came back from the command call
     // sequence matches CommandRet in command.h (FAIL, OK, NOT_FOUND, ERROR, NOT_ALLOWED, INVALID, NO_VALUE)
     // 400 (bad request)
@@ -141,21 +154,35 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     // 401 (unauthorized)
     // 400 (invalid)
     int ret_codes[7] = {400, 200, 404, 400, 401, 400, 404};
+
     response->setCode(ret_codes[return_code]);
     response->setLength();
     response->setContentType("application/json; charset=utf-8");
     request->send(response);
     api_count_++;
+    // serialize JSON to string to ensure correct content-length and avoid HTTP parsing errors (issue #2752)
+    // std::string output_str;
+    // serializeJson(output, output_str);
+    // request->send(ret_codes[return_code], "application/json; charset=utf-8", output_str.c_str());
 
 #if defined(EMSESP_UNITY)
     // store the result so we can test with Unity later
     storeResponse(output);
 #endif
 #if defined(EMSESP_STANDALONE) && !defined(EMSESP_UNITY)
-    Serial.printf("%sweb output: %s[%s]", COLOR_WHITE, COLOR_BRIGHT_CYAN, request->url().c_str());
-    Serial.printf(" %s(%d)%s ", ret_codes[return_code] == 200 ? COLOR_BRIGHT_GREEN : COLOR_BRIGHT_RED, ret_codes[return_code], COLOR_YELLOW);
-    serializeJson(output, Serial);
-    Serial.println(COLOR_RESET);
+    std::string output_str;
+    serializeJson(output, output_str);
+    Serial.printf("%sweb output: %s[%s] %s(%d)%s %s%s",
+                  COLOR_WHITE,
+                  COLOR_BRIGHT_CYAN,
+                  request->url().c_str(),
+                  ret_codes[return_code] == 200 ? COLOR_BRIGHT_GREEN : COLOR_BRIGHT_RED,
+                  ret_codes[return_code],
+                  COLOR_YELLOW,
+                  output_str.c_str(),
+                  COLOR_RESET);
+    Serial.println();
+    EMSESP::logger().debug("web output: %s %s", request->url().c_str(), output_str.c_str());
 #endif
 }
 

@@ -86,56 +86,24 @@ int8_t Modbus::tag_to_type(int8_t tag) {
         return TAG_TYPE_DEVICE_DATA;
 
     case DeviceValue::TAG_HC1:
-        return TAG_TYPE_HC;
-
     case DeviceValue::TAG_HC2:
-        return TAG_TYPE_HC;
-
     case DeviceValue::TAG_HC3:
-        return TAG_TYPE_HC;
-
     case DeviceValue::TAG_HC4:
-        return TAG_TYPE_HC;
-
     case DeviceValue::TAG_HC5:
-        return TAG_TYPE_HC;
-
     case DeviceValue::TAG_HC6:
-        return TAG_TYPE_HC;
-
     case DeviceValue::TAG_HC7:
-        return TAG_TYPE_HC;
-
     case DeviceValue::TAG_HC8:
         return TAG_TYPE_HC;
 
     case DeviceValue::TAG_DHW1:
-        return TAG_TYPE_DHW;
-
     case DeviceValue::TAG_DHW2:
-        return TAG_TYPE_DHW;
-
     case DeviceValue::TAG_DHW3:
-        return TAG_TYPE_DHW;
-
     case DeviceValue::TAG_DHW4:
-        return TAG_TYPE_DHW;
-
     case DeviceValue::TAG_DHW5:
-        return TAG_TYPE_DHW;
-
     case DeviceValue::TAG_DHW6:
-        return TAG_TYPE_DHW;
-
     case DeviceValue::TAG_DHW7:
-        return TAG_TYPE_DHW;
-
     case DeviceValue::TAG_DHW8:
-        return TAG_TYPE_DHW;
-
     case DeviceValue::TAG_DHW9:
-        return TAG_TYPE_DHW;
-
     case DeviceValue::TAG_DHW10:
         return TAG_TYPE_DHW;
 
@@ -143,53 +111,40 @@ int8_t Modbus::tag_to_type(int8_t tag) {
         return TAG_TYPE_AHS;
 
     case DeviceValue::TAG_HS1:
-        return TAG_TYPE_HS;
-
     case DeviceValue::TAG_HS2:
-        return TAG_TYPE_HS;
-
     case DeviceValue::TAG_HS3:
-        return TAG_TYPE_HS;
-
     case DeviceValue::TAG_HS4:
-        return TAG_TYPE_HS;
-
     case DeviceValue::TAG_HS5:
-        return TAG_TYPE_HS;
-
     case DeviceValue::TAG_HS6:
-        return TAG_TYPE_HS;
-
     case DeviceValue::TAG_HS7:
-        return TAG_TYPE_HS;
-
     case DeviceValue::TAG_HS8:
-        return TAG_TYPE_HS;
-
     case DeviceValue::TAG_HS9:
-        return TAG_TYPE_HS;
-
     case DeviceValue::TAG_HS10:
-        return TAG_TYPE_HS;
-
     case DeviceValue::TAG_HS11:
-        return TAG_TYPE_HS;
-
     case DeviceValue::TAG_HS12:
-        return TAG_TYPE_HS;
-
     case DeviceValue::TAG_HS13:
-        return TAG_TYPE_HS;
-
     case DeviceValue::TAG_HS14:
-        return TAG_TYPE_HS;
-
     case DeviceValue::TAG_HS15:
-        return TAG_TYPE_HS;
-
     case DeviceValue::TAG_HS16:
         return TAG_TYPE_HS;
 
+    case DeviceValue::TAG_SRC1:
+    case DeviceValue::TAG_SRC2:
+    case DeviceValue::TAG_SRC3:
+    case DeviceValue::TAG_SRC4:
+    case DeviceValue::TAG_SRC5:
+    case DeviceValue::TAG_SRC6:
+    case DeviceValue::TAG_SRC7:
+    case DeviceValue::TAG_SRC8:
+    case DeviceValue::TAG_SRC9:
+    case DeviceValue::TAG_SRC10:
+    case DeviceValue::TAG_SRC11:
+    case DeviceValue::TAG_SRC12:
+    case DeviceValue::TAG_SRC13:
+    case DeviceValue::TAG_SRC14:
+    case DeviceValue::TAG_SRC15:
+    case DeviceValue::TAG_SRC16:
+        return TAG_TYPE_SRC;
     default:
         return INVALID_TAG_TYPE;
     }
@@ -500,12 +455,10 @@ int Modbus::getRegisterCount(const DeviceValue & dv) {
             uint32_t num_values    = std::max(dv.max, (uint32_t)abs(dv.min));
             int      num_registers = 0;
 
-            if (num_values <= (1L << 8))
+            if (num_values < (1L << 16))
                 num_registers = 1;
-            else if (num_values <= (1L << 16))
+            else if (num_values <= (0xFFFFFFFF))
                 num_registers = 2;
-            else if (num_values <= (1L << 32))
-                num_registers = 4;
             else
                 LOG_ERROR("num_registers is too big to be encoded with modbus registers");
 

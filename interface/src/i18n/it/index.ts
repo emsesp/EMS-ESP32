@@ -40,7 +40,7 @@ const it: Translation = {
   RUN_COMMAND: 'Esegui',
   CHANGE_VALUE: 'Cambia Valore',
   CANCEL: 'Annulla',
-  RESET: 'Reset',
+  REMOVE_ALL: 'Rimuovi tutto',
   APPLY_CHANGES: 'Applica Cambiamenti ({0})',
   UPDATE: 'Update',
   EXECUTE: 'Execute',
@@ -60,7 +60,6 @@ const it: Translation = {
   DUTY_CYCLE: 'Ciclo di lavoro',
   UNIT: 'UoM',
   STARTVALUE: 'Valore di partenza',
-  WARN_GPIO: 'Avvertimento: prestare attenzione quando si assegna un GPIO!',
   EDIT: 'Modifica',
   SENSOR: 'Sensore',
   TEMP_SENSOR: 'Sensore Temperatura',
@@ -72,7 +71,7 @@ const it: Translation = {
   TX_ISSUES: 'Problema di Tx - prova una modalità differente',
   DISCONNECTED: 'Disconnesso',
   EMS_SCAN: 'Sei sicuro di voler iniziare una scansione completa del bus EMS ?',
-  DATA_TRAFFIC: 'Data Traffic', // TODO translate
+  DATA_TRAFFIC: 'Traffico dati',
   EMS_DEVICE: 'Dispositivo EMS ',
   SUCCESS: 'SUCCESSO',
   FAIL: 'FALLITO',
@@ -115,7 +114,7 @@ const it: Translation = {
   READONLY: 'Abilita modalità sola-lettura (blocca tutti i comandi di scrittura EMS Tx in uscita)',
   UNDERCLOCK_CPU: 'Abbassa velocità della CPU',
   REMOTE_TIMEOUT: 'Remote timeout',
-  REMOTE_TIMEOUT_EN: 'Disable remote on missing room temperature', // TODO translate
+  REMOTE_TIMEOUT_EN: 'Disabilitare il telecomando in caso di temperatura ambiente mancante',
   HEATINGOFF: 'Avviamento caldaia con riscaldamento forzato spento',
   MIN_DURATION: 'Wait time',
   ENABLE_SHOWER_TIMER: 'Abilita timer doccia',
@@ -153,7 +152,7 @@ const it: Translation = {
   SET_ALL: 'imposta tutto',
   OPTIONS: 'Opzioni',
   NAME: 'Nome',
-  CUSTOMIZATIONS_RESET: 'Sei sicuro di voler rimuovere tutte le personalizzazioni incluse le impostazioni personalizzate dei sensori di temperatura e analogici?',
+  CUSTOMIZATIONS_RESET: 'Sei sicuro di voler rimuovere tutte le personalizzazioni?',
   SUPPORT_INFORMATION: 'Informazioni di Supporto',
   HELP_INFORMATION_1: 'Visita il wiki online per ottenere istruzioni su come configurare EMS-ESP',
   HELP_INFORMATION_2: 'Per la chat della community dal vivo unisciti al nostro server Discord',
@@ -162,6 +161,7 @@ const it: Translation = {
   UPLOAD: 'Carica',
   DOWNLOAD: 'Scarica',
   INSTALL: 'Installare {0}',
+  REINSTALL: 'Riavviare',
   ABORTED: 'Annullato',
   FAILED: 'Fallito',
   SUCCESSFUL: 'Riuscito',
@@ -174,8 +174,8 @@ const it: Translation = {
   FACTORY_RESET: 'Impostazioni di fabbrica',
   SYSTEM_FACTORY_TEXT: 'Il dispositivo è stato ripristinato alle impostazioni di fabbrica e ora verrà riavviato',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Sei sicuro di voler ripristinare il dispositivo alle impostazioni di fabbrica??',
-  AVAILABLE_VERSION: 'Latest Available Versions', // TODO translate
-  STABLE: 'Stable', // TODO translate
+  AVAILABLE_VERSION: 'Versioni disponibili',
+  STABLE: 'Stabile',
   DEVELOPMENT: 'Sviluppo',
   UPTIME: 'Tempo di attività del sistema',
   FREE_MEMORY: 'Free Memory',
@@ -184,10 +184,11 @@ const it: Translation = {
   APPSIZE: 'Applicazione (Partizione: Usata / Libera)',
   FILESYSTEM: 'Memoria Sistema (Usata / Libera)',
   BUFFER_SIZE: 'Max Buffer Size',
-  COMPACT: 'Compact',
-  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
-  UPLOAD_TEXT: 'Upload a new firmware file (.bin) or a backup file (.json)', // TODO translate
-  UPLOAD_DROP_TEXT: 'Drop a firmware .bin file or click here', // TODO translate
+  COMPACT: 'Compatto',
+  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings',
+  DOWNLOAD_SETTINGS_TEXT2: 'Esporta tutti i dati',
+  UPLOAD_TEXT: 'Upload a new firmware file (.bin) or a backup file (.json)',
+  UPLOAD_DROP_TEXT: 'Drop a firmware .bin file or click here',
   ERROR: 'Errore Inaspettato, prego tenta ancora',
   TIME_SET: 'Imposta Ora',
   MANAGE_USERS: 'Gestione Utenti',
@@ -260,7 +261,7 @@ const it: Translation = {
   NETWORK_SCANNER: 'Scansione Rete',
   NETWORK_NO_WIFI: 'Nessuana rete WiFi trovata',
   NETWORK_BLANK_SSID: 'lasciare vuoto per disattivare WiFi',
-  NETWORK_BLANK_BSSID: 'leave blank to use only SSID', // TODO translate
+  NETWORK_BLANK_BSSID: 'lasciare vuoto per usare solo SSID',
   TX_POWER: 'Potenza Tx',
   HOSTNAME: 'Nome ospite',
   NETWORK_DISABLE_SLEEP: 'Disabilita la modalità sospensione Wi-Fi',
@@ -303,56 +304,59 @@ const it: Translation = {
   WRITEABLE: 'Scrivibile',
   SHOWING: 'Visualizza',
   SEARCH: 'Ricerca',
-  CERT: 'TLS root certificate (leave blank for insecure)', // TODO translate
+  CERT: 'Certificato radice TLS (lasciare vuoto per l\'insecure)',
   ENABLE_TLS: 'Abilita TLS',
-  ON: 'On', // TODO translate
-  OFF: 'Off', // TODO translate
-  POLARITY: 'Polarity', // TODO translate
-  ACTIVEHIGH: 'Active High', // TODO translate
-  ACTIVELOW: 'Active Low', // TODO translate
-  UNCHANGED: 'Unchanged', // TODO translate
-  ALWAYS: 'Always', // TODO translate
-  ACTIVITY: 'Activity', // TODO translate
-  CONFIGURE: 'Configure {0}', // TODO translate
-  SYSTEM_MEMORY: 'System Memory', // TODO translate
-  APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
-  SECURITY_1: 'Add or remove users', // TODO translate
-  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings and Firmware', // TODO translate
-  MODULES: 'Module', // TODO translate
-  MODULES_1: 'Attiva o disattiva i moduli esterni', // TODO translate
-  MODULES_UPDATED: 'Modules updated', // TODO translate
-  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
-  MODULES_NONE: 'No external modules detected', // TODO translate
-  RENAME: 'Rename', // TODO translate  
+  ON: 'On',
+  OFF: 'Off',
+  POLARITY: 'Polarity',
+  ACTIVEHIGH: 'Active High',
+  ACTIVELOW: 'Active Low',
+  UNCHANGED: 'Unchanged',
+  ALWAYS: 'Always',
+  ACTIVITY: 'Activity',
+  CONFIGURE: 'Configure {0}',
+  SYSTEM_MEMORY: 'System Memory',
+  APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings',
+  SECURITY_1: 'Add or remove users',
+  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings and Firmware',
+  MODULES: 'Module',
+  MODULES_1: 'Attiva o disattiva i moduli esterni',
+  MODULES_UPDATED: 'Modules updated',
+  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules',
+  MODULES_NONE: 'No external modules detected',
+  RENAME: 'Rename',
   ENABLE_MODBUS: 'Abilita Modbus',
-  VIEW_LOG: 'View log to diagnose issues', // TODO translate
-  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
-  SERVICES: 'Services', // TODO translate
-  ALLVALUES: 'All Values', // TODO translate
-  SPECIAL_FUNCTIONS: 'Special Functions', // TODO translate
-  WAIT_FIRMWARE: 'Firmware is uploading and installing', // TODO translate
-  INSTALL_VERSION: 'This will install version {0}. Are you sure?', // TODO translate
-  UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
-  LATEST_VERSION: 'You are using the latest firmware version', // TODO translate
-  PLEASE_WAIT: 'Please wait', // TODO translate
-  RESTARTING_PRE: 'Initializing', // TODO translate
-  RESTARTING_POST: 'Preparing', // TODO translate
-  AUTO_SCROLL: 'Auto Scroll', // TODO translate
-  DASHBOARD: 'Dashboard', // TODO translate
-  DEVELOPER_MODE: 'Developer Mode', // TODO translate
-  BYTES: 'Bytes', // TODO translate
-  BITMASK: 'Bit Mask',// TODO translate
-  DUPLICATE: 'Duplicate', // TODO translate
-  UPGRADE: 'Upgrade', // TODO translate
-  DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.', // TODO translate
-  NO_DATA_1: 'No favorite EMS entities found yet. Use the', // TODO translate
-  NO_DATA_2: 'module to mark them.', // TODO translate
-  NO_DATA_3: 'To see all available entities go to', // TODO translate
-  THIS_VERSION: 'This Version', // TODO translate
-  PLATFORM: 'Platform', // TODO translate
-  RELEASE_TYPE: 'Release Type', // TODO translate
-  REINSTALL: 'Re-install', // TODO translate
-  INTERNET_CONNECTION_REQUIRED: 'Internet connection required for automatic version checking and upgrading',
+  VIEW_LOG: 'Visualizza log per diagnosticare problemi',
+  UPLOAD_DRAG: 'trascina e rilascia un file qui o clicca per selezionare uno',
+  SERVICES: 'Servizi',
+  ALLVALUES: 'Tutti i valori',
+  SPECIAL_FUNCTIONS: 'Funzioni speciali',
+  WAIT_FIRMWARE: 'Firmware è in upload e installazione',
+  INSTALL_VERSION: 'Questo installerà la versione {1} {0}. Sei sicuro?',
+  UPDATE_AVAILABLE: 'aggiornamento disponibile',
+  LATEST_VERSION: 'Stai usando la versione più recente del firmware {0}',
+  PLEASE_WAIT: 'Attendere',
+  RESTARTING_PRE: 'Avviamento',
+  RESTARTING_POST: 'Preparazione',
+  AUTO_SCROLL: 'Scorrimento automatico',
+  DASHBOARD: 'Pannello di controllo',
+  DEVELOPER_MODE: 'Modalità sviluppatore',
+  BYTES: 'Byte',
+  BITMASK: 'Bitmask',
+  DUPLICATE: 'Duplicato',
+  DASHBOARD_1: 'Tutte le entità EMS che sono attive e marcate come preferite, più tutte le entità personalizzate, piani di programmazione e dati dei sensori esterni sono visualizzati di seguito.',
+  NO_DATA_1: 'Nessuna entità EMS preferita trovata. Usa il',
+  NO_DATA_2: 'modulo per marcarle.',
+  NO_DATA_3: 'Per vedere tutte le entità disponibili vai a',
+  THIS_VERSION: 'Questa versione',
+  PLATFORM: 'Piattaforma',
+  RELEASE_TYPE: 'Tipo di rilascio',
+  INTERNET_CONNECTION_REQUIRED: 'Connessione internet richiesta per il controllo automatico delle versioni e l\'aggiornamento',
+  SWITCH_RELEASE_TYPE: 'Cambia in {0} rilascio',
+  FIRMWARE_VERSION_INFO: 'Informazioni sulla versione del firmware',
+  NO_DATA: 'Nessun dato',
+  USER_PROFILE: 'Profilo utente',
+  STORED_VERSIONS: 'Versioni memorizzate'
 };
 
 export default it;

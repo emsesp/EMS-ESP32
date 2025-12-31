@@ -1,7 +1,10 @@
 #
 # Update modbus parameters from entity definitions.
 # This script generates c++ code for the modbus parameter definitions.
-# Called by /scripts/generate_csv_and_headers.sh
+#
+# Called by /scripts/generate_csv_and_headers.sh and pio build_modbus target.
+# can be called manually with:
+#   cat ./docs/dump_entities.csv | python3 ./scripts/update_modbus_registers.py > ./src/core/modbus_entity_parameters.hpp
 
 import fileinput
 import csv
@@ -42,7 +45,9 @@ string_sizes = {
     "thermostat/switchtime2": 16,
     "thermostat/switchtime": 16,
     "thermostat/switchtimeww": 21,
-    "controller/datetime": 25
+    "controller/datetime": 25,
+    "connect/datetime": 25,
+    "connect/name": 51
 }
 
 tag_to_tagtype = {
@@ -82,7 +87,23 @@ tag_to_tagtype = {
     32: "TAG_TYPE_HS",
     33: "TAG_TYPE_HS",
     34: "TAG_TYPE_HS",
-    35: "TAG_TYPE_HS"
+    35: "TAG_TYPE_HS",
+    36: "TAG_TYPE_SRC",
+    37: "TAG_TYPE_SRC",
+    38: "TAG_TYPE_SRC",
+    39: "TAG_TYPE_SRC",
+    40: "TAG_TYPE_SRC",
+    41: "TAG_TYPE_SRC",
+    42: "TAG_TYPE_SRC",
+    43: "TAG_TYPE_SRC",
+    44: "TAG_TYPE_SRC",
+    45: "TAG_TYPE_SRC",
+    46: "TAG_TYPE_SRC",
+    47: "TAG_TYPE_SRC",
+    48: "TAG_TYPE_SRC",
+    49: "TAG_TYPE_SRC",
+    50: "TAG_TYPE_SRC",
+    51: "TAG_TYPE_SRC"
 }
 
 device_type_names = [
@@ -140,27 +161,24 @@ cpp_entry_template = Template(
 # read translations
 listNames = {}
 transre = re.compile(r'^MAKE_TRANSLATION\(([^,\s]+)\s*,\s*\"([^\"]+)\"')
-transf = open('./src/core/locale_translations.h', 'r')
-while True:
-    line = transf.readline()
-    if not line:
-        break
-    m = transre.match(line)
-    if m is not None:
-        listNames[m.group(2)] = m.group(1)
-transf.close()
+try:
+    with open('./src/core/locale_translations.h', 'r', encoding='utf-8', errors='replace') as transf:
+        for line in transf:
+            m = transre.match(line)
+            if m is not None:
+                listNames[m.group(2)] = m.group(1)
+except FileNotFoundError:
+    # Handle case where file doesn't exist
+    raise Exception('Error! locale_translations.h not found')
 
 entities = []
 
-with fileinput.input() as f_input:
+with fileinput.input(encoding='utf-8', errors='replace') as f_input:
     entities_reader = csv.reader(f_input, delimiter=',', quotechar='"')
     headers = next(entities_reader)
 
     for row in entities_reader:
-        entity = {}
-        for i, val in enumerate(row):
-            # print(headers[i] + ": " + val)
-            entity[headers[i]] = val
+        entity = {headers[i]: val for i, val in enumerate(row)}
         entities.append(entity)
 
 # print(json.dumps(entities, indent="  "))
@@ -192,8 +210,8 @@ for entity in entities:
             (-string_sizes[entity_dev_name] // 2)  # divide and round up
 
     if int(entity["modbus count"]) <= 0:
-        raise Exception('Entity "' + entity_dev_name + ' (' + entity_shortname + ')' +
-                        '" does not have a size - string sizes need to be added manually to update_modbus_registers.py/string_sizes')
+        raise Exception('Error! Entity "' + entity_dev_name + ' (' + entity_shortname + ')' +
+                        '" does not have a size - string sizes need to be added manually to update_modbus_registers.py/string_sizes[]')
 
     #    if entity["modbus count"] == "0":
     #        print("ignoring " + entity_dev_name + " - it has a register length of zero")
@@ -216,30 +234,28 @@ for entity in entities:
 
 for device_type_name, device_type in device_types.items():
     for tag, entities in device_type.items():
-        total_registers = 0
+        # Pre-calculate all register info to avoid repeated int() conversions
+        register_info = []
         next_free_offset = 0
+
         for entity_name, modbus_info in entities.items():
             register_offset = int(modbus_info['modbus offset'])
             register_count = int(modbus_info['modbus count'])
-            total_registers += register_count
+            register_info.append(
+                (entity_name, modbus_info, register_offset, register_count))
+
             if register_offset >= 0 and register_offset + register_count > next_free_offset:
                 next_free_offset = register_offset + register_count
 
-        # print(device_type_name + "/" + tag + ": total_registers=" + str(total_registers) + "; next_free_offset=" + str(
-        #    next_free_offset))
-
-        for entity_name, modbus_info in entities.items():
-            register_offset = int(modbus_info['modbus offset'])
-            register_count = int(modbus_info['modbus count'])
+        # Assign registers for unassigned entities
+        for entity_name, modbus_info, register_offset, register_count in register_info:
             if register_offset < 0 and register_count > 0:
-                # assign register
-                # print("assign " + entity_name + " -> " + str(next_free_offset))
                 modbus_info['modbus offset'] = str(next_free_offset)
                 next_free_offset += register_count
 
 # OUTPUT
 
-cpp_entries = ""
+cpp_entries = []
 
 # traverse all elements in correct order so they are correctly sorted
 for device_type_name in device_type_names:
@@ -249,18 +265,28 @@ for device_type_name in device_type_names:
             tag = str(ntag)
             if tag in device_type:
                 entities = device_type[tag]
-                for entity_name, modbus_info in sorted(entities.items(), key=lambda x: int(x[1]["modbus offset"])):
+                # Sort once and reuse
+                sorted_entities = sorted(
+                    entities.items(), key=lambda x: int(x[1]["modbus offset"]))
+                for entity_name, modbus_info in sorted_entities:
+                    # Strip device type prefix (e.g., "dhw.nrg" -> "nrg") for translation lookup
+                    lookup_name = entity_name.split('.')[-1] if '.' in entity_name else entity_name
+                    
+                    if lookup_name not in listNames:
+                        raise KeyError(f"Error! Translation not found for '{lookup_name}' (entity: '{entity_name}'). Please add it to locale_translations.h")
+                    
                     params = {
                         'devtype': "dt::" + device_type_name,
-                        # re.sub(r"[0-9]+", "*", tag),
                         "tagtype": tag_to_tagtype[int(tag)],
-                        "shortname": 'FL_(' + listNames[entity_name] + ")",
+                        "shortname": 'FL_(' + listNames[lookup_name] + ")",
                         "entity_name": entity_name,
                         'registeroffset': modbus_info["modbus offset"],
                         'registercount': modbus_info["modbus count"]
                     }
-                    # print(entitypath + ": " + str(modbus_info))
-                    cpp_entries += cpp_entry_template.substitute(params)
+                    cpp_entries.append(cpp_entry_template.substitute(params))
 
-cpp_src = cpp_file_template.substitute({'entries': cpp_entries})
+# Join all entries at once
+cpp_entries_str = "".join(cpp_entries)
+
+cpp_src = cpp_file_template.substitute({'entries': cpp_entries_str})
 print(cpp_src)

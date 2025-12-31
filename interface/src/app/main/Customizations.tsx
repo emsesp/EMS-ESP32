@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useBlocker, useLocation } from 'react-router';
 import { toast } from 'react-toastify';
 
@@ -16,7 +16,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid2 as Grid,
+  Grid,
   InputAdornment,
   Link,
   MenuItem,
@@ -62,7 +62,24 @@ import OptionIcon from './OptionIcon';
 import { DeviceEntityMask } from './types';
 import type { APIcall, Device, DeviceEntity } from './types';
 
-export const APIURL = window.location.origin + '/api/';
+export const APIURL = `${window.location.origin}/api/`;
+
+const MAX_BUFFER_SIZE = 2000;
+
+// Helper function to create masked entity ID - extracted to avoid duplication
+const createMaskedEntityId = (de: DeviceEntity): string => {
+  const maskHex = de.m.toString(16).padStart(2, '0');
+  const hasCustomizations = !!(de.cn || de.mi || de.ma);
+  const customizations = [
+    de.cn || '',
+    de.mi ? `>${de.mi}` : '',
+    de.ma ? `<${de.ma}` : ''
+  ]
+    .filter(Boolean)
+    .join('');
+
+  return `${maskHex}${de.id}${hasCustomizations ? `|${customizations}` : ''}`;
+};
 
 const Customizations = () => {
   const { LL } = useI18nContext();
@@ -125,13 +142,22 @@ const Customizations = () => {
 
   const setOriginalSettings = (data: DeviceEntity[]) => {
     setDeviceEntities(
-      data.map((de) => ({
-        ...de,
-        o_m: de.m,
-        o_cn: de.cn,
-        o_mi: de.mi,
-        o_ma: de.ma
-      }))
+      data.map((de) => {
+        const result: DeviceEntity = {
+          ...de,
+          o_m: de.m
+        };
+        if (de.cn !== undefined) {
+          result.o_cn = de.cn;
+        }
+        if (de.mi !== undefined) {
+          result.o_mi = de.mi;
+        }
+        if (de.ma !== undefined) {
+          result.o_ma = de.ma;
+        }
+        return result;
+      })
     );
   };
 
@@ -144,17 +170,19 @@ const Customizations = () => {
     );
   };
 
-  const entities_theme = useTheme({
-    Table: `
+  const entities_theme = useMemo(
+    () =>
+      useTheme({
+        Table: `
       --data-table-library_grid-template-columns: 156px repeat(1, minmax(80px, 1fr)) 45px minmax(45px, auto) minmax(120px, auto);
     `,
-    BaseRow: `
+        BaseRow: `
       font-size: 14px;
       .td {
         height: 32px;
       }
     `,
-    BaseCell: `
+        BaseCell: `
       &:nth-of-type(3) {
         text-align: right;
       }
@@ -165,7 +193,7 @@ const Customizations = () => {
         text-align: right;
       }
     `,
-    HeaderRow: `
+        HeaderRow: `
       text-transform: uppercase;
       background-color: black;
       color: #90CAF9;
@@ -177,7 +205,7 @@ const Customizations = () => {
         text-align: center;
       }
     `,
-    Row: `
+        Row: `
       background-color: #1e1e1e;
       position: relative;
       cursor: pointer;
@@ -193,7 +221,7 @@ const Customizations = () => {
         background-color: #177ac9;
       }
     `,
-    Cell: `
+        Cell: `
       &:nth-of-type(2) {
         padding: 8px;
       }
@@ -207,7 +235,9 @@ const Customizations = () => {
         padding-right: 8px;
       }
     `
-  });
+      }),
+    []
+  );
 
   function hasEntityChanged(de: DeviceEntity) {
     return (
@@ -220,19 +250,8 @@ const Customizations = () => {
 
   useEffect(() => {
     if (deviceEntities.length) {
-      setNumChanges(
-        deviceEntities
-          .filter((de) => hasEntityChanged(de))
-          .map(
-            (new_de) =>
-              new_de.m.toString(16).padStart(2, '0') +
-              new_de.id +
-              (new_de.cn || new_de.mi || new_de.ma ? '|' : '') +
-              (new_de.cn ? new_de.cn : '') +
-              (new_de.mi ? '>' + new_de.mi : '') +
-              (new_de.ma ? '<' + new_de.ma : '')
-          ).length
-      );
+      const changedEntities = deviceEntities.filter((de) => hasEntityChanged(de));
+      setNumChanges(changedEntities.length);
     }
   }, [deviceEntities]);
 
@@ -244,8 +263,11 @@ const Customizations = () => {
         setSelectedDevice(-1);
         setSelectedDeviceTypeNameURL('');
       } else {
-        setSelectedDeviceTypeNameURL(devices.devices[index].url || '');
-        setSelectedDeviceName(devices.devices[index].n);
+        const device = devices.devices[index];
+        if (device) {
+          setSelectedDeviceTypeNameURL(device.url || '');
+          setSelectedDeviceName(device.n);
+        }
         setNumChanges(0);
         setRestartNeeded(false);
       }
@@ -263,18 +285,26 @@ const Customizations = () => {
     return value as string;
   }
 
-  const formatName = (de: DeviceEntity, withShortname: boolean) =>
-    (de.n && de.n[0] === '!'
-      ? de.t
-        ? LL.COMMAND(1) + ': ' + de.t + ' ' + de.n.slice(1)
-        : LL.COMMAND(1) + ': ' + de.n.slice(1)
-      : de.cn && de.cn !== ''
-        ? de.t
-          ? de.t + ' ' + de.cn
-          : de.cn
-        : de.t
-          ? de.t + ' ' + de.n
-          : de.n) + (withShortname ? ' ' + de.id : '');
+  const isCommand = useCallback((de: DeviceEntity) => {
+    return de.n && de.n[0] === '!';
+  }, []);
+
+  const formatName = useCallback(
+    (de: DeviceEntity, withShortname: boolean) => {
+      let name: string;
+      if (isCommand(de)) {
+        name = de.t
+          ? `${LL.COMMAND(1)}: ${de.t} ${de.n?.slice(1)}`
+          : `${LL.COMMAND(1)}: ${de.n?.slice(1)}`;
+      } else if (de.cn && de.cn !== '') {
+        name = de.t ? `${de.t} ${de.cn}` : de.cn;
+      } else {
+        name = de.t ? `${de.t} ${de.n}` : de.n || '';
+      }
+      return withShortname ? `${name} ${de.id}` : name;
+    },
+    [LL]
+  );
 
   const getMaskNumber = (newMask: string[]) => {
     let new_mask = 0;
@@ -304,34 +334,33 @@ const Customizations = () => {
     return new_masks;
   };
 
-  const filter_entity = (de: DeviceEntity) =>
-    (de.m & selectedFilters || !selectedFilters) &&
-    formatName(de, true).includes(search);
+  const filter_entity = useCallback(
+    (de: DeviceEntity) =>
+      (de.m & selectedFilters || !selectedFilters) &&
+      formatName(de, true).toLowerCase().includes(search.toLowerCase()),
+    [selectedFilters, search, formatName]
+  );
 
-  const maskDisabled = (set: boolean) => {
-    setDeviceEntities(
-      deviceEntities.map(function (de) {
-        if (filter_entity(de)) {
-          return {
-            ...de,
-            m: set
-              ? de.m |
-                (DeviceEntityMask.DV_API_MQTT_EXCLUDE |
-                  DeviceEntityMask.DV_WEB_EXCLUDE)
-              : de.m &
-                ~(
-                  DeviceEntityMask.DV_API_MQTT_EXCLUDE |
-                  DeviceEntityMask.DV_WEB_EXCLUDE
-                )
-          };
-        } else {
+  const maskDisabled = useCallback(
+    (set: boolean) => {
+      setDeviceEntities((prev) =>
+        prev.map((de) => {
+          if (filter_entity(de)) {
+            const excludeMask =
+              DeviceEntityMask.DV_API_MQTT_EXCLUDE | DeviceEntityMask.DV_WEB_EXCLUDE;
+            return {
+              ...de,
+              m: set ? de.m | excludeMask : de.m & ~excludeMask
+            };
+          }
           return de;
-        }
-      })
-    );
-  };
+        })
+      );
+    },
+    [filter_entity]
+  );
 
-  const resetCustomization = async () => {
+  const resetCustomization = useCallback(async () => {
     try {
       await sendResetCustomizations();
       toast.info(LL.CUSTOMIZATIONS_RESTART());
@@ -339,25 +368,30 @@ const Customizations = () => {
       toast.error((error as Error).message);
     } finally {
       setConfirmReset(false);
+      setRestarting(true);
     }
-  };
+  }, [sendResetCustomizations, LL]);
 
   const onDialogClose = () => {
     setDialogOpen(false);
   };
 
-  const updateDeviceEntity = (updatedItem: DeviceEntity) => {
+  const updateDeviceEntity = useCallback((updatedItem: DeviceEntity) => {
     setDeviceEntities(
-      deviceEntities?.map((de) =>
-        de.id === updatedItem.id ? { ...de, ...updatedItem } : de
-      )
+      (prev) =>
+        prev?.map((de) =>
+          de.id === updatedItem.id ? { ...de, ...updatedItem } : de
+        ) ?? []
     );
-  };
+  }, []);
 
-  const onDialogSave = (updatedItem: DeviceEntity) => {
-    setDialogOpen(false);
-    updateDeviceEntity(updatedItem);
-  };
+  const onDialogSave = useCallback(
+    (updatedItem: DeviceEntity) => {
+      setDialogOpen(false);
+      updateDeviceEntity(updatedItem);
+    },
+    [updateDeviceEntity]
+  );
 
   const editDeviceEntity = useCallback((de: DeviceEntity) => {
     if (de.n === undefined || (de.n && de.n[0] === '!')) {
@@ -372,54 +406,54 @@ const Customizations = () => {
     setDialogOpen(true);
   }, []);
 
-  const saveCustomization = async () => {
-    if (devices && deviceEntities && selectedDevice !== -1) {
-      const masked_entities = deviceEntities
-        .filter((de: DeviceEntity) => hasEntityChanged(de))
-        .map(
-          (new_de) =>
-            new_de.m.toString(16).padStart(2, '0') +
-            new_de.id +
-            (new_de.cn || new_de.mi || new_de.ma ? '|' : '') +
-            (new_de.cn ? new_de.cn : '') +
-            (new_de.mi ? '>' + new_de.mi : '') +
-            (new_de.ma ? '<' + new_de.ma : '')
-        );
+  const saveCustomization = useCallback(async () => {
+    if (!devices || !deviceEntities || selectedDevice === -1) {
+      return;
+    }
 
-      // check size in bytes to match buffer in CPP, which is 2048
-      const bytes = new TextEncoder().encode(JSON.stringify(masked_entities)).length;
-      if (bytes > 2000) {
-        toast.warning(LL.CUSTOMIZATIONS_FULL());
-        return;
-      }
+    const masked_entities = deviceEntities
+      .filter((de: DeviceEntity) => hasEntityChanged(de))
+      .map((new_de) => createMaskedEntityId(new_de));
 
-      await sendCustomizationEntities({
-        id: selectedDevice,
-        entity_ids: masked_entities
-      }).catch((error: Error) => {
+    // check size in bytes to match buffer in CPP, which is 2048
+    const bytes = new TextEncoder().encode(JSON.stringify(masked_entities)).length;
+    if (bytes > MAX_BUFFER_SIZE) {
+      toast.warning(LL.CUSTOMIZATIONS_FULL());
+      return;
+    }
+
+    await sendCustomizationEntities({
+      id: selectedDevice,
+      entity_ids: masked_entities
+    })
+      .then(() => {
+        toast.success(LL.CUSTOMIZATIONS_SAVED());
+      })
+      .catch((error: Error) => {
         if (error.message === 'Reboot required') {
           setRestartNeeded(true);
         } else {
           toast.error(error.message);
         }
+      })
+      .finally(() => {
+        setOriginalSettings(deviceEntities);
       });
-      setOriginalSettings(deviceEntities);
-    }
-  };
+  }, [devices, deviceEntities, selectedDevice, sendCustomizationEntities, LL]);
 
-  const renameDevice = async () => {
+  const renameDevice = useCallback(async () => {
     await sendDeviceName({ id: selectedDevice, name: selectedDeviceName })
       .then(() => {
         toast.success(LL.UPDATED_OF(LL.NAME(1)));
       })
       .catch(() => {
-        toast.error(LL.UPDATE_OF(LL.NAME(1)) + ' ' + LL.FAILED(1));
+        toast.error(`${LL.UPDATE_OF(LL.NAME(1))} ${LL.FAILED(1)}`);
       })
       .finally(async () => {
         setRename(false);
         await fetchCoreData();
       });
-  };
+  }, [selectedDevice, selectedDeviceName, sendDeviceName, LL, fetchCoreData]);
 
   const renderDeviceList = () => (
     <>
@@ -482,25 +516,38 @@ const Customizations = () => {
               </Button>
             </>
           ) : (
-            <Button
-              startIcon={<EditIcon />}
-              variant="outlined"
-              onClick={() => setRename(true)}
-            >
-              {LL.RENAME()}
-            </Button>
+            <>
+              <Button
+                startIcon={<EditIcon />}
+                variant="outlined"
+                onClick={() => setRename(true)}
+              >
+                {LL.RENAME()}
+              </Button>
+              <Button
+                startIcon={<SettingsBackupRestoreIcon />}
+                variant="outlined"
+                color="error"
+                onClick={() => setConfirmReset(true)}
+              >
+                {LL.REMOVE_ALL()}
+              </Button>
+            </>
           ))}
       </Box>
     </>
   );
 
-  const renderDeviceData = () => {
-    const shown_data = deviceEntities.filter((de) => filter_entity(de));
+  const filteredEntities = useMemo(
+    () => deviceEntities.filter((de) => filter_entity(de)),
+    [deviceEntities, filter_entity]
+  );
 
+  const renderDeviceData = () => {
     return (
       <>
         <Box color="warning.main">
-          <Typography variant="body2" mt={1}>
+          <Typography variant="body2" mt={1} mb={1}>
             <OptionIcon type="favorite" isSet={true} />={LL.CUSTOMIZATIONS_HELP_2()}
             &nbsp;&nbsp;
             <OptionIcon type="readonly" isSet={true} />={LL.CUSTOMIZATIONS_HELP_3()}
@@ -526,6 +573,7 @@ const Customizations = () => {
               size="small"
               variant="outlined"
               placeholder={LL.SEARCH()}
+              aria-label={LL.SEARCH()}
               onChange={(event) => {
                 setSearch(event.target.value);
               }}
@@ -545,7 +593,7 @@ const Customizations = () => {
               size="small"
               color="secondary"
               value={getMaskString(selectedFilters)}
-              onChange={(event, mask: string[]) => {
+              onChange={(_, mask: string[]) => {
                 setSelectedFilters(getMaskNumber(mask));
               }}
             >
@@ -594,13 +642,13 @@ const Customizations = () => {
           </Grid>
           <Grid>
             <Typography variant="subtitle2" color="grey">
-              {LL.SHOWING()}&nbsp;{shown_data.length}/{deviceEntities.length}
+              {LL.SHOWING()}&nbsp;{filteredEntities.length}/{deviceEntities.length}
               &nbsp;{LL.ENTITIES(deviceEntities.length)}
             </Typography>
           </Grid>
         </Grid>
         <Table
-          data={{ nodes: shown_data }}
+          data={{ nodes: filteredEntities }}
           theme={entities_theme}
           layout={{ custom: true }}
         >
@@ -622,14 +670,27 @@ const Customizations = () => {
                       <EntityMaskToggle onUpdate={updateDeviceEntity} de={de} />
                     </Cell>
                     <Cell>
-                      {formatName(de, false)}&nbsp;(
-                      <Link
-                        target="_blank"
-                        href={APIURL + selectedDeviceTypeNameURL + '/' + de.id}
+                      <span
+                        style={{
+                          color:
+                            de.v === undefined && !isCommand(de) ? 'grey' : 'inherit'
+                        }}
                       >
-                        {de.id}
-                      </Link>
-                      )
+                        {formatName(de, false)}&nbsp;(
+                        <Link
+                          style={{
+                            color:
+                              de.v === undefined && !isCommand(de)
+                                ? 'grey'
+                                : 'primary'
+                          }}
+                          target="_blank"
+                          href={APIURL + selectedDeviceTypeNameURL + '/' + de.id}
+                        >
+                          {de.id}
+                        </Link>
+                        )
+                      </span>
                     </Cell>
                     <Cell>
                       {!(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.mi)}
@@ -654,7 +715,7 @@ const Customizations = () => {
       open={confirmReset}
       onClose={() => setConfirmReset(false)}
     >
-      <DialogTitle>{LL.RESET(1)}</DialogTitle>
+      <DialogTitle>{LL.REMOVE_ALL()}</DialogTitle>
       <DialogContent dividers>{LL.CUSTOMIZATIONS_RESET()}</DialogContent>
       <DialogActions>
         <Button
@@ -671,7 +732,7 @@ const Customizations = () => {
           onClick={resetCustomization}
           color="error"
         >
-          {LL.RESET(0)}
+          {LL.REMOVE_ALL()}
         </Button>
       </DialogActions>
     </Dialog>
@@ -682,8 +743,9 @@ const Customizations = () => {
       {devices && renderDeviceList()}
       {selectedDevice !== -1 && !rename && renderDeviceData()}
       {restartNeeded ? (
-        <MessageBox my={2} level="warning" message={LL.RESTART_TEXT(0)}>
+        <MessageBox level="warning" message={LL.RESTART_TEXT(0)}>
           <Button
+            sx={{ ml: 2 }}
             startIcon={<PowerSettingsNewIcon />}
             variant="contained"
             color="error"
@@ -701,7 +763,11 @@ const Customizations = () => {
                   startIcon={<CancelIcon />}
                   variant="outlined"
                   color="secondary"
-                  onClick={() => devices && sendDeviceEntities(selectedDevice)}
+                  onClick={() => {
+                    if (devices) {
+                      void sendDeviceEntities(selectedDevice);
+                    }
+                  }}
                 >
                   {LL.CANCEL()}
                 </Button>
@@ -716,18 +782,6 @@ const Customizations = () => {
               </ButtonRow>
             )}
           </Box>
-          {!rename && (
-            <ButtonRow mt={1}>
-              <Button
-                startIcon={<SettingsBackupRestoreIcon />}
-                variant="outlined"
-                color="error"
-                onClick={() => setConfirmReset(true)}
-              >
-                {LL.RESET(0)}
-              </Button>
-            </ButtonRow>
-          )}
         </Box>
       )}
       {renderResetDialog()}

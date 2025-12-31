@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import etag from 'etag';
 import {
   createWriteStream,
   existsSync,
@@ -15,66 +15,79 @@ const INDENT = '  ';
 const outputPath = '../src/ESP32React/WWWData.h';
 const sourcePath = './dist';
 const bytesPerLine = 20;
-var totalSize = 0;
+let totalSize = 0;
+let bundleStats = {
+  js: { count: 0, uncompressed: 0, compressed: 0 },
+  css: { count: 0, uncompressed: 0, compressed: 0 },
+  html: { count: 0, uncompressed: 0, compressed: 0 },
+  svg: { count: 0, uncompressed: 0, compressed: 0 },
+  other: { count: 0, uncompressed: 0, compressed: 0 }
+};
 
-const generateWWWClass = () =>
-  `typedef std::function<void(const char * uri, const String & contentType, const uint8_t * content, size_t len, const String & hash)> RouteRegistrationHandler;
-// Total size is ${totalSize} bytes
+const generateWWWClass =
+  () => `typedef std::function<void(const char * uri, const String & contentType, const uint8_t * content, size_t len, const String & hash)> RouteRegistrationHandler;
+// Bundle Statistics:
+// - Total compressed size: ${(totalSize / 1000).toFixed(1)} KB
+// - Total uncompressed size: ${(Object.values(bundleStats).reduce((sum, stat) => sum + stat.uncompressed, 0) / 1000).toFixed(1)} KB
+// - Compression ratio: ${(((Object.values(bundleStats).reduce((sum, stat) => sum + stat.uncompressed, 0) - totalSize) / Object.values(bundleStats).reduce((sum, stat) => sum + stat.uncompressed, 0)) * 100).toFixed(1)}%
+// - Generated on: ${new Date().toISOString()}
 
 class WWWData {
-${indent}public:
-${indent.repeat(2)}static void registerRoutes(RouteRegistrationHandler handler) {
-${fileInfo.map((file) => `${indent.repeat(3)}handler("${file.uri}", "${file.mimeType}", ${file.variable}, ${file.size}, "${file.hash}");`).join('\n')}
-${indent.repeat(2)}}
+${INDENT}public:
+${INDENT.repeat(2)}static void registerRoutes(RouteRegistrationHandler handler) {
+${fileInfo.map((f) => `${INDENT.repeat(3)}handler("${f.uri}", "${f.mimeType}", ${f.variable}, ${f.size}, ${f.hash});`).join('\n')}
+${INDENT.repeat(2)}}
 };
 `;
 
-function getFilesSync(dir, files = []) {
+const getFilesSync = (dir, files = []) => {
   readdirSync(dir, { withFileTypes: true }).forEach((entry) => {
     const entryPath = resolve(dir, entry.name);
-    if (entry.isDirectory()) {
-      getFilesSync(entryPath, files);
-    } else {
-      files.push(entryPath);
-    }
+    entry.isDirectory() ? getFilesSync(entryPath, files) : files.push(entryPath);
   });
   return files;
-}
+};
 
-function cleanAndOpen(path) {
-  if (existsSync(path)) {
-    unlinkSync(path);
-  }
+const cleanAndOpen = (path) => {
+  existsSync(path) && unlinkSync(path);
   return createWriteStream(path, { flags: 'w+' });
-}
+};
+
+const getFileType = (filePath) => {
+  const ext = filePath.split('.').pop().toLowerCase();
+  if (ext === 'js') return 'js';
+  if (ext === 'css') return 'css';
+  if (ext === 'html') return 'html';
+  if (ext === 'svg') return 'svg';
+  return 'other';
+};
 
 const writeFile = (relativeFilePath, buffer) => {
-  const variable = 'ESP_REACT_DATA_' + fileInfo.length;
+  const variable = `ESP_REACT_DATA_${fileInfo.length}`;
   const mimeType = mime.lookup(relativeFilePath);
-  var size = 0;
-  writeStream.write('const uint8_t ' + variable + '[] = {');
-  // const zipBuffer = zlib.brotliCompressSync(buffer, { quality: 1 });
-  const zipBuffer = zlib.gzipSync(buffer, { level: 9 });
+  const fileType = getFileType(relativeFilePath);
+  let size = 0;
+  writeStream.write(`const uint8_t ${variable}[] = {`);
 
-  // create sha
-  const hashSum = crypto.createHash('sha256');
-  hashSum.update(zipBuffer);
-  const hash = hashSum.digest('hex');
+  const zipBuffer = zlib.gzipSync(buffer, { level: 9 });
+  // const hash = crypto.createHash('sha256').update(zipBuffer).digest('hex');
+  const hash = etag(zipBuffer); // use smaller md5 instead of sha256
 
   zipBuffer.forEach((b) => {
     if (!(size % bytesPerLine)) {
-      writeStream.write('\n');
-      writeStream.write(indent);
+      writeStream.write('\n' + INDENT);
     }
-    writeStream.write('0x' + ('00' + b.toString(16).toUpperCase()).slice(-2) + ',');
+    writeStream.write('0x' + b.toString(16).toUpperCase().padStart(2, '0') + ',');
     size++;
   });
 
-  if (size % bytesPerLine) {
-    writeStream.write('\n');
-  }
-
+  size % bytesPerLine && writeStream.write('\n');
   writeStream.write('};\n\n');
+
+  // Update bundle statistics
+  bundleStats[fileType].count++;
+  bundleStats[fileType].uncompressed += buffer.length;
+  bundleStats[fileType].compressed += zipBuffer.length;
 
   fileInfo.push({
     uri: '/' + relativeFilePath.replace(sep, '/'),
@@ -84,32 +97,52 @@ const writeFile = (relativeFilePath, buffer) => {
     hash
   });
 
-  // console.log(relativeFilePath + ' (size ' + size + ' bytes)');
   totalSize += size;
 };
 
-// start
-console.log('Generating ' + outputPath + ' from ' + sourcePath);
-const includes = ARDUINO_INCLUDES;
-const indent = INDENT;
+console.log(`Generating ${outputPath} from ${sourcePath}`);
 const fileInfo = [];
 const writeStream = cleanAndOpen(resolve(outputPath));
 
-// includes
-writeStream.write(includes);
+writeStream.write(ARDUINO_INCLUDES);
 
-// process static files
 const buildPath = resolve(sourcePath);
 for (const filePath of getFilesSync(buildPath)) {
-  const readStream = readFileSync(filePath);
-  const relativeFilePath = relative(buildPath, filePath);
-  writeFile(relativeFilePath, readStream);
+  writeFile(relative(buildPath, filePath), readFileSync(filePath));
 }
 
-// add class
 writeStream.write(generateWWWClass());
-
-// end
 writeStream.end();
 
-console.log('Total size: ' + totalSize / 1000 + ' KB');
+// Calculate and display bundle statistics
+const totalUncompressed = Object.values(bundleStats).reduce(
+  (sum, stat) => sum + stat.uncompressed,
+  0
+);
+const totalCompressed = Object.values(bundleStats).reduce(
+  (sum, stat) => sum + stat.compressed,
+  0
+);
+const compressionRatio = (
+  ((totalUncompressed - totalCompressed) / totalUncompressed) *
+  100
+).toFixed(1);
+
+console.log('\n📊 Bundle Size Analysis:');
+console.log('='.repeat(50));
+console.log(`Total compressed size: ${(totalSize / 1000).toFixed(1)} KB`);
+console.log(`Total uncompressed size: ${(totalUncompressed / 1000).toFixed(1)} KB`);
+console.log(`Compression ratio: ${compressionRatio}%`);
+console.log('\n📁 File Type Breakdown:');
+Object.entries(bundleStats).forEach(([type, stats]) => {
+  if (stats.count > 0) {
+    const ratio = (
+      ((stats.uncompressed - stats.compressed) / stats.uncompressed) *
+      100
+    ).toFixed(1);
+    console.log(
+      `${type.toUpperCase().padEnd(4)}: ${stats.count} files, ${(stats.uncompressed / 1000).toFixed(1)} KB → ${(stats.compressed / 1000).toFixed(1)} KB (${ratio}% compression)`
+    );
+  }
+});
+console.log('='.repeat(50));

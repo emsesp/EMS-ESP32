@@ -3,10 +3,11 @@ When developing and testing the web interface, it's handy not to bother with re-
 # prerequisites
 
 - Install the latest LTS of NodeJS
-- Install yarn (`npm install -g yarn`)
+- install corepack `npm install -g corepack@latest` and `orepack enable`
+- Install pnpm (`corepack use pnpm@latest-10` on linux or `winget install -e --id pnpm.pnpm` on windows). See <https://pnpm.io/installation>
 - Install bun (<https://bun.sh/docs/installation>)
-- type `yarn` from this `mock-api` folder to build
+- type `pnpm install` from this `mock-api` folder to build
 
 # To run
 
-- `yarn standalone` from the main `interface` folder and then navigate to <http://localhost:3000>
+- `pnpm standalone` from the main `interface` folder and then navigate to <http://localhost:3000>

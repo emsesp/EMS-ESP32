@@ -1,4 +1,6 @@
-import { type ChangeEventHandler, useContext } from 'react';
+import { memo, useCallback, useContext, useMemo } from 'react';
+import type { ChangeEventHandler } from 'react';
+import type { CSSProperties } from 'react';
 
 import { MenuItem, TextField } from '@mui/material';
 
@@ -17,73 +19,66 @@ import { I18nContext } from 'i18n/i18n-react';
 import type { Locales } from 'i18n/i18n-types';
 import { loadLocaleAsync } from 'i18n/i18n-util.async';
 
-const LanguageSelector = () => {
-  const { setLocale, locale } = useContext(I18nContext);
+const flagStyle: CSSProperties = { width: 16, verticalAlign: 'middle' };
 
-  const onLocaleSelected: ChangeEventHandler<HTMLInputElement> = async ({
-    target
-  }) => {
-    const loc = target.value as Locales;
-    localStorage.setItem('lang', loc);
-    await loadLocaleAsync(loc);
-    setLocale(loc);
-  };
+interface LanguageOption {
+  key: Locales;
+  flag: string;
+  label: string;
+}
+
+const LANGUAGE_OPTIONS: LanguageOption[] = [
+  { key: 'cz', flag: CZflag, label: 'CZ' },
+  { key: 'de', flag: DEflag, label: 'DE' },
+  { key: 'en', flag: GBflag, label: 'EN' },
+  { key: 'fr', flag: FRflag, label: 'FR' },
+  { key: 'it', flag: ITflag, label: 'IT' },
+  { key: 'nl', flag: NLflag, label: 'NL' },
+  { key: 'no', flag: NOflag, label: 'NO' },
+  { key: 'pl', flag: PLflag, label: 'PL' },
+  { key: 'sk', flag: SKflag, label: 'SK' },
+  { key: 'sv', flag: SVflag, label: 'SV' },
+  { key: 'tr', flag: TRflag, label: 'TR' }
+];
+
+const LanguageSelector = () => {
+  const { setLocale, locale, LL } = useContext(I18nContext);
+
+  const onLocaleSelected: ChangeEventHandler<HTMLInputElement> = useCallback(
+    async ({ target }) => {
+      const loc = target.value as Locales;
+      localStorage.setItem('lang', loc);
+      await loadLocaleAsync(loc);
+      setLocale(loc);
+    },
+    [setLocale]
+  );
+
+  // Memoize menu items to prevent recreation on every render
+  const menuItems = useMemo(
+    () =>
+      LANGUAGE_OPTIONS.map(({ key, flag, label }) => (
+        <MenuItem key={key} value={key}>
+          <img src={flag} style={flagStyle} alt={label} />
+          &nbsp;{label}
+        </MenuItem>
+      )),
+    []
+  );
 
   return (
     <TextField
       name="locale"
       variant="outlined"
+      aria-label={LL.LANGUAGE()}
       value={locale}
       onChange={onLocaleSelected}
       size="small"
       select
     >
-      <MenuItem key="cz" value="cz">
-        <img src={CZflag} style={{ width: 16, verticalAlign: 'middle' }} />
-        &nbsp;CZ
-      </MenuItem>
-      <MenuItem key="de" value="de">
-        <img src={DEflag} style={{ width: 16, verticalAlign: 'middle' }} />
-        &nbsp;DE
-      </MenuItem>
-      <MenuItem key="en" value="en">
-        <img src={GBflag} style={{ width: 16, verticalAlign: 'middle' }} />
-        &nbsp;EN
-      </MenuItem>
-      <MenuItem key="fr" value="fr">
-        <img src={FRflag} style={{ width: 16, verticalAlign: 'middle' }} />
-        &nbsp;FR
-      </MenuItem>
-      <MenuItem key="it" value="it">
-        <img src={ITflag} style={{ width: 16, verticalAlign: 'middle' }} />
-        &nbsp;IT
-      </MenuItem>
-      <MenuItem key="nl" value="nl">
-        <img src={NLflag} style={{ width: 16, verticalAlign: 'middle' }} />
-        &nbsp;NL
-      </MenuItem>
-      <MenuItem key="no" value="no">
-        <img src={NOflag} style={{ width: 16, verticalAlign: 'middle' }} />
-        &nbsp;NO
-      </MenuItem>
-      <MenuItem key="pl" value="pl">
-        <img src={PLflag} style={{ width: 16, verticalAlign: 'middle' }} />
-        &nbsp;PL
-      </MenuItem>
-      <MenuItem key="sk" value="sk">
-        <img src={SKflag} style={{ width: 16, verticalAlign: 'middle' }} />
-        &nbsp;SK
-      </MenuItem>
-      <MenuItem key="sv" value="sv">
-        <img src={SVflag} style={{ width: 16, verticalAlign: 'middle' }} />
-        &nbsp;SV
-      </MenuItem>
-      <MenuItem key="tr" value="tr">
-        <img src={TRflag} style={{ width: 16, verticalAlign: 'middle' }} />
-        &nbsp;TR
-      </MenuItem>
+      {menuItems}
     </TextField>
   );
 };
 
-export default LanguageSelector;
+export default memo(LanguageSelector);

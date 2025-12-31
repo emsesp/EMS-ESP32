@@ -40,10 +40,10 @@ const tr: Translation = {
   RUN_COMMAND: 'Çalıştırma Komutu',
   CHANGE_VALUE: 'Değeri Değiştir',
   CANCEL: 'İptal',
-  RESET: 'Reset',
-  APPLY_CHANGES: 'Apply Changes ({0})',
+  REMOVE_ALL: 'Tümünü Kaldır',
+  APPLY_CHANGES: 'Değişiklikleri Uygula ({0})',
   UPDATE: 'Update',
-  EXECUTE: 'Execute', // TODO translate
+  EXECUTE: 'Uygulamak',
   REMOVE: 'Kaldır',
   PROBLEM_UPDATING: 'Güncelleme Sorunu',
   PROBLEM_LOADING: 'Yükleme Sorunu',
@@ -60,7 +60,6 @@ const tr: Translation = {
   DUTY_CYCLE: 'Görev Çevrimi',
   UNIT: 'ÖB',
   STARTVALUE: 'Başlangıç değeri',
-  WARN_GPIO: 'Uyarı: bir GPIO atarken dikkatli olun!',
   EDIT: 'Değiştir',
   SENSOR: 'Sensör',
   TEMP_SENSOR: 'Sıcaklık Sensörü',
@@ -72,7 +71,7 @@ const tr: Translation = {
   TX_ISSUES: 'Tx sorunu - başka bir Tx Modu deneyin',
   DISCONNECTED: 'Bağlantı kesildi',
   EMS_SCAN: 'EMS Hattında tam bir cihaz taraması başlatmak istediğinizden emin misiniz?',
-  DATA_TRAFFIC: 'Data Traffic', // TODO translate
+  DATA_TRAFFIC: 'Veri trafiği',
   EMS_DEVICE: 'EMS Cihazı',
   SUCCESS: 'BAŞARILI',
   FAIL: 'HATA',
@@ -115,8 +114,8 @@ const tr: Translation = {
   READONLY: 'Salt okunur modu devreye al (bütün giden EMS Tx Yazma komutlarını engeller)',
   UNDERCLOCK_CPU: 'İşlemci hızını düşür',
   REMOTE_TIMEOUT: 'Remote timeout',
-  REMOTE_TIMEOUT_EN: 'Disable remote on missing room temperature', // TODO translate
-  HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
+  REMOTE_TIMEOUT_EN: 'Disable remote on missing room temperature',
+  HEATINGOFF: 'Start boiler with forced heating off',
   MIN_DURATION: 'Wait time',
   ENABLE_SHOWER_TIMER: 'Duş Sayacını Devreye Al',
   ENABLE_SHOWER_ALERT: 'Duş Alarmını Devreye Al',
@@ -153,7 +152,7 @@ const tr: Translation = {
   SET_ALL: 'hepsini ayarla',
   OPTIONS: 'Seçenekler',
   NAME: 'İsim',
-  CUSTOMIZATIONS_RESET: 'Sıcaklık ve Analog Sensörlerin özelleştirilmiş seçenekleri dahil bütün özelleştirmeleri kaldırmak istediğinizden emin misiniz?',
+  CUSTOMIZATIONS_RESET: 'Bütün özelleştirmeleri kaldırmak istediğinizden emin misiniz?',
   SUPPORT_INFORMATION: 'Destek Bilgileri',
   HELP_INFORMATION_1: 'EMS-ESPnin nasıl ayarlanacağı ile ilgili bilgileri edinmek için çevrimiçi WIKI sayfasını ziyaret edin',
   HELP_INFORMATION_2: 'Canlı topluluk sohbeti için Discord sunucumuza katılın',
@@ -162,6 +161,7 @@ const tr: Translation = {
   UPLOAD: 'Yükleme',
   DOWNLOAD: '{{İ|i|i}}İndirme',
   INSTALL: 'Düzenlemek',
+  REINSTALL: 'Yeniden düzenlemek',
   ABORTED: 'iptal edildi',
   FAILED: 'başarısız',
   SUCCESSFUL: 'başarılı',
@@ -174,8 +174,8 @@ const tr: Translation = {
   FACTORY_RESET: 'Fabrika ayarına dönme',
   SYSTEM_FACTORY_TEXT: 'Cihaz fabrika ayarlarına döndü ve şimdi yendiden başlatılacak',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Cihazı fabrika ayarlarına döndürmek istediğinize emin misiniz?',
-  AVAILABLE_VERSION: 'Latest Available Versions', // TODO translate
-  STABLE: 'Stable', // TODO translate
+  AVAILABLE_VERSION: 'En son kullanılabilir sürümler',
+  STABLE: 'Kararlı',
   DEVELOPMENT: 'Geliştirme',
   UPTIME: 'Sistem Çalışma Süresi',
   FREE_MEMORY: 'Yığın Memory',
@@ -185,9 +185,10 @@ const tr: Translation = {
   FILESYSTEM: 'Dosya Sistemi (Kullanılmış / Boş)',
   BUFFER_SIZE: 'En fazla bellek boyutu',
   COMPACT: 'Sıkışık',
-  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
-  UPLOAD_TEXT: 'Upload a new firmware file (.bin) or a backup file (.json)', // TODO translate
-  UPLOAD_DROP_TEXT: 'Drop a firmware .bin file or click here', // TODO translate
+  DOWNLOAD_SETTINGS_TEXT: 'Yapılandırma ve ayarlarınızın yedekleme yapın',
+  DOWNLOAD_SETTINGS_TEXT2: 'Tüm verileri dışarı al',
+  UPLOAD_TEXT: 'Yeni bir firmware dosyası (.bin) veya yedek dosyası (.json) yükle',
+  UPLOAD_DROP_TEXT: 'Bir firmware .bin dosyası veya buraya tıklayın',
   ERROR: 'Beklenemedik hata, lütfen tekrar deneyin.',
   TIME_SET: 'Zaman ayarı',
   MANAGE_USERS: 'Kullanıcıları yönet',
@@ -223,7 +224,7 @@ const tr: Translation = {
   MQTT_INT_THERMOSTATS: 'Termostatlar',
   MQTT_INT_SOLAR: 'Güneş Enerjisi Modülleri',
   MQTT_INT_MIXER: 'Karışım Modülleri',
-  MQTT_INT_WATER: 'Water Modules', // TODO translate
+  MQTT_INT_WATER: 'Su Modülleri',
   MQTT_QUEUE: 'MQTT Sırası',
   DEFAULT: 'Varsayılan',
   MQTT_ENTITY_FORMAT: 'Varlık Kimlik biçimi',
@@ -260,7 +261,7 @@ const tr: Translation = {
   NETWORK_SCANNER: 'Ağ Tarayıcısı',
   NETWORK_NO_WIFI: 'Hiçbir Kablosuz Ağ bulunamadı',
   NETWORK_BLANK_SSID: 'Kablosuz ağı devre dışı bırakmak için boş bırakın',
-  NETWORK_BLANK_BSSID: 'leave blank to use only SSID', // TODO translate
+  NETWORK_BLANK_BSSID: 'sadece SSID kullanmak için boş bırakın',
   TX_POWER: 'Aktarım gücü',
   HOSTNAME: 'Ana Makine Adı',
   NETWORK_DISABLE_SLEEP: 'Kablosuz uyku modunu devre dışına al',
@@ -280,79 +281,82 @@ const tr: Translation = {
   ENTITY: 'varlık',
   MIN: 'min',
   MAX: 'maks',
-  BLOCK_NAVIGATE_1: 'You have unsaved changes', // TODO translate
-  BLOCK_NAVIGATE_2: 'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?', // TODO translate
-  STAY: 'Stay', // TODO translate
-  LEAVE: 'Leave', // TODO translate
-  SCHEDULER: 'Scheduler', // TODO translate
-  SCHEDULER_HELP_1: 'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT', // TODO translate
-  SCHEDULER_HELP_2: 'Use 00:00 to trigger once on start-up', // TODO translate
-  SCHEDULE: 'Schedule', // TODO translate
-  TIME: 'Time', // TODO translate
-  TIMER: 'Timer', // TODO translate
+  BLOCK_NAVIGATE_1: 'Değiştirilmişleriniz var',
+  BLOCK_NAVIGATE_2: 'Farklı bir sayfaya geçerseniz değiştirilmişleriniz kaybolacak. Bu sayfadan çıkmak istediğinize emin misiniz?',
+  STAY: 'Kal',
+  LEAVE: 'Çık',
+  SCHEDULER: 'Zamanlayıcı',
+  SCHEDULER_HELP_1: 'Komutları zamanlayarak otomatikleştirin. Benzersiz bir ad belirtin API/MQTT aracılığıyla etkinleştirmek/devre dışı bırakma',
+  SCHEDULER_HELP_2: 'Başlangıçta bir kere tetiklemek için 00:00 kullanın',
+  SCHEDULE: 'Zamanlama',
+  TIME: 'Zaman',
+  TIMER: 'Zamanlayıcı',
   ONCHANGE: 'Değişimde',
-  CONDITION: 'Durum', // TODO translate
-  IMMEDIATE: 'hemen', // TODO translate
-  SCHEDULE_UPDATED: 'Schedule updated', // TODO translate
-  SCHEDULE_TIMER_1: 'on startup', // TODO translate
-  SCHEDULE_TIMER_2: 'every minute', // TODO translate
-  SCHEDULE_TIMER_3: 'every hour', // TODO translate
-  CUSTOM_ENTITIES: 'Custom Entities', // TODO translate
-  ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus', // TODO translate
-  ENTITIES_UPDATED: 'Entities Updated', // TODO translate
-  WRITEABLE: 'Writeable', // TODO translate
-  SHOWING: 'Showing', // TODO translate
-  SEARCH: 'Search', // TODO translate
-  CERT: 'TLS root certificate (leave blank for insecure)',
+  CONDITION: 'Durum',
+  IMMEDIATE: 'hemen',
+  SCHEDULE_UPDATED: 'Zamanlama güncellendi',
+  SCHEDULE_TIMER_1: 'Başlangıçta',
+  SCHEDULE_TIMER_2: 'her dakikada',
+  SCHEDULE_TIMER_3: 'her saatte',
+  CUSTOM_ENTITIES: 'Özel Varlıklar',
+  ENTITIES_HELP_1: 'Özel varlıkları EMS hattından alın',
+  ENTITIES_UPDATED: 'Varlıklar güncellendi',
+  WRITEABLE: 'Yazılabilir',
+  SHOWING: 'Görüntüleniyor',
+  SEARCH: 'Ara',
+  CERT: 'TLS kök sertifikası (güvenli olmayan için boş bırakın)',
   ENABLE_TLS: 'TLS deveye al',
-  ON: 'On', // TODO translate
-  OFF: 'Off', // TODO translate
-  POLARITY: 'Polarity', // TODO translate
-  ACTIVEHIGH: 'Active High', // TODO translate
-  ACTIVELOW: 'Active Low', // TODO translate
-  UNCHANGED: 'Unchanged', // TODO translate
-  ALWAYS: 'Always', // TODO translate
-  ACTIVITY: 'Activity', // TODO translate
-  CONFIGURE: 'Configure {0}', // TODO translate
-  SYSTEM_MEMORY: 'System Memory', // TODO translate
-  APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
-  SECURITY_1: 'Add or remove users', // TODO translate
-  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings and Firmware', // TODO translate
-  MODULES: 'Module', // TODO translate
+  ON: 'On',
+  OFF: 'Off',
+  POLARITY: 'Polarity',
+  ACTIVEHIGH: 'Aktif Yüksek',
+  ACTIVELOW: 'Aktif Düşük',
+  UNCHANGED: 'Değiştirilmedi',
+  ALWAYS: 'Her zaman',
+  ACTIVITY: 'Faaliyet',
+  CONFIGURE: 'Yapılandır {0}',
+  SYSTEM_MEMORY: 'Sistem Belleği',
+  APPLICATION_SETTINGS_1: 'EMS-ESP Uygulama Ayarlarını Değiştir',
+  SECURITY_1: 'Kullanıcıları ekle veya kaldır',
+  DOWNLOAD_UPLOAD_1: 'Ayarları ve firmware dosyasını indir ve yükle',
+  MODULES: 'Modül',
   MODULES_1: 'Harici modülleri etkinleştirin veya devre dışı bırakın',
-  MODULES_UPDATED: 'Modules updated', // TODO translate
-  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
-  MODULES_NONE: 'No external modules detected', // TODO translate
-  RENAME: 'Rename', // TODO translate 
-  ENABLE_MODBUS: 'Enable Modbus', // TODO translate
-  VIEW_LOG: 'View log to diagnose issues', // TODO translate
-  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
-  SERVICES: 'Services', // TODO translate
-  ALLVALUES: 'All Values', // TODO translate
-  SPECIAL_FUNCTIONS: 'Special Functions', // TODO translate
-  WAIT_FIRMWARE: 'Firmware is uploading and installing', // TODO translate
-  INSTALL_VERSION: 'This will install version {0}. Are you sure?', // TODO translate
-  UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
-  LATEST_VERSION: 'You are using the latest firmware version.', // TODO translate
-  PLEASE_WAIT: 'Please wait', // TODO translate
-  RESTARTING_PRE: 'Initializing', // TODO translate
-  RESTARTING_POST: 'Preparing', // TODO translate
-  AUTO_SCROLL: 'Auto Scroll', // TODO translate
-  DASHBOARD: 'Dashboard', // TODO translate
-  DEVELOPER_MODE: 'Developer Mode', // TODO translate
-  BYTES: 'Bytes', // TODO translate
-  BITMASK: 'Bit Mask',// TODO translate
-  DUPLICATE: 'Duplicate', // TODO translate
-  UPGRADE: 'Upgrade', // TODO translate
-  DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.', // TODO translate
-  NO_DATA_1: 'No favorite EMS entities found yet. Use the', // TODO translate
-  NO_DATA_2: 'module to mark them.', // TODO translate
-  NO_DATA_3: 'To see all available entities go to', // TODO translate
-  THIS_VERSION: 'This Version', // TODO translate
-  PLATFORM: 'Platform', // TODO translate
-  RELEASE_TYPE: 'Release Type', // TODO translate
-  REINSTALL: 'Re-install', // TODO translate
-  INTERNET_CONNECTION_REQUIRED: 'Internet connection required for automatic version checking and upgrading', // TODO translate
+  MODULES_UPDATED: 'Modülleri güncellendi',
+  MODULES_DESCRIPTION: 'Modüle tıklayarak etkinleştirin veya devre dışı bırakın EMS-ESP kütüphane modülleri',
+  MODULES_NONE: 'Hiçbir harici modül tespit edilmedi',
+  RENAME: 'Yeniden Adlandır',
+  ENABLE_MODBUS: 'Modbus\'ı etkinleştir',
+  VIEW_LOG: 'Sorunu tanımlamak için günlüğü görüntüleyin',
+  UPLOAD_DRAG: 'Bir dosya buraya sürükleyip bırakın veya seçmek için tıklayın',
+  SERVICES: 'Hizmetler',
+  ALLVALUES: 'Tüm Değerler',
+  SPECIAL_FUNCTIONS: 'Özel Fonksiyonlar',
+  WAIT_FIRMWARE: 'Firmware yükleniyor ve yükleniyor',
+  INSTALL_VERSION: 'Bu {0} sürümü {1} yükleyecek. Emin misiniz?',
+  UPDATE_AVAILABLE: 'güncellendi!',
+  LATEST_VERSION: 'En son {0} firmware sürümünü kullanıyorsunuz.',
+  PLEASE_WAIT: 'Lütfen bekleyin',
+  RESTARTING_PRE: 'Yükleniyor',
+  RESTARTING_POST: 'Hazırlanıyor',
+  AUTO_SCROLL: 'Otomatik kaydırma',
+  DASHBOARD: 'Kontrol Paneli',
+  DEVELOPER_MODE: 'Geliştirici Modu',
+  BYTES: 'Bayt',
+  BITMASK: 'Bit Maskesi',
+  DUPLICATE: 'Çift',
+  DASHBOARD_1: 'Tüm aktif ve Favori olarak işaretlenmiş EMS varlıkları, artı tüm özel varlıklar, zamanlayıcılar ve harici sensör verileri aşağıda görüntüleniyor.',
+  NO_DATA_1: 'Henüz bir favori EMS varlığı bulunamadı. Kullanın',
+  NO_DATA_2: 'modülünü kullanın.',
+  NO_DATA_3: 'Tüm kullanılabilir varlıkları görmek için git',
+  THIS_VERSION: 'Bu Sürüm',
+  PLATFORM: 'Platforma',
+  RELEASE_TYPE: 'Sürüm Tipi',
+  INTERNET_CONNECTION_REQUIRED: 'Otomatik sürüm kontrolü ve güncelleme için internet bağlantısı gereklidir',
+  SWITCH_RELEASE_TYPE: '{0} sürümüne geç',
+  FIRMWARE_VERSION_INFO: 'Firmware Sürüm Bilgisi',
+  NO_DATA: 'Hiçbir veri yok',
+  USER_PROFILE: 'Kullanıcı Profili',
+  STORED_VERSIONS: 'Kaydedilmiş Sürümler'
 };
 
 export default tr;

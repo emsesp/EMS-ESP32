@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { memo, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { IconContext } from 'react-icons/lib';
 import { Link } from 'react-router';
 import { toast } from 'react-toastify';
@@ -14,6 +14,7 @@ import {
   IconButton,
   ToggleButton,
   ToggleButtonGroup,
+  Tooltip,
   Typography
 } from '@mui/material';
 
@@ -44,7 +45,7 @@ import {
 } from './types';
 import { deviceValueItemValidation } from './validators';
 
-const Dashboard = () => {
+const Dashboard = memo(() => {
   const { LL } = useI18nContext();
   const { me } = useContext(AuthenticatedContext);
 
@@ -76,35 +77,40 @@ const Dashboard = () => {
     }
   );
 
-  const deviceValueDialogSave = async (devicevalue: DeviceValue) => {
-    if (!selectedDashboardItem) {
-      return;
-    }
-    const id = selectedDashboardItem.parentNode.id; // this is the parent ID
-    await sendDeviceValue({ id, c: devicevalue.c ?? '', v: devicevalue.v })
-      .then(() => {
-        toast.success(LL.WRITE_CMD_SENT());
-      })
-      .catch((error: Error) => {
-        toast.error(error.message);
-      })
-      .finally(() => {
-        setDeviceValueDialogOpen(false);
-        setSelectedDashboardItem(undefined);
-      });
-  };
+  const deviceValueDialogSave = useCallback(
+    async (devicevalue: DeviceValue) => {
+      if (!selectedDashboardItem) {
+        return;
+      }
+      const id = selectedDashboardItem.parentNode.id; // this is the parent ID
+      await sendDeviceValue({ id, c: devicevalue.c ?? '', v: devicevalue.v })
+        .then(() => {
+          toast.success(LL.WRITE_CMD_SENT());
+        })
+        .catch((error: Error) => {
+          toast.error(error.message);
+        })
+        .finally(() => {
+          setDeviceValueDialogOpen(false);
+          setSelectedDashboardItem(undefined);
+        });
+    },
+    [selectedDashboardItem, sendDeviceValue, LL]
+  );
 
-  const dashboard_theme = useTheme({
-    Table: `
+  const dashboard_theme = useMemo(
+    () =>
+      useTheme({
+        Table: `
       --data-table-library_grid-template-columns: minmax(80px, auto) 120px 32px;
     `,
-    BaseRow: `
+        BaseRow: `
       font-size: 14px;
       .td {
         height: 28px;
       }
     `,
-    Row: `
+        Row: `
       cursor: pointer;
       background-color: #1e1e1e;
       &:nth-of-type(odd) .td {
@@ -114,7 +120,7 @@ const Dashboard = () => {
         background-color: #177ac9;
       },
     `,
-    BaseCell: `
+        BaseCell: `
       &:nth-of-type(2) {
         text-align: right;
       }
@@ -122,12 +128,14 @@ const Dashboard = () => {
         text-align: right;
       }
     `
-  });
+      }),
+    []
+  );
 
   const tree = useTree(
-    { nodes: data.nodes },
+    { nodes: [...data.nodes] },
     {
-      onChange: undefined // not used but needed
+      onChange: () => {} // not used but needed
     },
     {
       treeIcon: {
@@ -156,65 +164,82 @@ const Dashboard = () => {
     }
   });
 
+  const nodeIds = useMemo(
+    () => data.nodes.map((item: DashboardItem) => item.id),
+    [data.nodes]
+  );
+
   useEffect(() => {
     showAll
-      ? tree.fns.onAddAll(data.nodes.map((item: DashboardItem) => item.id)) // expand tree
+      ? tree.fns.onAddAll(nodeIds) // expand tree
       : tree.fns.onRemoveAll(); // collapse tree
   }, [parentNodes]);
 
-  const showType = (n?: string, t?: number) => {
-    // if we have a name show it
-    if (n) {
-      return n;
-    }
-    if (t) {
-      // otherwise pick translation based on type
-      switch (t) {
-        case DeviceType.CUSTOM:
-          return LL.CUSTOM_ENTITIES(0);
-        case DeviceType.ANALOGSENSOR:
-          return LL.ANALOG_SENSORS();
-        case DeviceType.TEMPERATURESENSOR:
-          return LL.TEMP_SENSORS();
-        case DeviceType.SCHEDULER:
-          return LL.SCHEDULER();
-        default:
-          break;
+  const showType = useCallback(
+    (n?: string, t?: number) => {
+      // if we have a name show it
+      if (n) {
+        return n;
       }
-    }
-    return '';
-  };
-
-  const showName = (di: DashboardItem) => {
-    if (di.id < 100) {
-      // if its a device (parent node) and has entities
-      if (di.nodes?.length) {
-        return (
-          <span style={{ fontWeight: 'bold', fontSize: '14px' }}>
-            <DeviceIcon type_id={di.t ?? 0} />
-            &nbsp;&nbsp;{showType(di.n, di.t)}
-            <span style={{ color: 'lightblue' }}>&nbsp;({di.nodes?.length})</span>
-          </span>
-        );
+      if (t) {
+        // otherwise pick translation based on type
+        switch (t) {
+          case DeviceType.CUSTOM:
+            return LL.CUSTOM_ENTITIES(0);
+          case DeviceType.ANALOGSENSOR:
+            return LL.ANALOG_SENSORS();
+          case DeviceType.TEMPERATURESENSOR:
+            return LL.TEMP_SENSORS();
+          case DeviceType.SCHEDULER:
+            return LL.SCHEDULER();
+          default:
+            break;
+        }
       }
-    }
-    if (di.dv) {
-      return <span>{di.dv.id.slice(2)}</span>;
-    }
-  };
+      return '';
+    },
+    [LL]
+  );
 
-  const hasMask = (id: string, mask: number) =>
-    (parseInt(id.slice(0, 2), 16) & mask) === mask;
+  const showName = useCallback(
+    (di: DashboardItem) => {
+      if (di.id < 100) {
+        // if its a device (parent node) and has entities
+        if (di.nodes?.length) {
+          return (
+            <span style={{ fontSize: '15px' }}>
+              <DeviceIcon type_id={di.t ?? 0} />
+              &nbsp;&nbsp;{showType(di.n, di.t)}
+              <span style={{ color: 'lightblue' }}>&nbsp;({di.nodes?.length})</span>
+            </span>
+          );
+        }
+      }
+      if (di.dv) {
+        return <span>{di.dv.id.slice(2)}</span>;
+      }
+      return null;
+    },
+    [showType]
+  );
 
-  const editDashboardValue = (di: DashboardItem) => {
-    if (me.admin && di.dv?.c) {
-      setSelectedDashboardItem(di);
-      setDeviceValueDialogOpen(true);
-    }
-  };
+  const hasMask = useCallback(
+    (id: string, mask: number) => (parseInt(id.slice(0, 2), 16) & mask) === mask,
+    []
+  );
+
+  const editDashboardValue = useCallback(
+    (di: DashboardItem) => {
+      if (me.admin && di.dv?.c) {
+        setSelectedDashboardItem(di);
+        setDeviceValueDialogOpen(true);
+      }
+    },
+    [me.admin]
+  );
 
   const handleShowAll = (
-    event: React.MouseEvent<HTMLElement>,
+    _event: React.MouseEvent<HTMLElement>,
     toggle: boolean | null
   ) => {
     if (toggle !== null) {
@@ -223,19 +248,22 @@ const Dashboard = () => {
     }
   };
 
+  const hasFavEntities = useMemo(
+    () => data.nodes.filter((item: DashboardItem) => item.id <= 90).length,
+    [data.nodes]
+  );
+
   const renderContent = () => {
     if (!data) {
-      return <FormLoader onRetry={fetchDashboard} errorMessage={error?.message} />;
+      return (
+        <FormLoader onRetry={fetchDashboard} errorMessage={error?.message || ''} />
+      );
     }
-
-    const hasFavEntities = data.nodes.filter(
-      (item: DashboardItem) => item.id <= 90
-    ).length;
 
     return (
       <>
         {!data.connected && (
-          <MessageBox mb={2} level="error" message={LL.EMS_BUS_WARNING()} />
+          <MessageBox level="error" message={LL.EMS_BUS_WARNING()} />
         )}
 
         {data.connected && data.nodes.length > 0 && !hasFavEntities && (
@@ -255,105 +283,121 @@ const Dashboard = () => {
           </MessageBox>
         )}
 
-        {data.nodes.length > 0 && (
-          <>
-            <ToggleButtonGroup
-              color="primary"
-              size="small"
-              value={showAll}
-              exclusive
-              onChange={handleShowAll}
-            >
-              <ButtonTooltip title={LL.ALLVALUES()} arrow>
-                <ToggleButton value={true}>
-                  <UnfoldMoreIcon sx={{ fontSize: 18 }} />
-                </ToggleButton>
-              </ButtonTooltip>
-              <ButtonTooltip title={LL.COMPACT()} arrow>
-                <ToggleButton value={false}>
-                  <UnfoldLessIcon sx={{ fontSize: 18 }} />
-                </ToggleButton>
-              </ButtonTooltip>
-            </ToggleButtonGroup>
-            <ButtonTooltip title={LL.DASHBOARD_1()} arrow>
-              <HelpOutlineIcon color="primary" sx={{ ml: 1, fontSize: 20 }} />
+        <Box
+          display="flex"
+          justifyContent="flex-end"
+          flexWrap="nowrap"
+          whiteSpace="nowrap"
+        >
+          <ToggleButtonGroup
+            size="small"
+            color="primary"
+            value={showAll}
+            exclusive
+            onChange={handleShowAll}
+          >
+            <ButtonTooltip title={LL.ALLVALUES()}>
+              <ToggleButton value={true}>
+                <UnfoldMoreIcon sx={{ fontSize: 18 }} />
+              </ToggleButton>
             </ButtonTooltip>
+            <ButtonTooltip title={LL.COMPACT()}>
+              <ToggleButton value={false}>
+                <UnfoldLessIcon sx={{ fontSize: 18 }} />
+              </ToggleButton>
+            </ButtonTooltip>
+          </ToggleButtonGroup>
+        </Box>
 
-            <Box
-              padding={1}
-              justifyContent="center"
-              flexDirection="column"
-              sx={{
-                borderRadius: 1,
-                border: '1px solid grey'
+        {data.nodes.length > 0 ? (
+          <Box mt={1} justifyContent="center" flexDirection="column">
+            <IconContext.Provider
+              value={{
+                color: 'lightblue',
+                size: '18',
+                style: { verticalAlign: 'middle' }
               }}
             >
-              <IconContext.Provider
-                value={{
-                  color: 'lightblue',
-                  size: '18',
-                  style: { verticalAlign: 'middle' }
-                }}
+              <Table
+                data={{ nodes: data.nodes }}
+                theme={dashboard_theme}
+                layout={{ custom: true }}
+                tree={tree}
               >
-                <Table
-                  data={{ nodes: data.nodes }}
-                  theme={dashboard_theme}
-                  layout={{ custom: true }}
-                  tree={tree}
-                >
-                  {(tableList: DashboardItem[]) => (
-                    <Body>
-                      {tableList.map((di: DashboardItem) => (
-                        <Row
-                          key={di.id}
-                          item={di}
-                          onClick={() => editDashboardValue(di)}
-                        >
-                          {di.id > 99 ? (
-                            <>
-                              <Cell>{showName(di)}</Cell>
-                              <Cell>
-                                <ButtonTooltip
-                                  title={formatValue(LL, di.dv?.v, di.dv?.u)}
-                                >
-                                  <span>{formatValue(LL, di.dv?.v, di.dv?.u)}</span>
-                                </ButtonTooltip>
-                              </Cell>
+                {(tableList: DashboardItem[]) => (
+                  <Body>
+                    {tableList.map((di: DashboardItem) => (
+                      <Row
+                        key={di.id}
+                        item={di}
+                        onClick={() => editDashboardValue(di)}
+                      >
+                        {di.id > 99 ? (
+                          <>
+                            <Cell>{showName(di)}</Cell>
+                            <Cell>
+                              <ButtonTooltip
+                                title={formatValue(LL, di.dv?.v, di.dv?.u)}
+                              >
+                                <span>{formatValue(LL, di.dv?.v, di.dv?.u)}</span>
+                              </ButtonTooltip>
+                            </Cell>
 
-                              <Cell>
-                                {me.admin &&
-                                  di.dv?.c &&
-                                  !hasMask(
-                                    di.dv.id,
-                                    DeviceEntityMask.DV_READONLY
-                                  ) && (
-                                    <IconButton
-                                      size="small"
-                                      onClick={() => editDashboardValue(di)}
-                                    >
-                                      <EditIcon
-                                        color="primary"
-                                        sx={{ fontSize: 16 }}
-                                      />
-                                    </IconButton>
-                                  )}
-                              </Cell>
-                            </>
-                          ) : (
-                            <>
-                              <CellTree item={di}>{showName(di)}</CellTree>
-                              <Cell />
-                              <Cell />
-                            </>
-                          )}
-                        </Row>
-                      ))}
-                    </Body>
-                  )}
-                </Table>
-              </IconContext.Provider>
-            </Box>
-          </>
+                            <Cell>
+                              {me.admin &&
+                                di.dv?.c &&
+                                !hasMask(di.dv.id, DeviceEntityMask.DV_READONLY) && (
+                                  <IconButton
+                                    size="small"
+                                    aria-label={
+                                      LL.CHANGE_VALUE() + ' ' + LL.VALUE(0)
+                                    }
+                                    onClick={() => editDashboardValue(di)}
+                                  >
+                                    <EditIcon
+                                      color="primary"
+                                      sx={{ fontSize: 16 }}
+                                    />
+                                  </IconButton>
+                                )}
+                            </Cell>
+                          </>
+                        ) : (
+                          <>
+                            <CellTree item={di}>{showName(di)}</CellTree>
+                            <Cell />
+                            <Cell />
+                          </>
+                        )}
+                      </Row>
+                    ))}
+                  </Body>
+                )}
+              </Table>
+            </IconContext.Provider>
+          </Box>
+        ) : (
+          <Box
+            display="flex"
+            // justifyContent="flex-end"
+            // flexWrap="nowrap"
+            // whiteSpace="nowrap"
+          >
+            <Typography mt={1} color="warning.main" variant="body1">
+              no data
+            </Typography>
+            <Tooltip title={LL.DASHBOARD_1()}>
+              <HelpOutlineIcon
+                sx={{
+                  ml: 1,
+                  mt: 1,
+                  fontSize: 20,
+                  verticalAlign: 'middle'
+                }}
+                color="primary"
+              />
+            </Tooltip>
+          </Box>
         )}
       </>
     );
@@ -375,6 +419,6 @@ const Dashboard = () => {
       )}
     </SectionContent>
   );
-};
+});
 
 export default Dashboard;

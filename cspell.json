@@ -32,6 +32,9 @@
     "**/*.json",
     "src/core/modbus_entity_parameters.hpp",
     "sdkconfig.*",
-    "managed_components/**"
+    "managed_components/**",
+    "pnpm-*.yaml",
+    "vite.config.ts",
+    "lib/esp32-psram/**"
   ]
   }

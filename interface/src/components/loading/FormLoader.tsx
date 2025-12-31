@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { Box, Button, CircularProgress } from '@mui/material';
 
@@ -9,12 +11,12 @@ interface FormLoaderProps {
   onRetry?: () => void;
 }
 
-const FormLoader = ({ errorMessage, onRetry }: FormLoaderProps) => {
+const FormLoaderComponent = ({ errorMessage, onRetry }: FormLoaderProps) => {
   const { LL } = useI18nContext();
 
   if (errorMessage) {
     return (
-      <MessageBox my={2} level="error" message={errorMessage}>
+      <MessageBox level="error" message={errorMessage}>
         {onRetry && (
           <Button
             sx={{ ml: 2 }}
@@ -37,5 +39,7 @@ const FormLoader = ({ errorMessage, onRetry }: FormLoaderProps) => {
     </Box>
   );
 };
+
+const FormLoader = memo(FormLoaderComponent);
 
 export default FormLoader;

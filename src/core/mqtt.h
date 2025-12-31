@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include "console.h"
 #include "command.h"
 #include "emsdevicevalue.h"
+#include <esp32-psram.h>
 
 using uuid::console::Shell;
 
@@ -72,16 +73,26 @@ class Mqtt {
 
     static bool queue_publish(const std::string & topic, const std::string & payload);
     static bool queue_publish(const char * topic, const char * payload);
+    static bool queue_publish(const char * topic, const JsonObjectConst payload, const bool retain);
     static bool queue_publish(const std::string & topic, const JsonObjectConst payload);
     static bool queue_publish(const char * topic, const JsonObjectConst payload);
     static bool queue_publish(const char * topic, const std::string & payload);
-    static bool queue_publish_retain(const std::string & topic, const JsonObjectConst payload, const bool retain);
-    static bool queue_publish_retain(const char * topic, const std::string & payload, const bool retain);
-    static bool queue_publish_retain(const char * topic, const JsonObjectConst payload, const bool retain);
+
+    static bool queue_publish_retain(const std::string & topic, const JsonObjectConst payload);
+    static bool queue_publish_retain(const char * topic, const std::string & payload);
+    static bool queue_publish_retain(const char * topic, const JsonObjectConst payload);
+    static bool queue_publish_retain(const char * topic, const char * payload);
+
     static bool queue_ha(const char * topic, const JsonObjectConst payload);
     static bool queue_remove_topic(const char * topic);
 
-    static bool publish_ha_sensor_config(DeviceValue & dv, const char * model, const char * brand, const bool remove, const bool create_device_config = false);
+    static bool publish_ha_sensor_config_dv(DeviceValue & dv,
+                                            const char *  model,
+                                            const char *  brand,
+                                            const char *  version,
+                                            const bool    remove,
+                                            const bool    create_device_config = false);
+
     static bool publish_ha_sensor_config(uint8_t               type,
                                          int8_t                tag,
                                          const char * const    fullname,
@@ -96,10 +107,17 @@ class Mqtt {
                                          const int16_t         dv_set_min,
                                          const uint32_t        dv_set_max,
                                          const int8_t          num_op,
-                                         const JsonObjectConst dev_json);
+                                         const char * const    model                = nullptr,
+                                         const char * const    brand                = nullptr,
+                                         const char * const    version              = nullptr,
+                                         const bool            create_device_config = false);
 
     static bool publish_system_ha_sensor_config(uint8_t type, const char * name, const char * entity, const uint8_t uom);
-    static bool publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, const bool remove = false, const int16_t min = 5, const uint32_t max = 30);
+    static bool publish_ha_climate_config(const DeviceValue &   dv,
+                                          const bool            has_roomtemp,
+                                          const char * const ** mode_options,
+                                          const bool            remove = false,
+                                          const char *          icon   = nullptr);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
     static void show_mqtt(uuid::console::Shell & shell);
@@ -138,6 +156,13 @@ class Mqtt {
 
     static std::string basename() {
         return mqtt_basename_;
+    }
+
+    // create basename from the mqtt base
+    // and replacing all / with underscores, in case it's a path
+    static void basename(const std::string & base) {
+        mqtt_basename_ = base;
+        std::replace(mqtt_basename_.begin(), mqtt_basename_.end(), '/', '_');
     }
 
     // returns the discovery MQTT topic prefix and adds a /
@@ -232,16 +257,21 @@ class Mqtt {
 
     static std::string tag_to_topic(uint8_t device_type, int8_t tag);
 
-    static void add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, const char * entity = nullptr, bool is_discovery = true);
-
-    static void add_ha_sections_to_doc(const char *   name,
-                                       const char *   state_t,
-                                       JsonDocument & config,
-                                       const bool     is_first = false,
-                                       const char *   cond1    = nullptr,
-                                       const char *   cond2    = nullptr,
-                                       const char *   negcond  = nullptr);
-    static void add_ha_bool(JsonDocument & config);
+    static void
+    add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8_t type, const uint8_t uom, const char * entity = nullptr, bool display_only = false);
+    static void add_ha_dev_section(JsonObject   doc,
+                                   const char * name         = nullptr,
+                                   const bool   create_model = false,
+                                   const char * model        = nullptr,
+                                   const char * brand        = nullptr,
+                                   const char * version      = nullptr);
+    static void add_ha_avty_section(JsonObject   doc,
+                                    const char * state_t = nullptr,
+                                    const char * cond1   = nullptr,
+                                    const char * cond2   = nullptr,
+                                    const char * negcond = nullptr);
+    static void add_ha_bool(JsonObject doc);
+    static void add_value_bool(JsonObject doc, const char * name, bool value);
 
   private:
     static uuid::log::Logger logger_;
@@ -259,18 +289,18 @@ class Mqtt {
     // function handlers for MQTT subscriptions
     struct MQTTSubFunction {
         uint8_t             device_type_;      // which device type, from DeviceType::
-        const std::string   topic_;            // short topic name
+        const stringPSRAM   topic_;            // short topic name
         mqtt_sub_function_p mqtt_subfunction_; // can be empty
 
         // replaced &&topic with &topic in 3.7.0-dev.43, so we prevent the std:move later
         MQTTSubFunction(uint8_t device_type, const std::string & topic, mqtt_sub_function_p mqtt_subfunction)
             : device_type_(device_type)
-            , topic_(topic)
+            , topic_(topic.c_str())
             , mqtt_subfunction_(mqtt_subfunction) {
         }
     };
 
-    static std::vector<MQTTSubFunction> mqtt_subfunctions_; // list of mqtt subscribe callbacks for all devices
+    static std::vector<MQTTSubFunction, AllocatorPSRAM<MQTTSubFunction>> mqtt_subfunctions_; // list of mqtt subscribe callbacks for all devices
 
     uint32_t last_publish_boiler_     = 0;
     uint32_t last_publish_thermostat_ = 0;
@@ -289,13 +319,11 @@ class Mqtt {
     static uint8_t  connectcount_;
     static bool     ha_climate_reset_;
 
-    static std::string lasttopic_;
-    static std::string lastpayload_;
     static std::string lastresponse_;
 
     // settings, copied over
     static std::string mqtt_base_;
-    static std::string mqtt_basename_;
+    static std::string mqtt_basename_; // base name for MQTT topics with / replaced with _
     static uint8_t     mqtt_qos_;
     static bool        mqtt_retain_;
     static uint32_t    publish_time_;

@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { memo, useCallback, useContext, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -44,32 +44,33 @@ const SecuritySettings = () => {
   const authenticatedContext = useContext(AuthenticatedContext);
 
   const updateFormValue = updateValueDirty(
-    origData,
+    origData as unknown as Record<string, unknown>,
     dirtyFlags,
     setDirtyFlags,
-    updateDataValue
+    updateDataValue as (value: unknown) => void
   );
+
+  const validateAndSubmit = useCallback(async () => {
+    if (!data) return;
+    try {
+      setFieldErrors(undefined);
+      await validate(SECURITY_SETTINGS_VALIDATOR, data);
+      await saveData();
+      await authenticatedContext.refresh();
+    } catch (error) {
+      setFieldErrors(error as ValidateFieldsError);
+    }
+  }, [data, saveData, authenticatedContext]);
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
     }
-
-    const validateAndSubmit = async () => {
-      try {
-        setFieldErrors(undefined);
-        await validate(SECURITY_SETTINGS_VALIDATOR, data);
-        await saveData();
-        await authenticatedContext.refresh();
-      } catch (error) {
-        setFieldErrors(error as ValidateFieldsError);
-      }
-    };
 
     return (
       <>
         <ValidatedPasswordField
-          fieldErrors={fieldErrors}
+          fieldErrors={fieldErrors || {}}
           name="jwt_secret"
           label={LL.SU_PASSWORD()}
           fullWidth
@@ -115,4 +116,4 @@ const SecuritySettings = () => {
   );
 };
 
-export default SecuritySettings;
+export default memo(SecuritySettings);

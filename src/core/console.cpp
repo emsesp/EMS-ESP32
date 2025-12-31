@@ -1,7 +1,7 @@
 
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,8 +87,8 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                 Command::show_all(shell);
             } else if (command == F_(system)) {
                 EMSESP::system_.show_system(shell);
-            } else if (command == F_(users) && (shell.has_flags(CommandFlags::ADMIN))) {
-                EMSESP::system_.show_users(shell); // admin only
+            } else if (command == F_(users)) {
+                EMSESP::system_.show_users(shell);
             } else if (command == F_(devices)) {
                 EMSESP::show_devices(shell);
             } else if (command == F_(log)) {
@@ -302,7 +302,8 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
             std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
             std::string         board_profile = Helpers::toUpper(arguments.front());
             if (!EMSESP::system_.load_board_profile(data, board_profile)) {
-                shell.println("Invalid board profile (S32, E32, E32V2, MH-ET, NODEMCU, LOLIN, OLIMEX, OLIMEXPOE, C3MINI, S2MINI, S3MINI, S32S3, CUSTOM)");
+                shell.println(
+                    "Invalid board profile (S32, E32, E32V2, E32V2_2, MH-ET, NODEMCU, LOLIN, OLIMEX, OLIMEXPOE, C3MINI, S2MINI, S3MINI, S32S3, CUSTOM)");
                 return;
             }
 
@@ -319,8 +320,8 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                 settings.eth_clock_mode = data[8];
                 return StateUpdateResult::CHANGED;
             });
-            shell.printfln("Loaded board profile %s", board_profile.c_str());
-            EMSESP::system_.network_init(true);
+            shell.printfln("Loaded board profile %s. Restarting...", board_profile.c_str());
+            EMSESP::system_.system_restart();
         });
 
     commands->add_command(
@@ -337,7 +338,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                     return StateUpdateResult::CHANGED;
                 });
             } else {
-                shell.println("Must be 0B, 0D, 0A, 0E, 0F, or 48 - 4D");
+                shell.println("Must be 0B, 0D, 0A, 0E, 0F or 48-4D");
             }
         },
         [](Shell & shell, const std::vector<std::string> & current_arguments, const std::string & next_argument) -> std::vector<std::string> {
@@ -356,13 +357,18 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                                   shell.printfln(F_(tx_mode_fmt), settings.tx_mode);
                                   return StateUpdateResult::CHANGED;
                               });
-                              EMSESP::uart_init();
+                              EMSESP::system_.uart_init();
                           });
 
     //
     // EMS device commands
     //
 
+    commands->add_command(ShellContext::MAIN, CommandFlags::ADMIN, {F_(scan)}, [](Shell & shell, const std::vector<std::string> & arguments) {
+        EMSESP::scan_devices();
+    });
+
+    /* removed scan deep
     commands->add_command(ShellContext::MAIN, CommandFlags::ADMIN, {F_(scan)}, {F_(deep_optional)}, [](Shell & shell, const std::vector<std::string> & arguments) {
         if (arguments.empty()) {
             EMSESP::scan_devices();
@@ -378,6 +384,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
             }
         }
     });
+    */
 
     // read <deviceID> <type ID> [offset] [length]
     commands->add_command(ShellContext::MAIN,
@@ -670,9 +677,9 @@ void EMSESPShell::end_of_transmission() {
 void EMSESPShell::main_help_function(Shell & shell, const std::vector<std::string> & arguments) {
     shell.println();
 #if defined(EMSESP_DEBUG)
-    shell.printfln("%s%sEMS-ESP version %s%s", COLOR_BRIGHT_GREEN, COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_RESET);
-#else
     shell.printfln("%s%sEMS-ESP version %s%s (DEBUG)", COLOR_BRIGHT_GREEN, COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_RESET);
+#else
+    shell.printfln("%s%sEMS-ESP version %s%s", COLOR_BRIGHT_GREEN, COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_RESET);
 #endif
     shell.println();
     shell.print_all_available_commands();

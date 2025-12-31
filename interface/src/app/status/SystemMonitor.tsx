@@ -1,12 +1,11 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
-import { Box, Button, Dialog, DialogContent, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 
 import { callAction } from 'api/app';
 import { readSystemStatus } from 'api/system';
 
-import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova/client';
 import MessageBox from 'components/MessageBox';
 import { useI18nContext } from 'i18n/i18n-react';
@@ -17,10 +16,8 @@ import { LinearProgressWithLabel } from '../../components/upload/LinearProgressW
 
 const SystemMonitor = () => {
   const [errorMessage, setErrorMessage] = useState<string>();
-
+  const hasInitialized = useRef(false);
   const { LL } = useI18nContext();
-
-  let count = 0;
 
   const { send: setSystemStatus } = useRequest(
     (status: string) => callAction({ action: 'systemStatus', param: status }),
@@ -32,10 +29,12 @@ const SystemMonitor = () => {
   const { data, send } = useRequest(readSystemStatus, {
     force: true,
     async middleware(_, next) {
-      if (count++ >= 1) {
-        // skip first request (1 second) to allow AsyncWS to send its response
-        await next();
+      // Skip first request to allow AsyncWS to send its response
+      if (!hasInitialized.current) {
+        hasInitialized.current = true;
+        return; // Don't await next() on first call
       }
+      await next();
     }
   })
     .onSuccess((event) => {
@@ -51,53 +50,102 @@ const SystemMonitor = () => {
       }
     })
     .onError((error) => {
-      setErrorMessage(error.message);
+      setErrorMessage(String(error.error?.message || 'An error occurred'));
     });
 
   useInterval(() => {
     void send();
   }, 1000); // check every 1 second
 
-  const onCancel = async () => {
+  const { statusMessage, isUploading, progressValue } = useMemo(() => {
+    const status = data?.status;
+
+    let message = '';
+    if (status && status >= SystemStatusCodes.SYSTEM_STATUS_UPLOADING) {
+      message = LL.WAIT_FIRMWARE();
+    } else if (status === SystemStatusCodes.SYSTEM_STATUS_PENDING_RESTART) {
+      message = LL.APPLICATION_RESTARTING();
+    } else if (status === SystemStatusCodes.SYSTEM_STATUS_NORMAL) {
+      message = LL.RESTARTING_PRE();
+    } else if (status === SystemStatusCodes.SYSTEM_STATUS_ERROR_UPLOAD) {
+      message = 'Upload Failed';
+    } else {
+      message = LL.RESTARTING_POST();
+    }
+
+    const uploading =
+      status !== undefined && status >= SystemStatusCodes.SYSTEM_STATUS_UPLOADING;
+    const progress =
+      uploading && status
+        ? Math.round(status - SystemStatusCodes.SYSTEM_STATUS_UPLOADING)
+        : 0;
+
+    return {
+      statusMessage: message,
+      isUploading: uploading,
+      progressValue: progress
+    };
+  }, [data?.status, LL]);
+
+  const onCancel = useCallback(async () => {
     setErrorMessage(undefined);
-    await setSystemStatus(
-      SystemStatusCodes.SYSTEM_STATUS_NORMAL as unknown as string
-    );
+    await setSystemStatus(String(SystemStatusCodes.SYSTEM_STATUS_NORMAL));
     document.location.href = '/';
-  };
+  }, [setSystemStatus]);
 
   return (
-    <Dialog fullWidth={true} sx={dialogStyle} open={true}>
-      <DialogContent dividers>
-        <Box m={0} py={0} display="flex" alignItems="center" flexDirection="column">
+    <Box
+      sx={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backdropFilter: 'blur(8px)'
+      }}
+    >
+      <Box
+        sx={{
+          width: '30%',
+          minWidth: '300px',
+          maxWidth: '500px',
+          backgroundColor: '#393939',
+          border: 2,
+          borderColor: '#565656',
+          borderRadius: '8px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+          p: 3
+        }}
+      >
+        <Box display="flex" alignItems="center" flexDirection="column">
+          <img
+            src="/app/icon.png"
+            alt="EMS-ESP"
+            style={{ width: '40px', height: '40px', marginBottom: '16px' }}
+          />
           <Typography
             color="secondary"
             variant="h6"
             fontWeight={400}
             textAlign="center"
           >
-            {data?.status >= SystemStatusCodes.SYSTEM_STATUS_UPLOADING
-              ? LL.WAIT_FIRMWARE()
-              : data?.status === SystemStatusCodes.SYSTEM_STATUS_PENDING_RESTART
-                ? LL.APPLICATION_RESTARTING()
-                : data?.status === SystemStatusCodes.SYSTEM_STATUS_NORMAL
-                  ? LL.RESTARTING_PRE()
-                  : data?.status === SystemStatusCodes.SYSTEM_STATUS_ERROR_UPLOAD
-                    ? 'Upload Failed'
-                    : LL.RESTARTING_POST()}
+            {statusMessage}
           </Typography>
 
           {errorMessage ? (
-            <MessageBox my={2} level="error" message={errorMessage}>
+            <MessageBox level="error" message={errorMessage}>
               <Button
-                size="small"
                 sx={{ ml: 2 }}
+                size="small"
                 startIcon={<CancelIcon />}
                 variant="contained"
                 color="error"
                 onClick={onCancel}
               >
-                {LL.RESET(0)}
+                {LL.RESTART()}
               </Button>
             </MessageBox>
           ) : (
@@ -105,20 +153,16 @@ const SystemMonitor = () => {
               <Typography mt={2} variant="h6" fontWeight={400} textAlign="center">
                 {LL.PLEASE_WAIT()}&hellip;
               </Typography>
-              {data && data.status >= SystemStatusCodes.SYSTEM_STATUS_UPLOADING && (
+              {isUploading && (
                 <Box width="100%" pl={2} pr={2} py={2}>
-                  <LinearProgressWithLabel
-                    value={Math.round(
-                      data?.status - SystemStatusCodes.SYSTEM_STATUS_UPLOADING
-                    )}
-                  />
+                  <LinearProgressWithLabel value={progressValue} />
                 </Box>
               )}
             </>
           )}
         </Box>
-      </DialogContent>
-    </Dialog>
+      </Box>
+    </Box>
   );
 };
 

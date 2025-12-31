@@ -86,7 +86,7 @@ void ModbusClientRTU::doBegin(uint32_t baudRate, int coreID, uint32_t userInterv
   char taskName[18];
   snprintf(taskName, 18, "Modbus%02XRTU", instanceCounter);
   // Start task to handle the queue
-  xTaskCreatePinnedToCore((TaskFunction_t)&handleConnection, taskName, CLIENT_TASK_STACK, this, 6, &worker, coreID >= 0 ? coreID : NULL);
+  xTaskCreatePinnedToCore((TaskFunction_t)&handleConnection, taskName, CLIENT_TASK_STACK, this, 6, &worker, coreID >= 0 ? coreID : tskNO_AFFINITY);
 
   LOG_D("Client task %d started. Interval=%d\n", (uint32_t)worker, MR_interval);
 }
@@ -151,6 +151,7 @@ void ModbusClientRTU::clearQueue()
 {
   std::queue<RequestEntry> empty;
   LOCK_GUARD(lockGuard, qLock);
+  // Empty queue
   std::swap(requests, empty);
 }
 
@@ -342,8 +343,11 @@ void ModbusClientRTU::handleConnection(ModbusClientRTU *instance) {
       {
         // Safely lock the queue
         LOCK_GUARD(lockGuard, instance->qLock);
-        // Remove the front queue entry
-        instance->requests.pop();
+        
+        // Remove the front queue entry if the queue is not empty
+        if (!instance->requests.empty()) { 
+          instance->requests.pop();
+        }
       }
     } else {
       delay(1);

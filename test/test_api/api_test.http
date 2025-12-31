@@ -4,8 +4,8 @@
 # The response will be shown in the right panel
 
 # @host = http://ems-esp.local
-@host = http://192.168.1.225
-@host_dev = http://10.10.10.175
+@host = http://192.168.1.223
+@host_dev = http://192.168.1.65
 @host_standalone = http://localhost:3080
 @host_standalone2 = http://localhost:3082
 
@@ -16,6 +16,17 @@ GET {{host}}/api/system/info
 ###
 
 GET {{host}}/api/thermostat/seltemp
+
+###
+
+POST {{host}}/api/system/message
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "value" : "system/settings/locale"
+}
+
 
 ###
 
@@ -74,9 +85,95 @@ Authorization: Bearer {{token}}
 
 GET {{host}}/api/boiler/commands
 
+###
+
+POST {{host}}/api/custom/test_custom
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "value" : 22.0
+}
+
+###
+
+GET {{host}}/api/custom/test_custom
+
 #
-# Test on dev
+# Tests on dev
 #
+
+###
+
+POST {{host_dev}}/api/system/message
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "value" : "'hello world'"
+}
+
+###
+
+POST {{host_dev}}/api/system/message
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "value" : "system/settings/locale"
+}
+
+###
+
+POST {{host_dev}}/api/system/message
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "value" : "custom/test_custom"
+}
+
+###
+
+POST {{host_dev}}/api/thermostat/seltemp
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "value" : 21.0
+}
+
+###
+
+POST {{host_dev}}/api/system/txpause
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "value" : "on"
+}
+
+###
+
+POST {{host_dev}}/api/system/txpause
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "value" : "off"
+}
+
+###
+
+GET {{host_dev}}/api/system/settings/txMode/value
+
+###
+
+GET {{host_dev}}/api/system/settings/locale/value
+
+###
+
+POST {{host_dev}}/api/system/settings/locale/value
 
 ###
 

@@ -1,8 +1,10 @@
 import {
+  memo,
   useCallback,
   useContext,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useState
 } from 'react';
 import { IconContext } from 'react-icons';
@@ -31,7 +33,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid2 as Grid,
+  Grid,
   IconButton,
   InputAdornment,
   List,
@@ -75,7 +77,7 @@ import { DeviceEntityMask, DeviceType, DeviceValueUOM_s } from './types';
 import type { Device, DeviceValue } from './types';
 import { deviceValueItemValidation } from './validators';
 
-const Devices = () => {
+const Devices = memo(() => {
   const { LL } = useI18nContext();
   const { me } = useContext(AuthenticatedContext);
 
@@ -91,7 +93,7 @@ const Devices = () => {
 
   useLayoutTitle(LL.DEVICES());
 
-  const { data: coreData, send: sendCoreData } = useRequest(() => readCoreData(), {
+  const { data: coreData, send: sendCoreData } = useRequest(readCoreData, {
     initialData: {
       connected: true,
       devices: []
@@ -116,36 +118,36 @@ const Devices = () => {
   );
 
   useLayoutEffect(() => {
-    function updateSize() {
-      setSize([window.innerWidth, window.innerHeight]);
-    }
+    let raf = 0;
+    const updateSize = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        setSize([window.innerWidth, window.innerHeight]);
+      });
+    };
     window.addEventListener('resize', updateSize);
     updateSize();
-    return () => window.removeEventListener('resize', updateSize);
+    return () => {
+      window.removeEventListener('resize', updateSize);
+      cancelAnimationFrame(raf);
+    };
   }, []);
 
-  const leftOffset = () => {
+  const leftOffset = useCallback(() => {
     const devicesWindow = document.getElementById('devices-window');
-    if (!devicesWindow) {
-      return 0;
-    }
-
-    const clientRect = devicesWindow.getBoundingClientRect();
-    const left = clientRect.left;
-    const right = clientRect.right;
-
-    if (!left || !right) {
-      return 0;
-    }
-
+    if (!devicesWindow) return 0;
+    const { left, right } = devicesWindow.getBoundingClientRect();
+    if (!left || !right) return 0;
     return left + (right - left < 400 ? 0 : 200);
-  };
+  }, []);
 
-  const common_theme = useTheme({
-    BaseRow: `
+  const common_theme = useMemo(
+    () =>
+      useTheme({
+        BaseRow: `
       font-size: 14px;
     `,
-    HeaderRow: `
+        HeaderRow: `
       text-transform: uppercase;
       background-color: black;
       color: #90CAF9;
@@ -153,7 +155,7 @@ const Devices = () => {
         border-bottom: 1px solid #565656;
       }
     `,
-    Row: `
+        Row: `
       cursor: pointer;
       background-color: #1E1E1E;
       .td {
@@ -163,30 +165,47 @@ const Devices = () => {
         background-color: #177ac9;
       }
     `
-  });
+      }),
+    []
+  );
 
-  const device_theme = useTheme([
-    common_theme,
-    {
-      Table: `
+  const device_theme = useMemo(
+    () =>
+      useTheme([
+        common_theme,
+        {
+          BaseRow: `
+          font-size: 15px;
+          .td {
+           height: 28px;
+          }
+        `,
+          Table: `
         --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 130px;
       `,
-      HeaderRow: `
+          HeaderRow: `
         .th {
           padding: 8px;
       `,
-      Row: `
-        font-weight: bold;
+          Row: `
+        &:nth-of-type(odd) .td {
+            background-color: #303030;
+        },
         &:hover .td {
           background-color: #177ac9;
+        },
       `
-    }
-  ]);
+        }
+      ]),
+    [common_theme]
+  );
 
-  const data_theme = useTheme([
-    common_theme,
-    {
-      Table: `
+  const data_theme = useMemo(
+    () =>
+      useTheme([
+        common_theme,
+        {
+          Table: `
         --data-table-library_grid-template-columns: minmax(200px, auto) minmax(150px, auto) 40px;
         height: auto;
         max-height: 100%;
@@ -195,12 +214,12 @@ const Devices = () => {
           display:none;
         }
       `,
-      BaseRow: `
+          BaseRow: `
       .td {
         height: 32px;
       }
      `,
-      BaseCell: `
+          BaseCell: `
         &:nth-of-type(1) {
           border-left: 1px solid #177ac9;
         },
@@ -211,12 +230,12 @@ const Devices = () => {
           border-right: 1px solid #177ac9;
         }
       `,
-      HeaderRow: `
+          HeaderRow: `
         .th {
           border-top: 1px solid #565656;
         }
       `,
-      Row: `
+          Row: `
         &:nth-of-type(odd) .td {
           background-color: #303030;
         },
@@ -224,8 +243,10 @@ const Devices = () => {
           background-color: #177ac9;
       }
       `
-    }
-  ]);
+        }
+      ]),
+    [common_theme]
+  );
 
   const getSortIcon = (state: State, sortKey: unknown) => {
     if (state.sortKey === sortKey && state.reverse) {
@@ -238,7 +259,7 @@ const Devices = () => {
   };
 
   const dv_sort = useSort(
-    { nodes: deviceData.nodes },
+    { nodes: [...deviceData.nodes] },
     {},
     {
       sortIcon: {
@@ -268,7 +289,7 @@ const Devices = () => {
   }
 
   const device_select = useRowSelect(
-    { nodes: coreData.devices },
+    { nodes: [...coreData.devices] },
     {
       onChange: onSelectChange
     }
@@ -324,18 +345,23 @@ const Devices = () => {
     return sc;
   };
 
-  const hasMask = (id: string, mask: number) =>
-    (parseInt(id.slice(0, 2), 16) & mask) === mask;
+  const hasMask = useCallback(
+    (id: string, mask: number) => (parseInt(id.slice(0, 2), 16) & mask) === mask,
+    []
+  );
 
   const handleDownloadCsv = () => {
     const deviceIndex = coreData.devices.findIndex(
-      (d) => d.id === device_select.state.id
+      (d: Device) => d.id === device_select.state.id
     );
     if (deviceIndex === -1) {
       return;
     }
-    const filename =
-      coreData.devices[deviceIndex].tn + '_' + coreData.devices[deviceIndex].n;
+    const selectedDevice = coreData.devices[deviceIndex];
+    if (!selectedDevice) {
+      return;
+    }
+    const filename = selectedDevice.tn + '_' + selectedDevice.n;
 
     const columns = [
       {
@@ -350,7 +376,7 @@ const Devices = () => {
       {
         accessor: (dv: DeviceValue) =>
           dv.u !== undefined && DeviceValueUOM_s[dv.u]
-            ? DeviceValueUOM_s[dv.u].replace(/[^a-zA-Z0-9]/g, '')
+            ? DeviceValueUOM_s[dv.u]?.replace(/[^a-zA-Z0-9]/g, '')
             : '',
         name: 'UoM'
       },
@@ -373,7 +399,9 @@ const Devices = () => {
     ];
 
     const data = onlyFav
-      ? deviceData.nodes.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE))
+      ? deviceData.nodes.filter((dv: DeviceValue) =>
+          hasMask(dv.id, DeviceEntityMask.DV_FAVORITE)
+        )
       : deviceData.nodes;
 
     const csvData = data.reduce(
@@ -433,10 +461,14 @@ const Devices = () => {
   const renderDeviceDetails = () => {
     if (showDeviceInfo) {
       const deviceIndex = coreData.devices.findIndex(
-        (d) => d.id === device_select.state.id
+        (d: Device) => d.id === device_select.state.id
       );
       if (deviceIndex === -1) {
-        return;
+        return null;
+      }
+      const deviceDetails = coreData.devices[deviceIndex];
+      if (!deviceDetails) {
+        return null;
       }
 
       return (
@@ -449,47 +481,35 @@ const Devices = () => {
           <DialogContent dividers>
             <List dense={true}>
               <ListItem>
-                <ListItemText
-                  primary={LL.TYPE(0)}
-                  secondary={coreData.devices[deviceIndex].tn}
-                />
+                <ListItemText primary={LL.TYPE(0)} secondary={deviceDetails.tn} />
               </ListItem>
               <ListItem>
-                <ListItemText
-                  primary={LL.NAME(0)}
-                  secondary={coreData.devices[deviceIndex].n}
-                />
+                <ListItemText primary={LL.NAME(0)} secondary={deviceDetails.n} />
               </ListItem>
-              {coreData.devices[deviceIndex].t !== DeviceType.CUSTOM && (
+              {deviceDetails.t !== DeviceType.CUSTOM && (
                 <>
                   <ListItem>
-                    <ListItemText
-                      primary={LL.BRAND()}
-                      secondary={coreData.devices[deviceIndex].b}
-                    />
+                    <ListItemText primary={LL.BRAND()} secondary={deviceDetails.b} />
                   </ListItem>
                   <ListItem>
                     <ListItemText
                       primary={LL.ID_OF(LL.DEVICE())}
                       secondary={
                         '0x' +
-                        (
-                          '00' +
-                          coreData.devices[deviceIndex].d.toString(16).toUpperCase()
-                        ).slice(-2)
+                        ('00' + deviceDetails.d.toString(16).toUpperCase()).slice(-2)
                       }
                     />
                   </ListItem>
                   <ListItem>
                     <ListItemText
                       primary={LL.ID_OF(LL.PRODUCT())}
-                      secondary={coreData.devices[deviceIndex].p}
+                      secondary={deviceDetails.p}
                     />
                   </ListItem>
                   <ListItem>
                     <ListItemText
                       primary={LL.VERSION()}
-                      secondary={coreData.devices[deviceIndex].v}
+                      secondary={deviceDetails.v}
                     />
                   </ListItem>
                 </>
@@ -508,59 +528,60 @@ const Devices = () => {
         </Dialog>
       );
     }
+    return null;
   };
 
   const renderCoreData = () => (
     <>
-      <IconContext.Provider
-        value={{
-          color: 'lightblue',
-          size: '18',
-          style: { verticalAlign: 'middle' }
-        }}
-      >
-        {!coreData.connected && (
-          <MessageBox my={2} level="error" message={LL.EMS_BUS_WARNING()} />
-        )}
-
-        {coreData.connected && (
-          <Table
-            data={{ nodes: coreData.devices }}
-            select={device_select}
-            theme={device_theme}
-            layout={{ custom: true }}
+      {!coreData.connected ? (
+        <MessageBox level="error" message={LL.EMS_BUS_WARNING()} />
+      ) : (
+        <Box justifyContent="center" flexDirection="column">
+          <IconContext.Provider
+            value={{
+              color: 'lightblue',
+              size: '18',
+              style: { verticalAlign: 'middle' }
+            }}
           >
-            {(tableList: Device[]) => (
-              <>
-                <Header>
-                  <HeaderRow>
-                    <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
-                    <HeaderCell stiff>{LL.TYPE(0)}</HeaderCell>
-                  </HeaderRow>
-                </Header>
-                <Body>
-                  {tableList.length === 0 && (
-                    <CircularProgress sx={{ margin: 1 }} size={18} />
-                  )}
-                  {tableList.map((device: Device) => (
-                    <Row key={device.id} item={device}>
-                      <Cell>
-                        <DeviceIcon type_id={device.t} />
-                        &nbsp;&nbsp;
-                        {device.n}
-                        <span style={{ color: 'lightblue' }}>
-                          &nbsp;&nbsp;({device.e})
-                        </span>
-                      </Cell>
-                      <Cell stiff>{device.tn}</Cell>
-                    </Row>
-                  ))}
-                </Body>
-              </>
-            )}
-          </Table>
-        )}
-      </IconContext.Provider>
+            <Table
+              data={{ nodes: [...coreData.devices] }}
+              select={device_select}
+              theme={device_theme}
+              layout={{ custom: true }}
+            >
+              {(tableList: Device[]) => (
+                <>
+                  <Header>
+                    <HeaderRow>
+                      <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
+                      <HeaderCell stiff>{LL.TYPE(0)}</HeaderCell>
+                    </HeaderRow>
+                  </Header>
+                  <Body>
+                    {tableList.length === 0 && (
+                      <CircularProgress sx={{ margin: 1 }} size={18} />
+                    )}
+                    {tableList.map((device: Device) => (
+                      <Row key={device.id} item={device}>
+                        <Cell>
+                          <DeviceIcon type_id={device.t} />
+                          &nbsp;&nbsp;
+                          {device.n}
+                          <span style={{ color: 'lightblue' }}>
+                            &nbsp;&nbsp;({device.e})
+                          </span>
+                        </Cell>
+                        <Cell stiff>{device.tn}</Cell>
+                      </Row>
+                    ))}
+                  </Body>
+                </>
+              )}
+            </Table>
+          </IconContext.Provider>
+        </Box>
+      )}
     </>
   );
 
@@ -576,64 +597,77 @@ const Devices = () => {
       return;
     }
 
-    const showDeviceValue = (dv: DeviceValue) => {
+    const showDeviceValue = useCallback((dv: DeviceValue) => {
       setSelectedDeviceValue(dv);
       setDeviceValueDialogOpen(true);
-    };
+    }, []);
 
-    const renderNameCell = (dv: DeviceValue) => (
-      <>
-        {dv.id.slice(2)}&nbsp;
-        {hasMask(dv.id, DeviceEntityMask.DV_FAVORITE) && (
-          <StarIcon color="primary" sx={{ fontSize: 12 }} />
-        )}
-        {hasMask(dv.id, DeviceEntityMask.DV_READONLY) && (
-          <EditOffOutlinedIcon color="primary" sx={{ fontSize: 12 }} />
-        )}
-        {hasMask(dv.id, DeviceEntityMask.DV_API_MQTT_EXCLUDE) && (
-          <CommentsDisabledOutlinedIcon color="primary" sx={{ fontSize: 12 }} />
-        )}
-      </>
+    const renderNameCell = useCallback(
+      (dv: DeviceValue) => (
+        <>
+          {dv.id.slice(2)}&nbsp;
+          {hasMask(dv.id, DeviceEntityMask.DV_FAVORITE) && (
+            <StarIcon color="primary" sx={{ fontSize: 12 }} />
+          )}
+          {hasMask(dv.id, DeviceEntityMask.DV_READONLY) && (
+            <EditOffOutlinedIcon color="primary" sx={{ fontSize: 12 }} />
+          )}
+          {hasMask(dv.id, DeviceEntityMask.DV_API_MQTT_EXCLUDE) && (
+            <CommentsDisabledOutlinedIcon color="primary" sx={{ fontSize: 12 }} />
+          )}
+        </>
+      ),
+      [hasMask]
     );
 
-    const shown_data = onlyFav
-      ? deviceData.nodes.filter(
-          (dv) =>
+    const shown_data = useMemo(() => {
+      if (onlyFav) {
+        return deviceData.nodes.filter(
+          (dv: DeviceValue) =>
             hasMask(dv.id, DeviceEntityMask.DV_FAVORITE) &&
-            dv.id.slice(2).includes(search)
-        )
-      : deviceData.nodes.filter((dv) => dv.id.slice(2).includes(search));
+            dv.id.slice(2).toLowerCase().includes(search.toLowerCase())
+        );
+      }
+      return deviceData.nodes.filter((dv: DeviceValue) =>
+        dv.id.slice(2).toLowerCase().includes(search.toLowerCase())
+      );
+    }, [deviceData.nodes, onlyFav, search]);
 
     const deviceIndex = coreData.devices.findIndex(
-      (d) => d.id === device_select.state.id
+      (d: Device) => d.id === device_select.state.id
     );
     if (deviceIndex === -1) {
       return;
     }
+    const deviceInfo = coreData.devices[deviceIndex];
+    if (!deviceInfo) {
+      return;
+    }
 
+    const [, height] = size;
     return (
       <Box
         sx={{
           backgroundColor: 'black',
           position: 'absolute',
-          left: () => leftOffset(),
+          left: leftOffset,
           right: 0,
           bottom: 0,
           top: 64,
           zIndex: 'modal',
-          maxHeight: () => size[1] - 126,
+          maxHeight: () => (height || 0) - 126,
           border: '1px solid #177ac9'
         }}
       >
         <Box sx={{ p: 1 }}>
           <Grid container justifyContent="space-between">
             <Typography noWrap variant="subtitle1" color="warning.main">
-              {coreData.devices[deviceIndex].n}&nbsp;(
-              {coreData.devices[deviceIndex].tn})
+              {deviceInfo.n}&nbsp;(
+              {deviceInfo.tn})
             </Typography>
             <Grid justifyContent="flex-end">
               <ButtonTooltip title={LL.CLOSE()}>
-                <IconButton onClick={resetDeviceSelect}>
+                <IconButton onClick={resetDeviceSelect} aria-label={LL.CLOSE()}>
                   <HighlightOffIcon color="primary" sx={{ fontSize: 18 }} />
                 </IconButton>
               </ButtonTooltip>
@@ -645,6 +679,7 @@ const Devices = () => {
             variant="outlined"
             sx={{ width: '22ch' }}
             placeholder={LL.SEARCH()}
+            aria-label={LL.SEARCH()}
             onChange={(event) => {
               setSearch(event.target.value);
             }}
@@ -659,19 +694,22 @@ const Devices = () => {
             }}
           />
           <ButtonTooltip title={LL.DEVICE_DETAILS()}>
-            <IconButton onClick={() => setShowDeviceInfo(true)}>
+            <IconButton
+              onClick={() => setShowDeviceInfo(true)}
+              aria-label={LL.DEVICE_DETAILS()}
+            >
               <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
             </IconButton>
           </ButtonTooltip>
           {me.admin && (
             <ButtonTooltip title={LL.CUSTOMIZATIONS()}>
-              <IconButton onClick={customize}>
+              <IconButton onClick={customize} aria-label={LL.CUSTOMIZATIONS()}>
                 <ConstructionIcon color="primary" sx={{ fontSize: 18 }} />
               </IconButton>
             </ButtonTooltip>
           )}
           <ButtonTooltip title={LL.EXPORT()}>
-            <IconButton onClick={handleDownloadCsv}>
+            <IconButton onClick={handleDownloadCsv} aria-label={LL.EXPORT()}>
               <DownloadIcon color="primary" sx={{ fontSize: 18 }} />
             </IconButton>
           </ButtonTooltip>
@@ -699,14 +737,14 @@ const Devices = () => {
               ' ' +
               shown_data.length +
               '/' +
-              coreData.devices[deviceIndex].e +
+              deviceInfo.e +
               ' ' +
               LL.ENTITIES(shown_data.length)}
           </span>
         </Box>
 
         <Table
-          data={{ nodes: shown_data }}
+          data={{ nodes: Array.from(shown_data) }}
           theme={data_theme}
           sort={dv_sort}
           layout={{ custom: true, fixedHeader: true }}
@@ -790,6 +828,6 @@ const Devices = () => {
       )}
     </SectionContent>
   );
-};
+});
 
 export default Devices;

@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { memo, useContext } from 'react';
 import type { FC } from 'react';
 import { Navigate } from 'react-router';
 
@@ -14,4 +14,4 @@ const RequireAdmin: FC<RequiredChildrenProps> = ({ children }) => {
   );
 };
 
-export default RequireAdmin;
+export default memo(RequireAdmin);

@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { memo, useCallback, useContext } from 'react';
 
 import LockIcon from '@mui/icons-material/Lock';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
@@ -63,38 +63,41 @@ const WiFiNetworkSelector = ({ networkList }: { networkList: WiFiNetworkList }) 
 
   const wifiConnectionContext = useContext(WiFiConnectionContext);
 
-  const renderNetwork = (network: WiFiNetwork) => (
-    <ListItem
-      key={network.bssid}
-      onClick={() => wifiConnectionContext.selectNetwork(network)}
-    >
-      <ListItemAvatar>
-        <Avatar>{isNetworkOpen(network) ? <LockOpenIcon /> : <LockIcon />}</Avatar>
-      </ListItemAvatar>
-      <ListItemText
-        primary={network.ssid}
-        secondary={
-          'Security: ' +
-          networkSecurityMode(network) +
-          ', Ch: ' +
-          network.channel +
-          ', bssid: ' +
-          network.bssid
-        }
-      />
-      <ListItemIcon>
-        <Badge badgeContent={network.rssi + 'dBm'}>
-          <WifiIcon sx={{ color: networkQualityHighlight(network, theme) }} />
-        </Badge>
-      </ListItemIcon>
-    </ListItem>
+  const renderNetwork = useCallback(
+    (network: WiFiNetwork) => (
+      <ListItem
+        key={network.bssid}
+        onClick={() => wifiConnectionContext.selectNetwork(network)}
+      >
+        <ListItemAvatar>
+          <Avatar>{isNetworkOpen(network) ? <LockOpenIcon /> : <LockIcon />}</Avatar>
+        </ListItemAvatar>
+        <ListItemText
+          primary={network.ssid}
+          secondary={
+            'Security: ' +
+            networkSecurityMode(network) +
+            ', Ch: ' +
+            network.channel +
+            ', bssid: ' +
+            network.bssid
+          }
+        />
+        <ListItemIcon>
+          <Badge badgeContent={network.rssi + 'dBm'}>
+            <WifiIcon sx={{ color: networkQualityHighlight(network, theme) }} />
+          </Badge>
+        </ListItemIcon>
+      </ListItem>
+    ),
+    [wifiConnectionContext, theme]
   );
 
   if (networkList.networks.length === 0) {
-    return <MessageBox mt={2} mb={1} message={LL.NETWORK_NO_WIFI()} level="info" />;
+    return <MessageBox message={LL.NETWORK_NO_WIFI()} level="info" />;
   }
 
   return <List>{networkList.networks.map(renderNetwork)}</List>;
 };
 
-export default WiFiNetworkSelector;
+export default memo(WiFiNetworkSelector);

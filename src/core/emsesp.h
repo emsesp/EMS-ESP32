@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@
 #endif
 
 #ifndef EMSESP_STANDALONE
-#include "ESP32React/ESP32React.h"
+#include "../ESP32React/ESP32React.h"
 #else
 #include "../lib_standalone/ESP32React.h"
 #endif
@@ -71,7 +71,8 @@
 #include "roomcontrol.h"
 #include "command.h"
 
-#include "../version.h"
+#include "../emsesp_version.h"
+#include <esp32-psram.h>
 
 // Load external modules
 class Module {}; // forward declaration
@@ -94,6 +95,8 @@ using DeviceValueNumOp = DeviceValue::DeviceValueNumOp;
 // forward declarations for compiler
 class EMSESPShell;
 class Shower;
+
+static constexpr const char * EMSESP_NVS_BOOT_NEW_FIRMWARE = "fresh_firmware"; // max 15 characters
 
 class EMSESP {
   public:
@@ -146,8 +149,6 @@ class EMSESP {
 
     static void dump_all_entities(uuid::console::Shell & shell);
     static void dump_all_telegrams(uuid::console::Shell & shell);
-
-    static void uart_init();
 
     static void incoming_telegram(uint8_t * data, const uint8_t length);
 
@@ -222,8 +223,7 @@ class EMSESP {
     static void scan_devices();
     static void clear_all_devices();
 
-    static std::deque<std::unique_ptr<EMSdevice>> emsdevices;
-
+    static std::vector<std::unique_ptr<EMSdevice>, AllocatorPSRAM<std::unique_ptr<EMSdevice>>> emsdevices;
     // services
     static Mqtt              mqtt_;
     static Modbus *          modbus_;
@@ -268,7 +268,7 @@ class EMSESP {
         const char *          default_name;
         uint8_t               flags;
     };
-    static std::vector<Device_record> device_library_;
+    static std::vector<Device_record, AllocatorPSRAM<Device_record>> device_library_;
 
     static uint16_t watch_id_;
     static uint8_t  watch_;

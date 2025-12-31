@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -146,7 +146,7 @@ void RxService::add(uint8_t * data, uint8_t length) {
     }
 
     // ignore src==0, https://github.com/emsesp/EMS-ESP32/issues/2378
-    if (!(data[0] & 0x7F)) {
+    if (!(data[0] & 0x7F) && bus_connected()) {
         LOG_WARNING("Invalid source: %s", Helpers::data_to_hex(data, length).c_str()); // include CRC
         return;
     }
@@ -154,6 +154,10 @@ void RxService::add(uint8_t * data, uint8_t length) {
     // validate the CRC. if it fails then increment the number of corrupt/incomplete telegrams and only report to console/syslog
     uint8_t crc = calculate_crc(data, length - 1);
     if (data[length - 1] != crc) {
+        // if bus is not connected, assume its just noise on the line and ignore it
+        if (!bus_connected()) {
+            return;
+        }
         if (data[0] != EMSuart::last_tx_src()) { // do not count echos as errors
             telegram_error_count_++;
             LOG_WARNING("Incomplete Rx: %s", Helpers::data_to_hex(data, length).c_str()); // include CRC
@@ -228,10 +232,12 @@ void RxService::add(uint8_t * data, uint8_t length) {
     // create the telegram
     auto telegram = std::make_shared<Telegram>(operation, src, dest, type_id, offset, message_data, message_length);
 
-    // check if queue is full, if so remove top item to make space
+// check if queue is full, if so remove top item to make space, except if we're in standalone mode
+#ifndef EMSESP_STANDALONE
     if (rx_telegrams_.size() >= MAX_RX_TELEGRAMS) {
         rx_telegrams_.pop_front();
     }
+#endif
 
     rx_telegrams_.emplace_back(rx_telegram_id_++, std::move(telegram)); // add to queue
 }
@@ -239,7 +245,7 @@ void RxService::add(uint8_t * data, uint8_t length) {
 // add empty telegram to rx-queue
 void RxService::add_empty(const uint8_t src, const uint8_t dest, const uint16_t type_id, uint8_t offset) {
     auto telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, offset, nullptr, 0);
-    // only if queue is  not full
+    // only if queue is not full
     if (rx_telegrams_.size() < MAX_RX_TELEGRAMS) {
         rx_telegrams_.emplace_back(rx_telegram_id_++, std::move(telegram)); // add to queue
     }
@@ -266,13 +272,13 @@ void TxService::start() {
 
 // sends a 1 byte poll which is our own deviceID
 void TxService::send_poll() const {
-    //LOG_DEBUG("Ack %02X",ems_bus_id() ^ ems_mask());
-    if (tx_mode()) {
+    // LOG_DEBUG("Ack %02X",ems_bus_id() ^ ems_mask());
+    if (tx_mode() != EMS_TXMODE_OFF) {
         EMSuart::send_poll(ems_bus_id() ^ ems_mask());
     }
 }
 
-// get src id from next telegram to check poll in emsesp::incoming_telegram
+// get src id from next telegram to check poll in incoming_telegram() in emsesp.cpp
 uint8_t TxService::get_send_id() {
     static uint32_t count = 0;
     if (!tx_telegrams_.empty() && tx_telegrams_.front().telegram_->src != ems_bus_id()) {
@@ -303,7 +309,7 @@ void TxService::send() {
     delayed_send_ = 0;
 
     // if we're in read-only mode (tx_mode 0) forget the Tx call
-    if (tx_mode() != 0) {
+    if (tx_mode() != EMS_TXMODE_OFF) {
         send_telegram(tx_telegrams_.front());
     }
 
@@ -442,6 +448,7 @@ void TxService::add(const uint8_t  operation,
 
     LOG_DEBUG("New Tx [#%d] telegram, length %d", tx_telegram_id_, message_length);
 
+#ifndef EMSESP_STANDALONE
     // if the queue is full, make room by removing the last one
     if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
         LOG_WARNING("Tx queue overflow, skip one message");
@@ -452,6 +459,7 @@ void TxService::add(const uint8_t  operation,
         }
         tx_telegrams_.pop_front();
     }
+#endif
 
     if (front) {
         tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram), false, validateid); // add to front of queue
@@ -629,7 +637,8 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
         EMSESP::wait_validate(0); // do not wait for validation
         return;
     }
-
+    // for the last try wait 2 sec before sending.
+    delayed_send_ = (retry_count_ < MAXIMUM_TX_RETRIES) ? 0 : (uuid::get_uptime() + POST_SEND_DELAY);
     tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram_last_), true, get_post_send_query());
 }
 
@@ -649,7 +658,7 @@ uint16_t TxService::read_next_tx(const uint8_t offset, const uint8_t length) {
         return 0;
     }
     // we request all and get a short telegram with requested offset
-    if ((next_length + next_offset) == 0xFF && old_length < max_length - 1 && offset <= telegram_last_->offset) {
+    if ((next_length + next_offset) == 0xFF && old_length < max_length - 4 && offset <= telegram_last_->offset) {
         return 0;
     }
     if (offset >= telegram_last_->offset && old_length > 0 && next_length > 0) {

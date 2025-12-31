@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ class Shower {
     void loop();
 
     void set_shower_state(bool state, bool force = false);
+    void create_ha_discovery();
 
     // commands
     static bool command_coldshot(const char * value, const int8_t id);
@@ -39,6 +40,9 @@ class Shower {
 
     void shower_alert(bool enable) {
         shower_alert_ = enable;
+    }
+    void ha_reset() {
+        ha_configdone_ = false;
     }
 
   private:

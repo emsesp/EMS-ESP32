@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { memo, useCallback, useContext, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -104,42 +104,41 @@ const NetworkSettings = () => {
     origData,
     dirtyFlags,
     setDirtyFlags,
-    updateDataValue
+    updateDataValue as (value: unknown) => void
   );
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  useEffect(() => deselectNetwork, [deselectNetwork]);
+  const validateAndSubmit = useCallback(async () => {
+    if (!data) return;
+    try {
+      setFieldErrors(undefined);
+      await validate(createNetworkSettingsValidator(data), data);
+      await saveData();
+    } catch (error) {
+      setFieldErrors(error as ValidateFieldsError);
+    }
+    deselectNetwork();
+  }, [data, saveData, deselectNetwork]);
+
+  const setCancel = useCallback(async () => {
+    deselectNetwork();
+    await loadData();
+  }, [deselectNetwork, loadData]);
+
+  const doRestart = useCallback(async () => {
+    setRestarting(true);
+    await sendAPI({ device: 'system', cmd: 'restart', id: 0 }).catch(
+      (error: Error) => {
+        toast.error(error.message);
+      }
+    );
+  }, [sendAPI]);
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
     }
-
-    const validateAndSubmit = async () => {
-      try {
-        setFieldErrors(undefined);
-        await validate(createNetworkSettingsValidator(data), data);
-        await saveData();
-      } catch (error) {
-        setFieldErrors(error as ValidateFieldsError);
-      }
-      deselectNetwork();
-    };
-
-    const setCancel = async () => {
-      deselectNetwork();
-      await loadData();
-    };
-
-    const doRestart = async () => {
-      setRestarting(true);
-      await sendAPI({ device: 'system', cmd: 'restart', id: 0 }).catch(
-        (error: Error) => {
-          toast.error(error.message);
-        }
-      );
-    };
 
     return (
       <>
@@ -165,14 +164,14 @@ const NetworkSettings = () => {
                   selectedNetwork.bssid
                 }
               />
-              <IconButton onClick={setCancel}>
+              <IconButton onClick={setCancel} aria-label={LL.CANCEL()}>
                 <DeleteIcon />
               </IconButton>
             </ListItem>
           </List>
         ) : (
           <ValidatedTextField
-            fieldErrors={fieldErrors}
+            fieldErrors={fieldErrors || {}}
             name="ssid"
             label={'SSID (' + LL.NETWORK_BLANK_SSID() + ')'}
             fullWidth
@@ -183,7 +182,7 @@ const NetworkSettings = () => {
           />
         )}
         <ValidatedTextField
-          fieldErrors={fieldErrors}
+          fieldErrors={fieldErrors || {}}
           name="bssid"
           label={'BSSID (' + LL.NETWORK_BLANK_BSSID() + ')'}
           fullWidth
@@ -194,7 +193,7 @@ const NetworkSettings = () => {
         />
         {(!selectedNetwork || !isNetworkOpen(selectedNetwork)) && (
           <ValidatedPasswordField
-            fieldErrors={fieldErrors}
+            fieldErrors={fieldErrors || {}}
             name="password"
             label={LL.PASSWORD()}
             fullWidth
@@ -251,7 +250,7 @@ const NetworkSettings = () => {
           {LL.GENERAL_OPTIONS()}
         </Typography>
         <ValidatedTextField
-          fieldErrors={fieldErrors}
+          fieldErrors={fieldErrors || {}}
           name="hostname"
           label={LL.HOSTNAME()}
           fullWidth
@@ -304,7 +303,7 @@ const NetworkSettings = () => {
         {data.static_ip_config && (
           <>
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="local_ip"
               label={LL.AP_LOCAL_IP()}
               fullWidth
@@ -314,7 +313,7 @@ const NetworkSettings = () => {
               margin="normal"
             />
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="gateway_ip"
               label={LL.NETWORK_GATEWAY()}
               fullWidth
@@ -324,7 +323,7 @@ const NetworkSettings = () => {
               margin="normal"
             />
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="subnet_mask"
               label={LL.NETWORK_SUBNET()}
               fullWidth
@@ -334,7 +333,7 @@ const NetworkSettings = () => {
               margin="normal"
             />
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="dns_ip_1"
               label="DNS #1"
               fullWidth
@@ -344,7 +343,7 @@ const NetworkSettings = () => {
               margin="normal"
             />
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="dns_ip_2"
               label="DNS #2"
               fullWidth
@@ -356,8 +355,9 @@ const NetworkSettings = () => {
           </>
         )}
         {restartNeeded && (
-          <MessageBox my={2} level="warning" message={LL.RESTART_TEXT(0)}>
+          <MessageBox level="warning" message={LL.RESTART_TEXT(0)}>
             <Button
+              sx={{ ml: 2 }}
               startIcon={<PowerSettingsNewIcon />}
               variant="contained"
               color="error"
@@ -405,4 +405,4 @@ const NetworkSettings = () => {
   );
 };
 
-export default NetworkSettings;
+export default memo(NetworkSettings);

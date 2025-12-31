@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -155,7 +155,9 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     } else if (isRC300() || (model == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
         monitor_typeids = {0x02A5, 0x02A6, 0x02A7, 0x02A8, 0x02A9, 0x02AA, 0x02AB, 0x02AC};
         set_typeids     = {0x02B9, 0x02BA, 0x02BB, 0x02BC, 0x02BD, 0x02BE, 0x02BF, 0x02C0};
-        set2_typeids    = {0x02CC, 0x02CE, 0x02D0, 0x02D2}; // max. 4 heating circuits supported ny RC310
+        // 0x2CC is setting command to boiler, 0x2CD..0x2D4 is setting command to mixers, not a thermostat value, but also stored in thermostat
+        // set2_typeids    = {0x02CC, 0x02CE, 0x02D0, 0x02D2}; // max. 4 heating circuits supported ny RC310
+        set2_typeids    = {0x0421, 0x0422, 0x0423, 0x0424};
         summer_typeids  = {0x02AF, 0x02B0, 0x02B1, 0x02B2, 0x02B3, 0x02B4, 0x02B5, 0x02B6};
         curve_typeids   = {0x029B, 0x029C, 0x029D, 0x029E, 0x029F, 0x02A0, 0x02A1, 0x02A2};
         summer2_typeids = {0x0471, 0x0472, 0x0473, 0x0474, 0x0475, 0x0476, 0x0477, 0x0478};
@@ -169,7 +171,8 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(summer2_typeids[i], "RC300Summer2", false, MAKE_PF_CB(process_RC300Summer2));
         }
         for (uint8_t i = 0; i < set2_typeids.size(); i++) {
-            register_telegram_type(set2_typeids[i], "RC300Set2", false, MAKE_PF_CB(process_RC300Set2));
+            // register_telegram_type(set2_typeids[i], "RC300Set2", false, MAKE_PF_CB(process_RC300Set2));
+            register_telegram_type(set2_typeids[i], "RC300Set2", false, MAKE_PF_CB(process_PID));
             register_telegram_type(hp_typeids[i], "HPSet", false, MAKE_PF_CB(process_HPSet));
             register_telegram_type(hpmode_typeids[i], "HPMode", true, MAKE_PF_CB(process_HPMode));
         }
@@ -194,13 +197,16 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(0x269, "RC300Holiday", true, MAKE_PF_CB(process_RC300Holiday));
         }
         register_telegram_type(0x16E, "Absent", true, MAKE_PF_CB(process_Absent));
+        register_telegram_type(0xBF, "ErrorMessage", false, MAKE_PF_CB(process_ErrorMessageBF));
+        register_telegram_type(0xC0, "RCErrorMessage", false, MAKE_PF_CB(process_RCErrorMessage2));
+        EMSESP::send_read_request(0xC0, device_id, 0, 20); // read last errorcode on start (only published on errors)
 
         // JUNKERS/HT3
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
         if (device_id >= 0x18 && device_id <= 0x1B) { // remote hc1-hc4
             register_telegram_type(0x123, "JunkersRemote", false, MAKE_PF_CB(process_JunkersRemoteMonitor));
-            register_device_values(); // register device values for common values (not heating circuit)
-            return;                   // no values to add
+            // register_device_values(); // register device values for common values (not heating circuit)
+            // return;                   // no values to add
         }
 
         monitor_typeids = {0x016F, 0x0170, 0x0171, 0x0172};
@@ -223,6 +229,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         register_telegram_type(0xBB, "HybridSettings", true, MAKE_PF_CB(process_HybridSettings));
         register_telegram_type(0x23, "JunkersSetMixer", true, MAKE_PF_CB(process_JunkersSetMixer));
         register_telegram_type(0x1D3, "JunkersDhw", true, MAKE_PF_CB(process_JunkersWW));
+        register_telegram_type(0x11E, "JunkersDisp", true, MAKE_PF_CB(process_JunkersDisp));
     }
 
     // register device values for common values (not heating circuit)
@@ -270,6 +277,10 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(const in
 // returns pointer to the HeatingCircuit or nullptr if it can't be found
 // if its a new one, the heating circuit object will be created and also the fetch flags set
 std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::shared_ptr<const Telegram> telegram) {
+    // do not create a hc on empty messages
+    if (telegram->message_length == 0) {
+        return nullptr;
+    }
     // look through the Monitor and Set arrays to see if there is a match
     uint8_t hc_num  = 0; // 0 means we haven't found it yet
     bool    toggle_ = false;
@@ -504,7 +515,11 @@ uint8_t Thermostat::HeatingCircuit::get_mode() const {
             return HeatingCircuit::Mode::OFF;
         }
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_CR11) {
-        return HeatingCircuit::Mode::MANUAL;
+        if (mode > 0) {
+            return HeatingCircuit::Mode::MANUAL;
+        } else {
+            return HeatingCircuit::Mode::OFF;
+        }
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_BC400 || model == EMSdevice::EMS_DEVICE_FLAG_CR120) {
         if (mode_new == 0) {
             return HeatingCircuit::Mode::OFF;
@@ -513,7 +528,8 @@ uint8_t Thermostat::HeatingCircuit::get_mode() const {
         } else if (mode_new == 2) {
             return HeatingCircuit::Mode::AUTO;
         }
-    } else if ((model == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model == EMSdevice::EMS_DEVICE_FLAG_R3000) || (model == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
+    } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC300 || model == EMSdevice::EMS_DEVICE_FLAG_R3000 || model == EMSdevice::EMS_DEVICE_FLAG_RC100
+               || model == EMSdevice::EMS_DEVICE_FLAG_HMC310) {
         if (mode == 0) {
             return HeatingCircuit::Mode::MANUAL;
         } else if (mode == 1) {
@@ -559,13 +575,16 @@ uint8_t Thermostat::HeatingCircuit::get_mode_type() const {
         } else if (modetype == 1) {
             return HeatingCircuit::Mode::DAY;
         }
+    } else if (model == EMSdevice::EMS_DEVICE_FLAG_CR11) {
+        return mode ? HeatingCircuit::Mode::MANUAL : HeatingCircuit::Mode::OFF;
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_CRF) {
         if (modetype == 0) {
             return HeatingCircuit::Mode::OFF;
         } else if (modetype == 1) {
             return HeatingCircuit::Mode::ON;
         }
-    } else if ((model == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model == EMSdevice::EMS_DEVICE_FLAG_R3000) || (model == EMSdevice::EMS_DEVICE_FLAG_BC400)) {
+    } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC300 || model == EMSdevice::EMS_DEVICE_FLAG_R3000 || model == EMSdevice::EMS_DEVICE_FLAG_BC400
+               || model == EMSdevice::EMS_DEVICE_FLAG_HMC310) {
         if (modetype == 0) {
             return HeatingCircuit::Mode::ECO;
         } else if (modetype == 1) {
@@ -747,8 +766,12 @@ void Thermostat::process_RC20Remote(std::shared_ptr<const Telegram> telegram) {
 
 // 0x42B - for reading the roomtemperature from the RC100H remote thermostat (0x38, 0x39, ..)
 // e.g. "38 10 FF 00 03 2B 00 D1 08 2A 01"
+// also RF temp from 0x435
 void Thermostat::process_RemoteTemp(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, tempsensor1_, 0);
+    if (telegram->type_id >= 0x435) {
+        return;
+    }
     uint8_t hc = telegram->type_id - 0x42B;
     if (Roomctrl::is_remote(hc)) {
         toggle_fetch(0x273 + hc, false);
@@ -906,12 +929,12 @@ void Thermostat::process_IBASettings(std::shared_ptr<const Telegram> telegram) {
 // Settings WW 0x37 - RC35
 void Thermostat::process_RC35wwSettings(std::shared_ptr<const Telegram> telegram) {
     auto dhw = dhw_circuit(0, true);
-    has_update(telegram, dhw->wwProgMode_, 0);     // 0-like hc, 0xFF own prog
-    has_update(telegram, dhw->wwCircProg_, 1);     // 0-like hc, 0xFF own prog
-    has_update(telegram, dhw->wwMode_, 2);         // 0-off, 1-on, 2-auto
-    has_update(telegram, dhw->wwCircMode_, 3);     // 0-off, 1-on, 2-auto
-    has_update(telegram, dhw->wwDisinfecting_, 4); // 0-off, 0xFF on
-    has_update(telegram, dhw->wwDisinfectDay_, 5); // 0-6 Day of week, 7 every day
+    has_bitupdate(telegram, dhw->wwProgMode_, 0, 0); // 0-like hc, 0xFF own prog
+    has_bitupdate(telegram, dhw->wwCircProg_, 1, 0); // 0-like hc, 0xFF own prog
+    has_update(telegram, dhw->wwMode_, 2);           // 0-off, 1-on, 2-auto
+    has_update(telegram, dhw->wwCircMode_, 3);       // 0-off, 1-on, 2-auto
+    has_update(telegram, dhw->wwDisinfecting_, 4);   // 0-off, 0xFF on
+    has_update(telegram, dhw->wwDisinfectDay_, 5);   // 0-6 Day of week, 7 every day
     has_update(telegram, dhw->wwDisinfectHour_, 6);
     has_update(telegram, dhw->wwMaxTemp_, 8);    // Limiter 60 degrees
     has_update(telegram, dhw->wwOneTimeKey_, 9); // 0-off, 0xFF on
@@ -1046,9 +1069,16 @@ void Thermostat::process_JunkersSetMixer(std::shared_ptr<const Telegram> telegra
     has_update(telegram, hc->targetflowtemp, 0);
 }
 
+// Thermostat(0x10) -> All(0x00), ?(0x01D3), data: 01 00 00
 void Thermostat::process_JunkersWW(std::shared_ptr<const Telegram> telegram) {
     auto dhw = dhw_circuit(0, true);
     has_bitupdate(telegram, dhw->wwCharge_, 0, 3);
+}
+
+// 0x11E
+void Thermostat::process_JunkersDisp(std::shared_ptr<const Telegram> telegram) {
+    has_enumupdate(telegram, ibaMainDisplay_, 1, 1);
+    has_update(telegram, ibaLanguage_, 3);
 }
 
 // type 0x02A5 - data from Worchester CRF200
@@ -1074,10 +1104,15 @@ void Thermostat::process_CR11Monitor(std::shared_ptr<const Telegram> telegram) {
         return;
     }
 
-    has_update(telegram, hc->roomTemp, 0);   // is * 10
-    has_update(hc->mode, 0);                 // set manual for CR11
+    has_update(telegram, hc->roomTemp, 0); // is * 10
+    // has_update(hc->mode, 0);                 // set manual for CR11
     has_update(telegram, hc->selTemp, 6, 1); // is * 2, force as single byte
     has_update(telegram, hc->targetflowtemp, 4);
+    if (hc->selTemp == 0) {
+        hc->mode = 0;
+    } else {
+        hc->mode = 1;
+    }
 
     add_ha_climate(hc);
 }
@@ -1117,7 +1152,7 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
     has_update(telegram, hc->targetflowtemp, 4);
     has_update(telegram, hc->curroominfl, 27);
     has_update(telegram, hc->currSolarInfl, 29);
-    has_update(telegram, hc->coolingon, 32);
+    has_bitupdate(telegram, hc->coolingon, 32, 0);
     has_update(telegram, hc->vacationmode, 18);
 
     add_ha_climate(hc);
@@ -1191,13 +1226,14 @@ void Thermostat::process_RC300Summer(std::shared_ptr<const Telegram> telegram) {
         has_update(telegram, hc->summersetmode, 7);
     }
 
-    if (hc->heatingtype < 3) {
+    if (hc->heatingtype != 3) {
         has_update(telegram, hc->designtemp, 4);
+        has_update(telegram, hc->minflowtemp, 13);
     } else {
         has_update(telegram, hc->designtemp, 5);
+        has_update(telegram, hc->minflowtemp, 8);
     }
 
-    has_update(telegram, hc->minflowtemp, 8);
     has_update(telegram, hc->fastHeatup, 10);
 }
 
@@ -1238,7 +1274,7 @@ void Thermostat::process_RC300Curve(std::shared_ptr<const Telegram> telegram) {
     has_enumupdate(telegram, hc->nofrostmode, 5, 1); // 1-room, 2-outdoor, 3- room & outdoor
     has_update(telegram, hc->nofrosttemp, 6);
 
-    if (hc->heatingtype < 2) {
+    if (hc->heatingtype < 3) {
         has_update(telegram, hc->maxflowtemp, 8);
     } else {
         has_update(telegram, hc->maxflowtemp, 7);
@@ -1265,31 +1301,15 @@ void Thermostat::process_RC300WWmode(std::shared_ptr<const Telegram> telegram) {
     // circulation pump see: https://github.com/Th3M3/buderus_ems-wiki/blob/master/Einstellungen%20der%20Bedieneinheit%20RC310.md
     has_update(telegram, dhw->wwCircPump_, 1); // FF=off, 0=on ?
 
-    if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400) {
-        const uint8_t modes[] = {0, 5, 1, 2, 4}; // off, eco+, eco, comfort, auto
-        uint8_t       wwmode  = dhw->wwMode_ < sizeof(modes) ? modes[dhw->wwMode_] : EMS_VALUE_UINT8_NOTSET;
-        telegram->read_value(wwmode, 2);
-        const uint8_t modes1[] = {0, 2, 3, 0, 4, 1};
-        has_update(dhw->wwMode_, wwmode < sizeof(modes1) ? modes1[wwmode] : EMS_VALUE_UINT8_NOTSET);
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400 || model() == EMSdevice::EMS_DEVICE_FLAG_HMC310) {
+        has_enumupdate(telegram, dhw->wwMode_, 2, {0, 5, 1, 2, 4});
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) {
         // https://github.com/emsesp/EMS-ESP32/pull/1722#discussion_r1582823521
-        const uint8_t modes[] = {1, 2, 5}; // normal, comfort, eco+
-        uint8_t       wwmode  = dhw->wwMode_ < sizeof(modes) ? modes[dhw->wwMode_] : EMS_VALUE_UINT8_NOTSET;
-        telegram->read_value(wwmode, 2);
-        const uint8_t modes1[] = {0, 0, 1, 0, 0, 2}; // 0=normal (1), 1=comfort(2), 2=eco+(5)
-        has_update(dhw->wwMode_, wwmode < sizeof(modes1) ? modes1[wwmode] : EMS_VALUE_UINT8_NOTSET);
+        has_enumupdate(telegram, dhw->wwMode_, 2, {1, 2, 5}); // normal, comfort, eco+
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_CR120) {
-        const uint8_t modes[] = {1, 2, 4}; //// 0=normal (1), 1=comfort(2), 2=auto(4)
-        uint8_t       wwmode  = dhw->wwMode_ < sizeof(modes) ? modes[dhw->wwMode_] : EMS_VALUE_UINT8_NOTSET;
-        telegram->read_value(wwmode, 2);
-        const uint8_t modes1[] = {0, 0, 1, 0, 2, 0};
-        has_update(dhw->wwMode_, wwmode < sizeof(modes1) ? modes1[wwmode] : EMS_VALUE_UINT8_NOTSET);
+        has_enumupdate(telegram, dhw->wwMode_, 2, {1, 2, 4}); // normal, comfort, auto
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
-        const uint8_t modes[] = {0, 2, 3}; //// 0=off(0), 1=on(2), 2=auto(3)
-        uint8_t       wwmode  = dhw->wwMode_ < sizeof(modes) ? modes[dhw->wwMode_] : EMS_VALUE_UINT8_NOTSET;
-        telegram->read_value(wwmode, 2);
-        const uint8_t modes1[] = {0, 0, 1, 2, 0, 0};
-        has_update(dhw->wwMode_, wwmode < sizeof(modes1) ? modes1[wwmode] : EMS_VALUE_UINT8_NOTSET);
+        has_enumupdate(telegram, dhw->wwMode_, 2, {0, 2, 3}); // normal, on, auto
     } else {
         has_update(telegram, dhw->wwMode_, 2); // 0=off, 1=low, 2=high, 3=auto, 4=own prog
     }
@@ -1314,7 +1334,8 @@ void Thermostat::process_RC300WWmode2(std::shared_ptr<const Telegram> telegram) 
     // pos 1 = holiday mode
     // pos 2 = current status of DHW setpoint
     // pos 3 = current status of DHW circulation pump
-    has_update(telegram, dhw->wwExtra_, 0); // 0=no, 1=yes
+    has_update(telegram, dhw->wwExtra_, 0);    // 0=no, 1=yes
+    has_update(telegram, dhw->wwModeType_, 8); //  0-off, 1-eco, 2-comfort, 3-eco+
 }
 
 // 0x23A damped outdoor temp
@@ -1368,6 +1389,25 @@ void Thermostat::process_RC300Holiday(std::shared_ptr<const Telegram> telegram) 
              telegram->message_data[4],
              telegram->message_data[3] + 2000);
     has_update(vacation[0], data, sizeof(vacation[0]));
+}
+
+// https://github.com/emsesp/EMS-ESP32/issues/2735#issuecomment-3520124647
+void Thermostat::process_PID(std::shared_ptr<const Telegram> telegram) {
+    auto hc = heating_circuit(telegram);
+    if (hc == nullptr) {
+        return;
+    }
+    // Offset 0: Floorheating integral time in 10 min steps. Default is 25, range 16 to 32
+    // Offset 1: HC radiator/convector intergral time in 1min steps. Default is 16, range 3 to 80
+    // Offset 2: Heat Control characteristic as you figured out. Default is 3, Range 2-4
+    // Offset 3: Optimized Pump run with on/off as you figured out
+    if (hc->heatingtype == 3) {
+        has_update(telegram, hc->inttimefloor, 0);
+    } else if (hc->heatingtype != EMS_VALUE_UINT8_NOTSET) {
+        has_update(telegram, hc->inttime, 1);
+    }
+    has_enumupdate(telegram, hc->heatingpid, 2, 2);
+    has_update(telegram, hc->pumpopt, 3);
 }
 
 // 0x291 ff.  HP mode
@@ -1750,6 +1790,55 @@ void Thermostat::process_RCErrorMessage(std::shared_ptr<const Telegram> telegram
     }
 }
 
+// 0xBF
+void Thermostat::process_ErrorMessageBF(std::shared_ptr<const Telegram> telegram) {
+    EMSESP::send_read_request(0xC0, device_id(), 0, 20); // read last errorcode
+}
+
+// 0xC0 error log for RC300
+void Thermostat::process_RCErrorMessage2(std::shared_ptr<const Telegram> telegram) {
+    if (telegram->offset > 0 || telegram->message_length < 20) {
+        return;
+    }
+    uint8_t  code[4] = {telegram->message_data[5], telegram->message_data[6], telegram->message_data[7], 0};
+    uint16_t codeNo  = telegram->message_data[8] * 256 + telegram->message_data[9];
+    uint16_t year    = (telegram->message_data[10] & 0x7F) + 2000;
+    uint8_t  month   = telegram->message_data[11];
+    uint8_t  day     = telegram->message_data[13];
+    uint8_t  hour    = telegram->message_data[12];
+    uint8_t  min     = telegram->message_data[14];
+    uint16_t year1   = (telegram->message_data[15] & 0x7F) + 2000;
+    uint8_t  month1  = telegram->message_data[16];
+    uint8_t  day1    = telegram->message_data[18];
+    uint8_t  hour1   = telegram->message_data[17];
+    uint8_t  min1    = telegram->message_data[19];
+    if (isprint(code[0]) && isprint(code[1]) && isprint(code[2])) {
+        if (year == 2000) { // no clock
+            uint32_t min2 = 65536 * telegram->message_data[11] + 256 * telegram->message_data[12] + telegram->message_data[13];
+            snprintf(lastCode_, sizeof(lastCode_), "%s(%d) %d min", code, codeNo, min2);
+        } else if (year1 == 2000) {
+            snprintf(lastCode_, sizeof(lastCode_), "%s(%d) %02d.%02d.%d %02d:%02d", code, codeNo, day, month, year, hour, min);
+        } else {
+            snprintf(lastCode_,
+                     sizeof(lastCode_),
+                     "%s(%d) %02d.%02d.%d %02d:%02d-%02d.%02d.%d %02d:%02d",
+                     code,
+                     codeNo,
+                     day,
+                     month,
+                     year,
+                     hour,
+                     min,
+                     day1,
+                     month1,
+                     year1,
+                     hour1,
+                     min1);
+        }
+        has_update(lastCode_);
+    }
+}
+
 /*
  *
  * *** settings ***
@@ -1945,12 +2034,12 @@ bool Thermostat::set_calinttemp(const char * value, const int8_t id) {
     auto t = (int8_t)(ct * 10);
     LOG_DEBUG("Calibrating internal temperature to %d.%d C", t / 10, t < 0 ? -t % 10 : t % 10);
 
-    if (model() == EMSdevice::EMS_DEVICE_FLAG_RC10) {
+    if (device_id() >= 0x38 && device_id() <= 0x3F) { // remote thermostats RC100H, CR10, ...
+        write_command(0x273 + device_id() - 0x38, 0, t, 0x273 + device_id() - 0x38);
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC10) {
         write_command(0xB0, 0, t, 0xB0);
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC30) {
         write_command(EMS_TYPE_RC30Settings, 1, t, EMS_TYPE_RC30Settings);
-    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100H) {
-        write_command(0x273, 0, t, 0x273);
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
         write_command(0x241, 7, t, 0x241);
     } else if (isRC300()) {
@@ -1965,13 +2054,18 @@ bool Thermostat::set_calinttemp(const char * value, const int8_t id) {
 // 0xA5 - Set the display settings, RC30_N
 bool Thermostat::set_display(const char * value, const int8_t id) {
     uint8_t ds;
-    if (!Helpers::value2enum(value, ds, FL_(enum_ibaMainDisplay))) {
-        return false;
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+        if (Helpers::value2enum(value, ds, FL_(enum_ibaMainDisplayJ))) {
+            write_command(0x11E, 1, ds + 1, 0x11E);
+            return true;
+        }
+    } else {
+        if (Helpers::value2enum(value, ds, FL_(enum_ibaMainDisplay))) {
+            write_command(EMS_TYPE_IBASettings, 0, ds, EMS_TYPE_IBASettings);
+            return true;
+        }
     }
-
-    write_command(EMS_TYPE_IBASettings, 0, ds, EMS_TYPE_IBASettings);
-
-    return true;
+    return false;
 }
 
 // 0xA7 - Set Screen brightness
@@ -2005,7 +2099,7 @@ bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
         hc->remotetemp = (int16_t)(f * 10);
     }
 
-    if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS && !has_flags(EMSdevice::EMS_DEVICE_FLAG_JUNKERS_OLD)) {
         Roomctrl::set_remotetemp(Roomctrl::FB10, hc->hc(), hc->remotetemp); // FB10
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC35 || model() == EMSdevice::EMS_DEVICE_FLAG_RC30_N) {
         Roomctrl::set_remotetemp(Roomctrl::RC20, hc->hc(), hc->remotetemp); // RC20
@@ -2016,6 +2110,8 @@ bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
             Roomctrl::set_remotetemp(Roomctrl::RC100H, hc->hc(), hc->remotetemp); // RC100H
         } else if (hc->control == 2) {                                            // RC100(2)
             Roomctrl::set_remotetemp(Roomctrl::RC100, hc->hc(), hc->remotetemp);  // RC100
+        } else if (hc->control == 5) {
+            Roomctrl::set_remotetemp(Roomctrl::RC120RF, hc->hc(), hc->remotetemp);
         } else if (hc->control == 6) {
             Roomctrl::set_remotetemp(Roomctrl::RT800, hc->hc(), hc->remotetemp);
         } else {
@@ -2047,6 +2143,9 @@ bool Thermostat::set_remotehum(const char * value, const int8_t id) {
 
     if (hc->control == 3) {
         Roomctrl::set_remotehum(Roomctrl::RC100H, hc->hc(), hc->remotehum); // RC100H
+        return true;
+    } else if (hc->control == 5) {
+        Roomctrl::set_remotehum(Roomctrl::RC120RF, hc->hc(), hc->remotehum);
         return true;
     } else if (hc->control == 6) {
         Roomctrl::set_remotehum(Roomctrl::RT800, hc->hc(), hc->remotehum);
@@ -2087,9 +2186,54 @@ bool Thermostat::set_heatingpid(const char * value, const int8_t id) {
         write_command(0xB0, 6, pid, 0xB0);
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC30) {
         write_command(EMS_TYPE_RC30Settings, 25, pid, EMS_TYPE_RC30Settings);
+    } else if (isRC300() || model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
+        auto hc = heating_circuit(id);
+        if (hc == nullptr) {
+            return false;
+        }
+        write_command(set2_typeids[hc->hc()], 2, pid + 2, set2_typeids[hc->hc()]);
     }
 
     return true;
+}
+
+bool Thermostat::set_pumpopt(const char * value, const int8_t id) {
+    auto hc = heating_circuit(id);
+    if (hc == nullptr) {
+        return false;
+    }
+    bool b;
+    if (Helpers::value2bool(value, b)) {
+        write_command(set2_typeids[hc->hc()], 3, b ? 0xFF : 0, set2_typeids[hc->hc()]);
+        return true;
+    }
+    return false;
+}
+
+bool Thermostat::set_inttime(const char * value, const int8_t id) {
+    auto hc = heating_circuit(id);
+    if (hc == nullptr) {
+        return false;
+    }
+    int v;
+    if (Helpers::value2number(value, v)) {
+        write_command(set2_typeids[hc->hc()], 1, v, set2_typeids[hc->hc()]);
+        return true;
+    }
+    return false;
+}
+
+bool Thermostat::set_inttimefloor(const char * value, const int8_t id) {
+    auto hc = heating_circuit(id);
+    if (hc == nullptr) {
+        return false;
+    }
+    int v;
+    if (Helpers::value2number(value, v)) {
+        write_command(set2_typeids[hc->hc()], 0, v / 10, set2_typeids[hc->hc()]);
+        return true;
+    }
+    return false;
 }
 
 // 0xA5 and 0x0240- Set the damping settings
@@ -2126,7 +2270,12 @@ bool Thermostat::set_solar(const char * value, const int8_t id) {
 bool Thermostat::set_language(const char * value, const int8_t id) {
     uint8_t lg;
 
-    if (model() == EMSdevice::EMS_DEVICE_FLAG_RC30) {
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+        if (!Helpers::value2enum(value, lg, FL_(enum_ibaLanguageJ))) {
+            return false;
+        }
+        write_command(0x11E, 3, lg, 0x11E);
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC30) {
         if (!Helpers::value2enum(value, lg, FL_(enum_ibaLanguage_RC30))) {
             return false;
         }
@@ -2167,6 +2316,8 @@ bool Thermostat::set_control(const char * value, const int8_t id) {
                     Roomctrl::set_remotetemp(Roomctrl::RC100, hc->hc(), hc->remotetemp);
                 } else if (ctrl == 3) {
                     Roomctrl::set_remotetemp(Roomctrl::RC100H, hc->hc(), hc->remotetemp);
+                } else if (ctrl == 5) {
+                    Roomctrl::set_remotetemp(Roomctrl::RC120RF, hc->hc(), hc->remotetemp); // RC120
                 } else if (ctrl == 6) {
                     Roomctrl::set_remotetemp(Roomctrl::RT800, hc->hc(), hc->remotetemp);
                 } else {
@@ -2235,30 +2386,26 @@ bool Thermostat::set_wwmode(const char * value, const int8_t id) {
             return false;
         }
         write_command(0xB0, 2, set, 0xB0);
-    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400) {
-        if (!Helpers::value2enum(value, set, FL_(enum_wwMode4))) { // off, eco+, eco, comfort, auto
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400 || model() == EMSdevice::EMS_DEVICE_FLAG_HMC310) {
+        if (!Helpers::value2enum(value, set, FL_(enum_wwMode4), {0, 5, 1, 2, 4})) { // off, eco+, eco, comfort, auto
             return false;
         }
-        const uint8_t modes[] = {0, 5, 1, 2, 4};
-        write_command(0x02F5 + dhw->offset(), 2, modes[set], 0x02F5 + dhw->offset());
+        write_command(0x02F5 + dhw->offset(), 2, set, 0x02F5 + dhw->offset());
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_CR120) {
-        if (!Helpers::value2enum(value, set, FL_(enum_wwMode6))) { // normal, comfort, auto
+        if (!Helpers::value2enum(value, set, FL_(enum_wwMode6), {0, 2, 4})) { // normal, comfort, auto
             return false;
         }
-        const uint8_t modes[] = {0, 2, 4};
-        write_command(0x02F5 + dhw->offset(), 2, modes[set], 0x02F5 + dhw->offset());
+        write_command(0x02F5 + dhw->offset(), 2, set, 0x02F5 + dhw->offset());
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
-        if (!Helpers::value2enum(value, set, FL_(enum_wwMode2))) { // off, on, auto
+        if (!Helpers::value2enum(value, set, FL_(enum_wwMode2), {0, 2, 3})) { // off, on, auto
             return false;
         }
-        const uint8_t modes[] = {0, 2, 3};
-        write_command(0x02F5 + dhw->offset(), 2, modes[set], 0x02F5 + dhw->offset());
+        write_command(0x02F5 + dhw->offset(), 2, set, 0x02F5 + dhw->offset());
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) { // Rego3000 - https://github.com/emsesp/EMS-ESP32/issues/1692
-        if (!Helpers::value2enum(value, set, FL_(enum_wwMode5))) {
+        if (!Helpers::value2enum(value, set, FL_(enum_wwMode5), {1, 2, 5})) {
             return false;
         }
-        const uint8_t modes[] = {1, 2, 5};
-        write_command(0x02F5 + dhw->offset(), 2, modes[set], 0x02F5 + dhw->offset());
+        write_command(0x02F5 + dhw->offset(), 2, set, 0x02F5 + dhw->offset());
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC300) {
         if (!Helpers::value2enum(value, set, FL_(enum_wwMode))) {
             return false;
@@ -2946,6 +3093,7 @@ bool Thermostat::set_mode(const char * value, const int8_t id) {
     case EMSdevice::EMS_DEVICE_FLAG_RC300:
     case EMSdevice::EMS_DEVICE_FLAG_RC100:
     case EMSdevice::EMS_DEVICE_FLAG_R3000:
+    case EMSdevice::EMS_DEVICE_FLAG_HMC310:
         mode_list = FL_(enum_mode);
         break;
     case EMSdevice::EMS_DEVICE_FLAG_JUNKERS:
@@ -2954,6 +3102,9 @@ bool Thermostat::set_mode(const char * value, const int8_t id) {
     case EMSdevice::EMS_DEVICE_FLAG_CRF:
         mode_list = FL_(enum_mode5);
         break;
+    case EMSdevice::EMS_DEVICE_FLAG_CR11:
+        mode_list = FL_(enum_mode7);
+        break;
     default:
         return false;
     }
@@ -2961,11 +3112,10 @@ bool Thermostat::set_mode(const char * value, const int8_t id) {
     uint8_t enum_index = 0;
 
     // check for the mode being a full string name or single digit
+    // if not found, try the HA mode list if HA is enabled
     if (!Helpers::value2enum(value, enum_index, mode_list)) {
         mode_list = FL_(enum_mode_ha);
         if (!Mqtt::ha_enabled() || !Helpers::value2enum(value, enum_index, mode_list)) {
-            // We have logging on fail in command.cpp
-            // LOG_WARNING("wrong mode: %s", value);
             return false; // not found
         }
     }
@@ -3038,6 +3188,15 @@ bool Thermostat::set_mode_n(const uint8_t mode, const int8_t id) {
 
     uint8_t model_ = model();
     switch (model_) {
+    case EMSdevice::EMS_DEVICE_FLAG_CR11:
+        offset = 10;
+        if (set_mode_value) {
+            if (hc->selTemp > 0) {
+                return true;
+            }
+            set_mode_value = 50; // set selTemp to 5 degrees
+        }
+        break;
     case EMSdevice::EMS_DEVICE_FLAG_RC10:
         offset          = 0;
         validate_typeid = 0xB1;
@@ -3071,6 +3230,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const int8_t id) {
     case EMSdevice::EMS_DEVICE_FLAG_RC300:
     case EMSdevice::EMS_DEVICE_FLAG_RC100:
     case EMSdevice::EMS_DEVICE_FLAG_R3000:
+    case EMSdevice::EMS_DEVICE_FLAG_HMC310:
         offset         = EMS_OFFSET_RCPLUSSet_mode;
         set_mode_value = set_mode_value == 2 ? 0xFF : 0;
         break;
@@ -3105,7 +3265,8 @@ bool Thermostat::set_mode_n(const uint8_t mode, const int8_t id) {
         hc->mode = set_mode_value >> 1;
     } else if (model_ == EMSdevice::EMS_DEVICE_FLAG_BC400 || model_ == EMSdevice::EMS_DEVICE_FLAG_CR120) {
         hc->mode_new = set_mode_value;
-    } else if (model_ == EMSdevice::EMS_DEVICE_FLAG_RC300 || model_ == EMSdevice::EMS_DEVICE_FLAG_R3000 || model_ == EMSdevice::EMS_DEVICE_FLAG_RC100) {
+    } else if (model_ == EMSdevice::EMS_DEVICE_FLAG_RC300 || model_ == EMSdevice::EMS_DEVICE_FLAG_R3000 || model_ == EMSdevice::EMS_DEVICE_FLAG_HMC310
+               || model_ == EMSdevice::EMS_DEVICE_FLAG_RC100) {
         hc->mode = set_mode_value == 0xFF ? 1 : 0;
     } else if (model_ == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
         hc->mode = set_mode_value - 1;
@@ -3614,7 +3775,7 @@ bool Thermostat::set_wwCircSwitchTime(const char * value, const int8_t id) {
 // sets a single switchtime in the thermostat circulation program for RC35
 bool Thermostat::set_wwSwitchTime(const char * value, const int8_t id) {
     auto dhw = dhw_circuit(id2dhw(id));
-    if (dhw != nullptr) {
+    if (dhw == nullptr) {
         return false;
     }
     char out[sizeof(dhw->wwSwitchTime_)] = {'\0'};
@@ -3793,7 +3954,11 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
 
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_CR11) {
         offset = 10; // just seltemp write to manualtemp
-
+        if (temperature == 0) {
+            hc->mode = 0;
+        } else {
+            hc->mode = 1;
+        }
     } else if (isRC300() || (model == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
         validate_typeid = set_typeids[hc->hc()];
         switch (mode) {
@@ -3855,18 +4020,14 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
         case HeatingCircuit::Mode::MINFLOW:
             set_typeid      = summer_typeids[hc->hc()];
             validate_typeid = set_typeid;
-            offset          = 8;
+            offset          = hc->heatingtype == 3 ? 8 : 13;
             factor          = 1;
             break;
         case HeatingCircuit::Mode::MAXFLOW:
             set_typeid      = curve_typeids[hc->hc()];
             validate_typeid = set_typeid;
-            if (hc->heatingtype == 3) {
-                offset = 7;
-            } else {
-                offset = 8;
-            }
-            factor = 1;
+            offset          = hc->heatingtype == 3 ? 7 : 8;
+            factor          = 1;
             break;
         case HeatingCircuit::Mode::NOFROST:
             set_typeid      = curve_typeids[hc->hc()];
@@ -4130,8 +4291,15 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
         // add the write command to the Tx queue. value is *2
         // post validate is the corresponding monitor or set type IDs as they can differ per model
         write_command(set_typeid, offset, (uint8_t)(temperature * (float)factor), validate_typeid);
+
+        // update selTemp now, readback from monitor telegram takes a while
+        if (mode == HeatingCircuit::Mode::AUTO) {
+            has_update(hc->selTemp, (int16_t)(temperature * factor));
+            // read_command(0x08, 0x18); // UBAMonitorFast
+        }
         return true;
     }
+
     LOG_DEBUG("temperature mode %d not found", mode);
     return false;
 }
@@ -4188,6 +4356,7 @@ void Thermostat::register_device_values() {
     case EMSdevice::EMS_DEVICE_FLAG_R3000:
     case EMSdevice::EMS_DEVICE_FLAG_BC400:
     case EMSdevice::EMS_DEVICE_FLAG_CR120:
+    case EMSdevice::EMS_DEVICE_FLAG_HMC310:
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &dateTime_,
                               DeviceValueType::STRING,
@@ -4489,6 +4658,20 @@ void Thermostat::register_device_values() {
                                   FL_(dateTime),
                                   DeviceValueUOM::NONE,
                                   MAKE_CF_CB(set_datetime));
+            register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                                  &ibaMainDisplay_,
+                                  DeviceValueType::ENUM,
+                                  FL_(enum_ibaMainDisplayJ),
+                                  FL_(ibaMainDisplay),
+                                  DeviceValueUOM::NONE,
+                                  MAKE_CF_CB(set_display));
+            register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                                  &ibaLanguage_,
+                                  DeviceValueType::ENUM,
+                                  FL_(enum_ibaLanguageJ),
+                                  FL_(ibaLanguage),
+                                  DeviceValueUOM::NONE,
+                                  MAKE_CF_CB(set_language));
         }
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &hybridStrategy_,
@@ -4619,6 +4802,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
     case EMSdevice::EMS_DEVICE_FLAG_R3000:
     case EMSdevice::EMS_DEVICE_FLAG_BC400:
     case EMSdevice::EMS_DEVICE_FLAG_CR120:
+    case EMSdevice::EMS_DEVICE_FLAG_HMC310:
         if (model == EMSdevice::EMS_DEVICE_FLAG_BC400 || model == EMSdevice::EMS_DEVICE_FLAG_CR120) {
             register_device_value(tag, &hc->mode_new, DeviceValueType::ENUM, FL_(enum_mode2), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
         } else {
@@ -4749,6 +4933,18 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               22);
         register_device_value(tag, &hc->solarInfl, DeviceValueType::UINT8, FL_(solarinfl), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_solarinfl), -5, -1);
         register_device_value(tag, &hc->currSolarInfl, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(currsolarinfl), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &hc->heatingpid, DeviceValueType::ENUM, FL_(enum_PID), FL_(heatingPID), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatingpid));
+        register_device_value(tag, &hc->pumpopt, DeviceValueType::BOOL, FL_(pumpopt), DeviceValueUOM::NONE, MAKE_CF_CB(set_pumpopt));
+        register_device_value(tag,
+                              &hc->inttimefloor,
+                              DeviceValueType::UINT8,
+                              DeviceValueNumOp::DV_NUMOP_MUL10,
+                              FL_(inttimefloor),
+                              DeviceValueUOM::MINUTES,
+                              MAKE_CF_CB(set_inttimefloor),
+                              160,
+                              320);
+        register_device_value(tag, &hc->inttime, DeviceValueType::UINT8, FL_(inttime), DeviceValueUOM::MINUTES, MAKE_CF_CB(set_inttime), 3, 80);
         break;
     case EMSdevice::EMS_DEVICE_FLAG_CRF:
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode5), FL_(mode), DeviceValueUOM::NONE);
@@ -4756,7 +4952,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->targetflowtemp, DeviceValueType::UINT8, FL_(targetflowtemp), DeviceValueUOM::DEGREES);
         break;
     case EMSdevice::EMS_DEVICE_FLAG_CR11:
-        register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode), FL_(mode), DeviceValueUOM::NONE);
+        register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode7), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
         register_device_value(tag, &hc->targetflowtemp, DeviceValueType::UINT8, FL_(targetflowtemp), DeviceValueUOM::DEGREES);
         register_device_value(
             tag, &hc->heatingtype, DeviceValueType::ENUM, FL_(enum_heatingtype), FL_(heatingtype), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatingtype));
@@ -5058,7 +5254,8 @@ void Thermostat::register_device_values_dhw(std::shared_ptr<Thermostat::DhwCircu
     case EMSdevice::EMS_DEVICE_FLAG_R3000:
     case EMSdevice::EMS_DEVICE_FLAG_BC400:
     case EMSdevice::EMS_DEVICE_FLAG_CR120:
-        if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400) {
+    case EMSdevice::EMS_DEVICE_FLAG_HMC310:
+        if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400 || model() == EMSdevice::EMS_DEVICE_FLAG_HMC310) {
             register_device_value(tag, &dhw->wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode4), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
         } else if (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) {
             register_device_value(tag, &dhw->wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode5), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
@@ -5069,6 +5266,7 @@ void Thermostat::register_device_values_dhw(std::shared_ptr<Thermostat::DhwCircu
         } else {
             register_device_value(tag, &dhw->wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
         }
+        register_device_value(tag, &dhw->wwModeType_, DeviceValueType::ENUM, FL_(enum_wwModeType), FL_(modetype), DeviceValueUOM::NONE);
         register_device_value(tag, &dhw->wwSetTemp_, DeviceValueType::UINT8, FL_(wwSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwtemp));
         register_device_value(tag, &dhw->wwSetTempLow_, DeviceValueType::UINT8, FL_(wwSetTempLow), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwtemplow));
         register_device_value(tag, &dhw->wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcircmode));
@@ -5134,7 +5332,7 @@ void Thermostat::register_device_values_dhw(std::shared_ptr<Thermostat::DhwCircu
         register_device_value(tag, &dhw->wwMaxTemp_, DeviceValueType::UINT8, FL_(wwMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwMaxTemp));
         register_device_value(tag, &dhw->wwOneTimeKey_, DeviceValueType::BOOL, FL_(wwOneTimeKey), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwOneTimeKey));
         register_device_value(
-            tag, &dhw->wwSwitchTime_, DeviceValueType::STRING, FL_(tpl_switchtime), FL_(wwswitchtime), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwSwitchTime));
+            tag, &dhw->wwSwitchTime_, DeviceValueType::STRING, FL_(tpl_switchtime), FL_(switchtime), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwSwitchTime));
         register_device_value(tag,
                               &dhw->wwCircSwitchTime_,
                               DeviceValueType::STRING,
@@ -5157,7 +5355,7 @@ void Thermostat::register_device_values_dhw(std::shared_ptr<Thermostat::DhwCircu
         register_device_value(tag, &dhw->wwMaxTemp_, DeviceValueType::UINT8, FL_(wwMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwMaxTemp), 60, 80);
         register_device_value(tag, &dhw->wwOneTimeKey_, DeviceValueType::BOOL, FL_(wwOneTimeKey), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwOneTimeKey));
         register_device_value(
-            tag, &dhw->wwSwitchTime_, DeviceValueType::STRING, FL_(tpl_switchtime), FL_(wwswitchtime), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwSwitchTime));
+            tag, &dhw->wwSwitchTime_, DeviceValueType::STRING, FL_(tpl_switchtime), FL_(switchtime), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwSwitchTime));
         register_device_value(tag,
                               &dhw->wwCircSwitchTime_,
                               DeviceValueType::STRING,

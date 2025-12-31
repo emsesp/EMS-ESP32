@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,12 @@
 #define EMSESP_EMSUART_H
 
 #include "Arduino.h"
+
+#define EMS_TXMODE_OFF 0
+#define EMS_TXMODE_DEFAULT 1
+#define EMS_TXMODE_EMSPLUS 2
+#define EMS_TXMODE_HT3 3
+#define EMS_TXMODE_HW 4
 
 namespace emsesp {
 

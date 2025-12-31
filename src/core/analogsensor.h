@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,28 +25,27 @@
 
 #include <uuid/log.h>
 
-namespace emsesp {
+#include <esp32-psram.h>
 
-// names, same order as AnalogType
-MAKE_ENUM_FIXED(AnalogTypeName, "disabled", "dig_in", "counter", "adc", "timer", "rate", "dig_out", "pwm0", "pwm1", "pwm2")
+namespace emsesp {
 
 class AnalogSensor {
   public:
     class Sensor {
       public:
-        Sensor(const uint8_t gpio, const std::string & name, const double offset, const double factor, const uint8_t uom, const int8_t type);
+        Sensor(const uint8_t gpio, const char * name, const double offset, const double factor, const uint8_t uom, const int8_t type, const bool is_system);
         ~Sensor() = default;
 
         void set_offset(const double offset) {
             offset_ = offset;
         }
 
-        std::string name() const {
+        const char * name() const {
             return name_;
         }
 
-        void set_name(const std::string & name) {
-            name_ = name;
+        void set_name(const char * name) {
+            strlcpy(name_, name, sizeof(name_));
         }
 
         uint8_t gpio() const {
@@ -61,10 +60,16 @@ class AnalogSensor {
             value_ = value;
         }
 
+        bool is_system() const {
+            return is_system_;
+        }
+        void set_is_system(const bool is_system) {
+            is_system_ = is_system;
+        }
+
         double factor() const {
             return factor_;
         }
-
         void set_factor(const double factor) {
             factor_ = factor;
         }
@@ -76,7 +81,6 @@ class AnalogSensor {
         void set_uom(const uint8_t uom) {
             uom_ = uom;
         }
-
         uint8_t uom() const {
             return uom_;
         }
@@ -100,20 +104,20 @@ class AnalogSensor {
         uint32_t last_polltime_ = 0; // for timer
 
       private:
-        uint8_t     gpio_;
-        std::string name_;
-        double      offset_;
-        double      factor_;
-        uint8_t     uom_;
-        double      value_; // double because of the factor is a double
-        int8_t      type_;  // one of the AnalogType enum
+        uint8_t gpio_;
+        char    name_[20];
+        double  offset_;
+        double  factor_;
+        uint8_t uom_;
+        double  value_;     // double because of the factor is a double
+        int8_t  type_;      // one of the AnalogType enum
+        bool    is_system_; // if true, the sensor is a system sensor
     };
 
     AnalogSensor()  = default;
     ~AnalogSensor() = default;
 
     enum AnalogType : int8_t {
-        NOTUSED     = 0, // 0 = disabled
         DIGITAL_IN  = 1,
         COUNTER     = 2,
         ADC         = 3,
@@ -122,10 +126,19 @@ class AnalogSensor {
         DIGITAL_OUT = 6,
         PWM_0       = 7,
         PWM_1       = 8,
-        PWM_2       = 9
+        PWM_2       = 9,
+        NTC         = 10,
+        RGB         = 11,
+        PULSE       = 12,
+        FREQ_0      = 13,
+        FREQ_1      = 14,
+        FREQ_2      = 15,
+        CNT_0       = 16,
+        CNT_1       = 17,
+        CNT_2       = 18
     };
 
-    void start();
+    void start(const bool factory_settings = false);
     void loop();
     void publish_sensor(const Sensor & sensor) const;
     void publish_values(const bool force);
@@ -133,7 +146,7 @@ class AnalogSensor {
     bool updated_values();
 
     // return back reference to the sensor list, used by other classes
-    std::vector<Sensor> sensors() const {
+    std::vector<Sensor, AllocatorPSRAM<Sensor>> sensors() const {
         return sensors_;
     }
 
@@ -153,36 +166,53 @@ class AnalogSensor {
         return (!sensors_.empty());
     }
 
-    size_t count_entities(bool include_disabled = true) const {
-        if (!include_disabled) {
-            // count number of items in sensors_ where type is not set to disabled
-            return std::count_if(sensors_.begin(), sensors_.end(), [](const Sensor & sensor) { return sensor.type() != AnalogSensor::AnalogType::NOTUSED; });
+    // count number of items in sensors_ where type is not set to disabled and not a system sensor
+    size_t count_entities(bool exclude_disabled_system = false) const {
+        if (exclude_disabled_system) {
+            return std::count_if(sensors_.begin(), sensors_.end(), [](const Sensor & sensor) { return !sensor.is_system(); });
         }
         return sensors_.size();
     }
 
-    bool update(uint8_t gpio, std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted = false);
-    bool get_value_info(JsonObject output, const char * cmd, const int8_t id = -1);
-    void store_counters();
+    bool                        update(uint8_t gpio, const char * name, double offset, double factor, uint8_t uom, int8_t type, bool deleted, bool is_system);
+    bool                        get_value_info(JsonObject output, const char * cmd, const int8_t id = -1);
+    void                        store_counters();
+    static std::vector<uint8_t> exclude_types() {
+        return exclude_types_;
+    }
 
   private:
+    static constexpr double   Beta                    = 4260;
+    static constexpr double   T0                      = 273.15;
+    static constexpr double   T25                     = 298.15;
+    static constexpr double   R0                      = 100000;
+    static constexpr double   Rt                      = 60000;
     static constexpr uint8_t  MAX_SENSORS             = 20;
     static constexpr uint32_t MEASURE_ANALOG_INTERVAL = 500;
 
     static uuid::log::Logger logger_;
+    void                     remove_ha_topic(const int8_t type, const uint8_t id) const;
+    bool                     command_setvalue(const char * value, const int8_t gpio);
+    void                     measure();
+    void                     addSensorJson(JsonObject output, const Sensor & sensor);
+    void                     get_value_json(JsonObject output, const Sensor & sensor);
 
-    void remove_ha_topic(const int8_t type, const uint8_t id) const;
-    bool command_setvalue(const char * value, const int8_t gpio);
-    void measure();
-    void addSensorJson(JsonObject output, const Sensor & sensor);
-    void get_value_json(JsonObject output, const Sensor & sensor);
-
-    std::vector<Sensor> sensors_; // our list of sensors
+    std::vector<Sensor, AllocatorPSRAM<Sensor>> sensors_; // our list of sensors
+    static std::vector<uint8_t>                 exclude_types_;
 
     bool     analog_enabled_;
-    bool     changed_     = false;
+    bool     changed_     = true; // this will force a publish of all sensors when initialising
     uint32_t sensorfails_ = 0;
     uint32_t sensorreads_ = 0;
+
+#ifndef EMSESP_STANDALONE
+    static void IRAM_ATTR freqIrq0();
+    static void IRAM_ATTR freqIrq1();
+    static void IRAM_ATTR freqIrq2();
+    static unsigned long  edge[3];
+    static unsigned long  edgecnt[3];
+    unsigned long         lastedge[3] = {0, 0, 0};
+#endif
 };
 
 } // namespace emsesp

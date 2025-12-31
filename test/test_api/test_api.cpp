@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,14 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// tip: use https://jsondiff.com/ to compare the expected and actual responses.
+
 #include <Arduino.h>
-
 #include <unity.h>
-
 #include <emsesp.h>
+
 #include "ESPAsyncWebServer.h"
 #include "web/WebAPIService.h"
-#include "test_shuntingYard.hpp"
+#include "test_shuntingYard.h"
 
 using namespace emsesp;
 
@@ -37,8 +38,8 @@ WebAPIService *  webAPIService;
 EMSESP           application;
 FS               dummyFS;
 
-std::shared_ptr<emsesp::EMSESPConsole> shell;
-char                                   output_buffer[4096];
+std::shared_ptr<EMSESPConsole> shell;
+char                           output_buffer[4096];
 
 class TestStream : public Stream {
   public:
@@ -280,6 +281,80 @@ void manual_test6() {
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor/setvalue", data));
 }
 
+void manual_test7() {
+    auto expected_response = "[{}]"; // empty is good
+    char data[]            = "{\"value\":9}";
+
+    TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/custom/test_ram", data));
+}
+
+void manual_test8() {
+    const char * response = call_url("/api/boiler/metrics");
+
+    TEST_ASSERT_NOT_NULL(response);
+    TEST_ASSERT_TRUE(strlen(response) > 0);
+
+    TEST_ASSERT_TRUE(strstr(response, "# HELP") != nullptr);
+    TEST_ASSERT_TRUE(strstr(response, "# TYPE") != nullptr);
+    TEST_ASSERT_TRUE(strstr(response, "emsesp_") != nullptr);
+    TEST_ASSERT_TRUE(strstr(response, " gauge") != nullptr);
+
+    if (strstr(response, ", enum, (") != nullptr) {
+        TEST_ASSERT_TRUE(strstr(response, ", enum, (") != nullptr);
+        TEST_ASSERT_TRUE(strstr(response, ")") != nullptr);
+    }
+    TEST_ASSERT_TRUE(strstr(response, "emsesp_tapwateractive") != nullptr || strstr(response, "emsesp_selflowtemp") != nullptr
+                     || strstr(response, "emsesp_curflowtemp") != nullptr);
+}
+
+void manual_test9() {
+    const char * response = call_url("/api/thermostat/metrics");
+
+    TEST_ASSERT_NOT_NULL(response);
+    TEST_ASSERT_TRUE(strlen(response) > 0);
+
+    TEST_ASSERT_TRUE(strstr(response, "# HELP") != nullptr);
+    TEST_ASSERT_TRUE(strstr(response, "# TYPE") != nullptr);
+    TEST_ASSERT_TRUE(strstr(response, "emsesp_") != nullptr);
+
+    if (strstr(response, ", enum, (") != nullptr) {
+        TEST_ASSERT_TRUE(strstr(response, ", enum, (") != nullptr);
+        TEST_ASSERT_TRUE(strstr(response, ")") != nullptr);
+    }
+    if (strstr(response, "circuit=") != nullptr) {
+        TEST_ASSERT_TRUE(strstr(response, "{circuit=") != nullptr);
+    }
+}
+
+void manual_test10() {
+    const char * response = call_url("/api/system/metrics");
+
+    TEST_ASSERT_NOT_NULL(response);
+    TEST_ASSERT_TRUE(strlen(response) > 0);
+
+    TEST_ASSERT_TRUE(strstr(response, "# HELP") != nullptr);
+    TEST_ASSERT_TRUE(strstr(response, "# TYPE") != nullptr);
+    TEST_ASSERT_TRUE(strstr(response, "emsesp_") != nullptr);
+    TEST_ASSERT_TRUE(strstr(response, " gauge") != nullptr);
+
+    if (strstr(response, ", enum, (") != nullptr) {
+        TEST_ASSERT_TRUE(strstr(response, ", enum, (") != nullptr);
+        TEST_ASSERT_TRUE(strstr(response, ")") != nullptr);
+    }
+    // Check for some expected system metrics
+    TEST_ASSERT_TRUE(strstr(response, "emsesp_system_") != nullptr || strstr(response, "emsesp_network_") != nullptr
+                     || strstr(response, "emsesp_api_") != nullptr);
+
+    // Check for _info metrics if present
+    if (strstr(response, "_info") != nullptr) {
+        TEST_ASSERT_TRUE(strstr(response, "_info{") != nullptr || strstr(response, "_info ") != nullptr);
+    }
+
+    // Check for device metrics if devices are present
+    if (strstr(response, "device") != nullptr) {
+        TEST_ASSERT_TRUE(strstr(response, "emsesp_device_") != nullptr);
+    }
+}
 
 void run_manual_tests() {
     RUN_TEST(manual_test1);
@@ -288,6 +363,10 @@ void run_manual_tests() {
     RUN_TEST(manual_test4);
     RUN_TEST(manual_test5);
     RUN_TEST(manual_test6);
+    RUN_TEST(manual_test7);
+    RUN_TEST(manual_test8);
+    RUN_TEST(manual_test9);
+    RUN_TEST(manual_test10);
 }
 
 const char * run_console_command(const char * command) {
@@ -345,6 +424,7 @@ void create_tests() {
     capture("/api/boiler/values");
     capture("/api/boiler/info");
     // capture("/api/boiler/entities"); // skipping since payload is too large
+    capture("/api/boiler/metrics");
     capture("/api/boiler/comfort");
     capture("/api/boiler/comfort/value");
     capture("/api/boiler/comfort/fullname");
@@ -356,20 +436,24 @@ void create_tests() {
     // thermostat
     capture("/api/thermostat");
     capture("/api/thermostat/hc1/values");
+    capture("/api/thermostat/metrics");
     capture("/api/thermostat/hc1/seltemp");
     capture("/api/thermostat/hc2/seltemp");
 
     // custom
     capture("/api/custom");
     capture("/api/custom/info");
-    capture("/api/custom/seltemp");
+    capture("/api/custom/test_seltemp");
+    capture("/api/custom/test_seltemp/value");
+    capture("/api/custom/test_custom");
 
     // system
     capture("/api/system");
     capture("/api/system/info");
+    capture("/api/system/metrics");
     capture("/api/system/settings/locale");
     capture("/api/system/fetch");
-    capture("api/system/network/values");
+    capture("/api/system/network/values");
 
     // scheduler
     capture("/api/scheduler");
@@ -389,7 +473,10 @@ void create_tests() {
     capture("/api/analogsensor/test_analogsensor1");
     capture("/api/analogsensor/test_analogsensor1/offset");
 
-    // these tests should all fail...
+    //
+    // these next tests should all fail...
+    //
+
     capture("/api/boiler2");
     capture("/api/boiler/bad/value");
     capture("/api/boiler/comfort/valu");
@@ -405,8 +492,8 @@ void create_tests() {
     capture("/api/scheduler/test_scheduler2/val2");
 
     // custom
-    capture("/api/custom/seltemp2");
-    capture("/api/custom/seltemp/val");
+    capture("/api/custom/test_seltemp2");
+    capture("/api/custom/test_seltemp/val");
 
     // temperaturesensor
     capture("/api/temperaturesensor/test_sensor20");
@@ -437,15 +524,17 @@ int main() {
 
     application.start(); // calls begin()
 
-    EMSESP::webCustomEntityService.test();  // custom entities
-    EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
-    EMSESP::temperaturesensor_.test();      // add temperature sensors
-    EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
+    // populate with data, like custom entities, fake temp sensors and scheduler items
+    EMSESP::webCustomEntityService.load_test_data();  // custom entities
+    EMSESP::webCustomizationService.load_test_data(); // set customizations - this will overwrite any settings in the FS
+    EMSESP::temperaturesensor_.load_test_data();      // add temperature sensors
+    EMSESP::webSchedulerService.load_test_data();     // run scheduler tests, and conditions
 
     add_devices(); // add devices
 
 #if defined(EMSESP_UNITY_CREATE)
     create_tests();
+    return 0;
 #endif
 
     //

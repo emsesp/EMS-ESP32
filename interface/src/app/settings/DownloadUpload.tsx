@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
-import { Box, Button, Grid2 as Grid, Typography } from '@mui/material';
+import { Box, Button, Grid, Typography } from '@mui/material';
 
 import * as SystemApi from 'api/system';
 import { API, callAction } from 'api/app';
@@ -18,6 +18,13 @@ import {
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import { saveFile } from 'utils';
+
+interface DownloadButton {
+  key: string;
+  type: string;
+  label: string | number;
+  isGridButton: boolean;
+}
 
 const DownloadUpload = () => {
   const { LL } = useI18nContext();
@@ -35,7 +42,7 @@ const DownloadUpload = () => {
       toast.info(LL.DOWNLOAD_SUCCESSFUL());
     })
     .onError((error) => {
-      toast.error(error.message);
+      toast.error(String(error.error?.message || 'An error occurred'));
     });
 
   const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
@@ -44,95 +51,126 @@ const DownloadUpload = () => {
 
   const { data, send: loadData, error } = useRequest(SystemApi.readSystemStatus);
 
-  const doRestart = async () => {
+  const doRestart = useCallback(async () => {
     setRestarting(true);
-    await sendAPI({ device: 'system', cmd: 'restart', id: 0 }).catch(
-      (error: Error) => {
-        toast.error(error.message);
-      }
-    );
-  };
+    try {
+      await sendAPI({ device: 'system', cmd: 'restart', id: 0 });
+    } catch (error) {
+      toast.error((error as Error).message);
+      setRestarting(false);
+    }
+  }, [sendAPI]);
 
   useLayoutTitle(LL.DOWNLOAD_UPLOAD());
 
-  const content = () => {
-    if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
-    }
+  const downloadButtons: DownloadButton[] = useMemo(
+    () => [
+      {
+        key: 'settings',
+        type: 'settings',
+        label: LL.SETTINGS_OF(LL.APPLICATION()),
+        isGridButton: true
+      },
+      {
+        key: 'customizations',
+        type: 'customizations',
+        label: LL.CUSTOMIZATIONS(),
+        isGridButton: true
+      },
+      {
+        key: 'entities',
+        type: 'entities',
+        label: LL.CUSTOM_ENTITIES(0),
+        isGridButton: true
+      },
+      {
+        key: 'schedule',
+        type: 'schedule',
+        label: LL.SCHEDULE(0),
+        isGridButton: true
+      },
+      {
+        key: 'allvalues',
+        type: 'allvalues',
+        label: LL.ALLVALUES(),
+        isGridButton: false
+      }
+    ],
+    [LL]
+  );
 
+  const handleDownload = useCallback(
+    (type: string) => () => {
+      void sendExportData(type);
+    },
+    [sendExportData]
+  );
+
+  if (restarting) {
+    return <SystemMonitor />;
+  }
+
+  if (!data) {
     return (
-      <>
-        <Typography sx={{ pb: 2 }} variant="h6" color="primary">
-          {LL.DOWNLOAD(0)}
-        </Typography>
+      <SectionContent>
+        <FormLoader onRetry={loadData} errorMessage={error?.message || ''} />
+      </SectionContent>
+    );
+  }
 
-        <Typography mb={1} variant="body1" color="warning">
-          {LL.DOWNLOAD_SETTINGS_TEXT()}.
-        </Typography>
-        <Grid container spacing={1}>
-          <Button
-            sx={{ ml: 2 }}
-            startIcon={<DownloadIcon />}
-            variant="outlined"
-            color="primary"
-            onClick={() => sendExportData('settings')}
-          >
-            {LL.SETTINGS_OF(LL.APPLICATION())}
-          </Button>
+  const gridButtons = downloadButtons.filter((btn) => btn.isGridButton);
+  const standaloneButton = downloadButtons.find((btn) => !btn.isGridButton);
 
-          <Button
-            sx={{ ml: 2 }}
-            startIcon={<DownloadIcon />}
-            variant="outlined"
-            color="primary"
-            onClick={() => sendExportData('customizations')}
-          >
-            {LL.CUSTOMIZATIONS()}
-          </Button>
-          <Button
-            sx={{ ml: 2 }}
-            startIcon={<DownloadIcon />}
-            variant="outlined"
-            color="primary"
-            onClick={() => sendExportData('entities')}
-          >
-            {LL.CUSTOM_ENTITIES(0)}
-          </Button>
-          <Button
-            sx={{ ml: 2 }}
-            startIcon={<DownloadIcon />}
-            variant="outlined"
-            color="primary"
-            onClick={() => sendExportData('schedule')}
-          >
-            {LL.SCHEDULE(0)}
-          </Button>
-        </Grid>
+  return (
+    <SectionContent>
+      <Typography sx={{ pb: 2 }} variant="h6" color="primary">
+        {LL.DOWNLOAD(0)}
+      </Typography>
+
+      <Typography mb={1} variant="body1" color="warning">
+        {LL.DOWNLOAD_SETTINGS_TEXT()}.
+      </Typography>
+
+      <Grid container spacing={2}>
+        {gridButtons.map((button) => (
+          <Grid key={button.key}>
+            <Button
+              startIcon={<DownloadIcon />}
+              variant="outlined"
+              color="primary"
+              onClick={handleDownload(button.type)}
+            >
+              {button.label}
+            </Button>
+          </Grid>
+        ))}
+      </Grid>
+
+      <Typography mt={2} mb={1} variant="body1" color="warning">
+        {LL.DOWNLOAD_SETTINGS_TEXT2()}.
+      </Typography>
+
+      {standaloneButton && (
         <Button
-          sx={{ ml: 2, mt: 2 }}
           startIcon={<DownloadIcon />}
           variant="outlined"
           color="primary"
-          onClick={() => sendExportData('allvalues')}
+          onClick={handleDownload(standaloneButton.type)}
         >
-          {LL.ALLVALUES()}
+          {standaloneButton.label}
         </Button>
+      )}
 
-        <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
-          {LL.UPLOAD()}
-        </Typography>
+      <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
+        {LL.UPLOAD()}
+      </Typography>
 
-        <Box color="warning.main" sx={{ pb: 2 }}>
-          <Typography variant="body1">{LL.UPLOAD_TEXT()}.</Typography>
-        </Box>
+      <Box color="warning.main" sx={{ pb: 2 }}>
+        <Typography variant="body1">{LL.UPLOAD_TEXT()}.</Typography>
+      </Box>
 
-        <SingleUpload text={LL.UPLOAD_DRAG()} doRestart={doRestart} />
-      </>
-    );
-  };
-
-  return (
-    <SectionContent>{restarting ? <SystemMonitor /> : content()}</SectionContent>
+      <SingleUpload text={LL.UPLOAD_DRAG()} doRestart={doRestart} />
+    </SectionContent>
   );
 };
 

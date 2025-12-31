@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,20 +25,16 @@
 
 // UART drivers
 #if defined(ESP32)
-#include "uart/emsuart_esp32.h"
+#include "../uart/emsuart_esp32.h"
 #elif defined(EMSESP_STANDALONE)
 #include "emsuart_standalone.h"
 #endif
 
 #include "helpers.h"
+#include <esp32-psram.h>
 
-#if defined(EMSESP_STANDALONE)
 #define MAX_RX_TELEGRAMS 100 // size of Rx queue
-#define MAX_TX_TELEGRAMS 200 // size of Tx queue
-#else
-#define MAX_RX_TELEGRAMS 10  // size of Rx queue
 #define MAX_TX_TELEGRAMS 160 // size of Tx queue
-#endif
 
 // default values for null values
 static constexpr uint8_t  EMS_VALUE_BOOL          = 0xFF;       // used to mark that something is a boolean
@@ -208,7 +204,6 @@ class EMSbus {
 #endif
     }
 
-
     // sets the flag for EMS bus connected
     static void last_bus_activity(uint32_t timestamp) {
         // record the first time we connected to the BUS, as this will be our uptime
@@ -292,7 +287,7 @@ class RxService : public EMSbus {
         }
     };
 
-    std::deque<QueuedRxTelegram> queue() const {
+    std::deque<QueuedRxTelegram, AllocatorPSRAM<QueuedRxTelegram>> queue() const {
         return rx_telegrams_;
     }
 
@@ -303,7 +298,8 @@ class RxService : public EMSbus {
     uint32_t                        telegram_count_       = 0; // # Rx received
     uint32_t                        telegram_error_count_ = 0; // # Rx CRC errors
     std::shared_ptr<const Telegram> rx_telegram;               // the incoming Rx telegram
-    std::deque<QueuedRxTelegram>    rx_telegrams_;             // the Rx Queue
+
+    std::deque<QueuedRxTelegram, AllocatorPSRAM<QueuedRxTelegram>> rx_telegrams_; // the Rx Queue
 };
 
 class TxService : public EMSbus {
@@ -424,7 +420,7 @@ class TxService : public EMSbus {
         }
     };
 
-    std::deque<QueuedTxTelegram> queue() const {
+    std::deque<QueuedTxTelegram, AllocatorPSRAM<QueuedTxTelegram>> queue() const {
         return tx_telegrams_;
     }
 
@@ -436,7 +432,7 @@ class TxService : public EMSbus {
     static constexpr uint32_t POST_SEND_DELAY    = 2000;
 
   private:
-    std::deque<QueuedTxTelegram> tx_telegrams_; // the Tx queue
+    std::deque<QueuedTxTelegram, AllocatorPSRAM<QueuedTxTelegram>> tx_telegrams_; // the Tx queue
 
     uint32_t telegram_read_count_       = 0; // # Tx successful reads
     uint32_t telegram_write_count_      = 0; // # Tx successful writes

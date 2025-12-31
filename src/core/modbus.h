@@ -84,6 +84,7 @@ class Modbus {
         TAG_TYPE_DHW         = DeviceValue::DeviceValueTAG::TAG_DHW1,
         TAG_TYPE_AHS         = DeviceValue::DeviceValueTAG::TAG_AHS1,
         TAG_TYPE_HS          = DeviceValue::DeviceValueTAG::TAG_HS1,
+        TAG_TYPE_SRC         = DeviceValue::DeviceValueTAG::TAG_SRC1,
         INVALID_TAG_TYPE     = -2
     };
 

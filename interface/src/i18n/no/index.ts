@@ -40,10 +40,10 @@ const no: Translation = {
   RUN_COMMAND: 'Kjør kommando',
   CHANGE_VALUE: 'Endre Verdi',
   CANCEL: 'Avbryt',
-  RESET: 'Nullstill',
+  REMOVE_ALL: 'Fjern alles',
   APPLY_CHANGES: 'Utfør endringer({0})',
   UPDATE: 'Oppdater',
-  EXECUTE: 'Execute', // TODO translate
+  EXECUTE: 'Utfør',
   REMOVE: 'Fjern',
   PROBLEM_UPDATING: 'Problem med oppdatering',
   PROBLEM_LOADING: 'Problem med opplasting',
@@ -60,7 +60,6 @@ const no: Translation = {
   DUTY_CYCLE: 'Duty Cycle',
   UNIT: 'UoM',
   STARTVALUE: 'Startverdi',
-  WARN_GPIO: 'Advarsel: vær forsiktig ved aktivering av GPIO!',
   EDIT: 'Endre',
   SENSOR: 'Sensor',
   TEMP_SENSOR: 'Temperatursensor',
@@ -72,7 +71,7 @@ const no: Translation = {
   TX_ISSUES: 'Tx problemer - prøv en annen Tx Modus',
   DISCONNECTED: 'Frakoblet',
   EMS_SCAN: 'Er du sikker på du vil starte full søking av EMS bussen?',
-  DATA_TRAFFIC: 'Data Traffic', // TODO translate
+  DATA_TRAFFIC: 'Data trafikk',
   EMS_DEVICE: 'EMS Enhet',
   SUCCESS: 'VELLYKKET',
   FAIL: 'MISLYKKET',
@@ -115,9 +114,9 @@ const no: Translation = {
   READONLY: 'Aktiver read-only modus (blokker all EMS Tx Skriving)',
   UNDERCLOCK_CPU: 'Underklokking av prosessorhastighet',
   REMOTE_TIMEOUT: 'Remote timeout',
-  REMOTE_TIMEOUT_EN: 'Disable remote control on missing room temperature', // TODO translate
-  HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
-  MIN_DURATION: 'Wait time',
+  REMOTE_TIMEOUT_EN: 'Deaktiver fjernstyring på manglende romtemperatur',
+  HEATINGOFF: 'Start kjele med tvingt oppvarming av',
+  MIN_DURATION: 'Ventetid',
   ENABLE_SHOWER_TIMER: 'Aktiver Dusjtimer',
   ENABLE_SHOWER_ALERT: 'Aktiver Dusj-varsling',
   TRIGGER_TIME: 'Aktiveringstid',
@@ -153,7 +152,7 @@ const no: Translation = {
   SET_ALL: 'sett alle',
   OPTIONS: 'Alternativ',
   NAME: 'Navn',
-  CUSTOMIZATIONS_RESET: 'Er du sikker på att du vil fjerne tilpassninger inkludert innstillinger for Temperatur og Analoge sensorer?',
+  CUSTOMIZATIONS_RESET: 'Er du sikker på att du vil fjerne tilpassninger?',
   SUPPORT_INFORMATION: 'Supportinformasjon',
   HELP_INFORMATION_1: 'Besøk wiki for instruksjoner for å konfigurere EMS-ESP',
   HELP_INFORMATION_2: 'For community-support besøk vår Discord-server',
@@ -162,6 +161,7 @@ const no: Translation = {
   UPLOAD: 'Opplasning',
   DOWNLOAD: '{{N|n|n}}edlasting',
   INSTALL: 'Installer',
+  REINSTALL: 'Ominstaller',
   ABORTED: 'avbrutt',
   FAILED: 'feilet',
   SUCCESSFUL: 'vellykket',
@@ -174,9 +174,9 @@ const no: Translation = {
   FACTORY_RESET: 'Sett tilbake til fabrikkinstilling',
   SYSTEM_FACTORY_TEXT: 'Enhet har blitt satt tilbake til fabrikkinstilling og vil restarte',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Er du sikker på at du vil resette enheten til fabrikkinstillinger?',
-  AVAILABLE_VERSION: 'Latest Available Versions', // TODO translate
-  STABLE: 'Stable', // TODO translate
-  DEVELOPMENT: 'Development',
+  AVAILABLE_VERSION: 'Tilgjengelige versjoner',
+  STABLE: 'Stabil',
+  DEVELOPMENT: 'Utvikling',
   UPTIME: 'System Oppetid',
   FREE_MEMORY: 'Ledig Memory',
   PSRAM: 'PSRAM (Størrelse / Ledig)',
@@ -185,9 +185,10 @@ const no: Translation = {
   FILESYSTEM: 'File System (Brukt / Ledig)',
   BUFFER_SIZE: 'Max Buffer Størrelse',
   COMPACT: 'Komprimere',
-  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
-  UPLOAD_TEXT: 'Upload a new firmware file (.bin) or a backup file (.json)', // TODO translate
-  UPLOAD_DROP_TEXT: 'Drop a firmware .bin file or click here', // TODO translate
+  DOWNLOAD_SETTINGS_TEXT: 'Lag en sikkerhetskopi av dine konfigurasjon og innstillinger',
+  DOWNLOAD_SETTINGS_TEXT2: 'Eksporter alle data',
+  UPLOAD_TEXT: 'Last opp en ny firmware fil (.bin) eller en sikkerhetskopi fil (.json)',
+  UPLOAD_DROP_TEXT: 'Dropp en firmware fil (.bin) eller klikk her',
   ERROR: 'Ukjent feil, prøv igjen',
   TIME_SET: 'Still in tid',
   MANAGE_USERS: 'Administrer Brukere',
@@ -223,7 +224,7 @@ const no: Translation = {
   MQTT_INT_THERMOSTATS: 'Termostat',
   MQTT_INT_SOLAR: 'Solpaneler',
   MQTT_INT_MIXER: 'Blandeventil',
-  MQTT_INT_WATER: 'Water Modules', // TODO translate
+  MQTT_INT_WATER: 'Vannmoduler',
   MQTT_QUEUE: 'MQTT Queue',
   DEFAULT: 'Standard',
   MQTT_ENTITY_FORMAT: 'Enhets ID format',
@@ -260,7 +261,7 @@ const no: Translation = {
   NETWORK_SCANNER: 'Nettverk Scanner',
   NETWORK_NO_WIFI: 'Ingen trådløse nett funnet',
   NETWORK_BLANK_SSID: 'la feltet være blankt for å deaktivisere trådløst nettverk',
-  NETWORK_BLANK_BSSID: 'leave blank to use only SSID', // TODO translate
+  NETWORK_BLANK_BSSID: 'la feltet være blankt for å bruke kun SSID',
   TX_POWER: 'Tx Effekt',
   HOSTNAME: 'Hostname',
   NETWORK_DISABLE_SLEEP: 'Hindre at trådløst nettverk går i Sleep Mode',
@@ -297,62 +298,65 @@ const no: Translation = {
   SCHEDULE_TIMER_1: 'ved oppstart',
   SCHEDULE_TIMER_2: 'hvert minutt',
   SCHEDULE_TIMER_3: 'hver time',
-  CUSTOM_ENTITIES: 'Custom Entities', // TODO translate
-  ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus', // TODO translate
-  ENTITIES_UPDATED: 'Entities Updated', // TODO translate
-  WRITEABLE: 'Writeable', // TODO translate
-  SHOWING: 'Showing', // TODO translate
-  SEARCH: 'Search', // TODO translate
-  CERT: 'TLS root certificate (leave blank for insecure)', // TODO translate
+  CUSTOM_ENTITIES: 'Personlige entiteter',
+  ENTITIES_HELP_1: 'Hent personlige entiteter fra EMS bussen',
+  ENTITIES_UPDATED: 'Entiteter oppdatert',
+  WRITEABLE: 'Skrivbar',
+  SHOWING: 'Viser',
+  SEARCH: 'Søk',
+  CERT: 'TLS rot sertifikat (la feltet stå blankt for usikkert)',
   ENABLE_TLS: 'Aktiviser TLS',
-  ON: 'On', // TODO translate
-  OFF: 'Off', // TODO translate
-  POLARITY: 'Polarity', // TODO translate
-  ACTIVEHIGH: 'Active High', // TODO translate
-  ACTIVELOW: 'Active Low', // TODO translate
-  UNCHANGED: 'Unchanged', // TODO translate
-  ALWAYS: 'Always', // TODO translate
-  ACTIVITY: 'Activity', // TODO translate
-  CONFIGURE: 'Configure {0}', // TODO translate
-  SYSTEM_MEMORY: 'System Memory', // TODO translate
-  APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
-  SECURITY_1: 'Add or remove users', // TODO translate
-  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings and Firmware', // TODO translate
-  MODULES: 'Module', // TODO translate
+  ON: 'På',
+  OFF: 'Av',
+  POLARITY: 'Polarity',
+  ACTIVEHIGH: 'Active High',
+  ACTIVELOW: 'Active Low',
+  UNCHANGED: 'Unchanged',
+  ALWAYS: 'Always',
+  ACTIVITY: 'Aktivitet',
+  CONFIGURE: 'Konfigurer {0}',
+  SYSTEM_MEMORY: 'System Memory',
+  APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings',
+  SECURITY_1: 'Add or remove users',
+  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings and Firmware',
+  MODULES: 'Modul',
   MODULES_1: 'Aktiver eller deaktiver eksterne moduler',
-  MODULES_UPDATED: 'Modules updated', // TODO translate
-  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
-  MODULES_NONE: 'No external modules detected', // TODO translate
-  RENAME: 'Rename', // TODO translate 
+  MODULES_UPDATED: 'Moduler oppdatert',
+  MODULES_DESCRIPTION: 'Klikk på modulen for å aktivere eller deaktivere EMS-ESP biblioteksmoduler',
+  MODULES_NONE: 'Ingen eksterne moduler funnet',
+  RENAME: 'Gi nytt navn',
   ENABLE_MODBUS: 'Aktiver Modbus',
-  VIEW_LOG: 'View log to diagnose issues', // TODO translate
-  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
-  SERVICES: 'Services', // TODO translate
-  ALLVALUES: 'All Values', // TODO translate
-  SPECIAL_FUNCTIONS: 'Special Functions', // TODO translate
-  WAIT_FIRMWARE: 'Firmware is uploading and installing', // TODO translate
-  INSTALL_VERSION: 'This will install version {0}. Are you sure?', // TODO translate
-  UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
-  LATEST_VERSION: 'You are using the latest firmware version', // TODO translate
-  PLEASE_WAIT: 'Please wait', // TODO translate
-  RESTARTING_PRE: 'Initializing', // TODO translate
-  RESTARTING_POST: 'Preparing', // TODO translate
-  AUTO_SCROLL: 'Auto Scroll', // TODO translate
-  DASHBOARD: 'Dashboard', // TODO translate
-  DEVELOPER_MODE: 'Developer Mode', // TODO translate
-  BYTES: 'Bytes', // TODO translate
-  BITMASK: 'Bit Mask',// TODO translate
-  DUPLICATE: 'Duplicate', // TODO translate
-  UPGRADE: 'Upgrade', // TODO translate
-  DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.', // TODO translate
-  NO_DATA_1: 'No favorite EMS entities found yet. Use the', // TODO translate
-  NO_DATA_2: 'module to mark them.', // TODO translate
-  NO_DATA_3: 'To see all available entities go to', // TODO translate
-  THIS_VERSION: 'This Version', // TODO translate
-  PLATFORM: 'Platform', // TODO translate
-  RELEASE_TYPE: 'Release Type', // TODO translate
-  REINSTALL: 'Re-install', // TODO translate
-  INTERNET_CONNECTION_REQUIRED: 'Internet connection required for automatic version checking and upgrading',
+  VIEW_LOG: 'Se logg for å diagnostisere problemer',
+  UPLOAD_DRAG: 'dra og slippe en fil her eller klikk for å velge en',
+  SERVICES: 'Tjenester',
+  ALLVALUES: 'Alle verdier',
+  SPECIAL_FUNCTIONS: 'Spesielle funksjoner',
+  WAIT_FIRMWARE: 'Firmware er i opplasting og installasjon',
+  INSTALL_VERSION: 'Dette vil {0} versjon {1}. Er du sikker?',
+  UPDATE_AVAILABLE: 'oppdatering tilgjengelig',
+  LATEST_VERSION: 'Du bruker den nyeste {0} firmware versjonen',
+  PLEASE_WAIT: 'Vennligst vent',
+  RESTARTING_PRE: 'Starte',
+  RESTARTING_POST: 'Forbereder',
+  AUTO_SCROLL: 'Automatisk rulling',
+  DASHBOARD: 'Dashboard',
+  DEVELOPER_MODE: 'Utvikler modus',
+  BYTES: 'Bytes',
+  BITMASK: 'Bitmask',
+  DUPLICATE: 'Duplikat',
+  DASHBOARD_1: 'Alle EMS enheter som er aktive og merket som favoritt, pluss alle personlige enheter, planlegg og eksterne sensor data er vist nedenfor.',
+  NO_DATA_1: 'Ingen favoritte EMS enheter funnet enda. Bruk',
+  NO_DATA_2: 'modul for å markere dem.',
+  NO_DATA_3: 'For å se alle tilgjengelige enheter, gå til',
+  THIS_VERSION: 'Denne versjonen',
+  PLATFORM: 'Plattform',
+  RELEASE_TYPE: 'Utgivelses type',
+  INTERNET_CONNECTION_REQUIRED: 'Internettilkobling kreves for automatisk versjonskontroll og oppgradering',
+  SWITCH_RELEASE_TYPE: 'Bytt til {0} utgivelse',
+  FIRMWARE_VERSION_INFO: 'Informasjon om firmwareversjon',
+  NO_DATA: 'Ingen data',
+  USER_PROFILE: 'Brukerprofil',
+  STORED_VERSIONS: 'Lagret versjoner'
 };
 
 export default no;

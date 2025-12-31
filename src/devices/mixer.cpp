@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,15 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
         register_telegram_type(device_id - 0x20 + 0x02D7, "MMPLUSStatusMessage", false, MAKE_PF_CB(process_MMPLUSStatusMessage_HC));
         // register_telegram_type(device_id - 0x20 + 0x02E1, "MMPLUSSetMessage", true, MAKE_PF_CB(process_MMPLUSSetMessage_HC));
-        register_telegram_type(device_id - 0x20 + 0x02CD, "MMPLUSConfigMessage", true, MAKE_PF_CB(process_MMPLUSConfigMessage_HC));
+        register_telegram_type(device_id - 0x20 + 0x02CD, "MMPLUSConfigMessage", false, MAKE_PF_CB(process_MMPLUSConfigMessage_HC));
         register_device_value(tag, &flowTempHc_, DeviceValueType::UINT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(flowTempHc), DeviceValueUOM::DEGREES);
         register_device_value(tag, &status_, DeviceValueType::UINT8, FL_(mixerStatus), DeviceValueUOM::PERCENT);
         register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT8, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
         register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, FL_(pumpStatus), DeviceValueUOM::NONE, MAKE_CF_CB(set_pump));
         register_device_value(tag, &activated_, DeviceValueType::BOOL, FL_(activated), DeviceValueUOM::NONE, MAKE_CF_CB(set_activated));
+        register_device_value(tag, &flowRate_, DeviceValueType::UINT16, FL_(flow), DeviceValueUOM::LH);
+        register_device_value(
+            tag, &pressure_, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_MUL50, FL_(setDiffPress), DeviceValueUOM::MBAR, MAKE_CF_CB(set_pressure));
         register_device_value(tag,
                               &setValveTime_,
                               DeviceValueType::UINT8,
@@ -47,6 +50,8 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
                               10,
                               600);
         register_device_value(tag, &flowTempOffset_, DeviceValueType::UINT8, FL_(flowtempoffset), DeviceValueUOM::K, MAKE_CF_CB(set_flowTempOffset), 0, 20);
+        register_device_value(tag, &wwprio_, DeviceValueType::BOOL, FL_(wwprio), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwprio));
+        EMSESP::send_read_request(device_id - 0x20 + 0x02CD, device_id, 0, 3);
     }
 
     // EMS 1.0
@@ -90,7 +95,8 @@ void Mixer::process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> teleg
     has_update(telegram, flowTempHc_, 3); // is * 10
     has_update(telegram, flowSetTemp_, 5);
     has_bitupdate(telegram, pumpStatus_, 0, 0);
-    has_update(telegram, status_, 2); // valve status
+    has_update(telegram, status_, 2);   // valve status
+    has_update(telegram, flowRate_, 9); // l/h
 }
 
 // Mixer IPM - 0x010C
@@ -152,6 +158,8 @@ void Mixer::process_MMPLUSConfigMessage_HC(std::shared_ptr<const Telegram> teleg
     has_update(telegram, activated_, 0);      // on = 0xFF
     has_update(telegram, setValveTime_, 1);   // valve runtime in 10 sec, default 120 s, max 600 s
     has_update(telegram, flowTempOffset_, 2); // Mixer increase [0-20 K]
+    has_update(telegram, wwprio_, 3);
+    has_update(telegram, pressure_, 9);
 }
 
 // Thermostat(0x10) -> Mixer(0x20), ?(0x2E1), data: 01 1C 64 00 01
@@ -268,6 +276,26 @@ bool Mixer::set_flowTempOffset(const char * value, const int8_t id) {
         return true;
     }
     return false;
+}
+
+bool Mixer::set_pressure(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+    uint8_t hc = device_id() - 0x20;
+    write_command(0x2CD + hc, 9, v / 50, 0x2CD + hc);
+    return true;
+}
+
+bool Mixer::set_wwprio(const char * value, const int8_t id) {
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
+        return false;
+    }
+    uint8_t hc = device_id() - 0x20;
+    write_command(0x2CD + hc, 3, b ? 0xFF : 0, 0x2CD + hc);
+    return true;
 }
 
 } // namespace emsesp

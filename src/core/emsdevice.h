@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,9 @@
 #include "mqtt.h"
 #include "helpers.h"
 #include "emsdevicevalue.h"
+
+#include <esp32-psram.h>
+#include <unordered_map>
 
 namespace emsesp {
 
@@ -62,6 +65,7 @@ class EMSdevice {
     const char * brand_to_char();
     std::string  to_string();
     std::string  to_string_short();
+    std::string  to_string_version();
     std::string  name(); // returns either default or custom name of a device (if defined)
 
     bool is_device_id(uint8_t device_id) const {
@@ -197,6 +201,20 @@ class EMSdevice {
         }
     }
 
+    void has_enumupdate(std::shared_ptr<const Telegram> telegram, uint8_t & value, const uint8_t index, const std::vector<uint8_t> & maskIn) {
+        uint8_t val = value < maskIn.size() ? maskIn[value] : EMS_VALUE_UINT8_NOTSET;
+        if (telegram->read_value(val, index)) {
+            for (uint8_t i = 0; i < maskIn.size(); i++) {
+                if (val == maskIn[i]) {
+                    value       = i;
+                    has_update_ = true;
+                    publish_value((void *)&value);
+                    return;
+                }
+            }
+        }
+    }
+
     template <typename Value>
     void has_update(std::shared_ptr<const Telegram> telegram, Value & value, const uint8_t index, uint8_t s = 0) {
         if (telegram->read_value(value, index, s)) {
@@ -234,6 +252,7 @@ class EMSdevice {
     std::string get_value_uom(const std::string & shortname) const;
     bool        get_value_info(JsonObject root, const char * cmd, const int8_t id);
     void        get_value_json(JsonObject output, DeviceValue & dv);
+    std::string get_metrics_prometheus(const int8_t tag = -1);
     void        get_dv_info(JsonObject json);
 
     enum OUTPUT_TARGET : uint8_t { API_VERBOSE, API_SHORTNAMES, MQTT, CONSOLE };
@@ -413,6 +432,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_ID_DHW1           = 0x28; // MM100 module as water station
     static constexpr uint8_t EMS_DEVICE_ID_DHW2           = 0x29; // MM100 module as water station
     static constexpr uint8_t EMS_DEVICE_ID_DHW8           = 0x2F; // last DHW module id?
+    static constexpr uint8_t EMS_DEVICE_ID_IPM_DHW        = 0x41; // IPM module as water station
 
     // generic type IDs
     static constexpr uint16_t EMS_TYPE_NAME        = 0x01; // device config for ems devices, name ascii on offset 27ff  for ems+
@@ -433,9 +453,10 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_EMS      = 1;
     static constexpr uint8_t EMS_DEVICE_FLAG_EMSPLUS  = 2;
     static constexpr uint8_t EMS_DEVICE_FLAG_HT3      = 3;
-    static constexpr uint8_t EMS_DEVICE_FLAG_HEATPUMP = 4;
-    static constexpr uint8_t EMS_DEVICE_FLAG_HYBRID   = 5;
-    static constexpr uint8_t EMS_DEVICE_FLAG_HIU      = 6;
+    static constexpr uint8_t EMS_DEVICE_FLAG_HYBRID   = 4;
+    static constexpr uint8_t EMS_DEVICE_FLAG_HIU      = 5;
+    static constexpr uint8_t EMS_DEVICE_FLAG_HEATPUMP = 8; // use bit for subtypes
+    static constexpr uint8_t EMS_DEVICE_FLAG_CS6800   = 9; // subtype of heatpump
 
     // Solar Module
     static constexpr uint8_t EMS_DEVICE_FLAG_SM10  = 1;
@@ -468,6 +489,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_R3000       = 15; // Rego3000, same as RC300 with different wwmodes
     static constexpr uint8_t EMS_DEVICE_FLAG_CR120       = 16; // mostly like RC300, but some changes
     static constexpr uint8_t EMS_DEVICE_FLAG_CR11        = 17; // CRF200 only monitor
+    static constexpr uint8_t EMS_DEVICE_FLAG_HMC310      = 18;
 
     uint8_t count_entities();
     uint8_t count_entities_fav();
@@ -528,13 +550,12 @@ class EMSdevice {
         }
     };
 
-    std::vector<uint16_t> handlers_ignored_;
-
+    std::vector<uint16_t, AllocatorPSRAM<uint16_t>> handlers_ignored_, handlers_broadcasted_, handlers_config_;
 #if defined(EMSESP_STANDALONE) || defined(EMSESP_TEST)
-  public: // so we can call it from WebCustomizationService::test() and EMSESP::dump_all_entities()
+  public: // so we can call it from WebCustomizationService::load_test_data() and EMSESP::dump_all_entities()
 #endif
-    std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
-    std::vector<DeviceValue>      devicevalues_;       // all the device values
+    std::vector<TelegramFunction, AllocatorPSRAM<TelegramFunction>> telegram_functions_; // each EMS device has its own set of registered telegram types
+    std::vector<DeviceValue, AllocatorPSRAM<DeviceValue>>           devicevalues_;       // all the device values
 };
 
 } // namespace emsesp

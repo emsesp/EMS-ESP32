@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,6 +61,9 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "heat_exchange"
 // #define EMSESP_DEBUG_DEFAULT "ls"
 // #define EMSESP_DEBUG_DEFAULT "upload"
+// #define EMSESP_DEBUG_DEFAULT "hpmode"
+// #define EMSESP_DEBUG_DEFAULT "shuntingyard"
+// #define EMSESP_DEBUG_DEFAULT "src"
 
 #ifndef EMSESP_DEBUG_DEFAULT
 #define EMSESP_DEBUG_DEFAULT "general"

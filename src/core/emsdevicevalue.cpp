@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -108,10 +108,10 @@ DeviceValue::DeviceValue(uint8_t               device_type,
 const char * DeviceValue::DeviceValueUOM_s[] = {
 
     F_(uom_blank), // 0
-    F_(uom_degrees), F_(uom_degrees),    F_(uom_percent), F_(uom_lmin), F_(uom_kwh),   F_(uom_wh),   FL_(hours)[0],
-    FL_(minutes)[0], F_(uom_ua),         F_(uom_bar),     F_(uom_kw),   F_(uom_w),     F_(uom_kb),   FL_(seconds)[0],
-    F_(uom_dbm),     F_(uom_fahrenheit), F_(uom_mv),      F_(uom_sqm),  F_(uom_m3),    F_(uom_l),    F_(uom_kmin),
-    F_(uom_k),       F_(uom_volts),      F_(uom_mbar),    F_(uom_lh),   F_(uom_ctkwh), F_(uom_blank)
+    F_(uom_degrees), F_(uom_degrees), F_(uom_percent), F_(uom_lmin), F_(uom_kwh),  F_(uom_wh),      FL_(hours)[0], FL_(minutes)[0],
+    F_(uom_ua),      F_(uom_bar),     F_(uom_kw),      F_(uom_w),    F_(uom_kb),   FL_(seconds)[0], F_(uom_dbm),   F_(uom_fahrenheit),
+    F_(uom_mv),      F_(uom_sqm),     F_(uom_m3),      F_(uom_l),    F_(uom_kmin), F_(uom_k),       F_(uom_volts), F_(uom_mbar),
+    F_(uom_lh),      F_(uom_ctkwh),   F_(uom_hz),      F_(uom_blank)
 
 };
 
@@ -153,7 +153,23 @@ const char * const * DeviceValue::DeviceValueTAG_s[] = {
     FL_(tag_hs13),        // "hs13"
     FL_(tag_hs14),        // "hs14"
     FL_(tag_hs15),        // "hs15"
-    FL_(tag_hs16)         // "hs16"
+    FL_(tag_hs16),        // "hs16"
+    FL_(tag_src1),        // "src1"
+    FL_(tag_src2),        // "src2"
+    FL_(tag_src3),        // "src3"
+    FL_(tag_src4),        // "src4"
+    FL_(tag_src5),        // "src5"
+    FL_(tag_src6),        // "src6"
+    FL_(tag_src7),        // "src7"
+    FL_(tag_src8),        // "src8"
+    FL_(tag_src9),        // "src9"
+    FL_(tag_src10),       // "src10"
+    FL_(tag_src11),       // "src11"
+    FL_(tag_src12),       // "src12"
+    FL_(tag_src13),       // "src13"
+    FL_(tag_src14),       // "src14"
+    FL_(tag_src15),       // "src15"
+    FL_(tag_src16)        // "src16"
 
 };
 
@@ -195,7 +211,24 @@ const char * const DeviceValue::DeviceValueTAG_mqtt[] = {
     FL_(tag_hs13)[0],        // "hs13"
     FL_(tag_hs14)[0],        // "hs14"
     FL_(tag_hs15)[0],        // "hs15"
-    FL_(tag_hs16)[0]         // "hs16"
+    FL_(tag_hs16)[0],        // "hs16"
+    FL_(tag_src1)[0],        // "src1"
+    FL_(tag_src2)[0],        // "src2"
+    FL_(tag_src3)[0],        // "src3"
+    FL_(tag_src4)[0],        // "src4"
+    FL_(tag_src5)[0],        // "src5"
+    FL_(tag_src6)[0],        // "src6"
+    FL_(tag_src7)[0],        // "src7"
+    FL_(tag_src8)[0],        // "src8"
+    FL_(tag_src9)[0],        // "src9"
+    FL_(tag_src10)[0],       // "src10"
+    FL_(tag_src11)[0],       // "src11"
+    FL_(tag_src12)[0],       // "src12"
+    FL_(tag_src13)[0],       // "src13"
+    FL_(tag_src14)[0],       // "src14"
+    FL_(tag_src15)[0],       // "src15"
+    FL_(tag_src16)[0]        // "src16"
+
 
 };
 

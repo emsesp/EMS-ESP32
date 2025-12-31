@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import type { FC } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -45,7 +45,14 @@ const User: FC<UserFormProps> = ({
 }) => {
   const { LL } = useI18nContext();
 
-  const updateFormValue = updateValue(setUser);
+  const updateFormValue = updateValue((updater) => {
+    setUser((prevState) => {
+      if (!prevState) return prevState;
+      return updater(
+        prevState as unknown as Record<string, unknown>
+      ) as unknown as UserType;
+    });
+  });
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
   const open = !!user;
 
@@ -55,7 +62,7 @@ const User: FC<UserFormProps> = ({
     }
   }, [open]);
 
-  const validateAndDone = async () => {
+  const validateAndDone = useCallback(async () => {
     if (user) {
       try {
         setFieldErrors(undefined);
@@ -65,7 +72,7 @@ const User: FC<UserFormProps> = ({
         setFieldErrors(error as ValidateFieldsError);
       }
     }
-  };
+  }, [user, validator, onDoneEditing]);
 
   return (
     <Dialog
@@ -82,7 +89,7 @@ const User: FC<UserFormProps> = ({
           </DialogTitle>
           <DialogContent dividers>
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="username"
               label={LL.USERNAME(1)}
               fullWidth
@@ -93,7 +100,7 @@ const User: FC<UserFormProps> = ({
               margin="normal"
             />
             <ValidatedPasswordField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="password"
               label={LL.PASSWORD()}
               fullWidth
@@ -137,4 +144,4 @@ const User: FC<UserFormProps> = ({
   );
 };
 
-export default User;
+export default memo(User);

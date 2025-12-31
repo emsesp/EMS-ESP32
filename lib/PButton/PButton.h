@@ -36,6 +36,9 @@ class PButton {
     void onVLongPress(uint16_t, buttonEventHandler handler);
     bool init(uint8_t pin, bool pullMode);
     bool check(void);
+    bool button_busy() {
+        return buttonBusy_;
+    }
 
   private:
     uint16_t Debounce_;        // Debounce period to prevent flickering when pressing or releasing the button (in ms)
@@ -47,21 +50,21 @@ class PButton {
     bool    pullMode_;
     bool    enabled_;
 
-    bool state_;              // Value read from button
-    bool lastState_;          // Last value of button state
-    bool dblClickWaiting_;    // whether we're waiting for a double click (down)
-    bool dblClickOnNextUp_;   // whether to register a double click on next release, or whether to wait and click
-    bool singleClickOK_;      // whether it's OK to do a single click
+    bool state_;            // Value read from button
+    bool lastState_;        // Last value of button state
+    bool dblClickWaiting_;  // whether we're waiting for a double click (down)
+    bool dblClickOnNextUp_; // whether to register a double click on next release, or whether to wait and click
+    bool singleClickOK_;    // whether it's OK to do a single click
 
-    uint32_t downTime_;       // time the button was pressed down
-    uint32_t upTime_;         // time the button was released
+    uint32_t downTime_; // time the button was pressed down
+    uint32_t upTime_;   // time the button was released
 
     bool ignoreUP_;           // whether to ignore the button release because the click+hold was triggered
     bool waitForUP_;          // when held, whether to wait for the up event
     bool longPressHappened_;  // whether or not the hold event happened already
     bool vLongPressHappened_; // whether or not the long hold event happened already
 
-    bool buttonBusy_;         // false if idle
+    bool buttonBusy_; // false if idle
 
     buttonEventHandler cb_onClick, cb_onDblClick, cb_onLongPress, cb_onVLongPress;
 };

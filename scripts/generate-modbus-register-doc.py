@@ -1,122 +1,167 @@
 import fileinput
 import csv
+import sys
 from itertools import groupby
+from collections import defaultdict
 
 #
 # This is used to build the contents of the `Modbus-Entity-Registers.md` file used in the emsesp.org documentation.
 #
 
-# static data
 
-tag_to_tagtype = {
-    -1: "TAG_TYPE_NONE",
-    0: "DEVICE_DATA",
-    1: "HC",
-    2: "HC",
-    3: "HC",
-    4: "HC",
-    5: "HC",
-    6: "HC",
-    7: "HC",
-    8: "HC",
-    9: "DHW",
-    10: "DHW",
-    11: "DHW",
-    12: "DHW",
-    13: "DHW",
-    14: "DHW",
-    15: "DHW",
-    16: "DHW",
-    17: "DHW",
-    18: "DHW",
-    19: "AHS",
-    20: "HS",
-    21: "HS",
-    22: "HS",
-    23: "HS",
-    24: "HS",
-    25: "HS",
-    26: "HS",
-    27: "HS",
-    28: "HS",
-    29: "HS",
-    30: "HS",
-    31: "HS",
-    32: "HS",
-    33: "HS",
-    34: "HS",
-    35: "HS"
-}
+def get_tag_type(modbus_block):
+    """Convert modbus block number to tag type using lookup."""
+    block = int(modbus_block)
 
-# read entities csv from stdin
+    # Handle special cases first
+    if block == -1:
+        return "TAG_TYPE_NONE"
+    if block == 0:
+        return "DEVICE_DATA"
+    if block == 19:
+        return "AHS"
 
-entities = []
+    # Use ranges for efficiency
+    if 1 <= block <= 8:
+        return "HC"
+    if 9 <= block <= 18:
+        return "DHW"
+    if 20 <= block <= 35:
+        return "HS"
+    if 36 <= block <= 51:
+        return "SRC"
 
-with fileinput.input() as f_input:
-    entities_reader = csv.reader(f_input, delimiter=',', quotechar='"')
-    headers = next(entities_reader)
-
-    for row in entities_reader:
-        entity = {}
-        for i, val in enumerate(row):
-            entity[headers[i]] = val
-        entities.append(entity)
+    # Default fallback
+    return "UNKNOWN"
 
 
-def device_name_key(e): return e["device name"]
+def read_entities():
+    """Read and parse CSV entities from stdin with error handling."""
+    entities = []
+
+    try:
+        with fileinput.input() as f_input:
+            entities_reader = csv.reader(f_input, delimiter=',', quotechar='"')
+            headers = next(entities_reader)
+
+            # Validate required headers
+            required_headers = {'device name', 'device type', 'shortname', 'fullname',
+                                'type [options...] \\| (min/max)', 'uom', 'writeable',
+                                'modbus block', 'modbus offset', 'modbus count', 'modbus scale factor'}
+            missing_headers = required_headers - set(headers)
+            if missing_headers:
+                raise ValueError(
+                    f"Missing required headers: {missing_headers}")
+
+            for row_num, row in enumerate(entities_reader, start=2):
+                if len(row) != len(headers):
+                    print(
+                        f"Warning: Row {row_num} has {len(row)} columns, expected {len(headers)}", file=sys.stderr)
+                    continue
+
+                entity = dict(zip(headers, row))
+                entities.append(entity)
+
+    except Exception as e:
+        print(f"Error reading CSV data: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    return entities
 
 
-def device_type_key(e): return e["device type"]
+def group_entities_by_device_type(entities):
+    """Group entities by device type efficiently using defaultdict."""
+    grouped = defaultdict(list)
+    for entity in entities:
+        grouped[entity["device type"]].append(entity)
+    return grouped
 
 
-def grouped_by(list, key): return groupby(sorted(list, key=key), key)
-
-
-# entities_by_device_type = grouped_by(entities, device_type_key)
-
-
-def printDeviceEntities(device_name, device_entities):
-    print("### " + device_name)
+def print_device_entities(device_name, device_entities):
+    """Print device entities table using f-strings for better performance."""
+    print(f"### {device_name}")
+    print()
     print("| shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |")
     print("|-|-|-|-|-|-|-|-|-|")
-    for de in device_entities:
-        print("| " + de["shortname"] + " | " + de["fullname"] + " | " + de["type [options...] \\| (min/max)"] + " | " + de["uom"] + " | " + de["writeable"] +
-              " | " + tag_to_tagtype[int(de["modbus block"])] + " | " + de["modbus offset"] + " | " + de["modbus count"] + " | " + de["modbus scale factor"] + " | ")
+
+    for entity in device_entities:
+        tag_type = get_tag_type(entity["modbus block"])
+        type_long = entity['type [options...] \\| (min/max)']
+        
+        # Split off type and the rest efficiently
+        split_type = type_long.split(" ", 1)
+        type_base = split_type[0]
+        type_suffix = split_type[1] if len(split_type) > 1 else ""
+
+        # Optimize type_rest extraction and int range detection
+        type_rest_str = type_suffix
+        if "int" in type_base and "(" in type_suffix:
+            try:
+                # Extract inner part of parentheses
+                range_inner = type_suffix[type_suffix.index("(")+1:type_suffix.index(")")]
+                min_value = max_value = None
+                if ">=" in range_inner and "<=" in range_inner:
+                    # >=0<=100 style
+                    min_value, max_value = range_inner.replace(">=", "").split("<=")
+                elif "/" in range_inner:
+                    min_value, max_value = range_inner.split("/")
+                if min_value is not None and max_value is not None:
+                    type_rest_str = f"(&gt;={min_value.strip()}&lt;={max_value.strip()})"
+                else:
+                    type_rest_str = ""
+            except Exception:
+                # fallback to original
+                pass
+
+        print(f"| {entity['shortname']} | {entity['fullname']} | {type_base} {type_rest_str} | "
+              f"{entity['uom']} | {entity['writeable']} | {tag_type} | {entity['modbus offset']} | "
+              f"{entity['modbus count']} | {entity['modbus scale factor']} |")
     print()
 
 
-def printDeviceTypeDevices(device_type, devices):
-    print("## Devices of type *" + device_type + "*")
-    for device_name, device_entities in grouped_by(devices, device_name_key):
-        printDeviceEntities(device_name, device_entities)
+def print_device_type_devices(device_type, devices):
+    """Print all devices of a specific type."""
+    print(f"## Devices of type \\_{device_type}")
+    print()
+
+    # Group devices by name
+    device_groups = defaultdict(list)
+    for device in devices:
+        device_groups[device["device name"]].append(device)
+
+    for device_name, device_entities in device_groups.items():
+        print_device_entities(device_name, device_entities)
 
 
-# write header
-
-print("<!-- Use full browser width for this page, the tables are wide -->")
-print("<style>")
-print(".md-grid {")
-print("    max-width: 100%; /* or 100%, if you want to stretch to full-width */")
-print("}")
-print("</style>")
-print()
-print("# Entity/Register Mapping")
-print()
-print("!!! note")
-print()
-print("    This file has been auto-generated. Do not modify.")
-print()
-
-for device_type, devices in grouped_by(entities, device_type_key):
-    printDeviceTypeDevices(device_type, devices)
-
-# def printGroupedData(groupedData):
-#    for k, v in groupedData:
-#        # print("Group {} {}".format(k, list(v)))
-#        print(k)
+def print_header():
+    """Print the markdown document header."""
+    print("# Modbus Entity/Register Mapping")
+    print()
+    print(":::warning")
+    print("This file has been auto-generated. Do not modify.")
+    print(":::")
+    print()
 
 
-# printGroupedData(grouped_entities)
+def main():
+    """Main function to process entities and generate documentation."""
+    # Read entities from stdin
+    entities = read_entities()
 
-# for e in entities:
-#     print(e)
+    if not entities:
+        print("No entities found in input data.", file=sys.stderr)
+        sys.exit(1)
+
+    # Print header
+    print_header()
+
+    # Group entities by device type and process
+    grouped_entities = group_entities_by_device_type(entities)
+
+    # Print documentation for each device type
+    for device_type, devices in grouped_entities.items():
+        print_device_type_devices(device_type, devices)
+
+
+if __name__ == "__main__":
+    main()

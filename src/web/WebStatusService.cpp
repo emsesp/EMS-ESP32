@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
 #ifndef EMSESP_STANDALONE
     uint8_t ntp_status = 0; // 0=disabled, 1=enabled, 2=connected
     if (esp_sntp_enabled()) {
-        ntp_status = (emsesp::EMSESP::system_.ntp_connected()) ? 2 : 1;
+        ntp_status = (EMSESP::system_.ntp_connected()) ? 2 : 1;
     }
     root["ntp_status"] = ntp_status;
     if (ntp_status == 2) {
@@ -83,7 +83,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
 
     root["ap_status"] = EMSESP::esp32React.apStatus();
 
-    if (emsesp::EMSESP::system_.ethernet_connected()) {
+    if (EMSESP::system_.ethernet_connected()) {
         root["network_status"] = 10; // custom code #10 - ETHERNET_STATUS_CONNECTED
         root["wifi_rssi"]      = 0;
     } else {
@@ -115,7 +115,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     root["max_alloc_heap"]   = EMSESP::system_.getMaxAllocMem();
     root["arduino_version"]  = ARDUINO_VERSION;
     root["sdk_version"]      = ESP.getSdkVersion();
-    root["partition"]        = esp_ota_get_running_partition()->label; // active partition
+    root["partition"]        = (const char *)esp_ota_get_running_partition()->label; // active partition
     root["flash_chip_size"]  = ESP.getFlashChipSize() / 1024;
     root["flash_chip_speed"] = ESP.getFlashChipSpeed();
     root["app_used"]         = EMSESP::system_.appUsed();
@@ -130,8 +130,8 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
         root["free_psram"] = ESP.getFreePsram() / 1024;
     }
     root["model"] = EMSESP::system_.getBBQKeesGatewayDetails();
-#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32
-    root["temperature"] = Helpers::transformNumFloat(EMSESP::system_.temperature(), 0, EMSESP::system_.fahrenheit() ? 2 : 0); // only 2 decimal places
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
+    root["temperature"] = (int)Helpers::transformNumFloat(EMSESP::system_.temperature(), 0, EMSESP::system_.fahrenheit() ? 2 : 0); // only 2 decimal places
 #endif
 
     // check for a factory partition first
@@ -145,6 +145,23 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     } else {
         root["has_partition"] = false;
     }
+
+    // get the partition info for each partition, including the running one
+    // the partition data is done once in System::start() and stored in partition_info_
+    JsonArray partitions = root["partitions"].to<JsonArray>();
+    for (const auto & partition : EMSESP::system_.partition_info_) {
+        // Skip partition if it has no version, or it's size is 0
+        if (partition.second.version.empty() || partition.second.size == 0) {
+            continue;
+        }
+        JsonObject part      = partitions.add<JsonObject>();
+        part["partition"]    = partition.first;
+        part["version"]      = partition.second.version;
+        part["size"]         = partition.second.size;
+        part["install_date"] = partition.second.install_date;
+    }
+
+    root["developer_mode"] = EMSESP::system_.developer_mode();
 
     // Also used in SystemMonitor.tsx
     root["status"] = EMSESP::system_.systemStatus(); // send the status. See System.h for status codes
@@ -185,6 +202,8 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
 
     if (action == "checkUpgrade") {
         ok = checkUpgrade(root, param); // param could be empty, if so only send back version
+    } else if (action == "setPartition") {
+        ok = EMSESP::system_.set_partition(param.c_str());
     } else if (action == "export") {
         if (has_param) {
             ok = exportData(root, param);
@@ -195,6 +214,9 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
         ok = uploadURL(param.c_str());
     } else if (action == "systemStatus" && is_admin) {
         ok = setSystemStatus(param.c_str());
+    } else if (action == "resetMQTT" && is_admin) {
+        EMSESP::mqtt_.reset_mqtt();
+        ok = true;
     }
 
 #if defined(EMSESP_STANDALONE) && !defined(EMSESP_UNITY)
@@ -206,7 +228,7 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
 
     // check for error
     if (!ok) {
-        emsesp::EMSESP::logger().err("Action '%s' failed", action.c_str());
+        EMSESP::logger().err("Action '%s' failed", action.c_str());
         request->send(400); // bad request
         return;
     }
@@ -219,37 +241,38 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
 // action = checkUpgrade
 // versions holds the latest development version and stable version in one string, comma separated
 bool WebStatusService::checkUpgrade(JsonObject root, std::string & versions) {
-    std::string current_version_s;
-#ifndef EMSESP_STANDALONE
-    current_version_s = EMSESP_APP_VERSION;
-#else
-    // for testing only - see api3 test in test.cpp
-    // current_version_s = "3.6.5";
-    current_version_s = "3.7.2-dev.1";
-#endif
-
     if (!versions.empty()) {
         version::Semver200_version current_version(current_version_s);
-        bool using_dev_version = !current_version.prerelease().find("dev"); // look for dev in the name to determine if we're using dev version
-        version::Semver200_version latest_version(using_dev_version ? versions.substr(0, versions.find(',')) : versions.substr(versions.find(',') + 1));
-        bool                       upgradeable = (latest_version > current_version);
+        version::Semver200_version latest_dev_version(versions.substr(0, versions.find(',')));
+        version::Semver200_version latest_stable_version(versions.substr(versions.find(',') + 1));
+
+        bool dev_upgradeable    = latest_dev_version > current_version;
+        bool stable_upgradeable = latest_stable_version > current_version;
 
 #if defined(EMSESP_DEBUG)
-        emsesp::EMSESP::logger()
-            .debug("Checking Version upgrade. Using %s release branch. current version=%d.%d.%d-%s, latest version=%d.%d.%d-%s (%s upgradeable)",
-                   (using_dev_version ? "dev" : "stable"),
+        // look for dev in the name to determine if we're using a dev release
+        bool using_dev_version = !current_version.prerelease().find("dev");
+        EMSESP::logger()
+            .debug("Checking version upgrade. This version=%d.%d.%d-%s (%s),latest dev=%d.%d.%d-%s (%s upgradeable),latest stable=%d.%d.%d-%s (%s upgradeable)",
                    current_version.major(),
                    current_version.minor(),
                    current_version.patch(),
                    current_version.prerelease().c_str(),
-                   latest_version.major(),
-                   latest_version.minor(),
-                   latest_version.patch(),
-                   latest_version.prerelease().c_str(),
-                   upgradeable ? "IS" : "NOT");
+                   using_dev_version ? "Dev" : "Stable",
+                   latest_dev_version.major(),
+                   latest_dev_version.minor(),
+                   latest_dev_version.patch(),
+                   latest_dev_version.prerelease().c_str(),
+                   dev_upgradeable ? "is" : "is not",
+                   latest_stable_version.major(),
+                   latest_stable_version.minor(),
+                   latest_stable_version.patch(),
+                   latest_stable_version.prerelease().c_str(),
+                   stable_upgradeable ? "is" : "is not");
 #endif
 
-        root["upgradeable"] = upgradeable;
+        root["dev_upgradeable"]    = dev_upgradeable;
+        root["stable_upgradeable"] = stable_upgradeable;
     }
 
     root["emsesp_version"] = current_version_s; // always send back current version
@@ -322,15 +345,14 @@ bool WebStatusService::getCustomSupport(JsonObject root) {
 
 #if defined(EMSESP_STANDALONE)
     // dummy test data for "test api3"
-    deserializeJson(
-        doc, "{\"type\":\"customSupport\",\"Support\":{\"html\":[\"html code\",\"here\"], \"img_url\": \"https://docs.emsesp.org/_media/images/designer.png\"}");
+    deserializeJson(doc, "{\"type\":\"customSupport\",\"Support\":{\"html\":[\"html code\",\"here\"], \"img_url\": \"https://emsesp.org/_media/images/designer.png\"}");
 #else
     // check if we have custom support file uploaded
     File file = LittleFS.open(EMSESP_CUSTOMSUPPORT_FILE, "r");
     if (!file) {
         // there is no custom file, return empty object
 #if defined(EMSESP_DEBUG)
-        emsesp::EMSESP::logger().debug("No custom support file found");
+        EMSESP::logger().debug("No custom support file found");
 #endif
         return true;
     }
@@ -338,7 +360,7 @@ bool WebStatusService::getCustomSupport(JsonObject root) {
     // read the contents of the file into a json doc. We can't do this direct to object since 7.2.1
     DeserializationError error = deserializeJson(doc, file);
     if (error) {
-        emsesp::EMSESP::logger().err("Failed to read custom support file");
+        EMSESP::logger().err("Failed to read custom support file");
         return false;
     }
 
@@ -346,7 +368,7 @@ bool WebStatusService::getCustomSupport(JsonObject root) {
 #endif
 
 #if defined(EMSESP_DEBUG)
-    emsesp::EMSESP::logger().debug("Showing custom support page");
+    EMSESP::logger().debug("Showing custom support page");
 #endif
 
     root.set(doc.as<JsonObject>()); // add to web response root object
@@ -358,14 +380,14 @@ bool WebStatusService::getCustomSupport(JsonObject root) {
 // uploads a firmware file from a URL
 bool WebStatusService::uploadURL(const char * url) {
     // this will keep a copy of the URL, but won't initiate the download yet
-    emsesp::EMSESP::system_.uploadFirmwareURL(url);
+    EMSESP::system_.uploadFirmwareURL(url);
     return true;
 }
 
 // action = systemStatus
 // sets the system status
 bool WebStatusService::setSystemStatus(const char * status) {
-    emsesp::EMSESP::system_.systemStatus(Helpers::atoint(status));
+    EMSESP::system_.systemStatus(Helpers::atoint(status));
     return true;
 }
 

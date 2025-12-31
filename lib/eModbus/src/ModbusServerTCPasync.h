@@ -76,7 +76,6 @@ class ModbusServerTCPasync : public ModbusServer {
   bool isRunning();
 
  protected:
-  inline void isInstance() { }
   void onClientConnect(AsyncClient* client);
   void onClientDisconnect(mb_client* client);
 

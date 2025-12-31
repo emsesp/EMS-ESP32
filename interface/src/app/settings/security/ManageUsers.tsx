@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { memo, useCallback, useContext, useMemo, useState } from 'react';
 import { useBlocker } from 'react-router';
 
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -55,14 +55,16 @@ const ManageUsers = () => {
   const blocker = useBlocker(changed !== 0);
   const { LL } = useI18nContext();
 
-  const table_theme = useTheme({
-    Table: `
+  const table_theme = useMemo(
+    () =>
+      useTheme({
+        Table: `
       --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) minmax(120px, max-content) 120px;
     `,
-    BaseRow: `
+        BaseRow: `
       font-size: 14px;
     `,
-    HeaderRow: `
+        HeaderRow: `
       text-transform: uppercase;
       background-color: black;
       color: #90CAF9;
@@ -72,7 +74,7 @@ const ManageUsers = () => {
         border-bottom: 1px solid #565656;
       }
     `,
-    Row: `
+        Row: `
       .td {
         padding: 8px;
         border-top: 1px solid #565656;
@@ -85,7 +87,7 @@ const ManageUsers = () => {
         background-color: #1e1e1e;
       }
     `,
-    BaseCell: `
+        BaseCell: `
       &:nth-of-type(2) {
         text-align: center;
       }
@@ -93,71 +95,80 @@ const ManageUsers = () => {
         text-align: right;
       }
     `
-  });
+      }),
+    []
+  );
 
-  const content = () => {
-    if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
-    }
+  const noAdminConfigured = useCallback(
+    () => !data?.users.find((u) => u.admin),
+    [data]
+  );
 
-    const noAdminConfigured = () => !data.users.find((u) => u.admin);
-
-    const removeUser = (toRemove: UserType) => {
+  const removeUser = useCallback(
+    (toRemove: UserType) => {
+      if (!data) return;
       const users = data.users.filter((u) => u.username !== toRemove.username);
       updateDataValue({ ...data, users });
       setChanged(changed + 1);
-    };
+    },
+    [data, updateDataValue, changed]
+  );
 
-    const createUser = () => {
-      setCreating(true);
-      setUser({
-        username: '',
-        password: '',
-        admin: true
-      });
-    };
+  const createUser = useCallback(() => {
+    setCreating(true);
+    setUser({
+      username: '',
+      password: '',
+      admin: true
+    });
+  }, []);
 
-    const editUser = (toEdit: UserType) => {
-      setCreating(false);
-      setUser({ ...toEdit });
-    };
+  const editUser = useCallback((toEdit: UserType) => {
+    setCreating(false);
+    setUser({ ...toEdit });
+  }, []);
 
-    const cancelEditingUser = () => {
+  const cancelEditingUser = useCallback(() => {
+    setUser(undefined);
+  }, []);
+
+  const doneEditingUser = useCallback(() => {
+    if (user && data) {
+      const users = [
+        ...data.users.filter(
+          (u: { username: string }) => u.username !== user.username
+        ),
+        user
+      ];
+      updateDataValue({ ...data, users });
       setUser(undefined);
-    };
+      setChanged(changed + 1);
+    }
+  }, [user, data, updateDataValue, changed]);
 
-    const doneEditingUser = () => {
-      if (user) {
-        const users = [
-          ...data.users.filter(
-            (u: { username: string }) => u.username !== user.username
-          ),
-          user
-        ];
-        updateDataValue({ ...data, users });
-        setUser(undefined);
-        setChanged(changed + 1);
-      }
-    };
+  const closeGenerateToken = useCallback(() => {
+    setGeneratingToken(undefined);
+  }, []);
 
-    const closeGenerateToken = () => {
-      setGeneratingToken(undefined);
-    };
+  const generateTokenForUser = useCallback((username: string) => {
+    setGeneratingToken(username);
+  }, []);
 
-    const generateToken = (username: string) => {
-      setGeneratingToken(username);
-    };
+  const onSubmit = useCallback(async () => {
+    await saveData();
+    await authenticatedContext.refresh();
+    setChanged(0);
+  }, [saveData, authenticatedContext]);
 
-    const onSubmit = async () => {
-      await saveData();
-      await authenticatedContext.refresh();
-      setChanged(0);
-    };
+  const onCancelSubmit = useCallback(async () => {
+    await loadData();
+    setChanged(0);
+  }, [loadData]);
 
-    const onCancelSubmit = async () => {
-      await loadData();
-      setChanged(0);
-    };
+  const content = () => {
+    if (!data) {
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
+    }
 
     interface UserType2 {
       id: string;
@@ -167,10 +178,14 @@ const ManageUsers = () => {
     }
 
     // add id to the type, needed for the table
-    const user_table = data.users.map((u) => ({
-      ...u,
-      id: u.username
-    })) as UserType2[];
+    const user_table = useMemo(
+      () =>
+        data.users.map((u) => ({
+          ...u,
+          id: u.username
+        })) as UserType2[],
+      [data.users]
+    );
 
     return (
       <>
@@ -196,15 +211,24 @@ const ManageUsers = () => {
                     <Cell stiff>
                       <IconButton
                         size="small"
+                        aria-label={LL.GENERATING_TOKEN()}
                         disabled={!authenticatedContext.me.admin}
-                        onClick={() => generateToken(u.username)}
+                        onClick={() => generateTokenForUser(u.username)}
                       >
                         <VpnKeyIcon />
                       </IconButton>
-                      <IconButton size="small" onClick={() => removeUser(u)}>
+                      <IconButton
+                        size="small"
+                        onClick={() => removeUser(u)}
+                        aria-label={LL.REMOVE()}
+                      >
                         <DeleteIcon />
                       </IconButton>
-                      <IconButton size="small" onClick={() => editUser(u)}>
+                      <IconButton
+                        size="small"
+                        onClick={() => editUser(u)}
+                        aria-label={LL.EDIT()}
+                      >
                         <EditIcon />
                       </IconButton>
                     </Cell>
@@ -260,15 +284,20 @@ const ManageUsers = () => {
           </Box>
         </Box>
 
-        <GenerateToken username={generatingToken} onClose={closeGenerateToken} />
-        <User
-          user={user}
-          setUser={setUser}
-          creating={creating}
-          onDoneEditing={doneEditingUser}
-          onCancelEditing={cancelEditingUser}
-          validator={createUserValidator(data.users, creating)}
+        <GenerateToken
+          username={generatingToken || ''}
+          onClose={closeGenerateToken}
         />
+        {user && (
+          <User
+            user={user}
+            setUser={setUser}
+            creating={creating}
+            onDoneEditing={doneEditingUser}
+            onCancelEditing={cancelEditingUser}
+            validator={createUserValidator(data.users, creating)}
+          />
+        )}
       </>
     );
   };
@@ -281,4 +310,4 @@ const ManageUsers = () => {
   );
 };
 
-export default ManageUsers;
+export default memo(ManageUsers);

@@ -1,40 +1,37 @@
-let decoder;
+// @ts-nocheck - Optimized MessagePack unpacking library for EMS-ESP32
+let decoder,
+  src,
+  srcEnd,
+  position = 0,
+  strings = [],
+  stringPosition = 0,
+  currentUnpackr = {},
+  currentStructures,
+  srcString,
+  srcStringStart = 0,
+  srcStringEnd = 0,
+  bundledStrings,
+  referenceMap,
+  dataView;
+const EMPTY_ARRAY = [],
+  currentExtensions = [];
+const defaultOptions = { useRecords: false, mapsAsObjects: true };
 try {
   decoder = new TextDecoder();
 } catch (error) {}
-let src;
-let srcEnd;
-let position = 0;
-const EMPTY_ARRAY = [];
-let strings = EMPTY_ARRAY;
-let stringPosition = 0;
-let currentUnpackr = {};
-let currentStructures;
-let srcString;
-let srcStringStart = 0;
-let srcStringEnd = 0;
-let bundledStrings;
-let referenceMap;
-const currentExtensions = [];
-let dataView;
-const defaultOptions = {
-  useRecords: false,
-  mapsAsObjects: true
-};
-export class C1Type {}
-export const C1 = new C1Type();
+class C1Type {}
+const C1 = new C1Type();
 C1.name = 'MessagePack 0xC1';
-let sequentialMode = false;
-let inlineObjectReadThreshold = 2;
-let readStruct, onLoadedStructures, onSaveState;
-// no-eval build
+let sequentialMode = false,
+  inlineObjectReadThreshold = 2,
+  readStruct,
+  onLoadedStructures,
+  onSaveState;
 try {
   new Function('');
 } catch (error) {
-  // if eval variants are not supported, do not create inline object readers ever
   inlineObjectReadThreshold = Infinity;
 }
-
 export class Unpackr {
   constructor(options) {
     if (options) {
@@ -50,19 +47,15 @@ export class Unpackr {
       if (options.structures)
         options.structures.sharedLength = options.structures.length;
       else if (options.getStructures) {
-        (options.structures = []).uninitialized = true; // this is what we use to denote an uninitialized structures
+        (options.structures = []).uninitialized = true;
         options.structures.sharedLength = 0;
       }
-      if (options.int64AsNumber) {
-        options.int64AsType = 'number';
-      }
+      if (options.int64AsNumber) options.int64AsType = 'number';
     }
     Object.assign(this, options);
   }
-
-  unpack(source, options?: any) {
+  unpack(source, options?: { start?: number; end?: number; lazy?: boolean }) {
     if (src) {
-      // re-entrant execution, save the state and restore it after we do this unpack
       return saveState(() => {
         clearSource();
         return this
@@ -86,9 +79,6 @@ export class Unpackr {
     strings = EMPTY_ARRAY;
     bundledStrings = null;
     src = source;
-    // this provides cached access to the data view for a buffer if it is getting reused, which is a recommend
-    // technique for getting data from a database where it can be copied into an existing buffer instead of creating
-    // new ones
     try {
       dataView =
         source.dataView ||
@@ -191,10 +181,10 @@ export class Unpackr {
     return this.unpack(source, end);
   }
 }
-export function getPosition() {
+function getPosition() {
   return position;
 }
-export function checkedRead(options: any) {
+function checkedRead(options?: { lazy?: boolean }) {
   try {
     if (!currentUnpackr.trusted && !sequentialMode) {
       const sharedLength = currentStructures.sharedLength || 0;
@@ -264,7 +254,7 @@ function restoreStructures() {
   currentStructures.restoreStructures = null;
 }
 
-export function read() {
+function read() {
   let token = src[position++];
   if (token < 0xa0) {
     if (token < 0x80) {
@@ -589,7 +579,7 @@ const createSecondByteReader = (firstId, read0) =>
     return structure.read();
   };
 
-export function loadStructures() {
+function loadStructures() {
   const loadedStructures = saveState(() => {
     // save the state in case getStructures modifies our buffer
     src = null;
@@ -605,9 +595,8 @@ var readFixedString = readStringJS;
 var readString8 = readStringJS;
 var readString16 = readStringJS;
 var readString32 = readStringJS;
-export let isNativeAccelerationEnabled = false;
-
-export function setExtractor(extractStrings) {
+let isNativeAccelerationEnabled = false;
+function setExtractor(extractStrings) {
   isNativeAccelerationEnabled = true;
   readFixedString = readString(1);
   readString8 = readString(2);
@@ -701,7 +690,7 @@ function readStringJS(length) {
 
   return result;
 }
-export function readString(source, start, length) {
+function readString(source, start, length) {
   const existingSrc = src;
   src = source;
   position = start;
@@ -1065,7 +1054,7 @@ currentExtensions[0x70] = (data) => {
 
 currentExtensions[0x73] = () => new Set(read());
 
-export const typedArrays = [
+const typedArrays = [
   'Int8',
   'Uint8',
   'Uint8Clamped',
@@ -1177,44 +1166,20 @@ function saveState(callback) {
   dataView = new DataView(src.buffer, src.byteOffset, src.byteLength);
   return value;
 }
-export function clearSource() {
+function clearSource() {
   src = null;
   referenceMap = null;
   currentStructures = null;
 }
 
-export function addExtension(extension) {
+function addExtension(extension) {
   if (extension.unpack) currentExtensions[extension.type] = extension.unpack;
   else currentExtensions[extension.type] = extension;
 }
 
-export const mult10 = new Array(147); // this is a table matching binary exponents to the multiplier to determine significant digit rounding
+const mult10 = new Array(147);
 for (let i = 0; i < 256; i++) {
   mult10[i] = +('1e' + Math.floor(45.15 - i * 0.30103));
 }
-export const Decoder = Unpackr;
-var defaultUnpackr = new Unpackr({ useRecords: false });
+const defaultUnpackr = new Unpackr({ useRecords: false });
 export const unpack = defaultUnpackr.unpack;
-export const unpackMultiple = defaultUnpackr.unpackMultiple;
-export const decode = defaultUnpackr.unpack;
-export const FLOAT32_OPTIONS = {
-  NEVER: 0,
-  ALWAYS: 1,
-  DECIMAL_ROUND: 3,
-  DECIMAL_FIT: 4
-};
-const f32Array = new Float32Array(1);
-const u8Array = new Uint8Array(f32Array.buffer, 0, 4);
-export function roundFloat32(float32Number) {
-  f32Array[0] = float32Number;
-  const multiplier = mult10[((u8Array[3] & 0x7f) << 1) | (u8Array[2] >> 7)];
-  return (
-    ((multiplier * float32Number + (float32Number > 0 ? 0.5 : -0.5)) >> 0) /
-    multiplier
-  );
-}
-export function setReadStruct(updatedReadStruct, loadedStructs, saveState) {
-  readStruct = updatedReadStruct;
-  onLoadedStructures = loadedStructs;
-  onSaveState = saveState;
-}

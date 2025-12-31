@@ -1,31 +1,30 @@
 #!/bin/sh
 
 # run from root folder, like `sh ./scripts/update_all.sh`
-# make sure ncu is installed globally (https://github.com/raineorshine/npm-check-updates)
 # as well as GNUMake (make) and python3
 
 cd interface
-rm -rf yarn.lock node_modules
-touch yarn.lock
-ncu -u
-yarn set version stable
-yarn
-yarn format
-yarn lint
+rm -rf node_modules
+corepack use pnpm@latest-10
+pnpm update --latest
+pnpm install
+pnpm format
+pnpm lint
 
 cd ../mock-api
-rm -rf yarn.lock node_modules
-touch yarn.lock
-ncu -u
-yarn set version stable
-yarn
-yarn format
+rm -rf node_modules
+corepack use pnpm@latest-10
+pnpm update --latest
+pnpm install
+pnpm format
 
 cd ..
 cd interface
-yarn build; yarn webUI
+pnpm build_webUI
 
 cd ..
-npx cspell "**" 
+npx cspell "**"
 
-sh ./scripts/generate_csv_and_headers.sh
+# platformio run -e build_modbus
+# platformio run -e build_standalone
+# platformio run -e native-test -t exec

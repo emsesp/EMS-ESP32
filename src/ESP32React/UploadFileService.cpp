@@ -3,6 +3,7 @@
 #include <emsesp.h>
 
 #include <esp_app_format.h>
+#include <esp_ota_ops.h>
 
 static String getFilenameExtension(const String & filename) {
     const auto pos = filename.lastIndexOf('.');
@@ -81,6 +82,10 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
             }
 #endif
             // it's firmware - initialize the ArduinoOTA updater
+            emsesp::EMSESP::logger().info("Uploading firmware file %s (size: %d KB). Please wait...", filename.c_str(), filesize / 1024);
+            // turn off UART to prevent interference with the upload
+            emsesp::EMSuart::stop();
+
             if (Update.begin(filesize - sizeof(esp_image_header_t))) {
                 if (strlen(_md5.data()) == _md5.size() - 1) {
                     Update.setMD5(_md5.data());
@@ -113,6 +118,8 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
 }
 
 void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
+    emsesp::EMSESP::logger().info("Upload successful");
+
     // did we just complete uploading a json file?
     if (request->_tempFile) {
         request->_tempFile.close(); // close the file handle as the upload is now done
@@ -126,6 +133,9 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
     // check if it was a firmware upgrade
     // if no error, send the success response as a JSON
     if (_is_firmware && !request->_tempObject) {
+        // set NVS to tell EMS-ESP this is a new fresh firmware on next restart
+        emsesp::EMSESP::nvs_.putBool(emsesp::EMSESP_NVS_BOOT_NEW_FIRMWARE, true);
+
         AsyncWebServerResponse * response = request->beginResponse(200);
         request->send(response);
         emsesp::EMSESP::system_.systemStatus(
@@ -133,6 +143,7 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
         return;
     }
 
+    // add MD5 to the response
     if (strlen(_md5.data()) == _md5.size() - 1) {
         auto *     response = new AsyncJsonResponse(false);
         JsonObject root     = response->getRoot();
@@ -146,6 +157,9 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
 }
 
 void UploadFileService::handleError(AsyncWebServerRequest * request, int code) {
+    emsesp::EMSESP::logger().info("Upload error: %d", code);
+    emsesp::EMSESP::system_.uart_init(); // re-enable UART
+
     // if we have had an error already, do nothing
     if (request->_tempObject) {
         return;
@@ -155,15 +169,19 @@ void UploadFileService::handleError(AsyncWebServerRequest * request, int code) {
     AsyncWebServerResponse * response = request->beginResponse(code);
     request->send(response);
 
-    // check for invalid extension and immediately kill the connection, which will through an error
+    // check for invalid extension and immediately kill the connection, which will throw an error
     // that is caught by the web code. Unfortunately the http error code is not sent to the client on fast network connections
     if (code == 406) {
         request->client()->close(true);
-        handleEarlyDisconnect();
+        _is_firmware = false;
+        Update.abort();
     }
 }
 
 void UploadFileService::handleEarlyDisconnect() {
+    emsesp::EMSESP::logger().info("Upload ended");
+    emsesp::EMSESP::system_.uart_init(); // re-enable UART
+
     _is_firmware = false;
     Update.abort();
 }

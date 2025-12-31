@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -185,6 +185,10 @@
 #define EMSESP_DEFAULT_HA_ENABLED false
 #endif
 
+#ifndef EMSESP_DEFAULT_HA_OPTIMISTIC
+#define EMSESP_DEFAULT_HA_OPTIMISTIC false
+#endif
+
 #ifndef EMSESP_DEFAULT_PUBLISH_TIME
 #define EMSESP_DEFAULT_PUBLISH_TIME 10
 #endif
@@ -289,7 +293,7 @@ enum {
 #ifndef STRINGIZE
 #define STRINGIZE(s) #s
 #endif
-#if TASMOTA_SDK
+#ifdef TASMOTA_SDK
 #define ARDUINO_VERSION_STR(major, minor, patch) "Tasmota Arduino v" STRINGIZE(major) "." STRINGIZE(minor) "." STRINGIZE(patch)
 #else
 #define ARDUINO_VERSION_STR(major, minor, patch) "ESP32 Arduino v" STRINGIZE(major) "." STRINGIZE(minor) "." STRINGIZE(patch)

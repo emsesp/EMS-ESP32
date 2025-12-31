@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import DoneIcon from '@mui/icons-material/Done';
@@ -10,7 +10,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid2 as Grid,
+  Grid,
   TextField
 } from '@mui/material';
 
@@ -37,25 +37,35 @@ const ModulesDialog = ({
   const { LL } = useI18nContext();
   const [editItem, setEditItem] = useState<ModuleItem>(selectedItem);
 
-  const updateFormValue = updateValue(setEditItem);
+  const updateFormValue = useMemo(
+    () =>
+      updateValue(
+        setEditItem as unknown as React.Dispatch<
+          React.SetStateAction<Record<string, unknown>>
+        >
+      ),
+    []
+  );
 
+  // Sync form state when dialog opens or selected item changes
   useEffect(() => {
     if (open) {
       setEditItem(selectedItem);
     }
   }, [open, selectedItem]);
 
-  const close = () => {
-    onClose();
-  };
-
-  const save = () => {
+  const handleSave = useCallback(() => {
     onSave(editItem);
-  };
+  }, [editItem, onSave]);
+
+  const dialogTitle = useMemo(
+    () => `${LL.EDIT()} ${editItem.key}`,
+    [LL, editItem.key]
+  );
 
   return (
     <Dialog sx={dialogStyle} fullWidth maxWidth="xs" open={open} onClose={onClose}>
-      <DialogTitle>{LL.EDIT() + ' ' + editItem.key}</DialogTitle>
+      <DialogTitle>{dialogTitle}</DialogTitle>
       <DialogContent dividers>
         <Grid container>
           <BlockFormControlLabel
@@ -85,7 +95,7 @@ const ModulesDialog = ({
         <Button
           startIcon={<CancelIcon />}
           variant="outlined"
-          onClick={close}
+          onClick={onClose}
           color="secondary"
         >
           {LL.CANCEL()}
@@ -93,7 +103,7 @@ const ModulesDialog = ({
         <Button
           startIcon={<DoneIcon />}
           variant="outlined"
-          onClick={save}
+          onClick={handleSave}
           color="primary"
         >
           {LL.UPDATE()}

@@ -8,6 +8,7 @@
 #include <map>
 #include <functional>
 #include "ModbusClient.h"
+#include "ModbusServer.h"
 #include "ModbusClientTCP.h"  // Needed for client.setTarget()
 #include "RTUutils.h"  // Needed for RTScallback
 
@@ -29,7 +30,7 @@ public:
   ModbusBridge();
 
   // Constructors for the RTU variant. Parameters as are for ModbusServerRTU
-  ModbusBridge(uint32_t timeout, int rtsPin = -1);
+  explicit ModbusBridge(uint32_t timeout, int rtsPin = -1);
   ModbusBridge(uint32_t timeout, RTScallback rts);
 
   // Destructor
@@ -230,41 +231,55 @@ ModbusMessage ModbusBridge<SERVERCLASS>::bridgeWorker(ModbusMessage msg) {
   uint8_t aliasID = msg.getServerID();
   uint8_t functionCode = msg.getFunctionCode();
   ModbusMessage response;
+  bool foundServer = false;
+  uint8_t usableID = 255;
 
   // Find the (alias) serverID
   if (servers.find(aliasID) != servers.end()) {
+    foundServer = true;
+    usableID = aliasID;
+  } else {
+    if (servers.find(ANY_SERVER) != servers.end()) {
+      foundServer = true;
+      usableID = ANY_SERVER;
+    }
+  }
+  if (foundServer) {
     // Found it. We may use servers[aliasID] now without allocating a new map slot
 
     // Request filter hook to be called here
-    if (servers[aliasID]->requestFilter) {
+    if (servers[usableID]->requestFilter) {
       LOG_D("Calling request filter\n");
-      msg = servers[aliasID]->requestFilter(msg);
+      msg = servers[usableID]->requestFilter(msg);
     }
 
     // Set real target server ID
-    msg.setServerID(servers[aliasID]->serverID);
-
-    // Issue the request
-    LOG_D("Request (%02X/%02X) sent\n", servers[aliasID]->serverID, msg.getFunctionCode());
-    // TCP servers have a target host/port that needs to be set in the client
-    if (servers[aliasID]->serverType == TCP_SERVER) {
-      response = reinterpret_cast<ModbusClientTCP *>(servers[aliasID]->client)->syncRequestMT(msg, (uint32_t)millis(), servers[aliasID]->host, servers[aliasID]->port);
-    } else {
-      response = servers[aliasID]->client->syncRequestM(msg, (uint32_t)millis());
+    if (servers[usableID]->serverID != ANY_SERVER) {
+      msg.setServerID(servers[usableID]->serverID);
     }
 
-    // Response filter hook to be called here
-    if (servers[aliasID]->responseFilter) {
-      LOG_D("Calling response filter\n");
-      response = servers[aliasID]->responseFilter(response);
+    // Issue the request
+    LOG_D("Request (%02X/%02X) sent\n", servers[usableID]->serverID, msg.getFunctionCode());
+    // TCP servers have a target host/port that needs to be set in the client
+    if (servers[usableID]->serverType == TCP_SERVER) {
+      response = reinterpret_cast<ModbusClientTCP *>(servers[usableID]->client)->syncRequestMT(msg, (uint32_t)micros(), servers[usableID]->host, servers[usableID]->port);
+    } else {
+      response = servers[usableID]->client->syncRequestM(msg, (uint32_t)micros());
     }
 
     // Re-set the requested server ID and function code (may have been modified by filters)
     response.setServerID(aliasID);
+
     if (response.getError() != SUCCESS) {
       response.setFunctionCode(functionCode | 0x80);
     } else {
       response.setFunctionCode(functionCode);
+    }
+
+    // Response filter hook to be called here
+    if (servers[usableID]->responseFilter) {
+      LOG_D("Calling response filter\n");
+      response = servers[usableID]->responseFilter(response);
     }
   } else {
     // If we get here, something has gone wrong internally. We send back an error response anyway.

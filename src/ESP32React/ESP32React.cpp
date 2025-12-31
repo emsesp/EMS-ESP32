@@ -19,47 +19,49 @@ ESP32React::ESP32React(AsyncWebServer * server, FS * fs)
     // Serve static web resources
     //
 
-    // Populate the last modification date based on build datetime
-    static char last_modified[50];
-    sprintf(last_modified, "%s %s CET", __DATE__, __TIME__);
+    ArRequestHandlerFunction indexHtmlHandler = nullptr;
 
-    WWWData::registerRoutes([server](const char * uri, const String & contentType, const uint8_t * content, size_t len, const String & hash) {
+    WWWData::registerRoutes([server, &indexHtmlHandler](const char * uri, const String & contentType, const uint8_t * content, size_t len, const String & hash) {
         ArRequestHandlerFunction requestHandler = [contentType, content, len, hash](AsyncWebServerRequest * request) {
+            AsyncWebServerResponse * response;
+
             // Check if the client already has the same version and respond with a 304 (Not modified)
-            if (request->header("If-Modified-Since").indexOf(last_modified) > 0) {
-                return request->send(304);
-            } else if (request->header("If-None-Match").equals(hash)) {
-                return request->send(304);
+            if (request->header("If-None-Match").equals(hash)) {
+                response = request->beginResponse(304);
+            } else {
+                response = request->beginResponse(200, contentType, content, len);
+                response->addHeader("Content-Encoding", "gzip"); // not br for brotlin only works over HTTPS
             }
 
-            AsyncWebServerResponse * response = request->beginResponse(200, contentType, content, len);
-
-            response->addHeader("Content-Encoding", "gzip");
-            // response->addHeader("Content-Encoding", "br"); // only works over HTTPS
-            // response->addHeader("Cache-Control", "public, immutable, max-age=31536000");
-            response->addHeader("Cache-Control", "must-revalidate"); // ensure that a client will check the server for a change
-            response->addHeader("Last-Modified", last_modified);
+            // always send these headers - see https://datatracker.ietf.org/doc/html/rfc7232#section-4.1
             response->addHeader("ETag", hash);
+            response->addHeader("Cache-Control", "no-cache"); // Requires revalidation before using cached content (ETags enable 304 responses)
 
             request->send(response);
         };
 
         server->on(uri, HTTP_GET, requestHandler);
 
-        // Serving non matching get requests with "/index.html"
-        // OPTIONS get a straight up 200 response
-        if (strncmp(uri, "/index.html", 11) == 0) {
-            server->onNotFound([requestHandler](AsyncWebServerRequest * request) {
-                if (request->method() == HTTP_GET) {
-                    requestHandler(request);
-                } else if (request->method() == HTTP_OPTIONS) {
-                    request->send(200);
-                } else {
-                    request->send(404);
-                }
-            });
+        // Capture index.html handler to set onNotFound once after all routes are registered
+        if (strcmp(uri, "/index.html") == 0) {
+            indexHtmlHandler = requestHandler;
         }
     });
+
+    // Set onNotFound handler once after all routes are registered
+    // Serving non matching get requests with "/index.html"
+    // OPTIONS get a straight up 200 response
+    if (indexHtmlHandler != nullptr) {
+        server->onNotFound([indexHtmlHandler](AsyncWebServerRequest * request) {
+            if (request->method() == HTTP_GET) {
+                indexHtmlHandler(request);
+            } else if (request->method() == HTTP_OPTIONS) {
+                request->send(200);
+            } else {
+                request->send(404); // not found
+            }
+        });
+    }
 }
 
 void ESP32React::begin() {

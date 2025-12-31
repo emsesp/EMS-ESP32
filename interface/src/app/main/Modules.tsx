@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { useBlocker } from 'react-router';
 import { toast } from 'react-toastify';
 
@@ -31,6 +31,19 @@ import { readModules, writeModules } from '../../api/app';
 import ModulesDialog from './ModulesDialog';
 import type { ModuleItem } from './types';
 
+const PENDING_COLOR = 'red';
+const ACTIVATED_COLOR = '#00FF7F';
+
+const hasModulesChanged = (mi: ModuleItem): boolean =>
+  mi.enabled !== mi.o_enabled || mi.license !== mi.o_license;
+
+const ColorStatus = memo(({ status }: { status: number }) => {
+  if (status === 1) {
+    return <div style={{ color: PENDING_COLOR }}>Pending Activation</div>;
+  }
+  return <div style={{ color: ACTIVATED_COLOR }}>Activated</div>;
+});
+
 const Modules = () => {
   const { LL } = useI18nContext();
   const [numChanges, setNumChanges] = useState<number>(0);
@@ -56,105 +69,111 @@ const Modules = () => {
     }
   );
 
-  const modules_theme = useTheme({
-    Table: `
-      --data-table-library_grid-template-columns: 48px 180px 120px 100px repeat(1, minmax(160px, 1fr)) 180px;
-    `,
-    BaseRow: `
-      font-size: 14px;
-      .td {
-        height: 32px;
-      }
-    `,
-    BaseCell: `
-      &:nth-of-type(1) {
-        text-align: center;
-      }
-    `,
-    HeaderRow: `
-      text-transform: uppercase;
-      background-color: black;
-      color: #90CAF9;
-      .th {
-        border-bottom: 1px solid #565656;
-        height: 36px;
-      }
-    `,
-    Row: `
-      background-color: #1e1e1e;
-      position: relative;
-      cursor: pointer;
-      .td {
-        border-top: 1px solid #565656;
-        border-bottom: 1px solid #565656;
-      }
-      &:hover .td {
-        border-top: 1px solid #177ac9;
-        border-bottom: 1px solid #177ac9;
-      }
-      &:nth-of-type(odd) .td {
-        background-color: #303030;
-      }
-    `
-  });
+  const modules_theme = useTheme(
+    useMemo(
+      () => ({
+        Table: `
+          --data-table-library_grid-template-columns: 48px 180px 120px 100px repeat(1, minmax(160px, 1fr)) 180px;
+        `,
+        BaseRow: `
+          font-size: 14px;
+          .td {
+            height: 32px;
+          }
+        `,
+        BaseCell: `
+          &:nth-of-type(1) {
+            text-align: center;
+          }
+        `,
+        HeaderRow: `
+          text-transform: uppercase;
+          background-color: black;
+          color: #90CAF9;
+          .th {
+            border-bottom: 1px solid #565656;
+            height: 36px;
+          }
+        `,
+        Row: `
+          background-color: #1e1e1e;
+          position: relative;
+          cursor: pointer;
+          .td {
+            border-top: 1px solid #565656;
+            border-bottom: 1px solid #565656;
+          }
+          &:hover .td {
+            border-top: 1px solid #177ac9;
+            border-bottom: 1px solid #177ac9;
+          }
+          &:nth-of-type(odd) .td {
+            background-color: #303030;
+          }
+        `
+      }),
+      []
+    )
+  );
 
-  const onDialogClose = () => {
+  const onDialogClose = useCallback(() => {
     setDialogOpen(false);
-  };
+  }, []);
 
-  const onDialogSave = (updatedItem: ModuleItem) => {
-    setDialogOpen(false);
-    updateModuleItem(updatedItem);
-  };
+  const updateModuleItem = useCallback((updatedItem: ModuleItem) => {
+    void updateState(readModules(), (data: ModuleItem[]) => {
+      const new_data = data.map((mi) =>
+        mi.id === updatedItem.id ? { ...mi, ...updatedItem } : mi
+      );
+      setNumChanges(new_data.filter(hasModulesChanged).length);
+      return new_data;
+    });
+  }, []);
+
+  const onDialogSave = useCallback(
+    (updatedItem: ModuleItem) => {
+      setDialogOpen(false);
+      updateModuleItem(updatedItem);
+    },
+    [updateModuleItem]
+  );
 
   const editModuleItem = useCallback((mi: ModuleItem) => {
     setSelectedModuleItem(mi);
     setDialogOpen(true);
   }, []);
 
-  const onCancel = async () => {
+  const onCancel = useCallback(async () => {
     await fetchModules().then(() => {
       setNumChanges(0);
     });
-  };
+  }, [fetchModules]);
 
-  function hasModulesChanged(mi: ModuleItem) {
-    return mi.enabled !== mi.o_enabled || mi.license !== mi.o_license;
-  }
-
-  const updateModuleItem = (updatedItem: ModuleItem) => {
-    void updateState(readModules(), (data: ModuleItem[]) => {
-      const new_data = data.map((mi) =>
-        mi.id === updatedItem.id ? { ...mi, ...updatedItem } : mi
+  const saveModules = useCallback(async () => {
+    try {
+      await Promise.all(
+        modules.map((condensed_mi: ModuleItem) =>
+          updateModules({
+            key: condensed_mi.key,
+            enabled: condensed_mi.enabled,
+            license: condensed_mi.license
+          })
+        )
       );
-      setNumChanges(new_data.filter((mi) => hasModulesChanged(mi)).length);
-      return new_data;
-    });
-  };
+      toast.success(LL.MODULES_UPDATED());
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : String(error));
+    } finally {
+      await fetchModules();
+      setNumChanges(0);
+    }
+  }, [modules, updateModules, LL, fetchModules]);
 
-  const saveModules = async () => {
-    await updateModules({
-      modules: modules.map((condensed_mi) => ({
-        key: condensed_mi.key,
-        enabled: condensed_mi.enabled,
-        license: condensed_mi.license
-      }))
-    })
-      .then(() => {
-        toast.success(LL.MODULES_UPDATED());
-      })
-      .catch((error: Error) => {
-        toast.error(error.message);
-      })
-      .finally(async () => {
-        await fetchModules();
-        setNumChanges(0);
-      });
-  };
-
-  const renderContent = () => {
+  const content = useMemo(() => {
     if (!modules) {
-      return <FormLoader onRetry={fetchModules} errorMessage={error?.message} />;
+      return (
+        <FormLoader onRetry={fetchModules} errorMessage={error?.message || ''} />
+      );
     }
 
     if (modules.length === 0) {
@@ -164,13 +183,6 @@ const Modules = () => {
         </Typography>
       );
     }
-
-    const colorStatus = (status: number) => {
-      if (status === 1) {
-        return <div style={{ color: 'red' }}>Pending Activation</div>;
-      }
-      return <div style={{ color: '#00FF7F' }}>Activated</div>;
-    };
 
     return (
       <>
@@ -214,7 +226,9 @@ const Modules = () => {
                     <Cell>{mi.author}</Cell>
                     <Cell>{mi.version}</Cell>
                     <Cell>{mi.message}</Cell>
-                    <Cell>{colorStatus(mi.status)}</Cell>
+                    <Cell>
+                      <ColorStatus status={mi.status} />
+                    </Cell>
                   </Row>
                 ))}
               </Body>
@@ -248,12 +262,22 @@ const Modules = () => {
         </Box>
       </>
     );
-  };
+  }, [
+    modules,
+    fetchModules,
+    error,
+    modules_theme,
+    editModuleItem,
+    LL,
+    numChanges,
+    onCancel,
+    saveModules
+  ]);
 
   return (
     <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
-      {renderContent()}
+      {content}
       {selectedModuleItem && (
         <ModulesDialog
           open={dialogOpen}

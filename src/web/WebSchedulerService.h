@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,11 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <esp32-psram.h>
+
 #ifndef WebSchedulerService_h
 #define WebSchedulerService_h
 
 #define EMSESP_SCHEDULER_FILE "/config/emsespScheduler.json"
 #define EMSESP_SCHEDULER_SERVICE_PATH "/rest/schedule" // GET and POST
+
+#ifndef EMSESP_SCHEDULER_RUNNING_CORE
+#define EMSESP_SCHEDULER_RUNNING_CORE 1
+#endif
+
+#ifndef EMSESP_SCHEDULER_STACKSIZE
+#define EMSESP_SCHEDULER_STACKSIZE 5120
+#endif
+
+#ifndef EMSESP_SCHEDULER_PRIORITY
+#define EMSESP_SCHEDULER_PRIORITY 1
+#endif
 
 // bit flags for the schedule items. Matches those in interface/src/app/main/SchedulerDialog.tsx
 // 0-127 (0->0x7F) is day schedule
@@ -42,16 +56,16 @@ class ScheduleItem {
     boolean     active;
     uint8_t     flags;
     uint16_t    elapsed_min; // total mins from 00:00
-    std::string time;        // HH:MM
-    std::string cmd;
-    std::string value;
-    std::string name;
+    stringPSRAM time;        // HH:MM
+    stringPSRAM cmd;
+    stringPSRAM value;
+    char        name[20];
     uint8_t     retry_cnt;
 };
 
 class WebScheduler {
   public:
-    std::list<ScheduleItem> scheduleItems;
+    std::list<ScheduleItem, AllocatorPSRAM<ScheduleItem>> scheduleItems;
 
     static void              read(WebScheduler & webScheduler, JsonObject root);
     static StateUpdateResult update(JsonObject root, WebScheduler & webScheduler);
@@ -69,13 +83,16 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
     bool get_value_info(JsonObject output, const char * cmd);
     void get_value_json(JsonObject output, const ScheduleItem & scheduleItem);
     void ha_reset() {
-        ha_registered_ = false;
+        ha_configdone_ = false;
     }
     uint8_t count_entities(bool cmd_only = false);
     bool    onChange(const char * cmd);
 
+    std::string raw_value;
+    std::string computed_value;
+
 #if defined(EMSESP_TEST)
-    void test();
+    void load_test_data();
 #endif
 
 // make all functions public so we can test in the debug and standalone mode
@@ -89,10 +106,10 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
 
     HttpEndpoint<WebScheduler>  _httpEndpoint;
     FSPersistence<WebScheduler> _fsPersistence;
+    bool                        ha_configdone_ = false;
 
-    std::list<ScheduleItem> *  scheduleItems_; // pointer to the list of schedule events
-    bool                       ha_registered_ = false;
-    std::deque<ScheduleItem *> cmd_changed_;
+    std::list<ScheduleItem, AllocatorPSRAM<ScheduleItem>> *   scheduleItems_; // pointer to the list of schedule events
+    std::list<ScheduleItem *, AllocatorPSRAM<ScheduleItem *>> cmd_changed_;   // pointer to commands in list that are triggered by change
 };
 
 } // namespace emsesp

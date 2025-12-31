@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,11 @@
 
 #ifndef EMSESP_STANDALONE
 #include "esp_ota_ops.h"
+#include "esp_partition.h"
 #endif
+
+#include <HTTPClient.h>
+#include <map>
 
 #include <semver200.h>
 
@@ -48,7 +52,9 @@
 #include <esp_mac.h>
 #endif
 
-#include <HTTPClient.h>
+#ifndef EMSESP_STANDALONE
+#include "esp_efuse.h"
+#endif
 
 namespace emsesp {
 
@@ -79,6 +85,10 @@ const char * const languages[] = {EMSESP_LOCALE_EN,
 
 static constexpr uint8_t NUM_LANGUAGES = sizeof(languages) / sizeof(const char *);
 
+#ifndef EMSESP_STANDALONE
+uuid::syslog::SyslogService System::syslog_;
+#endif
+
 uuid::log::Logger System::logger_{F_(system), uuid::log::Facility::KERN};
 
 // init statics
@@ -86,6 +96,19 @@ PButton  System::myPButton_;
 bool     System::test_set_all_active_ = false;
 uint32_t System::max_alloc_mem_;
 uint32_t System::heap_mem_;
+
+// LED flash timer
+uint8_t  System::led_flash_gpio_       = 0;
+uint8_t  System::led_flash_type_       = 0;
+uint32_t System::led_flash_start_time_ = 0;
+uint32_t System::led_flash_duration_   = 0;
+bool     System::led_flash_timer_      = false;
+
+// GPIOs
+std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::valid_system_gpios_;
+std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::used_gpios_;
+std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::snapshot_used_gpios_;
+std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::snapshot_valid_system_gpios_;
 
 // find the index of the language
 // 0 = EN, 1 = DE, etc...
@@ -101,6 +124,19 @@ uint8_t System::language_index() {
 // send raw to ems
 bool System::command_send(const char * value, const int8_t id) {
     return EMSESP::txservice_.send_raw(value); // ignore id
+}
+
+// return string of languages and count
+std::string System::languages_string() {
+    std::string languages_string = std::to_string(NUM_LANGUAGES) + " languages (";
+    for (uint8_t i = 0; i < NUM_LANGUAGES; i++) {
+        languages_string += languages[i];
+        if (i != NUM_LANGUAGES - 1) {
+            languages_string += ",";
+        }
+    }
+    languages_string += ")";
+    return languages_string;
 }
 
 // returns last response from MQTT
@@ -201,14 +237,27 @@ bool System::command_syslog_level(const char * value, const int8_t id) {
 }
 */
 
-// send message - to log and MQTT
-bool System::command_message(const char * value, const int8_t id) {
+// send message - to system log and MQTT
+bool System::command_message(const char * value, const int8_t id, JsonObject output) {
     if (value == nullptr || value[0] == '\0') {
+        LOG_WARNING("Message is empty");
         return false; // must have a string value
     }
 
-    LOG_INFO("Message: %s", value);
-    Mqtt::queue_publish(F_(message), value);
+    EMSESP::webSchedulerService.computed_value.clear();
+    EMSESP::webSchedulerService.raw_value = value;
+    for (uint16_t wait = 0; wait < 2000 && !EMSESP::webSchedulerService.raw_value.empty(); wait++) {
+        delay(1);
+    }
+
+    if (EMSESP::webSchedulerService.computed_value.empty()) {
+        LOG_WARNING("Message result is empty");
+        return false;
+    }
+
+    LOG_INFO("Message: %s", EMSESP::webSchedulerService.computed_value.c_str());  // send to log
+    Mqtt::queue_publish(F_(message), EMSESP::webSchedulerService.computed_value); // send to MQTT if enabled
+    output["api_data"] = EMSESP::webSchedulerService.computed_value;              // send to API
 
     return true;
 }
@@ -255,33 +304,164 @@ void System::store_nvs_values() {
     EMSESP::nvs_.end();
 }
 
+// Build up a list of all partitions and their version info
+void System::get_partition_info() {
+    partition_info_.clear(); // clear existing data
+
+#ifdef EMSESP_STANDALONE
+    // dummy data for standalone mode - version, size, install_date
+    partition_info_["app0"]    = {EMSESP_APP_VERSION, 0, ""};
+    partition_info_["app1"]    = {"", 0, ""};
+    partition_info_["factory"] = {"", 0, ""};
+    partition_info_["boot"]    = {"", 0, ""};
+#else
+
+    auto current_partition = (const char *)esp_ota_get_running_partition()->label;
+
+    // update the current version and partition name in NVS if not already set (saves on flash wearing)
+    if (EMSESP::nvs_.isKey(current_partition)) {
+        if (EMSESP::nvs_.getString(current_partition) != EMSESP_APP_VERSION) {
+            EMSESP::nvs_.putString(current_partition, EMSESP_APP_VERSION);
+        }
+    } else {
+        EMSESP::nvs_.putString(current_partition, EMSESP_APP_VERSION); // create new entry
+    }
+
+    // Loop through all available partitions and update map with the version info pulled from NVS
+    // Partitions can be app0, app1, factory, boot
+    esp_partition_iterator_t it = esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_ANY, nullptr);
+    uint64_t                 buffer;
+
+    while (it != nullptr) {
+        bool                    is_valid = true;
+        const esp_partition_t * part     = esp_partition_get(it);
+
+        if (part->label != nullptr && part->label[0] != '\0') {
+            // check if partition is valid and not empty
+            esp_partition_read(part, 0, &buffer, 8);
+            if (buffer == 0xFFFFFFFFFFFFFFFF) {
+                is_valid = false; // skip this partition
+            }
+        }
+
+        // get the version from the NVS store, and add to map
+        if (is_valid) {
+            PartitionInfo p_info;
+            p_info.version      = "";
+            p_info.install_date = ""; // this will be added later when NTP is connected
+
+            p_info.size = part->size / 1024; // set size in KB
+
+            // if there is an entry for this partition in NVS, get it's version from NVS
+            if (EMSESP::nvs_.isKey(part->label)) {
+                p_info.version = EMSESP::nvs_.getString(part->label).c_str();
+            }
+
+            partition_info_[part->label] = p_info;
+        }
+
+        it = esp_partition_next(it); // loop to next partition
+    }
+    esp_partition_iterator_release(it);
+#endif
+}
+
+// set NTP install time/date for the current partition
+// assumes NTP is connected and working
+void System::set_partition_install_date(bool override) {
+#ifndef EMSESP_STANDALONE
+    auto current_partition = (const char *)esp_ota_get_running_partition()->label;
+    if (current_partition == nullptr) {
+        return; // fail-safe
+    }
+
+    // skip if it already has an install date, unless override is true
+    if (!partition_info_[current_partition].install_date.empty() && !override) {
+        return;
+    }
+
+    // EMSESP_NVS_BOOT_NEW_FIRMWARE is set in UploadFileService::uploadComplete()
+    auto is_fresh_firmware = EMSESP::nvs_.getBool(EMSESP_NVS_BOOT_NEW_FIRMWARE);
+    // always reset flag after setting the install date
+    EMSESP::nvs_.putBool(EMSESP_NVS_BOOT_NEW_FIRMWARE, false);
+
+    // check if the firmware is a new upload
+    if (is_fresh_firmware) {
+        LOG_DEBUG("Firmware is fresh, setting the new install date in partition %s", current_partition);
+    } else {
+        return; // skip, not new
+    }
+
+    // set current date/time from NTP
+    char   time_string[25];
+    time_t now = time(nullptr);
+    strftime(time_string, sizeof(time_string), "%FT%T", localtime(&now));
+    partition_info_[current_partition].install_date = time_string;
+    LOG_DEBUG("Adding NTP install date %s to partition %s", time_string, current_partition);
+#endif
+}
+
+// sets the partition to use on the next restart
+bool System::set_partition(const char * partitionname) {
+#ifdef EMSESP_STANDALONE
+    return true;
+#else
+    if (partitionname == nullptr) {
+        return false;
+    }
+
+    // Find the partition by label
+    esp_partition_iterator_t it = esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_ANY, partitionname);
+    if (it == nullptr) {
+        return false; // partition not found
+    }
+
+    const esp_partition_t * partition = esp_partition_get(it);
+    esp_partition_iterator_release(it);
+
+    if (partition == nullptr) {
+        return false;
+    }
+
+    // Set the boot partition
+    esp_err_t err = esp_ota_set_boot_partition(partition);
+    if (err != ESP_OK) {
+        return false;
+    }
+
+    // initiate the restart
+    EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED);
+    return true;
+#endif
+}
+
 // restart EMS-ESP
-// app0 or app1
-// on 16MB we have the additional boot and factory partitions
+// app0 or app1, or boot/factory on 16MB boards
 void System::system_restart(const char * partitionname) {
 #ifndef EMSESP_STANDALONE
     // see if we are forcing a partition to use
     if (partitionname != nullptr) {
         // Factory partition - label will be "factory"
         const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
-        if (partition && strcmp(partition->label, partitionname) == 0) {
+        if (partition && !strcmp(partition->label, partitionname)) {
             esp_ota_set_boot_partition(partition);
         } else
             // try and find the partition by name
-            if (strcmp(esp_ota_get_running_partition()->label, partitionname) != 0) {
+            if (strcmp(esp_ota_get_running_partition()->label, partitionname)) {
+                // not found, get next one in cycle
                 partition = esp_ota_get_next_update_partition(nullptr);
                 if (!partition) {
                     LOG_ERROR("Partition '%s' not found", partitionname);
                     return;
                 }
-                if (strcmp(partition->label, partitionname) != 0 && strcmp(partitionname, "boot") != 0) {
+                if (strcmp(partition->label, partitionname) && strcmp(partitionname, "boot") != 0) {
                     partition = esp_ota_get_next_update_partition(partition);
                     if (!partition || strcmp(partition->label, partitionname)) {
                         LOG_ERROR("Partition '%s' not found", partitionname);
                         return;
                     }
                 }
-                // check if partition is empty
+                // error if partition is empty
                 uint64_t buffer;
                 esp_partition_read(partition, 0, &buffer, 8);
                 if (buffer == 0xFFFFFFFFFFFFFFFF) {
@@ -302,8 +482,9 @@ void System::system_restart(const char * partitionname) {
     store_nvs_values(); // save any NVS values
     Shell::loop_all();  // flush log to output
     Mqtt::disconnect(); // gracefully disconnect MQTT, needed for QOS1
+    EMSuart::stop();    // stop UART so there is no interference
     delay(1000);        // wait 1 second
-    ESP.restart();
+    ESP.restart();      // ka-boom!
 #else
     EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_NORMAL);
     if (partitionname != nullptr) {
@@ -334,21 +515,20 @@ void System::syslog_init() {
 #ifndef EMSESP_STANDALONE
     if (syslog_enabled_) {
         // start & configure syslog
-        EMSESP::logger().info("Starting Syslog service");
-        syslog_.start();
-
+        syslog_.maximum_log_messages(10);
         syslog_.log_level((uuid::log::Level)syslog_level_);
         syslog_.mark_interval(syslog_mark_interval_);
         syslog_.destination(syslog_host_.c_str(), syslog_port_);
-        syslog_.hostname(hostname().c_str());
-
+        syslog_.hostname(hostname());
+        EMSESP::logger().info("Starting Syslog service");
     } else if (syslog_.started()) {
         // in case service is still running, this flushes the queue
         // https://github.com/emsesp/EMS-ESP/issues/496
         EMSESP::logger().info("Stopping Syslog");
-        syslog_.log_level((uuid::log::Level)-1); // stop server
+        syslog_.loop();
+        syslog_.log_level(uuid::log::Level::OFF); // stop server
         syslog_.mark_interval(0);
-        syslog_.destination("");
+        // syslog_.destination("");
     }
     if (Mqtt::publish_single()) {
         if (Mqtt::publish_single2cmd()) {
@@ -373,80 +553,54 @@ void System::syslog_init() {
 #endif
 }
 
-// read some specific system settings to store locally for faster access
-void System::reload_settings() {
-    EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        version_ = settings.version;
+// read specific major system settings to store locally for faster access
+void System::store_settings(WebSettings & settings) {
+    version_ = settings.version;
 
-        pbutton_gpio_   = settings.pbutton_gpio;
-        analog_enabled_ = settings.analog_enabled;
-        low_clock_      = settings.low_clock;
-        hide_led_       = settings.hide_led;
-        led_type_       = settings.led_type;
-        led_gpio_       = settings.led_gpio;
-        board_profile_  = settings.board_profile;
-        telnet_enabled_ = settings.telnet_enabled;
+    rx_gpio_      = settings.rx_gpio;
+    tx_gpio_      = settings.tx_gpio;
+    pbutton_gpio_ = settings.pbutton_gpio;
+    dallas_gpio_  = settings.dallas_gpio;
+    led_gpio_     = settings.led_gpio;
 
-        modbus_enabled_     = settings.modbus_enabled;
-        modbus_port_        = settings.modbus_port;
-        modbus_max_clients_ = settings.modbus_max_clients;
-        modbus_timeout_     = settings.modbus_timeout;
+    analog_enabled_ = settings.analog_enabled;
+    low_clock_      = settings.low_clock;
+    hide_led_       = settings.hide_led;
+    led_type_       = settings.led_type;
+    board_profile_  = settings.board_profile;
+    telnet_enabled_ = settings.telnet_enabled;
 
-        rx_gpio_     = settings.rx_gpio;
-        tx_gpio_     = settings.tx_gpio;
-        dallas_gpio_ = settings.dallas_gpio;
+    modbus_enabled_     = settings.modbus_enabled;
+    modbus_port_        = settings.modbus_port;
+    modbus_max_clients_ = settings.modbus_max_clients;
+    modbus_timeout_     = settings.modbus_timeout;
 
-        syslog_enabled_       = settings.syslog_enabled;
-        syslog_level_         = settings.syslog_level;
-        syslog_mark_interval_ = settings.syslog_mark_interval;
-        syslog_host_          = settings.syslog_host;
-        syslog_port_          = settings.syslog_port;
+    tx_mode_              = settings.tx_mode;
+    syslog_enabled_       = settings.syslog_enabled;
+    syslog_level_         = settings.syslog_level;
+    syslog_mark_interval_ = settings.syslog_mark_interval;
+    syslog_host_          = settings.syslog_host;
+    syslog_port_          = settings.syslog_port;
 
-        fahrenheit_     = settings.fahrenheit;
-        bool_format_    = settings.bool_format;
-        bool_dashboard_ = settings.bool_dashboard;
-        enum_format_    = settings.enum_format;
-        readonly_mode_  = settings.readonly_mode;
+    fahrenheit_     = settings.fahrenheit;
+    bool_format_    = settings.bool_format;
+    bool_dashboard_ = settings.bool_dashboard;
+    enum_format_    = settings.enum_format;
+    readonly_mode_  = settings.readonly_mode;
 
-        phy_type_       = settings.phy_type;
-        eth_power_      = settings.eth_power;
-        eth_phy_addr_   = settings.eth_phy_addr;
-        eth_clock_mode_ = settings.eth_clock_mode;
+    phy_type_       = settings.phy_type;
+    eth_power_      = settings.eth_power;
+    eth_phy_addr_   = settings.eth_phy_addr;
+    eth_clock_mode_ = settings.eth_clock_mode;
 
-        locale_         = settings.locale;
-        developer_mode_ = settings.developer_mode;
-    });
+    locale_         = settings.locale;
+    developer_mode_ = settings.developer_mode;
 }
 
-// check for valid ESP32 pins. This is very dependent on which ESP32 board is being used.
-// Typically you can't use 1, 6-11, 20, 24, 28-31 and 40+
-// we allow 0 as it has a special function on the NodeMCU apparently
-// See https://diyprojects.io/esp32-how-to-use-gpio-digital-io-arduino-code/#.YFpVEq9KhjG
-// and https://nodemcu.readthedocs.io/en/dev-esp32/modules/gpio/
-bool System::is_valid_gpio(uint8_t pin, bool has_psram) {
-#if CONFIG_IDF_TARGET_ESP32 || EMSESP_STANDALONE
-    if ((pin == 1) || (pin >= 6 && pin <= 11) || (pin == 20) || (pin == 24) || (pin >= 28 && pin <= 31) || (pin > 40)
-        || ((EMSESP::system_.PSram() > 0 || has_psram) && pin >= 16 && pin <= 17)) {
-#elif CONFIG_IDF_TARGET_ESP32S2
-    if ((pin >= 19 && pin <= 20) || (pin >= 22 && pin <= 32) || (pin > 40)) {
-#elif CONFIG_IDF_TARGET_ESP32C3
-    // https://www.wemos.cc/en/latest/c3/c3_mini.html
-    if ((pin >= 11 && pin <= 19) || (pin > 21)) {
-#elif CONFIG_IDF_TARGET_ESP32S3
-    if ((pin >= 19 && pin <= 20) || (pin >= 22 && pin <= 37) || (pin >= 39 && pin <= 42) || (pin > 48)) {
-#endif
-        return false; // bad pin
-    }
-
-    // extra check for pins 21 and 22 (I2C) when ethernet is onboard
-    if ((EMSESP::system_.ethernet_connected() || EMSESP::system_.phy_type_ != PHY_type::PHY_TYPE_NONE) && (pin >= 21 && pin <= 22)) {
-        return false; // bad pin
-    }
-    return true;
-}
-
-// Starts up the UART Serial bridge
+// Starts up core services
 void System::start() {
+    get_partition_info(); // get the partition info
+
 #ifndef EMSESP_STANDALONE
     // disable bluetooth module
     // periph_module_disable(PERIPH_BT_MODULE);
@@ -484,12 +638,12 @@ void System::start() {
         hostname(networkSettings.hostname.c_str()); // sets the hostname
     });
 
-    commands_init();     // console & api commands
-    led_init(false);     // init LED
-    button_init(false);  // the special button
-    network_init(false); // network
-    EMSESP::uart_init(); // start UART
-    syslog_init();       // start syslog
+    commands_init(); // console & api commands
+    led_init();      // init LED
+    button_init();   // button
+    network_init();  // network
+    uart_init();     // start UART
+    syslog_init();   // start syslog
 }
 
 // button single click
@@ -506,33 +660,84 @@ void System::button_OnClick(PButton & b) {
 
 // button double click
 void System::button_OnDblClick(PButton & b) {
-    LOG_NOTICE("Button pressed - double click - wifi reconnect");
-    EMSESP::system_.wifi_reconnect();
+    LOG_NOTICE("Button pressed - double click - wifi reconnect to AP");
+    // set AP mode to always so will join AP if wifi ssid fails to connect
+    EMSESP::esp32React.getAPSettingsService()->update([&](APSettings & apSettings) {
+        apSettings.provisionMode = AP_MODE_ALWAYS;
+        return StateUpdateResult::CHANGED;
+    });
+    // remove SSID from network settings
+    EMSESP::esp32React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
+        networkSettings.ssid = "";
+        return StateUpdateResult::CHANGED;
+    });
+    EMSESP::esp32React.getNetworkSettingsService()->callUpdateHandlers(); // in case we've changed ssid or password
+}
+
+// LED flash every 100ms
+void System::led_flash() {
+    static bool     led_flash_state_  = false;
+    static uint32_t last_toggle_time_ = 0;
+    uint32_t        current_time      = uuid::get_uptime();
+
+    if (current_time - last_toggle_time_ >= 100) { // every 100ms
+        led_flash_state_  = !led_flash_state_;
+        last_toggle_time_ = current_time;
+
+        if (led_flash_type_) {
+            uint8_t intensity = led_flash_state_ ? RGB_LED_BRIGHTNESS : 0;
+            EMSESP_RGB_WRITE(led_flash_gpio_, intensity, intensity, 0); // RGB LED - Yellow
+        } else {
+            digitalWrite(led_flash_gpio_, led_flash_state_ ? LED_ON : !LED_ON); // Standard LED
+        }
+    }
+
+    // after duration, turn off the LED
+    if (current_time - led_flash_start_time_ >= led_flash_duration_) {
+        if (led_flash_type_) {
+            EMSESP_RGB_WRITE(led_flash_gpio_, 0, 0, 0);
+        } else {
+            digitalWrite(led_flash_gpio_, !LED_ON);
+        }
+        led_flash_timer_ = false;
+        command_format(nullptr, 0); // Execute format operation
+    }
+}
+
+// Start the LED flash timer - duration in seconds
+void System::start_led_flash(uint8_t duration) {
+    // Don't start if already running
+    if (led_flash_timer_) {
+        return;
+    }
+
+    // Get LED settings
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
+        led_flash_type_ = settings.led_type;
+        led_flash_gpio_ = settings.led_gpio;
+    });
+
+    // Reset counter and state
+    led_flash_start_time_ = uuid::get_uptime(); // current time
+    led_flash_duration_   = duration * 1000;    // duration in milliseconds
+    led_flash_timer_      = true;               // it's active
 }
 
 // button long press
 void System::button_OnLongPress(PButton & b) {
-    LOG_NOTICE("Button pressed - long press - restart from factory/boot partition");
-    EMSESP::system_.system_restart("boot"); // this is default when first installed. it may contain the bootloader code.
+    LOG_NOTICE("Button pressed - long press - restart EMS-ESP");
+    EMSESP::system_.system_restart("boot");
 }
 
-// button indefinite press - do nothing for now
+// button indefinite press
 void System::button_OnVLongPress(PButton & b) {
-    LOG_NOTICE("Button pressed - very long press");
+    LOG_NOTICE("Button pressed - very long press - perform factory reset");
+    start_led_flash(5); // Start LED flash timer for 5 seconds
 }
 
 // push button
-void System::button_init(bool refresh) {
-    if (refresh) {
-        reload_settings();
-    }
-
+void System::button_init() {
 #ifndef EMSESP_STANDALONE
-    if (!is_valid_gpio(pbutton_gpio_)) {
-        LOG_WARNING("Invalid button GPIO. Check config.");
-        myPButton_.init(255, HIGH); // disable
-        return;
-    }
     if (!myPButton_.init(pbutton_gpio_, HIGH)) {
         LOG_WARNING("Multi-functional button not detected");
         return;
@@ -547,49 +752,61 @@ void System::button_init(bool refresh) {
 }
 
 // set the LED to on or off when in normal operating mode
-void System::led_init(bool refresh) {
-    if (refresh) {
-        // disabled old led port before setting new one
-        if ((led_gpio_ != 0) && is_valid_gpio(led_gpio_)) {
-            led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
-            pinMode(led_gpio_, INPUT);
-        }
-        reload_settings();
-    }
+void System::led_init() {
+    // disabled old led port before setting new one
+    led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
 
-    if ((led_gpio_ != 0) && is_valid_gpio(led_gpio_)) { // 0 means disabled
+    if ((led_gpio_)) { // 0 means disabled
         if (led_type_) {
             // rgb LED WS2812B, use Neopixel
-            neopixelWrite(led_gpio_, 0, 0, 0);
+            EMSESP_RGB_WRITE(led_gpio_, 0, 0, 0);
         } else {
             pinMode(led_gpio_, OUTPUT);
             digitalWrite(led_gpio_, !LED_ON); // start with LED off
         }
+    } else {
+        LOG_INFO("LED disabled");
     }
 }
 
+void System::uart_init() {
+    EMSuart::stop();
+    EMSuart::start(tx_mode_, rx_gpio_, tx_gpio_); // start UART, GPIOs have already been checked
+    EMSESP::txservice_.start();                   // reset counters and send devices request
+}
+
 // checks system health and handles LED flashing wizardry
-void System::loop() {
+// returns true if the LED flash is active
+bool System::loop() {
     // check if we're supposed to do a reset/restart
     if (systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED) {
         system_restart();
     }
 
-#ifndef EMSESP_STANDALONE
-    myPButton_.check(); // check button press
+    // if LED flashing is active, run the LED flash
+    if (led_flash_timer_) {
+        led_flash();
+        return true; // is active
+    }
 
-    // syslog
+    led_monitor();      // check status and report back using the LED
+    myPButton_.check(); // check button press
+    system_check();     // check system health
+
+// syslog
+#ifndef EMSESP_STANDALONE
     if (syslog_enabled_) {
         syslog_.loop();
     }
-
-    led_monitor();  // check status and report back using the LED
-    system_check(); // check system health
-    send_info_mqtt();
 #endif
+
+    send_info_mqtt();
+
+    return false; // LED flashing is not active
 }
 
 // send MQTT info topic appended with the version information as JSON, as a retained flag
+// this is only done once when the connection is established
 void System::send_info_mqtt() {
     static uint8_t _connection = 0;
     uint8_t        connection  = (ethernet_connected() ? 1 : 0) + ((WiFi.status() == WL_CONNECTED) ? 2 : 0) + (ntp_connected_ ? 4 : 0) + (has_ipv6_ ? 8 : 0);
@@ -608,7 +825,7 @@ void System::send_info_mqtt() {
         char   time_string[25];
         time_t now = time(nullptr) - uuid::get_uptime_sec();
         strftime(time_string, 25, "%FT%T%z", localtime(&now));
-        doc["boot time"] = time_string;
+        doc["bootTime"] = time_string;
     }
 
 #ifndef EMSESP_STANDALONE
@@ -647,7 +864,7 @@ void System::send_info_mqtt() {
 #endif
     }
 #endif
-    Mqtt::queue_publish_retain(F_(info), doc.as<JsonObject>(), true); // topic called "info" and it's Retained
+    Mqtt::queue_publish_retain(F_(info), doc.as<JsonObject>()); // topic called "info" and it's Retained
 }
 
 // create the json for heartbeat
@@ -692,7 +909,7 @@ void System::heartbeat_json(JsonObject output) {
 #ifndef EMSESP_STANDALONE
     output["freemem"]   = getHeapMem();
     output["max_alloc"] = getMaxAllocMem();
-#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
     output["temperature"] = (int)temperature_;
 #endif
 #endif
@@ -709,11 +926,6 @@ void System::heartbeat_json(JsonObject output) {
 
 // send periodic MQTT message with system information
 void System::send_heartbeat() {
-    // don't send heartbeat if WiFi or MQTT is not connected
-    if (!Mqtt::connected()) {
-        return;
-    }
-
     refreshHeapMem(); // refresh free heap and max alloc heap
 
     JsonDocument doc;
@@ -724,11 +936,7 @@ void System::send_heartbeat() {
 }
 
 // initializes network
-void System::network_init(bool refresh) {
-    if (refresh) {
-        reload_settings();
-    }
-
+void System::network_init() {
     last_system_check_ = 0; // force the LED to go from fast flash to pulse
 
 #if CONFIG_IDF_TARGET_ESP32
@@ -745,7 +953,9 @@ void System::network_init(bool refresh) {
     int            mdio     = 18;            // Pin# of the I²C IO signal for the Ethernet PHY - hardcoded
     uint8_t        phy_addr = eth_phy_addr_; // I²C-address of Ethernet PHY (0 or 1 for LAN8720, 31 for TLK110)
     int8_t         power    = eth_power_;    // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
-    eth_phy_type_t type     = (phy_type_ == PHY_type::PHY_TYPE_LAN8720) ? ETH_PHY_LAN8720 : ETH_PHY_TLK110; // Type of the Ethernet PHY (LAN8720 or TLK110)
+    eth_phy_type_t type     = (phy_type_ == PHY_type::PHY_TYPE_LAN8720)  ? ETH_PHY_LAN8720
+                              : (phy_type_ == PHY_type::PHY_TYPE_TLK110) ? ETH_PHY_TLK110
+                                                                         : ETH_PHY_RTL8201; // Type of the Ethernet PHY (LAN8720 or TLK110)
     // clock mode:
     //  ETH_CLOCK_GPIO0_IN   = 0  RMII clock input to GPIO0
     //  ETH_CLOCK_GPIO0_OUT  = 1  RMII clock output from GPIO0
@@ -771,14 +981,12 @@ void System::network_init(bool refresh) {
 
 // check health of system, done every 5 seconds
 void System::system_check() {
-    if (!last_system_check_ || ((uint32_t)(uuid::get_uptime() - last_system_check_) >= SYSTEM_CHECK_FREQUENCY)) {
-        last_system_check_ = uuid::get_uptime();
+    uint32_t current_uptime = uuid::get_uptime();
+    if (!last_system_check_ || ((uint32_t)(current_uptime - last_system_check_) >= SYSTEM_CHECK_FREQUENCY)) {
+        last_system_check_ = current_uptime;
 
 #ifndef EMSESP_STANDALONE
-#if defined(CONFIG_IDF_TARGET_ESP32)
-        uint8_t raw  = temprature_sens_read();
-        temperature_ = (raw - 32) / 1.8f; // convert to Celsius
-#elif CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
 #if ESP_IDF_VERSION_MAJOR < 5
         temp_sensor_read_celsius(&temperature_);
 #else
@@ -816,13 +1024,15 @@ void System::system_check() {
             // see if we're better now
             if (healthcheck_ == 0) {
                 // everything is healthy, show LED permanently on or off depending on setting
+                // Green on RGB LED, on/off on standard LED
                 if (led_gpio_) {
-                    led_type_ ? neopixelWrite(led_gpio_, 0, hide_led_ ? 0 : 128, 0) : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
+                    led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 0, hide_led_ ? 0 : RGB_LED_BRIGHTNESS, 0)
+                              : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON); // Green
                 }
             } else {
-                // turn off LED so we're ready to the flashes
+                // turn off LED so we're ready for the warning flashes
                 if (led_gpio_) {
-                    led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
+                    led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
                 }
             }
         }
@@ -837,6 +1047,7 @@ void System::commands_init() {
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, FL_(fetch_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, FL_(restart_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(format), System::command_format, FL_(format_cmd), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(txpause), System::command_txpause, FL_(txpause_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, FL_(watch_cmd));
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(message), System::command_message, FL_(message_cmd));
 #if defined(EMSESP_TEST)
@@ -851,19 +1062,29 @@ void System::commands_init() {
 }
 
 // uses LED to show system health
-// 1 x flash = the EMS bus is not connected
-// 2 x flash = the network (wifi or ethernet) is not connected
-// 3 x flash = both EMS bus and network are failing. This is a critical error!
 void System::led_monitor() {
+    // if button is pressed, show LED (yellow on RGB LED, on/off on standard LED)
+    static bool button_busy_ = false;
+    if (button_busy_ != myPButton_.button_busy()) {
+        button_busy_ = myPButton_.button_busy();
+        if (led_type_) {
+            EMSESP_RGB_WRITE(led_gpio_, button_busy_ ? RGB_LED_BRIGHTNESS : 0, button_busy_ ? RGB_LED_BRIGHTNESS : 0, 0); // Yellow
+        } else {
+            digitalWrite(led_gpio_, button_busy_ ? LED_ON : !LED_ON);
+        }
+    }
+
     // we only need to run the LED healthcheck if there are errors
-    if (!healthcheck_ || !led_gpio_) {
+    // skip if we're in the led_flash_timer or if a button has been pressed
+    if (!healthcheck_ || !led_gpio_ || button_busy_ || led_flash_timer_) {
         return; // all good
     }
 
     static uint32_t led_long_timer_  = 1; // 1 will kick it off immediately
     static uint32_t led_short_timer_ = 0;
     static uint8_t  led_flash_step_  = 0; // 0 means we're not in the short flash timer
-    auto            current_time     = uuid::get_uptime();
+
+    auto current_time = uuid::get_uptime();
 
     // first long pause before we start flashing
     if (led_long_timer_ && (uint32_t)(current_time - led_long_timer_) >= HEALTHCHECK_LED_LONG_DUARATION) {
@@ -882,51 +1103,50 @@ void System::led_monitor() {
             // reset the whole sequence
             led_long_timer_ = uuid::get_uptime();
             led_flash_step_ = 0;
-            led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON); // LED off
+            led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON); // LED off
         } else if (led_flash_step_ % 2) {
             // handle the step events (on odd numbers 3,5,7,etc). see if we need to turn on a LED
-            //  1 flash is the EMS bus is not connected
-            //  2 flashes if the network (wifi or ethernet) is not connected
-            //  3 flashes is both the bus and the network are not connected. Then you know you're truly f*cked.
+            //  1 flash (blue) is the EMS bus is not connected
+            //  2 flashes (red, red) if the network (wifi or ethernet) is not connected
+            //  3 flashes (red, red, blue) is both the bus and the network are not connected
+            bool no_network = (healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK;
+            bool no_bus     = (healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS;
 
             if (led_type_) {
                 if (led_flash_step_ == 3) {
-                    if ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
-                        neopixelWrite(led_gpio_, 128, 0, 0); // red
-                    } else if ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS) {
-                        neopixelWrite(led_gpio_, 0, 0, 128); // blue
+                    if (no_network) {
+                        EMSESP_RGB_WRITE(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
+                    } else if (no_bus) {
+                        EMSESP_RGB_WRITE(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
                     }
                 }
-                if (led_flash_step_ == 5 && (healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
-                    neopixelWrite(led_gpio_, 128, 0, 0); // red
+                if (led_flash_step_ == 5 && no_network) {
+                    EMSESP_RGB_WRITE(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
                 }
-                if ((led_flash_step_ == 7) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)
-                    && ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS)) {
-                    neopixelWrite(led_gpio_, 0, 0, 128); // blue
+                if ((led_flash_step_ == 7) && no_network && no_bus) {
+                    EMSESP_RGB_WRITE(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
                 }
             } else {
-                if ((led_flash_step_ == 3)
-                    && (((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) || ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS))) {
+                if ((led_flash_step_ == 3) && (no_network || no_bus)) {
                     led_on_ = true;
                 }
 
-                if ((led_flash_step_ == 5) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)) {
+                if ((led_flash_step_ == 5) && no_network) {
                     led_on_ = true;
                 }
 
-                if ((led_flash_step_ == 7) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)
-                    && ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS)) {
+                if ((led_flash_step_ == 7) && no_network && no_bus) {
                     led_on_ = true;
                 }
 
                 if (led_on_) {
-                    digitalWrite(led_gpio_, LED_ON); // LED off
+                    digitalWrite(led_gpio_, LED_ON); // LED on
                 }
             }
         } else {
             // turn the led off after the flash, on even number count
             if (led_on_) {
-                led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
+                led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
                 led_on_ = false;
             }
         }
@@ -951,6 +1171,11 @@ int8_t System::wifi_quality(int8_t dBm) {
 
 // print users to console
 void System::show_users(uuid::console::Shell & shell) {
+    if (!shell.has_flags(CommandFlags::ADMIN)) {
+        shell.printfln("Unauthorized. You need to be an admin to view users.");
+        return;
+    }
+
     shell.printfln("Users:");
 
 #ifndef EMSESP_STANDALONE
@@ -974,7 +1199,6 @@ void System::show_system(uuid::console::Shell & shell) {
 #ifndef EMSESP_STANDALONE
     shell.printfln(" Platform: %s (%s)", EMSESP_PLATFORM, ESP.getChipModel());
     shell.printfln(" Model: %s", getBBQKeesGatewayDetails().c_str());
-    shell.printfln(" Partition: %s", esp_ota_get_running_partition()->label);
 #endif
     shell.printfln(" Language: %s", locale().c_str());
     shell.printfln(" Board profile: %s", board_profile().c_str());
@@ -1001,10 +1225,35 @@ void System::show_system(uuid::console::Shell & shell) {
     } else {
         shell.printfln(" PSRAM: not available");
     }
+    // GPIOs
+    shell.println(" GPIOs:");
+    shell.printf("  in use:");
+    for (const auto & gpio : used_gpios_) {
+        shell.printf(" %d", gpio);
+    }
+    shell.printfln(" (total %d)", used_gpios_.size());
+    auto available = available_gpios();
+    shell.printf("  available:");
+    for (const auto & gpio : available) {
+        shell.printf(" %d", gpio);
+    }
+    shell.printfln(" (total %d)", available.size());
+    // List all partitions and their version info
+    shell.println(" Partitions:");
+    for (const auto & partition : partition_info_) {
+        if (partition.second.version.empty()) {
+            continue; // no version, empty string
+        }
+        shell.printfln("  %s: v%s (%d KB%s) %s",
+                       partition.first.c_str(),
+                       partition.second.version.c_str(),
+                       partition.second.size,
+                       partition.second.install_date.empty() ? "" : (std::string(", installed ") + partition.second.install_date).c_str(),
+                       (strcmp(esp_ota_get_running_partition()->label, partition.first.c_str()) == 0) ? "** active **" : "");
+    }
 
     shell.println();
     shell.println("Network:");
-
     switch (WiFi.status()) {
     case WL_IDLE_STATUS:
         shell.printfln(" Status: Idle");
@@ -1024,7 +1273,7 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.printfln(" BSSID: %s", WiFi.BSSIDstr().c_str());
         shell.printfln(" RSSI: %d dBm (%d %%)", WiFi.RSSI(), wifi_quality(WiFi.RSSI()));
         char result[10];
-        shell.printfln(" TxPower: %s dBm", emsesp::Helpers::render_value(result, (double)(WiFi.getTxPower() / 4), 1));
+        shell.printfln(" TxPower: %s dBm", Helpers::render_value(result, (double)(WiFi.getTxPower() / 4), 1));
         shell.printfln(" MAC address: %s", WiFi.macAddress().c_str());
         shell.printfln(" Hostname: %s", WiFi.getHostname());
         shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
@@ -1163,57 +1412,49 @@ bool System::check_restore() {
 // handle upgrades from previous versions
 // this function will not be called on a clean install, with no settings files yet created
 // returns true if we need a reboot
-bool System::check_upgrade(bool factory_settings) {
+bool System::check_upgrade() {
     bool        missing_version = true;
     std::string settingsVersion;
 
-    if (!factory_settings) {
-        // fetch current version from settings file
-        EMSESP::webSettingsService.read([&](WebSettings const & settings) { settingsVersion = settings.version.c_str(); });
+    // fetch current version from settings file
+    EMSESP::webSettingsService.read([&](WebSettings const & settings) { settingsVersion = settings.version.c_str(); });
 
-        // see if we're missing a version, will be < 3.5.0b13 from Dec 23 2022
-        missing_version = (settingsVersion.empty() || (settingsVersion.length() < 5));
-        if (missing_version) {
-            LOG_WARNING("No version information found");
-            settingsVersion = "3.5.0"; // this was the last stable version without version info
-        }
-    } else {
-        settingsVersion = EMSESP_APP_VERSION; // use the current version
+    // see if we're missing a version, will be < 3.5.0b13 from Dec 23 2022
+    missing_version = (settingsVersion.empty() || (settingsVersion.length() < 5));
+    if (missing_version) {
+        LOG_WARNING("No version information found");
+        settingsVersion = "3.5.0"; // this was the last stable version without version info
     }
 
     version::Semver200_version settings_version(settingsVersion);
-
-    if (!missing_version) {
-        LOG_DEBUG("Checking for version upgrades (settings file has v%d.%d.%d-%s)",
-                  settings_version.major(),
-                  settings_version.minor(),
-                  settings_version.patch(),
-                  settings_version.prerelease().c_str());
-    }
-
-    if (factory_settings) {
-        return false; // fresh install, do nothing
-    }
-
     version::Semver200_version this_version(EMSESP_APP_VERSION);
 
-    bool save_version = true;
+    std::string settings_version_type = settings_version.prerelease().empty() ? "" : ("-" + settings_version.prerelease());
+    std::string this_version_type     = this_version.prerelease().empty() ? "" : ("-" + this_version.prerelease());
+    bool        save_version          = true;
+    bool        reboot_required       = false;
+
+    LOG_DEBUG("Checking for version upgrades (settings file is v%d.%d.%d%s)",
+              settings_version.major(),
+              settings_version.minor(),
+              settings_version.patch(),
+              settings_version_type.c_str());
 
     // compare versions
     if (this_version > settings_version) {
         // we need to do an upgrade
         if (missing_version) {
-            LOG_NOTICE("Upgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
+            LOG_NOTICE("Upgrading to version %d.%d.%d%s", this_version.major(), this_version.minor(), this_version.patch(), this_version_type);
         } else {
-            LOG_NOTICE("Upgrading from version %d.%d.%d-%s to %d.%d.%d-%s",
+            LOG_NOTICE("Upgrading from version %d.%d.%d%s to %d.%d.%d%s",
                        settings_version.major(),
                        settings_version.minor(),
                        settings_version.patch(),
-                       settings_version.prerelease().c_str(),
+                       settings_version_type.c_str(),
                        this_version.major(),
                        this_version.minor(),
                        this_version.patch(),
-                       this_version.prerelease().c_str());
+                       this_version_type.c_str());
         }
 
         // if we're coming from 3.4.4 or 3.5.0b14 which had no version stored then we need to apply new settings
@@ -1238,51 +1479,58 @@ bool System::check_upgrade(bool factory_settings) {
             });
         }
 
-        // changes to Network
-        EMSESP::esp32React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
-            // Network Settings Wifi tx_power is now using the value * 4.
-            if (networkSettings.tx_power == 20) {
-                networkSettings.tx_power = WIFI_POWER_19_5dBm; // use 19.5 as we don't have 20 anymore
-                LOG_INFO("Upgrade: Setting WiFi TX Power to Auto");
-            }
-
-            // force WiFi sleep to off (was default on < 3.7.0-dev-33)
-            networkSettings.nosleep = true;
-            LOG_INFO("Upgrade: Disabling WiFi nosleep");
-
-            return StateUpdateResult::CHANGED;
-        });
+        // changes pre < v3.7.0
+        if (settings_version.major() == 3 && settings_version.minor() < 7) {
+            // network changes
+            // 1) WiFi Tx Power is now using the value * 4 (was 20)
+            // 2) WiFi sleep is now off by default (was on)
+            EMSESP::esp32React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
+                auto changed = StateUpdateResult::UNCHANGED;
+                if (networkSettings.tx_power == 20) {
+                    networkSettings.tx_power = WIFI_POWER_19_5dBm; // use 19.5 as we don't have 20 anymore
+                    LOG_INFO("Upgrade: Setting WiFi TX Power to Auto");
+                    changed = StateUpdateResult::CHANGED;
+                }
+                if (networkSettings.nosleep != true) {
+                    networkSettings.nosleep = true;
+                    LOG_INFO("Upgrade: Disabling WiFi nosleep");
+                    changed = StateUpdateResult::CHANGED;
+                }
+                return changed;
+            });
+        }
 
         // changes to application settings
         EMSESP::webSettingsService.update([&](WebSettings & settings) {
             // force web buffer to 25 for those boards without psram
-            if (EMSESP::system_.PSram() == 0) {
+            if ((EMSESP::system_.PSram() == 0) && (settings.weblog_buffer != 25)) {
                 settings.weblog_buffer = 25;
                 return StateUpdateResult::CHANGED;
             }
             return StateUpdateResult::UNCHANGED;
         });
-
-
     } else if (this_version < settings_version) {
-        // need downgrade
-        LOG_NOTICE("Downgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
+        // downgrading
+        LOG_NOTICE("Downgrading to version %d.%d.%d%s", this_version.major(), this_version.minor(), this_version.patch(), this_version_type.c_str());
     } else {
-        // same version, do nothing
-        save_version = false;
+        save_version = false; // same version, do nothing
     }
 
-    // if we did a change, set the new version and save it, then reboot
+    // if we did a change, set the new version and save it, no need to reboot
     if (save_version) {
         EMSESP::webSettingsService.update([&](WebSettings & settings) {
             settings.version = EMSESP_APP_VERSION;
+            LOG_DEBUG("Upgrade: Setting version to %s", EMSESP_APP_VERSION);
             return StateUpdateResult::CHANGED;
         });
-        // LOG_INFO("Upgrade: Setting version to %s", EMSESP_APP_VERSION);
+    }
+
+    if (reboot_required) {
+        LOG_INFO("Upgrade: Rebooting to apply changes");
         return true; // need reboot
     }
 
-    return false;
+    return false; // no reboot required
 }
 
 // convert settings file into json object
@@ -1383,6 +1631,24 @@ bool System::command_service(const char * cmd, const char * value) {
         }
     }
 
+    int n;
+    if (!ok && Helpers::value2number(value, n)) {
+#ifndef EMSESP_STANDALONE
+        if (!strcmp(cmd, "fuse/mfg")) {
+            ok = esp_efuse_write_reg(EFUSE_BLK3, 0, (uint32_t)n) == ESP_OK;
+            ok ? LOG_INFO("fuse programed with value '%X': successful", n) : LOG_ERROR("fuse programed with value '%X': failed", n);
+        }
+        if (!strcmp(cmd, "fuse/mfgadd")) {
+            uint8_t reg = 0;
+            while (esp_efuse_read_reg(EFUSE_BLK3, reg) != 0 && reg < 7)
+                reg++;
+            ok = esp_efuse_write_reg(EFUSE_BLK3, reg, (uint32_t)n) == ESP_OK;
+            ok ? LOG_INFO("fuse %d programed with value '%X': successful", reg, n) : LOG_ERROR("fuse %d programed with value '%X': failed", reg, n);
+            return true;
+        }
+#endif
+    }
+
     if (ok) {
         LOG_INFO("System command '%s' with value '%s'", cmd, value);
     }
@@ -1401,6 +1667,16 @@ bool System::get_value_info(JsonObject output, const char * cmd) {
         return command_info("", 0, output);
     }
 
+    // check for metrics
+    if (!strcmp(cmd, F_(metrics))) {
+        std::string metrics = get_metrics_prometheus();
+        if (!metrics.empty()) {
+            output["api_data"] = metrics;
+            return true;
+        }
+        return false;
+    }
+
     // fetch all the data from the system in a different json
     JsonDocument doc;
     JsonObject   root = doc.to<JsonObject>();
@@ -1410,9 +1686,11 @@ bool System::get_value_info(JsonObject output, const char * cmd) {
     if (!strcmp(cmd, F_(entities))) {
         for (JsonPair p : root) {
             if (p.value().is<JsonObject>()) {
+                const char * p_key = p.key().c_str(); // Cache the key
                 for (JsonPair p1 : p.value().as<JsonObject>()) {
-                    JsonObject entity = output[std::string(p.key().c_str()) + "." + p1.key().c_str()].to<JsonObject>();
-                    get_value_json(entity, p.key().c_str(), p1.key().c_str(), p1.value());
+                    const char * p1_key = p1.key().c_str(); // Cache the key
+                    JsonObject   entity = output[std::string(p_key) + "." + p1_key].to<JsonObject>();
+                    get_value_json(entity, p_key, p1_key, p1.value());
                 }
             }
         }
@@ -1447,18 +1725,20 @@ bool System::get_value_info(JsonObject output, const char * cmd) {
     // Loop through all the key-value pairs in root to find the key, case independent
     if (slash) { // search the top level first
         for (JsonPair p : root) {
-            if (p.value().is<JsonObject>() && Helpers::toLower(p.key().c_str()) == cmd) {
+            const char * p_key = p.key().c_str(); // Cache the key
+            if (p.value().is<JsonObject>() && Helpers::toLower(p_key) == cmd) {
                 for (JsonPair p1 : p.value().as<JsonObject>()) {
-                    if (Helpers::toLower(p1.key().c_str()) == slash && !p1.value().is<JsonObject>()) {
+                    const char * p1_key = p1.key().c_str(); // Cache the key
+                    if (Helpers::toLower(p1_key) == slash && !p1.value().is<JsonObject>()) {
                         if (val) {
                             output["api_data"] = p1.value().as<std::string>();
                             return true;
                         }
-                        get_value_json(output, p.key().c_str(), p1.key().c_str(), p1.value());
+                        get_value_json(output, p_key, p1_key, p1.value());
                         return true;
                     }
                 }
-            } // else skipt, but we don't have value pairs in system root
+            } // else skip, but we don't have value pairs in system root
         }
     }
     return false;
@@ -1475,13 +1755,278 @@ void System::get_value_json(JsonObject output, const std::string & circuit, cons
     if (val.is<bool>()) {
         output["value"] = val.as<bool>();
         output["type"]  = "boolean";
-    } else if (val.is<String>() || val.is<const char *>() || val.is<std::string>()) {
-        output["value"] = val.as<std::string>();
-        output["type"]  = "string";
-    } else {
+    } else if (val.is<float>() || val.is<int>()) {
         output["value"] = val.as<float>();
         output["type"]  = "number";
+    } else {
+        output["value"] = val.as<std::string>();
+        output["type"]  = "string";
     }
+}
+
+// generate Prometheus metrics format from system values
+std::string System::get_metrics_prometheus() {
+    std::string                           result;
+    std::unordered_map<std::string, bool> seen_metrics;
+
+    result.reserve(16000);
+
+    // get system data
+    JsonDocument doc;
+    JsonObject   root = doc.to<JsonObject>();
+    (void)command_info("", 0, root);
+
+    // helper function to escape Prometheus label values
+    auto escape_label = [](const std::string & str) -> std::string {
+        std::string escaped;
+        for (char c : str) {
+            if (c == '\\') {
+                escaped += "\\\\";
+            } else if (c == '"') {
+                escaped += "\\\"";
+            } else if (c == '\n') {
+                escaped += "\\n";
+            } else {
+                escaped += c;
+            }
+        }
+        return escaped;
+    };
+
+    // helper function to sanitize metric name (convert to lowercase and replace dots with underscores)
+    auto sanitize_name = [](const std::string & name) -> std::string {
+        std::string sanitized = name;
+        for (char & c : sanitized) {
+            if (c == '.') {
+                c = '_';
+            } else if (isupper(c)) {
+                c = tolower(c);
+            } else if (!isalnum(c) && c != '_') {
+                c = '_';
+            }
+        }
+        return sanitized;
+    };
+
+    // helper function to convert label name to lowercase
+    auto to_lowercase = [](const std::string & str) -> std::string {
+        std::string result = str;
+        for (char & c : result) {
+            if (isupper(c)) {
+                c = tolower(c);
+            }
+        }
+        return result;
+    };
+
+    // helper function to check if a field should be ignored
+    auto should_ignore = [](const std::string & path, const std::string & key) -> bool {
+        if (path == "system" && key == "uptime") {
+            return true;
+        }
+        if (path == "ntp" && key == "timestamp") {
+            return true;
+        }
+        if (path.find("devices[") != std::string::npos) {
+            if (key == "handlersReceived" || key == "handlersFetched" || key == "handlersPending" || key == "handlersIgnored") {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    // helper function to process a JSON object recursively
+    std::function<void(const JsonObject, const std::string &)> process_object = [&](const JsonObject obj, const std::string & prefix) {
+        std::vector<std::pair<std::string, std::string>> local_info_labels;
+        bool                                             has_nested_objects = false;
+
+        for (JsonPair p : obj) {
+            std::string key         = p.key().c_str();
+            std::string path        = prefix.empty() ? key : prefix + "." + key;
+            std::string metric_name = prefix.empty() ? key : prefix + "_" + key;
+
+            if (should_ignore(prefix, key)) {
+                continue;
+            }
+
+            if (p.value().is<JsonObject>()) {
+                // recursive call for nested objects
+                has_nested_objects = true;
+                process_object(p.value().as<JsonObject>(), metric_name);
+            } else if (p.value().is<JsonArray>()) {
+                // handle arrays (devices)
+                if (key == "devices") {
+                    JsonArray devices = p.value().as<JsonArray>();
+                    for (JsonObject device : devices) {
+                        std::vector<std::pair<std::string, std::string>> device_labels;
+
+                        // collect labels from device object
+                        for (JsonPair dp : device) {
+                            std::string dkey = dp.key().c_str();
+                            if (dkey == "type" || dkey == "name" || dkey == "deviceID" || dkey == "brand" || dkey == "version") {
+                                if (dp.value().is<const char *>()) {
+                                    std::string val = dp.value().as<const char *>();
+                                    if (!val.empty()) {
+                                        device_labels.push_back({to_lowercase(dkey), val});
+                                    }
+                                }
+                            }
+                        }
+
+                        // create productID metric
+                        if (device["productID"].is<int>()) {
+                            std::string metric = "emsesp_device_productid";
+                            if (seen_metrics.find(metric) == seen_metrics.end()) {
+                                result += "# HELP emsesp_device_productid productID\n";
+                                result += "# TYPE emsesp_device_productid gauge\n";
+                                seen_metrics[metric] = true;
+                            }
+
+                            result += metric;
+                            if (!device_labels.empty()) {
+                                result += "{";
+                                bool first = true;
+                                for (const auto & label : device_labels) {
+                                    if (!first) {
+                                        result += ", ";
+                                    }
+                                    result += label.first + "=\"" + escape_label(label.second) + "\"";
+                                    first = false;
+                                }
+                                result += "}";
+                            }
+                            result += " " + std::to_string(device["productID"].as<int>()) + "\n";
+                        }
+
+                        // create entities metric
+                        if (device["entities"].is<int>()) {
+                            std::string metric = "emsesp_device_entities";
+                            if (seen_metrics.find(metric) == seen_metrics.end()) {
+                                result += "# HELP emsesp_device_entities entities\n";
+                                result += "# TYPE emsesp_device_entities gauge\n";
+                                seen_metrics[metric] = true;
+                            }
+
+                            result += metric;
+                            if (!device_labels.empty()) {
+                                result += "{";
+                                bool first = true;
+                                for (const auto & label : device_labels) {
+                                    if (!first) {
+                                        result += ", ";
+                                    }
+                                    result += label.first + "=\"" + escape_label(label.second) + "\"";
+                                    first = false;
+                                }
+                                result += "}";
+                            }
+                            result += " " + std::to_string(device["entities"].as<int>()) + "\n";
+                        }
+                    }
+                }
+            } else {
+                // handle primitive values
+                bool is_number = p.value().is<int>() || p.value().is<float>();
+                bool is_bool   = p.value().is<bool>();
+                bool is_string = p.value().is<const char *>();
+
+                if (is_number || is_bool) {
+                    // add metric
+                    std::string full_metric_name = "emsesp_" + sanitize_name(metric_name);
+                    if (seen_metrics.find(full_metric_name) == seen_metrics.end()) {
+                        result += "# HELP emsesp_" + sanitize_name(metric_name) + " " + key + "\n";
+                        result += "# TYPE emsesp_" + sanitize_name(metric_name) + " gauge\n";
+                        seen_metrics[full_metric_name] = true;
+                    }
+
+                    result += full_metric_name + " ";
+                    if (is_bool) {
+                        result += p.value().as<bool>() ? "1" : "0";
+                    } else if (p.value().is<int>()) {
+                        result += std::to_string(p.value().as<int>());
+                    } else {
+                        char val_str[30];
+                        snprintf(val_str, sizeof(val_str), "%.2f", p.value().as<float>());
+                        result += val_str;
+                    }
+                    result += "\n";
+                } else if (is_string) {
+                    // collect string for info metric (skip dynamic strings like uptime and timestamp)
+                    std::string val = p.value().as<const char *>();
+                    if (!val.empty() && key != "uptime" && key != "timestamp") {
+                        std::string lower_key = to_lowercase(key);
+                        // check if key already exists in local_info_labels
+                        bool key_exists = false;
+                        for (const auto & label : local_info_labels) {
+                            if (label.first == lower_key) {
+                                key_exists = true;
+                                break;
+                            }
+                        }
+                        if (!key_exists) {
+                            local_info_labels.push_back({lower_key, val});
+                        }
+                    }
+                }
+            }
+        }
+
+        // create _info metric for this object level if we have labels and this is a leaf node (no nested objects)
+        if (!local_info_labels.empty() && !prefix.empty() && !has_nested_objects) {
+            std::string info_metric = "emsesp_" + sanitize_name(prefix) + "_info";
+            if (seen_metrics.find(info_metric) == seen_metrics.end()) {
+                result += "# HELP " + info_metric + " info\n";
+                result += "# TYPE " + info_metric + " gauge\n";
+                seen_metrics[info_metric] = true;
+            }
+
+            result += info_metric;
+            if (!local_info_labels.empty()) {
+                result += "{";
+                bool first = true;
+                for (const auto & label : local_info_labels) {
+                    if (!first) {
+                        result += ", ";
+                    }
+                    result += label.first + "=\"" + escape_label(label.second) + "\"";
+                    first = false;
+                }
+                result += "}";
+            }
+            result += " 1\n";
+        }
+    };
+
+    // process root object
+    process_object(root, "");
+
+    result.shrink_to_fit();
+
+    return result;
+}
+
+// return IP or hostname of the EMS-ESP device
+String System::get_ip_or_hostname() {
+    String result = "ems-esp";
+#ifndef EMSESP_STANDALONE
+    EMSESP::esp32React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
+        if (settings.enableMDNS) {
+            if (EMSESP::system_.ethernet_connected()) {
+                result = ETH.getHostname();
+            } else if (WiFi.status() == WL_CONNECTED) {
+                result = WiFi.getHostname();
+            }
+        } else {
+            // no DNS, use the IP
+            if (EMSESP::system_.ethernet_connected()) {
+                result = ETH.localIP().toString();
+            } else if (WiFi.status() == WL_CONNECTED) {
+                result = WiFi.localIP().toString();
+            }
+        }
+    });
+#endif
+    return result;
 }
 
 // export status information including the device information
@@ -1506,11 +2051,11 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["sdk"]             = ESP.getSdkVersion();
     node["freeMem"]         = getHeapMem();
     node["maxAlloc"]        = getMaxAllocMem();
-    node["freeCaps"]        = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024; // includes heap and psram
-    node["usedApp"]         = EMSESP::system_.appUsed();                       // kilobytes
-    node["freeApp"]         = EMSESP::system_.appFree();                       // kilobytes
-    node["partition"]       = esp_ota_get_running_partition()->label;          // active partition
-    node["flash_chip_size"] = ESP.getFlashChipSize() / 1024;                   // kilobytes
+    node["freeCaps"]        = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024;      // includes heap and psram
+    node["usedApp"]         = EMSESP::system_.appUsed();                            // kilobytes
+    node["freeApp"]         = EMSESP::system_.appFree();                            // kilobytes
+    node["partition"]       = (const char *)esp_ota_get_running_partition()->label; // active partition
+    node["flash_chip_size"] = ESP.getFlashChipSize() / 1024;                        // kilobytes
 #endif
     node["resetReason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 #ifndef EMSESP_STANDALONE
@@ -1573,25 +2118,39 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         }
     });
 
-#ifndef EMSESP_STANDALONE
-    EMSESP::esp32React.getAPSettingsService()->read([&](const APSettings & settings) {
-        const char * pM[]       = {"always", "disconnected", "never"};
-        node["APProvisionMode"] = pM[settings.provisionMode];
-        node["APSecurity"]      = settings.password.length() ? "wpa2" : "open";
-        node["APSSID"]          = settings.ssid;
-    });
-#endif
-
     // NTP status
-    node = output["ntp"].to<JsonObject>();
-#ifndef EMSESP_STANDALONE
-    node["NTPStatus"] = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
+    node              = output["ntp"].to<JsonObject>();
+    node["NTPstatus"] = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
     EMSESP::esp32React.getNTPSettingsService()->read([&](const NTPSettings & settings) {
+#ifndef EMSESP_STANDALONE
         node["enabled"] = settings.enabled;
+#else
+        node["enabled"] = true;
+#endif
         node["server"]  = settings.server;
         node["tzLabel"] = settings.tzLabel;
     });
+#ifndef EMSESP_STANDALONE
+    node["timestamp"] = time(nullptr);
 #endif
+    node["NTPStatus"] = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
+
+    // AP Status
+    node = output["ap"].to<JsonObject>();
+    EMSESP::esp32React.getAPSettingsService()->read([&](const APSettings & settings) {
+        const char * pM[]     = {"always", "disconnected", "never"};
+        node["provisionMode"] = pM[settings.provisionMode];
+        node["ssid"]          = settings.ssid;
+#ifndef EMSESP_STANDALONE
+        node["security"]   = settings.password.length() ? "wpa2" : "open";
+        node["channel"]    = settings.channel;
+        node["ssidHidden"] = settings.ssidHidden;
+        node["maxClients"] = settings.maxClients;
+        node["localIP"]    = settings.localIP.toString();
+        node["gatewayIP"]  = settings.gatewayIP.toString();
+        node["subnetMask"] = settings.subnetMask.toString();
+#endif
+    });
 
     // MQTT Status
     node               = output["mqtt"].to<JsonObject>();
@@ -1689,7 +2248,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["busReadsFailed"]         = EMSESP::txservice_.telegram_read_fail_count();
     node["busWritesFailed"]        = EMSESP::txservice_.telegram_write_fail_count();
     node["busRxLineQuality"]       = EMSESP::rxservice_.quality();
-    node["busTxLineQuality"]       = (EMSESP::txservice_.read_quality() + EMSESP::txservice_.read_quality()) / 2;
+    node["busTxLineQuality"]       = (EMSESP::txservice_.read_quality() + EMSESP::txservice_.write_quality()) / 2;
 
     // Settings
     node = output["settings"].to<JsonObject>();
@@ -1712,11 +2271,11 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
                 node["ethPhyAddr"]    = settings.eth_phy_addr;
                 node["ethClockMmode"] = settings.eth_clock_mode;
             }
-            node["rxGPIO"]      = settings.rx_gpio;
-            node["txGPIO"]      = settings.tx_gpio;
-            node["dallasGPIO"]  = settings.dallas_gpio;
-            node["pbuttonGPIO"] = settings.pbutton_gpio;
-            node["ledGPIO"]     = settings.led_gpio;
+            node["rxGPIO"]      = EMSESP::system_.rx_gpio_;
+            node["txGPIO"]      = EMSESP::system_.tx_gpio_;
+            node["dallasGPIO"]  = EMSESP::system_.dallas_gpio_;
+            node["pbuttonGPIO"] = EMSESP::system_.pbutton_gpio_;
+            node["ledGPIO"]     = EMSESP::system_.led_gpio_;
             node["ledType"]     = settings.led_type;
         }
         node["hideLed"]         = settings.hide_led;
@@ -1757,7 +2316,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
                     obj["brand"]     = emsdevice->brand_to_char();
                     obj["version"]   = emsdevice->version();
                     obj["entities"]  = emsdevice->count_entities();
-                    char result[500];
+                    char result[1000];
                     (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::RECEIVED);
                     if (result[0] != '\0') {
                         obj["handlersReceived"] = result; // don't show handlers if there aren't any
@@ -1778,6 +2337,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
             }
         }
     }
+
     // Also show EMSESP devices if we have any
     if (EMSESP::temperaturesensor_.count_entities()) {
         JsonObject obj  = devices.add<JsonObject>();
@@ -1821,20 +2381,19 @@ bool System::command_test(const char * value, const int8_t id) {
 // takes a board profile and populates a data array with GPIO configurations
 // returns false if profile is unknown
 //
-// data = led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
+// 0=led, 1=dallas, 2=rx, 3=tx, 4=button, 5=phy_type, 6=eth_power, 7=eth_phy_addr, 8=eth_clock_mode, 9=led_type
 //
-// clock modes:
-//  0 = RMII clock input to GPIO0
-//  1 = RMII clock output from GPIO0
-//  2 = RMII clock output from GPIO16
-//  3 = RMII clock output from GPIO17, for 50hz inverted clock
 bool System::load_board_profile(std::vector<int8_t> & data, const std::string & board_profile) {
-    if (board_profile == "S32") {
+    if (board_profile == "default") {
+        return false; // unknown, return false
+    } else if (board_profile == "S32") {
         data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // BBQKees Gateway S32
     } else if (board_profile == "E32") {
         data = {2, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720, 16, 1, 0, 0}; // BBQKees Gateway E32
     } else if (board_profile == "E32V2") {
         data = {2, 14, 4, 5, 34, PHY_type::PHY_TYPE_LAN8720, 15, 0, 1, 0}; // BBQKees Gateway E32 V2
+    } else if (board_profile == "E32V2_2") {
+        data = {32, 14, 4, 5, 34, PHY_type::PHY_TYPE_LAN8720, 15, 0, 1, 1}; // BBQKees Gateway E32 V2.2, rgb led
     } else if (board_profile == "MH-ET") {
         data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // MH-ET Live D1 Mini
     } else if (board_profile == "NODEMCU") {
@@ -1857,39 +2416,57 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
         data = {17, 18, 8, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // Liligo S3
     } else if (board_profile == "S32S3") {
         data = {2, 18, 5, 17, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // BBQKees Gateway S3
-    } else if (board_profile == "CUSTOM") {
-        // send back current values
-        data = {(int8_t)EMSESP::system_.led_gpio_,
-                (int8_t)EMSESP::system_.dallas_gpio_,
-                (int8_t)EMSESP::system_.rx_gpio_,
-                (int8_t)EMSESP::system_.tx_gpio_,
-                (int8_t)EMSESP::system_.pbutton_gpio_,
-                (int8_t)EMSESP::system_.phy_type_,
-                EMSESP::system_.eth_power_,
-                (int8_t)EMSESP::system_.eth_phy_addr_,
-                (int8_t)EMSESP::system_.eth_clock_mode_,
-                (int8_t)EMSESP::system_.led_type_};
     } else {
-        LOG_DEBUG("Couldn't identify board profile %s", board_profile.c_str());
         return false; // unknown, return false
     }
 
-    // LOG_DEBUG("Found data for board profile %s", board_profile.c_str());
     return true;
 }
 
-// format command - factory reset, removing all config fi`les
-bool System::command_format(const char * value, const int8_t id) {
-    LOG_INFO("Removing all config files");
-#ifndef EMSESP_STANDALONE
-    // TODO To replaced with LittleFS.rmdir(FS_CONFIG_DIRECTORY) now we're using IDF 4.2+
-    File root = LittleFS.open(EMSESP_FS_CONFIG_DIRECTORY);
-    File file;
-    while ((file = root.openNextFile())) {
-        String path = file.path();
-        file.close();
-        LittleFS.remove(path);
+// txpause command - temporarily pause the TX, by setting Txmode to 0 (disabled)
+bool System::command_txpause(const char * value, const int8_t id) {
+    bool arg;
+    if (!Helpers::value2bool(value, arg)) {
+        return false; // argument not recognized
     }
+
+    if (!arg) {
+        // arg = false: Tx mode to 0 (disabled) to pause
+        if (EMSbus::tx_mode() == EMS_TXMODE_OFF) {
+            EMSESP::webSettingsService.read([&](WebSettings & settings) {
+                EMSbus::tx_mode(settings.tx_mode);
+#ifdef EMSESP_DEBUG
+                LOG_INFO("TX mode restored (value %d)", settings.tx_mode);
+#else
+                LOG_INFO("TX active");
+#endif
+            });
+        }
+    } else {
+        // pause = true: Tx mode to 0 (disabled) to pause
+        if (EMSbus::tx_mode() != EMS_TXMODE_OFF) {
+            EMSbus::tx_mode(EMS_TXMODE_OFF);
+#ifdef EMSESP_DEBUG
+            LOG_INFO("TX mode set to OFF (value %d)", EMS_TXMODE_OFF);
+#else
+            LOG_INFO("TX paused");
+#endif
+        }
+    }
+    return true;
+}
+
+// format command - factory reset, removing all config files
+bool System::command_format(const char * value, const int8_t id) {
+#if !defined(EMSESP_STANDALONE) && !defined(EMSESP_DEBUG)
+    // don't really format the filesystem in debug or standalone mode
+    if (LittleFS.format()) {
+        LOG_INFO("Filesystem formatted successfully. All config files removed.");
+    } else {
+        LOG_ERROR("Format failed");
+    }
+#else
+    LOG_INFO("Format command not available in standalone or debug mode");
 #endif
 
     // restart will be handled by the main loop
@@ -1960,8 +2537,17 @@ std::string System::reset_reason(uint8_t cpu) const {
 
 // set NTP status
 void System::ntp_connected(bool b) {
-    if (b != ntp_connected_ && !b) {
-        LOG_WARNING("NTP disconnected"); // if turned off report it
+    if (b != ntp_connected_) {
+        if (b) {
+            LOG_INFO("NTP connected");
+#ifdef EMSESP_DEBUG // reset the install date on startup if in debug mode
+            set_partition_install_date(true);
+#else
+            set_partition_install_date(false);
+#endif
+        } else {
+            LOG_WARNING("NTP disconnected"); // if turned off report it
+        }
     }
 
     ntp_connected_  = b;
@@ -1979,8 +2565,9 @@ bool System::ntp_connected() {
 }
 
 // see if its a BBQKees Gateway by checking the nvs values
-String System::getBBQKeesGatewayDetails() {
+String System::getBBQKeesGatewayDetails(uint8_t detail) {
 #ifndef EMSESP_STANDALONE
+    /*
     if (!EMSESP::nvs_.isKey("mfg")) {
         return "";
     }
@@ -1994,6 +2581,49 @@ String System::getBBQKeesGatewayDetails() {
     }
 
     return "BBQKees Gateway Model " + EMSESP::nvs_.getString("model") + " v" + EMSESP::nvs_.getString("hwrevision") + "/" + EMSESP::nvs_.getString("batch");
+*/
+    union {
+        struct {
+            uint32_t no : 4;
+            uint32_t month : 4;
+            uint32_t year : 8;
+            uint32_t rev_minor : 4;
+            uint32_t rev_major : 4;
+            uint32_t model : 4;
+            uint32_t mfg : 4;
+        };
+        uint32_t reg;
+    } gw;
+    for (uint8_t reg = 0; reg < 8; reg++) {
+        gw.reg = esp_efuse_read_reg(EFUSE_BLK3, reg);
+        if (reg == 7 || esp_efuse_read_reg(EFUSE_BLK3, reg + 1) == 0)
+            break;
+    }
+    const char * mfg[]   = {"unknown", "BBQKees Electronics", "", "", "", "", "", ""};
+    const char * model[] = {"unknown", "S3", "E32V2", "E32V2.2", "S32", "E32", "", "", ""};
+    const char * board[] = {"CUSTOM", "S32S3", "E32V2", "E32V2_2", "S32", "E32", "", "", ""};
+    switch (detail) {
+    case FUSE_VALUE::MFG:
+        return gw.mfg < 2 ? String(mfg[gw.mfg]) : "unknown";
+    case FUSE_VALUE::MODEL:
+        return gw.model < 6 ? String(model[gw.model]) : "unknown";
+    case FUSE_VALUE::BOARD:
+        return gw.model < 6 ? String(board[gw.model]) : board_profile_;
+    case FUSE_VALUE::REV:
+        return String(gw.rev_major) + "." + String(gw.rev_minor);
+    case FUSE_VALUE::BATCH:
+        return String(2000 + gw.year) + (gw.month < 10 ? "0" : "") + String(gw.month) + String(gw.no);
+    case FUSE_VALUE::FUSE:
+        return "0x" + String(gw.reg, 16);
+    case FUSE_VALUE::ALL:
+    default:
+        break;
+    }
+    if (!gw.reg || gw.mfg > 1 || gw.model > 5) {
+        return "";
+    }
+    return String(mfg[gw.mfg]) + " " + String(model[gw.model]) + " rev." + String(gw.rev_major) + "." + String(gw.rev_minor) + "/" + String(2000 + gw.year)
+           + (gw.month < 10 ? "0" : "") + String(gw.month) + String(gw.no);
 #else
     return "";
 #endif
@@ -2005,7 +2635,6 @@ String System::getBBQKeesGatewayDetails() {
 // This is to avoid timeouts in callback functions, like calling from a web hook.
 bool System::uploadFirmwareURL(const char * url) {
 #ifndef EMSESP_STANDALONE
-
     static String saved_url;
 
     if (url && strlen(url) > 0) {
@@ -2046,23 +2675,28 @@ bool System::uploadFirmwareURL(const char * url) {
         return false; // error
     }
 
-    // check we have enough space for the upload in the ota partition
     int firmware_size = http.getSize();
-    LOG_INFO("Firmware uploading (size: %d bytes). Please wait...", firmware_size);
+
+    // check we have a valid size
+    if (firmware_size < 2097152) { // 2MB or greater is required
+        LOG_ERROR("Firmware upload failed - invalid size");
+        http.end();
+        return false; // error
+    }
+
+    // check we have enough space for the upload in the ota partition
     if (!Update.begin(firmware_size)) {
         LOG_ERROR("Firmware upload failed - no space");
         http.end();
         return false; // error
     }
 
+    LOG_INFO("Firmware uploading (size: %d KB). Please wait...", firmware_size / 1024);
+
     Shell::loop_all(); // flush log buffers so latest messages are shown in console
 
     // we're about to start the upload, set the status so the Web System Monitor spots it
     EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING);
-    // TODO do we need to stop the UART first with EMSuart::stop() ?
-
-    // set a callback so we can monitor progress in the WebUI
-    Update.onProgress([](size_t progress, size_t total) { EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING + (progress * 100 / total)); });
 
     // get tcp stream and send it to Updater
     WiFiClient * stream = http.getStreamPtr();
@@ -2112,7 +2746,7 @@ bool System::readCommand(const char * data) {
 
     // first check deviceID
     if ((p = strtok(data_args, " ,"))) {               // delimiter comma or space
-        strlcpy(value, p, 10);                         // get string
+        strlcpy(value, p, sizeof(value));              // get string
         device_id = (uint8_t)Helpers::hextoint(value); // convert hex to int
         if (!EMSESP::valid_device(device_id)) {
             LOG_ERROR("Invalid device ID (0x%02X) in read command", device_id);
@@ -2123,8 +2757,8 @@ bool System::readCommand(const char * data) {
     // iterate until end
     uint8_t num_args = 0;
     while (p != 0) {
-        if ((p = strtok(nullptr, " ,"))) { // delimiter comma or space
-            strlcpy(value, p, 10);         // get string
+        if ((p = strtok(nullptr, " ,"))) {    // delimiter comma or space
+            strlcpy(value, p, sizeof(value)); // get string
             if (num_args == 0) {
                 type_id = (uint16_t)Helpers::hextoint(value); // convert hex to int
             } else if (num_args == 1) {
@@ -2153,12 +2787,171 @@ bool System::command_read(const char * value, const int8_t id) {
 
 // set the system status code - SYSTEM_STATUS in system.h
 void System::systemStatus(uint8_t status_code) {
-    systemStatus_ = status_code;
-    // LOG_DEBUG("Setting System status code %d", status_code);
+    if (systemStatus_ != status_code) {
+        systemStatus_ = status_code;
+        LOG_DEBUG("Setting System status code %d", status_code);
+    }
 }
 
 uint8_t System::systemStatus() {
     return systemStatus_;
+}
+
+// takes a string range like "6-11, 1, 23, 24-48" which has optional ranges and single values and converts to a vector of ints
+std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::string_range_to_vector(const std::string & range) {
+    std::vector<uint8_t, AllocatorPSRAM<uint8_t>> gpios;
+    std::string::size_type                        pos  = 0;
+    std::string::size_type                        prev = 0;
+
+    auto process_part = [&gpios](std::string part) {
+        // trim whitespace
+        part.erase(0, part.find_first_not_of(" \t"));
+        part.erase(part.find_last_not_of(" \t") + 1);
+
+        // check if it's a range (contains '-')
+        std::string::size_type dash_pos = part.find('-');
+        if (dash_pos != std::string::npos) {
+            // it's a range like "6-11"
+            int start = std::stoi(part.substr(0, dash_pos));
+            int end   = std::stoi(part.substr(dash_pos + 1));
+            for (int i = start; i <= end; i++) {
+                gpios.push_back(static_cast<uint8_t>(i));
+            }
+        } else {
+            gpios.push_back(static_cast<uint8_t>(std::stoi(part)));
+        }
+    };
+
+    while ((pos = range.find(',', prev)) != std::string::npos) {
+        process_part(range.substr(prev, pos - prev));
+        prev = pos + 1;
+    }
+
+    // handle the last part
+    process_part(range.substr(prev));
+
+    return gpios;
+}
+
+// initialize a list of valid GPIOs based on the ESP32 board
+// note: we always allow 0, which is used to indicate Dallas or LED is disabled
+void System::set_valid_system_gpios() {
+    valid_system_gpios_.clear(); // reset system list
+    used_gpios_.clear();         // reset used list
+
+    // get free gpios based on board/platform type
+#if CONFIG_IDF_TARGET_ESP32C3
+    // https://www.wemos.cc/en/latest/c3/c3_mini.html
+    valid_system_gpios_ = string_range_to_vector("0-10"); // UART0=20,21
+#elif CONFIG_IDF_TARGET_ESP32S2
+    // 43 and 44 are UART0 pins
+    // 38 and 39 are strapping pins, input only
+    valid_system_gpios_ = string_range_to_vector("0-14, 19, 20, 21, 33-37, 45, 46");
+#elif CONFIG_IDF_TARGET_ESP32S3
+    // 43 and 44 are UART0 pins
+    // 33-37 for Octal SPI (SPIIO4 through SPIIO7 and SPIDQS)
+    // 38 and 39 are input only
+    // 45 and 36 are strapping pins, input only
+    valid_system_gpios_ = string_range_to_vector("0-14, 17, 18, 21, 33-39, 45, 46");
+#elif CONFIG_IDF_TARGET_ESP32
+    // 1 and 3 are UART0 pins, but used for some eth-boards (BBQKees-E32, OlimexPOE)
+    // 32-39 is ADC1, input only
+    if (ESP.getPsramSize() > 0) {
+        // if psram is enabled remove pins 16 and 17 from the list
+        valid_system_gpios_ = string_range_to_vector("0-5, 12-15, 18-19, 23, 25-27, 32-39");
+    } else {
+        valid_system_gpios_ = string_range_to_vector("0-5, 12-19, 23, 25-27, 32-39");
+    }
+#elif defined(EMSESP_STANDALONE)
+    valid_system_gpios_ = string_range_to_vector("0-5, 12-19, 23, 25-27, 32-39");
+#endif
+}
+
+// check if a pin is valid ESP32 pin and if not already used, add to the used gpio list
+// return false if not allowed or already used
+bool System::add_gpio(uint8_t pin, const char * source_name) {
+    // check if this is a valid user GPIO
+    if (std::find(valid_system_gpios_.begin(), valid_system_gpios_.end(), pin) != valid_system_gpios_.end()) {
+        // It's valid now check if it's already in the used list
+        if (std::find(used_gpios_.begin(), used_gpios_.end(), pin) != used_gpios_.end()) {
+            LOG_WARNING("GPIO %d for %s is already in use", pin, source_name);
+            return false; // Pin is already used
+        }
+    } else {
+        // not valid
+        LOG_WARNING("GPIO %d for %s is not valid", pin, source_name);
+        return false;
+    }
+
+    // remove the old pin, if exists from used list
+    remove_gpio(pin);
+
+    LOG_DEBUG("Adding GPIO %d for %s to used gpio list", pin, source_name);
+    used_gpios_.push_back(pin); // add to used list
+
+    return true;
+}
+
+// remove a gpio from both valid and used lists
+void System::remove_gpio(uint8_t pin, bool also_system) {
+    auto it = std::find(used_gpios_.begin(), used_gpios_.end(), pin);
+    if (it != used_gpios_.end()) {
+        LOG_DEBUG("GPIO %d removed from used gpio list", pin);
+        used_gpios_.erase(it);
+    }
+
+    if (also_system) {
+        it = std::find(valid_system_gpios_.begin(), valid_system_gpios_.end(), pin);
+        if (it != valid_system_gpios_.end()) {
+            LOG_DEBUG("GPIO %d removed from valid gpio list", pin);
+            valid_system_gpios_.erase(it);
+        }
+    }
+}
+
+// return a list of GPIO's available for use
+std::vector<uint8_t> System::available_gpios() {
+    std::vector<uint8_t> gpios;
+    for (const auto & gpio : valid_system_gpios_) {
+        if (std::find(used_gpios_.begin(), used_gpios_.end(), gpio) == used_gpios_.end()) {
+            gpios.push_back(gpio); // didn't find it in used_gpios_, so it's available
+        }
+    }
+    return gpios;
+}
+
+// make a snapshot of the current GPIOs
+void System::make_snapshot_gpios() {
+    snapshot_used_gpios_.clear();
+    for (const auto & gpio : used_gpios_) {
+        snapshot_used_gpios_.push_back(gpio);
+    }
+
+    snapshot_valid_system_gpios_.clear();
+    for (const auto & gpio : valid_system_gpios_) {
+        snapshot_valid_system_gpios_.push_back(gpio);
+    }
+}
+
+// restore the GPIOs from the snapshot
+void System::restore_snapshot_gpios() {
+    used_gpios_.clear();
+    for (const auto & gpio : snapshot_used_gpios_) {
+        used_gpios_.push_back(gpio);
+    }
+
+    valid_system_gpios_.clear();
+    for (const auto & gpio : snapshot_valid_system_gpios_) {
+        valid_system_gpios_.push_back(gpio);
+    }
+
+    // clear the snapshot
+    clear_snapshot_gpios();
+}
+
+void System::clear_snapshot_gpios() {
+    snapshot_used_gpios_.clear();
+    snapshot_valid_system_gpios_.clear();
 }
 
 } // namespace emsesp

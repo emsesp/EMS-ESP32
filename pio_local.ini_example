@@ -15,25 +15,24 @@
 ; my_build_flags = -DEMSESP_TEST -DEMSESP_DEBUG
 ; my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST -DEMSESP_PINGTEST
 ; my_build_flags = -DEMSESP_DEBUG -DCORE_DEBUG_LEVEL=5
+; my_build_flags = -DEMSESP_EN_ONLY -DEMSESP_TEST -DCORE_DEBUG_LEVEL=5 -DARDUINO_USB_CDC_ON_BOOT=1
 my_build_flags =
 
 [platformio]
-; default_envs = s_16M_P ; BBQKees E32V2
+default_envs = s_16M_P ; BBQKees E32V2
+; default_envs = build_webUI ; build the web interface only
 ; default_envs = s3_16M_P ; BBQKees S3
 ; default_envs = s_4M ; BBQKees older S32, 4MB no psram
-default_envs = s_16M ; BBQKees newer S32 V2, 16MB no psram
+; default_envs = s_16M ; BBQKees newer S32 V2, 16MB no psram
+; default_envs = c6 ; XIAO ESP32C
+; default_envs = debug
 
 [env]
 
-; uncomment this section to enable extra debug
-; build_type = debug
-; monitor_filters = colorize, esp32_exception_decoder
-
-; uncomment if you want to upload the firmware via OTA (must have upload_protocol = custom)
-; extra_scripts =
-;   pre:scripts/build_interface.py ; builds the WebUI (unless NO_BUILD_WEBUI is set) - comment out if you don't want to build each time
-;   scripts/rename_fw.py ; renames the firmware .bin file - comment out if not needed
-;   scripts/upload.py ; optionally upload the firmware via OTA (must have upload_protocol = custom)
+extra_scripts =
+ pre:scripts/build_interface.py ; builds the WebUI
+ scripts/rename_fw.py ; renames the firmware .bin file - comment out if not needed
+ scripts/upload.py ; optionally upload the firmware via OTA (must have upload_protocol = custom)
 
 ; set the username and password for the admin account (default password is admin)
 custom_username = admin
@@ -47,35 +46,26 @@ custom_password = admin
 ;  upload_protocol = custom
 ;  custom_emsesp_ip = <ip address> or ems-esp.local
 
-; upload_protocol = custom
-; custom_emsesp_ip = 10.10.10.93
-
-; example override for lib_deps and using locally built modules
-lib_deps =
- bblanchon/ArduinoJson
- ESP32Async/AsyncTCP
- ESP32Async/ESPAsyncWebServer
- file://${PROJECT_DIR}/../modules/EMS-ESP-Modules
-
 ; ** debug settings **
-; to be used with esp-prog/JTAG hardware device like https://docs.espressif.com/projects/esp-dev-kits/en/latest/other/esp-prog/user_guide.html   
-; pio run -e debug
-; add to build_flags these additional options: EMSESP_DEBUG EMSESP_UART_DEBUG EMSESP_DEBUG_SENSOR
+; to be used with an ESP32-S3 which has an onboard JTAG, connect the OTG USB port to the PC
+; if using an external JTAG board like the ESP-PROG set debug_tool = esp-prog, and use zadig to set the correct driver for the USB port
+; see https://docs.platformio.org/en/stable/projectconf/sections/env/options/debug/debug_init_break.html for settings
+; use with my_build_flags = -DEMSESP_EN_ONLY -DEMSESP_TEST -DCORE_DEBUG_LEVEL=5 -DARDUINO_USB_CDC_ON_BOOT=1
 [env:debug]
-board = esp32dev
+board = esp32-s3-devkitc-1
 framework = arduino
-platform = espressif32
-board_build.partitions = partitions/esp32_partition_debug.csv
-board_upload.flash_size = 4MB
+platform = espressif32@6.12.0 ; Arduino Core v2.0.17 / IDF v4.4.7
+board_build.partitions = partitions/esp32_partition_16M.csv
+board_upload.flash_size = 16MB
+board_build.app_partition_name = app0
 board_build.filesystem = littlefs
 upload_protocol = esptool
 build_type = debug
 monitor_raw = no
-monitor_filters = esp32_exception_decoder
-debug_tool = esp-prog
-debug_init_break = tbreak setup
-build_flags = ${factory_settings.build_flags} -DEMSESP_EN_ONLY -DCORE_DEBUG_LEVEL=5 -DONEWIRE_CRC16=0 -DNO_GLOBAL_ARDUINOOTA -DARDUINOJSON_ENABLE_STD_STRING=1 -DESP32=1 -DARDUINO_ARCH_ESP32=1
-upload_port = /dev/ttyUSB0
+monitor_filters = colorize, esp32_exception_decoder
+debug_tool = esp-builtin
+debug_init_break = 
+upload_speed = 2000000
+monitor_speed = 115200
 extra_scripts =
-  scripts/rename_fw.py
-  post:scripts/app-tls-size.py
+; debug_build_flags = -Og -g2 -ggdb2

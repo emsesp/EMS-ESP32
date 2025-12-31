@@ -1,8 +1,13 @@
 #!/bin/sh
 
-#
 # Builds the dump_*.csv files, modbus headers and modbus documentation.
 # Run as `sh scripts/generate_csv_and_headers.sh` from the root of the repository.
+
+##
+## IMPORTANT NOTE!
+##  This script is not used anymore. It is kept for reference only. 
+##  It has been replaced with two pio targets: build_modbus and build_standalone.
+##
 
 # create a dummy modbus_entity_parameters.hpp so the first pass compiles
 cat >./src/core/modbus_entity_parameters.hpp <<EOL

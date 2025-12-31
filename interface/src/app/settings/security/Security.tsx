@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import { Navigate, Route, Routes, matchRoutes, useLocation } from 'react-router';
 
 import { Tab } from '@mui/material';
@@ -12,14 +13,23 @@ const Security = () => {
   const { LL } = useI18nContext();
   useLayoutTitle(LL.SECURITY(0));
 
-  const matchedRoutes = matchRoutes(
-    [
-      { path: '/settings/security/settings', element: <ManageUsers />, dog: 'woof' },
-      { path: '/settings/security/users', element: <SecuritySettings /> }
-    ],
-    useLocation()
+  const location = useLocation();
+
+  const matchedRoutes = useMemo(
+    () =>
+      matchRoutes(
+        [
+          {
+            path: '/settings/security/settings',
+            element: <ManageUsers />
+          },
+          { path: '/settings/security/users', element: <SecuritySettings /> }
+        ],
+        location
+      ),
+    [location]
   );
-  const routerTab = matchedRoutes?.[0].route.path || false;
+  const routerTab = matchedRoutes?.[0]?.route.path || false;
 
   return (
     <>
@@ -42,4 +52,4 @@ const Security = () => {
   );
 };
 
-export default Security;
+export default memo(Security);

@@ -1,60 +1,88 @@
-export const numberValue = (value?: number) => {
-  if (value !== undefined) {
-    return isNaN(value) ? '' : value.toString();
-  }
-  return '';
-};
+/**
+ * Converts a number value to a string for input fields.
+ * Returns empty string for undefined or NaN values.
+ */
+export const numberValue = (value?: number): string =>
+  value === undefined || isNaN(value) ? '' : String(value);
 
-export const extractEventValue = (event: React.ChangeEvent<HTMLInputElement>) => {
-  switch (event.target.type) {
-    case 'number':
-      return event.target.valueAsNumber;
-    case 'checkbox':
-      return event.target.checked;
-    default:
-      return event.target.value;
+/**
+ * Extracts the appropriate value from an input event based on input type.
+ */
+export const extractEventValue = (
+  event: React.ChangeEvent<HTMLInputElement>
+): string | number | boolean => {
+  const { type, checked, value } = event.target;
+
+  if (type === 'number') {
+    if (value === '') return NaN;
+
+    const normalizedValue = value.replace(',', '.');
+
+    // For incomplete number entries, keep the raw string to allow smooth typing
+    // This includes: "0.", "1.0", "0.00", "-", "-.", "-.5", etc.
+    const endsWithDecimalAndZeros = /\.\d*0$/.test(normalizedValue);
+    const isIncomplete =
+      normalizedValue.endsWith('.') ||
+      normalizedValue === '-' ||
+      normalizedValue === '-.' ||
+      normalizedValue === '-0' ||
+      endsWithDecimalAndZeros;
+
+    if (isIncomplete) {
+      return normalizedValue;
+    }
+
+    const parsedValue = parseFloat(normalizedValue);
+    return parsedValue;
   }
+  if (type === 'checkbox') return checked;
+  return value;
 };
 
 type UpdateEntity<S> = (state: (prevState: Readonly<S>) => S) => void;
 
+/**
+ * Creates an event handler that updates an entity's state based on input changes.
+ */
 export const updateValue =
-  <S>(updateEntity: UpdateEntity<S>) =>
-  (event: React.ChangeEvent<HTMLInputElement>) => {
+  <S extends Record<string, unknown>>(updateEntity: UpdateEntity<S>) =>
+  (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const { name } = event.target;
+    const value = extractEventValue(event);
+
     updateEntity((prevState) => ({
       ...prevState,
-      [event.target.name]: extractEventValue(event)
+      [name]: value
     }));
   };
 
+/**
+ * Creates an event handler that tracks dirty flags for modified fields.
+ * Optimized to minimize state updates and unnecessary array operations.
+ */
 export const updateValueDirty =
-  (
-    origData,
+  <T extends Record<string, unknown>>(
+    origData: T,
     dirtyFlags: string[],
     setDirtyFlags: React.Dispatch<React.SetStateAction<string[]>>,
-    updateDataValue: (unknown) => void
+    updateDataValue: (updater: (prevState: T) => T) => void
   ) =>
-  (event: React.ChangeEvent<HTMLInputElement>) => {
-    const updated_value = extractEventValue(event);
-    const name = event.target.name;
+  (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const { name } = event.target;
+    const updatedValue = extractEventValue(event);
 
-    updateDataValue((prevState: unknown) => ({
-      ...(prevState as Record<string, unknown>),
-      [name]: updated_value
+    updateDataValue((prevState) => ({
+      ...prevState,
+      [name]: updatedValue
     }));
 
-    const arr: string[] = dirtyFlags;
+    const isDirty = origData[name] !== updatedValue;
+    const wasDirty = dirtyFlags.includes(name);
 
-    if ((origData as Record<string, unknown>)[name] !== updated_value) {
-      if (!arr.includes(name)) {
-        arr.push(name);
-      }
-    } else {
-      const startIndex = arr.indexOf(name);
-      if (startIndex !== -1) {
-        arr.splice(startIndex, 1);
-      }
+    // Only update dirty flags if the state changed
+    if (isDirty !== wasDirty) {
+      setDirtyFlags(
+        isDirty ? [...dirtyFlags, name] : dirtyFlags.filter((f) => f !== name)
+      );
     }
-
-    setDirtyFlags(arr);
   };

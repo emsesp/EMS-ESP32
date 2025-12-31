@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { memo, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import ForwardIcon from '@mui/icons-material/Forward';
@@ -19,7 +19,7 @@ import type { SignInRequest } from 'types';
 import { onEnterCallback, updateValue } from 'utils';
 import { SIGN_IN_REQUEST_VALIDATOR, validate } from 'validators';
 
-const SignIn = () => {
+const SignIn = memo(() => {
   const authenticationContext = useContext(AuthenticationContext);
 
   const { LL } = useI18nContext();
@@ -42,9 +42,18 @@ const SignIn = () => {
     }
   });
 
-  const updateLoginRequestValue = updateValue(setSignInRequest);
+  // Memoize callback to prevent recreation on every render
+  const updateLoginRequestValue = useMemo(
+    () =>
+      updateValue((updater) =>
+        setSignInRequest(
+          updater as unknown as (prevState: SignInRequest) => SignInRequest
+        )
+      ),
+    []
+  );
 
-  const signIn = async () => {
+  const signIn = useCallback(async () => {
     await callSignIn(signInRequest).catch((event: Error) => {
       if (event.message === 'Unauthorized') {
         toast.warning(LL.INVALID_LOGIN());
@@ -53,9 +62,9 @@ const SignIn = () => {
       }
       setProcessing(false);
     });
-  };
+  }, [callSignIn, signInRequest, LL]);
 
-  const validateAndSignIn = async () => {
+  const validateAndSignIn = useCallback(async () => {
     setProcessing(true);
     SIGN_IN_REQUEST_VALIDATOR.messages({
       required: LL.IS_REQUIRED('%s')
@@ -67,9 +76,19 @@ const SignIn = () => {
       setFieldErrors(error as ValidateFieldsError);
       setProcessing(false);
     }
-  };
+  }, [signInRequest, signIn, LL]);
 
-  const submitOnEnter = onEnterCallback(signIn);
+  // Memoize callback to prevent recreation on every render
+  const submitOnEnter = useMemo(() => onEnterCallback(signIn), [signIn]);
+
+  // get rid of scrollbar
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
 
   return (
     <Box
@@ -92,23 +111,27 @@ const SignIn = () => {
           width: '100%'
         })}
       >
-        <Typography variant="h4">{PROJECT_NAME}</Typography>
-
+        <Typography mb={1} variant="h4">
+          {PROJECT_NAME}
+        </Typography>
         <LanguageSelector />
-
-        <Box display="flex" flexDirection="column" alignItems="center">
+        <Box
+          mt={1}
+          display="flex"
+          flexDirection="column"
+          gap={1}
+          alignItems="center"
+        >
           <ValidatedTextField
-            fieldErrors={fieldErrors}
+            fieldErrors={fieldErrors || {}}
             disabled={processing}
             sx={{
-              width: 240
+              width: '32ch'
             }}
             name="username"
             label={LL.USERNAME(0)}
             value={signInRequest.username}
             onChange={updateLoginRequestValue}
-            margin="normal"
-            variant="outlined"
             slotProps={{
               input: {
                 autoCapitalize: 'none',
@@ -117,17 +140,16 @@ const SignIn = () => {
             }}
           />
           <ValidatedPasswordField
-            fieldErrors={fieldErrors}
+            fieldErrors={fieldErrors || {}}
             disabled={processing}
             sx={{
-              width: 240
+              width: '32ch'
             }}
             name="password"
             label={LL.PASSWORD()}
             value={signInRequest.password}
             onChange={updateLoginRequestValue}
             onKeyDown={submitOnEnter}
-            variant="outlined"
           />
         </Box>
 
@@ -144,6 +166,6 @@ const SignIn = () => {
       </Paper>
     </Box>
   );
-};
+});
 
 export default SignIn;

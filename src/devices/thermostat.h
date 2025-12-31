@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -113,6 +113,11 @@ class Thermostat : public EMSdevice {
         int8_t  currSolarInfl;
         int8_t  solarInfl;
 
+        uint8_t heatingpid;
+        uint8_t pumpopt;
+        uint8_t inttimefloor;
+        uint8_t inttime;
+
         uint8_t hc_num() const {
             return hc_num_;
         }
@@ -183,6 +188,7 @@ class Thermostat : public EMSdevice {
         ~DhwCircuit() = default;
         uint8_t wwExtra_;
         uint8_t wwMode_;
+        uint8_t wwModeType_;
         uint8_t wwCircPump_;
         uint8_t wwCircMode_;
         uint8_t wwSetTemp_;
@@ -229,8 +235,8 @@ class Thermostat : public EMSdevice {
 
     // check to see if the thermostat is a hybrid of the R300
     inline bool isRC300() const {
-        return ((model() == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) || (model() == EMSdevice::EMS_DEVICE_FLAG_BC400)
-                || (model() == EMSdevice::EMS_DEVICE_FLAG_CR120));
+        return (model() == EMSdevice::EMS_DEVICE_FLAG_RC300 || model() == EMSdevice::EMS_DEVICE_FLAG_R3000 || model() == EMSdevice::EMS_DEVICE_FLAG_BC400
+                || model() == EMSdevice::EMS_DEVICE_FLAG_CR120 || model() == EMSdevice::EMS_DEVICE_FLAG_HMC310);
     }
 
     inline uint8_t id2dhw(const int8_t id) const { // returns telegram offset for TAG(id)
@@ -411,6 +417,8 @@ class Thermostat : public EMSdevice {
     void process_RCTime(std::shared_ptr<const Telegram> telegram);
     void process_RCError(std::shared_ptr<const Telegram> telegram);
     void process_RCErrorMessage(std::shared_ptr<const Telegram> telegram);
+    void process_RCErrorMessage2(std::shared_ptr<const Telegram> telegram);
+    void process_ErrorMessageBF(std::shared_ptr<const Telegram> telegram);
     void process_RC35wwSettings(std::shared_ptr<const Telegram> telegram);
     void process_RC35wwTimer(std::shared_ptr<const Telegram> telegram);
     void process_RC35Monitor(std::shared_ptr<const Telegram> telegram);
@@ -456,12 +464,14 @@ class Thermostat : public EMSdevice {
     void process_Absent(std::shared_ptr<const Telegram> telegram);
     void process_JunkersSetMixer(std::shared_ptr<const Telegram> telegram);
     void process_JunkersWW(std::shared_ptr<const Telegram> telegram);
+    void process_JunkersDisp(std::shared_ptr<const Telegram> telegram);
     void process_RemoteTemp(std::shared_ptr<const Telegram> telegram);
     void process_RemoteHumidity(std::shared_ptr<const Telegram> telegram);
     void process_RemoteCorrection(std::shared_ptr<const Telegram> telegram);
     void process_RemoteBattery(std::shared_ptr<const Telegram> telegram);
     void process_HPSet(std::shared_ptr<const Telegram> telegram);
     void process_HPMode(std::shared_ptr<const Telegram> telegram);
+    void process_PID(std::shared_ptr<const Telegram> telegram);
 
     // internal helper functions
     bool set_mode_n(const uint8_t mode, const int8_t id);
@@ -639,6 +649,9 @@ class Thermostat : public EMSdevice {
     bool set_reducehours(const char * value, const int8_t id);
     bool set_backlight(const char * value, const int8_t id);
     bool set_heatingpid(const char * value, const int8_t id);
+    bool set_pumpopt(const char * value, const int8_t id);
+    bool set_inttime(const char * value, const int8_t id);
+    bool set_inttimefloor(const char * value, const int8_t id);
     bool set_brightness(const char * value, const int8_t id);
     bool set_autodst(const char * value, const int8_t id);
     bool set_preheating(const char * value, const int8_t id);

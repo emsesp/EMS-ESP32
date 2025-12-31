@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include <unordered_map>
 
 #include "console.h"
+#include <esp32-psram.h>
 
 using uuid::console::Shell;
 
@@ -36,6 +37,7 @@ enum CommandFlag : uint8_t {
     CMD_FLAG_DHW     = (1 << 1), // 2 TAG_DHW1 - TAG_DHW4
     CMD_FLAG_AHS     = (1 << 2), // 4 TAG_AHS1
     CMD_FLAG_HS      = (1 << 3), // 8 TAG_HS1 - TAG_HS16
+    CMD_FLAG_SRC     = (1 << 4), // 16 TAG_SRC1 - TAG_SRC16
     HIDDEN           = (1 << 6), // 64 do not show in API or Web
     ADMIN_ONLY       = (1 << 7)  // 128 requires authentication
 
@@ -96,7 +98,7 @@ class Command {
         }
     };
 
-    static std::vector<CmdFunction> commands() {
+    static std::vector<CmdFunction, AllocatorPSRAM<CmdFunction>> commands() {
         return cmdfunctions_;
     }
 
@@ -137,14 +139,14 @@ class Command {
 
     static const char * parse_command_string(const char * command, int8_t & id);
     static const char * get_attribute(const char * cmd);
-    static bool         set_attribute(JsonObject output, const char * cmd, const char * attribute);
+    static bool         get_attribute(JsonObject output, const char * cmd, const char * attribute);
 
     static const char * return_code_string(const uint8_t return_code);
 
   private:
     static uuid::log::Logger logger_;
 
-    static std::vector<CmdFunction> cmdfunctions_; // the list of commands
+    static std::vector<CmdFunction, AllocatorPSRAM<CmdFunction>> cmdfunctions_; // the list of commands
 
     static uint8_t json_message(uint8_t error_code, const char * message, JsonObject output, const char * object = nullptr);
 };

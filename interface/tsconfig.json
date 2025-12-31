@@ -1,31 +1,109 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
+    // Target modern browsers for better performance
+    "target": "ES2022",
     "useDefineForClassFields": true,
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "types": ["node"],
+
+    // Optimized library selection
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node", "vite/client"],
+
+    // JavaScript handling
     "allowJs": false,
-    "skipLibCheck": true,
-    "esModuleInterop": false,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "composite": true,
+    "checkJs": false,
+
+    // Module system optimized for Vite
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
+
+    // Emit configuration
     "noEmit": true,
-    "useUnknownInCatchVariables": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+
+    // React/JSX configuration
     "jsx": "react-jsx",
-    "noImplicitAny": false,
-    "baseUrl": "src",
+    "jsxImportSource": "react",
+
+    // Strict type checking for better code quality
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true,
+
+    // Additional checks
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "useUnknownInCatchVariables": true,
+
+    // Performance optimizations
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
+    "assumeChangesOnlyAffectDirectDependencies": true,
+
+    // Path mapping for cleaner imports
+    "baseUrl": ".",
     "paths": {
-      "@": ["src"],
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@/components/*": ["src/components/*"],
+      "@/utils/*": ["src/utils/*"],
+      "@/types/*": ["src/types/*"],
+      "@/hooks/*": ["src/hooks/*"],
+      "@/services/*": ["src/services/*"],
+      "@/assets/*": ["src/assets/*"],
+      // Support for bare imports from src directory
+      "App": ["src/App"],
+      "AppRouting": ["src/AppRouting"],
+      "CustomTheme": ["src/CustomTheme"],
+      "SignIn": ["src/SignIn"],
+      "AuthenticatedRouting": ["src/AuthenticatedRouting"],
+      "env": ["src/env"],
+      "components": ["src/components"],
+      "contexts": ["src/contexts"],
+      "i18n": ["src/i18n"],
+      "utils": ["src/utils"],
+      "validators": ["src/validators"],
+      "types": ["src/types"],
+      "api": ["src/api"],
+      "app": ["src/app"],
+      // Wildcard patterns for subdirectories
+      "components/*": ["src/components/*"],
+      "contexts/*": ["src/contexts/*"],
+      "i18n/*": ["src/i18n/*"],
+      "utils/*": ["src/utils/*"],
+      "validators/*": ["src/validators/*"],
+      "types/*": ["src/types/*"],
+      "api/*": ["src/api/*"],
+      "app/*": ["src/app/*"]
     }
   },
-  "include": ["src/**/*", "vite.config.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*", "vite.config.ts", "progmem-generator.js"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    ".tsbuildinfo",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx"
+  ],
+  "ts-node": {
+    "esm": true
+  }
 }

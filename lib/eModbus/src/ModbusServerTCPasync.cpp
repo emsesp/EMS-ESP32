@@ -32,7 +32,7 @@ ModbusServerTCPasync::mb_client::~mb_client() {
 
 void ModbusServerTCPasync::mb_client::onData(uint8_t* data, size_t len) {
   lastActiveTime = millis();
-  LOG_D("data len %d\n", len);
+  LOG_D("data len %u\n", len);
 
   Error error = SUCCESS;
   size_t i = 0;
@@ -250,7 +250,7 @@ void ModbusServerTCPasync::onClientConnect(AsyncClient* client) {
   LOCK_GUARD(lock1, cListLock);
   if (clients.size() < maxNoClients) {
     clients.emplace_back(new mb_client(this, client));
-    LOG_D("nr clients: %d\n", clients.size());
+    LOG_D("nr clients: %u\n", clients.size());
   } else {
     LOG_D("max number of clients reached, closing new\n");
     client->close(true);
@@ -264,5 +264,5 @@ void ModbusServerTCPasync::onClientDisconnect(mb_client* client) {
   clients.remove_if([client](mb_client* i) { return i->client == client->client; });
   // delete client itself
   delete client;
-  LOG_D("nr clients: %d\n", clients.size());
+  LOG_D("nr clients: %u\n", clients.size());
 }

@@ -1,8 +1,10 @@
+import { memo, useCallback, useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import MenuIcon from '@mui/icons-material/Menu';
 import { AppBar, IconButton, Toolbar, Typography } from '@mui/material';
+import type { SxProps, Theme } from '@mui/material/styles';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
@@ -13,30 +15,47 @@ interface LayoutAppBarProps {
   onToggleDrawer: () => void;
 }
 
-const LayoutAppBar = ({ title, onToggleDrawer }: LayoutAppBarProps) => {
+// Extract static styles
+const appBarStyles: SxProps<Theme> = {
+  width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
+  ml: { md: `${DRAWER_WIDTH}px` },
+  boxShadow: 'none',
+  backgroundColor: '#2e586a'
+};
+
+const menuButtonStyles: SxProps<Theme> = {
+  mr: 2,
+  display: { md: 'none' }
+};
+
+const backButtonStyles: SxProps<Theme> = {
+  mr: 1,
+  fontSize: 20,
+  verticalAlign: 'middle'
+};
+
+const LayoutAppBarComponent = ({ title, onToggleDrawer }: LayoutAppBarProps) => {
   const { LL } = useI18nContext();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const pathnames = useLocation()
-    .pathname.split('/')
-    .filter((x) => x);
+  const pathnames = useMemo(
+    () => location.pathname.split('/').filter((x) => x),
+    [location.pathname]
+  );
+
+  const handleBackClick = useCallback(() => {
+    void navigate('/' + pathnames[0]);
+  }, [navigate, pathnames]);
 
   return (
-    <AppBar
-      position="fixed"
-      sx={{
-        width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
-        ml: { md: `${DRAWER_WIDTH}px` },
-        boxShadow: 'none',
-        backgroundColor: '#2e586a'
-      }}
-    >
+    <AppBar position="fixed" sx={appBarStyles}>
       <Toolbar>
         <IconButton
           color="inherit"
           edge="start"
           onClick={onToggleDrawer}
-          sx={{ mr: 2, display: { md: 'none' } }}
+          sx={menuButtonStyles}
         >
           <MenuIcon />
         </IconButton>
@@ -44,10 +63,10 @@ const LayoutAppBar = ({ title, onToggleDrawer }: LayoutAppBarProps) => {
         {pathnames.length > 1 && (
           <>
             <IconButton
-              sx={{ mr: 1, fontSize: 20, verticalAlign: 'middle' }}
+              sx={backButtonStyles}
               color="primary"
               edge="start"
-              onClick={() => navigate('/' + pathnames[0])}
+              onClick={handleBackClick}
             >
               <ArrowBackIcon />
             </IconButton>
@@ -69,5 +88,7 @@ const LayoutAppBar = ({ title, onToggleDrawer }: LayoutAppBarProps) => {
     </AppBar>
   );
 };
+
+const LayoutAppBar = memo(LayoutAppBarComponent);
 
 export default LayoutAppBar;

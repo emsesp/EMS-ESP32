@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../core/telegram.h"
+#include <esp32-psram.h>
 
 #ifndef WebCustomEntityService_h
 #define WebCustomEntityService_h
@@ -33,18 +34,19 @@ class CustomEntityItem {
     uint8_t     offset;
     int8_t      value_type;
     uint8_t     uom; // DeviceValueUOM
-    std::string name;
+    char        name[20];
     double      factor;
     bool        writeable;
     uint32_t    value;
-    std::string data;
+    stringPSRAM data;
     uint8_t     ram;
     uint8_t *   raw;
+    bool        hide;
 };
 
 class WebCustomEntity {
   public:
-    std::list<CustomEntityItem> customEntityItems;
+    std::list<CustomEntityItem, AllocatorPSRAM<CustomEntityItem>> customEntityItems;
 
     static void              read(WebCustomEntity & webEntity, JsonObject root);
     static StateUpdateResult update(JsonObject root, WebCustomEntity & webEntity);
@@ -59,20 +61,20 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
     void publish(const bool force = false);
     bool command_setvalue(const char * value, const int8_t id, const char * name);
     bool get_value_info(JsonObject output, const char * cmd);
-    void get_value_json(JsonObject output, CustomEntityItem & entity);
+    void get_value_json(JsonObject output, CustomEntityItem const & entity);
     bool get_value(std::shared_ptr<const Telegram> telegram);
     void fetch();
-    void render_value(JsonObject output, CustomEntityItem & entity, const bool useVal = false, const bool web = false, const bool add_uom = false);
+    void render_value(JsonObject output, CustomEntityItem const & entity, const bool useVal = false, const bool web = false, const bool add_uom = false);
     void show_values(JsonObject output);
     void generate_value_web(JsonObject output, const bool is_dashboard = false);
 
     uint8_t count_entities();
     void    ha_reset() {
-        ha_registered_ = false;
+        ha_configdone_ = false;
     }
 
 #if defined(EMSESP_TEST)
-    void test();
+    void load_test_data();
 #endif
 
   private:
@@ -81,9 +83,9 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
 
     void getEntities(AsyncWebServerRequest * request);
 
-    std::list<CustomEntityItem> * customEntityItems_; // pointer to the list of entity items
+    std::list<CustomEntityItem, AllocatorPSRAM<CustomEntityItem>> * customEntityItems_; // pointer to the list of entity items
 
-    bool ha_registered_ = false;
+    bool ha_configdone_ = false;
 };
 
 } // namespace emsesp

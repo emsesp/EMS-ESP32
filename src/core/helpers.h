@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,8 @@ class Helpers {
     static char * render_value(char * result, const int16_t value, const int8_t format, const uint8_t fahrenheit = 0);
     static char * render_value(char * result, const int32_t value, const int8_t format, const uint8_t fahrenheit = 0);
     static char * render_boolean(char * result, const bool value, const bool dashboard = false);
+    static char * render_string(char * result, const char * s, const uint8_t len);
+    static char * utf8tolatin1(char * result, const char * s, const uint8_t len);
 
     static char *      hextoa(char * result, const uint8_t value);
     static char *      hextoa(char * result, const uint16_t value);
@@ -72,7 +74,9 @@ class Helpers {
     static bool value2bool(const char * value, bool & value_b);
     static bool value2string(const char * value, std::string & value_s);
     static bool value2enum(const char * value, uint8_t & value_ui, const char * const ** strs);
+    static bool value2enum(const char * value, uint8_t & value_ui, const char * const ** strs, const std::vector<uint8_t> & mask);
     static bool value2enum(const char * value, uint8_t & value_ui, const char * const * strs);
+    static bool value2enum(const char * value, uint8_t & value_ui, const char * const * strs, const std::vector<uint8_t> & mask);
     static bool value2temperature(const char * value, float & value_f, bool relative = false);
     static bool value2temperature(const char * value, int & value_i, const bool relative = false, const int min = -2147483648, const int max = 2147483647);
 

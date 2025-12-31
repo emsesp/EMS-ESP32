@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import type { FC } from 'react';
 
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -13,6 +13,10 @@ type ValidatedPasswordFieldProps = Omit<ValidatedTextFieldProps, 'type'>;
 const ValidatedPasswordField: FC<ValidatedPasswordFieldProps> = ({ ...props }) => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
+  const togglePasswordVisibility = useCallback(() => {
+    setShowPassword((prev) => !prev);
+  }, []);
+
   return (
     <ValidatedTextField
       {...props}
@@ -21,7 +25,11 @@ const ValidatedPasswordField: FC<ValidatedPasswordFieldProps> = ({ ...props }) =
         input: {
           endAdornment: (
             <InputAdornment position="end">
-              <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+              <IconButton
+                onClick={togglePasswordVisibility}
+                edge="end"
+                aria-label="Password visibility"
+              >
                 {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
               </IconButton>
             </InputAdornment>
@@ -32,4 +40,4 @@ const ValidatedPasswordField: FC<ValidatedPasswordFieldProps> = ({ ...props }) =
   );
 };
 
-export default ValidatedPasswordField;
+export default memo(ValidatedPasswordField);

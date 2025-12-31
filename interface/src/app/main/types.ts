@@ -60,7 +60,7 @@ export interface Stat {
 }
 
 export interface Activity {
-  stats: Stat[];
+  readonly stats: readonly Stat[];
 }
 
 export interface Device {
@@ -82,38 +82,43 @@ export interface TemperatureSensor {
   t?: number; // temp, optional
   o: number; // offset
   u: number; // uom
+  s: boolean; // system sensor flag
   o_n?: string;
 }
 
 export interface AnalogSensor {
   id: number;
   g: number; // GPIO
-  n: string;
-  v: number;
-  u: number;
-  o: number;
-  f: number;
-  t: number;
+  n: string; // name
+  v: number; // value
+  u: number; // uom
+  o: number; // offset
+  f: number; // factor
+  t: number; // type
   d: boolean; // deleted flag
-  o_n?: string;
+  s: boolean; // system sensor flag
+  o_n?: string; // original name
 }
 
 export interface WriteTemperatureSensor {
   id: string;
   name: string;
   offset: number;
+  is_system: boolean;
 }
 
 export interface SensorData {
   ts: TemperatureSensor[];
   as: AnalogSensor[];
   analog_enabled: boolean;
+  available_gpios: number[];
+  exclude_types: number[];
   platform: string;
 }
 
 export interface CoreData {
-  connected: boolean;
-  devices: Device[];
+  readonly connected: boolean;
+  readonly devices: readonly Device[];
 }
 
 export interface DashboardItem {
@@ -122,11 +127,12 @@ export interface DashboardItem {
   n?: string; // name, optional
   dv?: DeviceValue; // device value, optional
   nodes?: DashboardItem[]; // children nodes, optional
+  parentNode: DashboardItem; // to stop lint errors
 }
 
 export interface DashboardData {
-  connected: boolean; // true if connected to EMS bus
-  nodes: DashboardItem[];
+  readonly connected: boolean; // true if connected to EMS bus
+  readonly nodes: readonly DashboardItem[];
 }
 
 export interface DeviceValue {
@@ -139,10 +145,11 @@ export interface DeviceValue {
   s?: string; // steps for up/down, optional
   m?: number; // min, optional
   x?: number; // max, optional
+  [key: string]: unknown;
 }
 
 export interface DeviceData {
-  nodes: DeviceValue[];
+  readonly nodes: readonly DeviceValue[];
 }
 
 export interface DeviceEntity {
@@ -188,13 +195,14 @@ export enum DeviceValueUOM {
   VOLTS,
   MBAR,
   LH,
-  CTKWH
+  CTKWH,
+  HZ
 }
 
 export const DeviceValueUOM_s = [
   '',
   '°C',
-  '°C',
+  '°C Rel',
   '%',
   'l/min',
   'kWh',
@@ -218,12 +226,12 @@ export const DeviceValueUOM_s = [
   'V',
   'mbar',
   'l/h',
-  'ct/kWh'
-];
+  'ct/kWh',
+  'Hz'
+] as const;
 
 export enum AnalogType {
   REMOVED = -1,
-  NOTUSED = 0,
   DIGITAL_IN = 1,
   COUNTER = 2,
   ADC = 3,
@@ -232,29 +240,45 @@ export enum AnalogType {
   DIGITAL_OUT = 6,
   PWM_0 = 7,
   PWM_1 = 8,
-  PWM_2 = 9
+  PWM_2 = 9,
+  NTC = 10,
+  RGB = 11,
+  PULSE = 12,
+  FREQ_0 = 13,
+  FREQ_1 = 14,
+  FREQ_2 = 15,
+  CNT_0 = 16,
+  CNT_1 = 17,
+  CNT_2 = 18
 }
 
 export const AnalogTypeNames = [
-  '(disabled)',
-  'Digital In',
-  'Counter',
-  'ADC',
-  'Timer',
-  'Rate',
-  'Digital Out',
-  'PWM 0',
-  'PWM 1',
-  'PWM 2'
-];
+  'Digital In', // 1
+  'Counter', // 2
+  'ADC In', // 3
+  'Timer', // 4
+  'Rate', // 5
+  'Digital Out', // 6
+  'PWM 0', // 7
+  'PWM 1', // 8
+  'PWM 2', // 9
+  'NTC Temp', // 10
+  'RGB Led', // 11
+  'Pulse', // 12
+  'Freq 0', // 13
+  'Freq 1', // 14
+  'Freq 2', // 15
+  'Counter 0', // 16
+  'Counter 1', // 17
+  'Counter 2' // 18
+] as const;
 
-type BoardProfiles = Record<string, string>;
-
-export const BOARD_PROFILES: BoardProfiles = {
+export const BOARD_PROFILES = {
   S32: 'BBQKees Gateway S32',
   S32S3: 'BBQKees Gateway S3',
   E32: 'BBQKees Gateway E32',
   E32V2: 'BBQKees Gateway E32 V2',
+  E32V2_2: 'BBQKees Gateway E32 V2.2',
   NODEMCU: 'NodeMCU 32S',
   'MH-ET': 'MH-ET Live D1 Mini',
   LOLIN: 'Lolin D32',
@@ -263,7 +287,9 @@ export const BOARD_PROFILES: BoardProfiles = {
   C3MINI: 'Wemos C3 Mini',
   S2MINI: 'Wemos S2 Mini',
   S3MINI: 'Liligo S3'
-};
+} as const;
+
+export type BoardProfileKey = keyof typeof BOARD_PROFILES;
 
 export interface BoardProfile {
   board_profile: string;
@@ -300,6 +326,7 @@ export interface WriteAnalogSensor {
   uom: number;
   type: number;
   deleted: boolean;
+  is_system: boolean;
 }
 
 export enum DeviceEntityMask {
@@ -331,7 +358,7 @@ export interface ScheduleItem {
 }
 
 export interface Schedule {
-  schedule: ScheduleItem[];
+  readonly schedule: readonly ScheduleItem[];
 }
 
 export interface ModuleItem {
@@ -349,7 +376,7 @@ export interface ModuleItem {
 }
 
 export interface Modules {
-  modules: ModuleItem[];
+  readonly modules: readonly ModuleItem[];
 }
 
 export enum ScheduleFlag {
@@ -380,6 +407,7 @@ export interface EntityItem {
   value_type: number;
   value?: unknown;
   writeable: boolean;
+  hide: boolean;
   deleted?: boolean;
   o_id?: number;
   o_ram?: number;
@@ -393,10 +421,11 @@ export interface EntityItem {
   o_deleted?: boolean;
   o_writeable?: boolean;
   o_value?: unknown;
+  o_hide?: boolean;
 }
 
 export interface Entities {
-  entities: EntityItem[];
+  readonly entities: readonly EntityItem[];
 }
 
 // matches emsdevice.h DeviceType
@@ -452,4 +481,4 @@ export const DeviceValueTypeNames = [
   'ENUM',
   'RAW',
   'CMD'
-];
+] as const;

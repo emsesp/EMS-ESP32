@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { memo, useEffect } from 'react';
 
 import CloseIcon from '@mui/icons-material/Close';
 import {
@@ -40,7 +40,7 @@ const GenerateToken = ({ username, onClose }: GenerateTokenProps) => {
     if (open) {
       void generateToken();
     }
-  }, [open]);
+  }, [open, generateToken]);
 
   return (
     <Dialog
@@ -86,4 +86,4 @@ const GenerateToken = ({ username, onClose }: GenerateTokenProps) => {
   );
 };
 
-export default GenerateToken;
+export default memo(GenerateToken);

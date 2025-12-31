@@ -1,8 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import AddIcon from '@mui/icons-material/Add';
 import CancelIcon from '@mui/icons-material/Cancel';
+import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
 import DoneIcon from '@mui/icons-material/Done';
+import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import InsertCommentOutlinedIcon from '@mui/icons-material/InsertCommentOutlined';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
 import {
   Box,
@@ -12,7 +16,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid2 as Grid,
+  Grid,
   InputAdornment,
   MenuItem,
   TextField
@@ -28,6 +32,19 @@ import { validate } from 'validators';
 
 import { DeviceValueType, DeviceValueTypeNames, DeviceValueUOM_s } from './types';
 import type { EntityItem } from './types';
+
+// Constant value type options for the dropdown
+const VALUE_TYPE_OPTIONS = [
+  DeviceValueType.BOOL,
+  DeviceValueType.INT8,
+  DeviceValueType.UINT8,
+  DeviceValueType.INT16,
+  DeviceValueType.UINT16,
+  DeviceValueType.UINT24,
+  DeviceValueType.TIME,
+  DeviceValueType.UINT32,
+  DeviceValueType.STRING
+] as const;
 
 interface CustomEntitiesDialogProps {
   open: boolean;
@@ -51,61 +68,97 @@ const CustomEntitiesDialog = ({
   const { LL } = useI18nContext();
   const [editItem, setEditItem] = useState<EntityItem>(selectedItem);
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
-  const updateFormValue = updateValue(setEditItem);
+  const updateFormValue = useMemo(
+    () =>
+      updateValue(
+        setEditItem as unknown as React.Dispatch<
+          React.SetStateAction<Record<string, unknown>>
+        >
+      ),
+    []
+  );
 
   useEffect(() => {
     if (open) {
       setFieldErrors(undefined);
-      setEditItem(selectedItem);
-      // convert to hex strings straight away
+      // Convert to hex strings - combined into single setEditItem call
+      const deviceIdHex =
+        typeof selectedItem.device_id === 'number'
+          ? selectedItem.device_id.toString(16).toUpperCase()
+          : selectedItem.device_id;
+      const typeIdHex =
+        typeof selectedItem.type_id === 'number'
+          ? selectedItem.type_id.toString(16).toUpperCase()
+          : selectedItem.type_id;
+      const factorValue =
+        selectedItem.value_type === DeviceValueType.BOOL &&
+        typeof selectedItem.factor === 'number'
+          ? selectedItem.factor.toString(16).toUpperCase()
+          : selectedItem.factor;
+
       setEditItem({
         ...selectedItem,
-        device_id: selectedItem.device_id.toString(16).toUpperCase(),
-        type_id: selectedItem.type_id.toString(16).toUpperCase(),
-        factor:
-          selectedItem.value_type === DeviceValueType.BOOL
-            ? selectedItem.factor.toString(16).toUpperCase()
-            : selectedItem.factor
+        device_id: deviceIdHex,
+        type_id: typeIdHex,
+        factor: factorValue
       });
     }
   }, [open, selectedItem]);
 
-  const handleClose = (_event, reason: 'backdropClick' | 'escapeKeyDown') => {
-    if (reason !== 'backdropClick') {
-      onClose();
-    }
-  };
+  const handleClose = useCallback(
+    (_event: React.SyntheticEvent, reason: 'backdropClick' | 'escapeKeyDown') => {
+      if (reason !== 'backdropClick') {
+        onClose();
+      }
+    },
+    [onClose]
+  );
 
-  const save = async () => {
+  const save = useCallback(async () => {
     try {
       setFieldErrors(undefined);
       await validate(validator, editItem);
-      if (typeof editItem.device_id === 'string') {
-        editItem.device_id = parseInt(editItem.device_id, 16);
+
+      // Create a copy to avoid mutating the state directly
+      const processedItem: EntityItem = { ...editItem };
+
+      if (typeof processedItem.device_id === 'string') {
+        processedItem.device_id = Number.parseInt(processedItem.device_id, 16);
       }
-      if (typeof editItem.type_id === 'string') {
-        editItem.type_id = parseInt(editItem.type_id, 16);
+      if (typeof processedItem.type_id === 'string') {
+        processedItem.type_id = Number.parseInt(processedItem.type_id, 16);
       }
       if (
-        editItem.value_type === DeviceValueType.BOOL &&
-        typeof editItem.factor === 'string'
+        processedItem.value_type === DeviceValueType.BOOL &&
+        typeof processedItem.factor === 'string'
       ) {
-        editItem.factor = parseInt(editItem.factor, 16);
+        processedItem.factor = Number.parseInt(processedItem.factor, 16);
       }
-      onSave(editItem);
+      onSave(processedItem);
     } catch (error) {
       setFieldErrors(error as ValidateFieldsError);
     }
-  };
+  }, [validator, editItem, onSave]);
 
-  const remove = () => {
-    editItem.deleted = true;
-    onSave(editItem);
-  };
+  const remove = useCallback(() => {
+    const itemWithDeleted = { ...editItem, deleted: true };
+    onSave(itemWithDeleted);
+  }, [editItem, onSave]);
 
-  const dup = () => {
+  const dup = useCallback(() => {
     onDup(editItem);
-  };
+  }, [editItem, onDup]);
+
+  // Memoize UOM menu items to avoid recreating on every render
+  const uomMenuItems = useMemo(
+    () =>
+      DeviceValueUOM_s.map((val, i) => (
+        <MenuItem key={val} value={i}>
+          {val}
+        </MenuItem>
+      )),
+    []
+  );
 
   return (
     <Dialog sx={dialogStyle} open={open} onClose={handleClose}>
@@ -113,19 +166,30 @@ const CustomEntitiesDialog = ({
         {creating ? LL.ADD(1) + ' ' + LL.NEW(1) : LL.EDIT()}&nbsp;{LL.ENTITY()}
       </DialogTitle>
       <DialogContent dividers>
-        <Box display="flex" flexWrap="wrap" mb={1}>
-          <Box flexWrap="nowrap" whiteSpace="nowrap" />
-        </Box>
         <Grid container spacing={2} rowSpacing={0}>
           <Grid size={12}>
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="name"
               label={LL.NAME(0)}
               value={editItem.name}
               margin="normal"
               fullWidth
               onChange={updateFormValue}
+            />
+          </Grid>
+          <Grid mt={3}>
+            <BlockFormControlLabel
+              control={
+                <Checkbox
+                  icon={<InsertCommentOutlinedIcon htmlColor="white" />}
+                  checkedIcon={<CommentsDisabledOutlinedIcon color="primary" />}
+                  checked={editItem.hide}
+                  onChange={updateFormValue}
+                  name="hide"
+                />
+              }
+              label="API/MQTT"
             />
           </Grid>
           <Grid>
@@ -166,21 +230,19 @@ const CustomEntitiesDialog = ({
                   onChange={updateFormValue}
                   select
                 >
-                  {DeviceValueUOM_s.map((val, i) => (
-                    <MenuItem key={val} value={i}>
-                      {val}
-                    </MenuItem>
-                  ))}
+                  {uomMenuItems}
                 </TextField>
               </Grid>
             </>
           )}
           {editItem.ram === 0 && (
             <>
-              <Grid mt={3} size={9}>
+              <Grid mt={3}>
                 <BlockFormControlLabel
                   control={
                     <Checkbox
+                      icon={<EditOffOutlinedIcon color="primary" />}
+                      checkedIcon={<EditOutlinedIcon htmlColor="white" />}
                       checked={editItem.writeable}
                       onChange={updateFormValue}
                       name="writeable"
@@ -191,7 +253,7 @@ const CustomEntitiesDialog = ({
               </Grid>
               <Grid>
                 <ValidatedTextField
-                  fieldErrors={fieldErrors}
+                  fieldErrors={fieldErrors || {}}
                   name="device_id"
                   label={LL.ID_OF(LL.DEVICE())}
                   margin="normal"
@@ -211,7 +273,7 @@ const CustomEntitiesDialog = ({
               </Grid>
               <Grid>
                 <ValidatedTextField
-                  fieldErrors={fieldErrors}
+                  fieldErrors={fieldErrors || {}}
                   name="type_id"
                   label={LL.ID_OF(LL.TYPE(1))}
                   margin="normal"
@@ -231,7 +293,7 @@ const CustomEntitiesDialog = ({
               </Grid>
               <Grid>
                 <ValidatedTextField
-                  fieldErrors={fieldErrors}
+                  fieldErrors={fieldErrors || {}}
                   name="offset"
                   label={LL.OFFSET()}
                   margin="normal"
@@ -252,33 +314,11 @@ const CustomEntitiesDialog = ({
                   margin="normal"
                   select
                 >
-                  <MenuItem value={DeviceValueType.BOOL}>
-                    {DeviceValueTypeNames[DeviceValueType.BOOL]}
-                  </MenuItem>
-                  <MenuItem value={DeviceValueType.INT8}>
-                    {DeviceValueTypeNames[DeviceValueType.INT8]}
-                  </MenuItem>
-                  <MenuItem value={DeviceValueType.UINT8}>
-                    {DeviceValueTypeNames[DeviceValueType.UINT8]}
-                  </MenuItem>
-                  <MenuItem value={DeviceValueType.INT16}>
-                    {DeviceValueTypeNames[DeviceValueType.INT16]}
-                  </MenuItem>
-                  <MenuItem value={DeviceValueType.UINT16}>
-                    {DeviceValueTypeNames[DeviceValueType.UINT16]}
-                  </MenuItem>
-                  <MenuItem value={DeviceValueType.UINT24}>
-                    {DeviceValueTypeNames[DeviceValueType.UINT24]}
-                  </MenuItem>
-                  <MenuItem value={DeviceValueType.TIME}>
-                    {DeviceValueTypeNames[DeviceValueType.TIME]}
-                  </MenuItem>
-                  <MenuItem value={DeviceValueType.UINT32}>
-                    {DeviceValueTypeNames[DeviceValueType.UINT32]}
-                  </MenuItem>
-                  <MenuItem value={DeviceValueType.STRING}>
-                    {DeviceValueTypeNames[DeviceValueType.STRING]}
-                  </MenuItem>
+                  {VALUE_TYPE_OPTIONS.map((valueType) => (
+                    <MenuItem key={valueType} value={valueType}>
+                      {DeviceValueTypeNames[valueType]}
+                    </MenuItem>
+                  ))}
                 </TextField>
               </Grid>
 
@@ -310,11 +350,7 @@ const CustomEntitiesDialog = ({
                         onChange={updateFormValue}
                         select
                       >
-                        {DeviceValueUOM_s.map((val, i) => (
-                          <MenuItem key={val} value={i}>
-                            {val}
-                          </MenuItem>
-                        ))}
+                        {uomMenuItems}
                       </TextField>
                     </Grid>
                   </>
@@ -323,7 +359,7 @@ const CustomEntitiesDialog = ({
                 editItem.device_id !== '0' && (
                   <Grid>
                     <ValidatedTextField
-                      fieldErrors={fieldErrors}
+                      fieldErrors={fieldErrors || {}}
                       name="factor"
                       label={LL.BYTES()}
                       value={numberValue(editItem.factor as number)}
@@ -341,7 +377,7 @@ const CustomEntitiesDialog = ({
               {editItem.value_type === DeviceValueType.BOOL && (
                 <Grid>
                   <ValidatedTextField
-                    fieldErrors={fieldErrors}
+                    fieldErrors={fieldErrors || {}}
                     name="factor"
                     label={LL.BITMASK()}
                     value={editItem.factor as string}

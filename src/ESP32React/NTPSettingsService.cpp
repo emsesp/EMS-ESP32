@@ -25,7 +25,7 @@ void NTPSettingsService::WiFiEvent(WiFiEvent_t event) {
     switch (event) {
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
     case ARDUINO_EVENT_ETH_DISCONNECTED:
-        if (_connected) {
+        if (_connected && emsesp::EMSESP::system_.ntp_connected()) {
             emsesp::EMSESP::logger().info("WiFi connection dropped, stopping NTP");
             _connected = false;
             configureNTP();

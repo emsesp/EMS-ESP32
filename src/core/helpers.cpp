@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,12 +34,19 @@ char * Helpers::hextoa(char * result, const uint8_t value) {
 }
 
 // same as hextoa but uses to a hex std::string
+// Optimized: Avoid string concatenation to reduce temporary allocations
 std::string Helpers::hextoa(const uint8_t value, bool prefix) {
-    char buf[3];
     if (prefix) {
-        return std::string("0x") + hextoa(buf, value);
+        char buf[5]; // "0x" + 2 hex chars + null
+        buf[0] = '0';
+        buf[1] = 'x';
+        hextoa(&buf[2], value);
+        return std::string(buf);
+    } else {
+        char buf[3];
+        hextoa(buf, value);
+        return std::string(buf);
     }
-    return std::string(hextoa(buf, value));
 }
 
 // same for 16 bit values
@@ -53,12 +60,19 @@ char * Helpers::hextoa(char * result, const uint16_t value) {
 }
 
 // same as above but to a hex string
+// Optimized: Avoid string concatenation to reduce temporary allocations
 std::string Helpers::hextoa(const uint16_t value, bool prefix) {
-    char buf[5];
     if (prefix) {
-        return std::string("0x") + hextoa(buf, value);
+        char buf[7]; // "0x" + 4 hex chars + null
+        buf[0] = '0';
+        buf[1] = 'x';
+        hextoa(&buf[2], value);
+        return std::string(buf);
+    } else {
+        char buf[5];
+        hextoa(buf, value);
+        return std::string(buf);
     }
-    return std::string(hextoa(buf, value));
 }
 
 #ifdef EMSESP_STANDALONE
@@ -100,29 +114,34 @@ char * Helpers::ultostr(char * ptr, uint32_t value, const uint8_t base) {
 
 // fast itoa returning a std::string
 // http://www.strudel.org.uk/itoa/
+// Optimized: Use stack buffer to avoid heap allocation, then create string once
 std::string Helpers::itoa(int16_t value) {
-    std::string buf;
-    buf.reserve(25); // Pre-allocate enough space.
-    int quotient = value;
+    // int16_t max: -32768 to 32767 = max 6 chars + null
+    char   buf[8];
+    char * p = buf + sizeof(buf) - 1;
+    *p       = '\0';
 
+    bool    negative = value < 0;
+    int32_t abs_val  = negative ? -(int32_t)value : value; // cast to int32 to handle -32768
+
+    // Build string in reverse
     do {
-        buf += "0123456789abcdef"[std::abs(quotient % 10)];
-        quotient /= 10;
-    } while (quotient);
+        *--p = '0' + (abs_val % 10);
+        abs_val /= 10;
+    } while (abs_val > 0);
 
-    // Append the negative sign
-    if (value < 0)
-        buf += '-';
+    if (negative) {
+        *--p = '-';
+    }
 
-    std::reverse(buf.begin(), buf.end());
-    return buf;
+    return std::string(p);
 }
 
 /*
- * fast itoa
- * written by Lukás Chmela, Released under GPLv3. http://www.strudel.org.uk/itoa/ version 0.4
- * optimized for ESP32
- */
+  * fast itoa
+  * written by Lukás Chmela, Released under GPLv3. http://www.strudel.org.uk/itoa/ version 0.4
+  * optimized for ESP32
+  */
 char * Helpers::itoa(int32_t value, char * result, const uint8_t base) {
     // check that the base if valid
     if (base < 2 || base > 36) {
@@ -381,17 +400,106 @@ char * Helpers::render_value(char * result, const uint32_t value, const int8_t f
     return result;
 }
 
+// convert special Latin1 characters to UTF8
+char * Helpers::render_string(char * result, const char * c, const uint8_t len) {
+    char * p = result;
+    while (*c != '\0' && (p - result < len)) {
+        switch ((uint8_t)*c) {
+        case 0xC4: // Ä
+            *p     = 0xC3;
+            *(++p) = 0x84;
+            break;
+        case 0xD6: // Ö
+            *p     = 0xC3;
+            *(++p) = 0x96;
+            break;
+        case 0xDC: // Ü
+            *p     = 0xC3;
+            *(++p) = 0x9C;
+            break;
+        case 0xDF: // ß
+            *p     = 0xC3;
+            *(++p) = 0x9F;
+            break;
+        case 0xE4: // ä
+            *p     = 0xC3;
+            *(++p) = 0xA4;
+            break;
+        case 0xF6: // ö
+            *p     = 0xC3;
+            *(++p) = 0xB6;
+            break;
+        case 0xFC: // ü
+            *p     = 0xC3;
+            *(++p) = 0xBC;
+            break;
+        case 0xF0: // greek capital Xi, used for boiler servicecode dhw+heat
+            *p     = 0xCE;
+            *(++p) = 0x9E;
+            break;
+        default:
+            *p = (*c & 0x80) ? '?' : *c;
+            break;
+        }
+        c++;
+        p++;
+    }
+    *p = '\0'; // terminate result
+    return result;
+}
+
+char * Helpers::utf8tolatin1(char * result, const char * c, const uint8_t len) {
+    char * p = result;
+    while (*c != '\0' && (p - result < len)) {
+        if ((uint8_t)*c == 0xC3) {
+            c++;
+            switch ((uint8_t)*c) {
+            case 0x84: // Ä
+                *p = 0xC4;
+                break;
+            case 0x96: // Ö
+                *p = 0xD6;
+                break;
+            case 0x9C: // Ü
+                *p = 0xDC;
+                break;
+            case 0x9F: // ß
+                *p = 0xDF;
+                break;
+            case 0xA4: // ä
+                *p = 0xE4;
+                break;
+            case 0xB6: // ö
+                *p = 0xF6;
+                break;
+            case 0xBC: // ü
+                *p = 0xFC;
+                break;
+            default:
+                break;
+            }
+        } else if ((uint8_t)*c > 127) {
+            *p = '?';
+        } else {
+            *p = *c;
+        }
+        c++;
+        p++;
+    }
+    *p = '\0'; // terminate result
+    return result;
+}
 // creates string of hex values from an array of bytes
 std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
     if (length == 0) {
         return "<empty>";
     }
 
-    char str[length * 3];
-    memset(str, 0, sizeof(str));
+    std::vector<char> str(length * 3);
+    memset(str.data(), 0, str.size());
 
     char   buffer[4];
-    char * p = &str[0];
+    char * p = str.data();
     for (uint8_t i = 0; i < length; i++) {
         Helpers::hextoa(buffer, data[i]);
         *p++ = buffer[0];
@@ -400,7 +508,7 @@ std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
     }
     *--p = '\0'; // null terminate just in case, loosing the trailing space
 
-    return std::string(str);
+    return std::string(str.data());
 }
 
 // takes a hex string and convert it to an unsigned 32bit number (max 8 hex digits)
@@ -524,7 +632,12 @@ bool Helpers::value2number(const char * value, int & value_i, const int min, con
         return false;
     }
 
-    value_i = atoi(value);
+    if (strlen(value) > 2 && value[0] == '0' && value[1] == 'x') {
+        value_i = hextoint(value);
+    } else {
+        value_i = atoi(value);
+    }
+
     if (value_i >= min && value_i <= max) {
         return true;
     }
@@ -583,6 +696,7 @@ bool Helpers::value2string(const char * value, std::string & value_s) {
 
 // checks to see if a string (usually a command or payload cmd) looks like a boolean
 // on, off, true, false, 1, 0
+// uses translated words for on/off
 bool Helpers::value2bool(const char * value, bool & value_b) {
     if ((value == nullptr) || (strlen(value) == 0)) {
         return false;
@@ -603,7 +717,7 @@ bool Helpers::value2bool(const char * value, bool & value_b) {
     }
 
 #ifdef EMSESP_STANDALONE
-    emsesp::EMSESP::logger().debug("Error. value2bool: %s is not a boolean", value);
+    EMSESP::logger().debug("Error. value2bool: %s is not a boolean", value);
 #endif
 
     return false; // not a bool
@@ -627,8 +741,16 @@ bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * co
         }
     }
     value_ui = 0;
-
     return false;
+}
+
+bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * const ** strs, const std::vector<uint8_t> & mask) {
+    uint8_t v = value_ui;
+    if (!value2enum(value, v, strs) || v >= mask.size()) {
+        return false;
+    }
+    value_ui = mask[v];
+    return true;
 }
 
 // finds the string (value) of a list vector (strs)
@@ -658,6 +780,15 @@ bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * co
     return false;
 }
 
+bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * const * strs, const std::vector<uint8_t> & mask) {
+    uint8_t v = value_ui;
+    if (!value2enum(value, v, strs) || v >= mask.size()) {
+        return false;
+    }
+    value_ui = mask[v];
+    return true;
+}
+
 // https://stackoverflow.com/questions/313970/how-to-convert-stdstring-to-lower-case
 std::string Helpers::toLower(std::string const & s) {
     std::string lc = s;
@@ -676,8 +807,8 @@ std::string Helpers::toUpper(std::string const & s) {
 }
 
 // capitalizes one UTF-8 character in char array
-// works with Latin1 (1 byte), Polish amd some other (2 bytes) characters
-// TODO add special characters that occur in other supported languages
+// works with Latin1 (1 byte), Polish and other (2 bytes) characters
+// supports special characters for all 11 supported languages: EN, DE, NL, SV, PL, NO, FR, TR, IT, SK, CZ
 #if defined(EMSESP_STANDALONE)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wtype-limits"
@@ -692,23 +823,77 @@ void Helpers::CharToUpperUTF8(char * c) {
         if ((p_v >= (char)0xA0) && (p_v <= (char)0xBE)) {
             *p -= 0x20;
         }
+        // Additional special characters for supported languages
+        switch (p_v) {
+        case (char)0xA0: // à -> À
+        case (char)0xA1: // á -> Á
+        case (char)0xA2: // â -> Â
+        case (char)0xA3: // ã -> Ã
+        case (char)0xA4: // ä -> Ä (German, Swedish)
+        case (char)0xA5: // å -> Å (Swedish, Norwegian)
+        case (char)0xA6: // æ -> Æ (Norwegian)
+        case (char)0xA7: // ç -> Ç (French, Turkish)
+        case (char)0xA8: // è -> È (French, Italian)
+        case (char)0xA9: // é -> É (French, Italian)
+        case (char)0xAA: // ê -> Ê (French)
+        case (char)0xAB: // ë -> Ë (French)
+        case (char)0xAC: // ì -> Ì (Italian)
+        case (char)0xAD: // í -> Í (Slovak, Czech)
+        case (char)0xAE: // î -> Î (French)
+        case (char)0xAF: // ï -> Ï (French)
+        case (char)0xB0: // ð -> Ð (Icelandic)
+        case (char)0xB1: // ñ -> Ñ (Spanish)
+        case (char)0xB2: // ò -> Ò (Italian)
+        case (char)0xB3: // ó -> Ó (Slovak, Czech)
+        case (char)0xB4: // ô -> Ô (French, Slovak)
+        case (char)0xB5: // õ -> Õ (Portuguese)
+        case (char)0xB6: // ö -> Ö (German, Swedish, Turkish)
+        case (char)0xB8: // ø -> Ø (Norwegian)
+        case (char)0xB9: // ù -> Ù (French, Italian)
+        case (char)0xBA: // ú -> Ú (Slovak, Czech)
+        case (char)0xBB: // û -> Û (French)
+        case (char)0xBC: // ü -> Ü (German, French, Turkish)
+        case (char)0xBD: // ý -> Ý (Slovak, Czech)
+        case (char)0xBE: // þ -> Þ (Icelandic)
+        case (char)0xBF: // ÿ -> Ÿ (French)
+            *p -= 0x20;
+            break;
+        }
         break;
     case (char)0xC4:
         switch (p_v) {
-        case (char)0x85: //ą (0xC4,0x85) -> Ą (0xC4,0x84)
-        case (char)0x87: //ć (0xC4,0x87) -> Ć (0xC4,0x86)
-        case (char)0x99: //ę (0xC4,0x99) -> Ę (0xC4,0x98)
+        case (char)0x85: //ą (0xC4,0x85) -> Ą (0xC4,0x84) (Polish)
+        case (char)0x87: //ć (0xC4,0x87) -> Ć (0xC4,0x86) (Polish)
+        case (char)0x8D: //č (0xC4,0x8D) -> Č (0xC4,0x8C) (Slovak, Czech)
+        case (char)0x8F: //ď (0xC4,0x8F) -> Ď (0xC4,0x8E) (Slovak, Czech)
+        case (char)0x9F: //ğ (0xC4,0x9F) -> Ğ (0xC4,0x9E) (Turkish)
+        case (char)0x99: //ę (0xC4,0x99) -> Ę (0xC4,0x98) (Polish)
+        case (char)0x9B: //ě (0xC4,0x9B) -> Ě (0xC4,0x9A) (Czech)
+        case (char)0xAF: //ı (0xC4,0xAF) -> I (0xC4,0xAE) (Turkish)
+        case (char)0xB1: //ı (0xC4,0xB1) -> I (0xC4,0xB0) (Turkish)
+        case (char)0xB3: //ĳ (0xC4,0xB3) -> Ĳ (0xC4,0xB2) (Dutch)
             *p -= 1;
             break;
         }
         break;
     case (char)0xC5:
         switch (p_v) {
-        case (char)0x82: //ł (0xC5,0x82) -> Ł (0xC5,0x81)
-        case (char)0x84: //ń (0xC5,0x84) -> Ń (0xC5,0x83)
-        case (char)0x9B: //ś (0xC5,0x9B) -> Ś (0xC5,0x9A)
-        case (char)0xBA: //ź (0xC5,0xBA) -> Ź (0xC5,0xB9)
-        case (char)0xBC: //ż (0xC5,0xBC) -> Ż (0xC5,0xBB)
+        case (char)0x81: //ł (0xC5,0x81) -> Ł (0xC5,0x80) (Polish)
+        case (char)0x82: //ł (0xC5,0x82) -> Ł (0xC5,0x81) (Polish)
+        case (char)0x83: //ń (0xC5,0x83) -> Ń (0xC5,0x82) (Polish)
+        case (char)0x84: //ń (0xC5,0x84) -> Ń (0xC5,0x83) (Polish)
+        case (char)0x88: //ň (0xC5,0x88) -> Ň (0xC5,0x87) (Slovak, Czech)
+        case (char)0x95: //ŕ (0xC5,0x95) -> Ŕ (0xC5,0x94) (Slovak)
+        case (char)0x99: //ř (0xC5,0x99) -> Ř (0xC5,0x98) (Czech)
+        case (char)0x9A: //ś (0xC5,0x9A) -> Ś (0xC5,0x99) (Polish)
+        case (char)0x9B: //ś (0xC5,0x9B) -> Ś (0xC5,0x9A) (Polish)
+        case (char)0x9F: //ş (0xC5,0x9F) -> Ş (0xC5,0x9E) (Turkish)
+        case (char)0xA1: //š (0xC5,0xA1) -> Š (0xC5,0xA0) (Slovak, Czech)
+        case (char)0xA5: //ť (0xC5,0xA5) -> Ť (0xC5,0xA4) (Slovak, Czech)
+        case (char)0xAF: //ů (0xC5,0xAF) -> Ů (0xC5,0xAE) (Czech)
+        case (char)0xBA: //ź (0xC5,0xBA) -> Ź (0xC5,0xB9) (Polish)
+        case (char)0xBC: //ż (0xC5,0xBC) -> Ż (0xC5,0xBB) (Polish)
+        case (char)0xBE: //ž (0xC5,0xBE) -> Ž (0xC5,0xBD) (Slovak, Czech)
             *p -= 1;
             break;
         }

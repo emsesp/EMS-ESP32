@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,8 +24,10 @@
  */
 
 // Boilers - 0x08
-{  8, DeviceType::BOILER, "CS*800i, Logatherm WLW*", DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
+{  8, DeviceType::BOILER, "CS5800i, CS6800i, WLW176i, WLW186i", DeviceFlags::EMS_DEVICE_FLAG_CS6800},
+{ 11, DeviceType::BOILER, "Greenstar 2000", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 12, DeviceType::BOILER, "C1200W", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{ 16, DeviceType::BOILER, "CS5800iG", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 64, DeviceType::BOILER, "BK13/BK15, Smartline, GB1*2", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 72, DeviceType::BOILER, "Logano GB1*5, Logamatic MC10", DeviceFlags::EMS_DEVICE_FLAG_EMS},
 { 81, DeviceType::BOILER, "Cascade CM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
@@ -127,7 +129,7 @@
 // Thermostat remote - 0x38
 {  3, DeviceType::THERMOSTAT, "RT800, RC220", DeviceFlags::EMS_DEVICE_FLAG_RC100H},
 {200, DeviceType::THERMOSTAT, "RC100H, CR10H", DeviceFlags::EMS_DEVICE_FLAG_RC100H},
-{249, DeviceType::THERMOSTAT, "TR120RF, CR20RF", DeviceFlags::EMS_DEVICE_FLAG_RC100H},
+{249, DeviceType::THERMOSTAT, "RC120RF, TR120RF, CR20RF", DeviceFlags::EMS_DEVICE_FLAG_RC100H},
 
 // Solar Modules - 0x30 (for solar), 0x2A, 0x41 (for ww)
 { 73, DeviceType::SOLAR, "SM10", DeviceFlags::EMS_DEVICE_FLAG_SM10},
@@ -138,6 +140,7 @@
 {164, DeviceType::SOLAR, "SM200, MS200", DeviceFlags::EMS_DEVICE_FLAG_SM100},
 
 // Mixer Modules - 0x20-0x27 for HC, 0x28-0x29 for WWC and 0x11 for the MP100
+{  8, DeviceType::MIXER, "XCUMixer", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS}, // integrated in XCU_THH (CS6800, etc.)
 { 69, DeviceType::MIXER, "MM10", DeviceFlags::EMS_DEVICE_FLAG_MM10},
 {100, DeviceType::MIXER, "IPM", DeviceFlags::EMS_DEVICE_FLAG_IPM},
 {102, DeviceType::MIXER, "IPM2", DeviceFlags::EMS_DEVICE_FLAG_IPM},
@@ -153,9 +156,10 @@
 
 // Heat Pumps - 0x53
 {248, DeviceType::HEATPUMP, "Hybrid Manager HM200", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{16, DeviceType::HEATPUMP, "CSH5800iG", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Ventilation - 0x51
-{231, DeviceType::VENTILATION, "Logavent HRV176", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{231, DeviceType::VENTILATION, "HRV176, HRV156, 5000c, MV200", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Heatsource - 0x60
 {228, DeviceType::HEATSOURCE, "AM200", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // alternative heatsource
@@ -198,7 +202,8 @@
 {161, DeviceType::WATER, "MM200", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
 {163, DeviceType::WATER, "SM100, MS100", DeviceFlags::EMS_DEVICE_FLAG_SM100},
 {164, DeviceType::WATER, "SM200, MS200", DeviceFlags::EMS_DEVICE_FLAG_SM100},
-{248, DeviceType::MIXER, "HM210", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS}
+{248, DeviceType::MIXER, "HM210", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
+{17, DeviceType::CONNECT, "MX400", DeviceFlags::EMS_DEVICE_FLAG_NONE} // 0x50 Wireless Base
 // {157, DeviceType::THERMOSTAT, "RC120", DeviceFlags::EMS_DEVICE_FLAG_CR120}
 #endif
 

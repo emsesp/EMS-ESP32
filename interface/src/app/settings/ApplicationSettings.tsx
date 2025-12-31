@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -9,7 +9,7 @@ import {
   Button,
   Checkbox,
   Divider,
-  Grid2 as Grid,
+  Grid,
   InputAdornment,
   MenuItem,
   TextField,
@@ -37,13 +37,13 @@ import { validate } from 'validators';
 
 import { API, getBoardProfile, readSettings, writeSettings } from '../../api/app';
 import { BOARD_PROFILES } from '../main/types';
-import type { APIcall, Settings } from '../main/types';
+import type { APIcall, BoardProfileKey, Settings } from '../main/types';
 import { createSettingsValidator } from '../main/validators';
 
 export function boardProfileSelectItems() {
   return Object.keys(BOARD_PROFILES).map((code) => (
     <MenuItem key={code} value={code}>
-      {BOARD_PROFILES[code]}
+      {BOARD_PROFILES[code as BoardProfileKey]}
     </MenuItem>
   ));
 }
@@ -72,10 +72,10 @@ const ApplicationSettings = () => {
   const { LL } = useI18nContext();
 
   const updateFormValue = updateValueDirty(
-    origData,
+    origData as unknown as Record<string, unknown>,
     dirtyFlags,
     setDirtyFlags,
-    updateDataValue
+    updateDataValue as (value: unknown) => void
   );
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
@@ -106,50 +106,61 @@ const ApplicationSettings = () => {
     });
   });
 
-  const doRestart = async () => {
+  // Memoized input props to prevent recreation on every render
+  const SecondsInputProps = useMemo(
+    () => ({
+      endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+    }),
+    [LL]
+  );
+
+  const MinutesInputProps = useMemo(
+    () => ({
+      endAdornment: <InputAdornment position="end">{LL.MINUTES()}</InputAdornment>
+    }),
+    [LL]
+  );
+
+  const HoursInputProps = useMemo(
+    () => ({
+      endAdornment: <InputAdornment position="end">{LL.HOURS()}</InputAdornment>
+    }),
+    [LL]
+  );
+
+  const doRestart = useCallback(async () => {
     setRestarting(true);
     await sendAPI({ device: 'system', cmd: 'restart', id: 0 }).catch(
       (error: Error) => {
         toast.error(error.message);
       }
     );
-  };
+  }, [sendAPI]);
 
-  const updateBoardProfile = async (board_profile: string) => {
-    await readBoardProfile(board_profile).catch((error: Error) => {
-      toast.error(error.message);
-    });
-  };
+  const updateBoardProfile = useCallback(
+    async (board_profile: string) => {
+      await readBoardProfile(board_profile).catch((error: Error) => {
+        toast.error(error.message);
+      });
+    },
+    [readBoardProfile]
+  );
 
   useLayoutTitle(LL.APPLICATION());
 
-  const SecondsInputProps = {
-    endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
-  };
-  const MinutesInputProps = {
-    endAdornment: <InputAdornment position="end">{LL.MINUTES()}</InputAdornment>
-  };
-  const HoursInputProps = {
-    endAdornment: <InputAdornment position="end">{LL.HOURS()}</InputAdornment>
-  };
-
-  const content = () => {
-    if (!data || !hardwareData) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+  const validateAndSubmit = useCallback(async () => {
+    try {
+      setFieldErrors(undefined);
+      await validate(createSettingsValidator(data), data);
+    } catch (error) {
+      setFieldErrors(error as ValidateFieldsError);
+    } finally {
+      await saveData();
     }
+  }, [data, saveData]);
 
-    const validateAndSubmit = async () => {
-      try {
-        setFieldErrors(undefined);
-        await validate(createSettingsValidator(data), data);
-      } catch (error) {
-        setFieldErrors(error as ValidateFieldsError);
-      } finally {
-        await saveData();
-      }
-    };
-
-    const changeBoardProfile = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const changeBoardProfile = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
       const boardProfile = event.target.value;
       updateFormValue(event);
       if (boardProfile === 'CUSTOM') {
@@ -160,12 +171,22 @@ const ApplicationSettings = () => {
       } else {
         void updateBoardProfile(boardProfile);
       }
-    };
+    },
+    [data, updateBoardProfile, updateFormValue, updateDataValue]
+  );
 
-    const restart = async () => {
-      await validateAndSubmit();
-      await doRestart();
-    };
+  const restart = useCallback(async () => {
+    await validateAndSubmit();
+    await doRestart();
+  }, [validateAndSubmit, doRestart]);
+
+  // Memoize board profile select items to prevent recreation
+  const boardProfileItems = useMemo(() => boardProfileSelectItems(), []);
+
+  const content = () => {
+    if (!data || !hardwareData) {
+      return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
+    }
 
     return (
       <>
@@ -219,7 +240,7 @@ const ApplicationSettings = () => {
           <Grid container spacing={2} rowSpacing={0}>
             <Grid>
               <ValidatedTextField
-                fieldErrors={fieldErrors}
+                fieldErrors={fieldErrors || {}}
                 name="modbus_max_clients"
                 label={LL.AP_MAX_CLIENTS()}
                 variant="outlined"
@@ -231,7 +252,7 @@ const ApplicationSettings = () => {
             </Grid>
             <Grid>
               <ValidatedTextField
-                fieldErrors={fieldErrors}
+                fieldErrors={fieldErrors || {}}
                 name="modbus_port"
                 label="Port"
                 variant="outlined"
@@ -243,7 +264,7 @@ const ApplicationSettings = () => {
             </Grid>
             <Grid>
               <ValidatedTextField
-                fieldErrors={fieldErrors}
+                fieldErrors={fieldErrors || {}}
                 name="modbus_timeout"
                 label="Timeout"
                 slotProps={{
@@ -273,7 +294,7 @@ const ApplicationSettings = () => {
           <Grid container spacing={2} rowSpacing={0}>
             <Grid>
               <ValidatedTextField
-                fieldErrors={fieldErrors}
+                fieldErrors={fieldErrors || {}}
                 name="syslog_host"
                 label="Host"
                 variant="outlined"
@@ -284,7 +305,7 @@ const ApplicationSettings = () => {
             </Grid>
             <Grid>
               <ValidatedTextField
-                fieldErrors={fieldErrors}
+                fieldErrors={fieldErrors || {}}
                 name="syslog_port"
                 label="Port"
                 variant="outlined"
@@ -307,15 +328,15 @@ const ApplicationSettings = () => {
               >
                 <MenuItem value={-1}>OFF</MenuItem>
                 <MenuItem value={3}>ERR</MenuItem>
+                <MenuItem value={4}>WARN</MenuItem>
                 <MenuItem value={5}>NOTICE</MenuItem>
                 <MenuItem value={6}>INFO</MenuItem>
-                <MenuItem value={7}>DEBUG</MenuItem>
                 <MenuItem value={9}>ALL</MenuItem>
               </TextField>
             </Grid>
             <Grid>
               <ValidatedTextField
-                fieldErrors={fieldErrors}
+                fieldErrors={fieldErrors || {}}
                 name="syslog_mark_interval"
                 label={LL.MARK_INTERVAL()}
                 slotProps={{
@@ -474,7 +495,7 @@ const ApplicationSettings = () => {
           margin="normal"
           select
         >
-          {boardProfileSelectItems()}
+          {boardProfileItems}
           <Divider />
           <MenuItem key={'CUSTOM'} value={'CUSTOM'}>
             {LL.CUSTOM()}&hellip;
@@ -485,7 +506,7 @@ const ApplicationSettings = () => {
             <Grid container spacing={2} rowSpacing={0}>
               <Grid>
                 <ValidatedTextField
-                  fieldErrors={fieldErrors}
+                  fieldErrors={fieldErrors || {}}
                   name="rx_gpio"
                   label={LL.GPIO_OF('Rx')}
                   fullWidth
@@ -498,7 +519,7 @@ const ApplicationSettings = () => {
               </Grid>
               <Grid>
                 <ValidatedTextField
-                  fieldErrors={fieldErrors}
+                  fieldErrors={fieldErrors || {}}
                   name="tx_gpio"
                   label={LL.GPIO_OF('Tx')}
                   fullWidth
@@ -511,7 +532,7 @@ const ApplicationSettings = () => {
               </Grid>
               <Grid>
                 <ValidatedTextField
-                  fieldErrors={fieldErrors}
+                  fieldErrors={fieldErrors || {}}
                   name="pbutton_gpio"
                   label={LL.GPIO_OF(LL.BUTTON())}
                   fullWidth
@@ -524,7 +545,7 @@ const ApplicationSettings = () => {
               </Grid>
               <Grid>
                 <ValidatedTextField
-                  fieldErrors={fieldErrors}
+                  fieldErrors={fieldErrors || {}}
                   name="dallas_gpio"
                   label={
                     LL.GPIO_OF(LL.TEMPERATURE()) + ' (0=' + LL.DISABLED(1) + ')'
@@ -539,7 +560,7 @@ const ApplicationSettings = () => {
               </Grid>
               <Grid>
                 <ValidatedTextField
-                  fieldErrors={fieldErrors}
+                  fieldErrors={fieldErrors || {}}
                   name="led_gpio"
                   label={LL.GPIO_OF('LED') + ' (0=' + LL.DISABLED(1) + ')'}
                   fullWidth
@@ -554,7 +575,7 @@ const ApplicationSettings = () => {
                 <Grid>
                   <TextField
                     name="led_type"
-                    label={'LED ' + LL.TYPE()}
+                    label={'LED ' + LL.TYPE(0)}
                     value={data.led_type}
                     fullWidth
                     variant="outlined"
@@ -581,6 +602,7 @@ const ApplicationSettings = () => {
                   <MenuItem value={0}>{LL.DISABLED(1)}</MenuItem>
                   <MenuItem value={1}>LAN8720</MenuItem>
                   <MenuItem value={2}>TLK110</MenuItem>
+                  <MenuItem value={3}>RTL8201</MenuItem>
                 </TextField>
               </Grid>
             </Grid>
@@ -743,7 +765,7 @@ const ApplicationSettings = () => {
         {data.remote_timeout_en && (
           <Box mt={2}>
             <ValidatedTextField
-              fieldErrors={fieldErrors}
+              fieldErrors={fieldErrors || {}}
               name="remote_timeout"
               label={LL.REMOTE_TIMEOUT()}
               slotProps={{
@@ -783,7 +805,7 @@ const ApplicationSettings = () => {
           {data.shower_timer && (
             <Grid>
               <ValidatedTextField
-                fieldErrors={fieldErrors}
+                fieldErrors={fieldErrors || {}}
                 name="shower_min_duration"
                 label={LL.MIN_DURATION()}
                 slotProps={{
@@ -801,7 +823,7 @@ const ApplicationSettings = () => {
             <>
               <Grid>
                 <ValidatedTextField
-                  fieldErrors={fieldErrors}
+                  fieldErrors={fieldErrors || {}}
                   name="shower_alert_trigger"
                   label={LL.TRIGGER_TIME()}
                   slotProps={{
@@ -817,7 +839,7 @@ const ApplicationSettings = () => {
               </Grid>
               <Grid>
                 <ValidatedTextField
-                  fieldErrors={fieldErrors}
+                  fieldErrors={fieldErrors || {}}
                   name="shower_alert_coldshot"
                   label={LL.COLD_SHOT_DURATION()}
                   slotProps={{
@@ -836,8 +858,9 @@ const ApplicationSettings = () => {
         </Grid>
 
         {restartNeeded && (
-          <MessageBox my={2} level="warning" message={LL.RESTART_TEXT(0)}>
+          <MessageBox level="warning" message={LL.RESTART_TEXT(0)}>
             <Button
+              sx={{ ml: 2 }}
               startIcon={<PowerSettingsNewIcon />}
               variant="contained"
               color="error"

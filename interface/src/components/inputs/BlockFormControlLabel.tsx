@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { FC } from 'react';
 
 import { FormControlLabel } from '@mui/material';
@@ -9,4 +10,4 @@ const BlockFormControlLabel: FC<FormControlLabelProps> = (props) => (
   </div>
 );
 
-export default BlockFormControlLabel;
+export default memo(BlockFormControlLabel);

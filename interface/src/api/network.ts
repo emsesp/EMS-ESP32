@@ -2,12 +2,14 @@ import type { NetworkSettingsType, NetworkStatusType, WiFiNetworkList } from 'ty
 
 import { alovaInstance } from './endpoints';
 
+const LIST_NETWORKS_TIMEOUT = 20000; // 20 seconds
+
 export const readNetworkStatus = () =>
   alovaInstance.Get<NetworkStatusType>('/rest/networkStatus');
 export const scanNetworks = () => alovaInstance.Get('/rest/scanNetworks');
 export const listNetworks = () =>
   alovaInstance.Get<WiFiNetworkList>('/rest/listNetworks', {
-    timeout: 20000 // 20 seconds
+    timeout: LIST_NETWORKS_TIMEOUT
   });
 export const readNetworkSettings = () =>
   alovaInstance.Get<NetworkSettingsType>('/rest/networkSettings');

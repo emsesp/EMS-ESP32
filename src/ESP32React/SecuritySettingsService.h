@@ -53,7 +53,9 @@ class SecuritySettings {
         // users
         settings.users.clear();
         if (root["users"].is<JsonArray>()) {
-            for (JsonVariant user : root["users"].as<JsonArray>()) {
+            JsonArray users = root["users"].as<JsonArray>();
+            for (size_t i = 0; i < users.size(); i++) {
+                JsonObject user = users[i].as<JsonObject>();
                 settings.users.emplace_back(user["username"], user["password"], user["admin"]);
             }
         } else {

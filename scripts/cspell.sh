@@ -3,7 +3,7 @@
 # and https://github.com/streetsidesoftware/vscode-spell-checker/blob/main/FAQ.md
 
 # go to root top level directory
-# install cpsell with yarn add --dev cspell@latest
+# install cpsell with pnpm add --dev cspell@latest
 
 # first time installation
 #  1) run `npx cspell "**" --no-progress --unique > words-found-verbose.txt`

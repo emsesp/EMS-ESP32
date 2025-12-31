@@ -15,7 +15,7 @@
   <a href="https://github.com/emsesp/EMS-ESP32/blob/dev/CONTRIBUTING.md">
     <img src="https://img.shields.io/badge/Contribute-ff4785?style=for-the-badge&logo=git&logoColor=white" alt="Contribute" />
   </a>
-  <a href="https://docs.emsesp.org">
+  <a href="https://emsesp.org">
     <img src="https://img.shields.io/badge/Documentation-0077b5?style=for-the-badge&logo=googledocs&logoColor=white" alt="Guides" />
   </a>
   <a href="https://discord.gg/3J3GgnzpyT">
@@ -35,7 +35,7 @@
 [![chat](https://img.shields.io/discord/816637840644505620.svg?style=flat-square&color=blueviolet)](https://discord.gg/3J3GgnzpyT)
 
 [![GitHub stars](https://img.shields.io/github/stars/emsesp/EMS-ESP32.svg?style=social&label=Star)](https://github.com/emsesp/EMS-ESP32/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/emsesp/EMS-ESP32.svg?style=social&label=Fork)](https://github.com/emsesp/EMS-ES32P/network)
+[![GitHub forks](https://img.shields.io/github/forks/emsesp/EMS-ESP32.svg?style=social&label=Fork)](https://github.com/emsesp/EMS-ESP32/network)
 [![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.com/paypalme/prderbyshire/2)
 
 **EMS-ESP** is an open-source firmware for the Espressif ESP32 microcontroller to communicate with **EMS** (Energy Management System) compatible equipment from manufacturers such as Bosch, Buderus, Nefit, Junkers, Worcester, Sieger, elm.leblanc and iVT.
@@ -60,17 +60,17 @@ It requires a small circuit to interface with the EMS bus which can be purchased
 
 ## 🚀&nbsp; **Installing**
 
-Head over to [download.emsesp.org](https://download.emsesp.org) for instructions on how to install EMS-ESP. There is also further details on which boards are supported in [this section](https://docs.emsesp.org/Getting-Started/#first-time-install) of the documentation.
+Head over to the [Installation Guide](https://emsesp.org/Installing) section of the documentation for instructions on how to install EMS-ESP.
 
 ## 📋&nbsp; **Documentation**
 
-Visit [emsesp.org](https://docs.emsesp.org) for more details on how to install and configure EMS-ESP. There is also a collection of Frequently Asked Questions and Troubleshooting tips with example customizations from the community.
+Visit [emsesp.org](https://emsesp.org) for more details on how to install and configure EMS-ESP. There is also a collection of Frequently Asked Questions and Troubleshooting tips with example customizations from the community.
 
 ## 💬&nbsp; **Getting Support**
 
 To chat with the community reach out on our [Discord Server](https://discord.gg/3J3GgnzpyT).
 
-If you find an issue or have a request, see [here](https://docs.emsesp.org/Support/) on how to submit a bug report or feature request.
+If you find an issue or have a request, see [how to request support](https://emsesp.org/Support/) on how to submit a bug report or feature request.
 
 ## 🎥&nbsp; **Live Demo**
 
@@ -82,13 +82,19 @@ EMS-ESP is a project created by [proddy](https://github.com/proddy) and owned an
 
 If you like **EMS-ESP**, please give it a ✨ on GitHub, or even better fork it and contribute. You can also offer a small donation. This is an open-source project maintained by volunteers, and your support is greatly appreciated.
 
+## 📦&nbsp; **Building**
+
+To build the web interface only, run `platformio run -e build_webUI`. This will install the necessary dependencies and build the web interface and also create the embedded code used need to build the firmware. You can run the web interface locally by going to the `interface` directory and running `pnpm standalone`.
+
+To build the firmware, run `platformio run`. This will build the firmware for all ESP32 modules and place the binaries in the `build/firmware` folder. If you want to configure the build for a single platform create a local `pio_local.ni` file in the root directory (see example in `pio_local.ini_example`).
+
 ## 📢&nbsp; **Libraries used**
 
-- [esp8266-react](https://github.com/rjwats/esp8266-react) by @rjwats for the core framework that provides the Web UI, which has been heavily modified
+- [esp8266-react](https://github.com/rjwats/esp8266-react) originally by @rjwats for the core framework that provides the Web UI, which has been heavily modified
 - [uuid-\*](https://github.com/nomis/mcu-uuid-console) from @nomis. The console, syslog, telnet and logging are based off these awesome open source libraries
 - [ArduinoJson](https://github.com/bblanchon/ArduinoJson) for all the JSON processing
 - [espMqttClient](https://github.com/bertmelis/espMqttClient) for the MQTT client
-- ESPAsyncWebServer and AsyncTCP for the Web server and TCP backends, with custom modifications for performance
+- [ESPAsyncWebServer](https://github.com/ESP32Async/ESPAsyncWebServer) and [AsyncTCP](https://github.com/ESP32Async/AsyncTCP) for the Web server
 
 ## 📜&nbsp; **License**
 

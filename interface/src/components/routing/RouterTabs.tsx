@@ -1,3 +1,4 @@
+import { memo, useCallback } from 'react';
 import type { FC } from 'react';
 import { useNavigate } from 'react-router';
 
@@ -15,9 +16,12 @@ const RouterTabs: FC<RouterTabsProps> = ({ value, children }) => {
   const theme = useTheme();
   const smallDown = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const handleTabChange = (_event: unknown, path: string) => {
-    void navigate(path);
-  };
+  const handleTabChange = useCallback(
+    (_event: unknown, path: string) => {
+      void navigate(path);
+    },
+    [navigate]
+  );
 
   return (
     <Tabs
@@ -30,4 +34,4 @@ const RouterTabs: FC<RouterTabsProps> = ({ value, children }) => {
   );
 };
 
-export default RouterTabs;
+export default memo(RouterTabs);

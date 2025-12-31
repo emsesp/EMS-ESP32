@@ -1,16 +1,17 @@
-name: 'github-releases-to-discord'
+name: 'Publish releases to discord'
 
 on:
-  workflow_dispatch:
   release:
     types: [published]
 
 jobs:
   github-releases-to-discord:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         
       - name: GitHub Releases To Discord
         uses: SethCohen/github-releases-to-discord@v1.13.1

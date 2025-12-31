@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { FC } from 'react';
 import { useLocation } from 'react-router';
 
@@ -13,22 +13,26 @@ import { LayoutContext } from './context';
 
 export const DRAWER_WIDTH = 210;
 
-const Layout: FC<RequiredChildrenProps> = ({ children }) => {
+const LayoutComponent: FC<RequiredChildrenProps> = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [title, setTitle] = useState(PROJECT_NAME);
   const { pathname } = useLocation();
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+  // Memoize drawer toggle handler to prevent unnecessary re-renders
+  const handleDrawerToggle = useCallback(() => {
+    setMobileOpen((prev) => !prev);
+  }, []);
 
-  useEffect(() => setMobileOpen(false), [pathname]);
+  // Close drawer when route changes
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
-  // cache the object to prevent unnecessary re-renders
-  const obj = useMemo(() => ({ title, setTitle }), [title]);
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({ title, setTitle }), [title]);
 
   return (
-    <LayoutContext.Provider value={obj}>
+    <LayoutContext.Provider value={contextValue}>
       <LayoutAppBar title={title} onToggleDrawer={handleDrawerToggle} />
       <LayoutDrawer mobileOpen={mobileOpen} onClose={handleDrawerToggle} />
       <Box component="main" sx={{ marginLeft: { md: `${DRAWER_WIDTH}px` } }}>
@@ -38,5 +42,7 @@ const Layout: FC<RequiredChildrenProps> = ({ children }) => {
     </LayoutContext.Provider>
   );
 };
+
+const Layout = memo(LayoutComponent);
 
 export default Layout;

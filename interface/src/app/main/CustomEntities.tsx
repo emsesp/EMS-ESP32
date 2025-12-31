@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useBlocker } from 'react-router';
 import { toast } from 'react-toastify';
 
@@ -35,6 +35,10 @@ import { DeviceValueTypeNames, DeviceValueUOM_s } from './types';
 import type { Entities, EntityItem } from './types';
 import { entityItemValidation } from './validators';
 
+const MIN_ID = -100;
+const MAX_ID = 100;
+const ICON_SIZE = 12;
+
 const CustomEntities = () => {
   const { LL } = useI18nContext();
   const [numChanges, setNumChanges] = useState<number>(0);
@@ -53,18 +57,20 @@ const CustomEntities = () => {
     initialData: []
   });
 
-  useInterval(() => {
+  const intervalCallback = useCallback(() => {
     if (!dialogOpen && !numChanges) {
       void fetchEntities();
     }
-  });
+  }, [dialogOpen, numChanges, fetchEntities]);
+
+  useInterval(intervalCallback);
 
   const { send: writeEntities } = useRequest(
     (data: Entities) => writeCustomEntities(data),
     { immediate: false }
   );
 
-  function hasEntityChanged(ei: EntityItem) {
+  const hasEntityChanged = useCallback((ei: EntityItem) => {
     return (
       ei.id !== ei.o_id ||
       ei.ram !== ei.o_ram ||
@@ -76,22 +82,25 @@ const CustomEntities = () => {
       ei.factor !== ei.o_factor ||
       ei.value_type !== ei.o_value_type ||
       ei.writeable !== ei.o_writeable ||
+      ei.hide !== ei.o_hide ||
       ei.deleted !== ei.o_deleted ||
       (ei.value || '') !== (ei.o_value || '')
     );
-  }
+  }, []);
 
-  const entity_theme = useTheme({
-    Table: `
+  const entity_theme = useMemo(
+    () =>
+      useTheme({
+        Table: `
       --data-table-library_grid-template-columns: repeat(1, minmax(60px, 1fr)) minmax(80px, auto) 80px 80px 80px 120px;
     `,
-    BaseRow: `
+        BaseRow: `
       font-size: 14px;
       .td {
         height: 32px;
       }
     `,
-    BaseCell: `
+        BaseCell: `
       &:nth-of-type(1) {
         padding: 8px;
       }
@@ -111,7 +120,7 @@ const CustomEntities = () => {
         text-align: center;
       }
     `,
-    HeaderRow: `
+        HeaderRow: `
       text-transform: uppercase;
       background-color: black;
       color: #90CAF9;
@@ -120,7 +129,7 @@ const CustomEntities = () => {
         height: 36px;
       }
     `,
-    Row: `
+        Row: `
       background-color: #1e1e1e;
       position: relative;
       cursor: pointer;
@@ -131,13 +140,15 @@ const CustomEntities = () => {
         background-color: #177ac9;
       }
     `
-  });
+      }),
+    []
+  );
 
-  const saveEntities = async () => {
+  const saveEntities = useCallback(async () => {
     await writeEntities({
       entities: entities
-        .filter((ei) => !ei.deleted)
-        .map((condensed_ei) => ({
+        .filter((ei: EntityItem) => !ei.deleted)
+        .map((condensed_ei: EntityItem) => ({
           id: condensed_ei.id,
           ram: condensed_ei.ram,
           name: condensed_ei.name,
@@ -147,6 +158,7 @@ const CustomEntities = () => {
           factor: condensed_ei.factor,
           uom: condensed_ei.uom,
           writeable: condensed_ei.writeable,
+          hide: condensed_ei.hide,
           value_type: condensed_ei.value_type,
           value: condensed_ei.value
         }))
@@ -161,7 +173,7 @@ const CustomEntities = () => {
         await fetchEntities();
         setNumChanges(0);
       });
-  };
+  }, [entities, writeEntities, LL, fetchEntities]);
 
   const editEntityItem = useCallback((ei: EntityItem) => {
     setCreating(false);
@@ -169,36 +181,39 @@ const CustomEntities = () => {
     setDialogOpen(true);
   }, []);
 
-  const onDialogClose = () => {
+  const onDialogClose = useCallback(() => {
     setDialogOpen(false);
-  };
+  }, []);
 
-  const onDialogCancel = async () => {
+  const onDialogCancel = useCallback(async () => {
     await fetchEntities().then(() => {
       setNumChanges(0);
     });
-  };
+  }, [fetchEntities]);
 
-  const onDialogSave = (updatedItem: EntityItem) => {
-    setDialogOpen(false);
-    void updateState(readCustomEntities(), (data: EntityItem[]) => {
-      const new_data = creating
-        ? [
-            ...data.filter((ei) => creating || ei.o_id !== updatedItem.o_id),
-            updatedItem
-          ]
-        : data.map((ei) =>
-            ei.id === updatedItem.id ? { ...ei, ...updatedItem } : ei
-          );
-      setNumChanges(new_data.filter((ei) => hasEntityChanged(ei)).length);
-      return new_data;
-    });
-  };
+  const onDialogSave = useCallback(
+    (updatedItem: EntityItem) => {
+      setDialogOpen(false);
+      void updateState(readCustomEntities(), (data: EntityItem[]) => {
+        const new_data = creating
+          ? [
+              ...data.filter((ei) => creating || ei.o_id !== updatedItem.o_id),
+              updatedItem
+            ]
+          : data.map((ei) =>
+              ei.id === updatedItem.id ? { ...ei, ...updatedItem } : ei
+            );
+        setNumChanges(new_data.filter((ei) => hasEntityChanged(ei)).length);
+        return new_data;
+      });
+    },
+    [creating, hasEntityChanged]
+  );
 
-  const onDialogDup = (item: EntityItem) => {
+  const onDialogDup = useCallback((item: EntityItem) => {
     setCreating(true);
     setSelectedEntityItem({
-      id: Math.floor(Math.random() * (Math.floor(200) - 100) + 100),
+      id: Math.floor(Math.random() * (MAX_ID - MIN_ID) + MIN_ID),
       name: item.name + '_',
       ram: item.ram,
       device_id: item.device_id,
@@ -209,15 +224,16 @@ const CustomEntities = () => {
       value_type: item.value_type,
       writeable: item.writeable,
       deleted: false,
+      hide: item.hide,
       value: item.value
     });
     setDialogOpen(true);
-  };
+  }, []);
 
-  const addEntityItem = () => {
+  const addEntityItem = useCallback(() => {
     setCreating(true);
     setSelectedEntityItem({
-      id: Math.floor(Math.random() * (Math.floor(200) - 100) + 100),
+      id: Math.floor(Math.random() * (MAX_ID - MIN_ID) + MIN_ID),
       name: '',
       ram: 0,
       device_id: '0',
@@ -228,35 +244,44 @@ const CustomEntities = () => {
       value_type: 0,
       writeable: false,
       deleted: false,
+      hide: false,
       value: ''
     });
     setDialogOpen(true);
-  };
+  }, []);
 
-  function formatValue(value: unknown, uom: number) {
+  const formatValue = useCallback((value: unknown, uom: number) => {
     return value === undefined
       ? ''
       : typeof value === 'number'
         ? new Intl.NumberFormat().format(value) +
-          (uom === 0 ? '' : ' ' + DeviceValueUOM_s[uom])
-        : (value as string) + (uom === 0 ? '' : ' ' + DeviceValueUOM_s[uom]);
-  }
+          (uom === 0 ? '' : ` ${DeviceValueUOM_s[uom]}`)
+        : `${value as string}${uom === 0 ? '' : ` ${DeviceValueUOM_s[uom]}`}`;
+  }, []);
 
-  function showHex(value: number, digit: number) {
-    return '0x' + value.toString(16).toUpperCase().padStart(digit, '0');
-  }
+  const showHex = useCallback((value: number, digit: number) => {
+    return `0x${value.toString(16).toUpperCase().padStart(digit, '0')}`;
+  }, []);
 
-  const renderEntity = () => {
+  const filteredAndSortedEntities = useMemo(
+    () =>
+      entities
+        ?.filter((ei: EntityItem) => !ei.deleted)
+        .sort((a: EntityItem, b: EntityItem) => a.name.localeCompare(b.name)) ?? [],
+    [entities]
+  );
+
+  const renderEntity = useCallback(() => {
     if (!entities) {
-      return <FormLoader onRetry={fetchEntities} errorMessage={error?.message} />;
+      return (
+        <FormLoader onRetry={fetchEntities} errorMessage={error?.message || ''} />
+      );
     }
 
     return (
       <Table
         data={{
-          nodes: entities
-            .filter((ei) => !ei.deleted)
-            .sort((a, b) => a.name.localeCompare(b.name))
+          nodes: filteredAndSortedEntities
         }}
         theme={entity_theme}
         layout={{ custom: true }}
@@ -279,7 +304,10 @@ const CustomEntities = () => {
                   <Cell>
                     {ei.name}&nbsp;
                     {ei.writeable && (
-                      <EditOutlinedIcon color="primary" sx={{ fontSize: 12 }} />
+                      <EditOutlinedIcon
+                        color="primary"
+                        sx={{ fontSize: ICON_SIZE }}
+                      />
                     )}
                   </Cell>
                   <Cell>
@@ -298,7 +326,17 @@ const CustomEntities = () => {
         )}
       </Table>
     );
-  };
+  }, [
+    entities,
+    error,
+    fetchEntities,
+    entity_theme,
+    editEntityItem,
+    LL,
+    filteredAndSortedEntities,
+    showHex,
+    formatValue
+  ]);
 
   return (
     <SectionContent>
@@ -321,7 +359,7 @@ const CustomEntities = () => {
         />
       )}
 
-      <Box mt={1} display="flex" flexWrap="wrap">
+      <Box mt={2} display="flex" flexWrap="wrap">
         <Box flexGrow={1}>
           {numChanges > 0 && (
             <ButtonRow>

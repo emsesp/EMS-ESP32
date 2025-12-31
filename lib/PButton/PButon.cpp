@@ -23,10 +23,10 @@
 // Constructor
 PButton::PButton() {
     // Initialization of default properties
-    Debounce_        = 40;   // Debounce period to prevent flickering when pressing or releasing the button (in ms)
-    DblClickDelay_   = 250;  // Max period between clicks for a double click event (in ms)
-    LongPressDelay_  = 750;  // Hold period for a long press event (in ms)
-    VLongPressDelay_ = 3000; // Hold period for a very long press event (in ms)
+    Debounce_        = 40;    // Debounce period to prevent flickering when pressing or releasing the button (in ms)
+    DblClickDelay_   = 250;   // Max period between clicks for a double click event (in ms)
+    LongPressDelay_  = 9500;  // Hold period for a long press event (in ms)
+    VLongPressDelay_ = 20000; // Hold period for a very long press event (in ms)
 
     cb_onClick      = nullptr;
     cb_onDblClick   = nullptr;
@@ -54,7 +54,15 @@ bool PButton::init(uint8_t pin, bool pullMode) {
     pullMode_ = pullMode; // 1=HIGH (pullup) 0=LOW (pulldown)
 
 #if defined(ESP32)
+#if CONFIG_IDF_TARGET_ESP32
+    if (pin_ == 34 || pin_ == 35 || pin_ == 36 || pin_ == 39) {
+        pinMode(pin_, INPUT);
+    } else {
+        pinMode(pin_, pullMode ? INPUT_PULLUP : INPUT_PULLDOWN);
+    }
+#else
     pinMode(pin_, pullMode ? INPUT_PULLUP : INPUT_PULLDOWN);
+#endif
 #else // esp8266 and standalone
     pinMode(pin_, pullMode ? INPUT_PULLUP : INPUT);
 #endif
@@ -93,7 +101,15 @@ bool PButton::check(void) {
 
     // make sure the pin is still input
 #if defined(ESP32)
+#if CONFIG_IDF_TARGET_ESP32
+    if (pin_ == 34 || pin_ == 35 || pin_ == 36 || pin_ == 39) {
+        pinMode(pin_, INPUT);
+    } else {
+        pinMode(pin_, pullMode_ ? INPUT_PULLUP : INPUT_PULLDOWN);
+    }
+#else
     pinMode(pin_, pullMode_ ? INPUT_PULLUP : INPUT_PULLDOWN);
+#endif
 #else // esp8266 and standalone
     pinMode(pin_, pullMode_ ? INPUT_PULLUP : INPUT);
 #endif

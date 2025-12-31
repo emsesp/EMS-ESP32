@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -127,6 +127,7 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
                 obj["u"] = DeviceValueUOM::DEGREES;
                 obj["o"] = (float)(sensor.offset()) / 10;
             }
+            obj["s"] = sensor.is_system();
         }
     }
 
@@ -143,17 +144,25 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
             obj["o"]       = sensor.offset();
             obj["f"]       = sensor.factor();
             obj["t"]       = sensor.type();
-
-            if (sensor.type() != AnalogSensor::AnalogType::NOTUSED) {
-                obj["v"] = Helpers::transformNumFloat(sensor.value()); // is optional and is a float
-            } else {
-                obj["v"] = 0; // must have a value for web sorting to work
-            }
+            obj["s"]       = sensor.is_system();
+            obj["v"]       = Helpers::transformNumFloat(sensor.value()); // is optional and is a float
         }
     }
 
     root["analog_enabled"] = EMSESP::analog_enabled();
     root["platform"]       = EMSESP_PLATFORM;
+
+    // send back a list of valid and unused GPIOs still available for use
+    JsonArray available_gpios = root["available_gpios"].to<JsonArray>();
+    for (const auto & gpio : EMSESP::system_.available_gpios()) {
+        available_gpios.add(gpio);
+    }
+
+    // disable types that can only be used once
+    JsonArray exclude_types = root["exclude_types"].to<JsonArray>();
+    for (uint8_t type : EMSESP::analogsensor_.exclude_types()) {
+        exclude_types.add(type);
+    }
 
     response->setLength();
     request->send(response);
@@ -179,7 +188,7 @@ void WebDataService::device_data(AsyncWebServerRequest * request) {
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == id) {
                 // wait max 2.5 sec for updated data (post_send_delay is 2 sec)
-                for (uint16_t i = 0; i < (emsesp::TxService::POST_SEND_DELAY + 500) && EMSESP::wait_validate(); i++) {
+                for (uint16_t i = 0; i < (TxService::POST_SEND_DELAY + 500) && EMSESP::wait_validate(); i++) {
                     delay(1);
                 }
                 EMSESP::wait_validate(0); // reset in case of timeout
@@ -312,8 +321,8 @@ void WebDataService::write_temperature_sensor(AsyncWebServerRequest * request, J
     if (json.is<JsonObject>()) {
         JsonObject sensor = json;
 
-        std::string id   = sensor["id"]; // this is the key
-        std::string name = sensor["name"];
+        const char * id   = sensor["id"]; // this is the key
+        const char * name = sensor["name"];
 
         // calculate offset. We'll convert it to an int and * 10
         float   offset   = sensor["offset"];
@@ -322,7 +331,9 @@ void WebDataService::write_temperature_sensor(AsyncWebServerRequest * request, J
             offset10 = offset / 0.18;
         }
 
-        ok = EMSESP::temperaturesensor_.update(id, name, offset10);
+        bool is_system = sensor["is_system"] | false;
+
+        ok = EMSESP::temperaturesensor_.update(id, name, offset10, is_system);
     }
 
     AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 400); // bad request
@@ -335,14 +346,15 @@ void WebDataService::write_analog_sensor(AsyncWebServerRequest * request, JsonVa
     if (json.is<JsonObject>()) {
         JsonObject analog = json;
 
-        uint8_t     gpio    = analog["gpio"];
-        std::string name    = analog["name"];
-        double      factor  = analog["factor"];
-        double      offset  = analog["offset"];
-        uint8_t     uom     = analog["uom"];
-        int8_t      type    = analog["type"];
-        bool        deleted = analog["deleted"];
-        ok                  = EMSESP::analogsensor_.update(gpio, name, offset, factor, uom, type, deleted);
+        uint8_t      gpio      = analog["gpio"];
+        const char * name      = analog["name"];
+        double       factor    = analog["factor"];
+        double       offset    = analog["offset"];
+        uint8_t      uom       = analog["uom"];
+        int8_t       type      = analog["type"];
+        bool         deleted   = analog["deleted"];
+        bool         is_system = analog["is_system"] | false;
+        ok                     = EMSESP::analogsensor_.update(gpio, name, offset, factor, uom, type, deleted, is_system);
     }
 
     AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 400); // ok or bad request
@@ -387,18 +399,22 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
     }
 
     // add temperature sensors, if we have any
-    if (EMSESP::temperaturesensor_.have_sensors()) {
+    if (EMSESP::temperaturesensor_.count_entities(true)) { // no system sensors
         JsonObject obj  = nodes.add<JsonObject>();
         obj["id"]       = EMSdevice::DeviceTypeUniqueID::TEMPERATURESENSOR_UID; // it's unique id
         obj["t"]        = EMSdevice::DeviceType::TEMPERATURESENSOR;             // device type number
         JsonArray nodes = obj["nodes"].to<JsonArray>();
         uint8_t   count = 0;
         for (const auto & sensor : EMSESP::temperaturesensor_.sensors()) {
+            // ignore system sensors
+            if (sensor.is_system()) {
+                continue;
+            }
             JsonObject node = nodes.add<JsonObject>();
             node["id"]      = (EMSdevice::DeviceTypeUniqueID::TEMPERATURESENSOR_UID * 100) + count++;
 
             JsonObject dv = node["dv"].to<JsonObject>();
-            dv["id"]      = "00" + sensor.name();
+            dv["id"]      = std::string("00") + sensor.name();
             if (EMSESP::system_.fahrenheit()) {
                 if (Helpers::hasValue(sensor.temperature_c)) {
                     dv["v"] = (float)sensor.temperature_c * 0.18 + 32;
@@ -414,41 +430,47 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
     }
 
     // add analog sensors, count excludes disabled entries
-    if (EMSESP::analog_enabled() && EMSESP::analogsensor_.count_entities(false)) {
+    if (EMSESP::analog_enabled() && EMSESP::analogsensor_.count_entities(true)) {
         JsonObject obj  = nodes.add<JsonObject>();
         obj["id"]       = EMSdevice::DeviceTypeUniqueID::ANALOGSENSOR_UID; // it's unique id
         obj["t"]        = EMSdevice::DeviceType::ANALOGSENSOR;             // device type number
         JsonArray nodes = obj["nodes"].to<JsonArray>();
         uint8_t   count = 0;
         for (const auto & sensor : EMSESP::analogsensor_.sensors()) {
-            if (sensor.type() != AnalogSensor::AnalogType::NOTUSED) { // ignore disabled
-                JsonObject node = nodes.add<JsonObject>();
-                node["id"]      = (EMSdevice::DeviceTypeUniqueID::ANALOGSENSOR_UID * 100) + count++;
+            // ignore system and disabled sensors
+            if (sensor.is_system()) {
+                continue;
+            }
+            JsonObject node = nodes.add<JsonObject>();
+            node["id"]      = (EMSdevice::DeviceTypeUniqueID::ANALOGSENSOR_UID * 100) + count++;
 
-                JsonObject dv = node["dv"].to<JsonObject>();
-                dv["id"]      = "00" + sensor.name();
+            JsonObject dv = node["dv"].to<JsonObject>();
+            dv["id"]      = std::string("00") + sensor.name();
 #if CONFIG_IDF_TARGET_ESP32
-                if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT && (sensor.gpio() == 25 || sensor.gpio() == 26)) {
-                    obj["v"] = Helpers::transformNumFloat(sensor.value());
-                } else
+            if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT && (sensor.gpio() == 25 || sensor.gpio() == 26)) {
+                obj["v"] = Helpers::transformNumFloat(sensor.value());
+            } else
 #elif CONFIG_IDF_TARGET_ESP32S2
-                if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT && (sensor.gpio() == 17 || sensor.gpio() == 18)) {
-                    obj["v"] = Helpers::transformNumFloat(sensor.value());
-                } else
+            if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT && (sensor.gpio() == 17 || sensor.gpio() == 18)) {
+                obj["v"] = Helpers::transformNumFloat(sensor.value());
+            } else
 #endif
-                    if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT || sensor.type() == AnalogSensor::AnalogType::DIGITAL_IN) {
-                    char s[12];
-                    dv["v"]     = Helpers::render_boolean(s, sensor.value() != 0, true);
-                    JsonArray l = dv["l"].to<JsonArray>();
-                    l.add(Helpers::render_boolean(s, false, true));
-                    l.add(Helpers::render_boolean(s, true, true));
-                } else {
-                    dv["v"] = Helpers::transformNumFloat(sensor.value());
-                    dv["u"] = sensor.uom();
-                }
-                if (sensor.type() == AnalogSensor::AnalogType::COUNTER || sensor.type() >= AnalogSensor::AnalogType::DIGITAL_OUT) {
-                    dv["c"] = sensor.name();
-                }
+                if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT || sensor.type() == AnalogSensor::AnalogType::DIGITAL_IN
+                    || sensor.type() == AnalogSensor::AnalogType::PULSE) {
+                char s[12];
+                dv["v"]     = Helpers::render_boolean(s, sensor.value() != 0, true);
+                JsonArray l = dv["l"].to<JsonArray>();
+                l.add(Helpers::render_boolean(s, false, true));
+                l.add(Helpers::render_boolean(s, true, true));
+            } else {
+                dv["v"] = Helpers::transformNumFloat(sensor.value());
+                dv["u"] = sensor.uom();
+            }
+            if (sensor.type() == AnalogSensor::AnalogType::COUNTER
+                || (sensor.type() >= AnalogSensor::AnalogType::DIGITAL_OUT && sensor.type() <= AnalogSensor::AnalogType::PWM_2)
+                || sensor.type() == AnalogSensor::AnalogType::RGB || sensor.type() == AnalogSensor::AnalogType::PULSE
+                || (sensor.type() >= AnalogSensor::AnalogType::CNT_0 && sensor.type() <= AnalogSensor::AnalogType::CNT_2)) {
+                dv["c"] = sensor.name();
             }
         }
     }
@@ -464,12 +486,12 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
         EMSESP::webSchedulerService.read([&](const WebScheduler & webScheduler) {
             for (const ScheduleItem & scheduleItem : webScheduler.scheduleItems) {
                 // only add if we have a name - we don't need a u (UOM) for this
-                if (!scheduleItem.name.empty()) {
+                if (scheduleItem.name[0] != '\0') {
                     JsonObject node = nodes.add<JsonObject>();
                     node["id"]      = (EMSdevice::DeviceTypeUniqueID::SCHEDULER_UID * 100) + count++;
 
                     JsonObject dv = node["dv"].to<JsonObject>();
-                    dv["id"]      = "00" + scheduleItem.name;
+                    dv["id"]      = std::string("00") + scheduleItem.name;
                     dv["c"]       = scheduleItem.name;
                     char s[12];
                     dv["v"]     = Helpers::render_boolean(s, scheduleItem.active, true);

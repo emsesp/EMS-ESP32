@@ -15,8 +15,8 @@
 // Create own non-virtual EthernetServer class
 class EthernetServerEM : public EthernetServer {
 public:
-  EthernetServerEM(uint16_t port) : EthernetServer(port) { }
-  void begin(uint16_t port = 0) { }
+  explicit EthernetServerEM(uint16_t port) : EthernetServer(port) { }
+  void begin(uint16_t port = 0) override { }
 };
 
 #include "ModbusServerTCPtemp.h"

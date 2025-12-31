@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ * Copyright 2020-2025  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ class WebAPIService {
     WebAPIService(AsyncWebServer * server, SecurityManager * securityManager);
 
     void webAPIService(AsyncWebServerRequest * request, JsonVariant input);
+    void webAPIService(AsyncWebServerRequest * request, const char * data); // for plain text data
 
 #if defined(EMSESP_TEST)
     // for test.cpp and running unit tests
