@@ -30,6 +30,8 @@ def run_with_streaming_input(program_path, test_command, output_file=None):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
+            encoding='utf-8',
+            errors='replace',  # Replace invalid UTF-8 bytes instead of crashing
             bufsize=1  # Line buffered
         )
         
@@ -70,7 +72,7 @@ def run_with_streaming_input(program_path, test_command, output_file=None):
                 os.remove(output_file)
             
             # Export CSV output to file
-            with open(output_file, 'w') as f:
+            with open(output_file, 'w', encoding='utf-8', errors='replace') as f:
                 f.writelines(csv_output)
             print(f"CSV file created: {output_file} ({os.path.getsize(output_file)} bytes)")
 
