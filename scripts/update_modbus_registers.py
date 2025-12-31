@@ -1,7 +1,10 @@
 #
 # Update modbus parameters from entity definitions.
 # This script generates c++ code for the modbus parameter definitions.
-# Called by /scripts/generate_csv_and_headers.sh
+#
+# Called by /scripts/generate_csv_and_headers.sh and pio build_modbus target.
+# can be called manually with:
+#   cat ./docs/dump_entities.csv | python3 ./scripts/update_modbus_registers.py > ./src/core/modbus_entity_parameters.hpp
 
 import fileinput
 import csv
@@ -159,23 +162,22 @@ cpp_entry_template = Template(
 listNames = {}
 transre = re.compile(r'^MAKE_TRANSLATION\(([^,\s]+)\s*,\s*\"([^\"]+)\"')
 try:
-    with open('./src/core/locale_translations.h', 'r') as transf:
+    with open('./src/core/locale_translations.h', 'r', encoding='utf-8', errors='replace') as transf:
         for line in transf:
             m = transre.match(line)
             if m is not None:
                 listNames[m.group(2)] = m.group(1)
 except FileNotFoundError:
     # Handle case where file doesn't exist
-    pass
+    raise Exception('Error! locale_translations.h not found')
 
 entities = []
 
-with fileinput.input() as f_input:
+with fileinput.input(encoding='utf-8', errors='replace') as f_input:
     entities_reader = csv.reader(f_input, delimiter=',', quotechar='"')
     headers = next(entities_reader)
 
     for row in entities_reader:
-        # Use dict comprehension for better performance
         entity = {headers[i]: val for i, val in enumerate(row)}
         entities.append(entity)
 
@@ -208,7 +210,7 @@ for entity in entities:
             (-string_sizes[entity_dev_name] // 2)  # divide and round up
 
     if int(entity["modbus count"]) <= 0:
-        raise Exception('Entity "' + entity_dev_name + ' (' + entity_shortname + ')' +
+        raise Exception('Error! Entity "' + entity_dev_name + ' (' + entity_shortname + ')' +
                         '" does not have a size - string sizes need to be added manually to update_modbus_registers.py/string_sizes[]')
 
     #    if entity["modbus count"] == "0":
@@ -267,10 +269,16 @@ for device_type_name in device_type_names:
                 sorted_entities = sorted(
                     entities.items(), key=lambda x: int(x[1]["modbus offset"]))
                 for entity_name, modbus_info in sorted_entities:
+                    # Strip device type prefix (e.g., "dhw.nrg" -> "nrg") for translation lookup
+                    lookup_name = entity_name.split('.')[-1] if '.' in entity_name else entity_name
+                    
+                    if lookup_name not in listNames:
+                        raise KeyError(f"Error! Translation not found for '{lookup_name}' (entity: '{entity_name}'). Please add it to locale_translations.h")
+                    
                     params = {
                         'devtype': "dt::" + device_type_name,
                         "tagtype": tag_to_tagtype[int(tag)],
-                        "shortname": 'FL_(' + listNames[entity_name] + ")",
+                        "shortname": 'FL_(' + listNames[lookup_name] + ")",
                         "entity_name": entity_name,
                         'registeroffset': modbus_info["modbus offset"],
                         'registercount': modbus_info["modbus count"]
