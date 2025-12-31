@@ -1747,11 +1747,13 @@ void EMSESP::start() {
 
     webSettingsService.begin(); // load EMS-ESP Application settings
 
-    // do any system upgrades
-    if (system_.check_upgrade(factory_settings)) {
-        LOG_WARNING("System needs a restart to apply new settings. Please wait.");
-        system_.system_restart();
-    };
+    // perform any system upgrades
+    if (!factory_settings) {
+        if (system_.check_upgrade()) {
+            LOG_WARNING("System needs a restart to apply new settings. Please wait.");
+            system_.system_restart();
+        };
+    }
 
     // Load our library of known devices into stack mem. Names are stored in Flash memory
     device_library_ = {
@@ -1831,7 +1833,7 @@ void EMSESP::loop() {
 
     // run the loop, unless we're in the middle of an OTA upload
     if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_NORMAL || EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_INVALID_GPIO) {
-        // check for GPIO Errors
+        // check for GPIO Errors - this is called once when booting
         if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_INVALID_GPIO) {
             static bool only_once = false;
             if (!only_once) {

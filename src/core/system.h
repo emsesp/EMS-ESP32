@@ -122,7 +122,7 @@ class System {
     void show_mem(const char * note);
     void store_settings(class WebSettings & settings);
     void syslog_init();
-    bool check_upgrade(bool factory_settings);
+    bool check_upgrade();
     bool check_restore();
     void heartbeat_json(JsonObject output);
 
