@@ -1412,58 +1412,49 @@ bool System::check_restore() {
 // handle upgrades from previous versions
 // this function will not be called on a clean install, with no settings files yet created
 // returns true if we need a reboot
-bool System::check_upgrade(bool factory_settings) {
+bool System::check_upgrade() {
     bool        missing_version = true;
     std::string settingsVersion;
 
-    if (!factory_settings) {
-        // fetch current version from settings file
-        EMSESP::webSettingsService.read([&](WebSettings const & settings) { settingsVersion = settings.version.c_str(); });
+    // fetch current version from settings file
+    EMSESP::webSettingsService.read([&](WebSettings const & settings) { settingsVersion = settings.version.c_str(); });
 
-        // see if we're missing a version, will be < 3.5.0b13 from Dec 23 2022
-        missing_version = (settingsVersion.empty() || (settingsVersion.length() < 5));
-        if (missing_version) {
-            LOG_WARNING("No version information found");
-            settingsVersion = "3.5.0"; // this was the last stable version without version info
-        }
-    } else {
-        settingsVersion = EMSESP_APP_VERSION; // use the current version
+    // see if we're missing a version, will be < 3.5.0b13 from Dec 23 2022
+    missing_version = (settingsVersion.empty() || (settingsVersion.length() < 5));
+    if (missing_version) {
+        LOG_WARNING("No version information found");
+        settingsVersion = "3.5.0"; // this was the last stable version without version info
     }
 
     version::Semver200_version settings_version(settingsVersion);
-
-    if (!missing_version) {
-        LOG_DEBUG("Checking for version upgrades (settings file is v%d.%d.%d-%s)",
-                  settings_version.major(),
-                  settings_version.minor(),
-                  settings_version.patch(),
-                  settings_version.prerelease().c_str());
-    }
-
-    if (factory_settings) {
-        return true; // fresh install, do nothing, no reboot required
-    }
-
     version::Semver200_version this_version(EMSESP_APP_VERSION);
 
-    bool save_version    = true;
-    bool reboot_required = false;
+    std::string settings_version_type = settings_version.prerelease().empty() ? "" : ("-" + settings_version.prerelease());
+    std::string this_version_type     = this_version.prerelease().empty() ? "" : ("-" + this_version.prerelease());
+    bool        save_version          = true;
+    bool        reboot_required       = false;
+
+    LOG_DEBUG("Checking for version upgrades (settings file is v%d.%d.%d%s)",
+              settings_version.major(),
+              settings_version.minor(),
+              settings_version.patch(),
+              settings_version_type.c_str());
 
     // compare versions
     if (this_version > settings_version) {
         // we need to do an upgrade
         if (missing_version) {
-            LOG_NOTICE("Upgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
+            LOG_NOTICE("Upgrading to version %d.%d.%d%s", this_version.major(), this_version.minor(), this_version.patch(), this_version_type);
         } else {
-            LOG_NOTICE("Upgrading from version %d.%d.%d-%s to %d.%d.%d-%s",
+            LOG_NOTICE("Upgrading from version %d.%d.%d%s to %d.%d.%d%s",
                        settings_version.major(),
                        settings_version.minor(),
                        settings_version.patch(),
-                       settings_version.prerelease().c_str(),
+                       settings_version_type.c_str(),
                        this_version.major(),
                        this_version.minor(),
                        this_version.patch(),
-                       this_version.prerelease().c_str());
+                       this_version_type.c_str());
         }
 
         // if we're coming from 3.4.4 or 3.5.0b14 which had no version stored then we need to apply new settings
@@ -1518,11 +1509,9 @@ bool System::check_upgrade(bool factory_settings) {
             }
             return StateUpdateResult::UNCHANGED;
         });
-
-
     } else if (this_version < settings_version) {
         // downgrading
-        LOG_NOTICE("Downgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
+        LOG_NOTICE("Downgrading to version %d.%d.%d%s", this_version.major(), this_version.minor(), this_version.patch(), this_version_type.c_str());
     } else {
         save_version = false; // same version, do nothing
     }
@@ -2686,22 +2675,28 @@ bool System::uploadFirmwareURL(const char * url) {
         return false; // error
     }
 
-    // check we have enough space for the upload in the ota partition
     int firmware_size = http.getSize();
-    LOG_INFO("Firmware uploading (size: %d bytes). Please wait...", firmware_size);
+
+    // check we have a valid size
+    if (firmware_size < 2097152) { // 2MB or greater is required
+        LOG_ERROR("Firmware upload failed - invalid size");
+        http.end();
+        return false; // error
+    }
+
+    // check we have enough space for the upload in the ota partition
     if (!Update.begin(firmware_size)) {
         LOG_ERROR("Firmware upload failed - no space");
         http.end();
         return false; // error
     }
 
+    LOG_INFO("Firmware uploading (size: %d KB). Please wait...", firmware_size / 1024);
+
     Shell::loop_all(); // flush log buffers so latest messages are shown in console
 
     // we're about to start the upload, set the status so the Web System Monitor spots it
     EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING);
-
-    // set a callback so we can monitor progress in the WebUI
-    Update.onProgress([](size_t progress, size_t total) { EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING + (progress * 100 / total)); });
 
     // get tcp stream and send it to Updater
     WiFiClient * stream = http.getStreamPtr();
@@ -2792,8 +2787,10 @@ bool System::command_read(const char * value, const int8_t id) {
 
 // set the system status code - SYSTEM_STATUS in system.h
 void System::systemStatus(uint8_t status_code) {
-    systemStatus_ = status_code;
-    LOG_DEBUG("Setting System status code %d", status_code);
+    if (systemStatus_ != status_code) {
+        systemStatus_ = status_code;
+        LOG_DEBUG("Setting System status code %d", status_code);
+    }
 }
 
 uint8_t System::systemStatus() {
