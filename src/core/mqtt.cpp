@@ -1144,7 +1144,7 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
     const char * sc_ha_total            = "total";
     const char * sc_ha_total_increasing = "total_increasing";
 
-    // set uom, unless boolean - as HA is fussy with the naming
+    // set uom, unless boolean - as HA is fussy with the naming and is case sensitive
     // map too HA uom specific codes from https://github.com/home-assistant/core/blob/dev/homeassistant/const.py
     if (type != DeviceValueType::BOOL) {
         if (uom == DeviceValueUOM::HOURS) {
@@ -1157,6 +1157,8 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
             doc[uom_ha] = "kB";
         } else if (uom == DeviceValueUOM::LMIN) {
             doc[uom_ha] = "L/min";
+        } else if (uom == DeviceValueUOM::LH) {
+            doc[uom_ha] = "L/h";
         } else if (uom != DeviceValueUOM::NONE) {
             doc[uom_ha] = EMSdevice::uom_to_string(uom); // use default
         } else if (discovery_type() != discoveryType::HOMEASSISTANT) {
