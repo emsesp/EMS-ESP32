@@ -116,13 +116,13 @@ let system_status = {
     },
     {
       partition: 'app1',
-      version: '3.7.3-dev.40',
+      version: '3.8.1-dev.40',
       install_date: '2025-03-01T13:29:13.999Z',
       size: 4672
     },
     {
       partition: 'factory',
-      version: '3.7.3-dev.39',
+      version: '3.8.1-dev.39',
       install_date: '2025-03-01T13:29:13.999Z',
       size: 4672
     }
@@ -165,19 +165,19 @@ switch (version_test as number) {
     break;
   case 2:
     // upgrade an older stable to latest stable or switch to latest dev
-    THIS_VERSION = '3.7.2';
+    THIS_VERSION = '3.8.0';
     STABLE_VERSION_IS_UPGRADEABLE = true;
     DEV_VERSION_IS_UPGRADEABLE = true;
     break;
   case 3:
     // upgrade dev to latest, or switch to stable
-    THIS_VERSION = '3.8.0-dev.3';
+    THIS_VERSION = '3.8.1-dev.3';
     STABLE_VERSION_IS_UPGRADEABLE = false;
     DEV_VERSION_IS_UPGRADEABLE = true;
     break;
   case 4:
     // downgrade to an older dev, or switch back to stable
-    THIS_VERSION = '3.8.0-dev.1';
+    THIS_VERSION = '3.8.1-dev.1';
     STABLE_VERSION_IS_UPGRADEABLE = true;
     DEV_VERSION_IS_UPGRADEABLE = false;
     break;
