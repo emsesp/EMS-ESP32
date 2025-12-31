@@ -1333,8 +1333,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             // use same data as in restServer.ts
             // log shows first if you can upgrade to dev, and then if you can upgrade to stable
             // request.url("/rest/action");
-            // std::string LATEST_STABLE_VERSION = "3.7.2";
-            // std::string LATEST_DEV_VERSION    = "3.8.0-dev.3";
+            // std::string LATEST_STABLE_VERSION = "3.8.0";
+            // std::string LATEST_DEV_VERSION    = "3.8.1-dev.3";
             // std::string param                 = LATEST_DEV_VERSION + "," + LATEST_STABLE_VERSION;
             // std::string action                = "{\"action\":\"checkUpgrade\", \"param\":\"" + param + "\"}";
             // deserializeJson(doc, action);
