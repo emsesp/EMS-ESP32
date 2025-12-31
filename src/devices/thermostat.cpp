@@ -1226,13 +1226,14 @@ void Thermostat::process_RC300Summer(std::shared_ptr<const Telegram> telegram) {
         has_update(telegram, hc->summersetmode, 7);
     }
 
-    if (hc->heatingtype < 3) {
+    if (hc->heatingtype != 3) {
         has_update(telegram, hc->designtemp, 4);
+        has_update(telegram, hc->minflowtemp, 13);
     } else {
         has_update(telegram, hc->designtemp, 5);
+        has_update(telegram, hc->minflowtemp, 8);
     }
 
-    has_update(telegram, hc->minflowtemp, 8);
     has_update(telegram, hc->fastHeatup, 10);
 }
 
@@ -4019,18 +4020,14 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
         case HeatingCircuit::Mode::MINFLOW:
             set_typeid      = summer_typeids[hc->hc()];
             validate_typeid = set_typeid;
-            offset          = 8;
+            offset          = hc->heatingtype == 3 ? 8 : 13;
             factor          = 1;
             break;
         case HeatingCircuit::Mode::MAXFLOW:
             set_typeid      = curve_typeids[hc->hc()];
             validate_typeid = set_typeid;
-            if (hc->heatingtype == 3) {
-                offset = 7;
-            } else {
-                offset = 8;
-            }
-            factor = 1;
+            offset          = hc->heatingtype == 3 ? 7 : 8;
+            factor          = 1;
             break;
         case HeatingCircuit::Mode::NOFROST:
             set_typeid      = curve_typeids[hc->hc()];
