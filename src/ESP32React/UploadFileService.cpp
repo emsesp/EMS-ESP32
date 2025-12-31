@@ -82,7 +82,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
             }
 #endif
             // it's firmware - initialize the ArduinoOTA updater
-            emsesp::EMSESP::logger().info("Uploading firmware file %s (size: %d bytes)", filename.c_str(), filesize);
+            emsesp::EMSESP::logger().info("Uploading firmware file %s (size: %d KB). Please wait...", filename.c_str(), filesize / 1024);
             // turn off UART to prevent interference with the upload
             emsesp::EMSuart::stop();
 
