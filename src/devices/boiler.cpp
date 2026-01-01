@@ -2478,9 +2478,9 @@ bool Boiler::set_flow_temp(const char * value, const int8_t id) {
         uint8_t v1 = v;
         if (has_telegram_id(0xE4)) {
             EMSESP::txservice_.add(Telegram::Operation::TX_WRITE, device_id(), EMS_TYPE_UBASetPoints2, 1, &v1, 1, 0, false);
-        } else {
-            EMSESP::txservice_.add(Telegram::Operation::TX_WRITE, device_id(), EMS_TYPE_UBASetPoints, 0, &v1, 1, 0, false);
         }
+        // always write to 0x1A
+        EMSESP::txservice_.add(Telegram::Operation::TX_WRITE, device_id(), EMS_TYPE_UBASetPoints, 0, &v1, 1, 0, false);
         return true;
     }
 
