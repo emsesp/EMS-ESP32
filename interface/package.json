@@ -12,7 +12,7 @@
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
-    "build-hosted": "typesafe-i18n && vite build --mode hosted",
+    "build-hosted": "typesafe-i18n --no-watch && vite build --mode hosted",
     "mock-rest": "bun --watch ../mock-api/restServer.ts",
     "preview-standalone": "typesafe-i18n --no-watch && vite build && concurrently -c \"auto\" \"pnpm:mock-rest\" \"vite preview\"",
     "standalone": "concurrently -c \"auto\" \"typesafe-i18n\" \"pnpm:mock-rest\" \"vite dev\"",

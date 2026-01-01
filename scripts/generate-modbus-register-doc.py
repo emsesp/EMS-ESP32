@@ -94,8 +94,9 @@ def print_device_entities(device_name, device_entities):
         type_suffix = split_type[1] if len(split_type) > 1 else ""
 
         # Optimize type_rest extraction and int range detection
-        type_rest_str = type_suffix
+        type_rest_str = ""
         if "int" in type_base and "(" in type_suffix:
+            print(type_base)
             try:
                 # Extract inner part of parentheses
                 range_inner = type_suffix[type_suffix.index("(")+1:type_suffix.index(")")]
@@ -106,14 +107,12 @@ def print_device_entities(device_name, device_entities):
                 elif "/" in range_inner:
                     min_value, max_value = range_inner.split("/")
                 if min_value is not None and max_value is not None:
-                    type_rest_str = f"(&gt;={min_value.strip()}&lt;={max_value.strip()})"
-                else:
-                    type_rest_str = ""
+                    type_rest_str = f" (&gt;={min_value.strip()}&lt;={max_value.strip()})"
             except Exception:
                 # fallback to original
                 pass
 
-        print(f"| {entity['shortname']} | {entity['fullname']} | {type_base} {type_rest_str} | "
+        print(f"| {entity['shortname']} | {entity['fullname']} | {type_base}{type_rest_str} | "
               f"{entity['uom']} | {entity['writeable']} | {tag_type} | {entity['modbus offset']} | "
               f"{entity['modbus count']} | {entity['modbus scale factor']} |")
     print()
@@ -135,6 +134,9 @@ def print_device_type_devices(device_type, devices):
 
 def print_header():
     """Print the markdown document header."""
+    print("---")
+    print("id: Modbus-Entity-Registers")
+    print("---")
     print("# Modbus Entity/Register Mapping")
     print()
     print(":::warning")
