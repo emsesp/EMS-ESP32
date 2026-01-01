@@ -92,7 +92,9 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     const WebSettings original_settings(settings);
 
     // make a snapshot of the current GPIOs
-    EMSESP::system_.make_snapshot_gpios();
+    std::vector<int8_t> used_gpios;
+    std::vector<int8_t> system_gpios;
+    EMSESP::system_.make_snapshot_gpios(used_gpios, system_gpios);
 
     reset_flags();
 
@@ -110,13 +112,6 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     settings.eth_phy_addr   = root["eth_phy_addr"];
     settings.eth_clock_mode = root["eth_clock_mode"];
     settings.led_type       = root["led_type"]; // 1 = RGB-LED
-
-#if defined(EMSESP_DEBUG)
-    EMSESP::logger().debug("NVS boot value=[%s], current board_profile=[%s], new board_profile=[%s]",
-                           EMSESP::nvs_.getString("boot").c_str(),
-                           original_settings.board_profile.c_str(),
-                           settings.board_profile.c_str());
-#endif
 
     // see if the user has changed the board profile
     // this will set: led_gpio, dallas_gpio, rx_gpio, tx_gpio, pbutton_gpio, phy_type, eth_power, eth_phy_addr, eth_clock_mode, led_type
@@ -315,15 +310,12 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
         // replace settings with original settings
         settings = original_settings; // the original settings are still valid
         // restore the GPIOs from the snapshot
-        EMSESP::system_.restore_snapshot_gpios();
+        EMSESP::system_.restore_snapshot_gpios(used_gpios, system_gpios);
 
         // report the error to WebUI
         EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_INVALID_GPIO);
         return StateUpdateResult::ERROR; // don't save the settings if the GPIOs are invalid
     }
-
-    // clean up snapshot of the GPIOs
-    EMSESP::system_.clear_snapshot_gpios();
 
     // save the setting internally, for reference later
     EMSESP::system_.store_settings(settings);
