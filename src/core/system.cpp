@@ -317,12 +317,16 @@ void System::get_partition_info() {
     auto current_partition = (const char *)esp_ota_get_running_partition()->label;
 
     // update the current version and partition name in NVS if not already set (saves on flash wearing)
-    if (EMSESP::nvs_.isKey(current_partition)) {
-        if (EMSESP::nvs_.getString(current_partition) != EMSESP_APP_VERSION) {
-            EMSESP::nvs_.putString(current_partition, EMSESP_APP_VERSION);
+    if (EMSESP::nvs_.getString(current_partition) != EMSESP_APP_VERSION || emsesp::EMSESP::nvs_.getBool(emsesp::EMSESP_NVS_BOOT_NEW_FIRMWARE, false)) {
+        if (EMSESP::nvs_.getBool(emsesp::EMSESP_NVS_BOOT_NEW_FIRMWARE, false)) {
+            EMSESP::nvs_.putBool(emsesp::EMSESP_NVS_BOOT_NEW_FIRMWARE, false);
         }
-    } else {
-        EMSESP::nvs_.putString(current_partition, EMSESP_APP_VERSION); // create new entry
+        EMSESP::nvs_.putString(current_partition, EMSESP_APP_VERSION);
+        char c[20];
+        snprintf(c, sizeof(c), "d_%s", current_partition);
+        auto t = time(nullptr);
+        // write timestamp always with new version, if clock is not set, this will be updated with ntp
+        EMSESP::nvs_.putULong(c, t);
     }
 
     // Loop through all available partitions and update map with the version info pulled from NVS
@@ -345,15 +349,16 @@ void System::get_partition_info() {
         // get the version from the NVS store, and add to map
         if (is_valid) {
             PartitionInfo p_info;
-            p_info.version      = "";
-            p_info.install_date = ""; // this will be added later when NTP is connected
+            // if there is an entry for this partition in NVS, get it's version from NVS
+            p_info.version = EMSESP::nvs_.getString(part->label, "").c_str();
+            char c[20];
+            snprintf(c, sizeof(c), "d_%s", (const char *)part->label);
+            time_t d = EMSESP::nvs_.getULong(c, 0);
+            char   time_string[25];
+            strftime(time_string, sizeof(time_string), "%FT%T", localtime(&d));
+            p_info.install_date = d > 1500000000L ? time_string : "";
 
             p_info.size = part->size / 1024; // set size in KB
-
-            // if there is an entry for this partition in NVS, get it's version from NVS
-            if (EMSESP::nvs_.isKey(part->label)) {
-                p_info.version = EMSESP::nvs_.getString(part->label).c_str();
-            }
 
             partition_info_[part->label] = p_info;
         }
@@ -366,36 +371,21 @@ void System::get_partition_info() {
 
 // set NTP install time/date for the current partition
 // assumes NTP is connected and working
-void System::set_partition_install_date(bool override) {
+void System::set_partition_install_date() {
 #ifndef EMSESP_STANDALONE
     auto current_partition = (const char *)esp_ota_get_running_partition()->label;
     if (current_partition == nullptr) {
         return; // fail-safe
     }
 
-    // skip if it already has an install date, unless override is true
-    if (!partition_info_[current_partition].install_date.empty() && !override) {
-        return;
+    char c[20];
+    snprintf(c, sizeof(c), "d_%s", current_partition);
+    time_t d = EMSESP::nvs_.getULong(c, 0);
+    if (d < 1500000000L) {
+        LOG_INFO("Firmware is fresh, setting the new install date in partition %s", current_partition);
+        auto t = time(nullptr) - uuid::get_uptime_sec();
+        EMSESP::nvs_.putULong(c, t);
     }
-
-    // EMSESP_NVS_BOOT_NEW_FIRMWARE is set in UploadFileService::uploadComplete()
-    auto is_fresh_firmware = EMSESP::nvs_.getBool(EMSESP_NVS_BOOT_NEW_FIRMWARE);
-    // always reset flag after setting the install date
-    EMSESP::nvs_.putBool(EMSESP_NVS_BOOT_NEW_FIRMWARE, false);
-
-    // check if the firmware is a new upload
-    if (is_fresh_firmware) {
-        LOG_DEBUG("Firmware is fresh, setting the new install date in partition %s", current_partition);
-    } else {
-        return; // skip, not new
-    }
-
-    // set current date/time from NTP
-    char   time_string[25];
-    time_t now = time(nullptr);
-    strftime(time_string, sizeof(time_string), "%FT%T", localtime(&now));
-    partition_info_[current_partition].install_date = time_string;
-    LOG_DEBUG("Adding NTP install date %s to partition %s", time_string, current_partition);
 #endif
 }
 
@@ -1747,9 +1737,10 @@ void System::get_value_json(JsonObject output, const std::string & circuit, cons
     if (circuit.length()) {
         output["circuit"] = circuit;
     }
-    output["readable"]  = true;
-    output["writeable"] = (name == "showerTimer" || name == "showerAlert" || name == "enabled" || name == "hideLed" || name == "analogEnabled");
-    output["visible"]   = true;
+    output["readable"] = true;
+    output["writeable"] =
+        (name == "txpause" || name == "showerTimer" || name == "showerAlert" || name == "enabled" || name == "hideLed" || name == "analogEnabled");
+    output["visible"] = true;
     if (val.is<bool>()) {
         output["value"] = val.as<bool>();
         output["type"]  = "boolean";
@@ -2539,11 +2530,7 @@ void System::ntp_connected(bool b) {
     if (b != ntp_connected_) {
         if (b) {
             LOG_INFO("NTP connected");
-#ifdef EMSESP_DEBUG // reset the install date on startup if in debug mode
-            set_partition_install_date(true);
-#else
-            set_partition_install_date(false);
-#endif
+            set_partition_install_date();
         } else {
             LOG_WARNING("NTP disconnected"); // if turned off report it
         }
