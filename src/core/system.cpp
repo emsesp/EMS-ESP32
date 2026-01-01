@@ -107,8 +107,6 @@ bool     System::led_flash_timer_      = false;
 // GPIOs
 std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::valid_system_gpios_;
 std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::used_gpios_;
-std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::snapshot_used_gpios_;
-std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::snapshot_valid_system_gpios_;
 
 // find the index of the language
 // 0 = EN, 1 = DE, etc...
@@ -2923,37 +2921,26 @@ std::vector<uint8_t> System::available_gpios() {
 }
 
 // make a snapshot of the current GPIOs
-void System::make_snapshot_gpios() {
-    snapshot_used_gpios_.clear();
+void System::make_snapshot_gpios(std::vector<int8_t> & u_gpios, std::vector<int8_t> & s_gpios) {
     for (const auto & gpio : used_gpios_) {
-        snapshot_used_gpios_.push_back(gpio);
+        u_gpios.push_back(gpio);
     }
-
-    snapshot_valid_system_gpios_.clear();
     for (const auto & gpio : valid_system_gpios_) {
-        snapshot_valid_system_gpios_.push_back(gpio);
+        s_gpios.push_back(gpio);
     }
 }
 
 // restore the GPIOs from the snapshot
-void System::restore_snapshot_gpios() {
+void System::restore_snapshot_gpios(std::vector<int8_t> & u_gpios, std::vector<int8_t> & s_gpios) {
     used_gpios_.clear();
-    for (const auto & gpio : snapshot_used_gpios_) {
+    for (const auto & gpio : u_gpios) {
         used_gpios_.push_back(gpio);
     }
 
     valid_system_gpios_.clear();
-    for (const auto & gpio : snapshot_valid_system_gpios_) {
+    for (const auto & gpio : s_gpios) {
         valid_system_gpios_.push_back(gpio);
     }
-
-    // clear the snapshot
-    clear_snapshot_gpios();
-}
-
-void System::clear_snapshot_gpios() {
-    snapshot_used_gpios_.clear();
-    snapshot_valid_system_gpios_.clear();
 }
 
 } // namespace emsesp
