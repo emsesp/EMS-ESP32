@@ -1842,7 +1842,6 @@ std::string System::get_metrics_prometheus() {
 
         for (JsonPair p : obj) {
             std::string key         = p.key().c_str();
-            std::string path        = prefix.empty() ? key : prefix + "." + key;
             std::string metric_name = prefix.empty() ? key : prefix + "_" + key;
 
             if (should_ignore(prefix, key)) {
@@ -1981,6 +1980,7 @@ std::string System::get_metrics_prometheus() {
             }
 
             result += info_metric;
+            // TODO fix, as local_info_labels is always empty here
             if (!local_info_labels.empty()) {
                 result += "{";
                 bool first = true;
@@ -2069,6 +2069,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["temperature"] = EMSESP::system_.temperature();
 #endif
 
+    node["txpause"] = EMSbus::tx_mode() == EMS_TXMODE_OFF;
 #endif
 
     // Network Status
@@ -2852,7 +2853,8 @@ void System::set_valid_system_gpios() {
     // 33-37 for Octal SPI (SPIIO4 through SPIIO7 and SPIDQS)
     // 38 and 39 are input only
     // 45 and 36 are strapping pins, input only
-    valid_system_gpios_ = string_range_to_vector("0-14, 17, 18, 21, 33-39, 45, 46");
+    // 47 and 48 are valid on a Wemos S3 (https://github.com/emsesp/EMS-ESP32/issues/2874)
+    valid_system_gpios_ = string_range_to_vector("0-14, 17, 18, 21, 33-39, 45-48");
 #elif CONFIG_IDF_TARGET_ESP32
     // 1 and 3 are UART0 pins, but used for some eth-boards (BBQKees-E32, OlimexPOE)
     // 32-39 is ADC1, input only
