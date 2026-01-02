@@ -1228,7 +1228,7 @@ void Thermostat::process_RC300Summer(std::shared_ptr<const Telegram> telegram) {
 
     if (hc->heatingtype != 3) {
         has_update(telegram, hc->designtemp, 4);
-        has_update(telegram, hc->minflowtemp, 13);
+        has_update(telegram, hc->minflowtemp, model() == EMSdevice::EMS_DEVICE_FLAG_BC400 ? 13 : 8);
     } else {
         has_update(telegram, hc->designtemp, 5);
         has_update(telegram, hc->minflowtemp, 8);
