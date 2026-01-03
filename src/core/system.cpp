@@ -1432,7 +1432,7 @@ bool System::check_upgrade() {
     if (this_version > settings_version) {
         // we need to do an upgrade
         if (missing_version) {
-            LOG_NOTICE("Upgrading to version %d.%d.%d%s", this_version.major(), this_version.minor(), this_version.patch(), this_version_type);
+            LOG_NOTICE("Upgrading to version %d.%d.%d%s", this_version.major(), this_version.minor(), this_version.patch(), this_version_type.c_str());
         } else {
             LOG_NOTICE("Upgrading from version %d.%d.%d%s to %d.%d.%d%s",
                        settings_version.major(),
@@ -2033,6 +2033,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
 #endif
     node["uptime"]    = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     node["uptimeSec"] = uuid::get_uptime_sec();
+    node["resetReason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 #ifndef EMSESP_STANDALONE
     node["platform"]        = EMSESP_PLATFORM;
     node["cpuType"]         = ESP.getChipModel();
@@ -2044,10 +2045,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["usedApp"]         = EMSESP::system_.appUsed();                            // kilobytes
     node["freeApp"]         = EMSESP::system_.appFree();                            // kilobytes
     node["partition"]       = (const char *)esp_ota_get_running_partition()->label; // active partition
-    node["flash_chip_size"] = ESP.getFlashChipSize() / 1024;                        // kilobytes
-#endif
-    node["resetReason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
-#ifndef EMSESP_STANDALONE
+    node["flash_chip_size"] = ESP.getFlashChipSize() / 1024;                         // kilobytes
     node["psram"] = (EMSESP::system_.PSram() > 0); // make boolean
     if (EMSESP::system_.PSram()) {
         node["psramSize"] = EMSESP::system_.PSram();
@@ -2057,9 +2055,27 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
     node["temperature"] = EMSESP::system_.temperature();
 #endif
-
-    node["txpause"] = EMSbus::tx_mode() == EMS_TXMODE_OFF;
 #endif
+    node["txpause"] = EMSbus::tx_mode() == EMS_TXMODE_OFF;
+    
+    // GPIO information
+    std::string gpios_in_use_str;
+    for (const auto & gpio : EMSESP::system_.used_gpios_) {
+        if (!gpios_in_use_str.empty()) {
+            gpios_in_use_str += ",";
+        }
+        gpios_in_use_str += Helpers::itoa(gpio);
+    }
+    node["gpios_in_use"] = gpios_in_use_str;
+    
+    std::string gpios_available_str;
+    for (const auto & gpio : EMSESP::system_.available_gpios()) {
+        if (!gpios_available_str.empty()) {
+            gpios_available_str += ",";
+        }
+        gpios_available_str += Helpers::itoa(gpio);
+    }
+    node["gpios_available"] = gpios_available_str;
 
     // Network Status
     node = output["network"].to<JsonObject>();
@@ -2784,7 +2800,7 @@ uint8_t System::systemStatus() {
 }
 
 // takes a string range like "6-11, 1, 23, 24-48" which has optional ranges and single values and converts to a vector of ints
-std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::string_range_to_vector(const std::string & range) {
+std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::string_range_to_vector(const std::string & range, const std::string & exclude) {
     std::vector<uint8_t, AllocatorPSRAM<uint8_t>> gpios;
     std::string::size_type                        pos  = 0;
     std::string::size_type                        prev = 0;
@@ -2816,10 +2832,50 @@ std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::string_range_to_vector(con
     // handle the last part
     process_part(range.substr(prev));
 
+    // if exclude list is provided, parse it and remove excluded GPIOs
+    if (!exclude.empty()) {
+        std::vector<uint8_t, AllocatorPSRAM<uint8_t>> exclude_gpios;
+        pos  = 0;
+        prev = 0;
+
+        auto process_exclude = [&exclude_gpios](std::string part) {
+            // trim whitespace
+            part.erase(0, part.find_first_not_of(" \t"));
+            part.erase(part.find_last_not_of(" \t") + 1);
+
+            // check if it's a range (contains '-')
+            std::string::size_type dash_pos = part.find('-');
+            if (dash_pos != std::string::npos) {
+                // it's a range like "6-11"
+                int start = std::stoi(part.substr(0, dash_pos));
+                int end   = std::stoi(part.substr(dash_pos + 1));
+                for (int i = start; i <= end; i++) {
+                    exclude_gpios.push_back(static_cast<uint8_t>(i));
+                }
+            } else {
+                exclude_gpios.push_back(static_cast<uint8_t>(std::stoi(part)));
+            }
+        };
+
+        while ((pos = exclude.find(',', prev)) != std::string::npos) {
+            process_exclude(exclude.substr(prev, pos - prev));
+            prev = pos + 1;
+        }
+
+        // handle the last part
+        process_exclude(exclude.substr(prev));
+
+        // remove excluded GPIOs from the main list
+        gpios.erase(std::remove_if(gpios.begin(), gpios.end(), [&exclude_gpios](uint8_t gpio) {
+            return std::find(exclude_gpios.begin(), exclude_gpios.end(), gpio) != exclude_gpios.end();
+        }), gpios.end());
+    }
+
     return gpios;
 }
 
 // initialize a list of valid GPIOs based on the ESP32 board
+// string_to_vector() take two strings, the first is the range of GPIOs to use, the second is the range of GPIOs to exclude
 // note: we always allow 0, which is used to indicate Dallas or LED is disabled
 void System::set_valid_system_gpios() {
     valid_system_gpios_.clear(); // reset system list
@@ -2827,31 +2883,52 @@ void System::set_valid_system_gpios() {
 
     // get free gpios based on board/platform type
 #if CONFIG_IDF_TARGET_ESP32C3
-    // https://www.wemos.cc/en/latest/c3/c3_mini.html
-    valid_system_gpios_ = string_range_to_vector("0-10"); // UART0=20,21
+    // not valid:
+    //   20-21 are UART0
+    valid_system_gpios_ = string_range_to_vector("0-10", "20-21");
 #elif CONFIG_IDF_TARGET_ESP32S2
-    // 43 and 44 are UART0 pins
-    // 38 and 39 are strapping pins, input only
-    valid_system_gpios_ = string_range_to_vector("0-14, 19, 20, 21, 33-37, 45, 46");
+    // not valid:
+    //   6-11 are used for SPI flash and PSRAM
+    //   16-17 are also used for SPI flash and PSRAM
+    //   45-46 are strapping pins
+    //   43-44 are UART0
+    // notes:
+    //   34-39 are input only
+    valid_system_gpios_ = string_range_to_vector("0-46", "6-11, 16-17, 45-46, 43-44");
 #elif CONFIG_IDF_TARGET_ESP32S3
-    // 43 and 44 are UART0 pins
-    // 33-37 for Octal SPI (SPIIO4 through SPIIO7 and SPIDQS)
-    // 38 and 39 are input only
-    // 45 and 36 are strapping pins, input only
-    // 47 and 48 are valid on a Wemos S3 (https://github.com/emsesp/EMS-ESP32/issues/2874)
-    valid_system_gpios_ = string_range_to_vector("0-14, 17, 18, 21, 33-39, 45-48");
+    // not valid:
+    //   43-44 are UART0 pins
+    //   19-20 are USB-JTAG pins
+    //   33-37 for Octal SPI (SPIIO4 through SPIIO7 and SPIDQS) on 32MB boards
+    //   3, 45-46 are strapping pins
+    //   26-32 are typically used for SPI flash and PSRAM
+    //   42 transitions low on reset, slower than other GPIOs which can cause issues in time-sensitive applications
+    // notes:
+    //   34-39 are input only, and can be used
+    //   47 and 48 are valid on a Wemos S3 (https://github.com/emsesp/EMS-ESP32/issues/2874)
+    valid_system_gpios_ = string_range_to_vector("0-48", "43-44, 19-20, 33-37, 3, 45-46, 26-32, 42");
 #elif CONFIG_IDF_TARGET_ESP32
-    // 1 and 3 are UART0 pins, but used for some eth-boards (BBQKees-E32, OlimexPOE)
-    // 32-39 is ADC1, input only
-    // 25 and 26 are DAC (Digital-to-Analog Converter) pins
+    // not valid:
+    //   6-11 are used for SPI flash and PSRAM
+    //   16-17 are also used for SPI flash and PSRAM
+    //   26-32 are used for SPI flash and PSRAM
+    //   33-37 also used for SPI flash and PSRAM, on Octal SPI PSRAM (ESP32-S3R8, ESP32-S3R8V, ESP32-S3R16V)
+    //   9-10 are used for SPI flash and PSRAM
+    //   19-20 used for JTAG-USB
+    //   45-46 are strapping pins
+    //   1 and 3 are UART0 pins, but used for some eth-boards (BBQKees-E32, OlimexPOE)
+    //   42 transitions low on reset, slower than other GPIOs which can cause issues in time-sensitive applications
+    // notes:
+    //   34-39 are input only (ADC1), and can be used
+    //   25 and 26 are DAC (Digital-to-Analog Converter) pins, and can be used
     if (ESP.getPsramSize() > 0) {
         // if psram is enabled remove pins 16 and 17 from the list
-        valid_system_gpios_ = string_range_to_vector("0-5, 12-15, 18-19, 23, 25-27, 32-39");
+        valid_system_gpios_ = string_range_to_vector("0-39", "6-11, 16-17, 26-32, 33-37, 9-10, 19-20, 45-46, 1, 3, 42");
     } else {
-        valid_system_gpios_ = string_range_to_vector("0-5, 12-19, 23, 25-27, 32-39");
+        valid_system_gpios_ = string_range_to_vector("0-39", "19-20, 45-46, 1, 3, 42");
     }
 #elif defined(EMSESP_STANDALONE)
-    valid_system_gpios_ = string_range_to_vector("0-5, 12-19, 23, 25-27, 32-39");
+    valid_system_gpios_ = string_range_to_vector("0-39");
 #endif
 }
 
