@@ -1132,6 +1132,9 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
     if (device_type == EMSdevice::DeviceType::SYSTEM) {
         doc["ent_cat"] = "diagnostic"; // instead of 'config'
     }
+    if (type == DeviceValueType::BOOL) {
+        return;
+    }
 
     // For display_only, we don't use the aliases, also we don't display the icon
     const char * dc_ha  = display_only ? "device_class" : "dev_cla"; // device class, dev_cla
@@ -1146,24 +1149,22 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
 
     // set uom, unless boolean - as HA is fussy with the naming and is case sensitive
     // map too HA uom specific codes from https://github.com/home-assistant/core/blob/dev/homeassistant/const.py
-    if (type != DeviceValueType::BOOL) {
-        if (uom == DeviceValueUOM::HOURS) {
-            doc[uom_ha] = "h";
-        } else if (uom == DeviceValueUOM::MINUTES) {
-            doc[uom_ha] = "min";
-        } else if (uom == DeviceValueUOM::SECONDS) {
-            doc[uom_ha] = "s";
-        } else if (uom == DeviceValueUOM::KB) {
-            doc[uom_ha] = "kB";
-        } else if (uom == DeviceValueUOM::LMIN) {
-            doc[uom_ha] = "L/min";
-        } else if (uom == DeviceValueUOM::LH) {
-            doc[uom_ha] = "L/h";
-        } else if (uom != DeviceValueUOM::NONE) {
-            doc[uom_ha] = EMSdevice::uom_to_string(uom); // use default
-        } else if (discovery_type() != discoveryType::HOMEASSISTANT) {
-            doc[uom_ha] = " "; // Domoticz uses " " for a no-uom
-        }
+    if (uom == DeviceValueUOM::HOURS) {
+        doc[uom_ha] = "h";
+    } else if (uom == DeviceValueUOM::MINUTES) {
+        doc[uom_ha] = "min";
+    } else if (uom == DeviceValueUOM::SECONDS) {
+        doc[uom_ha] = "s";
+    } else if (uom == DeviceValueUOM::KB) {
+        doc[uom_ha] = "kB";
+    } else if (uom == DeviceValueUOM::LMIN) {
+        doc[uom_ha] = "L/min";
+    } else if (uom == DeviceValueUOM::LH) {
+        doc[uom_ha] = "L/h";
+    } else if (uom != DeviceValueUOM::NONE) {
+        doc[uom_ha] = EMSdevice::uom_to_string(uom); // use default
+    } else if (discovery_type() != discoveryType::HOMEASSISTANT) {
+        doc[uom_ha] = " "; // Domoticz uses " " for a no-uom
     }
 
     // set state and device class - always
@@ -1280,9 +1281,8 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
         // DeviceValueUOM::NONE:
         // DeviceValueUOM::KMIN:
         // for device entities which have numerical values, with no UOM
-        if ((type != DeviceValueType::STRING)
-            && (type == DeviceValueType::INT8 || type == DeviceValueType::UINT8 || type == DeviceValueType::INT16 || type == DeviceValueType::UINT16
-                || type == DeviceValueType::UINT24 || type == DeviceValueType::UINT32)) {
+        if (type == DeviceValueType::INT8 || type == DeviceValueType::UINT8 || type == DeviceValueType::INT16 || type == DeviceValueType::UINT16
+            || type == DeviceValueType::UINT24 || type == DeviceValueType::UINT32) {
             if (display_only) {
                 doc[ic_ha] = F_(iconnum); // set icon
             }
