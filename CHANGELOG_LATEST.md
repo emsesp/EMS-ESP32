@@ -6,12 +6,12 @@ For more details go to [emsesp.org](https://emsesp.org/).
 
 ## Added
 
-- update time safed in nvs
+- update time saved in nvs
 
 ## Fixed
 
-- selflowtemp [#2876](https://github.com/emsesp/EMS-ESP32/issues/2876)
+- selflowtemp fix [#2876](https://github.com/emsesp/EMS-ESP32/issues/2876)
 
 ## Changed
 
-- snapshot gpios in temporarly ram
+- snapshot gpios stored in temporary ram

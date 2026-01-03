@@ -8,6 +8,7 @@
 #include <espMqttClient.h>
 
 #include <uuid/common.h>
+#include <default_settings.h>
 
 #define MQTT_RECONNECTION_DELAY 2000 // 2 seconds
 
@@ -65,37 +66,37 @@
 
 class MqttSettings {
   public:
-    bool     enabled;
+    bool     enabled = FACTORY_MQTT_ENABLED;
     String   host;
-    uint16_t port;
+    uint16_t port = FACTORY_MQTT_PORT;
     String   rootCA;
-    bool     enableTLS;
+    bool     enableTLS = false;
     String   username;
     String   password;
     String   clientId;
-    uint16_t keepAlive;
-    bool     cleanSession;
+    uint16_t keepAlive    = FACTORY_MQTT_KEEP_ALIVE;
+    bool     cleanSession = FACTORY_MQTT_CLEAN_SESSION;
 
     // EMS-ESP specific
     String   base;
-    uint16_t publish_time_boiler;
-    uint16_t publish_time_thermostat;
-    uint16_t publish_time_solar;
-    uint16_t publish_time_mixer;
-    uint16_t publish_time_water;
-    uint16_t publish_time_other;
-    uint16_t publish_time_sensor;
-    uint16_t publish_time_heartbeat;
-    uint8_t  mqtt_qos;
-    bool     mqtt_retain;
-    bool     ha_enabled;
-    uint8_t  nested_format;
+    uint16_t publish_time_boiler     = EMSESP_DEFAULT_PUBLISH_TIME;
+    uint16_t publish_time_thermostat = EMSESP_DEFAULT_PUBLISH_TIME;
+    uint16_t publish_time_solar      = EMSESP_DEFAULT_PUBLISH_TIME;
+    uint16_t publish_time_mixer      = EMSESP_DEFAULT_PUBLISH_TIME;
+    uint16_t publish_time_water      = EMSESP_DEFAULT_PUBLISH_TIME;
+    uint16_t publish_time_other      = EMSESP_DEFAULT_PUBLISH_TIME_OTHER;
+    uint16_t publish_time_sensor     = EMSESP_DEFAULT_PUBLISH_TIME;
+    uint16_t publish_time_heartbeat  = EMSESP_DEFAULT_PUBLISH_HEARTBEAT;
+    uint8_t  mqtt_qos                = EMSESP_DEFAULT_MQTT_QOS;
+    bool     mqtt_retain             = EMSESP_DEFAULT_MQTT_RETAIN;
+    bool     ha_enabled              = EMSESP_DEFAULT_HA_ENABLED;
+    uint8_t  nested_format           = EMSESP_DEFAULT_NESTED_FORMAT;
     String   discovery_prefix;
-    uint8_t  discovery_type;
-    bool     publish_single;
-    bool     publish_single2cmd;
-    bool     send_response;
-    uint8_t  entity_format;
+    uint8_t  discovery_type     = EMSESP_DEFAULT_DISCOVERY_TYPE;
+    bool     publish_single     = EMSESP_DEFAULT_PUBLISH_SINGLE;
+    bool     publish_single2cmd = EMSESP_DEFAULT_PUBLISH_SINGLE2CMD;
+    bool     send_response      = EMSESP_DEFAULT_SEND_RESPONSE;
+    uint8_t  entity_format      = EMSESP_DEFAULT_ENTITY_FORMAT;
 
     static void              read(MqttSettings & settings, JsonObject root);
     static StateUpdateResult update(JsonObject root, MqttSettings & settings);

@@ -253,7 +253,7 @@ void ModbusServerTCPasync::onClientConnect(AsyncClient* client) {
     LOG_D("nr clients: %u\n", clients.size());
   } else {
     LOG_D("max number of clients reached, closing new\n");
-    client->close(true);
+    client->close();
     delete client;
   }
 }

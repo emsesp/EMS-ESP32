@@ -42,7 +42,7 @@ int ClientAsync::read(uint8_t* buf, size_t size) {
 }
 
 void ClientAsync::stop() {
-  client.close(false);
+  client.close();
 }
 
 bool ClientAsync::connected() {
