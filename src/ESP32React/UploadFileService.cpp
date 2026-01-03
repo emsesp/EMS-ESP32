@@ -172,7 +172,7 @@ void UploadFileService::handleError(AsyncWebServerRequest * request, int code) {
     // check for invalid extension and immediately kill the connection, which will throw an error
     // that is caught by the web code. Unfortunately the http error code is not sent to the client on fast network connections
     if (code == 406) {
-        request->client()->close(true);
+        request->client()->close();
         _is_firmware = false;
         Update.abort();
     }
