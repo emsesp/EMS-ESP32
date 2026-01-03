@@ -105,8 +105,8 @@ uint32_t System::led_flash_duration_   = 0;
 bool     System::led_flash_timer_      = false;
 
 // GPIOs
-std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::valid_system_gpios_;
-std::vector<uint8_t, AllocatorPSRAM<uint8_t>> System::used_gpios_;
+std::vector<uint8_t, AllocatorPSRAM<uint8_t>>              System::valid_system_gpios_;
+std::vector<System::GpioInfo, AllocatorPSRAM<System::GpioInfo>> System::used_gpios_;
 
 // find the index of the language
 // 0 = EN, 1 = DE, etc...
@@ -1216,8 +1216,8 @@ void System::show_system(uuid::console::Shell & shell) {
     // GPIOs
     shell.println(" GPIOs:");
     shell.printf("  in use:");
-    for (const auto & gpio : used_gpios_) {
-        shell.printf(" %d", gpio);
+    for (const auto & gpio_info : used_gpios_) {
+        shell.printf(" %d(%s)", gpio_info.pin, gpio_info.name.c_str());
     }
     shell.printfln(" (total %d)", used_gpios_.size());
     auto available = available_gpios();
@@ -2060,18 +2060,18 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     
     // GPIO information
     std::string gpios_in_use_str;
-    for (const auto & gpio : EMSESP::system_.used_gpios_) {
+    for (const auto & gpio_info : EMSESP::system_.used_gpios_) {
         if (!gpios_in_use_str.empty()) {
-            gpios_in_use_str += ",";
+            gpios_in_use_str += ", ";
         }
-        gpios_in_use_str += Helpers::itoa(gpio);
+        gpios_in_use_str += Helpers::itoa(gpio_info.pin) + "(" + gpio_info.name + ")";
     }
     node["gpios_in_use"] = gpios_in_use_str;
     
     std::string gpios_available_str;
     for (const auto & gpio : EMSESP::system_.available_gpios()) {
         if (!gpios_available_str.empty()) {
-            gpios_available_str += ",";
+            gpios_available_str += ", ";
         }
         gpios_available_str += Helpers::itoa(gpio);
     }
@@ -2938,8 +2938,9 @@ bool System::add_gpio(uint8_t pin, const char * source_name) {
     // check if this is a valid user GPIO
     if (std::find(valid_system_gpios_.begin(), valid_system_gpios_.end(), pin) != valid_system_gpios_.end()) {
         // It's valid now check if it's already in the used list
-        if (std::find(used_gpios_.begin(), used_gpios_.end(), pin) != used_gpios_.end()) {
-            LOG_WARNING("GPIO %d for %s is already in use", pin, source_name);
+        auto it = std::find_if(used_gpios_.begin(), used_gpios_.end(), [pin, source_name](const GpioInfo & gpio_info) { return gpio_info.pin == pin && gpio_info.name != source_name; });
+        if (it != used_gpios_.end()) {
+            LOG_WARNING("Can't add GPIO %d for %s, already in use by %s", pin, source_name, it->name.c_str());
             return false; // Pin is already used
         }
     } else {
@@ -2952,24 +2953,24 @@ bool System::add_gpio(uint8_t pin, const char * source_name) {
     remove_gpio(pin);
 
     LOG_DEBUG("Adding GPIO %d for %s to used gpio list", pin, source_name);
-    used_gpios_.push_back(pin); // add to used list
+    used_gpios_.push_back({pin, source_name}); // add to used list with name
 
     return true;
 }
 
 // remove a gpio from both valid and used lists
 void System::remove_gpio(uint8_t pin, bool also_system) {
-    auto it = std::find(used_gpios_.begin(), used_gpios_.end(), pin);
+    auto it = std::find_if(used_gpios_.begin(), used_gpios_.end(), [pin](const GpioInfo & gpio_info) { return gpio_info.pin == pin; });
     if (it != used_gpios_.end()) {
         LOG_DEBUG("GPIO %d removed from used gpio list", pin);
         used_gpios_.erase(it);
     }
 
     if (also_system) {
-        it = std::find(valid_system_gpios_.begin(), valid_system_gpios_.end(), pin);
-        if (it != valid_system_gpios_.end()) {
+        auto it_sys = std::find(valid_system_gpios_.begin(), valid_system_gpios_.end(), pin);
+        if (it_sys != valid_system_gpios_.end()) {
             LOG_DEBUG("GPIO %d removed from valid gpio list", pin);
-            valid_system_gpios_.erase(it);
+            valid_system_gpios_.erase(it_sys);
         }
     }
 }
@@ -2978,7 +2979,8 @@ void System::remove_gpio(uint8_t pin, bool also_system) {
 std::vector<uint8_t> System::available_gpios() {
     std::vector<uint8_t> gpios;
     for (const auto & gpio : valid_system_gpios_) {
-        if (std::find(used_gpios_.begin(), used_gpios_.end(), gpio) == used_gpios_.end()) {
+        auto it = std::find_if(used_gpios_.begin(), used_gpios_.end(), [gpio](const GpioInfo & gpio_info) { return gpio_info.pin == gpio; });
+        if (it == used_gpios_.end()) {
             gpios.push_back(gpio); // didn't find it in used_gpios_, so it's available
         }
     }
@@ -2987,8 +2989,8 @@ std::vector<uint8_t> System::available_gpios() {
 
 // make a snapshot of the current GPIOs
 void System::make_snapshot_gpios(std::vector<int8_t> & u_gpios, std::vector<int8_t> & s_gpios) {
-    for (const auto & gpio : used_gpios_) {
-        u_gpios.push_back(gpio);
+    for (const auto & gpio_info : used_gpios_) {
+        u_gpios.push_back(gpio_info.pin);
     }
     for (const auto & gpio : valid_system_gpios_) {
         s_gpios.push_back(gpio);
@@ -2999,7 +3001,7 @@ void System::make_snapshot_gpios(std::vector<int8_t> & u_gpios, std::vector<int8
 void System::restore_snapshot_gpios(std::vector<int8_t> & u_gpios, std::vector<int8_t> & s_gpios) {
     used_gpios_.clear();
     for (const auto & gpio : u_gpios) {
-        used_gpios_.push_back(gpio);
+        used_gpios_.push_back({static_cast<uint8_t>(gpio), "restored"});
     }
 
     valid_system_gpios_.clear();

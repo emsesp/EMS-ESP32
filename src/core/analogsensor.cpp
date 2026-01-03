@@ -576,7 +576,7 @@ bool AnalogSensor::update(uint8_t gpio, const char * org_name, double offset, do
             newSensor.is_system = is_system;
             settings.analogCustomizations.push_back(newSensor);
             // check the gpio again and add to used list
-            if (EMSESP::system_.add_gpio(gpio, "Analog Sensor")) {
+            if (EMSESP::system_.add_gpio(gpio, name)) {
                 LOG_DEBUG("Adding customization for analog sensor GPIO %02d", gpio);
                 return StateUpdateResult::CHANGED; // persist the change
             } else {
