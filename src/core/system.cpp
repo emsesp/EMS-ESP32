@@ -2843,6 +2843,7 @@ void System::set_valid_system_gpios() {
 #elif CONFIG_IDF_TARGET_ESP32
     // 1 and 3 are UART0 pins, but used for some eth-boards (BBQKees-E32, OlimexPOE)
     // 32-39 is ADC1, input only
+    // 25 and 26 are DAC (Digital-to-Analog Converter) pins
     if (ESP.getPsramSize() > 0) {
         // if psram is enabled remove pins 16 and 17 from the list
         valid_system_gpios_ = string_range_to_vector("0-5, 12-15, 18-19, 23, 25-27, 32-39");
