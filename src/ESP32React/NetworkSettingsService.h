@@ -68,13 +68,13 @@ class NetworkSettings {
     String  bssid;
     String  password;
     String  hostname;
-    bool    staticIPConfig;
-    bool    bandwidth20;
-    uint8_t tx_power;
-    bool    nosleep;
-    bool    enableMDNS;
-    bool    enableCORS;
-    String  CORSOrigin;
+    bool    staticIPConfig = false;
+    bool    bandwidth20    = false;
+    uint8_t tx_power       = 0;
+    bool    nosleep        = true;
+    bool    enableMDNS     = true;
+    bool    enableCORS     = false;
+    String  CORSOrigin     = "*";
 
     // optional configuration for static IP address
     IPAddress localIP;

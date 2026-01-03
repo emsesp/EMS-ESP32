@@ -30,7 +30,7 @@
 
 class NTPSettings {
   public:
-    bool   enabled;
+    bool   enabled = FACTORY_NTP_ENABLED;
     String tzLabel;
     String tzFormat;
     String server;

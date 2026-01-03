@@ -58,12 +58,12 @@ enum APNetworkStatus { ACTIVE = 0, INACTIVE, LINGERING };
 
 class APSettings {
   public:
-    uint8_t provisionMode; // 0 = on, 2 = off
+    uint8_t provisionMode = FACTORY_AP_PROVISION_MODE; // 0 = on, 2 = off
     String  ssid;
     String  password;
-    uint8_t channel;
-    bool    ssidHidden;
-    uint8_t maxClients;
+    uint8_t channel    = FACTORY_AP_CHANNEL;
+    bool    ssidHidden = FACTORY_AP_SSID_HIDDEN;
+    uint8_t maxClients = FACTORY_AP_MAX_CLIENTS;
 
     IPAddress localIP;
     IPAddress gatewayIP;
