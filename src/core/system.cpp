@@ -2835,11 +2835,12 @@ void System::set_valid_system_gpios() {
     valid_system_gpios_ = string_range_to_vector("0-14, 19, 20, 21, 33-37, 45, 46");
 #elif CONFIG_IDF_TARGET_ESP32S3
     // 43 and 44 are UART0 pins
+    // 19, 20 USB
     // 33-37 for Octal SPI (SPIIO4 through SPIIO7 and SPIDQS)
     // 38 and 39 are input only
-    // 45 and 36 are strapping pins, input only
+    // 45 and 46 are strapping pins, input only
     // 47 and 48 are valid on a Wemos S3 (https://github.com/emsesp/EMS-ESP32/issues/2874)
-    valid_system_gpios_ = string_range_to_vector("0-14, 17, 18, 21, 33-39, 45-48");
+    valid_system_gpios_ = string_range_to_vector("0-18, 21, 33-39, 45-48");
 #elif CONFIG_IDF_TARGET_ESP32
     // 1 and 3 are UART0 pins, but used for some eth-boards (BBQKees-E32, OlimexPOE)
     // 32-39 is ADC1, input only
