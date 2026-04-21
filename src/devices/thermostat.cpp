@@ -202,7 +202,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         if (model == EMSdevice::EMS_DEVICE_FLAG_RC100) {
             register_telegram_type(0x43F, "CRHolidays", true, MAKE_PF_CB(process_RC300Holiday), 6);
         } else {
-            register_telegram_type(0x269, "RC300Holiday", true, MAKE_PF_CB(process_RC300Holiday), 6);
+            register_telegram_type(0x269, "RC300Holiday", true, MAKE_PF_CB(process_RC300Holiday), 14);
         }
         register_telegram_type(0x16E, "Absent", true, MAKE_PF_CB(process_Absent), 1);
         register_telegram_type(0xBF, "ErrorMessage", false, MAKE_PF_CB(process_ErrorMessageBF));
