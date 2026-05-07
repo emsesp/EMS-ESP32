@@ -748,7 +748,10 @@ void Network::startAP() {
         LOG_DEBUG("softAPConfig failed");
         return;
     }
-    esp_wifi_set_bandwidth(static_cast<wifi_interface_t>(ESP_IF_WIFI_AP), WIFI_BW_HT20);
+
+    WiFi.mode(WIFI_AP);
+
+    // esp_wifi_set_bandwidth(static_cast<wifi_interface_t>(ESP_IF_WIFI_AP), WIFI_BW_HT20);
 
     // WiFi.softAPenableIPv6();
 
@@ -757,9 +760,13 @@ void Network::startAP() {
         WiFi.softAPdisconnect(true);
         return;
     }
-#if CONFIG_IDF_TARGET_ESP32C3
-    WiFi.setTxPower(WIFI_POWER_8_5dBm); // https://www.wemos.cc/en/latest/c3/c3_mini_1_0_0.html#about-wifi
-#endif
+
+    esp_wifi_set_bandwidth(WIFI_IF_AP, WIFI_BW_HT20);
+
+    WiFi.setTxPower(WIFI_POWER_5dBm); // https://www.wemos.cc/en/latest/c3/c3_mini_1_0_0.html#about-wifi
+
+    // WiFi.setTxPower(WIFI_POWER_8_5dBm); // https://www.wemos.cc/en/latest/c3/c3_mini_1_0_0.html#about-wifi
+
     const IPAddress apIp = WiFi.softAPIP();
     if (static_cast<uint32_t>(apIp) == 0) {
         LOG_DEBUG("SoftAP has no IPv4 yet; skipping captive-portal DNS for now.");

@@ -1336,4 +1336,4 @@ handshaked
 startm
 netifs
 testemail
-sendemail
+sendmail

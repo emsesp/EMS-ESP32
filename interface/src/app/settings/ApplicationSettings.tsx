@@ -165,10 +165,10 @@ const ApplicationSettings = () => {
     await doRestart();
   };
 
-  const sendemail = async () => {
+  const sendmail = async () => {
     await sendAPI({
       device: 'system',
-      cmd: 'sendemail',
+      cmd: 'sendmail',
       data: 'Email notification test successful!',
       id: 0
     })
@@ -505,7 +505,7 @@ const ApplicationSettings = () => {
                   variant="outlined"
                   color="primary"
                   disabled={dirtyFlags.length !== 0}
-                  onClick={sendemail}
+                  onClick={sendmail}
                 >
                   Send test email
                 </Button>

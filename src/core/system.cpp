@@ -116,7 +116,7 @@ bool System::command_send(const char * value, const int8_t id) {
 }
 
 // send email via SMTP
-bool System::command_sendemail(const char * value, const int8_t id) {
+bool System::command_sendmail(const char * value, const int8_t id) {
     bool     enabled = false;
     bool     ssl, starttls;
     uint16_t port;
@@ -136,8 +136,8 @@ bool System::command_sendemail(const char * value, const int8_t id) {
     if (!enabled) {
         return false;
     }
-    LOG_DEBUG("Command sendemail port %d%s called with '%s'", port, ssl ? " (SSL)" : starttls ? " (STARTTLS)" : "", value);
-    // LOG_DEBUG("Command sendemail port %d called with '%s'", port, value);
+    LOG_DEBUG("Command sendmail port %d%s called with '%s'", port, ssl ? " (SSL)" : starttls ? " (STARTTLS)" : "", value);
+    // LOG_DEBUG("Command sendmail port %d called with '%s'", port, value);
     bool success = false;
 
 #ifndef NO_TLS_SUPPORT
@@ -151,10 +151,10 @@ bool System::command_sendemail(const char * value, const int8_t id) {
     ssl_client->setBufferSizes(1024, 1024);
     r_client->addPort(port, starttls ? readymail_protocol_tls : ssl ? readymail_protocol_ssl : readymail_protocol_plain_text);
 
-    // smtp->connect(server, port, sendemailCallback);
+    // smtp->connect(server, port, sendmailCallback);
     smtp->connect(server, port);
     if (!smtp->isConnected()) {
-        LOG_ERROR("send email connection error");
+        LOG_ERROR("send mail connection error");
         delete smtp;
         delete r_client;
         delete ssl_client;
@@ -1081,7 +1081,7 @@ void System::commands_init() {
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(read), System::command_read, FL_(read_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, FL_(send_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, FL_(fetch_cmd), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(sendemail), System::command_sendemail, FL_(sendemail_cmd), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(sendmail), System::command_sendmail, FL_(sendmail_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, FL_(restart_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(format), System::command_format, FL_(format_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(txpause), System::command_txpause, FL_(txpause_cmd), CommandFlag::ADMIN_ONLY);

@@ -95,7 +95,7 @@ class System {
     static bool command_info(const char * value, const int8_t id, JsonObject output);
     static bool command_response(const char * value, const int8_t id, JsonObject output);
     static bool command_service(const char * cmd, const char * value);
-    static bool command_sendemail(const char * value, const int8_t id);
+    static bool command_sendmail(const char * value, const int8_t id);
     static bool command_txpause(const char * value, const int8_t id);
 
     static bool        get_value_info(JsonObject root, const char * cmd);
