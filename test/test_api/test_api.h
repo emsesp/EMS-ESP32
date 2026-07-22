@@ -227,7 +227,7 @@ void test_23() {
         "\"publish2command\":false,\"sendResponse\":false},\"syslog\":{\"enabled\":false},\"modbus\":{\"enabled\":false},\"sensor\":{\"temperatureSensors\":3,"
         "\"temperatureSensorReads\":0,\"temperatureSensorFails\":0},\"analog\":{\"enabled\":true,\"analogSensors\":5,\"analogSensorReads\":0,"
         "\"analogSensorFails\":0},\"api\":{\"APICalls\":0,\"APIFails\":0},\"bus\":{\"busStatus\":\"connected\",\"busProtocol\":\"Buderus\","
-        "\"busTelegramsReceived\":8,\"busReads\":0,\"busWrites\":0,\"busIncompleteTelegrams\":0,\"busReadsFailed\":0,\"busWritesFailed\":0,"
+        "\"busTelegramsReceived\":10,\"busReads\":0,\"busWrites\":0,\"busIncompleteTelegrams\":0,\"busReadsFailed\":0,\"busWritesFailed\":0,"
         "\"busRxLineQuality\":100,\"busTxLineQuality\":100},\"settings\":{\"boardProfile\":\"S32\",\"locale\":\"en\",\"txMode\":5,\"emsBusID\":73,"
         "\"showerTimer\":false,\"showerMinDuration\":180,\"showerAlert\":false,\"hideLed\":false,\"noTokenApi\":false,\"readonlyMode\":false,\"fahrenheit\":"
         "false,\"dallasParasite\":false,\"boolFormat\":1,\"boolDashboard\":1,\"enumFormat\":1,\"analogEnabled\":true,\"telnetEnabled\":true,"
@@ -238,8 +238,10 @@ void test_23() {
         "0x2E "
         "0x3B\"},{\"type\":\"thermostat\",\"name\":\"FW120\",\"deviceID\":\"0x10\",\"productID\":192,\"brand\":\"\",\"version\":\"01.00\",\"entities\":12,"
         "\"handlersReceived\":\"0x016F\",\"handlersFetched\":\"0x0170 0x0171\",\"handlersPending\":\"0xA3 0x06 0xA2 0x12 0x13 0x0172 0x0165 "
-        "0x0168\"},{\"type\":\"temperaturesensor\",\"name\":\"temperaturesensor\",\"entities\":3},{\"type\":\"analogsensor\",\"name\":\"analogsensor\","
-        "\"entities\":5},{\"type\":\"scheduler\",\"name\":\"scheduler\",\"entities\":2},{\"type\":\"custom\",\"name\":\"custom\",\"entities\":4}]}]";
+        "0x0168\"},{\"type\":\"water\",\"name\":\"SM200, "
+        "MS200\",\"deviceID\":\"0x28\",\"productID\":164,\"brand\":\"\",\"version\":\"01.00\",\"entities\":3,\"handlersReceived\":\"0x0331\"},{\"type\":"
+        "\"temperaturesensor\",\"name\":\"temperaturesensor\",\"entities\":3},{\"type\":\"analogsensor\",\"name\":\"analogsensor\",\"entities\":5},{\"type\":"
+        "\"scheduler\",\"name\":\"scheduler\",\"entities\":2},{\"type\":\"custom\",\"name\":\"custom\",\"entities\":4}]}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/system"));
 }
 
@@ -258,7 +260,7 @@ void test_24() {
         "\"publish2command\":false,\"sendResponse\":false},\"syslog\":{\"enabled\":false},\"modbus\":{\"enabled\":false},\"sensor\":{\"temperatureSensors\":3,"
         "\"temperatureSensorReads\":0,\"temperatureSensorFails\":0},\"analog\":{\"enabled\":true,\"analogSensors\":5,\"analogSensorReads\":0,"
         "\"analogSensorFails\":0},\"api\":{\"APICalls\":0,\"APIFails\":0},\"bus\":{\"busStatus\":\"connected\",\"busProtocol\":\"Buderus\","
-        "\"busTelegramsReceived\":8,\"busReads\":0,\"busWrites\":0,\"busIncompleteTelegrams\":0,\"busReadsFailed\":0,\"busWritesFailed\":0,"
+        "\"busTelegramsReceived\":10,\"busReads\":0,\"busWrites\":0,\"busIncompleteTelegrams\":0,\"busReadsFailed\":0,\"busWritesFailed\":0,"
         "\"busRxLineQuality\":100,\"busTxLineQuality\":100},\"settings\":{\"boardProfile\":\"S32\",\"locale\":\"en\",\"txMode\":5,\"emsBusID\":73,"
         "\"showerTimer\":false,\"showerMinDuration\":180,\"showerAlert\":false,\"hideLed\":false,\"noTokenApi\":false,\"readonlyMode\":false,\"fahrenheit\":"
         "false,\"dallasParasite\":false,\"boolFormat\":1,\"boolDashboard\":1,\"enumFormat\":1,\"analogEnabled\":true,\"telnetEnabled\":true,"
@@ -269,8 +271,10 @@ void test_24() {
         "0x2E "
         "0x3B\"},{\"type\":\"thermostat\",\"name\":\"FW120\",\"deviceID\":\"0x10\",\"productID\":192,\"brand\":\"\",\"version\":\"01.00\",\"entities\":12,"
         "\"handlersReceived\":\"0x016F\",\"handlersFetched\":\"0x0170 0x0171\",\"handlersPending\":\"0xA3 0x06 0xA2 0x12 0x13 0x0172 0x0165 "
-        "0x0168\"},{\"type\":\"temperaturesensor\",\"name\":\"temperaturesensor\",\"entities\":3},{\"type\":\"analogsensor\",\"name\":\"analogsensor\","
-        "\"entities\":5},{\"type\":\"scheduler\",\"name\":\"scheduler\",\"entities\":2},{\"type\":\"custom\",\"name\":\"custom\",\"entities\":4}]}]";
+        "0x0168\"},{\"type\":\"water\",\"name\":\"SM200, "
+        "MS200\",\"deviceID\":\"0x28\",\"productID\":164,\"brand\":\"\",\"version\":\"01.00\",\"entities\":3,\"handlersReceived\":\"0x0331\"},{\"type\":"
+        "\"temperaturesensor\",\"name\":\"temperaturesensor\",\"entities\":3},{\"type\":\"analogsensor\",\"name\":\"analogsensor\",\"entities\":5},{\"type\":"
+        "\"scheduler\",\"name\":\"scheduler\",\"entities\":2},{\"type\":\"custom\",\"name\":\"custom\",\"entities\":4}]}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/system/info"));
 }
 
@@ -322,7 +326,7 @@ void test_25() {
         "emsesp_analog_analogsensorreads gauge\\nemsesp_analog_analogsensorreads 0\\n# HELP emsesp_analog_analogsensorfails analogSensorFails\\n# TYPE "
         "emsesp_analog_analogsensorfails gauge\\nemsesp_analog_analogsensorfails 0\\n# HELP emsesp_api_apicalls APICalls\\n# TYPE emsesp_api_apicalls "
         "gauge\\nemsesp_api_apicalls 0\\n# HELP emsesp_api_apifails APIFails\\n# TYPE emsesp_api_apifails gauge\\nemsesp_api_apifails 0\\n# HELP "
-        "emsesp_bus_bustelegramsreceived busTelegramsReceived\\n# TYPE emsesp_bus_bustelegramsreceived gauge\\nemsesp_bus_bustelegramsreceived 8\\n# HELP "
+        "emsesp_bus_bustelegramsreceived busTelegramsReceived\\n# TYPE emsesp_bus_bustelegramsreceived gauge\\nemsesp_bus_bustelegramsreceived 10\\n# HELP "
         "emsesp_bus_busreads busReads\\n# TYPE emsesp_bus_busreads gauge\\nemsesp_bus_busreads 0\\n# HELP emsesp_bus_buswrites busWrites\\n# TYPE "
         "emsesp_bus_buswrites gauge\\nemsesp_bus_buswrites 0\\n# HELP emsesp_bus_busincompletetelegrams busIncompleteTelegrams\\n# TYPE "
         "emsesp_bus_busincompletetelegrams gauge\\nemsesp_bus_busincompletetelegrams 0\\n# HELP emsesp_bus_busreadsfailed busReadsFailed\\n# TYPE "
@@ -355,7 +359,9 @@ void test_25() {
         "gauge\\nemsesp_device_entities{type=\\\"boiler\\\", name=\\\"My Custom Boiler\\\", deviceid=\\\"0x08\\\", version=\\\"01.00\\\"} "
         "39\\nemsesp_device_productid{type=\\\"thermostat\\\", name=\\\"FW120\\\", deviceid=\\\"0x10\\\", version=\\\"01.00\\\"} "
         "192\\nemsesp_device_entities{type=\\\"thermostat\\\", name=\\\"FW120\\\", deviceid=\\\"0x10\\\", version=\\\"01.00\\\"} "
-        "12\\nemsesp_device_entities{type=\\\"temperaturesensor\\\", name=\\\"temperaturesensor\\\"} 3\\nemsesp_device_entities{type=\\\"analogsensor\\\", "
+        "12\\nemsesp_device_productid{type=\\\"water\\\", name=\\\"SM200, MS200\\\", deviceid=\\\"0x28\\\", version=\\\"01.00\\\"} "
+        "164\\nemsesp_device_entities{type=\\\"water\\\", name=\\\"SM200, MS200\\\", deviceid=\\\"0x28\\\", version=\\\"01.00\\\"} "
+        "3\\nemsesp_device_entities{type=\\\"temperaturesensor\\\", name=\\\"temperaturesensor\\\"} 3\\nemsesp_device_entities{type=\\\"analogsensor\\\", "
         "name=\\\"analogsensor\\\"} 5\\nemsesp_device_entities{type=\\\"scheduler\\\", name=\\\"scheduler\\\"} 2\\nemsesp_device_entities{type=\\\"custom\\\", "
         "name=\\\"custom\\\"} 4\\n\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/system/metrics"));

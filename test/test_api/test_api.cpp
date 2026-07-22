@@ -162,6 +162,19 @@ void add_devices() {
     uart_telegram({0x90, 0x00, 0xFF, 0x00, 0x00, 0x70, 0x02, 0x01, 0x00, 0xCE, 0x00, 0xE5});
     uart_telegram({0x90, 0x00, 0xFF, 0x00, 0x00, 0x71, 0x01, 0x02, 0x00, 0xCF, 0x00, 0xE6});
 
+    //
+    // water (SM200/MS200 used as a plain DHW "Warmwassersystem" charging station, not solar -
+    // see https://github.com/emsesp/EMS-ESP32/issues/3164 and PR #3165). Registered at device_id
+    // 0x28 (EMS_DEVICE_ID_DHW1), product 164, which must be re-flagged EMS_DEVICE_FLAG_MMPLUS so
+    // it listens for the MMPLUS telegrams (0x331/0x313) this unit actually sends, instead of the
+    // SM100 solar telegrams (0x7A6/0x7D4/0x7DE) it would otherwise wait for forever.
+    //
+    add_device(0x28, 164); // SM200/MS200
+
+    // Water(0x28) -> all, MMPLUSStatusMessage_WWC(0x331), captured on real hardware
+    // (BBQKees E32V2.2 gateway, SM200 firmware 25.06): dhw temp 55.6°C, pump off
+    uart_telegram({0x28, 0x00, 0xFF, 0x00, 0x02, 0x31, 0x02, 0x2C, 0x00, 0x37, 0x01, 0x37, 0x3C, 0x46, 0x02, 0x03, 0x05, 0x00, 0x00});
+
     // send the telegrams
     EMSESP::rxservice_.loop();
 }
@@ -379,6 +392,15 @@ void manual_test10() {
     }
 }
 
+// Regression test for https://github.com/emsesp/EMS-ESP32/issues/3164 (PR #3165):
+// SM200/MS200 (product 164) used as a plain DHW/"Warmwassersystem" station (no solar) must be
+// device-typed WATER *and* flagged MMPLUS so it processes the 0x331 telegram it actually sends.
+// Before the fix this device stayed on EMS_DEVICE_FLAG_SM100 and never received any data.
+void manual_test11() {
+    auto expected_response = "[{\"api_data\":\"55.6\"}]";
+    TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/water/dhw.temp/value"));
+}
+
 void run_manual_tests() {
     RUN_TEST(manual_test1);
     RUN_TEST(manual_test2);
@@ -390,6 +412,7 @@ void run_manual_tests() {
     RUN_TEST(manual_test8);
     RUN_TEST(manual_test9);
     RUN_TEST(manual_test10);
+    RUN_TEST(manual_test11);
 }
 
 const char * run_console_command(const char * command) {
