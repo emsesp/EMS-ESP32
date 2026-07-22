@@ -1378,6 +1378,12 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     }
     if ((device_id >= EMSdevice::EMS_DEVICE_ID_DHW1 && device_id <= EMSdevice::EMS_DEVICE_ID_DHW8) || device_id == EMSdevice::EMS_DEVICE_ID_IPM_DHW) {
         device_type = DeviceType::WATER;
+        // SM100/SM200 (product 163/164) used as a plain DHW/"Warmwassersystem" charging station
+        // (no solar collector) speak the MMPLUS telegram family (0x331/0x313/...), not the SM100
+        // solar telegrams (0x7A6/0x7D4/0x7DE) that the SOLAR-type table entry's flag would imply.
+        if (product_id == 163 || product_id == 164) {
+            flags = DeviceFlags::EMS_DEVICE_FLAG_MMPLUS;
+        }
     }
 
     // set MH210 with id 0x20 as mixer, see https://github.com/emsesp/EMS-ESP32/discussions/2138
