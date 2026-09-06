@@ -744,7 +744,7 @@ mlongcalls
 mmio
 mmode
 mmplus
-mockserver
+mockServer
 modbus
 modee
 modetype
@@ -1348,3 +1348,5 @@ dhcpc
 wifioff
 autonegotiation
 Mbit
+WROVER
+OLIMEXPOEW

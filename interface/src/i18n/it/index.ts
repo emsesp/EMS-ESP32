@@ -178,8 +178,6 @@ const it: Translation = {
   DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings',
   DOWNLOAD_SETTINGS_TEXT2: 'Esporta tutti i valori',
   DOWNLOAD_SYSTEM_BACKUP: 'Backup sistema',
-  UPLOAD_TEXT: 'Upload a new firmware file (.bin) or a backup file (.json)',
-  UPLOAD_DROP_TEXT: 'Drop a firmware .bin file or click here',
   ERROR: 'Errore Inaspettato, prego tenta ancora',
   TIME_SET: 'Imposta Ora',
   MANAGE_USERS: 'Gestione Utenti',
@@ -349,7 +347,11 @@ const it: Translation = {
   COMMANDS_HELP_1: 'Definisci comandi personalizzati per la magistrali EMS',
   COMMAND_EXECUTED: 'Comando eseguito con successo',
   RUN: 'Esegui comando',
-  INTERNET_CONNECTION_CHECK: 'Controllo online per le versioni disponibili'
+  INTERNET_CONNECTION_CHECK: 'Controllo online per le versioni disponibili',
+  UPLOAD_BACKUP_TEXT: 'Klik per selezionare o trascinare e rilasciare un file di backup (.json) qui',
+  UPLOAD_FIRMWARE_TEXT: 'Klik per selezionare o trascinare e rilasciare un file firmware .bin/.md5 qui',
+  UPLOAD_MD5_RECEIVED: 'Digest ricevuto, ora caricare il file firmware .bin',
+  UPLOAD_MD5_MATCHED: 'MD5 corrispondente, installazione firmware...'
 };
 
 export default it;

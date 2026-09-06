@@ -178,8 +178,6 @@ const cs: Translation = {
   DOWNLOAD_SETTINGS_TEXT: 'Vytvořte zálohu svého nastavení a konfigurace',
   DOWNLOAD_SETTINGS_TEXT2: 'Exportovat všechny hodnoty',
   DOWNLOAD_SYSTEM_BACKUP: 'Systémová záloha',
-  UPLOAD_TEXT: 'Nahrajte nový soubor firmwaru (.bin) nebo záložní soubor (.json)',
-  UPLOAD_DROP_TEXT: 'Přetáhněte soubor sem nebo klikněte pro výběr',
   ERROR: 'Neočekávaná chyba, zkuste to prosím znovu',
   TIME_SET: 'Čas nastaven',
   MANAGE_USERS: 'Spravovat uživatele',
@@ -349,7 +347,11 @@ const cs: Translation = {
   COMMANDS_HELP_1: 'Definujte vlastní příkazy pro magistrali EMS',
   COMMAND_EXECUTED: 'Příkaz úspěšně spuštěn',
   RUN: 'Spustit příkaz',
-  INTERNET_CONNECTION_CHECK: 'Kontrola online pro dostupné verze'
+  INTERNET_CONNECTION_CHECK: 'Kontrola online pro dostupné verze',
+  UPLOAD_BACKUP_TEXT: 'Klikněte, abyste vybrali nebo přetáhli a pustili soubor zálohy (.json) sem',
+  UPLOAD_FIRMWARE_TEXT: 'Klikněte, abyste vybrali nebo přetáhli a pustili soubor firmware .bin/.md5 sem',
+  UPLOAD_MD5_RECEIVED: 'Digest přijat, nyní nahrajte firmware .bin',
+  UPLOAD_MD5_MATCHED: 'MD5 souhlasí, firmware se instaluje...'
 };
 
 export default cs;

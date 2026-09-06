@@ -178,8 +178,6 @@ const pl: BaseTranslation = {
   DOWNLOAD_SETTINGS_TEXT: 'Utwórz kopię swoich ustawień i konfiguracji',
   DOWNLOAD_SETTINGS_TEXT2: 'Eksportuj wszystkie wartości',
   DOWNLOAD_SYSTEM_BACKUP: 'Kopia zapasowa systemu',
-  UPLOAD_TEXT: 'Wgraj nowy plik firmware (.bin) lub kopię ustawień (.json)',
-  UPLOAD_DROP_TEXT: 'Upuść plik firmware .bin lub kliknij tutaj',
   ERROR: 'Nieoczekiwany błąd, spróbuj ponownie!',
   TIME_SET: 'Zegar został ustawiony.',
   MANAGE_USERS: 'Zarządzanie użytkownikami',
@@ -349,7 +347,11 @@ const pl: BaseTranslation = {
   COMMANDS_HELP_1: 'Zdefiniuj niestandardowe komendy dla magistrali EMS',
   COMMAND_EXECUTED: 'Komenda wykonana pomyślnie',
   RUN: 'Wykonaj',
-  INTERNET_CONNECTION_CHECK: 'Sprawdzanie online dla dostępnych wersji'
+  INTERNET_CONNECTION_CHECK: 'Sprawdzanie online dla dostępnych wersji',
+  UPLOAD_BACKUP_TEXT: 'Kliknij, aby wybrać lub przeciągnij i upuść plik kopii zapasowej (.json) tutaj',
+  UPLOAD_FIRMWARE_TEXT: 'Kliknij, aby wybrać lub przeciągnij i upuść plik firmware .bin/.md5',
+  UPLOAD_MD5_RECEIVED: 'Suma MD5 odebrana, teraz wgraj plik firmware .bin',
+  UPLOAD_MD5_MATCHED: 'MD5 zgodne, instalowanie firmware...'
 };
 
 export default pl;

@@ -178,8 +178,6 @@ const de: Translation = {
   DOWNLOAD_SETTINGS_TEXT: 'Erstellen Sie eine Sicherung Ihrer Konfigurationen und Einstellungen',
   DOWNLOAD_SETTINGS_TEXT2: 'Exportiere alle Werte',
   DOWNLOAD_SYSTEM_BACKUP: 'Systemsicherung',
-  UPLOAD_TEXT: 'Laden Sie eine neue Firmware-Datei (.bin) oder eine Sicherungsdatei (.json) hoch',
-  UPLOAD_DROP_TEXT: 'Legen Sie eine Firmware-Datei (.bin) ab oder klicken Sie hier',
   ERROR: 'Unerwarteter Fehler, bitte versuchen Sie es erneut.',
   TIME_SET: 'Zeit gesetzt',
   MANAGE_USERS: 'Nutzerverwaltung',
@@ -349,7 +347,11 @@ const de: Translation = {
   COMMANDS_HELP_1: 'Definieren Sie eigene Befehle für die EMS-Magistral',
   COMMAND_EXECUTED: 'Befehl erfolgreich ausgeführt',
   RUN: 'Befehl ausführen',
-  INTERNET_CONNECTION_CHECK: 'Online-Prüfung auf verfügbare Versionen'
+  INTERNET_CONNECTION_CHECK: 'Online-Prüfung auf verfügbare Versionen',
+  UPLOAD_BACKUP_TEXT: 'Klicken Sie, um eine Sicherungsdatei (.json) auszuwählen oder zu ziehen und abzulegen',
+  UPLOAD_FIRMWARE_TEXT: 'Klicken Sie, um eine Firmware-Datei (.bin/.md5) auszuwählen oder zu ziehen und abzulegen',
+  UPLOAD_MD5_RECEIVED: 'Prüfsumme empfangen, jetzt die Firmware-Datei (.bin) hochladen',
+  UPLOAD_MD5_MATCHED: 'MD5 stimmt überein, Firmware wird installiert...'
 };
 
 export default de;

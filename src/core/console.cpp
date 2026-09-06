@@ -295,36 +295,35 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                           });
 
 
-    commands->add_command(
-        ShellContext::MAIN,
-        CommandFlags::ADMIN,
-        string_vector{F_(set), F_(board_profile)},
-        {F_(name_mandatory)},
-        [](Shell & shell, const std::vector<std::string> & arguments) {
-            std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
-            std::string         board_profile = Helpers::toUpper(arguments.front());
-            if (!EMSESP::system_.load_board_profile(data, board_profile)) {
-                shell.println(
-                    "Invalid board profile (S32, E32, E32V2, E32V2_2, MH-ET, NODEMCU, LOLIN, OLIMEX, OLIMEXPOE, OLIMEXPOEW, C3MINI, S2MINI, S3MINI, S32S3, CUSTOM)");
-                return;
-            }
+    commands->add_command(ShellContext::MAIN,
+                          CommandFlags::ADMIN,
+                          string_vector{F_(set), F_(board_profile)},
+                          {F_(name_mandatory)},
+                          [](Shell & shell, const std::vector<std::string> & arguments) {
+                              std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
+                              std::string         board_profile = Helpers::toUpper(arguments.front());
+                              if (!EMSESP::system_.load_board_profile(data, board_profile)) {
+                                  shell.println("Invalid board profile (S32, E32, E32V2, E32V2_2, MH-ET, NODEMCU, LOLIN, OLIMEX, OLIMEXPOE, OLIMEXPOEW, "
+                                                "C3MINI, S2MINI, S3MINI, S32S3, CUSTOM)");
+                                  return;
+                              }
 
-            EMSESP::webSettingsService.update([&](WebSettings & settings) {
-                settings.board_profile  = board_profile.c_str();
-                settings.led_gpio       = data[0];
-                settings.dallas_gpio    = data[1];
-                settings.rx_gpio        = data[2];
-                settings.tx_gpio        = data[3];
-                settings.pbutton_gpio   = data[4];
-                settings.phy_type       = data[5];
-                settings.eth_power      = data[6]; // can be -1
-                settings.eth_phy_addr   = data[7];
-                settings.eth_clock_mode = data[8];
-                return StateUpdateResult::CHANGED;
-            });
-            shell.printfln("Loaded board profile %s. Restarting...", board_profile.c_str());
-            EMSESP::system_.system_restart();
-        });
+                              EMSESP::webSettingsService.update([&](WebSettings & settings) {
+                                  settings.board_profile  = board_profile.c_str();
+                                  settings.led_gpio       = data[0];
+                                  settings.dallas_gpio    = data[1];
+                                  settings.rx_gpio        = data[2];
+                                  settings.tx_gpio        = data[3];
+                                  settings.pbutton_gpio   = data[4];
+                                  settings.phy_type       = data[5];
+                                  settings.eth_power      = data[6]; // can be -1
+                                  settings.eth_phy_addr   = data[7];
+                                  settings.eth_clock_mode = data[8];
+                                  return StateUpdateResult::CHANGED;
+                              });
+                              shell.printfln("Loaded board profile %s. Restarting...", board_profile.c_str());
+                              EMSESP::system_.system_restart();
+                          });
 
     commands->add_command(
         ShellContext::MAIN,

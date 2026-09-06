@@ -2823,7 +2823,7 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
         // uart0 = 1, 3; SD-card = 2, 14, 15; button = 34;
         valid_system_gpios_ = {4, 34, 36, 12, 13, 21, 22, 25, 26, 27, 32, 33, 39};
     } else if (board_profile == "OLIMEXPOEW") {
-        data = {0, 0, 36, 4, 34, PHY_type::PHY_TYPE_LAN8720, 12, 0, 1, 0}; // Olimex ESP32-POE-ISO WROVER (PSRAM)
+        data                = {0, 0, 36, 4, 34, PHY_type::PHY_TYPE_LAN8720, 12, 0, 1, 0}; // Olimex ESP32-POE-ISO WROVER (PSRAM)
         valid_system_gpios_ = {4, 34, 36, 12, 13, 21, 22, 25, 26, 27, 32, 33, 39};
     } else if (board_profile == "C3MINI") {
 #if defined(BOARD_C3_MINI_V1)

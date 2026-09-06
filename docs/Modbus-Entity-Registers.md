@@ -317,7 +317,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -477,7 +477,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -637,7 +637,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -797,7 +797,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -957,7 +957,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -1117,7 +1117,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -1277,7 +1277,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -1437,7 +1437,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -1597,7 +1597,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -1757,7 +1757,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -1917,7 +1917,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -2077,7 +2077,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -2237,7 +2237,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -2397,7 +2397,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -2557,7 +2557,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -2717,7 +2717,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -2877,7 +2877,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -3037,7 +3037,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -3197,7 +3197,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -3357,7 +3357,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -4067,7 +4067,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -4227,7 +4227,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -4387,7 +4387,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -4547,7 +4547,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -4707,7 +4707,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -4867,7 +4867,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8
@@ -5155,7 +5155,7 @@ uint8
 uint8
 | burnminperiod | burner min period | uint8 (&gt;=0&lt;=120) | minutes | true | DEVICE_DATA | 262 | 1 | 1 |
 | absburnpow | burner current power (absolute) | uint8 | % | false | DEVICE_DATA | 263 | 1 | 1 |
-| heatblock | Heatblok temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
+| heatblock | Heatblock temperature | uint16 | C | false | DEVICE_DATA | 264 | 1 | 1/10 |
 int8
 | boilhyston | hysteresis on temperature | int8 (&gt;=-20&lt;=0) | C | true | DEVICE_DATA | 265 | 1 | 1 |
 int8

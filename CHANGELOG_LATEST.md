@@ -13,6 +13,7 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - option to disable factory reset [#3150](https://github.com/emsesp/EMS-ESP32/issues/3150)
 - TLS support with 4MB boards without PSRAM
 - added eth_10mbit to Network Settings, which forces 10BASE-T half-duplex & autonegotiation off, halving the PHY’s power draw. It’s off by default as it will cause issues on managed switches with a port forced to 100Mb [#3213](https://github.com/emsesp/EMS-ESP32/pull/3213)
+- cleaner MD5 and firmware uploading in WebUI [#3222](https://github.com/emsesp/EMS-ESP32/issues/3222)
 
 ## Fixed
 

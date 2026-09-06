@@ -29,6 +29,7 @@
 
 NativeConsole Serial;
 
+EspClass  ESP;
 ETHClass  ETH;
 WiFiClass WiFi;
 

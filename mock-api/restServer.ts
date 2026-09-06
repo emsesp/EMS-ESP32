@@ -239,6 +239,17 @@ switch (emulate_esp) {
 // GLOBAL VARIABLES
 let countWifiScanPoll = 0; // wifi network scan
 let countHardwarePoll = 0; // for during an upload
+let pendingFirmwareMd5 = false; // set by a .md5 upload, cleared by the next .bin
+
+const VALID_UPLOAD_EXTENSIONS = new Set(['bin', 'json', 'md5']);
+
+function parseMd5Digest(text: string): string | null {
+  const token = text.trim().split(/\s+/)[0];
+  if (/^[0-9a-fA-F]{32}$/.test(token)) {
+    return token.toLowerCase();
+  }
+  return null;
+}
 
 // DeviceTypes
 const enum ScheduleFlag {
@@ -329,10 +340,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-        old_custom_name +
-        ') with new (' +
-        new_custom_name +
-        ')'
+          old_custom_name +
+          ') with new (' +
+          new_custom_name +
+          ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -434,24 +445,28 @@ function upgradeImportantMessages(version: string) {
   // 0 is do nothing
   // 1 means 3.9 and factory reset required
   // 2 means a major version upgrade
+
   let upgradeImportantMessageType_n = 0;
 
-  // see if its a filename with a .bin extension
-  if (version.endsWith('.bin')) {
-    upgradeImportantMessageType_n = 1; // make it 1, for testing, meaning factory reset required
-  } else if (version.endsWith('.md')) {
-    upgradeImportantMessageType_n = 0; // use default 0, no message
+  // check file extensions
+  if (version.endsWith('.md5') || version.endsWith('.json')) {
+    upgradeImportantMessageType_n = 0; // digest / backup restore: no upgrade warning
+  } else if (version.endsWith('.bin')) {
+    // extract the version number from the filename and if its going from 3.8.x to 3.9.x, then set upgradeImportantMessageType_n to 1
+    const versionNumber = version.split('.');
+    if (versionNumber[0] === '3' && versionNumber[1] === '8') {
+      upgradeImportantMessageType_n = 1; // make it 1, factory reset required
+    }
   } else {
     // this is a version string like "3.9.0"
-    // upgradeImportantMessageType_n = 2; // make it 2, for testing, meaning a major version upgrade
     upgradeImportantMessageType_n = 1; // make it 1, for testing, meaning a factory reset is required
   }
 
   console.log(
     'upgradeImportantMessageType: version=' +
-    version +
-    ' type=' +
-    upgradeImportantMessageType_n
+      version +
+      ' type=' +
+      upgradeImportantMessageType_n
   );
   return { upgradeImportantMessageType: upgradeImportantMessageType_n };
 }
@@ -502,17 +517,17 @@ function get_versions() {
 
   console.log(
     'getVersions: current=' +
-    THIS_VERSION +
-    ' stable=' +
-    LATEST_STABLE_VERSION +
-    ' (upgradeable=' +
-    (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-    ') dev=' +
-    LATEST_DEV_VERSION +
-    ' (upgradeable=' +
-    (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-    ')' +
-    (MOCK_OFFLINE ? ' [offline]' : '')
+      THIS_VERSION +
+      ' stable=' +
+      LATEST_STABLE_VERSION +
+      ' (upgradeable=' +
+      (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+      ') dev=' +
+      LATEST_DEV_VERSION +
+      ' (upgradeable=' +
+      (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+      ')' +
+      (MOCK_OFFLINE ? ' [offline]' : '')
   );
   return data;
 }
@@ -774,6 +789,7 @@ const EMSESP_COMMANDS_ENDPOINT = REST_ENDPOINT_ROOT + 'commands';
 const EMSESP_CUSTOMENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customEntities';
 const EMSESP_MODULES_ENDPOINT = REST_ENDPOINT_ROOT + 'modules';
 const EMSESP_ACTION_ENDPOINT = REST_ENDPOINT_ROOT + 'action';
+const EMSESP_UPLOAD_FILE_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFile';
 
 // these are used in the API calls only
 const EMSESP_SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info';
@@ -4637,6 +4653,47 @@ router
 
 // SYSTEM and SETTINGS
 router
+  .post(EMSESP_UPLOAD_FILE_ENDPOINT, async (request: Request) => {
+    const formData = await request.formData();
+    const uploaded = formData.get('file');
+    if (!uploaded || typeof uploaded === 'string') {
+      return status(400);
+    }
+
+    const fileName = uploaded.name || '';
+    const fileExtension = fileName.includes('.')
+      ? fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase()
+      : '';
+    console.log(
+      `File uploaded: ${fileName} (${fileExtension}, ${uploaded.size} bytes)`
+    );
+
+    if (!VALID_UPLOAD_EXTENSIONS.has(fileExtension)) {
+      console.log('Invalid file extension');
+      return status(406);
+    }
+
+    if (fileExtension === 'md5') {
+      const digest = parseMd5Digest(await uploaded.text());
+      if (!digest) {
+        console.log('Invalid MD5 digest file');
+        return status(406);
+      }
+      pendingFirmwareMd5 = true;
+      console.log('MD5 digest received', digest);
+      return { md5: digest };
+    }
+
+    if (fileExtension === 'bin' && pendingFirmwareMd5) {
+      pendingFirmwareMd5 = false;
+      console.log('Firmware MD5 matches');
+      return { md5_ok: true };
+    }
+
+    pendingFirmwareMd5 = false;
+    console.log('File uploaded successfully!');
+    return status(200);
+  })
   .get(ACTIVITY_ENDPOINT, () => activity)
   .get(SYSTEM_STATUS_ENDPOINT, async () => {
     if (countHardwarePoll >= 2) {
