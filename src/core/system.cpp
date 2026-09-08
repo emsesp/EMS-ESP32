@@ -1092,6 +1092,7 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.println();
     shell.println("System:");
     shell.printfln(" Version: %s", EMSESP_APP_VERSION);
+    shell.printfln(" System name: %s", system_name_.c_str());
 #ifndef EMSESP_STANDALONE
     shell.printfln(" Platform: %s (%s)", EMSESP_PLATFORM, ESP.getChipModel());
     shell.printfln(" Model: %s", getBBQKeesGatewayDetails().c_str());
@@ -1976,24 +1977,6 @@ bool System::command_service(const char * cmd, const char * value) {
             EMSESP::system_.syslog_init();
             ok = true;
         }
-    }
-
-    int n;
-    if (!ok && Helpers::value2number(value, n)) {
-#ifndef EMSESP_STANDALONE
-        if (!strcmp(cmd, "fuse/mfg")) {
-            ok = esp_efuse_write_reg(EFUSE_BLK3, 0, (uint32_t)n) == ESP_OK;
-            ok ? LOG_INFO("fuse programed with value '%X': successful", n) : LOG_ERROR("fuse programed with value '%X': failed", n);
-        }
-        if (!strcmp(cmd, "fuse/mfgadd")) {
-            uint8_t reg = 0;
-            while (esp_efuse_read_reg(EFUSE_BLK3, reg) != 0 && reg < 7)
-                reg++;
-            ok = esp_efuse_write_reg(EFUSE_BLK3, reg, (uint32_t)n) == ESP_OK;
-            ok ? LOG_INFO("fuse %d programed with value '%X': successful", reg, n) : LOG_ERROR("fuse %d programed with value '%X': failed", reg, n);
-            return true;
-        }
-#endif
     }
 
     if (ok) {
@@ -2917,7 +2900,7 @@ bool System::command_txpause(const char * value, const int8_t) {
     return true;
 }
 
-// format command - factory reset, removing all config files
+// format command - factory reset, removing all settings files
 bool System::command_format(const char * value, const int8_t id) {
     if (EMSESP::system_.disable_reset()) {
         LOG_NOTICE("Factory reset disabled");
@@ -2927,7 +2910,7 @@ bool System::command_format(const char * value, const int8_t id) {
 #if !defined(EMSESP_STANDALONE) && !defined(EMSESP_TEST)
     // don't really format the filesystem in test or standalone mode
     if (LittleFS.format()) {
-        LOG_INFO("Filesystem formatted successfully. All config files removed.");
+        LOG_INFO("Filesystem formatted successfully. All settings files removed.");
     } else {
         LOG_ERROR("Format failed");
     }
