@@ -935,7 +935,7 @@ bool Solar::set_heatTransferSystem(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
-    write_command(0x358, 5, b ? 0x01 : 0x00, 0x358);
+    write_command(0x358, 5, b ? 0xFF : 0x00); // change is broadcasted
     return true;
 }
 
@@ -945,7 +945,7 @@ bool Solar::set_externalCyl(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
-    write_command(0x358, 9, b ? 0x01 : 0x00, 0x358);
+    write_command(0x358, 9, b ? 0xFF : 0x00); // change is broadcasted
     return true;
 }
 
@@ -955,7 +955,7 @@ bool Solar::set_thermalDisinfect(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
-    write_command(0x358, 10, b ? 0x01 : 0x00, 0x358);
+    write_command(0x358, 10, b ? 0xFF : 0x00); // change is broadcasted
     return true;
 }
 
@@ -965,7 +965,7 @@ bool Solar::set_heatMetering(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
-    write_command(0x358, 14, b ? 0x01 : 0x00, 0x358);
+    write_command(0x358, 14, b ? 0xFF : 0x00); // change is broadcasted
     return true;
 }
 
@@ -978,7 +978,7 @@ bool Solar::set_solarEnabled(const char * value, const int8_t id) {
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_SM10) {
         write_command(0x96, 0, b ? 0xFF : 0x00, 0x96);
     } else {
-        write_command(0x358, 19, b ? 0x01 : 0x00, 0x358);
+        write_command(0x358, 19, b ? 0xFF : 0x00); // change is broadcasted
     }
     return true;
 }

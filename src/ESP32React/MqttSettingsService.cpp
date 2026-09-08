@@ -84,7 +84,7 @@ void MqttSettingsService::loop() {
     }
     if (_reconfigureMqtt || (_disconnectedAt && static_cast<uint32_t>(uuid::get_uptime() - _disconnectedAt) >= MQTT_RECONNECTION_DELAY)) {
         // configure MQTT client
-        if (_reconfigureMqtt) {
+        if (_reconfigureMqtt && _state.enabled) {
             emsesp::EMSESP::logger().info("Starting MQTT service");
         }
         _disconnectedAt  = configureMqtt() ? 0 : uuid::get_uptime();
@@ -130,6 +130,7 @@ MqttClient * MqttSettingsService::getMqttClient() {
 void MqttSettingsService::onMqttConnect(bool sessionPresent) {
     (void)sessionPresent;
     emsesp::EMSESP::mqtt_.on_connect();
+    _disconnectReason = espMqttClientTypes::DisconnectReason::USER_OK;
 }
 
 void MqttSettingsService::onMqttDisconnect(espMqttClientTypes::DisconnectReason reason) {
@@ -158,6 +159,9 @@ bool MqttSettingsService::configureMqtt() {
         emsesp::EMSESP::logger().debug("Disconnecting to configure");
 #endif
         _mqttClient->disconnect(true);
+        if (!_state.enabled) {
+            emsesp::EMSESP::logger().info("Stopping MQTT client");
+        }
     }
 
     // only connect if WiFi is connected and MQTT is enabled

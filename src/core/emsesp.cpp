@@ -1741,9 +1741,15 @@ void EMSESP::start() {
 #endif
 
     // start NVS storage
-    if (!nvs_.begin("ems-esp", false, "nvs1")) { // try bigger nvs partition on 16M flash first
-        nvs_.begin("ems-esp", false, "nvs");     // fallback to small nvs
+#ifndef EMSESP_STANDALONE
+    if (esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_NVS, "nvs1")) {
+        nvs_.begin("ems-esp", false, "nvs1");
+    } else {
+        nvs_.begin("ems-esp", false, "nvs"); // fallback to small nvs
     }
+#else
+        nvs_.begin("ems-esp", false, "nvs");
+#endif
 
     // set valid GPIOs list based on ESP32 chip/platform type
     system_.set_valid_system_gpios();

@@ -867,7 +867,7 @@ bool System::loop() {
 void System::send_info_mqtt() {
     static uint8_t _connection = 0;
     uint8_t        connection  = (EMSESP::network_.ethernet_connected() ? 1 : 0) + (EMSESP::network_.wifi_connected() ? 2 : 0) + (ntp_connected_ ? 4 : 0)
-                         + (EMSESP::network_.has_ipv6() ? 8 : 0);
+                                 + (EMSESP::network_.has_ipv6() ? 8 : 0);
     // check if connection status has changed
     if (!Mqtt::connected() || connection == _connection) {
         return;
