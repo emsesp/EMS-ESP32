@@ -207,9 +207,6 @@ export default defineConfig(
   async ({ command, mode }: { command: string; mode: string }) => {
     if (command === 'serve') {
       console.log(`Preparing for standalone build with server, mode=${mode}`);
-      // Imported through a computed URL so the config bundler leaves it as a real
-      // runtime import: mock-api is a separate package with its own node_modules,
-      // and inlining it here would drag its dependencies into every build.
       const mockServerUrl = pathToFileURL(
         path.resolve(import.meta.dirname, '../mock-api/mockServer.js')
       ).href;

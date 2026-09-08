@@ -846,7 +846,7 @@ const Version = () => {
             <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
               {LL.UPLOAD()}
             </Typography>
-            <SingleUpload doRestart={doRestart} />
+            <SingleUpload text={LL.UPLOAD_FIRMWARE_TEXT()} doRestart={doRestart} />
           </>
         )}
       </Box>

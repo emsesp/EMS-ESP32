@@ -13,10 +13,32 @@ static String getFilenameExtension(const String & filename) {
     return {};
 }
 
+// Accepts a raw 32-char hex digest, optionally with trailing newline or a GNU "hash  filename" suffix.
+static bool parseMd5Digest(const uint8_t * data, size_t len, std::array<char, 33> & out) {
+    size_t i = 0;
+    while (i < len && (data[i] == ' ' || data[i] == '\t' || data[i] == '\r' || data[i] == '\n')) {
+        ++i;
+    }
+    if (len - i < 32) {
+        return false;
+    }
+    for (size_t n = 0; n < 32; n++) {
+        const char c   = static_cast<char>(data[i + n]);
+        const bool hex = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+        if (!hex) {
+            return false;
+        }
+        out[n] = (c >= 'A' && c <= 'F') ? static_cast<char>(c - 'A' + 'a') : c;
+    }
+    out[32] = '\0';
+    return true;
+}
+
 UploadFileService::UploadFileService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager)
     , _is_firmware(false)
     , _is_filesystem(false)
+    , _md5_applied(false)
     , _md5() {
     server->on(
         UPLOAD_FILE_PATH,
@@ -48,18 +70,23 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
             // LittleFS filesystem image
             _is_filesystem = true;
             _md5[0]        = '\0'; // clear any stale md5 so Update.end() doesn't compare against it
+            _md5_applied   = false;
         } else if ((extension == "bin") && (filesize > 1000000)) {
             _is_firmware = true;
         } else if (extension == "json") {
-            _md5[0] = '\0'; // clear md5
+            _md5[0]      = '\0'; // clear md5
+            _md5_applied = false;
         } else if (extension == "md5") {
-            if (len == _md5.size() - 1) {
-                std::memcpy(_md5.data(), data, _md5.size() - 1);
-                _md5.back() = '\0';
+            if (!parseMd5Digest(data, len, _md5)) {
+                emsesp::EMSESP::logger().err("Invalid MD5 digest file");
+                handleError(request, 406); // Not Acceptable
+            } else {
+                emsesp::EMSESP::logger().info("MD5 digest received (%s). Now upload the firmware BIN", _md5.data());
             }
             return;
         } else {
             _md5.front() = '\0';
+            _md5_applied = false;
             emsesp::EMSESP::logger().err("Unsupported file type: %s, size: %u", filename.c_str(), filesize);
             handleError(request, 406); // Not Acceptable - unsupported file type
             return;
@@ -103,9 +130,11 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
             emsesp::EMSESP::system_.systemStatus(emsesp::SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING);
 
             if (Update.begin(filesize - sizeof(esp_image_header_t))) {
+                _md5_applied = false;
                 if (strlen(_md5.data()) == _md5.size() - 1) {
                     Update.setMD5(_md5.data());
-                    _md5.front() = '\0';
+                    _md5_applied = true;
+                    emsesp::EMSESP::logger().info("Firmware MD5 check enabled (%s)", _md5.data());
                 }
                 request->onDisconnect([this] { handleDisconnect(); }); // success, let's make sure we end the update if the client hangs up
             } else {
@@ -183,8 +212,19 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
             emsesp::EMSESP::nvs_.putBool(emsesp::EMSESP_NVS_BOOT_NEW_FIRMWARE, true);
         }
 
-        AsyncWebServerResponse * response = request->beginResponse(200);
-        request->send(response);
+        if (_is_firmware && _md5_applied) {
+            emsesp::EMSESP::logger().info("Firmware MD5 matches");
+            auto *     response = new emsesp::PsramAsyncJsonResponse(false);
+            JsonObject root     = response->getRoot();
+            root["md5_ok"]      = true;
+            response->setLength();
+            request->send(response);
+            _md5.front() = '\0';
+            _md5_applied = false;
+        } else {
+            AsyncWebServerResponse * response = request->beginResponse(200);
+            request->send(response);
+        }
         emsesp::EMSESP::system_.systemStatus(
             emsesp::SYSTEM_STATUS::SYSTEM_STATUS_PENDING_RESTART); // will be handled by the main loop. We use pending for the Web's SystemMonitor
         return;

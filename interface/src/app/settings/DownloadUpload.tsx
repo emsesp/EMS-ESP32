@@ -165,11 +165,7 @@ const DownloadUpload = () => {
         {LL.UPLOAD()}
       </Typography>
 
-      <Typography sx={{ pb: 2 }} color="warning" variant="body1">
-        {LL.UPLOAD_TEXT()}:
-      </Typography>
-
-      <SingleUpload doRestart={doRestart} />
+      <SingleUpload text={LL.UPLOAD_BACKUP_TEXT()} doRestart={doRestart} />
     </SectionContent>
   );
 };

@@ -23,6 +23,7 @@ class UploadFileService {
     SecurityManager *    _securityManager;
     bool                 _is_firmware;
     bool                 _is_filesystem;
+    bool                 _md5_applied; // true if an MD5 digest was applied to the current firmware upload
     std::array<char, 33> _md5;
 
     void handleUpload(AsyncWebServerRequest * request, const String & filename, size_t index, uint8_t * data, size_t len, bool final);

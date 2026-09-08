@@ -178,8 +178,6 @@ const en: Translation = {
   DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings',
   DOWNLOAD_SETTINGS_TEXT2: 'Export all values',
   DOWNLOAD_SYSTEM_BACKUP: 'System Backup',
-  UPLOAD_TEXT: 'Upload a new firmware file (.bin) or a backup file (.json)',
-  UPLOAD_DROP_TEXT: 'Drop a firmware .bin file or click here',
   ERROR: 'Unexpected Error, please try again',
   TIME_SET: 'Time set',
   MANAGE_USERS: 'Manage Users',
@@ -349,7 +347,11 @@ const en: Translation = {
   COMMANDS_HELP_1: 'Define reusable named commands below. These can be executed from the console, API/MQTT, or referenced by the Scheduler',
   COMMAND_EXECUTED: 'Command executed successfully',
   RUN: 'Run',
-  INTERNET_CONNECTION_CHECK: 'Checking online for available versions'
+  INTERNET_CONNECTION_CHECK: 'Checking online for available versions',
+  UPLOAD_BACKUP_TEXT: 'Click to select or Drag&Drop a backup file (.json) here',
+  UPLOAD_FIRMWARE_TEXT: 'Click to select or Drag&Drop a firmware .bin/.md5 file',
+  UPLOAD_MD5_RECEIVED: 'Digest received, now upload the firmware .bin file',
+  UPLOAD_MD5_MATCHED: 'MD5 matches, installing firmware...'
 };
 
 export default en;

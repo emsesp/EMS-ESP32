@@ -242,7 +242,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Greenstar 2000",boiler,11,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "Greenstar 2000",boiler,11,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "Greenstar 2000",boiler,11,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"Greenstar 2000",boiler,11,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"Greenstar 2000",boiler,11,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "Greenstar 2000",boiler,11,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "Greenstar 2000",boiler,11,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "Greenstar 2000",boiler,11,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -362,7 +362,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "C1200W",boiler,12,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "C1200W",boiler,12,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "C1200W",boiler,12,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"C1200W",boiler,12,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"C1200W",boiler,12,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "C1200W",boiler,12,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "C1200W",boiler,12,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "C1200W",boiler,12,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -482,7 +482,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "CS5800iG",boiler,16,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "CS5800iG",boiler,16,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "CS5800iG",boiler,16,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"CS5800iG",boiler,16,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"CS5800iG",boiler,16,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "CS5800iG",boiler,16,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "CS5800iG",boiler,16,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "CS5800iG",boiler,16,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -602,7 +602,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "BK13/BK15, Smartline, GB1*2",boiler,64,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "BK13/BK15, Smartline, GB1*2",boiler,64,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "BK13/BK15, Smartline, GB1*2",boiler,64,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"BK13/BK15, Smartline, GB1*2",boiler,64,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"BK13/BK15, Smartline, GB1*2",boiler,64,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "BK13/BK15, Smartline, GB1*2",boiler,64,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "BK13/BK15, Smartline, GB1*2",boiler,64,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "BK13/BK15, Smartline, GB1*2",boiler,64,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -722,7 +722,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Logano GB1*5, Logamatic MC10",boiler,72,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "Logano GB1*5, Logamatic MC10",boiler,72,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "Logano GB1*5, Logamatic MC10",boiler,72,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"Logano GB1*5, Logamatic MC10",boiler,72,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"Logano GB1*5, Logamatic MC10",boiler,72,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "Logano GB1*5, Logamatic MC10",boiler,72,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "Logano GB1*5, Logamatic MC10",boiler,72,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "Logano GB1*5, Logamatic MC10",boiler,72,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -842,7 +842,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Cascade CM10",boiler,81,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "Cascade CM10",boiler,81,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "Cascade CM10",boiler,81,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"Cascade CM10",boiler,81,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"Cascade CM10",boiler,81,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "Cascade CM10",boiler,81,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "Cascade CM10",boiler,81,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "Cascade CM10",boiler,81,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -962,7 +962,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Logamax Plus GB022",boiler,84,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "Logamax Plus GB022",boiler,84,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "Logamax Plus GB022",boiler,84,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"Logamax Plus GB022",boiler,84,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"Logamax Plus GB022",boiler,84,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "Logamax Plus GB022",boiler,84,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "Logamax Plus GB022",boiler,84,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "Logamax Plus GB022",boiler,84,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -1082,7 +1082,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Condens, Logamax/Logomatic, Cerapur Top, Greenstar, Generic HT3",boiler,95,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "Condens, Logamax/Logomatic, Cerapur Top, Greenstar, Generic HT3",boiler,95,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "Condens, Logamax/Logomatic, Cerapur Top, Greenstar, Generic HT3",boiler,95,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"Condens, Logamax/Logomatic, Cerapur Top, Greenstar, Generic HT3",boiler,95,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"Condens, Logamax/Logomatic, Cerapur Top, Greenstar, Generic HT3",boiler,95,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "Condens, Logamax/Logomatic, Cerapur Top, Greenstar, Generic HT3",boiler,95,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "Condens, Logamax/Logomatic, Cerapur Top, Greenstar, Generic HT3",boiler,95,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "Condens, Logamax/Logomatic, Cerapur Top, Greenstar, Generic HT3",boiler,95,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -1202,7 +1202,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Topline, GB162",boiler,115,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "Topline, GB162",boiler,115,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "Topline, GB162",boiler,115,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"Topline, GB162",boiler,115,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"Topline, GB162",boiler,115,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "Topline, GB162",boiler,115,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "Topline, GB162",boiler,115,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "Topline, GB162",boiler,115,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -1322,7 +1322,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Cascade MCM10",boiler,121,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "Cascade MCM10",boiler,121,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "Cascade MCM10",boiler,121,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"Cascade MCM10",boiler,121,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"Cascade MCM10",boiler,121,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "Cascade MCM10",boiler,121,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "Cascade MCM10",boiler,121,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "Cascade MCM10",boiler,121,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -1442,7 +1442,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Proline",boiler,122,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "Proline",boiler,122,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "Proline",boiler,122,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"Proline",boiler,122,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"Proline",boiler,122,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "Proline",boiler,122,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "Proline",boiler,122,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "Proline",boiler,122,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -1562,7 +1562,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "GB*72, Trendline, Cerapur, Greenstar Si",boiler,123,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "GB*72, Trendline, Cerapur, Greenstar Si",boiler,123,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "GB*72, Trendline, Cerapur, Greenstar Si",boiler,123,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"GB*72, Trendline, Cerapur, Greenstar Si",boiler,123,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"GB*72, Trendline, Cerapur, Greenstar Si",boiler,123,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "GB*72, Trendline, Cerapur, Greenstar Si",boiler,123,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "GB*72, Trendline, Cerapur, Greenstar Si",boiler,123,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "GB*72, Trendline, Cerapur, Greenstar Si",boiler,123,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -1682,7 +1682,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "GB212",boiler,131,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "GB212",boiler,131,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "GB212",boiler,131,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"GB212",boiler,131,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"GB212",boiler,131,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "GB212",boiler,131,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "GB212",boiler,131,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "GB212",boiler,131,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -1802,7 +1802,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "GC7000F",boiler,132,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "GC7000F",boiler,132,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "GC7000F",boiler,132,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"GC7000F",boiler,132,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"GC7000F",boiler,132,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "GC7000F",boiler,132,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "GC7000F",boiler,132,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "GC7000F",boiler,132,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -1922,7 +1922,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Logano GB125/KB195i, Logamatic MC110",boiler,133,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "Logano GB125/KB195i, Logamatic MC110",boiler,133,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "Logano GB125/KB195i, Logamatic MC110",boiler,133,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"Logano GB125/KB195i, Logamatic MC110",boiler,133,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"Logano GB125/KB195i, Logamatic MC110",boiler,133,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "Logano GB125/KB195i, Logamatic MC110",boiler,133,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "Logano GB125/KB195i, Logamatic MC110",boiler,133,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "Logano GB125/KB195i, Logamatic MC110",boiler,133,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -2042,7 +2042,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Greenstar 30Ri Compact",boiler,154,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "Greenstar 30Ri Compact",boiler,154,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "Greenstar 30Ri Compact",boiler,154,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"Greenstar 30Ri Compact",boiler,154,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"Greenstar 30Ri Compact",boiler,154,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "Greenstar 30Ri Compact",boiler,154,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "Greenstar 30Ri Compact",boiler,154,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "Greenstar 30Ri Compact",boiler,154,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -2162,7 +2162,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Suprapur-o",boiler,155,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "Suprapur-o",boiler,155,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "Suprapur-o",boiler,155,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"Suprapur-o",boiler,155,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"Suprapur-o",boiler,155,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "Suprapur-o",boiler,155,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "Suprapur-o",boiler,155,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "Suprapur-o",boiler,155,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -2282,7 +2282,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Cerapur Aero",boiler,167,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "Cerapur Aero",boiler,167,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "Cerapur Aero",boiler,167,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"Cerapur Aero",boiler,167,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"Cerapur Aero",boiler,167,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "Cerapur Aero",boiler,167,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "Cerapur Aero",boiler,167,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "Cerapur Aero",boiler,167,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -2402,7 +2402,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Hybrid Heatpump",boiler,168,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "Hybrid Heatpump",boiler,168,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "Hybrid Heatpump",boiler,168,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"Hybrid Heatpump",boiler,168,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"Hybrid Heatpump",boiler,168,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "Hybrid Heatpump",boiler,168,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "Hybrid Heatpump",boiler,168,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "Hybrid Heatpump",boiler,168,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -2522,7 +2522,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Logano GB212",boiler,170,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "Logano GB212",boiler,170,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "Logano GB212",boiler,170,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"Logano GB212",boiler,170,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"Logano GB212",boiler,170,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "Logano GB212",boiler,170,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "Logano GB212",boiler,170,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "Logano GB212",boiler,170,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -3078,7 +3078,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Condens 5000i, Greenstar 8000/GC9800IW, GB192i*2",boiler,195,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "Condens 5000i, Greenstar 8000/GC9800IW, GB192i*2",boiler,195,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "Condens 5000i, Greenstar 8000/GC9800IW, GB192i*2",boiler,195,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"Condens 5000i, Greenstar 8000/GC9800IW, GB192i*2",boiler,195,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"Condens 5000i, Greenstar 8000/GC9800IW, GB192i*2",boiler,195,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "Condens 5000i, Greenstar 8000/GC9800IW, GB192i*2",boiler,195,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "Condens 5000i, Greenstar 8000/GC9800IW, GB192i*2",boiler,195,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "Condens 5000i, Greenstar 8000/GC9800IW, GB192i*2",boiler,195,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -3198,7 +3198,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Logamax U122, Cerapur",boiler,203,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "Logamax U122, Cerapur",boiler,203,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "Logamax U122, Cerapur",boiler,203,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"Logamax U122, Cerapur",boiler,203,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"Logamax U122, Cerapur",boiler,203,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "Logamax U122, Cerapur",boiler,203,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "Logamax U122, Cerapur",boiler,203,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "Logamax U122, Cerapur",boiler,203,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -3318,7 +3318,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Ecomline Excellent",boiler,206,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "Ecomline Excellent",boiler,206,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "Ecomline Excellent",boiler,206,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"Ecomline Excellent",boiler,206,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"Ecomline Excellent",boiler,206,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "Ecomline Excellent",boiler,206,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "Ecomline Excellent",boiler,206,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "Ecomline Excellent",boiler,206,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -3438,7 +3438,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Logamax Plus, GB192, Condens GC9000, Greenstar ErP",boiler,208,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "Logamax Plus, GB192, Condens GC9000, Greenstar ErP",boiler,208,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "Logamax Plus, GB192, Condens GC9000, Greenstar ErP",boiler,208,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"Logamax Plus, GB192, Condens GC9000, Greenstar ErP",boiler,208,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"Logamax Plus, GB192, Condens GC9000, Greenstar ErP",boiler,208,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "Logamax Plus, GB192, Condens GC9000, Greenstar ErP",boiler,208,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "Logamax Plus, GB192, Condens GC9000, Greenstar ErP",boiler,208,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "Logamax Plus, GB192, Condens GC9000, Greenstar ErP",boiler,208,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -3558,7 +3558,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Cascade MC400",boiler,210,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "Cascade MC400",boiler,210,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "Cascade MC400",boiler,210,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"Cascade MC400",boiler,210,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"Cascade MC400",boiler,210,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "Cascade MC400",boiler,210,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "Cascade MC400",boiler,210,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "Cascade MC400",boiler,210,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -3678,7 +3678,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "EasyControl Adapter",boiler,211,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "EasyControl Adapter",boiler,211,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "EasyControl Adapter",boiler,211,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"EasyControl Adapter",boiler,211,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"EasyControl Adapter",boiler,211,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "EasyControl Adapter",boiler,211,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "EasyControl Adapter",boiler,211,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "EasyControl Adapter",boiler,211,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1
@@ -3898,7 +3898,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Logamax Plus GB122, Condense 2300, Junkers Cerapur GC2200W",boiler,234,burnmaxpower,burner max power,uint8 (>=0<=254),%,true,number.boiler_burner_max_power,number.boiler_burnmaxpower,6,0,1,261,1
 "Logamax Plus GB122, Condense 2300, Junkers Cerapur GC2200W",boiler,234,burnminperiod,burner min period,uint8 (>=0<=120),minutes,true,number.boiler_burner_min_period,number.boiler_burnminperiod,6,0,1,262,1
 "Logamax Plus GB122, Condense 2300, Junkers Cerapur GC2200W",boiler,234,absburnpow,burner current power (absolute),uint8,%,false,sensor.boiler_burner_current_power_(absolute),sensor.boiler_absburnpow,6,0,1,263,1
-"Logamax Plus GB122, Condense 2300, Junkers Cerapur GC2200W",boiler,234,heatblock,Heatblok temperature,uint16,C,false,sensor.boiler_Heatblok_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
+"Logamax Plus GB122, Condense 2300, Junkers Cerapur GC2200W",boiler,234,heatblock,Heatblock temperature,uint16,C,false,sensor.boiler_Heatblock_temperature,sensor.boiler_heatblock,6,0,1/10,264,1
 "Logamax Plus GB122, Condense 2300, Junkers Cerapur GC2200W",boiler,234,boilhyston,hysteresis on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_on_temperature,number.boiler_boilhyston,6,0,1,265,1
 "Logamax Plus GB122, Condense 2300, Junkers Cerapur GC2200W",boiler,234,boilhystoff,hysteresis off temperature,int8 (>=0<=20),C,true,number.boiler_hysteresis_off_temperature,number.boiler_boilhystoff,6,0,1,266,1
 "Logamax Plus GB122, Condense 2300, Junkers Cerapur GC2200W",boiler,234,boil2hyston,hysteresis stage 2 on temperature,int8 (>=-20<=0),C,true,number.boiler_hysteresis_stage_2_on_temperature,number.boiler_boil2hyston,6,0,1,267,1

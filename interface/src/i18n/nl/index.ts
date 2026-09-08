@@ -178,8 +178,6 @@ const nl: Translation = {
   DOWNLOAD_SETTINGS_TEXT: 'Maak een back-up van uw configuratie en instellingen',
   DOWNLOAD_SETTINGS_TEXT2: 'Exporteer alle waarden',
   DOWNLOAD_SYSTEM_BACKUP: 'Systeem Backup',
-  UPLOAD_TEXT: 'Upload een nieuw firmwarebestand (.bin) of een back-upbestand (.json)',
-  UPLOAD_DROP_TEXT: 'Sleep en firmware .bin bestand hierheen of klik hier',
   ERROR: 'Onverwachte fout, probeer opnieuw',
   TIME_SET: 'Tijd ingesteld',
   MANAGE_USERS: 'Gebruikersbeheer',
@@ -349,7 +347,11 @@ const nl: Translation = {
   COMMANDS_HELP_1: 'Definieer hergebruikbare benoemde commando\'s hieronder. Deze kunnen worden uitgevoerd vanuit de console, API/MQTT, of worden aangeroepen door de Scheduler',
   COMMAND_EXECUTED: 'Commando uitgevoerd succesvol',
   RUN: 'Commando uitvoeren',
-  INTERNET_CONNECTION_CHECK: 'Controleren op online beschikbare versies'
+  INTERNET_CONNECTION_CHECK: 'Controleren op online beschikbare versies',
+  UPLOAD_BACKUP_TEXT: 'Klik voor selecteren of sleep en drop een back-upbestand (.json) hier',
+  UPLOAD_FIRMWARE_TEXT: 'Klik voor selecteren of sleep en drop een firmware .bin/.md5 bestand hier',
+  UPLOAD_MD5_RECEIVED: 'Digest ontvangen, upload nu het firmware .bin-bestand',
+  UPLOAD_MD5_MATCHED: 'MD5 komt overeen, firmware wordt geïnstalleerd...'
 };
 
 export default nl;

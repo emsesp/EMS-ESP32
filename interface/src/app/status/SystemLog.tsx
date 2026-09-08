@@ -369,7 +369,7 @@ const SystemLog = () => {
           ) : (
             <>
               {data.developer_mode && (
-                <IconButton onClick={sendReadCommand} aria-label={LL.EXECUTE()}>
+                <IconButton onClick={sendReadCommand} aria-label={LL.RUN()}>
                   <PlayArrowIcon color="primary" />
                 </IconButton>
               )}

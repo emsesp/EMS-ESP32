@@ -178,8 +178,6 @@ const no: Translation = {
   DOWNLOAD_SETTINGS_TEXT: 'Lag en sikkerhetskopi av dine konfigurasjon og innstillinger',
   DOWNLOAD_SETTINGS_TEXT2: 'Eksporter alle verdier',
   DOWNLOAD_SYSTEM_BACKUP: 'System Sikkerhetskopi',
-  UPLOAD_TEXT: 'Last opp en ny firmware fil (.bin) eller en sikkerhetskopi fil (.json)',
-  UPLOAD_DROP_TEXT: 'Dropp en firmware fil (.bin) eller klikk her',
   ERROR: 'Ukjent feil, prøv igjen',
   TIME_SET: 'Still in tid',
   MANAGE_USERS: 'Administrer Brukere',
@@ -349,7 +347,11 @@ const no: Translation = {
   COMMANDS_HELP_1: 'Definer egne kommandoer for EMS-Magistral',
   COMMAND_EXECUTED: 'Kommando kjørt lykkes',
   RUN: 'Kjør',
-  INTERNET_CONNECTION_CHECK: 'Kontrollerer online for tilgjengelige versjoner'
+  INTERNET_CONNECTION_CHECK: 'Kontrollerer online for tilgjengelige versjoner',
+  UPLOAD_BACKUP_TEXT: 'Klikk for å velge eller dra og slipp en sikkerhetskopi (.json) her',
+  UPLOAD_FIRMWARE_TEXT: 'Klikk for å velge eller dra og slipp en firmware .bin/.md5 her',
+  UPLOAD_MD5_RECEIVED: 'MD5 mottatt, last nå opp firmware .bin-filen',
+  UPLOAD_MD5_MATCHED: 'MD5 stemmer, firmware installeres...'
 };
 
 export default no;

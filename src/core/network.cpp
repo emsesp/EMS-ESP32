@@ -229,8 +229,8 @@ void Network::reconnect() {
 // boards without an Ethernet PHY skip straight to WIFI; without a configured SSID, straight to AP
 // (unless AP provision mode is Never — then stay on WIFI and keep waiting)
 NetPhase Network::initialPhase() const {
-    bool eth_clock_conflicts_psram = ESP.getPsramSize()
-                                      && ((eth_clock_mode_t)eth_clock_mode_ == ETH_CLOCK_GPIO16_OUT || (eth_clock_mode_t)eth_clock_mode_ == ETH_CLOCK_GPIO17_OUT);
+    bool eth_clock_conflicts_psram =
+        ESP.getPsramSize() && ((eth_clock_mode_t)eth_clock_mode_ == ETH_CLOCK_GPIO16_OUT || (eth_clock_mode_t)eth_clock_mode_ == ETH_CLOCK_GPIO17_OUT);
     if (phy_type_ != PHY_type::PHY_TYPE_NONE && !eth_clock_conflicts_psram) {
         return NetPhase::ETHERNET;
     }
