@@ -46,7 +46,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "concurrently": "^10.0.5",
-    "eslint": "^10.9.1",
+    "eslint": "^10.10.0",
     "eslint-config-prettier": "^10.1.8",
     "etag": "^1.8.1",
     "mime-types": "^3.0.2",

@@ -89,6 +89,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
 
         register_telegram_type(0x492, "HpHeaterConfig", true, MAKE_PF_CB(process_HpHeaterConfig), 5);
         register_telegram_type(0x488, "HPValve", true, MAKE_PF_CB(process_HpValve), 14);
+        register_telegram_type(0x489, "HPpassive", false, MAKE_PF_CB(process_passiveCooling), 14);
         register_telegram_type(0x484, "HPSilentMode", true, MAKE_PF_CB(process_HpSilentMode), 65);
         register_telegram_type(0x48B, "HPPumps", true, MAKE_PF_CB(process_HpPumps), 19);
         register_telegram_type(0x491, "HPAdditionalHeater", true, MAKE_PF_CB(process_HpAdditionalHeater), 18);
@@ -357,8 +358,9 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           MAKE_CF_CB(set_emergency_temp),
                           15,
                           70);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pc0Flow_, DeviceValueType::INT16, FL_(pc0Flow), DeviceValueUOM::LH);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pc1Flow_, DeviceValueType::INT16, FL_(pc1Flow), DeviceValueUOM::LH);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pc0lpm_, DeviceValueType::UINT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(pc0lpm), DeviceValueUOM::LMIN);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pc0Flow_, DeviceValueType::UINT16, FL_(pc0Flow), DeviceValueUOM::LH);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pc1Flow_, DeviceValueType::UINT16, FL_(pc1Flow), DeviceValueUOM::LH);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pc1On_, DeviceValueType::BOOL, FL_(pc1On), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pc1Rate_, DeviceValueType::UINT8, FL_(pc1Rate), DeviceValueUOM::PERCENT);
 
@@ -2167,6 +2169,13 @@ void Boiler::process_HpValve(const std::shared_ptr<const Telegram> & telegram) {
     // has_bitupdate(telegram, auxHeaterStatus_, 0, 2);
     has_update(telegram, auxHeatMixValve_, 7);
     has_update(telegram, pc1Rate_, 13); // percent
+}
+
+// Boiler(0x08) -B-> All(0x00), ?(0x0489), data:  offset 0? TK1 passive cooling temperature
+// from #3224: Rx: 08 00 FF 00 03 89 00 00 00 00 80 00 00 00 00 00 00 00 00 65 D9
+void Boiler::process_passiveCooling(const std::shared_ptr<const Telegram> & telegram) {
+    has_update(telegram, tk1_, 0);     // guess 16 bit, https://github.com/emsesp/EMS-ESP32/discussions/1797
+    has_update(telegram, pc0lpm_, 12); // https://github.com/emsesp/EMS-ESP32/issues/3224
 }
 
 // Boiler(0x08) -B-> All(0x00), ?(0x048B), data: 00 00 0A 1E 4E 00 1E 01 2C 00 01 64 55 05 12 50 50 50 00 00 1E 01 2C 00
