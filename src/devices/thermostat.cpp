@@ -182,7 +182,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(summer_typeids[i], "RC300Summer", false, MAKE_PF_CB(process_RC300Summer), 14);
             register_telegram_type(curve_typeids[i], "RC300Curves", false, MAKE_PF_CB(process_RC300Curve), 9);
             if (model != EMSdevice::EMS_DEVICE_FLAG_UI800) {
-                register_telegram_type(summer2_typeids[i], "RC300Sumr2", false, MAKE_PF_CB(process_RC300Summer2), 8);
+                register_telegram_type(summer2_typeids[i], "RC300Summer2", false, MAKE_PF_CB(process_RC300Summer2), 8);
             }
         }
         const size_t set2_size = set2_typeids.size();
@@ -3440,7 +3440,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const int8_t id) {
 bool Thermostat::set_summermode(const char * value, const int8_t id) {
     uint8_t set;
     if (model() == EMSdevice::EMS_DEVICE_FLAG_UI800) {
-        if (Helpers::value2enum(value, set, FL_(enum_hpoperatingmode))) {
+        if (Helpers::value2enum(value, set, FL_(enum_summermode))) {
             write_command(0x470, 0, set, 0x470);
             return true;
         }
@@ -4694,7 +4694,7 @@ void Thermostat::register_device_values() {
             register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                                   &hpoperatingmode,
                                   DeviceValueType::ENUM,
-                                  FL_(enum_hpoperatingmode),
+                                  FL_(enum_summermode),
                                   FL_(hpoperatingmode),
                                   DeviceValueUOM::NONE,
                                   MAKE_CF_CB(set_summermode));
