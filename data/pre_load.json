@@ -1,7 +1,6 @@
 {
   "type": "systembackup",
   "version": "3.9.0",
-  "date": "2026-06-14T10:59:16",
   "systembackup": [
     {
       "type": "settings",
@@ -20,7 +19,7 @@
         "eth_10mbit": false
       },
       "AP": {
-        "provision_mode": 2,
+        "provision_mode": 1,
         "ssid": "ems-esp",
         "password": "ems-esp-neo",
         "channel": 1,
@@ -34,12 +33,12 @@
         "enableTLS": false,
         "rootCA": "",
         "enabled": false,
-        "host": "192.168.1.2",
+        "host": "",
         "port": 1883,
         "base": "ems-esp",
         "username": "",
         "password": "",
-        "client_id": "esp32",
+        "client_id": "ems-esp",
         "keep_alive": 60,
         "clean_session": false,
         "entity_format": 1,
@@ -57,7 +56,7 @@
         "nested_format": 1,
         "discovery_prefix": "homeassistant",
         "discovery_type": 0,
-        "ha_number_mode": 1,
+        "ha_number_mode": 0,
         "publish_single": false,
         "publish_single2cmd": false,
         "send_response": false
@@ -66,7 +65,10 @@
         "enabled": false,
         "server": "time.google.com",
         "tz_label": "Europe/Amsterdam",
-        "tz_format": "CET-1CEST,M3.5.0,M10.5.0/3"
+        "tz_format": "CET-1CEST,M3.5.0,M10.5.0/3",
+        "thermostat_sync": 1,
+        "tz_label_t": "Europe/Amsterdam",
+        "tz_format_t": "CET-1CEST,M3.5.0,M10.5.0/3"
       },
       "Security": {
         "jwt_secret": "ems-esp-neo",
@@ -87,9 +89,9 @@
         "version": "3.9.0",
         "board_profile": "E32V2_2",
         "platform": "ESP32",
-        "system_name": "ems-esp",
+        "system_name": "",
         "locale": "en",
-        "tx_mode": 1,
+        "tx_mode": 5,
         "ems_bus_id": 73,
         "syslog_enabled": false,
         "syslog_level": 3,
@@ -100,7 +102,7 @@
         "boiler_heatingoff": false,
         "remote_timeout": 24,
         "remote_timeout_en": false,
-        "shower_timer": true,
+        "shower_timer": false,
         "shower_alert": false,
         "shower_alert_coldshot": 10,
         "shower_alert_trigger": 7,
@@ -110,7 +112,7 @@
         "dallas_gpio": 14,
         "dallas_parasite": false,
         "led_gpio": 32,
-        "hide_led": true,
+        "hide_led": false,
         "led_type": 1,
         "low_clock": false,
         "telnet_enabled": true,
@@ -138,12 +140,12 @@
         "disable_reset": false,
         "email_enabled": false,
         "email_security": 2,
-        "email_server": "smtp.gmail.com",
+        "email_server": "smtp.example.net",
         "email_port": 587,
-        "email_login": "test@emsesp.org",
-        "email_pass": "password",
-        "email_sender": "test@emsesp.org",
-        "email_recp": "test@emsesp.org",
+        "email_login": "",
+        "email_pass": "",
+        "email_sender": "ems-esp@example.net",
+        "email_recp": "",
         "email_subject": "ems-esp notification"
       }
     },
@@ -162,6 +164,7 @@
     {
       "type": "customizations",
       "Customizations": {
+        "ts": [],
         "as": [],
         "masked_entities": []
       }
@@ -177,16 +180,6 @@
       "Modules": {
         "modules": []
       }
-    },
-    {
-      "type": "nvs",
-      "nvs": [
-        {
-          "type": 1,
-          "key": "fresh_firmware",
-          "value": 1
-        }
-      ]
     }
   ]
 }
