@@ -315,8 +315,9 @@ class Boiler : public EMSdevice {
     uint8_t  elHeatStep3_;
     uint16_t hpPowerLimit_;
     uint16_t hpCurrPower_;
-    int16_t  pc0Flow_;
-    int16_t  pc1Flow_;
+    uint16_t pc0lpm_;
+    uint16_t pc0Flow_;
+    uint16_t pc1Flow_;
     uint8_t  pc1Rate_;
     uint8_t  pc1On_;
     uint8_t  pumpKickHour_;  // hour
@@ -335,6 +336,8 @@ class Boiler : public EMSdevice {
     double  nrgHeatF_; // double calculate for nrgHeat
     double  nrgWwF_;   // double calculate for nrgWw
     uint8_t nomPower_;
+
+    int16_t  tk1_;
 
     /*
   // Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
@@ -389,6 +392,7 @@ class Boiler : public EMSdevice {
     void process_HpSilentMode(const std::shared_ptr<const Telegram> & telegram);
     void process_HpAdditionalHeater(const std::shared_ptr<const Telegram> & telegram);
     void process_HpValve(const std::shared_ptr<const Telegram> & telegram);
+    void process_passiveCooling(const std::shared_ptr<const Telegram> & telegram);
     void process_HpPumps(const std::shared_ptr<const Telegram> & telegram);
     void process_HpPump2(const std::shared_ptr<const Telegram> & telegram);
     void process_HpDhwSettings(const std::shared_ptr<const Telegram> & telegram);

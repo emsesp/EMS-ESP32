@@ -564,6 +564,7 @@ MAKE_TRANSLATION(hpSetDiffPress, "hpsetdiffpress", "set differential pressure", 
 MAKE_TRANSLATION(hpFan, "fan", "fan", "Lüfter", "", "Fläkt", "wentylator", "", "", "", "", "ventilátor", "ventilátor") 
 MAKE_TRANSLATION(fanSpd, "fanspd", "fan speed", "Lüfter Geschw.", "", "Fläkt", "wentylator", "", "", "", "", "ventilátor", "ventilátor") 
 MAKE_TRANSLATION(hpShutdown, "shutdown", "shutdown", "Abschalten", "", "Stäng av", "wyłączenie", "", "", "", "", "vypnutie", "vypnutí") 
+MAKE_TRANSLATION(pc0lpm, "pc0lpm", "Flow PC0", "Durchfluss PC0", "", "Flöde värmebärarpump", "", "", "", "", "", "prietok PC0", "průtok PC0") 
 MAKE_TRANSLATION(pc0Flow, "pc0flow", "Flow PC0", "Durchfluss PC0", "", "Flöde värmebärarpump", "", "", "", "", "", "prietok PC0", "průtok PC0") 
 MAKE_TRANSLATION(pc1Flow, "pc1flow", "Flow PC1", "Durchfluss PC1", "", "Flöde cirkulationspump", "", "", "", "", "", "prietok PC1", "průtok PC1") 
 MAKE_TRANSLATION(pc1On, "pc1on", "PC1", "PC1", "", "Cirkulationspump", "", "", "", "", "", "PC1", "PC1") 
