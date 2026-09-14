@@ -321,6 +321,7 @@ const pl: BaseTranslation = {
   DASHBOARD: 'Pulpit',
   DEVELOPER_MODE: 'Tryb programisty',
   DISABLE_RESET: 'Wyłącz reset fabryczny',
+  AUTO_FW_CHECK: 'Automatycznie sprawdzaj aktualizacje firmware',
   BYTES: 'Bajty',
   BITMASK: 'Bit Mask',
   DUPLICATE: 'Duplicate',

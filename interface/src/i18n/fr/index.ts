@@ -321,6 +321,7 @@ const fr: Translation = {
   DASHBOARD: 'Tableau de bord',
   DEVELOPER_MODE: 'Mode développeur',
   DISABLE_RESET: 'Désactiver la réinitialisation de fabrique',
+  AUTO_FW_CHECK: 'Vérifier automatiquement les mises à jour du firmware',
   BYTES: 'Octets',
   BITMASK: 'Masque de bits',
   DUPLICATE: 'Dupliquer',

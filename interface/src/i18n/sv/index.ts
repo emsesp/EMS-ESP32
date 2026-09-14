@@ -321,6 +321,7 @@ const sv: Translation = {
   DASHBOARD: 'Kontrollpanel',
   DEVELOPER_MODE: 'Utvecklarläge',
   DISABLE_RESET: 'Inaktivera fabriksåterställning',
+  AUTO_FW_CHECK: 'Sök automatiskt efter nya firmwareversioner',
   BYTES: 'Bytes',
   BITMASK: 'Bitmask',
   DUPLICATE: 'Dublett',

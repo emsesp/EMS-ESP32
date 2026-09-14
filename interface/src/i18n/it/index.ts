@@ -321,6 +321,7 @@ const it: Translation = {
   DASHBOARD: 'Pannello di controllo',
   DEVELOPER_MODE: 'Modalità sviluppatore',
   DISABLE_RESET: 'Disabilita la ripristino di fabbrica',
+  AUTO_FW_CHECK: 'Controlla automaticamente gli aggiornamenti del firmware',
   BYTES: 'Byte',
   BITMASK: 'Bitmask',
   DUPLICATE: 'Duplicato',

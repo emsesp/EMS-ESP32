@@ -321,6 +321,7 @@ const nl: Translation = {
   DASHBOARD: 'Dashboard',
   DEVELOPER_MODE: 'Ontwikkelaarsmodus',
   DISABLE_RESET: 'Fabrieksinstellingen uitschakelen',
+  AUTO_FW_CHECK: 'Automatisch controleren op firmware-updates',
   BYTES: 'Bytes',
   BITMASK: 'Bit Mask',
   DUPLICATE: 'Duplicaat',

@@ -720,6 +720,7 @@ void System::store_settings(WebSettings & settings) {
     system_name_    = settings.system_name;
     developer_mode_ = settings.developer_mode;
     disable_reset_  = settings.disable_reset;
+    auto_fw_check_  = settings.auto_fw_check;
 }
 
 // Starts up core services
@@ -2733,6 +2734,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["forceHeatingOff"] = settings.boiler_heatingoff;
         node["developerMode"]   = settings.developer_mode;
         node["disableReset"]    = settings.disable_reset;
+        node["autoFwCheck"]     = settings.auto_fw_check;
     });
 
     // Devices - show EMS devices if we have any

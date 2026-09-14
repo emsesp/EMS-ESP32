@@ -17,6 +17,7 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - pc0Flow in l/min [#3224](https://github.com/emsesp/EMS-ESP32/issues/3224)
 - remove HA config for excluded entities [#3229](https://github.com/emsesp/EMS-ESP32/issues/3229)
 - `show system` reports the Ethernet status on boards with a PHY, so a failed initialisation or a link that never came up is visible instead of Ethernet being omitted completely. Also shows the loop task's lowest free stack, to help diagnose reboots
+- new Application Setting "Automatically check for firmware updates", off by default. EMS-ESP only contacts emsesp.org for the latest version when it's enabled, so the Version page shows the available versions
 
 ## Fixed
 

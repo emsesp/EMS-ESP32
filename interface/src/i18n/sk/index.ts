@@ -321,6 +321,7 @@ const sk: Translation = {
   DASHBOARD: 'Panel',
   DEVELOPER_MODE: 'Režim vývojára',
   DISABLE_RESET: 'Zakázať továrenské nastavenia',
+  AUTO_FW_CHECK: 'Automaticky kontrolovať aktualizácie firmvéru',
   BYTES: 'Bytov',
   BITMASK: 'Bitová maska',
   DUPLICATE: 'Duplicitné',

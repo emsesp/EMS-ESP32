@@ -122,6 +122,7 @@ class WebSettings {
 
     bool developer_mode; // developer mode
     bool disable_reset;  // disable reset
+    bool auto_fw_check;  // periodically check emsesp.org for a newer firmware version
 
     static void              read(WebSettings & settings, JsonObject root);
     static StateUpdateResult update(JsonObject root, WebSettings & settings);

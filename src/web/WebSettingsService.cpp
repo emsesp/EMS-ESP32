@@ -85,6 +85,7 @@ void WebSettings::read(WebSettings & settings, JsonObject root) {
     root["modbus_timeout"]        = settings.modbus_timeout;
     root["developer_mode"]        = settings.developer_mode;
     root["disable_reset"]         = settings.disable_reset;
+    root["auto_fw_check"]         = settings.auto_fw_check;
     root["email_enabled"]         = settings.email_enabled;
     root["email_security"]        = settings.email_security;
     root["email_server"]          = settings.email_server;
@@ -309,6 +310,12 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
 
     settings.disable_reset = root["disable_reset"];
     EMSESP::system_.disable_reset(settings.disable_reset);
+
+    settings.auto_fw_check = root["auto_fw_check"] | EMSESP_DEFAULT_AUTO_FW_CHECK;
+    EMSESP::system_.auto_fw_check(settings.auto_fw_check);
+    if (settings.auto_fw_check && !original_settings.auto_fw_check) {
+        EMSESP::webStatusService.schedule_versions_refresh(); // just switched on, so look straight away
+    }
 
     settings.bool_dashboard = root["bool_dashboard"] | EMSESP_DEFAULT_BOOL_FORMAT;
     EMSESP::system_.bool_dashboard(settings.bool_dashboard);

@@ -321,6 +321,7 @@ const en: Translation = {
   DASHBOARD: 'Dashboard',
   DEVELOPER_MODE: 'Developer Mode',
   DISABLE_RESET: 'Disable Factory Reset',
+  AUTO_FW_CHECK: 'Automatically check for firmware updates',
   BYTES: 'Bytes',
   BITMASK: 'Bit Mask',
   DUPLICATE: 'Duplicate',

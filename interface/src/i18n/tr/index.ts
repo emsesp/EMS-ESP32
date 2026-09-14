@@ -321,6 +321,7 @@ const tr: Translation = {
   DASHBOARD: 'Kontrol Paneli',
   DEVELOPER_MODE: 'Geliştirici Modu',
   DISABLE_RESET: 'Fabrika ayarlarını devre dışı bırak',
+  AUTO_FW_CHECK: 'Firmware güncellemelerini otomatik olarak denetle',
   BYTES: 'Bayt',
   BITMASK: 'Bit Maskesi',
   DUPLICATE: 'Çift',

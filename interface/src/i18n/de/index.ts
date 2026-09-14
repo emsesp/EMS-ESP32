@@ -321,6 +321,7 @@ const de: Translation = {
   DASHBOARD: 'Dashboard',
   DEVELOPER_MODE: 'Entwicklermodus',
   DISABLE_RESET: 'Werkseinstellungen deaktivieren',
+  AUTO_FW_CHECK: 'Automatisch nach Firmware-Updates suchen',
   BYTES: 'Bytes',
   BITMASK: 'Bit Maske',
   DUPLICATE: 'Kopieren',

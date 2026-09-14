@@ -321,6 +321,7 @@ const cs: Translation = {
   DASHBOARD: 'Dashboard',
   DEVELOPER_MODE: 'Režim vývojáře',
   DISABLE_RESET: 'Zakázat obnovení továrního nastavení',
+  AUTO_FW_CHECK: 'Automaticky kontrolovat aktualizace firmwaru',
   BYTES: 'Bajty',
   BITMASK: 'Bit Mask',
   DUPLICATE: 'Duplikát',

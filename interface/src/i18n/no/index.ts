@@ -321,6 +321,7 @@ const no: Translation = {
   DASHBOARD: 'Dashboard',
   DEVELOPER_MODE: 'Utvikler modus',
   DISABLE_RESET: 'Deaktiver fabrikkinnstillinger',
+  AUTO_FW_CHECK: 'Se automatisk etter nye firmware versjoner',
   BYTES: 'Bytes',
   BITMASK: 'Bitmask',
   DUPLICATE: 'Duplikat',

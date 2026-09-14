@@ -402,10 +402,15 @@ void WebStatusService::schedule_versions_refresh() {
     versions_next_fetch_ms_ = next;
 }
 
-// periodic refresh (1 hour) of the cached versions.json
-// runs on the main loop task, which has a much bigger stack than AsyncTCP needed for https
+// periodic refresh (1 hour) of the cached versions.json, only when auto_fw_check is enabled
+// runs on the main loop task so the blocking fetch never happens in an AsyncTCP callback
 void WebStatusService::loop() {
 #ifndef EMSESP_STANDALONE
+    // only reach out to emsesp.org if the user has asked us to
+    if (!EMSESP::system_.auto_fw_check()) {
+        return;
+    }
+
     // need a network
     if (!EMSESP::network_.network_connected()) {
         return;

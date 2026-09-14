@@ -66,6 +66,7 @@ let settings = {
   modbus_timeout: 10000,
   developer_mode: true,
   disable_reset: false,
+  auto_fw_check: false,
   email_enabled: false,
   email_security: 2,
   email_server: 'smtp.gmail.com',
