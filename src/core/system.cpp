@@ -1126,6 +1126,12 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(" Internal heap free/largest block: %u KB / %u KB",
                    heap_caps_get_free_size(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT) / 1024,
                    heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT) / 1024);
+    // Lowest the loop task's stack has ever been since boot. EMSESP::loop() runs the blocking HTTP
+    // client and all the JSON work on this task, and a TLS handshake alone can want several KB
+    TaskHandle_t loop_task = xTaskGetHandle("loopTask");
+    if (loop_task != nullptr) {
+        shell.printfln(" Loop task stack min free/total: %u / %u bytes", (unsigned)uxTaskGetStackHighWaterMark(loop_task), (unsigned)getArduinoLoopTaskStackSize());
+    }
 #endif
     shell.printfln(" App used/free: %lu KB / %lu KB", appUsed(), appFree());
     uint32_t FSused = LittleFS.usedBytes() / 1024;
