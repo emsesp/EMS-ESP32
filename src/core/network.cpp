@@ -88,6 +88,11 @@ void Network::begin() {
         pinMode(eth_power_, OUTPUT);
         digitalWrite(eth_power_, LOW);
     }
+
+    // report it here rather than in startEthernet(), which is never reached because initialPhase() has already skipped Ethernet
+    if (phy_type_ != PHY_type::PHY_TYPE_NONE && ethClockConflictsPsram()) {
+        LOG_ERROR("Ethernet clock mode %d (GPIO16/17) conflicts with PSRAM - disabling Ethernet", eth_clock_mode_);
+    }
 #endif
 
     // avoid duplicate registration, so register the lambdas only once across the lifetime of this Network instance
@@ -225,15 +230,22 @@ void Network::reconnect() {
     begin();
 }
 
+// the RMII clock output on GPIO16/17 shares its pins with PSRAM, so Ethernet can't be used at all on
+// a board that has both. Ethernet is skipped for the whole boot when this is the case
+bool Network::ethClockConflictsPsram() const {
+#if CONFIG_IDF_TARGET_ESP32 && !defined(EMSESP_STANDALONE)
+    return ESP.getPsramSize() && ((eth_clock_mode_t)eth_clock_mode_ == ETH_CLOCK_GPIO16_OUT || (eth_clock_mode_t)eth_clock_mode_ == ETH_CLOCK_GPIO17_OUT);
+#else
+    return false;
+#endif
+}
+
 // pick the first phase that has the hardware/config to even be attempted on this device.
 // boards without an Ethernet PHY skip straight to WIFI; without a configured SSID, straight to AP
 // (unless AP provision mode is Never — then stay on WIFI and keep waiting)
 NetPhase Network::initialPhase() const {
 #if CONFIG_IDF_TARGET_ESP32
-
-    bool eth_clock_conflicts_psram =
-        ESP.getPsramSize() && ((eth_clock_mode_t)eth_clock_mode_ == ETH_CLOCK_GPIO16_OUT || (eth_clock_mode_t)eth_clock_mode_ == ETH_CLOCK_GPIO17_OUT);
-    if (phy_type_ != PHY_type::PHY_TYPE_NONE && !eth_clock_conflicts_psram) {
+    if (phy_type_ != PHY_type::PHY_TYPE_NONE && !ethClockConflictsPsram()) {
         return NetPhase::ETHERNET;
     }
 #endif
@@ -605,11 +617,6 @@ void Network::startEthernet() {
         return;
     }
 
-    if (ESP.getPsramSize() && ((eth_clock_mode_t)eth_clock_mode_ == ETH_CLOCK_GPIO16_OUT || (eth_clock_mode_t)eth_clock_mode_ == ETH_CLOCK_GPIO17_OUT)) {
-        LOG_ERROR("Ethernet clock mode %d (GPIO16/17) conflicts with PSRAM - disabling Ethernet", eth_clock_mode_);
-        return;
-    }
-
     /*
     // The Tasmota SDK is built with CONFIG_ESP32_UNIVERSAL_MAC_ADDRESSES=2, so the Ethernet MAC is derived as
     // a locally-administered address from base+1 instead of the universal base+3 that Arduino Core 2 used.
@@ -656,9 +663,11 @@ void Network::startEthernet() {
         ETH.setFullDuplex(false);
     }
 
+    // start the Eth module
     if (ETH.begin(type, eth_phy_addr_, 23, 18, eth_power_, (eth_clock_mode_t)eth_clock_mode_)) {
         // LOG_DEBUG("Ethernet module found - initialising");
         ethernet_started_         = true;
+        ethernet_init_failed_     = false;
         ethernet_connect_pending_ = true;
 
         // check whether DHCP already announced us under lwIP's default hostname, before we correct it
@@ -687,9 +696,35 @@ void Network::startEthernet() {
             ETH.config(localIP_, gatewayIP_, subnetMask_, dnsIP1_, dnsIP2_);
         }
     } else {
+        ethernet_init_failed_ = true;
         LOG_ERROR("Failed to start Ethernet");
     }
 #endif
+#endif
+}
+
+// Ethernet state as a printable string, for the console and the API
+// returns nullptr when this board has no Ethernet PHY configured, so callers can omit Ethernet completely
+const char * Network::ethernet_status() const {
+#if CONFIG_IDF_TARGET_ESP32 && !defined(EMSESP_STANDALONE)
+    if (phy_type_ == PHY_type::PHY_TYPE_NONE) {
+        return nullptr;
+    }
+    if (ethClockConflictsPsram()) {
+        return "disabled - clock mode GPIO16/17 conflicts with PSRAM";
+    }
+    if (ethernet_connected()) {
+        return "connected";
+    }
+    if (ethernet_init_failed_) {
+        return "failed to initialize - no PHY found, check the board profile";
+    }
+    if (!ethernet_started_) {
+        return "not started";
+    }
+    return ethernet_connect_pending_ ? "connecting" : "no connection";
+#else
+    return nullptr;
 #endif
 }
 

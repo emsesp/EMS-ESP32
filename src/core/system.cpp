@@ -1284,10 +1284,12 @@ void System::show_system(uuid::console::Shell & shell) {
         break;
     }
 
-    // show Ethernet if connected
+    // show the Ethernet state, and the details when it's actually up
+    const char * ethernet_status = EMSESP::network_.ethernet_status();
+    if (ethernet_status != nullptr) {
+        shell.printfln(" Ethernet Status: %s", ethernet_status);
+    }
     if (EMSESP::network_.ethernet_connected()) {
-        shell.println();
-        shell.printfln(" Ethernet Status: connected");
         shell.printfln(" Ethernet MAC address: %s", ETH.macAddress().c_str());
         shell.printfln(" Hostname: %s", ETH.getHostname());
         shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(ETH.localIP()).c_str(), uuid::printable_to_string(ETH.subnetMask()).c_str());
