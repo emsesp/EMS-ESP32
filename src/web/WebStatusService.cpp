@@ -359,6 +359,8 @@ void WebStatusService::getVersions(JsonObject root) {
         dev         = versions_dev_;
     }
 
+    versions_fetch_requested_ = true;
+
     if (!cache_valid) {
         // no successful fetch yet (no network, fetch pending, or parse error)
         return;
@@ -402,12 +404,12 @@ void WebStatusService::schedule_versions_refresh() {
     versions_next_fetch_ms_ = next;
 }
 
-// periodic refresh (1 hour) of the cached versions.json, only when auto_fw_check is enabled
-// runs on the main loop task so the blocking fetch never happens in an AsyncTCP callback
+// refresh of the cached versions.json, at most once a day
 void WebStatusService::loop() {
 #ifndef EMSESP_STANDALONE
-    // only reach out to emsesp.org if the user has asked us to
-    if (!EMSESP::system_.auto_fw_check()) {
+    // with auto_fw_check off we only reach out to emsesp.org when the WebUI asks for version
+    // information, so an unattended system never contacts it at all
+    if (!EMSESP::system_.auto_fw_check() && !versions_fetch_requested_) {
         return;
     }
 
@@ -425,6 +427,8 @@ void WebStatusService::loop() {
     if ((int32_t)(uuid::get_uptime() - versions_next_fetch_ms_) < 0) {
         return;
     }
+
+    versions_fetch_requested_ = false;
 
     uint32_t interval;
     if (refresh_versions_cache()) {
