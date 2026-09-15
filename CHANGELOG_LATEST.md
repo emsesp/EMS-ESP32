@@ -17,7 +17,7 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - pc0Flow in l/min [#3224](https://github.com/emsesp/EMS-ESP32/issues/3224)
 - remove HA config for excluded entities [#3229](https://github.com/emsesp/EMS-ESP32/issues/3229)
 - `show system` reports the Ethernet status on boards with a PHY, so a failed initialisation or a link that never came up is visible instead of Ethernet being omitted completely. Also shows the loop task's lowest free stack, to help diagnose reboots
-- new Application Setting "Automatically check for firmware updates", off by default. EMS-ESP only contacts emsesp.org for the latest version when it's enabled, so the Version page shows the available versions
+- new Application Setting "Automatically check for firmware updates", off by default. When enabled EMS-ESP asks emsesp.org for the latest version once a day on its own, otherwise it only asks when the WebUI wants to show it, so an unattended system never contacts emsesp.org
 
 ## Fixed
 
@@ -30,7 +30,7 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - HA Discovery warning on Uptime after EMS-ESP boot due to NTP not ready
 - hc/control setting for UI800 thermostats [#3181](https://github.com/emsesp/EMS-ESP32/discussions/3181)
 - solar module switches [#3223](https://github.com/emsesp/EMS-ESP32/issues/3223)
-- possible crash when the WebUI asked for version information while the hourly versions.json refresh was rewriting the cache from the main loop task
+- possible crash when the WebUI asked for version information while the versions.json refresh was rewriting the cache from the main loop task
 - HTTP client could write past a fixed 64 byte buffer when a URL had a hostname of 64 characters or more, could busy-spin for the whole read budget if the socket reported bytes it wouldn't return, and buffered responses without any size limit
 - the "Ethernet clock mode (GPIO16/17) conflicts with PSRAM" error was never logged because Ethernet had already been skipped by the time the check ran
 
