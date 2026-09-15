@@ -44,10 +44,13 @@ void WebLogService::begin() {
 // apply the user settings
 void WebLogService::start() {
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        maximum_log_messages_ = settings.weblog_buffer;
-        limit_log_messages_   = maximum_log_messages_;
-        compact_              = settings.weblog_compact;
-        level_                = (uuid::log::Level)settings.weblog_level;
+        // a stored value of 0 would make limit_log_messages_ 0, see the guard in operator<<
+        if (settings.weblog_buffer) {
+            maximum_log_messages_ = settings.weblog_buffer;
+        }
+        limit_log_messages_ = maximum_log_messages_;
+        compact_            = settings.weblog_compact;
+        level_              = (uuid::log::Level)settings.weblog_level;
     });
     uuid::log::Logger::register_handler(this, level_);
     if (level_ == uuid::log::Level::OFF) {
@@ -80,7 +83,9 @@ void WebLogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
         }
     }
 #endif
-    while (log_messages_.size() >= limit_log_messages_) {
+    // size() is unsigned, so with limit_log_messages_ == 0 this condition is always true
+    // and pop_front() would run on an empty deque (undefined behaviour)
+    while (!log_messages_.empty() && log_messages_.size() >= limit_log_messages_) {
         log_messages_.pop_front();
     }
 
@@ -210,9 +215,14 @@ void WebLogService::getSetValues(AsyncWebServerRequest * request, JsonVariant js
     }
 
     // POST - write the settings
-    level_                = json["level"];
-    maximum_log_messages_ = json["max_messages"];
-    compact_              = json["compact"];
+    level_ = json["level"];
+    // keep the current size if the key is missing or 0 - a 0 would be stored and make
+    // limit_log_messages_ 0 on the next boot
+    const size_t max_messages = json["max_messages"] | maximum_log_messages_;
+    if (max_messages) {
+        maximum_log_messages_ = max_messages;
+    }
+    compact_ = json["compact"];
 
     uuid::log::Logger::register_handler(this, level_);
     if (level_ == uuid::log::Level::OFF) {
