@@ -93,7 +93,7 @@ const SingleUpload = ({ doRestart, text }: SingleUploadProps) => {
         </>
       ) : (
         <DragNdrop
-          text={(md5 ? LL.UPLOAD_MD5_RECEIVED() : text) + '...'}
+          text={md5 ? LL.UPLOAD_MD5_RECEIVED() : text}
           onFileSelected={setFile}
         />
       )}
