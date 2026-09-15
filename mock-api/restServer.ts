@@ -210,14 +210,16 @@ switch (emulate_esp) {
   // ESP32 4MB
   case 'ESP32':
     system_status.esp_platform = 'ESP32';
-    system_status.cpu_type = 'ESP32';
-    system_status.arduino_version = 'Tasmota Arduino v2.0.17';
-    system_status.sdk_version = 'v4.4.7';
-    system_status.psram = false;
-    system_status.psram_size = 0;
-    system_status.free_psram = 0;
-    settings.board_profile = 'E32V2';
-    settings.platform = 'ESP32';
+    system_status.cpu_type = 'ESP32-D0WD-V3';
+    system_status.arduino_version = "Tasmota Arduino v3.3.8";
+    system_status.sdk_version = '5.5.4.260407';
+    system_status.psram = true;
+    system_status.psram_size = 4096;
+    system_status.free_psram = 4055;
+    system_status.model = "BBQKees Electronics E32V2.2 rev.2.2/2024073";
+    system_status.board = 'E32V2_2';
+
+    settings.board_profile = 'E32V2_2';
     break;
 
   // ESP32 S3
@@ -225,13 +227,15 @@ switch (emulate_esp) {
   default:
     system_status.esp_platform = 'ESP32S3';
     system_status.cpu_type = 'ESP32-S3';
-    system_status.arduino_version = 'ESP32 Arduino v2.0.18';
-    system_status.sdk_version = 'v4.4.7';
+    system_status.arduino_version = 'Tasmota Arduino v3.3.8';
+    system_status.sdk_version = '5.5.4.260407';
     system_status.psram = true;
     system_status.psram_size = 8189;
     system_status.free_psram = 8166;
+    system_status.model = "BBQKees Electronics S32";
+    system_status.board = 'S32S3';
+
     settings.board_profile = 'S32S3';
-    settings.platform = 'ESP32S3';
     break;
 }
 
@@ -341,10 +345,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-          old_custom_name +
-          ') with new (' +
-          new_custom_name +
-          ')'
+        old_custom_name +
+        ') with new (' +
+        new_custom_name +
+        ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -465,9 +469,9 @@ function upgradeImportantMessages(version: string) {
 
   console.log(
     'upgradeImportantMessageType: version=' +
-      version +
-      ' type=' +
-      upgradeImportantMessageType_n
+    version +
+    ' type=' +
+    upgradeImportantMessageType_n
   );
   return { upgradeImportantMessageType: upgradeImportantMessageType_n };
 }
@@ -518,17 +522,17 @@ function get_versions() {
 
   console.log(
     'getVersions: current=' +
-      THIS_VERSION +
-      ' stable=' +
-      LATEST_STABLE_VERSION +
-      ' (upgradeable=' +
-      (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-      ') dev=' +
-      LATEST_DEV_VERSION +
-      ' (upgradeable=' +
-      (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-      ')' +
-      (MOCK_OFFLINE ? ' [offline]' : '')
+    THIS_VERSION +
+    ' stable=' +
+    LATEST_STABLE_VERSION +
+    ' (upgradeable=' +
+    (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+    ') dev=' +
+    LATEST_DEV_VERSION +
+    ' (upgradeable=' +
+    (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+    ')' +
+    (MOCK_OFFLINE ? ' [offline]' : '')
   );
   return data;
 }
