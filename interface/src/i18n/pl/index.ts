@@ -349,8 +349,8 @@ const pl: BaseTranslation = {
   COMMAND_EXECUTED: 'Komenda wykonana pomyślnie',
   RUN: 'Wykonaj',
   INTERNET_CONNECTION_CHECK: 'Sprawdzanie online dla dostępnych wersji',
-  UPLOAD_BACKUP_TEXT: 'Kliknij, aby wybrać lub drop plik kopii zapasowej (.json) tutaj',
-  UPLOAD_FIRMWARE_TEXT: 'Kliknij, aby wybrać lub drop plik firmware .bin/.md5 tutaj',
+  UPLOAD_BACKUP_TEXT: 'Kliknij, aby wybrać, lub drop plik kopii zapasowej (.json) tutaj',
+  UPLOAD_FIRMWARE_TEXT: 'Kliknij, aby wybrać, lub drop plik firmware .bin/.md5 tutaj',
   UPLOAD_MD5_RECEIVED: 'Suma MD5 odebrana, teraz wgraj plik firmware .bin',
   UPLOAD_MD5_MATCHED: 'MD5 zgodne, instalowanie firmware...'
 };

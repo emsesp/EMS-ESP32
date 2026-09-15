@@ -349,8 +349,8 @@ const it: Translation = {
   COMMAND_EXECUTED: 'Comando eseguito con successo',
   RUN: 'Esegui comando',
   INTERNET_CONNECTION_CHECK: 'Controllo online per le versioni disponibili',
-  UPLOAD_BACKUP_TEXT: 'Klik per selezionare o drop un file di backup (.json) qui',
-  UPLOAD_FIRMWARE_TEXT: 'Klik per selezionare o drop un file firmware .bin/.md5 qui',
+  UPLOAD_BACKUP_TEXT: 'Klik per selezionare, o drop un file di backup (.json) qui',
+  UPLOAD_FIRMWARE_TEXT: 'Klik per selezionare, o drop un file firmware .bin/.md5 qui',
   UPLOAD_MD5_RECEIVED: 'Digest ricevuto, ora caricare il file firmware .bin',
   UPLOAD_MD5_MATCHED: 'MD5 corrispondente, installazione firmware...'
 };
