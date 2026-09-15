@@ -349,8 +349,8 @@ const tr: Translation = {
   COMMAND_EXECUTED: 'Komut başarıyla çalıştırıldı',
   RUN: 'Komutu çalıştır',
   INTERNET_CONNECTION_CHECK: 'Online bağlantısı kontrol ediliyor',
-  UPLOAD_BACKUP_TEXT: 'Yeni bir firmware dosyası (.bin) veya yedek dosyası (.json) yükle',
-  UPLOAD_FIRMWARE_TEXT: 'Bir firmware .bin dosyası veya buraya tıklayın',
+  UPLOAD_BACKUP_TEXT: 'Bir yedek dosyası (.json) buraya drop yapın',
+  UPLOAD_FIRMWARE_TEXT: 'Bir firmware .bin dosyası buraya drop yapın',
   UPLOAD_MD5_RECEIVED: 'Özet alındı, şimdi firmware .bin dosyasını yükleyin',
   UPLOAD_MD5_MATCHED: 'MD5 eşleşti, firmware yükleniyor...'
 };

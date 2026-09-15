@@ -349,8 +349,8 @@ const nl: Translation = {
   COMMAND_EXECUTED: 'Commando uitgevoerd succesvol',
   RUN: 'Commando uitvoeren',
   INTERNET_CONNECTION_CHECK: 'Controleren op online beschikbare versies',
-  UPLOAD_BACKUP_TEXT: 'Klik voor selecteren of sleep en drop een back-upbestand (.json) hier',
-  UPLOAD_FIRMWARE_TEXT: 'Klik voor selecteren of sleep en drop een firmware .bin/.md5 bestand hier',
+  UPLOAD_BACKUP_TEXT: 'Klik voor selecteren of drop een back-upbestand (.json) hier',
+  UPLOAD_FIRMWARE_TEXT: 'Klik voor selecteren of drop een firmware .bin/.md5 bestand hier',
   UPLOAD_MD5_RECEIVED: 'Digest ontvangen, upload nu het firmware .bin-bestand',
   UPLOAD_MD5_MATCHED: 'MD5 komt overeen, firmware wordt geïnstalleerd...'
 };
