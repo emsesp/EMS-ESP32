@@ -28,6 +28,7 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - HA Discovery warning on Uptime after EMS-ESP boot due to NTP not ready
 - hc/control setting for UI800 thermostats [#3181](https://github.com/emsesp/EMS-ESP32/discussions/3181)
 - solar module switches [#3223](https://github.com/emsesp/EMS-ESP32/issues/3223)
+- heat limit entities (`maxheatcomp`, `maxheatheat`, `dhw.maxheat`) read as unknown on heat pumps with an auxiliary heater larger than 9 kW - `enum_maxHeat` was missing the 12 kW and 15 kW steps
 
 ## Changed
 
