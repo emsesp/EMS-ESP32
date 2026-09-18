@@ -335,10 +335,12 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     settings.email_subject  = root["email_subject"] | FACTORY_EMAIL_SUBJECT;
 
     // if no psram limit weblog buffer to 25 messages
-    if (EMSESP::system_.PSram() > 0) {
-        settings.weblog_buffer = root["weblog_buffer"] | EMSESP_DEFAULT_WEBLOG_BUFFER;
-    } else {
-        settings.weblog_buffer = root["weblog_buffer"] | 25; // limit to 25 messages if no psram
+    const uint16_t weblog_buffer_default = (EMSESP::system_.PSram() > 0) ? EMSESP_DEFAULT_WEBLOG_BUFFER : 25;
+    settings.weblog_buffer               = root["weblog_buffer"] | weblog_buffer_default;
+    // a stored 0 is a valid uint16 and passes the | default above, but would make
+    // limit_log_messages_ 0 in WebLogService
+    if (settings.weblog_buffer == 0) {
+        settings.weblog_buffer = weblog_buffer_default;
     }
 
     // save the settings if changed from the webUI
