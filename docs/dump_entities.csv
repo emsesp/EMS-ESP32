@@ -2763,9 +2763,9 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,hpin3opt,input 3 options,string (>=0<=0), ,true,sensor.boiler_input_3_options,sensor.boiler_hpin3opt,6,0,1,198,8
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,hpin4,input 4 state,boolean, ,false,binary_sensor.boiler_input_4_state,binary_sensor.boiler_hpin4,6,0,1,206,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,hpin4opt,input 4 options,string (>=0<=0), ,true,sensor.boiler_input_4_options,sensor.boiler_hpin4opt,6,0,1,207,8
-"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,maxheatcomp,heat limit compressor,enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] (>=0<=0), ,true,select.boiler_heat_limit_compressor,select.boiler_maxheatcomp,6,0,1,215,1
-"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,maxheatheat,heat limit heating,enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] (>=0<=0), ,true,select.boiler_heat_limit_heating,select.boiler_maxheatheat,6,0,1,216,1
-"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.maxheat,heat limit,enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] (>=0<=0), ,true,select.boiler_dhw_heat_limit,select.boiler_dhw_maxheat,6,9,1,14,1
+"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,maxheatcomp,heat limit compressor,enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW\|12 kW\|15 kW] (>=0<=0), ,true,select.boiler_heat_limit_compressor,select.boiler_maxheatcomp,6,0,1,215,1
+"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,maxheatheat,heat limit heating,enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW\|12 kW\|15 kW] (>=0<=0), ,true,select.boiler_heat_limit_heating,select.boiler_maxheatheat,6,0,1,216,1
+"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,dhw.maxheat,heat limit,enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW\|12 kW\|15 kW] (>=0<=0), ,true,select.boiler_dhw_heat_limit,select.boiler_dhw_maxheat,6,9,1,14,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,auxheatersource,aux heater source,enum [not installed\|electric heater\|exclusive\|parallel\|hybrid] (>=0<=0), ,true,select.boiler_aux_heater_source,select.boiler_auxheatersource,6,0,1,217,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,pvcooling,cooling only with PV,boolean (>=0<=0), ,true,switch.boiler_cooling_only_with_PV,switch.boiler_pvcooling,6,0,1,218,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,auxheateronly,aux heater only,boolean (>=0<=0), ,true,switch.boiler_aux_heater_only,switch.boiler_auxheateronly,6,0,1,219,1
@@ -2982,9 +2982,9 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Geo 5xx",boiler,173,hpin3opt,input 3 options,string (>=0<=0), ,true,sensor.boiler_input_3_options,sensor.boiler_hpin3opt,6,0,1,198,8
 "Geo 5xx",boiler,173,hpin4,input 4 state,boolean, ,false,binary_sensor.boiler_input_4_state,binary_sensor.boiler_hpin4,6,0,1,206,1
 "Geo 5xx",boiler,173,hpin4opt,input 4 options,string (>=0<=0), ,true,sensor.boiler_input_4_options,sensor.boiler_hpin4opt,6,0,1,207,8
-"Geo 5xx",boiler,173,maxheatcomp,heat limit compressor,enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] (>=0<=0), ,true,select.boiler_heat_limit_compressor,select.boiler_maxheatcomp,6,0,1,215,1
-"Geo 5xx",boiler,173,maxheatheat,heat limit heating,enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] (>=0<=0), ,true,select.boiler_heat_limit_heating,select.boiler_maxheatheat,6,0,1,216,1
-"Geo 5xx",boiler,173,dhw.maxheat,heat limit,enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW] (>=0<=0), ,true,select.boiler_dhw_heat_limit,select.boiler_dhw_maxheat,6,9,1,14,1
+"Geo 5xx",boiler,173,maxheatcomp,heat limit compressor,enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW\|12 kW\|15 kW] (>=0<=0), ,true,select.boiler_heat_limit_compressor,select.boiler_maxheatcomp,6,0,1,215,1
+"Geo 5xx",boiler,173,maxheatheat,heat limit heating,enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW\|12 kW\|15 kW] (>=0<=0), ,true,select.boiler_heat_limit_heating,select.boiler_maxheatheat,6,0,1,216,1
+"Geo 5xx",boiler,173,dhw.maxheat,heat limit,enum [0 kW\|2 kW\|3 kW\|4 kW\|6 kW\|9 kW\|12 kW\|15 kW] (>=0<=0), ,true,select.boiler_dhw_heat_limit,select.boiler_dhw_maxheat,6,9,1,14,1
 "Geo 5xx",boiler,173,auxheatersource,aux heater source,enum [not installed\|electric heater\|exclusive\|parallel\|hybrid] (>=0<=0), ,true,select.boiler_aux_heater_source,select.boiler_auxheatersource,6,0,1,217,1
 "Geo 5xx",boiler,173,pvcooling,cooling only with PV,boolean (>=0<=0), ,true,switch.boiler_cooling_only_with_PV,switch.boiler_pvcooling,6,0,1,218,1
 "Geo 5xx",boiler,173,auxheateronly,aux heater only,boolean (>=0<=0), ,true,switch.boiler_aux_heater_only,switch.boiler_auxheateronly,6,0,1,219,1
