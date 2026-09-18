@@ -33,6 +33,7 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - possible crash when the WebUI asked for version information while the versions.json refresh was rewriting the cache from the main loop task
 - HTTP client could write past a fixed 64 byte buffer when a URL had a hostname of 64 characters or more, could busy-spin for the whole read budget if the socket reported bytes it wouldn't return, and buffered responses without any size limit
 - the "Ethernet clock mode (GPIO16/17) conflicts with PSRAM" error was never logged because Ethernet had already been skipped by the time the check ran
+- heat limit entities (`maxheatcomp`, `maxheatheat`, `dhw.maxheat`) read as unknown on heat pumps with an auxiliary heater larger than 9 kW - `enum_maxHeat` was missing the 12 kW and 15 kW steps
 
 ## Changed
 
