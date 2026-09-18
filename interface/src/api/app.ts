@@ -115,7 +115,6 @@ export const writeSchedule = (data: Schedule) =>
 // Commands
 export const readCommands = () =>
   alovaInstance.Get<CommandItem[]>('/rest/commands', {
-    // @ts-expect-error - exactOptionalPropertyTypes compatibility issue
     transform(data) {
       const commands = (data as Commands).commands;
       return commands.map((ci) => ({

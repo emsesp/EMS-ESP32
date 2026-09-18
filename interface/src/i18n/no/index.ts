@@ -321,6 +321,7 @@ const no: Translation = {
   DASHBOARD: 'Dashboard',
   DEVELOPER_MODE: 'Utvikler modus',
   DISABLE_RESET: 'Deaktiver fabrikkinnstillinger',
+  AUTO_FW_CHECK: 'Se automatisk etter nye firmware versjoner',
   BYTES: 'Bytes',
   BITMASK: 'Bitmask',
   DUPLICATE: 'Duplikat',
@@ -348,8 +349,8 @@ const no: Translation = {
   COMMAND_EXECUTED: 'Kommando kjørt lykkes',
   RUN: 'Kjør',
   INTERNET_CONNECTION_CHECK: 'Kontrollerer online for tilgjengelige versjoner',
-  UPLOAD_BACKUP_TEXT: 'Klikk for å velge eller dra og slipp en sikkerhetskopi (.json) her',
-  UPLOAD_FIRMWARE_TEXT: 'Klikk for å velge eller dra og slipp en firmware .bin/.md5 her',
+  UPLOAD_BACKUP_TEXT: 'Klikk for å velge, eller drop en sikkerhetskopi (.json) her',
+  UPLOAD_FIRMWARE_TEXT: 'Klikk for å velge, eller drop en firmware .bin/.md5 her',
   UPLOAD_MD5_RECEIVED: 'MD5 mottatt, last nå opp firmware .bin-filen',
   UPLOAD_MD5_MATCHED: 'MD5 stemmer, firmware installeres...'
 };

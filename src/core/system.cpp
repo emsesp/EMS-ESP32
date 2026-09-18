@@ -460,6 +460,7 @@ void System::get_partition_info() {
         auto t = time(nullptr);
         // write timestamp always with new version, if clock is not set, this will be updated with ntp
         EMSESP::nvs_.putULong(c, t);
+        LOG_DEBUG("Updated NVS partition due to version found");
     }
 
     // Loop through all available partitions and update map with the version info pulled from NVS
@@ -719,6 +720,7 @@ void System::store_settings(WebSettings & settings) {
     system_name_    = settings.system_name;
     developer_mode_ = settings.developer_mode;
     disable_reset_  = settings.disable_reset;
+    auto_fw_check_  = settings.auto_fw_check;
 }
 
 // Starts up core services
@@ -867,7 +869,7 @@ bool System::loop() {
 void System::send_info_mqtt() {
     static uint8_t _connection = 0;
     uint8_t        connection  = (EMSESP::network_.ethernet_connected() ? 1 : 0) + (EMSESP::network_.wifi_connected() ? 2 : 0) + (ntp_connected_ ? 4 : 0)
-                                 + (EMSESP::network_.has_ipv6() ? 8 : 0);
+                         + (EMSESP::network_.has_ipv6() ? 8 : 0);
     // check if connection status has changed
     if (!Mqtt::connected() || connection == _connection) {
         return;
@@ -1092,7 +1094,7 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.println();
     shell.println("System:");
     shell.printfln(" Version: %s", EMSESP_APP_VERSION);
-    shell.printfln(" System name: %s", system_name_.c_str());
+    shell.printfln(" System name: %s", system_name().c_str());
 #ifndef EMSESP_STANDALONE
     shell.printfln(" Platform: %s (%s)", EMSESP_PLATFORM, ESP.getChipModel());
     shell.printfln(" Model: %s", getBBQKeesGatewayDetails().c_str());
@@ -1125,6 +1127,12 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(" Internal heap free/largest block: %u KB / %u KB",
                    heap_caps_get_free_size(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT) / 1024,
                    heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT) / 1024);
+    // Lowest the loop task's stack has ever been since boot. EMSESP::loop() runs the blocking HTTP
+    // client and all the JSON work on this task, and a TLS handshake alone can want several KB
+    TaskHandle_t loop_task = xTaskGetHandle("loopTask");
+    if (loop_task != nullptr) {
+        shell.printfln(" Loop task stack min free/total: %u / %u bytes", (unsigned)uxTaskGetStackHighWaterMark(loop_task), (unsigned)getArduinoLoopTaskStackSize());
+    }
 #endif
     shell.printfln(" App used/free: %lu KB / %lu KB", appUsed(), appFree());
     uint32_t FSused = LittleFS.usedBytes() / 1024;
@@ -1182,6 +1190,55 @@ void System::show_system(uuid::console::Shell & shell) {
                        installed.c_str(),
                        (strcmp(esp_ota_get_running_partition()->label, partition.first.c_str()) == 0) ? "** active **" : "");
     }
+// List all NVS values
+#ifndef EMSESP_STANDALONE
+    shell.println(" NVS values:");
+    const char *   nvs_part = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_NVS, "nvs1") ? "nvs1" : "nvs"; // nvs1 is on 16MBs
+    nvs_iterator_t it       = nullptr;
+    esp_err_t      err      = nvs_entry_find(nvs_part, "ems-esp", NVS_TYPE_ANY, &it);
+    while (err == ESP_OK) {
+        nvs_entry_info_t info;
+        nvs_entry_info(it, &info);
+        shell.printf("  %s", info.key);
+        // also print the value depending on the type
+        switch (info.type) {
+        case NVS_TYPE_I8:
+            shell.printfln(" = %d", (int)EMSESP::nvs_.getChar(info.key));
+            break;
+        case NVS_TYPE_U8:
+            shell.printfln(" = %u", (unsigned int)EMSESP::nvs_.getUChar(info.key));
+            break;
+        case NVS_TYPE_I32:
+            shell.printfln(" = %d", (int)EMSESP::nvs_.getInt(info.key));
+            break;
+        case NVS_TYPE_U32:
+            shell.printfln(" = %u", (unsigned int)EMSESP::nvs_.getUInt(info.key));
+            break;
+        case NVS_TYPE_I64:
+            shell.printfln(" = %lld", (long long)EMSESP::nvs_.getLong64(info.key));
+            break;
+        case NVS_TYPE_U64:
+            shell.printfln(" = %llu", (unsigned long long)EMSESP::nvs_.getULong64(info.key));
+            break;
+        case NVS_TYPE_BLOB:
+            shell.printfln(" = %f", EMSESP::nvs_.getDouble(info.key)); // bytes used for double values
+            break;
+        case NVS_TYPE_STR:
+            shell.printfln(" = %s", EMSESP::nvs_.getString(info.key).c_str());
+            break;
+        default:
+            shell.printfln(" = unknown");
+            break;
+        }
+        err = nvs_entry_next(&it);
+    }
+    if (it != nullptr) {
+        nvs_release_iterator(it); // just in case
+    }
+    if (err == ESP_OK) {
+        shell.println();
+    }
+#endif
 
     shell.println();
     shell.println("Network:");
@@ -1234,10 +1291,12 @@ void System::show_system(uuid::console::Shell & shell) {
         break;
     }
 
-    // show Ethernet if connected
+    // show the Ethernet state, and the details when it's actually up
+    const char * ethernet_status = EMSESP::network_.ethernet_status();
+    if (ethernet_status != nullptr) {
+        shell.printfln(" Ethernet Status: %s", ethernet_status);
+    }
     if (EMSESP::network_.ethernet_connected()) {
-        shell.println();
-        shell.printfln(" Ethernet Status: connected");
         shell.printfln(" Ethernet MAC address: %s", ETH.macAddress().c_str());
         shell.printfln(" Hostname: %s", ETH.getHostname());
         shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(ETH.localIP()).c_str(), uuid::printable_to_string(ETH.subnetMask()).c_str());
@@ -2675,6 +2734,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["forceHeatingOff"] = settings.boiler_heatingoff;
         node["developerMode"]   = settings.developer_mode;
         node["disableReset"]    = settings.disable_reset;
+        node["autoFwCheck"]     = settings.auto_fw_check;
     });
 
     // Devices - show EMS devices if we have any
@@ -2916,6 +2976,12 @@ bool System::command_format(const char * value, const int8_t id) {
     }
 #else
     LOG_ERROR("Format command not available in standalone or test mode");
+#endif
+
+// in debug we also remove all the NVS keys
+#ifdef EMSESP_DEBUG
+    LOG_DEBUG("Setting NVS fresh firmware flag");
+    EMSESP::nvs_.putBool(EMSESP_NVS_BOOT_NEW_FIRMWARE, true);
 #endif
 
     // restart will be handled by the main loop

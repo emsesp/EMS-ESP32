@@ -8,7 +8,7 @@ set -e
 
 cd interface
 rm -rf node_modules
-corepack use pnpm@latest
+pnpm self-update
 pnpm update
 pnpm install
 pnpm format
@@ -17,7 +17,7 @@ pnpm lint
 
 cd ../mock-api
 rm -rf node_modules
-corepack use pnpm@latest
+pnpm self-update
 pnpm update
 pnpm install
 pnpm format

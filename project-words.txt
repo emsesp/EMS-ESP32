@@ -1350,3 +1350,4 @@ autonegotiation
 Mbit
 WROVER
 OLIMEXPOEW
+arduinoespressif

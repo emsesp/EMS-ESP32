@@ -512,6 +512,18 @@ const ApplicationSettings = () => {
             </Grid>
           </>
         )}
+        <Typography color="secondary">Firmware</Typography>
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.auto_fw_check}
+              onChange={updateFormValue}
+              name="auto_fw_check"
+            />
+          }
+          label={LL.AUTO_FW_CHECK()}
+        />
+
         <Typography sx={{ pb: 1, pt: 2 }} variant="h6" color="primary">
           {LL.SENSORS()}
         </Typography>

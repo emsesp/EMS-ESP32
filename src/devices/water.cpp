@@ -233,7 +233,6 @@ void Water::process_IPMParameterWW(const std::shared_ptr<const Telegram> & teleg
     // has_bitupdate(telegram, wwChargeType_, 10, 0); // 0 = charge pump, 0xff = 3-way valve
 }
 
-
 // 0x1E, only16 bit temperature
 // Mixer(0x41) -> Boiler(0x08), HydrTemp(0x1E), data: 01 D8
 void Water::process_IPMHydrTemp(const std::shared_ptr<const Telegram> & telegram) {
@@ -398,7 +397,6 @@ bool Water::set_wwRequiredTemp(const char * value, const int8_t id) {
     }
     return false;
 }
-
 
 bool Water::set_wwFlowTempOffset(const char * value, const int8_t id) {
     int n;

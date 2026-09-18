@@ -81,7 +81,6 @@ class Heatsource : public EMSdevice {
     void process_amCommandMessage(const std::shared_ptr<const Telegram> & telegram);
     void process_amExtraMessage(const std::shared_ptr<const Telegram> & telegram);
 
-
     bool set_vr2Config(const char * value, const int8_t id);     // pos 12: off(00)/Keelbypass(01)/(hc1pump(02) only standalone)
     bool set_ahsActivated(const char * value, const int8_t id);  // pos 00: Alternate heat source activation: No(00),Yes(01)
     bool set_aPumpConfig(const char * value, const int8_t id);   // pos 04: Buffer primary pump->Config pump: No(00),Yes(01)

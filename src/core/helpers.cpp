@@ -1042,5 +1042,4 @@ int16_t Helpers::calc_dew(int16_t temp, uint8_t humi) {
     return dt;
 }
 
-
 } // namespace emsesp

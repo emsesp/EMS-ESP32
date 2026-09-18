@@ -22,16 +22,16 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Install Node.js 24
+      - name: Install Node.js 26
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 26
 
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Enable Corepack
-        run: corepack enable pnpm
+      - name: Install pnpm
+        run: npm install -g pnpm
 
       - name: Get the EMS-ESP version
         id: build_info

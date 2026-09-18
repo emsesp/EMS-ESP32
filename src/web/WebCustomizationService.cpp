@@ -57,7 +57,7 @@ void WebCustomization::read(WebCustomization & customizations, JsonObject root) 
         sensorJson["id"]        = (const char *)sensor.id;   // ID of dallas temperature sensor chip
         sensorJson["name"]      = (const char *)sensor.name; // n
         sensorJson["offset"]    = sensor.offset;             // o
-        sensorJson["is_system"] = sensor.is_system;          // s for gateway_temperature
+        sensorJson["is_system"] = sensor.is_system;          // s true for gateway_temperature
     }
 
     // Analog Sensor customization
@@ -70,7 +70,7 @@ void WebCustomization::read(WebCustomization & customizations, JsonObject root) 
         sensorJson["factor"]    = sensor.factor;             // f
         sensorJson["uom"]       = sensor.uom;                // u
         sensorJson["type"]      = sensor.type;               // t
-        sensorJson["is_system"] = sensor.is_system;          // s for core_voltage, supply_voltage
+        sensorJson["is_system"] = sensor.is_system;          // s true for core_voltage, supply_voltage
     }
 
     // Masked entities customization and custom device name (optional)

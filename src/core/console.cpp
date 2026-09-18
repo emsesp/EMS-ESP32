@@ -108,7 +108,6 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
             return std::vector<std::string>{"system", "users", "devices", "log", "ems", "values", "mqtt", "commands"};
         });
 
-
     //
     // System commands
     //
@@ -293,7 +292,6 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                               });
                               EMSESP::network_.reconnect();
                           });
-
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::ADMIN,

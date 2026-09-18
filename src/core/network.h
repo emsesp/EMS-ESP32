@@ -132,9 +132,10 @@ class Network {
         return reconnect_count_;
     }
 
-    std::string getLocalIP() const;
-    std::string getMacAddress() const;
-    uint8_t     getStationNum() const;
+    std::string  getLocalIP() const;
+    std::string  getMacAddress() const;
+    uint8_t      getStationNum() const;
+    const char * ethernet_status() const;
 
     void reconnect();
 
@@ -192,6 +193,7 @@ class Network {
     const char * disconnectReason(uint8_t code);
     void         stopAP();
     NetPhase     initialPhase() const;
+    bool         ethClockConflictsPsram() const;
 
 #if defined(__clang__)
 #pragma clang diagnostic push
@@ -216,6 +218,7 @@ class Network {
     bool wifi_events_registered_          = false; // ensure WiFi.onEvent() handlers are registered only once across begin()/reconnect() cycles
     bool eth_hostname_handler_registered_ = false; // for the ETHERNET_EVENT_START hostname handler
     bool ethernet_started_                = false; // ETH.begin() succeeded; the driver runs for the lifetime of the boot
+    bool ethernet_init_failed_            = false; // ETH.begin() failed, so the driver was never installed
     bool wifi_ever_connected_             = false; // set true once we've successfully obtained an IP
     bool ethernet_ever_connected_         = false; // set true once we've successfully obtained an IP
     bool wifi_radio_off_                  = false; // STA powered down because Ethernet is carrying the traffic

@@ -1,4 +1,4 @@
-import { memo, useContext, useEffect, useState } from 'react';
+import { memo, useContext, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
 
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -52,6 +52,7 @@ const STABLE_RELNOTES_URL =
 const DEV_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/latest/';
 const DEV_RELNOTES_URL =
   'https://github.com/emsesp/EMS-ESP32/blob/dev/CHANGELOG_LATEST.md';
+const MAX_VERSION_POLLS = 5; // approx 15 seconds of waiting
 
 // Types for better type safety
 interface PartitionData {
@@ -440,12 +441,17 @@ const Version = () => {
   const stableUpgradeAvailable = versions?.stable?.upgradeable ?? false;
   const devUpgradeAvailable = versions?.dev?.upgradeable ?? false;
   const internetLive = Boolean(versions?.stable || versions?.dev);
+  const versionPolls = useRef(0);
 
   useEffect(() => {
-    if (internetLive) {
+    if (internetLive || versionPolls.current >= MAX_VERSION_POLLS) {
       return;
     }
     const interval = setInterval(() => {
+      versionPolls.current += 1;
+      if (versionPolls.current >= MAX_VERSION_POLLS) {
+        clearInterval(interval);
+      }
       void refreshVersions();
     }, 3000);
     return () => clearInterval(interval);

@@ -321,6 +321,7 @@ const sk: Translation = {
   DASHBOARD: 'Panel',
   DEVELOPER_MODE: 'Režim vývojára',
   DISABLE_RESET: 'Zakázať továrenské nastavenia',
+  AUTO_FW_CHECK: 'Automaticky kontrolovať aktualizácie firmvéru',
   BYTES: 'Bytov',
   BITMASK: 'Bitová maska',
   DUPLICATE: 'Duplicitné',
@@ -348,8 +349,8 @@ const sk: Translation = {
   COMMAND_EXECUTED: 'Príkaz vykonaný úspešne',
   RUN: 'Volať príkaz',
   INTERNET_CONNECTION_CHECK: 'Kontrola online pre dostupné verzie',
-  UPLOAD_BACKUP_TEXT: 'Kliknite, aby ste vybrali alebo presuňte a upustili súbor zálohy (.json) sem',
-  UPLOAD_FIRMWARE_TEXT: 'Kliknite, aby ste vybrali alebo presuňte a upustili súbor firmware .bin/.md5',
+  UPLOAD_BACKUP_TEXT: 'Kliknite, aby ste vybrali, alebo drop súbor zálohy (.json) sem',
+  UPLOAD_FIRMWARE_TEXT: 'Kliknite, aby ste vybrali, alebo drop súbor firmware .bin/.md5 sem',
   UPLOAD_MD5_RECEIVED: 'Suma MD5 prijatá, teraz nahrajte firmware .bin',
   UPLOAD_MD5_MATCHED: 'MD5 súhlasí, firmvér sa inštaluje...'
 };

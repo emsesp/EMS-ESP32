@@ -81,7 +81,6 @@ class Water : public EMSdevice {
     int8_t   wwHystOff_;        // Hyst off (default -1)
     uint8_t  wwFlowTempOffset_; // default 40
 
-
     void process_SM100wwTemperature(const std::shared_ptr<const Telegram> & telegram);
     void process_SM100wwStatus(const std::shared_ptr<const Telegram> & telegram);
     void process_SM100wwStatus2(const std::shared_ptr<const Telegram> & telegram);
@@ -99,7 +98,6 @@ class Water : public EMSdevice {
     void process_IPMMonitorWW(const std::shared_ptr<const Telegram> & telegram);
     void process_IPMHydrTemp(const std::shared_ptr<const Telegram> & telegram);
     void process_IPMParameterWW(const std::shared_ptr<const Telegram> & telegram);
-
 
     bool set_wwSelTemp(const char * value, const int8_t id);
     bool set_wwMaxTemp(const char * value, const int8_t id);

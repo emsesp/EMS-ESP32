@@ -138,7 +138,7 @@ const runRule = async (
 
 export default class Schema {
   private readonly rules: Rules;
-  private requiredMessage?: string;
+  private requiredMessage?: string | undefined;
 
   constructor(descriptor: Rules) {
     this.rules = descriptor;

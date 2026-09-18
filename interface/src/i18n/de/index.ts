@@ -321,6 +321,7 @@ const de: Translation = {
   DASHBOARD: 'Dashboard',
   DEVELOPER_MODE: 'Entwicklermodus',
   DISABLE_RESET: 'Werkseinstellungen deaktivieren',
+  AUTO_FW_CHECK: 'Automatisch nach Firmware-Updates suchen',
   BYTES: 'Bytes',
   BITMASK: 'Bit Maske',
   DUPLICATE: 'Kopieren',
@@ -348,8 +349,8 @@ const de: Translation = {
   COMMAND_EXECUTED: 'Befehl erfolgreich ausgeführt',
   RUN: 'Befehl ausführen',
   INTERNET_CONNECTION_CHECK: 'Online-Prüfung auf verfügbare Versionen',
-  UPLOAD_BACKUP_TEXT: 'Klicken Sie, um eine Sicherungsdatei (.json) auszuwählen oder zu ziehen und abzulegen',
-  UPLOAD_FIRMWARE_TEXT: 'Klicken Sie, um eine Firmware-Datei (.bin/.md5) auszuwählen oder zu ziehen und abzulegen',
+  UPLOAD_BACKUP_TEXT: 'Klicken Sie, um eine Sicherungsdatei (.json) auszuwählen, oder drop ein',
+  UPLOAD_FIRMWARE_TEXT: 'Klicken Sie, um eine Firmware-Datei (.bin/.md5) auszuwählen, oder drop ein',
   UPLOAD_MD5_RECEIVED: 'Prüfsumme empfangen, jetzt die Firmware-Datei (.bin) hochladen',
   UPLOAD_MD5_MATCHED: 'MD5 stimmt überein, Firmware wird installiert...'
 };

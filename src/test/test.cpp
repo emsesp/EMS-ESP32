@@ -77,7 +77,6 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
         return true;
     }
 
-
 //
 // the tests take a lot of memory when built for the ESP32
 // so only including the full set in standalone, otherwise a limited selection of basic tests
@@ -664,7 +663,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         request.url("/api/thermostat/hc1/entities");
         EMSESP::webAPIService.webAPIService(&request);
         Serial.println();
-
 
         request.url("/api/thermostat/hc2/entities");
         EMSESP::webAPIService.webAPIService(&request);

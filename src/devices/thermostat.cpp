@@ -3012,7 +3012,6 @@ bool Thermostat::set_R3000Holiday(const char * value, const int8_t id) {
     return true;
 }
 
-
 // set pause in hours
 bool Thermostat::set_pause(const char * value, const int8_t id) {
     auto hc = heating_circuit(id);
@@ -3668,7 +3667,6 @@ bool Thermostat::set_reducemode(const char * value, const int8_t id) {
     return false;
 }
 
-
 // sets the thermostat reducemode for RC35 vacations
 bool Thermostat::set_vacreducemode(const char * value, const int8_t id) {
     auto hc = heating_circuit(id);
@@ -3982,7 +3980,6 @@ bool Thermostat::set_wwSwitchTime(const char * value, const int8_t id) {
         return false;
     }
     char out[sizeof(dhw->wwSwitchTime_)] = {'\0'};
-
 
     if (set_switchtime(value, 0x38, out, sizeof(out))) {
         if (strlen(out)) {

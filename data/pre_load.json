@@ -1,7 +1,6 @@
 {
   "type": "systembackup",
   "version": "3.9.0",
-  "date": "2026-06-14T10:59:16",
   "systembackup": [
     {
       "type": "settings",
@@ -20,7 +19,7 @@
         "eth_10mbit": false
       },
       "AP": {
-        "provision_mode": 2,
+        "provision_mode": 1,
         "ssid": "ems-esp",
         "password": "ems-esp-neo",
         "channel": 1,
@@ -33,13 +32,13 @@
       "MQTT": {
         "enableTLS": false,
         "rootCA": "",
-        "enabled": true,
-        "host": "192.168.1.2",
+        "enabled": false,
+        "host": "",
         "port": 1883,
         "base": "ems-esp",
-        "username": "username",
-        "password": "password",
-        "client_id": "esp32",
+        "username": "",
+        "password": "",
+        "client_id": "ems-esp",
         "keep_alive": 60,
         "clean_session": false,
         "entity_format": 1,
@@ -53,20 +52,23 @@
         "publish_time_heartbeat": 60,
         "mqtt_qos": 0,
         "mqtt_retain": false,
-        "ha_enabled": true,
+        "ha_enabled": false,
         "nested_format": 1,
         "discovery_prefix": "homeassistant",
         "discovery_type": 0,
-        "ha_number_mode": 1,
+        "ha_number_mode": 0,
         "publish_single": false,
         "publish_single2cmd": false,
         "send_response": false
       },
       "NTP": {
-        "enabled": true,
+        "enabled": false,
         "server": "time.google.com",
         "tz_label": "Europe/Amsterdam",
-        "tz_format": "CET-1CEST,M3.5.0,M10.5.0/3"
+        "tz_format": "CET-1CEST,M3.5.0,M10.5.0/3",
+        "thermostat_sync": 1,
+        "tz_label_t": "Europe/Amsterdam",
+        "tz_format_t": "CET-1CEST,M3.5.0,M10.5.0/3"
       },
       "Security": {
         "jwt_secret": "ems-esp-neo",
@@ -87,9 +89,9 @@
         "version": "3.9.0",
         "board_profile": "E32V2_2",
         "platform": "ESP32",
-        "system_name": "prod",
+        "system_name": "",
         "locale": "en",
-        "tx_mode": 1,
+        "tx_mode": 5,
         "ems_bus_id": 73,
         "syslog_enabled": false,
         "syslog_level": 3,
@@ -100,7 +102,7 @@
         "boiler_heatingoff": false,
         "remote_timeout": 24,
         "remote_timeout_en": false,
-        "shower_timer": true,
+        "shower_timer": false,
         "shower_alert": false,
         "shower_alert_coldshot": 10,
         "shower_alert_trigger": 7,
@@ -110,7 +112,7 @@
         "dallas_gpio": 14,
         "dallas_parasite": false,
         "led_gpio": 32,
-        "hide_led": true,
+        "hide_led": false,
         "led_type": 1,
         "low_clock": false,
         "telnet_enabled": true,
@@ -134,139 +136,43 @@
         "modbus_port": 502,
         "modbus_max_clients": 10,
         "modbus_timeout": 300,
-        "developer_mode": true,
+        "developer_mode": false,
         "disable_reset": false,
-        "email_enabled": true,
+        "email_enabled": false,
         "email_security": 2,
-        "email_server": "smtp.gmail.com",
+        "email_server": "smtp.example.net",
         "email_port": 587,
-        "email_login": "test@emsesp.org",
-        "email_pass": "password",
-        "email_sender": "test@emsesp.org",
-        "email_recp": "test@emsesp.org",
+        "email_login": "",
+        "email_pass": "",
+        "email_sender": "ems-esp@example.net",
+        "email_recp": "",
         "email_subject": "ems-esp notification"
       }
     },
     {
       "type": "commands",
       "Commands": {
-        "commands": [
-          {
-            "id": 1,
-            "cmd": "{\"url\":\"https://api.pushover.net/1/messages.json\"}",
-            "value": "{\"user\":\"userkey\", \"token\":\"tokenkey\", \"message\":\"custom/message2\"}",
-            "name": "push_over"
-          },
-          {
-            "id": 2,
-            "cmd": "system/message",
-            "value": "hello",
-            "name": "sendmessage"
-          },
-          {
-            "id": 3,
-            "cmd": "system/message",
-            "value": "{\"url\":\"http://emsesp.org/versions.json\"}",
-            "name": "sendversions"
-          },
-          {
-            "id": 4,
-            "cmd": "custom/message",
-            "value": "{\"url\":\"http://emsesp.org/versions.json\"}",
-            "name": "getversions"
-          },
-          {
-            "id": 5,
-            "cmd": "system/sendmail",
-            "value": "\"test email with \" + custom/message2",
-            "name": "sendmail"
-          }
-        ]
+        "commands": []
       }
     },
     {
       "type": "schedule",
       "Schedule": {
-        "schedule": [
-          {
-            "id": 1,
-            "flags": 128,
-            "active": false,
-            "time": "",
-            "cmd_name": "sendmail",
-            "name": "sendmailtest"
-          }
-        ]
+        "schedule": []
       }
     },
     {
       "type": "customizations",
       "Customizations": {
-        "as": [
-          {
-            "gpio": 39,
-            "name": "core_voltage",
-            "offset": 0,
-            "factor": 0.003771,
-            "uom": 23,
-            "type": 3,
-            "is_system": true
-          },
-          {
-            "gpio": 36,
-            "name": "supply_voltage",
-            "offset": 0,
-            "factor": 0.017,
-            "uom": 23,
-            "type": 3,
-            "is_system": true
-          },
-          {
-            "gpio": 2,
-            "name": "led",
-            "offset": 0,
-            "factor": 1,
-            "uom": 0,
-            "type": 6,
-            "is_system": true
-          }
-        ],
+        "ts": [],
+        "as": [],
         "masked_entities": []
       }
     },
     {
       "type": "entities",
       "Entities": {
-        "entities": [
-          {
-            "id": 0,
-            "ram": 1,
-            "device_id": 0,
-            "type_id": 0,
-            "offset": 0,
-            "factor": 1,
-            "name": "message",
-            "uom": 0,
-            "value_type": 9,
-            "writeable": true,
-            "hide": false,
-            "value": "{\"stable\":{\"version\":\"3.8.3\",\"date\":\"2026-08-01\"},\"dev\":{\"version\":\"3.9.0-dev.0\",\"date\":\"2026-08-01T09:55:29Z\"}}"
-          },
-          {
-            "id": 1,
-            "ram": 1,
-            "device_id": 0,
-            "type_id": 0,
-            "offset": 0,
-            "factor": 1,
-            "name": "message2",
-            "uom": 0,
-            "value_type": 9,
-            "writeable": true,
-            "hide": false,
-            "value": "testing"
-          }
-        ]
+        "entities": []
       }
     },
     {
@@ -274,71 +180,6 @@
       "Modules": {
         "modules": []
       }
-    },
-    {
-      "type": "nvs",
-      "nvs": [
-        {
-          "type": 1,
-          "key": "nompower",
-          "value": 30
-        },
-        {
-          "type": 33,
-          "key": "boot",
-          "value": "3.9.0"
-        },
-        {
-          "type": 17,
-          "key": "led",
-          "value": 0
-        },
-        {
-          "type": 33,
-          "key": "intTemp",
-          "value": "28_1767_7B13_2502"
-        },
-        {
-          "type": 4,
-          "key": "d_boot",
-          "value": 1
-        },
-        {
-          "type": 33,
-          "key": "app1",
-          "value": "3.9.0"
-        },
-        {
-          "type": 33,
-          "key": "app0",
-          "value": "3.9.0"
-        },
-        {
-          "type": 66,
-          "key": "nrgheat",
-          "value": 49355.29793
-        },
-        {
-          "type": 4,
-          "key": "d_app1",
-          "value": 1781336521
-        },
-        {
-          "type": 1,
-          "key": "fresh_firmware",
-          "value": 0
-        },
-        {
-          "type": 4,
-          "key": "d_app0",
-          "value": 1781363944
-        },
-        {
-          "type": 66,
-          "key": "nrgww",
-          "value": 41852.79107
-        }
-      ]
     }
   ]
 }

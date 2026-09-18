@@ -87,6 +87,7 @@ void AnalogSensor::start(const bool factory_settings) {
 
             return StateUpdateResult::CHANGED; // persist the change
         });
+        LOG_DEBUG("Adding system sensors for core_voltage, supply_voltage and led");
     }
     reload(true); // fetch the list of sensors from our customization service
 
