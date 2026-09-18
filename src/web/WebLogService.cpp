@@ -94,7 +94,7 @@ void WebLogService::show(Shell & shell) {
     }
 
     shell.println();
-    shell.printfln("Recent Log:");
+    shell.printfln("Last %d messages:", log_messages_.size());
     shell.println();
 
     for (const auto & message : log_messages_) {

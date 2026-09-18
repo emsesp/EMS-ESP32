@@ -213,7 +213,7 @@ void TemperatureSensor::loop() {
                         if (!EMSESP::nvs_.isKey("intTemp")) {
                             EMSESP::nvs_.putString("intTemp", s->id());
                         }
-                        // LOG_NOTICE("Adding system sensor for gateway temperature %s", s->id().c_str());
+                        LOG_DEBUG("Adding system sensor for gateway_temperature");
                         EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
                             auto newSensor = SensorCustomization();
                             strlcpy(newSensor.id, s->id(), sizeof(newSensor.id));

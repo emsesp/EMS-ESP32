@@ -19,7 +19,6 @@ export const uploadFile = (file: File) => {
   const formData = new FormData();
   formData.append('file', file);
   return alovaInstance.Post('/rest/uploadFile', formData, {
-    timeout: UPLOAD_TIMEOUT,
-    enableUpload: true
+    timeout: UPLOAD_TIMEOUT
   });
 };

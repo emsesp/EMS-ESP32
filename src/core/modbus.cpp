@@ -238,7 +238,6 @@ ModbusMessage Modbus::handleRead(const ModbusMessage & request) {
                                                key,
                                                [](const EntityModbusInfo & a, const EntityModbusInfoKey & b) { return a.isLessThan(b); });
 
-
     if (modbusInfo == std::end(modbus_register_mappings) || !modbusInfo->equals(key)) {
         // combination of device_type/tag_type/register_offset does not exist
         LOG_ERROR("combination of device_type/tag_type/register_offset does not exist");
@@ -323,7 +322,6 @@ ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
     auto register_offset = start_address - tag * REGISTER_BLOCK_SIZE;
 
     LOG_DEBUG("Tag %d, offset %d", tag, register_offset);
-
 
     // binary search in modbus infos
     auto key        = EntityModbusInfoKey(device_type, tag_type, register_offset);

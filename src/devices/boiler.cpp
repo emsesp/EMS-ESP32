@@ -1145,7 +1145,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     EMSESP::send_read_request(0xC2, device_id, 0, 20); // read last errorcode on start (not broadcasted)
     EMSESP::send_read_request(0xC6, device_id, 0, 21); // read last errorcode on start (not broadcasted)
 
-
     if (!isHeatPump() && model() != EMSdevice::EMS_DEVICE_FLAG_HIU) {
         register_telegram_type(0x04, "UBAFactory", true, MAKE_PF_CB(process_UBAFactory), 21);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nomPower_, DeviceValueType::UINT8, FL_(nomPower), DeviceValueUOM::KW, MAKE_CF_CB(set_nomPower));
@@ -2451,7 +2450,6 @@ bool Boiler::set_ww_temp(const char * value, const int8_t id) {
 
     return true;
 }
-
 
 // Set the lower dhw temperature 0xEA
 bool Boiler::set_ww_temp_low(const char * value, const int8_t id) {

@@ -35,6 +35,31 @@ int HttpClient::request(std::string url, const std::string & method, const std::
         return 0; // unsupported scheme
     }
 
+    // split the host from the path before anything is allocated, so a bad URL costs nothing
+    url.replace(0, is_https ? 8 : 7, "");
+    std::string host  = url;
+    auto        index = url.find_first_of('/');
+    if (index != std::string::npos) {
+        host = url.substr(0, index);
+        url.replace(0, index, "");
+    } else {
+        url = "/";
+    }
+
+    if (host.empty()) {
+        return 0;
+    }
+
+    // ESP_SSLClient keeps the host in a fixed char[64] and strcpy()s into it without a length
+    // check, so a longer name would corrupt whatever follows it and crash somewhere unrelated
+    if (host.length() > MAX_HOSTNAME_LENGTH) {
+        EMSESP::logger().warning("%s hostname is too long (%u characters, max is %u)",
+                                 is_https ? "HTTPS" : "HTTP",
+                                 (unsigned)host.length(),
+                                 (unsigned)MAX_HOSTNAME_LENGTH);
+        return 0;
+    }
+
     WiFiClient *    basic_client = new WiFiClient;
     ESP_SSLClient * ssl_client   = new ESP_SSLClient;
     if (is_https) {
@@ -49,16 +74,6 @@ int HttpClient::request(std::string url, const std::string & method, const std::
     basic_client->setConnectionTimeout(CONNECT_TIMEOUT_MS);
     ssl_client->setTimeout(5);                     // seconds, drives BearSSL only - unused on the plain HTTP path
     ssl_client->setClient(basic_client, is_https); // enableSSL = false for plain HTTP
-
-    url.replace(0, is_https ? 8 : 7, "");
-    std::string host  = url;
-    auto        index = url.find_first_of('/');
-    if (index != std::string::npos) {
-        host = url.substr(0, index);
-        url.replace(0, index, "");
-    } else {
-        url = "/";
-    }
 
     const uint16_t port = is_https ? 443 : 80;
     if (ssl_client->connect(host.c_str(), port)) {
@@ -97,16 +112,25 @@ int HttpClient::request(std::string url, const std::string & method, const std::
         // the stream goes idle, or the overall budget runs out
         const uint32_t started   = millis();
         uint32_t       last_data = started;
+        bool           truncated = false;
         while (millis() - started < TOTAL_TIMEOUT_MS) {
             const int avail = ssl_client->available();
             if (avail > 0) {
+                if (result.length() >= MAX_RESPONSE_BYTES) {
+                    truncated = true;
+                    break;
+                }
                 uint8_t      buf[128];
                 const size_t want = (avail < (int)sizeof(buf)) ? (size_t)avail : sizeof(buf);
                 const int    len  = ssl_client->read(buf, want);
                 if (len > 0) {
                     result.append(reinterpret_cast<const char *>(buf), len);
                     last_data = millis();
+                    continue;
                 }
+                // available() reported bytes the client won't hand over. Yielding here keeps a
+                // stale count from busy-spinning the whole read budget on this task's core
+                delay(1);
                 continue;
             }
             if (!ssl_client->connected()) {
@@ -121,6 +145,9 @@ int HttpClient::request(std::string url, const std::string & method, const std::
         ssl_client->stop();
 
         const auto received = result.length();
+        if (truncated) {
+            EMSESP::logger().warning("%s response from %s truncated at %u bytes", is_https ? "HTTPS" : "HTTP", host.c_str(), (unsigned)received);
+        }
 
         // parse the status line "HTTP/1.x <code> <reason>". stoi() would abort rather than throw on
         // a malformed response, since the firmware is built with -fno-exceptions

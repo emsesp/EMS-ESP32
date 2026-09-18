@@ -55,6 +55,7 @@ export interface Settings {
   email_subject: string;
   developer_mode: boolean;
   disable_reset: boolean;
+  auto_fw_check: boolean;
 }
 
 export enum busConnectionStatus {

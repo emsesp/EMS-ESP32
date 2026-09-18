@@ -321,6 +321,7 @@ const cs: Translation = {
   DASHBOARD: 'Dashboard',
   DEVELOPER_MODE: 'Režim vývojáře',
   DISABLE_RESET: 'Zakázat obnovení továrního nastavení',
+  AUTO_FW_CHECK: 'Automaticky kontrolovat aktualizace firmwaru',
   BYTES: 'Bajty',
   BITMASK: 'Bit Mask',
   DUPLICATE: 'Duplikát',
@@ -348,8 +349,8 @@ const cs: Translation = {
   COMMAND_EXECUTED: 'Příkaz úspěšně spuštěn',
   RUN: 'Spustit příkaz',
   INTERNET_CONNECTION_CHECK: 'Kontrola online pro dostupné verze',
-  UPLOAD_BACKUP_TEXT: 'Klikněte, abyste vybrali nebo přetáhli a pustili soubor zálohy (.json) sem',
-  UPLOAD_FIRMWARE_TEXT: 'Klikněte, abyste vybrali nebo přetáhli a pustili soubor firmware .bin/.md5 sem',
+  UPLOAD_BACKUP_TEXT: 'Klikněte, abyste vybrali, nebo drop soubor zálohy (.json) sem',
+  UPLOAD_FIRMWARE_TEXT: 'Klikněte, abyste vybrali, nebo drop soubor firmware .bin/.md5 sem',
   UPLOAD_MD5_RECEIVED: 'Digest přijat, nyní nahrajte firmware .bin',
   UPLOAD_MD5_MATCHED: 'MD5 souhlasí, firmware se instaluje...'
 };

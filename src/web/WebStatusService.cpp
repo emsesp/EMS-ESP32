@@ -348,7 +348,20 @@ void WebStatusService::getVersions(JsonObject root) {
         }
     }
 
-    if (!versions_cache_valid_) {
+    // take a snapshot, since the loop task can be rewriting the cache while we run on AsyncTCP
+    VersionInfo stable;
+    VersionInfo dev;
+    bool        cache_valid;
+    {
+        std::lock_guard<std::mutex> lock{versions_mutex_};
+        cache_valid = versions_cache_valid_;
+        stable      = versions_stable_;
+        dev         = versions_dev_;
+    }
+
+    versions_fetch_requested_ = true;
+
+    if (!cache_valid) {
         // no successful fetch yet (no network, fetch pending, or parse error)
         return;
     }
@@ -364,8 +377,8 @@ void WebStatusService::getVersions(JsonObject root) {
         out["upgradeable"] = info.upgradeable;
     };
 
-    add_section("stable", versions_stable_);
-    add_section("dev", versions_dev_);
+    add_section("stable", stable);
+    add_section("dev", dev);
 #else
     // standalone/test build: provide deterministic dummy data
     JsonObject stable_out     = root["stable"].to<JsonObject>();
@@ -383,17 +396,23 @@ void WebStatusService::getVersions(JsonObject root) {
 // schedule the next versions.json fetch a few seconds out so the network stack has time to settle
 // (DHCP completion, default-netif assignment and DNS server propagation through lwip)
 void WebStatusService::schedule_versions_refresh() {
-    uint32_t next = uuid::get_uptime() + VERSIONS_INITIAL_FETCH_DELAY_MS;
+    versions_failures_ = 0; // a fresh link is a fresh chance, so start again from the short retry delay
+    uint32_t next      = uuid::get_uptime() + VERSIONS_INITIAL_FETCH_DELAY_MS;
     if (next == 0) {
         next = 1; // 0 is the "idle" sentinel — never let the wrap land there
     }
     versions_next_fetch_ms_ = next;
 }
 
-// periodic refresh (1 hour) of the cached versions.json
-// runs on the main loop task, which has a much bigger stack than AsyncTCP needed for https
+// refresh of the cached versions.json, at most once a day
 void WebStatusService::loop() {
 #ifndef EMSESP_STANDALONE
+    // with auto_fw_check off we only reach out to emsesp.org when the WebUI asks for version
+    // information, so an unattended system never contacts it at all
+    if (!EMSESP::system_.auto_fw_check() && !versions_fetch_requested_) {
+        return;
+    }
+
     // need a network
     if (!EMSESP::network_.network_connected()) {
         return;
@@ -409,8 +428,20 @@ void WebStatusService::loop() {
         return;
     }
 
-    bool     ok   = refresh_versions_cache();
-    uint32_t next = uuid::get_uptime() + (ok ? VERSIONS_REFRESH_INTERVAL_MS : VERSIONS_RETRY_INTERVAL_MS);
+    versions_fetch_requested_ = false;
+
+    uint32_t interval;
+    if (refresh_versions_cache()) {
+        versions_failures_ = 0;
+        interval           = VERSIONS_REFRESH_INTERVAL_MS;
+    } else {
+        if (versions_failures_ < VERSIONS_MAX_BACKOFF_STEPS) {
+            versions_failures_++;
+        }
+        interval = VERSIONS_RETRY_INTERVAL_MS << (versions_failures_ - 1);
+    }
+
+    uint32_t next = uuid::get_uptime() + interval;
     if (next == 0) {
         next = 1;
     }
@@ -451,16 +482,21 @@ bool WebStatusService::refresh_versions_cache() {
         out.upgradeable = !out.version.empty() && FirmwareVersion(out.version) > current_version;
     };
 
-    read_section("stable", versions_stable_);
-    read_section("dev", versions_dev_);
+    // parse into locals first, then publish in one go so the AsyncTCP task never sees a half-written cache
+    VersionInfo stable;
+    VersionInfo dev;
+    read_section("stable", stable);
+    read_section("dev", dev);
 
-    versions_cache_valid_ = true;
+    {
+        std::lock_guard<std::mutex> lock{versions_mutex_};
+        versions_stable_      = stable;
+        versions_dev_         = dev;
+        versions_cache_valid_ = true;
+    }
+
 #if defined(EMSESP_DEBUG)
-    EMSESP::logger().debug("Fetched from %s: stable=%s, dev=%s, current=%s",
-                           VERSIONS_URL,
-                           versions_stable_.version.c_str(),
-                           versions_dev_.version.c_str(),
-                           current_version_s.c_str());
+    EMSESP::logger().debug("Fetched from %s: stable=%s, dev=%s, current=%s", VERSIONS_URL, stable.version.c_str(), dev.version.c_str(), current_version_s.c_str());
 #endif
     return true;
 #endif
@@ -468,11 +504,12 @@ bool WebStatusService::refresh_versions_cache() {
 
 // returns if current dev/stable is upgradeable
 bool WebStatusService::current_upgradeable() const {
+    FirmwareVersion             current_version(current_version_s);
+    bool                        is_dev = current_version.prerelease().find("dev") != std::string::npos;
+    std::lock_guard<std::mutex> lock{versions_mutex_};
     if (!versions_cache_valid_) {
         return false;
     }
-    FirmwareVersion current_version(current_version_s);
-    bool            is_dev = current_version.prerelease().find("dev") != std::string::npos;
     return is_dev ? versions_dev_.upgradeable : versions_stable_.upgradeable;
 }
 

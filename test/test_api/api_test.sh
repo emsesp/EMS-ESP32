@@ -4,8 +4,7 @@
 # Command line test for the API
 #
 
-# emsesp_url="http://ems-esp.local"
-emsesp_url="http://ems-espT.local"
+emsesp_url="http://ems-esp.local"
 
 # get the token from the Security page. This is the token for the admin user, unless changed it'll always be the same
 emsesp_token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWV9.2bHpWya2C7Q12WjNUBD6_7N3RCD7CMl-EGhyQVzFdDg"

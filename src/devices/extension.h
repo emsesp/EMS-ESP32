@@ -40,7 +40,6 @@ class Extension : public EMSdevice {
     bool set_minT(const char * value, const int8_t id);
     bool set_maxT(const char * value, const int8_t id);
 
-
     int16_t headerTemp_; // T0
     uint8_t input_;      // IO1
     // uint8_t errorState_; // OE1

@@ -34,6 +34,12 @@ class HttpClient {
     static constexpr uint32_t FIRST_BYTE_TIMEOUT_MS = 8000;  // how long the server may take to start replying
     static constexpr uint32_t IDLE_TIMEOUT_MS       = 500;   // gap in the stream that marks the end of a response
     static constexpr uint32_t TOTAL_TIMEOUT_MS      = 10000; // ceiling for the whole read
+
+    // ceiling on the response we'll buffer. Without it a chatty or hijacked endpoint can grow the
+    // result string until the heap runs out, which aborts the firmware since it's built -fno-exceptions
+    static constexpr size_t MAX_RESPONSE_BYTES = 32 * 1024;
+
+    static constexpr size_t MAX_HOSTNAME_LENGTH = 63; // ESP_SSLClient stores the host in a char[64]
 };
 
 } // namespace emsesp

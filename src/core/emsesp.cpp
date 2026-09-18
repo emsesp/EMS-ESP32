@@ -1696,7 +1696,6 @@ void EMSESP::scheduled_fetch_values() {
 }
 
 // EMSESP main class
-
 EMSESP::EMSESP()
 #ifndef EMSESP_STANDALONE
     : telnet_([this](Stream & stream, const IPAddress & addr, uint16_t port) -> std::shared_ptr<uuid::console::Shell> {
@@ -1728,6 +1727,13 @@ void EMSESP::start() {
         LOG_ERROR("LittleFS Mount Failed");
         return;
     }
+//     else {
+// output filesystem folders and files for debugging
+// #if defined(EMSESP_DEBUG)
+//         LOG_DEBUG("Listing root directory before:");
+//         system_.listDir("/", 3); // show the contents of the root directory
+// #endif
+//     }
 #endif
 
 // do a quick scan of the filesystem to see if we a settings file in the /config folder
@@ -1748,7 +1754,7 @@ void EMSESP::start() {
         nvs_.begin("ems-esp", false, "nvs"); // fallback to small nvs
     }
 #else
-        nvs_.begin("ems-esp", false, "nvs");
+    nvs_.begin("ems-esp", false, "nvs");
 #endif
 
     // set valid GPIOs list based on ESP32 chip/platform type
@@ -1760,9 +1766,15 @@ void EMSESP::start() {
     // loads core system services settings (mqtt, ap, ntp etc)
     esp32React.begin();
 
+    // output filesystem folders and files for debugging
+    // #if defined(EMSESP_DEBUG)
+    //     LOG_DEBUG("Listing root directory after:");
+    //     system_.listDir("/", 3); // show the contents of the root directory
+    // #endif
+
 #ifndef EMSESP_STANDALONE
     if (factory_settings) {
-        LOG_WARNING("No settings found on filesystem. Using factory settings.");
+        LOG_WARNING("No settings found on filesystem. Initialising with factory settings...");
         // make sure OTAdata is updated with core3 (v3.9.0) format
         esp_ota_set_boot_partition(esp_ota_get_running_partition());
     }
@@ -1777,11 +1789,16 @@ void EMSESP::start() {
 
     LOG_DEBUG("System is running in Debug mode");
 
+    bool check_internal_sensors    = false; // true to check for internal sensors
+    bool force_analog_sensors      = false; // true to add core_voltage, supply_voltage and led
+    bool force_temperature_sensors = false; // true to add gateway_temperature
+
     // check if the firmware is fresh, i.e. a new install or a new version has been uploaded
-    // this is set in UploadFileService::uploadComplete()
+    // this is also set in UploadFileService::uploadComplete()
     // and reset in System::set_partition_install_date()
     if (EMSESP::nvs_.getBool(EMSESP_NVS_BOOT_NEW_FIRMWARE)) {
         LOG_DEBUG("Firmware is a new install");
+        check_internal_sensors = true; // force check for internal sensors
     } else {
 // check if the firmware has been uploaded via Serial/USB
 #if defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32C3)
@@ -1809,9 +1826,10 @@ void EMSESP::start() {
     };
 #endif
 
-    LOG_DEBUG("eFuse device information: %s", system_.getBBQKeesGatewayDetails().isEmpty() ? "not set" : system_.getBBQKeesGatewayDetails().c_str());
-
     webSettingsService.begin(); // load EMS-ESP Application settings
+
+    LOG_DEBUG("System name: %s", system_.system_name().c_str());
+    LOG_DEBUG("eFuse BBQKees Gateway Model: %s", system_.getBBQKeesGatewayDetails().isEmpty() ? "not set" : system_.getBBQKeesGatewayDetails().c_str());
 
     // start network services. This will initialise WiFi or Ethernet depending on the settings.
     network_.begin();
@@ -1823,12 +1841,24 @@ void EMSESP::start() {
     webCustomEntityService.begin();  // load the custom telegram reads
     webSchedulerService.begin();     // load the scheduler events
 
-    // perform any system upgrades
+    // check for any changes to the settings. skipped if it's a fresh factory install
     if (!factory_settings) {
+        // perform any system upgrades
         if (system_.check_upgrade()) {
             LOG_WARNING("System needs a restart to apply new settings. Please wait.");
             system_.system_restart();
         };
+
+        // if it's a new install and we have nothing in the analog or temperature customizations
+        // then assume its a fresh install and add back the internal sensors
+        // we could also check for core_voltage, supply_voltage, led and gateway_temperature and add them if they are not present
+        if (check_internal_sensors) {
+            auto check_empty_customizations = [&](const WebCustomization & settings) {
+                force_analog_sensors      = settings.analogCustomizations.empty();
+                force_temperature_sensors = settings.sensorCustomizations.empty();
+            };
+            webCustomizationService.read(check_empty_customizations);
+        }
     }
 
     // Load our library of known devices into stack mem. Names are stored in Flash memory
@@ -1848,11 +1878,11 @@ void EMSESP::start() {
 #endif
     }
 
-    mqtt_.start();                              // mqtt init
-    system_.start();                            // starts commands, led, adc, button, network (sets hostname), syslog & uart
-    shower_.start();                            // initialize shower timer and shower alert
-    temperaturesensor_.start(factory_settings); // Temperature external sensors
-    analogsensor_.start(factory_settings);      // Analog external sensors
+    mqtt_.start();                                                           // mqtt init
+    system_.start();                                                         // starts commands, led, adc, button, network (sets hostname), syslog & uart
+    shower_.start();                                                         // initialize shower timer and shower alert
+    temperaturesensor_.start(factory_settings || force_temperature_sensors); // Temperature external sensors
+    analogsensor_.start(factory_settings || force_analog_sensors);           // Analog external sensors
 
     // start web services
     LOG_INFO("Starting Web Server");

@@ -207,6 +207,14 @@ class System {
         disable_reset_ = disable_reset;
     }
 
+    bool auto_fw_check() {
+        return auto_fw_check_;
+    }
+
+    void auto_fw_check(bool auto_fw_check) {
+        auto_fw_check_ = auto_fw_check;
+    }
+
     // Boolean Format API/MQTT
     uint8_t bool_format() {
         return bool_format_;
@@ -447,6 +455,7 @@ class System {
     uint32_t    modbus_timeout_;
     bool        developer_mode_;
     bool        disable_reset_;
+    bool        auto_fw_check_;
     uint32_t    fstotal_;
     uint32_t    psram_;
     uint32_t    appused_;

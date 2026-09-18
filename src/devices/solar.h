@@ -115,7 +115,6 @@ class Solar : public EMSdevice {
     // telegram 0x361 Differential control
     uint8_t diffControl_; // is *10
 
-
     // telegram 0x380
     uint8_t  climateZone_;    // climate zone identifier
     uint16_t collector1Area_; // Area of collector field 1

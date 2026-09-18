@@ -237,7 +237,6 @@ const char * const DeviceValue::DeviceValueTAG_mqtt[] = {
     FL_(tag_src15)[0],       // "src15"
     FL_(tag_src16)[0]        // "src16"
 
-
 };
 
 // count #tags once at compile time

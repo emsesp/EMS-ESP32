@@ -66,7 +66,6 @@ Extension::Extension(uint8_t device_type, uint8_t device_id, uint8_t product_id,
     // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &errorState_, DeviceValueType::BOOL, FL_(error), DeviceValueUOM::NONE);
 }
 
-
 // extension(0x15) -W-> Me(0x0B), EM100SetMessage(0x0935), data: 00 00 64 50 14
 // need to be fetched
 void Extension::process_EM100SetMessage(const std::shared_ptr<const Telegram> & telegram) {
