@@ -1131,7 +1131,9 @@ void System::show_system(uuid::console::Shell & shell) {
     // client and all the JSON work on this task, and a TLS handshake alone can want several KB
     TaskHandle_t loop_task = xTaskGetHandle("loopTask");
     if (loop_task != nullptr) {
-        shell.printfln(" Loop task stack min free/total: %u / %u bytes", (unsigned)uxTaskGetStackHighWaterMark(loop_task), (unsigned)getArduinoLoopTaskStackSize());
+        shell.printfln(" Loop task stack min free/total: %u / %u bytes",
+                       (unsigned)uxTaskGetStackHighWaterMark(loop_task),
+                       (unsigned)getArduinoLoopTaskStackSize());
     }
 #endif
     shell.printfln(" App used/free: %lu KB / %lu KB", appUsed(), appFree());
