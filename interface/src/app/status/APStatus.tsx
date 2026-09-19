@@ -90,7 +90,10 @@ const APStatus = () => {
           <ListItemAvatar>
             <Avatar sx={{ bgcolor: 'primary.main' }}>IP</Avatar>
           </ListItemAvatar>
-          <ListItemText primary={LL.ADDRESS_OF('IP')} secondary={data.ip_address} />
+          <ListItemText
+            primary={LL.ADDRESS_OF('IP')}
+            secondary={data.ip_address || 'none'}
+          />
         </ListItem>
 
         <Divider variant="inset" component="li" />
@@ -103,7 +106,7 @@ const APStatus = () => {
           </ListItemAvatar>
           <ListItemText
             primary={LL.ADDRESS_OF('MAC')}
-            secondary={data.mac_address}
+            secondary={data.mac_address || 'none'}
           />
         </ListItem>
 

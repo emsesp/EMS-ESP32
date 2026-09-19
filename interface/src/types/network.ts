@@ -20,19 +20,23 @@ export enum WiFiEncryptionType {
   WIFI_AUTH_WPA2_WPA3_PSK = 7
 }
 
+export interface IPv6AddressType {
+  address: string;
+  scope: string; // global, unique local, site local or link local
+}
+
 export interface NetworkStatusType {
   status: NetworkConnectionStatus;
   local_ip: string;
-  local_ipv6: string;
+  ipv6?: IPv6AddressType[];
   mac_address: string;
   rssi: number;
   ssid: string;
   bssid: string;
   channel: number;
   subnet_mask: string;
-  gateway_ip: string;
-  dns_ip_1: string;
-  dns_ip_2: string;
+  gateway_ip?: string;
+  dns?: string[];
   hostname: string;
   reconnect_count: number;
 }

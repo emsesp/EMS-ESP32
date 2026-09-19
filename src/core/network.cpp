@@ -154,44 +154,83 @@ bool Network::formatBSSID([[maybe_unused]] const String & bssid, [[maybe_unused]
     return true;
 }
 
-// get the local IP address of the network interface
-std::string Network::getLocalIP() const {
-    switch (network_iface_) {
+// get the soft-AP's own IP address, empty when the AP isn't running
+std::string Network::getAPIP() const {
 #ifndef EMSESP_STANDALONE
-    case NetIface::AP:
-        return WiFi.softAPIP().toString().c_str();
-    case NetIface::WIFI:
-        return WiFi.localIP().toString().c_str();
-    case NetIface::ETHERNET:
-        return ETH.localIP().toString().c_str();
-    case NetIface::NONE:
-#endif
-    default:
-        return "";
+    const IPAddress ip = WiFi.softAPIP();
+    if (static_cast<uint32_t>(ip) != 0) {
+        return ip.toString().c_str();
     }
+#endif
+    return "";
 }
 
-// get the MAC address of the network interface
-std::string Network::getMacAddress() const {
-    switch (network_iface_) {
 #ifndef EMSESP_STANDALONE
-    case NetIface::AP:
-        return WiFi.softAPmacAddress().c_str();
-    case NetIface::WIFI:
-        return WiFi.macAddress().c_str();
-    case NetIface::ETHERNET:
-        return ETH.macAddress().c_str();
-    case NetIface::NONE:
-#endif
-    default:
-        return "";
+// Every IPv6 address bound to the interface, widest scope first so the address most people need
+// comes out on top. linkLocalIPv6() and globalIPv6() each only ever return a single address, so a
+// dual-stack host holding both a ULA and a routable GUA would have one of them hidden.
+std::vector<Network::IPv6Address> Network::ipv6_addresses([[maybe_unused]] NetworkInterface & netif) {
+    std::vector<IPv6Address> addresses;
+
+#if CONFIG_LWIP_IPV6
+    esp_ip6_addr_t raw[CONFIG_LWIP_IPV6_NUM_ADDRESSES];
+    int            found = esp_netif_get_all_ip6(netif.netif(), raw);
+    if (found <= 0) {
+        return addresses;
     }
+
+    struct Scope {
+        esp_ip6_addr_type_t type;
+        const char *        name;
+    };
+    static const Scope scopes[] = {{ESP_IP6_ADDR_IS_GLOBAL, "global"},
+                                   {ESP_IP6_ADDR_IS_UNIQUE_LOCAL, "unique local"},
+                                   {ESP_IP6_ADDR_IS_SITE_LOCAL, "site local"},
+                                   {ESP_IP6_ADDR_IS_LINK_LOCAL, "link local"}};
+
+    addresses.reserve(found);
+    for (const auto & scope : scopes) {
+        for (int i = 0; i < found; i++) {
+            IPAddress ip(IPv6, reinterpret_cast<const uint8_t *>(raw[i].addr), raw[i].zone);
+            if (ip.addr_type() == scope.type) {
+                addresses.push_back({ip, scope.name});
+            }
+        }
+    }
+#endif
+
+    return addresses;
+}
+
+// Every DNS server configured on the interface. The slots are shared between IPv4 and IPv6, so
+// reading only the first couple can hide the IPv4 resolver entirely once IPv6 is in use.
+std::vector<IPAddress> Network::dns_servers(const NetworkInterface & netif) {
+    std::vector<IPAddress> servers;
+    for (uint8_t i = 0; i < ESP_NETIF_DNS_MAX; i++) {
+        IPAddress ip = netif.dnsIP(i);
+        if (ip.type() == IPv4 ? static_cast<uint32_t>(ip) != 0 : ip != IN6ADDR_ANY) {
+            servers.push_back(ip);
+        }
+    }
+    return servers;
+}
+#endif
+
+// get the soft-AP's own MAC address, empty when the AP isn't running
+std::string Network::getAPMacAddress() const {
+#ifndef EMSESP_STANDALONE
+    uint8_t mac[6];
+    if (WiFi.softAPmacAddress(mac) != nullptr) { // null once the AP netif is gone
+        return WiFi.softAPmacAddress().c_str();
+    }
+#endif
+    return "";
 }
 
 // get the number of sessions connected to the AP
-uint8_t Network::getStationNum() const {
+uint8_t Network::getAPStationNum() const {
 #ifndef EMSESP_STANDALONE
-    return network_iface_ == NetIface::AP ? WiFi.softAPgetStationNum() : 0;
+    return WiFi.softAPgetStationNum();
 #else
     return 0;
 #endif

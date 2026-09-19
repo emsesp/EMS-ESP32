@@ -1723,17 +1723,23 @@ void EMSESP::start() {
 
 // start the file system
 #ifndef EMSESP_STANDALONE
+#if defined(EMSESP_DEBUG)
+    // don't format the filesystem in debug mode
+    if (!LittleFS.begin(false)) {
+        LOG_ERROR("LittleFS Mount Failed. Attempting to convert...");
+        return;
+    } else {
+        // it mounted, show the contents of the root directory
+        LOG_DEBUG("Listing root directory before:");
+        system_.listDir("/", 3);
+    }
+#else
+    // format filesystem if there isn't one
     if (!LittleFS.begin(true)) {
         LOG_ERROR("LittleFS Mount Failed");
         return;
     }
-//     else {
-// output filesystem folders and files for debugging
-// #if defined(EMSESP_DEBUG)
-//         LOG_DEBUG("Listing root directory before:");
-//         system_.listDir("/", 3); // show the contents of the root directory
-// #endif
-//     }
+#endif
 #endif
 
 // do a quick scan of the filesystem to see if we a settings file in the /config folder
@@ -1746,7 +1752,7 @@ void EMSESP::start() {
     bool factory_settings = false;
 #endif
 
-    // start NVS storage
+// start NVS storage
 #ifndef EMSESP_STANDALONE
     if (esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_NVS, "nvs1")) {
         nvs_.begin("ems-esp", false, "nvs1");
@@ -1766,11 +1772,11 @@ void EMSESP::start() {
     // loads core system services settings (mqtt, ap, ntp etc)
     esp32React.begin();
 
-    // output filesystem folders and files for debugging
-    // #if defined(EMSESP_DEBUG)
-    //     LOG_DEBUG("Listing root directory after:");
-    //     system_.listDir("/", 3); // show the contents of the root directory
-    // #endif
+// output filesystem folders and files for debugging
+#if defined(EMSESP_DEBUG)
+    LOG_DEBUG("Listing root directory after:");
+    system_.listDir("/", 3); // show the contents of the root directory
+#endif
 
 #ifndef EMSESP_STANDALONE
     if (factory_settings) {
@@ -1818,7 +1824,7 @@ void EMSESP::start() {
     LOG_INFO("Last system reset reason Core0: %s, Core1: %s", system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
 #endif
 
-    // see if we're restoring a settings file
+// see if we're restoring a settings file
 #ifndef EMSESP_STANDALONE
     if (system_.check_restore()) {
         LOG_WARNING("EMS-ESP will restart to apply new settings. Please wait.");

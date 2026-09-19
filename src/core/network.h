@@ -21,6 +21,7 @@
 
 #ifndef EMSESP_STANDALONE
 #include <esp_mac.h>
+#include <esp_netif.h>
 #include <esp_wifi.h>
 #include <ETH.h>
 #include <WiFi.h>
@@ -30,6 +31,7 @@
 #endif
 
 #include <cstring>
+#include <vector>
 
 #include <esp32-psram.h>
 #include <uuid/log.h>
@@ -132,10 +134,23 @@ class Network {
         return reconnect_count_;
     }
 
-    std::string  getLocalIP() const;
-    std::string  getMacAddress() const;
-    uint8_t      getStationNum() const;
+    // the soft-AP's own details, which are what the Access Point status page reports
+    std::string getAPIP() const;
+    std::string getAPMacAddress() const;
+    uint8_t     getAPStationNum() const;
+
     const char * ethernet_status() const;
+
+#ifndef EMSESP_STANDALONE
+    // an IPv6 address together with a readable scope, e.g. "global" or "link local"
+    struct IPv6Address {
+        IPAddress    ip;
+        const char * scope;
+    };
+
+    static std::vector<IPv6Address> ipv6_addresses(NetworkInterface & netif);
+    static std::vector<IPAddress>   dns_servers(const NetworkInterface & netif);
+#endif
 
     void reconnect();
 
