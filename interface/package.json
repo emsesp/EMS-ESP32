@@ -50,7 +50,7 @@
     "eslint-config-prettier": "^10.1.8",
     "etag": "^1.8.1",
     "mime-types": "^3.0.2",
-    "prettier": "^3.9.7",
+    "prettier": "^3.9.8",
     "rollup-plugin-visualizer": "^7.1.1",
     "terser": "^5.51.2",
     "typescript": "^6.0.3",
