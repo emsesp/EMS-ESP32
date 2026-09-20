@@ -2,6 +2,44 @@
 
 #include <emsesp.h>
 
+namespace {
+
+void add_ipv6(JsonObject root, NetworkInterface & netif) {
+    auto found = emsesp::Network::ipv6_addresses(netif);
+    if (found.empty()) {
+        return;
+    }
+    JsonArray addresses = root["ipv6"].to<JsonArray>();
+    for (const auto & ipv6 : found) {
+        JsonObject entry = addresses.add<JsonObject>();
+        entry["address"] = ipv6.ip.toString();
+        entry["scope"]   = ipv6.scope;
+    }
+}
+
+void add_dns(JsonObject root, const NetworkInterface & netif) {
+    JsonArray servers = root["dns"].to<JsonArray>();
+    for (const auto & ip : emsesp::Network::dns_servers(netif)) {
+        servers.add(ip.toString());
+    }
+}
+
+void add_gateways(JsonObject root, NetworkInterface & netif) {
+    if (IPUtils::isSet(netif.gatewayIP())) {
+        root["gateway_ip"] = netif.gatewayIP().toString();
+    }
+    auto found = emsesp::Network::ipv6_gateways(netif);
+    if (found.empty()) {
+        return;
+    }
+    JsonArray gateways = root["gateway_ipv6"].to<JsonArray>();
+    for (const auto & ip : found) {
+        gateways.add(ip.toString());
+    }
+}
+
+} // namespace
+
 NetworkStatus::NetworkStatus(AsyncWebServer * server, SecurityManager * securityManager) {
     securityManager->addEndpoint(server, NETWORK_STATUS_SERVICE_PATH, AuthenticationPredicates::IS_AUTHENTICATED, [this](AsyncWebServerRequest * request) {
         networkStatus(request);
@@ -27,21 +65,13 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
     if (emsesp::EMSESP::network_.ethernet_connected()) {
         // Ethernet
         root["local_ip"]    = ETH.localIP().toString();
-        root["local_ipv6"]  = ETH.linkLocalIPv6().toString();
         root["mac_address"] = ETH.macAddress();
         root["subnet_mask"] = ETH.subnetMask().toString();
-        root["gateway_ip"]  = ETH.gatewayIP().toString();
-        IPAddress dnsIP1    = ETH.dnsIP(0);
-        IPAddress dnsIP2    = ETH.dnsIP(1);
-        if (IPUtils::isSet(dnsIP1)) {
-            root["dns_ip_1"] = dnsIP1.toString();
-        }
-        if (IPUtils::isSet(dnsIP2)) {
-            root["dns_ip_2"] = dnsIP2.toString();
-        }
+        add_gateways(root, ETH);
+        add_ipv6(root, ETH);
+        add_dns(root, ETH);
     } else if (wifi_status == WL_CONNECTED) {
         root["local_ip"]        = WiFi.localIP().toString();
-        root["local_ipv6"]      = WiFi.linkLocalIPv6().toString();
         root["mac_address"]     = WiFi.macAddress();
         root["rssi"]            = WiFi.RSSI();
         root["ssid"]            = WiFi.SSID();
@@ -49,18 +79,9 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
         root["channel"]         = WiFi.channel();
         root["reconnect_count"] = emsesp::EMSESP::network_.getNetworkReconnects();
         root["subnet_mask"]     = WiFi.subnetMask().toString();
-
-        if (WiFi.gatewayIP() != INADDR_NONE) {
-            root["gateway_ip"] = WiFi.gatewayIP().toString();
-        }
-        IPAddress dnsIP1 = WiFi.dnsIP(0);
-        IPAddress dnsIP2 = WiFi.dnsIP(1);
-        if (dnsIP1 != INADDR_NONE) {
-            root["dns_ip_1"] = dnsIP1.toString();
-        }
-        if (dnsIP2 != INADDR_NONE) {
-            root["dns_ip_2"] = dnsIP2.toString();
-        }
+        add_gateways(root, WiFi.STA);
+        add_ipv6(root, WiFi.STA);
+        add_dns(root, WiFi.STA);
     }
 
     response->setLength();

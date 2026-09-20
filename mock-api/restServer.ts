@@ -580,7 +580,7 @@ let ap_settings = {
   max_clients: 4
 };
 const ap_status = {
-  status: 1,
+  status: 0, // active - an inactive AP reports no address at all
   ip_address: '192.168.4.1',
   mac_address: '3C:61:05:03:AB:2D',
   station_num: 0
@@ -612,6 +612,11 @@ let network_settings = {
 const network_status = {
   status: 3,
   local_ip: '10.10.10.101',
+  ipv6: [
+    { address: '2001:db8:1234:5678::a1b2', scope: 'global' },
+    { address: 'fd00:1234:5678::a1b2', scope: 'unique local' },
+    { address: 'fe80::3e61:5ff:fe03:ab2c', scope: 'link local' }
+  ],
   mac_address: '3C:61:05:03:AB:2C',
   rssi: -41,
   ssid: 'home',
@@ -619,8 +624,8 @@ const network_status = {
   channel: 11,
   subnet_mask: '255.255.255.0',
   gateway_ip: '10.10.10.1',
-  dns_ip_1: '10.10.10.1',
-  dns_ip_2: '0.0.0.0',
+  gateway_ipv6: ['fe80::1', 'fe80::2'],
+  dns: ['10.10.10.1', 'fd00:1234:5678::1'],
   hostname: 'ems-esp',
   reconnect_count: 1
 };

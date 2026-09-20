@@ -98,16 +98,51 @@ static void sendmail_tls_handshake(bool & success) {
     success = sendmail_ssl_client != nullptr && sendmail_ssl_client->connectSSL();
 }
 
-// The DNS slots are shared between IPv4 and IPv6, so with IPv6 enabled the first slot can hold an
-// IPv6 server. Pick the first IPv4 one so it matches the label we print it under.
-static IPAddress dns_ipv4(const NetworkInterface & netif) {
-    for (uint8_t i = 0; i < ESP_NETIF_DNS_MAX; i++) {
-        IPAddress ip = netif.dnsIP(i);
-        if (ip.type() == IPv4 && static_cast<uint32_t>(ip) != 0) {
-            return ip;
+// Print the full set of addresses for an interface. Every DNS server is listed, labelled with its
+// own family since the slots are shared, and every IPv6 address with its scope.
+static void show_addresses(uuid::console::Shell & shell, NetworkInterface & netif) {
+    shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(netif.localIP()).c_str(), uuid::printable_to_string(netif.subnetMask()).c_str());
+    shell.printfln(" IPv4 gateway: %s", uuid::printable_to_string(netif.gatewayIP()).c_str());
+    for (const auto & dns : Network::dns_servers(netif)) {
+        shell.printfln(" %s DNS Server: %s", dns.type() == IPv4 ? "IPv4" : "IPv6", uuid::printable_to_string(dns).c_str());
+    }
+    for (const auto & ipv6 : Network::ipv6_addresses(netif)) {
+        shell.printfln(" IPv6 address: %s (%s)", uuid::printable_to_string(ipv6.ip).c_str(), ipv6.scope);
+    }
+    for (const auto & gateway : Network::ipv6_gateways(netif)) {
+        shell.printfln(" IPv6 gateway: %s", uuid::printable_to_string(gateway).c_str());
+    }
+}
+
+// Add the full set of addresses for an interface to a JSON document, both families.
+static void add_addresses(JsonDocument & doc, NetworkInterface & netif) {
+    doc["MAC"]          = netif.macAddress();
+    doc["IPv4 address"] = uuid::printable_to_string(netif.localIP()) + "/" + uuid::printable_to_string(netif.subnetMask());
+    doc["IPv4 gateway"] = uuid::printable_to_string(netif.gatewayIP());
+
+    auto servers = Network::dns_servers(netif);
+    if (!servers.empty()) {
+        JsonArray dns = doc["DNS Server"].to<JsonArray>();
+        for (const auto & ip : servers) {
+            dns.add(uuid::printable_to_string(ip));
         }
     }
-    return IPAddress();
+
+    auto found = Network::ipv6_addresses(netif);
+    if (!found.empty()) {
+        JsonArray addresses = doc["IPv6 address"].to<JsonArray>();
+        for (const auto & ipv6 : found) {
+            addresses.add(uuid::printable_to_string(ipv6.ip));
+        }
+    }
+
+    auto gateways = Network::ipv6_gateways(netif);
+    if (!gateways.empty()) {
+        JsonArray routers = doc["IPv6 gateway"].to<JsonArray>();
+        for (const auto & ip : gateways) {
+            routers.add(uuid::printable_to_string(ip));
+        }
+    }
 }
 #endif
 
@@ -893,18 +928,13 @@ void System::send_info_mqtt() {
     if (EMSESP::network_.ethernet_connected()) {
         doc["network"]  = "ethernet";
         doc["hostname"] = ETH.getHostname();
+        add_addresses(doc, ETH);
     } else if (EMSESP::network_.wifi_connected()) {
-        doc["network"]         = "wifi";
-        doc["hostname"]        = WiFi.getHostname();
-        doc["SSID"]            = WiFi.SSID();
-        doc["BSSID"]           = WiFi.BSSIDstr();
-        doc["MAC"]             = WiFi.macAddress();
-        doc["IPv4 address"]    = uuid::printable_to_string(WiFi.localIP()) + "/" + uuid::printable_to_string(WiFi.subnetMask());
-        doc["IPv4 gateway"]    = uuid::printable_to_string(WiFi.gatewayIP());
-        doc["IPv4 DNS Server"] = uuid::printable_to_string(dns_ipv4(WiFi.STA));
-        if (WiFi.linkLocalIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000" && WiFi.linkLocalIPv6().toString() != "::") {
-            doc["IPv6 address"] = uuid::printable_to_string(WiFi.linkLocalIPv6());
-        }
+        doc["network"]  = "wifi";
+        doc["hostname"] = WiFi.getHostname();
+        doc["SSID"]     = WiFi.SSID();
+        doc["BSSID"]    = WiFi.BSSIDstr();
+        add_addresses(doc, WiFi.STA);
     }
 #endif
     Mqtt::queue_publish_retain(F_(info), doc.as<JsonObject>()); // topic called "info" and it's Retained
@@ -1266,12 +1296,7 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.printfln(" TxPower: %s dBm", Helpers::render_value(result, (double)(WiFi.getTxPower() / 4), 1));
         shell.printfln(" MAC address: %s", WiFi.macAddress().c_str());
         shell.printfln(" Hostname: %s", WiFi.getHostname());
-        shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
-        shell.printfln(" IPv4 gateway: %s", uuid::printable_to_string(WiFi.gatewayIP()).c_str());
-        shell.printfln(" IPv4 DNS Server: %s", uuid::printable_to_string(dns_ipv4(WiFi.STA)).c_str());
-        if (WiFi.linkLocalIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000" && WiFi.linkLocalIPv6().toString() != "::") {
-            shell.printfln(" IPv6 address: %s", uuid::printable_to_string(WiFi.linkLocalIPv6()).c_str());
-        }
+        show_addresses(shell, WiFi.STA);
         break;
 
     case WL_CONNECT_FAILED:
@@ -1301,12 +1326,7 @@ void System::show_system(uuid::console::Shell & shell) {
     if (EMSESP::network_.ethernet_connected()) {
         shell.printfln(" Ethernet MAC address: %s", ETH.macAddress().c_str());
         shell.printfln(" Hostname: %s", ETH.getHostname());
-        shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(ETH.localIP()).c_str(), uuid::printable_to_string(ETH.subnetMask()).c_str());
-        shell.printfln(" IPv4 gateway: %s", uuid::printable_to_string(ETH.gatewayIP()).c_str());
-        shell.printfln(" IPv4 DNS Server: %s", uuid::printable_to_string(dns_ipv4(ETH)).c_str());
-        if (ETH.linkLocalIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000" && ETH.linkLocalIPv6().toString() != "::") {
-            shell.printfln(" IPv6 address: %s", uuid::printable_to_string(ETH.linkLocalIPv6()).c_str());
-        }
+        show_addresses(shell, ETH);
     }
 
     // show AP is connected

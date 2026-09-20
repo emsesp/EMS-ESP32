@@ -20,6 +20,10 @@
 
 #include "emsesp.h"
 
+#if CONFIG_LWIP_IPV6 && !defined(EMSESP_STANDALONE)
+#include <lwip/priv/nd6_priv.h>
+#endif
+
 #ifndef NETWORK_FALLBACK_AP_SSID
 #define NETWORK_FALLBACK_AP_SSID "ems-esp"
 #endif
@@ -154,44 +158,131 @@ bool Network::formatBSSID([[maybe_unused]] const String & bssid, [[maybe_unused]
     return true;
 }
 
-// get the local IP address of the network interface
-std::string Network::getLocalIP() const {
-    switch (network_iface_) {
+// get the soft-AP's own IP address, empty when the AP isn't running
+std::string Network::getAPIP() const {
 #ifndef EMSESP_STANDALONE
-    case NetIface::AP:
-        return WiFi.softAPIP().toString().c_str();
-    case NetIface::WIFI:
-        return WiFi.localIP().toString().c_str();
-    case NetIface::ETHERNET:
-        return ETH.localIP().toString().c_str();
-    case NetIface::NONE:
-#endif
-    default:
-        return "";
+    const IPAddress ip = WiFi.softAPIP();
+    if (static_cast<uint32_t>(ip) != 0) {
+        return ip.toString().c_str();
     }
+#endif
+    return "";
 }
 
-// get the MAC address of the network interface
-std::string Network::getMacAddress() const {
-    switch (network_iface_) {
 #ifndef EMSESP_STANDALONE
-    case NetIface::AP:
-        return WiFi.softAPmacAddress().c_str();
-    case NetIface::WIFI:
-        return WiFi.macAddress().c_str();
-    case NetIface::ETHERNET:
-        return ETH.macAddress().c_str();
-    case NetIface::NONE:
-#endif
-    default:
-        return "";
+// Every IPv6 address bound to the interface, widest scope first so the address most people need
+// comes out on top. linkLocalIPv6() and globalIPv6() each only ever return a single address, so a
+// dual-stack host holding both a ULA and a routable GUA would have one of them hidden.
+std::vector<Network::IPv6Address> Network::ipv6_addresses([[maybe_unused]] NetworkInterface & netif) {
+    std::vector<IPv6Address> addresses;
+
+#if CONFIG_LWIP_IPV6
+    esp_ip6_addr_t raw[CONFIG_LWIP_IPV6_NUM_ADDRESSES];
+    int            found = esp_netif_get_all_ip6(netif.netif(), raw);
+    if (found <= 0) {
+        return addresses;
     }
+
+    struct Scope {
+        esp_ip6_addr_type_t type;
+        const char *        name;
+    };
+    static const Scope scopes[] = {{ESP_IP6_ADDR_IS_GLOBAL, "global"},
+                                   {ESP_IP6_ADDR_IS_UNIQUE_LOCAL, "unique local"},
+                                   {ESP_IP6_ADDR_IS_SITE_LOCAL, "site local"},
+                                   {ESP_IP6_ADDR_IS_LINK_LOCAL, "link local"}};
+
+    addresses.reserve(found);
+    for (const auto & scope : scopes) {
+        for (int i = 0; i < found; i++) {
+            IPAddress ip(IPv6, reinterpret_cast<const uint8_t *>(raw[i].addr), raw[i].zone);
+            if (ip.addr_type() == scope.type) {
+                addresses.push_back({ip, scope.name});
+            }
+        }
+    }
+#endif
+
+    return addresses;
+}
+
+// Every DNS server configured on the interface. The slots are shared between IPv4 and IPv6, so
+// reading only the first couple can hide the IPv4 resolver entirely once IPv6 is in use.
+std::vector<IPAddress> Network::dns_servers(const NetworkInterface & netif) {
+    std::vector<IPAddress> servers;
+    for (uint8_t i = 0; i < ESP_NETIF_DNS_MAX; i++) {
+        IPAddress ip = netif.dnsIP(i);
+        if (ip.type() == IPv4 ? static_cast<uint32_t>(ip) != 0 : ip != IN6ADDR_ANY) {
+            servers.push_back(ip);
+        }
+    }
+    return servers;
+}
+
+#if CONFIG_LWIP_IPV6
+namespace {
+
+struct Ipv6GatewayCtx {
+    int                      netif_index;
+    std::vector<IPAddress> * gateways;
+};
+
+// runs in the TCP/IP task, where neighbour discovery owns default_router_list
+esp_err_t collect_ipv6_gateways(void * ctx) {
+    auto * args = static_cast<Ipv6GatewayCtx *>(ctx);
+    for (uint8_t i = 0; i < LWIP_ND6_NUM_ROUTERS; i++) {
+        const struct nd6_neighbor_cache_entry * router = default_router_list[i].neighbor_entry;
+        // a null neighbour entry is how nd6_tmr() marks a slot as unused or expired
+        if (router == nullptr || netif_get_index(router->netif) != args->netif_index) {
+            continue;
+        }
+        const ip6_addr_t * addr = &router->next_hop_address;
+        args->gateways->push_back(IPAddress(IPv6, reinterpret_cast<const uint8_t *>(addr->addr), ip6_addr_zone(addr)));
+    }
+    return ESP_OK;
+}
+
+} // namespace
+
+// Every IPv6 default router known on the interface. Routers are learnt from router advertisements
+// rather than configured, so there can be more than one and none of them appear in the IPv4-only
+// esp_netif_ip_info_t.gw that gatewayIP() returns.
+std::vector<IPAddress> Network::ipv6_gateways(NetworkInterface & netif) {
+    std::vector<IPAddress> gateways;
+
+    const int netif_index = esp_netif_get_netif_impl_index(netif.netif());
+    if (netif_index < 0) {
+        return gateways;
+    }
+
+    gateways.reserve(LWIP_ND6_NUM_ROUTERS); // allocate before we're inside the TCP/IP task
+    Ipv6GatewayCtx args = {netif_index, &gateways};
+    esp_netif_tcpip_exec(collect_ipv6_gateways, &args);
+
+    return gateways;
+}
+#else
+std::vector<IPAddress> Network::ipv6_gateways(NetworkInterface &) {
+    return {};
+}
+#endif
+#endif
+
+// get the soft-AP's own MAC address, empty when the AP isn't running
+std::string Network::getAPMacAddress() const {
+#ifndef EMSESP_STANDALONE
+    uint8_t mac[6];
+    if (WiFi.softAPmacAddress(mac) != nullptr) { // null once the AP netif is gone
+        return WiFi.softAPmacAddress().c_str();
+    }
+#endif
+    return "";
 }
 
 // get the number of sessions connected to the AP
-uint8_t Network::getStationNum() const {
+uint8_t Network::getAPStationNum() const {
 #ifndef EMSESP_STANDALONE
-    return network_iface_ == NetIface::AP ? WiFi.softAPgetStationNum() : 0;
+    return WiFi.softAPgetStationNum();
 #else
     return 0;
 #endif
