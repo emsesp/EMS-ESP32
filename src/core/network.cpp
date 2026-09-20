@@ -20,6 +20,10 @@
 
 #include "emsesp.h"
 
+#if CONFIG_LWIP_IPV6 && !defined(EMSESP_STANDALONE)
+#include <lwip/priv/nd6_priv.h>
+#endif
+
 #ifndef NETWORK_FALLBACK_AP_SSID
 #define NETWORK_FALLBACK_AP_SSID "ems-esp"
 #endif
@@ -214,6 +218,54 @@ std::vector<IPAddress> Network::dns_servers(const NetworkInterface & netif) {
     }
     return servers;
 }
+
+#if CONFIG_LWIP_IPV6
+namespace {
+
+struct Ipv6GatewayCtx {
+    int                      netif_index;
+    std::vector<IPAddress> * gateways;
+};
+
+// runs in the TCP/IP task, where neighbour discovery owns default_router_list
+esp_err_t collect_ipv6_gateways(void * ctx) {
+    auto * args = static_cast<Ipv6GatewayCtx *>(ctx);
+    for (uint8_t i = 0; i < LWIP_ND6_NUM_ROUTERS; i++) {
+        const struct nd6_neighbor_cache_entry * router = default_router_list[i].neighbor_entry;
+        // a null neighbour entry is how nd6_tmr() marks a slot as unused or expired
+        if (router == nullptr || netif_get_index(router->netif) != args->netif_index) {
+            continue;
+        }
+        const ip6_addr_t * addr = &router->next_hop_address;
+        args->gateways->push_back(IPAddress(IPv6, reinterpret_cast<const uint8_t *>(addr->addr), ip6_addr_zone(addr)));
+    }
+    return ESP_OK;
+}
+
+} // namespace
+
+// Every IPv6 default router known on the interface. Routers are learnt from router advertisements
+// rather than configured, so there can be more than one and none of them appear in the IPv4-only
+// esp_netif_ip_info_t.gw that gatewayIP() returns.
+std::vector<IPAddress> Network::ipv6_gateways(NetworkInterface & netif) {
+    std::vector<IPAddress> gateways;
+
+    const int netif_index = esp_netif_get_netif_impl_index(netif.netif());
+    if (netif_index < 0) {
+        return gateways;
+    }
+
+    gateways.reserve(LWIP_ND6_NUM_ROUTERS); // allocate before we're inside the TCP/IP task
+    Ipv6GatewayCtx args = {netif_index, &gateways};
+    esp_netif_tcpip_exec(collect_ipv6_gateways, &args);
+
+    return gateways;
+}
+#else
+std::vector<IPAddress> Network::ipv6_gateways(NetworkInterface &) {
+    return {};
+}
+#endif
 #endif
 
 // get the soft-AP's own MAC address, empty when the AP isn't running

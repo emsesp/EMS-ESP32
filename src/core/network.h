@@ -150,6 +150,7 @@ class Network {
 
     static std::vector<IPv6Address> ipv6_addresses(NetworkInterface & netif);
     static std::vector<IPAddress>   dns_servers(const NetworkInterface & netif);
+    static std::vector<IPAddress>   ipv6_gateways(NetworkInterface & netif);
 #endif
 
     void reconnect();

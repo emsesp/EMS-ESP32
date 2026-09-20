@@ -624,6 +624,7 @@ const network_status = {
   channel: 11,
   subnet_mask: '255.255.255.0',
   gateway_ip: '10.10.10.1',
+  gateway_ipv6: ['fe80::1', 'fe80::2'],
   dns: ['10.10.10.1', 'fd00:1234:5678::1'],
   hostname: 'ems-esp',
   reconnect_count: 1

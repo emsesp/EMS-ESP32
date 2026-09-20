@@ -89,11 +89,16 @@ const AddressList = ({
   ));
 };
 
-const isSet = (ip?: string) => !!ip && ip !== '0.0.0.0' && ip !== '::';
+const isSet = (ip?: string): ip is string => !!ip && ip !== '0.0.0.0' && ip !== '::';
 
 const ipAddresses = ({ local_ip, ipv6 }: NetworkStatusType) => [
   ...(isSet(local_ip) ? [{ value: local_ip }] : []),
   ...(ipv6 ?? []).map(({ address, scope }) => ({ value: address, note: scope }))
+];
+
+const gateways = ({ gateway_ip, gateway_ipv6 }: NetworkStatusType) => [
+  ...(isSet(gateway_ip) ? [{ value: gateway_ip }] : []),
+  ...(gateway_ipv6 ?? []).filter(isSet).map((value) => ({ value }))
 ];
 
 const dnsServers = ({ dns }: NetworkStatusType) =>
@@ -230,7 +235,7 @@ const NetworkStatus = () => {
               </ListItemAvatar>
               <ListItemText
                 primary={LL.NETWORK_GATEWAY()}
-                secondary={data.gateway_ip || 'none'}
+                secondary={<AddressList addresses={gateways(data)} />}
               />
             </ListItem>
             <Divider variant="inset" component="li" />

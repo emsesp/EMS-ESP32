@@ -24,6 +24,20 @@ void add_dns(JsonObject root, const NetworkInterface & netif) {
     }
 }
 
+void add_gateways(JsonObject root, NetworkInterface & netif) {
+    if (IPUtils::isSet(netif.gatewayIP())) {
+        root["gateway_ip"] = netif.gatewayIP().toString();
+    }
+    auto found = emsesp::Network::ipv6_gateways(netif);
+    if (found.empty()) {
+        return;
+    }
+    JsonArray gateways = root["gateway_ipv6"].to<JsonArray>();
+    for (const auto & ip : found) {
+        gateways.add(ip.toString());
+    }
+}
+
 } // namespace
 
 NetworkStatus::NetworkStatus(AsyncWebServer * server, SecurityManager * securityManager) {
@@ -53,9 +67,7 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
         root["local_ip"]    = ETH.localIP().toString();
         root["mac_address"] = ETH.macAddress();
         root["subnet_mask"] = ETH.subnetMask().toString();
-        if (IPUtils::isSet(ETH.gatewayIP())) {
-            root["gateway_ip"] = ETH.gatewayIP().toString();
-        }
+        add_gateways(root, ETH);
         add_ipv6(root, ETH);
         add_dns(root, ETH);
     } else if (wifi_status == WL_CONNECTED) {
@@ -67,9 +79,7 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
         root["channel"]         = WiFi.channel();
         root["reconnect_count"] = emsesp::EMSESP::network_.getNetworkReconnects();
         root["subnet_mask"]     = WiFi.subnetMask().toString();
-        if (IPUtils::isSet(WiFi.gatewayIP())) {
-            root["gateway_ip"] = WiFi.gatewayIP().toString();
-        }
+        add_gateways(root, WiFi.STA);
         add_ipv6(root, WiFi.STA);
         add_dns(root, WiFi.STA);
     }

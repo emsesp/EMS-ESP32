@@ -36,6 +36,7 @@ export interface NetworkStatusType {
   channel: number;
   subnet_mask: string;
   gateway_ip?: string;
+  gateway_ipv6?: string[];
   dns?: string[];
   hostname: string;
   reconnect_count: number;

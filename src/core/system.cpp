@@ -109,6 +109,9 @@ static void show_addresses(uuid::console::Shell & shell, NetworkInterface & neti
     for (const auto & ipv6 : Network::ipv6_addresses(netif)) {
         shell.printfln(" IPv6 address: %s (%s)", uuid::printable_to_string(ipv6.ip).c_str(), ipv6.scope);
     }
+    for (const auto & gateway : Network::ipv6_gateways(netif)) {
+        shell.printfln(" IPv6 gateway: %s", uuid::printable_to_string(gateway).c_str());
+    }
 }
 
 // Add the full set of addresses for an interface to a JSON document, both families.
@@ -130,6 +133,14 @@ static void add_addresses(JsonDocument & doc, NetworkInterface & netif) {
         JsonArray addresses = doc["IPv6 address"].to<JsonArray>();
         for (const auto & ipv6 : found) {
             addresses.add(uuid::printable_to_string(ipv6.ip));
+        }
+    }
+
+    auto gateways = Network::ipv6_gateways(netif);
+    if (!gateways.empty()) {
+        JsonArray routers = doc["IPv6 gateway"].to<JsonArray>();
+        for (const auto & ip : gateways) {
+            routers.add(uuid::printable_to_string(ip));
         }
     }
 }
