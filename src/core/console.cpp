@@ -319,7 +319,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                                   settings.eth_clock_mode = data[8];
                                   return StateUpdateResult::CHANGED;
                               });
-                              shell.printfln("Loaded board profile %s. Restarting...", board_profile.c_str());
+                              shell.printfln("Set board profile to %s. Restarting...", board_profile.c_str());
                               EMSESP::system_.system_restart();
                           });
 

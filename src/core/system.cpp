@@ -487,7 +487,8 @@ void System::get_partition_info() {
     auto current_partition = (const char *)esp_ota_get_running_partition()->label;
 
     // update the current version and partition name in NVS if not already set
-    if (EMSESP::nvs_.getString(current_partition) != EMSESP_APP_VERSION || emsesp::EMSESP::nvs_.getBool(emsesp::EMSESP_NVS_BOOT_NEW_FIRMWARE, true)) {
+    if (!EMSESP::nvs_.isKey(current_partition) || EMSESP::nvs_.getString(current_partition) != EMSESP_APP_VERSION
+        || emsesp::EMSESP::nvs_.getBool(emsesp::EMSESP_NVS_BOOT_NEW_FIRMWARE, true)) {
         EMSESP::nvs_.putBool(emsesp::EMSESP_NVS_BOOT_NEW_FIRMWARE, false);
         EMSESP::nvs_.putString(current_partition, EMSESP_APP_VERSION);
         char c[20];
@@ -519,7 +520,9 @@ void System::get_partition_info() {
         if (is_valid) {
             PartitionInfo p_info;
             // if there is an entry for this partition in NVS, get it's version from NVS
-            p_info.version = EMSESP::nvs_.getString(part->label, "").c_str();
+            if (EMSESP::nvs_.isKey(part->label)) {
+                p_info.version = EMSESP::nvs_.getString(part->label).c_str();
+            }
             char c[20];
             snprintf(c, sizeof(c), "d_%s", (const char *)part->label);
             time_t d            = EMSESP::nvs_.getULong(c, 0);
