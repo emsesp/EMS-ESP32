@@ -465,7 +465,7 @@ void WebSettings::set_board_profile(WebSettings & settings) {
         String bbq_board = EMSESP::system_.getBBQKeesGatewayDetails(FUSE_VALUE::BOARD);
         if (!bbq_board.isEmpty() && settings.board_profile != "CUSTOM") {
 #if defined(EMSESP_DEBUG)
-            EMSESP::logger().info("Overriding board profile with eFuse value %s", bbq_board.c_str());
+            EMSESP::logger().debug("Overriding board profile with eFuse value %s", bbq_board.c_str());
 #endif
             settings.board_profile = bbq_board;
         }
@@ -532,9 +532,9 @@ void WebSettings::set_board_profile(WebSettings & settings) {
 #ifndef EMSESP_STANDALONE
     uint32_t psram_size = ESP.getPsramSize() / 1024; // in KB
     if (psram_size > 0) {
-        EMSESP::logger().info("Loaded board profile %s (PSRAM: %lu KB)", settings.board_profile.c_str(), psram_size);
+        EMSESP::logger().info("Applied board profile %s (PSRAM: %lu KB)", settings.board_profile.c_str(), psram_size);
     } else {
-        EMSESP::logger().info("Loaded board profile %s (PSRAM: not available)", settings.board_profile.c_str());
+        EMSESP::logger().info("Applied board profile %s (PSRAM: not available)", settings.board_profile.c_str());
     }
 #endif
 

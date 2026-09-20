@@ -21,6 +21,7 @@
 #ifndef EMSESP_STANDALONE
 #include "esp_ota_ops.h"
 #include "rom/rtc.h"
+#include "littlefs_compat.h"
 #endif
 
 static_assert(uuid::thread_safe, "uuid-common must be thread-safe");
@@ -1723,22 +1724,26 @@ void EMSESP::start() {
 
 // start the file system
 #ifndef EMSESP_STANDALONE
-#if defined(EMSESP_DEBUG)
-    // don't format the filesystem in debug mode
     if (!LittleFS.begin(false)) {
-        LOG_ERROR("LittleFS Mount Failed. Attempting to convert...");
-        return;
-    } else {
-        // it mounted, show the contents of the root directory
-        LOG_DEBUG("Listing root directory before:");
-        system_.listDir("/", 3);
+        // A partition written by an Arduino Core 2 build is readable but records limits
+        // this build refuses to mount. Rewrite the superblock and retry before resorting
+        // to a format, which would throw away the user's settings.
+        if (littlefs_migrate() && LittleFS.begin(false)) {
+            LOG_NOTICE("Converted Filesystem to new format");
+        } else if (LittleFS.begin(true)) {
+            LOG_WARNING("Formatted Filesystem, any previous settings have been lost");
+        } else {
+            // if we reach here, nothing will ever work so go into a infinite loop
+            Serial.println("LittleFS Mount Failed. Cannot start EMS-ESP");
+            while (true) {
+                delay(1000);
+                yield();
+            }
+        }
     }
-#else
-    // format filesystem if there isn't one
-    if (!LittleFS.begin(true)) {
-        LOG_ERROR("LittleFS Mount Failed");
-        return;
-    }
+#if defined(EMSESP_DEBUG)
+    LOG_DEBUG("Listing root directory before:");
+    system_.listDir("/", 3);
 #endif
 #endif
 

@@ -41,7 +41,8 @@ custom_password = admin
 ; ** upload settings **
 ; for direct USB, which is the default you can set an optional port for example:
 ;  upload_port = /dev/ttyUSB0 or COM3
-;
+;  upload_speed = 921600
+
 ; for direct via HTTP (OTA) set:
 ;  upload_protocol = custom
 ;  custom_emsesp_ip = <ip address> or ems-esp.local
