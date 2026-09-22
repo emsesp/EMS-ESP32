@@ -363,7 +363,7 @@ const it: Translation = {
   ONLINE_HELP: 'aiuto online',
   UPGRADE_IMPORTANT_MESSAGES: 'Aggiorna Messaggi Importanti',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Questa aggiornamento richiede un ripristino di fabbrica. Assicurati di prima scaricare un backup del sistema prima di continuare, e poi caricare questo file dopo l\'installazione della nuova versione.',
-  UPGRADE_IMPORTANT_MESSAGES_2: 'Stai aggiornando a una nuova versione principale. Assicurati di aver letto il ChangeLog per qualsiasi cambiamento importante.',
+  UPGRADE_IMPORTANT_MESSAGES_2: 'Stai aggiornando a una nuova versione major. È consigliabile prima creare un backup del sistema. Controlla anche l\'aiuto online per eventuali modifiche importanti.',
   WARNING_SYSTEM_BACKUP: 'Questo creerà un backup delle tue configurazioni e impostazioni complete. Tutte le password saranno leggibili nel file di backup. Sei sicuro di voler continuare?'
 
 };

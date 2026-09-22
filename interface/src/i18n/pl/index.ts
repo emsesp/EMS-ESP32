@@ -363,7 +363,7 @@ const pl: BaseTranslation = {
   ONLINE_HELP: 'pomoc online',
   UPGRADE_IMPORTANT_MESSAGES: 'Aktualizuj ważne wiadomości',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Ta aktualizacja wymaga resetu fabrycznego. Upewnij się, że najpierw pobierzesz kopię zapasową systemu przed kontynuowaniem, a następnie przesuń tę plik po zainstalowaniu nowej wersji.',
-  UPGRADE_IMPORTANT_MESSAGES_2: 'Aktualizujesz się do nowej głównej wersji. Upewnij się, że przeczytałeś ChangeLog dla wszelkich istotnych zmian.',
+  UPGRADE_IMPORTANT_MESSAGES_2: 'Aktualizujesz się na nową major wersję. Jest to zalecane, aby najpierw utworzyć kopię zapasową systemu. Sprawdź również online pomoc dla ewentualnych istotnych zmian.',
   WARNING_SYSTEM_BACKUP: 'To spowoduje utworzenie kopii zapasowej całej konfiguracji i ustawień systemu. Wszystkie hasła będą widoczne w pliku kopii zapasowej. Bądź ostrożny przy udostępnianiu! Chcesz kontynuować?'
 
 };

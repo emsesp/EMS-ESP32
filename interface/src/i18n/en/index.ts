@@ -363,7 +363,7 @@ const en: Translation = {
   ONLINE_HELP: 'online help',
   UPGRADE_IMPORTANT_MESSAGES: 'Upgrade Important Messages',
   UPGRADE_IMPORTANT_MESSAGES_1: 'This upgrade requires a factory reset. Make sure you first download a System Backup before continuing, and then upload this file after the new version is installed.',
-  UPGRADE_IMPORTANT_MESSAGES_2: 'You are upgrading to a new major version. Make sure you have read the ChangeLog for any breaking changes.',
+  UPGRADE_IMPORTANT_MESSAGES_2: 'You are upgrading to a new major version. It is advisable to make a system backup first. Also check the online help for any breaking changes.',
   WARNING_SYSTEM_BACKUP: 'This will create a backup of your full system configuration and settings. All passwords will be readable in the backup file. Be careful with sharing! Do you want to continue?'
 
 };

@@ -363,7 +363,7 @@ const tr: Translation = {
   ONLINE_HELP: 'online yardım',
   UPGRADE_IMPORTANT_MESSAGES: 'Önemli Mesajları Güncelle',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Bu güncelleme továrnı ayarlarını gerektirir. Yapılandırmanızı ve ayarlarınızı önce yedekleyin ve ardından yeni sürüm yüklendikten sonra yükleyin.',
-  UPGRADE_IMPORTANT_MESSAGES_2: 'Yeni bir büyük sürüme yükselteceksiniz. Değişiklikleri ChangeLogı okuduğunuzdan emin olun.',
+  UPGRADE_IMPORTANT_MESSAGES_2: 'Yeni bir major sürüme güncelleme yapıyorsunuz. Sistem yedeklemesi yapmanız önerilir. Ayrıca online yardımı kontrol ederek önemli değişiklikleri gözden geçirin.',
   WARNING_SYSTEM_BACKUP: 'Bu, sistem yapılandırmanızı ve ayarlarınızın bir yedeklemesi oluşturacaktır. Tüm şifreler yedekleme dosyasında okunabilir olacaktır. Paylaşırken dikkatli olun! Devam etmek istediğinize emin misiniz?'
 
 };

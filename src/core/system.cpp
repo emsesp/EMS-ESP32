@@ -954,6 +954,10 @@ void System::network_init() {
 #else
     eth_present_ = ETH.begin(type, phy_addr, mdc, mdio, power, clock_mode);
 #endif
+    // show error if Eth is present but fails to start, so it can be automatically detected by the new installers
+    if (!eth_present_) {
+        LOG_ERROR("Failed to start Ethernet");
+    }
 #endif
 }
 

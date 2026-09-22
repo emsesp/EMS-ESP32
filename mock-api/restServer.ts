@@ -302,10 +302,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-          old_custom_name +
-          ') with new (' +
-          new_custom_name +
-          ')'
+        old_custom_name +
+        ') with new (' +
+        new_custom_name +
+        ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -395,23 +395,32 @@ function custom_support() {
 }
 
 // called by Action endpoint upgradeImportantMessages
+// 0 is do nothing
+// 1 is a special upgrade and needs an export->factory reset->import
+// 2 is a major upgrade
 function upgradeImportantMessages(version: string) {
-  // 0 is do nothing
-  // 1 means 3.9 and factory reset required
-  // 2 means a major version upgrade
   let upgradeImportantMessageType_n = 0;
 
-  // see if its a filename with a .bin extension
-  if (version.endsWith('.bin')) {
-    upgradeImportantMessageType_n = 1; // 1 means 3.9 and factory reset required
-  } else if (version.endsWith('.md')) {
-    upgradeImportantMessageType_n = 0;
+  // check file extensions first
+  if (version.endsWith('.md5') || version.endsWith('.json')) {
+    upgradeImportantMessageType_n = 0; // digest / backup restore: no upgrade warning
+  } else if (version.endsWith('.bin')) {
+    // extract the version number from the filename and if its going from 3.8.x to 3.9.x, then set upgradeImportantMessageType_n to 1
+    const versionNumber = version.split('.');
+    if (versionNumber[0] === '3' && versionNumber[1] === '8') {
+      upgradeImportantMessageType_n = 2; // major upgrade
+    }
   } else {
-    // this is a version string like "3.9.0"
-    upgradeImportantMessageType_n = 2;
+    // the parameter is a version string like "3.9.0"
+    upgradeImportantMessageType_n = 2; // major upgrade
   }
 
-  console.log('upgradeImportantMessageType: ' + upgradeImportantMessageType_n);
+  console.log(
+    'upgradeImportantMessageType: version=' +
+    version +
+    ' type=' +
+    upgradeImportantMessageType_n
+  );
   return { upgradeImportantMessageType: upgradeImportantMessageType_n };
 }
 
@@ -424,15 +433,15 @@ function check_upgrade(version: string) {
 
     console.log(
       'Upgrade this version (' +
-        THIS_VERSION +
-        ') to dev (' +
-        dev_version +
-        ') is ' +
-        (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-        ' and to stable (' +
-        stable_version +
-        ') is ' +
-        (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
+      THIS_VERSION +
+      ') to dev (' +
+      dev_version +
+      ') is ' +
+      (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+      ' and to stable (' +
+      stable_version +
+      ') is ' +
+      (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
     );
     data = {
       emsesp_version: THIS_VERSION,
