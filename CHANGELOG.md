@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.8.5] 22 September 2026
+
+## Added
+
+- Change webUI message when upgrading to a major version of the firmware, in preparation for the upcoming 3.9.0 release.
+
 ## [3.8.4] 4 August 2026
 
 ## Fixed
