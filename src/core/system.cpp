@@ -1595,7 +1595,7 @@ bool System::check_upgrade() {
 
         // if we're coming from 3.4.4 or 3.5.0b14 which had no version stored then we need to apply new settings
         if (missing_version) {
-            LOG_INFO("Upgrade: Setting MQTT Entity ID format to older v3.4 format (0)");
+            LOG_INFO("Upgrade: setting MQTT Entity ID format to older v3.4 format (0)");
             EMSESP::esp32React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
                 mqttSettings.entity_format = Mqtt::entityFormat::SINGLE_LONG; // use old Entity ID format from v3.4
                 return StateUpdateResult::CHANGED;
@@ -1604,11 +1604,11 @@ bool System::check_upgrade() {
             EMSESP::esp32React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
                 if (mqttSettings.entity_format == 1) {
                     mqttSettings.entity_format = Mqtt::entityFormat::SINGLE_OLD; // use old Entity ID format from v3.6
-                    LOG_INFO("Upgrade: Setting MQTT Entity ID format to v3.6 format (3)");
+                    LOG_INFO("Upgrade: setting MQTT Entity ID format to v3.6 format (3)");
                     return StateUpdateResult::CHANGED;
                 } else if (mqttSettings.entity_format == 2) {
                     mqttSettings.entity_format = Mqtt::entityFormat::MULTI_OLD; // use old Entity ID format from v3.6
-                    LOG_INFO("Upgrade: Setting MQTT Entity ID format to v3.6 format (4)");
+                    LOG_INFO("Upgrade: setting MQTT Entity ID format to v3.6 format (4)");
                     return StateUpdateResult::CHANGED;
                 }
                 return StateUpdateResult::UNCHANGED;
@@ -1624,12 +1624,12 @@ bool System::check_upgrade() {
                 auto changed = StateUpdateResult::UNCHANGED;
                 if (networkSettings.tx_power == 20) {
                     networkSettings.tx_power = WIFI_POWER_19_5dBm; // use 19.5 as we don't have 20 anymore
-                    LOG_INFO("Upgrade: Setting WiFi TX Power to Auto");
+                    LOG_INFO("Upgrade: setting WiFi TX Power to Auto");
                     changed = StateUpdateResult::CHANGED;
                 }
                 if (networkSettings.nosleep != true) {
                     networkSettings.nosleep = true;
-                    LOG_INFO("Upgrade: Disabling WiFi nosleep");
+                    LOG_INFO("Upgrade: disabling WiFi nosleep");
                     changed = StateUpdateResult::CHANGED;
                 }
                 return changed;
@@ -1657,7 +1657,7 @@ bool System::check_upgrade() {
             EMSESP::esp32React.getAPSettingsService()->update([&](APSettings & apSettings) {
                 if (apSettings.provisionMode == 0) {
                     apSettings.provisionMode = AP_MODE_DISCONNECTED; // AP_MODE_DISCONNECTED is the new default
-                    LOG_INFO("Upgrade: Setting AP provision mode to on disconnect");
+                    LOG_INFO("Upgrade: setting AP provision mode to on disconnect");
                     return StateUpdateResult::CHANGED;
                 }
                 return StateUpdateResult::UNCHANGED;
@@ -1693,7 +1693,7 @@ bool System::check_upgrade() {
             }
 
             if (old_format) {
-                LOG_INFO("Upgrade: Migrating %d Scheduler entries to the new Commands Service", (int)oldScheduleItems.size());
+                LOG_INFO("Upgrade: migrating %d Scheduler entries to the new Commands Service", (int)oldScheduleItems.size());
 
                 // create a Command for each Scheduler entry, reusing the entry's name (generating one if empty)
                 EMSESP::webCommandService.update([&](WebCommands & commands) {
@@ -1771,7 +1771,7 @@ bool System::check_upgrade() {
         });
     } else if (this_version < settings_version) {
         // downgrading
-        LOG_NOTICE("Downgrading from version %d.%d.%d%s to version %d.%d.%d%s",
+        LOG_NOTICE("Upgrade: downgrading from version %d.%d.%d%s to version %d.%d.%d%s",
                    settings_version.major(),
                    settings_version.minor(),
                    settings_version.patch(),
@@ -1788,13 +1788,13 @@ bool System::check_upgrade() {
     if (save_version) {
         EMSESP::webSettingsService.update([&](WebSettings & settings) {
             settings.version = EMSESP_APP_VERSION;
-            LOG_DEBUG("Upgrade: Setting version to %s", EMSESP_APP_VERSION);
+            LOG_DEBUG("Upgrade: setting version to %s", EMSESP_APP_VERSION);
             return StateUpdateResult::CHANGED;
         });
     }
 
     if (reboot_required) {
-        LOG_INFO("Upgrade: Rebooting to apply changes");
+        LOG_INFO("Upgrade: rebooting to apply changes");
         return true; // need reboot
     }
 
