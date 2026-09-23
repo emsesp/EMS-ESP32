@@ -405,31 +405,33 @@ void WebStatusService::schedule_versions_refresh() {
     versions_next_fetch_ms_ = next;
 }
 
-// refresh of the cached versions.json, at most once a day
+// refresh of the cached versions.json
 void WebStatusService::loop() {
 #ifndef EMSESP_STANDALONE
-    // with auto_fw_check off we only reach out to emsesp.org when the WebUI asks for version
-    // information, so an unattended system never contacts it at all
-    if (!EMSESP::system_.auto_fw_check() && !versions_fetch_requested_) {
-        return;
-    }
 
     // need a network
     if (!EMSESP::network_.network_connected()) {
         return;
     }
 
-    // 0 = idle, nothing scheduled
-    if (versions_next_fetch_ms_ == 0) {
-        return;
-    }
+    // a request from getVersions() always forces a fetch, bypassing the schedule and any backoff
+    if (!versions_fetch_requested_.exchange(false)) {
+        // with auto_fw_check off we only reach out to emsesp.org when the WebUI asks for version
+        // information, so an unattended system never contacts it at all
+        if (!EMSESP::system_.auto_fw_check()) {
+            return;
+        }
 
-    // not time yet (signed difference handles uint32 wrap)
-    if ((int32_t)(uuid::get_uptime() - versions_next_fetch_ms_) < 0) {
-        return;
-    }
+        // 0 = idle, nothing scheduled
+        if (versions_next_fetch_ms_ == 0) {
+            return;
+        }
 
-    versions_fetch_requested_ = false;
+        // not time yet (signed difference handles uint32 wrap)
+        if ((int32_t)(uuid::get_uptime() - versions_next_fetch_ms_) < 0) {
+            return;
+        }
+    }
 
     uint32_t interval;
     if (refresh_versions_cache()) {
