@@ -311,7 +311,7 @@ const pl: BaseTranslation = {
   ALLVALUES: 'Wszystkie wartości',
   SPECIAL_FUNCTIONS: 'Specjalne funkcje',
   WAIT_FIRMWARE: 'Firmware ściąga się i instaluje',
-  INSTALL_VERSION: 'To zainstaluje wersję {1} {0}. Jesteś pewny?',
+  INSTALL_VERSION: 'To zainstaluje wersję {1} {0}',
   UPDATE_AVAILABLE: 'aktualizacja dostępna',
   LATEST_VERSION: 'Jesteś używając najnowszej wersji firmware {0}',
   PLEASE_WAIT: 'Proszę czekać',
@@ -340,7 +340,7 @@ const pl: BaseTranslation = {
   ONLINE_HELP: 'pomoc online',
   UPGRADE_IMPORTANT_MESSAGES: 'Aktualizuj ważne wiadomości',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Ta aktualizacja wymaga resetu fabrycznego. Upewnij się, że najpierw pobierzesz kopię zapasową systemu przed kontynuowaniem, a następnie przesuń tę plik po zainstalowaniu nowej wersji.',
-  UPGRADE_IMPORTANT_MESSAGES_2: 'Aktualizujesz się do nowej głównej wersji. Upewnij się, że przeczytałeś ChangeLog dla wszelkich istotnych zmian.',
+  UPGRADE_IMPORTANT_MESSAGES_2: 'Aktualizujesz się na nową major wersję. Jest to zalecane, aby najpierw utworzyć kopię zapasową systemu. Sprawdź również online pomoc dla ewentualnych istotnych zmian.',
   WARNING_SYSTEM_BACKUP: 'To spowoduje utworzenie kopii zapasowej całej konfiguracji i ustawień systemu. Wszystkie hasła będą widoczne w pliku kopii zapasowej. Bądź ostrożny przy udostępnianiu! Chcesz kontynuować?',
   TEST_EMAIL_SUCCESSFUL: 'Test email wysłany pomyślnie',
   SYSTEM_NAME: 'Nazwa systemu',
@@ -349,8 +349,8 @@ const pl: BaseTranslation = {
   COMMAND_EXECUTED: 'Komenda wykonana pomyślnie',
   RUN: 'Wykonaj',
   INTERNET_CONNECTION_CHECK: 'Sprawdzanie online dla dostępnych wersji',
-  UPLOAD_BACKUP_TEXT: 'Kliknij, aby wybrać lub przeciągnij i upuść plik kopii zapasowej (.json) tutaj',
-  UPLOAD_FIRMWARE_TEXT: 'Kliknij, aby wybrać lub przeciągnij i upuść plik firmware .bin/.md5',
+  UPLOAD_BACKUP_TEXT: 'Kliknij, aby wybrać, lub drop plik kopii zapasowej (.json) tutaj',
+  UPLOAD_FIRMWARE_TEXT: 'Kliknij, aby wybrać, lub drop plik firmware .bin/.md5 tutaj',
   UPLOAD_MD5_RECEIVED: 'Suma MD5 odebrana, teraz wgraj plik firmware .bin',
   UPLOAD_MD5_MATCHED: 'MD5 zgodne, instalowanie firmware...'
 };

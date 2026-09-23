@@ -258,9 +258,9 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
 
 // action = upgradeImportantMessages
 // returns the type of upgrade important message to display in the UI
-// 0 = no message (if just a minor version upgrade)
-// 1 = going from <= 3.8 to 3.9 (has new partition layout)
-// 2 = major version upgrade
+//  0 = no message (if just a minor version upgrade)
+//  1 = special message for upgrades (no longer used)
+//  2 = major version upgrade
 // version can be like 3.8.2 or a filename like EMS-ESP-3_8_2-dev_13-ESP32-16MB+.bin
 uint8_t WebStatusService::upgradeImportantMessages(std::string & version) {
     if (version.empty()) {
@@ -307,9 +307,10 @@ uint8_t WebStatusService::upgradeImportantMessages(std::string & version) {
         return 0; // no upgrade (same version or downgrade)
     }
 
-    if (current_version < FirmwareVersion("3.9.0-dev.0") && latest_version.major() == 3 && latest_version.minor() == 9) {
-        return 1; // upgrading to 3.9.x from anything older - new partition layout warning
-    }
+    // case "1" is no longer used
+    // if (current_version < FirmwareVersion("3.9.0-dev.0") && latest_version.major() == 3 && latest_version.minor() == 9) {
+    //     return 1; // upgrading to 3.9.x from anything older - new partition layout warning
+    // }
 
     if (current_version.major() < latest_version.major()) {
         return 2; // major version upgrade
@@ -359,6 +360,8 @@ void WebStatusService::getVersions(JsonObject root) {
         dev         = versions_dev_;
     }
 
+    versions_fetch_requested_ = true;
+
     if (!cache_valid) {
         // no successful fetch yet (no network, fetch pending, or parse error)
         return;
@@ -402,12 +405,12 @@ void WebStatusService::schedule_versions_refresh() {
     versions_next_fetch_ms_ = next;
 }
 
-// periodic refresh (1 hour) of the cached versions.json, only when auto_fw_check is enabled
-// runs on the main loop task so the blocking fetch never happens in an AsyncTCP callback
+// refresh of the cached versions.json, at most once a day
 void WebStatusService::loop() {
 #ifndef EMSESP_STANDALONE
-    // only reach out to emsesp.org if the user has asked us to
-    if (!EMSESP::system_.auto_fw_check()) {
+    // with auto_fw_check off we only reach out to emsesp.org when the WebUI asks for version
+    // information, so an unattended system never contacts it at all
+    if (!EMSESP::system_.auto_fw_check() && !versions_fetch_requested_) {
         return;
     }
 
@@ -425,6 +428,8 @@ void WebStatusService::loop() {
     if ((int32_t)(uuid::get_uptime() - versions_next_fetch_ms_) < 0) {
         return;
     }
+
+    versions_fetch_requested_ = false;
 
     uint32_t interval;
     if (refresh_versions_cache()) {

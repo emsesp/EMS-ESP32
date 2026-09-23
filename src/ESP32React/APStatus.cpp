@@ -14,9 +14,9 @@ void APStatus::apStatus(AsyncWebServerRequest * request) {
     JsonObject root     = response->getRoot();
 
     root["status"]      = _apSettingsService->getAPNetworkStatus();
-    root["ip_address"]  = emsesp::EMSESP::network_.getLocalIP();
-    root["mac_address"] = emsesp::EMSESP::network_.getMacAddress();
-    root["station_num"] = emsesp::EMSESP::network_.getStationNum();
+    root["ip_address"]  = emsesp::EMSESP::network_.getAPIP();
+    root["mac_address"] = emsesp::EMSESP::network_.getAPMacAddress();
+    root["station_num"] = emsesp::EMSESP::network_.getAPStationNum();
 
     response->setLength();
     request->send(response);

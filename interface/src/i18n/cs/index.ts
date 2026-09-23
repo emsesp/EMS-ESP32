@@ -311,7 +311,7 @@ const cs: Translation = {
   ALLVALUES: 'Všechny hodnoty',
   SPECIAL_FUNCTIONS: 'Speciální funkce',
   WAIT_FIRMWARE: 'Firmware se nahrává a instaluje',
-  INSTALL_VERSION: 'Tímto se {0} verze {1}. Jste si jistí?',
+  INSTALL_VERSION: 'Tímto se {0} verze {1}',
   UPDATE_AVAILABLE: 'aktualizace dostupná',
   LATEST_VERSION: 'Používáte nejnovější verzi {0}firmwaru',
   PLEASE_WAIT: 'Prosím čekejte',
@@ -340,7 +340,7 @@ const cs: Translation = {
   ONLINE_HELP: 'online nápověda',
   UPGRADE_IMPORTANT_MESSAGES: 'Aktualizovat důležité zprávy',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Tato aktualizace vyžaduje obnovení továrního nastavení. Ujistěte se, že nejprve stáhnete systémovou zálohu před pokračováním a poté nahrajte tento soubor po instalaci nové verze.',
-  UPGRADE_IMPORTANT_MESSAGES_2: 'Aktualizujete se na novou hlavní verzi. Ujistěte se, že jste přečetli ChangeLog pro jakékoliv závažné změny.',
+  UPGRADE_IMPORTANT_MESSAGES_2: 'Aktualizujete se na novou major verzi. Je vhodné nejprve vytvořit systémovou zálohu. Také zkontrolujte online nápovědu pro jakékoliv závažné změny.',
   WARNING_SYSTEM_BACKUP: 'Toto vytvoří zálohu vašich celých systémových konfigurací a nastavení. Všechna hesla budou v zálohovém souboru čitelná. Buďte opatrní při sdílení! Opravdu chcete pokračovat?',
   TEST_EMAIL_SUCCESSFUL: 'Test email byl úspěšně odeslán',
   SYSTEM_NAME: 'Název systému',
@@ -349,8 +349,8 @@ const cs: Translation = {
   COMMAND_EXECUTED: 'Příkaz úspěšně spuštěn',
   RUN: 'Spustit příkaz',
   INTERNET_CONNECTION_CHECK: 'Kontrola online pro dostupné verze',
-  UPLOAD_BACKUP_TEXT: 'Klikněte, abyste vybrali nebo přetáhli a pustili soubor zálohy (.json) sem',
-  UPLOAD_FIRMWARE_TEXT: 'Klikněte, abyste vybrali nebo přetáhli a pustili soubor firmware .bin/.md5 sem',
+  UPLOAD_BACKUP_TEXT: 'Klikněte, abyste vybrali, nebo drop soubor zálohy (.json) sem',
+  UPLOAD_FIRMWARE_TEXT: 'Klikněte, abyste vybrali, nebo drop soubor firmware .bin/.md5 sem',
   UPLOAD_MD5_RECEIVED: 'Digest přijat, nyní nahrajte firmware .bin',
   UPLOAD_MD5_MATCHED: 'MD5 souhlasí, firmware se instaluje...'
 };

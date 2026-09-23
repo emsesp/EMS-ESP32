@@ -311,7 +311,7 @@ const no: Translation = {
   ALLVALUES: 'Alle verdier',
   SPECIAL_FUNCTIONS: 'Spesielle funksjoner',
   WAIT_FIRMWARE: 'Firmware er i opplasting og installasjon',
-  INSTALL_VERSION: 'Dette vil {0} versjon {1}. Er du sikker?',
+  INSTALL_VERSION: 'Dette vil {0} versjon {1}',
   UPDATE_AVAILABLE: 'oppdatering tilgjengelig',
   LATEST_VERSION: 'Du bruker den nyeste {0} firmware versjonen',
   PLEASE_WAIT: 'Vennligst vent',
@@ -340,7 +340,7 @@ const no: Translation = {
   ONLINE_HELP: 'online hjelp',
   UPGRADE_IMPORTANT_MESSAGES: 'Oppdater viktige meldinger',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Denne oppdateringen krever en fabriksinstilling. Sørg for at du først lastet ned en System Backup før du fortsetter, og last denne filen etter at den nye versjonen er installert.',
-  UPGRADE_IMPORTANT_MESSAGES_2: 'Du oppdaterer til en ny hovedversjon. Sørg for at du har lest ChangeLog for eventuelle bruddende endringer.',
+  UPGRADE_IMPORTANT_MESSAGES_2: 'Du oppdaterer til en ny major versjon. Det er anbefalt å først lage en systembackup. Kontroller også onlinehjelp for eventuelle viktige endringer.',
   WARNING_SYSTEM_BACKUP: 'Dette vil lage en sikkerhetskopi av din fullstendige systemkonfigurasjon og innstillinger. Alle passord vil være lesbare i sikkerhetskopien. Vær forsiktig med deling! Vil du fortsette?',
   TEST_EMAIL_SUCCESSFUL: 'Test email sendt suksessfullt',
   SYSTEM_NAME: 'Systemnavn',
@@ -349,8 +349,8 @@ const no: Translation = {
   COMMAND_EXECUTED: 'Kommando kjørt lykkes',
   RUN: 'Kjør',
   INTERNET_CONNECTION_CHECK: 'Kontrollerer online for tilgjengelige versjoner',
-  UPLOAD_BACKUP_TEXT: 'Klikk for å velge eller dra og slipp en sikkerhetskopi (.json) her',
-  UPLOAD_FIRMWARE_TEXT: 'Klikk for å velge eller dra og slipp en firmware .bin/.md5 her',
+  UPLOAD_BACKUP_TEXT: 'Klikk for å velge, eller drop en sikkerhetskopi (.json) her',
+  UPLOAD_FIRMWARE_TEXT: 'Klikk for å velge, eller drop en firmware .bin/.md5 her',
   UPLOAD_MD5_RECEIVED: 'MD5 mottatt, last nå opp firmware .bin-filen',
   UPLOAD_MD5_MATCHED: 'MD5 stemmer, firmware installeres...'
 };

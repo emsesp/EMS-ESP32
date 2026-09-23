@@ -199,7 +199,7 @@ void TemperatureSensor::loop() {
                     if (firstscan_ > 0 && set_internal_) {
                         set_internal_ = false;
                         Sensor * s    = &sensors_[0];
-                        if (firstscan_ > 1) {
+                        if (firstscan_ > 1 && EMSESP::nvs_.isKey("intTemp")) {
                             std::string s_nvs = EMSESP::nvs_.getString("intTemp").c_str();
                             for (uint8_t i = 0; i < firstscan_; i++) {
                                 if (s_nvs == sensors_[i].id()) {

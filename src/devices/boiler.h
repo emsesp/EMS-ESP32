@@ -337,7 +337,7 @@ class Boiler : public EMSdevice {
     double  nrgWwF_;   // double calculate for nrgWw
     uint8_t nomPower_;
 
-    int16_t  tk1_;
+    int16_t tk1_;
 
     /*
   // Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat

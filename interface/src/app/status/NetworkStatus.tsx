@@ -7,11 +7,13 @@ import SettingsInputComponentIcon from '@mui/icons-material/SettingsInputCompone
 import WifiIcon from '@mui/icons-material/Wifi';
 import {
   Avatar,
+  Box,
   Divider,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
+  Typography,
   useTheme
 } from '@mui/material';
 import type { Theme } from '@mui/material';
@@ -62,26 +64,45 @@ const networkQualityHighlight = ({ rssi }: NetworkStatusType, theme: Theme) => {
   return theme.palette.success.main;
 };
 
-const dnsServers = ({ dns_ip_1, dns_ip_2 }: NetworkStatusType) => {
-  if (!dns_ip_1) {
+// one address per line, with an optional dimmed note such as the IPv6 scope
+const AddressList = ({
+  addresses
+}: {
+  addresses: { value: string; note?: string }[];
+}) => {
+  if (addresses.length === 0) {
     return 'none';
   }
-  return dns_ip_1 + (!dns_ip_2 || dns_ip_2 === '0.0.0.0' ? '' : ', ' + dns_ip_2);
+  return addresses.map(({ value, note }) => (
+    <Box component="span" sx={{ display: 'block' }} key={value}>
+      {value}
+      {note && (
+        <Typography
+          component="span"
+          variant="body2"
+          sx={{ color: 'grey.600', ml: 1 }} // dimmer than the grey[500] secondary text
+        >
+          ({note})
+        </Typography>
+      )}
+    </Box>
+  ));
 };
 
-const IPs = (status: NetworkStatusType) => {
-  if (
-    !status.local_ipv6 ||
-    status.local_ipv6 === '0000:0000:0000:0000:0000:0000:0000:0000' ||
-    status.local_ipv6 === '::'
-  ) {
-    return status.local_ip;
-  }
-  if (!status.local_ip || status.local_ip === '0.0.0.0') {
-    return status.local_ipv6;
-  }
-  return status.local_ip + ', ' + status.local_ipv6;
-};
+const isSet = (ip?: string): ip is string => !!ip && ip !== '0.0.0.0' && ip !== '::';
+
+const ipAddresses = ({ local_ip, ipv6 }: NetworkStatusType) => [
+  ...(isSet(local_ip) ? [{ value: local_ip }] : []),
+  ...(ipv6 ?? []).map(({ address, scope }) => ({ value: address, note: scope }))
+];
+
+const gateways = ({ gateway_ip, gateway_ipv6 }: NetworkStatusType) => [
+  ...(isSet(gateway_ip) ? [{ value: gateway_ip }] : []),
+  ...(gateway_ipv6 ?? []).filter(isSet).map((value) => ({ value }))
+];
+
+const dnsServers = ({ dns }: NetworkStatusType) =>
+  (dns ?? []).filter(isSet).map((value) => ({ value }));
 
 const getNetworkStatusText = (
   status: NetworkConnectionStatus,
@@ -178,7 +199,10 @@ const NetworkStatus = () => {
               <ListItemAvatar>
                 <Avatar>IP</Avatar>
               </ListItemAvatar>
-              <ListItemText primary={LL.ADDRESS_OF('IP')} secondary={IPs(data)} />
+              <ListItemText
+                primary={LL.ADDRESS_OF('IP')}
+                secondary={<AddressList addresses={ipAddresses(data)} />}
+              />
             </ListItem>
             <Divider variant="inset" component="li" />
             <ListItem>
@@ -211,7 +235,7 @@ const NetworkStatus = () => {
               </ListItemAvatar>
               <ListItemText
                 primary={LL.NETWORK_GATEWAY()}
-                secondary={data.gateway_ip || 'none'}
+                secondary={<AddressList addresses={gateways(data)} />}
               />
             </ListItem>
             <Divider variant="inset" component="li" />
@@ -223,7 +247,7 @@ const NetworkStatus = () => {
               </ListItemAvatar>
               <ListItemText
                 primary={LL.NETWORK_DNS()}
-                secondary={dnsServers(data)}
+                secondary={<AddressList addresses={dnsServers(data)} />}
               />
             </ListItem>
           </>

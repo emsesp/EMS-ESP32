@@ -21,6 +21,7 @@
 #ifndef EMSESP_STANDALONE
 #include "esp_ota_ops.h"
 #include "rom/rtc.h"
+#include "littlefs_compat.h"
 #endif
 
 static_assert(uuid::thread_safe, "uuid-common must be thread-safe");
@@ -1723,17 +1724,27 @@ void EMSESP::start() {
 
 // start the file system
 #ifndef EMSESP_STANDALONE
-    if (!LittleFS.begin(true)) {
-        LOG_ERROR("LittleFS Mount Failed");
-        return;
+    if (!LittleFS.begin(false)) {
+        // A partition written by an Arduino Core 2 build is readable but records limits
+        // this build refuses to mount. Rewrite the superblock and retry before resorting
+        // to a format, which would throw away the user's settings.
+        if (littlefs_migrate() && LittleFS.begin(false)) {
+            LOG_NOTICE("Converted Filesystem to new format");
+        } else if (LittleFS.begin(true)) {
+            LOG_WARNING("Formatted Filesystem, any previous settings have been lost");
+        } else {
+            // if we reach here, nothing will ever work so go into a infinite loop
+            Serial.println("LittleFS Mount Failed. Cannot start EMS-ESP");
+            while (true) {
+                delay(1000);
+                yield();
+            }
+        }
     }
-//     else {
-// output filesystem folders and files for debugging
-// #if defined(EMSESP_DEBUG)
-//         LOG_DEBUG("Listing root directory before:");
-//         system_.listDir("/", 3); // show the contents of the root directory
-// #endif
-//     }
+#if defined(EMSESP_DEBUG)
+    LOG_DEBUG("Listing root directory before:");
+    system_.listDir("/", 3);
+#endif
 #endif
 
 // do a quick scan of the filesystem to see if we a settings file in the /config folder
@@ -1746,7 +1757,7 @@ void EMSESP::start() {
     bool factory_settings = false;
 #endif
 
-    // start NVS storage
+// start NVS storage
 #ifndef EMSESP_STANDALONE
     if (esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_NVS, "nvs1")) {
         nvs_.begin("ems-esp", false, "nvs1");
@@ -1766,11 +1777,11 @@ void EMSESP::start() {
     // loads core system services settings (mqtt, ap, ntp etc)
     esp32React.begin();
 
-    // output filesystem folders and files for debugging
-    // #if defined(EMSESP_DEBUG)
-    //     LOG_DEBUG("Listing root directory after:");
-    //     system_.listDir("/", 3); // show the contents of the root directory
-    // #endif
+// output filesystem folders and files for debugging
+#if defined(EMSESP_DEBUG)
+    LOG_DEBUG("Listing root directory after:");
+    system_.listDir("/", 3); // show the contents of the root directory
+#endif
 
 #ifndef EMSESP_STANDALONE
     if (factory_settings) {
@@ -1818,7 +1829,7 @@ void EMSESP::start() {
     LOG_INFO("Last system reset reason Core0: %s, Core1: %s", system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
 #endif
 
-    // see if we're restoring a settings file
+// see if we're restoring a settings file
 #ifndef EMSESP_STANDALONE
     if (system_.check_restore()) {
         LOG_WARNING("EMS-ESP will restart to apply new settings. Please wait.");

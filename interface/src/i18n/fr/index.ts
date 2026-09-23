@@ -311,7 +311,7 @@ const fr: Translation = {
   ALLVALUES: 'Toutes les valeurs',
   SPECIAL_FUNCTIONS: 'Fonctions spéciales',
   WAIT_FIRMWARE: 'Firmware en cours de téléchargement et d\'installation',
-  INSTALL_VERSION: 'Cela va {0} la version {1}. Êtes-vous sûr ?',
+  INSTALL_VERSION: 'Cela va {0} la version {1}',
   UPDATE_AVAILABLE: 'mise à jour disponible',
   LATEST_VERSION: 'Vous utilisez la dernière version {0} du firmware',
   PLEASE_WAIT: 'Veuillez patienter',
@@ -340,7 +340,7 @@ const fr: Translation = {
   ONLINE_HELP: 'aide en ligne',
   UPGRADE_IMPORTANT_MESSAGES: 'Mettre à jour les messages importants',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Cette mise à jour nécessite une réinitialisation de fabrique. Assurez-vous de télécharger une sauvegarde système avant de continuer, et de la charger après l\'installation de la nouvelle version.',
-  UPGRADE_IMPORTANT_MESSAGES_2: 'Vous mettez à jour vers une nouvelle version majeure. Assurez-vous de lire le ChangeLog pour tout changement important.',
+  UPGRADE_IMPORTANT_MESSAGES_2: 'Vous mettez à jour vers une nouvelle version majeure. Il est recommandé de créer d\'abord une sauvegarde système. Vérifiez également l\'aide en ligne pour les éventuelles modifications importantes.',
   WARNING_SYSTEM_BACKUP: 'Cela créera une sauvegarde de votre configuration et paramètres complets. Tous les mots de passe seront lisibles dans le fichier de sauvegarde. Soyez prudent avec le partage ! Voulez-vous continuer ?',
   TEST_EMAIL_SUCCESSFUL: 'Test email envoyé avec succès',
   SYSTEM_NAME: 'Nom du système',
@@ -349,8 +349,8 @@ const fr: Translation = {
   COMMAND_EXECUTED: 'Commande exécutée avec succès',
   RUN: 'Exécuter une commande',
   INTERNET_CONNECTION_CHECK: 'Vérification en ligne pour les versions disponibles',
-  UPLOAD_BACKUP_TEXT: 'Cliquez pour sélectionner ou faites glisser et déposez un fichier de sauvegarde (.json) ici',
-  UPLOAD_FIRMWARE_TEXT: 'Cliquez pour sélectionner ou faites glisser et déposez un fichier firmware .bin/.md5 ici',
+  UPLOAD_BACKUP_TEXT: 'Cliquez pour sélectionner, ou drop un fichier de sauvegarde (.json) ici',
+  UPLOAD_FIRMWARE_TEXT: 'Cliquez pour sélectionner, ou drop un fichier firmware .bin/.md5 ici',
   UPLOAD_MD5_RECEIVED: 'Empreinte reçue, téléversez maintenant le fichier firmware .bin',
   UPLOAD_MD5_MATCHED: 'MD5 concordant, installation du firmware...'
 };

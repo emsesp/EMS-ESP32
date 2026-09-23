@@ -6,9 +6,9 @@ abluftqualität
 abluftqualitätsfühler
 abrt
 absburnpow
-ACAC
-ACAH
-ACAO
+acac
+acah
+acao
 accomodate
 aceotrope
 activehigh
@@ -48,6 +48,7 @@ appused
 apssid
 apsta
 arduhal
+arduinoespressif
 arduinojson
 arduinoota
 arjan
@@ -70,6 +71,7 @@ ausreichend
 authmode
 autodst
 automode
+autonegotiation
 autoscroll
 auxelecheatnrgcons
 auxelecheatnrgconsheating
@@ -139,6 +141,7 @@ bytetime
 calinttemp
 catagory
 cbuf
+ccrc
 cerapur
 cfamily
 changeloglevel
@@ -289,6 +292,7 @@ dewoffset
 dewpoint
 dewtemp
 dewtemperature
+dhcpc
 dhwmintemp
 dhwprio
 dhwvalve
@@ -362,6 +366,7 @@ entitypath
 enumupdate
 enviline
 equipt
+eraseap
 erct
 erdwärmetauscher
 errordisp
@@ -458,6 +463,7 @@ gpoc
 greenstar
 grokhotkov
 haclimate
+handshaked
 hardwarestatus
 harwerth
 headersize
@@ -501,7 +507,7 @@ heatsource
 heatsources
 heatstarts
 heattemp
-heattransfer 
+heattransfer
 heattransfersystem
 heatup
 heatvalve
@@ -578,6 +584,7 @@ iconua
 idedata
 iele
 ignwork
+iile
 iiwi
 ijoy
 imlhd
@@ -615,6 +622,7 @@ itty
 ivtclock
 jtag
 junkersclock
+juststopped
 kamin
 karlesky
 keelbypass
@@ -706,6 +714,7 @@ mbap
 mbar
 mbed
 mbedtsl
+mbit
 mdio
 mdns
 melis
@@ -744,7 +753,7 @@ mlongcalls
 mmio
 mmode
 mmplus
-mockServer
+mockserver
 modbus
 modee
 modetype
@@ -762,6 +771,7 @@ msgstr
 msys
 mtext
 mult
+mwdt
 mysys
 nachheiz
 nachheizreg
@@ -780,6 +790,7 @@ neopixel
 netcmp
 netflowtemp
 netif
+netifs
 newdatetime
 newnow
 newpcb
@@ -836,6 +847,7 @@ oilpreheat
 oldoffset
 olimex
 olimexpoe
+olimexpoew
 omea
 onchange
 onetimekey
@@ -843,6 +855,7 @@ onewire
 ooops
 operatingstate
 opmode
+optimisations
 optipng
 osrc
 outdoorhold
@@ -877,7 +890,7 @@ poolsettemp
 poolshunt
 poolshuntstatus
 poolstarts
-pooltemp 
+pooltemp
 portx
 powerreduction
 powervalues
@@ -944,7 +957,7 @@ rawstr
 rcplus
 readback
 readelf
-READYCLIENT
+readyclient
 readymail
 recp
 recved
@@ -1000,6 +1013,7 @@ roomsettings
 roomtemp
 roomtempdiff
 roomtemperature
+roomtempoffset
 roomthermostat
 roomthermostats
 rrts
@@ -1029,6 +1043,7 @@ seltemp
 seltemplow
 seltempoff
 seltempsingle
+sendmail
 sendtype
 sensordata
 sensorfails
@@ -1037,6 +1052,7 @@ sensorname
 sensorreads
 sensortype
 seperator
+serialises
 serverclass
 servicecode
 servicecodenumber
@@ -1087,11 +1103,13 @@ soll
 speicher
 spidqs
 spiio
+spiram
 squaremeters
 srts
 staconnected
 stadisconnected
 staipassigned
+startm
 startshp
 starttemp
 starttemperature
@@ -1112,6 +1130,7 @@ substract
 summermode
 summersetmode
 summertemp
+sumr
 supchan
 suprapur
 svenska
@@ -1161,6 +1180,7 @@ tempparmode
 temprature
 tempsensor
 tempstatus
+testemail
 testtemperature
 thermaldisinfect
 thermostate
@@ -1271,6 +1291,7 @@ werror
 wextra
 whenmodeoff
 wificlient
+wifioff
 wifireconnects
 wifistrength
 winsock
@@ -1281,6 +1302,7 @@ workm
 workmin
 worktime
 wouldblock
+wrover
 wswitch
 wtype
 wunused
@@ -1330,24 +1352,3 @@ zyxwvutsrqponmlkjihgfedcba
 öffnen
 česky
 živanović
-MWDT
-juststopped
-handshaked
-startm
-netifs
-testemail
-sendmail
-serialises
-SPIRAM
-optimisations
-IILE
-Sumr
-eraseap
-roomtempoffset
-dhcpc
-wifioff
-autonegotiation
-Mbit
-WROVER
-OLIMEXPOEW
-arduinoespressif

@@ -98,13 +98,13 @@ let system_status = {
   wifi_rssi: -41,
   esp_platform: 'ESP32',
   build_flags: 'DEMO',
-  cpu_type: 'ESP32',
+  cpu_type: 'ESP32-D0WD-V3',
   cpu_rev: 0,
   cpu_cores: 2,
   cpu_freq_mhz: 240,
   max_alloc_heap: 191,
-  arduino_version: 'ESP32 Arduino v2.0.17',
-  sdk_version: 'v4.4.7',
+  arduino_version: 'Tasmota Arduino v3.3.8',
+  sdk_version: '5.5.4.260407',
   partition: 'app0',
   flash_chip_size: 16384,
   flash_chip_speed: 80000000,
@@ -127,13 +127,13 @@ let system_status = {
     },
     {
       partition: 'app1',
-      version: '3.8.1-dev.40',
+      version: '3.8.3',
       install_date: '2025-03-01T13:29:13.999Z',
       size: 4672
     },
     {
       partition: 'factory',
-      version: '3.8.1-dev.39',
+      version: '3.8.4',
       install_date: '2025-03-01T13:29:13.999Z',
       size: 4672
     }
@@ -141,24 +141,22 @@ let system_status = {
   // partitions: [],
   developer_mode: settings.developer_mode,
   disable_reset: settings.disable_reset,
-  model: '',
-  board: '',
-  // model: 'BBQKees Electronics EMS Gateway E32 V2 (E32 V2.0 P3/2024011)',
-  // board: 'E32V2',
-  // status: 0,
-  status: 3
+  model: 'BBQKees Electronics E32V2.2 rev.2.2/2024074',
+  board: 'E32V2_2',
+  status: 0
+  // status: 3
 };
 
-// Test Versioning
+// Test the versioning
 let DEV_VERSION_IS_UPGRADEABLE: boolean;
 let STABLE_VERSION_IS_UPGRADEABLE: boolean;
 let THIS_VERSION: string;
-let LATEST_STABLE_VERSION = '3.8.3';
+let LATEST_STABLE_VERSION = '3.8.4';
 let LATEST_DEV_VERSION = '3.9.0-dev.1';
 
 // scenarios for testing versioning
-// let version_test = 0; // on latest stable, or switch to dev
-let version_test = 1; // on latest dev, or switch back to stable
+let version_test = 0; // on latest stable, or switch to dev
+// let version_test = 1; // on latest dev, or switch back to stable
 // let version_test = 2; // upgrade an older stable to latest stable or switch to latest dev
 // let version_test = 3; // upgrade dev to latest, or switch to stable
 // let version_test = 4; // downgrade to an older dev, or switch back to stable
@@ -210,14 +208,16 @@ switch (emulate_esp) {
   // ESP32 4MB
   case 'ESP32':
     system_status.esp_platform = 'ESP32';
-    system_status.cpu_type = 'ESP32';
-    system_status.arduino_version = 'Tasmota Arduino v2.0.17';
-    system_status.sdk_version = 'v4.4.7';
-    system_status.psram = false;
-    system_status.psram_size = 0;
-    system_status.free_psram = 0;
-    settings.board_profile = 'E32V2';
-    settings.platform = 'ESP32';
+    system_status.cpu_type = 'ESP32-D0WD-V3';
+    system_status.arduino_version = 'Tasmota Arduino v3.3.8';
+    system_status.sdk_version = '5.5.4.260407';
+    system_status.psram = true;
+    system_status.psram_size = 4096;
+    system_status.free_psram = 4055;
+    system_status.model = 'BBQKees Electronics E32V2.2 rev.2.2/2024073';
+    system_status.board = 'E32V2_2';
+
+    settings.board_profile = 'E32V2_2';
     break;
 
   // ESP32 S3
@@ -225,13 +225,15 @@ switch (emulate_esp) {
   default:
     system_status.esp_platform = 'ESP32S3';
     system_status.cpu_type = 'ESP32-S3';
-    system_status.arduino_version = 'ESP32 Arduino v2.0.18';
-    system_status.sdk_version = 'v4.4.7';
+    system_status.arduino_version = 'Tasmota Arduino v3.3.8';
+    system_status.sdk_version = '5.5.4.260407';
     system_status.psram = true;
     system_status.psram_size = 8189;
     system_status.free_psram = 8166;
+    system_status.model = 'BBQKees Electronics S32';
+    system_status.board = 'S32S3';
+
     settings.board_profile = 'S32S3';
-    settings.platform = 'ESP32S3';
     break;
 }
 
@@ -442,25 +444,24 @@ function executeCommand(name: string) {
 }
 
 // called by Action endpoint upgradeImportantMessages
+// 0 is do nothing
+// 1 is a special upgrade and needs an export->factory reset->import
+// 2 is a major upgrade
 function upgradeImportantMessages(version: string) {
-  // 0 is do nothing
-  // 1 means 3.9 and factory reset required
-  // 2 means a major version upgrade
-
   let upgradeImportantMessageType_n = 0;
 
-  // check file extensions
+  // check file extensions first
   if (version.endsWith('.md5') || version.endsWith('.json')) {
     upgradeImportantMessageType_n = 0; // digest / backup restore: no upgrade warning
   } else if (version.endsWith('.bin')) {
     // extract the version number from the filename and if its going from 3.8.x to 3.9.x, then set upgradeImportantMessageType_n to 1
     const versionNumber = version.split('.');
     if (versionNumber[0] === '3' && versionNumber[1] === '8') {
-      upgradeImportantMessageType_n = 1; // make it 1, factory reset required
+      upgradeImportantMessageType_n = 2; // major upgrade
     }
   } else {
-    // this is a version string like "3.9.0"
-    upgradeImportantMessageType_n = 1; // make it 1, for testing, meaning a factory reset is required
+    // the parameter is a version string like "3.9.0"
+    upgradeImportantMessageType_n = 2; // major upgrade
   }
 
   console.log(
@@ -576,7 +577,7 @@ let ap_settings = {
   max_clients: 4
 };
 const ap_status = {
-  status: 1,
+  status: 0, // active - an inactive AP reports no address at all
   ip_address: '192.168.4.1',
   mac_address: '3C:61:05:03:AB:2D',
   station_num: 0
@@ -608,6 +609,11 @@ let network_settings = {
 const network_status = {
   status: 3,
   local_ip: '10.10.10.101',
+  ipv6: [
+    { address: '2001:db8:1234:5678::a1b2', scope: 'global' },
+    { address: 'fd00:1234:5678::a1b2', scope: 'unique local' },
+    { address: 'fe80::3e61:5ff:fe03:ab2c', scope: 'link local' }
+  ],
   mac_address: '3C:61:05:03:AB:2C',
   rssi: -41,
   ssid: 'home',
@@ -615,8 +621,8 @@ const network_status = {
   channel: 11,
   subnet_mask: '255.255.255.0',
   gateway_ip: '10.10.10.1',
-  dns_ip_1: '10.10.10.1',
-  dns_ip_2: '0.0.0.0',
+  gateway_ipv6: ['fe80::1', 'fe80::2'],
+  dns: ['10.10.10.1', 'fd00:1234:5678::1'],
   hostname: 'ems-esp',
   reconnect_count: 1
 };

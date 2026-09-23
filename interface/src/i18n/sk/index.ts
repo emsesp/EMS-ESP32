@@ -311,7 +311,7 @@ const sk: Translation = {
   ALLVALUES: 'Všetky hodnoty',
   SPECIAL_FUNCTIONS: 'Špeciálne funkcie',
   WAIT_FIRMWARE: 'Firmvér sa nahráva a inštaluje',
-  INSTALL_VERSION: 'Týmto sa {0} verzia {1}. Si si istý?',
+  INSTALL_VERSION: 'Týmto sa {0} verzia {1}',
   UPDATE_AVAILABLE: 'dostupná aktualizácia',
   LATEST_VERSION: 'Používate poslednú {0} verziu firmvéru',
   PLEASE_WAIT: 'Čakajte prosím',
@@ -340,7 +340,7 @@ const sk: Translation = {
   ONLINE_HELP: 'online pomoc',
   UPGRADE_IMPORTANT_MESSAGES: 'Aktualizovať dôležité správy',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Táto aktualizácia vyžaduje reštart základných nastavení. Uistite sa, že najprv stiahnete systémovú zálohu pred pokračovaním, a potom nahrajte tento súbor po instalácii novej verzie.',
-  UPGRADE_IMPORTANT_MESSAGES_2: 'Aktualizujete sa na novú hlavnú verziu. Uistite sa, že ste prečítali ChangeLog pre akékoľvek dôležité zmeny.',
+  UPGRADE_IMPORTANT_MESSAGES_2: 'Aktualizujete sa na novú major verziu. Je vhodné najprv vytvoriť systémovú zálohu. Taktiež skontrolujte online nápovľu pre akékoľvek dôležité zmeny.',
   WARNING_SYSTEM_BACKUP: 'Toto vytvorí zálohu všetkých vašich celých systémových konfigurácií a nastavení. Všetky hesla budú čitateľné v zálohovom súbore. Buďte opatrní pri zdieľaní! Chcete pokračovať?',
   TEST_EMAIL_SUCCESSFUL: 'Test email bol úspešne odoslaný',
   SYSTEM_NAME: 'Názov systému',
@@ -349,8 +349,8 @@ const sk: Translation = {
   COMMAND_EXECUTED: 'Príkaz vykonaný úspešne',
   RUN: 'Volať príkaz',
   INTERNET_CONNECTION_CHECK: 'Kontrola online pre dostupné verzie',
-  UPLOAD_BACKUP_TEXT: 'Kliknite, aby ste vybrali alebo presuňte a upustili súbor zálohy (.json) sem',
-  UPLOAD_FIRMWARE_TEXT: 'Kliknite, aby ste vybrali alebo presuňte a upustili súbor firmware .bin/.md5',
+  UPLOAD_BACKUP_TEXT: 'Kliknite, aby ste vybrali, alebo drop súbor zálohy (.json) sem',
+  UPLOAD_FIRMWARE_TEXT: 'Kliknite, aby ste vybrali, alebo drop súbor firmware .bin/.md5 sem',
   UPLOAD_MD5_RECEIVED: 'Suma MD5 prijatá, teraz nahrajte firmware .bin',
   UPLOAD_MD5_MATCHED: 'MD5 súhlasí, firmvér sa inštaluje...'
 };
