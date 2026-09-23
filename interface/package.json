@@ -54,9 +54,9 @@
     "rollup-plugin-visualizer": "^7.1.1",
     "terser": "^5.51.2",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.70.0",
+    "typescript-eslint": "^8.70.1",
     "vite": "^8.3.0",
     "vite-plugin-imagemin": "^0.6.1"
   },
-  "packageManager": "pnpm@12.4.2"
+  "packageManager": "pnpm@12.6.0"
 }

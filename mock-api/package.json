@@ -17,5 +17,5 @@
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "prettier": "^3.9.8"
   },
-  "packageManager": "pnpm@12.4.2"
+  "packageManager": "pnpm@12.6.0"
 }
