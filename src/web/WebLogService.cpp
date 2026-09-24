@@ -76,9 +76,9 @@ void WebLogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
         limit_log_messages_ = maximum_log_messages_;
     } else {
         uint32_t maxAlloc = ESP.getMaxAllocHeap();
-        if (limit_log_messages_ > 5 && maxAlloc < (50 * 1024)) { // 50k
+        if (limit_log_messages_ > 5 && maxAlloc < LOG_HEAP_LOW) {
             --limit_log_messages_;
-        } else if (limit_log_messages_ < maximum_log_messages_ && maxAlloc > (60 * 1024)) { //  60k
+        } else if (limit_log_messages_ < maximum_log_messages_ && maxAlloc > LOG_HEAP_HIGH) {
             ++limit_log_messages_;
         }
     }

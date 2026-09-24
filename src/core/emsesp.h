@@ -291,6 +291,8 @@ class EMSESP {
     static constexpr uint32_t EMS_FETCH_FREQUENCY = 60000; // check every minute
     static constexpr uint8_t  EMS_WAIT_KM_TIMEOUT = 60;    // wait one minute
 
+    static constexpr uint32_t SYSTEM_STATUS_RESET_TIMEOUT = 300000; // return a non-normal system status to normal after this (in ms) - 5 minutes
+
     struct Device_record {
         uint8_t               product_id;
         EMSdevice::DeviceType device_type;

@@ -24,6 +24,29 @@
 
 namespace emsesp {
 
+// WS2812B driver replacing arduino-esp32's rgbLedWrite()/neopixelWrite(), which hard-code
+// T0H = 400 ns, T1L = 400 ns and have no reset gap. The WS2812B-2020-V6 needs T0H 220-380 ns,
+// T1L 580-1000 ns and a reset > 280 us, otherwise it misreads 0-bits as 1-bits (washed-out white).
+// Timings used (10 MHz RMT clock, 1 tick = 100 ns) fit both the original WS2812B and the V6:
+//
+//            sent     old WS2812B    WS2812B-2020-V6
+//   T0H     300 ns    250-550 ns     220-380 ns
+//   T0L     900 ns    700-1000 ns    580-1000 ns
+//   T1H     800 ns    650-950 ns     580-1000 ns
+//   T1L     600 ns    300-600 ns     580-1000 ns
+//   Reset  >300 us    >50 us         >280 us
+//
+// Do not mix with rgbLedWrite()/neopixelWrite() on the same pin, as both claim the pin's RMT channel.
+namespace rgb_led {
+
+enum class Order : uint8_t { GRB, RGB }; // WS2812B is GRB
+
+// Blocks ~30 us for the transmit, plus up to the reset gap if called again right after the previous update
+bool write(uint8_t pin, uint8_t red, uint8_t green, uint8_t blue, Order order = Order::GRB);
+void end(uint8_t pin); // release the pin's RMT channel, e.g. before reusing the pin for something else
+
+} // namespace rgb_led
+
 class LED {
   public:
     enum Color : uint8_t {
@@ -42,7 +65,7 @@ class LED {
     bool loop(uint8_t healthcheck, bool button_busy);
 
     void start_led_fast_flash(uint8_t duration); // duration in seconds
-    bool set_custom_led_routine(std::string color, std::string pattern);
+    bool set_custom_led_routine(const std::string & color, const std::string & pattern);
 
   private:
     static uuid::log::Logger logger_;
@@ -59,28 +82,31 @@ class LED {
     static constexpr uint32_t LED_FLASH_INTERVAL_MS               = 100;  // LED toggle period during factory-reset flash
     static constexpr uint8_t  RGB_LED_BRIGHTNESS                  = 20;   // 255 is max brightness
     static constexpr uint8_t  LED_ON                              = HIGH; // LED on
+    static constexpr Color    COLOR_UNSET                         = static_cast<Color>(0xFF); // forces the next set_led() to write
+
+    // led_fast_flash() state
+    uint32_t led_flash_start_time_ = 0;
+    uint32_t led_flash_duration_   = 0;
+    uint32_t last_toggle_time_     = 0;
+
+    // sequence_led() state
+    uint32_t led_long_timer_  = 1; // 1 will kick it off immediately
+    uint32_t led_short_timer_ = 0;
 
     // local copies of the application settings
     uint8_t led_gpio_ = 0;
     uint8_t led_type_ = 0;
     bool    hide_led_ = false;
 
-    bool     led_fast_flash_timer_ = false;
-    uint32_t led_flash_start_time_ = 0;
-    uint32_t led_flash_duration_   = 0;
+    bool led_fast_flash_timer_ = false;
+    bool led_flash_state_      = false;
 
-    // led_flash() state
-    bool     led_flash_state_  = false;
-    uint32_t last_toggle_time_ = 0;
+    bool    last_button_busy_ = false;
+    uint8_t led_flash_step_   = 0; // 0 means we're not in the short flash timer
 
-    // sequence_led() state
-    bool     last_button_busy_ = false;
-    uint32_t led_long_timer_   = 1; // 1 will kick it off immediately
-    uint32_t led_short_timer_  = 0;
-    uint8_t  led_flash_step_   = 0; // 0 means we're not in the short flash timer
-
-    // set_led_routine() state
+    // set_custom_led_routine() and healthcheck state
     Color color_steps_[3] = {Color::OFF, Color::OFF, Color::OFF};
+    Color last_color_     = COLOR_UNSET; // last color written, to skip redundant writes
 
     // if true, the user has requested a custom LED blink, this always has preference over the button or showing the system health
     bool is_user_led_blink_ = false;

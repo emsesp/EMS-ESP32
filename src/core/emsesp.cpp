@@ -1978,12 +1978,12 @@ void EMSESP::loop() {
         }
     }
 
-    // reset status after 5 Minutes
+    // reset status after a timeout
     if (EMSESP::system_.systemStatus() != SYSTEM_STATUS::SYSTEM_STATUS_NORMAL) {
         static uint32_t starttime = 0;
         if (starttime == 0) {
             starttime = uuid::get_uptime_ms();
-        } else if (uuid::get_uptime_ms() - starttime > 300000) {
+        } else if (uuid::get_uptime_ms() - starttime > SYSTEM_STATUS_RESET_TIMEOUT) {
             starttime = 0;
             EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_NORMAL);
         }
