@@ -299,7 +299,7 @@ void AnalogSensor::reload(bool get_nvs) {
             uint8_t  r = v / 10000;
             uint8_t  g = (v - r * 10000) / 100;
             uint8_t  b = v % 100;
-            EMSESP_RGB_WRITE(sensor.gpio(), 2 * r, 2 * g, 2 * b);
+            rgb_led::write(sensor.gpio(), 2 * r, 2 * g, 2 * b);
             LOG_DEBUG("RGB set to %d, %d, %d", r, g, b);
         } else if (sensor.type() == AnalogType::DIGITAL_OUT) {
             LOG_DEBUG("Digital Write on GPIO %02d", sensor.gpio());
@@ -1001,7 +1001,7 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                 uint8_t r = v / 10000;
                 uint8_t g = (v - r * 10000) / 100;
                 uint8_t b = v % 100;
-                EMSESP_RGB_WRITE(sensor.gpio(), 2 * r, 2 * g, 2 * b);
+                rgb_led::write(sensor.gpio(), 2 * r, 2 * g, 2 * b);
                 LOG_DEBUG("RGB set to %d, %d, %d", r, g, b);
             } else if (sensor.type() == AnalogType::PULSE) {
                 uint8_t v = val;

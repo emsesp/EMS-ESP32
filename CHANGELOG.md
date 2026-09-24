@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Allow auto-download and install of firmware versions which are smaller to allow update to the latest 3.9.0-development version.
 
+## Changed
+
 ## [3.8.3] 1 August 2026
 
 ## Added

@@ -37,11 +37,8 @@
 #include <uuid/log.h>
 #include <PButton.h>
 
-#if ESP_ARDUINO_VERSION_MAJOR < 3
-#define EMSESP_RGB_WRITE neopixelWrite
-#else
-#define EMSESP_RGB_WRITE rgbLedWrite
-#endif
+#include "rgb_led.h"
+
 
 #if CONFIG_IDF_TARGET_ESP32
 // there is no official API available on the original ESP32

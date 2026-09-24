@@ -147,7 +147,5 @@ double ledcSetup(uint8_t chan, double freq, uint8_t bit_num) {
 void ledcAttachPin(uint8_t pin, uint8_t chan) {};
 void ledcAttach(uint8_t pin, uint8_t chan, uint8_t bit_num) {};
 void ledcWrite(uint8_t chan, uint32_t duty) {};
-void neopixelWrite(uint8_t pin, uint8_t red_val, uint8_t green_val, uint8_t blue_val) {};
-void rgbLedWrite(uint8_t pin, uint8_t red_val, uint8_t green_val, uint8_t blue_val) {};
 
 #endif

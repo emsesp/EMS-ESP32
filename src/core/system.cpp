@@ -664,7 +664,7 @@ void System::led_flash() {
 
         if (led_flash_type_) {
             uint8_t intensity = led_flash_state_ ? RGB_LED_BRIGHTNESS : 0;
-            EMSESP_RGB_WRITE(led_flash_gpio_, intensity, intensity, 0); // RGB LED - Yellow
+            rgb_led::write(led_flash_gpio_, intensity, intensity, 0); // RGB LED - Yellow
         } else {
             digitalWrite(led_flash_gpio_, led_flash_state_ ? LED_ON : !LED_ON); // Standard LED
         }
@@ -673,7 +673,7 @@ void System::led_flash() {
     // after duration, turn off the LED
     if (current_time - led_flash_start_time_ >= led_flash_duration_) {
         if (led_flash_type_) {
-            EMSESP_RGB_WRITE(led_flash_gpio_, 0, 0, 0);
+            rgb_led::write(led_flash_gpio_, 0, 0, 0);
         } else {
             digitalWrite(led_flash_gpio_, !LED_ON);
         }
@@ -732,12 +732,11 @@ void System::button_init() {
 // set the LED to on or off when in normal operating mode
 void System::led_init() {
     // disabled old led port before setting new one
-    led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
+    led_type_ ? rgb_led::write(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
 
     if ((led_gpio_)) { // 0 means disabled
         if (led_type_) {
-            // rgb LED WS2812B, use Neopixel
-            EMSESP_RGB_WRITE(led_gpio_, 0, 0, 0);
+            rgb_led::write(led_gpio_, 0, 0, 0); // rgb LED WS2812B
         } else {
             pinMode(led_gpio_, OUTPUT);
             digitalWrite(led_gpio_, !LED_ON); // start with LED off
@@ -1008,13 +1007,13 @@ void System::system_check() {
                 // everything is healthy, show LED permanently on or off depending on setting
                 // Green on RGB LED, on/off on standard LED
                 if (led_gpio_) {
-                    led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 0, hide_led_ ? 0 : RGB_LED_BRIGHTNESS, 0)
+                    led_type_ ? rgb_led::write(led_gpio_, 0, hide_led_ ? 0 : RGB_LED_BRIGHTNESS, 0)
                               : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON); // Green
                 }
             } else {
                 // turn off LED so we're ready for the warning flashes
                 if (led_gpio_) {
-                    led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
+                    led_type_ ? rgb_led::write(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
                 }
             }
         }
@@ -1050,7 +1049,7 @@ void System::led_monitor() {
     if (button_busy_ != myPButton_.button_busy()) {
         button_busy_ = myPButton_.button_busy();
         if (led_type_) {
-            EMSESP_RGB_WRITE(led_gpio_, button_busy_ ? RGB_LED_BRIGHTNESS : 0, button_busy_ ? RGB_LED_BRIGHTNESS : 0, 0); // Yellow
+            rgb_led::write(led_gpio_, button_busy_ ? RGB_LED_BRIGHTNESS : 0, button_busy_ ? RGB_LED_BRIGHTNESS : 0, 0); // Yellow
         } else {
             digitalWrite(led_gpio_, button_busy_ ? LED_ON : !LED_ON);
         }
@@ -1085,7 +1084,7 @@ void System::led_monitor() {
             // reset the whole sequence
             led_long_timer_ = uuid::get_uptime();
             led_flash_step_ = 0;
-            led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON); // LED off
+            led_type_ ? rgb_led::write(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON); // LED off
         } else if (led_flash_step_ % 2) {
             // handle the step events (on odd numbers 3,5,7,etc). see if we need to turn on a LED
             //  1 flash (blue) is the EMS bus is not connected
@@ -1097,16 +1096,16 @@ void System::led_monitor() {
             if (led_type_) {
                 if (led_flash_step_ == 3) {
                     if (no_network) {
-                        EMSESP_RGB_WRITE(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
+                        rgb_led::write(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
                     } else if (no_bus) {
-                        EMSESP_RGB_WRITE(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
+                        rgb_led::write(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
                     }
                 }
                 if (led_flash_step_ == 5 && no_network) {
-                    EMSESP_RGB_WRITE(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
+                    rgb_led::write(led_gpio_, RGB_LED_BRIGHTNESS, 0, 0); // red
                 }
                 if ((led_flash_step_ == 7) && no_network && no_bus) {
-                    EMSESP_RGB_WRITE(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
+                    rgb_led::write(led_gpio_, 0, 0, RGB_LED_BRIGHTNESS); // blue
                 }
             } else {
                 if ((led_flash_step_ == 3) && (no_network || no_bus)) {
@@ -1128,7 +1127,7 @@ void System::led_monitor() {
         } else {
             // turn the led off after the flash, on even number count
             if (led_on_) {
-                led_type_ ? EMSESP_RGB_WRITE(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
+                led_type_ ? rgb_led::write(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
                 led_on_ = false;
             }
         }

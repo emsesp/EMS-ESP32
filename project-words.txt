@@ -776,7 +776,6 @@ negcond
 negheat
 nein
 nennvolumentstrom
-neopixel
 netcmp
 netflowtemp
 netif
