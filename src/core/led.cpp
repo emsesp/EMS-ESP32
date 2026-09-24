@@ -19,7 +19,116 @@
 #include "led.h"
 #include "emsesp.h"
 
+#ifndef EMSESP_STANDALONE
+#include <esp32-hal-rmt.h>
+#endif
+
 namespace emsesp {
+
+namespace rgb_led {
+
+#ifndef EMSESP_STANDALONE
+
+namespace {
+
+// durations in 100 ns ticks
+constexpr uint16_t T0H = 3; // 300 ns
+constexpr uint16_t T0L = 9; // 900 ns
+constexpr uint16_t T1H = 8; // 800 ns
+constexpr uint16_t T1L = 6; // 600 ns
+
+constexpr uint32_t RMT_FREQ_HZ = 10000000; // 10 MHz
+constexpr uint32_t RESET_US    = 300;
+constexpr uint8_t  NO_PIN      = 0xFF;
+constexpr uint8_t  MAX_PINS    = 2; // status LED + an RGB analog sensor; the ESP32-C3 only has 2 RMT TX channels
+
+struct Channel {
+    uint8_t  pin        = NO_PIN;
+    uint32_t last_tx_us = 0;
+};
+
+Channel channels[MAX_PINS];
+
+Channel * init(uint8_t pin) {
+    Channel * free_slot = nullptr;
+    for (auto & ch : channels) {
+        if (ch.pin == pin) {
+            return &ch;
+        }
+        if (!free_slot && ch.pin == NO_PIN) {
+            free_slot = &ch;
+        }
+    }
+
+    if (!free_slot) {
+        // all slots in use: release the oldest one
+        free_slot = &channels[0];
+        end(free_slot->pin);
+    }
+
+    if (!rmtInit(pin, RMT_TX_MODE, RMT_MEM_NUM_BLOCKS_1, RMT_FREQ_HZ)) {
+        return nullptr;
+    }
+    free_slot->pin        = pin;
+    free_slot->last_tx_us = micros() - RESET_US; // no wait on first write
+    return free_slot;
+}
+
+} // namespace
+
+bool write(uint8_t pin, uint8_t red, uint8_t green, uint8_t blue, Order order) {
+    Channel * ch = init(pin);
+    if (!ch) {
+        return false;
+    }
+
+    // enforce the latch/reset gap since the previous frame (V6 needs > 280 us)
+    const uint32_t elapsed = micros() - ch->last_tx_us;
+    if (elapsed < RESET_US) {
+        delayMicroseconds(RESET_US - elapsed);
+    }
+
+    const uint8_t bytes[3] = {order == Order::GRB ? green : red, order == Order::GRB ? red : green, blue};
+
+    rmt_data_t frame[24];
+    for (uint8_t i = 0; i < 24; i++) {
+        const bool one     = bytes[i >> 3] & (0x80 >> (i & 7));
+        frame[i].level0    = 1;
+        frame[i].duration0 = one ? T1H : T0H;
+        frame[i].level1    = 0;
+        frame[i].duration1 = one ? T1L : T0L;
+    }
+
+    const bool ok  = rmtWrite(pin, frame, 24, RMT_WAIT_FOR_EVER);
+    ch->last_tx_us = micros();
+    return ok;
+}
+
+void end(uint8_t pin) {
+    for (auto & ch : channels) {
+        if (ch.pin == pin && pin != NO_PIN) {
+            rmtDeinit(pin);
+            ch.pin = NO_PIN;
+        }
+    }
+}
+
+#else
+
+bool write(uint8_t, uint8_t, uint8_t, uint8_t, Order) {
+    return true;
+}
+
+void end(uint8_t) {
+}
+
+#endif
+
+bool off(uint8_t pin) {
+    return write(pin, 0, 0, 0);
+}
+
+} // namespace rgb_led
 
 uuid::log::Logger LED::logger_{F_(led), uuid::log::Facility::KERN};
 
@@ -189,7 +298,7 @@ void LED::set_led(Color color) {
     const uint8_t blue      = rgb_table[idx][2];
 
     if (led_type_) {
-        rgbLedWrite(led_gpio_, red, green, blue);
+        rgb_led::write(led_gpio_, red, green, blue);
     } else {
         digitalWrite(led_gpio_, (red == 0 && green == 0 && blue == 0) || color == Color::OFF ? !LED_ON : LED_ON);
     }
