@@ -31,12 +31,15 @@ class Pool : public EMSdevice {
     static uuid::log::Logger logger_;
 
     void process_HpPoolStatus(const std::shared_ptr<const Telegram> & telegram);
+    void process_HpPoolShunt(const std::shared_ptr<const Telegram> & telegram);
 
   private:
     // MP100 pool
     int16_t poolTemp_;
     uint8_t poolShuntStatus_;
     uint8_t poolShunt_;
+    uint8_t poolShuntSet_;
+    uint8_t poolPump_;
 
     uint8_t poolShuntStatus__ = EMS_VALUE_UINT8_NOTSET; // temp value
 };

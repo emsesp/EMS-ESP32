@@ -19,6 +19,7 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - `show system` reports the Ethernet status on boards with a PHY, so a failed initialisation or a link that never came up is visible instead of Ethernet being omitted completely. Also shows the loop task's lowest free stack, to help diagnose reboots
 - new Application Setting "Automatically check for firmware updates", off by default. When enabled EMS-ESP asks emsesp.org for the latest version once a day on its own, otherwise it only asks when the WebUI wants to show it, so an unattended system never contacts emsesp.org
 - Automatically check and convert older 3.8.x filesystem to the new 3.9.0 format
+- heatpump pool: `poolon` (switch, 0x48A), `hppoolon` (pool heating active, 0x488), MP100 `poolshuntset` (0x5C4) and `poolpump` (0x5BA)
 
 ## Fixed
 

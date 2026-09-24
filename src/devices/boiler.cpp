@@ -632,7 +632,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpHeatingOn_, DeviceValueType::BOOL, FL_(hpHeatingOn), DeviceValueUOM::NONE);
         // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpCoolingOn_, DeviceValueType::BOOL, FL_(hpCoolingOn), DeviceValueUOM::NONE);
         // register_device_value(DeviceValueTAG::TAG_DHW1, &hpWwOn_, DeviceValueType::BOOL, FL_(hpWwOn), DeviceValueUOM::NONE);
-        // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpPoolOn_, DeviceValueType::BOOL, FL_(hpPoolOn), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpPoolOn_, DeviceValueType::BOOL, FL_(hpPoolOn), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpBrinePumpSpd_, DeviceValueType::UINT8, FL_(hpBrinePumpSpd), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpSwitchValve_, DeviceValueType::BOOL, FL_(hpSwitchValve), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpCompSpd_, DeviceValueType::UINT8, FL_(hpCompSpd), DeviceValueUOM::PERCENT);
@@ -666,6 +666,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpPh1_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpPh1), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTa4_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTa4), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTw1_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTw1), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &poolOn_, DeviceValueType::BOOL, FL_(poolOn), DeviceValueUOM::NONE, MAKE_CF_CB(set_pool_on));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &poolSetTemp_,
                               DeviceValueType::UINT8,
@@ -1815,7 +1816,9 @@ void Boiler::process_HpTemperatures(const std::shared_ptr<const Telegram> & tele
 
 // Heatpump pool unit - type 0x48A
 // 08 00 FF 00 03 8A 01 4C 01 0C 00 00 0A 00 1E 00 00 01 00 04 4A 00
+// RC300 switches the pool: 10 08 FF 00 03 8A 01 (on) / 00 (off)
 void Boiler::process_HpPool(const std::shared_ptr<const Telegram> & telegram) {
+    has_update(telegram, poolOn_, 0);
     has_update(telegram, poolSetTemp_, 1);
 }
 
@@ -2164,8 +2167,11 @@ void Boiler::process_HpSilentMode(const std::shared_ptr<const Telegram> & telegr
 }
 
 // Boiler(0x08) -B-> All(0x00), ?(0x0488), data: 8E 00 00 00 00 00 01 03
+// byte 0 bit 6 is set while the heatpump is actually heating the pool
+// (switches together with 0x5C4 and MP100 0x5BA offset 2)
 void Boiler::process_HpValve(const std::shared_ptr<const Telegram> & telegram) {
     // has_bitupdate(telegram, auxHeaterStatus_, 0, 2);
+    has_bitupdate(telegram, hpPoolOn_, 0, 6);
     has_update(telegram, auxHeatMixValve_, 7);
     has_update(telegram, pc1Rate_, 13); // percent
 }
@@ -3158,6 +3164,16 @@ bool Boiler::set_pool_temp(const char * value, const int8_t id) {
     // LOG_INFO("Setting pool temperature to %d.%d C", v2 >> 1, (v2 & 0x01) * 5);
     write_command(0x48A, 1, v2, 0x48A);
 
+    return true;
+}
+
+// Switch the pool on/off 0x48A, same as RC300
+bool Boiler::set_pool_on(const char * value, const int8_t id) {
+    bool v;
+    if (!Helpers::value2bool(value, v)) {
+        return false;
+    }
+    write_command(0x48A, 0, v ? 0x01 : 0x00, 0x48A);
     return true;
 }
 
