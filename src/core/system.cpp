@@ -2924,11 +2924,13 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
 // https://github.com/emsesp/EMS-ESP32/issues/3063
 // /api//system/led command that takes an argument in the form [color]:[pattern]
 // color is red, green, blue, yellow, white
+// color is optional
 // pattern is
 //  blink1 for 1 time
 //  blink2 for 2 times
 //  blink3 for 3 times
 //  rgb for RGB
+//  cpc for CPC
 // For example: /api/system/led?data=red:blink1
 // For older non-RGB models, the colour would default to just being on.
 bool System::command_led(const char * value, const int8_t) {
@@ -2937,16 +2939,19 @@ bool System::command_led(const char * value, const int8_t) {
     }
 
     std::string arg = value;
-    if (arg.find(':') == std::string::npos) {
-        LOG_ERROR("LED command must be in the form [color]:[pattern]");
-        return false; // not in the form [color]:[pattern]
+    std::string color;
+    std::string pattern;
+    auto        sep = arg.find(':');
+    if (sep == std::string::npos) {
+        pattern = arg; // no color given, only a pattern
+    } else {
+        color   = arg.substr(0, sep);
+        pattern = arg.substr(sep + 1);
     }
-    std::string color   = arg.substr(0, arg.find(':'));
-    std::string pattern = arg.substr(arg.find(':') + 1);
 
     // set and validate the color and pattern
     if (!EMSESP::led_.set_custom_led_routine(color, pattern)) {
-        LOG_ERROR("Invalid color or pattern.");
+        LOG_ERROR("Invalid color or pattern");
         return false;
     }
 
@@ -3207,7 +3212,7 @@ bool System::uploadFirmwareURL(const char * url) {
     }
     basic_client.setTimeout(FIRMWARE_UPLOAD_READ_TIMEOUT_S * 1000); // socket-level read timeout, in ms
     ssl_client.setTimeout(FIRMWARE_UPLOAD_READ_TIMEOUT_S);          // Stream::readBytes timeout used by Update
-    ssl_client.setClient(&basic_client, is_https); // enableSSL = false for plain HTTP
+    ssl_client.setClient(&basic_client, is_https);                  // enableSSL = false for plain HTTP
 
     const uint16_t port           = is_https ? 443 : 80;
     String         url_remain     = saved_url.substring(scheme_len);
@@ -3355,9 +3360,9 @@ bool System::uploadFirmwareURL(const char * url) {
 
     // explicit chunked read loop instead of Update.writeStream():
     uint8_t buf[FIRMWARE_UPLOAD_CHUNK_SIZE];
-    size_t             total_read = 0;
-    bool               magic_ok   = false;
-    int                last_pct   = -1;
+    size_t  total_read = 0;
+    bool    magic_ok   = false;
+    int     last_pct   = -1;
 
     while (total_read < (size_t)firmware_size) {
         // a cancel is signalled by the WebUI dropping the status below UPLOADING (back to NORMAL)

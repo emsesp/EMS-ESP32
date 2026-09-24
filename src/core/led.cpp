@@ -37,6 +37,10 @@ constexpr uint16_t T0L = 9; // 900 ns
 constexpr uint16_t T1H = 8; // 800 ns
 constexpr uint16_t T1L = 6; // 600 ns
 
+// rmt_data_t.val layout: duration0:15, level0:1, duration1:15, level1:1 (high then low)
+constexpr uint32_t SYMBOL_0 = T0H | (1UL << 15) | (static_cast<uint32_t>(T0L) << 16);
+constexpr uint32_t SYMBOL_1 = T1H | (1UL << 15) | (static_cast<uint32_t>(T1L) << 16);
+
 constexpr uint32_t RMT_FREQ_HZ = 10000000; // 10 MHz
 constexpr uint32_t RESET_US    = 300;
 constexpr uint8_t  NO_PIN      = 0xFF;
@@ -61,8 +65,14 @@ Channel * init(uint8_t pin) {
     }
 
     if (!free_slot) {
-        // all slots in use: release the oldest one
-        free_slot = &channels[0];
+        // all slots in use: release the least recently written one
+        const uint32_t now = micros();
+        free_slot          = &channels[0];
+        for (auto & ch : channels) {
+            if (now - ch.last_tx_us > now - free_slot->last_tx_us) {
+                free_slot = &ch;
+            }
+        }
         end(free_slot->pin);
     }
 
@@ -92,11 +102,7 @@ bool write(uint8_t pin, uint8_t red, uint8_t green, uint8_t blue, Order order) {
 
     rmt_data_t frame[24];
     for (uint8_t i = 0; i < 24; i++) {
-        const bool one     = bytes[i >> 3] & (0x80 >> (i & 7));
-        frame[i].level0    = 1;
-        frame[i].duration0 = one ? T1H : T0H;
-        frame[i].level1    = 0;
-        frame[i].duration1 = one ? T1L : T0L;
+        frame[i].val = (bytes[i >> 3] & (0x80 >> (i & 7))) ? SYMBOL_1 : SYMBOL_0;
     }
 
     const bool ok  = rmtWrite(pin, frame, 24, RMT_WAIT_FOR_EVER);
@@ -124,10 +130,6 @@ void end(uint8_t) {
 
 #endif
 
-bool off(uint8_t pin) {
-    return write(pin, 0, 0, 0);
-}
-
 } // namespace rgb_led
 
 uuid::log::Logger LED::logger_{F_(led), uuid::log::Facility::KERN};
@@ -135,12 +137,21 @@ uuid::log::Logger LED::logger_{F_(led), uuid::log::Facility::KERN};
 // initialise the LED, fetching the settings from the WebSettingsService
 // set the LED to on or off when in normal operating mode
 void LED::init() {
+    // settings may have changed: turn off and release the previous pin
+    if (led_gpio_) {
+        set_led(Color::OFF);
+        if (led_type_) {
+            rgb_led::end(led_gpio_);
+        }
+    }
+
     // copy the application settings
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         led_gpio_ = settings.led_gpio;
         led_type_ = settings.led_type;
         hide_led_ = settings.hide_led;
     });
+    last_color_ = COLOR_UNSET;
 
     if (!led_gpio_) { // 0 means disabled
         LOG_INFO("LED disabled");
@@ -183,10 +194,6 @@ bool LED::loop(uint8_t healthcheck, bool button_busy) {
         // check the system health.
         // Set the sequence accordingly, only if the healthcheck is not 0 and has changed
         if (healthcheck != previous_healthcheck_) {
-            color_steps_[0] = Color::OFF;
-            color_steps_[1] = Color::OFF;
-            color_steps_[2] = Color::OFF;
-
             // if the healthcheck is 0, i.e. system is healthy, reset the LED
             if (healthcheck == 0) {
                 reset_led();
@@ -194,25 +201,12 @@ bool LED::loop(uint8_t healthcheck, bool button_busy) {
                 //  1 flash (blue) is the EMS bus is not connected
                 //  2 flashes (red, red) if the network (wifi or ethernet) is not connected
                 //  3 flashes (red, red, blue) is both the bus and the network are not connected
-                bool no_network = (healthcheck & System::HEALTHCHECK_NO_NETWORK) == System::HEALTHCHECK_NO_NETWORK;
-                bool no_bus     = (healthcheck & System::HEALTHCHECK_NO_BUS) == System::HEALTHCHECK_NO_BUS;
+                const bool no_network = (healthcheck & System::HEALTHCHECK_NO_NETWORK) == System::HEALTHCHECK_NO_NETWORK;
+                const bool no_bus     = (healthcheck & System::HEALTHCHECK_NO_BUS) == System::HEALTHCHECK_NO_BUS;
 
-                // set step 1
-                if (no_network) {
-                    color_steps_[0] = Color::RED; // red, no network
-                } else if (no_bus) {
-                    color_steps_[0] = Color::BLUE; // blue, no bus
-                }
-
-                // set step 2
-                if (no_network) {
-                    color_steps_[1] = Color::RED; // red, no network
-                }
-
-                // set step 3
-                if (no_network && no_bus) {
-                    color_steps_[2] = Color::BLUE; // blue, no network and no bus
-                }
+                color_steps_[0] = no_network ? Color::RED : (no_bus ? Color::BLUE : Color::OFF);
+                color_steps_[1] = no_network ? Color::RED : Color::OFF;
+                color_steps_[2] = (no_network && no_bus) ? Color::BLUE : Color::OFF;
             }
 
             previous_healthcheck_ = healthcheck; // must be set after reset_led(), which invalidates it
@@ -235,9 +229,7 @@ bool LED::loop(uint8_t healthcheck, bool button_busy) {
 void LED::reset_led() {
     is_user_led_blink_ = false;
     set_led(hide_led_ ? Color::OFF : Color::GREEN); // Green
-    color_steps_[0] = Color::OFF;
-    color_steps_[1] = Color::OFF;
-    color_steps_[2] = Color::OFF;
+    color_steps_[0] = color_steps_[1] = color_steps_[2] = Color::OFF;
 
     // invalidate the last health state so the sequence is rebuilt on the next check,
     // needed because the color steps above have been cleared
@@ -272,9 +264,10 @@ void LED::led_fast_flash() {
 // set LED on/off or RGB color
 // ignores whether the LED is hidden or not (if hide_led_ is set)
 void LED::set_led(Color color) {
-    if (!led_gpio_) {
+    if (!led_gpio_ || color == last_color_) {
         return;
     }
+    last_color_ = color;
 
     // RGB lookup table indexed by Color enum (must match enum order in led.h)
     static constexpr uint8_t B              = RGB_LED_BRIGHTNESS;
@@ -290,28 +283,26 @@ void LED::set_led(Color color) {
         {0, B, B}, // CYAN
         {H, 0, H}  // PINK
     };
+    static_assert(sizeof(rgb_table) / sizeof(rgb_table[0]) == Color::PINK + 1, "rgb_table must match the Color enum");
 
-    const uint8_t color_idx = static_cast<uint8_t>(color);
-    const uint8_t idx       = (color_idx < sizeof(rgb_table) / sizeof(rgb_table[0])) ? color_idx : static_cast<uint8_t>(Color::OFF);
-    const uint8_t red       = rgb_table[idx][0];
-    const uint8_t green     = rgb_table[idx][1];
-    const uint8_t blue      = rgb_table[idx][2];
+    const uint8_t * rgb = rgb_table[color];
 
     if (led_type_) {
-        rgb_led::write(led_gpio_, red, green, blue);
+        rgb_led::write(led_gpio_, rgb[0], rgb[1], rgb[2]);
     } else {
-        digitalWrite(led_gpio_, (red == 0 && green == 0 && blue == 0) || color == Color::OFF ? !LED_ON : LED_ON);
+        digitalWrite(led_gpio_, color == Color::OFF ? !LED_ON : LED_ON);
     }
 }
 
 // set LED custom routine
 // For example: /api/system/led?data=red:blink1
 // For older non-RGB models, the colour would default to just being on.
-bool LED::set_custom_led_routine(std::string color, std::string pattern) {
+bool LED::set_custom_led_routine(const std::string & color, const std::string & pattern) {
     static constexpr struct {
         const char * name;
         Color        value;
     } color_map[] = {
+        {"", Color::OFF},
         {"off", Color::OFF},
         {"on", Color::ON},
         {"white", Color::ON},
@@ -337,35 +328,33 @@ bool LED::set_custom_led_routine(std::string color, std::string pattern) {
         return false;
     }
 
-    // reset the color steps
-    color_steps_[0] = Color::OFF;
-    color_steps_[1] = Color::OFF;
-    color_steps_[2] = Color::OFF;
+    // build the steps locally so an unrecognized pattern leaves the current sequence untouched
+    Color steps[3] = {Color::OFF, Color::OFF, Color::OFF};
 
     // blink patterns
     if (pattern == "blink1") {
-        color_steps_[0] = color_type;
+        steps[0] = color_type;
     } else if (pattern == "blink2") {
-        color_steps_[0] = color_type;
-        color_steps_[1] = color_type;
+        steps[0] = steps[1] = color_type;
     } else if (pattern == "blink3") {
-        color_steps_[0] = color_type;
-        color_steps_[1] = color_type;
-        color_steps_[2] = color_type;
+        steps[0] = steps[1] = steps[2] = color_type;
 
         // special patterns, ignores the user color
     } else if (pattern == "rgb") {
-        color_steps_[0] = Color::RED;
-        color_steps_[1] = Color::GREEN;
-        color_steps_[2] = Color::BLUE;
+        steps[0] = Color::RED;
+        steps[1] = Color::GREEN;
+        steps[2] = Color::BLUE;
     } else if (pattern == "cpc") {
-        color_steps_[0] = Color::CYAN;
-        color_steps_[1] = Color::PINK;
-        color_steps_[2] = Color::CYAN;
+        steps[0] = Color::CYAN;
+        steps[1] = Color::PINK;
+        steps[2] = Color::CYAN;
     } else {
         return false; // pattern not recognized
     }
 
+    color_steps_[0]    = steps[0];
+    color_steps_[1]    = steps[1];
+    color_steps_[2]    = steps[2];
     is_user_led_blink_ = true; // user routine is active
 
     // when this is called we want the sequence_led to restart immediately and skip the long pause
@@ -395,7 +384,7 @@ void LED::sequence_led() {
 
         if (++led_flash_step_ == 8) {
             // finished first iteration, reset the whole sequence, turn off LED
-            led_long_timer_ = uuid::get_uptime();
+            led_long_timer_ = current_time;
             led_flash_step_ = 0;
             set_led(Color::OFF); // turn off the LED
 
@@ -407,24 +396,8 @@ void LED::sequence_led() {
             return;
         }
 
-        if (led_flash_step_ % 2) {
-            // handle the three step events (on odd numbers 3,5,7 etc). see if we need to set a LED color
-            switch (led_flash_step_) {
-            case 3: // first flash
-                set_led(color_steps_[0]);
-                break;
-            case 5: // second flash
-                set_led(color_steps_[1]);
-                break;
-            case 7: // third flash
-                set_led(color_steps_[2]);
-                break;
-            default:
-                break;
-            }
-        } else {
-            set_led(Color::OFF); // turn off on even number count, to make it flash
-        }
+        // odd steps 3, 5 and 7 show the three configured colors, even steps turn the LED off to make it flash
+        set_led(led_flash_step_ % 2 ? color_steps_[(led_flash_step_ - 3) / 2] : Color::OFF);
     }
 }
 
