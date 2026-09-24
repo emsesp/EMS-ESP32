@@ -1210,7 +1210,9 @@ bool EMSESP::process_telegram(const std::shared_ptr<const Telegram> & telegram) 
     // check all conditions in one loop
     for (const auto & emsdevice : emsdevices) {
         if ((emsdevice->is_device_id(telegram->src) && (telegram->dest == 0 || telegram->dest == EMSbus::ems_bus_id() || telegram->dest == 0x10))
-            || (emsdevice->is_device_id(telegram->dest) && telegram->src != EMSbus::ems_bus_id())) {
+            || (emsdevice->is_device_id(telegram->dest) && telegram->src != EMSbus::ems_bus_id())
+            // the MP100 sends its full status only to the heatpump
+            || (emsdevice->device_type() == EMSdevice::DeviceType::POOL && emsdevice->is_device_id(telegram->src))) {
             found_device = emsdevice.get();
             if (emsdevice->handle_telegram(telegram)) {
                 telegram_found = true;
