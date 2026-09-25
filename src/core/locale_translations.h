@@ -855,14 +855,16 @@ MAKE_TRANSLATION(flowTempVf, "flowtempvf", "flow temperature in header (T0/Vf)",
 MAKE_TRANSLATION(mixerSetTime, "valvesettime", "time to set valve", "Zeit zum einstellen des Ventils", "Inschakeltijd mengklep", "Inställningstid Shuntventil", "czas na ustawienie zaworu", "instillningstid ventil", "délai activation vanne", "vana ayar zamanı", "ritardo attivazione valvola", "čas na nastavenie ventilu", "čas pro nastavení ventilu")
 MAKE_TRANSLATION(setDiffPress, "setdiffpress", "set differential pressure", "Pumpensolldruck", "", "Tryckskillnad", "różnica ciśnień", "", "", "", "", "nastaviť diferenčný tlak", "nastavení rozdílového tlaku") 
 
-// mixer pool
+// MP100 pool module
 MAKE_TRANSLATION(poolOn, "poolon", "pool on", "Pool ein")
-MAKE_TRANSLATION(poolSetTemp, "poolsettemp", "pool set temperature", "Sollwert Pooltemperatur", "Streeftemperatuur zwembad", "Pool Temperatur Börvärde", "zadana temperatura basenu", "valgt temp basseng", "température consigne piscine", "hedef havuz sıcaklığı", "temperatura nominale piscina", "nastavená teplota bazéna", "cílová teplota bazénu")
+MAKE_TRANSLATION(poolSetTemp, "poolsettemp", "pool setpoint", "Pool Soll", "Streeftemperatuur zwembad", "Pool Temperatur Börvärde", "zadana temperatura basenu", "valgt temp basseng", "température consigne piscine", "hedef havuz sıcaklığı", "temperatura nominale piscina", "nastavená teplota bazéna", "cílová teplota bazénu")
 MAKE_TRANSLATION(poolTemp, "pooltemp", "pool temperature", "Pooltemperatur", "Zwembadtemperatuur", "Pooltemperatur", "temperatura basenu", "bassengtemperatur", "température piscine", "havuz sıcaklığı", "temperatura piscina", "teplota bazéna", "teplota bazénu")
-MAKE_TRANSLATION(poolShuntStatus, "poolshuntstatus", "pool shunt status opening/closing", "Poolventil öffnen/schließen", "Zwembadklep status openen/sluiten", "Pool Shunt-status öppen/stängd", "status bocznika basenu", "bassengshunt-status åpen/stengt", "état shunt piscine ouvert/fermé", "havuz şant durumu açılıyor/kapanıyor", "aprire/chiudere valvola regolazione piscina", "stav bazénového bočníka otváranie/zatváranie", "stav šoupátka bazénu (otevírání/zavírání)")
-MAKE_TRANSLATION(poolShunt, "poolshunt", "pool shunt open/close (0% = pool / 100% = heat)", "Poolventil Öffnung", "Mengklep zwembad stand", "Pool Shunt Öppen/Stängd", "bocznik basenu (0% = basen / 100% = grzanie)", "bassengshunt åpen/stengt (0% = basseng / 100% = varme)", "ouverture/fermeture shunt piscine (0% = piscine / 100% = chaleur).", "havuz şant açık/kapalı (0% = havuz / 100% = ısıtma)", "valvola regolazione piscina (0% = piscina / 100% = caldo)", "pohyb bazéna otvoriť/zatvoriť (0 % = bazén / 100 % = teplo)", "šoupátko bazénu (0% = bazén / 100% = vytápění)")
-MAKE_TRANSLATION(poolShuntSet, "poolshuntset", "pool shunt setpoint (0% = pool / 100% = heat)", "Poolventil Sollstellung")
-MAKE_TRANSLATION(poolPump, "poolpump", "pool circulation pump", "Pool Umwälzpumpe")
+MAKE_TRANSLATION(poolShuntStatus, "poolshuntstatus", "valve status", "Ventil Status", "Zwembadklep status openen/sluiten", "Pool Shunt-status öppen/stängd", "status bocznika basenu", "bassengshunt-status åpen/stengt", "état shunt piscine ouvert/fermé", "havuz şant durumu açılıyor/kapanıyor", "aprire/chiudere valvola regolazione piscina", "stav bazénového bočníka otváranie/zatváranie", "stav šoupátka bazénu (otevírání/zavírání)")
+MAKE_TRANSLATION(poolShunt, "poolshunt", "valve actual", "Ventil Ist", "Mengklep zwembad stand", "Pool Shunt Öppen/Stängd", "bocznik basenu (0% = basen / 100% = grzanie)", "bassengshunt åpen/stengt (0% = basseng / 100% = varme)", "ouverture/fermeture shunt piscine (0% = piscine / 100% = chaleur).", "havuz şant açık/kapalı (0% = havuz / 100% = ısıtma)", "valvola regolazione piscina (0% = piscina / 100% = caldo)", "pohyb bazéna otvoriť/zatvoriť (0 % = bazén / 100 % = teplo)", "šoupátko bazénu (0% = bazén / 100% = vytápění)")
+MAKE_TRANSLATION(poolShuntSet, "poolshuntset", "valve setpoint", "Ventil Soll")
+MAKE_TRANSLATION(poolRequest, "poolrequest", "pool request", "Pool Anforderung")
+
+// water
 MAKE_TRANSLATION(hydrTemp, "hydrTemp", "hydraulic header temperature", "Verteilertemperatur", "Temperatuur open verdeler", "Fördelartemperatur", "temperatura kolektora hydraulicznego", "Fordelertemperatur", "température collecteur hydraulique", "hidrolik başlık sıcaklığı", "temperatura del collettore", "teplota hydraulickej hlavice", "teplota hydraulické hlavice")
 
 // solar
