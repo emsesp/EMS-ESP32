@@ -43,6 +43,11 @@ class WebLogService : public uuid::log::Handler {
     virtual void operator<<(std::shared_ptr<uuid::log::Message> message);
 
   private:
+    // on boards without PSRAM, shrink the log buffer below LOW and grow it again above HIGH (max alloc heap, in bytes).
+    // The gap between them stops the limit flapping around a single threshold
+    static constexpr uint32_t LOG_HEAP_LOW  = 50 * 1024; // 50 KB
+    static constexpr uint32_t LOG_HEAP_HIGH = 60 * 1024; // 60 KB
+
     AsyncEventSource events_;
 
     class QueuedLogMessage {

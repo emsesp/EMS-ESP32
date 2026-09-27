@@ -286,7 +286,7 @@ void TxService::send_poll() const {
 uint8_t TxService::get_send_id() {
     static uint32_t count = 0;
     if (!tx_telegrams_.empty() && tx_telegrams_.front().telegram_->src != ems_bus_id()) {
-        if (++count > 500) { // after 500 polls (~3-10 sec) there will be no master poll for this id
+        if (++count > MAX_POLLS_WITHOUT_MASTER) {
             tx_telegrams_.pop_front();
             count = 0;
             return tx_telegrams_.empty() ? ems_bus_id() : tx_telegrams_.front().telegram_->src;

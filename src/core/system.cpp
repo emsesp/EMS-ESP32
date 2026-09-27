@@ -33,6 +33,7 @@
 
 #include "firmwareVersion.h"
 #include "shuntingYard.h" // for compute() used by the message and sendmail commands
+#include "httpClient.h"   // for the shared TLS client settings
 
 #if defined(EMSESP_TEST)
 #include "../test/test.h"
@@ -218,7 +219,7 @@ bool System::command_sendmail(const char * value, const int8_t) {
     ESP_SSLClient * ssl_client   = nullptr;
     SMTPClient *    smtp         = nullptr;
 
-    basic_client->setTimeout(5000);
+    basic_client->setTimeout(SMTP_TIMEOUT_MS);
 
     const bool implicit_ssl = (security == EMAIL_SECURITY::SSL);
     const bool start_tls    = (security == EMAIL_SECURITY::STARTTLS);
@@ -229,8 +230,8 @@ bool System::command_sendmail(const char * value, const int8_t) {
     } else {
         ssl_client = new ESP_SSLClient;
         ssl_client->setInsecure();
-        ssl_client->setBufferSizes(16384, 1024);
-        ssl_client->setTimeout(5);
+        ssl_client->setBufferSizes(HttpClient::TLS_RX_BUFFER_SIZE, HttpClient::TLS_TX_BUFFER_SIZE);
+        ssl_client->setTimeout(HttpClient::TLS_READ_TIMEOUT_S);
         // enableSSL is baked in at setClient() — true only for implicit SSL (port 465)
         ssl_client->setClient(basic_client, implicit_ssl);
         if (start_tls) {
@@ -2923,11 +2924,13 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
 // https://github.com/emsesp/EMS-ESP32/issues/3063
 // /api//system/led command that takes an argument in the form [color]:[pattern]
 // color is red, green, blue, yellow, white
+// color is optional
 // pattern is
 //  blink1 for 1 time
 //  blink2 for 2 times
 //  blink3 for 3 times
 //  rgb for RGB
+//  cpc for CPC
 // For example: /api/system/led?data=red:blink1
 // For older non-RGB models, the colour would default to just being on.
 bool System::command_led(const char * value, const int8_t) {
@@ -2936,16 +2939,19 @@ bool System::command_led(const char * value, const int8_t) {
     }
 
     std::string arg = value;
-    if (arg.find(':') == std::string::npos) {
-        LOG_ERROR("LED command must be in the form [color]:[pattern]");
-        return false; // not in the form [color]:[pattern]
+    std::string color;
+    std::string pattern;
+    auto        sep = arg.find(':');
+    if (sep == std::string::npos) {
+        pattern = arg; // no color given, only a pattern
+    } else {
+        color   = arg.substr(0, sep);
+        pattern = arg.substr(sep + 1);
     }
-    std::string color   = arg.substr(0, arg.find(':'));
-    std::string pattern = arg.substr(arg.find(':') + 1);
 
     // set and validate the color and pattern
     if (!EMSESP::led_.set_custom_led_routine(color, pattern)) {
-        LOG_ERROR("Invalid color or pattern.");
+        LOG_ERROR("Invalid color or pattern");
         return false;
     }
 
@@ -3093,8 +3099,7 @@ void System::ntp_connected(bool b) {
 
 // get NTP status
 bool System::ntp_connected() {
-    // timeout 2 hours, ntp sync is normally every hour.
-    if ((uuid::get_uptime_sec() - ntp_last_check_ > 7201) && ntp_connected_) {
+    if ((uuid::get_uptime_sec() - ntp_last_check_ > NTP_TIMEOUT_SEC) && ntp_connected_) {
         ntp_connected(false);
     }
 
@@ -3200,20 +3205,14 @@ bool System::uploadFirmwareURL(const char * url) {
 
     if (is_https) {
         ssl_client.setInsecure(); // no CA validation, matches the rest of the project
-        // BearSSL needs a receive buffer large enough to hold one full TLS record.
-        // GitHub's release-assets CDN sends standard up-to-16 KB records and does NOT
-        // negotiate max_fragment_length, so a small (e.g. 1 KB) RX buffer makes the
-        // body unreadable (headers still fit one small record, hence Content-Length
-        // looks fine, but the first body record cannot be decoded). 16384 + overhead
-        // is the safe value the library itself uses by default; we go a bit smaller
-        // to be friendlier to 4 MB / no-PSRAM boards while still big enough for any
-        // record the CDN actually sends in practice.
-        ssl_client.setBufferSizes(16384, 1024);
-        ssl_client.setSessionTimeout(120);
+        // a small (e.g. 1 KB) RX buffer makes the body unreadable: the headers still fit one small
+        // record, hence Content-Length looks fine, but the first body record cannot be decoded
+        ssl_client.setBufferSizes(HttpClient::TLS_RX_BUFFER_SIZE, HttpClient::TLS_TX_BUFFER_SIZE);
+        ssl_client.setSessionTimeout(HttpClient::TLS_SESSION_TIMEOUT_S);
     }
-    basic_client.setTimeout(15000);                // socket-level read timeout
-    ssl_client.setTimeout(15);                     // Stream::readBytes timeout used by Update
-    ssl_client.setClient(&basic_client, is_https); // enableSSL = false for plain HTTP
+    basic_client.setTimeout(FIRMWARE_UPLOAD_READ_TIMEOUT_S * 1000); // socket-level read timeout, in ms
+    ssl_client.setTimeout(FIRMWARE_UPLOAD_READ_TIMEOUT_S);          // Stream::readBytes timeout used by Update
+    ssl_client.setClient(&basic_client, is_https);                  // enableSSL = false for plain HTTP
 
     const uint16_t port           = is_https ? 443 : 80;
     String         url_remain     = saved_url.substring(scheme_len);
@@ -3248,9 +3247,9 @@ bool System::uploadFirmwareURL(const char * url) {
         ssl_client.println("Connection: close");
         ssl_client.print("\r\n");
 
-        // wait for the first byte (up to 8s, matching the previous HTTP timeout)
+        // wait for the first byte (matching the previous HTTP timeout)
         uint32_t ms = millis();
-        while (ssl_client.connected() && !ssl_client.available() && millis() - ms < 8000) {
+        while (ssl_client.connected() && !ssl_client.available() && millis() - ms < FIRMWARE_UPLOAD_RESPONSE_TIMEOUT) {
             delay(1);
         }
 
@@ -3326,7 +3325,7 @@ bool System::uploadFirmwareURL(const char * url) {
         // wait for the first byte of the body so the read loop sees real data
         // (headers and body may arrive in separate TLS records)
         uint32_t body_wait = millis();
-        while (ssl_client.connected() && !ssl_client.available() && millis() - body_wait < 8000) {
+        while (ssl_client.connected() && !ssl_client.available() && millis() - body_wait < FIRMWARE_UPLOAD_RESPONSE_TIMEOUT) {
             delay(1);
         }
         if (!ssl_client.available()) {
@@ -3341,7 +3340,7 @@ bool System::uploadFirmwareURL(const char * url) {
     }
 
     // check we have a valid size
-    if (firmware_size < 1677721) { // 1.6MB or greater is required
+    if (firmware_size < (int)MIN_FIRMWARE_SIZE) {
         LOG_ERROR("Firmware upload failed - invalid size");
         return false; // error
     }
@@ -3360,12 +3359,10 @@ bool System::uploadFirmwareURL(const char * url) {
     EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING);
 
     // explicit chunked read loop instead of Update.writeStream():
-    constexpr size_t   CHUNK_SIZE      = 1024;
-    constexpr uint32_t READ_TIMEOUT_MS = 30000; // overall stall timeout per chunk
-    uint8_t            buf[CHUNK_SIZE];
-    size_t             total_read = 0;
-    bool               magic_ok   = false;
-    int                last_pct   = -1;
+    uint8_t buf[FIRMWARE_UPLOAD_CHUNK_SIZE];
+    size_t  total_read = 0;
+    bool    magic_ok   = false;
+    int     last_pct   = -1;
 
     while (total_read < (size_t)firmware_size) {
         // a cancel is signalled by the WebUI dropping the status below UPLOADING (back to NORMAL)
@@ -3386,7 +3383,7 @@ bool System::uploadFirmwareURL(const char * url) {
             if (!ssl_client.connected()) {
                 break;
             }
-            if (millis() - wait_start > READ_TIMEOUT_MS) {
+            if (millis() - wait_start > FIRMWARE_UPLOAD_STALL_TIMEOUT) {
                 break;
             }
             // also bail out promptly if a cancel arrives mid-stall
@@ -3407,8 +3404,8 @@ bool System::uploadFirmwareURL(const char * url) {
         }
 
         size_t want = (size_t)firmware_size - total_read;
-        if (want > CHUNK_SIZE) {
-            want = CHUNK_SIZE;
+        if (want > FIRMWARE_UPLOAD_CHUNK_SIZE) {
+            want = FIRMWARE_UPLOAD_CHUNK_SIZE;
         }
 
         size_t n = stream->readBytes(buf, want);

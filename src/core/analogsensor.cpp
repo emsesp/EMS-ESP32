@@ -307,7 +307,7 @@ void AnalogSensor::reload(bool get_nvs) {
             uint8_t  r = v / 10000;
             uint8_t  g = (v - r * 10000) / 100;
             uint8_t  b = v % 100;
-            rgbLedWrite(sensor.gpio(), 2 * r, 2 * g, 2 * b);
+            rgb_led::write(sensor.gpio(), 2 * r, 2 * g, 2 * b);
             LOG_DEBUG("RGB set to %d, %d, %d", r, g, b);
         } else if (sensor.type() == AnalogType::DIGITAL_OUT) {
             LOG_DEBUG("Digital Write on GPIO %02d", sensor.gpio());
@@ -405,8 +405,8 @@ void AnalogSensor::measure() {
                     sensor.sum_    = (sensor.sum_ * 15 + a * 16) / 16;
                     sensor.analog_ = sensor.sum_ / 16;
                 }
-                if (sensor.analog_ > 0 && sensor.analog_ < 3300 && (sensor.last_reading_ + 1 < sensor.analog_ || sensor.last_reading_ > sensor.analog_ + 1)) {
-                    sensor.set_value(sensor.offset() + 1 / (1 / T25 + log((double)sensor.analog_ / (3300 - sensor.analog_) * (Rt / R0)) / Beta)
+                if (sensor.analog_ > 0 && sensor.analog_ < NTC_VREF_MV && (sensor.last_reading_ + 1 < sensor.analog_ || sensor.last_reading_ > sensor.analog_ + 1)) {
+                    sensor.set_value(sensor.offset() + 1 / (1 / T25 + log((double)sensor.analog_ / (NTC_VREF_MV - sensor.analog_) * (Rt / R0)) / Beta)
                                      - T0); // Temperature in Celsius
                     sensor.last_reading_ = sensor.analog_;
                     sensorreads_++;
@@ -424,7 +424,7 @@ void AnalogSensor::measure() {
                     edgecnt[index]  = 0;
                     portEXIT_CRITICAL_ISR(&mux);
                     sensor.set_value(sensor.factor() * 1000000.0 / t);
-                } else if (micros() - edge[index] > 10000000ul && sensor.value() > 0) {
+                } else if (micros() - edge[index] > FREQ_ZERO_TIMEOUT_US && sensor.value() > 0) {
                     sensor.set_value(0);
                 }
                 if (sensor.value() != oldval) {
@@ -999,7 +999,7 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                 uint8_t r = v / 10000;
                 uint8_t g = (v - r * 10000) / 100;
                 uint8_t b = v % 100;
-                rgbLedWrite(sensor.gpio(), 2 * r, 2 * g, 2 * b);
+                rgb_led::write(sensor.gpio(), 2 * r, 2 * g, 2 * b);
                 LOG_DEBUG("RGB set to %d, %d, %d", r, g, b);
             } else if (sensor.type() == AnalogType::PULSE) {
                 uint8_t v = val;

@@ -61,9 +61,10 @@ class Mqtt {
     enum Operation : uint8_t { PUBLISH, SUBSCRIBE, UNSUBSCRIBE };
     enum NestedFormat : uint8_t { NESTED = 1, SINGLE };
 
-    static constexpr uint8_t  MQTT_TOPIC_MAX_SIZE     = 128; // fixed, not a user setting anymore
+    static constexpr uint8_t  MQTT_TOPIC_MAX_SIZE     = 128;       // fixed, not a user setting anymore
     static constexpr uint16_t MQTT_QUEUE_MAX_SIZE     = 300;
-    static constexpr uint32_t MQTT_DISCONNECT_TIMEOUT = 1000; // max ms to flush a graceful disconnect on non-PSRAM boards
+    static constexpr uint32_t MQTT_DISCONNECT_TIMEOUT = 1000;      // max ms to flush a graceful disconnect on non-PSRAM boards
+    static constexpr uint32_t MQTT_MIN_FREE_HEAP      = 60 * 1024; // don't queue any MQTT message below this much free heap+PSRAM (in bytes) - 60 KB
 
     static void on_connect();
     static void on_disconnect(espMqttClientTypes::DisconnectReason reason);

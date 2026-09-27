@@ -370,6 +370,9 @@ class System {
     static constexpr uint8_t HEALTHCHECK_NO_NETWORK = (1 << 1); // 2
     static constexpr uint8_t HEALTHCHECK_RESET      = (1 << 7); // 128
 
+    // smallest .bin accepted as a firmware image, for both URL and web uploads - 1.6 MB
+    static constexpr size_t MIN_FIRMWARE_SIZE = 1677721;
+
   private:
     static uuid::log::Logger logger_;
 
@@ -401,6 +404,18 @@ class System {
 #else
     static constexpr uint32_t SYSTEM_CHECK_FREQUENCY = 5000; // do a system check every 5 seconds
 #endif
+
+    // NTP syncs about every hour, so allow one missed sync before treating it as lost (in seconds) - 2 hours
+    static constexpr uint32_t NTP_TIMEOUT_SEC = 7201;
+
+    // email
+    static constexpr uint32_t SMTP_TIMEOUT_MS = 5000; // socket read timeout (in ms) - 5 seconds
+
+    // firmware upload from URL
+    static constexpr uint32_t FIRMWARE_UPLOAD_RESPONSE_TIMEOUT = 8000;  // max wait for the first byte of the response headers/body (in ms) - 8 seconds
+    static constexpr uint32_t FIRMWARE_UPLOAD_READ_TIMEOUT_S   = 15;    // socket and Stream::readBytes timeout used by Update (in seconds)
+    static constexpr uint32_t FIRMWARE_UPLOAD_STALL_TIMEOUT    = 30000; // abort if no data arrives for a chunk (in ms) - 30 seconds
+    static constexpr size_t   FIRMWARE_UPLOAD_CHUNK_SIZE       = 1024;  // read buffer, on the stack
 
 #ifndef EMSESP_STANDALONE
     static uuid::syslog::SyslogService syslog_;

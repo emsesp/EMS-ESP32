@@ -2281,8 +2281,8 @@ bool EMSdevice::handle_telegram(const std::shared_ptr<const Telegram> & telegram
                 EMSESP::logger().debug("This telegram (%s) is not recognized by the EMS bus", tf.telegram_type_name_);
 #endif
                 // removing fetch after start causes issue: https://github.com/emsesp/EMS-ESP32/issues/1420
-                // continue retry the first 5 minutes, then disable (added 15.3.2024)
-                if (uuid::get_uptime_sec() > 600) {
+                // continue retrying for a while after boot, then disable (added 15.3.2024)
+                if (uuid::get_uptime_sec() > FETCH_RETRY_DURATION_SEC) {
                     tf.fetch_ = false;
                 }
                 return false;

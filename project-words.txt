@@ -786,7 +786,6 @@ negcond
 negheat
 nein
 nennvolumentstrom
-neopixel
 netcmp
 netflowtemp
 netif
@@ -1352,3 +1351,4 @@ zyxwvutsrqponmlkjihgfedcba
 öffnen
 česky
 živanović
+neopixel

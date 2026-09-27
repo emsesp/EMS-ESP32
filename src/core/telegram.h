@@ -440,6 +440,9 @@ class TxService : public EMSbus {
     static constexpr uint8_t  MAXIMUM_TX_RETRIES = 3;
     static constexpr uint32_t POST_SEND_DELAY    = 2000;
 
+    // drop a queued Tx telegram sent from another id if the master hasn't polled that id after this many polls (~3-10 seconds)
+    static constexpr uint32_t MAX_POLLS_WITHOUT_MASTER = 500;
+
   private:
     std::deque<QueuedTxTelegram, AllocatorPSRAM<QueuedTxTelegram>> tx_telegrams_; // the Tx queue
 
