@@ -8024,44 +8024,48 @@ int8
 | hpactivity | compressor activity | enum |   | false | DEVICE_DATA | 16 | 1 | 1 |
 | hppower | compressor power output | uint16 | W | false | DEVICE_DATA | 17 | 1 | 1 |
 | hpcurrpower | compressor current power | uint16 | W | false | DEVICE_DATA | 18 | 1 | 1 |
-| hybridstrategy | hybrid control strategy | enum |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| lownoisemode | low noise mode | enum |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| hppumpflow | volume flow | uint16 | l/h | false | DEVICE_DATA | 19 | 1 | 10 |
+| hpcompspder1 | compressor speed ER1 | uint8 | % | false | DEVICE_DATA | 20 | 1 | 1 |
+| hpSpeedSetpoint | speed setpoint | uint8 | % | false | DEVICE_DATA | 21 | 1 | 1 |
+| smartgridmode | smart grid mode | uint8 |   | false | DEVICE_DATA | 22 | 1 | 1 |
+| hybridstrategy | hybrid control strategy | enum |   | true | DEVICE_DATA | 23 | 1 | 1 |
+| lownoisemode | low noise mode | enum |   | true | DEVICE_DATA | 24 | 1 | 1 |
 uint8
-| lownoisestart | low noise starttime | uint8 (&gt;=0&lt;=23) | hours | true | DEVICE_DATA | 21 | 1 | 1 |
+| lownoisestart | low noise starttime | uint8 (&gt;=0&lt;=23) | hours | true | DEVICE_DATA | 25 | 1 | 1 |
 uint8
-| lownoisestop | low noise stoptime | uint8 (&gt;=0&lt;=23) | hours | true | DEVICE_DATA | 22 | 1 | 1 |
+| lownoisestop | low noise stoptime | uint8 (&gt;=0&lt;=23) | hours | true | DEVICE_DATA | 26 | 1 | 1 |
 | dhw.hybriddhw | hybrid DHW | enum |   | true | DHW | 0 | 1 | 1 |
 uint8
-| energypricegas | energy price gas | uint8 (&gt;=0&lt;=0) | ct/kWh | true | DEVICE_DATA | 23 | 1 | 1 |
+| energypricegas | energy price gas | uint8 (&gt;=0&lt;=0) | ct/kWh | true | DEVICE_DATA | 27 | 1 | 1 |
 uint8
-| energypriceel | energy price electric | uint8 (&gt;=0&lt;=0) | ct/kWh | true | DEVICE_DATA | 24 | 1 | 1 |
+| energypriceel | energy price electric | uint8 (&gt;=0&lt;=0) | ct/kWh | true | DEVICE_DATA | 28 | 1 | 1 |
 uint8
-| energyfeedpv | feed in PV | uint8 (&gt;=0&lt;=0) | ct/kWh | true | DEVICE_DATA | 25 | 1 | 1 |
+| energyfeedpv | feed in PV | uint8 (&gt;=0&lt;=0) | ct/kWh | true | DEVICE_DATA | 29 | 1 | 1 |
 int8
-| switchovertemp | outside switchover temperature | int8 (&gt;=0&lt;=0) | C | true | DEVICE_DATA | 26 | 1 | 1 |
-| airpurgemode | air purge mode | boolean |   | true | DEVICE_DATA | 27 | 1 | 1 |
+| switchovertemp | outside switchover temperature | int8 (&gt;=0&lt;=0) | C | true | DEVICE_DATA | 30 | 1 | 1 |
+| airpurgemode | air purge mode | boolean |   | true | DEVICE_DATA | 31 | 1 | 1 |
 uint8
-| heatpumpoutput | heatpump output | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 28 | 1 | 1 |
-| coolingcircuit | cooling circuit | boolean |   | true | DEVICE_DATA | 29 | 1 | 1 |
+| heatpumpoutput | heatpump output | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 32 | 1 | 1 |
+| coolingcircuit | cooling circuit | boolean |   | true | DEVICE_DATA | 33 | 1 | 1 |
 uint8
-| compstartmod | compressor start modulation | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 30 | 1 | 1 |
-| heatdrainpan | heat drain pan | boolean |   | true | DEVICE_DATA | 31 | 1 | 1 |
-| heatcable | heating cable | boolean |   | true | DEVICE_DATA | 32 | 1 | 1 |
-| nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 33 | 2 | 1/100 |
+| compstartmod | compressor start modulation | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 34 | 1 | 1 |
+| heatdrainpan | heat drain pan | boolean |   | true | DEVICE_DATA | 35 | 1 | 1 |
+| heatcable | heating cable | boolean |   | true | DEVICE_DATA | 36 | 1 | 1 |
+| nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 37 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 | kWh | false | DHW | 1 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 | kWh | false | DEVICE_DATA | 35 | 2 | 1/100 |
-| metertotal | meter total | uint24 | kWh | false | DEVICE_DATA | 37 | 2 | 1/100 |
-| metercomp | meter compressor | uint24 | kWh | false | DEVICE_DATA | 39 | 2 | 1/100 |
-| metereheat | meter e-heater | uint24 | kWh | false | DEVICE_DATA | 41 | 2 | 1/100 |
-| meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 43 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 | kWh | false | DEVICE_DATA | 39 | 2 | 1/100 |
+| metertotal | meter total | uint24 | kWh | false | DEVICE_DATA | 41 | 2 | 1/100 |
+| metercomp | meter compressor | uint24 | kWh | false | DEVICE_DATA | 43 | 2 | 1/100 |
+| metereheat | meter e-heater | uint24 | kWh | false | DEVICE_DATA | 45 | 2 | 1/100 |
+| meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 47 | 2 | 1/100 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 3 | 2 | 1/100 |
-| heatingstarts | heating control starts | uint24 |   | false | DEVICE_DATA | 45 | 2 | 1 |
+| heatingstarts | heating control starts | uint24 |   | false | DEVICE_DATA | 49 | 2 | 1 |
 | dhw.startshp | starts hp | uint24 |   | false | DHW | 5 | 2 | 1 |
-| fuelheat | fuel consumption heating | uint32 | kWh | false | DEVICE_DATA | 47 | 2 | 1/10 |
+| fuelheat | fuel consumption heating | uint32 | kWh | false | DEVICE_DATA | 51 | 2 | 1/10 |
 | dhw.fueldhw | fuel consumption | uint32 | kWh | false | DHW | 7 | 2 | 1/10 |
-| elheat | el. consumption heating | uint32 | kWh | false | DEVICE_DATA | 49 | 2 | 1/10 |
+| elheat | el. consumption heating | uint32 | kWh | false | DEVICE_DATA | 53 | 2 | 1/10 |
 | dhw.eldhw | el. consumption | uint32 | kWh | false | DHW | 9 | 2 | 1/10 |
-| elgenheat | el. generation heating | uint32 | kWh | false | DEVICE_DATA | 51 | 2 | 1/10 |
+| elgenheat | el. generation heating | uint32 | kWh | false | DEVICE_DATA | 55 | 2 | 1/10 |
 | dhw.elgendhw | el generation | uint32 | kWh | false | DHW | 11 | 2 | 1/10 |
 
 ### Hybrid Manager HM200
@@ -8087,44 +8091,48 @@ uint8
 | hpactivity | compressor activity | enum |   | false | DEVICE_DATA | 16 | 1 | 1 |
 | hppower | compressor power output | uint16 | W | false | DEVICE_DATA | 17 | 1 | 1 |
 | hpcurrpower | compressor current power | uint16 | W | false | DEVICE_DATA | 18 | 1 | 1 |
-| hybridstrategy | hybrid control strategy | enum |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| lownoisemode | low noise mode | enum |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| hppumpflow | volume flow | uint16 | l/h | false | DEVICE_DATA | 19 | 1 | 10 |
+| hpcompspder1 | compressor speed ER1 | uint8 | % | false | DEVICE_DATA | 20 | 1 | 1 |
+| hpSpeedSetpoint | speed setpoint | uint8 | % | false | DEVICE_DATA | 21 | 1 | 1 |
+| smartgridmode | smart grid mode | uint8 |   | false | DEVICE_DATA | 22 | 1 | 1 |
+| hybridstrategy | hybrid control strategy | enum |   | true | DEVICE_DATA | 23 | 1 | 1 |
+| lownoisemode | low noise mode | enum |   | true | DEVICE_DATA | 24 | 1 | 1 |
 uint8
-| lownoisestart | low noise starttime | uint8 (&gt;=0&lt;=23) | hours | true | DEVICE_DATA | 21 | 1 | 1 |
+| lownoisestart | low noise starttime | uint8 (&gt;=0&lt;=23) | hours | true | DEVICE_DATA | 25 | 1 | 1 |
 uint8
-| lownoisestop | low noise stoptime | uint8 (&gt;=0&lt;=23) | hours | true | DEVICE_DATA | 22 | 1 | 1 |
+| lownoisestop | low noise stoptime | uint8 (&gt;=0&lt;=23) | hours | true | DEVICE_DATA | 26 | 1 | 1 |
 | dhw.hybriddhw | hybrid DHW | enum |   | true | DHW | 0 | 1 | 1 |
 uint8
-| energypricegas | energy price gas | uint8 (&gt;=0&lt;=0) | ct/kWh | true | DEVICE_DATA | 23 | 1 | 1 |
+| energypricegas | energy price gas | uint8 (&gt;=0&lt;=0) | ct/kWh | true | DEVICE_DATA | 27 | 1 | 1 |
 uint8
-| energypriceel | energy price electric | uint8 (&gt;=0&lt;=0) | ct/kWh | true | DEVICE_DATA | 24 | 1 | 1 |
+| energypriceel | energy price electric | uint8 (&gt;=0&lt;=0) | ct/kWh | true | DEVICE_DATA | 28 | 1 | 1 |
 uint8
-| energyfeedpv | feed in PV | uint8 (&gt;=0&lt;=0) | ct/kWh | true | DEVICE_DATA | 25 | 1 | 1 |
+| energyfeedpv | feed in PV | uint8 (&gt;=0&lt;=0) | ct/kWh | true | DEVICE_DATA | 29 | 1 | 1 |
 int8
-| switchovertemp | outside switchover temperature | int8 (&gt;=0&lt;=0) | C | true | DEVICE_DATA | 26 | 1 | 1 |
-| airpurgemode | air purge mode | boolean |   | true | DEVICE_DATA | 27 | 1 | 1 |
+| switchovertemp | outside switchover temperature | int8 (&gt;=0&lt;=0) | C | true | DEVICE_DATA | 30 | 1 | 1 |
+| airpurgemode | air purge mode | boolean |   | true | DEVICE_DATA | 31 | 1 | 1 |
 uint8
-| heatpumpoutput | heatpump output | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 28 | 1 | 1 |
-| coolingcircuit | cooling circuit | boolean |   | true | DEVICE_DATA | 29 | 1 | 1 |
+| heatpumpoutput | heatpump output | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 32 | 1 | 1 |
+| coolingcircuit | cooling circuit | boolean |   | true | DEVICE_DATA | 33 | 1 | 1 |
 uint8
-| compstartmod | compressor start modulation | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 30 | 1 | 1 |
-| heatdrainpan | heat drain pan | boolean |   | true | DEVICE_DATA | 31 | 1 | 1 |
-| heatcable | heating cable | boolean |   | true | DEVICE_DATA | 32 | 1 | 1 |
-| nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 33 | 2 | 1/100 |
+| compstartmod | compressor start modulation | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 34 | 1 | 1 |
+| heatdrainpan | heat drain pan | boolean |   | true | DEVICE_DATA | 35 | 1 | 1 |
+| heatcable | heating cable | boolean |   | true | DEVICE_DATA | 36 | 1 | 1 |
+| nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 37 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 | kWh | false | DHW | 1 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 | kWh | false | DEVICE_DATA | 35 | 2 | 1/100 |
-| metertotal | meter total | uint24 | kWh | false | DEVICE_DATA | 37 | 2 | 1/100 |
-| metercomp | meter compressor | uint24 | kWh | false | DEVICE_DATA | 39 | 2 | 1/100 |
-| metereheat | meter e-heater | uint24 | kWh | false | DEVICE_DATA | 41 | 2 | 1/100 |
-| meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 43 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 | kWh | false | DEVICE_DATA | 39 | 2 | 1/100 |
+| metertotal | meter total | uint24 | kWh | false | DEVICE_DATA | 41 | 2 | 1/100 |
+| metercomp | meter compressor | uint24 | kWh | false | DEVICE_DATA | 43 | 2 | 1/100 |
+| metereheat | meter e-heater | uint24 | kWh | false | DEVICE_DATA | 45 | 2 | 1/100 |
+| meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 47 | 2 | 1/100 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 3 | 2 | 1/100 |
-| heatingstarts | heating control starts | uint24 |   | false | DEVICE_DATA | 45 | 2 | 1 |
+| heatingstarts | heating control starts | uint24 |   | false | DEVICE_DATA | 49 | 2 | 1 |
 | dhw.startshp | starts hp | uint24 |   | false | DHW | 5 | 2 | 1 |
-| fuelheat | fuel consumption heating | uint32 | kWh | false | DEVICE_DATA | 47 | 2 | 1/10 |
+| fuelheat | fuel consumption heating | uint32 | kWh | false | DEVICE_DATA | 51 | 2 | 1/10 |
 | dhw.fueldhw | fuel consumption | uint32 | kWh | false | DHW | 7 | 2 | 1/10 |
-| elheat | el. consumption heating | uint32 | kWh | false | DEVICE_DATA | 49 | 2 | 1/10 |
+| elheat | el. consumption heating | uint32 | kWh | false | DEVICE_DATA | 53 | 2 | 1/10 |
 | dhw.eldhw | el. consumption | uint32 | kWh | false | DHW | 9 | 2 | 1/10 |
-| elgenheat | el. generation heating | uint32 | kWh | false | DEVICE_DATA | 51 | 2 | 1/10 |
+| elgenheat | el. generation heating | uint32 | kWh | false | DEVICE_DATA | 55 | 2 | 1/10 |
 | dhw.elgendhw | el generation | uint32 | kWh | false | DHW | 11 | 2 | 1/10 |
 
 ### CSH5800iG
@@ -8150,44 +8158,48 @@ uint8
 | hpactivity | compressor activity | enum |   | false | DEVICE_DATA | 16 | 1 | 1 |
 | hppower | compressor power output | uint16 | W | false | DEVICE_DATA | 17 | 1 | 1 |
 | hpcurrpower | compressor current power | uint16 | W | false | DEVICE_DATA | 18 | 1 | 1 |
-| hybridstrategy | hybrid control strategy | enum |   | true | DEVICE_DATA | 19 | 1 | 1 |
-| lownoisemode | low noise mode | enum |   | true | DEVICE_DATA | 20 | 1 | 1 |
+| hppumpflow | volume flow | uint16 | l/h | false | DEVICE_DATA | 19 | 1 | 10 |
+| hpcompspder1 | compressor speed ER1 | uint8 | % | false | DEVICE_DATA | 20 | 1 | 1 |
+| hpSpeedSetpoint | speed setpoint | uint8 | % | false | DEVICE_DATA | 21 | 1 | 1 |
+| smartgridmode | smart grid mode | uint8 |   | false | DEVICE_DATA | 22 | 1 | 1 |
+| hybridstrategy | hybrid control strategy | enum |   | true | DEVICE_DATA | 23 | 1 | 1 |
+| lownoisemode | low noise mode | enum |   | true | DEVICE_DATA | 24 | 1 | 1 |
 uint8
-| lownoisestart | low noise starttime | uint8 (&gt;=0&lt;=23) | hours | true | DEVICE_DATA | 21 | 1 | 1 |
+| lownoisestart | low noise starttime | uint8 (&gt;=0&lt;=23) | hours | true | DEVICE_DATA | 25 | 1 | 1 |
 uint8
-| lownoisestop | low noise stoptime | uint8 (&gt;=0&lt;=23) | hours | true | DEVICE_DATA | 22 | 1 | 1 |
+| lownoisestop | low noise stoptime | uint8 (&gt;=0&lt;=23) | hours | true | DEVICE_DATA | 26 | 1 | 1 |
 | dhw.hybriddhw | hybrid DHW | enum |   | true | DHW | 0 | 1 | 1 |
 uint8
-| energypricegas | energy price gas | uint8 (&gt;=0&lt;=0) | ct/kWh | true | DEVICE_DATA | 23 | 1 | 1 |
+| energypricegas | energy price gas | uint8 (&gt;=0&lt;=0) | ct/kWh | true | DEVICE_DATA | 27 | 1 | 1 |
 uint8
-| energypriceel | energy price electric | uint8 (&gt;=0&lt;=0) | ct/kWh | true | DEVICE_DATA | 24 | 1 | 1 |
+| energypriceel | energy price electric | uint8 (&gt;=0&lt;=0) | ct/kWh | true | DEVICE_DATA | 28 | 1 | 1 |
 uint8
-| energyfeedpv | feed in PV | uint8 (&gt;=0&lt;=0) | ct/kWh | true | DEVICE_DATA | 25 | 1 | 1 |
+| energyfeedpv | feed in PV | uint8 (&gt;=0&lt;=0) | ct/kWh | true | DEVICE_DATA | 29 | 1 | 1 |
 int8
-| switchovertemp | outside switchover temperature | int8 (&gt;=0&lt;=0) | C | true | DEVICE_DATA | 26 | 1 | 1 |
-| airpurgemode | air purge mode | boolean |   | true | DEVICE_DATA | 27 | 1 | 1 |
+| switchovertemp | outside switchover temperature | int8 (&gt;=0&lt;=0) | C | true | DEVICE_DATA | 30 | 1 | 1 |
+| airpurgemode | air purge mode | boolean |   | true | DEVICE_DATA | 31 | 1 | 1 |
 uint8
-| heatpumpoutput | heatpump output | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 28 | 1 | 1 |
-| coolingcircuit | cooling circuit | boolean |   | true | DEVICE_DATA | 29 | 1 | 1 |
+| heatpumpoutput | heatpump output | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 32 | 1 | 1 |
+| coolingcircuit | cooling circuit | boolean |   | true | DEVICE_DATA | 33 | 1 | 1 |
 uint8
-| compstartmod | compressor start modulation | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 30 | 1 | 1 |
-| heatdrainpan | heat drain pan | boolean |   | true | DEVICE_DATA | 31 | 1 | 1 |
-| heatcable | heating cable | boolean |   | true | DEVICE_DATA | 32 | 1 | 1 |
-| nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 33 | 2 | 1/100 |
+| compstartmod | compressor start modulation | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 34 | 1 | 1 |
+| heatdrainpan | heat drain pan | boolean |   | true | DEVICE_DATA | 35 | 1 | 1 |
+| heatcable | heating cable | boolean |   | true | DEVICE_DATA | 36 | 1 | 1 |
+| nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 37 | 2 | 1/100 |
 | dhw.nrg | energy | uint24 | kWh | false | DHW | 1 | 2 | 1/100 |
-| nrgheat | energy heating | uint24 | kWh | false | DEVICE_DATA | 35 | 2 | 1/100 |
-| metertotal | meter total | uint24 | kWh | false | DEVICE_DATA | 37 | 2 | 1/100 |
-| metercomp | meter compressor | uint24 | kWh | false | DEVICE_DATA | 39 | 2 | 1/100 |
-| metereheat | meter e-heater | uint24 | kWh | false | DEVICE_DATA | 41 | 2 | 1/100 |
-| meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 43 | 2 | 1/100 |
+| nrgheat | energy heating | uint24 | kWh | false | DEVICE_DATA | 39 | 2 | 1/100 |
+| metertotal | meter total | uint24 | kWh | false | DEVICE_DATA | 41 | 2 | 1/100 |
+| metercomp | meter compressor | uint24 | kWh | false | DEVICE_DATA | 43 | 2 | 1/100 |
+| metereheat | meter e-heater | uint24 | kWh | false | DEVICE_DATA | 45 | 2 | 1/100 |
+| meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 47 | 2 | 1/100 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 3 | 2 | 1/100 |
-| heatingstarts | heating control starts | uint24 |   | false | DEVICE_DATA | 45 | 2 | 1 |
+| heatingstarts | heating control starts | uint24 |   | false | DEVICE_DATA | 49 | 2 | 1 |
 | dhw.startshp | starts hp | uint24 |   | false | DHW | 5 | 2 | 1 |
-| fuelheat | fuel consumption heating | uint32 | kWh | false | DEVICE_DATA | 47 | 2 | 1/10 |
+| fuelheat | fuel consumption heating | uint32 | kWh | false | DEVICE_DATA | 51 | 2 | 1/10 |
 | dhw.fueldhw | fuel consumption | uint32 | kWh | false | DHW | 7 | 2 | 1/10 |
-| elheat | el. consumption heating | uint32 | kWh | false | DEVICE_DATA | 49 | 2 | 1/10 |
+| elheat | el. consumption heating | uint32 | kWh | false | DEVICE_DATA | 53 | 2 | 1/10 |
 | dhw.eldhw | el. consumption | uint32 | kWh | false | DHW | 9 | 2 | 1/10 |
-| elgenheat | el. generation heating | uint32 | kWh | false | DEVICE_DATA | 51 | 2 | 1/10 |
+| elgenheat | el. generation heating | uint32 | kWh | false | DEVICE_DATA | 55 | 2 | 1/10 |
 | dhw.elgendhw | el generation | uint32 | kWh | false | DHW | 11 | 2 | 1/10 |
 
 ## Devices of type \_switch

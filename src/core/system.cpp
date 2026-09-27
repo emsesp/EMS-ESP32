@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -656,7 +656,7 @@ void System::system_restart(const char * partitionname) {
     Mqtt::disconnect(); // gracefully disconnect MQTT (flushes the DISCONNECT before reboot, needed for QOS1)
     EMSuart::stop();    // stop UART so there is no interference
 #ifndef EMSESP_STANDALONE
-    delay(1000);   // wait 1 second
+    delay(500);    // wait 1/2 second
     ESP.restart(); // ka-boom! - this is the only place where the ESP32 restart is called
 #endif
 }
@@ -1362,8 +1362,9 @@ void System::show_system(uuid::console::Shell & shell) {
 
 // see if there is a restore of an older settings file that needs to be applied
 // note there can be only one file at a time
+// called at boot before any services load their settings, returns true if system settings files were restored
 bool System::check_restore() {
-    bool reboot_required = false; // true if we need to reboot
+    bool settings_restored = false; // true if system settings files were restored
 
 #ifndef EMSESP_STANDALONE
     File new_file = LittleFS.open(TEMP_FILENAME_PATH);
@@ -1378,7 +1379,7 @@ bool System::check_restore() {
 
             // system backup, which is a consolidated json object with all the settings files
             if (settings_type == "systembackup") {
-                reboot_required    = true;
+                settings_restored  = true;
                 JsonArray sections = input["systembackup"].as<JsonArray>();
                 for (JsonObject section : sections) {
                     std::string section_type = section["type"];
@@ -1507,14 +1508,14 @@ bool System::check_restore() {
                 }
             }
 
-            // It's a single settings file. Parse each section separately. If it's system related it will require a reboot
+            // It's a single settings file. Parse each section separately
             else if (settings_type == "settings") {
-                reboot_required = saveSettings(NETWORK_SETTINGS_FILE, input);
-                reboot_required |= saveSettings(AP_SETTINGS_FILE, input);
-                reboot_required |= saveSettings(MQTT_SETTINGS_FILE, input);
-                reboot_required |= saveSettings(NTP_SETTINGS_FILE, input);
-                reboot_required |= saveSettings(SECURITY_SETTINGS_FILE, input);
-                reboot_required |= saveSettings(EMSESP_SETTINGS_FILE, input);
+                settings_restored = saveSettings(NETWORK_SETTINGS_FILE, input);
+                settings_restored |= saveSettings(AP_SETTINGS_FILE, input);
+                settings_restored |= saveSettings(MQTT_SETTINGS_FILE, input);
+                settings_restored |= saveSettings(NTP_SETTINGS_FILE, input);
+                settings_restored |= saveSettings(SECURITY_SETTINGS_FILE, input);
+                settings_restored |= saveSettings(EMSESP_SETTINGS_FILE, input);
             } else if (settings_type == "customizations") {
                 saveSettings(EMSESP_CUSTOMIZATION_FILE, input);
             } else if (settings_type == "schedule") {
@@ -1526,7 +1527,7 @@ bool System::check_restore() {
                 new_file.close();
                 if (LittleFS.rename(TEMP_FILENAME_PATH, EMSESP_CUSTOMSUPPORT_FILE)) {
                     LOG_INFO("Custom support file stored");
-                    return false; // no need to reboot
+                    return false;
                 } else {
                     LOG_ERROR("Failed to save custom support file");
                 }
@@ -1543,7 +1544,7 @@ bool System::check_restore() {
     }
 #endif
 
-    return reboot_required;
+    return settings_restored;
 }
 
 // handle upgrades from previous versions
@@ -3129,8 +3130,8 @@ String System::getBBQKeesGatewayDetails([[maybe_unused]] uint8_t detail) {
     }
 
     const char * mfg[]   = {"unknown", "BBQKees Electronics", "", "", "", "", "", ""};
-    const char * model[] = {"unknown", "S3", "E32V2", "E32V2.2", "S32", "E32", "", "", ""};
-    const char * board[] = {"CUSTOM", "S32S3", "E32V2", "E32V2_2", "S32", "E32", "", "", ""};
+    const char * model[] = {"unknown", "S3", "E32V2", "E32V2.2", "S32", "E32", "", ""};
+    const char * board[] = {"CUSTOM", "S32S3", "E32V2", "E32V2_2", "S32", "E32", "", ""};
 
     switch (detail) {
     case FUSE_VALUE::MFG:

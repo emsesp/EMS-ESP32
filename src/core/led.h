@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,9 +79,9 @@ class LED {
     static constexpr uint32_t HEALTHCHECK_LED_LONG_FAST_DURATION  = 500;  // 1/2 second between flash sequences
     static constexpr uint32_t HEALTHCHECK_LED_FLASH_DURATION      = 150;  // 150ms
     static constexpr uint32_t HEALTHCHECK_LED_FLASH_FAST_DURATION = 150;
-    static constexpr uint32_t LED_FLASH_INTERVAL_MS               = 100;  // LED toggle period during factory-reset flash
-    static constexpr uint8_t  RGB_LED_BRIGHTNESS                  = 20;   // 255 is max brightness
-    static constexpr uint8_t  LED_ON                              = HIGH; // LED on
+    static constexpr uint32_t LED_FLASH_INTERVAL_MS               = 100;                      // LED toggle period during factory-reset flash
+    static constexpr uint8_t  RGB_LED_BRIGHTNESS                  = 20;                       // 255 is max brightness
+    static constexpr uint8_t  LED_ON                              = HIGH;                     // LED on
     static constexpr Color    COLOR_UNSET                         = static_cast<Color>(0xFF); // forces the next set_led() to write
 
     // led_fast_flash() state

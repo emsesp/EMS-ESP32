@@ -144,8 +144,8 @@ void AnalogSensor::reload(bool get_nvs) {
     // load the list of analog sensors from the customization service
     // and store them locally and then activate them
     EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
-        auto it = sensors_.begin();
-        for (auto & sensor_ : sensors_) {
+        for (auto it = sensors_.begin(); it != sensors_.end();) {
+            auto & sensor_ = *it;
             // update existing sensors
             bool found = false;
             for (const auto & sensor : settings.analogCustomizations) { // search customlist
@@ -170,9 +170,10 @@ void AnalogSensor::reload(bool get_nvs) {
                 }
             }
             if (!found) {
-                sensors_.erase(it);
+                it = sensors_.erase(it);
+            } else {
+                ++it;
             }
-            it++;
         }
 
         // add new sensors from list
@@ -533,11 +534,7 @@ bool AnalogSensor::update(uint8_t gpio, const char * org_name, double offset, do
     bool found_sensor = false;
     EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
         for (auto & AnalogCustomization : settings.analogCustomizations) {
-            if (AnalogCustomization.type == AnalogType::COUNTER
-                || (AnalogCustomization.type >= AnalogType::DIGITAL_OUT && AnalogCustomization.type <= AnalogType::PWM_2)
-                || AnalogCustomization.type == AnalogType::RGB || AnalogCustomization.type == AnalogType::PULSE) {
-                Command::erase_command(EMSdevice::DeviceType::ANALOGSENSOR, AnalogCustomization.name);
-            }
+            Command::erase_command(EMSdevice::DeviceType::ANALOGSENSOR, AnalogCustomization.name);
             if (AnalogCustomization.gpio == gpio) {
                 found_sensor = true; // found the record
                 // see if it's marked for deletion

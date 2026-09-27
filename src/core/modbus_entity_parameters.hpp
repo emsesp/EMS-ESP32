@@ -524,30 +524,34 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(hpActivity), 16, 1), // hpactivity
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(hpPower), 17, 1), // hppower
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(hpCurrPower), 18, 1), // hpcurrpower
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(hybridStrategy), 19, 1), // hybridstrategy
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(lowNoiseMode), 20, 1), // lownoisemode
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(lowNoiseStart), 21, 1), // lownoisestart
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(lowNoiseStop), 22, 1), // lownoisestop
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(energyPriceGas), 23, 1), // energypricegas
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(energyPriceEl), 24, 1), // energypriceel
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(energyPricePV), 25, 1), // energyfeedpv
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(switchOverTemp), 26, 1), // switchovertemp
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(airPurgeMode), 27, 1), // airpurgemode
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(heatPumpOutput), 28, 1), // heatpumpoutput
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(coolingCircuit), 29, 1), // coolingcircuit
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(compStartMod), 30, 1), // compstartmod
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(heatDrainPan), 31, 1), // heatdrainpan
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(heatCable), 32, 1), // heatcable
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(nrgTotal), 33, 2), // nrgtotal
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(nrgHeat), 35, 2), // nrgheat
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(meterTotal), 37, 2), // metertotal
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(meterComp), 39, 2), // metercomp
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(meterEHeat), 41, 2), // metereheat
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(meterHeat), 43, 2), // meterheat
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(heatingStarts), 45, 2), // heatingstarts
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(fuelHeat), 47, 2), // fuelheat
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(elHeat), 49, 2), // elheat
-    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(elGenHeat), 51, 2), // elgenheat
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(hpPumpFlow), 19, 1), // hppumpflow
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(hpCompSpdER1), 20, 1), // hpcompspder1
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(hpSpeedSetpoint), 21, 1), // hpSpeedSetpoint
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(smartGridMode), 22, 1), // smartgridmode
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(hybridStrategy), 23, 1), // hybridstrategy
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(lowNoiseMode), 24, 1), // lownoisemode
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(lowNoiseStart), 25, 1), // lownoisestart
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(lowNoiseStop), 26, 1), // lownoisestop
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(energyPriceGas), 27, 1), // energypricegas
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(energyPriceEl), 28, 1), // energypriceel
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(energyPricePV), 29, 1), // energyfeedpv
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(switchOverTemp), 30, 1), // switchovertemp
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(airPurgeMode), 31, 1), // airpurgemode
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(heatPumpOutput), 32, 1), // heatpumpoutput
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(coolingCircuit), 33, 1), // coolingcircuit
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(compStartMod), 34, 1), // compstartmod
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(heatDrainPan), 35, 1), // heatdrainpan
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(heatCable), 36, 1), // heatcable
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(nrgTotal), 37, 2), // nrgtotal
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(nrgHeat), 39, 2), // nrgheat
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(meterTotal), 41, 2), // metertotal
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(meterComp), 43, 2), // metercomp
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(meterEHeat), 45, 2), // metereheat
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(meterHeat), 47, 2), // meterheat
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(heatingStarts), 49, 2), // heatingstarts
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(fuelHeat), 51, 2), // fuelheat
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(elHeat), 53, 2), // elheat
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(elGenHeat), 55, 2), // elgenheat
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DHW, FL_(hybridDHW), 0, 1), // hybriddhw
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DHW, FL_(nrgWw), 1, 2), // nrg
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DHW, FL_(meterWw), 3, 2), // meter

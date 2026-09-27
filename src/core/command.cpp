@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -542,16 +542,10 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, const ui
 }
 
 void Command::erase_device_commands(const uint8_t device_type) {
-    if (cmdfunctions_.empty()) {
-        return;
-    }
-    auto it = cmdfunctions_.end();
-    do {
-        int i = it - cmdfunctions_.begin();
-        if (cmdfunctions_[i].device_type_ == device_type) {
-            cmdfunctions_.erase(it);
-        }
-    } while (it-- > cmdfunctions_.begin());
+    cmdfunctions_.erase(std::remove_if(cmdfunctions_.begin(),
+                                       cmdfunctions_.end(),
+                                       [device_type](const CmdFunction & cf) { return cf.device_type_ == device_type; }),
+                        cmdfunctions_.end());
 }
 
 void Command::erase_command(const uint8_t device_type, const char * cmd, uint8_t flag) {

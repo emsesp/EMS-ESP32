@@ -1,6 +1,6 @@
 ﻿/*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -650,9 +650,13 @@ MAKE_TRANSLATION(powerReduction, "powerreduction", "power reduction", "Leistungs
 MAKE_TRANSLATION(fuelHeat, "fuelheat", "fuel consumption heating", "Verbrauch Heizen", "", "Bränsleförbrukning värme", "", "", "", "", "", "obmedzenie výkonu", "omezení výkonu") 
 MAKE_TRANSLATION(fuelDhw, "fueldhw", "fuel consumption", "Verbrauch", "", "Bränsleförbrukning varmvatten", "", "", "", "", "", "spotreba paliva", "spotřeba paliva") 
 MAKE_TRANSLATION(elHeat, "elheat", "el. consumption heating", "el. Verbrauch Heizen", "", "Elförbrukning värme", "", "", "", "", "", "el. spotreba kúrenie", "") 
-MAKE_TRANSLATION(elDhw, "eldhw", "el. consumption", "el. Verbrauch", "", "Elförbrukning  varmvatten", "", "", "", "", "", "el. spotreba", "") 
+MAKE_TRANSLATION(elDhw, "eldhw", "el. consumption", "el. Verbrauch", "",     "Elförbrukning  varmvatten", "", "", "", "", "", "el. spotreba", "") 
 MAKE_TRANSLATION(elGenHeat, "elgenheat", "el. generation heating", "el. Erzeugung Heizen", "", "Elgenerering värme", "", "", "", "", "", "el. generovanie kúrenia", "") 
 MAKE_TRANSLATION(elGenDhw, "elgendhw", "el generation", "el. Erzeugung", "", "Elgenerering varmvatten", "", "", "", "", "", "el. generovanie", "") 
+MAKE_TRANSLATION(hpPumpFlow, "hppumpflow", "volume flow", "Volumenstrom", "", "Volumenstrom", "", "", "", "", "", "objemový průtok", "objemový průtok") 
+MAKE_TRANSLATION(hpCompSpdER1, "hpcompspder1", "compressor speed ER1", "Kompressordrehzahl ER1", "", "Kompressordrehzahl ER1", "", "", "", "", "", "otáčky kompresoru ER1", "otáčky kompresoru ER1") 
+MAKE_TRANSLATION(hpSpeedSetpoint, "hpSpeedSetpoint", "speed setpoint", "Geschwindigkeitsteller", "", "Geschwindigkeitsteller", "", "", "", "", "", "nastavená rychlost", "nastavená rychlost") 
+MAKE_TRANSLATION(smartGridMode, "smartgridmode", "smart grid mode", "Smart Grid Modus", "", "Smart Grid Modus", "", "", "", "", "", "smart grid modus", "smart grid modus") 
 
 // HIU
 MAKE_TRANSLATION(netFlowTemp, "netflowtemp", "heat network flow temp", "Systemvorlauftemperatur", "Netto aanvoertemperatuur", "Temperatur fjärrvärmenät", "temp. zasilania sieci cieplnej", "", "", "ısıtma şebekesi akış derecesi", "temperatura di mandata della rete di riscaldamento", "teplota prívodu tepelnej siete", "teplota přívodu tepelné sítě") 
