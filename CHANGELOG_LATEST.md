@@ -4,7 +4,7 @@ For more details go to [emsesp.org](https://emsesp.org/).
 
 ## [3.9.0]
 
-This release is based on the latest Espressif/Arduino core version 3. It brings in many memory and performance optimizations. Note it does require the user to manually migrate settings from 3.8.x to 3.9.0.
+This release is based on the latest Espressif/Arduino core version 3. It brings in many memory and performance optimizations.
 
 ## Added
 
