@@ -451,7 +451,7 @@ void System::system_restart(const char * partitionname) {
     EMSuart::stop();    // stop UART so there is no interference
 
 #ifndef EMSESP_STANDALONE
-    delay(1000);   // wait 1 second
+    delay(500);    // wait 0.5 second
     ESP.restart(); // ka-boom! - this is the only place where the ESP32 restart is called
 #endif
 }
