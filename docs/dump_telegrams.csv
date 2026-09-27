@@ -29,7 +29,7 @@ telegram_type_id,name,is_fetched
 0x3B,Energy, 
 0x3D,RC35Set, 
 0x3E,RC35Monitor, 
-0x3F,RC30Timer, 
+0x3F,RC35Timer, 
 0x40,RC30Temp, 
 0x41,RC30Monitor, 
 0x42,RC35Timer2, 
@@ -77,7 +77,7 @@ telegram_type_id,name,is_fetched
 0x0103,ISM1StatusMessage,fetched
 0x0104,ISM2StatusMessage, 
 0x010C,IPMStatusMessage, 
-0x011E,JunkersDisp,fetched
+0x011E,IPMTempMessage, 
 0x012E,HPEnergy1, 
 0x013B,HPEnergy2, 
 0x0165,JunkersSet, 
@@ -115,7 +115,7 @@ telegram_type_id,name,is_fetched
 0x02A5,EasyMonitor, 
 0x02A6,RC300Monitor, 
 0x02A7,RC300Monitor, 
-0x02A8,CRFMonitor, 
+0x02A8,RC300Monitor, 
 0x02A9,RC300Monitor, 
 0x02AA,RC300Monitor, 
 0x02AB,RC300Monitor, 
@@ -209,6 +209,7 @@ telegram_type_id,name,is_fetched
 0x0585,Blowerspeed, 
 0x0587,Bypass, 
 0x05BA,HpPoolStatus,fetched
+0x05C4,HpPoolShunt, 
 0x05D9,Airquality, 
 0x0772,HIUSettings, 
 0x0779,HIUMonitor, 
