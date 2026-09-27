@@ -656,7 +656,7 @@ void System::system_restart(const char * partitionname) {
     Mqtt::disconnect(); // gracefully disconnect MQTT (flushes the DISCONNECT before reboot, needed for QOS1)
     EMSuart::stop();    // stop UART so there is no interference
 #ifndef EMSESP_STANDALONE
-    delay(1000);   // wait 1 second
+    delay(500);    // wait 1/2 second
     ESP.restart(); // ka-boom! - this is the only place where the ESP32 restart is called
 #endif
 }
