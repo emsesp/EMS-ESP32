@@ -406,7 +406,8 @@ void AnalogSensor::measure() {
                     sensor.sum_    = (sensor.sum_ * 15 + a * 16) / 16;
                     sensor.analog_ = sensor.sum_ / 16;
                 }
-                if (sensor.analog_ > 0 && sensor.analog_ < NTC_VREF_MV && (sensor.last_reading_ + 1 < sensor.analog_ || sensor.last_reading_ > sensor.analog_ + 1)) {
+                if (sensor.analog_ > 0 && sensor.analog_ < NTC_VREF_MV
+                    && (sensor.last_reading_ + 1 < sensor.analog_ || sensor.last_reading_ > sensor.analog_ + 1)) {
                     sensor.set_value(sensor.offset() + 1 / (1 / T25 + log((double)sensor.analog_ / (NTC_VREF_MV - sensor.analog_) * (Rt / R0)) / Beta)
                                      - T0); // Temperature in Celsius
                     sensor.last_reading_ = sensor.analog_;
