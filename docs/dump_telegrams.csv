@@ -29,7 +29,7 @@ telegram_type_id,name,is_fetched
 0x3B,Energy, 
 0x3D,RC35Set, 
 0x3E,RC35Monitor, 
-0x3F,RC35Timer, 
+0x3F,RC30Timer, 
 0x40,RC30Temp, 
 0x41,RC30Monitor, 
 0x42,RC35Timer2, 
@@ -77,7 +77,7 @@ telegram_type_id,name,is_fetched
 0x0103,ISM1StatusMessage,fetched
 0x0104,ISM2StatusMessage, 
 0x010C,IPMStatusMessage, 
-0x011E,IPMTempMessage, 
+0x011E,JunkersDisp,fetched
 0x012E,HPEnergy1, 
 0x013B,HPEnergy2, 
 0x0165,JunkersSet, 
@@ -112,7 +112,7 @@ telegram_type_id,name,is_fetched
 0x02A0,RC300Curves, 
 0x02A1,RC300Curves, 
 0x02A2,RC300Curves, 
-0x02A5,EasyMonitor, 
+0x02A5,CRFMonitor, 
 0x02A6,RC300Monitor, 
 0x02A7,RC300Monitor, 
 0x02A8,RC300Monitor, 
@@ -200,7 +200,7 @@ telegram_type_id,name,is_fetched
 0x04A2,HpInput,fetched
 0x04A5,HPFan,fetched
 0x04A7,HPPowerLimit,fetched
-0x04AA,HPPower, 
+0x04AA,HPPower2,fetched
 0x04AE,HPEnergy,fetched
 0x04AF,HPMeters,fetched
 0x055C,VentilationSet,fetched
