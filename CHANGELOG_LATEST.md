@@ -37,6 +37,7 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - HA Discovery warning on Uptime after EMS-ESP boot due to NTP not ready
 - hc/control setting for UI800 thermostats [#3181](https://github.com/emsesp/EMS-ESP32/discussions/3181)
 - solar module switches [#3223](https://github.com/emsesp/EMS-ESP32/issues/3223)
+- UI800/HMI800.2 thermostats without telegram 0x470 reported `summertemp` as 0 and lost the per-hc heat/cool delays [#3257](https://github.com/emsesp/EMS-ESP32/issues/3257)
 - possible crash when the WebUI asked for version information while the versions.json refresh was rewriting the cache from the main loop task
 - HTTP client could write past a fixed 64 byte buffer when a URL had a hostname of 64 characters or more, could busy-spin for the whole read budget if the socket reported bytes it wouldn't return, and buffered responses without any size limit
 - the "Ethernet clock mode (GPIO16/17) conflicts with PSRAM" error was never logged because Ethernet had already been skipped by the time the check ran
