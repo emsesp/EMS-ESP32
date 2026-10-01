@@ -1180,7 +1180,12 @@ void Thermostat::process_RC300Monitor(const std::shared_ptr<const Telegram> & te
         has_update(hc->hpoperatingstate, EMS_VALUE_UINT8_NOTSET);
     } else {
         has_enumupdate(telegram, hc->hpoperatingstate, 20, 1); // 1:heating, 2:off, 3:cooling
-        has_update(hc->summermode, EMS_VALUE_UINT8_NOTSET);
+        // UI800 heatpumps report a valid summer bit, older RC300 heatpumps don't, #3257
+        if (model() == EMSdevice::EMS_DEVICE_FLAG_UI800) {
+            has_update(hc->summermode, hc->statusbyte & 0x50 ? 1 : 0);
+        } else {
+            has_update(hc->summermode, EMS_VALUE_UINT8_NOTSET);
+        }
     }
     has_update(telegram, hc->targetflowtemp, 4);
     has_update(telegram, hc->curroominfl, 27);
