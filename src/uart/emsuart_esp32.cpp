@@ -156,6 +156,11 @@ uint8_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
 
     last_tx_src_ = len < 4 ? 0 : buf[0]; // update last tx source
 
+#ifdef EMSESP_TX_PRE_DELAY
+    // the BRK event fires after one character time of low, while the master break may still be running
+    delayMicroseconds(EMSESP_TX_PRE_DELAY);
+#endif
+
     // TXMODE is hardware controlled mode
     if (tx_mode_ == EMS_TXMODE_HW) {
         uart_write_bytes_with_break(EMSUART_NUM, buf, len, 10);

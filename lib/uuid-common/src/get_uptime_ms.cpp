@@ -43,11 +43,11 @@ uint32_t get_uptime() {
     return (uint32_t)now_millis;
 }
 
-// both clocks are read live and in ms, whole-second values would make the offset jitter by 1s
+// both clocks are read live and subtracted in us, rounding each to ms or s first makes the offset jitter
 int64_t get_wall_offset_ms() {
     struct timeval tv;
     gettimeofday(&tv, nullptr);
-    return (int64_t)tv.tv_sec * 1000 + tv.tv_usec / 1000 - esp_timer_get_time() / 1000;
+    return ((int64_t)tv.tv_sec * 1000000 + tv.tv_usec - esp_timer_get_time()) / 1000;
 }
 
 } // namespace uuid
