@@ -300,6 +300,8 @@ class EMSESP {
 
     static constexpr uint32_t GATEWAY_BURST_WINDOW    = 30000;  // ms window for counting gateway read requests
     static constexpr uint8_t  GATEWAY_BURST_THRESHOLD = 15;     // read requests within window to treat gateway as busy
+    static constexpr uint32_t GATEWAY_FAST_WINDOW     = 5000;   // short window to catch the start of a burst quickly
+    static constexpr uint8_t  GATEWAY_FAST_THRESHOLD  = 8;      // normal polling is ~1 read per 2s, a sync starts at >10/s
     static constexpr uint32_t GATEWAY_HOLD_TIME       = 60000;  // keep holding Tx this long after the last busy window
     static constexpr uint32_t GATEWAY_HOLD_MAX        = 600000; // never hold longer than 10 minutes in one go
     static constexpr uint32_t GATEWAY_HOLD_COOLDOWN   = 600000; // after hitting the max, don't hold again for 10 minutes
@@ -309,6 +311,8 @@ class EMSESP {
     static uint32_t gateway_cooldown_until_;
     static uint32_t gateway_window_start_;
     static uint8_t  gateway_window_count_;
+    static uint32_t gateway_fast_start_;
+    static uint8_t  gateway_fast_count_;
     static uint8_t  last_version_request_src_;
     static uint32_t last_version_request_time_;
 #endif

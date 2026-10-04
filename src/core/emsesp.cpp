@@ -55,6 +55,8 @@ uint32_t EMSESP::gateway_hold_start_        = 0;
 uint32_t EMSESP::gateway_cooldown_until_    = 0;
 uint32_t EMSESP::gateway_window_start_      = 0;
 uint8_t  EMSESP::gateway_window_count_      = 0;
+uint32_t EMSESP::gateway_fast_start_        = 0;
+uint8_t  EMSESP::gateway_fast_count_        = 0;
 uint8_t  EMSESP::last_version_request_src_  = 0;
 uint32_t EMSESP::last_version_request_time_ = 0;
 #endif
@@ -1771,9 +1773,17 @@ void EMSESP::gateway_rx_check(const uint8_t * data, const uint8_t length) {
         gateway_window_start_ = now;
         gateway_window_count_ = 0;
     }
-    if (++gateway_window_count_ >= GATEWAY_BURST_THRESHOLD) {
+    if (now - gateway_fast_start_ > GATEWAY_FAST_WINDOW) {
+        gateway_fast_start_ = now;
+        gateway_fast_count_ = 0;
+    }
+    ++gateway_window_count_;
+    ++gateway_fast_count_;
+    if (gateway_window_count_ >= GATEWAY_BURST_THRESHOLD || gateway_fast_count_ >= GATEWAY_FAST_THRESHOLD) {
         gateway_window_start_ = now;
         gateway_window_count_ = 0;
+        gateway_fast_start_   = now;
+        gateway_fast_count_   = 0;
         gateway_tx_hold_start();
     }
 }
