@@ -24,6 +24,7 @@
 #include "freertos/task.h"
 #include "freertos/queue.h"
 #include "driver/uart.h"
+#include "driver/gpio.h"
 #include "soc/uart_reg.h"
 #include "uart/emsuart_esp32.h"
 #include "emsesp.h"
@@ -91,6 +92,7 @@ void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t 
 #endif
         uart_param_config(EMSUART_NUM, &uart_config);
         uart_set_pin(EMSUART_NUM, tx_gpio, rx_gpio, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+        gpio_pullup_en((gpio_num_t)rx_gpio); // IDF 5 no longer enables the Rx pull-up, some custom interfaces rely on it
         uart_set_line_inverse(EMSUART_NUM, inverse_mask);
         uart_driver_install(EMSUART_NUM,
                             UART_HW_FIFO_LEN(EMSUART_NUM) + 1,
@@ -109,6 +111,7 @@ void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t 
 #endif
     } else {
         uart_set_pin(EMSUART_NUM, tx_gpio, rx_gpio, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+        gpio_pullup_en((gpio_num_t)rx_gpio);
         vTaskResume(xHandle);
     }
     tx_mode_ = tx_mode;
