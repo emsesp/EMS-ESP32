@@ -6,9 +6,18 @@
 # abort on first error so a failed lint/build isn't silently swallowed
 set -e
 
+# pnpm refuses to self-update when it's a Corepack shim; Corepack pins the version via packageManager instead
+update_pnpm() {
+    if readlink "$(command -v pnpm)" | grep -q corepack; then
+        corepack use pnpm@latest
+    else
+        pnpm self-update
+    fi
+}
+
 cd interface
 rm -rf node_modules
-pnpm self-update
+update_pnpm
 pnpm update
 pnpm install
 pnpm format
@@ -17,7 +26,7 @@ pnpm lint
 
 cd ../mock-api
 rm -rf node_modules
-pnpm self-update
+update_pnpm
 pnpm update
 pnpm install
 pnpm format

@@ -12,6 +12,7 @@ const KB_DIVISOR = 1024;
 const REPEAT_CHAR = '=';
 const REPEAT_COUNT = 50;
 const DEFAULT_OUT_DIR = 'dist';
+const RECOVERY_OUT_DIR = 'dist-recovery';
 const ES_TARGET = 'es2020';
 const CHUNK_SIZE_WARNING_LIMIT = 1024;
 const ASSETS_INLINE_LIMIT = 4096;
@@ -205,6 +206,65 @@ const imageOptimizationPlugin = {
 
 export default defineConfig(
   async ({ command, mode }: { command: string; mode: string }) => {
+    if (command === 'serve' && mode === 'recovery') {
+      console.log('Preparing Recovery WebUI with mock server');
+      const recoveryMockUrl = pathToFileURL(
+        path.resolve(import.meta.dirname, '../mock-api/recoveryMock.js')
+      ).href;
+      const { default: recoveryMock } = (await import(
+        /* @vite-ignore */ recoveryMockUrl
+      )) as { default: () => PluginOption };
+      return {
+        plugins: [...createBasePlugins(true, false), recoveryMock()],
+        resolve: {
+          alias: RESOLVE_ALIASES,
+          extensions: RESOLVE_EXTENSIONS,
+          tsconfigPaths: true
+        },
+        server: {
+          open: '/recovery.html',
+          port: 3001
+        }
+      };
+    }
+
+    if (mode === 'recovery') {
+      console.log('Preparing for Recovery WebUI, optimized build');
+      return {
+        plugins: [...createBasePlugins(false, true), imageOptimizationPlugin],
+        resolve: {
+          alias: RESOLVE_ALIASES,
+          extensions: RESOLVE_EXTENSIONS,
+          tsconfigPaths: true
+        },
+        build: {
+          ...createBaseBuildConfig(),
+          outDir: RECOVERY_OUT_DIR,
+          emptyOutDir: true,
+          minify: 'terser' as const,
+          terserOptions: createProductionTerserOptions(),
+          rollupOptions: {
+            input: path.resolve(import.meta.dirname, 'recovery.html'),
+            checks: {
+              pluginTimings: false
+            },
+            treeshake: {
+              moduleSideEffects: false,
+              propertyReadSideEffects: false as const,
+              unknownGlobalSideEffects: false
+            },
+            output: {
+              chunkFileNames: 'assets/[name]-[hash].js',
+              entryFileNames: 'assets/[name]-[hash].js',
+              assetFileNames: 'assets/[name]-[hash].[ext]',
+              manualChunks,
+              sourcemap: false
+            }
+          }
+        }
+      };
+    }
+
     if (command === 'serve') {
       console.log(`Preparing for standalone build with server, mode=${mode}`);
       const mockServerUrl = pathToFileURL(

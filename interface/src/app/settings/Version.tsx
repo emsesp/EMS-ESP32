@@ -71,6 +71,7 @@ interface VersionData {
   build_flags?: string;
   partition: string;
   partitions: PartitionData[];
+  recovery_version?: string; // only on boards with a factory partition, empty if not installed
   developer_mode: boolean;
   disable_reset: boolean;
 }
@@ -721,6 +722,19 @@ const Version = () => {
               </Typography>
             </Typography>
           </Grid>
+
+          {data.recovery_version !== undefined && (
+            <>
+              <Grid size={{ xs: 4, md: 2 }}>
+                <Typography color="secondary">{LL.RECOVERY()}</Typography>
+              </Grid>
+              <Grid size={{ xs: 8, md: 10 }}>
+                <Typography>
+                  {data.recovery_version || LL.RECOVERY_NOT_INSTALLED()}
+                </Typography>
+              </Grid>
+            </>
+          )}
         </Grid>
 
         {internetLive ? (
@@ -848,7 +862,11 @@ const Version = () => {
             <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
               {LL.UPLOAD()}
             </Typography>
-            <SingleUpload text={LL.UPLOAD_FIRMWARE_TEXT()} doRestart={doRestart} />
+            <SingleUpload
+              text={LL.UPLOAD_FIRMWARE_TEXT()}
+              doRestart={doRestart}
+              onRecoveryInstalled={() => void loadData()}
+            />
           </>
         )}
       </Box>

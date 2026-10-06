@@ -52,6 +52,7 @@ export interface SystemStatus {
   model: string;
   board: string;
   has_loader: boolean;
+  recovery_version?: string;
   has_partition: boolean;
   partitions: {
     partition: string;

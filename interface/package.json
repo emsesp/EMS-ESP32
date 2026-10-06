@@ -18,6 +18,8 @@
     "standalone": "concurrently -c \"auto\" \"typesafe-i18n\" \"pnpm:mock-rest\" \"vite dev\"",
     "typesafe-i18n": "typesafe-i18n --no-watch",
     "build-webUI": "typesafe-i18n --no-watch && vite build && node progmem-generator.js",
+    "recovery": "vite dev --mode recovery",
+    "build-recovery": "vite build --mode recovery && node progmem-generator.js --src ./dist-recovery --out ../recovery/WWWData.h --index recovery.html",
     "format": "prettier -l -w '**/*.{ts,tsx,js,css,json,md}'",
     "lint": "eslint . --fix",
     "standalone-devcontainer": "concurrently -c \"auto\" \"typesafe-i18n\" \"pnpm:mock-rest\" \"vite --host\""
@@ -54,9 +56,9 @@
     "rollup-plugin-visualizer": "^7.1.1",
     "terser": "^5.51.2",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.71.0",
+    "typescript-eslint": "^8.71.1",
     "vite": "^8.3.2",
     "vite-plugin-imagemin": "^0.6.1"
   },
-  "packageManager": "pnpm@12.8.1"
+  "packageManager": "pnpm@12.9.1"
 }

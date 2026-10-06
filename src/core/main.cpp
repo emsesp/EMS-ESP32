@@ -18,12 +18,32 @@
 
 #include "emsesp.h"
 
+#ifdef EMSESP_CRASH_TEST
+#include <esp_ota_ops.h>
+#endif
+
 using namespace emsesp;
 
 static EMSESP application; // the main application
 
+#ifdef EMSESP_CRASH_TEST
+// test builds for the bootloader rollback and the recovery fallback, see [env:crashtest_s3_16M_P] in platformio.ini
+static void crash_test() {
+    esp_ota_img_states_t state = ESP_OTA_IMG_UNDEFINED;
+    esp_ota_get_state_partition(esp_ota_get_running_partition(), &state);
+    if (EMSESP_CRASH_TEST == 1 || state == ESP_OTA_IMG_VALID) {
+        Serial.println("Crash test, aborting");
+        Serial.flush();
+        abort();
+    }
+}
+#endif
+
 void setup() {
     application.start();
+#ifdef EMSESP_CRASH_TEST
+    crash_test();
+#endif
 }
 
 void loop() {

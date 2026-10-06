@@ -352,7 +352,10 @@ const tr: Translation = {
   UPLOAD_BACKUP_TEXT: 'Bir yedek dosyası (.json), buraya drop yapın',
   UPLOAD_FIRMWARE_TEXT: 'Bir firmware .bin dosyası, buraya drop yapın',
   UPLOAD_MD5_RECEIVED: 'Özet alındı, şimdi firmware .bin dosyasını yükleyin',
-  UPLOAD_MD5_MATCHED: 'MD5 eşleşti, firmware yükleniyor...'
+  UPLOAD_MD5_MATCHED: 'MD5 eşleşti, firmware yükleniyor...',
+  RECOVERY: 'Kurtarma',
+  RECOVERY_NOT_INSTALLED: 'Yüklü değil',
+  RECOVERY_INSTALLED: 'Kurtarma firmware yüklendi'
 };
 
 export default tr;

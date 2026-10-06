@@ -27,6 +27,7 @@
 #include <esp_mac.h>
 #include "esp_efuse.h"
 #include <nvs.h>
+#include <Update.h>
 #endif
 
 #include <map>
@@ -43,9 +44,23 @@
 #define ENABLE_SMTP
 #include <ESP_SSLClient.h>
 #include <ReadyMail.h>
+#include <OtaUpdater.h>
+
+// Keeps new firmware in the bootloader's pending verification state until System::check_firmware_health()
+// confirms it, so a crash or restart before then rolls back to the previous image
+extern "C" bool verifyRollbackLater() {
+    return true;
+}
 #endif
 
 namespace emsesp {
+
+#ifndef EMSESP_STANDALONE
+// survives restarts, panics and watchdog resets but not a power cycle, hence the magic
+static constexpr uint32_t       CRASH_COUNT_MAGIC = 0x43524153;
+RTC_NOINIT_ATTR static uint32_t crash_count_magic_;
+RTC_NOINIT_ATTR static uint32_t crash_count_;
+#endif
 
 // Languages supported. Note: the order is important
 // and must match locale_translations.h and common.h
@@ -517,6 +532,10 @@ void System::get_partition_info() {
             }
         }
 
+#ifdef EMSESP_HAS_RECOVERY
+        // the recovery firmware is shown separately
+        is_valid = is_valid && !OtaUpdater::isRecoveryPartition(part);
+#endif
         // get the version from the NVS store, and add to map
         if (is_valid) {
             PartitionInfo p_info;
@@ -545,6 +564,31 @@ void System::get_partition_info() {
     }
     esp_partition_iterator_release(it);
 #endif
+}
+
+void System::recovery_installed() {
+#ifdef EMSESP_HAS_RECOVERY
+    // drop the version info of an EMS-ESP firmware that was in the factory partition before
+    const esp_partition_t * factory = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
+    if (factory != nullptr) {
+        char c[20];
+        snprintf(c, sizeof(c), "d_%s", factory->label);
+        EMSESP::nvs_.remove(factory->label);
+        EMSESP::nvs_.remove(c);
+        partition_info_.erase(factory->label); // on the AsyncTCP task, same as the web handlers reading it
+    }
+    LOG_INFO("Recovery firmware v%s installed", recovery_version().c_str());
+#endif
+}
+
+std::string System::recovery_version() const {
+#ifdef EMSESP_HAS_RECOVERY
+    esp_app_desc_t desc;
+    if (OtaUpdater::isRecoveryPartition(esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr), &desc)) {
+        return desc.version;
+    }
+#endif
+    return "";
 }
 
 // set install time/date for the current partition, in UTC
@@ -610,7 +654,13 @@ void System::system_restart(const char * partitionname) {
         // Factory partition - label will be "factory"
         const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
         if (partition && !strcmp(partition->label, partitionname)) {
+#ifdef EMSESP_HAS_RECOVERY
+            if (esp_ota_set_boot_partition(partition) == ESP_OK) {
+                EMSESP::nvs_.putString(EMSESP_NVS_RECOVERY_REASON, "request");
+            }
+#else
             esp_ota_set_boot_partition(partition);
+#endif
         } else
             // try and find the partition by name
             if (strcmp(esp_ota_get_running_partition()->label, partitionname)) {
@@ -762,11 +812,74 @@ void System::store_settings(WebSettings & settings) {
     auto_fw_check_  = settings.auto_fw_check;
 }
 
+// counts consecutive crashes and falls back to the recovery firmware in the factory partition (16MB boards)
+void System::check_crash_loop() {
+#ifndef EMSESP_STANDALONE
+    if (crash_count_magic_ != CRASH_COUNT_MAGIC) {
+        crash_count_magic_ = CRASH_COUNT_MAGIC;
+        crash_count_       = 0;
+    }
+
+    switch (esp_reset_reason()) {
+    case ESP_RST_PANIC:
+    case ESP_RST_INT_WDT:
+    case ESP_RST_TASK_WDT:
+    case ESP_RST_WDT:
+        crash_count_++;
+        break;
+    default:
+        crash_count_ = 0;
+        return;
+    }
+
+#ifdef EMSESP_HAS_RECOVERY
+    if (crash_count_ < CRASH_LOOP_LIMIT) {
+        return;
+    }
+
+    const esp_partition_t * factory = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
+    if (factory == nullptr || factory == esp_ota_get_running_partition()) {
+        return;
+    }
+    // fails if the factory partition doesn't hold a valid image, then keep trying the current one
+    if (esp_ota_set_boot_partition(factory) == ESP_OK) {
+        crash_count_ = 0;
+        EMSESP::nvs_.putString(EMSESP_NVS_RECOVERY_REASON, "crash");
+        Serial.printf("Crashed %d times in a row, restarting into the %s partition\n", CRASH_LOOP_LIMIT, factory->label);
+        Serial.flush();
+        esp_restart();
+    }
+#endif
+#endif
+}
+
+// once the firmware has run long enough, confirm it to the bootloader so it isn't rolled back
+void System::check_firmware_health() {
+#ifndef EMSESP_STANDALONE
+    if (firmware_healthy_ || uuid::get_uptime_sec() < FIRMWARE_HEALTHY_UPTIME) {
+        return;
+    }
+    firmware_healthy_ = true;
+    crash_count_      = 0;
+    if (OtaUpdater::confirmRunningApp()) {
+        LOG_INFO("New firmware confirmed as working");
+    }
+#endif
+}
+
 // Starts up core services
 void System::start() {
     get_partition_info(); // get the partition info
 
 #ifndef EMSESP_STANDALONE
+    if (crash_count_) {
+        LOG_WARNING("Restarted after a crash (%u in a row)", crash_count_);
+    }
+    const esp_partition_t * invalid = esp_ota_get_last_invalid_partition();
+    if (invalid != nullptr) {
+        LOG_WARNING("Firmware in partition %s failed to start and was rolled back", invalid->label);
+    }
+
     // disable bluetooth module
     // periph_module_disable(PERIPH_BT_MODULE);
     if (low_clock_) {
@@ -1027,6 +1140,8 @@ void System::system_check() {
     uint32_t current_uptime = uuid::get_uptime();
     if (!last_system_check_ || ((uint32_t)(current_uptime - last_system_check_) >= SYSTEM_CHECK_FREQUENCY)) {
         last_system_check_ = current_uptime;
+
+        check_firmware_health();
 
 #ifndef EMSESP_STANDALONE
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
@@ -3345,6 +3460,8 @@ bool System::uploadFirmwareURL(const char * url) {
         LOG_ERROR("Firmware upload failed - invalid size");
         return false; // error
     }
+
+    OtaUpdater::confirmRunningApp();
 
     // check we have enough space for the upload in the ota partition
     if (!Update.begin(firmware_size)) {

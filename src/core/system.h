@@ -81,6 +81,11 @@ class System {
     void start();
     bool loop(); // returns true if the LED flash is active
 
+    static void check_crash_loop(); // call at boot once NVS is open, may restart into the factory partition
+
+    void        recovery_installed();      // called on the AsyncTCP task after the recovery firmware was written
+    std::string recovery_version() const; // empty if there's no recovery firmware
+
     // commands
     static bool command_read(const char * value, const int8_t id);
     static bool command_send(const char * value, const int8_t id);
@@ -384,6 +389,14 @@ class System {
     volatile uint8_t systemStatus_; // uses SYSTEM_STATUS enum - written from the AsyncTCP task (e.g. cancel) and read from the main loop during OTA
 
     void set_partition_install_date();
+
+    // firmware is confirmed to the bootloader and the crash counter cleared once it has been up this long
+    static constexpr uint32_t FIRMWARE_HEALTHY_UPTIME = 120; // seconds
+    // consecutive crashes before falling back to the recovery firmware in the factory partition
+    static constexpr uint8_t CRASH_LOOP_LIMIT = 5;
+
+    bool firmware_healthy_ = false;
+    void check_firmware_health();
 
     // button
     static PButton            myPButton_; // PButton instance

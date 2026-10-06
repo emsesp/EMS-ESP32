@@ -352,7 +352,10 @@ const no: Translation = {
   UPLOAD_BACKUP_TEXT: 'Klikk for å velge, eller drop en sikkerhetskopi (.json) her',
   UPLOAD_FIRMWARE_TEXT: 'Klikk for å velge, eller drop en firmware .bin/.md5 her',
   UPLOAD_MD5_RECEIVED: 'MD5 mottatt, last nå opp firmware .bin-filen',
-  UPLOAD_MD5_MATCHED: 'MD5 stemmer, firmware installeres...'
+  UPLOAD_MD5_MATCHED: 'MD5 stemmer, firmware installeres...',
+  RECOVERY: 'Gjenoppretting',
+  RECOVERY_NOT_INSTALLED: 'Ikke installert',
+  RECOVERY_INSTALLED: 'Gjenopprettingsfirmware installert'
 };
 
 export default no;

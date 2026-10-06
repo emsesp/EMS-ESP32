@@ -117,6 +117,7 @@ let system_status = {
   psram_size: 8189,
   free_psram: 8166,
   has_loader: true,
+  recovery_version: '', // upload an EMS-ESP-Recovery-*.bin to set it
   has_partition: true,
   partitions: [
     {
@@ -4689,6 +4690,15 @@ router
       pendingFirmwareMd5 = true;
       console.log('MD5 digest received', digest);
       return { md5: digest };
+    }
+
+    // the firmware recognises the recovery image by its app description, the mock by its file name
+    if (fileExtension === 'bin' && fileName.startsWith('EMS-ESP-Recovery')) {
+      const md5_ok = pendingFirmwareMd5;
+      pendingFirmwareMd5 = false;
+      system_status.recovery_version = '1.0.0';
+      console.log('Recovery firmware installed');
+      return md5_ok ? { recovery: true, md5_ok } : { recovery: true };
     }
 
     if (fileExtension === 'bin' && pendingFirmwareMd5) {
