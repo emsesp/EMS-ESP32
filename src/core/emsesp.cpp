@@ -1703,6 +1703,8 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         // check for poll to us, if so send top message from Tx queue immediately and quit
 #ifdef EMSESP_GATEWAY_TX_HOLD
         if (poll_id == EMSbus::ems_bus_id() && gateway_tx_hold()) {
+            // still ack the poll, otherwise the master drops us from 0x07 and the gateway sees the device list change
+            txservice_.send_poll();
             return;
         }
 #endif
