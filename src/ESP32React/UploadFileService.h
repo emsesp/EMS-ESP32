@@ -22,6 +22,7 @@ class UploadFileService {
     bool              _is_firmware;
     bool              _is_filesystem;
     bool              _is_recovery; // firmware for the factory partition, which doesn't change the boot partition
+    bool              _response_sent;
     OtaUpdater        _ota;
 
     void handleUpload(AsyncWebServerRequest * request, const String & filename, size_t index, uint8_t * data, size_t len, bool final);

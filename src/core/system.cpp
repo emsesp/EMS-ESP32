@@ -573,8 +573,12 @@ void System::recovery_installed() {
     if (factory != nullptr) {
         char c[20];
         snprintf(c, sizeof(c), "d_%s", factory->label);
-        EMSESP::nvs_.remove(factory->label);
-        EMSESP::nvs_.remove(c);
+        if (EMSESP::nvs_.isKey(factory->label)) {
+            EMSESP::nvs_.remove(factory->label);
+        }
+        if (EMSESP::nvs_.isKey(c)) {
+            EMSESP::nvs_.remove(c);
+        }
         partition_info_.erase(factory->label); // on the AsyncTCP task, same as the web handlers reading it
     }
     LOG_INFO("Recovery firmware v%s installed", recovery_version().c_str());
@@ -638,6 +642,12 @@ bool System::set_partition([[maybe_unused]] const char * partitionname) {
     if (err != ESP_OK) {
         return false;
     }
+
+#ifdef EMSESP_HAS_RECOVERY
+    if (partition->subtype == ESP_PARTITION_SUBTYPE_APP_FACTORY) {
+        EMSESP::nvs_.putString(EMSESP_NVS_RECOVERY_REASON, "request");
+    }
+#endif
 
     // initiate the restart
     EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED);
@@ -1323,6 +1333,16 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(" [total %d]", available.size());
     // List all partitions and their version info
     shell.println(" Partitions:");
+#ifndef EMSESP_STANDALONE
+    const esp_partition_t * running       = esp_ota_get_running_partition();
+    const esp_partition_t * boot          = esp_ota_get_boot_partition();
+    const char *            running_label = running ? running->label : "";
+    const char *            boot_label    = boot ? boot->label : "";
+#else
+    const char * running_label = "";
+    const char * boot_label    = "";
+#endif
+    bool boot_listed = false;
     for (const auto & partition : partition_info_) {
         if (partition.second.version.empty()) {
             continue; // no version, empty string
@@ -1334,13 +1354,42 @@ void System::show_system(uuid::console::Shell & shell) {
             strftime(time_string, sizeof(time_string), "%FT%T", localtime(&d));
             installed = std::string(", installed on ") + time_string;
         }
-        shell.printfln("  %s: v%s (%d KB%s) %s",
-                       partition.first.c_str(),
-                       partition.second.version.c_str(),
-                       partition.second.size,
-                       installed.c_str(),
-                       (strcmp(esp_ota_get_running_partition()->label, partition.first.c_str()) == 0) ? "** active **" : "");
+        const bool is_running = strcmp(running_label, partition.first.c_str()) == 0;
+        const bool is_boot    = strcmp(boot_label, partition.first.c_str()) == 0;
+        if (is_boot) {
+            boot_listed = true;
+        }
+        const char * mark = is_running && is_boot ? "** active, boot **" : is_running ? "** active **" : is_boot ? "** boot **" : "";
+        shell.printfln("  %s: v%s (%d KB%s) %s", partition.first.c_str(), partition.second.version.c_str(), partition.second.size, installed.c_str(), mark);
     }
+#ifndef EMSESP_STANDALONE
+#ifdef EMSESP_HAS_RECOVERY
+    // 16MB boards: factory ("boot") holds the recovery app and is omitted from partition_info_
+    {
+        const esp_partition_t * factory = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
+        esp_app_desc_t          desc;
+        if (OtaUpdater::isRecoveryPartition(factory, &desc)) {
+            const bool is_running = running && factory == running;
+            const bool is_boot    = boot && factory == boot;
+            if (is_boot) {
+                boot_listed = true;
+            }
+            int                  size_kb  = 0;
+            esp_image_metadata_t meta     = {};
+            esp_partition_pos_t  part_pos = {.offset = factory->address, .size = factory->size};
+            if (esp_image_verify(ESP_IMAGE_VERIFY_SILENT, &part_pos, &meta) == ESP_OK) {
+                size_kb = static_cast<int>(meta.image_len / 1024);
+            }
+            const char * mark = is_running && is_boot ? "** active, boot **" : is_running ? "** active **" : is_boot ? "** boot **" : "";
+            shell.printfln("  %s: Recovery v%s (%d KB) %s", factory->label, desc.version, size_kb, mark);
+        }
+    }
+#endif
+    // recovery/factory is omitted from partition_info_, still show it if it's the boot target
+    if (!boot_listed && boot_label[0] != '\0') {
+        shell.printfln("  %s: ** boot **", boot_label);
+    }
+#endif
 // List all NVS values
 #ifndef EMSESP_STANDALONE
     shell.println(" NVS values:");

@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import SendIcon from '@mui/icons-material/Send';
 import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
@@ -500,6 +501,7 @@ const ApplicationSettings = () => {
               </Grid>
               <Grid>
                 <Button
+                  startIcon={<SendIcon />}
                   sx={{ mt: 3 }}
                   variant="outlined"
                   color="primary"

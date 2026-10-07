@@ -375,7 +375,8 @@ class System {
     static constexpr uint8_t HEALTHCHECK_NO_NETWORK = (1 << 1); // 2
     static constexpr uint8_t HEALTHCHECK_RESET      = (1 << 7); // 128
 
-    // smallest .bin accepted as a firmware image, for both URL and web uploads - 1.6 MB
+    // smallest .bin accepted as a main firmware image, for both URL and web uploads - 1.6 MB
+    // recovery firmware uses OtaUpdater::MIN_RECOVERY_FIRMWARE_SIZE when the filename contains "recovery"
     static constexpr size_t MIN_FIRMWARE_SIZE = 1677721;
 
   private:

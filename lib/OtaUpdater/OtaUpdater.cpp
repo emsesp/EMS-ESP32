@@ -3,6 +3,10 @@
 #include <Update.h>
 #include <esp_app_format.h>
 #include <esp_image_format.h>
+#ifdef OTA_UPDATER_ANY_PARTITION
+#include <esp_heap_caps.h>
+#include <esp_partition.h>
+#endif
 
 #include <cstddef>
 
@@ -19,8 +23,14 @@ OtaUpdater::FileType OtaUpdater::classify(const String & filename, size_t filesi
     if (extension == "bin" && filename.endsWith("littlefs.bin")) {
         return FileType::FILESYSTEM;
     }
-    if (extension == "bin" && filesize >= min_firmware_size) {
-        return FileType::FIRMWARE;
+    if (extension == "bin") {
+        String lower = filename;
+        lower.toLowerCase();
+        const size_t min_size =
+            lower.indexOf("recovery") >= 0 ? MIN_RECOVERY_FIRMWARE_SIZE : min_firmware_size;
+        if (filesize >= min_size) {
+            return FileType::FIRMWARE;
+        }
     }
     if (extension == "json") {
         return FileType::JSON;
@@ -114,6 +124,19 @@ bool OtaUpdater::hasMd5() const {
     return strlen(_md5.data()) == _md5.size() - 1;
 }
 
+#ifdef OTA_UPDATER_ANY_PARTITION
+void OtaUpdater::setError(esp_err_t err) {
+    snprintf(_error_buf, sizeof(_error_buf), "%s (0x%x)", esp_err_to_name(err), static_cast<unsigned>(err));
+    _error = _error_buf;
+}
+
+void OtaUpdater::releaseTarget() {
+    _target = nullptr;
+    heap_caps_free(_dram);
+    _dram = nullptr;
+}
+#endif
+
 bool OtaUpdater::beginFirmware(size_t filesize, const esp_partition_t * target, bool set_boot) {
     _md5_applied = false;
     _error       = "";
@@ -126,13 +149,14 @@ bool OtaUpdater::beginFirmware(size_t filesize, const esp_partition_t * target, 
             _error = "Firmware does not fit in the partition";
             return false;
         }
-        const esp_err_t err = esp_ota_begin(target, OTA_WITH_SEQUENTIAL_WRITES, &_handle);
-        if (err != ESP_OK) {
-            _error = esp_err_to_name(err);
+        _dram = static_cast<uint8_t *>(heap_caps_malloc(DRAM_CHUNK, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT));
+        if (_dram == nullptr) {
+            _error = "No internal RAM for OTA buffer";
             return false;
         }
         _target   = target;
         _written  = 0;
+        _erased   = 0;
         _set_boot = set_boot;
         if (hasMd5()) {
             _md5Builder.begin();
@@ -166,15 +190,39 @@ bool OtaUpdater::beginFilesystem() {
 bool OtaUpdater::write(const uint8_t * data, size_t len) {
 #ifdef OTA_UPDATER_ANY_PARTITION
     if (_target != nullptr) {
-        const esp_err_t err = esp_ota_write(_handle, data, len);
-        if (err != ESP_OK) {
-            _error = esp_err_to_name(err);
-            return false;
+        while (len) {
+            const size_t n = len < DRAM_CHUNK ? len : DRAM_CHUNK;
+            memcpy(_dram, data, n);
+
+            const size_t need = _written + n;
+            if (need > _erased) {
+                size_t erase_to = (need + FLASH_SECTOR - 1) / FLASH_SECTOR * FLASH_SECTOR;
+                if (erase_to > _target->size) {
+                    erase_to = _target->size;
+                }
+                const size_t erase_len = erase_to - _erased;
+                if (erase_len > 0) {
+                    const esp_err_t err = esp_partition_erase_range(_target, _erased, erase_len);
+                    if (err != ESP_OK) {
+                        setError(err);
+                        return false;
+                    }
+                    _erased = erase_to;
+                }
+            }
+
+            const esp_err_t err = esp_partition_write(_target, _written, _dram, n);
+            if (err != ESP_OK) {
+                setError(err);
+                return false;
+            }
+            if (_md5_applied) {
+                _md5Builder.add(_dram, n);
+            }
+            _written += n;
+            data += n;
+            len -= n;
         }
-        if (_md5_applied) {
-            _md5Builder.add(data, len);
-        }
-        _written += len;
         return true;
     }
 #endif
@@ -184,26 +232,31 @@ bool OtaUpdater::write(const uint8_t * data, size_t len) {
 bool OtaUpdater::end() {
 #ifdef OTA_UPDATER_ANY_PARTITION
     if (_target != nullptr) {
-        const esp_partition_t * target = _target;
-        _target                        = nullptr;
+        const esp_partition_t * target   = _target;
+        const bool              set_boot = _set_boot;
+        releaseTarget();
 
         if (_md5_applied) {
             _md5Builder.calculate();
             if (strcmp(_md5Builder.toString().c_str(), _md5.data()) != 0) {
-                esp_ota_abort(_handle);
                 _error = "MD5 check failed";
                 return false;
             }
         }
 
-        // esp_ota_end() validates the image
-        esp_err_t err = esp_ota_end(_handle);
-        if (err == ESP_OK && _set_boot) {
-            err = esp_ota_set_boot_partition(target);
-        }
+        esp_image_metadata_t meta     = {};
+        esp_partition_pos_t  part_pos = {.offset = target->address, .size = target->size};
+        esp_err_t            err      = esp_image_verify(ESP_IMAGE_VERIFY_SILENT, &part_pos, &meta);
         if (err != ESP_OK) {
-            _error = esp_err_to_name(err);
+            setError(err);
             return false;
+        }
+        if (set_boot) {
+            err = esp_ota_set_boot_partition(target);
+            if (err != ESP_OK) {
+                setError(err);
+                return false;
+            }
         }
         return true;
     }
@@ -214,12 +267,13 @@ bool OtaUpdater::end() {
 void OtaUpdater::abort() {
 #ifdef OTA_UPDATER_ANY_PARTITION
     if (_target != nullptr) {
-        esp_ota_abort(_handle);
-        _target = nullptr;
+        releaseTarget();
         return;
     }
 #endif
-    Update.abort();
+    if (Update.isRunning()) {
+        Update.abort();
+    }
 }
 
 size_t OtaUpdater::progress() const {

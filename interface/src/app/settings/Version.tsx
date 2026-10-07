@@ -16,7 +16,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
   IconButton,
   Table,
   TableBody,
@@ -369,14 +368,18 @@ const InstallPartitionDialog = memo(
     onClose: () => void;
     onInstall: (partition: string) => void;
   }) => {
+    const isRecovery = partition === 'boot';
+
     return (
       <Dialog sx={dialogStyle} open={openInstallPartitionDialog} onClose={onClose}>
         <DialogTitle>
-          {LL.INSTALL()} {LL.STORED_VERSIONS()}
+          {isRecovery ? LL.RECOVERY() : `${LL.INSTALL()} ${LL.STORED_VERSIONS()}`}
         </DialogTitle>
         <DialogContent dividers>
           <Typography sx={{ mb: 2 }}>
-            {LL.INSTALL_VERSION(LL.INSTALL(), version)}
+            {isRecovery
+              ? 'This will boot in recovery mode'
+              : LL.INSTALL_VERSION(LL.INSTALL(), version)}
           </Typography>
         </DialogContent>
         <DialogActions>
@@ -390,12 +393,14 @@ const InstallPartitionDialog = memo(
           </Button>
 
           <Button
-            startIcon={<WarningIcon color="warning" />}
+            startIcon={
+              isRecovery ? <PowerSettingsNewIcon /> : <WarningIcon color="warning" />
+            }
             variant="outlined"
             onClick={() => onInstall(partition)}
-            color="primary"
+            color={isRecovery ? 'success' : 'primary'}
           >
-            {LL.INSTALL()}
+            {isRecovery ? LL.RESTART() : LL.INSTALL()}
           </Button>
         </DialogActions>
       </Dialog>
@@ -665,77 +670,69 @@ const Version = () => {
           {LL.THIS_VERSION()}
         </Typography>
 
-        <Grid
-          container
-          direction="row"
+        <Box
           sx={{
-            justifyContent: 'flex-start',
-            alignItems: 'baseline'
+            display: 'grid',
+            gridTemplateColumns: 'auto 1fr',
+            columnGap: 3,
+            rowGap: 0.75,
+            alignItems: 'center'
           }}
         >
-          <Grid size={{ xs: 4, md: 2 }}>
-            <Typography color="secondary">{LL.VERSION()}</Typography>
-          </Grid>
-          <Grid size={{ xs: 8, md: 10 }}>
-            <Typography>
+          <Typography color="secondary">{LL.VERSION()}</Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              minWidth: 0
+            }}
+          >
+            <Typography component="span">
               {data.emsesp_version}
               {data.build_flags && (
-                <Typography variant="caption">
-                  &nbsp; &#40;{data.build_flags}&#41;
+                <Typography component="span" variant="caption">
+                  &nbsp;({data.build_flags})
                 </Typography>
               )}
-              <IconButton
-                onClick={() => setPartitionVersionInfo(data.partition)}
-                aria-label={LL.FIRMWARE_VERSION_INFO()}
-              >
-                <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
-              </IconButton>
             </Typography>
-          </Grid>
+            <IconButton
+              size="small"
+              onClick={() => setPartitionVersionInfo(data.partition)}
+              aria-label={LL.FIRMWARE_VERSION_INFO()}
+              sx={{ p: 0.5 }}
+            >
+              <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
+            </IconButton>
+          </Box>
 
-          <Grid size={{ xs: 4, md: 2 }}>
-            <Typography color="secondary">{LL.PLATFORM()}</Typography>
-          </Grid>
-          <Grid size={{ xs: 8, md: 10 }}>
-            <Typography>
-              {platform}
-              <Typography variant="caption">
-                &nbsp; &#40;
-                {data.psram ? (
-                  <CheckIcon
-                    color="success"
-                    sx={{
-                      fontSize: '1.5em',
-                      verticalAlign: 'middle'
-                    }}
-                  />
-                ) : (
-                  <CloseIcon
-                    color="error"
-                    sx={{
-                      fontSize: '1.5em',
-                      verticalAlign: 'middle'
-                    }}
-                  />
-                )}
-                PSRAM&#41;
-              </Typography>
+          <Typography color="secondary">{LL.PLATFORM()}</Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              minWidth: 0
+            }}
+          >
+            <Typography component="span">{platform}</Typography>
+            <Typography
+              component="span"
+              variant="caption"
+              sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                ml: 0.75
+              }}
+            >
+              (
+              {data.psram ? (
+                <CheckIcon color="success" sx={{ fontSize: 16, mx: 0.25 }} />
+              ) : (
+                <CloseIcon color="error" sx={{ fontSize: 16, mx: 0.25 }} />
+              )}
+              PSRAM)
             </Typography>
-          </Grid>
-
-          {data.recovery_version !== undefined && (
-            <>
-              <Grid size={{ xs: 4, md: 2 }}>
-                <Typography color="secondary">{LL.RECOVERY()}</Typography>
-              </Grid>
-              <Grid size={{ xs: 8, md: 10 }}>
-                <Typography>
-                  {data.recovery_version || LL.RECOVERY_NOT_INSTALLED()}
-                </Typography>
-              </Grid>
-            </>
-          )}
-        </Grid>
+          </Box>
+        </Box>
 
         {internetLive ? (
           <>
@@ -743,83 +740,147 @@ const Version = () => {
               {LL.AVAILABLE_VERSION()}
             </Typography>
 
-            <Grid
-              container
-              direction="row"
-              rowSpacing={1}
+            <Box
               sx={{
-                justifyContent: 'flex-start',
-                alignItems: 'baseline'
+                display: 'grid',
+                gridTemplateColumns: 'auto 1fr',
+                columnGap: 3,
+                rowGap: 0.75,
+                alignItems: 'center'
               }}
             >
-              {otherPartitions.length > 0 && data.developer_mode && (
+              {data.developer_mode && (
                 <>
-                  <Grid size={{ xs: 4, md: 2 }}>
-                    <Typography color="secondary">{LL.STORED_VERSIONS()}</Typography>
-                  </Grid>
-                  <Grid size={{ xs: 8, md: 10 }}>
-                    {otherPartitions.map((partition) => (
-                      <Typography key={partition.partition} sx={{ mb: 1 }}>
-                        {partition.version}
-                        <IconButton
-                          onClick={() =>
-                            setPartitionVersionInfo(partition.partition)
-                          }
-                          aria-label={LL.FIRMWARE_VERSION_INFO()}
-                        >
-                          <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
-                        </IconButton>
-                        <Button
-                          sx={{ ml: 0 }}
-                          variant="outlined"
-                          size="small"
-                          onClick={() =>
-                            showPartitionDialog(
-                              partition.version,
-                              partition.partition,
-                              partition.install_date ?? ''
-                            )
-                          }
-                        >
-                          {LL.INSTALL()}
-                        </Button>
+                  {otherPartitions.length > 0 && (
+                    <>
+                      <Typography
+                        color="secondary"
+                        sx={{ alignSelf: 'start', pt: 0.5 }}
+                      >
+                        {LL.STORED_VERSIONS()}
                       </Typography>
-                    ))}
-                  </Grid>
+                      <Box
+                        sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}
+                      >
+                        {otherPartitions.map((partition) => (
+                          <Box
+                            key={partition.partition}
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              flexWrap: 'wrap'
+                            }}
+                          >
+                            <Typography component="span">
+                              {partition.version}
+                            </Typography>
+                            <IconButton
+                              size="small"
+                              onClick={() =>
+                                setPartitionVersionInfo(partition.partition)
+                              }
+                              aria-label={LL.FIRMWARE_VERSION_INFO()}
+                              sx={{ p: 0.5 }}
+                            >
+                              <InfoOutlinedIcon
+                                color="primary"
+                                sx={{ fontSize: 18 }}
+                              />
+                            </IconButton>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              onClick={() =>
+                                showPartitionDialog(
+                                  partition.version,
+                                  partition.partition,
+                                  partition.install_date ?? ''
+                                )
+                              }
+                            >
+                              {LL.INSTALL()}
+                            </Button>
+                          </Box>
+                        ))}
+                      </Box>
+                    </>
+                  )}
+                  {data.recovery_version !== undefined && (
+                    <>
+                      <Typography color="secondary">{LL.RECOVERY()}</Typography>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          flexWrap: 'wrap'
+                        }}
+                      >
+                        <Typography component="span">
+                          {data.recovery_version || LL.RECOVERY_NOT_INSTALLED()}
+                        </Typography>
+                        {data.recovery_version && me.admin && (
+                          <Button
+                            sx={{ ml: 1 }}
+                            variant="outlined"
+                            size="small"
+                            onClick={() => {
+                              const version = data.recovery_version;
+                              if (version) {
+                                showPartitionDialog(version, 'boot', '');
+                              }
+                            }}
+                          >
+                            Boot
+                          </Button>
+                        )}
+                      </Box>
+                      <Box sx={{ gridColumn: '1 / -1', height: 12 }} />
+                    </>
+                  )}
                 </>
               )}
-              <Grid size={{ xs: 4, md: 2 }}>
-                <Typography color="secondary">{LL.STABLE()}</Typography>
-              </Grid>
-              <Grid size={{ xs: 8, md: 10 }}>
-                <Typography>
-                  {latestVersion?.version}
-                  <IconButton
-                    onClick={() => setShowVersionInfo(1)}
-                    aria-label={LL.FIRMWARE_VERSION_INFO()}
-                  >
-                    <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
-                  </IconButton>
-                  {showButtons(false)}
-                </Typography>
-              </Grid>
+              <Typography color="secondary">{LL.STABLE()}</Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  minWidth: 0
+                }}
+              >
+                <Typography component="span">{latestVersion?.version}</Typography>
+                <IconButton
+                  size="small"
+                  onClick={() => setShowVersionInfo(1)}
+                  aria-label={LL.FIRMWARE_VERSION_INFO()}
+                  sx={{ p: 0.5 }}
+                >
+                  <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
+                </IconButton>
+                {showButtons(false)}
+              </Box>
 
-              <Grid size={{ xs: 4, md: 2 }}>
-                <Typography color="secondary">{LL.DEVELOPMENT()}</Typography>
-              </Grid>
-              <Grid size={{ xs: 8, md: 10 }}>
-                <Typography>
-                  {latestDevVersion?.version}
-                  <IconButton
-                    onClick={() => setShowVersionInfo(2)}
-                    aria-label={LL.FIRMWARE_VERSION_INFO()}
-                  >
-                    <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
-                  </IconButton>
-                  {showButtons(true)}
-                </Typography>
-              </Grid>
-            </Grid>
+              <Typography color="secondary">{LL.DEVELOPMENT()}</Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  minWidth: 0
+                }}
+              >
+                <Typography component="span">{latestDevVersion?.version}</Typography>
+                <IconButton
+                  size="small"
+                  onClick={() => setShowVersionInfo(2)}
+                  aria-label={LL.FIRMWARE_VERSION_INFO()}
+                  sx={{ p: 0.5 }}
+                >
+                  <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
+                </IconButton>
+                {showButtons(true)}
+              </Box>
+            </Box>
           </>
         ) : (
           <Typography sx={{ mt: 2 }} color="warning">

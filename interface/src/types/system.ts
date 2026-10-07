@@ -51,7 +51,6 @@ export interface SystemStatus {
   free_caps: number;
   model: string;
   board: string;
-  has_loader: boolean;
   recovery_version?: string;
   has_partition: boolean;
   partitions: {

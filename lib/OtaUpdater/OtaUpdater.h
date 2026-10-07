@@ -16,10 +16,15 @@ class OtaUpdater {
   public:
     enum class FileType : uint8_t { UNSUPPORTED, FIRMWARE, FILESYSTEM, JSON, MD5 };
 
+    // min_firmware_size is for the main EMS-ESP image. Filenames containing "recovery"
+    // (case-insensitive) use MIN_RECOVERY_FIRMWARE_SIZE instead.
     static FileType classify(const String & filename, size_t filesize, size_t min_firmware_size);
 
     // project name in the app description of the recovery firmware, set by custom_fw_name in platformio.ini
     static constexpr char RECOVERY_PROJECT_NAME[] = "EMS-ESP-Recovery";
+
+    // recovery firmware is much smaller than the main image (~512 KB–1 MB)
+    static constexpr size_t MIN_RECOVERY_FIRMWARE_SIZE = 512 * 1024;
 
     // checks the ESP image magic byte and that the chip id matches the chip we're running on
     static bool isCompatibleFirmware(const uint8_t * data, size_t len);
@@ -64,12 +69,21 @@ class OtaUpdater {
     const char *         _error       = "";
 
 #ifdef OTA_UPDATER_ANY_PARTITION
-    // set when writing to an explicit target partition with the IDF OTA API instead of Update
+    // explicit target (factory/boot or an OTA slot) is written with the partition API;
+    // esp_ota_begin() returns ESP_ERR_INVALID_STATE (0x102) on the factory partition
     const esp_partition_t * _target   = nullptr;
-    esp_ota_handle_t        _handle   = 0;
     size_t                  _written  = 0;
+    size_t                  _erased   = 0;
     bool                    _set_boot = true;
     MD5Builder              _md5Builder;
+    // AsyncTCP may hand us PSRAM pointers; ESP32 flash DMA needs internal RAM
+    uint8_t *               _dram      = nullptr;
+    static constexpr size_t DRAM_CHUNK   = 1024;
+    static constexpr size_t FLASH_SECTOR = 4096;
+    char                    _error_buf[48]{};
+
+    void setError(esp_err_t err);
+    void releaseTarget();
 #endif
 };
 

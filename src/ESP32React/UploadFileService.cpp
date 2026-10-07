@@ -8,7 +8,8 @@ UploadFileService::UploadFileService(AsyncWebServer * server, SecurityManager * 
     : _securityManager(securityManager)
     , _is_firmware(false)
     , _is_filesystem(false)
-    , _is_recovery(false) {
+    , _is_recovery(false)
+    , _response_sent(false) {
     server->on(
         UPLOAD_FILE_PATH,
         HTTP_POST,
@@ -31,9 +32,10 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
         // check details of the file, to see if its a valid bin or json file
         const std::size_t filesize = request->contentLength();
 
-        _is_firmware   = false;
-        _is_filesystem = false;
-        _is_recovery   = false;
+        _is_firmware    = false;
+        _is_filesystem  = false;
+        _is_recovery    = false;
+        _response_sent  = false;
 
         switch (OtaUpdater::classify(filename, filesize, emsesp::System::MIN_FIRMWARE_SIZE)) {
         case OtaUpdater::FileType::FILESYSTEM:
@@ -96,6 +98,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
                 }
                 request->onDisconnect([this] { handleDisconnect(); }); // success, let's make sure we end the update if the client hangs up
             } else {
+                emsesp::EMSESP::logger().err("OTA begin failed: %s", _ota.errorString());
                 handleError(request, 507); // failed to begin, send an error response Insufficient Storage
                 return;
             }
@@ -147,6 +150,19 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
 }
 
 void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
+    if (request->_tempObject) {
+        const int code = static_cast<int>(reinterpret_cast<intptr_t>(request->_tempObject));
+        if (!_response_sent && code >= 400) {
+            request->send(request->beginResponse(code));
+            _response_sent = true;
+        }
+        _is_firmware   = false;
+        _is_filesystem = false;
+        _is_recovery   = false;
+        emsesp::EMSESP::system_.systemStatus(emsesp::SYSTEM_STATUS::SYSTEM_STATUS_NORMAL);
+        return;
+    }
+
     emsesp::EMSESP::logger().info("Upload successful");
 
     // did we just complete uploading a json file?
@@ -217,26 +233,25 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
 }
 
 void UploadFileService::handleError(AsyncWebServerRequest * request, int code) {
-    emsesp::EMSESP::logger().info("Upload error: %d", code);
-    emsesp::EMSESP::system_.uart_init(); // re-enable UART
-
     // if we have had an error already, do nothing
     if (request->_tempObject) {
         return;
     }
+    request->_tempObject = reinterpret_cast<void *>(static_cast<intptr_t>(code)); // stop later chunks from retrying the write
 
-    // send the error code to the client and record the error code in the temp object
-    AsyncWebServerResponse * response = request->beginResponse(code);
-    request->send(response);
+    emsesp::EMSESP::logger().info("Upload error: %d", code);
+    emsesp::EMSESP::system_.uart_init(); // re-enable UART
+    _ota.abort();
 
-    // check for invalid extension and immediately kill the connection, which will throw an error
-    // that is caught by the web code. Unfortunately the http error code is not sent to the client on fast network connections
+    // 406: the client sent a file we won't accept. Close now so the browser fails fast.
+    // Other codes wait for uploadComplete() to send, so we don't destroy the request mid-stream.
     if (code == 406) {
+        request->send(request->beginResponse(code));
+        _response_sent = true;
         request->client()->close();
         _is_firmware   = false;
         _is_filesystem = false;
         _is_recovery   = false;
-        _ota.abort();
     }
 
     // if we aborted a filesystem upload, remount LittleFS so the device keeps working
@@ -249,13 +264,10 @@ void UploadFileService::handleDisconnect() {
     emsesp::EMSESP::logger().info("Upload finished");
     emsesp::EMSESP::system_.uart_init(); // re-enable UART
 
-#ifdef EMSESP_HAS_RECOVERY
-    if (_is_recovery) {
-        // the client hung up before the upload completed
-        _ota.abort();
+    _ota.abort();
+    if (_is_recovery || _is_firmware || _is_filesystem) {
         emsesp::EMSESP::system_.systemStatus(emsesp::SYSTEM_STATUS::SYSTEM_STATUS_NORMAL);
     }
-#endif
 
     _is_firmware   = false;
     _is_filesystem = false;

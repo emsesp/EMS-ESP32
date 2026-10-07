@@ -8,24 +8,23 @@ This guide covers testing on hardware of:
 - the fallback to the recovery after repeated crashes;
 - Ethernet and static IP support in the recovery.
 
-It's written for an ESP32-S3 16MB board, since the crash test build is only defined for `s3_16M_P`. Ethernet testing needs an E32V2. Keep a USB serial cable connected with a serial monitor open throughout, as most of the checks are log lines.
+It's written for an ESP32 16MB board with PSRAM (`s_16M_P`, e.g. a BBQKees E32V2). Other 16MB boards (`s_16M`, `s3_16M_P`) follow the same steps with their matching PlatformIO envs; Ethernet is E32V2 only. Keep a USB serial cable connected with a serial monitor open throughout, as most of the checks are log lines.
 
 ## 0. Preparation
 
 Build everything:
 
 ```bash
-pio run -e s3_16M_P -e crashtest_s3_16M_P -e recovery_s3_16M_P
-pio run -e s_16M -e s_16M_P -e s_4M -e recovery_s_16M -e recovery_s_16M_P
+pio run -e s_16M_P -e crashtest_s_16M_P -e recovery_s_16M_P
 ```
 
 The firmware files are written to `build/firmware/`:
 
 | File | What it is |
 | --- | --- |
-| `EMS-ESP-<version>-ESP32S3-16MB+.bin` | EMS-ESP |
-| `EMS-ESP-CrashTest-<version>-ESP32S3-16MB+.bin` | crash test build |
-| `EMS-ESP-Recovery-<version>-ESP32S3-16MB+.bin` | the recovery |
+| `EMS-ESP-<version>-ESP32-16MB+.bin` | EMS-ESP |
+| `EMS-ESP-CrashTest-<version>-ESP32-16MB+.bin` | crash test build |
+| `EMS-ESP-Recovery-<version>-ESP32-16MB+.bin` | the recovery |
 
 Each has a matching `.md5` file.
 
@@ -33,13 +32,13 @@ Then:
 
 1. Run the unit tests with `pio run -e native-test -t exec`. All tests should pass.
 2. Optionally, check the recovery UI against mock data first: `cd interface && pnpm recovery`, then open <http://localhost:3001>.
-3. Open the serial monitor with `pio device monitor -e s3_16M_P`. Recovery log lines start with `[recovery]`.
+3. Open the serial monitor with `pio device monitor -e s_16M_P`. Recovery log lines start with `[recovery]`.
 
 The crash counter is kept in RTC memory. It survives crashes and software restarts but not a power cycle, so don't unplug the board during the crash tests.
 
 ## 1. Baseline: EMS-ESP over serial, no recovery
 
-1. Flash with `pio run -e s3_16M_P -t upload`. This also writes the current bootloader, which has rollback enabled. Boards flashed with an older bootloader don't roll back until they've been flashed over serial once.
+1. Flash with `pio run -e s_16M_P -t upload`. This also writes the current bootloader, which has rollback enabled. Boards flashed with an older bootloader don't roll back until they've been flashed over serial once.
 2. In the WebUI, open **Settings → Version**. Check that:
    - the **Recovery** row shows "not installed";
    - the firmware partition list doesn't include `boot`.
@@ -54,7 +53,7 @@ The crash counter is kept in RTC memory. It survives crashes and software restar
    - the install logged.
 2. Repeat, uploading the `.md5` first and then the `.bin`. The MD5 check should pass.
 3. Negative tests:
-   - Upload the recovery built for another chip, e.g. the ESP32 file on an S3. It should be rejected, and nothing should be written.
+   - Upload the recovery built for another chip, e.g. the ESP32-S3 file on this ESP32. It should be rejected, and nothing should be written.
    - Start a recovery upload and close the browser tab halfway through. EMS-ESP should keep running and the Recovery row should show "not installed". Reinstall it properly afterwards.
 4. Restart EMS-ESP normally. It should boot EMS-ESP again, not the recovery, because installing the recovery doesn't change the boot partition.
 
@@ -67,14 +66,14 @@ The crash counter is kept in RTC memory. It survives crashes and software restar
    - `[recovery] EMS-ESP Recovery v…` is logged;
    - LittleFS is mounted;
    - the access point has started;
-   - WiFi connects.
+   - Ethernet or WiFi connects.
 3. Join the access point. Its name is the AP SSID plus `-recovery` (default `ems-esp-recovery`), and it uses the AP password (default `ems-esp-neo`). Open <http://192.168.4.1>; a captive portal page may open by itself. Alternatively, use the device's normal IP or `http://<hostname>.local` from the LAN.
 4. Sign in with an EMS-ESP admin account (default `admin`/`admin`). A non-admin user must be refused.
 5. On the dashboard, check that:
    - there's **no** red reason box, because the restart was requested;
    - `Recovery (boot)` has the "running" chip;
    - the installed firmware shows the correct version;
-   - the System section shows the chip, flash, MAC, access point, and WiFi with its IP.
+   - the System section shows the chip, flash, MAC, access point, and the active network (Ethernet or WiFi) with its IP.
 6. Click **Restart**. It should come back into the recovery, still without a reason box, since the reason is only shown once.
 7. Click **Start** on the EMS-ESP slot. EMS-ESP should boot, and the Version page should still show the recovery version.
 
@@ -114,7 +113,7 @@ If step 3 ends in a crash loop instead of a rollback, the bootloader on the boar
 
 ## 6. Crash-loop fallback to the recovery (crash test mode 2)
 
-1. In `platformio.ini`, change `-D EMSESP_CRASH_TEST=1` to `=2`, then run `pio run -e crashtest_s3_16M_P`.
+1. In `platformio.ini`, change `-D EMSESP_CRASH_TEST=1` to `=2`, then run `pio run -e crashtest_s_16M_P`.
 2. Upload the crash test build from the WebUI. It runs normally.
 3. Wait for "New firmware confirmed as working", about 2 minutes after boot.
 4. Restart it from the WebUI. It should crash 5 times in a row, logging the "N in a row" count each time.
@@ -128,7 +127,7 @@ If step 3 ends in a crash loop instead of a rollback, the bootloader on the boar
 
 Optional, without a recovery installed:
 
-1. Erase the boot partition with `esptool --chip esp32s3 erase-region 0x10000 0x480000`. Older esptool versions use `erase_region`.
+1. Erase the boot partition with `esptool --chip esp32 erase-region 0x10000 0x480000`. Older esptool versions use `erase_region`.
 2. Repeat steps 2 to 4. It should keep crashing past 5, and needs to be reflashed over serial.
 
 ## 7. Network in the recovery
@@ -136,7 +135,7 @@ Optional, without a recovery installed:
 | Test | Setup | Expected in the recovery |
 | --- | --- | --- |
 | WiFi with static IP | Enable a static IP in the EMS-ESP Network settings, then `restart boot` | Same IP as EMS-ESP, and the WiFi row ends with ", static IP" |
-| Ethernet (E32V2) | Cable plugged in, `recovery_s_16M_P` installed, then `restart boot` | Log shows "Ethernet started" and "Ethernet connected, IP …". The Ethernet row shows "connected", and WiFi shows "not used, Ethernet is connected" |
+| Ethernet | Cable plugged in, then `restart boot` | Log shows "Ethernet started" and "Ethernet connected, IP …". The Ethernet row shows "connected", and WiFi shows "not used, Ethernet is connected" |
 | Ethernet with static IP | As above, with a static IP set | Ethernet uses the static IP and WiFi isn't started |
 | No cable | Unplugged, then `restart boot` | Ethernet shows "no cable connected" and WiFi shows "waiting for Ethernet". After about 15 seconds the log shows "No Ethernet connection" and WiFi connects |
 | Cable plugged in later | Plug in after WiFi has joined | Ethernet gets an IP as well, and WiFi stays connected |
@@ -153,4 +152,4 @@ Optional, without a recovery installed:
 
 ## Reset to a clean state
 
-`pio run -e s3_16M_P -t upload` restores EMS-ESP at any point. It leaves the recovery in `boot` and the settings untouched.
+`pio run -e s_16M_P -t upload` restores EMS-ESP at any point. It leaves the recovery in `boot` and the settings untouched.
