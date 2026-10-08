@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -290,6 +290,8 @@ class EMSESP {
 
     static constexpr uint32_t EMS_FETCH_FREQUENCY = 60000; // check every minute
     static constexpr uint8_t  EMS_WAIT_KM_TIMEOUT = 60;    // wait one minute
+
+    static constexpr uint32_t SYSTEM_STATUS_RESET_TIMEOUT = 300000; // return a non-normal system status to normal after this (in ms) - 5 minutes
 
     struct Device_record {
         uint8_t               product_id;

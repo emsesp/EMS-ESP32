@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,9 +76,9 @@ void WebLogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
         limit_log_messages_ = maximum_log_messages_;
     } else {
         uint32_t maxAlloc = ESP.getMaxAllocHeap();
-        if (limit_log_messages_ > 5 && maxAlloc < (50 * 1024)) { // 50k
+        if (limit_log_messages_ > 5 && maxAlloc < LOG_HEAP_LOW) {
             --limit_log_messages_;
-        } else if (limit_log_messages_ < maximum_log_messages_ && maxAlloc > (60 * 1024)) { //  60k
+        } else if (limit_log_messages_ < maximum_log_messages_ && maxAlloc > LOG_HEAP_HIGH) {
             ++limit_log_messages_;
         }
     }

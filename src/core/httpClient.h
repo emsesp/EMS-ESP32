@@ -29,6 +29,14 @@ class HttpClient {
   public:
     static int request(std::string url, const std::string & method, const std::string & value, JsonObjectConst headers, std::string & result);
 
+    // ESP_SSLClient (BearSSL) settings, shared by every TLS client in the project.
+    // The RX buffer must hold one full TLS record: servers such as GitHub's CDN send up-to-16 KB
+    // records and don't negotiate max_fragment_length, so a smaller buffer can't decode the body
+    static constexpr size_t   TLS_RX_BUFFER_SIZE    = 16384;
+    static constexpr size_t   TLS_TX_BUFFER_SIZE    = 1024;
+    static constexpr uint32_t TLS_SESSION_TIMEOUT_S = 120; // in seconds, the library minimum
+    static constexpr uint32_t TLS_READ_TIMEOUT_S    = 5;   // in seconds, not ms like the socket timeouts
+
   private:
     static constexpr uint32_t CONNECT_TIMEOUT_MS    = 5000;  // TCP connect, the core defaults to 3s
     static constexpr uint32_t FIRST_BYTE_TIMEOUT_MS = 8000;  // how long the server may take to start replying

@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,12 +44,16 @@ class Heatpump : public EMSdevice {
     uint8_t heatingPumpMod_;
     uint8_t hpCompSpd_;
     uint8_t hpActivity_;
+    uint8_t hpCompSpdER1_; // TODO: could be same as hpCompSpd_ ?
 
     uint16_t hpPower_;
     uint16_t hpCurrPower_;
+    uint16_t hpPumpFlow_;
+    uint8_t  hpSpeedSetpoint_;
 
     // Function test
     uint8_t airPurgeMode_;
+    uint8_t smartGridMode_;
     uint8_t heatPumpOutput_;
     uint8_t coolingCircuit_;
     uint8_t compStartMod_;
@@ -102,6 +106,8 @@ class Heatpump : public EMSdevice {
     void process_HpEnergy1(const std::shared_ptr<const Telegram> & telegram);
     void process_HpEnergy2(const std::shared_ptr<const Telegram> & telegram);
     void process_HpPower(const std::shared_ptr<const Telegram> & telegram);
+    void process_HPVolume(const std::shared_ptr<const Telegram> & telegram);
+    void process_HPComp2(const std::shared_ptr<const Telegram> & telegram);
 
     bool set_controlStrategy(const char * value, const int8_t id);
     bool set_lowNoiseMode(const char * value, const int8_t id);

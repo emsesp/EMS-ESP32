@@ -14,21 +14,22 @@ permissions:
 jobs:
   pre-release:
     name: 'Build Dev Release'
+    if: github.event_name == 'workflow_dispatch' || github.repository == 'emsesp/EMS-ESP32'
     runs-on: ubuntu-latest
     steps:
         
       - name: Install python 3.13
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.13'
 
       - name: Install Node.js 26
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 26
 
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
   

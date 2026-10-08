@@ -71,7 +71,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
             _is_filesystem = true;
             _md5[0]        = '\0'; // clear any stale md5 so Update.end() doesn't compare against it
             _md5_applied   = false;
-        } else if ((extension == "bin") && (filesize > 1000000)) {
+        } else if ((extension == "bin") && (filesize >= emsesp::System::MIN_FIRMWARE_SIZE)) {
             _is_firmware = true;
         } else if (extension == "json") {
             _md5[0]      = '\0'; // clear md5

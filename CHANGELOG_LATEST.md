@@ -4,7 +4,7 @@ For more details go to [emsesp.org](https://emsesp.org/).
 
 ## [3.9.0]
 
-This release is based on the latest Espressif/Arduino core version 3. It brings in many memory and performance optimizations. Note it does require the user to manually migrate settings from 3.8.x to 3.9.0.
+This release is based on the latest Espressif/Arduino core version 3. It brings in many memory and performance optimizations.
 
 ## Added
 
@@ -19,6 +19,7 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - `show system` reports the Ethernet status on boards with a PHY, so a failed initialisation or a link that never came up is visible instead of Ethernet being omitted completely. Also shows the loop task's lowest free stack, to help diagnose reboots
 - new Application Setting "Automatically check for firmware updates", off by default. When enabled EMS-ESP asks emsesp.org for the latest version once a day on its own, otherwise it only asks when the WebUI wants to show it, so an unattended system never contacts emsesp.org
 - Automatically check and convert older 3.8.x filesystem to the new 3.9.0 format
+- heatpump pool: `poolon` (switch, 0x48A), `hppoolon` (pool heating active, 0x488), MP100 `poolshuntset` (0x5C4) and `poolrequest` (0x5BA), shorter pool names
 
 ## Fixed
 
@@ -56,4 +57,5 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - multiple optimization in network, power down WiFi when Ethernet and WiFi nosleep is instant when selected [#3213](https://github.com/emsesp/EMS-ESP32/pull/3213)
 - TLS buffers (~17KB per HTTPS request) are taken from PSRAM on boards that have it, instead of fragmenting the internal heap
 - failed versions.json fetches back off from 5 up to 160 minutes instead of retrying every 5 minutes, as each attempt blocks the main loop for as long as the DNS, connect and read timeouts allow
+- optimized the LED library to support WS2812B V5 and the newer V6 RGB LEDs
 

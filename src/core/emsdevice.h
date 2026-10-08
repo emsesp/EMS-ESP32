@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -440,6 +440,9 @@ class EMSdevice {
     };
 
     static constexpr uint8_t EMS_DEVICES_MAX_TELEGRAMS = 20;
+
+    // keep fetching telegrams the bus master doesn't recognise for this long after boot, then give up (in seconds) - 10 minutes
+    static constexpr uint32_t FETCH_RETRY_DURATION_SEC = 600;
 
     // static device IDs
     static constexpr uint8_t EMS_DEVICE_ID_BOILER         = 0x08; // fixed device_id for Master Boiler/UBA

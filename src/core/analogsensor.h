@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -189,8 +189,10 @@ class AnalogSensor {
     static constexpr double   T25                     = 298.15;
     static constexpr double   R0                      = 100000;
     static constexpr double   Rt                      = 60000;
+    static constexpr uint32_t NTC_VREF_MV             = 3300; // NTC voltage divider supply (in mV) - 3.3 V
     static constexpr uint8_t  MAX_SENSORS             = 20;
     static constexpr uint32_t MEASURE_ANALOG_INTERVAL = 500;
+    static constexpr uint32_t FREQ_ZERO_TIMEOUT_US    = 10000000; // report 0 Hz if no edge arrives for this long (in us) - 10 seconds
 
     static uuid::log::Logger logger_;
     void                     remove_ha_topic(const int8_t type, const uint8_t id) const;

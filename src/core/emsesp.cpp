@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1210,7 +1210,9 @@ bool EMSESP::process_telegram(const std::shared_ptr<const Telegram> & telegram) 
     // check all conditions in one loop
     for (const auto & emsdevice : emsdevices) {
         if ((emsdevice->is_device_id(telegram->src) && (telegram->dest == 0 || telegram->dest == EMSbus::ems_bus_id() || telegram->dest == 0x10))
-            || (emsdevice->is_device_id(telegram->dest) && telegram->src != EMSbus::ems_bus_id())) {
+            || (emsdevice->is_device_id(telegram->dest) && telegram->src != EMSbus::ems_bus_id())
+            // the MP100 sends its full status only to the heatpump
+            || (emsdevice->device_type() == EMSdevice::DeviceType::POOL && emsdevice->is_device_id(telegram->src))) {
             found_device = emsdevice.get();
             if (emsdevice->handle_telegram(telegram)) {
                 telegram_found = true;
@@ -1774,6 +1776,15 @@ void EMSESP::start() {
     // start web log service. now we can start capturing logs to the web log
     webLogService.begin();
 
+#ifndef EMSESP_STANDALONE
+    // apply any uploaded settings before any service loads them from the filesystem
+    if (system_.check_restore()) {
+        root             = LittleFS.open(EMSESP_SETTINGS_FILE);
+        factory_settings = !root;
+        root.close();
+    }
+#endif
+
     // loads core system services settings (mqtt, ap, ntp etc)
     esp32React.begin();
 
@@ -1827,14 +1838,6 @@ void EMSESP::start() {
     LOG_INFO("Last system reset reason Core0: %s", system_.reset_reason(0).c_str());
 #else
     LOG_INFO("Last system reset reason Core0: %s, Core1: %s", system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
-#endif
-
-// see if we're restoring a settings file
-#ifndef EMSESP_STANDALONE
-    if (system_.check_restore()) {
-        LOG_WARNING("EMS-ESP will restart to apply new settings. Please wait.");
-        system_.system_restart();
-    };
 #endif
 
     webSettingsService.begin(); // load EMS-ESP Application settings
@@ -1978,12 +1981,12 @@ void EMSESP::loop() {
         }
     }
 
-    // reset status after 5 Minutes
+    // reset status after a timeout
     if (EMSESP::system_.systemStatus() != SYSTEM_STATUS::SYSTEM_STATUS_NORMAL) {
         static uint32_t starttime = 0;
         if (starttime == 0) {
             starttime = uuid::get_uptime_ms();
-        } else if (uuid::get_uptime_ms() - starttime > 300000) {
+        } else if (uuid::get_uptime_ms() - starttime > SYSTEM_STATUS_RESET_TIMEOUT) {
             starttime = 0;
             EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_NORMAL);
         }

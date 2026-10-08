@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
+ 
+ * Broadcast (0x099A), data: 05 00 00 00 00 00 00 37 00 00 1D 00 00 52 00 00 13 01 00 01 7C
+ * Broadcast (0x099B), data: 80 00 80 00 01 3C 01 38 80 00 80 00 80 00 01 37 00 00 00 00 64
+ * Broadcast (0x099C), data: 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 76 00 00
+                       data: 00 2B 00 03 04 13 00 00 00 00 00 02 02 02 (offset 24)
+ * Broadcast (0x099D), data: 02 02 00 00 02 00 01 38 00 00 63 03 E8 00 00 00 00
+ * Broadcast (0x099E), data: 03
+ * Broadcast (0x099F), data 05 4E 20 00 00 00 00 02 00 01 34 00 00 3F 00 00 5C 00 01 DD 00 01 37 00
+                       data 00 3F 00 00 5D 00 00 57 00 02 23 00 01 3D 02 80 00 5A 01 86 01 68 00 00 C0 (offset 24)
+                       data 00 00 00 00 (offset 49)
+ * Broadcast (0x09A0), data: 02 23 01 3E 01 39 00 5D 01 DE 01 38 00 40 00 5E 00 58 00 3F 01 34 00 02
+ * Broadcast (0x09A2), data: 00 00 00 00
+ * Broadcast (0x09A3), data: 01 01 01 00 0A 01 0A 00 00 00 00 00 00 01 01 00 00 (offset 2)
+ * Broadcast (0x09A4), data: 00 35 00 00 01 42 00 00 00 00 30 01 00 00 00 00 00 00 00 00 00 00 00 00 00
+                       data: 02 (offset 25)
+ * Broadcast (0x09A5), data: 00 00 00 00 00 00 00 00 0A 01 00 01 03 03 00 5A 00 00 00 00 00 00 00 00 14
+                       data: 00 00 00 (offset 25)
+ * Broadcast (0x09A6), data: 05 01 00 01 F4 1F 01 1F 01 01 03 00 3F 00 00 00 19 64 00 3C 00 01 01 19
+                       data: 02 EC 01 19 00 (offset 24)
+ * Broadcast (0x09A8), data: 01 18 01 00 01 17 00 06 00 00 86 06 00 2E 07 D0 00 00 00 45 00 04
+ 
+*/
+
 #include "heatpump.h"
 
 namespace emsesp {
@@ -26,8 +50,7 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     // telegram handlers
     // register_telegram_type(0x042B, "HP1", false, MAKE_PF_CB(process_HPMonitor1));
-    register_telegram_type(0x047B, "HP2", false, MAKE_PF_CB(process_HPMonitor2));
-
+    register_telegram_type(0x47B, "HP2", false, MAKE_PF_CB(process_HPMonitor2));
     register_telegram_type(0x998, "HPSettings", true, MAKE_PF_CB(process_HPSettings), 20);
     register_telegram_type(0x999, "HPFunctionTest", true, MAKE_PF_CB(process_HPFunctionTest), 11);
     register_telegram_type(0x9A0, "HPTemperature", false, MAKE_PF_CB(process_HPTemperature));
@@ -38,6 +61,9 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
     register_telegram_type(0x99A, "HPStarts", false, MAKE_PF_CB(process_HpStarts));
     register_telegram_type(0x12E, "HPEnergy1", false, MAKE_PF_CB(process_HpEnergy1));
     register_telegram_type(0x13B, "HPEnergy2", false, MAKE_PF_CB(process_HpEnergy2));
+    register_telegram_type(0x4AA, "HPPower", false, MAKE_PF_CB(process_HpPower));
+    register_telegram_type(0x9A8, "HPVolume", false, MAKE_PF_CB(process_HPVolume));
+    register_telegram_type(0x99D, "HPComp2", false, MAKE_PF_CB(process_HPComp2));
     register_telegram_type(0x4AA, "HPPower", false, MAKE_PF_CB(process_HpPower));
 
     // device values
@@ -73,6 +99,17 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpActivity_, DeviceValueType::ENUM, FL_(enum_hpactivity1), FL_(hpActivity), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpPower_, DeviceValueType::UINT16, FL_(hpPower), DeviceValueUOM::W);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpCurrPower_, DeviceValueType::UINT16, FL_(hpCurrPower), DeviceValueUOM::W);
+
+    // https://github.com/emsesp/EMS-ESP32/issues/3196
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &hpPumpFlow_,
+                          DeviceValueType::UINT16,
+                          DeviceValueNumOp::DV_NUMOP_MUL10,
+                          FL_(hpPumpFlow),
+                          DeviceValueUOM::LH);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpCompSpdER1_, DeviceValueType::UINT8, FL_(hpCompSpdER1), DeviceValueUOM::PERCENT);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpSpeedSetpoint_, DeviceValueType::UINT8, FL_(hpSpeedSetpoint), DeviceValueUOM::PERCENT);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &smartGridMode_, DeviceValueType::UINT8, FL_(smartGridMode), DeviceValueUOM::NONE);
 
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &controlStrategy_,
@@ -220,16 +257,17 @@ void Heatpump::process_HPMonitor1(const std::shared_ptr<const Telegram> & telegr
 // 0x09A0
 // Heatpump(0x53) -> All(0x00), ?(0x09A0), data: 02 23 01 3E 01 39 00 5D 01 DE 01 38 00 40 00 5E 00 58 00 3F 01 34 00 02
 void Heatpump::process_HPTemperature(const std::shared_ptr<const Telegram> & telegram) {
-    has_update(telegram, hpTc3_, 2);  // condenser temp.
-    has_update(telegram, hpTr1_, 8);  // compressor temp.
-    has_update(telegram, hpTr3_, 10); // cond. temp. heating
-    has_update(telegram, hpTr4_, 12); // cond. temp. clg
-    has_update(telegram, hpTr5_, 14); // suction line temp.
-    has_update(telegram, hpTr6_, 0);  // hot gas temp.
-    has_update(telegram, hpTl2_, 6);  // inlet air temperature
-    has_update(telegram, hpTa4_, 16); // drain pan temp.
-    has_update(telegram, hpJr0_, 18); // low pressure sensor
-    has_update(telegram, hpJr1_, 20); // high pressure sensor
+    has_update(telegram, hpTc3_, 2);         // condenser temp.
+    has_update(telegram, hpTr1_, 8);         // compressor temp.
+    has_update(telegram, hpTr3_, 10);        // cond. temp. heating
+    has_update(telegram, hpTr4_, 12);        // cond. temp. clg
+    has_update(telegram, hpTr5_, 14);        // suction line temp.
+    has_update(telegram, hpTr6_, 0);         // hot gas temp.
+    has_update(telegram, hpTl2_, 6);         // inlet air temperature
+    has_update(telegram, hpTa4_, 16);        // drain pan temp.
+    has_update(telegram, hpJr0_, 18);        // low pressure sensor
+    has_update(telegram, hpJr1_, 20);        // high pressure sensor
+    has_update(telegram, hpCompSpdER1_, 22); // compressor speed ER1
 }
 
 // 0x099B
@@ -298,6 +336,7 @@ void Heatpump::process_HpStarts(const std::shared_ptr<const Telegram> & telegram
     has_update(telegram, hpActivity_, 2); // https://github.com/emsesp/EMS-ESP32/issues/2883
     has_update(telegram, heatStartsHp_, 11, 3);
     has_update(telegram, wwStartsHp_, 14, 3);
+    has_update(telegram, smartGridMode_, 17); // smart grid mode
 }
 
 // 0x0112E energy consumption
@@ -320,28 +359,22 @@ void Heatpump::process_HpPower(const std::shared_ptr<const Telegram> & telegram)
     has_update(telegram, hpCurrPower_, 0);
 }
 
-/*
- * Broadcast (0x099A), data: 05 00 00 00 00 00 00 37 00 00 1D 00 00 52 00 00 13 01 00 01 7C
- * Broadcast (0x099B), data: 80 00 80 00 01 3C 01 38 80 00 80 00 80 00 01 37 00 00 00 00 64
- * Broadcast (0x099C), data: 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 76 00 00
-                       data: 00 2B 00 03 04 13 00 00 00 00 00 02 02 02 (offset 24)
- * Broadcast (0x099D), data: 02 02 00 00 02 00 01 38 00 00 63 03 E8 00 00 00 00
- * Broadcast (0x099E), data: 03
- * Broadcast (0x099F), data 05 4E 20 00 00 00 00 02 00 01 34 00 00 3F 00 00 5C 00 01 DD 00 01 37 00
-                       data 00 3F 00 00 5D 00 00 57 00 02 23 00 01 3D 02 80 00 5A 01 86 01 68 00 00 C0 (offset 24)
-                       data 00 00 00 00 (offset 49)
- * Broadcast (0x09A0), data: 02 23 01 3E 01 39 00 5D 01 DE 01 38 00 40 00 5E 00 58 00 3F 01 34 00 02
- * Broadcast (0x09A2), data: 00 00 00 00
- * Broadcast (0x09A3), data: 01 01 01 00 0A 01 0A 00 00 00 00 00 00 01 01 00 00 (offset 2)
- * Broadcast (0x09A4), data: 00 35 00 00 01 42 00 00 00 00 30 01 00 00 00 00 00 00 00 00 00 00 00 00 00
-                       data: 02 (offset 25)
- * Broadcast (0x09A5), data: 00 00 00 00 00 00 00 00 0A 01 00 01 03 03 00 5A 00 00 00 00 00 00 00 00 14
-                       data: 00 00 00 (offset 25)
- * Broadcast (0x09A6), data: 05 01 00 01 F4 1F 01 1F 01 01 03 00 3F 00 00 00 19 64 00 3C 00 01 01 19
-                       data: 02 EC 01 19 00 (offset 24)
- * Broadcast (0x09A8), data: 01 18 01 00 01 17 00 06 00 00 86 06 00 2E 07 D0 00 00 00 45 00 04
- 
-*/
+// https://github.com/emsesp/EMS-ESP32/issues/3196
+// 0x09A8 HPVolume
+// Broadcast (0x09A8), data: 01 18 01 00 01 17 00 06 00 00 86 06 00 2E 07 D0 00 00 00 45 00 04
+void Heatpump::process_HPVolume(const std::shared_ptr<const Telegram> & telegram) {
+    has_update(telegram, hpPumpFlow_, 12);
+}
+
+// 0x099D HPComp2
+// Broadcast (0x099D), data: 02 02 00 00 02 00 01 38 00 00 63 03 E8 00 00 00 00
+void Heatpump::process_HPComp2(const std::shared_ptr<const Telegram> & telegram) {
+    has_update(telegram, hpSpeedSetpoint_, 8);
+}
+
+//
+// Setters
+//
 
 bool Heatpump::set_controlStrategy(const char * value, const int8_t id) {
     uint8_t v;

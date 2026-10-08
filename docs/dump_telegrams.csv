@@ -77,7 +77,7 @@ telegram_type_id,name,is_fetched
 0x0103,ISM1StatusMessage,fetched
 0x0104,ISM2StatusMessage, 
 0x010C,IPMStatusMessage, 
-0x011E,JunkersDisp,fetched
+0x011E,IPMTempMessage, 
 0x012E,HPEnergy1, 
 0x013B,HPEnergy2, 
 0x0165,JunkersSet, 
@@ -104,7 +104,7 @@ telegram_type_id,name,is_fetched
 0x0292,HPMode,fetched
 0x0293,HPMode,fetched
 0x0294,HPMode,fetched
-0x029B,RC300Curves,fetched
+0x029B,RC300Curves, 
 0x029C,RC300Curves, 
 0x029D,RC300Curves, 
 0x029E,RC300Curves, 
@@ -112,7 +112,7 @@ telegram_type_id,name,is_fetched
 0x02A0,RC300Curves, 
 0x02A1,RC300Curves, 
 0x02A2,RC300Curves, 
-0x02A5,RC300Monitor, 
+0x02A5,EasyMonitor, 
 0x02A6,RC300Monitor, 
 0x02A7,RC300Monitor, 
 0x02A8,RC300Monitor, 
@@ -209,6 +209,7 @@ telegram_type_id,name,is_fetched
 0x0585,Blowerspeed, 
 0x0587,Bypass, 
 0x05BA,HpPoolStatus,fetched
+0x05C4,HpPoolShunt, 
 0x05D9,Airquality, 
 0x0772,HIUSettings, 
 0x0779,HIUMonitor, 
@@ -232,4 +233,6 @@ telegram_type_id,name,is_fetched
 0x099A,HPStarts, 
 0x099B,HPFlowTemp, 
 0x099C,HPComp, 
+0x099D,HPComp2, 
 0x09A0,HPTemperature, 
+0x09A8,HPVolume, 

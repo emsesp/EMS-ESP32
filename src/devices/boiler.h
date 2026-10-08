@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -213,7 +213,7 @@ class Boiler : public EMSdevice {
     // uint8_t  hpHeatingOn_;
     // uint8_t  hpCoolingOn_;
     // uint8_t  hpWwOn_;
-    // uint8_t  hpPoolOn_;
+    uint8_t  hpPoolOn_;
     int16_t  hpTc0_;
     int16_t  hpTc1_;
     int16_t  hpTc3_;
@@ -253,7 +253,8 @@ class Boiler : public EMSdevice {
     uint8_t  hpTargetSpd_;
 
     // Pool unit
-    int8_t poolSetTemp_;
+    uint8_t poolOn_;
+    int8_t  poolSetTemp_;
 
     // Inputs
     struct {
@@ -465,6 +466,7 @@ class Boiler : public EMSdevice {
     bool set_ww_hyst_on(const char * value, const int8_t id);
     bool set_ww_hyst_off(const char * value, const int8_t id);
     bool set_pool_temp(const char * value, const int8_t id);
+    bool set_pool_on(const char * value, const int8_t id);
     bool set_emergency_temp(const char * value, const int8_t id);
     bool set_emergency_ops(const char * value, const int8_t id);
 

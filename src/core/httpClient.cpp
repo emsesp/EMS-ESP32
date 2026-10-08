@@ -66,13 +66,13 @@ int HttpClient::request(std::string url, const std::string & method, const std::
         ssl_client->setInsecure();
         // Notes: with root CA we should set here: ssl_client->setCACert(rootCACert);
         // 1 KB RX buffer is fine for small JSON-style endpoints used by the scheduler/shunting-yard but it is NOT enough for servers that send full-size TLS records (>1 KB)
-        ssl_client->setBufferSizes(16384, 1024);
-        ssl_client->setSessionTimeout(120); // Set the timeout in seconds (>=120 seconds)
+        ssl_client->setBufferSizes(TLS_RX_BUFFER_SIZE, TLS_TX_BUFFER_SIZE);
+        ssl_client->setSessionTimeout(TLS_SESSION_TIMEOUT_S);
     }
     // WiFiClient is NetworkClient, which declares no setTimeout() of its own - calling it binds to
     // Stream::setTimeout() and only affects readBytes(), leaving the socket on the core's 3s default
     basic_client->setConnectionTimeout(CONNECT_TIMEOUT_MS);
-    ssl_client->setTimeout(5);                     // seconds, drives BearSSL only - unused on the plain HTTP path
+    ssl_client->setTimeout(TLS_READ_TIMEOUT_S);    // drives BearSSL only - unused on the plain HTTP path
     ssl_client->setClient(basic_client, is_https); // enableSSL = false for plain HTTP
 
     const uint16_t port = is_https ? 443 : 80;

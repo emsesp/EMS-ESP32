@@ -27,7 +27,7 @@ ifeq ($(UNAME_S),Linux)
 	JOBS := $(shell nproc)
 endif
 ifeq ($(UNAME_S),Darwin)
-    EXTRA_CPPFLAGS = -D OSX -Wno-tautological-constant-out-of-range-compare
+    EXTRA_CPPFLAGS = -D OSX -Wno-tautological-constant-out-of-range-compare -Wno-unused-lambda-capture
 	JOBS := $(shell sysctl -n hw.ncpu)
 endif
 
