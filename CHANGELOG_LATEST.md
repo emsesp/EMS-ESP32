@@ -37,10 +37,12 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - HA Discovery warning on Uptime after EMS-ESP boot due to NTP not ready
 - hc/control setting for UI800 thermostats [#3181](https://github.com/emsesp/EMS-ESP32/discussions/3181)
 - solar module switches [#3223](https://github.com/emsesp/EMS-ESP32/issues/3223)
+- UI800/HMI800.2 thermostats without telegram 0x470 reported `summertemp` as 0 and lost the per-hc heat/cool delays. `summermode` is now also shown for UI800 heatpumps [#3257](https://github.com/emsesp/EMS-ESP32/issues/3257)
 - possible crash when the WebUI asked for version information while the versions.json refresh was rewriting the cache from the main loop task
 - HTTP client could write past a fixed 64 byte buffer when a URL had a hostname of 64 characters or more, could busy-spin for the whole read budget if the socket reported bytes it wouldn't return, and buffered responses without any size limit
 - the "Ethernet clock mode (GPIO16/17) conflicts with PSRAM" error was never logged because Ethernet had already been skipped by the time the check ran
 - heat limit entities (`maxheatcomp`, `maxheatheat`, `dhw.maxheat`) read as unknown on heat pumps with an auxiliary heater larger than 9 kW - `enum_maxHeat` was missing the 12 kW and 15 kW steps
+- no EMS bus on custom boards whose interface relies on a pull-up on the Rx line. The newer ESP-IDF no longer enables the internal pull-up on the UART Rx pin, so it is now set explicitly as it was in 3.8 [#3258](https://github.com/emsesp/EMS-ESP32/discussions/3258)
 
 ## Changed
 
@@ -58,4 +60,4 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - TLS buffers (~17KB per HTTPS request) are taken from PSRAM on boards that have it, instead of fragmenting the internal heap
 - failed versions.json fetches back off from 5 up to 160 minutes instead of retrying every 5 minutes, as each attempt blocks the main loop for as long as the DNS, connect and read timeouts allow
 - optimized the LED library to support WS2812B V5 and the newer V6 RGB LEDs
-
+- hold Tx while a K30RF/KM200 gateway is syncing [#3094](https://github.com/emsesp/EMS-ESP32/issues/3094)

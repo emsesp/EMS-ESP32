@@ -181,9 +181,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(set_typeids[i], "RC300Set", false, MAKE_PF_CB(process_RC300Set), 29);
             register_telegram_type(summer_typeids[i], "RC300Summer", false, MAKE_PF_CB(process_RC300Summer), 14);
             register_telegram_type(curve_typeids[i], "RC300Curves", false, MAKE_PF_CB(process_RC300Curve), 9);
-            if (model != EMSdevice::EMS_DEVICE_FLAG_UI800) {
-                register_telegram_type(summer2_typeids[i], "RC300Summer2", false, MAKE_PF_CB(process_RC300Summer2), 8);
-            }
+            register_telegram_type(summer2_typeids[i], "RC300Summer2", false, MAKE_PF_CB(process_RC300Summer2), 8);
         }
         const size_t set2_size = set2_typeids.size();
         for (uint8_t i = 0; i < set2_size; i++) {
@@ -1182,7 +1180,12 @@ void Thermostat::process_RC300Monitor(const std::shared_ptr<const Telegram> & te
         has_update(hc->hpoperatingstate, EMS_VALUE_UINT8_NOTSET);
     } else {
         has_enumupdate(telegram, hc->hpoperatingstate, 20, 1); // 1:heating, 2:off, 3:cooling
-        has_update(hc->summermode, EMS_VALUE_UINT8_NOTSET);
+        // UI800 heatpumps report a valid summer bit, older RC300 heatpumps don't, #3257
+        if (model() == EMSdevice::EMS_DEVICE_FLAG_UI800) {
+            has_update(hc->summermode, hc->statusbyte & 0x50 ? 1 : 0);
+        } else {
+            has_update(hc->summermode, EMS_VALUE_UINT8_NOTSET);
+        }
     }
     has_update(telegram, hc->targetflowtemp, 4);
     has_update(telegram, hc->curroominfl, 27);
@@ -1256,7 +1259,7 @@ void Thermostat::process_RC300Summer(const std::shared_ptr<const Telegram> & tel
     has_update(telegram, hc->roominfl_factor, 1); // is * 10
     has_update(telegram, hc->offsettemp, 2);
     has_update(telegram, hc->solarInfl, 3);
-    if (!is_received(summer2_typeids[hc->hc()])) {
+    if (!is_received(summer2_typeids[hc->hc()]) && !has_summer3()) {
         has_update(telegram, hc->summertemp, 6);
         has_update(telegram, hc->summersetmode, 7);
     }
@@ -1272,6 +1275,11 @@ void Thermostat::process_RC300Summer(const std::shared_ptr<const Telegram> & tel
     has_update(telegram, hc->fastHeatup, 10);
     has_update(telegram, hc->comfortPointOffset, 11);
     has_update(telegram, hc->comfortPointTemp, 12);
+}
+
+// some UI800 (e.g. HMI800.2) don't send 0x470 and use the per-hc 0x471 ff instead, #3257
+bool Thermostat::has_summer3() const {
+    return model() == EMSdevice::EMS_DEVICE_FLAG_UI800 && is_received(0x470);
 }
 
 // type 0x470, only BC400/UI800
@@ -2654,7 +2662,7 @@ bool Thermostat::set_coolondelay(const char * value, const int8_t id) {
     if (!Helpers::value2float(value, f)) {
         return false;
     }
-    if (model() == EMSdevice::EMS_DEVICE_FLAG_UI800) {
+    if (has_summer3()) {
         write_command(0x470, 6, (uint8_t)(f * 4), 0x470);
         return true;
     }
@@ -2671,7 +2679,7 @@ bool Thermostat::set_cooloffdelay(const char * value, const int8_t id) {
     if (!Helpers::value2float(value, f)) {
         return false;
     }
-    if (model() == EMSdevice::EMS_DEVICE_FLAG_UI800) {
+    if (has_summer3()) {
         write_command(0x470, 7, (uint8_t)(f * 4), 0x470);
         return true;
     }
@@ -3438,7 +3446,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const int8_t id) {
 // sets the thermostat summermode for RC300
 bool Thermostat::set_summermode(const char * value, const int8_t id) {
     uint8_t set;
-    if (model() == EMSdevice::EMS_DEVICE_FLAG_UI800) {
+    if (has_summer3()) {
         if (Helpers::value2enum(value, set, FL_(enum_summermode))) {
             write_command(0x470, 0, set, 0x470);
             return true;
@@ -3599,7 +3607,7 @@ bool Thermostat::set_heatondelay(const char * value, const int8_t id) {
     if (!Helpers::value2float(value, f)) {
         return false;
     }
-    if (model() == EMSdevice::EMS_DEVICE_FLAG_UI800) {
+    if (has_summer3()) {
         write_command(0x470, 2, (uint8_t)(f * 4), 0x470);
         return true;
     }
@@ -3616,7 +3624,7 @@ bool Thermostat::set_heatoffdelay(const char * value, const int8_t id) {
     if (!Helpers::value2float(value, f)) {
         return false;
     }
-    if (model() == EMSdevice::EMS_DEVICE_FLAG_UI800) {
+    if (has_summer3()) {
         write_command(0x470, 3, (uint8_t)(f * 4), 0x470);
         return true;
     }
@@ -3633,7 +3641,7 @@ bool Thermostat::set_instantstart(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, v)) {
         return false;
     }
-    if (model() == EMSdevice::EMS_DEVICE_FLAG_UI800) {
+    if (has_summer3()) {
         write_command(0x470, 4, (uint8_t)v, 0x470);
         return true;
     }
@@ -4163,7 +4171,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
         validate_typeid = set_typeids[hc->hc()];
         switch (mode) {
         case HeatingCircuit::Mode::SUMMER:
-            if (model == EMSdevice::EMS_DEVICE_FLAG_UI800) {
+            if (has_summer3()) {
                 write_command(0x470, 1, temperature, 0x470);
                 return true;
             }
@@ -4178,7 +4186,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             factor          = 1;
             break;
         case HeatingCircuit::Mode::COOLSTART:
-            if (model == EMSdevice::EMS_DEVICE_FLAG_UI800) {
+            if (has_summer3()) {
                 write_command(0x470, 5, temperature, 0x470);
                 return true;
             }
@@ -5206,14 +5214,12 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                                   101);
             register_device_value(tag, &hc->remotehum, DeviceValueType::CMD, FL_(remotehum), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_remotehum), -1, 101);
         }
-        if (model != EMSdevice::EMS_DEVICE_FLAG_UI800) {
-            register_device_value(tag, &hc->heatondelay, DeviceValueType::UINT8, FL_(heatondelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_heatondelay), 1, 48);
-            register_device_value(tag, &hc->heatoffdelay, DeviceValueType::UINT8, FL_(heatoffdelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_heatoffdelay), 1, 48);
-            register_device_value(tag, &hc->coolondelay, DeviceValueType::UINT8, FL_(coolondelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_coolondelay), 1, 48);
-            register_device_value(tag, &hc->cooloffdelay, DeviceValueType::UINT8, FL_(cooloffdelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_cooloffdelay), 1, 48);
-            register_device_value(tag, &hc->instantstart, DeviceValueType::UINT8, FL_(instantstart), DeviceValueUOM::K, MAKE_CF_CB(set_instantstart), 1, 10);
-            register_device_value(tag, &hc->coolstart, DeviceValueType::UINT8, FL_(coolstart), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_coolstart), 20, 35);
-        }
+        register_device_value(tag, &hc->heatondelay, DeviceValueType::UINT8, FL_(heatondelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_heatondelay), 1, 48);
+        register_device_value(tag, &hc->heatoffdelay, DeviceValueType::UINT8, FL_(heatoffdelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_heatoffdelay), 1, 48);
+        register_device_value(tag, &hc->coolondelay, DeviceValueType::UINT8, FL_(coolondelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_coolondelay), 1, 48);
+        register_device_value(tag, &hc->cooloffdelay, DeviceValueType::UINT8, FL_(cooloffdelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_cooloffdelay), 1, 48);
+        register_device_value(tag, &hc->instantstart, DeviceValueType::UINT8, FL_(instantstart), DeviceValueUOM::K, MAKE_CF_CB(set_instantstart), 1, 10);
+        register_device_value(tag, &hc->coolstart, DeviceValueType::UINT8, FL_(coolstart), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_coolstart), 20, 35);
         register_device_value(tag, &hc->boost, DeviceValueType::BOOL, FL_(boost), DeviceValueUOM::NONE, MAKE_CF_CB(set_boost));
         register_device_value(tag, &hc->boosttime, DeviceValueType::UINT8, FL_(boosttime), DeviceValueUOM::HOURS, MAKE_CF_CB(set_boosttime));
         register_device_value(tag,

@@ -558,6 +558,16 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
 
 // send a Tx telegram to request data from an EMS device
 void TxService::read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t length, const bool front) {
+#ifdef EMSESP_GATEWAY_TX_HOLD
+    // while Tx is held the queue isn't drained, so periodic triggers (e.g. UBADevices) would stack up identical reads
+    for (const auto & queued : tx_telegrams_) {
+        const auto & t = queued.telegram_;
+        if (t->operation == Telegram::Operation::TX_READ && t->dest == dest && t->type_id == type_id && t->offset == offset) {
+            LOG_DEBUG("Tx read request to deviceID 0x%02X for typeID 0x%02X already queued", dest, type_id);
+            return;
+        }
+    }
+#endif
     LOG_DEBUG("Tx read request to deviceID 0x%02X for typeID 0x%02X", dest, type_id);
 
     uint8_t message_data = 0xFF;

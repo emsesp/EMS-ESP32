@@ -174,7 +174,7 @@ const Devices = memo(() => {
         }
       `,
       Table: `
-      --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 130px;
+      --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 170px;
     `,
       HeaderRow: `
       .th {

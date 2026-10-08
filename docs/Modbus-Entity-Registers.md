@@ -6583,6 +6583,18 @@ uint8
 | hc1.control | control device | enum |   | true | HC | 44 | 1 | 1 |
 | hc1.remotetemp | room temperature from remote | cmd | C | true | HC | 45 | 1 | 1/10 |
 | hc1.remotehum | room humidity from remote | cmd | % | true | HC | 46 | 1 | 1 |
+uint8
+| hc1.heatondelay | heat-on delay | uint8 (&gt;=1&lt;=48) | hours | true | HC | 47 | 1 | 1 |
+uint8
+| hc1.heatoffdelay | heat-off delay | uint8 (&gt;=1&lt;=48) | hours | true | HC | 48 | 1 | 1 |
+uint8
+| hc1.coolondelay | cooling on delay | uint8 (&gt;=1&lt;=48) | hours | true | HC | 49 | 1 | 1 |
+uint8
+| hc1.cooloffdelay | cooling off delay | uint8 (&gt;=1&lt;=48) | hours | true | HC | 50 | 1 | 1 |
+uint8
+| hc1.instantstart | instant start | uint8 (&gt;=1&lt;=10) | K | true | HC | 51 | 1 | 1 |
+uint8
+| hc1.coolstart | cooling starttemp | uint8 (&gt;=20&lt;=35) | C | true | HC | 52 | 1 | 1 |
 | hc1.boost | boost mode | boolean |   | true | HC | 53 | 1 | 1 |
 uint8
 | hc1.boosttime | boost time | uint8 (&gt;=0&lt;=0) | hours | true | HC | 54 | 1 | 1 |

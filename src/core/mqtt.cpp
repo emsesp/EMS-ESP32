@@ -1318,8 +1318,9 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
         break;
     case DeviceValueUOM::MV:
     case DeviceValueUOM::VOLTS:
-        doc[sc_ha] = sc_ha_measurement;
-        doc[dc_ha] = "voltage";
+        doc[sc_ha]         = sc_ha_measurement;
+        doc[dc_ha]         = "voltage";
+        doc["sug_dsp_prc"] = 2; // round to 2 decimal places
         break;
     case DeviceValueUOM::MBAR:
         doc[sc_ha] = sc_ha_measurement;

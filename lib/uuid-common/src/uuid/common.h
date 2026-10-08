@@ -105,6 +105,9 @@ uint64_t get_uptime_ms();
 uint32_t get_uptime();
 uint32_t get_uptime_sec();
 
+// milliseconds to add to an uptime in ms to get the wall clock time in ms since the epoch
+int64_t get_wall_offset_ms();
+
 void set_uptime();
 
 } // namespace uuid

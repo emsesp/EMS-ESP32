@@ -156,14 +156,15 @@ void WebLogService::loop() {
 
 // convert time to real offset
 char * WebLogService::messagetime(char * out, const uint64_t t, const size_t bufsize) {
-    time_t offset = time(nullptr) - uuid::get_uptime_sec();
-    if (offset < 1500000000L) {
+    int64_t offset_ms = uuid::get_wall_offset_ms();
+    if (offset_ms < 1500000000000LL) {
         strlcpy(out, uuid::log::format_timestamp_ms(t, 3).c_str(), bufsize);
     } else {
-        time_t t1 = offset + (time_t)(t / 1000);
-        char   timestr[25];
+        int64_t wall_ms = offset_ms + (int64_t)t;
+        time_t  t1      = (time_t)(wall_ms / 1000);
+        char    timestr[25];
         strftime(timestr, 25, "%FT%T", localtime(&t1));
-        snprintf(out, bufsize, "%s.%03d", timestr, (uint16_t)(t % 1000));
+        snprintf(out, bufsize, "%s.%03d", timestr, (int)(wall_ms % 1000));
     }
     return out;
 }
