@@ -1356,3 +1356,4 @@ firmwares
 recognises
 POWERON
 crashtest
+otadata
