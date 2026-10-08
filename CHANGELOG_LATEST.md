@@ -60,4 +60,4 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - TLS buffers (~17KB per HTTPS request) are taken from PSRAM on boards that have it, instead of fragmenting the internal heap
 - failed versions.json fetches back off from 5 up to 160 minutes instead of retrying every 5 minutes, as each attempt blocks the main loop for as long as the DNS, connect and read timeouts allow
 - optimized the LED library to support WS2812B V5 and the newer V6 RGB LEDs
-
+- hold Tx while a K30RF/KM200 gateway is syncing [#3094](https://github.com/emsesp/EMS-ESP32/issues/3094)
