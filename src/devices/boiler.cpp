@@ -726,7 +726,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
             register_device_value(DeviceValueTAG::TAG_DHW1,
                                   &maxHeatDhw_,
                                   DeviceValueType::ENUM,
-                                  FL_(enum_maxHeat2),
+                                  FL_(enum_maxHeat1),
                                   FL_(maxHeatDhw),
                                   DeviceValueUOM::NONE,
                                   MAKE_CF_CB(set_maxHeatDhw));
@@ -1873,7 +1873,7 @@ void Boiler::process_HpHeaterConfig(const std::shared_ptr<const Telegram> & tele
     if (model() == EMSdevice::EMS_DEVICE_FLAG_CS6800) {
         has_enumupdate(telegram, maxHeatComp_, 2, {0, 2, 4, 5});
         has_enumupdate(telegram, maxHeatHeat_, 3, {2, 4, 5});
-        has_enumupdate(telegram, maxHeatDhw_, 4, {2, 4, 5});
+        has_enumupdate(telegram, maxHeatDhw_, 4, {0, 2, 4, 5});
         return;
     }
     has_update(telegram, maxHeatComp_, 2);
@@ -3238,7 +3238,7 @@ bool Boiler::set_HpInLogic(const char * value, const int8_t id) {
 bool Boiler::set_maxHeat(const char * value, const int8_t id) {
     uint8_t v;
     if (model() == EMSdevice::EMS_DEVICE_FLAG_CS6800) {
-        if (id == 0) {
+        if (id == 2 || id == 4) { // maxHeatComp, maxHeatDhw
             if (!Helpers::value2enum(value, v, FL_(enum_maxHeat1), {0, 2, 4, 5})) {
                 return false;
             }
