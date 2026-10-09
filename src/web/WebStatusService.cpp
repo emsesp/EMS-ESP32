@@ -21,7 +21,7 @@
 #ifndef EMSESP_STANDALONE
 #include <esp_ota_ops.h>
 #endif
-#include "httpClient.h"
+#include "emsesp_http_client.h"
 
 namespace emsesp {
 

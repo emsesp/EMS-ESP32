@@ -304,7 +304,7 @@ enum {
 #define STRINGIZE(s) #s
 #endif
 
-#define ARDUINO_VERSION_STR(major, minor, patch) "Tasmota Arduino v" STRINGIZE(major) "." STRINGIZE(minor) "." STRINGIZE(patch)
+#define ARDUINO_VERSION_STR(major, minor, patch) "Arduino v" STRINGIZE(major) "." STRINGIZE(minor) "." STRINGIZE(patch)
 #define ARDUINO_VERSION ARDUINO_VERSION_STR(ESP_ARDUINO_VERSION_MAJOR, ESP_ARDUINO_VERSION_MINOR, ESP_ARDUINO_VERSION_PATCH)
 
 #endif

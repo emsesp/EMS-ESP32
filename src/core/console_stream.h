@@ -20,7 +20,7 @@
 
 #include <uuid/console.h>
 
-#include "console.h"
+#include "emsesp_console.h"
 
 namespace emsesp {
 

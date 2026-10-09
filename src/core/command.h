@@ -21,7 +21,7 @@
 
 #include <map>
 
-#include "console.h"
+#include "emsesp_console.h"
 #include <esp32-psram.h>
 
 using uuid::console::Shell;
