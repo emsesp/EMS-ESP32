@@ -31,17 +31,17 @@ namespace rgb_led {
 
 namespace {
 
-// durations in 100 ns ticks
-constexpr uint16_t T0H = 3; // 300 ns
-constexpr uint16_t T0L = 9; // 900 ns
-constexpr uint16_t T1H = 8; // 800 ns
-constexpr uint16_t T1L = 6; // 600 ns
+// durations in 12.5 ns ticks
+constexpr uint16_t T0H = 3.5 * 8; // 350 ns
+constexpr uint16_t T0L = 9 * 8;   // 900 ns
+constexpr uint16_t T1H = 8 * 8;   // 800 ns
+constexpr uint16_t T1L = 6 * 8;   // 600 ns
 
 // rmt_data_t.val layout: duration0:15, level0:1, duration1:15, level1:1 (high then low)
 constexpr uint32_t SYMBOL_0 = T0H | (1UL << 15) | (static_cast<uint32_t>(T0L) << 16);
 constexpr uint32_t SYMBOL_1 = T1H | (1UL << 15) | (static_cast<uint32_t>(T1L) << 16);
 
-constexpr uint32_t RMT_FREQ_HZ = 10000000; // 10 MHz
+constexpr uint32_t RMT_FREQ_HZ = 80000000; // 80 MHz
 constexpr uint32_t RESET_US    = 300;
 constexpr uint8_t  NO_PIN      = 0xFF;
 constexpr uint8_t  MAX_PINS    = 2; // status LED + an RGB analog sensor; the ESP32-C3 only has 2 RMT TX channels

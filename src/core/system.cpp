@@ -3933,9 +3933,14 @@ void System::remove_optional_gpio(uint8_t pin) {
 
 // set unused gpios to default state input high-Z
 void System::reset_unused_gpios() {
+#if CONFIG_IDF_TARGET_ESP32
+constexpr uint8_t tx0 = 1; // don't change tx0 pin
+#else
+constexpr uint8_t tx0 = 255; // no valid pin, chips have native USB, tx0 not connected to transceiver
+#endif
     for (const auto & pin : valid_system_gpios_) {
         auto it = std::find_if(used_gpios_.begin(), used_gpios_.end(), [pin](const GpioUsage & usage) { return usage.pin == pin; });
-        if (it == used_gpios_.end()) {
+        if (it == used_gpios_.end() && pin != tx0) {
             LOG_DEBUG("reset pin %d", pin);
             pinMode(pin, INPUT);
         }
