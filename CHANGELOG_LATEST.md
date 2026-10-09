@@ -20,6 +20,9 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - new Application Setting "Automatically check for firmware updates", off by default. When enabled EMS-ESP asks emsesp.org for the latest version once a day on its own, otherwise it only asks when the WebUI wants to show it, so an unattended system never contacts emsesp.org
 - Automatically check and convert older 3.8.x filesystem to the new 3.9.0 format
 - heatpump pool: `poolon` (switch, 0x48A), `hppoolon` (pool heating active, 0x488), MP100 `poolshuntset` (0x5C4) and `poolrequest` (0x5BA), shorter pool names
+- `s_16M_P_custom` PlatformIO env that HybridCompiles Arduino/IDF with a trimmed sdkconfig (no Bluetooth, PPP/modem, IP forward/NAPT, ULP, SPI Ethernet, GDBSTUB, FreeRTOS trace, mDNS browse/CLI) and places the UART ISR in IRAM
+- 16MB builds use EMS-ESP's own Arduino/IDF libs from [esp32-arduino-lib-builder](https://github.com/emsesp/esp32-arduino-lib-builder) (`0910-1604-5.5.5`) instead of Tasmota's prebuilt cores
+- optional `ccache` wrapping when it is installed (`scripts/enable_ccache.py`)
 
 ## Fixed
 
@@ -45,6 +48,9 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - add 0kW to heat limits [#3262](https://github.com/emsesp/EMS-ESP32/issues/3262), [#3265](https://github.com/emsesp/EMS-ESP32/issues/3265)
 - show temperature value for sensor 0x40 [#3272](https://github.com/emsesp/EMS-ESP32/issues/3272)
 - no EMS bus on custom boards whose interface relies on a pull-up on the Rx line. The newer ESP-IDF no longer enables the internal pull-up on the UART Rx pin, so it is now set explicitly as it was in 3.8 [#3258](https://github.com/emsesp/EMS-ESP32/discussions/3258)
+- Guru Meditation (cache error) on HybridCompile builds when the EMS or console UART ISR ran from flash during a SPI flash read (WiFi power-down, mDNS, NVS). The UART ISR and ringbuf ISR helpers are now in IRAM
+- compile errors against Arduino 3.3.12 from Tasmota/Arduino headers named `console.h`, `network.h` and `httpClient.h`. Those EMS-ESP headers are now `emsesp_console.h`, `emsesp_network.h` and `emsesp_http_client.h`
+- HTTP OTA from WSL/mDNS stalled on IPv6 and used tiny write chunks. Uploads now resolve IPv4 and stream in 64 KB blocks (`scripts/upload.py`, `scripts/upload_cli.py`)
 
 ## Changed
 
@@ -63,3 +69,5 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - failed versions.json fetches back off from 5 up to 160 minutes instead of retrying every 5 minutes, as each attempt blocks the main loop for as long as the DNS, connect and read timeouts allow
 - optimized the LED library to support WS2812B V5 and the newer V6 RGB LEDs
 - hold Tx while a K30RF/KM200 gateway is syncing [#3094](https://github.com/emsesp/EMS-ESP32/issues/3094)
+- Tasmota platform 2026.05.50 (Arduino 3.3.8 / IDF 5.5.4) to 2026.09.50 (Arduino 3.3.12 / IDF 5.5.5)
+- CI dev-release firmware jobs run in parallel (webUI, firmware targets, standalone) instead of one serial job
