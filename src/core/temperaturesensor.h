@@ -23,7 +23,7 @@
 
 #include "helpers.h"
 #include "mqtt.h"
-#include "console.h"
+#include "emsesp_console.h"
 
 #include <uuid/log.h>
 

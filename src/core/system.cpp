@@ -17,7 +17,7 @@
  */
 
 #include "system.h"
-#include "network.h"
+#include "emsesp_network.h"
 #include "emsesp.h" // for send_raw_telegram() command
 
 #ifndef EMSESP_STANDALONE
@@ -33,7 +33,7 @@
 
 #include "firmwareVersion.h"
 #include "shuntingYard.h" // for compute() used by the message and sendmail commands
-#include "httpClient.h"   // for the shared TLS client settings
+#include "emsesp_http_client.h"   // for the shared TLS client settings
 
 #if defined(EMSESP_TEST)
 #include "../test/test.h"

@@ -23,7 +23,7 @@
 #include <ArduinoJson.h>
 
 #include "helpers.h"
-#include "console.h"
+#include "emsesp_console.h"
 #include "mqtt.h"
 #include "telegram.h"
 #include "led.h"

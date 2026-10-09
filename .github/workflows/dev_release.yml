@@ -11,30 +11,209 @@ on:
 permissions:
   contents: write
 
+# Parallel graph (wall-clock is ~max of the firmware jobs, not the sum):
+#   webui ──────┐
+#               ├─► firmware (s_4M / s_16M / s_16M_P / s3_16M_P) ─┐
+#   modbus ─────┤                                                 ├─► release
+#               └─► standalone ───────────────────────────────────┘
+#
+# Extra -j on a single runner does not help: PlatformIO already compiles each
+# environment with all CPUs. The win is separate GitHub runners.
+
 jobs:
-  pre-release:
-    name: 'Build Dev Release'
+  webui:
+    name: Build webUI
     if: github.event_name == 'workflow_dispatch' || github.repository == 'emsesp/EMS-ESP32'
     runs-on: ubuntu-latest
     steps:
-        
-      - name: Install python 3.13
-        uses: actions/setup-python@v7
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
-          python-version: '3.13'
+          package_json_file: interface/package.json
 
       - name: Install Node.js 26
         uses: actions/setup-node@v7
         with:
           node-version: 26
 
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('interface/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Build webUI
+        env:
+          CI: true
+        working-directory: interface
+        run: |
+          pnpm install
+          pnpm build-webUI
+
+      - name: Upload WWWData.h
+        uses: actions/upload-artifact@v4
+        with:
+          name: wwwdata
+          path: src/ESP32React/WWWData.h
+          if-no-files-found: error
+
+  modbus:
+    name: Build modbus
+    if: github.event_name == 'workflow_dispatch' || github.repository == 'emsesp/EMS-ESP32'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install python 3.13
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+          enable-cache: false
+
+      - name: Install pioarduino
+        run: uv pip install --system pioarduino==6.2.0
+
+      - name: Build modbus
+        run: platformio run -e build_modbus
+
+      - name: Upload modbus header
+        uses: actions/upload-artifact@v4
+        with:
+          name: modbus-header
+          path: src/core/modbus_entity_parameters.hpp
+          if-no-files-found: error
+
+  standalone:
+    name: Build standalone
+    needs: modbus
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install python 3.13
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+          enable-cache: false
+
+      - name: Install pioarduino
+        run: uv pip install --system pioarduino==6.2.0
+
+      - name: Restore generated modbus header
+        uses: actions/download-artifact@v4
+        with:
+          name: modbus-header
+          path: src/core
+
+      - name: Build standalone
+        run: platformio run -e build_standalone
+
+      - name: Upload generated docs
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-docs
+          path: |
+            docs/dump_entities.csv
+            docs/dump_telegrams.csv
+            docs/Modbus-Entity-Registers.md
+          if-no-files-found: error
+
+  firmware:
+    name: Firmware ${{ matrix.env }}
+    needs: [webui, modbus]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        # Keep in sync with platformio.ini default_envs
+        env: [s_4M, s_16M, s_16M_P, s3_16M_P]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install python 3.13
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+          enable-cache: false
+
+      - name: Cache PlatformIO packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.platformio/.cache
+            ~/.platformio/packages
+            ~/.platformio/platforms
+          key: ${{ runner.os }}-pio-${{ matrix.env }}-${{ hashFiles('platformio.ini') }}
+          restore-keys: |
+            ${{ runner.os }}-pio-${{ matrix.env }}-
+            ${{ runner.os }}-pio-
+
+      - name: Install pioarduino
+        run: uv pip install --system pioarduino==6.2.0 intelhex
+
+      - name: Restore WWWData.h
+        uses: actions/download-artifact@v4
+        with:
+          name: wwwdata
+          path: src/ESP32React
+
+      - name: Restore generated modbus header
+        uses: actions/download-artifact@v4
+        with:
+          name: modbus-header
+          path: src/core
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: firmware-${{ matrix.env }}
+          restore-keys: firmware-${{ matrix.env }}-
+          max-size: 1G
+
+      - name: Build ${{ matrix.env }}
+        env:
+          CCACHE_COMPILERCHECK: content
+        run: platformio run -e ${{ matrix.env }}
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ matrix.env }}
+          path: build/firmware
+          if-no-files-found: error
+
+  release:
+    name: Create GitHub Release
+    needs: [firmware, standalone]
+    runs-on: ubuntu-latest
+    steps:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
-  
-      - name: Install pnpm
-        run: npm install -g pnpm
 
       - name: Get the EMS-ESP version
         id: build_info
@@ -49,27 +228,27 @@ jobs:
           prev=`git rev-parse -q --verify 'refs/tags/latest^{commit}' || git describe --tags --abbrev=0 --match 'v*'`
           echo "REF=$prev" >> $GITHUB_OUTPUT
 
-      - name: Install PlatformIO
-        run: |
-          python -m pip install --upgrade pip
-          pip install -U platformio
-          python -m pip install intelhex
+      - name: Restore generated modbus header
+        uses: actions/download-artifact@v4
+        with:
+          name: modbus-header
+          path: src/core
 
-      - name: Build webUI
-        run: |
-          platformio run -e build-webUI
+      - name: Restore generated docs
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-docs
+          path: .
 
-      - name: Build modbus
-        run: |
-          platformio run -e build_modbus
+      - name: Restore firmware binaries
+        uses: actions/download-artifact@v4
+        with:
+          pattern: firmware-*
+          merge-multiple: true
+          path: build/firmware
 
-      - name: Build standalone
-        run: |
-          platformio run -e build_standalone
-
-      - name: Build all PIO target environments, from default_envs
-        run: |
-          platformio run
+      - name: List firmware files
+        run: ls -la build/firmware
 
       - name: Commit the generated files
         uses: stefanzweifel/git-auto-commit-action@v7

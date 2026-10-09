@@ -103,7 +103,7 @@ let system_status = {
   cpu_cores: 2,
   cpu_freq_mhz: 240,
   max_alloc_heap: 191,
-  arduino_version: 'Tasmota Arduino v3.3.8',
+  arduino_version: 'Arduino v3.3.8',
   sdk_version: '5.5.4.260407',
   partition: 'app0',
   flash_chip_size: 16384,
@@ -209,7 +209,7 @@ switch (emulate_esp) {
   case 'ESP32':
     system_status.esp_platform = 'ESP32';
     system_status.cpu_type = 'ESP32-D0WD-V3';
-    system_status.arduino_version = 'Tasmota Arduino v3.3.8';
+    system_status.arduino_version = 'Arduino v3.3.8';
     system_status.sdk_version = '5.5.4.260407';
     system_status.psram = true;
     system_status.psram_size = 4096;
@@ -225,7 +225,7 @@ switch (emulate_esp) {
   default:
     system_status.esp_platform = 'ESP32S3';
     system_status.cpu_type = 'ESP32-S3';
-    system_status.arduino_version = 'Tasmota Arduino v3.3.8';
+    system_status.arduino_version = 'Arduino v3.3.8';
     system_status.sdk_version = '5.5.4.260407';
     system_status.psram = true;
     system_status.psram_size = 8189;
