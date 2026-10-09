@@ -49,6 +49,18 @@ uint16_t          EMSESP::wait_validate_    = 0;
 bool              EMSESP::wait_km_          = false;
 uint32_t          EMSESP::last_fetch_       = 0;
 
+#ifdef EMSESP_GATEWAY_TX_HOLD
+uint32_t EMSESP::gateway_hold_until_        = 0;
+uint32_t EMSESP::gateway_hold_start_        = 0;
+uint32_t EMSESP::gateway_cooldown_until_    = 0;
+uint32_t EMSESP::gateway_window_start_      = 0;
+uint8_t  EMSESP::gateway_window_count_      = 0;
+uint32_t EMSESP::gateway_fast_start_        = 0;
+uint8_t  EMSESP::gateway_fast_count_        = 0;
+uint8_t  EMSESP::last_version_request_src_  = 0;
+uint32_t EMSESP::last_version_request_time_ = 0;
+#endif
+
 uint32_t EMSESP::last_entity_change_        = 0;
 bool     EMSESP::entity_compaction_pending_ = false;
 
@@ -1130,8 +1142,25 @@ void EMSESP::process_version(const std::shared_ptr<const Telegram> & telegram) {
         brand = EMSdevice::Brand::NO_BRAND; // unknown
     }
 
+#ifdef EMSESP_GATEWAY_TX_HOLD
+    // skip the name request if we already know this device and its name
+    bool known = false;
+    for (const auto & emsdevice : emsdevices) {
+        if (emsdevice && emsdevice->is_device_id(device_id) && emsdevice->product_id() == product_id && !emsdevice->model().empty()) {
+            known = true;
+            break;
+        }
+    }
+#endif
+
     // add it - will be overwritten if device already exists
     (void)add_device(device_id, product_id, version, brand);
+
+#ifdef EMSESP_GATEWAY_TX_HOLD
+    if (known) {
+        return;
+    }
+#endif
 
     // request the deviceName from telegram 0x01
     send_read_request(EMSdevice::EMS_TYPE_NAME, device_id, 27);
@@ -1249,7 +1278,16 @@ bool EMSESP::process_telegram(const std::shared_ptr<const Telegram> & telegram) 
                 LOG_NOTICE("%s", pretty_telegram(telegram).c_str());
             }
             if (!wait_km_ && !found_device && (telegram->src != EMSbus::ems_bus_id()) && (telegram->message_length > 0)) {
+#ifdef EMSESP_GATEWAY_TX_HOLD
+                // a new device often sends several broadcasts before its version reply is processed, only ask once
+                if (telegram->src != last_version_request_src_ || uuid::get_uptime() - last_version_request_time_ > 5000) {
+                    last_version_request_src_  = telegram->src;
+                    last_version_request_time_ = uuid::get_uptime();
+                    send_read_request(EMSdevice::EMS_TYPE_VERSION, telegram->src);
+                }
+#else
                 send_read_request(EMSdevice::EMS_TYPE_VERSION, telegram->src);
+#endif
             }
         }
     }
@@ -1511,6 +1549,13 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     // Print to LOG showing we've added a new device
     LOG_INFO("Detected EMS device: %s (0x%02X)", EMSdevice::device_type_2_device_name(device_type), device_id);
 
+#ifdef EMSESP_GATEWAY_TX_HOLD
+    // a gateway appearing while we're running is most likely starting up and about to sync
+    if (device_id == EMSdevice::EMS_DEVICE_ID_GATEWAY1) {
+        gateway_tx_hold_start();
+    }
+#endif
+
     // register the MQTT subscribe topic for this device
     // except for controller and gateway
     if ((device_type == DeviceType::CONTROLLER) || (device_type == DeviceType::GATEWAY)) {
@@ -1656,6 +1701,13 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         }
 #endif
         // check for poll to us, if so send top message from Tx queue immediately and quit
+#ifdef EMSESP_GATEWAY_TX_HOLD
+        if (poll_id == EMSbus::ems_bus_id() && gateway_tx_hold()) {
+            // still ack the poll, otherwise the master drops us from 0x07 and the gateway sees the device list change
+            txservice_.send_poll();
+            return;
+        }
+#endif
         if (poll_id == txservice_.get_send_id()) {
             txservice_.send();
         } else {
@@ -1670,6 +1722,10 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 #endif
         Roomctrl::check(data[1], data, length); // check if there is a message for the roomcontroller
 
+#ifdef EMSESP_GATEWAY_TX_HOLD
+        gateway_rx_check(data, length);
+#endif
+
         rxservice_.add(data, length); // add to RxQueue
     }
 }
@@ -1677,6 +1733,11 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 // fetch devices one by one
 void EMSESP::scheduled_fetch_values() {
     static uint8_t no = 0;
+#ifdef EMSESP_GATEWAY_TX_HOLD
+    if (gateway_tx_hold()) {
+        return;
+    }
+#endif
     if (no || (uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {
         if (!no) {
             last_fetch_ = uuid::get_uptime();
@@ -1697,6 +1758,72 @@ void EMSESP::scheduled_fetch_values() {
         }
     }
 }
+
+#ifdef EMSESP_GATEWAY_TX_HOLD
+// count read requests from the gateway to other devices, a high rate means it's doing its startup sync
+void EMSESP::gateway_rx_check(const uint8_t * data, const uint8_t length) {
+    if (length < 4 || (data[0] & 0x7F) != EMSdevice::EMS_DEVICE_ID_GATEWAY1 || !(data[1] & 0x80)) {
+        return;
+    }
+    uint8_t dest = data[1] & 0x7F;
+    if (dest == 0 || dest == EMSbus::ems_bus_id()) {
+        return;
+    }
+
+    uint32_t now = uuid::get_uptime();
+    if (now - gateway_window_start_ > GATEWAY_BURST_WINDOW) {
+        gateway_window_start_ = now;
+        gateway_window_count_ = 0;
+    }
+    if (now - gateway_fast_start_ > GATEWAY_FAST_WINDOW) {
+        gateway_fast_start_ = now;
+        gateway_fast_count_ = 0;
+    }
+    ++gateway_window_count_;
+    ++gateway_fast_count_;
+    if (gateway_window_count_ >= GATEWAY_BURST_THRESHOLD || gateway_fast_count_ >= GATEWAY_FAST_THRESHOLD) {
+        gateway_window_start_ = now;
+        gateway_window_count_ = 0;
+        gateway_fast_start_   = now;
+        gateway_fast_count_   = 0;
+        gateway_tx_hold_start();
+    }
+}
+
+void EMSESP::gateway_tx_hold_start() {
+    uint32_t now = uuid::get_uptime();
+    if (gateway_cooldown_until_) {
+        if ((int32_t)(now - gateway_cooldown_until_) < 0) {
+            return;
+        }
+        gateway_cooldown_until_ = 0;
+    }
+    if (!gateway_hold_until_) {
+        gateway_hold_start_ = now;
+        LOG_INFO("Gateway 0x%02X is busy, holding Tx", EMSdevice::EMS_DEVICE_ID_GATEWAY1);
+    }
+    gateway_hold_until_ = (now + GATEWAY_HOLD_TIME) | 1; // 0 means no hold
+}
+
+bool EMSESP::gateway_tx_hold() {
+    if (!gateway_hold_until_) {
+        return false;
+    }
+    uint32_t now = uuid::get_uptime();
+    if (now - gateway_hold_start_ > GATEWAY_HOLD_MAX) {
+        gateway_hold_until_     = 0;
+        gateway_cooldown_until_ = (now + GATEWAY_HOLD_COOLDOWN) | 1;
+        LOG_WARNING("Gateway 0x%02X still busy after %lu s, resuming Tx", EMSdevice::EMS_DEVICE_ID_GATEWAY1, (unsigned long)(GATEWAY_HOLD_MAX / 1000));
+        return false;
+    }
+    if ((int32_t)(now - gateway_hold_until_) >= 0) {
+        gateway_hold_until_ = 0;
+        LOG_INFO("Gateway 0x%02X is quiet, resuming Tx after %lu s", EMSdevice::EMS_DEVICE_ID_GATEWAY1, (unsigned long)((now - gateway_hold_start_) / 1000));
+        return false;
+    }
+    return true;
+}
+#endif
 
 // EMSESP main class
 EMSESP::EMSESP()

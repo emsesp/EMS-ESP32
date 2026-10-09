@@ -291,6 +291,32 @@ class EMSESP {
     static constexpr uint32_t EMS_FETCH_FREQUENCY = 60000; // check every minute
     static constexpr uint8_t  EMS_WAIT_KM_TIMEOUT = 60;    // wait one minute
 
+#ifdef EMSESP_GATEWAY_TX_HOLD
+    // hold our Tx while a gateway (K30RF/KM200 on 0x48) is doing its startup sync, see issue #3094
+    // a startup sync is 55-250 read requests/min to other devices, normal operation is <10/min
+    static void gateway_rx_check(const uint8_t * data, const uint8_t length);
+    static bool gateway_tx_hold();
+    static void gateway_tx_hold_start();
+
+    static constexpr uint32_t GATEWAY_BURST_WINDOW    = 30000;  // ms window for counting gateway read requests
+    static constexpr uint8_t  GATEWAY_BURST_THRESHOLD = 15;     // read requests within window to treat gateway as busy
+    static constexpr uint32_t GATEWAY_FAST_WINDOW     = 5000;   // short window to catch the start of a burst quickly
+    static constexpr uint8_t  GATEWAY_FAST_THRESHOLD  = 8;      // normal polling is ~1 read per 2s, a sync starts at >10/s
+    static constexpr uint32_t GATEWAY_HOLD_TIME       = 60000;  // keep holding Tx this long after the last busy window
+    static constexpr uint32_t GATEWAY_HOLD_MAX        = 600000; // never hold longer than 10 minutes in one go
+    static constexpr uint32_t GATEWAY_HOLD_COOLDOWN   = 600000; // after hitting the max, don't hold again for 10 minutes
+
+    static uint32_t gateway_hold_until_;
+    static uint32_t gateway_hold_start_;
+    static uint32_t gateway_cooldown_until_;
+    static uint32_t gateway_window_start_;
+    static uint8_t  gateway_window_count_;
+    static uint32_t gateway_fast_start_;
+    static uint8_t  gateway_fast_count_;
+    static uint8_t  last_version_request_src_;
+    static uint32_t last_version_request_time_;
+#endif
+
     static constexpr uint32_t SYSTEM_STATUS_RESET_TIMEOUT = 300000; // return a non-normal system status to normal after this (in ms) - 5 minutes
 
     struct Device_record {

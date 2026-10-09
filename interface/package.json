@@ -31,7 +31,7 @@
     "@table-library/react-table-library": "4.1.15",
     "alova": "^3.5.5",
     "jwt-decode": "^4.0.0",
-    "preact": "^10.29.8",
+    "preact": "^11.0.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-icons": "^5.7.0",
@@ -58,5 +58,5 @@
     "vite": "^8.3.3",
     "vite-plugin-imagemin": "^0.6.1"
   },
-  "packageManager": "pnpm@12.9.1"
+  "packageManager": "pnpm@12.10.1"
 }

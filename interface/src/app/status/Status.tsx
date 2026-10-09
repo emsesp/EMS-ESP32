@@ -1,5 +1,3 @@
-import { useContext } from 'react';
-
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
@@ -24,7 +22,6 @@ import { useRequest } from 'alova/client';
 import { busConnectionStatus } from 'app/main/types';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import ListMenuItem from 'components/layout/ListMenuItem';
-import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { NTPSyncStatus, NetworkConnectionStatus, SystemStatusCodes } from 'types';
 import { useInterval } from 'utils';
@@ -55,8 +52,6 @@ const SystemStatus = () => {
   const { LL } = useI18nContext();
 
   useLayoutTitle(LL.STATUS_OF(''));
-
-  const { me } = useContext(AuthenticatedContext);
 
   const { data, send: loadData, error } = useRequest(readSystemStatus);
 
@@ -211,7 +206,6 @@ const SystemStatus = () => {
         </ListItem>
 
         <ListMenuItem
-          disabled={!me.admin}
           icon={MemoryIcon}
           bgcolor="#68374d"
           label={LL.HARDWARE()}
@@ -220,7 +214,6 @@ const SystemStatus = () => {
         />
 
         <ListMenuItem
-          disabled={!me.admin}
           icon={DirectionsBusIcon}
           bgcolor={busStatusHighlight}
           label={LL.DATA_TRAFFIC()}
@@ -229,7 +222,6 @@ const SystemStatus = () => {
         />
 
         <ListMenuItem
-          disabled={!me.admin}
           icon={
             data.network_status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED
               ? WifiIcon
@@ -242,7 +234,6 @@ const SystemStatus = () => {
         />
 
         <ListMenuItem
-          disabled={!me.admin}
           icon={DeviceHubIcon}
           bgcolor={activeHighlight(data.mqtt_status)}
           label="MQTT"
@@ -251,7 +242,6 @@ const SystemStatus = () => {
         />
 
         <ListMenuItem
-          disabled={!me.admin}
           icon={AccessTimeIcon}
           bgcolor={ntpStatusHighlight}
           label="NTP"
@@ -260,7 +250,6 @@ const SystemStatus = () => {
         />
 
         <ListMenuItem
-          disabled={!me.admin}
           icon={SettingsInputAntennaIcon}
           bgcolor={activeHighlight(data.ap_status)}
           label={LL.ACCESS_POINT(0)}
@@ -269,7 +258,6 @@ const SystemStatus = () => {
         />
 
         <ListMenuItem
-          disabled={!me.admin}
           icon={LogoDevIcon}
           bgcolor="#40828f"
           label={LL.LOG_OF(LL.SYSTEM(0))}
