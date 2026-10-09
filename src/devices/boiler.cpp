@@ -994,16 +994,16 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               48,
                               63);
         register_device_value(
-            DeviceValueTAG::TAG_DHW1, &wwComfDiffTemp_, DeviceValueType::UINT8, FL_(wwComfDiffTemp), DeviceValueUOM::K, MAKE_CF_CB(set_wwComfDiffTemp), 4, 15);
+            DeviceValueTAG::TAG_DHW1, &wwComfDiffTemp_, DeviceValueType::UINT8, FL_(wwComfDiffTemp), DeviceValueUOM::K, MAKE_CF_CB(set_wwComfDiffTemp), 6, 18);
         register_device_value(
-            DeviceValueTAG::TAG_DHW1, &wwEcoDiffTemp_, DeviceValueType::UINT8, FL_(wwEcoDiffTemp), DeviceValueUOM::K, MAKE_CF_CB(set_wwEcoDiffTemp), 4, 15);
+            DeviceValueTAG::TAG_DHW1, &wwEcoDiffTemp_, DeviceValueType::UINT8, FL_(wwEcoDiffTemp), DeviceValueUOM::K, MAKE_CF_CB(set_wwEcoDiffTemp), 6, 18);
         register_device_value(DeviceValueTAG::TAG_DHW1,
                               &wwEcoPlusDiffTemp_,
                               DeviceValueType::UINT8,
                               FL_(wwEcoPlusDiffTemp),
                               DeviceValueUOM::K,
                               MAKE_CF_CB(set_wwEcoPlusDiffTemp),
-                              4,
+                              6,
                               15);
         register_device_value(DeviceValueTAG::TAG_DHW1,
                               &wwComfStopTemp_,
