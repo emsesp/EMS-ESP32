@@ -83,7 +83,7 @@ class System {
 
     static void check_crash_loop(); // call at boot once NVS is open, may restart into the factory partition
 
-    void        recovery_installed();      // called on the AsyncTCP task after the recovery firmware was written
+    void        recovery_installed();     // called on the AsyncTCP task after the recovery firmware was written
     std::string recovery_version() const; // empty if there's no recovery firmware
 
     // commands

@@ -32,10 +32,10 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
         // check details of the file, to see if its a valid bin or json file
         const std::size_t filesize = request->contentLength();
 
-        _is_firmware    = false;
-        _is_filesystem  = false;
-        _is_recovery    = false;
-        _response_sent  = false;
+        _is_firmware   = false;
+        _is_filesystem = false;
+        _is_recovery   = false;
+        _response_sent = false;
 
         switch (OtaUpdater::classify(filename, filesize, emsesp::System::MIN_FIRMWARE_SIZE)) {
         case OtaUpdater::FileType::FILESYSTEM:
