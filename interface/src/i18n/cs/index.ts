@@ -352,7 +352,10 @@ const cs: Translation = {
   UPLOAD_BACKUP_TEXT: 'Klikněte, abyste vybrali, nebo drop soubor zálohy (.json) sem',
   UPLOAD_FIRMWARE_TEXT: 'Klikněte, abyste vybrali, nebo drop soubor firmware .bin/.md5 sem',
   UPLOAD_MD5_RECEIVED: 'Digest přijat, nyní nahrajte firmware .bin',
-  UPLOAD_MD5_MATCHED: 'MD5 souhlasí, firmware se instaluje...'
+  UPLOAD_MD5_MATCHED: 'MD5 souhlasí, firmware se instaluje...',
+  RECOVERY: 'Obnova',
+  RECOVERY_NOT_INSTALLED: 'Nenainstalováno',
+  RECOVERY_INSTALLED: 'Firmware pro obnovu nainstalován'
 };
 
 export default cs;

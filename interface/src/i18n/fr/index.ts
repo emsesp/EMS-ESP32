@@ -352,7 +352,10 @@ const fr: Translation = {
   UPLOAD_BACKUP_TEXT: 'Cliquez pour sélectionner, ou drop un fichier de sauvegarde (.json) ici',
   UPLOAD_FIRMWARE_TEXT: 'Cliquez pour sélectionner, ou drop un fichier firmware .bin/.md5 ici',
   UPLOAD_MD5_RECEIVED: 'Empreinte reçue, téléversez maintenant le fichier firmware .bin',
-  UPLOAD_MD5_MATCHED: 'MD5 concordant, installation du firmware...'
+  UPLOAD_MD5_MATCHED: 'MD5 concordant, installation du firmware...',
+  RECOVERY: 'Récupération',
+  RECOVERY_NOT_INSTALLED: 'Non installé',
+  RECOVERY_INSTALLED: 'Firmware de récupération installé'
 };
 
 export default fr;

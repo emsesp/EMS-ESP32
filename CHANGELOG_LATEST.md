@@ -20,6 +20,11 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - new Application Setting "Automatically check for firmware updates", off by default. When enabled EMS-ESP asks emsesp.org for the latest version once a day on its own, otherwise it only asks when the WebUI wants to show it, so an unattended system never contacts emsesp.org
 - Automatically check and convert older 3.8.x filesystem to the new 3.9.0 format
 - heatpump pool: `poolon` (switch, 0x48A), `hppoolon` (pool heating active, 0x488), MP100 `poolshuntset` (0x5C4) and `poolrequest` (0x5BA), shorter pool names
+- EMS-ESP Recovery, a small firmware for the factory (`boot`) partition on 16MB boards. It starts a `<AP name>-recovery` access point and connects to the network with the saved EMS-ESP settings (Ethernet if configured, otherwise WiFi, using the static IP if one is set), and has a WebUI to sign in with an existing admin user, upload a new firmware into either OTA partition, or start one of the installed firmwares. It only reads the EMS-ESP settings, never changes them. Released as `EMS-ESP-Recovery-<version>-<chip>-16MB[+].bin`, and installed by uploading it in the EMS-ESP WebUI like a normal firmware, or flashed with `pio run -e recovery_s3_16M_P -t upload`
+- firmware rollback: a newly installed firmware is only kept once it has run for 2 minutes. If it crashes or restarts before then, the device goes back to the previous firmware, or to the Recovery if there is none
+- on 16MB boards with the Recovery installed, EMS-ESP switches to it after crashing 5 times in a row. The Recovery shows why it was started and which firmware failed to start
+- the Version page shows the installed Recovery version on 16MB boards
+- crash test builds to try out the rollback and recovery, see `[env:crashtest_s3_16M_P]` in `platformio.ini`
 
 ## Fixed
 

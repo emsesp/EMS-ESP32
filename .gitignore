@@ -32,6 +32,8 @@ analyse.html
 interface/vite.config.ts.timestamp*
 *.local
 src/ESP32React/WWWData.h
+recovery/WWWData.h
+/interface/dist-recovery
 
 # i18n generated files
 interface/src/i18n/i18n-react.tsx

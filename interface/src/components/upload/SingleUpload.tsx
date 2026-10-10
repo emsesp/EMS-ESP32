@@ -14,10 +14,15 @@ import { LinearProgressWithLabel } from './LinearProgressWithLabel';
 
 interface SingleUploadProps {
   doRestart: () => void;
+  onRecoveryInstalled?: () => void;
   text: string;
 }
 
-const SingleUpload = ({ doRestart, text }: SingleUploadProps) => {
+const SingleUpload = ({
+  doRestart,
+  onRecoveryInstalled,
+  text
+}: SingleUploadProps) => {
   const [md5, setMd5] = useState<string>();
   const [file, setFile] = useState<File>();
   const { LL } = useI18nContext();
@@ -42,6 +47,12 @@ const SingleUpload = ({ doRestart, text }: SingleUploadProps) => {
       setMd5((payload as { md5: string }).md5);
       toast.success(LL.UPLOAD_MD5_RECEIVED());
       setFile(undefined);
+    } else if (payload && typeof payload === 'object' && 'recovery' in payload) {
+      // written to the factory partition, EMS-ESP keeps running
+      toast.success(LL.RECOVERY_INSTALLED());
+      setMd5(undefined);
+      setFile(undefined);
+      onRecoveryInstalled?.();
     } else {
       if (payload && typeof payload === 'object' && 'md5_ok' in payload) {
         toast.success(LL.UPLOAD_MD5_MATCHED());

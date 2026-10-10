@@ -352,7 +352,10 @@ const nl: Translation = {
   UPLOAD_BACKUP_TEXT: 'Klik voor selecteren, of drop een back-upbestand (.json) hier',
   UPLOAD_FIRMWARE_TEXT: 'Klik voor selecteren, of drop een firmware .bin/.md5 bestand hier',
   UPLOAD_MD5_RECEIVED: 'Digest ontvangen, upload nu het firmware .bin-bestand',
-  UPLOAD_MD5_MATCHED: 'MD5 komt overeen, firmware wordt geïnstalleerd...'
+  UPLOAD_MD5_MATCHED: 'MD5 komt overeen, firmware wordt geïnstalleerd...',
+  RECOVERY: 'Herstel',
+  RECOVERY_NOT_INSTALLED: 'Niet geïnstalleerd',
+  RECOVERY_INSTALLED: 'Herstelfirmware geïnstalleerd'
 };
 
 export default nl;

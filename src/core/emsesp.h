@@ -116,6 +116,8 @@ class EMSESPShell;
 class Shower;
 
 static constexpr const char * EMSESP_NVS_BOOT_NEW_FIRMWARE = "fresh_firmware"; // max 15 characters
+// why EMS-ESP switched to the recovery firmware, read and removed by the recovery app (recovery/main.cpp)
+static constexpr const char * EMSESP_NVS_RECOVERY_REASON = "rec_reason";
 
 class EMSESP {
   public:

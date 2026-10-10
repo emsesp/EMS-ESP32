@@ -18,6 +18,7 @@ export default defineConfig(
   {
     ignores: [
       'dist/*',
+      'dist-recovery/*',
       '*.mjs',
       'build/*',
       '*.js',

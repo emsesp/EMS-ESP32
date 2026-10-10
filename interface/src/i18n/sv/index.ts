@@ -352,7 +352,10 @@ const sv: Translation = {
   UPLOAD_BACKUP_TEXT: 'Klicka för att välja, eller drop en säkerhetskopia (.json) här',
   UPLOAD_FIRMWARE_TEXT: 'Klicka för att välja, eller drop en firmware .bin/.md5 här',
   UPLOAD_MD5_RECEIVED: 'MD5 mottagen, ladda nu upp firmware .bin-filen',
-  UPLOAD_MD5_MATCHED: 'MD5 stämmer, firmware installeras...'
+  UPLOAD_MD5_MATCHED: 'MD5 stämmer, firmware installeras...',
+  RECOVERY: 'Återställning',
+  RECOVERY_NOT_INSTALLED: 'Inte installerad',
+  RECOVERY_INSTALLED: 'Återställningsfirmware installerad'
 };
 
 export default sv;

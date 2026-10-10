@@ -60,6 +60,10 @@ jobs:
         run: |
           platformio run
 
+      - name: Build the recovery firmware for the 16MB boards
+        run: |
+          platformio run -e recovery_s_16M -e recovery_s_16M_P -e recovery_s3_16M_P
+
       - name: Create GitHub Release
         uses: emsesp/action-automatic-releases@v1.0.1
         with:
