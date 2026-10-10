@@ -959,23 +959,30 @@ void System::button_OnDblClick(PButton & b) {
 #endif
 }
 
-// button long press
+// button long press, held for BUTTON_LongPressDelay (3000 ms, 3 seconds)
+// restart EMS-ESP
 void System::button_OnLongPress(PButton & b) {
-    LOG_NOTICE("Button pressed - long press - restart EMS-ESP");
-    EMSESP::system_.system_restart("boot");
-}
-
-// button indefinite press
-void System::button_OnVLongPress(PButton & b) {
     if (EMSESP::system_.disable_reset()) {
-        LOG_NOTICE("Factory reset disabled");
+        LOG_NOTICE("reset disabled, can't boot");
         return;
     }
-    LOG_NOTICE("Button pressed - very long press - perform factory reset");
-    EMSESP::led_.start_led_fast_flash(5); // Start LED flash timer for 5 seconds
+    LOG_NOTICE("Button pressed - long press - restart EMS-ESP");
+    EMSESP::system_.system_restart();
 }
 
-// push button
+// button indefinite press, held for BUTTON_VLongPressDelay (6000 ms, 6 seconds)
+// restart EMS_ESP into the Recovery boot menu, where you can optionally do a factory reset
+void System::button_OnVLongPress(PButton & b) {
+    if (EMSESP::system_.disable_reset()) {
+        LOG_NOTICE("reset disabled, can't boot");
+        return;
+    }
+    LOG_NOTICE("Button pressed - very long press - perform factory reset in Recovery Mode");
+    EMSESP::system_.system_restart("boot");
+    // EMSESP::led_.start_led_fast_flash(5); // Start LED flash timer for 5 seconds
+}
+
+// push button, held for BUTTON_Debounce (200 ms)
 void System::button_init() {
 #ifndef EMSESP_STANDALONE
     if (!myPButton_.init(pbutton_gpio_, HIGH)) {
@@ -3934,9 +3941,9 @@ void System::remove_optional_gpio(uint8_t pin) {
 // set unused gpios to default state input high-Z
 void System::reset_unused_gpios() {
 #if CONFIG_IDF_TARGET_ESP32
-constexpr uint8_t tx0 = 1; // don't change tx0 pin
+    constexpr uint8_t tx0 = 1; // don't change tx0 pin
 #else
-constexpr uint8_t tx0 = 255; // no valid pin, chips have native USB, tx0 not connected to transceiver
+    constexpr uint8_t tx0 = 255; // no valid pin, chips have native USB, tx0 not connected to transceiver
 #endif
     for (const auto & pin : valid_system_gpios_) {
         auto it = std::find_if(used_gpios_.begin(), used_gpios_.end(), [pin](const GpioUsage & usage) { return usage.pin == pin; });

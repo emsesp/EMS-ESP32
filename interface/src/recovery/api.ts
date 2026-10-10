@@ -59,6 +59,8 @@ export const setBootPartition = (partition: string) =>
 
 export const restart = () => request<void>('POST', '/rest/recovery/restart');
 
+export const factoryReset = () => request<void>('POST', '/rest/recovery/format');
+
 export interface UploadHandle {
   promise: Promise<UploadResult>;
   abort: () => void;

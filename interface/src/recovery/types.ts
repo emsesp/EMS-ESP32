@@ -39,6 +39,7 @@ export interface RecoveryStatus {
   wifi_ip?: string;
   wifi_rssi?: number;
   static_ip: boolean;
+  disable_reset: boolean; // factory reset is disabled in the EMS-ESP settings
   // only on boards with Ethernet configured
   eth_state?: 'disabled' | 'failed' | 'no_link' | 'connecting' | 'connected';
   eth_ip?: string;

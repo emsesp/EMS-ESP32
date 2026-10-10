@@ -6,6 +6,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import MemoryIcon from '@mui/icons-material/Memory';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import {
   Avatar,
   Box,
@@ -32,7 +33,7 @@ import SectionContent from 'components/SectionContent';
 import { toast } from 'components/toast';
 
 import FirmwareUpload from './FirmwareUpload';
-import { HttpError, restart, setBootPartition } from './api';
+import { HttpError, factoryReset, restart, setBootPartition } from './api';
 import type { RecoveryPartition, RecoveryStatus } from './types';
 
 const formatMB = (bytes: number) => `${(bytes / 1048576).toFixed(2)} MB`;
@@ -97,6 +98,7 @@ interface DashboardProps {
 
 const Dashboard = ({ status, onRestarting, onSignOut }: DashboardProps) => {
   const [confirmBoot, setConfirmBoot] = useState<RecoveryPartition>();
+  const [confirmFactoryReset, setConfirmFactoryReset] = useState(false);
   const [pickedTarget, setPickedTarget] = useState<string>();
   const uploadTarget = pickedTarget ?? status.upload_target;
 
@@ -127,6 +129,16 @@ const Dashboard = ({ status, onRestarting, onSignOut }: DashboardProps) => {
     try {
       await restart();
       onRestarting(target);
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+  const doFactoryReset = async () => {
+    setConfirmFactoryReset(false);
+    try {
+      await factoryReset();
+      onRestarting(status.boot);
     } catch (error) {
       handleError(error);
     }
@@ -317,6 +329,16 @@ const Dashboard = ({ status, onRestarting, onSignOut }: DashboardProps) => {
         <InfoRow label="Hostname" value={status.hostname} />
 
         <ButtonRow>
+          {!status.disable_reset && (
+            <Button
+              startIcon={<SettingsBackupRestoreIcon />}
+              variant="outlined"
+              color="error"
+              onClick={() => setConfirmFactoryReset(true)}
+            >
+              Factory Reset
+            </Button>
+          )}
           <Button
             startIcon={<RestartAltIcon />}
             variant="outlined"
@@ -335,6 +357,35 @@ const Dashboard = ({ status, onRestarting, onSignOut }: DashboardProps) => {
           </Button>
         </ButtonRow>
       </SectionContent>
+
+      <Dialog
+        sx={dialogStyle}
+        open={confirmFactoryReset}
+        onClose={() => setConfirmFactoryReset(false)}
+      >
+        <DialogTitle>Factory Reset</DialogTitle>
+        <DialogContent dividers>
+          Are you sure you want to reset EMS-ESP to its factory defaults?
+        </DialogContent>
+        <DialogActions>
+          <Button
+            startIcon={<CancelIcon />}
+            variant="outlined"
+            color="secondary"
+            onClick={() => setConfirmFactoryReset(false)}
+          >
+            Cancel
+          </Button>
+          <Button
+            startIcon={<SettingsBackupRestoreIcon />}
+            variant="outlined"
+            color="error"
+            onClick={() => void doFactoryReset()}
+          >
+            Factory Reset
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog
         sx={dialogStyle}

@@ -5,7 +5,8 @@
 // if one is set), and serves a cut-down WebUI to upload a new EMS-ESP firmware into the OTA partitions
 // or select which OTA partition to boot.
 //
-// The EMS-ESP settings in LittleFS are only ever read, never written.
+// The EMS-ESP settings in LittleFS are only ever read, never written, except for a factory reset
+// which erases them.
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
@@ -76,6 +77,7 @@ struct Settings {
     int8_t                 eth_power      = -1;
     uint8_t                eth_phy_addr   = 0;
     uint8_t                eth_clock_mode = 0;
+    bool                   disable_reset  = false; // factory reset is disabled in the EMS-ESP settings
     std::vector<AdminUser> admins;
 };
 
@@ -174,6 +176,7 @@ static void loadSettings() {
         settings.eth_power      = doc["eth_power"] | -1;
         settings.eth_phy_addr   = doc["eth_phy_addr"] | 0;
         settings.eth_clock_mode = doc["eth_clock_mode"] | 0;
+        settings.disable_reset  = doc["disable_reset"] | false;
     }
 
     doc.clear();
@@ -185,6 +188,8 @@ static void loadSettings() {
         }
     }
     if (settings.admins.empty()) {
+        // the admin user couldn't be read, so sign in with the factory login but never allow a factory reset
+        settings.disable_reset = true;
         settings.admins.push_back({FACTORY_ADMIN_USERNAME, FACTORY_ADMIN_PASSWORD});
     }
 
@@ -449,8 +454,9 @@ static void handleStatus(AsyncWebServerRequest * request) {
         root["wifi_ip"]   = WiFi.localIP().toString();
         root["wifi_rssi"] = WiFi.RSSI();
     }
-    root["wifi_started"] = wifi_started;
-    root["static_ip"]    = settings.static_ip;
+    root["wifi_started"]  = wifi_started;
+    root["static_ip"]     = settings.static_ip;
+    root["disable_reset"] = settings.disable_reset;
 
     // only on boards with Ethernet configured
     if (eth_state[0] != '\0') {
@@ -546,6 +552,30 @@ static void handleRestart(AsyncWebServerRequest * request) {
         return;
     }
     LOG("Restart requested");
+    request->send(200);
+    restart_at = millis() + RESTART_DELAY_MS;
+}
+
+// factory reset, erases all EMS-ESP settings and restarts
+// only signed in admins are authorized (the recovery only accepts admin users), and only if not disabled in the settings
+static void handleFactoryReset(AsyncWebServerRequest * request) {
+    if (!isAuthorized(request)) {
+        request->send(401);
+        return;
+    }
+    if (settings.disable_reset) {
+        LOG("Factory reset disabled");
+        request->send(403);
+        return;
+    }
+
+    const bool ok = LittleFS.format(); // the only place the recovery writes to the filesystem
+    LOG("Factory reset %s", ok ? "done" : "failed");
+    if (!ok) {
+        request->send(500);
+        return;
+    }
+
     request->send(200);
     restart_at = millis() + RESTART_DELAY_MS;
 }
@@ -784,6 +814,7 @@ static void startNetwork() {
 static void startWebServer() {
     server.on("/rest/recovery/status", HTTP_GET, handleStatus);
     server.on("/rest/recovery/restart", HTTP_POST, handleRestart);
+    server.on("/rest/recovery/format", HTTP_POST, handleFactoryReset);
     server.on("/rest/uploadFile", HTTP_POST, handleUploadComplete, handleUpload);
     server.addHandler(new AsyncCallbackJsonWebHandler("/rest/signIn", handleSignIn));
     server.addHandler(new AsyncCallbackJsonWebHandler("/rest/recovery/boot", handleSetBoot));

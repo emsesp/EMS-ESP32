@@ -409,8 +409,8 @@ class System {
     static constexpr uint32_t BUTTON_DblClickDelay = 250; // Max period between clicks for a double click event (in ms)
 
     // button press delays
-    static constexpr uint32_t BUTTON_LongPressDelay  = 3000; // Hold period for a long press event (in ms) - ~3 seconds
-    static constexpr uint32_t BUTTON_VLongPressDelay = 9500; // Hold period for a very long press event (in ms) - !10 seconds
+    static constexpr uint32_t BUTTON_LongPressDelay  = 3000; // Hold period for a long press event (in ms) - 3 seconds
+    static constexpr uint32_t BUTTON_VLongPressDelay = 9500; // Hold period for a very long press event (in ms) - 9.5 seconds
 
     // healthcheck
 #ifdef EMSESP_PINGTEST

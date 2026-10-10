@@ -83,6 +83,7 @@ const status = (authenticated) => ({
   wifi_started: false,
   wifi_connected: false,
   static_ip: true,
+  disable_reset: false, // set to true to test with the factory reset disabled
   eth_state: 'connected',
   eth_ip: '192.168.1.50',
   running: 'boot',
@@ -158,6 +159,12 @@ export default function recoveryMock() {
         }
 
         if (url === '/rest/recovery/restart' && req.method === 'POST') {
+          send(res, 200);
+          return restart();
+        }
+
+        if (url === '/rest/recovery/format' && req.method === 'POST') {
+          if (status(true).disable_reset) return send(res, 403);
           send(res, 200);
           return restart();
         }
