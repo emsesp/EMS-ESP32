@@ -1352,3 +1352,9 @@ zyxwvutsrqponmlkjihgfedcba
 česky
 živanović
 neopixel
+firmwares
+recognises
+POWERON
+crashtest
+otadata
+merase

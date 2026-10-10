@@ -10,10 +10,17 @@ import mime from 'mime-types';
 import { relative, resolve, sep } from 'path';
 import zlib from 'zlib';
 
+// optional args: --src <dir> --out <file> --index <html file served as /index.html>
+const getArg = (name, fallback) => {
+  const i = process.argv.indexOf(name);
+  return i !== -1 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
+};
+
 const ARDUINO_INCLUDES = '#include <Arduino.h>\n\n';
 const INDENT = '  ';
-const outputPath = '../src/ESP32React/WWWData.h';
-const sourcePath = './dist';
+const outputPath = getArg('--out', '../src/ESP32React/WWWData.h');
+const sourcePath = getArg('--src', './dist');
+const indexFile = getArg('--index', 'index.html');
 const bytesPerLine = 20;
 let totalSize = 0;
 let bundleStats = {
@@ -129,7 +136,10 @@ const writeFile = (relativeFilePath, buffer) => {
   bundleStats[fileType].compressed += zipBuffer.length;
 
   fileInfo.push({
-    uri: '/' + relativeFilePath.replace(sep, '/'),
+    uri:
+      relativeFilePath === indexFile
+        ? '/index.html'
+        : '/' + relativeFilePath.replace(sep, '/'),
     mimeType,
     variable,
     size,

@@ -81,6 +81,11 @@ class System {
     void start();
     bool loop(); // returns true if the LED flash is active
 
+    static void check_crash_loop(); // call at boot once NVS is open, may restart into the factory partition
+
+    void        recovery_installed();     // called on the AsyncTCP task after the recovery firmware was written
+    std::string recovery_version() const; // empty if there's no recovery firmware
+
     // commands
     static bool command_read(const char * value, const int8_t id);
     static bool command_send(const char * value, const int8_t id);
@@ -370,7 +375,8 @@ class System {
     static constexpr uint8_t HEALTHCHECK_NO_NETWORK = (1 << 1); // 2
     static constexpr uint8_t HEALTHCHECK_RESET      = (1 << 7); // 128
 
-    // smallest .bin accepted as a firmware image, for both URL and web uploads - 1.6 MB
+    // smallest .bin accepted as a main firmware image, for both URL and web uploads - 1.6 MB
+    // recovery firmware uses OtaUpdater::MIN_RECOVERY_FIRMWARE_SIZE when the filename contains "recovery"
     static constexpr size_t MIN_FIRMWARE_SIZE = 1677721;
 
   private:
@@ -385,6 +391,14 @@ class System {
 
     void set_partition_install_date();
 
+    // firmware is confirmed to the bootloader and the crash counter cleared once it has been up this long
+    static constexpr uint32_t FIRMWARE_HEALTHY_UPTIME = 120; // seconds
+    // consecutive crashes before falling back to the recovery firmware in the factory partition
+    static constexpr uint8_t CRASH_LOOP_LIMIT = 5;
+
+    bool firmware_healthy_ = false;
+    void check_firmware_health();
+
     // button
     static PButton            myPButton_; // PButton instance
     static void               button_OnClick(PButton & b);
@@ -395,8 +409,8 @@ class System {
     static constexpr uint32_t BUTTON_DblClickDelay = 250; // Max period between clicks for a double click event (in ms)
 
     // button press delays
-    static constexpr uint32_t BUTTON_LongPressDelay  = 3000; // Hold period for a long press event (in ms) - ~3 seconds
-    static constexpr uint32_t BUTTON_VLongPressDelay = 9500; // Hold period for a very long press event (in ms) - !10 seconds
+    static constexpr uint32_t BUTTON_LongPressDelay  = 3000; // Hold period for a long press event (in ms) - 3 seconds
+    static constexpr uint32_t BUTTON_VLongPressDelay = 9500; // Hold period for a very long press event (in ms) - 9.5 seconds
 
     // healthcheck
 #ifdef EMSESP_PINGTEST

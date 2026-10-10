@@ -6,10 +6,8 @@
 #include <Arduino.h>
 #include <ESPAsyncWebServer.h>
 #include <LittleFS.h>
-#include <Update.h>
+#include <OtaUpdater.h>
 #include <WiFi.h>
-
-#include <array>
 
 #define UPLOAD_FILE_PATH "/rest/uploadFile"
 
@@ -20,11 +18,12 @@ class UploadFileService {
     UploadFileService(AsyncWebServer * server, SecurityManager * securityManager);
 
   private:
-    SecurityManager *    _securityManager;
-    bool                 _is_firmware;
-    bool                 _is_filesystem;
-    bool                 _md5_applied; // true if an MD5 digest was applied to the current firmware upload
-    std::array<char, 33> _md5;
+    SecurityManager * _securityManager;
+    bool              _is_firmware;
+    bool              _is_filesystem;
+    bool              _is_recovery; // firmware for the factory partition, which doesn't change the boot partition
+    bool              _response_sent;
+    OtaUpdater        _ota;
 
     void handleUpload(AsyncWebServerRequest * request, const String & filename, size_t index, uint8_t * data, size_t len, bool final);
     void uploadComplete(AsyncWebServerRequest * request);

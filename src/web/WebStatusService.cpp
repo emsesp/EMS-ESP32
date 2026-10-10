@@ -134,10 +134,12 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     root["temperature"] = (int)Helpers::transformNumFloat(EMSESP::system_.temperature(), 0, EMSESP::system_.fahrenheit() ? 2 : 0); // only 2 decimal places
 #endif
 
-    // check for a factory partition first
+    // factory partition is only on 16MB boards; recovery_version is empty until a recovery .bin is installed
     const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
-    root["has_loader"]                = partition != NULL && partition != esp_ota_get_running_partition();
-    partition                         = esp_ota_get_next_update_partition(nullptr);
+    if (partition != NULL) {
+        root["recovery_version"] = EMSESP::system_.recovery_version();
+    }
+    partition = esp_ota_get_next_update_partition(nullptr);
     if (partition) {
         uint64_t buffer;
         esp_partition_read(partition, 0, &buffer, 8);

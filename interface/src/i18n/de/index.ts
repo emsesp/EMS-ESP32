@@ -352,7 +352,10 @@ const de: Translation = {
   UPLOAD_BACKUP_TEXT: 'Klicken Sie, um eine Sicherungsdatei (.json) auszuwählen, oder drop ein',
   UPLOAD_FIRMWARE_TEXT: 'Klicken Sie, um eine Firmware-Datei (.bin/.md5) auszuwählen, oder drop ein',
   UPLOAD_MD5_RECEIVED: 'Prüfsumme empfangen, jetzt die Firmware-Datei (.bin) hochladen',
-  UPLOAD_MD5_MATCHED: 'MD5 stimmt überein, Firmware wird installiert...'
+  UPLOAD_MD5_MATCHED: 'MD5 stimmt überein, Firmware wird installiert...',
+  RECOVERY: 'Wiederherstellung',
+  RECOVERY_NOT_INSTALLED: 'Nicht installiert',
+  RECOVERY_INSTALLED: 'Wiederherstellungs-Firmware installiert'
 };
 
 export default de;

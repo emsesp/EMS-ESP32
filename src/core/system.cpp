@@ -27,6 +27,7 @@
 #include <esp_mac.h>
 #include "esp_efuse.h"
 #include <nvs.h>
+#include <Update.h>
 #endif
 
 #include <map>
@@ -43,9 +44,23 @@
 #define ENABLE_SMTP
 #include <ESP_SSLClient.h>
 #include <ReadyMail.h>
+#include <OtaUpdater.h>
+
+// Keeps new firmware in the bootloader's pending verification state until System::check_firmware_health()
+// confirms it, so a crash or restart before then rolls back to the previous image
+extern "C" bool verifyRollbackLater() {
+    return true;
+}
 #endif
 
 namespace emsesp {
+
+#ifndef EMSESP_STANDALONE
+// survives restarts, panics and watchdog resets but not a power cycle, hence the magic
+static constexpr uint32_t       CRASH_COUNT_MAGIC = 0x43524153;
+RTC_NOINIT_ATTR static uint32_t crash_count_magic_;
+RTC_NOINIT_ATTR static uint32_t crash_count_;
+#endif
 
 // Languages supported. Note: the order is important
 // and must match locale_translations.h and common.h
@@ -517,6 +532,10 @@ void System::get_partition_info() {
             }
         }
 
+#ifdef EMSESP_HAS_RECOVERY
+        // the recovery firmware is shown separately
+        is_valid = is_valid && !OtaUpdater::isRecoveryPartition(part);
+#endif
         // get the version from the NVS store, and add to map
         if (is_valid) {
             PartitionInfo p_info;
@@ -545,6 +564,35 @@ void System::get_partition_info() {
     }
     esp_partition_iterator_release(it);
 #endif
+}
+
+void System::recovery_installed() {
+#ifdef EMSESP_HAS_RECOVERY
+    // drop the version info of an EMS-ESP firmware that was in the factory partition before
+    const esp_partition_t * factory = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
+    if (factory != nullptr) {
+        char c[20];
+        snprintf(c, sizeof(c), "d_%s", factory->label);
+        if (EMSESP::nvs_.isKey(factory->label)) {
+            EMSESP::nvs_.remove(factory->label);
+        }
+        if (EMSESP::nvs_.isKey(c)) {
+            EMSESP::nvs_.remove(c);
+        }
+        partition_info_.erase(factory->label); // on the AsyncTCP task, same as the web handlers reading it
+    }
+    LOG_INFO("Recovery firmware v%s installed", recovery_version().c_str());
+#endif
+}
+
+std::string System::recovery_version() const {
+#ifdef EMSESP_HAS_RECOVERY
+    esp_app_desc_t desc;
+    if (OtaUpdater::isRecoveryPartition(esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr), &desc)) {
+        return desc.version;
+    }
+#endif
+    return "";
 }
 
 // set install time/date for the current partition, in UTC
@@ -595,6 +643,12 @@ bool System::set_partition([[maybe_unused]] const char * partitionname) {
         return false;
     }
 
+#ifdef EMSESP_HAS_RECOVERY
+    if (partition->subtype == ESP_PARTITION_SUBTYPE_APP_FACTORY) {
+        EMSESP::nvs_.putString(EMSESP_NVS_RECOVERY_REASON, "request");
+    }
+#endif
+
     // initiate the restart
     EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED);
     return true;
@@ -610,7 +664,13 @@ void System::system_restart(const char * partitionname) {
         // Factory partition - label will be "factory"
         const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
         if (partition && !strcmp(partition->label, partitionname)) {
+#ifdef EMSESP_HAS_RECOVERY
+            if (esp_ota_set_boot_partition(partition) == ESP_OK) {
+                EMSESP::nvs_.putString(EMSESP_NVS_RECOVERY_REASON, "request");
+            }
+#else
             esp_ota_set_boot_partition(partition);
+#endif
         } else
             // try and find the partition by name
             if (strcmp(esp_ota_get_running_partition()->label, partitionname)) {
@@ -762,11 +822,74 @@ void System::store_settings(WebSettings & settings) {
     auto_fw_check_  = settings.auto_fw_check;
 }
 
+// counts consecutive crashes and falls back to the recovery firmware in the factory partition (16MB boards)
+void System::check_crash_loop() {
+#ifndef EMSESP_STANDALONE
+    if (crash_count_magic_ != CRASH_COUNT_MAGIC) {
+        crash_count_magic_ = CRASH_COUNT_MAGIC;
+        crash_count_       = 0;
+    }
+
+    switch (esp_reset_reason()) {
+    case ESP_RST_PANIC:
+    case ESP_RST_INT_WDT:
+    case ESP_RST_TASK_WDT:
+    case ESP_RST_WDT:
+        crash_count_++;
+        break;
+    default:
+        crash_count_ = 0;
+        return;
+    }
+
+#ifdef EMSESP_HAS_RECOVERY
+    if (crash_count_ < CRASH_LOOP_LIMIT) {
+        return;
+    }
+
+    const esp_partition_t * factory = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
+    if (factory == nullptr || factory == esp_ota_get_running_partition()) {
+        return;
+    }
+    // fails if the factory partition doesn't hold a valid image, then keep trying the current one
+    if (esp_ota_set_boot_partition(factory) == ESP_OK) {
+        crash_count_ = 0;
+        EMSESP::nvs_.putString(EMSESP_NVS_RECOVERY_REASON, "crash");
+        Serial.printf("Crashed %d times in a row, restarting into the %s partition\n", CRASH_LOOP_LIMIT, factory->label);
+        Serial.flush();
+        esp_restart();
+    }
+#endif
+#endif
+}
+
+// once the firmware has run long enough, confirm it to the bootloader so it isn't rolled back
+void System::check_firmware_health() {
+#ifndef EMSESP_STANDALONE
+    if (firmware_healthy_ || uuid::get_uptime_sec() < FIRMWARE_HEALTHY_UPTIME) {
+        return;
+    }
+    firmware_healthy_ = true;
+    crash_count_      = 0;
+    if (OtaUpdater::confirmRunningApp()) {
+        LOG_INFO("New firmware confirmed as working");
+    }
+#endif
+}
+
 // Starts up core services
 void System::start() {
     get_partition_info(); // get the partition info
 
 #ifndef EMSESP_STANDALONE
+    if (crash_count_) {
+        LOG_WARNING("Restarted after a crash (%u in a row)", crash_count_);
+    }
+    const esp_partition_t * invalid = esp_ota_get_last_invalid_partition();
+    if (invalid != nullptr) {
+        LOG_WARNING("Firmware in partition %s failed to start and was rolled back", invalid->label);
+    }
+
     // disable bluetooth module
     // periph_module_disable(PERIPH_BT_MODULE);
     if (low_clock_) {
@@ -836,23 +959,30 @@ void System::button_OnDblClick(PButton & b) {
 #endif
 }
 
-// button long press
+// button long press, held for BUTTON_LongPressDelay (3000 ms, 3 seconds)
+// restart EMS-ESP
 void System::button_OnLongPress(PButton & b) {
-    LOG_NOTICE("Button pressed - long press - restart EMS-ESP");
-    EMSESP::system_.system_restart("boot");
-}
-
-// button indefinite press
-void System::button_OnVLongPress(PButton & b) {
     if (EMSESP::system_.disable_reset()) {
-        LOG_NOTICE("Factory reset disabled");
+        LOG_NOTICE("reset disabled, can't boot");
         return;
     }
-    LOG_NOTICE("Button pressed - very long press - perform factory reset");
-    EMSESP::led_.start_led_fast_flash(5); // Start LED flash timer for 5 seconds
+    LOG_NOTICE("Button pressed - long press - restart EMS-ESP");
+    EMSESP::system_.system_restart();
 }
 
-// push button
+// button indefinite press, held for BUTTON_VLongPressDelay (6000 ms, 6 seconds)
+// restart EMS_ESP into the Recovery boot menu, where you can optionally do a factory reset
+void System::button_OnVLongPress(PButton & b) {
+    if (EMSESP::system_.disable_reset()) {
+        LOG_NOTICE("reset disabled, can't boot");
+        return;
+    }
+    LOG_NOTICE("Button pressed - very long press - perform factory reset in Recovery Mode");
+    EMSESP::system_.system_restart("boot");
+    // EMSESP::led_.start_led_fast_flash(5); // Start LED flash timer for 5 seconds
+}
+
+// push button, held for BUTTON_Debounce (200 ms)
 void System::button_init() {
 #ifndef EMSESP_STANDALONE
     if (!myPButton_.init(pbutton_gpio_, HIGH)) {
@@ -1027,6 +1157,8 @@ void System::system_check() {
     uint32_t current_uptime = uuid::get_uptime();
     if (!last_system_check_ || ((uint32_t)(current_uptime - last_system_check_) >= SYSTEM_CHECK_FREQUENCY)) {
         last_system_check_ = current_uptime;
+
+        check_firmware_health();
 
 #ifndef EMSESP_STANDALONE
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
@@ -1208,6 +1340,16 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(" [total %d]", available.size());
     // List all partitions and their version info
     shell.println(" Partitions:");
+#ifndef EMSESP_STANDALONE
+    const esp_partition_t * running       = esp_ota_get_running_partition();
+    const esp_partition_t * boot          = esp_ota_get_boot_partition();
+    const char *            running_label = running ? running->label : "";
+    const char *            boot_label    = boot ? boot->label : "";
+#else
+    const char * running_label = "";
+    const char * boot_label    = "";
+#endif
+    bool boot_listed = false;
     for (const auto & partition : partition_info_) {
         if (partition.second.version.empty()) {
             continue; // no version, empty string
@@ -1219,13 +1361,42 @@ void System::show_system(uuid::console::Shell & shell) {
             strftime(time_string, sizeof(time_string), "%FT%T", localtime(&d));
             installed = std::string(", installed on ") + time_string;
         }
-        shell.printfln("  %s: v%s (%d KB%s) %s",
-                       partition.first.c_str(),
-                       partition.second.version.c_str(),
-                       partition.second.size,
-                       installed.c_str(),
-                       (strcmp(esp_ota_get_running_partition()->label, partition.first.c_str()) == 0) ? "** active **" : "");
+        const bool is_running = strcmp(running_label, partition.first.c_str()) == 0;
+        const bool is_boot    = strcmp(boot_label, partition.first.c_str()) == 0;
+        if (is_boot) {
+            boot_listed = true;
+        }
+        const char * mark = is_running && is_boot ? "** active, boot **" : is_running ? "** active **" : is_boot ? "** boot **" : "";
+        shell.printfln("  %s: v%s (%d KB%s) %s", partition.first.c_str(), partition.second.version.c_str(), partition.second.size, installed.c_str(), mark);
     }
+#ifndef EMSESP_STANDALONE
+#ifdef EMSESP_HAS_RECOVERY
+    // 16MB boards: factory ("boot") holds the recovery app and is omitted from partition_info_
+    {
+        const esp_partition_t * factory = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
+        esp_app_desc_t          desc;
+        if (OtaUpdater::isRecoveryPartition(factory, &desc)) {
+            const bool is_running = running && factory == running;
+            const bool is_boot    = boot && factory == boot;
+            if (is_boot) {
+                boot_listed = true;
+            }
+            int                  size_kb  = 0;
+            esp_image_metadata_t meta     = {};
+            esp_partition_pos_t  part_pos = {.offset = factory->address, .size = factory->size};
+            if (esp_image_verify(ESP_IMAGE_VERIFY_SILENT, &part_pos, &meta) == ESP_OK) {
+                size_kb = static_cast<int>(meta.image_len / 1024);
+            }
+            const char * mark = is_running && is_boot ? "** active, boot **" : is_running ? "** active **" : is_boot ? "** boot **" : "";
+            shell.printfln("  %s: Recovery v%s (%d KB) %s", factory->label, desc.version, size_kb, mark);
+        }
+    }
+#endif
+    // recovery/factory is omitted from partition_info_, still show it if it's the boot target
+    if (!boot_listed && boot_label[0] != '\0') {
+        shell.printfln("  %s: ** boot **", boot_label);
+    }
+#endif
 // List all NVS values
 #ifndef EMSESP_STANDALONE
     shell.println(" NVS values:");
@@ -3346,6 +3517,8 @@ bool System::uploadFirmwareURL(const char * url) {
         return false; // error
     }
 
+    OtaUpdater::confirmRunningApp();
+
     // check we have enough space for the upload in the ota partition
     if (!Update.begin(firmware_size)) {
         LOG_ERROR("Firmware upload failed - no space");
@@ -3768,9 +3941,9 @@ void System::remove_optional_gpio(uint8_t pin) {
 // set unused gpios to default state input high-Z
 void System::reset_unused_gpios() {
 #if CONFIG_IDF_TARGET_ESP32
-constexpr uint8_t tx0 = 1; // don't change tx0 pin
+    constexpr uint8_t tx0 = 1; // don't change tx0 pin
 #else
-constexpr uint8_t tx0 = 255; // no valid pin, chips have native USB, tx0 not connected to transceiver
+    constexpr uint8_t tx0 = 255; // no valid pin, chips have native USB, tx0 not connected to transceiver
 #endif
     for (const auto & pin : valid_system_gpios_) {
         auto it = std::find_if(used_gpios_.begin(), used_gpios_.end(), [pin](const GpioUsage & usage) { return usage.pin == pin; });

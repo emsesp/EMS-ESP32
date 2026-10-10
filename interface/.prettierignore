@@ -1,6 +1,7 @@
 node_modules/
 build/
 dist/
+dist-recovery/
 src/i18n/*
 
 .prettierrc

@@ -1897,6 +1897,8 @@ void EMSESP::start() {
     nvs_.begin("ems-esp", false, "nvs");
 #endif
 
+    System::check_crash_loop();
+
     // set valid GPIOs list based on ESP32 chip/platform type
     system_.set_valid_system_gpios();
 
