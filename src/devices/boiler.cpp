@@ -1090,6 +1090,18 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           MAKE_CF_CB(set_ww_disinfect_temp),
                           60,
                           80);
+    if (isHeatPump()) {
+        // time allowed to reach the disinfection temperature (120-240 min, steps of 10), on timeout HPC4x0 reports A01(5284), #3278
+        register_device_value(DeviceValueTAG::TAG_DHW1,
+                              &wwDisinfectDuration_,
+                              DeviceValueType::UINT8,
+                              DeviceValueNumOp::DV_NUMOP_MUL10,
+                              FL_(wwDisinfectDuration),
+                              DeviceValueUOM::MINUTES,
+                              MAKE_CF_CB(set_ww_disinfect_duration),
+                              120,
+                              240);
+    }
     register_device_value(DeviceValueTAG::TAG_DHW1,
                           &wwCircMode_,
                           DeviceValueType::ENUM,
@@ -1651,6 +1663,7 @@ void Boiler::process_UBAParameterWWPlus(const std::shared_ptr<const Telegram> & 
     has_update(telegram, wwCircMode_, 11);         // 0=off, 1=1x3min... 6=6x3min, 7=continuous
     has_update(telegram, wwDisinfectionTemp_, 12); // setting here, status in E9
     has_update(telegram, wwAlternatingOper_, 14);  // 0x01 means enabled
+    has_update(telegram, wwDisinfectDuration_, 15); // heat pumps: disinfection duration in steps of 10 min, #3278
     has_update(telegram, wwSelTempSingle_, 16);
     has_update(telegram, wwSelTempLow_, 18);
     has_update(telegram, wwMaxTemp_, 20);
@@ -2503,6 +2516,16 @@ bool Boiler::set_ww_disinfect_temp(const char * value, const int8_t id) {
         write_command(EMS_TYPE_UBAParameterWW, 8, v, EMS_TYPE_UBAParameterWW);
     }
 
+    return true;
+}
+
+// Set the dhw disinfection duration (heat pumps), 0xEA offset 15 in steps of 10 min, #3278
+bool Boiler::set_ww_disinfect_duration(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2number(value, v, 120, 240)) { // HPC410 menu: 120-240 min in steps of 10
+        return false;
+    }
+    write_command(EMS_TYPE_UBAParameterWWPlus, 15, (v + 5) / 10, EMS_TYPE_UBAParameterWWPlus);
     return true;
 }
 
