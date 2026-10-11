@@ -70,6 +70,7 @@ class Boiler : public EMSdevice {
     uint8_t  wwChargeType_;         // DHW charge type (pump or 3-way-valve)
     uint8_t  wwChargeOptimization_; // DHW charge optimization
     uint8_t  wwDisinfectionTemp_;   // DHW disinfection temperature to prevent infection
+    uint8_t  wwDisinfectDuration_;  // DHW disinfection duration, heat pumps (0xEA offset 15, steps of 10 min)
     uint8_t  wwCircMode_;           // DHW circulation pump mode
     uint8_t  wwCirc_;               // DHW circulation on/off
     uint16_t wwCurTemp_;            // DHW current temperature
@@ -431,6 +432,7 @@ class Boiler : public EMSdevice {
     bool        set_ww_temp_eco(const char * value, const int8_t id);
     bool        set_ww_temp_single(const char * value, const int8_t id);
     bool        set_ww_disinfect_temp(const char * value, const int8_t id);
+    bool        set_ww_disinfect_duration(const char * value, const int8_t id);
     bool        set_ww_maxpower(const char * value, const int8_t id);
     bool        set_ww_maxtemp(const char * value, const int8_t id);
     bool        set_ww_flowTempOffset(const char * value, const int8_t id);
