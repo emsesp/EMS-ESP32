@@ -336,7 +336,6 @@ const no: Translation = {
   SWITCH_RELEASE_TYPE: 'Bytt til {0} utgivelse',
   FIRMWARE_VERSION_INFO: 'Informasjon om firmwareversjon',
   USER_PROFILE: 'Brukerprofil',
-  STORED_VERSIONS: 'Lagret versjoner',
   ONLINE_HELP: 'online hjelp',
   UPGRADE_IMPORTANT_MESSAGES: 'Oppdater viktige meldinger',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Denne oppdateringen krever en fabriksinstilling. Sørg for at du først lastet ned en System Backup før du fortsetter, og last denne filen etter at den nye versjonen er installert.',
@@ -353,9 +352,11 @@ const no: Translation = {
   UPLOAD_FIRMWARE_TEXT: 'Klikk for å velge, eller drop en firmware .bin/.md5 her',
   UPLOAD_MD5_RECEIVED: 'MD5 mottatt, last nå opp firmware .bin-filen',
   UPLOAD_MD5_MATCHED: 'MD5 stemmer, firmware installeres...',
-  RECOVERY: 'Gjenoppretting',
+  RECOVERY_APP: 'Gjenopprettingsapp',
   RECOVERY_NOT_INSTALLED: 'Ikke installert',
-  RECOVERY_INSTALLED: 'Gjenopprettingsfirmware installert'
+  RECOVERY_INSTALLED: 'Gjenopprettingsfirmware installert',
+  RESTART_INTO_RECOVERY: 'Start på nytt i gjenopprettingsappen',
+  RECOVERY_NOT_FOUND: 'Fant ikke gjenopprettingsappen på nettet'
 };
 
 export default no;

@@ -10,6 +10,40 @@ Everybody is welcome and invited to contribute to the EMS-ESP Project by:
 
 This document describes rules that are in effect for this repository, meant for handling issues by contributors in the issue tracker and PRs.
 
+## Building the firmware
+
+Arduino/IDF 3.3.12 (Tasmota platform `2026.09.50` in `platformio.ini`) needs **PlatformIO Core ≥6.2.0**. The official `platformio` package on PyPI is still 6.1.19, so `pio upgrade` and `pip install -U platformio` stay on 6.1.19 and you get:
+
+`IncompatiblePlatform: Development platform 'espressif32' is not compatible with PlatformIO Core v6.1.19 and depends on PlatformIO Core >=6.2.0.`
+
+Install **pioarduino** 6.2.0 (drop-in Core fork). It provides the same `pio` / `platformio` commands.
+
+**VS Code / Cursor** (PlatformIO IDE uses `~/.platformio/penv`):
+
+Linux / macOS:
+
+```bash
+~/.platformio/penv/bin/pip install -U "pioarduino==6.2.0"
+~/.platformio/penv/bin/pio --version
+```
+
+Windows (PowerShell):
+
+```powershell
+& "$env:USERPROFILE\.platformio\penv\Scripts\pip.exe" install -U "pioarduino==6.2.0"
+& "$env:USERPROFILE\.platformio\penv\Scripts\pio.exe" --version
+```
+
+You should see `PlatformIO Core, version 6.2.0`. Reload the window (or restart the IDE), then build again.
+
+**CLI-only / CI:**
+
+```bash
+pip install -U "pioarduino==6.2.0"
+# or: uv pip install --system pioarduino==6.2.0
+platformio --version
+```
+
 ## Opening New Issues
 
 1. Opening an issue means that a problem exists in the code and should be addressed by the project contributors.

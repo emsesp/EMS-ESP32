@@ -336,7 +336,6 @@ const sk: Translation = {
   SWITCH_RELEASE_TYPE: 'Prepnúť na {0} verziu',
   FIRMWARE_VERSION_INFO: 'Informácie o verzii firmware',
   USER_PROFILE: 'Profil používateľa',
-  STORED_VERSIONS: 'Uložené verzie',
   ONLINE_HELP: 'online pomoc',
   UPGRADE_IMPORTANT_MESSAGES: 'Aktualizovať dôležité správy',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Táto aktualizácia vyžaduje reštart základných nastavení. Uistite sa, že najprv stiahnete systémovú zálohu pred pokračovaním, a potom nahrajte tento súbor po instalácii novej verzie.',
@@ -353,9 +352,11 @@ const sk: Translation = {
   UPLOAD_FIRMWARE_TEXT: 'Kliknite, aby ste vybrali, alebo drop súbor firmware .bin/.md5 sem',
   UPLOAD_MD5_RECEIVED: 'Suma MD5 prijatá, teraz nahrajte firmware .bin',
   UPLOAD_MD5_MATCHED: 'MD5 súhlasí, firmvér sa inštaluje...',
-  RECOVERY: 'Obnova',
+  RECOVERY_APP: 'Aplikácia na obnovu',
   RECOVERY_NOT_INSTALLED: 'Nenainštalované',
-  RECOVERY_INSTALLED: 'Firmvér obnovy nainštalovaný'
+  RECOVERY_INSTALLED: 'Firmvér obnovy nainštalovaný',
+  RESTART_INTO_RECOVERY: 'Reštartovať do aplikácie na obnovu',
+  RECOVERY_NOT_FOUND: 'Aplikácia na obnovu sa online nenašla'
 };
 
 export default sk;

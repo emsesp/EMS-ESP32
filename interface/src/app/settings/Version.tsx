@@ -3,11 +3,14 @@ import { Link } from 'react-router';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import CloseIcon from '@mui/icons-material/Close';
+import DescriptionIcon from '@mui/icons-material/Description';
 import CheckIcon from '@mui/icons-material/Done';
 import DownloadIcon from '@mui/icons-material/GetApp';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
@@ -51,6 +54,8 @@ const STABLE_RELNOTES_URL =
 const DEV_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/latest/';
 const DEV_RELNOTES_URL =
   'https://github.com/emsesp/EMS-ESP32/blob/dev/CHANGELOG_LATEST.md';
+const RELEASES_API_URL =
+  'https://api.github.com/repos/emsesp/EMS-ESP32/releases/tags/';
 const MAX_VERSION_POLLS = 5; // approx 15 seconds of waiting
 
 // Types for better type safety
@@ -74,6 +79,96 @@ interface VersionData {
   developer_mode: boolean;
   disable_reset: boolean;
 }
+
+interface RecoveryRelease {
+  url: string;
+  version: string;
+}
+
+// finds the recovery firmware for this board in the GitHub releases, trying each release tag in turn.
+// The version is in the filename, e.g. EMS-ESP-Recovery-1_0_0-ESP32S3-16MB+.bin is 1.0.0
+const findRecovery = async (
+  tags: string[],
+  platform: string
+): Promise<RecoveryRelease | undefined> => {
+  const prefix = 'ems-esp-recovery-';
+  const suffix = `-${platform}.bin`.toLowerCase();
+  for (const tag of tags) {
+    try {
+      const response = await fetch(`${RELEASES_API_URL}${tag}`);
+      if (!response.ok) {
+        continue;
+      }
+      const release = (await response.json()) as {
+        assets?: { name: string; browser_download_url: string }[];
+      };
+      const asset = release.assets?.find((a) => {
+        const name = a.name.toLowerCase();
+        return name.startsWith(prefix) && name.endsWith(suffix);
+      });
+      if (asset) {
+        return {
+          url: asset.browser_download_url,
+          version: asset.name
+            .slice(prefix.length, asset.name.length - suffix.length)
+            .replaceAll('_', '.')
+        };
+      }
+    } catch {
+      // try the next one
+    }
+  }
+  return undefined;
+};
+
+// the GitHub API only allows 60 requests an hour, so only look once per page load for each board and channel
+const recoveryLookups = new Map<string, Promise<RecoveryRelease | undefined>>();
+const findRecoveryCached = (tags: string[], platform: string) => {
+  const key = `${tags.join(',')}|${platform}`;
+  let lookup = recoveryLookups.get(key);
+  if (!lookup) {
+    lookup = findRecovery(tags, platform);
+    recoveryLookups.set(key, lookup);
+    void lookup.then((release) => {
+      if (!release) {
+        recoveryLookups.delete(key); // try again next time
+      }
+    });
+  }
+  return lookup;
+};
+
+// true if version a is newer than b, like 1.0.1 and 1.0.0. A prerelease, like 1.1.0-dev.1, is older than the release
+const isNewerVersion = (a: string, b: string) => {
+  const parse = (v: string) => {
+    const dash = v.indexOf('-');
+    const numbers = (text: string) =>
+      text.split('.').map((n) => Number.parseInt(n, 10) || 0);
+    return {
+      main: numbers(dash < 0 ? v : v.slice(0, dash)),
+      pre: dash < 0 ? [] : numbers(v.slice(dash + 1)),
+      isPre: dash >= 0
+    };
+  };
+  const x = parse(a);
+  const y = parse(b);
+  for (let i = 0; i < Math.max(x.main.length, y.main.length); i++) {
+    const diff = (x.main[i] ?? 0) - (y.main[i] ?? 0);
+    if (diff !== 0) {
+      return diff > 0;
+    }
+  }
+  if (x.isPre !== y.isPre) {
+    return !x.isPre;
+  }
+  for (let i = 0; i < Math.max(x.pre.length, y.pre.length); i++) {
+    const diff = (x.pre[i] ?? 0) - (y.pre[i] ?? 0);
+    if (diff !== 0) {
+      return diff > 0;
+    }
+  }
+  return false;
+};
 
 // Memoized components for better performance
 const VersionInfoDialog = memo(
@@ -235,6 +330,7 @@ const VersionInfoDialog = memo(
         <DialogActions>
           {!isPartition && (
             <Button
+              startIcon={<DescriptionIcon />}
               variant="outlined"
               component="a"
               href={relNotesUrl}
@@ -244,7 +340,12 @@ const VersionInfoDialog = memo(
               Changelog
             </Button>
           )}
-          <Button variant="outlined" onClick={onClose} color="secondary">
+          <Button
+            startIcon={<CloseIcon />}
+            variant="outlined"
+            onClick={onClose}
+            color="secondary"
+          >
             {LL.CLOSE()}
           </Button>
         </DialogActions>
@@ -372,9 +473,7 @@ const InstallPartitionDialog = memo(
 
     return (
       <Dialog sx={dialogStyle} open={openInstallPartitionDialog} onClose={onClose}>
-        <DialogTitle>
-          {isRecovery ? LL.RECOVERY() : `${LL.INSTALL()} ${LL.STORED_VERSIONS()}`}
-        </DialogTitle>
+        <DialogTitle>{isRecovery ? LL.RECOVERY_APP() : LL.INSTALL()}</DialogTitle>
         <DialogContent dividers>
           <Typography sx={{ mb: 2 }}>
             {isRecovery
@@ -394,7 +493,7 @@ const InstallPartitionDialog = memo(
 
           <Button
             startIcon={
-              isRecovery ? <PowerSettingsNewIcon /> : <WarningIcon color="warning" />
+              isRecovery ? <RestartAltIcon /> : <WarningIcon color="warning" />
             }
             variant="outlined"
             onClick={() => onInstall(partition)}
@@ -418,6 +517,11 @@ const Version = () => {
   const { me, versions, refreshVersions } = useContext(AuthenticatedContext);
 
   const [restarting, setRestarting] = useState<boolean>(false);
+  const [findingRecovery, setFindingRecovery] = useState<boolean>(false);
+  const [installingRecovery, setInstallingRecovery] = useState<boolean>(false);
+  const [latestRecovery, setLatestRecovery] = useState<RecoveryRelease | undefined>(
+    undefined
+  );
   const [confirmFactoryReset, setConfirmFactoryReset] = useState<boolean>(false);
   const [confirmRestart, setConfirmRestart] = useState<boolean>(false);
   const [openInstallDialog, setOpenInstallDialog] = useState<boolean>(false);
@@ -499,9 +603,6 @@ const Version = () => {
 
   const platform = data ? getPlatform(data) : '';
 
-  const otherPartitions =
-    data?.partitions.filter((p) => p.partition !== data.partition) ?? [];
-
   const setPartitionVersionInfo = (partition: string) => {
     setShowVersionInfo(3);
     const partitionData = data?.partitions.find((p) => p.partition === partition);
@@ -542,6 +643,49 @@ const Version = () => {
       toast.error(error.message);
     });
     await doRestart();
+  };
+
+  // the release of the channel we're on first, it may not have a recovery app yet so try the other one too
+  const stableTag = latestVersion ? `v${latestVersion.version}` : '';
+  const recoveryTags = (
+    usingDevVersion ? ['latest', stableTag] : [stableTag, 'latest']
+  ).filter(Boolean);
+  const recoveryTagsKey = recoveryTags.join(',');
+  const hasRecoverySlot = data?.recovery_version !== undefined;
+
+  // look for the latest recovery app, to show if there is a newer one
+  useEffect(() => {
+    if (!hasRecoverySlot || !internetLive || !platform) {
+      return;
+    }
+    let cancelled = false;
+    void findRecoveryCached(recoveryTags, platform).then((release) => {
+      if (!cancelled) {
+        setLatestRecovery(release);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [hasRecoverySlot, internetLive, platform, recoveryTagsKey]);
+
+  // downloads the recovery app from GitHub into the factory partition, EMS-ESP doesn't restart
+  const installRecovery = async () => {
+    setFindingRecovery(true);
+    const release =
+      latestRecovery ?? (await findRecoveryCached(recoveryTags, platform));
+    setFindingRecovery(false);
+
+    if (!release) {
+      toast.error(LL.RECOVERY_NOT_FOUND());
+      return;
+    }
+
+    await sendUploadURL(release.url)
+      .then(() => setInstallingRecovery(true))
+      .catch((error: Error) => {
+        toast.error(error.message);
+      });
   };
 
   const installPartitionFirmware = async (partition: string) => {
@@ -607,8 +751,9 @@ const Version = () => {
             {LL.LATEST_VERSION(usingDevVersion ? LL.DEVELOPMENT() : LL.STABLE())}
           </span>
           <Button
-            sx={{ ml: 1 }}
+            sx={{ ml: 3 }}
             variant="outlined"
+            startIcon={<RefreshIcon />}
             size="small"
             onClick={() => showFirmwareDialog(showingDev)}
           >
@@ -624,9 +769,10 @@ const Version = () => {
 
     return (
       <Button
-        sx={{ ml: 1 }}
+        sx={{ ml: 3 }}
         variant="outlined"
         color={isUpdateAvailable ? 'success' : 'warning'}
+        startIcon={!isUpdateAvailable ? <SwapHorizIcon /> : undefined}
         size="small"
         onClick={() => showFirmwareDialog(showingDev)}
       >
@@ -639,7 +785,7 @@ const Version = () => {
               display: 'inline-block',
               width: 8,
               height: 8,
-              ml: 1,
+              ml: 3,
               verticalAlign: 'middle',
               borderRadius: '50%',
               backgroundColor: '#ffeb3b',
@@ -653,6 +799,20 @@ const Version = () => {
 
   if (restarting) {
     return <SystemMonitor />;
+  }
+
+  if (installingRecovery) {
+    return (
+      <SystemMonitor
+        onDone={(success) => {
+          setInstallingRecovery(false);
+          if (success) {
+            toast.success(LL.RECOVERY_INSTALLED());
+          }
+          void loadData();
+        }}
+      />
+    );
   }
 
   if (!data) {
@@ -674,9 +834,13 @@ const Version = () => {
           sx={{
             display: 'grid',
             gridTemplateColumns: 'auto 1fr',
+            gridAutoRows: 'minmax(32px, auto)', // same height for every row
             columnGap: 3,
             rowGap: 0.75,
-            alignItems: 'center'
+            alignItems: 'center',
+            // whole pixel line height so the labels and values are centered on the same pixel
+            '& .MuiTypography-root': { lineHeight: '24px' },
+            '& .MuiTypography-caption': { lineHeight: 1 }
           }}
         >
           <Typography color="secondary">{LL.VERSION()}</Typography>
@@ -732,6 +896,51 @@ const Version = () => {
               PSRAM)
             </Typography>
           </Box>
+
+          {data.recovery_version !== undefined && (
+            <>
+              <Typography color="secondary">{LL.RECOVERY_APP()}</Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  minWidth: 0
+                }}
+              >
+                <Typography component="span">
+                  {data.recovery_version || LL.RECOVERY_NOT_INSTALLED()}
+                </Typography>
+                {!data.recovery_version && me.admin && internetLive && (
+                  <Button
+                    startIcon={<DownloadIcon />}
+                    sx={{ ml: 3 }}
+                    variant="outlined"
+                    size="small"
+                    disabled={findingRecovery}
+                    onClick={() => void installRecovery()}
+                  >
+                    {LL.INSTALL()}
+                  </Button>
+                )}
+                {data.recovery_version && me.admin && (
+                  <Button
+                    startIcon={<RestartAltIcon />}
+                    sx={{ ml: 3 }}
+                    variant="outlined"
+                    size="small"
+                    onClick={() => {
+                      const version = data.recovery_version;
+                      if (version) {
+                        showPartitionDialog(version, 'boot', '');
+                      }
+                    }}
+                  >
+                    {LL.RESTART_INTO_RECOVERY()}
+                  </Button>
+                )}
+              </Box>
+            </>
+          )}
         </Box>
 
         {internetLive ? (
@@ -749,96 +958,6 @@ const Version = () => {
                 alignItems: 'center'
               }}
             >
-              {data.developer_mode && (
-                <>
-                  {otherPartitions.length > 0 && (
-                    <>
-                      <Typography
-                        color="secondary"
-                        sx={{ alignSelf: 'start', pt: 0.5 }}
-                      >
-                        {LL.STORED_VERSIONS()}
-                      </Typography>
-                      <Box
-                        sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}
-                      >
-                        {otherPartitions.map((partition) => (
-                          <Box
-                            key={partition.partition}
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              flexWrap: 'wrap'
-                            }}
-                          >
-                            <Typography component="span">
-                              {partition.version}
-                            </Typography>
-                            <IconButton
-                              size="small"
-                              onClick={() =>
-                                setPartitionVersionInfo(partition.partition)
-                              }
-                              aria-label={LL.FIRMWARE_VERSION_INFO()}
-                              sx={{ p: 0.5 }}
-                            >
-                              <InfoOutlinedIcon
-                                color="primary"
-                                sx={{ fontSize: 18 }}
-                              />
-                            </IconButton>
-                            <Button
-                              variant="outlined"
-                              size="small"
-                              onClick={() =>
-                                showPartitionDialog(
-                                  partition.version,
-                                  partition.partition,
-                                  partition.install_date ?? ''
-                                )
-                              }
-                            >
-                              {LL.INSTALL()}
-                            </Button>
-                          </Box>
-                        ))}
-                      </Box>
-                    </>
-                  )}
-                  {data.recovery_version !== undefined && (
-                    <>
-                      <Typography color="secondary">{LL.RECOVERY()}</Typography>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          flexWrap: 'wrap'
-                        }}
-                      >
-                        <Typography component="span">
-                          {data.recovery_version || LL.RECOVERY_NOT_INSTALLED()}
-                        </Typography>
-                        {data.recovery_version && me.admin && (
-                          <Button
-                            sx={{ ml: 1 }}
-                            variant="outlined"
-                            size="small"
-                            onClick={() => {
-                              const version = data.recovery_version;
-                              if (version) {
-                                showPartitionDialog(version, 'boot', '');
-                              }
-                            }}
-                          >
-                            Boot
-                          </Button>
-                        )}
-                      </Box>
-                      <Box sx={{ gridColumn: '1 / -1', height: 12 }} />
-                    </>
-                  )}
-                </>
-              )}
               <Typography color="secondary">{LL.STABLE()}</Typography>
               <Box
                 sx={{
@@ -880,6 +999,52 @@ const Version = () => {
                 </IconButton>
                 {showButtons(true)}
               </Box>
+
+              {data.recovery_version && latestRecovery && (
+                <>
+                  <Typography color="secondary">{LL.RECOVERY_APP()}</Typography>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      minWidth: 0
+                    }}
+                  >
+                    <Typography component="span">
+                      {latestRecovery.version}
+                    </Typography>
+                    {isNewerVersion(
+                      latestRecovery.version,
+                      data.recovery_version
+                    ) ? (
+                      me.admin && (
+                        <Button
+                          startIcon={<DownloadIcon />}
+                          sx={{ ml: 3 }}
+                          variant="outlined"
+                          color="success"
+                          size="small"
+                          disabled={findingRecovery}
+                          onClick={() => void installRecovery()}
+                        >
+                          {LL.INSTALL()}
+                        </Button>
+                      )
+                    ) : (
+                      <>
+                        <CheckIcon
+                          color="success"
+                          sx={{ verticalAlign: 'middle', ml: 0.5, mr: 0.5 }}
+                        />
+                        <span style={{ color: '#66bb6a', fontSize: '0.8em' }}>
+                          {LL.LATEST_VERSION(LL.RECOVERY_APP())}
+                        </span>
+                      </>
+                    )}
+                  </Box>
+                </>
+              )}
             </Box>
           </>
         ) : (
@@ -978,7 +1143,7 @@ const Version = () => {
                 {LL.CANCEL()}
               </Button>
               <Button
-                startIcon={<PowerSettingsNewIcon />}
+                startIcon={<RestartAltIcon />}
                 variant="outlined"
                 onClick={doRestart}
                 color="success"
@@ -1010,7 +1175,7 @@ const Version = () => {
               </Button>
             )}
             <Button
-              startIcon={<PowerSettingsNewIcon />}
+              startIcon={<RestartAltIcon />}
               variant="outlined"
               onClick={handleRestartClick}
               color="success"

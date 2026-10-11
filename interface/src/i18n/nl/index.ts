@@ -336,7 +336,6 @@ const nl: Translation = {
   SWITCH_RELEASE_TYPE: 'Switch naar {0} release',
   FIRMWARE_VERSION_INFO: 'Informatie over firmwareversie',
   USER_PROFILE: 'Gebruikersprofiel',
-  STORED_VERSIONS: 'Opgeslagen versies',
   ONLINE_HELP: 'online help',
   UPGRADE_IMPORTANT_MESSAGES: 'Upgrade Belangrijke Berichten',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Deze upgrade vereist een fabrieksinstelling. Zorg ervoor dat u eerst een Systeem Backup download voordat u doorgaat, en upload deze file na de installatie van de nieuwe versie.',
@@ -353,9 +352,11 @@ const nl: Translation = {
   UPLOAD_FIRMWARE_TEXT: 'Klik voor selecteren, of drop een firmware .bin/.md5 bestand hier',
   UPLOAD_MD5_RECEIVED: 'Digest ontvangen, upload nu het firmware .bin-bestand',
   UPLOAD_MD5_MATCHED: 'MD5 komt overeen, firmware wordt geïnstalleerd...',
-  RECOVERY: 'Herstel',
+  RECOVERY_APP: 'Herstel-app',
   RECOVERY_NOT_INSTALLED: 'Niet geïnstalleerd',
-  RECOVERY_INSTALLED: 'Herstelfirmware geïnstalleerd'
+  RECOVERY_INSTALLED: 'Herstelfirmware geïnstalleerd',
+  RESTART_INTO_RECOVERY: 'Herstart naar de herstel-app',
+  RECOVERY_NOT_FOUND: 'Herstel-app niet online gevonden'
 };
 
 export default nl;

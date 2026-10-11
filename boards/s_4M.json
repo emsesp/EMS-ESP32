@@ -17,7 +17,7 @@
       "arduino",
       "espidf"
     ],
-    "name": "Tasmota ESP32 4M Flash, 4608KB Code/OTA, 2MB FS",
+    "name": "ESP32 4M Flash, 4608KB Code/OTA, 2MB FS",
     "upload": {
       "flash_size": "4MB",
       "maximum_ram_size": 327680,

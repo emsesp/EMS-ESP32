@@ -336,7 +336,6 @@ const fr: Translation = {
   SWITCH_RELEASE_TYPE: 'Passer à la version {0}',
   FIRMWARE_VERSION_INFO: 'Informations sur la version du firmware',
   USER_PROFILE: 'Profil utilisateur',
-  STORED_VERSIONS: 'Versions stockées',
   ONLINE_HELP: 'aide en ligne',
   UPGRADE_IMPORTANT_MESSAGES: 'Mettre à jour les messages importants',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Cette mise à jour nécessite une réinitialisation de fabrique. Assurez-vous de télécharger une sauvegarde système avant de continuer, et de la charger après l\'installation de la nouvelle version.',
@@ -353,9 +352,11 @@ const fr: Translation = {
   UPLOAD_FIRMWARE_TEXT: 'Cliquez pour sélectionner, ou drop un fichier firmware .bin/.md5 ici',
   UPLOAD_MD5_RECEIVED: 'Empreinte reçue, téléversez maintenant le fichier firmware .bin',
   UPLOAD_MD5_MATCHED: 'MD5 concordant, installation du firmware...',
-  RECOVERY: 'Récupération',
+  RECOVERY_APP: 'Application de récupération',
   RECOVERY_NOT_INSTALLED: 'Non installé',
-  RECOVERY_INSTALLED: 'Firmware de récupération installé'
+  RECOVERY_INSTALLED: 'Firmware de récupération installé',
+  RESTART_INTO_RECOVERY: 'Redémarrer dans l\'application de récupération',
+  RECOVERY_NOT_FOUND: 'Application de récupération introuvable en ligne'
 };
 
 export default fr;

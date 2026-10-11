@@ -18,7 +18,7 @@
 
 #include "emsesp.h"
 
-#include "httpClient.h"
+#include "emsesp_http_client.h"
 
 #include <WiFiClient.h>
 #include <ESP_SSLClient.h>

@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "console.h"
+#include "emsesp_console.h"
 #include "console_stream.h"
 #include "emsesp.h"
 

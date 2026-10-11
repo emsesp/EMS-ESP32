@@ -21,7 +21,7 @@
 #ifndef EMSESP_STANDALONE
 #include <esp_ota_ops.h>
 #endif
-#include "httpClient.h"
+#include "emsesp_http_client.h"
 
 namespace emsesp {
 
@@ -45,7 +45,8 @@ WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * se
 // This contains both system & hardware Status to avoid having multiple costly endpoints
 // This is also used for polling during the SystemMonitor to see if EMS-ESP is alive
 void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
-    EMSESP::system_.refreshHeapMem(); // refresh free heap and max alloc heap
+    EMSESP::system_.refreshHeapMem();           // refresh free heap and max alloc heap
+    EMSESP::system_.recovery_installed_apply(); // update the partition info if the recovery firmware was just downloaded
 
     auto *     response = new PsramAsyncJsonResponse(false);
     JsonObject root     = response->getRoot();

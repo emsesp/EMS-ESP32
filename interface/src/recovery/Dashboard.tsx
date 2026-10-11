@@ -2,6 +2,7 @@ import { type ReactNode, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MemoryIcon from '@mui/icons-material/Memory';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -17,11 +18,16 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  IconButton,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
   MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
   TextField,
   Typography
 } from '@mui/material';
@@ -37,6 +43,9 @@ import { HttpError, factoryReset, restart, setBootPartition } from './api';
 import type { RecoveryPartition, RecoveryStatus } from './types';
 
 const formatMB = (bytes: number) => `${(bytes / 1048576).toFixed(2)} MB`;
+
+const formatInstallDate = (epoch: number) =>
+  epoch > 0 ? new Date(epoch * 1000).toLocaleString() : 'unknown';
 
 const formatUptime = (seconds: number) => {
   const h = Math.floor(seconds / 3600);
@@ -81,13 +90,27 @@ const SectionTitle = ({ children }: { children: ReactNode }) => (
   </Typography>
 );
 
+// same look as the version info dialog in the EMS-ESP app
 const InfoRow = ({ label, value }: { label: string; value: ReactNode }) => (
-  <Box sx={{ display: 'flex', py: 0.5 }}>
-    <Typography sx={{ width: 160, flexShrink: 0 }} color="text.secondary">
+  <TableRow sx={{ height: 24, borderBottom: 'none' }}>
+    <TableCell
+      component="th"
+      scope="row"
+      sx={{
+        color: 'lightblue',
+        borderBottom: 'none',
+        pr: 1,
+        py: 0.5,
+        fontSize: 13,
+        width: 140
+      }}
+    >
       {label}
-    </Typography>
-    <Typography>{value}</Typography>
-  </Box>
+    </TableCell>
+    <TableCell sx={{ borderBottom: 'none', py: 0.5, fontSize: 13 }}>
+      {value}
+    </TableCell>
+  </TableRow>
 );
 
 interface DashboardProps {
@@ -98,6 +121,7 @@ interface DashboardProps {
 
 const Dashboard = ({ status, onRestarting, onSignOut }: DashboardProps) => {
   const [confirmBoot, setConfirmBoot] = useState<RecoveryPartition>();
+  const [infoPartition, setInfoPartition] = useState<RecoveryPartition>();
   const [confirmFactoryReset, setConfirmFactoryReset] = useState(false);
   const [pickedTarget, setPickedTarget] = useState<string>();
   const uploadTarget = pickedTarget ?? status.upload_target;
@@ -240,6 +264,16 @@ const Dashboard = ({ status, onRestarting, onSignOut }: DashboardProps) => {
                           label="unconfirmed"
                         />
                       )}
+                      {p.valid && (
+                        <IconButton
+                          size="small"
+                          onClick={() => setInfoPartition(p)}
+                          aria-label="Firmware version info"
+                          sx={{ p: 0.5 }}
+                        >
+                          <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
+                        </IconButton>
+                      )}
                     </Box>
                   }
                   secondary={
@@ -287,46 +321,53 @@ const Dashboard = ({ status, onRestarting, onSignOut }: DashboardProps) => {
 
       <SectionContent>
         <SectionTitle>System</SectionTitle>
-        <InfoRow label="Recovery version" value={'v' + status.recovery_version} />
-        <InfoRow
-          label="Chip"
-          value={`${status.chip}, ${formatMB(status.flash_size)} flash${status.psram_size ? ', ' + formatMB(status.psram_size) + ' PSRAM' : ''}`}
-        />
-        <InfoRow
-          label="Free heap"
-          value={`${Math.round(status.free_heap / 1024)} KB`}
-        />
-        <InfoRow label="Uptime" value={formatUptime(status.uptime)} />
-        <InfoRow label="MAC address" value={status.mac} />
-        <InfoRow
-          label="Access point"
-          value={`${status.ap_ssid} on ${status.ap_ip} (${status.ap_clients} connected)`}
-        />
-        {status.eth_state && (
-          <InfoRow
-            label="Ethernet"
-            value={
-              status.eth_state === 'connected'
-                ? `connected, ${status.eth_ip ?? ''}${status.static_ip ? ' (static IP)' : ''}`
-                : ETH_STATE_TEXT[status.eth_state]
-            }
-          />
-        )}
-        <InfoRow
-          label="WiFi"
-          value={
-            !status.wifi_ssid
-              ? 'not configured'
-              : status.wifi_connected
-                ? `${status.wifi_ssid}, ${status.wifi_ip ?? ''} (${status.wifi_rssi ?? 0} dBm)${status.static_ip ? ', static IP' : ''}`
-                : !status.wifi_started
-                  ? status.eth_state === 'connected'
-                    ? 'not used, Ethernet is connected'
-                    : 'waiting for Ethernet'
-                  : `connecting to ${status.wifi_ssid}`
-          }
-        />
-        <InfoRow label="Hostname" value={status.hostname} />
+        <Table size="small" sx={{ borderCollapse: 'collapse', minWidth: 0 }}>
+          <TableBody>
+            <InfoRow
+              label="Recovery version"
+              value={'v' + status.recovery_version}
+            />
+            <InfoRow
+              label="Chip"
+              value={`${status.chip}, ${formatMB(status.flash_size)} flash${status.psram_size ? ', ' + formatMB(status.psram_size) + ' PSRAM' : ''}`}
+            />
+            <InfoRow
+              label="Free heap"
+              value={`${Math.round(status.free_heap / 1024)} KB`}
+            />
+            <InfoRow label="Uptime" value={formatUptime(status.uptime)} />
+            <InfoRow label="MAC address" value={status.mac} />
+            <InfoRow
+              label="Access point"
+              value={`${status.ap_ssid} on ${status.ap_ip} (${status.ap_clients} connected)`}
+            />
+            {status.eth_state && (
+              <InfoRow
+                label="Ethernet"
+                value={
+                  status.eth_state === 'connected'
+                    ? `connected, ${status.eth_ip ?? ''}${status.static_ip ? ' (static IP)' : ''}`
+                    : ETH_STATE_TEXT[status.eth_state]
+                }
+              />
+            )}
+            <InfoRow
+              label="WiFi"
+              value={
+                !status.wifi_ssid
+                  ? 'not configured'
+                  : status.wifi_connected
+                    ? `${status.wifi_ssid}, ${status.wifi_ip ?? ''} (${status.wifi_rssi ?? 0} dBm)${status.static_ip ? ', static IP' : ''}`
+                    : !status.wifi_started
+                      ? status.eth_state === 'connected'
+                        ? 'not used, Ethernet is connected'
+                        : 'waiting for Ethernet'
+                      : `connecting to ${status.wifi_ssid}`
+              }
+            />
+            <InfoRow label="Hostname" value={status.hostname} />
+          </TableBody>
+        </Table>
 
         <ButtonRow>
           {!status.disable_reset && (
@@ -342,7 +383,7 @@ const Dashboard = ({ status, onRestarting, onSignOut }: DashboardProps) => {
           <Button
             startIcon={<RestartAltIcon />}
             variant="outlined"
-            color="error"
+            color="success"
             onClick={() => void doRestart(status.boot)}
           >
             Restart{status.boot !== status.running ? ` (boots ${status.boot})` : ''}
@@ -351,6 +392,7 @@ const Dashboard = ({ status, onRestarting, onSignOut }: DashboardProps) => {
             startIcon={<LogoutIcon />}
             variant="outlined"
             color="secondary"
+            sx={{ float: 'right' }}
             onClick={onSignOut}
           >
             Sign Out
@@ -421,6 +463,50 @@ const Dashboard = ({ status, onRestarting, onSignOut }: DashboardProps) => {
             onClick={() => confirmBoot && void doBoot(confirmBoot)}
           >
             Start
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        sx={dialogStyle}
+        open={!!infoPartition}
+        onClose={() => setInfoPartition(undefined)}
+      >
+        <DialogTitle>Firmware Version Info</DialogTitle>
+        <DialogContent dividers>
+          {infoPartition && (
+            <Table size="small" sx={{ borderCollapse: 'collapse', minWidth: 0 }}>
+              <TableBody>
+                <InfoRow
+                  label="Version"
+                  value={
+                    infoPartition.version ? 'v' + infoPartition.version : 'unknown'
+                  }
+                />
+                <InfoRow
+                  label="Type"
+                  value={infoPartition.factory ? 'Recovery App' : 'EMS-ESP Firmware'}
+                />
+                <InfoRow label="Partition" value={infoPartition.label} />
+                <InfoRow
+                  label="Size"
+                  value={`${formatMB(infoPartition.image_size)} of ${formatMB(infoPartition.size)}`}
+                />
+                <InfoRow
+                  label="Install Date"
+                  value={formatInstallDate(infoPartition.install_date)}
+                />
+              </TableBody>
+            </Table>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => setInfoPartition(undefined)}
+          >
+            Close
           </Button>
         </DialogActions>
       </Dialog>

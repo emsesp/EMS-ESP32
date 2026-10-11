@@ -336,7 +336,6 @@ const en: Translation = {
   SWITCH_RELEASE_TYPE: 'Switch to {0} release',
   FIRMWARE_VERSION_INFO: 'Firmware Version Information',
   USER_PROFILE: 'User Profile',
-  STORED_VERSIONS: 'Stored Versions',
   ONLINE_HELP: 'online help',
   UPGRADE_IMPORTANT_MESSAGES: 'Upgrade Important Messages',
   UPGRADE_IMPORTANT_MESSAGES_1: 'This upgrade requires a factory reset. Make sure you first download a System Backup before continuing, and then upload this file after the new version is installed.',
@@ -353,9 +352,11 @@ const en: Translation = {
   UPLOAD_FIRMWARE_TEXT: 'Click to select, or drop a firmware .bin/.md5 file here',
   UPLOAD_MD5_RECEIVED: 'Digest received, now upload the firmware .bin file',
   UPLOAD_MD5_MATCHED: 'MD5 matches, installing firmware...',
-  RECOVERY: 'Recovery',
+  RECOVERY_APP: 'Recovery App',
   RECOVERY_NOT_INSTALLED: 'Not installed',
-  RECOVERY_INSTALLED: 'Recovery firmware installed'
+  RECOVERY_INSTALLED: 'Recovery firmware installed',
+  RESTART_INTO_RECOVERY: 'Restart into Recovery App',
+  RECOVERY_NOT_FOUND: 'Recovery App not found online'
 };
 
 export default en;

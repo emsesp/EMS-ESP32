@@ -336,7 +336,6 @@ const sv: Translation = {
   SWITCH_RELEASE_TYPE: 'Byt till {0} utgåva',
   FIRMWARE_VERSION_INFO: 'Information om firmwareversion',
   USER_PROFILE: 'Användarprofil',
-  STORED_VERSIONS: 'Lagrad versioner',
   ONLINE_HELP: 'online hjälp',
   UPGRADE_IMPORTANT_MESSAGES: 'Uppdatera viktiga meddelanden',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Denna uppdatering kräver en fabriksåterställning. Se till att du först laddar ned en System Backup innan du fortsätter, och ladda upp denna fil efter att den nya versionen är installerad.',
@@ -353,9 +352,11 @@ const sv: Translation = {
   UPLOAD_FIRMWARE_TEXT: 'Klicka för att välja, eller drop en firmware .bin/.md5 här',
   UPLOAD_MD5_RECEIVED: 'MD5 mottagen, ladda nu upp firmware .bin-filen',
   UPLOAD_MD5_MATCHED: 'MD5 stämmer, firmware installeras...',
-  RECOVERY: 'Återställning',
+  RECOVERY_APP: 'Återställningsapp',
   RECOVERY_NOT_INSTALLED: 'Inte installerad',
-  RECOVERY_INSTALLED: 'Återställningsfirmware installerad'
+  RECOVERY_INSTALLED: 'Återställningsfirmware installerad',
+  RESTART_INTO_RECOVERY: 'Starta om i återställningsappen',
+  RECOVERY_NOT_FOUND: 'Återställningsappen hittades inte online'
 };
 
 export default sv;

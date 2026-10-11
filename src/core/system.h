@@ -23,7 +23,7 @@
 #include <ArduinoJson.h>
 
 #include "helpers.h"
-#include "console.h"
+#include "emsesp_console.h"
 #include "mqtt.h"
 #include "telegram.h"
 #include "led.h"
@@ -84,6 +84,8 @@ class System {
     static void check_crash_loop(); // call at boot once NVS is open, may restart into the factory partition
 
     void        recovery_installed();     // called on the AsyncTCP task after the recovery firmware was written
+    void        recovery_installed_deferred(); // called from the main loop after the recovery firmware was downloaded from a URL
+    void        recovery_installed_apply();    // called on the AsyncTCP task, handles the deferred call
     std::string recovery_version() const; // empty if there's no recovery firmware
 
     // commands
@@ -390,6 +392,8 @@ class System {
     volatile uint8_t systemStatus_; // uses SYSTEM_STATUS enum - written from the AsyncTCP task (e.g. cancel) and read from the main loop during OTA
 
     void set_partition_install_date();
+
+    volatile bool recovery_installed_pending_ = false; // set by the main loop, handled on the AsyncTCP task
 
     // firmware is confirmed to the bootloader and the crash counter cleared once it has been up this long
     static constexpr uint32_t FIRMWARE_HEALTHY_UPTIME = 120; // seconds

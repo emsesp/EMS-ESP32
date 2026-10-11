@@ -336,7 +336,6 @@ const tr: Translation = {
   SWITCH_RELEASE_TYPE: '{0} sürümüne geç',
   FIRMWARE_VERSION_INFO: 'Firmware Sürüm Bilgisi',
   USER_PROFILE: 'Kullanıcı Profili',
-  STORED_VERSIONS: 'Kaydedilmiş Sürümler',
   ONLINE_HELP: 'online yardım',
   UPGRADE_IMPORTANT_MESSAGES: 'Önemli Mesajları Güncelle',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Bu güncelleme továrnı ayarlarını gerektirir. Yapılandırmanızı ve ayarlarınızı önce yedekleyin ve ardından yeni sürüm yüklendikten sonra yükleyin.',
@@ -353,9 +352,11 @@ const tr: Translation = {
   UPLOAD_FIRMWARE_TEXT: 'Bir firmware .bin dosyası, buraya drop yapın',
   UPLOAD_MD5_RECEIVED: 'Özet alındı, şimdi firmware .bin dosyasını yükleyin',
   UPLOAD_MD5_MATCHED: 'MD5 eşleşti, firmware yükleniyor...',
-  RECOVERY: 'Kurtarma',
+  RECOVERY_APP: 'Kurtarma Uygulaması',
   RECOVERY_NOT_INSTALLED: 'Yüklü değil',
-  RECOVERY_INSTALLED: 'Kurtarma firmware yüklendi'
+  RECOVERY_INSTALLED: 'Kurtarma firmware yüklendi',
+  RESTART_INTO_RECOVERY: 'Kurtarma uygulamasına yeniden başlat',
+  RECOVERY_NOT_FOUND: 'Kurtarma uygulaması çevrimiçi bulunamadı'
 };
 
 export default tr;

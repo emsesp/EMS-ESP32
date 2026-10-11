@@ -22,7 +22,7 @@
 
 #include "shuntingYard.h"
 
-#include "httpClient.h"
+#include "emsesp_http_client.h"
 
 namespace emsesp {
 

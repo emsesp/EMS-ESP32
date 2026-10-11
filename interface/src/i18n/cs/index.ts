@@ -336,7 +336,6 @@ const cs: Translation = {
   SWITCH_RELEASE_TYPE: 'Přepnout na {0} verzi',
   FIRMWARE_VERSION_INFO: 'Informace o verzi firmwaru',
   USER_PROFILE: 'Uživatelský profil',
-  STORED_VERSIONS: 'Uložené verze',
   ONLINE_HELP: 'online nápověda',
   UPGRADE_IMPORTANT_MESSAGES: 'Aktualizovat důležité zprávy',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Tato aktualizace vyžaduje obnovení továrního nastavení. Ujistěte se, že nejprve stáhnete systémovou zálohu před pokračováním a poté nahrajte tento soubor po instalaci nové verze.',
@@ -353,9 +352,11 @@ const cs: Translation = {
   UPLOAD_FIRMWARE_TEXT: 'Klikněte, abyste vybrali, nebo drop soubor firmware .bin/.md5 sem',
   UPLOAD_MD5_RECEIVED: 'Digest přijat, nyní nahrajte firmware .bin',
   UPLOAD_MD5_MATCHED: 'MD5 souhlasí, firmware se instaluje...',
-  RECOVERY: 'Obnova',
+  RECOVERY_APP: 'Aplikace pro obnovu',
   RECOVERY_NOT_INSTALLED: 'Nenainstalováno',
-  RECOVERY_INSTALLED: 'Firmware pro obnovu nainstalován'
+  RECOVERY_INSTALLED: 'Firmware pro obnovu nainstalován',
+  RESTART_INTO_RECOVERY: 'Restartovat do aplikace pro obnovu',
+  RECOVERY_NOT_FOUND: 'Aplikace pro obnovu nebyla online nalezena'
 };
 
 export default cs;

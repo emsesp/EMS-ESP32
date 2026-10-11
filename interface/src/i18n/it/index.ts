@@ -336,7 +336,6 @@ const it: Translation = {
   SWITCH_RELEASE_TYPE: 'Cambia in {0} rilascio',
   FIRMWARE_VERSION_INFO: 'Informazioni sulla versione del firmware',
   USER_PROFILE: 'Profilo utente',
-  STORED_VERSIONS: 'Versioni memorizzate',
   ONLINE_HELP: 'aiuto online',
   UPGRADE_IMPORTANT_MESSAGES: 'Aggiorna Messaggi Importanti',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Questa aggiornamento richiede un ripristino di fabbrica. Assicurati di prima scaricare un backup del sistema prima di continuare, e poi caricare questo file dopo l\'installazione della nuova versione.',
@@ -353,9 +352,11 @@ const it: Translation = {
   UPLOAD_FIRMWARE_TEXT: 'Klik per selezionare, o drop un file firmware .bin/.md5 qui',
   UPLOAD_MD5_RECEIVED: 'Digest ricevuto, ora caricare il file firmware .bin',
   UPLOAD_MD5_MATCHED: 'MD5 corrispondente, installazione firmware...',
-  RECOVERY: 'Ripristino',
+  RECOVERY_APP: 'App di ripristino',
   RECOVERY_NOT_INSTALLED: 'Non installato',
-  RECOVERY_INSTALLED: 'Firmware di ripristino installato'
+  RECOVERY_INSTALLED: 'Firmware di ripristino installato',
+  RESTART_INTO_RECOVERY: 'Riavvia nell\'app di ripristino',
+  RECOVERY_NOT_FOUND: 'App di ripristino non trovata online'
 };
 
 export default it;

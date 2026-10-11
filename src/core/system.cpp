@@ -17,7 +17,7 @@
  */
 
 #include "system.h"
-#include "network.h"
+#include "emsesp_network.h"
 #include "emsesp.h" // for send_raw_telegram() command
 
 #ifndef EMSESP_STANDALONE
@@ -34,7 +34,7 @@
 
 #include "firmwareVersion.h"
 #include "shuntingYard.h" // for compute() used by the message and sendmail commands
-#include "httpClient.h"   // for the shared TLS client settings
+#include "emsesp_http_client.h"   // for the shared TLS client settings
 
 #if defined(EMSESP_TEST)
 #include "../test/test.h"
@@ -568,7 +568,8 @@ void System::get_partition_info() {
 
 void System::recovery_installed() {
 #ifdef EMSESP_HAS_RECOVERY
-    // drop the version info of an EMS-ESP firmware that was in the factory partition before
+    // drop the version info of an EMS-ESP firmware that was in the factory partition before. The recovery reports its
+    // own version, but the install date is only known here, as it's not set when flashed over serial
     const esp_partition_t * factory = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
     if (factory != nullptr) {
         char c[20];
@@ -576,13 +577,29 @@ void System::recovery_installed() {
         if (EMSESP::nvs_.isKey(factory->label)) {
             EMSESP::nvs_.remove(factory->label);
         }
-        if (EMSESP::nvs_.isKey(c)) {
-            EMSESP::nvs_.remove(c);
+        const time_t now = time(nullptr);
+        if (now > 1500000000L) {
+            EMSESP::nvs_.putULong(c, now); // UTC epoch, read by the recovery app. Only if the clock is set (NTP)
+        } else if (EMSESP::nvs_.isKey(c)) {
+            EMSESP::nvs_.remove(c); // clock not set, the date of the previous firmware is wrong
         }
         partition_info_.erase(factory->label); // on the AsyncTCP task, same as the web handlers reading it
     }
     LOG_INFO("Recovery firmware v%s installed", recovery_version().c_str());
 #endif
+}
+
+// the partition info is read by the web handlers on the AsyncTCP task, so the update after a recovery firmware
+// download (which runs on the main loop) is deferred to be done there, on the next systemStatus request
+void System::recovery_installed_deferred() {
+    recovery_installed_pending_ = true;
+}
+
+void System::recovery_installed_apply() {
+    if (recovery_installed_pending_) {
+        recovery_installed_pending_ = false;
+        recovery_installed();
+    }
 }
 
 std::string System::recovery_version() const {
@@ -3511,21 +3528,44 @@ bool System::uploadFirmwareURL(const char * url) {
         break;
     }
 
+    // the recovery firmware is recognized by its filename. It's written to the factory partition and
+    // EMS-ESP keeps running, there is no restart
+#ifdef EMSESP_HAS_RECOVERY
+    String file_name = saved_url.substring(saved_url.lastIndexOf('/') + 1);
+    file_name.toLowerCase();
+    const bool is_recovery = file_name.indexOf("recovery") >= 0;
+#else
+    const bool is_recovery = false;
+#endif
+    OtaUpdater ota; // only used for the recovery firmware
+
     // check we have a valid size
-    if (firmware_size < (int)MIN_FIRMWARE_SIZE) {
+    if (firmware_size < (int)(is_recovery ? OtaUpdater::MIN_RECOVERY_FIRMWARE_SIZE : MIN_FIRMWARE_SIZE)) {
         LOG_ERROR("Firmware upload failed - invalid size");
         return false; // error
     }
 
     OtaUpdater::confirmRunningApp();
 
-    // check we have enough space for the upload in the ota partition
-    if (!Update.begin(firmware_size)) {
+    if (is_recovery) {
+#ifdef EMSESP_HAS_RECOVERY
+        const esp_partition_t * factory = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
+        if (factory == nullptr || factory == esp_ota_get_running_partition()) {
+            LOG_ERROR("The recovery firmware can't be installed on this board");
+            return false; // error
+        }
+        if (!ota.beginFirmware(firmware_size, factory, false)) {
+            LOG_ERROR("Recovery firmware upload failed - %s", ota.errorString());
+            return false; // error
+        }
+#endif
+    } else if (!Update.begin(firmware_size)) {
+        // check we have enough space for the upload in the ota partition
         LOG_ERROR("Firmware upload failed - no space");
         return false; // error
     }
 
-    LOG_INFO("Firmware uploading (size: %dKB) over %s. Please wait...", firmware_size / 1024, is_https ? "HTTPS" : "HTTP");
+    LOG_INFO("%s uploading (size: %dKB) over %s. Please wait...", is_recovery ? "Recovery firmware" : "Firmware", firmware_size / 1024, is_https ? "HTTPS" : "HTTP");
 
     Shell::loop_all(); // flush log buffers so latest messages are shown in console
 
@@ -3543,7 +3583,11 @@ bool System::uploadFirmwareURL(const char * url) {
         // via the systemStatus action, which runs on the AsyncTCP task while we're blocked here
         if (EMSESP::system_.systemStatus() < SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING) {
             LOG_WARNING("Firmware upload cancelled at %u of %d bytes", (unsigned)total_read, firmware_size);
-            Update.abort();    // release the OTA partition handle so a later attempt can start cleanly
+            if (is_recovery) {
+                ota.abort();
+            } else {
+                Update.abort(); // release the OTA partition handle so a later attempt can start cleanly
+            }
             ssl_client.stop(); // drop the connection
             saved_url.clear(); // prevent it from downloading again
             EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_NORMAL);
@@ -3573,6 +3617,9 @@ bool System::uploadFirmwareURL(const char * url) {
                 continue;
             }
             LOG_ERROR("Firmware upload failed - read stalled at %u of %d bytes", (unsigned)total_read, firmware_size);
+            if (is_recovery) {
+                ota.abort();
+            }
             EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
             return false;
         }
@@ -3585,6 +3632,9 @@ bool System::uploadFirmwareURL(const char * url) {
         size_t n = stream->readBytes(buf, want);
         if (n == 0) {
             LOG_ERROR("Firmware upload failed - read returned 0 at %u of %d bytes", (unsigned)total_read, firmware_size);
+            if (is_recovery) {
+                ota.abort();
+            }
             EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
             return false;
         }
@@ -3594,14 +3644,33 @@ bool System::uploadFirmwareURL(const char * url) {
         if (!magic_ok) {
             if (buf[0] != 0xE9) {
                 LOG_ERROR("Firmware upload failed - bad magic byte 0x%02X (expected 0xE9, not an ESP32 firmware image?)", buf[0]);
+                if (is_recovery) {
+                    ota.abort();
+                }
+                EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
+                return false;
+            }
+            // the recovery firmware must be for this chip, and really be the recovery
+            if (is_recovery && !(OtaUpdater::isCompatibleFirmware(buf, n) && OtaUpdater::isRecoveryFirmware(buf, n))) {
+                LOG_ERROR("Recovery firmware upload failed - not a recovery firmware image for this chip");
+                if (is_recovery) {
+                    ota.abort();
+                }
                 EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
                 return false;
             }
             magic_ok = true;
         }
 
-        if (Update.write(buf, n) != n) {
-            LOG_ERROR("Firmware upload failed - flash write error at %u of %d bytes: %s", (unsigned)total_read, firmware_size, Update.errorString());
+        const bool written = is_recovery ? ota.write(buf, n) : (Update.write(buf, n) == n);
+        if (!written) {
+            LOG_ERROR("Firmware upload failed - flash write error at %u of %d bytes: %s",
+                      (unsigned)total_read,
+                      firmware_size,
+                      is_recovery ? ota.errorString() : Update.errorString());
+            if (is_recovery) {
+                ota.abort();
+            }
             EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
             return false;
         }
@@ -3618,13 +3687,22 @@ bool System::uploadFirmwareURL(const char * url) {
         yield();
     }
 
-    if (!Update.end(true)) {
-        LOG_ERROR("Firmware upload failed - %s", Update.errorString());
+    if (!(is_recovery ? ota.end() : Update.end(true))) {
+        LOG_ERROR("Firmware upload failed - %s", is_recovery ? ota.errorString() : Update.errorString());
         EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
         return false; // error
     }
 
     saved_url.clear(); // prevent from downloading again
+
+    if (is_recovery) {
+        // no restart. The partition info is updated later on the AsyncTCP task, see recovery_installed_apply()
+        EMSESP::system_.recovery_installed_deferred();
+        LOG_INFO("Recovery firmware uploaded successfully");
+        EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_NORMAL);
+        return true;
+    }
+
     LOG_INFO("Firmware uploaded successfully. Restarting...");
     EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_PENDING_RESTART);
 #endif

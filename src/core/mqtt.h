@@ -23,7 +23,7 @@
 
 #include "helpers.h"
 #include "system.h"
-#include "console.h"
+#include "emsesp_console.h"
 #include "command.h"
 #include "emsdevicevalue.h"
 #include <esp32-psram.h>

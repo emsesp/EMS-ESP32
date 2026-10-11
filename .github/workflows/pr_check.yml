@@ -22,10 +22,10 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Install PlatformIO
+      - name: Install pioarduino
         run: |
           pip install wheel
-          pip install -U platformio
+          pip install -U "pioarduino==6.2.0"
 
       - name: Run unit tests
         run: |
