@@ -10,6 +10,8 @@ on:
 
 jobs:
   stale:
+    name: Mark or close stale issues and PRs
+    if: github.repository == 'emsesp/EMS-ESP32'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/stale@v11
