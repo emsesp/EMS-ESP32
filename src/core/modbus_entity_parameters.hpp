@@ -246,30 +246,31 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwHystOn), 45, 1), // hyston
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwHystOff), 46, 1), // hystoff
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwDisinfectionTemp), 47, 1), // disinfectiontemp
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwCircMode), 48, 1), // circmode
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwCirc), 49, 1), // circ
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwCurTemp), 50, 1), // curtemp
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwCurTemp2), 51, 1), // curtemp2
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwCurFlow), 52, 1), // curflow
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwStorageTemp1), 53, 1), // storagetemp1
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwStorageTemp2), 54, 1), // storagetemp2
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(activated), 55, 1), // activated
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwOneTime), 56, 1), // onetime
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwDisinfecting), 57, 1), // disinfecting
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwCharging), 58, 1), // charging
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwRecharging), 59, 1), // recharging
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwTempOK), 60, 1), // tempok
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwActive), 61, 1), // active
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(ww3wayValve), 62, 1), // 3wayvalve
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwChargePump), 63, 1), // chargepump
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwMixerTemp), 64, 1), // mixertemp
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(cylMiddleTemp), 65, 1), // cylmiddletemp
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwprio), 66, 1), // dhwprio
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwStarts), 67, 2), // starts
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwWorkM), 69, 2), // workm
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(gasMeterWw), 71, 2), // gasmeter
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(nrgWw2), 73, 2), // nrg2
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwValve), 75, 1), // dhwvalve
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwDisinfectDuration), 48, 1), // disinfectduration
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwCircMode), 49, 1), // circmode
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwCirc), 50, 1), // circ
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwCurTemp), 51, 1), // curtemp
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwCurTemp2), 52, 1), // curtemp2
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwCurFlow), 53, 1), // curflow
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwStorageTemp1), 54, 1), // storagetemp1
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwStorageTemp2), 55, 1), // storagetemp2
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(activated), 56, 1), // activated
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwOneTime), 57, 1), // onetime
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwDisinfecting), 58, 1), // disinfecting
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwCharging), 59, 1), // charging
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwRecharging), 60, 1), // recharging
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwTempOK), 61, 1), // tempok
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwActive), 62, 1), // active
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(ww3wayValve), 63, 1), // 3wayvalve
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwChargePump), 64, 1), // chargepump
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwMixerTemp), 65, 1), // mixertemp
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(cylMiddleTemp), 66, 1), // cylmiddletemp
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwprio), 67, 1), // dhwprio
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwStarts), 68, 2), // starts
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwWorkM), 70, 2), // workm
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(gasMeterWw), 72, 2), // gasmeter
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(nrgWw2), 74, 2), // nrg2
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwValve), 76, 1), // dhwvalve
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(errorCode), 0, 8), // errorcode
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(lastCode), 8, 25), // lastcode
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(dateTime), 33, 13), // datetime
