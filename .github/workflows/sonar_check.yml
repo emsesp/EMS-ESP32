@@ -23,11 +23,11 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install Build Wrapper
-        uses: SonarSource/sonarqube-scan-action/install-build-wrapper@v8.2.2
+        uses: SonarSource/sonarqube-scan-action/install-build-wrapper@v8.3.0
       - name: Run Build Wrapper
         run: build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} make all
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v8.2.2
+        uses: SonarSource/sonarqube-scan-action@v8.3.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
             
