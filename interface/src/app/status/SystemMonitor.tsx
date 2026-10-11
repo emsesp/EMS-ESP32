@@ -14,7 +14,12 @@ import { useInterval } from 'utils';
 
 import { LinearProgressWithLabel } from '../../components/upload/LinearProgressWithLabel';
 
-const SystemMonitor = () => {
+interface SystemMonitorProps {
+  // when set the page isn't reloaded when done, e.g. when the firmware was installed without a restart
+  onDone?: (success: boolean) => void;
+}
+
+const SystemMonitor = ({ onDone }: SystemMonitorProps) => {
   const [errorMessage, setErrorMessage] = useState<string>();
   const hasInitialized = useRef(false);
   const { LL } = useI18nContext();
@@ -42,7 +47,11 @@ const SystemMonitor = () => {
         event.data.status === SystemStatusCodes.SYSTEM_STATUS_NORMAL ||
         event.data.status === undefined
       ) {
-        document.location.href = '/';
+        if (onDone) {
+          onDone(true);
+        } else {
+          document.location.href = '/';
+        }
       } else if (
         event.data.status === SystemStatusCodes.SYSTEM_STATUS_ERROR_UPLOAD
       ) {
@@ -80,7 +89,11 @@ const SystemMonitor = () => {
   const onCancel = async () => {
     setErrorMessage(undefined);
     await setSystemStatus(String(SystemStatusCodes.SYSTEM_STATUS_NORMAL));
-    document.location.href = '/';
+    if (onDone) {
+      onDone(false);
+    } else {
+      document.location.href = '/';
+    }
   };
 
   return (

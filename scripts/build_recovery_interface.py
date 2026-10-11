@@ -1,4 +1,5 @@
-# Builds the Recovery WebUI into recovery/WWWData.h when it's missing or older than its sources
+# Builds the Recovery WebUI into recovery/WWWData.h when it's missing or older than its sources.
+# In the build-recovery environment it only builds the WebUI, always.
 from pathlib import Path
 import os
 import shutil
@@ -52,7 +53,29 @@ def build():
             env.Exit(1)
 
 
-if is_stale():
+if env.get("PIOENV") == "build-recovery":
+    # the WebUI is only built by the "build" target. Skip any other, e.g. `pio run -t upload` also runs this environment
+    # when it's one of the default_envs, and it has nothing to upload
+    if "build" not in [t.strip() for t in COMMAND_LINE_TARGETS]:
+        print("Skipping the Recovery WebUI build, the target is not 'build'")
+        env.Exit(0)
+
+    # `pio run -e build-recovery` only builds the WebUI, always, and exits without building any firmware
+    def build_recovery_webUI(*args, **kwargs):
+        print("Building Recovery WebUI...")
+        build()
+        print("Recovery WebUI build completed successfully!")
+        env.Exit(0)
+
+    env.AddCustomTarget(
+        name="build",
+        dependencies=None,
+        actions=[build_recovery_webUI],
+        title="build recovery web interface",
+        description="installs pnpm packages and builds the recovery web UI into recovery/WWWData.h",
+        always_build=True,
+    )
+elif is_stale():
     print("Building Recovery WebUI...")
     build()
 else:

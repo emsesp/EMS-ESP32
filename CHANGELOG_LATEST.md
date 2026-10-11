@@ -26,8 +26,8 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - the Version page shows the installed Recovery version on 16MB boards
 - crash test builds to try out the rollback and recovery, see `[env:crashtest_s3_16M_P]` in `platformio.ini`
 - `s_16M_P_custom` PlatformIO env that HybridCompiles Arduino/IDF with a trimmed sdkconfig (no Bluetooth, PPP/modem, IP forward/NAPT, ULP, SPI Ethernet, GDBSTUB, FreeRTOS trace, mDNS browse/CLI) and places the UART ISR in IRAM
-- 16MB builds use EMS-ESP's own Arduino/IDF libs from [esp32-arduino-lib-builder](https://github.com/emsesp/esp32-arduino-lib-builder) (`0910-1604-5.5.5`) instead of Tasmota's prebuilt cores
-- optional `ccache` wrapping when it is installed (`scripts/enable_ccache.py`)
+- 16MB builds use EMS-ESP's own Arduino/IDF libs from [esp32-arduino-lib-builder](https://github.com/emsesp/esp32-arduino-lib-builder) instead of Tasmota's prebuilt cores
+- optional `ccache` wrapping when it is installed (`scripts/enable_ccache.py`) to speed up CI
 
 ## Fixed
 

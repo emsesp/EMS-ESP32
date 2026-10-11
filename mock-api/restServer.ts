@@ -116,8 +116,8 @@ let system_status = {
   psram: true,
   psram_size: 8189,
   free_psram: 8166,
-  // recovery_version: '', // upload an EMS-ESP-Recovery-*.bin to set it
-  recovery_version: '1.0.0',
+  recovery_version: '', // upload an EMS-ESP-Recovery-*.bin to set it
+  // recovery_version: '1.0.0',
   has_partition: true,
   partitions: [
     {
@@ -5447,6 +5447,10 @@ router
       } else if (action === 'uploadURL') {
         // upload URL
         console.log('upload File from URL', content.param);
+        if (String(content.param).toLowerCase().includes('recovery')) {
+          // the recovery app is installed without a restart
+          system_status.recovery_version = '1.0.0';
+        }
         return status(200);
       } else if (action === 'resetMQTT') {
         // reset MQTT

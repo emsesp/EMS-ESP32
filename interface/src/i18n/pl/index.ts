@@ -336,7 +336,6 @@ const pl: BaseTranslation = {
   SWITCH_RELEASE_TYPE: 'Zmień na {0} wydanie',
   FIRMWARE_VERSION_INFO: 'Informacje o wersji firmware',
   USER_PROFILE: 'Profil użytkownika',
-  STORED_VERSIONS: 'Zapisane wersje',
   ONLINE_HELP: 'pomoc online',
   UPGRADE_IMPORTANT_MESSAGES: 'Aktualizuj ważne wiadomości',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Ta aktualizacja wymaga resetu fabrycznego. Upewnij się, że najpierw pobierzesz kopię zapasową systemu przed kontynuowaniem, a następnie przesuń tę plik po zainstalowaniu nowej wersji.',
@@ -353,9 +352,11 @@ const pl: BaseTranslation = {
   UPLOAD_FIRMWARE_TEXT: 'Kliknij, aby wybrać, lub drop plik firmware .bin/.md5 tutaj',
   UPLOAD_MD5_RECEIVED: 'Suma MD5 odebrana, teraz wgraj plik firmware .bin',
   UPLOAD_MD5_MATCHED: 'MD5 zgodne, instalowanie firmware...',
-  RECOVERY: 'Odzyskiwanie',
+  RECOVERY_APP: 'Aplikacja odzyskiwania',
   RECOVERY_NOT_INSTALLED: 'Nie zainstalowano',
-  RECOVERY_INSTALLED: 'Zainstalowano firmware odzyskiwania'
+  RECOVERY_INSTALLED: 'Zainstalowano firmware odzyskiwania',
+  RESTART_INTO_RECOVERY: 'Uruchom ponownie w aplikacji odzyskiwania',
+  RECOVERY_NOT_FOUND: 'Nie znaleziono aplikacji odzyskiwania online'
 };
 
 export default pl;

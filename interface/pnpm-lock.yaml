@@ -217,7 +217,7 @@ importers:
         version: 2.10.6(@babel/core@7.29.7(supports-color@10.2.2))(preact@11.0.1)(supports-color@10.2.2)(vite@8.3.4(@types/node@26.6.5)(terser@5.51.2))
       '@trivago/prettier-plugin-sort-imports':
         specifier: ^6.0.2
-        version: 6.0.2(prettier@3.9.9)(supports-color@10.2.2)
+        version: 6.0.2(prettier@3.9.10)(supports-color@10.2.2)
       '@types/node':
         specifier: ^26.6.5
         version: 26.6.5
@@ -243,8 +243,8 @@ importers:
         specifier: ^3.0.2
         version: 3.0.2
       prettier:
-        specifier: ^3.9.9
-        version: 3.9.9
+        specifier: ^3.9.10
+        version: 3.9.10
       rollup-plugin-visualizer:
         specifier: ^7.1.1
         version: 7.1.1(rolldown@1.2.13)
@@ -2554,8 +2554,8 @@ packages:
     resolution: {integrity: sha512-ravE6m9Atw9Z/jjttRUZ+clIXogdghyZAuWJ3qEzjT+jI/dL1ifAqhZeC5VHzQp1MSt1+jxKkFNemj/iO7tVUA==}
     engines: {node: '>=4'}
 
-  prettier@3.9.9:
-    resolution: {integrity: sha512-Z/CJHIkdujO/OtN7nXUii0Rf3VT5SRuhjBA82Xvu2XhBUgX3nhP67T0LHceBdQLex7OOFGTox+Q5Yg8Jk2Qivg==}
+  prettier@3.9.10:
+    resolution: {integrity: sha512-skGHTH1Yb9QvaTC4hWnRTzEYtCpApF0UMBPz+t/0ZPzP8ihefo/btKd+QA7pUE0fEwA1SbS/NmhyEcstdXOIdA==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -3708,7 +3708,7 @@ snapshots:
       react-virtualized-auto-sizer: 1.0.26(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       react-window: 1.8.11(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
 
-  '@trivago/prettier-plugin-sort-imports@6.0.2(prettier@3.9.9)(supports-color@10.2.2)':
+  '@trivago/prettier-plugin-sort-imports@6.0.2(prettier@3.9.10)(supports-color@10.2.2)':
     dependencies:
       '@babel/generator': 7.29.8
       '@babel/parser': 7.29.9
@@ -3718,7 +3718,7 @@ snapshots:
       lodash-es: 4.18.1
       minimatch: 9.0.9
       parse-imports-exports: 0.2.4
-      prettier: 3.9.9
+      prettier: 3.9.10
     transitivePeerDependencies:
       - supports-color
 
@@ -5514,7 +5514,7 @@ snapshots:
 
   prepend-http@2.0.0: {}
 
-  prettier@3.9.9: {}
+  prettier@3.9.10: {}
 
   process-nextick-args@2.0.1: {}
 

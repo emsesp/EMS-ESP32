@@ -336,7 +336,6 @@ const de: Translation = {
   SWITCH_RELEASE_TYPE: 'Zum {0}-Release wechseln',
   FIRMWARE_VERSION_INFO: 'Firmware-Versionsinformation',
   USER_PROFILE: 'Benutzerprofil',
-  STORED_VERSIONS: 'Gespeicherte Versionen',
   ONLINE_HELP: 'Online-Hilfe',
   UPGRADE_IMPORTANT_MESSAGES: 'Wichtige Nachrichten aktualisieren',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Für diese Aktualisierung ist ein Werksreset erforderlich. Stellen Sie sicher, dass Sie zuerst eine Systemsicherung herunterladen, bevor Sie fortfahren, und laden Sie diese Datei dann nach der Installation der neuen Version hoch.',
@@ -353,9 +352,11 @@ const de: Translation = {
   UPLOAD_FIRMWARE_TEXT: 'Klicken Sie, um eine Firmware-Datei (.bin/.md5) auszuwählen, oder drop ein',
   UPLOAD_MD5_RECEIVED: 'Prüfsumme empfangen, jetzt die Firmware-Datei (.bin) hochladen',
   UPLOAD_MD5_MATCHED: 'MD5 stimmt überein, Firmware wird installiert...',
-  RECOVERY: 'Wiederherstellung',
+  RECOVERY_APP: 'Wiederherstellungs-App',
   RECOVERY_NOT_INSTALLED: 'Nicht installiert',
-  RECOVERY_INSTALLED: 'Wiederherstellungs-Firmware installiert'
+  RECOVERY_INSTALLED: 'Wiederherstellungs-Firmware installiert',
+  RESTART_INTO_RECOVERY: 'Neustart in die Wiederherstellungs-App',
+  RECOVERY_NOT_FOUND: 'Wiederherstellungs-App online nicht gefunden'
 };
 
 export default de;
