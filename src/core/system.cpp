@@ -749,7 +749,10 @@ void System::syslog_init() {
 #ifndef EMSESP_STANDALONE
     if (syslog_enabled_) {
         // start & configure syslog
-        syslog_.maximum_log_messages(10);
+        // 10 is smaller than one DEBUG/ALL bus burst (about 30 telegrams, two lines each).
+        // The queue is PSRAM-backed and drains at one UDP packet per 10 ms, so 100 holds
+        // the burst until the next quiet period.
+        syslog_.maximum_log_messages(100);
         syslog_.log_level((uuid::log::Level)syslog_level_);
         syslog_.mark_interval(syslog_mark_interval_);
         syslog_.destination(syslog_host_.c_str(), syslog_port_);
@@ -1122,6 +1125,12 @@ void System::heartbeat_json(JsonObject output) {
         output["mqttfails"]      = Mqtt::publish_fails();
         output["mqttreconnects"] = Mqtt::connect_count();
     }
+#ifndef EMSESP_STANDALONE
+    if (syslog_enabled_) {
+        output["syslogcount"] = syslog_count();
+        output["syslogfails"] = syslog_fails();
+    }
+#endif
     output["apicalls"] = WebAPIService::api_count(); // + WebAPIService::api_fails();
     output["apifails"] = WebAPIService::api_fails();
 

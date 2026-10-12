@@ -283,6 +283,7 @@ class EMSESP {
     static void        process_version(const std::shared_ptr<const Telegram> & telegram);
     static void        publish_response(const std::shared_ptr<const Telegram> & telegram);
     static void        publish_all_loop();
+    static void        reply_own_request(const uint8_t * data, const uint8_t length, const uint8_t tx_state);
 
     // one-time compaction of per-device/command vectors once registration has been stable
     static void compact_entities_if_stable();

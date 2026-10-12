@@ -1595,6 +1595,49 @@ void EMSESP::send_write_request(const uint16_t type_id, const uint8_t dest, cons
     EMSESP::send_write_request(type_id, dest, offset, message_data, 1, validate_typeid);
 }
 
+// answer a read or write aimed at our own bus id, so the requester is not left waiting for a timeout
+// a reply to one of our own reads has the same destination and no read-bit, so only ack a write when we are not finishing a read
+// see https://github.com/emsesp/EMS-ESP32/issues/3094
+void EMSESP::reply_own_request(const uint8_t * data, const uint8_t length, const uint8_t tx_state) {
+    if (length < 4) {
+        return;
+    }
+
+    const uint8_t our  = EMSbus::ems_bus_id();
+    uint8_t       mask = EMSbus::ems_mask();
+    if (mask == EMSbus::EMS_MASK_UNSET) {
+        mask = data[0] & 0x80; // same bit RxService uses, before this telegram has been queued
+    }
+
+    if (data[1] == (our | 0x80)) {
+        uint8_t reply[7];
+        reply[0] = our | mask;
+        reply[1] = data[0] & 0x7F;
+        if (data[2] < 0xF0) { // EMS read
+            reply[2] = data[2];
+            reply[3] = data[3];
+            reply[4] = EMSbus::calculate_crc(reply, 4);
+            EMSuart::transmit(reply, 5);
+            LOG_DEBUG("Empty reply to 0x%02X read 0x%02X", reply[1], data[2]);
+        } else if (data[2] == 0xFF && length >= 7) { // EMS+ read
+            reply[2] = 0xFF;
+            reply[3] = data[3];
+            reply[4] = data[5];
+            reply[5] = data[6];
+            reply[6] = EMSbus::calculate_crc(reply, 6);
+            EMSuart::transmit(reply, 7);
+            LOG_DEBUG("Empty reply to 0x%02X read 0x%02X%02X", reply[1], data[5], data[6]);
+        }
+        return;
+    }
+
+    if (tx_state == Telegram::Operation::NONE && data[1] == our) { // EMS/EMS+ write
+        uint8_t ack = TxService::TX_WRITE_SUCCESS;
+        EMSuart::transmit(&ack, 1);
+        LOG_DEBUG("Ack write from 0x%02X", data[0] & 0x7F);
+    }
+}
+
 // this is main entry point when data is received on the Rx line, via emsuart library
 // we check if its a complete telegram or just a single byte (which could be a poll or a return status)
 // the CRC check is not done here, only when it's added to the Rx queue with add()
@@ -1721,6 +1764,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         LOG_TRACE("[UART_DEBUG] Reply after %d ms: %s", uuid::get_uptime_ms() - rx_time_, Helpers::data_to_hex(data, length).c_str());
 #endif
         Roomctrl::check(data[1], data, length); // check if there is a message for the roomcontroller
+        reply_own_request(data, length, tx_state);
 
 #ifdef EMSESP_GATEWAY_TX_HOLD
         gateway_rx_check(data, length);
