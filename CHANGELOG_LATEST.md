@@ -54,6 +54,7 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - add 0kW to heat limits [#3262](https://github.com/emsesp/EMS-ESP32/issues/3262), [#3265](https://github.com/emsesp/EMS-ESP32/issues/3265)
 - show temperature value for sensor 0x40 [#3272](https://github.com/emsesp/EMS-ESP32/issues/3272)
 - no EMS bus on custom boards whose interface relies on a pull-up on the Rx line. The newer ESP-IDF no longer enables the internal pull-up on the UART Rx pin, so it is now set explicitly as it was in 3.8 [#3258](https://github.com/emsesp/EMS-ESP32/discussions/3258)
+- no EMS bus after restart when Rx uses a pin that boots with another IO_MUX function (e.g. GPIO43/44 = UART0 on ESP32-S3). IDF 5 `uart_set_pin()` no longer selects the GPIO function on the Rx pad when routing via the matrix, so the pin is reset before UART setup [#3258](https://github.com/emsesp/EMS-ESP32/discussions/3258)
 - Guru Meditation (cache error) on HybridCompile builds when the EMS or console UART ISR ran from flash during a SPI flash read (WiFi power-down, mDNS, NVS). The UART ISR and ringbuf ISR helpers are now in IRAM
 - compile errors against Arduino 3.3.12 from Tasmota/Arduino headers named `console.h`, `network.h` and `httpClient.h`. Those EMS-ESP headers are now `emsesp_console.h`, `emsesp_network.h` and `emsesp_http_client.h`
 - HTTP OTA from WSL/mDNS stalled on IPv6 and used tiny write chunks. Uploads now resolve IPv4 and stream in 64 KB blocks (`scripts/upload.py`, `scripts/upload_cli.py`)
