@@ -91,6 +91,9 @@ void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t 
         inverse_mask |= UART_SIGNAL_TXD_INV;
 #endif
         uart_param_config(EMSUART_NUM, &uart_config);
+        // IDF 5 uart_set_pin() no longer selects the GPIO function on the Rx pad when routing via the GPIO matrix.
+        // Pins that boot with another IO_MUX function (e.g. GPIO43/44 = UART0 on S3, JTAG pins) would never see the signal.
+        gpio_reset_pin((gpio_num_t)rx_gpio);
         uart_set_pin(EMSUART_NUM, tx_gpio, rx_gpio, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
         gpio_pullup_en((gpio_num_t)rx_gpio); // IDF 5 no longer enables the Rx pull-up, some custom interfaces rely on it
         uart_set_line_inverse(EMSUART_NUM, inverse_mask);
@@ -110,6 +113,7 @@ void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t 
         xTaskCreatePinnedToCore(uart_event_task, "uart_event_task", EMSESP_UART_STACKSIZE, NULL, EMSESP_UART_PRIORITY, &xHandle, EMSESP_UART_RUNNING_CORE);
 #endif
     } else {
+        gpio_reset_pin((gpio_num_t)rx_gpio);
         uart_set_pin(EMSUART_NUM, tx_gpio, rx_gpio, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
         gpio_pullup_en((gpio_num_t)rx_gpio);
         vTaskResume(xHandle);
