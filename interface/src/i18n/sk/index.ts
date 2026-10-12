@@ -141,6 +141,8 @@ const sk: Translation = {
   CUSTOMIZATIONS_HELP_6: 'odstrániť z pamäte',
   SELECT_DEVICE: 'Zvoliť zariadenie',
   SET_ALL: 'nastaviť všetko',
+  MODIFIED: 'upravené',
+  RESET_SELECTED: 'Obnoviť vybrané',
   OPTIONS: 'Možnosti',
   NAME: 'Názov',
   CUSTOMIZATIONS_RESET: 'Naozaj chcete odstrániť všetky prispôsobenia?',

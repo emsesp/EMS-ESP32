@@ -3,6 +3,7 @@ import { memo, useEffect, useState } from 'react';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CloseIcon from '@mui/icons-material/Close';
 import DoneIcon from '@mui/icons-material/Done';
+import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import {
   Box,
   Button,
@@ -101,6 +102,14 @@ const CustomizationsDialog = ({
     setEditItem((prev) => ({ ...prev, m: updatedItem.m }));
   };
 
+  const remove = () => {
+    const next: DeviceEntity = { ...editItem, m: 0, c: false };
+    delete next.cn;
+    delete next.mi;
+    delete next.ma;
+    onSave(next);
+  };
+
   return (
     <Dialog sx={dialogStyle} open={open} onClose={handleClose}>
       <DialogTitle>{`${LL.EDIT()} ${LL.ENTITY()}`}</DialogTitle>
@@ -169,6 +178,15 @@ const CustomizationsDialog = ({
       </DialogContent>
 
       <DialogActions>
+        <Button
+          startIcon={<SettingsBackupRestoreIcon />}
+          variant="outlined"
+          onClick={remove}
+          color="error"
+        >
+          {LL.REMOVE()}
+        </Button>
+        <Box sx={{ flexGrow: 1 }} />
         <Button
           startIcon={<CancelIcon />}
           variant="outlined"

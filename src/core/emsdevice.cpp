@@ -1193,6 +1193,12 @@ void EMSdevice::generate_values_web_customization(JsonArray output) {
         // 0x10 = 16  = DV_WEB_EXCLUDE
         obj["m"] = dv.state >> 4;
 
+        // Saved customization: mask bits, or a custom name/min/max stored in custom_fullname.
+        // Min/max in "mi"/"ma" are the effective limits, so they alone do not show a customization.
+        if (dv.has_custom_fullname() || (dv.state >> 4) != 0) {
+            obj["c"] = true;
+        }
+
         obj["w"] = dv.has_cmd; // if writable
 
         if (dv.has_cmd && (obj["v"].is<float>() || obj["v"].is<int>())) {
@@ -1219,6 +1225,7 @@ void EMSdevice::generate_values_web_customization(JsonArray output) {
                         JsonObject obj = output.add<JsonObject>();
                         obj["id"]      = DeviceValue::get_name(entity_id); // set the name, it could be custom following a '|'
                         obj["m"]       = mask;                             // update the mask
+                        obj["c"]       = true;
                         obj["w"]       = false;                            // not writeable as it won't be shown
                     }
                 }

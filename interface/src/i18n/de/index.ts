@@ -141,6 +141,8 @@ const de: Translation = {
   CUSTOMIZATIONS_HELP_6: 'Aus dem Speicher entfernen',
   SELECT_DEVICE: 'Wählen Sie ein Gerät aus',
   SET_ALL: 'Setzen Sie alle',
+  MODIFIED: 'geändert',
+  RESET_SELECTED: 'Auswahl zurücksetzen',
   OPTIONS: 'Optionen',
   NAME: 'Name',
   CUSTOMIZATIONS_RESET: 'Möchten Sie wirklich alle Anpassungen entfernen?',

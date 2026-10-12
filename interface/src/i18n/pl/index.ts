@@ -141,6 +141,8 @@ const pl: BaseTranslation = {
   CUSTOMIZATIONS_HELP_6: 'usuń z pamięci',
   SELECT_DEVICE: 'wybierz urządzenie',
   SET_ALL: 'Ustaw wszystko jako',
+  MODIFIED: 'zmienione',
+  RESET_SELECTED: 'Resetuj zaznaczone',
   OPTIONS: 'Opcje',
   NAME: '{{Nazwa|nazwa|}}',
   CUSTOMIZATIONS_RESET: 'Na pewno chcesz usunąć wszystkie personalizacje?',

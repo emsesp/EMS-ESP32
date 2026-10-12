@@ -141,6 +141,8 @@ const cs: Translation = {
   CUSTOMIZATIONS_HELP_6: 'odstranit z paměti',
   SELECT_DEVICE: 'Vyberte zařízení',
   SET_ALL: 'nastavit vše',
+  MODIFIED: 'upravené',
+  RESET_SELECTED: 'Obnovit vybrané',
   OPTIONS: 'Možnosti',
   NAME: 'Název',
   CUSTOMIZATIONS_RESET: 'Opravdu chcete odstranit všechna přizpůsobení?',

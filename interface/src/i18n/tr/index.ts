@@ -141,6 +141,8 @@ const tr: Translation = {
   CUSTOMIZATIONS_HELP_6: 'remove from memory',
   SELECT_DEVICE: 'Bir cihaz seç',
   SET_ALL: 'hepsini ayarla',
+  MODIFIED: 'değiştirilmiş',
+  RESET_SELECTED: 'Seçilenleri sıfırla',
   OPTIONS: 'Seçenekler',
   NAME: 'İsim',
   CUSTOMIZATIONS_RESET: 'Bütün özelleştirmeleri kaldırmak istediğinizden emin misiniz?',

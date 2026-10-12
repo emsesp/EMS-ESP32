@@ -174,6 +174,7 @@ export interface DeviceEntity {
   w: boolean; // writeable
   mi?: number; // min value
   ma?: number; // max value
+  c?: boolean; // true when a customization is saved (mask, name, or min/max)
   o_m?: number; // original mask before edits
   o_cn?: string; // original cn before edits
   o_mi?: number; // original min value

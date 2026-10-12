@@ -141,6 +141,8 @@ const sv: Translation = {
   CUSTOMIZATIONS_HELP_6: 'Ta bort',
   SELECT_DEVICE: 'Välj en enhet',
   SET_ALL: 'ställ in alla',
+  MODIFIED: 'ändrade',
+  RESET_SELECTED: 'Återställ markerade',
   OPTIONS: 'Alternativ',
   NAME: 'Namn',
   CUSTOMIZATIONS_RESET: 'Är du säker på att du vill ta bort alla anpassningar?',

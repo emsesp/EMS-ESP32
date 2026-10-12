@@ -141,6 +141,8 @@ const no: Translation = {
   CUSTOMIZATIONS_HELP_6: 'fjern fra minnet',
   SELECT_DEVICE: 'Velg en enhet',
   SET_ALL: 'sett alle',
+  MODIFIED: 'endret',
+  RESET_SELECTED: 'Tilbakestill valgte',
   OPTIONS: 'Alternativ',
   NAME: 'Navn',
   CUSTOMIZATIONS_RESET: 'Er du sikker på att du vil fjerne tilpassninger?',

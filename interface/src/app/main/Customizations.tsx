@@ -11,6 +11,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
@@ -91,6 +92,8 @@ const Customizations = () => {
   const [deviceEntities, setDeviceEntities] = useState<DeviceEntity[]>([]);
   const [confirmReset, setConfirmReset] = useState<boolean>(false);
   const [selectedFilters, setSelectedFilters] = useState<number>(0);
+  const [modifiedOnly, setModifiedOnly] = useState<boolean>(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState('');
   const [selectedDeviceEntity, setSelectedDeviceEntity] = useState<DeviceEntity>();
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
@@ -173,7 +176,7 @@ const Customizations = () => {
 
   const entities_theme = useTheme({
     Table: `
-      --data-table-library_grid-template-columns: 156px repeat(1, minmax(80px, 1fr)) 45px minmax(45px, auto) minmax(120px, auto);
+      --data-table-library_grid-template-columns: 32px 156px repeat(1, minmax(80px, 1fr)) 45px minmax(45px, auto) minmax(120px, auto);
     `,
     BaseRow: `
       font-size: 14px;
@@ -182,10 +185,10 @@ const Customizations = () => {
       }
     `,
     BaseCell: `
-      &:nth-of-type(3) {
+      &:nth-of-type(4) {
         text-align: right;
       }
-      &:nth-of-type(4) {
+      &:nth-of-type(5) {
         text-align: right;
       }
       &:last-of-type {
@@ -221,13 +224,13 @@ const Customizations = () => {
       }
     `,
     Cell: `
-      &:nth-of-type(2) {
+      &:nth-of-type(3) {
         padding: 8px;
       }
-      &:nth-of-type(3) {
+      &:nth-of-type(4) {
         padding-right: 4px;
       }
-      &:nth-of-type(4) {
+      &:nth-of-type(5) {
         padding-right: 4px;
       }
       &:last-of-type {
@@ -243,6 +246,11 @@ const Customizations = () => {
       de.ma !== de.o_ma ||
       de.mi !== de.o_mi
     );
+  }
+
+  // Saved customization (c), or an edit that is not applied yet.
+  function isModified(de: DeviceEntity) {
+    return !!de.c || hasEntityChanged(de);
   }
 
   useEffect(() => {
@@ -267,6 +275,7 @@ const Customizations = () => {
           setSelectedDeviceBrand(device.b);
         }
         setNumChanges(0);
+        setSelectedIds(new Set());
         setRestartNeeded(false);
       }
     }
@@ -331,22 +340,59 @@ const Customizations = () => {
 
   const filter_entity = (de: DeviceEntity) =>
     (de.m & selectedFilters || !selectedFilters) &&
+    (!modifiedOnly || isModified(de)) &&
     formatName(de, true).toLowerCase().includes(search.toLowerCase());
 
+  // Checked rows when any are checked, otherwise every row the filter is showing.
+  const inBulkTarget = (de: DeviceEntity) =>
+    selectedIds.size > 0 ? selectedIds.has(de.id) : filter_entity(de);
+
   const maskDisabled = (set: boolean) => {
+    const excludeMask =
+      DeviceEntityMask.DV_API_MQTT_EXCLUDE | DeviceEntityMask.DV_WEB_EXCLUDE;
     setDeviceEntities((prev) =>
       prev.map((de) => {
-        if (filter_entity(de)) {
-          const excludeMask =
-            DeviceEntityMask.DV_API_MQTT_EXCLUDE | DeviceEntityMask.DV_WEB_EXCLUDE;
-          return {
-            ...de,
-            m: set ? de.m | excludeMask : de.m & ~excludeMask
-          };
+        if (!inBulkTarget(de)) {
+          return de;
         }
-        return de;
+        return {
+          ...de,
+          m: set ? de.m | excludeMask : de.m & ~excludeMask
+        };
       })
     );
+  };
+
+  const maskReadonly = (set: boolean) => {
+    setDeviceEntities((prev) =>
+      prev.map((de) => {
+        if (!inBulkTarget(de) || !de.w) {
+          return de;
+        }
+        return {
+          ...de,
+          m: set
+            ? de.m | DeviceEntityMask.DV_READONLY
+            : de.m & ~DeviceEntityMask.DV_READONLY
+        };
+      })
+    );
+  };
+
+  const resetSelected = () => {
+    setDeviceEntities((prev) =>
+      prev.map((de) => {
+        if (!selectedIds.has(de.id)) {
+          return de;
+        }
+        const next: DeviceEntity = { ...de, m: 0, c: false };
+        delete next.cn;
+        delete next.mi;
+        delete next.ma;
+        return next;
+      })
+    );
+    setSelectedIds(new Set());
   };
 
   const resetCustomization = async () => {
@@ -414,6 +460,8 @@ const Customizations = () => {
     })
       .then(() => {
         toast.success(LL.CUSTOMIZATIONS_SAVED());
+        // Reload so cleared min/max fall back to the built-in limits and the modified flag matches the file.
+        void sendDeviceEntities(selectedDevice);
       })
       .catch((error: Error) => {
         if (error.message === 'Reboot required') {
@@ -541,6 +589,34 @@ const Customizations = () => {
   );
 
   const filteredEntities = deviceEntities.filter((de) => filter_entity(de));
+  const allFilteredSelected =
+    filteredEntities.length > 0 &&
+    filteredEntities.every((de) => selectedIds.has(de.id));
+  const someFilteredSelected = filteredEntities.some((de) => selectedIds.has(de.id));
+
+  const toggleSelected = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectFiltered = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allFilteredSelected) {
+        filteredEntities.forEach((de) => next.delete(de.id));
+      } else {
+        filteredEntities.forEach((de) => next.add(de.id));
+      }
+      return next;
+    });
+  };
 
   const renderDeviceData = () => {
     return (
@@ -613,6 +689,17 @@ const Customizations = () => {
               size="small"
               sx={{ fontSize: 10 }}
               variant="outlined"
+              color={modifiedOnly ? 'secondary' : 'inherit'}
+              onClick={() => setModifiedOnly((current) => !current)}
+            >
+              {LL.MODIFIED()}
+            </Button>
+          </Grid>
+          <Grid>
+            <Button
+              size="small"
+              sx={{ fontSize: 10 }}
+              variant="outlined"
               color="inherit"
               onClick={() => maskDisabled(false)}
             >
@@ -635,6 +722,43 @@ const Customizations = () => {
             </Button>
           </Grid>
           <Grid>
+            <Button
+              size="small"
+              sx={{ fontSize: 10 }}
+              variant="outlined"
+              color="inherit"
+              onClick={() => maskReadonly(false)}
+            >
+              {LL.SET_ALL()}&nbsp;
+              <OptionIcon type="readonly" isSet={false} />
+            </Button>
+          </Grid>
+          <Grid>
+            <Button
+              size="small"
+              sx={{ fontSize: 10 }}
+              variant="outlined"
+              color="inherit"
+              onClick={() => maskReadonly(true)}
+            >
+              {LL.SET_ALL()}&nbsp;
+              <OptionIcon type="readonly" isSet={true} />
+            </Button>
+          </Grid>
+          {selectedIds.size > 0 && (
+            <Grid>
+              <Button
+                size="small"
+                sx={{ fontSize: 10 }}
+                variant="outlined"
+                color="error"
+                onClick={resetSelected}
+              >
+                {LL.RESET_SELECTED()} ({selectedIds.size})
+              </Button>
+            </Grid>
+          )}
+          <Grid>
             <Typography variant="subtitle2" color="grey">
               {LL.SHOWING()}&nbsp;{filteredEntities.length}/{deviceEntities.length}
               &nbsp;{LL.ENTITIES(deviceEntities.length)}
@@ -650,6 +774,16 @@ const Customizations = () => {
             <>
               <Header>
                 <HeaderRow>
+                  <HeaderCell stiff>
+                    <Checkbox
+                      size="small"
+                      sx={{ p: 0, color: 'inherit' }}
+                      checked={allFilteredSelected}
+                      indeterminate={!allFilteredSelected && someFilteredSelected}
+                      disabled={filteredEntities.length === 0}
+                      onChange={toggleSelectFiltered}
+                    />
+                  </HeaderCell>
                   <HeaderCell stiff>{LL.OPTIONS()}</HeaderCell>
                   <HeaderCell resize>{LL.NAME(1)}</HeaderCell>
                   <HeaderCell stiff>{LL.MIN()}</HeaderCell>
@@ -660,6 +794,14 @@ const Customizations = () => {
               <Body>
                 {tableList.map((de: DeviceEntity) => (
                   <Row key={de.id} item={de} onClick={() => editDeviceEntity(de)}>
+                    <Cell stiff onClick={(event) => event.stopPropagation()}>
+                      <Checkbox
+                        size="small"
+                        sx={{ p: 0 }}
+                        checked={selectedIds.has(de.id)}
+                        onChange={() => toggleSelected(de.id)}
+                      />
+                    </Cell>
                     <Cell stiff>
                       <EntityMaskToggle onUpdate={updateDeviceEntity} de={de} />
                     </Cell>

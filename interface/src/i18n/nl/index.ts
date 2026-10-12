@@ -141,6 +141,8 @@ const nl: Translation = {
   CUSTOMIZATIONS_HELP_6: 'verwijderen van memory',
   SELECT_DEVICE: 'Selecteer een apparaat',
   SET_ALL: 'Alles aanzetten',
+  MODIFIED: 'gewijzigd',
+  RESET_SELECTED: 'Selectie resetten',
   OPTIONS: 'Opties',
   NAME: 'Naam',
   CUSTOMIZATIONS_RESET: 'Weet je zeker dat je alle custom aanpassingen wilt verwijderen?',
