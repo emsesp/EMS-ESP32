@@ -171,7 +171,9 @@ uint8_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
         return EMS_TX_STATUS_OK;
     }
 
-    auto tx_mode = tx_mode_ != EMS_TXMODE_AUTO ? tx_mode_ : EMSbus::is_ht3() ? EMS_TXMODE_HT3 : EMSbus::is_ems2() ? EMS_TXMODE_EMSPLUS : EMS_TXMODE_EMS;
+    // Auto: prefer EMS+ over HT3. Some Bosch heat pumps set the HT3 address mask (source MSB)
+    // but need EMS+ pacing; HT3-first caused FF→E3 echo corruption (#3283, #3245).
+    auto tx_mode = tx_mode_ != EMS_TXMODE_AUTO ? tx_mode_ : EMSbus::is_ems2() ? EMS_TXMODE_EMSPLUS : EMSbus::is_ht3() ? EMS_TXMODE_HT3 : EMS_TXMODE_EMS;
 
     // TXMODE is EMS+ with long delay
     if (tx_mode == EMS_TXMODE_EMSPLUS) {
