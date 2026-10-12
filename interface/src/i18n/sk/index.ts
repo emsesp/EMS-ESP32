@@ -344,7 +344,7 @@ const sk: Translation = {
   TEST_EMAIL_SUCCESSFUL: 'Test email bol úspešne odoslaný',
   SYSTEM_NAME: 'Názov systému',
   COMMANDS: 'Príkazy',
-  COMMANDS_HELP_1: 'Definujte vlastné príkazy pre magistrali EMS',
+  COMMANDS_HELP_1: 'Nižšie definujte opakovane použiteľné pomenované príkazy. Tieto môžu byť spustené z konzoly, API/MQTT alebo odkazované plánovačom',
   COMMAND_EXECUTED: 'Príkaz vykonaný úspešne',
   RUN: 'Volať príkaz',
   INTERNET_CONNECTION_CHECK: 'Kontrola online pre dostupné verzie',
