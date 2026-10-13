@@ -464,6 +464,7 @@ class Thermostat : public EMSdevice {
     void process_RC300Summer2(const std::shared_ptr<const Telegram> & telegram);
     void process_RC300Summer3(const std::shared_ptr<const Telegram> & telegram);
     bool has_summer3() const;
+    bool has_hpoperatingstate() const;
 
     void process_RC300WWmode(const std::shared_ptr<const Telegram> & telegram);
     void process_RC300WWmode2(const std::shared_ptr<const Telegram> & telegram);

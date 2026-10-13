@@ -1176,7 +1176,9 @@ void Thermostat::process_RC300Monitor(const std::shared_ptr<const Telegram> & te
     // summermode is bit 4 for boilers and bit 6 for heatpumps: 0:winter, 1:summer
     telegram->read_value(hc->statusbyte, 2);
     // use summertemp or hpoperatingstate, https://github.com/emsesp/EMS-ESP32/issues/747, #550, #503
-    if ((hc->statusbyte & 1) || !is_received(summer2_typeids[hc->hc()])) {
+    // 0x470 or any 0x471+ means offset 20 is the heat-pump state. Publish it on every circuit:
+    // some BC400/UI800 only answer 0x471, while hc2+ still broadcast the state in 0x2A6 ff. #3097
+    if ((hc->statusbyte & 1) || !has_hpoperatingstate()) {
         has_update(hc->summermode, hc->statusbyte & 0x50 ? 1 : 0);
         has_update(hc->hpoperatingstate, EMS_VALUE_UINT8_NOTSET);
     } else {
@@ -1281,6 +1283,21 @@ void Thermostat::process_RC300Summer(const std::shared_ptr<const Telegram> & tel
 // some UI800 (e.g. HMI800.2) don't send 0x470 and use the per-hc 0x471 ff instead, #3257
 bool Thermostat::has_summer3() const {
     return model() == EMSdevice::EMS_DEVICE_FLAG_UI800 && is_received(0x470);
+}
+
+// monitor offset 20 is heating/off/cooling once this thermostat is known to be a heat pump.
+// 0x470 covers every circuit. A single answered 0x471+ does too: hc2 may never reply to 0x472
+// but still broadcasts its state in 0x2A6. #3097
+bool Thermostat::has_hpoperatingstate() const {
+    if (has_summer3()) {
+        return true;
+    }
+    for (const uint16_t type_id : summer2_typeids) {
+        if (is_received(type_id)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // type 0x470, only BC400/UI800
