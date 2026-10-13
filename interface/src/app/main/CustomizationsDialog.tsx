@@ -72,6 +72,15 @@ const CustomizationsDialog = ({
     editItem.w &&
     !(editItem.m & DeviceEntityMask.DV_READONLY);
 
+  // c is set by the firmware for a saved customization. Mask, name, and edited
+  // limits also count, including changes made in this dialog before they are saved.
+  const showReset =
+    !!editItem.c ||
+    editItem.m !== 0 ||
+    (editItem.cn ?? '') !== '' ||
+    editItem.mi !== editItem.o_mi ||
+    editItem.ma !== editItem.o_ma;
+
   useEffect(() => {
     if (open) {
       setError(false);
@@ -203,7 +212,7 @@ const CustomizationsDialog = ({
       </DialogContent>
 
       <DialogActions>
-        {editItem.c && (
+        {showReset && (
           <Button
             startIcon={<SettingsBackupRestoreIcon />}
             variant="outlined"
