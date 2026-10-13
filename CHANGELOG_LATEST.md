@@ -25,7 +25,6 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - on 16MB boards with the Recovery installed, EMS-ESP switches to it after crashing 5 times in a row. The Recovery shows why it was started and which firmware failed to start
 - the Version page shows the installed Recovery version on 16MB boards
 - crash test builds to try out the rollback and recovery, see `[env:crashtest_s3_16M_P]` in `platformio.ini`
-- `s_16M_P_custom` PlatformIO env that HybridCompiles Arduino/IDF with a trimmed sdkconfig (no Bluetooth, PPP/modem, IP forward/NAPT, ULP, SPI Ethernet, GDBSTUB, FreeRTOS trace, mDNS browse/CLI) and places the UART ISR in IRAM
 - 16MB builds use EMS-ESP's own Arduino/IDF libs from [esp32-arduino-lib-builder](https://github.com/emsesp/esp32-arduino-lib-builder) instead of Tasmota's prebuilt cores
 - optional `ccache` wrapping when it is installed (`scripts/enable_ccache.py`) to speed up CI
 - heat pump `dhw/disinfectduration`, the time allowed to reach the thermal disinfection temperature (0xEA offset 15, 120-240 min) [#3278](https://github.com/emsesp/EMS-ESP32/issues/3278)
