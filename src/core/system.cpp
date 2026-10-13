@@ -1025,6 +1025,20 @@ void System::uart_init() {
 // checks system health and handles LED flashing wizardry
 // returns true if the LED flash is active
 bool System::loop() {
+    // a restart requested from the WebUI is first set to pending, so the WebUI's SystemMonitor can pick it up
+    // and show the restart screen before the connection drops. Don't depend on the browser tab staying open though:
+    // if nothing has polled the status after a short grace period, go ahead and restart anyway
+    if (systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_PENDING_RESTART) {
+        if (pending_restart_start_ == 0) {
+            pending_restart_start_ = uuid::get_uptime_ms();
+        } else if (uuid::get_uptime_ms() - pending_restart_start_ > PENDING_RESTART_TIMEOUT) {
+            LOG_INFO("No WebUI response to pending restart, restarting now");
+            systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED);
+        }
+    } else {
+        pending_restart_start_ = 0;
+    }
+
     // check if we're supposed to do a reset/restart
     if (systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED) {
         system_restart();
