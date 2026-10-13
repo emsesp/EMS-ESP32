@@ -4,6 +4,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import CloseIcon from '@mui/icons-material/Close';
 import DoneIcon from '@mui/icons-material/Done';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
+import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
   Button,
@@ -12,7 +13,9 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
+  InputAdornment,
   TextField,
+  Tooltip,
   Typography
 } from '@mui/material';
 
@@ -103,12 +106,24 @@ const CustomizationsDialog = ({
   };
 
   const remove = () => {
-    const next: DeviceEntity = { ...editItem, m: 0, c: false };
-    delete next.cn;
-    delete next.mi;
-    delete next.ma;
+    const next: DeviceEntity = { ...editItem, m: 0, cn: '', c: false };
+    if (editItem.mi !== undefined) {
+      next.mi = null;
+    }
+    if (editItem.ma !== undefined) {
+      next.ma = null;
+    }
     onSave(next);
   };
+
+  const limitAdornment = (cleared: boolean) =>
+    cleared ? (
+      <InputAdornment position="end">
+        <Tooltip title={LL.CUSTOMIZATIONS_LIMITS()}>
+          <WarningIcon color="warning" sx={{ fontSize: 16 }} />
+        </Tooltip>
+      </InputAdornment>
+    ) : undefined;
 
   return (
     <Dialog sx={dialogStyle} open={open} onClose={handleClose}>
@@ -150,20 +165,26 @@ const CustomizationsDialog = ({
                 <TextField
                   name="mi"
                   label={LL.MIN()}
-                  value={numberValue(editItem.mi)}
+                  value={typeof editItem.mi === 'number' ? numberValue(editItem.mi) : ''}
                   sx={{ width: '11ch' }}
                   type="number"
                   onChange={updateFormValue}
+                  slotProps={{
+                    input: { endAdornment: limitAdornment(editItem.mi === null) }
+                  }}
                 />
               </Grid>
               <Grid>
                 <TextField
                   name="ma"
                   label={LL.MAX()}
-                  value={numberValue(editItem.ma)}
+                  value={typeof editItem.ma === 'number' ? numberValue(editItem.ma) : ''}
                   sx={{ width: '11ch' }}
                   type="number"
                   onChange={updateFormValue}
+                  slotProps={{
+                    input: { endAdornment: limitAdornment(editItem.ma === null) }
+                  }}
                 />
               </Grid>
             </>
@@ -178,14 +199,16 @@ const CustomizationsDialog = ({
       </DialogContent>
 
       <DialogActions>
-        <Button
-          startIcon={<SettingsBackupRestoreIcon />}
-          variant="outlined"
-          onClick={remove}
-          color="error"
-        >
-          {LL.REMOVE()}
-        </Button>
+        {editItem.c && (
+          <Button
+            startIcon={<SettingsBackupRestoreIcon />}
+            variant="outlined"
+            onClick={remove}
+            color="error"
+          >
+            {LL.RESET()}
+          </Button>
+        )}
         <Box sx={{ flexGrow: 1 }} />
         <Button
           startIcon={<CancelIcon />}

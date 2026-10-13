@@ -23,6 +23,7 @@ import {
   TextField,
   ToggleButton,
   ToggleButtonGroup,
+  Tooltip,
   Typography
 } from '@mui/material';
 
@@ -292,6 +293,17 @@ const Customizations = () => {
     return value as string;
   }
 
+  function formatLimit(value: number | null | undefined) {
+    if (value === null) {
+      return (
+        <Tooltip title={LL.CUSTOMIZATIONS_LIMITS()}>
+          <WarningIcon color="warning" sx={{ fontSize: 16 }} />
+        </Tooltip>
+      );
+    }
+    return formatValue(value);
+  }
+
   const isCommand = (de: DeviceEntity) => {
     return de.n && de.n[0] === '!';
   };
@@ -385,10 +397,13 @@ const Customizations = () => {
         if (!selectedIds.has(de.id)) {
           return de;
         }
-        const next: DeviceEntity = { ...de, m: 0, c: false };
-        delete next.cn;
-        delete next.mi;
-        delete next.ma;
+        const next: DeviceEntity = { ...de, m: 0, cn: '', c: false };
+        if (de.mi !== undefined) {
+          next.mi = null;
+        }
+        if (de.ma !== undefined) {
+          next.ma = null;
+        }
         return next;
       })
     );
@@ -829,10 +844,10 @@ const Customizations = () => {
                       </span>
                     </Cell>
                     <Cell>
-                      {!(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.mi)}
+                      {!(de.m & DeviceEntityMask.DV_READONLY) && formatLimit(de.mi)}
                     </Cell>
                     <Cell>
-                      {!(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.ma)}
+                      {!(de.m & DeviceEntityMask.DV_READONLY) && formatLimit(de.ma)}
                     </Cell>
                     <Cell>{formatValue(de.v)}</Cell>
                   </Row>
