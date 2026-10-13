@@ -391,6 +391,11 @@ class System {
 
     volatile uint8_t systemStatus_; // uses SYSTEM_STATUS enum - written from the AsyncTCP task (e.g. cancel) and read from the main loop during OTA
 
+    uint32_t pending_restart_start_ = 0; // uptime (ms) when a pending restart was first seen in the main loop
+    // restart anyway if a pending restart hasn't been picked up by the WebUI within this time (in ms)
+    // the SystemMonitor polls every second, so this only kicks in when the browser tab was closed or lost connection
+    static constexpr uint32_t PENDING_RESTART_TIMEOUT = 10000;
+
     void set_partition_install_date();
 
     volatile bool recovery_installed_pending_ = false; // set by the main loop, handled on the AsyncTCP task
