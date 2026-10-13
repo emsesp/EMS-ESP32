@@ -2154,9 +2154,11 @@ void EMSESP::loop() {
         }
     }
 
-    // reset status after a timeout
-    if (EMSESP::system_.systemStatus() != SYSTEM_STATUS::SYSTEM_STATUS_NORMAL) {
-        static uint32_t starttime = 0;
+    // reset status after a timeout. A pending restart is never reset, it's handled in System::loop()
+    static uint32_t starttime = 0;
+    if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_NORMAL || EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_PENDING_RESTART) {
+        starttime = 0;
+    } else {
         if (starttime == 0) {
             starttime = uuid::get_uptime_ms();
         } else if (uuid::get_uptime_ms() - starttime > SYSTEM_STATUS_RESET_TIMEOUT) {
