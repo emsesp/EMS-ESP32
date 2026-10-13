@@ -165,7 +165,9 @@ const CustomizationsDialog = ({
                 <TextField
                   name="mi"
                   label={LL.MIN()}
-                  value={typeof editItem.mi === 'number' ? numberValue(editItem.mi) : ''}
+                  value={
+                    typeof editItem.mi === 'number' ? numberValue(editItem.mi) : ''
+                  }
                   sx={{ width: '11ch' }}
                   type="number"
                   onChange={updateFormValue}
@@ -178,7 +180,9 @@ const CustomizationsDialog = ({
                 <TextField
                   name="ma"
                   label={LL.MAX()}
-                  value={typeof editItem.ma === 'number' ? numberValue(editItem.ma) : ''}
+                  value={
+                    typeof editItem.ma === 'number' ? numberValue(editItem.ma) : ''
+                  }
                   sx={{ width: '11ch' }}
                   type="number"
                   onChange={updateFormValue}
