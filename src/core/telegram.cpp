@@ -207,7 +207,9 @@ void RxService::add(uint8_t * data, uint8_t length) {
         message_data   = data + 6;
         message_length = length - 7;
     }
-    if (type_id > 0x0FF && message_length > 1) { // used for auto tx_mode
+    // EMS+ boilers broadcast UBAMonitorFastPlus (0xE4); EMS/HT3 use 0x18.
+    // Extended telegrams alone are not enough: Junkers HT3 also uses them (e.g. 0x16F).
+    if (type_id == 0xE4) {
         set_ems2();
     }
     // if we're watching and "raw" print out actual telegram as bytes to the console

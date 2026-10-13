@@ -171,8 +171,8 @@ uint8_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
         return EMS_TX_STATUS_OK;
     }
 
-    // Auto: prefer EMS+ over HT3. Some Bosch heat pumps set the HT3 address mask (source MSB)
-    // but need EMS+ pacing; HT3-first caused FF→E3 echo corruption (#3283, #3245).
+    // Auto: EMS+ if boiler monitor 0xE4 seen (is_ems2), else HT3 address mask, else EMS.
+    // Do not key off extended telegrams alone — Junkers HT3 uses those too (#3283, #3245).
     auto tx_mode = tx_mode_ != EMS_TXMODE_AUTO ? tx_mode_ : EMSbus::is_ems2() ? EMS_TXMODE_EMSPLUS : EMSbus::is_ht3() ? EMS_TXMODE_HT3 : EMS_TXMODE_EMS;
 
     // TXMODE is EMS+ with long delay

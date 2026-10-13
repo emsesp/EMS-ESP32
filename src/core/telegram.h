@@ -169,6 +169,7 @@ class EMSbus {
         return (ems_mask_ == EMS_MASK_HT3);
     }
 
+    // True once UBAMonitorFastPlus (0xE4) was received — used by Tx mode Auto for EMS+ pacing
     static bool is_ems2() {
         return isEMS2_;
     }
