@@ -1530,7 +1530,11 @@ void Boiler::process_UBAMonitorFastPlus(const std::shared_ptr<const Telegram> & 
     if (Helpers::hasValue(exhaustTemp1_)) {
         has_update(exhaustTemp_, exhaustTemp1_);
     }
-    has_update(telegram, pc0Flow_, 36); // see https://github.com/emsesp/EMS-ESP32/issues/2001
+    // heating sends a second 0xE4 with 0xFFFF here, which would clear a valid flow, #3224
+    uint16_t pc0flow = pc0Flow_;
+    if (telegram->read_value(pc0flow, 36) && Helpers::hasValue(pc0flow)) { // see https://github.com/emsesp/EMS-ESP32/issues/2001
+        has_update(pc0Flow_, pc0flow);
+    }
 
     // read 3 char service code / installation status as appears on the display
     if ((telegram->message_length > 3) && (telegram->offset == 0)) {
