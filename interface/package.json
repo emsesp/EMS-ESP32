@@ -34,8 +34,8 @@
     "alova": "^3.5.5",
     "jwt-decode": "^4.0.0",
     "preact": "^11.0.1",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "react-icons": "^5.7.0",
     "react-router": "^8.4.0",
     "typesafe-i18n": "^5.27.1"
