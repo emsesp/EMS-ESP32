@@ -381,119 +381,148 @@ bool Heatpump::set_controlStrategy(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, v, FL_(enum_hybridStrategy1))) {
         return false;
     }
+
     write_command(0x998, 0, v, 0x998);
     return true;
 }
+
 bool Heatpump::set_lowNoiseMode(const char * value, const int8_t id) {
     uint8_t v;
     if (!Helpers::value2enum(value, v, FL_(enum_lowNoiseMode))) {
         return false;
     }
+
     write_command(0x998, 9, v, 0x998);
     return true;
 }
+
 bool Heatpump::set_lowNoiseStart(const char * value, const int8_t id) {
     int v;
     if (!Helpers::value2number(value, v, 0, 23)) {
         return false;
     }
+
     write_command(0x998, 10, v, 0x998);
     return true;
 }
+
 bool Heatpump::set_lowNoiseStop(const char * value, const int8_t id) {
     int v;
     if (!Helpers::value2number(value, v, 0, 23)) {
         return false;
     }
+
     write_command(0x998, 11, v, 0x998);
     return true;
 }
+
 bool Heatpump::set_hybridDHW(const char * value, const int8_t id) {
     uint8_t v;
     if (!Helpers::value2enum(value, v, FL_(enum_comfort2))) {
         return false;
     }
+
     write_command(0x998, 1, v, 0x998);
     return true;
 }
+
 bool Heatpump::set_energyPriceGas(const char * value, const int8_t id) {
     int v;
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     write_command(0x998, 2, v, 0x998);
     return true;
 }
+
 bool Heatpump::set_energyPriceEl(const char * value, const int8_t id) {
     int v;
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     write_command(0x998, 5, v, 0x998);
     return true;
 }
+
 bool Heatpump::set_energyPricePV(const char * value, const int8_t id) {
     int v;
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     write_command(0x998, 6, v, 0x998);
     return true;
 }
+
 bool Heatpump::set_switchOverTemp(const char * value, const int8_t id) {
     int v;
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     write_command(0x998, 14, v, 0x998);
     return true;
 }
+
 // Function tests:
 bool Heatpump::set_airPurgeMode(const char * value, const int8_t id) {
     bool v;
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
+
     write_command(0x999, 0, v, 0x999);
     return true;
 }
+
 bool Heatpump::set_heatPumpOutput(const char * value, const int8_t id) {
     int v;
     if (!Helpers::value2number(value, v, 0, 100)) {
         return false;
     }
+
     write_command(0x999, 2, v, 0x999);
     return true;
 }
+
 bool Heatpump::set_coolingCircuit(const char * value, const int8_t id) {
     bool v;
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
+
     write_command(0x999, 6, v, 0x999);
     return true;
 }
+
 bool Heatpump::set_compStartMod(const char * value, const int8_t id) {
     int v;
     if (!Helpers::value2number(value, v, 0, 100)) {
         return false;
     }
+
     write_command(0x999, 7, v, 0x999);
     return true;
 }
+
 bool Heatpump::set_heatDrainPan(const char * value, const int8_t id) {
     bool v;
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
+
     write_command(0x999, 9, v, 0x999);
     return true;
 }
+
 bool Heatpump::set_heatCable(const char * value, const int8_t id) {
     bool v;
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
+
     write_command(0x999, 10, v, 0x999);
     return true;
 }

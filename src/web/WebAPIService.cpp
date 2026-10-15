@@ -44,6 +44,7 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request, JsonVariant j
         request->send(429); // too many requests
         return;
     }
+
     busy = true;
     JsonDocument input_doc; // has no body JSON so create dummy as empty input object
     JsonObject   input;
@@ -58,6 +59,7 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request, JsonVariant j
         input         = input_doc.to<JsonObject>();
         input["data"] = json.as<std::string>();
     }
+
     parse(request, input);
     busy = false;
 }
@@ -95,21 +97,27 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
         if (request->hasParam(F_(device))) {
             input["device"] = request->getParam(F_(device))->value().c_str();
         }
+
         if (request->hasParam(F_(cmd))) {
             input["cmd"] = request->getParam(F_(cmd))->value().c_str();
         }
+
         if (request->hasParam(F_(data))) {
             input["data"] = request->getParam(F_(data))->value().c_str();
         }
+
         if (request->hasParam(F_(value))) {
             input["value"] = request->getParam(F_(value))->value().c_str();
         }
+
         if (request->hasParam(F_(id))) {
             input["id"] = Helpers::atoint(request->getParam(F_(id))->value().c_str());
         }
+
         if (request->hasParam(F_(hc))) {
             input["hc"] = Helpers::atoint(request->getParam(F_(hc))->value().c_str());
         }
+
         if (request->hasParam(F_(dhw))) {
             input["dhw"] = Helpers::atoint(request->getParam(F_(dhw))->value().c_str());
         }
@@ -205,6 +213,7 @@ void WebAPIService::storeResponse(JsonObject response) {
     storeResponseDoc_.clear();       // clear it, so can only recall once
     storeResponseDoc_.add(response); // add the object to our doc
 }
+
 const char * WebAPIService::getResponse() {
     static std::string buffer;
     serializeJson(storeResponseDoc_, buffer);

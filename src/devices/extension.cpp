@@ -28,6 +28,7 @@ Extension::Extension(uint8_t device_type, uint8_t device_id, uint8_t product_id,
         // no entities for T1RF outdoor sensor, values are coming from RFbase 0x50 (connect)
         return;
     }
+
     // Extension module EM100 device_id 0x12
     register_telegram_type(0x935, "EM100SetMessage", true, MAKE_PF_CB(process_EM100SetMessage), 5);
     register_telegram_type(0x936, "EM100OutMessage", false, MAKE_PF_CB(process_EM100OutMessage));
@@ -108,6 +109,7 @@ bool Extension::set_minV(const char * value, const int8_t id) {
     if (!Helpers::value2float(value, v)) {
         return false;
     }
+
     write_command(0x935, 1, (uint8_t)(v * 10));
     return true;
 }
@@ -117,6 +119,7 @@ bool Extension::set_maxV(const char * value, const int8_t id) {
     if (!Helpers::value2float(value, v)) {
         return false;
     }
+
     write_command(0x935, 2, (uint8_t)(v * 10));
     return true;
 }
@@ -126,6 +129,7 @@ bool Extension::set_minT(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
+
     write_command(0x935, 3, v);
     return true;
 }
@@ -135,6 +139,7 @@ bool Extension::set_maxT(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
+
     write_command(0x935, 4, v);
     return true;
 }

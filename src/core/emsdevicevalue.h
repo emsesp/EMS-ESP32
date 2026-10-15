@@ -236,12 +236,15 @@ class DeviceValue {
     void add_state(uint8_t s) {
         state |= s;
     }
+
     bool has_state(uint8_t s) const {
         return (state & s) == s;
     }
+
     void remove_state(uint8_t s) {
         state &= ~s;
     }
+
     uint8_t get_state() const {
         return state;
     }

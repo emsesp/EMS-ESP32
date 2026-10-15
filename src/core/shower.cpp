@@ -46,6 +46,7 @@ void Shower::start() {
                 LOG_WARNING("Coldshot failed. Shower not active");
                 force_coldshot = false;
             }
+
             return true;
         },
         FL_(coldshot_cmd),
@@ -90,6 +91,7 @@ void Shower::loop() {
                     set_shower_state(true);
                     LOG_DEBUG("hot water still running, starting shower timer");
                 }
+
                 // check if the shower has been on too long
                 else if ((shower_alert_ && ((time_now - timer_start_) > next_alert_)) || force_coldshot) {
                     shower_alert_start();
@@ -138,6 +140,7 @@ void Shower::loop() {
                 set_shower_state(false);
             }
         }
+
         return;
     }
 
@@ -178,6 +181,7 @@ void Shower::set_shower_state(bool state, bool force) {
     if ((shower_state_ == old_shower_state_) && !force) {
         return;
     }
+
     old_shower_state_ = shower_state_;
 
     // always publish as a string - see https://github.com/emsesp/EMS-ESP/issues/369
@@ -205,6 +209,7 @@ void Shower::create_ha_discovery() {
         } else {
             snprintf(str, sizeof(str), "shower_active"); // v3.4 compatible
         }
+
         doc["uniq_id"]    = str;
         doc["def_ent_id"] = (std::string) "binary_sensor." + str;
         doc["stat_t"]     = "~/shower_active";

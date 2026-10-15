@@ -36,6 +36,7 @@ void SecurityManager::ensureRestDispatcher(AsyncWebServer * server) {
     if (_restDispatcherInstalled || server == nullptr) {
         return;
     }
+
     _restDispatcherInstalled = true;
     server->addHandler(new RestCatchAllHandler(this));
 }
@@ -47,6 +48,7 @@ void SecurityManager::dispatchRest(AsyncWebServerRequest * request, JsonVariant 
         if (!route.method.matches(method)) {
             continue;
         }
+
         if (!route.uri.matches(request)) {
             continue;
         }
@@ -64,6 +66,7 @@ void SecurityManager::dispatchRest(AsyncWebServerRequest * request, JsonVariant 
         } else {
             route.plainHandler(request);
         }
+
         return;
     }
 
@@ -78,11 +81,13 @@ bool SecurityManager::RestCatchAllHandler::canHandle(AsyncWebServerRequest * req
     if (!request->isHTTP()) {
         return false;
     }
+
     for (const auto & route : _owner->_restRoutes) {
         if (route.method.matches(request->method()) && route.uri.matches(request)) {
             return true;
         }
     }
+
     return false;
 }
 
@@ -96,6 +101,7 @@ void SecurityManager::RestCatchAllHandler::handleBody(AsyncWebServerRequest * re
     if (total == 0 || total > kMaxBodySize || !isJsonContent(request)) {
         return;
     }
+
     if (index == 0 && request->_tempObject == nullptr) {
         request->_tempObject = calloc(total + 1, sizeof(uint8_t)); // freed by request destructor
         if (request->_tempObject == nullptr) {
@@ -103,6 +109,7 @@ void SecurityManager::RestCatchAllHandler::handleBody(AsyncWebServerRequest * re
             return;
         }
     }
+
     if (request->_tempObject != nullptr) {
         memcpy(static_cast<uint8_t *>(request->_tempObject) + index, data, len);
     }
@@ -116,8 +123,10 @@ void SecurityManager::RestCatchAllHandler::handleRequest(AsyncWebServerRequest *
             request->send(400);
             return;
         }
+
         json = doc.as<JsonVariant>();
     }
+
     _owner->dispatchRest(request, json);
 }
 

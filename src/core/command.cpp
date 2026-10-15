@@ -35,6 +35,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     if (!strncmp(path, Mqtt::base().c_str(), Mqtt::base().length())) {
         path += Mqtt::base().length();
     }
+
     SUrlParser p; // parse URL for the path names
     p.parse(path);
 
@@ -102,6 +103,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     if (device_type >= EMSdevice::DeviceType::BOILER) {
         command_p = parse_command_string(command_p, id_n);
     }
+
     if (command_p == nullptr) {
         // handle dead endpoints like api/system or api/boiler
         // default to 'value' for all devices
@@ -159,6 +161,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
                 if (device_type1 >= EMSdevice::DeviceType::BOILER) {
                     data_p = parse_command_string(data_p, id_d);
                 }
+
                 if (data_p == nullptr) {
                     return CommandRet::INVALID;
                 }
@@ -202,6 +205,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     } else {
         return json_message(CommandRet::ERROR, "cannot parse command", output); // can't process
     }
+
     return return_code;
 }
 
@@ -222,6 +226,7 @@ const char * Command::return_code_string(const uint8_t return_code) {
     default:
         break;
     }
+
     static char s[4]; // static to avoid allocation on each call and loosing scope
     return Helpers::smallitoa(s, return_code);
 }
@@ -249,6 +254,7 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
     for (size_t i = 0; i < len; i++) {
         lowerCmd[i] = tolower(command[i]);
     }
+
     lowerCmd[len] = '\0';
 
     // check prefix and valid number range, also check 'id'
@@ -294,6 +300,7 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
         id = id_org;
         return cmd_org;
     }
+
     command++;
 
     // return null for empty command
@@ -315,6 +322,7 @@ const char * Command::get_attribute(const char * cmd) {
         *breakp = '\0';
         return breakp + 1;
     }
+
     return nullptr;
 }
 
@@ -365,6 +373,7 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
     if (command == nullptr) {
         return CommandRet::NOT_FOUND;
     }
+
     char cmd[COMMAND_MAX_LENGTH];
     strlcpy(cmd, Helpers::toLower(command).c_str(), sizeof(cmd));
 
@@ -378,6 +387,7 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
         if (!strcmp(cmd, F_(commands))) {
             return Command::list(device_type, output);
         }
+
         // for the Commands device, calling a named command executes it (using its stored value)
         // rather than returning its definition, so skip the value-info lookup and fall through
         // to the registered command function. The list keywords above are still handled.
@@ -430,6 +440,7 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
             output["message"] = err;
             LOG_WARNING("Command failed: %s", err.c_str());
         }
+
         return CommandRet::NOT_FOUND;
     }
 
@@ -461,6 +472,7 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
         } else {
             snprintf(error, sizeof(error), "Command %s: %s failed (%s)", cmd, value, return_code_string(return_code));
         }
+
         output.clear();
         output["message"] = error;
         LOG_WARNING(error);
@@ -475,6 +487,7 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
         } else {
             snprintf(info_s, sizeof(info_s), "%s/%s", dname, cmd);
         }
+
         if (single_command) {
             // log as DEBUG (TRACE) regardless if compiled with EMSESP_DEBUG
             logger_.debug("%sCalled command %s", ro.c_str(), info_s);
@@ -552,6 +565,7 @@ void Command::erase_command(const uint8_t device_type, const char * cmd, uint8_t
     if ((cmd == nullptr) || (strlen(cmd) == 0) || (cmdfunctions_.empty())) {
         return;
     }
+
     const std::string cmd_lower = Helpers::toLower(cmd);
     auto              it        = cmdfunctions_.begin();
     for (auto const & cf : cmdfunctions_) {
@@ -559,6 +573,7 @@ void Command::erase_command(const uint8_t device_type, const char * cmd, uint8_t
             cmdfunctions_.erase(it);
             return;
         }
+
         it++;
     }
 }
@@ -607,6 +622,7 @@ bool Command::list(const uint8_t device_type, JsonObject output) {
             sorted_cmds.push_back(tagged_cmd(cf.cmd_, cf.flags_));
         }
     }
+
     sorted_cmds.sort();
 
     for (const auto & cl : sorted_cmds) {
@@ -616,6 +632,7 @@ bool Command::list(const uint8_t device_type, JsonObject output) {
             }
         }
     }
+
     return true;
 }
 
@@ -628,6 +645,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
             sorted_cmds.push_back(tagged_cmd(cf.cmd_, cf.flags_));
         }
     }
+
     if (device_type == EMSdevice::DeviceType::SYSTEM) {
         sorted_cmds.emplace_back("settings/showertimer");
         sorted_cmds.emplace_back("settings/showeralert");
@@ -638,6 +656,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
         sorted_cmds.emplace_back("ap/enabled");
         sorted_cmds.emplace_back("syslog/enabled");
     }
+
     sorted_cmds.sort(); // sort them
 
     // if not in verbose mode, just print them on a single line and exit
@@ -650,6 +669,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
             shell.print(cl);
             shell.print(" ");
         }
+
         shell.println();
         return;
     }
@@ -668,6 +688,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                 while (i++ < 30) {
                     shell.print(' ');
                 }
+
                 shell.print(COLOR_BRIGHT_CYAN);
                 if (cf.has_flags(CommandFlag::CMD_FLAG_HC)) {
                     shell.print(Helpers::translated_word(FL_(tag_hcx)));
@@ -685,12 +706,14 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                     shell.print(Helpers::translated_word(FL_(tag_srcx)));
                     shell.print(' ');
                 }
+
                 shell.print(Helpers::translated_word(cf.description_));
                 if (!cf.has_flags(CommandFlag::ADMIN_ONLY)) {
                     shell.print(' ');
                     shell.print(COLOR_BRIGHT_GREEN);
                     shell.print('*');
                 }
+
                 shell.print(COLOR_RESET);
                 shell.println();
             }
@@ -747,6 +770,7 @@ void Command::show_devices(uuid::console::Shell & shell) {
     if (EMSESP::sensor_enabled()) {
         shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::TEMPERATURESENSOR));
     }
+
     if (EMSESP::analog_enabled()) {
         shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::ANALOGSENSOR));
     }
@@ -759,6 +783,7 @@ void Command::show_devices(uuid::console::Shell & shell) {
             }
         }
     }
+
     shell.println();
 }
 
@@ -788,6 +813,7 @@ void Command::show_all(uuid::console::Shell & shell) {
     if (EMSESP::sensor_enabled()) {
         show(shell, EMSdevice::DeviceType::TEMPERATURESENSOR, true);
     }
+
     if (EMSESP::analog_enabled()) {
         show(shell, EMSdevice::DeviceType::ANALOGSENSOR, true);
     }
@@ -811,6 +837,7 @@ uint8_t Command::json_message(uint8_t error_code, const char * message, const Js
     } else {
         output["message"] = message;
     }
+
     return error_code;
 }
 
@@ -826,6 +853,7 @@ std::string SUrlParser::path() {
         s += f;
         s += "/";
     }
+
     s.pop_back(); // deleting last letter, that is slash '/'
     return std::string(s);
 }
@@ -858,12 +886,14 @@ bool SUrlParser::parse(const char * uri) {
                 m_folders.push_back(s);
                 s.clear();
             }
+
             t = Type::folder;
         } else if (*c == '?' && (t == Type::folder || t == Type::begin)) {
             if (s.length() > 0) {
                 m_folders.push_back(s);
                 s.clear();
             }
+
             t = Type::param;
         } else if (*c == '=' && (t == Type::param || t == Type::begin)) {
             m_keysvalues[s] = "";
@@ -877,6 +907,7 @@ bool SUrlParser::parse(const char * uri) {
                 m_keysvalues[s] = "";
                 last_param      = s;
             }
+
             t = Type::param;
             s.clear();
         } else if (*c == '\0' && s.length() > 0) {
@@ -888,11 +919,13 @@ bool SUrlParser::parse(const char * uri) {
                 m_keysvalues[s] = "";
                 last_param      = s;
             }
+
             s.clear();
         } else if (*c == '\0' && s.length() == 0) {
             if (t == Type::param && last_param.length() > 0) {
                 m_keysvalues[last_param] = "";
             }
+
             s.clear();
         } else {
             s += *c;

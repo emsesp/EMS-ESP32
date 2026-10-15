@@ -196,6 +196,7 @@ class EMSESP {
     static uint8_t watch() {
         return watch_;
     }
+
     static void set_read_id(uint16_t id) {
         read_id_ = id;
     }
@@ -211,6 +212,7 @@ class EMSESP {
     static bool wait_validate() {
         return (wait_validate_ != 0);
     }
+
     static void wait_validate(uint16_t wait) {
         wait_validate_ = wait;
     }
@@ -328,6 +330,7 @@ class EMSESP {
         const char *          default_name;
         uint8_t               flags;
     };
+
     static std::vector<Device_record, AllocatorPSRAM<Device_record>> device_library_;
 
     static uint16_t watch_id_;

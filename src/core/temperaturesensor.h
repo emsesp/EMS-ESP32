@@ -48,6 +48,7 @@ class TemperatureSensor {
         bool is_system() const {
             return is_system_;
         }
+
         void set_is_system(const bool is_system) {
             is_system_ = is_system;
         }
@@ -59,6 +60,7 @@ class TemperatureSensor {
         int16_t offset() const {
             return offset_;
         }
+
         void set_offset(const int16_t offset) {
             offset_ = offset;
         }
@@ -124,6 +126,7 @@ class TemperatureSensor {
         if (exclude_disabled_system) {
             return std::count_if(sensors_.begin(), sensors_.end(), [](const Sensor & sensor) { return !sensor.is_system(); });
         }
+
         return sensors_.size();
     }
 

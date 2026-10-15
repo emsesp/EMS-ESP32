@@ -122,9 +122,11 @@ static void show_addresses(uuid::console::Shell & shell, NetworkInterface & neti
     for (const auto & dns : Network::dns_servers(netif)) {
         shell.printfln(" %s DNS Server: %s", dns.type() == IPv4 ? "IPv4" : "IPv6", uuid::printable_to_string(dns).c_str());
     }
+
     for (const auto & ipv6 : Network::ipv6_addresses(netif)) {
         shell.printfln(" IPv6 address: %s (%s)", uuid::printable_to_string(ipv6.ip).c_str(), ipv6.scope);
     }
+
     for (const auto & gateway : Network::ipv6_gateways(netif)) {
         shell.printfln(" IPv6 gateway: %s", uuid::printable_to_string(gateway).c_str());
     }
@@ -170,6 +172,7 @@ uint8_t System::language_index() {
             return i;
         }
     }
+
     return 0; // EN only
 }
 
@@ -198,6 +201,7 @@ bool System::command_sendmail(const char * value, const int8_t) {
     if (!enabled) {
         return false;
     }
+
     LOG_DEBUG("Command sendmail port %d%s called with '%s'",
               port,
               security == EMAIL_SECURITY::SSL        ? " (SSL)"
@@ -219,6 +223,7 @@ bool System::command_sendmail(const char * value, const int8_t) {
             body    = doc["body"] | body;
         }
     }
+
     // keep the original body if the calculator returns nothing, so unquoted literal text still gets sent
     std::string computed_body = compute(body.c_str());
     if (!computed_body.empty()) {
@@ -269,6 +274,7 @@ bool System::command_sendmail(const char * value, const int8_t) {
         cleanup();
         return false;
     }
+
     if (!smtp->isConnected()) {
         LOG_ERROR("send email connection error: %s", smtp->status().text.c_str());
         cleanup();
@@ -284,6 +290,7 @@ bool System::command_sendmail(const char * value, const int8_t) {
             return false;
         }
     }
+
     SMTPMessage & msg = smtp->getMessage();
     msg.headers.add(rfc822_subject, subject);
     msg.headers.add(rfc822_from, sender);
@@ -324,6 +331,7 @@ std::string System::languages_string() {
             languages_string += ",";
         }
     }
+
     languages_string += ")";
     return languages_string;
 }
@@ -338,6 +346,7 @@ bool System::command_response(const char * value, const int8_t id, JsonObject ou
     } else {
         output["response"] = Mqtt::get_response();
     }
+
     return true;
 }
 
@@ -454,6 +463,7 @@ bool System::command_watch(const char * value, const int8_t id) {
         if (w == 0 || EMSESP::watch() == EMSESP::Watch::WATCH_OFF) {
             EMSESP::watch_id(0);
         }
+
         if (Mqtt::publish_single() && w != EMSESP::watch()) {
             if (Mqtt::publish_single2cmd()) {
                 Mqtt::queue_publish("system/watch", EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(w) : (FL_(list_watch)[w]));
@@ -461,6 +471,7 @@ bool System::command_watch(const char * value, const int8_t id) {
                 Mqtt::queue_publish("system_data/watch", EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX ? Helpers::itoa(w) : (FL_(list_watch)[w]));
             }
         }
+
         EMSESP::watch(w);
         return true;
     } else if (i) {
@@ -471,12 +482,15 @@ bool System::command_watch(const char * value, const int8_t id) {
                 Mqtt::queue_publish("system_data/watch", Helpers::hextoa(i));
             }
         }
+
         EMSESP::watch_id(i);
         if (EMSESP::watch() == EMSESP::Watch::WATCH_OFF) {
             EMSESP::watch(EMSESP::Watch::WATCH_ON);
         }
+
         return true;
     }
+
     return false;
 }
 
@@ -484,6 +498,7 @@ void System::store_nvs_values() {
     if (Command::find_command(EMSdevice::DeviceType::BOILER, 0, "nompower", 0) != nullptr) {
         Command::call(EMSdevice::DeviceType::BOILER, "nompower", "-1"); // trigger a write
     }
+
     EMSESP::analogsensor_.store_counters();
     EMSESP::nvs_.end();
 }
@@ -543,6 +558,7 @@ void System::get_partition_info() {
             if (EMSESP::nvs_.isKey(part->label)) {
                 p_info.version = EMSESP::nvs_.getString(part->label).c_str();
             }
+
             char c[20];
             snprintf(c, sizeof(c), "d_%s", (const char *)part->label);
             time_t d            = EMSESP::nvs_.getULong(c, 0);
@@ -556,12 +572,14 @@ void System::get_partition_info() {
                 } else {
                     p_info.size = 0;
                 }
+
                 partition_info_[part->label] = p_info;
             }
         }
 
         it = esp_partition_next(it); // loop to next partition
     }
+
     esp_partition_iterator_release(it);
 #endif
 }
@@ -577,14 +595,17 @@ void System::recovery_installed() {
         if (EMSESP::nvs_.isKey(factory->label)) {
             EMSESP::nvs_.remove(factory->label);
         }
+
         const time_t now = time(nullptr);
         if (now > 1500000000L) {
             EMSESP::nvs_.putULong(c, now); // UTC epoch, read by the recovery app. Only if the clock is set (NTP)
         } else if (EMSESP::nvs_.isKey(c)) {
             EMSESP::nvs_.remove(c); // clock not set, the date of the previous firmware is wrong
         }
+
         partition_info_.erase(factory->label); // on the AsyncTCP task, same as the web handlers reading it
     }
+
     LOG_INFO("Recovery firmware v%s installed", recovery_version().c_str());
 #endif
 }
@@ -697,6 +718,7 @@ void System::system_restart(const char * partitionname) {
                     LOG_ERROR("Partition '%s' not found", partitionname);
                     return;
                 }
+
                 if (strcmp(partition->label, partitionname) && strcmp(partitionname, "boot") != 0) {
                     partition = esp_ota_get_next_update_partition(partition);
                     if (!partition || strcmp(partition->label, partitionname)) {
@@ -704,6 +726,7 @@ void System::system_restart(const char * partitionname) {
                         return;
                     }
                 }
+
                 // error if partition is empty
                 uint64_t buffer;
                 esp_partition_read(partition, 0, &buffer, 8);
@@ -711,6 +734,7 @@ void System::system_restart(const char * partitionname) {
                     LOG_ERROR("Partition '%s' is empty, not bootable", partition->label);
                     return;
                 }
+
                 // set the boot partition
                 esp_ota_set_boot_partition(partition);
             }
@@ -728,6 +752,7 @@ void System::system_restart(const char * partitionname) {
         Shell::loop_all();
         delay(10); // give telnet TCP stack time to transmit
     }
+
     Serial.flush(); // wait for hardware TX buffer to drain
 
     Mqtt::disconnect(); // gracefully disconnect MQTT (flushes the DISCONNECT before reboot, needed for QOS1)
@@ -767,6 +792,7 @@ void System::syslog_init() {
         syslog_.mark_interval(0);
         // syslog_.destination("");
     }
+
     if (Mqtt::publish_single()) {
         if (Mqtt::publish_single2cmd()) {
             Mqtt::queue_publish("system/syslog", syslog_enabled_ ? (FL_(list_syslog_level)[syslog_level_ + 1]) : "off");
@@ -806,6 +832,7 @@ void System::modbus_init() {
             delete EMSESP::modbus_;
             EMSESP::modbus_ = nullptr;
         }
+
         modbus_enabled_     = settings.modbus_enabled;
         modbus_port_        = settings.modbus_port;
         modbus_max_clients_ = settings.modbus_max_clients;
@@ -871,6 +898,7 @@ void System::check_crash_loop() {
     if (factory == nullptr || factory == esp_ota_get_running_partition()) {
         return;
     }
+
     // fails if the factory partition doesn't hold a valid image, then keep trying the current one
     if (esp_ota_set_boot_partition(factory) == ESP_OK) {
         crash_count_ = 0;
@@ -889,6 +917,7 @@ void System::check_firmware_health() {
     if (firmware_healthy_ || uuid::get_uptime_sec() < FIRMWARE_HEALTHY_UPTIME) {
         return;
     }
+
     firmware_healthy_ = true;
     crash_count_      = 0;
     if (OtaUpdater::confirmRunningApp()) {
@@ -905,6 +934,7 @@ void System::start() {
     if (crash_count_) {
         LOG_WARNING("Restarted after a crash (%u in a row)", crash_count_);
     }
+
     const esp_partition_t * invalid = esp_ota_get_last_invalid_partition();
     if (invalid != nullptr) {
         LOG_WARNING("Firmware in partition %s failed to start and was rolled back", invalid->label);
@@ -986,6 +1016,7 @@ void System::button_OnLongPress(PButton & b) {
         LOG_NOTICE("reset disabled, can't boot");
         return;
     }
+
     LOG_NOTICE("Button pressed - long press - restart EMS-ESP");
     EMSESP::system_.system_restart();
 }
@@ -997,6 +1028,7 @@ void System::button_OnVLongPress(PButton & b) {
         LOG_NOTICE("reset disabled, can't boot");
         return;
     }
+
     LOG_NOTICE("Button pressed - very long press - perform factory reset in Recovery Mode");
     EMSESP::system_.system_restart("boot");
     // EMSESP::led_.start_led_fast_flash(5); // Start LED flash timer for 5 seconds
@@ -1009,6 +1041,7 @@ void System::button_init() {
         LOG_WARNING("Multi-functional button not detected");
         return;
     }
+
     LOG_DEBUG("Multi-functional button enabled");
 
     myPButton_.onClick(BUTTON_Debounce, button_OnClick);
@@ -1077,6 +1110,7 @@ void System::send_info_mqtt() {
     if (!Mqtt::connected() || connection == _connection) {
         return;
     }
+
     _connection = connection;
     JsonDocument doc;
 
@@ -1270,6 +1304,7 @@ int8_t System::wifi_quality(int8_t dBm) {
     if (dBm >= -50) {
         return 100;
     }
+
     return 2 * (dBm + 100);
 }
 
@@ -1358,12 +1393,14 @@ void System::show_system(uuid::console::Shell & shell) {
     } else {
         shell.printfln(" PSRAM: not available");
     }
+
     // GPIOs
     shell.println(" GPIOs:");
     shell.printf("  allowed:");
     for (const auto & gpio : valid_system_gpios_) {
         shell.printf(" %d", gpio);
     }
+
     shell.printfln(" [total %d]", valid_system_gpios_.size());
     shell.printf("  in use:");
     auto sorted_gpios = used_gpios_;
@@ -1371,12 +1408,14 @@ void System::show_system(uuid::console::Shell & shell) {
     for (const auto & gpio : sorted_gpios) {
         shell.printf(" %d(%s)", gpio.pin, gpio.source.c_str());
     }
+
     shell.printfln(" [total %d]", used_gpios_.size());
     auto available = available_gpios();
     shell.printf("  available:");
     for (const auto & gpio : available) {
         shell.printf(" %d", gpio);
     }
+
     shell.printfln(" [total %d]", available.size());
     // List all partitions and their version info
     shell.println(" Partitions:");
@@ -1394,6 +1433,7 @@ void System::show_system(uuid::console::Shell & shell) {
         if (partition.second.version.empty()) {
             continue; // no version, empty string
         }
+
         std::string installed;
         if (partition.second.install_date > 0) {
             char   time_string[25];
@@ -1401,11 +1441,13 @@ void System::show_system(uuid::console::Shell & shell) {
             strftime(time_string, sizeof(time_string), "%FT%T", localtime(&d));
             installed = std::string(", installed on ") + time_string;
         }
+
         const bool is_running = strcmp(running_label, partition.first.c_str()) == 0;
         const bool is_boot    = strcmp(boot_label, partition.first.c_str()) == 0;
         if (is_boot) {
             boot_listed = true;
         }
+
         const char * mark = is_running && is_boot ? "** active, boot **" : is_running ? "** active **" : is_boot ? "** boot **" : "";
         shell.printfln("  %s: v%s (%d KB%s) %s", partition.first.c_str(), partition.second.version.c_str(), partition.second.size, installed.c_str(), mark);
     }
@@ -1421,12 +1463,14 @@ void System::show_system(uuid::console::Shell & shell) {
             if (is_boot) {
                 boot_listed = true;
             }
+
             int                  size_kb  = 0;
             esp_image_metadata_t meta     = {};
             esp_partition_pos_t  part_pos = {.offset = factory->address, .size = factory->size};
             if (esp_image_verify(ESP_IMAGE_VERIFY_SILENT, &part_pos, &meta) == ESP_OK) {
                 size_kb = static_cast<int>(meta.image_len / 1024);
             }
+
             const char * mark = is_running && is_boot ? "** active, boot **" : is_running ? "** active **" : is_boot ? "** boot **" : "";
             shell.printfln("  %s: Recovery v%s (%d KB) %s", factory->label, desc.version, size_kb, mark);
         }
@@ -1477,11 +1521,14 @@ void System::show_system(uuid::console::Shell & shell) {
             shell.printfln(" = unknown");
             break;
         }
+
         err = nvs_entry_next(&it);
     }
+
     if (it != nullptr) {
         nvs_release_iterator(it); // just in case
     }
+
     if (err == ESP_OK) {
         shell.println();
     }
@@ -1538,6 +1585,7 @@ void System::show_system(uuid::console::Shell & shell) {
     if (ethernet_status != nullptr) {
         shell.printfln(" Ethernet Status: %s", ethernet_status);
     }
+
     if (EMSESP::network_.ethernet_connected()) {
         shell.printfln(" Ethernet MAC address: %s", ETH.macAddress().c_str());
         shell.printfln(" Hostname: %s", ETH.getHostname());
@@ -1616,24 +1664,31 @@ bool System::check_restore() {
                                 }
                             }
                         }
+
                         // continue processing the rest of the sections
                         saveSettings(EMSESP_SETTINGS_FILE, section);
                     }
+
                     if (section_type == "commands") {
                         saveSettings(EMSESP_COMMANDS_FILE, section);
                     }
+
                     if (section_type == "schedule") {
                         saveSettings(EMSESP_SCHEDULER_FILE, section);
                     }
+
                     if (section_type == "customizations") {
                         saveSettings(EMSESP_CUSTOMIZATION_FILE, section);
                     }
+
                     if (section_type == "entities") {
                         saveSettings(EMSESP_CUSTOMENTITY_FILE, section);
                     }
+
                     if (section_type == "modules") {
                         saveSettings(EMSESP_MODULES_FILE, section);
                     }
+
                     if (section_type == "customSupport") {
                         // it's a custom support, extract json and write to /config/customSupport.json file
                         File customSupportFile = LittleFS.open(EMSESP_CUSTOMSUPPORT_FILE, "w");
@@ -1660,6 +1715,7 @@ bool System::check_restore() {
                                     EMSESP::nvs_.putChar(key.c_str(), v);
                                     LOG_DEBUG("Restored NVS value: %s = %d", key.c_str(), v);
                                 }
+
                                 break;
                             case NVS_TYPE_U8:
                                 if (entry["value"].is<JsonVariantConst>()) {
@@ -1667,6 +1723,7 @@ bool System::check_restore() {
                                     EMSESP::nvs_.putUChar(key.c_str(), v);
                                     LOG_DEBUG("Restored NVS value: %s = %d", key.c_str(), v);
                                 }
+
                                 break;
                             case NVS_TYPE_I32:
                                 if (entry["value"].is<JsonVariantConst>()) {
@@ -1674,6 +1731,7 @@ bool System::check_restore() {
                                     EMSESP::nvs_.putInt(key.c_str(), v);
                                     LOG_DEBUG("Restored NVS value: %s = %d", key.c_str(), v);
                                 }
+
                                 break;
                             case NVS_TYPE_U32:
                                 if (entry["value"].is<JsonVariantConst>()) {
@@ -1681,6 +1739,7 @@ bool System::check_restore() {
                                     EMSESP::nvs_.putUInt(key.c_str(), v);
                                     LOG_DEBUG("Restored NVS value: %s = %d", key.c_str(), v);
                                 }
+
                                 break;
                             case NVS_TYPE_I64:
                                 if (entry["value"].is<JsonVariantConst>()) {
@@ -1688,6 +1747,7 @@ bool System::check_restore() {
                                     EMSESP::nvs_.putLong64(key.c_str(), v);
                                     LOG_DEBUG("Restored NVS value: %s = %d", key.c_str(), v);
                                 }
+
                                 break;
                             case NVS_TYPE_U64:
                                 if (entry["value"].is<JsonVariantConst>()) {
@@ -1695,6 +1755,7 @@ bool System::check_restore() {
                                     EMSESP::nvs_.putULong64(key.c_str(), v);
                                     LOG_DEBUG("Restored NVS value: %s = %d", key.c_str(), v);
                                 }
+
                                 break;
                             case NVS_TYPE_BLOB:
                                 // used for double values
@@ -1703,6 +1764,7 @@ bool System::check_restore() {
                                     EMSESP::nvs_.putDouble(key.c_str(), v);
                                     LOG_DEBUG("Restored NVS value: %s = %d", key.c_str(), v);
                                 }
+
                                 break;
                             case NVS_TYPE_STR:
                             case NVS_TYPE_ANY:
@@ -1712,6 +1774,7 @@ bool System::check_restore() {
                                     EMSESP::nvs_.putString(key.c_str(), v.c_str());
                                     LOG_DEBUG("Restored NVS value: %s = %s", key.c_str(), v.c_str());
                                 }
+
                                 break;
                             }
                         }
@@ -1824,6 +1887,7 @@ bool System::check_upgrade() {
                     LOG_INFO("Upgrade: setting MQTT Entity ID format to v3.6 format (4)");
                     return StateUpdateResult::CHANGED;
                 }
+
                 return StateUpdateResult::UNCHANGED;
             });
         }
@@ -1840,11 +1904,13 @@ bool System::check_upgrade() {
                     LOG_INFO("Upgrade: setting WiFi TX Power to Auto");
                     changed = StateUpdateResult::CHANGED;
                 }
+
                 if (networkSettings.nosleep != true) {
                     networkSettings.nosleep = true;
                     LOG_INFO("Upgrade: disabling WiFi nosleep");
                     changed = StateUpdateResult::CHANGED;
                 }
+
                 return changed;
             });
             EMSESP::network_.reconnect();
@@ -1873,6 +1939,7 @@ bool System::check_upgrade() {
                     LOG_INFO("Upgrade: setting AP provision mode to on disconnect");
                     return StateUpdateResult::CHANGED;
                 }
+
                 return StateUpdateResult::UNCHANGED;
             });
             // Scheduler name is now mandatory, update FS if name is empty
@@ -1885,6 +1952,7 @@ bool System::check_upgrade() {
                         schedule_changed = true;
                     }
                 }
+
                 return schedule_changed ? StateUpdateResult::CHANGED : StateUpdateResult::UNCHANGED;
             });
 #endif
@@ -1923,9 +1991,11 @@ bool System::check_upgrade() {
                         } else {
                             snprintf(ci.name, sizeof(ci.name), "schedule_%d", idx);
                         }
+
                         commands.commandItems.push_back(ci);
                         idx++;
                     }
+
                     return StateUpdateResult::CHANGED;
                 });
 
@@ -1937,12 +2007,14 @@ bool System::check_upgrade() {
                         if (it == scheduler.scheduleItems.end()) {
                             break;
                         }
+
                         // flag 132 (0x84) is the old IMMEDIATE format which has no command - erase the entry
                         if (item["flags"].as<uint8_t>() == 0x84) {
                             it = scheduler.scheduleItems.erase(it);
                             idx++;
                             continue;
                         }
+
                         const char * nm = item["name"];
                         char         cmd_name[sizeof(it->name)];
                         if (nm != nullptr && nm[0] != '\0') {
@@ -1951,10 +2023,12 @@ bool System::check_upgrade() {
                             snprintf(cmd_name, sizeof(cmd_name), "schedule_%d", idx);
                             strlcpy(it->name, cmd_name, sizeof(it->name)); // keep entry name consistent with its command
                         }
+
                         it->cmd_name = cmd_name;
                         ++it;
                         idx++;
                     }
+
                     return StateUpdateResult::CHANGED;
                 });
 
@@ -1975,11 +2049,13 @@ bool System::check_upgrade() {
                     return StateUpdateResult::CHANGED;
                 }
             }
+
             // Migrate language from cz to cs
             if (settings.locale == "cz") {
                 settings.locale = "cs";
                 return StateUpdateResult::CHANGED;
             }
+
             return StateUpdateResult::UNCHANGED;
         });
     } else if (this_version < settings_version) {
@@ -2060,8 +2136,10 @@ void System::exportSettings(const std::string & type, [[maybe_unused]] const cha
                 LOG_ERROR("Failed to deserialize settings file %s", filename);
                 return;
             }
+
             output[section].set(jsonDocument.as<JsonObject>());
         }
+
         LOG_DEBUG("Exported %s settings from file %s", section, filename);
     } else {
         LOG_ERROR("No settings file for %s found", filename);
@@ -2177,6 +2255,7 @@ void System::exportSystemBackup(JsonObject output) {
             entry["value"] = EMSESP::nvs_.getString(info.key);
             break;
         }
+
         err = nvs_entry_next(&it);
     }
 
@@ -2279,6 +2358,7 @@ bool System::command_service(const char * cmd, const char * value) {
     if (ok) {
         LOG_INFO("System command '%s' with value '%s'", cmd, value);
     }
+
     return ok;
 }
 
@@ -2288,9 +2368,11 @@ bool System::get_value_info(JsonObject output, const char * cmd) {
         LOG_ERROR("empty system command");
         return false;
     }
+
     if (!strcmp(cmd, "restart")) { // restart is a command, not an entity
         return false;
     }
+
     // check for hardcoded "info"/"value"
     if (!strcmp(cmd, F_(info)) || !strcmp(cmd, F_(values))) {
         return command_info("", 0, output);
@@ -2303,6 +2385,7 @@ bool System::get_value_info(JsonObject output, const char * cmd) {
             output["api_data"] = metrics;
             return true;
         }
+
         return false;
     }
 
@@ -2323,6 +2406,7 @@ bool System::get_value_info(JsonObject output, const char * cmd) {
                 }
             }
         }
+
         return true;
     }
 
@@ -2344,9 +2428,11 @@ bool System::get_value_info(JsonObject output, const char * cmd) {
                 for (JsonPair p1 : p.value().as<JsonObject>()) {
                     output[p1.key().c_str()] = p1.value().as<std::string>();
                 }
+
                 return true;
             }
         }
+
         return false;
     }
 
@@ -2363,6 +2449,7 @@ bool System::get_value_info(JsonObject output, const char * cmd) {
                             output["api_data"] = p1.value().as<std::string>();
                             return true;
                         }
+
                         get_value_json(output, p_key, p1_key, p1.value());
                         return true;
                     }
@@ -2370,6 +2457,7 @@ bool System::get_value_info(JsonObject output, const char * cmd) {
             } // else skip, but we don't have value pairs in system root
         }
     }
+
     return false;
 }
 
@@ -2378,6 +2466,7 @@ void System::get_value_json(JsonObject output, const std::string & circuit, cons
     if (circuit.length()) {
         output["circuit"] = circuit;
     }
+
     output["readable"] = true;
     output["writeable"] =
         (name == "txpause" || name == "showerTimer" || name == "showerAlert" || name == "enabled" || name == "hideLed" || name == "analogEnabled");
@@ -2420,6 +2509,7 @@ std::string System::get_metrics_prometheus() {
                 escaped += c;
             }
         }
+
         return escaped;
     };
 
@@ -2435,6 +2525,7 @@ std::string System::get_metrics_prometheus() {
                 c = '_';
             }
         }
+
         return sanitized;
     };
 
@@ -2446,6 +2537,7 @@ std::string System::get_metrics_prometheus() {
                 c = tolower(c);
             }
         }
+
         return result;
     };
 
@@ -2454,14 +2546,17 @@ std::string System::get_metrics_prometheus() {
         if (path == "system" && key == "uptime") {
             return true;
         }
+
         if (path == "ntp" && key == "timestamp") {
             return true;
         }
+
         if (path.find("devices[") != std::string::npos) {
             if (key == "handlersReceived" || key == "handlersFetched" || key == "handlersPending" || key == "handlersIgnored") {
                 return true;
             }
         }
+
         return false;
     };
 
@@ -2519,11 +2614,14 @@ std::string System::get_metrics_prometheus() {
                                     if (!first) {
                                         result += ", ";
                                     }
+
                                     result += label.first + "=\"" + escape_label(label.second) + "\"";
                                     first = false;
                                 }
+
                                 result += "}";
                             }
+
                             result += " " + std::to_string(device["productID"].as<int>()) + "\n";
                         }
 
@@ -2544,11 +2642,14 @@ std::string System::get_metrics_prometheus() {
                                     if (!first) {
                                         result += ", ";
                                     }
+
                                     result += label.first + "=\"" + escape_label(label.second) + "\"";
                                     first = false;
                                 }
+
                                 result += "}";
                             }
+
                             result += " " + std::to_string(device["entities"].as<int>()) + "\n";
                         }
                     }
@@ -2578,6 +2679,7 @@ std::string System::get_metrics_prometheus() {
                         snprintf(val_str, sizeof(val_str), "%.2f", p.value().as<float>());
                         result += val_str;
                     }
+
                     result += "\n";
                 } else if (is_string) {
                     // collect string for info metric (skip dynamic strings like uptime and timestamp)
@@ -2592,6 +2694,7 @@ std::string System::get_metrics_prometheus() {
                                 break;
                             }
                         }
+
                         if (!key_exists) {
                             local_info_labels.push_back({lower_key, val});
                         }
@@ -2617,11 +2720,14 @@ std::string System::get_metrics_prometheus() {
                     if (!first) {
                         result += ", ";
                     }
+
                     result += label.first + "=\"" + escape_label(label.second) + "\"";
                     first = false;
                 }
+
                 result += "}";
             }
+
             result += " 1\n";
         }
     };
@@ -2692,6 +2798,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["psramSize"] = EMSESP::system_.PSram();
         node["freePsram"] = ESP.getFreePsram() / 1024;
     }
+
     node["model"] = EMSESP::system_.getBBQKeesGatewayDetails();
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
     node["temperature"] = EMSESP::system_.temperature();
@@ -2705,8 +2812,10 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         if (!gpios_allowed_str.empty()) {
             gpios_allowed_str += ", ";
         }
+
         gpios_allowed_str += Helpers::itoa(gpio);
     }
+
     node["gpios_allowed"] = gpios_allowed_str;
 
     std::string gpios_in_use_str;
@@ -2716,8 +2825,10 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         if (!gpios_in_use_str.empty()) {
             gpios_in_use_str += ", ";
         }
+
         gpios_in_use_str += Helpers::itoa(gpio.pin);
     }
+
     node["gpios_in_use"] = gpios_in_use_str;
 
     std::string gpios_available_str;
@@ -2725,8 +2836,10 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         if (!gpios_available_str.empty()) {
             gpios_available_str += ", ";
         }
+
         gpios_available_str += Helpers::itoa(gpio);
     }
+
     node["gpios_available"] = gpios_available_str;
 
     // Network Status
@@ -2765,6 +2878,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         if (WiFi.status() == WL_CONNECTED && !settings.bssid.isEmpty()) {
             node["BSSID"] = "set"; // we don't disclose the name
         }
+
         node["TxPowerSetting"] = settings.tx_power;
         node["staticIP"]       = settings.staticIPConfig;
         node["lowBandwidth"]   = settings.bandwidth20;
@@ -2819,6 +2933,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["MQTTPublishFails"] = Mqtt::publish_fails();
         node["MQTTReconnects"]   = Mqtt::connect_count();
     }
+
     EMSESP::esp32React.getMqttSettingsService()->read([&](const MqttSettings & settings) {
         node["enabled"]               = settings.enabled;
         node["clientID"]              = settings.clientId;
@@ -2911,6 +3026,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["busStatus"] = "unknown";
         break;
     }
+
     node["busProtocol"]            = EMSbus::is_ht3() ? "HT3" : "Buderus";
     node["busTelegramsReceived"]   = EMSESP::rxservice_.telegram_count();
     node["busReads"]               = EMSESP::txservice_.telegram_read_count();
@@ -2935,6 +3051,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
             node["showerAlertColdshot"] = settings.shower_alert_coldshot; // seconds
             node["showerAlertTrigger"]  = settings.shower_alert_trigger;  // minutes
         }
+
         if (settings.board_profile == "CUSTOM") {
             node["phyType"] = settings.phy_type;
             if (settings.phy_type != PHY_type::PHY_TYPE_NONE) {
@@ -2942,6 +3059,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
                 node["ethPhyAddr"]    = settings.eth_phy_addr;
                 node["ethClockMmode"] = settings.eth_clock_mode;
             }
+
             node["rxGPIO"]      = settings.rx_gpio;
             node["txGPIO"]      = settings.tx_gpio;
             node["dallasGPIO"]  = settings.dallas_gpio;
@@ -2949,6 +3067,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
             node["ledGPIO"]     = settings.led_gpio;
             node["ledType"]     = settings.led_type;
         }
+
         node["hideLed"]         = settings.hide_led;
         node["noTokenApi"]      = settings.notoken_api;
         node["readonlyMode"]    = settings.readonly_mode;
@@ -2994,14 +3113,17 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
                     if (result[0] != '\0') {
                         obj["handlersReceived"] = result; // don't show handlers if there aren't any
                     }
+
                     (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::FETCHED);
                     if (result[0] != '\0') {
                         obj["handlersFetched"] = result;
                     }
+
                     (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::PENDING);
                     if (result[0] != '\0') {
                         obj["handlersPending"] = result;
                     }
+
                     (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::IGNORED);
                     if (result[0] != '\0') {
                         obj["handlersIgnored"] = result;
@@ -3018,24 +3140,28 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         obj["name"]     = F_(temperaturesensor);
         obj["entities"] = EMSESP::temperaturesensor_.count_entities();
     }
+
     if (EMSESP::analogsensor_.count_entities()) {
         JsonObject obj  = devices.add<JsonObject>();
         obj["type"]     = F_(analogsensor);
         obj["name"]     = F_(analogsensor);
         obj["entities"] = EMSESP::analogsensor_.count_entities();
     }
+
     if (EMSESP::webSchedulerService.count_entities()) {
         JsonObject obj  = devices.add<JsonObject>();
         obj["type"]     = F_(scheduler);
         obj["name"]     = F_(scheduler);
         obj["entities"] = EMSESP::webSchedulerService.count_entities();
     }
+
     if (EMSESP::webCommandService.count_entities()) {
         JsonObject obj  = devices.add<JsonObject>();
         obj["type"]     = F_(commands);
         obj["name"]     = F_(commands);
         obj["entities"] = EMSESP::webCommandService.count_entities();
     }
+
     if (EMSESP::webCustomEntityService.count_entities()) {
         JsonObject obj  = devices.add<JsonObject>();
         obj["type"]     = F_(custom);
@@ -3200,6 +3326,7 @@ bool System::command_txpause(const char * value, const int8_t) {
 #endif
         }
     }
+
     return true;
 }
 
@@ -3331,6 +3458,7 @@ String System::getBBQKeesGatewayDetails([[maybe_unused]] uint8_t detail) {
             uint32_t model : 4;
             uint32_t mfg : 4;
         };
+
         uint32_t reg;
     } gw;
 
@@ -3422,6 +3550,7 @@ bool System::uploadFirmwareURL(const char * url) {
         ssl_client.setBufferSizes(HttpClient::TLS_RX_BUFFER_SIZE, HttpClient::TLS_TX_BUFFER_SIZE);
         ssl_client.setSessionTimeout(HttpClient::TLS_SESSION_TIMEOUT_S);
     }
+
     basic_client.setTimeout(FIRMWARE_UPLOAD_READ_TIMEOUT_S * 1000); // socket-level read timeout, in ms
     ssl_client.setTimeout(FIRMWARE_UPLOAD_READ_TIMEOUT_S);          // Stream::readBytes timeout used by Update
     ssl_client.setClient(&basic_client, is_https);                  // enableSSL = false for plain HTTP
@@ -3479,10 +3608,12 @@ bool System::uploadFirmwareURL(const char * url) {
             if (line.isEmpty()) {
                 break; // end of headers
             }
+
             int colon = line.indexOf(':');
             if (colon < 0) {
                 continue;
             }
+
             String name = line.substring(0, colon);
             name.toLowerCase();
             String val = line.substring(colon + 1);
@@ -3501,6 +3632,7 @@ bool System::uploadFirmwareURL(const char * url) {
                 LOG_ERROR("Firmware upload failed - too many redirects");
                 return false;
             }
+
             String lower_loc = location;
             lower_loc.toLowerCase();
             if (lower_loc.startsWith("https://") || lower_loc.startsWith("http://")) {
@@ -3511,6 +3643,7 @@ bool System::uploadFirmwareURL(const char * url) {
                     LOG_ERROR("Firmware upload failed - cross-scheme redirect to %s", location.c_str());
                     return false;
                 }
+
                 url_remain = location.substring(new_is_https ? 8 : 7);
             } else if (location.startsWith("/")) {
                 url_remain = host + location; // relative redirect, same host
@@ -3518,6 +3651,7 @@ bool System::uploadFirmwareURL(const char * url) {
                 LOG_ERROR("Firmware upload failed - unsupported redirect to %s", location.c_str());
                 return false;
             }
+
             LOG_DEBUG("Following redirect to %s", url_remain.c_str());
             continue;
         }
@@ -3540,6 +3674,7 @@ bool System::uploadFirmwareURL(const char * url) {
         while (ssl_client.connected() && !ssl_client.available() && millis() - body_wait < FIRMWARE_UPLOAD_RESPONSE_TIMEOUT) {
             delay(1);
         }
+
         if (!ssl_client.available()) {
             ssl_client.stop();
             LOG_ERROR("Firmware upload failed - no body received");
@@ -3577,6 +3712,7 @@ bool System::uploadFirmwareURL(const char * url) {
             LOG_ERROR("The recovery firmware can't be installed on this board");
             return false; // error
         }
+
         if (!ota.beginFirmware(firmware_size, factory, false)) {
             LOG_ERROR("Recovery firmware upload failed - %s", ota.errorString());
             return false; // error
@@ -3611,6 +3747,7 @@ bool System::uploadFirmwareURL(const char * url) {
             } else {
                 Update.abort(); // release the OTA partition handle so a later attempt can start cleanly
             }
+
             ssl_client.stop(); // drop the connection
             saved_url.clear(); // prevent it from downloading again
             EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_NORMAL);
@@ -3624,13 +3761,16 @@ bool System::uploadFirmwareURL(const char * url) {
             if (!ssl_client.connected()) {
                 break;
             }
+
             if (millis() - wait_start > FIRMWARE_UPLOAD_STALL_TIMEOUT) {
                 break;
             }
+
             // also bail out promptly if a cancel arrives mid-stall
             if (EMSESP::system_.systemStatus() < SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING) {
                 break;
             }
+
             delay(1);
         }
 
@@ -3639,10 +3779,12 @@ bool System::uploadFirmwareURL(const char * url) {
             if (EMSESP::system_.systemStatus() < SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING) {
                 continue;
             }
+
             LOG_ERROR("Firmware upload failed - read stalled at %u of %d bytes", (unsigned)total_read, firmware_size);
             if (is_recovery) {
                 ota.abort();
             }
+
             EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
             return false;
         }
@@ -3658,6 +3800,7 @@ bool System::uploadFirmwareURL(const char * url) {
             if (is_recovery) {
                 ota.abort();
             }
+
             EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
             return false;
         }
@@ -3670,18 +3813,22 @@ bool System::uploadFirmwareURL(const char * url) {
                 if (is_recovery) {
                     ota.abort();
                 }
+
                 EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
                 return false;
             }
+
             // the recovery firmware must be for this chip, and really be the recovery
             if (is_recovery && !(OtaUpdater::isCompatibleFirmware(buf, n) && OtaUpdater::isRecoveryFirmware(buf, n))) {
                 LOG_ERROR("Recovery firmware upload failed - not a recovery firmware image for this chip");
                 if (is_recovery) {
                     ota.abort();
                 }
+
                 EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
                 return false;
             }
+
             magic_ok = true;
         }
 
@@ -3694,6 +3841,7 @@ bool System::uploadFirmwareURL(const char * url) {
             if (is_recovery) {
                 ota.abort();
             }
+
             EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
             return false;
         }
@@ -3775,6 +3923,7 @@ bool System::readCommand(const char * data) {
             } else if (num_args == 2) {
                 length = Helpers::atoint(value); // decimal
             }
+
             num_args++;
         }
     }
@@ -4063,6 +4212,7 @@ std::vector<uint8_t> System::available_gpios() {
             gpios.push_back(gpio); // didn't find it in used_gpios_, so it's available
         }
     }
+
     return gpios;
 }
 
@@ -4071,6 +4221,7 @@ void System::make_snapshot_gpios(std::vector<int8_t> & u_gpios, std::vector<int8
     for (const auto & usage : used_gpios_) {
         u_gpios.push_back(usage.pin);
     }
+
     for (const auto & gpio : valid_system_gpios_) {
         s_gpios.push_back(gpio);
     }
@@ -4099,6 +4250,7 @@ void System::listDir([[maybe_unused]] const char * dirname, [[maybe_unused]] uin
         LOG_DEBUG("Failed to open directory %s", dirname);
         return;
     }
+
     if (!root.isDirectory()) {
         LOG_DEBUG("%s is not a directory", dirname);
         return;
@@ -4118,6 +4270,7 @@ void System::listDir([[maybe_unused]] const char * dirname, [[maybe_unused]] uin
             std::string line = "  (file) " + std::string(file.name()) + " (" + std::to_string(file.size()) + " bytes)";
             LOG_DEBUG("%s", line.c_str());
         }
+
         file = root.openNextFile();
     }
 #endif

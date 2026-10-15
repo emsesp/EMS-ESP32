@@ -45,6 +45,7 @@ void NTPStatus::ntpStatus(AsyncWebServerRequest * request) {
                 return 1;
             }
         }
+
         return 0;
     }();
 

@@ -34,6 +34,7 @@ class Roomctrl {
     static bool is_remote(const uint8_t hc) {
         return (hc < 4 && remotetemp_[hc] != EMS_VALUE_INT16_NOTSET);
     }
+
     static void set_timeout(uint8_t t);
 
   private:

@@ -282,6 +282,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               0,
                               10);
     }
+
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &heatingActivated_,
                           DeviceValueType::BOOL,
@@ -753,6 +754,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                                   DeviceValueUOM::NONE,
                                   MAKE_CF_CB(set_maxHeatDhw));
         }
+
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &auxHeaterSource_,
                               DeviceValueType::ENUM,
@@ -1102,6 +1104,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               120,
                               240);
     }
+
     register_device_value(DeviceValueTAG::TAG_DHW1,
                           &wwCircMode_,
                           DeviceValueType::ENUM,
@@ -1192,12 +1195,15 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         if (nrgHeatF_ < 0 || nrgHeatF_ >= EMS_VALUE_UINT32_NOTSET) {
             nrgHeatF_ = 0;
         }
+
         if (nrgWwF_ < 0 || nrgWwF_ >= EMS_VALUE_UINT32_NOTSET) {
             nrgWwF_ = 0;
         }
+
         if (nomPower_ == EMS_VALUE_UINT8_NOTSET) {
             nomPower_ = 0;
         }
+
         store_energy();
         // update/publish the values
         has_update(nrgHeat_, (uint32_t)(nrgHeatF_ + 0.5));
@@ -1211,12 +1217,15 @@ void Boiler::store_energy() {
     if (nrgHeatF_ != EMSESP::nvs_.getDouble("nrgheat")) {
         EMSESP::nvs_.putDouble("nrgheat", nrgHeatF_);
     }
+
     if (nrgWwF_ != EMSESP::nvs_.getDouble("nrgww")) {
         EMSESP::nvs_.putDouble("nrgww", nrgWwF_);
     }
+
     if (nomPower_ != EMSESP::nvs_.getUChar("nompower")) {
         EMSESP::nvs_.putUChar("nompower", nomPower_);
     }
+
     // LOG_DEBUG("energy values stored");
 }
 
@@ -1250,6 +1259,7 @@ void Boiler::check_active() {
     if (Helpers::hasValue(wwCurFlow_) && (wwCurFlow_ > 0) && (wwType_ == 1)) {
         flowsensor = true;
     }
+
     if (flowsensor) {
         b = ((wwCurFlow_ > 0) && ((boilerState_ & 0x0A) == 0x0A));
     } else {
@@ -1271,6 +1281,7 @@ void Boiler::check_active() {
         EMSESP::webSettingsService.read([&](WebSettings & settings) { forceHeatingOff_ = settings.boiler_heatingoff ? EMS_VALUE_BOOL_ON : 0; });
         has_update(&forceHeatingOff_);
     }
+
     static uint32_t lastSendHeatingOff = 0;
     if (forceHeatingOff_ == EMS_VALUE_BOOL_ON && (uuid::get_uptime_sec() - lastSendHeatingOff) >= 60) {
         lastSendHeatingOff = uuid::get_uptime_sec();
@@ -1278,6 +1289,7 @@ void Boiler::check_active() {
             uint8_t data[] = {1, 0, 0, 1, 1};
             write_command(EMS_TYPE_UBASetPoints2, 0, data, sizeof(data), 0);
         }
+
         uint8_t data[] = {0, 0, 0, 0};
         write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
     }
@@ -1304,6 +1316,7 @@ void Boiler::check_active() {
         } else if (curBurnPow_ == 0 && (heatBurnPow + wwBurnPow) > 0) { // on burner switch off
             store_energy();
         }
+
         // store new modulation and time
         heatBurnPow      = heatingActive_ && !tapwaterActive_ ? curBurnPow_ : 0;
         wwBurnPow        = tapwaterActive_ ? curBurnPow_ : 0;
@@ -1319,6 +1332,7 @@ void Boiler::process_UBAFactory(const std::shared_ptr<const Telegram> & telegram
     if (telegram->offset > 4 || telegram->offset + telegram->message_length < 7) {
         return;
     }
+
     toggle_fetch(telegram->type_id, false); // only read once
     uint8_t min      = 0;
     uint8_t max      = 0;
@@ -1330,6 +1344,7 @@ void Boiler::process_UBAFactory(const std::shared_ptr<const Telegram> & telegram
     if (nomPower > 0 && nomPower_ == 0) {
         has_update(nomPower_, nomPower);
     }
+
     if (min <= max) {
         // set_minmax(&burnMinPower_, 0, max); // removed #2918
         set_minmax(&burnMaxPower_, min, max);
@@ -1389,6 +1404,7 @@ void Boiler::process_UBAMonitorFast(const std::shared_ptr<const Telegram> & tele
             curBurnPow = 100;
             selBurnPow = 100;
         }
+
         has_update(selBurnPow_, selBurnPow);
         has_update(curBurnPow_, curBurnPow);
 
@@ -1464,6 +1480,7 @@ void Boiler::process_UBAParameterWW(const std::shared_ptr<const Telegram> & tele
         } else {
             wwComfort = EMS_VALUE_UINT8_NOTSET;
         }
+
         has_update(wwComfort_, wwComfort);
     }
 }
@@ -1520,16 +1537,18 @@ void Boiler::process_UBAMonitorFastPlus(const std::shared_ptr<const Telegram> & 
     if (syspress == 0) {
         syspress = EMS_VALUE_UINT8_NOTSET;
     }
-    has_update(sysPress_, syspress);
 
+    has_update(sysPress_, syspress);
     //has_update(telegram, temperatur_, 13); // unknown temperature
     has_update(telegram, heatblock_, 23);  // see #1317
     has_update(telegram, headertemp_, 25); // see #1317
     //has_update(telegram, temperatur_, 27); // unknown temperature
+
     telegram->read_value(exhaustTemp1_, 31);
     if (Helpers::hasValue(exhaustTemp1_)) {
         has_update(exhaustTemp_, exhaustTemp1_);
     }
+
     // heating sends a second 0xE4 with 0xFFFF here, which would clear a valid flow, #3224
     uint16_t pc0flow = pc0Flow_;
     if (telegram->read_value(pc0flow, 36) && Helpers::hasValue(pc0flow)) { // see https://github.com/emsesp/EMS-ESP32/issues/2001
@@ -1597,10 +1616,12 @@ void Boiler::process_UBAMonitorSlowPlus2(const std::shared_ptr<const Telegram> &
         if (telegram->read_value(state, 2)) {
             boilerState_ |= state == 1 ? 0x09 : 0; // heating 0/1
         }
+
         state = EMS_VALUE_UINT8_NOTSET;
         if (telegram->read_value(state, 5)) {
             boilerState_ |= state == 1 ? 0x0A : 0; // dhw 0/1
         }
+
         check_active(); // do a quick check to see if the hot water or heating is active
     }
 }
@@ -1620,6 +1641,7 @@ void Boiler::process_UBAMonitorSlowPlus(const std::shared_ptr<const Telegram> & 
     if (!Helpers::hasValue(exhaustTemp1_)) {
         has_update(telegram, exhaustTemp_, 6);
     }
+
     has_update(telegram, burnStarts_, 10, 3);   // force to 3 bytes
     has_update(telegram, burnWorkMin_, 13, 3);  // force to 3 bytes
     has_update(telegram, burn2WorkMin_, 16, 3); // force to 3 bytes
@@ -1686,6 +1708,7 @@ void Boiler::process_UBAParameterWWPlus(const std::shared_ptr<const Telegram> & 
         } else {
             wwComfort1 = EMS_VALUE_UINT8_NOTSET;
         }
+
         has_update(wwComfort1_, wwComfort1);
     }
 }
@@ -1779,6 +1802,7 @@ void Boiler::process_HpPower(const std::shared_ptr<const Telegram> & telegram) {
     if (coolingType_ == 3) {
         has_bitupdate(telegram, hp4wayValve_, 0, 3); // https://github.com/emsesp/EMS-ESP32/issues/2844#issuecomment-3869770845
     }
+
     has_bitupdate(telegram, elHeatStep1_, 3, 0);
     has_bitupdate(telegram, elHeatStep2_, 3, 1);
     has_bitupdate(telegram, elHeatStep3_, 3, 2);
@@ -1797,7 +1821,7 @@ void Boiler::process_HpPower(const std::shared_ptr<const Telegram> & telegram) {
     has_bitupdate(telegram, hpInput[2].state, 1, 6);
     has_bitupdate(telegram, hpInput[3].state, 1, 7);
 
-    // from https://github.com/emsesp/EMS-ESP32/issues/2669
+    // https://github.com/emsesp/EMS-ESP32/issues/2669
     has_update(telegram, hpTargetSpd_, 22);
     has_update(telegram, receiverValveVr0_, 15);
     has_update(telegram, expansionValveVr1_, 16);
@@ -1860,11 +1884,13 @@ void Boiler::process_HpInConfig(const std::shared_ptr<const Telegram> & telegram
             telegram->read_value(option[j], index[j] + i);
             option[j] = option[j] == 1 ? '1' : '0';
         }
+
         option[12] = atoi(&hpInput[i].option[12]);
         telegram->read_value(option[12], 27 + i); // modulation
         Helpers::smallitoa(&option[12], (uint16_t)option[12]);
         has_update(hpInput[i].option, option, 16);
     }
+
     // input 4 <inv>[<comp><aux><cool><heat><dhw><pv><prot><pres><mod>]
     uint8_t index4[] = {42, 43, 44, 45, 46, 47, 52, 50, 49, 48};
     for (uint8_t j = 0; j < 9; j++) {
@@ -1872,6 +1898,7 @@ void Boiler::process_HpInConfig(const std::shared_ptr<const Telegram> & telegram
         telegram->read_value(option[j], index4[j]);
         option[j] = option[j] == 1 ? '1' : '0';
     }
+
     option[9] = atoi(&hpInput[3].option[9]);
     telegram->read_value(option[9], 48); // modulation
     Helpers::smallitoa(&option[9], (uint16_t)option[9]);
@@ -1893,6 +1920,7 @@ void Boiler::process_HpHeaterConfig(const std::shared_ptr<const Telegram> & tele
         has_enumupdate(telegram, maxHeatDhw_, 4, {0, 2, 4, 5});
         return;
     }
+
     has_update(telegram, maxHeatComp_, 2);
     has_update(telegram, maxHeatHeat_, 3);
     has_update(telegram, maxHeatDhw_, 4);
@@ -1973,6 +2001,7 @@ void Boiler::process_UBAErrorMessage(const std::shared_ptr<const Telegram> & tel
     if (telegram->offset > 0 || telegram->message_length < 11) {
         return;
     }
+
     // data: displaycode(2), errornumber(2), year, month, hour, day, minute, duration(2), src-addr
     static uint32_t lastCodeDate_ = 0; // last code date
     uint8_t         code[3]       = {telegram->message_data[0], telegram->message_data[1], 0};
@@ -1992,8 +2021,10 @@ void Boiler::process_UBAErrorMessage(const std::shared_ptr<const Telegram> & tel
             has_update(lastCode_, newCode, sizeof(lastCode_));
             lastCodeDate_ = 1;
         }
+
         return;
     }
+
     // store only the newest code from telegrams 10 and 11
     if (date > lastCodeDate_) {
         lastCodeDate_ = date;
@@ -2063,6 +2094,7 @@ void Boiler::process_UBAErrorMessage2(const std::shared_ptr<const Telegram> & te
         snprintf(&code[3], sizeof(code) - 3, "(%d) @uptime %lu - %lu min", codeNo, starttime, endtime);
         date = starttime;
     }
+
     if (date > lastCodeDate_) {
         lastCodeDate_ = date;
         has_update(lastCode_, code, sizeof(lastCode_));
@@ -2129,6 +2161,7 @@ void Boiler::process_UBAErrorMessage3(const std::shared_ptr<const Telegram> & te
         snprintf(&code[3], sizeof(code) - 3, "(%d) @uptime %lu - %lu min", codeNo, starttime, endtime);
         date = starttime;
     }
+
     if (date > lastCodeDate_) {
         lastCodeDate_ = date;
         has_update(lastCode_, code, sizeof(lastCode_));
@@ -2357,6 +2390,7 @@ bool Boiler::set_keepWarmTemp(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
+
     write_command(0x772, 1, v, 0x772);
     return true;
 }
@@ -2366,6 +2400,7 @@ bool Boiler::set_returnTemp(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
+
     write_command(0x772, 2, v, 0x772);
     return true;
 }
@@ -2529,6 +2564,7 @@ bool Boiler::set_ww_disinfect_duration(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, v, 120, 240)) { // HPC410 menu: 120-240 min in steps of 10
         return false;
     }
+
     write_command(EMS_TYPE_UBAParameterWWPlus, 15, (v + 5) / 10, EMS_TYPE_UBAParameterWWPlus);
     return true;
 }
@@ -2539,6 +2575,7 @@ bool Boiler::set_ww_prio(const char * value, const int8_t) {
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
+
     write_command(0x2CC, 3, b ? 0xFF : 0, 0x2CC);
     return true;
 }
@@ -2557,6 +2594,7 @@ bool Boiler::set_flow_temp(const char * value, const int8_t id) {
         if (has_telegram_id(0xE4)) {
             EMSESP::txservice_.add(Telegram::Operation::TX_WRITE, device_id(), EMS_TYPE_UBASetPoints2, 1, &v1, 1, 0, false);
         }
+
         // always write to 0x1A
         EMSESP::txservice_.add(Telegram::Operation::TX_WRITE, device_id(), EMS_TYPE_UBASetPoints, 0, &v1, 1, 0, false);
         return true;
@@ -2569,6 +2607,7 @@ bool Boiler::set_flow_temp(const char * value, const int8_t id) {
     } else {
         write_command(EMS_TYPE_UBASetPoints, 0, v, 0x18);
     }
+
     return true;
 }
 
@@ -2585,6 +2624,7 @@ bool Boiler::set_burn_power(const char * value, const int8_t id) {
     } else {
         write_command(EMS_TYPE_UBASetPoints, 1, v);
     }
+
     return true;
 }
 
@@ -2778,6 +2818,7 @@ bool Boiler::set_pumpMode(const char * value, const int8_t id) {
         write_command(EMS_TYPE_UBAParameters, 11, v, EMS_TYPE_UBAParameters);
         return true;
     }
+
     return false;
 }
 
@@ -2787,6 +2828,7 @@ bool Boiler::set_pumpCharacter(const char * value, const int8_t id) {
         write_command(EMS_TYPE_UBAParametersPlus, 15, v, EMS_TYPE_UBAParametersPlus);
         return true;
     }
+
     return false;
 }
 
@@ -2889,6 +2931,7 @@ bool Boiler::set_ww_mode(const char * value, const int8_t id) {
             return true;
         }
     }
+
     return false;
 }
 
@@ -3074,6 +3117,7 @@ bool Boiler::set_reset(const char * value, const int8_t id) {
         write_command(0x05, 6, 154);
         return true;
     }
+
     return false;
 }
 
@@ -3082,6 +3126,7 @@ bool Boiler::set_manDefrost(const char * value, const int8_t) {
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
+
     write_command(0x05, 52, b ? 1 : 0);
     return true;
 }
@@ -3091,6 +3136,7 @@ bool Boiler::set_chimneysweeper(const char * value, const int8_t) {
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
+
     write_command(0x05, 0x04, b ? 100 : 0);
     return true;
 }
@@ -3122,6 +3168,7 @@ bool Boiler::set_maintenance(const char * value, const int8_t id) {
             LOG_WARNING("Setting maintenance: wrong format %d.%d.%d", day, month, year + 2000);
             return false;
         }
+
         return true;
     }
 
@@ -3145,6 +3192,7 @@ bool Boiler::set_maintenance(const char * value, const int8_t id) {
     LOG_WARNING("Setting maintenance: wrong format");
     return false;
 }
+
 //maintenance
 bool Boiler::set_maintenancetime(const char * value, const int8_t id) {
     int hrs;
@@ -3156,6 +3204,7 @@ bool Boiler::set_maintenancetime(const char * value, const int8_t id) {
             return true;
         }
     }
+
     LOG_WARNING("Setting maintenance: wrong format");
     return false;
 }
@@ -3174,6 +3223,7 @@ bool Boiler::set_maintenancedate(const char * value, const int8_t id) {
             LOG_WARNING("Setting maintenance: wrong format %d.%d.%d", day, month, year + 2000);
             return false;
         }
+
         return true;
     }
 
@@ -3187,6 +3237,7 @@ bool Boiler::set_pool_temp(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
+
     uint8_t v2 = ((v * 2) + 0.5);
     // LOG_INFO("Setting pool temperature to %d.%d C", v2 >> 1, (v2 & 0x01) * 5);
     write_command(0x48A, 1, v2, 0x48A);
@@ -3200,6 +3251,7 @@ bool Boiler::set_pool_on(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
+
     write_command(0x48A, 0, v ? 0x01 : 0x00, 0x48A);
     return true;
 }
@@ -3220,6 +3272,7 @@ bool Boiler::set_emergency_ops(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
+
     write_command(EMS_TYPE_UBAParametersPlus, 18, v ? 0x01 : 0x00, EMS_TYPE_UBAParametersPlus);
     return true;
 }
@@ -3228,11 +3281,13 @@ bool Boiler::set_HpInLogic(const char * value, const int8_t id) {
     if (id == 0 || id > 4 || strlen(value) > 15) {
         return false;
     }
+
     bool v;
     if (strlen(value) == 1 && Helpers::value2bool(value, v)) {
         write_command(0x486, id == 4 ? 42 : id - 1, v ? 1 : 0, 0x486);
         return true;
     }
+
     char option[] = {"xxxxxxxxxxxxxxx"};
     strncpy(option, value, strlen(option)); // copy without termination
     // inputs 1,2,3 <inv>[<evu1><evu2><evu3><comp><aux><cool><heat><dhw><pv><prot><pres><mod>]
@@ -3243,9 +3298,11 @@ bool Boiler::set_HpInLogic(const char * value, const int8_t id) {
                 write_command(0x486, index[i] + id - 1, option[i] - '0');
             }
         }
+
         if (option[12] >= '0' && option[12] <= '9') {
             write_command(0x486, 27, (uint8_t)atoi(&option[12]));
         }
+
         return true;
     }
 
@@ -3256,9 +3313,11 @@ bool Boiler::set_HpInLogic(const char * value, const int8_t id) {
             write_command(0x486, index4[i], option[i] - '0');
         }
     }
+
     if (option[9] >= '0' && option[9] <= '9') {
         write_command(0x486, 48, (uint8_t)atoi(&option[9]));
     }
+
     return true;
 }
 
@@ -3279,6 +3338,7 @@ bool Boiler::set_maxHeat(const char * value, const int8_t id) {
             return false;
         }
     }
+
     write_command(0x492, id, v, 0x492);
     return true;
 }
@@ -3288,6 +3348,7 @@ bool Boiler::set_silentMode(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, v, FL_(enum_silentMode))) {
         return false;
     }
+
     write_command(0x484, 10, v, 0x484);
     return true;
 }
@@ -3296,6 +3357,7 @@ bool Boiler::set_silentFrom(const char * value, const int8_t id) {
     if (value == nullptr || value[0] < '0' || value[0] > '9') {
         return false;
     }
+
     auto v = Helpers::string2minutes(value);
     write_command(0x484, 52, v / 15, 0x484);
     return true;
@@ -3305,6 +3367,7 @@ bool Boiler::set_silentTo(const char * value, const int8_t id) {
     if (value == nullptr || value[0] < '0' || value[0] > '9') {
         return false;
     }
+
     auto v = Helpers::string2minutes(value);
     write_command(0x484, 53, v / 15, 0x484);
     return true;
@@ -3316,6 +3379,7 @@ bool Boiler::set_minTempSilent(const char * value, const int8_t id) {
         write_command(0x484, 11, v, 0x484);
         return true;
     }
+
     return false;
 }
 
@@ -3325,6 +3389,7 @@ bool Boiler::set_additionalHeaterOnly(const char * value, const int8_t id) {
         write_command(0x491, model() == EMSdevice::EMS_DEVICE_FLAG_CS6800 ? 3 : 1, v ? 1 : 0, 0x491);
         return true;
     }
+
     return false;
 }
 
@@ -3334,6 +3399,7 @@ bool Boiler::set_additionalHeater(const char * value, const int8_t id) {
         write_command(0x491, 2, v ? 1 : 0, 0x491);
         return true;
     }
+
     return false;
 }
 
@@ -3343,6 +3409,7 @@ bool Boiler::set_tempParMode(const char * value, const int8_t id) {
         write_command(0x491, 5, v, 0x491);
         return true;
     }
+
     return false;
 }
 
@@ -3354,6 +3421,7 @@ bool Boiler::set_additionalHeaterDelay(const char * value, const int8_t id) {
         write_command(0x491, 16, data, 2, 0x491);
         return true;
     }
+
     return false;
 }
 
@@ -3363,6 +3431,7 @@ bool Boiler::set_auxHeatMode(const char * value, const int8_t id) {
         write_command(0x491, 4, v, 0x491);
         return true;
     }
+
     return false;
 }
 
@@ -3372,6 +3441,7 @@ bool Boiler::set_auxLimit(const char * value, const int8_t id) {
         write_command(0x491, id, (uint8_t)(v * 10), 0x491);
         return true;
     }
+
     return false;
 }
 
@@ -3381,6 +3451,7 @@ bool Boiler::set_auxHeaterSource(const char * value, const int8_t) {
         write_command(0x491, 0, v, 0x491);
         return true;
     }
+
     return false;
 }
 
@@ -3390,6 +3461,7 @@ bool Boiler::set_pvCooling(const char * value, const int8_t id) {
         write_command(0x485, 21, v ? 1 : 0, 0x485);
         return true;
     }
+
     return false;
 }
 
@@ -3401,6 +3473,7 @@ bool Boiler::set_hpHyst(const char * value, const int8_t id) {
         write_command(0x484, id, data, 2, 0x484);
         return true;
     }
+
     return false;
 }
 
@@ -3410,6 +3483,7 @@ bool Boiler::set_tempDiff(const char * value, const int8_t id) {
         write_command(0x48B, id, (uint8_t)(v * 10), 0x48B);
         return true;
     }
+
     return false;
 }
 
@@ -3420,6 +3494,7 @@ bool Boiler::set_wwOffTemp(const char * value, const int8_t id) {
         write_command(0x499, id, v, 0x499);
         return true;
     }
+
     return false;
 }
 
@@ -3429,6 +3504,7 @@ bool Boiler::set_wwDiffTemp(const char * value, const int8_t id) {
         write_command(0x499, id, v, 0x499);
         return true;
     }
+
     return false;
 }
 
@@ -3438,6 +3514,7 @@ bool Boiler::set_hpCircPumpWw(const char * value, const int8_t id) {
         write_command(0x484, 46, v ? 1 : 0, 0x484);
         return true;
     }
+
     return false;
 }
 
@@ -3447,6 +3524,7 @@ bool Boiler::set_hpPumpMode(const char * value, const int8_t id) {
         write_command(0x48B, 18, v, 0x48B);
         return true;
     }
+
     return false;
 }
 
@@ -3456,6 +3534,7 @@ bool Boiler::set_hpMaxPower(const char * value, const int8_t id) {
         write_command(0x484, 31, v, 0x484);
         return true;
     }
+
     return false;
 }
 
@@ -3465,6 +3544,7 @@ bool Boiler::set_pvMaxComp(const char * value, const int8_t) {
         write_command(0x484, 54, (uint8_t)(v * 10), 0x484);
         return true;
     }
+
     return false;
 }
 
@@ -3474,6 +3554,7 @@ bool Boiler::set_hpDiffPress(const char * value, const int8_t id) {
         write_command(0x2CC, 9, (uint8_t)(v / 50), 0x2CC);
         return true;
     }
+
     return false;
 }
 
@@ -3484,6 +3565,7 @@ bool Boiler::set_hpPowerLimit(const char * value, const int8_t id) {
         write_command(0x4A7, 0, data, 2, 0x4A7);
         return true;
     }
+
     return false;
 }
 
@@ -3493,6 +3575,7 @@ bool Boiler::set_powerReduction(const char * value, const int8_t) {
         write_command(0x484, 64, v / 10, 0x484);
         return true;
     }
+
     return false;
 }
 
@@ -3502,6 +3585,7 @@ bool Boiler::set_vp_cooling(const char * value, const int8_t id) {
         write_command(0x49C, 3, v ? 1 : 0, 0x49C);
         return true;
     }
+
     return false;
 }
 
@@ -3511,6 +3595,7 @@ bool Boiler::set_heatCable(const char * value, const int8_t id) {
         write_command(0x49D, 2, v ? 1 : 0, 0x49D);
         return true;
     }
+
     return false;
 }
 
@@ -3520,6 +3605,7 @@ bool Boiler::set_VC0valve(const char * value, const int8_t id) {
         write_command(0x49D, 3, v ? 1 : 0, 0x49D);
         return true;
     }
+
     return false;
 }
 
@@ -3529,6 +3615,7 @@ bool Boiler::set_primePump(const char * value, const int8_t id) {
         write_command(0x49D, 4, v ? 1 : 0, 0x49D);
         return true;
     }
+
     return false;
 }
 
@@ -3538,6 +3625,7 @@ bool Boiler::set_primePumpMod(const char * value, const int8_t id) {
         write_command(0x49D, 5, v, 0x49D);
         return true;
     }
+
     return false;
 }
 
@@ -3547,6 +3635,7 @@ bool Boiler::set_hp3wayValve(const char * value, const int8_t id) {
         write_command(0x49D, 6, v ? 1 : 0, 0x49D);
         return true;
     }
+
     return false;
 }
 
@@ -3556,6 +3645,7 @@ bool Boiler::set_elHeatStep(const char * value, const int8_t id) {
         write_command(0x49D, 6 + id, v ? 1 : 0, 0x49D);
         return true;
     }
+
     return false;
 }
 
@@ -3565,6 +3655,7 @@ bool Boiler::set_wwAlternatingOper(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
+
     write_command(EMS_TYPE_UBAParameterWWPlus, 14, v ? 1 : 0, EMS_TYPE_UBAParameterWWPlus);
     return true;
 }
@@ -3576,6 +3667,7 @@ bool Boiler::set_wwAltOpPrio(const char * value, const int8_t id) {
         write_command(0x484, id, v, 0x484);
         return true;
     }
+
     return false;
 }
 
@@ -3588,15 +3680,18 @@ bool Boiler::set_forceHeatingOff(const char * value, const int8_t id) {
                 uint8_t data[] = {1, heatingTemp_, (Helpers::hasValue(burnMaxPower_) ? burnMaxPower_ : (uint8_t)100), 1, 1};
                 write_command(EMS_TYPE_UBASetPoints2, 0, data, sizeof(data), 0);
             }
+
             uint8_t data[] = {heatingTemp_,
                               (Helpers::hasValue(burnMaxPower_) ? burnMaxPower_ : (uint8_t)100),
                               (Helpers::hasValue(pumpModMax_) ? pumpModMax_ : (uint8_t)100),
                               0};
             write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
         }
+
         has_update(forceHeatingOff_, v);
         return true;
     }
+
     return false;
 }
 
@@ -3606,10 +3701,12 @@ bool Boiler::set_nrgHeat(const char * value, const int8_t id) {
     if (!Helpers::value2float(value, v)) {
         return false;
     }
+
     if (v >= 0) {
         nrgHeatF_ = v * 100;
         has_update(nrgHeat_, (uint32_t)(nrgHeatF_ + 0.5));
     }
+
     store_energy();
     return true;
 }
@@ -3619,10 +3716,12 @@ bool Boiler::set_nrgWw(const char * value, const int8_t id) {
     if (!Helpers::value2float(value, v)) {
         return false;
     }
+
     if (v >= 0) {
         nrgWwF_ = v * 100;
         has_update(nrgWw_, (uint32_t)(nrgWwF_ + 0.5));
     }
+
     store_energy();
     return true;
 }
@@ -3632,9 +3731,11 @@ bool Boiler::set_nomPower(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     if (v > 0 && v < EMS_VALUE_UINT8_NOTSET) {
         has_update(nomPower_, (uint8_t)v);
     }
+
     store_energy();
     return true;
 }
@@ -3645,6 +3746,7 @@ bool Boiler::set_curveOn(const char * value, const int8_t id) {
         write_command(0x28, 0, v ? 0xFF : 0);
         return true;
     }
+
     return false;
 }
 
@@ -3653,6 +3755,7 @@ bool Boiler::set_curveBase(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
+
     write_command(0x28, 2, v);
     return true;
 }
@@ -3662,6 +3765,7 @@ bool Boiler::set_curveEnd(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
+
     write_command(0x28, 1, v);
     return true;
 }
@@ -3671,6 +3775,7 @@ bool Boiler::set_summerTemp(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
+
     write_command(0x28, 3, v);
     return true;
 }
@@ -3681,6 +3786,7 @@ bool Boiler::set_nofrost(const char * value, const int8_t id) {
         write_command(0x28, 4, v ? 0xFF : 0);
         return true;
     }
+
     return false;
 }
 
@@ -3689,6 +3795,7 @@ bool Boiler::set_nofrostTemp(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
+
     write_command(0x28, 5, v);
     return true;
 }
@@ -3699,6 +3806,7 @@ bool Boiler::set_fan(const char * value, const int8_t id) {
         write_command(0x4A5, 9, (uint8_t)v, 0x4A5);
         return true;
     }
+
     return false;
 }
 
@@ -3708,6 +3816,7 @@ bool Boiler::set_shutdown(const char * value, const int8_t id) {
         write_command(0x484, 58, b ? 1 : 0, 0x484);
         return true;
     }
+
     return false;
 }
 
@@ -3717,6 +3826,7 @@ bool Boiler::set_pumpKickHour(const char * value, const int8_t) {
         write_command(0xEB, 0, v, 0xEB);
         return true;
     }
+
     return false;
 }
 
@@ -3726,6 +3836,7 @@ bool Boiler::set_pumpKickDay(const char * value, const int8_t) {
         write_command(0xEB, 1, v + 1, 0xEB);
         return true;
     }
+
     return false;
 }
 
@@ -3736,6 +3847,7 @@ bool Boiler::set_pumpKickDelay(const char * value, const int8_t) {
         write_command(0xEB, 2, data, 2, 0xEB);
         return true;
     }
+
     return false;
 }
 

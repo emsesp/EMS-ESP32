@@ -54,6 +54,7 @@ void EMSuart::uart_event_task(void * pvParameters) {
                 if (length == 2 || (length >= 6 && length <= EMS_MAXBUFFERSIZE)) {
                     EMSESP::incoming_telegram(telegram, (uint8_t)(length - 1));
                 }
+
                 length = 0;
             } else if (event.type == UART_BUFFER_FULL) {
                 uart_flush_input(EMSUART_NUM);
@@ -61,6 +62,7 @@ void EMSuart::uart_event_task(void * pvParameters) {
             }
         }
     }
+
     vTaskDelete(NULL);
 }
 
@@ -118,6 +120,7 @@ void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t 
         gpio_pullup_en((gpio_num_t)rx_gpio);
         vTaskResume(xHandle);
     }
+
     tx_mode_ = tx_mode;
     uart_enable_intr_mask(EMSUART_NUM, UART_BRK_DET_INT_ENA | UART_RXFIFO_FULL_INT_ENA);
 }
@@ -181,6 +184,7 @@ uint8_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
             uart_write_bytes(EMSUART_NUM, &buf[i], 1);
             delayMicroseconds(EMSUART_TX_WAIT_PLUS);
         }
+
         uart_gen_break(EMSUART_TX_BRK_PLUS);
         return EMS_TX_STATUS_OK;
     }
@@ -191,6 +195,7 @@ uint8_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
             uart_write_bytes(EMSUART_NUM, &buf[i], 1);
             delayMicroseconds(EMSUART_TX_WAIT_HT3);
         }
+
         uart_gen_break(EMSUART_TX_BRK_HT3);
         return EMS_TX_STATUS_OK;
     }
@@ -206,6 +211,7 @@ uint8_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
             uart_get_buffered_data_len(EMSUART_NUM, &rx1);
         } while ((rx1 == rx0) && (--timeoutcnt));
     }
+
     uart_gen_break(EMSUART_TX_BRK_EMS);
     return EMS_TX_STATUS_OK;
 }

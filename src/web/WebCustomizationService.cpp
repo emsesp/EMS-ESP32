@@ -110,6 +110,7 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
                     *p = '_';
                 }
             }
+
             customizations.sensorCustomizations.push_back(sensor); // add to list
         }
     }
@@ -126,6 +127,7 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
                 EMSESP::logger().warning("Analog sensor: Invalid GPIO %d for %s. Skipping.", analogJson["gpio"].as<uint8_t>(), analog_sensor_name);
                 continue;
             }
+
             auto analog = AnalogCustomization();
             strlcpy(analog.name, analogJson["name"].as<const char *>(), sizeof(analog.name));
             analog.gpio      = analogJson["gpio"];
@@ -137,6 +139,7 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
             if (_start && analog.type == EMSESP::analogsensor_.AnalogType::DIGITAL_OUT && analog.uom > DeviceValue::DeviceValueUOM::NONE) {
                 analog.offset = analog.uom > 1 ? 1 : 0;
             }
+
             customizations.analogCustomizations.push_back(analog); // add to list
         }
     }
@@ -332,11 +335,13 @@ void WebCustomizationService::customization_entities(AsyncWebServerRequest * req
                                                 break;
                                             }
                                         }
+
                                         if (!is_set) {
                                             entity_ids.push_back(entity_id);
                                         }
                                     }
                                 }
+
                                 break;
                             }
                         }
@@ -499,6 +504,7 @@ void WebCustomizationService::load_test_data() {
                         dv.state = DeviceValueState::DV_FAVORITE; // set as favorite
                     }
                 }
+
                 break;
             }
         }

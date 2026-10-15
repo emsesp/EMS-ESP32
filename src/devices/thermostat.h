@@ -32,6 +32,7 @@ class Thermostat : public EMSdevice {
             : hc_num_(hc_num)
             , model_(model) {
         }
+
         ~HeatingCircuit() = default;
 
         int16_t selTemp;
@@ -190,6 +191,7 @@ class Thermostat : public EMSdevice {
         DhwCircuit(const uint8_t offset)
             : dhw_num_(offset) {
         }
+
         ~DhwCircuit() = default;
         uint8_t wwExtra_;
         uint8_t wwMode_;
@@ -507,6 +509,7 @@ class Thermostat : public EMSdevice {
     inline bool set_vacation(const char * value, const int8_t id) {
         return set_holiday(value, id, true);
     }
+
     bool set_pause(const char * value, const int8_t id);
     bool set_party(const char * value, const int8_t id);
     bool set_holidaymode(const char * value, const int8_t id);
@@ -537,78 +540,103 @@ class Thermostat : public EMSdevice {
     inline bool set_temp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::AUTO);
     }
+
     inline bool set_nighttemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::NIGHT);
     }
+
     inline bool set_daytemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::DAY);
     }
+
     inline bool set_daylowtemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::DAYLOW);
     }
+
     inline bool set_daymidtemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::DAYMID);
     }
+
     inline bool set_comforttemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::COMFORT);
     }
+
     inline bool set_nofrosttemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::NOFROST);
     }
+
     inline bool set_ecotemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::ECO);
     }
+
     inline bool set_heattemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::HEAT);
     }
+
     inline bool set_summertemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::SUMMER);
     }
+
     inline bool set_designtemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::DESIGN);
     }
+
     inline bool set_offsettemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::OFFSET);
     }
+
     inline bool set_holidaytemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::HOLIDAY);
     }
+
     inline bool set_offtemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::OFF);
     }
+
     inline bool set_manualtemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::MANUAL);
     }
+
     inline bool set_tempautotemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::TEMPAUTO);
     }
+
     inline bool set_noreducetemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::NOREDUCE);
     }
+
     inline bool set_reducetemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::REDUCE);
     }
+
     inline bool set_vacreducetemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::VACREDUCE);
     }
+
     inline bool set_flowtempoffset(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::FLOWOFFSET, true);
     }
+
     inline bool set_maxflowtemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::MAXFLOW);
     }
+
     inline bool set_minflowtemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::MINFLOW);
     }
+
     inline bool set_baseflowtemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::BASEFLOW);
     }
+
     inline bool set_roominfluence(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::ROOMINFLUENCE, true);
     }
+
     inline bool set_cooltemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::COOLTEMP);
     }
+
     inline bool set_coolstart(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::COOLSTART);
     }
@@ -636,31 +664,40 @@ class Thermostat : public EMSdevice {
     inline bool set_wwVacation(const char * value, const int8_t id) {
         return set_holiday(value, DeviceValueTAG::TAG_DHW1, true);
     }
+
     inline bool set_wwHoliday(const char * value, const int8_t id) {
         return set_holiday(value, DeviceValueTAG::TAG_DHW1);
     }
+
     bool        set_RC30Vacation(const char * value, const int8_t id);
     inline bool set_RC30Vacation1(const char * value, const int8_t id) {
         return set_RC30Vacation(value, 1);
     }
+
     inline bool set_RC30Vacation2(const char * value, const int8_t id) {
         return set_RC30Vacation(value, 2);
     }
+
     inline bool set_RC30Vacation3(const char * value, const int8_t id) {
         return set_RC30Vacation(value, 3);
     }
+
     inline bool set_RC30Vacation4(const char * value, const int8_t id) {
         return set_RC30Vacation(value, 4);
     }
+
     inline bool set_RC30Vacation5(const char * value, const int8_t id) {
         return set_RC30Vacation(value, 5);
     }
+
     inline bool set_RC30Vacation6(const char * value, const int8_t id) {
         return set_RC30Vacation(value, 6);
     }
+
     inline bool set_RC30Vacation7(const char * value, const int8_t id) {
         return set_RC30Vacation(value, 7);
     }
+
     bool set_datetime(const char * value, const int8_t id);
     bool set_minexttemp(const char * value, const int8_t id);
     bool set_clockoffset(const char * value, const int8_t id);

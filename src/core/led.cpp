@@ -59,6 +59,7 @@ Channel * init(uint8_t pin) {
         if (ch.pin == pin) {
             return &ch;
         }
+
         if (!free_slot && ch.pin == NO_PIN) {
             free_slot = &ch;
         }
@@ -73,12 +74,14 @@ Channel * init(uint8_t pin) {
                 free_slot = &ch;
             }
         }
+
         end(free_slot->pin);
     }
 
     if (!rmtInit(pin, RMT_TX_MODE, RMT_MEM_NUM_BLOCKS_1, RMT_FREQ_HZ)) {
         return nullptr;
     }
+
     free_slot->pin        = pin;
     free_slot->last_tx_us = micros() - RESET_US; // no wait on first write
     return free_slot;
@@ -188,6 +191,7 @@ bool LED::loop(uint8_t healthcheck, bool button_busy) {
             } else {
                 reset_led();
             }
+
             return false;
         }
 
@@ -267,6 +271,7 @@ void LED::set_led(Color color) {
     if (!led_gpio_ || color == last_color_) {
         return;
     }
+
     last_color_ = color;
 
     // RGB lookup table indexed by Color enum (must match enum order in led.h)
@@ -283,6 +288,7 @@ void LED::set_led(Color color) {
         {0, B, B}, // CYAN
         {H, 0, H}  // PINK
     };
+
     static_assert(sizeof(rgb_table) / sizeof(rgb_table[0]) == Color::PINK + 1, "rgb_table must match the Color enum");
 
     const uint8_t * rgb = rgb_table[color];
@@ -324,6 +330,7 @@ bool LED::set_custom_led_routine(const std::string & color, const std::string & 
             break;
         }
     }
+
     if (!color_matched) {
         return false;
     }
@@ -393,6 +400,7 @@ void LED::sequence_led() {
                 is_user_led_blink_    = false;
                 previous_healthcheck_ = System::HEALTHCHECK_RESET; // this will force the healthcheck to be checked again
             }
+
             return;
         }
 

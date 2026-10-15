@@ -120,12 +120,15 @@ class EMSdevice {
     inline void add_flags(uint8_t flags) {
         flags_ |= flags;
     }
+
     inline bool has_flags(uint8_t flags) const {
         return (flags_ & flags) == flags;
     }
+
     inline void remove_flags(uint8_t flags) {
         flags_ &= ~flags;
     }
+
     inline uint8_t flags() const {
         return flags_;
     }
@@ -147,6 +150,7 @@ class EMSdevice {
     const std::string & custom_brand() const {
         return custom_brand_;
     }
+
     // set device model
     void model(std::string const & model) {
         model_ = model;
@@ -240,6 +244,7 @@ class EMSdevice {
                     publish_value((void *)&value);
                     return;
                 }
+
                 ++i;
             }
         }
@@ -388,6 +393,7 @@ class EMSdevice {
     bool ha_config_done() const {
         return ha_config_done_;
     }
+
     void ha_config_done(const bool v) {
         ha_config_done_ = v;
     }
@@ -571,6 +577,7 @@ class EMSdevice {
             , fetch_(fetch) {
         }
     };
+
     void dump_telegram_info(std::vector<TelegramFunctionDump> & telegram_functions_dump);
     void dump_devicevalue_info();
 #endif

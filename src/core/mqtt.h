@@ -164,6 +164,7 @@ class Mqtt {
         if (discovery_prefix_.empty()) {
             return std::string{};
         }
+
         return discovery_prefix_ + "/";
     }
 

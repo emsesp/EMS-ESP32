@@ -62,6 +62,7 @@ class SecuritySettings {
             settings.users.emplace_back(FACTORY_ADMIN_USERNAME, FACTORY_ADMIN_PASSWORD, true);
             settings.users.emplace_back(FACTORY_GUEST_USERNAME, FACTORY_GUEST_PASSWORD, false);
         }
+
         return StateUpdateResult::CHANGED;
     }
 };

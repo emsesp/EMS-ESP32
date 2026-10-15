@@ -31,6 +31,7 @@ uint8_t EMSdevice::count_entities() {
             count++;
         }
     }
+
     return count;
 }
 
@@ -40,6 +41,7 @@ uint8_t EMSdevice::count_entities_fav() {
     for (const auto & dv : devicevalues_) {
         count += dv.has_state(DeviceValueState::DV_FAVORITE) && dv.hasValue();
     }
+
     return count;
 }
 
@@ -50,6 +52,7 @@ bool EMSdevice::has_entities() const {
             return true;
         }
     }
+
     bool found = false;
     EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
         for (const auto & entityCustomization : settings.entityCustomizations) {
@@ -84,6 +87,7 @@ uint8_t EMSdevice::tag_to_flag(const uint8_t tag) {
     } else if (tag >= DeviceValueTAG::TAG_SRC1 && tag <= DeviceValueTAG::TAG_SRC16) {
         return CommandFlag::CMD_FLAG_SRC;
     }
+
     return 0;
 }
 
@@ -112,6 +116,7 @@ const char * EMSdevice::brand_to_cstr() const {
     if (!custom_brand().empty()) {
         return custom_brand().c_str();
     }
+
     switch (brand_) {
     case EMSdevice::Brand::BOSCH:
         return F_(bosch);
@@ -192,6 +197,7 @@ const char * EMSdevice::device_type_2_device_name_translated() {
         if (flags_ == EMS_DEVICE_FLAG_HEATPUMP) {
             return Helpers::translated_word(FL_(boiler_hp_device));
         }
+
         return Helpers::translated_word(FL_(boiler_device));
     case DeviceType::THERMOSTAT:
         return Helpers::translated_word(FL_(thermostat_device));
@@ -224,6 +230,7 @@ const char * EMSdevice::device_type_2_device_name_translated() {
     default:
         break;
     }
+
     return Helpers::translated_word(FL_(unknown_device));
 }
 
@@ -243,45 +250,59 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     if (!strcmp(lowtopic, F_(boiler))) {
         return DeviceType::BOILER;
     }
+
     if (!strcmp(lowtopic, F_(thermostat))) {
         return DeviceType::THERMOSTAT;
     }
+
     if (!strcmp(lowtopic, F_(scheduler))) {
         return DeviceType::SCHEDULER;
     }
+
     if (!strcmp(lowtopic, F_(heatpump))) {
         return DeviceType::HEATPUMP;
     }
+
     if (!strcmp(lowtopic, F_(solar))) {
         return DeviceType::SOLAR;
     }
+
     if (!strcmp(lowtopic, F_(mixer))) {
         return DeviceType::MIXER;
     }
+
     if (!strcmp(lowtopic, F_(switcher))) {
         return DeviceType::SWITCH;
     }
+
     if (!strcmp(lowtopic, F_(gateway))) {
         return DeviceType::GATEWAY;
     }
+
     if (!strcmp(lowtopic, F_(alert))) {
         return DeviceType::ALERT;
     }
+
     if (!strcmp(lowtopic, F_(extension))) {
         return DeviceType::EXTENSION;
     }
+
     if (!strcmp(lowtopic, F_(heatsource))) {
         return DeviceType::HEATSOURCE;
     }
+
     if (!strcmp(lowtopic, F_(ventilation))) {
         return DeviceType::VENTILATION;
     }
+
     if (!strcmp(lowtopic, F_(water))) {
         return DeviceType::WATER;
     }
+
     if (!strcmp(lowtopic, F_(pool))) {
         return DeviceType::POOL;
     }
+
     if (!strcmp(lowtopic, F_(connect))) {
         return DeviceType::CONNECT;
     }
@@ -290,18 +311,23 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     if (!strcmp(lowtopic, F_(custom))) {
         return DeviceType::CUSTOM;
     }
+
     if (!strcmp(lowtopic, F_(temperaturesensor))) {
         return DeviceType::TEMPERATURESENSOR;
     }
+
     if (!strcmp(lowtopic, F_(analogsensor))) {
         return DeviceType::ANALOGSENSOR;
     }
+
     if (!strcmp(lowtopic, F_(scheduler))) {
         return DeviceType::SCHEDULER;
     }
+
     if (!strcmp(lowtopic, F_(commands))) {
         return DeviceType::COMMAND;
     }
+
     if (!strcmp(lowtopic, F_(system))) {
         return DeviceType::SYSTEM;
     }
@@ -403,6 +429,7 @@ bool EMSdevice::is_fetch(uint16_t telegram_id, uint8_t len) const {
             return tf.fetch_ && tf.length_ >= len;
         }
     }
+
     return false;
 }
 
@@ -413,6 +440,7 @@ bool EMSdevice::is_received(uint16_t telegram_id) const {
             return tf.received_;
         }
     }
+
     return false;
 }
 
@@ -423,6 +451,7 @@ bool EMSdevice::has_tags(const int8_t tag) const {
             return true;
         }
     }
+
     return false;
 }
 
@@ -433,6 +462,7 @@ bool EMSdevice::has_cmd(const char * cmd, const int8_t id) const {
             return true;
         }
     }
+
     return false;
 }
 
@@ -471,6 +501,7 @@ void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) const {
     if (telegram_functions_.empty()) {
         return;
     }
+
     /*
 	// colored list of type-ids
     shell.printf(" This %s will listen to telegram type IDs: ", device_type_name().c_str());
@@ -492,6 +523,7 @@ void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) const {
             shell.printf("0x%02X ", tf.telegram_type_id_);
         }
     }
+
     shell.println();
     shell.printf(" Fetched telegram type IDs: ");
     for (const auto & tf : telegram_functions_) {
@@ -499,6 +531,7 @@ void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) const {
             shell.printf("0x%02X ", tf.telegram_type_id_);
         }
     }
+
     shell.println();
     shell.printf(" Pending telegram type IDs: ");
     for (const auto & tf : telegram_functions_) {
@@ -506,11 +539,13 @@ void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) const {
             shell.printf("0x%02X ", tf.telegram_type_id_);
         }
     }
+
     shell.println();
     shell.printf(" Ignored telegram type IDs: ");
     for (auto handlers : handlers_ignored_) {
         shell.printf("0x%02X ", handlers);
     }
+
     shell.println();
 }
 
@@ -525,6 +560,7 @@ char * EMSdevice::show_telegram_handlers(char * result, const size_t len, const 
             if (i++ > 0) {
                 strlcat(result, " ", len);
             }
+
             strlcat(result, Helpers::hextoa(tf.telegram_type_id_, true).c_str(), len);
         }
     }
@@ -535,6 +571,7 @@ char * EMSdevice::show_telegram_handlers(char * result, const size_t len, const 
             if (i++ > 0) {
                 strlcat(result, " ", len);
             }
+
             strlcat(result, Helpers::hextoa(h).c_str(), len);
         }
     }
@@ -548,6 +585,7 @@ void EMSdevice::add_handlers_ignored(const uint16_t handler) {
             return;
         }
     }
+
     handlers_ignored_.push_back(handler);
 }
 
@@ -623,6 +661,7 @@ void EMSdevice::add_device_value(int8_t                 tag,              // to 
         } else if (uom == DeviceValueUOM::PERCENT) {
             *(uint8_t *)(value_p) = use_max ? static_cast<uint8_t>(max) : (test_active ? EMS_VALUE_DEFAULT_UINT8_DUMMY : EMS_VALUE_DEFAULT_UINT8);
         }
+
         break;
     }
 
@@ -662,6 +701,7 @@ void EMSdevice::add_device_value(int8_t                 tag,              // to 
                         if (has_custom_name) {
                             custom_fullname = entity_id.substr(custom_name_pos + 1);
                         }
+
                         break;
                     }
                 }
@@ -692,6 +732,7 @@ void EMSdevice::erase_device_values() {
             Command::erase_command(device_type_, dv.short_name, tag_to_flag(dv.tag));
         }
     }
+
     devicevalues_.clear();
     telegram_functions_.clear();
     handlers_ignored_.clear();
@@ -802,6 +843,7 @@ bool EMSdevice::is_readable(const void * value_p) const {
             return !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE);
         }
     }
+
     return false;
 }
 
@@ -814,6 +856,7 @@ bool EMSdevice::is_readonly(const std::string & cmd, const int8_t id) const {
             return dv.has_state(DeviceValueState::DV_READONLY);
         }
     }
+
     return true; // not found, no write
 }
 
@@ -824,6 +867,7 @@ bool EMSdevice::has_command(const void * value_p) const {
             return dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY);
         }
     }
+
     return false;
 }
 
@@ -879,8 +923,10 @@ void EMSdevice::publish_value(void * value_p) const {
                         strlcpy(payload, enum_str, sizeof(payload));
                     }
                 }
+
                 break;
             }
+
             case DeviceValueType::UINT16:
                 Helpers::render_value(payload, *(uint16_t *)(value_p), num_op, fahrenheit);
                 break;
@@ -905,6 +951,7 @@ void EMSdevice::publish_value(void * value_p) const {
                 if (Helpers::hasValue((char *)(value_p))) {
                     Helpers::render_string(payload, (char *)(value_p), sizeof(payload));
                 }
+
                 break;
             default:
                 break;
@@ -913,6 +960,7 @@ void EMSdevice::publish_value(void * value_p) const {
             if (Mqtt::publish_single() && payload[0] != '\0') {
                 Mqtt::queue_publish(topic, payload);
             }
+
             // check scheduler for on change
             char cmd[COMMAND_MAX_LENGTH];
             if (dv.tag >= DeviceValueTAG::TAG_HC1) {
@@ -920,6 +968,7 @@ void EMSdevice::publish_value(void * value_p) const {
             } else {
                 snprintf(cmd, sizeof(cmd), "%s/%s", device_type_2_device_name(device_type_), (dv.short_name));
             }
+
             EMSESP::webSchedulerService.onChange(cmd);
         }
     }
@@ -933,6 +982,7 @@ std::string EMSdevice::get_value_uom(const std::string & shortname) const {
             if ((dv.uom == DeviceValueUOM::NONE) || (dv.uom == DeviceValueUOM::MINUTES)) {
                 break;
             }
+
             return EMSdevice::uom_to_string(dv.uom);
         }
     }
@@ -949,6 +999,7 @@ bool EMSdevice::export_values(uint8_t device_type, JsonObject output, const int8
                 has_value |= emsdevice->generate_values(output, id, (id < 1), output_target); // use nested for id -1 and 0
             }
         }
+
         return has_value;
     }
 
@@ -962,10 +1013,12 @@ bool EMSdevice::export_values(uint8_t device_type, JsonObject output, const int8
                     output_hc    = output[EMSdevice::tag_to_mqtt(tag)].to<JsonObject>();
                     nest_created = true;
                 }
+
                 has_value |= emsdevice->generate_values(output_hc, tag, true, output_target); // use nested for id -1 and 0
             }
         }
     }
+
     return has_value;
 }
 
@@ -1083,12 +1136,14 @@ void EMSdevice::generate_values_web(JsonObject output, const bool is_dashboard) 
                     l.add(Helpers::render_boolean(result, false, true));
                     l.add(Helpers::render_boolean(result, true, true));
                 }
+
                 // add command help template
                 else if (dv.type == DeviceValueType::STRING || (dv.type == DeviceValueType::CMD && dv.uom == DeviceValueUOM::NONE)) {
                     if (dv.options_size == 1) {
                         obj["h"] = dv.options_single[0]; // NOT translated
                     }
                 }
+
                 // handle INTs
                 else {
                     // add min and max values, if available
@@ -1182,6 +1237,7 @@ void EMSdevice::generate_values_web_customization(JsonArray output) {
         } else {
             obj["n"] = "!" + std::string(fullname); // prefix commands with a !
         }
+
         if (dv.has_tag()) {
             obj["t"] = tag_to_string(dv.tag);
         }
@@ -1229,6 +1285,7 @@ void EMSdevice::generate_values_web_customization(JsonArray output) {
                         obj["w"]       = false;                            // not writeable as it won't be shown
                     }
                 }
+
                 break;
             }
         }
@@ -1243,6 +1300,7 @@ void EMSdevice::set_climate_minmax(int8_t tag, int16_t min, uint32_t max) {
                 dv.max = max;
                 dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
             }
+
             return;
         }
     }
@@ -1254,6 +1312,7 @@ void EMSdevice::setValueEnum(const void * value_p, const char * const ** options
             if (dv.options != options && Mqtt::ha_enabled()) {
                 dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
             }
+
             dv.options      = options;
             dv.options_size = Helpers::count_items(options);
             break;
@@ -1324,6 +1383,7 @@ void EMSdevice::getCustomizationEntities(std::vector<std::string> & entity_ids) 
             strcpy(name, tag_to_mqtt(dv.tag));
             strcat(name, "/");
         }
+
         strcat(name, dv.short_name);
         std::string entity_name = name;
 
@@ -1335,6 +1395,7 @@ void EMSdevice::getCustomizationEntities(std::vector<std::string> & entity_ids) 
                 break;
             }
         }
+
         if (!is_set && (mask || dv.has_custom_fullname())) {
             if (!dv.has_custom_fullname()) {
                 entity_ids.push_back(Helpers::hextoa(mask, false) + entity_name);
@@ -1403,6 +1464,7 @@ void EMSdevice::dump_devicevalue_info() {
                         Serial.print("\\|");
                     }
                 }
+
                 Serial.print(']');
                 break;
 
@@ -1454,6 +1516,7 @@ void EMSdevice::dump_devicevalue_info() {
                 Serial.print(dv.max);
                 Serial.print(")");
             }
+
             Serial.print(",");
 
             // uom
@@ -1462,6 +1525,7 @@ void EMSdevice::dump_devicevalue_info() {
             } else {
                 Serial.print(DeviceValue::DeviceValueUOM_s[dv.uom]);
             }
+
             Serial.print(",");
 
             // writeable flag
@@ -1576,9 +1640,11 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
     if (!strcmp(cmd, F_(info))) {
         return export_values(device_type(), output, tag, EMSdevice::OUTPUT_TARGET::API_VERBOSE);
     }
+
     if (!strcmp(cmd, F_(values))) {
         return export_values(device_type(), output, tag, EMSdevice::OUTPUT_TARGET::API_SHORTNAMES);
     }
+
     if (!strcmp(cmd, F_(entities))) {
         char name[30];
         for (auto & dv : devicevalues_) {
@@ -1589,14 +1655,17 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
                 get_value_json(output[name].to<JsonObject>(), dv);
             }
         }
+
         return true;
     }
+
     if (!strcmp(cmd, F_(metrics))) {
         std::string metrics = get_metrics_prometheus(tag);
         if (!metrics.empty()) {
             output["api_data"] = metrics;
             return true;
         }
+
         return false;
     }
 
@@ -1613,6 +1682,7 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
             return Command::get_attribute(output, cmd_s, attribute_s);
         }
     }
+
     return false; // not found, but don't return a message error yet
 }
 
@@ -1649,11 +1719,13 @@ void EMSdevice::get_value_json(JsonObject json, DeviceValue & dv) {
                 json[value] = Helpers::translated_word(dv.options[*(uint8_t *)(dv.value_p)]); // text
             }
         }
+
         json[type]      = F_(enum);
         JsonArray enum_ = json[F_(enum)].to<JsonArray>();
         for (uint8_t i = 0; i < dv.options_size; i++) {
             enum_.add(Helpers::translated_word(dv.options[i]));
         }
+
         break;
     }
 
@@ -1661,6 +1733,7 @@ void EMSdevice::get_value_json(JsonObject json, DeviceValue & dv) {
         if (Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
             json[value] = serialized(Helpers::render_value(val, *(uint16_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
         }
+
         json[type] = F_(number);
         break;
 
@@ -1668,6 +1741,7 @@ void EMSdevice::get_value_json(JsonObject json, DeviceValue & dv) {
         if (Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
             json[value] = serialized(Helpers::render_value(val, *(uint8_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
         }
+
         json[type] = F_(number);
         break;
 
@@ -1675,6 +1749,7 @@ void EMSdevice::get_value_json(JsonObject json, DeviceValue & dv) {
         if (Helpers::hasValue(*(int16_t *)(dv.value_p))) {
             json[value] = serialized(Helpers::render_value(val, *(int16_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
         }
+
         json[type] = F_(number);
         break;
 
@@ -1682,6 +1757,7 @@ void EMSdevice::get_value_json(JsonObject json, DeviceValue & dv) {
         if (Helpers::hasValue(*(int8_t *)(dv.value_p))) {
             json[value] = serialized(Helpers::render_value(val, *(int8_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
         }
+
         json[type] = F_(number);
         break;
 
@@ -1690,6 +1766,7 @@ void EMSdevice::get_value_json(JsonObject json, DeviceValue & dv) {
         if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
             json[value] = serialized(Helpers::render_value(val, *(uint32_t *)(dv.value_p), dv.numeric_operator));
         }
+
         json[type] = F_(number);
         break;
 
@@ -1700,6 +1777,7 @@ void EMSdevice::get_value_json(JsonObject json, DeviceValue & dv) {
             json["index"] = value_b ? 1 : 0;
             Mqtt::add_value_bool(json, value, value_b);
         }
+
         json[type] = ("boolean");
         break;
 
@@ -1707,6 +1785,7 @@ void EMSdevice::get_value_json(JsonObject json, DeviceValue & dv) {
         if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
             json[value] = serialized(Helpers::render_value(val, *(uint32_t *)(dv.value_p), dv.numeric_operator));
         }
+
         json[type] = F_(number);
         break;
 
@@ -1715,6 +1794,7 @@ void EMSdevice::get_value_json(JsonObject json, DeviceValue & dv) {
             char s[55];
             json[value] = Helpers::render_string(s, (char *)(dv.value_p), sizeof(s));
         }
+
         json[type] = ("string");
         break;
 
@@ -1730,6 +1810,7 @@ void EMSdevice::get_value_json(JsonObject json, DeviceValue & dv) {
         } else {
             json[type] = F_(command);
         }
+
         break;
 
     default:
@@ -1773,11 +1854,13 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
         if (tag >= 0 && tag != dv.tag) {
             continue;
         }
+
         // only count supported types
         if (dv.hasValue() && is_supported_type(dv.type)) {
             entity_count++;
         }
     }
+
     result.reserve(160 * entity_count);
 
     for (auto & dv : devicevalues_) {
@@ -1799,30 +1882,35 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
                 has_value    = true;
                 metric_value = (bool)*(uint8_t *)(dv.value_p) ? 1.0 : 0.0;
             }
+
             break;
         case DeviceValueType::UINT8:
             if (Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
                 has_value    = true;
                 metric_value = *(uint8_t *)(dv.value_p);
             }
+
             break;
         case DeviceValueType::INT8:
             if (Helpers::hasValue(*(int8_t *)(dv.value_p))) {
                 has_value    = true;
                 metric_value = *(int8_t *)(dv.value_p);
             }
+
             break;
         case DeviceValueType::UINT16:
             if (Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
                 has_value    = true;
                 metric_value = *(uint16_t *)(dv.value_p);
             }
+
             break;
         case DeviceValueType::INT16:
             if (Helpers::hasValue(*(int16_t *)(dv.value_p))) {
                 has_value    = true;
                 metric_value = *(int16_t *)(dv.value_p);
             }
+
             break;
         case DeviceValueType::UINT24:
         case DeviceValueType::UINT32:
@@ -1831,12 +1919,14 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
                 has_value    = true;
                 metric_value = *(uint32_t *)(dv.value_p);
             }
+
             break;
         case DeviceValueType::ENUM:
             if (*(uint8_t *)(dv.value_p) < dv.options_size) {
                 has_value    = true;
                 metric_value = *(uint8_t *)(dv.value_p);
             }
+
             break;
         default:
             break;
@@ -1890,8 +1980,10 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
                 if (i > 0) {
                     enum_mapping += "; ";
                 }
+
                 enum_mapping += std::to_string(i) + ": " + std::string(Helpers::translated_word(dv.options[i]));
             }
+
             enum_mapping += ")";
         } else if (dv.uom != DeviceValueUOM::NONE) {
             uom_str = uom_to_string(dv.uom);
@@ -1901,6 +1993,7 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
         if (!uom_str.empty()) {
             help_line += ", " + uom_str;
         }
+
         if (!enum_mapping.empty()) {
             help_line += ", enum, " + enum_mapping;
         }
@@ -1912,9 +2005,11 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
         if (readable) {
             help_line += ", readable";
         }
+
         if (writeable) {
             help_line += ", writeable";
         }
+
         if (visible) {
             help_line += ", visible";
         }
@@ -1940,6 +2035,7 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
         if (!circuit_label.empty()) {
             result += "{circuit=\"" + circuit_label + "\"}";
         }
+
         result += " ";
 
         char   val_str[30];
@@ -1959,6 +2055,7 @@ std::string EMSdevice::get_metrics_prometheus(const int8_t tag) {
         } else {
             snprintf(val_str, sizeof(val_str), "%.2f", final_value);
         }
+
         result += val_str;
         result += "\n";
     }
@@ -2092,6 +2189,7 @@ bool EMSdevice::generate_values(JsonObject output, const int8_t tag_filter, cons
                     if (dv.numeric_operator == DeviceValueNumOp::DV_NUMOP_DIV60) {
                         time_value /= 60; // sometimes we need to divide by 60
                     }
+
                     if (output_target == OUTPUT_TARGET::API_VERBOSE || output_target == OUTPUT_TARGET::CONSOLE) {
                         char time_s[60];
                         snprintf(time_s,
@@ -2125,6 +2223,7 @@ bool EMSdevice::generate_values(JsonObject output, const int8_t tag_filter, cons
                     if (fahrenheit) {
                         v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
                     }
+
                     if (v < dv.min) {
                         dv.min = v;
                         dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
@@ -2174,6 +2273,7 @@ void EMSdevice::mqtt_ha_entity_config_create() {
                     } else {
                         dv.add_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
                     }
+
                     dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
                     count++;
                 }
@@ -2205,9 +2305,11 @@ void EMSdevice::mqtt_ha_entity_config_create() {
                     if ((d.tag != dv.tag) || (d.type != DeviceValueType::ENUM)) {
                         continue;
                     }
+
                     if (!strcmp(d.short_name, FL_(mode)[0]) && (d.options_size > 0)) {
                         mode_options = d.options;
                     }
+
                     if (!strcmp(d.short_name, FL_(icon)[0])) {
                         uint8_t val = *(uint8_t *)(d.value_p);
                         if (val != 0 && val < d.options_size) {
@@ -2215,6 +2317,7 @@ void EMSdevice::mqtt_ha_entity_config_create() {
                         }
                     }
                 }
+
                 Mqtt::publish_ha_climate_config(dv, true, mode_options, false, icon);
                 count++;
             }
@@ -2250,6 +2353,7 @@ bool EMSdevice::has_telegram_id(uint16_t id) const {
             return true;
         }
     }
+
     return false;
 }
 
@@ -2281,6 +2385,7 @@ bool EMSdevice::handle_telegram(const std::shared_ptr<const Telegram> & telegram
                 tf.process_function_(this, telegram);
                 return true;
             }
+
             // if the data block is empty and we have not received data before, assume that this telegram
             // is not recognized by the bus master. So remove it from the automatic fetch list
             if (telegram->message_length == 0 && telegram->offset == 0 && !tf.received_) {
@@ -2292,8 +2397,10 @@ bool EMSdevice::handle_telegram(const std::shared_ptr<const Telegram> & telegram
                 if (uuid::get_uptime_sec() > FETCH_RETRY_DURATION_SEC) {
                     tf.fetch_ = false;
                 }
+
                 return false;
             }
+
             if (telegram->message_length > 0) {
                 tf.received_ = true;
                 tf.process_function_(this, telegram);
@@ -2302,6 +2409,7 @@ bool EMSdevice::handle_telegram(const std::shared_ptr<const Telegram> & telegram
             return true;
         }
     }
+
     return false; // type not found
 }
 
@@ -2332,6 +2440,7 @@ std::string EMSdevice::name() {
         if (model().empty()) {
             return default_name();
         }
+
         return model() + "/" + std::string(default_name());
     }
 
@@ -2442,6 +2551,7 @@ int EMSdevice::modbus_value_to_json(uint8_t tag, const std::string & shortname, 
         if (modbus_data.size() != 2) {
             return -2;
         }
+
         jsonValue["value"] = modbus_data[0] || modbus_data[1];
     }
 

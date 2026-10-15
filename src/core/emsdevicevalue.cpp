@@ -326,6 +326,7 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, uint32_t & dv_set_max) {
         } else {
             dv_set_max = Helpers::transformNumFloat(EMS_VALUE_UINT8_NOTSET - 1, numeric_operator, fahrenheit);
         }
+
         return true;
     }
 
@@ -337,6 +338,7 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, uint32_t & dv_set_max) {
             dv_set_min = Helpers::transformNumFloat(-EMS_VALUE_INT8_NOTSET + 1, numeric_operator, fahrenheit);
             dv_set_max = Helpers::transformNumFloat(EMS_VALUE_INT8_NOTSET - 1, numeric_operator, fahrenheit);
         }
+
         return true;
     }
 
@@ -359,11 +361,14 @@ bool DeviceValue::get_custom_min(int16_t & val) {
         if (fahrenheit) {
             v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
         }
+
         if (max > 0 && v > 0 && (uint32_t)v > max) {
             return false;
         }
+
         val = v;
     }
+
     return has_min;
 }
 
@@ -378,11 +383,14 @@ bool DeviceValue::get_custom_max(uint32_t & val) {
         if (fahrenheit) {
             v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
         }
+
         if (v < 0 || v < (int32_t)min) {
             return false;
         }
+
         val = v;
     }
+
     return has_max;
 }
 
@@ -417,6 +425,7 @@ std::string DeviceValue::get_custom_fullname() const {
     if (minmax_pos != std::string::npos) {
         return cf.substr(0, minmax_pos);
     }
+
     return cf;
 }
 
@@ -427,6 +436,7 @@ std::string DeviceValue::get_fullname() const {
     if (customname.empty()) {
         return Helpers::translated_word(fullname);
     }
+
     return customname;
 }
 
@@ -436,6 +446,7 @@ std::string DeviceValue::get_name(const std::string & entity) {
     if (pos != std::string::npos) {
         return entity.substr(2, pos - 2);
     }
+
     return entity.substr(2);
 }
 

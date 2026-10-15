@@ -120,6 +120,7 @@ void EMSESP::fetch_device_values(const uint8_t device_id) {
         for (const auto & emsdevice : emsdevices) {
             emsdevice->fetch_values();
         }
+
         return;
     }
 
@@ -144,6 +145,7 @@ bool EMSESP::valid_device(const uint8_t device_id) {
             return true;
         }
     }
+
     return false; // can't find it
 }
 
@@ -170,6 +172,7 @@ bool EMSESP::cmd_is_readonly(const uint8_t device_type, const uint8_t device_id,
             return emsdevice->is_readonly(cmd, id);
         }
     }
+
     return false;
 }
 
@@ -183,6 +186,7 @@ uint8_t EMSESP::device_id_from_cmd(const uint8_t device_type, const char * cmd, 
             return emsdevice->device_id();
         }
     }
+
     return 0;
 }
 
@@ -202,6 +206,7 @@ void EMSESP::clear_all_devices() {
     for (const auto & emsdevice : emsdevices) {
         emsdevice->erase_device_values();
     }
+
     emsdevices.clear();
 }
 
@@ -221,6 +226,7 @@ void EMSESP::compact_entities_if_stable() {
     if (!entity_compaction_pending_) {
         return; // nothing to do (cheap early-out on the hot path)
     }
+
     if ((uuid::get_uptime() - last_entity_change_) < ENTITY_COMPACT_DELAY) {
         return; // still settling
     }
@@ -230,6 +236,7 @@ void EMSESP::compact_entities_if_stable() {
             emsdevice->compact();
         }
     }
+
     Command::compact();
 
     entity_compaction_pending_ = false;
@@ -248,6 +255,7 @@ uint8_t EMSESP::count_devices() {
             count++;
         }
     }
+
     return count;
 }
 
@@ -348,6 +356,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
             } else if ((it.telegram_->operation) == Telegram::Operation::TX_WRITE) {
                 op = "WRITE";
             }
+
             shell.printfln(" [%02d%c] %s %s", it.id_, ((it.retry_) ? '*' : ' '), op.c_str(), pretty_telegram(it.telegram_).c_str());
         }
     }
@@ -385,10 +394,12 @@ void EMSESP::dump_all_entities(uuid::console::Shell & shell) {
                 if (device.device_type == DeviceType::MIXER) {
                     device_id = 0x20; // hc
                 }
+
                 // For Heatsource set AM200
                 if (device.device_type == DeviceType::HEATSOURCE) {
                     device_id = EMSdevice::EMS_DEVICE_ID_AHS1;
                 }
+
                 // For MX400 SRC plus base
                 if (device.device_type == DeviceType::CONNECT && device.product_id == 17) {
                     device_id = EMSdevice::EMS_DEVICE_ID_RFBASE;
@@ -510,6 +521,7 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
 
                     shell.printfln("  %s: %s%s %s%s", key.c_str(), COLOR_BRIGHT_GREEN, p.value().as<std::string>().c_str(), uom.c_str(), COLOR_RESET);
                 }
+
                 shell.println();
             }
         }
@@ -524,6 +536,7 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
         for (JsonPair p : custom_output) {
             shell.printfln("  %s: %s%s%s", p.key().c_str(), COLOR_BRIGHT_GREEN, p.value().as<std::string>().c_str(), COLOR_RESET);
         }
+
         shell.println();
     }
 }
@@ -555,6 +568,7 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
                                sensor.is_system() ? "Yes" : "No");
             }
         }
+
         shell.println();
     }
 
@@ -588,6 +602,7 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
                 break;
             }
         }
+
         shell.println();
     }
 }
@@ -650,6 +665,7 @@ void EMSESP::publish_all_loop() {
         if (Mqtt::ha_enabled()) {
             Mqtt::ha_status();
         }
+
         system_.send_heartbeat(); // send MQTT heartbeat topic
         break;
     default:
@@ -698,9 +714,11 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                     json_tag     = doc[EMSdevice::tag_to_mqtt(tag)].to<JsonObject>();
                     nest_created = true;
                 }
+
                 need_publish |= emsdevice->generate_values(json_tag, tag, false, EMSdevice::OUTPUT_TARGET::MQTT);
             }
         }
+
         if (need_publish && !nested) {
             Mqtt::queue_publish(Mqtt::tag_to_topic(device_type, tag), json);
             json         = doc.to<JsonObject>();
@@ -712,6 +730,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
         if (doc.overflowed()) {
             LOG_WARNING("MQTT buffer overflow, please use individual topics");
         }
+
         Mqtt::queue_publish(Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_NONE), json);
     }
 
@@ -769,6 +788,7 @@ void EMSESP::publish_response(const std::shared_ptr<const Telegram> & telegram) 
         delete[] buffer;
         buffer = nullptr;
     }
+
     if (buffer == nullptr) {
         offset = telegram->offset; // store offset from first part
         type   = telegram->type_id;
@@ -778,17 +798,21 @@ void EMSESP::publish_response(const std::shared_ptr<const Telegram> & telegram) 
             buffer[i * 3 + 1] = '0';
             buffer[i * 3 + 2] = ' ';
         }
+
         buffer[267] = '\0';
     }
+
     if (telegram->message_length) {
         strlcpy(&buffer[(telegram->offset - offset) * 3], Helpers::data_to_hex(telegram->message_data, telegram->message_length).c_str(), 768);
     } else {
         strlcpy(&buffer[(telegram->offset - offset) * 3], "", 768);
     }
+
     if (response_id_ != 0) {
         buffer[strlen(buffer)] = ' '; // overwrite termination \0
         return;                       // do not delete buffer
     }
+
     JsonDocument doc;
     char         s[10];
     doc["src"]    = Helpers::hextoa(s, telegram->src);
@@ -801,6 +825,7 @@ void EMSESP::publish_response(const std::shared_ptr<const Telegram> & telegram) 
         uint32_t value = Helpers::hextoint(buffer);
         doc["value"]   = value;
     }
+
     Mqtt::queue_publish("response", doc.as<JsonObject>());
     delete[] buffer;
     buffer = nullptr;
@@ -1061,6 +1086,7 @@ void EMSESP::process_UBADevices(const std::shared_ptr<const Telegram> & telegram
                 LOG_DEBUG("Remove EMS device with ID 0x%02X", device_id);
                 erase_device(device_id); //
             }
+
             next_byte = next_byte >> 1; // advance 1 bit
         }
     }
@@ -1072,6 +1098,7 @@ void EMSESP::process_deviceName(const std::shared_ptr<const Telegram> & telegram
     if (telegram->offset > 27 || (telegram->offset + telegram->message_length) < 29) {
         return;
     }
+
     char name[16];
     // len including zero terminator, if there is one, otherwise copy to end of telegram
     // https://github.com/emsesp/EMS-ESP32/discussions/2482#discussioncomment-12649817
@@ -1081,6 +1108,7 @@ void EMSESP::process_deviceName(const std::shared_ptr<const Telegram> & telegram
     while (isprint(*c)) {
         c++;
     };
+
     *c = '\0';
     if (strlen(name) > 2) { // https://github.com/emsesp/EMS-ESP32/issues/2166#issuecomment-2454488657
         LOG_DEBUG("Model name received for device 0x%02X: %s", telegram->src, name);
@@ -1177,17 +1205,21 @@ bool EMSESP::process_telegram(const std::shared_ptr<const Telegram> & telegram) 
             if (!trace_raw_) {
                 LOG_TRACE("%s", pretty_telegram(telegram).c_str());
             }
+
             if (!read_next_) {
                 response_id_ = 0;
             }
+
             publish_response(telegram);
         } else {
             LOG_NOTICE("%s", pretty_telegram(telegram).c_str());
         }
+
         // check if read is finished or gives more parts
         if (!read_next_) {
             read_id_ = WATCH_ID_NONE;
         }
+
         read_next_ = false;
     } else if (watch() == WATCH_ON) {
         if ((watch_id_ == WATCH_ID_NONE) || (telegram->type_id == watch_id_)
@@ -1226,6 +1258,7 @@ bool EMSESP::process_telegram(const std::shared_ptr<const Telegram> & telegram) 
         if (!wait_km_) {
             process_UBADevices(telegram);
         }
+
         return true;
     }
 
@@ -1252,6 +1285,7 @@ bool EMSESP::process_telegram(const std::shared_ptr<const Telegram> & telegram) 
                         found_device->has_update(false);                    // reset flag
                         publish_device_values(found_device->device_type()); // publish to MQTT if we explicitly have too
                     }
+
                     // auto publish: timeinterval 0 and publish single not set, only if queue is empty
                     else if (mqtt_.get_publish_onchange(found_device->device_type()) && found_device->has_update() && mqtt_.publish_queued() == 0) {
                         found_device->has_update(false); // reset flag
@@ -1260,6 +1294,7 @@ bool EMSESP::process_telegram(const std::shared_ptr<const Telegram> & telegram) 
                         }
                     }
                 }
+
                 break; // remove this to handle same telegrams on multiple devices
             }
         }
@@ -1271,12 +1306,14 @@ bool EMSESP::process_telegram(const std::shared_ptr<const Telegram> & telegram) 
         if (found_device && telegram->message_length > 0) {
             found_device->add_handlers_ignored(telegram->type_id);
         }
+
         // handle unknown broadcasted telegrams (or send to us)
         if (telegram->dest == 0 || telegram->dest == EMSbus::ems_bus_id()) {
             LOG_DEBUG("No telegram type handler found for ID 0x%02X (src 0x%02X)", telegram->type_id, telegram->src);
             if (watch() == WATCH_UNKNOWN) {
                 LOG_NOTICE("%s", pretty_telegram(telegram).c_str());
             }
+
             if (!wait_km_ && !found_device && (telegram->src != EMSbus::ems_bus_id()) && (telegram->message_length > 0)) {
 #ifdef EMSESP_GATEWAY_TX_HOLD
                 // a new device often sends several broadcasts before its version reply is processed, only ask once
@@ -1291,6 +1328,7 @@ bool EMSESP::process_telegram(const std::shared_ptr<const Telegram> & telegram) 
             }
         }
     }
+
     return telegram_found;
 }
 
@@ -1300,6 +1338,7 @@ bool EMSESP::device_hasEntities(const uint8_t device_id) {
             return true;
         }
     }
+
     return false; // not found
 }
 
@@ -1381,12 +1420,15 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
             if (product_id == 0) { // no product-id, ignore
                 return false;
             }
+
             if ((*it)->product_id() == product_id) { // update version if we have valid product_id
                 if (!strcmp((*it)->version(), "00.00")) {
                     (*it)->version(version);
                 }
+
                 return true;
             }
+
             // product-id has changed for this device-id, delete and re-add
             (*it)->erase_device_values();
             emsdevices.erase(it); // erase the old device without product_id and re detect
@@ -1406,6 +1448,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
                     device_p = &device;
                     break;
                 }
+
                 if (device_id >= EMSdevice::EMS_DEVICE_ID_HS1 && device_id <= EMSdevice::EMS_DEVICE_ID_HS16) {
                     device_p              = &device;
                     device_p->device_type = DeviceType::HEATSOURCE;
@@ -1442,11 +1485,13 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
             default_name = "Wireless sensor base";
         }
     }
+
     // map MX400 also to RF Base
     if (device_id == EMSdevice::EMS_DEVICE_ID_RFBASE) {
         device_type  = DeviceType::CONNECT;
         default_name = "Wireless base";
     }
+
     if ((device_id >= EMSdevice::EMS_DEVICE_ID_DHW1 && device_id <= EMSdevice::EMS_DEVICE_ID_DHW8) || device_id == EMSdevice::EMS_DEVICE_ID_IPM_DHW) {
         device_type = DeviceType::WATER;
     }
@@ -1463,6 +1508,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
         flags        = DeviceFlags::EMS_DEVICE_FLAG_CR120;
         default_name = "CR120";
     }
+
     if (product_id == 158 && strncmp(version, "73", 2) == 0) {
         flags        = DeviceFlags::EMS_DEVICE_FLAG_HMC310;
         default_name = "HMC310";
@@ -1628,6 +1674,7 @@ void EMSESP::reply_own_request(const uint8_t * data, const uint8_t length, const
             EMSuart::transmit(reply, 7);
             LOG_DEBUG("Empty reply to 0x%02X read 0x%02X%02X", reply[1], data[5], data[6]);
         }
+
         return;
     }
 
@@ -1730,6 +1777,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
             if (poll_id != 0x48 && (uuid::get_uptime_sec() - connect_time) < EMS_WAIT_KM_TIMEOUT) {
                 return;
             }
+
             wait_km_ = false; // KM200 is polled, from now on it is safe to send
         }
 
@@ -1797,6 +1845,7 @@ void EMSESP::scheduled_fetch_values() {
                     return;
                 }
             }
+
             webCustomEntityService.fetch();
             no = 0;
         }
@@ -1809,6 +1858,7 @@ void EMSESP::gateway_rx_check(const uint8_t * data, const uint8_t length) {
     if (length < 4 || (data[0] & 0x7F) != EMSdevice::EMS_DEVICE_ID_GATEWAY1 || !(data[1] & 0x80)) {
         return;
     }
+
     uint8_t dest = data[1] & 0x7F;
     if (dest == 0 || dest == EMSbus::ems_bus_id()) {
         return;
@@ -1819,10 +1869,12 @@ void EMSESP::gateway_rx_check(const uint8_t * data, const uint8_t length) {
         gateway_window_start_ = now;
         gateway_window_count_ = 0;
     }
+
     if (now - gateway_fast_start_ > GATEWAY_FAST_WINDOW) {
         gateway_fast_start_ = now;
         gateway_fast_count_ = 0;
     }
+
     ++gateway_window_count_;
     ++gateway_fast_count_;
     if (gateway_window_count_ >= GATEWAY_BURST_THRESHOLD || gateway_fast_count_ >= GATEWAY_FAST_THRESHOLD) {
@@ -1840,12 +1892,15 @@ void EMSESP::gateway_tx_hold_start() {
         if ((int32_t)(now - gateway_cooldown_until_) < 0) {
             return;
         }
+
         gateway_cooldown_until_ = 0;
     }
+
     if (!gateway_hold_until_) {
         gateway_hold_start_ = now;
         LOG_INFO("Gateway 0x%02X is busy, holding Tx", EMSdevice::EMS_DEVICE_ID_GATEWAY1);
     }
+
     gateway_hold_until_ = (now + GATEWAY_HOLD_TIME) | 1; // 0 means no hold
 }
 
@@ -1853,6 +1908,7 @@ bool EMSESP::gateway_tx_hold() {
     if (!gateway_hold_until_) {
         return false;
     }
+
     uint32_t now = uuid::get_uptime();
     if (now - gateway_hold_start_ > GATEWAY_HOLD_MAX) {
         gateway_hold_until_     = 0;
@@ -1860,11 +1916,13 @@ bool EMSESP::gateway_tx_hold() {
         LOG_WARNING("Gateway 0x%02X still busy after %lu s, resuming Tx", EMSdevice::EMS_DEVICE_ID_GATEWAY1, (unsigned long)(GATEWAY_HOLD_MAX / 1000));
         return false;
     }
+
     if ((int32_t)(now - gateway_hold_until_) >= 0) {
         gateway_hold_until_ = 0;
         LOG_INFO("Gateway 0x%02X is quiet, resuming Tx after %lu s", EMSdevice::EMS_DEVICE_ID_GATEWAY1, (unsigned long)((now - gateway_hold_start_) / 1000));
         return false;
     }
+
     return true;
 }
 #endif
@@ -2044,6 +2102,7 @@ void EMSESP::start() {
                 force_analog_sensors      = settings.analogCustomizations.empty();
                 force_temperature_sensors = settings.sensorCustomizations.empty();
             };
+
             webCustomizationService.read(check_empty_customizations);
         }
     }
@@ -2052,6 +2111,7 @@ void EMSESP::start() {
     device_library_ = {
 #include "device_library.h"
     };
+
     LOG_INFO("Library loaded: %d EMS devices, %d device entities, %s", device_library_.size(), EMSESP_TRANSLATION_COUNT, system_.languages_string().c_str());
 
     // start telnet service if it's enabled
@@ -2192,10 +2252,12 @@ void EMSESP::loop() {
             shell_prompt();
             show_prompt = false; // only show it once
         }
+
         int c = serial_console_.read();
         if (c != -1) {
             show_prompt = true;
         }
+
         // https://daleswanson.org/ascii.htm#:~:text=0
         // CTRL-D to open
         if (c == '\x04') {

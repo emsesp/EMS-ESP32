@@ -59,6 +59,7 @@ void WebActivityService::webActivityService(AsyncWebServerRequest * request) {
         statJson["q"] =
             EMSESP::temperaturesensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::temperaturesensor_.fails()) / EMSESP::temperaturesensor_.reads());
     }
+
     if (EMSESP::analog_enabled()) {
         statJson       = statsJson.add<JsonObject>();
         statJson["id"] = 4;
@@ -66,6 +67,7 @@ void WebActivityService::webActivityService(AsyncWebServerRequest * request) {
         statJson["f"]  = EMSESP::analogsensor_.fails();
         statJson["q"]  = EMSESP::analogsensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::analogsensor_.fails()) / EMSESP::analogsensor_.reads());
     }
+
     if (Mqtt::enabled()) {
         statJson       = statsJson.add<JsonObject>();
         statJson["id"] = 5;

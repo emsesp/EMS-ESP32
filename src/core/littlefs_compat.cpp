@@ -72,21 +72,27 @@ constexpr uint32_t TYPE_CCRC         = 0x500;
 constexpr bool tag_isvalid(uint32_t t) {
     return (t & 0x80000000) == 0;
 }
+
 constexpr uint32_t tag_type2(uint32_t t) {
     return (t & 0x78000000) >> 20;
 }
+
 constexpr uint32_t tag_type3(uint32_t t) {
     return (t & 0x7ff00000) >> 20;
 }
+
 constexpr uint32_t tag_chunk(uint32_t t) {
     return (t & 0x0ff00000) >> 20;
 }
+
 constexpr uint32_t tag_id(uint32_t t) {
     return (t & 0x000ffc00) >> 10;
 }
+
 constexpr uint32_t tag_size(uint32_t t) {
     return t & 0x3ff;
 }
+
 // a size of 0x3ff marks a delete tag, which carries no payload
 constexpr uint32_t tag_dsize(uint32_t t) {
     return 4 + (tag_size(t) == 0x3ff ? 0 : tag_size(t));
@@ -95,9 +101,11 @@ constexpr uint32_t tag_dsize(uint32_t t) {
 uint32_t rd_be32(const uint8_t * p) {
     return (static_cast<uint32_t>(p[0]) << 24) | (static_cast<uint32_t>(p[1]) << 16) | (static_cast<uint32_t>(p[2]) << 8) | p[3];
 }
+
 uint32_t rd_le32(const uint8_t * p) {
     return (static_cast<uint32_t>(p[3]) << 24) | (static_cast<uint32_t>(p[2]) << 16) | (static_cast<uint32_t>(p[1]) << 8) | p[0];
 }
+
 void wr_le32(uint8_t * p, uint32_t v) {
     p[0] = static_cast<uint8_t>(v);
     p[1] = static_cast<uint8_t>(v >> 8);
@@ -125,11 +133,13 @@ uint32_t lfs_crc(uint32_t crc, const void * buffer, size_t size) {
         0xa00ae278,
         0xbdbdf21c,
     };
+
     const uint8_t * data = static_cast<const uint8_t *>(buffer);
     for (size_t i = 0; i < size; i++) {
         crc = (crc >> 4) ^ rtable[(crc ^ data[i]) & 0xf];
         crc = (crc >> 4) ^ rtable[(crc ^ (data[i] >> 4)) & 0xf];
     }
+
     return crc;
 }
 
@@ -166,15 +176,18 @@ Located locate_superblock(const uint8_t * buf) {
         if (!tag_isvalid(tag)) {
             break; // nothing committed beyond this point
         }
+
         if (off + tag_dsize(tag) > BLOCK_SIZE) {
             break;
         }
+
         ptag = tag;
 
         if (tag_type2(tag) == TYPE_CCRC) {
             if (crc != rd_le32(&buf[off + 4])) {
                 break; // commit never completed, so the chain ends here
             }
+
             if (pending) {
                 found.found        = true;
                 found.struct_off   = pending_off;
@@ -182,6 +195,7 @@ Located locate_superblock(const uint8_t * buf) {
                 found.crc_off      = off + 4;
                 pending            = false;
             }
+
             ptag ^= (tag_chunk(tag) & 1u) << 31;
             crc          = 0xffffffff;
             commit_start = off + tag_dsize(tag); // the padding after the CRC is not covered
@@ -204,11 +218,13 @@ const esp_partition_t * find_partition(const char * partition_label) {
     if (partition_label != nullptr) {
         return esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, partition_label);
     }
+
     // 0x83 is the littlefs subtype, 0x82 the spiffs one that older partition tables use
     const esp_partition_t * part = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, static_cast<esp_partition_subtype_t>(0x83), nullptr);
     if (part != nullptr) {
         return part;
     }
+
     return esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_SPIFFS, nullptr);
 }
 

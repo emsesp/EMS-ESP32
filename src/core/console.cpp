@@ -55,6 +55,7 @@ static void console_log_level(Shell & shell, const std::vector<std::string> & ar
             return;
         }
     }
+
     shell.printfln(F_(log_level_fmt), uuid::log::format_level_uppercase(shell.log_level()));
 }
 
@@ -224,6 +225,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                                                                   return StateUpdateResult::CHANGED;
                                                               }
                                                           }
+
                                                           // otherwise add a new admin user
                                                           securitySettings.users.emplace_back(F_(admin), password2.c_str(), true);
                                                           return StateUpdateResult::CHANGED;
@@ -395,6 +397,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                                   if (!data.empty()) {
                                       data += " ";
                                   }
+
                                   data += arg;
                               }
 
@@ -509,6 +512,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
             if (device_type >= EMSdevice::DeviceType::BOILER) {
                 cmd = Command::parse_command_string(cmd, id); // extract hc or dhw
             }
+
             if (cmd == nullptr) {
                 cmd = F_(values);
             }
@@ -544,6 +548,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                         shell.println(data.c_str());
                         return;
                     }
+
                     serializeJsonPretty(doc, shell);
                     shell.println();
                     return;
@@ -575,6 +580,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                         devices_list.emplace_back(EMSdevice::device_type_2_device_name(device_class.first));
                     }
                 }
+
                 return devices_list;
             } else if (current_arguments.size() == 1) {
                 uint8_t device_type = EMSdevice::device_name_2_device_type(current_arguments[0].c_str());
@@ -585,6 +591,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                             command_list.emplace_back(cf.cmd_);
                         }
                     }
+
                     return command_list;
                 }
             }
@@ -612,6 +619,7 @@ void EMSESPShell::stopped() {
     if (has_flags(CommandFlags::ADMIN)) {
         logger().log(LogLevel::INFO, LogFacility::AUTH, F("Admin session closed on console %s"), console_name().c_str());
     }
+
     logger().log(LogLevel::INFO, LogFacility::CONSOLE, F("User session closed on console %s"), console_name().c_str());
 }
 

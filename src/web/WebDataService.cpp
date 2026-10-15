@@ -115,15 +115,18 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
                 if (Helpers::hasValue(sensor.temperature_c)) {
                     obj["t"] = (float)sensor.temperature_c * 0.18 + 32;
                 }
+
                 obj["u"] = DeviceValueUOM::FAHRENHEIT;
                 obj["o"] = (float)sensor.offset() * 0.18;
             } else {
                 if (Helpers::hasValue(sensor.temperature_c)) {
                     obj["t"] = (float)sensor.temperature_c / 10;
                 }
+
                 obj["u"] = DeviceValueUOM::DEGREES;
                 obj["o"] = (float)(sensor.offset()) / 10;
             }
+
             obj["s"] = sensor.is_system();
         }
     }
@@ -188,6 +191,7 @@ void WebDataService::device_data(AsyncWebServerRequest * request) {
                 for (uint16_t i = 0; i < (TxService::POST_SEND_DELAY + 500) && EMSESP::wait_validate(); i++) {
                     delay(1);
                 }
+
                 EMSESP::wait_validate(0); // reset in case of timeout
 #ifndef EMSESP_STANDALONE
                 JsonObject output = response->getRoot();
@@ -263,14 +267,17 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
                     break;
                 }
             }
+
             break;
         }
+
         if (device_type == EMSdevice::DeviceType::UNKNOWN) {
             EMSESP::logger().warning("Write command failed, bad device id: %d", unique_id);
             AsyncWebServerResponse * response = request->beginResponse(400); // bad request
             request->send(response);
             return;
         }
+
         // create JSON for output
         auto *     response = new PsramAsyncJsonResponse(false);
         JsonObject output   = response->getRoot();
@@ -282,6 +289,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
         if (device_type >= EMSdevice::DeviceType::BOILER) {
             cmd = Command::parse_command_string(cmd, id); // extract hc or dhw
         }
+
         if (data.is<const char *>()) {
             return_code = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
         } else if (data.is<int>()) {
@@ -413,6 +421,7 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
             if (sensor.is_system()) {
                 continue;
             }
+
             JsonObject node = nodes.add<JsonObject>();
             node["id"]      = (EMSdevice::DeviceTypeUniqueID::TEMPERATURESENSOR_UID * 100) + count++;
 
@@ -422,11 +431,13 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
                 if (Helpers::hasValue(sensor.temperature_c)) {
                     dv["v"] = (float)sensor.temperature_c * 0.18 + 32;
                 }
+
                 dv["u"] = DeviceValueUOM::FAHRENHEIT;
             } else {
                 if (Helpers::hasValue(sensor.temperature_c)) {
                     dv["v"] = (float)sensor.temperature_c / 10;
                 }
+
                 dv["u"] = DeviceValueUOM::DEGREES;
             }
         }
@@ -444,6 +455,7 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
             if (sensor.is_system()) {
                 continue;
             }
+
             JsonObject node = nodes.add<JsonObject>();
             node["id"]      = (EMSdevice::DeviceTypeUniqueID::ANALOGSENSOR_UID * 100) + count++;
 
@@ -469,6 +481,7 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
                 dv["v"] = Helpers::transformNumFloat(sensor.value());
                 dv["u"] = sensor.uom();
             }
+
             if (sensor.type() == AnalogSensor::AnalogType::COUNTER
                 || (sensor.type() >= AnalogSensor::AnalogType::DIGITAL_OUT && sensor.type() <= AnalogSensor::AnalogType::PWM_2)
                 || sensor.type() == AnalogSensor::AnalogType::RGB || sensor.type() == AnalogSensor::AnalogType::PULSE
