@@ -134,7 +134,6 @@ const cs: Translation = {
   CUSTOMIZATIONS_RESTART: 'Všechna přizpůsobení byla odstraněna. Restartování...',
   CUSTOMIZATIONS_FULL: 'Vybrané entity překročily limit. Ukládejte je postupně',
   CUSTOMIZATIONS_SAVED: 'Přizpůsobení uloženo',
-  CUSTOMIZATIONS_LIMITS: 'Původní limity se vrátí po restartu',
   CUSTOMIZATIONS_HELP_1: 'Vyberte zařízení a přizpůsobte možnosti entit nebo klikněte pro přejmenování',
   CUSTOMIZATIONS_HELP_2: 'označit jako oblíbené',
   CUSTOMIZATIONS_HELP_3: 'zakázat akci zápisu',

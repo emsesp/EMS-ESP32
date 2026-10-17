@@ -134,7 +134,6 @@ const sv: Translation = {
   CUSTOMIZATIONS_RESTART: 'Alla anpassningar har raderats. Startar om...',
   CUSTOMIZATIONS_FULL: 'För många valda enheter. Vänligen spara ett mindre antal åt gången.',
   CUSTOMIZATIONS_SAVED: 'Anpassningarna är sparade',
-  CUSTOMIZATIONS_LIMITS: 'Originalgränserna gäller efter omstart',
   CUSTOMIZATIONS_HELP_1: 'Välj en enhet och anpassa entiteter med hjälp av alternativen',
   CUSTOMIZATIONS_HELP_2: 'Favorit',
   CUSTOMIZATIONS_HELP_3: 'Skrivskyddad',

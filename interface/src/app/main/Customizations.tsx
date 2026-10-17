@@ -23,7 +23,6 @@ import {
   TextField,
   ToggleButton,
   ToggleButtonGroup,
-  Tooltip,
   Typography
 } from '@mui/material';
 
@@ -295,11 +294,7 @@ const Customizations = () => {
 
   function formatLimit(value: number | null | undefined) {
     if (value === null) {
-      return (
-        <Tooltip title={LL.CUSTOMIZATIONS_LIMITS()}>
-          <WarningIcon color="warning" sx={{ fontSize: 16 }} />
-        </Tooltip>
-      );
+      return '';
     }
     return formatValue(value);
   }

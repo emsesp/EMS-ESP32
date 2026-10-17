@@ -134,7 +134,6 @@ const no: Translation = {
   CUSTOMIZATIONS_RESTART: 'Alle tilpasninger har blitt slettet. Restarter...',
   CUSTOMIZATIONS_FULL: 'Antall valgte objekter for høyt. Largre i mindre antall om gangen',
   CUSTOMIZATIONS_SAVED: 'Tilpasninger lagret',
-  CUSTOMIZATIONS_LIMITS: 'Opprinnelige grenser gjelder etter omstart',
   CUSTOMIZATIONS_HELP_1: 'Velg en enhet og tilpass underenheter med hjelp av alternativer eller velg å gi nytt navn',
   CUSTOMIZATIONS_HELP_2: 'merk som favoritt',
   CUSTOMIZATIONS_HELP_3: 'inaktiviser skriving',

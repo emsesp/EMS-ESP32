@@ -66,9 +66,6 @@ DeviceValue::DeviceValue(uint8_t               device_type,
         custom_fullname_ = std::make_unique<std::string>(custom_fullname);
     }
 
-    // set the min/max (reads back the custom name set above)
-    set_custom_minmax();
-
     /*
 #ifdef EMSESP_STANDALONE
     // only added for debugging
@@ -296,11 +293,15 @@ bool DeviceValue::has_tag() const {
 bool DeviceValue::get_min_max(int16_t & dv_set_min, uint32_t & dv_set_max) {
     uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (uom == DeviceValueUOM::DEGREES) ? 2 : (uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
-    // if we have individual limits set already, just do the conversion
+    // Register limits stay in min/max. Custom limits, if any, are applied only here.
     // limits are not scaled with num operator and temperatures are °C
-    if (min != 0 || max != 0) {
-        dv_set_min = Helpers::transformNumFloat(min, 0, fahrenheit);
-        dv_set_max = Helpers::transformNumFloat(max, 0, fahrenheit);
+    int16_t  eff_min = min;
+    uint32_t eff_max = max;
+    apply_custom_minmax(eff_min, eff_max);
+
+    if (eff_min != 0 || eff_max != 0) {
+        dv_set_min = Helpers::transformNumFloat(eff_min, 0, fahrenheit);
+        dv_set_max = Helpers::transformNumFloat(eff_max, 0, fahrenheit);
         return true;
     }
 
@@ -350,8 +351,8 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, uint32_t & dv_set_max) {
     return false; // nothing changed, not supported
 }
 
-// extract custom min from custom_fullname
-bool DeviceValue::get_custom_min(int16_t & val) {
+// extract custom min from custom_fullname, in °C. Does not range-check against the register limits.
+bool DeviceValue::get_custom_min(int16_t & val) const {
     const auto & cf         = custom_fullname();
     auto         min_pos    = cf.find('>');
     bool         has_min    = (min_pos != std::string::npos);
@@ -362,18 +363,14 @@ bool DeviceValue::get_custom_min(int16_t & val) {
             v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
         }
 
-        if (max > 0 && v > 0 && (uint32_t)v > max) {
-            return false;
-        }
-
         val = v;
     }
 
     return has_min;
 }
 
-// extract custom max from custom_fullname
-bool DeviceValue::get_custom_max(uint32_t & val) {
+// extract custom max from custom_fullname, in °C. Does not range-check against the register limits.
+bool DeviceValue::get_custom_max(uint32_t & val) const {
     const auto & cf         = custom_fullname();
     auto         max_pos    = cf.find('<');
     bool         has_max    = (max_pos != std::string::npos);
@@ -384,7 +381,7 @@ bool DeviceValue::get_custom_max(uint32_t & val) {
             v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
         }
 
-        if (v < 0 || v < (int32_t)min) {
+        if (v < 0) {
             return false;
         }
 
@@ -394,10 +391,41 @@ bool DeviceValue::get_custom_max(uint32_t & val) {
     return has_max;
 }
 
-// sets min max to stored custom values (if set)
-void DeviceValue::set_custom_minmax() {
-    get_custom_min(min);
-    get_custom_max(max);
+// Overlay custom limits onto copies of the register min/max. A custom min is checked against
+// the custom max when both are set, so a range outside the register limits is still accepted.
+void DeviceValue::apply_custom_minmax(int16_t & eff_min, uint32_t & eff_max, bool * min_custom, bool * max_custom) const {
+    int16_t  cmin     = 0;
+    uint32_t cmax     = 0;
+    bool     has_cmin = get_custom_min(cmin);
+    bool     has_cmax = get_custom_max(cmax);
+
+    if (has_cmin) {
+        uint32_t bound = has_cmax ? cmax : eff_max;
+        if (bound > 0 && cmin > 0 && (uint32_t)cmin > bound) {
+            has_cmin = false;
+        }
+    }
+
+    if (has_cmax) {
+        int32_t bound = has_cmin ? cmin : eff_min;
+        if ((int32_t)cmax < bound) {
+            has_cmax = false;
+        }
+    }
+
+    if (has_cmin) {
+        eff_min = cmin;
+    }
+    if (has_cmax) {
+        eff_max = cmax;
+    }
+
+    if (min_custom) {
+        *min_custom = has_cmin;
+    }
+    if (max_custom) {
+        *max_custom = has_cmax;
+    }
 }
 
 // raw stored custom name (empty string if none was set)

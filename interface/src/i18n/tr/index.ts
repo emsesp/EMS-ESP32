@@ -134,7 +134,6 @@ const tr: Translation = {
   CUSTOMIZATIONS_RESTART: 'Bütün özelleştirmeler kaldırıldı. Yeniden başlatılıyor...',
   CUSTOMIZATIONS_FULL: 'Seçilen varlıklar sınırı aşmaktadır. Lütfen parçalar halinde kaydedin',
   CUSTOMIZATIONS_SAVED: 'Özelleştirmeler kaydedildi',
-  CUSTOMIZATIONS_LIMITS: 'Orijinal sınırlar yeniden başlatınca döner',
   CUSTOMIZATIONS_HELP_1: 'Bir cihaz seçip varlıkların seçeneklerini özelleştirin veya yeniden adlandırmak için tıklayın',
   CUSTOMIZATIONS_HELP_2: 'favori olarak işaretle',
   CUSTOMIZATIONS_HELP_3: 'yazma işlemini devre dışı bırak',

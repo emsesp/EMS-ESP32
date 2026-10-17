@@ -134,7 +134,6 @@ const en: Translation = {
   CUSTOMIZATIONS_RESTART: 'All customizations have been removed. Restarting...',
   CUSTOMIZATIONS_FULL: 'Selected entities exceeded limit. Please save in batches',
   CUSTOMIZATIONS_SAVED: 'Customizations saved',
-  CUSTOMIZATIONS_LIMITS: 'Original limits return after restart',
   CUSTOMIZATIONS_HELP_1: 'Select a device and customize the entities options',
   CUSTOMIZATIONS_HELP_2: 'mark as favorite',
   CUSTOMIZATIONS_HELP_3: 'disable write action',

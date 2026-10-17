@@ -134,7 +134,6 @@ const pl: BaseTranslation = {
   CUSTOMIZATIONS_RESTART: 'Wszystkie personalizacje zostały usunięte. Restartuję...',
   CUSTOMIZATIONS_FULL: 'Wybrano za dużo obiektów. Wprowadzaj zmiany w mniejszych partiach.',
   CUSTOMIZATIONS_SAVED: 'Personalizacje zostały zapisane.',
-  CUSTOMIZATIONS_LIMITS: 'Oryginalne limity wrócą po restarcie',
   CUSTOMIZATIONS_HELP_1: 'Wybierz urządzenie EMS, a następnie dostosuj opcje lub kliknij na nazwie encji by tę nazwę zmienić',
   CUSTOMIZATIONS_HELP_2: 'oznacz jako ulubioną',
   CUSTOMIZATIONS_HELP_3: 'zablokuj akcje zapisu',

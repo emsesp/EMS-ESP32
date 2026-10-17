@@ -134,7 +134,6 @@ const it: Translation = {
   CUSTOMIZATIONS_RESTART: 'Tutte le personalizzazioni sono state rimosse. Riavvio ...',
   CUSTOMIZATIONS_FULL: 'Le entità selezionate hanno superato il limite. Si prega di salvare in batch',
   CUSTOMIZATIONS_SAVED: 'Personalizzazioni salvate',
-  CUSTOMIZATIONS_LIMITS: 'I limiti originali tornano dopo il riavvio',
   CUSTOMIZATIONS_HELP_1: 'Seleziona un dispositivo e personalizza le opzioni delle entità o fai clic per rinominarlo',
   CUSTOMIZATIONS_HELP_2: 'seleziona come preferito',
   CUSTOMIZATIONS_HELP_3: 'disabilita azione scrittura',

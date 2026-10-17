@@ -458,7 +458,10 @@ int Modbus::getRegisterCount(const DeviceValue & dv) {
 
         case DeviceValue::CMD: {
             // calculate a sensible register size from min, max and numeric_operator
-            uint32_t num_values    = std::max(dv.max, (uint32_t)abs(dv.min));
+            int16_t  eff_min = dv.min;
+            uint32_t eff_max = dv.max;
+            dv.apply_custom_minmax(eff_min, eff_max);
+            uint32_t num_values    = std::max(eff_max, (uint32_t)abs(eff_min));
             int      num_registers = 0;
 
             if (num_values < (1L << 16))

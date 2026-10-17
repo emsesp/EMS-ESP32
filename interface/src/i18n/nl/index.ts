@@ -134,7 +134,6 @@ const nl: Translation = {
   CUSTOMIZATIONS_RESTART: 'Alle custom profielen worden verwijderd. Herstarten...',
   CUSTOMIZATIONS_FULL: 'Te veel entiteiten geselecteerd. Sla op in delen aub',
   CUSTOMIZATIONS_SAVED: 'Custom aanpassingen opgeslagen',
-  CUSTOMIZATIONS_LIMITS: 'Originele limieten gelden na herstart',
   CUSTOMIZATIONS_HELP_1: 'Selecteer een apparaat en pas de entiteiten aan door middel van de opties',
   CUSTOMIZATIONS_HELP_2: 'Markeer als favoriet',
   CUSTOMIZATIONS_HELP_3: 'Zet schrijfacties uit',

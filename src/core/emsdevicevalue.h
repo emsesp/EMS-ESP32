@@ -218,9 +218,12 @@ class DeviceValue {
     bool has_tag() const;
     bool get_min_max(int16_t & dv_set_min, uint32_t & dv_set_max);
 
-    void               set_custom_minmax();
-    bool               get_custom_min(int16_t & val);
-    bool               get_custom_max(uint32_t & val);
+    // Overlay a custom >min/<max from the name onto eff_min/eff_max.
+    // The stored register limits (min/max) are left unchanged.
+    // min_custom/max_custom report whether that side came from the custom name.
+    void apply_custom_minmax(int16_t & eff_min, uint32_t & eff_max, bool * min_custom = nullptr, bool * max_custom = nullptr) const;
+    bool get_custom_min(int16_t & val) const;
+    bool get_custom_max(uint32_t & val) const;
     std::string        get_custom_fullname() const;
     std::string        get_fullname() const;
     static std::string get_name(const std::string & entity);

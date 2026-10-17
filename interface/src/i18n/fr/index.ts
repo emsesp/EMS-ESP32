@@ -134,7 +134,6 @@ const fr: Translation = {
   CUSTOMIZATIONS_RESTART: 'Toutes les personnalisations ont été supprimées. Redémarrage...',
   CUSTOMIZATIONS_FULL: 'Les entités sélectionnées ont dépassé la limite. Veuillez sauvegarder par lots',
   CUSTOMIZATIONS_SAVED: 'Personnalisations enregistrées',
-  CUSTOMIZATIONS_LIMITS: "Les limites d'origine reviennent après redémarrage",
   CUSTOMIZATIONS_HELP_1: 'Sélectionnez un appareil et personnalisez les options des entités ou cliquez pour renommer',
   CUSTOMIZATIONS_HELP_2: 'marquer comme favori',
   CUSTOMIZATIONS_HELP_3: "désactiver l'action d'écriture",

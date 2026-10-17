@@ -4,7 +4,6 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import CloseIcon from '@mui/icons-material/Close';
 import DoneIcon from '@mui/icons-material/Done';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
-import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
   Button,
@@ -13,9 +12,7 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
-  InputAdornment,
   TextField,
-  Tooltip,
   Typography
 } from '@mui/material';
 
@@ -125,15 +122,6 @@ const CustomizationsDialog = ({
     onSave(next);
   };
 
-  const limitAdornment = (cleared: boolean) =>
-    cleared ? (
-      <InputAdornment position="end">
-        <Tooltip title={LL.CUSTOMIZATIONS_LIMITS()}>
-          <WarningIcon color="warning" sx={{ fontSize: 16 }} />
-        </Tooltip>
-      </InputAdornment>
-    ) : undefined;
-
   return (
     <Dialog sx={dialogStyle} open={open} onClose={handleClose}>
       <DialogTitle>{`${LL.EDIT()} ${LL.ENTITY()}`}</DialogTitle>
@@ -180,9 +168,6 @@ const CustomizationsDialog = ({
                   sx={{ width: '11ch' }}
                   type="number"
                   onChange={updateFormValue}
-                  slotProps={{
-                    input: { endAdornment: limitAdornment(editItem.mi === null) }
-                  }}
                 />
               </Grid>
               <Grid>
@@ -195,9 +180,6 @@ const CustomizationsDialog = ({
                   sx={{ width: '11ch' }}
                   type="number"
                   onChange={updateFormValue}
-                  slotProps={{
-                    input: { endAdornment: limitAdornment(editItem.ma === null) }
-                  }}
                 />
               </Grid>
             </>

@@ -134,7 +134,6 @@ const sk: Translation = {
   CUSTOMIZATIONS_RESTART: 'Ste si istí, že chcete reštartovať EMS-ESP?',
   CUSTOMIZATIONS_FULL: 'Vybrané subjekty prekročili limit. Prosím, ukladajte v dávkach',
   CUSTOMIZATIONS_SAVED: 'Uložené prispôsobenia',
-  CUSTOMIZATIONS_LIMITS: 'Pôvodné limity sa vrátia po reštarte',
   CUSTOMIZATIONS_HELP_1: 'Vyberte zariadenie a prispôsobte možnosti entít alebo kliknutím premenujte',
   CUSTOMIZATIONS_HELP_2: 'označiť ako obľúbené',
   CUSTOMIZATIONS_HELP_3: 'zakázať akciu zápisu',

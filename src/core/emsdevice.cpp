@@ -877,7 +877,6 @@ void EMSdevice::set_minmax(const void * value_p, int16_t min, uint32_t max) {
         if (dv.value_p == value_p) {
             dv.min = min;
             dv.max = max;
-            dv.set_custom_minmax(); // custom priority
             return;
         }
     }
@@ -1340,6 +1339,7 @@ void EMSdevice::setCustomizationEntity(const std::string & entity_id) {
             // check the masks
             uint8_t current_mask = dv.state >> 4;
             uint8_t new_mask     = Helpers::hextoint(entity_id.substr(0, 2).c_str()); // first character contains mask flags
+            bool    had_limit    = dv.custom_fullname().find('>') != std::string::npos || dv.custom_fullname().find('<') != std::string::npos;
 
             // if it's a new mask, reconfigure HA
             if (Mqtt::ha_enabled() && (has_custom_name || ((current_mask ^ new_mask) & (DeviceValueState::DV_READONLY >> 4)))) {
@@ -1358,14 +1358,19 @@ void EMSdevice::setCustomizationEntity(const std::string & entity_id) {
                 dv.set_custom_fullname("");
             }
 
-            auto min = dv.min;
-            auto max = dv.max;
-
-            // set the min / max
-            dv.set_custom_minmax();
-
-            if (Mqtt::ha_enabled() && dv.tag <= DeviceValueTAG::TAG_HC8 && !strcmp(dv.short_name, FL_(selRoomTemp)[0]) && (min != dv.min || max != dv.max)) {
-                set_climate_minmax(dv.tag, dv.min, dv.max);
+            // Climate discovery reads its own min/max. selRoomTemp keeps the register limits.
+            // A custom range is copied across; clearing it restores the limits haclimate was registered with (5..30).
+            if (Mqtt::ha_enabled() && dv.tag <= DeviceValueTAG::TAG_HC8 && !strcmp(dv.short_name, FL_(selRoomTemp)[0])) {
+                int16_t  eff_min    = dv.min;
+                uint32_t eff_max    = dv.max;
+                bool     min_custom = false;
+                bool     max_custom = false;
+                dv.apply_custom_minmax(eff_min, eff_max, &min_custom, &max_custom);
+                if (min_custom || max_custom) {
+                    set_climate_minmax(dv.tag, eff_min, eff_max);
+                } else if (had_limit) {
+                    set_climate_minmax(dv.tag, 5, 30);
+                }
             }
 
             return;
@@ -2218,18 +2223,27 @@ bool EMSdevice::generate_values(JsonObject output, const int8_t tag_filter, cons
 
                 // check for value outside min/max range and adapt the limits to avoid HA complains
                 // Should this also check for api output?
-                if ((output_target == OUTPUT_TARGET::MQTT) && (dv.min != 0 || dv.max != 0)) {
-                    int v = Helpers::atoint(val);
-                    if (fahrenheit) {
-                        v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
-                    }
+                // Only the register limits are widened. A custom limit stays in the name so a reset can restore the original.
+                {
+                    int16_t  eff_min       = dv.min;
+                    uint32_t eff_max       = dv.max;
+                    bool     min_custom    = false;
+                    bool     max_custom    = false;
+                    dv.apply_custom_minmax(eff_min, eff_max, &min_custom, &max_custom);
 
-                    if (v < dv.min) {
-                        dv.min = v;
-                        dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
-                    } else if (v > 0 && (uint32_t)v > dv.max) {
-                        dv.max = v;
-                        dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
+                    if ((output_target == OUTPUT_TARGET::MQTT) && (eff_min != 0 || eff_max != 0)) {
+                        int v = Helpers::atoint(val);
+                        if (fahrenheit) {
+                            v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
+                        }
+
+                        if (v < eff_min && !min_custom) {
+                            dv.min = v;
+                            dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
+                        } else if (v > 0 && (uint32_t)v > eff_max && !max_custom) {
+                            dv.max = v;
+                            dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
+                        }
                     }
                 }
             }

@@ -134,7 +134,6 @@ const de: Translation = {
   CUSTOMIZATIONS_RESTART: 'Alle Anpassungen wurden entfernt. Neustart...',
   CUSTOMIZATIONS_FULL: 'Ausgewählte Entitäten haben das Limit überschritten. Bitte stapelweise speichern!',
   CUSTOMIZATIONS_SAVED: 'Anpassungen gespeichert',
-  CUSTOMIZATIONS_LIMITS: 'Originalgrenzen gelten nach einem Neustart',
   CUSTOMIZATIONS_HELP_1: 'Wählen Sie ein Gerät aus und passen Sie die Entitäten mithilfe der Optionen an',
   CUSTOMIZATIONS_HELP_2: 'Als Favorit markieren',
   CUSTOMIZATIONS_HELP_3: 'Schreibaktion deaktivieren',
