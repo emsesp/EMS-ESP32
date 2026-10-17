@@ -151,6 +151,7 @@ bool Network::formatBSSID([[maybe_unused]] const String & bssid, [[maybe_unused]
     if (bssid.isEmpty() || sscanf(bssid.c_str(), "%X:%X:%X:%X:%X:%X", &tmp[0], &tmp[1], &tmp[2], &tmp[3], &tmp[4], &tmp[5]) != 6) {
         return false;
     }
+
     for (uint8_t i = 0; i < 6; i++) {
         mac[i] = static_cast<uint8_t>(tmp[i]);
     }
@@ -187,6 +188,7 @@ std::vector<Network::IPv6Address> Network::ipv6_addresses([[maybe_unused]] Netwo
         esp_ip6_addr_type_t type;
         const char *        name;
     };
+
     static const Scope scopes[] = {{ESP_IP6_ADDR_IS_GLOBAL, "global"},
                                    {ESP_IP6_ADDR_IS_UNIQUE_LOCAL, "unique local"},
                                    {ESP_IP6_ADDR_IS_SITE_LOCAL, "site local"},
@@ -216,6 +218,7 @@ std::vector<IPAddress> Network::dns_servers(const NetworkInterface & netif) {
             servers.push_back(ip);
         }
     }
+
     return servers;
 }
 
@@ -236,9 +239,11 @@ esp_err_t collect_ipv6_gateways(void * ctx) {
         if (router == nullptr || netif_get_index(router->netif) != args->netif_index) {
             continue;
         }
+
         const ip6_addr_t * addr = &router->next_hop_address;
         args->gateways->push_back(IPAddress(IPv6, reinterpret_cast<const uint8_t *>(addr->addr), ip6_addr_zone(addr)));
     }
+
     return ESP_OK;
 }
 
@@ -343,6 +348,7 @@ NetPhase Network::initialPhase() const {
     if (!ssid_.isEmpty() || ap_provisionMode_ == AP_MODE_NEVER) {
         return NetPhase::WIFI;
     }
+
     return NetPhase::AP;
 }
 
@@ -354,6 +360,7 @@ void Network::loop() {
         reconnect_pending_ = false;
         reconnect();
     }
+
     // already have a connection: verify it's still alive
     if (network_ip_ != 0 || last_disconnect_reason_ != 0) {
         checkConnection();
@@ -394,10 +401,12 @@ void Network::checkConnection() {
         if (iface_from_desc(esp_netif_get_desc(netif)) != network_iface_) {
             continue;
         }
+
         esp_netif_ip_info_t ip_info = {};
         if (esp_netif_is_netif_up(netif) && esp_netif_get_ip_info(netif, &ip_info) == ESP_OK && ip_info.ip.addr == network_ip_) {
             still_up = true;
         }
+
         break; // only one active netif per kind in our world (sta / eth / ap)
     }
 
@@ -416,8 +425,10 @@ void Network::checkConnection() {
             if (wifi_radio_off_) {
                 startWiFiRadio();
             }
+
             return;
         }
+
         begin();
     }
 #endif
@@ -439,6 +450,7 @@ void Network::setWiFiPower([[maybe_unused]] uint8_t tx_power) {
         if (!WiFi.setTxPower(static_cast<wifi_power_t>(tx_power))) {
             emsesp::EMSESP::logger().warning("Failed to set WiFi Tx Power");
         }
+
         return;
     }
 
@@ -455,6 +467,7 @@ void Network::setWiFiPower([[maybe_unused]] uint8_t tx_power) {
     if (newrssi < threshold) {
         min_tx_pwr = threshold - newrssi;
     }
+
     if (min_tx_pwr > max_tx_pwr) {
         min_tx_pwr = max_tx_pwr;
     }
@@ -621,6 +634,7 @@ void Network::startWiFiRadio() {
     } else {
         esp_wifi_set_bandwidth(static_cast<wifi_interface_t>(ESP_IF_WIFI_STA), WIFI_BW_HT40);
     }
+
     if (nosleep_) {
         WiFi.setSleep(false); // turn off sleep - WIFI_PS_NONE
     } else {
@@ -638,6 +652,7 @@ void Network::stopWiFiRadio() {
     if (wifi_radio_off_) {
         return;
     }
+
     WiFi.mode(WIFI_OFF);
     wifi_radio_off_       = true;
     wifi_connect_pending_ = false;
@@ -801,18 +816,23 @@ const char * Network::ethernet_status() const {
     if (phy_type_ == PHY_type::PHY_TYPE_NONE) {
         return nullptr;
     }
+
     if (ethClockConflictsPsram()) {
         return "disabled - clock mode GPIO16/17 conflicts with PSRAM";
     }
+
     if (ethernet_connected()) {
         return "connected";
     }
+
     if (ethernet_init_failed_) {
         return "failed to initialize - no PHY found, check the board profile";
     }
+
     if (!ethernet_started_) {
         return "not started";
     }
+
     return ethernet_connect_pending_ ? "connecting" : "no connection";
 #else
     return nullptr;
@@ -871,6 +891,7 @@ void Network::findNetworks() {
         if (desc) {
             strlcpy(info.desc, desc, sizeof(info.desc));
         }
+
         info.has_ipv6 = (esp_netif_get_ip6_linklocal(netif, &info.ip6) == ESP_OK);
 
         best_iface = candidate;
@@ -896,9 +917,11 @@ void Network::findNetworks() {
         } else if (network_iface_ == NetIface::AP) {
             phase_ = NetPhase::AP;
         }
+
         if (!ethernet_ever_connected_ && ethernet_connected()) {
             ethernet_ever_connected_ = true;
         }
+
         LOG_INFO("Network connected via %s (IP: " IPSTR ")",
                  network_iface_ == NetIface::ETHERNET ? "Ethernet"
                  : network_iface_ == NetIface::WIFI   ? "WiFi"
@@ -962,6 +985,7 @@ void Network::findNetworks() {
                     LOG_WARNING("Ethernet failed to connect after %u attempts, switching to WiFi", connect_retry_);
                     phase_ = NetPhase::WIFI;
                 }
+
                 ethernet_connect_pending_ = false;
             } else if (phase_ == NetPhase::WIFI) {
                 if (!wifi_ever_connected_) {
@@ -972,8 +996,10 @@ void Network::findNetworks() {
                         phase_ = NetPhase::AP;
                     }
                 }
+
                 wifi_connect_pending_ = false;
             }
+
             connect_retry_ = 0;
         }
     }
@@ -1009,6 +1035,7 @@ void Network::startAP() {
         LOG_DEBUG("softAPConfig failed");
         return;
     }
+
     esp_wifi_set_bandwidth(static_cast<wifi_interface_t>(ESP_IF_WIFI_AP), WIFI_BW_HT20);
 
     // WiFi.softAPenableIPv6();
@@ -1027,6 +1054,7 @@ void Network::startAP() {
         WiFi.softAPdisconnect(true);
         return;
     }
+
     LOG_INFO("Starting Access Point with captive portal on %u.%u.%u.%u", apIp[0], apIp[1], apIp[2], apIp[3]);
 
     ap_dnsServer_ = new DNSServer;
@@ -1035,6 +1063,7 @@ void Network::startAP() {
         WiFi.softAPdisconnect(true);
         return;
     }
+
     ap_dnsServer_->start(DNS_PORT, "*", apIp);
 #endif
 }

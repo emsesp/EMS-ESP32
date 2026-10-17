@@ -57,6 +57,7 @@ class PsramJsonAllocator : public ArduinoJson::Allocator {
         if (p == nullptr) {
             p = malloc(size);
         }
+
         return p;
 #endif
     }
@@ -80,6 +81,7 @@ class PsramJsonAllocator : public ArduinoJson::Allocator {
         if (p == nullptr) {
             p = realloc(ptr, new_size);
         }
+
         return p;
 #endif
     }

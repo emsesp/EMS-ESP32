@@ -64,6 +64,7 @@ StateUpdateResult APSettings::update(JsonObject root, APSettings & settings) {
     if (appliedOnce && modeChanged) {
         emsesp::EMSESP::network_.schedule_reconnect();
     }
+
     appliedOnce = true;
 
     return StateUpdateResult::CHANGED;

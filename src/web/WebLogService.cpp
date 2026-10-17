@@ -48,6 +48,7 @@ void WebLogService::start() {
         if (settings.weblog_buffer) {
             maximum_log_messages_ = settings.weblog_buffer;
         }
+
         limit_log_messages_ = maximum_log_messages_;
         compact_            = settings.weblog_compact;
         level_              = (uuid::log::Level)settings.weblog_level;
@@ -166,6 +167,7 @@ char * WebLogService::messagetime(char * out, const uint64_t t, const size_t buf
         strftime(timestr, 25, "%FT%T", localtime(&t1));
         snprintf(out, bufsize, "%s.%03d", timestr, (int)(wall_ms % 1000));
     }
+
     return out;
 }
 
@@ -188,6 +190,7 @@ void WebLogService::transmit(const QueuedLogMessage & message) {
     if (scratch_buf_.capacity() < len + 1) {
         scratch_buf_.reserve(len + 1);
     }
+
     scratch_buf_.resize(len);
     serializeJson(jsonDocument, scratch_buf_.data(), len + 1);
     events_.send(scratch_buf_.c_str(), "message", message.id_);
@@ -223,6 +226,7 @@ void WebLogService::getSetValues(AsyncWebServerRequest * request, JsonVariant js
     if (max_messages) {
         maximum_log_messages_ = max_messages;
     }
+
     compact_ = json["compact"];
 
     uuid::log::Logger::register_handler(this, level_);

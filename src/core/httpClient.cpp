@@ -69,6 +69,7 @@ int HttpClient::request(std::string url, const std::string & method, const std::
         ssl_client->setBufferSizes(TLS_RX_BUFFER_SIZE, TLS_TX_BUFFER_SIZE);
         ssl_client->setSessionTimeout(TLS_SESSION_TIMEOUT_S);
     }
+
     // WiFiClient is NetworkClient, which declares no setTimeout() of its own - calling it binds to
     // Stream::setTimeout() and only affects readBytes(), leaving the socket on the core's 3s default
     basic_client->setConnectionTimeout(CONNECT_TIMEOUT_MS);
@@ -89,17 +90,21 @@ int HttpClient::request(std::string url, const std::string & method, const std::
             agent_set |= (key == "user-agent");
             req += std::string(p.key().c_str()) + ": " + p.value().as<std::string>() + "\r\n";
         }
+
         if (!agent_set) {
             req += "User-Agent: EMS-ESP\r\n"; // CDNs are more likely to stall on a request without one
         }
+
         if (is_post) {
             if (!content_set) {
                 req += "Content-Type: ";
                 req += value.starts_with('{') ? asyncsrv::T_application_json : asyncsrv::T_text_plain;
                 req += "\r\n";
             }
+
             req += "Content-Length: " + std::to_string(value.length()) + "\r\n";
         }
+
         req += "Connection: close\r\n\r\n"; // the blank line terminates the headers - without it the server never responds
 
         ssl_client->print(req.c_str());
@@ -120,6 +125,7 @@ int HttpClient::request(std::string url, const std::string & method, const std::
                     truncated = true;
                     break;
                 }
+
                 uint8_t      buf[128];
                 const size_t want = (avail < (int)sizeof(buf)) ? (size_t)avail : sizeof(buf);
                 const int    len  = ssl_client->read(buf, want);
@@ -128,20 +134,25 @@ int HttpClient::request(std::string url, const std::string & method, const std::
                     last_data = millis();
                     continue;
                 }
+
                 // available() reported bytes the client won't hand over. Yielding here keeps a
                 // stale count from busy-spinning the whole read budget on this task's core
                 delay(1);
                 continue;
             }
+
             if (!ssl_client->connected()) {
                 break; // closed, with nothing left buffered
             }
+
             // the server may take a while to start replying
             if (millis() - last_data > (result.empty() ? FIRST_BYTE_TIMEOUT_MS : IDLE_TIMEOUT_MS)) {
                 break;
             }
+
             delay(1);
         }
+
         ssl_client->stop();
 
         const auto received = result.length();
@@ -170,6 +181,7 @@ int HttpClient::request(std::string url, const std::string & method, const std::
     } else {
         EMSESP::logger().warning("%s connection to %s failed", is_https ? "HTTPS" : "HTTP", host.c_str());
     }
+
     delete ssl_client;
     delete basic_client;
 

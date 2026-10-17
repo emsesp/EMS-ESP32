@@ -172,8 +172,9 @@ export interface DeviceEntity {
   t?: string; // tag for name
   m: DeviceEntityMask; // mask
   w: boolean; // writeable
-  mi?: number; // min value
-  ma?: number; // max value
+  mi?: number | null; // min value; null means cleared and the original returns after restart
+  ma?: number | null; // max value; null means cleared and the original returns after restart
+  c?: boolean; // true when a customization is saved (mask, name, or min/max)
   o_m?: number; // original mask before edits
   o_cn?: string; // original cn before edits
   o_mi?: number; // original min value

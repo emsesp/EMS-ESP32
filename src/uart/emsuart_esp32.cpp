@@ -54,6 +54,7 @@ void EMSuart::uart_event_task(void * pvParameters) {
                 if (length == 2 || (length >= 6 && length <= EMS_MAXBUFFERSIZE)) {
                     EMSESP::incoming_telegram(telegram, (uint8_t)(length - 1));
                 }
+
                 length = 0;
             } else if (event.type == UART_BUFFER_FULL) {
                 uart_flush_input(EMSUART_NUM);
@@ -61,6 +62,7 @@ void EMSuart::uart_event_task(void * pvParameters) {
             }
         }
     }
+
     vTaskDelete(NULL);
 }
 
@@ -91,6 +93,9 @@ void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t 
         inverse_mask |= UART_SIGNAL_TXD_INV;
 #endif
         uart_param_config(EMSUART_NUM, &uart_config);
+        // IDF 5 uart_set_pin() no longer selects the GPIO function on the Rx pad when routing via the GPIO matrix.
+        // Pins that boot with another IO_MUX function (e.g. GPIO43/44 = UART0 on S3, JTAG pins) would never see the signal.
+        gpio_reset_pin((gpio_num_t)rx_gpio);
         uart_set_pin(EMSUART_NUM, tx_gpio, rx_gpio, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
         gpio_pullup_en((gpio_num_t)rx_gpio); // IDF 5 no longer enables the Rx pull-up, some custom interfaces rely on it
         uart_set_line_inverse(EMSUART_NUM, inverse_mask);
@@ -110,10 +115,12 @@ void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t 
         xTaskCreatePinnedToCore(uart_event_task, "uart_event_task", EMSESP_UART_STACKSIZE, NULL, EMSESP_UART_PRIORITY, &xHandle, EMSESP_UART_RUNNING_CORE);
 #endif
     } else {
+        gpio_reset_pin((gpio_num_t)rx_gpio);
         uart_set_pin(EMSUART_NUM, tx_gpio, rx_gpio, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
         gpio_pullup_en((gpio_num_t)rx_gpio);
         vTaskResume(xHandle);
     }
+
     tx_mode_ = tx_mode;
     uart_enable_intr_mask(EMSUART_NUM, UART_BRK_DET_INT_ENA | UART_RXFIFO_FULL_INT_ENA);
 }
@@ -167,7 +174,9 @@ uint8_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
         return EMS_TX_STATUS_OK;
     }
 
-    auto tx_mode = tx_mode_ != EMS_TXMODE_AUTO ? tx_mode_ : EMSbus::is_ht3() ? EMS_TXMODE_HT3 : EMSbus::is_ems2() ? EMS_TXMODE_EMSPLUS : EMS_TXMODE_EMS;
+    // Auto: EMS+ if boiler monitor 0xE4 seen (is_ems2), else HT3 address mask, else EMS.
+    // Do not key off extended telegrams alone — Junkers HT3 uses those too (#3283, #3245).
+    auto tx_mode = tx_mode_ != EMS_TXMODE_AUTO ? tx_mode_ : EMSbus::is_ems2() ? EMS_TXMODE_EMSPLUS : EMSbus::is_ht3() ? EMS_TXMODE_HT3 : EMS_TXMODE_EMS;
 
     // TXMODE is EMS+ with long delay
     if (tx_mode == EMS_TXMODE_EMSPLUS) {
@@ -175,6 +184,7 @@ uint8_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
             uart_write_bytes(EMSUART_NUM, &buf[i], 1);
             delayMicroseconds(EMSUART_TX_WAIT_PLUS);
         }
+
         uart_gen_break(EMSUART_TX_BRK_PLUS);
         return EMS_TX_STATUS_OK;
     }
@@ -185,6 +195,7 @@ uint8_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
             uart_write_bytes(EMSUART_NUM, &buf[i], 1);
             delayMicroseconds(EMSUART_TX_WAIT_HT3);
         }
+
         uart_gen_break(EMSUART_TX_BRK_HT3);
         return EMS_TX_STATUS_OK;
     }
@@ -200,6 +211,7 @@ uint8_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
             uart_get_buffered_data_len(EMSUART_NUM, &rx1);
         } while ((rx1 == rx0) && (--timeoutcnt));
     }
+
     uart_gen_break(EMSUART_TX_BRK_EMS);
     return EMS_TX_STATUS_OK;
 }

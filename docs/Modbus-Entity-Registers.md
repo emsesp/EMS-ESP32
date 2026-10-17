@@ -223,11 +223,11 @@ uint8
 uint8
 | dhw.ecoplusoff | eco+ switch off | uint8 (&gt;=48&lt;=63) | C | true | DHW | 20 | 1 | 1 |
 uint8
-| dhw.comfdiff | comfort diff | uint8 (&gt;=6&lt;=18) | K | true | DHW | 21 | 1 | 1 |
+| dhw.comfdiff | comfort diff | uint8 (&gt;=4&lt;=18) | K | true | DHW | 21 | 1 | 1 |
 uint8
-| dhw.ecodiff | eco diff | uint8 (&gt;=6&lt;=18) | K | true | DHW | 22 | 1 | 1 |
+| dhw.ecodiff | eco diff | uint8 (&gt;=4&lt;=18) | K | true | DHW | 22 | 1 | 1 |
 uint8
-| dhw.ecoplusdiff | eco+ diff | uint8 (&gt;=6&lt;=15) | K | true | DHW | 23 | 1 | 1 |
+| dhw.ecoplusdiff | eco+ diff | uint8 (&gt;=4&lt;=15) | K | true | DHW | 23 | 1 | 1 |
 uint8
 | dhw.comfstop | comfort stop temp | uint8 (&gt;=0&lt;=0) | C | true | DHW | 24 | 1 | 1 |
 uint8
@@ -265,27 +265,29 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+uint8
+| dhw.disinfectduration | disinfection duration | uint8 (&gt;=120&lt;=240) | minutes | true | DHW | 48 | 1 | 10 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 
 ### Greenstar 2000
 
@@ -386,9 +388,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -419,27 +421,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -547,9 +549,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -580,27 +582,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -708,9 +710,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -741,27 +743,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -869,9 +871,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -902,27 +904,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -1030,9 +1032,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -1063,27 +1065,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -1191,9 +1193,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -1224,27 +1226,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -1352,9 +1354,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -1385,27 +1387,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -1513,9 +1515,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -1546,27 +1548,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -1674,9 +1676,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -1707,27 +1709,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -1835,9 +1837,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -1868,27 +1870,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -1996,9 +1998,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -2029,27 +2031,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -2157,9 +2159,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -2190,27 +2192,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -2318,9 +2320,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -2351,27 +2353,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -2479,9 +2481,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -2512,27 +2514,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -2640,9 +2642,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -2673,27 +2675,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -2801,9 +2803,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -2834,27 +2836,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -2962,9 +2964,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -2995,27 +2997,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -3123,9 +3125,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -3156,27 +3158,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -3284,9 +3286,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -3317,27 +3319,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -3445,9 +3447,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -3478,27 +3480,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -3721,11 +3723,11 @@ uint8
 uint8
 | dhw.ecoplusoff | eco+ switch off | uint8 (&gt;=48&lt;=63) | C | true | DHW | 20 | 1 | 1 |
 uint8
-| dhw.comfdiff | comfort diff | uint8 (&gt;=6&lt;=18) | K | true | DHW | 21 | 1 | 1 |
+| dhw.comfdiff | comfort diff | uint8 (&gt;=4&lt;=18) | K | true | DHW | 21 | 1 | 1 |
 uint8
-| dhw.ecodiff | eco diff | uint8 (&gt;=6&lt;=18) | K | true | DHW | 22 | 1 | 1 |
+| dhw.ecodiff | eco diff | uint8 (&gt;=4&lt;=18) | K | true | DHW | 22 | 1 | 1 |
 uint8
-| dhw.ecoplusdiff | eco+ diff | uint8 (&gt;=6&lt;=15) | K | true | DHW | 23 | 1 | 1 |
+| dhw.ecoplusdiff | eco+ diff | uint8 (&gt;=4&lt;=15) | K | true | DHW | 23 | 1 | 1 |
 uint8
 | dhw.comfstop | comfort stop temp | uint8 (&gt;=0&lt;=0) | C | true | DHW | 24 | 1 | 1 |
 uint8
@@ -3763,27 +3765,29 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+uint8
+| dhw.disinfectduration | disinfection duration | uint8 (&gt;=120&lt;=240) | minutes | true | DHW | 48 | 1 | 10 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 
 ### Geo 5xx
 
@@ -3999,11 +4003,11 @@ uint8
 uint8
 | dhw.ecoplusoff | eco+ switch off | uint8 (&gt;=48&lt;=63) | C | true | DHW | 20 | 1 | 1 |
 uint8
-| dhw.comfdiff | comfort diff | uint8 (&gt;=6&lt;=18) | K | true | DHW | 21 | 1 | 1 |
+| dhw.comfdiff | comfort diff | uint8 (&gt;=4&lt;=18) | K | true | DHW | 21 | 1 | 1 |
 uint8
-| dhw.ecodiff | eco diff | uint8 (&gt;=6&lt;=18) | K | true | DHW | 22 | 1 | 1 |
+| dhw.ecodiff | eco diff | uint8 (&gt;=4&lt;=18) | K | true | DHW | 22 | 1 | 1 |
 uint8
-| dhw.ecoplusdiff | eco+ diff | uint8 (&gt;=6&lt;=15) | K | true | DHW | 23 | 1 | 1 |
+| dhw.ecoplusdiff | eco+ diff | uint8 (&gt;=4&lt;=15) | K | true | DHW | 23 | 1 | 1 |
 uint8
 | dhw.comfstop | comfort stop temp | uint8 (&gt;=0&lt;=0) | C | true | DHW | 24 | 1 | 1 |
 uint8
@@ -4041,27 +4045,29 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+uint8
+| dhw.disinfectduration | disinfection duration | uint8 (&gt;=120&lt;=240) | minutes | true | DHW | 48 | 1 | 10 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 
 ### Condens 5000i, Greenstar 8000/GC9800IW, GB192i*2
 
@@ -4162,9 +4168,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -4195,27 +4201,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -4323,9 +4329,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -4356,27 +4362,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -4484,9 +4490,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -4517,27 +4523,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -4645,9 +4651,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -4678,27 +4684,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -4806,9 +4812,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -4839,27 +4845,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -4967,9 +4973,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -5000,27 +5006,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |
@@ -5035,7 +5041,7 @@ uint24
 |-|-|-|-|-|-|-|-|-|
 | netflowtemp | heat network flow temp | uint16 | C | false | DEVICE_DATA | 283 | 1 | 1/10 |
 | heatvalve | heating valve | uint8 | % | false | DEVICE_DATA | 284 | 1 | 1 |
-| dhw.dhwvalve | valve | uint8 | % | false | DHW | 75 | 1 | 1 |
+| dhw.dhwvalve | valve | uint8 | % | false | DHW | 76 | 1 | 1 |
 uint8
 | keepwarmtemp | keep warm temperature | uint8 (&gt;=0&lt;=0) | C | true | DEVICE_DATA | 285 | 1 | 1 |
 uint8
@@ -5103,9 +5109,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -5136,27 +5142,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 
 ### Logamax Plus GB122, Condense 2300, Junkers Cerapur GC2200W
 
@@ -5257,9 +5263,9 @@ uint16
 | meterheat | meter heating | uint24 | kWh | false | DEVICE_DATA | 101 | 2 | 1/10 |
 | dhw.meter | meter | uint24 | kWh | false | DHW | 2 | 2 | 1/10 |
 | gasmeterheat | gas meter heating | uint24 | kWh | false | DEVICE_DATA | 278 | 2 | 1/10 |
-| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 71 | 2 | 1/10 |
+| dhw.gasmeter | gas meter | uint24 | kWh | false | DHW | 72 | 2 | 1/10 |
 | nrgheat2 | energy heating 2 | uint24 | kWh | false | DEVICE_DATA | 280 | 2 | 1/10 |
-| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 73 | 2 | 1/10 |
+| dhw.nrg2 | energy 2 | uint24 | kWh | false | DHW | 74 | 2 | 1/10 |
 | dhw.tapactivated | turn on/off | boolean |   | true | DHW | 28 | 1 | 1 |
 | dhw.settemp | set temperature | uint8 | C | false | DHW | 29 | 1 | 1 |
 uint8
@@ -5290,27 +5296,27 @@ int8
 | dhw.hystoff | hysteresis off temperature | int8 (&gt;=0&lt;=0) | C | true | DHW | 46 | 1 | 1 |
 uint8
 | dhw.disinfectiontemp | disinfection temperature | uint8 (&gt;=60&lt;=80) | C | true | DHW | 47 | 1 | 1 |
-| dhw.circmode | circulation pump mode | enum |   | true | DHW | 48 | 1 | 1 |
-| dhw.circ | circulation active | boolean |   | true | DHW | 49 | 1 | 1 |
-| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 50 | 1 | 1/10 |
-| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
-| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 52 | 1 | 1/10 |
-| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 53 | 1 | 1/10 |
-| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
-| dhw.activated | activated | boolean |   | true | DHW | 55 | 1 | 1 |
-| dhw.onetime | one time charging | boolean |   | true | DHW | 56 | 1 | 1 |
-| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 57 | 1 | 1 |
-| dhw.charging | charging | boolean |   | false | DHW | 58 | 1 | 1 |
-| dhw.recharging | recharging | boolean |   | false | DHW | 59 | 1 | 1 |
-| dhw.tempok | temperature ok | boolean |   | false | DHW | 60 | 1 | 1 |
-| dhw.active | active | boolean |   | false | DHW | 61 | 1 | 1 |
-| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 62 | 1 | 1 |
-| dhw.chargepump | charge pump | boolean |   | false | DHW | 63 | 1 | 1 |
-| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 64 | 1 | 1/10 |
-| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 65 | 1 | 1/10 |
-| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 66 | 1 | 1 |
-| dhw.starts | starts | uint24 |   | false | DHW | 67 | 2 | 1 |
-| dhw.workm | active time | time | minutes | false | DHW | 69 | 2 | 1 |
+| dhw.circmode | circulation pump mode | enum |   | true | DHW | 49 | 1 | 1 |
+| dhw.circ | circulation active | boolean |   | true | DHW | 50 | 1 | 1 |
+| dhw.curtemp | current intern temperature | uint16 | C | false | DHW | 51 | 1 | 1/10 |
+| dhw.curtemp2 | current extern temperature | uint16 | C | false | DHW | 52 | 1 | 1/10 |
+| dhw.curflow | current tap water flow | uint8 | l/min | false | DHW | 53 | 1 | 1/10 |
+| dhw.storagetemp1 | storage intern temperature | uint16 | C | false | DHW | 54 | 1 | 1/10 |
+| dhw.storagetemp2 | storage extern temperature | uint16 | C | false | DHW | 55 | 1 | 1/10 |
+| dhw.activated | activated | boolean |   | true | DHW | 56 | 1 | 1 |
+| dhw.onetime | one time charging | boolean |   | true | DHW | 57 | 1 | 1 |
+| dhw.disinfecting | disinfecting | boolean |   | true | DHW | 58 | 1 | 1 |
+| dhw.charging | charging | boolean |   | false | DHW | 59 | 1 | 1 |
+| dhw.recharging | recharging | boolean |   | false | DHW | 60 | 1 | 1 |
+| dhw.tempok | temperature ok | boolean |   | false | DHW | 61 | 1 | 1 |
+| dhw.active | active | boolean |   | false | DHW | 62 | 1 | 1 |
+| dhw.3wayvalve | 3-way valve active | boolean |   | false | DHW | 63 | 1 | 1 |
+| dhw.chargepump | charge pump | boolean |   | false | DHW | 64 | 1 | 1 |
+| dhw.mixertemp | mixer temperature | uint16 | C | false | DHW | 65 | 1 | 1/10 |
+| dhw.cylmiddletemp | cylinder middle temperature (TS3) | uint16 | C | false | DHW | 66 | 1 | 1/10 |
+| dhw.dhwprio | dhw priority | boolean |   | true | DHW | 67 | 1 | 1 |
+| dhw.starts | starts | uint24 |   | false | DHW | 68 | 2 | 1 |
+| dhw.workm | active time | time | minutes | false | DHW | 70 | 2 | 1 |
 uint8
 | nompower | nominal Power | uint8 (&gt;=0&lt;=0) | kW | true | DEVICE_DATA | 282 | 1 | 1 |
 | nrgtotal | total energy | uint24 | kWh | false | DEVICE_DATA | 89 | 2 | 1/100 |

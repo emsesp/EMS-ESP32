@@ -36,6 +36,7 @@ void Controller::process_dateTime(const std::shared_ptr<const Telegram> & telegr
     if (telegram->offset > 0 || telegram->message_length < 5) {
         return;
     }
+
     char newdatetime[sizeof(dateTime_)];
     // publish as dd.mm.yyyy hh:mm
     snprintf(newdatetime,

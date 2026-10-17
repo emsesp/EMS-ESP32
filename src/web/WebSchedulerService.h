@@ -70,6 +70,7 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
     void ha_reset() {
         ha_configdone_ = false;
     }
+
     uint8_t count_entities();
     bool    onChange(const char * cmd);
 

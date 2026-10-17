@@ -165,16 +165,20 @@ class Network {
         if (!desc) {
             return NetIface::NONE;
         }
+
         if (strcmp(desc, "sta") == 0) {
             return NetIface::WIFI;
         }
+
         if (strcmp(desc, "ap") == 0) {
             return NetIface::AP;
         }
+
         // any "eth*" (eth, eth0, eth1, ...) is treated as Ethernet
         if (strncmp(desc, "eth", 3) == 0) {
             return NetIface::ETHERNET;
         }
+
         return NetIface::NONE;
     }
 
@@ -190,6 +194,7 @@ class Network {
         default:
             return "None";
         }
+
         return "unknown";
     }
 

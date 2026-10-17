@@ -52,6 +52,7 @@ class StaticContentHandler : public AsyncWebHandler {
                 return &WWW_ASSETS[i];
             }
         }
+
         return nullptr;
     }
 
@@ -62,6 +63,7 @@ class StaticContentHandler : public AsyncWebHandler {
         if (cached == nullptr) {
             cached = lookup("/index.html");
         }
+
         return cached;
     }
 };
@@ -91,6 +93,7 @@ void ESP32React::begin() {
             defaultHeaders.addHeader(asyncsrv::T_CORS_ACAH, "Accept, Content-Type, Authorization");
             defaultHeaders.addHeader(asyncsrv::T_CORS_ACAC, "true");
         }
+
         defaultHeaders.addHeader(asyncsrv::T_Server, networkSettings.hostname);
     });
     _apSettingsService.begin();

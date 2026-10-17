@@ -71,6 +71,7 @@ StateUpdateResult WebScheduler::update(JsonObject root, WebScheduler & webSchedu
             EMSESP::nvs_.remove(key);
         }
     }
+
     webScheduler.scheduleItems.clear();
     EMSESP::webSchedulerService.ha_reset();
 
@@ -95,6 +96,7 @@ StateUpdateResult WebScheduler::update(JsonObject root, WebScheduler & webSchedu
         if (EMSESP::nvs_.isKey(key)) {
             webScheduler.scheduleItems.back().active = EMSESP::nvs_.getBool(key);
         }
+
         Command::add(
             EMSdevice::DeviceType::SCHEDULER,
             webScheduler.scheduleItems.back().name,
@@ -104,6 +106,7 @@ StateUpdateResult WebScheduler::update(JsonObject root, WebScheduler & webSchedu
             FL_(schedule_cmd),
             CommandFlag::ADMIN_ONLY);
     }
+
     return StateUpdateResult::CHANGED;
 }
 
@@ -134,6 +137,7 @@ bool WebSchedulerService::command_setvalue(const char * value, const int8_t id, 
             return true;
         }
     }
+
     return false;
 }
 
@@ -150,6 +154,7 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
                 Mqtt::add_value_bool(output, scheduleItem.name, scheduleItem.active);
             }
         }
+
         return true;
     }
 
@@ -160,6 +165,7 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
             strlcpy(name, scheduleItem.name[0] == '\0' ? Helpers::smallitoa(name, i++) : scheduleItem.name, sizeof(name));
             get_value_json(output[name].to<JsonObject>(), scheduleItem);
         }
+
         return true;
     }
 
@@ -169,6 +175,7 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
             output["api_data"] = metrics;
             return true;
         }
+
         return false;
     }
 
@@ -191,10 +198,12 @@ std::string WebSchedulerService::get_metrics_prometheus() {
         if (scheduleItem.name[0] == '\0') {
             continue;
         }
+
         result += (std::string) "# HELP emsesp_" + scheduleItem.name + " " + scheduleItem.name + ", boolean, readable, visible, writable\n";
         result += (std::string) "# TYPE emsesp_" + scheduleItem.name + " gauge\n";
         result += (std::string) "emsesp_" + scheduleItem.name + " " + (scheduleItem.active ? "1\n" : "0\n");
     }
+
     return result;
 }
 
@@ -213,6 +222,7 @@ void WebSchedulerService::get_value_json(JsonObject output, const ScheduleItem &
     } else {
         output["time"] = scheduleItem.time;
     }
+
     output["cmd_name"]  = scheduleItem.cmd_name;
     output["readable"]  = true;
     output["writeable"] = true;
@@ -241,11 +251,13 @@ void WebSchedulerService::publish(const bool force) {
     if (!Mqtt::enabled() || scheduleItems_->empty()) {
         return;
     }
+
     if (force) {
         if (Mqtt::publish_single()) {
             for (const ScheduleItem & scheduleItem : *scheduleItems_) {
                 publish_single(scheduleItem.name, scheduleItem.active);
             }
+
             return;
         } else if (!EMSESP::mqtt_.get_publish_onchange(EMSdevice::DeviceType::SYSTEM)) {
             return; // wait for first time period
@@ -279,6 +291,7 @@ void WebSchedulerService::publish(const bool force) {
                 } else {
                     snprintf(val_tpl, sizeof(val_tpl), "{{%s}}", val_obj); // omit value conditional Jinja2 template code
                 }
+
                 config["val_tpl"] = val_tpl;
 
                 char uniq_s[70];
@@ -328,6 +341,7 @@ bool WebSchedulerService::runScheduleCommand(const ScheduleItem & si) {
         EMSESP::logger().warning("Schedule '%s': no command assigned", si.name);
         return false;
     }
+
     return EMSESP::webCommandService.dispatchCommand(si.cmd_name.c_str());
 }
 
@@ -339,6 +353,7 @@ bool WebSchedulerService::onChange(const char * cmd) {
             return true;
         }
     }
+
     return false;
 }
 
@@ -369,6 +384,7 @@ void WebSchedulerService::loop() {
     if (scheduleItems_->empty()) {
         return;
     }
+
     // do not execute any command in the first 60 secondes
     if (uuid::get_uptime_sec() < 60) {
         return;
@@ -395,6 +411,7 @@ void WebSchedulerService::loop() {
                 scheduleItem.retry_cnt = runScheduleCommand(scheduleItem) ? 0xFF : 0;
             }
         }
+
         last_tm_min = -1;
     }
 
@@ -406,11 +423,13 @@ void WebSchedulerService::loop() {
                 && scheduleItem.retry_cnt < MAX_STARTUP_RETRIES) {
                 scheduleItem.retry_cnt = runScheduleCommand(scheduleItem) ? 0xFF : scheduleItem.retry_cnt + 1;
             }
+
             if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min > 0
                 && (uptime_min % scheduleItem.elapsed_min == 0)) {
                 runScheduleCommand(scheduleItem);
             }
         }
+
         last_uptime_min = uptime_min;
     }
 
@@ -427,6 +446,7 @@ void WebSchedulerService::loop() {
                 runScheduleCommand(scheduleItem);
             }
         }
+
         last_tm_min = tm->tm_min;
     }
 }

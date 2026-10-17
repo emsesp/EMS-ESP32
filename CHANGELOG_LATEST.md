@@ -4,7 +4,7 @@ For more details go to [emsesp.org](https://emsesp.org/).
 
 ## [3.9.0]
 
-This release is based on the latest Espressif/Arduino core version 3. It brings in many memory and performance optimizations.
+This release is based on the latest Espressif/Arduino core version 3. It brings in many memory and performance optimizations, for example 25% more available memory and 30% less PSRAM fragmentation.
 
 ## Added
 
@@ -25,13 +25,13 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - on 16MB boards with the Recovery installed, EMS-ESP switches to it after crashing 5 times in a row. The Recovery shows why it was started and which firmware failed to start
 - the Version page shows the installed Recovery version on 16MB boards
 - crash test builds to try out the rollback and recovery, see `[env:crashtest_s3_16M_P]` in `platformio.ini`
-- `s_16M_P_custom` PlatformIO env that HybridCompiles Arduino/IDF with a trimmed sdkconfig (no Bluetooth, PPP/modem, IP forward/NAPT, ULP, SPI Ethernet, GDBSTUB, FreeRTOS trace, mDNS browse/CLI) and places the UART ISR in IRAM
 - 16MB builds use EMS-ESP's own Arduino/IDF libs from [esp32-arduino-lib-builder](https://github.com/emsesp/esp32-arduino-lib-builder) instead of Tasmota's prebuilt cores
 - optional `ccache` wrapping when it is installed (`scripts/enable_ccache.py`) to speed up CI
 - heat pump `dhw/disinfectduration`, the time allowed to reach the thermal disinfection temperature (0xEA offset 15, 120-240 min) [#3278](https://github.com/emsesp/EMS-ESP32/issues/3278)
 
 ## Fixed
 
+- heat-pump operating state (`hpoperatingstate`: heating/off/cooling) is published for every heating circuit. On BC400/UI800 it was only filled for hc1, because hc2 never answers telegram 0x472 while the state is still broadcast in 0x2A6 offset 20 [#3097](https://github.com/emsesp/EMS-ESP32/issues/3097)
 - restart from the WebUI (Restart button, firmware/settings upload) only happened while the browser tab stayed open. If the tab was closed the restart was silently dropped after 5 minutes, leaving a new firmware uninstalled. EMS-ESP now restarts on its own if the WebUI hasn't picked up the pending restart within 10 seconds
 - shunting yard show json
 - `system/sendmail` called from a Command or the Scheduler computed its value twice, which stripped the quotes from literal text and then failed on characters like `!`. Also shunting yard treated a `?` inside a quoted string as a ternary, so text like `"too hot?"` returned nothing
@@ -55,9 +55,18 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - add 0kW to heat limits [#3262](https://github.com/emsesp/EMS-ESP32/issues/3262), [#3265](https://github.com/emsesp/EMS-ESP32/issues/3265)
 - show temperature value for sensor 0x40 [#3272](https://github.com/emsesp/EMS-ESP32/issues/3272)
 - no EMS bus on custom boards whose interface relies on a pull-up on the Rx line. The newer ESP-IDF no longer enables the internal pull-up on the UART Rx pin, so it is now set explicitly as it was in 3.8 [#3258](https://github.com/emsesp/EMS-ESP32/discussions/3258)
+- no EMS bus after restart when Rx uses a pin that boots with another IO_MUX function (e.g. GPIO43/44 = UART0 on ESP32-S3). IDF 5 `uart_set_pin()` no longer selects the GPIO function on the Rx pad when routing via the matrix, so the pin is reset before UART setup [#3258](https://github.com/emsesp/EMS-ESP32/discussions/3258)
+- Tx mode Auto preferred HT3 pacing over EMS+ when the bus used the HT3 address mask. Some Bosch heat pumps (e.g. Compress 7000i AW, CS5800i) need EMS+ timing; Auto now selects EMS+ when boiler monitor 0xE4 is seen (not merely any extended telegram, which Junkers HT3 also uses) [#3283](https://github.com/emsesp/EMS-ESP32/issues/3283), [#3245](https://github.com/emsesp/EMS-ESP32/issues/3245)
 - Guru Meditation (cache error) on HybridCompile builds when the EMS or console UART ISR ran from flash during a SPI flash read (WiFi power-down, mDNS, NVS). The UART ISR and ringbuf ISR helpers are now in IRAM
 - compile errors against Arduino 3.3.12 from Tasmota/Arduino headers named `console.h`, `network.h` and `httpClient.h`. Those EMS-ESP headers are now `emsesp_console.h`, `emsesp_network.h` and `emsesp_http_client.h`
 - HTTP OTA from WSL/mDNS stalled on IPv6 and used tiny write chunks. Uploads now resolve IPv4 and stream in 64 KB blocks (`scripts/upload.py`, `scripts/upload_cli.py`)
+- BC400/UI800/HMC310 `dhw.circmode` labels: `auto` was "According to DHW time program" and `own prog` was the circulation's own Auto program. Renamed to match the CS5800i UI [#3296](https://github.com/emsesp/EMS-ESP32/issues/3296)
+- resetting a customized min/max now restores the original limits immediately. The register limits are kept and the custom range is applied only when the limits are read, so a restart is no longer needed
+- a device's custom name and brand were wiped when saving an entity customization, and the name was gone after the next restart. Saving entities now keeps the name and brand stored in the same record
+- `dhw/comfdiff`, `dhw/ecodiff` and `dhw/ecoplusdiff` now accept a minimum of 4 K instead of 6 K, matching the CS5800i [#3273](https://github.com/emsesp/EMS-ESP32/issues/3273)
+- syslog dropped messages at DEBUG because the queue held only 10 lines, less than one bus burst. The queue is now 100. Syslog success and failure counts are included in the MQTT heartbeat, and the Activity page rounds the quality percentage instead of truncating it [#3284](https://github.com/emsesp/EMS-ESP32/issues/3284)
+- a read or write aimed at EMS-ESP's own bus id was left unanswered, so the sender waited for a timeout. EMS-ESP now sends an empty reply to those reads and acknowledges those writes [#3094](https://github.com/emsesp/EMS-ESP32/issues/3094)
+- a second boiler monitor `0xE4` carrying `0xFFFF` cleared a valid `pc0Flow`. That empty value is now ignored [#3224](https://github.com/emsesp/EMS-ESP32/issues/3224)
 
 ## Changed
 

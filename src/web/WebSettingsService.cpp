@@ -149,6 +149,7 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
         if (settings.eth_power != -1) { // Ethernet Power -1 means disabled
             EMSESP::system_.remove_gpio(settings.eth_power, true);
         }
+
         // remove the ethernet pins from valid list, regardless of whether the GPIOs are valid or not
         EMSESP::system_.remove_gpio(23, true); // MDC
         EMSESP::system_.remove_gpio(18, true); // MDIO
@@ -410,6 +411,7 @@ void WebSettingsService::onUpdate() {
     if (WebSettings::has_flags(WebSettings::ChangeFlags::MODBUS)) {
         EMSESP::system_.modbus_init();
     }
+
     WebSettings::reset_flags();
     EMSESP::system_.reset_unused_gpios();
 }
@@ -514,6 +516,7 @@ void WebSettings::set_board_profile(WebSettings & settings) {
                 settings.board_profile = "S32"; // ESP32 standard WiFi with PSRAM
             }
         }
+
 // override if we know the target from the build config like C3, S2, S3 etc..
 #elif CONFIG_IDF_TARGET_ESP32C3
         settings.board_profile = "C3MINI";
@@ -561,6 +564,7 @@ bool WebSettings::check_flag(int prev_v, int new_v, uint16_t flag) {
 #endif
         return true;
     }
+
     return false;
 }
 

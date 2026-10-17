@@ -50,6 +50,7 @@ void Pool::process_HpPoolStatus(const std::shared_ptr<const Telegram> & telegram
     if (telegram->read_value(request, 4)) {
         has_update(poolRequest_, request == 0 ? EMS_VALUE_BOOL_ON : EMS_VALUE_BOOL_OFF);
     }
+
     has_update(telegram, poolTemp_, 0);
     has_update(telegram, poolShunt_, 3); // 0-100%, 0% = pool / 100% = heat
     telegram->read_value(poolShuntStatus__, 2);

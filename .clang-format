@@ -30,6 +30,7 @@ BreakConstructorInitializersBeforeComma: true # Always break constructor initial
 ExperimentalAutoDetectBinPacking: false
 KeepEmptyLinesAtTheStartOfBlocks: false
 MaxEmptyLinesToKeep: 1
+InsertNewlineAtEOF: true # clang-format 16+: one newline at end of file if missing
 PenaltyBreakBeforeFirstCallParameter: 200
 PenaltyExcessCharacter: 10
 PointerAlignment: Middle

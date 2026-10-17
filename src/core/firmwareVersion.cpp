@@ -55,9 +55,11 @@ static int compare_prerelease(const std::string & a, const std::string & b) {
     if (a == b) {
         return 0;
     }
+
     if (a.empty()) {
         return 1; // release > prerelease
     }
+
     if (b.empty()) {
         return -1;
     }
@@ -70,9 +72,11 @@ static int compare_prerelease(const std::string & a, const std::string & b) {
         if (ea == std::string::npos) {
             ea = a.size();
         }
+
         if (eb == std::string::npos) {
             eb = b.size();
         }
+
         std::string id_a = a.substr(ia, ea - ia);
         std::string id_b = b.substr(ib, eb - ib);
 
@@ -102,9 +106,11 @@ static int compare_prerelease(const std::string & a, const std::string & b) {
     if (ia < a.size()) {
         return 1;
     }
+
     if (ib < b.size()) {
         return -1;
     }
+
     return 0;
 }
 
@@ -144,6 +150,7 @@ void FirmwareVersion::parse(const char * s) {
     if (s == nullptr || *s == '\0') {
         return;
     }
+
     // parse numeric major.minor.patch; accept partial ("3", "3.9", "3.9.0")
     sscanf(s, "%d.%d.%d", &major_, &minor_, &patch_);
     // capture prerelease tag after '-' if present (stop at '+' which is build metadata)

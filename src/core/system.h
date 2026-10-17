@@ -308,6 +308,7 @@ class System {
     void PSram(uint32_t psram) {
         psram_ = psram / 1024;
     }
+
     uint32_t PSram() {
         return psram_;
     }
@@ -315,6 +316,7 @@ class System {
     uint32_t appFree() {
         return appfree_;
     }
+
     uint32_t appUsed() {
         return appused_;
     }
@@ -323,9 +325,11 @@ class System {
     static uint32_t getMaxAllocMem() {
         return max_alloc_mem_;
     }
+
     static uint32_t getHeapMem() {
         return heap_mem_;
     }
+
     // All-time low watermark of free internal heap (KB).
     // Unlike getHeapMem() (sampled now), this captures the *lowest* free heap
     // has ever been since boot — i.e. the worst transient dip during MQTT
@@ -335,6 +339,7 @@ class System {
     static uint32_t getMinFreeMem() {
         return min_free_mem_;
     }
+
     static void refreshHeapMem() {
 #ifndef EMSESP_STANDALONE
         max_alloc_mem_ = ESP.getMaxAllocHeap() / 1024;
@@ -346,6 +351,7 @@ class System {
     static bool test_set_all_active() {
         return test_set_all_active_;
     }
+
     static void test_set_all_active(bool n) {
 #if defined(EMSESP_TEST)
         if (n) {
@@ -453,6 +459,7 @@ class System {
         uint8_t     pin;
         std::string source;
     };
+
     static std::vector<uint8_t, AllocatorPSRAM<uint8_t>>     valid_system_gpios_; // list of valid GPIOs for the ESP32 board that can be used
     static std::vector<GpioUsage, AllocatorPSRAM<GpioUsage>> used_gpios_;         // list of GPIOs used by the application
 

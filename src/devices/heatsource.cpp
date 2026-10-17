@@ -187,6 +187,7 @@ bool Heatsource::set_vr2Config(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, v, FL_(enum_vr2Config))) {
         return false;
     }
+
     write_command(0x54C, 12, v, 0x54C);
     return true;
 }
@@ -197,6 +198,7 @@ bool Heatsource::set_ahsActivated(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
+
     write_command(0x54C, 0, v, 0x54C);
     return true;
 }
@@ -207,6 +209,7 @@ bool Heatsource::set_aPumpConfig(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
+
     write_command(0x54C, 4, v, 0x54C);
     return true;
 }
@@ -217,6 +220,7 @@ bool Heatsource::set_aPumpSignal(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, v, FL_(enum_aPumpSignal))) {
         return false;
     }
+
     write_command(0x54C, 3, v, 0x54C);
     return true;
 }
@@ -227,6 +231,7 @@ bool Heatsource::set_aPumpMin(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     write_command(0x54C, 21, v, 0x54C);
     return true;
 }
@@ -237,6 +242,7 @@ bool Heatsource::set_tempRise(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
+
     write_command(0x54C, 1, v, 0x54C);
     return true;
 }
@@ -247,6 +253,7 @@ bool Heatsource::set_setReturnTemp(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
+
     write_command(0x54C, 6, v, 0x54C);
     return true;
 }
@@ -257,6 +264,7 @@ bool Heatsource::set_mixRuntime(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     uint8_t data[2] = {(uint8_t)(v >> 8), (uint8_t)v};
     write_command(0x54C, 8, data, 2, 0x54C);
     return true;
@@ -268,6 +276,7 @@ bool Heatsource::set_setFlowTemp(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     write_command(0x54C, 7, v, 0x54C);
     return true;
 }
@@ -278,6 +287,7 @@ bool Heatsource::set_bufBypass(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, v, FL_(enum_bufBypass))) {
         return false;
     }
+
     write_command(0x54C, 2, v, 0x54C);
     return true;
 }
@@ -288,6 +298,7 @@ bool Heatsource::set_bufMixRuntime(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     uint8_t data[2] = {(uint8_t)(v >> 8), (uint8_t)v};
     write_command(0x54C, 10, data, 2, 0x54C);
     return true;
@@ -299,6 +310,7 @@ bool Heatsource::set_bufConfig(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, v, FL_(enum_bufConfig))) {
         return false;
     }
+
     write_command(0x54C, 20, v, 0x54C);
     return true;
 }
@@ -309,6 +321,7 @@ bool Heatsource::set_blockMode(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, v, FL_(enum_blockMode))) {
         return false;
     }
+
     write_command(0x54C, 16, v, 0x54C);
     return true;
 }
@@ -319,6 +332,7 @@ bool Heatsource::set_blockTerm(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, v, FL_(enum_blockTerm))) {
         return false;
     }
+
     write_command(0x54C, 17, v, 0x54C);
     return true;
 }
@@ -329,6 +343,7 @@ bool Heatsource::set_blockHyst(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, v, true)) {
         return false;
     }
+
     write_command(0x54C, 14, v, 0x54C);
     return true;
 }
@@ -339,6 +354,7 @@ bool Heatsource::set_releaseWait(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     write_command(0x54C, 15, v, 0x54C);
     return true;
 }

@@ -69,6 +69,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     if (esp_sntp_enabled()) {
         ntp_status = (EMSESP::system_.ntp_connected()) ? 2 : 1;
     }
+
     root["ntp_status"] = ntp_status;
     if (ntp_status == 2) {
         // send back actual time if NTP enabled and active
@@ -129,6 +130,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
         root["psram_size"] = EMSESP::system_.PSram();
         root["free_psram"] = ESP.getFreePsram() / 1024;
     }
+
     root["model"] = EMSESP::system_.getBBQKeesGatewayDetails();
     root["board"] = EMSESP::system_.getBBQKeesGatewayDetails(FUSE_VALUE::BOARD);
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
@@ -140,6 +142,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     if (partition != NULL) {
         root["recovery_version"] = EMSESP::system_.recovery_version();
     }
+
     partition = esp_ota_get_next_update_partition(nullptr);
     if (partition) {
         uint64_t buffer;
@@ -159,6 +162,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
         if (partition.second.version.empty() || partition.second.size == 0) {
             continue;
         }
+
         JsonObject part   = partitions.add<JsonObject>();
         part["partition"] = partition.first;
         part["version"]   = partition.second.version;
@@ -182,6 +186,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
         // we're ready to do the actual restart ASAP
         EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED);
     }
+
     if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD) {
         // error is reported, back to normal state
         EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_NORMAL);
@@ -375,6 +380,7 @@ void WebStatusService::getVersions(JsonObject root) {
         if (info.version.empty()) {
             return;
         }
+
         JsonObject out     = root[key].to<JsonObject>();
         out["version"]     = info.version;
         out["date"]        = info.date;
@@ -405,6 +411,7 @@ void WebStatusService::schedule_versions_refresh() {
     if (next == 0) {
         next = 1; // 0 is the "idle" sentinel — never let the wrap land there
     }
+
     versions_next_fetch_ms_ = next;
 }
 
@@ -444,6 +451,7 @@ void WebStatusService::loop() {
         if (versions_failures_ < VERSIONS_MAX_BACKOFF_STEPS) {
             versions_failures_++;
         }
+
         interval = VERSIONS_RETRY_INTERVAL_MS << (versions_failures_ - 1);
     }
 
@@ -451,6 +459,7 @@ void WebStatusService::loop() {
     if (next == 0) {
         next = 1;
     }
+
     versions_next_fetch_ms_ = next;
 #endif
 }
@@ -467,6 +476,7 @@ bool WebStatusService::refresh_versions_cache() {
         EMSESP::logger().warning("Unable to retrieve online version information (HTTP error code %d)", http_code);
         return false;
     }
+
     DeserializationError err = deserializeJson(doc, result);
     if (err) {
 #if defined(EMSESP_DEBUG)
@@ -483,6 +493,7 @@ bool WebStatusService::refresh_versions_cache() {
             out = {};
             return;
         }
+
         out.version     = section["version"] | "";
         out.date        = section["date"] | "";
         out.upgradeable = !out.version.empty() && FirmwareVersion(out.version) > current_version;
@@ -516,6 +527,7 @@ bool WebStatusService::current_upgradeable() const {
     if (!versions_cache_valid_) {
         return false;
     }
+
     return is_dev ? versions_dev_.upgradeable : versions_stable_.upgradeable;
 }
 

@@ -55,6 +55,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
             } else {
                 emsesp::EMSESP::logger().info("MD5 digest received (%s). Now upload the firmware BIN", _ota.md5());
             }
+
             return;
         default:
             _ota.clearMd5();
@@ -78,6 +79,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
                     handleError(request, 406);
                     return;
                 }
+
                 _is_recovery = true;
                 emsesp::EMSESP::logger().info("Recovery firmware uploading to the %s partition (size: %dKB). Please wait...", target->label, filesize / 1024);
             } else
@@ -96,6 +98,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
                 if (_ota.md5Applied()) {
                     emsesp::EMSESP::logger().info("Firmware MD5 check enabled (%s)", _ota.md5());
                 }
+
                 request->onDisconnect([this] { handleDisconnect(); }); // success, let's make sure we end the update if the client hangs up
             } else {
                 emsesp::EMSESP::logger().err("OTA begin failed: %s", _ota.errorString());
@@ -133,6 +136,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
                 handleError(request, 500); // internal error, failed
                 return;
             }
+
             if (final) {
                 if (!_ota.end()) {
                     emsesp::EMSESP::logger().err("OTA update failed: %s", _ota.errorString());
@@ -156,6 +160,7 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
             request->send(request->beginResponse(code));
             _response_sent = true;
         }
+
         _is_firmware   = false;
         _is_filesystem = false;
         _is_recovery   = false;
@@ -187,6 +192,7 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
             emsesp::EMSESP::logger().info("Firmware MD5 matches");
             root["md5_ok"] = true;
         }
+
         response->setLength();
         request->send(response);
         _ota.clearMd5();
@@ -214,6 +220,7 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
             AsyncWebServerResponse * response = request->beginResponse(200);
             request->send(response);
         }
+
         emsesp::EMSESP::system_.systemStatus(
             emsesp::SYSTEM_STATUS::SYSTEM_STATUS_PENDING_RESTART); // will be handled by the main loop. We use pending for the Web's SystemMonitor
         return;
@@ -237,6 +244,7 @@ void UploadFileService::handleError(AsyncWebServerRequest * request, int code) {
     if (request->_tempObject) {
         return;
     }
+
     request->_tempObject = reinterpret_cast<void *>(static_cast<intptr_t>(code)); // stop later chunks from retrying the write
 
     emsesp::EMSESP::logger().info("Upload error: %d", code);

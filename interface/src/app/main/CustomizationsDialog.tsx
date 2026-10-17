@@ -3,6 +3,7 @@ import { memo, useEffect, useState } from 'react';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CloseIcon from '@mui/icons-material/Close';
 import DoneIcon from '@mui/icons-material/Done';
+import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import {
   Box,
   Button,
@@ -68,6 +69,15 @@ const CustomizationsDialog = ({
     editItem.w &&
     !(editItem.m & DeviceEntityMask.DV_READONLY);
 
+  // c is set by the firmware for a saved customization. Mask, name, and edited
+  // limits also count, including changes made in this dialog before they are saved.
+  const showReset =
+    !!editItem.c ||
+    editItem.m !== 0 ||
+    (editItem.cn ?? '') !== '' ||
+    editItem.mi !== editItem.o_mi ||
+    editItem.ma !== editItem.o_ma;
+
   useEffect(() => {
     if (open) {
       setError(false);
@@ -99,6 +109,17 @@ const CustomizationsDialog = ({
 
   const updateDeviceEntity = (updatedItem: DeviceEntity) => {
     setEditItem((prev) => ({ ...prev, m: updatedItem.m }));
+  };
+
+  const remove = () => {
+    const next: DeviceEntity = { ...editItem, m: 0, cn: '', c: false };
+    if (editItem.mi !== undefined) {
+      next.mi = null;
+    }
+    if (editItem.ma !== undefined) {
+      next.ma = null;
+    }
+    onSave(next);
   };
 
   return (
@@ -141,7 +162,9 @@ const CustomizationsDialog = ({
                 <TextField
                   name="mi"
                   label={LL.MIN()}
-                  value={numberValue(editItem.mi)}
+                  value={
+                    typeof editItem.mi === 'number' ? numberValue(editItem.mi) : ''
+                  }
                   sx={{ width: '11ch' }}
                   type="number"
                   onChange={updateFormValue}
@@ -151,7 +174,9 @@ const CustomizationsDialog = ({
                 <TextField
                   name="ma"
                   label={LL.MAX()}
-                  value={numberValue(editItem.ma)}
+                  value={
+                    typeof editItem.ma === 'number' ? numberValue(editItem.ma) : ''
+                  }
                   sx={{ width: '11ch' }}
                   type="number"
                   onChange={updateFormValue}
@@ -169,6 +194,17 @@ const CustomizationsDialog = ({
       </DialogContent>
 
       <DialogActions>
+        {showReset && (
+          <Button
+            startIcon={<SettingsBackupRestoreIcon />}
+            variant="outlined"
+            onClick={remove}
+            color="error"
+          >
+            {LL.RESET()}
+          </Button>
+        )}
+        <Box sx={{ flexGrow: 1 }} />
         <Button
           startIcon={<CancelIcon />}
           variant="outlined"

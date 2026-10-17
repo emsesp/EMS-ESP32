@@ -55,6 +55,7 @@ class AnalogCustomization {
     bool operator==(const AnalogCustomization & a) const {
         return gpio == a.gpio;
     }
+
     bool operator!=(const AnalogCustomization & a) const {
         return !operator==(a);
     }

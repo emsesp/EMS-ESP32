@@ -35,7 +35,7 @@ summary=$(awk '
     }
 ' "${added}" "${CHANGELOG}")
 
-echo "Development build of EMS-ESP v${VERSION}."
+echo "Development build of EMS-ESP v${VERSION}"
 echo
 
 if [ -n "${summary}" ]; then

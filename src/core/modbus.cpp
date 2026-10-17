@@ -37,12 +37,14 @@ void Modbus::start(uint8_t systemServerId, uint16_t port, uint8_t max_clients, u
             modbusServer_->registerWorker(i, WRITE_MULT_REGISTERS, [this](auto && request) { return handleWrite(request); });
         }
     }
+
     modbusServer_->start(port, max_clients, timeout);
     LOG_INFO("Starting Modbus service (ID %d, port %d)", systemServerId, port);
 #else
     if (!check_parameter_order()) {
         LOG_ERROR("Unable to enable Modbus - the parameter list order is corrupt. This is a firmware bug.");
     }
+
     LOG_INFO("Modbus deactivated in standalone build.");
 #endif
 }
@@ -71,8 +73,10 @@ bool Modbus::check_parameter_order() {
             LOG_ERROR("Error in modbus parameters: %s must be listed before %s.", mi.short_name, prev->short_name);
             return false;
         }
+
         prev = &mi;
     }
+
     return true;
 }
 
@@ -263,10 +267,12 @@ ModbusMessage Modbus::handleRead(const ModbusMessage & request) {
             }
         }
     }
+
     if (error_code) {
         if (uuid::get_uptime_sec() > 60 || error_code < -2) { // suppress not found messages for the first minute
             LOG_ERROR("Unable to read raw device value %s for tag=%d - error_code = %d", modbusInfo->short_name, (int)tag, error_code);
         }
+
         response.setError(request.getServerID(), request.getFunctionCode(), SERVER_DEVICE_FAILURE);
         return response;
     }
@@ -361,6 +367,7 @@ ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
             }
         }
     }
+
     if (error_code) {
         // error getting modbus value as json
         LOG_ERROR("error getting modbus value as json, error code = %d", error_code);
@@ -397,6 +404,7 @@ ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
         } else {
             snprintf(error, sizeof(error), "Modbus write command failed with error code (%s)", Command::return_code_string(return_code));
         }
+
         LOG_ERROR(error);
         response.setError(request.getServerID(), request.getFunctionCode(), ILLEGAL_DATA_VALUE);
     } else {
@@ -450,7 +458,10 @@ int Modbus::getRegisterCount(const DeviceValue & dv) {
 
         case DeviceValue::CMD: {
             // calculate a sensible register size from min, max and numeric_operator
-            uint32_t num_values    = std::max(dv.max, (uint32_t)abs(dv.min));
+            int16_t  eff_min = dv.min;
+            uint32_t eff_max = dv.max;
+            dv.apply_custom_minmax(eff_min, eff_max);
+            uint32_t num_values    = std::max(eff_max, (uint32_t)abs(eff_min));
             int      num_registers = 0;
 
             if (num_values < (1L << 16))

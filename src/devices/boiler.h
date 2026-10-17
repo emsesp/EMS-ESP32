@@ -34,6 +34,7 @@ class Boiler : public EMSdevice {
     inline uint8_t model() const {
         return (flags() & 0x0F);
     }
+
     inline bool isHeatPump() const {
         return flags() & 0x08;
     }
@@ -454,9 +455,11 @@ class Boiler : public EMSdevice {
     inline bool set_hyst2_on(const char * value, const int8_t id) {
         return set_hyst_on(value, 2);
     }
+
     inline bool set_hyst2_off(const char * value, const int8_t id) {
         return set_hyst_off(value, 2);
     }
+
     bool set_burn_period(const char * value, const int8_t id);
     bool set_pump_delay(const char * value, const int8_t id);
     bool set_reset(const char * value, const int8_t id);
@@ -476,25 +479,32 @@ class Boiler : public EMSdevice {
     inline bool set_HpIn1Logic(const char * value, const int8_t id) {
         return set_HpInLogic(value, 1);
     }
+
     inline bool set_HpIn2Logic(const char * value, const int8_t id) {
         return set_HpInLogic(value, 2);
     }
+
     inline bool set_HpIn3Logic(const char * value, const int8_t id) {
         return set_HpInLogic(value, 3);
     }
+
     inline bool set_HpIn4Logic(const char * value, const int8_t id) {
         return set_HpInLogic(value, 4);
     }
+
     bool        set_maxHeat(const char * value, const int8_t id);
     inline bool set_maxHeatComp(const char * value, const int8_t id) {
         return set_maxHeat(value, 2);
     }
+
     inline bool set_maxHeatHeat(const char * value, const int8_t id) {
         return set_maxHeat(value, 3);
     }
+
     inline bool set_maxHeatDhw(const char * value, const int8_t id) {
         return set_maxHeat(value, 4);
     }
+
     bool set_silentMode(const char * value, const int8_t id);
     bool set_minTempSilent(const char * value, const int8_t id);
     bool set_silentFrom(const char * value, const int8_t id);
@@ -518,55 +528,71 @@ class Boiler : public EMSdevice {
     inline bool set_auxMaxLimit(const char * value, const int8_t id) {
         return set_auxLimit(value, 14);
     }
+
     inline bool set_auxLimitStart(const char * value, const int8_t id) {
         return set_auxLimit(value, 15);
     }
+
     bool        set_hpHyst(const char * value, const int8_t id);
     inline bool set_hpHystHeat(const char * value, const int8_t id) {
         return set_hpHyst(value, 37);
     }
+
     inline bool set_hpHystCool(const char * value, const int8_t id) {
         return set_hpHyst(value, 35);
     }
+
     inline bool set_hpHystPool(const char * value, const int8_t id) {
         return set_hpHyst(value, 33);
     }
+
     bool        set_tempDiff(const char * value, const int8_t id);
     inline bool set_tempDiffHeat(const char * value, const int8_t id) {
         return set_tempDiff(value, 4);
     }
+
     inline bool set_tempDiffCool(const char * value, const int8_t id) {
         return set_tempDiff(value, 3);
     }
+
     bool        set_wwOffTemp(const char * value, const int8_t id);
     inline bool set_wwComfOffTemp(const char * value, const int8_t id) {
         return set_wwOffTemp(value, 1);
     }
+
     inline bool set_wwEcoOffTemp(const char * value, const int8_t id) {
         return set_wwOffTemp(value, 0);
     }
+
     inline bool set_wwEcoPlusOffTemp(const char * value, const int8_t id) {
         return set_wwOffTemp(value, 5);
     }
+
     bool        set_wwDiffTemp(const char * value, const int8_t id);
     inline bool set_wwComfDiffTemp(const char * value, const int8_t id) {
         return set_wwDiffTemp(value, 12);
     }
+
     inline bool set_wwEcoDiffTemp(const char * value, const int8_t id) {
         return set_wwDiffTemp(value, 13);
     }
+
     inline bool set_wwEcoPlusDiffTemp(const char * value, const int8_t id) {
         return set_wwDiffTemp(value, 14);
     }
+
     inline bool set_wwComfStopTemp(const char * value, const int8_t id) {
         return set_wwOffTemp(value, 8);
     }
+
     inline bool set_wwEcoStopTemp(const char * value, const int8_t id) {
         return set_wwOffTemp(value, 9);
     }
+
     inline bool set_wwEcoPlusStopTemp(const char * value, const int8_t id) {
         return set_wwOffTemp(value, 10);
     }
+
     bool        set_vp_cooling(const char * value, const int8_t id);
     bool        set_heatCable(const char * value, const int8_t id);
     bool        set_VC0valve(const char * value, const int8_t id);
@@ -577,20 +603,25 @@ class Boiler : public EMSdevice {
     inline bool set_elHeatStep1(const char * value, const int8_t id) {
         return set_elHeatStep(value, 1);
     }
+
     inline bool set_elHeatStep2(const char * value, const int8_t id) {
         return set_elHeatStep(value, 2);
     }
+
     inline bool set_elHeatStep3(const char * value, const int8_t id) {
         return set_elHeatStep(value, 3);
     }
+
     bool        set_wwAlternatingOper(const char * value, const int8_t id);
     bool        set_wwAltOpPrio(const char * value, const int8_t id);
     inline bool set_wwAltOpPrioHeat(const char * value, const int8_t id) {
         return set_wwAltOpPrio(value, 2);
     }
+
     inline bool set_wwAltOpPrioWw(const char * value, const int8_t id) {
         return set_wwAltOpPrio(value, 3);
     }
+
     bool set_forceHeatingOff(const char * value, const int8_t id);
 
     /*
