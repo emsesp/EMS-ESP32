@@ -4134,7 +4134,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "UI800, BC400",thermostat,4,dhw.modetype,mode type,enum [off\|eco\|comfort\|eco+], ,false,sensor.thermostat_dhw_mode_type,sensor.thermostat_dhw_modetype,7,9,1,1,1
 "UI800, BC400",thermostat,4,dhw.settemp,set temperature,uint8 (>=0<=0),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,7,9,1,2,1
 "UI800, BC400",thermostat,4,dhw.settemplow,set low temperature,uint8 (>=0<=0),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,7,9,1,3,1
-"UI800, BC400",thermostat,4,dhw.circmode,circulation pump mode,enum [off\|on\|auto\|own prog] (>=0<=0), ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,7,9,1,4,1
+"UI800, BC400",thermostat,4,dhw.circmode,circulation pump mode,enum [off\|on\|According to DHW time program\|auto] (>=0<=0), ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,7,9,1,4,1
 "UI800, BC400",thermostat,4,dhw.chargeduration,charge duration,uint8 (>=0<=0),minutes,true,number.thermostat_dhw_charge_duration,number.thermostat_dhw_chargeduration,7,9,15,5,1
 "UI800, BC400",thermostat,4,dhw.charge,charge,boolean (>=0<=0), ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,7,9,1,6,1
 "UI800, BC400",thermostat,4,dhw.extra,extra,boolean, ,false,binary_sensor.thermostat_dhw_extra,binary_sensor.thermostat_dhw_extra,7,9,1,7,1
@@ -4859,7 +4859,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.modetype,mode type,enum [off\|eco\|comfort\|eco+], ,false,sensor.thermostat_dhw_mode_type,sensor.thermostat_dhw_modetype,7,9,1,1,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.settemp,set temperature,uint8 (>=0<=0),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,7,9,1,2,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.settemplow,set low temperature,uint8 (>=0<=0),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,7,9,1,3,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.circmode,circulation pump mode,enum [off\|on\|auto\|own prog] (>=0<=0), ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,7,9,1,4,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.circmode,circulation pump mode,enum [off\|on\|According to DHW time program\|auto] (>=0<=0), ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,7,9,1,4,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.chargeduration,charge duration,uint8 (>=0<=0),minutes,true,number.thermostat_dhw_charge_duration,number.thermostat_dhw_chargeduration,7,9,15,5,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.charge,charge,boolean (>=0<=0), ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,7,9,1,6,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,dhw.extra,extra,boolean, ,false,binary_sensor.thermostat_dhw_extra,binary_sensor.thermostat_dhw_extra,7,9,1,7,1
