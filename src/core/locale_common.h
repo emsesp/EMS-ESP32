@@ -334,6 +334,7 @@ MAKE_ENUM(enum_PID, FL_(fast), FL_(medium), FL_(slow))
 MAKE_ENUM(enum_heatup, FL_(slow), FL_(medium), FL_(fast))
 MAKE_ENUM(enum_wwMode, FL_(off), FL_(normal), FL_(comfort), FL_(auto), FL_(own_prog))
 MAKE_ENUM(enum_wwCircMode, FL_(off), FL_(on), FL_(auto), FL_(own_prog))
+MAKE_ENUM(enum_wwCircMode2, FL_(off), FL_(on), FL_(dhw_prog), FL_(auto)) // BC400/UI800/HMC310, see #3296
 MAKE_ENUM(enum_wwMode2, FL_(off), FL_(on), FL_(auto))
 MAKE_ENUM(enum_wwMode3, FL_(on), FL_(off), FL_(auto))
 MAKE_ENUM(enum_wwMode4, FL_(off), FL_(ecoplus), FL_(eco), FL_(comfort), FL_(auto))

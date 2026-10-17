@@ -1437,7 +1437,7 @@ void Thermostat::process_RC300WWmode(const std::shared_ptr<const Telegram> & tel
         has_update(telegram, dhw->wwMode_, 2); // 0=off, 1=low, 2=high, 3=auto, 4=own prog
     }
 
-    has_update(telegram, dhw->wwCircMode_, 3);        // 0=off, 1=on, 2=auto, 4=own?
+    has_update(telegram, dhw->wwCircMode_, 3);        // 0=off, 1=on, 2=dhw prog (BC400+) / auto, 3=auto (BC400+) / own prog
     has_update(telegram, dhw->wwChargeDuration_, 10); // value in steps of 15 min
     has_update(telegram, dhw->wwCharge_, 11);         // 0=off, 0xFF=on
     has_update(telegram, dhw->wwDisinfecting_, 5);    // 0=off, 0xFF=on
@@ -2864,7 +2864,11 @@ bool Thermostat::set_wwcircmode(const char * value, const int8_t id) {
     uint8_t set;
 
     if (isRC300() || (model() == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
-        if (!Helpers::value2enum(value, set, FL_(enum_wwCircMode))) {
+        if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400 || model() == EMSdevice::EMS_DEVICE_FLAG_UI800 || model() == EMSdevice::EMS_DEVICE_FLAG_HMC310) {
+            if (!Helpers::value2enum(value, set, FL_(enum_wwCircMode2))) {
+                return false;
+            }
+        } else if (!Helpers::value2enum(value, set, FL_(enum_wwCircMode))) {
             return false;
         }
 
@@ -5866,7 +5870,11 @@ void Thermostat::register_device_values_dhw(std::shared_ptr<Thermostat::DhwCircu
         register_device_value(tag, &dhw->wwModeType_, DeviceValueType::ENUM, FL_(enum_wwModeType), FL_(modetype), DeviceValueUOM::NONE);
         register_device_value(tag, &dhw->wwSetTemp_, DeviceValueType::UINT8, FL_(wwSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwtemp));
         register_device_value(tag, &dhw->wwSetTempLow_, DeviceValueType::UINT8, FL_(wwSetTempLow), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwtemplow));
-        register_device_value(tag, &dhw->wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcircmode));
+        if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400 || model() == EMSdevice::EMS_DEVICE_FLAG_UI800 || model() == EMSdevice::EMS_DEVICE_FLAG_HMC310) {
+            register_device_value(tag, &dhw->wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode2), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcircmode));
+        } else {
+            register_device_value(tag, &dhw->wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcircmode));
+        }
         register_device_value(tag,
                               &dhw->wwChargeDuration_,
                               DeviceValueType::UINT8,
