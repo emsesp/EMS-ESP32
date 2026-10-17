@@ -61,6 +61,8 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - compile errors against Arduino 3.3.12 from Tasmota/Arduino headers named `console.h`, `network.h` and `httpClient.h`. Those EMS-ESP headers are now `emsesp_console.h`, `emsesp_network.h` and `emsesp_http_client.h`
 - HTTP OTA from WSL/mDNS stalled on IPv6 and used tiny write chunks. Uploads now resolve IPv4 and stream in 64 KB blocks (`scripts/upload.py`, `scripts/upload_cli.py`)
 - BC400/UI800/HMC310 `dhw.circmode` labels: `auto` was "According to DHW time program" and `own prog` was the circulation's own Auto program. Renamed to match the CS5800i UI [#3296](https://github.com/emsesp/EMS-ESP32/issues/3296)
+- resetting a customized min/max now restores the original limits immediately. The register limits are kept and the custom range is applied only when the limits are read, so a restart is no longer needed
+- a device's custom name and brand were wiped when saving an entity customization, and the name was gone after the next restart. Saving entities now keeps the name and brand stored in the same record
 
 ## Changed
 
