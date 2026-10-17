@@ -57,6 +57,7 @@ uint32_t EMSESP::gateway_window_start_      = 0;
 uint8_t  EMSESP::gateway_window_count_      = 0;
 uint32_t EMSESP::gateway_fast_start_        = 0;
 uint8_t  EMSESP::gateway_fast_count_        = 0;
+uint32_t EMSESP::gateway_last_seen_         = 0;
 uint8_t  EMSESP::last_version_request_src_  = 0;
 uint32_t EMSESP::last_version_request_time_ = 0;
 #endif
@@ -1598,6 +1599,8 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
 #ifdef EMSESP_GATEWAY_TX_HOLD
     // a gateway appearing while we're running is most likely starting up and about to sync
     if (device_id == EMSdevice::EMS_DEVICE_ID_GATEWAY1) {
+        uint32_t now       = uuid::get_uptime();
+        gateway_last_seen_ = now ? now : 1;
         gateway_tx_hold_start();
     }
 #endif
@@ -1781,6 +1784,13 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
             wait_km_ = false; // KM200 is polled, from now on it is safe to send
         }
 
+#ifdef EMSESP_GATEWAY_TX_HOLD
+        // master polling 0x48 again after a gap means the gateway (or heat pump) came back
+        if (poll_id == EMSdevice::EMS_DEVICE_ID_GATEWAY1) {
+            gateway_note_activity();
+        }
+#endif
+
 #ifdef EMSESP_UART_DEBUG
         char s[4];
         if (first_value & 0x80) {
@@ -1853,9 +1863,32 @@ void EMSESP::scheduled_fetch_values() {
 }
 
 #ifdef EMSESP_GATEWAY_TX_HOLD
+// any poll of or telegram from 0x48 — if it was silent (HP/K30RF restart) re-arm the Tx hold
+void EMSESP::gateway_note_activity() {
+    uint32_t now = uuid::get_uptime();
+    if (gateway_last_seen_ && (now - gateway_last_seen_ > GATEWAY_SILENCE_MS)) {
+        // a real reconnect: allow hold even if we were in the post-max cooldown
+        gateway_cooldown_until_ = 0;
+        LOG_INFO("Gateway 0x%02X returned after %lu s silence, holding Tx",
+                 EMSdevice::EMS_DEVICE_ID_GATEWAY1,
+                 (unsigned long)((now - gateway_last_seen_) / 1000));
+        if (!gateway_hold_until_) {
+            gateway_hold_start_ = now;
+        }
+        gateway_hold_until_ = (now + GATEWAY_HOLD_TIME) | 1;
+    }
+    gateway_last_seen_ = now ? now : 1; // keep 0 as "never seen"
+}
+
 // count read requests from the gateway to other devices, a high rate means it's doing its startup sync
 void EMSESP::gateway_rx_check(const uint8_t * data, const uint8_t length) {
-    if (length < 4 || (data[0] & 0x7F) != EMSdevice::EMS_DEVICE_ID_GATEWAY1 || !(data[1] & 0x80)) {
+    if (length < 2 || (data[0] & 0x7F) != EMSdevice::EMS_DEVICE_ID_GATEWAY1) {
+        return;
+    }
+
+    gateway_note_activity();
+
+    if (length < 4 || !(data[1] & 0x80)) {
         return;
     }
 

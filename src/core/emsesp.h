@@ -300,6 +300,7 @@ class EMSESP {
     // hold our Tx while a gateway (K30RF/KM200 on 0x48) is doing its startup sync, see issue #3094
     // a startup sync is 55-250 read requests/min to other devices, normal operation is <10/min
     static void gateway_rx_check(const uint8_t * data, const uint8_t length);
+    static void gateway_note_activity(); // poll or telegram from 0x48 — re-arm hold if it was silent
     static bool gateway_tx_hold();
     static void gateway_tx_hold_start();
 
@@ -310,6 +311,7 @@ class EMSESP {
     static constexpr uint32_t GATEWAY_HOLD_TIME       = 60000;  // keep holding Tx this long after the last busy window
     static constexpr uint32_t GATEWAY_HOLD_MAX        = 600000; // never hold longer than 10 minutes in one go
     static constexpr uint32_t GATEWAY_HOLD_COOLDOWN   = 600000; // after hitting the max, don't hold again for 10 minutes
+    static constexpr uint32_t GATEWAY_SILENCE_MS      = 60000;  // no 0x48 traffic for this long = gone; next sighting re-arms hold
 
     static uint32_t gateway_hold_until_;
     static uint32_t gateway_hold_start_;
@@ -318,6 +320,7 @@ class EMSESP {
     static uint8_t  gateway_window_count_;
     static uint32_t gateway_fast_start_;
     static uint8_t  gateway_fast_count_;
+    static uint32_t gateway_last_seen_; // last poll or telegram from 0x48
     static uint8_t  last_version_request_src_;
     static uint32_t last_version_request_time_;
 #endif
