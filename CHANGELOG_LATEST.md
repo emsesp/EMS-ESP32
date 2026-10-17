@@ -63,6 +63,10 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - BC400/UI800/HMC310 `dhw.circmode` labels: `auto` was "According to DHW time program" and `own prog` was the circulation's own Auto program. Renamed to match the CS5800i UI [#3296](https://github.com/emsesp/EMS-ESP32/issues/3296)
 - resetting a customized min/max now restores the original limits immediately. The register limits are kept and the custom range is applied only when the limits are read, so a restart is no longer needed
 - a device's custom name and brand were wiped when saving an entity customization, and the name was gone after the next restart. Saving entities now keeps the name and brand stored in the same record
+- `dhw/comfdiff`, `dhw/ecodiff` and `dhw/ecoplusdiff` now accept a minimum of 4 K instead of 6 K, matching the CS5800i [#3273](https://github.com/emsesp/EMS-ESP32/issues/3273)
+- syslog dropped messages at DEBUG because the queue held only 10 lines, less than one bus burst. The queue is now 100. Syslog success and failure counts are included in the MQTT heartbeat, and the Activity page rounds the quality percentage instead of truncating it [#3284](https://github.com/emsesp/EMS-ESP32/issues/3284)
+- a read or write aimed at EMS-ESP's own bus id was left unanswered, so the sender waited for a timeout. EMS-ESP now sends an empty reply to those reads and acknowledges those writes [#3094](https://github.com/emsesp/EMS-ESP32/issues/3094)
+- a second boiler monitor `0xE4` carrying `0xFFFF` cleared a valid `pc0Flow`. That empty value is now ignored [#3224](https://github.com/emsesp/EMS-ESP32/issues/3224)
 
 ## Changed
 
