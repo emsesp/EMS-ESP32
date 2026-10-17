@@ -4,7 +4,7 @@ For more details go to [emsesp.org](https://emsesp.org/).
 
 ## [3.9.0]
 
-This release is based on the latest Espressif/Arduino core version 3. It brings in many memory and performance optimizations.
+This release is based on the latest Espressif/Arduino core version 3. It brings in many memory and performance optimizations, for example 25% more available memory and 30% less PSRAM fragmentation.
 
 ## Added
 
