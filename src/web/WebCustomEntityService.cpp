@@ -235,7 +235,7 @@ bool WebCustomEntityService::command_setvalue(const char * value, const int8_t i
                     return false;
                 }
 
-                int v = (f / entityItem.factor + 0.5);
+                int v = (f / entityItem.factor + (v >= 0 ? 0.5 : -0.5));
                 if (entityItem.value_type == DeviceValueType::UINT8 || entityItem.value_type == DeviceValueType::INT8) {
                     EMSESP::send_write_request(entityItem.type_id, entityItem.device_id, entityItem.offset, v, entityItem.type_id);
                 } else if (entityItem.value_type == DeviceValueType::UINT16 || entityItem.value_type == DeviceValueType::INT16) {
