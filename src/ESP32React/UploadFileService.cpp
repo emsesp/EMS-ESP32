@@ -214,6 +214,10 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
             AsyncWebServerResponse * response = request->beginResponse(200);
             request->send(response);
         }
+        // the upload is done: clear the flags so handleDisconnect() doesn't treat the client closing the
+        // connection as an aborted upload and cancel the pending restart
+        _is_firmware   = false;
+        _is_filesystem = false;
         emsesp::EMSESP::system_.systemStatus(
             emsesp::SYSTEM_STATUS::SYSTEM_STATUS_PENDING_RESTART); // will be handled by the main loop. We use pending for the Web's SystemMonitor
         return;
