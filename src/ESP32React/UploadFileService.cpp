@@ -151,7 +151,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
 
 void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
     if (request->_tempObject) {
-        const int code = static_cast<int>(reinterpret_cast<intptr_t>(request->_tempObject));
+        const int code = *static_cast<int *>(request->_tempObject);
         if (!_response_sent && code >= 400) {
             request->send(request->beginResponse(code));
             _response_sent = true;
@@ -241,7 +241,12 @@ void UploadFileService::handleError(AsyncWebServerRequest * request, int code) {
     if (request->_tempObject) {
         return;
     }
-    request->_tempObject = reinterpret_cast<void *>(static_cast<intptr_t>(code)); // stop later chunks from retrying the write
+    // stop later chunks from retrying the write. The request destructor frees _tempObject, so it must be heap memory
+    auto * error = static_cast<int *>(malloc(sizeof(int)));
+    if (error) {
+        *error = code;
+    }
+    request->_tempObject = error;
 
     emsesp::EMSESP::logger().info("Upload error: %d", code);
     emsesp::EMSESP::system_.uart_init(); // re-enable UART
