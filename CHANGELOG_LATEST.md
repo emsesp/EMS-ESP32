@@ -60,6 +60,7 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - Guru Meditation (cache error) on HybridCompile builds when the EMS or console UART ISR ran from flash during a SPI flash read (WiFi power-down, mDNS, NVS). The UART ISR and ringbuf ISR helpers are now in IRAM
 - compile errors against Arduino 3.3.12 from Tasmota/Arduino headers named `console.h`, `network.h` and `httpClient.h`. Those EMS-ESP headers are now `emsesp_console.h`, `emsesp_network.h` and `emsesp_http_client.h`
 - HTTP OTA from WSL/mDNS stalled on IPv6 and used tiny write chunks. Uploads now resolve IPv4 and stream in 64 KB blocks (`scripts/upload.py`, `scripts/upload_cli.py`)
+- a rejected upload (an invalid MD5 file, an unsupported file type) got no HTTP response: the connection was closed before the 406 was written, so `curl` reported "Empty reply from server". The 406 is now sent once the upload has been received
 
 ## Changed
 
