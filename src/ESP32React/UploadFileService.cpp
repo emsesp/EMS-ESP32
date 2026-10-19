@@ -247,16 +247,8 @@ void UploadFileService::handleError(AsyncWebServerRequest * request, int code) {
     emsesp::EMSESP::system_.uart_init(); // re-enable UART
     _ota.abort();
 
-    // 406: the client sent a file we won't accept. Close now so the browser fails fast.
-    // Other codes wait for uploadComplete() to send, so we don't destroy the request mid-stream.
-    if (code == 406) {
-        request->send(request->beginResponse(code));
-        _response_sent = true;
-        request->client()->close();
-        _is_firmware   = false;
-        _is_filesystem = false;
-        _is_recovery   = false;
-    }
+    // uploadComplete() sends the error code. The web server only writes a response once the whole body has
+    // arrived, so closing the connection here to fail fast would lose the response.
 
     // if we aborted a filesystem upload, remount LittleFS so the device keeps working
     if (_is_filesystem) {
