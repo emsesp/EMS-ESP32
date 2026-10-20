@@ -74,6 +74,7 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
         if (entityItem.raw) {
             delete[] entityItem.raw;
         }
+
         if (entityItem.ram == 2) { // NVS
             char key[sizeof(entityItem.name) + 2];
             snprintf(key, sizeof(key), "c:%s", entityItem.name);
@@ -81,10 +82,12 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
                 EMSESP::nvs_.remove(key);
             }
         }
+
         if (entityItem.ram) { // save name/value pairs for change checking
             doc[entityItem.name] = entityItem.value;
         }
     }
+
     webCustomEntity.customEntityItems.clear();
     EMSESP::webCustomEntityService.ha_reset();
 
@@ -110,6 +113,7 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
                 entityItem.value_type = DeviceValueType::STRING;
                 entityItem.writeable  = true;
             }
+
             entityItem.raw = nullptr;
             if (entityItem.ram == 0 && entityItem.value_type == DeviceValueType::STRING) {
                 entityItem.raw  = new uint8_t[(size_t)entityItem.factor + 1];
@@ -134,6 +138,7 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
             if (entityItem.factor == 0) {
                 entityItem.factor = 1;
             }
+
             if (entityItem.ram == 2) { // NVS
                 char key[sizeof(entityItem.name) + 2];
                 snprintf(key, sizeof(key), "c:%s", entityItem.name);
@@ -141,6 +146,7 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
                     entityItem.data = EMSESP::nvs_.getString(key).c_str();
                 }
             }
+
             webCustomEntity.customEntityItems.push_back(entityItem); // add to list
 
             if (entityItem.writeable && entityItem.name[0] != '\0') {
@@ -161,6 +167,7 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
             }
         }
     }
+
     return StateUpdateResult::CHANGED;
 }
 
@@ -179,6 +186,7 @@ bool WebCustomEntityService::command_setvalue(const char * value, const int8_t i
             if (entityItem.data == value) {
                 return true; // no change
             }
+
             if (entityItem.ram == 1) {
                 entityItem.data = value;
             } else if (entityItem.ram == 2) { // NVS
@@ -198,6 +206,7 @@ bool WebCustomEntityService::command_setvalue(const char * value, const int8_t i
                     data[count++] = (uint8_t)strtol(p, 0, 16);
                     p             = strtok(nullptr, " ,");
                 }
+
                 free(telegram);
                 uint8_t   offset = entityItem.offset;
                 uint8_t * dat    = data;
@@ -208,6 +217,7 @@ bool WebCustomEntityService::command_setvalue(const char * value, const int8_t i
                     count -= len;
                     dat += len;
                 }
+
                 delete[] data;
                 // validate telegram
                 EMSESP::send_read_request(entityItem.type_id, entityItem.device_id, entityItem.offset, length);
@@ -217,13 +227,15 @@ bool WebCustomEntityService::command_setvalue(const char * value, const int8_t i
                 if (!Helpers::value2bool(value, v)) {
                     return false;
                 }
+
                 EMSESP::send_write_request(entityItem.type_id, entityItem.device_id, entityItem.offset, v ? (uint8_t)entityItem.factor : 0, entityItem.type_id);
             } else {
                 float f;
                 if (!Helpers::value2float(value, f)) {
                     return false;
                 }
-                int v = (f / entityItem.factor + 0.5);
+
+                int v = (f / entityItem.factor + (f >= 0 ? 0.5 : -0.5));
                 if (entityItem.value_type == DeviceValueType::UINT8 || entityItem.value_type == DeviceValueType::INT8) {
                     EMSESP::send_write_request(entityItem.type_id, entityItem.device_id, entityItem.offset, v, entityItem.type_id);
                 } else if (entityItem.value_type == DeviceValueType::UINT16 || entityItem.value_type == DeviceValueType::INT16) {
@@ -239,12 +251,14 @@ bool WebCustomEntityService::command_setvalue(const char * value, const int8_t i
             if (EMSESP::mqtt_.get_publish_onchange(EMSdevice::DeviceType::SYSTEM)) {
                 publish();
             }
+
             char cmd[COMMAND_MAX_LENGTH];
             snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), entityItem.name);
             EMSESP::webSchedulerService.onChange(cmd);
             return true;
         }
     }
+
     return false;
 }
 
@@ -263,30 +277,35 @@ void WebCustomEntityService::render_value(JsonObject output, CustomEntityItem co
                 Mqtt::add_value_bool(output, name, (uint8_t)entity.value != 0);
             }
         }
+
         break;
     case DeviceValueType::INT8:
         if ((int8_t)entity.value != EMS_VALUE_INT8_NOTSET) {
             std::string v = Helpers::render_value(payload, entity.factor * (int8_t)entity.value, 2);
             output[name]  = add_uom ? serialized(v + ' ' + EMSdevice::uom_to_string(entity.uom)) : serialized(v);
         }
+
         break;
     case DeviceValueType::UINT8:
         if ((uint8_t)entity.value != EMS_VALUE_UINT8_NOTSET) {
             std::string v = Helpers::render_value(payload, entity.factor * (int8_t)entity.value, 2);
             output[name]  = add_uom ? serialized(v + ' ' + EMSdevice::uom_to_string(entity.uom)) : serialized(v);
         }
+
         break;
     case DeviceValueType::INT16:
         if ((int16_t)entity.value != EMS_VALUE_INT16_NOTSET) {
             std::string v = Helpers::render_value(payload, entity.factor * (int16_t)entity.value, 2);
             output[name]  = add_uom ? serialized(v + ' ' + EMSdevice::uom_to_string(entity.uom)) : serialized(v);
         }
+
         break;
     case DeviceValueType::UINT16:
         if ((uint16_t)entity.value != EMS_VALUE_UINT16_NOTSET) {
             std::string v = Helpers::render_value(payload, entity.factor * (uint16_t)entity.value, 2);
             output[name]  = add_uom ? serialized(v + ' ' + EMSdevice::uom_to_string(entity.uom)) : serialized(v);
         }
+
         break;
     case DeviceValueType::UINT24:
     case DeviceValueType::TIME:
@@ -295,6 +314,7 @@ void WebCustomEntityService::render_value(JsonObject output, CustomEntityItem co
             std::string v = Helpers::render_value(payload, entity.factor * entity.value, 2);
             output[name]  = add_uom ? serialized(v + ' ' + EMSdevice::uom_to_string(entity.uom)) : serialized(v);
         }
+
         break;
     // case DeviceValueType::STRING:
     default:
@@ -302,6 +322,7 @@ void WebCustomEntityService::render_value(JsonObject output, CustomEntityItem co
         if (entity.data.length() > 0) {
             output[name] = add_uom ? entity.data + ' ' + EMSdevice::uom_to_string(entity.uom) : entity.data;
         }
+
         break;
     }
 }
@@ -335,6 +356,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
                 render_value(output, entity);
             }
         }
+
         return true;
     }
 
@@ -344,6 +366,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
             auto nest = output[entity.name].to<JsonObject>();
             get_value_json(nest, entity);
         }
+
         return true;
     }
 
@@ -353,6 +376,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
             output["api_data"] = metrics;
             return true;
         }
+
         return false;
     }
 
@@ -364,6 +388,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
             return Command::get_attribute(output, cmd, attribute_s);
         }
     }
+
     return false; // not found
 }
 
@@ -376,10 +401,12 @@ std::string WebCustomEntityService::get_metrics_prometheus() {
         if (entity.hide || entity.name[0] == '\0') {
             continue;
         }
+
         result += (std::string) "# HELP emsesp_" + entity.name + " " + entity.name;
         if (entity.uom != 0) {
             result += (std::string) ", " + EMSdevice::uom_to_string(entity.uom);
         }
+
         result += (std::string) ", readable, visible" + (entity.writeable ? ", writable\n" : "\n");
         result += (std::string) "# TYPE emsesp_" + entity.name + " gauge\n";
         result += (std::string) "emsesp_" + entity.name + " ";
@@ -408,10 +435,13 @@ std::string WebCustomEntityService::get_metrics_prometheus() {
             if (entity.data.length() > 0) {
                 result += entity.data;
             }
+
             break;
         }
+
         result += (std::string) "\n";
     }
+
     return result;
 }
 
@@ -466,11 +496,13 @@ void WebCustomEntityService::publish(const bool force) {
     if (!Mqtt::enabled() || customEntityItems_->empty()) {
         return;
     }
+
     if (force) {
         if (Mqtt::publish_single()) {
             for (CustomEntityItem & entityItem : *customEntityItems_) {
                 publish_single(entityItem);
             }
+
             return;
         } else if (!EMSESP::mqtt_.get_publish_onchange(EMSdevice::DeviceType::SYSTEM)) {
             return; // wait for first time period
@@ -485,6 +517,7 @@ void WebCustomEntityService::publish(const bool force) {
         if (entityItem.hide) {
             continue;
         }
+
         render_value(output, entityItem);
         // create HA config
         if (Mqtt::ha_enabled() && !ha_configdone_) {
@@ -524,6 +557,7 @@ void WebCustomEntityService::publish(const bool force) {
                 } else {
                     snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name);
                 }
+
                 char command_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 snprintf(command_topic, sizeof(command_topic), "~/%s/%s", F_(custom), entityItem.name);
                 config["cmd_t"] = command_topic;
@@ -559,6 +593,7 @@ void WebCustomEntityService::publish(const bool force) {
         snprintf(topic, sizeof(topic), "%s_data", F_(custom));
         Mqtt::queue_publish(topic, output);
     }
+
     // EMSESP::logger().debug("publish %d custom entities", output.size());
 }
 
@@ -591,6 +626,7 @@ void WebCustomEntityService::generate_value_web(JsonObject output, const bool is
         if (entity.hide) {
             continue;
         }
+
         bool       include  = false;
         JsonObject root_obj = nodes.add<JsonObject>(); // create the object, we know there is a value
 
@@ -627,29 +663,34 @@ void WebCustomEntityService::generate_value_web(JsonObject output, const bool is
             l.add(Helpers::render_boolean(s, true, true));
             break;
         }
+
         case DeviceValueType::INT8:
             if ((int8_t)entity.value != EMS_VALUE_INT8_NOTSET) {
                 obj["v"] = Helpers::transformNumFloat(entity.factor * (int8_t)entity.value);
                 include  = true;
             }
+
             break;
         case DeviceValueType::UINT8:
             if ((uint8_t)entity.value != EMS_VALUE_UINT8_NOTSET) {
                 obj["v"] = Helpers::transformNumFloat(entity.factor * (uint8_t)entity.value);
                 include  = true;
             }
+
             break;
         case DeviceValueType::INT16:
             if ((int16_t)entity.value != EMS_VALUE_INT16_NOTSET) {
                 obj["v"] = Helpers::transformNumFloat(entity.factor * (int16_t)entity.value);
                 include  = true;
             }
+
             break;
         case DeviceValueType::UINT16:
             if ((uint16_t)entity.value != EMS_VALUE_UINT16_NOTSET) {
                 obj["v"] = Helpers::transformNumFloat(entity.factor * (uint16_t)entity.value);
                 include  = true;
             }
+
             break;
         case DeviceValueType::UINT24:
         case DeviceValueType::TIME:
@@ -658,12 +699,14 @@ void WebCustomEntityService::generate_value_web(JsonObject output, const bool is
                 obj["v"] = Helpers::transformNumFloat(entity.factor * entity.value);
                 include  = true;
             }
+
             break;
         case DeviceValueType::STRING:
             if (entity.data.length() > 0) {
                 obj["v"] = entity.data;
                 include  = true;
             }
+
             break;
         default:
             break;
@@ -696,6 +739,7 @@ void WebCustomEntityService::fetch() {
                     break;
                 }
             }
+
             if (needFetch) {
                 EMSESP::send_read_request(entity.type_id,
                                           entity.device_id,
@@ -722,6 +766,7 @@ bool WebCustomEntityService::get_value(const std::shared_ptr<const Telegram> & t
                 message_length -= entity.offset - telegram->offset;
                 offset = 0;
             }
+
             auto length = std::min(offset + message_length, (int)entity.factor);
             auto rest   = std::min((int)entity.factor - offset, (int)message_length);
             if (rest > 0) {
@@ -734,6 +779,7 @@ bool WebCustomEntityService::get_value(const std::shared_ptr<const Telegram> & t
                     } else if (EMSESP::mqtt_.get_publish_onchange(EMSdevice::DeviceType::SYSTEM)) {
                         has_change = true;
                     }
+
                     char cmd[COMMAND_MAX_LENGTH];
                     snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), entity.name);
                     EMSESP::webSchedulerService.onChange(cmd);
@@ -745,10 +791,12 @@ bool WebCustomEntityService::get_value(const std::shared_ptr<const Telegram> & t
             for (uint8_t i = 0; i < len[entity.value_type]; i++) {
                 value = (value << 8) + telegram->message_data[i + entity.offset - telegram->offset];
             }
+
             // mask bits for bool values
             if (entity.value_type == DeviceValueType::BOOL && entity.factor > 0) {
                 value = (value & (uint8_t)entity.factor) ? 1 : 0;
             }
+
             if (value != entity.value) {
                 entity.value = value;
                 if (Mqtt::publish_single()) {
@@ -756,10 +804,12 @@ bool WebCustomEntityService::get_value(const std::shared_ptr<const Telegram> & t
                 } else if (EMSESP::mqtt_.get_publish_onchange(EMSdevice::DeviceType::SYSTEM)) {
                     has_change = true;
                 }
+
                 char cmd[COMMAND_MAX_LENGTH];
                 snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), entity.name);
                 EMSESP::webSchedulerService.onChange(cmd);
             }
+
             // EMSESP::logger().debug("custom entity %s received with value %d", entity.name, (int)entity.val);
         }
     }

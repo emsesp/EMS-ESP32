@@ -82,6 +82,49 @@ def create_base_headers(host_ip, emsesp_url):
     }
 
 
+def post_file(session, upload_url, host_ip, emsesp_url, access_token, filename, data, progress_desc=None):
+    """POST one multipart file to /rest/uploadFile (WebUI-compatible)."""
+    encoder = MultipartEncoder(fields={
+        'file': (filename, data, 'application/octet-stream')
+    })
+
+    bar = None
+    if progress_desc is not None:
+        bar = tqdm(
+            desc=progress_desc,
+            total=encoder.len,
+            dynamic_ncols=True,
+            unit='B',
+            unit_scale=True,
+            unit_divisor=1024,
+            mininterval=0.2
+        )
+        monitor = MultipartEncoderMonitor(
+            encoder, lambda m: bar.update(m.bytes_read - bar.n))
+        body = monitor
+        content_type = monitor.content_type
+        content_length = monitor.len
+    else:
+        body = encoder
+        content_type = encoder.content_type
+        content_length = encoder.len
+
+    headers = create_base_headers(host_ip, emsesp_url)
+    headers.update({
+        'Content-Type': content_type,
+        'Content-Length': str(content_length),
+        'Origin': emsesp_url,
+        'Authorization': f'Bearer {access_token}'
+    })
+
+    started = time.perf_counter()
+    response = session.post(upload_url, data=body, headers=headers, timeout=None)
+    elapsed = time.perf_counter() - started
+    if bar is not None:
+        bar.close()
+    return response, encoder.len, elapsed
+
+
 def upload(file, ip, username, password):
     """Upload firmware to EMS-ESP device."""
     print()
@@ -127,45 +170,29 @@ def upload(file, ip, username, password):
 
         firmware = file_path.read_bytes()
         md5 = hashlib.md5(firmware).hexdigest()
-
-        encoder = MultipartEncoder(fields={
-            'MD5': md5,
-            'file': (file_path.name, firmware, 'application/octet-stream')
-        })
-
-        bar = tqdm(
-            desc='Upload Progress',
-            total=encoder.len,
-            dynamic_ncols=True,
-            unit='B',
-            unit_scale=True,
-            unit_divisor=1024,
-            mininterval=0.2
-        )
-
-        monitor = MultipartEncoderMonitor(
-            encoder, lambda monitor: bar.update(monitor.bytes_read - bar.n))
-
-        post_headers = create_base_headers(host_ip, emsesp_url)
-        post_headers.update({
-            'Content-Type': monitor.content_type,
-            'Content-Length': str(monitor.len),
-            'Origin': emsesp_url,
-            'Authorization': f'Bearer {access_token}'
-        })
-
+        # Device enables MD5 check only after a file whose name ends in .md5
+        # (same as the WebUI). An ElegantOTA "MD5" form field is ignored.
+        md5_name = file_path.with_suffix('.md5').name
         upload_url = f"{emsesp_url}/rest/uploadFile"
-        started = time.perf_counter()
-        response = session.post(
-            upload_url, data=monitor, headers=post_headers, timeout=None)
-        elapsed = time.perf_counter() - started
 
-        bar.close()
+        print(f"Uploading MD5 ({md5})")
+        response, _, _ = post_file(
+            session, upload_url, host_ip, emsesp_url, access_token,
+            md5_name, (md5 + '\n').encode('ascii'))
+        if response.status_code != 200:
+            print_fail(f"MD5 upload failed (code {response.status_code})")
+            return
+        print_success("MD5 accepted")
+
+        print(f"Uploading firmware ({file_path.name})")
+        response, size, elapsed = post_file(
+            session, upload_url, host_ip, emsesp_url, access_token,
+            file_path.name, firmware, progress_desc='Upload Progress')
 
         if response.status_code != 200:
             print_fail(f"Upload failed (code {response.status_code})")
         else:
-            kibs = (encoder.len / 1024) / elapsed if elapsed > 0 else 0
+            kibs = (size / 1024) / elapsed if elapsed > 0 else 0
             print_success(
                 f"Upload successful ({kibs:.0f} KiB/s in {elapsed:.1f}s). Rebooting device.")
             restart_headers = create_base_headers(host_ip, emsesp_url)

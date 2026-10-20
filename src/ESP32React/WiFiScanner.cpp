@@ -34,6 +34,7 @@ void WiFiScanner::listNetworks(AsyncWebServerRequest * request) {
             network["channel"]         = WiFi.channel(i);
             network["encryption_type"] = static_cast<uint8_t>(WiFi.encryptionType(i));
         }
+
         response->setLength();
         request->send(response);
     } else {

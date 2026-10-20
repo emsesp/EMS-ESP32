@@ -63,6 +63,7 @@ class AnalogSensor {
         bool is_system() const {
             return is_system_;
         }
+
         void set_is_system(const bool is_system) {
             is_system_ = is_system;
         }
@@ -70,6 +71,7 @@ class AnalogSensor {
         double factor() const {
             return factor_;
         }
+
         void set_factor(const double factor) {
             factor_ = factor;
         }
@@ -81,6 +83,7 @@ class AnalogSensor {
         void set_uom(const uint8_t uom) {
             uom_ = uom;
         }
+
         uint8_t uom() const {
             return uom_;
         }
@@ -172,6 +175,7 @@ class AnalogSensor {
         if (exclude_disabled_system) {
             return std::count_if(sensors_.begin(), sensors_.end(), [](const Sensor & sensor) { return !sensor.is_system(); });
         }
+
         return sensors_.size();
     }
 

@@ -83,6 +83,7 @@ void Mqtt::subscribe(const uint8_t device_type, const std::string & topic, mqtt_
                 if (cb) {
                     mqtt_subfunction.mqtt_subfunction_ = cb;
                 }
+
                 return; // exit - don't add
             }
         }
@@ -237,6 +238,7 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) {
             queue_publish_message(topic, "", true);
             LOG_DEBUG("Remove topic %s", topic);
         }
+
         return;
     }
 
@@ -251,6 +253,7 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) {
                 LOG_ERROR("error: invalid payload %s for this topic %s", message, topic);
                 Mqtt::queue_publish("response", "error: invalid data");
             }
+
             return;
         }
     }
@@ -282,6 +285,7 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) {
         } else {
             snprintf(error, sizeof(error), "MQTT command failed with error %s", Command::return_code_string(return_code));
         }
+
         LOG_ERROR(error);
         Mqtt::queue_publish("response", error);
     } else {
@@ -351,6 +355,7 @@ void Mqtt::reset_mqtt() {
     if (mqttClient_->connected()) {
         mqttClient_->disconnect(true); // force a disconnect
     }
+
     load_settings(); // reload MQTT settings
 }
 
@@ -401,6 +406,7 @@ void Mqtt::start() {
     if (initialized_) {
         return;
     }
+
     initialized_ = true;
 
     // add the 'publish' command ('call system publish' in console or via API)
@@ -447,6 +453,7 @@ bool Mqtt::get_publish_onchange(uint8_t device_type) {
     if (publish_single_ && !ha_enabled_) {
         return false;
     }
+
     if (device_type == EMSdevice::DeviceType::BOILER) {
         if (!publish_time_boiler_) {
             return true;
@@ -470,6 +477,7 @@ bool Mqtt::get_publish_onchange(uint8_t device_type) {
     } else if (!publish_time_other_) {
         return true;
     }
+
     return false;
 }
 
@@ -626,6 +634,7 @@ void Mqtt::ha_status() {
                                     "bootTime",
                                     DeviceValueUOM::UPTIME); // called Uptime in HA and derives value from bootTime element in info topic
 }
+
 // add sub or pub task to the queue.
 // the base is not included in the topic
 bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, const bool retain) {
@@ -648,14 +657,17 @@ bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
             mqtt_message_id_++;
             mqtt_publish_fails_++;
         }
+
         LOG_WARNING("%s failed: low memory", operation == Operation::PUBLISH ? "Publish" : operation == Operation::SUBSCRIBE ? "Subscribe" : "Unsubscribe");
         return false; // quit
     }
+
     if (queuecount_ >= MQTT_QUEUE_MAX_SIZE) {
         if (operation == Operation::PUBLISH) {
             mqtt_message_id_++;
             mqtt_publish_fails_++;
         }
+
         LOG_WARNING("%s failed: queue full", operation == Operation::PUBLISH ? "Publish" : operation == Operation::SUBSCRIBE ? "Subscribe" : "Unsubscribe");
         return false; // quit
     }
@@ -758,6 +770,7 @@ bool Mqtt::queue_publish(const char * topic, const JsonObjectConst payload, cons
         serializeJson(payload, payload_text); // convert json to string
         return queue_publish_message(topic, payload_text, retain);
     }
+
     return false;
 }
 
@@ -893,6 +906,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
                     snprintf(entity_with_tag, sizeof(entity_with_tag), "%sww", dhw_old[i]);
                 }
             }
+
             snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, entity_with_tag);
         } else if (has_tag && device_type == EMSdevice::DeviceType::WATER && tag >= DeviceValue::DeviceValueTAG::TAG_DHW3) {
             snprintf(entity_with_tag, sizeof(entity_with_tag), "wwc%d_%s", tag - DeviceValue::DeviceValueTAG::TAG_DHW1 + 1, entity);
@@ -913,6 +927,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
                     snprintf(entity_with_tag, sizeof(entity_with_tag), "%sww", dhw_old[i]);
                 }
             }
+
             snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", Mqtt::basename().c_str(), device_name, entity_with_tag);
         } else if (has_tag && device_type == EMSdevice::DeviceType::WATER && tag >= DeviceValue::DeviceValueTAG::TAG_DHW3) {
             snprintf(entity_with_tag, sizeof(entity_with_tag), "wwc%d_%s", tag - DeviceValue::DeviceValueTAG::TAG_DHW1 + 1, entity);
@@ -975,6 +990,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             if (discovery_type() == discoveryType::HOMEASSISTANT || discovery_type() == discoveryType::DOMOTICZ_LATEST) {
                 snprintf(topic, sizeof(topic), "number/%s", config_topic);
             }
+
             break;
         case DeviceValueType::BOOL:
             // switch - https://www.home-assistant.io/integrations/switch.mqtt
@@ -990,6 +1006,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             } else if (discovery_type() == discoveryType::HOMEASSISTANT || discovery_type() == discoveryType::DOMOTICZ_LATEST) {
                 snprintf(topic, sizeof(topic), "number/%s", config_topic);
             }
+
             break;
         case DeviceValueType::STRING:
             // text - https://www.home-assistant.io/integrations/text.mqtt
@@ -997,6 +1014,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             if (discovery_type() == discoveryType::HOMEASSISTANT) {
                 snprintf(topic, sizeof(topic), "text/%s", config_topic); // e.g. set_datetime, set_holiday, set_wwswitchtime
             }
+
             break;
         default:
             break;
@@ -1040,6 +1058,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         } else {
             snprintf(command_topic, sizeof(command_topic), "~/%s/%s", device_name, entity);
         }
+
         doc["cmd_t"] = command_topic;
 
         // extend for enums and also commands, add options
@@ -1063,6 +1082,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             } else {
                 doc["mode"] = "box"; // auto, slider or box
             }
+
             if (num_op > 0) {
                 doc["step"] = 1.0 / num_op;
             } else if (num_op < 0) {
@@ -1089,6 +1109,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     } else {
         snprintf(ha_name, sizeof(ha_name), "%s", F_name); // no tag
     }
+
     free(F_name); // very important!
     doc["name"] = ha_name;
 
@@ -1108,6 +1129,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
                 snprintf(stat_t, sizeof(stat_t), "~/%s", F_(info));
             }
         }
+
         doc["stat_t"] = stat_t;
 
         // value template
@@ -1141,6 +1163,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
                 // default
                 doc["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else 'None'}}";
             }
+
             add_ha_avty_section(doc.as<JsonObject>(), stat_t, val_cond); // adds availability section
         } else {
             // Domoticz doesn't support value templates, so we just use the value directly
@@ -1180,6 +1203,7 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
     if (device_type == EMSdevice::DeviceType::SYSTEM) {
         doc["ent_cat"] = "diagnostic"; // instead of 'config'
     }
+
     if (type == DeviceValueType::BOOL) {
         return;
     }
@@ -1238,12 +1262,14 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
         if (display_only) {
             doc[ic_ha] = F_(iconpercent); // set icon
         }
+
         doc[sc_ha] = sc_ha_measurement;
         if (entity == FL_(airHumidity)[0] || entity == FL_(remotehum)[0]) {
             doc[dc_ha] = "humidity";
         } else if (entity == FL_(battery)[0]) {
             doc[dc_ha] = "battery";
         }
+
         break;
     case DeviceValueUOM::SECONDS:
     case DeviceValueUOM::MINUTES:
@@ -1253,12 +1279,14 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
         } else {
             doc[sc_ha] = sc_ha_measurement;
         }
+
         doc[dc_ha] = "duration"; // https://github.com/emsesp/EMS-ESP32/issues/822
         break;
     case DeviceValueUOM::KB:
         if (display_only) {
             doc[ic_ha] = F_(iconkb);
         }
+
         doc[dc_ha] = "data_size";
         break;
     case DeviceValueUOM::LMIN:
@@ -1266,6 +1294,7 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
         if (display_only) {
             doc[ic_ha] = F_(iconlmin);
         }
+
         doc[sc_ha] = sc_ha_measurement;
         doc[dc_ha] = "volume_flow_rate";
         break;
@@ -1280,6 +1309,7 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
         } else {
             doc[sc_ha] = sc_ha_measurement; // no device class for this
         }
+
         break;
     case DeviceValueUOM::KWH:
         doc[sc_ha] = sc_ha_total_increasing;
@@ -1289,6 +1319,7 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
         if (display_only) {
             doc[ic_ha] = F_(iconua);
         }
+
         doc[sc_ha] = sc_ha_measurement;
         // doc[dc_ha] = "current"; // there is no uA in HA, only mA
         break;
@@ -1354,6 +1385,7 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
             if (display_only) {
                 doc[ic_ha] = F_(iconnum); // set icon
             }
+
             // determine if its a measurement or total increasing
             // most of the values are measurement. for example Tx Reads will increment but can be reset to 0 after a restart
             // all the starts are increasing, and they are ULONGs
@@ -1363,6 +1395,7 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
                 doc[sc_ha] = sc_ha_measurement; // default to measurement
             }
         }
+
         break;
     }
 }
@@ -1412,10 +1445,12 @@ bool Mqtt::publish_ha_climate_config(const DeviceValue & dv, const bool has_room
             snprintf(currtemp_s, sizeof(currtemp_s), "value_json.%s%d.currtemp", tagname, hc_num);
             snprintf(currtemp_cond, sizeof(currtemp_cond), "value_json.%s%d is defined and %s is defined", tagname, hc_num, currtemp_s);
         }
+
         if (tag >= DeviceValueTAG::TAG_SRC1) {
             snprintf(currhum_s, sizeof(currhum_s), "value_json.%s%d.airhumidity", tagname, hc_num);
             snprintf(currhum_cond, sizeof(currhum_cond), "value_json.%s%d is defined and %s is defined", tagname, hc_num, currhum_s);
         }
+
         snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(device_type, DeviceValueTAG::TAG_NONE).c_str());
     } else {
         // single format
@@ -1428,10 +1463,12 @@ bool Mqtt::publish_ha_climate_config(const DeviceValue & dv, const bool has_room
             snprintf(currtemp_s, sizeof(currtemp_s), "value_json.currtemp");
             snprintf(currtemp_cond, sizeof(currtemp_cond), "%s is defined", currtemp_s);
         }
+
         if (tag >= DeviceValueTAG::TAG_SRC1) {
             snprintf(currhum_s, sizeof(currhum_s), "value_json.airhumidity");
             snprintf(currhum_cond, sizeof(currhum_cond), "%s is defined", currhum_s);
         }
+
         snprintf(topic_t, sizeof(topic_t), "~/%s", Mqtt::tag_to_topic(device_type, tag).c_str());
     }
 
@@ -1480,6 +1517,7 @@ bool Mqtt::publish_ha_climate_config(const DeviceValue & dv, const bool has_room
         doc["curr_temp_t"]   = topic_t;
         doc["curr_temp_tpl"] = (std::string) "{{" + currtemp_s + " if " + currtemp_cond + " else 'None'}}";
     }
+
     if (tag >= DeviceValueTAG::TAG_SRC1) {
         doc["curr_hum_t"]   = topic_t;
         doc["curr_hum_tpl"] = (std::string) "{{" + currhum_s + " if " + currhum_cond + " else 'None'}}";
@@ -1531,12 +1569,15 @@ bool Mqtt::publish_ha_climate_config(const DeviceValue & dv, const bool has_room
         if (found_auto) {
             modes.add("auto");
         }
+
         if (found_heat) {
             modes.add("heat");
         }
+
         if (found_off) {
             modes.add("off");
         }
+
         if (found_cool) {
             modes.add("cool");
         }

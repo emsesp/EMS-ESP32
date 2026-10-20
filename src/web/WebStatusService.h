@@ -18,6 +18,7 @@ class WebStatusService {
     void set_current_version(const std::string & version) {
         current_version_s = version;
     }
+
     std::string get_current_version() {
         return current_version_s;
     }
@@ -67,6 +68,7 @@ class WebStatusService {
         std::string date;
         bool        upgradeable = false;
     };
+
     VersionInfo versions_stable_;
     VersionInfo versions_dev_;
     bool        versions_cache_valid_   = false; // true once we've had at least one successful fetch

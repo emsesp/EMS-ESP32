@@ -38,6 +38,7 @@ void MqttSettingsService::startClient() {
         if ((isSecure && _state.enableTLS) || (!isSecure && !_state.enableTLS)) {
             return;
         }
+
         delete _mqttClient;
         _mqttClient = nullptr;
     }
@@ -49,10 +50,12 @@ void MqttSettingsService::startClient() {
         } else {
             _mqttClient = new espMqttClientSecure(EMSESP_MQTT_PRIORITY, EMSESP_MQTT_RUNNING_CORE);
         }
+
         if (!_mqttClient) {
             emsesp::EMSESP::logger().warning("MQTT Client alloc failed");
             return;
         }
+
         static_cast<espMqttClientSecure *>(_mqttClient)->onConnect([this](bool sessionPresent) { onMqttConnect(sessionPresent); });
         static_cast<espMqttClientSecure *>(_mqttClient)->onDisconnect([this](espMqttClientTypes::DisconnectReason reason) { onMqttDisconnect(reason); });
         static_cast<espMqttClientSecure *>(_mqttClient)
@@ -62,12 +65,14 @@ void MqttSettingsService::startClient() {
                 });
         return;
     }
+
     isSecure = false;
     if (emsesp::EMSESP::system_.PSram() == 0) {
         _mqttClient = new espMqttClient(espMqttClientTypes::UseInternalTask::NO);
     } else {
         _mqttClient = new espMqttClient(EMSESP_MQTT_PRIORITY, EMSESP_MQTT_RUNNING_CORE);
     }
+
     static_cast<espMqttClient *>(_mqttClient)->onConnect([this](bool sessionPresent) { onMqttConnect(sessionPresent); });
     static_cast<espMqttClient *>(_mqttClient)->onDisconnect([this](espMqttClientTypes::DisconnectReason reason) { onMqttDisconnect(reason); });
     static_cast<espMqttClient *>(_mqttClient)
@@ -82,14 +87,17 @@ void MqttSettingsService::loop() {
         // emsesp::EMSESP::logger().info("Network connection dropped, stopping MQTT client");
         _mqttClient->disconnect(true);
     }
+
     if (_reconfigureMqtt || (_disconnectedAt && static_cast<uint32_t>(uuid::get_uptime() - _disconnectedAt) >= MQTT_RECONNECTION_DELAY)) {
         // configure MQTT client
         if (_reconfigureMqtt && _state.enabled) {
             emsesp::EMSESP::logger().info("Starting MQTT service");
         }
+
         _disconnectedAt  = configureMqtt() ? 0 : uuid::get_uptime();
         _reconfigureMqtt = false;
     }
+
     if (emsesp::EMSESP::system_.PSram() == 0) {
         _mqttClient->loop();
     }
@@ -188,21 +196,25 @@ bool MqttSettingsService::configureMqtt() {
                 String certificate = "-----BEGIN CERTIFICATE-----\n" + _state.rootCA + "\n-----END CERTIFICATE-----\n";
                 static_cast<espMqttClientSecure *>(_mqttClient)->setCACert(certificate.c_str());
             }
+
             static_cast<espMqttClientSecure *>(_mqttClient)->setServer(_state.host.c_str(), _state.port);
             if (_state.username.length() > 0) {
                 static_cast<espMqttClientSecure *>(_mqttClient)
                     ->setCredentials(_state.username.c_str(), _state.password.length() > 0 ? _state.password.c_str() : nullptr);
             }
+
             static_cast<espMqttClientSecure *>(_mqttClient)->setClientId(_state.clientId.c_str());
             static_cast<espMqttClientSecure *>(_mqttClient)->setKeepAlive(_state.keepAlive);
             static_cast<espMqttClientSecure *>(_mqttClient)->setCleanSession(_state.cleanSession);
             static_cast<espMqttClientSecure *>(_mqttClient)->setWill(will_topic, 1, true, "offline"); // QOS 1, retain
             return (_mqttClient->connect());
         }
+
         static_cast<espMqttClient *>(_mqttClient)->setServer(_state.host.c_str(), _state.port);
         if (_state.username.length() > 0) {
             static_cast<espMqttClient *>(_mqttClient)->setCredentials(_state.username.c_str(), _state.password.length() > 0 ? _state.password.c_str() : nullptr);
         }
+
         static_cast<espMqttClient *>(_mqttClient)->setClientId(_state.clientId.c_str());
         static_cast<espMqttClient *>(_mqttClient)->setKeepAlive(_state.keepAlive);
         static_cast<espMqttClient *>(_mqttClient)->setCleanSession(_state.cleanSession);
@@ -322,6 +334,7 @@ StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings)
         if (newSettings.publish_single) {
             newSettings.ha_enabled = false;
         }
+
         changed = true;
     }
 
@@ -338,6 +351,7 @@ StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings)
         if (newSettings.ha_enabled) {
             newSettings.publish_single = false;
         }
+
         changed = true;
     }
 
@@ -387,9 +401,11 @@ StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings)
     if (newSettings.rootCA.length() == 0 && newSettings.enableTLS) {
         newSettings.rootCA = "insecure";
     }
+
     if (newSettings.enableTLS != settings.enableTLS || newSettings.rootCA != settings.rootCA) {
         changed = true;
     }
+
     // save the new settings
     settings = newSettings;
 

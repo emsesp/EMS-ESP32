@@ -97,6 +97,7 @@ bool Ventilation::set_ventMode(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, v, FL_(enum_ventMode))) {
         return false;
     }
+
     write_command(0x56B, 0, v - 1, 0x56B);
     return true;
 }
@@ -106,6 +107,7 @@ bool Ventilation::set_filter(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     // write_command(0x5xx, 0, v, 0x5xx);
     return true;
 }
@@ -115,6 +117,7 @@ bool Ventilation::set_bypass(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
+
     write_command(0x55C, 1, b ? 1 : 0, 0x587);
     return true;
 }

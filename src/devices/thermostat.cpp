@@ -38,6 +38,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         register_device_values();
         return;
     }
+
     // remote thermostats with humidity: RC100H remote, each thermostat is for one hc
     if (device_id >= 0x38 && device_id <= 0x3F) {
         register_telegram_type(0x042B + device_id - 0x38, "RemoteTemp", false, MAKE_PF_CB(process_RemoteTemp));
@@ -49,6 +50,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             // register_telegram_type(0x0273, "RemoteCorrection", true, MAKE_PF_CB(process_RemoteCorrection), 1);
             // register_telegram_type(0x0A6B, "RemoteBattery", true, MAKE_PF_CB(process_RemoteBattery), 2);
         }
+
         register_device_values(); // register device values for common values (not heating circuit)
         return;                   // no values to add
     }
@@ -85,6 +87,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(timer_typeids[i], "RC35Timer", false, MAKE_PF_CB(process_RC35Timer), 99);
             register_telegram_type(timer2_typeids[i], "RC35Timer2", false, MAKE_PF_CB(process_RC35Timer), 99);
         }
+
         register_telegram_type(EMS_TYPE_IBASettings, "IBASettings", true, MAKE_PF_CB(process_IBASettings), 22);
         register_telegram_type(EMS_TYPE_wwSettings, "WWSettings", true, MAKE_PF_CB(process_RC35wwSettings), 10);
         register_telegram_type(0x38, "WWTimer", true, MAKE_PF_CB(process_RC35wwTimer), 99);
@@ -108,6 +111,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             // remote thermostat uses only 0xAF
             register_telegram_type(0xAF, "RC20Remote", false, MAKE_PF_CB(process_RC20Remote));
         }
+
         // RC20 newer
     } else if ((model == EMSdevice::EMS_DEVICE_FLAG_RC20_N) || (model == EMSdevice::EMS_DEVICE_FLAG_RC25)) {
         if (device_id == 0x17) { // master
@@ -122,6 +126,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             // remote thermostat uses only 0xAF
             register_telegram_type(0xAF, "RC20Remote", false, MAKE_PF_CB(process_RC20Remote));
         }
+
         // RC30
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC30) {
         monitor_typeids   = {0x41};
@@ -135,6 +140,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(curve_typeids[i], "RC30Temp", false, MAKE_PF_CB(process_RC30Temp), 25);
             register_telegram_type(timer_typeids[i], "RC30Timer", false, MAKE_PF_CB(process_RC35Timer), 99);
         }
+
         register_telegram_type(0xA9, "RC30Vacation", true, MAKE_PF_CB(process_RC30Vacation), 57);
         register_telegram_type(EMS_TYPE_RC30wwSettings, "RC30WWSettings", true, MAKE_PF_CB(process_RC30wwSettings), 5);
         register_telegram_type(0x38, "WWTimer", true, MAKE_PF_CB(process_RC35wwTimer), 99);
@@ -184,6 +190,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(curve_typeids[i], "RC300Curves", false, MAKE_PF_CB(process_RC300Curve), 9);
             register_telegram_type(summer2_typeids[i], "RC300Summer2", false, MAKE_PF_CB(process_RC300Summer2), 8);
         }
+
         const size_t set2_size = set2_typeids.size();
         for (uint8_t i = 0; i < set2_size; i++) {
             // register_telegram_type(set2_typeids[i], "RC300Set2", false, MAKE_PF_CB(process_RC300Set2));
@@ -191,6 +198,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(hp_typeids[i], "HPSet", false, MAKE_PF_CB(process_HPSet), 5);
             register_telegram_type(hpmode_typeids[i], "HPMode", true, MAKE_PF_CB(process_HPMode), 6);
         }
+
         register_telegram_type(0x2F5, "RC300WWmode", true, MAKE_PF_CB(process_RC300WWmode), 21);
         register_telegram_type(0x2F6, "RC300WW2mode", true, MAKE_PF_CB(process_RC300WWmode), 21);
         register_telegram_type(0x31B, "RC300WWtemp", true, MAKE_PF_CB(process_RC300WWtemp), 2);
@@ -211,12 +219,14 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         } else {
             register_telegram_type(0x269, "RC300Holiday", true, MAKE_PF_CB(process_RC300Holiday), 18);
         }
+
         register_telegram_type(0x16E, "Absent", true, MAKE_PF_CB(process_Absent), 1);
         register_telegram_type(0xBF, "ErrorMessage", false, MAKE_PF_CB(process_ErrorMessageBF));
         register_telegram_type(0xC0, "RCErrorMessage", false, MAKE_PF_CB(process_RCErrorMessage2));
         if (model == EMSdevice::EMS_DEVICE_FLAG_UI800) {
             register_telegram_type(0x470, "RC300Summer3", true, MAKE_PF_CB(process_RC300Summer3), 8);
         }
+
         EMSESP::send_read_request(0xC0, device_id, 0, 20); // read last errorcode on start (only published on errors)
 
         // JUNKERS/HT3
@@ -245,6 +255,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
                 register_telegram_type(set_typeids[i], "JunkersSet", false, MAKE_PF_CB(process_JunkersSet), 20);
             }
         }
+
         register_telegram_type(0xBB, "HybridSettings", true, MAKE_PF_CB(process_HybridSettings), 20);
         register_telegram_type(0x23, "JunkersSetMixer", true, MAKE_PF_CB(process_JunkersSetMixer), 1);
         register_telegram_type(0x1D3, "JunkersDhw", true, MAKE_PF_CB(process_JunkersWW), 3);
@@ -260,6 +271,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     for (uint8_t i = 0; i < monitor_size_final; i++) {
         EMSESP::send_read_request(monitor_typeids[i], device_id);
     }
+
     const size_t set_size = set_typeids.size();
     for (uint8_t i = 0; i < set_size; i++) {
         EMSESP::send_read_request(set_typeids[i], device_id);
@@ -302,6 +314,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(const st
     if (telegram->message_length == 0) {
         return nullptr;
     }
+
     // look through the Monitor and Set arrays to see if there is a match
     uint8_t hc_num  = 0; // 0 means we haven't found it yet
     bool    toggle_ = false;
@@ -472,27 +485,35 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(const st
     if (monitor_typeids.size()) {
         toggle_fetch(monitor_typeids[hc_num - 1], toggle_);
     }
+
     if (set_typeids.size()) {
         toggle_fetch(set_typeids[hc_num - 1], toggle_);
     }
+
     if (hc_num <= set2_typeids.size()) {
         toggle_fetch(set2_typeids[hc_num - 1], toggle_);
     }
+
     if (summer_typeids.size()) {
         toggle_fetch(summer_typeids[hc_num - 1], toggle_);
     }
+
     if (curve_typeids.size()) {
         toggle_fetch(curve_typeids[hc_num - 1], toggle_);
     }
+
     if (timer_typeids.size()) {
         toggle_fetch(timer_typeids[hc_num - 1], toggle_);
     }
+
     if (timer2_typeids.size()) {
         toggle_fetch(timer2_typeids[hc_num - 1], toggle_);
     }
+
     if (summer2_typeids.size()) {
         toggle_fetch(summer2_typeids[hc_num - 1], toggle_);
     }
+
     if (hp_typeids.size()) {
         toggle_fetch(hp_typeids[hc_num - 1], toggle_);
     }
@@ -636,9 +657,11 @@ std::shared_ptr<Thermostat::DhwCircuit> Thermostat::dhw_circuit(const uint8_t of
             return dhw_circuit;
         }
     }
+
     if (!create) {
         return nullptr;
     }
+
     // create a new circuit object and add to the list
     auto new_dhw = std::make_shared<Thermostat::DhwCircuit>(offset);
     dhw_circuits_.push_back(new_dhw);
@@ -655,6 +678,7 @@ void Thermostat::process_RC10Monitor(const std::shared_ptr<const Telegram> & tel
     if (hc == nullptr) {
         return;
     }
+
     uint8_t mode = 1 << hc->mode;
     telegram->read_value(mode, 0);           // 1: nofrost, 2: night, 4: day
     has_update(hc->mode, mode >> 1);         // store as enum 0, 1, 2
@@ -672,6 +696,7 @@ void Thermostat::process_RC10Set(const std::shared_ptr<const Telegram> & telegra
     if (hc == nullptr) {
         return;
     }
+
     auto dhw = dhw_circuit(0, true);
     has_update(telegram, ibaCalIntTemperature_, 0);
     has_update(telegram, backlight_, 1);
@@ -689,6 +714,7 @@ void Thermostat::process_RC10Set_2(const std::shared_ptr<const Telegram> & teleg
     if (hc == nullptr) {
         return;
     }
+
     // uint8_t mode = 1 << hc->mode;
     // telegram->read_value(mode, 0);           // 1: nofrost, 2: night, 4: day
     // has_update(hc->mode, mode >> 1);          // store as enum 0, 1, 2
@@ -701,6 +727,7 @@ void Thermostat::process_RC20Set(const std::shared_ptr<const Telegram> & telegra
     if (hc == nullptr) {
         return;
     }
+
     has_update(telegram, hc->mode, 23);        // 0:off, 1:manual, 2:auto
     has_update(telegram, hc->nofrosttemp, 24); // for mode off
     // has_update(telegram, hc->tempautotemp, 28); // no need to read this
@@ -714,6 +741,7 @@ void Thermostat::process_RC20Temp(const std::shared_ptr<const Telegram> & telegr
     if (hc == nullptr) {
         return;
     }
+
     has_update(telegram, hc->nighttemp, 3);
     has_update(telegram, hc->daylowtemp, 4);
     has_update(telegram, hc->daymidtemp, 5);
@@ -730,6 +758,7 @@ void Thermostat::process_RC20Timer(const std::shared_ptr<const Telegram> & teleg
     if (hc == nullptr) {
         return;
     }
+
     if ((telegram->message_length == 2 && telegram->offset < 83 && !(telegram->offset & 1))
         || (!telegram->offset && telegram->message_length > 1 && !strlen(hc->switchtime1))) {
         char    data[sizeof(hc->switchtime1)];
@@ -746,6 +775,7 @@ void Thermostat::process_RC20Timer(const std::shared_ptr<const Telegram> & teleg
         } else {
             snprintf(data, sizeof(data), "%02d %s %02d:%02d T%d", no, sday, time / 6, 10 * (time % 6), temp);
         }
+
         has_update(hc->switchtime1, data, sizeof(hc->switchtime1));
     }
 }
@@ -758,6 +788,7 @@ void Thermostat::process_RC20Monitor_2(const std::shared_ptr<const Telegram> & t
     if (hc == nullptr) {
         return;
     }
+
     // modes byte 0,1: day: 8002, night: 0000, auto-day:0402, auto-night:0400
     has_bitupdate(telegram, hc->modetype, 1, 1); // day/night
     has_update(telegram, hc->selTemp, 2, 1);     // is * 2, force as single byte
@@ -777,6 +808,7 @@ void Thermostat::process_RC20Set_2(const std::shared_ptr<const Telegram> & teleg
     if (hc == nullptr) {
         return;
     }
+
     has_update(telegram, hc->heatingtype, 0);
     has_update(telegram, hc->nighttemp, 1); // is * 2,
     has_update(telegram, hc->daytemp, 2);   // is * 2,
@@ -804,6 +836,7 @@ void Thermostat::process_RemoteTemp(const std::shared_ptr<const Telegram> & tele
     if (telegram->type_id >= 0x435) {
         return;
     }
+
     uint8_t hc = telegram->type_id - 0x42B;
     if (Roomctrl::is_remote(hc)) {
         toggle_fetch(0x273 + hc, false);
@@ -845,6 +878,7 @@ void Thermostat::process_JunkersSet(const std::shared_ptr<const Telegram> & tele
     if (hc == nullptr) {
         return;
     }
+
     has_update(telegram, hc->controlmode, 0);       // 0-off, 1-unmixed-no-IPM, 2-unmixed-IPM, 3-mixed
     has_update(telegram, hc->control, 1);           // remote: 0-off, 1-FB10, 2-FB100
     has_update(telegram, hc->heatingtype, 2);       // 0-off, 1-curve, 2-radiator, 3-convector, 4-floor
@@ -935,6 +969,7 @@ void Thermostat::process_EasyMonitor(const std::shared_ptr<const Telegram> & tel
             has_update(hc->roomTemp, temp * 10); // * 100
             toggle_fetch(0x0A, false);
         }
+
         int16_t sel = hc->selTemp / 50;
         if (telegram->read_value(sel, 6, 1)) { // is * 2
             has_update(hc->selTemp, sel * 50); // * 100
@@ -1001,11 +1036,13 @@ void Thermostat::process_RC35wwTimer(const std::shared_ptr<const Telegram> & tel
         } else {
             snprintf(data, sizeof(data), "%02d %s %02d:%02d %s", no, sday, time / 6, 10 * (time % 6), on ? "on" : "off");
         }
+
         if (telegram->type_id == 0x38) {
             has_update(dhw->wwSwitchTime_, data, sizeof(dhw->wwSwitchTime_));
         } else {
             has_update(dhw->wwCircSwitchTime_, data, sizeof(dhw->wwCircSwitchTime_));
         }
+
         if (is_fetch(telegram->type_id)) {
             toggle_fetch(telegram->type_id, false); // dont fetch again
         }
@@ -1098,6 +1135,7 @@ void Thermostat::process_JunkersSetMixer(const std::shared_ptr<const Telegram> &
     if (hc == nullptr) {
         return;
     }
+
     has_update(telegram, hc->targetflowtemp, 0);
 }
 
@@ -1176,7 +1214,9 @@ void Thermostat::process_RC300Monitor(const std::shared_ptr<const Telegram> & te
     // summermode is bit 4 for boilers and bit 6 for heatpumps: 0:winter, 1:summer
     telegram->read_value(hc->statusbyte, 2);
     // use summertemp or hpoperatingstate, https://github.com/emsesp/EMS-ESP32/issues/747, #550, #503
-    if ((hc->statusbyte & 1) || !is_received(summer2_typeids[hc->hc()])) {
+    // 0x470 or any 0x471+ means offset 20 is the heat-pump state. Publish it on every circuit:
+    // some BC400/UI800 only answer 0x471, while hc2+ still broadcast the state in 0x2A6 ff. #3097
+    if ((hc->statusbyte & 1) || !has_hpoperatingstate()) {
         has_update(hc->summermode, hc->statusbyte & 0x50 ? 1 : 0);
         has_update(hc->hpoperatingstate, EMS_VALUE_UINT8_NOTSET);
     } else {
@@ -1188,6 +1228,7 @@ void Thermostat::process_RC300Monitor(const std::shared_ptr<const Telegram> & te
             has_update(hc->summermode, EMS_VALUE_UINT8_NOTSET);
         }
     }
+
     has_update(telegram, hc->targetflowtemp, 4);
     has_update(telegram, hc->curroominfl, 27);
     has_update(telegram, hc->currSolarInfl, 29);
@@ -1228,6 +1269,7 @@ void Thermostat::process_RC300Set(const std::shared_ptr<const Telegram> & telegr
     if ((uint8_t)tat == 0xFF) {
         tat = -2;
     }
+
     has_update(hc->tempautotemp, tat);
 
     if (model() == EMS_DEVICE_FLAG_CR120) {
@@ -1235,6 +1277,7 @@ void Thermostat::process_RC300Set(const std::shared_ptr<const Telegram> & telegr
     } else {
         has_update(telegram, hc->manualtemp, 10); // is * 2
     }
+
     has_enumupdate(telegram, hc->program, 11, 1); // timer program 1 or 2
 
     has_enumupdate(telegram, hc->reducemode, 5, 1); // 1-outdoor temp threshold, 2-room temp threshold, 3-reduced mode
@@ -1270,6 +1313,7 @@ void Thermostat::process_RC300Summer(const std::shared_ptr<const Telegram> & tel
     } else {
         has_update(telegram, hc->designtemp, 5);
     }
+
     // minflowtemp could be in 8 or 13 #2969
     has_update(telegram, hc->minflowtemp, 13);
     has_update(telegram, hc->baseflowtemp, 8);
@@ -1281,6 +1325,23 @@ void Thermostat::process_RC300Summer(const std::shared_ptr<const Telegram> & tel
 // some UI800 (e.g. HMI800.2) don't send 0x470 and use the per-hc 0x471 ff instead, #3257
 bool Thermostat::has_summer3() const {
     return model() == EMSdevice::EMS_DEVICE_FLAG_UI800 && is_received(0x470);
+}
+
+// monitor offset 20 is heating/off/cooling once this thermostat is known to be a heat pump.
+// 0x470 covers every circuit. A single answered 0x471+ does too: hc2 may never reply to 0x472
+// but still broadcasts its state in 0x2A6. #3097
+bool Thermostat::has_hpoperatingstate() const {
+    if (has_summer3()) {
+        return true;
+    }
+
+    for (const uint16_t type_id : summer2_typeids) {
+        if (is_received(type_id)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 // type 0x470, only BC400/UI800
@@ -1303,6 +1364,7 @@ void Thermostat::process_RC300Summer2(const std::shared_ptr<const Telegram> & te
     if (hc == nullptr) {
         return;
     }
+
     if (hc->statusbyte & 1) {
         has_update(telegram, hc->summersetmode, 0);
         has_update(hc->hpoperatingmode, EMS_VALUE_UINT8_NOTSET);
@@ -1310,6 +1372,7 @@ void Thermostat::process_RC300Summer2(const std::shared_ptr<const Telegram> & te
         has_update(telegram, hc->hpoperatingmode, 0);
         has_update(hc->summersetmode, EMS_VALUE_UINT8_NOTSET);
     }
+
     has_update(telegram, hc->summertemp, 1);
     has_update(telegram, hc->heatondelay, 2);
     has_update(telegram, hc->heatoffdelay, 3);
@@ -1357,6 +1420,7 @@ void Thermostat::process_RC300WWmode(const std::shared_ptr<const Telegram> & tel
     if (dhw == nullptr) {
         return;
     }
+
     // circulation pump see: https://github.com/Th3M3/buderus_ems-wiki/blob/master/Einstellungen%20der%20Bedieneinheit%20RC310.md
     has_update(telegram, dhw->wwCircPump_, 1); // FF=off, 0=on ?
 
@@ -1372,7 +1436,8 @@ void Thermostat::process_RC300WWmode(const std::shared_ptr<const Telegram> & tel
     } else {
         has_update(telegram, dhw->wwMode_, 2); // 0=off, 1=low, 2=high, 3=auto, 4=own prog
     }
-    has_update(telegram, dhw->wwCircMode_, 3);        // 0=off, 1=on, 2=auto, 4=own?
+
+    has_update(telegram, dhw->wwCircMode_, 3);        // 0=off, 1=on, 2=dhw prog (BC400+) / auto, 3=auto (BC400+) / own prog
     has_update(telegram, dhw->wwChargeDuration_, 10); // value in steps of 15 min
     has_update(telegram, dhw->wwCharge_, 11);         // 0=off, 0xFF=on
     has_update(telegram, dhw->wwDisinfecting_, 5);    // 0=off, 0xFF=on
@@ -1389,6 +1454,7 @@ void Thermostat::process_RC300WWmode2(const std::shared_ptr<const Telegram> & te
     if (dhw == nullptr) {
         return;
     }
+
     // 0x31D for WW system 1, 0x31E for WW system 2
     // pos 1 = holiday mode
     // pos 2 = current status of DHW setpoint
@@ -1422,6 +1488,7 @@ void Thermostat::process_RC300Set2(const std::shared_ptr<const Telegram> & teleg
     if (hc == nullptr) {
         return;
     }
+
     has_update(telegram, hc->wwprio, 3);
 }
 
@@ -1437,6 +1504,7 @@ void Thermostat::process_RC300Holiday(const std::shared_ptr<const Telegram> & te
     if (telegram->offset || telegram->message_length < 6) {
         return;
     }
+
     char data[sizeof(vacation[0]) + 4];
     snprintf(data,
              sizeof(data),
@@ -1456,6 +1524,7 @@ void Thermostat::process_PID(const std::shared_ptr<const Telegram> & telegram) {
     if (hc == nullptr) {
         return;
     }
+
     // Offset 0: Floorheating integral time in 10 min steps. Default is 25, range 16 to 32
     // Offset 1: HC radiator/convector intergral time in 1min steps. Default is 16, range 3 to 80
     // Offset 2: Heat Control characteristic as you figured out. Default is 3, Range 2-4
@@ -1465,6 +1534,7 @@ void Thermostat::process_PID(const std::shared_ptr<const Telegram> & telegram) {
     } else if (hc->heatingtype != EMS_VALUE_UINT8_NOTSET) {
         has_update(telegram, hc->inttime, 1);
     }
+
     has_enumupdate(telegram, hc->heatingpid, 2, 2);
     has_update(telegram, hc->pumpopt, 3);
 }
@@ -1476,6 +1546,7 @@ void Thermostat::process_HPMode(const std::shared_ptr<const Telegram> & telegram
     if (hc == nullptr) {
         return;
     }
+
     has_update(telegram, hc->control, 3);
     has_update(telegram, hc->hpmode, 5);
 }
@@ -1486,11 +1557,13 @@ void Thermostat::process_HPSet(const std::shared_ptr<const Telegram> & telegram)
     if (hc == nullptr) {
         return;
     }
+
     if (hc->control == 3 || hc->control == 6) {     // control with humidity
         has_update(telegram, hc->hpminflowtemp, 0); // 7-35°C
     } else {
         has_update(telegram, hc->hpminflowtemp, 1); // 7-35°C
     }
+
     // has_update(telegram, hc->roomtempoffset, 2); // 1-10K // not implemented, mentioned in #3144
     has_update(telegram, hc->roomtempdiff, 3); // 1-10K
     has_update(telegram, hc->dewoffset, 4);    // 2-10K
@@ -1518,6 +1591,7 @@ void Thermostat::process_RC30Set(const std::shared_ptr<const Telegram> & telegra
     if (hc == nullptr) {
         return;
     }
+
     has_update(telegram, ibaLanguage_, 0);          // language on Thermostat: 0 german, 1 dutch, 2 french, 3 italian
     has_update(telegram, ibaCalIntTemperature_, 1); // offset int. temperature sensor, by * 0.1 Kelvin
     has_update(telegram, autodst_, 2);              // Automatic change Daylight Saving time: (0x00 = off, 0xFF = on)
@@ -1627,6 +1701,7 @@ void Thermostat::process_RC35Set(const std::shared_ptr<const Telegram> & telegra
         has_update(telegram, hc->designtemp, 17);  // is * 1
         has_update(telegram, hc->maxflowtemp, 15); // is * 1
     }
+
     setValueEnum(&hc->heatingtype, hc->control == 1 ? FL_(enum_heatingtype2) : FL_(enum_heatingtype));
 }
 
@@ -1656,6 +1731,7 @@ void Thermostat::process_RC35Timer(const std::shared_ptr<const Telegram> & teleg
         } else {
             snprintf(data, sizeof(data), "%02d %s %02d:%02d %s", no, sday, time / 6, 10 * (time % 6), on ? "on" : "off");
         }
+
         if (!prog) {
             strlcpy(hc->switchtime1, data, sizeof(hc->switchtime1));
             has_update(hc->switchtime1); // always publish
@@ -1714,6 +1790,7 @@ void Thermostat::process_RC30Vacation(const std::shared_ptr<const Telegram> & te
     if ((telegram->offset + telegram->message_length) > 57) {
         return;
     }
+
     static uint8_t vacation_telegram[57] = {0}; // make a copy of the whole telegram to access blocks
     memcpy(&vacation_telegram[telegram->offset], telegram->message_data, telegram->message_length);
     for (uint8_t index = 0, pos = 0; index < 8; index++, pos += 7) {
@@ -1753,8 +1830,10 @@ void Thermostat::process_RCTime(const std::shared_ptr<const Telegram> & telegram
             } else {
                 set_datetime("ntp", -1); // set from NTP
             }
+
             setTimeRetry++;
         }
+
         return;
     }
 
@@ -1808,6 +1887,7 @@ void Thermostat::process_RCTime(const std::shared_ptr<const Telegram> & telegram
                     set_datetime("ntp", -1); // set from NTP
                     LOG_INFO("thermostat time correction %d seconds from ntp", difference);
                 }
+
                 setTimeRetry++;
             }
         } else {
@@ -1888,6 +1968,7 @@ void Thermostat::process_RCErrorMessage2(const std::shared_ptr<const Telegram> &
     if (telegram->offset > 0 || telegram->message_length < 20) {
         return;
     }
+
     uint8_t  code[4] = {telegram->message_data[5], telegram->message_data[6], telegram->message_data[7], 0};
     uint16_t codeNo  = telegram->message_data[8] * 256 + telegram->message_data[9];
     uint16_t year    = (telegram->message_data[10] & 0x7F) + 2000;
@@ -1923,6 +2004,7 @@ void Thermostat::process_RCErrorMessage2(const std::shared_ptr<const Telegram> &
                      hour1,
                      min1);
         }
+
         has_update(lastCode_);
     }
 }
@@ -1939,23 +2021,28 @@ bool Thermostat::set_roomtempdiff(const char * value, const int8_t id) {
     if (hc == nullptr) {
         return false;
     }
+
     int v;
     if (Helpers::value2number(value, v)) {
         write_command(hp_typeids[hc->hc()], 3, v, hp_typeids[hc->hc()]);
         return true;
     }
+
     return false;
 }
+
 bool Thermostat::set_dewoffset(const char * value, const int8_t id) {
     auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
+
     int v;
     if (Helpers::value2number(value, v)) {
         write_command(hp_typeids[hc->hc()], 4, v, hp_typeids[hc->hc()]);
         return true;
     }
+
     return false;
 }
 
@@ -1964,6 +2051,7 @@ bool Thermostat::set_hpminflowtemp(const char * value, const int8_t id) {
     if (hc == nullptr) {
         return false;
     }
+
     int v;
     if (Helpers::value2temperature(value, v)) {
         if (hc->control == 3 || hc->control == 6) { // remotes with humidity
@@ -1971,8 +2059,10 @@ bool Thermostat::set_hpminflowtemp(const char * value, const int8_t id) {
         } else {
             write_command(hp_typeids[hc->hc()], 1, v, hp_typeids[hc->hc()]);
         }
+
         return true;
     }
+
     return false;
 }
 
@@ -1981,10 +2071,12 @@ bool Thermostat::set_hpmode(const char * value, const int8_t id) {
     if (hc == nullptr) {
         return false;
     }
+
     uint8_t v;
     if (!Helpers::value2enum(value, v, FL_(enum_hpmode))) {
         return false;
     }
+
     write_command(hpmode_typeids[hc->hc()], 5, v, hpmode_typeids[hc->hc()]);
     return true;
 }
@@ -1995,6 +2087,7 @@ bool Thermostat::set_hybridStrategy(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, v, FL_(enum_hybridStrategy))) {
         return false;
     }
+
     write_command(0xBB, 12, v + 1, 0xBB);
     return true;
 }
@@ -2004,6 +2097,7 @@ bool Thermostat::set_switchOverTemp(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
+
     write_command(0xBB, 13, v, 0xBB);
     return true;
 }
@@ -2013,6 +2107,7 @@ bool Thermostat::set_energyCostRatio(const char * value, const int8_t id) {
     if (!Helpers::value2float(value, v)) {
         return false;
     }
+
     write_command(0xBB, 14, (uint8_t)(v * 10), 0xBB);
     return true;
 }
@@ -2022,6 +2117,7 @@ bool Thermostat::set_fossileFactor(const char * value, const int8_t id) {
     if (!Helpers::value2float(value, v)) {
         return false;
     }
+
     write_command(0xBB, 15, (uint8_t)(v * 10), 0xBB);
     return true;
 }
@@ -2031,6 +2127,7 @@ bool Thermostat::set_electricFactor(const char * value, const int8_t id) {
     if (!Helpers::value2float(value, v)) {
         return false;
     }
+
     write_command(0xBB, 16, (uint8_t)(v * 10), 0xBB);
     return true;
 }
@@ -2040,6 +2137,7 @@ bool Thermostat::set_delayBoiler(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     write_command(0xBB, 18, v, 0xBB);
     return true;
 }
@@ -2049,6 +2147,7 @@ bool Thermostat::set_tempDiffBoiler(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, v, true)) {
         return false;
     }
+
     write_command(0xBB, 19, v, 0xBB);
     return true;
 }
@@ -2059,6 +2158,7 @@ bool Thermostat::set_pvEnableWw(const char * value, const int8_t id) {
         write_command(0x23E, 3, v ? 0xFF : 0, 0x23E);
         return true;
     }
+
     return false;
 }
 
@@ -2068,6 +2168,7 @@ bool Thermostat::set_pvRaiseHeat(const char * value, const int8_t id) {
         write_command(0x23E, 0, v, 0x23E);
         return true;
     }
+
     return false;
 }
 
@@ -2077,6 +2178,7 @@ bool Thermostat::set_pvLowerCool(const char * value, const int8_t id) {
         write_command(0x23E, 5, v, 0x23E);
         return true;
     }
+
     return false;
 }
 
@@ -2159,6 +2261,7 @@ bool Thermostat::set_display(const char * value, const int8_t id) {
             return true;
         }
     }
+
     return false;
 }
 
@@ -2245,6 +2348,7 @@ bool Thermostat::set_remotehum(const char * value, const int8_t id) {
         Roomctrl::set_remotehum(Roomctrl::RT800, hc->hc(), hc->remotehum);
         return true;
     }
+
     Roomctrl::set_remotehum(Roomctrl::RC100H, hc->hc(), EMS_VALUE_UINT8_NOTSET); // RC100H
     return false;
 }
@@ -2257,8 +2361,10 @@ bool Thermostat::set_building(const char * value, const int8_t id) {
             write_command(0x110, 17, i / 10, 0x110);
             return true;
         }
+
         return false;
     }
+
     uint8_t bd;
     if (!Helpers::value2enum(value, bd, FL_(enum_ibaBuildingType))) {
         return false;
@@ -2293,6 +2399,7 @@ bool Thermostat::set_heatingpid(const char * value, const int8_t id) {
         if (hc == nullptr) {
             return false;
         }
+
         write_command(set2_typeids[hc->hc()], 2, pid + 2, set2_typeids[hc->hc()]);
     }
 
@@ -2304,11 +2411,13 @@ bool Thermostat::set_pumpopt(const char * value, const int8_t id) {
     if (hc == nullptr) {
         return false;
     }
+
     bool b;
     if (Helpers::value2bool(value, b)) {
         write_command(set2_typeids[hc->hc()], 3, b ? 0xFF : 0, set2_typeids[hc->hc()]);
         return true;
     }
+
     return false;
 }
 
@@ -2317,11 +2426,13 @@ bool Thermostat::set_inttime(const char * value, const int8_t id) {
     if (hc == nullptr) {
         return false;
     }
+
     int v;
     if (Helpers::value2number(value, v)) {
         write_command(set2_typeids[hc->hc()], 1, v, set2_typeids[hc->hc()]);
         return true;
     }
+
     return false;
 }
 
@@ -2330,11 +2441,13 @@ bool Thermostat::set_inttimefloor(const char * value, const int8_t id) {
     if (hc == nullptr) {
         return false;
     }
+
     int v;
     if (Helpers::value2number(value, v)) {
         write_command(set2_typeids[hc->hc()], 0, v / 10, set2_typeids[hc->hc()]);
         return true;
     }
+
     return false;
 }
 
@@ -2349,8 +2462,10 @@ bool Thermostat::set_damping(const char * value, const int8_t id) {
         } else {
             write_command(EMS_TYPE_IBASettings, 21, dmp ? 0xFF : 0, EMS_TYPE_IBASettings);
         }
+
         return true;
     }
+
     return false;
 }
 
@@ -2363,8 +2478,10 @@ bool Thermostat::set_solar(const char * value, const int8_t) {
         } else {
             write_command(0x240, 13, b ? 0xFF : 0, 0x240);
         }
+
         return true;
     }
+
     return false;
 }
 
@@ -2376,16 +2493,19 @@ bool Thermostat::set_language(const char * value, const int8_t id) {
         if (!Helpers::value2enum(value, lg, FL_(enum_ibaLanguageJ))) {
             return false;
         }
+
         write_command(0x11E, 3, lg, 0x11E);
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC30) {
         if (!Helpers::value2enum(value, lg, FL_(enum_ibaLanguage_RC30))) {
             return false;
         }
+
         write_command(EMS_TYPE_RC30Settings, 0, lg, EMS_TYPE_RC30Settings);
     } else {
         if (!Helpers::value2enum(value, lg, FL_(enum_ibaLanguage))) {
             return false;
         }
+
         write_command(EMS_TYPE_IBASettings, 1, lg, EMS_TYPE_IBASettings);
     }
 
@@ -2408,6 +2528,7 @@ bool Thermostat::set_control(const char * value, const int8_t id) {
             write_command(set_typeids[hc->hc()], 1, ctrl);
             return true;
         }
+
         // BC400
         // 1-RC100, 2-RC100H, 3-RC200
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400) {
@@ -2428,6 +2549,7 @@ bool Thermostat::set_control(const char * value, const int8_t id) {
                     Roomctrl::set_remotetemp(0, hc->hc(), hc->remotetemp);
                 }
             }
+
             return true;
         }
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_UI800) {
@@ -2442,8 +2564,10 @@ bool Thermostat::set_control(const char * value, const int8_t id) {
                     Roomctrl::set_remotetemp(0, hc->hc(), hc->remotetemp);
                 }
             }
+
             return true;
         }
+
         // RC100 or RC300
         // 1-RC200, 2-RC100, 3-RC100H
     } else if (isRC300() || model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
@@ -2461,8 +2585,10 @@ bool Thermostat::set_control(const char * value, const int8_t id) {
                     hc->remotetemp = EMS_VALUE_INT16_NOTSET;
                     Roomctrl::set_remotetemp(0, hc->hc(), hc->remotetemp);
                 }
+
                 // Roomctrl::set_remotetemp(ctrl == 1 ? Roomctrl::RC200 : ctrl == 3 ? Roomctrl::RC100H : Roomctrl::RC100, hc->hc(), hc->remotetemp);
             }
+
             return true;
         }
     } else if (Helpers::value2enum(value, ctrl, FL_(enum_control))) {
@@ -2488,6 +2614,7 @@ bool Thermostat::set_roomsensor(const char * value, const int8_t id) {
             return true;
         }
     }
+
     return false;
 }
 
@@ -2497,47 +2624,56 @@ bool Thermostat::set_wwmode(const char * value, const int8_t id) {
     if (dhw == nullptr) {
         return false;
     }
+
     uint8_t set;
 
     if (model() == EMSdevice::EMS_DEVICE_FLAG_RC10) {
         if (!Helpers::value2enum(value, set, FL_(enum_wwMode3))) {
             return false;
         }
+
         write_command(0xB0, 2, set, 0xB0);
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400 || model() == EMSdevice::EMS_DEVICE_FLAG_UI800 || model() == EMSdevice::EMS_DEVICE_FLAG_HMC310) {
         if (!Helpers::value2enum(value, set, FL_(enum_wwMode4), {0, 5, 1, 2, 4})) { // off, eco+, eco, comfort, auto
             return false;
         }
+
         write_command(0x02F5 + dhw->offset(), 2, set, 0x02F5 + dhw->offset());
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_CR120) {
         if (!Helpers::value2enum(value, set, FL_(enum_wwMode6), {0, 2, 4})) { // normal, comfort, auto
             return false;
         }
+
         write_command(0x02F5 + dhw->offset(), 2, set, 0x02F5 + dhw->offset());
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
         if (!Helpers::value2enum(value, set, FL_(enum_wwMode2), {0, 2, 3})) { // off, on, auto
             return false;
         }
+
         write_command(0x02F5 + dhw->offset(), 2, set, 0x02F5 + dhw->offset());
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) { // Rego3000 - https://github.com/emsesp/EMS-ESP32/issues/1692
         if (!Helpers::value2enum(value, set, FL_(enum_wwMode5), {1, 2, 5})) {
             return false;
         }
+
         write_command(0x02F5 + dhw->offset(), 2, set, 0x02F5 + dhw->offset());
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC300) {
         if (!Helpers::value2enum(value, set, FL_(enum_wwMode))) {
             return false;
         }
+
         write_command(0x02F5 + dhw->offset(), 2, set, 0x02F5 + dhw->offset());
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC30) {
         if (!Helpers::value2enum(value, set, FL_(enum_wwMode3))) {
             return false;
         }
+
         write_command(EMS_TYPE_RC30wwSettings, 0, set, EMS_TYPE_RC30wwSettings);
     } else {
         if (!Helpers::value2enum(value, set, FL_(enum_wwMode2))) {
             return false;
         }
+
         write_command(EMS_TYPE_wwSettings, 2, set, EMS_TYPE_wwSettings);
     }
 
@@ -2586,6 +2722,7 @@ bool Thermostat::set_wwcharge(const char * value, const int8_t id) {
     if (dhw == nullptr) {
         return false;
     }
+
     bool b;
     if (!Helpers::value2bool(value, b)) {
         return false;
@@ -2612,10 +2749,12 @@ bool Thermostat::set_wwchargeduration(const char * value, const int8_t id) {
     if (dhw == nullptr) {
         return false;
     }
+
     int t;
     if (!Helpers::value2number(value, t)) {
         return false;
     }
+
     t = (t + 8) / 15;
 
     write_command(0x2F5 + dhw->offset(), 10, t, 0x02F5 + dhw->offset());
@@ -2633,6 +2772,7 @@ bool Thermostat::set_wwprio(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
+
     if (isRC300()) {
         write_command(set2_typeids[hc->hc()], 3, b ? 0xFF : 0x00, set2_typeids[hc->hc()]);
     } else {
@@ -2653,6 +2793,7 @@ bool Thermostat::set_cooling(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
+
     write_command(set_typeids[hc->hc()], 28, b ? 0x01 : 0x00, set_typeids[hc->hc()]);
     return true;
 }
@@ -2663,14 +2804,17 @@ bool Thermostat::set_coolondelay(const char * value, const int8_t id) {
     if (!Helpers::value2float(value, f)) {
         return false;
     }
+
     if (has_summer3()) {
         write_command(0x470, 6, (uint8_t)(f * 4), 0x470);
         return true;
     }
+
     auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
+
     write_command(summer2_typeids[hc->hc()], 6, (uint8_t)f, summer2_typeids[hc->hc()]);
     return true;
 }
@@ -2680,14 +2824,17 @@ bool Thermostat::set_cooloffdelay(const char * value, const int8_t id) {
     if (!Helpers::value2float(value, f)) {
         return false;
     }
+
     if (has_summer3()) {
         write_command(0x470, 7, (uint8_t)(f * 4), 0x470);
         return true;
     }
+
     auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
+
     write_command(summer2_typeids[hc->hc()], 7, (uint8_t)f, summer2_typeids[hc->hc()]);
     return true;
 }
@@ -2697,10 +2844,12 @@ bool Thermostat::set_switchProgMode(const char * value, const int8_t id) {
     if (hc == nullptr) {
         return false;
     }
+
     uint8_t set;
     if (!Helpers::value2enum(value, set, FL_(enum_switchProgMode))) {
         return false;
     }
+
     write_command(set_typeids[hc->hc()], 19, set + 1, set_typeids[hc->hc()]);
     return true;
 }
@@ -2711,15 +2860,22 @@ bool Thermostat::set_wwcircmode(const char * value, const int8_t id) {
     if (dhw == nullptr) {
         return false;
     }
+
     uint8_t set;
 
     if (isRC300() || (model() == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
-        if (!Helpers::value2enum(value, set, FL_(enum_wwCircMode))) {
+        if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400 || model() == EMSdevice::EMS_DEVICE_FLAG_UI800 || model() == EMSdevice::EMS_DEVICE_FLAG_HMC310) {
+            if (!Helpers::value2enum(value, set, FL_(enum_wwCircMode2))) {
+                return false;
+            }
+        } else if (!Helpers::value2enum(value, set, FL_(enum_wwCircMode))) {
             return false;
         }
+
         write_command(0x02F5 + dhw->offset(), 3, set, 0x02F5 + dhw->offset());
         return true;
     }
+
     if (!Helpers::value2enum(value, set, FL_(enum_wwMode2))) {
         return false;
     }
@@ -2734,6 +2890,7 @@ bool Thermostat::set_wwDailyHeating(const char * value, const int8_t id) {
     if (dhw == nullptr) {
         return false;
     }
+
     bool b;
     if (!Helpers::value2bool(value, b)) {
         return false;
@@ -2748,6 +2905,7 @@ bool Thermostat::set_wwDailyHeatTime(const char * value, const int8_t id) {
     if (dhw == nullptr) {
         return false;
     }
+
     int set;
     if (!Helpers::value2number(value, set)) {
         return false;
@@ -2761,6 +2919,7 @@ bool Thermostat::set_wwDailyHeatTime(const char * value, const int8_t id) {
 
         write_command(0x2F5 + dhw->offset(), 9, t, 0x2F5 + dhw->offset());
     }
+
     return true;
 }
 
@@ -2769,6 +2928,7 @@ bool Thermostat::set_wwDisinfect(const char * value, const int8_t id) {
     if (dhw == nullptr) {
         return false;
     }
+
     bool b;
     if (!Helpers::value2bool(value, b)) {
         return false;
@@ -2790,6 +2950,7 @@ bool Thermostat::set_wwDisinfectDay(const char * value, const int8_t id) {
     if (dhw == nullptr) {
         return false;
     }
+
     uint8_t set;
     if (!Helpers::value2enum(value, set, FL_(enum_dayOfWeek))) {
         return false;
@@ -2811,21 +2972,25 @@ bool Thermostat::set_wwDisinfectHour(const char * value, const int8_t id) {
     if (dhw == nullptr) {
         return false;
     }
+
     int set;
     if (isRC300() || (model() == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
         if (!Helpers::value2number(value, set, 0, 1431)) {
             return false;
         }
+
         write_command(0x2F5 + dhw->offset(), 6, (set + 8) / 15, 0x2F5 + dhw->offset());
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC30) {
         if (!Helpers::value2number(value, set, 0, 23)) {
             return false;
         }
+
         write_command(EMS_TYPE_RC30wwSettings, 4, set, EMS_TYPE_RC30wwSettings);
     } else {
         if (!Helpers::value2number(value, set, 0, 23)) {
             return false;
         }
+
         write_command(0x37, 6, set, 0x37);
     }
 
@@ -2948,6 +3113,7 @@ bool Thermostat::set_holiday(const char * value, const int8_t id, const bool vac
     if (!data[0] || data[0] > 31 || !data[1] || data[1] > 12 || !data[3] || data[3] > 31 || !data[4] || data[4] > 12) {
         return false;
     }
+
     if (!vacation || value[10] == '+') { // + for compatibility
         if (hc) {
             write_command(timer_typeids[hc->hc()], 93, data, 6, timer_typeids[hc->hc()]);
@@ -2986,10 +3152,12 @@ bool Thermostat::set_RC30Vacation(const char * value, const int8_t id) {
     if (!data[0] || data[0] > 31 || !data[1] || data[1] > 12 || !data[3] || data[3] > 31 || !data[4] || data[4] > 12) {
         return false;
     }
+
     if (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) {
         write_command(0x269, 0, data, 6, 0x269);
         return true;
     }
+
     // RC30
     write_command(0xA9, 1 + 7 * (id - 1), data, 6, 0x9A);
     return true;
@@ -3013,11 +3181,13 @@ bool Thermostat::set_R3000Holiday(const char * value, const int8_t id) {
     if (!data[2] || data[2] > 31 || !data[1] || data[1] > 12 || !data[5] || data[5] > 31 || !data[4] || data[4] > 12) {
         return false;
     }
+
     if (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) {
         write_command(0x269, 0, data, 6, 0x269);
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
         write_command(0x43F, 0, data, 6, 0x43F);
     }
+
     return true;
 }
 
@@ -3027,10 +3197,12 @@ bool Thermostat::set_pause(const char * value, const int8_t id) {
     if (hc == nullptr) {
         return false;
     }
+
     if (value == nullptr) {
         read_command(timer_typeids[hc->hc()], 85, 1);
         return true;
     }
+
     int hrs = 0;
     if (!Helpers::value2number(value, hrs)) {
         return false;
@@ -3070,6 +3242,7 @@ bool Thermostat::set_absent(const char * value, const int8_t) {
         write_command(0x16E, 0, b ? 0xFF : 0, 0x16E);
         return true;
     }
+
     return false;
 }
 
@@ -3078,11 +3251,13 @@ bool Thermostat::set_redthreshold(const char * value, const int8_t id) {
     if (hc == nullptr) {
         return false;
     }
+
     float t;
     if (Helpers::value2temperature(value, t)) {
         write_command(set_typeids[hc->hc()], 20, (int8_t)(t * 2), set_typeids[hc->hc()]);
         return true;
     }
+
     return false;
 }
 
@@ -3091,11 +3266,13 @@ bool Thermostat::set_solarinfl(const char * value, const int8_t id) {
     if (hc == nullptr) {
         return false;
     }
+
     float t;
     if (Helpers::value2temperature(value, t)) {
         write_command(summer_typeids[hc->hc()], 3, (int8_t)t, summer_typeids[hc->hc()]);
         return true;
     }
+
     return false;
 }
 
@@ -3124,6 +3301,7 @@ bool Thermostat::set_datetime(const char * value, const int8_t id) {
         if (tm_->tm_year < 110) { // no valid time
             return false;
         }
+
         if (!EMSESP::system_.ntp_connected()) {
             LOG_WARNING("Set date: no valid NTP data, setting from ESP Clock");
         }
@@ -3177,6 +3355,7 @@ bool Thermostat::set_datetime(const char * value, const int8_t id) {
         LOG_WARNING("Set date: invalid data, wrong length");
         return false;
     }
+
     if (data[1] == 0 || data[1] > 12 || data[2] > 23 || data[3] == 0 || data[3] > 31 || data[4] > 59 || data[5] > 59 || data[6] > 6 || data[7] > 3) {
         LOG_WARNING("Invalid date/time: %02d.%02d.2%03d-%02d:%02d:%02d-%d-%d", data[3], data[1], data[0], data[2], data[4], data[5], data[6], data[7]);
         return false;
@@ -3199,10 +3378,12 @@ bool Thermostat::set_roominfl_factor(const char * value, const int8_t id) {
     if (hc == nullptr) {
         return false;
     }
+
     float val;
     if (!Helpers::value2float(value, val)) {
         return false;
     }
+
     if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
         write_command(set_typeids[hc->hc()], 6, (uint8_t)((val + 5) / 10));
 
@@ -3219,10 +3400,12 @@ bool Thermostat::set_roominfl_mode(const char * value, const int8_t id) {
     if (hc == nullptr) {
         return false;
     }
+
     uint8_t val;
     if (!Helpers::value2enum(value, val, FL_(enum_roominfluence))) {
         return false;
     }
+
     write_command(set_typeids[hc->hc()], 7, (uint8_t)val);
 
     return true;
@@ -3290,30 +3473,39 @@ bool Thermostat::set_mode(const char * value, const int8_t id) {
     if (!strcmp(mode, FL_(auto)[0])) {
         return set_mode_n(HeatingCircuit::Mode::AUTO, id);
     }
+
     if (!strcmp(mode, FL_(off)[0])) {
         return set_mode_n(HeatingCircuit::Mode::OFF, id);
     }
+
     if (!strcmp(mode, FL_(manual)[0])) {
         return set_mode_n(HeatingCircuit::Mode::MANUAL, id);
     }
+
     if (!strcmp(mode, FL_(day)[0])) {
         return set_mode_n(HeatingCircuit::Mode::DAY, id);
     }
+
     if (!strcmp(mode, FL_(night)[0])) {
         return set_mode_n(HeatingCircuit::Mode::NIGHT, id);
     }
+
     if (!strcmp(mode, FL_(heat)[0])) {
         return set_mode_n(HeatingCircuit::Mode::HEAT, id);
     }
+
     if (!strcmp(mode, FL_(nofrost)[0])) {
         return set_mode_n(HeatingCircuit::Mode::NOFROST, id);
     }
+
     if (!strcmp(mode, FL_(eco)[0])) {
         return set_mode_n(HeatingCircuit::Mode::ECO, id);
     }
+
     if (!strcmp(mode, FL_(holiday)[0])) {
         return set_mode_n(HeatingCircuit::Mode::HOLIDAY, id);
     }
+
     if (!strcmp(mode, FL_(comfort)[0])) {
         return set_mode_n(HeatingCircuit::Mode::COMFORT, id);
     }
@@ -3359,8 +3551,10 @@ bool Thermostat::set_mode_n(const uint8_t mode, const int8_t id) {
             if (hc->selTemp > 0) {
                 return true;
             }
+
             set_mode_value = 50; // set selTemp to 5 degrees
         }
+
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC10:
         offset          = 0;
@@ -3373,6 +3567,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const int8_t id) {
         } else { // DAY
             set_mode_value = 4;
         }
+
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC20:
         offset = EMS_OFFSET_RC20Set_mode;
@@ -3406,6 +3601,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const int8_t id) {
         } else {
             offset = EMS_OFFSET_JunkersSetMessage_set_mode;
         }
+
         // validate_typeid = monitor_typeids[hc_p];
         if (mode == HeatingCircuit::Mode::NOFROST) {
             set_mode_value = 0x01;
@@ -3416,6 +3612,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const int8_t id) {
         } else if (mode == HeatingCircuit::Mode::AUTO) {
             set_mode_value = 0x04;
         }
+
         break;
     default:
         offset = 0;
@@ -3439,6 +3636,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const int8_t id) {
     } else {
         hc->mode = set_mode_value;
     }
+
     has_update(&hc->mode);
 
     return true;
@@ -3452,8 +3650,10 @@ bool Thermostat::set_summermode(const char * value, const int8_t id) {
             write_command(0x470, 0, set, 0x470);
             return true;
         }
+
         return false;
     }
+
     auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
@@ -3498,10 +3698,12 @@ bool Thermostat::set_comfortPointTemp(const char * value, const int8_t id) {
     if (hc == nullptr) {
         return false;
     }
+
     int set;
     if (!Helpers::value2temperature(value, set)) {
         return false;
     }
+
     write_command(summer_typeids[hc->hc()], 12, set, summer_typeids[hc->hc()]);
     return true;
 }
@@ -3511,10 +3713,12 @@ bool Thermostat::set_comfortPointOffset(const char * value, const int8_t id) {
     if (hc == nullptr) {
         return false;
     }
+
     int set;
     if (!Helpers::value2temperature(value, set, true)) {
         return false;
     }
+
     write_command(summer_typeids[hc->hc()], 11, set, summer_typeids[hc->hc()]);
     return true;
 }
@@ -3531,11 +3735,13 @@ bool Thermostat::set_holidaymode(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, v, FL_(enum_mode4))) {
         return false;
     }
+
     if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS && has_flags(EMSdevice::EMS_DEVICE_FLAG_JUNKERS_OLD)) {
         write_command(set_typeids[hc->hc()], 8, v + 1, set_typeids[hc->hc()]);
     } else {
         write_command(set_typeids[hc->hc()], 19, v + 1, set_typeids[hc->hc()]);
     }
+
     return true;
 }
 
@@ -3551,6 +3757,7 @@ bool Thermostat::set_heatup(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, v, FL_(enum_heatup))) {
         return false;
     }
+
     write_command(set_typeids[hc->hc()], 18, v + 1, set_typeids[hc->hc()]);
     return true;
 }
@@ -3567,6 +3774,7 @@ bool Thermostat::set_switchonoptimization(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
+
     if (model() == EMSdevice::EMS_DEVICE_FLAG_RC35) {
         write_command(set_typeids[hc->hc()], 19, b ? 0xFF : 0x00, set_typeids[hc->hc()]);
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS && has_flags(EMSdevice::EMS_DEVICE_FLAG_JUNKERS_OLD)) {
@@ -3574,6 +3782,7 @@ bool Thermostat::set_switchonoptimization(const char * value, const int8_t id) {
     } else {
         write_command(curve_typeids[hc->hc()], 4, b ? 0xFF : 0x00, curve_typeids[hc->hc()]);
     }
+
     return true;
 }
 
@@ -3582,10 +3791,12 @@ bool Thermostat::set_boost(const char * value, const int8_t id) {
     if (hc == nullptr) {
         return false;
     }
+
     bool b;
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
+
     write_command(set_typeids[hc->hc()], 23, b ? 0xFF : 0x00, set_typeids[hc->hc()]);
     return true;
 }
@@ -3595,10 +3806,12 @@ bool Thermostat::set_boosttime(const char * value, const int8_t id) {
     if (hc == nullptr) {
         return false;
     }
+
     int v;
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     write_command(set_typeids[hc->hc()], 24, (uint8_t)v, set_typeids[hc->hc()]);
     return true;
 }
@@ -3608,14 +3821,17 @@ bool Thermostat::set_heatondelay(const char * value, const int8_t id) {
     if (!Helpers::value2float(value, f)) {
         return false;
     }
+
     if (has_summer3()) {
         write_command(0x470, 2, (uint8_t)(f * 4), 0x470);
         return true;
     }
+
     auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
+
     write_command(summer2_typeids[hc->hc()], 2, (uint8_t)f, summer2_typeids[hc->hc()]);
     return true;
 }
@@ -3625,14 +3841,17 @@ bool Thermostat::set_heatoffdelay(const char * value, const int8_t id) {
     if (!Helpers::value2float(value, f)) {
         return false;
     }
+
     if (has_summer3()) {
         write_command(0x470, 3, (uint8_t)(f * 4), 0x470);
         return true;
     }
+
     auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
+
     write_command(summer2_typeids[hc->hc()], 3, (uint8_t)f, summer2_typeids[hc->hc()]);
     return true;
 }
@@ -3642,14 +3861,17 @@ bool Thermostat::set_instantstart(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     if (has_summer3()) {
         write_command(0x470, 4, (uint8_t)v, 0x470);
         return true;
     }
+
     auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
+
     write_command(summer2_typeids[hc->hc()], 4, (uint8_t)v, summer2_typeids[hc->hc()]);
     return true;
 }
@@ -3673,6 +3895,7 @@ bool Thermostat::set_reducemode(const char * value, const int8_t id) {
             return true;
         }
     }
+
     return false;
 }
 
@@ -3698,6 +3921,7 @@ bool Thermostat::set_nofrostmode(const char * value, const int8_t id) {
     if (hc == nullptr) {
         return false;
     }
+
     uint8_t set;
     if (isRC300() || model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
         if (Helpers::value2enum(value, set, FL_(enum_nofrostmode1))) {
@@ -3710,6 +3934,7 @@ bool Thermostat::set_nofrostmode(const char * value, const int8_t id) {
             return true;
         }
     }
+
     return false;
 }
 
@@ -3739,6 +3964,7 @@ bool Thermostat::set_heatingtype(const char * value, const int8_t id) {
         } else {
             write_command(curve_typeids[hc->hc()], 1, set, curve_typeids[hc->hc()]);
         }
+
         return true;
     }
 
@@ -3805,6 +4031,7 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
     if (value == nullptr) {
         return false;
     }
+
     uint8_t no   = 44;   // invalid value
     uint8_t day  = 8;    // invalid
     uint8_t on   = 8;    // invalid
@@ -3816,19 +4043,23 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
         if (error) {
             return false;
         }
+
         if (!doc["no"].is<int>()) {
             return false;
         }
+
         no = doc["no"];
         if (!doc["day"].is<const char *>() || !doc["mode"].is<const char *>() || !doc["time"].is<const char *>()) {
             EMSESP::wait_validate(type_id);
             read_command(type_id, 2 * no, 2);
             return true;
         }
+
         const char * s_day = doc["day"];
         if (!Helpers::value2enum(s_day, day, FL_(enum_dayOfWeek))) {
             return false;
         }
+
         const char * s_mode = doc["mode"];
         const char * s_time = doc["time"];
         if (model() == EMSdevice::EMS_DEVICE_FLAG_RC35 || model() == EMSdevice::EMS_DEVICE_FLAG_RC30_N) {
@@ -3836,6 +4067,7 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
             if (Helpers::value2bool(s_mode, b)) {
                 on = b ? 1 : 0;
             }
+
             if (strlen(s_time) == 5 && s_time[2] == ':') {
                 time = 6 * ((s_time[0] - '0') * 10 + (s_time[1] - '0')) + (s_time[3] - '0');
             }
@@ -3845,6 +4077,7 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
             } else {
                 on = s_mode[0] - '0';
             }
+
             if (strlen(s_time) == 5 && s_time[2] == ':') {
                 time = 6 * ((s_time[0] - '0') * 10 + (s_time[1] - '0')) + (s_time[3] - '0');
             }
@@ -3854,6 +4087,7 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
                 time = 4 * ((s_time[0] - '0') * 10 + (s_time[1] - '0')) + ((s_time[3] - '0') * 10 + (s_time[4] - '0')) / 15;
             }
         }
+
         if (strncmp(s_mode, "not_set", 7) == 0) {
             day  = 7;
             on   = 7;
@@ -3864,14 +4098,17 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
         if (strlen(value) > 1) {
             no = (value[0] - '0') * 10 + (value[1] - '0');
         }
+
         if (strlen(value) == 2) {
             if (no < 42) {
                 EMSESP::wait_validate(type_id);
                 read_command(type_id, 2 * no, 2);
                 return true;
             }
+
             return false;
         }
+
         if (strlen(value) > 4) {
             for (uint8_t i = 0; i < 7; i++) {
                 // we use EN settings for the day abbreviation
@@ -3880,9 +4117,11 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
                 }
             }
         }
+
         if (strlen(value) > 10) {
             time = 6 * ((value[6] - '0') * 10 + (value[7] - '0')) + (value[9] - '0');
         }
+
         if (strlen(value) > 13 && value[12] == 'o') {
             on = value[13] == 'n' ? 1 : 0;
         } else if (strlen(value) == 14 && value[12] == 'T') {
@@ -3890,6 +4129,7 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
         } else if (strlen(value) == 13) {
             on = value[12] - '0';
         }
+
         if (strlen(value) >= 10 && strncmp(&value[3], "not_set", 7) == 0) {
             day  = 7;
             on   = 7;
@@ -3897,6 +4137,7 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
             // LOG_INFO("switchtime %02d cleared", no);
         }
     }
+
     uint8_t data[2] = {0xE7, 0x90}; // unset switchtime
     if (day != 7 && on != 7) {
         data[0] = (day << 5) + on;
@@ -3909,11 +4150,13 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
         min_on = 0;
         max_on = 1;
     }
+
     if (no > 41 || time > 0x90 || day > 7 || ((on < min_on || on > max_on) && on != 7)) {
         // LOG_WARNING("Setting switchtime: Invalid data: %s", value);
         // LOG_WARNING("Setting switchtime: Invalid data: %02d.%1d.0x%02X.%1d", no, day, time, on);
         return false;
     }
+
     if (data[0] != 0xE7) {
         // we use EN settings for the day abbreviation
         auto sday = (FL_(enum_dayOfWeek)[day][0]);
@@ -3928,6 +4171,7 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
     } else {
         snprintf(out, len, "%02d not_set", no);
     }
+
     write_command(type_id, no * 2, &data[0], 2, 0);
     return true;
 }
@@ -3938,14 +4182,17 @@ bool Thermostat::set_switchtime1(const char * value, const int8_t id) {
     if (hc == nullptr) {
         return false;
     }
+
     char out[sizeof(hc->switchtime1)] = {'\0'};
 
     if (set_switchtime(value, timer_typeids[hc->hc()], out, sizeof(out))) {
         if (strlen(out)) {
             has_update(hc->switchtime1, out, sizeof(hc->switchtime1));
         }
+
         return true;
     }
+
     return false;
 }
 
@@ -3955,30 +4202,37 @@ bool Thermostat::set_switchtime2(const char * value, const int8_t id) {
     if (hc == nullptr) {
         return false;
     }
+
     char out[sizeof(hc->switchtime2)] = {'\0'};
 
     if (set_switchtime(value, timer_typeids[hc->hc()] + 3, out, sizeof(out))) {
         if (strlen(out)) {
             has_update(hc->switchtime2, out, sizeof(hc->switchtime2));
         }
+
         return true;
     }
+
     return false;
 }
+
 // sets a single switchtime in the thermostat dhw program for RC35
 bool Thermostat::set_wwCircSwitchTime(const char * value, const int8_t id) {
     auto dhw = dhw_circuit(id2dhw(id));
     if (dhw == nullptr) {
         return false;
     }
+
     char out[sizeof(dhw->wwCircSwitchTime_)] = {'\0'};
 
     if (set_switchtime(value, 0x39, out, sizeof(out))) {
         if (strlen(out)) {
             has_update(dhw->wwCircSwitchTime_, out, sizeof(dhw->wwCircSwitchTime_));
         }
+
         return true;
     }
+
     return false;
 }
 
@@ -3988,14 +4242,17 @@ bool Thermostat::set_wwSwitchTime(const char * value, const int8_t id) {
     if (dhw == nullptr) {
         return false;
     }
+
     char out[sizeof(dhw->wwSwitchTime_)] = {'\0'};
 
     if (set_switchtime(value, 0x38, out, sizeof(out))) {
         if (strlen(out)) {
             has_update(dhw->wwSwitchTime_, out, sizeof(dhw->wwSwitchTime_));
         }
+
         return true;
     }
+
     return false;
 }
 
@@ -4029,9 +4286,11 @@ bool Thermostat::set_program(const char * value, const int8_t id) {
             } else {
                 write_command(set_typeids[hc->hc()], 13, set + 1, set_typeids[hc->hc()]);
             }
+
             return true;
         }
     }
+
     return false;
 }
 
@@ -4063,6 +4322,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             } else {
                 offset = 4;
             }
+
             break;
         default:
             break;
@@ -4106,6 +4366,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             } else {
                 offset = EMS_OFFSET_RC20Set_temp_auto;
             }
+
             break;
         default:
             break;
@@ -4158,6 +4419,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             } else {
                 offset = EMS_OFFSET_RC30Set_temp_auto;
             }
+
             break;
         }
 
@@ -4176,6 +4438,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
                 write_command(0x470, 1, temperature, 0x470);
                 return true;
             }
+
             if (is_received(summer2_typeids[hc->hc()])) {
                 offset     = 0x01;
                 set_typeid = summer2_typeids[hc->hc()];
@@ -4183,6 +4446,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
                 offset     = 0x06;
                 set_typeid = summer_typeids[hc->hc()];
             }
+
             validate_typeid = set_typeid;
             factor          = 1;
             break;
@@ -4191,6 +4455,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
                 write_command(0x470, 5, temperature, 0x470);
                 return true;
             }
+
             offset          = 5;
             set_typeid      = summer2_typeids[hc->hc()];
             validate_typeid = set_typeid;
@@ -4202,12 +4467,14 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             } else {
                 offset = 10; // manual offset
             }
+
             break;
         case HeatingCircuit::Mode::TEMPAUTO:
             offset = 0x08; // auto offset
             if (temperature == -1) {
                 factor = 1; // to write 0xFF
             }
+
             break;
         case HeatingCircuit::Mode::COOLTEMP:
             offset = 0x11;
@@ -4232,6 +4499,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             } else {
                 offset = 4;
             }
+
             factor = 1;
             break;
         case HeatingCircuit::Mode::BASEFLOW:
@@ -4287,6 +4555,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
                     factor = 1;
                 }
             }
+
             validate_typeid = monitor_typeids[hc->hc()]; // get setpoint roomtemp back
             break;
         }
@@ -4324,6 +4593,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             } else {
                 offset = 13; // tempautotemp
             }
+
             break;
         }
 
@@ -4352,6 +4622,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             } else {
                 offset = EMS_OFFSET_RC35Set_temp_design;
             }
+
             factor = 1;
             break;
         case HeatingCircuit::Mode::SUMMER:
@@ -4391,6 +4662,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             } else {
                 offset = 15;
             }
+
             factor = 1;
             break;
         default:
@@ -4408,6 +4680,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
                 uint8_t modetype = hc->get_mode_type();
                 offset           = (modetype == HeatingCircuit::Mode::NIGHT) ? EMS_OFFSET_RC35Set_temp_night : EMS_OFFSET_RC35Set_temp_day;
             }
+
             break;
         }
 
@@ -4463,6 +4736,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
                         offset = EMS_OFFSET_JunkersSetMessage_no_frost_temp;
                     }
                 }
+
                 break;
             }
 
@@ -4504,6 +4778,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
                         offset = EMS_OFFSET_JunkersSetMessage2_no_frost_temp;
                     }
                 }
+
                 break;
             }
         }
@@ -4520,6 +4795,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             has_update(hc->selTemp, (int16_t)(temperature * factor));
             // read_command(0x08, 0x18); // UBAMonitorFast
         }
+
         return true;
     }
 
@@ -4532,6 +4808,7 @@ bool Thermostat::set_temperature_value(const char * value, const int8_t id, cons
     if (Helpers::value2temperature(value, f, relative)) {
         return set_temperature(f, mode, id);
     }
+
     return false;
 }
 
@@ -4544,6 +4821,7 @@ void Thermostat::register_device_values() {
         register_device_value(tag, &tempsensor1_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(RFTemp), DeviceValueUOM::DEGREES);
         return;
     }
+
     // RC100H remote with humidity, this is also EMSdevice::EMS_DEVICE_FLAG_RC100 for set_calinttemp
     if (device_id() >= 0x38 && device_id() <= 0x3F) {
         // each device controls only one hc, so we tag the values
@@ -4561,6 +4839,7 @@ void Thermostat::register_device_values() {
         register_device_value(tag, &battery_, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(battery), DeviceValueUOM::PERCENT);
         return;
     }
+
     // Remotes RC20 and Junkers FB10, show only internal sensor
     if ((this->model() == EMSdevice::EMS_DEVICE_FLAG_RC20_N || this->model() == EMSdevice::EMS_DEVICE_FLAG_RC20
          || this->model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS)
@@ -4569,6 +4848,7 @@ void Thermostat::register_device_values() {
         register_device_value(tag, &tempsensor1_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(RFTemp), DeviceValueUOM::DEGREES);
         return;
     }
+
     // Common for all thermostats
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &errorCode_, DeviceValueType::STRING, FL_(errorCode), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &lastCode_, DeviceValueType::STRING, FL_(lastCode), DeviceValueUOM::NONE);
@@ -4632,6 +4912,7 @@ void Thermostat::register_device_values() {
                                   DeviceValueUOM::NONE,
                                   MAKE_CF_CB(set_R3000Holiday));
         }
+
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &hybridStrategy_,
                               DeviceValueType::ENUM,
@@ -4961,6 +5242,7 @@ void Thermostat::register_device_values() {
                                   DeviceValueUOM::NONE,
                                   MAKE_CF_CB(set_language));
         }
+
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &ibaBuildingType_,
                               DeviceValueType::UINT8,
@@ -5085,6 +5367,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
     } else {
         register_device_value(tag, &hc->selTemp, DeviceValueType::INT16, seltemp_divider, FL_(selRoomTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_temp), 0, 30);
     }
+
     register_device_value(tag, &hc->roomTemp, DeviceValueType::INT16, roomtemp_divider, FL_(roomTemp), DeviceValueUOM::DEGREES);
     register_device_value(tag, &hc->climate, DeviceValueType::ENUM, FL_(enum_climate), FL_(haclimate), DeviceValueUOM::NONE, nullptr, 5, 30);
 
@@ -5110,6 +5393,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         } else {
             register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
         }
+
         register_device_value(tag, &hc->modetype, DeviceValueType::ENUM, FL_(enum_modetype), FL_(modetype), DeviceValueUOM::NONE);
         register_device_value(
             tag, &hc->nighttemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(ecotemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_ecotemp));
@@ -5162,6 +5446,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
             register_device_value(
                 tag, &hc->controlmode, DeviceValueType::ENUM, FL_(enum_controlmode1), FL_(controlmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_controlmode));
         }
+
         register_device_value(tag, &hc->program, DeviceValueType::ENUM, FL_(enum_progMode), FL_(program), DeviceValueUOM::NONE, MAKE_CF_CB(set_program));
         register_device_value(tag,
                               &hc->tempautotemp,
@@ -5203,6 +5488,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         } else if (device_id() == 0x10) { // only master thermostats have control by remote
             register_device_value(tag, &hc->control, DeviceValueType::ENUM, FL_(enum_control1), FL_(control), DeviceValueUOM::NONE, MAKE_CF_CB(set_control));
         }
+
         if (model != EMSdevice::EMS_DEVICE_FLAG_RC100 && model != EMSdevice::EMS_DEVICE_FLAG_CR120) {
             register_device_value(tag,
                                   &hc->remotetemp,
@@ -5215,6 +5501,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                                   101);
             register_device_value(tag, &hc->remotehum, DeviceValueType::CMD, FL_(remotehum), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_remotehum), -1, 101);
         }
+
         register_device_value(tag, &hc->heatondelay, DeviceValueType::UINT8, FL_(heatondelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_heatondelay), 1, 48);
         register_device_value(tag, &hc->heatoffdelay, DeviceValueType::UINT8, FL_(heatoffdelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_heatoffdelay), 1, 48);
         register_device_value(tag, &hc->coolondelay, DeviceValueType::UINT8, FL_(coolondelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_coolondelay), 1, 48);
@@ -5505,6 +5792,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         if (device_id() == 0x10) { // only master thermostats have control by remote
             register_device_value(tag, &hc->control, DeviceValueType::ENUM, FL_(enum_j_control), FL_(control), DeviceValueUOM::NONE, MAKE_CF_CB(set_control));
         }
+
         register_device_value(tag, &hc->program, DeviceValueType::ENUM, FL_(enum_progMode4), FL_(program), DeviceValueUOM::NONE, MAKE_CF_CB(set_program));
         register_device_value(tag,
                               &hc->remotetemp,
@@ -5578,10 +5866,15 @@ void Thermostat::register_device_values_dhw(std::shared_ptr<Thermostat::DhwCircu
         } else {
             register_device_value(tag, &dhw->wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
         }
+
         register_device_value(tag, &dhw->wwModeType_, DeviceValueType::ENUM, FL_(enum_wwModeType), FL_(modetype), DeviceValueUOM::NONE);
         register_device_value(tag, &dhw->wwSetTemp_, DeviceValueType::UINT8, FL_(wwSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwtemp));
         register_device_value(tag, &dhw->wwSetTempLow_, DeviceValueType::UINT8, FL_(wwSetTempLow), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwtemplow));
-        register_device_value(tag, &dhw->wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcircmode));
+        if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400 || model() == EMSdevice::EMS_DEVICE_FLAG_UI800 || model() == EMSdevice::EMS_DEVICE_FLAG_HMC310) {
+            register_device_value(tag, &dhw->wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode2), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcircmode));
+        } else {
+            register_device_value(tag, &dhw->wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcircmode));
+        }
         register_device_value(tag,
                               &dhw->wwChargeDuration_,
                               DeviceValueType::UINT8,

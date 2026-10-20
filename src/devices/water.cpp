@@ -76,6 +76,7 @@ Water::Water(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         } else if (tag == DeviceValueTAG::TAG_DHW4) {
             register_telegram_type(0x07C3, "SM100wwCommand", false, MAKE_PF_CB(process_SM100wwCommand)); // command from dhw3->dhw4
         }
+
         // device values...
         register_device_value(tag, &wwTemp_, DeviceValueType::UINT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp), DeviceValueUOM::DEGREES);
         register_device_value(tag, &wwTemp2_, DeviceValueType::UINT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwStorageTemp1), DeviceValueUOM::DEGREES);
@@ -133,6 +134,7 @@ void Water::process_SM100wwParam(const std::shared_ptr<const Telegram> & telegra
     // (daily heating time thermostat 2F5, offset 9, offset 8 on/off)
     has_update(telegram, errorDisp_, 19);
 }
+
 // SM100wwParam2 - 0x07AC, Solar Module(0x2A) -> (0x00)
 void Water::process_SM100wwParam2(const std::shared_ptr<const Telegram> & telegram) {
     has_update(telegram, wwDeltaTRet_, 1);
@@ -248,6 +250,7 @@ bool Water::set_wwSelTemp(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, temperature)) {
         return false;
     }
+
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         write_command(0x35, 3, (uint8_t)temperature, 0x34);
     } else if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
@@ -255,6 +258,7 @@ bool Water::set_wwSelTemp(const char * value, const int8_t id) {
     } else { // SM100
         write_command(0x7A6, 9, (uint8_t)temperature, 0x7A6);
     }
+
     return true;
 }
 
@@ -263,6 +267,7 @@ bool Water::set_wwMaxTemp(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, temperature)) {
         return false;
     }
+
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         return false;
     } else if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
@@ -270,6 +275,7 @@ bool Water::set_wwMaxTemp(const char * value, const int8_t id) {
     } else { // SM100
         write_command(0x7A6, 8, (uint8_t)temperature, 0x7A6);
     }
+
     return true;
 }
 
@@ -278,6 +284,7 @@ bool Water::set_wwRedTemp(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, temperature)) {
         return false;
     }
+
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         return false;
     } else if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
@@ -285,6 +292,7 @@ bool Water::set_wwRedTemp(const char * value, const int8_t id) {
     } else { // SM100
         write_command(0x7A6, 10, (uint8_t)temperature, 0x7A6);
     }
+
     return true;
 }
 
@@ -293,6 +301,7 @@ bool Water::set_wwHotTemp(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, temperature)) {
         return false;
     }
+
     write_command(0x7A6, 7, (uint8_t)temperature, 0x7A6);
     return true;
 }
@@ -302,6 +311,7 @@ bool Water::set_wwDailyTemp(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, temperature)) {
         return false;
     }
+
     write_command(0x7A6, 6, (uint8_t)temperature, 0x7A6);
     return true;
 }
@@ -311,6 +321,7 @@ bool Water::set_wwDisinfectionTemp(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, temperature)) {
         return false;
     }
+
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         write_command(0x33, 8, (uint8_t)temperature, 0x33);
     } else if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
@@ -318,6 +329,7 @@ bool Water::set_wwDisinfectionTemp(const char * value, const int8_t id) {
     } else { // SM100
         write_command(0x7A6, 12, (uint8_t)temperature, 0x7A6);
     }
+
     return true;
 }
 
@@ -326,6 +338,7 @@ bool Water::set_wwCirc(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
+
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         write_command(0x33, 6, b ? 0xFF : 0x00, 0x33);
     } else if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
@@ -333,6 +346,7 @@ bool Water::set_wwCirc(const char * value, const int8_t id) {
     } else { // SM100
         write_command(0x7A5, 0, b ? 0xFF : 0x00, 0x7A5);
     }
+
     return true;
 }
 
@@ -341,6 +355,7 @@ bool Water::set_wwCircMode(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, num, FL_(enum_wwCircMode))) {
         return false;
     }
+
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         write_command(0x33, 7, num, 0x33);
     } else if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
@@ -348,6 +363,7 @@ bool Water::set_wwCircMode(const char * value, const int8_t id) {
     } else { // SM100
         write_command(0x7A5, 3, num, 0x7A5);
     }
+
     return true;
 }
 
@@ -357,11 +373,13 @@ bool Water::set_wwCircTc(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
+
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
         write_command(0x33B + dhw_, 4, b ? 0x01 : 0x00, 0x33B + dhw_);
     } else { // SM100
         write_command(0x7A5, 4, b ? 0xFF : 0x00, 0x7A5);
     }
+
     return true;
 }
 
@@ -370,6 +388,7 @@ bool Water::set_wwKeepWarm(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
+
     write_command(0x7AE, 0, b ? 0xFF : 0x00, 0x7AE);
     return true;
 }
@@ -379,10 +398,12 @@ bool Water::set_wwDiffTemp(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
+
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
         write_command(0x313 + dhw_, 7, (int8_t)(v * 10), 0x313 + dhw_);
         return true;
     }
+
     return false;
 }
 
@@ -391,10 +412,12 @@ bool Water::set_wwRequiredTemp(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
+
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
         write_command(0x313 + dhw_, 4, (uint8_t)v, 0x313 + dhw_);
         return true;
     }
+
     return false;
 }
 
@@ -403,6 +426,7 @@ bool Water::set_wwFlowTempOffset(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, n)) {
         return false;
     }
+
     write_command(0x33, 5, n, 0x33);
     return true;
 }
@@ -412,6 +436,7 @@ bool Water::set_wwHystOn(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, n)) {
         return false;
     }
+
     write_command(0x33, 3, n, 0x33);
     return true;
 }
@@ -421,6 +446,7 @@ bool Water::set_wwHystOff(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, n)) {
         return false;
     }
+
     write_command(0x33, 4, n, 0x33);
     return true;
 }
@@ -430,6 +456,7 @@ bool Water::set_wwRetValve(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, n)) {
         return false;
     }
+
     write_command(0x7AD, 1, n, 0x7AD);
     return true;
 }
@@ -439,6 +466,7 @@ bool Water::set_errorDisp(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, n, FL_(enum_errorDisp))) {
         return false;
     }
+
     write_command(0x7A6, 19, n, 0x7A6);
     return true;
 }
@@ -448,6 +476,7 @@ bool Water::set_wwDeltaTRet(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, n)) {
         return false;
     }
+
     write_command(0x7AC, 1, n, 0x7AC);
     return true;
 }

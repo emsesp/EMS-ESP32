@@ -8,6 +8,7 @@ class IPUtils {
     static bool isSet(const IPAddress & ip) {
         return ip != getNotSetIP();
     }
+
     static bool isNotSet(const IPAddress & ip) {
         return ip == getNotSetIP();
     }

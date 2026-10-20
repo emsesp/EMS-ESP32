@@ -32,6 +32,7 @@ class Connect : public EMSdevice {
         RoomCircuit(const uint8_t num)
             : room_(num) {
         }
+
         ~RoomCircuit() = default;
         int16_t temp_;
         uint8_t humidity_;

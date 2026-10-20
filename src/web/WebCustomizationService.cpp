@@ -110,6 +110,7 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
                     *p = '_';
                 }
             }
+
             customizations.sensorCustomizations.push_back(sensor); // add to list
         }
     }
@@ -126,6 +127,7 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
                 EMSESP::logger().warning("Analog sensor: Invalid GPIO %d for %s. Skipping.", analogJson["gpio"].as<uint8_t>(), analog_sensor_name);
                 continue;
             }
+
             auto analog = AnalogCustomization();
             strlcpy(analog.name, analogJson["name"].as<const char *>(), sizeof(analog.name));
             analog.gpio      = analogJson["gpio"];
@@ -137,6 +139,7 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
             if (_start && analog.type == EMSESP::analogsensor_.AnalogType::DIGITAL_OUT && analog.uom > DeviceValue::DeviceValueUOM::NONE) {
                 analog.offset = analog.uom > 1 ? 1 : 0;
             }
+
             customizations.analogCustomizations.push_back(analog); // add to list
         }
     }
@@ -332,11 +335,13 @@ void WebCustomizationService::customization_entities(AsyncWebServerRequest * req
                                                 break;
                                             }
                                         }
+
                                         if (!is_set) {
                                             entity_ids.push_back(entity_id);
                                         }
                                     }
                                 }
+
                                 break;
                             }
                         }
@@ -345,23 +350,29 @@ void WebCustomizationService::customization_entities(AsyncWebServerRequest * req
                     // get list of entities that have masks set or a custom fullname
                     emsdevice->getCustomizationEntities(entity_ids);
 
-                    // Save the list to the customization file
+                    // Save the list to the customization file.
+                    // The same record holds the device custom name and brand, so keep those when replacing the entity list.
                     update([&](WebCustomization & settings) {
-                        // see if we already have a mask list for this device, if so remove the entry
+                        std::string custom_name;
+                        std::string custom_brand;
+
                         for (auto it = settings.entityCustomizations.begin(); it != settings.entityCustomizations.end();) {
                             if ((*it).product_id == product_id && (*it).device_id == device_id) {
-                                it = settings.entityCustomizations.erase(it);
+                                custom_name  = (*it).custom_name;
+                                custom_brand = (*it).custom_brand;
+                                it           = settings.entityCustomizations.erase(it);
                                 break;
                             } else {
                                 ++it;
                             }
                         }
 
-                        // re-create a new entry
                         EntityCustomization new_entry;
-                        new_entry.product_id = product_id;
-                        new_entry.device_id  = device_id;
-                        new_entry.entity_ids = entity_ids;
+                        new_entry.product_id   = product_id;
+                        new_entry.device_id    = device_id;
+                        new_entry.custom_name  = custom_name;
+                        new_entry.custom_brand = custom_brand;
+                        new_entry.entity_ids   = entity_ids;
                         settings.entityCustomizations.push_back(new_entry);
 
                         return StateUpdateResult::CHANGED; // save the changes
@@ -499,6 +510,7 @@ void WebCustomizationService::load_test_data() {
                         dv.state = DeviceValueState::DV_FAVORITE; // set as favorite
                     }
                 }
+
                 break;
             }
         }

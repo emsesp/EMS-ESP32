@@ -35,6 +35,7 @@ class FSPersistence {
                 settingsFile.close();
                 return;
             }
+
             settingsFile.close();
         }
 

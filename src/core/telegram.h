@@ -169,6 +169,7 @@ class EMSbus {
         return (ems_mask_ == EMS_MASK_HT3);
     }
 
+    // True once UBAMonitorFastPlus (0xE4) was received — used by Tx mode Auto for EMS+ pacing
     static bool is_ems2() {
         return isEMS2_;
     }
@@ -209,6 +210,7 @@ class EMSbus {
         if ((uuid::get_uptime() - last_bus_activity_) > EMS_BUS_TIMEOUT) {
             bus_connected_ = false;
         }
+
         return bus_connected_;
 #endif
     }
@@ -219,6 +221,7 @@ class EMSbus {
         if (!last_bus_activity_) {
             bus_uptime_start_ = timestamp;
         }
+
         last_bus_activity_ = timestamp;
         bus_connected_     = true;
     }
@@ -228,12 +231,14 @@ class EMSbus {
         if (!bus_uptime_start_) {
             return 0; // not yet initialized
         }
+
         return (uint32_t)((uuid::get_uptime() - bus_uptime_start_) / 1000ULL);
     }
 
     static uint8_t tx_state() {
         return tx_state_;
     }
+
     static void tx_state(uint8_t tx_state) {
         tx_state_ = tx_state;
     }
@@ -279,6 +284,7 @@ class RxService : public EMSbus {
         if (telegram_error_count_ == 0) {
             return 100; // all good, 100%
         }
+
         uint8_t q = (telegram_error_count_ * 100 / (telegram_count_ + telegram_error_count_));
         return (q <= EMS_BUS_QUALITY_RX_THRESHOLD ? 100 : 100 - q);
     }
@@ -358,6 +364,7 @@ class TxService : public EMSbus {
     uint32_t telegram_read_count() const {
         return telegram_read_count_;
     }
+
     uint32_t telegram_write_count() const {
         return telegram_write_count_;
     }
@@ -395,6 +402,7 @@ class TxService : public EMSbus {
         if (telegram_read_fail_count_ == 0) {
             return 100; // all good, 100%
         }
+
         return (100 - (uint8_t)(telegram_read_fail_count_ * 100 / (telegram_read_fail_count_ + telegram_read_count_)));
     }
 
@@ -402,6 +410,7 @@ class TxService : public EMSbus {
         if (telegram_write_fail_count_ == 0) {
             return 100; // all good, 100%
         }
+
         return (100 - (uint8_t)(telegram_write_fail_count_ * 100 / (telegram_write_fail_count_ + telegram_write_count_)));
     }
 

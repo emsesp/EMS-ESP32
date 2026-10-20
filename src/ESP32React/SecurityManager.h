@@ -50,9 +50,11 @@ class AuthenticationPredicates {
         (void)authentication;
         return true;
     };
+
     static bool IS_AUTHENTICATED(const Authentication & authentication) {
         return authentication.authenticated;
     };
+
     static bool IS_ADMIN(const Authentication & authentication) {
         return authentication.authenticated && authentication.user->admin;
     };

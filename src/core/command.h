@@ -86,12 +86,15 @@ class Command {
         inline void add_flags(uint8_t flags) {
             flags_ |= flags;
         }
+
         inline bool has_flags(uint8_t flags) const {
             return (flags_ & flags) == flags;
         }
+
         inline void remove_flags(uint8_t flags) {
             flags_ &= ~flags;
         }
+
         inline uint8_t flags() const {
             return flags_;
         }

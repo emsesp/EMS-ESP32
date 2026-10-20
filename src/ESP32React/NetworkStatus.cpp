@@ -9,6 +9,7 @@ void add_ipv6(JsonObject root, NetworkInterface & netif) {
     if (found.empty()) {
         return;
     }
+
     JsonArray addresses = root["ipv6"].to<JsonArray>();
     for (const auto & ipv6 : found) {
         JsonObject entry = addresses.add<JsonObject>();
@@ -28,10 +29,12 @@ void add_gateways(JsonObject root, NetworkInterface & netif) {
     if (IPUtils::isSet(netif.gatewayIP())) {
         root["gateway_ip"] = netif.gatewayIP().toString();
     }
+
     auto found = emsesp::Network::ipv6_gateways(netif);
     if (found.empty()) {
         return;
     }
+
     JsonArray gateways = root["gateway_ipv6"].to<JsonArray>();
     for (const auto & ip : found) {
         gateways.add(ip.toString());

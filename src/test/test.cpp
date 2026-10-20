@@ -316,6 +316,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             id1 = Helpers::atoint(id1_s.c_str());
         }
     }
+
     if (!id2_s.empty()) {
         id2 = Helpers::atoint(id2_s.c_str());
     }
@@ -326,6 +327,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             shell.printfln("Usage: test add <device_id> <product_id>");
             return;
         }
+
         shell.printfln("Testing adding a device (deviceID 0x%02X, product_id %d), with all values...", id1, id2);
         test("add", id1, id2);
         shell.invoke_command("show devices");
@@ -694,6 +696,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
                 if (json.size() != 0) {
                     serializeJson(doc, Serial);
                 }
+
                 shell.println();
                 Serial.print(COLOR_RESET);
 
@@ -715,6 +718,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
                 Serial.println(" **");
             }
         }
+
         ok = true;
     }
 
@@ -983,6 +987,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         if (id1 == -1) {
             id1 = 0;
         }
+
         shell.printfln("Testing healthcheck with %d", id1);
         EMSESP::system_.healthcheck(id1);
         ok = true;
@@ -2212,6 +2217,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             if (!pass) {
                 failed++;
             }
+
             shell.printfln("%s %-14s -> %-14s expected %-9s got %-9s", pass ? "PASS" : "FAIL", test.settings, test.current, test.expected, actual);
         }
 
@@ -2238,6 +2244,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             snprintf(value, 7, "val%03d", i);
             doc[key] = value;
         }
+
         doc.shrinkToFit();
         JsonObject jo = doc.as<JsonObject>();
         shell.printfln("Length of JSON payload = %d", measureJson(jo));
@@ -2528,11 +2535,13 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
                 for (const auto & d : response._data) {
                     shell.printf(" %d", d);
                 }
+
                 if (response._data.size() == 5 && response._data[3] == 0 && response._data[4] == (uint8_t)EMS_VALUE_DEFAULT_INT8_DUMMY) {
                     shell.printf(" [OK]");
                 } else {
                     shell.printf(" [ERROR - invalid response]");
                 }
+
                 shell.println();
             } else {
                 shell.printf("mintempsilent [MODBUS ERROR %d]\n", response.getError());
@@ -2553,6 +2562,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
                 for (const auto & d : response._data) {
                     shell.printf(" %d", d);
                 }
+
                 shell.println(" [OK]");
             } else {
                 shell.printf("selflowtemp [MODBUS ERROR %d]\n", response.getError());
@@ -2574,6 +2584,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
                 for (const auto & d : response._data) {
                     shell.printf(" %d", d);
                 }
+
                 shell.println(" [OK]");
             } else {
                 shell.printf("remotetemp [MODBUS ERROR %d]\n", response.getError());
@@ -2691,6 +2702,7 @@ void Test::rx_telegram(const std::vector<uint8_t> & rx_data) {
         data[i] = rx_data[i];
         i++;
     }
+
     data[i] = EMSESP::rxservice_.calculate_crc(data, i);
     EMSESP::rxservice_.add(data, len + 1);
 
@@ -2706,6 +2718,7 @@ void Test::uart_telegram(const std::vector<uint8_t> & rx_data) {
         data[i] = rx_data[i];
         i++;
     }
+
     data[i] = EMSESP::rxservice_.calculate_crc(data, i);
     EMSESP::incoming_telegram(data, i + 1);
 
@@ -2719,6 +2732,7 @@ void Test::uart_telegram_withCRC(const char * rx_data) {
     for (uint8_t i = 0; i < strlen(rx_data); i++) {
         telegram[i] = rx_data[i];
     }
+
     telegram[strlen(rx_data)] = '\0'; // make sure its terminated
 
     uint8_t count = 0;
@@ -2758,6 +2772,7 @@ void Test::uart_telegram(const char * rx_data) {
     for (uint8_t i = 0; i < strlen(rx_data); i++) {
         telegram[i] = rx_data[i];
     }
+
     telegram[strlen(rx_data)] = '\0'; // make sure its terminated
 
     uint8_t count = 0;

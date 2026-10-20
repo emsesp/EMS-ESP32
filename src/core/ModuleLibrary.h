@@ -34,6 +34,7 @@ class ModuleLibrary {
             : key(key)
             , module(std::move(module)) {
         }
+
         const char *            key;
         std::unique_ptr<Module> module;
     };

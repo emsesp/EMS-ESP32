@@ -97,8 +97,10 @@ StateUpdateResult NTPSettings::update(JsonObject root, NTPSettings & settings) {
     while (settings.tzFormat.length() < 40) {
         settings.tzFormat += " ";
     }
+
     while (settings.tzFormatT.length() < 40) {
         settings.tzFormatT += " ";
     }
+
     return StateUpdateResult::CHANGED;
 }

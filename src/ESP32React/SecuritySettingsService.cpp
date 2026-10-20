@@ -29,6 +29,7 @@ Authentication SecuritySettingsService::authenticateRequest(AsyncWebServerReques
         String value          = tokenParamater->value();
         return authenticateJWT(value);
     }
+
     return {};
 }
 
@@ -48,6 +49,7 @@ Authentication SecuritySettingsService::authenticateJWT(String & jwt) {
             }
         }
     }
+
     return {};
 }
 
@@ -57,6 +59,7 @@ Authentication SecuritySettingsService::authenticate(const String & username, co
             return Authentication(_user);
         }
     }
+
     return {};
 }
 
@@ -91,5 +94,6 @@ void SecuritySettingsService::generateToken(AsyncWebServerRequest * request) {
             return;
         }
     }
+
     request->send(401);
 }

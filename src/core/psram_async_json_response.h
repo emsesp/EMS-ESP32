@@ -81,6 +81,7 @@ class PsramAsyncJsonResponse : public ::AsyncJsonResponse {
         if (_contentLength) {
             _isValid = true;
         }
+
         return _contentLength;
     }
 
@@ -119,6 +120,7 @@ class PsramAsyncMessagePackResponse : public ::AsyncMessagePackResponse {
         if (_contentLength) {
             _isValid = true;
         }
+
         return _contentLength;
     }
 

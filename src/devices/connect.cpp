@@ -27,6 +27,7 @@ Connect::Connect(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
     if (device_id != EMSdevice::EMS_DEVICE_ID_RFBASE) { // Modems have no entities
         return;
     }
+
     register_telegram_type(0xD1, "RFOutdoorTemp", false, MAKE_PF_CB(process_OutdoorTemp));
     register_telegram_type(0x06, "RCTime", false, MAKE_PF_CB(process_RCTime));
 
@@ -45,6 +46,7 @@ Connect::Connect(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
         register_telegram_type(0x1230 + i, "Roomparams", false, MAKE_PF_CB(process_roomThermostatParam));         // fetch for active circuits
         register_telegram_type(0x1244 + i, "Roomdata", false, MAKE_PF_CB(process_roomThermostatData));            // broadcasted
     }
+
     register_telegram_type(0x0B65, "Roomschedule", true, MAKE_PF_CB(process_roomSchedule));
     register_telegram_type(0xF7, "MenuConfig", false, MAKE_PF_CB(process_roomConfig));
     // 0x2040, broadcast 36 bytes:
@@ -57,6 +59,7 @@ Connect::Connect(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
     register_device_values_room(new_room);
 #endif
 }
+
 /*
  * OutdoorTemp - type 0xD1 - external temperature
  */
@@ -70,6 +73,7 @@ void Connect::process_RCTime(const std::shared_ptr<const Telegram> & telegram) {
     if (telegram->offset || telegram->message_length < 10) {
         return;
     }
+
     char time[sizeof(dateTime_)];
     snprintf(time,
              sizeof(time),
@@ -106,9 +110,11 @@ std::shared_ptr<Connect::RoomCircuit> Connect::room_circuit(const uint8_t num, c
             return room_circuit;
         }
     }
+
     if (!create) {
         return nullptr;
     }
+
     // create a new circuit object and add to the list
     auto new_room = std::make_shared<Connect::RoomCircuit>(num);
     room_circuits_.push_back(new_room);
@@ -128,12 +134,14 @@ void Connect::process_roomThermostat(const std::shared_ptr<const Telegram> & tel
     if (rc == nullptr) {
         return;
     }
+
     has_update(telegram, rc->temp_, 0);
     has_update(telegram, rc->humidity_, 2); // could show -3 if not set
     // make sure we have read mode and icon, needed for ha climate
     if (!Mqtt::ha_enabled() || (Helpers::hasValue(rc->mode_) && Helpers::hasValue(rc->icon_))) {
         has_update(telegram, rc->seltemp_, 3);
     }
+
     // calculate dew temperature
     has_update(rc->dewtemp_, Helpers::calc_dew(rc->temp_, rc->humidity_));
 }
@@ -145,12 +153,14 @@ void Connect::process_roomThermostatName(const std::shared_ptr<const Telegram> &
     if (rc == nullptr) {
         return;
     }
+
     has_update(telegram, rc->icon_, 0);
     for (uint8_t i = telegram->offset; i < telegram->message_length + telegram->offset && i < 100; i++) {
         if ((i > 1) && (i % 2) == 0) {
             rc->name_[(i - 2) / 2] = telegram->message_data[i - telegram->offset];
         }
     }
+
     rc->name_[50] = '\0'; // make sure name is terminated
 }
 
@@ -161,6 +171,7 @@ void Connect::process_roomThermostatSettings(const std::shared_ptr<const Telegra
     if (rc == nullptr) {
         return;
     }
+
     // has_enumupdate(telegram, rc->mode_, 0, {3, 1, 0}); // modes off, manual auto
     // has_update(telegram, rc->mode_, 0); // modes: auto, heat, cool, off
     // has_update(telegram, rc->tempautotemp_, 1); // FF means off
@@ -215,6 +226,7 @@ void Connect::process_roomSchedule(const std::shared_ptr<const Telegram> & teleg
             return;
         }
     }
+
     toggle_fetch(telegram->type_id, false); // fetch only once if all is initialized
 }
 
@@ -227,6 +239,7 @@ void Connect::process_roomConfig(const std::shared_ptr<const Telegram> & telegra
             if (rc == nullptr) {
                 return;
             }
+
             uint8_t bits = telegram->message_data[3];
             if (rc->mode_ == 2) {
                 if (bits & 0x02) {
@@ -235,6 +248,7 @@ void Connect::process_roomConfig(const std::shared_ptr<const Telegram> & telegra
                     rc->coolmode_ = 1;
                 }
             }
+
             /*
             switch (bits & 0x6A) {
             case 0: // cooling off
@@ -272,12 +286,14 @@ bool Connect::set_mode(const char * value, const int8_t id) {
     if (rc == nullptr) {
         return false;
     }
+
     uint8_t v;
     if (!Helpers::value2enum(value, v, FL_(enum_mode2), {3, 1, 0})) {
         if (!Helpers::value2enum(value, v, FL_(enum_mode_ha), {3, 1, 0})) {
             return false;
         }
     }
+
     write_command(0xBB5 + rc->room(), rc->coolmode_ == 1 ? 4 : 0, v); // no validate, mode change is broadcasted
     return true;
 }
@@ -287,6 +303,7 @@ bool Connect::set_seltemp(const char * value, const int8_t id) {
     if (rc == nullptr) {
         return false;
     }
+
     float v;
     if (Helpers::value2temperature(value, v)) {
         // depends on mode, auto (2 for enum_mode2, 0 for enum_mode8) set in offset 1
@@ -295,8 +312,10 @@ bool Connect::set_seltemp(const char * value, const int8_t id) {
         } else {
             write_command(0xBB5 + rc->room(), rc->mode_ == 2 ? 1 : 3, v == -1 ? 0xFF : uint8_t(v * 2));
         }
+
         return true;
     }
+
     return false;
 }
 
@@ -305,6 +324,7 @@ bool Connect::set_name(const char * value, const int8_t id) {
     if (rc == nullptr || value == nullptr || strlen(value) > 50) {
         return false;
     }
+
     Helpers::utf8tolatin1(rc->name_, value, sizeof(rc->name_));
     uint8_t len = strlen(rc->name_) * 2 + 2;
     uint8_t data[len];
@@ -312,6 +332,7 @@ bool Connect::set_name(const char * value, const int8_t id) {
         data[2 * i]     = 0;
         data[2 * i + 1] = rc->name_[i];
     }
+
     uint8_t ofs = 0;
     while (len > 0) {
         uint8_t part = len > 25 ? 25 : len;
@@ -319,6 +340,7 @@ bool Connect::set_name(const char * value, const int8_t id) {
         ofs += part;
         len -= part;
     }
+
     return true;
 }
 
@@ -327,11 +349,13 @@ bool Connect::set_childlock(const char * value, const int8_t id) {
     if (rc == nullptr) {
         return false;
     }
+
     bool b;
     if (Helpers::value2bool(value, b)) {
         write_command(0xBB5 + rc->room(), 7, b ? 1 : 0, 0xBB5 + rc->room());
         return true;
     }
+
     return false;
 }
 
@@ -340,11 +364,13 @@ bool Connect::set_icon(const char * value, const int8_t id) {
     if (rc == nullptr) {
         return false;
     }
+
     uint8_t v;
     if (Helpers::value2enum(value, v, FL_(enum_icons))) {
         write_command(0x0B3D + rc->room(), 0, v, 0x0B3D + rc->room());
         return true;
     }
+
     return false;
 }
 

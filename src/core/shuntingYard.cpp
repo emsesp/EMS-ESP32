@@ -41,6 +41,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                 i += (*p == '{') ? 1 : (*p == '}') ? -1 : 0;
                 ++p;
             }
+
             const auto s = std::string(b, p);
             tokens.emplace_back(Token::Type::String, s, -3);
             if (*p == '\0') {
@@ -84,6 +85,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
             while ((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') || (*p == '_') || (*p & 0x80)) {
                 ++p;
             }
+
             const auto s = std::string(b, p);
             tokens.emplace_back(Token::Type::String, s, -3);
             --p;
@@ -93,6 +95,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
             while (*p && *p != '"') {
                 ++p;
             }
+
             const auto s = std::string(b, p);
             tokens.emplace_back(Token::Type::String, s, -3);
             if (*p == '\0') {
@@ -104,6 +107,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
             while (*p && *p != '\'') {
                 ++p;
             }
+
             const auto s = std::string(b, p);
             tokens.emplace_back(Token::Type::String, s, -3);
             if (*p == '\0') {
@@ -114,6 +118,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
             while (isdigit(*p) || *p == '.') {
                 ++p;
             }
+
             const auto s = std::string(b, p);
             tokens.emplace_back(Token::Type::Number, s, -2);
             --p;
@@ -160,6 +165,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                         tokens.pop_back();
                         continue;
                     }
+
                     token      = Token::Type::Unary;
                     c          = 'm';
                     precedence = 5;
@@ -167,6 +173,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                     // otherwise, it's binary '-'
                     precedence = 2;
                 }
+
                 break;
             case '&':
                 if (p[1] == '&')
@@ -189,12 +196,14 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                     precedence = 2;
                     token      = Token::Type::Unary;
                 }
+
                 break;
             case '<':
                 if (p[1] == '=') {
                     ++p;
                     c = '{';
                 }
+
                 precedence = 1;
                 token      = Token::Type::Compare;
                 break;
@@ -203,6 +212,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                     ++p;
                     c = '}';
                 }
+
                 precedence = 1;
                 token      = Token::Type::Compare;
                 break;
@@ -213,6 +223,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                 token      = Token::Type::Compare;
                 break;
             }
+
             const auto s = std::string(1, c);
             tokens.emplace_back(token, s, precedence, rightAssociative);
         }
@@ -321,6 +332,7 @@ std::deque<Token> shuntingYard(const std::deque<Token> & tokens) {
         queue.push_back(std::move(stack.back()));
         stack.pop_back();
     }
+
     return queue;
 }
 
@@ -329,9 +341,11 @@ bool isnum(const std::string & s) {
     if (s.empty() || s.find_first_of("0123456789") == std::string::npos) {
         return false;
     }
+
     if (s.find_first_not_of("0123456789.") == std::string::npos || (s[0] == '-' && s.find_first_not_of("0123456789.", 1) == std::string::npos)) {
         return true;
     }
+
     return false;
 }
 
@@ -350,17 +364,20 @@ std::string commands(std::string & expr, bool quotes) {
             if (e == std::string::npos) {
                 e = expr.length();
             }
+
             char   cmd[COMMAND_MAX_LENGTH];
             size_t l = e - f;
             if (l >= sizeof(cmd) - 1) {
                 break;
             }
+
             expr_new.copy(cmd, l, f);
             cmd[l] = '\0';
 
             if (strstr(cmd, "/value") == nullptr) {
                 strlcat(cmd, "/value", sizeof(cmd) - 6);
             }
+
             JsonDocument doc_out;
             JsonDocument doc_in;
             JsonObject   output = doc_out.to<JsonObject>();
@@ -373,6 +390,7 @@ std::string commands(std::string & expr, bool quotes) {
             if (return_code != CommandRet::OK && return_code != CommandRet::NO_VALUE) {
                 return expr = "";
             }
+
             std::string data;
             if (output["api_data"].is<std::string>()) {
                 data = output["api_data"].as<std::string>();
@@ -383,12 +401,14 @@ std::string commands(std::string & expr, bool quotes) {
             } else {
                 serializeJson(output, data);
             }
+
             expr.replace(f, l, data);
             e        = f + data.length();
             expr_new = Helpers::toLower(expr);
             f        = expr_new.find(d, e);
         }
     }
+
     if (quotes) {
         // remove double quotes
         auto f = expr.find("\"\"");
@@ -397,6 +417,7 @@ std::string commands(std::string & expr, bool quotes) {
             f = expr.find("\"\"");
         }
     }
+
     return expr;
 }
 
@@ -406,6 +427,7 @@ int to_logic(const std::string & s) {
     if (!Helpers::value2bool(s.c_str(), value_b)) {
         return -1; // invalid
     }
+
     return value_b;
 
     // if (s.empty()) {
@@ -427,9 +449,11 @@ std::string to_string(double d) {
     while (!s.empty() && s.back() == '0') {
         s.pop_back();
     }
+
     if (!s.empty() && s.back() == '.') {
         s.pop_back();
     }
+
     return s;
 }
 
@@ -476,6 +500,7 @@ std::string calculate(const std::string & expr) {
             if (stack.empty()) {
                 return "";
             }
+
             const auto rhs = stack.back();
             stack.pop_back();
             if (token.str[0] == '!') {
@@ -489,20 +514,25 @@ std::string calculate(const std::string & expr) {
                     EMSESP::logger().warning("'!' needs a boolean or numeric operand, got '%s'. Literal text must be quoted", rhs.c_str());
                     return "";
                 }
+
                 break;
             }
+
             if (token.str[0] == 'h') {
                 // hex string to number
                 if (rhs.empty() || rhs.find_first_not_of("0123456789abcdefABCDEF") != std::string::npos) {
                     return "";
                 }
+
                 stack.push_back(to_string(std::stoi(rhs, 0, 16)));
                 break;
             }
+
             // bail out on non-numeric operand
             if (!isnum(rhs)) {
                 return "";
             }
+
             auto rhd = std::stod(rhs);
             switch (token.str[0]) {
             default:
@@ -551,6 +581,7 @@ std::string calculate(const std::string & expr) {
             if (stack.size() < 2) {
                 return "";
             }
+
             const auto rhs = stack.back();
             stack.pop_back();
             const auto lhs = stack.back();
@@ -564,6 +595,7 @@ std::string calculate(const std::string & expr) {
                     stack.push_back((std::stod(lhs) < std::stod(rhs)) ? "1" : "0");
                     break;
                 }
+
                 stack.push_back((lhs < rhs) ? "1" : "0");
                 break;
             case '{':
@@ -571,6 +603,7 @@ std::string calculate(const std::string & expr) {
                     stack.push_back((std::stod(lhs) <= std::stod(rhs)) ? "1" : "0");
                     break;
                 }
+
                 stack.push_back((lhs <= rhs) ? "1" : "0");
                 break;
             case '>':
@@ -578,6 +611,7 @@ std::string calculate(const std::string & expr) {
                     stack.push_back((std::stod(lhs) > std::stod(rhs)) ? "1" : "0");
                     break;
                 }
+
                 stack.push_back((lhs > rhs) ? "1" : "0");
                 break;
             case '}':
@@ -585,6 +619,7 @@ std::string calculate(const std::string & expr) {
                     stack.push_back((std::stod(lhs) >= std::stod(rhs)) ? "1" : "0");
                     break;
                 }
+
                 stack.push_back((lhs >= rhs) ? "1" : "0");
                 break;
             case '=':
@@ -592,6 +627,7 @@ std::string calculate(const std::string & expr) {
                     stack.push_back((std::stod(lhs) == std::stod(rhs)) ? "1" : "0");
                     break;
                 }
+
                 // compare strings lower case
                 stack.push_back((Helpers::toLower(lhs) == Helpers::toLower(rhs)) ? "1" : "0");
                 break;
@@ -600,6 +636,7 @@ std::string calculate(const std::string & expr) {
                     stack.push_back((std::stod(lhs) != std::stod(rhs)) ? "1" : "0");
                     break;
                 }
+
                 // compare strings lower case
                 stack.push_back((Helpers::toLower(lhs) != Helpers::toLower(rhs)) ? "1" : "0");
                 break;
@@ -610,6 +647,7 @@ std::string calculate(const std::string & expr) {
             if (stack.size() < 2) {
                 return "";
             }
+
             const auto rhs = to_logic(stack.back());
             stack.pop_back();
             const auto lhs = to_logic(stack.back());
@@ -617,6 +655,7 @@ std::string calculate(const std::string & expr) {
             if (rhs < 0 || lhs < 0) {
                 return "";
             }
+
             switch (token.str[0]) {
             default:
                 return "";
@@ -634,6 +673,7 @@ std::string calculate(const std::string & expr) {
             if (stack.size() < 2) {
                 return "";
             }
+
             const auto rhs = stack.back();
             stack.pop_back();
             const auto lhs = stack.back();
@@ -642,10 +682,12 @@ std::string calculate(const std::string & expr) {
                 stack.push_back(lhs + rhs);
                 break;
             }
+
             // bail out on non-numeric operands
             if (!isnum(lhs) || !isnum(rhs)) {
                 return "";
             }
+
             auto lhd = std::stod(lhs);
             auto rhd = std::stod(rhs);
             switch (token.str[0]) {
@@ -686,6 +728,7 @@ std::string calculate(const std::string & expr) {
     for (const auto & s : stack) {
         result += s;
     }
+
     return result;
 }
 
@@ -704,6 +747,7 @@ static size_t find_unquoted(const std::string & s, char c, size_t from = 0) {
             return i;
         }
     }
+
     return std::string::npos;
 }
 
@@ -725,6 +769,7 @@ std::string compute(const std::string & expr) {
                 i++;
             }
         }
+
         std::string  cmd = expr_new.substr(f, e - f).c_str();
         JsonDocument doc;
         if (DeserializationError::Ok == deserializeJson(doc, cmd)) {
@@ -747,6 +792,7 @@ std::string compute(const std::string & expr) {
                     keys_s = p.key().c_str();
                 }
             }
+
             std::string value  = doc[value_s] | "";
             std::string method = doc[method_s] | "GET";
             std::string result;
@@ -758,6 +804,7 @@ std::string compute(const std::string & expr) {
                 if (doc[keys_s].is<JsonArray>()) {
                     keys_doc.set(doc[keys_s].as<JsonArray>());
                 }
+
                 JsonArray keys = keys_doc.as<JsonArray>();
                 if (key.length() || !keys.isNull()) {
                     doc.clear();
@@ -775,17 +822,21 @@ std::string compute(const std::string & expr) {
                                     break; // type mismatch
                                 }
                             }
+
                             result = json.as<std::string>();
                         }
+
                         expr_new.replace(f, e - f, result.c_str());
                     }
                 }
+
                 expr_new.replace(f, e - f, result);
             } else if (httpResult != 0) {
                 // httpResult of 0 means no url
                 EMSESP::logger().warning("URL command failed with https code: %d, response: %s", httpResult, result.c_str());
             }
         }
+
         f = expr_new.find_first_of('{', e);
     }
 
@@ -799,15 +850,18 @@ std::string compute(const std::string & expr) {
             q1 = find_unquoted(expr_new, '?', q1 + 1);
             c1 = find_unquoted(expr_new, ':', c1 + 1);
         }
+
         if (c1 == std::string::npos) {
             return ""; // error: missing colon
         }
+
         auto s  = q; // start search brackets
         int  br = 0; // count brackets
         while (s > 0 && (br || expr_new[s - 1] != '(')) {
             s--;
             br += (expr_new[s] == '(' ? -1 : expr_new[s] == ')' ? 1 : 0);
         }
+
         std::string cond = calculate(expr_new.substr(s, q - s));
         if (cond.length() == 0) {
             return "";
@@ -821,6 +875,7 @@ std::string compute(const std::string & expr) {
                     br += (expr_new[e] == ')' ? -1 : expr_new[e] == '(' ? 1 : 0);
                 }
             }
+
             expr_new.erase(c1, e + 1 - c1); // remove second expression after colon
             expr_new.erase(s, q + 1 - s);   // remove condition before questionmark
         } else if (cond[0] == '0') {
@@ -828,6 +883,7 @@ std::string compute(const std::string & expr) {
         } else {
             return ""; // error
         }
+
         q = find_unquoted(expr_new, '?'); // search next instance
     }
 

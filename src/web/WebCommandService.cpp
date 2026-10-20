@@ -73,6 +73,7 @@ bool WebCommandService::queueCommand(const char * name, const char * value) {
         if (job == nullptr) {
             return false;
         }
+
         job->name      = name ? name : "";
         job->has_value = (value != nullptr);
         job->value     = value ? value : "";
@@ -81,6 +82,7 @@ bool WebCommandService::queueCommand(const char * name, const char * value) {
             delete job;
             return false;
         }
+
         return true;
     }
 #endif
@@ -95,6 +97,7 @@ bool WebCommandService::isUrlCommand(const std::string & command) {
     if (deserializeJson(doc, command) != DeserializationError::Ok) {
         return false;
     }
+
     std::string url       = doc["url"] | "";
     auto        lower_url = Helpers::toLower(url.c_str());
     return lower_url.starts_with("http://") || lower_url.starts_with("https://");
@@ -123,6 +126,7 @@ bool WebCommandService::valueContainsUrl(const std::string & value) {
                 i++;
             }
         }
+
         JsonDocument doc;
         if (deserializeJson(doc, value.substr(f, e - f)) == DeserializationError::Ok) {
             for (JsonPairConst p : doc.as<JsonObjectConst>()) {
@@ -131,8 +135,10 @@ bool WebCommandService::valueContainsUrl(const std::string & value) {
                 }
             }
         }
+
         f = value.find_first_of('{', e);
     }
+
     return false;
 }
 
@@ -149,6 +155,7 @@ bool WebCommandService::dispatchCommand(const char * name, const char * value) {
             if (isUrlCommand(ci->cmd.c_str())) {
                 return queueCommand(name, value);
             }
+
             // internal command whose value embeds a {url} fetch (e.g. system/message) - the value is
             // resolved by compute() at execution time and would block, so offload it to the worker task
             // the effective value is the override if given, else the command's stored default
@@ -209,6 +216,7 @@ StateUpdateResult WebCommands::update(JsonObject root, WebCommands & webCommands
             FL_(command_cmd),
             CommandFlag::ADMIN_ONLY);
     }
+
     return StateUpdateResult::CHANGED;
 }
 
@@ -217,12 +225,14 @@ const CommandItem * WebCommandService::find(const char * name) {
     if (name == nullptr || name[0] == '\0') {
         return nullptr;
     }
+
     auto lower_name = Helpers::toLower(name);
     for (const CommandItem & ci : *commandItems_) {
         if (ci.name[0] != '\0' && Helpers::toLower(ci.name) == lower_name) {
             return &ci;
         }
     }
+
     return nullptr;
 }
 
@@ -233,6 +243,7 @@ bool WebCommandService::executeCommand(const char * name, const char * value) {
         EMSESP::logger().warning("Command '%s' not found", name ? name : "");
         return false;
     }
+
     // if there is a value use it, otherwise use the command's default value
     std::string cmd_value = value ? value : ci->value.c_str();
     return executeCommand(ci->name, std::string(ci->cmd.c_str()), cmd_value);
@@ -268,6 +279,7 @@ bool WebCommandService::executeCommand(const char * name, const std::string & co
             commands(s, false);
             url.replace(q + 1, l, s);
         }
+
         // the cmd's embedded value only gets entity substitution (commands), the passed value is fully computed
         std::string value  = doc["value"] | computed_data;
         std::string method = doc["method"] | "GET";
@@ -308,6 +320,7 @@ bool WebCommandService::executeCommand(const char * name, const std::string & co
         if (data.empty() && output.size()) {
             Mqtt::queue_publish("response", output);
         }
+
         return true;
     }
 
@@ -317,6 +330,7 @@ bool WebCommandService::executeCommand(const char * name, const std::string & co
     } else {
         snprintf(error, sizeof(error), "Command '%s': %s failed with error %s", name, cmd.c_str(), Command::return_code_string(return_code));
     }
+
     EMSESP::logger().warning(error);
     return false;
 }
@@ -332,6 +346,7 @@ bool WebCommandService::get_value_info(JsonObject output, const char * cmd) {
                 output[(const char *)ci.name] = ci.value.c_str();
             }
         }
+
         return true;
     }
 
@@ -341,6 +356,7 @@ bool WebCommandService::get_value_info(JsonObject output, const char * cmd) {
                 output[(const char *)ci.name] = std::string(ci.cmd + ": " + ci.value);
             }
         }
+
         return true;
     }
 
@@ -350,6 +366,7 @@ bool WebCommandService::get_value_info(JsonObject output, const char * cmd) {
                 get_value_json(output[ci.name].to<JsonObject>(), ci);
             }
         }
+
         return true;
     }
 
@@ -359,6 +376,7 @@ bool WebCommandService::get_value_info(JsonObject output, const char * cmd) {
             output["api_data"] = metrics;
             return true;
         }
+
         return false;
     }
 
@@ -381,10 +399,12 @@ std::string WebCommandService::get_metrics_prometheus() {
         if (ci.name[0] == '\0') {
             continue;
         }
+
         result += (std::string) "# HELP emsesp_cmd_" + ci.name + " " + ci.name + ", readable, writable, visible\n";
         result += (std::string) "# TYPE emsesp_cmd_" + ci.name + " gauge\n";
         result += (std::string) "emsesp_cmd_" + ci.name + " 1\n";
     }
+
     return result;
 }
 
@@ -403,6 +423,7 @@ void WebCommandService::publish(const bool force) {
     if (!Mqtt::enabled() || commandItems_->empty()) {
         return;
     }
+
     if (force && !EMSESP::mqtt_.get_publish_onchange(EMSdevice::DeviceType::SYSTEM)) {
         return;
     }

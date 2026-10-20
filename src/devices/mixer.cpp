@@ -190,19 +190,23 @@ bool Mixer::set_flowSetTemp(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_MM10) {
         write_command(0xAC, 0, v, 0xAB);
         return true;
     }
+
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         write_command(0x123, 0, v, 0x10C);
         return true;
     }
+
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
         uint8_t hc = device_id() - 0x20;
         write_command(0x2E1 + hc, 1, v, 0x2D7 + hc);
         return true;
     }
+
     return false;
 }
 
@@ -211,21 +215,25 @@ bool Mixer::set_pump(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
+
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_MM10) {
         // AC telegram can only be written with offset 0
         uint8_t dat[2] = {flowSetTemp_, b ? (uint8_t)0x64 : (uint8_t)0};
         write_command(0xAC, 0, dat, sizeof(dat), 0xAB);
         return true;
     }
+
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         write_command(0x123, 1, b ? 0x64 : 0, 0x10C);
         return true;
     }
+
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
         uint8_t hc = device_id() - 0x20;
         write_command(0x2E1 + hc, 2, b ? 0x64 : 0, 0x2D7 + hc);
         return true;
     }
+
     return false;
 }
 
@@ -234,15 +242,18 @@ bool Mixer::set_activated(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
+
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_MM10) {
         write_command(0xAA, 0, b ? 0xFF : 0, 0xAA);
         return true;
     }
+
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
         uint8_t hc = device_id() - 0x20;
         write_command(0x2CD + hc, 0, b ? 0xFF : 0, 0x2CD + hc);
         return true;
     }
+
     return false;
 }
 
@@ -251,17 +262,20 @@ bool Mixer::set_setValveTime(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_MM10) {
         v = (v + 5) / 10;
         write_command(0xAA, 1, v, 0xAA);
         return true;
     }
+
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
         v          = (v + 5) / 10;
         uint8_t hc = device_id() - 0x20;
         write_command(0x2CD + hc, 1, v, 0x2CD + hc);
         return true;
     }
+
     return false;
 }
 
@@ -270,11 +284,13 @@ bool Mixer::set_flowTempOffset(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
         uint8_t hc = device_id() - 0x20;
         write_command(0x2CD + hc, 2, v, 0x2CD + hc);
         return true;
     }
+
     return false;
 }
 
@@ -283,6 +299,7 @@ bool Mixer::set_pressure(const char * value, const int8_t) {
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     uint8_t hc = device_id() - 0x20;
     write_command(0x2CD + hc, 9, v / 50, 0x2CD + hc);
     return true;
@@ -293,6 +310,7 @@ bool Mixer::set_wwprio(const char * value, const int8_t) {
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
+
     uint8_t hc = device_id() - 0x20;
     write_command(0x2CD + hc, 3, b ? 0xFF : 0, 0x2CD + hc);
     return true;

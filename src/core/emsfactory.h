@@ -58,6 +58,7 @@ class EMSFactory {
         if (auto * ptr = makeRaw(device_type, device_id, product_id, version, default_name, flags, brand)) {
             return std::unique_ptr<EMSdevice>(ptr);
         }
+
         return nullptr;
     }
 
