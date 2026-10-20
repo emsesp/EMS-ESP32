@@ -68,11 +68,13 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - a read or write aimed at EMS-ESP's own bus id was left unanswered, so the sender waited for a timeout. EMS-ESP now sends an empty reply to those reads and acknowledges those writes [#3094](https://github.com/emsesp/EMS-ESP32/issues/3094)
 - a second boiler monitor `0xE4` carrying `0xFFFF` cleared a valid `pc0Flow`. That empty value is now ignored [#3224](https://github.com/emsesp/EMS-ESP32/issues/3224)
 - writing a negative custom entity value was always 1 too high because float-to-int rounding always added +0.5. Negative values now round the same way as positive ones [#3297](https://github.com/emsesp/EMS-ESP32/issues/3297)
+- after a cold boot, SoftAP fallback no longer abandons STA forever. If a home WiFi SSID is configured, EMS-ESP keeps retrying STA while the captive portal is up so a late-booting router (e.g. after a power outage) can still be joined; SoftAP stops once STA gets an IP
 
 ## Changed
 
 - various memory optimizations [#3083](https://github.com/emsesp/EMS-ESP32/issues/3083)
 - Scheduler name is now mandatory
+- Access Point provision mode label renamed from "When network connection is lost" to "When network connection not found" (all languages)
 - network fallback to AP only after start [#3090](https://github.com/emsesp/EMS-ESP32/issues/3090)
 - replaced Web async-validator with custom validator and toast with native snackbar to reduce bundle size
 - Gateway and Connect devices are shown in the Devices page, but disabled [3126](https://github.com/emsesp/EMS-ESP32/discussions/3126)

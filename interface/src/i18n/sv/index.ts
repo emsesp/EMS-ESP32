@@ -238,7 +238,7 @@ const sv: Translation = {
   TIME_ZONE: 'Tidszon',
   ACCESS_POINT: 'Accesspunkt',
   AP_PROVIDE: 'Aktivera accesspunkt',
-  AP_PROVIDE_TEXT_2: 'när nätverksanslutningen är bortkopplad',
+  AP_PROVIDE_TEXT_2: 'när nätverksanslutningen inte hittas',
   AP_PROVIDE_TEXT_3: 'aldrig',
   AP_PREFERRED_CHANNEL: 'Kanal',
   AP_HIDE_SSID: 'Göm SSID',

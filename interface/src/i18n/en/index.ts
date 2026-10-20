@@ -238,7 +238,7 @@ const en: Translation = {
   TIME_ZONE: 'Time Zone',
   ACCESS_POINT: 'Access Point',
   AP_PROVIDE: 'Enable Access Point',
-  AP_PROVIDE_TEXT_2: 'When network connection is lost',
+  AP_PROVIDE_TEXT_2: 'When network connection not found',
   AP_PROVIDE_TEXT_3: 'Never',
   AP_PREFERRED_CHANNEL: 'Preferred Channel',
   AP_HIDE_SSID: 'Hide SSID',

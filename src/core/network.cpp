@@ -125,6 +125,10 @@ void Network::begin() {
                 wifi_connect_pending_   = false;
                 if (wifi_ever_connected_) {
                     LOG_WARNING("WiFi disconnected (reason: %s)", disconnectReason(last_disconnect_reason_));
+                } else if (phase_ == NetPhase::AP) {
+                    // SoftAP fallback is up and we're periodically retrying STA (slow router after
+                    // power restore) — don't flood the log with WARNING on every failed attempt
+                    LOG_DEBUG("WiFi STA retry while AP active failed (reason: %s)", disconnectReason(last_disconnect_reason_));
                 } else {
                     LOG_WARNING("WiFi initial connect attempt failed (reason: %s)", disconnectReason(last_disconnect_reason_));
                 }
@@ -663,19 +667,28 @@ void Network::stopWiFiRadio() {
 // WiFi management
 void Network::startWIFI() {
 #ifndef EMSESP_STANDALONE
-    // only run during the WIFI phase; ETHERNET phase keeps WiFi quiet, AP phase has its own bring-up
-    if (phase_ != NetPhase::WIFI) {
+    // WIFI phase: normal STA connect. AP phase with a configured SSID: keep retrying STA while
+    // SoftAP is up so a late-booting router (e.g. after a power outage) can still be joined —
+    // findNetworks() stops SoftAP once STA gets an IP. ETHERNET phase keeps WiFi quiet.
+    const bool ap_fallback_retry = (phase_ == NetPhase::AP && !ssid_.isEmpty());
+    if (phase_ != NetPhase::WIFI && !ap_fallback_retry) {
         return;
     }
 
-    // the radio was powered down while Ethernet was up, so bring it back before trying to associate
-    if (wifi_radio_off_) {
+    // the radio was powered down while Ethernet was up, so bring it back before trying to associate.
+    // Don't call this during SoftAP fallback — startWiFiRadio() forces WIFI_STA and would kill the AP.
+    if (wifi_radio_off_ && !ap_fallback_retry) {
         startWiFiRadio();
     }
 
     // exit if WiFi or Ethernet is already connected, or if we have no SSID or another Wifi.begin() is already in progress
     if (WiFi.isConnected() || ssid_.isEmpty() || ethernet_connected() || wifi_connect_pending_) {
         return;
+    }
+
+    // SoftAP is serving the captive portal — keep it and enable STA alongside
+    if (ap_fallback_retry && (WiFi.getMode() & WIFI_AP)) {
+        WiFi.mode(WIFI_AP_STA);
     }
 
     wifi_connect_pending_ = true;
@@ -969,6 +982,7 @@ void Network::findNetworks() {
                                                : "AP");
 
         // give up on this interface and try the next one. ETHERNET -> WIFI (or straight to AP if no SSID configured); WIFI -> AP.
+        // Once in AP phase with a configured SSID, startWIFI() keeps retrying STA (WIFI_AP_STA) so a late router can still be joined.
         // AP_MODE_NEVER: never promote to the AP phase — keep waiting on the current interface.
         if (connect_retry_ >= MAX_NETWORK_RECONNECTION_ATTEMPTS && phase_ != NetPhase::AP) {
             if (phase_ == NetPhase::ETHERNET) {

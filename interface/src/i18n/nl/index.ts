@@ -238,7 +238,7 @@ const nl: Translation = {
   TIME_ZONE: 'Tijdzone',
   ACCESS_POINT: 'Access Point',
   AP_PROVIDE: 'Activeer Access Point',
-  AP_PROVIDE_TEXT_2: 'als netwerk verbinding verloren gaat',
+  AP_PROVIDE_TEXT_2: 'als netwerkverbinding niet gevonden wordt',
   AP_PROVIDE_TEXT_3: 'nooit',
   AP_PREFERRED_CHANNEL: 'Voorkeurskanaal',
   AP_HIDE_SSID: 'SSID verbergen',

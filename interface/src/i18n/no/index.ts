@@ -238,7 +238,7 @@ const no: Translation = {
   TIME_ZONE: 'Tidssone',
   ACCESS_POINT: 'Aksesspunkt',
   AP_PROVIDE: 'Aktiver Aksesspunkt',
-  AP_PROVIDE_TEXT_2: 'når nettverksforbindelsen er utilgjengelig',
+  AP_PROVIDE_TEXT_2: 'når nettverksforbindelsen ikke finnes',
   AP_PROVIDE_TEXT_3: 'aldri',
   AP_PREFERRED_CHANNEL: 'Foretrukket kanal',
   AP_HIDE_SSID: 'Skjul SSID',

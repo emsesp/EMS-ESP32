@@ -238,7 +238,7 @@ const tr: Translation = {
   TIME_ZONE: 'Saat dilimi',
   ACCESS_POINT: 'Erişim Noktası',
   AP_PROVIDE: 'Erişim noktasını çalıştır',
-  AP_PROVIDE_TEXT_2: 'Ağ bağlantısı kesildiğinde',
+  AP_PROVIDE_TEXT_2: 'Ağ bağlantısı bulunamadığında',
   AP_PROVIDE_TEXT_3: 'asla',
   AP_PREFERRED_CHANNEL: 'Tercih edilen kanal',
   AP_HIDE_SSID: 'SSID yi gizle',

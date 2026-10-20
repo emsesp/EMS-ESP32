@@ -238,7 +238,7 @@ const it: Translation = {
   TIME_ZONE: 'Fuso orario',
   ACCESS_POINT: 'Access Point',
   AP_PROVIDE: 'Abilita Access Point',
-  AP_PROVIDE_TEXT_2: 'quando la connessione di rete è persa',
+  AP_PROVIDE_TEXT_2: 'quando la connessione di rete non è trovata',
   AP_PROVIDE_TEXT_3: 'mai',
   AP_PREFERRED_CHANNEL: 'Canale preferito',
   AP_HIDE_SSID: 'Nascondi SSID',

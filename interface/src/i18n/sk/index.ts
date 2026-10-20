@@ -238,7 +238,7 @@ const sk: Translation = {
   TIME_ZONE: 'Časová zóna',
   ACCESS_POINT: 'Prístupový bod',
   AP_PROVIDE: 'Povoliť prístupový bod',
-  AP_PROVIDE_TEXT_2: 'keď je sieťové pripojenie stratené',
+  AP_PROVIDE_TEXT_2: 'keď sieťové pripojenie nie je nájdené',
   AP_PROVIDE_TEXT_3: 'nikdy',
   AP_PREFERRED_CHANNEL: 'Preferovaný kanál',
   AP_HIDE_SSID: 'Skryť SSID',
