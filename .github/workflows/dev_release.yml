@@ -327,6 +327,7 @@ jobs:
           repo_token: '${{ secrets.GITHUB_TOKEN }}'
           title: Development Build v${{steps.build_info.outputs.VERSION}}
           body: ${{ steps.notes.outputs.BODY }}
+          generate_notes: false
           automatic_release_tag: 'latest'
           prerelease: true
           files: |
