@@ -466,8 +466,39 @@ export const TIME_ZONES: Record<string, string> = {
 // Pre-compute sorted timezone labels for better performance
 export const TIME_ZONE_LABELS = Object.keys(TIME_ZONES).sort();
 
+/** Resolve the select value for a saved zone. Prefer the label when it is in
+ * TIME_ZONES so a stale stored tz_format (after a table update) still shows the
+ * correct city; firmware migrates the format from the label on boot. */
 export function selectedTimeZone(label: string, format: string) {
-  return TIME_ZONES[label] === format ? label : undefined;
+  if (label in TIME_ZONES) {
+    return label;
+  }
+  return Object.keys(TIME_ZONES).find((key) => TIME_ZONES[key] === format);
+}
+
+/** Return settings with tz_format / tz_format_t refreshed from TIME_ZONES, or
+ * null if already current (or labels are unknown). */
+export function migrateNtpTimeZones<
+  T extends {
+    tz_label: string;
+    tz_format: string;
+    tz_label_t: string;
+    tz_format_t: string;
+  }
+>(settings: T): T | null {
+  const tz_format = TIME_ZONES[settings.tz_label];
+  const tz_format_t = TIME_ZONES[settings.tz_label_t];
+  const next = { ...settings };
+  let changed = false;
+  if (tz_format && tz_format !== settings.tz_format) {
+    next.tz_format = tz_format;
+    changed = true;
+  }
+  if (tz_format_t && tz_format_t !== settings.tz_format_t) {
+    next.tz_format_t = tz_format_t;
+    changed = true;
+  }
+  return changed ? next : null;
 }
 
 const precomputedTimeZoneItems = TIME_ZONE_LABELS.map((label) => (
