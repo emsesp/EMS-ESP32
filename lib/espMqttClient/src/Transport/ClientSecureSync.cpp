@@ -53,6 +53,7 @@ int ClientSecureSync::read(uint8_t * buf, size_t size) {
 
 void ClientSecureSync::stop() {
     client.stop();
+    basic_client.stop(); // ESP_SSLClient::stop() leaves the socket open if the TLS handshake failed
 }
 
 bool ClientSecureSync::connected() {
