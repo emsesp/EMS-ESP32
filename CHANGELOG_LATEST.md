@@ -71,6 +71,7 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - a second boiler monitor `0xE4` carrying `0xFFFF` cleared a valid `pc0Flow`. That empty value is now ignored [#3224](https://github.com/emsesp/EMS-ESP32/issues/3224)
 - writing a negative custom entity value was always 1 too high because float-to-int rounding always added +0.5. Negative values now round the same way as positive ones [#3297](https://github.com/emsesp/EMS-ESP32/issues/3297)
 - after a cold boot, SoftAP fallback no longer abandons STA forever. If a home WiFi SSID is configured, EMS-ESP keeps retrying STA while the captive portal is up so a late-booting router (e.g. after a power outage) can still be joined; SoftAP stops once STA gets an IP
+- MQTT with TLS dropped the connection to brokers that ignore the TLS max fragment length extension (for example ones behind Go's crypto/tls) as soon as they sent a TLS record larger than about 1.7 KB. Boards with PSRAM now use a 16 KB TLS receive buffer, allocated in PSRAM
 
 ## Changed
 
