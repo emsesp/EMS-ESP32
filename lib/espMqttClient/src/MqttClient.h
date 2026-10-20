@@ -81,7 +81,7 @@ class MqttClient {
   }
     
  protected:
-  explicit MqttClient(espMqttClientTypes::UseInternalTask useInternalTask, uint8_t priority = 1, uint8_t core = 1);
+  explicit MqttClient(espMqttClientTypes::UseInternalTask useInternalTask, uint8_t priority = 1, uint8_t core = 1, uint32_t stackSize = EMC_TASK_STACK_SIZE);
   espMqttClientTypes::UseInternalTask _useInternalTask;
   espMqttClientInternals::Transport* _transport;
 
@@ -207,6 +207,7 @@ class MqttClient {
   #if defined(ARDUINO_ARCH_ESP32)
   #if ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_INFO
   size_t _highWaterMark;
+  size_t _stackSize;
   #endif
   #endif
 };
