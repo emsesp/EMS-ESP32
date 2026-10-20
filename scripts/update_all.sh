@@ -22,6 +22,7 @@ pnpm update
 pnpm install
 pnpm format
 pnpm build-webUI
+pnpm build-recovery
 pnpm lint
 
 cd ../mock-api

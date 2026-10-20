@@ -111,6 +111,52 @@ def build_headers(host_ip, emsesp_url, content_type='application/json', access_t
     return headers
 
 
+def post_file(session, upload_url, host_ip, emsesp_url, access_token, filename, data, progress_desc=None):
+    """POST one multipart file to /rest/uploadFile (WebUI-compatible)."""
+    encoder = MultipartEncoder(fields={
+        'file': (filename, data, 'application/octet-stream')
+    })
+
+    bar = None
+    if progress_desc is not None:
+        bar = tqdm(
+            desc=progress_desc,
+            total=encoder.len,
+            dynamic_ncols=True,
+            unit='B',
+            unit_scale=True,
+            unit_divisor=1024,
+            mininterval=0.2
+        )
+        monitor = MultipartEncoderMonitor(
+            encoder, lambda m: bar.update(m.bytes_read - bar.n))
+        body = monitor
+        content_type = monitor.content_type
+        content_length = monitor.len
+    else:
+        body = encoder
+        content_type = encoder.content_type
+        content_length = encoder.len
+
+    headers = build_headers(
+        host_ip,
+        emsesp_url,
+        content_type=content_type,
+        access_token=access_token,
+        extra_headers={
+            'Content-Length': str(content_length),
+            'Origin': emsesp_url
+        }
+    )
+
+    started = time.perf_counter()
+    response = session.post(upload_url, data=body, headers=headers, timeout=None)
+    elapsed = time.perf_counter() - started
+    if bar is not None:
+        bar.close()
+    return response, encoder.len, elapsed
+
+
 def on_upload(source, target, env):
 
     # make sure we have set the upload_protocol to custom
@@ -166,48 +212,30 @@ def on_upload(source, target, env):
 
         md5 = hashlib.md5(firmware).hexdigest()
         filename = os.path.basename(firmware_path)
-
-        encoder = MultipartEncoder(fields={
-            'MD5': md5,
-            'file': (filename, firmware, 'application/octet-stream')}
-        )
-
-        bar = tqdm(desc='Upload Progress',
-                   total=encoder.len,
-                   dynamic_ncols=True,
-                   unit='B',
-                   unit_scale=True,
-                   unit_divisor=1024,
-                   mininterval=0.2
-                   )
-
-        monitor = MultipartEncoderMonitor(
-            encoder, lambda monitor: bar.update(monitor.bytes_read - bar.n))
-
-        post_headers = build_headers(
-            host_ip,
-            emsesp_url,
-            content_type=monitor.content_type,
-            access_token=access_token,
-            extra_headers={
-                'Content-Length': str(monitor.len),
-                'Origin': emsesp_url
-            }
-        )
-
+        # Device enables MD5 check only after a file whose name ends in .md5
+        # (same as the WebUI). An ElegantOTA "MD5" form field is ignored.
+        md5_name = os.path.splitext(filename)[0] + '.md5'
         upload_url = f"{emsesp_url}/rest/uploadFile"
-        started = time.perf_counter()
-        response = session.post(
-            upload_url, data=monitor, headers=post_headers, timeout=None)
-        elapsed = time.perf_counter() - started
 
-        bar.close()
+        print(f"Uploading MD5 ({md5})")
+        response, _, _ = post_file(
+            session, upload_url, host_ip, emsesp_url, access_token,
+            md5_name, (md5 + '\n').encode('ascii'))
+        if response.status_code != 200:
+            print_fail(f"MD5 upload failed (code {response.status_code}).")
+            return
+        print_success("MD5 accepted")
+
+        print(f"Uploading firmware ({filename})")
+        response, size, elapsed = post_file(
+            session, upload_url, host_ip, emsesp_url, access_token,
+            filename, firmware, progress_desc='Upload Progress')
         print()
 
         if response.status_code != 200:
             print_fail(f"Upload failed (code {response.status_code}).")
         else:
-            kibs = (encoder.len / 1024) / elapsed if elapsed > 0 else 0
+            kibs = (size / 1024) / elapsed if elapsed > 0 else 0
             print_success(
                 f"Upload successful ({kibs:.0f} KiB/s in {elapsed:.1f}s). Rebooting device.")
             restart_headers = build_headers(
