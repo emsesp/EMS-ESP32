@@ -155,7 +155,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
 
 void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
     if (request->_tempObject) {
-        const int code = static_cast<int>(reinterpret_cast<intptr_t>(request->_tempObject));
+        const int code = *static_cast<int *>(request->_tempObject);
         if (!_response_sent && code >= 400) {
             request->send(request->beginResponse(code));
             _response_sent = true;
@@ -220,7 +220,10 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
             AsyncWebServerResponse * response = request->beginResponse(200);
             request->send(response);
         }
-
+        // the upload is done: clear the flags so handleDisconnect() doesn't treat the client closing the
+        // connection as an aborted upload and cancel the pending restart
+        _is_firmware   = false;
+        _is_filesystem = false;
         emsesp::EMSESP::system_.systemStatus(
             emsesp::SYSTEM_STATUS::SYSTEM_STATUS_PENDING_RESTART); // will be handled by the main loop. We use pending for the Web's SystemMonitor
         return;
@@ -244,23 +247,19 @@ void UploadFileService::handleError(AsyncWebServerRequest * request, int code) {
     if (request->_tempObject) {
         return;
     }
-
-    request->_tempObject = reinterpret_cast<void *>(static_cast<intptr_t>(code)); // stop later chunks from retrying the write
+    // stop later chunks from retrying the write. The request destructor frees _tempObject, so it must be heap memory
+    auto * error = static_cast<int *>(malloc(sizeof(int)));
+    if (error) {
+        *error = code;
+    }
+    request->_tempObject = error;
 
     emsesp::EMSESP::logger().info("Upload error: %d", code);
     emsesp::EMSESP::system_.uart_init(); // re-enable UART
     _ota.abort();
 
-    // 406: the client sent a file we won't accept. Close now so the browser fails fast.
-    // Other codes wait for uploadComplete() to send, so we don't destroy the request mid-stream.
-    if (code == 406) {
-        request->send(request->beginResponse(code));
-        _response_sent = true;
-        request->client()->close();
-        _is_firmware   = false;
-        _is_filesystem = false;
-        _is_recovery   = false;
-    }
+    // uploadComplete() sends the error code. The web server only writes a response once the whole body has
+    // arrived, so closing the connection here to fail fast would lose the response.
 
     // if we aborted a filesystem upload, remount LittleFS so the device keeps working
     if (_is_filesystem) {

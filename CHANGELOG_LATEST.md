@@ -33,6 +33,8 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 
 - heat-pump operating state (`hpoperatingstate`: heating/off/cooling) is published for every heating circuit. On BC400/UI800 it was only filled for hc1, because hc2 never answers telegram 0x472 while the state is still broadcast in 0x2A6 offset 20 [#3097](https://github.com/emsesp/EMS-ESP32/issues/3097)
 - restart from the WebUI (Restart button, firmware/settings upload) only happened while the browser tab stayed open. If the tab was closed the restart was silently dropped after 5 minutes, leaving a new firmware uninstalled. EMS-ESP now restarts on its own if the WebUI hasn't picked up the pending restart within 10 seconds
+- a firmware upload from a script or `curl` was accepted (`md5_ok`) but EMS-ESP didn't restart into it: the client closing the connection after the upload was treated as an aborted upload, which cancelled the pending restart
+- EMS-ESP crashed and restarted when an upload was rejected, for example an empty or invalid MD5 file. The error code was kept in the request's `_tempObject`, which the web server frees as heap memory when the request ends
 - shunting yard show json
 - `system/sendmail` called from a Command or the Scheduler computed its value twice, which stripped the quotes from literal text and then failed on characters like `!`. Also shunting yard treated a `?` inside a quoted string as a ternary, so text like `"too hot?"` returned nothing
 - memory leak when using different timezones for ems-esp and thermostat[#3184](https://github.com/emsesp/EMS-ESP32/issues/3184)
