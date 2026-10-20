@@ -23,8 +23,11 @@ ClientSecureSync::~ClientSecureSync() {
     stop();
 }
 
+// ESP_SSLClient::connect() only starts TLS on its built-in list of well-known ports (8883 among them) and stays
+// plain TCP on any other port, which would send the MQTT credentials in clear. Finish the TLS handshake here instead.
 bool ClientSecureSync::connect(IPAddress ip, uint16_t port) {
-    bool ret = client.connect(ip, port); // implicit conversion of return code int --> bool
+    // shortcut: connectSSL() verifies against the host of the last connect by name (none if there was none), fine while setServer() is not switched from a host to an IP
+    bool ret = client.connect(ip, port) && (client.isSecure() || client.connectSSL());
     if (ret) {
         // Set TCP option directly to bypass lack of working setNoDelay for WiFiClientSecure
         int val = true;
@@ -34,7 +37,7 @@ bool ClientSecureSync::connect(IPAddress ip, uint16_t port) {
 }
 
 bool ClientSecureSync::connect(const char * host, uint16_t port) {
-    bool ret = client.connect(host, port); // implicit conversion of return code int --> bool
+    bool ret = client.connect(host, port) && (client.isSecure() || client.connectSSL());
     if (ret) {
         // Set TCP option directly to bypass lack of working setNoDelay for WiFiClientSecure
         int val = true;
