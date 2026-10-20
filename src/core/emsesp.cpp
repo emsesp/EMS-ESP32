@@ -52,7 +52,7 @@ uint32_t          EMSESP::last_fetch_       = 0;
 #ifdef EMSESP_GATEWAY_TX_HOLD
 uint32_t EMSESP::gateway_hold_until_        = 0;
 uint32_t EMSESP::gateway_hold_start_        = 0;
-uint32_t EMSESP::gateway_cooldown_until_    = 0;
+uint32_t EMSESP::gateway_hold_max_log_      = 0;
 uint32_t EMSESP::gateway_window_start_      = 0;
 uint8_t  EMSESP::gateway_window_count_      = 0;
 uint32_t EMSESP::gateway_fast_start_        = 0;
@@ -1803,9 +1803,12 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 #endif
         // check for poll to us, if so send top message from Tx queue immediately and quit
 #ifdef EMSESP_GATEWAY_TX_HOLD
-        if (poll_id == EMSbus::ems_bus_id() && gateway_tx_hold()) {
-            // still ack the poll, otherwise the master drops us from 0x07 and the gateway sees the device list change
-            txservice_.send_poll();
+        // while the gateway is syncing, don't Tx anything (including Roomctrl) — only ack our own poll
+        // so the master keeps us in 0x07 and the gateway doesn't see the device list change
+        if (gateway_tx_hold()) {
+            if (poll_id == EMSbus::ems_bus_id()) {
+                txservice_.send_poll();
+            }
             return;
         }
 #endif
@@ -1867,13 +1870,10 @@ void EMSESP::scheduled_fetch_values() {
 void EMSESP::gateway_note_activity() {
     uint32_t now = uuid::get_uptime();
     if (gateway_last_seen_ && (now - gateway_last_seen_ > GATEWAY_SILENCE_MS)) {
-        // a real reconnect: allow hold even if we were in the post-max cooldown
-        gateway_cooldown_until_ = 0;
-        LOG_INFO("Gateway 0x%02X returned after %lu s silence, holding Tx",
-                 EMSdevice::EMS_DEVICE_ID_GATEWAY1,
-                 (unsigned long)((now - gateway_last_seen_) / 1000));
+        LOG_INFO("Gateway 0x%02X returned after %lu s silence, holding Tx", EMSdevice::EMS_DEVICE_ID_GATEWAY1, (unsigned long)((now - gateway_last_seen_) / 1000));
         if (!gateway_hold_until_) {
-            gateway_hold_start_ = now;
+            gateway_hold_start_   = now;
+            gateway_hold_max_log_ = 0;
         }
         gateway_hold_until_ = (now + GATEWAY_HOLD_TIME) | 1;
     }
@@ -1921,16 +1921,10 @@ void EMSESP::gateway_rx_check(const uint8_t * data, const uint8_t length) {
 
 void EMSESP::gateway_tx_hold_start() {
     uint32_t now = uuid::get_uptime();
-    if (gateway_cooldown_until_) {
-        if ((int32_t)(now - gateway_cooldown_until_) < 0) {
-            return;
-        }
-
-        gateway_cooldown_until_ = 0;
-    }
 
     if (!gateway_hold_until_) {
-        gateway_hold_start_ = now;
+        gateway_hold_start_   = now;
+        gateway_hold_max_log_ = 0;
         LOG_INFO("Gateway 0x%02X is busy, holding Tx", EMSdevice::EMS_DEVICE_ID_GATEWAY1);
     }
 
@@ -1943,17 +1937,23 @@ bool EMSESP::gateway_tx_hold() {
     }
 
     uint32_t now = uuid::get_uptime();
-    if (now - gateway_hold_start_ > GATEWAY_HOLD_MAX) {
-        gateway_hold_until_     = 0;
-        gateway_cooldown_until_ = (now + GATEWAY_HOLD_COOLDOWN) | 1;
-        LOG_WARNING("Gateway 0x%02X still busy after %lu s, resuming Tx", EMSdevice::EMS_DEVICE_ID_GATEWAY1, (unsigned long)(GATEWAY_HOLD_MAX / 1000));
+
+    // only resume when the gateway has been quiet for GATEWAY_HOLD_TIME — never force-resume
+    // while bursts keep extending the hold (that 10‑min flap prolonged A21 storm on #3094)
+    if ((int32_t)(now - gateway_hold_until_) >= 0) {
+        uint32_t held_s       = (now - gateway_hold_start_) / 1000;
+        gateway_hold_until_   = 0;
+        gateway_hold_max_log_ = 0;
+        LOG_INFO("Gateway 0x%02X is quiet, resuming Tx after %lu s", EMSdevice::EMS_DEVICE_ID_GATEWAY1, (unsigned long)held_s);
         return false;
     }
 
-    if ((int32_t)(now - gateway_hold_until_) >= 0) {
-        gateway_hold_until_ = 0;
-        LOG_INFO("Gateway 0x%02X is quiet, resuming Tx after %lu s", EMSdevice::EMS_DEVICE_ID_GATEWAY1, (unsigned long)((now - gateway_hold_start_) / 1000));
-        return false;
+    // still busy past HOLD_MAX — stay muted, just log periodically
+    if (now - gateway_hold_start_ > GATEWAY_HOLD_MAX && (!gateway_hold_max_log_ || now - gateway_hold_max_log_ > GATEWAY_HOLD_MAX)) {
+        gateway_hold_max_log_ = now;
+        LOG_WARNING("Gateway 0x%02X still busy after %lu s, continuing to hold Tx",
+                    EMSdevice::EMS_DEVICE_ID_GATEWAY1,
+                    (unsigned long)((now - gateway_hold_start_) / 1000));
     }
 
     return true;
