@@ -15,8 +15,8 @@ espMqttClient::espMqttClient(espMqttClientTypes::UseInternalTask useInternalTask
     _transport = &_client;
 }
 
-espMqttClient::espMqttClient(uint8_t priority, uint8_t core)
-    : MqttClientSetup(espMqttClientTypes::UseInternalTask::YES, priority, core)
+espMqttClient::espMqttClient(uint8_t priority, uint8_t core, uint32_t stackSize)
+    : MqttClientSetup(espMqttClientTypes::UseInternalTask::YES, priority, core, stackSize)
     , _client() {
     _transport = &_client;
 }
@@ -27,8 +27,8 @@ espMqttClientSecure::espMqttClientSecure(espMqttClientTypes::UseInternalTask use
     _transport = &_client;
 }
 
-espMqttClientSecure::espMqttClientSecure(uint8_t priority, uint8_t core)
-    : MqttClientSetup(espMqttClientTypes::UseInternalTask::YES, priority, core)
+espMqttClientSecure::espMqttClientSecure(uint8_t priority, uint8_t core, uint32_t stackSize)
+    : MqttClientSetup(espMqttClientTypes::UseInternalTask::YES, priority, core, stackSize)
     , _client() {
     _transport = &_client;
 }
