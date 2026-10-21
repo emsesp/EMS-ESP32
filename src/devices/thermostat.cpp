@@ -1393,7 +1393,7 @@ void Thermostat::process_RC300Curve(const std::shared_ptr<const Telegram> & tele
     has_enumupdate(telegram, hc->controlmode, 0, 1); // 1-weather_compensated, 2-outside_footpoint,3-n/a, 4-room --  RC310
     has_update(telegram, hc->heatingtype, 1);        // 1=radiator, 2=convector, 3=floor
     has_update(telegram, hc->switchonoptimization, 4);
-    has_enumupdate(telegram, hc->nofrostmode, 5, 1); // 1-room, 2-outdoor, 3- room & outdoor
+    has_update(telegram, hc->nofrostmode, 5); // 0-off, 1-room, 2-outdoor, 3-room & outdoor
     has_update(telegram, hc->nofrosttemp, 6);
 
     if (hc->heatingtype < 3) {
@@ -3925,7 +3925,7 @@ bool Thermostat::set_nofrostmode(const char * value, const int8_t id) {
     uint8_t set;
     if (isRC300() || model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
         if (Helpers::value2enum(value, set, FL_(enum_nofrostmode1))) {
-            write_command(curve_typeids[hc->hc()], 5, set + 1, curve_typeids[hc->hc()]);
+            write_command(curve_typeids[hc->hc()], 5, set, curve_typeids[hc->hc()]);
             return true;
         }
     } else {

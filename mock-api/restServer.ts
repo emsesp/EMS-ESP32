@@ -3820,7 +3820,7 @@ const emsesp_devicedata_10 = {
       u: 0,
       id: '00hc1 nofrost mode',
       c: 'hc1/nofrostmode',
-      l: ['room', 'outdoor', 'room outdoor']
+      l: ['off', 'room', 'outdoor', 'room outdoor']
     },
     {
       v: 2,
