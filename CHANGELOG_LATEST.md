@@ -31,6 +31,7 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 
 ## Fixed
 
+- ESP32-C6 boards without a board profile got invalid GPIOs (99), so on every start the settings were rejected and fell back to empty values (blank Board Profile, EMS Tx Mode and Bus ID), and saving any Application setting failed with a 400 error. A new C6 now starts with the CUSTOM profile and pins for the Seeed XIAO ESP32-C6: Rx GPIO20 (D9), Tx GPIO19 (D8), button GPIO9
 - heat-pump operating state (`hpoperatingstate`: heating/off/cooling) is published for every heating circuit. On BC400/UI800 it was only filled for hc1, because hc2 never answers telegram 0x472 while the state is still broadcast in 0x2A6 offset 20 [#3097](https://github.com/emsesp/EMS-ESP32/issues/3097)
 - restart from the WebUI (Restart button, firmware/settings upload) only happened while the browser tab stayed open. If the tab was closed the restart was silently dropped after 5 minutes, leaving a new firmware uninstalled. EMS-ESP now restarts on its own if the WebUI hasn't picked up the pending restart within 10 seconds
 - a firmware upload from a script or `curl` was accepted (`md5_ok`) but EMS-ESP didn't restart into it: the client closing the connection after the upload was treated as an aborted upload, which cancelled the pending restart
