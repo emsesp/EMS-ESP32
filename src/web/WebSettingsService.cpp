@@ -525,7 +525,12 @@ void WebSettings::set_board_profile(WebSettings & settings) {
 #elif CONFIG_IDF_TARGET_ESP32S3
         settings.board_profile = "S32S3"; // BBQKees Gateway S3
 #elif CONFIG_IDF_TARGET_ESP32C6
+        // there is no C6 board profile, so start as CUSTOM with pins that suit the Seeed XIAO ESP32-C6 (the c6_xiao_4M build).
+        // load_board_profile() has no entry for CUSTOM, so without these the GPIOs stay at 99, every settings update
+        // fails the GPIO check and the settings fall back to empty values.
+        // Rx D9 (GPIO20), Tx D8 (GPIO19), button BOOT (GPIO9), no LED (the onboard LED on GPIO15 is active low), no Dallas
         settings.board_profile = "CUSTOM";
+        data                   = {0, 0, 20, 19, 9, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0};
 #endif
         // apply the new board profile setting
         System::load_board_profile(data, settings.board_profile.c_str());
