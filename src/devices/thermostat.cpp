@@ -2300,7 +2300,7 @@ bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
         Roomctrl::set_remotetemp(Roomctrl::FB10, hc->hc(), hc->remotetemp); // FB10
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC35 || model() == EMSdevice::EMS_DEVICE_FLAG_RC30_N) {
         Roomctrl::set_remotetemp(Roomctrl::RC20, hc->hc(), hc->remotetemp); // RC20
-    } else if (isRC300()) {
+    } else if (isRC300() || model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
         if (hc->control == 1 || hc->control == 0) {
             Roomctrl::set_remotetemp(Roomctrl::RC200, hc->hc(), hc->remotetemp);  // RC200
         } else if (hc->control == 3) {                                            // RC100H(3)
@@ -5489,7 +5489,8 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
             register_device_value(tag, &hc->control, DeviceValueType::ENUM, FL_(enum_control1), FL_(control), DeviceValueUOM::NONE, MAKE_CF_CB(set_control));
         }
 
-        if (model != EMSdevice::EMS_DEVICE_FLAG_RC100 && model != EMSdevice::EMS_DEVICE_FLAG_CR120) {
+        // RC100/CR120 at 0x18 are the remote. The same model at 0x10 (a CW100 used as the only controller) can take one.
+        if (device_id() == 0x10 || (model != EMSdevice::EMS_DEVICE_FLAG_RC100 && model != EMSdevice::EMS_DEVICE_FLAG_CR120)) {
             register_device_value(tag,
                                   &hc->remotetemp,
                                   DeviceValueType::CMD,
