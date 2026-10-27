@@ -4084,7 +4084,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "UI800, BC400",thermostat,4,hc1.roominfluence,room influence,uint8 (>=0<=0),C,true,number.thermostat_hc1_room_influence,number.thermostat_hc1_roominfluence,7,1,1,14,1
 "UI800, BC400",thermostat,4,hc1.roominflfactor,room influence factor,uint8 (>=0<=0), ,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,7,1,1/10,15,1
 "UI800, BC400",thermostat,4,hc1.curroominfl,current room influence,int16,C,false,sensor.thermostat_hc1_current_room_influence,sensor.thermostat_hc1_curroominfl,7,1,1/10,16,1
-"UI800, BC400",thermostat,4,hc1.nofrostmode,nofrost mode,enum [room\|outdoor\|room outdoor] (>=0<=0), ,true,select.thermostat_hc1_nofrost_mode,select.thermostat_hc1_nofrostmode,7,1,1,17,1
+"UI800, BC400",thermostat,4,hc1.nofrostmode,nofrost mode,enum [off\|room\|outdoor\|room outdoor] (>=0<=0), ,true,select.thermostat_hc1_nofrost_mode,select.thermostat_hc1_nofrostmode,7,1,1,17,1
 "UI800, BC400",thermostat,4,hc1.nofrosttemp,nofrost temperature,int8 (>=0<=0),C,true,number.thermostat_hc1_nofrost_temperature,number.thermostat_hc1_nofrosttemp,7,1,1,18,1
 "UI800, BC400",thermostat,4,hc1.targetflowtemp,target flow temperature,uint8,C,false,sensor.thermostat_hc1_target_flow_temperature,sensor.thermostat_hc1_targetflowtemp,7,1,1,19,1
 "UI800, BC400",thermostat,4,hc1.heatingtype,heating type,enum [off\|radiator\|convector\|floor] (>=0<=0), ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,7,1,1,20,1
@@ -4476,7 +4476,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC200, CW100, CR120, CR50",thermostat,157,hc1.roominfluence,room influence,uint8 (>=0<=0),C,true,number.thermostat_hc1_room_influence,number.thermostat_hc1_roominfluence,7,1,1,14,1
 "RC200, CW100, CR120, CR50",thermostat,157,hc1.roominflfactor,room influence factor,uint8 (>=0<=0), ,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,7,1,1/10,15,1
 "RC200, CW100, CR120, CR50",thermostat,157,hc1.curroominfl,current room influence,int16,C,false,sensor.thermostat_hc1_current_room_influence,sensor.thermostat_hc1_curroominfl,7,1,1/10,16,1
-"RC200, CW100, CR120, CR50",thermostat,157,hc1.nofrostmode,nofrost mode,enum [room\|outdoor\|room outdoor] (>=0<=0), ,true,select.thermostat_hc1_nofrost_mode,select.thermostat_hc1_nofrostmode,7,1,1,17,1
+"RC200, CW100, CR120, CR50",thermostat,157,hc1.nofrostmode,nofrost mode,enum [off\|room\|outdoor\|room outdoor] (>=0<=0), ,true,select.thermostat_hc1_nofrost_mode,select.thermostat_hc1_nofrostmode,7,1,1,17,1
 "RC200, CW100, CR120, CR50",thermostat,157,hc1.nofrosttemp,nofrost temperature,int8 (>=0<=0),C,true,number.thermostat_hc1_nofrost_temperature,number.thermostat_hc1_nofrosttemp,7,1,1,18,1
 "RC200, CW100, CR120, CR50",thermostat,157,hc1.targetflowtemp,target flow temperature,uint8,C,false,sensor.thermostat_hc1_target_flow_temperature,sensor.thermostat_hc1_targetflowtemp,7,1,1,19,1
 "RC200, CW100, CR120, CR50",thermostat,157,hc1.heatingtype,heating type,enum [off\|radiator\|convector\|floor] (>=0<=0), ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,7,1,1,20,1
@@ -4571,7 +4571,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,hc1.roominfluence,room influence,uint8 (>=0<=0),C,true,number.thermostat_hc1_room_influence,number.thermostat_hc1_roominfluence,7,1,1,14,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,hc1.roominflfactor,room influence factor,uint8 (>=0<=0), ,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,7,1,1/10,15,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,hc1.curroominfl,current room influence,int16,C,false,sensor.thermostat_hc1_current_room_influence,sensor.thermostat_hc1_curroominfl,7,1,1/10,16,1
-"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,hc1.nofrostmode,nofrost mode,enum [room\|outdoor\|room outdoor] (>=0<=0), ,true,select.thermostat_hc1_nofrost_mode,select.thermostat_hc1_nofrostmode,7,1,1,17,1
+"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,hc1.nofrostmode,nofrost mode,enum [off\|room\|outdoor\|room outdoor] (>=0<=0), ,true,select.thermostat_hc1_nofrost_mode,select.thermostat_hc1_nofrostmode,7,1,1,17,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,hc1.nofrosttemp,nofrost temperature,int8 (>=0<=0),C,true,number.thermostat_hc1_nofrost_temperature,number.thermostat_hc1_nofrosttemp,7,1,1,18,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,hc1.targetflowtemp,target flow temperature,uint8,C,false,sensor.thermostat_hc1_target_flow_temperature,sensor.thermostat_hc1_targetflowtemp,7,1,1,19,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,hc1.heatingtype,heating type,enum [off\|radiator\|convector\|floor] (>=0<=0), ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,7,1,1,20,1
@@ -4677,7 +4677,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Rego 2000/3000",thermostat,172,hc1.roominfluence,room influence,uint8 (>=0<=0),C,true,number.thermostat_hc1_room_influence,number.thermostat_hc1_roominfluence,7,1,1,14,1
 "Rego 2000/3000",thermostat,172,hc1.roominflfactor,room influence factor,uint8 (>=0<=0), ,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,7,1,1/10,15,1
 "Rego 2000/3000",thermostat,172,hc1.curroominfl,current room influence,int16,C,false,sensor.thermostat_hc1_current_room_influence,sensor.thermostat_hc1_curroominfl,7,1,1/10,16,1
-"Rego 2000/3000",thermostat,172,hc1.nofrostmode,nofrost mode,enum [room\|outdoor\|room outdoor] (>=0<=0), ,true,select.thermostat_hc1_nofrost_mode,select.thermostat_hc1_nofrostmode,7,1,1,17,1
+"Rego 2000/3000",thermostat,172,hc1.nofrostmode,nofrost mode,enum [off\|room\|outdoor\|room outdoor] (>=0<=0), ,true,select.thermostat_hc1_nofrost_mode,select.thermostat_hc1_nofrostmode,7,1,1,17,1
 "Rego 2000/3000",thermostat,172,hc1.nofrosttemp,nofrost temperature,int8 (>=0<=0),C,true,number.thermostat_hc1_nofrost_temperature,number.thermostat_hc1_nofrosttemp,7,1,1,18,1
 "Rego 2000/3000",thermostat,172,hc1.targetflowtemp,target flow temperature,uint8,C,false,sensor.thermostat_hc1_target_flow_temperature,sensor.thermostat_hc1_targetflowtemp,7,1,1,19,1
 "Rego 2000/3000",thermostat,172,hc1.heatingtype,heating type,enum [off\|radiator\|convector\|floor] (>=0<=0), ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,7,1,1,20,1
@@ -4809,7 +4809,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,hc1.roominfluence,room influence,uint8 (>=0<=0),C,true,number.thermostat_hc1_room_influence,number.thermostat_hc1_roominfluence,7,1,1,14,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,hc1.roominflfactor,room influence factor,uint8 (>=0<=0), ,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,7,1,1/10,15,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,hc1.curroominfl,current room influence,int16,C,false,sensor.thermostat_hc1_current_room_influence,sensor.thermostat_hc1_curroominfl,7,1,1/10,16,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,hc1.nofrostmode,nofrost mode,enum [room\|outdoor\|room outdoor] (>=0<=0), ,true,select.thermostat_hc1_nofrost_mode,select.thermostat_hc1_nofrostmode,7,1,1,17,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,hc1.nofrostmode,nofrost mode,enum [off\|room\|outdoor\|room outdoor] (>=0<=0), ,true,select.thermostat_hc1_nofrost_mode,select.thermostat_hc1_nofrostmode,7,1,1,17,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,hc1.nofrosttemp,nofrost temperature,int8 (>=0<=0),C,true,number.thermostat_hc1_nofrost_temperature,number.thermostat_hc1_nofrosttemp,7,1,1,18,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,hc1.targetflowtemp,target flow temperature,uint8,C,false,sensor.thermostat_hc1_target_flow_temperature,sensor.thermostat_hc1_targetflowtemp,7,1,1,19,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,hc1.heatingtype,heating type,enum [off\|radiator\|convector\|floor] (>=0<=0), ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,7,1,1,20,1
