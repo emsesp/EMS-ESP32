@@ -1358,3 +1358,4 @@ POWERON
 crashtest
 otadata
 merase
+Seeed
