@@ -4,11 +4,11 @@ import type { CSSProperties } from 'react';
 
 import { MenuItem, TextField } from '@mui/material';
 
-import HUflag from 'i18n/HU.svg';
 import CZflag from 'i18n/CS.svg';
 import DEflag from 'i18n/DE.svg';
 import FRflag from 'i18n/FR.svg';
 import GBflag from 'i18n/GB.svg';
+import HUflag from 'i18n/HU.svg';
 import ITflag from 'i18n/IT.svg';
 import NLflag from 'i18n/NL.svg';
 import NOflag from 'i18n/NO.svg';
@@ -29,11 +29,11 @@ interface LanguageOption {
 }
 
 const LANGUAGE_OPTIONS: LanguageOption[] = [
-  { key: 'hu', flag: HUflag, label: 'HU' },
   { key: 'cs', flag: CZflag, label: 'CS' },
   { key: 'de', flag: DEflag, label: 'DE' },
   { key: 'en', flag: GBflag, label: 'EN' },
   { key: 'fr', flag: FRflag, label: 'FR' },
+  { key: 'hu', flag: HUflag, label: 'HU' },
   { key: 'it', flag: ITflag, label: 'IT' },
   { key: 'nl', flag: NLflag, label: 'NL' },
   { key: 'no', flag: NOflag, label: 'NO' },

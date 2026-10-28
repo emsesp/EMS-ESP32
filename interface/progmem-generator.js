@@ -61,6 +61,7 @@ const ALL_LOCALES = [
   'de',
   'en',
   'fr',
+  'hu',
   'it',
   'nl',
   'no',

@@ -297,7 +297,8 @@ class EMSESP {
     static constexpr uint8_t  EMS_WAIT_KM_TIMEOUT = 60;    // wait one minute
 
 #ifdef EMSESP_GATEWAY_TX_HOLD
-    // hold our Tx (and poll ACKs, since 19d) while a gateway (K30RF/KM200 on 0x48) is syncing — see #3094
+    // hold our Tx while a gateway (K30RF/KM200 on 0x48) is doing its startup sync, see issue #3094
+    // (still ack our own poll so we stay in 0x07 — muting ACKs in 19d made A21 worse)
     // a startup sync is 55-250 read requests/min to other devices, normal operation is <10/min
     static void gateway_rx_check(const uint8_t * data, const uint8_t length);
     static void gateway_note_activity(); // poll or telegram from 0x48 — re-arm hold if it was silent
