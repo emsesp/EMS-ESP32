@@ -33,8 +33,8 @@
 #include <map>
 
 #include "firmwareVersion.h"
-#include "shuntingYard.h" // for compute() used by the message and sendmail commands
-#include "emsesp_http_client.h"   // for the shared TLS client settings
+#include "shuntingYard.h"       // for compute() used by the message and sendmail commands
+#include "emsesp_http_client.h" // for the shared TLS client settings
 
 #if defined(EMSESP_TEST)
 #include "../test/test.h"

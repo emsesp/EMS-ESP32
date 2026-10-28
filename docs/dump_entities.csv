@@ -5056,18 +5056,18 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FW100",thermostat,105,hc1.program,program,enum [prog a\|prog b\|prog c\|prog d\|prog e\|prog f] (>=0<=0), ,true,select.thermostat_hc1_program,select.thermostat_hc1_program,7,1,1,27,1
 "FW100",thermostat,105,hc1.remotetemp,room temperature from remote,cmd [] (>=-1<=101),C,true,sensor.thermostat_hc1_room_temperature_from_remote,sensor.thermostat_hc1_remotetemp,7,1,1/10,45,1
 "FW100",thermostat,105,hc1.targetflowtemp,target flow temperature,uint8,C,false,sensor.thermostat_hc1_target_flow_temperature,sensor.thermostat_hc1_targetflowtemp,7,1,1,19,1
-"FW100",thermostat,105,hc1.summertemp,summer temperature,uint8 (>=9<=25),C,true,number.thermostat_hc1_summer_temperature,number.thermostat_hc1_summertemp,7,1,1/2,8,1
-"FW100",thermostat,105,hc1.roomsensor,room sensor,enum [extern\|intern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_sensor,select.thermostat_hc1_roomsensor,7,1,1,206,1
 "FW100",thermostat,105,hc1.holidaymode,holiday mode,enum [nofrost\|eco\|heat\|auto] (>=0<=0), ,true,select.thermostat_hc1_holiday_mode,select.thermostat_hc1_holidaymode,7,1,1,66,1
 "FW100",thermostat,105,hc1.switchonoptimization,switch-on optimization,boolean (>=0<=0), ,true,switch.thermostat_hc1_switch-on_optimization,switch.thermostat_hc1_switchonoptimization,7,1,1,33,1
+"FW100",thermostat,105,hc1.maxflowtemp,max flow temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_max_flow_temperature,number.thermostat_hc1_maxflowtemp,7,1,1,13,1
+"FW100",thermostat,105,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM] (>=0<=0), ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,7,1,1,26,1
+"FW100",thermostat,105,hc1.summertemp,summer temperature,uint8 (>=9<=25),C,true,number.thermostat_hc1_summer_temperature,number.thermostat_hc1_summertemp,7,1,1/2,8,1
+"FW100",thermostat,105,hc1.roomsensor,room sensor,enum [extern\|intern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_sensor,select.thermostat_hc1_roomsensor,7,1,1,206,1
 "FW100",thermostat,105,hc1.heatup,heatup,enum [slow\|medium\|fast] (>=0<=0), ,true,select.thermostat_hc1_heatup,select.thermostat_hc1_heatup,7,1,1,207,1
 "FW100",thermostat,105,hc1.minflowtemp,min flow temperature,uint8 (>=5<=70),C,true,number.thermostat_hc1_min_flow_temperature,number.thermostat_hc1_minflowtemp,7,1,1,12,1
-"FW100",thermostat,105,hc1.maxflowtemp,max flow temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_max_flow_temperature,number.thermostat_hc1_maxflowtemp,7,1,1,13,1
 "FW100",thermostat,105,hc1.designtemp,design temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_design_temperature,number.thermostat_hc1_designtemp,7,1,1,9,1
 "FW100",thermostat,105,hc1.roominfluence,room influence,enum [off\|intern\|extern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_influence,select.thermostat_hc1_roominfluence,7,1,1,14,1
 "FW100",thermostat,105,hc1.roominflfactor,room influence factor,uint8 (>=0<=0),%,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,7,1,10,15,1
 "FW100",thermostat,105,hc1.heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor] (>=0<=0), ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,7,1,1,20,1
-"FW100",thermostat,105,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM] (>=0<=0), ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,7,1,1,26,1
 "FW100",thermostat,105,dhw.charge,charge,boolean (>=0<=0), ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,7,9,1,6,1
 "FW200",thermostat,106,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FW200",thermostat,106,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
@@ -5094,18 +5094,18 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FW200",thermostat,106,hc1.program,program,enum [prog a\|prog b\|prog c\|prog d\|prog e\|prog f] (>=0<=0), ,true,select.thermostat_hc1_program,select.thermostat_hc1_program,7,1,1,27,1
 "FW200",thermostat,106,hc1.remotetemp,room temperature from remote,cmd [] (>=-1<=101),C,true,sensor.thermostat_hc1_room_temperature_from_remote,sensor.thermostat_hc1_remotetemp,7,1,1/10,45,1
 "FW200",thermostat,106,hc1.targetflowtemp,target flow temperature,uint8,C,false,sensor.thermostat_hc1_target_flow_temperature,sensor.thermostat_hc1_targetflowtemp,7,1,1,19,1
-"FW200",thermostat,106,hc1.summertemp,summer temperature,uint8 (>=9<=25),C,true,number.thermostat_hc1_summer_temperature,number.thermostat_hc1_summertemp,7,1,1/2,8,1
-"FW200",thermostat,106,hc1.roomsensor,room sensor,enum [extern\|intern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_sensor,select.thermostat_hc1_roomsensor,7,1,1,206,1
 "FW200",thermostat,106,hc1.holidaymode,holiday mode,enum [nofrost\|eco\|heat\|auto] (>=0<=0), ,true,select.thermostat_hc1_holiday_mode,select.thermostat_hc1_holidaymode,7,1,1,66,1
 "FW200",thermostat,106,hc1.switchonoptimization,switch-on optimization,boolean (>=0<=0), ,true,switch.thermostat_hc1_switch-on_optimization,switch.thermostat_hc1_switchonoptimization,7,1,1,33,1
+"FW200",thermostat,106,hc1.maxflowtemp,max flow temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_max_flow_temperature,number.thermostat_hc1_maxflowtemp,7,1,1,13,1
+"FW200",thermostat,106,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM] (>=0<=0), ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,7,1,1,26,1
+"FW200",thermostat,106,hc1.summertemp,summer temperature,uint8 (>=9<=25),C,true,number.thermostat_hc1_summer_temperature,number.thermostat_hc1_summertemp,7,1,1/2,8,1
+"FW200",thermostat,106,hc1.roomsensor,room sensor,enum [extern\|intern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_sensor,select.thermostat_hc1_roomsensor,7,1,1,206,1
 "FW200",thermostat,106,hc1.heatup,heatup,enum [slow\|medium\|fast] (>=0<=0), ,true,select.thermostat_hc1_heatup,select.thermostat_hc1_heatup,7,1,1,207,1
 "FW200",thermostat,106,hc1.minflowtemp,min flow temperature,uint8 (>=5<=70),C,true,number.thermostat_hc1_min_flow_temperature,number.thermostat_hc1_minflowtemp,7,1,1,12,1
-"FW200",thermostat,106,hc1.maxflowtemp,max flow temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_max_flow_temperature,number.thermostat_hc1_maxflowtemp,7,1,1,13,1
 "FW200",thermostat,106,hc1.designtemp,design temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_design_temperature,number.thermostat_hc1_designtemp,7,1,1,9,1
 "FW200",thermostat,106,hc1.roominfluence,room influence,enum [off\|intern\|extern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_influence,select.thermostat_hc1_roominfluence,7,1,1,14,1
 "FW200",thermostat,106,hc1.roominflfactor,room influence factor,uint8 (>=0<=0),%,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,7,1,10,15,1
 "FW200",thermostat,106,hc1.heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor] (>=0<=0), ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,7,1,1,20,1
-"FW200",thermostat,106,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM] (>=0<=0), ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,7,1,1,26,1
 "FW200",thermostat,106,dhw.charge,charge,boolean (>=0<=0), ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,7,9,1,6,1
 "FR100",thermostat,107,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FR100",thermostat,107,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
@@ -5130,18 +5130,12 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FR100",thermostat,107,hc1.program,program,enum [prog a\|prog b\|prog c\|prog d\|prog e\|prog f] (>=0<=0), ,true,select.thermostat_hc1_program,select.thermostat_hc1_program,7,1,1,27,1
 "FR100",thermostat,107,hc1.remotetemp,room temperature from remote,cmd [] (>=-1<=101),C,true,sensor.thermostat_hc1_room_temperature_from_remote,sensor.thermostat_hc1_remotetemp,7,1,1/10,45,1
 "FR100",thermostat,107,hc1.targetflowtemp,target flow temperature,uint8,C,false,sensor.thermostat_hc1_target_flow_temperature,sensor.thermostat_hc1_targetflowtemp,7,1,1,19,1
-"FR100",thermostat,107,hc1.summertemp,summer temperature,uint8 (>=9<=25),C,true,number.thermostat_hc1_summer_temperature,number.thermostat_hc1_summertemp,7,1,1/2,8,1
-"FR100",thermostat,107,hc1.roomsensor,room sensor,enum [extern\|intern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_sensor,select.thermostat_hc1_roomsensor,7,1,1,206,1
 "FR100",thermostat,107,hc1.holidaymode,holiday mode,enum [nofrost\|eco\|heat\|auto] (>=0<=0), ,true,select.thermostat_hc1_holiday_mode,select.thermostat_hc1_holidaymode,7,1,1,66,1
 "FR100",thermostat,107,hc1.switchonoptimization,switch-on optimization,boolean (>=0<=0), ,true,switch.thermostat_hc1_switch-on_optimization,switch.thermostat_hc1_switchonoptimization,7,1,1,33,1
-"FR100",thermostat,107,hc1.heatup,heatup,enum [slow\|medium\|fast] (>=0<=0), ,true,select.thermostat_hc1_heatup,select.thermostat_hc1_heatup,7,1,1,207,1
-"FR100",thermostat,107,hc1.minflowtemp,min flow temperature,uint8 (>=5<=70),C,true,number.thermostat_hc1_min_flow_temperature,number.thermostat_hc1_minflowtemp,7,1,1,12,1
 "FR100",thermostat,107,hc1.maxflowtemp,max flow temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_max_flow_temperature,number.thermostat_hc1_maxflowtemp,7,1,1,13,1
-"FR100",thermostat,107,hc1.designtemp,design temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_design_temperature,number.thermostat_hc1_designtemp,7,1,1,9,1
-"FR100",thermostat,107,hc1.roominfluence,room influence,enum [off\|intern\|extern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_influence,select.thermostat_hc1_roominfluence,7,1,1,14,1
-"FR100",thermostat,107,hc1.roominflfactor,room influence factor,uint8 (>=0<=0),%,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,7,1,10,15,1
-"FR100",thermostat,107,hc1.heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor] (>=0<=0), ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,7,1,1,20,1
 "FR100",thermostat,107,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM] (>=0<=0), ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,7,1,1,26,1
+"FR100",thermostat,107,hc1.adaptfactor,adaptation factor,uint8 (>=0<=100),%,true,number.thermostat_hc1_adaptation_factor,number.thermostat_hc1_adaptfactor,7,1,5,208,1
+"FR100",thermostat,107,hc1.gainfactor,gain factor,uint8 (>=40<=100),%,true,number.thermostat_hc1_gain_factor,number.thermostat_hc1_gainfactor,7,1,5,209,1
 "FR100",thermostat,107,dhw.charge,charge,boolean (>=0<=0), ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,7,9,1,6,1
 "FR110",thermostat,108,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FR110",thermostat,108,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
@@ -5166,18 +5160,12 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FR110",thermostat,108,hc1.program,program,enum [prog a\|prog b\|prog c\|prog d\|prog e\|prog f] (>=0<=0), ,true,select.thermostat_hc1_program,select.thermostat_hc1_program,7,1,1,27,1
 "FR110",thermostat,108,hc1.remotetemp,room temperature from remote,cmd [] (>=-1<=101),C,true,sensor.thermostat_hc1_room_temperature_from_remote,sensor.thermostat_hc1_remotetemp,7,1,1/10,45,1
 "FR110",thermostat,108,hc1.targetflowtemp,target flow temperature,uint8,C,false,sensor.thermostat_hc1_target_flow_temperature,sensor.thermostat_hc1_targetflowtemp,7,1,1,19,1
-"FR110",thermostat,108,hc1.summertemp,summer temperature,uint8 (>=9<=25),C,true,number.thermostat_hc1_summer_temperature,number.thermostat_hc1_summertemp,7,1,1/2,8,1
-"FR110",thermostat,108,hc1.roomsensor,room sensor,enum [extern\|intern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_sensor,select.thermostat_hc1_roomsensor,7,1,1,206,1
 "FR110",thermostat,108,hc1.holidaymode,holiday mode,enum [nofrost\|eco\|heat\|auto] (>=0<=0), ,true,select.thermostat_hc1_holiday_mode,select.thermostat_hc1_holidaymode,7,1,1,66,1
 "FR110",thermostat,108,hc1.switchonoptimization,switch-on optimization,boolean (>=0<=0), ,true,switch.thermostat_hc1_switch-on_optimization,switch.thermostat_hc1_switchonoptimization,7,1,1,33,1
-"FR110",thermostat,108,hc1.heatup,heatup,enum [slow\|medium\|fast] (>=0<=0), ,true,select.thermostat_hc1_heatup,select.thermostat_hc1_heatup,7,1,1,207,1
-"FR110",thermostat,108,hc1.minflowtemp,min flow temperature,uint8 (>=5<=70),C,true,number.thermostat_hc1_min_flow_temperature,number.thermostat_hc1_minflowtemp,7,1,1,12,1
 "FR110",thermostat,108,hc1.maxflowtemp,max flow temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_max_flow_temperature,number.thermostat_hc1_maxflowtemp,7,1,1,13,1
-"FR110",thermostat,108,hc1.designtemp,design temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_design_temperature,number.thermostat_hc1_designtemp,7,1,1,9,1
-"FR110",thermostat,108,hc1.roominfluence,room influence,enum [off\|intern\|extern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_influence,select.thermostat_hc1_roominfluence,7,1,1,14,1
-"FR110",thermostat,108,hc1.roominflfactor,room influence factor,uint8 (>=0<=0),%,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,7,1,10,15,1
-"FR110",thermostat,108,hc1.heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor] (>=0<=0), ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,7,1,1,20,1
 "FR110",thermostat,108,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM] (>=0<=0), ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,7,1,1,26,1
+"FR110",thermostat,108,hc1.adaptfactor,adaptation factor,uint8 (>=0<=100),%,true,number.thermostat_hc1_adaptation_factor,number.thermostat_hc1_adaptfactor,7,1,5,208,1
+"FR110",thermostat,108,hc1.gainfactor,gain factor,uint8 (>=40<=100),%,true,number.thermostat_hc1_gain_factor,number.thermostat_hc1_gainfactor,7,1,5,209,1
 "FR110",thermostat,108,dhw.charge,charge,boolean (>=0<=0), ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,7,9,1,6,1
 "FB10",thermostat,109,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FB10",thermostat,109,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
@@ -5204,18 +5192,18 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FB10",thermostat,109,hc1.program,program,enum [prog a\|prog b\|prog c\|prog d\|prog e\|prog f] (>=0<=0), ,true,select.thermostat_hc1_program,select.thermostat_hc1_program,7,1,1,27,1
 "FB10",thermostat,109,hc1.remotetemp,room temperature from remote,cmd [] (>=-1<=101),C,true,sensor.thermostat_hc1_room_temperature_from_remote,sensor.thermostat_hc1_remotetemp,7,1,1/10,45,1
 "FB10",thermostat,109,hc1.targetflowtemp,target flow temperature,uint8,C,false,sensor.thermostat_hc1_target_flow_temperature,sensor.thermostat_hc1_targetflowtemp,7,1,1,19,1
-"FB10",thermostat,109,hc1.summertemp,summer temperature,uint8 (>=9<=25),C,true,number.thermostat_hc1_summer_temperature,number.thermostat_hc1_summertemp,7,1,1/2,8,1
-"FB10",thermostat,109,hc1.roomsensor,room sensor,enum [extern\|intern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_sensor,select.thermostat_hc1_roomsensor,7,1,1,206,1
 "FB10",thermostat,109,hc1.holidaymode,holiday mode,enum [nofrost\|eco\|heat\|auto] (>=0<=0), ,true,select.thermostat_hc1_holiday_mode,select.thermostat_hc1_holidaymode,7,1,1,66,1
 "FB10",thermostat,109,hc1.switchonoptimization,switch-on optimization,boolean (>=0<=0), ,true,switch.thermostat_hc1_switch-on_optimization,switch.thermostat_hc1_switchonoptimization,7,1,1,33,1
+"FB10",thermostat,109,hc1.maxflowtemp,max flow temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_max_flow_temperature,number.thermostat_hc1_maxflowtemp,7,1,1,13,1
+"FB10",thermostat,109,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM] (>=0<=0), ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,7,1,1,26,1
+"FB10",thermostat,109,hc1.summertemp,summer temperature,uint8 (>=9<=25),C,true,number.thermostat_hc1_summer_temperature,number.thermostat_hc1_summertemp,7,1,1/2,8,1
+"FB10",thermostat,109,hc1.roomsensor,room sensor,enum [extern\|intern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_sensor,select.thermostat_hc1_roomsensor,7,1,1,206,1
 "FB10",thermostat,109,hc1.heatup,heatup,enum [slow\|medium\|fast] (>=0<=0), ,true,select.thermostat_hc1_heatup,select.thermostat_hc1_heatup,7,1,1,207,1
 "FB10",thermostat,109,hc1.minflowtemp,min flow temperature,uint8 (>=5<=70),C,true,number.thermostat_hc1_min_flow_temperature,number.thermostat_hc1_minflowtemp,7,1,1,12,1
-"FB10",thermostat,109,hc1.maxflowtemp,max flow temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_max_flow_temperature,number.thermostat_hc1_maxflowtemp,7,1,1,13,1
 "FB10",thermostat,109,hc1.designtemp,design temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_design_temperature,number.thermostat_hc1_designtemp,7,1,1,9,1
 "FB10",thermostat,109,hc1.roominfluence,room influence,enum [off\|intern\|extern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_influence,select.thermostat_hc1_roominfluence,7,1,1,14,1
 "FB10",thermostat,109,hc1.roominflfactor,room influence factor,uint8 (>=0<=0),%,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,7,1,10,15,1
 "FB10",thermostat,109,hc1.heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor] (>=0<=0), ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,7,1,1,20,1
-"FB10",thermostat,109,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM] (>=0<=0), ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,7,1,1,26,1
 "FB10",thermostat,109,dhw.charge,charge,boolean (>=0<=0), ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,7,9,1,6,1
 "FB100",thermostat,110,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FB100",thermostat,110,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
@@ -5242,18 +5230,18 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FB100",thermostat,110,hc1.program,program,enum [prog a\|prog b\|prog c\|prog d\|prog e\|prog f] (>=0<=0), ,true,select.thermostat_hc1_program,select.thermostat_hc1_program,7,1,1,27,1
 "FB100",thermostat,110,hc1.remotetemp,room temperature from remote,cmd [] (>=-1<=101),C,true,sensor.thermostat_hc1_room_temperature_from_remote,sensor.thermostat_hc1_remotetemp,7,1,1/10,45,1
 "FB100",thermostat,110,hc1.targetflowtemp,target flow temperature,uint8,C,false,sensor.thermostat_hc1_target_flow_temperature,sensor.thermostat_hc1_targetflowtemp,7,1,1,19,1
-"FB100",thermostat,110,hc1.summertemp,summer temperature,uint8 (>=9<=25),C,true,number.thermostat_hc1_summer_temperature,number.thermostat_hc1_summertemp,7,1,1/2,8,1
-"FB100",thermostat,110,hc1.roomsensor,room sensor,enum [extern\|intern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_sensor,select.thermostat_hc1_roomsensor,7,1,1,206,1
 "FB100",thermostat,110,hc1.holidaymode,holiday mode,enum [nofrost\|eco\|heat\|auto] (>=0<=0), ,true,select.thermostat_hc1_holiday_mode,select.thermostat_hc1_holidaymode,7,1,1,66,1
 "FB100",thermostat,110,hc1.switchonoptimization,switch-on optimization,boolean (>=0<=0), ,true,switch.thermostat_hc1_switch-on_optimization,switch.thermostat_hc1_switchonoptimization,7,1,1,33,1
+"FB100",thermostat,110,hc1.maxflowtemp,max flow temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_max_flow_temperature,number.thermostat_hc1_maxflowtemp,7,1,1,13,1
+"FB100",thermostat,110,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM] (>=0<=0), ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,7,1,1,26,1
+"FB100",thermostat,110,hc1.summertemp,summer temperature,uint8 (>=9<=25),C,true,number.thermostat_hc1_summer_temperature,number.thermostat_hc1_summertemp,7,1,1/2,8,1
+"FB100",thermostat,110,hc1.roomsensor,room sensor,enum [extern\|intern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_sensor,select.thermostat_hc1_roomsensor,7,1,1,206,1
 "FB100",thermostat,110,hc1.heatup,heatup,enum [slow\|medium\|fast] (>=0<=0), ,true,select.thermostat_hc1_heatup,select.thermostat_hc1_heatup,7,1,1,207,1
 "FB100",thermostat,110,hc1.minflowtemp,min flow temperature,uint8 (>=5<=70),C,true,number.thermostat_hc1_min_flow_temperature,number.thermostat_hc1_minflowtemp,7,1,1,12,1
-"FB100",thermostat,110,hc1.maxflowtemp,max flow temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_max_flow_temperature,number.thermostat_hc1_maxflowtemp,7,1,1,13,1
 "FB100",thermostat,110,hc1.designtemp,design temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_design_temperature,number.thermostat_hc1_designtemp,7,1,1,9,1
 "FB100",thermostat,110,hc1.roominfluence,room influence,enum [off\|intern\|extern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_influence,select.thermostat_hc1_roominfluence,7,1,1,14,1
 "FB100",thermostat,110,hc1.roominflfactor,room influence factor,uint8 (>=0<=0),%,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,7,1,10,15,1
 "FB100",thermostat,110,hc1.heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor] (>=0<=0), ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,7,1,1,20,1
-"FB100",thermostat,110,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM] (>=0<=0), ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,7,1,1,26,1
 "FB100",thermostat,110,dhw.charge,charge,boolean (>=0<=0), ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,7,9,1,6,1
 "FR10",thermostat,111,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FR10",thermostat,111,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
@@ -5278,18 +5266,12 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FR10",thermostat,111,hc1.program,program,enum [prog a\|prog b\|prog c\|prog d\|prog e\|prog f] (>=0<=0), ,true,select.thermostat_hc1_program,select.thermostat_hc1_program,7,1,1,27,1
 "FR10",thermostat,111,hc1.remotetemp,room temperature from remote,cmd [] (>=-1<=101),C,true,sensor.thermostat_hc1_room_temperature_from_remote,sensor.thermostat_hc1_remotetemp,7,1,1/10,45,1
 "FR10",thermostat,111,hc1.targetflowtemp,target flow temperature,uint8,C,false,sensor.thermostat_hc1_target_flow_temperature,sensor.thermostat_hc1_targetflowtemp,7,1,1,19,1
-"FR10",thermostat,111,hc1.summertemp,summer temperature,uint8 (>=9<=25),C,true,number.thermostat_hc1_summer_temperature,number.thermostat_hc1_summertemp,7,1,1/2,8,1
-"FR10",thermostat,111,hc1.roomsensor,room sensor,enum [extern\|intern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_sensor,select.thermostat_hc1_roomsensor,7,1,1,206,1
 "FR10",thermostat,111,hc1.holidaymode,holiday mode,enum [nofrost\|eco\|heat\|auto] (>=0<=0), ,true,select.thermostat_hc1_holiday_mode,select.thermostat_hc1_holidaymode,7,1,1,66,1
 "FR10",thermostat,111,hc1.switchonoptimization,switch-on optimization,boolean (>=0<=0), ,true,switch.thermostat_hc1_switch-on_optimization,switch.thermostat_hc1_switchonoptimization,7,1,1,33,1
-"FR10",thermostat,111,hc1.heatup,heatup,enum [slow\|medium\|fast] (>=0<=0), ,true,select.thermostat_hc1_heatup,select.thermostat_hc1_heatup,7,1,1,207,1
-"FR10",thermostat,111,hc1.minflowtemp,min flow temperature,uint8 (>=5<=70),C,true,number.thermostat_hc1_min_flow_temperature,number.thermostat_hc1_minflowtemp,7,1,1,12,1
 "FR10",thermostat,111,hc1.maxflowtemp,max flow temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_max_flow_temperature,number.thermostat_hc1_maxflowtemp,7,1,1,13,1
-"FR10",thermostat,111,hc1.designtemp,design temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_design_temperature,number.thermostat_hc1_designtemp,7,1,1,9,1
-"FR10",thermostat,111,hc1.roominfluence,room influence,enum [off\|intern\|extern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_influence,select.thermostat_hc1_roominfluence,7,1,1,14,1
-"FR10",thermostat,111,hc1.roominflfactor,room influence factor,uint8 (>=0<=0),%,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,7,1,10,15,1
-"FR10",thermostat,111,hc1.heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor] (>=0<=0), ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,7,1,1,20,1
 "FR10",thermostat,111,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM] (>=0<=0), ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,7,1,1,26,1
+"FR10",thermostat,111,hc1.adaptfactor,adaptation factor,uint8 (>=0<=100),%,true,number.thermostat_hc1_adaptation_factor,number.thermostat_hc1_adaptfactor,7,1,5,208,1
+"FR10",thermostat,111,hc1.gainfactor,gain factor,uint8 (>=40<=100),%,true,number.thermostat_hc1_gain_factor,number.thermostat_hc1_gainfactor,7,1,5,209,1
 "FR10",thermostat,111,dhw.charge,charge,boolean (>=0<=0), ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,7,9,1,6,1
 "FW500",thermostat,116,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FW500",thermostat,116,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
@@ -5316,18 +5298,18 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FW500",thermostat,116,hc1.program,program,enum [prog a\|prog b\|prog c\|prog d\|prog e\|prog f] (>=0<=0), ,true,select.thermostat_hc1_program,select.thermostat_hc1_program,7,1,1,27,1
 "FW500",thermostat,116,hc1.remotetemp,room temperature from remote,cmd [] (>=-1<=101),C,true,sensor.thermostat_hc1_room_temperature_from_remote,sensor.thermostat_hc1_remotetemp,7,1,1/10,45,1
 "FW500",thermostat,116,hc1.targetflowtemp,target flow temperature,uint8,C,false,sensor.thermostat_hc1_target_flow_temperature,sensor.thermostat_hc1_targetflowtemp,7,1,1,19,1
-"FW500",thermostat,116,hc1.summertemp,summer temperature,uint8 (>=9<=25),C,true,number.thermostat_hc1_summer_temperature,number.thermostat_hc1_summertemp,7,1,1/2,8,1
-"FW500",thermostat,116,hc1.roomsensor,room sensor,enum [extern\|intern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_sensor,select.thermostat_hc1_roomsensor,7,1,1,206,1
 "FW500",thermostat,116,hc1.holidaymode,holiday mode,enum [nofrost\|eco\|heat\|auto] (>=0<=0), ,true,select.thermostat_hc1_holiday_mode,select.thermostat_hc1_holidaymode,7,1,1,66,1
 "FW500",thermostat,116,hc1.switchonoptimization,switch-on optimization,boolean (>=0<=0), ,true,switch.thermostat_hc1_switch-on_optimization,switch.thermostat_hc1_switchonoptimization,7,1,1,33,1
+"FW500",thermostat,116,hc1.maxflowtemp,max flow temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_max_flow_temperature,number.thermostat_hc1_maxflowtemp,7,1,1,13,1
+"FW500",thermostat,116,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM] (>=0<=0), ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,7,1,1,26,1
+"FW500",thermostat,116,hc1.summertemp,summer temperature,uint8 (>=9<=25),C,true,number.thermostat_hc1_summer_temperature,number.thermostat_hc1_summertemp,7,1,1/2,8,1
+"FW500",thermostat,116,hc1.roomsensor,room sensor,enum [extern\|intern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_sensor,select.thermostat_hc1_roomsensor,7,1,1,206,1
 "FW500",thermostat,116,hc1.heatup,heatup,enum [slow\|medium\|fast] (>=0<=0), ,true,select.thermostat_hc1_heatup,select.thermostat_hc1_heatup,7,1,1,207,1
 "FW500",thermostat,116,hc1.minflowtemp,min flow temperature,uint8 (>=5<=70),C,true,number.thermostat_hc1_min_flow_temperature,number.thermostat_hc1_minflowtemp,7,1,1,12,1
-"FW500",thermostat,116,hc1.maxflowtemp,max flow temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_max_flow_temperature,number.thermostat_hc1_maxflowtemp,7,1,1,13,1
 "FW500",thermostat,116,hc1.designtemp,design temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_design_temperature,number.thermostat_hc1_designtemp,7,1,1,9,1
 "FW500",thermostat,116,hc1.roominfluence,room influence,enum [off\|intern\|extern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_influence,select.thermostat_hc1_roominfluence,7,1,1,14,1
 "FW500",thermostat,116,hc1.roominflfactor,room influence factor,uint8 (>=0<=0),%,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,7,1,10,15,1
 "FW500",thermostat,116,hc1.heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor] (>=0<=0), ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,7,1,1,20,1
-"FW500",thermostat,116,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM] (>=0<=0), ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,7,1,1,26,1
 "FW500",thermostat,116,dhw.charge,charge,boolean (>=0<=0), ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,7,9,1,6,1
 "FR50",thermostat,147,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FR50",thermostat,147,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
@@ -5352,18 +5334,12 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FR50",thermostat,147,hc1.program,program,enum [prog a\|prog b\|prog c\|prog d\|prog e\|prog f] (>=0<=0), ,true,select.thermostat_hc1_program,select.thermostat_hc1_program,7,1,1,27,1
 "FR50",thermostat,147,hc1.remotetemp,room temperature from remote,cmd [] (>=-1<=101),C,true,sensor.thermostat_hc1_room_temperature_from_remote,sensor.thermostat_hc1_remotetemp,7,1,1/10,45,1
 "FR50",thermostat,147,hc1.targetflowtemp,target flow temperature,uint8,C,false,sensor.thermostat_hc1_target_flow_temperature,sensor.thermostat_hc1_targetflowtemp,7,1,1,19,1
-"FR50",thermostat,147,hc1.summertemp,summer temperature,uint8 (>=9<=25),C,true,number.thermostat_hc1_summer_temperature,number.thermostat_hc1_summertemp,7,1,1/2,8,1
-"FR50",thermostat,147,hc1.roomsensor,room sensor,enum [extern\|intern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_sensor,select.thermostat_hc1_roomsensor,7,1,1,206,1
 "FR50",thermostat,147,hc1.holidaymode,holiday mode,enum [nofrost\|eco\|heat\|auto] (>=0<=0), ,true,select.thermostat_hc1_holiday_mode,select.thermostat_hc1_holidaymode,7,1,1,66,1
 "FR50",thermostat,147,hc1.switchonoptimization,switch-on optimization,boolean (>=0<=0), ,true,switch.thermostat_hc1_switch-on_optimization,switch.thermostat_hc1_switchonoptimization,7,1,1,33,1
-"FR50",thermostat,147,hc1.heatup,heatup,enum [slow\|medium\|fast] (>=0<=0), ,true,select.thermostat_hc1_heatup,select.thermostat_hc1_heatup,7,1,1,207,1
-"FR50",thermostat,147,hc1.minflowtemp,min flow temperature,uint8 (>=5<=70),C,true,number.thermostat_hc1_min_flow_temperature,number.thermostat_hc1_minflowtemp,7,1,1,12,1
 "FR50",thermostat,147,hc1.maxflowtemp,max flow temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_max_flow_temperature,number.thermostat_hc1_maxflowtemp,7,1,1,13,1
-"FR50",thermostat,147,hc1.designtemp,design temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_design_temperature,number.thermostat_hc1_designtemp,7,1,1,9,1
-"FR50",thermostat,147,hc1.roominfluence,room influence,enum [off\|intern\|extern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_influence,select.thermostat_hc1_roominfluence,7,1,1,14,1
-"FR50",thermostat,147,hc1.roominflfactor,room influence factor,uint8 (>=0<=0),%,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,7,1,10,15,1
-"FR50",thermostat,147,hc1.heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor] (>=0<=0), ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,7,1,1,20,1
 "FR50",thermostat,147,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM] (>=0<=0), ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,7,1,1,26,1
+"FR50",thermostat,147,hc1.adaptfactor,adaptation factor,uint8 (>=0<=100),%,true,number.thermostat_hc1_adaptation_factor,number.thermostat_hc1_adaptfactor,7,1,5,208,1
+"FR50",thermostat,147,hc1.gainfactor,gain factor,uint8 (>=40<=100),%,true,number.thermostat_hc1_gain_factor,number.thermostat_hc1_gainfactor,7,1,5,209,1
 "FR50",thermostat,147,dhw.charge,charge,boolean (>=0<=0), ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,7,9,1,6,1
 "FR120",thermostat,191,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FR120",thermostat,191,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
@@ -5388,18 +5364,12 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FR120",thermostat,191,hc1.program,program,enum [prog a\|prog b\|prog c\|prog d\|prog e\|prog f] (>=0<=0), ,true,select.thermostat_hc1_program,select.thermostat_hc1_program,7,1,1,27,1
 "FR120",thermostat,191,hc1.remotetemp,room temperature from remote,cmd [] (>=-1<=101),C,true,sensor.thermostat_hc1_room_temperature_from_remote,sensor.thermostat_hc1_remotetemp,7,1,1/10,45,1
 "FR120",thermostat,191,hc1.targetflowtemp,target flow temperature,uint8,C,false,sensor.thermostat_hc1_target_flow_temperature,sensor.thermostat_hc1_targetflowtemp,7,1,1,19,1
-"FR120",thermostat,191,hc1.summertemp,summer temperature,uint8 (>=9<=25),C,true,number.thermostat_hc1_summer_temperature,number.thermostat_hc1_summertemp,7,1,1/2,8,1
-"FR120",thermostat,191,hc1.roomsensor,room sensor,enum [extern\|intern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_sensor,select.thermostat_hc1_roomsensor,7,1,1,206,1
 "FR120",thermostat,191,hc1.holidaymode,holiday mode,enum [nofrost\|eco\|heat\|auto] (>=0<=0), ,true,select.thermostat_hc1_holiday_mode,select.thermostat_hc1_holidaymode,7,1,1,66,1
 "FR120",thermostat,191,hc1.switchonoptimization,switch-on optimization,boolean (>=0<=0), ,true,switch.thermostat_hc1_switch-on_optimization,switch.thermostat_hc1_switchonoptimization,7,1,1,33,1
-"FR120",thermostat,191,hc1.heatup,heatup,enum [slow\|medium\|fast] (>=0<=0), ,true,select.thermostat_hc1_heatup,select.thermostat_hc1_heatup,7,1,1,207,1
-"FR120",thermostat,191,hc1.minflowtemp,min flow temperature,uint8 (>=5<=70),C,true,number.thermostat_hc1_min_flow_temperature,number.thermostat_hc1_minflowtemp,7,1,1,12,1
 "FR120",thermostat,191,hc1.maxflowtemp,max flow temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_max_flow_temperature,number.thermostat_hc1_maxflowtemp,7,1,1,13,1
-"FR120",thermostat,191,hc1.designtemp,design temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_design_temperature,number.thermostat_hc1_designtemp,7,1,1,9,1
-"FR120",thermostat,191,hc1.roominfluence,room influence,enum [off\|intern\|extern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_influence,select.thermostat_hc1_roominfluence,7,1,1,14,1
-"FR120",thermostat,191,hc1.roominflfactor,room influence factor,uint8 (>=0<=0),%,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,7,1,10,15,1
-"FR120",thermostat,191,hc1.heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor] (>=0<=0), ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,7,1,1,20,1
 "FR120",thermostat,191,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM] (>=0<=0), ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,7,1,1,26,1
+"FR120",thermostat,191,hc1.adaptfactor,adaptation factor,uint8 (>=0<=100),%,true,number.thermostat_hc1_adaptation_factor,number.thermostat_hc1_adaptfactor,7,1,5,208,1
+"FR120",thermostat,191,hc1.gainfactor,gain factor,uint8 (>=40<=100),%,true,number.thermostat_hc1_gain_factor,number.thermostat_hc1_gainfactor,7,1,5,209,1
 "FR120",thermostat,191,dhw.charge,charge,boolean (>=0<=0), ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,7,9,1,6,1
 "FW120",thermostat,192,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FW120",thermostat,192,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
@@ -5426,18 +5396,18 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FW120",thermostat,192,hc1.program,program,enum [prog a\|prog b\|prog c\|prog d\|prog e\|prog f] (>=0<=0), ,true,select.thermostat_hc1_program,select.thermostat_hc1_program,7,1,1,27,1
 "FW120",thermostat,192,hc1.remotetemp,room temperature from remote,cmd [] (>=-1<=101),C,true,sensor.thermostat_hc1_room_temperature_from_remote,sensor.thermostat_hc1_remotetemp,7,1,1/10,45,1
 "FW120",thermostat,192,hc1.targetflowtemp,target flow temperature,uint8,C,false,sensor.thermostat_hc1_target_flow_temperature,sensor.thermostat_hc1_targetflowtemp,7,1,1,19,1
-"FW120",thermostat,192,hc1.summertemp,summer temperature,uint8 (>=9<=25),C,true,number.thermostat_hc1_summer_temperature,number.thermostat_hc1_summertemp,7,1,1/2,8,1
-"FW120",thermostat,192,hc1.roomsensor,room sensor,enum [extern\|intern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_sensor,select.thermostat_hc1_roomsensor,7,1,1,206,1
 "FW120",thermostat,192,hc1.holidaymode,holiday mode,enum [nofrost\|eco\|heat\|auto] (>=0<=0), ,true,select.thermostat_hc1_holiday_mode,select.thermostat_hc1_holidaymode,7,1,1,66,1
 "FW120",thermostat,192,hc1.switchonoptimization,switch-on optimization,boolean (>=0<=0), ,true,switch.thermostat_hc1_switch-on_optimization,switch.thermostat_hc1_switchonoptimization,7,1,1,33,1
+"FW120",thermostat,192,hc1.maxflowtemp,max flow temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_max_flow_temperature,number.thermostat_hc1_maxflowtemp,7,1,1,13,1
+"FW120",thermostat,192,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM] (>=0<=0), ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,7,1,1,26,1
+"FW120",thermostat,192,hc1.summertemp,summer temperature,uint8 (>=9<=25),C,true,number.thermostat_hc1_summer_temperature,number.thermostat_hc1_summertemp,7,1,1/2,8,1
+"FW120",thermostat,192,hc1.roomsensor,room sensor,enum [extern\|intern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_sensor,select.thermostat_hc1_roomsensor,7,1,1,206,1
 "FW120",thermostat,192,hc1.heatup,heatup,enum [slow\|medium\|fast] (>=0<=0), ,true,select.thermostat_hc1_heatup,select.thermostat_hc1_heatup,7,1,1,207,1
 "FW120",thermostat,192,hc1.minflowtemp,min flow temperature,uint8 (>=5<=70),C,true,number.thermostat_hc1_min_flow_temperature,number.thermostat_hc1_minflowtemp,7,1,1,12,1
-"FW120",thermostat,192,hc1.maxflowtemp,max flow temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_max_flow_temperature,number.thermostat_hc1_maxflowtemp,7,1,1,13,1
 "FW120",thermostat,192,hc1.designtemp,design temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_design_temperature,number.thermostat_hc1_designtemp,7,1,1,9,1
 "FW120",thermostat,192,hc1.roominfluence,room influence,enum [off\|intern\|extern\|auto] (>=0<=0), ,true,select.thermostat_hc1_room_influence,select.thermostat_hc1_roominfluence,7,1,1,14,1
 "FW120",thermostat,192,hc1.roominflfactor,room influence factor,uint8 (>=0<=0),%,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,7,1,10,15,1
 "FW120",thermostat,192,hc1.heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor] (>=0<=0), ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,7,1,1,20,1
-"FW120",thermostat,192,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM] (>=0<=0), ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,7,1,1,26,1
 "FW120",thermostat,192,dhw.charge,charge,boolean (>=0<=0), ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,7,9,1,6,1
 "RT800, RC220",thermostat,3,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "RT800, RC220",thermostat,3,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25

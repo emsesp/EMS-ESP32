@@ -1361,3 +1361,6 @@ crashtest
 otadata
 merase
 Seeed
+Anpassungsfaktor
+Verstärkungsfaktor
+Fachmann
