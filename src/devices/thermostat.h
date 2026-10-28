@@ -63,6 +63,8 @@ class Thermostat : public EMSdevice {
         uint8_t hpoperatingstate;
         uint8_t roominfluence;
         uint8_t roominfl_factor;
+        uint8_t adaptfactor; // FR100/FR120 Anpassungsfaktor I, byte * 5 = %
+        uint8_t gainfactor;  // FR100/FR120 Verstärkungsfaktor V, byte * 5 = %
         int16_t curroominfl;
         uint8_t flowtempoffset;
         uint8_t minflowtemp;
@@ -521,6 +523,13 @@ class Thermostat : public EMSdevice {
     bool set_remotehum(const char * value, const int8_t id);
     bool set_roominfl_factor(const char * value, const int8_t id);
     bool set_roominfl_mode(const char * value, const int8_t id);
+    bool set_junkers_factor(const char * value, const int8_t id, const uint8_t offset, const int min_percent);
+    inline bool set_adaptfactor(const char * value, const int8_t id) {
+        return set_junkers_factor(value, id, 1, 0); // Anpassungsfaktor I, 0..100%
+    }
+    inline bool set_gainfactor(const char * value, const int8_t id) {
+        return set_junkers_factor(value, id, 2, 40); // Verstärkungsfaktor V, 40..100%
+    }
     bool set_reducemode(const char * value, const int8_t id);
     bool set_switchtime1(const char * value, const int8_t id);
     bool set_switchtime2(const char * value, const int8_t id);
