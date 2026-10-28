@@ -274,6 +274,8 @@ class Thermostat : public EMSdevice {
     // Installation parameters
     uint8_t ibaMainDisplay_; // display on Thermostat: 0 int temp, 1 int setpoint, 2 ext temp, 3 burner temp, 4 ww temp, 5 functioning mode, 6 time, 7 data, 9 smoke temp
     uint8_t ibaLanguage_;          // language on Thermostat: 0 german, 1 dutch, 2 french, 3 italian
+    uint8_t ibaDateFormat_;        // Junkers: date format: 0 DD.MM.YYYY, 1 MM/DD/YYYY
+    uint8_t ibaContrast_;          // Junkers: display contrast, raw value 10..30 (= 25..75 % in steps of 2.5)
     int8_t  ibaCalIntTemperature_; // offset int. temperature sensor, by * 0.1 Kelvin (-5.0 to 5.0K)
     int8_t  ibaMinExtTemperature_; // min ext temp for heating curve, in deg., 0xF6=-10, 0x0 = 0, 0xFF=-1
     uint8_t ibaBuildingType_;      // building type: 0 = light, 1 = medium, 2 = heavy
@@ -712,6 +714,8 @@ class Thermostat : public EMSdevice {
     bool set_clockoffset(const char * value, const int8_t id);
     bool set_calinttemp(const char * value, const int8_t id);
     bool set_display(const char * value, const int8_t id);
+    bool set_dateformat(const char * value, const int8_t id);
+    bool set_contrast(const char * value, const int8_t id);
     bool set_building(const char * value, const int8_t id);
     bool set_damping(const char * value, const int8_t id);
     bool set_solar(const char * value, const int8_t id);
