@@ -4,6 +4,7 @@ import type { CSSProperties } from 'react';
 
 import { MenuItem, TextField } from '@mui/material';
 
+import HUflag from 'i18n/HU.svg';
 import CZflag from 'i18n/CS.svg';
 import DEflag from 'i18n/DE.svg';
 import FRflag from 'i18n/FR.svg';
@@ -28,6 +29,7 @@ interface LanguageOption {
 }
 
 const LANGUAGE_OPTIONS: LanguageOption[] = [
+  { key: 'hu', flag: HUflag, label: 'HU' },
   { key: 'cs', flag: CZflag, label: 'CS' },
   { key: 'de', flag: DEflag, label: 'DE' },
   { key: 'en', flag: GBflag, label: 'EN' },
