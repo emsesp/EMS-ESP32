@@ -1803,10 +1803,13 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 #endif
         // check for poll to us, if so send top message from Tx queue immediately and quit
 #ifdef EMSESP_GATEWAY_TX_HOLD
-        // while the gateway is syncing, mute ALL Tx including poll ACKs (#3094 19d).
-        // 19c still A21'd with ACK-only traffic; this tests whether that was enough to break HomeCom.
-        // risk: master may drop us from 0x07 while held — expect that in the log/status.
+        // while the gateway is syncing, don't Tx anything (including Roomctrl) — only ack our own poll
+        // so the master keeps us in 0x07 and the gateway doesn't see the device list change
+        // (19d muted ACKs too; A21 was worse and never self-healed — back to 19c behaviour)
         if (gateway_tx_hold()) {
+            if (poll_id == EMSbus::ems_bus_id()) {
+                txservice_.send_poll();
+            }
             return;
         }
 #endif
@@ -1868,9 +1871,7 @@ void EMSESP::scheduled_fetch_values() {
 void EMSESP::gateway_note_activity() {
     uint32_t now = uuid::get_uptime();
     if (gateway_last_seen_ && (now - gateway_last_seen_ > GATEWAY_SILENCE_MS)) {
-        LOG_INFO("Gateway 0x%02X returned after %lu s silence, holding Tx (incl. poll ACK)",
-                 EMSdevice::EMS_DEVICE_ID_GATEWAY1,
-                 (unsigned long)((now - gateway_last_seen_) / 1000));
+        LOG_INFO("Gateway 0x%02X returned after %lu s silence, holding Tx", EMSdevice::EMS_DEVICE_ID_GATEWAY1, (unsigned long)((now - gateway_last_seen_) / 1000));
         if (!gateway_hold_until_) {
             gateway_hold_start_   = now;
             gateway_hold_max_log_ = 0;
@@ -1925,7 +1926,7 @@ void EMSESP::gateway_tx_hold_start() {
     if (!gateway_hold_until_) {
         gateway_hold_start_   = now;
         gateway_hold_max_log_ = 0;
-        LOG_INFO("Gateway 0x%02X is busy, holding Tx (incl. poll ACK)", EMSdevice::EMS_DEVICE_ID_GATEWAY1);
+        LOG_INFO("Gateway 0x%02X is busy, holding Tx", EMSdevice::EMS_DEVICE_ID_GATEWAY1);
     }
 
     gateway_hold_until_ = (now + GATEWAY_HOLD_TIME) | 1; // 0 means no hold
