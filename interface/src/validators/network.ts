@@ -15,9 +15,7 @@ const OPTIONAL_IP_VALIDATOR = [IP_ADDRESS_VALIDATOR];
 const createStaticIpRules = () => ({
   local_ip: REQUIRED_IP_VALIDATOR('Local IP'),
   gateway_ip: REQUIRED_IP_VALIDATOR('Gateway IP'),
-  subnet_mask: REQUIRED_IP_VALIDATOR('Subnet mask'),
-  dns_ip_1: OPTIONAL_IP_VALIDATOR,
-  dns_ip_2: OPTIONAL_IP_VALIDATOR
+  subnet_mask: REQUIRED_IP_VALIDATOR('Subnet mask')
 });
 
 export const createNetworkSettingsValidator = (
@@ -45,5 +43,8 @@ export const createNetworkSettingsValidator = (
       { required: true, message: 'Hostname is required' },
       HOSTNAME_VALIDATOR
     ],
+    // DNS servers are optional and also apply as an override when using DHCP
+    dns_ip_1: OPTIONAL_IP_VALIDATOR,
+    dns_ip_2: OPTIONAL_IP_VALIDATOR,
     ...(networkSettings.static_ip_config && createStaticIpRules())
   });

@@ -324,7 +324,8 @@ MAKE_ENUM(enum_pumpMode2, FL_(pumpstep), FL_(consthigh), FL_(constmed), FL_(cons
 
 // thermostat lists
 MAKE_ENUM(enum_ibaMainDisplay, FL_(internal_temperature), FL_(internal_setpoint), FL_(external_temperature), FL_(burner_temperature), FL_(ww_temperature), FL_(functioning_mode), FL_(time), FL_(date), FL_(smoke_temperature))
-MAKE_ENUM(enum_ibaMainDisplayJ, FL_(ww_temperature), FL_(date), FL_(external_temperature))
+MAKE_ENUM(enum_ibaMainDisplayJ, FL_(ww_temperature), FL_(date), FL_(external_temperature), FL_(BLANK), FL_(BLANK), FL_(internal_setpoint))
+MAKE_ENUM(enum_ibaDateFormatJ, FL_(dateformat_ddmmyyyy), FL_(dateformat_mmddyyyy))
 MAKE_ENUM(enum_ibaLanguage, FL_(german), FL_(dutch), FL_(french), FL_(italian))
 MAKE_ENUM(enum_ibaLanguageJ, FL_(german), FL_(italian), FL_(french), FL_(dutch))
 MAKE_ENUM(enum_ibaLanguage_RC30, FL_(german), FL_(dutch))

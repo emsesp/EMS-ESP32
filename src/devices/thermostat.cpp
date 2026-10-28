@@ -1147,8 +1147,10 @@ void Thermostat::process_JunkersWW(const std::shared_ptr<const Telegram> & teleg
 
 // 0x11E
 void Thermostat::process_JunkersDisp(const std::shared_ptr<const Telegram> & telegram) {
-    has_enumupdate(telegram, ibaMainDisplay_, 1, 1);
+    has_update(telegram, ibaContrast_, 0);          // raw 10..30, factor 2.5 => 25..75 %
+    has_enumupdate(telegram, ibaMainDisplay_, 1, 1); // 1=ww temp, 2=date, 3=ext temp, 6=set room temp
     has_update(telegram, ibaLanguage_, 3);
+    has_enumupdate(telegram, ibaDateFormat_, 5, 1); // 1=DD.MM.YYYY, 2=MM/DD/YYYY
     has_update(telegram, ibaMinExtTemperature_, 16);
     has_update(telegram, ibaBuildingType_, 17); // percent /10
 }
@@ -2263,6 +2265,28 @@ bool Thermostat::set_display(const char * value, const int8_t id) {
     }
 
     return false;
+}
+
+// 0x11E - Junkers date format
+bool Thermostat::set_dateformat(const char * value, const int8_t id) {
+    uint8_t df;
+    if (!Helpers::value2enum(value, df, FL_(enum_ibaDateFormatJ))) {
+        return false;
+    }
+
+    write_command(0x11E, 5, df + 1, 0x11E);
+    return true;
+}
+
+// 0x11E - Junkers display contrast, raw value 10..30 (= 25..75 %)
+bool Thermostat::set_contrast(const char * value, const int8_t id) {
+    int ct;
+    if (!Helpers::value2number(value, ct, 10, 30)) {
+        return false;
+    }
+
+    write_command(0x11E, 0, ct, 0x11E);
+    return true;
 }
 
 // 0xA7 - Set Screen brightness
@@ -5277,6 +5301,19 @@ void Thermostat::register_device_values() {
                                   FL_(ibaLanguage),
                                   DeviceValueUOM::NONE,
                                   MAKE_CF_CB(set_language));
+            register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                                  &ibaDateFormat_,
+                                  DeviceValueType::ENUM,
+                                  FL_(enum_ibaDateFormatJ),
+                                  FL_(ibaDateFormat),
+                                  DeviceValueUOM::NONE,
+                                  MAKE_CF_CB(set_dateformat));
+            register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                                  &ibaContrast_,
+                                  DeviceValueType::UINT8,
+                                  FL_(ibaContrast),
+                                  DeviceValueUOM::NONE,
+                                  MAKE_CF_CB(set_contrast));
         }
 
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
