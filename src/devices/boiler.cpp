@@ -524,6 +524,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(meterEHeat),
                               DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &meterEHeatHeat_,
+                              DeviceValueType::UINT24,
+                              DeviceValueNumOp::DV_NUMOP_DIV100,
+                              FL_(meterEHeatHeat),
+                              DeviceValueUOM::KWH);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &meterHeat_,
                               DeviceValueType::UINT24,
                               DeviceValueNumOp::DV_NUMOP_DIV100,
@@ -536,6 +542,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(meterCool),
                               DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DHW1, &meterWw_, DeviceValueType::UINT24, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(meterWw), DeviceValueUOM::KWH);
+        register_device_value(DeviceValueTAG::TAG_DHW1,
+                              &meterEHeatWw_,
+                              DeviceValueType::UINT24,
+                              DeviceValueNumOp::DV_NUMOP_DIV100,
+                              FL_(meterEHeatWw),
+                              DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &upTimeTotal_,
                               DeviceValueType::TIME,
@@ -2311,7 +2323,9 @@ void Boiler::process_HpMeters(const std::shared_ptr<const Telegram> & telegram) 
     has_update(telegram, meterComp_, 4);
     has_update(telegram, meterEHeat_, 8);
     has_update(telegram, meterHeat_, 24);
+    has_update(telegram, meterEHeatHeat_, 28);
     has_update(telegram, meterWw_, 32);
+    has_update(telegram, meterEHeatWw_, 36);
     has_update(telegram, meterCool_, 40);
 }
 

@@ -239,6 +239,8 @@ class Boiler : public EMSdevice {
     uint32_t meterTotal_;
     uint32_t meterComp_;
     uint32_t meterEHeat_;
+    uint32_t meterEHeatHeat_;
+    uint32_t meterEHeatWw_;
     uint32_t meterHeat_;
     uint32_t meterWw_;
     uint32_t meterCool_;
