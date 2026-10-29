@@ -12,7 +12,7 @@ const hu: Translation = {
   SETTINGS_OF: '{0} beállításai',
   HELP: 'Súgó',
   LOGGED_IN: 'Bejelentkezve mint {name}',
-  PLEASE_SIGN_IN: 'A folytatáshoz jelentkezz be',
+  PLEASE_SIGNIN: 'A folytatáshoz jelentkezz be',
   UPLOAD_SUCCESSFUL: 'Sikeres feltöltés',
   DOWNLOAD_SUCCESSFUL: 'Sikeres letöltés',
   INVALID_LOGIN: 'Érvénytelen bejelentkezési adatok',

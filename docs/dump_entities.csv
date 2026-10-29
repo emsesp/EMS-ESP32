@@ -5034,8 +5034,10 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FW100",thermostat,105,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FW100",thermostat,105,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
 "FW100",thermostat,105,datetime,date/time,string (>=0<=0), ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,7,0,1,33,13
-"FW100",thermostat,105,display,display,enum [dhw temperature\|date\|external temperature] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,65,1
+"FW100",thermostat,105,display,display,enum [dhw temperature\|date\|external temperature\|\|\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,65,1
 "FW100",thermostat,105,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,66,1
+"FW100",thermostat,105,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,97,1
+"FW100",thermostat,105,contrast,contrast,uint8 (>=0<=0), ,true,number.thermostat_contrast,number.thermostat_contrast,7,0,1,98,1
 "FW100",thermostat,105,building,building type,uint8 (>=0<=0),%,true,number.thermostat_building_type,number.thermostat_building,7,0,10,50,1
 "FW100",thermostat,105,minexttemp,minimal external temperature,int8 (>=0<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1
 "FW100",thermostat,105,hybridstrategy,hybrid control strategy,enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix] (>=0<=0), ,true,select.thermostat_hybrid_control_strategy,select.thermostat_hybridstrategy,7,0,1,54,1
@@ -5072,8 +5074,10 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FW200",thermostat,106,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FW200",thermostat,106,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
 "FW200",thermostat,106,datetime,date/time,string (>=0<=0), ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,7,0,1,33,13
-"FW200",thermostat,106,display,display,enum [dhw temperature\|date\|external temperature] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,65,1
+"FW200",thermostat,106,display,display,enum [dhw temperature\|date\|external temperature\|\|\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,65,1
 "FW200",thermostat,106,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,66,1
+"FW200",thermostat,106,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,97,1
+"FW200",thermostat,106,contrast,contrast,uint8 (>=0<=0), ,true,number.thermostat_contrast,number.thermostat_contrast,7,0,1,98,1
 "FW200",thermostat,106,building,building type,uint8 (>=0<=0),%,true,number.thermostat_building_type,number.thermostat_building,7,0,10,50,1
 "FW200",thermostat,106,minexttemp,minimal external temperature,int8 (>=0<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1
 "FW200",thermostat,106,hybridstrategy,hybrid control strategy,enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix] (>=0<=0), ,true,select.thermostat_hybrid_control_strategy,select.thermostat_hybridstrategy,7,0,1,54,1
@@ -5170,8 +5174,10 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FB10",thermostat,109,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FB10",thermostat,109,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
 "FB10",thermostat,109,datetime,date/time,string (>=0<=0), ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,7,0,1,33,13
-"FB10",thermostat,109,display,display,enum [dhw temperature\|date\|external temperature] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,65,1
+"FB10",thermostat,109,display,display,enum [dhw temperature\|date\|external temperature\|\|\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,65,1
 "FB10",thermostat,109,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,66,1
+"FB10",thermostat,109,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,97,1
+"FB10",thermostat,109,contrast,contrast,uint8 (>=0<=0), ,true,number.thermostat_contrast,number.thermostat_contrast,7,0,1,98,1
 "FB10",thermostat,109,building,building type,uint8 (>=0<=0),%,true,number.thermostat_building_type,number.thermostat_building,7,0,10,50,1
 "FB10",thermostat,109,minexttemp,minimal external temperature,int8 (>=0<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1
 "FB10",thermostat,109,hybridstrategy,hybrid control strategy,enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix] (>=0<=0), ,true,select.thermostat_hybrid_control_strategy,select.thermostat_hybridstrategy,7,0,1,54,1
@@ -5208,8 +5214,10 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FB100",thermostat,110,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FB100",thermostat,110,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
 "FB100",thermostat,110,datetime,date/time,string (>=0<=0), ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,7,0,1,33,13
-"FB100",thermostat,110,display,display,enum [dhw temperature\|date\|external temperature] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,65,1
+"FB100",thermostat,110,display,display,enum [dhw temperature\|date\|external temperature\|\|\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,65,1
 "FB100",thermostat,110,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,66,1
+"FB100",thermostat,110,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,97,1
+"FB100",thermostat,110,contrast,contrast,uint8 (>=0<=0), ,true,number.thermostat_contrast,number.thermostat_contrast,7,0,1,98,1
 "FB100",thermostat,110,building,building type,uint8 (>=0<=0),%,true,number.thermostat_building_type,number.thermostat_building,7,0,10,50,1
 "FB100",thermostat,110,minexttemp,minimal external temperature,int8 (>=0<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1
 "FB100",thermostat,110,hybridstrategy,hybrid control strategy,enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix] (>=0<=0), ,true,select.thermostat_hybrid_control_strategy,select.thermostat_hybridstrategy,7,0,1,54,1
@@ -5276,8 +5284,10 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FW500",thermostat,116,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FW500",thermostat,116,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
 "FW500",thermostat,116,datetime,date/time,string (>=0<=0), ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,7,0,1,33,13
-"FW500",thermostat,116,display,display,enum [dhw temperature\|date\|external temperature] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,65,1
+"FW500",thermostat,116,display,display,enum [dhw temperature\|date\|external temperature\|\|\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,65,1
 "FW500",thermostat,116,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,66,1
+"FW500",thermostat,116,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,97,1
+"FW500",thermostat,116,contrast,contrast,uint8 (>=0<=0), ,true,number.thermostat_contrast,number.thermostat_contrast,7,0,1,98,1
 "FW500",thermostat,116,building,building type,uint8 (>=0<=0),%,true,number.thermostat_building_type,number.thermostat_building,7,0,10,50,1
 "FW500",thermostat,116,minexttemp,minimal external temperature,int8 (>=0<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1
 "FW500",thermostat,116,hybridstrategy,hybrid control strategy,enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix] (>=0<=0), ,true,select.thermostat_hybrid_control_strategy,select.thermostat_hybridstrategy,7,0,1,54,1
@@ -5374,8 +5384,10 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FW120",thermostat,192,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FW120",thermostat,192,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
 "FW120",thermostat,192,datetime,date/time,string (>=0<=0), ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,7,0,1,33,13
-"FW120",thermostat,192,display,display,enum [dhw temperature\|date\|external temperature] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,65,1
+"FW120",thermostat,192,display,display,enum [dhw temperature\|date\|external temperature\|\|\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,65,1
 "FW120",thermostat,192,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,66,1
+"FW120",thermostat,192,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,97,1
+"FW120",thermostat,192,contrast,contrast,uint8 (>=0<=0), ,true,number.thermostat_contrast,number.thermostat_contrast,7,0,1,98,1
 "FW120",thermostat,192,building,building type,uint8 (>=0<=0),%,true,number.thermostat_building_type,number.thermostat_building,7,0,10,50,1
 "FW120",thermostat,192,minexttemp,minimal external temperature,int8 (>=0<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1
 "FW120",thermostat,192,hybridstrategy,hybrid control strategy,enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix] (>=0<=0), ,true,select.thermostat_hybrid_control_strategy,select.thermostat_hybridstrategy,7,0,1,54,1
