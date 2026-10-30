@@ -1337,13 +1337,14 @@ void EMSdevice::setCustomizationEntity(const std::string & entity_id) {
 
         if (entity_name == shortname) {
             // check the masks
-            uint8_t current_mask = dv.state >> 4;
-            uint8_t new_mask     = Helpers::hextoint(entity_id.substr(0, 2).c_str()); // first character contains mask flags
-            bool    had_limit    = dv.custom_fullname().find('>') != std::string::npos || dv.custom_fullname().find('<') != std::string::npos;
+            uint8_t     current_mask    = dv.state >> 4;
+            uint8_t     new_mask        = Helpers::hextoint(entity_id.substr(0, 2).c_str()); // first character contains mask flags
+            bool        had_limit       = dv.custom_fullname().find('>') != std::string::npos || dv.custom_fullname().find('<') != std::string::npos;
+            std::string new_custom_name = has_custom_name ? entity_id.substr(custom_name_pos + 1) : std::string{};
 
-            // if it's a new mask, reconfigure HA
-            if (Mqtt::ha_enabled() && (has_custom_name || ((current_mask ^ new_mask) & (DeviceValueState::DV_READONLY >> 4)))) {
-                // remove ha config on change of dv_readonly flag
+            // reconfigure HA on a new name or limits (also when cleared), or a change of the dv_readonly flag
+            if (Mqtt::ha_enabled()
+                && (has_custom_name || new_custom_name != dv.custom_fullname() || ((current_mask ^ new_mask) & (DeviceValueState::DV_READONLY >> 4)))) {
                 dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
                 Mqtt::publish_ha_sensor_config_dv(dv, "", "", "", true); // delete topic (remove = true)
             }
@@ -1352,11 +1353,7 @@ void EMSdevice::setCustomizationEntity(const std::string & entity_id) {
             dv.state = ((dv.state & 0x0F) | (new_mask << 4)); // set state high bits to flag
 
             // set the custom name if it has one, or clear it
-            if (has_custom_name) {
-                dv.set_custom_fullname(entity_id.substr(custom_name_pos + 1));
-            } else {
-                dv.set_custom_fullname("");
-            }
+            dv.set_custom_fullname(new_custom_name);
 
             // Climate discovery reads its own min/max. selRoomTemp keeps the register limits.
             // A custom range is copied across; clearing it restores the limits haclimate was registered with (5..30).

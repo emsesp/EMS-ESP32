@@ -1805,6 +1805,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 #ifdef EMSESP_GATEWAY_TX_HOLD
         // while the gateway is syncing, don't Tx anything (including Roomctrl) — only ack our own poll
         // so the master keeps us in 0x07 and the gateway doesn't see the device list change
+        // (19d muted ACKs too; A21 was worse and never self-healed — back to 19c behaviour)
         if (gateway_tx_hold()) {
             if (poll_id == EMSbus::ems_bus_id()) {
                 txservice_.send_poll();

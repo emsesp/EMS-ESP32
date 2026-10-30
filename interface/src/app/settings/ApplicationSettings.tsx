@@ -576,6 +576,7 @@ const ApplicationSettings = () => {
               <MenuItem value="en">English (EN)</MenuItem>
               <MenuItem value="fr">Français (FR)</MenuItem>
               <MenuItem value="it">Italiano (IT)</MenuItem>
+              <MenuItem value="hu">Magyar (HU)</MenuItem>
               <MenuItem value="nl">Nederlands (NL)</MenuItem>
               <MenuItem value="no">Norsk (NO)</MenuItem>
               <MenuItem value="pl">Polski (PL)</MenuItem>

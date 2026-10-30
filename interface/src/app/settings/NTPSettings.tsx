@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -42,6 +42,7 @@ import type { ValidateFieldsError } from 'validators/schema';
 
 import {
   TIME_ZONES,
+  migrateNtpTimeZones,
   selectedTimeZone,
   timeZoneSelectItemsT,
   useTimeZoneSelectItems
@@ -56,6 +57,7 @@ const NTPSettings = () => {
     origData,
     dirtyFlags,
     setDirtyFlags,
+    setOrigData,
     blocker,
     saveData,
     errorMessage
@@ -81,6 +83,31 @@ const NTPSettings = () => {
   const [settingTime, setSettingTime] = useState<boolean>(false);
   const [processing, setProcessing] = useState<boolean>(false);
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
+  const migratingTz = useRef(false);
+
+  // If firmware has not yet rewritten tz_format from the label (or the user
+  // landed here before reboot), persist the current TIME_ZONES values quietly.
+  useEffect(() => {
+    if (!data || migratingTz.current || dirtyFlags.length > 0) {
+      return;
+    }
+    const migrated = migrateNtpTimeZones(data);
+    if (!migrated) {
+      return;
+    }
+    migratingTz.current = true;
+    void (async () => {
+      try {
+        updateDataValue(migrated);
+        await NTPApi.updateNTPSettings(migrated);
+        setOrigData(migrated);
+      } catch {
+        // Boot-time firmware migration still applies on the next restart.
+      } finally {
+        migratingTz.current = false;
+      }
+    })();
+  }, [data, dirtyFlags.length, setOrigData, updateDataValue]);
 
   const { send: updateTime } = useRequest(
     (local_time: Time) => NTPApi.updateTime(local_time),
