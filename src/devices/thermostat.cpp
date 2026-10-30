@@ -1151,6 +1151,7 @@ void Thermostat::process_JunkersDisp(const std::shared_ptr<const Telegram> & tel
     has_enumupdate(telegram, ibaMainDisplay_, 1, 1); // 1=ww temp, 2=date, 3=ext temp, 6=set room temp
     has_update(telegram, ibaLanguage_, 3);
     has_enumupdate(telegram, ibaDateFormat_, 5, 1); // 1=DD.MM.YYYY, 2=MM/DD/YYYY
+    has_update(telegram, ibaCalIntTemperature_, 8); // calibrate room temperature sensor, by * 0.1 K (-3.0 to 3.0K)
     has_update(telegram, ibaMinExtTemperature_, 16);
     has_update(telegram, ibaBuildingType_, 17); // percent /10
 }
@@ -2242,6 +2243,8 @@ bool Thermostat::set_calinttemp(const char * value, const int8_t id) {
         write_command(0x241, 7, t, 0x241);
     } else if (isRC300()) {
         write_command(0x240, 7, t, 0x240);
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+        write_command(0x11E, 8, t, 0x11E);
     } else {
         write_command(EMS_TYPE_IBASettings, 2, t, EMS_TYPE_IBASettings);
     }
@@ -5287,34 +5290,45 @@ void Thermostat::register_device_values() {
                                   FL_(dateTime),
                                   DeviceValueUOM::NONE,
                                   MAKE_CF_CB(set_datetime));
-            register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                                  &ibaMainDisplay_,
-                                  DeviceValueType::ENUM,
-                                  FL_(enum_ibaMainDisplayJ),
-                                  FL_(ibaMainDisplay),
-                                  DeviceValueUOM::NONE,
-                                  MAKE_CF_CB(set_display));
-            register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                                  &ibaLanguage_,
-                                  DeviceValueType::ENUM,
-                                  FL_(enum_ibaLanguageJ),
-                                  FL_(ibaLanguage),
-                                  DeviceValueUOM::NONE,
-                                  MAKE_CF_CB(set_language));
-            register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                                  &ibaDateFormat_,
-                                  DeviceValueType::ENUM,
-                                  FL_(enum_ibaDateFormatJ),
-                                  FL_(ibaDateFormat),
-                                  DeviceValueUOM::NONE,
-                                  MAKE_CF_CB(set_dateformat));
-            register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                                  &ibaContrast_,
-                                  DeviceValueType::UINT8,
-                                  FL_(ibaContrast),
-                                  DeviceValueUOM::NONE,
-                                  MAKE_CF_CB(set_contrast));
         }
+
+        // display settings and room sensor calibration, all from 0x11E, #3329
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &ibaMainDisplay_,
+                              DeviceValueType::ENUM,
+                              FL_(enum_ibaMainDisplayJ),
+                              FL_(ibaMainDisplay),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_display));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &ibaLanguage_,
+                              DeviceValueType::ENUM,
+                              FL_(enum_ibaLanguageJ),
+                              FL_(ibaLanguage),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_language));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &ibaDateFormat_,
+                              DeviceValueType::ENUM,
+                              FL_(enum_ibaDateFormatJ),
+                              FL_(ibaDateFormat),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_dateformat));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &ibaContrast_,
+                              DeviceValueType::UINT8,
+                              FL_(ibaContrast),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_contrast));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &ibaCalIntTemperature_,
+                              DeviceValueType::INT8,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(ibaCalIntTemperature),
+                              DeviceValueUOM::DEGREES_R,
+                              MAKE_CF_CB(set_calinttemp),
+                              -3,
+                              3);
 
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &ibaBuildingType_,
