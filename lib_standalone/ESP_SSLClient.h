@@ -42,6 +42,12 @@ class ESP_SSLClient : public Stream {
     bool connected() {
         return false;
     }
+    bool isSecure() {
+        return false;
+    }
+    bool connectSSL() {
+        return false;
+    }
 
     // Stream / Print overrides
     int available() override {
