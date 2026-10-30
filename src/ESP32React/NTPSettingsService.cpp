@@ -1,6 +1,24 @@
 #include "NTPSettingsService.h"
 
+#include "tz_zones.h"
+
 #include <emsesp.h>
+
+namespace {
+
+String trimmedTzFormat(const String & format) {
+    int space = format.indexOf(' ');
+    return space < 0 ? format : format.substring(0, static_cast<unsigned int>(space));
+}
+
+void padTzFormat(String & format) {
+    format.reserve(NTP_TZ_FORMAT_LEN);
+    while (format.length() < NTP_TZ_FORMAT_LEN) {
+        format += ' ';
+    }
+}
+
+} // namespace
 
 NTPSettingsService::NTPSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(NTPSettings::read, NTPSettings::update, this, server, NTP_SETTINGS_SERVICE_PATH, securityManager)
@@ -16,6 +34,13 @@ NTPSettingsService::NTPSettingsService(AsyncWebServer * server, FS * fs, Securit
 
 void NTPSettingsService::begin() {
     _fsPersistence.readFromFS();
+
+    // After an OTA that updates tz_zones.h, rewrite stored POSIX strings from the
+    // saved IANA labels so localtime / thermostat sync use the current rules
+    // without the user re-selecting the zone in the WebUI.
+    update([](NTPSettings & settings) {
+        return NTPSettings::syncFormatsFromLabels(settings) ? StateUpdateResult::CHANGED : StateUpdateResult::UNCHANGED;
+    });
 }
 
 void NTPSettingsService::loop() {
@@ -77,15 +102,40 @@ void NTPSettings::read(NTPSettings & settings, JsonObject root) {
     root["enabled"]         = settings.enabled;
     root["server"]          = settings.server;
     root["tz_label"]        = settings.tzLabel;
-    root["tz_format"]       = settings.tzFormat.substring(0, settings.tzFormat.indexOf(" "));
+    root["tz_format"]       = trimmedTzFormat(settings.tzFormat);
     root["thermostat_sync"] = settings.thermostat_sync;
     root["tz_label_t"]      = settings.tzLabelT;
-    root["tz_format_t"]     = settings.tzFormatT.substring(0, settings.tzFormatT.indexOf(" "));
+    root["tz_format_t"]     = trimmedTzFormat(settings.tzFormatT);
+}
+
+bool NTPSettings::syncFormatsFromLabels(NTPSettings & settings) {
+    bool changed = false;
+
+    auto apply = [&](const String & label, String & format) {
+        const char * mapped = emsesp_tz_format_for_label(label.c_str());
+        if (mapped == nullptr) {
+            return;
+        }
+        if (trimmedTzFormat(format) == mapped) {
+            // Still re-pad in case NTP_TZ_FORMAT_LEN grew since the value was stored.
+            if (format.length() != NTP_TZ_FORMAT_LEN) {
+                format = mapped;
+                padTzFormat(format);
+                changed = true;
+            }
+            return;
+        }
+        format = mapped;
+        padTzFormat(format);
+        changed = true;
+    };
+
+    apply(settings.tzLabel, settings.tzFormat);
+    apply(settings.tzLabelT, settings.tzFormatT);
+    return changed;
 }
 
 StateUpdateResult NTPSettings::update(JsonObject root, NTPSettings & settings) {
-    settings.tzFormat.reserve(40);
-    settings.tzFormatT.reserve(40);
     settings.enabled         = root["enabled"] | FACTORY_NTP_ENABLED;
     settings.server          = root["server"] | FACTORY_NTP_SERVER;
     settings.tzLabel         = root["tz_label"] | FACTORY_NTP_TIME_ZONE_LABEL;
@@ -93,14 +143,15 @@ StateUpdateResult NTPSettings::update(JsonObject root, NTPSettings & settings) {
     settings.thermostat_sync = root["thermostat_sync"] | FACTORY_NTP_THERMOSTAT_SYNC;
     settings.tzLabelT        = root["tz_label_t"] | FACTORY_NTP_TIME_ZONE_LABEL;
     settings.tzFormatT       = root["tz_format_t"] | FACTORY_NTP_TIME_ZONE_FORMAT;
-    // The format string must have same length to avoid memory leak, #3184
-    while (settings.tzFormat.length() < 40) {
-        settings.tzFormat += " ";
-    }
 
-    while (settings.tzFormatT.length() < 40) {
-        settings.tzFormatT += " ";
-    }
+    // Do not call syncFormatsFromLabels here: readFromFS() uses this updater
+    // via updateWithoutPropagation, and a sync at that point would not be
+    // written back. Boot migration runs in NTPSettingsService::begin() instead.
+    // The WebUI always POSTs tz_format from TIME_ZONES when the user saves.
+
+    // The format string must have a fixed length to avoid a setenv leak, #3184.
+    padTzFormat(settings.tzFormat);
+    padTzFormat(settings.tzFormatT);
 
     return StateUpdateResult::CHANGED;
 }

@@ -908,9 +908,9 @@ void Thermostat::process_JunkersSet2(const std::shared_ptr<const Telegram> & tel
         return;
     }
 
-    has_update(telegram, hc->controlmode, 0); // 0-off, 1-unmixed-no-IPM, 2-unmixed-IPM, 3-mixed
-    // 1 curve factor roomtemp
-    // 2 curve factor heating
+    has_update(telegram, hc->controlmode, 0);          // 0-off, 1-unmixed-no-IPM, 2-unmixed-IPM, 3-mixed
+    has_update(telegram, hc->adaptfactor, 1);          // Anpassungsfaktor I, byte * 5 = %
+    has_update(telegram, hc->gainfactor, 2);           // Verstärkungsfaktor V, byte * 5 = %
     has_update(telegram, hc->maxflowtemp, 3);          // degrees
     has_enumupdate(telegram, hc->mode, 4, 1);          // 0 = nofrost, 1 = eco, 2 = heat, 3 = auto
     has_update(telegram, hc->nofrosttemp, 5);          // is * 2
@@ -1147,8 +1147,10 @@ void Thermostat::process_JunkersWW(const std::shared_ptr<const Telegram> & teleg
 
 // 0x11E
 void Thermostat::process_JunkersDisp(const std::shared_ptr<const Telegram> & telegram) {
-    has_enumupdate(telegram, ibaMainDisplay_, 1, 1);
+    has_update(telegram, ibaContrast_, 0);          // raw 10..30, factor 2.5 => 25..75 %
+    has_enumupdate(telegram, ibaMainDisplay_, 1, 1); // 1=ww temp, 2=date, 3=ext temp, 6=set room temp
     has_update(telegram, ibaLanguage_, 3);
+    has_enumupdate(telegram, ibaDateFormat_, 5, 1); // 1=DD.MM.YYYY, 2=MM/DD/YYYY
     has_update(telegram, ibaMinExtTemperature_, 16);
     has_update(telegram, ibaBuildingType_, 17); // percent /10
 }
@@ -1393,7 +1395,7 @@ void Thermostat::process_RC300Curve(const std::shared_ptr<const Telegram> & tele
     has_enumupdate(telegram, hc->controlmode, 0, 1); // 1-weather_compensated, 2-outside_footpoint,3-n/a, 4-room --  RC310
     has_update(telegram, hc->heatingtype, 1);        // 1=radiator, 2=convector, 3=floor
     has_update(telegram, hc->switchonoptimization, 4);
-    has_enumupdate(telegram, hc->nofrostmode, 5, 1); // 1-room, 2-outdoor, 3- room & outdoor
+    has_update(telegram, hc->nofrostmode, 5); // 0-off, 1-room, 2-outdoor, 3-room & outdoor
     has_update(telegram, hc->nofrosttemp, 6);
 
     if (hc->heatingtype < 3) {
@@ -2265,6 +2267,28 @@ bool Thermostat::set_display(const char * value, const int8_t id) {
     return false;
 }
 
+// 0x11E - Junkers date format
+bool Thermostat::set_dateformat(const char * value, const int8_t id) {
+    uint8_t df;
+    if (!Helpers::value2enum(value, df, FL_(enum_ibaDateFormatJ))) {
+        return false;
+    }
+
+    write_command(0x11E, 5, df + 1, 0x11E);
+    return true;
+}
+
+// 0x11E - Junkers display contrast, raw value 10..30 (= 25..75 %)
+bool Thermostat::set_contrast(const char * value, const int8_t id) {
+    int ct;
+    if (!Helpers::value2number(value, ct, 10, 30)) {
+        return false;
+    }
+
+    write_command(0x11E, 0, ct, 0x11E);
+    return true;
+}
+
 // 0xA7 - Set Screen brightness
 bool Thermostat::set_brightness(const char * value, const int8_t id) {
     int bo;
@@ -2300,7 +2324,7 @@ bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
         Roomctrl::set_remotetemp(Roomctrl::FB10, hc->hc(), hc->remotetemp); // FB10
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC35 || model() == EMSdevice::EMS_DEVICE_FLAG_RC30_N) {
         Roomctrl::set_remotetemp(Roomctrl::RC20, hc->hc(), hc->remotetemp); // RC20
-    } else if (isRC300()) {
+    } else if (isRC300() || model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
         if (hc->control == 1 || hc->control == 0) {
             Roomctrl::set_remotetemp(Roomctrl::RC200, hc->hc(), hc->remotetemp);  // RC200
         } else if (hc->control == 3) {                                            // RC100H(3)
@@ -3385,6 +3409,11 @@ bool Thermostat::set_roominfl_factor(const char * value, const int8_t id) {
     }
 
     if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+        // offset 6 is nighttemp on FR100/FR120
+        if (has_flags(EMSdevice::EMS_DEVICE_FLAG_JUNKERS_OLD)) {
+            return false;
+        }
+
         write_command(set_typeids[hc->hc()], 6, (uint8_t)((val + 5) / 10));
 
     } else {
@@ -3401,6 +3430,11 @@ bool Thermostat::set_roominfl_mode(const char * value, const int8_t id) {
         return false;
     }
 
+    // offset 7 is daytemp on FR100/FR120
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS && has_flags(EMSdevice::EMS_DEVICE_FLAG_JUNKERS_OLD)) {
+        return false;
+    }
+
     uint8_t val;
     if (!Helpers::value2enum(value, val, FL_(enum_roominfluence))) {
         return false;
@@ -3408,6 +3442,32 @@ bool Thermostat::set_roominfl_mode(const char * value, const int8_t id) {
 
     write_command(set_typeids[hc->hc()], 7, (uint8_t)val);
 
+    return true;
+}
+
+// FR100/FR120 Anpassungsfaktor I (offset 1, 0..100%) and Verstärkungsfaktor V (offset 2, 40..100%).
+// The telegram byte is the percentage divided by 5.
+bool Thermostat::set_junkers_factor(const char * value, const int8_t id, const uint8_t offset, const int min_percent) {
+    if (!has_flags(EMSdevice::EMS_DEVICE_FLAG_JUNKERS_OLD)) {
+        return false;
+    }
+
+    auto hc = heating_circuit(id);
+    if (hc == nullptr) {
+        return false;
+    }
+
+    float val;
+    if (!Helpers::value2float(value, val)) {
+        return false;
+    }
+
+    int percent = (int)((val + 2.0f) / 5.0f) * 5; // nearest 5%
+    if (percent < min_percent || percent > 100) {
+        return false;
+    }
+
+    write_command(set_typeids[hc->hc()], offset, (uint8_t)(percent / 5), set_typeids[hc->hc()]);
     return true;
 }
 
@@ -3754,7 +3814,7 @@ bool Thermostat::set_heatup(const char * value, const int8_t id) {
 
     uint8_t v;
 
-    if (!Helpers::value2enum(value, v, FL_(enum_heatup))) {
+    if (has_flags(EMSdevice::EMS_DEVICE_FLAG_JUNKERS_OLD) || !Helpers::value2enum(value, v, FL_(enum_heatup))) {
         return false;
     }
 
@@ -3925,7 +3985,7 @@ bool Thermostat::set_nofrostmode(const char * value, const int8_t id) {
     uint8_t set;
     if (isRC300() || model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
         if (Helpers::value2enum(value, set, FL_(enum_nofrostmode1))) {
-            write_command(curve_typeids[hc->hc()], 5, set + 1, curve_typeids[hc->hc()]);
+            write_command(curve_typeids[hc->hc()], 5, set, curve_typeids[hc->hc()]);
             return true;
         }
     } else {
@@ -3947,7 +4007,7 @@ bool Thermostat::set_heatingtype(const char * value, const int8_t id) {
 
     uint8_t set;
     if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
-        if (Helpers::value2enum(value, set, FL_(enum_heatingtype1))) {
+        if (!has_flags(EMSdevice::EMS_DEVICE_FLAG_JUNKERS_OLD) && Helpers::value2enum(value, set, FL_(enum_heatingtype1))) {
             write_command(set_typeids[hc->hc()], 0, set, set_typeids[hc->hc()]);
             return true;
         }
@@ -5241,6 +5301,19 @@ void Thermostat::register_device_values() {
                                   FL_(ibaLanguage),
                                   DeviceValueUOM::NONE,
                                   MAKE_CF_CB(set_language));
+            register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                                  &ibaDateFormat_,
+                                  DeviceValueType::ENUM,
+                                  FL_(enum_ibaDateFormatJ),
+                                  FL_(ibaDateFormat),
+                                  DeviceValueUOM::NONE,
+                                  MAKE_CF_CB(set_dateformat));
+            register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                                  &ibaContrast_,
+                                  DeviceValueType::UINT8,
+                                  FL_(ibaContrast),
+                                  DeviceValueUOM::NONE,
+                                  MAKE_CF_CB(set_contrast));
         }
 
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
@@ -5489,7 +5562,8 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
             register_device_value(tag, &hc->control, DeviceValueType::ENUM, FL_(enum_control1), FL_(control), DeviceValueUOM::NONE, MAKE_CF_CB(set_control));
         }
 
-        if (model != EMSdevice::EMS_DEVICE_FLAG_RC100 && model != EMSdevice::EMS_DEVICE_FLAG_CR120) {
+        // RC100/CR120 at 0x18 are the remote. The same model at 0x10 (a CW100 used as the only controller) can take one.
+        if (device_id() == 0x10 || (model != EMSdevice::EMS_DEVICE_FLAG_RC100 && model != EMSdevice::EMS_DEVICE_FLAG_CR120)) {
             register_device_value(tag,
                                   &hc->remotetemp,
                                   DeviceValueType::CMD,
@@ -5789,7 +5863,8 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               FL_(nofrosttemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_nofrosttemp));
-        if (device_id() == 0x10) { // only master thermostats have control by remote
+        // FR100/FR120 use 0x0179. Offset 1 is Anpassungsfaktor, not the remote-control byte.
+        if (!has_flags(EMSdevice::EMS_DEVICE_FLAG_JUNKERS_OLD) && device_id() == 0x10) {
             register_device_value(tag, &hc->control, DeviceValueType::ENUM, FL_(enum_j_control), FL_(control), DeviceValueUOM::NONE, MAKE_CF_CB(set_control));
         }
 
@@ -5805,39 +5880,79 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               101);
         register_device_value(tag, &hc->targetflowtemp, DeviceValueType::UINT8, FL_(targetflowtemp), DeviceValueUOM::DEGREES);
         register_device_value(tag,
-                              &hc->summertemp,
-                              DeviceValueType::UINT8,
-                              DeviceValueNumOp::DV_NUMOP_DIV2,
-                              FL_(summertemp),
-                              DeviceValueUOM::DEGREES,
-                              MAKE_CF_CB(set_summertemp),
-                              9,
-                              25);
-        register_device_value(tag, &hc->roomsensor, DeviceValueType::ENUM, FL_(enum_roomsensor), FL_(roomsensor), DeviceValueUOM::NONE, MAKE_CF_CB(set_roomsensor));
-        register_device_value(tag, &hc->holidaymode, DeviceValueType::ENUM, FL_(enum_mode4), FL_(holidaymode), DeviceValueUOM::NONE, MAKE_CF_CB(set_holidaymode));
+                              &hc->holidaymode,
+                              DeviceValueType::ENUM,
+                              FL_(enum_mode4),
+                              FL_(holidaymode),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_holidaymode));
         register_device_value(tag,
                               &hc->switchonoptimization,
                               DeviceValueType::BOOL,
                               FL_(switchonoptimization),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_switchonoptimization));
-        register_device_value(tag, &hc->fastHeatup, DeviceValueType::ENUM, FL_(enum_heatup), FL_(heatup), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatup));
-        register_device_value(tag, &hc->minflowtemp, DeviceValueType::UINT8, FL_(minflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_minflowtemp), 5, 70);
         register_device_value(tag, &hc->maxflowtemp, DeviceValueType::UINT8, FL_(maxflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_maxflowtemp), 30, 90);
-        register_device_value(tag, &hc->designtemp, DeviceValueType::UINT8, FL_(designtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_designtemp), 30, 90);
-        register_device_value(
-            tag, &hc->roominfluence, DeviceValueType::ENUM, FL_(enum_roominfluence), FL_(roominfluence), DeviceValueUOM::NONE, MAKE_CF_CB(set_roominfl_mode));
-        register_device_value(tag,
-                              &hc->roominfl_factor,
-                              DeviceValueType::UINT8,
-                              DeviceValueNumOp::DV_NUMOP_MUL10,
-                              FL_(roominfl_factor),
-                              DeviceValueUOM::PERCENT,
-                              MAKE_CF_CB(set_roominfl_factor));
-        register_device_value(
-            tag, &hc->heatingtype, DeviceValueType::ENUM, FL_(enum_heatingtype1), FL_(heatingtype), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatingtype));
         register_device_value(
             tag, &hc->controlmode, DeviceValueType::ENUM, FL_(enum_controlmode3), FL_(controlmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_controlmode));
+        if (has_flags(EMSdevice::EMS_DEVICE_FLAG_JUNKERS_OLD)) {
+            // Fachmann menu: Anpassungsfaktor I 0..100%, Verstärkungsfaktor V 40..100%, both in steps of 5
+            register_device_value(tag,
+                                  &hc->adaptfactor,
+                                  DeviceValueType::UINT8,
+                                  DeviceValueNumOp::DV_NUMOP_MUL5,
+                                  FL_(adaptfactor),
+                                  DeviceValueUOM::PERCENT,
+                                  MAKE_CF_CB(set_adaptfactor),
+                                  0,
+                                  100);
+            register_device_value(tag,
+                                  &hc->gainfactor,
+                                  DeviceValueType::UINT8,
+                                  DeviceValueNumOp::DV_NUMOP_MUL5,
+                                  FL_(gainfactor),
+                                  DeviceValueUOM::PERCENT,
+                                  MAKE_CF_CB(set_gainfactor),
+                                  40,
+                                  100);
+        } else {
+            register_device_value(tag,
+                                  &hc->summertemp,
+                                  DeviceValueType::UINT8,
+                                  DeviceValueNumOp::DV_NUMOP_DIV2,
+                                  FL_(summertemp),
+                                  DeviceValueUOM::DEGREES,
+                                  MAKE_CF_CB(set_summertemp),
+                                  9,
+                                  25);
+            register_device_value(tag,
+                                  &hc->roomsensor,
+                                  DeviceValueType::ENUM,
+                                  FL_(enum_roomsensor),
+                                  FL_(roomsensor),
+                                  DeviceValueUOM::NONE,
+                                  MAKE_CF_CB(set_roomsensor));
+            register_device_value(tag, &hc->fastHeatup, DeviceValueType::ENUM, FL_(enum_heatup), FL_(heatup), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatup));
+            register_device_value(tag, &hc->minflowtemp, DeviceValueType::UINT8, FL_(minflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_minflowtemp), 5, 70);
+            register_device_value(tag, &hc->designtemp, DeviceValueType::UINT8, FL_(designtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_designtemp), 30, 90);
+            register_device_value(tag,
+                                  &hc->roominfluence,
+                                  DeviceValueType::ENUM,
+                                  FL_(enum_roominfluence),
+                                  FL_(roominfluence),
+                                  DeviceValueUOM::NONE,
+                                  MAKE_CF_CB(set_roominfl_mode));
+            register_device_value(tag,
+                                  &hc->roominfl_factor,
+                                  DeviceValueType::UINT8,
+                                  DeviceValueNumOp::DV_NUMOP_MUL10,
+                                  FL_(roominfl_factor),
+                                  DeviceValueUOM::PERCENT,
+                                  MAKE_CF_CB(set_roominfl_factor));
+            register_device_value(
+                tag, &hc->heatingtype, DeviceValueType::ENUM, FL_(enum_heatingtype1), FL_(heatingtype), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatingtype));
+        }
+
         break;
     default:
         break;

@@ -14,6 +14,7 @@ aceotrope
 activehigh
 activelow
 adafruit
+adaptfactor
 adde
 adress
 ahsx
@@ -446,6 +447,7 @@ fullscreen
 fulltopic
 funktion
 furtheron
+gainfactor
 gasmeter
 gasmeterheat
 genuino
@@ -1358,3 +1360,7 @@ POWERON
 crashtest
 otadata
 merase
+Seeed
+Anpassungsfaktor
+Verstärkungsfaktor
+Fachmann

@@ -48,7 +48,7 @@ class espMqttClientSecure : public MqttClientSetup<espMqttClientSecure> {
 class espMqttClient : public MqttClientSetup<espMqttClient> {
   public:
     explicit espMqttClient(espMqttClientTypes::UseInternalTask useInternalTask);
-    explicit espMqttClient(uint8_t priority = 1, uint8_t core = 1);
+    explicit espMqttClient(uint8_t priority = 1, uint8_t core = 1, uint32_t stackSize = EMC_TASK_STACK_SIZE);
 
   protected:
     espMqttClientInternals::ClientSync _client;
@@ -57,7 +57,7 @@ class espMqttClient : public MqttClientSetup<espMqttClient> {
 class espMqttClientSecure : public MqttClientSetup<espMqttClientSecure> {
   public:
     explicit espMqttClientSecure(espMqttClientTypes::UseInternalTask useInternalTask);
-    explicit espMqttClientSecure(uint8_t priority = 1, uint8_t core = 1);
+    explicit espMqttClientSecure(uint8_t priority = 1, uint8_t core = 1, uint32_t stackSize = EMC_TASK_STACK_SIZE);
     espMqttClientSecure & setInsecure();
     espMqttClientSecure & setCACert(const char * rootCA);
     espMqttClientSecure & setCertificate(const char * clientCa);

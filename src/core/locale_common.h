@@ -324,7 +324,8 @@ MAKE_ENUM(enum_pumpMode2, FL_(pumpstep), FL_(consthigh), FL_(constmed), FL_(cons
 
 // thermostat lists
 MAKE_ENUM(enum_ibaMainDisplay, FL_(internal_temperature), FL_(internal_setpoint), FL_(external_temperature), FL_(burner_temperature), FL_(ww_temperature), FL_(functioning_mode), FL_(time), FL_(date), FL_(smoke_temperature))
-MAKE_ENUM(enum_ibaMainDisplayJ, FL_(ww_temperature), FL_(date), FL_(external_temperature))
+MAKE_ENUM(enum_ibaMainDisplayJ, FL_(ww_temperature), FL_(date), FL_(external_temperature), FL_(BLANK), FL_(BLANK), FL_(internal_setpoint))
+MAKE_ENUM(enum_ibaDateFormatJ, FL_(dateformat_ddmmyyyy), FL_(dateformat_mmddyyyy))
 MAKE_ENUM(enum_ibaLanguage, FL_(german), FL_(dutch), FL_(french), FL_(italian))
 MAKE_ENUM(enum_ibaLanguageJ, FL_(german), FL_(italian), FL_(french), FL_(dutch))
 MAKE_ENUM(enum_ibaLanguage_RC30, FL_(german), FL_(dutch))
@@ -368,7 +369,7 @@ MAKE_ENUM(enum_modetype5, FL_(off), FL_(on))
 MAKE_ENUM(enum_reducemode, FL_(nofrost), FL_(reduce), FL_(room), FL_(outdoor))
 MAKE_ENUM(enum_reducemode1, FL_(outdoor), FL_(room), FL_(reduce)) // RC310 values: 1-3
 MAKE_ENUM(enum_nofrostmode, FL_(off), FL_(outdoor), FL_(room))
-MAKE_ENUM(enum_nofrostmode1, FL_(room), FL_(outdoor), FL_(room_outdoor))
+MAKE_ENUM(enum_nofrostmode1, FL_(off), FL_(room), FL_(outdoor), FL_(room_outdoor)) // RC300/RC310: 0-3
 
 MAKE_ENUM(enum_controlmode, FL_(optimized), FL_(simple), FL_(na), FL_(room), FL_(power))
 MAKE_ENUM(enum_controlmode1, FL_(weather_compensated), FL_(outside_basepoint), FL_(na), FL_(room), FL_(power), FL_(constant)) // RC310 1-4

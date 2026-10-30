@@ -10,17 +10,18 @@ import { loadLocaleAsync } from 'i18n/i18n-util.async';
 import { detectLocale, navigatorDetector } from 'typesafe-i18n/detectors';
 
 const ALL_LOCALES = [
+  'cs',
   'de',
   'en',
-  'it',
   'fr',
+  'hu',
+  'it',
   'nl',
   'no',
   'pl',
   'sk',
   'sv',
-  'tr',
-  'cs'
+  'tr'
 ] as Locales[];
 
 // Optional build-time allow-list (e.g. VITE_APP_LOCALES="en,de,nl"). When unset,

@@ -353,28 +353,28 @@ const NetworkSettings = () => {
               onChange={updateFormValue}
               margin="normal"
             />
-            <ValidatedTextField
-              fieldErrors={fieldErrors || {}}
-              name="dns_ip_1"
-              label="DNS #1"
-              fullWidth
-              variant="outlined"
-              value={data.dns_ip_1}
-              onChange={updateFormValue}
-              margin="normal"
-            />
-            <ValidatedTextField
-              fieldErrors={fieldErrors || {}}
-              name="dns_ip_2"
-              label="DNS #2"
-              fullWidth
-              variant="outlined"
-              value={data.dns_ip_2}
-              onChange={updateFormValue}
-              margin="normal"
-            />
           </>
         )}
+        <ValidatedTextField
+          fieldErrors={fieldErrors || {}}
+          name="dns_ip_1"
+          label="DNS #1"
+          fullWidth
+          variant="outlined"
+          value={data.dns_ip_1}
+          onChange={updateFormValue}
+          margin="normal"
+        />
+        <ValidatedTextField
+          fieldErrors={fieldErrors || {}}
+          name="dns_ip_2"
+          label="DNS #2"
+          fullWidth
+          variant="outlined"
+          value={data.dns_ip_2}
+          onChange={updateFormValue}
+          margin="normal"
+        />
         {restartNeeded && (
           <MessageBox level="warning" message={LL.RESTART_TEXT(0)}>
             <Button

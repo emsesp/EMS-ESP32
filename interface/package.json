@@ -33,18 +33,18 @@
     "@table-library/react-table-library": "4.1.15",
     "alova": "^3.5.5",
     "jwt-decode": "^4.0.0",
-    "preact": "^11.0.1",
+    "preact": "^11.1.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-icons": "^5.7.0",
-    "react-router": "^8.4.0",
+    "react-router": "^8.5.1",
     "typesafe-i18n": "^5.27.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@preact/preset-vite": "^2.10.6",
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
-    "@types/node": "^26.6.5",
+    "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "concurrently": "^10.0.6",
@@ -56,9 +56,9 @@
     "rollup-plugin-visualizer": "^7.1.1",
     "terser": "^5.51.2",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.71.2",
-    "vite": "^8.3.4",
+    "typescript-eslint": "^8.72.1",
+    "vite": "^8.3.5",
     "vite-plugin-imagemin": "^0.6.1"
   },
-  "packageManager": "pnpm@12.14.0"
+  "packageManager": "pnpm@12.16.1"
 }

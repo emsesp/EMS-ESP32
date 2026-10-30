@@ -32,10 +32,13 @@ void MqttSettingsService::begin() {
 }
 
 void MqttSettingsService::startClient() {
-    static bool isSecure = false;
+    static bool     isSecure  = false;
+    static uint32_t stackSize = EMC_TASK_STACK_SIZE;
+    // only verifying a CA chain needs the larger stack, insecure TLS and plain MQTT fit in the default
+    const uint32_t wantStack = (_state.enableTLS && _state.rootCA != "insecure") ? EMSESP_MQTT_STACKSIZE_CA : EMC_TASK_STACK_SIZE;
     if (_mqttClient) {
         // do we need to change the client?
-        if ((isSecure && _state.enableTLS) || (!isSecure && !_state.enableTLS)) {
+        if (isSecure == _state.enableTLS && stackSize == wantStack) {
             return;
         }
 
@@ -43,12 +46,14 @@ void MqttSettingsService::startClient() {
         _mqttClient = nullptr;
     }
 
+    stackSize = wantStack;
+
     if (_state.enableTLS) {
         isSecure = true;
         if (emsesp::EMSESP::system_.PSram() == 0) {
             _mqttClient = new espMqttClientSecure(espMqttClientTypes::UseInternalTask::NO);
         } else {
-            _mqttClient = new espMqttClientSecure(EMSESP_MQTT_PRIORITY, EMSESP_MQTT_RUNNING_CORE);
+            _mqttClient = new espMqttClientSecure(EMSESP_MQTT_PRIORITY, EMSESP_MQTT_RUNNING_CORE, wantStack);
         }
 
         if (!_mqttClient) {

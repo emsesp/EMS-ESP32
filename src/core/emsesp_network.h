@@ -211,6 +211,9 @@ class Network {
     void         startWiFiRadio();
     void         stopWiFiRadio();
     void         setWiFiPower(uint8_t tx_power);
+#ifndef EMSESP_STANDALONE
+    void applyDnsOverride(esp_netif_t * netif) const;
+#endif
     const char * disconnectReason(uint8_t code);
     void         stopAP();
     NetPhase     initialPhase() const;

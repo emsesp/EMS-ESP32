@@ -154,7 +154,7 @@ const it: Translation = {
   HELP_INFORMATION_4: 'Ricordati di scaricare e allegare le informazioni del tuo sistema per una risposta più rapida quando segnali un problema',
   UPLOAD: 'Carica',
   DOWNLOAD: 'Scarica',
-  INSTALL: 'Installare {0}',
+  INSTALL: 'Installare',
   REINSTALL: 'Riavviare',
   ABORTED: 'Annullato',
   FAILED: 'Fallito',

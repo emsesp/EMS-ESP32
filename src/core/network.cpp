@@ -143,10 +143,42 @@ void Network::begin() {
                 wifi_ever_connected_    = true;
             },
             ARDUINO_EVENT_WIFI_STA_GOT_IP);
+
+        // with DHCP, replace the DNS servers handed out by the router with the ones configured by the user
+        WiFi.onEvent([this](WiFiEvent_t /*event*/, WiFiEventInfo_t /*info*/) { applyDnsOverride(WiFi.STA.netif()); }, ARDUINO_EVENT_WIFI_STA_GOT_IP);
+        WiFi.onEvent([this](WiFiEvent_t /*event*/, WiFiEventInfo_t /*info*/) { applyDnsOverride(ETH.netif()); }, ARDUINO_EVENT_ETH_GOT_IP);
     }
 
 #endif
 }
+
+// When using DHCP, the DNS servers can be overridden by the optional DNS #1 and #2 settings.
+// This is useful when the router advertises a DNS server that doesn't resolve, e.g. only an unreachable IPv6 one.
+// Static IP configuration already sets the DNS servers through WiFi.config()/ETH.config().
+#ifndef EMSESP_STANDALONE
+void Network::applyDnsOverride(esp_netif_t * netif) const {
+    if (staticIPConfig_ || netif == nullptr) {
+        return;
+    }
+
+    const IPAddress servers[] = {dnsIP1_, dnsIP2_};
+    const esp_netif_dns_type_t types[] = {ESP_NETIF_DNS_MAIN, ESP_NETIF_DNS_BACKUP};
+
+    for (uint8_t i = 0; i < 2; i++) {
+        if (IPUtils::isNotSet(servers[i])) {
+            continue;
+        }
+        esp_netif_dns_info_t dns = {};
+        dns.ip.type              = ESP_IPADDR_TYPE_V4;
+        dns.ip.u_addr.ip4.addr   = static_cast<uint32_t>(servers[i]);
+        if (esp_netif_set_dns_info(netif, types[i], &dns) == ESP_OK) {
+            LOG_DEBUG("Using custom DNS server %s", servers[i].toString().c_str());
+        } else {
+            LOG_WARNING("Failed to set custom DNS server %s", servers[i].toString().c_str());
+        }
+    }
+}
+#endif
 
 // format the BSSID (MAC address) of the network interface
 bool Network::formatBSSID([[maybe_unused]] const String & bssid, [[maybe_unused]] uint8_t (&mac)[6]) {

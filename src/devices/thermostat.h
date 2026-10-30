@@ -63,6 +63,8 @@ class Thermostat : public EMSdevice {
         uint8_t hpoperatingstate;
         uint8_t roominfluence;
         uint8_t roominfl_factor;
+        uint8_t adaptfactor; // FR100/FR120 Anpassungsfaktor I, byte * 5 = %
+        uint8_t gainfactor;  // FR100/FR120 Verstärkungsfaktor V, byte * 5 = %
         int16_t curroominfl;
         uint8_t flowtempoffset;
         uint8_t minflowtemp;
@@ -272,6 +274,8 @@ class Thermostat : public EMSdevice {
     // Installation parameters
     uint8_t ibaMainDisplay_; // display on Thermostat: 0 int temp, 1 int setpoint, 2 ext temp, 3 burner temp, 4 ww temp, 5 functioning mode, 6 time, 7 data, 9 smoke temp
     uint8_t ibaLanguage_;          // language on Thermostat: 0 german, 1 dutch, 2 french, 3 italian
+    uint8_t ibaDateFormat_;        // Junkers: date format: 0 DD.MM.YYYY, 1 MM/DD/YYYY
+    uint8_t ibaContrast_;          // Junkers: display contrast, raw value 10..30 (= 25..75 % in steps of 2.5)
     int8_t  ibaCalIntTemperature_; // offset int. temperature sensor, by * 0.1 Kelvin (-5.0 to 5.0K)
     int8_t  ibaMinExtTemperature_; // min ext temp for heating curve, in deg., 0xF6=-10, 0x0 = 0, 0xFF=-1
     uint8_t ibaBuildingType_;      // building type: 0 = light, 1 = medium, 2 = heavy
@@ -521,6 +525,13 @@ class Thermostat : public EMSdevice {
     bool set_remotehum(const char * value, const int8_t id);
     bool set_roominfl_factor(const char * value, const int8_t id);
     bool set_roominfl_mode(const char * value, const int8_t id);
+    bool set_junkers_factor(const char * value, const int8_t id, const uint8_t offset, const int min_percent);
+    inline bool set_adaptfactor(const char * value, const int8_t id) {
+        return set_junkers_factor(value, id, 1, 0); // Anpassungsfaktor I, 0..100%
+    }
+    inline bool set_gainfactor(const char * value, const int8_t id) {
+        return set_junkers_factor(value, id, 2, 40); // Verstärkungsfaktor V, 40..100%
+    }
     bool set_reducemode(const char * value, const int8_t id);
     bool set_switchtime1(const char * value, const int8_t id);
     bool set_switchtime2(const char * value, const int8_t id);
@@ -703,6 +714,8 @@ class Thermostat : public EMSdevice {
     bool set_clockoffset(const char * value, const int8_t id);
     bool set_calinttemp(const char * value, const int8_t id);
     bool set_display(const char * value, const int8_t id);
+    bool set_dateformat(const char * value, const int8_t id);
+    bool set_contrast(const char * value, const int8_t id);
     bool set_building(const char * value, const int8_t id);
     bool set_damping(const char * value, const int8_t id);
     bool set_solar(const char * value, const int8_t id);
