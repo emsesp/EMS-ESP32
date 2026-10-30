@@ -535,6 +535,8 @@ void create_tests() {
     capture(); // always end with this, this will create the run_test() function
 }
 
+#include "test_security.h"
+
 // Main entry point
 int main() {
     webServer     = new AsyncWebServer(80);
@@ -571,6 +573,7 @@ int main() {
     run_manual_tests();       // execute some other manual tests from this file
     run_console_tests();      // execute some console tests
     run_shuntingYard_tests(); // execute the shuntingYard tests
+    run_security_tests();     // execute the permission tests, last as they change settings
 
     return UNITY_END();
 }

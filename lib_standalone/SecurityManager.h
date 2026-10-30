@@ -6,6 +6,7 @@
 #include "AsyncJson.h"
 
 #include <memory>
+#include <vector>
 
 #define FACTORY_JWT_SECRET "ems-esp"
 #define ACCESS_TOKEN_PARAMETER "access_token"
@@ -57,6 +58,15 @@ class AuthenticationPredicates {
     };
 };
 
+// a registered endpoint, kept so unit tests can check its permissions and call its handler
+struct StandaloneRoute {
+    String                       path;
+    WebRequestMethodComposite    method;
+    AuthenticationPredicate      predicate;
+    ArRequestHandlerFunction     plainHandler;
+    ArJsonRequestHandlerFunction jsonHandler;
+};
+
 class SecurityManager {
   public:
     virtual Authentication authenticateRequest(AsyncWebServerRequest * request) = 0;
@@ -67,6 +77,7 @@ class SecurityManager {
                      AuthenticationPredicate      predicate,
                      ArJsonRequestHandlerFunction function,
                      WebRequestMethodComposite    method = HTTP_POST) {
+        routes().push_back({path, method, predicate, nullptr, function});
     }
 
     // non-Json endpoints - default GET
@@ -75,6 +86,22 @@ class SecurityManager {
                      AuthenticationPredicate   predicate,
                      ArRequestHandlerFunction  function,
                      WebRequestMethodComposite method = HTTP_GET) {
+        routes().push_back({path, method, predicate, function, nullptr});
+    }
+
+    // function-local static, services register from static constructors
+    static std::vector<StandaloneRoute> & routes() {
+        static std::vector<StandaloneRoute> routes_;
+        return routes_;
+    }
+
+    static const StandaloneRoute * findRoute(const String & path, WebRequestMethod method) {
+        for (const auto & route : routes()) {
+            if ((route.method & method) && route.path == path.c_str()) {
+                return &route;
+            }
+        }
+        return nullptr;
     }
 };
 

@@ -22,6 +22,7 @@ class HttpGetEndpoint {
                     AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN)
         : _stateReader(stateReader)
         , _statefulService(statefulService) {
+        SecurityManager::routes().push_back({servicePath, HTTP_GET, authenticationPredicate, nullptr, nullptr});
     }
 
     HttpGetEndpoint(JsonStateReader<T> stateReader, StatefulService<T> * statefulService, AsyncWebServer * server, const String & servicePath)
@@ -50,6 +51,7 @@ class HttpPostEndpoint {
         : _stateReader(stateReader)
         , _stateUpdater(stateUpdater)
         , _statefulService(statefulService) {
+        SecurityManager::routes().push_back({servicePath, HTTP_POST, authenticationPredicate, nullptr, nullptr});
     }
 
     HttpPostEndpoint(JsonStateReader<T>   stateReader,

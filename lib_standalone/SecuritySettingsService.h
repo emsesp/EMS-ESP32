@@ -24,6 +24,9 @@
 #define SECURITY_SETTINGS_FILE "/config/securitySettings.json"
 #define SECURITY_SETTINGS_PATH "/rest/securitySettings"
 
+// who authenticateRequest() reports as the caller, set by unit tests
+enum class StandaloneIdentity : uint8_t { NONE, GUEST, ADMIN };
+
 class SecuritySettingsService : public SecurityManager {
   public:
     SecuritySettingsService(AsyncWebServer * server, FS * fs);
@@ -31,6 +34,13 @@ class SecuritySettingsService : public SecurityManager {
 
     // minimal set of functions to support framework with security settings disabled
     Authentication authenticateRequest(AsyncWebServerRequest * request);
+
+    static void identity(StandaloneIdentity identity) {
+        identity_ = identity;
+    }
+
+  private:
+    static StandaloneIdentity identity_;
 };
 
 #endif

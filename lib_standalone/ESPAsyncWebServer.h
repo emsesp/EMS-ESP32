@@ -70,6 +70,7 @@ class AsyncWebServerRequest {
     WebRequestMethodComposite _method;
 
     String _url;
+    int    _sentCode = 0;
 
   public:
     void * _tempObject;
@@ -96,12 +97,25 @@ class AsyncWebServerRequest {
         return 0;
     }
 
-    void send(AsyncWebServerResponse * response) {};
+    void send(AsyncWebServerResponse * response) {
+        _sentCode = 200;
+    };
 
-    void send(AsyncJsonResponse * response) {};
+    void send(AsyncJsonResponse * response) {
+        _sentCode = 200;
+    };
 
-    void send(int code, const String & contentType = String(), const String & content = String()) {};
-    void send(int code, const String & contentType, const __FlashStringHelper *) {};
+    void send(int code, const String & contentType = String(), const String & content = String()) {
+        _sentCode = code;
+    };
+    void send(int code, const String & contentType, const __FlashStringHelper *) {
+        _sentCode = code;
+    };
+
+    // HTTP status code of the last response sent, 0 if nothing was sent
+    int sentCode() const {
+        return _sentCode;
+    }
 
     const String & url() const {
         return _url;
@@ -163,8 +177,9 @@ typedef std::function<bool(AsyncWebServerRequest * request)> ArRequestFilterFunc
 
 class AsyncWebHandler {
   protected:
-    String _username;
-    String _password;
+    String                  _username;
+    String                  _password;
+    ArRequestFilterFunction _filter;
 
   public:
     AsyncWebHandler()
@@ -198,7 +213,12 @@ class AsyncWebHandler {
     }
 
     AsyncWebHandler & setFilter(ArRequestFilterFunction fn) {
+        _filter = fn;
         return *this;
+    }
+
+    bool filter(AsyncWebServerRequest * request) {
+        return _filter == nullptr || _filter(request);
     }
 };
 
