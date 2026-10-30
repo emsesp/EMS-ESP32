@@ -15,7 +15,14 @@ namespace espMqttClientInternals {
 ClientSecureSync::ClientSecureSync()
     : client() {
     client.setClient(&basic_client, true);
+#if defined(BOARD_HAS_PSRAM) && defined(ENABLE_PSRAM)
+    // A small receive buffer relies on the broker honouring the TLS max fragment length extension. Brokers that
+    // ignore it send records of up to 16 KB, which fail the connection. With PSRAM the TLS buffers are allocated
+    // there, so take a full-size receive buffer.
+    client.setBufferSizes(ESP.getPsramSize() > 0 ? 16384 : EMC_RX_BUFFER_SIZE, EMC_TX_BUFFER_SIZE);
+#else
     client.setBufferSizes(EMC_RX_BUFFER_SIZE, EMC_TX_BUFFER_SIZE);
+#endif
     client.setSessionTimeout(120); // Set the timeout in seconds (>=120 seconds)
 }
 
