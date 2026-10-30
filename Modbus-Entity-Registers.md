@@ -6892,6 +6892,8 @@ uint8
 | dateformat | date format | enum |   | true | DEVICE_DATA | 97 | 1 | 1 |
 uint8
 | contrast | contrast | uint8 (&gt;=0&lt;=0) |   | true | DEVICE_DATA | 98 | 1 | 1 |
+int8
+| intoffset | internal temperature offset | int8 (&gt;=-3&lt;=3) | C | true | DEVICE_DATA | 46 | 1 | 1/10 |
 uint8
 | building | building type | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 50 | 1 | 10 |
 int8
@@ -6955,6 +6957,8 @@ uint8
 | dateformat | date format | enum |   | true | DEVICE_DATA | 97 | 1 | 1 |
 uint8
 | contrast | contrast | uint8 (&gt;=0&lt;=0) |   | true | DEVICE_DATA | 98 | 1 | 1 |
+int8
+| intoffset | internal temperature offset | int8 (&gt;=-3&lt;=3) | C | true | DEVICE_DATA | 46 | 1 | 1/10 |
 uint8
 | building | building type | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 50 | 1 | 10 |
 int8
@@ -7013,6 +7017,13 @@ uint8
 | errorcode | error code | string |   | false | DEVICE_DATA | 0 | 8 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 8 | 25 | 1 |
 | datetime | date/time | string |   | false | DEVICE_DATA | 33 | 13 | 1 |
+| display | display | enum |   | true | DEVICE_DATA | 65 | 1 | 1 |
+| language | language | enum |   | true | DEVICE_DATA | 66 | 1 | 1 |
+| dateformat | date format | enum |   | true | DEVICE_DATA | 97 | 1 | 1 |
+uint8
+| contrast | contrast | uint8 (&gt;=0&lt;=0) |   | true | DEVICE_DATA | 98 | 1 | 1 |
+int8
+| intoffset | internal temperature offset | int8 (&gt;=-3&lt;=3) | C | true | DEVICE_DATA | 46 | 1 | 1/10 |
 uint8
 | building | building type | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 50 | 1 | 10 |
 int8
@@ -7063,6 +7074,13 @@ uint8
 | errorcode | error code | string |   | false | DEVICE_DATA | 0 | 8 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 8 | 25 | 1 |
 | datetime | date/time | string |   | false | DEVICE_DATA | 33 | 13 | 1 |
+| display | display | enum |   | true | DEVICE_DATA | 65 | 1 | 1 |
+| language | language | enum |   | true | DEVICE_DATA | 66 | 1 | 1 |
+| dateformat | date format | enum |   | true | DEVICE_DATA | 97 | 1 | 1 |
+uint8
+| contrast | contrast | uint8 (&gt;=0&lt;=0) |   | true | DEVICE_DATA | 98 | 1 | 1 |
+int8
+| intoffset | internal temperature offset | int8 (&gt;=-3&lt;=3) | C | true | DEVICE_DATA | 46 | 1 | 1/10 |
 uint8
 | building | building type | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 50 | 1 | 10 |
 int8
@@ -7118,6 +7136,8 @@ uint8
 | dateformat | date format | enum |   | true | DEVICE_DATA | 97 | 1 | 1 |
 uint8
 | contrast | contrast | uint8 (&gt;=0&lt;=0) |   | true | DEVICE_DATA | 98 | 1 | 1 |
+int8
+| intoffset | internal temperature offset | int8 (&gt;=-3&lt;=3) | C | true | DEVICE_DATA | 46 | 1 | 1/10 |
 uint8
 | building | building type | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 50 | 1 | 10 |
 int8
@@ -7181,6 +7201,8 @@ uint8
 | dateformat | date format | enum |   | true | DEVICE_DATA | 97 | 1 | 1 |
 uint8
 | contrast | contrast | uint8 (&gt;=0&lt;=0) |   | true | DEVICE_DATA | 98 | 1 | 1 |
+int8
+| intoffset | internal temperature offset | int8 (&gt;=-3&lt;=3) | C | true | DEVICE_DATA | 46 | 1 | 1/10 |
 uint8
 | building | building type | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 50 | 1 | 10 |
 int8
@@ -7239,6 +7261,13 @@ uint8
 | errorcode | error code | string |   | false | DEVICE_DATA | 0 | 8 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 8 | 25 | 1 |
 | datetime | date/time | string |   | false | DEVICE_DATA | 33 | 13 | 1 |
+| display | display | enum |   | true | DEVICE_DATA | 65 | 1 | 1 |
+| language | language | enum |   | true | DEVICE_DATA | 66 | 1 | 1 |
+| dateformat | date format | enum |   | true | DEVICE_DATA | 97 | 1 | 1 |
+uint8
+| contrast | contrast | uint8 (&gt;=0&lt;=0) |   | true | DEVICE_DATA | 98 | 1 | 1 |
+int8
+| intoffset | internal temperature offset | int8 (&gt;=-3&lt;=3) | C | true | DEVICE_DATA | 46 | 1 | 1/10 |
 uint8
 | building | building type | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 50 | 1 | 10 |
 int8
@@ -7294,6 +7323,8 @@ uint8
 | dateformat | date format | enum |   | true | DEVICE_DATA | 97 | 1 | 1 |
 uint8
 | contrast | contrast | uint8 (&gt;=0&lt;=0) |   | true | DEVICE_DATA | 98 | 1 | 1 |
+int8
+| intoffset | internal temperature offset | int8 (&gt;=-3&lt;=3) | C | true | DEVICE_DATA | 46 | 1 | 1/10 |
 uint8
 | building | building type | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 50 | 1 | 10 |
 int8
@@ -7352,6 +7383,13 @@ uint8
 | errorcode | error code | string |   | false | DEVICE_DATA | 0 | 8 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 8 | 25 | 1 |
 | datetime | date/time | string |   | false | DEVICE_DATA | 33 | 13 | 1 |
+| display | display | enum |   | true | DEVICE_DATA | 65 | 1 | 1 |
+| language | language | enum |   | true | DEVICE_DATA | 66 | 1 | 1 |
+| dateformat | date format | enum |   | true | DEVICE_DATA | 97 | 1 | 1 |
+uint8
+| contrast | contrast | uint8 (&gt;=0&lt;=0) |   | true | DEVICE_DATA | 98 | 1 | 1 |
+int8
+| intoffset | internal temperature offset | int8 (&gt;=-3&lt;=3) | C | true | DEVICE_DATA | 46 | 1 | 1/10 |
 uint8
 | building | building type | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 50 | 1 | 10 |
 int8
@@ -7402,6 +7440,13 @@ uint8
 | errorcode | error code | string |   | false | DEVICE_DATA | 0 | 8 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 8 | 25 | 1 |
 | datetime | date/time | string |   | false | DEVICE_DATA | 33 | 13 | 1 |
+| display | display | enum |   | true | DEVICE_DATA | 65 | 1 | 1 |
+| language | language | enum |   | true | DEVICE_DATA | 66 | 1 | 1 |
+| dateformat | date format | enum |   | true | DEVICE_DATA | 97 | 1 | 1 |
+uint8
+| contrast | contrast | uint8 (&gt;=0&lt;=0) |   | true | DEVICE_DATA | 98 | 1 | 1 |
+int8
+| intoffset | internal temperature offset | int8 (&gt;=-3&lt;=3) | C | true | DEVICE_DATA | 46 | 1 | 1/10 |
 uint8
 | building | building type | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 50 | 1 | 10 |
 int8
@@ -7457,6 +7502,8 @@ uint8
 | dateformat | date format | enum |   | true | DEVICE_DATA | 97 | 1 | 1 |
 uint8
 | contrast | contrast | uint8 (&gt;=0&lt;=0) |   | true | DEVICE_DATA | 98 | 1 | 1 |
+int8
+| intoffset | internal temperature offset | int8 (&gt;=-3&lt;=3) | C | true | DEVICE_DATA | 46 | 1 | 1/10 |
 uint8
 | building | building type | uint8 (&gt;=0&lt;=0) | % | true | DEVICE_DATA | 50 | 1 | 10 |
 int8
