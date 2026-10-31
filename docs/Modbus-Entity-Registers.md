@@ -6891,7 +6891,7 @@ uint8
 | language | language | enum |   | true | DEVICE_DATA | 66 | 1 | 1 |
 | dateformat | date format | enum |   | true | DEVICE_DATA | 97 | 1 | 1 |
 uint8
-| contrast | contrast | uint8 (&gt;=0&lt;=0) |   | true | DEVICE_DATA | 98 | 1 | 1 |
+| contrast | display contrast | uint8 (&gt;=25&lt;=75) | % | true | DEVICE_DATA | 98 | 1 | 1/2 |
 int8
 | intoffset | internal temperature offset | int8 (&gt;=-3&lt;=3) | C | true | DEVICE_DATA | 46 | 1 | 1/10 |
 uint8
@@ -6956,7 +6956,7 @@ uint8
 | language | language | enum |   | true | DEVICE_DATA | 66 | 1 | 1 |
 | dateformat | date format | enum |   | true | DEVICE_DATA | 97 | 1 | 1 |
 uint8
-| contrast | contrast | uint8 (&gt;=0&lt;=0) |   | true | DEVICE_DATA | 98 | 1 | 1 |
+| contrast | display contrast | uint8 (&gt;=25&lt;=75) | % | true | DEVICE_DATA | 98 | 1 | 1/2 |
 int8
 | intoffset | internal temperature offset | int8 (&gt;=-3&lt;=3) | C | true | DEVICE_DATA | 46 | 1 | 1/10 |
 uint8
@@ -7021,7 +7021,7 @@ uint8
 | language | language | enum |   | true | DEVICE_DATA | 66 | 1 | 1 |
 | dateformat | date format | enum |   | true | DEVICE_DATA | 97 | 1 | 1 |
 uint8
-| contrast | contrast | uint8 (&gt;=0&lt;=0) |   | true | DEVICE_DATA | 98 | 1 | 1 |
+| contrast | display contrast | uint8 (&gt;=25&lt;=75) | % | true | DEVICE_DATA | 98 | 1 | 1/2 |
 int8
 | intoffset | internal temperature offset | int8 (&gt;=-3&lt;=3) | C | true | DEVICE_DATA | 46 | 1 | 1/10 |
 uint8
@@ -7078,7 +7078,7 @@ uint8
 | language | language | enum |   | true | DEVICE_DATA | 66 | 1 | 1 |
 | dateformat | date format | enum |   | true | DEVICE_DATA | 97 | 1 | 1 |
 uint8
-| contrast | contrast | uint8 (&gt;=0&lt;=0) |   | true | DEVICE_DATA | 98 | 1 | 1 |
+| contrast | display contrast | uint8 (&gt;=25&lt;=75) | % | true | DEVICE_DATA | 98 | 1 | 1/2 |
 int8
 | intoffset | internal temperature offset | int8 (&gt;=-3&lt;=3) | C | true | DEVICE_DATA | 46 | 1 | 1/10 |
 uint8
@@ -7135,7 +7135,7 @@ uint8
 | language | language | enum |   | true | DEVICE_DATA | 66 | 1 | 1 |
 | dateformat | date format | enum |   | true | DEVICE_DATA | 97 | 1 | 1 |
 uint8
-| contrast | contrast | uint8 (&gt;=0&lt;=0) |   | true | DEVICE_DATA | 98 | 1 | 1 |
+| contrast | display contrast | uint8 (&gt;=25&lt;=75) | % | true | DEVICE_DATA | 98 | 1 | 1/2 |
 int8
 | intoffset | internal temperature offset | int8 (&gt;=-3&lt;=3) | C | true | DEVICE_DATA | 46 | 1 | 1/10 |
 uint8
@@ -7200,7 +7200,7 @@ uint8
 | language | language | enum |   | true | DEVICE_DATA | 66 | 1 | 1 |
 | dateformat | date format | enum |   | true | DEVICE_DATA | 97 | 1 | 1 |
 uint8
-| contrast | contrast | uint8 (&gt;=0&lt;=0) |   | true | DEVICE_DATA | 98 | 1 | 1 |
+| contrast | display contrast | uint8 (&gt;=25&lt;=75) | % | true | DEVICE_DATA | 98 | 1 | 1/2 |
 int8
 | intoffset | internal temperature offset | int8 (&gt;=-3&lt;=3) | C | true | DEVICE_DATA | 46 | 1 | 1/10 |
 uint8
@@ -7265,7 +7265,7 @@ uint8
 | language | language | enum |   | true | DEVICE_DATA | 66 | 1 | 1 |
 | dateformat | date format | enum |   | true | DEVICE_DATA | 97 | 1 | 1 |
 uint8
-| contrast | contrast | uint8 (&gt;=0&lt;=0) |   | true | DEVICE_DATA | 98 | 1 | 1 |
+| contrast | display contrast | uint8 (&gt;=25&lt;=75) | % | true | DEVICE_DATA | 98 | 1 | 1/2 |
 int8
 | intoffset | internal temperature offset | int8 (&gt;=-3&lt;=3) | C | true | DEVICE_DATA | 46 | 1 | 1/10 |
 uint8
@@ -7322,7 +7322,7 @@ uint8
 | language | language | enum |   | true | DEVICE_DATA | 66 | 1 | 1 |
 | dateformat | date format | enum |   | true | DEVICE_DATA | 97 | 1 | 1 |
 uint8
-| contrast | contrast | uint8 (&gt;=0&lt;=0) |   | true | DEVICE_DATA | 98 | 1 | 1 |
+| contrast | display contrast | uint8 (&gt;=25&lt;=75) | % | true | DEVICE_DATA | 98 | 1 | 1/2 |
 int8
 | intoffset | internal temperature offset | int8 (&gt;=-3&lt;=3) | C | true | DEVICE_DATA | 46 | 1 | 1/10 |
 uint8
@@ -7387,7 +7387,7 @@ uint8
 | language | language | enum |   | true | DEVICE_DATA | 66 | 1 | 1 |
 | dateformat | date format | enum |   | true | DEVICE_DATA | 97 | 1 | 1 |
 uint8
-| contrast | contrast | uint8 (&gt;=0&lt;=0) |   | true | DEVICE_DATA | 98 | 1 | 1 |
+| contrast | display contrast | uint8 (&gt;=25&lt;=75) | % | true | DEVICE_DATA | 98 | 1 | 1/2 |
 int8
 | intoffset | internal temperature offset | int8 (&gt;=-3&lt;=3) | C | true | DEVICE_DATA | 46 | 1 | 1/10 |
 uint8
@@ -7444,7 +7444,7 @@ uint8
 | language | language | enum |   | true | DEVICE_DATA | 66 | 1 | 1 |
 | dateformat | date format | enum |   | true | DEVICE_DATA | 97 | 1 | 1 |
 uint8
-| contrast | contrast | uint8 (&gt;=0&lt;=0) |   | true | DEVICE_DATA | 98 | 1 | 1 |
+| contrast | display contrast | uint8 (&gt;=25&lt;=75) | % | true | DEVICE_DATA | 98 | 1 | 1/2 |
 int8
 | intoffset | internal temperature offset | int8 (&gt;=-3&lt;=3) | C | true | DEVICE_DATA | 46 | 1 | 1/10 |
 uint8
@@ -7501,7 +7501,7 @@ uint8
 | language | language | enum |   | true | DEVICE_DATA | 66 | 1 | 1 |
 | dateformat | date format | enum |   | true | DEVICE_DATA | 97 | 1 | 1 |
 uint8
-| contrast | contrast | uint8 (&gt;=0&lt;=0) |   | true | DEVICE_DATA | 98 | 1 | 1 |
+| contrast | display contrast | uint8 (&gt;=25&lt;=75) | % | true | DEVICE_DATA | 98 | 1 | 1/2 |
 int8
 | intoffset | internal temperature offset | int8 (&gt;=-3&lt;=3) | C | true | DEVICE_DATA | 46 | 1 | 1/10 |
 uint8
