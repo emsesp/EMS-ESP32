@@ -53,7 +53,7 @@ class WebStatusService {
 
     // actions
     void    getVersions(JsonObject root);
-    bool    exportData(JsonObject root, std::string & type);
+    bool    exportData(JsonObject root, std::string & type, const bool include_secrets);
     bool    getCustomSupport(JsonObject root);
     bool    uploadURL(const char * url);
     bool    setSystemStatus(const char * status);

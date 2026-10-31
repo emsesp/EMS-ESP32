@@ -241,7 +241,7 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
         ok = EMSESP::system_.set_partition(param.c_str());
     } else if (action == "export") {
         if (has_param) {
-            ok = exportData(root, param);
+            ok = exportData(root, param, json["secrets"] | false); // include passwords and keys, only if asked for
         }
     } else if (action == "getCustomSupport") {
         ok = getCustomSupport(root);
@@ -580,15 +580,15 @@ void WebStatusService::allvalues(JsonObject output) {
 
 // action = export
 // returns data for a specific feature/settings as a json object
-bool WebStatusService::exportData(JsonObject root, std::string & type) {
+bool WebStatusService::exportData(JsonObject root, std::string & type, const bool include_secrets) {
     if (type == "settings") {
         root["type"] = type; // add settings as a group
-        System::exportSettings(type, NETWORK_SETTINGS_FILE, root);
-        System::exportSettings(type, AP_SETTINGS_FILE, root);
-        System::exportSettings(type, MQTT_SETTINGS_FILE, root);
-        System::exportSettings(type, NTP_SETTINGS_FILE, root);
-        System::exportSettings(type, SECURITY_SETTINGS_FILE, root);
-        System::exportSettings(type, EMSESP_SETTINGS_FILE, root);
+        System::exportSettings(type, NETWORK_SETTINGS_FILE, root, include_secrets);
+        System::exportSettings(type, AP_SETTINGS_FILE, root, include_secrets);
+        System::exportSettings(type, MQTT_SETTINGS_FILE, root, include_secrets);
+        System::exportSettings(type, NTP_SETTINGS_FILE, root, include_secrets);
+        System::exportSettings(type, SECURITY_SETTINGS_FILE, root, include_secrets);
+        System::exportSettings(type, EMSESP_SETTINGS_FILE, root, include_secrets);
     } else if (type == "schedule") {
         System::exportSettings(type, EMSESP_SCHEDULER_FILE, root);
     } else if (type == "customizations") {
@@ -598,7 +598,7 @@ bool WebStatusService::exportData(JsonObject root, std::string & type) {
     } else if (type == "allvalues") {
         allvalues(root);
     } else if (type == "systembackup") {
-        System::exportSystemBackup(root);
+        System::exportSystemBackup(root, include_secrets);
     } else {
         return false; // error
     }

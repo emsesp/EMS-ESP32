@@ -3,6 +3,7 @@
 #include <unity.h>
 
 #include "SecuritySettingsService.h"
+#include "settings_secrets.h"
 
 // Permission tests. Run last, they change settings and identity.
 
@@ -227,6 +228,67 @@ void security_test_serial_su_needs_password() {
     TEST_ASSERT_NULL(strstr(output_buffer, "change the default Super User password"));
 }
 
+// exported settings leave out passwords and keys
+void security_test_backup_redacts_secrets() {
+    JsonDocument doc;
+    deserializeJson(doc,
+                    R"({"jwt_secret":"s3cret","users":[{"username":"admin","password":"pw","admin":true}],"enabled":true})");
+    JsonObject security = doc.as<JsonObject>();
+    SettingsSecrets::redact("Security", security);
+    TEST_ASSERT_FALSE(security["jwt_secret"].is<JsonVariant>());
+    TEST_ASSERT_FALSE(security["users"][0]["password"].is<JsonVariant>());
+    TEST_ASSERT_EQUAL_STRING("admin", security["users"][0]["username"]);
+
+    deserializeJson(doc, R"({"ssid":"home","password":"wifi-pw"})");
+    JsonObject network = doc.as<JsonObject>();
+    SettingsSecrets::redact("Network", network);
+    TEST_ASSERT_FALSE(network["password"].is<JsonVariant>());
+    TEST_ASSERT_EQUAL_STRING("home", network["ssid"]);
+
+    deserializeJson(doc, R"({"modules":[{"key":"m1","license":"L1","enabled":true}]})");
+    JsonObject modules = doc.as<JsonObject>();
+    SettingsSecrets::redact("Modules", modules);
+    TEST_ASSERT_FALSE(modules["modules"][0]["license"].is<JsonVariant>());
+
+    deserializeJson(doc, R"({"email_pass":"mail-pw","locale":"en"})");
+    JsonObject settings = doc.as<JsonObject>();
+    SettingsSecrets::redact("Settings", settings);
+    TEST_ASSERT_FALSE(settings["email_pass"].is<JsonVariant>());
+}
+
+// restoring a backup without secrets keeps the ones on the device, a backup with secrets overwrites them
+void security_test_restore_merges_secrets() {
+    JsonDocument current;
+    deserializeJson(current,
+                    R"({"jwt_secret":"device","users":[{"username":"admin","password":"device-pw","admin":true}]})");
+
+    JsonDocument restored;
+    deserializeJson(restored,
+                    R"({"users":[{"username":"admin","admin":true},{"username":"newuser","admin":false}]})");
+    SettingsSecrets::merge("Security", restored.as<JsonObject>(), current.as<JsonObjectConst>());
+    TEST_ASSERT_EQUAL_STRING("device", restored["jwt_secret"]);
+    TEST_ASSERT_EQUAL_STRING("device-pw", restored["users"][0]["password"]);
+    TEST_ASSERT_EQUAL_STRING("", restored["users"][1]["password"]); // can't log in until an admin sets one
+
+    // older backups and full backups carry their own secrets
+    deserializeJson(restored, R"({"jwt_secret":"backup","users":[{"username":"admin","password":"backup-pw","admin":true}]})");
+    SettingsSecrets::merge("Security", restored.as<JsonObject>(), current.as<JsonObjectConst>());
+    TEST_ASSERT_EQUAL_STRING("backup", restored["jwt_secret"]);
+    TEST_ASSERT_EQUAL_STRING("backup-pw", restored["users"][0]["password"]);
+
+    deserializeJson(current, R"({"modules":[{"key":"m1","license":"L1"}]})");
+    deserializeJson(restored, R"({"modules":[{"key":"m1","enabled":true}]})");
+    SettingsSecrets::merge("Modules", restored.as<JsonObject>(), current.as<JsonObjectConst>());
+    TEST_ASSERT_EQUAL_STRING("L1", restored["modules"][0]["license"]);
+}
+
+// the device signing key and its flag stay on the device, never in a backup
+void security_test_private_nvs_keys() {
+    TEST_ASSERT_FALSE(SettingsSecrets::is_private_nvs_key("boiler_x"));
+    TEST_ASSERT_TRUE(SettingsSecrets::is_private_nvs_key(EMSESP_NVS_JWT_KEY));
+    TEST_ASSERT_TRUE(SettingsSecrets::is_private_nvs_key(EMSESP_NVS_TOKENS_RESET));
+}
+
 void run_security_tests() {
     EMSESP::webCommandService.load_test_data(); // named commands used by executeCommand
 
@@ -242,4 +304,7 @@ void run_security_tests() {
     RUN_TEST(security_test_console_read_needs_admin);
     RUN_TEST(security_test_console_su_default_password);
     RUN_TEST(security_test_serial_su_needs_password);
+    RUN_TEST(security_test_backup_redacts_secrets);
+    RUN_TEST(security_test_restore_merges_secrets);
+    RUN_TEST(security_test_private_nvs_keys);
 }

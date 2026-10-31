@@ -524,7 +524,7 @@ static void handleSignIn(AsyncWebServerRequest * request, JsonVariant & json) {
     const String password = json["password"] | "";
 
     for (const auto & admin : settings.admins) {
-        if (admin.username == username && admin.password == password) {
+        if (admin.username == username && !admin.password.isEmpty() && admin.password == password) {
             session_token = generateToken();
 
             auto *     response  = new AsyncJsonResponse();

@@ -92,6 +92,7 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - security: the live System Log needs a login
 - security: on telnet, `su` is refused while the Super User password is still the factory default, and on the serial console `su` asks for the password. The console `read` command needs admin
 - security: to go back to 3.8.x after upgrading, restore a System Backup made before the upgrade
+- security: settings exports and System Backups leave out passwords and keys, unless an admin ticks "Include passwords and keys". Restoring keeps the passwords already on the device; a restored user with no password can't log in until an admin sets one [#3356](https://github.com/emsesp/EMS-ESP32/issues/3356)
 
 - various memory optimizations [#3083](https://github.com/emsesp/EMS-ESP32/issues/3083)
 - Scheduler name is now mandatory

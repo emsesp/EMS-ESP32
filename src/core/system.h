@@ -156,8 +156,9 @@ class System {
     void    systemStatus(uint8_t status_code);
     uint8_t systemStatus();
 
-    static void exportSettings(const std::string & type, const char * filename, JsonObject output);
-    static void exportSystemBackup(JsonObject output);
+    // without include_secrets, passwords and keys are left out (see SettingsSecrets)
+    static void exportSettings(const std::string & type, const char * filename, JsonObject output, const bool include_secrets = false);
+    static void exportSystemBackup(JsonObject output, const bool include_secrets = false);
     static bool saveSettings(const char * filename, JsonObject input);
 
     static bool                 add_gpio(uint8_t pin, const char * source_name);

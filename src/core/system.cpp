@@ -33,6 +33,7 @@
 #include <map>
 
 #include "firmwareVersion.h"
+#include "settings_secrets.h"
 #include "shuntingYard.h"       // for compute() used by the message and sendmail commands
 #include "emsesp_http_client.h" // for the shared TLS client settings
 
@@ -1708,6 +1709,9 @@ bool System::check_restore() {
                         for (JsonObject entry : nvs_entries) {
                             std::string key  = entry["key"] | "";
                             int         type = entry["type"] | NVS_TYPE_ANY;
+                            if (SettingsSecrets::is_private_nvs_key(key.c_str())) {
+                                continue;
+                            }
 
                             switch (type) {
                             case NVS_TYPE_I8:
@@ -2109,7 +2113,7 @@ static const std::pair<const char *, const char *> SECTION_MAP[] = {
 #endif
 
 // convert a single config file into a section of the output json object
-void System::exportSettings(const std::string & type, [[maybe_unused]] const char * filename, JsonObject output) {
+void System::exportSettings(const std::string & type, [[maybe_unused]] const char * filename, JsonObject output, [[maybe_unused]] const bool include_secrets) {
     if (type != "settings") {
         output["type"] = type; // add the type to the output, not for settings as it's already added because its grouped
     }
@@ -2139,6 +2143,9 @@ void System::exportSettings(const std::string & type, [[maybe_unused]] const cha
             }
 
             output[section].set(jsonDocument.as<JsonObject>());
+            if (!include_secrets) {
+                SettingsSecrets::redact(section, output[section]);
+            }
         }
 
         LOG_DEBUG("Exported %s settings from file %s", section, filename);
@@ -2149,7 +2156,7 @@ void System::exportSettings(const std::string & type, [[maybe_unused]] const cha
 }
 
 // full system backup of all settings files
-void System::exportSystemBackup(JsonObject output) {
+void System::exportSystemBackup(JsonObject output, const bool include_secrets) {
     output["type"]    = "systembackup";     // add the type to the output
     output["version"] = EMSESP_APP_VERSION; // add the version to the output
 
@@ -2171,23 +2178,23 @@ void System::exportSystemBackup(JsonObject output) {
     // start with settings by grouping them together
     JsonObject node = nodes.add<JsonObject>();
     node["type"]    = "settings"; // add type once for this group
-    exportSettings("settings", NETWORK_SETTINGS_FILE, node);
-    exportSettings("settings", AP_SETTINGS_FILE, node);
-    exportSettings("settings", MQTT_SETTINGS_FILE, node);
-    exportSettings("settings", NTP_SETTINGS_FILE, node);
-    exportSettings("settings", SECURITY_SETTINGS_FILE, node);
-    exportSettings("settings", EMSESP_SETTINGS_FILE, node);
+    exportSettings("settings", NETWORK_SETTINGS_FILE, node, include_secrets);
+    exportSettings("settings", AP_SETTINGS_FILE, node, include_secrets);
+    exportSettings("settings", MQTT_SETTINGS_FILE, node, include_secrets);
+    exportSettings("settings", NTP_SETTINGS_FILE, node, include_secrets);
+    exportSettings("settings", SECURITY_SETTINGS_FILE, node, include_secrets);
+    exportSettings("settings", EMSESP_SETTINGS_FILE, node, include_secrets);
 
     node = nodes.add<JsonObject>();
-    exportSettings("commands", EMSESP_COMMANDS_FILE, node);
+    exportSettings("commands", EMSESP_COMMANDS_FILE, node, include_secrets);
     node = nodes.add<JsonObject>();
-    exportSettings("schedule", EMSESP_SCHEDULER_FILE, node);
+    exportSettings("schedule", EMSESP_SCHEDULER_FILE, node, include_secrets);
     node = nodes.add<JsonObject>();
-    exportSettings("customizations", EMSESP_CUSTOMIZATION_FILE, node);
+    exportSettings("customizations", EMSESP_CUSTOMIZATION_FILE, node, include_secrets);
     node = nodes.add<JsonObject>();
-    exportSettings("entities", EMSESP_CUSTOMENTITY_FILE, node);
+    exportSettings("entities", EMSESP_CUSTOMENTITY_FILE, node, include_secrets);
     node = nodes.add<JsonObject>();
-    exportSettings("modules", EMSESP_MODULES_FILE, node);
+    exportSettings("modules", EMSESP_MODULES_FILE, node, include_secrets);
 
 #ifndef EMSESP_STANDALONE
     // special case for custom support
@@ -2222,6 +2229,11 @@ void System::exportSystemBackup(JsonObject output) {
     while (err == ESP_OK) {
         nvs_entry_info_t info;
         nvs_entry_info(it, &info);
+        if (SettingsSecrets::is_private_nvs_key(info.key)) {
+            err = nvs_entry_next(&it);
+            continue;
+        }
+
         JsonObject entry = entries.add<JsonObject>();
         entry["type"]    = info.type;
         entry["key"]     = info.key;
@@ -2283,6 +2295,16 @@ bool System::saveSettings([[maybe_unused]] const char * filename, [[maybe_unused
 
     JsonObject section_json = input[section];
     if (section_json) {
+        // keep the device's own secrets for any the backup left out
+        File current_file = LittleFS.open(filename);
+        if (current_file) {
+            JsonDocument current(PSRAM_DOC);
+            if (!deserializeJson(current, current_file)) {
+                SettingsSecrets::merge(section, section_json, current.as<JsonObjectConst>());
+            }
+            current_file.close();
+        }
+
         File section_file = LittleFS.open(filename, "w");
         if (section_file) {
             LOG_DEBUG("Applying new uploaded %s data", section);

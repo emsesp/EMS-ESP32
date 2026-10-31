@@ -341,6 +341,7 @@ export interface APIcall {
 export interface Action {
   action: string;
   param?: string; // optional
+  secrets?: boolean; // export: include passwords and keys
 }
 
 export interface WriteAnalogSensor {

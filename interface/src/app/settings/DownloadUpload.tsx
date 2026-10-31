@@ -5,6 +5,7 @@ import DownloadIcon from '@mui/icons-material/GetApp';
 import WarningIcon from '@mui/icons-material/Warning';
 import {
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
@@ -21,6 +22,7 @@ import { useRequest } from 'alova/client';
 import type { APIcall } from 'app/main/types';
 import SystemMonitor from 'app/status/SystemMonitor';
 import {
+  BlockFormControlLabel,
   FormLoader,
   SectionContent,
   SingleUpload,
@@ -34,11 +36,13 @@ const DownloadUpload = () => {
   const { LL } = useI18nContext();
 
   const [confirmBackup, setConfirmBackup] = useState<boolean>(false);
+  const [includeSecrets, setIncludeSecrets] = useState<boolean>(false);
 
   const [restarting, setRestarting] = useState<boolean>(false);
 
   const { send: sendExportData } = useRequest(
-    (type: string) => callAction({ action: 'export', param: type }),
+    (type: string, secrets = false) =>
+      callAction({ action: 'export', param: type, secrets }),
     {
       immediate: false
     }
@@ -71,11 +75,12 @@ const DownloadUpload = () => {
 
   const handleCloseBackupDialog = () => {
     setConfirmBackup(false);
+    setIncludeSecrets(false);
   };
 
   const handleDownload = (type: string) => () => {
-    void sendExportData(type);
-    setConfirmBackup(false);
+    void sendExportData(type, includeSecrets);
+    handleCloseBackupDialog();
   };
 
   if (restarting) {
@@ -102,6 +107,16 @@ const DownloadUpload = () => {
           <WarningIcon color="warning" sx={{ fontSize: 18 }} />
           &nbsp;
           {LL.WARNING_SYSTEM_BACKUP()}
+          <BlockFormControlLabel
+            sx={{ mt: 2 }}
+            control={
+              <Checkbox
+                checked={includeSecrets}
+                onChange={(event) => setIncludeSecrets(event.target.checked)}
+              />
+            }
+            label={LL.BACKUP_INCLUDE_SECRETS()}
+          />
         </DialogContent>
         <DialogActions>
           <Button

@@ -146,7 +146,7 @@ Authentication SecuritySettingsService::authenticateJWT(String & jwt) {
 
 Authentication SecuritySettingsService::authenticate(const String & username, const String & password) {
     for (const User & _user : _state.users) {
-        if (_user.username == username && _user.password == password) {
+        if (_user.username == username && !_user.password.isEmpty() && _user.password == password) {
             return Authentication(_user);
         }
     }
