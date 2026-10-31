@@ -80,11 +80,12 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - MQTT with TLS and a CA certificate crashed on every connect (a boot loop) on boards with PSRAM when the broker's certificate chain is EC, such as Let's Encrypt ISRG Root X2: verifying it needs about 6 KB of stack and the MQTT task only had 5120 bytes. The MQTT task now gets an 8 KB stack when TLS verifies a CA certificate, and keeps 5120 bytes for insecure TLS and plain MQTT
 - a command value containing a `/` (e.g. the date format `mm/dd/yyyy`) sent via MQTT or the API was taken as a reference to another entity (`device/entity`) and failed with `no 'dd' in unknown`. It is now only treated as a reference when the part before the `/` is a known device [#3329](https://github.com/emsesp/EMS-ESP32/issues/3329)
 - Junkers `contrast` is shown and set in % (25 to 75 in steps of 2.5) instead of the raw value 10 to 30, and the Junkers `display` setting no longer lists two empty options [#3329](https://github.com/emsesp/EMS-ESP32/issues/3329)
+- RC300/RC310 `nofrostmode` missing `off` state [#3311](https://github.com/emsesp/EMS-ESP32/issues/3311)
 
 ## Changed
 
 - security: web and API access tokens are signed with a random key that is unique to each device. Existing API access tokens stop working after the upgrade: copy the new token for each user from Security > Manage Users (key icon) and update integrations that use it, such as Home Assistant. Admins see a notice in the WebUI until it is closed. Changing an admin password replaces the key, which signs everyone out; changing the Super User password no longer does
-- security: changing settings through `/api` (for example `system/mqtt/enabled`) needs an admin token
+- security: changing settings through `/api` (for example `system/mqtt/enabled`) needs an admin token, unless "Bypass Access Token authorization on API calls" is enabled in Application Settings
 - security: reading the definitions of named Commands through `/api` (`/api/commands/values`, `/info`, `/entities` or `/api/commands/<name>/value`) needs an admin token. Integrations that read these without one get "authentication failed". Calling a command by name still runs it
 - security: only admins can open or change the Scheduler, Commands, Custom Entities and Modules, rename devices or change entity customizations and log settings, or use admin actions such as exports and partition switching. Guests can still view the log
 - security: each Command has a "Guests may run this command" option. Commands created before 3.9.0 keep guest access, new ones start without it. It applies to the WebUI and `/api`
