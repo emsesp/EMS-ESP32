@@ -232,6 +232,11 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
 
     if (action == "getVersions") {
         getVersions(root);
+        if (is_admin && EMSESP::nvs_.isKey(EMSESP_NVS_TOKENS_RESET)) {
+            root["tokens_reset"] = true; // the WebUI asks the admin to regenerate API access tokens
+        }
+    } else if (action == "dismissTokensReset") {
+        EMSESP::nvs_.remove(EMSESP_NVS_TOKENS_RESET);
     } else if (action == "setPartition") {
         ok = EMSESP::system_.set_partition(param.c_str());
     } else if (action == "export") {

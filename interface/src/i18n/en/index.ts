@@ -164,6 +164,7 @@ const en: Translation = {
   STATUS_OF: '{0} Status',
   DOWNLOAD_UPLOAD: 'Download/Upload',
   CLOSE: 'Close',
+  TOKENS_RESET: 'This upgrade signs access tokens with a new device key. Existing API access tokens no longer work: generate new ones in Manage Users and update any integrations, such as Home Assistant, that use them.',
   USE: 'Use',
   FACTORY_RESET: 'Factory Reset',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Are you sure you want to reset EMS-ESP to its factory defaults?',

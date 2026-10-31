@@ -81,10 +81,16 @@ class SecuritySettingsService final : public StatefulService<SecuritySettings>, 
     HttpEndpoint<SecuritySettings>  _httpEndpoint;
     FSPersistence<SecuritySettings> _fsPersistence;
     ArduinoJsonJWT                  _jwtHandler;
+    FS *                            _fs;
+    String                          _adminCredentials; // to detect admin password changes
 
     void generateToken(AsyncWebServerRequest * request);
 
-    void configureJWTHandler();
+    void   loadSigningKey();
+    void   rotateSigningKey();
+    void   saveSigningKey(const String & key);
+    void   onSettingsUpdated();
+    String adminCredentials();
 
     Authentication authenticateJWT(String & jwt); // Lookup the user by JWT
 

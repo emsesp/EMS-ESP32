@@ -22,4 +22,5 @@ export interface VersionsResponse {
   stable?: RemoteVersionInfo;
   dev?: RemoteVersionInfo;
   system_name?: string;
+  tokens_reset?: boolean; // admins only, set after an upgrade invalidated the API access tokens
 }

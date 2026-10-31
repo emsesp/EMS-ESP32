@@ -478,6 +478,8 @@ function upgradeImportantMessages(version: string) {
 // Set MOCK_OFFLINE = true to simulate a device with no internet (omits stable/dev).
 const MOCK_OFFLINE = false;
 // const MOCK_OFFLINE = true;
+// Set to true to show the "API access tokens were reset" banner, until dismissed
+let MOCK_TOKENS_RESET = false;
 
 function get_versions() {
   const isDev = THIS_VERSION.includes('dev');
@@ -495,6 +497,7 @@ function get_versions() {
     };
     stable?: { version: string; date: string; upgradeable: boolean };
     dev?: { version: string; date: string; upgradeable: boolean };
+    tokens_reset?: boolean;
   } = {
     system_name: settings.system_name,
     current: {
@@ -504,6 +507,10 @@ function get_versions() {
       upgradeable: currentUpgradeable
     }
   };
+
+  if (MOCK_TOKENS_RESET) {
+    data.tokens_reset = true;
+  }
 
   if (!MOCK_OFFLINE) {
     data.stable = {
@@ -5510,6 +5517,9 @@ router
       } else if (action === 'setPartition') {
         // set partition
         console.log('setting partition to', content.param);
+        return status(200);
+      } else if (action === 'dismissTokensReset') {
+        MOCK_TOKENS_RESET = false;
         return status(200);
       } else if (action === 'upgradeImportantMessages') {
         // check upgrade important messages

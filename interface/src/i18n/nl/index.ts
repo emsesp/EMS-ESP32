@@ -164,6 +164,7 @@ const nl: Translation = {
   STATUS_OF: '{0} Status',
   DOWNLOAD_UPLOAD: 'Download/Upload',
   CLOSE: 'Sluiten',
+  TOKENS_RESET: 'Deze upgrade ondertekent toegangstokens met een nieuwe apparaatsleutel. Bestaande API-tokens werken niet meer: maak nieuwe aan in Gebruikers beheren en werk integraties zoals Home Assistant bij die ze gebruiken.',
   USE: 'Gebruik',
   FACTORY_RESET: 'Fabrieksinstellingen',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Weet je zeker dat je een reset naar fabrieksinstellingen uit wilt voeren?',

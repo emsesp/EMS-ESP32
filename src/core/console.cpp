@@ -230,7 +230,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                                           if (completed) {
                                               if (password1 == password2) {
 #ifndef EMSESP_STANDALONE
-                                                  EMSESP::esp32React.getSecuritySettingsService()->updateWithoutPropagation(
+                                                  EMSESP::esp32React.getSecuritySettingsService()->update(
                                                       [&](SecuritySettings & securitySettings) {
                                                           // find the username 'admin' and update its password
                                                           for (auto & user : securitySettings.users) {

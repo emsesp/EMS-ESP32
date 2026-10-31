@@ -118,6 +118,10 @@ class Shower;
 static constexpr const char * EMSESP_NVS_BOOT_NEW_FIRMWARE = "fresh_firmware"; // max 15 characters
 // why EMS-ESP switched to the recovery firmware, read and removed by the recovery app (recovery/main.cpp)
 static constexpr const char * EMSESP_NVS_RECOVERY_REASON = "rec_reason";
+// key that signs the web and API access tokens. Never exported
+static constexpr const char * EMSESP_NVS_JWT_KEY = "jwt_key";
+// set when an upgrade invalidated existing access tokens, cleared when an admin dismisses the notice
+static constexpr const char * EMSESP_NVS_TOKENS_RESET = "tokens_reset";
 
 class EMSESP {
   public:

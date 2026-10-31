@@ -164,6 +164,7 @@ const hu: Translation = {
   STATUS_OF: '{0} státusz',
   DOWNLOAD_UPLOAD: 'Letöltés/Feltöltés',
   CLOSE: 'Bezárás',
+  TOKENS_RESET: 'Ez a frissítés új eszközkulccsal írja alá a hozzáférési tokeneket. A meglévő API tokenek már nem működnek: hozzon létre újakat a Felhasználók kezelése menüben, és frissítse az ezeket használó integrációkat, például a Home Assistantot.',
   USE: 'Használat',
   FACTORY_RESET: 'Gyári alaphelyzet',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Biztosan visszaállítod az EMS-ESP-t a gyári alapértékekre?',

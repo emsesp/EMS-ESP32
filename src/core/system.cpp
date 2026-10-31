@@ -3375,6 +3375,9 @@ bool System::command_format(const char * value, const int8_t id) {
     LOG_ERROR("Format command not available in standalone or test mode");
 #endif
 
+    EMSESP::nvs_.remove(EMSESP_NVS_JWT_KEY);
+    EMSESP::nvs_.remove(EMSESP_NVS_TOKENS_RESET);
+
 // in debug we also remove all the NVS keys
 #ifdef EMSESP_DEBUG
     LOG_DEBUG("Setting NVS fresh firmware flag");
