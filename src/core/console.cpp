@@ -44,6 +44,14 @@ static inline EMSESPShell & to_shell(Shell & shell) {
 
 // add static functions here....
 
+// the factory Super User password is public, so it must not grant admin over the network
+static bool default_su_password() {
+    bool is_default = false;
+    EMSESP::esp32React.getSecuritySettingsService()->read(
+        [&](SecuritySettings & securitySettings) { is_default = securitySettings.jwtSecret.equals(FACTORY_JWT_SECRET); });
+    return is_default;
+}
+
 static void console_log_level(Shell & shell, const std::vector<std::string> & arguments) {
     if (!arguments.empty()) {
         uuid::log::Level level;
@@ -144,6 +152,9 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
             return;
         } else if (shell.has_flags(CommandFlags::LOCAL)) {
             become_admin(shell);
+        } else if (default_su_password()) {
+            shell.logger().log(LogLevel::NOTICE, LogFacility::AUTH, F("Admin login refused on console %s, default password in use"), to_shell(shell).console_name().c_str());
+            shell.println("su: change the default Super User password in the Web UI first");
         } else {
             shell.enter_password(F_(password_prompt), [=](Shell & shell, bool completed, const std::string & password) {
                 if (completed) {
@@ -387,7 +398,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
 
     // read <deviceID> <type ID> [offset] [length]
     commands->add_command(ShellContext::MAIN,
-                          CommandFlags::USER,
+                          CommandFlags::ADMIN,
                           {F_(read)},
                           string_vector{F_(deviceid_mandatory), F_(typeid_mandatory), F_(offset_optional), F_(length_optional)},
                           [=](Shell & shell, const std::vector<std::string> & arguments) {

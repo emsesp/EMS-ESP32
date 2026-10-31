@@ -162,6 +162,15 @@ void security_test_console_read_needs_admin() {
     TEST_ASSERT_NOT_NULL(strstr(output_buffer, "Command not found"));
 }
 
+// the factory Super User password is public, so su over the network must be refused while it is set
+void security_test_console_su_default_password() {
+    auto network_shell = std::make_shared<EMSESPConsole>(application, stream, false);
+    output_buffer[0]   = '\0';
+    network_shell->invoke_command("su");
+    TEST_ASSERT_NOT_NULL(strstr(output_buffer, "change the default Super User password"));
+    TEST_ASSERT_FALSE(network_shell->has_flags(CommandFlags::ADMIN));
+}
+
 void run_security_tests() {
     EMSESP::webCommandService.load_test_data(); // named commands used by executeCommand
 
@@ -173,4 +182,5 @@ void run_security_tests() {
     RUN_TEST(security_test_log_settings);
     RUN_TEST(security_test_log_stream_needs_login);
     RUN_TEST(security_test_console_read_needs_admin);
+    RUN_TEST(security_test_console_su_default_password);
 }

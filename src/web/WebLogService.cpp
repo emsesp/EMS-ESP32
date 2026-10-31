@@ -42,6 +42,7 @@ WebLogService::WebLogService(AsyncWebServer * server, SecurityManager * security
         },
         HTTP_ANY);
 
+    events_.setFilter([securityManager](AsyncWebServerRequest * request) { return securityManager->authenticateRequest(request).authenticated; });
     server->addHandler(&events_);
 }
 
