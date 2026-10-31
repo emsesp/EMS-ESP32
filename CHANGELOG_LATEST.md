@@ -8,6 +8,18 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 
 ## *Breaking Changes*:
 
+Please read this before upgrading. Details are under "Changed" below.
+
+1. **Make a System Backup before upgrading** (Settings > Download/Upload). Passwords are stored hashed after the upgrade and 3.8.x can't read them, so going back to 3.8.x needs this backup, otherwise a factory reset.
+2. **API access tokens stop working.** After the upgrade, copy each user's new token from Security > Manage Users (key icon) and update everything that uses one, such as Home Assistant REST sensors and scripts.
+3. **Some `/api` calls need an admin token**: changing settings (for example `system/mqtt/enabled`) and reading the definitions of named Commands (`/api/commands/...`). Use an admin user's token for these, or enable "Bypass Access Token authorization on API calls" in Application Settings.
+4. **Guest users have less access.** Only admins can open or change the Scheduler, Commands, Custom Entities and Modules, rename devices or change entity customizations. New Commands can't be run by guests until "Guests may run this command" is ticked; Commands from before the upgrade keep guest access.
+5. **The live System Log needs a login**, also for tools that read `/es/log` directly.
+6. **Telnet changes.** Log in with a Web UI user: admin users get admin rights, `su` no longer works over telnet. At most 2 sessions at a time. On new installs telnet is off, turn it on in Application Settings if you use it.
+7. **Serial console `su` asks for the Super User password.**
+8. **Backups leave out passwords by default.** To move settings to a new device, tick "Include passwords and keys" when making the System Backup, and keep that file safe.
+9. **MQTT `info` topic:** `IPv6 address` is now an array, and `IPv4 DNS Server` is replaced by a `DNS Server` array. Update any automations that read these fields.
+
 ## Added
 
 - user-requested LED blink [#3063](https://github.com/emsesp/EMS-ESP32/issues/3063)
