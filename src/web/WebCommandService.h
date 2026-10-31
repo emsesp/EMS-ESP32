@@ -50,6 +50,7 @@ class CommandItem {
     stringPSRAM cmd;
     stringPSRAM value;
     char        name[20];
+    bool        guest = true; // logged-in non-admin users may run it
 };
 
 // a single unit of work handed to the command worker task
@@ -88,6 +89,7 @@ class WebCommandService : public StatefulService<WebCommands> {
     static bool computesOwnValue(const std::string & cmd);   // true if the command runs the shunting-yard itself
 
     const CommandItem * find(const char * name);
+    bool                guest_allowed(const char * name);
 
     uint8_t count_entities();
 

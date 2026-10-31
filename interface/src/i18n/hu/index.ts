@@ -164,6 +164,7 @@ const hu: Translation = {
   STATUS_OF: '{0} státusz',
   DOWNLOAD_UPLOAD: 'Letöltés/Feltöltés',
   CLOSE: 'Bezárás',
+  COMMAND_GUEST: 'Vendégek futtathatják ezt a parancsot',
   TOKENS_RESET: 'Ez a frissítés új eszközkulccsal írja alá a hozzáférési tokeneket, ezért a meglévő API tokenek már nem működnek. A Felhasználók kezelése menüben kattintson a felhasználó melletti kulcs ikonra az új token másolásához, és frissítse az azt használó integrációkat, például a Home Assistantot.',
   USE: 'Használat',
   FACTORY_RESET: 'Gyári alaphelyzet',

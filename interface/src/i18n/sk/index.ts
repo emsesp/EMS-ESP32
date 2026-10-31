@@ -164,6 +164,7 @@ const sk: Translation = {
   STATUS_OF: '{0} Stav',
   DOWNLOAD_UPLOAD: 'Stiahnuť/Nahrať',
   CLOSE: 'Zatvoriť',
+  COMMAND_GUEST: 'Hostia môžu spustiť tento príkaz',
   TOKENS_RESET: 'Táto aktualizácia podpisuje prístupové tokeny novým kľúčom zariadenia, preto existujúce API tokeny už nefungujú. V Správe používateľov kliknite na ikonu kľúča pri používateľovi, skopírujte jeho nový token a aktualizujte integrácie, ktoré ho používajú, napríklad Home Assistant.',
   USE: 'Použiť',
   FACTORY_RESET: 'Továrenské nastavenia',

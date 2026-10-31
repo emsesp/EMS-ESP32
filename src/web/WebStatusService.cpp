@@ -254,6 +254,12 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
     } else if (action == "upgradeImportantMessages") {
         root["upgradeImportantMessageType"] = upgradeImportantMessages(param);
     } else if (action == "executeCommand") {
+        if (!is_admin && !EMSESP::webCommandService.guest_allowed(param.c_str())) {
+            EMSESP::logger().warning("Command '%s' not allowed for this user", param.c_str());
+            request->send(403);
+            delete response;
+            return;
+        }
         ok = EMSESP::webCommandService.dispatchCommand(param.c_str()); // command worker task (ok = dispatched); fast internal commands run inline (ok = real result)
     }
 

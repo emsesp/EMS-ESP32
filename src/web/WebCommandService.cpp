@@ -192,6 +192,7 @@ void WebCommands::read(WebCommands & webCommands, JsonObject root) {
         obj["cmd"]     = ci.cmd;
         obj["value"]   = ci.value;
         obj["name"]    = (const char *)ci.name;
+        obj["guest"]   = ci.guest;
     }
 }
 
@@ -205,6 +206,7 @@ StateUpdateResult WebCommands::update(JsonObject root, WebCommands & webCommands
         ci.cmd   = item["cmd"].as<std::string>();
         ci.value = item["value"].as<std::string>();
         strlcpy(ci.name, item["name"].as<const char *>(), sizeof(ci.name));
+        ci.guest = item["guest"] | true; // commands saved before the flag existed stay available to guests
 
         webCommands.commandItems.push_back(ci);
         Command::add(
@@ -214,7 +216,7 @@ StateUpdateResult WebCommands::update(JsonObject root, WebCommands & webCommands
                 return EMSESP::webCommandService.dispatchCommand(name.c_str(), value); // value is optional
             },
             FL_(command_cmd),
-            CommandFlag::ADMIN_ONLY);
+            CommandFlag::ADMIN_ONLY | (ci.guest ? CommandFlag::GUEST : CommandFlag::CMD_FLAG_DEFAULT));
     }
 
     return StateUpdateResult::CHANGED;
@@ -234,6 +236,11 @@ const CommandItem * WebCommandService::find(const char * name) {
     }
 
     return nullptr;
+}
+
+bool WebCommandService::guest_allowed(const char * name) {
+    const CommandItem * ci = find(name);
+    return ci != nullptr && ci->guest;
 }
 
 // execute a named command — looks up by name and runs it
@@ -457,6 +464,7 @@ void WebCommandService::load_test_data() {
         ci.cmd   = "system/fetch";
         ci.value = "10";
         strcpy(ci.name, "fetch_values");
+        ci.guest = false;
         webCommands.commandItems.push_back(ci);
 
         ci       = CommandItem();
@@ -481,7 +489,7 @@ void WebCommandService::load_test_data() {
                         return EMSESP::webCommandService.dispatchCommand(name.c_str(), value);
                     },
                     FL_(command_cmd),
-                    CommandFlag::ADMIN_ONLY);
+                    CommandFlag::ADMIN_ONLY | (item.guest ? CommandFlag::GUEST : CommandFlag::CMD_FLAG_DEFAULT));
             }
         }
 

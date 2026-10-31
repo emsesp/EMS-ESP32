@@ -164,6 +164,7 @@ const en: Translation = {
   STATUS_OF: '{0} Status',
   DOWNLOAD_UPLOAD: 'Download/Upload',
   CLOSE: 'Close',
+  COMMAND_GUEST: 'Guests may run this command',
   TOKENS_RESET: 'This upgrade signs access tokens with a new device key, so existing API access tokens no longer work. In Manage Users, click the key icon next to a user to copy their new token, and update any integrations that use it, such as Home Assistant.',
   USE: 'Use',
   FACTORY_RESET: 'Factory Reset',

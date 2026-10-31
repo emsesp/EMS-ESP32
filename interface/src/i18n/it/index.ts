@@ -164,6 +164,7 @@ const it: Translation = {
   STATUS_OF: 'Stato {0}',
   DOWNLOAD_UPLOAD: 'Scaricamento/Caricamento',
   CLOSE: 'Chiudere',
+  COMMAND_GUEST: 'Gli ospiti possono eseguire questo comando',
   TOKENS_RESET: 'Questo aggiornamento firma i token di accesso con una nuova chiave del dispositivo, quindi i token API esistenti non funzionano più. In Gestione utenti, fai clic sull\'icona della chiave accanto a un utente per copiare il nuovo token e aggiorna le integrazioni che lo usano, come Home Assistant.',
   USE: 'Usa',
   FACTORY_RESET: 'Impostazioni di fabbrica',

@@ -85,9 +85,11 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
 void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     // check if the user has admin privileges (token is included and authorized)
     bool is_admin = false;
+    bool is_user  = false;
     EMSESP::webSettingsService.read([&](WebSettings const & settings) {
         Authentication authentication = _securityManager->authenticateRequest(request);
         is_admin                      = settings.notoken_api || AuthenticationPredicates::IS_ADMIN(authentication);
+        is_user                       = AuthenticationPredicates::IS_AUTHENTICATED(authentication);
     });
 
     // check for query parameters first, the old style from v2
@@ -139,7 +141,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     JsonObject output = response->getRoot();
 
     // call command
-    uint8_t return_code = Command::process(request->url().c_str(), is_admin, input, output);
+    uint8_t return_code = Command::process(request->url().c_str(), is_admin, input, output, is_user);
     if (return_code != CommandRet::OK) {
         api_fails_++;
     }

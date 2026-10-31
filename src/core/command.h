@@ -38,6 +38,7 @@ enum CommandFlag : uint8_t {
     CMD_FLAG_AHS     = (1 << 2), // 4 TAG_AHS1
     CMD_FLAG_HS      = (1 << 3), // 8 TAG_HS1 - TAG_HS16
     CMD_FLAG_SRC     = (1 << 4), // 16 TAG_SRC1 - TAG_SRC16
+    GUEST            = (1 << 5), // 32 with ADMIN_ONLY, logged-in users may also call it
     HIDDEN           = (1 << 6), // 64 do not show in API or Web
     ADMIN_ONLY       = (1 << 7)  // 128 requires authentication
 
@@ -104,7 +105,8 @@ class Command {
         return cmdfunctions_;
     }
 
-    static uint8_t call(const uint8_t device_type, const char * cmd, const char * value, const bool is_admin, const int8_t id, JsonObject output);
+    // is_user: caller is logged in, which allows ADMIN_ONLY commands flagged GUEST
+    static uint8_t call(const uint8_t device_type, const char * cmd, const char * value, const bool is_admin, const int8_t id, JsonObject output, const bool is_user = false);
     static uint8_t call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id = -1);
 
     // with normal call back function taking a value and id
@@ -146,7 +148,7 @@ class Command {
 
     static bool list(const uint8_t device_type, JsonObject output);
 
-    static uint8_t process(const char * path, const bool is_admin, const JsonObject input, JsonObject output);
+    static uint8_t process(const char * path, const bool is_admin, const JsonObject input, JsonObject output, const bool is_user = false);
 
     static const char * parse_command_string(const char * command, int8_t & id);
     static const char * get_attribute(const char * cmd);

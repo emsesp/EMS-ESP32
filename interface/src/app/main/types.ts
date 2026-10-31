@@ -390,11 +390,13 @@ export interface CommandItem {
   cmd: string;
   value: string;
   name: string;
+  guest: boolean; // logged-in non-admin users may run it
   deleted?: boolean;
   o_id?: number;
   o_cmd?: string;
   o_value?: string;
   o_name?: string;
+  o_guest?: boolean;
   o_deleted?: boolean;
 }
 

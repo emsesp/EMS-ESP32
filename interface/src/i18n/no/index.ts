@@ -164,6 +164,7 @@ const no: Translation = {
   STATUS_OF: '{0} Status',
   DOWNLOAD_UPLOAD: 'Nedlasting/Opp',
   CLOSE: 'Steng',
+  COMMAND_GUEST: 'Gjester kan kjøre denne kommandoen',
   TOKENS_RESET: 'Denne oppgraderingen signerer tilgangstokener med en ny enhetsnøkkel, så eksisterende API-tokener virker ikke lenger. Under Administrer brukere klikker du på nøkkelikonet ved en bruker for å kopiere det nye tokenet, og oppdaterer integrasjoner som bruker det, som Home Assistant.',
   USE: 'Bruk',
   FACTORY_RESET: 'Sett tilbake til fabrikkinstilling',

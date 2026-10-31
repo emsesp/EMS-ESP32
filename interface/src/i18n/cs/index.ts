@@ -164,6 +164,7 @@ const cs: Translation = {
   STATUS_OF: '{0} Stav',
   DOWNLOAD_UPLOAD: 'Stáhnout/Nahrát',
   CLOSE: 'Zavřít',
+  COMMAND_GUEST: 'Hosté mohou spustit tento příkaz',
   TOKENS_RESET: 'Tato aktualizace podepisuje přístupové tokeny novým klíčem zařízení, proto stávající API tokeny již nefungují. Ve Správě uživatelů klikněte na ikonu klíče u uživatele, zkopírujte jeho nový token a aktualizujte integrace, které jej používají, například Home Assistant.',
   USE: 'Použít',
   FACTORY_RESET: 'Obnovení továrního nastavení',

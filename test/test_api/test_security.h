@@ -125,6 +125,24 @@ void security_test_action_guest_allowed() {
     TEST_ASSERT_NOT_EQUAL(200, call_action(StandaloneIdentity::GUEST, "executeCommand", "no_such_command"));
 }
 
+// send_message is guest-allowed in the test data, fetch_values is not
+void security_test_command_guest_flag() {
+    TEST_ASSERT_TRUE(denied(call_action(StandaloneIdentity::GUEST, "executeCommand", "fetch_values")));
+    TEST_ASSERT_EQUAL(200, call_action(StandaloneIdentity::ADMIN, "executeCommand", "fetch_values"));
+
+    JsonDocument doc_out;
+    JsonObject   output = doc_out.to<JsonObject>();
+    JsonDocument doc_in;
+    JsonObject   input = doc_in.to<JsonObject>();
+    input["value"]     = "1"; // without a value /api returns the command's info instead of running it
+
+    // /api: logged-in guest, anonymous caller, admin
+    TEST_ASSERT_EQUAL(CommandRet::OK, Command::process("/api/commands/send_message", false, input, output, true));
+    TEST_ASSERT_EQUAL(CommandRet::NOT_ALLOWED, Command::process("/api/commands/fetch_values", false, input, output, true));
+    TEST_ASSERT_EQUAL(CommandRet::NOT_ALLOWED, Command::process("/api/commands/send_message", false, input, output, false));
+    TEST_ASSERT_EQUAL(CommandRet::OK, Command::process("/api/commands/fetch_values", true, input, output));
+}
+
 void security_test_write_endpoints_admin_only() {
     assert_admin_only_write(EMSESP_SCHEDULER_SERVICE_PATH);
     assert_admin_only_write(EMSESP_COMMANDS_SERVICE_PATH);
@@ -187,6 +205,7 @@ void run_security_tests() {
     RUN_TEST(security_test_api_without_token);
     RUN_TEST(security_test_action_admin_only);
     RUN_TEST(security_test_action_guest_allowed);
+    RUN_TEST(security_test_command_guest_flag);
     RUN_TEST(security_test_write_endpoints_admin_only);
     RUN_TEST(security_test_log_settings);
     RUN_TEST(security_test_log_stream_needs_login);

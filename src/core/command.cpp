@@ -30,7 +30,7 @@ std::vector<Command::CmdFunction, AllocatorPSRAM<Command::CmdFunction>> Command:
 // the path is leading so if duplicate keys are in the input JSON it will be ignored
 // the entry point will be either via the Web API (api/) or MQTT (<base>/)
 // returns a return code and json output
-uint8_t Command::process(const char * path, const bool is_admin, const JsonObject input, JsonObject output) {
+uint8_t Command::process(const char * path, const bool is_admin, const JsonObject input, JsonObject output, const bool is_user) {
     // check for MQTT, if so strip the "<base>" from the path
     if (!strncmp(path, Mqtt::base().c_str(), Mqtt::base().length())) {
         path += Mqtt::base().length();
@@ -178,7 +178,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
             if (output["api_data"].is<std::string>()) {
                 std::string api_data = output["api_data"];
                 output.clear();
-                return Command::call(device_type, command_p, api_data.c_str(), is_admin, id_n, output);
+                return Command::call(device_type, command_p, api_data.c_str(), is_admin, id_n, output, is_user);
             }
 
             return CommandRet::INVALID;
@@ -189,17 +189,17 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
 
     // call the command based on the type
     if (data.is<const char *>()) {
-        return_code = Command::call(device_type, command_p, data.as<const char *>(), is_admin, id_n, output);
+        return_code = Command::call(device_type, command_p, data.as<const char *>(), is_admin, id_n, output, is_user);
     } else if (data.is<int>()) {
         char data_str[10];
-        return_code = Command::call(device_type, command_p, Helpers::itoa(data.as<int32_t>(), data_str), is_admin, id_n, output);
+        return_code = Command::call(device_type, command_p, Helpers::itoa(data.as<int32_t>(), data_str), is_admin, id_n, output, is_user);
     } else if (data.is<float>()) {
         char data_str[10];
-        return_code = Command::call(device_type, command_p, Helpers::render_value(data_str, data.as<float>(), 2), is_admin, id_n, output);
+        return_code = Command::call(device_type, command_p, Helpers::render_value(data_str, data.as<float>(), 2), is_admin, id_n, output, is_user);
     } else if (data.is<bool>()) {
-        return_code = Command::call(device_type, command_p, data.as<bool>() ? "1" : "0", is_admin, id_n, output);
+        return_code = Command::call(device_type, command_p, data.as<bool>() ? "1" : "0", is_admin, id_n, output, is_user);
     } else if (data.isNull()) {
-        return_code = Command::call(device_type, command_p, "", is_admin, id_n, output); // empty, will do a query instead
+        return_code = Command::call(device_type, command_p, "", is_admin, id_n, output, is_user); // empty, will do a query instead
     } else {
         return json_message(CommandRet::ERROR, "cannot parse command", output); // can't process
     }
@@ -367,7 +367,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 // calls a command. Takes a json object for output.
 // id may be used to represent a heating circuit for example
 // returns 0 if the command errored, 1 (TRUE) if ok, 2 if not found, 3 if error or 4 if not allowed
-uint8_t Command::call(const uint8_t device_type, const char * command, const char * value, const bool is_admin, const int8_t id, JsonObject output) {
+uint8_t Command::call(const uint8_t device_type, const char * command, const char * value, const bool is_admin, const int8_t id, JsonObject output, const bool is_user) {
     if (command == nullptr) {
         return CommandRet::NOT_FOUND;
     }
@@ -449,7 +449,7 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
     }
 
     // before calling the command, check permissions and abort if not authorized
-    if (cf->has_flags(CommandFlag::ADMIN_ONLY) && !is_admin) {
+    if (cf->has_flags(CommandFlag::ADMIN_ONLY) && !is_admin && !(is_user && cf->has_flags(CommandFlag::GUEST))) {
         LOG_WARNING("Command failed: authentication failed");
         output["message"] = "authentication failed";
         return CommandRet::NOT_ALLOWED; // command not allowed

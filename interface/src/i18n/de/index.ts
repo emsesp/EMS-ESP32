@@ -164,6 +164,7 @@ const de: Translation = {
   STATUS_OF: '{0} Status',
   DOWNLOAD_UPLOAD: 'Herunterladen/Hochladen',
   CLOSE: 'Schließen',
+  COMMAND_GUEST: 'Gäste dürfen diesen Befehl ausführen',
   TOKENS_RESET: 'Dieses Update signiert Zugangs-Tokens mit einem neuen Geräteschlüssel, daher funktionieren bestehende API-Tokens nicht mehr. Klicke unter Benutzer verwalten auf das Schlüsselsymbol neben einem Benutzer, um sein neues Token zu kopieren, und aktualisiere alle Integrationen, die es verwenden, z. B. Home Assistant.',
   USE: 'Verwenden Sie',
   FACTORY_RESET: 'Werkseinstellung',

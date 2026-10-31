@@ -164,6 +164,7 @@ const nl: Translation = {
   STATUS_OF: '{0} Status',
   DOWNLOAD_UPLOAD: 'Download/Upload',
   CLOSE: 'Sluiten',
+  COMMAND_GUEST: 'Gasten mogen dit commando uitvoeren',
   TOKENS_RESET: 'Deze upgrade ondertekent toegangstokens met een nieuwe apparaatsleutel, waardoor bestaande API-tokens niet meer werken. Klik in Gebruikers beheren op het sleutelpictogram naast een gebruiker om het nieuwe token te kopiëren, en werk integraties bij die het gebruiken, zoals Home Assistant.',
   USE: 'Gebruik',
   FACTORY_RESET: 'Fabrieksinstellingen',

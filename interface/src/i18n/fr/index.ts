@@ -164,6 +164,7 @@ const fr: Translation = {
   STATUS_OF: 'Statut {0}',
   DOWNLOAD_UPLOAD: 'Télécharger/Mettre à jour',
   CLOSE: 'Fermer',
+  COMMAND_GUEST: 'Les invités peuvent exécuter cette commande',
   TOKENS_RESET: 'Cette mise à jour signe les jetons d\'accès avec une nouvelle clé de l\'appareil, les jetons API existants ne fonctionnent donc plus. Dans Gérer les utilisateurs, cliquez sur l\'icône de clé à côté d\'un utilisateur pour copier son nouveau jeton, puis mettez à jour les intégrations qui l\'utilisent, comme Home Assistant.',
   USE: 'Utiliser',
   FACTORY_RESET: 'Réinitialisation',
