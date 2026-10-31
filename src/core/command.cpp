@@ -390,7 +390,14 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
         // rather than returning its definition, so skip the value-info lookup and fall through
         // to the registered command function. The list keywords above are still handled.
         bool is_named_command = (device_type == EMSdevice::DeviceType::COMMAND) && strcmp(cmd, F_(info)) && strcmp(cmd, F_(values)) && strcmp(cmd, F_(entities))
-                                && strcmp(cmd, F_(metrics)) && !strchr(cmd, '/') && is_admin;
+                                && strcmp(cmd, F_(metrics)) && !strchr(cmd, '/') && (is_admin || is_user);
+
+        // command definitions can hold credentials (URLs, mail settings), so only admins may read them
+        if (device_type == EMSdevice::DeviceType::COMMAND && !is_admin && !is_named_command && strcmp(cmd, F_(metrics))) {
+            LOG_WARNING("Command failed: authentication failed");
+            output["message"] = "authentication failed";
+            return CommandRet::NOT_ALLOWED;
+        }
         if (!is_named_command && EMSESP::get_device_value_info(output, cmd, id, device_type)) { // entity = cmd
             LOG_DEBUG("Fetched device entity/attributes for %s/%s (id=%d)", dname, cmd, id);
             return CommandRet::OK;

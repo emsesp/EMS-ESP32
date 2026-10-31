@@ -141,6 +141,35 @@ void security_test_command_guest_flag() {
     TEST_ASSERT_EQUAL(CommandRet::NOT_ALLOWED, Command::process("/api/commands/fetch_values", false, input, output, true));
     TEST_ASSERT_EQUAL(CommandRet::NOT_ALLOWED, Command::process("/api/commands/send_message", false, input, output, false));
     TEST_ASSERT_EQUAL(CommandRet::OK, Command::process("/api/commands/fetch_values", true, input, output));
+
+    // without a value a guest runs the command, it does not get the definition
+    JsonDocument doc_empty;
+    JsonObject   no_value = doc_empty.to<JsonObject>();
+    JsonDocument doc_guest_out;
+    JsonObject   guest_out = doc_guest_out.to<JsonObject>();
+    TEST_ASSERT_NOT_EQUAL(CommandRet::NOT_ALLOWED, Command::process("/api/commands/send_message", false, no_value, guest_out, true));
+    TEST_ASSERT_FALSE(guest_out["command"].is<const char *>());
+}
+
+// command definitions can hold credentials, only admins may read them
+void security_test_command_definitions_admin_only() {
+    const char * reads[] = {"/api/commands/values", "/api/commands/info", "/api/commands/entities", "/api/commands/send_message/value"};
+
+    for (const char * path : reads) {
+        JsonDocument doc_in;
+        JsonDocument doc_out;
+        JsonObject   input  = doc_in.to<JsonObject>();
+        JsonObject   output = doc_out.to<JsonObject>();
+        TEST_ASSERT_EQUAL_MESSAGE(CommandRet::NOT_ALLOWED, Command::process(path, false, input, output, false), path); // anonymous
+        TEST_ASSERT_EQUAL_MESSAGE(CommandRet::NOT_ALLOWED, Command::process(path, false, input, output, true), path);  // guest
+        TEST_ASSERT_EQUAL_MESSAGE(CommandRet::OK, Command::process(path, true, input, output), path);                  // admin
+    }
+
+    JsonDocument doc_in;
+    JsonDocument doc_out;
+    JsonObject   input  = doc_in.to<JsonObject>();
+    JsonObject   output = doc_out.to<JsonObject>();
+    TEST_ASSERT_EQUAL(CommandRet::NOT_ALLOWED, Command::process("/api/commands/send_message", false, input, output, false));
 }
 
 void security_test_write_endpoints_admin_only() {
@@ -206,6 +235,7 @@ void run_security_tests() {
     RUN_TEST(security_test_action_admin_only);
     RUN_TEST(security_test_action_guest_allowed);
     RUN_TEST(security_test_command_guest_flag);
+    RUN_TEST(security_test_command_definitions_admin_only);
     RUN_TEST(security_test_write_endpoints_admin_only);
     RUN_TEST(security_test_log_settings);
     RUN_TEST(security_test_log_stream_needs_login);
