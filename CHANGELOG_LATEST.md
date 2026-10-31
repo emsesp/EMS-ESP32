@@ -83,6 +83,15 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 
 ## Changed
 
+- security: web and API access tokens are signed with a random key that is unique to each device. Existing API access tokens stop working after the upgrade: copy the new token for each user from Security > Manage Users (key icon) and update integrations that use it, such as Home Assistant. Admins see a notice in the WebUI until it is closed. Changing an admin password replaces the key, which signs everyone out; changing the Super User password no longer does
+- security: changing settings through `/api` (for example `system/mqtt/enabled`) needs an admin token
+- security: reading the definitions of named Commands through `/api` (`/api/commands/values`, `/info`, `/entities` or `/api/commands/<name>/value`) needs an admin token. Integrations that read these without one get "authentication failed". Calling a command by name still runs it
+- security: only admins can open or change the Scheduler, Commands, Custom Entities and Modules, rename devices or change entity customizations and log settings, or use admin actions such as exports and partition switching. Guests can still view the log
+- security: each Command has a "Guests may run this command" option. Commands created before 3.9.0 keep guest access, new ones start without it. It applies to the WebUI and `/api`
+- security: the live System Log needs a login
+- security: on telnet, `su` is refused while the Super User password is still the factory default, and on the serial console `su` asks for the password. The console `read` command needs admin
+- security: to go back to 3.8.x after upgrading, restore a System Backup made before the upgrade
+
 - various memory optimizations [#3083](https://github.com/emsesp/EMS-ESP32/issues/3083)
 - Scheduler name is now mandatory
 - Access Point provision mode label renamed from "When network connection is lost" to "When network connection not found" (all languages)
