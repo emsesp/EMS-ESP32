@@ -39,12 +39,12 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
 
     securityManager->addEndpoint(server,
                                  EMSESP_WRITE_DEVICE_NAME_PATH,
-                                 AuthenticationPredicates::IS_AUTHENTICATED,
+                                 AuthenticationPredicates::IS_ADMIN,
                                  [this](AsyncWebServerRequest * request, JsonVariant json) { writeDeviceName(request, json); });
 
     securityManager->addEndpoint(server,
                                  EMSESP_CUSTOMIZATION_ENTITIES_PATH,
-                                 AuthenticationPredicates::IS_AUTHENTICATED,
+                                 AuthenticationPredicates::IS_ADMIN,
                                  [this](AsyncWebServerRequest * request, JsonVariant json) { customization_entities(request, json); });
 }
 

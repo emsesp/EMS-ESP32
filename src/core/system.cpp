@@ -2297,7 +2297,32 @@ bool System::saveSettings([[maybe_unused]] const char * filename, [[maybe_unused
 }
 
 // set a entity of services 'network', 'settings', 'mqtt', etc.
-bool System::command_service(const char * cmd, const char * value) {
+// returns NOT_FOUND if cmd is not a service command so the caller can try the command functions
+uint8_t System::command_service(const char * cmd, const char * value, const bool is_admin) {
+    static constexpr const char * service_commands[] = {"settings/showertimer",
+                                                        "settings/showeralert",
+                                                        "settings/hideled",
+                                                        "settings/analogenabled",
+                                                        "mqtt/enabled",
+                                                        "ap/enabled",
+                                                        "ntp/enabled",
+                                                        "syslog/enabled"};
+
+    bool found = false;
+    for (const char * service_command : service_commands) {
+        if (!strcmp(cmd, service_command)) {
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        return CommandRet::NOT_FOUND;
+    }
+
+    if (!is_admin) {
+        return CommandRet::NOT_ALLOWED;
+    }
+
     bool ok = false;
     bool b;
     if (Helpers::value2bool(value, b)) {
@@ -2358,9 +2383,10 @@ bool System::command_service(const char * cmd, const char * value) {
 
     if (ok) {
         LOG_INFO("System command '%s' with value '%s'", cmd, value);
+        return CommandRet::OK;
     }
 
-    return ok;
+    return CommandRet::NOT_FOUND;
 }
 
 // return back a system value

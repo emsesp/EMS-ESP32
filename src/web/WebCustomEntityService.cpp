@@ -27,7 +27,7 @@ WebCustomEntityService::WebCustomEntityService(AsyncWebServer * server, FS * fs,
                     server,
                     EMSESP_CUSTOMENTITY_SERVICE_PATH,
                     securityManager,
-                    AuthenticationPredicates::IS_AUTHENTICATED)
+                    AuthenticationPredicates::IS_ADMIN)
     , _fsPersistence(WebCustomEntity::read, WebCustomEntity::update, this, fs, EMSESP_CUSTOMENTITY_FILE) {
 }
 

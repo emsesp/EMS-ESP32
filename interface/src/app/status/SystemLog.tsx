@@ -1,4 +1,11 @@
-import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import {
+  memo,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState
+} from 'react';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -26,6 +33,7 @@ import {
   useLayoutTitle
 } from 'components';
 import { toast } from 'components/toast';
+import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { LogEntry, LogSettings } from 'types';
 import { LogLevel } from 'types';
@@ -101,6 +109,7 @@ const LogEntryItem = memo(
 
 const SystemLog = () => {
   const { LL } = useI18nContext();
+  const { me } = useContext(AuthenticatedContext);
 
   useLayoutTitle(LL.LOG_OF(LL.SYSTEM(0)));
 
@@ -268,6 +277,7 @@ const SystemLog = () => {
               variant="outlined"
               onChange={updateFormValue}
               margin="normal"
+              disabled={!me.admin}
               select
             >
               <MenuItem value={-1}>OFF</MenuItem>
@@ -288,6 +298,7 @@ const SystemLog = () => {
                 variant="outlined"
                 onChange={updateFormValue}
                 margin="normal"
+                disabled={!me.admin}
                 select
               >
                 <MenuItem value={25}>25</MenuItem>
@@ -306,6 +317,7 @@ const SystemLog = () => {
                   checked={data.compact}
                   onChange={updateFormValue}
                   name="compact"
+                  disabled={!me.admin}
                 />
               }
               label={LL.COMPACT()}
@@ -376,7 +388,7 @@ const SystemLog = () => {
             </>
           )}
 
-          {dirtyFlags && dirtyFlags.length !== 0 && (
+          {me.admin && dirtyFlags && dirtyFlags.length !== 0 && (
             <Grid>
               <Button
                 startIcon={<WarningIcon color="warning" />}

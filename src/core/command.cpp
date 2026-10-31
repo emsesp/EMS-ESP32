@@ -397,7 +397,13 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
         }
     } else if (device_type == EMSdevice::DeviceType::SYSTEM && strchr(cmd, '/')) {
         // check service commands, if not found continue with command functions
-        if (EMSESP::system_.command_service(cmd, value)) {
+        uint8_t return_code = EMSESP::system_.command_service(cmd, value, is_admin);
+        if (return_code == CommandRet::NOT_ALLOWED) {
+            LOG_WARNING("Command failed: authentication failed");
+            output["message"] = "authentication failed";
+            return CommandRet::NOT_ALLOWED;
+        }
+        if (return_code == CommandRet::OK) {
             return CommandRet::OK;
         }
     }

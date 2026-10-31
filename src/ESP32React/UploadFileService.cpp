@@ -168,6 +168,13 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
         return;
     }
 
+    // a request without a file part never reaches handleUpload's check
+    Authentication authentication = _securityManager->authenticateRequest(request);
+    if (!AuthenticationPredicates::IS_ADMIN(authentication)) {
+        request->send(403);
+        return;
+    }
+
     emsesp::EMSESP::logger().info("Upload successful");
 
     // did we just complete uploading a json file?

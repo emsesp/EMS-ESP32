@@ -214,13 +214,21 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
         has_param = false;
     }
 
-    // check if we're authenticated for admin tasks, some actions are only for admins
     Authentication authentication = _securityManager->authenticateRequest(request);
     bool           is_admin       = AuthenticationPredicates::IS_ADMIN(authentication);
 
     // call action command
     bool        ok     = true;
     std::string action = json["action"];
+
+    // admin only, unless explicitly allowed for all logged-in users
+    bool user_action = (action == "getVersions") || (action == "getCustomSupport") || (action == "executeCommand");
+    if (!user_action && !is_admin) {
+        EMSESP::logger().warning("Action '%s' not allowed", action.c_str());
+        request->send(403);
+        delete response;
+        return;
+    }
 
     if (action == "getVersions") {
         getVersions(root);
@@ -232,11 +240,11 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
         }
     } else if (action == "getCustomSupport") {
         ok = getCustomSupport(root);
-    } else if (action == "uploadURL" && is_admin) {
+    } else if (action == "uploadURL") {
         ok = uploadURL(param.c_str());
-    } else if (action == "systemStatus" && is_admin) {
+    } else if (action == "systemStatus") {
         ok = setSystemStatus(param.c_str());
-    } else if (action == "resetMQTT" && is_admin) {
+    } else if (action == "resetMQTT") {
         EMSESP::mqtt_.reset_mqtt();
     } else if (action == "upgradeImportantMessages") {
         root["upgradeImportantMessageType"] = upgradeImportantMessages(param);
