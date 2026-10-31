@@ -12,6 +12,11 @@
 
 static constexpr size_t JWT_KEY_BYTES = 32;
 
+// before NTP has set the clock, tokens get no expiry and only their version is checked
+static bool clock_set(time_t now) {
+    return now > 1700000000; // November 2023
+}
+
 static String to_hex(const uint8_t * data, size_t len) {
     String hex;
     hex.reserve(len * 2);
@@ -30,7 +35,10 @@ SecuritySettingsService::SecuritySettingsService(AsyncWebServer * server, FS * f
     , _fs(fs) {
     addUpdateHandler([this] { onSettingsUpdated(); }, false);
 
-    addEndpoint(server, GENERATE_TOKEN_PATH, AuthenticationPredicates::IS_ADMIN, [this](AsyncWebServerRequest * request) { generateToken(request); });
+    addEndpoint(server, API_KEYS_PATH, AuthenticationPredicates::IS_ADMIN, [this](AsyncWebServerRequest * request) { listApiKeys(request); });
+    addEndpoint(server, API_KEYS_PATH, AuthenticationPredicates::IS_ADMIN, [this](AsyncWebServerRequest * request, JsonVariant json) {
+        apiKeyAction(request, json);
+    });
 }
 
 void SecuritySettingsService::begin() {
@@ -137,6 +145,95 @@ Authentication SecuritySettingsService::authenticateRequest(AsyncWebServerReques
     return {};
 }
 
+// API keys are only accepted here, so they can't be used for the Web UI
+Authentication SecuritySettingsService::authenticateApiRequest(AsyncWebServerRequest * request) {
+    auto authorizationHeader = request->getHeader(AUTHORIZATION_HEADER);
+    if (authorizationHeader) {
+        String value = authorizationHeader->value();
+        if (value.startsWith(AUTHORIZATION_HEADER_PREFIX)) {
+            value = value.substring(AUTHORIZATION_HEADER_PREFIX_LEN);
+            if (value.startsWith(ApiKey::PREFIX)) {
+                const String id = ApiKey::id(value.c_str());
+                for (const ApiKeyEntry & key : _state.api_keys) {
+                    if (!id.isEmpty() && key.id == id && ApiKey::matches(value.c_str(), key.hash)) {
+                        return Authentication(User(key.label, "", key.write));
+                    }
+                }
+                return {};
+            }
+        }
+    }
+
+    return authenticateRequest(request);
+}
+
+void SecuritySettingsService::listApiKeys(AsyncWebServerRequest * request) {
+    auto *     response = new emsesp::PsramAsyncJsonResponse(false);
+    JsonObject root     = response->getRoot();
+    JsonArray  keys     = root["keys"].to<JsonArray>();
+    for (const ApiKeyEntry & key : _state.api_keys) {
+        JsonObject k = keys.add<JsonObject>();
+        k["id"]      = key.id;
+        k["label"]   = key.label;
+        k["write"]   = key.write;
+        k["created"] = key.created;
+    }
+    response->setLength();
+    request->send(response);
+}
+
+// create returns the key, the only time it's shown
+void SecuritySettingsService::apiKeyAction(AsyncWebServerRequest * request, JsonVariant json) {
+    const String action = json["action"] | "";
+
+    if (action == "create") {
+        const String label = json["label"] | "";
+        if (label.isEmpty() || label.length() > ApiKey::MAX_LABEL || _state.api_keys.size() >= ApiKey::MAX_KEYS) {
+            request->send(400);
+            return;
+        }
+
+        const String   key     = ApiKey::generate();
+        const time_t   now     = time(nullptr);
+        const uint32_t created = clock_set(now) ? static_cast<uint32_t>(now) : 0;
+        const bool     write   = json["write"] | false;
+        update(
+            [&](SecuritySettings & settings) {
+                settings.api_keys.push_back({ApiKey::id(key.c_str()), label, write, created, ApiKey::hash(key.c_str())});
+                return StateUpdateResult::CHANGED;
+            });
+        emsesp::EMSESP::logger().notice("API key '%s' created", label.c_str());
+
+        auto *     response = new emsesp::PsramAsyncJsonResponse(false);
+        JsonObject root     = response->getRoot();
+        root["key"]         = key;
+        response->setLength();
+        request->send(response);
+        return;
+    }
+
+    if (action == "revoke") {
+        const String id      = json["id"] | "";
+        bool         removed = false;
+        update(
+            [&](SecuritySettings & settings) {
+                for (auto it = settings.api_keys.begin(); it != settings.api_keys.end(); ++it) {
+                    if (it->id == id) {
+                        emsesp::EMSESP::logger().notice("API key '%s' revoked", it->label.c_str());
+                        settings.api_keys.erase(it);
+                        removed = true;
+                        return StateUpdateResult::CHANGED;
+                    }
+                }
+                return StateUpdateResult::UNCHANGED;
+            });
+        request->send(removed ? 200 : 404);
+        return;
+    }
+
+    request->send(400);
+}
+
 Authentication SecuritySettingsService::authenticateJWT(String & jwt) {
     JsonDocument payloadDocument;
     _jwtHandler.parseJWT(jwt, payloadDocument);
@@ -163,37 +260,33 @@ Authentication SecuritySettingsService::authenticate(const String & username, co
     return {};
 }
 
-inline void populateJWTPayload(JsonObject payload, const User * user) {
-    payload["username"] = user->username;
-    payload["admin"]    = user->admin;
-}
-
+// the user must still exist with the same rights and token version, and the token must not have expired
 boolean SecuritySettingsService::validatePayload(JsonObject parsedPayload, const User * user) {
-    JsonDocument jsonDocument;
-    JsonObject   payload = jsonDocument.to<JsonObject>();
-    populateJWTPayload(payload, user);
-    return payload == parsedPayload;
+    if ((parsedPayload["admin"] | false) != user->admin || (parsedPayload["ver"] | 0u) != user->ver) {
+        return false;
+    }
+
+    if (parsedPayload["exp"].is<uint32_t>()) {
+        const time_t now = time(nullptr);
+        if (clock_set(now) && static_cast<uint32_t>(now) >= parsedPayload["exp"].as<uint32_t>()) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 String SecuritySettingsService::generateJWT(const User * user) {
     JsonDocument jsonDocument;
     JsonObject   payload = jsonDocument.to<JsonObject>();
-    populateJWTPayload(payload, user);
-    return _jwtHandler.buildJWT(payload);
-}
+    payload["username"]  = user->username;
+    payload["admin"]     = user->admin;
+    payload["ver"]       = user->ver;
 
-void SecuritySettingsService::generateToken(AsyncWebServerRequest * request) {
-    auto usernameParam = request->getParam("username");
-    for (const User & _user : _state.users) {
-        if (_user.username == usernameParam->value()) {
-            auto *     response = new emsesp::PsramAsyncJsonResponse(false);
-            JsonObject root     = response->getRoot();
-            root["token"]       = generateJWT(&_user);
-            response->setLength();
-            request->send(response);
-            return;
-        }
+    const time_t now = time(nullptr);
+    if (clock_set(now)) {
+        payload["iat"] = static_cast<uint32_t>(now);
+        payload["exp"] = static_cast<uint32_t>(now) + SESSION_TOKEN_LIFETIME;
     }
-
-    request->send(401);
+    return _jwtHandler.buildJWT(payload);
 }

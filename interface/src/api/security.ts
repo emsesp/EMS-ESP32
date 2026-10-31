@@ -1,4 +1,4 @@
-import type { SecuritySettingsType, Token } from 'types';
+import type { ApiKeyType, SecuritySettingsType } from 'types';
 
 import { alovaInstance } from './endpoints';
 
@@ -8,7 +8,12 @@ export const readSecuritySettings = () =>
 export const updateSecuritySettings = (securitySettings: SecuritySettingsType) =>
   alovaInstance.Post('/rest/securitySettings', securitySettings);
 
-export const generateToken = (username?: string) =>
-  alovaInstance.Get<Token>('/rest/generateToken', {
-    params: { username }
-  });
+export const readApiKeys = () =>
+  alovaInstance.Get<{ keys: ApiKeyType[] }>('/rest/apiKeys');
+
+export const apiKeyAction = (action: {
+  action: string;
+  label?: string;
+  write?: boolean;
+  id?: string;
+}) => alovaInstance.Post<{ key?: string }>('/rest/apiKeys', action);

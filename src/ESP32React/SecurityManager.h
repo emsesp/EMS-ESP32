@@ -16,15 +16,17 @@
 
 class User {
   public:
-    String username;
-    String password;
-    bool   admin;
+    String   username;
+    String   password;
+    bool     admin;
+    uint32_t ver; // in the user's session tokens, changed with the password to sign the user out everywhere
 
   public:
-    User(String username, String password, bool admin)
+    User(String username, String password, bool admin, uint32_t ver = 0)
         : username(std::move(username))
         , password(std::move(password))
-        , admin(admin) {
+        , admin(admin)
+        , ver(ver) {
     }
 };
 
@@ -72,6 +74,11 @@ class SecurityManager {
 
     // Check the request header for the Authorization token
     virtual Authentication authenticateRequest(AsyncWebServerRequest * request) = 0;
+
+    // for /api, also accepts API keys
+    virtual Authentication authenticateApiRequest(AsyncWebServerRequest * request) {
+        return authenticateRequest(request);
+    }
 
     // Json endpoints - default POST. Registered with the shared dispatcher.
     void addEndpoint(AsyncWebServer *             server,

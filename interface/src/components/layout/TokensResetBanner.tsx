@@ -32,9 +32,9 @@ const TokensResetBanner = () => {
           sx={{ ml: 2 }}
           variant="contained"
           color="warning"
-          onClick={() => void navigate('/settings/security/users')}
+          onClick={() => void navigate('/settings/security/apikeys')}
         >
-          {LL.MANAGE_USERS()}
+          {LL.API_KEYS()}
         </Button>
         <Button
           sx={{ ml: 1 }}

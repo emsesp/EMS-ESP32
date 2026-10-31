@@ -11,14 +11,15 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 Please read this before upgrading. Details are under "Changed" below.
 
 1. **Make a System Backup before upgrading** (Settings > Download/Upload). Passwords are stored hashed after the upgrade and 3.8.x can't read them, so going back to 3.8.x needs this backup, otherwise a factory reset.
-2. **API access tokens stop working.** After the upgrade, copy each user's new token from Security > Manage Users (key icon) and update everything that uses one, such as Home Assistant REST sensors and scripts.
-3. **Some `/api` calls need an admin token**: changing settings (for example `system/mqtt/enabled`) and reading the definitions of named Commands (`/api/commands/...`). Use an admin user's token for these, or enable "Bypass Access Token authorization on API calls" in Application Settings.
-4. **Guest users have less access.** Only admins can open or change the Scheduler, Commands, Custom Entities and Modules, rename devices or change entity customizations. New Commands can't be run by guests until "Guests may run this command" is ticked; Commands from before the upgrade keep guest access.
-5. **The live System Log needs a login**, also for tools that read `/es/log` directly.
-6. **Telnet changes.** Log in with a Web UI user: admin users get admin rights, `su` no longer works over telnet. At most 2 sessions at a time. On new installs telnet is off, turn it on in Application Settings if you use it.
-7. **Serial console `su` asks for the Super User password.**
-8. **Backups leave out passwords by default.** To move settings to a new device, tick "Include passwords and keys" when making the System Backup, and keep that file safe.
-9. **MQTT `info` topic:** `IPv6 address` is now an array, and `IPv4 DNS Server` is replaced by a `DNS Server` array. Update any automations that read these fields.
+2. **API access tokens stop working and are replaced by API keys.** After the upgrade, create an API key in Security > API Keys for each integration, such as Home Assistant REST sensors and scripts, and send it as `Authorization: Bearer <key>`. Pick "Read" for integrations that only read values, "Read and write" for ones that change settings or values. The key icon in Manage Users is gone.
+3. **Web UI sign-ins expire after 30 days**, and changing a user's password signs that user out on all browsers.
+4. **Some `/api` calls need a "Read and write" API key**: changing settings (for example `system/mqtt/enabled`) and reading the definitions of named Commands (`/api/commands/...`). Use such a key for these, or enable "Bypass Access Token authorization on API calls" in Application Settings.
+5. **Guest users have less access.** Only admins can open or change the Scheduler, Commands, Custom Entities and Modules, rename devices or change entity customizations. New Commands can't be run by guests until "Guests may run this command" is ticked; Commands from before the upgrade keep guest access.
+6. **The live System Log needs a login**, also for tools that read `/es/log` directly.
+7. **Telnet changes.** Log in with a Web UI user: admin users get admin rights, `su` no longer works over telnet. At most 2 sessions at a time. On new installs telnet is off, turn it on in Application Settings if you use it.
+8. **Serial console `su` asks for the Super User password.**
+9. **Backups leave out passwords by default.** To move settings to a new device, tick "Include passwords and keys" when making the System Backup, and keep that file safe.
+10. **MQTT `info` topic:** `IPv6 address` is now an array, and `IPv4 DNS Server` is replaced by a `DNS Server` array. Update any automations that read these fields.
 
 ## Added
 
@@ -98,9 +99,11 @@ Please read this before upgrading. Details are under "Changed" below.
 
 ## Changed
 
-- security: web and API access tokens are signed with a random key that is unique to each device. Existing API access tokens stop working after the upgrade: copy the new token for each user from Security > Manage Users (key icon) and update integrations that use it, such as Home Assistant. Admins see a notice in the WebUI until it is closed. Changing an admin password replaces the key, which signs everyone out; changing the Super User password no longer does
-- security: changing settings through `/api` (for example `system/mqtt/enabled`) needs an admin token, unless "Bypass Access Token authorization on API calls" is enabled in Application Settings
-- security: reading the definitions of named Commands through `/api` (`/api/commands/values`, `/info`, `/entities` or `/api/commands/<name>/value`) needs an admin token. Integrations that read these without one get "authentication failed". Calling a command by name still runs it
+- security: Web UI sign-in tokens are signed with a random key that is unique to each device, so existing access tokens stop working after the upgrade. Admins see a notice in the WebUI until it is closed. Changing an admin password replaces the key, which signs everyone out; changing the Super User password no longer does
+- security: Web UI sign-ins expire after 30 days (once the clock is set by NTP), and changing a user's password, or removing the user, signs that user out everywhere [#3353](https://github.com/emsesp/EMS-ESP32/issues/3353)
+- security: API keys replace the per-user access tokens for `/api`. Admins create them in Security > API Keys with a name and "Read" or "Read and write" access, and can revoke each one. A key is shown once when created and only stored as a hash. Read keys act like a guest user, Read and write keys like an admin, and keys only work on `/api`, not for the Web UI [#3354](https://github.com/emsesp/EMS-ESP32/issues/3354)
+- security: changing settings through `/api` (for example `system/mqtt/enabled`) needs a "Read and write" API key, unless "Bypass Access Token authorization on API calls" is enabled in Application Settings
+- security: reading the definitions of named Commands through `/api` (`/api/commands/values`, `/info`, `/entities` or `/api/commands/<name>/value`) needs a "Read and write" API key. Integrations that read these without one get "authentication failed". Calling a command by name still runs it
 - security: only admins can open or change the Scheduler, Commands, Custom Entities and Modules, rename devices or change entity customizations and log settings, or use admin actions such as exports and partition switching. Guests can still view the log
 - security: each Command has a "Guests may run this command" option. Commands created before 3.9.0 keep guest access, new ones start without it. It applies to the WebUI and `/api`
 - security: the live System Log needs a login

@@ -236,6 +236,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                                                           for (auto & user : securitySettings.users) {
                                                               if (user.username == "admin") {
                                                                   user.password = PasswordHash::hash(password2.c_str());
+                                                                  user.ver++; // signs the admin out everywhere
                                                                   return StateUpdateResult::CHANGED;
                                                               }
                                                           }

@@ -9,6 +9,9 @@ export interface SecuritySettingsType {
   jwt_secret: string;
 }
 
-export interface Token {
-  token: string;
+export interface ApiKeyType {
+  id: string;
+  label: string;
+  write: boolean;
+  created: number; // unix time, 0 if unknown
 }

@@ -755,7 +755,7 @@ const SECURITY_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'securitySettings';
 // SYSTEM SIGNIN
 const VERIFY_AUTHORIZATION_ENDPOINT = REST_ENDPOINT_ROOT + 'verifyAuthorization';
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn';
-const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken';
+const API_KEYS_ENDPOINT = REST_ENDPOINT_ROOT + 'apiKeys';
 
 let security_settings = {
   jwt_secret: 'naughty!',
@@ -780,7 +780,9 @@ const guest_signin = {
 const signin = admin_signin;
 // const signin = guest_signin;
 
-const generate_token = { token: '1234' };
+let api_keys: { id: string; label: string; write: boolean; created: number }[] = [
+  { id: 'a1b2c3d4', label: 'Home Assistant', write: true, created: 1761900000 }
+];
 
 const EMSESP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'settings';
 const EMSESP_CORE_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'coreData';
@@ -4815,7 +4817,29 @@ router
   })
   .get(VERIFY_AUTHORIZATION_ENDPOINT, () => verify_authentication)
   .post(SIGN_IN_ENDPOINT, () => signin)
-  .get(GENERATE_TOKEN_ENDPOINT, () => generate_token);
+  .get(API_KEYS_ENDPOINT, () => ({ keys: api_keys }))
+  .post(API_KEYS_ENDPOINT, async (request: any) => {
+    const content: any = await request.json();
+    if (content.action === 'create') {
+      const key =
+        'emsesp_' +
+        Array.from({ length: 40 }, () =>
+          Math.floor(Math.random() * 16).toString(16)
+        ).join('');
+      api_keys.push({
+        id: key.substring(7, 15),
+        label: content.label,
+        write: !!content.write,
+        created: Math.floor(Date.now() / 1000)
+      });
+      return { key };
+    }
+    if (content.action === 'revoke') {
+      api_keys = api_keys.filter((k) => k.id !== content.id);
+      return status(200);
+    }
+    return status(400);
+  });
 
 //
 //  EMS-ESP Project stuff

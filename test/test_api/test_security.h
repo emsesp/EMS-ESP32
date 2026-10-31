@@ -6,6 +6,7 @@
 #include "settings_secrets.h"
 #include "password_hash.h"
 #include "login_limiter.h"
+#include "api_key.h"
 
 // Permission tests. Run last, they change settings and identity.
 
@@ -410,6 +411,43 @@ void security_test_console_login_lockout() {
     LoginLimiter::instance().succeeded(shell->console_name().c_str());
 }
 
+// API keys are random, identified by their first digits and stored only as a hash
+void security_test_api_key() {
+    const String key = ApiKey::generate();
+    TEST_ASSERT_TRUE(key.startsWith("emsesp_"));
+    TEST_ASSERT_EQUAL(7 + 40, key.length());
+    TEST_ASSERT_TRUE(ApiKey::is_key(key.c_str()));
+    TEST_ASSERT_EQUAL(8, ApiKey::id(key.c_str()).length());
+    TEST_ASSERT_NOT_EQUAL(0, strcmp(key.c_str(), ApiKey::generate().c_str()));
+
+    const String hash = ApiKey::hash(key.c_str());
+    TEST_ASSERT_EQUAL(64, hash.length());
+    TEST_ASSERT_TRUE(ApiKey::matches(key.c_str(), hash));
+    TEST_ASSERT_FALSE(ApiKey::matches(key.c_str(), ""));
+
+    std::string other = key.c_str();
+    other.back()      = other.back() == '0' ? '1' : '0';
+    TEST_ASSERT_FALSE(ApiKey::matches(other.c_str(), hash));
+
+    TEST_ASSERT_FALSE(ApiKey::is_key("emsesp_123"));
+    TEST_ASSERT_FALSE(ApiKey::is_key("eyJhbGciOiJIUzI1NiJ9.e30.abc")); // a JWT
+    TEST_ASSERT_FALSE(ApiKey::is_key(("emsesp_" + std::string(40, 'G')).c_str()));
+    TEST_ASSERT_TRUE(ApiKey::id("emsesp_123").isEmpty());
+}
+
+// backups leave out the key hashes, restoring keeps the ones on the device
+void security_test_backup_api_keys() {
+    JsonDocument doc;
+    deserializeJson(doc, R"({"api_keys":[{"id":"a1b2c3d4","label":"HA","write":true,"hash":"abc"}]})");
+    SettingsSecrets::redact("Security", doc.as<JsonObject>());
+    TEST_ASSERT_FALSE(doc["api_keys"][0]["hash"].is<JsonVariant>());
+
+    JsonDocument current;
+    deserializeJson(current, R"({"api_keys":[{"id":"a1b2c3d4","hash":"device"}]})");
+    SettingsSecrets::merge("Security", doc.as<JsonObject>(), current.as<JsonObjectConst>());
+    TEST_ASSERT_EQUAL_STRING("device", doc["api_keys"][0]["hash"]);
+}
+
 void run_security_tests() {
     EMSESP::webCommandService.load_test_data(); // named commands used by executeCommand
 
@@ -434,4 +472,6 @@ void run_security_tests() {
     RUN_TEST(security_test_login_limiter_global);
     RUN_TEST(security_test_console_login);
     RUN_TEST(security_test_console_login_lockout);
+    RUN_TEST(security_test_api_key);
+    RUN_TEST(security_test_backup_api_keys);
 }

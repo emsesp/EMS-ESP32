@@ -87,7 +87,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     bool is_admin = false;
     bool is_user  = false;
     EMSESP::webSettingsService.read([&](WebSettings const & settings) {
-        Authentication authentication = _securityManager->authenticateRequest(request);
+        Authentication authentication = _securityManager->authenticateApiRequest(request);
         is_admin                      = settings.notoken_api || AuthenticationPredicates::IS_ADMIN(authentication);
         is_user                       = AuthenticationPredicates::IS_AUTHENTICATED(authentication);
     });

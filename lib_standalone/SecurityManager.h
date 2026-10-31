@@ -18,15 +18,17 @@
 
 class User {
   public:
-    String username;
-    String password;
-    bool   admin;
+    String   username;
+    String   password;
+    bool     admin;
+    uint32_t ver;
 
   public:
-    User(String username, String password, bool admin)
+    User(String username, String password, bool admin, uint32_t ver = 0)
         : username(username)
         , password(password)
-        , admin(admin) {
+        , admin(admin)
+        , ver(ver) {
     }
 };
 
@@ -71,6 +73,9 @@ class SecurityManager {
   public:
     virtual Authentication authenticateRequest(AsyncWebServerRequest * request) = 0;
     virtual Authentication authenticate(const String & username, const String & password) = 0;
+    virtual Authentication authenticateApiRequest(AsyncWebServerRequest * request) {
+        return authenticateRequest(request);
+    }
 
     // Json endpoints - default POST. Registered with the shared dispatcher.
     void addEndpoint(AsyncWebServer *             server,

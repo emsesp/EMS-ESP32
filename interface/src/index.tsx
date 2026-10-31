@@ -32,6 +32,7 @@ import Version from 'app/settings/Version';
 import Network from 'app/settings/network/Network';
 import NetworkSettings from 'app/settings/network/NetworkSettings';
 import WiFiNetworkScanner from 'app/settings/network/WiFiNetworkScanner';
+import ApiKeys from 'app/settings/security/ApiKeys';
 import ManageUsers from 'app/settings/security/ManageUsers';
 import Security from 'app/settings/security/Security';
 import SecuritySettings from 'app/settings/security/SecuritySettings';
@@ -212,6 +213,7 @@ const router = createBrowserRouter(
             />
             <Route path="settings" element={<SecuritySettings />} />
             <Route path="users" element={<ManageUsers />} />
+            <Route path="apikeys" element={<ApiKeys />} />
             <Route
               path="*"
               element={<Navigate replace to="/settings/security/settings" />}

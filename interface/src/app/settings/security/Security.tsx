@@ -20,6 +20,7 @@ const Security = () => {
           label={LL.SETTINGS_OF(LL.SECURITY(1))}
         />
         <Tab value="/settings/security/users" label={LL.MANAGE_USERS()} />
+        <Tab value="/settings/security/apikeys" label={LL.API_KEYS()} />
       </RouterTabs>
       <Outlet />
     </>

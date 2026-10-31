@@ -119,6 +119,37 @@ class PasswordHash {
 #endif
     }
 
+    // constant time, so the comparison doesn't reveal how many bytes matched
+    static bool equal(const uint8_t * a, const uint8_t * b, size_t len) {
+        uint8_t diff = 0;
+        for (size_t i = 0; i < len; i++) {
+            diff |= a[i] ^ b[i];
+        }
+        return diff == 0;
+    }
+
+    static std::string to_hex(const uint8_t * data, size_t len) {
+        static constexpr char digits[] = "0123456789abcdef";
+        std::string           hex;
+        hex.reserve(len * 2);
+        for (size_t i = 0; i < len; i++) {
+            hex += digits[data[i] >> 4];
+            hex += digits[data[i] & 0x0F];
+        }
+        return hex;
+    }
+
+    static void random_bytes(uint8_t * data, size_t len) {
+#ifdef EMSESP_STANDALONE
+        static std::random_device rd;
+        for (size_t i = 0; i < len; i++) {
+            data[i] = rd() & 0xFF;
+        }
+#else
+        esp_fill_random(data, len);
+#endif
+    }
+
   private:
     static constexpr const char * PREFIX = "$pbkdf2-sha256$";
 
@@ -149,26 +180,6 @@ class PasswordHash {
         return from_hex(salt_hex, salt, SALT_BYTES) && from_hex(hash_hex, expected, HASH_BYTES);
     }
 
-    // constant time, so the comparison doesn't reveal how many bytes matched
-    static bool equal(const uint8_t * a, const uint8_t * b, size_t len) {
-        uint8_t diff = 0;
-        for (size_t i = 0; i < len; i++) {
-            diff |= a[i] ^ b[i];
-        }
-        return diff == 0;
-    }
-
-    static std::string to_hex(const uint8_t * data, size_t len) {
-        static constexpr char digits[] = "0123456789abcdef";
-        std::string           hex;
-        hex.reserve(len * 2);
-        for (size_t i = 0; i < len; i++) {
-            hex += digits[data[i] >> 4];
-            hex += digits[data[i] & 0x0F];
-        }
-        return hex;
-    }
-
     static bool from_hex(const char * hex, uint8_t * out, size_t len) {
         for (size_t i = 0; i < len; i++) {
             int hi = nibble(hex[i * 2]);
@@ -189,17 +200,6 @@ class PasswordHash {
             return c - 'a' + 10;
         }
         return -1;
-    }
-
-    static void random_bytes(uint8_t * data, size_t len) {
-#ifdef EMSESP_STANDALONE
-        static std::random_device rd;
-        for (size_t i = 0; i < len; i++) {
-            data[i] = rd() & 0xFF;
-        }
-#else
-        esp_fill_random(data, len);
-#endif
     }
 
 #ifdef EMSESP_STANDALONE

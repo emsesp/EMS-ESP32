@@ -44,6 +44,7 @@ struct SecretListField {
 
 static constexpr SecretListField SECRET_LIST_FIELDS[] = {
     {"Security", "users", "username", "password"},
+    {"Security", "api_keys", "id", "hash"},
     {"Modules", "modules", "key", "license"},
 };
 
