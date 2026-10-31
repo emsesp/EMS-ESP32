@@ -1,6 +1,9 @@
 #include "AuthenticationService.h"
 
 #include "../core/psram_async_json_response.h"
+#include "../core/login_limiter.h"
+
+#include <emsesp.h>
 
 AuthenticationService::AuthenticationService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager) {
@@ -21,11 +24,22 @@ void AuthenticationService::verifyAuthorization(AsyncWebServerRequest * request)
 
 // Signs in a user if the username and password match. Provides a JWT to be used in the Authorization header in subsequent requests.
 void AuthenticationService::signIn(AsyncWebServerRequest * request, JsonVariant json) {
+    auto &         limiter = LoginLimiter::instance();
+    const String   source  = request->client()->remoteIP().toString();
+    const uint32_t wait    = limiter.retry_after(source.c_str(), millis());
+    if (wait) {
+        AsyncWebServerResponse * response = request->beginResponse(429);
+        response->addHeader("Retry-After", String((wait + 999) / 1000));
+        request->send(response);
+        return;
+    }
+
     if (json.is<JsonObject>()) {
         String         username       = json["username"];
         String         password       = json["password"];
         Authentication authentication = _securityManager->authenticate(username, password);
         if (authentication.authenticated) {
+            limiter.succeeded(source.c_str());
             auto *     response        = new emsesp::PsramAsyncJsonResponse(false);
             JsonObject jsonObject      = response->getRoot();
             jsonObject["access_token"] = _securityManager->generateJWT(authentication.user.get());
@@ -34,6 +48,9 @@ void AuthenticationService::signIn(AsyncWebServerRequest * request, JsonVariant 
             return;
         }
     }
+
+    limiter.failed(source.c_str(), millis());
+    emsesp::EMSESP::logger().notice("Failed sign-in for user '%s' from %s", json["username"] | "", source.c_str());
 
     AsyncWebServerResponse * response = request->beginResponse(401);
     request->send(response);

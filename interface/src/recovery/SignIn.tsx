@@ -41,6 +41,8 @@ const SignIn = ({ onSignedIn }: SignInProps) => {
     } catch (error) {
       if (error instanceof HttpError && error.status === 401) {
         toast.warning('Invalid login details');
+      } else if (error instanceof HttpError && error.status === 429) {
+        toast.warning('Too many failed sign-ins, try again in a few minutes');
       } else {
         toast.error('Error: ' + (error as Error).message);
       }

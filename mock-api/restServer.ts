@@ -499,6 +499,7 @@ function get_versions() {
     stable?: { version: string; date: string; upgradeable: boolean };
     dev?: { version: string; date: string; upgradeable: boolean };
     tokens_reset?: boolean;
+    telnet_enabled?: boolean;
   } = {
     system_name: settings.system_name,
     current: {
@@ -511,6 +512,10 @@ function get_versions() {
 
   if (MOCK_TOKENS_RESET) {
     data.tokens_reset = true;
+  }
+
+  if (settings.telnet_enabled) {
+    data.telnet_enabled = true;
   }
 
   if (!MOCK_OFFLINE) {

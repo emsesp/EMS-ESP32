@@ -45,12 +45,24 @@ class EMSESPShell : public uuid::console::Shell {
     static void main_help_function(Shell & shell, const std::vector<std::string> & arguments);
     static void main_exit_function(Shell & shell, const std::vector<std::string> & arguments);
 
+    enum class LoginResult : uint8_t { OK, FAILED, LOCKED };
+
+    // checks a web user's login, admins get admin rights
+    LoginResult login(const std::string & username, const std::string & password);
+
     EMSESP & emsesp_;
 
   protected:
     EMSESPShell(EMSESP & emsesp, Stream & stream, unsigned int context, unsigned int flags);
 
     static std::shared_ptr<uuid::console::Commands> commands_;
+
+    bool login_required_ = false; // telnet, asks for a web user's login before anything else
+
+    // who is trying to log in, for the failed login limit
+    virtual std::string login_source() {
+        return console_name();
+    }
 
     // our custom functions for Shell
     void        started() override;
@@ -62,7 +74,10 @@ class EMSESPShell : public uuid::console::Shell {
     void        end_of_transmission() override;
 
   private:
-    std::string console_hostname_;
+    std::string   console_hostname_;
+    unsigned long idle_timeout_after_login_ = 0;
+
+    void start_login();
 };
 
 } // namespace emsesp

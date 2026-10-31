@@ -5,6 +5,7 @@
 #include "SecuritySettingsService.h"
 #include "settings_secrets.h"
 #include "password_hash.h"
+#include "login_limiter.h"
 
 // Permission tests. Run last, they change settings and identity.
 
@@ -211,12 +212,12 @@ void security_test_console_read_needs_admin() {
     TEST_ASSERT_NOT_NULL(strstr(output_buffer, "Command not found"));
 }
 
-// the factory Super User password is public, so su over the network must be refused while it is set
-void security_test_console_su_default_password() {
+// telnet users log in with a web user, su is only for the serial console
+void security_test_console_su_network_refused() {
     auto network_shell = std::make_shared<EMSESPConsole>(application, stream, false);
     output_buffer[0]   = '\0';
     network_shell->invoke_command("su");
-    TEST_ASSERT_NOT_NULL(strstr(output_buffer, "change the default Super User password"));
+    TEST_ASSERT_NOT_NULL(strstr(output_buffer, "su: only on the serial console"));
     TEST_ASSERT_FALSE(network_shell->has_flags(CommandFlags::ADMIN));
 }
 
@@ -226,7 +227,7 @@ void security_test_serial_su_needs_password() {
     output_buffer[0]  = '\0';
     serial_shell->invoke_command("su");
     TEST_ASSERT_FALSE(serial_shell->has_flags(CommandFlags::ADMIN));
-    TEST_ASSERT_NULL(strstr(output_buffer, "change the default Super User password"));
+    TEST_ASSERT_NULL(strstr(output_buffer, "su: only on the serial console"));
 }
 
 // exported settings leave out passwords and keys
@@ -334,23 +335,79 @@ void security_test_password_hash() {
     TEST_ASSERT_FALSE(PasswordHash::verify("admin", "admin2"));
 }
 
-// the factory Super User password is still recognised once it's hashed
-void security_test_console_su_default_hashed() {
-    EMSESP::esp32React.getSecuritySettingsService()->update([](SecuritySettings & settings) {
-        settings.jwtSecret = PasswordHash::hash(FACTORY_JWT_SECRET);
-        return StateUpdateResult::CHANGED;
-    });
+// failed logins from one source lock it out with a growing wait, others are not affected
+void security_test_login_limiter() {
+    LoginLimiter limiter;
+    uint32_t     now = 1000;
+    for (uint8_t i = 1; i < LoginLimiter::FREE_ATTEMPTS; i++) {
+        limiter.failed("10.0.0.1", now);
+        TEST_ASSERT_EQUAL_UINT32(0, limiter.retry_after("10.0.0.1", now));
+    }
+    limiter.failed("10.0.0.1", now);
+    TEST_ASSERT_EQUAL_UINT32(LoginLimiter::FIRST_LOCKOUT_MS, limiter.retry_after("10.0.0.1", now));
+    TEST_ASSERT_EQUAL_UINT32(0, limiter.retry_after("10.0.0.2", now));
 
-    auto network_shell = std::make_shared<EMSESPConsole>(application, stream, false);
-    output_buffer[0]   = '\0';
-    network_shell->invoke_command("su");
-    TEST_ASSERT_NOT_NULL(strstr(output_buffer, "change the default Super User password"));
-    TEST_ASSERT_FALSE(network_shell->has_flags(CommandFlags::ADMIN));
+    now += LoginLimiter::FIRST_LOCKOUT_MS;
+    TEST_ASSERT_EQUAL_UINT32(0, limiter.retry_after("10.0.0.1", now));
+    limiter.failed("10.0.0.1", now);
+    TEST_ASSERT_EQUAL_UINT32(LoginLimiter::FIRST_LOCKOUT_MS * 2, limiter.retry_after("10.0.0.1", now));
 
-    EMSESP::esp32React.getSecuritySettingsService()->update([](SecuritySettings & settings) {
-        settings.jwtSecret = FACTORY_JWT_SECRET;
-        return StateUpdateResult::CHANGED;
-    });
+    // the wait stops growing
+    for (int i = 0; i < 20; i++) {
+        limiter.failed("10.0.0.1", now);
+    }
+    TEST_ASSERT_EQUAL_UINT32(LoginLimiter::MAX_LOCKOUT_MS, limiter.retry_after("10.0.0.1", now));
+
+    // forgotten after a while without failures, and on a successful login
+    now += LoginLimiter::FORGET_MS;
+    limiter.failed("10.0.0.1", now);
+    TEST_ASSERT_EQUAL_UINT32(0, limiter.retry_after("10.0.0.1", now));
+    limiter.succeeded("10.0.0.1");
+    TEST_ASSERT_EQUAL_UINT32(0, limiter.retry_after("10.0.0.1", now));
+
+    // across the millis() wrap around
+    LoginLimiter wrap;
+    now = 0xFFFFFFFF - 1000;
+    for (uint8_t i = 0; i < LoginLimiter::FREE_ATTEMPTS; i++) {
+        wrap.failed("10.0.0.1", now);
+    }
+    TEST_ASSERT_EQUAL_UINT32(LoginLimiter::FIRST_LOCKOUT_MS - 2000, wrap.retry_after("10.0.0.1", now + 2000));
+}
+
+// many failures from different sources lock out everyone for a while
+void security_test_login_limiter_global() {
+    LoginLimiter limiter;
+    char         source[16];
+    for (uint8_t i = 0; i < LoginLimiter::GLOBAL_FAILURES; i++) {
+        snprintf(source, sizeof(source), "10.0.1.%u", i);
+        limiter.failed(source, 5000);
+    }
+    TEST_ASSERT_EQUAL_UINT32(LoginLimiter::GLOBAL_LOCKOUT_MS, limiter.retry_after("10.0.2.1", 5000));
+    TEST_ASSERT_EQUAL_UINT32(0, limiter.retry_after("10.0.2.1", 5000 + LoginLimiter::GLOBAL_LOCKOUT_MS));
+}
+
+// a console login with a web user, admins get admin rights
+void security_test_console_login() {
+    auto guest_shell = std::make_shared<EMSESPConsole>(application, stream, false);
+    TEST_ASSERT_TRUE(guest_shell->login("guest", "guest") == EMSESPShell::LoginResult::OK);
+    TEST_ASSERT_FALSE(guest_shell->has_flags(CommandFlags::ADMIN));
+
+    auto admin_shell = std::make_shared<EMSESPConsole>(application, stream, false);
+    TEST_ASSERT_TRUE(admin_shell->login("admin", "wrong") == EMSESPShell::LoginResult::FAILED);
+    TEST_ASSERT_FALSE(admin_shell->has_flags(CommandFlags::ADMIN));
+    TEST_ASSERT_TRUE(admin_shell->login("admin", "admin") == EMSESPShell::LoginResult::OK);
+    TEST_ASSERT_TRUE(admin_shell->has_flags(CommandFlags::ADMIN));
+}
+
+// once locked out, even the right password is refused
+void security_test_console_login_lockout() {
+    auto shell = std::make_shared<EMSESPConsole>(application, stream, false);
+    for (uint8_t i = 0; i < LoginLimiter::FREE_ATTEMPTS; i++) {
+        shell->login("admin", "wrong");
+    }
+    TEST_ASSERT_TRUE(shell->login("admin", "admin") == EMSESPShell::LoginResult::LOCKED);
+    TEST_ASSERT_FALSE(shell->has_flags(CommandFlags::ADMIN));
+    LoginLimiter::instance().succeeded(shell->console_name().c_str());
 }
 
 void run_security_tests() {
@@ -366,12 +423,15 @@ void run_security_tests() {
     RUN_TEST(security_test_log_settings);
     RUN_TEST(security_test_log_stream_needs_login);
     RUN_TEST(security_test_console_read_needs_admin);
-    RUN_TEST(security_test_console_su_default_password);
+    RUN_TEST(security_test_console_su_network_refused);
     RUN_TEST(security_test_serial_su_needs_password);
     RUN_TEST(security_test_backup_redacts_secrets);
     RUN_TEST(security_test_restore_merges_secrets);
     RUN_TEST(security_test_private_nvs_keys);
     RUN_TEST(security_test_pbkdf2_vectors);
     RUN_TEST(security_test_password_hash);
-    RUN_TEST(security_test_console_su_default_hashed);
+    RUN_TEST(security_test_login_limiter);
+    RUN_TEST(security_test_login_limiter_global);
+    RUN_TEST(security_test_console_login);
+    RUN_TEST(security_test_console_login_lockout);
 }

@@ -34,6 +34,11 @@ class EMSESPConsole : public EMSESPShell {
 
     std::string console_name() override;
 
+  protected:
+#ifndef EMSESP_STANDALONE
+    std::string login_source() override;
+#endif
+
   private:
 #ifndef EMSESP_STANDALONE
     static std::vector<bool> ptys_;

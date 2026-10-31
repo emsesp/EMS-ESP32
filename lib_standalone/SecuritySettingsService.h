@@ -34,6 +34,7 @@ class SecuritySettingsService : public SecurityManager {
 
     // minimal set of functions to support framework with security settings disabled
     Authentication authenticateRequest(AsyncWebServerRequest * request);
+    Authentication authenticate(const String & username, const String & password); // the factory admin and guest users
 
     static void identity(StandaloneIdentity identity) {
         identity_ = identity;

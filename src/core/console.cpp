@@ -21,6 +21,7 @@
 #include "console_stream.h"
 #include "emsesp.h"
 #include "password_hash.h"
+#include "login_limiter.h"
 
 #if defined(EMSESP_TEST)
 #include "../test/test.h"
@@ -34,6 +35,7 @@ using LogFacility = ::uuid::log::Facility;
 namespace emsesp {
 
 static constexpr unsigned long INVALID_PASSWORD_DELAY_MS = 3000;
+static constexpr unsigned long LOGIN_TIMEOUT_S           = 60; // telnet, time to enter the login
 
 static inline EMSESPShell & to_shell(Shell & shell) {
     return static_cast<EMSESPShell &>(shell);
@@ -44,15 +46,6 @@ static inline EMSESPShell & to_shell(Shell & shell) {
     }
 
 // add static functions here....
-
-// the factory Super User password is public, so it must not grant admin over the network
-// the serial console still accepts it, as that needs physical access
-static bool default_su_password() {
-    bool is_default = false;
-    EMSESP::esp32React.getSecuritySettingsService()->read(
-        [&](SecuritySettings & securitySettings) { is_default = PasswordHash::verify(FACTORY_JWT_SECRET, securitySettings.jwtSecret); });
-    return is_default;
-}
 
 static void console_log_level(Shell & shell, const std::vector<std::string> & arguments) {
     if (!arguments.empty()) {
@@ -156,18 +149,24 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
         } else if (shell.has_flags(CommandFlags::LOCAL)) {
             become_admin(shell);
 #endif
-        } else if (!shell.has_flags(CommandFlags::LOCAL) && default_su_password()) {
-            shell.logger().log(LogLevel::NOTICE, LogFacility::AUTH, F("Admin login refused on console %s, default password in use"), to_shell(shell).console_name().c_str());
-            shell.println("su: change the default Super User password in the Web UI first");
+        } else if (!shell.has_flags(CommandFlags::LOCAL)) {
+            // telnet users log in with their web user, admins get admin rights from that
+            shell.logger().log(LogLevel::NOTICE, LogFacility::AUTH, F("Admin login refused on console %s"), to_shell(shell).console_name().c_str());
+            shell.println("su: only on the serial console, log in to telnet as an admin user instead");
+        } else if (LoginLimiter::instance().retry_after(to_shell(shell).console_name().c_str(), static_cast<uint32_t>(uuid::get_uptime_ms()))) {
+            shell.println("su: too many failed attempts, try again later");
         } else {
             shell.enter_password(F_(password_prompt), [=](Shell & shell, bool completed, const std::string & password) {
                 if (completed) {
-                    uint64_t now = uuid::get_uptime_ms();
+                    uint64_t           now    = uuid::get_uptime_ms();
+                    const std::string source = to_shell(shell).console_name();
 
                     EMSESP::esp32React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
                         if (!password.empty() && PasswordHash::verify(password.c_str(), securitySettings.jwtSecret)) {
+                            LoginLimiter::instance().succeeded(source.c_str());
                             become_admin(shell);
                         } else {
+                            LoginLimiter::instance().failed(source.c_str(), static_cast<uint32_t>(now));
                             shell.delay_until(now + INVALID_PASSWORD_DELAY_MS, [](Shell & shell) {
                                 shell.logger().log(LogLevel::NOTICE,
                                                    LogFacility::AUTH,
@@ -645,18 +644,95 @@ void EMSESPShell::display_banner() {
     printfln("│  EMS-ESP version %-18s │", EMSESP_APP_VERSION);
     printfln("│                                     │");
     printfln("│  %shelp%s to show available commands    │", COLOR_UNDERLINE, COLOR_RESET);
-    printfln("│  %ssu%s to access admin commands        │", COLOR_UNDERLINE, COLOR_RESET);
+    if (login_required_) {
+        printfln("│  log in with a Web UI user          │");
+    } else {
+        printfln("│  %ssu%s to access admin commands        │", COLOR_UNDERLINE, COLOR_RESET);
+    }
     printfln("│                                     │");
     printfln("│  %s%shttps://emsesp.org%s                 │", COLOR_GREEN, COLOR_UNDERLINE, COLOR_RESET);
     printfln("│                                     │");
     printfln("└─────────────────────────────────────┘");
     println();
 
+    if (login_required_) {
+        start_login();
+    }
+
     // set console name
     EMSESP::esp32React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) { console_hostname_ = networkSettings.hostname.c_str(); });
     if (console_hostname_.empty()) {
         console_hostname_ = "ems-esp";
     }
+}
+
+// nothing is shown or accepted until the login succeeds, not even the log
+void EMSESPShell::start_login() {
+    uuid::log::Logger::unregister_handler(this);
+    idle_timeout_after_login_ = idle_timeout();
+    idle_timeout(LOGIN_TIMEOUT_S);
+
+    enter_text("Username: ", [](Shell & shell, bool completed, const std::string & username) {
+        if (!completed) {
+            shell.stop();
+            return;
+        }
+        shell.enter_password("Password: ", [username](Shell & shell, bool completed, const std::string & password) {
+            if (!completed) {
+                shell.stop();
+                return;
+            }
+
+            auto &            self   = static_cast<EMSESPShell &>(shell);
+            const LoginResult result = self.login(username, password);
+            if (result == LoginResult::OK) {
+                self.idle_timeout(self.idle_timeout_after_login_);
+#if defined(EMSESP_DEBUG)
+                self.log_level(uuid::log::Level::DEBUG);
+#else
+                self.log_level(uuid::log::Level::INFO);
+#endif
+            } else if (result == LoginResult::LOCKED) {
+                shell.println("Too many failed logins, try again later");
+                shell.stop();
+            } else {
+                shell.delay_until(uuid::get_uptime_ms() + INVALID_PASSWORD_DELAY_MS, [](Shell & shell) {
+                    shell.println("Login incorrect");
+                    shell.stop();
+                });
+            }
+        });
+    });
+}
+
+EMSESPShell::LoginResult EMSESPShell::login(const std::string & username, const std::string & password) {
+    auto &            limiter = LoginLimiter::instance();
+    const std::string source  = login_source();
+    const uint32_t    now     = static_cast<uint32_t>(uuid::get_uptime_ms());
+
+    if (limiter.retry_after(source.c_str(), now)) {
+        logger().log(LogLevel::NOTICE, LogFacility::AUTH, F("Login refused on console %s from %s, too many failed attempts"), console_name().c_str(), source.c_str());
+        return LoginResult::LOCKED;
+    }
+
+    Authentication authentication = EMSESP::esp32React.getSecurityManager()->authenticate(username.c_str(), password.c_str());
+    if (!authentication.authenticated) {
+        limiter.failed(source.c_str(), now);
+        logger().log(LogLevel::NOTICE, LogFacility::AUTH, F("Failed login for user '%s' on console %s from %s"), username.c_str(), console_name().c_str(), source.c_str());
+        return LoginResult::FAILED;
+    }
+
+    limiter.succeeded(source.c_str());
+    if (authentication.user->admin) {
+        add_flags(CommandFlags::ADMIN);
+    }
+    logger().log(LogLevel::NOTICE,
+                 LogFacility::AUTH,
+                 F("User '%s' logged in on console %s%s"),
+                 username.c_str(),
+                 console_name().c_str(),
+                 authentication.user->admin ? " as admin" : "");
+    return LoginResult::OK;
 }
 
 std::string EMSESPShell::hostname_text() {
@@ -733,6 +809,8 @@ EMSESPConsole::EMSESPConsole(EMSESP & emsesp, Stream & stream, const IPAddress &
     , port_(port) {
     std::array<char, 16> text;
 
+    login_required_ = true;
+
     pty_ = 0;
     while (pty_ < ptys_.size() && ptys_[pty_])
         pty_++;
@@ -763,5 +841,11 @@ EMSESPConsole::~EMSESPConsole() {
 std::string EMSESPConsole::console_name() {
     return name_;
 }
+
+#ifndef EMSESP_STANDALONE
+std::string EMSESPConsole::login_source() {
+    return pty_ == SIZE_MAX ? name_ : uuid::printable_to_string(addr_);
+}
+#endif
 
 } // namespace emsesp

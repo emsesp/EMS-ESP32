@@ -23,4 +23,5 @@ export interface VersionsResponse {
   dev?: RemoteVersionInfo;
   system_name?: string;
   tokens_reset?: boolean; // admins only, set after an upgrade invalidated the API access tokens
+  telnet_enabled?: boolean; // admins only, the telnet console is on
 }

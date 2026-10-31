@@ -4,7 +4,9 @@ For more details go to [emsesp.org](https://emsesp.org/).
 
 ## [3.9.0]
 
-This release is based on the latest Espressif/Arduino core version 3. It brings in many memory and performance optimizations, for example 25% more available memory and 30% less PSRAM fragmentation.
+This release is based on the latest Espressif/Arduino core version 3. It brings in many memory and performance optimizations, for example 25% more available memory and 30% less PSRAM fragmentation and security hardening.
+
+## *Breaking Changes*:
 
 ## Added
 
@@ -90,11 +92,12 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - security: only admins can open or change the Scheduler, Commands, Custom Entities and Modules, rename devices or change entity customizations and log settings, or use admin actions such as exports and partition switching. Guests can still view the log
 - security: each Command has a "Guests may run this command" option. Commands created before 3.9.0 keep guest access, new ones start without it. It applies to the WebUI and `/api`
 - security: the live System Log needs a login
-- security: on telnet, `su` is refused while the Super User password is still the factory default, and on the serial console `su` asks for the password. The console `read` command needs admin
+- security: on the serial console `su` asks for the Super User password. The console `read` command needs admin
+- security: telnet asks for a Web UI user's login, admin users get admin rights and `su` is only on the serial console. At most 2 telnet sessions, closed after 10 minutes idle. Telnet is off on new installs (upgrades keep their setting) and the Web UI shows a notice while it's on. Telnet is not encrypted, so use the Web UI or serial for admin work, or a VPN [#3358](https://github.com/emsesp/EMS-ESP32/issues/3358)
+- security: repeated failed logins to the Web UI, telnet, serial `su` and the recovery firmware are slowed down, per source address and for all sources together. The Web UI sign-in answers HTTP 429 while locked out [#3362](https://github.com/emsesp/EMS-ESP32/issues/3362)
 - security: to go back to 3.8.x after upgrading, restore a System Backup made before the upgrade. 3.8.x can't read the hashed passwords, so without that backup a factory reset is needed
 - security: user and Super User passwords are stored hashed (PBKDF2-SHA256), existing passwords are converted on the first boot. The Web UI and `show users` no longer show stored passwords; leave a password field empty to keep the current one [#3355](https://github.com/emsesp/EMS-ESP32/issues/3355)
 - security: settings exports and System Backups leave out passwords and keys, unless an admin ticks "Include passwords and keys". Restoring keeps the passwords already on the device; a restored user with no password can't log in until an admin sets one [#3356](https://github.com/emsesp/EMS-ESP32/issues/3356)
-
 - various memory optimizations [#3083](https://github.com/emsesp/EMS-ESP32/issues/3083)
 - Scheduler name is now mandatory
 - Access Point provision mode label renamed from "When network connection is lost" to "When network connection not found" (all languages)

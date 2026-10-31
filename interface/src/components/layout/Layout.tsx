@@ -9,6 +9,7 @@ import type { RequiredChildrenProps } from 'utils';
 
 import LayoutAppBar from './LayoutAppBar';
 import LayoutDrawer from './LayoutDrawer';
+import TelnetBanner from './TelnetBanner';
 import TokensResetBanner from './TokensResetBanner';
 import { LayoutContext } from './context';
 
@@ -37,6 +38,7 @@ const LayoutComponent: FC<RequiredChildrenProps> = ({ children }) => {
       <Box component="main" sx={{ marginLeft: { md: `${DRAWER_WIDTH}px` } }}>
         <Toolbar />
         <TokensResetBanner />
+        <TelnetBanner />
         {children}
       </Box>
     </LayoutContext.Provider>

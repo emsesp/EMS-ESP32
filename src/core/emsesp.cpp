@@ -2154,7 +2154,8 @@ void EMSESP::start() {
     if (system_.telnet_enabled()) {
 #ifndef EMSESP_STANDALONE
         telnet_.start();
-        telnet_.initial_idle_timeout(3600);  // in sec, one hour idle timeout
+        telnet_.maximum_connections(2);
+        telnet_.initial_idle_timeout(600);   // in sec, 10 minutes idle timeout
         telnet_.default_write_timeout(1000); // in ms, socket timeout 1 second
 #endif
     }

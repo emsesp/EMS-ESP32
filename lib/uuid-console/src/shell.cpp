@@ -325,9 +325,10 @@ void Shell::loop_normal() {
     idle_time_ = uuid::get_uptime_ms();
 }
 
-Shell::PasswordData::PasswordData(const char * password_prompt, password_function && password_function)
+Shell::PasswordData::PasswordData(const char * password_prompt, password_function && password_function, bool echo)
     : password_prompt_(password_prompt)
-    , password_function_(std::move(password_function)) {
+    , password_function_(std::move(password_function))
+    , echo_(echo) {
 }
 
 void Shell::loop_password() {
@@ -338,7 +339,8 @@ void Shell::loop_password() {
         return;
     }
 
-    const unsigned char c = input;
+    const unsigned char c    = input;
+    const bool          echo = reinterpret_cast<Shell::PasswordData *>(mode_data_.get())->echo_;
 
     switch (c) {
     case '\x03':
@@ -352,6 +354,9 @@ void Shell::loop_password() {
         // Delete (^?)
         if (!line_buffer_.empty()) {
             line_buffer_.pop_back();
+            if (echo) {
+                erase_characters(1);
+            }
         }
         break;
 
@@ -376,12 +381,21 @@ void Shell::loop_password() {
 
     case '\x15':
         // Delete line (^U)
+        if (echo) {
+            erase_characters(line_buffer_.length());
+        }
         line_buffer_.clear();
         break;
 
     case '\x17':
         // Delete word (^W)
+        if (echo) {
+            erase_characters(line_buffer_.length());
+        }
         delete_buffer_word(false);
+        if (echo) {
+            print(line_buffer_);
+        }
         break;
 
     default:
@@ -389,6 +403,9 @@ void Shell::loop_password() {
             // ASCII text
             if (line_buffer_.length() < maximum_command_line_length_) {
                 line_buffer_.push_back(c);
+                if (echo) {
+                    print(static_cast<char>(c));
+                }
             }
         }
         break;
@@ -461,6 +478,13 @@ void Shell::enter_password(const char * prompt, password_function function) {
     if (mode_ == Mode::NORMAL) {
         mode_      = Mode::PASSWORD;
         mode_data_ = std::make_unique<Shell::PasswordData>(prompt, std::move(function));
+    }
+}
+
+void Shell::enter_text(const char * prompt, password_function function) {
+    if (mode_ == Mode::NORMAL) {
+        mode_      = Mode::PASSWORD;
+        mode_data_ = std::make_unique<Shell::PasswordData>(prompt, std::move(function), true);
     }
 }
 

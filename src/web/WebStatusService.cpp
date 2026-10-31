@@ -235,6 +235,9 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
         if (is_admin && EMSESP::nvs_.isKey(EMSESP_NVS_TOKENS_RESET)) {
             root["tokens_reset"] = true; // the WebUI asks the admin to regenerate API access tokens
         }
+        if (is_admin && EMSESP::system_.telnet_enabled()) {
+            root["telnet_enabled"] = true; // the WebUI warns that the unencrypted telnet console is on
+        }
     } else if (action == "dismissTokensReset") {
         EMSESP::nvs_.remove(EMSESP_NVS_TOKENS_RESET);
     } else if (action == "setPartition") {

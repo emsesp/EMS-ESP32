@@ -25,4 +25,13 @@ Authentication SecuritySettingsService::authenticateRequest(AsyncWebServerReques
     }
 }
 
+Authentication SecuritySettingsService::authenticate(const String & username, const String & password) {
+    for (const User * user : {&ADMIN_USER, &GUEST_USER}) {
+        if (username == user->username.c_str() && password == user->password.c_str()) {
+            return Authentication(*user);
+        }
+    }
+    return Authentication();
+}
+
 #endif

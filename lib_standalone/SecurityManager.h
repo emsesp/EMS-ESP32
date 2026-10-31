@@ -70,6 +70,7 @@ struct StandaloneRoute {
 class SecurityManager {
   public:
     virtual Authentication authenticateRequest(AsyncWebServerRequest * request) = 0;
+    virtual Authentication authenticate(const String & username, const String & password) = 0;
 
     // Json endpoints - default POST. Registered with the shared dispatcher.
     void addEndpoint(AsyncWebServer *             server,
