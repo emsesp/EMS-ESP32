@@ -164,7 +164,7 @@ const pl: BaseTranslation = {
   STATUS_OF: 'Status {0}',
   DOWNLOAD_UPLOAD: 'Plików przesyłanie',
   CLOSE: 'Zamknij',
-  TOKENS_RESET: 'Ta aktualizacja podpisuje tokeny dostępu nowym kluczem urządzenia. Dotychczasowe tokeny API przestały działać: wygeneruj nowe w Zarządzaniu użytkownikami i zaktualizuj integracje, np. Home Assistant, które ich używają.',
+  TOKENS_RESET: 'Ta aktualizacja podpisuje tokeny dostępu nowym kluczem urządzenia, więc dotychczasowe tokeny API przestały działać. W Zarządzaniu użytkownikami kliknij ikonę klucza obok użytkownika, aby skopiować jego nowy token, i zaktualizuj integracje, które go używają, np. Home Assistant.',
   USE: 'Aby zaktualizować firmware skorzystaj z funkcji',
   FACTORY_RESET: 'Ustawienia fabryczne',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Na pewno chcesz przywrócić ustawienia fabryczne interfejsu EMS-ESP?',

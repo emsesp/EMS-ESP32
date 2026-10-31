@@ -164,7 +164,7 @@ const it: Translation = {
   STATUS_OF: 'Stato {0}',
   DOWNLOAD_UPLOAD: 'Scaricamento/Caricamento',
   CLOSE: 'Chiudere',
-  TOKENS_RESET: 'Questo aggiornamento firma i token di accesso con una nuova chiave del dispositivo. I token API esistenti non funzionano più: generane di nuovi in Gestione utenti e aggiorna le integrazioni, come Home Assistant, che li usano.',
+  TOKENS_RESET: 'Questo aggiornamento firma i token di accesso con una nuova chiave del dispositivo, quindi i token API esistenti non funzionano più. In Gestione utenti, fai clic sull\'icona della chiave accanto a un utente per copiare il nuovo token e aggiorna le integrazioni che lo usano, come Home Assistant.',
   USE: 'Usa',
   FACTORY_RESET: 'Impostazioni di fabbrica',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Sei sicuro di voler ripristinare il dispositivo alle impostazioni di fabbrica??',

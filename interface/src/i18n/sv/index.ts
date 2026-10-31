@@ -164,7 +164,7 @@ const sv: Translation = {
   STATUS_OF: '{0} Status',
   DOWNLOAD_UPLOAD: 'Nedladdning/Uppladdning',
   CLOSE: 'Stäng',
-  TOKENS_RESET: 'Den här uppgraderingen signerar åtkomsttoken med en ny enhetsnyckel. Befintliga API-token fungerar inte längre: skapa nya under Hantera användare och uppdatera integrationer, som Home Assistant, som använder dem.',
+  TOKENS_RESET: 'Den här uppgraderingen signerar åtkomsttoken med en ny enhetsnyckel, så befintliga API-token fungerar inte längre. Under Hantera användare klickar du på nyckelikonen bredvid en användare för att kopiera den nya token, och uppdaterar integrationer som använder den, som Home Assistant.',
   USE: 'Använd',
   FACTORY_RESET: 'Fabriksåterställning',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Är du säker på att du vill fabriksåterställa enheten?',

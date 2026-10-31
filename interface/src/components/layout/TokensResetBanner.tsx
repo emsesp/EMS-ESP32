@@ -30,7 +30,7 @@ const TokensResetBanner = () => {
       <MessageBox level="warning" message={LL.TOKENS_RESET()}>
         <Button
           sx={{ ml: 2 }}
-          variant="outlined"
+          variant="contained"
           color="warning"
           onClick={() => void navigate('/settings/security/users')}
         >
@@ -38,7 +38,7 @@ const TokensResetBanner = () => {
         </Button>
         <Button
           sx={{ ml: 1 }}
-          variant="outlined"
+          variant="contained"
           color="warning"
           onClick={() => void dismiss()}
         >

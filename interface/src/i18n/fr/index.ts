@@ -164,7 +164,7 @@ const fr: Translation = {
   STATUS_OF: 'Statut {0}',
   DOWNLOAD_UPLOAD: 'Télécharger/Mettre à jour',
   CLOSE: 'Fermer',
-  TOKENS_RESET: 'Cette mise à jour signe les jetons d\'accès avec une nouvelle clé de l\'appareil. Les jetons API existants ne fonctionnent plus : générez-en de nouveaux dans Gérer les utilisateurs et mettez à jour les intégrations, comme Home Assistant, qui les utilisent.',
+  TOKENS_RESET: 'Cette mise à jour signe les jetons d\'accès avec une nouvelle clé de l\'appareil, les jetons API existants ne fonctionnent donc plus. Dans Gérer les utilisateurs, cliquez sur l\'icône de clé à côté d\'un utilisateur pour copier son nouveau jeton, puis mettez à jour les intégrations qui l\'utilisent, comme Home Assistant.',
   USE: 'Utiliser',
   FACTORY_RESET: 'Réinitialisation',
   SYSTEM_FACTORY_TEXT_DIALOG: "Êtes-vous sûr de vouloir réinitialiser l'appareil à ses paramètres d'usine ?",

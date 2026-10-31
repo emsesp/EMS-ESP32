@@ -164,7 +164,7 @@ const cs: Translation = {
   STATUS_OF: '{0} Stav',
   DOWNLOAD_UPLOAD: 'Stáhnout/Nahrát',
   CLOSE: 'Zavřít',
-  TOKENS_RESET: 'Tato aktualizace podepisuje přístupové tokeny novým klíčem zařízení. Stávající API tokeny již nefungují: vygenerujte nové ve Správě uživatelů a aktualizujte integrace, například Home Assistant, které je používají.',
+  TOKENS_RESET: 'Tato aktualizace podepisuje přístupové tokeny novým klíčem zařízení, proto stávající API tokeny již nefungují. Ve Správě uživatelů klikněte na ikonu klíče u uživatele, zkopírujte jeho nový token a aktualizujte integrace, které jej používají, například Home Assistant.',
   USE: 'Použít',
   FACTORY_RESET: 'Obnovení továrního nastavení',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Opravdu chcete resetovat zařízení EMS-ESP do továrního nastavení?',

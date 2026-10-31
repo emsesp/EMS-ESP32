@@ -164,7 +164,7 @@ const tr: Translation = {
   STATUS_OF: '{0} Durumu',
   DOWNLOAD_UPLOAD: 'İndirme/Yükleme',
   CLOSE: 'Kapat',
-  TOKENS_RESET: 'Bu güncelleme erişim jetonlarını yeni bir cihaz anahtarıyla imzalar. Mevcut API jetonları artık çalışmıyor: Kullanıcıları Yönet bölümünde yenilerini oluşturun ve bunları kullanan Home Assistant gibi entegrasyonları güncelleyin.',
+  TOKENS_RESET: 'Bu güncelleme erişim jetonlarını yeni bir cihaz anahtarıyla imzalar, bu nedenle mevcut API jetonları artık çalışmıyor. Kullanıcıları Yönet bölümünde bir kullanıcının yanındaki anahtar simgesine tıklayarak yeni jetonunu kopyalayın ve onu kullanan Home Assistant gibi entegrasyonları güncelleyin.',
   USE: 'KUllan',
   FACTORY_RESET: 'Fabrika ayarına dönme',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Cihazı fabrika ayarlarına döndürmek istediğinize emin misiniz?',

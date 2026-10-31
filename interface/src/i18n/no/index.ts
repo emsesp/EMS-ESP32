@@ -164,7 +164,7 @@ const no: Translation = {
   STATUS_OF: '{0} Status',
   DOWNLOAD_UPLOAD: 'Nedlasting/Opp',
   CLOSE: 'Steng',
-  TOKENS_RESET: 'Denne oppgraderingen signerer tilgangstokener med en ny enhetsnøkkel. Eksisterende API-tokener virker ikke lenger: generer nye under Administrer brukere og oppdater integrasjoner, som Home Assistant, som bruker dem.',
+  TOKENS_RESET: 'Denne oppgraderingen signerer tilgangstokener med en ny enhetsnøkkel, så eksisterende API-tokener virker ikke lenger. Under Administrer brukere klikker du på nøkkelikonet ved en bruker for å kopiere det nye tokenet, og oppdaterer integrasjoner som bruker det, som Home Assistant.',
   USE: 'Bruk',
   FACTORY_RESET: 'Sett tilbake til fabrikkinstilling',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Er du sikker på at du vil resette enheten til fabrikkinstillinger?',
