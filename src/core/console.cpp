@@ -45,6 +45,7 @@ static inline EMSESPShell & to_shell(Shell & shell) {
 // add static functions here....
 
 // the factory Super User password is public, so it must not grant admin over the network
+// the serial console still accepts it, as that needs physical access
 static bool default_su_password() {
     bool is_default = false;
     EMSESP::esp32React.getSecuritySettingsService()->read(
@@ -150,9 +151,11 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
 
         if (shell.has_flags(CommandFlags::ADMIN)) {
             return;
+#if defined(EMSESP_DEBUG)
         } else if (shell.has_flags(CommandFlags::LOCAL)) {
             become_admin(shell);
-        } else if (default_su_password()) {
+#endif
+        } else if (!shell.has_flags(CommandFlags::LOCAL) && default_su_password()) {
             shell.logger().log(LogLevel::NOTICE, LogFacility::AUTH, F("Admin login refused on console %s, default password in use"), to_shell(shell).console_name().c_str());
             shell.println("su: change the default Super User password in the Web UI first");
         } else {

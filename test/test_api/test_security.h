@@ -171,6 +171,15 @@ void security_test_console_su_default_password() {
     TEST_ASSERT_FALSE(network_shell->has_flags(CommandFlags::ADMIN));
 }
 
+// the serial console asks for the Super User password, it does not grant admin on su alone
+void security_test_serial_su_needs_password() {
+    auto serial_shell = std::make_shared<EMSESPConsole>(application, stream, true);
+    output_buffer[0]  = '\0';
+    serial_shell->invoke_command("su");
+    TEST_ASSERT_FALSE(serial_shell->has_flags(CommandFlags::ADMIN));
+    TEST_ASSERT_NULL(strstr(output_buffer, "change the default Super User password"));
+}
+
 void run_security_tests() {
     EMSESP::webCommandService.load_test_data(); // named commands used by executeCommand
 
@@ -183,4 +192,5 @@ void run_security_tests() {
     RUN_TEST(security_test_log_stream_needs_login);
     RUN_TEST(security_test_console_read_needs_admin);
     RUN_TEST(security_test_console_su_default_password);
+    RUN_TEST(security_test_serial_su_needs_password);
 }
