@@ -4786,9 +4786,25 @@ router
 
     return system_status;
   })
-  .get(SECURITY_SETTINGS_ENDPOINT, () => security_settings)
+  // like the device, never return the stored passwords
+  .get(SECURITY_SETTINGS_ENDPOINT, () => ({
+    jwt_secret: '',
+    users: security_settings.users.map((u) => ({ ...u, password: '' }))
+  }))
   .post(SECURITY_SETTINGS_ENDPOINT, async (request: any) => {
-    security_settings = await request.json();
+    const content: any = await request.json();
+    // an empty password keeps the current one
+    security_settings = {
+      jwt_secret: content.jwt_secret || security_settings.jwt_secret,
+      users: content.users.map((u: any) => ({
+        ...u,
+        password:
+          u.password ||
+          security_settings.users.find((o) => o.username === u.username)
+            ?.password ||
+          ''
+      }))
+    };
     console.log('security settings saved', security_settings);
     return status(200);
   })

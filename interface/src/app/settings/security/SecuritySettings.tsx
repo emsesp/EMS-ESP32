@@ -78,6 +78,7 @@ const SecuritySettings = () => {
           value={data.jwt_secret}
           onChange={updateFormValue}
           margin="normal"
+          helperText={LL.PASSWORD_KEEP()}
         />
         <MessageBox level="info" message={LL.SU_TEXT()} sx={{ mt: 1 }} />
         {dirtyFlags && dirtyFlags.length !== 0 && (

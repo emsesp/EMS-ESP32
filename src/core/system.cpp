@@ -1322,7 +1322,7 @@ void System::show_users(uuid::console::Shell & shell) {
 #ifndef EMSESP_STANDALONE
     EMSESP::esp32React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
         for (const User & user : securitySettings.users) {
-            shell.printfln(" username: %s, password: %s, is_admin: %s", user.username.c_str(), user.password.c_str(), user.admin ? ("yes") : ("no"));
+            shell.printfln(" username: %s, is_admin: %s", user.username.c_str(), user.admin ? ("yes") : ("no"));
         }
     });
 #endif

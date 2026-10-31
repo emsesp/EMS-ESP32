@@ -24,7 +24,7 @@ static String to_hex(const uint8_t * data, size_t len) {
 }
 
 SecuritySettingsService::SecuritySettingsService(AsyncWebServer * server, FS * fs)
-    : _httpEndpoint(SecuritySettings::read, SecuritySettings::update, this, server, SECURITY_SETTINGS_PATH, this)
+    : _httpEndpoint(SecuritySettings::readForWeb, SecuritySettings::updateFromWeb, this, server, SECURITY_SETTINGS_PATH, this)
     , _fsPersistence(SecuritySettings::read, SecuritySettings::update, this, fs, SECURITY_SETTINGS_FILE)
     , _jwtHandler("")
     , _fs(fs) {
@@ -34,8 +34,9 @@ SecuritySettingsService::SecuritySettingsService(AsyncWebServer * server, FS * f
 }
 
 void SecuritySettingsService::begin() {
-    auto & nvs = emsesp::EMSESP::nvs_;
-    if (!_fs->exists(SECURITY_SETTINGS_FILE)) {
+    auto &     nvs      = emsesp::EMSESP::nvs_;
+    const bool had_file = _fs->exists(SECURITY_SETTINGS_FILE);
+    if (!had_file) {
         // fresh install or factory reset, tokens from before must not survive it
         nvs.remove(emsesp::EMSESP_NVS_JWT_KEY);
         nvs.remove(emsesp::EMSESP_NVS_TOKENS_RESET);
@@ -45,8 +46,16 @@ void SecuritySettingsService::begin() {
     }
 
     _fsPersistence.readFromFS();
-    _adminCredentials = adminCredentials();
+    _adminCredentials = adminCredentials(); // after hashing, so hashing alone doesn't invalidate the tokens
     loadSigningKey();
+
+    if (_state.hashed_on_load) {
+        _state.hashed_on_load = false;
+        _fsPersistence.writeToFS();
+        if (had_file) {
+            emsesp::EMSESP::logger().notice("Stored passwords are now hashed");
+        }
+    }
 }
 
 // the signing key is random per device, so tokens can't be forged from the public factory settings
@@ -146,7 +155,7 @@ Authentication SecuritySettingsService::authenticateJWT(String & jwt) {
 
 Authentication SecuritySettingsService::authenticate(const String & username, const String & password) {
     for (const User & _user : _state.users) {
-        if (_user.username == username && !_user.password.isEmpty() && _user.password == password) {
+        if (_user.username == username && PasswordHash::verify(password, _user.password)) {
             return Authentication(_user);
         }
     }

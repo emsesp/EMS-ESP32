@@ -4,6 +4,7 @@
 
 #include "SecuritySettingsService.h"
 #include "settings_secrets.h"
+#include "password_hash.h"
 
 // Permission tests. Run last, they change settings and identity.
 
@@ -289,6 +290,69 @@ void security_test_private_nvs_keys() {
     TEST_ASSERT_TRUE(SettingsSecrets::is_private_nvs_key(EMSESP_NVS_TOKENS_RESET));
 }
 
+static String hex(const uint8_t * data, size_t len) {
+    String out;
+    char   byte[3];
+    for (size_t i = 0; i < len; i++) {
+        snprintf(byte, sizeof(byte), "%02x", data[i]);
+        out += byte;
+    }
+    return out;
+}
+
+// PBKDF2-HMAC-SHA256 test vectors, P="password" S="salt"
+void security_test_pbkdf2_vectors() {
+    const uint8_t salt[] = {'s', 'a', 'l', 't'};
+    uint8_t       out[32];
+    PasswordHash::pbkdf2("password", salt, sizeof(salt), 1, out);
+    TEST_ASSERT_EQUAL_STRING("120fb6cffcf8b32c43e7225256c4f837a86548c92ccc35480805987cb70be17b", hex(out, sizeof(out)).c_str());
+    PasswordHash::pbkdf2("password", salt, sizeof(salt), 4096, out);
+    TEST_ASSERT_EQUAL_STRING("c5e478d59288c841aa530db6845c4c8d962893a001ce4e11a4963873aa98134a", hex(out, sizeof(out)).c_str());
+}
+
+void security_test_password_hash() {
+    String stored = PasswordHash::hash("s3cret");
+    TEST_ASSERT_TRUE(stored.startsWith("$pbkdf2-sha256$10000$"));
+    TEST_ASSERT_TRUE(PasswordHash::is_hashed(stored));
+    TEST_ASSERT_TRUE(PasswordHash::verify("s3cret", stored));
+    TEST_ASSERT_FALSE(PasswordHash::verify("s3creT", stored));
+    TEST_ASSERT_FALSE(PasswordHash::verify("", stored));
+    TEST_ASSERT_NOT_EQUAL(0, strcmp(stored.c_str(), PasswordHash::hash("s3cret").c_str())); // random salt
+
+    // a damaged hash is treated as plain text, so it only matches itself
+    std::string damaged = stored.c_str();
+    damaged.back()      = damaged.back() == '0' ? '1' : '0';
+    TEST_ASSERT_FALSE(PasswordHash::verify("s3cret", damaged.c_str()));
+    damaged.back() = 'x';
+    TEST_ASSERT_FALSE(PasswordHash::is_hashed(damaged.c_str()));
+    TEST_ASSERT_FALSE(PasswordHash::is_hashed("$pbkdf2-sha256$0$00$00"));
+    TEST_ASSERT_FALSE(PasswordHash::is_hashed(("$pbkdf2-sha256$999999999" + std::string(stored.c_str() + 20)).c_str()));
+
+    // empty never matches, plain text matches until it's hashed at boot
+    TEST_ASSERT_FALSE(PasswordHash::verify("", ""));
+    TEST_ASSERT_TRUE(PasswordHash::verify("admin", "admin"));
+    TEST_ASSERT_FALSE(PasswordHash::verify("admin", "admin2"));
+}
+
+// the factory Super User password is still recognised once it's hashed
+void security_test_console_su_default_hashed() {
+    EMSESP::esp32React.getSecuritySettingsService()->update([](SecuritySettings & settings) {
+        settings.jwtSecret = PasswordHash::hash(FACTORY_JWT_SECRET);
+        return StateUpdateResult::CHANGED;
+    });
+
+    auto network_shell = std::make_shared<EMSESPConsole>(application, stream, false);
+    output_buffer[0]   = '\0';
+    network_shell->invoke_command("su");
+    TEST_ASSERT_NOT_NULL(strstr(output_buffer, "change the default Super User password"));
+    TEST_ASSERT_FALSE(network_shell->has_flags(CommandFlags::ADMIN));
+
+    EMSESP::esp32React.getSecuritySettingsService()->update([](SecuritySettings & settings) {
+        settings.jwtSecret = FACTORY_JWT_SECRET;
+        return StateUpdateResult::CHANGED;
+    });
+}
+
 void run_security_tests() {
     EMSESP::webCommandService.load_test_data(); // named commands used by executeCommand
 
@@ -307,4 +371,7 @@ void run_security_tests() {
     RUN_TEST(security_test_backup_redacts_secrets);
     RUN_TEST(security_test_restore_merges_secrets);
     RUN_TEST(security_test_private_nvs_keys);
+    RUN_TEST(security_test_pbkdf2_vectors);
+    RUN_TEST(security_test_password_hash);
+    RUN_TEST(security_test_console_su_default_hashed);
 }

@@ -20,6 +20,7 @@
 #include "emsesp_console.h"
 #include "console_stream.h"
 #include "emsesp.h"
+#include "password_hash.h"
 
 #if defined(EMSESP_TEST)
 #include "../test/test.h"
@@ -49,7 +50,7 @@ static inline EMSESPShell & to_shell(Shell & shell) {
 static bool default_su_password() {
     bool is_default = false;
     EMSESP::esp32React.getSecuritySettingsService()->read(
-        [&](SecuritySettings & securitySettings) { is_default = securitySettings.jwtSecret.equals(FACTORY_JWT_SECRET); });
+        [&](SecuritySettings & securitySettings) { is_default = PasswordHash::verify(FACTORY_JWT_SECRET, securitySettings.jwtSecret); });
     return is_default;
 }
 
@@ -164,7 +165,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                     uint64_t now = uuid::get_uptime_ms();
 
                     EMSESP::esp32React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
-                        if (!password.empty() && (securitySettings.jwtSecret.equals(password.c_str()))) {
+                        if (!password.empty() && PasswordHash::verify(password.c_str(), securitySettings.jwtSecret)) {
                             become_admin(shell);
                         } else {
                             shell.delay_until(now + INVALID_PASSWORD_DELAY_MS, [](Shell & shell) {
@@ -188,7 +189,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                     if (completed) {
                         if (password1 == password2) {
                             EMSESP::esp32React.getSecuritySettingsService()->update([&](SecuritySettings & securitySettings) {
-                                securitySettings.jwtSecret = password2.c_str();
+                                securitySettings.jwtSecret = PasswordHash::hash(password2.c_str());
                                 return StateUpdateResult::CHANGED;
                             });
                             shell.println("Admin password updated");
@@ -235,13 +236,13 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                                                           // find the username 'admin' and update its password
                                                           for (auto & user : securitySettings.users) {
                                                               if (user.username == "admin") {
-                                                                  user.password = password2.c_str();
+                                                                  user.password = PasswordHash::hash(password2.c_str());
                                                                   return StateUpdateResult::CHANGED;
                                                               }
                                                           }
 
                                                           // otherwise add a new admin user
-                                                          securitySettings.users.emplace_back(F_(admin), password2.c_str(), true);
+                                                          securitySettings.users.emplace_back(F_(admin), PasswordHash::hash(password2.c_str()), true);
                                                           return StateUpdateResult::CHANGED;
                                                       });
 #endif

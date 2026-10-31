@@ -7,13 +7,12 @@ const JWT_SECRET_MAX_LENGTH = 64;
 const PASSWORD_MAX_LENGTH = 64;
 
 export const SECURITY_SETTINGS_VALIDATOR = new Schema({
+  // empty keeps the current password
   jwt_secret: [
-    { required: true, message: 'JWT secret is required' },
     {
       type: 'string',
-      min: 1,
       max: JWT_SECRET_MAX_LENGTH,
-      message: `JWT secret must be between 1 and ${JWT_SECRET_MAX_LENGTH} characters`
+      message: `Password must be at most ${JWT_SECRET_MAX_LENGTH} characters`
     }
   ]
 });
@@ -54,13 +53,15 @@ export const createUserValidator = (users: UserType[], creating: boolean) =>
       },
       ...(creating ? [createUniqueUsernameValidator(users)] : [])
     ],
+    // an existing user keeps the current password when it's left empty
     password: [
-      { required: true, message: 'Please provide a password' },
+      ...(creating
+        ? [{ required: true, message: 'Please provide a password' }]
+        : []),
       {
         type: 'string',
-        min: 1,
         max: PASSWORD_MAX_LENGTH,
-        message: `Password must be 1-${PASSWORD_MAX_LENGTH} characters`
+        message: `Password must be at most ${PASSWORD_MAX_LENGTH} characters`
       }
     ]
   });
