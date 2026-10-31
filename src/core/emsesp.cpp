@@ -2182,7 +2182,6 @@ void EMSESP::start_serial_console() {
     shell_->start();
 #if defined(EMSESP_DEBUG)
     shell_->log_level(uuid::log::Level::DEBUG);
-    shell_->add_flags(CommandFlags::ADMIN); // always start in su/admin mode when compiled with debug
 #else
     shell_->log_level(uuid::log::Level::TRACE);
 #endif
