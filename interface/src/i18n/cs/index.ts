@@ -212,6 +212,8 @@ const cs: Translation = {
   SETUP_VIEW_USER: 'Volitelné: přidejte hostujícího uživatele jen pro prohlížení.',
   NETWORK_CORS_ORIGIN_HELP: 'Webová adresa, která smí volat API z prohlížeče, například http://homeassistant.local:8123',
   NETWORK_CORS_WILDCARD: 'S * může API volat každá webová stránka otevřená v prohlížeči ve vaší síti. Místo toho zadejte přesnou adresu.',
+  NETWORK_ALLOWED_HOSTS: 'Povolené názvy hostitele',
+  NETWORK_ALLOWED_HOSTS_HELP: 'Další názvy, pod kterými lze toto zařízení otevřít v prohlížeči, například ems-esp.fritz.box nebo název reverse proxy. IP adresa, název hostitele a název.local fungují vždy',
   NOT_ENABLED: 'Nepovoleno',
   ERRORS_OF: '{0} Chyby',
   DISCONNECT_REASON: 'Důvod odpojení',

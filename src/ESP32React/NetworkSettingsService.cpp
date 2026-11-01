@@ -23,6 +23,7 @@ void NetworkSettings::read(NetworkSettings & settings, JsonObject root) {
     root["enableMDNS"]       = settings.enableMDNS;
     root["enableCORS"]       = settings.enableCORS;
     root["CORSOrigin"]       = settings.CORSOrigin;
+    root["allowed_hosts"]    = settings.allowedHosts;
     root["tx_power"]         = settings.tx_power;
     root["eth_10mbit"]       = settings.eth_10mbit;
 
@@ -52,6 +53,7 @@ StateUpdateResult NetworkSettings::update(JsonObject root, NetworkSettings & set
     settings.enableMDNS     = root["enableMDNS"] | true;
     settings.enableCORS     = root["enableCORS"];
     settings.CORSOrigin     = root["CORSOrigin"] | "";
+    settings.allowedHosts   = root["allowed_hosts"] | "";
     settings.eth_10mbit     = root["eth_10mbit"];
 
     // extended settings

@@ -212,6 +212,8 @@ const nl: Translation = {
   SETUP_VIEW_USER: 'Optioneel: voeg een gastgebruiker toe die alleen mag kijken.',
   NETWORK_CORS_ORIGIN_HELP: 'Het webadres dat de API vanuit een browser mag aanroepen, bijvoorbeeld http://homeassistant.local:8123',
   NETWORK_CORS_WILDCARD: 'Met * kan elke website die in een browser op je netwerk open staat de API aanroepen. Vul in plaats daarvan het exacte adres in.',
+  NETWORK_ALLOWED_HOSTS: 'Toegestane hostnamen',
+  NETWORK_ALLOWED_HOSTS_HELP: 'Extra namen waarmee dit apparaat in een browser geopend mag worden, bijvoorbeeld ems-esp.fritz.box of de naam van een reverse proxy. Het IP-adres, de hostnaam en hostnaam.local werken altijd',
   NOT_ENABLED: 'Niet geactiveerd',
   ERRORS_OF: '{0} Foutmeldingen',
   DISCONNECT_REASON: 'Verbinding verbroken vanwege',

@@ -95,7 +95,8 @@ const NetworkSettings = () => {
             nosleep: true,
             enableMDNS: true,
             enableCORS: false,
-            CORSOrigin: '',
+            CORSOrigin: current_data ? current_data.CORSOrigin : '',
+            allowed_hosts: current_data ? current_data.allowed_hosts : '',
             eth_10mbit: current_data ? current_data.eth_10mbit : false
           })
         );
@@ -316,6 +317,17 @@ const NetworkSettings = () => {
             {data.CORSOrigin === '*' && (
               <MessageBox level="warning" message={LL.NETWORK_CORS_WILDCARD()} />
             )}
+            <ValidatedTextField
+              fieldErrors={fieldErrors || {}}
+              name="allowed_hosts"
+              label={LL.NETWORK_ALLOWED_HOSTS()}
+              helperText={LL.NETWORK_ALLOWED_HOSTS_HELP()}
+              fullWidth
+              variant="outlined"
+              value={data.allowed_hosts}
+              onChange={updateFormValue}
+              margin="normal"
+            />
           </>
         )}
         <BlockFormControlLabel

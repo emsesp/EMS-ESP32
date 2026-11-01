@@ -212,6 +212,8 @@ const tr: Translation = {
   SETUP_VIEW_USER: 'İsteğe bağlı: yalnızca görüntüleyebilen bir misafir kullanıcı ekleyin.',
   NETWORK_CORS_ORIGIN_HELP: 'API\'yi bir tarayıcıdan çağırmasına izin verilen web adresi, örneğin http://homeassistant.local:8123',
   NETWORK_CORS_WILDCARD: '* ile ağınızdaki bir tarayıcıda açık olan her web sitesi API\'yi çağırabilir. Bunun yerine tam adresi girin.',
+  NETWORK_ALLOWED_HOSTS: 'İzin verilen ana bilgisayar adları',
+  NETWORK_ALLOWED_HOSTS_HELP: 'Bu cihazın tarayıcıda açılabileceği ek adlar, örneğin ems-esp.fritz.box veya bir ters vekil sunucu adı. IP adresi, ana bilgisayar adı ve adı.local her zaman çalışır',
   NOT_ENABLED: 'Etkinleştirilmedi',
   ERRORS_OF: '{0} Hata(ları)',
   DISCONNECT_REASON: 'Bağlantının kopma nedeni',

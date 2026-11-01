@@ -212,6 +212,8 @@ const hu: Translation = {
   SETUP_VIEW_USER: 'Opcionális: adjon hozzá egy csak megtekintésre jogosult vendégfelhasználót.',
   NETWORK_CORS_ORIGIN_HELP: 'A webcím, amely böngészőből hívhatja az API-t, például http://homeassistant.local:8123',
   NETWORK_CORS_WILDCARD: 'A * beállítással a hálózatán bármely böngészőben megnyitott weboldal hívhatja az API-t. Adja meg helyette a pontos címet.',
+  NETWORK_ALLOWED_HOSTS: 'Engedélyezett gépnevek',
+  NETWORK_ALLOWED_HOSTS_HELP: 'További nevek, amelyeken ez az eszköz böngészőben megnyitható, például ems-esp.fritz.box vagy egy fordított proxy neve. Az IP-cím, a gépnév és a gépnév.local mindig működik',
   NOT_ENABLED: 'Nincs engedélyezve',
   ERRORS_OF: '{0} hiba',
   DISCONNECT_REASON: 'Lecsatlakozás oka',

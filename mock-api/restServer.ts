@@ -613,6 +613,7 @@ let network_settings = {
   enableMDNS: true,
   enableCORS: false,
   CORSOrigin: '',
+  allowed_hosts: '',
   eth_10mbit: false,
   local_ip: '',
   gateway_ip: '',

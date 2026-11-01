@@ -212,6 +212,8 @@ const en: Translation = {
   SETUP_VIEW_USER: 'Optional: add a view-only guest user.',
   NETWORK_CORS_ORIGIN_HELP: 'The web address allowed to call the API from a browser, for example http://homeassistant.local:8123',
   NETWORK_CORS_WILDCARD: 'With * any website open in a browser on your network can call the API. Set the exact address instead.',
+  NETWORK_ALLOWED_HOSTS: 'Allowed host names',
+  NETWORK_ALLOWED_HOSTS_HELP: 'Extra names this device may be opened as in a browser, for example ems-esp.fritz.box or a reverse proxy name. Its IP address, hostname and hostname.local always work',
   NOT_ENABLED: 'Not enabled',
   ERRORS_OF: '{0} Errors',
   DISCONNECT_REASON: 'Disconnect Reason',

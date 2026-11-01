@@ -212,6 +212,8 @@ const sv: Translation = {
   SETUP_VIEW_USER: 'Valfritt: lägg till en gästanvändare som bara kan titta.',
   NETWORK_CORS_ORIGIN_HELP: 'Webbadressen som får anropa API:et från en webbläsare, till exempel http://homeassistant.local:8123',
   NETWORK_CORS_WILDCARD: 'Med * kan alla webbplatser som är öppna i en webbläsare i ditt nätverk anropa API:et. Ange den exakta adressen i stället.',
+  NETWORK_ALLOWED_HOSTS: 'Tillåtna värdnamn',
+  NETWORK_ALLOWED_HOSTS_HELP: 'Extra namn som enheten får öppnas som i en webbläsare, till exempel ems-esp.fritz.box eller namnet på en omvänd proxy. IP-adressen, värdnamnet och värdnamn.local fungerar alltid',
   NOT_ENABLED: 'Ej aktiv',
   ERRORS_OF: '{0} fel',
   DISCONNECT_REASON: 'Anledning till nedkoppling',

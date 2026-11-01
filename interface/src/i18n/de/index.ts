@@ -212,6 +212,8 @@ const de: Translation = {
   SETUP_VIEW_USER: 'Optional: einen Gastbenutzer nur zum Ansehen hinzufügen.',
   NETWORK_CORS_ORIGIN_HELP: 'Die Webadresse, die die API aus einem Browser aufrufen darf, zum Beispiel http://homeassistant.local:8123',
   NETWORK_CORS_WILDCARD: 'Mit * kann jede Webseite, die in einem Browser in deinem Netzwerk geöffnet ist, die API aufrufen. Trage stattdessen die genaue Adresse ein.',
+  NETWORK_ALLOWED_HOSTS: 'Erlaubte Hostnamen',
+  NETWORK_ALLOWED_HOSTS_HELP: 'Weitere Namen, unter denen dieses Gerät im Browser geöffnet werden darf, zum Beispiel ems-esp.fritz.box oder der Name eines Reverse Proxys. IP-Adresse, Hostname und Hostname.local funktionieren immer',
   NOT_ENABLED: 'Nicht aktiviert',
   ERRORS_OF: '{0} Fehler',
   DISCONNECT_REASON: 'Grund der Verbindungsunterbrechung',

@@ -212,6 +212,8 @@ const no: Translation = {
   SETUP_VIEW_USER: 'Valgfritt: legg til en gjestebruker som bare kan se.',
   NETWORK_CORS_ORIGIN_HELP: 'Nettadressen som kan kalle API-et fra en nettleser, for eksempel http://homeassistant.local:8123',
   NETWORK_CORS_WILDCARD: 'Med * kan alle nettsider som er åpne i en nettleser på nettverket ditt kalle API-et. Angi den nøyaktige adressen i stedet.',
+  NETWORK_ALLOWED_HOSTS: 'Tillatte vertsnavn',
+  NETWORK_ALLOWED_HOSTS_HELP: 'Ekstra navn enheten kan åpnes som i en nettleser, for eksempel ems-esp.fritz.box eller navnet på en omvendt proxy. IP-adressen, vertsnavnet og vertsnavn.local fungerer alltid',
   NOT_ENABLED: 'Ikke aktiv',
   ERRORS_OF: '{0} Feil',
   DISCONNECT_REASON: 'Årsak til nedkobling',

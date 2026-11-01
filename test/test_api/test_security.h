@@ -8,6 +8,7 @@
 #include "login_limiter.h"
 #include "api_key.h"
 #include "origin_check.h"
+#include "host_check.h"
 
 // Permission tests. Run last, they change settings and identity.
 
@@ -147,6 +148,22 @@ void security_test_origin_check() {
     TEST_ASSERT_FALSE(origin_allowed("http://evil.example", "ems-esp.local", true, "http://homeassistant.local:8123"));
     TEST_ASSERT_TRUE(origin_allowed("http://homeassistant.local:8123", "ems-esp.local", true, "http://homeassistant.local:8123"));
     TEST_ASSERT_TRUE(origin_allowed("http://evil.example", "ems-esp.local", true, "*"));
+}
+
+// a browser may only reach the device by IP address, hostname, <hostname>.local or an extra allowed name
+void security_test_host_check() {
+    TEST_ASSERT_TRUE(host_allowed(nullptr, "ems-esp", ""));
+    TEST_ASSERT_TRUE(host_allowed("192.168.1.5", "ems-esp", ""));
+    TEST_ASSERT_TRUE(host_allowed("192.168.1.5:8080", "ems-esp", ""));
+    TEST_ASSERT_TRUE(host_allowed("[fe80::1]:80", "ems-esp", ""));
+    TEST_ASSERT_TRUE(host_allowed("ems-esp", "ems-esp", ""));
+    TEST_ASSERT_TRUE(host_allowed("EMS-ESP.local", "ems-esp", ""));
+    TEST_ASSERT_FALSE(host_allowed("evil.example", "ems-esp", ""));
+    TEST_ASSERT_FALSE(host_allowed("ems-esp.evil.example", "ems-esp", ""));
+    TEST_ASSERT_FALSE(host_allowed("ems-esp.fritz.box", "ems-esp", ""));
+    TEST_ASSERT_TRUE(host_allowed("ems-esp.fritz.box", "ems-esp", "heating.example.com, ems-esp.fritz.box"));
+    TEST_ASSERT_TRUE(host_allowed("heating.example.com:443", "ems-esp", "heating.example.com,ems-esp.fritz.box"));
+    TEST_ASSERT_FALSE(host_allowed("example.com", "ems-esp", "heating.example.com"));
 }
 
 void security_test_action_admin_only() {
@@ -512,6 +529,7 @@ void run_security_tests() {
     RUN_TEST(security_test_api_without_token);
     RUN_TEST(security_test_api_notoken_is_guest);
     RUN_TEST(security_test_origin_check);
+    RUN_TEST(security_test_host_check);
     RUN_TEST(security_test_action_admin_only);
     RUN_TEST(security_test_action_guest_allowed);
     RUN_TEST(security_test_command_guest_flag);

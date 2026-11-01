@@ -212,6 +212,8 @@ const sk: Translation = {
   SETUP_VIEW_USER: 'Voliteľné: pridajte hosťovského používateľa len na prezeranie.',
   NETWORK_CORS_ORIGIN_HELP: 'Webová adresa, ktorá môže volať API z prehliadača, napríklad http://homeassistant.local:8123',
   NETWORK_CORS_WILDCARD: 'S * môže API volať každá webová stránka otvorená v prehliadači vo vašej sieti. Namiesto toho zadajte presnú adresu.',
+  NETWORK_ALLOWED_HOSTS: 'Povolené názvy hostiteľa',
+  NETWORK_ALLOWED_HOSTS_HELP: 'Ďalšie názvy, pod ktorými možno toto zariadenie otvoriť v prehliadači, napríklad ems-esp.fritz.box alebo názov reverse proxy. IP adresa, názov hostiteľa a názov.local fungujú vždy',
   NOT_ENABLED: 'Nie je povolené',
   ERRORS_OF: '{0} errory',
   DISCONNECT_REASON: 'Dôvod odpojenia',
