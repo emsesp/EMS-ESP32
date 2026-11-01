@@ -1766,7 +1766,12 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     // check for poll
     if (length == 1) {
         // if ht3 poll must be ems_bus_id else if Buderus poll must be (ems_bus_id | 0x80)
-        uint8_t         poll_id      = (first_value ^ 0x80 ^ rxservice_.ems_mask());
+        // until the bus type is known, take it from the poll itself: Buderus polls with the MSB set, HT3 without
+        uint8_t mask = rxservice_.ems_mask();
+        if (mask == EMSbus::EMS_MASK_UNSET) {
+            mask = (first_value & 0x80) ^ 0x80;
+        }
+        uint8_t         poll_id      = (first_value ^ 0x80 ^ mask);
         static uint32_t connect_time = 0;
         if (!rxservice_.bus_connected()) {
             wait_km_     = true;
@@ -1774,7 +1779,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         }
 
         if (poll_id == EMSbus::ems_bus_id()) {
-            EMSbus::last_bus_activity(uuid::get_uptime()); // set the flag indication the EMS bus is active
+            EMSbus::poll_received(uuid::get_uptime(), mask); // sets the flag indicating the EMS bus is active
         }
 
         if (wait_km_) {
