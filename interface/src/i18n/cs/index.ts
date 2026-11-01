@@ -103,7 +103,7 @@ const cs: Translation = {
   ENABLE_TELNET: 'Povolit Telnet konzoli',
   ENABLE_ANALOG: 'Povolit analogové senzory',
   CONVERT_FAHRENHEIT: 'Převést hodnoty teploty na Fahrenheit',
-  BYPASS_TOKEN: 'Obejít autorizaci tokenu při API voláních',
+  BYPASS_TOKEN: 'Povolit volání API bez přístupového tokenu, s právy hosta (čtení hodnot a příkazy povolené hostům)',
   READONLY: 'Povolit režim jen pro čtení (blokuje všechny odchozí příkazy EMS Tx Write)',
   UNDERCLOCK_CPU: 'Snížit takt CPU',
   REMOTE_TIMEOUT: 'Časový limit vzdáleného připojení',

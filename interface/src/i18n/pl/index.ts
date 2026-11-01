@@ -103,7 +103,7 @@ const pl: BaseTranslation = {
   ENABLE_TELNET: 'Aktywuj dostęp dla konsoli Telnet',
   ENABLE_ANALOG: 'Aktywuj urządzenia GPIO (czujniki analogowe i cyfrowe oraz wyjścia cyfrowe)',
   CONVERT_FAHRENHEIT: 'Konwertuj temperatury do skali Fahrenheita',
-  BYPASS_TOKEN: 'Pomiń autoryzację tokenem w wywołaniach API',
+  BYPASS_TOKEN: 'Zezwalaj na wywołania API bez tokena dostępu, z uprawnieniami gościa (odczyt wartości i polecenia dozwolone dla gości)',
   READONLY: 'Tryb pracy "tylko do odczytu" (blokuje wszystkie komendy zapisu na magistralę EMS)',
   UNDERCLOCK_CPU: 'Obniż taktowanie CPU',
   REMOTE_TIMEOUT: 'Remote timeout',

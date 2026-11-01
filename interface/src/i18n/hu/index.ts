@@ -103,7 +103,7 @@ const hu: Translation = {
   ENABLE_TELNET: 'Telnet konzol engedélyezése',
   ENABLE_ANALOG: 'Analóg szenzorok engedélyezése',
   CONVERT_FAHRENHEIT: 'Hőmérséklet konvertálása Fahrenheitbe',
-  BYPASS_TOKEN: 'Hozzáférési token kihagyása az API hívásoknál',
+  BYPASS_TOKEN: 'API-hívások engedélyezése hozzáférési token nélkül, vendégjogokkal (értékek olvasása és a vendégek által futtatható parancsok)',
   READONLY: 'Csak olvasható mód engedélyezése (letilt minden kimenő EMS írási parancsot)',
   UNDERCLOCK_CPU: 'CPU órajelének csökkentése',
   REMOTE_TIMEOUT: 'Távoli időtúllépés',

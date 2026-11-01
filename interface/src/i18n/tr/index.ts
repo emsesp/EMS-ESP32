@@ -103,7 +103,7 @@ const tr: Translation = {
   ENABLE_TELNET: 'Telnet Konsolunu Aktif Hale Getir',
   ENABLE_ANALOG: 'Analog Sensörleri Aktif Hale Getir',
   CONVERT_FAHRENHEIT: 'Sıcaklık değerlerini Fahrenheit a çevir',
-  BYPASS_TOKEN: 'API bağlantılarında Erişim Jeton onaylamasını geç',
+  BYPASS_TOKEN: 'Erişim jetonu olmadan API çağrılarına misafir haklarıyla izin ver (değerleri okuma ve misafirlerin çalıştırabildiği komutları çalıştırma)',
   READONLY: 'Salt okunur modu devreye al (bütün giden EMS Tx Yazma komutlarını engeller)',
   UNDERCLOCK_CPU: 'İşlemci hızını düşür',
   REMOTE_TIMEOUT: 'Remote timeout',

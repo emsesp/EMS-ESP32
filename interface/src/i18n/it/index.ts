@@ -103,7 +103,7 @@ const it: Translation = {
   ENABLE_TELNET: 'Abilità la Console Telnet',
   ENABLE_ANALOG: 'Abilita Sensori Analogici',
   CONVERT_FAHRENHEIT: 'Converti valori temperatura in Fahrenheit',
-  BYPASS_TOKEN: 'Ignora autorizzazione del token di accesso sulle chiamate API',
+  BYPASS_TOKEN: 'Consenti chiamate API senza token di accesso, con diritti di ospite (leggere i valori ed eseguire i comandi consentiti agli ospiti)',
   READONLY: 'Abilita modalità sola-lettura (blocca tutti i comandi di scrittura EMS Tx in uscita)',
   UNDERCLOCK_CPU: 'Abbassa velocità della CPU',
   REMOTE_TIMEOUT: 'Remote timeout',

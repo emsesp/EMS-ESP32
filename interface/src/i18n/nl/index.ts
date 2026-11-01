@@ -103,7 +103,7 @@ const nl: Translation = {
   ENABLE_TELNET: 'Activeer Telnet console',
   ENABLE_ANALOG: 'Activeer analoge sensoren',
   CONVERT_FAHRENHEIT: 'Converteer temperatuurwaarden naar Fahrenheit',
-  BYPASS_TOKEN: 'API Access Token authenticatie uitschakelen',
+  BYPASS_TOKEN: 'API-aanroepen zonder toegangstoken toestaan, met gastrechten (waarden lezen en commando\'s uitvoeren die gasten mogen uitvoeren)',
   READONLY: 'Activeer read-only modus (blokkeert alle outgaande EMS Tx schrijf commandos)',
   UNDERCLOCK_CPU: 'Underclock CPU snelheid',
   REMOTE_TIMEOUT: 'Remote timeout',

@@ -25,7 +25,7 @@ uint16_t WebAPIService::api_fails_ = 0;
 
 WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager) {
-    // parse() does its own per-request admin check (with notoken_api), so no predicate.
+    // parse() does its own per-request check (with notoken_api), so no predicate.
     // /api also matches /api/<device>/<entity> via the route's backward-compatible URI matcher.
     securityManager->addEndpoint(
         server,
@@ -83,13 +83,13 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
 // parse the URL looking for query or path parameters
 // reporting back any errors
 void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
-    // check if the user has admin privileges (token is included and authorized)
+    // admin rights need an admin token or a read+write API key. notoken_api lets calls without one act like a guest, never an admin
     bool is_admin = false;
     bool is_user  = false;
     EMSESP::webSettingsService.read([&](WebSettings const & settings) {
         Authentication authentication = _securityManager->authenticateApiRequest(request);
-        is_admin                      = settings.notoken_api || AuthenticationPredicates::IS_ADMIN(authentication);
-        is_user                       = AuthenticationPredicates::IS_AUTHENTICATED(authentication);
+        is_admin                      = AuthenticationPredicates::IS_ADMIN(authentication);
+        is_user                       = settings.notoken_api || AuthenticationPredicates::IS_AUTHENTICATED(authentication);
     });
 
     // check for query parameters first, the old style from v2

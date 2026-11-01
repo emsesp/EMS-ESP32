@@ -112,6 +112,29 @@ void security_test_api_without_token() {
     TEST_ASSERT_NOT_NULL(strstr(response, "authentication failed"));
 }
 
+// "Bypass Access Token authorization" lets calls without a token act like a guest, never an admin
+void security_test_api_notoken_is_guest() {
+    EMSESP::webSettingsService.update([](WebSettings & settings) {
+        settings.notoken_api = true;
+        return StateUpdateResult::CHANGED;
+    });
+    SecuritySettingsService::identity(StandaloneIdentity::NONE);
+
+    std::string setting = call_url("/api/system/mqtt/enabled", "{\"value\":false}");
+    std::string guest   = call_url("/api/commands/send_message", "{\"value\":\"1\"}");
+    std::string admin   = call_url("/api/commands/fetch_values", "{\"value\":\"1\"}");
+
+    SecuritySettingsService::identity(StandaloneIdentity::ADMIN);
+    EMSESP::webSettingsService.update([](WebSettings & settings) {
+        settings.notoken_api = false;
+        return StateUpdateResult::CHANGED;
+    });
+
+    TEST_ASSERT_NOT_EQUAL(std::string::npos, setting.find("authentication failed"));
+    TEST_ASSERT_EQUAL(std::string::npos, guest.find("authentication failed"));
+    TEST_ASSERT_NOT_EQUAL(std::string::npos, admin.find("authentication failed"));
+}
+
 void security_test_action_admin_only() {
     TEST_ASSERT_TRUE(denied(call_action(StandaloneIdentity::GUEST, "export", "settings")));
     TEST_ASSERT_TRUE(denied(call_action(StandaloneIdentity::GUEST, "export", "systembackup")));
@@ -453,6 +476,7 @@ void run_security_tests() {
 
     RUN_TEST(security_test_settings_commands_need_admin);
     RUN_TEST(security_test_api_without_token);
+    RUN_TEST(security_test_api_notoken_is_guest);
     RUN_TEST(security_test_action_admin_only);
     RUN_TEST(security_test_action_guest_allowed);
     RUN_TEST(security_test_command_guest_flag);
