@@ -57,12 +57,13 @@ void SecuritySettingsService::begin() {
     _adminCredentials = adminCredentials(); // after hashing, so hashing alone doesn't invalidate the tokens
     loadSigningKey();
 
-    if (_state.hashed_on_load) {
-        _state.hashed_on_load = false;
-        _fsPersistence.writeToFS();
-        if (had_file) {
+    if (_state.hashed_on_load || _state.dropped_on_load) {
+        if (had_file && _state.hashed_on_load) {
             emsesp::EMSESP::logger().notice("Stored passwords are now hashed");
         }
+        _state.hashed_on_load  = false;
+        _state.dropped_on_load = false;
+        _fsPersistence.writeToFS();
     }
 }
 

@@ -758,11 +758,10 @@ const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn';
 const API_KEYS_ENDPOINT = REST_ENDPOINT_ROOT + 'apiKeys';
 const SETUP_ENDPOINT = REST_ENDPOINT_ROOT + 'setup';
 
-// which factory passwords are still in use. Set admin or su to true to test the setup screen
-let setup_state = { admin: false, su: false, ap: true, ap_required: false };
+// which factory passwords are still in use. Set admin to true to test the setup screen
+let setup_state = { admin: false, ap: true, ap_required: false };
 
 let security_settings = {
-  jwt_secret: 'naughty!',
   users: [
     { username: 'admin', password: 'admin', admin: true },
     { username: 'guest', password: 'guest', admin: false }
@@ -4799,14 +4798,12 @@ router
   })
   // like the device, never return the stored passwords
   .get(SECURITY_SETTINGS_ENDPOINT, () => ({
-    jwt_secret: '',
     users: security_settings.users.map((u) => ({ ...u, password: '' }))
   }))
   .post(SECURITY_SETTINGS_ENDPOINT, async (request: any) => {
     const content: any = await request.json();
     // an empty password keeps the current one
     security_settings = {
-      jwt_secret: content.jwt_secret || security_settings.jwt_secret,
       users: content.users.map((u: any) => ({
         ...u,
         password:
@@ -4850,7 +4847,6 @@ router
     console.log('setup saved', content);
     setup_state = {
       admin: false,
-      su: false,
       ap: setup_state.ap && !content.ap_password,
       ap_required: false
     };

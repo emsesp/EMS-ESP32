@@ -81,7 +81,6 @@ class DummySettings {
     uint32_t publish_time_water      = 0;
 
     String hostname  = "ems-esp";
-    String jwtSecret = "ems-esp";
     String ssid      = "ems-esp";
     String password  = "ems-esp";
 

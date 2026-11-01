@@ -11,7 +11,7 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 Please read this before upgrading. Details are under "Changed" below.
 
 1. **Make a System Backup before upgrading** (Settings > Download/Upload). Passwords are stored hashed after the upgrade and 3.8.x can't read them, so going back to 3.8.x needs this backup, otherwise a factory reset.
-2. **Factory passwords must be changed.** After signing in with a factory password, an admin must set a new admin password and Super User password before the Web UI can be used. If no WiFi network is set yet, a new access point password is needed too. Integrations using API keys keep working in the meantime.
+2. **Factory passwords must be changed.** After signing in with a factory password, an admin must set a new admin password before the Web UI can be used. If no WiFi network is set yet, a new access point password is needed too. Integrations using API keys keep working in the meantime.
 3. **API access tokens stop working and are replaced by API keys.** After the upgrade, create an API key in Security > API Keys for each integration, such as Home Assistant REST sensors and scripts, and send it as `Authorization: Bearer <key>`. Pick "Read" for integrations that only read values, "Read and write" for ones that change settings or values. The key icon in Manage Users is gone.
 4. **Web UI sign-ins expire after 30 days**, and changing a user's password signs that user out on all browsers.
 5. **Some `/api` calls need a "Read and write" API key**: changing settings (for example `system/mqtt/enabled`) and reading the definitions of named Commands (`/api/commands/...`).
@@ -20,7 +20,7 @@ Please read this before upgrading. Details are under "Changed" below.
 8. **The live System Log needs a login**, also for tools that read `/es/log` directly.
 9. **Tokens and API keys are only accepted in the `Authorization` header.** A token in the URL (`?access_token=...`) no longer works on `/api`, `/rest` or `/es/log`. Send `Authorization: Bearer <key>` instead, for example `curl -H "Authorization: Bearer emsesp_..." http://ems-esp.local/api/boiler`.
 10. **Telnet changes.** Log in with a Web UI user: admin users get admin rights, `su` no longer works over telnet. At most 2 sessions at a time. On new installs telnet is off, turn it on in Application Settings if you use it.
-11. **Serial console `su` asks for the Super User password.**
+11. **The Super User password is gone.** On the serial console, `su` asks for the username and password of a Web UI admin user. The `passwd` command and the Super User password field in Security settings are removed.
 12. **Backups leave out passwords by default.** To move settings to a new device, tick "Include passwords and keys" when making the System Backup, and keep that file safe.
 13. **MQTT `info` topic:** `IPv6 address` is now an array, and `IPv4 DNS Server` is replaced by a `DNS Server` array. Update any automations that read these fields.
 14. **New installs have no `guest` user.** A fresh install or factory reset only creates `admin`. Add a view-only user in the setup screen or under Security > Users. Existing users are kept when upgrading.
@@ -104,10 +104,10 @@ Please read this before upgrading. Details are under "Changed" below.
 
 ## Changed
 
-- security: Web UI sign-in tokens are signed with a random key that is unique to each device, so existing access tokens stop working after the upgrade. Admins see a notice in the WebUI until it is closed. Changing an admin password replaces the key, which signs everyone out; changing the Super User password no longer does
+- security: Web UI sign-in tokens are signed with a random key that is unique to each device, so existing access tokens stop working after the upgrade. Admins see a notice in the WebUI until it is closed. Changing an admin password replaces the key, which signs everyone out
 - security: Web UI sign-ins expire after 30 days (once the clock is set by NTP), and changing a user's password, or removing the user, signs that user out everywhere [#3353](https://github.com/emsesp/EMS-ESP32/issues/3353)
 - security: API keys replace the per-user access tokens for `/api`. Admins create them in Security > API Keys with a name and "Read" or "Read and write" access, and can revoke each one. A key is shown once when created and only stored as a hash. Read keys act like a guest user, Read and write keys like an admin, and keys only work on `/api`, not for the Web UI [#3354](https://github.com/emsesp/EMS-ESP32/issues/3354)
-- security: an admin who signs in while factory passwords are in use must set new admin and Super User passwords first, plus an access point password if no WiFi network is set [#3357](https://github.com/emsesp/EMS-ESP32/issues/3357)
+- security: an admin who signs in while factory passwords are in use must set a new admin password first, plus an access point password if no WiFi network is set [#3357](https://github.com/emsesp/EMS-ESP32/issues/3357)
 - security: a fresh install or factory reset no longer creates the `guest` user [#3357](https://github.com/emsesp/EMS-ESP32/issues/3357)
 - security: a warning is shown while the access point still uses the factory password [#3359](https://github.com/emsesp/EMS-ESP32/issues/3359)
 - security: CORS needs an explicit origin, `Access-Control-Allow-Credentials` is no longer sent, and `/api` refuses browser requests from other sites unless their origin is allowed by the CORS setting [#3361](https://github.com/emsesp/EMS-ESP32/issues/3361)
@@ -118,11 +118,11 @@ Please read this before upgrading. Details are under "Changed" below.
 - security: only admins can open or change the Scheduler, Commands, Custom Entities and Modules, rename devices or change entity customizations and log settings, or use admin actions such as exports and partition switching. Guests can still view the log
 - security: each Command has a "Guests may run this command" option. Commands created before 3.9.0 keep guest access, new ones start without it. It applies to the WebUI and `/api`
 - security: the live System Log needs a login
-- security: on the serial console `su` asks for the Super User password. The console `read` command needs admin
+- security: the Super User password is removed. On the serial console `su` asks for a Web UI admin user's username and password, `passwd` is removed. The console `read` command needs admin
 - security: telnet asks for a Web UI user's login, admin users get admin rights and `su` is only on the serial console. At most 2 telnet sessions, closed after 10 minutes idle. Telnet is off on new installs (upgrades keep their setting) and the Web UI shows a notice while it's on. Telnet is not encrypted, so use the Web UI or serial for admin work, or a VPN [#3358](https://github.com/emsesp/EMS-ESP32/issues/3358)
 - security: repeated failed logins to the Web UI, telnet, serial `su` and the recovery firmware are slowed down, per source address and for all sources together. The Web UI sign-in answers HTTP 429 while locked out [#3362](https://github.com/emsesp/EMS-ESP32/issues/3362)
 - security: to go back to 3.8.x after upgrading, restore a System Backup made before the upgrade. 3.8.x can't read the hashed passwords, so without that backup a factory reset is needed
-- security: user and Super User passwords are stored hashed (PBKDF2-SHA256), existing passwords are converted on the first boot. The Web UI and `show users` no longer show stored passwords; leave a password field empty to keep the current one [#3355](https://github.com/emsesp/EMS-ESP32/issues/3355)
+- security: user passwords are stored hashed (PBKDF2-SHA256), existing passwords are converted on the first boot. The Web UI and `show users` no longer show stored passwords; leave a password field empty to keep the current one [#3355](https://github.com/emsesp/EMS-ESP32/issues/3355)
 - security: settings exports and System Backups leave out passwords and keys, unless an admin ticks "Include passwords and keys". Restoring keeps the passwords already on the device; a restored user with no password can't log in until an admin sets one [#3356](https://github.com/emsesp/EMS-ESP32/issues/3356)
 - various memory optimizations [#3083](https://github.com/emsesp/EMS-ESP32/issues/3083)
 - Scheduler name is now mandatory

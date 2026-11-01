@@ -3,19 +3,7 @@ import Schema from 'validators/schema';
 import type { InternalRuleItem } from 'validators/schema';
 
 const USERNAME_PATTERN = /^[a-zA-Z0-9_\\.]{1,24}$/;
-const JWT_SECRET_MAX_LENGTH = 64;
 const PASSWORD_MAX_LENGTH = 64;
-
-export const SECURITY_SETTINGS_VALIDATOR = new Schema({
-  // empty keeps the current password
-  jwt_secret: [
-    {
-      type: 'string',
-      max: JWT_SECRET_MAX_LENGTH,
-      message: `Password must be at most ${JWT_SECRET_MAX_LENGTH} characters`
-    }
-  ]
-});
 
 /**
  * Creates a validator to ensure username uniqueness
@@ -94,17 +82,6 @@ export const createSetupValidator = (state: SetupStateType, setup: SetupType) =>
           message: `Password must be at most ${PASSWORD_MAX_LENGTH} characters`
         },
         notFactory('admin')
-      ]
-    }),
-    ...(state.su && {
-      su_password: [
-        { required: true, message: 'Please provide a password' },
-        {
-          type: 'string',
-          max: JWT_SECRET_MAX_LENGTH,
-          message: `Password must be at most ${JWT_SECRET_MAX_LENGTH} characters`
-        },
-        notFactory('ems-esp-neo')
       ]
     }),
     ...(state.ap && {

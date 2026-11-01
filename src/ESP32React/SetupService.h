@@ -23,11 +23,9 @@ class SetupService {
         bool   factory = false;
     };
     FactoryCheck _adminCheck;
-    FactoryCheck _suCheck;
 
     struct State {
         bool admin       = false; // the signed-in user still has the factory admin password
-        bool su          = false; // the Super User password is the factory one
         bool ap          = false; // the access point password is the factory one
         bool ap_required = false; // no WiFi network is set, so the access point is the way in
     };

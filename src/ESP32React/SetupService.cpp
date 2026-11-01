@@ -28,9 +28,7 @@ bool SetupService::isFactory(const String & hash, const char * factory, FactoryC
 SetupService::State SetupService::state(const String & username) {
     State  s;
     String admin_hash;
-    String su_hash;
     _security->read([&](const SecuritySettings & settings) {
-        su_hash = settings.jwtSecret;
         for (const User & user : settings.users) {
             if (user.username == username) {
                 admin_hash = user.password;
@@ -38,7 +36,6 @@ SetupService::State SetupService::state(const String & username) {
         }
     });
     s.admin = !admin_hash.isEmpty() && isFactory(admin_hash, FACTORY_ADMIN_PASSWORD, _adminCheck);
-    s.su    = isFactory(su_hash, FACTORY_JWT_SECRET, _suCheck);
 
     _ap->read([&](const APSettings & settings) { s.ap = settings.password == FACTORY_AP_PASSWORD; });
     bool has_wifi = false;
@@ -54,7 +51,6 @@ void SetupService::getSetup(AsyncWebServerRequest * request) {
     auto *     response = new emsesp::PsramAsyncJsonResponse(false);
     JsonObject root     = response->getRoot();
     root["admin"]       = s.admin;
-    root["su"]          = s.su;
     root["ap"]          = s.ap;
     root["ap_required"] = s.ap_required;
     response->setLength();
@@ -68,16 +64,12 @@ void SetupService::saveSetup(AsyncWebServerRequest * request, JsonVariant json) 
     const State          s              = state(username);
 
     const String password      = json["password"] | "";
-    const String su_password   = json["su_password"] | "";
     const String ap_password   = json["ap_password"] | "";
     const String view_username = json["view_username"] | "";
     const String view_password = json["view_password"] | "";
 
     bool valid = true;
     if (s.admin && (password.isEmpty() || password == FACTORY_ADMIN_PASSWORD)) {
-        valid = false;
-    }
-    if (s.su && (su_password.isEmpty() || su_password == FACTORY_JWT_SECRET)) {
         valid = false;
     }
     if (s.ap_required && ap_password.isEmpty()) {
@@ -111,9 +103,6 @@ void SetupService::saveSetup(AsyncWebServerRequest * request, JsonVariant json) 
                     user.ver++;
                 }
             }
-        }
-        if (!su_password.isEmpty()) {
-            settings.jwtSecret = PasswordHash::hash(su_password);
         }
         if (!view_username.isEmpty()) {
             uint32_t ver;

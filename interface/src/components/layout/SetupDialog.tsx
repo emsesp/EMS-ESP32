@@ -32,7 +32,6 @@ const DISMISSED_KEY = 'apPasswordBannerDismissed';
 
 const EMPTY_SETUP: SetupType = {
   password: '',
-  su_password: '',
   ap_password: '',
   view_username: '',
   view_password: ''
@@ -72,7 +71,7 @@ const SetupDialog = () => {
     return null;
   }
 
-  const blocking = state.admin || state.su || state.ap_required;
+  const blocking = state.admin || state.ap_required;
 
   if (!blocking) {
     if (!state.ap || dismissed) {
@@ -140,19 +139,6 @@ const SetupDialog = () => {
             fullWidth
             variant="outlined"
             value={setup.password}
-            onChange={updateFormValue}
-            margin="normal"
-          />
-        )}
-        {state.su && (
-          <ValidatedPasswordField
-            fieldErrors={fieldErrors || {}}
-            name="su_password"
-            label={LL.SU_PASSWORD()}
-            helperText={LL.SU_TEXT()}
-            fullWidth
-            variant="outlined"
-            value={setup.su_password}
             onChange={updateFormValue}
             margin="normal"
           />

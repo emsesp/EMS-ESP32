@@ -153,52 +153,30 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
             // telnet users log in with their web user, admins get admin rights from that
             shell.logger().log(LogLevel::NOTICE, LogFacility::AUTH, F("Admin login refused on console %s"), to_shell(shell).console_name().c_str());
             shell.println("su: only on the serial console, log in to telnet as an admin user instead");
-        } else if (LoginLimiter::instance().retry_after(to_shell(shell).console_name().c_str(), static_cast<uint32_t>(uuid::get_uptime_ms()))) {
-            shell.println("su: too many failed attempts, try again later");
         } else {
-            shell.enter_password(F_(password_prompt), [=](Shell & shell, bool completed, const std::string & password) {
-                if (completed) {
-                    uint64_t           now    = uuid::get_uptime_ms();
-                    const std::string source = to_shell(shell).console_name();
-
-                    EMSESP::esp32React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
-                        if (!password.empty() && PasswordHash::verify(password.c_str(), securitySettings.jwtSecret)) {
-                            LoginLimiter::instance().succeeded(source.c_str());
-                            become_admin(shell);
-                        } else {
-                            LoginLimiter::instance().failed(source.c_str(), static_cast<uint32_t>(now));
-                            shell.delay_until(now + INVALID_PASSWORD_DELAY_MS, [](Shell & shell) {
-                                shell.logger().log(LogLevel::NOTICE,
-                                                   LogFacility::AUTH,
-                                                   F("Invalid admin password on console %s"),
-                                                   to_shell(shell).console_name().c_str());
-                                shell.println(F("su: incorrect password"));
-                            });
-                        }
-                    });
+            // the serial console asks for a Web UI admin user, the same login as telnet
+            shell.enter_text("Username: ", [](Shell & shell, bool completed, const std::string & username) {
+                if (!completed) {
+                    return;
                 }
-            });
-        }
-    });
-
-    commands->add_command(ShellContext::MAIN, CommandFlags::ADMIN, {F_(passwd)}, [](Shell & shell, const std::vector<std::string> & arguments) {
-        shell.enter_password(F_(new_password_prompt1), [](Shell & shell, bool completed, const std::string & password1) {
-            if (completed) {
-                shell.enter_password(F_(new_password_prompt2), [password1](Shell & shell, bool completed, const std::string & password2) {
-                    if (completed) {
-                        if (password1 == password2) {
-                            EMSESP::esp32React.getSecuritySettingsService()->update([&](SecuritySettings & securitySettings) {
-                                securitySettings.jwtSecret = PasswordHash::hash(password2.c_str());
-                                return StateUpdateResult::CHANGED;
-                            });
-                            shell.println("Admin password updated");
-                        } else {
-                            shell.println("Passwords do not match");
-                        }
+                shell.enter_password(F_(password_prompt), [username](Shell & shell, bool completed, const std::string & password) {
+                    if (!completed) {
+                        return;
+                    }
+                    auto &            self   = static_cast<EMSESPShell &>(shell);
+                    const EMSESPShell::LoginResult result = self.login(username, password);
+                    if (result == EMSESPShell::LoginResult::LOCKED) {
+                        shell.println("su: too many failed attempts, try again later");
+                    } else if (result == EMSESPShell::LoginResult::FAILED) {
+                        shell.delay_until(uuid::get_uptime_ms() + INVALID_PASSWORD_DELAY_MS, [](Shell & shell) {
+                            shell.println("su: incorrect username or password");
+                        });
+                    } else if (!shell.has_flags(CommandFlags::ADMIN)) {
+                        shell.println("su: this user is not an admin");
                     }
                 });
-            }
-        });
+            });
+        }
     });
 
     commands->add_command(ShellContext::MAIN,

@@ -8,7 +8,6 @@
 #include <memory>
 #include <vector>
 
-#define FACTORY_JWT_SECRET "ems-esp"
 #define AUTHORIZATION_HEADER "Authorization"
 #define AUTHORIZATION_HEADER_PREFIX "Bearer "
 #define AUTHORIZATION_HEADER_PREFIX_LEN 7

@@ -33,16 +33,13 @@ struct ApiKeyEntry {
 
 class SecuritySettings {
   public:
-    String                   jwtSecret; // the Super User password, the name is kept for older settings files
     std::vector<User>        users;
     std::vector<ApiKeyEntry> api_keys;
-    bool              hashed_on_load = false; // plain text passwords were hashed, the file needs saving
+    bool              hashed_on_load  = false; // plain text passwords were hashed, the file needs saving
+    bool              dropped_on_load = false; // the old Super User password was in the file, the file needs saving
 
     // the settings file. Passwords are hashed
     static void read(SecuritySettings & settings, JsonObject root) {
-        // secret
-        root["jwt_secret"] = settings.jwtSecret;
-
         // users
         JsonArray users = root["users"].to<JsonArray>();
         for (const User & user : settings.users) {
@@ -66,8 +63,8 @@ class SecuritySettings {
 
     // the settings file, including ones from older versions or restored backups with plain text passwords
     static StateUpdateResult update(JsonObject root, SecuritySettings & settings) {
-        // secret
-        settings.jwtSecret = hashed(settings, root["jwt_secret"] | FACTORY_JWT_SECRET);
+        // the Super User password of older versions is no longer used
+        settings.dropped_on_load = root["jwt_secret"].is<const char *>();
 
         // users
         settings.users.clear();
@@ -91,7 +88,6 @@ class SecuritySettings {
     // the web UI never gets the stored passwords
     static void readForWeb(SecuritySettings & settings, JsonObject root) {
         read(settings, root);
-        root["jwt_secret"] = "";
         root.remove("api_keys"); // listed by API_KEYS_PATH, without the hashes
         for (JsonObject user : root["users"].as<JsonArray>()) {
             user["password"] = "";
@@ -101,11 +97,6 @@ class SecuritySettings {
 
     // an empty password from the web UI keeps the current one, anything else is a new password
     static StateUpdateResult updateFromWeb(JsonObject root, SecuritySettings & settings) {
-        const String jwt_secret = root["jwt_secret"] | "";
-        if (!jwt_secret.isEmpty()) {
-            settings.jwtSecret = PasswordHash::hash(jwt_secret);
-        }
-
         if (root["users"].is<JsonArray>()) {
             std::vector<User> current = std::move(settings.users);
             settings.users.clear();
