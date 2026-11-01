@@ -17,10 +17,11 @@ Please read this before upgrading. Details are under "Changed" below.
 5. **"Bypass Access Token authorization on API calls" only gives guest rights.** Calls without a token can still read values and run Commands that guests may run, but can no longer change values or settings. If an integration writes values without a token, for example to set a temperature, give it a "Read and write" API key.
 6. **Guest users have less access.** Only admins can open or change the Scheduler, Commands, Custom Entities and Modules, rename devices or change entity customizations. New Commands can't be run by guests until "Guests may run this command" is ticked; Commands from before the upgrade keep guest access.
 7. **The live System Log needs a login**, also for tools that read `/es/log` directly.
-8. **Telnet changes.** Log in with a Web UI user: admin users get admin rights, `su` no longer works over telnet. At most 2 sessions at a time. On new installs telnet is off, turn it on in Application Settings if you use it.
-9. **Serial console `su` asks for the Super User password.**
-10. **Backups leave out passwords by default.** To move settings to a new device, tick "Include passwords and keys" when making the System Backup, and keep that file safe.
-11. **MQTT `info` topic:** `IPv6 address` is now an array, and `IPv4 DNS Server` is replaced by a `DNS Server` array. Update any automations that read these fields.
+8. **Tokens and API keys are only accepted in the `Authorization` header.** A token in the URL (`?access_token=...`) no longer works on `/api`, `/rest` or `/es/log`. Send `Authorization: Bearer <key>` instead, for example `curl -H "Authorization: Bearer emsesp_..." http://ems-esp.local/api/boiler`.
+9. **Telnet changes.** Log in with a Web UI user: admin users get admin rights, `su` no longer works over telnet. At most 2 sessions at a time. On new installs telnet is off, turn it on in Application Settings if you use it.
+10. **Serial console `su` asks for the Super User password.**
+11. **Backups leave out passwords by default.** To move settings to a new device, tick "Include passwords and keys" when making the System Backup, and keep that file safe.
+12. **MQTT `info` topic:** `IPv6 address` is now an array, and `IPv4 DNS Server` is replaced by a `DNS Server` array. Update any automations that read these fields.
 
 ## Added
 
@@ -103,6 +104,7 @@ Please read this before upgrading. Details are under "Changed" below.
 - security: Web UI sign-in tokens are signed with a random key that is unique to each device, so existing access tokens stop working after the upgrade. Admins see a notice in the WebUI until it is closed. Changing an admin password replaces the key, which signs everyone out; changing the Super User password no longer does
 - security: Web UI sign-ins expire after 30 days (once the clock is set by NTP), and changing a user's password, or removing the user, signs that user out everywhere [#3353](https://github.com/emsesp/EMS-ESP32/issues/3353)
 - security: API keys replace the per-user access tokens for `/api`. Admins create them in Security > API Keys with a name and "Read" or "Read and write" access, and can revoke each one. A key is shown once when created and only stored as a hash. Read keys act like a guest user, Read and write keys like an admin, and keys only work on `/api`, not for the Web UI [#3354](https://github.com/emsesp/EMS-ESP32/issues/3354)
+- security: tokens and API keys are only accepted in the `Authorization: Bearer` header, no longer as an `access_token` URL parameter, so they don't end up in browser history or server logs [#3363](https://github.com/emsesp/EMS-ESP32/issues/3363)
 - security: changing settings through `/api` (for example `system/mqtt/enabled`) needs a "Read and write" API key
 - security: "Bypass Access Token authorization on API calls" no longer grants admin rights. Calls without a token act like a guest: they can read values and run Commands that guests may run, but not change values or settings [#3360](https://github.com/emsesp/EMS-ESP32/issues/3360)
 - security: reading the definitions of named Commands through `/api` (`/api/commands/values`, `/info`, `/entities` or `/api/commands/<name>/value`) needs a "Read and write" API key. Integrations that read these without one get "authentication failed". Calling a command by name still runs it

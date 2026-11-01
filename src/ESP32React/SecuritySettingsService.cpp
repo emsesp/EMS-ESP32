@@ -136,10 +136,6 @@ Authentication SecuritySettingsService::authenticateRequest(AsyncWebServerReques
             value = value.substring(AUTHORIZATION_HEADER_PREFIX_LEN);
             return authenticateJWT(value);
         }
-    } else if (request->hasParam(ACCESS_TOKEN_PARAMETER)) {
-        auto   tokenParamater = request->getParam(ACCESS_TOKEN_PARAMETER);
-        String value          = tokenParamater->value();
-        return authenticateJWT(value);
     }
 
     return {};

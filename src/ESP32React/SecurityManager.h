@@ -9,7 +9,6 @@
 #include <memory>
 #include <vector>
 
-#define ACCESS_TOKEN_PARAMETER "access_token"
 #define AUTHORIZATION_HEADER "Authorization"
 #define AUTHORIZATION_HEADER_PREFIX "Bearer "
 #define AUTHORIZATION_HEADER_PREFIX_LEN 7
