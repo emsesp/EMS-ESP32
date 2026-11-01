@@ -1,8 +1,10 @@
 import {
+  type KeyboardEvent,
   memo,
   useContext,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState
 } from 'react';
@@ -16,13 +18,18 @@ import {
   Checkbox,
   Grid,
   IconButton,
+  InputAdornment,
   MenuItem,
   TextField,
   styled
 } from '@mui/material';
 
-import { API } from 'api/app';
-import { fetchLogES, readLogSettings, updateLogSettings } from 'api/system';
+import {
+  fetchLogES,
+  readLogSettings,
+  runConsoleCommand,
+  updateLogSettings
+} from 'api/system';
 
 import { useRequest, useSSE } from 'alova/client';
 import {
@@ -107,6 +114,32 @@ const LogEntryItem = memo(
     prevProps.compact === nextProps.compact
 );
 
+// a console command and its output, shown after the log entry that was last when it was sent
+interface ConsoleBlock {
+  id: number;
+  afterLogId: number;
+  command: string;
+  output: string;
+}
+
+const CONSOLE_HEIGHT = 48;
+const CONSOLE_HISTORY = 20;
+
+// the shell output has terminal colour codes and \r\n line endings
+const ANSI_CODES = new RegExp(String.fromCharCode(27) + '\\[[0-9;]*[A-Za-z]', 'g');
+const cleanOutput = (output: string) =>
+  output
+    .replace(ANSI_CODES, '')
+    .replace(/\r/g, '')
+    .replace(/^\n+|\n+$/g, '');
+
+const ConsoleBlockItem = ({ block }: { block: ConsoleBlock }) => (
+  <div style={{ font: '13px monospace', whiteSpace: 'pre', color: '#7fff7f' }}>
+    <span style={{ color: '#00ff00', fontWeight: 'bold' }}># {block.command}</span>
+    {block.output && '\n' + block.output}
+  </div>
+);
+
 const SystemLog = () => {
   const { LL } = useI18nContext();
   const { me } = useContext(AuthenticatedContext);
@@ -128,21 +161,18 @@ const SystemLog = () => {
     update: updateLogSettings
   });
 
-  const { send } = useRequest(
-    (data: string) => API({ device: 'system', cmd: 'read', id: 0, data: data }),
-    {
-      immediate: false
-    }
+  const { send: sendConsoleCommand, loading: consoleBusy } = useRequest(
+    runConsoleCommand,
+    { immediate: false }
   );
 
-  const [readValue, setReadValue] = useState('');
-  const [readOpen, setReadOpen] = useState(false);
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
+  const [consoleBlocks, setConsoleBlocks] = useState<ConsoleBlock[]>([]);
+  const [consoleCommand, setConsoleCommand] = useState('');
+  const [consoleHistory, setConsoleHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
   const [autoscroll, setAutoscroll] = useState(true);
   const [boxPosition, setBoxPosition] = useState({ top: 0, left: 0 });
-
-  const ALPHA_NUMERIC_DASH_REGEX = /^[a-fA-F0-9 ]+$/;
-
   const updateFormValue = updateValueDirty(
     origData as unknown as Record<string, unknown>,
     dirtyFlags,
@@ -237,7 +267,7 @@ const SystemLog = () => {
   const logWindowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (logEntries.length && autoscroll) {
+    if ((logEntries.length || consoleBlocks.length) && autoscroll) {
       const container = logWindowRef.current;
       if (container) {
         requestAnimationFrame(() => {
@@ -245,18 +275,64 @@ const SystemLog = () => {
         });
       }
     }
-  }, [logEntries.length, autoscroll]);
+  }, [logEntries.length, consoleBlocks.length, autoscroll]);
 
-  const sendReadCommand = () => {
-    if (readValue === '') {
-      setReadOpen(!readOpen);
+  const blocksAfterLogId = useMemo(() => {
+    const blocks = new Map<number, ConsoleBlock[]>();
+    for (const block of consoleBlocks) {
+      blocks.set(block.afterLogId, [...(blocks.get(block.afterLogId) ?? []), block]);
+    }
+    return blocks;
+  }, [consoleBlocks]);
+
+  const runCommand = async () => {
+    const command = consoleCommand.trim();
+    if (command === '' || consoleBusy) {
       return;
     }
 
-    if (readValue.split(' ').filter((word) => word !== '').length > 1) {
-      void send(readValue);
-      setReadOpen(false);
-      setReadValue('');
+    setConsoleHistory((history) =>
+      [command, ...history.filter((c) => c !== command)].slice(0, CONSOLE_HISTORY)
+    );
+    setHistoryIndex(-1);
+    setConsoleCommand('');
+
+    let output: string;
+    try {
+      const result = await sendConsoleCommand(command);
+      output = cleanOutput(result.output);
+      if (result.truncated) {
+        output += '\n... output truncated';
+      }
+    } catch (error) {
+      output = (error as Error).message;
+    }
+
+    setConsoleBlocks((blocks) => [
+      ...blocks,
+      {
+        id: blocks.length + 1,
+        afterLogId: logEntries.length ? logEntries[logEntries.length - 1]!.i : 0,
+        command,
+        output
+      }
+    ]);
+  };
+
+  const onConsoleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      void runCommand();
+    } else if (e.key === 'ArrowUp' && historyIndex < consoleHistory.length - 1) {
+      e.preventDefault();
+      setHistoryIndex(historyIndex + 1);
+      setConsoleCommand(consoleHistory[historyIndex + 1] ?? '');
+    } else if (e.key === 'ArrowDown' && historyIndex >= 0) {
+      e.preventDefault();
+      setHistoryIndex(historyIndex - 1);
+      setConsoleCommand(
+        historyIndex > 0 ? (consoleHistory[historyIndex - 1] ?? '') : ''
+      );
     }
   };
 
@@ -264,6 +340,8 @@ const SystemLog = () => {
     if (!data) {
       return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
     }
+
+    const showConsole = me.admin && data.developer_mode;
 
     return (
       <>
@@ -344,50 +422,6 @@ const SystemLog = () => {
             </Button>
           </Grid>
 
-          {readOpen ? (
-            <Box
-              component="form"
-              sx={{ display: 'flex', alignItems: 'flex-end' }}
-              onSubmit={(e) => {
-                e.preventDefault();
-                sendReadCommand();
-              }}
-            >
-              <IconButton
-                disableRipple
-                aria-label={LL.CANCEL()}
-                onClick={() => {
-                  setReadOpen(false);
-                  setReadValue('');
-                }}
-              >
-                <PlayArrowIcon color="primary" sx={{ my: 2.5 }} />
-              </IconButton>
-              <TextField
-                value={readValue}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value !== '' && !ALPHA_NUMERIC_DASH_REGEX.test(value)) {
-                    return;
-                  }
-                  setReadValue(value);
-                }}
-                focused={true}
-                size="small"
-                label="Send Read command" // doesn't need translating - developer only
-                helperText="<deviceID> <typeID> [offset] [len]"
-              />
-            </Box>
-          ) : (
-            <>
-              {data.developer_mode && (
-                <IconButton onClick={sendReadCommand} aria-label={LL.RUN()}>
-                  <PlayArrowIcon color="primary" />
-                </IconButton>
-              )}
-            </>
-          )}
-
           {me.admin && dirtyFlags && dirtyFlags.length !== 0 && (
             <Grid>
               <Button
@@ -409,18 +443,75 @@ const SystemLog = () => {
             overflowY: 'scroll',
             position: 'absolute',
             right: 18,
-            bottom: 18,
+            bottom: showConsole ? 18 + CONSOLE_HEIGHT : 18,
             left: boxPosition.left,
             top: boxPosition.top,
             p: 1
           }}
         >
+          {blocksAfterLogId.get(0)?.map((b) => (
+            <ConsoleBlockItem key={'c' + b.id} block={b} />
+          ))}
           {logEntries.map((e) => (
-            <LogEntryItem key={e.i} entry={e} compact={data.compact} />
+            <div key={e.i}>
+              <LogEntryItem entry={e} compact={data.compact} />
+              {blocksAfterLogId.get(e.i)?.map((b) => (
+                <ConsoleBlockItem key={'c' + b.id} block={b} />
+              ))}
+            </div>
           ))}
 
           <div ref={ref} />
         </Box>
+
+        {showConsole && (
+          <Box
+            sx={{
+              position: 'absolute',
+              right: 18,
+              bottom: 18,
+              left: boxPosition.left,
+              height: CONSOLE_HEIGHT,
+              display: 'flex',
+              alignItems: 'flex-end'
+            }}
+          >
+            <TextField
+              fullWidth
+              size="small"
+              placeholder={LL.COMMAND(0)}
+              value={consoleCommand}
+              onChange={(e) => {
+                setConsoleCommand(e.target.value);
+                setHistoryIndex(-1);
+              }}
+              onKeyDown={onConsoleKeyDown}
+              disabled={consoleBusy}
+              autoComplete="off"
+              slotProps={{
+                htmlInput: { maxLength: 200, spellCheck: false },
+                input: {
+                  sx: { fontFamily: 'monospace' },
+                  startAdornment: (
+                    <InputAdornment position="start">#</InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        edge="end"
+                        aria-label={LL.RUN()}
+                        onClick={() => void runCommand()}
+                        disabled={consoleBusy || consoleCommand.trim() === ''}
+                      >
+                        <PlayArrowIcon color="primary" />
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }
+              }}
+            />
+          </Box>
+        )}
       </>
     );
   };

@@ -87,6 +87,7 @@ WebStatusService   EMSESP::webStatusService   = WebStatusService(&webServer, EMS
 WebDataService     EMSESP::webDataService     = WebDataService(&webServer, EMSESP::esp32React.getSecurityManager());
 WebAPIService      EMSESP::webAPIService      = WebAPIService(&webServer, EMSESP::esp32React.getSecurityManager());
 WebLogService      EMSESP::webLogService      = WebLogService(&webServer, EMSESP::esp32React.getSecurityManager());
+WebConsoleService  EMSESP::webConsoleService  = WebConsoleService(&webServer, EMSESP::esp32React.getSecurityManager());
 
 using DeviceFlags = EMSdevice;
 using DeviceType  = EMSdevice::DeviceType;
@@ -2169,6 +2170,7 @@ void EMSESP::start() {
     // start web services
     LOG_INFO("Starting Web Server");
     webLogService.start();     // apply settings to weblog service
+    webConsoleService.begin(*this);
     webModulesService.begin(); // setup the external library modules
     webServer.begin();         // start the web server
 }

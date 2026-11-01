@@ -1,4 +1,4 @@
-import type { LogSettings, SystemStatus } from 'types';
+import type { ConsoleOutput, LogSettings, SystemStatus } from 'types';
 
 import { alovaInstance } from './endpoints';
 
@@ -12,6 +12,8 @@ export const readLogSettings = () =>
 export const updateLogSettings = (data: LogSettings) =>
   alovaInstance.Post('/rest/logSettings', data);
 export const fetchLogES = () => alovaInstance.Get('/es/log');
+export const runConsoleCommand = (command: string) =>
+  alovaInstance.Post<ConsoleOutput>('/rest/console', { command });
 
 const UPLOAD_TIMEOUT = 60000; // 1 minute
 

@@ -268,6 +268,26 @@ void security_test_serial_su_needs_password() {
     TEST_ASSERT_NULL(strstr(output_buffer, "su: only on the serial console"));
 }
 
+// the Web UI console is only for admins
+void security_test_web_console_admin_only() {
+    assert_admin_only_write(EMSESP_CONSOLE_PATH);
+    TEST_ASSERT_EQUAL(200, call_route(EMSESP_CONSOLE_PATH, HTTP_POST, StandaloneIdentity::ADMIN, "{\"command\":\"show users\"}"));
+    TEST_ASSERT_EQUAL(400, call_route(EMSESP_CONSOLE_PATH, HTTP_POST, StandaloneIdentity::ADMIN, "{}"));
+}
+
+// the Web UI console runs admin commands but can't answer a password prompt
+void security_test_web_console_shell() {
+    auto web_shell   = std::make_shared<EMSESPWebShell>(application, stream);
+    output_buffer[0] = '\0';
+    web_shell->run("read 08 18");
+    TEST_ASSERT_NULL(strstr(output_buffer, "Command not found"));
+
+    output_buffer[0] = '\0';
+    web_shell->run("set admin password; show users");
+    TEST_ASSERT_NOT_NULL(strstr(output_buffer, "needs interactive input"));
+    TEST_ASSERT_NULL(strstr(output_buffer, "admin"));
+}
+
 // exported settings leave out passwords and keys
 void security_test_backup_redacts_secrets() {
     JsonDocument doc;
@@ -502,6 +522,8 @@ void run_security_tests() {
     RUN_TEST(security_test_console_read_needs_admin);
     RUN_TEST(security_test_console_su_network_refused);
     RUN_TEST(security_test_serial_su_needs_password);
+    RUN_TEST(security_test_web_console_admin_only);
+    RUN_TEST(security_test_web_console_shell);
     RUN_TEST(security_test_backup_redacts_secrets);
     RUN_TEST(security_test_restore_merges_secrets);
     RUN_TEST(security_test_private_nvs_keys);

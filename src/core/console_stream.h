@@ -52,4 +52,19 @@ class EMSESPConsole : public EMSESPShell {
 #endif
 };
 
+// runs command lines from the Web UI console, an admin shell that is never started so it has no prompt, banner or log output
+class EMSESPWebShell : public EMSESPShell {
+  public:
+    EMSESPWebShell(EMSESP & emsesp, Stream & stream);
+    ~EMSESPWebShell() override = default;
+
+    std::string console_name() override;
+
+    // commands can be separated by ';' like on telnet
+    void run(const std::string & line);
+
+  protected:
+    void stopped() override;
+};
+
 } // namespace emsesp

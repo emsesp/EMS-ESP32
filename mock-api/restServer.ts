@@ -40,7 +40,7 @@ let settings = {
   led_gpio: 2,
   hide_led: true,
   low_clock: false,
-  telnet_enabled: true,
+  telnet_enabled: false,
   notoken_api: false,
   readonly_mode: false,
   analog_enabled: true,
@@ -759,7 +759,7 @@ const API_KEYS_ENDPOINT = REST_ENDPOINT_ROOT + 'apiKeys';
 const SETUP_ENDPOINT = REST_ENDPOINT_ROOT + 'setup';
 
 // which factory passwords are still in use. Set admin to true to test the setup screen
-let setup_state = { admin: false, ap: true, ap_required: false };
+let setup_state = { admin: false, ap: false, ap_required: false };
 
 let security_settings = {
   users: [
@@ -4663,6 +4663,13 @@ router
     log_settings = await request.json();
     console.log('log settings saved', log_settings);
     return status(200);
+  })
+  .post(REST_ENDPOINT_ROOT + 'console', async (request: any) => {
+    const { command } = await request.json();
+    console.log('console command', command);
+    return {
+      output: '\r\n\x1b[33mmock output for\x1b[0m: ' + command + '\r\n  line two\r\n'
+    };
   });
 
 // NETWORK
@@ -4927,6 +4934,7 @@ router
     settings = await request.json();
     console.log('application settings saved', settings);
     system_status.developer_mode = settings.developer_mode;
+    log_settings.developer_mode = settings.developer_mode;
     system_status.disable_reset = settings.disable_reset;
     return status(200); // no restart needed
     // return status(205); // reboot required

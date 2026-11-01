@@ -821,6 +821,46 @@ std::string EMSESPConsole::console_name() {
     return name_;
 }
 
+//  **** EMSESPWebShell Class *****
+
+EMSESPWebShell::EMSESPWebShell(EMSESP & emsesp, Stream & stream)
+    : EMSESPShell(emsesp, stream, ShellContext::MAIN, CommandFlags::USER | CommandFlags::ADMIN) {
+}
+
+std::string EMSESPWebShell::console_name() {
+    return "web";
+}
+
+// exit would log a closed session that was never opened
+void EMSESPWebShell::stopped() {
+}
+
+void EMSESPWebShell::run(const std::string & line) {
+    size_t start = 0;
+    while (start <= line.length() && running()) {
+        size_t end = line.find(';', start);
+        if (end == std::string::npos) {
+            end = line.length();
+        }
+
+        uuid::console::CommandLine command_line{line.substr(start, end - start)};
+        if (!command_line->empty()) {
+            auto execution = commands_->execute_command(*this, std::move(command_line));
+            if (execution.error != nullptr) {
+                println(execution.error);
+            }
+        }
+
+        // the shell is thrown away after this request, so anything asking for more input can't finish
+        if (waiting()) {
+            println("This command needs interactive input, use telnet or the serial console");
+            return;
+        }
+
+        start = end + 1;
+    }
+}
+
 #ifndef EMSESP_STANDALONE
 std::string EMSESPConsole::login_source() {
     return pty_ == SIZE_MAX ? name_ : uuid::printable_to_string(addr_);

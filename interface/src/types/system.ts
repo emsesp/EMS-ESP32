@@ -90,3 +90,8 @@ export interface LogSettings {
   psram: boolean;
   developer_mode: boolean;
 }
+
+export interface ConsoleOutput {
+  output: string;
+  truncated?: boolean;
+}

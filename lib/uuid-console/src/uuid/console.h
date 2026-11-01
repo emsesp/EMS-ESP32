@@ -1417,6 +1417,11 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
 	 */
     void invoke_command(const std::string & line);
 
+    // added for EMS-ESP, true while the shell waits for a password, a delay or a blocking function
+    inline bool waiting() const {
+        return mode_ != Mode::NORMAL;
+    }
+
   private:
     /**
 	 * Current mode of the shell.
