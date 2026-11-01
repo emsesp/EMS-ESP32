@@ -117,7 +117,7 @@ let system_status = {
   psram_size: 8189,
   free_psram: 8166,
   recovery_version: '', // upload an EMS-ESP-Recovery-*.bin to set it
-  // recovery_version: '1.0.0',
+  // recovery_version: '1.0.1',
   has_partition: true,
   partitions: [
     {
@@ -4772,7 +4772,7 @@ router
     if (fileExtension === 'bin' && fileName.startsWith('EMS-ESP-Recovery')) {
       const md5_ok = pendingFirmwareMd5;
       pendingFirmwareMd5 = false;
-      system_status.recovery_version = '1.0.0';
+      system_status.recovery_version = '1.0.1';
       console.log('Recovery firmware installed');
       return md5_ok ? { recovery: true, md5_ok } : { recovery: true };
     }
@@ -5573,7 +5573,7 @@ router
         console.log('upload File from URL', content.param);
         if (String(content.param).toLowerCase().includes('recovery')) {
           // the recovery app is installed without a restart
-          system_status.recovery_version = '1.0.0';
+          system_status.recovery_version = '1.0.1';
         }
         return status(200);
       } else if (action === 'resetMQTT') {
