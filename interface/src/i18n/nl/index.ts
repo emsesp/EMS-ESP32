@@ -169,7 +169,7 @@ const nl: Translation = {
   API_KEYS_TEXT: 'Met API-sleutels kunnen integraties zoals Home Assistant en scripts de API gebruiken. Stuur de sleutel mee in de header "Authorization: Bearer <sleutel>". Leessleutels kunnen waarden lezen en commando\'s uitvoeren die gasten mogen uitvoeren, lees- en schrijfsleutels kunnen via de API alles wat een admin kan.',
   API_KEY_ACCESS: 'Toegang',
   API_KEY_READ: 'Lezen',
-  API_KEY_READ_WRITE: 'Lezen en schrijven',
+  API_KEY_READ_WRITE: 'Lezen en Schrijven',
   API_KEY_SHOW_ONCE: 'Kopieer deze sleutel nu en bewaar hem veilig. Hij wordt niet opnieuw getoond.',
   CREATED: 'Aangemaakt',
   COPY: 'Kopiëren',

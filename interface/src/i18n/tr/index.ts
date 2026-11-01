@@ -169,7 +169,7 @@ const tr: Translation = {
   API_KEYS_TEXT: 'API anahtarları, Home Assistant gibi entegrasyonların ve betiklerin API\'yi kullanmasını sağlar. Anahtarı "Authorization: Bearer <anahtar>" başlığında gönderin. Okuma anahtarları değerleri okuyabilir ve misafirlerin çalıştırabildiği komutları çalıştırabilir, okuma ve yazma anahtarları API üzerinden bir yöneticinin yapabildiği her şeyi yapabilir.',
   API_KEY_ACCESS: 'Erişim',
   API_KEY_READ: 'Okuma',
-  API_KEY_READ_WRITE: 'Okuma ve yazma',
+  API_KEY_READ_WRITE: 'Okuma ve Yazma',
   API_KEY_SHOW_ONCE: 'Bu anahtarı şimdi kopyalayın ve güvenli bir yerde saklayın. Tekrar gösterilmeyecek.',
   CREATED: 'Oluşturuldu',
   COPY: 'Kopyala',

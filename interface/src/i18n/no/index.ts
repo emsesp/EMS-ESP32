@@ -169,7 +169,7 @@ const no: Translation = {
   API_KEYS_TEXT: 'API-nøkler lar integrasjoner som Home Assistant og skript bruke API-et. Send nøkkelen i headeren "Authorization: Bearer <nøkkel>". Lesenøkler kan lese verdier og kjøre kommandoer som gjester kan kjøre, lese- og skrivenøkler kan gjøre alt en admin kan gjøre via API-et.',
   API_KEY_ACCESS: 'Tilgang',
   API_KEY_READ: 'Lese',
-  API_KEY_READ_WRITE: 'Lese og skrive',
+  API_KEY_READ_WRITE: 'Lese og Skrive',
   API_KEY_SHOW_ONCE: 'Kopier denne nøkkelen nå og oppbevar den trygt. Den vises ikke igjen.',
   CREATED: 'Opprettet',
   COPY: 'Kopier',

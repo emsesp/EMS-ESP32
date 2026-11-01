@@ -169,7 +169,7 @@ const pl: BaseTranslation = {
   API_KEYS_TEXT: 'Klucze API pozwalają integracjom, takim jak Home Assistant, i skryptom korzystać z API. Wyślij klucz w nagłówku "Authorization: Bearer <klucz>". Klucze do odczytu mogą odczytywać wartości i uruchamiać polecenia dozwolone dla gości, klucze do odczytu i zapisu mogą przez API wszystko, co administrator.',
   API_KEY_ACCESS: 'Dostęp',
   API_KEY_READ: 'Odczyt',
-  API_KEY_READ_WRITE: 'Odczyt i zapis',
+  API_KEY_READ_WRITE: 'Odczyt i Zapis',
   API_KEY_SHOW_ONCE: 'Skopiuj teraz ten klucz i przechowuj go bezpiecznie. Nie zostanie pokazany ponownie.',
   CREATED: 'Utworzono',
   COPY: 'Kopiuj',

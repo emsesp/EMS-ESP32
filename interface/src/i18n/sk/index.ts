@@ -169,7 +169,7 @@ const sk: Translation = {
   API_KEYS_TEXT: 'Kľúče API umožňujú integráciám ako Home Assistant a skriptom používať API. Kľúč pošlite v hlavičke "Authorization: Bearer <kľúč>". Kľúče na čítanie môžu čítať hodnoty a spúšťať príkazy povolené hosťom, kľúče na čítanie a zápis môžu cez API všetko, čo správca.',
   API_KEY_ACCESS: 'Prístup',
   API_KEY_READ: 'Čítanie',
-  API_KEY_READ_WRITE: 'Čítanie a zápis',
+  API_KEY_READ_WRITE: 'Čítanie a Zápis',
   API_KEY_SHOW_ONCE: 'Skopírujte tento kľúč teraz a uložte ho bezpečne. Znova sa nezobrazí.',
   CREATED: 'Vytvorené',
   COPY: 'Kopírovať',

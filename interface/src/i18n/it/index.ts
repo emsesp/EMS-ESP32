@@ -169,7 +169,7 @@ const it: Translation = {
   API_KEYS_TEXT: 'Le chiavi API permettono a integrazioni come Home Assistant e agli script di usare l\'API. Invia la chiave nell\'intestazione "Authorization: Bearer <chiave>". Le chiavi in lettura possono leggere i valori ed eseguire i comandi consentiti agli ospiti, le chiavi in lettura e scrittura possono fare tramite l\'API tutto ciò che può fare un amministratore.',
   API_KEY_ACCESS: 'Accesso',
   API_KEY_READ: 'Lettura',
-  API_KEY_READ_WRITE: 'Lettura e scrittura',
+  API_KEY_READ_WRITE: 'Lettura e Scrittura',
   API_KEY_SHOW_ONCE: 'Copia ora questa chiave e conservala al sicuro. Non verrà mostrata di nuovo.',
   CREATED: 'Creata',
   COPY: 'Copia',

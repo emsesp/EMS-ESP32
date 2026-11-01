@@ -169,7 +169,7 @@ const hu: Translation = {
   API_KEYS_TEXT: 'Az API-kulcsokkal az olyan integrációk, mint a Home Assistant, és a szkriptek használhatják az API-t. A kulcsot az "Authorization: Bearer <kulcs>" fejlécben küldje. Az olvasási kulcsok értékeket olvashatnak és a vendégek által futtatható parancsokat futtathatnak, az olvasási és írási kulcsok az API-n keresztül mindent megtehetnek, amit egy adminisztrátor.',
   API_KEY_ACCESS: 'Hozzáférés',
   API_KEY_READ: 'Olvasás',
-  API_KEY_READ_WRITE: 'Olvasás és írás',
+  API_KEY_READ_WRITE: 'Olvasás és Írás',
   API_KEY_SHOW_ONCE: 'Másolja ki most ezt a kulcsot, és tárolja biztonságos helyen. Többé nem jelenik meg.',
   CREATED: 'Létrehozva',
   COPY: 'Másolás',
