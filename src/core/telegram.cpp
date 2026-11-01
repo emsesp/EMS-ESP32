@@ -37,9 +37,7 @@ const uint8_t ems_crc_table[] = {0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E,
                                  0xF9, 0xFB, 0xFD, 0xFF, 0xF1, 0xF3, 0xF5, 0xF7, 0xE9, 0xEB, 0xED, 0xEF, 0xE1, 0xE3, 0xE5, 0xE7};
 
 uint32_t EMSbus::last_bus_activity_ = 0;              // timestamp of last time a valid Rx came in
-uint32_t EMSbus::last_poll_         = 0;              // timestamp of the last poll to our bus id
-uint8_t  EMSbus::clean_polls_       = 0;              // consecutive clean polls to our bus id
-uint8_t  EMSbus::poll_mask_         = EMS_MASK_UNSET; // bus type implied by the last poll
+uint8_t  EMSbus::clean_rx_          = 0;              // consecutive valid telegrams since the last corrupt one
 uint32_t EMSbus::bus_uptime_start_  = 0;              // timestamp of when the bus was started
 bool     EMSbus::bus_connected_     = false;          // start assuming the bus hasn't been connected
 uint8_t  EMSbus::ems_mask_          = EMS_MASK_UNSET; // unset so its triggered when booting, the its 0x00=buderus, 0x80=junker/ht3
@@ -153,11 +151,13 @@ void RxService::add(uint8_t * data, uint8_t length) {
 
     uint8_t crc = calculate_crc(data, length - 1);
 
-    // until polls have confirmed the bus, assume it's just noise on an unconnected line and ignore it
+    // until a trusted poll has confirmed the bus, assume it's just noise on an unconnected line and ignore it
     // a noise frame can pass the CRC by chance, so even valid looking telegrams are dropped
     if (!bus_connected()) {
         if (data[length - 1] != crc || !(data[0] & 0x7F)) {
             rx_error();
+        } else {
+            rx_valid();
         }
         return;
     }
@@ -181,6 +181,8 @@ void RxService::add(uint8_t * data, uint8_t length) {
 
         return;
     }
+
+    rx_valid();
 
     // since it's a valid telegram, work out the ems mask
     // we check the 1st byte, which assumed is the src ID and see if the MSB (8th bit) is set

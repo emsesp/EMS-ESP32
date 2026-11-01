@@ -227,19 +227,10 @@ class EMSbus {
     }
 
     // a poll to our bus id was received, mask is the bus type the poll implies
-    // a single poll byte is easily faked by noise on an unconnected Rx line, so the bus is only
-    // treated as active after several consistent polls with no corrupt telegrams in between
+    // a single poll byte is easily faked by noise on an unconnected Rx line, so it's only trusted
+    // when the last few telegrams before it all had a valid CRC, which noise practically never manages
     static void poll_received(uint32_t timestamp, uint8_t mask) {
-        if ((timestamp - last_poll_) > EMS_BUS_POLL_GAP || mask != poll_mask_) {
-            clean_polls_ = 0;
-        }
-        last_poll_ = timestamp;
-        poll_mask_ = mask;
-
-        if (clean_polls_ < EMS_BUS_MIN_POLLS) {
-            clean_polls_++;
-        }
-        if (clean_polls_ < EMS_BUS_MIN_POLLS) {
+        if (clean_rx_ < EMS_BUS_MIN_CLEAN_RX) {
             return;
         }
 
@@ -249,9 +240,16 @@ class EMSbus {
         last_bus_activity(timestamp);
     }
 
-    // a corrupt telegram was received, the next polls are not trusted until enough clean ones follow
+    // a telegram with a valid CRC was received
+    static void rx_valid() {
+        if (clean_rx_ < EMS_BUS_MIN_CLEAN_RX) {
+            clean_rx_++;
+        }
+    }
+
+    // a corrupt telegram was received, polls are not trusted until enough valid telegrams follow
     static void rx_error() {
-        clean_polls_ = 0;
+        clean_rx_ = 0;
     }
 
     // return bus uptime in seconds
@@ -274,14 +272,11 @@ class EMSbus {
     static uint8_t calculate_crc(const uint8_t * data, const uint8_t length);
 
   private:
-    static constexpr uint32_t EMS_BUS_TIMEOUT   = 30000; // timeout in ms before recognizing the ems bus is offline (30 seconds)
-    static constexpr uint8_t  EMS_BUS_MIN_POLLS = 3;     // consecutive clean polls to our id needed to accept the bus as active
-    static constexpr uint32_t EMS_BUS_POLL_GAP  = 5000;  // max ms between those polls
+    static constexpr uint32_t EMS_BUS_TIMEOUT      = 30000; // timeout in ms before recognizing the ems bus is offline (30 seconds)
+    static constexpr uint8_t  EMS_BUS_MIN_CLEAN_RX = 3;     // consecutive valid telegrams needed before a poll to our id is trusted
 
     static uint32_t last_bus_activity_; // timestamp of last time a valid Rx came in
-    static uint32_t last_poll_;         // timestamp of the last poll to our bus id
-    static uint8_t  clean_polls_;       // consecutive polls to our bus id without a corrupt telegram in between
-    static uint8_t  poll_mask_;         // bus type implied by the last poll
+    static uint8_t  clean_rx_;          // consecutive valid telegrams since the last corrupt one
     static uint32_t bus_uptime_start_;  // timestamp of first time we connected to the bus
     static bool     bus_connected_;     // start assuming the bus hasn't been connected
     static uint8_t  ems_mask_;          // unset=0xFF, buderus=0x00, junkers/ht3=0x80
