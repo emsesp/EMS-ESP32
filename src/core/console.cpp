@@ -138,16 +138,12 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
 #endif
 
     commands->add_command(ShellContext::MAIN, CommandFlags::USER, {F_(su)}, [=](Shell & shell, const std::vector<std::string> & arguments) {
-        auto become_admin = [](Shell & shell) {
-            shell.logger().log(LogLevel::NOTICE, LogFacility::AUTH, F("Admin session opened on console %s"), to_shell(shell).console_name().c_str());
-            shell.add_flags(CommandFlags::ADMIN);
-        };
-
         if (shell.has_flags(CommandFlags::ADMIN)) {
             return;
 #if defined(EMSESP_DEBUG)
         } else if (shell.has_flags(CommandFlags::LOCAL)) {
-            become_admin(shell);
+            shell.logger().log(LogLevel::NOTICE, LogFacility::AUTH, F("Admin session opened on console %s"), to_shell(shell).console_name().c_str());
+            shell.add_flags(CommandFlags::ADMIN);
 #endif
         } else if (!shell.has_flags(CommandFlags::LOCAL)) {
             // telnet users log in with their web user, admins get admin rights from that

@@ -23,6 +23,8 @@ namespace emsesp {
 namespace {
 
 // collects what the shell prints, up to a limit. There is never any input
+// terminal escape sequences and control characters other than \n and \t are dropped,
+// ArduinoJson doesn't escape them so they would make the JSON response invalid
 class CaptureStream : public ::Stream {
   public:
     explicit CaptureStream(size_t limit)
@@ -42,11 +44,31 @@ class CaptureStream : public ::Stream {
         return write(&data, 1);
     }
     size_t write(const uint8_t * buffer, size_t size) override {
-        const size_t room = limit_ - output_.size();
-        if (size > room) {
-            truncated_ = true;
+        for (size_t i = 0; i < size; i++) {
+            const uint8_t c = buffer[i];
+            if (escape_ == Escape::START) {
+                escape_ = (c == '[') ? Escape::CSI : Escape::NONE;
+                continue;
+            }
+            if (escape_ == Escape::CSI) {
+                if (c >= 0x40 && c <= 0x7E) {
+                    escape_ = Escape::NONE;
+                }
+                continue;
+            }
+            if (c == 0x1B) {
+                escape_ = Escape::START;
+                continue;
+            }
+            if ((c < 0x20 && c != '\n' && c != '\t') || c == 0x7F) {
+                continue;
+            }
+            if (output_.size() >= limit_) {
+                truncated_ = true;
+                break;
+            }
+            output_.push_back(static_cast<char>(c));
         }
-        output_.append(reinterpret_cast<const char *>(buffer), std::min(size, room));
         return size;
     }
     void flush() override {
@@ -60,9 +82,12 @@ class CaptureStream : public ::Stream {
     }
 
   private:
+    enum class Escape : uint8_t { NONE, START, CSI };
+
     size_t      limit_;
     stringPSRAM output_;
     bool        truncated_ = false;
+    Escape      escape_    = Escape::NONE;
 };
 
 } // namespace

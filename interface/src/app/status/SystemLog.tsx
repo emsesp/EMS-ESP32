@@ -300,6 +300,9 @@ const SystemLog = () => {
     let output: string;
     try {
       const result = await sendConsoleCommand(command);
+      if (typeof result?.output !== 'string') {
+        throw new Error('Invalid response from device');
+      }
       output = cleanOutput(result.output);
       if (result.truncated) {
         output += '\n... output truncated';
