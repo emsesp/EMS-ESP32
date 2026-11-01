@@ -56,6 +56,7 @@ Please read this before upgrading. Details are under "Changed" below.
 
 ## Fixed
 
+- large numbers in analog sensor values (e.g. pulse counters above 1 million), custom entities and API/MQTT writes could be cut off or lose digits [#3367](https://github.com/emsesp/EMS-ESP32/issues/3367)
 - ESP32-C6 boards without a board profile got invalid GPIOs (99), so on every start the settings were rejected and fell back to empty values (blank Board Profile, EMS Tx Mode and Bus ID), and saving any Application setting failed with a 400 error. A new C6 now starts with the CUSTOM profile and pins for the Seeed XIAO ESP32-C6: Rx GPIO20 (D9), Tx GPIO19 (D8), button GPIO9
 - heat-pump operating state (`hpoperatingstate`: heating/off/cooling) is published for every heating circuit. On BC400/UI800 it was only filled for hc1, because hc2 never answers telegram 0x472 while the state is still broadcast in 0x2A6 offset 20 [#3097](https://github.com/emsesp/EMS-ESP32/issues/3097)
 - restart from the WebUI (Restart button, firmware/settings upload) only happened while the browser tab stayed open. If the tab was closed the restart was silently dropped after 5 minutes, leaving a new firmware uninstalled. EMS-ESP now restarts on its own if the WebUI hasn't picked up the pending restart within 10 seconds
@@ -113,6 +114,7 @@ Please read this before upgrading. Details are under "Changed" below.
 - security: an admin who signs in while factory passwords are in use must set a new admin password first, plus an access point password if no WiFi network is set [#3357](https://github.com/emsesp/EMS-ESP32/issues/3357)
 - security: a fresh install or factory reset no longer creates the `guest` user [#3357](https://github.com/emsesp/EMS-ESP32/issues/3357)
 - security: a warning is shown while the access point still uses the factory password [#3359](https://github.com/emsesp/EMS-ESP32/issues/3359)
+- security: hardened parsing of API, MQTT and expression input: large numbers, `%` by zero, very long numbers or hex values and oversized request bodies no longer crash the device. Request bodies are only read after the login check [#3367](https://github.com/emsesp/EMS-ESP32/issues/3367)
 - security: custom Commands run by guests use the stored value only, and URL fetches in values only work in text saved by an admin (Commands, Schedules, Custom Entities) or sent by an admin [#3366](https://github.com/emsesp/EMS-ESP32/issues/3366)
 - security: browsers can only open the device by its IP address, hostname, `<hostname>.local` or a name added under Network Settings > Allowed host names, against DNS rebinding. Requests from Home Assistant, scripts and through the access point are not checked [#3364](https://github.com/emsesp/EMS-ESP32/issues/3364)
 - security: the Web UI is served with `Content-Security-Policy`, `X-Content-Type-Options: nosniff` and `Referrer-Policy: no-referrer` headers [#3365](https://github.com/emsesp/EMS-ESP32/issues/3365)

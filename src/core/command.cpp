@@ -73,7 +73,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     uint8_t device_type = EMSdevice::device_name_2_device_type(device_s);
     if (!device_has_commands(device_type)) {
         char err[100];
-        snprintf(err, sizeof(err), "unknown device %s", device_s);
+        snprintf(err, sizeof(err), "unknown device %s", device_s ? device_s : "");
         LOG_WARNING("Command failed: %s", err);
         output["message"] = err;
         return CommandRet::NOT_FOUND;
@@ -175,7 +175,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
                 strlcat(data_s, "/value", sizeof(data_s) - 6);
             }
 
-            if (Command::call(device_type1, data_s, "", true, id_d, output) != CommandRet::OK) {
+            if (Command::call(device_type1, data_s, "", is_admin, id_d, output, is_user) != CommandRet::OK) {
                 return CommandRet::INVALID;
             }
 
@@ -195,11 +195,11 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     if (data.is<const char *>()) {
         return_code = Command::call(device_type, command_p, data.as<const char *>(), is_admin, id_n, output, is_user);
     } else if (data.is<int>()) {
-        char data_str[10];
+        char data_str[12];
         return_code = Command::call(device_type, command_p, Helpers::itoa(data.as<int32_t>(), data_str), is_admin, id_n, output, is_user);
     } else if (data.is<float>()) {
-        char data_str[10];
-        return_code = Command::call(device_type, command_p, Helpers::render_value(data_str, data.as<float>(), 2), is_admin, id_n, output, is_user);
+        char data_str[32];
+        return_code = Command::call(device_type, command_p, Helpers::render_value(data_str, data.as<double>(), 2), is_admin, id_n, output, is_user);
     } else if (data.is<bool>()) {
         return_code = Command::call(device_type, command_p, data.as<bool>() ? "1" : "0", is_admin, id_n, output, is_user);
     } else if (data.isNull()) {

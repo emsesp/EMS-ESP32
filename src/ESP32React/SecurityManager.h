@@ -140,6 +140,7 @@ class SecurityManager {
 
     void ensureRestDispatcher(AsyncWebServer * server);
     void dispatchRest(AsyncWebServerRequest * request, JsonVariant json);
+    bool mayReceiveBody(AsyncWebServerRequest * request);
 
     std::vector<RestRoute> _restRoutes;
     bool                   _restDispatcherInstalled = false;

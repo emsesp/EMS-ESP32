@@ -67,12 +67,12 @@ bool EMSdevice::has_entities() const {
 
 // return translated tag name based on tag id
 const char * EMSdevice::tag_to_string(int8_t tag, const bool translate) {
-    int8_t tag_n = tag > DeviceValue::NUM_TAGS ? 0 : tag;
+    int8_t tag_n = (tag < 0 || tag >= DeviceValue::NUM_TAGS) ? 0 : tag;
     return (translate ? Helpers::translated_word(DeviceValue::DeviceValueTAG_s[tag_n]) : DeviceValue::DeviceValueTAG_s[tag_n][0]);
 }
 
 const char * EMSdevice::tag_to_mqtt(int8_t tag) {
-    return (DeviceValue::DeviceValueTAG_mqtt[tag > DeviceValue::NUM_TAGS ? 0 : tag]);
+    return (DeviceValue::DeviceValueTAG_mqtt[(tag < 0 || tag >= DeviceValue::NUM_TAGS) ? 0 : tag]);
 }
 
 uint8_t EMSdevice::tag_to_flag(const uint8_t tag) {

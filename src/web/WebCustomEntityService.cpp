@@ -265,7 +265,7 @@ bool WebCustomEntityService::command_setvalue(const char * value, const int8_t i
 // output of a single value
 // if add_uom is true it will add the UOM string to the value
 void WebCustomEntityService::render_value(JsonObject output, CustomEntityItem const & entity, const bool useVal, const bool web, const bool add_uom) {
-    char         payload[20];
+    char         payload[32];
     const char * name = useVal ? "value" : (const char *)entity.name;
 
     switch (entity.value_type) {
@@ -396,7 +396,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
 std::string WebCustomEntityService::get_metrics_prometheus() {
     std::string result;
     result.reserve(customEntityItems_->size() * 140);
-    char val[10];
+    char val[32];
     for (CustomEntityItem & entity : *customEntityItems_) {
         if (entity.hide || entity.name[0] == '\0') {
             continue;

@@ -575,9 +575,9 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
     }
 
     if (analogsensor_.have_sensors()) {
-        char s[10];
-        char s2[10];
-        char s3[10];
+        char s[24];
+        char s2[24];
+        char s3[24];
         shell.printfln("Analog sensors:");
         for (const auto & sensor : analogsensor_.sensors()) {
             switch (sensor.type()) {

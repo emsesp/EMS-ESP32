@@ -272,16 +272,24 @@ char * Helpers::render_value(char * result, uint8_t value, int8_t format, const 
 
 // float: convert float to char
 // format is the precision, 0 to 8
-char * Helpers::render_value(char * result, const double value, const int8_t format) {
+// the result is cut to fit len
+char * Helpers::render_value(char * out, const size_t len, const double value, const int8_t format) {
     if (format > 8) {
         return nullptr;
     }
 
+    // whole numbers beyond long long can't be converted, render them as 0
+    if (!std::isfinite(value) || std::fabs(value) >= 1e18) {
+        strlcpy(out, "0", len);
+        return out;
+    }
+
     uint32_t p[] = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
 
-    char * ret   = result;
-    double v     = value < 0 ? value - 1.0 / (2 * p[format]) : value + 1.0 / (2 * p[format]);
-    auto   whole = (long long)v;
+    char   buf[32]; // sign, 19 digits, point, 8 decimals
+    char * result = buf;
+    double v      = value < 0 ? value - 1.0 / (2 * p[format]) : value + 1.0 / (2 * p[format]);
+    auto   whole  = (long long)v;
 
     if (whole <= 0 && v < 0) {
         result[0] = '-';
@@ -292,7 +300,7 @@ char * Helpers::render_value(char * result, const double value, const int8_t for
 #ifndef EMSESP_STANDALONE
     lltoa(whole, result, 10);
 #else
-    ultostr(result, whole, 10);
+    snprintf(result, 20, "%lld", whole);
 #endif
 
     while (*result != '\0') {
@@ -309,7 +317,8 @@ char * Helpers::render_value(char * result, const double value, const int8_t for
 
     itoa(decimal, result, 10);
 
-    return remove_trailing_zero(ret);
+    strlcpy(out, remove_trailing_zero(buf), len);
+    return out;
 }
 
 // int32: convert signed 32bit to text string and returns string

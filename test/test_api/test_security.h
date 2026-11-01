@@ -9,6 +9,7 @@
 #include "api_key.h"
 #include "origin_check.h"
 #include "host_check.h"
+#include "shuntingYard.h"
 
 // Permission tests. Run last, they change settings and identity.
 
@@ -225,6 +226,41 @@ void security_test_guest_value_no_url() {
     TEST_ASSERT_NOT_EQUAL(CommandRet::OK, send_message("commands/fetch_values/value", false));
     TEST_ASSERT_EQUAL(CommandRet::OK, send_message("commands/fetch_values/value", true));
     TEST_ASSERT_TRUE(Command::caller_is_admin());
+}
+
+// render_value never writes past the buffer it is given, whatever the value
+void security_test_render_value_bounded() {
+    char small[8];
+    TEST_ASSERT_EQUAL_STRING("1234567", Helpers::render_value(small, 123456789.25, 2));
+    char buf[32];
+    TEST_ASSERT_EQUAL_STRING("12345678901.5", Helpers::render_value(buf, 12345678901.5, 2));
+    TEST_ASSERT_EQUAL_STRING("-20.56", Helpers::render_value(buf, -20.56, 2));
+    TEST_ASSERT_EQUAL_STRING("0", Helpers::render_value(buf, 1e30, 2));
+}
+
+// large JSON numbers sent to /api are passed on in full
+void security_test_api_large_numbers() {
+    JsonDocument doc_in;
+    JsonDocument doc_out;
+    JsonObject   input  = doc_in.to<JsonObject>();
+    JsonObject   output = doc_out.to<JsonObject>();
+    input["value"]      = 12345678901.5;
+    TEST_ASSERT_EQUAL(CommandRet::OK, Command::process("/api/system/message", true, input, output));
+    TEST_ASSERT_EQUAL_STRING("12345678901.5", output["api_data"] | "");
+
+    output.clear();
+    input["value"] = INT32_MIN;
+    TEST_ASSERT_EQUAL(CommandRet::OK, Command::process("/api/system/message", true, input, output));
+    TEST_ASSERT_EQUAL_STRING("-2147483648", output["api_data"] | "");
+}
+
+// expressions that used to crash the device now fail cleanly
+void security_test_compute_bad_input() {
+    TEST_ASSERT_EQUAL_STRING("", emsesp::compute("5 % 0").c_str());
+    TEST_ASSERT_EQUAL_STRING("", emsesp::compute("hex \"FFFFFFFFFFFF\"").c_str());
+    TEST_ASSERT_EQUAL_STRING("255", emsesp::compute("hex \"ff\"").c_str());
+    emsesp::compute(std::string(400, '1') + " + 1");
+    emsesp::compute(std::string(300, '(') + "1" + std::string(300, ')'));
 }
 
 // command definitions can hold credentials, only admins may read them
@@ -552,6 +588,9 @@ void run_security_tests() {
     RUN_TEST(security_test_action_guest_allowed);
     RUN_TEST(security_test_command_guest_flag);
     RUN_TEST(security_test_guest_value_no_url);
+    RUN_TEST(security_test_render_value_bounded);
+    RUN_TEST(security_test_api_large_numbers);
+    RUN_TEST(security_test_compute_bad_input);
     RUN_TEST(security_test_command_definitions_admin_only);
     RUN_TEST(security_test_write_endpoints_admin_only);
     RUN_TEST(security_test_log_settings);

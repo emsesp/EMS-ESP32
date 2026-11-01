@@ -192,7 +192,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     // 400 (invalid)
     int ret_codes[7] = {400, 200, 404, 400, 401, 400, 404};
 
-    response->setCode(ret_codes[return_code]);
+    response->setCode(return_code < 7 ? ret_codes[return_code] : 400);
     response->setLength();
     response->setContentType("application/json; charset=utf-8");
     request->send(response);
