@@ -209,7 +209,7 @@ const sk: Translation = {
   SETUP_AP_REQUIRED: 'Zatiaľ nie je nastavená žiadna WiFi sieť, takže prístup je cez prístupový bod. 8-63 znakov, použije sa pri ďalšom spustení prístupového bodu.',
   SETUP_AP_OPTIONAL: 'Odporúčané. 8-63 znakov, použije sa pri ďalšom spustení prístupového bodu. Nechajte prázdne pre zachovanie aktuálneho.',
   SETUP_AP_DEFAULT: 'Prístupový bod stále používa výrobné heslo. Nastavte si vlastné v nastaveniach prístupového bodu.',
-  SETUP_VIEW_USER: 'Voliteľné: pridajte používateľa len na prezeranie, napríklad pre členov rodiny.',
+  SETUP_VIEW_USER: 'Voliteľné: pridajte hosťovského používateľa len na prezeranie.',
   NETWORK_CORS_ORIGIN_HELP: 'Webová adresa, ktorá môže volať API z prehliadača, napríklad http://homeassistant.local:8123',
   NETWORK_CORS_WILDCARD: 'S * môže API volať každá webová stránka otvorená v prehliadači vo vašej sieti. Namiesto toho zadajte presnú adresu.',
   NOT_ENABLED: 'Nie je povolené',

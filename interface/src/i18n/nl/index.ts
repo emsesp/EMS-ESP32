@@ -209,7 +209,7 @@ const nl: Translation = {
   SETUP_AP_REQUIRED: 'Er is nog geen wifi-netwerk ingesteld, dus het access point is de toegang. 8-63 tekens, gebruikt bij de volgende start van het access point.',
   SETUP_AP_OPTIONAL: 'Aanbevolen. 8-63 tekens, gebruikt bij de volgende start van het access point. Laat leeg om het huidige te houden.',
   SETUP_AP_DEFAULT: 'Het access point gebruikt nog het fabriekswachtwoord. Stel een eigen wachtwoord in bij de Access Point-instellingen.',
-  SETUP_VIEW_USER: 'Optioneel: voeg een gebruiker toe die alleen mag kijken, bijvoorbeeld voor gezinsleden.',
+  SETUP_VIEW_USER: 'Optioneel: voeg een gastgebruiker toe die alleen mag kijken.',
   NETWORK_CORS_ORIGIN_HELP: 'Het webadres dat de API vanuit een browser mag aanroepen, bijvoorbeeld http://homeassistant.local:8123',
   NETWORK_CORS_WILDCARD: 'Met * kan elke website die in een browser op je netwerk open staat de API aanroepen. Vul in plaats daarvan het exacte adres in.',
   NOT_ENABLED: 'Niet geactiveerd',

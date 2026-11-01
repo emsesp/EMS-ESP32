@@ -209,7 +209,7 @@ const tr: Translation = {
   SETUP_AP_REQUIRED: 'Henüz bir WiFi ağı ayarlanmadı, bu yüzden giriş yolu erişim noktasıdır. 8-63 karakter, erişim noktası bir sonraki başladığında kullanılır.',
   SETUP_AP_OPTIONAL: 'Önerilir. 8-63 karakter, erişim noktası bir sonraki başladığında kullanılır. Mevcut şifreyi korumak için boş bırakın.',
   SETUP_AP_DEFAULT: 'Erişim noktası hâlâ fabrika şifresini kullanıyor. Erişim Noktası ayarlarından kendi şifrenizi belirleyin.',
-  SETUP_VIEW_USER: 'İsteğe bağlı: örneğin aile üyeleri için yalnızca görüntüleyebilen bir kullanıcı ekleyin.',
+  SETUP_VIEW_USER: 'İsteğe bağlı: yalnızca görüntüleyebilen bir misafir kullanıcı ekleyin.',
   NETWORK_CORS_ORIGIN_HELP: 'API\'yi bir tarayıcıdan çağırmasına izin verilen web adresi, örneğin http://homeassistant.local:8123',
   NETWORK_CORS_WILDCARD: '* ile ağınızdaki bir tarayıcıda açık olan her web sitesi API\'yi çağırabilir. Bunun yerine tam adresi girin.',
   NOT_ENABLED: 'Etkinleştirilmedi',

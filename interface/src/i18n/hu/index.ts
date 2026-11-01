@@ -209,7 +209,7 @@ const hu: Translation = {
   SETUP_AP_REQUIRED: 'Még nincs WiFi-hálózat beállítva, ezért a hozzáférési pont az egyetlen bejutási út. 8-63 karakter, a hozzáférési pont következő indításakor lép életbe.',
   SETUP_AP_OPTIONAL: 'Ajánlott. 8-63 karakter, a hozzáférési pont következő indításakor lép életbe. Hagyja üresen a jelenlegi megtartásához.',
   SETUP_AP_DEFAULT: 'A hozzáférési pont még a gyári jelszót használja. Állítson be sajátot a hozzáférési pont beállításaiban.',
-  SETUP_VIEW_USER: 'Opcionális: adjon hozzá egy csak megtekintésre jogosult felhasználót, például családtagoknak.',
+  SETUP_VIEW_USER: 'Opcionális: adjon hozzá egy csak megtekintésre jogosult vendégfelhasználót.',
   NETWORK_CORS_ORIGIN_HELP: 'A webcím, amely böngészőből hívhatja az API-t, például http://homeassistant.local:8123',
   NETWORK_CORS_WILDCARD: 'A * beállítással a hálózatán bármely böngészőben megnyitott weboldal hívhatja az API-t. Adja meg helyette a pontos címet.',
   NOT_ENABLED: 'Nincs engedélyezve',

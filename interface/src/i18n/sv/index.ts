@@ -209,7 +209,7 @@ const sv: Translation = {
   SETUP_AP_REQUIRED: 'Inget WiFi-nätverk är inställt ännu, så åtkomstpunkten är vägen in. 8-63 tecken, används nästa gång åtkomstpunkten startar.',
   SETUP_AP_OPTIONAL: 'Rekommenderas. 8-63 tecken, används nästa gång åtkomstpunkten startar. Lämna tomt för att behålla det nuvarande.',
   SETUP_AP_DEFAULT: 'Åtkomstpunkten använder fortfarande fabrikslösenordet. Ange ett eget i inställningarna för åtkomstpunkten.',
-  SETUP_VIEW_USER: 'Valfritt: lägg till en användare som bara kan titta, till exempel för familjemedlemmar.',
+  SETUP_VIEW_USER: 'Valfritt: lägg till en gästanvändare som bara kan titta.',
   NETWORK_CORS_ORIGIN_HELP: 'Webbadressen som får anropa API:et från en webbläsare, till exempel http://homeassistant.local:8123',
   NETWORK_CORS_WILDCARD: 'Med * kan alla webbplatser som är öppna i en webbläsare i ditt nätverk anropa API:et. Ange den exakta adressen i stället.',
   NOT_ENABLED: 'Ej aktiv',

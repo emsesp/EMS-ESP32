@@ -209,7 +209,7 @@ const en: Translation = {
   SETUP_AP_REQUIRED: 'No WiFi network is set up yet, so the access point is the way in. 8-63 characters, used the next time the access point starts.',
   SETUP_AP_OPTIONAL: 'Recommended. 8-63 characters, used the next time the access point starts. Leave empty to keep the current one.',
   SETUP_AP_DEFAULT: 'The access point still uses the factory password. Set your own in the Access Point settings.',
-  SETUP_VIEW_USER: 'Optional: add a view-only user, for example for family members.',
+  SETUP_VIEW_USER: 'Optional: add a view-only guest user.',
   NETWORK_CORS_ORIGIN_HELP: 'The web address allowed to call the API from a browser, for example http://homeassistant.local:8123',
   NETWORK_CORS_WILDCARD: 'With * any website open in a browser on your network can call the API. Set the exact address instead.',
   NOT_ENABLED: 'Not enabled',

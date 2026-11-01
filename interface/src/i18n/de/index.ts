@@ -209,7 +209,7 @@ const de: Translation = {
   SETUP_AP_REQUIRED: 'Es ist noch kein WLAN eingerichtet, daher ist der Access Point der Zugang. 8-63 Zeichen, gilt beim nächsten Start des Access Points.',
   SETUP_AP_OPTIONAL: 'Empfohlen. 8-63 Zeichen, gilt beim nächsten Start des Access Points. Leer lassen, um das aktuelle zu behalten.',
   SETUP_AP_DEFAULT: 'Der Access Point verwendet noch das Werkspasswort. Lege in den Access-Point-Einstellungen ein eigenes fest.',
-  SETUP_VIEW_USER: 'Optional: einen Benutzer nur zum Ansehen hinzufügen, zum Beispiel für Familienmitglieder.',
+  SETUP_VIEW_USER: 'Optional: einen Gastbenutzer nur zum Ansehen hinzufügen.',
   NETWORK_CORS_ORIGIN_HELP: 'Die Webadresse, die die API aus einem Browser aufrufen darf, zum Beispiel http://homeassistant.local:8123',
   NETWORK_CORS_WILDCARD: 'Mit * kann jede Webseite, die in einem Browser in deinem Netzwerk geöffnet ist, die API aufrufen. Trage stattdessen die genaue Adresse ein.',
   NOT_ENABLED: 'Nicht aktiviert',

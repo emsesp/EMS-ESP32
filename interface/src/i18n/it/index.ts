@@ -209,7 +209,7 @@ const it: Translation = {
   SETUP_AP_REQUIRED: 'Nessuna rete WiFi è ancora configurata, quindi l\'access point è l\'unico accesso. 8-63 caratteri, usata al prossimo avvio dell\'access point.',
   SETUP_AP_OPTIONAL: 'Consigliato. 8-63 caratteri, usata al prossimo avvio dell\'access point. Lascia vuoto per mantenere quella attuale.',
   SETUP_AP_DEFAULT: 'L\'access point usa ancora la password di fabbrica. Impostane una tua nelle impostazioni dell\'access point.',
-  SETUP_VIEW_USER: 'Facoltativo: aggiungi un utente in sola visualizzazione, ad esempio per i familiari.',
+  SETUP_VIEW_USER: 'Facoltativo: aggiungi un utente ospite in sola visualizzazione.',
   NETWORK_CORS_ORIGIN_HELP: 'L\'indirizzo web autorizzato a chiamare l\'API da un browser, ad esempio http://homeassistant.local:8123',
   NETWORK_CORS_WILDCARD: 'Con * qualsiasi sito aperto in un browser nella tua rete può chiamare l\'API. Inserisci invece l\'indirizzo esatto.',
   NOT_ENABLED: 'Non abilitato',

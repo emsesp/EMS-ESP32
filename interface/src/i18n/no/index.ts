@@ -209,7 +209,7 @@ const no: Translation = {
   SETUP_AP_REQUIRED: 'Det er ikke satt opp noe WiFi-nettverk ennå, så tilgangspunktet er veien inn. 8-63 tegn, brukes neste gang tilgangspunktet starter.',
   SETUP_AP_OPTIONAL: 'Anbefalt. 8-63 tegn, brukes neste gang tilgangspunktet starter. La stå tomt for å beholde det nåværende.',
   SETUP_AP_DEFAULT: 'Tilgangspunktet bruker fortsatt fabrikkpassordet. Angi ditt eget i innstillingene for tilgangspunktet.',
-  SETUP_VIEW_USER: 'Valgfritt: legg til en bruker som bare kan se, for eksempel for familiemedlemmer.',
+  SETUP_VIEW_USER: 'Valgfritt: legg til en gjestebruker som bare kan se.',
   NETWORK_CORS_ORIGIN_HELP: 'Nettadressen som kan kalle API-et fra en nettleser, for eksempel http://homeassistant.local:8123',
   NETWORK_CORS_WILDCARD: 'Med * kan alle nettsider som er åpne i en nettleser på nettverket ditt kalle API-et. Angi den nøyaktige adressen i stedet.',
   NOT_ENABLED: 'Ikke aktiv',

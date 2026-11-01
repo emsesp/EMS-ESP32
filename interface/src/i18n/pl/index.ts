@@ -209,7 +209,7 @@ const pl: BaseTranslation = {
   SETUP_AP_REQUIRED: 'Nie skonfigurowano jeszcze sieci WiFi, więc dostęp jest przez punkt dostępowy. 8-63 znaków, użyte przy następnym uruchomieniu punktu dostępowego.',
   SETUP_AP_OPTIONAL: 'Zalecane. 8-63 znaków, użyte przy następnym uruchomieniu punktu dostępowego. Pozostaw puste, aby zachować obecne.',
   SETUP_AP_DEFAULT: 'Punkt dostępowy nadal używa hasła fabrycznego. Ustaw własne w ustawieniach punktu dostępowego.',
-  SETUP_VIEW_USER: 'Opcjonalnie: dodaj użytkownika tylko do podglądu, na przykład dla domowników.',
+  SETUP_VIEW_USER: 'Opcjonalnie: dodaj użytkownika gościa tylko do podglądu.',
   NETWORK_CORS_ORIGIN_HELP: 'Adres strony, która może wywoływać API z przeglądarki, na przykład http://homeassistant.local:8123',
   NETWORK_CORS_WILDCARD: 'Przy * każda strona otwarta w przeglądarce w Twojej sieci może wywoływać API. Zamiast tego wpisz dokładny adres.',
   NOT_ENABLED: 'nie aktywowano',
