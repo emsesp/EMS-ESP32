@@ -67,6 +67,9 @@ const SingleUpload = ({
         await sendUpload(file).catch((error: Error) => {
           if (error.message.includes('The user aborted a request')) {
             toast.warning(LL.UPLOAD() + ' ' + LL.ABORTED());
+          } else if (error.message === 'Precondition Failed') {
+            // 412, see OtaUpdater
+            toast.error(LL.UPLOAD_NOT_SIGNED());
           } else {
             toast.warning('Invalid file extension or incompatible bin file');
           }

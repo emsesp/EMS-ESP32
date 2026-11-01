@@ -377,6 +377,7 @@ const hu: Translation = {
   UPLOAD_FIRMWARE_TEXT: 'Kattints a kiválasztáshoz, vagy húzd ide a firmware fájlt (.bin/.md5)',
   UPLOAD_MD5_RECEIVED: 'Ellenőrző összeg megérkezett, most töltsd fel a firmware .bin fájlját',
   UPLOAD_MD5_MATCHED: 'Az MD5 egyezik, a firmware telepítése folyamatban...',
+  UPLOAD_NOT_SIGNED: 'Ezt a firmware-t nem az EMS-ESP írta alá',
   RECOVERY_APP: 'Helyreállítási alkalmazás (Recovery)',
   RECOVERY_NOT_INSTALLED: 'Nincs telepítve',
   RECOVERY_INSTALLED: 'Helyreállítási firmware telepítve',

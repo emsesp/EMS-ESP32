@@ -724,7 +724,7 @@ static void handleUpload(AsyncWebServerRequest * request, const String & filenam
         // on success this also makes the new partition the boot partition
         if (!ota.end()) {
             LOG("Upload failed: %s", ota.errorString());
-            uploadFail(request, 500, "image check failed");
+            uploadFail(request, ota.notSigned() ? 412 : 500, ota.notSigned() ? "not signed by EMS-ESP" : "image check failed");
             return;
         }
         LOG("Upload finished, the image is verified");

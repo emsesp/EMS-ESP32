@@ -2,8 +2,12 @@ import hashlib
 import shutil
 import re
 import os
+import sys
 from pathlib import Path
 Import("env")
+
+sys.path.insert(0, os.path.join(env.subst("$PROJECT_DIR"), "scripts"))
+import sign_firmware
 
 OUTPUT_DIR = Path("build")
 
@@ -82,6 +86,18 @@ def bin_copy(source, target, env):
 
     # Copy firmware.bin to firmware/<variant>.bin
     shutil.copy2(str(target[0]), str(bin_file))
+
+    # Sign it, EMS-ESP only accepts signed firmware as an upload. Release builds set EMSESP_SIGNING_REQUIRED
+    pem = sign_firmware.load_key_pem()
+    if pem:
+        sign_firmware.sign_file(bin_file, pem)
+        print("Signed: Yes")
+    elif os.environ.get("EMSESP_SIGNING_REQUIRED"):
+        bin_file.unlink()
+        print("Error: EMSESP_SIGNING_REQUIRED is set but there is no signing key in EMSESP_SIGNING_KEY")
+        env.Exit(1)
+    else:
+        print("Signed: No, set EMSESP_SIGNING_KEY to sign")
 
     # Calculate and write MD5 hash
     with bin_file.open("rb") as f:

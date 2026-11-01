@@ -377,6 +377,7 @@ const pl: BaseTranslation = {
   UPLOAD_FIRMWARE_TEXT: 'Kliknij, aby wybrać, lub drop plik firmware .bin/.md5 tutaj',
   UPLOAD_MD5_RECEIVED: 'Suma MD5 odebrana, teraz wgraj plik firmware .bin',
   UPLOAD_MD5_MATCHED: 'MD5 zgodne, instalowanie firmware...',
+  UPLOAD_NOT_SIGNED: 'Ten firmware nie jest podpisany przez EMS-ESP',
   RECOVERY_APP: 'Aplikacja odzyskiwania',
   RECOVERY_NOT_INSTALLED: 'Nie zainstalowano',
   RECOVERY_INSTALLED: 'Zainstalowano firmware odzyskiwania',

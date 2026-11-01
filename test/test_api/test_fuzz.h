@@ -1,5 +1,5 @@
-// Fuzzes Command::process (the /api and MQTT entry point) and compute() (the expression evaluator)
-// with random and mutated input. Built with AddressSanitizer and UBSan in the native-fuzz env, so
+// Fuzzes Command::process (the /api and MQTT entry point), compute() (the expression evaluator) and the
+// firmware signature check with random and mutated input. Built with AddressSanitizer and UBSan in the native-fuzz env, so
 // any out-of-bounds access or undefined behaviour stops the run with a report.
 // Run with `pio run -e native-fuzz -t exec`. FUZZ_ITERATIONS and FUZZ_SEED override the defaults.
 
@@ -248,6 +248,32 @@ static void fuzz_compute() {
     emsesp::compute(expr);
 }
 
+// a changed signed file never passes
+static void fuzz_signature() {
+    const auto original = fwsig::signed_file(chance(50) ? fwsig::SIG_R33 : fwsig::SIG_R32);
+    auto       file     = original;
+    const uint32_t flips = 1 + below(4);
+    for (uint32_t i = 0; i < flips; i++) {
+        // mostly the DER bytes, where the parser has the most branches
+        const size_t pos = chance(70) ? 3000 + below(72) : below(file.size());
+        file[pos] ^= static_cast<uint8_t>(1 + below(255));
+    }
+    if (chance(10)) {
+        file.resize(below(file.size()));
+    }
+    const size_t chunk = 1 + below(2000);
+    last_input         = "signature, " + std::to_string(flips) + " flips, size " + std::to_string(file.size()) + ", chunk " + std::to_string(chunk);
+    if (file != original && fwsig::stream(file, chunk, fwsig::KEYS, 2).ok) {
+        for (size_t i = 0; i < std::min(file.size(), original.size()); i++) {
+            if (file[i] != original[i]) {
+                fprintf(stderr, "fuzz: byte %u changed from 0x%02x to 0x%02x\n", (unsigned)i, original[i], file[i]);
+            }
+        }
+        fprintf(stderr, "fuzz: a changed file passed the signature check: %s\n", last_input.c_str());
+        abort();
+    }
+}
+
 static int run() {
     uint32_t iterations = 20000;
     if (const char * s = getenv("FUZZ_ITERATIONS")) {
@@ -265,10 +291,13 @@ static int run() {
     printf("fuzz: %u iterations, seed %llu, %u registered command names\n", iterations, (unsigned long long)seed, (unsigned)registered.size());
 
     for (uint32_t i = 0; i < iterations; i++) {
-        if (chance(60)) {
+        const uint32_t kind = below(100);
+        if (kind < 55) {
             fuzz_command();
-        } else {
+        } else if (kind < 90) {
             fuzz_compute();
+        } else {
+            fuzz_signature();
         }
     }
 

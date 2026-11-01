@@ -536,6 +536,7 @@ void create_tests() {
 }
 
 #include "test_security.h"
+#include "test_firmware_signature.h"
 
 #if defined(EMSESP_FUZZ)
 #include "test_fuzz.h"
@@ -581,6 +582,7 @@ int main() {
     run_manual_tests();       // execute some other manual tests from this file
     run_console_tests();      // execute some console tests
     run_shuntingYard_tests(); // execute the shuntingYard tests
+    run_firmware_signature_tests();
     run_security_tests();     // execute the permission tests, last as they change settings
 
     return UNITY_END();

@@ -377,6 +377,7 @@ const de: Translation = {
   UPLOAD_FIRMWARE_TEXT: 'Klicken Sie, um eine Firmware-Datei (.bin/.md5) auszuwählen, oder drop ein',
   UPLOAD_MD5_RECEIVED: 'Prüfsumme empfangen, jetzt die Firmware-Datei (.bin) hochladen',
   UPLOAD_MD5_MATCHED: 'MD5 stimmt überein, Firmware wird installiert...',
+  UPLOAD_NOT_SIGNED: 'Diese Firmware ist nicht von EMS-ESP signiert',
   RECOVERY_APP: 'Wiederherstellungs-App',
   RECOVERY_NOT_INSTALLED: 'Nicht installiert',
   RECOVERY_INSTALLED: 'Wiederherstellungs-Firmware installiert',

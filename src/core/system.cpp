@@ -27,7 +27,6 @@
 #include <esp_mac.h>
 #include "esp_efuse.h"
 #include <nvs.h>
-#include <Update.h>
 #endif
 
 #include <map>
@@ -3627,7 +3626,7 @@ bool System::uploadFirmwareURL(const char * url) {
     }
 
     basic_client.setTimeout(FIRMWARE_UPLOAD_READ_TIMEOUT_S * 1000); // socket-level read timeout, in ms
-    ssl_client.setTimeout(FIRMWARE_UPLOAD_READ_TIMEOUT_S);          // Stream::readBytes timeout used by Update
+    ssl_client.setTimeout(FIRMWARE_UPLOAD_READ_TIMEOUT_S);          // Stream::readBytes timeout
     ssl_client.setClient(&basic_client, is_https);                  // enableSSL = false for plain HTTP
 
     const uint16_t port           = is_https ? 443 : 80;
@@ -3770,7 +3769,8 @@ bool System::uploadFirmwareURL(const char * url) {
 #else
     const bool is_recovery = false;
 #endif
-    OtaUpdater ota; // only used for the recovery firmware
+    // on the heap, the loop task's stack is small
+    auto ota = std::make_unique<OtaUpdater>();
 
     // check we have a valid size
     if (firmware_size < (int)(is_recovery ? OtaUpdater::MIN_RECOVERY_FIRMWARE_SIZE : MIN_FIRMWARE_SIZE)) {
@@ -3778,24 +3778,19 @@ bool System::uploadFirmwareURL(const char * url) {
         return false; // error
     }
 
-    OtaUpdater::confirmRunningApp();
-
-    if (is_recovery) {
+    const esp_partition_t * target = nullptr;
 #ifdef EMSESP_HAS_RECOVERY
-        const esp_partition_t * factory = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
-        if (factory == nullptr || factory == esp_ota_get_running_partition()) {
+    if (is_recovery) {
+        target = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
+        if (target == nullptr || target == esp_ota_get_running_partition()) {
             LOG_ERROR("The recovery firmware can't be installed on this board");
             return false; // error
         }
-
-        if (!ota.beginFirmware(firmware_size, factory, false)) {
-            LOG_ERROR("Recovery firmware upload failed - %s", ota.errorString());
-            return false; // error
-        }
+    }
 #endif
-    } else if (!Update.begin(firmware_size)) {
-        // check we have enough space for the upload in the ota partition
-        LOG_ERROR("Firmware upload failed - no space");
+
+    if (!ota->beginFirmware(firmware_size, target, !is_recovery)) {
+        LOG_ERROR("%s upload failed - %s", is_recovery ? "Recovery firmware" : "Firmware", ota->errorString());
         return false; // error
     }
 
@@ -3806,7 +3801,7 @@ bool System::uploadFirmwareURL(const char * url) {
     // we're about to start the upload, set the status so the Web System Monitor spots it
     EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING);
 
-    // explicit chunked read loop instead of Update.writeStream():
+    // explicit chunked read loop instead of a stream copy:
     uint8_t buf[FIRMWARE_UPLOAD_CHUNK_SIZE];
     size_t  total_read = 0;
     bool    magic_ok   = false;
@@ -3817,11 +3812,7 @@ bool System::uploadFirmwareURL(const char * url) {
         // via the systemStatus action, which runs on the AsyncTCP task while we're blocked here
         if (EMSESP::system_.systemStatus() < SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING) {
             LOG_WARNING("Firmware upload cancelled at %u of %d bytes", (unsigned)total_read, firmware_size);
-            if (is_recovery) {
-                ota.abort();
-            } else {
-                Update.abort(); // release the OTA partition handle so a later attempt can start cleanly
-            }
+            ota->abort(); // release the OTA partition handle so a later attempt can start cleanly
 
             ssl_client.stop(); // drop the connection
             saved_url.clear(); // prevent it from downloading again
@@ -3856,9 +3847,7 @@ bool System::uploadFirmwareURL(const char * url) {
             }
 
             LOG_ERROR("Firmware upload failed - read stalled at %u of %d bytes", (unsigned)total_read, firmware_size);
-            if (is_recovery) {
-                ota.abort();
-            }
+            ota->abort();
 
             EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
             return false;
@@ -3872,9 +3861,7 @@ bool System::uploadFirmwareURL(const char * url) {
         size_t n = stream->readBytes(buf, want);
         if (n == 0) {
             LOG_ERROR("Firmware upload failed - read returned 0 at %u of %d bytes", (unsigned)total_read, firmware_size);
-            if (is_recovery) {
-                ota.abort();
-            }
+            ota->abort();
 
             EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
             return false;
@@ -3885,9 +3872,7 @@ bool System::uploadFirmwareURL(const char * url) {
         if (!magic_ok) {
             if (buf[0] != 0xE9) {
                 LOG_ERROR("Firmware upload failed - bad magic byte 0x%02X (expected 0xE9, not an ESP32 firmware image?)", buf[0]);
-                if (is_recovery) {
-                    ota.abort();
-                }
+                ota->abort();
 
                 EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
                 return false;
@@ -3896,9 +3881,7 @@ bool System::uploadFirmwareURL(const char * url) {
             // the recovery firmware must be for this chip, and really be the recovery
             if (is_recovery && !(OtaUpdater::isCompatibleFirmware(buf, n) && OtaUpdater::isRecoveryFirmware(buf, n))) {
                 LOG_ERROR("Recovery firmware upload failed - not a recovery firmware image for this chip");
-                if (is_recovery) {
-                    ota.abort();
-                }
+                ota->abort();
 
                 EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
                 return false;
@@ -3907,15 +3890,9 @@ bool System::uploadFirmwareURL(const char * url) {
             magic_ok = true;
         }
 
-        const bool written = is_recovery ? ota.write(buf, n) : (Update.write(buf, n) == n);
-        if (!written) {
-            LOG_ERROR("Firmware upload failed - flash write error at %u of %d bytes: %s",
-                      (unsigned)total_read,
-                      firmware_size,
-                      is_recovery ? ota.errorString() : Update.errorString());
-            if (is_recovery) {
-                ota.abort();
-            }
+        if (!ota->write(buf, n)) {
+            LOG_ERROR("Firmware upload failed - flash write error at %u of %d bytes: %s", (unsigned)total_read, firmware_size, ota->errorString());
+            ota->abort();
 
             EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
             return false;
@@ -3933,8 +3910,8 @@ bool System::uploadFirmwareURL(const char * url) {
         yield();
     }
 
-    if (!(is_recovery ? ota.end() : Update.end(true))) {
-        LOG_ERROR("Firmware upload failed - %s", is_recovery ? ota.errorString() : Update.errorString());
+    if (!ota->end()) {
+        LOG_ERROR("Firmware upload failed - %s", ota->errorString());
         EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
         return false; // error
     }

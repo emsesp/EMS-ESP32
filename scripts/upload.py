@@ -20,6 +20,7 @@
 import hashlib
 import os
 import socket
+import sys
 import time
 from urllib.parse import urlparse
 
@@ -27,6 +28,9 @@ import requests
 from requests.adapters import HTTPAdapter
 
 Import("env")
+
+sys.path.insert(0, os.path.join(env.subst("$PROJECT_DIR"), "scripts"))
+import sign_firmware
 
 try:
     from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
@@ -210,6 +214,11 @@ def on_upload(source, target, env):
         with open(firmware_path, 'rb') as firmware_file:
             firmware = firmware_file.read()
 
+        # EMS-ESP only accepts signed firmware
+        pem = sign_firmware.load_key_pem()
+        if pem:
+            firmware = sign_firmware.sign_bytes(firmware, pem)
+
         md5 = hashlib.md5(firmware).hexdigest()
         filename = os.path.basename(firmware_path)
         # Device enables MD5 check only after a file whose name ends in .md5
@@ -232,7 +241,10 @@ def on_upload(source, target, env):
             filename, firmware, progress_desc='Upload Progress')
         print()
 
-        if response.status_code != 200:
+        if response.status_code == 412:
+            print_fail("Upload refused, the firmware isn't signed by EMS-ESP. Set EMSESP_SIGNING_KEY, "
+                       "or run 'allow unsigned' on the device's serial console first.")
+        elif response.status_code != 200:
             print_fail(f"Upload failed (code {response.status_code}).")
         else:
             kibs = (size / 1024) / elapsed if elapsed > 0 else 0

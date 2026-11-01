@@ -33,6 +33,8 @@ const uploadErrorMessage = (status: number, chip: string) => {
       return 'Not authorized, please sign in again';
     case 409:
       return 'This is the recovery firmware, it can only be installed from EMS-ESP';
+    case 412:
+      return 'This firmware is not signed by EMS-ESP';
     case 503:
       return `This firmware is not built for the ${chip}`;
     case 507:

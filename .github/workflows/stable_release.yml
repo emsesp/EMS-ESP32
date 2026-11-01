@@ -160,7 +160,7 @@ jobs:
             ${{ runner.os }}-pio-
 
       - name: Install pioarduino
-        run: uv pip install --system pioarduino==6.2.0
+        run: uv pip install --system pioarduino==6.2.0 cryptography
 
       - name: Restore WWWData.h
         uses: actions/download-artifact@v8
@@ -184,6 +184,8 @@ jobs:
       - name: Build ${{ matrix.env }}
         env:
           CCACHE_COMPILERCHECK: content
+          EMSESP_SIGNING_KEY: ${{ secrets.EMSESP_SIGNING_KEY }}
+          EMSESP_SIGNING_REQUIRED: ${{ github.repository == 'emsesp/EMS-ESP32' && '1' || '' }}
         run: platformio run -e ${{ matrix.env }}
 
       - name: Upload firmware
@@ -246,7 +248,7 @@ jobs:
             ${{ runner.os }}-pio-
 
       - name: Install pioarduino
-        run: uv pip install --system pioarduino==6.2.0
+        run: uv pip install --system pioarduino==6.2.0 cryptography
 
       - name: Install pnpm
         uses: pnpm/action-setup@v6
@@ -267,8 +269,16 @@ jobs:
             ${{ runner.os }}-pnpm-
 
       - name: Build the recovery firmware for the 16MB boards
+        env:
+          EMSESP_SIGNING_KEY: ${{ secrets.EMSESP_SIGNING_KEY }}
+          EMSESP_SIGNING_REQUIRED: ${{ github.repository == 'emsesp/EMS-ESP32' && '1' || '' }}
         run: |
           platformio run -e recovery_s_16M -e recovery_s_16M_P -e recovery_s3_16M_P
+
+      # every published .bin must pass the check in lib/FirmwareSignature
+      - name: Check the firmware signatures
+        if: github.repository == 'emsesp/EMS-ESP32'
+        run: python3 scripts/sign_firmware.py verify build/firmware/*.bin
 
       - name: List firmware files
         run: ls -la build/firmware

@@ -114,8 +114,8 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
             if (_ota.beginFilesystem()) {
                 request->onDisconnect([this] { handleDisconnect(); });
             } else {
-                emsesp::EMSESP::logger().err("Update.begin(U_SPIFFS) failed: %s", _ota.errorString());
-                handleError(request, 507);
+                emsesp::EMSESP::logger().err("Filesystem upload failed: %s", _ota.errorString());
+                handleError(request, _ota.notSigned() ? 412 : 507);
                 return;
             }
         } else {
@@ -140,7 +140,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
             if (final) {
                 if (!_ota.end()) {
                     emsesp::EMSESP::logger().err("OTA update failed: %s", _ota.errorString());
-                    handleError(request, 500); // internal error, failed
+                    handleError(request, _ota.notSigned() ? 412 : 500); // 412 Precondition Failed, not signed by EMS-ESP
                     return;
                 }
             }
