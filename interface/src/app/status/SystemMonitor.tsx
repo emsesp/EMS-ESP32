@@ -8,6 +8,7 @@ import { readSystemStatus } from 'api/system';
 
 import { useRequest } from 'alova/client';
 import MessageBox from 'components/MessageBox';
+import { clearAccessToken } from 'components/routing/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { SystemStatusCodes } from 'types';
 import { useInterval } from 'utils';
@@ -59,6 +60,12 @@ const SystemMonitor = ({ onDone }: SystemMonitorProps) => {
       }
     })
     .onError((error) => {
+      // the device is back but the sign-in is no longer valid, e.g. after a factory reset
+      if (error.error?.message === 'Unauthorized') {
+        clearAccessToken();
+        document.location.href = '/';
+        return;
+      }
       setErrorMessage(String(error.error?.message || 'An error occurred'));
     });
 
