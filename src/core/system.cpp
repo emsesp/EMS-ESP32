@@ -2278,7 +2278,22 @@ void System::exportSystemBackup(JsonObject output, const bool include_secrets) {
 #endif
 }
 
+#ifndef EMSESP_STANDALONE
+// overlay src onto dst, recursing into objects present in both. arrays and values are replaced
+static void merge_json(JsonObject dst, JsonObjectConst src) {
+    for (JsonPairConst kv : src) {
+        JsonVariant target = dst[kv.key()];
+        if (kv.value().is<JsonObjectConst>() && target.is<JsonObject>()) {
+            merge_json(target.as<JsonObject>(), kv.value().as<JsonObjectConst>());
+        } else {
+            dst[kv.key()] = kv.value();
+        }
+    }
+}
+#endif
+
 // write a settings file using input from a json object, called from upload/restore
+// the input is merged over the existing file, so a partial upload only changes the keys it contains
 bool System::saveSettings([[maybe_unused]] const char * filename, [[maybe_unused]] JsonObject input) {
 #ifndef EMSESP_STANDALONE
     const char * section = nullptr;
@@ -2295,20 +2310,28 @@ bool System::saveSettings([[maybe_unused]] const char * filename, [[maybe_unused
 
     JsonObject section_json = input[section];
     if (section_json) {
-        // keep the device's own secrets for any the backup left out
-        File current_file = LittleFS.open(filename);
+        JsonDocument current(PSRAM_DOC);
+        bool         has_current  = false;
+        File         current_file = LittleFS.open(filename);
         if (current_file) {
-            JsonDocument current(PSRAM_DOC);
-            if (!deserializeJson(current, current_file)) {
-                SettingsSecrets::merge(section, section_json, current.as<JsonObjectConst>());
-            }
+            has_current = !deserializeJson(current, current_file) && current.is<JsonObject>();
             current_file.close();
+        }
+
+        if (has_current) {
+            // keep the device's own secrets for any the backup left out
+            SettingsSecrets::merge(section, section_json, current.as<JsonObjectConst>());
+            merge_json(current.as<JsonObject>(), section_json);
         }
 
         File section_file = LittleFS.open(filename, "w");
         if (section_file) {
             LOG_DEBUG("Applying new uploaded %s data", section);
-            serializeJson(section_json, section_file);
+            if (has_current) {
+                serializeJson(current, section_file);
+            } else {
+                serializeJson(section_json, section_file);
+            }
             section_file.close();
             return true; // reboot required
         }
