@@ -156,8 +156,32 @@ class Command {
 
     static const char * return_code_string(const uint8_t return_code);
 
+    // rights of the caller whose command runs on this task. compute() uses them so text sent by a
+    // non-admin can't fetch URLs or read admin-only values. Internal callers (scheduler, MQTT) are admin
+    static bool caller_is_admin() {
+        return caller_is_admin_;
+    }
+
+    class CallerRights {
+      public:
+        explicit CallerRights(const bool is_admin)
+            : prev_(caller_is_admin_) {
+            caller_is_admin_ = is_admin;
+        }
+        ~CallerRights() {
+            caller_is_admin_ = prev_;
+        }
+        CallerRights(const CallerRights &)             = delete;
+        CallerRights & operator=(const CallerRights &) = delete;
+
+      private:
+        bool prev_;
+    };
+
   private:
     static uuid::log::Logger logger_;
+
+    static thread_local bool caller_is_admin_;
 
     static std::vector<CmdFunction, AllocatorPSRAM<CmdFunction>> cmdfunctions_; // the list of commands
 

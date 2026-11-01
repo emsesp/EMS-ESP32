@@ -24,6 +24,8 @@ namespace emsesp {
 
 uuid::log::Logger Command::logger_{F_(command), uuid::log::Facility::DAEMON};
 
+thread_local bool Command::caller_is_admin_ = true;
+
 std::vector<Command::CmdFunction, AllocatorPSRAM<Command::CmdFunction>> Command::cmdfunctions_;
 
 // takes a URI path and a json body, parses the data and calls the command
@@ -31,6 +33,8 @@ std::vector<Command::CmdFunction, AllocatorPSRAM<Command::CmdFunction>> Command:
 // the entry point will be either via the Web API (api/) or MQTT (<base>/)
 // returns a return code and json output
 uint8_t Command::process(const char * path, const bool is_admin, const JsonObject input, JsonObject output, const bool is_user) {
+    CallerRights rights(is_admin);
+
     // check for MQTT, if so strip the "<base>" from the path
     if (!strncmp(path, Mqtt::base().c_str(), Mqtt::base().length())) {
         path += Mqtt::base().length();
@@ -460,6 +464,13 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
         LOG_WARNING("Command failed: authentication failed");
         output["message"] = "authentication failed";
         return CommandRet::NOT_ALLOWED; // command not allowed
+    }
+
+    // a non-admin may run a guest-allowed custom Command, but only with the value the admin stored
+    if (device_type == EMSdevice::DeviceType::COMMAND && !single_command && !is_admin) {
+        LOG_WARNING("Command failed: only admins can pass a value to a Command");
+        output["message"] = "only admins can pass a value to a Command";
+        return CommandRet::NOT_ALLOWED;
     }
 
     // call the function based on command function type

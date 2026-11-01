@@ -385,7 +385,7 @@ std::string commands(std::string & expr, bool quotes) {
             char         cmd_s[COMMAND_MAX_LENGTH + 5]; // "api/" prefix + cmd
             snprintf(cmd_s, sizeof(cmd_s), "api/%s", cmd);
 
-            auto return_code = Command::process(cmd_s, true, input, output);
+            auto return_code = Command::process(cmd_s, Command::caller_is_admin(), input, output);
             // check for no value (entity is valid but has no value set)
             if (return_code != CommandRet::OK && return_code != CommandRet::NO_VALUE) {
                 return expr = "";
@@ -791,6 +791,11 @@ std::string compute(const std::string & expr) {
                     key_s  = "";
                     keys_s = p.key().c_str();
                 }
+            }
+
+            if (!Command::caller_is_admin()) {
+                EMSESP::logger().warning("Only admins can fetch a URL in a value");
+                return "";
             }
 
             std::string value  = doc[value_s] | "";

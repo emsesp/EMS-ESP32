@@ -192,10 +192,10 @@ void security_test_command_guest_flag() {
     JsonObject   output = doc_out.to<JsonObject>();
     JsonDocument doc_in;
     JsonObject   input = doc_in.to<JsonObject>();
-    input["value"]     = "1"; // without a value /api returns the command's info instead of running it
+    input["value"]     = "1";
 
-    // /api: logged-in guest, anonymous caller, admin
-    TEST_ASSERT_EQUAL(CommandRet::OK, Command::process("/api/commands/send_message", false, input, output, true));
+    // /api: logged-in guest, anonymous caller, admin. Only admins can pass their own value
+    TEST_ASSERT_EQUAL(CommandRet::NOT_ALLOWED, Command::process("/api/commands/send_message", false, input, output, true));
     TEST_ASSERT_EQUAL(CommandRet::NOT_ALLOWED, Command::process("/api/commands/fetch_values", false, input, output, true));
     TEST_ASSERT_EQUAL(CommandRet::NOT_ALLOWED, Command::process("/api/commands/send_message", false, input, output, false));
     TEST_ASSERT_EQUAL(CommandRet::OK, Command::process("/api/commands/fetch_values", true, input, output));
@@ -207,6 +207,24 @@ void security_test_command_guest_flag() {
     JsonObject   guest_out = doc_guest_out.to<JsonObject>();
     TEST_ASSERT_NOT_EQUAL(CommandRet::NOT_ALLOWED, Command::process("/api/commands/send_message", false, no_value, guest_out, true));
     TEST_ASSERT_FALSE(guest_out["command"].is<const char *>());
+}
+
+// values sent by non-admins can't fetch URLs or read admin-only values through compute()
+static uint8_t send_message(const char * value, const bool is_admin) {
+    JsonDocument doc_in;
+    JsonDocument doc_out;
+    JsonObject   input  = doc_in.to<JsonObject>();
+    JsonObject   output = doc_out.to<JsonObject>();
+    input["value"]      = value;
+    return Command::process("/api/system/message", is_admin, input, output, !is_admin);
+}
+
+void security_test_guest_value_no_url() {
+    TEST_ASSERT_EQUAL(CommandRet::OK, send_message("\"hello\"", false));
+    TEST_ASSERT_NOT_EQUAL(CommandRet::OK, send_message("{\"url\":\"http://192.168.1.1/\"}", false));
+    TEST_ASSERT_NOT_EQUAL(CommandRet::OK, send_message("commands/fetch_values/value", false));
+    TEST_ASSERT_EQUAL(CommandRet::OK, send_message("commands/fetch_values/value", true));
+    TEST_ASSERT_TRUE(Command::caller_is_admin());
 }
 
 // command definitions can hold credentials, only admins may read them
@@ -533,6 +551,7 @@ void run_security_tests() {
     RUN_TEST(security_test_action_admin_only);
     RUN_TEST(security_test_action_guest_allowed);
     RUN_TEST(security_test_command_guest_flag);
+    RUN_TEST(security_test_guest_value_no_url);
     RUN_TEST(security_test_command_definitions_admin_only);
     RUN_TEST(security_test_write_endpoints_admin_only);
     RUN_TEST(security_test_log_settings);

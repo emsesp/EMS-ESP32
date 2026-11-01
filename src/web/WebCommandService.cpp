@@ -259,6 +259,8 @@ bool WebCommandService::executeCommand(const char * name, const char * value) {
 // execute a command with explicit cmd and value strings
 // handles both HTTP URLs (JSON format) and internal API commands
 bool WebCommandService::executeCommand(const char * name, const std::string & command, const std::string & data) {
+    Command::CallerRights admin(true); // the command and its value were saved by an admin
+
     std::string cmd = Helpers::toLower(command);
 
     // run the value through the shunting-yard calculator so expressions like "custom/heatcnt + 1"
