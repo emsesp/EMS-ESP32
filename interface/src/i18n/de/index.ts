@@ -362,7 +362,6 @@ const de: Translation = {
   USER_PROFILE: 'Benutzerprofil',
   ONLINE_HELP: 'Online-Hilfe',
   UPGRADE_IMPORTANT_MESSAGES: 'Wichtige Nachrichten aktualisieren',
-  UPGRADE_IMPORTANT_MESSAGES_1: 'Für diese Aktualisierung ist ein Werksreset erforderlich. Stellen Sie sicher, dass Sie zuerst eine Systemsicherung herunterladen, bevor Sie fortfahren, und laden Sie diese Datei dann nach der Installation der neuen Version hoch.',
   UPGRADE_IMPORTANT_MESSAGES_2: 'Sie aktualisieren auf eine neue major Version. Es ist ratsam, zuerst eine Systemsicherung zu erstellen. Überprüfen Sie auch die Online-Hilfe für eventuelle wichtige Änderungen.',
   WARNING_SYSTEM_BACKUP: 'Dies erstellt eine Sicherung der gesamten Systemkonfiguration und Einstellungen. Passwörter und Schlüssel werden nur mitgesichert, wenn du sie unten einschließt; beim Wiederherstellen bleiben die Passwörter auf dem Gerät erhalten. Befehle werden immer gesichert und können Zugangsdaten enthalten, also vorsichtig beim Teilen. Möchtest du fortfahren?',
   BACKUP_INCLUDE_SECRETS: 'Passwörter und Schlüssel einschließen (nötig zum Wiederherstellen auf einem neuen Gerät)',

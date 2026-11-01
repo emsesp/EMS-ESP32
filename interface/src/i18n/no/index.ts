@@ -362,7 +362,6 @@ const no: Translation = {
   USER_PROFILE: 'Brukerprofil',
   ONLINE_HELP: 'online hjelp',
   UPGRADE_IMPORTANT_MESSAGES: 'Oppdater viktige meldinger',
-  UPGRADE_IMPORTANT_MESSAGES_1: 'Denne oppdateringen krever en fabriksinstilling. Sørg for at du først lastet ned en System Backup før du fortsetter, og last denne filen etter at den nye versjonen er installert.',
   UPGRADE_IMPORTANT_MESSAGES_2: 'Du oppdaterer til en ny major versjon. Det er anbefalt å først lage en systembackup. Kontroller også onlinehjelp for eventuelle viktige endringer.',
   WARNING_SYSTEM_BACKUP: 'Dette lager en sikkerhetskopi av hele systemkonfigurasjonen og innstillingene. Passord og nøkler utelates med mindre du tar dem med nedenfor; ved gjenoppretting beholdes passordene som allerede er på enheten. Kommandoer tas alltid med og kan inneholde påloggingsdata, så vær forsiktig med deling. Vil du fortsette?',
   BACKUP_INCLUDE_SECRETS: 'Ta med passord og nøkler (nødvendig for å gjenopprette på en ny enhet)',

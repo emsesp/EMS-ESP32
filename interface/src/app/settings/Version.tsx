@@ -398,7 +398,6 @@ const InstallDialog = memo(
             )}
           </Typography>
           {upgradeImportantMessageType === 2 && LL.UPGRADE_IMPORTANT_MESSAGES_2()}
-          {upgradeImportantMessageType === 1 && LL.UPGRADE_IMPORTANT_MESSAGES_1()}
           <Typography sx={{ mt: 2 }}>
             <Link to="/settings/downloadUpload" style={{ color: 'lightblue' }}>
               {LL.DOWNLOAD_SYSTEM_BACKUP()}

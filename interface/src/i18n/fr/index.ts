@@ -362,7 +362,6 @@ const fr: Translation = {
   USER_PROFILE: 'Profil utilisateur',
   ONLINE_HELP: 'aide en ligne',
   UPGRADE_IMPORTANT_MESSAGES: 'Mettre à jour les messages importants',
-  UPGRADE_IMPORTANT_MESSAGES_1: 'Cette mise à jour nécessite une réinitialisation de fabrique. Assurez-vous de télécharger une sauvegarde système avant de continuer, et de la charger après l\'installation de la nouvelle version.',
   UPGRADE_IMPORTANT_MESSAGES_2: 'Vous mettez à jour vers une nouvelle version majeure. Il est recommandé de créer d\'abord une sauvegarde système. Vérifiez également l\'aide en ligne pour les éventuelles modifications importantes.',
   WARNING_SYSTEM_BACKUP: 'Cela crée une sauvegarde de toute la configuration et des paramètres du système. Les mots de passe et les clés sont exclus, sauf si vous les incluez ci-dessous ; la restauration conserve les mots de passe déjà présents sur l\'appareil. Les commandes sont toujours incluses et peuvent contenir des identifiants, soyez donc prudent en la partageant. Voulez-vous continuer ?',
   BACKUP_INCLUDE_SECRETS: 'Inclure les mots de passe et les clés (nécessaire pour restaurer sur un nouvel appareil)',

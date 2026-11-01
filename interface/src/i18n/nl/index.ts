@@ -362,7 +362,6 @@ const nl: Translation = {
   USER_PROFILE: 'Gebruikersprofiel',
   ONLINE_HELP: 'online help',
   UPGRADE_IMPORTANT_MESSAGES: 'Upgrade Belangrijke Berichten',
-  UPGRADE_IMPORTANT_MESSAGES_1: 'Deze upgrade vereist een fabrieksinstelling. Zorg ervoor dat u eerst een Systeem Backup download voordat u doorgaat, en upload deze file na de installatie van de nieuwe versie.',
   UPGRADE_IMPORTANT_MESSAGES_2: 'U updatet naar een nieuwe major versie. Het is raadzaam om eerst een systeem backup te maken. Controleer ook de online help voor eventuele brekende wijzigingen.',
   WARNING_SYSTEM_BACKUP: 'Dit maakt een back-up van de volledige systeemconfiguratie en instellingen. Wachtwoorden en sleutels worden weggelaten, tenzij je ze hieronder meeneemt; bij het terugzetten blijven de wachtwoorden op het apparaat behouden. Commando\'s worden altijd meegenomen en kunnen inloggegevens bevatten, dus wees voorzichtig met delen. Wil je doorgaan?',
   BACKUP_INCLUDE_SECRETS: 'Wachtwoorden en sleutels meenemen (nodig om op een nieuw apparaat terug te zetten)',

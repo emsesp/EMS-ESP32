@@ -362,7 +362,6 @@ const cs: Translation = {
   USER_PROFILE: 'Uživatelský profil',
   ONLINE_HELP: 'online nápověda',
   UPGRADE_IMPORTANT_MESSAGES: 'Aktualizovat důležité zprávy',
-  UPGRADE_IMPORTANT_MESSAGES_1: 'Tato aktualizace vyžaduje obnovení továrního nastavení. Ujistěte se, že nejprve stáhnete systémovou zálohu před pokračováním a poté nahrajte tento soubor po instalaci nové verze.',
   UPGRADE_IMPORTANT_MESSAGES_2: 'Aktualizujete se na novou major verzi. Je vhodné nejprve vytvořit systémovou zálohu. Také zkontrolujte online nápovědu pro jakékoliv závažné změny.',
   WARNING_SYSTEM_BACKUP: 'Tímto se vytvoří záloha celé konfigurace a nastavení systému. Hesla a klíče se vynechají, pokud je níže nezahrnete; při obnově zůstanou zachována hesla, která už jsou v zařízení. Příkazy jsou vždy zahrnuty a mohou obsahovat přihlašovací údaje, proto buďte při sdílení opatrní. Chcete pokračovat?',
   BACKUP_INCLUDE_SECRETS: 'Zahrnout hesla a klíče (nutné pro obnovu na novém zařízení)',

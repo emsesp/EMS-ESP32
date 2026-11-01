@@ -289,7 +289,7 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
 // action = upgradeImportantMessages
 // returns the type of upgrade important message to display in the UI
 //  0 = no message (if just a minor version upgrade)
-//  1 = special message for upgrades (no longer used)
+//  1 = don't reuse, 3.8.x firmware shows it as "requires a factory reset" for upgrades to 3.9.x
 //  2 = major version upgrade
 // version can be like 3.8.2 or a filename like EMS-ESP-3_8_2-dev_13-ESP32-16MB+.bin
 uint8_t WebStatusService::upgradeImportantMessages(std::string & version) {
@@ -336,11 +336,6 @@ uint8_t WebStatusService::upgradeImportantMessages(std::string & version) {
     if (!(latest_version > current_version)) {
         return 0; // no upgrade (same version or downgrade)
     }
-
-    // case "1" is no longer used
-    // if (current_version < FirmwareVersion("3.9.0-dev.0") && latest_version.major() == 3 && latest_version.minor() == 9) {
-    //     return 1; // upgrading to 3.9.x from anything older - new partition layout warning
-    // }
 
     if (current_version.major() < latest_version.major()) {
         return 2; // major version upgrade

@@ -362,7 +362,6 @@ const it: Translation = {
   USER_PROFILE: 'Profilo utente',
   ONLINE_HELP: 'aiuto online',
   UPGRADE_IMPORTANT_MESSAGES: 'Aggiorna Messaggi Importanti',
-  UPGRADE_IMPORTANT_MESSAGES_1: 'Questa aggiornamento richiede un ripristino di fabbrica. Assicurati di prima scaricare un backup del sistema prima di continuare, e poi caricare questo file dopo l\'installazione della nuova versione.',
   UPGRADE_IMPORTANT_MESSAGES_2: 'Stai aggiornando a una nuova versione major. È consigliabile prima creare un backup del sistema. Controlla anche l\'aiuto online per eventuali modifiche importanti.',
   WARNING_SYSTEM_BACKUP: 'Questo crea un backup dell\'intera configurazione e delle impostazioni del sistema. Password e chiavi sono escluse, a meno che tu non le includa qui sotto; il ripristino mantiene le password già presenti sul dispositivo. I comandi sono sempre inclusi e possono contenere credenziali, quindi fai attenzione quando lo condividi. Vuoi continuare?',
   BACKUP_INCLUDE_SECRETS: 'Includi password e chiavi (necessario per ripristinare su un nuovo dispositivo)',

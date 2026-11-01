@@ -362,7 +362,6 @@ const pl: BaseTranslation = {
   USER_PROFILE: 'Profil użytkownika',
   ONLINE_HELP: 'pomoc online',
   UPGRADE_IMPORTANT_MESSAGES: 'Aktualizuj ważne wiadomości',
-  UPGRADE_IMPORTANT_MESSAGES_1: 'Ta aktualizacja wymaga resetu fabrycznego. Upewnij się, że najpierw pobierzesz kopię zapasową systemu przed kontynuowaniem, a następnie przesuń tę plik po zainstalowaniu nowej wersji.',
   UPGRADE_IMPORTANT_MESSAGES_2: 'Aktualizujesz się na nową major wersję. Jest to zalecane, aby najpierw utworzyć kopię zapasową systemu. Sprawdź również online pomoc dla ewentualnych istotnych zmian.',
   WARNING_SYSTEM_BACKUP: 'Spowoduje to utworzenie kopii zapasowej całej konfiguracji i ustawień systemu. Hasła i klucze są pomijane, chyba że je dołączysz poniżej; przywrócenie kopii zachowuje hasła zapisane na urządzeniu. Polecenia są zawsze dołączane i mogą zawierać dane logowania, więc zachowaj ostrożność przy udostępnianiu. Czy chcesz kontynuować?',
   BACKUP_INCLUDE_SECRETS: 'Dołącz hasła i klucze (potrzebne do przywrócenia na nowym urządzeniu)',

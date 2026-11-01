@@ -362,7 +362,6 @@ const tr: Translation = {
   USER_PROFILE: 'Kullanıcı Profili',
   ONLINE_HELP: 'online yardım',
   UPGRADE_IMPORTANT_MESSAGES: 'Önemli Mesajları Güncelle',
-  UPGRADE_IMPORTANT_MESSAGES_1: 'Bu güncelleme továrnı ayarlarını gerektirir. Yapılandırmanızı ve ayarlarınızı önce yedekleyin ve ardından yeni sürüm yüklendikten sonra yükleyin.',
   UPGRADE_IMPORTANT_MESSAGES_2: 'Yeni bir major sürüme güncelleme yapıyorsunuz. Sistem yedeklemesi yapmanız önerilir. Ayrıca online yardımı kontrol ederek önemli değişiklikleri gözden geçirin.',
   WARNING_SYSTEM_BACKUP: 'Bu, tüm sistem yapılandırmanızın ve ayarlarınızın yedeğini oluşturur. Şifreler ve anahtarlar, aşağıda dahil etmediğiniz sürece yedeğe alınmaz; geri yükleme cihazdaki mevcut şifreleri korur. Komutlar her zaman dahil edilir ve kimlik bilgileri içerebilir, bu yüzden paylaşırken dikkatli olun. Devam etmek istiyor musunuz?',
   BACKUP_INCLUDE_SECRETS: 'Şifreleri ve anahtarları dahil et (yeni bir cihaza geri yüklemek için gerekli)',

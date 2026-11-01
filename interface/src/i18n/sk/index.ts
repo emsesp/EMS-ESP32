@@ -362,7 +362,6 @@ const sk: Translation = {
   USER_PROFILE: 'Profil používateľa',
   ONLINE_HELP: 'online pomoc',
   UPGRADE_IMPORTANT_MESSAGES: 'Aktualizovať dôležité správy',
-  UPGRADE_IMPORTANT_MESSAGES_1: 'Táto aktualizácia vyžaduje reštart základných nastavení. Uistite sa, že najprv stiahnete systémovú zálohu pred pokračovaním, a potom nahrajte tento súbor po instalácii novej verzie.',
   UPGRADE_IMPORTANT_MESSAGES_2: 'Aktualizujete sa na novú major verziu. Je vhodné najprv vytvoriť systémovú zálohu. Taktiež skontrolujte online nápovľu pre akékoľvek dôležité zmeny.',
   WARNING_SYSTEM_BACKUP: 'Týmto sa vytvorí záloha celej konfigurácie a nastavení systému. Heslá a kľúče sa vynechajú, pokiaľ ich nižšie nezahrniete; pri obnove sa zachovajú heslá, ktoré sú už v zariadení. Príkazy sú vždy zahrnuté a môžu obsahovať prihlasovacie údaje, preto buďte pri zdieľaní opatrní. Chcete pokračovať?',
   BACKUP_INCLUDE_SECRETS: 'Zahrnúť heslá a kľúče (potrebné na obnovu na novom zariadení)',
