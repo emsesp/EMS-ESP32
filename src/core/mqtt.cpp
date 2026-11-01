@@ -286,7 +286,7 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) {
             snprintf(error, sizeof(error), "MQTT command failed with error %s", Command::return_code_string(return_code));
         }
 
-        LOG_ERROR(error);
+        LOG_ERROR("%s", error);
         Mqtt::queue_publish("response", error);
     } else {
         // all good, send back json output from call

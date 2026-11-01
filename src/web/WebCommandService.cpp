@@ -340,7 +340,7 @@ bool WebCommandService::executeCommand(const char * name, const std::string & co
         snprintf(error, sizeof(error), "Command '%s': %s failed with error %s", name, cmd.c_str(), Command::return_code_string(return_code));
     }
 
-    EMSESP::logger().warning(error);
+    EMSESP::logger().warning("%s", error);
     return false;
 }
 

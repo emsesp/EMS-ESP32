@@ -264,6 +264,17 @@ void security_test_compute_bad_input() {
     emsesp::compute(std::string(300, '(') + "1" + std::string(300, ')'));
 }
 
+// a value with printf conversions is logged as text when the command fails
+void security_test_value_not_a_format() {
+    JsonDocument doc_in;
+    JsonDocument doc_out;
+    JsonObject   input  = doc_in.to<JsonObject>();
+    JsonObject   output = doc_out.to<JsonObject>();
+    input["value"]      = "%s%s%s%n%n%ln";
+    TEST_ASSERT_EQUAL(CommandRet::ERROR, Command::process("/api/thermostat/hc1/seltemp", true, input, output));
+    TEST_ASSERT_NOT_NULL(strstr(output["message"] | "", "%s%s%s%n%n%ln"));
+}
+
 // command definitions can hold credentials, only admins may read them
 void security_test_command_definitions_admin_only() {
     const char * reads[] = {"/api/commands/values", "/api/commands/info", "/api/commands/entities", "/api/commands/send_message/value"};
@@ -592,6 +603,7 @@ void run_security_tests() {
     RUN_TEST(security_test_render_value_bounded);
     RUN_TEST(security_test_api_large_numbers);
     RUN_TEST(security_test_compute_bad_input);
+    RUN_TEST(security_test_value_not_a_format);
     RUN_TEST(security_test_command_definitions_admin_only);
     RUN_TEST(security_test_write_endpoints_admin_only);
     RUN_TEST(security_test_log_settings);

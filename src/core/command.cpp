@@ -497,7 +497,7 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
 
         output.clear();
         output["message"] = error;
-        LOG_WARNING(error);
+        LOG_WARNING("%s", error);
     } else {
         // build up the log string for reporting back
         // We send the log message as Warning so it appears in the log (debug is only enabled when compiling with DEBUG)

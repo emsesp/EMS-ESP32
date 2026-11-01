@@ -405,7 +405,7 @@ ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
             snprintf(error, sizeof(error), "Modbus write command failed with error code (%s)", Command::return_code_string(return_code));
         }
 
-        LOG_ERROR(error);
+        LOG_ERROR("%s", error);
         response.setError(request.getServerID(), request.getFunctionCode(), ILLEGAL_DATA_VALUE);
     } else {
         // all good
