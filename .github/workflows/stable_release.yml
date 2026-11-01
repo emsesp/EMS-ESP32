@@ -126,6 +126,8 @@ jobs:
   firmware:
     name: Firmware ${{ matrix.env }}
     needs: [webui, modbus]
+    # the signing key is only in the 'release' environment, limited to dev, main and v* tags
+    environment: release
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
@@ -198,6 +200,8 @@ jobs:
   release:
     name: Create GitHub Release
     needs: [firmware, standalone]
+    # the signing key is only in the 'release' environment, limited to dev, main and v* tags
+    environment: release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
