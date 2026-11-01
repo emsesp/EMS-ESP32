@@ -81,17 +81,21 @@ ESP32React::ESP32React(AsyncWebServer * server, FS * fs)
     , _uploadFileService(server, &_securitySettingsService)
     , _mqttSettingsService(server, fs, &_securitySettingsService)
     , _mqttStatus(server, &_mqttSettingsService, &_securitySettingsService)
-    , _authenticationService(server, &_securitySettingsService) {
+    , _authenticationService(server, &_securitySettingsService)
+    , _setupService(server, &_securitySettingsService, &_apSettingsService, &_networkSettingsService) {
 }
 
 void ESP32React::begin() {
     _networkSettingsService.begin();
     _networkSettingsService.read([&](NetworkSettings & networkSettings) {
         DefaultHeaders & defaultHeaders = DefaultHeaders::Instance();
-        if (networkSettings.enableCORS) {
+        // credentials are never allowed together with the "*" wildcard origin
+        if (networkSettings.enableCORS && !networkSettings.CORSOrigin.isEmpty()) {
             defaultHeaders.addHeader(asyncsrv::T_CORS_ACAO, networkSettings.CORSOrigin);
             defaultHeaders.addHeader(asyncsrv::T_CORS_ACAH, "Accept, Content-Type, Authorization");
-            defaultHeaders.addHeader(asyncsrv::T_CORS_ACAC, "true");
+            if (networkSettings.CORSOrigin != "*") {
+                defaultHeaders.addHeader(asyncsrv::T_CORS_ACAC, "true");
+            }
         }
 
         defaultHeaders.addHeader(asyncsrv::T_Server, networkSettings.hostname);

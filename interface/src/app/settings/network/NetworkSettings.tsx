@@ -95,7 +95,7 @@ const NetworkSettings = () => {
             nosleep: true,
             enableMDNS: true,
             enableCORS: false,
-            CORSOrigin: '*',
+            CORSOrigin: '',
             eth_10mbit: current_data ? current_data.eth_10mbit : false
           })
         );
@@ -301,15 +301,22 @@ const NetworkSettings = () => {
           label={LL.NETWORK_ENABLE_CORS()}
         />
         {data.enableCORS && (
-          <TextField
-            name="CORSOrigin"
-            label={LL.NETWORK_CORS_ORIGIN()}
-            fullWidth
-            variant="outlined"
-            value={data.CORSOrigin}
-            onChange={updateFormValue}
-            margin="normal"
-          />
+          <>
+            <ValidatedTextField
+              fieldErrors={fieldErrors || {}}
+              name="CORSOrigin"
+              label={LL.NETWORK_CORS_ORIGIN()}
+              helperText={LL.NETWORK_CORS_ORIGIN_HELP()}
+              fullWidth
+              variant="outlined"
+              value={data.CORSOrigin}
+              onChange={updateFormValue}
+              margin="normal"
+            />
+            {data.CORSOrigin === '*' && (
+              <MessageBox level="warning" message={LL.NETWORK_CORS_WILDCARD()} />
+            )}
+          </>
         )}
         <BlockFormControlLabel
           control={

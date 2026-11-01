@@ -46,5 +46,16 @@ export const createNetworkSettingsValidator = (
     // DNS servers are optional and also apply as an override when using DHCP
     dns_ip_1: OPTIONAL_IP_VALIDATOR,
     dns_ip_2: OPTIONAL_IP_VALIDATOR,
+    // "*" is still accepted for existing settings, the page warns about it
+    ...(networkSettings.enableCORS && {
+      CORSOrigin: [
+        { required: true, message: 'Origin is required' },
+        {
+          type: 'string',
+          pattern: /^(\*|https?:\/\/[^\s/]+)$/,
+          message: 'Must be like http://homeassistant.local:8123'
+        }
+      ]
+    }),
     ...(networkSettings.static_ip_config && createStaticIpRules())
   });

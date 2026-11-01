@@ -16,14 +16,6 @@
 #define FACTORY_ADMIN_PASSWORD "admin"
 #endif
 
-#ifndef FACTORY_GUEST_USERNAME
-#define FACTORY_GUEST_USERNAME "guest"
-#endif
-
-#ifndef FACTORY_GUEST_PASSWORD
-#define FACTORY_GUEST_PASSWORD "guest"
-#endif
-
 #define SECURITY_SETTINGS_FILE "/config/securitySettings.json"
 #define SECURITY_SETTINGS_PATH "/rest/securitySettings"
 
@@ -84,8 +76,8 @@ class SecuritySettings {
                 settings.users.emplace_back(user["username"] | "", hashed(settings, user["password"] | ""), user["admin"] | false, user["ver"] | 0u);
             }
         } else {
+            // a fresh install only has the admin user, the setup screen in the Web UI asks for new passwords
             settings.users.emplace_back(FACTORY_ADMIN_USERNAME, hashed(settings, FACTORY_ADMIN_PASSWORD), true);
-            settings.users.emplace_back(FACTORY_GUEST_USERNAME, hashed(settings, FACTORY_GUEST_PASSWORD), false);
         }
 
         settings.api_keys.clear();

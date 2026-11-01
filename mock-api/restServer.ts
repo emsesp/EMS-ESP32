@@ -612,7 +612,7 @@ let network_settings = {
   static_ip_config: false,
   enableMDNS: true,
   enableCORS: false,
-  CORSOrigin: '*',
+  CORSOrigin: '',
   eth_10mbit: false,
   local_ip: '',
   gateway_ip: '',
@@ -756,6 +756,10 @@ const SECURITY_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'securitySettings';
 const VERIFY_AUTHORIZATION_ENDPOINT = REST_ENDPOINT_ROOT + 'verifyAuthorization';
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn';
 const API_KEYS_ENDPOINT = REST_ENDPOINT_ROOT + 'apiKeys';
+const SETUP_ENDPOINT = REST_ENDPOINT_ROOT + 'setup';
+
+// which factory passwords are still in use. Set admin or su to true to test the setup screen
+let setup_state = { admin: false, su: false, ap: true, ap_required: false };
 
 let security_settings = {
   jwt_secret: 'naughty!',
@@ -4839,6 +4843,18 @@ router
       return status(200);
     }
     return status(400);
+  })
+  .get(SETUP_ENDPOINT, () => setup_state)
+  .post(SETUP_ENDPOINT, async (request: any) => {
+    const content: any = await request.json();
+    console.log('setup saved', content);
+    setup_state = {
+      admin: false,
+      su: false,
+      ap: setup_state.ap && !content.ap_password,
+      ap_required: false
+    };
+    return signin;
   });
 
 //

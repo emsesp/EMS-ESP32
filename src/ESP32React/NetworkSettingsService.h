@@ -38,7 +38,7 @@ class NetworkSettings {
     bool    nosleep        = true;
     bool    enableMDNS     = true;
     bool    enableCORS     = false;
-    String  CORSOrigin     = "*";
+    String  CORSOrigin     = ""; // must be set explicitly when CORS is enabled
     bool    eth_10mbit     = false; // force 10BASE-T half-duplex, no auto-negotiation
 
     // optional configuration for static IP address

@@ -51,7 +51,7 @@ StateUpdateResult NetworkSettings::update(JsonObject root, NetworkSettings & set
     settings.nosleep        = root["nosleep"] | true;
     settings.enableMDNS     = root["enableMDNS"] | true;
     settings.enableCORS     = root["enableCORS"];
-    settings.CORSOrigin     = root["CORSOrigin"] | "*";
+    settings.CORSOrigin     = root["CORSOrigin"] | "";
     settings.eth_10mbit     = root["eth_10mbit"];
 
     // extended settings
