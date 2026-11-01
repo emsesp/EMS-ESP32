@@ -89,13 +89,10 @@ void ESP32React::begin() {
     _networkSettingsService.begin();
     _networkSettingsService.read([&](NetworkSettings & networkSettings) {
         DefaultHeaders & defaultHeaders = DefaultHeaders::Instance();
-        // credentials are never allowed together with the "*" wildcard origin
+        // no Access-Control-Allow-Credentials: tokens are sent in the Authorization header, never as cookies
         if (networkSettings.enableCORS && !networkSettings.CORSOrigin.isEmpty()) {
             defaultHeaders.addHeader(asyncsrv::T_CORS_ACAO, networkSettings.CORSOrigin);
             defaultHeaders.addHeader(asyncsrv::T_CORS_ACAH, "Accept, Content-Type, Authorization");
-            if (networkSettings.CORSOrigin != "*") {
-                defaultHeaders.addHeader(asyncsrv::T_CORS_ACAC, "true");
-            }
         }
 
         defaultHeaders.addHeader(asyncsrv::T_Server, networkSettings.hostname);

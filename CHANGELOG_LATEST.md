@@ -24,7 +24,7 @@ Please read this before upgrading. Details are under "Changed" below.
 12. **Backups leave out passwords by default.** To move settings to a new device, tick "Include passwords and keys" when making the System Backup, and keep that file safe.
 13. **MQTT `info` topic:** `IPv6 address` is now an array, and `IPv4 DNS Server` is replaced by a `DNS Server` array. Update any automations that read these fields.
 14. **New installs have no `guest` user.** A fresh install or factory reset only creates `admin`. Add a view-only user in the setup screen or under Security > Users. Existing users are kept when upgrading.
-15. **CORS needs an exact origin.** When CORS is enabled, set the origin to the address of the web page that calls the API, for example `http://homeassistant.local:8123`. With `*`, browsers are no longer allowed to send credentials, and the settings page shows a warning.
+15. **Web pages on other addresses need CORS to use `/api`.** A browser request to `/api` from a page on another address (for example a home-made dashboard) is refused with 403, unless CORS is enabled with that page's address as the origin, for example `http://homeassistant.local:8123`. Home Assistant's integration, Node-RED, scripts and `curl` are not affected. `*` still works but shows a warning.
 
 ## Added
 
@@ -110,7 +110,7 @@ Please read this before upgrading. Details are under "Changed" below.
 - security: an admin who signs in while factory passwords are in use must set new admin and Super User passwords first, plus an access point password if no WiFi network is set [#3357](https://github.com/emsesp/EMS-ESP32/issues/3357)
 - security: a fresh install or factory reset no longer creates the `guest` user [#3357](https://github.com/emsesp/EMS-ESP32/issues/3357)
 - security: a warning is shown while the access point still uses the factory password [#3359](https://github.com/emsesp/EMS-ESP32/issues/3359)
-- security: CORS needs an explicit origin, and `Access-Control-Allow-Credentials` is never sent together with the `*` origin [#3361](https://github.com/emsesp/EMS-ESP32/issues/3361)
+- security: CORS needs an explicit origin, `Access-Control-Allow-Credentials` is no longer sent, and `/api` refuses browser requests from other sites unless their origin is allowed by the CORS setting [#3361](https://github.com/emsesp/EMS-ESP32/issues/3361)
 - security: tokens and API keys are only accepted in the `Authorization: Bearer` header, no longer as an `access_token` URL parameter, so they don't end up in browser history or server logs [#3363](https://github.com/emsesp/EMS-ESP32/issues/3363)
 - security: changing settings through `/api` (for example `system/mqtt/enabled`) needs a "Read and write" API key
 - security: "Bypass Access Token authorization on API calls" no longer grants admin rights. Calls without a token act like a guest: they can read values and run Commands that guests may run, but not change values or settings [#3360](https://github.com/emsesp/EMS-ESP32/issues/3360)

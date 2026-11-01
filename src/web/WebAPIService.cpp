@@ -18,6 +18,8 @@
 
 #include "emsesp.h"
 
+#include "../core/origin_check.h"
+
 namespace emsesp {
 
 uint32_t WebAPIService::api_count_ = 0;
@@ -83,6 +85,20 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
 // parse the URL looking for query or path parameters
 // reporting back any errors
 void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
+#ifndef EMSESP_STANDALONE
+    if (request->hasHeader("Origin")) {
+        bool allowed = false;
+        EMSESP::esp32React.getNetworkSettingsService()->read([&](NetworkSettings const & settings) {
+            allowed = origin_allowed(request->header("Origin").c_str(), request->header("Host").c_str(), settings.enableCORS, settings.CORSOrigin.c_str());
+        });
+        if (!allowed) {
+            api_fails_++;
+            request->send(403);
+            return;
+        }
+    }
+#endif
+
     // admin rights need an admin token or a read+write API key. notoken_api lets calls without one act like a guest, never an admin
     bool is_admin = false;
     bool is_user  = false;

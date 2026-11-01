@@ -7,6 +7,7 @@
 #include "password_hash.h"
 #include "login_limiter.h"
 #include "api_key.h"
+#include "origin_check.h"
 
 // Permission tests. Run last, they change settings and identity.
 
@@ -133,6 +134,19 @@ void security_test_api_notoken_is_guest() {
     TEST_ASSERT_NOT_EQUAL(std::string::npos, setting.find("authentication failed"));
     TEST_ASSERT_EQUAL(std::string::npos, guest.find("authentication failed"));
     TEST_ASSERT_NOT_EQUAL(std::string::npos, admin.find("authentication failed"));
+}
+
+// browsers on other sites may only use /api when the CORS setting allows their origin
+void security_test_origin_check() {
+    TEST_ASSERT_TRUE(origin_allowed(nullptr, "ems-esp.local", false, ""));
+    TEST_ASSERT_TRUE(origin_allowed("http://ems-esp.local", "ems-esp.local", false, ""));
+    TEST_ASSERT_TRUE(origin_allowed("http://192.168.1.5:8080", "192.168.1.5:8080", false, ""));
+    TEST_ASSERT_FALSE(origin_allowed("http://evil.example", "ems-esp.local", false, ""));
+    TEST_ASSERT_FALSE(origin_allowed("null", "ems-esp.local", false, ""));
+    TEST_ASSERT_FALSE(origin_allowed("http://evil.example", "ems-esp.local", true, ""));
+    TEST_ASSERT_FALSE(origin_allowed("http://evil.example", "ems-esp.local", true, "http://homeassistant.local:8123"));
+    TEST_ASSERT_TRUE(origin_allowed("http://homeassistant.local:8123", "ems-esp.local", true, "http://homeassistant.local:8123"));
+    TEST_ASSERT_TRUE(origin_allowed("http://evil.example", "ems-esp.local", true, "*"));
 }
 
 void security_test_action_admin_only() {
@@ -477,6 +491,7 @@ void run_security_tests() {
     RUN_TEST(security_test_settings_commands_need_admin);
     RUN_TEST(security_test_api_without_token);
     RUN_TEST(security_test_api_notoken_is_guest);
+    RUN_TEST(security_test_origin_check);
     RUN_TEST(security_test_action_admin_only);
     RUN_TEST(security_test_action_guest_allowed);
     RUN_TEST(security_test_command_guest_flag);
