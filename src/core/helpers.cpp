@@ -583,6 +583,10 @@ int Helpers::atoint(const char * value) {
     }
 
     while (*value >= '0' && *value <= '9') {
+        if (x > (INT_MAX - (*value - '0')) / 10) {
+            x = INT_MAX; // saturate rather than overflow
+            break;
+        }
         x = (x * 10) + (*value - '0');
         ++value;
     }

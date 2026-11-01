@@ -290,8 +290,6 @@ std::deque<Token> shuntingYard(const std::deque<Token> & tokens) {
 
         case Token::Type::RightParen: {
             // If token is right parenthesis:
-            bool match = false;
-
             // Until the token at the top of the stack
             // is a left parenthesis,
             while (!stack.empty() && stack.back().type != Token::Type::LeftParen) {
@@ -299,10 +297,9 @@ std::deque<Token> shuntingYard(const std::deque<Token> & tokens) {
                 // onto the output queue.
                 queue.push_back(stack.back());
                 stack.pop_back();
-                match = true;
             }
 
-            if (!match && stack.empty()) {
+            if (stack.empty()) {
                 // If the stack runs out without finding a left parenthesis,
                 // then there are mismatched parentheses.
                 return {};

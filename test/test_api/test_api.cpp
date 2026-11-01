@@ -537,6 +537,10 @@ void create_tests() {
 
 #include "test_security.h"
 
+#if defined(EMSESP_FUZZ)
+#include "test_fuzz.h"
+#endif
+
 // Main entry point
 int main() {
     webServer     = new AsyncWebServer(80);
@@ -562,6 +566,10 @@ int main() {
 #if defined(EMSESP_UNITY_CREATE)
     create_tests();
     return 0;
+#endif
+
+#if defined(EMSESP_FUZZ)
+    return fuzz::run();
 #endif
 
     //

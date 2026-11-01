@@ -259,6 +259,7 @@ void security_test_compute_bad_input() {
     TEST_ASSERT_EQUAL_STRING("", emsesp::compute("5 % 0").c_str());
     TEST_ASSERT_EQUAL_STRING("", emsesp::compute("hex \"FFFFFFFFFFFF\"").c_str());
     TEST_ASSERT_EQUAL_STRING("255", emsesp::compute("hex \"ff\"").c_str());
+    TEST_ASSERT_EQUAL_STRING("", emsesp::compute("1 + )").c_str());
     emsesp::compute(std::string(400, '1') + " + 1");
     emsesp::compute(std::string(300, '(') + "1" + std::string(300, ')'));
 }
