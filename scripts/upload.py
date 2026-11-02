@@ -210,6 +210,16 @@ def on_upload(source, target, env):
         print_success("Authentication with EMS-ESP successful")
         access_token = response.json().get('access_token')
 
+        # firmware uploads need the password entered again (404 on firmware older than 3.9.0)
+        response = session.post(
+            f"{emsesp_url}/rest/confirmPassword",
+            json={"password": password},
+            headers=build_headers(host_ip, emsesp_url, access_token=access_token),
+            timeout=15)
+        if response.status_code not in (200, 404):
+            print_fail(f"Password confirmation with EMS-ESP failed (code {response.status_code})")
+            return
+
         firmware_path = str(source[0])
         with open(firmware_path, 'rb') as firmware_file:
             firmware = firmware_file.read()
