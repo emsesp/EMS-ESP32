@@ -74,10 +74,10 @@ Use this if you install your own builds often.
    python3 scripts/sign_firmware.py genkey ~/.ems-esp/firmware_signing_key.pem
    ```
 
-3. Print its public key and add the output to the list in `lib/FirmwareSignature/firmware_keys.h`. Add it after the EMS-ESP keys rather than replacing them, so official releases can still be installed. Builds signed with your key are accepted, but the Version page shows them as "Custom build":
+3. Add its public key to the keys the firmware accepts. This writes `lib/FirmwareSignature/firmware_keys_local.h`, which git ignores, so your key never ends up in a commit and the EMS-ESP keys stay as they are. Builds signed with your key are accepted, but the Version page shows them as "Custom build":
 
    ```bash
-   python3 scripts/sign_firmware.py pubkey ~/.ems-esp/firmware_signing_key.pem
+   python3 scripts/sign_firmware.py addkey ~/.ems-esp/firmware_signing_key.pem
    ```
 
 4. Build. The build signs the copy in `build/firmware/` and prints `Signed: Yes`. Install this first build with option 1 or 2, because the device doesn't know your key yet.
@@ -89,7 +89,7 @@ To sign or check a file by hand:
 
 ```bash
 python3 scripts/sign_firmware.py sign build/firmware/<file>.bin    # also rewrites the .md5 next to it
-python3 scripts/sign_firmware.py verify build/firmware/<file>.bin  # checks against the keys in firmware_keys.h
+python3 scripts/sign_firmware.py verify build/firmware/<file>.bin  # checks against the keys in firmware_keys.h and firmware_keys_local.h
 ```
 
 Signing adds 512 bytes to the end of the `.bin`. Older EMS-ESP versions and the ESP32 ignore them, so a signed file also installs on a device running an older version. What makes a build official is in [SECURITY.md](SECURITY.md#firmware-signing).

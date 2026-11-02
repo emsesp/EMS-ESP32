@@ -44,6 +44,7 @@ interface/src/i18n/i18n-util.async.ts
 
 # firmware signing keys
 *.pem
+lib/FirmwareSignature/firmware_keys_local.h
 
 # scripts
 test.sh

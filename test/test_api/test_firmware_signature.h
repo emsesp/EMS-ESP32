@@ -156,7 +156,7 @@ void security_test_signature_parse() {
 // the built-in keys are points on the curve
 void security_test_firmware_keys() {
     const size_t count = sizeof(FIRMWARE_PUBLIC_KEYS) / sizeof(FIRMWARE_PUBLIC_KEYS[0]);
-    TEST_ASSERT_EQUAL(2, count);
+    TEST_ASSERT_TRUE(count >= EMSESP_KEY_COUNT); // plus any in firmware_keys_local.h
     for (size_t i = 0; i < count; i++) {
         TEST_ASSERT_EQUAL(1, uECC_valid_public_key(FIRMWARE_PUBLIC_KEYS[i], uECC_secp256r1()));
     }
