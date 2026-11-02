@@ -36,6 +36,7 @@
 #include "shuntingYard.h"       // for compute() used by the message and sendmail commands
 #include "emsesp_http_client.h" // for the shared TLS client settings
 #include "firmware_url.h"
+#include "fs_wipe.h"
 
 #if defined(EMSESP_TEST)
 #include "../test/test.h"
@@ -760,6 +761,10 @@ void System::system_restart(const char * partitionname) {
     Mqtt::disconnect(); // gracefully disconnect MQTT (flushes the DISCONNECT before reboot, needed for QOS1)
     EMSuart::stop();    // stop UART so there is no interference
 #ifndef EMSESP_STANDALONE
+    if (wipe_fs_) {
+        Serial.println(fs_wipe() ? "Filesystem erased" : "Filesystem erase failed");
+        Serial.flush();
+    }
     delay(500);    // wait 1/2 second
     ESP.restart(); // ka-boom! - this is the only place where the ESP32 restart is called
 #endif
@@ -3417,6 +3422,7 @@ bool System::command_format(const char * value, const int8_t id) {
     } else {
         LOG_ERROR("Format failed");
     }
+    EMSESP::system_.wipe_fs_ = true;
 #else
     LOG_ERROR("Format command not available in standalone or test mode");
 #endif

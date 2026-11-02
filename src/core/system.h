@@ -504,6 +504,7 @@ class System {
     uint32_t    modbus_timeout_;
     bool        developer_mode_;
     bool        disable_reset_;
+    bool        wipe_fs_ = false; // set by a factory reset, the filesystem partition is erased just before the restart
     bool        auto_fw_check_;
     uint32_t    fstotal_;
     uint32_t    psram_;
