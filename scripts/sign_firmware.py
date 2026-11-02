@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Signs EMS-ESP firmware so EMS-ESP 3.9 and later show it as an official build.
+Signs EMS-ESP firmware so EMS-ESP 3.10 and later show it as an official build.
 
 The signature is ECDSA P-256 over SHA-256 of the whole .bin, DER encoded and zero padded to 512 bytes, appended to
 the file. Old EMS-ESP versions and the ESP32 ignore the extra bytes, so a signed file installs everywhere.

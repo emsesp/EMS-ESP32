@@ -186,7 +186,7 @@ def upload(file, ip, username, password):
         print_success("Authentication successful")
         access_token = response.json().get('access_token')
 
-        # firmware uploads need the password entered again (404 on firmware older than 3.9.0)
+        # firmware uploads need the password entered again (404 on firmware older than 3.10.0)
         confirm_headers = create_base_headers(host_ip, emsesp_url)
         confirm_headers.update({'Content-Type': 'application/json', 'Authorization': f'Bearer {access_token}'})
         response = session.post(
