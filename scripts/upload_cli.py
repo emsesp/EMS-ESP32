@@ -168,6 +168,18 @@ def upload(file, ip, username, password):
         print_success("Authentication successful")
         access_token = response.json().get('access_token')
 
+        # firmware uploads need the password entered again (404 on firmware older than 3.9.0)
+        confirm_headers = create_base_headers(host_ip, emsesp_url)
+        confirm_headers.update({'Content-Type': 'application/json', 'Authorization': f'Bearer {access_token}'})
+        response = session.post(
+            f"{emsesp_url}/rest/confirmPassword",
+            json={"password": password},
+            headers=confirm_headers,
+            timeout=15)
+        if response.status_code not in (200, 404):
+            print_fail(f"Password confirmation failed (code {response.status_code})")
+            return
+
         firmware = file_path.read_bytes()
         md5 = hashlib.md5(firmware).hexdigest()
         # Device enables MD5 check only after a file whose name ends in .md5
@@ -189,7 +201,10 @@ def upload(file, ip, username, password):
             session, upload_url, host_ip, emsesp_url, access_token,
             file_path.name, firmware, progress_desc='Upload Progress')
 
-        if response.status_code != 200:
+        if response.status_code == 412:
+            print_fail("Upload refused, the firmware isn't signed by EMS-ESP or your own key. "
+                       "Run 'allow unsigned' on the device's serial console first.")
+        elif response.status_code != 200:
             print_fail(f"Upload failed (code {response.status_code})")
         else:
             kibs = (size / 1024) / elapsed if elapsed > 0 else 0
