@@ -674,6 +674,46 @@ void security_test_firmware_url() {
     TEST_ASSERT_FALSE(FirmwareURL::redirect_allowed("https://github.com/someone/repo/releases/download/x.bin"));
 }
 
+// a number outside the entity's min and max is refused, whichever way it's written
+void security_test_write_range() {
+    JsonDocument doc_in;
+    JsonDocument doc_out;
+    JsonObject   input  = doc_in.to<JsonObject>();
+    JsonObject   output = doc_out.to<JsonObject>();
+
+    input["value"] = "95"; // selflowtemp is 0 to 90
+    TEST_ASSERT_EQUAL(CommandRet::INVALID, Command::process("/api/boiler/selflowtemp", true, input, output));
+    TEST_ASSERT_NOT_NULL(strstr(output["message"] | "", "out of range 0 to 90"));
+    input["value"] = "-1";
+    TEST_ASSERT_EQUAL(CommandRet::INVALID, Command::process("/api/boiler/selflowtemp", true, input, output));
+    input["value"] = "60";
+    TEST_ASSERT_EQUAL(CommandRet::OK, Command::process("/api/boiler/selflowtemp", true, input, output));
+}
+
+// read-only mode also stops raw write telegrams, raw reads still work
+void security_test_readonly_raw() {
+    EMSESP::system_.readonly_mode(true);
+    TEST_ASSERT_FALSE(EMSESP::txservice_.send_raw("0B 08 1A 00 3C"));
+    TEST_ASSERT_TRUE(EMSESP::txservice_.send_raw("0B 88 18 00 20"));
+    EMSESP::system_.readonly_mode(false);
+    TEST_ASSERT_TRUE(EMSESP::txservice_.send_raw("0B 08 1A 00 3C"));
+}
+
+// the write log names the caller, nested callers keep theirs
+void security_test_caller_source() {
+    TEST_ASSERT_NULL(Command::caller_source());
+    {
+        Command::CallerSource outer("api, HA");
+        TEST_ASSERT_EQUAL_STRING("api, HA", Command::caller_source());
+        {
+            Command::CallerSource inner("mqtt");
+            TEST_ASSERT_EQUAL_STRING("mqtt", Command::caller_source());
+        }
+        TEST_ASSERT_EQUAL_STRING("api, HA", Command::caller_source());
+    }
+    TEST_ASSERT_NULL(Command::caller_source());
+}
+
 void run_security_tests() {
     EMSESP::webCommandService.load_test_data(); // named commands used by executeCommand
 
@@ -713,4 +753,7 @@ void run_security_tests() {
     RUN_TEST(security_test_password_confirm);
     RUN_TEST(security_test_password_required_actions);
     RUN_TEST(security_test_firmware_url);
+    RUN_TEST(security_test_write_range);
+    RUN_TEST(security_test_readonly_raw);
+    RUN_TEST(security_test_caller_source);
 }

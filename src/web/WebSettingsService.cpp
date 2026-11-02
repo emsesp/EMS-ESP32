@@ -31,11 +31,12 @@ WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, Securit
 
     addUpdateHandler([this] { onUpdate(); }, false);
 
-    // turning on the unencrypted telnet console, or the API without an access token
+    // turning on the unencrypted telnet console or the API without an access token, or turning off read-only mode
     _httpEndpoint.requirePassword([](JsonObject json, WebSettings & current) {
-        const bool telnet  = json["telnet_enabled"] | EMSESP_DEFAULT_TELNET_ENABLED;
-        const bool notoken = json["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
-        return (telnet && !current.telnet_enabled) || (notoken && !current.notoken_api);
+        const bool telnet   = json["telnet_enabled"] | EMSESP_DEFAULT_TELNET_ENABLED;
+        const bool notoken  = json["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
+        const bool readonly = json["readonly_mode"] | false;
+        return (telnet && !current.telnet_enabled) || (notoken && !current.notoken_api) || (!readonly && current.readonly_mode);
     });
 }
 

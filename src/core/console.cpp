@@ -519,6 +519,9 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                 cmd = F_(values);
             }
 
+            const std::string     source = "console " + to_shell(shell).console_name();
+            Command::CallerSource caller(source.c_str());
+
             if (arguments.size() == 2) {
                 // no value specified, just the cmd
                 return_code = Command::call(device_type, cmd, nullptr, true, id, json);

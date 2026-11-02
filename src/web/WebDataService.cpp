@@ -20,7 +20,8 @@
 
 namespace emsesp {
 
-WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securityManager) {
+WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securityManager)
+    : _securityManager(securityManager) {
     // write endpoints - POSTs
     securityManager->addEndpoint(server,
                                  EMSESP_WRITE_DEVICE_VALUE_SERVICE_PATH,
@@ -289,6 +290,13 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
         if (device_type >= EMSdevice::DeviceType::BOILER) {
             cmd = Command::parse_command_string(cmd, id); // extract hc or dhw
         }
+
+        Authentication authentication = _securityManager->authenticateRequest(request);
+        std::string    source         = std::string("web, ") + (authentication.authenticated ? authentication.user->username.c_str() : "");
+#ifndef EMSESP_STANDALONE
+        source += std::string(", ") + request->client()->remoteIP().toString().c_str();
+#endif
+        Command::CallerSource caller(source.c_str());
 
         if (data.is<const char *>()) {
             return_code = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);

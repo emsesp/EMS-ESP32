@@ -276,7 +276,8 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) {
     // parse and call the command
     input               = input_doc.as<JsonObject>();
     output              = output_doc.to<JsonObject>();
-    uint8_t return_code = Command::process(topic, true, input, output); // mqtt is always authenticated
+    Command::CallerSource caller("mqtt");
+    uint8_t               return_code = Command::process(topic, true, input, output); // mqtt is always authenticated
 
     if (return_code != CommandRet::OK) {
         char error[100];

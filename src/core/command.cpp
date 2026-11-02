@@ -26,6 +26,7 @@ uuid::log::Logger Command::logger_{F_(command), uuid::log::Facility::DAEMON};
 
 thread_local bool Command::caller_is_admin_           = true;
 thread_local bool Command::caller_password_confirmed_ = true;
+thread_local const char * Command::caller_source_    = nullptr;
 
 std::vector<Command::CmdFunction, AllocatorPSRAM<Command::CmdFunction>> Command::cmdfunctions_;
 
@@ -484,11 +485,17 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
 
     // call the function based on command function type
     // commands return true or false only (bool)
-    uint8_t return_code = CommandRet::OK;
+    uint8_t  return_code = CommandRet::OK;
+    char     reason[40]  = "";
+    int16_t  min         = 0;
+    uint32_t max         = 0;
     if (cf->cmdfunction_) {
         // JSON-output commands bypass the readonly check; for the rest, reject a write to a read-only entity
         if (!cf->has_json_output_ && !single_command && EMSESP::cmd_is_readonly(device_type, device_id, cmd, id)) {
             return_code = CommandRet::INVALID; // error on readonly or invalid hc
+        } else if (!cf->has_json_output_ && !single_command && !EMSESP::cmd_value_in_range(device_type, device_id, cmd, id, value, min, max)) {
+            return_code = CommandRet::INVALID;
+            snprintf(reason, sizeof(reason), "out of range %d to %lu", min, static_cast<unsigned long>(max));
         } else {
             // call the command (the output object is ignored by non-JSON commands)
             return_code = ((cf->cmdfunction_)(value, id, output)) ? CommandRet::OK : CommandRet::ERROR;
@@ -498,10 +505,11 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
     // report back. If not OK show output from error, otherwise return the error code
     if (return_code != CommandRet::OK) {
         char error[100];
+        const char * why = reason[0] ? reason : return_code_string(return_code);
         if (single_command) {
-            snprintf(error, sizeof(error), "Command %s failed (%s)", cmd, return_code_string(return_code));
+            snprintf(error, sizeof(error), "Command %s failed (%s)", cmd, why);
         } else {
-            snprintf(error, sizeof(error), "Command %s: %s failed (%s)", cmd, value, return_code_string(return_code));
+            snprintf(error, sizeof(error), "Command %s: %s failed (%s)", cmd, value, why);
         }
 
         output.clear();
@@ -519,15 +527,19 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
             snprintf(info_s, sizeof(info_s), "%s/%s", dname, cmd);
         }
 
+        char by[64] = "";
+        if (caller_source_) {
+            snprintf(by, sizeof(by), " (by %s)", caller_source_);
+        }
         if (single_command) {
             // log as DEBUG (TRACE) regardless if compiled with EMSESP_DEBUG
-            logger_.debug("%sCalled command %s", ro.c_str(), info_s);
+            logger_.debug("%sCalled command %s%s", ro.c_str(), info_s, by);
         } else {
             if (id > 0) {
-                (device_id) ? LOG_INFO(("%sCalled command %s with value %s and id %d on device 0x%02X"), ro.c_str(), info_s, value, id, device_id)
-                            : LOG_INFO(("%sCalled command %s with value %s and id %d"), ro.c_str(), info_s, value, id);
+                (device_id) ? LOG_INFO(("%sCalled command %s with value %s and id %d on device 0x%02X%s"), ro.c_str(), info_s, value, id, device_id, by)
+                            : LOG_INFO(("%sCalled command %s with value %s and id %d%s"), ro.c_str(), info_s, value, id, by);
             } else {
-                LOG_INFO(("%sCalled command %s with value %s"), ro.c_str(), info_s, value);
+                LOG_INFO(("%sCalled command %s with value %s%s"), ro.c_str(), info_s, value, by);
             }
         }
     }

@@ -636,6 +636,12 @@ bool TxService::send_raw(const char * telegram_data) {
         return false;
     }
 
+    // a read has the top bit of the destination set
+    if (EMSESP::system_.readonly_mode() && !(data[1] & 0x80)) {
+        LOG_WARNING("[readonly] Raw write telegram not sent");
+        return false;
+    }
+
     add(Telegram::Operation::TX_RAW, data, count, 0, true); // add to top/front of Tx queue
     return true;
 }

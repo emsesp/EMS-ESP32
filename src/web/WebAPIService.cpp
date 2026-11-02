@@ -103,12 +103,22 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     bool is_admin           = false;
     bool is_user            = false;
     bool password_confirmed = true; // only a Web UI session is asked for it
+    std::string source      = "api, ";
     EMSESP::webSettingsService.read([&](WebSettings const & settings) {
         Authentication authentication = _securityManager->authenticateApiRequest(request);
         is_admin                      = AuthenticationPredicates::IS_ADMIN(authentication);
         is_user                       = settings.notoken_api || AuthenticationPredicates::IS_AUTHENTICATED(authentication);
         password_confirmed            = !authentication.session || authentication.password_confirmed;
+        if (!authentication.authenticated) {
+            source += "no token";
+        } else {
+            source += std::string(authentication.session ? "" : "API key ") + authentication.user->username.c_str();
+        }
     });
+#ifndef EMSESP_STANDALONE
+    source += std::string(", ") + request->client()->remoteIP().toString().c_str();
+#endif
+    Command::CallerSource caller(source.c_str());
 
     // check for query parameters first, the old style from v2
     // api?device={device}&cmd={name}&data={value}&id={hc}

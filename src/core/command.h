@@ -165,6 +165,27 @@ class Command {
         return caller_is_admin_;
     }
 
+    static const char * caller_source() {
+        return caller_source_;
+    }
+
+    // who sent the commands that run on this task, for the log. The text must outlive the object
+    class CallerSource {
+      public:
+        explicit CallerSource(const char * source)
+            : prev_(caller_source_) {
+            caller_source_ = source;
+        }
+        ~CallerSource() {
+            caller_source_ = prev_;
+        }
+        CallerSource(const CallerSource &)             = delete;
+        CallerSource & operator=(const CallerSource &) = delete;
+
+      private:
+        const char * prev_;
+    };
+
     class CallerRights {
       public:
         explicit CallerRights(const bool is_admin, const bool password_confirmed = true)
@@ -190,6 +211,7 @@ class Command {
 
     static thread_local bool caller_is_admin_;
     static thread_local bool caller_password_confirmed_;
+    static thread_local const char * caller_source_;
 
     static std::vector<CmdFunction, AllocatorPSRAM<CmdFunction>> cmdfunctions_; // the list of commands
 
