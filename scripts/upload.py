@@ -53,6 +53,24 @@ def print_fail(x):
     cprint(f'Error: {x}', 'red')
 
 
+UPLOAD_ERRORS = {
+    400: "The device didn't accept the file. It isn't a firmware file, or the upload was cut off.",
+    401: "The device didn't accept the sign-in. Check custom_username and custom_password in pio_local.ini.",
+    403: "This user isn't an admin. Set custom_username to an admin user in pio_local.ini.",
+    412: "The device refused it because it isn't an official EMS-ESP build. Firmware from 2 Nov 2026 onwards installs it anyway "
+         "when uploaded with this script. An older 3.9.0 dev build only accepts it after running 'allow unsigned' in its console, "
+         "or flash it over USB once.",
+    428: "The device asked for the password again. Upload again.",
+    500: "The device couldn't install the file. It may be built for a different board (for example an S3 build on an ESP32), "
+         "or the MD5 didn't match. The device's log says why.",
+    507: "The file doesn't fit in the device's firmware partition.",
+}
+
+
+def upload_error(code):
+    return f"Upload failed (HTTP {code}). " + UPLOAD_ERRORS.get(code, "The device's log says why.")
+
+
 def resolve_ipv4(host):
     """Resolve hostname to IPv4 so we skip mDNS/IPv6 retries on every request."""
     if host.startswith('['):
@@ -163,7 +181,7 @@ def on_upload(source, target, env):
     if env.get('UPLOAD_PROTOCOL') != 'custom':
         print_fail(
             "Please set upload_protocol = custom in your pio_local.ini file when using upload.py")
-        return
+        return 1
 
     # first check authentication
     try:
@@ -172,7 +190,7 @@ def on_upload(source, target, env):
         emsesp_ip = env.GetProjectOption('custom_emsesp_ip')
     except Exception:
         print_fail(f'Missing settings. Add these to your pio_local.ini file:\n\ncustom_username=username\ncustom_password=password\ncustom_emsesp_ip=ems-esp.local\n')
-        return
+        return 1
 
     parsed_url = urlparse(f"http://{emsesp_ip}")
     host_name = parsed_url.hostname or emsesp_ip
@@ -180,7 +198,7 @@ def on_upload(source, target, env):
         host_ip = resolve_ipv4(host_name)
     except OSError as e:
         print_fail(f"Could not resolve {host_name} to IPv4: {e}")
-        return
+        return 1
 
     if host_ip != host_name:
         print_success(f"Resolved {host_name} -> {host_ip}")
@@ -201,7 +219,7 @@ def on_upload(source, target, env):
         if response.status_code != 200:
             print_fail("Authentication with EMS-ESP failed (code " +
                        str(response.status_code) + ")")
-            return
+            return 1
 
         print_success("Authentication with EMS-ESP successful")
         access_token = response.json().get('access_token')
@@ -214,7 +232,7 @@ def on_upload(source, target, env):
             timeout=15)
         if response.status_code not in (200, 404):
             print_fail(f"Password confirmation with EMS-ESP failed (code {response.status_code})")
-            return
+            return 1
 
         firmware_path = str(source[0])
         with open(firmware_path, 'rb') as firmware_file:
@@ -232,8 +250,8 @@ def on_upload(source, target, env):
             session, upload_url, host_ip, emsesp_url, access_token,
             md5_name, (md5 + '\n').encode('ascii'))
         if response.status_code != 200:
-            print_fail(f"MD5 upload failed (code {response.status_code}).")
-            return
+            print_fail(upload_error(response.status_code))
+            return 1
         print_success("MD5 accepted")
 
         print(f"Uploading firmware ({filename})")
@@ -243,7 +261,8 @@ def on_upload(source, target, env):
         print()
 
         if response.status_code != 200:
-            print_fail(f"Upload failed (code {response.status_code}).")
+            print_fail(upload_error(response.status_code))
+            return 1
         else:
             kibs = (size / 1024) / elapsed if elapsed > 0 else 0
             print_success(

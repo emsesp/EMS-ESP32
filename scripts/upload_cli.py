@@ -40,6 +40,24 @@ def print_fail(x):
     return cprint(x, 'red')
 
 
+UPLOAD_ERRORS = {
+    400: "The device didn't accept the file. It isn't a firmware file, or the upload was cut off.",
+    401: "The device didn't accept the sign-in. Check the username and password.",
+    403: "This user isn't an admin. Use an admin user with -u and -p.",
+    412: "The device refused it because it isn't an official EMS-ESP build. Firmware from 2 Nov 2026 onwards installs it anyway "
+         "when uploaded with this script. An older 3.9.0 dev build only accepts it after running 'allow unsigned' in its console, "
+         "or flash it over USB once.",
+    428: "The device asked for the password again. Upload again.",
+    500: "The device couldn't install the file. It may be built for a different board (for example an S3 build on an ESP32), "
+         "or the MD5 didn't match. The device's log says why.",
+    507: "The file doesn't fit in the device's firmware partition.",
+}
+
+
+def upload_error(code):
+    return f"Upload failed (HTTP {code}). " + UPLOAD_ERRORS.get(code, "The device's log says why.")
+
+
 def resolve_ipv4(host):
     """Resolve hostname to IPv4 so we skip mDNS/IPv6 retries on every request."""
     if host.startswith('['):
@@ -133,7 +151,7 @@ def upload(file, ip, username, password):
     file_path = Path(file)
     if not file_path.exists():
         print_fail(f"File not found: {file}")
-        return
+        sys.exit(1)
 
     parsed_url = urlparse(f"http://{ip}")
     host_name = parsed_url.hostname or ip
@@ -141,7 +159,7 @@ def upload(file, ip, username, password):
         host_ip = resolve_ipv4(host_name)
     except OSError as e:
         print_fail(f"Could not resolve {host_name} to IPv4: {e}")
-        return
+        sys.exit(1)
 
     if host_ip != host_name:
         print_success(f"Resolved {host_name} -> {host_ip}")
@@ -163,7 +181,7 @@ def upload(file, ip, username, password):
 
         if response.status_code != 200:
             print_fail(f"Authentication failed (code {response.status_code})")
-            return
+            sys.exit(1)
 
         print_success("Authentication successful")
         access_token = response.json().get('access_token')
@@ -178,7 +196,7 @@ def upload(file, ip, username, password):
             timeout=15)
         if response.status_code not in (200, 404):
             print_fail(f"Password confirmation failed (code {response.status_code})")
-            return
+            sys.exit(1)
 
         firmware = file_path.read_bytes()
         md5 = hashlib.md5(firmware).hexdigest()
@@ -192,8 +210,8 @@ def upload(file, ip, username, password):
             session, upload_url, host_ip, emsesp_url, access_token,
             md5_name, (md5 + '\n').encode('ascii'))
         if response.status_code != 200:
-            print_fail(f"MD5 upload failed (code {response.status_code})")
-            return
+            print_fail(upload_error(response.status_code))
+            sys.exit(1)
         print_success("MD5 accepted")
 
         print(f"Uploading firmware ({file_path.name})")
@@ -202,7 +220,8 @@ def upload(file, ip, username, password):
             file_path.name, firmware, progress_desc='Upload Progress')
 
         if response.status_code != 200:
-            print_fail(f"Upload failed (code {response.status_code})")
+            print_fail(upload_error(response.status_code))
+            sys.exit(1)
         else:
             kibs = (size / 1024) / elapsed if elapsed > 0 else 0
             print_success(
