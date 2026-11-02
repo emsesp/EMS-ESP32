@@ -377,6 +377,7 @@ const tr: Translation = {
   UPLOAD_MD5_RECEIVED: 'Özet alındı, şimdi firmware .bin dosyasını yükleyin',
   UPLOAD_MD5_MATCHED: 'MD5 eşleşti, firmware yükleniyor...',
   UPLOAD_NOT_SIGNED: 'Bu firmware EMS-ESP tarafından imzalanmamış',
+  UPLOAD_NOT_SIGNED_HELP: "Kendi firmware'inizi nasıl kurarsınız",
   RECOVERY_APP: 'Kurtarma Uygulaması',
   RECOVERY_NOT_INSTALLED: 'Yüklü değil',
   RECOVERY_INSTALLED: 'Kurtarma firmware yüklendi',

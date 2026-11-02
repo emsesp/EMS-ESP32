@@ -10,6 +10,7 @@ import { toast } from 'components/toast';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import DragNdrop from './DragNdrop';
+import FirmwareNotSigned from './FirmwareNotSigned';
 import { LinearProgressWithLabel } from './LinearProgressWithLabel';
 
 interface SingleUploadProps {
@@ -25,6 +26,7 @@ const SingleUpload = ({
 }: SingleUploadProps) => {
   const [md5, setMd5] = useState<string>();
   const [file, setFile] = useState<File>();
+  const [notSigned, setNotSigned] = useState(false);
   const { LL } = useI18nContext();
 
   const {
@@ -64,12 +66,14 @@ const SingleUpload = ({
   useEffect(() => {
     const uploadFile = async () => {
       if (file) {
+        setNotSigned(false);
         await sendUpload(file).catch((error: Error) => {
           if (error.message.includes('The user aborted a request')) {
             toast.warning(LL.UPLOAD() + ' ' + LL.ABORTED());
           } else if (error.message === 'Precondition Failed') {
             // 412, see OtaUpdater
             toast.error(LL.UPLOAD_NOT_SIGNED());
+            setNotSigned(true);
           } else {
             toast.warning('Invalid file extension or incompatible bin file');
           }
@@ -109,6 +113,13 @@ const SingleUpload = ({
         <DragNdrop
           text={md5 ? LL.UPLOAD_MD5_RECEIVED() : text}
           onFileSelected={setFile}
+        />
+      )}
+
+      {notSigned && !isUploading && (
+        <FirmwareNotSigned
+          message={LL.UPLOAD_NOT_SIGNED()}
+          linkText={LL.UPLOAD_NOT_SIGNED_HELP()}
         />
       )}
 

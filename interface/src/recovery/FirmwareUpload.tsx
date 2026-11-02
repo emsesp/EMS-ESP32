@@ -6,6 +6,7 @@ import UploadIcon from '@mui/icons-material/Upload';
 import { Box, Button, Typography, styled } from '@mui/material';
 
 import { toast } from 'components/toast';
+import FirmwareNotSigned from 'components/upload/FirmwareNotSigned';
 import { LinearProgressWithLabel } from 'components/upload/LinearProgressWithLabel';
 
 import { HttpError, type UploadHandle, uploadFile } from './api';
@@ -62,6 +63,7 @@ const FirmwareUpload = ({
   const [file, setFile] = useState<File>();
   const [dragged, setDragged] = useState(false);
   const [md5, setMd5] = useState<string>();
+  const [notSigned, setNotSigned] = useState(false);
   const [progress, setProgress] = useState<number>();
   const uploadRef = useRef<UploadHandle | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -89,6 +91,7 @@ const FirmwareUpload = ({
   const startUpload = async () => {
     if (!file) return;
     setProgress(0);
+    setNotSigned(false);
     uploadRef.current = uploadFile(file, target, setProgress);
     try {
       const result = await uploadRef.current.promise;
@@ -108,6 +111,7 @@ const FirmwareUpload = ({
         toast.warning('Upload aborted');
       } else {
         toast.error(uploadErrorMessage(status, chip));
+        setNotSigned(status === 412);
         if (status === 401 || status === 403) onUnauthorized();
       }
     } finally {
@@ -198,6 +202,12 @@ const FirmwareUpload = ({
           </>
         )}
       </DocumentUploader>
+      {notSigned && (
+        <FirmwareNotSigned
+          message={uploadErrorMessage(412, chip)}
+          linkText="How to install your own firmware"
+        />
+      )}
       {md5 && (
         <Typography sx={{ mt: 2 }} variant="body2" color="success">
           {'MD5: ' + md5}

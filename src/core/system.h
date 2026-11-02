@@ -64,7 +64,8 @@ enum SYSTEM_STATUS : uint8_t {
     SYSTEM_STATUS_ERROR_UPLOAD      = 3,
     SYSTEM_STATUS_PENDING_RESTART   = 4,
     SYSTEM_STATUS_RESTART_REQUESTED = 5,
-    SYSTEM_STATUS_INVALID_GPIO      = 6
+    SYSTEM_STATUS_INVALID_GPIO      = 6,
+    SYSTEM_STATUS_ERROR_NOT_SIGNED  = 7 // upload from a URL refused, not signed by EMS-ESP
 };
 
 enum FUSE_VALUE : uint8_t { ALL = 0, MFG = 1, MODEL = 2, BOARD = 3, REV = 4, BATCH = 5, FUSE = 6 };

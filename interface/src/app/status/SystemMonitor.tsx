@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, Link, Typography } from '@mui/material';
 
 import { callAction } from 'api/app';
 import { readSystemStatus } from 'api/system';
@@ -9,6 +9,7 @@ import { readSystemStatus } from 'api/system';
 import { useRequest } from 'alova/client';
 import MessageBox from 'components/MessageBox';
 import { clearAccessToken } from 'components/routing/authentication';
+import { FIRMWARE_NOT_SIGNED_URL } from 'components/upload/FirmwareNotSigned';
 import { useI18nContext } from 'i18n/i18n-react';
 import { SystemStatusCodes } from 'types';
 import { useInterval } from 'utils';
@@ -22,7 +23,10 @@ interface SystemMonitorProps {
 
 const SystemMonitor = ({ onDone }: SystemMonitorProps) => {
   const [errorMessage, setErrorMessage] = useState<string>();
+  const [notSigned, setNotSigned] = useState(false);
   const hasInitialized = useRef(false);
+  // the device reports an upload error once, then goes back to normal
+  const uploadFailed = useRef(false);
   const { LL } = useI18nContext();
 
   const { send: setSystemStatus } = useRequest(
@@ -44,6 +48,9 @@ const SystemMonitor = ({ onDone }: SystemMonitorProps) => {
     }
   })
     .onSuccess((event) => {
+      if (uploadFailed.current) {
+        return;
+      }
       if (
         event.data.status === SystemStatusCodes.SYSTEM_STATUS_NORMAL ||
         event.data.status === undefined
@@ -56,7 +63,14 @@ const SystemMonitor = ({ onDone }: SystemMonitorProps) => {
       } else if (
         event.data.status === SystemStatusCodes.SYSTEM_STATUS_ERROR_UPLOAD
       ) {
+        uploadFailed.current = true;
         setErrorMessage('Please check system logs for possible causes');
+      } else if (
+        event.data.status === SystemStatusCodes.SYSTEM_STATUS_ERROR_NOT_SIGNED
+      ) {
+        uploadFailed.current = true;
+        setErrorMessage(LL.UPLOAD_NOT_SIGNED() + '. ');
+        setNotSigned(true);
       }
     })
     .onError((error) => {
@@ -75,14 +89,16 @@ const SystemMonitor = ({ onDone }: SystemMonitorProps) => {
 
   const status = data?.status;
 
-  const statusMessage =
-    status && status >= SystemStatusCodes.SYSTEM_STATUS_UPLOADING
+  const statusMessage = uploadFailed.current
+    ? 'Upload Failed'
+    : status && status >= SystemStatusCodes.SYSTEM_STATUS_UPLOADING
       ? LL.WAIT_FIRMWARE()
       : status === SystemStatusCodes.SYSTEM_STATUS_PENDING_RESTART
         ? LL.APPLICATION_RESTARTING()
         : status === SystemStatusCodes.SYSTEM_STATUS_NORMAL
           ? LL.RESTARTING_PRE()
-          : status === SystemStatusCodes.SYSTEM_STATUS_ERROR_UPLOAD
+          : status === SystemStatusCodes.SYSTEM_STATUS_ERROR_UPLOAD ||
+              status === SystemStatusCodes.SYSTEM_STATUS_ERROR_NOT_SIGNED
             ? 'Upload Failed'
             : LL.RESTARTING_POST();
 
@@ -145,6 +161,16 @@ const SystemMonitor = ({ onDone }: SystemMonitorProps) => {
 
           {errorMessage ? (
             <MessageBox level="error" message={errorMessage}>
+              {notSigned && (
+                <Link
+                  href={FIRMWARE_NOT_SIGNED_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  sx={{ color: 'lightblue' }}
+                >
+                  {LL.UPLOAD_NOT_SIGNED_HELP()}
+                </Link>
+              )}
               <Button
                 sx={{ ml: 2 }}
                 size="small"

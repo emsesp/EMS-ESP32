@@ -187,7 +187,8 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
         EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED);
     }
 
-    if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD) {
+    if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD
+        || EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_ERROR_NOT_SIGNED) {
         // error is reported, back to normal state
         EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_NORMAL);
     }

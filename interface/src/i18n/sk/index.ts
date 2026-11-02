@@ -377,6 +377,7 @@ const sk: Translation = {
   UPLOAD_MD5_RECEIVED: 'Suma MD5 prijatá, teraz nahrajte firmware .bin',
   UPLOAD_MD5_MATCHED: 'MD5 súhlasí, firmvér sa inštaluje...',
   UPLOAD_NOT_SIGNED: 'Tento firmvér nie je podpísaný EMS-ESP',
+  UPLOAD_NOT_SIGNED_HELP: 'Ako nainštalovať vlastný firmvér',
   RECOVERY_APP: 'Aplikácia na obnovu',
   RECOVERY_NOT_INSTALLED: 'Nenainštalované',
   RECOVERY_INSTALLED: 'Firmvér obnovy nainštalovaný',

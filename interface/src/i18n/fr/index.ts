@@ -377,6 +377,7 @@ const fr: Translation = {
   UPLOAD_MD5_RECEIVED: 'Empreinte reçue, téléversez maintenant le fichier firmware .bin',
   UPLOAD_MD5_MATCHED: 'MD5 concordant, installation du firmware...',
   UPLOAD_NOT_SIGNED: "Ce firmware n'est pas signé par EMS-ESP",
+  UPLOAD_NOT_SIGNED_HELP: 'Comment installer votre propre firmware',
   RECOVERY_APP: 'Application de récupération',
   RECOVERY_NOT_INSTALLED: 'Non installé',
   RECOVERY_INSTALLED: 'Firmware de récupération installé',

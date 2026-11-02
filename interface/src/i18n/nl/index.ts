@@ -377,6 +377,7 @@ const nl: Translation = {
   UPLOAD_MD5_RECEIVED: 'Digest ontvangen, upload nu het firmware .bin-bestand',
   UPLOAD_MD5_MATCHED: 'MD5 komt overeen, firmware wordt geïnstalleerd...',
   UPLOAD_NOT_SIGNED: 'Deze firmware is niet ondertekend door EMS-ESP',
+  UPLOAD_NOT_SIGNED_HELP: 'Zo installeer je je eigen firmware',
   RECOVERY_APP: 'Herstel-app',
   RECOVERY_NOT_INSTALLED: 'Niet geïnstalleerd',
   RECOVERY_INSTALLED: 'Herstelfirmware geïnstalleerd',

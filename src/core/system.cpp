@@ -3912,7 +3912,7 @@ bool System::uploadFirmwareURL(const char * url) {
 
     if (!ota->end()) {
         LOG_ERROR("Firmware upload failed - %s", ota->errorString());
-        EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
+        EMSESP::system_.systemStatus(ota->notSigned() ? SYSTEM_STATUS::SYSTEM_STATUS_ERROR_NOT_SIGNED : SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
         return false; // error
     }
 

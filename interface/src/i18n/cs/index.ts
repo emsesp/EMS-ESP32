@@ -377,6 +377,7 @@ const cs: Translation = {
   UPLOAD_MD5_RECEIVED: 'Digest přijat, nyní nahrajte firmware .bin',
   UPLOAD_MD5_MATCHED: 'MD5 souhlasí, firmware se instaluje...',
   UPLOAD_NOT_SIGNED: 'Tento firmware není podepsán EMS-ESP',
+  UPLOAD_NOT_SIGNED_HELP: 'Jak nainstalovat vlastní firmware',
   RECOVERY_APP: 'Aplikace pro obnovu',
   RECOVERY_NOT_INSTALLED: 'Nenainstalováno',
   RECOVERY_INSTALLED: 'Firmware pro obnovu nainstalován',
