@@ -234,6 +234,14 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
         return;
     }
 
+    // these need the password entered again, see SecurityManager::PASSWORD_REQUIRED
+    const bool needs_password = (action == "setPartition") || (action == "uploadURL") || (action == "export" && (json["secrets"] | false));
+    if (needs_password && !authentication.password_confirmed) {
+        request->send(SecurityManager::PASSWORD_REQUIRED);
+        delete response;
+        return;
+    }
+
     if (action == "getVersions") {
         getVersions(root);
         if (is_admin && EMSESP::nvs_.isKey(EMSESP_NVS_TOKENS_RESET)) {
@@ -650,8 +658,7 @@ bool WebStatusService::getCustomSupport(JsonObject root) {
 // uploads a firmware file from a URL
 bool WebStatusService::uploadURL(const char * url) {
     // this will keep a copy of the URL, but won't initiate the download yet
-    EMSESP::system_.uploadFirmwareURL(url);
-    return true;
+    return EMSESP::system_.uploadFirmwareURL(url);
 }
 
 // action = systemStatus

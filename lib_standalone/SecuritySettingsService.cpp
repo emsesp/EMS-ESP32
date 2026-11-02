@@ -5,7 +5,8 @@
 User ADMIN_USER = User(FACTORY_ADMIN_USERNAME, FACTORY_ADMIN_PASSWORD, true);
 User GUEST_USER = User(FACTORY_GUEST_USERNAME, FACTORY_GUEST_PASSWORD, false);
 
-StandaloneIdentity SecuritySettingsService::identity_ = StandaloneIdentity::ADMIN;
+StandaloneIdentity SecuritySettingsService::identity_           = StandaloneIdentity::ADMIN;
+bool               SecuritySettingsService::password_confirmed_ = true;
 
 SecuritySettingsService::SecuritySettingsService(AsyncWebServer * server, FS * fs)
     : SecurityManager() {
@@ -15,14 +16,14 @@ SecuritySettingsService::~SecuritySettingsService() {
 
 // Return the identity selected with identity(), the admin user by default
 Authentication SecuritySettingsService::authenticateRequest(AsyncWebServerRequest * request) {
-    switch (identity_) {
-    case StandaloneIdentity::NONE:
+    if (identity_ == StandaloneIdentity::NONE) {
         return Authentication();
-    case StandaloneIdentity::GUEST:
-        return Authentication(GUEST_USER);
-    default:
-        return Authentication(ADMIN_USER);
     }
+
+    Authentication authentication(identity_ == StandaloneIdentity::GUEST ? GUEST_USER : ADMIN_USER);
+    authentication.session            = true;
+    authentication.password_confirmed = password_confirmed_;
+    return authentication;
 }
 
 Authentication SecuritySettingsService::authenticate(const String & username, const String & password) {

@@ -6,6 +6,8 @@
 #include "settings_secrets.h"
 #include "password_hash.h"
 #include "login_limiter.h"
+#include "password_confirm.h"
+#include "firmware_url.h"
 #include "api_key.h"
 #include "origin_check.h"
 #include "host_check.h"
@@ -588,6 +590,90 @@ void security_test_backup_api_keys() {
     TEST_ASSERT_EQUAL_STRING("device", doc["api_keys"][0]["hash"]);
 }
 
+// the password entered again counts for this sign-in only, and for a few minutes
+void security_test_password_confirm() {
+    PasswordConfirm confirm;
+    const char *    token = "header.payload.signature1";
+    uint32_t        now   = 1000;
+
+    TEST_ASSERT_FALSE(confirm.confirmed(token, now));
+    confirm.confirm(token, now);
+    TEST_ASSERT_TRUE(confirm.confirmed(token, now));
+    TEST_ASSERT_TRUE(confirm.confirmed(token, now + PasswordConfirm::DURATION_MS - 1));
+    TEST_ASSERT_FALSE(confirm.confirmed(token, now + PasswordConfirm::DURATION_MS));
+    TEST_ASSERT_FALSE(confirm.confirmed("header.payload.signature2", now));
+    TEST_ASSERT_FALSE(confirm.confirmed("nodot", now));
+    TEST_ASSERT_FALSE(confirm.confirmed(nullptr, now));
+
+    // a new sign-in pushes out the one that expires first
+    char other[32];
+    for (size_t i = 0; i < PasswordConfirm::MAX_SESSIONS; i++) {
+        snprintf(other, sizeof(other), "h.p.other%u", static_cast<unsigned>(i));
+        confirm.confirm(other, now + 1 + i);
+    }
+    TEST_ASSERT_FALSE(confirm.confirmed(token, now + 10));
+    TEST_ASSERT_TRUE(confirm.confirmed("h.p.other0", now + 10));
+
+    // across the millis() wrap around
+    PasswordConfirm wrap;
+    now = 0xFFFFFFFF - 1000;
+    wrap.confirm(token, now);
+    TEST_ASSERT_TRUE(wrap.confirmed(token, now + 2000));
+    TEST_ASSERT_FALSE(wrap.confirmed(token, now + PasswordConfirm::DURATION_MS));
+
+    confirm.clear();
+    TEST_ASSERT_FALSE(confirm.confirmed("h.p.other0", now + 10));
+}
+
+// firmware changes from a Web UI session need the password entered again, other actions don't
+void security_test_password_required_actions() {
+    SecuritySettingsService::password_confirmed(false);
+    TEST_ASSERT_EQUAL(SecurityManager::PASSWORD_REQUIRED, call_action(StandaloneIdentity::ADMIN, "setPartition", "app0"));
+    TEST_ASSERT_EQUAL(SecurityManager::PASSWORD_REQUIRED,
+                      call_action(StandaloneIdentity::ADMIN, "uploadURL", "https://github.com/emsesp/EMS-ESP32/releases/download/latest/x.bin"));
+    TEST_ASSERT_EQUAL(SecurityManager::PASSWORD_REQUIRED,
+                      call_route(EMSESP_ACTION_SERVICE_PATH, HTTP_POST, StandaloneIdentity::ADMIN, R"({"action":"export","param":"systembackup","secrets":true})"));
+    TEST_ASSERT_EQUAL(200, call_action(StandaloneIdentity::ADMIN, "export", "systembackup"));
+    TEST_ASSERT_EQUAL(200, call_action(StandaloneIdentity::ADMIN, "getVersions"));
+
+    // a factory reset, only from a session. API keys, MQTT and the consoles don't have a password to enter
+    JsonDocument doc_in;
+    JsonDocument doc_out;
+    JsonObject   input  = doc_in.to<JsonObject>();
+    JsonObject   output = doc_out.to<JsonObject>();
+    TEST_ASSERT_EQUAL(CommandRet::PASSWORD_REQUIRED, Command::process("/api/system/format", true, input, output, true, false));
+    input["device"] = "system";
+    input["cmd"]    = "format";
+    TEST_ASSERT_EQUAL(CommandRet::PASSWORD_REQUIRED, Command::process("/api", true, input, output, true, false));
+
+    SecuritySettingsService::password_confirmed(true);
+}
+
+// only EMS-ESP releases on GitHub can be installed from a URL
+void security_test_firmware_url() {
+    TEST_ASSERT_TRUE(FirmwareURL::allowed("https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_9_0-ESP32S3-16MB+.bin"));
+    TEST_ASSERT_TRUE(FirmwareURL::allowed("https://GitHub.com/emsesp/EMS-ESP32/releases/download/v3.9.0/EMS-ESP-3_9_0-ESP32-16MB.bin"));
+    TEST_ASSERT_FALSE(FirmwareURL::allowed("http://github.com/emsesp/EMS-ESP32/releases/download/latest/x.bin"));
+    TEST_ASSERT_FALSE(FirmwareURL::allowed("https://github.com/someone/EMS-ESP32/releases/download/latest/x.bin"));
+    TEST_ASSERT_FALSE(FirmwareURL::allowed("https://github.com/emsesp/EMS-ESP32/releases/../../someone/repo/releases/x.bin"));
+    TEST_ASSERT_FALSE(FirmwareURL::allowed("https://github.com/emsesp/EMS-ESP32/releases/%2e%2e/x.bin"));
+    TEST_ASSERT_FALSE(FirmwareURL::allowed("https://github.com/emsesp/EMS-ESP32/releases/x.bin HTTP/1.0\r\nHost: evil"));
+    TEST_ASSERT_FALSE(FirmwareURL::allowed("https://github.com@evil.com/emsesp/EMS-ESP32/releases/x.bin"));
+    TEST_ASSERT_FALSE(FirmwareURL::allowed("https://github.com.evil.com/emsesp/EMS-ESP32/releases/x.bin"));
+    TEST_ASSERT_FALSE(FirmwareURL::allowed("https://github.com/emsesp/EMS-ESP32/releases/"));
+    TEST_ASSERT_FALSE(FirmwareURL::allowed("https://example.com/firmware.bin"));
+    TEST_ASSERT_FALSE(FirmwareURL::allowed(""));
+    TEST_ASSERT_FALSE(FirmwareURL::allowed(nullptr));
+
+    TEST_ASSERT_TRUE(FirmwareURL::redirect_allowed("https://release-assets.githubusercontent.com/github-production-release-asset/1?sig=abc"));
+    TEST_ASSERT_TRUE(FirmwareURL::redirect_allowed("https://objects.githubusercontent.com/github-production-release-asset-2e65be/1"));
+    TEST_ASSERT_TRUE(FirmwareURL::redirect_allowed("https://github.com/emsesp/EMS-ESP32/releases/download/v3.9.0/x.bin"));
+    TEST_ASSERT_FALSE(FirmwareURL::redirect_allowed("http://release-assets.githubusercontent.com/x"));
+    TEST_ASSERT_FALSE(FirmwareURL::redirect_allowed("https://release-assets.githubusercontent.com.evil.com/x"));
+    TEST_ASSERT_FALSE(FirmwareURL::redirect_allowed("https://evil.com/x.bin"));
+    TEST_ASSERT_FALSE(FirmwareURL::redirect_allowed("https://github.com/someone/repo/releases/download/x.bin"));
+}
+
 void run_security_tests() {
     EMSESP::webCommandService.load_test_data(); // named commands used by executeCommand
 
@@ -624,4 +710,7 @@ void run_security_tests() {
     RUN_TEST(security_test_console_login_lockout);
     RUN_TEST(security_test_api_key);
     RUN_TEST(security_test_backup_api_keys);
+    RUN_TEST(security_test_password_confirm);
+    RUN_TEST(security_test_password_required_actions);
+    RUN_TEST(security_test_firmware_url);
 }

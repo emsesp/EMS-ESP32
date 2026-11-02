@@ -30,6 +30,13 @@ WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, Securit
     });
 
     addUpdateHandler([this] { onUpdate(); }, false);
+
+    // turning on the unencrypted telnet console, or the API without an access token
+    _httpEndpoint.requirePassword([](JsonObject json, WebSettings & current) {
+        const bool telnet  = json["telnet_enabled"] | EMSESP_DEFAULT_TELNET_ENABLED;
+        const bool notoken = json["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
+        return (telnet && !current.telnet_enabled) || (notoken && !current.notoken_api);
+    });
 }
 
 void WebSettings::read(WebSettings & settings, JsonObject root) {

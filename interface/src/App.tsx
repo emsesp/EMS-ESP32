@@ -2,6 +2,7 @@ import { memo, useEffect, useState } from 'react';
 import { Outlet } from 'react-router';
 
 import CustomTheme from 'CustomTheme';
+import PasswordConfirmDialog from 'components/layout/PasswordConfirmDialog';
 import { Toaster } from 'components/toast';
 import { Authentication } from 'contexts/authentication';
 import TypesafeI18n from 'i18n/i18n-react';
@@ -67,6 +68,7 @@ const App = memo(() => {
         <Authentication>
           <Outlet />
         </Authentication>
+        <PasswordConfirmDialog />
         <Toaster />
       </CustomTheme>
     </TypesafeI18n>

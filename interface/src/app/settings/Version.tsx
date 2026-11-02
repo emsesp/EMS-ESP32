@@ -628,10 +628,14 @@ const Version = () => {
   };
 
   const doFormat = async () => {
-    await sendAPI({ device: 'system', cmd: 'format', id: 0 }).then(() => {
-      setRestarting(true);
-      setConfirmFactoryReset(false);
-    });
+    await sendAPI({ device: 'system', cmd: 'format', id: 0 })
+      .then(() => {
+        setRestarting(true);
+        setConfirmFactoryReset(false);
+      })
+      .catch((error: Error) => {
+        toast.error(error.message);
+      });
   };
 
   const handleFactoryResetClose = () => setConfirmFactoryReset(false);
@@ -640,10 +644,15 @@ const Version = () => {
   const handleRestartClick = () => setConfirmRestart(true);
 
   const installFirmwareURL = async (url: string) => {
-    await sendUploadURL(url).catch((error: Error) => {
-      toast.error(error.message);
-    });
-    await doRestart();
+    const started = await sendUploadURL(url)
+      .then(() => true)
+      .catch((error: Error) => {
+        toast.error(error.message);
+        return false;
+      });
+    if (started) {
+      await doRestart();
+    }
   };
 
   // the release of the channel we're on first, it may not have a recovery app yet so try the other one too
@@ -690,10 +699,12 @@ const Version = () => {
   };
 
   const installPartitionFirmware = async (partition: string) => {
-    await sendSetPartition(partition).catch((error: Error) => {
-      toast.error(error.message);
-    });
-    setRestarting(true);
+    const switched = await sendSetPartition(partition)
+      .then(() => true)
+      .catch(() => false); // onError shows the message
+    if (switched) {
+      setRestarting(true);
+    }
   };
 
   const showPartitionDialog = (

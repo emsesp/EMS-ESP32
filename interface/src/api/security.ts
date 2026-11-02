@@ -23,6 +23,12 @@ export const apiKeyAction = (action: {
   id?: string;
 }) => alovaInstance.Post<{ key?: string }>('/rest/apiKeys', action);
 
+export const readPasswordConfirmed = () =>
+  alovaInstance.Get<{ confirmed: boolean }>('/rest/confirmPassword');
+
+export const confirmPassword = (password: string) =>
+  alovaInstance.Post('/rest/confirmPassword', { password });
+
 export const readSetup = () => alovaInstance.Get<SetupStateType>('/rest/setup');
 
 export const saveSetup = (setup: SetupType) =>

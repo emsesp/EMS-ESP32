@@ -37,6 +37,11 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
         _is_recovery   = false;
         _response_sent = false;
 
+        if (!authentication.password_confirmed) {
+            handleError(request, SecurityManager::PASSWORD_REQUIRED);
+            return;
+        }
+
         switch (OtaUpdater::classify(filename, filesize, emsesp::System::MIN_FIRMWARE_SIZE)) {
         case OtaUpdater::FileType::FILESYSTEM:
             _is_filesystem = true;

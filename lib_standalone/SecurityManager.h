@@ -33,7 +33,9 @@ class User {
 class Authentication {
   public:
     std::unique_ptr<User> user;
-    boolean               authenticated = false;
+    boolean               authenticated      = false;
+    bool                  session            = false;
+    bool                  password_confirmed = false;
 
   public:
     explicit Authentication(const User & u)
@@ -69,6 +71,8 @@ struct StandaloneRoute {
 
 class SecurityManager {
   public:
+    static constexpr int PASSWORD_REQUIRED = 428;
+
     virtual Authentication authenticateRequest(AsyncWebServerRequest * request) = 0;
     virtual Authentication authenticate(const String & username, const String & password) = 0;
     virtual Authentication authenticateApiRequest(AsyncWebServerRequest * request) {

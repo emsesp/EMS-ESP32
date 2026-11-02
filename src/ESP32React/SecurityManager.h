@@ -32,7 +32,9 @@ class User {
 class Authentication {
   public:
     std::unique_ptr<User> user;
-    boolean               authenticated = false;
+    boolean               authenticated      = false;
+    bool                  session            = false; // a Web UI access token, not an API key
+    bool                  password_confirmed = false; // the session's password was entered again in the last few minutes
 
   public:
     explicit Authentication(const User & u)
@@ -63,6 +65,9 @@ class AuthenticationPredicates {
 
 class SecurityManager {
   public:
+    // sent when a Web UI session has to enter its password again first, the Web UI asks for it and retries
+    static constexpr int PASSWORD_REQUIRED = 428;
+
     virtual ~SecurityManager() = default;
 
     // Authenticate, returning the user if found
@@ -78,6 +83,9 @@ class SecurityManager {
     virtual Authentication authenticateApiRequest(AsyncWebServerRequest * request) {
         return authenticateRequest(request);
     }
+
+    // checks the password of the request's session user, and if it's right confirms the session for a few minutes
+    virtual bool confirmPassword(AsyncWebServerRequest * request, const String & password) = 0;
 
     // Json endpoints - default POST. Registered with the shared dispatcher.
     void addEndpoint(AsyncWebServer *             server,

@@ -40,8 +40,14 @@ class SecuritySettingsService : public SecurityManager {
         identity_ = identity;
     }
 
+    // whether the session entered its password again recently
+    static void password_confirmed(bool confirmed) {
+        password_confirmed_ = confirmed;
+    }
+
   private:
     static StandaloneIdentity identity_;
+    static bool               password_confirmed_;
 };
 
 #endif

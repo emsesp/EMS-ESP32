@@ -24,7 +24,8 @@ namespace emsesp {
 
 uuid::log::Logger Command::logger_{F_(command), uuid::log::Facility::DAEMON};
 
-thread_local bool Command::caller_is_admin_ = true;
+thread_local bool Command::caller_is_admin_           = true;
+thread_local bool Command::caller_password_confirmed_ = true;
 
 std::vector<Command::CmdFunction, AllocatorPSRAM<Command::CmdFunction>> Command::cmdfunctions_;
 
@@ -32,8 +33,8 @@ std::vector<Command::CmdFunction, AllocatorPSRAM<Command::CmdFunction>> Command:
 // the path is leading so if duplicate keys are in the input JSON it will be ignored
 // the entry point will be either via the Web API (api/) or MQTT (<base>/)
 // returns a return code and json output
-uint8_t Command::process(const char * path, const bool is_admin, const JsonObject input, JsonObject output, const bool is_user) {
-    CallerRights rights(is_admin);
+uint8_t Command::process(const char * path, const bool is_admin, const JsonObject input, JsonObject output, const bool is_user, const bool password_confirmed) {
+    CallerRights rights(is_admin, password_confirmed);
 
     // check for MQTT, if so strip the "<base>" from the path
     if (!strncmp(path, Mqtt::base().c_str(), Mqtt::base().length())) {
@@ -225,6 +226,8 @@ const char * Command::return_code_string(const uint8_t return_code) {
         return "Failed";
     case CommandRet::INVALID:
         return "Invalid";
+    case CommandRet::PASSWORD_REQUIRED:
+        return "Password Required";
     default:
         break;
     }
@@ -464,6 +467,12 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
         LOG_WARNING("Command failed: authentication failed");
         output["message"] = "authentication failed";
         return CommandRet::NOT_ALLOWED; // command not allowed
+    }
+
+    // a factory reset from a Web UI session needs the password entered again. API keys, MQTT and the consoles don't
+    if (!caller_password_confirmed_ && device_type == EMSdevice::DeviceType::SYSTEM && !strcmp(cf->cmd_, F_(format))) {
+        output["message"] = "password required";
+        return CommandRet::PASSWORD_REQUIRED;
     }
 
     // a non-admin may run a guest-allowed custom Command, but only with the value the admin stored

@@ -7,6 +7,7 @@
 
 #include "../core/api_key.h"
 #include "../core/password_hash.h"
+#include "../core/password_confirm.h"
 
 #ifndef FACTORY_ADMIN_USERNAME
 #define FACTORY_ADMIN_USERNAME "admin"
@@ -150,6 +151,7 @@ class SecuritySettingsService final : public StatefulService<SecuritySettings>, 
     Authentication authenticateRequest(AsyncWebServerRequest * request) override;
     Authentication authenticateApiRequest(AsyncWebServerRequest * request) override;
     String         generateJWT(const User * user) override;
+    bool           confirmPassword(AsyncWebServerRequest * request, const String & password) override;
 
   private:
     HttpEndpoint<SecuritySettings>  _httpEndpoint;
@@ -157,6 +159,7 @@ class SecuritySettingsService final : public StatefulService<SecuritySettings>, 
     ArduinoJsonJWT                  _jwtHandler;
     FS *                            _fs;
     String                          _adminCredentials; // to detect admin password changes
+    PasswordConfirm                 _passwordConfirm;
 
     void listApiKeys(AsyncWebServerRequest * request);
     void apiKeyAction(AsyncWebServerRequest * request, JsonVariant json);
@@ -168,6 +171,7 @@ class SecuritySettingsService final : public StatefulService<SecuritySettings>, 
     String adminCredentials();
 
     Authentication authenticateJWT(String & jwt); // Lookup the user by JWT
+    static String  bearerToken(AsyncWebServerRequest * request);
 
     boolean validatePayload(JsonObject parsedPayload, const User * user); // Verify the payload is correct
 };

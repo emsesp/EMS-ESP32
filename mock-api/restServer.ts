@@ -760,6 +760,10 @@ const VERIFY_AUTHORIZATION_ENDPOINT = REST_ENDPOINT_ROOT + 'verifyAuthorization'
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn';
 const API_KEYS_ENDPOINT = REST_ENDPOINT_ROOT + 'apiKeys';
 const SETUP_ENDPOINT = REST_ENDPOINT_ROOT + 'setup';
+const CONFIRM_PASSWORD_ENDPOINT = REST_ENDPOINT_ROOT + 'confirmPassword';
+
+// the password entered again, counts for 5 minutes. The mock doesn't ask for it with 428
+let password_confirmed_until = 0;
 
 // which factory passwords are still in use. Set admin to true to test the setup screen
 let setup_state = { admin: false, ap: false, ap_required: false };
@@ -4828,6 +4832,17 @@ router
   })
   .get(VERIFY_AUTHORIZATION_ENDPOINT, () => verify_authentication)
   .post(SIGN_IN_ENDPOINT, () => signin)
+  .get(CONFIRM_PASSWORD_ENDPOINT, () => ({
+    confirmed: Date.now() < password_confirmed_until
+  }))
+  .post(CONFIRM_PASSWORD_ENDPOINT, async (request: any) => {
+    const content: any = await request.json();
+    if (content.password !== 'admin') {
+      return new Response(null, { status: 403 });
+    }
+    password_confirmed_until = Date.now() + 5 * 60 * 1000;
+    return status(200);
+  })
   .get(API_KEYS_ENDPOINT, () => ({ keys: api_keys }))
   .post(API_KEYS_ENDPOINT, async (request: any) => {
     const content: any = await request.json();

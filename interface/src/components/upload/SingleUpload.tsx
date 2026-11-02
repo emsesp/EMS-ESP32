@@ -4,6 +4,8 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import { Box, Button, Typography } from '@mui/material';
 
 import * as SystemApi from 'api/system';
+import { askPassword, passwordCancelledMessage } from 'api/passwordPrompt';
+import { readPasswordConfirmed } from 'api/security';
 
 import { useRequest } from 'alova/client';
 import { toast } from 'components/toast';
@@ -74,6 +76,15 @@ const SingleUpload = ({
     const uploadFile = async () => {
       if (file) {
         setNotSigned(false);
+        // asked before sending, otherwise the whole file is sent first
+        const confirmed = await readPasswordConfirmed()
+          .then((state) => state.confirmed || askPassword())
+          .catch(() => false);
+        if (!confirmed) {
+          toast.warning(passwordCancelledMessage());
+          setFile(undefined);
+          return;
+        }
         await sendUpload(file).catch((error: Error) => {
           if (error.message.includes('The user aborted a request')) {
             toast.warning(LL.UPLOAD() + ' ' + LL.ABORTED());

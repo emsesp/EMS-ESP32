@@ -51,8 +51,9 @@ enum CommandRet : uint8_t {
     NOT_FOUND,   // 2
     ERROR,       // 3
     NOT_ALLOWED, // 4 - needs authentication
-    INVALID,     // 5 - invalid (tag)
-    NO_VALUE     // 6 - no value
+    INVALID,          // 5 - invalid (tag)
+    NO_VALUE,         // 6 - no value
+    PASSWORD_REQUIRED // 7 - a Web UI session has to enter its password again first
 };
 
 using cmd_function_p = std::function<bool(const char * data, const int8_t id, JsonObject output)>;
@@ -148,7 +149,9 @@ class Command {
 
     static bool list(const uint8_t device_type, JsonObject output);
 
-    static uint8_t process(const char * path, const bool is_admin, const JsonObject input, JsonObject output, const bool is_user = false);
+    // password_confirmed: false for a Web UI session that hasn't entered its password again recently
+    static uint8_t
+    process(const char * path, const bool is_admin, const JsonObject input, JsonObject output, const bool is_user = false, const bool password_confirmed = true);
 
     static const char * parse_command_string(const char * command, int8_t & id);
     static const char * get_attribute(const char * cmd);
@@ -164,24 +167,29 @@ class Command {
 
     class CallerRights {
       public:
-        explicit CallerRights(const bool is_admin)
-            : prev_(caller_is_admin_) {
-            caller_is_admin_ = is_admin;
+        explicit CallerRights(const bool is_admin, const bool password_confirmed = true)
+            : prev_(caller_is_admin_)
+            , prev_password_confirmed_(caller_password_confirmed_) {
+            caller_is_admin_           = is_admin;
+            caller_password_confirmed_ = password_confirmed;
         }
         ~CallerRights() {
-            caller_is_admin_ = prev_;
+            caller_is_admin_           = prev_;
+            caller_password_confirmed_ = prev_password_confirmed_;
         }
         CallerRights(const CallerRights &)             = delete;
         CallerRights & operator=(const CallerRights &) = delete;
 
       private:
         bool prev_;
+        bool prev_password_confirmed_;
     };
 
   private:
     static uuid::log::Logger logger_;
 
     static thread_local bool caller_is_admin_;
+    static thread_local bool caller_password_confirmed_;
 
     static std::vector<CmdFunction, AllocatorPSRAM<CmdFunction>> cmdfunctions_; // the list of commands
 

@@ -5,6 +5,13 @@
 NetworkSettingsService::NetworkSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(NetworkSettings::read, NetworkSettings::update, this, server, NETWORK_SETTINGS_SERVICE_PATH, securityManager)
     , _fsPersistence(NetworkSettings::read, NetworkSettings::update, this, fs, NETWORK_SETTINGS_FILE) {
+    // letting other web sites or host names reach the device
+    _httpEndpoint.requirePassword([](JsonObject json, NetworkSettings & current) {
+        const bool   cors   = json["enableCORS"] | false;
+        const String origin = json["CORSOrigin"] | "";
+        const String hosts  = json["allowed_hosts"] | "";
+        return (cors && (!current.enableCORS || origin != current.CORSOrigin)) || (!hosts.isEmpty() && hosts != current.allowedHosts);
+    });
 }
 
 void NetworkSettingsService::begin() {

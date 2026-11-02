@@ -100,12 +100,14 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
 #endif
 
     // admin rights need an admin token or a read+write API key. notoken_api lets calls without one act like a guest, never an admin
-    bool is_admin = false;
-    bool is_user  = false;
+    bool is_admin           = false;
+    bool is_user            = false;
+    bool password_confirmed = true; // only a Web UI session is asked for it
     EMSESP::webSettingsService.read([&](WebSettings const & settings) {
         Authentication authentication = _securityManager->authenticateApiRequest(request);
         is_admin                      = AuthenticationPredicates::IS_ADMIN(authentication);
         is_user                       = settings.notoken_api || AuthenticationPredicates::IS_AUTHENTICATED(authentication);
+        password_confirmed            = !authentication.session || authentication.password_confirmed;
     });
 
     // check for query parameters first, the old style from v2
@@ -157,7 +159,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     JsonObject output = response->getRoot();
 
     // call command
-    uint8_t return_code = Command::process(request->url().c_str(), is_admin, input, output, is_user);
+    uint8_t return_code = Command::process(request->url().c_str(), is_admin, input, output, is_user, password_confirmed);
     if (return_code != CommandRet::OK) {
         api_fails_++;
     }
@@ -184,15 +186,15 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     api_count_++;
 
     // send the json that came back from the command call
-    // sequence matches CommandRet in command.h (FAIL, OK, NOT_FOUND, ERROR, NOT_ALLOWED, INVALID, NO_VALUE)
+    // sequence matches CommandRet in command.h (FAIL, OK, NOT_FOUND, ERROR, NOT_ALLOWED, INVALID, NO_VALUE, PASSWORD_REQUIRED)
     // 400 (bad request)
     // 200 (OK)
     // 404 (not found)
     // 401 (unauthorized)
     // 400 (invalid)
-    int ret_codes[7] = {400, 200, 404, 400, 401, 400, 404};
+    int ret_codes[8] = {400, 200, 404, 400, 401, 400, 404, SecurityManager::PASSWORD_REQUIRED};
 
-    response->setCode(return_code < 7 ? ret_codes[return_code] : 400);
+    response->setCode(return_code < 8 ? ret_codes[return_code] : 400);
     response->setLength();
     response->setContentType("application/json; charset=utf-8");
     request->send(response);

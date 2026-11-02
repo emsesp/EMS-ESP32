@@ -35,6 +35,7 @@
 #include "settings_secrets.h"
 #include "shuntingYard.h"       // for compute() used by the message and sendmail commands
 #include "emsesp_http_client.h" // for the shared TLS client settings
+#include "firmware_url.h"
 
 #if defined(EMSESP_TEST)
 #include "../test/test.h"
@@ -3592,6 +3593,12 @@ bool System::uploadFirmwareURL(const char * url) {
             return true;
         }
 
+        if (!FirmwareURL::allowed(url)) {
+            LOG_ERROR("Only EMS-ESP releases can be installed from a URL, upload the file instead");
+            saved_url.clear();
+            return false;
+        }
+
         // given a URL to download from, save it ready for the 2nd pass
         saved_url = url;
         LOG_INFO("Firmware location: %s", saved_url.c_str());
@@ -3607,10 +3614,13 @@ bool System::uploadFirmwareURL(const char * url) {
 
     Shell::loop_all(); // flush log buffers so latest messages are shown in console
 
-    String scheme = saved_url.substring(0, 8);
-    scheme.toLowerCase();
-    const bool is_https   = scheme.startsWith("https://");
-    const int  scheme_len = is_https ? 8 : 7; // "https://" vs "http://"
+    if (!FirmwareURL::allowed(saved_url.c_str())) {
+        LOG_ERROR("Only EMS-ESP releases can be installed from a URL, upload the file instead");
+        saved_url.clear();
+        return false;
+    }
+
+    const int scheme_len = 8; // "https://"
 
     WiFiClient    basic_client;
     ESP_SSLClient ssl_client;
@@ -3618,19 +3628,17 @@ bool System::uploadFirmwareURL(const char * url) {
     Stream * stream        = nullptr;
     int      firmware_size = 0;
 
-    if (is_https) {
-        ssl_client.setInsecure(); // no CA validation, matches the rest of the project
-        // a small (e.g. 1 KB) RX buffer makes the body unreadable: the headers still fit one small
-        // record, hence Content-Length looks fine, but the first body record cannot be decoded
-        ssl_client.setBufferSizes(HttpClient::TLS_RX_BUFFER_SIZE, HttpClient::TLS_TX_BUFFER_SIZE);
-        ssl_client.setSessionTimeout(HttpClient::TLS_SESSION_TIMEOUT_S);
-    }
+    ssl_client.setInsecure(); // no CA validation, matches the rest of the project. The firmware signature is checked instead
+    // a small (e.g. 1 KB) RX buffer makes the body unreadable: the headers still fit one small
+    // record, hence Content-Length looks fine, but the first body record cannot be decoded
+    ssl_client.setBufferSizes(HttpClient::TLS_RX_BUFFER_SIZE, HttpClient::TLS_TX_BUFFER_SIZE);
+    ssl_client.setSessionTimeout(HttpClient::TLS_SESSION_TIMEOUT_S);
 
     basic_client.setTimeout(FIRMWARE_UPLOAD_READ_TIMEOUT_S * 1000); // socket-level read timeout, in ms
     ssl_client.setTimeout(FIRMWARE_UPLOAD_READ_TIMEOUT_S);          // Stream::readBytes timeout
-    ssl_client.setClient(&basic_client, is_https);                  // enableSSL = false for plain HTTP
+    ssl_client.setClient(&basic_client, true);
 
-    const uint16_t port           = is_https ? 443 : 80;
+    const uint16_t port           = 443;
     String         url_remain     = saved_url.substring(scheme_len);
     int            redirect_count = 0;
 
@@ -3708,24 +3716,17 @@ bool System::uploadFirmwareURL(const char * url) {
                 return false;
             }
 
-            String lower_loc = location;
-            lower_loc.toLowerCase();
-            if (lower_loc.startsWith("https://") || lower_loc.startsWith("http://")) {
-                // scheme-changing redirect is not supported - the SSL state is
-                // baked in at setClient() time and we don't want to re-init mid-flight
-                const bool new_is_https = lower_loc.startsWith("https://");
-                if (new_is_https != is_https) {
-                    LOG_ERROR("Firmware upload failed - cross-scheme redirect to %s", location.c_str());
-                    return false;
-                }
-
-                url_remain = location.substring(new_is_https ? 8 : 7);
-            } else if (location.startsWith("/")) {
-                url_remain = host + location; // relative redirect, same host
+            String next;
+            if (location.startsWith("/")) {
+                next = "https://" + host + location; // relative redirect, same host
             } else {
+                next = location;
+            }
+            if (!FirmwareURL::redirect_allowed(next.c_str())) {
                 LOG_ERROR("Firmware upload failed - unsupported redirect to %s", location.c_str());
                 return false;
             }
+            url_remain = next.substring(scheme_len);
 
             LOG_DEBUG("Following redirect to %s", url_remain.c_str());
             continue;
@@ -3795,7 +3796,7 @@ bool System::uploadFirmwareURL(const char * url) {
         return false; // error
     }
 
-    LOG_INFO("%s uploading (size: %dKB) over %s. Please wait...", is_recovery ? "Recovery firmware" : "Firmware", firmware_size / 1024, is_https ? "HTTPS" : "HTTP");
+    LOG_INFO("%s uploading (size: %dKB) over HTTPS. Please wait...", is_recovery ? "Recovery firmware" : "Firmware", firmware_size / 1024);
 
     Shell::loop_all(); // flush log buffers so latest messages are shown in console
 

@@ -105,6 +105,9 @@ class HttpEndpoint : public HttpGetEndpoint<T>, public HttpPostEndpoint<T> {
         : HttpGetEndpoint<T>(stateReader, statefulService, server, servicePath)
         , HttpPostEndpoint<T>(stateReader, stateUpdater, statefulService, server, servicePath) {
     }
+
+    void requirePassword(std::function<bool(JsonObject json, T & current)> when) {
+    }
 };
 
 #endif

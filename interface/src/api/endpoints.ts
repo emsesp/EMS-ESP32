@@ -1,7 +1,13 @@
 import { type AlovaXHRResponse, xhrRequestAdapter } from '@alova/adapter-xhr';
 import { createAlova } from 'alova';
+import type { AlovaGenerics, Method } from 'alova';
 import ReactHook from 'alova/react';
 
+import {
+  PASSWORD_REQUIRED,
+  askPassword,
+  passwordCancelledMessage
+} from './passwordPrompt';
 import { unpack } from './unpack';
 
 export const ACCESS_TOKEN = 'access_token' as const;
@@ -21,7 +27,18 @@ export const clearTokenCache = (): void => {
   cachedToken = null;
 };
 
-const handleResponse = async (response: AlovaXHRResponse) => {
+const handleResponse = async (
+  response: AlovaXHRResponse,
+  method: Method<AlovaGenerics>
+) => {
+  // ask for the password and send the request again
+  if (response.status === PASSWORD_REQUIRED) {
+    if (await askPassword()) {
+      return method.send(true) as Promise<unknown>;
+    }
+    throw new Error(passwordCancelledMessage());
+  }
+
   // Handle various HTTP status codes
   if (response.status === 205) {
     throw new Error('Reboot required');

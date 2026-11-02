@@ -35,6 +35,9 @@ SecuritySettingsService::SecuritySettingsService(AsyncWebServer * server, FS * f
     , _fs(fs) {
     addUpdateHandler([this] { onSettingsUpdated(); }, false);
 
+    // adding, changing or removing users and passwords
+    _httpEndpoint.requirePassword([](JsonObject, SecuritySettings &) { return true; });
+
     addEndpoint(server, API_KEYS_PATH, AuthenticationPredicates::IS_ADMIN, [this](AsyncWebServerRequest * request) { listApiKeys(request); });
     addEndpoint(server, API_KEYS_PATH, AuthenticationPredicates::IS_ADMIN, [this](AsyncWebServerRequest * request, JsonVariant json) {
         apiKeyAction(request, json);
@@ -129,17 +132,40 @@ String SecuritySettingsService::adminCredentials() {
     return credentials;
 }
 
-Authentication SecuritySettingsService::authenticateRequest(AsyncWebServerRequest * request) {
+String SecuritySettingsService::bearerToken(AsyncWebServerRequest * request) {
     auto authorizationHeader = request->getHeader(AUTHORIZATION_HEADER);
     if (authorizationHeader) {
-        String value = authorizationHeader->value();
+        const String & value = authorizationHeader->value();
         if (value.startsWith(AUTHORIZATION_HEADER_PREFIX)) {
-            value = value.substring(AUTHORIZATION_HEADER_PREFIX_LEN);
-            return authenticateJWT(value);
+            return value.substring(AUTHORIZATION_HEADER_PREFIX_LEN);
         }
     }
+    return "";
+}
 
-    return {};
+Authentication SecuritySettingsService::authenticateRequest(AsyncWebServerRequest * request) {
+    String token = bearerToken(request);
+    if (token.isEmpty()) {
+        return {};
+    }
+
+    Authentication authentication = authenticateJWT(token);
+    if (authentication.authenticated) {
+        authentication.session            = true;
+        authentication.password_confirmed = _passwordConfirm.confirmed(token.c_str(), millis());
+    }
+    return authentication;
+}
+
+bool SecuritySettingsService::confirmPassword(AsyncWebServerRequest * request, const String & password) {
+    String         token          = bearerToken(request);
+    Authentication authentication = authenticateJWT(token);
+    if (!authentication.authenticated || !PasswordHash::verify(password, authentication.user->password)) {
+        return false;
+    }
+
+    _passwordConfirm.confirm(token.c_str(), millis());
+    return true;
 }
 
 // API keys are only accepted here, so they can't be used for the Web UI
@@ -181,6 +207,11 @@ void SecuritySettingsService::listApiKeys(AsyncWebServerRequest * request) {
 
 // create returns the key, the only time it's shown
 void SecuritySettingsService::apiKeyAction(AsyncWebServerRequest * request, JsonVariant json) {
+    if (!authenticateRequest(request).password_confirmed) {
+        request->send(PASSWORD_REQUIRED);
+        return;
+    }
+
     const String action = json["action"] | "";
 
     if (action == "create") {
