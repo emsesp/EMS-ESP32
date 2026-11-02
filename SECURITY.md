@@ -15,7 +15,7 @@ Firmware is signed with ECDSA P-256 over SHA-256 of the whole `.bin`. The signat
 - **Release key:** signs every official release and development build. It is held by the project maintainer (proddy). It exists only as the `EMSESP_SIGNING_KEY` secret of the `release` environment in this repository, and as an encrypted offline backup. It is not kept on development machines.
 - **Spare key:** never used for signing until the release key has to be replaced. It is held offline by the project maintainer only, and never stored on GitHub or on a computer that builds firmware.
 
-The `release` environment can only be used by the `dev` and `main` branches and `v*` tags, so only the dev and stable release workflows can sign. Pull requests and forks never get the key. Before a release is published, the workflow checks every `.bin` against the public keys.
+Only firmware built by the GitHub Actions of this repository is signed, so only those builds are shown as "Official build". The `release` environment can only be used by the `dev` and `main` branches and `v*` tags, and every run that signs waits until a member of the [owners](https://github.com/orgs/emsesp/teams/owners) team approves it. Only owners can create `v*` tags. Pull requests and forks never get the key. Before a release is published, the workflow checks every `.bin` against the public keys.
 
 You can check a downloaded file yourself with `python3 scripts/sign_firmware.py verify <file.bin>` (needs `pip install cryptography`).
 
