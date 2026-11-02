@@ -52,4 +52,5 @@ export interface RecoveryStatus {
 export interface UploadResult {
   md5?: string;
   md5_ok?: boolean;
+  signed?: boolean;
 }

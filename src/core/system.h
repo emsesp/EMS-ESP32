@@ -149,6 +149,8 @@ class System {
     String getBBQKeesGatewayDetails(uint8_t detail = 0);
 
     static bool uploadFirmwareURL(const char * url = nullptr);
+    // the running firmware is signed by EMS-ESP, checked once
+    static bool official_build();
 
     void button_init();
     void commands_init();

@@ -153,6 +153,14 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
     }
 }
 
+void UploadFileService::logSigned() {
+    if (_ota.isSigned()) {
+        emsesp::EMSESP::logger().info("Firmware signature verified");
+    } else {
+        emsesp::EMSESP::logger().warning("Unsigned firmware installed, it was allowed on the serial console");
+    }
+}
+
 void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
     if (request->_tempObject) {
         const int code = *static_cast<int *>(request->_tempObject);
@@ -195,6 +203,8 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
         auto *     response = new emsesp::PsramAsyncJsonResponse(false);
         JsonObject root     = response->getRoot();
         root["recovery"]    = true;
+        root["signed"]      = _ota.isSigned();
+        logSigned();
         if (_ota.md5Applied()) {
             emsesp::EMSESP::logger().info("Firmware MD5 matches");
             root["md5_ok"] = true;
@@ -215,14 +225,18 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
             emsesp::EMSESP::nvs_.putBool(emsesp::EMSESP_NVS_BOOT_NEW_FIRMWARE, true);
         }
 
-        if (_is_firmware && _ota.md5Applied()) {
-            emsesp::EMSESP::logger().info("Firmware MD5 matches");
+        if (_is_firmware) {
             auto *     response = new emsesp::PsramAsyncJsonResponse(false);
             JsonObject root     = response->getRoot();
-            root["md5_ok"]      = true;
+            root["signed"]      = _ota.isSigned();
+            logSigned();
+            if (_ota.md5Applied()) {
+                emsesp::EMSESP::logger().info("Firmware MD5 matches");
+                root["md5_ok"] = true;
+                _ota.clearMd5();
+            }
             response->setLength();
             request->send(response);
-            _ota.clearMd5();
         } else {
             AsyncWebServerResponse * response = request->beginResponse(200);
             request->send(response);

@@ -62,7 +62,8 @@ class FirmwareSignature {
 
     // after the last write, checks the held back bytes are a signature of the image by one of the keys
     bool verify(const uint8_t (*keys)[PUBLIC_KEY_SIZE], size_t num_keys);
-    bool verify(); // with the EMS-ESP keys from firmware_keys.h
+    bool verify();        // with all the keys from firmware_keys.h
+    bool verify_emsesp(); // only with the EMS-ESP keys, not keys added for your own builds
 
     // the held back bytes, they're the end of the image if the file isn't signed
     const uint8_t * tail() const {

@@ -748,15 +748,15 @@ static void handleUploadComplete(AsyncWebServerRequest * request) {
             }
         }
 
+        LOG("Firmware signature verified");
+        auto *     response = new AsyncJsonResponse();
+        JsonObject root     = response->getRoot().to<JsonObject>();
+        root["signed"]      = ota.isSigned();
         if (ota.md5Applied()) {
-            auto *     response = new AsyncJsonResponse();
-            JsonObject root     = response->getRoot().to<JsonObject>();
-            root["md5_ok"]      = true;
-            response->setLength();
-            request->send(response);
-        } else {
-            request->send(200);
+            root["md5_ok"] = true;
         }
+        response->setLength();
+        request->send(response);
         ota.clearMd5();
         return;
     }

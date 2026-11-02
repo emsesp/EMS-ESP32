@@ -15,6 +15,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
   Button,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -36,6 +37,7 @@ import type { APIcall } from 'app/main/types';
 import SystemMonitor from 'app/status/SystemMonitor';
 import {
   FormLoader,
+  MessageBox,
   SectionContent,
   SingleUpload,
   useLayoutTitle
@@ -866,6 +868,15 @@ const Version = () => {
             >
               <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
             </IconButton>
+            {data.official_build !== undefined && (
+              <Chip
+                size="small"
+                variant="outlined"
+                color={data.official_build ? 'success' : 'default'}
+                label={data.official_build ? LL.OFFICIAL_BUILD() : LL.CUSTOM_BUILD()}
+                sx={{ ml: 1 }}
+              />
+            )}
           </Box>
 
           <Typography color="secondary">{LL.PLATFORM()}</Typography>
@@ -1087,6 +1098,13 @@ const Version = () => {
             <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
               {LL.UPLOAD()}
             </Typography>
+            {data.allow_unsigned && (
+              <MessageBox
+                level="warning"
+                message={LL.UPLOAD_UNSIGNED_ALLOWED()}
+                sx={{ mb: 2 }}
+              />
+            )}
             <SingleUpload
               text={LL.UPLOAD_FIRMWARE_TEXT()}
               doRestart={doRestart}

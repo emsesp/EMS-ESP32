@@ -39,6 +39,8 @@ export interface SystemStatus {
   arduino_version: string;
   sdk_version: string;
   partition: string;
+  official_build?: boolean;
+  allow_unsigned?: boolean;
   flash_chip_size: number;
   flash_chip_speed: number;
   app_used: number;

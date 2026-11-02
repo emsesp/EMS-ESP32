@@ -161,6 +161,14 @@ void security_test_firmware_keys() {
         TEST_ASSERT_EQUAL(1, uECC_valid_public_key(FIRMWARE_PUBLIC_KEYS[i], uECC_secp256r1()));
     }
     TEST_ASSERT_FALSE(fwsig::stream(fwsig::signed_file(fwsig::SIG_R33), 512, FIRMWARE_PUBLIC_KEYS, count).ok);
+
+    // only the EMS-ESP keys make an official build, not a key added for your own builds
+    TEST_ASSERT_EQUAL(2, EMSESP_KEY_COUNT);
+    const auto        file = fwsig::signed_file(fwsig::SIG_R33);
+    FirmwareSignature sig;
+    sig.begin();
+    sig.write(file.data(), file.size(), [](const uint8_t *, size_t) { return true; });
+    TEST_ASSERT_FALSE(sig.verify_emsesp());
 }
 
 // unsigned firmware can only be allowed by an admin on the serial console

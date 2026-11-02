@@ -3,13 +3,15 @@
 #include <Update.h>
 #include <esp_app_format.h>
 #include <esp_image_format.h>
+#include <esp_partition.h>
 #ifdef OTA_UPDATER_ANY_PARTITION
 #include <esp_heap_caps.h>
-#include <esp_partition.h>
 #endif
 
 #include <algorithm>
 #include <cstddef>
+#include <memory>
+#include <new>
 
 bool OtaUpdater::_allow_unsigned = false;
 
@@ -140,9 +142,39 @@ void OtaUpdater::releaseTarget() {
 }
 #endif
 
+bool OtaUpdater::isOfficialFirmware(const esp_partition_t * partition) {
+    if (partition == nullptr) {
+        return false;
+    }
+    const esp_partition_pos_t pos  = {.offset = partition->address, .size = partition->size};
+    esp_image_metadata_t      meta = {};
+    if (esp_image_get_metadata(&pos, &meta) != ESP_OK || meta.image_len + FirmwareSignature::SIGNATURE_SIZE > partition->size) {
+        return false;
+    }
+
+    // on the heap, this can run on a task with a small stack
+    std::unique_ptr<FirmwareSignature> signature(new (std::nothrow) FirmwareSignature());
+    std::unique_ptr<uint8_t[]>         buf(new (std::nothrow) uint8_t[READ_CHUNK]);
+    if (!signature || !buf) {
+        return false;
+    }
+    signature->begin();
+    const size_t total = meta.image_len + FirmwareSignature::SIGNATURE_SIZE;
+    for (size_t offset = 0; offset < total;) {
+        const size_t n = std::min(READ_CHUNK, total - offset);
+        if (esp_partition_read(partition, offset, buf.get(), n) != ESP_OK) {
+            return false;
+        }
+        signature->write(buf.get(), n, [](const uint8_t *, size_t) { return true; });
+        offset += n;
+    }
+    return signature->verify_emsesp();
+}
+
 bool OtaUpdater::beginFirmware(size_t filesize, const esp_partition_t * target, bool set_boot) {
     _md5_applied = false;
     _not_signed  = false;
+    _signed      = false;
     _filesystem  = false;
     _error       = "";
 
@@ -188,6 +220,7 @@ bool OtaUpdater::beginFirmware(size_t filesize, const esp_partition_t * target, 
 bool OtaUpdater::beginFilesystem() {
     clearMd5(); // a digest is only for firmware
     _not_signed = false;
+    _signed     = false;
     _filesystem = true;
     _error      = "";
     if (!_allow_unsigned) {
@@ -264,14 +297,16 @@ bool OtaUpdater::end() {
         }
     }
 
-    if (!_filesystem && !_signature.verify()) {
-        if (!_allow_unsigned) {
+    if (!_filesystem) {
+        _signed = _signature.verify();
+        if (!_signed && !_allow_unsigned) {
             _not_signed = true;
             _error      = NOT_SIGNED_ERROR;
             abort();
             return false;
         }
-        // not signed, so the held back bytes are the end of the image
+        // the signature is kept after the image so isOfficialFirmware() can check it later, as when the file is
+        // flashed over USB. Not signed, the held back bytes are the end of the image
         if (!writeImage(_signature.tail(), _signature.tail_size())) {
             abort();
             return false;

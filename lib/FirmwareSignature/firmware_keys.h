@@ -1,11 +1,15 @@
 #ifndef FirmwareKeys_h
 #define FirmwareKeys_h
 
+#include <cstddef>
 #include <cstdint>
 
 // Public keys of the EMS-ESP firmware signing keys, uncompressed P-256 points (X then Y).
 // The first is used for releases, the second is a spare kept offline in case the first has to be replaced.
 // Print one with: python3 scripts/sign_firmware.py pubkey <key.pem>
+// Keys added after the first EMSESP_KEY_COUNT are accepted for uploads, but their builds are shown as custom builds.
+static constexpr size_t EMSESP_KEY_COUNT = 2;
+
 static constexpr uint8_t FIRMWARE_PUBLIC_KEYS[][64] = {
     // release key
     {0xa2, 0x01, 0x88, 0x16, 0x29, 0x42, 0x74, 0x4e, 0xae, 0x13, 0xef, 0x08, 0xd0, 0x7c, 0x79, 0x06,

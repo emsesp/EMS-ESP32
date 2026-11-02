@@ -45,6 +45,13 @@ const SingleUpload = ({
         payload = data;
       }
     }
+    if (
+      payload &&
+      typeof payload === 'object' &&
+      (payload as { signed?: boolean }).signed
+    ) {
+      toast.success(LL.UPLOAD_SIGNATURE_VERIFIED());
+    }
     if (payload && typeof payload === 'object' && 'md5' in payload) {
       setMd5((payload as { md5: string }).md5);
       toast.success(LL.UPLOAD_MD5_RECEIVED());

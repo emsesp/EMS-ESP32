@@ -106,6 +106,8 @@ let system_status = {
   arduino_version: 'Arduino v3.3.8',
   sdk_version: '5.5.4.260407',
   partition: 'app0',
+  official_build: true,
+  allow_unsigned: false,
   flash_chip_size: 16384,
   flash_chip_speed: 80000000,
   app_used: 2258,

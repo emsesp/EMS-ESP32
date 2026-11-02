@@ -99,6 +99,9 @@ const FirmwareUpload = ({
         setMd5(result.md5);
         toast.success('MD5 received, now upload the firmware .bin');
       } else {
+        if (result.signed) {
+          toast.success('Signature verified');
+        }
         if (result.md5_ok) {
           toast.success('Firmware MD5 matches');
         }

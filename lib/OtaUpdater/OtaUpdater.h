@@ -44,6 +44,10 @@ class OtaUpdater {
     // IDF refuses to start another firmware update until then. Returns true if it was pending.
     static bool confirmRunningApp();
 
+    // the partition holds an image followed by a signature from one of the EMS-ESP keys, as written by end() or by
+    // flashing a signed file over USB. Reads the whole image, so it takes a moment
+    static bool isOfficialFirmware(const esp_partition_t * partition);
+
     // only from the serial console. Cleared by the next successful update and by a restart
     static void allowUnsigned(bool allow) {
         _allow_unsigned = allow;
@@ -77,9 +81,14 @@ class OtaUpdater {
     bool notSigned() const {
         return _not_signed;
     }
+    // the firmware written by the last successful end() was signed
+    bool isSigned() const {
+        return _signed;
+    }
 
   private:
-    static bool _allow_unsigned;
+    static bool             _allow_unsigned;
+    static constexpr size_t READ_CHUNK = 1024;
 
     std::array<char, 33> _md5{};
     bool                 _md5_applied = false;
@@ -87,6 +96,7 @@ class OtaUpdater {
     FirmwareSignature    _signature;
     bool                 _filesystem = false;
     bool                 _not_signed = false;
+    bool                 _signed     = false;
     const char *         _error      = "";
 
     bool writeImage(const uint8_t * data, size_t len);

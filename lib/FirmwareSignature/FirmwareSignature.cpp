@@ -115,3 +115,8 @@ bool FirmwareSignature::verify(const uint8_t (*keys)[PUBLIC_KEY_SIZE], size_t nu
 bool FirmwareSignature::verify() {
     return verify(FIRMWARE_PUBLIC_KEYS, sizeof(FIRMWARE_PUBLIC_KEYS) / sizeof(FIRMWARE_PUBLIC_KEYS[0]));
 }
+
+bool FirmwareSignature::verify_emsesp() {
+    static_assert(EMSESP_KEY_COUNT <= sizeof(FIRMWARE_PUBLIC_KEYS) / sizeof(FIRMWARE_PUBLIC_KEYS[0]), "EMSESP_KEY_COUNT is too big");
+    return verify(FIRMWARE_PUBLIC_KEYS, EMSESP_KEY_COUNT);
+}

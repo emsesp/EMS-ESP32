@@ -20,6 +20,7 @@
 
 #ifndef EMSESP_STANDALONE
 #include <esp_ota_ops.h>
+#include <OtaUpdater.h>
 #endif
 #include "emsesp_http_client.h"
 
@@ -117,6 +118,8 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     root["arduino_version"]  = ARDUINO_VERSION;
     root["sdk_version"]      = ESP.getSdkVersion();
     root["partition"]        = (const char *)esp_ota_get_running_partition()->label; // active partition
+    root["official_build"]   = EMSESP::system_.official_build();
+    root["allow_unsigned"]   = OtaUpdater::unsignedAllowed();
     root["flash_chip_size"]  = ESP.getFlashChipSize() / 1024;
     root["flash_chip_speed"] = ESP.getFlashChipSpeed();
     root["app_used"]         = EMSESP::system_.appUsed();

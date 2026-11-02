@@ -2863,6 +2863,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["usedApp"]         = EMSESP::system_.appUsed();                            // kilobytes
     node["freeApp"]         = EMSESP::system_.appFree();                            // kilobytes
     node["partition"]       = (const char *)esp_ota_get_running_partition()->label; // active partition
+    node["build"]           = official_build() ? "official" : "custom";
     node["flash_chip_size"] = ESP.getFlashChipSize() / 1024;                        // kilobytes
     node["psram"]           = (EMSESP::system_.PSram() > 0);                        // make boolean
     if (EMSESP::system_.PSram()) {
@@ -3918,6 +3919,12 @@ bool System::uploadFirmwareURL(const char * url) {
 
     saved_url.clear(); // prevent from downloading again
 
+    if (ota->isSigned()) {
+        LOG_INFO("Firmware signature verified");
+    } else {
+        LOG_WARNING("Unsigned firmware installed, it was allowed on the serial console");
+    }
+
     if (is_recovery) {
         // no restart. The partition info is updated later on the AsyncTCP task, see recovery_installed_apply()
         EMSESP::system_.recovery_installed_deferred();
@@ -3931,6 +3938,18 @@ bool System::uploadFirmwareURL(const char * url) {
 #endif
 
     return true; // OK
+}
+
+bool System::official_build() {
+#ifndef EMSESP_STANDALONE
+    static int8_t official = -1; // reads the whole image, so only once
+    if (official < 0) {
+        official = OtaUpdater::isOfficialFirmware(esp_ota_get_running_partition()) ? 1 : 0;
+    }
+    return official == 1;
+#else
+    return false;
+#endif
 }
 
 // read command, e.g. read <deviceID> <type ID> [offset] [length] from console or API

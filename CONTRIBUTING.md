@@ -74,7 +74,7 @@ Use this if you install your own builds often.
    python3 scripts/sign_firmware.py genkey ~/.ems-esp/firmware_signing_key.pem
    ```
 
-3. Print its public key and add the output to the list in `lib/FirmwareSignature/firmware_keys.h`. Add it after the EMS-ESP keys rather than replacing them, so official releases can still be installed:
+3. Print its public key and add the output to the list in `lib/FirmwareSignature/firmware_keys.h`. Add it after the EMS-ESP keys rather than replacing them, so official releases can still be installed. Builds signed with your key are accepted, but the Version page shows them as "Custom build":
 
    ```bash
    python3 scripts/sign_firmware.py pubkey ~/.ems-esp/firmware_signing_key.pem
