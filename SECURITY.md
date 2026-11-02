@@ -6,7 +6,7 @@ Please report any security vulnerabilities using the [Contact Form](https://emse
 
 ## Firmware signing
 
-From 3.9.0, EMS-ESP only installs firmware and filesystem images signed by EMS-ESP when they're uploaded in the Web UI, installed from a URL, sent over the network or uploaded in the Recovery firmware. Flashing over USB isn't checked. To install your own build, see [Installing your own build](CONTRIBUTING.md#installing-your-own-build).
+From 3.9.0, EMS-ESP checks the signature of firmware uploaded in the Web UI, installed from a URL, sent over the network or uploaded in the Recovery firmware. Anything that isn't signed by EMS-ESP, including filesystem images, is only installed after the user agrees to install a custom build. Flashing over USB isn't checked. To install your own build, see [Installing your own build](CONTRIBUTING.md#installing-your-own-build).
 
 Firmware is signed with ECDSA P-256 over SHA-256 of the whole `.bin`, and the signature is appended to the file, so signed files also install on older versions. The public keys are in `lib/FirmwareSignature/firmware_keys.h`.
 

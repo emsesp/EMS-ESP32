@@ -11,7 +11,7 @@ export enum SystemStatusCodes {
   SYSTEM_STATUS_PENDING_RESTART = 4,
   SYSTEM_STATUS_RESTART_REQUESTED = 5,
   SYSTEM_STATUS_INVALID_GPIO = 6,
-  SYSTEM_STATUS_ERROR_NOT_SIGNED = 7
+  SYSTEM_STATUS_ERROR_NOT_OFFICIAL = 7
 }
 
 export interface SystemStatus {
@@ -40,7 +40,6 @@ export interface SystemStatus {
   sdk_version: string;
   partition: string;
   official_build?: boolean;
-  allow_unsigned?: boolean;
   flash_chip_size: number;
   flash_chip_speed: number;
   app_used: number;

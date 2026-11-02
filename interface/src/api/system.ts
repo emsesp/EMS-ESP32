@@ -17,10 +17,12 @@ export const runConsoleCommand = (command: string) =>
 
 const UPLOAD_TIMEOUT = 60000; // 1 minute
 
-export const uploadFile = (file: File) => {
+// custom: the user agreed to install a build that isn't an official EMS-ESP build
+export const uploadFile = (file: File, custom = false) => {
   const formData = new FormData();
   formData.append('file', file);
   return alovaInstance.Post('/rest/uploadFile', formData, {
-    timeout: UPLOAD_TIMEOUT
+    timeout: UPLOAD_TIMEOUT,
+    ...(custom && { params: { custom: 1 } })
   });
 };

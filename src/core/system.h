@@ -65,7 +65,7 @@ enum SYSTEM_STATUS : uint8_t {
     SYSTEM_STATUS_PENDING_RESTART   = 4,
     SYSTEM_STATUS_RESTART_REQUESTED = 5,
     SYSTEM_STATUS_INVALID_GPIO      = 6,
-    SYSTEM_STATUS_ERROR_NOT_SIGNED  = 7 // upload from a URL refused, not signed by EMS-ESP
+    SYSTEM_STATUS_ERROR_NOT_OFFICIAL = 7 // upload from a URL stopped, a custom build the user hasn't agreed to
 };
 
 enum FUSE_VALUE : uint8_t { ALL = 0, MFG = 1, MODEL = 2, BOARD = 3, REV = 4, BATCH = 5, FUSE = 6 };
@@ -148,7 +148,7 @@ class System {
 
     String getBBQKeesGatewayDetails(uint8_t detail = 0);
 
-    static bool uploadFirmwareURL(const char * url = nullptr);
+    static bool uploadFirmwareURL(const char * url = nullptr, bool allow_custom = false);
     // the running firmware is signed by EMS-ESP, checked once
     static bool official_build();
 

@@ -24,7 +24,6 @@ import SystemMonitor from 'app/status/SystemMonitor';
 import {
   BlockFormControlLabel,
   FormLoader,
-  MessageBox,
   SectionContent,
   SingleUpload,
   useLayoutTitle
@@ -181,13 +180,6 @@ const DownloadUpload = () => {
         {LL.UPLOAD()}
       </Typography>
 
-      {data?.allow_unsigned && (
-        <MessageBox
-          level="warning"
-          message={LL.UPLOAD_UNSIGNED_ALLOWED()}
-          sx={{ mb: 2 }}
-        />
-      )}
       <SingleUpload text={LL.UPLOAD_BACKUP_TEXT()} doRestart={doRestart} />
     </SectionContent>
   );

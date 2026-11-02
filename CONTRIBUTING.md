@@ -46,53 +46,17 @@ platformio --version
 
 ## Installing your own build
 
-From 3.9.0, EMS-ESP only installs firmware that is signed by EMS-ESP when it's uploaded through the Web UI, installed from a URL, sent over the network with `pio run -t upload`, or uploaded in the Recovery firmware. Filesystem images are treated the same way. A build from your fork isn't signed with the EMS-ESP key, so the device refuses it with "This firmware is not signed by EMS-ESP". Choose one of these:
+From 3.9.0, EMS-ESP checks whether firmware is an official build, signed by EMS-ESP, when it's uploaded through the Web UI, installed from a URL, sent over the network with `pio run -t upload`, or uploaded in the Recovery firmware. A build from your fork, and any filesystem image, isn't, so the Web UI shows "This is not an official EMS-ESP build". Click "Install anyway" to install it. The Version page then shows "Custom build".
 
-### 1. Flash over USB
+`pio run -t upload` over the network (`scripts/upload.py`) and `scripts/upload_cli.py` install your build without asking. Flashing over a USB or serial cable (`pio run -e <env> -t upload` with the board connected, or esptool) isn't checked either. Your settings stay as they are.
 
-Flashing over a USB or serial cable (`pio run -e <env> -t upload` with the board connected, or esptool) is never checked. Your settings stay as they are.
-
-### 2. Allow one unsigned upload
-
-On the device's serial console (USB cable, 115200 baud):
-
-```text
-su
-allow unsigned
-```
-
-`su` asks for the username and password of a Web UI admin user. `allow unsigned` only works on the serial console, not on telnet or the Web UI's console. The next firmware or filesystem upload can then be unsigned, through the Web UI or the network. This ends after that upload or a restart, so repeat it for each upload.
-
-### 3. Sign with your own key
-
-Use this if you install your own builds often.
-
-1. Install the Python package the signing script uses, in the same Python as PlatformIO, e.g. `~/.platformio/penv/bin/pip install cryptography`.
-2. Create a key. It's saved where the build looks for it, `~/.ems-esp/firmware_signing_key.pem`. Keep it private, and never commit it (`*.pem` is in `.gitignore`):
-
-   ```bash
-   python3 scripts/sign_firmware.py genkey ~/.ems-esp/firmware_signing_key.pem
-   ```
-
-3. Add its public key to the keys the firmware accepts. This writes `lib/FirmwareSignature/firmware_keys_local.h`, which git ignores, so your key never ends up in a commit and the EMS-ESP keys stay as they are. Builds signed with your key are accepted, but the Version page shows them as "Custom build":
-
-   ```bash
-   python3 scripts/sign_firmware.py addkey ~/.ems-esp/firmware_signing_key.pem
-   ```
-
-4. Build. The build signs the copy in `build/firmware/` and prints `Signed: Yes`. Install this first build with option 1 or 2, because the device doesn't know your key yet.
-5. From then on, every build is signed automatically and installs from the Web UI or with `pio run -t upload`.
-
-To keep the key somewhere else, set `EMSESP_SIGNING_KEY` to the path of the `.pem` file or to its contents. For builds in your fork's GitHub Actions, add the contents as a repository secret called `EMSESP_SIGNING_KEY`.
-
-To sign or check a file by hand:
+To check whether a file is an official build (needs `pip install cryptography`):
 
 ```bash
-python3 scripts/sign_firmware.py sign build/firmware/<file>.bin    # also rewrites the .md5 next to it
-python3 scripts/sign_firmware.py verify build/firmware/<file>.bin  # checks against the keys in firmware_keys.h and firmware_keys_local.h
+python3 scripts/sign_firmware.py verify build/firmware/<file>.bin
 ```
 
-Signing adds 512 bytes to the end of the `.bin`. Older EMS-ESP versions and the ESP32 ignore them, so a signed file also installs on a device running an older version. What makes a build official is in [SECURITY.md](SECURITY.md#firmware-signing).
+What makes a build official is in [SECURITY.md](SECURITY.md#firmware-signing).
 
 ## Opening New Issues
 

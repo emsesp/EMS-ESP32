@@ -36,6 +36,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
         _is_filesystem = false;
         _is_recovery   = false;
         _response_sent = false;
+        _ota.allowCustom(request->hasParam("custom")); // the user agreed to install a custom build
 
         if (!authentication.password_confirmed) {
             handleError(request, SecurityManager::PASSWORD_REQUIRED);
@@ -120,7 +121,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
                 request->onDisconnect([this] { handleDisconnect(); });
             } else {
                 emsesp::EMSESP::logger().err("Filesystem upload failed: %s", _ota.errorString());
-                handleError(request, _ota.notSigned() ? 412 : 507);
+                handleError(request, _ota.notOfficial() ? 412 : 507);
                 return;
             }
         } else {
@@ -145,7 +146,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
             if (final) {
                 if (!_ota.end()) {
                     emsesp::EMSESP::logger().err("OTA update failed: %s", _ota.errorString());
-                    handleError(request, _ota.notSigned() ? 412 : 500); // 412 Precondition Failed, not signed by EMS-ESP
+                    handleError(request, _ota.notOfficial() ? 412 : 500); // 412 Precondition Failed, a custom build that wasn't agreed to
                     return;
                 }
             }
@@ -158,11 +159,11 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
     }
 }
 
-void UploadFileService::logSigned() {
-    if (_ota.isSigned()) {
-        emsesp::EMSESP::logger().info("Firmware signature verified");
+void UploadFileService::logOfficial() {
+    if (_ota.isOfficial()) {
+        emsesp::EMSESP::logger().info("Official EMS-ESP build, signature verified");
     } else {
-        emsesp::EMSESP::logger().warning("Unsigned firmware installed, it was allowed on the serial console");
+        emsesp::EMSESP::logger().warning("Custom build installed, it isn't signed by EMS-ESP");
     }
 }
 
@@ -208,8 +209,8 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
         auto *     response = new emsesp::PsramAsyncJsonResponse(false);
         JsonObject root     = response->getRoot();
         root["recovery"]    = true;
-        root["signed"]      = _ota.isSigned();
-        logSigned();
+        root["official"]    = _ota.isOfficial();
+        logOfficial();
         if (_ota.md5Applied()) {
             emsesp::EMSESP::logger().info("Firmware MD5 matches");
             root["md5_ok"] = true;
@@ -233,8 +234,8 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
         if (_is_firmware) {
             auto *     response = new emsesp::PsramAsyncJsonResponse(false);
             JsonObject root     = response->getRoot();
-            root["signed"]      = _ota.isSigned();
-            logSigned();
+            root["official"]    = _ota.isOfficial();
+            logOfficial();
             if (_ota.md5Applied()) {
                 emsesp::EMSESP::logger().info("Firmware MD5 matches");
                 root["md5_ok"] = true;

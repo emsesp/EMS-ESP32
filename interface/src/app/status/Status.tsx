@@ -82,7 +82,7 @@ const SystemStatus = () => {
       case SystemStatusCodes.SYSTEM_STATUS_UPLOADING:
         return LL.WAIT_FIRMWARE();
       case SystemStatusCodes.SYSTEM_STATUS_ERROR_UPLOAD:
-      case SystemStatusCodes.SYSTEM_STATUS_ERROR_NOT_SIGNED:
+      case SystemStatusCodes.SYSTEM_STATUS_ERROR_NOT_OFFICIAL:
         return LL.ERROR();
       case SystemStatusCodes.SYSTEM_STATUS_PENDING_RESTART:
       case SystemStatusCodes.SYSTEM_STATUS_RESTART_REQUESTED:

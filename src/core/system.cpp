@@ -3581,9 +3581,10 @@ String System::getBBQKeesGatewayDetails([[maybe_unused]] uint8_t detail) {
 //
 // This function needs to be called twice, 1st pass once with a url to persist it, 2nd pass with no arguments to start the upload
 // This is to avoid timeouts in callback functions, like calling from a web hook.
-bool System::uploadFirmwareURL(const char * url) {
+bool System::uploadFirmwareURL(const char * url, bool allow_custom) {
 #ifndef EMSESP_STANDALONE
     static String saved_url;
+    static bool   saved_allow_custom = false; // the user agreed to install a custom build
 
     if (url && strlen(url) > 0) {
         // if the passed URL is "reset" abort the current upload. This is called when an error happens during OTA
@@ -3600,7 +3601,8 @@ bool System::uploadFirmwareURL(const char * url) {
         }
 
         // given a URL to download from, save it ready for the 2nd pass
-        saved_url = url;
+        saved_url          = url;
+        saved_allow_custom = allow_custom;
         LOG_INFO("Firmware location: %s", saved_url.c_str());
         EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_PENDING_UPLOAD); // we're ready to start the upload
         return true;
@@ -3773,6 +3775,7 @@ bool System::uploadFirmwareURL(const char * url) {
 #endif
     // on the heap, the loop task's stack is small
     auto ota = std::make_unique<OtaUpdater>();
+    ota->allowCustom(saved_allow_custom);
 
     // check we have a valid size
     if (firmware_size < (int)(is_recovery ? OtaUpdater::MIN_RECOVERY_FIRMWARE_SIZE : MIN_FIRMWARE_SIZE)) {
@@ -3914,16 +3917,16 @@ bool System::uploadFirmwareURL(const char * url) {
 
     if (!ota->end()) {
         LOG_ERROR("Firmware upload failed - %s", ota->errorString());
-        EMSESP::system_.systemStatus(ota->notSigned() ? SYSTEM_STATUS::SYSTEM_STATUS_ERROR_NOT_SIGNED : SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
+        EMSESP::system_.systemStatus(ota->notOfficial() ? SYSTEM_STATUS::SYSTEM_STATUS_ERROR_NOT_OFFICIAL : SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
         return false; // error
     }
 
     saved_url.clear(); // prevent from downloading again
 
-    if (ota->isSigned()) {
-        LOG_INFO("Firmware signature verified");
+    if (ota->isOfficial()) {
+        LOG_INFO("Official EMS-ESP build, signature verified");
     } else {
-        LOG_WARNING("Unsigned firmware installed, it was allowed on the serial console");
+        LOG_WARNING("Custom build installed, it isn't signed by EMS-ESP");
     }
 
     if (is_recovery) {

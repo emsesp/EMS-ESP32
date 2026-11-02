@@ -70,7 +70,8 @@ export interface UploadHandle {
 export const uploadFile = (
   file: File,
   partition: string,
-  onProgress: (percent: number) => void
+  onProgress: (percent: number) => void,
+  custom = false // the user agreed to install a build that isn't an official EMS-ESP build
 ): UploadHandle => {
   const xhr = new XMLHttpRequest();
   const promise = new Promise<UploadResult>((resolve, reject) => {
@@ -99,7 +100,10 @@ export const uploadFile = (
 
   const formData = new FormData();
   formData.append('file', file);
-  xhr.open('POST', `/rest/uploadFile?partition=${encodeURIComponent(partition)}`);
+  xhr.open(
+    'POST',
+    `/rest/uploadFile?partition=${encodeURIComponent(partition)}${custom ? '&custom=1' : ''}`
+  );
   for (const [key, value] of Object.entries(authHeaders())) {
     xhr.setRequestHeader(key, value);
   }

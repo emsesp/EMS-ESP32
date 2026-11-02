@@ -678,6 +678,7 @@ static void handleUpload(AsyncWebServerRequest * request, const String & filenam
             uploadFail(request, 400, "no valid target partition");
             return;
         }
+        ota.allowCustom(request->hasParam("custom")); // the user agreed to install a custom build
         if (!ota.beginFirmware(filesize, target)) {
             LOG("Cannot write to %s: %s", target->label, ota.errorString());
             uploadFail(request, 507, "cannot start the update");
@@ -724,7 +725,7 @@ static void handleUpload(AsyncWebServerRequest * request, const String & filenam
         // on success this also makes the new partition the boot partition
         if (!ota.end()) {
             LOG("Upload failed: %s", ota.errorString());
-            uploadFail(request, ota.notSigned() ? 412 : 500, ota.notSigned() ? "not signed by EMS-ESP" : "image check failed");
+            uploadFail(request, ota.notOfficial() ? 412 : 500, ota.notOfficial() ? "not an official EMS-ESP build" : "image check failed");
             return;
         }
         LOG("Upload finished, the image is verified");
@@ -748,10 +749,10 @@ static void handleUploadComplete(AsyncWebServerRequest * request) {
             }
         }
 
-        LOG("Firmware signature verified");
+        LOG("%s", ota.isOfficial() ? "Official EMS-ESP build, signature verified" : "Custom build, it isn't signed by EMS-ESP");
         auto *     response = new AsyncJsonResponse();
         JsonObject root     = response->getRoot().to<JsonObject>();
-        root["signed"]      = ota.isSigned();
+        root["official"]    = ota.isOfficial();
         if (ota.md5Applied()) {
             root["md5_ok"] = true;
         }

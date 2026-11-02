@@ -11,8 +11,8 @@
 
 // Validates and streams firmware (.bin), LittleFS images (*littlefs.bin) and MD5 digests (.md5) into flash.
 // Shared between the EMS-ESP application and the recovery application.
-// Firmware must be signed by EMS-ESP (see lib/FirmwareSignature). An unsigned firmware or a filesystem image is only
-// accepted after allowUnsigned(), for one update.
+// Firmware signed with an EMS-ESP key (see lib/FirmwareSignature) is an official build. Anything else, and every
+// filesystem image, is a custom build and is only installed after allowCustom(true), once the user agreed.
 class OtaUpdater {
   public:
     enum class FileType : uint8_t { UNSUPPORTED, FIRMWARE, FILESYSTEM, JSON, MD5 };
@@ -27,7 +27,7 @@ class OtaUpdater {
     // recovery firmware is much smaller than the main image (~512 KB–1 MB)
     static constexpr size_t MIN_RECOVERY_FIRMWARE_SIZE = 512 * 1024;
 
-    static constexpr char NOT_SIGNED_ERROR[] = "This firmware is not signed by EMS-ESP";
+    static constexpr char NOT_OFFICIAL_ERROR[] = "This is not an official EMS-ESP build";
 
     // checks the ESP image magic byte and that the chip id matches the chip we're running on
     static bool isCompatibleFirmware(const uint8_t * data, size_t len);
@@ -48,12 +48,9 @@ class OtaUpdater {
     // flashing a signed file over USB. Reads the whole image, so it takes a moment
     static bool isOfficialFirmware(const esp_partition_t * partition);
 
-    // only from the serial console. Cleared by the next successful update and by a restart
-    static void allowUnsigned(bool allow) {
-        _allow_unsigned = allow;
-    }
-    static bool unsignedAllowed() {
-        return _allow_unsigned;
+    // set before begin, for that update only
+    void allowCustom(bool allow) {
+        _allow_custom = allow;
     }
 
     bool setMd5(const uint8_t * data, size_t len);
@@ -77,27 +74,27 @@ class OtaUpdater {
 
     size_t       progress() const;
     const char * errorString() const;
-    // the last begin or end failed because the file isn't signed by EMS-ESP
-    bool notSigned() const {
-        return _not_signed;
+    // the last begin or end failed because it's a custom build and allowCustom() wasn't set
+    bool notOfficial() const {
+        return _not_official;
     }
-    // the firmware written by the last successful end() was signed
-    bool isSigned() const {
-        return _signed;
+    // the firmware written by the last successful end() is an official build
+    bool isOfficial() const {
+        return _official;
     }
 
   private:
-    static bool             _allow_unsigned;
     static constexpr size_t READ_CHUNK = 1024;
 
     std::array<char, 33> _md5{};
     bool                 _md5_applied = false;
     MD5Builder           _md5Builder;
     FirmwareSignature    _signature;
-    bool                 _filesystem = false;
-    bool                 _not_signed = false;
-    bool                 _signed     = false;
-    const char *         _error      = "";
+    bool                 _filesystem   = false;
+    bool                 _allow_custom = false;
+    bool                 _not_official = false;
+    bool                 _official     = false;
+    const char *         _error        = "";
 
     bool writeImage(const uint8_t * data, size_t len);
 

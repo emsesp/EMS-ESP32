@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Signs EMS-ESP firmware so EMS-ESP 3.9 and later accept it as an upload.
+Signs EMS-ESP firmware so EMS-ESP 3.9 and later show it as an official build.
 
 The signature is ECDSA P-256 over SHA-256 of the whole .bin, DER encoded and zero padded to 512 bytes, appended to
 the file. Old EMS-ESP versions and the ESP32 ignore the extra bytes, so a signed file installs everywhere.
@@ -11,7 +11,6 @@ PEM file, or from ~/.ems-esp/firmware_signing_key.pem.
 
   python3 scripts/sign_firmware.py genkey <key.pem>          create a new key
   python3 scripts/sign_firmware.py pubkey <key.pem>          print the public key for firmware_keys.h
-  python3 scripts/sign_firmware.py addkey <key.pem>          accept builds signed with this key, in firmware_keys_local.h
   python3 scripts/sign_firmware.py sign <file.bin> [...]     sign in place and rewrite the .md5 next to it
   python3 scripts/sign_firmware.py verify <file.bin> [...]   check against the keys in firmware_keys.h
 """
@@ -25,7 +24,6 @@ from pathlib import Path
 SIGNATURE_SIZE = 512
 DEFAULT_KEY_FILE = Path.home() / ".ems-esp" / "firmware_signing_key.pem"
 KEYS_HEADER = Path(__file__).resolve().parent.parent / "lib" / "FirmwareSignature" / "firmware_keys.h"
-LOCAL_KEYS_HEADER = KEYS_HEADER.with_name("firmware_keys_local.h")  # your own keys, git ignores it
 
 
 def _crypto():
@@ -73,10 +71,7 @@ def _keys_in(text):
 
 def known_public_keys():
     """The public keys compiled into the firmware."""
-    keys = _keys_in(KEYS_HEADER.read_text().split("FIRMWARE_PUBLIC_KEYS", 1)[1])
-    if LOCAL_KEYS_HEADER.exists():
-        keys += _keys_in(LOCAL_KEYS_HEADER.read_text())
-    return keys
+    return _keys_in(KEYS_HEADER.read_text().split("FIRMWARE_PUBLIC_KEYS", 1)[1])
 
 
 def _key_lines(raw):
@@ -136,7 +131,7 @@ def sign_file(bin_file, pem):
 
 
 def main(argv):
-    if len(argv) < 3 or argv[1] not in ("genkey", "pubkey", "addkey", "sign", "verify"):
+    if len(argv) < 3 or argv[1] not in ("genkey", "pubkey", "sign", "verify"):
         print(__doc__)
         return 1
 
@@ -162,21 +157,6 @@ def main(argv):
     if command == "pubkey":
         raw = public_key_bytes(_private_key(Path(files[0]).expanduser().read_bytes()).public_key())
         print(_key_lines(raw))
-        return 0
-
-    if command == "addkey":
-        raw = public_key_bytes(_private_key(Path(files[0]).expanduser().read_bytes()).public_key())
-        if raw in known_public_keys():
-            print("This key is already accepted")
-            return 0
-        if not LOCAL_KEYS_HEADER.exists():
-            LOCAL_KEYS_HEADER.write_text(
-                "// Your own firmware signing keys, added to FIRMWARE_PUBLIC_KEYS in firmware_keys.h. Not in git.\n"
-                "// Builds signed with them are accepted for uploads and shown as custom builds.\n"
-            )
-        with LOCAL_KEYS_HEADER.open("a") as f:
-            f.write(f"    // {Path(files[0]).name}\n{_key_lines(raw)}\n")
-        print(f"Added to {LOCAL_KEYS_HEADER}. Rebuild, and install that build once over USB or after 'allow unsigned'")
         return 0
 
     if command == "sign":

@@ -6,7 +6,7 @@ import UploadIcon from '@mui/icons-material/Upload';
 import { Box, Button, Typography, styled } from '@mui/material';
 
 import { toast } from 'components/toast';
-import FirmwareNotSigned from 'components/upload/FirmwareNotSigned';
+import CustomBuildWarning from 'components/upload/CustomBuildWarning';
 import { LinearProgressWithLabel } from 'components/upload/LinearProgressWithLabel';
 
 import { HttpError, type UploadHandle, uploadFile } from './api';
@@ -34,8 +34,6 @@ const uploadErrorMessage = (status: number, chip: string) => {
       return 'Not authorized, please sign in again';
     case 409:
       return 'This is the recovery firmware, it can only be installed from EMS-ESP';
-    case 412:
-      return 'This firmware is not signed by EMS-ESP';
     case 503:
       return `This firmware is not built for the ${chip}`;
     case 507:
@@ -63,7 +61,8 @@ const FirmwareUpload = ({
   const [file, setFile] = useState<File>();
   const [dragged, setDragged] = useState(false);
   const [md5, setMd5] = useState<string>();
-  const [notSigned, setNotSigned] = useState(false);
+  // the file the device stopped because it isn't an official build
+  const [customFile, setCustomFile] = useState<File>();
   const [progress, setProgress] = useState<number>();
   const uploadRef = useRef<UploadHandle | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -88,19 +87,20 @@ const FirmwareUpload = ({
     selectFile(e.dataTransfer.files[0]);
   };
 
-  const startUpload = async () => {
-    if (!file) return;
+  const startUpload = async (selected = file, custom = false) => {
+    if (!selected) return;
+    setFile(selected);
     setProgress(0);
-    setNotSigned(false);
-    uploadRef.current = uploadFile(file, target, setProgress);
+    setCustomFile(undefined);
+    uploadRef.current = uploadFile(selected, target, setProgress, custom);
     try {
       const result = await uploadRef.current.promise;
       if (result.md5) {
         setMd5(result.md5);
         toast.success('MD5 received, now upload the firmware .bin');
       } else {
-        if (result.signed) {
-          toast.success('Signature verified');
+        if (result.official) {
+          toast.success('Official build');
         }
         if (result.md5_ok) {
           toast.success('Firmware MD5 matches');
@@ -112,9 +112,10 @@ const FirmwareUpload = ({
       const status = error instanceof HttpError ? error.status : 0;
       if (status === -1) {
         toast.warning('Upload aborted');
+      } else if (status === 412) {
+        setCustomFile(selected);
       } else {
         toast.error(uploadErrorMessage(status, chip));
-        setNotSigned(status === 412);
         if (status === 401 || status === 403) onUnauthorized();
       }
     } finally {
@@ -205,10 +206,12 @@ const FirmwareUpload = ({
           </>
         )}
       </DocumentUploader>
-      {notSigned && (
-        <FirmwareNotSigned
-          message={uploadErrorMessage(412, chip)}
-          linkText="How to install your own firmware"
+      {customFile && (
+        <CustomBuildWarning
+          message="This is not an official EMS-ESP build. Only install firmware you trust"
+          linkText="About official and custom builds"
+          installText="Install anyway"
+          onInstall={() => void startUpload(customFile, true)}
         />
       )}
       {md5 && (

@@ -55,7 +55,7 @@ class WebStatusService {
     void    getVersions(JsonObject root);
     bool    exportData(JsonObject root, std::string & type, const bool include_secrets);
     bool    getCustomSupport(JsonObject root);
-    bool    uploadURL(const char * url);
+    bool    uploadURL(const char * url, bool allow_custom);
     bool    setSystemStatus(const char * status);
     void    allvalues(JsonObject output);
     uint8_t upgradeImportantMessages(std::string & version);

@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
-import { Box, Button, Link, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 
 import { callAction } from 'api/app';
 import { readSystemStatus } from 'api/system';
@@ -9,7 +9,7 @@ import { readSystemStatus } from 'api/system';
 import { useRequest } from 'alova/client';
 import MessageBox from 'components/MessageBox';
 import { clearAccessToken } from 'components/routing/authentication';
-import { FIRMWARE_NOT_SIGNED_URL } from 'components/upload/FirmwareNotSigned';
+import CustomBuildWarning from 'components/upload/CustomBuildWarning';
 import { useI18nContext } from 'i18n/i18n-react';
 import { SystemStatusCodes } from 'types';
 import { useInterval } from 'utils';
@@ -19,11 +19,13 @@ import { LinearProgressWithLabel } from '../../components/upload/LinearProgressW
 interface SystemMonitorProps {
   // when set the page isn't reloaded when done, e.g. when the firmware was installed without a restart
   onDone?: (success: boolean) => void;
+  // installs the same firmware from its URL again, as a custom build
+  onInstallCustom?: () => Promise<unknown>;
 }
 
-const SystemMonitor = ({ onDone }: SystemMonitorProps) => {
+const SystemMonitor = ({ onDone, onInstallCustom }: SystemMonitorProps) => {
   const [errorMessage, setErrorMessage] = useState<string>();
-  const [notSigned, setNotSigned] = useState(false);
+  const [notOfficial, setNotOfficial] = useState(false);
   const hasInitialized = useRef(false);
   // the device reports an upload error once, then goes back to normal
   const uploadFailed = useRef(false);
@@ -66,11 +68,11 @@ const SystemMonitor = ({ onDone }: SystemMonitorProps) => {
         uploadFailed.current = true;
         setErrorMessage('Please check system logs for possible causes');
       } else if (
-        event.data.status === SystemStatusCodes.SYSTEM_STATUS_ERROR_NOT_SIGNED
+        event.data.status === SystemStatusCodes.SYSTEM_STATUS_ERROR_NOT_OFFICIAL
       ) {
         uploadFailed.current = true;
-        setErrorMessage(LL.UPLOAD_NOT_SIGNED() + '. ');
-        setNotSigned(true);
+        setErrorMessage(LL.UPLOAD_NOT_OFFICIAL());
+        setNotOfficial(true);
       }
     })
     .onError((error) => {
@@ -98,7 +100,7 @@ const SystemMonitor = ({ onDone }: SystemMonitorProps) => {
         : status === SystemStatusCodes.SYSTEM_STATUS_NORMAL
           ? LL.RESTARTING_PRE()
           : status === SystemStatusCodes.SYSTEM_STATUS_ERROR_UPLOAD ||
-              status === SystemStatusCodes.SYSTEM_STATUS_ERROR_NOT_SIGNED
+              status === SystemStatusCodes.SYSTEM_STATUS_ERROR_NOT_OFFICIAL
             ? 'Upload Failed'
             : LL.RESTARTING_POST();
 
@@ -108,6 +110,19 @@ const SystemMonitor = ({ onDone }: SystemMonitorProps) => {
     isUploading && status
       ? Math.round(status - SystemStatusCodes.SYSTEM_STATUS_UPLOADING)
       : 0;
+
+  const installCustom = async () => {
+    if (!onInstallCustom) {
+      return;
+    }
+    setErrorMessage(undefined);
+    setNotOfficial(false);
+    uploadFailed.current = false;
+    await onInstallCustom().catch((error: Error) => {
+      uploadFailed.current = true;
+      setErrorMessage(error.message);
+    });
+  };
 
   const onCancel = async () => {
     setErrorMessage(undefined);
@@ -159,18 +174,27 @@ const SystemMonitor = ({ onDone }: SystemMonitorProps) => {
             {statusMessage}
           </Typography>
 
-          {errorMessage ? (
+          {notOfficial && onInstallCustom ? (
+            <>
+              <CustomBuildWarning
+                message={LL.UPLOAD_NOT_OFFICIAL()}
+                linkText={LL.UPLOAD_NOT_OFFICIAL_HELP()}
+                installText={LL.UPLOAD_INSTALL_ANYWAY()}
+                onInstall={() => void installCustom()}
+              />
+              <Button
+                sx={{ mt: 2 }}
+                size="small"
+                startIcon={<CancelIcon />}
+                variant="outlined"
+                color="secondary"
+                onClick={onCancel}
+              >
+                {LL.CANCEL()}
+              </Button>
+            </>
+          ) : errorMessage ? (
             <MessageBox level="error" message={errorMessage}>
-              {notSigned && (
-                <Link
-                  href={FIRMWARE_NOT_SIGNED_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  sx={{ color: 'lightblue' }}
-                >
-                  {LL.UPLOAD_NOT_SIGNED_HELP()}
-                </Link>
-              )}
               <Button
                 sx={{ ml: 2 }}
                 size="small"

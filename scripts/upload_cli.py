@@ -185,7 +185,7 @@ def upload(file, ip, username, password):
         # Device enables MD5 check only after a file whose name ends in .md5
         # (same as the WebUI). An ElegantOTA "MD5" form field is ignored.
         md5_name = file_path.with_suffix('.md5').name
-        upload_url = f"{emsesp_url}/rest/uploadFile"
+        upload_url = f"{emsesp_url}/rest/uploadFile?custom=1"  # you chose the file, so install it even if it's a custom build
 
         print(f"Uploading MD5 ({md5})")
         response, _, _ = post_file(
@@ -201,10 +201,7 @@ def upload(file, ip, username, password):
             session, upload_url, host_ip, emsesp_url, access_token,
             file_path.name, firmware, progress_desc='Upload Progress')
 
-        if response.status_code == 412:
-            print_fail("Upload refused, the firmware isn't signed by EMS-ESP or your own key. "
-                       "Run 'allow unsigned' on the device's serial console first.")
-        elif response.status_code != 200:
+        if response.status_code != 200:
             print_fail(f"Upload failed (code {response.status_code})")
         else:
             kibs = (size / 1024) / elapsed if elapsed > 0 else 0

@@ -342,6 +342,7 @@ export interface Action {
   action: string;
   param?: string; // optional
   secrets?: boolean; // export: include passwords and keys
+  custom?: boolean; // uploadURL: install even if it isn't an official build
 }
 
 export interface WriteAnalogSensor {

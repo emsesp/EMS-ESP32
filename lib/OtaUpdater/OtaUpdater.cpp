@@ -13,8 +13,6 @@
 #include <memory>
 #include <new>
 
-bool OtaUpdater::_allow_unsigned = false;
-
 static String getFilenameExtension(const String & filename) {
     const auto pos = filename.lastIndexOf('.');
     if (pos != -1) {
@@ -168,14 +166,14 @@ bool OtaUpdater::isOfficialFirmware(const esp_partition_t * partition) {
         signature->write(buf.get(), n, [](const uint8_t *, size_t) { return true; });
         offset += n;
     }
-    return signature->verify_emsesp();
+    return signature->verify();
 }
 
 bool OtaUpdater::beginFirmware(size_t filesize, const esp_partition_t * target, bool set_boot) {
-    _md5_applied = false;
-    _not_signed  = false;
-    _signed      = false;
-    _filesystem  = false;
+    _md5_applied  = false;
+    _not_official = false;
+    _official     = false;
+    _filesystem   = false;
     _error       = "";
 
     confirmRunningApp();
@@ -219,13 +217,13 @@ bool OtaUpdater::beginFirmware(size_t filesize, const esp_partition_t * target, 
 
 bool OtaUpdater::beginFilesystem() {
     clearMd5(); // a digest is only for firmware
-    _not_signed = false;
-    _signed     = false;
-    _filesystem = true;
-    _error      = "";
-    if (!_allow_unsigned) {
-        _not_signed = true;
-        _error      = "A filesystem image can only be uploaded after allowing unsigned firmware on the serial console";
+    _not_official = false;
+    _official     = false;
+    _filesystem   = true;
+    _error        = "";
+    if (!_allow_custom) {
+        _not_official = true;
+        _error        = NOT_OFFICIAL_ERROR;
         return false;
     }
     // the HTTP content length is the multipart body size, not the file size, so it can exceed
@@ -298,15 +296,15 @@ bool OtaUpdater::end() {
     }
 
     if (!_filesystem) {
-        _signed = _signature.verify();
-        if (!_signed && !_allow_unsigned) {
-            _not_signed = true;
-            _error      = NOT_SIGNED_ERROR;
+        _official = _signature.verify();
+        if (!_official && !_allow_custom) {
+            _not_official = true;
+            _error        = NOT_OFFICIAL_ERROR;
             abort();
             return false;
         }
         // the signature is kept after the image so isOfficialFirmware() can check it later, as when the file is
-        // flashed over USB. Not signed, the held back bytes are the end of the image
+        // flashed over USB. Without one, the held back bytes are the end of the image
         if (!writeImage(_signature.tail(), _signature.tail_size())) {
             abort();
             return false;
@@ -324,9 +322,6 @@ bool OtaUpdater::end() {
         ok = Update.end(true);
     }
 
-    if (ok) {
-        _allow_unsigned = false;
-    }
     return ok;
 }
 

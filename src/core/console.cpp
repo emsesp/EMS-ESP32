@@ -24,7 +24,6 @@
 #include "login_limiter.h"
 
 #ifndef EMSESP_STANDALONE
-#include <OtaUpdater.h>
 #endif
 
 #if defined(EMSESP_TEST)
@@ -193,15 +192,6 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
 
     commands->add_command(ShellContext::MAIN, CommandFlags::ADMIN, string_vector{F_(wifi), F_(reconnect)}, [](Shell &, const std::vector<std::string> &) {
         EMSESP::network_.reconnect();
-    });
-
-    // needs physical access, so a stolen admin login can't install unsigned firmware
-    commands->add_command(ShellContext::MAIN, CommandFlags::ADMIN | CommandFlags::LOCAL, {"allow", "unsigned"}, [](Shell & shell, const std::vector<std::string> &) {
-#ifndef EMSESP_STANDALONE
-        OtaUpdater::allowUnsigned(true);
-#endif
-        shell.logger().log(LogLevel::WARNING, LogFacility::AUTH, F("Unsigned firmware allowed for one update on console %s"), to_shell(shell).console_name().c_str());
-        shell.println("The next firmware or filesystem upload doesn't need to be signed by EMS-ESP. This ends after that upload or a restart");
     });
 
     //

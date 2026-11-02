@@ -20,7 +20,6 @@
 
 #ifndef EMSESP_STANDALONE
 #include <esp_ota_ops.h>
-#include <OtaUpdater.h>
 #endif
 #include "emsesp_http_client.h"
 
@@ -119,7 +118,6 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     root["sdk_version"]      = ESP.getSdkVersion();
     root["partition"]        = (const char *)esp_ota_get_running_partition()->label; // active partition
     root["official_build"]   = EMSESP::system_.official_build();
-    root["allow_unsigned"]   = OtaUpdater::unsignedAllowed();
     root["flash_chip_size"]  = ESP.getFlashChipSize() / 1024;
     root["flash_chip_speed"] = ESP.getFlashChipSpeed();
     root["app_used"]         = EMSESP::system_.appUsed();
@@ -191,7 +189,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     }
 
     if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD
-        || EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_ERROR_NOT_SIGNED) {
+        || EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_ERROR_NOT_OFFICIAL) {
         // error is reported, back to normal state
         EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_NORMAL);
     }
@@ -261,7 +259,7 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
     } else if (action == "getCustomSupport") {
         ok = getCustomSupport(root);
     } else if (action == "uploadURL") {
-        ok = uploadURL(param.c_str());
+        ok = uploadURL(param.c_str(), json["custom"] | false);
     } else if (action == "systemStatus") {
         ok = setSystemStatus(param.c_str());
     } else if (action == "resetMQTT") {
@@ -656,9 +654,9 @@ bool WebStatusService::getCustomSupport(JsonObject root) {
 
 // action = uploadURL
 // uploads a firmware file from a URL
-bool WebStatusService::uploadURL(const char * url) {
+bool WebStatusService::uploadURL(const char * url, bool allow_custom) {
     // this will keep a copy of the URL, but won't initiate the download yet
-    return EMSESP::system_.uploadFirmwareURL(url);
+    return EMSESP::system_.uploadFirmwareURL(url, allow_custom);
 }
 
 // action = systemStatus

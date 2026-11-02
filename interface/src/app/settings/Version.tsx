@@ -37,7 +37,6 @@ import type { APIcall } from 'app/main/types';
 import SystemMonitor from 'app/status/SystemMonitor';
 import {
   FormLoader,
-  MessageBox,
   SectionContent,
   SingleUpload,
   useLayoutTitle
@@ -573,10 +572,15 @@ const Version = () => {
 
   const { data, send: loadData, error } = useRequest(SystemApi.readSystemStatus);
 
+  // custom: the user agreed to install a build that isn't an official EMS-ESP build
   const { send: sendUploadURL } = useRequest(
-    (url: string) => callAction({ action: 'uploadURL', param: url }),
+    (url: string, custom = false) =>
+      callAction({ action: 'uploadURL', param: url, custom }),
     { immediate: false }
   );
+  const [installURL, setInstallURL] = useState<string>();
+  const installCustom = () =>
+    installURL ? sendUploadURL(installURL, true) : Promise.resolve();
 
   const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
     immediate: false
@@ -644,6 +648,7 @@ const Version = () => {
   const handleRestartClick = () => setConfirmRestart(true);
 
   const installFirmwareURL = async (url: string) => {
+    setInstallURL(url);
     const started = await sendUploadURL(url)
       .then(() => true)
       .catch((error: Error) => {
@@ -691,6 +696,7 @@ const Version = () => {
       return;
     }
 
+    setInstallURL(release.url);
     await sendUploadURL(release.url)
       .then(() => setInstallingRecovery(true))
       .catch((error: Error) => {
@@ -810,12 +816,13 @@ const Version = () => {
   };
 
   if (restarting) {
-    return <SystemMonitor />;
+    return <SystemMonitor onInstallCustom={installCustom} />;
   }
 
   if (installingRecovery) {
     return (
       <SystemMonitor
+        onInstallCustom={installCustom}
         onDone={(success) => {
           setInstallingRecovery(false);
           if (success) {
@@ -1109,13 +1116,6 @@ const Version = () => {
             <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
               {LL.UPLOAD()}
             </Typography>
-            {data.allow_unsigned && (
-              <MessageBox
-                level="warning"
-                message={LL.UPLOAD_UNSIGNED_ALLOWED()}
-                sx={{ mb: 2 }}
-              />
-            )}
             <SingleUpload
               text={LL.UPLOAD_FIRMWARE_TEXT()}
               doRestart={doRestart}

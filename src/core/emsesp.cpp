@@ -2262,7 +2262,7 @@ void EMSESP::loop() {
             // upload failed, send a "reset" to reset the OTA URL
             Shell::loop_all(); // flush log buffers so latest error message are shown in console
             system_.uploadFirmwareURL("reset");
-            if (EMSESP::system_.systemStatus() != SYSTEM_STATUS::SYSTEM_STATUS_ERROR_NOT_SIGNED) {
+            if (EMSESP::system_.systemStatus() != SYSTEM_STATUS::SYSTEM_STATUS_ERROR_NOT_OFFICIAL) {
                 EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
             }
         }

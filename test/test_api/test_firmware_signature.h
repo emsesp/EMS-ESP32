@@ -156,45 +156,18 @@ void security_test_signature_parse() {
 // the built-in keys are points on the curve
 void security_test_firmware_keys() {
     const size_t count = sizeof(FIRMWARE_PUBLIC_KEYS) / sizeof(FIRMWARE_PUBLIC_KEYS[0]);
-    TEST_ASSERT_TRUE(count >= EMSESP_KEY_COUNT); // plus any in firmware_keys_local.h
+    TEST_ASSERT_EQUAL(2, count); // the release key and the spare
     for (size_t i = 0; i < count; i++) {
         TEST_ASSERT_EQUAL(1, uECC_valid_public_key(FIRMWARE_PUBLIC_KEYS[i], uECC_secp256r1()));
     }
     TEST_ASSERT_FALSE(fwsig::stream(fwsig::signed_file(fwsig::SIG_R33), 512, FIRMWARE_PUBLIC_KEYS, count).ok);
 
-    // only the EMS-ESP keys make an official build, not a key added for your own builds
-    TEST_ASSERT_EQUAL(2, EMSESP_KEY_COUNT);
+    // a build signed with any other key is a custom build
     const auto        file = fwsig::signed_file(fwsig::SIG_R33);
     FirmwareSignature sig;
     sig.begin();
     sig.write(file.data(), file.size(), [](const uint8_t *, size_t) { return true; });
-    TEST_ASSERT_FALSE(sig.verify_emsesp());
-}
-
-// unsigned firmware can only be allowed by an admin on the serial console
-void security_test_allow_unsigned_serial_only() {
-    static constexpr const char * allowed = "doesn't need to be signed";
-
-    auto web_shell   = std::make_shared<EMSESPWebShell>(application, stream);
-    output_buffer[0] = '\0';
-    web_shell->run("allow unsigned");
-    TEST_ASSERT_NULL(strstr(output_buffer, allowed));
-
-    auto network_shell = std::make_shared<EMSESPConsole>(application, stream, false);
-    network_shell->add_flags(CommandFlags::ADMIN);
-    output_buffer[0] = '\0';
-    network_shell->invoke_command("allow unsigned");
-    TEST_ASSERT_NULL(strstr(output_buffer, allowed));
-
-    auto serial_shell = std::make_shared<EMSESPConsole>(application, stream, true);
-    output_buffer[0]  = '\0';
-    serial_shell->invoke_command("allow unsigned");
-    TEST_ASSERT_NULL(strstr(output_buffer, allowed));
-
-    serial_shell->add_flags(CommandFlags::ADMIN);
-    output_buffer[0] = '\0';
-    serial_shell->invoke_command("allow unsigned");
-    TEST_ASSERT_NOT_NULL(strstr(output_buffer, allowed));
+    TEST_ASSERT_FALSE(sig.verify());
 }
 
 void run_firmware_signature_tests() {
@@ -204,5 +177,4 @@ void run_firmware_signature_tests() {
     RUN_TEST(security_test_signature_unsigned);
     RUN_TEST(security_test_signature_parse);
     RUN_TEST(security_test_firmware_keys);
-    RUN_TEST(security_test_allow_unsigned_serial_only);
 }

@@ -7,10 +7,7 @@
 // Public keys of the EMS-ESP firmware signing keys, uncompressed P-256 points (X then Y).
 // The first is used for releases, the second is a spare kept offline in case the first has to be replaced.
 // Print one with: python3 scripts/sign_firmware.py pubkey <key.pem>
-// Keys added after the first EMSESP_KEY_COUNT are accepted for uploads, but their builds are shown as custom builds.
-// Your own keys go in firmware_keys_local.h, which git ignores: python3 scripts/sign_firmware.py addkey <key.pem>
-static constexpr size_t EMSESP_KEY_COUNT = 2;
-
+// Only builds signed with one of these are official builds. Anything else installs as a custom build.
 static constexpr uint8_t FIRMWARE_PUBLIC_KEYS[][64] = {
     // release key
     {0xa2, 0x01, 0x88, 0x16, 0x29, 0x42, 0x74, 0x4e, 0xae, 0x13, 0xef, 0x08, 0xd0, 0x7c, 0x79, 0x06,
@@ -22,9 +19,6 @@ static constexpr uint8_t FIRMWARE_PUBLIC_KEYS[][64] = {
      0x3a, 0x2e, 0x75, 0xcd, 0x17, 0xb8, 0x00, 0xa1, 0x87, 0x46, 0x1b, 0xdc, 0xfb, 0x8a, 0x4a, 0x98,
      0xdd, 0xe5, 0x88, 0x53, 0x6c, 0x67, 0x28, 0x6b, 0xd8, 0x93, 0x0e, 0xe8, 0xf7, 0x4e, 0x6d, 0xc0,
      0x78, 0x8e, 0xaa, 0x6e, 0xa2, 0xa0, 0x49, 0xe8, 0x5a, 0x1e, 0x00, 0xc5, 0x4a, 0x50, 0x63, 0x0f},
-#if __has_include("firmware_keys_local.h")
-#include "firmware_keys_local.h"
-#endif
 };
 
 #endif

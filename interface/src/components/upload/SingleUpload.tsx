@@ -11,8 +11,8 @@ import { useRequest } from 'alova/client';
 import { toast } from 'components/toast';
 import { useI18nContext } from 'i18n/i18n-react';
 
+import CustomBuildWarning from './CustomBuildWarning';
 import DragNdrop from './DragNdrop';
-import FirmwareNotSigned from './FirmwareNotSigned';
 import { LinearProgressWithLabel } from './LinearProgressWithLabel';
 
 interface SingleUploadProps {
@@ -28,7 +28,8 @@ const SingleUpload = ({
 }: SingleUploadProps) => {
   const [md5, setMd5] = useState<string>();
   const [file, setFile] = useState<File>();
-  const [notSigned, setNotSigned] = useState(false);
+  // the file the device stopped because it isn't an official build
+  const [customFile, setCustomFile] = useState<File>();
   const { LL } = useI18nContext();
 
   const {
@@ -50,9 +51,9 @@ const SingleUpload = ({
     if (
       payload &&
       typeof payload === 'object' &&
-      (payload as { signed?: boolean }).signed
+      (payload as { official?: boolean }).official
     ) {
-      toast.success(LL.UPLOAD_SIGNATURE_VERIFIED());
+      toast.success(LL.OFFICIAL_BUILD());
     }
     if (payload && typeof payload === 'object' && 'md5' in payload) {
       setMd5((payload as { md5: string }).md5);
@@ -72,33 +73,33 @@ const SingleUpload = ({
     }
   });
 
-  useEffect(() => {
-    const uploadFile = async () => {
-      if (file) {
-        setNotSigned(false);
-        // asked before sending, otherwise the whole file is sent first
-        const confirmed = await readPasswordConfirmed()
-          .then((state) => state.confirmed || askPassword())
-          .catch(() => false);
-        if (!confirmed) {
-          toast.warning(passwordCancelledMessage());
-          setFile(undefined);
-          return;
-        }
-        await sendUpload(file).catch((error: Error) => {
-          if (error.message.includes('The user aborted a request')) {
-            toast.warning(LL.UPLOAD() + ' ' + LL.ABORTED());
-          } else if (error.message === 'Precondition Failed') {
-            // 412, see OtaUpdater
-            toast.error(LL.UPLOAD_NOT_SIGNED());
-            setNotSigned(true);
-          } else {
-            toast.warning('Invalid file extension or incompatible bin file');
-          }
-        });
+  const upload = async (selected: File, custom: boolean) => {
+    setCustomFile(undefined);
+    // asked before sending, otherwise the whole file is sent first
+    const confirmed = await readPasswordConfirmed()
+      .then((state) => state.confirmed || askPassword())
+      .catch(() => false);
+    if (!confirmed) {
+      toast.warning(passwordCancelledMessage());
+      setFile(undefined);
+      return;
+    }
+    await sendUpload(selected, custom).catch((error: Error) => {
+      if (error.message.includes('The user aborted a request')) {
+        toast.warning(LL.UPLOAD() + ' ' + LL.ABORTED());
+      } else if (error.message === 'Precondition Failed') {
+        // 412, see OtaUpdater
+        setCustomFile(selected);
+      } else {
+        toast.warning('Invalid file extension or incompatible bin file');
       }
-    };
-    void uploadFile();
+    });
+  };
+
+  useEffect(() => {
+    if (file) {
+      void upload(file, false);
+    }
   }, [file]);
 
   return (
@@ -134,10 +135,12 @@ const SingleUpload = ({
         />
       )}
 
-      {notSigned && !isUploading && (
-        <FirmwareNotSigned
-          message={LL.UPLOAD_NOT_SIGNED()}
-          linkText={LL.UPLOAD_NOT_SIGNED_HELP()}
+      {customFile && !isUploading && (
+        <CustomBuildWarning
+          message={LL.UPLOAD_NOT_OFFICIAL()}
+          linkText={LL.UPLOAD_NOT_OFFICIAL_HELP()}
+          installText={LL.UPLOAD_INSTALL_ANYWAY()}
+          onInstall={() => void upload(customFile, true)}
         />
       )}
 
