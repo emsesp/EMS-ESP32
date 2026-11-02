@@ -92,7 +92,7 @@ python3 scripts/sign_firmware.py sign build/firmware/<file>.bin    # also rewrit
 python3 scripts/sign_firmware.py verify build/firmware/<file>.bin  # checks against the keys in firmware_keys.h
 ```
 
-Signing adds 512 bytes to the end of the `.bin`. Older EMS-ESP versions and the ESP32 ignore them, so a signed file also installs on a device running an older version. How the official keys are held and replaced is in [SECURITY.md](SECURITY.md#firmware-signing).
+Signing adds 512 bytes to the end of the `.bin`. Older EMS-ESP versions and the ESP32 ignore them, so a signed file also installs on a device running an older version. What makes a build official is in [SECURITY.md](SECURITY.md#firmware-signing).
 
 ## Opening New Issues
 
