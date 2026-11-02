@@ -60,6 +60,7 @@ class espMqttClientSecure : public MqttClientSetup<espMqttClientSecure> {
     explicit espMqttClientSecure(uint8_t priority = 1, uint8_t core = 1, uint32_t stackSize = EMC_TASK_STACK_SIZE);
     espMqttClientSecure & setInsecure();
     espMqttClientSecure & setCACert(const char * rootCA);
+    espMqttClientSecure & setFingerprint(const char * fingerprint); // SHA-1 of the server certificate, in hex
     espMqttClientSecure & setCertificate(const char * clientCa);
     espMqttClientSecure & setPrivateKey(const char * privateKey);
     espMqttClientSecure & setPreSharedKey(const char * pskIdent, const char * psKey);

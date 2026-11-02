@@ -8,6 +8,7 @@
 #include "login_limiter.h"
 #include "password_confirm.h"
 #include "firmware_url.h"
+#include "mqtt_tls.h"
 #include "api_key.h"
 #include "origin_check.h"
 #include "host_check.h"
@@ -714,6 +715,25 @@ void security_test_caller_source() {
     TEST_ASSERT_NULL(Command::caller_source());
 }
 
+// what the MQTT rootCA setting holds decides how the broker is checked
+void security_test_mqtt_tls() {
+    char fp[MqttTls::FINGERPRINT_LEN + 1];
+    TEST_ASSERT_TRUE(MqttTls::parse_fingerprint("AB:CD:EF:01:23:45:67:89:AB:CD:EF:01:23:45:67:89:AB:CD:EF:01", fp));
+    TEST_ASSERT_EQUAL_STRING("abcdef0123456789abcdef0123456789abcdef01", fp);
+    TEST_ASSERT_TRUE(MqttTls::parse_fingerprint("abcdef0123456789abcdef0123456789abcdef01", fp));
+    TEST_ASSERT_FALSE(MqttTls::parse_fingerprint("abcdef0123456789abcdef0123456789abcdef0"));   // too short
+    TEST_ASSERT_FALSE(MqttTls::parse_fingerprint("abcdef0123456789abcdef0123456789abcdef0123")); // SHA-256 or too long
+    TEST_ASSERT_FALSE(MqttTls::parse_fingerprint("abcdef0123456789abcdef0123456789abcdef0g"));
+    TEST_ASSERT_FALSE(MqttTls::parse_fingerprint("a:bcdef0123456789abcdef0123456789abcdef01"));
+    TEST_ASSERT_FALSE(MqttTls::parse_fingerprint("ab::cdef0123456789abcdef0123456789abcdef01"));
+    TEST_ASSERT_FALSE(MqttTls::parse_fingerprint("abcdef0123456789abcdef0123456789abcdef01:"));
+
+    TEST_ASSERT_TRUE(MqttTls::check("") == MqttTls::Check::NONE);
+    TEST_ASSERT_TRUE(MqttTls::check("insecure") == MqttTls::Check::NONE);
+    TEST_ASSERT_TRUE(MqttTls::check("abcdef0123456789abcdef0123456789abcdef01") == MqttTls::Check::FINGERPRINT);
+    TEST_ASSERT_TRUE(MqttTls::check("MIIDdzCCAl+gAwIBAgIEAgAAuTANBgkqhkiG9w0BAQUFADBaMQswCQYDVQQGEwJJ") == MqttTls::Check::CA);
+}
+
 void run_security_tests() {
     EMSESP::webCommandService.load_test_data(); // named commands used by executeCommand
 
@@ -756,4 +776,5 @@ void run_security_tests() {
     RUN_TEST(security_test_write_range);
     RUN_TEST(security_test_readonly_raw);
     RUN_TEST(security_test_caller_source);
+    RUN_TEST(security_test_mqtt_tls);
 }

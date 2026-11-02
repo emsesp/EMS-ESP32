@@ -21,6 +21,7 @@ import {
   BlockNavigation,
   ButtonRow,
   FormLoader,
+  MessageBox,
   SectionContent,
   ValidatedPasswordField,
   ValidatedTextField,
@@ -31,6 +32,7 @@ import { useI18nContext } from 'i18n/i18n-react';
 import type { MqttSettingsType } from 'types';
 import { numberValue, updateValueDirty, useRest } from 'utils';
 import { ValidationError, createMqttSettingsValidator, validate } from 'validators';
+import { type TlsCheck, tlsCheckOf } from 'validators/mqtt';
 import type { ValidateFieldsError } from 'validators/schema';
 
 import { callAction } from '../../api/app';
@@ -56,6 +58,9 @@ const MqttSettings = () => {
   useLayoutTitle('MQTT');
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
+  // chosen in the form, otherwise what the stored rootCA holds
+  const [chosenTlsCheck, setChosenTlsCheck] = useState<TlsCheck>();
+  const tlsCheck = chosenTlsCheck ?? tlsCheckOf(data?.rootCA);
 
   const sendResetMQTT = () => {
     void callAction({ action: 'resetMQTT' })
@@ -74,6 +79,17 @@ const MqttSettings = () => {
     updateDataValue as (value: unknown) => void
   );
 
+  const changeTlsCheck = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const next = event.target.value as TlsCheck;
+    setChosenTlsCheck(next);
+    const current = data?.rootCA ?? '';
+    const rootCA =
+      next === 'none' ? 'insecure' : tlsCheckOf(current) === next ? current : '';
+    updateFormValue({
+      target: { name: 'rootCA', value: rootCA, type: 'text' }
+    } as React.ChangeEvent<HTMLInputElement>);
+  };
+
   const SecondsInputProps = {
     endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
   };
@@ -82,7 +98,7 @@ const MqttSettings = () => {
     if (!data) return;
     try {
       setFieldErrors(undefined);
-      await validate(createMqttSettingsValidator(data), data);
+      await validate(createMqttSettingsValidator(data, tlsCheck), data);
       await saveData();
     } catch (error) {
       setFieldErrors((error as ValidationError).fieldErrors);
@@ -249,15 +265,50 @@ const MqttSettings = () => {
           />
         )}
         {data.enableTLS === true && (
-          <ValidatedPasswordField
-            name="rootCA"
-            label={LL.CERT()}
-            variant="outlined"
-            value={data.rootCA}
-            sx={{ width: '50ch' }}
-            onChange={updateFormValue}
-            margin="normal"
-          />
+          <>
+            <TextField
+              name="tlsCheck"
+              label={LL.TLS_CHECK()}
+              value={tlsCheck}
+              sx={{ width: '50ch' }}
+              variant="outlined"
+              onChange={changeTlsCheck}
+              margin="normal"
+              select
+            >
+              <MenuItem value="ca">{LL.TLS_CHECK_CA()}</MenuItem>
+              <MenuItem value="fingerprint">{LL.TLS_CHECK_FINGERPRINT()}</MenuItem>
+              <MenuItem value="none">{LL.TLS_CHECK_NONE()}</MenuItem>
+            </TextField>
+            {tlsCheck === 'ca' && (
+              <ValidatedPasswordField
+                fieldErrors={fieldErrors ?? {}}
+                name="rootCA"
+                label={LL.CERT()}
+                variant="outlined"
+                value={data.rootCA}
+                sx={{ width: '50ch' }}
+                onChange={updateFormValue}
+                margin="normal"
+              />
+            )}
+            {tlsCheck === 'fingerprint' && (
+              <ValidatedTextField
+                fieldErrors={fieldErrors ?? {}}
+                name="rootCA"
+                label={LL.TLS_CHECK_FINGERPRINT()}
+                placeholder="AB:CD:EF:..."
+                variant="outlined"
+                value={data.rootCA}
+                sx={{ width: '50ch' }}
+                onChange={updateFormValue}
+                margin="normal"
+              />
+            )}
+            {tlsCheck === 'none' && (
+              <MessageBox level="warning" message={LL.TLS_NOT_CHECKED()} />
+            )}
+          </>
         )}
         <BlockFormControlLabel
           control={

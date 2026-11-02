@@ -29,6 +29,21 @@ const PORT_VALIDATOR = [
   }
 ];
 
+// how MQTT over TLS checks the broker, see src/core/mqtt_tls.h. rootCA holds 'insecure', a fingerprint or a CA certificate
+export type TlsCheck = 'none' | 'fingerprint' | 'ca';
+
+const FINGERPRINT = /^[0-9a-f]{2}(:?[0-9a-f]{2}){19}$/i;
+
+export const isFingerprint = (value: string) =>
+  FINGERPRINT.test(value.replace(/\s/g, ''));
+
+export const tlsCheckOf = (rootCA = ''): TlsCheck =>
+  rootCA === '' || rootCA === 'insecure'
+    ? 'none'
+    : isFingerprint(rootCA)
+      ? 'fingerprint'
+      : 'ca';
+
 const createNumberValidator = (fieldName: string, min: number, max: number) => [
   { required: true, message: `${fieldName} is required` },
   {
@@ -39,8 +54,36 @@ const createNumberValidator = (fieldName: string, min: number, max: number) => [
   }
 ];
 
-export const createMqttSettingsValidator = (mqttSettings: MqttSettingsType) =>
+export const createMqttSettingsValidator = (
+  mqttSettings: MqttSettingsType,
+  tlsCheck: TlsCheck = 'none'
+) =>
   new Schema({
+    ...(mqttSettings.enabled &&
+      mqttSettings.enableTLS &&
+      tlsCheck === 'fingerprint' && {
+        rootCA: [
+          { required: true, message: 'Fingerprint is required' },
+          {
+            validator(
+              _rule: unknown,
+              value: string,
+              callback: (error?: string) => void
+            ) {
+              callback(
+                isFingerprint(value)
+                  ? undefined
+                  : 'Must be a SHA-1 fingerprint, 40 hex digits'
+              );
+            }
+          }
+        ]
+      }),
+    ...(mqttSettings.enabled &&
+      mqttSettings.enableTLS &&
+      tlsCheck === 'ca' && {
+        rootCA: [{ required: true, message: 'Certificate is required' }]
+      }),
     ...(mqttSettings.enabled && {
       host: REQUIRED_HOST_VALIDATOR,
       base: REQUIRED_BASE_VALIDATOR,

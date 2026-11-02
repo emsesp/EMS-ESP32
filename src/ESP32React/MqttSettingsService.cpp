@@ -2,6 +2,8 @@
 
 #include <emsesp.h>
 
+#include "../core/mqtt_tls.h"
+
 MqttSettingsService::MqttSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(MqttSettings::read, MqttSettings::update, this, server, MQTT_SETTINGS_SERVICE_PATH, securityManager)
     , _fsPersistence(MqttSettings::read, MqttSettings::update, this, fs, MQTT_SETTINGS_FILE)
@@ -34,8 +36,8 @@ void MqttSettingsService::begin() {
 void MqttSettingsService::startClient() {
     static bool     isSecure  = false;
     static uint32_t stackSize = EMC_TASK_STACK_SIZE;
-    // only verifying a CA chain needs the larger stack, insecure TLS and plain MQTT fit in the default
-    const uint32_t wantStack = (_state.enableTLS && _state.rootCA != "insecure") ? EMSESP_MQTT_STACKSIZE_CA : EMC_TASK_STACK_SIZE;
+    // only verifying a CA chain needs the larger stack, a fingerprint, insecure TLS and plain MQTT fit in the default
+    const uint32_t wantStack = (_state.enableTLS && MqttTls::check(_state.rootCA.c_str()) == MqttTls::Check::CA) ? EMSESP_MQTT_STACKSIZE_CA : EMC_TASK_STACK_SIZE;
     if (_mqttClient) {
         // do we need to change the client?
         if (isSecure == _state.enableTLS && stackSize == wantStack) {
@@ -97,6 +99,9 @@ void MqttSettingsService::loop() {
         // configure MQTT client
         if (_reconfigureMqtt && _state.enabled) {
             emsesp::EMSESP::logger().info("Starting MQTT service");
+            if (_state.enableTLS && MqttTls::check(_state.rootCA.c_str()) == MqttTls::Check::NONE) {
+                emsesp::EMSESP::logger().warning("MQTT over TLS doesn't check the broker's certificate");
+            }
         }
 
         _disconnectedAt  = configureMqtt() ? 0 : uuid::get_uptime();
@@ -189,11 +194,17 @@ bool MqttSettingsService::configureMqtt() {
 
         _reconfigureMqtt = false;
         if (_state.enableTLS) {
-            if (_state.rootCA == "insecure") {
+            const MqttTls::Check check = MqttTls::check(_state.rootCA.c_str());
+            if (check == MqttTls::Check::NONE) {
 #if defined(EMSESP_DEBUG)
                 emsesp::EMSESP::logger().debug("Start insecure MQTT");
 #endif
                 static_cast<espMqttClientSecure *>(_mqttClient)->setInsecure();
+            } else if (check == MqttTls::Check::FINGERPRINT) {
+#if defined(EMSESP_DEBUG)
+                emsesp::EMSESP::logger().debug("Start secure MQTT with certificate fingerprint");
+#endif
+                static_cast<espMqttClientSecure *>(_mqttClient)->setFingerprint(_state.rootCA.c_str());
             } else {
 #if defined(EMSESP_DEBUG)
                 emsesp::EMSESP::logger().debug("Start secure MQTT with rootCA");
@@ -403,6 +414,10 @@ StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings)
     newSettings.rootCA.replace("-----BEGIN CERTIFICATE-----", "");
     newSettings.rootCA.replace("-----END CERTIFICATE-----", "");
     newSettings.rootCA.replace(" ", "");
+    char fingerprint[MqttTls::FINGERPRINT_LEN + 1];
+    if (MqttTls::parse_fingerprint(newSettings.rootCA.c_str(), fingerprint)) {
+        newSettings.rootCA = fingerprint;
+    }
     if (newSettings.rootCA.length() == 0 && newSettings.enableTLS) {
         newSettings.rootCA = "insecure";
     }
