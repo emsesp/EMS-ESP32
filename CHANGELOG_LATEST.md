@@ -78,6 +78,8 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - MQTT with "Enable TLS" on a port that isn't one of a few well-known TLS ports (8883 is, 8884 or 18883 are not) connected without TLS, sending the MQTT username and password in clear text
 - NTP time zone strings updated to IANA tz 2026e. About 32 zones had the wrong UTC offset now or within the next year (Mexico no longer uses DST, Egypt does again, Morocco is permanent UTC+0, Kazakhstan, and from 1 November 2026 western Canada stays on permanent offsets). On boot EMS-ESP rewrites the stored POSIX string from the saved IANA label so existing installs pick up the new rules without re-selecting the zone [#3308](https://github.com/emsesp/EMS-ESP32/pull/3308)
 - MQTT with TLS and a CA certificate crashed on every connect (a boot loop) on boards with PSRAM when the broker's certificate chain is EC, such as Let's Encrypt ISRG Root X2: verifying it needs about 6 KB of stack and the MQTT task only had 5120 bytes. The MQTT task now gets an 8 KB stack when TLS verifies a CA certificate, and keeps 5120 bytes for insecure TLS and plain MQTT
+- a command value containing a `/` (e.g. the date format `mm/dd/yyyy`) sent via MQTT or the API was taken as a reference to another entity (`device/entity`) and failed with `no 'dd' in unknown`. It is now only treated as a reference when the part before the `/` is a known device [#3329](https://github.com/emsesp/EMS-ESP32/issues/3329)
+- Junkers `contrast` is shown and set in % (25 to 75 in steps of 2.5) instead of the raw value 10 to 30, and the Junkers `display` setting no longer lists two empty options [#3329](https://github.com/emsesp/EMS-ESP32/issues/3329)
 
 ## Changed
 

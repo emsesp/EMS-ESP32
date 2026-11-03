@@ -1147,8 +1147,11 @@ void Thermostat::process_JunkersWW(const std::shared_ptr<const Telegram> & teleg
 
 // 0x11E
 void Thermostat::process_JunkersDisp(const std::shared_ptr<const Telegram> & telegram) {
-    has_update(telegram, ibaContrast_, 0);          // raw 10..30, factor 2.5 => 25..75 %
-    has_enumupdate(telegram, ibaMainDisplay_, 1, 1); // 1=ww temp, 2=date, 3=ext temp, 6=set room temp
+    uint8_t contrast;
+    if (telegram->read_value(contrast, 0)) {
+        has_update(ibaContrast_, (uint8_t)(contrast * 5)); // raw 10..30, factor 2.5 => 25..75 %, stored *2
+    }
+    has_enumupdate(telegram, ibaMainDisplay_, 1, {1, 2, 3, 6}); // 1=ww temp, 2=date, 3=ext temp, 6=set room temp
     has_update(telegram, ibaLanguage_, 3);
     has_enumupdate(telegram, ibaDateFormat_, 5, 1); // 1=DD.MM.YYYY, 2=MM/DD/YYYY
     has_update(telegram, ibaCalIntTemperature_, 8); // calibrate room temperature sensor, by * 0.1 K (-3.0 to 3.0K)
@@ -2256,8 +2259,8 @@ bool Thermostat::set_calinttemp(const char * value, const int8_t id) {
 bool Thermostat::set_display(const char * value, const int8_t id) {
     uint8_t ds;
     if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
-        if (Helpers::value2enum(value, ds, FL_(enum_ibaMainDisplayJ))) {
-            write_command(0x11E, 1, ds + 1, 0x11E);
+        if (Helpers::value2enum(value, ds, FL_(enum_ibaMainDisplayJ), {1, 2, 3, 6})) {
+            write_command(0x11E, 1, ds, 0x11E);
             return true;
         }
     } else {
@@ -2281,14 +2284,14 @@ bool Thermostat::set_dateformat(const char * value, const int8_t id) {
     return true;
 }
 
-// 0x11E - Junkers display contrast, raw value 10..30 (= 25..75 %)
+// 0x11E - Junkers display contrast in %, 25..75 in steps of 2.5, sent as raw value 10..30
 bool Thermostat::set_contrast(const char * value, const int8_t id) {
-    int ct;
-    if (!Helpers::value2number(value, ct, 10, 30)) {
+    float ct;
+    if (!Helpers::value2float(value, ct) || ct < 25 || ct > 75) {
         return false;
     }
 
-    write_command(0x11E, 0, ct, 0x11E);
+    write_command(0x11E, 0, (uint8_t)(ct / 2.5f + 0.5f), 0x11E);
     return true;
 }
 
@@ -5317,9 +5320,12 @@ void Thermostat::register_device_values() {
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &ibaContrast_,
                               DeviceValueType::UINT8,
+                              DeviceValueNumOp::DV_NUMOP_DIV2,
                               FL_(ibaContrast),
-                              DeviceValueUOM::NONE,
-                              MAKE_CF_CB(set_contrast));
+                              DeviceValueUOM::PERCENT,
+                              MAKE_CF_CB(set_contrast),
+                              25,
+                              75);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &ibaCalIntTemperature_,
                               DeviceValueType::INT8,

@@ -145,45 +145,43 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     }
 
     // check if data is entity like device/hc/name/value
-    // unless the command is system/message
+    // unless the command is system/message, or the value just contains a '/' (e.g. a date format "mm/dd/yyyy")
     if ((strcmp(command_p, "message") != 0) && data.is<const char *>()) {
-        const char * d = data.as<const char *>();
-        if (strlen(d)) {
-            char * device_end = (char *)strchr(d, '/');
-            if (device_end != nullptr) {
-                char         device_s[20] = {'\0'};
-                const char * device_p     = device_s;
-                const char * data_p       = nullptr;
-                strlcpy(device_s, d, device_end - d + 1);
-                data_p               = device_end + 1;
-                int8_t  id_d         = -1;
-                uint8_t device_type1 = EMSdevice::device_name_2_device_type(device_p);
-                if (device_type1 >= EMSdevice::DeviceType::BOILER) {
-                    data_p = parse_command_string(data_p, id_d);
-                }
+        const char * d          = data.as<const char *>();
+        const char * device_end = strchr(d, '/');
+        char         device_s[20] = {'\0'};
+        if (device_end != nullptr) {
+            strlcpy(device_s, d, std::min<size_t>(device_end - d + 1, sizeof(device_s)));
+        }
+        uint8_t device_type1 = device_end ? EMSdevice::device_name_2_device_type(device_s) : EMSdevice::DeviceType::UNKNOWN;
+        if (device_has_commands(device_type1)) {
+            const char * data_p = device_end + 1;
+            int8_t       id_d   = -1;
+            if (device_type1 >= EMSdevice::DeviceType::BOILER) {
+                data_p = parse_command_string(data_p, id_d);
+            }
 
-                if (data_p == nullptr) {
-                    return CommandRet::INVALID;
-                }
-
-                char data_s[COMMAND_MAX_LENGTH];
-                strlcpy(data_s, Helpers::toLower(data_p).c_str(), 30);
-                if (strstr(data_s, "/value") == nullptr) {
-                    strlcat(data_s, "/value", sizeof(data_s) - 6);
-                }
-
-                if (Command::call(device_type1, data_s, "", true, id_d, output) != CommandRet::OK) {
-                    return CommandRet::INVALID;
-                }
-
-                if (output["api_data"].is<std::string>()) {
-                    std::string api_data = output["api_data"];
-                    output.clear();
-                    return Command::call(device_type, command_p, api_data.c_str(), is_admin, id_n, output);
-                }
-
+            if (data_p == nullptr) {
                 return CommandRet::INVALID;
             }
+
+            char data_s[COMMAND_MAX_LENGTH];
+            strlcpy(data_s, Helpers::toLower(data_p).c_str(), 30);
+            if (strstr(data_s, "/value") == nullptr) {
+                strlcat(data_s, "/value", sizeof(data_s) - 6);
+            }
+
+            if (Command::call(device_type1, data_s, "", true, id_d, output) != CommandRet::OK) {
+                return CommandRet::INVALID;
+            }
+
+            if (output["api_data"].is<std::string>()) {
+                std::string api_data = output["api_data"];
+                output.clear();
+                return Command::call(device_type, command_p, api_data.c_str(), is_admin, id_n, output);
+            }
+
+            return CommandRet::INVALID;
         }
     }
 
