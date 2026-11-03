@@ -104,7 +104,7 @@ const cs: Translation = {
   CONVERT_FAHRENHEIT: 'Převést hodnoty teploty na Fahrenheit',
   BYPASS_TOKEN: 'Povolit volání API bez přístupového tokenu, s právy hosta (čtení hodnot a příkazy povolené hostům)',
   READONLY: 'Povolit režim jen pro čtení (blokuje všechny odchozí příkazy EMS Tx Write)',
-  WRITE_SKIP_REPEAT: 'Přeskočit zápis, který opakuje hodnotu odeslanou v poslední minutě',
+  WRITE_PROTECTION: 'Chránit zařízení EMS před opakovanými a častými zápisy',
   WRITE_LIMIT: 'Max. počet zápisů za minutu (0 = bez limitu)',
   WRITE_LIMIT_REFUSE: 'Odmítnout zápisy nad limit (jinak se jen zapíše varování do logu)',
   UNDERCLOCK_CPU: 'Snížit takt CPU',

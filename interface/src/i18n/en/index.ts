@@ -104,7 +104,7 @@ const en: Translation = {
   CONVERT_FAHRENHEIT: 'Convert temperature values to Fahrenheit',
   BYPASS_TOKEN: 'Allow API calls without an access token, with guest rights (read values and run Commands that guests may run)',
   READONLY: 'Enable read-only mode (blocks all outgoing EMS Tx Write commands)',
-  WRITE_SKIP_REPEAT: 'Skip a write that repeats the value sent in the last minute',
+  WRITE_PROTECTION: 'Protect the EMS devices from repeated and frequent writes',
   WRITE_LIMIT: 'Max #writes per minute (0 = no limit)',
   WRITE_LIMIT_REFUSE: 'Refuse writes over the limit (otherwise only a warning is logged)',
   UNDERCLOCK_CPU: 'Underclock CPU speed',

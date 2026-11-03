@@ -895,14 +895,14 @@ const ApplicationSettings = () => {
         <BlockFormControlLabel
           control={
             <Checkbox
-              checked={data.write_skip_repeat}
+              checked={data.write_protection}
               onChange={updateFormValue}
-              name="write_skip_repeat"
+              name="write_protection"
             />
           }
-          label={LL.WRITE_SKIP_REPEAT()}
+          label={LL.WRITE_PROTECTION()}
         />
-        {data.write_skip_repeat && (
+        {data.write_protection && (
           <>
             <Box sx={{ mt: 1, mb: 1 }}>
               <ValidatedTextField

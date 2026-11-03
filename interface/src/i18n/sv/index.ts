@@ -104,7 +104,7 @@ const sv: Translation = {
   CONVERT_FAHRENHEIT: 'Konvertera temperaturer till Fahrenheit',
   BYPASS_TOKEN: 'Tillåt API-anrop utan åtkomsttoken, med gästrättigheter (läsa värden och köra kommandon som gäster får köra)',
   READONLY: 'Aktivera skrivskydd (blockerar alla utgående skrivkommandon mot EMS-bussen)',
-  WRITE_SKIP_REPEAT: 'Hoppa över skrivning som upprepar värdet som skickades senaste minuten',
+  WRITE_PROTECTION: 'Skydda EMS-enheterna mot upprepade och täta skrivningar',
   WRITE_LIMIT: 'Max antal skrivningar per minut (0 = ingen gräns)',
   WRITE_LIMIT_REFUSE: 'Neka skrivningar över gränsen (annars loggas bara en varning)',
   UNDERCLOCK_CPU: 'Nedklocka Processorhastighet',

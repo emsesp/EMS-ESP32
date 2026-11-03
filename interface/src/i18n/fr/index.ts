@@ -104,7 +104,7 @@ const fr: Translation = {
   CONVERT_FAHRENHEIT: 'Convertir les températures en Fahrenheit',
   BYPASS_TOKEN: 'Autoriser les appels API sans jeton d\'accès, avec les droits d\'invité (lire les valeurs et lancer les commandes autorisées aux invités)',
   READONLY: 'Activer le mode lecture uniquement (bloque toutes les commandes EMS sortantes en écriture Tx)',
-  WRITE_SKIP_REPEAT: 'Ignorer une écriture qui répète la valeur envoyée dans la dernière minute',
+  WRITE_PROTECTION: 'Protéger les appareils EMS contre les écritures répétées et fréquentes',
   WRITE_LIMIT: "Nombre max. d'écritures par minute (0 = pas de limite)",
   WRITE_LIMIT_REFUSE: 'Refuser les écritures au-delà de la limite (sinon seul un avertissement est journalisé)',
   UNDERCLOCK_CPU: 'Underclock du CPU',

@@ -43,7 +43,7 @@ let settings = {
   telnet_enabled: false,
   notoken_api: false,
   readonly_mode: false,
-  write_skip_repeat: true,
+  write_protection: true,
   write_limit: 10,
   write_limit_refuse: false,
   analog_enabled: true,

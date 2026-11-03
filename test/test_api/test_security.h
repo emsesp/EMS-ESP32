@@ -801,7 +801,7 @@ void security_test_write_limiter_command() {
     output.clear();
     TEST_ASSERT_EQUAL(CommandRet::OK, Command::process("/api/boiler/selflowtemp", true, input, output));
 
-    limiter.configure(EMSESP_DEFAULT_WRITE_SKIP_REPEAT, EMSESP_DEFAULT_WRITE_LIMIT, EMSESP_DEFAULT_WRITE_LIMIT_REFUSE);
+    limiter.configure(EMSESP_DEFAULT_WRITE_PROTECTION, EMSESP_DEFAULT_WRITE_LIMIT, EMSESP_DEFAULT_WRITE_LIMIT_REFUSE);
     limiter.reset();
 }
 

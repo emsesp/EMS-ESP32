@@ -104,7 +104,7 @@ const hu: Translation = {
   CONVERT_FAHRENHEIT: 'Hőmérséklet konvertálása Fahrenheitbe',
   BYPASS_TOKEN: 'API-hívások engedélyezése hozzáférési token nélkül, vendégjogokkal (értékek olvasása és a vendégek által futtatható parancsok)',
   READONLY: 'Csak olvasható mód engedélyezése (letilt minden kimenő EMS írási parancsot)',
-  WRITE_SKIP_REPEAT: 'Az utolsó percben elküldött értéket ismétlő írás kihagyása',
+  WRITE_PROTECTION: 'Az EMS eszközök védelme az ismételt és gyakori írások ellen',
   WRITE_LIMIT: 'Max. írások száma percenként (0 = nincs korlát)',
   WRITE_LIMIT_REFUSE: 'A korlát feletti írások elutasítása (különben csak figyelmeztetés kerül a naplóba)',
   UNDERCLOCK_CPU: 'CPU órajelének csökkentése',
