@@ -1561,10 +1561,17 @@ void Boiler::process_UBAMonitorFastPlus(const std::shared_ptr<const Telegram> & 
         has_update(exhaustTemp_, exhaustTemp1_);
     }
 
-    // heating sends a second 0xE4 with 0xFFFF here, which would clear a valid flow, #3224
-    uint16_t pc0flow = pc0Flow_;
-    if (telegram->read_value(pc0flow, 36) && Helpers::hasValue(pc0flow)) { // see https://github.com/emsesp/EMS-ESP32/issues/2001
-        has_update(pc0Flow_, pc0flow);
+    // 0xE4 offset 36: some HPs interleave a second telegram with 0xFFFF alongside a valid flow (#3224).
+    // Ignore those single invalids, but clear after sustained 0xFFFF (genuine no-flow, #3385).
+    // see also https://github.com/emsesp/EMS-ESP32/issues/2001
+    uint16_t pc0flow;
+    if (telegram->read_value(pc0flow, 36)) {
+        if (Helpers::hasValue(pc0flow)) {
+            pc0FlowInvalidCount_ = 0;
+            has_update(pc0Flow_, pc0flow);
+        } else if (pc0FlowInvalidCount_ < 3 && ++pc0FlowInvalidCount_ == 3) {
+            has_update(pc0Flow_, pc0flow);
+        }
     }
 
     // read 3 char service code / installation status as appears on the display
