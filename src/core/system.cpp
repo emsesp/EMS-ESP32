@@ -1342,6 +1342,7 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.println();
     shell.println("System:");
     shell.printfln(" Version: %s", EMSESP_APP_VERSION);
+    shell.printfln(" Build: %s", official_build() ? "official" : "custom");
     shell.printfln(" System name: %s", system_name().c_str());
 #ifndef EMSESP_STANDALONE
     shell.printfln(" Platform: %s (%s)", EMSESP_PLATFORM, ESP.getChipModel());
@@ -2870,8 +2871,8 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["freeApp"]         = EMSESP::system_.appFree();                            // kilobytes
     node["partition"]       = (const char *)esp_ota_get_running_partition()->label; // active partition
     node["build"]           = official_build() ? "official" : "custom";
-    node["flash_chip_size"] = ESP.getFlashChipSize() / 1024;                        // kilobytes
-    node["psram"]           = (EMSESP::system_.PSram() > 0);                        // make boolean
+    node["flash_chip_size"] = ESP.getFlashChipSize() / 1024; // kilobytes
+    node["psram"]           = (EMSESP::system_.PSram() > 0); // make boolean
     if (EMSESP::system_.PSram()) {
         node["psramSize"] = EMSESP::system_.PSram();
         node["freePsram"] = ESP.getFreePsram() / 1024;
