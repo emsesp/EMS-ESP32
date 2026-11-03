@@ -4,7 +4,7 @@
 Usage: python3 scripts/security_check.py <ip> <admin password>
 
 Creates two temporary API keys and revokes them at the end. Only sends out-of-range writes, which are refused before
-anything reaches the EMS bus, and writes syslog/enabled with its current value (off).
+anything reaches the EMS bus, and writes syslog/enabled with its current value.
 """
 
 import sys
@@ -36,6 +36,7 @@ def uptime(token):
 
 T = sign_in().json()["access_token"]
 start_uptime = uptime(T)
+SYSLOG = requests.get(f"{B}/api/system/info", headers=h(T), timeout=10).json()["syslog"]["enabled"]
 
 # password re-entry (#3371)
 r = requests.post(f"{B}/rest/apiKeys", headers=h(T), json={"action": "create", "label": "netcheck-read"}, timeout=10)
@@ -57,15 +58,15 @@ try:
     # /api access (#3343, #3354, #3360, #3363)
     r = requests.get(f"{B}/api/system/info", timeout=10)
     check("/api reads values without a token (as in 3.8)", r.status_code == 200, str(r.status_code))
-    r = requests.post(f"{B}/api/system/syslog/enabled", json={"value": False}, timeout=10)
+    r = requests.post(f"{B}/api/system/syslog/enabled", json={"value": SYSLOG}, timeout=10)
     check("/api write without a token is refused", r.status_code == 401, f"{r.status_code} {r.text[:60]}")
     r = requests.get(f"{B}/api/system/info", headers=h(RK), timeout=10)
     check("/api with a Read key reads", r.status_code == 200, str(r.status_code))
-    r = requests.post(f"{B}/api/system/syslog/enabled?access_token={T}", json={"value": False}, timeout=10)
+    r = requests.post(f"{B}/api/system/syslog/enabled?access_token={T}", json={"value": SYSLOG}, timeout=10)
     check("admin token in the URL gives no write rights (401)", r.status_code == 401, str(r.status_code))
-    r = requests.post(f"{B}/api/system/syslog/enabled", headers=h(RK), json={"value": False}, timeout=10)
+    r = requests.post(f"{B}/api/system/syslog/enabled", headers=h(RK), json={"value": SYSLOG}, timeout=10)
     check("Read key can't change a setting", r.status_code in (400, 401, 403), f"{r.status_code} {r.text[:60]}")
-    r = requests.post(f"{B}/api/system/syslog/enabled", headers=h(WK), json={"value": False}, timeout=10)
+    r = requests.post(f"{B}/api/system/syslog/enabled", headers=h(WK), json={"value": SYSLOG}, timeout=10)
     check("Read and Write key can change a setting (to its current value)", r.status_code == 200, f"{r.status_code} {r.text[:60]}")
     r = requests.get(f"{B}/rest/settings", headers=h(WK), timeout=10)
     check("API keys don't work on /rest", r.status_code == 401, str(r.status_code))
@@ -134,7 +135,7 @@ finally:
             rr = requests.post(f"{B}/rest/apiKeys", headers=h(T), json={"action": "revoke", "id": k["id"]}, timeout=10)
             print(f"revoked {k['label']}: {rr.status_code}")
     if WK:
-        r = requests.post(f"{B}/api/system/syslog/enabled", headers=h(WK), json={"value": False}, timeout=10)
+        r = requests.post(f"{B}/api/system/syslog/enabled", headers=h(WK), json={"value": SYSLOG}, timeout=10)
         check("a revoked Read and Write key can't write any more", r.status_code == 401, str(r.status_code))
 
 print(f"\n{sum(results)}/{len(results)} passed")
