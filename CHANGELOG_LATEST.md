@@ -56,6 +56,8 @@ Please read this before upgrading. Details are under "Changed" below.
 - Junkers FW/FR thermostat display settings (main display, language, date format, contrast) are now also shown on older models like the FR120, plus the room temperature sensor calibration `intoffset` (0x11E offset 8, -3.0 to 3.0 K) [#3329](https://github.com/emsesp/EMS-ESP32/issues/3329)
 - Hungarian language (HU) 
 - heat pump backup heater energy per mode in 0.01 kWh: `metereheatheat` and `dhw/metereheat` (0x4AF offsets 28 and 36) [#3325](https://github.com/emsesp/EMS-ESP32/issues/3325)
+- console on the System Log page: admins can run console commands such as `show values` from the WebUI and see their output
+- uploading a settings file only changes the settings it contains, so a partial file can be used to change a few settings and keep the rest
 
 ## Fixed
 
