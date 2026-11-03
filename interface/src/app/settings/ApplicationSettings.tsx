@@ -907,6 +907,7 @@ const ApplicationSettings = () => {
             fieldErrors={fieldErrors || {}}
             name="write_limit"
             label={LL.WRITE_LIMIT()}
+            sx={{ minWidth: 320 }}
             variant="outlined"
             value={numberValue(data.write_limit)}
             type="number"
