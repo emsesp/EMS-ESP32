@@ -105,7 +105,7 @@ const hu: Translation = {
   BYPASS_TOKEN: 'API-hívások engedélyezése hozzáférési token nélkül, vendégjogokkal (értékek olvasása és a vendégek által futtatható parancsok)',
   READONLY: 'Csak olvasható mód engedélyezése (letilt minden kimenő EMS írási parancsot)',
   WRITE_SKIP_REPEAT: 'Az utolsó percben elküldött értéket ismétlő írás kihagyása',
-  WRITE_LIMIT: 'Egy entitásra percenként engedélyezett írások maximális száma (0 = nincs korlát)',
+  WRITE_LIMIT: 'Max. írások száma percenként (0 = nincs korlát)',
   WRITE_LIMIT_REFUSE: 'A korlát feletti írások elutasítása (különben csak figyelmeztetés kerül a naplóba)',
   UNDERCLOCK_CPU: 'CPU órajelének csökkentése',
   REMOTE_TIMEOUT: 'Távoli időtúllépés',

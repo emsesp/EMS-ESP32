@@ -105,7 +105,7 @@ const no: Translation = {
   BYPASS_TOKEN: 'Tillat API-kall uten tilgangstoken, med gjesterettigheter (lese verdier og kjøre kommandoer som gjester kan kjøre)',
   READONLY: 'Aktiver read-only modus (blokker all EMS Tx Skriving)',
   WRITE_SKIP_REPEAT: 'Hopp over skriving som gjentar verdien sendt siste minutt',
-  WRITE_LIMIT: 'Maks antall skrivinger per minutt til én entitet (0 = ingen grense)',
+  WRITE_LIMIT: 'Maks antall skrivinger per minutt (0 = ingen grense)',
   WRITE_LIMIT_REFUSE: 'Avvis skrivinger over grensen (ellers logges bare en advarsel)',
   UNDERCLOCK_CPU: 'Underklokking av prosessorhastighet',
   REMOTE_TIMEOUT: 'Remote timeout',

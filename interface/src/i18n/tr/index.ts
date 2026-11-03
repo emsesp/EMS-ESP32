@@ -105,7 +105,7 @@ const tr: Translation = {
   BYPASS_TOKEN: 'Erişim jetonu olmadan API çağrılarına misafir haklarıyla izin ver (değerleri okuma ve misafirlerin çalıştırabildiği komutları çalıştırma)',
   READONLY: 'Salt okunur modu devreye al (bütün giden EMS Tx Yazma komutlarını engeller)',
   WRITE_SKIP_REPEAT: 'Son bir dakikada gönderilen değeri tekrarlayan yazmayı atla',
-  WRITE_LIMIT: 'Bir varlığa dakikada en fazla yazma sayısı (0 = sınırsız)',
+  WRITE_LIMIT: 'Dakikada en fazla yazma sayısı (0 = sınırsız)',
   WRITE_LIMIT_REFUSE: 'Sınırın üzerindeki yazmaları reddet (aksi halde yalnızca bir uyarı kaydedilir)',
   UNDERCLOCK_CPU: 'İşlemci hızını düşür',
   REMOTE_TIMEOUT: 'Remote timeout',
