@@ -14,8 +14,11 @@ permissions:
 # Parallel graph (wall-clock is ~max of the firmware jobs, not the sum):
 #   webui ──────┐
 #               ├─► firmware (s_4M / s_16M / s_16M_P / s3_16M_P) ─┐
-#   modbus ─────┤                                                 ├─► release
-#               └─► standalone ───────────────────────────────────┘
+#   modbus ─────┤                                                 ├─► sign ─┐
+#               │   recovery ─────────────────────────────────────┘         ├─► release
+#               └─► standalone ─────────────────────────────────────────────┘
+#
+# Only the sign job has the signing key. The builds run without it, so build tools and libraries never see it.
 #
 # Extra -j on a single runner does not help: PlatformIO already compiles each
 # environment with all CPUs. The win is separate GitHub runners.
@@ -138,8 +141,6 @@ jobs:
   firmware:
     name: Firmware ${{ matrix.env }}
     needs: [webui, modbus]
-    # the signing key is only in the 'release' environment, limited to dev, main and v* tags
-    environment: release
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
@@ -198,8 +199,6 @@ jobs:
       - name: Build ${{ matrix.env }}
         env:
           CCACHE_COMPILERCHECK: content
-          EMSESP_SIGNING_KEY: ${{ secrets.EMSESP_SIGNING_KEY }}
-          EMSESP_SIGNING_REQUIRED: ${{ github.repository == 'emsesp/EMS-ESP32' && '1' || '' }}
         run: platformio run -e ${{ matrix.env }}
 
       - name: Upload firmware
@@ -209,11 +208,119 @@ jobs:
           path: build/firmware
           if-no-files-found: error
 
+  recovery:
+    name: Recovery firmware
+    if: github.event_name == 'workflow_dispatch' || github.repository == 'emsesp/EMS-ESP32'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      # the recovery build needs PlatformIO, and pnpm + Node.js to build its own WebUI (recovery/WWWData.h)
+      - name: Install python 3.13
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+          enable-cache: false
+
+      # falls back to the firmware jobs' caches, which hold the same toolchains
+      - name: Cache PlatformIO packages
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.platformio/.cache
+            ~/.platformio/packages
+            ~/.platformio/platforms
+          key: ${{ runner.os }}-pio-recovery-${{ hashFiles('platformio.ini') }}
+          restore-keys: |
+            ${{ runner.os }}-pio-recovery-
+            ${{ runner.os }}-pio-
+
+      - name: Install pioarduino
+        run: uv pip install --system pioarduino==6.2.0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          package_json_file: interface/package.json
+
+      - name: Install Node.js 26
+        uses: actions/setup-node@v7
+        with:
+          node-version: 26
+
+      - name: Cache pnpm store
+        uses: actions/cache@v6
+        with:
+          path: ~/.local/share/pnpm/store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('interface/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Build the recovery firmware for the 16MB boards
+        run: platformio run -e recovery_s_16M -e recovery_s_16M_P -e recovery_s3_16M_P
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v7
+        with:
+          name: firmware-recovery
+          path: build/firmware
+          if-no-files-found: error
+
+  # The only job with the signing key: the 'release' environment is limited to dev, main and v* tags and needs an
+  # owner's approval. Keep it to GitHub's own actions and sign_firmware.py, nothing else may run with the key.
+  sign:
+    name: Sign firmware
+    needs: [firmware, recovery]
+    environment: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Install python 3.13
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Install cryptography
+        run: python3 -m pip install cryptography==46.0.7
+
+      - name: Restore firmware binaries
+        uses: actions/download-artifact@v8
+        with:
+          pattern: firmware-*
+          merge-multiple: true
+          path: build/firmware
+
+      - name: Sign the firmware
+        if: github.repository == 'emsesp/EMS-ESP32'
+        env:
+          EMSESP_SIGNING_KEY: ${{ secrets.EMSESP_SIGNING_KEY }}
+        run: python3 scripts/sign_firmware.py sign build/firmware/*.bin
+
+      # every published .bin must pass the check in lib/FirmwareSignature
+      - name: Check the firmware signatures
+        if: github.repository == 'emsesp/EMS-ESP32'
+        run: python3 scripts/sign_firmware.py verify build/firmware/*.bin
+
+      - name: Upload signed firmware
+        uses: actions/upload-artifact@v7
+        with:
+          name: signed-firmware
+          path: build/firmware
+          if-no-files-found: error
+
   release:
     name: Create GitHub Release
-    needs: [firmware, standalone]
-    # the signing key is only in the 'release' environment, limited to dev, main and v* tags
-    environment: release
+    needs: [sign, standalone]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -246,73 +353,14 @@ jobs:
           name: generated-docs
           path: .
 
-      - name: Restore firmware binaries
+      - name: Restore signed firmware
         uses: actions/download-artifact@v8
         with:
-          pattern: firmware-*
-          merge-multiple: true
+          name: signed-firmware
           path: build/firmware
 
       - name: List firmware files
         run: ls -la build/firmware
-
-      # the recovery build needs PlatformIO, and pnpm + Node.js to build its own WebUI (recovery/WWWData.h)
-      - name: Install python 3.13
-        uses: actions/setup-python@v7
-        with:
-          python-version: '3.13'
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          version: "latest"
-          enable-cache: false
-
-      # falls back to the firmware jobs' caches, which hold the same toolchains
-      - name: Cache PlatformIO packages
-        uses: actions/cache@v6
-        with:
-          path: |
-            ~/.platformio/.cache
-            ~/.platformio/packages
-            ~/.platformio/platforms
-          key: ${{ runner.os }}-pio-recovery-${{ hashFiles('platformio.ini') }}
-          restore-keys: |
-            ${{ runner.os }}-pio-recovery-
-            ${{ runner.os }}-pio-
-
-      - name: Install pioarduino
-        run: uv pip install --system pioarduino==6.2.0 cryptography
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v6
-        with:
-          package_json_file: interface/package.json
-
-      - name: Install Node.js 26
-        uses: actions/setup-node@v7
-        with:
-          node-version: 26
-
-      - name: Cache pnpm store
-        uses: actions/cache@v6
-        with:
-          path: ~/.local/share/pnpm/store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('interface/package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
-
-      - name: Build the recovery firmware for the 16MB boards
-        env:
-          EMSESP_SIGNING_KEY: ${{ secrets.EMSESP_SIGNING_KEY }}
-          EMSESP_SIGNING_REQUIRED: ${{ github.repository == 'emsesp/EMS-ESP32' && '1' || '' }}
-        run: |
-          platformio run -e recovery_s_16M -e recovery_s_16M_P -e recovery_s3_16M_P
-
-      # every published .bin must pass the check in lib/FirmwareSignature
-      - name: Check the firmware signatures
-        if: github.repository == 'emsesp/EMS-ESP32'
-        run: python3 scripts/sign_firmware.py verify build/firmware/*.bin
 
       - name: Commit the generated files
         uses: stefanzweifel/git-auto-commit-action@v7

@@ -87,15 +87,12 @@ def bin_copy(source, target, env):
     # Copy firmware.bin to firmware/<variant>.bin
     shutil.copy2(str(target[0]), str(bin_file))
 
-    # Signed with an EMS-ESP key it's an official build, otherwise a custom build. Release builds set EMSESP_SIGNING_REQUIRED
+    # Signed with an EMS-ESP key it's an official build, otherwise a custom build. Releases are signed later, in the
+    # sign job of the release workflows
     pem = sign_firmware.load_key_pem()
     if pem:
         sign_firmware.sign_file(bin_file, pem)
         print("Signed: Yes")
-    elif os.environ.get("EMSESP_SIGNING_REQUIRED"):
-        bin_file.unlink()
-        print("Error: EMSESP_SIGNING_REQUIRED is set but there is no signing key in EMSESP_SIGNING_KEY")
-        env.Exit(1)
     else:
         print("Signed: No, it installs as a custom build")
 
