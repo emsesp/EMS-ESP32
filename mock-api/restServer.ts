@@ -156,8 +156,8 @@ let system_status = {
 let DEV_VERSION_IS_UPGRADEABLE: boolean;
 let STABLE_VERSION_IS_UPGRADEABLE: boolean;
 let THIS_VERSION: string;
-let LATEST_STABLE_VERSION = '3.8.6';
-let LATEST_DEV_VERSION = '3.9.0-dev.1';
+let LATEST_STABLE_VERSION = '3.9.0';
+let LATEST_DEV_VERSION = '3.10.0-dev.1';
 
 // scenarios for testing versioning
 // let version_test = 0; // on latest stable, or switch to dev
@@ -348,10 +348,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-          old_custom_name +
-          ') with new (' +
-          new_custom_name +
-          ')'
+        old_custom_name +
+        ') with new (' +
+        new_custom_name +
+        ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -471,9 +471,9 @@ function upgradeImportantMessages(version: string) {
 
   console.log(
     'upgradeImportantMessageType: version=' +
-      version +
-      ' type=' +
-      upgradeImportantMessageType_n
+    version +
+    ' type=' +
+    upgradeImportantMessageType_n
   );
   return { upgradeImportantMessageType: upgradeImportantMessageType_n };
 }
@@ -537,17 +537,17 @@ function get_versions() {
 
   console.log(
     'getVersions: current=' +
-      THIS_VERSION +
-      ' stable=' +
-      LATEST_STABLE_VERSION +
-      ' (upgradeable=' +
-      (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-      ') dev=' +
-      LATEST_DEV_VERSION +
-      ' (upgradeable=' +
-      (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-      ')' +
-      (MOCK_OFFLINE ? ' [offline]' : '')
+    THIS_VERSION +
+    ' stable=' +
+    LATEST_STABLE_VERSION +
+    ' (upgradeable=' +
+    (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+    ') dev=' +
+    LATEST_DEV_VERSION +
+    ' (upgradeable=' +
+    (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+    ')' +
+    (MOCK_OFFLINE ? ' [offline]' : '')
   );
   return data;
 }

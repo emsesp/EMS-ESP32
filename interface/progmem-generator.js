@@ -1,3 +1,4 @@
+import { gzipAsync } from '@gfx/zopfli';
 import etag from 'etag';
 import {
   createWriteStream,
@@ -8,7 +9,6 @@ import {
 } from 'fs';
 import mime from 'mime-types';
 import { relative, resolve, sep } from 'path';
-import zlib from 'zlib';
 
 // optional args: --src <dir> --out <file> --index <html file served as /index.html>
 const getArg = (name, fallback) => {
@@ -108,14 +108,13 @@ const getFileType = (filePath) => {
   return 'other';
 };
 
-const writeFile = (relativeFilePath, buffer) => {
+const writeFile = (relativeFilePath, buffer, zipBuffer) => {
   const variable = `ESP_REACT_DATA_${fileInfo.length}`;
   const mimeType = mime.lookup(relativeFilePath);
   const fileType = getFileType(relativeFilePath);
   let size = 0;
   writeStream.write(`const uint8_t ${variable}[] = {`);
 
-  const zipBuffer = zlib.gzipSync(buffer, { level: 9 });
   // const hash = crypto.createHash('sha256').update(zipBuffer).digest('hex');
   const hash = etag(zipBuffer); // use smaller md5 instead of sha256
   const rawHash = hash.replace(/^"|"$/g, '');
@@ -158,14 +157,23 @@ const writeStream = cleanAndOpen(resolve(outputPath));
 writeStream.write(ARDUINO_INCLUDES);
 
 const buildPath = resolve(sourcePath);
+const assets = [];
 for (const filePath of getFilesSync(buildPath)) {
   const relativeFilePath = relative(buildPath, filePath);
   if (isExcludedLocaleChunk(relativeFilePath)) {
     console.log(`Skipping locale (not in VITE_APP_LOCALES): ${relativeFilePath}`);
     continue;
   }
-  writeFile(relativeFilePath, readFileSync(filePath));
+  assets.push({ relativeFilePath, buffer: readFileSync(filePath) });
 }
+
+// Zopfli emits standard gzip, ~4% smaller than zlib level 9
+const zipped = await Promise.all(
+  assets.map(({ buffer }) => gzipAsync(buffer, { numiterations: 15 }))
+);
+assets.forEach(({ relativeFilePath, buffer }, i) =>
+  writeFile(relativeFilePath, buffer, Buffer.from(zipped[i]))
+);
 
 writeStream.write(generateWWWClass());
 writeStream.end();

@@ -4,7 +4,6 @@ import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { pathToFileURL } from 'url';
 import { Plugin, PluginOption, defineConfig } from 'vite';
-import viteImagemin from 'vite-plugin-imagemin';
 import zlib from 'zlib';
 
 // Constants
@@ -180,30 +179,6 @@ const createProductionTerserOptions = () => ({
   toplevel: true
 });
 
-// Image optimization plugin.
-// Only svgo runs here: the raster optimizers (optipng, pngquant, gifsicle,
-// jpegtran, mozjpeg) are native binaries whose install scripts are blocked by
-// `allowBuilds` in pnpm-workspace.yaml, so they would fail on every build.
-// Raster assets are committed pre-optimized instead.
-const imageOptimizationPlugin = {
-  ...viteImagemin({
-    verbose: false,
-    filter: /\.svg$/i,
-    gifsicle: false,
-    jpegTran: false,
-    mozjpeg: false,
-    optipng: false,
-    pngquant: false,
-    svgo: {
-      plugins: [
-        { name: 'removeViewBox' },
-        { name: 'removeEmptyAttrs', active: false }
-      ]
-    }
-  }),
-  enforce: 'pre' as const
-};
-
 export default defineConfig(
   async ({ command, mode }: { command: string; mode: string }) => {
     if (command === 'serve' && mode === 'recovery') {
@@ -231,7 +206,7 @@ export default defineConfig(
     if (mode === 'recovery') {
       console.log('Preparing for Recovery WebUI, optimized build');
       return {
-        plugins: [...createBasePlugins(false, true), imageOptimizationPlugin],
+        plugins: createBasePlugins(false, true),
         resolve: {
           alias: RESOLVE_ALIASES,
           extensions: RESOLVE_EXTENSIONS,
@@ -333,7 +308,6 @@ export default defineConfig(
     return {
       plugins: [
         ...createBasePlugins(false, true),
-        imageOptimizationPlugin,
         visualizer({
           template: 'treemap',
           open: false,

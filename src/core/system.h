@@ -96,6 +96,7 @@ class System {
     static bool command_fetch(const char * value, const int8_t id);
     static bool command_restart(const char * value, const int8_t id);
     static bool command_format(const char * value, const int8_t id);
+    static bool command_coredump(const char * value, const int8_t id);
     static bool command_watch(const char * value, const int8_t id);
     static bool command_message(const char * value, const int8_t id, JsonObject output);
     static bool command_info(const char * value, const int8_t id, JsonObject output);
@@ -417,6 +418,9 @@ class System {
 
     bool firmware_healthy_ = false;
     void check_firmware_health();
+
+    std::string coredump_; // summary of the core dump left by the last crash, empty if there is none
+    void        read_coredump();
 
     // button
     static PButton            myPButton_; // PButton instance

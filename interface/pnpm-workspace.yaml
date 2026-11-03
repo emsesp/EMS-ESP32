@@ -1,8 +1,2 @@
 allowBuilds:
-  cwebp-bin: false
   esbuild: false
-  gifsicle: false
-  jpegtran-bin: false
-  mozjpeg: false
-  optipng-bin: false
-  pngquant-bin: false
