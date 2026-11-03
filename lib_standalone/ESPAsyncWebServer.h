@@ -279,6 +279,10 @@ class AsyncEventSource : public AsyncWebHandler {
         return 0;
     };
 
+    void authorizeConnect(ArRequestFilterFunction cb) {
+        setFilter(cb);
+    };
+
     void send(const char * message, const char * event = NULL, uint32_t id = 0, uint32_t reconnect = 0) {};
 };
 
