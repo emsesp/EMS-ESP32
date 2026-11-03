@@ -19,6 +19,7 @@
 #include "system.h"
 #include "emsesp_network.h"
 #include "emsesp.h" // for send_raw_telegram() command
+#include "write_limiter.h"
 
 #ifndef EMSESP_STANDALONE
 #include "esp_image_format.h"
@@ -1188,6 +1189,10 @@ void System::heartbeat_json(JsonObject output) {
 #endif
     output["apicalls"] = WebAPIService::api_count(); // + WebAPIService::api_fails();
     output["apifails"] = WebAPIService::api_fails();
+    if (WriteLimiter::instance().skipped() || WriteLimiter::instance().limited()) {
+        output["writesskipped"] = WriteLimiter::instance().skipped();
+        output["writeslimited"] = WriteLimiter::instance().limited();
+    }
 
     if (EMSESP::sensor_enabled() || EMSESP::analog_enabled()) {
         output["sensorreads"] = EMSESP::temperaturesensor_.reads() + EMSESP::analogsensor_.reads();
@@ -3088,6 +3093,8 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["APICalls"] = WebAPIService::api_count();
     node["APIFails"] = WebAPIService::api_fails();
 #endif
+    node["writesSkipped"] = WriteLimiter::instance().skipped();
+    node["writesLimited"] = WriteLimiter::instance().limited();
 
     // EMS Bus Status
     node = output["bus"].to<JsonObject>();
@@ -3150,6 +3157,9 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["hideLed"]         = settings.hide_led;
         node["noTokenApi"]      = settings.notoken_api;
         node["readonlyMode"]    = settings.readonly_mode;
+        node["writeSkipRepeat"]  = settings.write_skip_repeat;
+        node["writeLimit"]       = settings.write_limit;
+        node["writeLimitRefuse"] = settings.write_limit_refuse;
         node["fahrenheit"]      = settings.fahrenheit;
         node["dallasParasite"]  = settings.dallas_parasite;
         node["boolFormat"]      = settings.bool_format;

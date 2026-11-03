@@ -163,6 +163,7 @@ class EMSESP {
     static bool    device_exists(const uint8_t device_id);
     static void    device_active(const uint8_t device_id, const bool active);
     static bool    cmd_is_readonly(const uint8_t device_type, const uint8_t device_id, const char * cmd, const int8_t id);
+    static int16_t cmd_value_type(const uint8_t device_type, const uint8_t device_id, const char * cmd, const int8_t id);
     static bool
     cmd_value_in_range(const uint8_t device_type, const uint8_t device_id, const char * cmd, const int8_t id, const char * value, int16_t & min, uint32_t & max);
     static uint8_t device_id_from_cmd(const uint8_t device_type, const char * cmd, const int8_t id);

@@ -879,6 +879,17 @@ bool EMSdevice::value_in_range(const std::string & cmd, const int8_t id, const c
     return true;
 }
 
+// the DeviceValueType of a writable entity, -1 if not found
+int16_t EMSdevice::value_type(const std::string & cmd, const int8_t id) const {
+    for (const auto & dv : devicevalues_) {
+        if (dv.has_cmd && std::string(dv.short_name) == cmd && (dv.tag < DeviceValueTAG::TAG_HC1 || dv.tag == id || id == -1)) {
+            return dv.type;
+        }
+    }
+
+    return -1;
+}
+
 // check if value has a registered command
 bool EMSdevice::has_command(const void * value_p) const {
     for (const auto & dv : devicevalues_) {

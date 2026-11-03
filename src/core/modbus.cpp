@@ -407,7 +407,7 @@ ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
         }
 
         LOG_ERROR("%s", error);
-        response.setError(request.getServerID(), request.getFunctionCode(), ILLEGAL_DATA_VALUE);
+        response.setError(request.getServerID(), request.getFunctionCode(), return_code == CommandRet::TOO_MANY_WRITES ? SERVER_DEVICE_BUSY : ILLEGAL_DATA_VALUE);
     } else {
         // all good
         response.add(request.getServerID());

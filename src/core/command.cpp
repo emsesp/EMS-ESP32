@@ -19,6 +19,7 @@
 #include "command.h"
 #include "emsdevice.h"
 #include "emsesp.h"
+#include "write_limiter.h"
 
 namespace emsesp {
 
@@ -229,6 +230,8 @@ const char * Command::return_code_string(const uint8_t return_code) {
         return "Invalid";
     case CommandRet::PASSWORD_REQUIRED:
         return "Password Required";
+    case CommandRet::TOO_MANY_WRITES:
+        return "Too Many Writes";
     default:
         break;
     }
@@ -372,6 +375,57 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     return call(device_type, cmd, value, true, id, output);
 }
 
+// false if the write doesn't reach the EMS bus, so isn't limited. An empty entity is a raw telegram.
+// The value is normalised so that "45", "45.0" and 45, or "on", "1" and true, are the same write.
+static bool write_limit_key(const uint8_t  device_type,
+                            const uint8_t  device_id,
+                            const char *   cmd,
+                            const int8_t   id,
+                            const char *   value,
+                            char *         entity,
+                            size_t         entity_len,
+                            char *         written,
+                            size_t         written_len) {
+    entity[0]    = '\0';
+    int16_t type = -1;
+    if (device_type == EMSdevice::DeviceType::SYSTEM) {
+        if (strcmp(cmd, F_(send))) {
+            return false;
+        }
+        strlcpy(written, value, written_len);
+        return true;
+    } else if (device_type == EMSdevice::DeviceType::CUSTOM) {
+        if (!EMSESP::webCustomEntityService.writes_to_bus(cmd)) {
+            return false;
+        }
+    } else if (device_type >= EMSdevice::DeviceType::BOILER) {
+        type = EMSESP::cmd_value_type(device_type, device_id, cmd, id);
+        if (type == DeviceValueType::CMD) {
+            return false;
+        }
+    } else {
+        return false;
+    }
+
+    const char * dname = EMSdevice::device_type_2_device_name(device_type);
+    if (id >= DeviceValueTAG::TAG_HC1) {
+        snprintf(entity, entity_len, "%s/%s/%s", dname, EMSdevice::tag_to_mqtt(id), cmd);
+    } else {
+        snprintf(entity, entity_len, "%s/%s", dname, cmd);
+    }
+
+    float f;
+    bool  b;
+    if (type == DeviceValueType::BOOL && Helpers::value2bool(value, b)) {
+        snprintf(written, written_len, "%d", b ? 1 : 0);
+    } else if (type != DeviceValueType::STRING && Helpers::value2float(value, f)) {
+        snprintf(written, written_len, "%.3f", f);
+    } else {
+        strlcpy(written, Helpers::toLower(value).c_str(), written_len);
+    }
+    return true;
+}
+
 // calls a command. Takes a json object for output.
 // id may be used to represent a heating circuit for example
 // returns 0 if the command errored, 1 (TRUE) if ok, 2 if not found, 3 if error or 4 if not allowed
@@ -497,8 +551,42 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
             return_code = CommandRet::INVALID;
             snprintf(reason, sizeof(reason), "out of range %d to %lu", min, static_cast<unsigned long>(max));
         } else {
+            char       entity[64]  = "";
+            char       written[24] = "";
+            const bool limited = !cf->has_json_output_ && !single_command
+                                 && write_limit_key(device_type, device_id, cmd, id, value, entity, sizeof(entity), written, sizeof(written));
+            const char * limited_entity = entity[0] ? entity : nullptr;
+            if (limited) {
+                auto &       limiter = WriteLimiter::instance();
+                uint32_t     ms;
+                bool         log;
+                const char * by      = caller_source_ ? caller_source_ : "unknown";
+                const auto   verdict = limiter.check(limited_entity, written, uuid::get_uptime(), ms, log);
+                const char * name    = limited_entity ? limited_entity : "system/send";
+                if (verdict == WriteLimiter::Verdict::SKIP) {
+                    LOG_DEBUG("Write %s %s skipped, same value sent %lus ago (by %s)", name, value, static_cast<unsigned long>(ms / 1000), by);
+                    return CommandRet::OK;
+                }
+                if (verdict == WriteLimiter::Verdict::REFUSE) {
+                    if (log) {
+                        LOG_WARNING("Too many writes to %s, refusing writes for %lus (by %s)", name, static_cast<unsigned long>((ms + 999) / 1000), by);
+                    }
+                    char message[100];
+                    snprintf(message, sizeof(message), "too many writes to %s, try again in %lus", name, static_cast<unsigned long>((ms + 999) / 1000));
+                    output.clear();
+                    output["message"] = message;
+                    return CommandRet::TOO_MANY_WRITES;
+                }
+                if (verdict == WriteLimiter::Verdict::OVER_LIMIT && log) {
+                    LOG_WARNING("Too many writes to %s in the last minute (by %s)", name, by);
+                }
+            }
+
             // call the command (the output object is ignored by non-JSON commands)
             return_code = ((cf->cmdfunction_)(value, id, output)) ? CommandRet::OK : CommandRet::ERROR;
+            if (limited && return_code == CommandRet::OK) {
+                WriteLimiter::instance().sent(limited_entity, written, uuid::get_uptime());
+            }
         }
     }
 

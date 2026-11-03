@@ -378,6 +378,7 @@ class EMSdevice {
     bool         is_readable(const void * value_p) const;
     bool         is_readonly(const std::string & cmd, const int8_t id) const;
     bool         value_in_range(const std::string & cmd, const int8_t id, const char * value, int16_t & min, uint32_t & max);
+    int16_t      value_type(const std::string & cmd, const int8_t id) const;
     bool         has_command(const void * value_p) const;
     void         set_minmax(const void * value_p, int16_t min, uint32_t max);
     void         publish_value(void * value_p) const;

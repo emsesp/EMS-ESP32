@@ -172,6 +172,16 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
 }
 
 // set value by api command
+// false for entities that only live in RAM or NVS
+bool WebCustomEntityService::writes_to_bus(const char * name) {
+    for (const CustomEntityItem & entityItem : *customEntityItems_) {
+        if (Helpers::toLower(entityItem.name) == Helpers::toLower(name)) {
+            return entityItem.ram == 0;
+        }
+    }
+    return false;
+}
+
 bool WebCustomEntityService::command_setvalue(const char * value, const int8_t id, const char * name) {
     // don't write if there is no value, to prevent setting an empty value by mistake when parsing attributes
     if (!strlen(value)) {

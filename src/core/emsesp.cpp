@@ -178,6 +178,16 @@ bool EMSESP::cmd_is_readonly(const uint8_t device_type, const uint8_t device_id,
     return false;
 }
 
+int16_t EMSESP::cmd_value_type(const uint8_t device_type, const uint8_t device_id, const char * cmd, const int8_t id) {
+    for (const auto & emsdevice : emsdevices) {
+        if (emsdevice && (emsdevice->device_type() == device_type) && (!device_id || emsdevice->device_id() == device_id)) {
+            return emsdevice->value_type(cmd, id);
+        }
+    }
+
+    return -1;
+}
+
 // false if a number is outside the entity's min and max, which include the custom limits from Customizations
 bool EMSESP::cmd_value_in_range(const uint8_t device_type, const uint8_t device_id, const char * cmd, const int8_t id, const char * value, int16_t & min, uint32_t & max) {
     for (const auto & emsdevice : emsdevices) {

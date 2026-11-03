@@ -196,15 +196,15 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     api_count_++;
 
     // send the json that came back from the command call
-    // sequence matches CommandRet in command.h (FAIL, OK, NOT_FOUND, ERROR, NOT_ALLOWED, INVALID, NO_VALUE, PASSWORD_REQUIRED)
+    // sequence matches CommandRet in command.h (FAIL, OK, NOT_FOUND, ERROR, NOT_ALLOWED, INVALID, NO_VALUE, PASSWORD_REQUIRED, TOO_MANY_WRITES)
     // 400 (bad request)
     // 200 (OK)
     // 404 (not found)
     // 401 (unauthorized)
     // 400 (invalid)
-    int ret_codes[8] = {400, 200, 404, 400, 401, 400, 404, SecurityManager::PASSWORD_REQUIRED};
+    int ret_codes[9] = {400, 200, 404, 400, 401, 400, 404, SecurityManager::PASSWORD_REQUIRED, 429};
 
-    response->setCode(return_code < 8 ? ret_codes[return_code] : 400);
+    response->setCode(return_code < 9 ? ret_codes[return_code] : 400);
     response->setLength();
     response->setContentType("application/json; charset=utf-8");
     request->send(response);

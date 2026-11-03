@@ -53,7 +53,8 @@ enum CommandRet : uint8_t {
     NOT_ALLOWED, // 4 - needs authentication
     INVALID,          // 5 - invalid (tag)
     NO_VALUE,         // 6 - no value
-    PASSWORD_REQUIRED // 7 - a Web UI session has to enter its password again first
+    PASSWORD_REQUIRED, // 7 - a Web UI session has to enter its password again first
+    TOO_MANY_WRITES    // 8 - refused by the write limit
 };
 
 using cmd_function_p = std::function<bool(const char * data, const int8_t id, JsonObject output)>;

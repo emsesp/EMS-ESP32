@@ -27,6 +27,9 @@ export interface Settings {
   low_clock: boolean;
   notoken_api: boolean;
   readonly_mode: boolean;
+  write_skip_repeat: boolean;
+  write_limit: number;
+  write_limit_refuse: boolean;
   analog_enabled: boolean;
   pbutton_gpio: number;
   trace_raw: boolean;

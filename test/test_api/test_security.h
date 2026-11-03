@@ -6,6 +6,7 @@
 #include "settings_secrets.h"
 #include "password_hash.h"
 #include "login_limiter.h"
+#include "write_limiter.h"
 #include "password_confirm.h"
 #include "firmware_url.h"
 #include "mqtt_tls.h"
@@ -691,6 +692,119 @@ void security_test_write_range() {
     TEST_ASSERT_EQUAL(CommandRet::OK, Command::process("/api/boiler/selflowtemp", true, input, output));
 }
 
+// the same value again within a minute is skipped, a new value or a minute later is sent
+void security_test_write_limiter_repeat() {
+    WriteLimiter limiter;
+    uint32_t     ms;
+    bool         log;
+    uint32_t     now = 1000;
+
+    TEST_ASSERT_TRUE(limiter.check("boiler/selflowtemp", "45.000", now, ms, log) == WriteLimiter::Verdict::SEND);
+    limiter.sent("boiler/selflowtemp", "45.000", now);
+    TEST_ASSERT_TRUE(limiter.check("boiler/selflowtemp", "45.000", now + 12000, ms, log) == WriteLimiter::Verdict::SKIP);
+    TEST_ASSERT_EQUAL_UINT32(12000, ms);
+    TEST_ASSERT_EQUAL_UINT32(1, limiter.skipped());
+    TEST_ASSERT_TRUE(limiter.check("boiler/selflowtemp", "46.000", now + 12000, ms, log) == WriteLimiter::Verdict::SEND);
+    TEST_ASSERT_TRUE(limiter.check("thermostat/hc2/seltemp", "45.000", now + 12000, ms, log) == WriteLimiter::Verdict::SEND);
+    TEST_ASSERT_TRUE(limiter.check("boiler/selflowtemp", "45.000", now + WriteLimiter::REPEAT_MS, ms, log) == WriteLimiter::Verdict::SEND);
+
+    // a write the command didn't take isn't remembered
+    TEST_ASSERT_TRUE(limiter.check("boiler/wwseltemp", "50.000", now, ms, log) == WriteLimiter::Verdict::SEND);
+    TEST_ASSERT_TRUE(limiter.check("boiler/wwseltemp", "50.000", now + 1000, ms, log) == WriteLimiter::Verdict::SEND);
+
+    limiter.configure(false, 10, false);
+    TEST_ASSERT_TRUE(limiter.check("boiler/selflowtemp", "45.000", now + 1000, ms, log) == WriteLimiter::Verdict::SEND);
+}
+
+// over the limit is logged once a minute, or refused with the time to wait
+void security_test_write_limiter_limit() {
+    WriteLimiter limiter;
+    uint32_t     ms;
+    bool         log;
+    uint32_t     now = 5000;
+    char         value[8];
+
+    limiter.configure(false, 3, false);
+    for (uint8_t i = 0; i < 3; i++) {
+        snprintf(value, sizeof(value), "%u", i);
+        TEST_ASSERT_TRUE(limiter.check("boiler/selflowtemp", value, now + i, ms, log) == WriteLimiter::Verdict::SEND);
+        limiter.sent("boiler/selflowtemp", value, now + i);
+    }
+    TEST_ASSERT_TRUE(limiter.check("boiler/selflowtemp", "9", now + 10, ms, log) == WriteLimiter::Verdict::OVER_LIMIT);
+    TEST_ASSERT_TRUE(log);
+    limiter.sent("boiler/selflowtemp", "9", now + 10);
+    TEST_ASSERT_TRUE(limiter.check("boiler/selflowtemp", "8", now + 20, ms, log) == WriteLimiter::Verdict::OVER_LIMIT);
+    TEST_ASSERT_FALSE(log);
+    TEST_ASSERT_TRUE(limiter.check("boiler/wwseltemp", "50", now + 20, ms, log) == WriteLimiter::Verdict::SEND);
+
+    limiter.configure(false, 3, true);
+    TEST_ASSERT_TRUE(limiter.check("boiler/selflowtemp", "7", now + 22000, ms, log) == WriteLimiter::Verdict::REFUSE);
+    TEST_ASSERT_EQUAL_UINT32(WriteLimiter::WINDOW_MS - 22000, ms);
+    TEST_ASSERT_EQUAL_UINT32(3, limiter.limited());
+    TEST_ASSERT_TRUE(limiter.check("boiler/selflowtemp", "7", now + WriteLimiter::WINDOW_MS, ms, log) == WriteLimiter::Verdict::SEND);
+
+    limiter.configure(false, 0, true);
+    for (uint16_t i = 0; i < 200; i++) {
+        TEST_ASSERT_TRUE(limiter.check("boiler/selflowtemp", "7", now, ms, log) == WriteLimiter::Verdict::SEND);
+        limiter.sent("boiler/selflowtemp", "7", now);
+    }
+}
+
+// raw telegrams and all entities together share one limit, and the table keeps working when full
+void security_test_write_limiter_global() {
+    WriteLimiter limiter;
+    uint32_t     ms;
+    bool         log;
+    uint32_t     now = 1000;
+    char         entity[24];
+
+    limiter.configure(true, 10, true);
+    for (uint16_t i = 0; i < WriteLimiter::GLOBAL_MAX; i++) {
+        snprintf(entity, sizeof(entity), "boiler/e%u", i);
+        TEST_ASSERT_TRUE(limiter.check(i % 2 ? entity : nullptr, "1", now, ms, log) == WriteLimiter::Verdict::SEND);
+        limiter.sent(i % 2 ? entity : nullptr, "1", now);
+    }
+    TEST_ASSERT_TRUE(limiter.check(nullptr, "0B 08 1A 00 3C", now + 1000, ms, log) == WriteLimiter::Verdict::REFUSE);
+    TEST_ASSERT_TRUE(log);
+    TEST_ASSERT_EQUAL_UINT32(WriteLimiter::WINDOW_MS - 1000, ms);
+    TEST_ASSERT_TRUE(limiter.check("boiler/new", "1", now + 2000, ms, log) == WriteLimiter::Verdict::REFUSE);
+    TEST_ASSERT_FALSE(log);
+    TEST_ASSERT_TRUE(limiter.check(nullptr, "0B 08 1A 00 3C", now + WriteLimiter::WINDOW_MS, ms, log) == WriteLimiter::Verdict::SEND);
+}
+
+// through Command::call: "61" and "61.0" are the same write, an out of range value isn't counted, a refused write gets its own code
+void security_test_write_limiter_command() {
+    auto &       limiter = WriteLimiter::instance();
+    JsonDocument doc_in;
+    JsonDocument doc_out;
+    JsonObject   input  = doc_in.to<JsonObject>();
+    JsonObject   output = doc_out.to<JsonObject>();
+    limiter.reset();
+    limiter.configure(true, 2, true);
+    const uint32_t skipped = limiter.skipped();
+
+    input["value"] = "61";
+    TEST_ASSERT_EQUAL(CommandRet::OK, Command::process("/api/boiler/selflowtemp", true, input, output));
+    input["value"] = "61.0";
+    TEST_ASSERT_EQUAL(CommandRet::OK, Command::process("/api/boiler/selflowtemp", true, input, output));
+    TEST_ASSERT_EQUAL_UINT32(skipped + 1, limiter.skipped());
+    input["value"] = "95";
+    TEST_ASSERT_EQUAL(CommandRet::INVALID, Command::process("/api/boiler/selflowtemp", true, input, output));
+    input["value"] = "62";
+    TEST_ASSERT_EQUAL(CommandRet::OK, Command::process("/api/boiler/selflowtemp", true, input, output));
+    input["value"] = "63";
+    TEST_ASSERT_EQUAL(CommandRet::TOO_MANY_WRITES, Command::process("/api/boiler/selflowtemp", true, input, output));
+    TEST_ASSERT_NOT_NULL(strstr(output["message"] | "", "too many writes to boiler/selflowtemp, try again in"));
+
+    // reads aren't limited
+    input.clear();
+    output.clear();
+    TEST_ASSERT_EQUAL(CommandRet::OK, Command::process("/api/boiler/selflowtemp", true, input, output));
+
+    limiter.configure(EMSESP_DEFAULT_WRITE_SKIP_REPEAT, EMSESP_DEFAULT_WRITE_LIMIT, EMSESP_DEFAULT_WRITE_LIMIT_REFUSE);
+    limiter.reset();
+}
+
 // read-only mode also stops raw write telegrams, raw reads still work
 void security_test_readonly_raw() {
     EMSESP::system_.readonly_mode(true);
@@ -774,6 +888,10 @@ void run_security_tests() {
     RUN_TEST(security_test_password_required_actions);
     RUN_TEST(security_test_firmware_url);
     RUN_TEST(security_test_write_range);
+    RUN_TEST(security_test_write_limiter_repeat);
+    RUN_TEST(security_test_write_limiter_limit);
+    RUN_TEST(security_test_write_limiter_global);
+    RUN_TEST(security_test_write_limiter_command);
     RUN_TEST(security_test_readonly_raw);
     RUN_TEST(security_test_caller_source);
     RUN_TEST(security_test_mqtt_tls);

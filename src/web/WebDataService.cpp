@@ -320,7 +320,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
 #endif
         }
 
-        response->setCode((return_code == CommandRet::OK) ? 200 : 400); // bad request
+        response->setCode(return_code == CommandRet::OK ? 200 : return_code == CommandRet::TOO_MANY_WRITES ? 429 : 400);
         response->setLength();
         request->send(response);
         return;

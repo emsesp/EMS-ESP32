@@ -892,6 +892,39 @@ const ApplicationSettings = () => {
           }
           label={LL.READONLY()}
         />
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.write_skip_repeat}
+              onChange={updateFormValue}
+              name="write_skip_repeat"
+            />
+          }
+          label={LL.WRITE_SKIP_REPEAT()}
+        />
+        <Box sx={{ mt: 1, mb: 1 }}>
+          <ValidatedTextField
+            fieldErrors={fieldErrors || {}}
+            name="write_limit"
+            label={LL.WRITE_LIMIT()}
+            variant="outlined"
+            value={numberValue(data.write_limit)}
+            type="number"
+            onChange={updateFormValue}
+          />
+        </Box>
+        {data.write_limit !== 0 && (
+          <BlockFormControlLabel
+            control={
+              <Checkbox
+                checked={data.write_limit_refuse}
+                onChange={updateFormValue}
+                name="write_limit_refuse"
+              />
+            }
+            label={LL.WRITE_LIMIT_REFUSE()}
+          />
+        )}
         {data.led_gpio !== 0 && (
           <BlockFormControlLabel
             control={

@@ -17,6 +17,7 @@
  */
 
 #include "emsesp.h"
+#include "write_limiter.h"
 
 namespace emsesp {
 
@@ -31,12 +32,14 @@ WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, Securit
 
     addUpdateHandler([this] { onUpdate(); }, false);
 
-    // turning on the unencrypted telnet console or the API without an access token, or turning off read-only mode
+    // turning on the unencrypted telnet console or the API without an access token, or turning off read-only mode or the write limit
     _httpEndpoint.requirePassword([](JsonObject json, WebSettings & current) {
-        const bool telnet   = json["telnet_enabled"] | EMSESP_DEFAULT_TELNET_ENABLED;
-        const bool notoken  = json["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
-        const bool readonly = json["readonly_mode"] | false;
-        return (telnet && !current.telnet_enabled) || (notoken && !current.notoken_api) || (!readonly && current.readonly_mode);
+        const bool    telnet      = json["telnet_enabled"] | EMSESP_DEFAULT_TELNET_ENABLED;
+        const bool    notoken     = json["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
+        const bool    readonly    = json["readonly_mode"] | false;
+        const uint8_t write_limit = json["write_limit"] | EMSESP_DEFAULT_WRITE_LIMIT;
+        return (telnet && !current.telnet_enabled) || (notoken && !current.notoken_api) || (!readonly && current.readonly_mode)
+               || (!write_limit && current.write_limit);
     });
 }
 
@@ -73,6 +76,9 @@ void WebSettings::read(WebSettings & settings, JsonObject root) {
     root["telnet_enabled"]        = settings.telnet_enabled;
     root["notoken_api"]           = settings.notoken_api;
     root["readonly_mode"]         = settings.readonly_mode;
+    root["write_skip_repeat"]     = settings.write_skip_repeat;
+    root["write_limit"]           = settings.write_limit;
+    root["write_limit_refuse"]    = settings.write_limit_refuse;
     root["analog_enabled"]        = settings.analog_enabled;
     root["pbutton_gpio"]          = settings.pbutton_gpio;
     root["solar_maxflow"]         = settings.solar_maxflow;
@@ -313,6 +319,11 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
 
     settings.readonly_mode = root["readonly_mode"];
     EMSESP::system_.readonly_mode(settings.readonly_mode);
+
+    settings.write_skip_repeat  = root["write_skip_repeat"] | EMSESP_DEFAULT_WRITE_SKIP_REPEAT;
+    settings.write_limit        = root["write_limit"] | EMSESP_DEFAULT_WRITE_LIMIT;
+    settings.write_limit_refuse = root["write_limit_refuse"] | EMSESP_DEFAULT_WRITE_LIMIT_REFUSE;
+    WriteLimiter::instance().configure(settings.write_skip_repeat, settings.write_limit, settings.write_limit_refuse);
 
     settings.developer_mode = root["developer_mode"];
     EMSESP::system_.developer_mode(settings.developer_mode);
