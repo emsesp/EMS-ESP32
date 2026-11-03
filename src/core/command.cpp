@@ -153,7 +153,8 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         if (device_end != nullptr) {
             strlcpy(device_s, d, std::min<size_t>(device_end - d + 1, sizeof(device_s)));
         }
-        uint8_t device_type1 = device_end ? EMSdevice::device_name_2_device_type(device_s) : EMSdevice::DeviceType::UNKNOWN;
+        uint8_t device_type1 = device_end ? EMSdevice::device_name_2_device_type(device_s)
+                                          : static_cast<uint8_t>(EMSdevice::DeviceType::UNKNOWN);
         if (device_has_commands(device_type1)) {
             const char * data_p = device_end + 1;
             int8_t       id_d   = -1;
