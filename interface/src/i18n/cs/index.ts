@@ -105,7 +105,7 @@ const cs: Translation = {
   BYPASS_TOKEN: 'Povolit volání API bez přístupového tokenu, s právy hosta (čtení hodnot a příkazy povolené hostům)',
   READONLY: 'Povolit režim jen pro čtení (blokuje všechny odchozí příkazy EMS Tx Write)',
   WRITE_SKIP_REPEAT: 'Přeskočit zápis, který opakuje hodnotu odeslanou v poslední minutě',
-  WRITE_LIMIT: 'Limit zápisů (zápisy za minutu na entitu, 0 = vypnuto)',
+  WRITE_LIMIT: 'Maximální počet zápisů za minutu na jednu entitu (0 = bez limitu)',
   WRITE_LIMIT_REFUSE: 'Odmítnout zápisy nad limit (jinak se jen zapíše varování do logu)',
   UNDERCLOCK_CPU: 'Snížit takt CPU',
   REMOTE_TIMEOUT: 'Časový limit vzdáleného připojení',

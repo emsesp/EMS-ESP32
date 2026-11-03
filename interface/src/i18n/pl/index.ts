@@ -105,7 +105,7 @@ const pl: BaseTranslation = {
   BYPASS_TOKEN: 'Zezwalaj na wywołania API bez tokena dostępu, z uprawnieniami gościa (odczyt wartości i polecenia dozwolone dla gości)',
   READONLY: 'Tryb pracy "tylko do odczytu" (blokuje wszystkie komendy zapisu na magistralę EMS)',
   WRITE_SKIP_REPEAT: 'Pomiń zapis, który powtarza wartość wysłaną w ostatniej minucie',
-  WRITE_LIMIT: 'Limit zapisów (zapisy na minutę dla jednej encji, 0 = wyłączony)',
+  WRITE_LIMIT: 'Maksymalna liczba zapisów na minutę do jednej encji (0 = bez limitu)',
   WRITE_LIMIT_REFUSE: 'Odrzucaj zapisy ponad limit (w przeciwnym razie tylko ostrzeżenie w logu)',
   UNDERCLOCK_CPU: 'Obniż taktowanie CPU',
   REMOTE_TIMEOUT: 'Remote timeout',

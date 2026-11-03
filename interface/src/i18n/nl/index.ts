@@ -105,7 +105,7 @@ const nl: Translation = {
   BYPASS_TOKEN: 'API-aanroepen zonder toegangstoken toestaan, met gastrechten (waarden lezen en commando\'s uitvoeren die gasten mogen uitvoeren)',
   READONLY: 'Activeer read-only modus (blokkeert alle outgaande EMS Tx schrijf commandos)',
   WRITE_SKIP_REPEAT: 'Schrijfactie overslaan als dezelfde waarde in de laatste minuut is verzonden',
-  WRITE_LIMIT: 'Schrijflimiet (schrijfacties per minuut per entiteit, 0 = uit)',
+  WRITE_LIMIT: 'Maximaal aantal schrijfacties per minuut naar één entiteit (0 = geen limiet)',
   WRITE_LIMIT_REFUSE: 'Schrijfacties boven de limiet weigeren (anders alleen een waarschuwing in het log)',
   UNDERCLOCK_CPU: 'Underclock CPU snelheid',
   REMOTE_TIMEOUT: 'Remote timeout',

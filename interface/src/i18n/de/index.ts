@@ -105,7 +105,7 @@ const de: Translation = {
   BYPASS_TOKEN: 'API-Aufrufe ohne Zugriffstoken erlauben, mit Gastrechten (Werte lesen und Befehle ausführen, die Gäste ausführen dürfen)',
   READONLY: 'Nur-Lese-Modus aktivieren (blockiert alle ausgehenden EMS Tx-Schreibbefehle)',
   WRITE_SKIP_REPEAT: 'Schreibvorgang überspringen, wenn derselbe Wert in der letzten Minute gesendet wurde',
-  WRITE_LIMIT: 'Schreiblimit (Schreibvorgänge pro Minute und Entität, 0 = aus)',
+  WRITE_LIMIT: 'Maximale Schreibvorgänge pro Minute für eine Entität (0 = kein Limit)',
   WRITE_LIMIT_REFUSE: 'Schreibvorgänge über dem Limit ablehnen (sonst nur eine Warnung im Log)',
   UNDERCLOCK_CPU: 'CPU-Geschwindigkeit untertakten',
   REMOTE_TIMEOUT: 'Timeout',
