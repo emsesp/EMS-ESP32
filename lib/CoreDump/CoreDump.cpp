@@ -82,4 +82,13 @@ void send(AsyncWebServerRequest * request) {
     request->send(404);
 }
 
+bool erase() {
+#ifdef COREDUMP_SUPPORTED
+    const esp_err_t err = esp_core_dump_image_erase();
+    return err == ESP_OK || err == ESP_ERR_NOT_FOUND;
+#else
+    return true;
+#endif
+}
+
 } // namespace CoreDump

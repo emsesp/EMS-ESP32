@@ -27,7 +27,6 @@
 #include "esp_partition.h"
 #include <esp_mac.h>
 #include "esp_efuse.h"
-#include "esp_core_dump.h"
 #include <nvs.h>
 #endif
 
@@ -3463,6 +3462,10 @@ bool System::command_format(const char * value, const int8_t id) {
     } else {
         LOG_ERROR("Format failed");
     }
+    if (!CoreDump::erase()) {
+        LOG_ERROR("Failed to erase the crash dump");
+    }
+    EMSESP::system_.coredump_.clear();
     EMSESP::system_.wipe_fs_ = true;
 #else
     LOG_ERROR("Format command not available in standalone or test mode");
@@ -3485,7 +3488,7 @@ bool System::command_format(const char * value, const int8_t id) {
 // erases the core dump from the last crash, so the next one shows up as new
 bool System::command_coredump(const char * value, const int8_t id) {
 #if !defined(EMSESP_STANDALONE)
-    if (esp_core_dump_image_erase() != ESP_OK) {
+    if (!CoreDump::erase()) {
         LOG_ERROR("Failed to erase the crash dump");
         return false;
     }

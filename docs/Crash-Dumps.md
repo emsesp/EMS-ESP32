@@ -1,6 +1,6 @@
 # Decoding crash dumps
 
-When EMS-ESP crashes (panic, `abort()`, stack overflow or a watchdog panic), the ESP32 writes a core dump to the `coredump` flash partition before it restarts. The dump survives the restart and is kept until the next crash overwrites it, or until it is erased.
+When EMS-ESP crashes (panic, `abort()`, stack overflow or a watchdog panic), the ESP32 writes a core dump to the `coredump` flash partition before it restarts. The dump survives the restart and is kept until the next crash overwrites it, until it is erased, or until a factory reset. It's a copy of the memory, so it can contain passwords and keys: only share it with people you trust.
 
 Only boards whose partition table has a `coredump` partition store a dump. That's the 16MB and 32MB layouts, not the 4MB ones. A brownout, a power cut or a normal restart doesn't write a dump.
 

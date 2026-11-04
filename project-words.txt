@@ -1385,3 +1385,11 @@ opad
 nosniff
 fwsig
 cret
+automations
+mcause
+mtval
+normalised
+summarises
+writeslimited
+writesskipped
+xtensa

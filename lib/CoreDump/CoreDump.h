@@ -13,4 +13,8 @@ std::string summary();
 // sends the raw dump as coredump.bin, for decoding with esp-coredump. 404 if there is no dump
 void send(AsyncWebServerRequest * request);
 
+// erases the coredump partition. The dump holds memory contents (passwords, tokens), so a factory reset removes it too.
+// true if there is no partition to erase
+bool erase();
+
 } // namespace CoreDump

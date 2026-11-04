@@ -40,7 +40,7 @@ EMS-ESP is designed for a home network that you trust. See [Securing your gatewa
 
 Anyone with access to the gateway's USB port can read its flash, flash other firmware and use the serial console. Gateways, including those sold by BBQKees Electronics, ship without secure boot or flash encryption, so that owners can always install any firmware they want. Keep the gateway where other people can't get to it.
 
-A factory reset erases all settings, including passwords and keys, from the flash. Do one before you sell or give away a gateway.
+A factory reset erases all settings, including passwords and keys, and any crash dump from the flash. Do one before you sell or give away a gateway.
 
 ## Firmware signing
 

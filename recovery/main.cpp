@@ -616,6 +616,10 @@ static void handleFactoryReset(AsyncWebServerRequest * request) {
     LOG("Factory reset requested");
     const bool ok = LittleFS.format(); // with the erase before the restart, the only place the recovery writes to the filesystem
     LOG("Factory reset %s", ok ? "done" : "failed");
+    if (!CoreDump::erase()) {
+        LOG("Crash dump erase failed");
+    }
+    coredump.clear();
     if (!ok) {
         request->send(500);
         return;
