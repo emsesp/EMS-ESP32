@@ -180,8 +180,8 @@ export interface DeviceEntity {
   c?: boolean; // true when a customization is saved (mask, name, or min/max)
   o_m?: number; // original mask before edits
   o_cn?: string; // original cn before edits
-  o_mi?: number; // original min value
-  o_ma?: number; // original max value
+  o_mi?: number | null; // original min value
+  o_ma?: number | null; // original max value
 }
 
 export enum DeviceValueUOM {
