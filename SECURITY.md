@@ -29,7 +29,7 @@ A fix comes in a new release. Once it is out, we publish a [GitHub security advi
 EMS-ESP is designed for a home network that you trust. See [Securing your gateway](https://docs.emsesp.org/Securing) for how to set it up.
 
 - **Don't expose it to the internet.** Use a VPN, or Home Assistant or an HTTPS reverse proxy in front of it. The Web UI and `/api` use plain HTTP, so anyone on the same network can see that traffic.
-- **The Web UI and `/api` need a sign-in or an API key** for anything beyond reading values. Guests and Read keys can read, admins and Read and Write keys can change settings and write to the heating system. In the Web UI, changes to the firmware, users and security settings need the password entered again.
+- **The Web UI and `/api` need a sign-in or an API key**, also for reading values. Guests and Read keys can read, admins and Read and Write keys can change settings and write to the heating system. In the Web UI, changes to the firmware, users and security settings need the password entered again. Opening an `/api` address in a browser asks for a sign-in, which only reads, also for admins.
 - **MQTT and Modbus are trusted channels.** Anything that can publish to EMS-ESP's MQTT topics or reach the Modbus port can write to the heating system. Protect them with the broker's access control lists and your firewall. MQTT can use TLS with a check of the broker's certificate.
 - **The telnet console** needs a Web UI username and password and is off on new installs. Admin commands on the serial console need an admin password.
 - **Writes to the heating system** are checked against each value's minimum and maximum, and read-only mode blocks all writes.

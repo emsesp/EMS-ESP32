@@ -36,6 +36,7 @@ class Authentication {
     boolean               authenticated      = false;
     bool                  session            = false;
     bool                  password_confirmed = false;
+    bool                  basic              = false;
 
   public:
     explicit Authentication(const User & u)

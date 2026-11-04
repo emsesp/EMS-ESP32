@@ -57,7 +57,9 @@ RK, WK = keys["netcheck-read"], keys["netcheck-rw"]
 try:
     # /api access (#3343, #3354, #3360, #3363)
     r = requests.get(f"{B}/api/system/info", timeout=10)
-    check("/api reads values without a token (as in 3.8)", r.status_code == 200, str(r.status_code))
+    check("/api read without a token is refused", r.status_code == 401, str(r.status_code))
+    r = requests.get(f"{B}/api/boiler", timeout=10)
+    check("/api value read without a token is refused", r.status_code == 401, str(r.status_code))
     r = requests.post(f"{B}/api/system/syslog/enabled", json={"value": SYSLOG}, timeout=10)
     check("/api write without a token is refused", r.status_code == 401, f"{r.status_code} {r.text[:60]}")
     r = requests.get(f"{B}/api/system/info", headers=h(RK), timeout=10)

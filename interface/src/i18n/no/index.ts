@@ -102,7 +102,6 @@ const no: Translation = {
   ENABLE_TELNET: 'Aktiver Telnet',
   ENABLE_ANALOG: 'Aktiver Analoge Sensorer',
   CONVERT_FAHRENHEIT: 'Konverter temperatur til Fahrenheit',
-  BYPASS_TOKEN: 'Tillat API-kall uten tilgangstoken, med gjesterettigheter (lese verdier og kjøre kommandoer som gjester kan kjøre)',
   READONLY: 'Aktiver read-only modus (blokker all EMS Tx Skriving)',
   WRITE_PROTECTION: 'Beskytt EMS-enhetene mot gjentatte og hyppige skrivinger',
   WRITE_LIMIT: 'Maks antall skrivinger per minutt (0 = ingen grense)',

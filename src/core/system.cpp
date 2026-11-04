@@ -3184,7 +3184,6 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         }
 
         node["hideLed"]         = settings.hide_led;
-        node["noTokenApi"]      = settings.notoken_api;
         node["readonlyMode"]    = settings.readonly_mode;
         node["writeProtection"]  = settings.write_protection;
         node["writeLimit"]       = settings.write_limit;

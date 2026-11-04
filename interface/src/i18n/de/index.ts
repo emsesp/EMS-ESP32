@@ -102,7 +102,6 @@ const de: Translation = {
   ENABLE_TELNET: 'Aktiviere Telnet-Konsole',
   ENABLE_ANALOG: 'Aktiviere Analogsensoren',
   CONVERT_FAHRENHEIT: 'Konvertiere Temperaturwerte in Fahrenheit',
-  BYPASS_TOKEN: 'API-Aufrufe ohne Zugriffstoken erlauben, mit Gastrechten (Werte lesen und Befehle ausführen, die Gäste ausführen dürfen)',
   READONLY: 'Nur-Lese-Modus aktivieren (blockiert alle ausgehenden EMS Tx-Schreibbefehle)',
   WRITE_PROTECTION: 'EMS-Geräte vor wiederholten und häufigen Schreibvorgängen schützen',
   WRITE_LIMIT: 'Max. Schreibvorgänge pro Minute (0 = kein Limit)',

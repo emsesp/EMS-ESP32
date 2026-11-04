@@ -11,6 +11,7 @@
 #include "firmware_url.h"
 #include "mqtt_tls.h"
 #include "api_key.h"
+#include "basic_auth.h"
 #include "origin_check.h"
 #include "host_check.h"
 #include "shuntingYard.h"
@@ -119,27 +120,93 @@ void security_test_api_without_token() {
     TEST_ASSERT_NOT_NULL(strstr(response, "authentication failed"));
 }
 
-// "Bypass Access Token authorization" lets calls without a token act like a guest, never an admin
-void security_test_api_notoken_is_guest() {
-    EMSESP::webSettingsService.update([](WebSettings & settings) {
-        settings.notoken_api = true;
-        return StateUpdateResult::CHANGED;
-    });
+// reads need a token or API key too, a guest token is enough
+void security_test_api_read_needs_token() {
     SecuritySettingsService::identity(StandaloneIdentity::NONE);
-
-    std::string setting = call_url("/api/system/mqtt/enabled", "{\"value\":false}");
-    std::string guest   = call_url("/api/commands/send_message", "{\"value\":\"1\"}");
-    std::string admin   = call_url("/api/commands/fetch_values", "{\"value\":\"1\"}");
-
+    std::string values = call_url("/api/boiler");
+    std::string info   = call_url("/api/system/info");
+    std::string metric = call_url("/api/system/metrics");
+    SecuritySettingsService::identity(StandaloneIdentity::GUEST);
+    std::string guest = call_url("/api/boiler");
     SecuritySettingsService::identity(StandaloneIdentity::ADMIN);
-    EMSESP::webSettingsService.update([](WebSettings & settings) {
-        settings.notoken_api = false;
-        return StateUpdateResult::CHANGED;
-    });
 
-    TEST_ASSERT_NOT_EQUAL(std::string::npos, setting.find("authentication failed"));
+    TEST_ASSERT_NOT_EQUAL(std::string::npos, values.find("authentication failed"));
+    TEST_ASSERT_NOT_EQUAL(std::string::npos, info.find("authentication failed"));
+    TEST_ASSERT_NOT_EQUAL(std::string::npos, metric.find("authentication failed"));
     TEST_ASSERT_EQUAL(std::string::npos, guest.find("authentication failed"));
-    TEST_ASSERT_NOT_EQUAL(std::string::npos, admin.find("authentication failed"));
+}
+
+// a browser's Basic login reads values, but can't change them or run Commands, even as admin
+void security_test_api_basic_read_only() {
+    SecuritySettingsService::identity(StandaloneIdentity::BASIC_ADMIN);
+    std::string values  = call_url("/api/boiler");
+    std::string info    = call_url("/api/system/info");
+    std::string setting = call_url("/api/system/mqtt/enabled", "{\"value\":false}");
+    std::string command = call_url("/api/commands/send_message", "{\"value\":\"1\"}");
+    std::string action  = call_url("/api/commands/send_message");
+    std::string unknown = call_url("/api/boiler/nosuchentity");
+    SecuritySettingsService::identity(StandaloneIdentity::ADMIN);
+
+    TEST_ASSERT_EQUAL(std::string::npos, values.find("message"));
+    TEST_ASSERT_EQUAL(std::string::npos, info.find("message"));
+    TEST_ASSERT_NOT_EQUAL(std::string::npos, setting.find("read only"));
+    TEST_ASSERT_NOT_EQUAL(std::string::npos, command.find("read only"));
+    TEST_ASSERT_TRUE(action.find("read only") != std::string::npos || action.find("authentication failed") != std::string::npos);
+    TEST_ASSERT_EQUAL(std::string::npos, unknown.find("read only"));
+}
+
+void security_test_basic_auth_parse() {
+    std::string user, pass;
+    TEST_ASSERT_TRUE(BasicAuth::parse("Basic YWRtaW46c2VjcmV0", user, pass)); // admin:secret
+    TEST_ASSERT_EQUAL_STRING("admin", user.c_str());
+    TEST_ASSERT_EQUAL_STRING("secret", pass.c_str());
+    TEST_ASSERT_TRUE(BasicAuth::parse("Basic YTpiOmM=", user, pass)); // a:b:c, the password may contain ':'
+    TEST_ASSERT_EQUAL_STRING("a", user.c_str());
+    TEST_ASSERT_EQUAL_STRING("b:c", pass.c_str());
+    TEST_ASSERT_TRUE(BasicAuth::parse("Basic dTo=", user, pass)); // u: with an empty password
+    TEST_ASSERT_EQUAL_STRING("", pass.c_str());
+
+    TEST_ASSERT_FALSE(BasicAuth::parse("Bearer YWRtaW46c2VjcmV0", user, pass));
+    TEST_ASSERT_FALSE(BasicAuth::parse("Basic YWRtaW4=", user, pass));   // admin, no ':'
+    TEST_ASSERT_FALSE(BasicAuth::parse("Basic OnBhc3M=", user, pass));   // :pass, no username
+    TEST_ASSERT_FALSE(BasicAuth::parse("Basic YWRt!W46", user, pass));   // not base64
+    TEST_ASSERT_FALSE(BasicAuth::parse("Basic YQ==YQ==", user, pass));   // data after the padding
+    TEST_ASSERT_FALSE(BasicAuth::parse("Basic ", user, pass));
+    TEST_ASSERT_FALSE(BasicAuth::parse(nullptr, user, pass));
+    std::string longer = "Basic " + std::string(BasicAuth::MAX_HEADER, 'Q');
+    TEST_ASSERT_FALSE(BasicAuth::parse(longer.c_str(), user, pass));
+}
+
+void security_test_basic_auth_cache() {
+    BasicAuthCache cache;
+    TEST_ASSERT_FALSE(cache.find("admin", "secret", "hash1", 1000));
+    cache.add("admin", "secret", "hash1", 1000);
+    TEST_ASSERT_TRUE(cache.find("admin", "secret", "hash1", 2000));
+    TEST_ASSERT_FALSE(cache.find("admin", "wrong", "hash1", 2000));
+    TEST_ASSERT_FALSE(cache.find("guest", "secret", "hash1", 2000));
+    TEST_ASSERT_FALSE(cache.find("admin", "secret", "hash2", 2000)); // the password was changed
+    TEST_ASSERT_FALSE(cache.find("admin", "secret", "hash1", 1000 + BasicAuthCache::DURATION_MS));
+
+    // a full cache replaces the oldest login
+    for (uint32_t i = 0; i < BasicAuthCache::MAX_ENTRIES; i++) {
+        cache.add("user" + std::to_string(i), "pw", "hash", 10000 + i);
+    }
+    cache.add("newest", "pw", "hash", 20000);
+    TEST_ASSERT_FALSE(cache.find("user0", "pw", "hash", 20001));
+    TEST_ASSERT_TRUE(cache.find("user1", "pw", "hash", 20001));
+    TEST_ASSERT_TRUE(cache.find("newest", "pw", "hash", 20001));
+}
+
+// Commands, even those guests may run, need a token: a guest token runs them, no token doesn't
+void security_test_api_guest_command_needs_token() {
+    SecuritySettingsService::identity(StandaloneIdentity::NONE);
+    std::string anonymous = call_url("/api/commands/send_message", "{\"value\":\"1\"}");
+    SecuritySettingsService::identity(StandaloneIdentity::GUEST);
+    std::string guest = call_url("/api/commands/send_message", "{\"value\":\"1\"}");
+    SecuritySettingsService::identity(StandaloneIdentity::ADMIN);
+
+    TEST_ASSERT_NOT_EQUAL(std::string::npos, anonymous.find("authentication failed"));
+    TEST_ASSERT_EQUAL(std::string::npos, guest.find("authentication failed"));
 }
 
 // browsers on other sites may only use /api when the CORS setting allows their origin
@@ -853,7 +920,11 @@ void run_security_tests() {
 
     RUN_TEST(security_test_settings_commands_need_admin);
     RUN_TEST(security_test_api_without_token);
-    RUN_TEST(security_test_api_notoken_is_guest);
+    RUN_TEST(security_test_api_read_needs_token);
+    RUN_TEST(security_test_api_basic_read_only);
+    RUN_TEST(security_test_basic_auth_parse);
+    RUN_TEST(security_test_basic_auth_cache);
+    RUN_TEST(security_test_api_guest_command_needs_token);
     RUN_TEST(security_test_origin_check);
     RUN_TEST(security_test_host_check);
     RUN_TEST(security_test_action_admin_only);

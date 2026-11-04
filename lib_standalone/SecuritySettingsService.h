@@ -24,8 +24,8 @@
 #define SECURITY_SETTINGS_FILE "/config/securitySettings.json"
 #define SECURITY_SETTINGS_PATH "/rest/securitySettings"
 
-// who authenticateRequest() reports as the caller, set by unit tests
-enum class StandaloneIdentity : uint8_t { NONE, GUEST, ADMIN };
+// who authenticateRequest() reports as the caller, set by unit tests. BASIC_ADMIN is the admin through a browser's Basic login
+enum class StandaloneIdentity : uint8_t { NONE, GUEST, ADMIN, BASIC_ADMIN };
 
 class SecuritySettingsService : public SecurityManager {
   public:

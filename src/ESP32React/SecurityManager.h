@@ -35,6 +35,7 @@ class Authentication {
     boolean               authenticated      = false;
     bool                  session            = false; // a Web UI access token, not an API key
     bool                  password_confirmed = false; // the session's password was entered again in the last few minutes
+    bool                  basic              = false; // HTTP Basic login from a browser, which only reads
 
   public:
     explicit Authentication(const User & u)

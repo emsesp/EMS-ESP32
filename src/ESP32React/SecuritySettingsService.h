@@ -8,6 +8,7 @@
 #include "../core/api_key.h"
 #include "../core/password_hash.h"
 #include "../core/password_confirm.h"
+#include "../core/basic_auth.h"
 
 #ifndef FACTORY_ADMIN_USERNAME
 #define FACTORY_ADMIN_USERNAME "admin"
@@ -160,6 +161,10 @@ class SecuritySettingsService final : public StatefulService<SecuritySettings>, 
     FS *                            _fs;
     String                          _adminCredentials; // to detect admin password changes
     PasswordConfirm                 _passwordConfirm;
+    BasicAuthCache                  _basicAuthCache;
+
+    Authentication authenticateApiKey(const char * key);
+    Authentication authenticateBasic(AsyncWebServerRequest * request, const String & header);
 
     void listApiKeys(AsyncWebServerRequest * request);
     void apiKeyAction(AsyncWebServerRequest * request, JsonVariant json);

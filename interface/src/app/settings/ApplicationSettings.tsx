@@ -213,17 +213,6 @@ const ApplicationSettings = () => {
         <Typography sx={{ pb: 1, pt: 2 }} variant="h6" color="primary">
           {LL.SERVICES()}
         </Typography>
-        <Typography color="secondary">API</Typography>
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.notoken_api}
-              onChange={updateFormValue}
-              name="notoken_api"
-            />
-          }
-          label={LL.BYPASS_TOKEN()}
-        />
         <Typography color="secondary">Console</Typography>
         <BlockFormControlLabel
           control={

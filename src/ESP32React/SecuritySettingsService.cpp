@@ -1,6 +1,7 @@
 #include "SecuritySettingsService.h"
 
 #include "../core/psram_async_json_response.h"
+#include "../core/login_limiter.h"
 
 #include <emsesp.h>
 
@@ -168,26 +169,79 @@ bool SecuritySettingsService::confirmPassword(AsyncWebServerRequest * request, c
     return true;
 }
 
-// API keys are only accepted here, so they can't be used for the Web UI
+// API keys and Basic logins are only accepted here, so they can't be used for the Web UI
 Authentication SecuritySettingsService::authenticateApiRequest(AsyncWebServerRequest * request) {
     auto authorizationHeader = request->getHeader(AUTHORIZATION_HEADER);
     if (authorizationHeader) {
         String value = authorizationHeader->value();
+        if (value.startsWith("Basic ")) {
+            return authenticateBasic(request, value);
+        }
         if (value.startsWith(AUTHORIZATION_HEADER_PREFIX)) {
             value = value.substring(AUTHORIZATION_HEADER_PREFIX_LEN);
             if (value.startsWith(ApiKey::PREFIX)) {
-                const String id = ApiKey::id(value.c_str());
-                for (const ApiKeyEntry & key : _state.api_keys) {
-                    if (!id.isEmpty() && key.id == id && ApiKey::matches(value.c_str(), key.hash)) {
-                        return Authentication(User(key.label, "", key.write));
-                    }
-                }
-                return {};
+                return authenticateApiKey(value.c_str());
             }
         }
     }
 
     return authenticateRequest(request);
+}
+
+Authentication SecuritySettingsService::authenticateApiKey(const char * key) {
+    const String id = ApiKey::id(key);
+    for (const ApiKeyEntry & entry : _state.api_keys) {
+        if (!id.isEmpty() && entry.id == id && ApiKey::matches(key, entry.hash)) {
+            return Authentication(User(entry.label, "", entry.write));
+        }
+    }
+    return {};
+}
+
+// a browser's login prompt: a user's password, or an API key as the password with any username.
+// Wrong passwords count towards the same sign-in limits as the Web UI
+Authentication SecuritySettingsService::authenticateBasic(AsyncWebServerRequest * request, const String & header) {
+    std::string username;
+    std::string password;
+    if (!BasicAuth::parse(header.c_str(), username, password)) {
+        return {};
+    }
+
+    Authentication authentication;
+    if (ApiKey::is_key(password.c_str())) {
+        authentication = authenticateApiKey(password.c_str());
+    } else {
+        const User * user = nullptr;
+        for (const User & u : _state.users) {
+            if (u.username == username.c_str()) {
+                user = &u;
+                break;
+            }
+        }
+
+        const uint32_t now = millis();
+        if (user && _basicAuthCache.find(username, password, user->password.c_str(), now)) {
+            authentication = Authentication(*user);
+        } else {
+            auto &       limiter = LoginLimiter::instance();
+            const String source  = request->client()->remoteIP().toString();
+            if (limiter.retry_after(source.c_str(), now)) {
+                return {};
+            }
+            if (user && PasswordHash::verify(String(password.c_str()), user->password)) {
+                limiter.succeeded(source.c_str());
+                _basicAuthCache.add(username, password, user->password.c_str(), now);
+                authentication = Authentication(*user);
+            } else {
+                limiter.failed(source.c_str(), now);
+                emsesp::EMSESP::logger().notice("Failed API sign-in for user '%s' from %s", username.c_str(), source.c_str());
+                return {};
+            }
+        }
+    }
+
+    authentication.basic = authentication.authenticated;
+    return authentication;
 }
 
 void SecuritySettingsService::listApiKeys(AsyncWebServerRequest * request) {

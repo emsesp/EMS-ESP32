@@ -25,7 +25,6 @@ export interface Settings {
   led_type: number;
   hide_led: boolean;
   low_clock: boolean;
-  notoken_api: boolean;
   readonly_mode: boolean;
   write_protection: boolean;
   write_limit: number;

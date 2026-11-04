@@ -21,6 +21,10 @@ Authentication SecuritySettingsService::authenticateRequest(AsyncWebServerReques
     }
 
     Authentication authentication(identity_ == StandaloneIdentity::GUEST ? GUEST_USER : ADMIN_USER);
+    if (identity_ == StandaloneIdentity::BASIC_ADMIN) {
+        authentication.basic = true;
+        return authentication;
+    }
     authentication.session            = true;
     authentication.password_confirmed = password_confirmed_;
     return authentication;

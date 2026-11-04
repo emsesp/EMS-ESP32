@@ -27,7 +27,7 @@ uint16_t WebAPIService::api_fails_ = 0;
 
 WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager) {
-    // parse() does its own per-request check (with notoken_api), so no predicate.
+    // parse() does its own per-request check, so no predicate.
     // /api also matches /api/<device>/<entity> via the route's backward-compatible URI matcher.
     securityManager->addEndpoint(
         server,
@@ -99,26 +99,42 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     }
 #endif
 
-    // admin rights need an admin token or a read+write API key. notoken_api lets calls without one act like a guest, never an admin
-    bool is_admin           = false;
-    bool is_user            = false;
-    bool password_confirmed = true; // only a Web UI session is asked for it
-    std::string source      = "api, ";
-    EMSESP::webSettingsService.read([&](WebSettings const & settings) {
-        Authentication authentication = _securityManager->authenticateApiRequest(request);
-        is_admin                      = AuthenticationPredicates::IS_ADMIN(authentication);
-        is_user                       = settings.notoken_api || AuthenticationPredicates::IS_AUTHENTICATED(authentication);
-        password_confirmed            = !authentication.session || authentication.password_confirmed;
-        if (!authentication.authenticated) {
-            source += "no token";
-        } else {
-            source += std::string(authentication.session ? "" : "API key ") + authentication.user->username.c_str();
+    // every call needs a token or an API key, also reads. Admin rights need an admin token or a read+write API key
+    Authentication authentication = _securityManager->authenticateApiRequest(request);
+    if (!authentication.authenticated) {
+        api_fails_++;
+        EMSESP::logger().debug("API call without a token or API key refused: %s", request->url().c_str());
+        auto *     response   = new PsramAsyncJsonResponse();
+        JsonObject output     = response->getRoot();
+        output["message"]     = "authentication failed";
+#if defined(EMSESP_UNITY)
+        storeResponse(output);
+#endif
+        response->setCode(401);
+#ifndef EMSESP_STANDALONE
+        // the browser shows its login prompt. Not for a rejected Bearer token, so the Web UI never gets that prompt
+        if (!request->hasHeader("Authorization") || request->header("Authorization").startsWith("Basic ")) {
+            response->addHeader("WWW-Authenticate", "Basic realm=\"EMS-ESP\", charset=\"UTF-8\"");
         }
-    });
+#endif
+        response->setLength();
+        response->setContentType("application/json; charset=utf-8");
+        request->send(response);
+        return;
+    }
+
+    // a browser's Basic login is sent with every request to the device, also ones other web sites start, so it only reads
+    const bool  basic              = authentication.basic;
+    const bool  is_admin           = !basic && AuthenticationPredicates::IS_ADMIN(authentication);
+    const bool  is_user            = !basic;
+    const bool  password_confirmed = !authentication.session || authentication.password_confirmed; // only a Web UI session is asked for it
+    std::string source             = std::string("api, ") + (authentication.session ? "" : basic ? "browser login " : "API key ")
+                         + authentication.user->username.c_str();
 #ifndef EMSESP_STANDALONE
     source += std::string(", ") + request->client()->remoteIP().toString().c_str();
 #endif
-    Command::CallerSource caller(source.c_str());
+    Command::CallerSource   caller(source.c_str());
+    Command::CallerReadOnly read_only(basic);
 
     // check for query parameters first, the old style from v2
     // api?device={device}&cmd={name}&data={value}&id={hc}

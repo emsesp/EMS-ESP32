@@ -207,9 +207,27 @@ class Command {
         bool prev_password_confirmed_;
     };
 
+    // a caller that may only read values, not run commands or change anything (a browser's Basic login on /api)
+    class CallerReadOnly {
+      public:
+        explicit CallerReadOnly(const bool read_only)
+            : prev_(caller_read_only_) {
+            caller_read_only_ = read_only;
+        }
+        ~CallerReadOnly() {
+            caller_read_only_ = prev_;
+        }
+        CallerReadOnly(const CallerReadOnly &)             = delete;
+        CallerReadOnly & operator=(const CallerReadOnly &) = delete;
+
+      private:
+        bool prev_;
+    };
+
   private:
     static uuid::log::Logger logger_;
 
+    static thread_local bool caller_read_only_;
     static thread_local bool caller_is_admin_;
     static thread_local bool caller_password_confirmed_;
     static thread_local const char * caller_source_;
@@ -217,6 +235,7 @@ class Command {
     static std::vector<CmdFunction, AllocatorPSRAM<CmdFunction>> cmdfunctions_; // the list of commands
 
     static uint8_t json_message(uint8_t error_code, const char * message, JsonObject output, const char * object = nullptr);
+    static uint8_t read_only_refused(const char * dname, const char * cmd, JsonObject output);
 };
 
 class SUrlParser {

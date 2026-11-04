@@ -102,7 +102,6 @@ const nl: Translation = {
   ENABLE_TELNET: 'Activeer Telnet console',
   ENABLE_ANALOG: 'Activeer analoge sensoren',
   CONVERT_FAHRENHEIT: 'Converteer temperatuurwaarden naar Fahrenheit',
-  BYPASS_TOKEN: 'API-aanroepen zonder toegangstoken toestaan, met gastrechten (waarden lezen en commando\'s uitvoeren die gasten mogen uitvoeren)',
   READONLY: 'Activeer read-only modus (blokkeert alle outgaande EMS Tx schrijf commandos)',
   WRITE_PROTECTION: 'EMS-apparaten beschermen tegen herhaalde en frequente schrijfacties',
   WRITE_LIMIT: 'Max. aantal schrijfacties per minuut (0 = geen limiet)',

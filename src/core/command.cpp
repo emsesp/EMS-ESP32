@@ -25,6 +25,7 @@ namespace emsesp {
 
 uuid::log::Logger Command::logger_{F_(command), uuid::log::Facility::DAEMON};
 
+thread_local bool Command::caller_read_only_          = false;
 thread_local bool Command::caller_is_admin_           = true;
 thread_local bool Command::caller_password_confirmed_ = true;
 thread_local const char * Command::caller_source_    = nullptr;
@@ -443,6 +444,9 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
     // it could be an endpoint like a device's entity or attribute e.g. api/boiler/nrgheat or /api/boiler/nrgheat/value
     // or a special command like 'info', 'values', 'commands', 'entities' etc
     bool single_command = (!value || !strlen(value));
+    if (!single_command && caller_read_only_) {
+        return read_only_refused(dname, cmd, output);
+    }
     if (single_command) {
         if (!strcmp(cmd, F_(commands))) {
             return Command::list(device_type, output);
@@ -515,6 +519,11 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
         }
 
         return CommandRet::NOT_FOUND;
+    }
+
+    // anything that isn't answered by the value lookup above runs a command
+    if (caller_read_only_) {
+        return read_only_refused(dname, cmd, output);
     }
 
     // before calling the command, check permissions and abort if not authorized
@@ -633,6 +642,12 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
     }
 
     return return_code;
+}
+
+uint8_t Command::read_only_refused(const char * dname, const char * cmd, JsonObject output) {
+    LOG_WARNING("Command %s/%s refused: a browser login can only read values", dname, cmd);
+    output["message"] = "read only, use an API key to change values or run commands";
+    return CommandRet::NOT_ALLOWED;
 }
 
 // add a command to the list, which does not return json

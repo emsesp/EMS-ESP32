@@ -1,6 +1,6 @@
 # testing EMS-ESP API
 # to be used with "REST Client" extension in Visual Studio Code (https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
-# Open this file in VSC, modify the token, go to the API call and click on 'Send Request' (or Ctrl+Alt+R)
+# Open this file in VSC, set the API key and the sign-in below, go to the API call and click on 'Send Request' (or Ctrl+Alt+R)
 # The response will be shown in the right panel
 
 @host = http://ems-esp.local
@@ -8,19 +8,38 @@
 @host_standalone = http://localhost:3080
 @host_standalone2 = http://localhost:3082
 
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWV9.2bHpWya2C7Q12WjNUBD6_7N3RCD7CMl-EGhyQVzFdDg
+# every /api call needs an API key, create a "Read and Write" one in Security > API Keys
+@key = emsesp_...
+
+# /rest needs a WebUI sign-in instead: send the signin request below first, the others reuse its token
+@username = admin
+@password = ...
+@session = {{signin.response.body.access_token}}
+
+# @name signin
+POST {{host}}/rest/signIn
+Content-Type: application/json
+
+{
+    "username" : "{{username}}",
+    "password" : "{{password}}"
+}
+
+###
 
 GET {{host}}/api/system/info
+Authorization: Bearer {{key}}
 
 ###
 
 GET {{host}}/api/thermostat/seltemp
+Authorization: Bearer {{key}}
 
 ###
 
 POST {{host}}/api/system/message
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{key}}
 
 {
     "value" : "system/settings/locale"
@@ -31,7 +50,7 @@ Authorization: Bearer {{token}}
 
 POST {{host}}/api/thermostat/seltemp
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{key}}
 
 {
     "value" : 21.0
@@ -41,7 +60,7 @@ Authorization: Bearer {{token}}
 
 POST {{host}}/api/thermostat
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{key}}
 
 {
     "entity" : "seltemp",
@@ -52,7 +71,7 @@ Authorization: Bearer {{token}}
 
 POST {{host}}/api
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{key}}
 
 {
     "device" : "boiler",
@@ -63,32 +82,34 @@ Authorization: Bearer {{token}}
 ###
 
 GET {{host}}/api/system/restart
-Authorization: Bearer {{token}}
+Authorization: Bearer {{key}}
 
 ###
 
 GET {{host}}/api/boiler/coldshot
-Authorization: Bearer {{token}}
+Authorization: Bearer {{key}}
 
 ###
 
 GET {{host}}/api/temperaturesensor/info
+Authorization: Bearer {{key}}
 
 ###
 
 GET {{host}}/rest/deviceData?id=3
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{session}}
 
 ###
 
 GET {{host}}/api/boiler/commands
+Authorization: Bearer {{key}}
 
 ###
 
 POST {{host}}/api/custom/test_custom
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{key}}
 
 {
     "value" : 22.0
@@ -97,6 +118,7 @@ Authorization: Bearer {{token}}
 ###
 
 GET {{host}}/api/custom/test_custom
+Authorization: Bearer {{key}}
 
 #
 # Tests on dev
@@ -106,7 +128,7 @@ GET {{host}}/api/custom/test_custom
 
 POST {{host_dev}}/api/system/message
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{key}}
 
 {
     "value" : "'hello world'"
@@ -116,7 +138,7 @@ Authorization: Bearer {{token}}
 
 POST {{host_dev}}/api/system/message
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{key}}
 
 {
     "value" : "system/settings/locale"
@@ -126,7 +148,7 @@ Authorization: Bearer {{token}}
 
 POST {{host_dev}}/api/system/message
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{key}}
 
 {
     "value" : "custom/test_custom"
@@ -136,7 +158,7 @@ Authorization: Bearer {{token}}
 
 POST {{host_dev}}/api/thermostat/seltemp
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{key}}
 
 {
     "value" : 21.0
@@ -146,7 +168,7 @@ Authorization: Bearer {{token}}
 
 POST {{host_dev}}/api/system/txpause
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{key}}
 
 {
     "value" : "on"
@@ -156,7 +178,7 @@ Authorization: Bearer {{token}}
 
 POST {{host_dev}}/api/system/txpause
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{key}}
 
 {
     "value" : "off"
@@ -165,23 +187,27 @@ Authorization: Bearer {{token}}
 ###
 
 GET {{host_dev}}/api/system/settings/txMode/value
+Authorization: Bearer {{key}}
 
 ###
 
 GET {{host_dev}}/api/system/settings/locale/value
+Authorization: Bearer {{key}}
 
 ###
 
 POST {{host_dev}}/api/system/settings/locale/value
+Authorization: Bearer {{key}}
 
 ###
 
 GET {{host_dev}}/api/system/info
+Authorization: Bearer {{key}}
 
 ###
 
 GET {{host_dev}}/api/system/restart
-Authorization: Bearer {{token}}
+Authorization: Bearer {{key}}
 
 # Run a test. EMS-ESP must be compiled with -DEMSESP_TEST
 # Use this to load up a dummy thermostat and boiler with data
@@ -189,34 +215,40 @@ Authorization: Bearer {{token}}
 ###
 
 GET {{host_dev}}/api?device=system&cmd=test&data=general
+Authorization: Bearer {{key}}
 
 ###
 
 GET {{host_dev}}/api/boiler/info
+Authorization: Bearer {{key}}
 
 ###
 
 GET {{host_dev}}/api/boiler/info
+Authorization: Bearer {{key}}
 
 ###
 GET {{host_dev}}/api/boiler/values
+Authorization: Bearer {{key}}
 
 ###
 
 GET {{host_dev}}/api/analogsensor/info
+Authorization: Bearer {{key}}
 
 ###
 
 GET {{host_dev}}/api/boiler/coldshot
-Authorization: Bearer {{token}}
+Authorization: Bearer {{key}}
 
 ###
 GET {{host_dev}}/api/system/commands
+Authorization: Bearer {{key}}
 
 ###
 POST {{host_dev}}/api/thermostat/seltemp
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{key}}
 
 {
     "value" : 21.0
@@ -224,28 +256,32 @@ Authorization: Bearer {{token}}
 
 ###
 GET {{host_dev}}/api/thermostat/seltemp
+Authorization: Bearer {{key}}
 
 ###
 POST {{host_dev}}/rest/signIn
 Content-Type: application/json
 
 {
-    "username" : "admin",
-    "password" : "admin"
+    "username" : "{{username}}",
+    "password" : "{{password}}"
 }
 
 #### STANDALONE ####
 
 GET {{host_standalone}}/api/system/info
+Authorization: Bearer {{key}}
 
 ###
 
 GET {{host_standalone}}/rest/dashboardData
+Authorization: Bearer {{session}}
 
 ###
 
 POST {{host_standalone2}}/rest/uploadFile
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+Authorization: Bearer {{session}}
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="text"
@@ -261,6 +297,7 @@ Content-Type: application/json
 # test calling Home Assistant script
 # https://developers.home-assistant.io/docs/api/rest/#post-apiservicesdomainservice
 POST {{host_standalone}}/api
+Authorization: Bearer {{key}}
 
 # HA tests
 

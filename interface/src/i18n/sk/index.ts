@@ -102,7 +102,6 @@ const sk: Translation = {
   ENABLE_TELNET: 'Povoliť Telnet konzolu',
   ENABLE_ANALOG: 'Povoliť analógové snímače',
   CONVERT_FAHRENHEIT: 'Previesť hodnoty teploty na °F',
-  BYPASS_TOKEN: 'Povoliť volania API bez prístupového tokenu, s právami hosťa (čítanie hodnôt a príkazy povolené hosťom)',
   READONLY: 'Povoliť režim len na čítanie (blokuje všetky odchádzajúce príkazy EMS Tx Write)',
   WRITE_PROTECTION: 'Chrániť zariadenia EMS pred opakovanými a častými zápismi',
   WRITE_LIMIT: 'Max. počet zápisov za minútu (0 = bez limitu)',

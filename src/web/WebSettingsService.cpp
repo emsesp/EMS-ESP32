@@ -32,15 +32,14 @@ WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, Securit
 
     addUpdateHandler([this] { onUpdate(); }, false);
 
-    // turning on the unencrypted telnet console or the API without an access token, or turning off read-only mode or write protection
+    // turning on the unencrypted telnet console, or turning off read-only mode or write protection
     _httpEndpoint.requirePassword([](JsonObject json, WebSettings & current) {
         const bool    telnet      = json["telnet_enabled"] | EMSESP_DEFAULT_TELNET_ENABLED;
-        const bool    notoken     = json["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
         const bool    readonly    = json["readonly_mode"] | false;
         const bool    protection  = json["write_protection"] | EMSESP_DEFAULT_WRITE_PROTECTION;
         const uint8_t write_limit = json["write_limit"] | EMSESP_DEFAULT_WRITE_LIMIT;
-        return (telnet && !current.telnet_enabled) || (notoken && !current.notoken_api) || (!readonly && current.readonly_mode)
-               || (!protection && current.write_protection) || (!write_limit && current.write_limit);
+        return (telnet && !current.telnet_enabled) || (!readonly && current.readonly_mode) || (!protection && current.write_protection)
+               || (!write_limit && current.write_limit);
     });
 }
 
@@ -75,7 +74,6 @@ void WebSettings::read(WebSettings & settings, JsonObject root) {
     root["led_type"]              = settings.led_type;
     root["low_clock"]             = settings.low_clock;
     root["telnet_enabled"]        = settings.telnet_enabled;
-    root["notoken_api"]           = settings.notoken_api;
     root["readonly_mode"]         = settings.readonly_mode;
     root["write_protection"]      = settings.write_protection;
     root["write_limit"]           = settings.write_limit;
@@ -308,7 +306,6 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
     EMSESP::trace_raw(settings.trace_raw);
 
-    settings.notoken_api            = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
     settings.solar_maxflow          = root["solar_maxflow"] | EMSESP_DEFAULT_SOLAR_MAXFLOW;
     settings.boiler_heatingoff      = root["boiler_heatingoff"] | EMSESP_DEFAULT_BOILER_HEATINGOFF;
     settings.remote_timeout         = root["remote_timeout"] | EMSESP_DEFAULT_REMOTE_TIMEOUT;

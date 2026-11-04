@@ -102,7 +102,6 @@ const pl: BaseTranslation = {
   ENABLE_TELNET: 'Aktywuj dostęp dla konsoli Telnet',
   ENABLE_ANALOG: 'Aktywuj urządzenia GPIO (czujniki analogowe i cyfrowe oraz wyjścia cyfrowe)',
   CONVERT_FAHRENHEIT: 'Konwertuj temperatury do skali Fahrenheita',
-  BYPASS_TOKEN: 'Zezwalaj na wywołania API bez tokena dostępu, z uprawnieniami gościa (odczyt wartości i polecenia dozwolone dla gości)',
   READONLY: 'Tryb pracy "tylko do odczytu" (blokuje wszystkie komendy zapisu na magistralę EMS)',
   WRITE_PROTECTION: 'Chroń urządzenia EMS przed powtarzanymi i częstymi zapisami',
   WRITE_LIMIT: 'Maks. liczba zapisów na minutę (0 = bez limitu)',
