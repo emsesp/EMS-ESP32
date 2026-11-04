@@ -899,23 +899,30 @@ void System::check_crash_loop() {
     }
 
 #ifdef EMSESP_HAS_RECOVERY
+    Serial.printf("Crashed %lu times in a row\n", static_cast<unsigned long>(crash_count_));
     if (crash_count_ < CRASH_LOOP_LIMIT) {
         return;
     }
 
     const esp_partition_t * factory = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
-    if (factory == nullptr || factory == esp_ota_get_running_partition()) {
+    if (factory == nullptr) {
+        Serial.println("No factory partition, can't fall back to the recovery firmware");
+        return;
+    }
+    if (factory == esp_ota_get_running_partition()) {
         return;
     }
 
     // fails if the factory partition doesn't hold a valid image, then keep trying the current one
-    if (esp_ota_set_boot_partition(factory) == ESP_OK) {
+    const esp_err_t err = esp_ota_set_boot_partition(factory);
+    if (err == ESP_OK) {
         crash_count_ = 0;
         EMSESP::nvs_.putString(EMSESP_NVS_RECOVERY_REASON, "crash");
         Serial.printf("Crashed %d times in a row, restarting into the %s partition\n", CRASH_LOOP_LIMIT, factory->label);
         Serial.flush();
         esp_restart();
     }
+    Serial.printf("Can't fall back to the recovery firmware in the %s partition: %s\n", factory->label, esp_err_to_name(err));
 #endif
 #endif
 }
