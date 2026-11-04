@@ -42,6 +42,17 @@ Erase the dump once you've noted it, so the next crash is clearly a new one. Use
 
 ## 2. Full: every task's stack and registers
 
+Download the dump without USB, as an admin:
+
+- EMS-ESP: **Settings > Download/Upload**, button **Crash Dump**. It's only shown when there is a dump. Or `GET /rest/coredump`.
+- EMS-ESP Recovery: the **Crash Dump** section on the dashboard, after signing in. It also shows the summary, so a crash that made EMS-ESP fall back to the Recovery can be reported without starting EMS-ESP again.
+
+Both give `coredump.bin`, which decodes with:
+
+```bash
+~/.platformio/penv/bin/esp-coredump info_corefile -t raw -c coredump.bin .pio/build/s_16M_P/firmware.elf
+```
+
 With the board on USB, `esp-coredump` reads the partition and decodes it in one step:
 
 ```bash

@@ -11,6 +11,7 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <AsyncJson.h>
+#include <CoreDump.h>
 #include <DNSServer.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPmDNS.h>
@@ -108,6 +109,7 @@ static bool                       wipe_fs    = false; // after a factory reset, 
 static String                     session_token;
 static String                     ap_ssid;
 static String                     recovery_reason;   // set by EMS-ESP when it switched to the recovery
+static std::string                coredump;          // summary of the dump left by the last crash
 static const char *               eth_state    = ""; // "", "disabled", "failed" or "started"
 static uint32_t                   wifi_join_at = 0;  // when to try WiFi if Ethernet has no address, 0 if not waiting
 static bool                       wifi_started = false;
@@ -459,8 +461,9 @@ static void handleStatus(AsyncWebServerRequest * request) {
     auto *     response = new AsyncJsonResponse();
     JsonObject root     = response->getRoot().to<JsonObject>();
 
+    const bool authorized    = isAuthorized(request);
     root["recovery_version"] = RECOVERY_VERSION;
-    root["authenticated"]    = isAuthorized(request);
+    root["authenticated"]    = authorized;
     root["hostname"]         = settings.hostname;
     root["chip"]             = ESP.getChipModel();
     root["flash_size"]       = ESP.getFlashChipSize();
@@ -470,6 +473,9 @@ static void handleStatus(AsyncWebServerRequest * request) {
     root["uptime"]           = millis() / 1000;
     root["reason"]           = recovery_reason;
     root["reset_reason"]     = resetReasonName(esp_reset_reason());
+    if (authorized && !coredump.empty()) {
+        root["coredump"] = coredump;
+    }
     root["ap_ssid"]          = ap_ssid;
     root["ap_ip"]            = WiFi.softAPIP().toString();
     root["ap_clients"]       = WiFi.softAPgetStationNum();
@@ -885,8 +891,17 @@ static void startNetwork() {
     }
 }
 
+static void handleCoreDump(AsyncWebServerRequest * request) {
+    if (!isAuthorized(request)) {
+        request->send(401);
+        return;
+    }
+    CoreDump::send(request);
+}
+
 static void startWebServer() {
     server.on("/rest/recovery/status", HTTP_GET, handleStatus);
+    server.on("/rest/recovery/coredump", HTTP_GET, handleCoreDump);
     server.on("/rest/recovery/restart", HTTP_POST, handleRestart);
     server.on("/rest/recovery/format", HTTP_POST, handleFactoryReset);
     server.on("/rest/uploadFile", HTTP_POST, handleUploadComplete, handleUpload);
@@ -905,6 +920,10 @@ void setup() {
 
     loadSettings();
     loadRecoveryReason();
+    coredump = CoreDump::summary();
+    if (!coredump.empty()) {
+        LOG("Crash dump found: %s", coredump.c_str());
+    }
     loadPartitions();
     startNetwork();
     startWebServer();

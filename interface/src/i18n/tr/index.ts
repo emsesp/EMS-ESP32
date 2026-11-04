@@ -193,6 +193,8 @@ const tr: Translation = {
   COMPACT: 'Sıkışık',
   DOWNLOAD_SETTINGS_TEXT: 'Yapılandırma ve ayarlarınızın yedekleme yapın',
   DOWNLOAD_SETTINGS_TEXT2: 'Tüm değerleri dışarı al',
+  DOWNLOAD_COREDUMP_TEXT: 'Son çökmenin dökümünü indirip bir GitHub kaydına ekleyin',
+  COREDUMP: 'Çökme Dökümü',
   DOWNLOAD_SYSTEM_BACKUP: 'Sistem yedekleme',
   ERROR: 'Beklenemedik hata, lütfen tekrar deneyin.',
   TIME_SET: 'Zaman ayarı',

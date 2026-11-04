@@ -193,6 +193,8 @@ const fr: Translation = {
   COMPACT: 'Compact',
   DOWNLOAD_SETTINGS_TEXT: 'Créer une sauvegarde de vos paramètres et configurations',
   DOWNLOAD_SETTINGS_TEXT2: 'Exporter toutes les valeurs',
+  DOWNLOAD_COREDUMP_TEXT: 'Télécharger le vidage du dernier plantage, à joindre à un ticket GitHub',
+  COREDUMP: 'Vidage de plantage',
   DOWNLOAD_SYSTEM_BACKUP: 'Sauvegarde système',
   ERROR: 'Erreur inattendue, veuillez réessayer',
   TIME_SET: 'Time set',

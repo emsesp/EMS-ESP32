@@ -193,6 +193,8 @@ const sv: Translation = {
   COMPACT: 'Komprimerad',
   DOWNLOAD_SETTINGS_TEXT: 'Skapa en säkerhetskopia av din konfiguration och inställningar',
   DOWNLOAD_SETTINGS_TEXT2: 'Exportera alla värden',
+  DOWNLOAD_COREDUMP_TEXT: 'Ladda ner kraschdumpen från den senaste kraschen, för att bifoga till ett GitHub-ärende',
+  COREDUMP: 'Kraschdump',
   DOWNLOAD_SYSTEM_BACKUP: 'System säkerhetskopia',
   ERROR: 'Okänt fel, var god försök igen',
   TIME_SET: 'Ställ in tid',

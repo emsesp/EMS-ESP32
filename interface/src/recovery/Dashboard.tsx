@@ -1,6 +1,7 @@
 import { type ReactNode, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
+import DownloadIcon from '@mui/icons-material/GetApp';
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -39,7 +40,13 @@ import SectionContent from 'components/SectionContent';
 import { toast } from 'components/toast';
 
 import FirmwareUpload from './FirmwareUpload';
-import { HttpError, factoryReset, restart, setBootPartition } from './api';
+import {
+  HttpError,
+  downloadCoreDump,
+  factoryReset,
+  restart,
+  setBootPartition
+} from './api';
 import type { RecoveryPartition, RecoveryStatus } from './types';
 
 const formatMB = (bytes: number) => `${(bytes / 1048576).toFixed(2)} MB`;
@@ -158,6 +165,14 @@ const Dashboard = ({ status, onRestarting, onSignOut }: DashboardProps) => {
     }
   };
 
+  const doDownloadCoreDump = async () => {
+    try {
+      await downloadCoreDump();
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
   const doFactoryReset = async () => {
     setConfirmFactoryReset(false);
     try {
@@ -185,6 +200,35 @@ const Dashboard = ({ status, onRestarting, onSignOut }: DashboardProps) => {
             : 'No EMS-ESP firmware is installed. Upload a firmware to continue.'}
         </MessageBox>
       </SectionContent>
+
+      {status.coredump && (
+        <SectionContent>
+          <SectionTitle>Crash Dump</SectionTitle>
+          <Typography sx={{ pb: 1 }} variant="body2" color="text.secondary">
+            The last crash left this summary. Copy it, or download the crash dump,
+            and add it to a GitHub issue so the crash can be decoded.
+          </Typography>
+          <Typography
+            sx={{
+              pb: 2,
+              fontFamily: 'monospace',
+              fontSize: 13,
+              wordBreak: 'break-all'
+            }}
+            variant="body2"
+          >
+            {status.coredump}
+          </Typography>
+          <Button
+            startIcon={<DownloadIcon />}
+            variant="outlined"
+            color="primary"
+            onClick={() => void doDownloadCoreDump()}
+          >
+            Download crash dump
+          </Button>
+        </SectionContent>
+      )}
 
       <SectionContent>
         <SectionTitle>Firmware</SectionTitle>

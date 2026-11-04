@@ -193,6 +193,8 @@ const pl: BaseTranslation = {
   COMPACT: 'Kompaktowy',
   DOWNLOAD_SETTINGS_TEXT: 'Utwórz kopię swoich ustawień i konfiguracji',
   DOWNLOAD_SETTINGS_TEXT2: 'Eksportuj wszystkie wartości',
+  DOWNLOAD_COREDUMP_TEXT: 'Pobierz zrzut ostatniej awarii, aby dołączyć go do zgłoszenia na GitHubie',
+  COREDUMP: 'Zrzut awarii',
   DOWNLOAD_SYSTEM_BACKUP: 'Kopia zapasowa systemu',
   ERROR: 'Nieoczekiwany błąd, spróbuj ponownie!',
   TIME_SET: 'Zegar został ustawiony.',

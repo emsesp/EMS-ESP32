@@ -49,6 +49,7 @@
 #include <ESP_SSLClient.h>
 #include <ReadyMail.h>
 #include <OtaUpdater.h>
+#include <CoreDump.h>
 
 // Keeps new firmware in the bootloader's pending verification state until System::check_firmware_health()
 // confirms it, so a crash or restart before then rolls back to the previous image
@@ -949,48 +950,11 @@ void System::check_firmware_health() {
 
 // summarises the core dump left in flash by the last crash, see docs/Crash-Dumps.md for decoding it
 void System::read_coredump() {
-#if !defined(EMSESP_STANDALONE) && CONFIG_ESP_COREDUMP_ENABLE_TO_FLASH && CONFIG_ESP_COREDUMP_DATA_FORMAT_ELF
-    coredump_.clear();
-    if (esp_core_dump_image_check() != ESP_OK) {
-        return; // no partition, no dump or a corrupt one
+#ifndef EMSESP_STANDALONE
+    coredump_ = CoreDump::summary();
+    if (!coredump_.empty()) {
+        LOG_WARNING("Crash dump found: %s", coredump_.c_str());
     }
-
-    // too big for the stack on RISC-V, it holds a copy of the crashing task's stack
-    auto summary = std::make_unique<esp_core_dump_summary_t>();
-    if (esp_core_dump_get_summary(summary.get()) != ESP_OK) {
-        return;
-    }
-
-    char buf[64];
-    snprintf(buf, sizeof(buf), "task=%.16s pc=0x%08" PRIx32, summary->exc_task, summary->exc_pc);
-    coredump_ = buf;
-
-#if defined(__XTENSA__)
-    snprintf(buf, sizeof(buf), " cause=%" PRIu32 " vaddr=0x%08" PRIx32, summary->ex_info.exc_cause, summary->ex_info.exc_vaddr);
-    coredump_ += buf;
-    coredump_ += " bt=";
-    for (uint32_t i = 0; i < summary->exc_bt_info.depth && i < 16; i++) {
-        snprintf(buf, sizeof(buf), "%s0x%08" PRIx32, i ? " " : "", summary->exc_bt_info.bt[i]);
-        coredump_ += buf;
-    }
-    if (summary->exc_bt_info.corrupted) {
-        coredump_ += " (corrupted)";
-    }
-#else
-    snprintf(buf, sizeof(buf), " ra=0x%08" PRIx32 " mcause=%" PRIu32 " mtval=0x%08" PRIx32, summary->ex_info.ra, summary->ex_info.mcause, summary->ex_info.mtval);
-    coredump_ += buf;
-#endif
-
-    coredump_ += " sha=";
-    coredump_ += (const char *)summary->app_elf_sha256;
-
-    char reason[100];
-    if (esp_core_dump_get_panic_reason(reason, sizeof(reason)) == ESP_OK) {
-        coredump_ += " reason=";
-        coredump_ += reason;
-    }
-
-    LOG_WARNING("Crash dump found: %s", coredump_.c_str());
 #endif
 }
 

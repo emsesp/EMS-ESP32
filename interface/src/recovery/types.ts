@@ -30,6 +30,7 @@ export interface RecoveryStatus {
     | 'watchdog'
     | 'brownout'
     | 'other';
+  coredump?: string; // summary of the dump the last crash left, only when signed in
   ap_ssid: string;
   ap_ip: string;
   ap_clients: number;

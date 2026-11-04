@@ -193,6 +193,8 @@ const cs: Translation = {
   COMPACT: 'Kompaktní',
   DOWNLOAD_SETTINGS_TEXT: 'Vytvořte zálohu svého nastavení a konfigurace',
   DOWNLOAD_SETTINGS_TEXT2: 'Exportovat všechny hodnoty',
+  DOWNLOAD_COREDUMP_TEXT: 'Stáhnout výpis posledního pádu a přiložit ho k hlášení na GitHubu',
+  COREDUMP: 'Výpis pádu',
   DOWNLOAD_SYSTEM_BACKUP: 'Systémová záloha',
   ERROR: 'Neočekávaná chyba, zkuste to prosím znovu',
   TIME_SET: 'Čas nastaven',

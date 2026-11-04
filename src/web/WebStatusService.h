@@ -3,6 +3,7 @@
 
 #define EMSESP_SYSTEM_STATUS_SERVICE_PATH "/rest/systemStatus"
 #define EMSESP_ACTION_SERVICE_PATH "/rest/action"
+#define EMSESP_COREDUMP_SERVICE_PATH "/rest/coredump"
 
 #include "../core/firmwareVersion.h"
 #include "../emsesp_version.h"

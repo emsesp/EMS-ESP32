@@ -118,6 +118,10 @@ class System {
 
     std::string reset_reason(uint8_t cpu) const;
 
+    const std::string & coredump() const {
+        return coredump_;
+    }
+
     void store_nvs_values();
     void system_restart(const char * partition = nullptr);
     void get_partition_info();

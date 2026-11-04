@@ -20,6 +20,7 @@
 
 #ifndef EMSESP_STANDALONE
 #include <esp_ota_ops.h>
+#include <CoreDump.h>
 #endif
 #include "emsesp_http_client.h"
 
@@ -39,6 +40,15 @@ WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * se
         AuthenticationPredicates::IS_AUTHENTICATED,
         [this](AsyncWebServerRequest * request, JsonVariant json) { action(request, json); },
         HTTP_ANY);
+
+    // GET - the raw crash dump, it holds memory contents so only for admins
+    securityManager->addEndpoint(server, EMSESP_COREDUMP_SERVICE_PATH, AuthenticationPredicates::IS_ADMIN, [](AsyncWebServerRequest * request) {
+#ifndef EMSESP_STANDALONE
+        CoreDump::send(request);
+#else
+        request->send(404);
+#endif
+    });
 }
 
 // /rest/systemStatus
@@ -63,6 +73,9 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     root["free_heap"]      = EMSESP::system_.getHeapMem();
     root["uptime"]         = uuid::get_uptime_sec();
     root["mqtt_status"]    = EMSESP::mqtt_.connected();
+    if (!EMSESP::system_.coredump().empty()) {
+        root["coredump"] = EMSESP::system_.coredump();
+    }
 
 #ifndef EMSESP_STANDALONE
     uint8_t ntp_status = 0; // 0=disabled, 1=enabled, 2=connected

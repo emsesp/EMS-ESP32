@@ -30,7 +30,7 @@ import {
 } from 'components';
 import { toast } from 'components/toast';
 import { useI18nContext } from 'i18n/i18n-react';
-import { saveFile } from 'utils';
+import { saveBlob, saveFile } from 'utils';
 
 const DownloadUpload = () => {
   const { LL } = useI18nContext();
@@ -49,6 +49,17 @@ const DownloadUpload = () => {
   )
     .onSuccess((event) => {
       saveFile(event.data, event.args[0], '.json');
+      toast.info(LL.DOWNLOAD_SUCCESSFUL());
+    })
+    .onError((error) => {
+      toast.error(String(error.error?.message || 'An error occurred'));
+    });
+
+  const { send: sendCoreDump } = useRequest(SystemApi.readCoreDump, {
+    immediate: false
+  })
+    .onSuccess((event) => {
+      saveBlob(event.data, 'emsesp_coredump.bin');
       toast.info(LL.DOWNLOAD_SUCCESSFUL());
     })
     .onError((error) => {
@@ -175,6 +186,22 @@ const DownloadUpload = () => {
           {LL.ALLVALUES()}
         </Button>
       </Grid>
+
+      {data.coredump && (
+        <Grid container spacing={2} sx={{ mt: 2, alignItems: 'center' }}>
+          <Typography variant="body1" color="warning">
+            {LL.DOWNLOAD_COREDUMP_TEXT()}:
+          </Typography>
+          <Button
+            startIcon={<DownloadIcon />}
+            variant="outlined"
+            color="primary"
+            onClick={() => void sendCoreDump()}
+          >
+            {LL.COREDUMP()}
+          </Button>
+        </Grid>
+      )}
 
       <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
         {LL.UPLOAD()}

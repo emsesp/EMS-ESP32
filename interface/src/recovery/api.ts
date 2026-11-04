@@ -61,6 +61,27 @@ export const restart = () => request<void>('POST', '/rest/recovery/restart');
 
 export const factoryReset = () => request<void>('POST', '/rest/recovery/format');
 
+export const downloadCoreDump = async (): Promise<void> => {
+  const response = await fetch('/rest/recovery/coredump', {
+    headers: authHeaders(),
+    cache: 'no-store'
+  });
+  if (!response.ok) {
+    throw new HttpError(
+      response.status,
+      response.statusText || `HTTP ${response.status}`
+    );
+  }
+  const url = URL.createObjectURL(await response.blob());
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = 'coredump.bin';
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+
 export interface UploadHandle {
   promise: Promise<UploadResult>;
   abort: () => void;

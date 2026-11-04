@@ -193,6 +193,8 @@ const de: Translation = {
   COMPACT: 'Kompakte Darstellung',
   DOWNLOAD_SETTINGS_TEXT: 'Erstellen Sie eine Sicherung Ihrer Konfigurationen und Einstellungen',
   DOWNLOAD_SETTINGS_TEXT2: 'Exportiere alle Werte',
+  DOWNLOAD_COREDUMP_TEXT: 'Absturzdaten des letzten Absturzes herunterladen, um sie einem GitHub-Issue anzuhängen',
+  COREDUMP: 'Absturzdaten',
   DOWNLOAD_SYSTEM_BACKUP: 'Systemsicherung',
   ERROR: 'Unerwarteter Fehler, bitte versuchen Sie es erneut.',
   TIME_SET: 'Zeit gesetzt',

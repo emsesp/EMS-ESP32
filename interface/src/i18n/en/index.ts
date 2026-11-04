@@ -193,6 +193,8 @@ const en: Translation = {
   COMPACT: 'Compact',
   DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings',
   DOWNLOAD_SETTINGS_TEXT2: 'Export all values',
+  DOWNLOAD_COREDUMP_TEXT: 'Download the dump of the last crash, to add to a GitHub issue',
+  COREDUMP: 'Crash Dump',
   DOWNLOAD_SYSTEM_BACKUP: 'System Backup',
   ERROR: 'Unexpected Error, please try again',
   TIME_SET: 'Time set',

@@ -25,6 +25,7 @@ export interface SystemStatus {
   ntp_status: number;
   ntp_time?: string;
   mqtt_status: boolean;
+  coredump?: string; // summary of the dump the last crash left
   ap_status: boolean;
   network_status: NetworkConnectionStatus;
   wifi_rssi: number;

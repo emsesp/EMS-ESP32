@@ -193,6 +193,8 @@ const nl: Translation = {
   COMPACT: 'Compact',
   DOWNLOAD_SETTINGS_TEXT: 'Maak een back-up van uw configuratie en instellingen',
   DOWNLOAD_SETTINGS_TEXT2: 'Exporteer alle waarden',
+  DOWNLOAD_COREDUMP_TEXT: 'Download de crashdump van de laatste crash, om toe te voegen aan een GitHub-issue',
+  COREDUMP: 'Crashdump',
   DOWNLOAD_SYSTEM_BACKUP: 'Systeem Backup',
   ERROR: 'Onverwachte fout, probeer opnieuw',
   TIME_SET: 'Tijd ingesteld',

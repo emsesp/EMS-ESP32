@@ -6,6 +6,9 @@ import { alovaInstance } from './endpoints';
 export const readSystemStatus = () =>
   alovaInstance.Get<SystemStatus>('/rest/systemStatus');
 
+export const readCoreDump = () =>
+  alovaInstance.Get<Blob>('/rest/coredump', { responseType: 'blob' });
+
 // SystemLog
 export const readLogSettings = () =>
   alovaInstance.Get<LogSettings>('/rest/logSettings');

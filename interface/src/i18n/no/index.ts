@@ -193,6 +193,8 @@ const no: Translation = {
   COMPACT: 'Komprimere',
   DOWNLOAD_SETTINGS_TEXT: 'Lag en sikkerhetskopi av dine konfigurasjon og innstillinger',
   DOWNLOAD_SETTINGS_TEXT2: 'Eksporter alle verdier',
+  DOWNLOAD_COREDUMP_TEXT: 'Last ned krasjdumpen fra siste krasj, for å legge den ved en GitHub-sak',
+  COREDUMP: 'Krasjdump',
   DOWNLOAD_SYSTEM_BACKUP: 'System Sikkerhetskopi',
   ERROR: 'Ukjent feil, prøv igjen',
   TIME_SET: 'Still in tid',

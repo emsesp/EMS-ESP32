@@ -193,6 +193,8 @@ const hu: Translation = {
   COMPACT: 'Tömörítés',
   DOWNLOAD_SETTINGS_TEXT: 'Biztonsági mentés készítése a konfigurációról és a beállításokról',
   DOWNLOAD_SETTINGS_TEXT2: 'Összes érték exportálása',
+  DOWNLOAD_COREDUMP_TEXT: 'A legutóbbi összeomlás adatainak letöltése egy GitHub-hibajegyhez',
+  COREDUMP: 'Összeomlási adatok',
   DOWNLOAD_SYSTEM_BACKUP: 'Rendszerbiztonsági mentés',
   ERROR: 'Váratlan hiba, kérlek próbáld újra',
   TIME_SET: 'Idő beállítva',
