@@ -904,7 +904,7 @@ void System::check_crash_loop() {
     }
 
 #ifdef EMSESP_HAS_RECOVERY
-    Serial.printf("Crashed %lu times in a row\n", static_cast<unsigned long>(crash_count_));
+    Serial.printf("Restarted after a crash (%lu in a row)\n", static_cast<unsigned long>(crash_count_));
     if (crash_count_ < CRASH_LOOP_LIMIT) {
         return;
     }
