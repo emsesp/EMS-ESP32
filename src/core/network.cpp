@@ -145,8 +145,11 @@ void Network::begin() {
             ARDUINO_EVENT_WIFI_STA_GOT_IP);
 
         // with DHCP, replace the DNS servers handed out by the router with the ones configured by the user
+        // IPv6 router advertisements arrive after the IPv4 lease and overwrite the slots again, so also re-apply on GOT_IP6
         WiFi.onEvent([this](WiFiEvent_t /*event*/, WiFiEventInfo_t /*info*/) { applyDnsOverride(WiFi.STA.netif()); }, ARDUINO_EVENT_WIFI_STA_GOT_IP);
+        WiFi.onEvent([this](WiFiEvent_t /*event*/, WiFiEventInfo_t /*info*/) { applyDnsOverride(WiFi.STA.netif()); }, ARDUINO_EVENT_WIFI_STA_GOT_IP6);
         WiFi.onEvent([this](WiFiEvent_t /*event*/, WiFiEventInfo_t /*info*/) { applyDnsOverride(ETH.netif()); }, ARDUINO_EVENT_ETH_GOT_IP);
+        WiFi.onEvent([this](WiFiEvent_t /*event*/, WiFiEventInfo_t /*info*/) { applyDnsOverride(ETH.netif()); }, ARDUINO_EVENT_ETH_GOT_IP6);
     }
 
 #endif
@@ -155,6 +158,8 @@ void Network::begin() {
 // When using DHCP, the DNS servers can be overridden by the optional DNS #1 and #2 settings.
 // This is useful when the router advertises a DNS server that doesn't resolve, e.g. only an unreachable IPv6 one.
 // Static IP configuration already sets the DNS servers through WiFi.config()/ETH.config().
+// lwIP's IPv6 RDNSS (router advertisements) and DHCPv6 write their servers from slot 0 onwards on every
+// advertisement, so this is called repeatedly and only touches a slot when it no longer holds our server.
 #ifndef EMSESP_STANDALONE
 void Network::applyDnsOverride(esp_netif_t * netif) const {
     if (staticIPConfig_ || netif == nullptr) {
@@ -166,6 +171,11 @@ void Network::applyDnsOverride(esp_netif_t * netif) const {
 
     for (uint8_t i = 0; i < 2; i++) {
         if (IPUtils::isNotSet(servers[i])) {
+            continue;
+        }
+        esp_netif_dns_info_t current = {};
+        if (esp_netif_get_dns_info(netif, types[i], &current) == ESP_OK && current.ip.type == ESP_IPADDR_TYPE_V4
+            && current.ip.u_addr.ip4.addr == static_cast<uint32_t>(servers[i])) {
             continue;
         }
         esp_netif_dns_info_t dns = {};
@@ -415,6 +425,11 @@ void Network::loop() {
         startAP();       // Captive Portal (AP)
 
         findNetworks(); // detect any new network connections
+    }
+
+    if (network_ip_ != 0 && static_cast<uint32_t>(currentMillis - lastDnsOverrideCheck_) >= NETWORK_DNS_OVERRIDE_CHECK) {
+        lastDnsOverrideCheck_ = currentMillis;
+        applyDnsOverride(network_iface_ == NetIface::ETHERNET ? ETH.netif() : WiFi.STA.netif());
     }
 
     // process DNS requests for the captive portal while the soft-AP is up
