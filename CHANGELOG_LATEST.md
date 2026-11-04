@@ -103,3 +103,4 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - hold Tx while a K30RF/KM200 gateway is syncing [#3094](https://github.com/emsesp/EMS-ESP32/issues/3094)
 - Tasmota platform 2026.05.50 (Arduino 3.3.8 / IDF 5.5.4) to 2026.09.50 (Arduino 3.3.12 / IDF 5.5.5). Building that platform needs PlatformIO Core ≥6.2.0; install `pioarduino==6.2.0` (official `platformio` is still 6.1.19). See CONTRIBUTING.md
 - CI dev-release firmware jobs run in parallel (webUI, firmware targets, standalone) instead of one serial job
+- Junkers FR50 `mode`, `heattemp` and `maxflowtemp` are now read-only. The FR50 rejects remote writes to these and re-broadcasts its own values; `ecotemp` can still be set [#3339](https://github.com/emsesp/EMS-ESP32/issues/3339)
