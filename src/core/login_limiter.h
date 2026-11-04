@@ -21,9 +21,10 @@
 #ifndef EMSESP_LOGIN_LIMITER_H
 #define EMSESP_LOGIN_LIMITER_H
 
+#include "spin_lock.h"
+
 #include <array>
 #include <cstdint>
-#include <mutex>
 
 // Slows down password guessing, for each source (an IP address or a console) and for all sources together.
 // After FREE_ATTEMPTS failures a source has to wait, and the wait doubles with every further failure.
@@ -46,14 +47,15 @@ class LoginLimiter {
 
     // milliseconds until the source may try again, 0 if it may try now
     uint32_t retry_after(const char * source, uint32_t now) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        const uint32_t             k = key(source);
+        std::lock_guard<SpinLock> lock(lock_);
 
         uint32_t wait = 0;
         if (global_locked_ && before(now, global_locked_until_)) {
             wait = global_locked_until_ - now;
         }
 
-        const Entry * entry = find(key(source));
+        const Entry * entry = find(k);
         if (entry && entry->failures >= FREE_ATTEMPTS && before(now, entry->locked_until) && entry->locked_until - now > wait) {
             wait = entry->locked_until - now;
         }
@@ -61,10 +63,10 @@ class LoginLimiter {
     }
 
     void failed(const char * source, uint32_t now) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        const uint32_t             k = key(source);
+        std::lock_guard<SpinLock> lock(lock_);
 
-        const uint32_t k     = key(source);
-        Entry *        entry = find(k);
+        Entry * entry = find(k);
         if (!entry) {
             entry = oldest();
             *entry = Entry{k, 0, now, now, true};
@@ -94,9 +96,10 @@ class LoginLimiter {
     }
 
     void succeeded(const char * source) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        const uint32_t             k = key(source);
+        std::lock_guard<SpinLock> lock(lock_);
 
-        Entry * entry = find(key(source));
+        Entry * entry = find(k);
         if (entry) {
             *entry = Entry{};
         }
@@ -116,7 +119,7 @@ class LoginLimiter {
     uint8_t                        global_count_        = 0;
     uint32_t                       global_locked_until_ = 0;
     bool                           global_locked_       = false;
-    std::mutex                     mutex_;
+    SpinLock                       lock_;
 
     // works across the millis() wrap around
     static bool before(uint32_t a, uint32_t b) {

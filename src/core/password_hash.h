@@ -33,6 +33,7 @@
 #include <random>
 #else
 #include <esp_random.h>
+#include <mbedtls/md.h>
 #include <mbedtls/pkcs5.h>
 #endif
 
@@ -70,22 +71,42 @@ class PasswordHash {
     }
 
     // an empty stored password never matches. Plain text is still accepted until it's been hashed at boot
-    static bool verify(const String & password, const String & stored) {
-        if (stored.isEmpty()) {
+    static bool verify(const String & password, const char * stored) {
+        if (!stored || !*stored) {
             return false;
         }
 
         uint32_t                        iterations;
         std::array<uint8_t, SALT_BYTES> salt;
         std::array<uint8_t, HASH_BYTES> expected;
-        if (!parse(stored.c_str(), iterations, salt.data(), expected.data())) {
-            return password.length() == stored.length()
-                   && equal(reinterpret_cast<const uint8_t *>(password.c_str()), reinterpret_cast<const uint8_t *>(stored.c_str()), stored.length());
+        if (!parse(stored, iterations, salt.data(), expected.data())) {
+            const size_t stored_len = strlen(stored);
+            return password.length() == stored_len
+                   && equal(reinterpret_cast<const uint8_t *>(password.c_str()), reinterpret_cast<const uint8_t *>(stored), stored_len);
         }
 
         std::array<uint8_t, HASH_BYTES> derived{};
         pbkdf2(password, salt.data(), salt.size(), iterations, derived.data());
         return equal(derived.data(), expected.data(), HASH_BYTES);
+    }
+
+    static bool verify(const String & password, const String & stored) {
+        return verify(password, stored.c_str());
+    }
+
+    using Digest = std::array<uint8_t, HASH_BYTES>;
+
+    // SHA-256, to notice that a text changed without keeping a copy of it
+    static Digest digest(const char * text) {
+        Digest out{};
+#ifdef EMSESP_STANDALONE
+        PortableSha256 sha;
+        sha.update(reinterpret_cast<const uint8_t *>(text), strlen(text));
+        sha.finish(out.data());
+#else
+        mbedtls_md(mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), reinterpret_cast<const unsigned char *>(text), strlen(text), out.data());
+#endif
+        return out;
     }
 
     static void pbkdf2(const String & password, const uint8_t * salt, size_t salt_len, uint32_t iterations, uint8_t * out) {

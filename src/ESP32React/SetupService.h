@@ -19,8 +19,8 @@ class SetupService {
 
     // checking a hash takes a PBKDF2 run, so the last result is kept until the stored hash changes
     struct FactoryCheck {
-        String hash;
-        bool   factory = false;
+        PasswordHash::Digest hash{}; // of the stored hash that was checked
+        bool                 factory = false;
     };
     FactoryCheck _adminCheck;
 
@@ -31,7 +31,7 @@ class SetupService {
     };
 
     State state(const String & username);
-    bool  isFactory(const String & hash, const char * factory, FactoryCheck & check);
+    bool  isFactory(const char * hash, const char * factory, FactoryCheck & check);
     void  getSetup(AsyncWebServerRequest * request);
     void  saveSetup(AsyncWebServerRequest * request, JsonVariant json);
 };

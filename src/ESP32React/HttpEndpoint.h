@@ -13,13 +13,15 @@
 
 template <class T>
 class HttpEndpoint {
+  public:
+    using PasswordCheck = bool (*)(JsonObject json, T & current);
+
   protected:
     JsonStateReader<T>   _stateReader;
     JsonStateUpdater<T>  _stateUpdater;
     StatefulService<T> * _statefulService;
     SecurityManager *    _securityManager;
-
-    std::function<bool(JsonObject json, T & current)> _needsPassword;
+    PasswordCheck        _needsPassword = nullptr;
 
   public:
     HttpEndpoint(JsonStateReader<T>      stateReader,
@@ -39,8 +41,8 @@ class HttpEndpoint {
     }
 
     // a change for which the user must have entered their password again in the last few minutes
-    void requirePassword(std::function<bool(JsonObject json, T & current)> when) {
-        _needsPassword = std::move(when);
+    void requirePassword(PasswordCheck when) {
+        _needsPassword = when;
     }
 
   protected:

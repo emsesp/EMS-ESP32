@@ -20,11 +20,11 @@
 #define EMSESP_BASIC_AUTH_H
 
 #include "password_hash.h"
+#include "spin_lock.h"
 
 #include <array>
 #include <cstdint>
 #include <cstring>
-#include <mutex>
 #include <string>
 
 // HTTP Basic authentication on /api, so a browser can read values after its own login prompt.
@@ -107,7 +107,7 @@ class BasicAuthCache {
     bool find(const std::string & username, const std::string & password, const char * stored_hash, uint32_t now) {
         Fingerprint fp;
         fingerprint(username, password, stored_hash, fp);
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<SpinLock> lock(lock_);
         for (auto & entry : entries_) {
             if (entry.used && now - entry.at < DURATION_MS && PasswordHash::equal(entry.fingerprint.data(), fp.data(), fp.size())) {
                 return true;
@@ -119,7 +119,7 @@ class BasicAuthCache {
     void add(const std::string & username, const std::string & password, const char * stored_hash, uint32_t now) {
         Fingerprint fp;
         fingerprint(username, password, stored_hash, fp);
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<SpinLock> lock(lock_);
         Entry * slot = &entries_[0];
         for (auto & entry : entries_) {
             if (!entry.used || now - entry.at >= DURATION_MS) {
@@ -151,7 +151,7 @@ class BasicAuthCache {
 
     std::array<uint8_t, PasswordHash::SALT_BYTES> salt_{};
     std::array<Entry, MAX_ENTRIES>                 entries_{};
-    std::mutex                                     mutex_;
+    SpinLock                                       lock_;
 };
 
 #endif

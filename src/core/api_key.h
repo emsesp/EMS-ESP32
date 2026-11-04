@@ -64,14 +64,18 @@ class ApiKey {
     }
 
     // an empty stored hash never matches
-    static bool matches(const char * key, const String & stored_hash) {
-        if (!is_key(key) || stored_hash.length() != PasswordHash::HASH_BYTES * 2) {
+    static bool matches(const char * key, const char * stored_hash) {
+        if (!is_key(key) || !stored_hash || strlen(stored_hash) != PasswordHash::HASH_BYTES * 2) {
             return false;
         }
         const String computed = hash(key);
         return PasswordHash::equal(reinterpret_cast<const uint8_t *>(computed.c_str()),
-                                   reinterpret_cast<const uint8_t *>(stored_hash.c_str()),
+                                   reinterpret_cast<const uint8_t *>(stored_hash),
                                    PasswordHash::HASH_BYTES * 2);
+    }
+
+    static bool matches(const char * key, const String & stored_hash) {
+        return matches(key, stored_hash.c_str());
     }
 };
 

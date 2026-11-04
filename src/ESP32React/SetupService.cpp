@@ -17,17 +17,18 @@ SetupService::SetupService(AsyncWebServer * server, SecuritySettingsService * se
     });
 }
 
-bool SetupService::isFactory(const String & hash, const char * factory, FactoryCheck & check) {
-    if (check.hash != hash) {
-        check.hash    = hash;
+bool SetupService::isFactory(const char * hash, const char * factory, FactoryCheck & check) {
+    const PasswordHash::Digest digest = PasswordHash::digest(hash);
+    if (check.hash != digest) {
+        check.hash    = digest;
         check.factory = PasswordHash::verify(factory, hash);
     }
     return check.factory;
 }
 
 SetupService::State SetupService::state(const String & username) {
-    State  s;
-    String admin_hash;
+    State       s;
+    stringPSRAM admin_hash;
     _security->read([&](const SecuritySettings & settings) {
         for (const User & user : settings.users) {
             if (user.username == username) {
@@ -35,7 +36,7 @@ SetupService::State SetupService::state(const String & username) {
             }
         }
     });
-    s.admin = !admin_hash.isEmpty() && isFactory(admin_hash, FACTORY_ADMIN_PASSWORD, _adminCheck);
+    s.admin = !admin_hash.empty() && isFactory(admin_hash.c_str(), FACTORY_ADMIN_PASSWORD, _adminCheck);
 
     _ap->read([&](const APSettings & settings) { s.ap = settings.password == FACTORY_AP_PASSWORD; });
     bool has_wifi = false;
@@ -99,7 +100,7 @@ void SetupService::saveSetup(AsyncWebServerRequest * request, JsonVariant json) 
         if (!password.isEmpty()) {
             for (User & user : settings.users) {
                 if (user.username == username) {
-                    user.password = PasswordHash::hash(password);
+                    user.password = PasswordHash::hash(password).c_str();
                     user.ver++;
                 }
             }

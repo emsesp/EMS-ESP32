@@ -5,6 +5,7 @@
 
 #include <ESPAsyncWebServer.h>
 #include <AsyncJson.h>
+#include <esp32-psram.h>
 
 #include <memory>
 #include <vector>
@@ -15,15 +16,15 @@
 
 class User {
   public:
-    String   username;
-    String   password;
-    bool     admin;
-    uint32_t ver; // in the user's session tokens, changed with the password to sign the user out everywhere
+    String      username;
+    stringPSRAM password; // the PBKDF2 hash
+    bool        admin;
+    uint32_t    ver; // in the user's session tokens, changed with the password to sign the user out everywhere
 
   public:
-    User(String username, String password, bool admin, uint32_t ver = 0)
+    User(String username, const String & password, bool admin, uint32_t ver = 0)
         : username(std::move(username))
-        , password(std::move(password))
+        , password(password.c_str())
         , admin(admin)
         , ver(ver) {
     }
@@ -101,6 +102,11 @@ class SecurityManager {
                      AuthenticationPredicate   predicate,
                      ArRequestHandlerFunction  function,
                      WebRequestMethodComposite method = HTTP_GET);
+
+    // after the last addEndpoint, frees the capacity the route list grew beyond what it needs
+    void compactRoutes() {
+        _restRoutes.shrink_to_fit();
+    }
 
   private:
     // Single internal route record. Each route holds either a plain or JSON handler.

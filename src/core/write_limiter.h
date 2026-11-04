@@ -19,9 +19,10 @@
 #ifndef EMSESP_WRITE_LIMITER_H
 #define EMSESP_WRITE_LIMITER_H
 
+#include "spin_lock.h"
+
 #include <array>
 #include <cstdint>
-#include <mutex>
 
 // Protects the heating devices from automations that write too often.
 // A write of the value last sent to the same entity within REPEAT_MS is skipped.
@@ -31,7 +32,7 @@ class WriteLimiter {
     static constexpr uint32_t REPEAT_MS    = 60 * 1000;
     static constexpr uint32_t WINDOW_MS    = 60 * 1000;
     static constexpr uint16_t GLOBAL_MAX   = 120;
-    static constexpr size_t   MAX_ENTITIES = 32;
+    static constexpr size_t   MAX_ENTITIES = 16; // the entities written most recently, a full table forgets the oldest
 
     enum class Verdict : uint8_t { SEND, SKIP, OVER_LIMIT, REFUSE };
 
@@ -42,7 +43,7 @@ class WriteLimiter {
 
     // limit 0 turns the per-entity and global limits off
     void configure(bool skip_repeat, uint8_t limit, bool refuse) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<SpinLock> lock(lock_);
         skip_repeat_ = skip_repeat;
         limit_       = limit;
         refuse_      = refuse;
@@ -52,15 +53,16 @@ class WriteLimiter {
     // ms is how long ago the value was sent for SKIP, and the wait for REFUSE.
     // log is set for the first OVER_LIMIT or REFUSE of an entity in a window
     Verdict check(const char * entity, const char * value, uint32_t now, uint32_t & ms, bool & log) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        const uint32_t             k = entity ? key(entity) : 0;
+        const uint32_t             v = entity ? key(value) : 0;
+        std::lock_guard<SpinLock> lock(lock_);
         ms  = 0;
         log = false;
 
         Entry * entry = nullptr;
         if (entity) {
-            const uint32_t k = key(entity);
-            entry            = find(k);
-            if (entry && skip_repeat_ && entry->sent_value && entry->value == key(value) && now - entry->sent < REPEAT_MS) {
+            entry = find(k);
+            if (entry && skip_repeat_ && entry->sent_value && entry->value == v && now - entry->sent < REPEAT_MS) {
                 skipped_++;
                 ms = now - entry->sent;
                 return Verdict::SKIP;
@@ -118,18 +120,20 @@ class WriteLimiter {
 
     // after the command took the value
     void sent(const char * entity, const char * value, uint32_t now) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        const uint32_t             k = entity ? key(entity) : 0;
+        const uint32_t             v = entity ? key(value) : 0;
+        std::lock_guard<SpinLock> lock(lock_);
         if (global_count_ < UINT16_MAX) {
             global_count_++;
         }
         if (!entity) {
             return;
         }
-        Entry * entry = find(key(entity));
+        Entry * entry = find(k);
         if (!entry) {
             return;
         }
-        entry->value      = key(value);
+        entry->value      = v;
         entry->sent       = now;
         entry->sent_value = true;
         if (entry->count < UINT8_MAX) {
@@ -138,7 +142,7 @@ class WriteLimiter {
     }
 
     void reset() {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<SpinLock> lock(lock_);
         entries_       = {};
         global_start_  = 0;
         global_count_  = 0;
@@ -175,7 +179,7 @@ class WriteLimiter {
     bool                            refuse_        = false;
     uint32_t                        skipped_       = 0;
     uint32_t                        limited_       = 0;
-    std::mutex                      mutex_;
+    SpinLock                        lock_;
 
     static uint32_t key(const char * s) {
         uint32_t hash = 2166136261u; // FNV-1a

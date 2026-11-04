@@ -47,8 +47,10 @@ class StaticContentHandler : public AsyncWebHandler {
         response->addHeader(asyncsrv::T_Content_Encoding, asyncsrv::T_gzip, false);
         response->addHeader(asyncsrv::T_ETag, asset->etag, false);
         response->addHeader(asyncsrv::T_Cache_Control, CACHE_CONTROL, false);
+        response->addHeader("X-Content-Type-Options", "nosniff", false);
         if (asset == index_asset()) {
             response->addHeader("Content-Security-Policy", CONTENT_SECURITY_POLICY, false);
+            response->addHeader("Referrer-Policy", "no-referrer", false);
         }
         request->send(response);
     }
@@ -105,8 +107,6 @@ void ESP32React::begin() {
         }
 
         defaultHeaders.addHeader(asyncsrv::T_Server, networkSettings.hostname);
-        defaultHeaders.addHeader("X-Content-Type-Options", "nosniff");
-        defaultHeaders.addHeader("Referrer-Policy", "no-referrer");
     });
 
     // DNS rebinding only works through a browser, so requests without browser headers (Home Assistant, scripts) aren't checked.

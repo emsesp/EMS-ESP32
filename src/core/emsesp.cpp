@@ -2062,6 +2062,9 @@ void EMSESP::start() {
 
     System::check_crash_loop();
 
+    // the result is kept, so the buffers for reading the whole image are only needed once, before the heap fragments
+    System::official_build();
+
     // set valid GPIOs list based on ESP32 chip/platform type
     system_.set_valid_system_gpios();
 
@@ -2198,7 +2201,10 @@ void EMSESP::start() {
     webLogService.start();     // apply settings to weblog service
     webConsoleService.begin(*this);
     webModulesService.begin(); // setup the external library modules
-    webServer.begin();         // start the web server
+#ifndef EMSESP_STANDALONE
+    esp32React.getSecurityManager()->compactRoutes(); // all routes are registered by now
+#endif
+    webServer.begin(); // start the web server
 }
 
 void EMSESP::start_serial_console() {

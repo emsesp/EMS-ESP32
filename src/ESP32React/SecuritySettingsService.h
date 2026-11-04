@@ -29,8 +29,8 @@ struct ApiKeyEntry {
     String   id; // the first hex digits of the key
     String   label;
     bool     write;   // read+write, otherwise read only
-    uint32_t created; // unix time, 0 if the clock wasn't set
-    String   hash;
+    uint32_t    created; // unix time, 0 if the clock wasn't set
+    stringPSRAM hash;
 };
 
 class SecuritySettings {
@@ -47,7 +47,7 @@ class SecuritySettings {
         for (const User & user : settings.users) {
             JsonObject userRoot  = users.add<JsonObject>();
             userRoot["username"] = user.username;
-            userRoot["password"] = user.password;
+            userRoot["password"] = user.password.c_str();
             userRoot["admin"]    = user.admin;
             userRoot["ver"]      = user.ver;
         }
@@ -59,7 +59,7 @@ class SecuritySettings {
             keyRoot["label"]   = key.label;
             keyRoot["write"]   = key.write;
             keyRoot["created"] = key.created;
-            keyRoot["hash"]    = key.hash;
+            keyRoot["hash"]    = key.hash.c_str();
         }
     }
 
@@ -121,7 +121,7 @@ class SecuritySettings {
                     ver = password.isEmpty() ? existing->ver : existing->ver + 1;
                 }
                 if (password.isEmpty()) {
-                    password = existing ? existing->password : "";
+                    password = existing ? existing->password.c_str() : "";
                 } else {
                     password = PasswordHash::hash(password);
                 }
@@ -159,7 +159,7 @@ class SecuritySettingsService final : public StatefulService<SecuritySettings>, 
     FSPersistence<SecuritySettings> _fsPersistence;
     ArduinoJsonJWT                  _jwtHandler;
     FS *                            _fs;
-    String                          _adminCredentials; // to detect admin password changes
+    PasswordHash::Digest            _adminCredentials{}; // to detect admin password changes
     PasswordConfirm                 _passwordConfirm;
     BasicAuthCache                  _basicAuthCache;
 
@@ -173,7 +173,7 @@ class SecuritySettingsService final : public StatefulService<SecuritySettings>, 
     void   rotateSigningKey();
     void   saveSigningKey(const String & key);
     void   onSettingsUpdated();
-    String adminCredentials();
+    PasswordHash::Digest adminCredentials();
 
     Authentication authenticateJWT(String & jwt); // Lookup the user by JWT
     static String  bearerToken(AsyncWebServerRequest * request);

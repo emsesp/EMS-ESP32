@@ -19,27 +19,28 @@
 #ifndef EMSESP_PASSWORD_CONFIRM_H
 #define EMSESP_PASSWORD_CONFIRM_H
 
+#include "spin_lock.h"
+
 #include <array>
 #include <cstdint>
 #include <cstring>
-#include <mutex>
 
 // The sign-ins whose password was entered again in the last few minutes, so a copied access token alone
 // can't change the firmware, the users or the security settings. Kept in memory only, a restart clears it.
-// A sign-in is known by the signature of its access token.
+// A sign-in is known by the start of its access token's signature.
 class PasswordConfirm {
   public:
     static constexpr uint32_t DURATION_MS  = 5 * 60 * 1000;
     static constexpr size_t   MAX_SESSIONS = 4;
-    static constexpr size_t   MAX_ID       = 64; // a base64url HMAC-SHA256 signature is 43 characters
+    static constexpr size_t   ID_CHARS     = 16; // of the base64url HMAC-SHA256 signature, 96 bits can't be guessed
 
     void confirm(const char * token, uint32_t now) {
-        char id[MAX_ID + 1];
+        Id id;
         if (!signature(token, id)) {
             return;
         }
 
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<SpinLock> lock(lock_);
 
         Entry * entry = find(id, now);
         if (!entry) {
@@ -53,36 +54,45 @@ class PasswordConfirm {
                     entry = &e; // the one that expires first
                 }
             }
-            strcpy(entry->id, id);
+            entry->id = id;
         }
         entry->until = now + DURATION_MS;
         entry->used  = true;
     }
 
     bool confirmed(const char * token, uint32_t now) {
-        char id[MAX_ID + 1];
+        Id id;
         if (!signature(token, id)) {
             return false;
         }
 
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<SpinLock> lock(lock_);
         return find(id, now) != nullptr;
     }
 
     void clear() {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<SpinLock> lock(lock_);
         entries_ = {};
     }
 
   private:
+    struct Id {
+        char    chars[ID_CHARS];
+        uint8_t len;
+
+        bool operator==(const Id & other) const {
+            return len == other.len && memcmp(chars, other.chars, len) == 0;
+        }
+    };
+
     struct Entry {
-        char     id[MAX_ID + 1];
-        uint32_t until;
+        Id       id;
         bool     used;
+        uint32_t until;
     };
 
     std::array<Entry, MAX_SESSIONS> entries_{};
-    std::mutex                      mutex_;
+    SpinLock                        lock_;
 
     // works across the millis() wrap around
     static bool before(uint32_t a, uint32_t b) {
@@ -94,7 +104,7 @@ class PasswordConfirm {
     }
 
     // the part after the last dot
-    static bool signature(const char * token, char * id) {
+    static bool signature(const char * token, Id & id) {
         if (!token) {
             return false;
         }
@@ -103,16 +113,17 @@ class PasswordConfirm {
             return false;
         }
         const size_t len = strlen(dot + 1);
-        if (len == 0 || len > MAX_ID) {
+        if (len == 0) {
             return false;
         }
-        memcpy(id, dot + 1, len + 1);
+        id.len = len < ID_CHARS ? len : ID_CHARS;
+        memcpy(id.chars, dot + 1, id.len);
         return true;
     }
 
-    Entry * find(const char * id, uint32_t now) {
+    Entry * find(const Id & id, uint32_t now) {
         for (auto & entry : entries_) {
-            if (active(entry, now) && strcmp(entry.id, id) == 0) {
+            if (active(entry, now) && entry.id == id) {
                 return &entry;
             }
         }

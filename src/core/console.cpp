@@ -212,7 +212,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                                                           // find the username 'admin' and update its password
                                                           for (auto & user : securitySettings.users) {
                                                               if (user.username == "admin") {
-                                                                  user.password = PasswordHash::hash(password2.c_str());
+                                                                  user.password = PasswordHash::hash(password2.c_str()).c_str();
                                                                   user.ver++; // signs the admin out everywhere
                                                                   return StateUpdateResult::CHANGED;
                                                               }

@@ -116,21 +116,24 @@ void SecuritySettingsService::saveSigningKey(const String & key) {
 }
 
 void SecuritySettingsService::onSettingsUpdated() {
-    String credentials = adminCredentials();
+    const PasswordHash::Digest credentials = adminCredentials();
     if (credentials != _adminCredentials) {
         _adminCredentials = credentials;
         rotateSigningKey();
     }
 }
 
-String SecuritySettingsService::adminCredentials() {
-    String credentials;
+PasswordHash::Digest SecuritySettingsService::adminCredentials() {
+    stringPSRAM credentials;
     for (const User & user : _state.users) {
         if (user.admin) {
-            credentials += user.username + '\n' + user.password + '\n';
+            credentials += user.username.c_str();
+            credentials += '\n';
+            credentials += user.password;
+            credentials += '\n';
         }
     }
-    return credentials;
+    return PasswordHash::digest(credentials.c_str());
 }
 
 String SecuritySettingsService::bearerToken(AsyncWebServerRequest * request) {
@@ -161,7 +164,7 @@ Authentication SecuritySettingsService::authenticateRequest(AsyncWebServerReques
 bool SecuritySettingsService::confirmPassword(AsyncWebServerRequest * request, const String & password) {
     String         token          = bearerToken(request);
     Authentication authentication = authenticateJWT(token);
-    if (!authentication.authenticated || !PasswordHash::verify(password, authentication.user->password)) {
+    if (!authentication.authenticated || !PasswordHash::verify(password, authentication.user->password.c_str())) {
         return false;
     }
 
@@ -191,7 +194,7 @@ Authentication SecuritySettingsService::authenticateApiRequest(AsyncWebServerReq
 Authentication SecuritySettingsService::authenticateApiKey(const char * key) {
     const String id = ApiKey::id(key);
     for (const ApiKeyEntry & entry : _state.api_keys) {
-        if (!id.isEmpty() && entry.id == id && ApiKey::matches(key, entry.hash)) {
+        if (!id.isEmpty() && entry.id == id && ApiKey::matches(key, entry.hash.c_str())) {
             return Authentication(User(entry.label, "", entry.write));
         }
     }
@@ -232,7 +235,7 @@ Authentication SecuritySettingsService::authenticateBasic(AsyncWebServerRequest 
             if (limiter.retry_after(source.c_str(), now)) {
                 return {};
             }
-            if (user && PasswordHash::verify(String(password.c_str()), user->password)) {
+            if (user && PasswordHash::verify(String(password.c_str()), user->password.c_str())) {
                 limiter.succeeded(source.c_str());
                 _basicAuthCache.add(username, password, user->password.c_str(), now);
                 authentication = Authentication(*user);
@@ -285,7 +288,7 @@ void SecuritySettingsService::apiKeyAction(AsyncWebServerRequest * request, Json
         const bool     write   = json["write"] | false;
         update(
             [&](SecuritySettings & settings) {
-                settings.api_keys.push_back({ApiKey::id(key.c_str()), label, write, created, ApiKey::hash(key.c_str())});
+                settings.api_keys.push_back({ApiKey::id(key.c_str()), label, write, created, ApiKey::hash(key.c_str()).c_str()});
                 return StateUpdateResult::CHANGED;
             });
         emsesp::EMSESP::logger().notice("API key '%s' created", label.c_str());
@@ -338,7 +341,7 @@ Authentication SecuritySettingsService::authenticateJWT(String & jwt) {
 
 Authentication SecuritySettingsService::authenticate(const String & username, const String & password) {
     for (const User & _user : _state.users) {
-        if (_user.username == username && PasswordHash::verify(password, _user.password)) {
+        if (_user.username == username && PasswordHash::verify(password, _user.password.c_str())) {
             return Authentication(_user);
         }
     }
