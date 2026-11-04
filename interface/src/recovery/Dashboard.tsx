@@ -20,6 +20,7 @@ import {
   DialogTitle,
   Divider,
   IconButton,
+  Link,
   List,
   ListItem,
   ListItemAvatar,
@@ -206,7 +207,15 @@ const Dashboard = ({ status, onRestarting, onSignOut }: DashboardProps) => {
           <SectionTitle>Crash Dump</SectionTitle>
           <Typography sx={{ pb: 1 }} variant="body2" color="text.secondary">
             The last crash left this summary. Copy it, or download the crash dump,
-            and add it to a GitHub issue so the crash can be decoded.
+            and add it to a GitHub issue so the crash can be decoded. See{' '}
+            <Link
+              href="https://docs.emsesp.org/FAQ#what-to-do-when-ems-esp-crashes"
+              target="_blank"
+              rel="noreferrer"
+            >
+              what to do when EMS-ESP crashes
+            </Link>
+            .
           </Typography>
           <Typography
             sx={{
