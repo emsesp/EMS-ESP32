@@ -25,7 +25,8 @@ namespace emsesp {
 
 uuid::log::Logger Command::logger_{F_(command), uuid::log::Facility::DAEMON};
 
-thread_local bool Command::caller_read_only_          = false;
+thread_local Command::Access Command::caller_access_  = Command::Access::ALL;
+thread_local const char * Command::caller_access_reason_ = nullptr;
 thread_local bool Command::caller_is_admin_           = true;
 thread_local bool Command::caller_password_confirmed_ = true;
 thread_local const char * Command::caller_source_    = nullptr;
@@ -444,8 +445,8 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
     // it could be an endpoint like a device's entity or attribute e.g. api/boiler/nrgheat or /api/boiler/nrgheat/value
     // or a special command like 'info', 'values', 'commands', 'entities' etc
     bool single_command = (!value || !strlen(value));
-    if (!single_command && caller_read_only_) {
-        return read_only_refused(dname, cmd, output);
+    if (!single_command && !caller_may(device_type, nullptr)) {
+        return access_refused(dname, cmd, output);
     }
     if (single_command) {
         if (!strcmp(cmd, F_(commands))) {
@@ -522,8 +523,8 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
     }
 
     // anything that isn't answered by the value lookup above runs a command
-    if (caller_read_only_) {
-        return read_only_refused(dname, cmd, output);
+    if (!caller_may(device_type, cf->cmd_)) {
+        return access_refused(dname, cmd, output);
     }
 
     // before calling the command, check permissions and abort if not authorized
@@ -644,9 +645,24 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
     return return_code;
 }
 
-uint8_t Command::read_only_refused(const char * dname, const char * cmd, JsonObject output) {
-    LOG_WARNING("Command %s/%s refused: a browser login can only read values", dname, cmd);
-    output["message"] = "read only, use an API key to change values or run commands";
+// cmd is the command about to run, or nullptr when a value is given but the command isn't looked up yet
+bool Command::caller_may(const uint8_t device_type, const char * cmd) {
+    switch (caller_access_) {
+    case Access::READ:
+        return false;
+    case Access::VALUES:
+        return device_type != EMSdevice::DeviceType::SYSTEM;
+    case Access::NO_ERASE:
+        return !(device_type == EMSdevice::DeviceType::SYSTEM && cmd && (!strcmp(cmd, F_(format)) || !strcmp(cmd, F_(coredump))));
+    default:
+        return true;
+    }
+}
+
+uint8_t Command::access_refused(const char * dname, const char * cmd, JsonObject output) {
+    const char * reason = caller_access_reason_ ? caller_access_reason_ : "not allowed";
+    LOG_WARNING("Command %s/%s refused (by %s): %s", dname, cmd, caller_source_ ? caller_source_ : "unknown", reason);
+    output["message"] = reason;
     return CommandRet::NOT_ALLOWED;
 }
 

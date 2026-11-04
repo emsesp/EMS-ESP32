@@ -12,6 +12,16 @@ MqttSettingsService::MqttSettingsService(AsyncWebServer * server, FS * fs, Secur
     , _disconnectReason(espMqttClientTypes::DisconnectReason::USER_OK)
     , _mqttClient(nullptr) {
     addUpdateHandler([this] { onConfigUpdated(); }, false);
+
+    // letting MQTT do more
+    _httpEndpoint.requirePassword([](JsonObject json, MqttSettings & current) {
+        return MqttSettings::commands(json) > current.mqtt_commands;
+    });
+}
+
+uint8_t MqttSettings::commands(JsonObject root) {
+    const uint8_t commands = root["mqtt_commands"] | EMSESP_DEFAULT_MQTT_COMMANDS;
+    return commands <= emsesp::Mqtt::Commands::COMMANDS_ALL ? commands : EMSESP_DEFAULT_MQTT_COMMANDS;
 }
 
 static String generateClientId() {
@@ -131,10 +141,9 @@ void MqttSettingsService::onMqttMessage(const espMqttClientTypes::MessagePropert
                                         size_t                                        len,
                                         size_t                                        index,
                                         size_t                                        total) {
-    (void)properties;
     (void)index;
     (void)total;
-    emsesp::EMSESP::mqtt_.on_message(topic, payload, len);
+    emsesp::EMSESP::mqtt_.on_message(topic, payload, len, properties.retain);
 }
 
 espMqttClientTypes::DisconnectReason MqttSettingsService::getDisconnectReason() {
@@ -273,6 +282,7 @@ void MqttSettings::read(MqttSettings & settings, JsonObject root) {
     root["publish_single"]          = settings.publish_single;
     root["publish_single2cmd"]      = settings.publish_single2cmd;
     root["send_response"]           = settings.send_response;
+    root["mqtt_commands"]           = settings.mqtt_commands;
 }
 
 StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings) {
@@ -310,6 +320,7 @@ StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings)
     newSettings.publish_single     = root["publish_single"] | EMSESP_DEFAULT_PUBLISH_SINGLE;
     newSettings.publish_single2cmd = root["publish_single2cmd"] | EMSESP_DEFAULT_PUBLISH_SINGLE2CMD;
     newSettings.send_response      = root["send_response"] | EMSESP_DEFAULT_SEND_RESPONSE;
+    newSettings.mqtt_commands      = MqttSettings::commands(root);
     newSettings.entity_format      = static_cast<uint8_t>(root["entity_format"] | EMSESP_DEFAULT_ENTITY_FORMAT);
 
     if (newSettings.enabled != settings.enabled) {
@@ -359,6 +370,10 @@ StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings)
     }
 
     if (newSettings.send_response != settings.send_response) {
+        changed = true;
+    }
+
+    if (newSettings.mqtt_commands != settings.mqtt_commands) {
         changed = true;
     }
 

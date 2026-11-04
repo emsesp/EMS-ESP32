@@ -209,7 +209,11 @@ Authentication SecuritySettingsService::authenticateBasic(AsyncWebServerRequest 
 
     Authentication authentication;
     if (ApiKey::is_key(password.c_str())) {
-        authentication = authenticateApiKey(password.c_str());
+        // tools that only support Basic get the key's rights. A browser keeps the login and sends it with
+        // requests that other sites trigger, so there it only reads. Browsers send Sec-Fetch-Site on every request
+        authentication       = authenticateApiKey(password.c_str());
+        authentication.basic = authentication.authenticated && request->hasHeader("Sec-Fetch-Site");
+        return authentication;
     } else {
         const User * user = nullptr;
         for (const User & u : _state.users) {

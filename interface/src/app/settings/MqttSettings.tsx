@@ -330,6 +330,20 @@ const MqttSettings = () => {
           }
           label={LL.MQTT_RETAIN_FLAG()}
         />
+        <TextField
+          name="mqtt_commands"
+          label={LL.MQTT_COMMANDS()}
+          value={data.mqtt_commands}
+          sx={{ width: '50ch' }}
+          variant="outlined"
+          onChange={updateFormValue}
+          margin="normal"
+          select
+        >
+          <MenuItem value={0}>{LL.MQTT_COMMANDS_0()}</MenuItem>
+          <MenuItem value={1}>{LL.MQTT_COMMANDS_1()}</MenuItem>
+          <MenuItem value={2}>{LL.MQTT_COMMANDS_2()}</MenuItem>
+        </TextField>
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           {LL.FORMATTING()}
         </Typography>

@@ -207,27 +207,40 @@ class Command {
         bool prev_password_confirmed_;
     };
 
-    // a caller that may only read values, not run commands or change anything (a browser's Basic login on /api)
-    class CallerReadOnly {
+    // what a caller may do on top of its rights, from most to least
+    enum class Access : uint8_t {
+        ALL,      // anything its rights allow
+        NO_ERASE, // not the factory reset or erasing the crash dump
+        VALUES,   // change values and run Commands, but no system commands
+        READ      // only read values (a browser's Basic login on /api, MQTT with commands off)
+    };
+
+    // reason is the message a refused caller gets back. It must outlive the object
+    class CallerAccess {
       public:
-        explicit CallerReadOnly(const bool read_only)
-            : prev_(caller_read_only_) {
-            caller_read_only_ = read_only;
+        CallerAccess(const Access access, const char * reason)
+            : prev_(caller_access_)
+            , prev_reason_(caller_access_reason_) {
+            caller_access_        = access;
+            caller_access_reason_ = reason;
         }
-        ~CallerReadOnly() {
-            caller_read_only_ = prev_;
+        ~CallerAccess() {
+            caller_access_        = prev_;
+            caller_access_reason_ = prev_reason_;
         }
-        CallerReadOnly(const CallerReadOnly &)             = delete;
-        CallerReadOnly & operator=(const CallerReadOnly &) = delete;
+        CallerAccess(const CallerAccess &)             = delete;
+        CallerAccess & operator=(const CallerAccess &) = delete;
 
       private:
-        bool prev_;
+        Access       prev_;
+        const char * prev_reason_;
     };
 
   private:
     static uuid::log::Logger logger_;
 
-    static thread_local bool caller_read_only_;
+    static thread_local Access       caller_access_;
+    static thread_local const char * caller_access_reason_;
     static thread_local bool caller_is_admin_;
     static thread_local bool caller_password_confirmed_;
     static thread_local const char * caller_source_;
@@ -235,7 +248,8 @@ class Command {
     static std::vector<CmdFunction, AllocatorPSRAM<CmdFunction>> cmdfunctions_; // the list of commands
 
     static uint8_t json_message(uint8_t error_code, const char * message, JsonObject output, const char * object = nullptr);
-    static uint8_t read_only_refused(const char * dname, const char * cmd, JsonObject output);
+    static bool    caller_may(const uint8_t device_type, const char * cmd);
+    static uint8_t access_refused(const char * dname, const char * cmd, JsonObject output);
 };
 
 class SUrlParser {

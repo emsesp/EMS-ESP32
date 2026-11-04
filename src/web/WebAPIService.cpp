@@ -133,8 +133,8 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
 #ifndef EMSESP_STANDALONE
     source += std::string(", ") + request->client()->remoteIP().toString().c_str();
 #endif
-    Command::CallerSource   caller(source.c_str());
-    Command::CallerReadOnly read_only(basic);
+    Command::CallerSource caller(source.c_str());
+    Command::CallerAccess access(basic ? Command::Access::READ : Command::Access::ALL, "read only, use an API key to change values or run commands");
 
     // check for query parameters first, the old style from v2
     // api?device={device}&cmd={name}&data={value}&id={hc}

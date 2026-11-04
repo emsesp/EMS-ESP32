@@ -155,6 +155,55 @@ void security_test_api_basic_read_only() {
     TEST_ASSERT_EQUAL(std::string::npos, unknown.find("read only"));
 }
 
+static std::string mqtt_send(const char * topic, const char * payload, const bool retain = false) {
+    std::string full = Mqtt::base() + "/" + topic;
+    Mqtt::clear_response();
+    Mqtt::on_message(full.c_str(), (const uint8_t *)payload, strlen(payload), retain);
+    return Mqtt::get_response();
+}
+
+static bool shower_timer() {
+    bool on = false;
+    EMSESP::webSettingsService.read([&](WebSettings & settings) { on = settings.shower_timer; });
+    return on;
+}
+
+static bool contains(const std::string & s, const char * part) {
+    return s.find(part) != std::string::npos;
+}
+
+// MQTT changes values and runs Commands by default, system commands need "everything", and
+// a factory reset or erasing the crash dump never comes from MQTT
+void security_test_mqtt_commands() {
+    const bool before = shower_timer();
+
+    Mqtt::mqtt_commands(Mqtt::Commands::COMMANDS_VALUES);
+    TEST_ASSERT_TRUE(contains(mqtt_send("system/settings/showertimer", before ? "false" : "true"), "system commands over MQTT are turned off"));
+    TEST_ASSERT_TRUE(contains(mqtt_send("system/restart", ""), "system commands over MQTT are turned off"));
+    TEST_ASSERT_EQUAL(before, shower_timer());
+    TEST_ASSERT_FALSE(contains(mqtt_send("boiler/selflowtemp", "45"), "turned off"));
+    TEST_ASSERT_FALSE(contains(mqtt_send("system/info", ""), "turned off"));
+
+    Mqtt::mqtt_commands(Mqtt::Commands::COMMANDS_OFF);
+    TEST_ASSERT_TRUE(contains(mqtt_send("boiler/selflowtemp", "45"), "read only"));
+    TEST_ASSERT_TRUE(contains(mqtt_send("commands/send_message", ""), "read only"));
+    TEST_ASSERT_FALSE(contains(mqtt_send("boiler/selflowtemp", ""), "read only"));
+
+    Mqtt::mqtt_commands(Mqtt::Commands::COMMANDS_ALL);
+    mqtt_send("system/settings/showertimer", before ? "false" : "true");
+    TEST_ASSERT_EQUAL(!before, shower_timer());
+    TEST_ASSERT_TRUE(contains(mqtt_send("system/format", ""), "not allowed over MQTT"));
+    TEST_ASSERT_TRUE(contains(mqtt_send("system/coredump", ""), "not allowed over MQTT"));
+
+    // a retained command is ignored, it would run again on every reconnect
+    TEST_ASSERT_TRUE(mqtt_send("system/settings/showertimer", before ? "true" : "false", true).empty());
+    TEST_ASSERT_EQUAL(!before, shower_timer());
+
+    mqtt_send("system/settings/showertimer", before ? "true" : "false");
+    TEST_ASSERT_EQUAL(before, shower_timer());
+    Mqtt::mqtt_commands(Mqtt::Commands::COMMANDS_VALUES);
+}
+
 void security_test_basic_auth_parse() {
     std::string user, pass;
     TEST_ASSERT_TRUE(BasicAuth::parse("Basic YWRtaW46c2VjcmV0", user, pass)); // admin:secret
@@ -922,6 +971,7 @@ void run_security_tests() {
     RUN_TEST(security_test_api_without_token);
     RUN_TEST(security_test_api_read_needs_token);
     RUN_TEST(security_test_api_basic_read_only);
+    RUN_TEST(security_test_mqtt_commands);
     RUN_TEST(security_test_basic_auth_parse);
     RUN_TEST(security_test_basic_auth_cache);
     RUN_TEST(security_test_api_guest_command_needs_token);

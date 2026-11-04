@@ -260,6 +260,7 @@ bool WebCommandService::executeCommand(const char * name, const char * value) {
 // handles both HTTP URLs (JSON format) and internal API commands
 bool WebCommandService::executeCommand(const char * name, const std::string & command, const std::string & data) {
     Command::CallerRights admin(true); // the command and its value were saved by an admin
+    Command::CallerAccess all(Command::Access::ALL, nullptr);
     std::string           source = std::string("command '") + name + "'";
     if (Command::caller_source()) {
         source += std::string(", ") + Command::caller_source();
