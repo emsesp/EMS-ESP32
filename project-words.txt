@@ -813,7 +813,6 @@ norsk
 nosleep
 nostdinc
 notepack
-notoken
 notranslation
 notset
 notype
