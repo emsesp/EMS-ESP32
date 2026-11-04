@@ -701,6 +701,11 @@ bool System::set_partition([[maybe_unused]] const char * partitionname) {
 // restart EMS-ESP
 // app0 or app1, or boot/factory on 16MB boards
 void System::system_restart(const char * partitionname) {
+#ifndef EMSESP_STANDALONE
+    // a requested restart means the firmware works, so a new one isn't rolled back by restarting within the health check time
+    OtaUpdater::confirmRunningApp();
+#endif
+
     // see if we are forcing a partition to use
     if (partitionname != nullptr) {
 #ifndef EMSESP_STANDALONE
