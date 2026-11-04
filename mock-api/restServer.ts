@@ -94,6 +94,9 @@ let system_status = {
   ntp_status: 2,
   ntp_time: '2021-04-01T14:25:42Z',
   mqtt_status: true,
+  // summary of the last crash's dump, '' for none. Erased with `call system coredump`
+  coredump:
+    'task=loopTask pc=0x4012293f cause=0 vaddr=0x00000000 bt=0x4008d09c 0x4008d065 0x40090856 0x4012293f 0x4018091b 0x40207b4d sha=1e0b55050ab1c3f2 reason=abort() was called at PC 0x4012293f on core 1',
   ap_status: false,
   network_status: 3, // wifi connected
   // network_status: 10, // ethernet connected
@@ -755,6 +758,7 @@ const ACTIVITY_ENDPOINT = REST_ENDPOINT_ROOT + 'activity';
 
 // SETTINGS
 const SYSTEM_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'systemStatus';
+const COREDUMP_ENDPOINT = REST_ENDPOINT_ROOT + 'coredump';
 const SECURITY_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'securitySettings';
 
 // SYSTEM SIGNIN
@@ -4812,6 +4816,18 @@ router
 
     return system_status;
   })
+  // a few bytes of random data in place of a real dump, it's only saved as coredump.bin
+  .get(COREDUMP_ENDPOINT, () => {
+    if (!system_status.coredump) {
+      return status(404);
+    }
+    return new Response(crypto.getRandomValues(new Uint8Array(1024)), {
+      headers: {
+        'Content-Type': 'application/octet-stream',
+        'Content-Disposition': 'attachment; filename="coredump.bin"'
+      }
+    });
+  })
   // like the device, never return the stored passwords
   .get(SECURITY_SETTINGS_ENDPOINT, () => ({
     users: security_settings.users.map((u) => ({ ...u, password: '' }))
@@ -5645,6 +5661,10 @@ router
         return status(200);
       } else if (cmd === 'read') {
         console.log('send read command:', data.data);
+        return status(200);
+      } else if (cmd === 'coredump') {
+        console.log('erasing the crash dump');
+        system_status.coredump = '';
         return status(200);
       }
     }
