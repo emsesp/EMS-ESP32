@@ -313,7 +313,7 @@ void WebSchedulerService::publish(const bool force) {
 
                 Mqtt::add_ha_bool(config.as<JsonObject>());
                 Mqtt::add_ha_dev_section(config.as<JsonObject>(), F_(scheduler), !ha_created);
-                Mqtt::add_ha_avty_section(config.as<JsonObject>(), stat_t, val_cond);
+                Mqtt::add_ha_avty_section(config.as<JsonObject>());
 
                 ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
             }
