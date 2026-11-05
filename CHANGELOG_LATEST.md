@@ -168,6 +168,7 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - MQTT with TLS and a CA certificate crashed on every connect (a boot loop) on boards with PSRAM when the broker's certificate chain is EC, such as Let's Encrypt ISRG Root X2: verifying it needs about 6 KB of stack and the MQTT task only had 5120 bytes. The MQTT task now gets an 8 KB stack when TLS verifies a CA certificate, and keeps 5120 bytes for insecure TLS and plain MQTT
 - a command value containing a `/` (e.g. the date format `mm/dd/yyyy`) sent via MQTT or the API was taken as a reference to another entity (`device/entity`) and failed with `no 'dd' in unknown`. It is now only treated as a reference when the part before the `/` is a known device [#3329](https://github.com/emsesp/EMS-ESP32/issues/3329)
 - Junkers `contrast` is shown and set in % (25 to 75 in steps of 2.5) instead of the raw value 10 to 30, and the Junkers `display` setting no longer lists two empty options [#3329](https://github.com/emsesp/EMS-ESP32/issues/3329)
+- SRC plus / SRC 100 RF room thermostats with a cooling heat pump: `mode` and `seltemp` showed and changed the heating settings while cooling. The SRC keeps separate heating (0x0BB5 offset 0/3) and cooling (offset 4/6) settings; the active set is now chosen from the thermostat's `hpoperatingstate` instead of being guessed from the modes [#3107](https://github.com/emsesp/EMS-ESP32/issues/3107)
 
 ## Changed
 
