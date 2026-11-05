@@ -33,7 +33,7 @@ const CustomBuildWarning = ({
     <Button
       sx={{ mt: 1 }}
       size="small"
-      startIcon={<WarningIcon />}
+      startIcon={<WarningIcon color="warning" />}
       variant="outlined"
       color="warning"
       onClick={onInstall}
