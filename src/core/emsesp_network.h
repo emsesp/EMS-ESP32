@@ -48,6 +48,8 @@ namespace emsesp {
 
 #define MAX_NETWORK_RECONNECTION_ATTEMPTS 4 // maximum number of network reconnection attempts before going to AP fallback
 
+#define NETWORK_DNS_OVERRIDE_CHECK 10000 // 10 seconds - how often to re-assert the custom DNS servers when using DHCP
+
 #define DNS_PORT 53 // dns server port for captive portal
 
 // copied from Tasmota
@@ -225,6 +227,7 @@ class Network {
 #endif
 
     unsigned long    lastConnectionAttempt_  = 0;
+    unsigned long    lastDnsOverrideCheck_   = 0;
     uint16_t         reconnect_count_        = 0; // number of network reconnects
     uint32_t         network_ip_             = 0;
     NetIface         network_iface_          = NetIface::NONE;

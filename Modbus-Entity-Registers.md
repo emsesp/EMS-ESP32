@@ -7411,10 +7411,9 @@ int16
 | hc1.seltemp | selected room temperature | int16 (&gt;=0&lt;=30) | C | true | HC | 0 | 1 | 1/10 |
 | hc1.currtemp | current room temperature | int16 | C | false | HC | 1 | 1 | 1/10 |
 | hc1.haclimate | mqtt discovery current room temperature | enum |   | false | HC | 2 | 1 | 1 |
-| hc1.mode | operating mode | enum |   | true | HC | 3 | 1 | 1 |
+| hc1.mode | operating mode | enum |   | false | HC | 3 | 1 | 1 |
 | hc1.modetype | mode type | enum |   | false | HC | 4 | 1 | 1 |
-uint8
-| hc1.heattemp | heat temperature | uint8 (&gt;=0&lt;=0) | C | true | HC | 205 | 1 | 1/2 |
+| hc1.heattemp | heat temperature | uint8 | C | false | HC | 205 | 1 | 1/2 |
 uint8
 | hc1.ecotemp | eco temperature | uint8 (&gt;=0&lt;=0) | C | true | HC | 5 | 1 | 1/2 |
 int8
@@ -7424,8 +7423,7 @@ int8
 | hc1.targetflowtemp | target flow temperature | uint8 | C | false | HC | 19 | 1 | 1 |
 | hc1.holidaymode | holiday mode | enum |   | true | HC | 66 | 1 | 1 |
 | hc1.switchonoptimization | switch-on optimization | boolean |   | true | HC | 33 | 1 | 1 |
-uint8
-| hc1.maxflowtemp | max flow temperature | uint8 (&gt;=30&lt;=90) | C | true | HC | 13 | 1 | 1 |
+| hc1.maxflowtemp | max flow temperature | uint8 | C | false | HC | 13 | 1 | 1 |
 | hc1.controlmode | control mode | enum |   | true | HC | 26 | 1 | 1 |
 uint8
 | hc1.adaptfactor | adaptation factor | uint8 (&gt;=0&lt;=100) | % | true | HC | 208 | 1 | 5 |

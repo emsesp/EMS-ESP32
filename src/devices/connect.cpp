@@ -164,7 +164,8 @@ void Connect::process_roomThermostatName(const std::shared_ptr<const Telegram> &
     rc->name_[50] = '\0'; // make sure name is terminated
 }
 
-// settings 0-mode, 1-tempautotemp, 3 - manualtemp, 6 - ?, 7 - childlock
+// settings 0-heatmode, 1-tempautotemp, 3-manualtemp, 4-coolmode, 5-coolautotemp, 6-coolmanualtemp, 7-childlock
+// heat- and coolmode are independent, both 0-auto, 1-manual, 3-off, https://github.com/emsesp/EMS-ESP32/issues/3107
 // 0x0BB5, ff: data: 00 FF 00 24 01 FF 24 00
 void Connect::process_roomThermostatSettings(const std::shared_ptr<const Telegram> & telegram) {
     auto rc = room_circuit(telegram->type_id - 0xBB5);
@@ -172,33 +173,43 @@ void Connect::process_roomThermostatSettings(const std::shared_ptr<const Telegra
         return;
     }
 
-    // has_enumupdate(telegram, rc->mode_, 0, {3, 1, 0}); // modes off, manual auto
-    // has_update(telegram, rc->mode_, 0); // modes: auto, heat, cool, off
     // has_update(telegram, rc->tempautotemp_, 1); // FF means off
     // has_update(telegram, rc->manualtemp_, 3);
-    // has_update(telegram, rc->coolmode_, 4); // 01-cooling, 00-heating
     // has_update(telegram, rc->coolautotemp_, 5);
     // has_update(telegram, rc->cooltemp_, 6);
     has_update(telegram, rc->childlock_, 7);
-    uint8_t mh = 0xFF;
-    uint8_t mc = 0xFF;
-    telegram->read_value(mh, 0);
-    telegram->read_value(mc, 4);
-    if (mc == 3) {
-        rc->coolmode_ = 1;
-        rc->mode_     = 0;
-    } else if (mh == 3) {
-        rc->coolmode_ = 0;
-        rc->mode_     = 0;
-    } else if (mc == 1) {
-        rc->coolmode_ = 1;
-        rc->mode_     = 1;
-    } else if (mh == 1) {
-        rc->coolmode_ = 0;
-        rc->mode_     = 1;
-    } else {
-        rc->mode_ = 2;
+    telegram->read_value(rc->heatmodeRaw_, 0);
+    telegram->read_value(rc->coolmodeRaw_, 4);
+    update_room_mode(rc);
+}
+
+// heatpump operating state from the master thermostat, index of enum_operatingstate: 0-heating, 1-off, 2-cooling
+uint8_t Connect::hp_operatingstate() {
+    JsonDocument doc;
+    JsonObject   root = doc.to<JsonObject>();
+    if (EMSESP::get_device_value_info(root, "hpoperatingstate", 0, EMSdevice::DeviceType::THERMOSTAT) && root["index"].is<uint8_t>()) {
+        return root["index"].as<uint8_t>();
     }
+
+    return EMS_VALUE_UINT8_NOTSET;
+}
+
+// heating/cooling is set system wide by the heatpump, the SRC uses the mode and setpoints of the active one
+void Connect::update_room_mode(std::shared_ptr<Connect::RoomCircuit> rc) {
+    uint8_t state = hp_operatingstate();
+    if (state == 0 || state == 2) {
+        rc->coolmode_ = state == 2 ? 1 : 0;
+    } else if (state == EMS_VALUE_UINT8_NOTSET) {
+        // no heatpump state, guess from the modes, both auto is resolved by MenuConfig 0xF7
+        if (rc->coolmodeRaw_ == 3 || (rc->heatmodeRaw_ != 3 && rc->coolmodeRaw_ == 1)) {
+            rc->coolmode_ = 1;
+        } else if (rc->heatmodeRaw_ == 3 || rc->heatmodeRaw_ == 1) {
+            rc->coolmode_ = 0;
+        }
+    }
+
+    uint8_t m = rc->coolmode_ == 1 ? rc->coolmodeRaw_ : rc->heatmodeRaw_;
+    has_update(rc->mode_, m == 3 ? 0 : m == 1 ? 1 : m == 0 ? 2 : EMS_VALUE_UINT8_NOTSET); // enum_mode2: off, manual, auto
 }
 
 // unknown telegrams, needs fetch
@@ -241,7 +252,7 @@ void Connect::process_roomConfig(const std::shared_ptr<const Telegram> & telegra
             }
 
             uint8_t bits = telegram->message_data[3];
-            if (rc->mode_ == 2) {
+            if (rc->mode_ == 2 && hp_operatingstate() == EMS_VALUE_UINT8_NOTSET) {
                 if (bits & 0x02) {
                     rc->coolmode_ = 0;
                 } else if (bits & 0x20) {
@@ -294,6 +305,7 @@ bool Connect::set_mode(const char * value, const int8_t id) {
         }
     }
 
+    update_room_mode(rc);
     write_command(0xBB5 + rc->room(), rc->coolmode_ == 1 ? 4 : 0, v); // no validate, mode change is broadcasted
     return true;
 }
@@ -307,6 +319,7 @@ bool Connect::set_seltemp(const char * value, const int8_t id) {
     float v;
     if (Helpers::value2temperature(value, v)) {
         // depends on mode, auto (2 for enum_mode2, 0 for enum_mode8) set in offset 1
+        update_room_mode(rc);
         if (rc->coolmode_ == 1) {
             write_command(0xBB5 + rc->room(), rc->mode_ == 2 ? 5 : 6, v == -1 ? 0xFF : uint8_t(v * 2));
         } else {
