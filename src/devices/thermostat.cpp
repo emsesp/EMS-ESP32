@@ -5869,11 +5869,21 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(
             tag, &hc->switchtime2, DeviceValueType::STRING, FL_(tpl_switchtime), FL_(switchtime2), DeviceValueUOM::NONE, MAKE_CF_CB(set_switchtime2));
         break;
-    case EMSdevice::EMS_DEVICE_FLAG_JUNKERS:
-        register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode4), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
+    case EMSdevice::EMS_DEVICE_FLAG_JUNKERS: {
+        // FR50 rejects writes to mode, heattemp and maxflowtemp and re-broadcasts the old value, see #3339
+        const bool is_fr50 = (product_id() == 147);
+        if (is_fr50) {
+            register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode4), FL_(mode), DeviceValueUOM::NONE);
+        } else {
+            register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode4), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
+        }
         register_device_value(tag, &hc->modetype, DeviceValueType::ENUM, FL_(enum_modetype4), FL_(modetype), DeviceValueUOM::NONE);
-        register_device_value(
-            tag, &hc->daytemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(heattemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_heattemp));
+        if (is_fr50) {
+            register_device_value(tag, &hc->daytemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(heattemp), DeviceValueUOM::DEGREES);
+        } else {
+            register_device_value(
+                tag, &hc->daytemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(heattemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_heattemp));
+        }
         register_device_value(
             tag, &hc->nighttemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(ecotemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_ecotemp));
         register_device_value(tag,
@@ -5912,7 +5922,11 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               FL_(switchonoptimization),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_switchonoptimization));
-        register_device_value(tag, &hc->maxflowtemp, DeviceValueType::UINT8, FL_(maxflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_maxflowtemp), 30, 90);
+        if (is_fr50) {
+            register_device_value(tag, &hc->maxflowtemp, DeviceValueType::UINT8, FL_(maxflowtemp), DeviceValueUOM::DEGREES);
+        } else {
+            register_device_value(tag, &hc->maxflowtemp, DeviceValueType::UINT8, FL_(maxflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_maxflowtemp), 30, 90);
+        }
         register_device_value(
             tag, &hc->controlmode, DeviceValueType::ENUM, FL_(enum_controlmode3), FL_(controlmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_controlmode));
         if (has_flags(EMSdevice::EMS_DEVICE_FLAG_JUNKERS_OLD)) {
@@ -5974,6 +5988,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         }
 
         break;
+    }
     default:
         break;
     }

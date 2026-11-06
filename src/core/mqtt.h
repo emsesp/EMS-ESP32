@@ -252,11 +252,7 @@ class Mqtt {
                                    const char * model        = nullptr,
                                    const char * brand        = nullptr,
                                    const char * version      = nullptr);
-    static void add_ha_avty_section(JsonObject   doc,
-                                    const char * state_t = nullptr,
-                                    const char * cond1   = nullptr,
-                                    const char * cond2   = nullptr,
-                                    const char * negcond = nullptr);
+    static void add_ha_avty_section(JsonObject doc);
     static void add_ha_bool(JsonObject doc);
     static void add_value_bool(JsonObject doc, const char * name, bool value);
 

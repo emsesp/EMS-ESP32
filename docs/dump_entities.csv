@@ -5367,9 +5367,9 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FR50",thermostat,147,hc1.seltemp,selected room temperature,int16 (>=0<=30),C,true,number.thermostat_hc1_selected_room_temperature,number.thermostat_hc1_seltemp,7,1,1/10,0,1
 "FR50",thermostat,147,hc1.currtemp,current room temperature,int16,C,false,sensor.thermostat_hc1_current_room_temperature,sensor.thermostat_hc1_currtemp,7,1,1/10,1,1
 "FR50",thermostat,147,hc1.haclimate,mqtt discovery current room temperature,enum [selTemp\|roomTemp], ,false,sensor.thermostat_hc1_mqtt_discovery_current_room_temperature,sensor.thermostat_hc1_haclimate,7,1,1,2,1
-"FR50",thermostat,147,hc1.mode,operating mode,enum [nofrost\|eco\|heat\|auto] (>=0<=0), ,true,select.thermostat_hc1_operating_mode,select.thermostat_hc1_mode,7,1,1,3,1
+"FR50",thermostat,147,hc1.mode,operating mode,enum [nofrost\|eco\|heat\|auto], ,false,sensor.thermostat_hc1_operating_mode,sensor.thermostat_hc1_mode,7,1,1,3,1
 "FR50",thermostat,147,hc1.modetype,mode type,enum [nofrost\|eco\|heat], ,false,sensor.thermostat_hc1_mode_type,sensor.thermostat_hc1_modetype,7,1,1,4,1
-"FR50",thermostat,147,hc1.heattemp,heat temperature,uint8 (>=0<=0),C,true,number.thermostat_hc1_heat_temperature,number.thermostat_hc1_heattemp,7,1,1/2,205,1
+"FR50",thermostat,147,hc1.heattemp,heat temperature,uint8,C,false,sensor.thermostat_hc1_heat_temperature,sensor.thermostat_hc1_heattemp,7,1,1/2,205,1
 "FR50",thermostat,147,hc1.ecotemp,eco temperature,uint8 (>=0<=0),C,true,number.thermostat_hc1_eco_temperature,number.thermostat_hc1_ecotemp,7,1,1/2,5,1
 "FR50",thermostat,147,hc1.nofrosttemp,nofrost temperature,int8 (>=0<=0),C,true,number.thermostat_hc1_nofrost_temperature,number.thermostat_hc1_nofrosttemp,7,1,1/2,18,1
 "FR50",thermostat,147,hc1.program,program,enum [prog a\|prog b\|prog c\|prog d\|prog e\|prog f] (>=0<=0), ,true,select.thermostat_hc1_program,select.thermostat_hc1_program,7,1,1,27,1
@@ -5377,7 +5377,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FR50",thermostat,147,hc1.targetflowtemp,target flow temperature,uint8,C,false,sensor.thermostat_hc1_target_flow_temperature,sensor.thermostat_hc1_targetflowtemp,7,1,1,19,1
 "FR50",thermostat,147,hc1.holidaymode,holiday mode,enum [nofrost\|eco\|heat\|auto] (>=0<=0), ,true,select.thermostat_hc1_holiday_mode,select.thermostat_hc1_holidaymode,7,1,1,66,1
 "FR50",thermostat,147,hc1.switchonoptimization,switch-on optimization,boolean (>=0<=0), ,true,switch.thermostat_hc1_switch-on_optimization,switch.thermostat_hc1_switchonoptimization,7,1,1,33,1
-"FR50",thermostat,147,hc1.maxflowtemp,max flow temperature,uint8 (>=30<=90),C,true,number.thermostat_hc1_max_flow_temperature,number.thermostat_hc1_maxflowtemp,7,1,1,13,1
+"FR50",thermostat,147,hc1.maxflowtemp,max flow temperature,uint8,C,false,sensor.thermostat_hc1_max_flow_temperature,sensor.thermostat_hc1_maxflowtemp,7,1,1,13,1
 "FR50",thermostat,147,hc1.controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM] (>=0<=0), ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,7,1,1,26,1
 "FR50",thermostat,147,hc1.adaptfactor,adaptation factor,uint8 (>=0<=100),%,true,number.thermostat_hc1_adaptation_factor,number.thermostat_hc1_adaptfactor,7,1,5,208,1
 "FR50",thermostat,147,hc1.gainfactor,gain factor,uint8 (>=40<=100),%,true,number.thermostat_hc1_gain_factor,number.thermostat_hc1_gainfactor,7,1,5,209,1

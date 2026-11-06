@@ -279,6 +279,20 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
         return true;
     }
 
+    // https://github.com/emsesp/EMS-ESP32/issues/3107
+    if (cmd == "src_cooling") {
+        EMSESP::logger().notice("Adding SRC plus thermostat with heatpump in cooling...");
+
+        add_device(0x10, 253);                                   // UI800
+        add_device(0x50, 17);                                    // MX400 module
+        uart_telegram("10 00 FF 00 03 71 00 11 04 01 01 1C 08 04"); // RC300Summer2, heatpump
+        // RC300Monitor hc1, offset 20: hpoperatingstate cooling
+        uart_telegram("10 00 FF 00 01 A5 00 D7 00 00 00 00 30 01 84 01 01 03 01 84 01 F1 00 00 11 01 03");
+        uart_telegram("50 00 FF 00 0A DD 00 E6 36 2A");             // monitor, temperatures
+        uart_telegram("50 00 FF 00 0A B5 03 FF 00 24 01 FF 2C 00"); // heating off, cooling manual
+        return true;
+    }
+
 #endif
 
     return false;

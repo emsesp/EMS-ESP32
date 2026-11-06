@@ -42,7 +42,9 @@ class Connect : public EMSdevice {
         int16_t dewtemp_;
         uint8_t childlock_;
         uint8_t icon_;
-        uint8_t coolmode_;
+        uint8_t coolmode_    = EMS_VALUE_UINT8_NOTSET; // 1 if the cooling settings are active
+        uint8_t heatmodeRaw_ = EMS_VALUE_UINT8_NOTSET; // offset 0: 0-auto, 1-manual, 3-off
+        uint8_t coolmodeRaw_ = EMS_VALUE_UINT8_NOTSET; // offset 4: 0-auto, 1-manual, 3-off
         // uint8_t tempautotemp_;
         // uint8_t manualtemp_;
         // uint8_t coolautotemp_;
@@ -67,6 +69,8 @@ class Connect : public EMSdevice {
     void process_roomThermostatData(const std::shared_ptr<const Telegram> & telegram);
     void process_roomSchedule(const std::shared_ptr<const Telegram> & telegram);
     void process_roomConfig(const std::shared_ptr<const Telegram> & telegram);
+    uint8_t hp_operatingstate();
+    void    update_room_mode(std::shared_ptr<Connect::RoomCircuit> rc);
     bool set_mode(const char * value, const int8_t id);
     bool set_seltemp(const char * value, const int8_t id);
     bool set_name(const char * value, const int8_t id);

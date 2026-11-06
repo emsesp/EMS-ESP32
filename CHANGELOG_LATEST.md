@@ -31,9 +31,11 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - Junkers FW/FR thermostat display settings (main display, language, date format, contrast) are now also shown on older models like the FR120, plus the room temperature sensor calibration `intoffset` (0x11E offset 8, -3.0 to 3.0 K) [#3329](https://github.com/emsesp/EMS-ESP32/issues/3329)
 - Hungarian language (HU) 
 - heat pump backup heater energy per mode in 0.01 kWh: `metereheatheat` and `dhw/metereheat` (0x4AF offsets 28 and 36) [#3325](https://github.com/emsesp/EMS-ESP32/issues/3325)
+- with DHCP, the DNS #1 and DNS #2 Network Settings now replace the DNS servers handed out by the router. They are re-applied whenever an IPv6 router advertisement or DHCPv6 overwrites them [#3333](https://github.com/emsesp/EMS-ESP32/issues/3333)
 
 ## Fixed
 
+- `pc0flow` stayed at its last valid reading when the heat pump reported 0xFFFF (no flow). The #3224 filter ignored every invalid update; it now only ignores interleaved single 0xFFFF telegrams and clears after three consecutive ones [#3385](https://github.com/emsesp/EMS-ESP32/issues/3385)
 - ESP32-C6 boards without a board profile got invalid GPIOs (99), so on every start the settings were rejected and fell back to empty values (blank Board Profile, EMS Tx Mode and Bus ID), and saving any Application setting failed with a 400 error. A new C6 now starts with the CUSTOM profile and pins for the Seeed XIAO ESP32-C6: Rx GPIO20 (D9), Tx GPIO19 (D8), button GPIO9
 - heat-pump operating state (`hpoperatingstate`: heating/off/cooling) is published for every heating circuit. On BC400/UI800 it was only filled for hc1, because hc2 never answers telegram 0x472 while the state is still broadcast in 0x2A6 offset 20 [#3097](https://github.com/emsesp/EMS-ESP32/issues/3097)
 - restart from the WebUI (Restart button, firmware/settings upload) only happened while the browser tab stayed open. If the tab was closed the restart was silently dropped after 5 minutes, leaving a new firmware uninstalled. EMS-ESP now restarts on its own if the WebUI hasn't picked up the pending restart within 10 seconds
@@ -80,6 +82,7 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - MQTT with TLS and a CA certificate crashed on every connect (a boot loop) on boards with PSRAM when the broker's certificate chain is EC, such as Let's Encrypt ISRG Root X2: verifying it needs about 6 KB of stack and the MQTT task only had 5120 bytes. The MQTT task now gets an 8 KB stack when TLS verifies a CA certificate, and keeps 5120 bytes for insecure TLS and plain MQTT
 - a command value containing a `/` (e.g. the date format `mm/dd/yyyy`) sent via MQTT or the API was taken as a reference to another entity (`device/entity`) and failed with `no 'dd' in unknown`. It is now only treated as a reference when the part before the `/` is a known device [#3329](https://github.com/emsesp/EMS-ESP32/issues/3329)
 - Junkers `contrast` is shown and set in % (25 to 75 in steps of 2.5) instead of the raw value 10 to 30, and the Junkers `display` setting no longer lists two empty options [#3329](https://github.com/emsesp/EMS-ESP32/issues/3329)
+- SRC plus / SRC 100 RF room thermostats with a cooling heat pump: `mode` and `seltemp` showed and changed the heating settings while cooling. The SRC keeps separate heating (0x0BB5 offset 0/3) and cooling (offset 4/6) settings; the active set is now chosen from the thermostat's `hpoperatingstate` instead of being guessed from the modes [#3107](https://github.com/emsesp/EMS-ESP32/issues/3107)
 
 ## Changed
 
@@ -101,3 +104,4 @@ This release is based on the latest Espressif/Arduino core version 3. It brings 
 - hold Tx while a K30RF/KM200 gateway is syncing [#3094](https://github.com/emsesp/EMS-ESP32/issues/3094)
 - Tasmota platform 2026.05.50 (Arduino 3.3.8 / IDF 5.5.4) to 2026.09.50 (Arduino 3.3.12 / IDF 5.5.5). Building that platform needs PlatformIO Core ≥6.2.0; install `pioarduino==6.2.0` (official `platformio` is still 6.1.19). See CONTRIBUTING.md
 - CI dev-release firmware jobs run in parallel (webUI, firmware targets, standalone) instead of one serial job
+- Junkers FR50 `mode`, `heattemp` and `maxflowtemp` are now read-only. The FR50 rejects remote writes to these and re-broadcasts its own values; `ecotemp` can still be set [#3339](https://github.com/emsesp/EMS-ESP32/issues/3339)

@@ -322,6 +322,7 @@ class Boiler : public EMSdevice {
     uint16_t hpCurrPower_;
     uint16_t pc0lpm_;
     uint16_t pc0Flow_;
+    uint8_t  pc0FlowInvalidCount_ = 0; // consecutive 0xFFFF at 0xE4:36 before clearing (#3224 / #3385)
     uint16_t pc1Flow_;
     uint8_t  pc1Rate_;
     uint8_t  pc1On_;
