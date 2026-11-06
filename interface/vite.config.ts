@@ -2,9 +2,9 @@ import preact from '@preact/preset-vite';
 import fs from 'fs';
 import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
+import { optimize } from 'svgo';
 import { pathToFileURL } from 'url';
 import { Plugin, PluginOption, defineConfig } from 'vite';
-import viteImagemin from 'vite-plugin-imagemin';
 import zlib from 'zlib';
 
 // Constants
@@ -180,28 +180,20 @@ const createProductionTerserOptions = () => ({
   toplevel: true
 });
 
-// Image optimization plugin.
-// Only svgo runs here: the raster optimizers (optipng, pngquant, gifsicle,
-// jpegtran, mozjpeg) are native binaries whose install scripts are blocked by
-// `allowBuilds` in pnpm-workspace.yaml, so they would fail on every build.
-// Raster assets are committed pre-optimized instead.
-const imageOptimizationPlugin = {
-  ...viteImagemin({
-    verbose: false,
-    filter: /\.svg$/i,
-    gifsicle: false,
-    jpegTran: false,
-    mozjpeg: false,
-    optipng: false,
-    pngquant: false,
-    svgo: {
-      plugins: [
-        { name: 'removeViewBox' },
-        { name: 'removeEmptyAttrs', active: false }
-      ]
+// Image optimization plugin: runs svgo over emitted SVG assets.
+// Raster assets are committed pre-optimized.
+const imageOptimizationPlugin: Plugin = {
+  name: 'svg-optimize',
+  apply: 'build',
+  generateBundle(_, bundle) {
+    for (const asset of Object.values(bundle)) {
+      if (asset.type !== 'asset' || !asset.fileName.endsWith('.svg')) continue;
+      asset.source = optimize(asset.source.toString(), {
+        multipass: true,
+        plugins: ['removeViewBox']
+      }).data;
     }
-  }),
-  enforce: 'pre' as const
+  }
 };
 
 export default defineConfig(
