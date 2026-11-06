@@ -543,6 +543,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_CR11        = 17; // CRF200 only monitor
     static constexpr uint8_t EMS_DEVICE_FLAG_HMC310      = 18;
     static constexpr uint8_t EMS_DEVICE_FLAG_UI800       = 19;
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC300V11    = 20;
 
     uint8_t count_entities();
     uint8_t count_entities_fav();
