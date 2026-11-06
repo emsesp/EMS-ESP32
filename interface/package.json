@@ -53,11 +53,11 @@
     "etag": "^1.8.1",
     "mime-types": "^3.0.2",
     "prettier": "^3.9.10",
-    "rollup-plugin-visualizer": "^7.1.1",
+    "rollup-plugin-visualizer": "^7.1.2",
     "terser": "^5.51.2",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.1",
-    "vite": "^8.3.5",
+    "vite": "^8.3.6",
     "vite-plugin-imagemin": "^0.6.1"
   },
   "packageManager": "pnpm@12.16.1"
