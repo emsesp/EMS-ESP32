@@ -865,34 +865,18 @@ const Version = () => {
           </TableBody>
         </Table>
 
-        {me.admin && ((internetLive && switchVersion) || data.recovery_version) && (
-          <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-            {internetLive && switchVersion && (
-              <Button
-                startIcon={<SwapHorizIcon />}
-                variant="outlined"
-                color="warning"
-                onClick={() => showFirmwareDialog(!usingDevVersion)}
-              >
-                {usingDevVersion
-                  ? LL.SWITCH_TO_STABLE(switchVersion.version)
-                  : LL.SWITCH_TO_DEV(switchVersion.version)}
-              </Button>
-            )}
-            {data.recovery_version && (
-              <Button
-                startIcon={<RestartAltIcon />}
-                variant="outlined"
-                onClick={() => {
-                  const version = data.recovery_version;
-                  if (version) {
-                    showPartitionDialog(version, 'boot', '');
-                  }
-                }}
-              >
-                {LL.RESTART_INTO_RECOVERY()}
-              </Button>
-            )}
+        {me.admin && internetLive && switchVersion && (
+          <Box sx={{ mt: 2 }}>
+            <Button
+              startIcon={<SwapHorizIcon />}
+              variant="outlined"
+              color="warning"
+              onClick={() => showFirmwareDialog(!usingDevVersion)}
+            >
+              {usingDevVersion
+                ? LL.SWITCH_TO_STABLE(switchVersion.version)
+                : LL.SWITCH_TO_DEV(switchVersion.version)}
+            </Button>
           </Box>
         )}
 
@@ -1005,7 +989,7 @@ const Version = () => {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              flexWrap: 'nowrap',
+              flexWrap: 'wrap',
               whiteSpace: 'nowrap',
               gap: 1
             }}
@@ -1020,14 +1004,30 @@ const Version = () => {
                 {LL.FACTORY_RESET()}
               </Button>
             )}
-            <Button
-              startIcon={<RestartAltIcon />}
-              variant="outlined"
-              onClick={handleRestartClick}
-              color="success"
-            >
-              {LL.RESTART()}
-            </Button>
+            <Box sx={{ display: 'flex', gap: 1, ml: 'auto' }}>
+              {data.recovery_version && (
+                <Button
+                  startIcon={<RestartAltIcon />}
+                  variant="outlined"
+                  onClick={() => {
+                    const version = data.recovery_version;
+                    if (version) {
+                      showPartitionDialog(version, 'boot', '');
+                    }
+                  }}
+                >
+                  {LL.RESTART_INTO_RECOVERY()}
+                </Button>
+              )}
+              <Button
+                startIcon={<RestartAltIcon />}
+                variant="outlined"
+                onClick={handleRestartClick}
+                color="success"
+              >
+                {LL.RESTART()}
+              </Button>
+            </Box>
           </Box>
         </>
       )}
