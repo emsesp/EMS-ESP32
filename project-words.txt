@@ -1366,3 +1366,5 @@ Anpassungsfaktor
 Verstärkungsfaktor
 Fachmann
 heatmode
+wwcd
+auxheater

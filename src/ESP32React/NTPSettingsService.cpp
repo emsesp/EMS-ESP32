@@ -38,9 +38,7 @@ void NTPSettingsService::begin() {
     // After an OTA that updates tz_zones.h, rewrite stored POSIX strings from the
     // saved IANA labels so localtime / thermostat sync use the current rules
     // without the user re-selecting the zone in the WebUI.
-    update([](NTPSettings & settings) {
-        return NTPSettings::syncFormatsFromLabels(settings) ? StateUpdateResult::CHANGED : StateUpdateResult::UNCHANGED;
-    });
+    update([](NTPSettings & settings) { return NTPSettings::syncFormatsFromLabels(settings) ? StateUpdateResult::CHANGED : StateUpdateResult::UNCHANGED; });
 }
 
 void NTPSettingsService::loop() {
