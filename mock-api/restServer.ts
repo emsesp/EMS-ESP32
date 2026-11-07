@@ -1,8 +1,109 @@
-import { Encoder } from '@msgpack/msgpack';
 import { AutoRouter, status } from 'itty-router';
 
-const encoder = new Encoder();
-const router = AutoRouter();
+// true when hosted as the public demo (demo.emsesp.org, a Cloudflare Worker), false when run locally with bun.
+// The demo is open to anyone without a login, and every visitor served by the same Worker shares the state
+// below, so it ignores changes, doesn't log request bodies and turns off the test-only pages
+const DEMO = typeof (globalThis as any).Bun === 'undefined';
+const DEMO_MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+
+if (DEMO) {
+  console.log = () => { };
+}
+
+// Minimal MessagePack encoder, the counterpart of interface/src/api/unpack.ts. Writes the same bytes as
+// @msgpack/msgpack's defaults: the smallest integer type, float64 for other numbers and nil for undefined
+const textEncoder = new TextEncoder();
+const encoder = {
+  encode(value: unknown): Uint8Array {
+    let buf = new Uint8Array(4096);
+    let view = new DataView(buf.buffer);
+    let pos = 0;
+
+    const ensure = (size: number) => {
+      if (pos + size <= buf.length) return;
+      const bigger = new Uint8Array(Math.max(buf.length * 2, pos + size));
+      bigger.set(buf);
+      buf = bigger;
+      view = new DataView(buf.buffer);
+    };
+    const byte = (b: number) => {
+      ensure(1);
+      buf[pos++] = b;
+    };
+    const typed = (type: number, size: number, write: (at: number) => void) => {
+      ensure(1 + size);
+      buf[pos++] = type;
+      write(pos);
+      pos += size;
+    };
+    const bytes = (data: Uint8Array) => {
+      ensure(data.length);
+      buf.set(data, pos);
+      pos += data.length;
+    };
+    // the header of a str, bin, array or map: fix is the fixed-size type, or -1 if there isn't one
+    const header = (
+      len: number,
+      fix: number,
+      fixMax: number,
+      t8: number,
+      t16: number,
+      t32: number
+    ) => {
+      if (fix >= 0 && len <= fixMax) byte(fix | len);
+      else if (t8 >= 0 && len <= 0xff) typed(t8, 1, (at) => view.setUint8(at, len));
+      else if (len <= 0xffff) typed(t16, 2, (at) => view.setUint16(at, len));
+      else typed(t32, 4, (at) => view.setUint32(at, len));
+    };
+
+    const write = (v: unknown) => {
+      if (v === null || v === undefined) {
+        byte(0xc0);
+      } else if (typeof v === 'boolean') {
+        byte(v ? 0xc3 : 0xc2);
+      } else if (typeof v === 'number') {
+        if (!Number.isSafeInteger(v)) {
+          typed(0xcb, 8, (at) => view.setFloat64(at, v));
+        } else if (v >= 0) {
+          if (v < 0x80) byte(v);
+          else if (v <= 0xff) typed(0xcc, 1, (at) => view.setUint8(at, v));
+          else if (v <= 0xffff) typed(0xcd, 2, (at) => view.setUint16(at, v));
+          else if (v <= 0xffffffff) typed(0xce, 4, (at) => view.setUint32(at, v));
+          else typed(0xcf, 8, (at) => view.setBigUint64(at, BigInt(v)));
+        } else {
+          if (v >= -0x20) byte(v & 0xff);
+          else if (v >= -0x80) typed(0xd0, 1, (at) => view.setInt8(at, v));
+          else if (v >= -0x8000) typed(0xd1, 2, (at) => view.setInt16(at, v));
+          else if (v >= -0x80000000) typed(0xd2, 4, (at) => view.setInt32(at, v));
+          else typed(0xd3, 8, (at) => view.setBigInt64(at, BigInt(v)));
+        }
+      } else if (typeof v === 'string') {
+        const data = textEncoder.encode(v);
+        header(data.length, 0xa0, 0x1f, 0xd9, 0xda, 0xdb);
+        bytes(data);
+      } else if (v instanceof Uint8Array) {
+        header(v.length, -1, 0, 0xc4, 0xc5, 0xc6);
+        bytes(v);
+      } else if (Array.isArray(v)) {
+        header(v.length, 0x90, 0x0f, -1, 0xdc, 0xdd);
+        v.forEach(write);
+      } else if (typeof v === 'object') {
+        const keys = Object.keys(v);
+        header(keys.length, 0x80, 0x0f, -1, 0xde, 0xdf);
+        for (const key of keys) {
+          write(key);
+          write((v as Record<string, unknown>)[key]);
+        }
+      } else {
+        throw new Error(`Can't encode ${typeof v} as MessagePack`);
+      }
+    };
+
+    write(value);
+    return buf.subarray(0, pos);
+  }
+};
+const router = AutoRouter({ before: [demoGuard] });
 
 const REST_ENDPOINT_ROOT = '/rest/';
 const API_ENDPOINT_ROOT = '/api/';
@@ -404,10 +505,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-          old_custom_name +
-          ') with new (' +
-          new_custom_name +
-          ')'
+        old_custom_name +
+        ') with new (' +
+        new_custom_name +
+        ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -527,9 +628,9 @@ function upgradeImportantMessages(version: string) {
 
   console.log(
     'upgradeImportantMessageType: version=' +
-      version +
-      ' type=' +
-      upgradeImportantMessageType_n
+    version +
+    ' type=' +
+    upgradeImportantMessageType_n
   );
   return { upgradeImportantMessageType: upgradeImportantMessageType_n };
 }
@@ -600,20 +701,20 @@ function get_versions() {
 
   console.log(
     'getVersions: current=' +
-      v.current +
-      ' stable=' +
-      v.stable +
-      ' (upgradeable=' +
-      (stableUpgradeable ? 'YES' : 'NO') +
-      ') dev=' +
-      v.dev +
-      ' (upgradeable=' +
-      (devUpgradeable ? 'YES' : 'NO') +
-      ') recovery=' +
-      (v.recovery || 'not installed') +
-      ' recoveryLatest=' +
-      (v.recoveryLatest || 'not found') +
-      (v.offline ? ' [offline]' : '')
+    v.current +
+    ' stable=' +
+    v.stable +
+    ' (upgradeable=' +
+    (stableUpgradeable ? 'YES' : 'NO') +
+    ') dev=' +
+    v.dev +
+    ' (upgradeable=' +
+    (devUpgradeable ? 'YES' : 'NO') +
+    ') recovery=' +
+    (v.recovery || 'not installed') +
+    ' recoveryLatest=' +
+    (v.recoveryLatest || 'not found') +
+    (v.offline ? ' [offline]' : '')
   );
   return data;
 }
@@ -642,12 +743,20 @@ function mock_versions_page(request: Request) {
   console.log('mock versions set to', mock_versions);
 
   const v = mock_versions;
-  const link = (href: string, text: string) => `<a href="?${href}">${text}</a>`;
+  // the values come from the query string
+  const escape = (text: unknown) =>
+    String(text).replace(
+      /[&<>"']/g,
+      (c) =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!
+    );
+  const link = (key: string, value: unknown, text: string) =>
+    `<a href="?${key}=${encodeURIComponent(String(value))}">${escape(text)}</a>`;
   const toggle = (key: keyof MockVersions) =>
-    `<li>${key}: <b>${v[key]}</b> ${link(`${key}=${!v[key]}`, 'toggle')}</li>`;
+    `<li>${key}: <b>${escape(v[key])}</b> ${link(key, !v[key], 'toggle')}</li>`;
   const choices = (key: keyof MockVersions, options: string[]) =>
-    `<li>${key}: <b>${v[key] || "''"}</b> ` +
-    options.map((o) => link(`${key}=${o}`, o || "''")).join(' | ') +
+    `<li>${key}: <b>${escape(v[key] || "''")}</b> ` +
+    options.map((o) => link(key, o, o || "''")).join(' | ') +
     '</li>';
 
   const html = `<!doctype html><html><head><title>Mock Versions</title>
@@ -656,8 +765,8 @@ function mock_versions_page(request: Request) {
 <h2>Mock Versions</h2>
 <p>Change the scenario here, then reload the Web UI to fetch the new versions.</p>
 <h3>Presets</h3>
-<ol start="0">${MOCK_VERSION_PRESETS.map((p, i) => `<li>${link(`preset=${i}`, p.name)}</li>`).join('')}</ol>
-<p>${link('reset', 'reset to defaults')}</p>
+<ol start="0">${MOCK_VERSION_PRESETS.map((p, i) => `<li>${link('preset', i, p.name)}</li>`).join('')}</ol>
+<p>${link('reset', '', 'reset to defaults')}</p>
 <h3>Current settings</h3>
 <ul>
 ${choices('current', ['3.8.0', '3.9.0', '3.10.0-dev.0', '3.10.0-dev.1', '3.10.0-dev.2'])}
@@ -927,13 +1036,15 @@ let security_settings = {
 
 const verify_authentication = { access_token: '1234' };
 
+// signed with 'ems-esp-mock-not-a-device-key'. Never sign these with a key a device has used (like the old
+// factory key 'ems-esp-neo'), or the public demo would hand out admin tokens that work on real devices
 const admin_signin = {
   access_token:
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWUsInZlcnNpb24iOiIzLjAuMmIwIn0.MsHSgoJKI1lyYz77EiT5ZN3ECMrb4mPv9FNy3udq0TU'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWUsInZlcnNpb24iOiIzLjAuMmIwIn0.YK19vdCyiQYmPv0ZzHeGpWceplwQ3PPFgBZjAAq4r3A'
 };
 const guest_signin = {
   access_token:
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imd1ZXN0IiwiYWRtaW4iOmZhbHNlfQ.E_lylR_vGIQFZUGNwcl5F6OkHoaELGsC5zqhi0pAiJE'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imd1ZXN0IiwiYWRtaW4iOmZhbHNlfQ.ZyLvq8RXQymLgR1qpF9q5CZjCJ2ZQtd6fPFdLYW7Yew'
 };
 
 // modify here to simulate admin and guest logins
@@ -4813,6 +4924,51 @@ const emsesp_deviceentities_7 = [
   { v: 102151, n: 'dhw active time', id: 'dhw/workm', m: 0, w: false }
 ];
 
+// in the demo, saves answer 200 like the device but change nothing, as every visitor would see them
+function demoGuard(request: Request) {
+  if (!DEMO) {
+    return;
+  }
+  const path = new URL(request.url).pathname;
+  if (path === MOCK_VERSIONS_ENDPOINT) {
+    return status(404);
+  }
+  if (request.method !== 'POST') {
+    return;
+  }
+  if (DEMO_IGNORED_SAVES.has(path)) {
+    return status(200);
+  }
+  if (path === EMSESP_UPLOAD_FILE_ENDPOINT) {
+    const length = Number(request.headers.get('content-length'));
+    if (!length || length > DEMO_MAX_UPLOAD_BYTES) {
+      return status(413);
+    }
+  }
+}
+
+const MOCK_VERSIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'mockVersions';
+const DEMO_IGNORED_SAVES = new Set([
+  LOG_SETTINGS_ENDPOINT,
+  NETWORK_SETTINGS_ENDPOINT,
+  AP_SETTINGS_ENDPOINT,
+  MQTT_SETTINGS_ENDPOINT,
+  TIME_ENDPOINT,
+  NTP_SETTINGS_ENDPOINT,
+  SECURITY_SETTINGS_ENDPOINT,
+  EMSESP_SETTINGS_ENDPOINT,
+  EMSESP_CUSTOMIZATION_ENTITIES_ENDPOINT,
+  EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT,
+  EMSESP_WRITE_DEVICENAME_ENDPOINT,
+  EMSESP_COMMANDS_ENDPOINT,
+  EMSESP_SCHEDULE_ENDPOINT,
+  EMSESP_MODULES_ENDPOINT,
+  EMSESP_CUSTOMENTITIES_ENDPOINT,
+  EMSESP_WRITE_DEVICEVALUE_ENDPOINT,
+  EMSESP_WRITE_TEMPSENSOR_ENDPOINT,
+  EMSESP_WRITE_ANALOGSENSOR_ENDPOINT
+]);
+
 // LOG
 router
   .get(LOG_SETTINGS_ENDPOINT, () => log_settings)
@@ -4929,8 +5085,10 @@ router
     if (fileExtension === 'bin' && fileName.startsWith('EMS-ESP-Recovery')) {
       const md5_ok = pendingFirmwareMd5;
       pendingFirmwareMd5 = false;
-      mock_versions.recovery = '1.1.0';
-      applyMockVersions();
+      if (!DEMO) {
+        mock_versions.recovery = '1.1.0';
+        applyMockVersions();
+      }
       console.log('Recovery firmware installed');
       return md5_ok ? { recovery: true, md5_ok } : { recovery: true };
     }
@@ -4946,7 +5104,7 @@ router
     return status(200);
   })
   .get(ACTIVITY_ENDPOINT, () => activity)
-  .get(REST_ENDPOINT_ROOT + 'mockVersions', mock_versions_page)
+  .get(MOCK_VERSIONS_ENDPOINT, mock_versions_page)
   .get(SYSTEM_STATUS_ENDPOINT, async () => {
     if (countHardwarePoll >= 2) {
       countHardwarePoll = 0;
@@ -5018,6 +5176,9 @@ router
         Array.from({ length: 40 }, () =>
           Math.floor(Math.random() * 16).toString(16)
         ).join('');
+      if (DEMO) {
+        return { key };
+      }
       api_keys.push({
         id: key.substring(7, 15),
         label: content.label,
@@ -5027,6 +5188,9 @@ router
       return { key };
     }
     if (content.action === 'revoke') {
+      if (DEMO) {
+        return status(200);
+      }
       api_keys = api_keys.filter((k) => k.id !== content.id);
       return status(200);
     }
@@ -5036,6 +5200,9 @@ router
   .post(SETUP_ENDPOINT, async (request: any) => {
     const content: any = await request.json();
     console.log('setup saved', content);
+    if (DEMO) {
+      return signin;
+    }
     setup_state = {
       admin: false,
       ap: setup_state.ap && !content.ap_password,
@@ -5755,7 +5922,7 @@ router
       } else if (action === 'uploadURL') {
         // upload URL
         console.log('upload File from URL', content.param);
-        if (String(content.param).toLowerCase().includes('recovery')) {
+        if (!DEMO && String(content.param).toLowerCase().includes('recovery')) {
           // the recovery app is installed without a restart
           mock_versions.recovery = mock_versions.recoveryLatest || '1.0.1';
           applyMockVersions();
@@ -5770,7 +5937,7 @@ router
         console.log('setting partition to', content.param);
         return status(200);
       } else if (action === 'dismissTokensReset') {
-        MOCK_TOKENS_RESET = false;
+        if (!DEMO) MOCK_TOKENS_RESET = false;
         return status(200);
       } else if (action === 'upgradeImportantMessages') {
         // check upgrade important messages
@@ -5806,15 +5973,17 @@ router
         return status(200);
       } else if (cmd === 'restart') {
         console.log('restarting...');
-        system_status.status = 5;
-        countHardwarePoll = 0;
+        if (!DEMO) {
+          system_status.status = 5;
+          countHardwarePoll = 0;
+        }
         return status(200);
       } else if (cmd === 'read') {
         console.log('send read command:', data.data);
         return status(200);
       } else if (cmd === 'coredump') {
         console.log('erasing the crash dump');
-        system_status.coredump = '';
+        if (!DEMO) system_status.coredump = '';
         return status(200);
       }
     }
@@ -5831,12 +6000,11 @@ router
 //   );
 // };
 
+// Works for both Bun (uses port) and Cloudflare Workers (ignores port).
+// Don't export the router itself: its Proxy prototype makes Workers detect fake scheduled/queue/etc handlers.
 export default {
   port: 3080,
   fetch: router.fetch
   // missing: () => error(404, 'Error, endpoint not found'),
   // finally: [logger]
 };
-
-// use this with cloudflare workers instead
-// export default { ...router };
