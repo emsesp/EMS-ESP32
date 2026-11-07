@@ -1281,7 +1281,7 @@ void EMSdevice::generate_values_web_customization(JsonArray output) {
                         obj["id"]      = DeviceValue::get_name(entity_id); // set the name, it could be custom following a '|'
                         obj["m"]       = mask;                             // update the mask
                         obj["c"]       = true;
-                        obj["w"]       = false;                            // not writeable as it won't be shown
+                        obj["w"]       = false; // not writeable as it won't be shown
                     }
                 }
 
@@ -2222,10 +2222,10 @@ bool EMSdevice::generate_values(JsonObject output, const int8_t tag_filter, cons
                 // Should this also check for api output?
                 // Only the register limits are widened. A custom limit stays in the name so a reset can restore the original.
                 {
-                    int16_t  eff_min       = dv.min;
-                    uint32_t eff_max       = dv.max;
-                    bool     min_custom    = false;
-                    bool     max_custom    = false;
+                    int16_t  eff_min    = dv.min;
+                    uint32_t eff_max    = dv.max;
+                    bool     min_custom = false;
+                    bool     max_custom = false;
                     dv.apply_custom_minmax(eff_min, eff_max, &min_custom, &max_custom);
 
                     if ((output_target == OUTPUT_TARGET::MQTT) && (eff_min != 0 || eff_max != 0)) {

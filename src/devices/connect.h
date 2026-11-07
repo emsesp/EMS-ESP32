@@ -61,21 +61,21 @@ class Connect : public EMSdevice {
   private:
     std::shared_ptr<Connect::RoomCircuit> room_circuit(const uint8_t num, const bool create = false);
 
-    void register_device_values_room(std::shared_ptr<Connect::RoomCircuit> room);
-    void process_roomThermostat(const std::shared_ptr<const Telegram> & telegram);
-    void process_roomThermostatName(const std::shared_ptr<const Telegram> & telegram);
-    void process_roomThermostatSettings(const std::shared_ptr<const Telegram> & telegram);
-    void process_roomThermostatParam(const std::shared_ptr<const Telegram> & telegram);
-    void process_roomThermostatData(const std::shared_ptr<const Telegram> & telegram);
-    void process_roomSchedule(const std::shared_ptr<const Telegram> & telegram);
-    void process_roomConfig(const std::shared_ptr<const Telegram> & telegram);
+    void    register_device_values_room(std::shared_ptr<Connect::RoomCircuit> room);
+    void    process_roomThermostat(const std::shared_ptr<const Telegram> & telegram);
+    void    process_roomThermostatName(const std::shared_ptr<const Telegram> & telegram);
+    void    process_roomThermostatSettings(const std::shared_ptr<const Telegram> & telegram);
+    void    process_roomThermostatParam(const std::shared_ptr<const Telegram> & telegram);
+    void    process_roomThermostatData(const std::shared_ptr<const Telegram> & telegram);
+    void    process_roomSchedule(const std::shared_ptr<const Telegram> & telegram);
+    void    process_roomConfig(const std::shared_ptr<const Telegram> & telegram);
     uint8_t hp_operatingstate();
     void    update_room_mode(std::shared_ptr<Connect::RoomCircuit> rc);
-    bool set_mode(const char * value, const int8_t id);
-    bool set_seltemp(const char * value, const int8_t id);
-    bool set_name(const char * value, const int8_t id);
-    bool set_childlock(const char * value, const int8_t id);
-    bool set_icon(const char * value, const int8_t id);
+    bool    set_mode(const char * value, const int8_t id);
+    bool    set_seltemp(const char * value, const int8_t id);
+    bool    set_name(const char * value, const int8_t id);
+    bool    set_childlock(const char * value, const int8_t id);
+    bool    set_icon(const char * value, const int8_t id);
 
     std::vector<std::shared_ptr<Connect::RoomCircuit>, AllocatorPSRAM<std::shared_ptr<Connect::RoomCircuit>>> room_circuits_;
 

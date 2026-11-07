@@ -203,16 +203,16 @@ class Network {
   private:
     static uuid::log::Logger logger_;
 
-    void         findNetworks();
-    void         checkConnection();
-    void         startmDNS() const;
-    bool         formatBSSID(const String & bssid, uint8_t (&mac)[6]);
-    void         startAP();
-    void         startWIFI();
-    void         startEthernet();
-    void         startWiFiRadio();
-    void         stopWiFiRadio();
-    void         setWiFiPower(uint8_t tx_power);
+    void findNetworks();
+    void checkConnection();
+    void startmDNS() const;
+    bool formatBSSID(const String & bssid, uint8_t (&mac)[6]);
+    void startAP();
+    void startWIFI();
+    void startEthernet();
+    void startWiFiRadio();
+    void stopWiFiRadio();
+    void setWiFiPower(uint8_t tx_power);
 #ifndef EMSESP_STANDALONE
     void applyDnsOverride(esp_netif_t * netif) const;
 #endif
