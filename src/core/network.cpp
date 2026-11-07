@@ -728,6 +728,14 @@ void Network::startWIFI() {
         startWiFiRadio();
     }
 
+    // a WiFi.begin() that never produced a GOT_IP or DISCONNECTED event would block reconnects forever, so give up on it after a timeout
+    if (wifi_connect_pending_ && static_cast<uint32_t>(uuid::get_uptime_ms() - wifi_connect_started_) >= NETWORK_WIFI_CONNECT_TIMEOUT) {
+        LOG_WARNING("WiFi connect attempt timed out, retrying");
+        WiFi.disconnect(false, true);
+        wifi_connect_pending_ = false;
+        return; // let the DISCONNECTED event settle, begin() again on the next tick        
+    }
+
     // exit if WiFi or Ethernet is already connected, or if we have no SSID or another Wifi.begin() is already in progress
     if (WiFi.isConnected() || ssid_.isEmpty() || ethernet_connected() || wifi_connect_pending_) {
         return;
@@ -739,6 +747,7 @@ void Network::startWIFI() {
     }
 
     wifi_connect_pending_ = true;
+    wifi_connect_started_ = uuid::get_uptime_ms();
 
     // attempt to connect to the wifi network
     // the event handlers handle error handling and retries
