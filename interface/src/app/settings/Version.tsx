@@ -1028,7 +1028,7 @@ const Version = () => {
                 {showButtons(true)}
               </Box>
 
-              {data.recovery_version && latestRecovery && (
+              {hasRecoverySlot && latestRecovery && (
                 <>
                   <Typography color="secondary">{LL.RECOVERY_APP()}</Typography>
                   <Box
@@ -1042,10 +1042,10 @@ const Version = () => {
                     <Typography component="span">
                       {latestRecovery.version}
                     </Typography>
-                    {isNewerVersion(
-                      latestRecovery.version,
-                      data.recovery_version
-                    ) ? (
+                    {!data.recovery_version ? null : isNewerVersion(
+                        latestRecovery.version,
+                        data.recovery_version
+                      ) ? (
                       me.admin && (
                         <Button
                           startIcon={<DownloadIcon />}
