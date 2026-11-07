@@ -285,6 +285,7 @@ class Boiler : public EMSdevice {
     uint8_t  auxHeaterStatus_;
     uint8_t  auxHeaterLevel_;
     uint16_t auxHeaterDelay_;
+    uint8_t  auxHeater_; // from #3315, telegram 0x061E
     uint8_t  silentMode_;
     int8_t   minTempSilent_;
     uint8_t  silentFrom_;
@@ -411,6 +412,7 @@ class Boiler : public EMSdevice {
     void process_HpPower2(const std::shared_ptr<const Telegram> & telegram);
     void process_HpPowerLimit(const std::shared_ptr<const Telegram> & telegram);
     void process_PumpKick(const std::shared_ptr<const Telegram> & telegram);
+    void process_auxHeater(const std::shared_ptr<const Telegram> & telegram);
 
     void process_Meters(const std::shared_ptr<const Telegram> & telegram);
     void process_Energy(const std::shared_ptr<const Telegram> & telegram);
@@ -652,6 +654,7 @@ class Boiler : public EMSdevice {
     bool set_pumpKickHour(const char * value, const int8_t id);
     bool set_pumpKickDay(const char * value, const int8_t id);
     bool set_pumpKickDelay(const char * value, const int8_t id);
+    bool set_auxHeater(const char * value, const int8_t id);
 };
 
 } // namespace emsesp
