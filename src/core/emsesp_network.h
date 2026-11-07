@@ -50,7 +50,7 @@ namespace emsesp {
 
 #define MAX_NETWORK_RECONNECTION_ATTEMPTS 4 // maximum number of network reconnection attempts before going to AP fallback
 
-#define NETWORK_DNS_OVERRIDE_CHECK 10000 // 10 seconds - how often to re-assert the custom DNS servers when using DHCP
+#define NETWORK_DNS_OVERRIDE_CHECK 10000 // 10 seconds - how often to re-assert the custom or DHCP IPv4 DNS servers when using DHCP
 
 #define DNS_PORT 53 // dns server port for captive portal
 
@@ -216,6 +216,7 @@ class Network {
     void stopWiFiRadio();
     void setWiFiPower(uint8_t tx_power);
 #ifndef EMSESP_STANDALONE
+    void captureDhcpDns(esp_netif_t * netif);
     void applyDnsOverride(esp_netif_t * netif) const;
 #endif
     const char * disconnectReason(uint8_t code);
@@ -261,6 +262,7 @@ class Network {
     IPAddress subnetMask_;
     IPAddress dnsIP1_;
     IPAddress dnsIP2_;
+    IPAddress dhcpDnsIP_[2]; // IPv4 DNS servers from the last DHCP lease
     String    hostname_;
     String    ssid_;
     String    password_;
