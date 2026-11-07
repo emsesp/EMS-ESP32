@@ -453,6 +453,9 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
     // call the function based on command function type
     // commands return true or false only (bool)
     uint8_t return_code = CommandRet::OK;
+    // the command can add commands (the test command adds devices), and a growing
+    // command list moves its entries, so cf must not be used after the call
+    const auto cmd_description = cf->description_;
     if (cf->cmdfunction_) {
         // JSON-output commands bypass the readonly check; for the rest, reject a write to a read-only entity
         if (!cf->has_json_output_ && !single_command && EMSESP::cmd_is_readonly(device_type, device_id, cmd, id)) {
@@ -479,7 +482,7 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
         // build up the log string for reporting back
         // We send the log message as Warning so it appears in the log (debug is only enabled when compiling with DEBUG)
         std::string ro          = EMSESP::system_.readonly_mode() ? "[readonly] " : "";
-        auto        description = Helpers::translated_word(cf->description_);
+        auto        description = Helpers::translated_word(cmd_description);
         char        info_s[100];
         if (strlen(description)) {
             snprintf(info_s, sizeof(info_s), "%s/%s (%s)", dname, cmd, description);
