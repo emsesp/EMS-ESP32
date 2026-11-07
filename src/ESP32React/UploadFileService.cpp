@@ -43,7 +43,13 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
             return;
         }
 
-        switch (OtaUpdater::classify(filename, filesize, emsesp::System::MIN_FIRMWARE_SIZE)) {
+#ifdef EMSESP_HAS_RECOVERY
+        // the recovery is smaller than EMS-ESP, whatever its file name. The image itself is checked below
+        constexpr size_t min_firmware_size = OtaUpdater::MIN_RECOVERY_FIRMWARE_SIZE;
+#else
+        constexpr size_t min_firmware_size = emsesp::System::MIN_FIRMWARE_SIZE;
+#endif
+        switch (OtaUpdater::classify(filename, filesize, min_firmware_size)) {
         case OtaUpdater::FileType::FILESYSTEM:
             _is_filesystem = true;
             _ota.clearMd5(); // clear any stale md5 so Update.end() doesn't compare against it
@@ -91,6 +97,11 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
             } else
 #endif
             {
+                if (filesize < emsesp::System::MIN_FIRMWARE_SIZE) {
+                    emsesp::EMSESP::logger().err("Unsupported file type: %s, size: %u", filename.c_str(), filesize);
+                    handleError(request, 406);
+                    return;
+                }
                 emsesp::EMSESP::logger().info("Firmware uploading (file %s, size: %dKB). Please wait...", filename.c_str(), filesize / 1024);
             }
 
