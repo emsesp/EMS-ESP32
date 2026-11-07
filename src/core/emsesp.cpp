@@ -189,7 +189,13 @@ int16_t EMSESP::cmd_value_type(const uint8_t device_type, const uint8_t device_i
 }
 
 // false if a number is outside the entity's min and max, which include the custom limits from Customizations
-bool EMSESP::cmd_value_in_range(const uint8_t device_type, const uint8_t device_id, const char * cmd, const int8_t id, const char * value, int16_t & min, uint32_t & max) {
+bool EMSESP::cmd_value_in_range(const uint8_t device_type,
+                                const uint8_t device_id,
+                                const char *  cmd,
+                                const int8_t  id,
+                                const char *  value,
+                                int16_t &     min,
+                                uint32_t &    max) {
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type) && (!device_id || emsdevice->device_id() == device_id)) {
             return emsdevice->value_in_range(cmd, id, value, min, max);
@@ -2198,7 +2204,7 @@ void EMSESP::start() {
 
     // start web services
     LOG_INFO("Starting Web Server");
-    webLogService.start();     // apply settings to weblog service
+    webLogService.start(); // apply settings to weblog service
     webConsoleService.begin(*this);
     webModulesService.begin(); // setup the external library modules
 #ifndef EMSESP_STANDALONE

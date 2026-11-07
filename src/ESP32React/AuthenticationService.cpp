@@ -17,9 +17,10 @@ AuthenticationService::AuthenticationService(AsyncWebServer * server, SecurityMa
     securityManager->addEndpoint(server, CONFIRM_PASSWORD_PATH, AuthenticationPredicates::IS_AUTHENTICATED, [this](AsyncWebServerRequest * request) {
         passwordConfirmed(request);
     });
-    securityManager->addEndpoint(server, CONFIRM_PASSWORD_PATH, AuthenticationPredicates::IS_AUTHENTICATED, [this](AsyncWebServerRequest * request, JsonVariant json) {
-        confirmPassword(request, json);
-    });
+    securityManager->addEndpoint(server,
+                                 CONFIRM_PASSWORD_PATH,
+                                 AuthenticationPredicates::IS_AUTHENTICATED,
+                                 [this](AsyncWebServerRequest * request, JsonVariant json) { confirmPassword(request, json); });
 }
 
 // Verifies that the request supplied a valid JWT.

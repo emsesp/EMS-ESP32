@@ -114,7 +114,7 @@ class PasswordHash {
         Hmac base(reinterpret_cast<const uint8_t *>(password.c_str()), password.length());
 
         std::array<uint8_t, 32> u{};
-        Hmac                    first = base;
+        Hmac                    first    = base;
         const uint8_t           block[4] = {0, 0, 0, 1}; // a single block, the output is one SHA-256 long
         first.update(salt, salt_len);
         first.update(block, sizeof(block));
@@ -130,14 +130,8 @@ class PasswordHash {
             }
         }
 #else
-        mbedtls_pkcs5_pbkdf2_hmac_ext(MBEDTLS_MD_SHA256,
-                                      reinterpret_cast<const unsigned char *>(password.c_str()),
-                                      password.length(),
-                                      salt,
-                                      salt_len,
-                                      iterations,
-                                      HASH_BYTES,
-                                      out);
+        mbedtls_pkcs5_pbkdf2_hmac_ext(
+            MBEDTLS_MD_SHA256, reinterpret_cast<const unsigned char *>(password.c_str()), password.length(), salt, salt_len, iterations, HASH_BYTES, out);
 #endif
     }
 

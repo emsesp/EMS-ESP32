@@ -119,17 +119,15 @@ void ESP32React::begin() {
         }
         const String host    = request->header("Host");
         bool         allowed = true;
-        _networkSettingsService.read([&](NetworkSettings & settings) {
-            allowed = emsesp::host_allowed(host.c_str(), settings.hostname.c_str(), settings.allowedHosts.c_str());
-        });
+        _networkSettingsService.read(
+            [&](NetworkSettings & settings) { allowed = emsesp::host_allowed(host.c_str(), settings.hostname.c_str(), settings.allowedHosts.c_str()); });
         if (allowed) {
             next();
             return;
         }
         request->send(403,
                       "text/plain",
-                      "EMS-ESP can't be opened as " + host
-                          + ". Open it by its IP address and add this name under Network Settings > Allowed host names.");
+                      "EMS-ESP can't be opened as " + host + ". Open it by its IP address and add this name under Network Settings > Allowed host names.");
     });
     _apSettingsService.begin();
     _ntpSettingsService.begin();

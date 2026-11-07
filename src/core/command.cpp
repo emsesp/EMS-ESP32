@@ -25,11 +25,11 @@ namespace emsesp {
 
 uuid::log::Logger Command::logger_{F_(command), uuid::log::Facility::DAEMON};
 
-thread_local Command::Access Command::caller_access_  = Command::Access::ALL;
-thread_local const char * Command::caller_access_reason_ = nullptr;
-thread_local bool Command::caller_is_admin_           = true;
-thread_local bool Command::caller_password_confirmed_ = true;
-thread_local const char * Command::caller_source_    = nullptr;
+thread_local Command::Access Command::caller_access_             = Command::Access::ALL;
+thread_local const char *    Command::caller_access_reason_      = nullptr;
+thread_local bool            Command::caller_is_admin_           = true;
+thread_local bool            Command::caller_password_confirmed_ = true;
+thread_local const char *    Command::caller_source_             = nullptr;
 
 std::vector<Command::CmdFunction, AllocatorPSRAM<Command::CmdFunction>> Command::cmdfunctions_;
 
@@ -156,8 +156,8 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     // check if data is entity like device/hc/name/value
     // unless the command is system/message, or the value just contains a '/' (e.g. a date format "mm/dd/yyyy")
     if ((strcmp(command_p, "message") != 0) && data.is<const char *>()) {
-        const char * d          = data.as<const char *>();
-        const char * device_end = strchr(d, '/');
+        const char * d            = data.as<const char *>();
+        const char * device_end   = strchr(d, '/');
         char         device_s[20] = {'\0'};
         if (device_end != nullptr) {
             strlcpy(device_s, d, std::min<size_t>(device_end - d + 1, sizeof(device_s)));
@@ -379,15 +379,15 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
 // false if the write doesn't reach the EMS bus, so isn't limited. An empty entity is a raw telegram.
 // The value is normalised so that "45", "45.0" and 45, or "on", "1" and true, are the same write.
-static bool write_limit_key(const uint8_t  device_type,
-                            const uint8_t  device_id,
-                            const char *   cmd,
-                            const int8_t   id,
-                            const char *   value,
-                            char *         entity,
-                            size_t         entity_len,
-                            char *         written,
-                            size_t         written_len) {
+static bool write_limit_key(const uint8_t device_type,
+                            const uint8_t device_id,
+                            const char *  cmd,
+                            const int8_t  id,
+                            const char *  value,
+                            char *        entity,
+                            size_t        entity_len,
+                            char *        written,
+                            size_t        written_len) {
     entity[0]    = '\0';
     int16_t type = -1;
     if (device_type == EMSdevice::DeviceType::SYSTEM) {
@@ -431,7 +431,8 @@ static bool write_limit_key(const uint8_t  device_type,
 // calls a command. Takes a json object for output.
 // id may be used to represent a heating circuit for example
 // returns 0 if the command errored, 1 (TRUE) if ok, 2 if not found, 3 if error or 4 if not allowed
-uint8_t Command::call(const uint8_t device_type, const char * command, const char * value, const bool is_admin, const int8_t id, JsonObject output, const bool is_user) {
+uint8_t
+Command::call(const uint8_t device_type, const char * command, const char * value, const bool is_admin, const int8_t id, JsonObject output, const bool is_user) {
     if (command == nullptr) {
         return CommandRet::NOT_FOUND;
     }
@@ -563,7 +564,7 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
         } else {
             char       entity[64]  = "";
             char       written[24] = "";
-            const bool limited = !cf->has_json_output_ && !single_command
+            const bool limited     = !cf->has_json_output_ && !single_command
                                  && write_limit_key(device_type, device_id, cmd, id, value, entity, sizeof(entity), written, sizeof(written));
             const char * limited_entity = entity[0] ? entity : nullptr;
             if (limited) {
@@ -602,7 +603,7 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
 
     // report back. If not OK show output from error, otherwise return the error code
     if (return_code != CommandRet::OK) {
-        char error[100];
+        char         error[100];
         const char * why = reason[0] ? reason : return_code_string(return_code);
         if (single_command) {
             snprintf(error, sizeof(error), "Command %s failed (%s)", cmd, why);

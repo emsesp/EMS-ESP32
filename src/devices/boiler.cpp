@@ -1704,10 +1704,10 @@ void Boiler::process_UBAParameterWWPlus(const std::shared_ptr<const Telegram> & 
     has_update(telegram, wwHystOn_, 7);
     has_update(telegram, wwHystOff_, 8);
     has_update(telegram, wwFlowTempOffset_, 9);
-    has_update(telegram, wwCircPump_, 10);         // 0x01 means yes
-    has_update(telegram, wwCircMode_, 11);         // 0=off, 1=1x3min... 6=6x3min, 7=continuous
-    has_update(telegram, wwDisinfectionTemp_, 12); // setting here, status in E9
-    has_update(telegram, wwAlternatingOper_, 14);  // 0x01 means enabled
+    has_update(telegram, wwCircPump_, 10);          // 0x01 means yes
+    has_update(telegram, wwCircMode_, 11);          // 0=off, 1=1x3min... 6=6x3min, 7=continuous
+    has_update(telegram, wwDisinfectionTemp_, 12);  // setting here, status in E9
+    has_update(telegram, wwAlternatingOper_, 14);   // 0x01 means enabled
     has_update(telegram, wwDisinfectDuration_, 15); // heat pumps: disinfection duration in steps of 10 min, #3278
     has_update(telegram, wwSelTempSingle_, 16);
     has_update(telegram, wwSelTempLow_, 18);

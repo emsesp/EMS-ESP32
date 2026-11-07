@@ -389,8 +389,8 @@ ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
     serializeJson(input, inputStr);
     LOG_DEBUG("input: %s\n", inputStr.c_str());
 
-    JsonDocument output_doc;
-    JsonObject   output      = output_doc.to<JsonObject>();
+    JsonDocument          output_doc;
+    JsonObject            output = output_doc.to<JsonObject>();
     Command::CallerSource caller("modbus");
     uint8_t               return_code = Command::process(path.c_str(), true, input, output); // modbus is always authenticated
 

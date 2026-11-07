@@ -58,13 +58,13 @@ namespace emsesp {
 enum PHY_type : uint8_t { PHY_TYPE_NONE = 0, PHY_TYPE_LAN8720, PHY_TYPE_TLK110, PHY_TYPE_RTL8201 };
 
 enum SYSTEM_STATUS : uint8_t {
-    SYSTEM_STATUS_NORMAL            = 0,
-    SYSTEM_STATUS_PENDING_UPLOAD    = 1,
-    SYSTEM_STATUS_UPLOADING         = 100,
-    SYSTEM_STATUS_ERROR_UPLOAD      = 3,
-    SYSTEM_STATUS_PENDING_RESTART   = 4,
-    SYSTEM_STATUS_RESTART_REQUESTED = 5,
-    SYSTEM_STATUS_INVALID_GPIO      = 6,
+    SYSTEM_STATUS_NORMAL             = 0,
+    SYSTEM_STATUS_PENDING_UPLOAD     = 1,
+    SYSTEM_STATUS_UPLOADING          = 100,
+    SYSTEM_STATUS_ERROR_UPLOAD       = 3,
+    SYSTEM_STATUS_PENDING_RESTART    = 4,
+    SYSTEM_STATUS_RESTART_REQUESTED  = 5,
+    SYSTEM_STATUS_INVALID_GPIO       = 6,
     SYSTEM_STATUS_ERROR_NOT_OFFICIAL = 7 // upload from a URL stopped, a custom build the user hasn't agreed to
 };
 
@@ -84,27 +84,27 @@ class System {
 
     static void check_crash_loop(); // call at boot once NVS is open, may restart into the factory partition
 
-    void        recovery_installed();     // called on the AsyncTCP task after the recovery firmware was written
+    void        recovery_installed();          // called on the AsyncTCP task after the recovery firmware was written
     void        recovery_installed_deferred(); // called from the main loop after the recovery firmware was downloaded from a URL
     void        recovery_installed_apply();    // called on the AsyncTCP task, handles the deferred call
-    std::string recovery_version() const; // empty if there's no recovery firmware
+    std::string recovery_version() const;      // empty if there's no recovery firmware
 
     // commands
-    static bool command_read(const char * value, const int8_t id);
-    static bool command_send(const char * value, const int8_t id);
-    static bool command_publish(const char * value, const int8_t id);
-    static bool command_fetch(const char * value, const int8_t id);
-    static bool command_restart(const char * value, const int8_t id);
-    static bool command_format(const char * value, const int8_t id);
-    static bool command_coredump(const char * value, const int8_t id);
-    static bool command_watch(const char * value, const int8_t id);
-    static bool command_message(const char * value, const int8_t id, JsonObject output);
-    static bool command_info(const char * value, const int8_t id, JsonObject output);
-    static bool command_response(const char * value, const int8_t id, JsonObject output);
+    static bool    command_read(const char * value, const int8_t id);
+    static bool    command_send(const char * value, const int8_t id);
+    static bool    command_publish(const char * value, const int8_t id);
+    static bool    command_fetch(const char * value, const int8_t id);
+    static bool    command_restart(const char * value, const int8_t id);
+    static bool    command_format(const char * value, const int8_t id);
+    static bool    command_coredump(const char * value, const int8_t id);
+    static bool    command_watch(const char * value, const int8_t id);
+    static bool    command_message(const char * value, const int8_t id, JsonObject output);
+    static bool    command_info(const char * value, const int8_t id, JsonObject output);
+    static bool    command_response(const char * value, const int8_t id, JsonObject output);
     static uint8_t command_service(const char * cmd, const char * value, const bool is_admin); // returns a CommandRet
-    static bool command_sendmail(const char * value, const int8_t id);
-    static bool command_txpause(const char * value, const int8_t id);
-    static bool command_led(const char * value, const int8_t id);
+    static bool    command_sendmail(const char * value, const int8_t id);
+    static bool    command_txpause(const char * value, const int8_t id);
+    static bool    command_led(const char * value, const int8_t id);
 
     static bool        get_value_info(JsonObject root, const char * cmd);
     static void        get_value_json(JsonObject output, const std::string & circuit, const std::string & name, JsonVariant val);

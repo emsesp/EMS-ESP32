@@ -120,7 +120,7 @@ class BasicAuthCache {
         Fingerprint fp;
         fingerprint(username, password, stored_hash, fp);
         std::lock_guard<SpinLock> lock(lock_);
-        Entry * slot = &entries_[0];
+        Entry *                   slot = &entries_[0];
         for (auto & entry : entries_) {
             if (!entry.used || now - entry.at >= DURATION_MS) {
                 slot = &entry;
@@ -150,8 +150,8 @@ class BasicAuthCache {
     }
 
     std::array<uint8_t, PasswordHash::SALT_BYTES> salt_{};
-    std::array<Entry, MAX_ENTRIES>                 entries_{};
-    SpinLock                                       lock_;
+    std::array<Entry, MAX_ENTRIES>                entries_{};
+    SpinLock                                      lock_;
 };
 
 #endif

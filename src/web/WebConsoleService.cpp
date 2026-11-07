@@ -94,10 +94,9 @@ class CaptureStream : public ::Stream {
 
 WebConsoleService::WebConsoleService(AsyncWebServer * server, SecurityManager * securityManager)
     : securityManager_(securityManager) {
-    securityManager->addEndpoint(server,
-                                 EMSESP_CONSOLE_PATH,
-                                 AuthenticationPredicates::IS_ADMIN,
-                                 [this](AsyncWebServerRequest * request, JsonVariant json) { runCommand(request, json); });
+    securityManager->addEndpoint(server, EMSESP_CONSOLE_PATH, AuthenticationPredicates::IS_ADMIN, [this](AsyncWebServerRequest * request, JsonVariant json) {
+        runCommand(request, json);
+    });
 }
 
 void WebConsoleService::begin(EMSESP & emsesp) {

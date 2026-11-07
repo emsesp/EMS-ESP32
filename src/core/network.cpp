@@ -166,8 +166,8 @@ void Network::applyDnsOverride(esp_netif_t * netif) const {
         return;
     }
 
-    const IPAddress servers[] = {dnsIP1_, dnsIP2_};
-    const esp_netif_dns_type_t types[] = {ESP_NETIF_DNS_MAIN, ESP_NETIF_DNS_BACKUP};
+    const IPAddress            servers[] = {dnsIP1_, dnsIP2_};
+    const esp_netif_dns_type_t types[]   = {ESP_NETIF_DNS_MAIN, ESP_NETIF_DNS_BACKUP};
 
     for (uint8_t i = 0; i < 2; i++) {
         if (IPUtils::isNotSet(servers[i])) {

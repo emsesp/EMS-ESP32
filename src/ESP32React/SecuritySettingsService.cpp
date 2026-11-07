@@ -286,11 +286,10 @@ void SecuritySettingsService::apiKeyAction(AsyncWebServerRequest * request, Json
         const time_t   now     = time(nullptr);
         const uint32_t created = clock_set(now) ? static_cast<uint32_t>(now) : 0;
         const bool     write   = json["write"] | false;
-        update(
-            [&](SecuritySettings & settings) {
-                settings.api_keys.push_back({ApiKey::id(key.c_str()), label, write, created, ApiKey::hash(key.c_str()).c_str()});
-                return StateUpdateResult::CHANGED;
-            });
+        update([&](SecuritySettings & settings) {
+            settings.api_keys.push_back({ApiKey::id(key.c_str()), label, write, created, ApiKey::hash(key.c_str()).c_str()});
+            return StateUpdateResult::CHANGED;
+        });
         emsesp::EMSESP::logger().notice("API key '%s' created", label.c_str());
 
         auto *     response = new emsesp::PsramAsyncJsonResponse(false);
@@ -304,18 +303,17 @@ void SecuritySettingsService::apiKeyAction(AsyncWebServerRequest * request, Json
     if (action == "revoke") {
         const String id      = json["id"] | "";
         bool         removed = false;
-        update(
-            [&](SecuritySettings & settings) {
-                for (auto it = settings.api_keys.begin(); it != settings.api_keys.end(); ++it) {
-                    if (it->id == id) {
-                        emsesp::EMSESP::logger().notice("API key '%s' revoked", it->label.c_str());
-                        settings.api_keys.erase(it);
-                        removed = true;
-                        return StateUpdateResult::CHANGED;
-                    }
+        update([&](SecuritySettings & settings) {
+            for (auto it = settings.api_keys.begin(); it != settings.api_keys.end(); ++it) {
+                if (it->id == id) {
+                    emsesp::EMSESP::logger().notice("API key '%s' revoked", it->label.c_str());
+                    settings.api_keys.erase(it);
+                    removed = true;
+                    return StateUpdateResult::CHANGED;
                 }
-                return StateUpdateResult::UNCHANGED;
-            });
+            }
+            return StateUpdateResult::UNCHANGED;
+        });
         request->send(removed ? 200 : 404);
         return;
     }

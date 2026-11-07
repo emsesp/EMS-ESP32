@@ -286,8 +286,8 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len, c
     }
 
     // parse and call the command
-    input               = input_doc.as<JsonObject>();
-    output              = output_doc.to<JsonObject>();
+    input  = input_doc.as<JsonObject>();
+    output = output_doc.to<JsonObject>();
     // the broker's access control decides who may publish, the mqtt_commands setting what they may do.
     // A factory reset or erasing the crash dump never comes from MQTT
     Command::CallerSource caller("mqtt");

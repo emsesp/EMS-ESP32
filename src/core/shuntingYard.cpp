@@ -836,7 +836,6 @@ std::string compute(const std::string & expr) {
 
                             result = json.as<std::string>();
                         }
-
                     }
                 }
 

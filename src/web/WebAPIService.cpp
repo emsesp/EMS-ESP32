@@ -104,9 +104,9 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     if (!authentication.authenticated) {
         api_fails_++;
         EMSESP::logger().debug("API call without a token or API key refused: %s", request->url().c_str());
-        auto *     response   = new PsramAsyncJsonResponse();
-        JsonObject output     = response->getRoot();
-        output["message"]     = "authentication failed";
+        auto *     response = new PsramAsyncJsonResponse();
+        JsonObject output   = response->getRoot();
+        output["message"]   = "authentication failed";
 #if defined(EMSESP_UNITY)
         storeResponse(output);
 #endif
@@ -128,8 +128,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     const bool  is_admin           = !basic && AuthenticationPredicates::IS_ADMIN(authentication);
     const bool  is_user            = !basic;
     const bool  password_confirmed = !authentication.session || authentication.password_confirmed; // only a Web UI session is asked for it
-    std::string source             = std::string("api, ") + (authentication.session ? "" : basic ? "browser login " : "API key ")
-                         + authentication.user->username.c_str();
+    std::string source = std::string("api, ") + (authentication.session ? "" : basic ? "browser login " : "API key ") + authentication.user->username.c_str();
 #ifndef EMSESP_STANDALONE
     source += std::string(", ") + request->client()->remoteIP().toString().c_str();
 #endif

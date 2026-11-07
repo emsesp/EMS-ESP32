@@ -3184,19 +3184,19 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
             node["ledType"]     = settings.led_type;
         }
 
-        node["hideLed"]         = settings.hide_led;
-        node["readonlyMode"]    = settings.readonly_mode;
+        node["hideLed"]          = settings.hide_led;
+        node["readonlyMode"]     = settings.readonly_mode;
         node["writeProtection"]  = settings.write_protection;
         node["writeLimit"]       = settings.write_limit;
         node["writeLimitRefuse"] = settings.write_limit_refuse;
-        node["fahrenheit"]      = settings.fahrenheit;
-        node["dallasParasite"]  = settings.dallas_parasite;
-        node["boolFormat"]      = settings.bool_format;
-        node["boolDashboard"]   = settings.bool_dashboard;
-        node["enumFormat"]      = settings.enum_format;
-        node["analogEnabled"]   = settings.analog_enabled;
-        node["telnetEnabled"]   = settings.telnet_enabled;
-        node["maxWebLogBuffer"] = settings.weblog_buffer;
+        node["fahrenheit"]       = settings.fahrenheit;
+        node["dallasParasite"]   = settings.dallas_parasite;
+        node["boolFormat"]       = settings.bool_format;
+        node["boolDashboard"]    = settings.bool_dashboard;
+        node["enumFormat"]       = settings.enum_format;
+        node["analogEnabled"]    = settings.analog_enabled;
+        node["telnetEnabled"]    = settings.telnet_enabled;
+        node["maxWebLogBuffer"]  = settings.weblog_buffer;
 
         /*
  #if defined(EMSESP_UNITY)

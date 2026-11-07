@@ -53,8 +53,8 @@ class WriteLimiter {
     // ms is how long ago the value was sent for SKIP, and the wait for REFUSE.
     // log is set for the first OVER_LIMIT or REFUSE of an entity in a window
     Verdict check(const char * entity, const char * value, uint32_t now, uint32_t & ms, bool & log) {
-        const uint32_t             k = entity ? key(entity) : 0;
-        const uint32_t             v = entity ? key(value) : 0;
+        const uint32_t            k = entity ? key(entity) : 0;
+        const uint32_t            v = entity ? key(value) : 0;
         std::lock_guard<SpinLock> lock(lock_);
         ms  = 0;
         log = false;
@@ -120,8 +120,8 @@ class WriteLimiter {
 
     // after the command took the value
     void sent(const char * entity, const char * value, uint32_t now) {
-        const uint32_t             k = entity ? key(entity) : 0;
-        const uint32_t             v = entity ? key(value) : 0;
+        const uint32_t            k = entity ? key(entity) : 0;
+        const uint32_t            v = entity ? key(value) : 0;
         std::lock_guard<SpinLock> lock(lock_);
         if (global_count_ < UINT16_MAX) {
             global_count_++;

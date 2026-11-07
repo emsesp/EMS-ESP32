@@ -514,18 +514,18 @@ class Thermostat : public EMSdevice {
         return set_holiday(value, id, true);
     }
 
-    bool set_pause(const char * value, const int8_t id);
-    bool set_party(const char * value, const int8_t id);
-    bool set_holidaymode(const char * value, const int8_t id);
-    bool set_heatup(const char * value, const int8_t id);
-    bool set_summermode(const char * value, const int8_t id);
-    bool set_vacreducemode(const char * value, const int8_t id);
-    bool set_nofrostmode(const char * value, const int8_t id);
-    bool set_remotetemp(const char * value, const int8_t id);
-    bool set_remotehum(const char * value, const int8_t id);
-    bool set_roominfl_factor(const char * value, const int8_t id);
-    bool set_roominfl_mode(const char * value, const int8_t id);
-    bool set_junkers_factor(const char * value, const int8_t id, const uint8_t offset, const int min_percent);
+    bool        set_pause(const char * value, const int8_t id);
+    bool        set_party(const char * value, const int8_t id);
+    bool        set_holidaymode(const char * value, const int8_t id);
+    bool        set_heatup(const char * value, const int8_t id);
+    bool        set_summermode(const char * value, const int8_t id);
+    bool        set_vacreducemode(const char * value, const int8_t id);
+    bool        set_nofrostmode(const char * value, const int8_t id);
+    bool        set_remotetemp(const char * value, const int8_t id);
+    bool        set_remotehum(const char * value, const int8_t id);
+    bool        set_roominfl_factor(const char * value, const int8_t id);
+    bool        set_roominfl_mode(const char * value, const int8_t id);
+    bool        set_junkers_factor(const char * value, const int8_t id, const uint8_t offset, const int min_percent);
     inline bool set_adaptfactor(const char * value, const int8_t id) {
         return set_junkers_factor(value, id, 1, 0); // Anpassungsfaktor I, 0..100%
     }

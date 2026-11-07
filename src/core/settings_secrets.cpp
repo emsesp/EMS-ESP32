@@ -77,7 +77,7 @@ void SettingsSecrets::merge(const char * section, JsonObject restored, JsonObjec
             continue;
         }
 
-        JsonArray      list          = restored[s.list];
+        JsonArray      list         = restored[s.list];
         JsonArrayConst current_list = current[s.list];
         for (JsonObject entry : list) {
             if (entry[s.field].is<JsonVariantConst>()) {

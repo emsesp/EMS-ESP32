@@ -21,13 +21,7 @@
 namespace emsesp {
 
 WebCustomEntityService::WebCustomEntityService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
-    : _httpEndpoint(WebCustomEntity::read,
-                    WebCustomEntity::update,
-                    this,
-                    server,
-                    EMSESP_CUSTOMENTITY_SERVICE_PATH,
-                    securityManager,
-                    AuthenticationPredicates::IS_ADMIN)
+    : _httpEndpoint(WebCustomEntity::read, WebCustomEntity::update, this, server, EMSESP_CUSTOMENTITY_SERVICE_PATH, securityManager, AuthenticationPredicates::IS_ADMIN)
     , _fsPersistence(WebCustomEntity::read, WebCustomEntity::update, this, fs, EMSESP_CUSTOMENTITY_FILE) {
 }
 

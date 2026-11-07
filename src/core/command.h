@@ -46,13 +46,13 @@ enum CommandFlag : uint8_t {
 
 // return status after calling a Command
 enum CommandRet : uint8_t {
-    FAIL = 0,    // 0 or FALSE
-    OK,          // 1 or TRUE
-    NOT_FOUND,   // 2
-    ERROR,       // 3
-    NOT_ALLOWED, // 4 - needs authentication
-    INVALID,          // 5 - invalid (tag)
-    NO_VALUE,         // 6 - no value
+    FAIL = 0,          // 0 or FALSE
+    OK,                // 1 or TRUE
+    NOT_FOUND,         // 2
+    ERROR,             // 3
+    NOT_ALLOWED,       // 4 - needs authentication
+    INVALID,           // 5 - invalid (tag)
+    NO_VALUE,          // 6 - no value
     PASSWORD_REQUIRED, // 7 - a Web UI session has to enter its password again first
     TOO_MANY_WRITES    // 8 - refused by the write limit
 };
@@ -108,7 +108,8 @@ class Command {
     }
 
     // is_user: caller is logged in, which allows ADMIN_ONLY commands flagged GUEST
-    static uint8_t call(const uint8_t device_type, const char * cmd, const char * value, const bool is_admin, const int8_t id, JsonObject output, const bool is_user = false);
+    static uint8_t
+    call(const uint8_t device_type, const char * cmd, const char * value, const bool is_admin, const int8_t id, JsonObject output, const bool is_user = false);
     static uint8_t call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id = -1);
 
     // with normal call back function taking a value and id
@@ -241,8 +242,8 @@ class Command {
 
     static thread_local Access       caller_access_;
     static thread_local const char * caller_access_reason_;
-    static thread_local bool caller_is_admin_;
-    static thread_local bool caller_password_confirmed_;
+    static thread_local bool         caller_is_admin_;
+    static thread_local bool         caller_password_confirmed_;
     static thread_local const char * caller_source_;
 
     static std::vector<CmdFunction, AllocatorPSRAM<CmdFunction>> cmdfunctions_; // the list of commands

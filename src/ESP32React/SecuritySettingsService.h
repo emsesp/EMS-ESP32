@@ -26,9 +26,9 @@
 #define SESSION_TOKEN_LIFETIME (30 * 24 * 3600) // seconds
 
 struct ApiKeyEntry {
-    String   id; // the first hex digits of the key
-    String   label;
-    bool     write;   // read+write, otherwise read only
+    String      id; // the first hex digits of the key
+    String      label;
+    bool        write;   // read+write, otherwise read only
     uint32_t    created; // unix time, 0 if the clock wasn't set
     stringPSRAM hash;
 };
@@ -37,8 +37,8 @@ class SecuritySettings {
   public:
     std::vector<User>        users;
     std::vector<ApiKeyEntry> api_keys;
-    bool              hashed_on_load  = false; // plain text passwords were hashed, the file needs saving
-    bool              dropped_on_load = false; // the old Super User password was in the file, the file needs saving
+    bool                     hashed_on_load  = false; // plain text passwords were hashed, the file needs saving
+    bool                     dropped_on_load = false; // the old Super User password was in the file, the file needs saving
 
     // the settings file. Passwords are hashed
     static void read(SecuritySettings & settings, JsonObject root) {
@@ -169,10 +169,10 @@ class SecuritySettingsService final : public StatefulService<SecuritySettings>, 
     void listApiKeys(AsyncWebServerRequest * request);
     void apiKeyAction(AsyncWebServerRequest * request, JsonVariant json);
 
-    void   loadSigningKey();
-    void   rotateSigningKey();
-    void   saveSigningKey(const String & key);
-    void   onSettingsUpdated();
+    void                 loadSigningKey();
+    void                 rotateSigningKey();
+    void                 saveSigningKey(const String & key);
+    void                 onSettingsUpdated();
     PasswordHash::Digest adminCredentials();
 
     Authentication authenticateJWT(String & jwt); // Lookup the user by JWT

@@ -47,7 +47,7 @@ class LoginLimiter {
 
     // milliseconds until the source may try again, 0 if it may try now
     uint32_t retry_after(const char * source, uint32_t now) {
-        const uint32_t             k = key(source);
+        const uint32_t            k = key(source);
         std::lock_guard<SpinLock> lock(lock_);
 
         uint32_t wait = 0;
@@ -63,12 +63,12 @@ class LoginLimiter {
     }
 
     void failed(const char * source, uint32_t now) {
-        const uint32_t             k = key(source);
+        const uint32_t            k = key(source);
         std::lock_guard<SpinLock> lock(lock_);
 
         Entry * entry = find(k);
         if (!entry) {
-            entry = oldest();
+            entry  = oldest();
             *entry = Entry{k, 0, now, now, true};
         }
         if (now - entry->last >= FORGET_MS) {
@@ -96,7 +96,7 @@ class LoginLimiter {
     }
 
     void succeeded(const char * source) {
-        const uint32_t             k = key(source);
+        const uint32_t            k = key(source);
         std::lock_guard<SpinLock> lock(lock_);
 
         Entry * entry = find(k);

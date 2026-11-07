@@ -14,9 +14,7 @@ MqttSettingsService::MqttSettingsService(AsyncWebServer * server, FS * fs, Secur
     addUpdateHandler([this] { onConfigUpdated(); }, false);
 
     // letting MQTT do more
-    _httpEndpoint.requirePassword([](JsonObject json, MqttSettings & current) {
-        return MqttSettings::commands(json) > current.mqtt_commands;
-    });
+    _httpEndpoint.requirePassword([](JsonObject json, MqttSettings & current) { return MqttSettings::commands(json) > current.mqtt_commands; });
 }
 
 uint8_t MqttSettings::commands(JsonObject root) {

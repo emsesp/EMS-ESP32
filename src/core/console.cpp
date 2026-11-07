@@ -162,14 +162,13 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                     if (!completed) {
                         return;
                     }
-                    auto &            self   = static_cast<EMSESPShell &>(shell);
+                    auto &                         self   = static_cast<EMSESPShell &>(shell);
                     const EMSESPShell::LoginResult result = self.login(username, password);
                     if (result == EMSESPShell::LoginResult::LOCKED) {
                         shell.println("su: too many failed attempts, try again later");
                     } else if (result == EMSESPShell::LoginResult::FAILED) {
-                        shell.delay_until(uuid::get_uptime_ms() + INVALID_PASSWORD_DELAY_MS, [](Shell & shell) {
-                            shell.println("su: incorrect username or password");
-                        });
+                        shell.delay_until(uuid::get_uptime_ms() + INVALID_PASSWORD_DELAY_MS,
+                                          [](Shell & shell) { shell.println("su: incorrect username or password"); });
                     } else if (!shell.has_flags(CommandFlags::ADMIN)) {
                         shell.println("su: this user is not an admin");
                     }
@@ -207,21 +206,20 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                                           if (completed) {
                                               if (password1 == password2) {
 #ifndef EMSESP_STANDALONE
-                                                  EMSESP::esp32React.getSecuritySettingsService()->update(
-                                                      [&](SecuritySettings & securitySettings) {
-                                                          // find the username 'admin' and update its password
-                                                          for (auto & user : securitySettings.users) {
-                                                              if (user.username == "admin") {
-                                                                  user.password = PasswordHash::hash(password2.c_str()).c_str();
-                                                                  user.ver++; // signs the admin out everywhere
-                                                                  return StateUpdateResult::CHANGED;
-                                                              }
+                                                  EMSESP::esp32React.getSecuritySettingsService()->update([&](SecuritySettings & securitySettings) {
+                                                      // find the username 'admin' and update its password
+                                                      for (auto & user : securitySettings.users) {
+                                                          if (user.username == "admin") {
+                                                              user.password = PasswordHash::hash(password2.c_str()).c_str();
+                                                              user.ver++; // signs the admin out everywhere
+                                                              return StateUpdateResult::CHANGED;
                                                           }
+                                                      }
 
-                                                          // otherwise add a new admin user
-                                                          securitySettings.users.emplace_back(F_(admin), PasswordHash::hash(password2.c_str()), true);
-                                                          return StateUpdateResult::CHANGED;
-                                                      });
+                                                      // otherwise add a new admin user
+                                                      securitySettings.users.emplace_back(F_(admin), PasswordHash::hash(password2.c_str()), true);
+                                                      return StateUpdateResult::CHANGED;
+                                                  });
 #endif
                                                   shell.println("Admin user's password updated.");
                                               } else {
@@ -692,14 +690,23 @@ EMSESPShell::LoginResult EMSESPShell::login(const std::string & username, const 
     const uint32_t    now     = static_cast<uint32_t>(uuid::get_uptime_ms());
 
     if (limiter.retry_after(source.c_str(), now)) {
-        logger().log(LogLevel::NOTICE, LogFacility::AUTH, F("Login refused on console %s from %s, too many failed attempts"), console_name().c_str(), source.c_str());
+        logger().log(LogLevel::NOTICE,
+                     LogFacility::AUTH,
+                     F("Login refused on console %s from %s, too many failed attempts"),
+                     console_name().c_str(),
+                     source.c_str());
         return LoginResult::LOCKED;
     }
 
     Authentication authentication = EMSESP::esp32React.getSecurityManager()->authenticate(username.c_str(), password.c_str());
     if (!authentication.authenticated) {
         limiter.failed(source.c_str(), now);
-        logger().log(LogLevel::NOTICE, LogFacility::AUTH, F("Failed login for user '%s' on console %s from %s"), username.c_str(), console_name().c_str(), source.c_str());
+        logger().log(LogLevel::NOTICE,
+                     LogFacility::AUTH,
+                     F("Failed login for user '%s' on console %s from %s"),
+                     username.c_str(),
+                     console_name().c_str(),
+                     source.c_str());
         return LoginResult::FAILED;
     }
 
