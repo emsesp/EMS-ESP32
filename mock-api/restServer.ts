@@ -116,7 +116,7 @@ const headers = {
 
 // EMS-ESP Application Settings
 let settings = {
-  system_name: 'standalone',
+  system_name: DEMO ? 'demo' : 'standalone',
   locale: 'en',
   tx_mode: 1,
   ems_bus_id: 11,
@@ -5268,8 +5268,8 @@ function getDashboardEntityData(id: number) {
   // filter device_data on
   //  - only add favorite (mask has bit 8 set) except for Custom Entities (type 99)
   let new_data = (device_data as any).nodes
-    .filter((item) => id === 99 || parseInt(item.id.slice(0, 2), 16) & 0x08)
-    .map((item, index) => ({
+    .filter((item: any) => id === 99 || parseInt(item.id.slice(0, 2), 16) & 0x08)
+    .map((item: any, index: number) => ({
       id: id * 100 + index, // mandatory unique id for table
       dv: item // devicevalue
     }));
