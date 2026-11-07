@@ -1,4 +1,7 @@
+import { useContext } from 'react';
+
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import BuildIcon from '@mui/icons-material/Build';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import LogoDevIcon from '@mui/icons-material/LogoDev';
@@ -22,6 +25,7 @@ import { useRequest } from 'alova/client';
 import { busConnectionStatus } from 'app/main/types';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import ListMenuItem from 'components/layout/ListMenuItem';
+import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { NTPSyncStatus, NetworkConnectionStatus, SystemStatusCodes } from 'types';
 import { useInterval } from 'utils';
@@ -50,6 +54,7 @@ const formatDurationSec = (
 
 const SystemStatus = () => {
   const { LL } = useI18nContext();
+  const { me, versions } = useContext(AuthenticatedContext);
 
   useLayoutTitle(LL.STATUS_OF(''));
 
@@ -205,6 +210,21 @@ const SystemStatus = () => {
             secondary={`${systemStatus} (${LL.UPTIME()}: ${formatDurationSec(data.uptime, LL)})`}
           />
         </ListItem>
+
+        {!me.admin && (
+          <ListMenuItem
+            icon={BuildIcon}
+            bgcolor="#72caf9"
+            label="EMS-ESP Firmware"
+            text={
+              versions?.current?.version
+                ? `v${versions.current.version}${versions.current.upgradeable ? ` (${LL.UPDATE_AVAILABLE()})` : ''}`
+                : ''
+            }
+            to="/status/version"
+            badge={versions?.current?.upgradeable ?? false}
+          />
+        )}
 
         <ListMenuItem
           icon={MemoryIcon}

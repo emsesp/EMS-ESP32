@@ -335,7 +335,7 @@ const no: Translation = {
   CONFIGURE: 'Konfigurer {0}',
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings',
   SECURITY_1: 'Add or remove users',
-  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings and Firmware',
+  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings',
   MODULES: 'Modul',
   MODULES_1: 'Aktiver eller deaktiver eksterne moduler',
   MODULES_UPDATED: 'Moduler oppdatert',
@@ -403,7 +403,13 @@ const no: Translation = {
   RECOVERY_NOT_INSTALLED: 'Ikke installert',
   RECOVERY_INSTALLED: 'Gjenopprettingsfirmware installert',
   RESTART_INTO_RECOVERY: 'Start på nytt i gjenopprettingsappen',
-  RECOVERY_NOT_FOUND: 'Fant ikke gjenopprettingsappen på nettet'
+  RECOVERY_NOT_FOUND: 'Fant ikke gjenopprettingsappen på nettet',
+  VERSIONS: 'Versjoner',
+  EMSESP_APP: 'EMS-ESP App',
+  UPDATE_AVAILABLE_BUTTON: 'Det finnes en oppdatering',
+  NO_UPDATES_AVAILABLE: 'ingen oppdateringer tilgjengelig',
+  SWITCH_TO_DEV: 'Bytt til dev {0}',
+  SWITCH_TO_STABLE: 'Bytt til stabil versjon {0}'
 };
 
 export default no;

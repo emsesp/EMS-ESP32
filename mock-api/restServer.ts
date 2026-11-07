@@ -122,8 +122,7 @@ let system_status = {
   psram: true,
   psram_size: 8189,
   free_psram: 8166,
-  recovery_version: '', // upload an EMS-ESP-Recovery-*.bin to set it
-  // recovery_version: '1.1.0',
+  recovery_version: '' as string | undefined, // set by mock_versions, or upload an EMS-ESP-Recovery-*.bin
   has_partition: true,
   partitions: [
     {
@@ -154,57 +153,112 @@ let system_status = {
   // status: 3
 };
 
-// Test the versioning
-let DEV_VERSION_IS_UPGRADEABLE: boolean;
-let STABLE_VERSION_IS_UPGRADEABLE: boolean;
-let THIS_VERSION: string;
-let LATEST_STABLE_VERSION = '3.9.0';
-let LATEST_DEV_VERSION = '3.10.0-dev.1';
-
-// scenarios for testing versioning
-// let version_test = 0; // on latest stable, or switch to dev
-let version_test = 1; // on latest dev, or switch back to stable
-// let version_test = 2; // upgrade an older stable to latest stable or switch to latest dev
-// let version_test = 3; // upgrade dev to latest, or switch to stable
-// let version_test = 4; // downgrade to an older dev, or switch back to stable
-
-switch (version_test as number) {
-  case 0:
-  default:
-    // on latest stable, or switch to dev
-    THIS_VERSION = LATEST_STABLE_VERSION;
-    STABLE_VERSION_IS_UPGRADEABLE = false;
-    DEV_VERSION_IS_UPGRADEABLE = true;
-    break;
-  case 1:
-    // on latest dev, or switch back to stable
-    THIS_VERSION = LATEST_DEV_VERSION;
-    STABLE_VERSION_IS_UPGRADEABLE = false;
-    DEV_VERSION_IS_UPGRADEABLE = false;
-    break;
-  case 2:
-    // upgrade an older stable to latest stable or switch to latest dev
-    THIS_VERSION = '3.8.0';
-    STABLE_VERSION_IS_UPGRADEABLE = true;
-    DEV_VERSION_IS_UPGRADEABLE = true;
-    break;
-  case 3:
-    // upgrade dev to latest, or switch to stable
-    THIS_VERSION = '3.8.1-dev.3';
-    STABLE_VERSION_IS_UPGRADEABLE = false;
-    DEV_VERSION_IS_UPGRADEABLE = true;
-    break;
-  case 4:
-    // downgrade to an older dev, or switch back to stable
-    THIS_VERSION = '3.8.1-dev.1';
-    STABLE_VERSION_IS_UPGRADEABLE = true;
-    DEV_VERSION_IS_UPGRADEABLE = false;
-    break;
+// Test the versioning, used by the Version page
+// Change these defaults, or switch them at runtime by opening /rest/mockVersions in the browser
+// (e.g. http://localhost:3000/rest/mockVersions) and then reloading the Web UI
+interface MockVersions {
+  current: string; // this EMS-ESP version
+  stable: string; // latest stable release online
+  dev: string; // latest dev release online
+  offline: boolean; // no internet, getVersions omits stable and dev
+  official: boolean; // official or custom build
+  debug: boolean; // built with EMSESP_DEBUG
+  recovery: string; // installed recovery app version, '' for not installed, 'noslot' for no factory partition
+  recoveryLatest: string; // recovery app in the stable and dev releases online, '' for none
 }
 
-// set the version
-system_status.emsesp_version = THIS_VERSION;
-system_status.partitions[0].version = THIS_VERSION; // app0
+const MOCK_VERSION_PRESETS: { name: string; values: Partial<MockVersions> }[] = [
+  {
+    name: 'on latest stable, no updates',
+    values: { current: '3.9.0' }
+  },
+  {
+    name: 'on latest dev, no updates',
+    values: { current: '3.10.0-dev.1' }
+  },
+  {
+    name: 'older stable, update available',
+    values: { current: '3.8.0' }
+  },
+  {
+    name: 'older dev, update available',
+    values: { current: '3.10.0-dev.0' }
+  },
+  {
+    name: 'dev, DEBUG custom build',
+    values: { current: '3.10.0-dev.1', official: false, debug: true }
+  },
+  {
+    name: 'recovery not installed',
+    values: { recovery: '' }
+  },
+  {
+    name: 'recovery update available',
+    values: { recovery: '1.0.0', recoveryLatest: '1.1.0' }
+  },
+  {
+    name: 'recovery not found online',
+    values: { recovery: '1.0.0', recoveryLatest: '' }
+  },
+  {
+    name: 'no factory partition (no recovery row)',
+    values: { recovery: 'noslot' }
+  },
+  {
+    name: 'offline',
+    values: { offline: true }
+  }
+];
+
+const MOCK_VERSIONS_DEFAULT: MockVersions = {
+  current: '3.10.0-dev.1',
+  stable: '3.9.0',
+  dev: '3.10.0-dev.1',
+  offline: false,
+  official: true,
+  debug: false,
+  recovery: '1.1.0',
+  recoveryLatest: '1.1.0'
+};
+
+let mock_versions: MockVersions = { ...MOCK_VERSIONS_DEFAULT };
+
+// true if version a is newer than b, a prerelease like 1.1.0-dev.1 is older than the release 1.1.0
+function isNewerVersion(a: string, b: string) {
+  const parse = (v: string) => {
+    const dash = v.indexOf('-');
+    const numbers = (text: string) =>
+      text.split(/[.-]/).map((n) => Number.parseInt(n, 10) || 0);
+    return {
+      main: numbers(dash < 0 ? v : v.slice(0, dash)),
+      pre: dash < 0 ? [] : numbers(v.slice(dash + 1).replace(/^[a-z]+[.-]?/i, '')),
+      isPre: dash >= 0
+    };
+  };
+  const x = parse(a);
+  const y = parse(b);
+  for (let i = 0; i < Math.max(x.main.length, y.main.length); i++) {
+    const diff = (x.main[i] ?? 0) - (y.main[i] ?? 0);
+    if (diff !== 0) return diff > 0;
+  }
+  if (x.isPre !== y.isPre) return !x.isPre;
+  for (let i = 0; i < Math.max(x.pre.length, y.pre.length); i++) {
+    const diff = (x.pre[i] ?? 0) - (y.pre[i] ?? 0);
+    if (diff !== 0) return diff > 0;
+  }
+  return false;
+}
+
+function applyMockVersions() {
+  const v = mock_versions;
+  system_status.emsesp_version = v.current;
+  system_status.partitions[0].version = v.current; // app0
+  system_status.official_build = v.official;
+  system_status.build_flags = v.debug ? 'DEBUG' : '';
+  system_status.recovery_version = v.recovery === 'noslot' ? undefined : v.recovery;
+}
+
+applyMockVersions();
 
 // set the ESP platform - using ESP32 will disable OTA and automatic version downloading
 let emulate_esp: string;
@@ -480,19 +534,16 @@ function upgradeImportantMessages(version: string) {
   return { upgradeImportantMessageType: upgradeImportantMessageType_n };
 }
 
-// called by Action endpoint getVersions
-// Set MOCK_OFFLINE = true to simulate a device with no internet (omits stable/dev).
-const MOCK_OFFLINE = false;
-// const MOCK_OFFLINE = true;
+// called by Action endpoint getVersions, using mock_versions
 // Set to true to show the "API access tokens were reset" banner, until dismissed
 let MOCK_TOKENS_RESET = false;
 // let MOCK_TOKENS_RESET = true;
 
 function get_versions() {
-  const isDev = THIS_VERSION.includes('dev');
-  const currentUpgradeable =
-    !MOCK_OFFLINE &&
-    (isDev ? DEV_VERSION_IS_UPGRADEABLE : STABLE_VERSION_IS_UPGRADEABLE);
+  const v = mock_versions;
+  const isDev = v.current.includes('dev');
+  const stableUpgradeable = isNewerVersion(v.stable, v.current);
+  const devUpgradeable = isNewerVersion(v.dev, v.current);
 
   const data: {
     system_name: string;
@@ -502,17 +553,22 @@ function get_versions() {
       date: string;
       upgradeable: boolean;
     };
-    stable?: { version: string; date: string; upgradeable: boolean };
-    dev?: { version: string; date: string; upgradeable: boolean };
+    stable?: {
+      version: string;
+      date: string;
+      upgradeable: boolean;
+      recovery?: string;
+    };
+    dev?: { version: string; date: string; upgradeable: boolean; recovery?: string };
     tokens_reset?: boolean;
     telnet_enabled?: boolean;
   } = {
     system_name: settings.system_name,
     current: {
-      version: THIS_VERSION,
+      version: v.current,
       type: isDev ? 'dev' : 'stable',
       date: '2026-04-25T12:00:00',
-      upgradeable: currentUpgradeable
+      upgradeable: !v.offline && (isDev ? devUpgradeable : stableUpgradeable)
     }
   };
 
@@ -524,34 +580,122 @@ function get_versions() {
     data.telnet_enabled = true;
   }
 
-  if (!MOCK_OFFLINE) {
+  if (!v.offline) {
     data.stable = {
-      version: LATEST_STABLE_VERSION,
+      version: v.stable,
       date: '2026-04-25',
-      upgradeable: STABLE_VERSION_IS_UPGRADEABLE
+      upgradeable: stableUpgradeable
     };
     data.dev = {
-      version: LATEST_DEV_VERSION,
+      version: v.dev,
       date: '2026-04-25',
-      upgradeable: DEV_VERSION_IS_UPGRADEABLE
+      upgradeable: devUpgradeable
     };
+    // the recovery app version in each release, the Web UI builds the download URL from it
+    if (v.recoveryLatest) {
+      data.stable.recovery = v.recoveryLatest;
+      data.dev.recovery = v.recoveryLatest;
+    }
   }
 
   console.log(
     'getVersions: current=' +
-      THIS_VERSION +
+      v.current +
       ' stable=' +
-      LATEST_STABLE_VERSION +
+      v.stable +
       ' (upgradeable=' +
-      (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+      (stableUpgradeable ? 'YES' : 'NO') +
       ') dev=' +
-      LATEST_DEV_VERSION +
+      v.dev +
       ' (upgradeable=' +
-      (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-      ')' +
-      (MOCK_OFFLINE ? ' [offline]' : '')
+      (devUpgradeable ? 'YES' : 'NO') +
+      ') recovery=' +
+      (v.recovery || 'not installed') +
+      ' recoveryLatest=' +
+      (v.recoveryLatest || 'not found') +
+      (v.offline ? ' [offline]' : '')
   );
   return data;
+}
+
+// GET /rest/mockVersions, a page to switch the version scenario at runtime
+// takes ?preset=N, ?reset, or any MockVersions field like ?current=3.8.0&debug=true
+function mock_versions_page(request: Request) {
+  const query = new URL(request.url).searchParams;
+  if (query.has('reset')) {
+    mock_versions = { ...MOCK_VERSIONS_DEFAULT };
+  }
+  const preset = MOCK_VERSION_PRESETS[Number(query.get('preset'))];
+  if (query.has('preset') && preset) {
+    mock_versions = { ...MOCK_VERSIONS_DEFAULT, ...preset.values };
+  }
+  for (const key of Object.keys(MOCK_VERSIONS_DEFAULT) as (keyof MockVersions)[]) {
+    const value = query.get(key);
+    if (value === null) continue;
+    if (typeof MOCK_VERSIONS_DEFAULT[key] === 'boolean') {
+      (mock_versions[key] as boolean) = value === 'true' || value === '1';
+    } else {
+      (mock_versions[key] as string) = value;
+    }
+  }
+  applyMockVersions();
+  console.log('mock versions set to', mock_versions);
+
+  const v = mock_versions;
+  const link = (href: string, text: string) => `<a href="?${href}">${text}</a>`;
+  const toggle = (key: keyof MockVersions) =>
+    `<li>${key}: <b>${v[key]}</b> ${link(`${key}=${!v[key]}`, 'toggle')}</li>`;
+  const choices = (key: keyof MockVersions, options: string[]) =>
+    `<li>${key}: <b>${v[key] || "''"}</b> ` +
+    options.map((o) => link(`${key}=${o}`, o || "''")).join(' | ') +
+    '</li>';
+
+  const html = `<!doctype html><html><head><title>Mock Versions</title>
+<style>body{font-family:sans-serif;background:#1e1e1e;color:#ddd;padding:1em}a{color:lightblue}li{margin:4px 0}</style>
+</head><body>
+<h2>Mock Versions</h2>
+<p>Change the scenario here, then reload the Web UI to fetch the new versions.</p>
+<h3>Presets</h3>
+<ol start="0">${MOCK_VERSION_PRESETS.map((p, i) => `<li>${link(`preset=${i}`, p.name)}</li>`).join('')}</ol>
+<p>${link('reset', 'reset to defaults')}</p>
+<h3>Current settings</h3>
+<ul>
+${choices('current', ['3.8.0', '3.9.0', '3.10.0-dev.0', '3.10.0-dev.1', '3.10.0-dev.2'])}
+${choices('stable', ['3.9.0', '3.9.1'])}
+${choices('dev', ['3.10.0-dev.1', '3.10.0-dev.2'])}
+${toggle('offline')}
+${toggle('official')}
+${toggle('debug')}
+${choices('recovery', ['', '1.0.0', '1.1.0', 'noslot'])}
+${choices('recoveryLatest', ['', '1.0.0', '1.1.0', '1.2.0'])}
+</ul>
+<h3>User</h3>
+<p>Signed in as: <b id="user">?</b> <a href="#" data-token="admin">admin</a> | <a href="#" data-token="guest">guest</a></p>
+<p id="origin" style="color:orange;display:none">The Web UI keeps its login per address, so open this page through the Web UI's address, e.g. http://localhost:3000/rest/mockVersions</p>
+<script>
+const tokens = ${JSON.stringify({ admin: admin_signin.access_token, guest: guest_signin.access_token })};
+const show = () => {
+  const token = localStorage.getItem('access_token');
+  let user = 'not signed in';
+  try {
+    const me = JSON.parse(atob(token.split('.')[1]));
+    user = me.username + (me.admin ? ' (admin)' : ' (guest)');
+  } catch {}
+  document.getElementById('user').textContent = user;
+  document.getElementById('origin').style.display = token ? 'none' : '';
+};
+document.querySelectorAll('[data-token]').forEach((a) =>
+  a.addEventListener('click', (e) => {
+    e.preventDefault();
+    localStorage.setItem('access_token', tokens[a.dataset.token]);
+    show();
+  })
+);
+show();
+</script>
+</body></html>`;
+
+  return new Response(html, { headers: { 'Content-Type': 'text/html' } });
 }
 
 // LOG
@@ -835,7 +979,7 @@ const EMSESP_SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info';
 
 const emsesp_info = {
   System: {
-    version: THIS_VERSION,
+    version: mock_versions.current,
     uptime: '001+06:40:34.018',
     'uptime (seconds)': 110434,
     freemem: 131,
@@ -4785,7 +4929,8 @@ router
     if (fileExtension === 'bin' && fileName.startsWith('EMS-ESP-Recovery')) {
       const md5_ok = pendingFirmwareMd5;
       pendingFirmwareMd5 = false;
-      system_status.recovery_version = '1.1.0';
+      mock_versions.recovery = '1.1.0';
+      applyMockVersions();
       console.log('Recovery firmware installed');
       return md5_ok ? { recovery: true, md5_ok } : { recovery: true };
     }
@@ -4801,6 +4946,7 @@ router
     return status(200);
   })
   .get(ACTIVITY_ENDPOINT, () => activity)
+  .get(REST_ENDPOINT_ROOT + 'mockVersions', mock_versions_page)
   .get(SYSTEM_STATUS_ENDPOINT, async () => {
     if (countHardwarePoll >= 2) {
       countHardwarePoll = 0;
@@ -4848,7 +4994,10 @@ router
     return status(200);
   })
   .get(VERIFY_AUTHORIZATION_ENDPOINT, () => verify_authentication)
-  .post(SIGN_IN_ENDPOINT, () => signin)
+  .post(SIGN_IN_ENDPOINT, async (request: any) => {
+    const content: any = await request.json().catch(() => ({}));
+    return content.username === 'guest' ? guest_signin : signin;
+  })
   .get(CONFIRM_PASSWORD_ENDPOINT, () => ({
     confirmed: Date.now() < password_confirmed_until
   }))
@@ -5608,7 +5757,8 @@ router
         console.log('upload File from URL', content.param);
         if (String(content.param).toLowerCase().includes('recovery')) {
           // the recovery app is installed without a restart
-          system_status.recovery_version = '1.0.1';
+          mock_versions.recovery = mock_versions.recoveryLatest || '1.0.1';
+          applyMockVersions();
         }
         return status(200);
       } else if (action === 'resetMQTT') {

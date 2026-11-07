@@ -335,7 +335,7 @@ const cs: Translation = {
   CONFIGURE: '{0} Konfigurovat',
   APPLICATION_SETTINGS_1: 'Upravit nastavení aplikace EMS-ESP',
   SECURITY_1: 'Přidat nebo odebrat uživatele',
-  DOWNLOAD_UPLOAD_1: 'Stáhnout a nahrát nastavení a firmware',
+  DOWNLOAD_UPLOAD_1: 'Stáhnout a nahrát nastavení',
   MODULES: 'Moduly',
   MODULES_1: 'Aktivovat nebo deaktivovat externí moduly',
   MODULES_UPDATED: 'Moduly aktualizovány',
@@ -403,7 +403,13 @@ const cs: Translation = {
   RECOVERY_NOT_INSTALLED: 'Nenainstalováno',
   RECOVERY_INSTALLED: 'Firmware pro obnovu nainstalován',
   RESTART_INTO_RECOVERY: 'Restartovat do aplikace pro obnovu',
-  RECOVERY_NOT_FOUND: 'Aplikace pro obnovu nebyla online nalezena'
+  RECOVERY_NOT_FOUND: 'Aplikace pro obnovu nebyla online nalezena',
+  VERSIONS: 'Verze',
+  EMSESP_APP: 'Aplikace EMS-ESP',
+  UPDATE_AVAILABLE_BUTTON: 'Je k dispozici aktualizace',
+  NO_UPDATES_AVAILABLE: 'žádné aktualizace nejsou k dispozici',
+  SWITCH_TO_DEV: 'Přepnout na dev {0}',
+  SWITCH_TO_STABLE: 'Přepnout na stabilní verzi {0}'
 };
 
 export default cs;

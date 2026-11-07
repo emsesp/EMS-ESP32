@@ -335,7 +335,7 @@ const sv: Translation = {
   CONFIGURE: 'Konfigurera {0}',
   APPLICATION_SETTINGS_1: 'Ändra EMS-ESP Applikationsinställningar',
   SECURITY_1: 'Lägg till eller ta bort användare',
-  DOWNLOAD_UPLOAD_1: 'Ladda ner eller ladda upp inställningar och firmware',
+  DOWNLOAD_UPLOAD_1: 'Ladda ner eller ladda upp inställningar',
   MODULES: 'Moduler',
   MODULES_1: 'Aktivera eller avaktivera externa moduler',
   MODULES_UPDATED: 'Moduler updaterade',
@@ -403,7 +403,13 @@ const sv: Translation = {
   RECOVERY_NOT_INSTALLED: 'Inte installerad',
   RECOVERY_INSTALLED: 'Återställningsfirmware installerad',
   RESTART_INTO_RECOVERY: 'Starta om i återställningsappen',
-  RECOVERY_NOT_FOUND: 'Återställningsappen hittades inte online'
+  RECOVERY_NOT_FOUND: 'Återställningsappen hittades inte online',
+  VERSIONS: 'Versioner',
+  EMSESP_APP: 'EMS-ESP App',
+  UPDATE_AVAILABLE_BUTTON: 'Det finns en uppdatering',
+  NO_UPDATES_AVAILABLE: 'inga uppdateringar tillgängliga',
+  SWITCH_TO_DEV: 'Byt till dev {0}',
+  SWITCH_TO_STABLE: 'Byt till stabil version {0}'
 };
 
 export default sv;

@@ -335,7 +335,7 @@ const tr: Translation = {
   CONFIGURE: 'Yapılandır {0}',
   APPLICATION_SETTINGS_1: 'EMS-ESP Uygulama Ayarlarını Değiştir',
   SECURITY_1: 'Kullanıcıları ekle veya kaldır',
-  DOWNLOAD_UPLOAD_1: 'Ayarları ve firmware dosyasını indir ve yükle',
+  DOWNLOAD_UPLOAD_1: 'Ayarları indir ve yükle',
   MODULES: 'Modül',
   MODULES_1: 'Harici modülleri etkinleştirin veya devre dışı bırakın',
   MODULES_UPDATED: 'Modülleri güncellendi',
@@ -403,7 +403,13 @@ const tr: Translation = {
   RECOVERY_NOT_INSTALLED: 'Yüklü değil',
   RECOVERY_INSTALLED: 'Kurtarma firmware yüklendi',
   RESTART_INTO_RECOVERY: 'Kurtarma uygulamasına yeniden başlat',
-  RECOVERY_NOT_FOUND: 'Kurtarma uygulaması çevrimiçi bulunamadı'
+  RECOVERY_NOT_FOUND: 'Kurtarma uygulaması çevrimiçi bulunamadı',
+  VERSIONS: 'Sürümler',
+  EMSESP_APP: 'EMS-ESP Uygulaması',
+  UPDATE_AVAILABLE_BUTTON: 'Bir güncelleme mevcut',
+  NO_UPDATES_AVAILABLE: 'güncelleme yok',
+  SWITCH_TO_DEV: 'Dev {0} sürümüne geç',
+  SWITCH_TO_STABLE: 'Kararlı {0} sürümüne geç'
 };
 
 export default tr;

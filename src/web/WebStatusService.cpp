@@ -425,6 +425,9 @@ void WebStatusService::getVersions(JsonObject root) {
         out["version"]     = info.version;
         out["date"]        = info.date;
         out["upgradeable"] = info.upgradeable;
+        if (!info.recovery.empty()) {
+            out["recovery"] = info.recovery;
+        }
     };
 
     add_section("stable", stable);
@@ -435,11 +438,13 @@ void WebStatusService::getVersions(JsonObject root) {
     stable_out["version"]     = "3.8.3";
     stable_out["date"]        = "2026-08-01";
     stable_out["upgradeable"] = FirmwareVersion("3.8.3") > current_version;
+    stable_out["recovery"]    = "1.1.0";
 
     JsonObject dev_out     = root["dev"].to<JsonObject>();
     dev_out["version"]     = "3.9.0-dev.1";
     dev_out["date"]        = "2026-08-02";
     dev_out["upgradeable"] = FirmwareVersion("3.9.0-dev.1") > current_version;
+    dev_out["recovery"]    = "1.1.0";
 #endif
 }
 
@@ -536,6 +541,7 @@ bool WebStatusService::refresh_versions_cache() {
 
         out.version     = section["version"] | "";
         out.date        = section["date"] | "";
+        out.recovery    = section["recovery"] | "";
         out.upgradeable = !out.version.empty() && FirmwareVersion(out.version) > current_version;
     };
 

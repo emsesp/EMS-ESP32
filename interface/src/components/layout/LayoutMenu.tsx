@@ -112,7 +112,6 @@ const LayoutMenuComponent = () => {
         <LayoutMenuItem
           icon={SettingsIcon}
           label={LL.SETTINGS(0)}
-          disabled={!me.admin}
           to="/settings"
           badge={upgradeAvailable}
         />

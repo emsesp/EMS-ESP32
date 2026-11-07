@@ -19,12 +19,14 @@ interface SingleUploadProps {
   doRestart: () => void;
   onRecoveryInstalled?: () => void;
   text: string;
+  extensions: string[];
 }
 
 const SingleUpload = ({
   doRestart,
   onRecoveryInstalled,
-  text
+  text,
+  extensions
 }: SingleUploadProps) => {
   const [md5, setMd5] = useState<string>();
   const [file, setFile] = useState<File>();
@@ -131,6 +133,7 @@ const SingleUpload = ({
       ) : (
         <DragNdrop
           text={md5 ? LL.UPLOAD_MD5_RECEIVED() : text}
+          extensions={extensions}
           onFileSelected={setFile}
         />
       )}

@@ -4,10 +4,8 @@ import { Link } from 'react-router';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CloseIcon from '@mui/icons-material/Close';
 import DescriptionIcon from '@mui/icons-material/Description';
-import CheckIcon from '@mui/icons-material/Done';
 import DownloadIcon from '@mui/icons-material/GetApp';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
@@ -55,8 +53,6 @@ const STABLE_RELNOTES_URL =
 const DEV_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/latest/';
 const DEV_RELNOTES_URL =
   'https://github.com/emsesp/EMS-ESP32/blob/dev/CHANGELOG_LATEST.md';
-const RELEASES_API_URL =
-  'https://api.github.com/repos/emsesp/EMS-ESP32/releases/tags/';
 const MAX_VERSION_POLLS = 5; // approx 15 seconds of waiting
 
 // Types for better type safety
@@ -80,64 +76,6 @@ interface VersionData {
   developer_mode: boolean;
   disable_reset: boolean;
 }
-
-interface RecoveryRelease {
-  url: string;
-  version: string;
-}
-
-// finds the recovery firmware for this board in the GitHub releases, trying each release tag in turn.
-// The version is in the filename, e.g. EMS-ESP-Recovery-1_0_0-ESP32S3-16MB+.bin is 1.0.0
-const findRecovery = async (
-  tags: string[],
-  platform: string
-): Promise<RecoveryRelease | undefined> => {
-  const prefix = 'ems-esp-recovery-';
-  const suffix = `-${platform}.bin`.toLowerCase();
-  for (const tag of tags) {
-    try {
-      const response = await fetch(`${RELEASES_API_URL}${tag}`);
-      if (!response.ok) {
-        continue;
-      }
-      const release = (await response.json()) as {
-        assets?: { name: string; browser_download_url: string }[];
-      };
-      const asset = release.assets?.find((a) => {
-        const name = a.name.toLowerCase();
-        return name.startsWith(prefix) && name.endsWith(suffix);
-      });
-      if (asset) {
-        return {
-          url: asset.browser_download_url,
-          version: asset.name
-            .slice(prefix.length, asset.name.length - suffix.length)
-            .replaceAll('_', '.')
-        };
-      }
-    } catch {
-      // try the next one
-    }
-  }
-  return undefined;
-};
-
-// the GitHub API only allows 60 requests an hour, so only look once per page load for each board and channel
-const recoveryLookups = new Map<string, Promise<RecoveryRelease | undefined>>();
-const findRecoveryCached = (tags: string[], platform: string) => {
-  const key = `${tags.join(',')}|${platform}`;
-  let lookup = recoveryLookups.get(key);
-  if (!lookup) {
-    lookup = findRecovery(tags, platform);
-    recoveryLookups.set(key, lookup);
-    void lookup.then((release) => {
-      if (!release) {
-        recoveryLookups.delete(key); // try again next time
-      }
-    });
-  }
-  return lookup;
-};
 
 // true if version a is newer than b, like 1.0.1 and 1.0.0. A prerelease, like 1.1.0-dev.1, is older than the release
 const isNewerVersion = (a: string, b: string) => {
@@ -517,11 +455,7 @@ const Version = () => {
   const { me, versions, refreshVersions } = useContext(AuthenticatedContext);
 
   const [restarting, setRestarting] = useState<boolean>(false);
-  const [findingRecovery, setFindingRecovery] = useState<boolean>(false);
   const [installingRecovery, setInstallingRecovery] = useState<boolean>(false);
-  const [latestRecovery, setLatestRecovery] = useState<RecoveryRelease | undefined>(
-    undefined
-  );
   const [confirmFactoryReset, setConfirmFactoryReset] = useState<boolean>(false);
   const [confirmRestart, setConfirmRestart] = useState<boolean>(false);
   const [openInstallDialog, setOpenInstallDialog] = useState<boolean>(false);
@@ -544,8 +478,7 @@ const Version = () => {
     ? { version: versions.dev.version, date: versions.dev.date }
     : undefined;
   const usingDevVersion = versions?.current?.type === 'dev';
-  const stableUpgradeAvailable = versions?.stable?.upgradeable ?? false;
-  const devUpgradeAvailable = versions?.dev?.upgradeable ?? false;
+  const upgradeAvailable = versions?.current?.upgradeable ?? false;
   const internetLive = Boolean(versions?.stable || versions?.dev);
   const versionPolls = useRef(0);
 
@@ -660,37 +593,30 @@ const Version = () => {
     }
   };
 
-  // the release of the channel we're on first, it may not have a recovery app yet so try the other one too
-  const stableTag = latestVersion ? `v${latestVersion.version}` : '';
-  const recoveryTags = (
-    usingDevVersion ? ['latest', stableTag] : [stableTag, 'latest']
-  ).filter(Boolean);
-  const recoveryTagsKey = recoveryTags.join(',');
   const hasRecoverySlot = data?.recovery_version !== undefined;
 
-  // look for the latest recovery app, to show if there is a newer one
-  useEffect(() => {
-    if (!hasRecoverySlot || !internetLive || !platform) {
-      return;
-    }
-    let cancelled = false;
-    void findRecoveryCached(recoveryTags, platform).then((release) => {
-      if (!cancelled) {
-        setLatestRecovery(release);
-      }
-    });
-    return () => {
-      cancelled = true;
+  // the recovery app in the release of the channel we're on, or the other one if that has none
+  const onlineRecovery = (() => {
+    const releases = [
+      { info: versions?.dev, dev: true },
+      { info: versions?.stable, dev: false }
+    ];
+    if (!usingDevVersion) releases.reverse();
+    const release = releases.find((r) => r.info?.recovery);
+    if (!release?.info?.recovery || !platform) return undefined;
+    const version = release.info.recovery;
+    const filename = `EMS-ESP-Recovery-${version.replaceAll('.', '_')}-${platform}.bin`;
+    return {
+      version,
+      url: release.dev
+        ? `${DEV_URL}${filename}`
+        : `${STABLE_URL}v${release.info.version}/${filename}`
     };
-  }, [hasRecoverySlot, internetLive, platform, recoveryTagsKey]);
+  })();
 
   // downloads the recovery app from GitHub into the factory partition, EMS-ESP doesn't restart
   const installRecovery = async () => {
-    setFindingRecovery(true);
-    const release =
-      latestRecovery ?? (await findRecoveryCached(recoveryTags, platform));
-    setFindingRecovery(false);
-
+    const release = onlineRecovery;
     if (!release) {
       toast.error(LL.RECOVERY_NOT_FOUND());
       return;
@@ -745,72 +671,61 @@ const Version = () => {
 
   useLayoutTitle('EMS-ESP Firmware');
 
-  const showButtons = (showingDev: boolean) => {
-    const choice = showingDev
-      ? !usingDevVersion
-        ? LL.SWITCH_RELEASE_TYPE(LL.DEVELOPMENT())
-        : devUpgradeAvailable
-          ? LL.UPDATE_AVAILABLE()
-          : undefined
-      : usingDevVersion
-        ? LL.SWITCH_RELEASE_TYPE(LL.STABLE())
-        : stableUpgradeAvailable
-          ? LL.UPDATE_AVAILABLE()
-          : undefined;
+  // the third column, nothing when offline as we don't know if there are updates
+  // install is for something that isn't installed yet, so there's nothing to update
+  const updateCell = (
+    updateAvailable: boolean,
+    onUpdate: () => void,
+    install = false
+  ) => {
+    if (!internetLive || (install && !updateAvailable)) return null;
 
-    if (!choice) {
+    if (!updateAvailable) {
       return (
-        <>
-          <CheckIcon
-            color="success"
-            sx={{ verticalAlign: 'middle', ml: 0.5, mr: 0.5 }}
-          />
-          <span style={{ color: '#66bb6a', fontSize: '0.8em' }}>
-            {LL.LATEST_VERSION(usingDevVersion ? LL.DEVELOPMENT() : LL.STABLE())}
-          </span>
-          <Button
-            sx={{ ml: 3 }}
-            variant="outlined"
-            startIcon={<RefreshIcon />}
-            size="small"
-            onClick={() => showFirmwareDialog(showingDev)}
-          >
-            {LL.REINSTALL()}
-          </Button>
-        </>
+        <Typography variant="body2" color="text.secondary">
+          {LL.NO_UPDATES_AVAILABLE()}
+        </Typography>
       );
     }
 
-    if (!me.admin) return null;
+    if (install) {
+      return me.admin ? (
+        <Button
+          startIcon={<DownloadIcon />}
+          variant="outlined"
+          color="success"
+          size="small"
+          onClick={onUpdate}
+        >
+          {LL.INSTALL()}
+        </Button>
+      ) : null;
+    }
 
-    const isUpdateAvailable = choice === LL.UPDATE_AVAILABLE();
+    if (!me.admin) {
+      return (
+        <Typography variant="body2" color="success">
+          {LL.UPDATE_AVAILABLE_BUTTON()}
+        </Typography>
+      );
+    }
 
     return (
-      <Button
-        sx={{ ml: 3 }}
-        variant="outlined"
-        color={isUpdateAvailable ? 'success' : 'warning'}
-        startIcon={!isUpdateAvailable ? <SwapHorizIcon /> : undefined}
-        size="small"
-        onClick={() => showFirmwareDialog(showingDev)}
-      >
-        {choice}
-        {isUpdateAvailable && (
-          <Box
-            component="span"
-            aria-label="update available"
-            sx={{
-              display: 'inline-block',
-              width: 8,
-              height: 8,
-              ml: 3,
-              verticalAlign: 'middle',
-              borderRadius: '50%',
-              backgroundColor: '#ffeb3b',
-              boxShadow: '0 0 6px rgba(255, 235, 59, 0.8)'
-            }}
-          />
-        )}
+      <Button variant="outlined" color="success" size="small" onClick={onUpdate}>
+        {LL.UPDATE_AVAILABLE_BUTTON()}
+        <Box
+          component="span"
+          aria-hidden
+          sx={{
+            display: 'inline-block',
+            width: 8,
+            height: 8,
+            ml: 1.5,
+            borderRadius: '50%',
+            backgroundColor: '#ffeb3b',
+            boxShadow: '0 0 6px rgba(255, 235, 59, 0.8)'
+          }}
+        />
       </Button>
     );
   };
@@ -842,258 +757,160 @@ const Version = () => {
     );
   }
 
+  const isDevBuild = versions?.current
+    ? usingDevVersion
+    : data.emsesp_version.includes('dev');
+  const isDebugBuild = data.build_flags?.includes('DEBUG') ?? false;
+  const recoveryUpdateAvailable =
+    !!onlineRecovery &&
+    (!data.recovery_version ||
+      isNewerVersion(onlineRecovery.version, data.recovery_version));
+  const switchVersion = usingDevVersion ? latestVersion : latestDevVersion;
+
   return (
     <SectionContent>
       <Box sx={{ p: 2, border: '1px solid #565656', borderRadius: 2 }}>
         <Typography sx={{ mb: 1 }} variant="h6" color="primary">
-          {LL.THIS_VERSION()}
+          {LL.VERSIONS()}
         </Typography>
 
-        <Box
+        <Table
+          size="small"
           sx={{
-            display: 'grid',
-            gridTemplateColumns: 'auto 1fr',
-            gridAutoRows: 'minmax(32px, auto)', // same height for every row
-            columnGap: 3,
-            rowGap: 0.75,
-            alignItems: 'center',
-            // whole pixel line height so the labels and values are centered on the same pixel
-            '& .MuiTypography-root': { lineHeight: '24px' },
-            '& .MuiTypography-caption': { lineHeight: 1 }
+            width: 'auto',
+            '& .MuiTableCell-root': {
+              borderBottom: 'none',
+              py: 0.75,
+              pl: 0,
+              pr: 3,
+              verticalAlign: 'middle'
+            }
           }}
         >
-          <Typography color="secondary">{LL.VERSION()}</Typography>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              minWidth: 0
-            }}
-          >
-            <Typography component="span">
-              {data.emsesp_version}
-              {data.build_flags && (
-                <Typography component="span" variant="caption">
-                  &nbsp;({data.build_flags})
-                </Typography>
-              )}
-            </Typography>
-            <IconButton
-              size="small"
-              onClick={() => setPartitionVersionInfo(data.partition)}
-              aria-label={LL.FIRMWARE_VERSION_INFO()}
-              sx={{ p: 0.5 }}
-            >
-              <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
-            </IconButton>
-            {data.official_build !== undefined && (
-              <Chip
-                size="small"
+          <TableBody>
+            <TableRow>
+              <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                <Typography color="secondary">{LL.EMSESP_APP()}</Typography>
+              </TableCell>
+              <TableCell>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: 1
+                  }}
+                >
+                  <Typography component="span">{data.emsesp_version}</Typography>
+                  <IconButton
+                    size="small"
+                    onClick={() => setPartitionVersionInfo(data.partition)}
+                    aria-label={LL.FIRMWARE_VERSION_INFO()}
+                    sx={{ p: 0.5, ml: -0.5 }}
+                  >
+                    <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
+                  </IconButton>
+                  {data.official_build !== undefined && (
+                    <Chip
+                      size="small"
+                      variant="outlined"
+                      color={data.official_build ? 'success' : 'default'}
+                      label={
+                        data.official_build ? LL.OFFICIAL_BUILD() : LL.CUSTOM_BUILD()
+                      }
+                    />
+                  )}
+                  {isDebugBuild && (
+                    <Chip
+                      size="small"
+                      variant="outlined"
+                      color="error"
+                      label="DEBUG"
+                    />
+                  )}
+                  <Chip
+                    size="small"
+                    variant="outlined"
+                    color={isDevBuild ? 'warning' : 'primary'}
+                    label={isDevBuild ? 'dev' : 'stable'}
+                  />
+                </Box>
+              </TableCell>
+              <TableCell>
+                {updateCell(upgradeAvailable, () =>
+                  showFirmwareDialog(usingDevVersion)
+                )}
+              </TableCell>
+            </TableRow>
+
+            {hasRecoverySlot && (
+              <TableRow>
+                <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                  <Typography color="secondary">{LL.RECOVERY_APP()}</Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography component="span">
+                    {data.recovery_version || LL.RECOVERY_NOT_INSTALLED()}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  {updateCell(
+                    recoveryUpdateAvailable,
+                    () => void installRecovery(),
+                    !data.recovery_version
+                  )}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+
+        {me.admin && ((internetLive && switchVersion) || data.recovery_version) && (
+          <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+            {internetLive && switchVersion && (
+              <Button
+                startIcon={<SwapHorizIcon />}
                 variant="outlined"
-                color={data.official_build ? 'success' : 'default'}
-                label={data.official_build ? LL.OFFICIAL_BUILD() : LL.CUSTOM_BUILD()}
-                sx={{ ml: 1 }}
-              />
+                color="warning"
+                onClick={() => showFirmwareDialog(!usingDevVersion)}
+              >
+                {usingDevVersion
+                  ? LL.SWITCH_TO_STABLE(switchVersion.version)
+                  : LL.SWITCH_TO_DEV(switchVersion.version)}
+              </Button>
+            )}
+            {data.recovery_version && (
+              <Button
+                startIcon={<RestartAltIcon />}
+                variant="outlined"
+                onClick={() => {
+                  const version = data.recovery_version;
+                  if (version) {
+                    showPartitionDialog(version, 'boot', '');
+                  }
+                }}
+              >
+                {LL.RESTART_INTO_RECOVERY()}
+              </Button>
             )}
           </Box>
-
-          <Typography color="secondary">{LL.PLATFORM()}</Typography>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              minWidth: 0
-            }}
-          >
-            <Typography component="span">{platform}</Typography>
-            <Typography
-              component="span"
-              variant="caption"
-              sx={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                ml: 0.75
-              }}
-            >
-              (
-              {data.psram ? (
-                <CheckIcon color="success" sx={{ fontSize: 16, mx: 0.25 }} />
-              ) : (
-                <CloseIcon color="error" sx={{ fontSize: 16, mx: 0.25 }} />
-              )}
-              PSRAM)
-            </Typography>
-          </Box>
-
-          {data.recovery_version !== undefined && (
-            <>
-              <Typography color="secondary">{LL.RECOVERY_APP()}</Typography>
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  minWidth: 0
-                }}
-              >
-                <Typography component="span">
-                  {data.recovery_version || LL.RECOVERY_NOT_INSTALLED()}
-                </Typography>
-                {!data.recovery_version && me.admin && internetLive && (
-                  <Button
-                    startIcon={<DownloadIcon />}
-                    sx={{ ml: 3 }}
-                    variant="outlined"
-                    size="small"
-                    disabled={findingRecovery}
-                    onClick={() => void installRecovery()}
-                  >
-                    {LL.INSTALL()}
-                  </Button>
-                )}
-                {data.recovery_version && me.admin && (
-                  <Button
-                    startIcon={<RestartAltIcon />}
-                    sx={{ ml: 3 }}
-                    variant="outlined"
-                    size="small"
-                    onClick={() => {
-                      const version = data.recovery_version;
-                      if (version) {
-                        showPartitionDialog(version, 'boot', '');
-                      }
-                    }}
-                  >
-                    {LL.RESTART_INTO_RECOVERY()}
-                  </Button>
-                )}
-              </Box>
-            </>
-          )}
-        </Box>
-
-        {internetLive ? (
-          <>
-            <Typography sx={{ mt: 4, mb: 1 }} variant="h6" color="primary">
-              {LL.AVAILABLE_VERSION()}
-            </Typography>
-
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: 'auto 1fr',
-                columnGap: 3,
-                rowGap: 0.75,
-                alignItems: 'center'
-              }}
-            >
-              <Typography color="secondary">{LL.STABLE()}</Typography>
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  minWidth: 0
-                }}
-              >
-                <Typography component="span">{latestVersion?.version}</Typography>
-                <IconButton
-                  size="small"
-                  onClick={() => setShowVersionInfo(1)}
-                  aria-label={LL.FIRMWARE_VERSION_INFO()}
-                  sx={{ p: 0.5 }}
-                >
-                  <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
-                </IconButton>
-                {showButtons(false)}
-              </Box>
-
-              <Typography color="secondary">{LL.DEVELOPMENT()}</Typography>
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  minWidth: 0
-                }}
-              >
-                <Typography component="span">{latestDevVersion?.version}</Typography>
-                <IconButton
-                  size="small"
-                  onClick={() => setShowVersionInfo(2)}
-                  aria-label={LL.FIRMWARE_VERSION_INFO()}
-                  sx={{ p: 0.5 }}
-                >
-                  <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
-                </IconButton>
-                {showButtons(true)}
-              </Box>
-
-              {hasRecoverySlot && latestRecovery && (
-                <>
-                  <Typography color="secondary">{LL.RECOVERY_APP()}</Typography>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      flexWrap: 'wrap',
-                      minWidth: 0
-                    }}
-                  >
-                    <Typography component="span">
-                      {latestRecovery.version}
-                    </Typography>
-                    {!data.recovery_version ? null : isNewerVersion(
-                        latestRecovery.version,
-                        data.recovery_version
-                      ) ? (
-                      me.admin && (
-                        <Button
-                          startIcon={<DownloadIcon />}
-                          sx={{ ml: 3 }}
-                          variant="outlined"
-                          color="success"
-                          size="small"
-                          disabled={findingRecovery}
-                          onClick={() => void installRecovery()}
-                        >
-                          {LL.INSTALL()}
-                        </Button>
-                      )
-                    ) : (
-                      <>
-                        <CheckIcon
-                          color="success"
-                          sx={{ verticalAlign: 'middle', ml: 0.5, mr: 0.5 }}
-                        />
-                        <span style={{ color: '#66bb6a', fontSize: '0.8em' }}>
-                          {LL.LATEST_VERSION(LL.RECOVERY_APP())}
-                        </span>
-                      </>
-                    )}
-                  </Box>
-                </>
-              )}
-            </Box>
-          </>
-        ) : (
-          <Typography sx={{ mt: 2 }} color="warning">
-            {LL.INTERNET_CONNECTION_CHECK()}&hellip;
-          </Typography>
         )}
+
+        <VersionInfoDialog
+          showVersionInfo={showVersionInfo}
+          latestVersion={latestVersion}
+          latestDevVersion={latestDevVersion}
+          partitionVersion={partitionVersion}
+          locale={locale}
+          partition={partition}
+          currentPartition={data?.partition ?? ''}
+          size={firmwareSize}
+          LL={LL}
+          onClose={handleVersionInfoClose}
+        />
+
         {me.admin && (
           <>
-            <VersionInfoDialog
-              showVersionInfo={showVersionInfo}
-              latestVersion={latestVersion}
-              latestDevVersion={latestDevVersion}
-              partitionVersion={partitionVersion}
-              locale={locale}
-              partition={partition}
-              currentPartition={data?.partition ?? ''}
-              size={firmwareSize}
-              LL={LL}
-              onClose={handleVersionInfoClose}
-            />
             <InstallDialog
               openInstallDialog={openInstallDialog}
               fetchDevVersion={fetchDevVersion}
@@ -1118,6 +935,7 @@ const Version = () => {
             </Typography>
             <SingleUpload
               text={LL.UPLOAD_FIRMWARE_TEXT()}
+              extensions={['.bin', '.md5']}
               doRestart={doRestart}
               onRecoveryInstalled={() => void loadData()}
             />

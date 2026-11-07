@@ -335,7 +335,7 @@ const pl: BaseTranslation = {
   CONFIGURE: 'Konfiguracja {0}',
   APPLICATION_SETTINGS_1: 'Modyfikacja ustawień aplikacji EMS-ESP',
   SECURITY_1: 'Dodawanie i usuwanie użytkowników',
-  DOWNLOAD_UPLOAD_1: 'Pobieranie/wysyłanie ustawień i firmware',
+  DOWNLOAD_UPLOAD_1: 'Pobieranie/wysyłanie ustawień',
   MODULES: 'Moduł',
   MODULES_1: 'Aktywuj lub dezaktywuj moduły zewnętrzne',
   MODULES_UPDATED: 'Zaktualizowano moduły',
@@ -403,7 +403,13 @@ const pl: BaseTranslation = {
   RECOVERY_NOT_INSTALLED: 'Nie zainstalowano',
   RECOVERY_INSTALLED: 'Zainstalowano firmware odzyskiwania',
   RESTART_INTO_RECOVERY: 'Uruchom ponownie w aplikacji odzyskiwania',
-  RECOVERY_NOT_FOUND: 'Nie znaleziono aplikacji odzyskiwania online'
+  RECOVERY_NOT_FOUND: 'Nie znaleziono aplikacji odzyskiwania online',
+  VERSIONS: 'Wersje',
+  EMSESP_APP: 'Aplikacja EMS-ESP',
+  UPDATE_AVAILABLE_BUTTON: 'Dostępna jest aktualizacja',
+  NO_UPDATES_AVAILABLE: 'brak dostępnych aktualizacji',
+  SWITCH_TO_DEV: 'Przełącz na dev {0}',
+  SWITCH_TO_STABLE: 'Przełącz na wersję stabilną {0}'
 };
 
 export default pl;

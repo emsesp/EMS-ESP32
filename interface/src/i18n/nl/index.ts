@@ -335,7 +335,7 @@ const nl: Translation = {
   CONFIGURE: '{0} Configureren',
   APPLICATION_SETTINGS_1: 'Applicatie-instellingen wijzigen',
   SECURITY_1: 'Gebruikers toevoegen of verwijderen',
-  DOWNLOAD_UPLOAD_1: 'Download en upload instellingen en firmware',
+  DOWNLOAD_UPLOAD_1: 'Download en upload instellingen',
   MODULES: 'Module',
   MODULES_1: 'Externe modules activeren of deactiveren',
   MODULES_UPDATED: 'Modules geüpdatet',
@@ -403,7 +403,13 @@ const nl: Translation = {
   RECOVERY_NOT_INSTALLED: 'Niet geïnstalleerd',
   RECOVERY_INSTALLED: 'Herstelfirmware geïnstalleerd',
   RESTART_INTO_RECOVERY: 'Herstart naar de herstel-app',
-  RECOVERY_NOT_FOUND: 'Herstel-app niet online gevonden'
+  RECOVERY_NOT_FOUND: 'Herstel-app niet online gevonden',
+  VERSIONS: 'Versies',
+  EMSESP_APP: 'EMS-ESP App',
+  UPDATE_AVAILABLE_BUTTON: 'Er is een update beschikbaar',
+  NO_UPDATES_AVAILABLE: 'geen updates beschikbaar',
+  SWITCH_TO_DEV: 'Overschakelen naar dev {0}',
+  SWITCH_TO_STABLE: 'Overschakelen naar stabiele release {0}'
 };
 
 export default nl;

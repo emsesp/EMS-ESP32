@@ -207,7 +207,11 @@ const DownloadUpload = () => {
         {LL.UPLOAD()}
       </Typography>
 
-      <SingleUpload text={LL.UPLOAD_BACKUP_TEXT()} doRestart={doRestart} />
+      <SingleUpload
+        text={LL.UPLOAD_BACKUP_TEXT()}
+        extensions={['.json']}
+        doRestart={doRestart}
+      />
     </SectionContent>
   );
 };

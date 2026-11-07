@@ -335,7 +335,7 @@ const it: Translation = {
   CONFIGURE: 'Configure {0}',
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings',
   SECURITY_1: 'Add or remove users',
-  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings and Firmware',
+  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings',
   MODULES: 'Module',
   MODULES_1: 'Attiva o disattiva i moduli esterni',
   MODULES_UPDATED: 'Modules updated',
@@ -403,7 +403,13 @@ const it: Translation = {
   RECOVERY_NOT_INSTALLED: 'Non installato',
   RECOVERY_INSTALLED: 'Firmware di ripristino installato',
   RESTART_INTO_RECOVERY: 'Riavvia nell\'app di ripristino',
-  RECOVERY_NOT_FOUND: 'App di ripristino non trovata online'
+  RECOVERY_NOT_FOUND: 'App di ripristino non trovata online',
+  VERSIONS: 'Versioni',
+  EMSESP_APP: 'App EMS-ESP',
+  UPDATE_AVAILABLE_BUTTON: 'È disponibile un aggiornamento',
+  NO_UPDATES_AVAILABLE: 'nessun aggiornamento disponibile',
+  SWITCH_TO_DEV: 'Passa a dev {0}',
+  SWITCH_TO_STABLE: 'Passa alla release stabile {0}'
 };
 
 export default it;

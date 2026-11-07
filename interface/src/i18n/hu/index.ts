@@ -335,7 +335,7 @@ const hu: Translation = {
   CONFIGURE: '{0} konfigurálása',
   APPLICATION_SETTINGS_1: 'EMS-ESP alkalmazás beállításainak módosítása',
   SECURITY_1: 'Felhasználók hozzáadása vagy eltávolítása',
-  DOWNLOAD_UPLOAD_1: 'Beállítások és firmware letöltése és feltöltése',
+  DOWNLOAD_UPLOAD_1: 'Beállítások letöltése és feltöltése',
   MODULES: 'Modulok',
   MODULES_1: 'Külső modulok aktiválása vagy deaktiválása',
   MODULES_UPDATED: 'Modulok frissítve',
@@ -403,7 +403,13 @@ const hu: Translation = {
   RECOVERY_NOT_INSTALLED: 'Nincs telepítve',
   RECOVERY_INSTALLED: 'Helyreállítási firmware telepítve',
   RESTART_INTO_RECOVERY: 'Újraindítás helyreállítási módba',
-  RECOVERY_NOT_FOUND: 'A helyreállítási alkalmazás nem található az interneten'
+  RECOVERY_NOT_FOUND: 'A helyreállítási alkalmazás nem található az interneten',
+  VERSIONS: 'Verziók',
+  EMSESP_APP: 'EMS-ESP alkalmazás',
+  UPDATE_AVAILABLE_BUTTON: 'Frissítés érhető el',
+  NO_UPDATES_AVAILABLE: 'nincs elérhető frissítés',
+  SWITCH_TO_DEV: 'Váltás dev {0} verzióra',
+  SWITCH_TO_STABLE: 'Váltás a stabil {0} kiadásra'
 };
 
 export default hu;

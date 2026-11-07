@@ -181,10 +181,11 @@ const router = createBrowserRouter(
         <Route path="status/ntp" element={<NTPStatus />} />
         <Route path="status/ap" element={<APStatus />} />
         <Route path="status/network" element={<NetworkStatus />} />
+        <Route path="status/version" element={<Version />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="settings/version" element={<Version />} />
 
         <Route element={<RequireAdmin />}>
-          <Route path="settings" element={<Settings />} />
-          <Route path="settings/version" element={<Version />} />
           <Route path="settings/application" element={<ApplicationSettings />} />
           <Route path="settings/mqtt" element={<MqttSettings />} />
           <Route path="settings/ntp" element={<NTPSettings />} />

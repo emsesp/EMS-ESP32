@@ -10,6 +10,7 @@ export interface VersionInfo {
 
 export interface RemoteVersionInfo extends VersionInfo {
   upgradeable: boolean;
+  recovery?: string; // version of the recovery app in this release, if it has one
 }
 
 export interface CurrentVersionInfo extends VersionInfo {

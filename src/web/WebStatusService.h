@@ -67,6 +67,7 @@ class WebStatusService {
     struct VersionInfo {
         std::string version;
         std::string date;
+        std::string recovery; // recovery app version in this release, empty if there's none
         bool        upgradeable = false;
     };
 

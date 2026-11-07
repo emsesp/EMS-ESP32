@@ -335,7 +335,7 @@ const sk: Translation = {
   CONFIGURE: 'Konfigurácia {0}',
   APPLICATION_SETTINGS_1: 'Zmeniť nastavenia aplikácie EMS-ESP',
   SECURITY_1: 'Pridať, alebo odstrániť používateľov',
-  DOWNLOAD_UPLOAD_1: 'Stiahnuť a nahrať nastavenia a firmware',
+  DOWNLOAD_UPLOAD_1: 'Stiahnuť a nahrať nastavenia',
   MODULES: 'Moduly',
   MODULES_1: 'Aktivujte alebo deaktivujte externé moduly',
   MODULES_UPDATED: 'Aktualizované moduly',
@@ -403,7 +403,13 @@ const sk: Translation = {
   RECOVERY_NOT_INSTALLED: 'Nenainštalované',
   RECOVERY_INSTALLED: 'Firmvér obnovy nainštalovaný',
   RESTART_INTO_RECOVERY: 'Reštartovať do aplikácie na obnovu',
-  RECOVERY_NOT_FOUND: 'Aplikácia na obnovu sa online nenašla'
+  RECOVERY_NOT_FOUND: 'Aplikácia na obnovu sa online nenašla',
+  VERSIONS: 'Verzie',
+  EMSESP_APP: 'Aplikácia EMS-ESP',
+  UPDATE_AVAILABLE_BUTTON: 'K dispozícii je aktualizácia',
+  NO_UPDATES_AVAILABLE: 'žiadne aktualizácie nie sú k dispozícii',
+  SWITCH_TO_DEV: 'Prepnúť na dev {0}',
+  SWITCH_TO_STABLE: 'Prepnúť na stabilnú verziu {0}'
 };
 
 export default sk;
