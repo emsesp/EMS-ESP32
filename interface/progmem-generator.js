@@ -5,6 +5,7 @@ import {
   existsSync,
   readFileSync,
   readdirSync,
+  statSync,
   unlinkSync
 } from 'fs';
 import mime from 'mime-types';
@@ -150,7 +151,25 @@ const writeFile = (relativeFilePath, buffer, zipBuffer) => {
   totalSize += size;
 };
 
+// the assets table of the existing output file, read before it's overwritten
+const readPreviousAssets = (path) => {
+  if (!existsSync(path)) return undefined;
+  const text = readFileSync(path, 'utf8');
+  const assets = new Map();
+  for (const m of text.matchAll(
+    /\{"([^"]+)", "[^"]*", \w+, (\d+), "\\"(.*?)\\""\}/g
+  )) {
+    assets.set(m[1], { size: Number(m[2]), etag: m[3] });
+  }
+  return {
+    assets,
+    generated: /Generated on: (\S+)/.exec(text)?.[1],
+    modified: statSync(path).mtime
+  };
+};
+
 console.log(`Generating ${outputPath} from ${sourcePath}`);
+const previous = readPreviousAssets(resolve(outputPath));
 const fileInfo = [];
 const writeStream = cleanAndOpen(resolve(outputPath));
 
@@ -210,3 +229,40 @@ Object.entries(bundleStats).forEach(([type, stats]) => {
   }
 });
 console.log('='.repeat(50));
+
+// Compare with the previous output, by URI and etag (the hash of the compressed content)
+if (!previous) {
+  console.log(`\n🆕 ${outputPath} didn't exist before`);
+} else {
+  const when = previous.generated ?? previous.modified.toISOString();
+  const added = fileInfo.filter((f) => !previous.assets.has(f.uri));
+  const changed = fileInfo.filter((f) => {
+    const old = previous.assets.get(f.uri);
+    return old && old.etag !== f.rawHash;
+  });
+  const current = new Set(fileInfo.map((f) => f.uri));
+  const removed = [...previous.assets.keys()].filter((uri) => !current.has(uri));
+  const previousSize = [...previous.assets.values()].reduce(
+    (sum, a) => sum + a.size,
+    0
+  );
+  const sizeDiff = totalSize - previousSize;
+
+  if (!added.length && !changed.length && !removed.length) {
+    console.log(`\n✅ No changes since the last generation (${when})`);
+  } else {
+    console.log(`\n🔄 Changes since the last generation (${when}):`);
+    changed.forEach((f) =>
+      console.log(
+        `  ~ ${f.uri} (${previous.assets.get(f.uri).size} → ${f.size} bytes)`
+      )
+    );
+    added.forEach((f) => console.log(`  + ${f.uri} (${f.size} bytes)`));
+    removed.forEach((uri) =>
+      console.log(`  - ${uri} (${previous.assets.get(uri).size} bytes)`)
+    );
+    console.log(
+      `  Total: ${(previousSize / 1000).toFixed(1)} KB → ${(totalSize / 1000).toFixed(1)} KB (${sizeDiff >= 0 ? '+' : ''}${(sizeDiff / 1000).toFixed(1)} KB)`
+    );
+  }
+}
