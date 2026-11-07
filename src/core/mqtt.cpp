@@ -1312,7 +1312,13 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
 
         break;
     case DeviceValueUOM::KWH:
-        doc[sc_ha] = sc_ha_total_increasing;
+        // https://github.com/emsesp/EMS-ESP32/issues/3405
+        // heat counters of heat pumps step back during defrost
+        if (entity == FL_(nrgTotal)[0] || entity == FL_(nrgHeat)[0] || entity == FL_(nrgWw)[0]) {
+            doc[sc_ha] = sc_ha_total;
+        } else {
+            doc[sc_ha] = sc_ha_total_increasing;
+        }
         doc[dc_ha] = "energy";
         break;
     case DeviceValueUOM::UA:
