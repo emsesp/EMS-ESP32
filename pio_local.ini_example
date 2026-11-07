@@ -18,13 +18,13 @@
 ; my_build_flags = -DEMSESP_DEBUG -DCORE_DEBUG_LEVEL=5
 ; my_build_flags = -DEMSESP_EN_ONLY -DEMSESP_TEST -DCORE_DEBUG_LEVEL=5 -DARDUINO_USB_CDC_ON_BOOT=1
 ; my_build_flags = -DEMSESP_EN_ONLY
+; my_build_flags = -DEMSESP_DEBUG
 ; my_build_flags = -D EMSESP_GATEWAY_TX_HOLD
-my_build_flags = -DEMSESP_DEBUG
-; my_build_flags = 
+my_build_flags =
 
 [platformio]
-default_envs = s_16M_P, recovery_s_16M_P, build-recovery, build-webUI
-; default_envs = s_16M_P ; BBQKees E32V2
+; default_envs = s_16M_P, recovery_s_16M_P, build-recovery, build-webUI
+default_envs = s_16M_P ; BBQKees E32V2
 ; default_envs = s_16M_P_custom ; BBQKees E32V2 with custom Arduino/IDF libs
 ; default_envs = recovery_s_16M_P ; recovery firmware
 ; default_envs = crashtest_s_16M_P ; crash test
@@ -45,7 +45,7 @@ extra_scripts =
 
 ; set the username and password for the admin account (default password is admin)
 custom_username = admin
-custom_password = admin
+custom_password = admin2
 
 ; ** upload settings **
 ; for direct USB, which is the default you can set an optional port for example:
@@ -54,16 +54,13 @@ custom_password = admin
 
 ; CH340G bridge tops out here reliably; drop back to 460800 if uploads fail
 ; 2000000 is the max speed for the CH340G bridge
-upload_speed = 921600
+; upload_speed = 921600
+upload_speed = 2000000
 
 ; for direct via HTTP (OTA) set:
-;  upload_protocol = custom
-;  custom_emsesp_ip = <ip address> or ems-esp.local
-
 upload_protocol = custom
-
-custom_emsesp_ip = ems-esp.local ; E32V2.2 (test)
-; custom_emsesp_ip = ems-espP.local ; E32V2.2 (prod)
+; custom_emsesp_ip = ems-esp.local ; E32V2.2 (test)
+custom_emsesp_ip = ems-espP.local ; E32V2.2 (prod)
 ; custom_emsesp_ip = ems-esps32.local ; S32, 4MB no psramS32
 ; custom_emsesp_ip = ems-espS3.local ; ems-espS3
 
@@ -75,6 +72,10 @@ custom_emsesp_ip = ems-esp.local ; E32V2.2 (test)
 ;   https://github.com/mobizt/ESP_SSLClient.git @ 3.1.3
   ; https://github.com/emsesp/EMS-ESP-Modules.git @ 1.0.8
 ;   ; file://${PROJECT_DIR}/../modules/EMS-ESP-Modules
+
+; pio run -e recovery_s_16M_P -t upload 
+[env:recovery_s_16M_P]
+upload_protocol = custom
 
 ; ** debug settings **
 ; to be used with an ESP32-S3 which has an onboard JTAG, connect the OTG USB port to the PC

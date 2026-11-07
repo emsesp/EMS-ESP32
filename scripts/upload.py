@@ -239,7 +239,9 @@ def on_upload(source, target, env):
             firmware = firmware_file.read()
 
         md5 = hashlib.md5(firmware).hexdigest()
-        filename = os.path.basename(firmware_path)
+        # EMS-ESP only accepts a recovery image below the normal minimum firmware size when the name contains "recovery"
+        fw_name = env.GetProjectOption('custom_fw_name', '')
+        filename = f"{fw_name}.bin" if fw_name else os.path.basename(firmware_path)
         # Device enables MD5 check only after a file whose name ends in .md5
         # (same as the WebUI). An ElegantOTA "MD5" form field is ignored.
         md5_name = os.path.splitext(filename)[0] + '.md5'
@@ -263,8 +265,16 @@ def on_upload(source, target, env):
         if response.status_code != 200:
             print_fail(upload_error(response.status_code))
             return 1
+        kibs = (size / 1024) / elapsed if elapsed > 0 else 0
+        try:
+            is_recovery = response.json().get('recovery', False)
+        except ValueError:
+            is_recovery = False
+        if is_recovery:
+            # EMS-ESP wrote it into the factory partition and keeps running, there's nothing to restart into
+            print_success(
+                f"Recovery installed in the boot partition ({kibs:.0f} KiB/s in {elapsed:.1f}s). EMS-ESP keeps running.")
         else:
-            kibs = (size / 1024) / elapsed if elapsed > 0 else 0
             print_success(
                 f"Upload successful ({kibs:.0f} KiB/s in {elapsed:.1f}s). Rebooting device.")
             restart_headers = build_headers(
