@@ -343,6 +343,7 @@ const fr: Translation = {
   UPGRADE_IMPORTANT_MESSAGES: 'Mettre à jour les messages importants',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Cette mise à jour nécessite une réinitialisation de fabrique. Assurez-vous de télécharger une sauvegarde système avant de continuer, et de la charger après l\'installation de la nouvelle version.',
   UPGRADE_IMPORTANT_MESSAGES_2: 'Vous mettez à jour vers une nouvelle version majeure. Il est recommandé de créer d\'abord une sauvegarde système. Vérifiez également l\'aide en ligne pour les éventuelles modifications importantes.',
+  UPGRADE_IMPORTANT_MESSAGES_3: 'La version 3.10 contient des changements de sécurité importants. Créez d\'abord une sauvegarde système : après la mise à jour, les mots de passe sont stockés hachés et les versions plus anciennes ne peuvent pas les lire, donc revenir en arrière nécessite cette sauvegarde. Chaque appel API nécessite ensuite une clé API, les intégrations comme Home Assistant doivent donc être mises à jour. Lisez les changements importants dans l\'aide en ligne avant de continuer.',
   WARNING_SYSTEM_BACKUP: 'Cela créera une sauvegarde de votre configuration et paramètres complets. Tous les mots de passe seront lisibles dans le fichier de sauvegarde. Soyez prudent avec le partage ! Voulez-vous continuer ?',
   TEST_EMAIL_SUCCESSFUL: 'Test email envoyé avec succès',
   SYSTEM_NAME: 'Nom du système',

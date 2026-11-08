@@ -343,6 +343,7 @@ const pl: BaseTranslation = {
   UPGRADE_IMPORTANT_MESSAGES: 'Aktualizuj ważne wiadomości',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Ta aktualizacja wymaga resetu fabrycznego. Upewnij się, że najpierw pobierzesz kopię zapasową systemu przed kontynuowaniem, a następnie przesuń tę plik po zainstalowaniu nowej wersji.',
   UPGRADE_IMPORTANT_MESSAGES_2: 'Aktualizujesz się na nową major wersję. Jest to zalecane, aby najpierw utworzyć kopię zapasową systemu. Sprawdź również online pomoc dla ewentualnych istotnych zmian.',
+  UPGRADE_IMPORTANT_MESSAGES_3: 'Wersja 3.10 zawiera istotne zmiany bezpieczeństwa. Najpierw utwórz kopię zapasową systemu: po aktualizacji hasła są przechowywane jako skróty (hash) i starsze wersje nie mogą ich odczytać, więc powrót wymaga tej kopii. Każde wywołanie API wymaga potem klucza API, więc integracje takie jak Home Assistant trzeba zaktualizować. Przed kontynuowaniem przeczytaj istotne zmiany w pomocy online.',
   WARNING_SYSTEM_BACKUP: 'To spowoduje utworzenie kopii zapasowej całej konfiguracji i ustawień systemu. Wszystkie hasła będą widoczne w pliku kopii zapasowej. Bądź ostrożny przy udostępnianiu! Chcesz kontynuować?',
   TEST_EMAIL_SUCCESSFUL: 'Test email wysłany pomyślnie',
   SYSTEM_NAME: 'Nazwa systemu',

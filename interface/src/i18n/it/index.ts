@@ -343,6 +343,7 @@ const it: Translation = {
   UPGRADE_IMPORTANT_MESSAGES: 'Aggiorna Messaggi Importanti',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Questa aggiornamento richiede un ripristino di fabbrica. Assicurati di prima scaricare un backup del sistema prima di continuare, e poi caricare questo file dopo l\'installazione della nuova versione.',
   UPGRADE_IMPORTANT_MESSAGES_2: 'Stai aggiornando a una nuova versione major. È consigliabile prima creare un backup del sistema. Controlla anche l\'aiuto online per eventuali modifiche importanti.',
+  UPGRADE_IMPORTANT_MESSAGES_3: 'La versione 3.10 contiene modifiche importanti per la sicurezza. Crea prima un backup del sistema: dopo l\'aggiornamento le password sono salvate come hash e le versioni precedenti non possono leggerle, quindi per tornare indietro serve questo backup. Ogni chiamata API richiede poi una chiave API, quindi le integrazioni come Home Assistant devono essere aggiornate. Leggi le modifiche importanti nell\'aiuto online prima di continuare.',
   WARNING_SYSTEM_BACKUP: 'Questo creerà un backup delle tue configurazioni e impostazioni complete. Tutte le password saranno leggibili nel file di backup. Sei sicuro di voler continuare?',
   TEST_EMAIL_SUCCESSFUL: 'Test email inviata con successo',
   SYSTEM_NAME: 'Nome del sistema',

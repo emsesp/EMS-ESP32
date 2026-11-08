@@ -343,6 +343,7 @@ const hu: Translation = {
   UPGRADE_IMPORTANT_MESSAGES: 'Fontos üzenetek a frissítéshez',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Ez a frissítés gyári alaphelyzetbe állítást igényel. Mielőtt folytatnád, tölts le egy Rendszerbiztonsági mentést, majd az új verzió telepítése után töltsd fel ezt a fájlt.',
   UPGRADE_IMPORTANT_MESSAGES_2: 'Új főverzióra frissítesz. Ajánlott előtte rendszerbiztonsági mentést készíteni. Ezen kívül ellenőrizd az online súgót az esetleges mérföldkő/változási (breaking changes) információkért.',
+  UPGRADE_IMPORTANT_MESSAGES_3: 'A 3.10-es verzió fontos biztonsági változásokat tartalmaz. Először készíts rendszerbiztonsági mentést: a frissítés után a jelszavak hash-elve tárolódnak, és a régebbi verziók nem tudják olvasni őket, így a visszatéréshez erre a mentésre van szükség. Ezután minden API-híváshoz API-kulcs kell, ezért az olyan integrációkat, mint a Home Assistant, frissíteni kell. Folytatás előtt olvasd el a fontos változásokat az online súgóban.',
   WARNING_SYSTEM_BACKUP: 'Ez biztonsági mentést készít a teljes rendszerkonfigurációról és beállításokról. Minden jelszó olvasható lesz a biztonsági mentés fájljában. Óvatosan oszd meg! Szeretnéd folytatni?',
   TEST_EMAIL_SUCCESSFUL: 'Teszt e-mail sikeresen elküldve',
   SYSTEM_NAME: 'Rendszer neve',

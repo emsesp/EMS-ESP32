@@ -343,6 +343,7 @@ const sk: Translation = {
   UPGRADE_IMPORTANT_MESSAGES: 'Aktualizovať dôležité správy',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Táto aktualizácia vyžaduje reštart základných nastavení. Uistite sa, že najprv stiahnete systémovú zálohu pred pokračovaním, a potom nahrajte tento súbor po instalácii novej verzie.',
   UPGRADE_IMPORTANT_MESSAGES_2: 'Aktualizujete sa na novú major verziu. Je vhodné najprv vytvoriť systémovú zálohu. Taktiež skontrolujte online nápovľu pre akékoľvek dôležité zmeny.',
+  UPGRADE_IMPORTANT_MESSAGES_3: 'Verzia 3.10 obsahuje dôležité bezpečnostné zmeny. Najprv vytvorte systémovú zálohu: po aktualizácii sú heslá uložené ako hash a staršie verzie ich nedokážu prečítať, takže návrat vyžaduje túto zálohu. Každé volanie API potom vyžaduje kľúč API, takže integrácie ako Home Assistant je potrebné aktualizovať. Pred pokračovaním si prečítajte dôležité zmeny v online nápovede.',
   WARNING_SYSTEM_BACKUP: 'Toto vytvorí zálohu všetkých vašich celých systémových konfigurácií a nastavení. Všetky hesla budú čitateľné v zálohovom súbore. Buďte opatrní pri zdieľaní! Chcete pokračovať?',
   TEST_EMAIL_SUCCESSFUL: 'Test email bol úspešne odoslaný',
   SYSTEM_NAME: 'Názov systému',
