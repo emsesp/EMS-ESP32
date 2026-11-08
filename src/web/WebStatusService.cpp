@@ -193,6 +193,11 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
 
     root["developer_mode"] = EMSESP::system_.developer_mode();
     root["disable_reset"]  = EMSESP::system_.disable_reset();
+#endif
+
+    System::supported_languages(root["languages"].to<JsonArray>()); // supported entity languages, depends on the build
+
+#ifndef EMSESP_STANDALONE
 
     // Also used in SystemMonitor.tsx
     root["status"] = EMSESP::system_.systemStatus(); // send the status. See System.h for status codes

@@ -43,6 +43,21 @@ import { BOARD_PROFILES } from '../main/types';
 import type { APIcall, BoardProfileKey, Settings } from '../main/types';
 import { createSettingsValidator } from '../main/validators';
 
+const ENTITY_LANGUAGES: Record<string, string> = {
+  cs: 'Česky',
+  de: 'Deutsch',
+  en: 'English',
+  fr: 'Français',
+  it: 'Italiano',
+  hu: 'Magyar',
+  nl: 'Nederlands',
+  no: 'Norsk',
+  pl: 'Polski',
+  sk: 'Slovenčina',
+  sv: 'Svenska',
+  tr: 'Türk'
+};
+
 export function boardProfileSelectItems() {
   return Object.keys(BOARD_PROFILES).map((code) => (
     <MenuItem key={code} value={code}>
@@ -560,18 +575,18 @@ const ApplicationSettings = () => {
               margin="normal"
               select
             >
-              <MenuItem value="cs">Česky (CS)</MenuItem>
-              <MenuItem value="de">Deutsch (DE)</MenuItem>
-              <MenuItem value="en">English (EN)</MenuItem>
-              <MenuItem value="fr">Français (FR)</MenuItem>
-              <MenuItem value="it">Italiano (IT)</MenuItem>
-              <MenuItem value="hu">Magyar (HU)</MenuItem>
-              <MenuItem value="nl">Nederlands (NL)</MenuItem>
-              <MenuItem value="no">Norsk (NO)</MenuItem>
-              <MenuItem value="pl">Polski (PL)</MenuItem>
-              <MenuItem value="sk">Slovenčina (SK)</MenuItem>
-              <MenuItem value="sv">Svenska (SV)</MenuItem>
-              <MenuItem value="tr">Türk (TR)</MenuItem>
+              {Object.entries(ENTITY_LANGUAGES)
+                .filter(
+                  ([code]) =>
+                    !hardwareData?.languages ||
+                    hardwareData.languages.includes(code) ||
+                    code === data.locale
+                )
+                .map(([code, name]) => (
+                  <MenuItem key={code} value={code}>
+                    {name} ({code.toUpperCase()})
+                  </MenuItem>
+                ))}
             </TextField>
           </Grid>
           <Grid size={3}>

@@ -341,6 +341,13 @@ std::string System::languages_string() {
     return languages_string;
 }
 
+// add the supported language codes to a JSON array
+void System::supported_languages(JsonArray output) {
+    for (uint8_t i = 0; i < NUM_LANGUAGES; i++) {
+        output.add(languages[i]);
+    }
+}
+
 // returns last response from MQTT
 bool System::command_response(const char * value, const int8_t id, JsonObject output) {
     JsonDocument doc;

@@ -248,6 +248,8 @@ let system_status = {
   // partitions: [],
   developer_mode: settings.developer_mode,
   disable_reset: settings.disable_reset,
+  languages: ['en', 'de', 'nl', 'sv', 'pl', 'no', 'fr', 'tr', 'it', 'sk', 'cs', 'hu'],
+  // languages: ['en'], // 4MB flash boards
   model: 'BBQKees Electronics E32V2.2 rev.2.2/2024074',
   board: 'E32V2_2',
   status: 0

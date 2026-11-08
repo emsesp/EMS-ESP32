@@ -309,6 +309,7 @@ class System {
     void show_users(uuid::console::Shell & shell);
 
     static std::string languages_string();
+    static void        supported_languages(JsonArray output);
 
     uint32_t FStotal() {
         return fstotal_;
