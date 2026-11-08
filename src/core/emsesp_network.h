@@ -46,9 +46,11 @@ namespace emsesp {
 #define NETWORK_RECONNECTION_DELAY_LONG 10000 // 10 seconds - for debugging
 #endif
 
+#define NETWORK_WIFI_CONNECT_TIMEOUT 30000 // 30 seconds before a WiFi.begin() without any event is considered hung
+
 #define MAX_NETWORK_RECONNECTION_ATTEMPTS 4 // maximum number of network reconnection attempts before going to AP fallback
 
-#define NETWORK_DNS_OVERRIDE_CHECK 10000 // 10 seconds - how often to re-assert the custom DNS servers when using DHCP
+#define NETWORK_DNS_OVERRIDE_CHECK 10000 // 10 seconds - how often to re-assert the custom or DHCP IPv4 DNS servers when using DHCP
 
 #define DNS_PORT 53 // dns server port for captive portal
 
@@ -203,17 +205,18 @@ class Network {
   private:
     static uuid::log::Logger logger_;
 
-    void         findNetworks();
-    void         checkConnection();
-    void         startmDNS() const;
-    bool         formatBSSID(const String & bssid, uint8_t (&mac)[6]);
-    void         startAP();
-    void         startWIFI();
-    void         startEthernet();
-    void         startWiFiRadio();
-    void         stopWiFiRadio();
-    void         setWiFiPower(uint8_t tx_power);
+    void findNetworks();
+    void checkConnection();
+    void startmDNS() const;
+    bool formatBSSID(const String & bssid, uint8_t (&mac)[6]);
+    void startAP();
+    void startWIFI();
+    void startEthernet();
+    void startWiFiRadio();
+    void stopWiFiRadio();
+    void setWiFiPower(uint8_t tx_power);
 #ifndef EMSESP_STANDALONE
+    void captureDhcpDns(esp_netif_t * netif);
     void applyDnsOverride(esp_netif_t * netif) const;
 #endif
     const char * disconnectReason(uint8_t code);
@@ -237,6 +240,7 @@ class Network {
     uint16_t         connect_retry_          = 0; // number of network re-connection attempts
 
     volatile bool wifi_connect_pending_     = false;
+    uint32_t      wifi_connect_started_     = 0; // uptime (ms) of the last WiFi.begin(), to detect a hung connect attempt
     volatile bool ethernet_connect_pending_ = false;
     volatile bool reconnect_pending_        = false; // set by schedule_reconnect(), actioned in loop()
 
@@ -258,6 +262,7 @@ class Network {
     IPAddress subnetMask_;
     IPAddress dnsIP1_;
     IPAddress dnsIP2_;
+    IPAddress dhcpDnsIP_[2]; // IPv4 DNS servers from the last DHCP lease
     String    hostname_;
     String    ssid_;
     String    password_;

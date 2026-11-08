@@ -10,7 +10,7 @@ struct EmsespTzZone {
 };
 
 // Longest POSIX TZ value in the table is 44 chars.
-static constexpr size_t EMSESP_TZ_ZONE_COUNT = 460;
+static constexpr size_t   EMSESP_TZ_ZONE_COUNT                  = 460;
 static const EmsespTzZone EMSESP_TZ_ZONES[EMSESP_TZ_ZONE_COUNT] = {
     {"Africa/Abidjan", "GMT0"},
     {"Africa/Accra", "GMT0"},
@@ -483,7 +483,6 @@ inline const char * emsesp_tz_format_for_label(const char * label) {
     if (label == nullptr || *label == '\0') {
         return nullptr;
     }
-    const auto * found = static_cast<const EmsespTzZone *>(
-        bsearch(label, EMSESP_TZ_ZONES, EMSESP_TZ_ZONE_COUNT, sizeof(EmsespTzZone), emsesp_tz_zone_cmp));
+    const auto * found = static_cast<const EmsespTzZone *>(bsearch(label, EMSESP_TZ_ZONES, EMSESP_TZ_ZONE_COUNT, sizeof(EmsespTzZone), emsesp_tz_zone_cmp));
     return found != nullptr ? found->format : nullptr;
 }
