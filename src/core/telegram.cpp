@@ -320,8 +320,7 @@ void TxService::send() {
         send_poll();
         return;
     }
-    // send telegrams with intermediate delay of 200 ms to avoid errors with K30RF module, https://github.com/emsesp/EMS-ESP32/issues/3094
-    delayed_send_ = uuid::get_uptime() + 200;
+    delayed_send_ = 0;
 
     // if we're in read-only mode (tx_mode 0) forget the Tx call
     if (tx_mode() != EMS_TXMODE_OFF) {
