@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef } from 'react';
+import { createContext, useContext, useEffect } from 'react';
 
 export interface LayoutContextValue {
   title: string;
@@ -9,17 +9,9 @@ const LayoutContextDefaultValue = {} as LayoutContextValue;
 export const LayoutContext = createContext(LayoutContextDefaultValue);
 
 export const useLayoutTitle = (myTitle: string) => {
-  const { title, setTitle } = useContext(LayoutContext);
-  const previousTitle = useRef(title);
+  const { setTitle } = useContext(LayoutContext);
 
   useEffect(() => {
     setTitle(myTitle);
   }, [setTitle, myTitle]);
-
-  useEffect(
-    () => () => {
-      setTitle(previousTitle.current);
-    },
-    [setTitle]
-  );
 };
