@@ -343,6 +343,7 @@ const de: Translation = {
   UPGRADE_IMPORTANT_MESSAGES: 'Wichtige Nachrichten aktualisieren',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Für diese Aktualisierung ist ein Werksreset erforderlich. Stellen Sie sicher, dass Sie zuerst eine Systemsicherung herunterladen, bevor Sie fortfahren, und laden Sie diese Datei dann nach der Installation der neuen Version hoch.',
   UPGRADE_IMPORTANT_MESSAGES_2: 'Sie aktualisieren auf eine neue major Version. Es ist ratsam, zuerst eine Systemsicherung zu erstellen. Überprüfen Sie auch die Online-Hilfe für eventuelle wichtige Änderungen.',
+  UPGRADE_IMPORTANT_MESSAGES_3: 'Version 3.10 enthält wichtige Sicherheitsänderungen. Erstellen Sie zuerst eine Systemsicherung: nach dem Update werden die Passwörter gehasht gespeichert und ältere Versionen können sie nicht lesen, daher ist für eine Rückkehr diese Sicherung nötig. Jeder API-Aufruf benötigt danach einen API-Schlüssel, Integrationen wie Home Assistant müssen also angepasst werden. Lesen Sie vor dem Fortfahren die wichtigen Änderungen in der Online-Hilfe.',
   WARNING_SYSTEM_BACKUP: 'Dies wird eine Sicherung Ihrer vollständigen Systemkonfiguration und Einstellungen erstellen. Alle Passwörter werden in dieser Sicherungsdatei lesbar sein. Seien Sie vorsichtig beim Teilen! Möchten Sie fortfahren?',
   TEST_EMAIL_SUCCESSFUL: 'Test email erfolgreich gesendet',
   SYSTEM_NAME: 'Systemname',

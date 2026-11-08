@@ -98,7 +98,7 @@ See the [Building the firmware](https://emsesp.org/Building) guide in the docume
 
 ## 📜&nbsp; **License**
 
-This program is licensed under GPL-3.0
+This program is licensed under GPL-3.0-or-later
 
 ## **Screenshots**
 

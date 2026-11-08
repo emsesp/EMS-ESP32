@@ -102,7 +102,7 @@ class Packet {
   , _payloadEndIndex(0)
   , _getPayload(nullptr) {
     static_assert(sizeof...(Args) % 2 == 0, "Subscribe should be in topic/qos pairs");
-    size_t numberTopics = 2 + (sizeof...(Args) / 2);
+    constexpr size_t numberTopics = 2 + (sizeof...(Args) / 2);
     SubscribeItem list[numberTopics] = {topic1, qos1, topic2, qos2, args...};
     _createSubscribe(error, list, numberTopics);
   }
@@ -123,7 +123,7 @@ class Packet {
   , _payloadStartIndex(0)
   , _payloadEndIndex(0)
   , _getPayload(nullptr) {
-    size_t numberTopics = 2 + sizeof...(Args);
+    constexpr size_t numberTopics = 2 + sizeof...(Args);
     const char* list[numberTopics] = {topic1, topic2, args...};
     _createUnsubscribe(error, list, numberTopics);
   }

@@ -343,6 +343,7 @@ const tr: Translation = {
   UPGRADE_IMPORTANT_MESSAGES: 'Önemli Mesajları Güncelle',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Bu güncelleme továrnı ayarlarını gerektirir. Yapılandırmanızı ve ayarlarınızı önce yedekleyin ve ardından yeni sürüm yüklendikten sonra yükleyin.',
   UPGRADE_IMPORTANT_MESSAGES_2: 'Yeni bir major sürüme güncelleme yapıyorsunuz. Sistem yedeklemesi yapmanız önerilir. Ayrıca online yardımı kontrol ederek önemli değişiklikleri gözden geçirin.',
+  UPGRADE_IMPORTANT_MESSAGES_3: 'Sürüm 3.10 önemli güvenlik değişiklikleri içerir. Önce bir sistem yedeği oluşturun: güncellemeden sonra parolalar hash olarak saklanır ve eski sürümler bunları okuyamaz, bu nedenle geri dönmek için bu yedek gerekir. Ardından her API çağrısı bir API anahtarı gerektirir, bu yüzden Home Assistant gibi entegrasyonların güncellenmesi gerekir. Devam etmeden önce online yardımdaki önemli değişiklikleri okuyun.',
   WARNING_SYSTEM_BACKUP: 'Bu, sistem yapılandırmanızı ve ayarlarınızın bir yedeklemesi oluşturacaktır. Tüm şifreler yedekleme dosyasında okunabilir olacaktır. Paylaşırken dikkatli olun! Devam etmek istediğinize emin misiniz?',
   TEST_EMAIL_SUCCESSFUL: 'Test email başarıyla gönderildi',
   SYSTEM_NAME: 'Sistem Adı',

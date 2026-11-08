@@ -269,6 +269,7 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
 //  0 = no message (if just a minor version upgrade)
 //  1 = special message for upgrades (no longer used)
 //  2 = major version upgrade
+//  3 = upgrade to 3.10.x or later from an older version, which has breaking security changes
 // version can be like 3.8.2 or a filename like EMS-ESP-3_8_2-dev_13-ESP32-16MB+.bin
 uint8_t WebStatusService::upgradeImportantMessages(std::string & version) {
     if (version.empty()) {
@@ -322,6 +323,11 @@ uint8_t WebStatusService::upgradeImportantMessages(std::string & version) {
 
     if (current_version.major() < latest_version.major()) {
         return 2; // major version upgrade
+    }
+
+    const FirmwareVersion security_version("3.10.0-dev.0");
+    if (current_version < security_version && latest_version >= security_version) {
+        return 3;
     }
 
     return 0; // minor or patch upgrade, no special message

@@ -343,6 +343,7 @@ const en: Translation = {
   UPGRADE_IMPORTANT_MESSAGES: 'Upgrade Important Messages',
   UPGRADE_IMPORTANT_MESSAGES_1: 'This upgrade requires a factory reset. Make sure you first download a System Backup before continuing, and then upload this file after the new version is installed.',
   UPGRADE_IMPORTANT_MESSAGES_2: 'You are upgrading to a new major version. It is advisable to make a system backup first. Also check the online help for any breaking changes.',
+  UPGRADE_IMPORTANT_MESSAGES_3: 'Version 3.10 has breaking security changes. Make a System Backup first: after the upgrade the passwords are stored hashed and older versions can\'t read them, so going back needs this backup. Every API call then needs an API key, so integrations such as Home Assistant must be updated. Read the breaking changes in the online help before continuing.',
   WARNING_SYSTEM_BACKUP: 'This will create a backup of your full system configuration and settings. All passwords will be readable in the backup file. Be careful with sharing! Do you want to continue?',
   TEST_EMAIL_SUCCESSFUL: 'Test email sent successfully',
   SYSTEM_NAME: 'System Name',

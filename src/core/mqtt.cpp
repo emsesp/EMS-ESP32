@@ -410,7 +410,7 @@ void Mqtt::start() {
     initialized_ = true;
 
     // add the 'publish' command ('call system publish' in console or via API)
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), MAKE_CF_CB(System::command_publish), FL_(publish_cmd));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), MAKE_CF_CB_STATIC(System::command_publish), FL_(publish_cmd));
 
 #if defined(EMSESP_STANDALONE)
     Mqtt::on_connect(); // simulate an MQTT connection

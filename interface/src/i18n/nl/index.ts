@@ -343,6 +343,7 @@ const nl: Translation = {
   UPGRADE_IMPORTANT_MESSAGES: 'Upgrade Belangrijke Berichten',
   UPGRADE_IMPORTANT_MESSAGES_1: 'Deze upgrade vereist een fabrieksinstelling. Zorg ervoor dat u eerst een Systeem Backup download voordat u doorgaat, en upload deze file na de installatie van de nieuwe versie.',
   UPGRADE_IMPORTANT_MESSAGES_2: 'U updatet naar een nieuwe major versie. Het is raadzaam om eerst een systeem backup te maken. Controleer ook de online help voor eventuele brekende wijzigingen.',
+  UPGRADE_IMPORTANT_MESSAGES_3: 'Versie 3.10 bevat brekende wijzigingen voor beveiliging. Maak eerst een systeem backup: na de update worden wachtwoorden gehasht opgeslagen en oudere versies kunnen ze niet lezen, dus teruggaan kan alleen met deze backup. Elke API-aanroep heeft daarna een API-sleutel nodig, dus integraties zoals Home Assistant moeten worden aangepast. Lees de brekende wijzigingen in de online help voordat u verdergaat.',
   WARNING_SYSTEM_BACKUP: 'Dit zal een back-up van uw volledige systeemconfiguratie en instellingen maken. Alle wachtwoorden zijn leesbaar in het back-upbestand. Wees voorzichtig bij delen! Wilt u doorgaan?',
   TEST_EMAIL_SUCCESSFUL: 'Test email verzonden succesvol',
   SYSTEM_NAME: 'Systeemnaam',

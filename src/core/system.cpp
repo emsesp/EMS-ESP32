@@ -1271,18 +1271,18 @@ void System::system_check() {
 void System::commands_init() {
     // Command::reserve(200);
 
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(read), MAKE_CF_CB(System::command_read), FL_(read_cmd), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), MAKE_CF_CB(System::command_send), FL_(send_cmd), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), MAKE_CF_CB(System::command_fetch), FL_(fetch_cmd), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(sendmail), MAKE_CF_CB(System::command_sendmail), FL_(sendmail_cmd), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), MAKE_CF_CB(System::command_restart), FL_(restart_cmd), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(format), MAKE_CF_CB(System::command_format), FL_(format_cmd), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(txpause), MAKE_CF_CB(System::command_txpause), FL_(txpause_cmd), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(led), MAKE_CF_CB(System::command_led), FL_(led_cmd), CommandFlag::ADMIN_ONLY);
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), MAKE_CF_CB(System::command_watch), FL_(watch_cmd));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(read), MAKE_CF_CB_STATIC(System::command_read), FL_(read_cmd), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), MAKE_CF_CB_STATIC(System::command_send), FL_(send_cmd), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), MAKE_CF_CB_STATIC(System::command_fetch), FL_(fetch_cmd), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(sendmail), MAKE_CF_CB_STATIC(System::command_sendmail), FL_(sendmail_cmd), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), MAKE_CF_CB_STATIC(System::command_restart), FL_(restart_cmd), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(format), MAKE_CF_CB_STATIC(System::command_format), FL_(format_cmd), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(txpause), MAKE_CF_CB_STATIC(System::command_txpause), FL_(txpause_cmd), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(led), MAKE_CF_CB_STATIC(System::command_led), FL_(led_cmd), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), MAKE_CF_CB_STATIC(System::command_watch), FL_(watch_cmd));
     Command::add_json(EMSdevice::DeviceType::SYSTEM, F_(message), System::command_message, FL_(message_cmd));
 #if defined(EMSESP_TEST)
-    Command::add(EMSdevice::DeviceType::SYSTEM, ("test"), MAKE_CF_CB(System::command_test), FL_(test_cmd));
+    Command::add(EMSdevice::DeviceType::SYSTEM, ("test"), MAKE_CF_CB_STATIC(System::command_test), FL_(test_cmd));
 #endif
 
     // these commands will return data in JSON format
