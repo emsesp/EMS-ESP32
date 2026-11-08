@@ -12,6 +12,7 @@
 #include "SecuritySettingsService.h"
 #include "StatefulService.h"
 #include "Network.h"
+// #include "IPAddress.h"
 
 #include <espMqttClient.h>
 
@@ -21,12 +22,16 @@
 #define NTP_SETTINGS_FILE "/config/ntpSettings.json"
 #define EMSESP_SETTINGS_FILE "/config/emsespSettings.json"
 
-#define AP_MODE_ALWAYS 0
+// AP provision modes, mirrors src/ESP32React/APSettingsService.h
+#define AP_MODE_DISCONNECTED 1
+#define AP_MODE_NEVER 2
+
 class DummySettings {
   public:
     // SYSTEM
     bool bandwidth20 = false;
     bool nosleep     = true;
+    bool eth_10mbit  = false;
 
     // MQTT
     uint16_t publish_time       = 10;
@@ -49,6 +54,22 @@ class DummySettings {
     uint16_t keepAlive          = 60;
     bool     cleanSession       = false;
     uint8_t  entity_format      = 1;
+    String   CORSOrigin         = "*";
+    uint8_t  tx_power           = 0;
+    String   bssid              = "";
+    String   localIP            = "";
+    String   gatewayIP          = "";
+    String   subnetMask         = "";
+    bool     staticIPConfig     = false;
+    String   dnsIP1             = "";
+    String   dnsIP2             = "";
+    bool     enableMDNS         = true;
+    bool     enableCORS         = false;
+    uint8_t  channel            = 1;
+    bool     ssid_hidden        = false;
+    uint8_t  max_clients        = 4;
+    bool     ssidHidden         = false;
+    uint8_t  maxClients         = 4;
 
     uint16_t publish_time_boiler     = 10;
     uint16_t publish_time_thermostat = 10;
@@ -59,24 +80,13 @@ class DummySettings {
     uint16_t publish_time_heartbeat  = 60;
     uint32_t publish_time_water      = 0;
 
-    String  hostname       = "ems-esp";
-    String  jwtSecret      = "ems-esp";
-    String  ssid           = "ems-esp";
-    String  password       = "ems-esp";
-    String  bssid          = "";
-    String  localIP        = "";
-    String  gatewayIP      = "";
-    String  subnetMask     = "";
-    bool    staticIPConfig = false;
-    String  dnsIP1         = "";
-    String  dnsIP2         = "";
-    bool    enableMDNS     = true;
-    bool    enableCORS     = false;
-    String  CORSOrigin     = "*";
-    uint8_t tx_power       = 0;
+    String hostname  = "ems-esp";
+    String jwtSecret = "ems-esp";
+    String ssid      = "ems-esp";
+    String password  = "ems-esp";
 
     // AP
-    uint8_t provisionMode = 0;
+    uint8_t provisionMode = AP_MODE_DISCONNECTED; // always
 
     // NTP
     String  server          = "pool.ntp.org";

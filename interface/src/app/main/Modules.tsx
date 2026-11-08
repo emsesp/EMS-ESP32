@@ -1,6 +1,5 @@
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useState } from 'react';
 import { useBlocker } from 'react-router';
-import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import CircleIcon from '@mui/icons-material/Circle';
@@ -25,6 +24,7 @@ import {
   SectionContent,
   useLayoutTitle
 } from 'components';
+import { toast } from 'components/toast';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import { readModules, writeModules } from '../../api/app';
@@ -69,58 +69,53 @@ const Modules = () => {
     }
   );
 
-  const modules_theme = useTheme(
-    useMemo(
-      () => ({
-        Table: `
-          --data-table-library_grid-template-columns: 48px 180px 120px 100px repeat(1, minmax(160px, 1fr)) 180px;
-        `,
-        BaseRow: `
-          font-size: 14px;
-          .td {
-            height: 32px;
-          }
-        `,
-        BaseCell: `
-          &:nth-of-type(1) {
-            text-align: center;
-          }
-        `,
-        HeaderRow: `
-          text-transform: uppercase;
-          background-color: black;
-          color: #90CAF9;
-          .th {
-            border-bottom: 1px solid #565656;
-            height: 36px;
-          }
-        `,
-        Row: `
-          background-color: #1e1e1e;
-          position: relative;
-          cursor: pointer;
-          .td {
-            border-top: 1px solid #565656;
-            border-bottom: 1px solid #565656;
-          }
-          &:hover .td {
-            border-top: 1px solid #177ac9;
-            border-bottom: 1px solid #177ac9;
-          }
-          &:nth-of-type(odd) .td {
-            background-color: #303030;
-          }
-        `
-      }),
-      []
-    )
-  );
+  const modules_theme = useTheme({
+    Table: `
+      --data-table-library_grid-template-columns: 48px 180px 120px 100px repeat(1, minmax(160px, 1fr)) 180px;
+    `,
+    BaseRow: `
+      font-size: 14px;
+      .td {
+        height: 32px;
+      }
+    `,
+    BaseCell: `
+      &:nth-of-type(1) {
+        text-align: center;
+      }
+    `,
+    HeaderRow: `
+      text-transform: uppercase;
+      background-color: black;
+      color: #90CAF9;
+      .th {
+        border-bottom: 1px solid #565656;
+        height: 36px;
+      }
+    `,
+    Row: `
+      background-color: #1e1e1e;
+      position: relative;
+      cursor: pointer;
+      .td {
+        border-top: 1px solid #565656;
+        border-bottom: 1px solid #565656;
+      }
+      &:hover .td {
+        border-top: 1px solid #177ac9;
+        border-bottom: 1px solid #177ac9;
+      }
+      &:nth-of-type(odd) .td {
+        background-color: #303030;
+      }
+    `
+  });
 
-  const onDialogClose = useCallback(() => {
+  const onDialogClose = () => {
     setDialogOpen(false);
-  }, []);
+  };
 
-  const updateModuleItem = useCallback((updatedItem: ModuleItem) => {
+  const updateModuleItem = (updatedItem: ModuleItem) => {
     void updateState(readModules(), (data: ModuleItem[]) => {
       const new_data = data.map((mi) =>
         mi.id === updatedItem.id ? { ...mi, ...updatedItem } : mi
@@ -128,28 +123,25 @@ const Modules = () => {
       setNumChanges(new_data.filter(hasModulesChanged).length);
       return new_data;
     });
-  }, []);
+  };
 
-  const onDialogSave = useCallback(
-    (updatedItem: ModuleItem) => {
-      setDialogOpen(false);
-      updateModuleItem(updatedItem);
-    },
-    [updateModuleItem]
-  );
+  const onDialogSave = (updatedItem: ModuleItem) => {
+    setDialogOpen(false);
+    updateModuleItem(updatedItem);
+  };
 
-  const editModuleItem = useCallback((mi: ModuleItem) => {
+  const editModuleItem = (mi: ModuleItem) => {
     setSelectedModuleItem(mi);
     setDialogOpen(true);
-  }, []);
+  };
 
-  const onCancel = useCallback(async () => {
+  const onCancel = async () => {
     await fetchModules().then(() => {
       setNumChanges(0);
     });
-  }, [fetchModules]);
+  };
 
-  const saveModules = useCallback(async () => {
+  const saveModules = async () => {
     try {
       await Promise.all(
         modules.map((condensed_mi: ModuleItem) =>
@@ -167,9 +159,9 @@ const Modules = () => {
       await fetchModules();
       setNumChanges(0);
     }
-  }, [modules, updateModules, LL, fetchModules]);
+  };
 
-  const content = useMemo(() => {
+  const renderContent = () => {
     if (!modules) {
       return (
         <FormLoader onRetry={fetchModules} errorMessage={error?.message || ''} />
@@ -262,22 +254,12 @@ const Modules = () => {
         </Box>
       </>
     );
-  }, [
-    modules,
-    fetchModules,
-    error,
-    modules_theme,
-    editModuleItem,
-    LL,
-    numChanges,
-    onCancel,
-    saveModules
-  ]);
+  };
 
   return (
     <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
-      {content}
+      {renderContent()}
       {selectedModuleItem && (
         <ModulesDialog
           open={dialogOpen}

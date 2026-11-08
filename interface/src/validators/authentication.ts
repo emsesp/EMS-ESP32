@@ -1,4 +1,4 @@
-import Schema from 'async-validator';
+import Schema from 'validators/schema';
 
 export const SIGN_IN_REQUEST_VALIDATOR = new Schema({
   username: {

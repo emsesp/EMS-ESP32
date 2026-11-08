@@ -1,12 +1,7 @@
 #ifndef APStatus_h
 #define APStatus_h
 
-#include <WiFi.h>
-#include <AsyncTCP.h>
-
 #include <ArduinoJson.h>
-#include <ESPAsyncWebServer.h>
-#include <IPAddress.h>
 
 #include "SecurityManager.h"
 #include "APSettingsService.h"

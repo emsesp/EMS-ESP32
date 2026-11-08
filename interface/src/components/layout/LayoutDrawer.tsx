@@ -1,7 +1,8 @@
-import { memo, useMemo } from 'react';
+import { memo, useContext } from 'react';
 
 import { Box, Divider, Drawer, Toolbar, Typography, styled } from '@mui/material';
 
+import { AuthenticatedContext } from 'contexts/authentication';
 import { PROJECT_NAME } from 'env';
 
 import { DRAWER_WIDTH } from './Layout';
@@ -24,22 +25,33 @@ interface LayoutDrawerProps {
 }
 
 const LayoutDrawerComponent = ({ mobileOpen, onClose }: LayoutDrawerProps) => {
-  // Memoize drawer content to prevent unnecessary re-renders
-  const drawer = useMemo(
-    () => (
-      <>
-        <Toolbar disableGutters>
-          <Box sx={{ display: 'flex', alignItems: 'center', p: 2 }}>
-            <LayoutDrawerLogo src="/app/icon.png" alt={PROJECT_NAME} />
-            <Typography variant="h6">{PROJECT_NAME}</Typography>
+  const { systemName } = useContext(AuthenticatedContext);
+
+  const drawer = (
+    <>
+      <Toolbar disableGutters>
+        <Box sx={{ display: 'flex', alignItems: 'center', p: 2 }}>
+          <LayoutDrawerLogo src="/app/icon.png" alt={PROJECT_NAME} />
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center'
+            }}
+          >
+            <Typography>{PROJECT_NAME}</Typography>
+            {systemName && (
+              <Typography color="secondary" variant="body2">
+                {systemName}
+              </Typography>
+            )}
           </Box>
-          <Divider absolute />
-        </Toolbar>
-        <Divider />
-        <LayoutMenu />
-      </>
-    ),
-    []
+        </Box>
+        <Divider absolute />
+      </Toolbar>
+      <Divider />
+      <LayoutMenu />
+    </>
   );
 
   return (

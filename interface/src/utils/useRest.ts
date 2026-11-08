@@ -1,9 +1,9 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useBlocker } from 'react-router';
-import { toast } from 'react-toastify';
 
 import type { AlovaGenerics, Method } from 'alova';
 import { useRequest } from 'alova/client';
+import { toast } from 'components/toast';
 import { useI18nContext } from 'i18n/i18n-react';
 
 export interface RestRequestOptions<D> {
@@ -54,61 +54,44 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
     }
   }, [readData]);
 
-  const saveData = useCallback(async () => {
+  const saveData = async () => {
     if (!data) return;
 
-    // Reset states before saving
     setRestartNeeded(false);
     setErrorMessage(undefined);
 
     try {
       await writeData(data as D);
-      // Only update origData on successful save (dirtyFlags cleared by onSuccess handler)
       setOrigData(data as D);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
 
       if (message === REBOOT_ERROR_MESSAGE) {
         setRestartNeeded(true);
-        return; // Early return - save succeeded but needs reboot
+        return;
       }
 
-      // Restore original data on validation error
       if (origData) {
         updateData({ data: origData });
       }
       toast.error(message);
       setErrorMessage(message);
-      setDirtyFlags([]); // Clear flags so user can retry
+      setDirtyFlags([]);
     }
-  }, [data, writeData, origData, updateData]);
+  };
 
-  return useMemo(
-    () => ({
-      loadData,
-      saveData,
-      saving: !!saving,
-      updateDataValue,
-      data: data as D,
-      origData: origData as D,
-      dirtyFlags,
-      setDirtyFlags,
-      setOrigData,
-      blocker,
-      errorMessage,
-      restartNeeded
-    }),
-    [
-      loadData,
-      saveData,
-      saving,
-      updateDataValue,
-      data,
-      origData,
-      dirtyFlags,
-      blocker,
-      errorMessage,
-      restartNeeded
-    ]
-  );
+  return {
+    loadData,
+    saveData,
+    saving: !!saving,
+    updateDataValue,
+    data: data as D,
+    origData: origData as D,
+    dirtyFlags,
+    setDirtyFlags,
+    setOrigData,
+    blocker,
+    errorMessage,
+    restartNeeded
+  };
 };

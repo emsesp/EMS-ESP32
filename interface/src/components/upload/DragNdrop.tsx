@@ -7,7 +7,6 @@ import {
   useState
 } from 'react';
 import { Link } from 'react-router';
-import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -28,6 +27,7 @@ import { callAction } from 'api/app';
 
 import { dialogStyle } from '@/CustomTheme';
 import { useRequest } from 'alova/client';
+import { toast } from 'components/toast';
 import { useI18nContext } from 'i18n/i18n-react';
 
 const DocumentUploader = styled(Box)<{ active?: boolean }>(({ theme, active }) => ({
@@ -91,7 +91,9 @@ const DragNdrop = ({ text, onFileSelected }: DragNdropProps) => {
       ).upgradeImportantMessageType;
       setUpgradeImportantMessageType(upgradeImportantMessageType_n);
       if (upgradeImportantMessageType_n === 0) {
-        onFileSelected(file);
+        if (file) {
+          onFileSelected(file);
+        }
       }
     })
     .onError((error) => {
@@ -215,6 +217,8 @@ const DragNdrop = ({ text, onFileSelected }: DragNdropProps) => {
                   LL.UPGRADE_IMPORTANT_MESSAGES_2()}
                 {upgradeImportantMessageType === 1 &&
                   LL.UPGRADE_IMPORTANT_MESSAGES_1()}
+                {upgradeImportantMessageType === 3 &&
+                  LL.UPGRADE_IMPORTANT_MESSAGES_3()}
                 <Typography sx={{ mt: 2 }}>
                   <Link
                     to="https://docs.emsesp.org/FAQ#upgrading-the-firmware"

@@ -6,7 +6,6 @@ const router = AutoRouter();
 
 const REST_ENDPOINT_ROOT = '/rest/';
 const API_ENDPOINT_ROOT = '/api/';
-const GH_ENDPOINT_ROOT = '/gh/'; // for mock GitHub API for version checking
 
 // HTTP HEADERS for msgpack
 const headers = {
@@ -16,6 +15,7 @@ const headers = {
 
 // EMS-ESP Application Settings
 let settings = {
+  system_name: 'standalone',
   locale: 'en',
   tx_mode: 1,
   ems_bus_id: 11,
@@ -64,7 +64,18 @@ let settings = {
   modbus_port: 502,
   modbus_max_clients: 10,
   modbus_timeout: 10000,
-  developer_mode: true
+  developer_mode: true,
+  disable_reset: false,
+  auto_fw_check: false,
+  email_enabled: false,
+  email_security: 2,
+  email_server: 'smtp.gmail.com',
+  email_port: 587,
+  email_login: 'test@emsesp.org',
+  email_pass: 'password',
+  email_sender: 'test@emsesp.org',
+  email_recp: 'test@emsesp.org',
+  email_subject: 'ems-esp notification'
 };
 
 // EMS-ESP System Settings
@@ -85,15 +96,15 @@ let system_status = {
   // network_status: 10, // ethernet connected
   // network_status: 6, // wifi disconnected
   wifi_rssi: -41,
-  esp_platform: 'ESP32S3',
+  esp_platform: 'ESP32',
   build_flags: 'DEMO',
-  cpu_type: 'ESP32-S3',
+  cpu_type: 'ESP32-D0WD-V3',
   cpu_rev: 0,
   cpu_cores: 2,
   cpu_freq_mhz: 240,
   max_alloc_heap: 191,
-  arduino_version: 'ESP32 Arduino v2.0.17',
-  sdk_version: 'v4.4.7',
+  arduino_version: 'Arduino v3.3.8',
+  sdk_version: '5.5.4.260407',
   partition: 'app0',
   flash_chip_size: 16384,
   flash_chip_speed: 80000000,
@@ -105,7 +116,8 @@ let system_status = {
   psram: true,
   psram_size: 8189,
   free_psram: 8166,
-  has_loader: true,
+  recovery_version: '', // upload an EMS-ESP-Recovery-*.bin to set it
+  // recovery_version: '1.0.0',
   has_partition: true,
   partitions: [
     {
@@ -116,37 +128,36 @@ let system_status = {
     },
     {
       partition: 'app1',
-      version: '3.8.1-dev.40',
+      version: '3.8.3',
       install_date: '2025-03-01T13:29:13.999Z',
       size: 4672
     },
     {
       partition: 'factory',
-      version: '3.8.1-dev.39',
+      version: '3.8.4',
       install_date: '2025-03-01T13:29:13.999Z',
       size: 4672
     }
   ],
   // partitions: [],
-  developer_mode: true,
-  model: '',
-  board: '',
-  // model: 'BBQKees Electronics EMS Gateway E32 V2 (E32 V2.0 P3/2024011)',
-  // board: 'E32V2',
-  // status: 0,
-  status: 3
+  developer_mode: settings.developer_mode,
+  disable_reset: settings.disable_reset,
+  model: 'BBQKees Electronics E32V2.2 rev.2.2/2024074',
+  board: 'E32V2_2',
+  status: 0
+  // status: 3
 };
 
-// Test Versioning
+// Test the versioning
 let DEV_VERSION_IS_UPGRADEABLE: boolean;
 let STABLE_VERSION_IS_UPGRADEABLE: boolean;
 let THIS_VERSION: string;
-let LATEST_STABLE_VERSION = '3.8.3';
-let LATEST_DEV_VERSION = '3.9.0-dev.0';
+let LATEST_STABLE_VERSION = '3.8.6';
+let LATEST_DEV_VERSION = '3.9.0-dev.1';
 
 // scenarios for testing versioning
-let version_test = 0; // on latest stable, or switch to dev
-// let version_test = 1; // on latest dev, or switch back to stable
+// let version_test = 0; // on latest stable, or switch to dev
+let version_test = 1; // on latest dev, or switch back to stable
 // let version_test = 2; // upgrade an older stable to latest stable or switch to latest dev
 // let version_test = 3; // upgrade dev to latest, or switch to stable
 // let version_test = 4; // downgrade to an older dev, or switch back to stable
@@ -191,21 +202,23 @@ system_status.partitions[0].version = THIS_VERSION; // app0
 
 // set the ESP platform - using ESP32 will disable OTA and automatic version downloading
 let emulate_esp: string;
-emulate_esp = 'ESP32S3';
-// emulate_esp = 'ESP32';
+// emulate_esp = 'ESP32S3';
+emulate_esp = 'ESP32';
 
 switch (emulate_esp) {
   // ESP32 4MB
   case 'ESP32':
     system_status.esp_platform = 'ESP32';
-    system_status.cpu_type = 'ESP32';
-    system_status.arduino_version = 'Tasmota Arduino v2.0.17';
-    system_status.sdk_version = 'v4.4.7';
-    system_status.psram = false;
-    system_status.psram_size = 0;
-    system_status.free_psram = 0;
-    settings.board_profile = 'E32V2';
-    settings.platform = 'ESP32';
+    system_status.cpu_type = 'ESP32-D0WD-V3';
+    system_status.arduino_version = 'Arduino v3.3.8';
+    system_status.sdk_version = '5.5.4.260407';
+    system_status.psram = true;
+    system_status.psram_size = 4096;
+    system_status.free_psram = 4055;
+    system_status.model = 'BBQKees Electronics E32V2.2 rev.2.2/2024073';
+    system_status.board = 'E32V2_2';
+
+    settings.board_profile = 'E32V2_2';
     break;
 
   // ESP32 S3
@@ -213,13 +226,15 @@ switch (emulate_esp) {
   default:
     system_status.esp_platform = 'ESP32S3';
     system_status.cpu_type = 'ESP32-S3';
-    system_status.arduino_version = 'ESP32 Arduino v2.0.18';
-    system_status.sdk_version = 'v4.4.7';
+    system_status.arduino_version = 'Arduino v3.3.8';
+    system_status.sdk_version = '5.5.4.260407';
     system_status.psram = true;
     system_status.psram_size = 8189;
     system_status.free_psram = 8166;
+    system_status.model = 'BBQKees Electronics S32';
+    system_status.board = 'S32S3';
+
     settings.board_profile = 'S32S3';
-    settings.platform = 'ESP32S3';
     break;
 }
 
@@ -228,14 +243,40 @@ switch (emulate_esp) {
 // GLOBAL VARIABLES
 let countWifiScanPoll = 0; // wifi network scan
 let countHardwarePoll = 0; // for during an upload
+let pendingFirmwareMd5 = false; // set by a .md5 upload, cleared by the next .bin
+
+const VALID_UPLOAD_EXTENSIONS = new Set(['bin', 'json', 'md5']);
+
+function parseMd5Digest(text: string): string | null {
+  const token = text.trim().split(/\s+/)[0];
+  if (/^[0-9a-fA-F]{32}$/.test(token)) {
+    return token.toLowerCase();
+  }
+  return null;
+}
 
 // DeviceTypes
+const enum ScheduleFlag {
+  SCHEDULE_SUN = 1,
+  SCHEDULE_MON = 2,
+  SCHEDULE_TUE = 4,
+  SCHEDULE_WED = 8,
+  SCHEDULE_THU = 16,
+  SCHEDULE_FRI = 32,
+  SCHEDULE_SAT = 64,
+  SCHEDULE_DAY = 0,
+  SCHEDULE_TIMER = 128,
+  SCHEDULE_ONCHANGE = 129,
+  SCHEDULE_CONDITION = 130
+}
+
 const enum DeviceType {
   SYSTEM = 0,
   TEMPERATURESENSOR,
   ANALOGSENSOR,
   SCHEDULER,
   CUSTOM,
+  COMMAND,
   BOILER,
   THERMOSTAT,
   MIXER,
@@ -256,6 +297,7 @@ const enum DeviceType {
 }
 
 const enum DeviceTypeUniqueID {
+  COMMAND_UID = 95,
   SCHEDULER_UID = 96,
   ANALOGSENSOR_UID = 97,
   TEMPERATURESENSOR_UID = 98,
@@ -302,10 +344,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-        old_custom_name +
-        ') with new (' +
-        new_custom_name +
-        ')'
+          old_custom_name +
+          ') with new (' +
+          new_custom_name +
+          ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -359,6 +401,8 @@ function export_data(type: string) {
       return emsesp_customentities;
     case 'schedule':
       return emsesp_schedule;
+    case 'commands':
+      return emsesp_commands;
     case 'modules':
       return emsesp_modules;
     case 'allvalues':
@@ -394,6 +438,12 @@ function custom_support() {
   };
 }
 
+// run a command
+function executeCommand(name: string) {
+  console.log('executing command', name);
+  return status(200);
+}
+
 // called by Action endpoint upgradeImportantMessages
 // 0 is do nothing
 // 1 is a special upgrade and needs an export->factory reset->import
@@ -417,43 +467,71 @@ function upgradeImportantMessages(version: string) {
 
   console.log(
     'upgradeImportantMessageType: version=' +
-    version +
-    ' type=' +
-    upgradeImportantMessageType_n
+      version +
+      ' type=' +
+      upgradeImportantMessageType_n
   );
   return { upgradeImportantMessageType: upgradeImportantMessageType_n };
 }
 
-// called by Action endpoint checkUpgrade
-function check_upgrade(version: string) {
-  let data = {};
-  if (version) {
-    const dev_version = version.split(',')[0];
-    const stable_version = version.split(',')[1];
+// called by Action endpoint getVersions
+// Set MOCK_OFFLINE = true to simulate a device with no internet (omits stable/dev).
+const MOCK_OFFLINE = false;
+// const MOCK_OFFLINE = true;
 
-    console.log(
-      'Upgrade this version (' +
-      THIS_VERSION +
-      ') to dev (' +
-      dev_version +
-      ') is ' +
-      (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-      ' and to stable (' +
-      stable_version +
-      ') is ' +
-      (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO')
-    );
-    data = {
-      emsesp_version: THIS_VERSION,
-      dev_upgradeable: DEV_VERSION_IS_UPGRADEABLE,
-      stable_upgradeable: STABLE_VERSION_IS_UPGRADEABLE
+function get_versions() {
+  const isDev = THIS_VERSION.includes('dev');
+  const currentUpgradeable =
+    !MOCK_OFFLINE &&
+    (isDev ? DEV_VERSION_IS_UPGRADEABLE : STABLE_VERSION_IS_UPGRADEABLE);
+
+  const data: {
+    system_name: string;
+    current: {
+      version: string;
+      type: 'stable' | 'dev';
+      date: string;
+      upgradeable: boolean;
     };
-  } else {
-    console.log('requesting ems-esp version (' + THIS_VERSION + ')');
-    data = {
-      emsesp_version: THIS_VERSION
+    stable?: { version: string; date: string; upgradeable: boolean };
+    dev?: { version: string; date: string; upgradeable: boolean };
+  } = {
+    system_name: settings.system_name,
+    current: {
+      version: THIS_VERSION,
+      type: isDev ? 'dev' : 'stable',
+      date: '2026-04-25T12:00:00',
+      upgradeable: currentUpgradeable
+    }
+  };
+
+  if (!MOCK_OFFLINE) {
+    data.stable = {
+      version: LATEST_STABLE_VERSION,
+      date: '2026-04-25',
+      upgradeable: STABLE_VERSION_IS_UPGRADEABLE
+    };
+    data.dev = {
+      version: LATEST_DEV_VERSION,
+      date: '2026-04-25',
+      upgradeable: DEV_VERSION_IS_UPGRADEABLE
     };
   }
+
+  console.log(
+    'getVersions: current=' +
+      THIS_VERSION +
+      ' stable=' +
+      LATEST_STABLE_VERSION +
+      ' (upgradeable=' +
+      (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+      ') dev=' +
+      LATEST_DEV_VERSION +
+      ' (upgradeable=' +
+      (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+      ')' +
+      (MOCK_OFFLINE ? ' [offline]' : '')
+  );
   return data;
 }
 
@@ -500,7 +578,7 @@ let ap_settings = {
   max_clients: 4
 };
 const ap_status = {
-  status: 1,
+  status: 0, // active - an inactive AP reports no address at all
   ip_address: '192.168.4.1',
   mac_address: '3C:61:05:03:AB:2D',
   station_num: 0
@@ -522,6 +600,7 @@ let network_settings = {
   enableMDNS: true,
   enableCORS: false,
   CORSOrigin: '*',
+  eth_10mbit: false,
   local_ip: '',
   gateway_ip: '',
   subnet_mask: '',
@@ -531,6 +610,11 @@ let network_settings = {
 const network_status = {
   status: 3,
   local_ip: '10.10.10.101',
+  ipv6: [
+    { address: '2001:db8:1234:5678::a1b2', scope: 'global' },
+    { address: 'fd00:1234:5678::a1b2', scope: 'unique local' },
+    { address: 'fe80::3e61:5ff:fe03:ab2c', scope: 'link local' }
+  ],
   mac_address: '3C:61:05:03:AB:2C',
   rssi: -41,
   ssid: 'home',
@@ -538,8 +622,8 @@ const network_status = {
   channel: 11,
   subnet_mask: '255.255.255.0',
   gateway_ip: '10.10.10.1',
-  dns_ip_1: '10.10.10.1',
-  dns_ip_2: '0.0.0.0',
+  gateway_ipv6: ['fe80::1', 'fe80::2'],
+  dns: ['10.10.10.1', 'fd00:1234:5678::1'],
   hostname: 'ems-esp',
   reconnect_count: 1
 };
@@ -709,9 +793,11 @@ const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT =
   REST_ENDPOINT_ROOT + 'resetCustomizations';
 
 const EMSESP_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
+const EMSESP_COMMANDS_ENDPOINT = REST_ENDPOINT_ROOT + 'commands';
 const EMSESP_CUSTOMENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customEntities';
 const EMSESP_MODULES_ENDPOINT = REST_ENDPOINT_ROOT + 'modules';
 const EMSESP_ACTION_ENDPOINT = REST_ENDPOINT_ROOT + 'action';
+const EMSESP_UPLOAD_FILE_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFile';
 
 // these are used in the API calls only
 const EMSESP_SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info';
@@ -877,7 +963,7 @@ const emsesp_coredata = {
   devices: [
     {
       id: 7,
-      t: 5,
+      t: 6,
       tn: 'Boiler',
       b: 'Nefit',
       n: 'Nefit Trendline HRC30/Generic Heatronic 3',
@@ -889,7 +975,7 @@ const emsesp_coredata = {
     },
     {
       id: 3,
-      t: 5,
+      t: 6,
       tn: 'Boiler',
       b: 'Buderus',
       n: 'Buderus GB125',
@@ -901,7 +987,7 @@ const emsesp_coredata = {
     },
     {
       id: 1,
-      t: 6,
+      t: 7,
       tn: 'Thermostat',
       b: 'Buderus',
       n: 'RC35',
@@ -913,7 +999,7 @@ const emsesp_coredata = {
     },
     {
       id: 2,
-      t: 6,
+      t: 7,
       tn: 'Thermostat',
       b: '',
       n: 'RC20',
@@ -925,7 +1011,7 @@ const emsesp_coredata = {
     },
     {
       id: 4,
-      t: 6,
+      t: 7,
       tn: 'Thermostat',
       b: 'Nefit',
       n: 'Moduline 1000',
@@ -937,7 +1023,7 @@ const emsesp_coredata = {
     },
     {
       id: 5,
-      t: 7,
+      t: 8,
       tn: 'Mixer Module',
       b: 'Buderus',
       n: 'MM10',
@@ -948,7 +1034,7 @@ const emsesp_coredata = {
     },
     {
       id: 6,
-      t: 8,
+      t: 9,
       tn: 'Solar Module',
       b: 'Buderus',
       n: 'SM10',
@@ -961,7 +1047,7 @@ const emsesp_coredata = {
     {
       id: 8,
       tn: 'Boiler/HP',
-      t: 5,
+      t: 10,
       b: '',
       n: 'Bosch Compress 7000i AW Heat Pump',
       d: 8,
@@ -973,7 +1059,7 @@ const emsesp_coredata = {
     {
       id: 9,
       tn: 'Thermostat',
-      t: 6,
+      t: 7,
       b: '',
       n: 'RC100H',
       d: 56,
@@ -985,7 +1071,7 @@ const emsesp_coredata = {
     {
       id: 10,
       tn: 'Thermostat',
-      t: 6,
+      t: 7,
       b: '',
       n: 'RC310',
       d: 16,
@@ -997,7 +1083,7 @@ const emsesp_coredata = {
     {
       id: 11,
       tn: 'Ventilation',
-      t: 18,
+      t: 19,
       b: '',
       n: 'Vent4000CC',
       d: 81,
@@ -1005,6 +1091,30 @@ const emsesp_coredata = {
       v: '53.02',
       e: 10,
       url: 'ventilation'
+    },
+    {
+      id: 12,
+      tn: 'Gateway',
+      t: 11,
+      b: '',
+      n: 'KM300',
+      d: 72,
+      p: 231,
+      v: '01.20',
+      e: 0,
+      url: 'gateway'
+    },
+    {
+      id: 13,
+      tn: 'Connect',
+      t: 12,
+      b: '',
+      n: 'Easy Connect',
+      d: 2,
+      p: 206,
+      v: '12.34',
+      e: 0,
+      url: 'connect'
     }
   ]
 };
@@ -3710,7 +3820,7 @@ const emsesp_devicedata_10 = {
       u: 0,
       id: '00hc1 nofrost mode',
       c: 'hc1/nofrostmode',
-      l: ['room', 'outdoor', 'room outdoor']
+      l: ['off', 'room', 'outdoor', 'room outdoor']
     },
     {
       v: 2,
@@ -4101,6 +4211,75 @@ let emsesp_customentities = {
       value_type: 0,
       writeable: true,
       value: 21
+    },
+    {
+      id: 0,
+      ram: 1,
+      device_id: 0,
+      type_id: 0,
+      offset: 0,
+      factor: 1,
+      name: 'message',
+      uom: 0,
+      value_type: 9,
+      writeable: true,
+      hide: false,
+      value:
+        '{"stable":{"version":"3.8.3","date":"2026-08-01"},"dev":{"version":"3.9.0-dev.0","date":"2026-08-01T09:55:29Z"}}'
+    }
+  ]
+};
+
+// COMMANDS
+let emsesp_commands = {
+  commands: [
+    {
+      id: 1,
+      cmd: 'hc1/mode',
+      value: 'day',
+      name: 'set_day_mode'
+    },
+    {
+      id: 2,
+      cmd: 'hc1/mode',
+      value: 'night',
+      name: 'set_night_mode'
+    },
+    {
+      id: 3,
+      cmd: 'thermostat/hc2/seltemp',
+      value: '20',
+      name: 'set_temp_20'
+    },
+    {
+      id: 4,
+      cmd: 'system/restart',
+      value: '',
+      name: 'restart_system'
+    },
+    {
+      id: 5,
+      cmd: 'boiler/selflowtemp',
+      value: '(custom/setpoint - boiler/outdoortemp) * 2.8 + 3',
+      name: 'heatingcurve'
+    },
+    {
+      id: 6,
+      cmd: 'system/message',
+      value: '"hello world"',
+      name: 'send_message'
+    },
+    {
+      id: 7,
+      cmd: 'custom/message',
+      value: '{"url":"http://emsesp.org/versions.json"}',
+      name: 'get_versions'
+    },
+    {
+      id: 8,
+      cmd: 'system/sendmail',
+      value: '"test email with version " + custom/message',
+      name: 'sendmail'
     }
   ]
 };
@@ -4113,8 +4292,7 @@ let emsesp_schedule = {
       active: true,
       flags: 6,
       time: '07:30',
-      cmd: 'hc1/mode',
-      value: 'day',
+      cmd_name: 'set_day_mode',
       name: 'day_mode'
     },
     {
@@ -4122,8 +4300,7 @@ let emsesp_schedule = {
       active: true,
       flags: 31,
       time: '23:00',
-      cmd: 'hc1/mode',
-      value: 'night',
+      cmd_name: 'set_night_mode',
       name: 'night_mode'
     },
     {
@@ -4131,45 +4308,40 @@ let emsesp_schedule = {
       active: true,
       flags: 10,
       time: '00:00',
-      cmd: 'thermostat/hc2/seltemp',
-      value: '20',
+      cmd_name: 'set_temp_20',
       name: 'temp_20'
     },
     {
       id: 4,
       active: false,
-      flags: 1,
+      flags: ScheduleFlag.SCHEDULE_TIMER,
       time: '04:00',
-      cmd: 'system/restart',
-      value: '',
+      cmd_name: 'restart_system',
       name: 'auto_restart'
     },
     {
       id: 5,
       active: false,
-      flags: 130,
+      flags: ScheduleFlag.SCHEDULE_CONDITION,
       time: 'system/network/rssi < -70',
-      cmd: 'system/restart',
-      value: '',
+      cmd_name: 'restart_system',
       name: 'bad_wifi'
     },
     {
       id: 6,
       active: false,
-      flags: 129,
+      flags: ScheduleFlag.SCHEDULE_ONCHANGE,
       time: 'boiler/outdoortemp',
-      cmd: 'boiler/selflowtemp',
-      value: '(custom/setpoint - boiler/outdoortemp) * 2.8 + 3',
+      cmd_name: 'heatingcurve',
       name: 'heatingcurve'
     },
     {
       id: 7,
-      active: false,
-      flags: 132,
+      active: true,
+      flags: ScheduleFlag.SCHEDULE_TIMER,
       time: '',
-      cmd: 'system/message',
-      value: '"hello world"',
-      name: '' // empty
+      cmd_name: 'send_message',
+      name: 'on_boot'
     }
   ]
 };
@@ -4272,6 +4444,8 @@ const emsesp_deviceentities_4 = [
     n: 'hc2 selected room temperature',
     id: 'hc2/seltemp',
     m: 8,
+    mi: 5,
+    ma: 30,
     w: true
   },
   {
@@ -4294,8 +4468,25 @@ const emsesp_deviceentities_7 = [
   { u: 0, n: '!reset', id: 'reset', m: 8, w: false },
   { v: false, n: 'heating active', id: 'heatingactive', m: 8, w: false },
   { v: false, n: 'tapwater active', id: 'tapwateractive', m: 4, w: false },
-  { v: 5, n: 'selected flow temperature', id: 'selflowtemp', m: 4, w: true },
-  { v: 0, n: 'burner selected max power', id: 'selburnpow', m: 14, w: true },
+  {
+    v: 5,
+    n: 'selected flow temperature',
+    id: 'selflowtemp',
+    m: 8,
+    mi: 0,
+    ma: 90,
+    c: true,
+    w: true
+  },
+  {
+    v: 0,
+    n: 'burner selected max power',
+    id: 'selburnpow',
+    m: 14,
+    mi: 0,
+    ma: 100,
+    w: true
+  },
   { v: 0, n: 'heating pump modulation', id: 'heatingpumpmod', m: 0, w: false },
   { n: 'heating pump 2 modulation', id: 'heatingpump2mod', m: 0, w: false },
   { n: 'outside temperature', id: 'outdoortemp', m: 0, w: false },
@@ -4313,16 +4504,48 @@ const emsesp_deviceentities_7 = [
   { v: false, n: 'ignition', id: 'ignwork', m: 0, w: false },
   { v: false, n: 'oil preheating', id: 'oilpreheat', m: 0, w: false },
   { v: true, n: 'heating activated', id: 'heatingactivated', m: 0, w: false },
-  { v: 80, n: 'heating temperature', id: 'heatingtemp', m: 0, w: false },
-  { v: 70, n: 'burner pump max power', id: 'pumpmodmax', m: 0, w: false },
+  {
+    v: 80,
+    n: 'heating temperature',
+    id: 'heatingtemp',
+    m: 0,
+    mi: 30,
+    ma: 82,
+    w: true
+  },
+  {
+    v: 70,
+    n: 'burner pump max power',
+    id: 'pumpmodmax',
+    m: 0,
+    mi: 10,
+    ma: 100,
+    w: true
+  },
   { v: 30, n: 'burner pump min power', id: 'pumpmodmin', m: 0, w: false },
   { v: 1, n: 'pump delay', id: 'pumpdelay', m: 0, w: false },
   { v: 10, n: 'burner min period', id: 'burnminperiod', m: 0, w: false },
   { v: 0, n: 'burner min power', id: 'burnminpower', m: 0, w: false },
-  { v: 50, n: 'burner max power', id: 'burnmaxpower', m: 0, w: false },
+  {
+    v: 50,
+    n: 'burner max power',
+    id: 'burnmaxpower',
+    m: 0,
+    mi: 0,
+    ma: 100,
+    w: true
+  },
   { v: -6, n: 'hysteresis on temperature', id: 'boilhyston', m: 0, w: false },
   { v: 6, n: 'hysteresis off temperature', id: 'boilhystoff', m: 0, w: false },
-  { v: 0, n: 'set flow temperature', id: 'setflowtemp', m: 0, w: true },
+  {
+    v: 0,
+    n: 'set flow temperature',
+    id: 'setflowtemp',
+    m: 0,
+    mi: 0,
+    ma: 90,
+    w: true
+  },
   { v: 0, n: 'burner set power', id: 'setburnpow', m: 0, w: false },
   { v: 0, n: 'burner current power', id: 'curburnpow', m: 0, w: false },
   { v: 326323, n: 'burner starts', id: 'burnstarts', m: 0, w: false },
@@ -4489,6 +4712,56 @@ router
 
 // SYSTEM and SETTINGS
 router
+  .post(EMSESP_UPLOAD_FILE_ENDPOINT, async (request: Request) => {
+    const formData = await request.formData();
+    const uploaded = formData.get('file');
+    if (!uploaded || typeof uploaded === 'string') {
+      return status(400);
+    }
+
+    const fileName = uploaded.name || '';
+    const fileExtension = fileName.includes('.')
+      ? fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase()
+      : '';
+    console.log(
+      `File uploaded: ${fileName} (${fileExtension}, ${uploaded.size} bytes)`
+    );
+
+    if (!VALID_UPLOAD_EXTENSIONS.has(fileExtension)) {
+      console.log('Invalid file extension');
+      return status(406);
+    }
+
+    if (fileExtension === 'md5') {
+      const digest = parseMd5Digest(await uploaded.text());
+      if (!digest) {
+        console.log('Invalid MD5 digest file');
+        return status(406);
+      }
+      pendingFirmwareMd5 = true;
+      console.log('MD5 digest received', digest);
+      return { md5: digest };
+    }
+
+    // the firmware recognises the recovery image by its app description, the mock by its file name
+    if (fileExtension === 'bin' && fileName.startsWith('EMS-ESP-Recovery')) {
+      const md5_ok = pendingFirmwareMd5;
+      pendingFirmwareMd5 = false;
+      system_status.recovery_version = '1.0.0';
+      console.log('Recovery firmware installed');
+      return md5_ok ? { recovery: true, md5_ok } : { recovery: true };
+    }
+
+    if (fileExtension === 'bin' && pendingFirmwareMd5) {
+      pendingFirmwareMd5 = false;
+      console.log('Firmware MD5 matches');
+      return { md5_ok: true };
+    }
+
+    pendingFirmwareMd5 = false;
+    console.log('File uploaded successfully!');
+    return status(200);
+  })
   .get(ACTIVITY_ENDPOINT, () => activity)
   .get(SYSTEM_STATUS_ENDPOINT, async () => {
     if (countHardwarePoll >= 2) {
@@ -4588,12 +4861,18 @@ router
   .post(EMSESP_SETTINGS_ENDPOINT, async (request: any) => {
     settings = await request.json();
     console.log('application settings saved', settings);
+    system_status.developer_mode = settings.developer_mode;
+    system_status.disable_reset = settings.disable_reset;
     return status(200); // no restart needed
     // return status(205); // reboot required
   })
 
   // Device Data
   .get(EMSESP_CORE_DATA_ENDPOINT, () => {
+    // remove gateway and connect devices
+    // emsesp_coredata.devices = emsesp_coredata.devices.filter(
+    //   (item) => item.t !== 11 && item.t !== 12
+    // );
     // sort by type, like its done in the C++ code
     let sorted_devices = [...emsesp_coredata.devices].sort((a, b) => a.t - b.t);
     // append emsesp_coredata to sorted_devices so Custom is always at the end of the list
@@ -4722,15 +5001,16 @@ router
       }
 
       // add the scheduler data
-      // filter emsesp_schedule with only if it has a name and create data in one pass
-      const namedSchedules = emsesp_schedule.schedule.filter((item) => item.name);
+      const namedSchedules = emsesp_schedule.schedule.filter(
+        (item: any) => item.name
+      );
       if (namedSchedules.length > 0) {
-        const scheduler_data = namedSchedules.map((item, index) => ({
+        const scheduler_data = namedSchedules.map((item: any, index: number) => ({
           id: DeviceTypeUniqueID.SCHEDULER_UID * 100 + index,
           dv: {
             id: '00' + item.name,
-            v: item.active ? 'on' : 'off',
             c: item.name,
+            v: item.active ? 'on' : 'off',
             l: ['off', 'on']
           }
         }));
@@ -4738,6 +5018,26 @@ router
           id: DeviceTypeUniqueID.SCHEDULER_UID,
           t: DeviceType.SCHEDULER,
           nodes: scheduler_data
+        };
+        dashboard_nodes.push(dashboard_object);
+      }
+
+      // add the command items (executable from dashboard)
+      const namedCommands = emsesp_commands.commands.filter(
+        (item: any) => item.name
+      );
+      if (namedCommands.length > 0) {
+        const command_data = namedCommands.map((item: any, index: number) => ({
+          id: DeviceTypeUniqueID.COMMAND_UID * 100 + index,
+          dv: {
+            id: '00' + item.name,
+            c: item.name
+          }
+        }));
+        dashboard_object = {
+          id: DeviceTypeUniqueID.COMMAND_UID,
+          t: DeviceType.COMMAND,
+          nodes: command_data
         };
         dashboard_nodes.push(dashboard_object);
       }
@@ -4829,6 +5129,15 @@ router
     console.log('Renaming device ID ' + id + ' to ' + content.name);
     return status(200);
   })
+
+  // Commands
+  .post(EMSESP_COMMANDS_ENDPOINT, async (request: any) => {
+    const content = await request.json();
+    emsesp_commands = content;
+    console.log('commands saved', emsesp_commands);
+    return status(200);
+  })
+  .get(EMSESP_COMMANDS_ENDPOINT, () => emsesp_commands)
 
   // Scheduler
   .post(EMSESP_SCHEDULE_ENDPOINT, async (request: any) => {
@@ -4930,14 +5239,16 @@ router
     }
     if (id === DeviceTypeUniqueID.SCHEDULER_UID) {
       // toggle scheduler
-      // find the schedule in emsesp_schedule via the name and toggle the active
       const objIndex = emsesp_schedule.schedule.findIndex(
-        (obj) => obj.name === command
+        (obj: any) => obj.name === command
       );
       if (objIndex !== -1) {
         emsesp_schedule.schedule[objIndex].active = value;
         console.log("Toggle schedule '" + command + "' to " + value);
       }
+    }
+    if (id === DeviceTypeUniqueID.COMMAND_UID) {
+      console.log("Execute command '" + command + "'");
     }
 
     // await delay(1000); // wait to show spinner
@@ -5181,16 +5492,16 @@ router
       } else if (action === 'getCustomSupport') {
         // send custom support
         return custom_support();
-      } else if (action === 'checkUpgrade') {
-        // check upgrade
-        // check if content has a param
-        if (!content.param) {
-          return check_upgrade('');
-        }
-        return check_upgrade(content.param);
+      } else if (action === 'getVersions') {
+        // get versions
+        return get_versions();
       } else if (action === 'uploadURL') {
         // upload URL
         console.log('upload File from URL', content.param);
+        if (String(content.param).toLowerCase().includes('recovery')) {
+          // the recovery app is installed without a restart
+          system_status.recovery_version = '1.0.0';
+        }
         return status(200);
       } else if (action === 'resetMQTT') {
         // reset MQTT
@@ -5203,6 +5514,9 @@ router
       } else if (action === 'upgradeImportantMessages') {
         // check upgrade important messages
         return upgradeImportantMessages(content.param);
+      } else if (action === 'executeCommand') {
+        // execute command
+        return executeCommand(content.param);
       }
     }
     return status(404); // cmd not found
@@ -5240,27 +5554,6 @@ router
       }
     }
     return status(404); // not found
-  });
-
-// Mock GitHub API
-// https://api.github.com/repos/emsesp/EMS-ESP32/releases
-
-router
-  .get(GH_ENDPOINT_ROOT + '/tags/latest', () => {
-    const data = {
-      name: 'v' + LATEST_DEV_VERSION,
-      published_at: new Date().toISOString() // use todays date
-    };
-    console.log('returning latest development version (today): ', data);
-    return data;
-  })
-  .get(GH_ENDPOINT_ROOT + '/latest', () => {
-    const data = {
-      name: 'v' + LATEST_STABLE_VERSION,
-      published_at: '2025-03-01T13:29:13.999Z'
-    };
-    console.log('returning latest stable version: ', data);
-    return data;
   });
 
 // const logger: ResponseHandler = (response, request) => {

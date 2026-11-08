@@ -1,4 +1,4 @@
-import { memo, useCallback } from 'react';
+import { memo } from 'react';
 import type { Blocker } from 'react-router';
 
 import {
@@ -15,13 +15,13 @@ import { useI18nContext } from 'i18n/i18n-react';
 const BlockNavigation = ({ blocker }: { blocker: Blocker }) => {
   const { LL } = useI18nContext();
 
-  const handleReset = useCallback(() => {
+  const handleReset = () => {
     blocker.reset?.();
-  }, [blocker]);
+  };
 
-  const handleProceed = useCallback(() => {
+  const handleProceed = () => {
     blocker.proceed?.();
-  }, [blocker]);
+  };
 
   return (
     <Dialog sx={dialogStyle} open={blocker.state === 'blocked'}>

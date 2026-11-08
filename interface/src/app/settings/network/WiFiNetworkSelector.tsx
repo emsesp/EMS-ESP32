@@ -1,4 +1,4 @@
-import { memo, useCallback, useContext } from 'react';
+import { memo, useContext } from 'react';
 
 import LockIcon from '@mui/icons-material/Lock';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
@@ -63,34 +63,31 @@ const WiFiNetworkSelector = ({ networkList }: { networkList: WiFiNetworkList }) 
 
   const wifiConnectionContext = useContext(WiFiConnectionContext);
 
-  const renderNetwork = useCallback(
-    (network: WiFiNetwork) => (
-      <ListItem
-        key={network.bssid}
-        onClick={() => wifiConnectionContext.selectNetwork(network)}
-      >
-        <ListItemAvatar>
-          <Avatar>{isNetworkOpen(network) ? <LockOpenIcon /> : <LockIcon />}</Avatar>
-        </ListItemAvatar>
-        <ListItemText
-          primary={network.ssid}
-          secondary={
-            'Security: ' +
-            networkSecurityMode(network) +
-            ', Ch: ' +
-            network.channel +
-            ', bssid: ' +
-            network.bssid
-          }
-        />
-        <ListItemIcon>
-          <Badge badgeContent={network.rssi + 'dBm'}>
-            <WifiIcon sx={{ color: networkQualityHighlight(network, theme) }} />
-          </Badge>
-        </ListItemIcon>
-      </ListItem>
-    ),
-    [wifiConnectionContext, theme]
+  const renderNetwork = (network: WiFiNetwork) => (
+    <ListItem
+      key={network.bssid}
+      onClick={() => wifiConnectionContext.selectNetwork(network)}
+    >
+      <ListItemAvatar>
+        <Avatar>{isNetworkOpen(network) ? <LockOpenIcon /> : <LockIcon />}</Avatar>
+      </ListItemAvatar>
+      <ListItemText
+        primary={network.ssid}
+        secondary={
+          'Security: ' +
+          networkSecurityMode(network) +
+          ', Ch: ' +
+          network.channel +
+          ', bssid: ' +
+          network.bssid
+        }
+      />
+      <ListItemIcon>
+        <Badge badgeContent={network.rssi + 'dBm'}>
+          <WifiIcon sx={{ color: networkQualityHighlight(network, theme) }} />
+        </Badge>
+      </ListItemIcon>
+    </ListItem>
   );
 
   if (networkList.networks.length === 0) {

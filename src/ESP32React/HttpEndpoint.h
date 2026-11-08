@@ -7,6 +7,7 @@
 
 #include "SecurityManager.h"
 #include "StatefulService.h"
+#include "../core/psram_async_json_response.h"
 
 #define HTTP_ENDPOINT_ORIGIN_ID "http"
 
@@ -58,7 +59,7 @@ class HttpEndpoint {
             }
         }
 
-        auto *     response   = new AsyncJsonResponse(false);
+        auto *     response   = new emsesp::PsramAsyncJsonResponse(false);
         JsonObject jsonObject = response->getRoot().to<JsonObject>();
         _statefulService->read(jsonObject, _stateReader);
         response->setLength();

@@ -14,12 +14,17 @@
 # and
 #  extra_scripts = scripts/upload.py
 #
+# Prefer a numeric IP over .local — mDNS (especially under WSL2) adds latency
+# and can stall on IPv6 before falling back to IPv4.
+
+import hashlib
+import os
+import socket
+import time
+from urllib.parse import urlparse
 
 import requests
-import hashlib
-from urllib.parse import urlparse
-import time
-import os
+from requests.adapters import HTTPAdapter
 
 Import("env")
 
@@ -35,6 +40,10 @@ except ImportError:
     from tqdm import tqdm
     from termcolor import cprint
 
+# http.client/urllib3 default is 8–16 KiB, which starves a LAN TCP window.
+UPLOAD_BLOCK_SIZE = 64 * 1024
+UPLOAD_SNDBUF = 256 * 1024
+
 
 def print_success(x):
     cprint(x, 'green')
@@ -44,6 +53,43 @@ def print_fail(x):
     cprint(f'Error: {x}', 'red')
 
 
+def resolve_ipv4(host):
+    """Resolve hostname to IPv4 so we skip mDNS/IPv6 retries on every request."""
+    if host.startswith('['):
+        return host
+    if ':' in host and host.count(':') == 1:
+        host = host.rsplit(':', 1)[0]
+    try:
+        socket.inet_pton(socket.AF_INET, host)
+        return host
+    except OSError:
+        pass
+    infos = socket.getaddrinfo(host, 80, socket.AF_INET, socket.SOCK_STREAM)
+    if not infos:
+        raise socket.gaierror(f'No IPv4 address for {host}')
+    return infos[0][4][0]
+
+
+class FastHTTPAdapter(HTTPAdapter):
+    """Larger write chunks and socket send buffer for streaming POSTs."""
+
+    def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
+        socket_options = [
+            (socket.IPPROTO_TCP, socket.TCP_NODELAY, 1),
+            (socket.SOL_SOCKET, socket.SO_SNDBUF, UPLOAD_SNDBUF),
+        ]
+        pool_kwargs.setdefault('socket_options', socket_options)
+        pool_kwargs.setdefault('blocksize', UPLOAD_BLOCK_SIZE)
+        super().init_poolmanager(connections, maxsize, block=block, **pool_kwargs)
+
+
+def make_session():
+    session = requests.Session()
+    adapter = FastHTTPAdapter(pool_connections=2, pool_maxsize=2)
+    session.mount('http://', adapter)
+    return session
+
+
 def build_headers(host_ip, emsesp_url, content_type='application/json', access_token=None, extra_headers=None):
     """Build common HTTP headers with optional overrides."""
     headers = {
@@ -51,19 +97,64 @@ def build_headers(host_ip, emsesp_url, content_type='application/json', access_t
         'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/118.0',
         'Accept': '*/*',
         'Accept-Language': 'en-US',
-        'Accept-Encoding': 'gzip, deflate',
         'Referer': emsesp_url,
         'Content-Type': content_type,
         'Connection': 'keep-alive'
     }
-    
+
     if access_token:
         headers['Authorization'] = f'Bearer {access_token}'
-    
+
     if extra_headers:
         headers.update(extra_headers)
-    
+
     return headers
+
+
+def post_file(session, upload_url, host_ip, emsesp_url, access_token, filename, data, progress_desc=None):
+    """POST one multipart file to /rest/uploadFile (WebUI-compatible)."""
+    encoder = MultipartEncoder(fields={
+        'file': (filename, data, 'application/octet-stream')
+    })
+
+    bar = None
+    if progress_desc is not None:
+        bar = tqdm(
+            desc=progress_desc,
+            total=encoder.len,
+            dynamic_ncols=True,
+            unit='B',
+            unit_scale=True,
+            unit_divisor=1024,
+            mininterval=0.2
+        )
+        monitor = MultipartEncoderMonitor(
+            encoder, lambda m: bar.update(m.bytes_read - bar.n))
+        body = monitor
+        content_type = monitor.content_type
+        content_length = monitor.len
+    else:
+        body = encoder
+        content_type = encoder.content_type
+        content_length = encoder.len
+
+    headers = build_headers(
+        host_ip,
+        emsesp_url,
+        content_type=content_type,
+        access_token=access_token,
+        extra_headers={
+            'Content-Length': str(content_length),
+            'Origin': emsesp_url
+        }
+    )
+
+    started = time.perf_counter()
+    response = session.post(upload_url, data=body, headers=headers, timeout=None)
+    elapsed = time.perf_counter() - started
+    if bar is not None:
+        bar.close()
+    return response, encoder.len, elapsed
 
 
 def on_upload(source, target, env):
@@ -79,90 +170,89 @@ def on_upload(source, target, env):
         username = env.GetProjectOption('custom_username')
         password = env.GetProjectOption('custom_password')
         emsesp_ip = env.GetProjectOption('custom_emsesp_ip')
-    except Exception as e:
+    except Exception:
         print_fail(f'Missing settings. Add these to your pio_local.ini file:\n\ncustom_username=username\ncustom_password=password\ncustom_emsesp_ip=ems-esp.local\n')
         return
 
-    emsesp_url = f"http://{emsesp_ip}"
-    parsed_url = urlparse(emsesp_url)
-    host_ip = parsed_url.netloc
-
-    signon_url = f"{emsesp_url}/rest/signIn"
-    signon_headers = build_headers(host_ip, emsesp_url)
-
-    username_password = {
-        "username": username,
-        "password": password
-    }
-
-    response = requests.post(
-        signon_url, json=username_password, headers=signon_headers)
-
-    if response.status_code != 200:
-        print_fail("Authentication with EMS-ESP failed (code " +
-                   str(response.status_code) + ")")
+    parsed_url = urlparse(f"http://{emsesp_ip}")
+    host_name = parsed_url.hostname or emsesp_ip
+    try:
+        host_ip = resolve_ipv4(host_name)
+    except OSError as e:
+        print_fail(f"Could not resolve {host_name} to IPv4: {e}")
         return
 
-    print_success("Authentication with EMS-ESP successful")
-    access_token = response.json().get('access_token')
+    if host_ip != host_name:
+        print_success(f"Resolved {host_name} -> {host_ip}")
 
-    # start the upload
-    firmware_path = str(source[0])
+    emsesp_url = f"http://{host_ip}"
+    session = make_session()
 
-    with open(firmware_path, 'rb') as firmware:
-        md5 = hashlib.md5(firmware.read()).hexdigest()
+    try:
+        signon_url = f"{emsesp_url}/rest/signIn"
+        signon_headers = build_headers(host_ip, emsesp_url)
 
-        firmware.seek(0)
+        response = session.post(
+            signon_url,
+            json={"username": username, "password": password},
+            headers=signon_headers,
+            timeout=15)
 
-        encoder = MultipartEncoder(fields={
-            'MD5': md5,
-            'file': (firmware_path, firmware, 'application/octet-stream')}
-        )
+        if response.status_code != 200:
+            print_fail("Authentication with EMS-ESP failed (code " +
+                       str(response.status_code) + ")")
+            return
 
-        bar = tqdm(desc='Upload Progress',
-                   total=encoder.len,
-                   dynamic_ncols=True,
-                   unit='B',
-                   unit_scale=True,
-                   unit_divisor=1024
-                   )
+        print_success("Authentication with EMS-ESP successful")
+        access_token = response.json().get('access_token')
 
-        monitor = MultipartEncoderMonitor(
-            encoder, lambda monitor: bar.update(monitor.bytes_read - bar.n))
+        firmware_path = str(source[0])
+        with open(firmware_path, 'rb') as firmware_file:
+            firmware = firmware_file.read()
 
-        post_headers = build_headers(
-            host_ip,
-            emsesp_url,
-            content_type=monitor.content_type,
-            access_token=access_token,
-            extra_headers={
-                'Content-Length': str(monitor.len),
-                'Origin': emsesp_url
-            }
-        )
-
+        md5 = hashlib.md5(firmware).hexdigest()
+        filename = os.path.basename(firmware_path)
+        # Device enables MD5 check only after a file whose name ends in .md5
+        # (same as the WebUI). An ElegantOTA "MD5" form field is ignored.
+        md5_name = os.path.splitext(filename)[0] + '.md5'
         upload_url = f"{emsesp_url}/rest/uploadFile"
 
-        response = requests.post(
-            upload_url, data=monitor, headers=post_headers)
+        print(f"Uploading MD5 ({md5})")
+        response, _, _ = post_file(
+            session, upload_url, host_ip, emsesp_url, access_token,
+            md5_name, (md5 + '\n').encode('ascii'))
+        if response.status_code != 200:
+            print_fail(f"MD5 upload failed (code {response.status_code}).")
+            return
+        print_success("MD5 accepted")
 
-        bar.close()
-        time.sleep(0.1)
-
+        print(f"Uploading firmware ({filename})")
+        response, size, elapsed = post_file(
+            session, upload_url, host_ip, emsesp_url, access_token,
+            filename, firmware, progress_desc='Upload Progress')
         print()
 
         if response.status_code != 200:
             print_fail(f"Upload failed (code {response.status_code}).")
         else:
-            print_success("Upload successful. Rebooting device.")
+            kibs = (size / 1024) / elapsed if elapsed > 0 else 0
+            print_success(
+                f"Upload successful ({kibs:.0f} KiB/s in {elapsed:.1f}s). Rebooting device.")
             restart_headers = build_headers(
                 host_ip, emsesp_url, access_token=access_token)
             restart_url = f"{emsesp_url}/api/system/restart"
-            response = requests.get(restart_url, headers=restart_headers)
-            if response.status_code != 200:
-                print_fail(f"Restart failed (code {response.status_code})")
+            try:
+                response = session.get(
+                    restart_url, headers=restart_headers, timeout=10)
+                if response.status_code != 200:
+                    print_fail(f"Restart failed (code {response.status_code})")
+            except requests.RequestException:
+                # Device often drops the connection as it reboots — that's OK.
+                pass
 
         print()
+    finally:
+        session.close()
 
 
 if env.get('UPLOAD_PROTOCOL') == 'custom':

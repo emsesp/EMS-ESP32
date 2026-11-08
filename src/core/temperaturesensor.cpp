@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,20 +45,20 @@ void TemperatureSensor::start(const bool factory_settings) {
     Mqtt::subscribe(EMSdevice::DeviceType::TEMPERATURESENSOR, topic, nullptr); // use empty function callback
 }
 
-// load settings
-void TemperatureSensor::reload() {
-    // load the service settings
-    EMSESP::system_.dallas_gpio(0); // reset in system to check valid sensor
-    EMSESP::webSettingsService.read([&](WebSettings const & settings) {
-        dallas_gpio_ = settings.dallas_gpio;
-        parasite_    = settings.dallas_parasite;
-    });
-    EMSESP::system_.dallas_gpio(dallas_gpio_); // set to system for checks
-
+void TemperatureSensor::ha_reset() {
     for (auto & sensor : sensors_) {
         remove_ha_topic(sensor.id());
         sensor.ha_registered = false; // force HA configs to be re-created
     }
+}
+
+// load settings
+void TemperatureSensor::reload() {
+    EMSESP::webSettingsService.read([&](WebSettings const & settings) {
+        dallas_gpio_ = settings.dallas_gpio;
+        parasite_    = settings.dallas_parasite;
+    });
+    ha_reset();
 }
 
 void TemperatureSensor::loop() {
@@ -97,6 +97,7 @@ void TemperatureSensor::loop() {
                     }
                 }
             }
+
             last_activity_ = time_now;
         }
     } else if (state_ == State::READING) {
@@ -127,6 +128,7 @@ void TemperatureSensor::loop() {
                 if (!parasite_) {
                     bus_.depower();
                 }
+
                 if (bus_.crc8(addr, ADDR_LEN - 1) == addr[ADDR_LEN - 1]) {
                     switch (addr[0]) {
                     case TYPE_DS18B20:
@@ -147,11 +149,13 @@ void TemperatureSensor::loop() {
                                         publish_sensor(sensor);
                                         changed_ |= true;
                                     }
+
                                     sensor.read = true;
                                     found       = true;
                                     break;
                                 }
                             }
+
                             // add new sensor. this will create the id string, empty name and offset
                             if (!found && (sensors_.size() < (MAX_SENSORS - 1))) {
                                 // LOG_NOTICE("Adding new sensor for %s", Sensor(addr).id().c_str());
@@ -169,6 +173,7 @@ void TemperatureSensor::loop() {
                         } else {
                             sensorfails_++;
                         }
+
                         break;
 
                     default:
@@ -184,6 +189,7 @@ void TemperatureSensor::loop() {
                 if (!parasite_) {
                     bus_.depower();
                 }
+
                 // check for missing sensors after some samples
                 if (++scancnt_ > SCAN_MAX) {
                     for (auto & sensor : sensors_) {
@@ -191,15 +197,17 @@ void TemperatureSensor::loop() {
                             sensor.temperature_c = EMS_VALUE_INT16_NOTSET;
                             changed_             = true;
                         }
+
                         sensor.read = false;
                     }
+
                     scancnt_ = 0;
                 } else if (scancnt_ == SCAN_START + 1) { // startup
                     firstscan_ = sensors_.size();
                     if (firstscan_ > 0 && set_internal_) {
                         set_internal_ = false;
                         Sensor * s    = &sensors_[0];
-                        if (firstscan_ > 1) {
+                        if (firstscan_ > 1 && EMSESP::nvs_.isKey("intTemp")) {
                             std::string s_nvs = EMSESP::nvs_.getString("intTemp").c_str();
                             for (uint8_t i = 0; i < firstscan_; i++) {
                                 if (s_nvs == sensors_[i].id()) {
@@ -208,12 +216,14 @@ void TemperatureSensor::loop() {
                                 }
                             }
                         }
+
                         s->set_name("gateway_temperature");
                         s->set_is_system(true); // mark as internal system temperature sensor
                         if (!EMSESP::nvs_.isKey("intTemp")) {
                             EMSESP::nvs_.putString("intTemp", s->id());
                         }
-                        // LOG_NOTICE("Adding system sensor for gateway temperature %s", s->id().c_str());
+
+                        LOG_DEBUG("Adding system sensor for gateway_temperature");
                         EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
                             auto newSensor = SensorCustomization();
                             strlcpy(newSensor.id, s->id(), sizeof(newSensor.id));
@@ -224,11 +234,13 @@ void TemperatureSensor::loop() {
                             return StateUpdateResult::CHANGED;
                         });
                     }
+
                     // LOG_NOTICE("Adding %d sensor(s) from first scan", firstscan_);
                 } else if ((scancnt_ <= 0) && (firstscan_ != sensors_.size())) { // check 2 times for no change of sensor #
                     scancnt_ = SCAN_START;
                     sensors_.clear(); // restart scanning and clear to get correct numbering
                 }
+
                 state_ = State::IDLE;
             }
         }
@@ -241,6 +253,7 @@ bool TemperatureSensor::temperature_convert_complete(const uint32_t time) {
     if (parasite_) {
         return time > CONVERSION_MS; // don't care, use the datasheet time
     }
+
     return bus_.read_bit() == 1;
 #else
     return time > CONVERSION_MS;
@@ -300,6 +313,7 @@ int16_t TemperatureSensor::get_temperature_c(const uint8_t addr[]) {
             break;
         }
     }
+
     raw_value = ((int32_t)raw_value * 625 + 500) / 1000; // round to 0.1
     return raw_value;
 #else
@@ -338,6 +352,7 @@ bool TemperatureSensor::update(const char * id, const char * name, int16_t offse
                         break;
                     }
                 }
+
                 if (!found) {
                     auto newSensor = SensorCustomization();
                     strlcpy(newSensor.id, id, sizeof(newSensor.id));
@@ -347,6 +362,7 @@ bool TemperatureSensor::update(const char * id, const char * name, int16_t offse
                     settings.sensorCustomizations.push_back(newSensor);
                     LOG_DEBUG("Adding new customization for sensor ID %s", id);
                 }
+
                 sensor.ha_registered = false; // it's changed so we may need to recreate the HA config
                 return StateUpdateResult::CHANGED;
             });
@@ -363,6 +379,7 @@ bool TemperatureSensor::updated_values() {
         changed_ = false;
         return true;
     }
+
     return false;
 }
 
@@ -380,6 +397,7 @@ bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, cons
                 output[sensor.name()] = serialized(Helpers::render_value(val, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
             }
         }
+
         return true;
     }
 
@@ -387,6 +405,7 @@ bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, cons
         for (const auto & sensor : sensors_) {
             get_value_json(output[sensor.name()].to<JsonObject>(), sensor);
         }
+
         return true;
     }
 
@@ -396,6 +415,7 @@ bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, cons
             output["api_data"] = metrics;
             return true;
         }
+
         return false;
     }
 
@@ -425,6 +445,7 @@ std::string TemperatureSensor::get_metrics_prometheus() {
         result +=
             (std::string) "emsesp_" + sensor.name() + " " + Helpers::render_value(val, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0) + "\n";
     }
+
     return result;
 }
 
@@ -455,9 +476,11 @@ void TemperatureSensor::publish_sensor(const Sensor & sensor) {
         } else {
             snprintf(topic, sizeof(topic), "%s%s/%s", F_(temperaturesensor), "_data", sensor.name());
         }
+
         char payload[10];
         Mqtt::queue_publish(topic, Helpers::render_value(payload, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
     }
+
     char cmd[COMMAND_MAX_LENGTH];
     snprintf(cmd, sizeof(cmd), "%s/%s", F_(temperaturesensor), sensor.name());
     EMSESP::webSchedulerService.onChange(cmd);
@@ -491,13 +514,14 @@ void TemperatureSensor::publish_values(const bool force) {
             for (const auto & sensor : sensors_) {
                 publish_sensor(sensor);
             }
+
             return;
-        } else if (!EMSESP::mqtt_.get_publish_onchange(0)) {
+        } else if (!EMSESP::mqtt_.get_publish_onchange(EMSdevice::DeviceType::SYSTEM)) {
             return; // wait for first time period
         }
     }
 
-    JsonDocument doc;
+    JsonDocument doc(PSRAM_DOC);
     bool         ha_dev_created = false;
 
     for (auto & sensor : sensors_) {
@@ -522,7 +546,7 @@ void TemperatureSensor::publish_values(const bool force) {
             } else if (!sensor.ha_registered || force) {
                 LOG_DEBUG("Recreating HA config for sensor ID %s", sensor.id());
 
-                JsonDocument config;
+                JsonDocument config(PSRAM_DOC);
                 config["~"]        = Mqtt::base();
                 config["dev_cla"]  = "temperature";
                 config["stat_cla"] = "measurement";
@@ -546,7 +570,7 @@ void TemperatureSensor::publish_values(const bool force) {
                 // for the value template, there's a problem still with Domoticz probably due to the special characters.
                 // See https://github.com/emsesp/EMS-ESP32/issues/1360
                 if (Mqtt::discovery_type() == Mqtt::discoveryType::HOMEASSISTANT) {
-                    config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else -55}}";
+                    config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else 'None'}}";
                 } else {
                     config["val_tpl"] = (std::string) "{{" + val_obj + "}}"; // omit value conditional Jinja2 template code
                 }
@@ -566,7 +590,7 @@ void TemperatureSensor::publish_values(const bool force) {
 
                 // dev section with model is only created on the 1st sensor
                 Mqtt::add_ha_dev_section(config.as<JsonObject>(), "Temperature Sensors", !ha_dev_created);
-                Mqtt::add_ha_avty_section(config.as<JsonObject>(), stat_t, val_cond);
+                Mqtt::add_ha_avty_section(config.as<JsonObject>());
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(temperaturesensor), sensor.id());
@@ -609,6 +633,7 @@ const char * TemperatureSensor::Sensor::name() const {
     if (name_[0] == '\0') {
         return id_;
     }
+
     return name_;
 }
 
@@ -628,6 +653,7 @@ bool TemperatureSensor::Sensor::apply_customization() {
                 }
             }
         }
+
         return false;
     });
 

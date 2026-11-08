@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ void WebSettings::read(WebSettings & settings, JsonObject root) {
     root["version"]               = settings.version;
     root["board_profile"]         = settings.board_profile;
     root["platform"]              = EMSESP_PLATFORM;
+    root["system_name"]           = settings.system_name;
     root["locale"]                = settings.locale;
     root["tx_mode"]               = settings.tx_mode;
     root["ems_bus_id"]            = settings.ems_bus_id;
@@ -83,6 +84,17 @@ void WebSettings::read(WebSettings & settings, JsonObject root) {
     root["modbus_max_clients"]    = settings.modbus_max_clients;
     root["modbus_timeout"]        = settings.modbus_timeout;
     root["developer_mode"]        = settings.developer_mode;
+    root["disable_reset"]         = settings.disable_reset;
+    root["auto_fw_check"]         = settings.auto_fw_check;
+    root["email_enabled"]         = settings.email_enabled;
+    root["email_security"]        = settings.email_security;
+    root["email_server"]          = settings.email_server;
+    root["email_port"]            = settings.email_port;
+    root["email_login"]           = settings.email_login;
+    root["email_pass"]            = settings.email_pass;
+    root["email_sender"]          = settings.email_sender;
+    root["email_recp"]            = settings.email_recp;
+    root["email_subject"]         = settings.email_subject;
 }
 
 // call on initialization and also when settings are updated/saved via web or console
@@ -137,6 +149,7 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
         if (settings.eth_power != -1) { // Ethernet Power -1 means disabled
             EMSESP::system_.remove_gpio(settings.eth_power, true);
         }
+
         // remove the ethernet pins from valid list, regardless of whether the GPIOs are valid or not
         EMSESP::system_.remove_gpio(23, true); // MDC
         EMSESP::system_.remove_gpio(18, true); // MDIO
@@ -267,9 +280,6 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     }
 
     settings.locale = root["locale"] | EMSESP_DEFAULT_LOCALE;
-    if (settings.locale == "cz") { // convert from older settings file
-        settings.locale = "cs";
-    }
     EMSESP::system_.locale(settings.locale);
     if (Mqtt::ha_enabled() && original_settings.locale != settings.locale) {
         add_flags(ChangeFlags::MQTT);
@@ -278,6 +288,8 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     //
     // without checks or necessary restarts...
     //
+    settings.system_name = root["system_name"] | EMSESP_DEFAULT_SYSTEM_NAME;
+
     settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
     EMSESP::trace_raw(settings.trace_raw);
 
@@ -297,17 +309,39 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     settings.developer_mode = root["developer_mode"];
     EMSESP::system_.developer_mode(settings.developer_mode);
 
+    settings.disable_reset = root["disable_reset"];
+    EMSESP::system_.disable_reset(settings.disable_reset);
+
+    settings.auto_fw_check = root["auto_fw_check"] | EMSESP_DEFAULT_AUTO_FW_CHECK;
+    EMSESP::system_.auto_fw_check(settings.auto_fw_check);
+    if (settings.auto_fw_check && !original_settings.auto_fw_check) {
+        EMSESP::webStatusService.schedule_versions_refresh(); // just switched on, so look straight away
+    }
+
     settings.bool_dashboard = root["bool_dashboard"] | EMSESP_DEFAULT_BOOL_FORMAT;
     EMSESP::system_.bool_dashboard(settings.bool_dashboard);
 
     settings.weblog_level   = root["weblog_level"] | EMSESP_DEFAULT_WEBLOG_LEVEL;
     settings.weblog_compact = root["weblog_compact"] | EMSESP_DEFAULT_WEBLOG_COMPACT;
 
+    settings.email_enabled = root["email_enabled"] | FACTORY_EMAIL_ENABLE;
+    // Off is 0, so `| FACTORY_EMAIL_SECURITY` would replace it with STARTTLS (2)
+    settings.email_security = root["email_security"].isNull() ? FACTORY_EMAIL_SECURITY : root["email_security"].as<uint8_t>();
+    settings.email_server   = root["email_server"] | FACTORY_EMAIL_SERVER;
+    settings.email_port     = root["email_port"] | FACTORY_EMAIL_PORT;
+    settings.email_login    = root["email_login"] | FACTORY_EMAIL_LOGIN;
+    settings.email_pass     = root["email_pass"] | FACTORY_EMAIL_PASSWORD;
+    settings.email_sender   = root["email_sender"] | FACTORY_EMAIL_FROM;
+    settings.email_recp     = root["email_recp"] | FACTORY_EMAIL_TO;
+    settings.email_subject  = root["email_subject"] | FACTORY_EMAIL_SUBJECT;
+
     // if no psram limit weblog buffer to 25 messages
-    if (EMSESP::system_.PSram() > 0) {
-        settings.weblog_buffer = root["weblog_buffer"] | EMSESP_DEFAULT_WEBLOG_BUFFER;
-    } else {
-        settings.weblog_buffer = root["weblog_buffer"] | 25; // limit to 25 messages if no psram
+    const uint16_t weblog_buffer_default = (EMSESP::system_.PSram() > 0) ? EMSESP_DEFAULT_WEBLOG_BUFFER : 25;
+    settings.weblog_buffer               = root["weblog_buffer"] | weblog_buffer_default;
+    // a stored 0 is a valid uint16 and passes the | default above, but would make
+    // limit_log_messages_ 0 in WebLogService
+    if (settings.weblog_buffer == 0) {
+        settings.weblog_buffer = weblog_buffer_default;
     }
 
     // save the settings if changed from the webUI
@@ -338,7 +372,6 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
 // either via the Web UI or via the Console
 void WebSettingsService::onUpdate() {
     // skip if we're restarting anyway
-
     if (WebSettings::has_flags(WebSettings::ChangeFlags::RESTART)) {
         return;
     }
@@ -368,7 +401,7 @@ void WebSettingsService::onUpdate() {
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::LED)) {
-        EMSESP::system_.led_init();
+        EMSESP::led_.init();
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::MQTT)) {
@@ -378,6 +411,7 @@ void WebSettingsService::onUpdate() {
     if (WebSettings::has_flags(WebSettings::ChangeFlags::MODBUS)) {
         EMSESP::system_.modbus_init();
     }
+
     WebSettings::reset_flags();
     EMSESP::system_.reset_unused_gpios();
 }
@@ -395,7 +429,7 @@ void WebSettingsService::board_profile(AsyncWebServerRequest * request) {
     if (request->hasParam("boardProfile")) {
         std::string board_profile = request->getParam("boardProfile")->value().c_str();
 
-        auto *     response = new AsyncJsonResponse(false);
+        auto *     response = new PsramAsyncJsonResponse(false);
         JsonObject root     = response->getRoot();
 
         // 0=led, 1=dallas, 2=rx, 3=tx, 4=button, 5=phy_type, 6=eth_power, 7=eth_phy_addr, 8=eth_clock_mode, 9=led_type
@@ -433,7 +467,7 @@ void WebSettings::set_board_profile(WebSettings & settings) {
         String bbq_board = EMSESP::system_.getBBQKeesGatewayDetails(FUSE_VALUE::BOARD);
         if (!bbq_board.isEmpty() && settings.board_profile != "CUSTOM") {
 #if defined(EMSESP_DEBUG)
-            EMSESP::logger().info("Overriding board profile with fuse value %s", bbq_board.c_str());
+            EMSESP::logger().debug("Overriding board profile with eFuse value %s", bbq_board.c_str());
 #endif
             settings.board_profile = bbq_board;
         }
@@ -465,23 +499,14 @@ void WebSettings::set_board_profile(WebSettings & settings) {
 #if CONFIG_IDF_TARGET_ESP32
         // check for no PSRAM, could be a E32 or S32?
         if (!ESP.getPsramSize()) {
-#if ESP_ARDUINO_VERSION_MAJOR < 3
-            if (ETH.begin(1, 16, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_IN)) {
-#else
             if (ETH.begin(ETH_PHY_LAN8720, 1, 23, 18, 16, ETH_CLOCK_GPIO0_IN)) {
-#endif
                 settings.board_profile = "E32"; // Ethernet without PSRAM
             } else {
                 settings.board_profile = "S32"; // ESP32 standard WiFi without PSRAM
             }
         } else {
-// check for boards with PSRAM, could be a E32V2 otherwise default back to the S32
-#if ESP_ARDUINO_VERSION_MAJOR < 3
-            if (ETH.begin(0, 15, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_OUT)) {
-#else
+            // check for boards with PSRAM, could be a E32V2 otherwise default back to the S32
             if (ETH.begin(ETH_PHY_LAN8720, 0, 23, 18, 15, ETH_CLOCK_GPIO0_OUT)) {
-#endif
-
                 if (analogReadMilliVolts(39) > 700) {   // core voltage > 2.6V
                     settings.board_profile = "E32V2_2"; // Ethernet, PSRAM, internal sensors
                 } else {
@@ -491,6 +516,7 @@ void WebSettings::set_board_profile(WebSettings & settings) {
                 settings.board_profile = "S32"; // ESP32 standard WiFi with PSRAM
             }
         }
+
 // override if we know the target from the build config like C3, S2, S3 etc..
 #elif CONFIG_IDF_TARGET_ESP32C3
         settings.board_profile = "C3MINI";
@@ -499,7 +525,12 @@ void WebSettings::set_board_profile(WebSettings & settings) {
 #elif CONFIG_IDF_TARGET_ESP32S3
         settings.board_profile = "S32S3"; // BBQKees Gateway S3
 #elif CONFIG_IDF_TARGET_ESP32C6
+        // there is no C6 board profile, so start as CUSTOM with pins that suit the Seeed XIAO ESP32-C6 (the c6_xiao_4M build).
+        // load_board_profile() has no entry for CUSTOM, so without these the GPIOs stay at 99, every settings update
+        // fails the GPIO check and the settings fall back to empty values.
+        // Rx D9 (GPIO20), Tx D8 (GPIO19), button BOOT (GPIO9), no LED (the onboard LED on GPIO15 is active low), no Dallas
         settings.board_profile = "CUSTOM";
+        data                   = {0, 0, 20, 19, 9, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0};
 #endif
         // apply the new board profile setting
         System::load_board_profile(data, settings.board_profile.c_str());
@@ -509,9 +540,9 @@ void WebSettings::set_board_profile(WebSettings & settings) {
 #ifndef EMSESP_STANDALONE
     uint32_t psram_size = ESP.getPsramSize() / 1024; // in KB
     if (psram_size > 0) {
-        EMSESP::logger().info("Loaded board profile %s (PSRAM: %lu KB)", settings.board_profile.c_str(), psram_size);
+        EMSESP::logger().info("Applied board profile %s (PSRAM: %lu KB)", settings.board_profile.c_str(), psram_size);
     } else {
-        EMSESP::logger().info("Loaded board profile %s (PSRAM: not available)", settings.board_profile.c_str());
+        EMSESP::logger().info("Applied board profile %s (PSRAM: not available)", settings.board_profile.c_str());
     }
 #endif
 
@@ -538,6 +569,7 @@ bool WebSettings::check_flag(int prev_v, int new_v, uint16_t flag) {
 #endif
         return true;
     }
+
     return false;
 }
 

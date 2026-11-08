@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ WebActivityService::WebActivityService(AsyncWebServer * server, SecurityManager 
 }
 
 void WebActivityService::webActivityService(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false);
+    auto *     response = new PsramAsyncJsonResponse(false);
     JsonObject root     = response->getRoot();
 
     JsonArray  statsJson = root["stats"].to<JsonArray>();
@@ -59,6 +59,7 @@ void WebActivityService::webActivityService(AsyncWebServerRequest * request) {
         statJson["q"] =
             EMSESP::temperaturesensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::temperaturesensor_.fails()) / EMSESP::temperaturesensor_.reads());
     }
+
     if (EMSESP::analog_enabled()) {
         statJson       = statsJson.add<JsonObject>();
         statJson["id"] = 4;
@@ -66,6 +67,7 @@ void WebActivityService::webActivityService(AsyncWebServerRequest * request) {
         statJson["f"]  = EMSESP::analogsensor_.fails();
         statJson["q"]  = EMSESP::analogsensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::analogsensor_.fails()) / EMSESP::analogsensor_.reads());
     }
+
     if (Mqtt::enabled()) {
         statJson       = statsJson.add<JsonObject>();
         statJson["id"] = 5;
@@ -84,11 +86,15 @@ void WebActivityService::webActivityService(AsyncWebServerRequest * request) {
 
 #ifndef EMSESP_STANDALONE
     if (EMSESP::system_.syslog_enabled()) {
-        statJson       = statsJson.add<JsonObject>();
-        statJson["id"] = 7;
-        statJson["s"]  = EMSESP::system_.syslog_count();
-        statJson["f"]  = EMSESP::system_.syslog_fails();
-        statJson["q"]  = EMSESP::system_.syslog_count() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::system_.syslog_fails()) / EMSESP::system_.syslog_count());
+        statJson                         = statsJson.add<JsonObject>();
+        statJson["id"]                   = 7;
+        const unsigned long syslog_count = EMSESP::system_.syslog_count();
+        const unsigned long syslog_fails = EMSESP::system_.syslog_fails();
+        statJson["s"]                    = syslog_count;
+        statJson["f"]                    = syslog_fails;
+        // Round to the nearest percent. Integer division alone stays on the truncated value
+        // (8.7% dropped still displays as 92%) until the ratio crosses the next whole percent.
+        statJson["q"] = syslog_count == 0 ? 100 : (uint8_t)(100 - ((100ULL * syslog_fails + syslog_count / 2) / syslog_count));
     }
 #endif
 

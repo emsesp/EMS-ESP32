@@ -11,14 +11,16 @@ OUTPUT_DIR = Path("build")
 def bin_copy(source, target, env):
     """Optimized firmware renaming and copying function."""
     
-    # Get the application version from emsesp_version.h
-    version_file = Path('./src/emsesp_version.h')
+    # Get the application version, from emsesp_version.h unless overridden in the env
+    fw_name = env.GetProjectOption("custom_fw_name", "EMS-ESP")
+    version_file = Path(env.GetProjectOption("custom_version_file", "./src/emsesp_version.h"))
+    version_define = env.GetProjectOption("custom_version_define", "EMSESP_APP_VERSION")
     if not version_file.exists():
-        print("Error: emsesp_version.h not found!")
+        print(f"Error: {version_file} not found!")
         return
     
     app_version = None
-    version_pattern = re.compile(r'^#define EMSESP_APP_VERSION\s+"(\S+)"')
+    version_pattern = re.compile(rf'^#define {version_define}\s+"(\S+)"')
     
     with version_file.open('r') as f:
         for line in f:
@@ -28,7 +30,7 @@ def bin_copy(source, target, env):
                 break
     
     if not app_version:
-        print("Error: Could not find EMSESP_APP_VERSION in emsesp_version.h!")
+        print(f"Error: Could not find {version_define} in {version_file}!")
         return
 
     # Get the chip type, in uppercase
@@ -61,7 +63,7 @@ def bin_copy(source, target, env):
 
     # Convert . to _ so Windows doesn't complain
     # Format is EMS-ESP-<version>-<mcu>-<flash> with + at the end if it has PSRAM
-    variant = f"EMS-ESP-{app_version.replace('.', '_')}-{mcu}-{flash_mem}{'+' if psram else ''}"
+    variant = f"{fw_name}-{app_version.replace('.', '_')}-{mcu}-{flash_mem}{'+' if psram else ''}"
 
     # Create output directories
     firmware_dir = OUTPUT_DIR / "firmware"

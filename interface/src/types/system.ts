@@ -51,7 +51,7 @@ export interface SystemStatus {
   free_caps: number;
   model: string;
   board: string;
-  has_loader: boolean;
+  recovery_version?: string;
   has_partition: boolean;
   partitions: {
     partition: string;
@@ -61,6 +61,7 @@ export interface SystemStatus {
   }[];
   status: number; // System Status Codes which matches SYSTEM_STATUS in System.h
   developer_mode: boolean;
+  disable_reset: boolean;
   temperature?: number;
 }
 

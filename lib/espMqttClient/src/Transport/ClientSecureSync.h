@@ -8,15 +8,10 @@ the LICENSE file.
 
 #pragma once
 
-#if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
 
-// Added for EMS-ESP
-#include "../Config.h"
-#if defined(EMC_CLIENT_SECURE)
-#include <WiFiClientSecure.h> // includes IPAddress
-#else
+// #include "esp_tls.h"
 #include <WiFiClient.h>
-#endif
+#include <ESP_SSLClient.h>
 #include "Transport.h"
 
 namespace espMqttClientInternals {
@@ -24,6 +19,7 @@ namespace espMqttClientInternals {
 class ClientSecureSync : public Transport {
   public:
     ClientSecureSync();
+    ~ClientSecureSync();
     bool   connect(IPAddress ip, uint16_t port) override;
     bool   connect(const char * host, uint16_t port) override;
     size_t write(const uint8_t * buf, size_t size) override;
@@ -31,14 +27,9 @@ class ClientSecureSync : public Transport {
     void   stop() override;
     bool   connected() override;
     bool   disconnected() override;
-    // added for EMS-ESP
-#if defined(EMC_CLIENT_SECURE)
-    WiFiClientSecure client;
-#else
-    WiFiClient client;
-#endif
+
+    WiFiClient    basic_client;
+    ESP_SSLClient client;
 };
 
 } // namespace espMqttClientInternals
-
-#endif

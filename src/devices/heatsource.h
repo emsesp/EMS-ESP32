@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,15 +72,14 @@ class Heatsource : public EMSdevice {
     int8_t   blockHyst_;     // pos 14?: Hyst. for bolier block (K)
     uint8_t  releaseWait_;   // pos 15: Boiler release wait time (min)
 
-    void process_CascadeMessage(std::shared_ptr<const Telegram> telegram);
-    void process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram);
+    void process_CascadeMessage(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBAMonitorFastPlus(const std::shared_ptr<const Telegram> & telegram);
 
-    void process_amTempMessage(std::shared_ptr<const Telegram> telegram);
-    void process_amStatusMessage(std::shared_ptr<const Telegram> telegram);
-    void process_amSettingMessage(std::shared_ptr<const Telegram> telegram);
-    void process_amCommandMessage(std::shared_ptr<const Telegram> telegram);
-    void process_amExtraMessage(std::shared_ptr<const Telegram> telegram);
-
+    void process_amTempMessage(const std::shared_ptr<const Telegram> & telegram);
+    void process_amStatusMessage(const std::shared_ptr<const Telegram> & telegram);
+    void process_amSettingMessage(const std::shared_ptr<const Telegram> & telegram);
+    void process_amCommandMessage(const std::shared_ptr<const Telegram> & telegram);
+    void process_amExtraMessage(const std::shared_ptr<const Telegram> & telegram);
 
     bool set_vr2Config(const char * value, const int8_t id);     // pos 12: off(00)/Keelbypass(01)/(hc1pump(02) only standalone)
     bool set_ahsActivated(const char * value, const int8_t id);  // pos 00: Alternate heat source activation: No(00),Yes(01)

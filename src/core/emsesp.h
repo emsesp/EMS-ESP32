@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,11 +51,14 @@
 #include "../web/WebSettingsService.h"
 #include "../web/WebCustomizationService.h"
 #include "../web/WebSchedulerService.h"
+#include "../web/WebCommandService.h"
 #include "../web/WebAPIService.h"
 #include "../web/WebLogService.h"
 #include "../web/WebCustomEntityService.h"
 #include "../web/WebModulesService.h"
 
+#include "psram_json_allocator.h"
+#include "psram_async_json_response.h"
 #include "emsdevicevalue.h"
 #include "emsdevice.h"
 #include "emsfactory.h"
@@ -63,9 +66,10 @@
 #include "mqtt.h"
 #include "modbus.h"
 #include "system.h"
+#include "emsesp_network.h"
 #include "temperaturesensor.h"
 #include "analogsensor.h"
-#include "console.h"
+#include "emsesp_console.h"
 #include "console_stream.h"
 #include "shower.h"
 #include "roomcontrol.h"
@@ -81,8 +85,26 @@ class Module {}; // forward declaration
 #define WATCH_ID_NONE 0 // no watch id set
 
 // helpers for callback functions
-#define MAKE_PF_CB(__f) [&](std::shared_ptr<const Telegram> t) { __f(t); }                  // for Process Function callbacks to EMSDevice::process_function_p
-#define MAKE_CF_CB(__f) [&](const char * value, const int8_t id) { return __f(value, id); } // for Command Function callbacks Command::cmd_function_p
+//
+// MAKE_PF_CB(member) produces a non-capturing trampoline that decays to a
+// plain function pointer (EMSdevice::process_function_p). The outer IILE
+// (immediately-invoked lambda expression) uses `decltype(this)` in an
+// unevaluated context to deduce the derived-class type without capturing
+// `this`; the inner lambda is non-capturing and therefore convertible to a
+// function pointer via the unary `+` operator.
+// Result: zero heap (no std::function control block) and direct dispatch.
+#define MAKE_PF_CB(__f)                                                                                                                                        \
+    ([]() {                                                                                                                                                    \
+        using SelfT = std::remove_pointer_t<decltype(this)>;                                                                                                   \
+        return +[](emsesp::EMSdevice * dev, const std::shared_ptr<const Telegram> & t) { static_cast<SelfT *>(dev)->__f(t); };                                 \
+    }())
+
+// for Command Function callbacks (Command::cmd_function_p). The unified callback takes a JsonObject
+// output which entity/setter commands ignore.
+#define MAKE_CF_CB(__f) [this](const char * value, const int8_t id, JsonObject output) { return __f(value, id); }
+
+// Same callback for static functions (System::command_*). No `this` capture: Clang warns when a capture is unused.
+#define MAKE_CF_CB_STATIC(__f) [](const char * value, const int8_t id, JsonObject output) { return __f(value, id); }
 
 namespace emsesp {
 
@@ -97,6 +119,8 @@ class EMSESPShell;
 class Shower;
 
 static constexpr const char * EMSESP_NVS_BOOT_NEW_FIRMWARE = "fresh_firmware"; // max 15 characters
+// why EMS-ESP switched to the recovery firmware, read and removed by the recovery app (recovery/main.cpp)
+static constexpr const char * EMSESP_NVS_RECOVERY_REASON = "rec_reason";
 
 class EMSESP {
   public:
@@ -120,8 +144,8 @@ class EMSESP {
     static void uart_telegram(const std::vector<uint8_t> & rx_data);
 #endif
 
-    static bool        process_telegram(std::shared_ptr<const Telegram> telegram);
-    static std::string pretty_telegram(std::shared_ptr<const Telegram> telegram);
+    static bool        process_telegram(const std::shared_ptr<const Telegram> & telegram);
+    static std::string pretty_telegram(const std::shared_ptr<const Telegram> & telegram);
 
     static void send_read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset = 0, const uint8_t length = 0, const bool front = false);
     static void send_write_request(const uint16_t type_id,
@@ -133,13 +157,12 @@ class EMSESP {
     static void send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t value);
     static void send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid);
 
+    static bool    device_hasEntities(const uint8_t device_id);
     static bool    device_exists(const uint8_t device_id);
     static void    device_active(const uint8_t device_id, const bool active);
     static bool    cmd_is_readonly(const uint8_t device_type, const uint8_t device_id, const char * cmd, const int8_t id);
     static uint8_t device_id_from_cmd(const uint8_t device_type, const char * cmd, const int8_t id);
-    static uint8_t count_devices(const uint8_t device_type);
     static uint8_t count_devices();
-    static uint8_t device_index(const uint8_t device_type, const uint8_t unique_id);
     static bool    get_device_value_info(JsonObject root, const char * cmd, const int8_t id, const uint8_t devicetype);
 
     static void show_device_values(uuid::console::Shell & shell);
@@ -176,6 +199,7 @@ class EMSESP {
     static uint8_t watch() {
         return watch_;
     }
+
     static void set_read_id(uint16_t id) {
         read_id_ = id;
     }
@@ -191,6 +215,7 @@ class EMSESP {
     static bool wait_validate() {
         return (wait_validate_ != 0);
     }
+
     static void wait_validate(uint16_t wait) {
         wait_validate_ = wait;
     }
@@ -221,16 +246,23 @@ class EMSESP {
 
     static bool add_device(const uint8_t device_id, const uint8_t product_id, const char * version, const uint8_t brand);
     static void scan_devices();
+    static void erase_device(const uint8_t type_id);
     static void clear_all_devices();
+
+    // called whenever a device entity or telegram handler is registered, so we can
+    // later reclaim the (deliberately generous) reserved vector capacity once stable
+    static void mark_entities_changed();
 
     static std::vector<std::unique_ptr<EMSdevice>, AllocatorPSRAM<std::unique_ptr<EMSdevice>>> emsdevices;
     // services
     static Mqtt              mqtt_;
     static Modbus *          modbus_;
     static System            system_;
+    static Network           network_;
     static TemperatureSensor temperaturesensor_;
     static AnalogSensor      analogsensor_;
     static Shower            shower_;
+    static LED               led_;
     static RxService         rxservice_;
     static TxService         txservice_;
     static Preferences       nvs_;
@@ -245,16 +277,21 @@ class EMSESP {
     static WebLogService           webLogService;
     static WebCustomizationService webCustomizationService;
     static WebSchedulerService     webSchedulerService;
+    static WebCommandService       webCommandService;
     static WebCustomEntityService  webCustomEntityService;
     static WebModulesService       webModulesService;
 
   private:
     static std::string device_tostring(const uint8_t device_id);
-    static void        process_UBADevices(std::shared_ptr<const Telegram> telegram);
-    static void        process_deviceName(std::shared_ptr<const Telegram> telegram);
-    static void        process_version(std::shared_ptr<const Telegram> telegram);
-    static void        publish_response(std::shared_ptr<const Telegram> telegram);
+    static void        process_UBADevices(const std::shared_ptr<const Telegram> & telegram);
+    static void        process_deviceName(const std::shared_ptr<const Telegram> & telegram);
+    static void        process_version(const std::shared_ptr<const Telegram> & telegram);
+    static void        publish_response(const std::shared_ptr<const Telegram> & telegram);
     static void        publish_all_loop();
+    static void        reply_own_request(const uint8_t * data, const uint8_t length, const uint8_t tx_state);
+
+    // one-time compaction of per-device/command vectors once registration has been stable
+    static void compact_entities_if_stable();
 
     void shell_prompt();
     void start_serial_console();
@@ -262,12 +299,44 @@ class EMSESP {
     static constexpr uint32_t EMS_FETCH_FREQUENCY = 60000; // check every minute
     static constexpr uint8_t  EMS_WAIT_KM_TIMEOUT = 60;    // wait one minute
 
+#ifdef EMSESP_GATEWAY_TX_HOLD
+    // hold our Tx while a gateway (K30RF/KM200 on 0x48) is doing its startup sync, see issue #3094
+    // (still ack our own poll so we stay in 0x07 — muting ACKs in 19d made A21 worse)
+    // a startup sync is 55-250 read requests/min to other devices, normal operation is <10/min
+    static void gateway_rx_check(const uint8_t * data, const uint8_t length);
+    static void gateway_note_activity(); // poll or telegram from 0x48 — re-arm hold if it was silent
+    static bool gateway_tx_hold();
+    static void gateway_tx_hold_start();
+
+    static constexpr uint32_t GATEWAY_BURST_WINDOW    = 30000;  // ms window for counting gateway read requests
+    static constexpr uint8_t  GATEWAY_BURST_THRESHOLD = 15;     // read requests within window to treat gateway as busy
+    static constexpr uint32_t GATEWAY_FAST_WINDOW     = 5000;   // short window to catch the start of a burst quickly
+    static constexpr uint8_t  GATEWAY_FAST_THRESHOLD  = 8;      // normal polling is ~1 read per 2s, a sync starts at >10/s
+    static constexpr uint32_t GATEWAY_HOLD_TIME       = 60000;  // keep holding Tx this long after the last busy window
+    static constexpr uint32_t GATEWAY_HOLD_MAX        = 600000; // log every 10 minutes while still busy; do not force-resume (see #3094)
+    static constexpr uint32_t GATEWAY_SILENCE_MS      = 60000;  // no 0x48 traffic for this long = gone; next sighting re-arms hold
+
+    static uint32_t gateway_hold_until_;
+    static uint32_t gateway_hold_start_;
+    static uint32_t gateway_hold_max_log_; // last time we logged a HOLD_MAX "still busy" warning
+    static uint32_t gateway_window_start_;
+    static uint8_t  gateway_window_count_;
+    static uint32_t gateway_fast_start_;
+    static uint8_t  gateway_fast_count_;
+    static uint32_t gateway_last_seen_; // last poll or telegram from 0x48
+    static uint8_t  last_version_request_src_;
+    static uint32_t last_version_request_time_;
+#endif
+
+    static constexpr uint32_t SYSTEM_STATUS_RESET_TIMEOUT = 300000; // return a non-normal system status to normal after this (in ms) - 5 minutes
+
     struct Device_record {
         uint8_t               product_id;
         EMSdevice::DeviceType device_type;
         const char *          default_name;
         uint8_t               flags;
     };
+
     static std::vector<Device_record, AllocatorPSRAM<Device_record>> device_library_;
 
     static uint16_t watch_id_;
@@ -283,6 +352,11 @@ class EMSESP {
     static uint16_t wait_validate_;
     static bool     wait_km_;
     static uint32_t last_fetch_;
+
+    // entity/telegram registration tracking, used to trigger a one-time vector compaction
+    static constexpr uint32_t ENTITY_COMPACT_DELAY = 60000; // ms of stability before compacting
+    static uint32_t           last_entity_change_;          // uptime (ms) of last registration
+    static bool               entity_compaction_pending_;   // true while a compaction is owed
 
     // UUID stuff
     static constexpr auto &        serial_console_          = Serial;

@@ -1,12 +1,16 @@
 #include "AuthenticationService.h"
 
+#include "../core/psram_async_json_response.h"
+
 AuthenticationService::AuthenticationService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager) {
-    // none of these need authentication
-    server->on(VERIFY_AUTHORIZATION_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { verifyAuthorization(request); });
-    auto * handler = new AsyncCallbackJsonWebHandler(SIGN_IN_PATH);
-    handler->onRequest([this](AsyncWebServerRequest * request, JsonVariant json) { signIn(request, json); });
-    server->addHandler(handler);
+    // None of these need authentication: verifyAuthorization checks the JWT itself, and signIn IS the authentication flow.
+    securityManager->addEndpoint(server, VERIFY_AUTHORIZATION_PATH, AuthenticationPredicates::NONE_REQUIRED, [this](AsyncWebServerRequest * request) {
+        verifyAuthorization(request);
+    });
+    securityManager->addEndpoint(server, SIGN_IN_PATH, AuthenticationPredicates::NONE_REQUIRED, [this](AsyncWebServerRequest * request, JsonVariant json) {
+        signIn(request, json);
+    });
 }
 
 // Verifies that the request supplied a valid JWT.
@@ -22,10 +26,9 @@ void AuthenticationService::signIn(AsyncWebServerRequest * request, JsonVariant 
         String         password       = json["password"];
         Authentication authentication = _securityManager->authenticate(username, password);
         if (authentication.authenticated) {
-            User *     user            = authentication.user;
-            auto *     response        = new AsyncJsonResponse(false);
+            auto *     response        = new emsesp::PsramAsyncJsonResponse(false);
             JsonObject jsonObject      = response->getRoot();
-            jsonObject["access_token"] = _securityManager->generateJWT(user);
+            jsonObject["access_token"] = _securityManager->generateJWT(authentication.user.get());
             response->setLength();
             request->send(response);
             return;

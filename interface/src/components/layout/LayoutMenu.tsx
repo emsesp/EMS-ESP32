@@ -1,4 +1,4 @@
-import { memo, useCallback, useContext, useState } from 'react';
+import { memo, useContext, useState } from 'react';
 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AssessmentIcon from '@mui/icons-material/Assessment';
@@ -8,6 +8,7 @@ import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import LiveHelpIcon from '@mui/icons-material/LiveHelp';
 import MoreTimeIcon from '@mui/icons-material/MoreTime';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
+import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
 import SensorsIcon from '@mui/icons-material/Sensors';
 import SettingsIcon from '@mui/icons-material/Settings';
 import StarIcon from '@mui/icons-material/Star';
@@ -18,13 +19,15 @@ import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 
 const LayoutMenuComponent = () => {
-  const { me } = useContext(AuthenticatedContext);
+  const { me, versions } = useContext(AuthenticatedContext);
   const { LL } = useI18nContext();
   const [menuOpen, setMenuOpen] = useState(true);
 
-  const handleMenuToggle = useCallback(() => {
+  const upgradeAvailable = versions?.current?.upgradeable ?? false;
+
+  const handleMenuToggle = () => {
     setMenuOpen((prev) => !prev);
-  }, []);
+  };
 
   return (
     <>
@@ -79,6 +82,12 @@ const LayoutMenuComponent = () => {
                 to={`/customizations`}
               />
               <LayoutMenuItem
+                icon={PlaylistPlayIcon}
+                label={LL.COMMANDS()}
+                disabled={!me.admin}
+                to={`/commands`}
+              />
+              <LayoutMenuItem
                 icon={MoreTimeIcon}
                 label={LL.SCHEDULER()}
                 disabled={!me.admin}
@@ -105,6 +114,7 @@ const LayoutMenuComponent = () => {
           label={LL.SETTINGS(0)}
           disabled={!me.admin}
           to="/settings"
+          badge={upgradeAvailable}
         />
         <LayoutMenuItem icon={LiveHelpIcon} label={LL.HELP()} to={`/help`} />
         <Divider />

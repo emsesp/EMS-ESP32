@@ -2,8 +2,8 @@ import type {
   InternalRuleItem,
   ValidateFieldsError,
   ValidateOption
-} from 'async-validator';
-import type Schema from 'async-validator';
+} from 'validators/schema';
+import type Schema from 'validators/schema';
 
 export class ValidationError extends Error {
   readonly fieldErrors: ValidateFieldsError;

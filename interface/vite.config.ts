@@ -2,27 +2,34 @@ import preact from '@preact/preset-vite';
 import fs from 'fs';
 import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
+import { optimize } from 'svgo';
+import { pathToFileURL } from 'url';
 import { Plugin, PluginOption, defineConfig } from 'vite';
-import viteImagemin from 'vite-plugin-imagemin';
 import zlib from 'zlib';
-
-// @ts-expect-error - mock server doesn't have type declarations
-import mockServer from '../mock-api/mockServer.js';
 
 // Constants
 const KB_DIVISOR = 1024;
 const REPEAT_CHAR = '=';
 const REPEAT_COUNT = 50;
 const DEFAULT_OUT_DIR = 'dist';
+const RECOVERY_OUT_DIR = 'dist-recovery';
 const ES_TARGET = 'es2020';
 const CHUNK_SIZE_WARNING_LIMIT = 1024;
 const ASSETS_INLINE_LIMIT = 4096;
 
 // Common resolve aliases
+// `react` points at a local shim (preact/compat + a useOptimistic stub) because
+// react-router v8 statically imports useOptimistic from "react". See src/preact-react-shim.ts for details.
+const REACT_SHIM = path.resolve(import.meta.dirname, 'src/preact-react-shim.ts');
+// `react/jsx-runtime` is listed before `react` so the more specific alias wins
+// (a bare `react` alias would otherwise also match `react/jsx-runtime`).
+// NOTE: @preact/preset-vite is configured with `reactAliasesEnabled: false`
+// so these aliases (not the preset's `react -> preact/compat`) are authoritative.
 const RESOLVE_ALIASES = {
-  react: 'preact/compat',
+  'react/jsx-runtime': 'preact/jsx-runtime',
+  'react-dom/test-utils': 'preact/test-utils',
   'react-dom': 'preact/compat',
-  'react/jsx-runtime': 'preact/jsx-runtime'
+  react: REACT_SHIM
 };
 
 // Common resolve extensions - prioritize TypeScript/React files for Windows compatibility
@@ -92,38 +99,30 @@ const bundleSizeReporter = (): Plugin => {
 };
 
 // Common preact plugin config
-const createPreactPlugin = (devToolsEnabled: boolean) =>
-  preact({
+const createPreactPlugin = (devToolsEnabled: boolean): PluginOption[] => {
+  const plugins = preact({
     devToolsEnabled,
-    prefreshEnabled: false
+    prefreshEnabled: false,
+    // Disable the preset's built-in `react -> preact/compat` aliases so our
+    // RESOLVE_ALIASES (which routes `react` through the useOptimistic shim) win.
+    reactAliasesEnabled: false
   });
-
-// Patch preact/compat to export stub React 19 APIs (use, useOptimistic) so that
-// react-router v7 doesn't trigger IMPORT_IS_UNDEFINED warnings from Rolldown.
-const preactCompatPatchPlugin = (): Plugin => ({
-  name: 'preact-compat-react19-patch',
-  transform(code, id) {
-    if (id.includes('preact') && id.includes('compat.module.js')) {
-      return {
-        code:
-          code +
-          '\nexport var use = undefined;\nexport var useOptimistic = undefined;\n',
-        map: null
-      };
-    }
-    return undefined;
-  }
-});
+  // The preset always registers its devtools-only plugins (`preact:devtools`
+  // and `preact:transform-hook-names`); the flag only gates their work, not
+  // their presence. When disabled they're per-module no-ops that still run a
+  // hook on every module and dominate [PLUGIN_TIMINGS], so drop them entirely.
+  const devToolsOnly = new Set(['preact:devtools', 'preact:transform-hook-names']);
+  return devToolsEnabled
+    ? plugins
+    : plugins.filter((p) => !p || !devToolsOnly.has(p.name));
+};
 
 // Common base plugins
 const createBasePlugins = (
   devToolsEnabled: boolean,
   includeBundleReporter = true
 ): PluginOption[] => {
-  const plugins: PluginOption[] = [
-    createPreactPlugin(devToolsEnabled),
-    preactCompatPatchPlugin()
-  ];
+  const plugins: PluginOption[] = [...createPreactPlugin(devToolsEnabled)];
   if (includeBundleReporter) {
     plugins.push(bundleSizeReporter());
   }
@@ -181,38 +180,91 @@ const createProductionTerserOptions = () => ({
   toplevel: true
 });
 
-// Image optimization plugin
-const imageOptimizationPlugin = {
-  ...viteImagemin({
-    verbose: false,
-    gifsicle: {
-      optimizationLevel: 7,
-      interlaced: false
-    },
-    optipng: {
-      optimizationLevel: 7
-    },
-    mozjpeg: {
-      quality: 20
-    },
-    pngquant: {
-      quality: [0.8, 0.9],
-      speed: 4
-    },
-    svgo: {
-      plugins: [
-        { name: 'removeViewBox' },
-        { name: 'removeEmptyAttrs', active: false }
-      ]
+// Image optimization plugin: runs svgo over emitted SVG assets.
+// Raster assets are committed pre-optimized.
+const imageOptimizationPlugin: Plugin = {
+  name: 'svg-optimize',
+  apply: 'build',
+  generateBundle(_, bundle) {
+    for (const asset of Object.values(bundle)) {
+      if (asset.type !== 'asset' || !asset.fileName.endsWith('.svg')) continue;
+      asset.source = optimize(asset.source.toString(), {
+        multipass: true,
+        plugins: ['removeViewBox']
+      }).data;
     }
-  }),
-  enforce: 'pre' as const
+  }
 };
 
 export default defineConfig(
-  ({ command, mode }: { command: string; mode: string }) => {
+  async ({ command, mode }: { command: string; mode: string }) => {
+    if (command === 'serve' && mode === 'recovery') {
+      console.log('Preparing Recovery WebUI with mock server');
+      const recoveryMockUrl = pathToFileURL(
+        path.resolve(import.meta.dirname, '../mock-api/recoveryMock.js')
+      ).href;
+      const { default: recoveryMock } = (await import(
+        /* @vite-ignore */ recoveryMockUrl
+      )) as { default: () => PluginOption };
+      return {
+        plugins: [...createBasePlugins(true, false), recoveryMock()],
+        resolve: {
+          alias: RESOLVE_ALIASES,
+          extensions: RESOLVE_EXTENSIONS,
+          tsconfigPaths: true
+        },
+        server: {
+          open: '/recovery.html',
+          port: 3001
+        }
+      };
+    }
+
+    if (mode === 'recovery') {
+      console.log('Preparing for Recovery WebUI, optimized build');
+      return {
+        plugins: [...createBasePlugins(false, true), imageOptimizationPlugin],
+        resolve: {
+          alias: RESOLVE_ALIASES,
+          extensions: RESOLVE_EXTENSIONS,
+          tsconfigPaths: true
+        },
+        build: {
+          ...createBaseBuildConfig(),
+          outDir: RECOVERY_OUT_DIR,
+          emptyOutDir: true,
+          minify: 'terser' as const,
+          terserOptions: createProductionTerserOptions(),
+          rollupOptions: {
+            input: path.resolve(import.meta.dirname, 'recovery.html'),
+            checks: {
+              pluginTimings: false
+            },
+            treeshake: {
+              moduleSideEffects: false,
+              propertyReadSideEffects: false as const,
+              unknownGlobalSideEffects: false
+            },
+            output: {
+              chunkFileNames: 'assets/[name]-[hash].js',
+              entryFileNames: 'assets/[name]-[hash].js',
+              assetFileNames: 'assets/[name]-[hash].[ext]',
+              manualChunks,
+              sourcemap: false
+            }
+          }
+        }
+      };
+    }
+
     if (command === 'serve') {
       console.log(`Preparing for standalone build with server, mode=${mode}`);
+      const mockServerUrl = pathToFileURL(
+        path.resolve(import.meta.dirname, '../mock-api/mockServer.js')
+      ).href;
+      const { default: mockServer } = (await import(
+        /* @vite-ignore */ mockServerUrl
+      )) as { default: () => PluginOption };
       return {
         plugins: [...createBasePlugins(true, true), mockServer()],
         resolve: {
@@ -229,8 +281,7 @@ export default defineConfig(
               changeOrigin: true,
               secure: false
             },
-            '/rest': 'http://localhost:3080',
-            '/gh': 'http://localhost:3080'
+            '/rest': 'http://localhost:3080'
           }
         },
         build: {
@@ -255,6 +306,9 @@ export default defineConfig(
           minify: 'terser' as const,
           terserOptions: createHostedTerserOptions(),
           rollupOptions: {
+            checks: {
+              pluginTimings: false
+            },
             treeshake: {
               moduleSideEffects: false
             },
@@ -290,6 +344,9 @@ export default defineConfig(
         minify: 'terser' as const,
         terserOptions: createProductionTerserOptions(),
         rollupOptions: {
+          checks: {
+            pluginTimings: false
+          },
           treeshake: {
             moduleSideEffects: false,
             propertyReadSideEffects: false as const,

@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ class Controller : public EMSdevice {
   public:
     Controller(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand);
 
-    void process_dateTime(std::shared_ptr<const Telegram> telegram);
+    void process_dateTime(const std::shared_ptr<const Telegram> & telegram);
 
     char dateTime_[25];
 };

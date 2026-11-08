@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,15 +30,15 @@ class Mixer : public EMSdevice {
   private:
     static uuid::log::Logger logger_;
 
-    void process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> telegram);
-    void process_MMPLUSConfigMessage_HC(std::shared_ptr<const Telegram> telegram);
-    void process_MMPLUSSetMessage_HC(std::shared_ptr<const Telegram> telegram);
-    void process_IPMStatusMessage(std::shared_ptr<const Telegram> telegram);
-    void process_IPMTempMessage(std::shared_ptr<const Telegram> telegram);
-    void process_IPMSetMessage(std::shared_ptr<const Telegram> telegram);
-    void process_MMStatusMessage(std::shared_ptr<const Telegram> telegram);
-    void process_MMConfigMessage(std::shared_ptr<const Telegram> telegram);
-    void process_MMSetMessage(std::shared_ptr<const Telegram> telegram);
+    void process_MMPLUSStatusMessage_HC(const std::shared_ptr<const Telegram> & telegram);
+    void process_MMPLUSConfigMessage_HC(const std::shared_ptr<const Telegram> & telegram);
+    void process_MMPLUSSetMessage_HC(const std::shared_ptr<const Telegram> & telegram);
+    void process_IPMStatusMessage(const std::shared_ptr<const Telegram> & telegram);
+    void process_IPMTempMessage(const std::shared_ptr<const Telegram> & telegram);
+    void process_IPMSetMessage(const std::shared_ptr<const Telegram> & telegram);
+    void process_MMStatusMessage(const std::shared_ptr<const Telegram> & telegram);
+    void process_MMConfigMessage(const std::shared_ptr<const Telegram> & telegram);
+    void process_MMSetMessage(const std::shared_ptr<const Telegram> & telegram);
 
     bool set_flowSetTemp(const char * value, const int8_t id);
     bool set_pump(const char * value, const int8_t id);

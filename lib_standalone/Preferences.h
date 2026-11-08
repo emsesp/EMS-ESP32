@@ -71,10 +71,13 @@ class Preferences {
         return true;
     }
 
+    bool clear() {
+        return true;
+    }
+
     // unused....
 
     // void           end();
-    // bool           clear();
     // size_t         putShort(const char * key, int16_t value);
     // size_t         putUShort(const char * key, uint16_t value);
     // size_t         putInt(const char * key, int32_t value);

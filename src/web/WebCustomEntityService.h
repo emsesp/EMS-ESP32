@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
     bool command_setvalue(const char * value, const int8_t id, const char * name);
     bool get_value_info(JsonObject output, const char * cmd);
     void get_value_json(JsonObject output, CustomEntityItem const & entity);
-    bool get_value(std::shared_ptr<const Telegram> telegram);
+    bool get_value(const std::shared_ptr<const Telegram> & telegram);
     void fetch();
     void render_value(JsonObject output, CustomEntityItem const & entity, const bool useVal = false, const bool web = false, const bool add_uom = false);
     void show_values(JsonObject output);

@@ -1,5 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
-import { toast } from 'react-toastify';
+import { useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
@@ -17,7 +16,6 @@ import {
 
 import * as MqttApi from 'api/mqtt';
 
-import type { ValidateFieldsError } from 'async-validator';
 import {
   BlockFormControlLabel,
   BlockNavigation,
@@ -28,10 +26,12 @@ import {
   ValidatedTextField,
   useLayoutTitle
 } from 'components';
+import { toast } from 'components/toast';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { MqttSettingsType } from 'types';
 import { numberValue, updateValueDirty, useRest } from 'utils';
 import { ValidationError, createMqttSettingsValidator, validate } from 'validators';
+import type { ValidateFieldsError } from 'validators/schema';
 
 import { callAction } from '../../api/app';
 
@@ -57,7 +57,7 @@ const MqttSettings = () => {
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const sendResetMQTT = useCallback(() => {
+  const sendResetMQTT = () => {
     void callAction({ action: 'resetMQTT' })
       .then(() => {
         toast.success('MQTT ' + LL.REFRESH() + ' successful');
@@ -65,29 +65,20 @@ const MqttSettings = () => {
       .catch((error) => {
         toast.error(String(error.error?.message || 'An error occurred'));
       });
-  }, []);
+  };
 
-  const updateFormValue = useMemo(
-    () =>
-      updateValueDirty(
-        origData as unknown as Record<string, unknown>,
-        dirtyFlags,
-        setDirtyFlags,
-        updateDataValue as (value: unknown) => void
-      ),
-    [origData, dirtyFlags, setDirtyFlags, updateDataValue]
+  const updateFormValue = updateValueDirty(
+    origData as unknown as Record<string, unknown>,
+    dirtyFlags,
+    setDirtyFlags,
+    updateDataValue as (value: unknown) => void
   );
 
-  const SecondsInputProps = useMemo(
-    () => ({
-      endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
-    }),
-    [LL]
-  );
+  const SecondsInputProps = {
+    endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+  };
 
-  const emptyFieldErrors = useMemo(() => ({}), []);
-
-  const validateAndSubmit = useCallback(async () => {
+  const validateAndSubmit = async () => {
     if (!data) return;
     try {
       setFieldErrors(undefined);
@@ -96,25 +87,22 @@ const MqttSettings = () => {
     } catch (error) {
       setFieldErrors((error as ValidationError).fieldErrors);
     }
-  }, [data, saveData]);
+  };
 
-  const publishIntervalFields = useMemo(
-    () => [
-      { name: 'publish_time_heartbeat', label: 'Heartbeat', validated: true },
-      { name: 'publish_time_boiler', label: LL.MQTT_INT_BOILER(), validated: false },
-      {
-        name: 'publish_time_thermostat',
-        label: LL.MQTT_INT_THERMOSTATS(),
-        validated: false
-      },
-      { name: 'publish_time_solar', label: LL.MQTT_INT_SOLAR(), validated: false },
-      { name: 'publish_time_mixer', label: LL.MQTT_INT_MIXER(), validated: false },
-      { name: 'publish_time_water', label: LL.MQTT_INT_WATER(), validated: false },
-      { name: 'publish_time_sensor', label: LL.SENSORS(), validated: false },
-      { name: 'publish_time_other', label: LL.DEFAULT(0), validated: false }
-    ],
-    [LL]
-  );
+  const publishIntervalFields = [
+    { name: 'publish_time_heartbeat', label: 'Heartbeat', validated: true },
+    { name: 'publish_time_boiler', label: LL.MQTT_INT_BOILER(), validated: false },
+    {
+      name: 'publish_time_thermostat',
+      label: LL.MQTT_INT_THERMOSTATS(),
+      validated: false
+    },
+    { name: 'publish_time_solar', label: LL.MQTT_INT_SOLAR(), validated: false },
+    { name: 'publish_time_mixer', label: LL.MQTT_INT_MIXER(), validated: false },
+    { name: 'publish_time_water', label: LL.MQTT_INT_WATER(), validated: false },
+    { name: 'publish_time_sensor', label: LL.SENSORS(), validated: false },
+    { name: 'publish_time_other', label: LL.DEFAULT(0), validated: false }
+  ];
 
   if (!data) {
     return (
@@ -154,7 +142,7 @@ const MqttSettings = () => {
         <Grid container spacing={2} rowSpacing={0}>
           <Grid>
             <ValidatedTextField
-              fieldErrors={fieldErrors ?? emptyFieldErrors}
+              fieldErrors={fieldErrors ?? {}}
               name="host"
               label={LL.ADDRESS_OF(LL.BROKER())}
               multiline
@@ -166,7 +154,7 @@ const MqttSettings = () => {
           </Grid>
           <Grid>
             <ValidatedTextField
-              fieldErrors={fieldErrors ?? emptyFieldErrors}
+              fieldErrors={fieldErrors ?? {}}
               name="port"
               label="Port"
               variant="outlined"
@@ -178,7 +166,7 @@ const MqttSettings = () => {
           </Grid>
           <Grid>
             <ValidatedTextField
-              fieldErrors={fieldErrors ?? emptyFieldErrors}
+              fieldErrors={fieldErrors ?? {}}
               name="base"
               label={LL.BASE_TOPIC()}
               variant="outlined"
@@ -219,7 +207,7 @@ const MqttSettings = () => {
           </Grid>
           <Grid>
             <ValidatedTextField
-              fieldErrors={fieldErrors ?? emptyFieldErrors}
+              fieldErrors={fieldErrors ?? {}}
               name="keep_alive"
               label="Keep Alive"
               slotProps={{
@@ -438,7 +426,7 @@ const MqttSettings = () => {
             <Grid key={field.name}>
               {field.validated ? (
                 <ValidatedTextField
-                  fieldErrors={fieldErrors ?? emptyFieldErrors}
+                  fieldErrors={fieldErrors ?? {}}
                   name={field.name}
                   label={field.label}
                   slotProps={{

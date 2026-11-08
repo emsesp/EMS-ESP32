@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,10 +32,11 @@ Controller::Controller(uint8_t device_type, uint8_t device_id, uint8_t product_i
 }
 
 // process_dateTime - type 0x06 - date and time from a thermostat - 14 bytes long, IVT only
-void Controller::process_dateTime(std::shared_ptr<const Telegram> telegram) {
+void Controller::process_dateTime(const std::shared_ptr<const Telegram> & telegram) {
     if (telegram->offset > 0 || telegram->message_length < 5) {
         return;
     }
+
     char newdatetime[sizeof(dateTime_)];
     // publish as dd.mm.yyyy hh:mm
     snprintf(newdatetime,

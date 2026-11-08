@@ -8,7 +8,7 @@ the LICENSE file.
 
 #include "ClientPosix.h"
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(__APPLE__)
 
 namespace espMqttClientInternals {
 

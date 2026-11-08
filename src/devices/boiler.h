@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ class Boiler : public EMSdevice {
     inline uint8_t model() const {
         return (flags() & 0x0F);
     }
+
     inline bool isHeatPump() const {
         return flags() & 0x08;
     }
@@ -70,6 +71,7 @@ class Boiler : public EMSdevice {
     uint8_t  wwChargeType_;         // DHW charge type (pump or 3-way-valve)
     uint8_t  wwChargeOptimization_; // DHW charge optimization
     uint8_t  wwDisinfectionTemp_;   // DHW disinfection temperature to prevent infection
+    uint8_t  wwDisinfectDuration_;  // DHW disinfection duration, heat pumps (0xEA offset 15, steps of 10 min)
     uint8_t  wwCircMode_;           // DHW circulation pump mode
     uint8_t  wwCirc_;               // DHW circulation on/off
     uint16_t wwCurTemp_;            // DHW current temperature
@@ -213,7 +215,7 @@ class Boiler : public EMSdevice {
     // uint8_t  hpHeatingOn_;
     // uint8_t  hpCoolingOn_;
     // uint8_t  hpWwOn_;
-    // uint8_t  hpPoolOn_;
+    uint8_t  hpPoolOn_;
     int16_t  hpTc0_;
     int16_t  hpTc1_;
     int16_t  hpTc3_;
@@ -237,6 +239,8 @@ class Boiler : public EMSdevice {
     uint32_t meterTotal_;
     uint32_t meterComp_;
     uint32_t meterEHeat_;
+    uint32_t meterEHeatHeat_;
+    uint32_t meterEHeatWw_;
     uint32_t meterHeat_;
     uint32_t meterWw_;
     uint32_t meterCool_;
@@ -253,7 +257,8 @@ class Boiler : public EMSdevice {
     uint8_t  hpTargetSpd_;
 
     // Pool unit
-    int8_t poolSetTemp_;
+    uint8_t poolOn_;
+    int8_t  poolSetTemp_;
 
     // Inputs
     struct {
@@ -280,6 +285,7 @@ class Boiler : public EMSdevice {
     uint8_t  auxHeaterStatus_;
     uint8_t  auxHeaterLevel_;
     uint16_t auxHeaterDelay_;
+    uint8_t  auxHeater_; // from #3315, telegram 0x061E
     uint8_t  silentMode_;
     int8_t   minTempSilent_;
     uint8_t  silentFrom_;
@@ -315,8 +321,10 @@ class Boiler : public EMSdevice {
     uint8_t  elHeatStep3_;
     uint16_t hpPowerLimit_;
     uint16_t hpCurrPower_;
-    int16_t  pc0Flow_;
-    int16_t  pc1Flow_;
+    uint16_t pc0lpm_;
+    uint16_t pc0Flow_;
+    uint8_t  pc0FlowInvalidCount_ = 0; // consecutive 0xFFFF at 0xE4:36 before clearing (#3224 / #3385)
+    uint16_t pc1Flow_;
     uint8_t  pc1Rate_;
     uint8_t  pc1On_;
     uint8_t  pumpKickHour_;  // hour
@@ -336,6 +344,8 @@ class Boiler : public EMSdevice {
     double  nrgWwF_;   // double calculate for nrgWw
     uint8_t nomPower_;
 
+    int16_t tk1_;
+
     /*
   // Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
   // thermostat always overwrites settings in boiler
@@ -349,65 +359,67 @@ class Boiler : public EMSdevice {
     uint8_t delayBoiler_;     // minutes
     uint8_t tempDiffBoiler_;  // relative temperature degrees
   */
-    void process_UBAFactory(std::shared_ptr<const Telegram> telegram);
-    void process_UBAParameterWW(std::shared_ptr<const Telegram> telegram);
-    void process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram);
-    void process_UBATotalUptime(std::shared_ptr<const Telegram> telegram);
-    void process_UBAParameters(std::shared_ptr<const Telegram> telegram);
-    void process_UBAMonitorWW(std::shared_ptr<const Telegram> telegram);
-    void process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram);
-    void process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram);
-    void process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram);
-    void process_UBAMonitorSlowPlus2(std::shared_ptr<const Telegram> telegram);
-    void process_UBAParametersPlus(std::shared_ptr<const Telegram> telegram);
-    void process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram);
-    void process_UBAOutdoorTemp(std::shared_ptr<const Telegram> telegram);
-    void process_UBASetPoints(std::shared_ptr<const Telegram> telegram);
-    void process_UBASetPoints2(std::shared_ptr<const Telegram> telegram);
-    void process_UBAFlags(std::shared_ptr<const Telegram> telegram);
-    void process_MC110Status(std::shared_ptr<const Telegram> telegram);
-    void process_UBAMaintenanceStatus(std::shared_ptr<const Telegram> telegram);
-    void process_UBAMaintenanceData(std::shared_ptr<const Telegram> telegram);
-    void process_ErrorMessage(std::shared_ptr<const Telegram> telegram);
-    void process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram);
-    void process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram);
-    void process_UBAErrorMessage3(std::shared_ptr<const Telegram> telegram);
-    void process_UBAMonitorWWPlus(std::shared_ptr<const Telegram> telegram);
-    void process_UBAInformation(std::shared_ptr<const Telegram> telegram);
-    void process_UBAEnergySupplied(std::shared_ptr<const Telegram> telegram);
-    void process_CascadeMessage(std::shared_ptr<const Telegram> telegram);
-    void process_UBASettingsWW(std::shared_ptr<const Telegram> telegram);
-    void process_HpPower(std::shared_ptr<const Telegram> telegram);
-    void process_HpTemperatures(std::shared_ptr<const Telegram> telegram);
-    void process_HpPool(std::shared_ptr<const Telegram> telegram);
-    void process_HpInput(std::shared_ptr<const Telegram> telegram);
-    void process_HpInConfig(std::shared_ptr<const Telegram> telegram);
-    void process_HpPressure(std::shared_ptr<const Telegram> telegram);
-    void process_HpCooling(std::shared_ptr<const Telegram> telegram);
-    void process_HpHeaterConfig(std::shared_ptr<const Telegram> telegram);
-    void process_HybridHp(std::shared_ptr<const Telegram> telegram);
-    void process_HpSilentMode(std::shared_ptr<const Telegram> telegram);
-    void process_HpAdditionalHeater(std::shared_ptr<const Telegram> telegram);
-    void process_HpValve(std::shared_ptr<const Telegram> telegram);
-    void process_HpPumps(std::shared_ptr<const Telegram> telegram);
-    void process_HpPump2(std::shared_ptr<const Telegram> telegram);
-    void process_HpDhwSettings(std::shared_ptr<const Telegram> telegram);
-    void process_HpSettings2(std::shared_ptr<const Telegram> telegram);
-    void process_HpSettings3(std::shared_ptr<const Telegram> telegram);
-    void process_HpEnergy(std::shared_ptr<const Telegram> telegram);
-    void process_HpMeters(std::shared_ptr<const Telegram> telegram);
-    void process_WeatherComp(std::shared_ptr<const Telegram> telegram);
-    void process_HpFan(std::shared_ptr<const Telegram> telegram);
-    void process_HpPower2(std::shared_ptr<const Telegram> telegram);
-    void process_HpPowerLimit(std::shared_ptr<const Telegram> telegram);
-    void process_PumpKick(std::shared_ptr<const Telegram> telegram);
+    void process_UBAFactory(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBAParameterWW(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBAMonitorFast(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBATotalUptime(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBAParameters(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBAMonitorWW(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBAMonitorFastPlus(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBAMonitorSlow(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBAMonitorSlowPlus(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBAMonitorSlowPlus2(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBAParametersPlus(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBAParameterWWPlus(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBAOutdoorTemp(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBASetPoints(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBASetPoints2(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBAFlags(const std::shared_ptr<const Telegram> & telegram);
+    void process_MC110Status(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBAMaintenanceStatus(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBAMaintenanceData(const std::shared_ptr<const Telegram> & telegram);
+    void process_ErrorMessage(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBAErrorMessage(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBAErrorMessage2(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBAErrorMessage3(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBAMonitorWWPlus(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBAInformation(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBAEnergySupplied(const std::shared_ptr<const Telegram> & telegram);
+    void process_CascadeMessage(const std::shared_ptr<const Telegram> & telegram);
+    void process_UBASettingsWW(const std::shared_ptr<const Telegram> & telegram);
+    void process_HpPower(const std::shared_ptr<const Telegram> & telegram);
+    void process_HpTemperatures(const std::shared_ptr<const Telegram> & telegram);
+    void process_HpPool(const std::shared_ptr<const Telegram> & telegram);
+    void process_HpInput(const std::shared_ptr<const Telegram> & telegram);
+    void process_HpInConfig(const std::shared_ptr<const Telegram> & telegram);
+    void process_HpPressure(const std::shared_ptr<const Telegram> & telegram);
+    void process_HpCooling(const std::shared_ptr<const Telegram> & telegram);
+    void process_HpHeaterConfig(const std::shared_ptr<const Telegram> & telegram);
+    void process_HybridHp(const std::shared_ptr<const Telegram> & telegram);
+    void process_HpSilentMode(const std::shared_ptr<const Telegram> & telegram);
+    void process_HpAdditionalHeater(const std::shared_ptr<const Telegram> & telegram);
+    void process_HpValve(const std::shared_ptr<const Telegram> & telegram);
+    void process_passiveCooling(const std::shared_ptr<const Telegram> & telegram);
+    void process_HpPumps(const std::shared_ptr<const Telegram> & telegram);
+    void process_HpPump2(const std::shared_ptr<const Telegram> & telegram);
+    void process_HpDhwSettings(const std::shared_ptr<const Telegram> & telegram);
+    void process_HpSettings2(const std::shared_ptr<const Telegram> & telegram);
+    void process_HpSettings3(const std::shared_ptr<const Telegram> & telegram);
+    void process_HpEnergy(const std::shared_ptr<const Telegram> & telegram);
+    void process_HpMeters(const std::shared_ptr<const Telegram> & telegram);
+    void process_WeatherComp(const std::shared_ptr<const Telegram> & telegram);
+    void process_HpFan(const std::shared_ptr<const Telegram> & telegram);
+    void process_HpPower2(const std::shared_ptr<const Telegram> & telegram);
+    void process_HpPowerLimit(const std::shared_ptr<const Telegram> & telegram);
+    void process_PumpKick(const std::shared_ptr<const Telegram> & telegram);
+    void process_auxHeater(const std::shared_ptr<const Telegram> & telegram);
 
-    void process_Meters(std::shared_ptr<const Telegram> telegram);
-    void process_Energy(std::shared_ptr<const Telegram> telegram);
+    void process_Meters(const std::shared_ptr<const Telegram> & telegram);
+    void process_Energy(const std::shared_ptr<const Telegram> & telegram);
 
     // HIU
-    void process_HIUSettings(std::shared_ptr<const Telegram> telegram);
-    void process_HIUMonitor(std::shared_ptr<const Telegram> telegram);
+    void process_HIUSettings(const std::shared_ptr<const Telegram> & telegram);
+    void process_HIUMonitor(const std::shared_ptr<const Telegram> & telegram);
 
     bool set_keepWarmTemp(const char * value, const int8_t id);
     bool set_returnTemp(const char * value, const int8_t id);
@@ -426,6 +438,7 @@ class Boiler : public EMSdevice {
     bool        set_ww_temp_eco(const char * value, const int8_t id);
     bool        set_ww_temp_single(const char * value, const int8_t id);
     bool        set_ww_disinfect_temp(const char * value, const int8_t id);
+    bool        set_ww_disinfect_duration(const char * value, const int8_t id);
     bool        set_ww_maxpower(const char * value, const int8_t id);
     bool        set_ww_maxtemp(const char * value, const int8_t id);
     bool        set_ww_flowTempOffset(const char * value, const int8_t id);
@@ -447,9 +460,11 @@ class Boiler : public EMSdevice {
     inline bool set_hyst2_on(const char * value, const int8_t id) {
         return set_hyst_on(value, 2);
     }
+
     inline bool set_hyst2_off(const char * value, const int8_t id) {
         return set_hyst_off(value, 2);
     }
+
     bool set_burn_period(const char * value, const int8_t id);
     bool set_pump_delay(const char * value, const int8_t id);
     bool set_reset(const char * value, const int8_t id);
@@ -461,6 +476,7 @@ class Boiler : public EMSdevice {
     bool set_ww_hyst_on(const char * value, const int8_t id);
     bool set_ww_hyst_off(const char * value, const int8_t id);
     bool set_pool_temp(const char * value, const int8_t id);
+    bool set_pool_on(const char * value, const int8_t id);
     bool set_emergency_temp(const char * value, const int8_t id);
     bool set_emergency_ops(const char * value, const int8_t id);
 
@@ -468,25 +484,32 @@ class Boiler : public EMSdevice {
     inline bool set_HpIn1Logic(const char * value, const int8_t id) {
         return set_HpInLogic(value, 1);
     }
+
     inline bool set_HpIn2Logic(const char * value, const int8_t id) {
         return set_HpInLogic(value, 2);
     }
+
     inline bool set_HpIn3Logic(const char * value, const int8_t id) {
         return set_HpInLogic(value, 3);
     }
+
     inline bool set_HpIn4Logic(const char * value, const int8_t id) {
         return set_HpInLogic(value, 4);
     }
+
     bool        set_maxHeat(const char * value, const int8_t id);
     inline bool set_maxHeatComp(const char * value, const int8_t id) {
         return set_maxHeat(value, 2);
     }
+
     inline bool set_maxHeatHeat(const char * value, const int8_t id) {
         return set_maxHeat(value, 3);
     }
+
     inline bool set_maxHeatDhw(const char * value, const int8_t id) {
         return set_maxHeat(value, 4);
     }
+
     bool set_silentMode(const char * value, const int8_t id);
     bool set_minTempSilent(const char * value, const int8_t id);
     bool set_silentFrom(const char * value, const int8_t id);
@@ -510,55 +533,71 @@ class Boiler : public EMSdevice {
     inline bool set_auxMaxLimit(const char * value, const int8_t id) {
         return set_auxLimit(value, 14);
     }
+
     inline bool set_auxLimitStart(const char * value, const int8_t id) {
         return set_auxLimit(value, 15);
     }
+
     bool        set_hpHyst(const char * value, const int8_t id);
     inline bool set_hpHystHeat(const char * value, const int8_t id) {
         return set_hpHyst(value, 37);
     }
+
     inline bool set_hpHystCool(const char * value, const int8_t id) {
         return set_hpHyst(value, 35);
     }
+
     inline bool set_hpHystPool(const char * value, const int8_t id) {
         return set_hpHyst(value, 33);
     }
+
     bool        set_tempDiff(const char * value, const int8_t id);
     inline bool set_tempDiffHeat(const char * value, const int8_t id) {
         return set_tempDiff(value, 4);
     }
+
     inline bool set_tempDiffCool(const char * value, const int8_t id) {
         return set_tempDiff(value, 3);
     }
+
     bool        set_wwOffTemp(const char * value, const int8_t id);
     inline bool set_wwComfOffTemp(const char * value, const int8_t id) {
         return set_wwOffTemp(value, 1);
     }
+
     inline bool set_wwEcoOffTemp(const char * value, const int8_t id) {
         return set_wwOffTemp(value, 0);
     }
+
     inline bool set_wwEcoPlusOffTemp(const char * value, const int8_t id) {
         return set_wwOffTemp(value, 5);
     }
+
     bool        set_wwDiffTemp(const char * value, const int8_t id);
     inline bool set_wwComfDiffTemp(const char * value, const int8_t id) {
         return set_wwDiffTemp(value, 12);
     }
+
     inline bool set_wwEcoDiffTemp(const char * value, const int8_t id) {
         return set_wwDiffTemp(value, 13);
     }
+
     inline bool set_wwEcoPlusDiffTemp(const char * value, const int8_t id) {
         return set_wwDiffTemp(value, 14);
     }
+
     inline bool set_wwComfStopTemp(const char * value, const int8_t id) {
         return set_wwOffTemp(value, 8);
     }
+
     inline bool set_wwEcoStopTemp(const char * value, const int8_t id) {
         return set_wwOffTemp(value, 9);
     }
+
     inline bool set_wwEcoPlusStopTemp(const char * value, const int8_t id) {
         return set_wwOffTemp(value, 10);
     }
+
     bool        set_vp_cooling(const char * value, const int8_t id);
     bool        set_heatCable(const char * value, const int8_t id);
     bool        set_VC0valve(const char * value, const int8_t id);
@@ -569,20 +608,25 @@ class Boiler : public EMSdevice {
     inline bool set_elHeatStep1(const char * value, const int8_t id) {
         return set_elHeatStep(value, 1);
     }
+
     inline bool set_elHeatStep2(const char * value, const int8_t id) {
         return set_elHeatStep(value, 2);
     }
+
     inline bool set_elHeatStep3(const char * value, const int8_t id) {
         return set_elHeatStep(value, 3);
     }
+
     bool        set_wwAlternatingOper(const char * value, const int8_t id);
     bool        set_wwAltOpPrio(const char * value, const int8_t id);
     inline bool set_wwAltOpPrioHeat(const char * value, const int8_t id) {
         return set_wwAltOpPrio(value, 2);
     }
+
     inline bool set_wwAltOpPrioWw(const char * value, const int8_t id) {
         return set_wwAltOpPrio(value, 3);
     }
+
     bool set_forceHeatingOff(const char * value, const int8_t id);
 
     /*
@@ -610,6 +654,7 @@ class Boiler : public EMSdevice {
     bool set_pumpKickHour(const char * value, const int8_t id);
     bool set_pumpKickDay(const char * value, const int8_t id);
     bool set_pumpKickDelay(const char * value, const int8_t id);
+    bool set_auxHeater(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

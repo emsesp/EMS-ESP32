@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -159,22 +159,23 @@ class EMSbus {
   public:
     static uuid::log::Logger logger_;
 
-    static constexpr uint8_t EMS_MASK_UNSET     = 0xFF; // EMS bus type (budrus/junkers) hasn't been detected yet
-    static constexpr uint8_t EMS_MASK_HT3       = 0x80; // EMS bus type Junkers/HT3
-    static constexpr uint8_t EMS_MASK_BUDERUS   = 0xFF; // EMS bus type Buderus
-    static constexpr uint8_t EMS_TX_ERROR_LIMIT = 10;   // % limit of failed Tx read/write attempts before showing a warning
+    static constexpr uint8_t EMS_MASK_UNSET       = 0xFF; // EMS bus type (budrus/junkers) hasn't been detected yet
+    static constexpr uint8_t EMS_MASK_HT3         = 0x80; // EMS bus type Junkers/HT3
+    static constexpr uint8_t EMS_MASK_BUDERUS     = 0xFF; // EMS bus type Buderus
+    static constexpr uint8_t EMS_TX_ERROR_LIMIT   = 10;   // % limit of failed Tx read/write attempts before showing a warning
+    static constexpr uint8_t EMS_POLL_MATCH_LIMIT = 3;    // consecutive poll matches needed before declaring bus connected
 
     static bool is_ht3() {
         return (ems_mask_ == EMS_MASK_HT3);
     }
 
+    // True once UBAMonitorFastPlus (0xE4) was received — used by Tx mode Auto for EMS+ pacing
     static bool is_ems2() {
         return isEMS2_;
     }
 
     static void set_ems2() {
         isEMS2_ = true;
-        ;
     }
 
     static uint8_t ems_mask() {
@@ -203,12 +204,13 @@ class EMSbus {
 
     // checks every 30 seconds if the EMS bus is still alive
     static bool bus_connected() {
-#if defined(EMSESP_STANDALONE) || defined(EMSESP_TEST)
+#if defined(EMSESP_STANDALONE)
         return true;
 #else
         if ((uuid::get_uptime() - last_bus_activity_) > EMS_BUS_TIMEOUT) {
             bus_connected_ = false;
         }
+
         return bus_connected_;
 #endif
     }
@@ -229,12 +231,14 @@ class EMSbus {
         if (!bus_uptime_start_) {
             return 0; // not yet initialized
         }
+
         return (uint32_t)((uuid::get_uptime() - bus_uptime_start_) / 1000ULL);
     }
 
     static uint8_t tx_state() {
         return tx_state_;
     }
+
     static void tx_state(uint8_t tx_state) {
         tx_state_ = tx_state;
     }
@@ -248,7 +252,7 @@ class EMSbus {
     static uint32_t bus_uptime_start_;  // timestamp of first time we connected to the bus
     static bool     bus_connected_;     // start assuming the bus hasn't been connected
     static uint8_t  ems_mask_;          // unset=0xFF, buderus=0x00, junkers/ht3=0x80
-    static uint8_t  ems_bus_id_;        // the bus id, which configurable and stored in settings
+    static uint8_t  ems_bus_id_;        // the EMS Bus id, which configurable and stored in settings
     static uint8_t  tx_mode_;           // local copy of the tx mode
     static uint8_t  tx_state_;          // state of the Tx line (NONE or waiting on a TX_READ or TX_WRITE)
     static bool     isEMS2_;
@@ -280,6 +284,7 @@ class RxService : public EMSbus {
         if (telegram_error_count_ == 0) {
             return 100; // all good, 100%
         }
+
         uint8_t q = (telegram_error_count_ * 100 / (telegram_count_ + telegram_error_count_));
         return (q <= EMS_BUS_QUALITY_RX_THRESHOLD ? 100 : 100 - q);
     }
@@ -359,6 +364,7 @@ class TxService : public EMSbus {
     uint32_t telegram_read_count() const {
         return telegram_read_count_;
     }
+
     uint32_t telegram_write_count() const {
         return telegram_write_count_;
     }
@@ -396,6 +402,7 @@ class TxService : public EMSbus {
         if (telegram_read_fail_count_ == 0) {
             return 100; // all good, 100%
         }
+
         return (100 - (uint8_t)(telegram_read_fail_count_ * 100 / (telegram_read_fail_count_ + telegram_read_count_)));
     }
 
@@ -403,6 +410,7 @@ class TxService : public EMSbus {
         if (telegram_write_fail_count_ == 0) {
             return 100; // all good, 100%
         }
+
         return (100 - (uint8_t)(telegram_write_fail_count_ * 100 / (telegram_write_fail_count_ + telegram_write_count_)));
     }
 
@@ -440,6 +448,9 @@ class TxService : public EMSbus {
 
     static constexpr uint8_t  MAXIMUM_TX_RETRIES = 3;
     static constexpr uint32_t POST_SEND_DELAY    = 2000;
+
+    // drop a queued Tx telegram sent from another id if the master hasn't polled that id after this many polls (~3-10 seconds)
+    static constexpr uint32_t MAX_POLLS_WITHOUT_MASTER = 500;
 
   private:
     std::deque<QueuedTxTelegram, AllocatorPSRAM<QueuedTxTelegram>> tx_telegrams_; // the Tx queue

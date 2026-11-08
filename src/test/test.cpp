@@ -77,7 +77,6 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
         return true;
     }
 
-
 //
 // the tests take a lot of memory when built for the ESP32
 // so only including the full set in standalone, otherwise a limited selection of basic tests
@@ -280,6 +279,20 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
         return true;
     }
 
+    // https://github.com/emsesp/EMS-ESP32/issues/3107
+    if (cmd == "src_cooling") {
+        EMSESP::logger().notice("Adding SRC plus thermostat with heatpump in cooling...");
+
+        add_device(0x10, 253);                                      // UI800
+        add_device(0x50, 17);                                       // MX400 module
+        uart_telegram("10 00 FF 00 03 71 00 11 04 01 01 1C 08 04"); // RC300Summer2, heatpump
+        // RC300Monitor hc1, offset 20: hpoperatingstate cooling
+        uart_telegram("10 00 FF 00 01 A5 00 D7 00 00 00 00 30 01 84 01 01 03 01 84 01 F1 00 00 11 01 03");
+        uart_telegram("50 00 FF 00 0A DD 00 E6 36 2A");             // monitor, temperatures
+        uart_telegram("50 00 FF 00 0A B5 03 FF 00 24 01 FF 2C 00"); // heating off, cooling manual
+        return true;
+    }
+
 #endif
 
     return false;
@@ -317,6 +330,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             id1 = Helpers::atoint(id1_s.c_str());
         }
     }
+
     if (!id2_s.empty()) {
         id2 = Helpers::atoint(id2_s.c_str());
     }
@@ -327,6 +341,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             shell.printfln("Usage: test add <device_id> <product_id>");
             return;
         }
+
         shell.printfln("Testing adding a device (deviceID 0x%02X, product_id %d), with all values...", id1, id2);
         test("add", id1, id2);
         shell.invoke_command("show devices");
@@ -350,6 +365,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::webCustomEntityService.load_test_data();  // custom entities
         EMSESP::webCustomizationService.load_test_data(); // set customizations - this will overwrite any settings in the FS
         EMSESP::temperaturesensor_.load_test_data();      // add temperature sensors
+        EMSESP::webCommandService.load_test_data();       // add command items
         EMSESP::webSchedulerService.load_test_data();     // add scheduler data
 
         shell.invoke_command("show values");
@@ -406,7 +422,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     if (command == "scheduler") {
         shell.printfln("Adding Scheduler items...");
 
-        // add some dummy entities
+        EMSESP::webCommandService.load_test_data();
         EMSESP::webSchedulerService.load_test_data();
 
 #ifdef EMSESP_STANDALONE
@@ -450,7 +466,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 // THESE ONLY WORK WITH AN ESP32, not in standalone/native mode
 #ifndef EMSESP_STANDALONE
     if (command == "ls") {
-        System::listDir("/", 3);
+        EMSESP::system_.listDir("/", 3);
         ok = true;
     }
 
@@ -458,7 +474,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // S3 has 16MB flash
         // EMSESP::system_.uploadFirmwareURL("https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_0-dev_32-ESP32S3-16MB+.bin"); // S3
 
-        // Test for 4MB Tasmota builds
+        // Test for 4MB builds
         // EMSESP::system_.uploadFirmwareURL("https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_2-dev_8-ESP32-4MB.bin"); // S32
         EMSESP::system_.uploadFirmwareURL("https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_2-dev_8-ESP32-16MB.bin"); // E32
 
@@ -664,7 +680,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::webAPIService.webAPIService(&request);
         Serial.println();
 
-
         request.url("/api/thermostat/hc2/entities");
         EMSESP::webAPIService.webAPIService(&request);
         Serial.println();
@@ -695,6 +710,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
                 if (json.size() != 0) {
                     serializeJson(doc, Serial);
                 }
+
                 shell.println();
                 Serial.print(COLOR_RESET);
 
@@ -716,6 +732,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
                 Serial.println(" **");
             }
         }
+
         ok = true;
     }
 
@@ -960,12 +977,31 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         ok = true;
     }
 
+    if (command == "pool") {
+        shell.printfln("Testing heatpump with MP100 pool module...");
+        add_device(0x08, 172); // heatpump
+        add_device(0x11, 204); // MP100
+        // RC300 switches pool on, 40.0 C
+        uart_telegram({0x10, 0x08, 0xFF, 0x00, 0x03, 0x8A, 0x01});
+        uart_telegram({0x08, 0x00, 0xFF, 0x00, 0x03, 0x8A, 0x01, 0x50, 0x01, 0x0C, 0x00, 0x00, 0x0A, 0x00, 0x1E, 0x00, 0x00, 0x01, 0x00, 0x04});
+        // HPValve, byte 0 bit 6 = pool heating active
+        uart_telegram({0x08, 0x00, 0xFF, 0x00, 0x03, 0x88, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
+                       0x00, 0x00, 0x00, 0x00, 0x5A, 0x00, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00});
+        // heatpump -> MP100 shunt setpoint 0%
+        uart_telegram({0x08, 0x11, 0xFF, 0x00, 0x04, 0xC4, 0x00});
+        // MP100 -> heatpump: 32.5 C, shunt 45%, pool request active
+        uart_telegram({0x11, 0x08, 0xFF, 0x00, 0x04, 0xBA, 0x01, 0x45, 0x02, 0x2D, 0x00});
+        shell.invoke_command("show values");
+        ok = true;
+    }
+
     if (command == "healthcheck") {
         // n=1 = EMSESP::system_.HEALTHCHECK_NO_BUS
         // n=2 = EMSESP::system_.HEALTHCHECK_NO_NETWORK
         if (id1 == -1) {
             id1 = 0;
         }
+
         shell.printfln("Testing healthcheck with %d", id1);
         EMSESP::system_.healthcheck(id1);
         ok = true;
@@ -1091,6 +1127,22 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.invoke_command("call boiler circpump/value");
     }
 
+    if (command == "led") {
+        shell.printfln("Testing LED...");
+
+        JsonDocument          doc;
+        AsyncWebServerRequest request;
+
+        request.method(HTTP_POST);
+        char data1[] = "{\"data\":\"red:blink1\"}";
+        deserializeJson(doc, data1);
+        JsonVariant json = doc.as<JsonVariant>();
+        request.url("/api/system/led");
+        EMSESP::webAPIService.webAPIService(&request, json);
+
+        ok = true;
+    }
+
     if (command == "shuntingyard") {
         shell.printfln("Testing shunting yard...");
 
@@ -1100,6 +1152,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::webCustomEntityService.load_test_data();  // custom entities
         EMSESP::webCustomizationService.load_test_data(); // set customizations - this will overwrite any settings in the FS
         EMSESP::temperaturesensor_.load_test_data();      // add temperature sensors
+        EMSESP::webCommandService.load_test_data();       // add command items
         EMSESP::webSchedulerService.load_test_data();     // run scheduler tests, and conditions
 
         JsonDocument          doc;
@@ -1329,16 +1382,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             // request.url("/rest/action");
             // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
-            // test version checks
-            // use same data as in restServer.ts
-            // log shows first if you can upgrade to dev, and then if you can upgrade to stable
-            // request.url("/rest/action");
-            // std::string LATEST_STABLE_VERSION = "3.8.0";
-            // std::string LATEST_DEV_VERSION    = "3.8.1-dev.3";
-            // std::string param                 = LATEST_DEV_VERSION + "," + LATEST_STABLE_VERSION;
-            // std::string action                = "{\"action\":\"checkUpgrade\", \"param\":\"" + param + "\"}";
-            // deserializeJson(doc, action);
-
             // // case 0: on latest stable, can upgrade to dev only. So true, false
             // EMSESP::webStatusService.set_current_version(LATEST_STABLE_VERSION);
             // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
@@ -1373,6 +1416,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             EMSESP::webCustomEntityService.load_test_data();  // custom entities
             EMSESP::webCustomizationService.load_test_data(); // set customizations - this will overwrite any settings in the FS
             EMSESP::temperaturesensor_.load_test_data();      // add temperature sensors
+            EMSESP::webCommandService.load_test_data();       // add command items
             EMSESP::webSchedulerService.load_test_data();     // run scheduler tests, and conditions
 
             request.method(HTTP_GET);
@@ -2104,6 +2148,102 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         ok = true;
     }
 
+    if (command == "version") {
+        shell.printfln("Testing version upgrade and downgrade detection...");
+
+        // mirrors System::check_upgrade(): settings = version stored in settings file, current = running firmware
+        struct VersionTest {
+            const char * settings;
+            const char * current;
+            const char * expected; // "upgrade", "downgrade" or "same"
+        };
+
+        const VersionTest tests[] = {
+            // identical versions
+            {"3.9.0", "3.9.0", "same"},
+            {"3.9.0-dev.12", "3.9.0-dev.12", "same"},
+
+            // numeric upgrades (patch, minor, major)
+            {"3.9.0", "3.9.1", "upgrade"},
+            {"3.8.5", "3.9.0", "upgrade"},
+            {"2.10.9", "3.0.0", "upgrade"},
+
+            // numeric downgrades
+            {"3.9.1", "3.9.0", "downgrade"},
+            {"3.9.0", "3.8.5", "downgrade"},
+            {"3.0.0", "2.10.9", "downgrade"},
+
+            // prerelease (dev) sequences on the same base version
+            {"3.9.0-dev.12", "3.9.0-dev.13", "upgrade"},
+            {"3.9.0-dev.13", "3.9.0-dev.12", "downgrade"},
+            {"3.9.0-dev.9", "3.9.0-dev.12", "upgrade"}, // single vs double digit dev number
+            {"3.9.0-dev.8", "3.9.0-dev.12", "upgrade"}, // regression: was reported as a downgrade
+
+            // prerelease vs release on the same base version (semver: prerelease < release)
+            {"3.9.0-dev.12", "3.9.0", "upgrade"},
+            {"3.9.0", "3.9.0-dev.12", "downgrade"},
+
+            // prerelease vs a different base version
+            {"3.9.0-dev.12", "3.9.1", "upgrade"},
+            {"3.9.1", "3.9.0-dev.12", "downgrade"},
+            {"3.8.5", "3.9.0-dev.12", "upgrade"},
+
+            // mixed prerelease tags
+            {"3.5.0-b13", "3.9.0-dev.12", "upgrade"},
+
+            // partial version strings are shorter than 5 chars, so check_upgrade() treats them as missing (3.5.0)
+            {"3.9", "3.9.0", "upgrade"},
+            {"3.9", "3.9.1", "upgrade"},
+
+            // build metadata after '+' is ignored
+            {"3.9.0+abc123", "3.9.0", "same"},
+
+            // numeric prerelease identifiers compare numerically, so leading zeros are equivalent
+            {"3.9.0-dev.01", "3.9.0-dev.1", "same"},
+            {"3.9.0-dev.012", "3.9.0-dev.12", "same"},
+
+            // missing/short version: check_upgrade() assumes 3.5.0
+            {"", "3.9.0", "upgrade"},
+            {"1.0", "3.9.0", "upgrade"},
+        };
+
+        uint8_t failed = 0;
+        for (const auto & test : tests) {
+            // replicate check_upgrade()'s handling of a missing version
+            std::string settingsVersion = test.settings;
+            if (settingsVersion.length() < 5) {
+                settingsVersion = "3.5.0";
+            }
+
+            FirmwareVersion settings_version(settingsVersion);
+            FirmwareVersion this_version(test.current);
+
+            const char * actual;
+            if (this_version > settings_version) {
+                actual = "upgrade";
+            } else if (this_version < settings_version) {
+                actual = "downgrade";
+            } else {
+                actual = "same";
+            }
+
+            bool pass = (strcmp(actual, test.expected) == 0);
+            if (!pass) {
+                failed++;
+            }
+
+            shell.printfln("%s %-14s -> %-14s expected %-9s got %-9s", pass ? "PASS" : "FAIL", test.settings, test.current, test.expected, actual);
+        }
+
+        if (failed) {
+            shell.printfln("%d test(s) FAILED", failed);
+        } else {
+            shell.printfln("All version tests passed");
+        }
+
+        ok = true;
+    }
+
     if (command == "mqtt2") {
         shell.printfln("Testing MQTT large payloads...");
 
@@ -2118,6 +2258,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             snprintf(value, 7, "val%03d", i);
             doc[key] = value;
         }
+
         doc.shrinkToFit();
         JsonObject jo = doc.as<JsonObject>();
         shell.printfln("Length of JSON payload = %d", measureJson(jo));
@@ -2408,11 +2549,13 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
                 for (const auto & d : response._data) {
                     shell.printf(" %d", d);
                 }
+
                 if (response._data.size() == 5 && response._data[3] == 0 && response._data[4] == (uint8_t)EMS_VALUE_DEFAULT_INT8_DUMMY) {
                     shell.printf(" [OK]");
                 } else {
                     shell.printf(" [ERROR - invalid response]");
                 }
+
                 shell.println();
             } else {
                 shell.printf("mintempsilent [MODBUS ERROR %d]\n", response.getError());
@@ -2433,6 +2576,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
                 for (const auto & d : response._data) {
                     shell.printf(" %d", d);
                 }
+
                 shell.println(" [OK]");
             } else {
                 shell.printf("selflowtemp [MODBUS ERROR %d]\n", response.getError());
@@ -2454,6 +2598,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
                 for (const auto & d : response._data) {
                     shell.printf(" %d", d);
                 }
+
                 shell.println(" [OK]");
             } else {
                 shell.printf("remotetemp [MODBUS ERROR %d]\n", response.getError());
@@ -2571,6 +2716,7 @@ void Test::rx_telegram(const std::vector<uint8_t> & rx_data) {
         data[i] = rx_data[i];
         i++;
     }
+
     data[i] = EMSESP::rxservice_.calculate_crc(data, i);
     EMSESP::rxservice_.add(data, len + 1);
 
@@ -2586,6 +2732,7 @@ void Test::uart_telegram(const std::vector<uint8_t> & rx_data) {
         data[i] = rx_data[i];
         i++;
     }
+
     data[i] = EMSESP::rxservice_.calculate_crc(data, i);
     EMSESP::incoming_telegram(data, i + 1);
 
@@ -2599,6 +2746,7 @@ void Test::uart_telegram_withCRC(const char * rx_data) {
     for (uint8_t i = 0; i < strlen(rx_data); i++) {
         telegram[i] = rx_data[i];
     }
+
     telegram[strlen(rx_data)] = '\0'; // make sure its terminated
 
     uint8_t count = 0;
@@ -2638,6 +2786,7 @@ void Test::uart_telegram(const char * rx_data) {
     for (uint8_t i = 0; i < strlen(rx_data); i++) {
         telegram[i] = rx_data[i];
     }
+
     telegram[strlen(rx_data)] = '\0'; // make sure its terminated
 
     uint8_t count = 0;

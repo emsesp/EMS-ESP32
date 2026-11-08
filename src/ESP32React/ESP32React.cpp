@@ -6,7 +6,7 @@
 
 static constexpr const char CACHE_CONTROL[] = "public,max-age=60";
 
-// Single static-content handler serving all assets embedded in WWWData.h.
+// Single static-content handler serving all assets embedded in WWWData.h
 class StaticContentHandler : public AsyncWebHandler {
   public:
     bool canHandle(AsyncWebServerRequest * request) const override {
@@ -15,8 +15,7 @@ class StaticContentHandler : public AsyncWebHandler {
     }
 
     void handleRequest(AsyncWebServerRequest * request) override {
-        // OPTIONS is handled generically - the server-level CORS headers are
-        // attached via DefaultHeaders in ESP32React::begin().
+        // OPTIONS is handled generically - the server-level CORS headers are attached via DefaultHeaders in ESP32React::begin().
         if (request->method() == HTTP_OPTIONS) {
             request->send(200);
             return;
@@ -53,17 +52,18 @@ class StaticContentHandler : public AsyncWebHandler {
                 return &WWW_ASSETS[i];
             }
         }
+
         return nullptr;
     }
 
     // Returns the /index.html asset, used as the SPA fallback for any GET
-    // that didn't match an embedded asset (React Router handles routing on
-    // the client side).
+    // that didn't match an embedded asset (React Router handles routing on the client side).
     static const WWWAsset * index_asset() {
         static const WWWAsset * cached = nullptr;
         if (cached == nullptr) {
             cached = lookup("/index.html");
         }
+
         return cached;
     }
 };
@@ -93,6 +93,7 @@ void ESP32React::begin() {
             defaultHeaders.addHeader(asyncsrv::T_CORS_ACAH, "Accept, Content-Type, Authorization");
             defaultHeaders.addHeader(asyncsrv::T_CORS_ACAC, "true");
         }
+
         defaultHeaders.addHeader(asyncsrv::T_Server, networkSettings.hostname);
     });
     _apSettingsService.begin();
@@ -103,7 +104,6 @@ void ESP32React::begin() {
 }
 
 void ESP32React::loop() {
-    _networkSettingsService.loop();
-    _apSettingsService.loop();
     _mqttSettingsService.loop();
+    _ntpSettingsService.loop();
 }

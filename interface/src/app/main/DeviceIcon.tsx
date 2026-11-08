@@ -38,6 +38,7 @@ const deviceIconLookup: Record<DeviceType, IconType | null> = {
   [DeviceType.CUSTOM]: MdPlaylistAdd,
   [DeviceType.UNKNOWN]: MdOutlineSensors,
   [DeviceType.SYSTEM]: null,
+  [DeviceType.COMMAND]: MdPlaylistAdd,
   [DeviceType.SCHEDULER]: MdMoreTime,
   [DeviceType.GENERIC]: MdOutlineSensors,
   [DeviceType.VENTILATION]: PiFan

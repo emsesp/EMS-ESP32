@@ -4,6 +4,8 @@ import type {
   APIcall,
   Action,
   Activity,
+  CommandItem,
+  Commands,
   CoreData,
   DashboardData,
   DeviceData,
@@ -102,14 +104,30 @@ export const readSchedule = () =>
         o_deleted: si.deleted,
         o_flags: si.flags,
         o_time: si.time,
-        o_cmd: si.cmd,
-        o_value: si.value,
+        o_cmd_name: si.cmd_name,
         o_name: si.name
       }));
     }
   });
 export const writeSchedule = (data: Schedule) =>
   alovaInstance.Post('/rest/schedule', data);
+
+// Commands
+export const readCommands = () =>
+  alovaInstance.Get<CommandItem[]>('/rest/commands', {
+    transform(data) {
+      const commands = (data as Commands).commands;
+      return commands.map((ci) => ({
+        ...ci,
+        o_id: ci.id,
+        o_cmd: ci.cmd,
+        o_value: ci.value,
+        o_name: ci.name
+      }));
+    }
+  });
+export const writeCommands = (data: Commands) =>
+  alovaInstance.Post('/rest/commands', data);
 
 // Modules
 export const readModules = () =>

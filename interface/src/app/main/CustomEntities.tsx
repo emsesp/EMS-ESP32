@@ -1,6 +1,5 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useBlocker } from 'react-router';
-import { toast } from 'react-toastify';
 
 import AddIcon from '@mui/icons-material/Add';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -26,6 +25,7 @@ import {
   SectionContent,
   useLayoutTitle
 } from 'components';
+import { toast } from 'components/toast';
 import { useI18nContext } from 'i18n/i18n-react';
 import { useInterval } from 'utils';
 
@@ -57,20 +57,18 @@ const CustomEntities = () => {
     initialData: []
   });
 
-  const intervalCallback = useCallback(() => {
+  useInterval(() => {
     if (!dialogOpen && !numChanges) {
       void fetchEntities();
     }
-  }, [dialogOpen, numChanges, fetchEntities]);
-
-  useInterval(intervalCallback);
+  });
 
   const { send: writeEntities } = useRequest(
     (data: Entities) => writeCustomEntities(data),
     { immediate: false }
   );
 
-  const hasEntityChanged = useCallback((ei: EntityItem) => {
+  const hasEntityChanged = (ei: EntityItem) => {
     return (
       ei.id !== ei.o_id ||
       ei.ram !== ei.o_ram ||
@@ -86,21 +84,19 @@ const CustomEntities = () => {
       ei.deleted !== ei.o_deleted ||
       (ei.value || '') !== (ei.o_value || '')
     );
-  }, []);
+  };
 
-  const entity_theme = useMemo(
-    () =>
-      useTheme({
-        Table: `
+  const entity_theme = useTheme({
+    Table: `
       --data-table-library_grid-template-columns: repeat(1, minmax(60px, 1fr)) minmax(80px, auto) 80px 80px 80px 120px;
     `,
-        BaseRow: `
+    BaseRow: `
       font-size: 14px;
       .td {
         height: 32px;
       }
     `,
-        BaseCell: `
+    BaseCell: `
       &:nth-of-type(1) {
         padding: 8px;
       }
@@ -120,7 +116,7 @@ const CustomEntities = () => {
         text-align: center;
       }
     `,
-        HeaderRow: `
+    HeaderRow: `
       text-transform: uppercase;
       background-color: black;
       color: #90CAF9;
@@ -129,7 +125,7 @@ const CustomEntities = () => {
         height: 36px;
       }
     `,
-        Row: `
+    Row: `
       background-color: #1e1e1e;
       position: relative;
       cursor: pointer;
@@ -140,11 +136,9 @@ const CustomEntities = () => {
         background-color: #177ac9;
       }
     `
-      }),
-    []
-  );
+  });
 
-  const saveEntities = useCallback(async () => {
+  const saveEntities = async () => {
     await writeEntities({
       entities: entities
         .filter((ei: EntityItem) => !ei.deleted)
@@ -173,44 +167,41 @@ const CustomEntities = () => {
         await fetchEntities();
         setNumChanges(0);
       });
-  }, [entities, writeEntities, LL, fetchEntities]);
+  };
 
-  const editEntityItem = useCallback((ei: EntityItem) => {
+  const editEntityItem = (ei: EntityItem) => {
     setCreating(false);
     setSelectedEntityItem(ei);
     setDialogOpen(true);
-  }, []);
+  };
 
-  const onDialogClose = useCallback(() => {
+  const onDialogClose = () => {
     setDialogOpen(false);
-  }, []);
+  };
 
-  const onDialogCancel = useCallback(async () => {
+  const onDialogCancel = async () => {
     await fetchEntities().then(() => {
       setNumChanges(0);
     });
-  }, [fetchEntities]);
+  };
 
-  const onDialogSave = useCallback(
-    (updatedItem: EntityItem) => {
-      setDialogOpen(false);
-      void updateState(readCustomEntities(), (data: EntityItem[]) => {
-        const new_data = creating
-          ? [
-              ...data.filter((ei) => creating || ei.o_id !== updatedItem.o_id),
-              updatedItem
-            ]
-          : data.map((ei) =>
-              ei.id === updatedItem.id ? { ...ei, ...updatedItem } : ei
-            );
-        setNumChanges(new_data.filter((ei) => hasEntityChanged(ei)).length);
-        return new_data;
-      });
-    },
-    [creating, hasEntityChanged]
-  );
+  const onDialogSave = (updatedItem: EntityItem) => {
+    setDialogOpen(false);
+    void updateState(readCustomEntities(), (data: EntityItem[]) => {
+      const new_data = creating
+        ? [
+            ...data.filter((ei) => creating || ei.o_id !== updatedItem.o_id),
+            updatedItem
+          ]
+        : data.map((ei) =>
+            ei.id === updatedItem.id ? { ...ei, ...updatedItem } : ei
+          );
+      setNumChanges(new_data.filter((ei) => hasEntityChanged(ei)).length);
+      return new_data;
+    });
+  };
 
-  const onDialogDup = useCallback((item: EntityItem) => {
+  const onDialogDup = (item: EntityItem) => {
     setCreating(true);
     setSelectedEntityItem({
       id: Math.floor(Math.random() * (MAX_ID - MIN_ID) + MIN_ID),
@@ -228,9 +219,9 @@ const CustomEntities = () => {
       value: item.value
     });
     setDialogOpen(true);
-  }, []);
+  };
 
-  const addEntityItem = useCallback(() => {
+  const addEntityItem = () => {
     setCreating(true);
     setSelectedEntityItem({
       id: Math.floor(Math.random() * (MAX_ID - MIN_ID) + MIN_ID),
@@ -248,30 +239,27 @@ const CustomEntities = () => {
       value: ''
     });
     setDialogOpen(true);
-  }, []);
+  };
 
-  const formatValue = useCallback((value: unknown, uom: number) => {
+  const formatValue = (value: unknown, uom: number) => {
     return value === undefined
       ? ''
       : typeof value === 'number'
         ? new Intl.NumberFormat().format(value) +
           (uom === 0 ? '' : ` ${DeviceValueUOM_s[uom]}`)
         : `${value as string}${uom === 0 ? '' : ` ${DeviceValueUOM_s[uom]}`}`;
-  }, []);
+  };
 
-  const showHex = useCallback((value: number, digit: number) => {
+  const showHex = (value: number, digit: number) => {
     return `0x${value.toString(16).toUpperCase().padStart(digit, '0')}`;
-  }, []);
+  };
 
-  const filteredAndSortedEntities = useMemo(
-    () =>
-      entities
-        ?.filter((ei: EntityItem) => !ei.deleted)
-        .sort((a: EntityItem, b: EntityItem) => a.name.localeCompare(b.name)) ?? [],
-    [entities]
-  );
+  const filteredAndSortedEntities =
+    entities
+      ?.filter((ei: EntityItem) => !ei.deleted)
+      .sort((a: EntityItem, b: EntityItem) => a.name.localeCompare(b.name)) ?? [];
 
-  const renderEntity = useCallback(() => {
+  const renderEntity = () => {
     if (!entities) {
       return (
         <FormLoader onRetry={fetchEntities} errorMessage={error?.message || ''} />
@@ -328,17 +316,7 @@ const CustomEntities = () => {
         )}
       </Table>
     );
-  }, [
-    entities,
-    error,
-    fetchEntities,
-    entity_theme,
-    editEntityItem,
-    LL,
-    filteredAndSortedEntities,
-    showHex,
-    formatValue
-  ]);
+  };
 
   return (
     <SectionContent>

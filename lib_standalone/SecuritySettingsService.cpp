@@ -10,22 +10,9 @@ SecuritySettingsService::SecuritySettingsService(AsyncWebServer * server, FS * f
 SecuritySettingsService::~SecuritySettingsService() {
 }
 
-ArRequestFilterFunction SecuritySettingsService::filterRequest(AuthenticationPredicate predicate) {
-    return [predicate](AsyncWebServerRequest * request) { return true; };
-}
-
-// Return the admin user on all request - disabling security features
+// Return the admin user on all requests - disabling security features
 Authentication SecuritySettingsService::authenticateRequest(AsyncWebServerRequest * request) {
     return Authentication(ADMIN_USER);
-}
-
-// Return the function unwrapped
-ArRequestHandlerFunction SecuritySettingsService::wrapRequest(ArRequestHandlerFunction onRequest, AuthenticationPredicate predicate) {
-    return onRequest;
-}
-
-ArJsonRequestHandlerFunction SecuritySettingsService::wrapCallback(ArJsonRequestHandlerFunction onRequest, AuthenticationPredicate predicate) {
-    return onRequest;
 }
 
 #endif

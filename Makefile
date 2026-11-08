@@ -27,7 +27,7 @@ ifeq ($(UNAME_S),Linux)
 	JOBS := $(shell nproc)
 endif
 ifeq ($(UNAME_S),Darwin)
-    EXTRA_CPPFLAGS = -D OSX -Wno-tautological-constant-out-of-range-compare
+    EXTRA_CPPFLAGS = -D OSX -Wno-tautological-constant-out-of-range-compare -Wno-unused-lambda-capture
 	JOBS := $(shell sysctl -n hw.ncpu)
 endif
 
@@ -47,7 +47,7 @@ MAKEFLAGS += -j$(JOBS) -l$(shell echo $$(($(JOBS) * 2)))
 #----------------------------------------------------------------------
 TARGET    := emsesp
 BUILD     := build
-SOURCES   := src/core src/devices src/web src/test lib_standalone lib/espMqttClient/src lib/espMqttClient/src/*         lib/ArduinoJson/src lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src   lib/PButton 
+SOURCES   := src/core src/devices src/web src/test lib_standalone       lib/espMqttClient/src lib/espMqttClient/src/*         lib/ArduinoJson/src lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src   lib/PButton 
 INCLUDES  := src/core src/devices src/web src/test lib_standalone lib/* lib/espMqttClient/src lib/espMqttClient/src/Transport lib/ArduinoJson/src lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src   lib/uuid-telnet/src lib/uuid-syslog/src
 LIBRARIES :=
 
@@ -65,7 +65,6 @@ CXX_STANDARD := -std=gnu++20
 #----------------------------------------------------------------------
 DEFINES += -DARDUINOJSON_ENABLE -DARDUINOJSON_ENABLE_ARDUINO_STRING -DARDUINOJSON_USE_DOUBLE=0 
 DEFINES += -DEMSESP_STANDALONE -DEMSESP_TEST -DEMSESP_DEBUG -DEMC_RX_BUFFER_SIZE=1500
-DEFINES += -DNO_TLS_SUPPORT
 DEFINES += $(ARGS)
 
 DEFAULTS = -DEMSESP_DEFAULT_LOCALE=\"en\" -DEMSESP_DEFAULT_BOARD_PROFILE=\"S32S3\"
@@ -113,8 +112,8 @@ CXX := /usr/bin/g++
 CPPFLAGS  += $(DEFINES) $(DEFAULTS) $(INCLUDE)
 CPPFLAGS  += -ggdb -g3 -MMD
 CPPFLAGS  += -flto=auto
-CPPFLAGS  += -Wall -Wextra -Werror -Wswitch-enum
-CPPFLAGS  += -Wno-unused-parameter -Wno-missing-braces -Wno-vla-cxx-extension
+CPPFLAGS  += -Wall -Wextra -Werror
+CPPFLAGS  += -Wno-unused-parameter -Wno-missing-braces -Wno-vla-cxx-extension -Wno-switch-enum
 CPPFLAGS  += -ffunction-sections -fdata-sections -fno-exceptions -fno-rtti -fno-threadsafe-statics
 CPPFLAGS  += -Os -DNDEBUG
 

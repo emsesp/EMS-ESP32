@@ -106,14 +106,15 @@ void Shell::output_logs() {
     }
 
     while (1) {
-        time_t offset = time(nullptr) - uuid::get_uptime_sec();
-        if (offset < 1500000000L) {
+        int64_t offset_ms = uuid::get_wall_offset_ms();
+        if (offset_ms < 1500000000000LL) {
             print(uuid::log::format_timestamp_ms(message.content_->uptime_ms, 3));
         } else {
-            time_t t1 = offset + (time_t)(message.content_->uptime_ms / 1000);
-            char   timestr[25];
+            int64_t wall_ms = offset_ms + (int64_t)message.content_->uptime_ms;
+            time_t  t1      = (time_t)(wall_ms / 1000);
+            char    timestr[25];
             strftime(timestr, 25, "%FT%T", localtime(&t1));
-            printf("%s.%03d", timestr, (uint16_t)(message.content_->uptime_ms % 1000));
+            printf("%s.%03d", timestr, (int)(wall_ms % 1000));
         }
         printf(" %c %lu: [%s] ", uuid::log::format_level_char(message.content_->level), message.id_, message.content_->name);
 

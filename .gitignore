@@ -2,6 +2,7 @@
 .vscode/c_cpp_properties.json
 .vscode/extensions.json
 .vscode/launch.json
+.vscode/settings.json
 
 # c++ compiling
 .clang_complete
@@ -31,6 +32,8 @@ analyse.html
 interface/vite.config.ts.timestamp*
 *.local
 src/ESP32React/WWWData.h
+recovery/WWWData.h
+/interface/dist-recovery
 
 # i18n generated files
 interface/src/i18n/i18n-react.tsx
@@ -63,7 +66,7 @@ words-found-verbose.txt
 # sonarlint
 compile_commands.json
 
-# pioarduino + hybrid
+# other files
 managed_components
 dependencies.lock
 CMakeLists.txt
@@ -75,3 +78,7 @@ pnpm-lock.yaml
 .cache/
 interface/.tsbuildinfo
 test/test_api/package-lock.json
+.clangd
+mklittlefs
+.cursor
+*:Zone.Identifier

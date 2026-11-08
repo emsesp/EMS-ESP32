@@ -18,7 +18,6 @@ const LayoutComponent: FC<RequiredChildrenProps> = ({ children }) => {
   const [title, setTitle] = useState(PROJECT_NAME);
   const { pathname } = useLocation();
 
-  // Memoize drawer toggle handler to prevent unnecessary re-renders
   const handleDrawerToggle = useCallback(() => {
     setMobileOpen((prev) => !prev);
   }, []);
@@ -28,7 +27,6 @@ const LayoutComponent: FC<RequiredChildrenProps> = ({ children }) => {
     setMobileOpen(false);
   }, [pathname]);
 
-  // Memoize context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => ({ title, setTitle }), [title]);
 
   return (

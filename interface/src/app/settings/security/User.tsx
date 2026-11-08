@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import type { FC } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -14,8 +14,6 @@ import {
 } from '@mui/material';
 
 import { dialogStyle } from 'CustomTheme';
-import type Schema from 'async-validator';
-import type { ValidateFieldsError } from 'async-validator';
 import {
   BlockFormControlLabel,
   ValidatedPasswordField,
@@ -25,6 +23,8 @@ import { useI18nContext } from 'i18n/i18n-react';
 import type { UserType } from 'types';
 import { updateValue } from 'utils';
 import { ValidationError, validate } from 'validators';
+import type Schema from 'validators/schema';
+import type { ValidateFieldsError } from 'validators/schema';
 
 interface UserFormProps {
   creating: boolean;
@@ -62,7 +62,7 @@ const User: FC<UserFormProps> = ({
     }
   }, [open]);
 
-  const validateAndDone = useCallback(async () => {
+  const validateAndDone = async () => {
     if (user) {
       try {
         setFieldErrors(undefined);
@@ -72,7 +72,7 @@ const User: FC<UserFormProps> = ({
         setFieldErrors((error as ValidationError).fieldErrors);
       }
     }
-  }, [user, validator, onDoneEditing]);
+  };
 
   return (
     <Dialog

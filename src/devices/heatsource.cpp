@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -96,14 +96,14 @@ Heatsource::Heatsource(uint8_t device_type, uint8_t device_id, uint8_t product_i
  */
 
 // 0x6DC, ff for cascaded heatsources (hs)
-void Heatsource::process_CascadeMessage(std::shared_ptr<const Telegram> telegram) {
+void Heatsource::process_CascadeMessage(const std::shared_ptr<const Telegram> & telegram) {
     telegram->read_value(burnWorkMin_, 3); // this is in seconds
     burnWorkMin_ /= 60;
     has_update(burnWorkMin_);
 }
 
 // UBAMonitorFastPlus - type 0xE4 - central heating monitor EMS+
-void Heatsource::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram) {
+void Heatsource::process_UBAMonitorFastPlus(const std::shared_ptr<const Telegram> & telegram) {
     has_update(telegram, setFlowTemp_, 6);
     has_update(telegram, curBurnPow_, 10);
     has_update(telegram, selBurnPow_, 9);
@@ -116,7 +116,7 @@ void Heatsource::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> tele
 // 0x054D AM200 temperatures
 // Rx: 60 00 FF 00 04 4D 0103 0108 8000 00C6 0127 0205 8000 0200 0000 8000 6C
 //                        TB4  TR2       TA1  TR1  TB1  TB2* TB3
-void Heatsource::process_amTempMessage(std::shared_ptr<const Telegram> telegram) {
+void Heatsource::process_amTempMessage(const std::shared_ptr<const Telegram> & telegram) {
     has_update(telegram, curFlowTemp_, 0); // TB4
     has_update(telegram, retTemp_, 2);     // TR2
     has_update(telegram, flueGasTemp_, 4);
@@ -129,7 +129,7 @@ void Heatsource::process_amTempMessage(std::shared_ptr<const Telegram> telegram)
 
 // 0x054E AM200 status (6 bytes long)
 // Rx: 60 00 FF 00 04 4E 00 00 00 00 00 00 86
-void Heatsource::process_amStatusMessage(std::shared_ptr<const Telegram> telegram) {
+void Heatsource::process_amStatusMessage(const std::shared_ptr<const Telegram> & telegram) {
     has_update(telegram, aPumpMod_, 0); // PR1
     // offset 1: bitfield 01-pump on, 02-VR1 opening, 04-VR1 closing, 08-VB1 opening, 10-VB1 closing
     // actually we dont know the offset of VR2
@@ -143,7 +143,7 @@ void Heatsource::process_amStatusMessage(std::shared_ptr<const Telegram> telegra
 
 // 0x054C AM200 not broadcasted message, 23 bytes long
 // data: 00 01 01 00 01 00 41 4B 00 5A 00 5A 00 01 05 3C 00 00 5A 00 01 23 00
-void Heatsource::process_amSettingMessage(std::shared_ptr<const Telegram> telegram) {
+void Heatsource::process_amSettingMessage(const std::shared_ptr<const Telegram> & telegram) {
     has_update(telegram, vr2Config_, 12);     // pos 12: off(00)/bypass(01)
     has_update(telegram, ahsActivated_, 0);   // pos 00: Alternate heat source activation: No(00),Yes(01)
     has_update(telegram, aPumpConfig_, 4);    // pos 04: Buffer primary pump->Config pump: No(00),Yes(01)
@@ -164,7 +164,7 @@ void Heatsource::process_amSettingMessage(std::shared_ptr<const Telegram> telegr
 
 // 0x054F AM200 not broadcasted message, 7 bytes long
 // Boiler(0x60) -> Me(0x0B), amCommand(0x054F), data: 00 00 00 00 00 00 00
-void Heatsource::process_amCommandMessage(std::shared_ptr<const Telegram> telegram) {
+void Heatsource::process_amCommandMessage(const std::shared_ptr<const Telegram> & telegram) {
     // pos 0: return pump in percent
     // pos 3: setValveBuffer VB1 0-off, 1-open, 2-close
     // pos 2: setValveReturn VR1 0-off, 1-open, 2-close
@@ -174,7 +174,7 @@ void Heatsource::process_amCommandMessage(std::shared_ptr<const Telegram> telegr
 // 0x0550 AM200 broadcasted message, all 27 bytes unkown
 // Rx: 60 00 FF 00 04 50 00 FF 00 FF FF 00 0D 00 01 00 00 00 00 01 03 01 00 03 00 2D 19 C8 02 94 00 4A
 // Rx: 60 00 FF 19 04 50 00 FF FF 39
-void Heatsource::process_amExtraMessage(std::shared_ptr<const Telegram> telegram) {
+void Heatsource::process_amExtraMessage(const std::shared_ptr<const Telegram> & telegram) {
     has_update(telegram, blockRemain_, 24);   // minutes
     has_update(telegram, blockRemainWw_, 25); // minutes
 }
@@ -187,6 +187,7 @@ bool Heatsource::set_vr2Config(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, v, FL_(enum_vr2Config))) {
         return false;
     }
+
     write_command(0x54C, 12, v, 0x54C);
     return true;
 }
@@ -197,6 +198,7 @@ bool Heatsource::set_ahsActivated(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
+
     write_command(0x54C, 0, v, 0x54C);
     return true;
 }
@@ -207,6 +209,7 @@ bool Heatsource::set_aPumpConfig(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
+
     write_command(0x54C, 4, v, 0x54C);
     return true;
 }
@@ -217,6 +220,7 @@ bool Heatsource::set_aPumpSignal(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, v, FL_(enum_aPumpSignal))) {
         return false;
     }
+
     write_command(0x54C, 3, v, 0x54C);
     return true;
 }
@@ -227,6 +231,7 @@ bool Heatsource::set_aPumpMin(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     write_command(0x54C, 21, v, 0x54C);
     return true;
 }
@@ -237,6 +242,7 @@ bool Heatsource::set_tempRise(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
+
     write_command(0x54C, 1, v, 0x54C);
     return true;
 }
@@ -247,6 +253,7 @@ bool Heatsource::set_setReturnTemp(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
+
     write_command(0x54C, 6, v, 0x54C);
     return true;
 }
@@ -257,6 +264,7 @@ bool Heatsource::set_mixRuntime(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     uint8_t data[2] = {(uint8_t)(v >> 8), (uint8_t)v};
     write_command(0x54C, 8, data, 2, 0x54C);
     return true;
@@ -268,6 +276,7 @@ bool Heatsource::set_setFlowTemp(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     write_command(0x54C, 7, v, 0x54C);
     return true;
 }
@@ -278,6 +287,7 @@ bool Heatsource::set_bufBypass(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, v, FL_(enum_bufBypass))) {
         return false;
     }
+
     write_command(0x54C, 2, v, 0x54C);
     return true;
 }
@@ -288,6 +298,7 @@ bool Heatsource::set_bufMixRuntime(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     uint8_t data[2] = {(uint8_t)(v >> 8), (uint8_t)v};
     write_command(0x54C, 10, data, 2, 0x54C);
     return true;
@@ -299,6 +310,7 @@ bool Heatsource::set_bufConfig(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, v, FL_(enum_bufConfig))) {
         return false;
     }
+
     write_command(0x54C, 20, v, 0x54C);
     return true;
 }
@@ -309,6 +321,7 @@ bool Heatsource::set_blockMode(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, v, FL_(enum_blockMode))) {
         return false;
     }
+
     write_command(0x54C, 16, v, 0x54C);
     return true;
 }
@@ -319,6 +332,7 @@ bool Heatsource::set_blockTerm(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, v, FL_(enum_blockTerm))) {
         return false;
     }
+
     write_command(0x54C, 17, v, 0x54C);
     return true;
 }
@@ -329,6 +343,7 @@ bool Heatsource::set_blockHyst(const char * value, const int8_t id) {
     if (!Helpers::value2temperature(value, v, true)) {
         return false;
     }
+
     write_command(0x54C, 14, v, 0x54C);
     return true;
 }
@@ -339,6 +354,7 @@ bool Heatsource::set_releaseWait(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     write_command(0x54C, 15, v, 0x54C);
     return true;
 }

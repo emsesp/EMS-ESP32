@@ -1,5 +1,6 @@
-import { memo, useCallback, useContext } from 'react';
+import { memo, useContext } from 'react';
 
+import LogoutIcon from '@mui/icons-material/Logout';
 import PersonIcon from '@mui/icons-material/Person';
 import {
   Avatar,
@@ -23,9 +24,9 @@ const UserProfileComponent = () => {
 
   useLayoutTitle(LL.USER_PROFILE());
 
-  const handleSignOut = useCallback(() => {
+  const handleSignOut = () => {
     signOut(true);
-  }, [signOut]);
+  };
 
   return (
     <SectionContent>
@@ -53,6 +54,7 @@ const UserProfileComponent = () => {
       </Box>
       <Divider />
       <Button
+        startIcon={<LogoutIcon />}
         sx={{ mt: 2 }}
         variant="outlined"
         color="primary"

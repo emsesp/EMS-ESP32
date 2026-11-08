@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,6 +64,8 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "hpmode"
 // #define EMSESP_DEBUG_DEFAULT "shuntingyard"
 // #define EMSESP_DEBUG_DEFAULT "src"
+// #define EMSESP_DEBUG_DEFAULT "led"
+// #define EMSESP_DEBUG_DEFAULT "version"
 
 #ifndef EMSESP_DEBUG_DEFAULT
 #define EMSESP_DEBUG_DEFAULT "general"

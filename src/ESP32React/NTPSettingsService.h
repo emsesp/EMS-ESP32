@@ -32,6 +32,12 @@
 #define NTP_SETTINGS_SERVICE_PATH "/rest/ntpSettings"
 #define TIME_PATH "/rest/time"
 
+// Fixed length for tz_format passed to setenv to avoid the realloc leak in #3184.
+// Must be >= longest POSIX TZ string in tz_zones.h (currently 44 for Pacific/Chatham).
+#ifndef NTP_TZ_FORMAT_LEN
+#define NTP_TZ_FORMAT_LEN 48
+#endif
+
 class NTPSettings {
   public:
     bool    enabled         = FACTORY_NTP_ENABLED;
@@ -44,6 +50,10 @@ class NTPSettings {
 
     static void              read(NTPSettings & settings, JsonObject root);
     static StateUpdateResult update(JsonObject root, NTPSettings & settings);
+
+    // Refresh tz_format / tz_format_t from the IANA label using tz_zones.h.
+    // Returns true if either format string changed.
+    static bool syncFormatsFromLabels(NTPSettings & settings);
 };
 
 class NTPSettingsService : public StatefulService<NTPSettings> {
@@ -51,6 +61,7 @@ class NTPSettingsService : public StatefulService<NTPSettings> {
     NTPSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
 
     void        begin();
+    void        loop();
     static void ntp_received(struct timeval * tv);
 
   private:
@@ -58,7 +69,6 @@ class NTPSettingsService : public StatefulService<NTPSettings> {
     FSPersistence<NTPSettings> _fsPersistence;
     volatile bool              _connected;
 
-    void WiFiEvent(WiFiEvent_t event);
     void configureNTP();
     void configureTime(AsyncWebServerRequest * request, JsonVariant json);
 };

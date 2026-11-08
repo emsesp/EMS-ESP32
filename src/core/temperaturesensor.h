@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 #include "helpers.h"
 #include "mqtt.h"
-#include "console.h"
+#include "emsesp_console.h"
 
 #include <uuid/log.h>
 
@@ -48,6 +48,7 @@ class TemperatureSensor {
         bool is_system() const {
             return is_system_;
         }
+
         void set_is_system(const bool is_system) {
             is_system_ = is_system;
         }
@@ -59,6 +60,7 @@ class TemperatureSensor {
         int16_t offset() const {
             return offset_;
         }
+
         void set_offset(const int16_t offset) {
             offset_ = offset;
         }
@@ -93,13 +95,14 @@ class TemperatureSensor {
     void publish_sensor(const Sensor & sensor);
     void publish_values(const bool force);
     void reload();
+    void ha_reset();
     bool updated_values();
     bool get_value_info(JsonObject output, const char * cmd, const int8_t id = -1);
 
     std::string get_metrics_prometheus();
 
     // return back reference to the sensor list, used by other classes
-    std::vector<Sensor, AllocatorPSRAM<Sensor>> sensors() const {
+    const std::vector<Sensor, AllocatorPSRAM<Sensor>> & sensors() const {
         return sensors_;
     }
 
@@ -123,6 +126,7 @@ class TemperatureSensor {
         if (exclude_disabled_system) {
             return std::count_if(sensors_.begin(), sensors_.end(), [](const Sensor & sensor) { return !sensor.is_system(); });
         }
+
         return sensors_.size();
     }
 

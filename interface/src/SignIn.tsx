@@ -1,5 +1,4 @@
-import { memo, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { toast } from 'react-toastify';
+import { memo, useContext, useEffect, useState } from 'react';
 
 import ForwardIcon from '@mui/icons-material/Forward';
 import { Box, Button, Paper, Typography } from '@mui/material';
@@ -7,18 +6,19 @@ import type { Theme } from '@mui/material/styles';
 
 import * as AuthenticationApi from 'components/routing/authentication';
 import { useRequest } from 'alova/client';
-import type { ValidateFieldsError } from 'async-validator';
 import {
   LanguageSelector,
   ValidatedPasswordField,
   ValidatedTextField
 } from 'components';
+import { toast } from 'components/toast';
 import { AuthenticationContext } from 'contexts/authentication';
 import { PROJECT_NAME } from 'env';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { SignInRequest } from 'types';
 import { onEnterCallback, updateValue } from 'utils';
 import { SIGN_IN_REQUEST_VALIDATOR, ValidationError, validate } from 'validators';
+import type { ValidateFieldsError } from 'validators/schema';
 
 const SignIn = memo(() => {
   const authenticationContext = useContext(AuthenticationContext);
@@ -43,18 +43,13 @@ const SignIn = memo(() => {
     }
   });
 
-  // Memoize callback to prevent recreation on every render
-  const updateLoginRequestValue = useMemo(
-    () =>
-      updateValue((updater) =>
-        setSignInRequest(
-          updater as unknown as (prevState: SignInRequest) => SignInRequest
-        )
-      ),
-    []
+  const updateLoginRequestValue = updateValue((updater) =>
+    setSignInRequest(
+      updater as unknown as (prevState: SignInRequest) => SignInRequest
+    )
   );
 
-  const signIn = useCallback(async () => {
+  const signIn = async () => {
     await callSignIn(signInRequest).catch((event: Error) => {
       if (event.message === 'Unauthorized') {
         toast.warning(LL.INVALID_LOGIN());
@@ -63,9 +58,9 @@ const SignIn = memo(() => {
       }
       setProcessing(false);
     });
-  }, [callSignIn, signInRequest, LL]);
+  };
 
-  const validateAndSignIn = useCallback(async () => {
+  const validateAndSignIn = async () => {
     setProcessing(true);
     SIGN_IN_REQUEST_VALIDATOR.messages({
       required: LL.IS_REQUIRED('%s')
@@ -77,9 +72,9 @@ const SignIn = memo(() => {
       setFieldErrors((error as ValidationError).fieldErrors);
       setProcessing(false);
     }
-  }, [signInRequest, signIn, LL]);
+  };
 
-  const submitOnEnter = useMemo(() => onEnterCallback(signIn), [signIn]);
+  const submitOnEnter = onEnterCallback(signIn);
 
   // get rid of scrollbar
   useEffect(() => {

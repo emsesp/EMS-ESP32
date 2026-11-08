@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,26 +58,23 @@ WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securi
 // this is used in the Devices page and contains all EMS device information
 // /coreData endpoint
 void WebDataService::core_data(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false);
+    auto *     response = new PsramAsyncJsonResponse(false);
     JsonObject root     = response->getRoot();
 
     // list is already sorted by device type
     JsonArray devices = root["devices"].to<JsonArray>();
     for (const auto & emsdevice : EMSESP::emsdevices) {
-        // ignore controller
-        if (emsdevice && (emsdevice->device_type() != EMSdevice::DeviceType::CONTROLLER || emsdevice->count_entities() > 0)) {
-            JsonObject obj = devices.add<JsonObject>();
-            obj["id"]      = emsdevice->unique_id();                            // a unique id
-            obj["tn"]      = emsdevice->device_type_2_device_name_translated(); // translated device type name
-            obj["t"]       = emsdevice->device_type();                          // device type number
-            obj["b"]       = emsdevice->brand_to_char();                        // brand
-            obj["n"]       = emsdevice->name();                                 // custom name
-            obj["d"]       = emsdevice->device_id();                            // deviceid
-            obj["p"]       = emsdevice->product_id();                           // productid
-            obj["v"]       = emsdevice->version();                              // version
-            obj["e"]       = emsdevice->count_entities();                       // number of entities
-            obj["url"]     = emsdevice->device_type_name();                     // non-translated, lower-case, used for API URL in customization page
-        }
+        JsonObject obj = devices.add<JsonObject>();
+        obj["id"]      = emsdevice->unique_id();                            // a unique id
+        obj["tn"]      = emsdevice->device_type_2_device_name_translated(); // translated device type name
+        obj["t"]       = emsdevice->device_type();                          // device type number
+        obj["b"]       = emsdevice->brand_to_char();                        // brand (std::string → copied into doc, safe across async serialize)
+        obj["n"]       = emsdevice->name();                                 // custom name
+        obj["d"]       = emsdevice->device_id();                            // deviceid
+        obj["p"]       = emsdevice->product_id();                           // productid
+        obj["v"]       = emsdevice->version();                              // version
+        obj["e"]       = emsdevice->count_entities();                       // number of entities
+        obj["url"]     = emsdevice->device_type_name();                     // non-translated, lower-case, used for API URL in customization page
     }
 
     // add any custom entities
@@ -104,7 +101,7 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
 // sensor data - sends back to web
 // /sensorData endpoint
 void WebDataService::sensor_data(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false);
+    auto *     response = new PsramAsyncJsonResponse(false);
     JsonObject root     = response->getRoot();
 
     // temperature sensors
@@ -118,15 +115,18 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
                 if (Helpers::hasValue(sensor.temperature_c)) {
                     obj["t"] = (float)sensor.temperature_c * 0.18 + 32;
                 }
+
                 obj["u"] = DeviceValueUOM::FAHRENHEIT;
                 obj["o"] = (float)sensor.offset() * 0.18;
             } else {
                 if (Helpers::hasValue(sensor.temperature_c)) {
                     obj["t"] = (float)sensor.temperature_c / 10;
                 }
+
                 obj["u"] = DeviceValueUOM::DEGREES;
                 obj["o"] = (float)(sensor.offset()) / 10;
             }
+
             obj["s"] = sensor.is_system();
         }
     }
@@ -176,7 +176,7 @@ void WebDataService::device_data(AsyncWebServerRequest * request) {
     if (request->hasParam(F_(id))) {
         id = Helpers::atoint(request->getParam(F_(id))->value().c_str()); // get id from url
 
-        auto * response = new AsyncMessagePackResponse();
+        auto * response = new PsramAsyncMessagePackResponse();
 
         // check size
         // while (!response) {
@@ -191,6 +191,7 @@ void WebDataService::device_data(AsyncWebServerRequest * request) {
                 for (uint16_t i = 0; i < (TxService::POST_SEND_DELAY + 500) && EMSESP::wait_validate(); i++) {
                     delay(1);
                 }
+
                 EMSESP::wait_validate(0); // reset in case of timeout
 #ifndef EMSESP_STANDALONE
                 JsonObject output = response->getRoot();
@@ -217,6 +218,9 @@ void WebDataService::device_data(AsyncWebServerRequest * request) {
             return;
         }
 #endif
+        // no matching device and not CUSTOM_UID: we never called request->send(response),
+        // so AsyncWebServer never took ownership. Delete it ourselves to avoid leaking.
+        delete response;
     }
 
     // invalid
@@ -247,6 +251,9 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
         case EMSdevice::DeviceTypeUniqueID::SCHEDULER_UID:
             device_type = EMSdevice::DeviceType::SCHEDULER;
             break;
+        case EMSdevice::DeviceTypeUniqueID::COMMAND_UID:
+            device_type = EMSdevice::DeviceType::COMMAND;
+            break;
         case EMSdevice::DeviceTypeUniqueID::TEMPERATURESENSOR_UID:
             device_type = EMSdevice::DeviceType::TEMPERATURESENSOR;
             break;
@@ -260,16 +267,19 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
                     break;
                 }
             }
+
             break;
         }
+
         if (device_type == EMSdevice::DeviceType::UNKNOWN) {
             EMSESP::logger().warning("Write command failed, bad device id: %d", unique_id);
             AsyncWebServerResponse * response = request->beginResponse(400); // bad request
             request->send(response);
             return;
         }
+
         // create JSON for output
-        auto *     response = new AsyncJsonResponse(false);
+        auto *     response = new PsramAsyncJsonResponse(false);
         JsonObject output   = response->getRoot();
         // the data could be in any format, but we need string
         // authenticated is always true
@@ -279,6 +289,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
         if (device_type >= EMSdevice::DeviceType::BOILER) {
             cmd = Command::parse_command_string(cmd, id); // extract hc or dhw
         }
+
         if (data.is<const char *>()) {
             return_code = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
         } else if (data.is<int>()) {
@@ -410,6 +421,7 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
             if (sensor.is_system()) {
                 continue;
             }
+
             JsonObject node = nodes.add<JsonObject>();
             node["id"]      = (EMSdevice::DeviceTypeUniqueID::TEMPERATURESENSOR_UID * 100) + count++;
 
@@ -419,11 +431,13 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
                 if (Helpers::hasValue(sensor.temperature_c)) {
                     dv["v"] = (float)sensor.temperature_c * 0.18 + 32;
                 }
+
                 dv["u"] = DeviceValueUOM::FAHRENHEIT;
             } else {
                 if (Helpers::hasValue(sensor.temperature_c)) {
                     dv["v"] = (float)sensor.temperature_c / 10;
                 }
+
                 dv["u"] = DeviceValueUOM::DEGREES;
             }
         }
@@ -441,6 +455,7 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
             if (sensor.is_system()) {
                 continue;
             }
+
             JsonObject node = nodes.add<JsonObject>();
             node["id"]      = (EMSdevice::DeviceTypeUniqueID::ANALOGSENSOR_UID * 100) + count++;
 
@@ -466,6 +481,7 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
                 dv["v"] = Helpers::transformNumFloat(sensor.value());
                 dv["u"] = sensor.uom();
             }
+
             if (sensor.type() == AnalogSensor::AnalogType::COUNTER
                 || (sensor.type() >= AnalogSensor::AnalogType::DIGITAL_OUT && sensor.type() <= AnalogSensor::AnalogType::PWM_2)
                 || sensor.type() == AnalogSensor::AnalogType::RGB || sensor.type() == AnalogSensor::AnalogType::PULSE
@@ -475,30 +491,48 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
         }
     }
 
-    // show scheduler, with name, on/off
-    if (EMSESP::webSchedulerService.count_entities(true)) {
+    // show scheduler items (active state toggles)
+    if (EMSESP::webSchedulerService.count_entities()) {
         JsonObject obj  = nodes.add<JsonObject>();
-        obj["id"]       = EMSdevice::DeviceTypeUniqueID::SCHEDULER_UID; // it's unique id
-        obj["t"]        = EMSdevice::DeviceType::SCHEDULER;             // device type number
+        obj["id"]       = EMSdevice::DeviceTypeUniqueID::SCHEDULER_UID;
+        obj["t"]        = EMSdevice::DeviceType::SCHEDULER;
         JsonArray nodes = obj["nodes"].to<JsonArray>();
         uint8_t   count = 0;
 
         EMSESP::webSchedulerService.read([&](const WebScheduler & webScheduler) {
             for (const ScheduleItem & scheduleItem : webScheduler.scheduleItems) {
-                // only add if we have a name - we don't need a u (UOM) for this
-                if (scheduleItem.name[0] != '\0') {
-                    JsonObject node = nodes.add<JsonObject>();
-                    node["id"]      = (EMSdevice::DeviceTypeUniqueID::SCHEDULER_UID * 100) + count++;
+                JsonObject node = nodes.add<JsonObject>();
+                node["id"]      = (EMSdevice::DeviceTypeUniqueID::SCHEDULER_UID * 100) + count++;
 
-                    JsonObject dv = node["dv"].to<JsonObject>();
-                    dv["id"]      = std::string("00") + scheduleItem.name;
-                    dv["c"]       = scheduleItem.name;
-                    char s[12];
-                    dv["v"]     = Helpers::render_boolean(s, scheduleItem.active, true);
-                    JsonArray l = dv["l"].to<JsonArray>();
-                    l.add(Helpers::render_boolean(s, false, true));
-                    l.add(Helpers::render_boolean(s, true, true));
-                }
+                JsonObject dv = node["dv"].to<JsonObject>();
+                dv["id"]      = std::string("00") + scheduleItem.name;
+                dv["c"]       = scheduleItem.name;
+
+                char s[12];
+                dv["v"]     = Helpers::render_boolean(s, scheduleItem.active, true);
+                JsonArray l = dv["l"].to<JsonArray>();
+                l.add(Helpers::render_boolean(s, false, true));
+                l.add(Helpers::render_boolean(s, true, true));
+            }
+        });
+    }
+
+    // show command items (executable from dashboard)
+    if (EMSESP::webCommandService.count_entities()) {
+        JsonObject obj  = nodes.add<JsonObject>();
+        obj["id"]       = EMSdevice::DeviceTypeUniqueID::COMMAND_UID;
+        obj["t"]        = EMSdevice::DeviceType::COMMAND;
+        JsonArray nodes = obj["nodes"].to<JsonArray>();
+        uint8_t   count = 0;
+
+        EMSESP::webCommandService.read([&](const WebCommands & webCommands) {
+            for (const CommandItem & ci : webCommands.commandItems) {
+                JsonObject node = nodes.add<JsonObject>();
+                node["id"]      = (EMSdevice::DeviceTypeUniqueID::COMMAND_UID * 100) + count++;
+
+                JsonObject dv = node["dv"].to<JsonObject>();
+                dv["id"]      = std::string("00") + ci.name;
+                dv["c"]       = ci.name;
             }
         });
     }

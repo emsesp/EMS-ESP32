@@ -1,5 +1,4 @@
 export enum APProvisionMode {
-  AP_MODE_ALWAYS = 0,
   AP_MODE_DISCONNECTED = 1,
   AP_NEVER = 2
 }

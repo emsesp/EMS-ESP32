@@ -1,6 +1,5 @@
-import { memo, useCallback, useContext, useMemo, useState } from 'react';
+import { memo, useContext, useState } from 'react';
 import type { ReactElement } from 'react';
-import { toast } from 'react-toastify';
 
 import CommentIcon from '@mui/icons-material/CommentTwoTone';
 import DownloadIcon from '@mui/icons-material/GetApp';
@@ -25,6 +24,7 @@ import type { SxProps, Theme } from '@mui/material/styles';
 
 import { useRequest } from 'alova/client';
 import { SectionContent, useLayoutTitle } from 'components';
+import { toast } from 'components/toast';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { saveFile } from 'utils';
@@ -60,6 +60,8 @@ const AVATAR_STYLES: SxProps<Theme> = {
   bgcolor: '#72caf9'
 };
 
+const SYSTEM_INFO_API: APIcall = { device: 'system', cmd: 'info', id: 0 };
+
 const HelpComponent = () => {
   const { LL } = useI18nContext();
   useLayoutTitle(LL.HELP());
@@ -72,12 +74,7 @@ const HelpComponent = () => {
   });
   const [imgError, setImgError] = useState<boolean>(false);
 
-  const getCustomSupportMethod = useMemo(
-    () => callAction({ action: 'getCustomSupport' }),
-    []
-  );
-
-  useRequest(getCustomSupportMethod).onSuccess((event) => {
+  useRequest(callAction({ action: 'getCustomSupport' })).onSuccess((event) => {
     if (event?.data && Object.keys(event.data).length !== 0) {
       const { Support } = event.data as {
         Support: { img_url?: string; html?: string[] };
@@ -100,47 +97,26 @@ const HelpComponent = () => {
       toast.error(String(error.error?.message || 'An error occurred'));
     });
 
-  // Optimize API call memoization
-  const apiCall = useMemo(() => ({ device: 'system', cmd: 'info', id: 0 }), []);
+  const helpLinks: HelpLink[] = [
+    {
+      href: 'https://emsesp.org',
+      icon: <MenuBookIcon />,
+      label: () => LL.HELP_INFORMATION_1()
+    },
+    {
+      href: 'https://discord.gg/GP9DPSgeJq',
+      icon: <CommentIcon />,
+      label: () => LL.HELP_INFORMATION_2()
+    },
+    {
+      href: 'https://github.com/emsesp/EMS-ESP32/issues/new/choose',
+      icon: <GitHubIcon />,
+      label: () => LL.HELP_INFORMATION_3()
+    }
+  ];
 
-  const handleDownloadSystemInfo = useCallback(() => {
-    void sendAPI(apiCall);
-  }, [sendAPI, apiCall]);
-
-  const handleImageError = useCallback(() => {
-    setImgError(true);
-  }, []);
-
-  // Memoize help links to prevent recreation on every render
-  const helpLinks: HelpLink[] = useMemo(
-    () => [
-      {
-        href: 'https://emsesp.org',
-        icon: <MenuBookIcon />,
-        label: () => LL.HELP_INFORMATION_1()
-      },
-      {
-        href: 'https://discord.gg/GP9DPSgeJq',
-        icon: <CommentIcon />,
-        label: () => LL.HELP_INFORMATION_2()
-      },
-      {
-        href: 'https://github.com/emsesp/EMS-ESP32/issues/new/choose',
-        icon: <GitHubIcon />,
-        label: () => LL.HELP_INFORMATION_3()
-      }
-    ],
-    [LL]
-  );
-
-  const isAdmin = useMemo(() => me?.admin ?? false, [me?.admin]);
-
-  // Memoize image source computation
-  const imageSrc = useMemo(
-    () =>
-      imgError || !customSupport.img_url ? DEFAULT_IMAGE_URL : customSupport.img_url,
-    [imgError, customSupport.img_url]
-  );
+  const imageSrc =
+    imgError || !customSupport.img_url ? DEFAULT_IMAGE_URL : customSupport.img_url;
 
   return (
     <SectionContent>
@@ -157,13 +133,13 @@ const HelpComponent = () => {
             component="img"
             referrerPolicy="no-referrer"
             sx={IMAGE_STYLES}
-            onError={handleImageError}
+            onError={() => setImgError(true)}
             src={imageSrc}
           />
         </Stack>
       )}
 
-      {isAdmin && (
+      {me?.admin && (
         <List>
           {helpLinks.map(({ href, icon, label }) => (
             <ListItem key={href}>
@@ -191,7 +167,7 @@ const HelpComponent = () => {
           startIcon={<DownloadIcon />}
           variant="outlined"
           color="primary"
-          onClick={handleDownloadSystemInfo}
+          onClick={() => void sendAPI(SYSTEM_INFO_API)}
         >
           {LL.SUPPORT_INFORMATION(0)}
         </Button>
@@ -214,7 +190,6 @@ const HelpComponent = () => {
   );
 };
 
-// Memoize the component to prevent unnecessary re-renders
 const Help = memo(HelpComponent);
 
 export default Help;

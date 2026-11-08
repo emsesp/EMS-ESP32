@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ class Connect : public EMSdevice {
         RoomCircuit(const uint8_t num)
             : room_(num) {
         }
+
         ~RoomCircuit() = default;
         int16_t temp_;
         uint8_t humidity_;
@@ -41,7 +42,9 @@ class Connect : public EMSdevice {
         int16_t dewtemp_;
         uint8_t childlock_;
         uint8_t icon_;
-        uint8_t coolmode_;
+        uint8_t coolmode_    = EMS_VALUE_UINT8_NOTSET; // 1 if the cooling settings are active
+        uint8_t heatmodeRaw_ = EMS_VALUE_UINT8_NOTSET; // offset 0: 0-auto, 1-manual, 3-off
+        uint8_t coolmodeRaw_ = EMS_VALUE_UINT8_NOTSET; // offset 4: 0-auto, 1-manual, 3-off
         // uint8_t tempautotemp_;
         // uint8_t manualtemp_;
         // uint8_t coolautotemp_;
@@ -58,25 +61,26 @@ class Connect : public EMSdevice {
   private:
     std::shared_ptr<Connect::RoomCircuit> room_circuit(const uint8_t num, const bool create = false);
 
-    void register_device_values_room(std::shared_ptr<Connect::RoomCircuit> room);
-    void process_roomThermostat(std::shared_ptr<const Telegram> telegram);
-    void process_roomThermostatName(std::shared_ptr<const Telegram> telegram);
-    void process_roomThermostatSettings(std::shared_ptr<const Telegram> telegram);
-    void process_roomThermostatParam(std::shared_ptr<const Telegram> telegram);
-    void process_roomThermostatData(std::shared_ptr<const Telegram> telegram);
-    void process_roomSchedule(std::shared_ptr<const Telegram> telegram);
-    void process_roomConfig(std::shared_ptr<const Telegram> telegram);
-    bool set_mode(const char * value, const int8_t id);
-    bool set_seltemp(const char * value, const int8_t id);
-    bool set_name(const char * value, const int8_t id);
-    bool set_coolmode(const char * value, const int8_t id);
-    bool set_childlock(const char * value, const int8_t id);
-    bool set_icon(const char * value, const int8_t id);
+    void    register_device_values_room(std::shared_ptr<Connect::RoomCircuit> room);
+    void    process_roomThermostat(const std::shared_ptr<const Telegram> & telegram);
+    void    process_roomThermostatName(const std::shared_ptr<const Telegram> & telegram);
+    void    process_roomThermostatSettings(const std::shared_ptr<const Telegram> & telegram);
+    void    process_roomThermostatParam(const std::shared_ptr<const Telegram> & telegram);
+    void    process_roomThermostatData(const std::shared_ptr<const Telegram> & telegram);
+    void    process_roomSchedule(const std::shared_ptr<const Telegram> & telegram);
+    void    process_roomConfig(const std::shared_ptr<const Telegram> & telegram);
+    uint8_t hp_operatingstate();
+    void    update_room_mode(std::shared_ptr<Connect::RoomCircuit> rc);
+    bool    set_mode(const char * value, const int8_t id);
+    bool    set_seltemp(const char * value, const int8_t id);
+    bool    set_name(const char * value, const int8_t id);
+    bool    set_childlock(const char * value, const int8_t id);
+    bool    set_icon(const char * value, const int8_t id);
 
     std::vector<std::shared_ptr<Connect::RoomCircuit>, AllocatorPSRAM<std::shared_ptr<Connect::RoomCircuit>>> room_circuits_;
 
-    void    process_OutdoorTemp(std::shared_ptr<const Telegram> telegram);
-    void    process_RCTime(std::shared_ptr<const Telegram> telegram);
+    void    process_OutdoorTemp(const std::shared_ptr<const Telegram> & telegram);
+    void    process_RCTime(const std::shared_ptr<const Telegram> & telegram);
     int16_t outdoorTemp_;
     char    dateTime_[25];  // date and time stamp
     uint8_t schedule_[126]; // telegram copy

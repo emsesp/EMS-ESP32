@@ -34,6 +34,15 @@
 #include "WString.h"
 #include "Network.h"
 
+// stub of Arduino-ESP32's EspClass, holding only what is called outside of #ifndef EMSESP_STANDALONE
+class EspClass {
+  public:
+    size_t getPsramSize() {
+        return 0; // standalone has no PSRAM
+    }
+};
+
+extern EspClass  ESP;
 extern ETHClass  ETH;
 extern WiFiClass WiFi;
 

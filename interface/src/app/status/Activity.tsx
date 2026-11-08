@@ -1,5 +1,3 @@
-import { useCallback, useMemo } from 'react';
-
 import {
   Body,
   Cell,
@@ -36,16 +34,14 @@ const SystemActivity = () => {
 
   useLayoutTitle(LL.DATA_TRAFFIC());
 
-  const stats_theme = tableTheme(
-    useMemo(
-      () => ({
-        Table: `
+  const stats_theme = tableTheme({
+    Table: `
       --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 90px 90px 80px;
     `,
-        BaseRow: `
+    BaseRow: `
       font-size: 14px;
     `,
-        HeaderRow: `
+    HeaderRow: `
       text-transform: uppercase;
       background-color: black;
       color: #90CAF9;
@@ -55,7 +51,7 @@ const SystemActivity = () => {
         border-bottom: 1px solid #565656;
       }
     `,
-        Row: `
+    Row: `
       .td {
         padding: 8px;
         border-top: 1px solid #565656;
@@ -69,26 +65,20 @@ const SystemActivity = () => {
         background-color: #1e1e1e;
       }
     `,
-        BaseCell: `
+    BaseCell: `
       &:not(:first-of-type) {
         text-align: center;
       }
     `
-      }),
-      []
-    )
-  );
+  });
 
-  const showName = useCallback(
-    (id: number) => {
-      const name: keyof Translation['STATUS_NAMES'] =
-        id.toString() as keyof Translation['STATUS_NAMES'];
-      return LL.STATUS_NAMES[name]();
-    },
-    [LL]
-  );
+  const showName = (id: number) => {
+    const name: keyof Translation['STATUS_NAMES'] =
+      id.toString() as keyof Translation['STATUS_NAMES'];
+    return LL.STATUS_NAMES[name]();
+  };
 
-  const showQuality = useCallback((stat: Stat) => {
+  const showQuality = (stat: Stat) => {
     if (stat.q === 0 || stat.s + stat.f === 0) {
       return;
     }
@@ -100,14 +90,18 @@ const SystemActivity = () => {
     } else {
       return <div style={{ color: QUALITY_COLORS.POOR }}>{stat.q}%</div>;
     }
-  }, []);
+  };
 
-  const content = useMemo(() => {
-    if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={error?.message || ''} />;
-    }
-
+  if (!data) {
     return (
+      <SectionContent>
+        <FormLoader onRetry={loadData} errorMessage={error?.message || ''} />
+      </SectionContent>
+    );
+  }
+
+  return (
+    <SectionContent>
       <Table
         data={{ nodes: data.stats }}
         theme={stats_theme}
@@ -136,10 +130,8 @@ const SystemActivity = () => {
           </>
         )}
       </Table>
-    );
-  }, [data, loadData, error?.message, stats_theme, LL, showName, showQuality]);
-
-  return <SectionContent>{content}</SectionContent>;
+    </SectionContent>
+  );
 };
 
 export default SystemActivity;

@@ -1,6 +1,24 @@
 #include "NTPSettingsService.h"
 
+#include "tz_zones.h"
+
 #include <emsesp.h>
+
+namespace {
+
+String trimmedTzFormat(const String & format) {
+    int space = format.indexOf(' ');
+    return space < 0 ? format : format.substring(0, static_cast<unsigned int>(space));
+}
+
+void padTzFormat(String & format) {
+    format.reserve(NTP_TZ_FORMAT_LEN);
+    while (format.length() < NTP_TZ_FORMAT_LEN) {
+        format += ' ';
+    }
+}
+
+} // namespace
 
 NTPSettingsService::NTPSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(NTPSettings::read, NTPSettings::update, this, server, NTP_SETTINGS_SERVICE_PATH, securityManager)
@@ -11,36 +29,22 @@ NTPSettingsService::NTPSettingsService(AsyncWebServer * server, FS * fs, Securit
         configureTime(request, json);
     });
 
-    WiFi.onEvent([this](WiFiEvent_t event, WiFiEventInfo_t info) { WiFiEvent(event); });
     addUpdateHandler([this] { configureNTP(); }, false);
 }
 
 void NTPSettingsService::begin() {
     _fsPersistence.readFromFS();
-    configureNTP();
+
+    // After an OTA that updates tz_zones.h, rewrite stored POSIX strings from the
+    // saved IANA labels so localtime / thermostat sync use the current rules
+    // without the user re-selecting the zone in the WebUI.
+    update([](NTPSettings & settings) { return NTPSettings::syncFormatsFromLabels(settings) ? StateUpdateResult::CHANGED : StateUpdateResult::UNCHANGED; });
 }
 
-// handles both WiFI and Ethernet
-void NTPSettingsService::WiFiEvent(WiFiEvent_t event) {
-    switch (event) {
-    case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
-    case ARDUINO_EVENT_ETH_DISCONNECTED:
-        if (_connected && emsesp::EMSESP::system_.ntp_connected()) {
-            emsesp::EMSESP::logger().info("WiFi connection dropped, stopping NTP");
-            _connected = false;
-            configureNTP();
-        }
-        break;
-
-    case ARDUINO_EVENT_WIFI_STA_GOT_IP:
-    case ARDUINO_EVENT_ETH_GOT_IP:
-        // emsesp::EMSESP::logger().info("Got IP address, starting NTP synchronization");
-        _connected = true;
+void NTPSettingsService::loop() {
+    if (_connected != emsesp::EMSESP::network_.network_connected()) {
+        _connected = emsesp::EMSESP::network_.network_connected();
         configureNTP();
-        break;
-
-    default:
-        break;
     }
 }
 
@@ -55,7 +59,9 @@ void NTPSettingsService::configureNTP() {
     } else {
         setenv("TZ", _state.tzFormat.c_str(), 1);
         tzset();
-        esp_sntp_stop();
+        if (esp_sntp_enabled()) {
+            esp_sntp_stop();
+        }
     }
 }
 
@@ -68,7 +74,12 @@ void NTPSettingsService::configureTime(AsyncWebServerRequest * request, JsonVari
             tm.tm_isdst         = -1; // not set by strptime, tells mktime to determine daylightsaving
             time_t         time = mktime(&tm);
             struct timeval now  = {.tv_sec = time, .tv_usec = {}};
+#if CONFIG_IDF_TARGET_ESP32C3
+            // settimeofday and adjtime() does not work, unknown how to set time
+            emsesp::EMSESP::logger().warning("manual clock setting not possible");
+#else
             settimeofday(&now, nullptr);
+#endif
             AsyncWebServerResponse * response = request->beginResponse(200);
             request->send(response);
             return;
@@ -89,10 +100,37 @@ void NTPSettings::read(NTPSettings & settings, JsonObject root) {
     root["enabled"]         = settings.enabled;
     root["server"]          = settings.server;
     root["tz_label"]        = settings.tzLabel;
-    root["tz_format"]       = settings.tzFormat;
+    root["tz_format"]       = trimmedTzFormat(settings.tzFormat);
     root["thermostat_sync"] = settings.thermostat_sync;
     root["tz_label_t"]      = settings.tzLabelT;
-    root["tz_format_t"]     = settings.tzFormatT;
+    root["tz_format_t"]     = trimmedTzFormat(settings.tzFormatT);
+}
+
+bool NTPSettings::syncFormatsFromLabels(NTPSettings & settings) {
+    bool changed = false;
+
+    auto apply = [&](const String & label, String & format) {
+        const char * mapped = emsesp_tz_format_for_label(label.c_str());
+        if (mapped == nullptr) {
+            return;
+        }
+        if (trimmedTzFormat(format) == mapped) {
+            // Still re-pad in case NTP_TZ_FORMAT_LEN grew since the value was stored.
+            if (format.length() != NTP_TZ_FORMAT_LEN) {
+                format = mapped;
+                padTzFormat(format);
+                changed = true;
+            }
+            return;
+        }
+        format = mapped;
+        padTzFormat(format);
+        changed = true;
+    };
+
+    apply(settings.tzLabel, settings.tzFormat);
+    apply(settings.tzLabelT, settings.tzFormatT);
+    return changed;
 }
 
 StateUpdateResult NTPSettings::update(JsonObject root, NTPSettings & settings) {
@@ -103,5 +141,15 @@ StateUpdateResult NTPSettings::update(JsonObject root, NTPSettings & settings) {
     settings.thermostat_sync = root["thermostat_sync"] | FACTORY_NTP_THERMOSTAT_SYNC;
     settings.tzLabelT        = root["tz_label_t"] | FACTORY_NTP_TIME_ZONE_LABEL;
     settings.tzFormatT       = root["tz_format_t"] | FACTORY_NTP_TIME_ZONE_FORMAT;
+
+    // Do not call syncFormatsFromLabels here: readFromFS() uses this updater
+    // via updateWithoutPropagation, and a sync at that point would not be
+    // written back. Boot migration runs in NTPSettingsService::begin() instead.
+    // The WebUI always POSTs tz_format from TIME_ZONES when the user saves.
+
+    // The format string must have a fixed length to avoid a setenv leak, #3184.
+    padTzFormat(settings.tzFormat);
+    padTzFormat(settings.tzFormatT);
+
     return StateUpdateResult::CHANGED;
 }

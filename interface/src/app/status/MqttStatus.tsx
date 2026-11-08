@@ -1,4 +1,4 @@
-import { type FC, memo, useMemo } from 'react';
+import { type FC, memo } from 'react';
 
 import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
@@ -127,16 +127,15 @@ const MqttStatus = () => {
     void loadData();
   });
 
-  // Memoize error message separately to avoid re-renders on error object changes
   const errorMessage = error?.message || '';
 
-  const mqttStatusText = useMemo(() => {
-    if (!data) return '';
-    if (!data.enabled) return LL.NOT_ENABLED();
-    return data.connected
-      ? `${LL.CONNECTED(0)} (${data.connect_count})`
-      : `${LL.DISCONNECTED()} (${data.connect_count})`;
-  }, [data, LL]);
+  const mqttStatusText = !data
+    ? ''
+    : !data.enabled
+      ? LL.NOT_ENABLED()
+      : data.connected
+        ? `${LL.CONNECTED(0)} (${data.connect_count})`
+        : `${LL.DISCONNECTED()} (${data.connect_count})`;
 
   if (!data) {
     return (

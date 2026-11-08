@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import DoneIcon from '@mui/icons-material/Done';
@@ -37,14 +37,10 @@ const ModulesDialog = ({
   const { LL } = useI18nContext();
   const [editItem, setEditItem] = useState<ModuleItem>(selectedItem);
 
-  const updateFormValue = useMemo(
-    () =>
-      updateValue(
-        setEditItem as unknown as React.Dispatch<
-          React.SetStateAction<Record<string, unknown>>
-        >
-      ),
-    []
+  const updateFormValue = updateValue(
+    setEditItem as unknown as React.Dispatch<
+      React.SetStateAction<Record<string, unknown>>
+    >
   );
 
   // Sync form state when dialog opens or selected item changes
@@ -54,18 +50,13 @@ const ModulesDialog = ({
     }
   }, [open, selectedItem]);
 
-  const handleSave = useCallback(() => {
+  const handleSave = () => {
     onSave(editItem);
-  }, [editItem, onSave]);
-
-  const dialogTitle = useMemo(
-    () => `${LL.EDIT()} ${editItem.key}`,
-    [LL, editItem.key]
-  );
+  };
 
   return (
     <Dialog sx={dialogStyle} fullWidth maxWidth="xs" open={open} onClose={onClose}>
-      <DialogTitle>{dialogTitle}</DialogTitle>
+      <DialogTitle>{`${LL.EDIT()} ${editItem.key}`}</DialogTitle>
       <DialogContent dividers>
         <Grid container>
           <BlockFormControlLabel

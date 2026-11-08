@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,6 +55,7 @@ class AnalogCustomization {
     bool operator==(const AnalogCustomization & a) const {
         return gpio == a.gpio;
     }
+
     bool operator!=(const AnalogCustomization & a) const {
         return !operator==(a);
     }

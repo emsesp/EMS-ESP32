@@ -1,12 +1,12 @@
-import { memo, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { memo, useContext, useEffect, useState } from 'react';
 import { IconContext } from 'react-icons/lib';
 import { Link } from 'react-router';
-import { toast } from 'react-toastify';
 
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutlined';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import {
@@ -29,6 +29,7 @@ import {
   SectionContent,
   useLayoutTitle
 } from 'components';
+import { toast } from 'components/toast';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { useInterval, usePersistState } from 'utils';
@@ -75,42 +76,38 @@ const Dashboard = memo(() => {
     {
       immediate: false
     }
-  );
+  )
+    .onSuccess(() => {
+      toast.success(LL.WRITE_CMD_SENT());
+    })
+    .onError((error) => {
+      toast.error(String(error.error?.message || 'An error occurred'));
+    });
 
-  const deviceValueDialogSave = useCallback(
-    async (devicevalue: DeviceValue) => {
-      if (!selectedDashboardItem) {
-        return;
-      }
+  const deviceValueDialogSave = async (devicevalue: DeviceValue) => {
+    if (!selectedDashboardItem) {
+      return;
+    }
+    // skip if we're executing an immediate schedule as this is handled in DevicesDialog::doAction()
+    if (devicevalue.v !== undefined) {
       const id = selectedDashboardItem.parentNode.id; // this is the parent ID
-      await sendDeviceValue({ id, c: devicevalue.c ?? '', v: devicevalue.v })
-        .then(() => {
-          toast.success(LL.WRITE_CMD_SENT());
-        })
-        .catch((error: Error) => {
-          toast.error(error.message);
-        })
-        .finally(() => {
-          setDeviceValueDialogOpen(false);
-          setSelectedDashboardItem(undefined);
-        });
-    },
-    [selectedDashboardItem, sendDeviceValue, LL]
-  );
+      await sendDeviceValue({ id, c: devicevalue.c ?? '', v: devicevalue.v });
+    }
+    setDeviceValueDialogOpen(false);
+    setSelectedDashboardItem(undefined);
+  };
 
-  const dashboard_theme = useMemo(
-    () =>
-      useTheme({
-        Table: `
+  const dashboard_theme = useTheme({
+    Table: `
       --data-table-library_grid-template-columns: minmax(80px, auto) 120px 32px;
     `,
-        BaseRow: `
+    BaseRow: `
       font-size: 14px;
       .td {
         height: 28px;
       }
     `,
-        Row: `
+    Row: `
       cursor: pointer;
       background-color: #1e1e1e;
       &:nth-of-type(odd) .td {
@@ -120,7 +117,7 @@ const Dashboard = memo(() => {
         background-color: #177ac9;
       },
     `,
-        BaseCell: `
+    BaseCell: `
       &:nth-of-type(2) {
         text-align: right;
       }
@@ -128,9 +125,7 @@ const Dashboard = memo(() => {
         text-align: right;
       }
     `
-      }),
-    []
-  );
+  });
 
   const tree = useTree(
     { nodes: [...data.nodes] },
@@ -164,79 +159,71 @@ const Dashboard = memo(() => {
     }
   });
 
-  const nodeIds = useMemo(
-    () => data.nodes.map((item: DashboardItem) => item.id),
-    [data.nodes]
-  );
-
   useEffect(() => {
+    const nodeIds = data.nodes.map((item: DashboardItem) => item.id);
     showAll
       ? tree.fns.onAddAll(nodeIds) // expand tree
       : tree.fns.onRemoveAll(); // collapse tree
   }, [parentNodes]);
 
-  const showType = useCallback(
-    (n?: string, t?: number) => {
-      // if we have a name show it
-      if (n) {
-        return n;
+  const showType = (n?: string, t?: number) => {
+    // if we have a name show it
+    if (n) {
+      return n;
+    }
+    if (t) {
+      // otherwise pick translation based on type
+      switch (t) {
+        case DeviceType.CUSTOM:
+          return LL.CUSTOM_ENTITIES(0);
+        case DeviceType.ANALOGSENSOR:
+          return LL.ANALOG_SENSORS();
+        case DeviceType.TEMPERATURESENSOR:
+          return LL.TEMP_SENSORS();
+        case DeviceType.COMMAND:
+          return LL.COMMANDS();
+        case DeviceType.SCHEDULER:
+          return LL.SCHEDULER();
+        default:
+          break;
       }
-      if (t) {
-        // otherwise pick translation based on type
-        switch (t) {
-          case DeviceType.CUSTOM:
-            return LL.CUSTOM_ENTITIES(0);
-          case DeviceType.ANALOGSENSOR:
-            return LL.ANALOG_SENSORS();
-          case DeviceType.TEMPERATURESENSOR:
-            return LL.TEMP_SENSORS();
-          case DeviceType.SCHEDULER:
-            return LL.SCHEDULER();
-          default:
-            break;
-        }
-      }
-      return '';
-    },
-    [LL]
-  );
+    }
+    return '';
+  };
 
-  const showName = useCallback(
-    (di: DashboardItem) => {
-      if (di.id < 100) {
-        // if its a device (parent node) and has entities
-        if (di.nodes?.length) {
-          return (
-            <span style={{ fontSize: '15px' }}>
-              <DeviceIcon type_id={di.t ?? 0} />
-              &nbsp;&nbsp;{showType(di.n, di.t)}
-              <span style={{ color: 'lightblue' }}>&nbsp;({di.nodes?.length})</span>
-            </span>
-          );
-        }
+  const showName = (di: DashboardItem) => {
+    if (di.id < 100) {
+      // if its a device (parent node) and has entities
+      if (di.nodes?.length) {
+        return (
+          <span style={{ fontSize: '15px' }}>
+            <DeviceIcon type_id={di.t ?? 0} />
+            &nbsp;&nbsp;{showType(di.n, di.t)}
+            <span style={{ color: 'lightblue' }}>&nbsp;({di.nodes?.length})</span>
+          </span>
+        );
       }
-      if (di.dv) {
-        return <span>{di.dv.id.slice(2)}</span>;
-      }
-      return null;
-    },
-    [showType]
-  );
+    }
+    if (di.dv) {
+      return <span>{di.dv.id.slice(2)}</span>;
+    }
+    return null;
+  };
 
-  const hasMask = useCallback(
-    (id: string, mask: number) => (parseInt(id.slice(0, 2), 16) & mask) === mask,
-    []
-  );
+  const hasMask = (id: string, mask: number) =>
+    (parseInt(id.slice(0, 2), 16) & mask) === mask;
 
-  const editDashboardValue = useCallback(
-    (di: DashboardItem) => {
-      if (me.admin && di.dv?.c) {
-        setSelectedDashboardItem(di);
-        setDeviceValueDialogOpen(true);
-      }
-    },
-    [me.admin]
-  );
+  const editDashboardValue = (di: DashboardItem) => {
+    // don't execute on parent nodes
+    if (!me.admin || di.id <= 99) {
+      return;
+    }
+
+    if (di.dv?.c) {
+      setSelectedDashboardItem(di);
+      setDeviceValueDialogOpen(true);
+    }
+  };
 
   const handleShowAll = (
     _event: React.MouseEvent<HTMLElement>,
@@ -248,10 +235,9 @@ const Dashboard = memo(() => {
     }
   };
 
-  const hasFavEntities = useMemo(
-    () => data.nodes.filter((item: DashboardItem) => item.id <= 90).length,
-    [data.nodes]
-  );
+  const hasFavEntities = data.nodes.filter(
+    (item: DashboardItem) => item.id <= 90
+  ).length;
 
   const renderContent = () => {
     if (!data) {
@@ -344,20 +330,34 @@ const Dashboard = memo(() => {
                             <Cell>
                               {me.admin &&
                                 di.dv?.c &&
-                                !hasMask(di.dv.id, DeviceEntityMask.DV_READONLY) && (
+                                !hasMask(di.dv.id, DeviceEntityMask.DV_READONLY) &&
+                                (di.dv.v === '' || di.dv.v === undefined ? (
+                                  <IconButton
+                                    size="small"
+                                    aria-label={LL.RUN()}
+                                    onClick={() => editDashboardValue(di)}
+                                    style={{ backgroundColor: 'transparent' }}
+                                  >
+                                    <PlayArrowIcon
+                                      color="primary"
+                                      sx={{ fontSize: 16 }}
+                                    />
+                                  </IconButton>
+                                ) : (
                                   <IconButton
                                     size="small"
                                     aria-label={
                                       LL.CHANGE_VALUE() + ' ' + LL.VALUE(0)
                                     }
                                     onClick={() => editDashboardValue(di)}
+                                    style={{ backgroundColor: 'transparent' }}
                                   >
                                     <EditIcon
                                       color="primary"
                                       sx={{ fontSize: 16 }}
                                     />
                                   </IconButton>
-                                )}
+                                ))}
                             </Cell>
                           </>
                         ) : (
@@ -402,7 +402,10 @@ const Dashboard = memo(() => {
       {selectedDashboardItem && selectedDashboardItem.dv && (
         <DevicesDialog
           open={deviceValueDialogOpen}
-          onClose={() => setDeviceValueDialogOpen(false)}
+          onClose={() => {
+            setDeviceValueDialogOpen(false);
+            setSelectedDashboardItem(undefined);
+          }}
           onSave={deviceValueDialogSave}
           selectedItem={selectedDashboardItem.dv}
           writeable={true}

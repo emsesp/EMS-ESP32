@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,7 +68,9 @@ static TestStream stream;
 // load the tests
 // this is generated from this file when compiled with -DEMSESP_UNITY_CREATE
 // copy the output to the test_api.h file
+#ifndef EMSESP_UNITY_CREATE
 #include "test_api.h"
+#endif
 
 // Unity's setup call - is called before each test - empty for now
 void setUp() {

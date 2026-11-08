@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ class Thermostat : public EMSdevice {
             : hc_num_(hc_num)
             , model_(model) {
         }
+
         ~HeatingCircuit() = default;
 
         int16_t selTemp;
@@ -62,6 +63,8 @@ class Thermostat : public EMSdevice {
         uint8_t hpoperatingstate;
         uint8_t roominfluence;
         uint8_t roominfl_factor;
+        uint8_t adaptfactor; // FR100/FR120 Anpassungsfaktor I, byte * 5 = %
+        uint8_t gainfactor;  // FR100/FR120 Verstärkungsfaktor V, byte * 5 = %
         int16_t curroominfl;
         uint8_t flowtempoffset;
         uint8_t minflowtemp;
@@ -190,6 +193,7 @@ class Thermostat : public EMSdevice {
         DhwCircuit(const uint8_t offset)
             : dhw_num_(offset) {
         }
+
         ~DhwCircuit() = default;
         uint8_t wwExtra_;
         uint8_t wwMode_;
@@ -241,7 +245,8 @@ class Thermostat : public EMSdevice {
     // check to see if the thermostat is a hybrid of the R300
     inline bool isRC300() const {
         return (model() == EMSdevice::EMS_DEVICE_FLAG_RC300 || model() == EMSdevice::EMS_DEVICE_FLAG_R3000 || model() == EMSdevice::EMS_DEVICE_FLAG_BC400
-                || model() == EMSdevice::EMS_DEVICE_FLAG_CR120 || model() == EMSdevice::EMS_DEVICE_FLAG_HMC310 || model() == EMSdevice::EMS_DEVICE_FLAG_UI800);
+                || model() == EMSdevice::EMS_DEVICE_FLAG_CR120 || model() == EMSdevice::EMS_DEVICE_FLAG_HMC310 || model() == EMSdevice::EMS_DEVICE_FLAG_UI800
+                || model() == EMSdevice::EMS_DEVICE_FLAG_RC300V11);
     }
 
     inline uint8_t id2dhw(const int8_t id) const { // returns telegram offset for TAG(id)
@@ -270,6 +275,8 @@ class Thermostat : public EMSdevice {
     // Installation parameters
     uint8_t ibaMainDisplay_; // display on Thermostat: 0 int temp, 1 int setpoint, 2 ext temp, 3 burner temp, 4 ww temp, 5 functioning mode, 6 time, 7 data, 9 smoke temp
     uint8_t ibaLanguage_;          // language on Thermostat: 0 german, 1 dutch, 2 french, 3 italian
+    uint8_t ibaDateFormat_;        // Junkers: date format: 0 DD.MM.YYYY, 1 MM/DD/YYYY
+    uint8_t ibaContrast_;          // Junkers: display contrast in % * 2, 50..150 (raw value 10..30, factor 2.5)
     int8_t  ibaCalIntTemperature_; // offset int. temperature sensor, by * 0.1 Kelvin (-5.0 to 5.0K)
     int8_t  ibaMinExtTemperature_; // min ext temp for heating curve, in deg., 0xF6=-10, 0x0 = 0, 0xFF=-1
     uint8_t ibaBuildingType_;      // building type: 0 = light, 1 = medium, 2 = heavy
@@ -319,6 +326,9 @@ class Thermostat : public EMSdevice {
     uint8_t pvEnableWw_;
     uint8_t pvRaiseHeat_;
     uint8_t pvLowerCool_;
+
+    // auxheater
+    uint8_t auxHeaterMode_;
 
     std::vector<std::shared_ptr<HeatingCircuit>, AllocatorPSRAM<std::shared_ptr<HeatingCircuit>>> heating_circuits_; // each thermostat can have multiple heating circuits
     std::vector<std::shared_ptr<DhwCircuit>, AllocatorPSRAM<std::shared_ptr<DhwCircuit>>> dhw_circuits_; // each thermostat can have multiple dhw circuits
@@ -418,7 +428,7 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_TYPE_RC30wwSettings = 0x3A; // RC30 ww settings
     static constexpr uint8_t EMS_TYPE_time           = 0x06; // time
 
-    std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(std::shared_ptr<const Telegram> telegram);
+    std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const std::shared_ptr<const Telegram> & telegram);
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const int8_t id);
     std::shared_ptr<Thermostat::DhwCircuit>     dhw_circuit(const uint8_t offset, const bool create = false);
 
@@ -427,67 +437,72 @@ class Thermostat : public EMSdevice {
 
     void add_ha_climate(std::shared_ptr<HeatingCircuit> hc) const;
 
-    void process_RCOutdoorTemp(std::shared_ptr<const Telegram> telegram);
-    void process_IBASettings(std::shared_ptr<const Telegram> telegram);
-    void process_RCTime(std::shared_ptr<const Telegram> telegram);
-    void process_RCError(std::shared_ptr<const Telegram> telegram);
-    void process_RCErrorMessage(std::shared_ptr<const Telegram> telegram);
-    void process_RCErrorMessage2(std::shared_ptr<const Telegram> telegram);
-    void process_ErrorMessageBF(std::shared_ptr<const Telegram> telegram);
-    void process_RC35wwSettings(std::shared_ptr<const Telegram> telegram);
-    void process_RC35wwTimer(std::shared_ptr<const Telegram> telegram);
-    void process_RC35Monitor(std::shared_ptr<const Telegram> telegram);
-    void process_RC35Set(std::shared_ptr<const Telegram> telegram);
-    void process_RC35Timer(std::shared_ptr<const Telegram> telegram);
-    void process_RC30Vacation(std::shared_ptr<const Telegram> telegram);
-    void process_RC30Monitor(std::shared_ptr<const Telegram> telegram);
-    void process_RC30Set(std::shared_ptr<const Telegram> telegram);
-    void process_RC30Temp(std::shared_ptr<const Telegram> telegram);
-    void process_RC30wwSettings(std::shared_ptr<const Telegram> telegram);
-    void process_RC20Monitor(std::shared_ptr<const Telegram> telegram);
-    void process_RC20Set(std::shared_ptr<const Telegram> telegram);
-    void process_RC20Temp(std::shared_ptr<const Telegram> telegram);
-    void process_RC20Timer(std::shared_ptr<const Telegram> telegram);
-    void process_RC20Remote(std::shared_ptr<const Telegram> telegram);
-    void process_RC20Monitor_2(std::shared_ptr<const Telegram> telegram);
-    void process_RC20Set_2(std::shared_ptr<const Telegram> telegram);
-    void process_RC10Monitor(std::shared_ptr<const Telegram> telegram);
-    void process_RC10Set(std::shared_ptr<const Telegram> telegram);
-    void process_RC10Set_2(std::shared_ptr<const Telegram> telegram);
-    void process_CRFMonitor(std::shared_ptr<const Telegram> telegram);
-    void process_CR11Monitor(std::shared_ptr<const Telegram> telegram);
-    void process_RC300Monitor(std::shared_ptr<const Telegram> telegram);
-    void process_RC300Set(std::shared_ptr<const Telegram> telegram);
-    void process_RC300Set2(std::shared_ptr<const Telegram> telegram);
-    void process_RC300Summer(std::shared_ptr<const Telegram> telegram);
-    void process_RC300Summer2(std::shared_ptr<const Telegram> telegram);
-    void process_RC300Summer3(std::shared_ptr<const Telegram> telegram);
-    void process_RC300WWmode(std::shared_ptr<const Telegram> telegram);
-    void process_RC300WWmode2(std::shared_ptr<const Telegram> telegram);
-    void process_RC300WWtemp(std::shared_ptr<const Telegram> telegram);
-    void process_RC300OutdoorTemp(std::shared_ptr<const Telegram> telegram);
-    void process_RC300Settings(std::shared_ptr<const Telegram> telegram);
-    void process_RC300Floordry(std::shared_ptr<const Telegram> telegram);
-    void process_RC300Holiday(std::shared_ptr<const Telegram> telegram);
-    void process_RC300Curve(std::shared_ptr<const Telegram> telegram);
-    void process_JunkersMonitor(std::shared_ptr<const Telegram> telegram);
-    void process_JunkersSet(std::shared_ptr<const Telegram> telegram);
-    void process_JunkersSet2(std::shared_ptr<const Telegram> telegram);
-    void process_EasyMonitor(std::shared_ptr<const Telegram> telegram);
-    void process_JunkersRemoteMonitor(std::shared_ptr<const Telegram> telegram);
-    void process_HybridSettings(std::shared_ptr<const Telegram> telegram);
-    void process_PVSettings(std::shared_ptr<const Telegram> telegram);
-    void process_Absent(std::shared_ptr<const Telegram> telegram);
-    void process_JunkersSetMixer(std::shared_ptr<const Telegram> telegram);
-    void process_JunkersWW(std::shared_ptr<const Telegram> telegram);
-    void process_JunkersDisp(std::shared_ptr<const Telegram> telegram);
-    void process_RemoteTemp(std::shared_ptr<const Telegram> telegram);
-    void process_RemoteHumidity(std::shared_ptr<const Telegram> telegram);
-    void process_RemoteCorrection(std::shared_ptr<const Telegram> telegram);
-    void process_RemoteBattery(std::shared_ptr<const Telegram> telegram);
-    void process_HPSet(std::shared_ptr<const Telegram> telegram);
-    void process_HPMode(std::shared_ptr<const Telegram> telegram);
-    void process_PID(std::shared_ptr<const Telegram> telegram);
+    void process_RCOutdoorTemp(const std::shared_ptr<const Telegram> & telegram);
+    void process_IBASettings(const std::shared_ptr<const Telegram> & telegram);
+    void process_RCTime(const std::shared_ptr<const Telegram> & telegram);
+    void process_RCError(const std::shared_ptr<const Telegram> & telegram);
+    void process_RCErrorMessage(const std::shared_ptr<const Telegram> & telegram);
+    void process_RCErrorMessage2(const std::shared_ptr<const Telegram> & telegram);
+    void process_ErrorMessageBF(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC35wwSettings(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC35wwTimer(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC35Monitor(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC35Set(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC35Timer(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC30Vacation(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC30Monitor(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC30Set(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC30Temp(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC30wwSettings(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC20Monitor(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC20Set(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC20Temp(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC20Timer(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC20Remote(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC20Monitor_2(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC20Set_2(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC10Monitor(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC10Set(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC10Set_2(const std::shared_ptr<const Telegram> & telegram);
+    void process_CRFMonitor(const std::shared_ptr<const Telegram> & telegram);
+    void process_CR11Monitor(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC300Monitor(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC300Set(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC300Set2(const std::shared_ptr<const Telegram> & telegram);
+
+    void process_RC300Summer(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC300Summer2(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC300Summer3(const std::shared_ptr<const Telegram> & telegram);
+    bool has_summer3() const;
+    bool has_hpoperatingstate() const;
+
+    void process_RC300WWmode(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC300WWmode2(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC300WWtemp(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC300OutdoorTemp(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC300Settings(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC300Floordry(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC300Holiday(const std::shared_ptr<const Telegram> & telegram);
+    void process_RC300Curve(const std::shared_ptr<const Telegram> & telegram);
+    void process_JunkersMonitor(const std::shared_ptr<const Telegram> & telegram);
+    void process_JunkersSet(const std::shared_ptr<const Telegram> & telegram);
+    void process_JunkersSet2(const std::shared_ptr<const Telegram> & telegram);
+    void process_EasyMonitor(const std::shared_ptr<const Telegram> & telegram);
+    void process_JunkersRemoteMonitor(const std::shared_ptr<const Telegram> & telegram);
+    void process_HybridSettings(const std::shared_ptr<const Telegram> & telegram);
+    void process_PVSettings(const std::shared_ptr<const Telegram> & telegram);
+    void process_Absent(const std::shared_ptr<const Telegram> & telegram);
+    void process_JunkersSetMixer(const std::shared_ptr<const Telegram> & telegram);
+    void process_JunkersWW(const std::shared_ptr<const Telegram> & telegram);
+    void process_JunkersDisp(const std::shared_ptr<const Telegram> & telegram);
+    void process_RemoteTemp(const std::shared_ptr<const Telegram> & telegram);
+    void process_RemoteHumidity(const std::shared_ptr<const Telegram> & telegram);
+    void process_RemoteCorrection(const std::shared_ptr<const Telegram> & telegram);
+    void process_RemoteBattery(const std::shared_ptr<const Telegram> & telegram);
+    void process_HPSet(const std::shared_ptr<const Telegram> & telegram);
+    void process_HPMode(const std::shared_ptr<const Telegram> & telegram);
+    void process_PID(const std::shared_ptr<const Telegram> & telegram);
+    void process_auxHeaterMode(const std::shared_ptr<const Telegram> & telegram);
 
     // internal helper functions
     bool set_mode_n(const uint8_t mode, const int8_t id);
@@ -503,17 +518,25 @@ class Thermostat : public EMSdevice {
     inline bool set_vacation(const char * value, const int8_t id) {
         return set_holiday(value, id, true);
     }
-    bool set_pause(const char * value, const int8_t id);
-    bool set_party(const char * value, const int8_t id);
-    bool set_holidaymode(const char * value, const int8_t id);
-    bool set_heatup(const char * value, const int8_t id);
-    bool set_summermode(const char * value, const int8_t id);
-    bool set_vacreducemode(const char * value, const int8_t id);
-    bool set_nofrostmode(const char * value, const int8_t id);
-    bool set_remotetemp(const char * value, const int8_t id);
-    bool set_remotehum(const char * value, const int8_t id);
-    bool set_roominfl_factor(const char * value, const int8_t id);
-    bool set_roominfl_mode(const char * value, const int8_t id);
+
+    bool        set_pause(const char * value, const int8_t id);
+    bool        set_party(const char * value, const int8_t id);
+    bool        set_holidaymode(const char * value, const int8_t id);
+    bool        set_heatup(const char * value, const int8_t id);
+    bool        set_summermode(const char * value, const int8_t id);
+    bool        set_vacreducemode(const char * value, const int8_t id);
+    bool        set_nofrostmode(const char * value, const int8_t id);
+    bool        set_remotetemp(const char * value, const int8_t id);
+    bool        set_remotehum(const char * value, const int8_t id);
+    bool        set_roominfl_factor(const char * value, const int8_t id);
+    bool        set_roominfl_mode(const char * value, const int8_t id);
+    bool        set_junkers_factor(const char * value, const int8_t id, const uint8_t offset, const int min_percent);
+    inline bool set_adaptfactor(const char * value, const int8_t id) {
+        return set_junkers_factor(value, id, 1, 0); // Anpassungsfaktor I, 0..100%
+    }
+    inline bool set_gainfactor(const char * value, const int8_t id) {
+        return set_junkers_factor(value, id, 2, 40); // Verstärkungsfaktor V, 40..100%
+    }
     bool set_reducemode(const char * value, const int8_t id);
     bool set_switchtime1(const char * value, const int8_t id);
     bool set_switchtime2(const char * value, const int8_t id);
@@ -533,78 +556,103 @@ class Thermostat : public EMSdevice {
     inline bool set_temp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::AUTO);
     }
+
     inline bool set_nighttemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::NIGHT);
     }
+
     inline bool set_daytemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::DAY);
     }
+
     inline bool set_daylowtemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::DAYLOW);
     }
+
     inline bool set_daymidtemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::DAYMID);
     }
+
     inline bool set_comforttemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::COMFORT);
     }
+
     inline bool set_nofrosttemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::NOFROST);
     }
+
     inline bool set_ecotemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::ECO);
     }
+
     inline bool set_heattemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::HEAT);
     }
+
     inline bool set_summertemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::SUMMER);
     }
+
     inline bool set_designtemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::DESIGN);
     }
+
     inline bool set_offsettemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::OFFSET);
     }
+
     inline bool set_holidaytemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::HOLIDAY);
     }
+
     inline bool set_offtemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::OFF);
     }
+
     inline bool set_manualtemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::MANUAL);
     }
+
     inline bool set_tempautotemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::TEMPAUTO);
     }
+
     inline bool set_noreducetemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::NOREDUCE);
     }
+
     inline bool set_reducetemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::REDUCE);
     }
+
     inline bool set_vacreducetemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::VACREDUCE);
     }
+
     inline bool set_flowtempoffset(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::FLOWOFFSET, true);
     }
+
     inline bool set_maxflowtemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::MAXFLOW);
     }
+
     inline bool set_minflowtemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::MINFLOW);
     }
+
     inline bool set_baseflowtemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::BASEFLOW);
     }
+
     inline bool set_roominfluence(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::ROOMINFLUENCE, true);
     }
+
     inline bool set_cooltemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::COOLTEMP);
     }
+
     inline bool set_coolstart(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::COOLSTART);
     }
@@ -632,36 +680,47 @@ class Thermostat : public EMSdevice {
     inline bool set_wwVacation(const char * value, const int8_t id) {
         return set_holiday(value, DeviceValueTAG::TAG_DHW1, true);
     }
+
     inline bool set_wwHoliday(const char * value, const int8_t id) {
         return set_holiday(value, DeviceValueTAG::TAG_DHW1);
     }
+
     bool        set_RC30Vacation(const char * value, const int8_t id);
     inline bool set_RC30Vacation1(const char * value, const int8_t id) {
         return set_RC30Vacation(value, 1);
     }
+
     inline bool set_RC30Vacation2(const char * value, const int8_t id) {
         return set_RC30Vacation(value, 2);
     }
+
     inline bool set_RC30Vacation3(const char * value, const int8_t id) {
         return set_RC30Vacation(value, 3);
     }
+
     inline bool set_RC30Vacation4(const char * value, const int8_t id) {
         return set_RC30Vacation(value, 4);
     }
+
     inline bool set_RC30Vacation5(const char * value, const int8_t id) {
         return set_RC30Vacation(value, 5);
     }
+
     inline bool set_RC30Vacation6(const char * value, const int8_t id) {
         return set_RC30Vacation(value, 6);
     }
+
     inline bool set_RC30Vacation7(const char * value, const int8_t id) {
         return set_RC30Vacation(value, 7);
     }
+
     bool set_datetime(const char * value, const int8_t id);
     bool set_minexttemp(const char * value, const int8_t id);
     bool set_clockoffset(const char * value, const int8_t id);
     bool set_calinttemp(const char * value, const int8_t id);
     bool set_display(const char * value, const int8_t id);
+    bool set_dateformat(const char * value, const int8_t id);
+    bool set_contrast(const char * value, const int8_t id);
     bool set_building(const char * value, const int8_t id);
     bool set_damping(const char * value, const int8_t id);
     bool set_solar(const char * value, const int8_t id);
@@ -702,6 +761,7 @@ class Thermostat : public EMSdevice {
     bool set_absent(const char * value, const int8_t id);
     bool set_redthreshold(const char * value, const int8_t id);
     bool set_solarinfl(const char * value, const int8_t id);
+    bool set_auxHeaterMode(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

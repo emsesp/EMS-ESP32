@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,6 @@ char * Helpers::hextoa(char * result, const uint8_t value) {
 }
 
 // same as hextoa but uses to a hex std::string
-// Optimized: Avoid string concatenation to reduce temporary allocations
 std::string Helpers::hextoa(const uint8_t value, bool prefix) {
     if (prefix) {
         char buf[5]; // "0x" + 2 hex chars + null
@@ -54,13 +53,13 @@ char * Helpers::hextoa(char * result, const uint16_t value) {
     if (value <= 0xFF) {
         return hextoa(result, (uint8_t)value);
     }
+
     hextoa(result, (uint8_t)(value >> 8));
     hextoa(&result[2], (uint8_t)(value & 0xFF));
     return result;
 }
 
 // same as above but to a hex string
-// Optimized: Avoid string concatenation to reduce temporary allocations
 std::string Helpers::hextoa(const uint16_t value, bool prefix) {
     if (prefix) {
         char buf[7]; // "0x" + 4 hex chars + null
@@ -114,7 +113,6 @@ char * Helpers::ultostr(char * ptr, uint32_t value, const uint8_t base) {
 
 // fast itoa returning a std::string
 // http://www.strudel.org.uk/itoa/
-// Optimized: Use stack buffer to avoid heap allocation, then create string once
 std::string Helpers::itoa(int16_t value) {
     // int16_t max: -32768 to 32767 = max 6 chars + null
     char   buf[8];
@@ -140,7 +138,7 @@ std::string Helpers::itoa(int16_t value) {
 /*
   * fast itoa
   * written by Lukás Chmela, Released under GPLv3. http://www.strudel.org.uk/itoa/ version 0.4
-  * optimized for ESP32
+  * optimized for ESP32 for EMS-ESP
   */
 char * Helpers::itoa(int32_t value, char * result, const uint8_t base) {
     // check that the base if valid
@@ -204,6 +202,7 @@ char * Helpers::render_boolean(char * result, const bool value, const bool dashb
     } else {
         strlcpy(result, value ? "true" : "false", 7); // default
     }
+
     return result;
 }
 
@@ -212,10 +211,12 @@ char * Helpers::remove_trailing_zero(char * result) {
         while (result[strlen(result) - 1] == '0') {
             result[strlen(result) - 1] = '\0';
         }
+
         if (result[strlen(result) - 1] == '.') {
             result[strlen(result) - 1] = '\0';
         }
     }
+
     return result;
 }
 
@@ -231,6 +232,7 @@ char * Helpers::render_value(char * result, uint8_t value, int8_t format, const 
         } else {
             render_boolean(result, true); // assume on. could have value 0x01 or 0xFF
         }
+
         return result;
     }
 
@@ -304,6 +306,7 @@ char * Helpers::render_value(char * result, const double value, const int8_t for
             *result++ = '0'; // add leading zeros
         }
     }
+
     itoa(decimal, result, 10);
 
     return remove_trailing_zero(ret);
@@ -379,6 +382,7 @@ char * Helpers::render_value(char * result, const uint32_t value, const int8_t f
     if (!hasValue(value)) {
         return nullptr;
     }
+
     result[0]          = '\0';
     uint32_t new_value = fahrenheit ? format ? value * 1.8 + 32 * format * (fahrenheit - 1) : value * 1.8 + 32 * (fahrenheit - 1) : value;
     char     s[14]     = {0};
@@ -450,9 +454,11 @@ char * Helpers::render_string(char * result, const char * c, const uint8_t len) 
             *p = (*c & 0x80) ? '?' : *c;
             break;
         }
+
         c++;
         p++;
     }
+
     *p = '\0'; // terminate result
     return result;
 }
@@ -492,12 +498,15 @@ char * Helpers::utf8tolatin1(char * result, const char * c, const uint8_t len) {
         } else {
             *p = *c;
         }
+
         c++;
         p++;
     }
+
     *p = '\0'; // terminate result
     return result;
 }
+
 // creates string of hex values from an array of bytes
 std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
     if (length == 0) {
@@ -515,6 +524,7 @@ std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
         *p++ = buffer[1];
         *p++ = ' '; // space
     }
+
     *--p = '\0'; // null terminate just in case, loosing the trailing space
 
     return std::string(str.data());
@@ -562,13 +572,16 @@ int Helpers::atoint(const char * value) {
     if (s == '-') {
         ++value;
     }
+
     while (*value >= '0' && *value <= '9') {
         x = (x * 10) + (*value - '0');
         ++value;
     }
+
     if (s == '-') {
         return (-x);
     }
+
     return x;
 }
 
@@ -606,6 +619,7 @@ bool Helpers::hasValue(const uint8_t & value, const uint8_t isBool) {
     if (isBool == EMS_VALUE_BOOL) {
         return (value != EMS_VALUE_BOOL_NOTSET);
     }
+
     return (value != EMS_VALUE_UINT8_NOTSET);
 }
 
@@ -650,6 +664,7 @@ bool Helpers::value2number(const char * value, int & value_i, const int min, con
     if (value_i >= min && value_i <= max) {
         return true;
     }
+
     return false;
 }
 
@@ -669,6 +684,7 @@ bool Helpers::value2float(const char * value, float & value_f) {
         value_f = atof(value + 1);
         return true;
     }
+
     return false;
 }
 
@@ -677,8 +693,10 @@ bool Helpers::value2temperature(const char * value, float & value_f, bool relati
         if (EMSESP::system_.fahrenheit()) {
             value_f = relative ? (value_f / 1.8) : (value_f - 32) / 1.8;
         }
+
         return true;
     }
+
     return false;
 }
 
@@ -687,8 +705,10 @@ bool Helpers::value2temperature(const char * value, int & value_i, const bool re
         if (EMSESP::system_.fahrenheit()) {
             value_i = relative ? (value_i / 1.8) : (value_i - 32) / 1.8;
         }
+
         return true;
     }
+
     return false;
 }
 
@@ -738,6 +758,7 @@ bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * co
     if ((value == nullptr) || (strlen(value) == 0)) {
         return false;
     }
+
     std::string str = toLower(value);
 
     for (value_ui = 0; strs[value_ui]; value_ui++) {
@@ -749,6 +770,7 @@ bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * co
             return true;
         }
     }
+
     value_ui = 0;
     return false;
 }
@@ -758,6 +780,7 @@ bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * co
     if (!value2enum(value, v, strs) || v >= mask.size()) {
         return false;
     }
+
     value_ui = mask[v];
     return true;
 }
@@ -769,6 +792,7 @@ bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * co
     if ((value == nullptr) || (strlen(value) == 0)) {
         return false;
     }
+
     std::string str = toLower(value);
 
     std::string s_on  = Helpers::translated_word(FL_(on));
@@ -794,6 +818,7 @@ bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * co
     if (!value2enum(value, v, strs) || v >= mask.size()) {
         return false;
     }
+
     value_ui = mask[v];
     return true;
 }
@@ -832,6 +857,7 @@ void Helpers::CharToUpperUTF8(char * c) {
         if ((p_v >= (char)0xA0) && (p_v <= (char)0xBE)) {
             *p -= 0x20;
         }
+
         // Additional special characters for supported languages
         switch (p_v) {
         case (char)0xA0: // à -> À
@@ -868,6 +894,7 @@ void Helpers::CharToUpperUTF8(char * c) {
             *p -= 0x20;
             break;
         }
+
         break;
     case (char)0xC4:
         switch (p_v) {
@@ -884,6 +911,7 @@ void Helpers::CharToUpperUTF8(char * c) {
             *p -= 1;
             break;
         }
+
         break;
     case (char)0xC5:
         switch (p_v) {
@@ -906,6 +934,7 @@ void Helpers::CharToUpperUTF8(char * c) {
             *p -= 1;
             break;
         }
+
         break;
     default:
         *c = toupper(*c); // works on Latin1 letters
@@ -942,6 +971,7 @@ uint8_t Helpers::count_items(const char * const * list) {
             list_size++;
         }
     }
+
     return list_size;
 }
 
@@ -954,6 +984,7 @@ uint8_t Helpers::count_items(const char * const ** list) {
             list_size++;
         }
     }
+
     return list_size;
 }
 
@@ -986,19 +1017,23 @@ uint16_t Helpers::string2minutes(const std::string & str) {
         if (str[i] >= '0' && str[i] <= '9') {
             tmp = tmp * 10 + str[i] - '0';
         }
+
         // Or if we got a colon
         else if (str[i] == ':') {
             // If we were reading the hours
             if (state == 0) {
                 res = 60 * tmp;
             }
+
             // Or if we were reading the minutes
             else if (state == 1) {
                 if (tmp > 60) {
                     return 0;
                 }
+
                 res += tmp;
             }
+
             // Or we got an extra colon
             else {
                 return 0;
@@ -1012,6 +1047,7 @@ uint16_t Helpers::string2minutes(const std::string & str) {
         else {
             return 0;
         }
+
         i++;
     }
 
@@ -1037,6 +1073,7 @@ int16_t Helpers::calc_dew(int16_t temp, uint8_t humi) {
     if (humi == EMS_VALUE_UINT8_NOTSET || temp == EMS_VALUE_INT16_NOTSET) {
         return EMS_VALUE_INT16_NOTSET;
     }
+
     const float k2 = 17.62;
     const float k3 = 243.12;
     const float t  = (float)temp / 10;
@@ -1044,6 +1081,5 @@ int16_t Helpers::calc_dew(int16_t temp, uint8_t humi) {
     int16_t     dt = (10 * k3 * (((k2 * t) / (k3 + t)) + log(h)) / (((k2 * k3) / (k3 + t)) - log(h)));
     return dt;
 }
-
 
 } // namespace emsesp

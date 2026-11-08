@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 
 #include <map>
 
-#include "console.h"
+#include "emsesp_console.h"
 #include <esp32-psram.h>
 
 using uuid::console::Shell;
@@ -54,51 +54,53 @@ enum CommandRet : uint8_t {
     NO_VALUE     // 6 - no value
 };
 
-using cmd_function_p      = std::function<bool(const char * data, const int8_t id)>;
-using cmd_json_function_p = std::function<bool(const char * data, const int8_t id, JsonObject output)>;
+using cmd_function_p = std::function<bool(const char * data, const int8_t id, JsonObject output)>;
 
 class Command {
   public:
     struct CmdFunction {
         uint8_t              device_type_; // DeviceType::
         uint8_t              device_id_;
-        uint8_t              flags_; // mqtt flags for command subscriptions
+        uint8_t              flags_;           // mqtt flags for command subscriptions
+        bool                 has_json_output_; // true if the command writes JSON output; such commands bypass the readonly check
         const char *         cmd_;
         cmd_function_p       cmdfunction_;
-        cmd_json_function_p  cmdfunction_json_;
         const char * const * description_;
 
-        CmdFunction(const uint8_t             device_type,
-                    const uint8_t             device_id,
-                    const uint8_t             flags,
-                    const char *              cmd,
-                    const cmd_function_p      cmdfunction,
-                    const cmd_json_function_p cmdfunction_json,
-                    const char * const *      description)
+        CmdFunction(const uint8_t          device_type,
+                    const uint8_t          device_id,
+                    const uint8_t          flags,
+                    const bool             has_json_output,
+                    const char *           cmd,
+                    const cmd_function_p & cmdfunction,
+                    const char * const *   description)
             : device_type_(device_type)
             , device_id_(device_id)
             , flags_(flags)
+            , has_json_output_(has_json_output)
             , cmd_(cmd)
             , cmdfunction_(cmdfunction)
-            , cmdfunction_json_(cmdfunction_json)
             , description_(description) {
         }
 
         inline void add_flags(uint8_t flags) {
             flags_ |= flags;
         }
+
         inline bool has_flags(uint8_t flags) const {
             return (flags_ & flags) == flags;
         }
+
         inline void remove_flags(uint8_t flags) {
             flags_ &= ~flags;
         }
+
         inline uint8_t flags() const {
             return flags_;
         }
     };
 
-    static std::vector<CmdFunction, AllocatorPSRAM<CmdFunction>> commands() {
+    static const std::vector<CmdFunction, AllocatorPSRAM<CmdFunction>> & commands() {
         return cmdfunctions_;
     }
 
@@ -106,22 +108,31 @@ class Command {
     static uint8_t call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id = -1);
 
     // with normal call back function taking a value and id
-    static void add(const uint8_t        device_type,
-                    const uint8_t        device_id,
-                    const char *         cmd,
-                    const cmd_function_p cb,
-                    const char * const * description,
-                    uint8_t              flags = CommandFlag::CMD_FLAG_DEFAULT);
+    static void add(const uint8_t          device_type,
+                    const uint8_t          device_id,
+                    const char *           cmd,
+                    const cmd_function_p & cb,
+                    const char * const *   description,
+                    uint8_t                flags = CommandFlag::CMD_FLAG_DEFAULT);
 
     // same for system/temperature/analog devices
     static void
-    add(const uint8_t device_type, const char * cmd, const cmd_function_p cb, const char * const * description, uint8_t flags = CommandFlag::CMD_FLAG_DEFAULT);
-    // callback function taking value, id and a json object for its output
-    static void add(const uint8_t             device_type,
-                    const char *              cmd,
-                    const cmd_json_function_p cb,
-                    const char * const *      description,
-                    uint8_t                   flags = CommandFlag::CMD_FLAG_DEFAULT);
+    add(const uint8_t device_type, const char * cmd, const cmd_function_p & cb, const char * const * description, uint8_t flags = CommandFlag::CMD_FLAG_DEFAULT);
+    // command that writes a JSON object as its output; bypasses the readonly check
+    static void add_json(const uint8_t          device_type,
+                         const char *           cmd,
+                         const cmd_function_p & cb,
+                         const char * const *   description,
+                         uint8_t                flags = CommandFlag::CMD_FLAG_DEFAULT);
+
+    static void reserve(size_t num) {
+        cmdfunctions_.reserve(num);
+    }
+
+    // release any reserved-but-unused capacity once commands have settled
+    static void compact() {
+        cmdfunctions_.shrink_to_fit();
+    }
 
     static void                   show_all(uuid::console::Shell & shell);
     static Command::CmdFunction * find_command(const uint8_t device_type, const uint8_t device_id, const char * cmd, const uint8_t flag);

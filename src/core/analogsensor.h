@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 
 #include "helpers.h"
 #include "mqtt.h"
-#include "console.h"
+#include "emsesp_console.h"
 
 #include <uuid/log.h>
 
@@ -63,6 +63,7 @@ class AnalogSensor {
         bool is_system() const {
             return is_system_;
         }
+
         void set_is_system(const bool is_system) {
             is_system_ = is_system;
         }
@@ -70,6 +71,7 @@ class AnalogSensor {
         double factor() const {
             return factor_;
         }
+
         void set_factor(const double factor) {
             factor_ = factor;
         }
@@ -81,6 +83,7 @@ class AnalogSensor {
         void set_uom(const uint8_t uom) {
             uom_ = uom;
         }
+
         uint8_t uom() const {
             return uom_;
         }
@@ -144,9 +147,10 @@ class AnalogSensor {
     void publish_values(const bool force);
     void reload(bool get_nvs = false);
     bool updated_values();
+    void ha_reset();
 
     // return back reference to the sensor list, used by other classes
-    std::vector<Sensor, AllocatorPSRAM<Sensor>> sensors() const {
+    const std::vector<Sensor, AllocatorPSRAM<Sensor>> & sensors() const {
         return sensors_;
     }
 
@@ -171,14 +175,15 @@ class AnalogSensor {
         if (exclude_disabled_system) {
             return std::count_if(sensors_.begin(), sensors_.end(), [](const Sensor & sensor) { return !sensor.is_system(); });
         }
+
         return sensors_.size();
     }
 
-    bool                        update(uint8_t gpio, const char * name, double offset, double factor, uint8_t uom, int8_t type, bool deleted, bool is_system);
-    bool                        get_value_info(JsonObject output, const char * cmd, const int8_t id = -1);
-    void                        store_counters();
-    std::string                 get_metrics_prometheus();
-    static std::vector<uint8_t> exclude_types() {
+    bool        update(uint8_t gpio, const char * name, double offset, double factor, uint8_t uom, int8_t type, bool deleted, bool is_system);
+    bool        get_value_info(JsonObject output, const char * cmd, const int8_t id = -1);
+    void        store_counters();
+    std::string get_metrics_prometheus();
+    static const std::vector<uint8_t> & exclude_types() {
         return exclude_types_;
     }
 
@@ -188,8 +193,10 @@ class AnalogSensor {
     static constexpr double   T25                     = 298.15;
     static constexpr double   R0                      = 100000;
     static constexpr double   Rt                      = 60000;
+    static constexpr uint32_t NTC_VREF_MV             = 3300; // NTC voltage divider supply (in mV) - 3.3 V
     static constexpr uint8_t  MAX_SENSORS             = 20;
     static constexpr uint32_t MEASURE_ANALOG_INTERVAL = 500;
+    static constexpr uint32_t FREQ_ZERO_TIMEOUT_US    = 10000000; // report 0 Hz if no edge arrives for this long (in us) - 10 seconds
 
     static uuid::log::Logger logger_;
     void                     remove_ha_topic(const int8_t type, const uint8_t id) const;
@@ -207,12 +214,12 @@ class AnalogSensor {
     uint32_t sensorreads_ = 0;
 
 #ifndef EMSESP_STANDALONE
-    static void IRAM_ATTR freqIrq0();
-    static void IRAM_ATTR freqIrq1();
-    static void IRAM_ATTR freqIrq2();
-    static unsigned long  edge[3];
-    static unsigned long  edgecnt[3];
-    unsigned long         lastedge[3] = {0, 0, 0};
+    static void IRAM_ATTR         freqIrq0();
+    static void IRAM_ATTR         freqIrq1();
+    static void IRAM_ATTR         freqIrq2();
+    static volatile unsigned long edge[3];    // written from freqIrqN() ISRs, read from the main measure() loop (partly outside the critical section)
+    static volatile unsigned long edgecnt[3]; // written from freqIrqN() ISRs, read from the main measure() loop (partly outside the critical section)
+    unsigned long                 lastedge[3] = {0, 0, 0};
 #endif
 };
 

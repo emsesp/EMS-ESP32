@@ -1,12 +1,4 @@
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState
-} from 'react';
-import { toast } from 'react-toastify';
+import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -33,6 +25,7 @@ import {
   SectionContent,
   useLayoutTitle
 } from 'components';
+import { toast } from 'components/toast';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { LogEntry, LogSettings } from 'types';
 import { LogLevel } from 'types';
@@ -185,8 +178,7 @@ const SystemLog = () => {
     };
   }, [data]); // Recalculate when data changes (in case layout shifts)
 
-  // Memoize message handler to avoid recreating on every render
-  const handleLogMessage = useCallback((message: { data: string }) => {
+  const handleLogMessage = (message: { data: string }) => {
     const rawData = message.data;
     const logentry = JSON.parse(rawData) as LogEntry;
     setLogEntries((log) => {
@@ -200,7 +192,7 @@ const SystemLog = () => {
       const newLog = [...log, logentry];
       return newLog;
     });
-  }, []);
+  };
 
   useSSE(fetchLogES, {
     immediate: true,
@@ -211,7 +203,7 @@ const SystemLog = () => {
       toast.error('No connection to Log service');
     });
 
-  const onDownload = useCallback(() => {
+  const onDownload = () => {
     const result = logEntries
       .map((i) => `${i.t} ${levelLabel(i.l)} ${i.i}: [${i.n}] ${i.m}`)
       .join('\n');
@@ -225,11 +217,11 @@ const SystemLog = () => {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-  }, [logEntries]);
+  };
 
-  const saveSettings = useCallback(async () => {
+  const saveSettings = async () => {
     await saveData();
-  }, [saveData]);
+  };
 
   // handle scrolling - optimized to only scroll when needed
   const ref = useRef<HTMLDivElement>(null);
@@ -246,7 +238,7 @@ const SystemLog = () => {
     }
   }, [logEntries.length, autoscroll]);
 
-  const sendReadCommand = useCallback(() => {
+  const sendReadCommand = () => {
     if (readValue === '') {
       setReadOpen(!readOpen);
       return;
@@ -257,7 +249,7 @@ const SystemLog = () => {
       setReadOpen(false);
       setReadValue('');
     }
-  }, [readValue, readOpen, send]);
+  };
 
   const content = () => {
     if (!data) {
@@ -377,7 +369,7 @@ const SystemLog = () => {
           ) : (
             <>
               {data.developer_mode && (
-                <IconButton onClick={sendReadCommand} aria-label={LL.EXECUTE()}>
+                <IconButton onClick={sendReadCommand} aria-label={LL.RUN()}>
                   <PlayArrowIcon color="primary" />
                 </IconButton>
               )}

@@ -1,17 +1,14 @@
 import { memo, useContext } from 'react';
-import type { FC } from 'react';
-import { Navigate } from 'react-router';
+import { Navigate, Outlet } from 'react-router';
 
 import { AuthenticatedContext } from 'contexts/authentication';
-import type { RequiredChildrenProps } from 'utils';
 
-const RequireAdmin: FC<RequiredChildrenProps> = ({ children }) => {
-  const authenticatedContext = useContext(AuthenticatedContext);
-  return authenticatedContext.me.admin ? (
-    <>{children}</>
-  ) : (
-    <Navigate replace to="/" />
-  );
+// Layout-route guard: renders nested admin routes only for admins, otherwise
+// redirects home. Must be used inside the authenticated route subtree so that
+// AuthenticatedContext (and `me`) is available.
+const RequireAdmin = () => {
+  const { me } = useContext(AuthenticatedContext);
+  return me.admin ? <Outlet /> : <Navigate replace to="/" />;
 };
 
 export default memo(RequireAdmin);

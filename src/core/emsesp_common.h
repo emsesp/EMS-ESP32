@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,17 +23,21 @@
 
 using uuid::log::Level;
 
+// Log macros gate on logger_.enabled(level) so that expensive argument
+// expressions (e.g. pretty_telegram(...).c_str()) are not evaluated when
+// the level is filtered out. Without this, every LOG_TRACE on the RX path
+// allocates a std::string even when no handler is interested.
 #if defined(EMSESP_DEBUG)
-#define LOG_DEBUG(...) logger_.debug(__VA_ARGS__)
+#define LOG_DEBUG(...) (logger_.enabled(uuid::log::Level::DEBUG) ? logger_.debug(__VA_ARGS__) : (void)0)
 #else
-#define LOG_DEBUG(...)
+#define LOG_DEBUG(...) ((void)0)
 #endif
 
-#define LOG_INFO(...) logger_.info(__VA_ARGS__)
-#define LOG_TRACE(...) logger_.trace(__VA_ARGS__)
-#define LOG_NOTICE(...) logger_.notice(__VA_ARGS__)
-#define LOG_WARNING(...) logger_.warning(__VA_ARGS__)
-#define LOG_ERROR(...) logger_.err(__VA_ARGS__)
+#define LOG_INFO(...) (logger_.enabled(uuid::log::Level::INFO) ? logger_.info(__VA_ARGS__) : (void)0)
+#define LOG_TRACE(...) (logger_.enabled(uuid::log::Level::TRACE) ? logger_.trace(__VA_ARGS__) : (void)0)
+#define LOG_NOTICE(...) (logger_.enabled(uuid::log::Level::NOTICE) ? logger_.notice(__VA_ARGS__) : (void)0)
+#define LOG_WARNING(...) (logger_.enabled(uuid::log::Level::WARNING) ? logger_.warning(__VA_ARGS__) : (void)0)
+#define LOG_ERROR(...) (logger_.enabled(uuid::log::Level::ERR) ? logger_.err(__VA_ARGS__) : (void)0)
 
 // flash strings
 using uuid::string_vector;

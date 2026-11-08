@@ -154,8 +154,12 @@ class Outbox {
     if (!it) return;
     Node* node = it._node;
     Node* prev = it._prev;
-    ++it;
+    Node* next = node->next;
+
     _remove(prev, node);
+
+    it._prev = prev;
+    it._node = next;
   }
 
   // remove current node, current points to next

@@ -5,10 +5,10 @@
 #include "ESPAsyncWebServer.h"
 #include "AsyncJson.h"
 
-#include <list>
+#include <memory>
 
 #define FACTORY_JWT_SECRET "ems-esp"
-#define ACCESS_TOKEN_PARAMATER "access_token"
+#define ACCESS_TOKEN_PARAMETER "access_token"
 #define AUTHORIZATION_HEADER "Authorization"
 #define AUTHORIZATION_HEADER_PREFIX "Bearer "
 #define AUTHORIZATION_HEADER_PREFIX_LEN 7
@@ -31,21 +31,15 @@ class User {
 
 class Authentication {
   public:
-    User *  user;
-    boolean authenticated;
+    std::unique_ptr<User> user;
+    boolean               authenticated = false;
 
   public:
-    Authentication(User & user)
-        : user(new User(user))
+    explicit Authentication(const User & u)
+        : user(std::make_unique<User>(u))
         , authenticated(true) {
     }
-    Authentication()
-        : user(nullptr)
-        , authenticated(false) {
-    }
-    ~Authentication() {
-        delete (user);
-    }
+    Authentication() = default;
 };
 
 typedef std::function<boolean(Authentication & authentication)> AuthenticationPredicate;
@@ -65,11 +59,9 @@ class AuthenticationPredicates {
 
 class SecurityManager {
   public:
-    virtual Authentication               authenticateRequest(AsyncWebServerRequest * request)                                    = 0;
-    virtual ArRequestFilterFunction      filterRequest(AuthenticationPredicate predicate)                                        = 0;
-    virtual ArRequestHandlerFunction     wrapRequest(ArRequestHandlerFunction onRequest, AuthenticationPredicate predicate)      = 0;
-    virtual ArJsonRequestHandlerFunction wrapCallback(ArJsonRequestHandlerFunction onRequest, AuthenticationPredicate predicate) = 0;
+    virtual Authentication authenticateRequest(AsyncWebServerRequest * request) = 0;
 
+    // Json endpoints - default POST. Registered with the shared dispatcher.
     void addEndpoint(AsyncWebServer *             server,
                      const String &               path,
                      AuthenticationPredicate      predicate,

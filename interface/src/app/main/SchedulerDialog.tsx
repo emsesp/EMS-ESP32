@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import AddIcon from '@mui/icons-material/Add';
 import CancelIcon from '@mui/icons-material/Cancel';
+import CircleIcon from '@mui/icons-material/Circle';
 import DoneIcon from '@mui/icons-material/Done';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutlined';
 import {
   Box,
@@ -14,6 +14,7 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
+  MenuItem,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
@@ -21,12 +22,12 @@ import {
 } from '@mui/material';
 
 import { dialogStyle } from 'CustomTheme';
-import type Schema from 'async-validator';
-import type { ValidateFieldsError } from 'async-validator';
 import { BlockFormControlLabel, ValidatedTextField } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import { updateValue } from 'utils';
 import { ValidationError, validate } from 'validators';
+import type Schema from 'validators/schema';
+import type { ValidateFieldsError } from 'validators/schema';
 
 import { ScheduleFlag } from './types';
 import type { ScheduleItem } from './types';
@@ -60,6 +61,12 @@ const FLAG_VALUES = [
   ScheduleFlag.SCHEDULE_SAT
 ] as const;
 
+const getFlagDOWnumber = (flags: string[]) =>
+  flags.reduce((acc, flag) => acc | Number(flag), 0) & FLAG_MASK_127;
+
+const getFlagDOWstring = (f: number) =>
+  FLAG_VALUES.filter((flag) => (f & flag) === flag).map((flag) => String(flag));
+
 interface SchedulerDialogProps {
   open: boolean;
   creating: boolean;
@@ -68,6 +75,7 @@ interface SchedulerDialogProps {
   selectedItem: ScheduleItem;
   validator: Schema;
   dow: string[];
+  commandNames: string[];
 }
 
 const SchedulerDialog = ({
@@ -77,33 +85,24 @@ const SchedulerDialog = ({
   onSave,
   selectedItem,
   validator,
-  dow
+  dow,
+  commandNames
 }: SchedulerDialogProps) => {
   const { LL } = useI18nContext();
   const [editItem, setEditItem] = useState<ScheduleItem>(selectedItem);
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
   const [scheduleType, setScheduleType] = useState<ScheduleFlag>();
 
-  const updateFormValue = useMemo(
-    () =>
-      updateValue(
-        setEditItem as unknown as React.Dispatch<
-          React.SetStateAction<Record<string, unknown>>
-        >
-      ),
-    []
+  const updateFormValue = updateValue(
+    setEditItem as unknown as React.Dispatch<
+      React.SetStateAction<Record<string, unknown>>
+    >
   );
 
   useEffect(() => {
     if (open) {
       setFieldErrors(undefined);
       setEditItem(selectedItem);
-      // Set the flags based on type when page is loaded:
-      // 0-127 is day schedule
-      // 128 is timer
-      // 129 is on change
-      // 130 is on condition
-      // 132 is immediate
       setScheduleType(
         selectedItem.flags <= SCHEDULE_TYPE_THRESHOLD
           ? ScheduleFlag.SCHEDULE_DAY
@@ -112,129 +111,89 @@ const SchedulerDialog = ({
     }
   }, [open, selectedItem]);
 
-  // Helper function to handle save operations
-  const handleSave = useCallback(
-    async (itemToSave: ScheduleItem) => {
-      try {
-        setFieldErrors(undefined);
-        await validate(validator, itemToSave);
-        onSave(itemToSave);
-      } catch (error) {
-        setFieldErrors((error as ValidationError).fieldErrors);
-      }
-    },
-    [validator, onSave]
-  );
-
-  const save = useCallback(async () => {
-    await handleSave(editItem);
-  }, [editItem, handleSave]);
-
-  const saveandactivate = useCallback(async () => {
-    await handleSave({ ...editItem, active: true });
-  }, [editItem, handleSave]);
-
-  const remove = useCallback(() => {
-    onSave({ ...editItem, deleted: true });
-  }, [editItem, onSave]);
-
-  // Optimize DOW flag conversion
-  const getFlagDOWnumber = useCallback((flags: string[]) => {
-    return flags.reduce((acc, flag) => acc | Number(flag), 0) & FLAG_MASK_127;
-  }, []);
-
-  const getFlagDOWstring = useCallback((f: number) => {
-    return FLAG_VALUES.filter((flag) => (f & flag) === flag).map((flag) =>
-      String(flag)
-    );
-  }, []);
-
-  // Day of week display component
-  const DayOfWeekButton = useCallback(
-    (flag: number) => {
-      const dayIndex = Math.log2(flag);
-      const isSelected = (editItem.flags & flag) === flag;
-      return (
-        <Typography
-          sx={{ fontSize: TYPOGRAPHY_FONT_SIZE }}
-          color={isSelected ? 'primary' : 'grey'}
-        >
-          {dow[dayIndex]}
-        </Typography>
-      );
-    },
-    [editItem.flags, dow]
-  );
-
-  const handleClose = useCallback(
-    (_event: React.SyntheticEvent, reason: 'backdropClick' | 'escapeKeyDown') => {
-      if (reason !== 'backdropClick') {
-        onClose();
-      }
-    },
-    [onClose]
-  );
-
-  const handleScheduleTypeChange = useCallback(
-    (_event: React.SyntheticEvent<HTMLElement>, flag: ScheduleFlag | null) => {
-      if (flag !== null) {
-        setFieldErrors(undefined); // clear any validation errors
-        setScheduleType(flag);
-        // wipe the time field when changing the schedule type
-        // set the flags based on type
-        const newFlags = flag === ScheduleFlag.SCHEDULE_DAY ? FLAG_ALL_DAYS : flag;
-        setEditItem((prev) => ({ ...prev, time: '', flags: newFlags }));
-      }
-    },
-    []
-  );
-
-  const handleDOWChange = useCallback(
-    (_event: React.SyntheticEvent<HTMLElement>, flags: string[]) => {
-      const newFlags =
-        getFlagDOWnumber(flags) === 0 ? FLAG_ALL_DAYS : getFlagDOWnumber(flags);
-      setEditItem((prev) => ({ ...prev, flags: newFlags }));
-    },
-    [getFlagDOWnumber]
-  );
-
-  // Memoize derived values
-  const isDaySchedule = useMemo(
-    () => scheduleType === ScheduleFlag.SCHEDULE_DAY,
-    [scheduleType]
-  );
-  const isTimerSchedule = useMemo(
-    () => scheduleType === ScheduleFlag.SCHEDULE_TIMER,
-    [scheduleType]
-  );
-  const isImmediateSchedule = useMemo(
-    () => scheduleType === ScheduleFlag.SCHEDULE_IMMEDIATE,
-    [scheduleType]
-  );
-  const needsTimeField = useMemo(
-    () => isDaySchedule || isTimerSchedule,
-    [isDaySchedule, isTimerSchedule]
-  );
-
-  const dowFlags = useMemo(
-    () => getFlagDOWstring(editItem.flags),
-    [editItem.flags, getFlagDOWstring]
-  );
-
-  const timeFieldValue = useMemo(() => {
-    if (needsTimeField) {
-      return editItem.time === '' ? DEFAULT_TIME : editItem.time;
+  const handleSave = async (itemToSave: ScheduleItem) => {
+    try {
+      setFieldErrors(undefined);
+      await validate(validator, itemToSave);
+      onSave(itemToSave);
+    } catch (error) {
+      setFieldErrors((error as ValidationError).fieldErrors);
     }
-    return editItem.time === DEFAULT_TIME ? '' : editItem.time;
-  }, [editItem.time, needsTimeField]);
+  };
 
-  const timeFieldLabel = useMemo(() => {
+  const save = async () => {
+    await handleSave(editItem);
+  };
+
+  const remove = () => {
+    onSave({ ...editItem, deleted: true });
+  };
+
+  const DayOfWeekButton = (flag: number) => {
+    const dayIndex = Math.log2(flag);
+    const isSelected = (editItem.flags & flag) === flag;
+    return (
+      <Typography
+        sx={{ fontSize: TYPOGRAPHY_FONT_SIZE }}
+        color={isSelected ? 'primary' : 'grey'}
+      >
+        {dow[dayIndex]}
+      </Typography>
+    );
+  };
+
+  const handleClose = (
+    _event: React.SyntheticEvent,
+    reason: 'backdropClick' | 'escapeKeyDown'
+  ) => {
+    if (reason !== 'backdropClick') {
+      onClose();
+    }
+  };
+
+  const handleScheduleTypeChange = (
+    _event: React.SyntheticEvent<HTMLElement>,
+    flag: ScheduleFlag | null
+  ) => {
+    if (flag !== null) {
+      setFieldErrors(undefined); // clear any validation errors
+      setScheduleType(flag);
+      // wipe the time field when changing the schedule type
+      // set the flags based on type
+      const newFlags = flag === ScheduleFlag.SCHEDULE_DAY ? FLAG_ALL_DAYS : flag;
+      setEditItem((prev) => ({ ...prev, time: '', flags: newFlags }));
+    }
+  };
+
+  const handleDOWChange = (
+    _event: React.SyntheticEvent<HTMLElement>,
+    flags: string[]
+  ) => {
+    const newFlags =
+      getFlagDOWnumber(flags) === 0 ? FLAG_ALL_DAYS : getFlagDOWnumber(flags);
+    setEditItem((prev) => ({ ...prev, flags: newFlags }));
+  };
+
+  const isDaySchedule = scheduleType === ScheduleFlag.SCHEDULE_DAY;
+  const isTimerSchedule = scheduleType === ScheduleFlag.SCHEDULE_TIMER;
+  const needsTimeField = isDaySchedule || isTimerSchedule;
+
+  const dowFlags = getFlagDOWstring(editItem.flags);
+
+  const timeFieldValue = needsTimeField
+    ? editItem.time === ''
+      ? DEFAULT_TIME
+      : editItem.time
+    : editItem.time === DEFAULT_TIME
+      ? ''
+      : editItem.time;
+
+  const timeFieldLabel = (() => {
     if (scheduleType === ScheduleFlag.SCHEDULE_TIMER) return LL.TIMER(1);
     if (scheduleType === ScheduleFlag.SCHEDULE_CONDITION) return LL.CONDITION();
     if (scheduleType === ScheduleFlag.SCHEDULE_ONCHANGE) return LL.ONCHANGE();
-    if (scheduleType === ScheduleFlag.SCHEDULE_IMMEDIATE) return LL.IMMEDIATE();
     return LL.TIME(1);
-  }, [scheduleType, LL]);
+  })();
 
   return (
     <Dialog sx={dialogStyle} open={open} onClose={handleClose}>
@@ -287,14 +246,6 @@ const SchedulerDialog = ({
               {LL.CONDITION()}
             </Typography>
           </ToggleButton>
-          <ToggleButton value={ScheduleFlag.SCHEDULE_IMMEDIATE}>
-            <Typography
-              sx={{ fontSize: TYPOGRAPHY_FONT_SIZE }}
-              color={isImmediateSchedule ? 'primary' : 'grey'}
-            >
-              {LL.IMMEDIATE()}
-            </Typography>
-          </ToggleButton>
         </ToggleButtonGroup>
 
         {isDaySchedule && (
@@ -312,78 +263,74 @@ const SchedulerDialog = ({
           </ToggleButtonGroup>
         )}
 
-        {!isImmediateSchedule && (
-          <>
-            <Grid container>
-              <BlockFormControlLabel
-                control={
-                  <Checkbox
-                    checked={editItem.active}
-                    onChange={updateFormValue}
-                    name="active"
-                  />
-                }
-                label={LL.ACTIVE()}
+        <Grid container>
+          <BlockFormControlLabel
+            control={
+              <Checkbox
+                checked={editItem.active}
+                onChange={updateFormValue}
+                name="active"
               />
-            </Grid>
-            <Grid container>
-              {needsTimeField ? (
-                <>
-                  <TextField
-                    name="time"
-                    type="time"
-                    label={timeFieldLabel}
-                    value={timeFieldValue}
-                    margin="normal"
-                    onChange={updateFormValue}
-                  />
-                  {isTimerSchedule && (
-                    <Typography
-                      sx={{ ml: 2, mt: 4 }}
-                      color="warning"
-                      variant="body2"
-                    >
-                      {LL.SCHEDULER_HELP_2()}
-                    </Typography>
-                  )}
-                </>
-              ) : (
-                <TextField
-                  name="time"
-                  label={timeFieldLabel}
-                  multiline
-                  fullWidth
-                  value={timeFieldValue}
-                  margin="normal"
-                  onChange={updateFormValue}
-                />
+            }
+            label={LL.ACTIVE()}
+          />
+          <CircleIcon
+            color={editItem.active ? 'success' : 'error'}
+            sx={{
+              fontSize: 16,
+              mt: '12px'
+            }}
+          />
+        </Grid>
+
+        <Grid container>
+          {needsTimeField ? (
+            <>
+              <TextField
+                name="time"
+                type="time"
+                label={timeFieldLabel}
+                value={timeFieldValue}
+                margin="normal"
+                onChange={updateFormValue}
+              />
+              {isTimerSchedule && (
+                <Typography sx={{ ml: 2, mt: 4 }} color="warning" variant="body2">
+                  00:00 = {LL.SCHEDULER_HELP_2()}
+                </Typography>
               )}
-            </Grid>
-          </>
-        )}
-        <ValidatedTextField
-          fieldErrors={fieldErrors || {}}
-          name="cmd"
-          label={LL.COMMAND(0)}
-          multiline
-          fullWidth
-          value={editItem.cmd}
-          margin="normal"
-          onChange={updateFormValue}
-        />
+            </>
+          ) : (
+            <TextField
+              name="time"
+              label={timeFieldLabel}
+              multiline
+              fullWidth
+              value={timeFieldValue}
+              margin="normal"
+              onChange={updateFormValue}
+            />
+          )}
+        </Grid>
         <TextField
-          name="value"
-          label={LL.VALUE(0)}
-          multiline
-          margin="normal"
+          name="cmd_name"
+          label={LL.COMMAND(0)}
+          value={editItem.cmd_name}
           fullWidth
-          value={editItem.value}
+          select
+          margin="normal"
           onChange={updateFormValue}
-        />
+        >
+          {commandNames.map((name) => (
+            <MenuItem key={name} value={name}>
+              {name}
+            </MenuItem>
+          ))}
+        </TextField>
         <ValidatedTextField
           fieldErrors={fieldErrors || {}}
           name="name"
-          label={LL.NAME(0) + ' (' + LL.OPTIONAL() + ')'}
+          label={LL.NAME(0)}
           value={editItem.name}
           fullWidth
           margin="normal"
@@ -420,16 +367,6 @@ const SchedulerDialog = ({
         >
           {creating ? LL.ADD(0) : LL.UPDATE()}
         </Button>
-        {isImmediateSchedule && editItem.cmd !== '' && (
-          <Button
-            startIcon={<PlayArrowIcon />}
-            variant="outlined"
-            onClick={saveandactivate}
-            color="success"
-          >
-            {LL.EXECUTE()}
-          </Button>
-        )}
       </DialogActions>
     </Dialog>
   );

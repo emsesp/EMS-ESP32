@@ -54,19 +54,6 @@ class ESP32React {
         return _mqttSettingsService.getMqttClient();
     }
 
-    //
-    // special functions needed outside scope
-    //
-
-    // true if AP is active
-    bool apStatus() {
-        return _apSettingsService.getAPNetworkStatus() == APNetworkStatus::ACTIVE;
-    }
-
-    uint16_t getWifiReconnects() {
-        return _networkSettingsService.getWifiReconnects();
-    }
-
   private:
     AsyncWebServer *        _server;
     SecuritySettingsService _securitySettingsService;

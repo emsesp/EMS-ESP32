@@ -102,6 +102,7 @@ String ArduinoJsonJWT::encode(const char * cstr, int inputLen) {
     while (result.length() > 0 && result.charAt(result.length() - 1) == '=') {
         result.remove(result.length() - 1);
     }
+
     result.replace('+', '-');
     result.replace('/', '_');
 

@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,18 +28,17 @@ class Extension : public EMSdevice {
     Extension(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand);
 
   private:
-    void process_EM100SetMessage(std::shared_ptr<const Telegram> telegram);
-    void process_EM100OutMessage(std::shared_ptr<const Telegram> telegram);
-    void process_EM100MonitorMessage(std::shared_ptr<const Telegram> telegram);
-    void process_EM100TempMessage(std::shared_ptr<const Telegram> telegram);
-    void process_EM100InputMessage(std::shared_ptr<const Telegram> telegram);
-    void process_EM100ConfigMessage(std::shared_ptr<const Telegram> telegram);
+    void process_EM100SetMessage(const std::shared_ptr<const Telegram> & telegram);
+    void process_EM100OutMessage(const std::shared_ptr<const Telegram> & telegram);
+    void process_EM100MonitorMessage(const std::shared_ptr<const Telegram> & telegram);
+    void process_EM100TempMessage(const std::shared_ptr<const Telegram> & telegram);
+    void process_EM100InputMessage(const std::shared_ptr<const Telegram> & telegram);
+    void process_EM100ConfigMessage(const std::shared_ptr<const Telegram> & telegram);
 
     bool set_minV(const char * value, const int8_t id);
     bool set_maxV(const char * value, const int8_t id);
     bool set_minT(const char * value, const int8_t id);
     bool set_maxT(const char * value, const int8_t id);
-
 
     int16_t headerTemp_; // T0
     uint8_t input_;      // IO1

@@ -30,10 +30,7 @@ class SecuritySettingsService : public SecurityManager {
     ~SecuritySettingsService();
 
     // minimal set of functions to support framework with security settings disabled
-    Authentication               authenticateRequest(AsyncWebServerRequest * request);
-    ArRequestFilterFunction      filterRequest(AuthenticationPredicate predicate);
-    ArRequestHandlerFunction     wrapRequest(ArRequestHandlerFunction onRequest, AuthenticationPredicate predicate);
-    ArJsonRequestHandlerFunction wrapCallback(ArJsonRequestHandlerFunction onRequest, AuthenticationPredicate predicate);
+    Authentication authenticateRequest(AsyncWebServerRequest * request);
 };
 
 #endif

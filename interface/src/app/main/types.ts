@@ -1,4 +1,5 @@
 export interface Settings {
+  system_name: string;
   locale: string;
   tx_mode: number;
   ems_bus_id: number;
@@ -43,7 +44,18 @@ export interface Settings {
   modbus_port: number;
   modbus_max_clients: number;
   modbus_timeout: number;
+  email_enabled: boolean;
+  email_security: number;
+  email_server: string;
+  email_port: number;
+  email_login: string;
+  email_pass: string;
+  email_sender: string;
+  email_recp: string;
+  email_subject: string;
   developer_mode: boolean;
+  disable_reset: boolean;
+  auto_fw_check: boolean;
 }
 
 export enum busConnectionStatus {
@@ -160,8 +172,9 @@ export interface DeviceEntity {
   t?: string; // tag for name
   m: DeviceEntityMask; // mask
   w: boolean; // writeable
-  mi?: number; // min value
-  ma?: number; // max value
+  mi?: number | null; // min value; null means cleared and the original returns after restart
+  ma?: number | null; // max value; null means cleared and the original returns after restart
+  c?: boolean; // true when a customization is saved (mask, name, or min/max)
   o_m?: number; // original mask before edits
   o_cn?: string; // original cn before edits
   o_mi?: number; // original min value
@@ -197,6 +210,18 @@ export enum DeviceValueUOM {
   LH,
   CTKWH,
   HERTZ
+}
+
+export type DeviceValueKind =
+  'value' | 'scheduler' | 'command' | 'deviceCommand' | 'deviceEntity';
+
+export function getDeviceValueKind(item: DeviceValue): DeviceValueKind {
+  if (!item.c) return 'value';
+  if (item.v !== undefined && item.l !== undefined && item.u === undefined)
+    return 'scheduler';
+  if (item.v === undefined && item.l === undefined) return 'command';
+  if (item.u === DeviceValueUOM.NONE) return 'deviceCommand';
+  return 'deviceEntity';
 }
 
 export const DeviceValueUOM_s = [
@@ -284,6 +309,7 @@ export const BOARD_PROFILES = {
   LOLIN: 'Lolin D32',
   OLIMEX: 'Olimex ESP32-EVB',
   OLIMEXPOE: 'Olimex ESP32-POE',
+  OLIMEXPOEW: 'Olimex ESP32-POE-ISO WROVER (PSRAM)',
   C3MINI: 'Wemos C3 Mini',
   S2MINI: 'Wemos S2 Mini',
   S3MINI: 'Liligo S3'
@@ -339,26 +365,41 @@ export enum DeviceEntityMask {
 }
 
 export interface ScheduleItem {
-  id: number; // unique index
+  id: number; // unique index for table
   active: boolean;
   deleted?: boolean;
   flags: number;
   time: string; // also used for Condition and On Change
-  cmd: string;
-  value: string;
-  name: string; // can be empty
+  cmd_name: string; // references a named Command
+  name: string;
   o_id?: number;
   o_active?: boolean;
   o_deleted?: boolean;
   o_flags?: number;
   o_time?: string;
-  o_cmd?: string;
-  o_value?: string;
+  o_cmd_name?: string;
   o_name?: string;
 }
 
 export interface Schedule {
   readonly schedule: readonly ScheduleItem[];
+}
+
+export interface CommandItem {
+  id: number;
+  cmd: string;
+  value: string;
+  name: string;
+  deleted?: boolean;
+  o_id?: number;
+  o_cmd?: string;
+  o_value?: string;
+  o_name?: string;
+  o_deleted?: boolean;
+}
+
+export interface Commands {
+  readonly commands: readonly CommandItem[];
 }
 
 export interface ModuleItem {
@@ -391,8 +432,7 @@ export enum ScheduleFlag {
   SCHEDULE_DAY = 0, // no bits set
   SCHEDULE_TIMER = 128, // bit 8
   SCHEDULE_ONCHANGE = 129, // bit 1
-  SCHEDULE_CONDITION = 130, // bit 2
-  SCHEDULE_IMMEDIATE = 132 // bit 3
+  SCHEDULE_CONDITION = 130 // bit 2
 }
 
 export interface EntityItem {
@@ -435,6 +475,7 @@ export const enum DeviceType {
   ANALOGSENSOR = 2,
   SCHEDULER = 3,
   CUSTOM = 4,
+  COMMAND = 5,
   BOILER,
   THERMOSTAT,
   MIXER,

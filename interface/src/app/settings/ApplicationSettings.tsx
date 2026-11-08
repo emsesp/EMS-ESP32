@@ -1,8 +1,8 @@
-import { useCallback, useMemo, useState } from 'react';
-import { toast } from 'react-toastify';
+import { useContext, useEffect, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import SendIcon from '@mui/icons-material/Send';
 import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
@@ -20,7 +20,6 @@ import { readSystemStatus } from 'api/system';
 
 import { useRequest } from 'alova/client';
 import SystemMonitor from 'app/status/SystemMonitor';
-import type { ValidateFieldsError } from 'async-validator';
 import {
   BlockFormControlLabel,
   BlockNavigation,
@@ -28,12 +27,16 @@ import {
   FormLoader,
   MessageBox,
   SectionContent,
+  ValidatedPasswordField,
   ValidatedTextField,
   useLayoutTitle
 } from 'components';
+import { toast } from 'components/toast';
+import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { numberValue, updateValueDirty, useRest } from 'utils';
 import { ValidationError, validate } from 'validators';
+import type { ValidateFieldsError } from 'validators/schema';
 
 import { API, getBoardProfile, readSettings, writeSettings } from '../../api/app';
 import { BOARD_PROFILES } from '../main/types';
@@ -66,6 +69,14 @@ const ApplicationSettings = () => {
     read: readSettings,
     update: writeSettings
   });
+
+  // the menu drawer reads the system name from the authentication context
+  const { setSystemName } = useContext(AuthenticatedContext);
+  useEffect(() => {
+    if (origData?.system_name !== undefined) {
+      setSystemName(origData.system_name);
+    }
+  }, [origData?.system_name, setSystemName]);
 
   const [restarting, setRestarting] = useState<boolean>();
 
@@ -106,82 +117,79 @@ const ApplicationSettings = () => {
     });
   });
 
-  // Memoized input props to prevent recreation on every render
-  const SecondsInputProps = useMemo(
-    () => ({
-      endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
-    }),
-    [LL]
-  );
+  const SecondsInputProps = {
+    endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+  };
 
-  const MinutesInputProps = useMemo(
-    () => ({
-      endAdornment: <InputAdornment position="end">{LL.MINUTES()}</InputAdornment>
-    }),
-    [LL]
-  );
+  const MinutesInputProps = {
+    endAdornment: <InputAdornment position="end">{LL.MINUTES()}</InputAdornment>
+  };
 
-  const HoursInputProps = useMemo(
-    () => ({
-      endAdornment: <InputAdornment position="end">{LL.HOURS()}</InputAdornment>
-    }),
-    [LL]
-  );
+  const HoursInputProps = {
+    endAdornment: <InputAdornment position="end">{LL.HOURS()}</InputAdornment>
+  };
 
-  const doRestart = useCallback(async () => {
+  const doRestart = async () => {
     setRestarting(true);
     await sendAPI({ device: 'system', cmd: 'restart', id: 0 }).catch(
       (error: Error) => {
         toast.error(error.message);
       }
     );
-  }, [sendAPI]);
+  };
 
-  const updateBoardProfile = useCallback(
-    async (board_profile: string) => {
-      await readBoardProfile(board_profile).catch((error: Error) => {
-        toast.error(error.message);
-      });
-    },
-    [readBoardProfile]
-  );
+  const updateBoardProfile = async (board_profile: string) => {
+    await readBoardProfile(board_profile).catch((error: Error) => {
+      toast.error(error.message);
+    });
+  };
 
   useLayoutTitle(LL.APPLICATION());
 
-  const validateAndSubmit = useCallback(async () => {
+  const validateAndSubmit = async () => {
     try {
       setFieldErrors(undefined);
       await validate(createSettingsValidator(data), data);
+      await saveData();
     } catch (error) {
       setFieldErrors((error as ValidationError).fieldErrors);
-    } finally {
-      await saveData();
     }
-  }, [data, saveData]);
+  };
 
-  const changeBoardProfile = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const boardProfile = event.target.value;
-      updateFormValue(event);
-      if (boardProfile === 'CUSTOM') {
-        updateDataValue({
-          ...data,
-          board_profile: boardProfile
-        });
-      } else {
-        void updateBoardProfile(boardProfile);
-      }
-    },
-    [data, updateBoardProfile, updateFormValue, updateDataValue]
-  );
+  const changeBoardProfile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const boardProfile = event.target.value;
+    updateFormValue(event);
+    if (boardProfile === 'CUSTOM') {
+      updateDataValue({
+        ...data,
+        board_profile: boardProfile
+      });
+    } else {
+      void updateBoardProfile(boardProfile);
+    }
+  };
 
-  const restart = useCallback(async () => {
+  const restart = async () => {
     await validateAndSubmit();
     await doRestart();
-  }, [validateAndSubmit, doRestart]);
+  };
 
-  // Memoize board profile select items to prevent recreation
-  const boardProfileItems = useMemo(() => boardProfileSelectItems(), []);
+  const sendmail = async () => {
+    await sendAPI({
+      device: 'system',
+      cmd: 'sendmail',
+      data: '"Email notification test successful!"',
+      id: 0
+    })
+      .then(() => {
+        toast.success(LL.TEST_EMAIL_SUCCESSFUL());
+      })
+      .catch((error: Error) => {
+        toast.error(error.message);
+      });
+  };
+
+  const boardProfileItems = boardProfileSelectItems();
 
   const content = () => {
     if (!data || !hardwareData) {
@@ -190,7 +198,19 @@ const ApplicationSettings = () => {
 
     return (
       <>
-        <Typography sx={{ pb: 1 }} variant="h6" color="primary">
+        <Typography variant="h6" color="primary">
+          {LL.SYSTEM(0)}&nbsp;
+          {LL.CUSTOMIZATIONS()}
+        </Typography>
+        <TextField
+          name="system_name"
+          label={LL.SYSTEM_NAME()}
+          value={data.system_name}
+          variant="outlined"
+          onChange={updateFormValue}
+          margin="normal"
+        />
+        <Typography sx={{ pb: 1, pt: 2 }} variant="h6" color="primary">
           {LL.SERVICES()}
         </Typography>
         <Typography color="secondary">API</Typography>
@@ -351,6 +371,161 @@ const ApplicationSettings = () => {
             </Grid>
           </Grid>
         )}
+        <Typography color="secondary">eMail</Typography>
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.email_enabled}
+              onChange={updateFormValue}
+              name="email_enabled"
+              disabled={!hardwareData.psram}
+            />
+          }
+          label={
+            <Typography color={!hardwareData.psram ? 'grey' : 'default'}>
+              Enable eMail notification
+              {!hardwareData.psram && (
+                <Typography variant="caption">
+                  &nbsp; &#40;{LL.IS_REQUIRED('PSRAM')}&#41;
+                </Typography>
+              )}
+            </Typography>
+          }
+        />
+        {data.email_enabled && (
+          <>
+            <Grid
+              container
+              spacing={2}
+              direction="row"
+              sx={{ justifyContent: 'flex-start', alignItems: 'flex-start' }}
+            >
+              <Grid>
+                <ValidatedTextField
+                  fieldErrors={fieldErrors || {}}
+                  name="email_server"
+                  label="SMTP Server"
+                  variant="outlined"
+                  value={data.email_server}
+                  onChange={updateFormValue}
+                  margin="normal"
+                />
+              </Grid>
+              <Grid>
+                <ValidatedTextField
+                  fieldErrors={fieldErrors || {}}
+                  sx={{ width: '12ch' }}
+                  name="email_port"
+                  variant="outlined"
+                  label="Port"
+                  value={numberValue(data.email_port)}
+                  type="number"
+                  onChange={updateFormValue}
+                  margin="normal"
+                />
+              </Grid>
+              <Grid>
+                <TextField
+                  sx={{ width: '20ch' }}
+                  name="email_security"
+                  label={LL.SECURITY(0)}
+                  value={data.email_security}
+                  variant="outlined"
+                  onChange={updateFormValue}
+                  margin="normal"
+                  select
+                >
+                  <MenuItem value={0}>{LL.OFF()}</MenuItem>
+                  <MenuItem value={1}>SSL</MenuItem>
+                  <MenuItem value={2}>StartTLS</MenuItem>
+                </TextField>
+              </Grid>
+            </Grid>
+            <Grid container spacing={2} rowSpacing={0}>
+              <Grid>
+                <ValidatedTextField
+                  fieldErrors={fieldErrors || {}}
+                  name="email_login"
+                  label="Login"
+                  variant="outlined"
+                  value={data.email_login}
+                  onChange={updateFormValue}
+                  margin="normal"
+                />
+              </Grid>
+              <Grid>
+                <ValidatedPasswordField
+                  fieldErrors={fieldErrors || {}}
+                  name="email_pass"
+                  label="Password"
+                  variant="outlined"
+                  value={data.email_pass}
+                  onChange={updateFormValue}
+                  margin="normal"
+                />
+              </Grid>
+            </Grid>
+            <Grid container spacing={2} rowSpacing={0}>
+              <Grid>
+                <ValidatedTextField
+                  fieldErrors={fieldErrors || {}}
+                  name="email_sender"
+                  label="From"
+                  variant="outlined"
+                  value={data.email_sender}
+                  onChange={updateFormValue}
+                  margin="normal"
+                />
+              </Grid>
+              <Grid>
+                <ValidatedTextField
+                  fieldErrors={fieldErrors || {}}
+                  name="email_recp"
+                  label="To"
+                  variant="outlined"
+                  value={data.email_recp}
+                  onChange={updateFormValue}
+                  margin="normal"
+                />
+              </Grid>
+              <Grid>
+                <ValidatedTextField
+                  fieldErrors={fieldErrors || {}}
+                  name="email_subject"
+                  label="Subject"
+                  variant="outlined"
+                  value={data.email_subject}
+                  onChange={updateFormValue}
+                  margin="normal"
+                />
+              </Grid>
+              <Grid>
+                <Button
+                  startIcon={<SendIcon />}
+                  sx={{ mt: 3 }}
+                  variant="outlined"
+                  color="primary"
+                  disabled={dirtyFlags.length !== 0}
+                  onClick={sendmail}
+                >
+                  Send test email
+                </Button>
+              </Grid>
+            </Grid>
+          </>
+        )}
+        <Typography color="secondary">Firmware</Typography>
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.auto_fw_check}
+              onChange={updateFormValue}
+              name="auto_fw_check"
+            />
+          }
+          label={LL.AUTO_FW_CHECK()}
+        />
+
         <Typography sx={{ pb: 1, pt: 2 }} variant="h6" color="primary">
           {LL.SENSORS()}
         </Typography>
@@ -401,6 +576,7 @@ const ApplicationSettings = () => {
               <MenuItem value="en">English (EN)</MenuItem>
               <MenuItem value="fr">Français (FR)</MenuItem>
               <MenuItem value="it">Italiano (IT)</MenuItem>
+              <MenuItem value="hu">Magyar (HU)</MenuItem>
               <MenuItem value="nl">Nederlands (NL)</MenuItem>
               <MenuItem value="no">Norsk (NO)</MenuItem>
               <MenuItem value="pl">Polski (PL)</MenuItem>
@@ -673,6 +849,7 @@ const ApplicationSettings = () => {
               sx={{ width: '15ch' }}
               select
             >
+              {data.developer_mode && <MenuItem value={0}>{LL.OFF()}</MenuItem>}
               <MenuItem value={1}>EMS</MenuItem>
               <MenuItem value={2}>EMS+</MenuItem>
               <MenuItem value={3}>HT3</MenuItem>
@@ -750,6 +927,16 @@ const ApplicationSettings = () => {
             />
           }
           label={LL.DEVELOPER_MODE()}
+        />
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.disable_reset}
+              onChange={updateFormValue}
+              name="disable_reset"
+            />
+          }
+          label={LL.DISABLE_RESET()}
         />
         <BlockFormControlLabel
           control={

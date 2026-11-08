@@ -1,5 +1,3 @@
-import { useMemo } from 'react';
-
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import DnsIcon from '@mui/icons-material/Dns';
 import SwapVerticalCircleIcon from '@mui/icons-material/SwapVerticalCircle';
@@ -67,12 +65,16 @@ const NTPStatus = () => {
     }
   };
 
-  const content = useMemo(() => {
-    if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={error?.message || ''} />;
-    }
-
+  if (!data) {
     return (
+      <SectionContent>
+        <FormLoader onRetry={loadData} errorMessage={error?.message || ''} />
+      </SectionContent>
+    );
+  }
+
+  return (
+    <SectionContent>
       <List>
         <ListItem>
           <ListItemAvatar>
@@ -121,10 +123,8 @@ const NTPStatus = () => {
         </ListItem>
         <Divider variant="inset" component="li" />
       </List>
-    );
-  }, [data, error, loadData, LL, theme]);
-
-  return <SectionContent>{content}</SectionContent>;
+    </SectionContent>
+  );
 };
 
 export default NTPStatus;

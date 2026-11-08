@@ -13,7 +13,7 @@ using espMqttClientInternals::PacketType;
 using espMqttClientTypes::DisconnectReason;
 using espMqttClientTypes::Error;
 
-MqttClient::MqttClient(espMqttClientTypes::UseInternalTask useInternalTask, uint8_t priority, uint8_t core)
+MqttClient::MqttClient(espMqttClientTypes::UseInternalTask useInternalTask, uint8_t priority, uint8_t core, uint32_t stackSize)
 : _useInternalTask(useInternalTask)
 , _transport(nullptr)
 , _onConnectCallback(nullptr)
@@ -55,6 +55,7 @@ MqttClient::MqttClient(espMqttClientTypes::UseInternalTask useInternalTask, uint
 , _disconnectReason(DisconnectReason::TCP_DISCONNECTED)
 #if defined(ARDUINO_ARCH_ESP32) && ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_INFO
 , _highWaterMark(4294967295)
+, _stackSize(stackSize)
 #endif
   {
   EMC_GENERATE_CLIENTID(_generatedClientId);
@@ -62,14 +63,25 @@ MqttClient::MqttClient(espMqttClientTypes::UseInternalTask useInternalTask, uint
   _xSemaphore = xSemaphoreCreateMutex();
   EMC_SEMAPHORE_GIVE();  // release before first use
   if (_useInternalTask == espMqttClientTypes::UseInternalTask::YES) {
-    xTaskCreatePinnedToCore((TaskFunction_t)_loop, "mqttclient", EMC_TASK_STACK_SIZE, this, priority, &_taskHandle, core);
+#ifdef CONFIG_FREERTOS_UNICORE
+    // no core to pin to on single-core targets (S2, C3, C6)
+    xTaskCreate((TaskFunction_t)_loop, "mqttclient", stackSize, this, priority, &_taskHandle);
+#else
+    if (core > 1) {
+      xTaskCreate((TaskFunction_t)_loop, "mqttclient", stackSize, this, priority, &_taskHandle);
+    } else {
+      xTaskCreatePinnedToCore((TaskFunction_t)_loop, "mqttclient", stackSize, this, priority, &_taskHandle, core);
+    }
+#endif
   }
 #else
   (void) useInternalTask;
   (void) priority;
   (void) core;
+  (void) stackSize;
 #endif
   _clientId = _generatedClientId;
+  _core = core;
 }
 
 MqttClient::~MqttClient() {
@@ -310,7 +322,7 @@ void MqttClient::loop() {
   size_t waterMark = uxTaskGetStackHighWaterMark(NULL);
   if (waterMark < _highWaterMark) {
     _highWaterMark = waterMark;
-    emc_log_i("Stack usage: %zu/%i", EMC_TASK_STACK_SIZE - _highWaterMark, EMC_TASK_STACK_SIZE);
+    emc_log_i("Stack usage: %zu/%zu", _stackSize - _highWaterMark, _stackSize);
   }
   #endif
 }

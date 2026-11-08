@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,11 @@ class WebLogService : public uuid::log::Handler {
     virtual void operator<<(std::shared_ptr<uuid::log::Message> message);
 
   private:
+    // on boards without PSRAM, shrink the log buffer below LOW and grow it again above HIGH (max alloc heap, in bytes).
+    // The gap between them stops the limit flapping around a single threshold
+    static constexpr uint32_t LOG_HEAP_LOW  = 50 * 1024; // 50 KB
+    static constexpr uint32_t LOG_HEAP_HIGH = 60 * 1024; // 60 KB
+
     AsyncEventSource events_;
 
     class QueuedLogMessage {
@@ -71,6 +76,9 @@ class WebLogService : public uuid::log::Handler {
     unsigned long    log_message_id_tail_  = 0;                                   // last event shown on the screen after fetch
     bool             compact_              = true;
     uuid::log::Level level_                = uuid::log::Level::INFO;
+
+    // PSRAM-backed scratch buffer reused across every SSE log event
+    stringPSRAM scratch_buf_;
 };
 
 } // namespace emsesp

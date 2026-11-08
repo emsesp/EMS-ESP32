@@ -30,7 +30,7 @@ String toLocalTimeString(tm * time) {
 }
 
 void NTPStatus::ntpStatus(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false);
+    auto *     response = new emsesp::PsramAsyncJsonResponse(false);
     JsonObject root     = response->getRoot();
 
     // grab the current instant in unix seconds
@@ -45,6 +45,7 @@ void NTPStatus::ntpStatus(AsyncWebServerRequest * request) {
                 return 1;
             }
         }
+
         return 0;
     }();
 

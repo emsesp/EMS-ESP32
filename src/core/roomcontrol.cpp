@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,15 +31,17 @@ uint8_t  Roomctrl::type_[HCS]         = {RemoteType::NONE, RemoteType::NONE, Rem
 uint32_t Roomctrl::timeout_           = 0;
 
 /**
- * set the temperature,
- */
+  * set the temperature,
+  */
 void Roomctrl::set_timeout(uint8_t t) {
     timeout_ = t * 3600000; // ms
 }
+
 void Roomctrl::set_remotetemp(const uint8_t type, const uint8_t hc, const int16_t temp) {
     if (!type_[hc] && !type) {
         return;
     }
+
     if (remotetemp_[hc] != EMS_VALUE_INT16_NOTSET && temp == EMS_VALUE_INT16_NOTSET) { // switch remote off
         remotetemp_[hc] = EMS_VALUE_INT16_NOTSET;
         switch_off_[hc] = true;
@@ -47,13 +49,16 @@ void Roomctrl::set_remotetemp(const uint8_t type, const uint8_t hc, const int16_
         sendtype_[hc]   = SendType::TEMP;
         return;
     }
+
     if (hc >= HCS || !type) {
         return;
     }
+
     if (remotetemp_[hc] != temp) {
         send_time_[hc] = uuid::get_uptime() - SEND_INTERVAL; // send now
         sendtype_[hc]  = SendType::TEMP;
     }
+
     type_[hc]         = type;
     remotetemp_[hc]   = temp;
     receive_time_[hc] = uuid::get_uptime();
@@ -64,10 +69,12 @@ void Roomctrl::set_remotehum(const uint8_t type, const uint8_t hc, const int8_t 
     if (hc >= HCS || type != type_[hc]) {
         return;
     }
+
     if (remotehum_[hc] != hum) {
         send_time_[hc] = uuid::get_uptime() - SEND_INTERVAL; // send now
         sendtype_[hc]  = SendType::HUMI;
     }
+
     remotehum_[hc] = hum;
 }
 
@@ -82,21 +89,24 @@ uint8_t Roomctrl::get_hc(uint8_t addr) {
     } else if (addr >= 0x18 && addr <= 0x1B && (type_[addr - 0x18] == RC20 || type_[addr - 0x18] == FB10)) {
         return addr - 0x18; // RC20, FB10
     }
+
     return 0xFF; // invalid
 }
 
 /**
- * if remote control is active send the temperature every 15 seconds
- */
+  * if remote control is active send the temperature every 15 seconds
+  */
 void Roomctrl::send(uint8_t addr) {
     if ((addr & 0x80) || EMSESP::system_.readonly_mode()) {
         return;
     }
+
     uint8_t hc = get_hc(addr);
     // check address, reply only on addresses 0x18..0x1B or 0x40..0x43
     if (hc >= HCS) {
         return;
     }
+
     // no reply if the temperature is not set
     if (!switch_off_[hc] && remotetemp_[hc] == EMS_VALUE_INT16_NOTSET && remotehum_[hc] == EMS_VALUE_UINT8_NOTSET) {
         return;
@@ -108,12 +118,14 @@ void Roomctrl::send(uint8_t addr) {
         sendtype_[hc]   = SendType::TEMP;
         EMSESP::logger().warning("remotetemp timeout hc%d, stop sending roomtemperature to thermostat", hc);
     }
+
     if (switch_off_[hc] || (uuid::get_uptime() - send_time_[hc]) > SEND_INTERVAL) { // check interval
         if (type_[hc] == RC100H || type_[hc] == RT800 || type_[hc] == RC120RF) {
             if (sendtype_[hc] == SendType::HUMI) { // send humidity
                 if (switch_off_[hc]) {
                     remotehum_[hc] = EMS_VALUE_UINT8_NOTSET;
                 }
+
                 send_time_[hc] = uuid::get_uptime();
                 humidity(addr, 0x10, hc);
                 sendtype_[hc] = SendType::TEMP;
@@ -123,6 +135,7 @@ void Roomctrl::send(uint8_t addr) {
                 } else {
                     send_time_[hc] = uuid::get_uptime();
                 }
+
                 temperature(addr, 0x10, hc); // send to master-thermostat
             }
         } else if (type_[hc] == RC200 || type_[hc] == RC100 || type_[hc] == FB10) {
@@ -132,6 +145,7 @@ void Roomctrl::send(uint8_t addr) {
             send_time_[hc] = uuid::get_uptime();
             temperature(addr, 0x00, hc); // send to all
         }
+
         if (remotehum_[hc] == EMS_VALUE_UINT8_NOTSET && switch_off_[hc]) {
             switch_off_[hc] = false;
             type_[hc]       = RemoteType::NONE;
@@ -143,28 +157,33 @@ void Roomctrl::send(uint8_t addr) {
 }
 
 /**
- * check if there is a message for the remote room controller
- */
+  * check if there is a message for the remote room controller
+  */
 void Roomctrl::check(uint8_t addr, const uint8_t * data, const uint8_t length) {
     if (EMSESP::system_.readonly_mode()) {
         return;
     }
+
     uint8_t hc = get_hc(addr);
     if (hc >= HCS || length < 5) {
         return;
     }
+
     if (type_[hc] == SENSOR) {
         return;
     }
+
     // no reply if the temperature is not set
     if (remotetemp_[hc] == EMS_VALUE_INT16_NOTSET) {
         return;
     }
+
     // reply to writes with write nack byte
     if ((addr & 0x80) == 0) { // it's a write to us
         ack_write();          // accept writes, don't care.
         return;
     }
+
     addr &= 0x7F;
     // reads: for now we only reply to version and remote temperature
     // empty message back if temperature not set or unknown message type
@@ -190,8 +209,8 @@ void Roomctrl::check(uint8_t addr, const uint8_t * data, const uint8_t length) {
 }
 
 /**
- * send version info
- */
+  * send version info
+  */
 void Roomctrl::version(uint8_t addr, uint8_t dst, uint8_t hc) {
     uint8_t data[20];
     data[0] = addr | EMSbus::ems_mask();
@@ -265,8 +284,8 @@ void Roomctrl::version(uint8_t addr, uint8_t dst, uint8_t hc) {
 }
 
 /**
- * unknown message id, we reply with empty message
- */
+  * unknown message id, we reply with empty message
+  */
 void Roomctrl::unknown(uint8_t addr, uint8_t dst, uint8_t type, uint8_t offset) {
     uint8_t data[10];
     data[0] = addr | EMSbus::ems_mask();
@@ -290,8 +309,8 @@ void Roomctrl::unknown(uint8_t addr, uint8_t dst, uint8_t offset, uint8_t typeh,
 }
 
 /**
- * send the room temperature in message 0xAF
- */
+  * send the room temperature in message 0xAF
+  */
 void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
     uint8_t data[14];
     data[0] = addr | EMSbus::ems_mask();
@@ -299,8 +318,8 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
     if (type_[hc] == RC20) { // RC20, telegram 0xAF
         data[2] = 0xAF;
         data[3] = 0;
-        data[4] = (uint8_t)(remotetemp_[hc] >> 8);
-        data[5] = (uint8_t)(remotetemp_[hc] & 0xFF);
+        data[4] = static_cast<uint8_t>(remotetemp_[hc] >> 8);
+        data[5] = static_cast<uint8_t>(remotetemp_[hc] & 0xFF);
         data[6] = 0;
         data[7] = EMSbus::calculate_crc(data, 7); // append CRC
         EMSuart::transmit(data, 8);
@@ -309,8 +328,8 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[3] = 0;
         data[4] = 0;
         data[5] = 0x23; //  fixed for all hc
-        data[6] = (uint8_t)(remotetemp_[hc] >> 8);
-        data[7] = (uint8_t)(remotetemp_[hc] & 0xFF);
+        data[6] = static_cast<uint8_t>(remotetemp_[hc] >> 8);
+        data[7] = static_cast<uint8_t>(remotetemp_[hc] & 0xFF);
         data[8] = EMSbus::calculate_crc(data, 8); // append CRC
         EMSuart::transmit(data, 9);
     } else if (type_[hc] == RC200) { // RC200, telegram 42B, ff
@@ -318,11 +337,11 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[3]     = 0;
         data[4]     = 3;
         data[5]     = 0x2B + hc;
-        data[6]     = (uint8_t)(remotetemp_[hc] >> 8);
-        data[7]     = (uint8_t)(remotetemp_[hc] & 0xFF);
+        data[6]     = static_cast<uint8_t>(remotetemp_[hc] >> 8);
+        data[7]     = static_cast<uint8_t>(remotetemp_[hc] & 0xFF);
         uint16_t t1 = remotetemp_[hc] * 10;
-        data[8]     = (uint8_t)(t1 >> 8);
-        data[9]     = (uint8_t)(t1 & 0xFF);
+        data[8]     = static_cast<uint8_t>(t1 >> 8);
+        data[9]     = static_cast<uint8_t>(t1 & 0xFF);
         data[10]    = 1;                               // not sure what this is and if we need it, maybe mode?
         data[11]    = EMSbus::calculate_crc(data, 11); // append CRC
         EMSuart::transmit(data, 12);
@@ -331,8 +350,8 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[3] = 0;
         data[4] = 3;
         data[5] = 0x2B + hc;
-        data[6] = (uint8_t)(remotetemp_[hc] >> 8);
-        data[7] = (uint8_t)(remotetemp_[hc] & 0xFF);
+        data[6] = static_cast<uint8_t>(remotetemp_[hc] >> 8);
+        data[7] = static_cast<uint8_t>(remotetemp_[hc] & 0xFF);
         data[8] = EMSbus::calculate_crc(data, 8); // append CRC
         EMSuart::transmit(data, 9);
     } else if (type_[hc] == SENSOR) { // wireless sensor, broadcast id 435
@@ -340,8 +359,8 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[3] = 0;
         data[4] = 3;
         data[5] = 0x35 + hc;
-        data[6] = (uint8_t)(remotetemp_[hc] >> 8);
-        data[7] = (uint8_t)(remotetemp_[hc] & 0xFF);
+        data[6] = static_cast<uint8_t>(remotetemp_[hc] >> 8);
+        data[7] = static_cast<uint8_t>(remotetemp_[hc] & 0xFF);
         data[8] = EMSbus::calculate_crc(data, 8); // append CRC
         EMSuart::transmit(data, 9);
     } else if (type_[hc] == RT800) { // RC200, telegram 42B, ff
@@ -349,11 +368,11 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[3]     = 0;
         data[4]     = 3;
         data[5]     = 0x2B + hc;
-        data[6]     = (uint8_t)(remotetemp_[hc] >> 8);
-        data[7]     = (uint8_t)(remotetemp_[hc] & 0xFF);
+        data[6]     = static_cast<uint8_t>(remotetemp_[hc] >> 8);
+        data[7]     = static_cast<uint8_t>(remotetemp_[hc] & 0xFF);
         uint16_t t1 = remotetemp_[hc] * 10;
-        data[8]     = (uint8_t)(t1 >> 8);
-        data[9]     = (uint8_t)(t1 & 0xFF);
+        data[8]     = static_cast<uint8_t>(t1 >> 8);
+        data[9]     = static_cast<uint8_t>(t1 & 0xFF);
         data[10]    = 1;                               // not sure what this is and if we need it, maybe mode?
         data[11]    = 9;                               // not sure what this is and if we need it, maybe mode?
         data[12]    = EMSbus::calculate_crc(data, 12); // append CRC
@@ -363,11 +382,11 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[3]     = 0;
         data[4]     = 3;
         data[5]     = 0x2B + hc;
-        data[6]     = (uint8_t)(remotetemp_[hc] >> 8);
-        data[7]     = (uint8_t)(remotetemp_[hc] & 0xFF);
+        data[6]     = static_cast<uint8_t>(remotetemp_[hc] >> 8);
+        data[7]     = static_cast<uint8_t>(remotetemp_[hc] & 0xFF);
         uint16_t t1 = remotetemp_[hc] * 10;
-        data[8]     = (uint8_t)(t1 >> 8);
-        data[9]     = (uint8_t)(t1 & 0xFF);
+        data[8]     = static_cast<uint8_t>(t1 >> 8);
+        data[9]     = static_cast<uint8_t>(t1 & 0xFF);
         data[10]    = 0;                               // not sure what this is and if we need it
         data[11]    = 0;                               // not sure what this is and if we need it
         data[12]    = EMSbus::calculate_crc(data, 12); // append CRC
@@ -382,6 +401,7 @@ void Roomctrl::humidity(uint8_t addr, uint8_t dst, uint8_t hc) {
     if (dew != EMS_VALUE_INT16_NOTSET) {
         dew8 = static_cast<int8_t>((dew >= 0 ? dew + 5 : dew - 5) / 10);
     }
+
     uint8_t data[11];
     data[0]  = addr | EMSbus::ems_mask();
     data[1]  = dst & 0x7F;
@@ -398,8 +418,8 @@ void Roomctrl::humidity(uint8_t addr, uint8_t dst, uint8_t hc) {
 }
 
 /**
- * send a nack if someone want to write to us.
- */
+  * send a nack if someone want to write to us.
+  */
 void Roomctrl::nack_write() {
     uint8_t data[1];
     data[0] = TxService::TX_WRITE_FAIL;
@@ -407,8 +427,8 @@ void Roomctrl::nack_write() {
 }
 
 /**
- * send a ack if someone want to write to us.
- */
+  * send a ack if someone want to write to us.
+  */
 void Roomctrl::ack_write() {
     uint8_t data[1];
     data[0] = TxService::TX_WRITE_SUCCESS;
@@ -436,6 +456,7 @@ void Roomctrl::replyF7(uint8_t addr, uint8_t dst, uint8_t offset, uint8_t typehh
         data[7] = 0;
         data[8] = 0;
     }
+
     data[9] = EMSbus::calculate_crc(data, 9); // append CRC
     EMSuart::transmit(data, 10);
 }

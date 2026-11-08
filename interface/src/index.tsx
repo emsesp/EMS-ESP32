@@ -1,6 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
+  Navigate,
+  Outlet,
   Route,
   RouterProvider,
   createBrowserRouter,
@@ -9,6 +11,45 @@ import {
 } from 'react-router';
 
 import App from 'App';
+import SignIn from 'SignIn';
+import Commands from 'app/main/Commands';
+import CustomEntities from 'app/main/CustomEntities';
+import Customizations from 'app/main/Customizations';
+import Dashboard from 'app/main/Dashboard';
+import Devices from 'app/main/Devices';
+import Help from 'app/main/Help';
+import Modules from 'app/main/Modules';
+import Scheduler from 'app/main/Scheduler';
+import Sensors from 'app/main/Sensors';
+import UserProfile from 'app/main/UserProfile';
+import APSettings from 'app/settings/APSettings';
+import ApplicationSettings from 'app/settings/ApplicationSettings';
+import DownloadUpload from 'app/settings/DownloadUpload';
+import MqttSettings from 'app/settings/MqttSettings';
+import NTPSettings from 'app/settings/NTPSettings';
+import Settings from 'app/settings/Settings';
+import Version from 'app/settings/Version';
+import Network from 'app/settings/network/Network';
+import NetworkSettings from 'app/settings/network/NetworkSettings';
+import WiFiNetworkScanner from 'app/settings/network/WiFiNetworkScanner';
+import ManageUsers from 'app/settings/security/ManageUsers';
+import Security from 'app/settings/security/Security';
+import SecuritySettings from 'app/settings/security/SecuritySettings';
+import APStatus from 'app/status/APStatus';
+import Activity from 'app/status/Activity';
+import HardwareStatus from 'app/status/HardwareStatus';
+import MqttStatus from 'app/status/MqttStatus';
+import NTPStatus from 'app/status/NTPStatus';
+import NetworkStatus from 'app/status/NetworkStatus';
+import Status from 'app/status/Status';
+import SystemLog from 'app/status/SystemLog';
+import {
+  Layout,
+  RequireAdmin,
+  RequireAuthenticated,
+  RequireUnauthenticated,
+  RootRedirect
+} from 'components';
 
 const errorPageStyles = {
   container: {
@@ -105,7 +146,87 @@ function ErrorPage() {
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path="/*" element={<App />} errorElement={<ErrorPage />} />
+    <Route path="/" element={<App />} errorElement={<ErrorPage />}>
+      <Route
+        index
+        element={
+          <RequireUnauthenticated>
+            <SignIn />
+          </RequireUnauthenticated>
+        }
+      />
+      <Route path="unauthorized" element={<RootRedirect kind="unauthorized" />} />
+      <Route path="fileUpdated" element={<RootRedirect kind="fileUpdated" />} />
+
+      <Route
+        element={
+          <RequireAuthenticated>
+            <Layout>
+              <Outlet />
+            </Layout>
+          </RequireAuthenticated>
+        }
+      >
+        <Route path="dashboard/*" element={<Dashboard />} />
+        <Route path="devices/*" element={<Devices />} />
+        <Route path="sensors/*" element={<Sensors />} />
+        <Route path="help/*" element={<Help />} />
+        <Route path="user/*" element={<UserProfile />} />
+
+        <Route path="status/*" element={<Status />} />
+        <Route path="status/hardwarestatus/*" element={<HardwareStatus />} />
+        <Route path="status/activity" element={<Activity />} />
+        <Route path="status/log" element={<SystemLog />} />
+        <Route path="status/mqtt" element={<MqttStatus />} />
+        <Route path="status/ntp" element={<NTPStatus />} />
+        <Route path="status/ap" element={<APStatus />} />
+        <Route path="status/network" element={<NetworkStatus />} />
+
+        <Route element={<RequireAdmin />}>
+          <Route path="settings" element={<Settings />} />
+          <Route path="settings/version" element={<Version />} />
+          <Route path="settings/application" element={<ApplicationSettings />} />
+          <Route path="settings/mqtt" element={<MqttSettings />} />
+          <Route path="settings/ntp" element={<NTPSettings />} />
+          <Route path="settings/ap" element={<APSettings />} />
+          <Route path="settings/modules" element={<Modules />} />
+          <Route path="settings/downloadUpload" element={<DownloadUpload />} />
+
+          <Route path="settings/network" element={<Network />}>
+            <Route
+              index
+              element={<Navigate replace to="/settings/network/settings" />}
+            />
+            <Route path="settings" element={<NetworkSettings />} />
+            <Route path="scan" element={<WiFiNetworkScanner />} />
+            <Route
+              path="*"
+              element={<Navigate replace to="/settings/network/settings" />}
+            />
+          </Route>
+
+          <Route path="settings/security" element={<Security />}>
+            <Route
+              index
+              element={<Navigate replace to="/settings/security/settings" />}
+            />
+            <Route path="settings" element={<SecuritySettings />} />
+            <Route path="users" element={<ManageUsers />} />
+            <Route
+              path="*"
+              element={<Navigate replace to="/settings/security/settings" />}
+            />
+          </Route>
+
+          <Route path="customizations" element={<Customizations />} />
+          <Route path="commands" element={<Commands />} />
+          <Route path="scheduler" element={<Scheduler />} />
+          <Route path="customentities" element={<CustomEntities />} />
+        </Route>
+
+        <Route path="*" element={<Navigate replace to="/" />} />
+      </Route>
+    </Route>
   )
 );
 

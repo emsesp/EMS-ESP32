@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 #include "helpers.h"
 #include "system.h"
-#include "console.h"
+#include "emsesp_console.h"
 #include "command.h"
 #include "emsdevicevalue.h"
 #include <esp32-psram.h>
@@ -61,8 +61,10 @@ class Mqtt {
     enum Operation : uint8_t { PUBLISH, SUBSCRIBE, UNSUBSCRIBE };
     enum NestedFormat : uint8_t { NESTED = 1, SINGLE };
 
-    static constexpr uint8_t  MQTT_TOPIC_MAX_SIZE = 128; // fixed, not a user setting anymore
-    static constexpr uint16_t MQTT_QUEUE_MAX_SIZE = 300;
+    static constexpr uint8_t  MQTT_TOPIC_MAX_SIZE     = 128; // fixed, not a user setting anymore
+    static constexpr uint16_t MQTT_QUEUE_MAX_SIZE     = 300;
+    static constexpr uint32_t MQTT_DISCONNECT_TIMEOUT = 1000;      // max ms to flush a graceful disconnect on non-PSRAM boards
+    static constexpr uint32_t MQTT_MIN_FREE_HEAP      = 60 * 1024; // don't queue any MQTT message below this much free heap+PSRAM (in bytes) - 60 KB
 
     static void on_connect();
     static void on_disconnect(espMqttClientTypes::DisconnectReason reason);
@@ -132,15 +134,7 @@ class Mqtt {
         return mqttClient_ ? mqttClient_->connected() : false;
     }
 
-    static void disconnect() {
-        if (mqttClient_) {
-            mqttClient_->disconnect();
-        };
-    }
-
-    static MqttClient * client() {
-        return mqttClient_;
-    }
+    static void disconnect();
 
     static bool enabled() {
         return mqtt_enabled_;
@@ -150,11 +144,11 @@ class Mqtt {
         mqtt_enabled_ = mqtt_enabled;
     }
 
-    static std::string base() {
+    static const std::string & base() {
         return mqtt_base_;
     }
 
-    static std::string basename() {
+    static const std::string & basename() {
         return mqtt_basename_;
     }
 
@@ -170,6 +164,7 @@ class Mqtt {
         if (discovery_prefix_.empty()) {
             return std::string{};
         }
+
         return discovery_prefix_ + "/";
     }
 
@@ -231,15 +226,7 @@ class Mqtt {
         ha_enabled_ = ha_enabled;
     }
 
-    static bool ha_climate_reset() {
-        return ha_climate_reset_;
-    }
-
-    static void ha_climate_reset(bool reset) {
-        ha_climate_reset_ = reset;
-    }
-
-    static std::string get_response() {
+    static const std::string & get_response() {
         return lastresponse_;
     }
 
@@ -265,11 +252,7 @@ class Mqtt {
                                    const char * model        = nullptr,
                                    const char * brand        = nullptr,
                                    const char * version      = nullptr);
-    static void add_ha_avty_section(JsonObject   doc,
-                                    const char * state_t = nullptr,
-                                    const char * cond1   = nullptr,
-                                    const char * cond2   = nullptr,
-                                    const char * negcond = nullptr);
+    static void add_ha_avty_section(JsonObject doc);
     static void add_ha_bool(JsonObject doc);
     static void add_value_bool(JsonObject doc, const char * name, bool value);
 
@@ -312,12 +295,11 @@ class Mqtt {
     uint32_t last_publish_heartbeat_  = 0;
     // uint32_t last_publish_queue_      = 0;
 
-    static bool     connecting_;
+    static bool     connected_;
     static bool     initialized_;
     static uint32_t mqtt_publish_fails_;
     static uint16_t queuecount_;
     static uint8_t  connectcount_;
-    static bool     ha_climate_reset_;
 
     static std::string lastresponse_;
 

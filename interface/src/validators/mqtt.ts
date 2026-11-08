@@ -1,5 +1,5 @@
-import Schema from 'async-validator';
 import type { MqttSettingsType } from 'types';
+import Schema from 'validators/schema';
 
 import { IP_OR_HOSTNAME_VALIDATOR } from './shared';
 

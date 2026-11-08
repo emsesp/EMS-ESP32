@@ -7,9 +7,8 @@ MqttSettingsService::MqttSettingsService(AsyncWebServer * server, FS * fs, Secur
     , _fsPersistence(MqttSettings::read, MqttSettings::update, this, fs, MQTT_SETTINGS_FILE)
     , _reconfigureMqtt(false)
     , _disconnectedAt(0)
-    , _disconnectReason(espMqttClientTypes::DisconnectReason::TCP_DISCONNECTED)
+    , _disconnectReason(espMqttClientTypes::DisconnectReason::USER_OK)
     , _mqttClient(nullptr) {
-    WiFi.onEvent([this](WiFiEvent_t event, WiFiEventInfo_t info) { WiFiEvent(event); });
     addUpdateHandler([this] { onConfigUpdated(); }, false);
 }
 
@@ -29,30 +28,39 @@ MqttSettingsService::~MqttSettingsService() {
 void MqttSettingsService::begin() {
     _fsPersistence.readFromFS();
     startClient();
+    _reconfigureMqtt = true;
 }
 
 void MqttSettingsService::startClient() {
-    static bool isSecure = false;
+    static bool     isSecure  = false;
+    static uint32_t stackSize = EMC_TASK_STACK_SIZE;
+    // only verifying a CA chain needs the larger stack, insecure TLS and plain MQTT fit in the default
+    const uint32_t wantStack = (_state.enableTLS && _state.rootCA != "insecure") ? EMSESP_MQTT_STACKSIZE_CA : EMC_TASK_STACK_SIZE;
     if (_mqttClient) {
         // do we need to change the client?
-        if ((isSecure && _state.enableTLS) || (!isSecure && !_state.enableTLS)) {
+        if (isSecure == _state.enableTLS && stackSize == wantStack) {
             return;
         }
+
         delete _mqttClient;
         _mqttClient = nullptr;
     }
-#ifndef TASMOTA_SDK
+
+    stackSize = wantStack;
+
     if (_state.enableTLS) {
         isSecure = true;
         if (emsesp::EMSESP::system_.PSram() == 0) {
             _mqttClient = new espMqttClientSecure(espMqttClientTypes::UseInternalTask::NO);
         } else {
-            _mqttClient = new espMqttClientSecure(EMSESP_MQTT_PRIORITY, EMSESP_MQTT_RUNNING_CORE);
+            _mqttClient = new espMqttClientSecure(EMSESP_MQTT_PRIORITY, EMSESP_MQTT_RUNNING_CORE, wantStack);
         }
+
         if (!_mqttClient) {
             emsesp::EMSESP::logger().warning("MQTT Client alloc failed");
             return;
         }
+
         static_cast<espMqttClientSecure *>(_mqttClient)->onConnect([this](bool sessionPresent) { onMqttConnect(sessionPresent); });
         static_cast<espMqttClientSecure *>(_mqttClient)->onDisconnect([this](espMqttClientTypes::DisconnectReason reason) { onMqttDisconnect(reason); });
         static_cast<espMqttClientSecure *>(_mqttClient)
@@ -62,13 +70,14 @@ void MqttSettingsService::startClient() {
                 });
         return;
     }
-#endif
+
     isSecure = false;
     if (emsesp::EMSESP::system_.PSram() == 0) {
         _mqttClient = new espMqttClient(espMqttClientTypes::UseInternalTask::NO);
     } else {
         _mqttClient = new espMqttClient(EMSESP_MQTT_PRIORITY, EMSESP_MQTT_RUNNING_CORE);
     }
+
     static_cast<espMqttClient *>(_mqttClient)->onConnect([this](bool sessionPresent) { onMqttConnect(sessionPresent); });
     static_cast<espMqttClient *>(_mqttClient)->onDisconnect([this](espMqttClientTypes::DisconnectReason reason) { onMqttDisconnect(reason); });
     static_cast<espMqttClient *>(_mqttClient)
@@ -79,11 +88,21 @@ void MqttSettingsService::startClient() {
 }
 
 void MqttSettingsService::loop() {
+    if (_state.enabled && _mqttClient && _mqttClient->connected() && !emsesp::EMSESP::network_.network_connected()) {
+        // emsesp::EMSESP::logger().info("Network connection dropped, stopping MQTT client");
+        _mqttClient->disconnect(true);
+    }
+
     if (_reconfigureMqtt || (_disconnectedAt && static_cast<uint32_t>(uuid::get_uptime() - _disconnectedAt) >= MQTT_RECONNECTION_DELAY)) {
-        // reconfigure MQTT client
+        // configure MQTT client
+        if (_reconfigureMqtt && _state.enabled) {
+            emsesp::EMSESP::logger().info("Starting MQTT service");
+        }
+
         _disconnectedAt  = configureMqtt() ? 0 : uuid::get_uptime();
         _reconfigureMqtt = false;
     }
+
     if (emsesp::EMSESP::system_.PSram() == 0) {
         _mqttClient->loop();
     }
@@ -124,14 +143,18 @@ MqttClient * MqttSettingsService::getMqttClient() {
 void MqttSettingsService::onMqttConnect(bool sessionPresent) {
     (void)sessionPresent;
     emsesp::EMSESP::mqtt_.on_connect();
+    _disconnectReason = espMqttClientTypes::DisconnectReason::USER_OK;
 }
 
 void MqttSettingsService::onMqttDisconnect(espMqttClientTypes::DisconnectReason reason) {
-    _disconnectReason = reason;
+    if (reason != _disconnectReason) {
+        emsesp::EMSESP::mqtt_.on_disconnect(reason);
+        _disconnectReason = reason;
+    }
+
     if (!_disconnectedAt) {
         _disconnectedAt = uuid::get_uptime();
     }
-    emsesp::EMSESP::mqtt_.on_disconnect(reason);
 }
 
 void MqttSettingsService::onConfigUpdated() {
@@ -142,37 +165,20 @@ void MqttSettingsService::onConfigUpdated() {
     emsesp::EMSESP::mqtt_.start(); // reload EMS-ESP MQTT settings
 }
 
-void MqttSettingsService::WiFiEvent(WiFiEvent_t event) {
-    switch (event) {
-    case ARDUINO_EVENT_WIFI_STA_GOT_IP:
-    case ARDUINO_EVENT_ETH_GOT_IP:
-    case ARDUINO_EVENT_ETH_GOT_IP6:
-    case ARDUINO_EVENT_WIFI_STA_GOT_IP6:
-        if (_state.enabled && !_mqttClient->connected()) {
-            onConfigUpdated();
-        }
-        break;
-    case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
-    case ARDUINO_EVENT_ETH_DISCONNECTED:
-        if (_state.enabled) {
-            _mqttClient->disconnect(true);
-        }
-        break;
-
-    default:
-        break;
-    }
-}
-
 bool MqttSettingsService::configureMqtt() {
     // disconnect if already connected
     if (_mqttClient->connected()) {
-        // emsesp::EMSESP::logger().info("Disconnecting to configure");
+#if defined(EMSESP_DEBUG)
+        emsesp::EMSESP::logger().debug("Disconnecting to configure");
+#endif
         _mqttClient->disconnect(true);
+        if (!_state.enabled) {
+            emsesp::EMSESP::logger().info("Stopping MQTT client");
+        }
     }
 
     // only connect if WiFi is connected and MQTT is enabled
-    if (_state.enabled && emsesp::EMSESP::system_.network_connected() && !_state.host.isEmpty()) {
+    if (_state.enabled && emsesp::EMSESP::network_.network_connected() && !_state.host.isEmpty()) {
         // create the Last Will Testament topic (LWT) with the base prefixed. It has to be static because the client destroys the reference
         static char will_topic[FACTORY_MQTT_MAX_TOPIC_LENGTH];
         if (_state.base.isEmpty()) {
@@ -182,7 +188,6 @@ bool MqttSettingsService::configureMqtt() {
         }
 
         _reconfigureMqtt = false;
-#ifndef TASMOTA_SDK
         if (_state.enableTLS) {
             if (_state.rootCA == "insecure") {
 #if defined(EMSESP_DEBUG)
@@ -196,37 +201,38 @@ bool MqttSettingsService::configureMqtt() {
                 String certificate = "-----BEGIN CERTIFICATE-----\n" + _state.rootCA + "\n-----END CERTIFICATE-----\n";
                 static_cast<espMqttClientSecure *>(_mqttClient)->setCACert(certificate.c_str());
             }
+
             static_cast<espMqttClientSecure *>(_mqttClient)->setServer(_state.host.c_str(), _state.port);
             if (_state.username.length() > 0) {
                 static_cast<espMqttClientSecure *>(_mqttClient)
                     ->setCredentials(_state.username.c_str(), _state.password.length() > 0 ? _state.password.c_str() : nullptr);
             }
+
             static_cast<espMqttClientSecure *>(_mqttClient)->setClientId(_state.clientId.c_str());
             static_cast<espMqttClientSecure *>(_mqttClient)->setKeepAlive(_state.keepAlive);
             static_cast<espMqttClientSecure *>(_mqttClient)->setCleanSession(_state.cleanSession);
             static_cast<espMqttClientSecure *>(_mqttClient)->setWill(will_topic, 1, true, "offline"); // QOS 1, retain
-            return _mqttClient->connect();
+            return (_mqttClient->connect());
         }
-#endif
+
         static_cast<espMqttClient *>(_mqttClient)->setServer(_state.host.c_str(), _state.port);
         if (_state.username.length() > 0) {
             static_cast<espMqttClient *>(_mqttClient)->setCredentials(_state.username.c_str(), _state.password.length() > 0 ? _state.password.c_str() : nullptr);
         }
+
         static_cast<espMqttClient *>(_mqttClient)->setClientId(_state.clientId.c_str());
         static_cast<espMqttClient *>(_mqttClient)->setKeepAlive(_state.keepAlive);
         static_cast<espMqttClient *>(_mqttClient)->setCleanSession(_state.cleanSession);
         static_cast<espMqttClient *>(_mqttClient)->setWill(will_topic, 1, true, "offline"); // QOS 1, retain
-        return _mqttClient->connect();
+        return (_mqttClient->connect());
     }
 
     return false;
 }
 
 void MqttSettings::read(MqttSettings & settings, JsonObject root) {
-#ifndef TASMOTA_SDK
-    root["enableTLS"] = settings.enableTLS;
-    root["rootCA"]    = settings.rootCA;
-#endif
+    root["enableTLS"]     = settings.enableTLS;
+    root["rootCA"]        = settings.rootCA;
     root["enabled"]       = settings.enabled;
     root["host"]          = settings.host;
     root["port"]          = settings.port;
@@ -262,12 +268,8 @@ StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings)
     MqttSettings newSettings;
     bool         changed = false;
 
-#ifndef TASMOTA_SDK
-    newSettings.enableTLS = root["enableTLS"];
-    newSettings.rootCA    = root["rootCA"] | "";
-#else
-    newSettings.enableTLS = false;
-#endif
+    newSettings.enableTLS    = root["enableTLS"];
+    newSettings.rootCA       = root["rootCA"] | "";
     newSettings.enabled      = root["enabled"] | FACTORY_MQTT_ENABLED;
     newSettings.host         = root["host"] | FACTORY_MQTT_HOST;
     newSettings.port         = static_cast<uint16_t>(root["port"] | FACTORY_MQTT_PORT);
@@ -337,6 +339,7 @@ StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings)
         if (newSettings.publish_single) {
             newSettings.ha_enabled = false;
         }
+
         changed = true;
     }
 
@@ -353,6 +356,7 @@ StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings)
         if (newSettings.ha_enabled) {
             newSettings.publish_single = false;
         }
+
         changed = true;
     }
 
@@ -393,7 +397,6 @@ StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings)
         emsesp::EMSESP::mqtt_.set_publish_time_heartbeat(newSettings.publish_time_heartbeat);
     }
 
-#ifndef TASMOTA_SDK
     // strip down to certificate only
     newSettings.rootCA.replace("\r", "");
     newSettings.rootCA.replace("\n", "");
@@ -403,10 +406,11 @@ StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings)
     if (newSettings.rootCA.length() == 0 && newSettings.enableTLS) {
         newSettings.rootCA = "insecure";
     }
+
     if (newSettings.enableTLS != settings.enableTLS || newSettings.rootCA != settings.rootCA) {
         changed = true;
     }
-#endif
+
     // save the new settings
     settings = newSettings;
 

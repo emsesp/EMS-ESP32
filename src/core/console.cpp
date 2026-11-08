@@ -1,7 +1,7 @@
 
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "console.h"
+#include "emsesp_console.h"
 #include "console_stream.h"
 #include "emsesp.h"
 
@@ -55,6 +55,7 @@ static void console_log_level(Shell & shell, const std::vector<std::string> & ar
             return;
         }
     }
+
     shell.printfln(F_(log_level_fmt), uuid::log::format_level_uppercase(shell.log_level()));
 }
 
@@ -104,10 +105,9 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                 shell.printfln("Unknown show command");
             }
         },
-        [](Shell const & shell, const std::vector<std::string> & current_arguments, const std::string & next_argument) -> std::vector<std::string> {
+        [](Shell const &, const std::vector<std::string> &, const std::string &) -> std::vector<std::string> {
             return std::vector<std::string>{"system", "users", "devices", "log", "ems", "values", "mqtt", "commands"};
         });
-
 
     //
     // System commands
@@ -191,7 +191,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                           CommandFlags::ADMIN,
                           {F_(restart)},
                           {F_(partitionname_optional)},
-                          [](Shell & shell, const std::vector<std::string> & arguments) {
+                          [](Shell &, const std::vector<std::string> & arguments) {
                               if (arguments.size()) {
                                   EMSESP::system_.system_restart(arguments.front().c_str());
                               } else {
@@ -199,10 +199,9 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                               }
                           });
 
-    commands->add_command(ShellContext::MAIN,
-                          CommandFlags::ADMIN,
-                          string_vector{F_(wifi), F_(reconnect)},
-                          [](Shell & shell, const std::vector<std::string> & arguments) { EMSESP::system_.wifi_reconnect(); });
+    commands->add_command(ShellContext::MAIN, CommandFlags::ADMIN, string_vector{F_(wifi), F_(reconnect)}, [](Shell &, const std::vector<std::string> &) {
+        EMSESP::network_.reconnect();
+    });
 
     //
     // SET commands
@@ -226,6 +225,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                                                                   return StateUpdateResult::CHANGED;
                                                               }
                                                           }
+
                                                           // otherwise add a new admin user
                                                           securitySettings.users.emplace_back(F_(admin), password2.c_str(), true);
                                                           return StateUpdateResult::CHANGED;
@@ -244,18 +244,18 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::ADMIN,
                           string_vector{F_(set), F_(wifi), F_(password)},
-                          [](Shell & shell, const std::vector<std::string> & arguments) {
+                          [](Shell & shell, const std::vector<std::string> &) {
                               shell.enter_password(F_(new_password_prompt1), [](Shell & shell, bool completed, const std::string & password1) {
                                   if (completed) {
                                       shell.enter_password(F_(new_password_prompt2), [password1](Shell & shell, bool completed, const std::string & password2) {
                                           if (completed) {
                                               if (password1 == password2) {
-                                                  EMSESP::esp32React.getNetworkSettingsService()->updateWithoutPropagation([&](NetworkSettings & networkSettings) {
+                                                  EMSESP::esp32React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
                                                       networkSettings.password = password2.c_str();
                                                       return StateUpdateResult::CHANGED;
                                                   });
                                                   shell.println("WiFi password updated. Reconnecting...");
-                                                  EMSESP::system_.wifi_reconnect();
+                                                  EMSESP::network_.reconnect();
                                               } else {
                                                   shell.println("Passwords do not match");
                                               }
@@ -277,6 +277,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                                   networkSettings.hostname = arguments.front().c_str();
                                   return StateUpdateResult::CHANGED;
                               });
+                              EMSESP::network_.reconnect();
                           });
 
     commands->add_command(ShellContext::MAIN,
@@ -284,45 +285,45 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                           string_vector{F_(set), F_(wifi), F_(ssid)},
                           {F_(name_mandatory)},
                           [](Shell & shell, const std::vector<std::string> & arguments) {
-                              EMSESP::esp32React.getNetworkSettingsService()->updateWithoutPropagation([&](NetworkSettings & networkSettings) {
+                              shell.println("The network connection will be reset...");
+                              Shell::loop_all();
+                              delay(1000); // wait a second
+                              EMSESP::esp32React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
                                   networkSettings.ssid = arguments.front().c_str();
                                   return StateUpdateResult::CHANGED;
                               });
-                              shell.println("WiFi ssid updated. Reconnecting...");
-                              EMSESP::system_.wifi_reconnect();
+                              EMSESP::network_.reconnect();
                           });
 
+    commands->add_command(ShellContext::MAIN,
+                          CommandFlags::ADMIN,
+                          string_vector{F_(set), F_(board_profile)},
+                          {F_(name_mandatory)},
+                          [](Shell & shell, const std::vector<std::string> & arguments) {
+                              std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
+                              std::string         board_profile = Helpers::toUpper(arguments.front());
+                              if (!EMSESP::system_.load_board_profile(data, board_profile)) {
+                                  shell.println("Invalid board profile (S32, E32, E32V2, E32V2_2, MH-ET, NODEMCU, LOLIN, OLIMEX, OLIMEXPOE, OLIMEXPOEW, "
+                                                "C3MINI, S2MINI, S3MINI, S32S3, CUSTOM)");
+                                  return;
+                              }
 
-    commands->add_command(
-        ShellContext::MAIN,
-        CommandFlags::ADMIN,
-        string_vector{F_(set), F_(board_profile)},
-        {F_(name_mandatory)},
-        [](Shell & shell, const std::vector<std::string> & arguments) {
-            std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
-            std::string         board_profile = Helpers::toUpper(arguments.front());
-            if (!EMSESP::system_.load_board_profile(data, board_profile)) {
-                shell.println(
-                    "Invalid board profile (S32, E32, E32V2, E32V2_2, MH-ET, NODEMCU, LOLIN, OLIMEX, OLIMEXPOE, C3MINI, S2MINI, S3MINI, S32S3, CUSTOM)");
-                return;
-            }
-
-            EMSESP::webSettingsService.update([&](WebSettings & settings) {
-                settings.board_profile  = board_profile.c_str();
-                settings.led_gpio       = data[0];
-                settings.dallas_gpio    = data[1];
-                settings.rx_gpio        = data[2];
-                settings.tx_gpio        = data[3];
-                settings.pbutton_gpio   = data[4];
-                settings.phy_type       = data[5];
-                settings.eth_power      = data[6]; // can be -1
-                settings.eth_phy_addr   = data[7];
-                settings.eth_clock_mode = data[8];
-                return StateUpdateResult::CHANGED;
-            });
-            shell.printfln("Loaded board profile %s. Restarting...", board_profile.c_str());
-            EMSESP::system_.system_restart();
-        });
+                              EMSESP::webSettingsService.update([&](WebSettings & settings) {
+                                  settings.board_profile  = board_profile.c_str();
+                                  settings.led_gpio       = data[0];
+                                  settings.dallas_gpio    = data[1];
+                                  settings.rx_gpio        = data[2];
+                                  settings.tx_gpio        = data[3];
+                                  settings.pbutton_gpio   = data[4];
+                                  settings.phy_type       = data[5];
+                                  settings.eth_power      = data[6]; // can be -1
+                                  settings.eth_phy_addr   = data[7];
+                                  settings.eth_clock_mode = data[8];
+                                  return StateUpdateResult::CHANGED;
+                              });
+                              shell.printfln("Set board profile to %s. Restarting...", board_profile.c_str());
+                              EMSESP::system_.system_restart();
+                          });
 
     commands->add_command(
         ShellContext::MAIN,
@@ -364,9 +365,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
     // EMS device commands
     //
 
-    commands->add_command(ShellContext::MAIN, CommandFlags::ADMIN, {F_(scan)}, [](Shell & shell, const std::vector<std::string> & arguments) {
-        EMSESP::scan_devices();
-    });
+    commands->add_command(ShellContext::MAIN, CommandFlags::ADMIN, {F_(scan)}, [](Shell &, const std::vector<std::string> &) { EMSESP::scan_devices(); });
 
     /* removed scan deep
     commands->add_command(ShellContext::MAIN, CommandFlags::ADMIN, {F_(scan)}, {F_(deep_optional)}, [](Shell & shell, const std::vector<std::string> & arguments) {
@@ -398,6 +397,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                                   if (!data.empty()) {
                                       data += " ";
                                   }
+
                                   data += arg;
                               }
 
@@ -512,6 +512,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
             if (device_type >= EMSdevice::DeviceType::BOILER) {
                 cmd = Command::parse_command_string(cmd, id); // extract hc or dhw
             }
+
             if (cmd == nullptr) {
                 cmd = F_(values);
             }
@@ -547,6 +548,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                         shell.println(data.c_str());
                         return;
                     }
+
                     serializeJsonPretty(doc, shell);
                     shell.println();
                     return;
@@ -578,6 +580,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                         devices_list.emplace_back(EMSdevice::device_type_2_device_name(device_class.first));
                     }
                 }
+
                 return devices_list;
             } else if (current_arguments.size() == 1) {
                 uint8_t device_type = EMSdevice::device_name_2_device_type(current_arguments[0].c_str());
@@ -588,6 +591,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                             command_list.emplace_back(cf.cmd_);
                         }
                     }
+
                     return command_list;
                 }
             }
@@ -615,21 +619,22 @@ void EMSESPShell::stopped() {
     if (has_flags(CommandFlags::ADMIN)) {
         logger().log(LogLevel::INFO, LogFacility::AUTH, F("Admin session closed on console %s"), console_name().c_str());
     }
+
     logger().log(LogLevel::INFO, LogFacility::CONSOLE, F("User session closed on console %s"), console_name().c_str());
 }
 
 // show welcome banner
 void EMSESPShell::display_banner() {
     println();
-    printfln("┌───────────────────────────────────────┐");
-    printfln("│  %sEMS-ESP version %-20s%s │", COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
-    printfln("│                                       │");
-    printfln("│  %shelp%s to show available commands      │", COLOR_UNDERLINE, COLOR_RESET);
-    printfln("│  %ssu%s to access admin commands          │", COLOR_UNDERLINE, COLOR_RESET);
-    printfln("│                                       │");
-    printfln("│  %s%shttps://github.com/emsesp/EMS-ESP32%s  │", COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
-    printfln("│                                       │");
-    printfln("└───────────────────────────────────────┘");
+    printfln("┌─────────────────────────────────────┐");
+    printfln("│  EMS-ESP version %-18s │", EMSESP_APP_VERSION);
+    printfln("│                                     │");
+    printfln("│  %shelp%s to show available commands    │", COLOR_UNDERLINE, COLOR_RESET);
+    printfln("│  %ssu%s to access admin commands        │", COLOR_UNDERLINE, COLOR_RESET);
+    printfln("│                                     │");
+    printfln("│  %s%shttps://emsesp.org%s                 │", COLOR_GREEN, COLOR_UNDERLINE, COLOR_RESET);
+    printfln("│                                     │");
+    printfln("└─────────────────────────────────────┘");
     println();
 
     // set console name

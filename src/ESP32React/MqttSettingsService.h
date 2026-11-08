@@ -60,6 +60,11 @@
 #define EMC_TASK_STACK_SIZE EMSESP_MQTT_STACKSIZE
 #endif
 
+// MQTT task stack when TLS verifies the broker against a CA. BearSSL needs ~6 KB to verify an EC (P-384, P-521) chain
+#ifndef EMSESP_MQTT_STACKSIZE_CA
+#define EMSESP_MQTT_STACKSIZE_CA 8192
+#endif
+
 #ifndef EMSESP_MQTT_PRIORITY
 #define EMSESP_MQTT_PRIORITY 1
 #endif
@@ -134,7 +139,6 @@ class MqttSettingsService : public StatefulService<MqttSettings> {
     // the MQTT client instance
     MqttClient * _mqttClient;
 
-    void WiFiEvent(WiFiEvent_t event);
     void onMqttConnect(bool sessionPresent);
     void onMqttDisconnect(espMqttClientTypes::DisconnectReason reason);
     void

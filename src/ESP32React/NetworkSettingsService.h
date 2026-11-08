@@ -8,15 +8,10 @@
 
 #ifndef EMSESP_STANDALONE
 #include <esp_wifi.h>
-#include <ETH.h>
-#include <WiFi.h>
-#include <AsyncTCP.h>
-#include <ESPmDNS.h>
 #endif
 
 #define NETWORK_SETTINGS_FILE "/config/networkSettings.json"
 #define NETWORK_SETTINGS_SERVICE_PATH "/rest/networkSettings"
-#define WIFI_RECONNECTION_DELAY (1000 * 3)
 
 #ifndef FACTORY_WIFI_SSID
 #define FACTORY_WIFI_SSID ""
@@ -26,39 +21,8 @@
 #define FACTORY_WIFI_PASSWORD ""
 #endif
 
-#ifndef FACTORY_WIFI_HOSTNAME
-#define FACTORY_WIFI_HOSTNAME ""
-#endif
-
-// copied from Tasmota
-#if CONFIG_IDF_TARGET_ESP32S2
-#define MAX_TX_PWR_DBM_11b 195
-#define MAX_TX_PWR_DBM_54g 150
-#define MAX_TX_PWR_DBM_n 130
-#define WIFI_SENSITIVITY_11b -880
-#define WIFI_SENSITIVITY_54g -750
-#define WIFI_SENSITIVITY_n -720
-#elif CONFIG_IDF_TARGET_ESP32S3
-#define MAX_TX_PWR_DBM_11b 210
-#define MAX_TX_PWR_DBM_54g 190
-#define MAX_TX_PWR_DBM_n 185
-#define WIFI_SENSITIVITY_11b -880
-#define WIFI_SENSITIVITY_54g -760
-#define WIFI_SENSITIVITY_n -720
-#elif CONFIG_IDF_TARGET_ESP32C2 || CONFIG_IDF_TARGET_ESP32C3
-#define MAX_TX_PWR_DBM_11b 210
-#define MAX_TX_PWR_DBM_54g 190
-#define MAX_TX_PWR_DBM_n 185
-#define WIFI_SENSITIVITY_11b -880
-#define WIFI_SENSITIVITY_54g -760
-#define WIFI_SENSITIVITY_n -730
-#else
-#define MAX_TX_PWR_DBM_11b 195
-#define MAX_TX_PWR_DBM_54g 160
-#define MAX_TX_PWR_DBM_n 140
-#define WIFI_SENSITIVITY_11b -880
-#define WIFI_SENSITIVITY_54g -750
-#define WIFI_SENSITIVITY_n -700
+#ifndef FACTORY_NETWORK_HOSTNAME
+#define FACTORY_NETWORK_HOSTNAME ""
 #endif
 
 class NetworkSettings {
@@ -67,7 +31,7 @@ class NetworkSettings {
     String  ssid           = FACTORY_WIFI_SSID;
     String  bssid          = "";
     String  password       = FACTORY_WIFI_PASSWORD;
-    String  hostname       = FACTORY_WIFI_HOSTNAME;
+    String  hostname       = FACTORY_NETWORK_HOSTNAME;
     bool    staticIPConfig = false;
     bool    bandwidth20    = false;
     uint8_t tx_power       = 0;
@@ -75,6 +39,7 @@ class NetworkSettings {
     bool    enableMDNS     = true;
     bool    enableCORS     = false;
     String  CORSOrigin     = "*";
+    bool    eth_10mbit     = false; // force 10BASE-T half-duplex, no auto-negotiation
 
     // optional configuration for static IP address
     IPAddress localIP;
@@ -92,27 +57,10 @@ class NetworkSettingsService : public StatefulService<NetworkSettings> {
     NetworkSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
 
     void begin();
-    void loop();
-
-    uint16_t getWifiReconnects() const {
-        return connectcount_;
-    }
 
   private:
     HttpEndpoint<NetworkSettings>  _httpEndpoint;
     FSPersistence<NetworkSettings> _fsPersistence;
-
-    volatile unsigned long _lastConnectionAttempt;
-    volatile bool          _stopping;
-
-    volatile uint16_t connectcount_ = 0; // number of wifi reconnects
-
-    void         WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
-    void         mDNS_start() const;
-    const char * disconnectReason(uint8_t code);
-    void         reconfigureWiFiConnection();
-    void         manageSTA();
-    void         setWiFiPowerOnRSSI();
 };
 
 #endif

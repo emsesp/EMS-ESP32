@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -6,7 +6,6 @@ import { Button, Checkbox, MenuItem } from '@mui/material';
 
 import * as APApi from 'api/ap';
 
-import type { ValidateFieldsError } from 'async-validator';
 import {
   BlockFormControlLabel,
   BlockNavigation,
@@ -22,9 +21,9 @@ import type { APSettingsType } from 'types';
 import { APProvisionMode } from 'types';
 import { numberValue, updateValueDirty, useRest } from 'utils';
 import { ValidationError, createAPSettingsValidator, validate } from 'validators';
+import type { ValidateFieldsError } from 'validators/schema';
 
 export const isAPEnabled = ({ provision_mode }: APSettingsType) =>
-  provision_mode === APProvisionMode.AP_MODE_ALWAYS ||
   provision_mode === APProvisionMode.AP_MODE_DISCONNECTED;
 
 // Efficient range function without recursion
@@ -63,22 +62,16 @@ const APSettings = () => {
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const updateFormValue = useMemo(
-    () =>
-      updateValueDirty(
-        origData as unknown as Record<string, unknown>,
-        dirtyFlags,
-        setDirtyFlags,
-        updateDataValue as (value: unknown) => void
-      ),
-    [origData, dirtyFlags, setDirtyFlags, updateDataValue]
+  const updateFormValue = updateValueDirty(
+    origData as unknown as Record<string, unknown>,
+    dirtyFlags,
+    setDirtyFlags,
+    updateDataValue as (value: unknown) => void
   );
 
-  // Memoize AP enabled state
-  const apEnabled = useMemo(() => (data ? isAPEnabled(data) : false), [data]);
+  const apEnabled = data ? isAPEnabled(data) : false;
 
-  // Memoize validation and submit handler
-  const validateAndSubmit = useCallback(async () => {
+  const validateAndSubmit = async () => {
     if (!data) return;
 
     try {
@@ -88,7 +81,7 @@ const APSettings = () => {
     } catch (error) {
       setFieldErrors((error as ValidationError).fieldErrors);
     }
-  }, [data, saveData]);
+  };
 
   const content = () => {
     if (!data) {
@@ -108,9 +101,6 @@ const APSettings = () => {
           onChange={updateFormValue}
           margin="normal"
         >
-          <MenuItem value={APProvisionMode.AP_MODE_ALWAYS}>
-            {LL.AP_PROVIDE_TEXT_1()}
-          </MenuItem>
           <MenuItem value={APProvisionMode.AP_MODE_DISCONNECTED}>
             {LL.AP_PROVIDE_TEXT_2()}
           </MenuItem>

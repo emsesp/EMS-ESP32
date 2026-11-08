@@ -49,6 +49,10 @@ the LICENSE file.
 #define EMC_CLIENTID_LENGTH 23 + 1
 #endif
 
+#ifdef EMSESP_MQTT_STACKSIZE
+#define EMC_TASK_STACK_SIZE EMSESP_MQTT_STACKSIZE
+#endif
+
 #ifndef EMC_TASK_STACK_SIZE
 #define EMC_TASK_STACK_SIZE 5120
 #endif
@@ -66,14 +70,10 @@ the LICENSE file.
 #endif
 
 #if EMC_USE_MEMPOOL
-  #ifndef EMC_NUM_POOL_ELEMENTS
-    #define EMC_NUM_POOL_ELEMENTS 32
-  #endif
-  #ifndef EMC_SIZE_POOL_ELEMENTS
-    #define EMC_SIZE_POOL_ELEMENTS 128
-  #endif
+#ifndef EMC_NUM_POOL_ELEMENTS
+#define EMC_NUM_POOL_ELEMENTS 32
 #endif
-
-#ifndef  TASMOTA_SDK
-#define EMC_CLIENT_SECURE
+#ifndef EMC_SIZE_POOL_ELEMENTS
+#define EMC_SIZE_POOL_ELEMENTS 128
+#endif
 #endif

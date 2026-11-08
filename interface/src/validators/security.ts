@@ -1,6 +1,6 @@
-import Schema from 'async-validator';
-import type { InternalRuleItem } from 'async-validator';
 import type { UserType } from 'types';
+import Schema from 'validators/schema';
+import type { InternalRuleItem } from 'validators/schema';
 
 const USERNAME_PATTERN = /^[a-zA-Z0-9_\\.]{1,24}$/;
 const JWT_SECRET_MAX_LENGTH = 64;

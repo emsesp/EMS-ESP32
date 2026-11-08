@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ void WebModulesService::loop() {
 // it adds data to an empty 'root' json object
 // and also calls when the Modules web page is refreshed/loaded
 void WebModules::read(WebModules & webModules, JsonObject root) {
-    JsonDocument doc_modules;
+    JsonDocument doc_modules(PSRAM_DOC);
     auto         root_modules = doc_modules.to<JsonObject>();
     moduleLibrary.list(root_modules); // get list the external library modules, put in a json object
 

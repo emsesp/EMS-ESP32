@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,9 +28,9 @@ class Switch : public EMSdevice {
     Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand);
 
   private:
-    void process_WM10SetMessage(std::shared_ptr<const Telegram> telegram);
-    void process_WM10MonitorMessage(std::shared_ptr<const Telegram> telegram);
-    void process_WM10TempMessage(std::shared_ptr<const Telegram> telegram);
+    void process_WM10SetMessage(const std::shared_ptr<const Telegram> & telegram);
+    void process_WM10MonitorMessage(const std::shared_ptr<const Telegram> & telegram);
+    void process_WM10TempMessage(const std::shared_ptr<const Telegram> & telegram);
 
     uint16_t flowTempHc_;
     uint8_t  status_;

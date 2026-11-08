@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,21 +25,27 @@ uint16_t WebAPIService::api_fails_ = 0;
 
 WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager) {
-    AsyncCallbackJsonWebHandler * jsonHandler = new AsyncCallbackJsonWebHandler(EMSESP_API_SERVICE_PATH);
-    jsonHandler->setMethod(HTTP_POST | HTTP_GET);
-    jsonHandler->onRequest([this](AsyncWebServerRequest * request, JsonVariant json) { webAPIService(request, json); });
-    server->addHandler(jsonHandler);
+    // parse() does its own per-request admin check (with notoken_api), so no predicate.
+    // /api also matches /api/<device>/<entity> via the route's backward-compatible URI matcher.
+    securityManager->addEndpoint(
+        server,
+        EMSESP_API_SERVICE_PATH,
+        AuthenticationPredicates::NONE_REQUIRED,
+        [this](AsyncWebServerRequest * request, JsonVariant json) { webAPIService(request, json); },
+        HTTP_POST | HTTP_GET);
 }
 
 // POST|GET api/
 // POST|GET api/{device}
 // POST|GET api/{device}/{entity}
 void WebAPIService::webAPIService(AsyncWebServerRequest * request, JsonVariant json) {
-    static uint64_t lastcall = 0;
-    if (uuid::get_uptime_ms() - lastcall < 50 && request->method() == HTTP_GET) {
-        request->send(429); //too many requests
+    static bool busy = false;
+    if (busy && request->method() == HTTP_GET) {
+        request->send(429); // too many requests
         return;
     }
+
+    busy = true;
     JsonDocument input_doc; // has no body JSON so create dummy as empty input object
     JsonObject   input;
     // if no body then treat it as a secure GET
@@ -53,8 +59,9 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request, JsonVariant j
         input         = input_doc.to<JsonObject>();
         input["data"] = json.as<std::string>();
     }
+
     parse(request, input);
-    lastcall = uuid::get_uptime_ms();
+    busy = false;
 }
 
 // for POSTS accepting plain text data
@@ -90,21 +97,27 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
         if (request->hasParam(F_(device))) {
             input["device"] = request->getParam(F_(device))->value().c_str();
         }
+
         if (request->hasParam(F_(cmd))) {
             input["cmd"] = request->getParam(F_(cmd))->value().c_str();
         }
+
         if (request->hasParam(F_(data))) {
             input["data"] = request->getParam(F_(data))->value().c_str();
         }
+
         if (request->hasParam(F_(value))) {
             input["value"] = request->getParam(F_(value))->value().c_str();
         }
+
         if (request->hasParam(F_(id))) {
             input["id"] = Helpers::atoint(request->getParam(F_(id))->value().c_str());
         }
+
         if (request->hasParam(F_(hc))) {
             input["hc"] = Helpers::atoint(request->getParam(F_(hc))->value().c_str());
         }
+
         if (request->hasParam(F_(dhw))) {
             input["dhw"] = Helpers::atoint(request->getParam(F_(dhw))->value().c_str());
         }
@@ -114,7 +127,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     EMSESP::system_.refreshHeapMem();
 
     // output json buffer
-    auto response = new AsyncJsonResponse();
+    auto response = new PsramAsyncJsonResponse();
 
     // add more mem if needed - won't be needed in ArduinoJson 7
     // while (!response->getSize()) {
@@ -200,6 +213,7 @@ void WebAPIService::storeResponse(JsonObject response) {
     storeResponseDoc_.clear();       // clear it, so can only recall once
     storeResponseDoc_.add(response); // add the object to our doc
 }
+
 const char * WebAPIService::getResponse() {
     static std::string buffer;
     serializeJson(storeResponseDoc_, buffer);

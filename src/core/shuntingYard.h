@@ -21,7 +21,6 @@
 #ifndef EMSESP_SHUNTING_YARD_H_
 #define EMSESP_SHUNTING_YARD_H_
 
-#include <HTTPClient.h>
 #include <ArduinoJson.h>
 
 #include <string>
@@ -85,6 +84,6 @@ std::string calculate(const std::string & expr);
 // check for multiple instances of <cond> ? <expr1> : <expr2>
 std::string compute(const std::string & expr);
 
-#endif
-
 } // namespace emsesp
+
+#endif

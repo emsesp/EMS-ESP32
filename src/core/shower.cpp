@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,10 +33,10 @@ void Shower::start() {
         shower_min_duration_   = settings.shower_min_duration;       // in seconds
     });
 
-    Command::add(
+    Command::add_json(
         EMSdevice::DeviceType::BOILER,
         F_(coldshot),
-        [&](const char * value, const int8_t id, JsonObject output) {
+        [this](const char * value, const int8_t id, JsonObject output) {
             LOG_INFO("Forcing coldshot...");
             if (shower_state_) {
                 output["message"] = "OK";
@@ -46,6 +46,7 @@ void Shower::start() {
                 LOG_WARNING("Coldshot failed. Shower not active");
                 force_coldshot = false;
             }
+
             return true;
         },
         FL_(coldshot_cmd),
@@ -90,6 +91,7 @@ void Shower::loop() {
                     set_shower_state(true);
                     LOG_DEBUG("hot water still running, starting shower timer");
                 }
+
                 // check if the shower has been on too long
                 else if ((shower_alert_ && ((time_now - timer_start_) > next_alert_)) || force_coldshot) {
                     shower_alert_start();
@@ -138,6 +140,7 @@ void Shower::loop() {
                 set_shower_state(false);
             }
         }
+
         return;
     }
 
@@ -178,6 +181,7 @@ void Shower::set_shower_state(bool state, bool force) {
     if ((shower_state_ == old_shower_state_) && !force) {
         return;
     }
+
     old_shower_state_ = shower_state_;
 
     // always publish as a string - see https://github.com/emsesp/EMS-ESP/issues/369
@@ -205,13 +209,14 @@ void Shower::create_ha_discovery() {
         } else {
             snprintf(str, sizeof(str), "shower_active"); // v3.4 compatible
         }
+
         doc["uniq_id"]    = str;
         doc["def_ent_id"] = (std::string) "binary_sensor." + str;
         doc["stat_t"]     = "~/shower_active";
 
         Mqtt::add_ha_bool(doc.as<JsonObject>());
         Mqtt::add_ha_dev_section(doc.as<JsonObject>(), "Shower Sensors", true);
-        Mqtt::add_ha_avty_section(doc.as<JsonObject>()); // no conditions
+        Mqtt::add_ha_avty_section(doc.as<JsonObject>());
 
         snprintf(topic, sizeof(topic), "binary_sensor/%s/shower_active/config", Mqtt::basename().c_str());
         ha_configdone_ = Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
@@ -229,7 +234,7 @@ void Shower::create_ha_discovery() {
 
         // don't bother with value template conditions if using Domoticz which doesn't fully support MQTT Discovery
         if (Mqtt::discovery_type() == Mqtt::discoveryType::HOMEASSISTANT) {
-            doc["val_tpl"] = "{{value_json.duration if value_json.duration is defined else 0}}";
+            doc["val_tpl"] = "{{value_json.duration if value_json.duration is defined else 'None'}}";
         } else {
             doc["val_tpl"] = "{{value_json.duration}}";
         }
@@ -240,7 +245,7 @@ void Shower::create_ha_discovery() {
         // doc["ent_cat"]      = "diagnostic";
 
         Mqtt::add_ha_dev_section(doc.as<JsonObject>(), "Shower Sensors");
-        Mqtt::add_ha_avty_section(doc.as<JsonObject>(), "~/shower_data", "value_json.duration is defined");
+        Mqtt::add_ha_avty_section(doc.as<JsonObject>());
 
         snprintf(topic, sizeof(topic), "sensor/%s/shower_duration/config", Mqtt::basename().c_str());
         Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag

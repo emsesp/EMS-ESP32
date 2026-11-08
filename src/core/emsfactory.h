@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,6 +58,7 @@ class EMSFactory {
         if (auto * ptr = makeRaw(device_type, device_id, product_id, version, default_name, flags, brand)) {
             return std::unique_ptr<EMSdevice>(ptr);
         }
+
         return nullptr;
     }
 

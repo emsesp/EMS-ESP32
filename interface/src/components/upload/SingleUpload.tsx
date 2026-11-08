@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import { Box, Button, Typography } from '@mui/material';
@@ -7,6 +6,7 @@ import { Box, Button, Typography } from '@mui/material';
 import * as SystemApi from 'api/system';
 
 import { useRequest } from 'alova/client';
+import { toast } from 'components/toast';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import DragNdrop from './DragNdrop';
@@ -14,9 +14,15 @@ import { LinearProgressWithLabel } from './LinearProgressWithLabel';
 
 interface SingleUploadProps {
   doRestart: () => void;
+  onRecoveryInstalled?: () => void;
+  text: string;
 }
 
-const SingleUpload = ({ doRestart }: SingleUploadProps) => {
+const SingleUpload = ({
+  doRestart,
+  onRecoveryInstalled,
+  text
+}: SingleUploadProps) => {
   const [md5, setMd5] = useState<string>();
   const [file, setFile] = useState<File>();
   const { LL } = useI18nContext();
@@ -29,11 +35,28 @@ const SingleUpload = ({ doRestart }: SingleUploadProps) => {
   } = useRequest(SystemApi.uploadFile, {
     immediate: false
   }).onSuccess(({ data }) => {
-    if (data && typeof data === 'object' && 'md5' in data) {
-      setMd5((data as { md5: string }).md5);
-      toast.success(LL.UPLOAD() + ' MD5 ' + LL.SUCCESSFUL());
+    let payload = data;
+    if (typeof payload === 'string' && payload.length > 0) {
+      try {
+        payload = JSON.parse(payload);
+      } catch {
+        payload = data;
+      }
+    }
+    if (payload && typeof payload === 'object' && 'md5' in payload) {
+      setMd5((payload as { md5: string }).md5);
+      toast.success(LL.UPLOAD_MD5_RECEIVED());
       setFile(undefined);
+    } else if (payload && typeof payload === 'object' && 'recovery' in payload) {
+      // written to the factory partition, EMS-ESP keeps running
+      toast.success(LL.RECOVERY_INSTALLED());
+      setMd5(undefined);
+      setFile(undefined);
+      onRecoveryInstalled?.();
     } else {
+      if (payload && typeof payload === 'object' && 'md5_ok' in payload) {
+        toast.success(LL.UPLOAD_MD5_MATCHED());
+      }
       doRestart();
     }
   });
@@ -80,12 +103,17 @@ const SingleUpload = ({ doRestart }: SingleUploadProps) => {
           </Button>
         </>
       ) : (
-        <DragNdrop text={LL.UPLOAD_DROP_TEXT()} onFileSelected={setFile} />
+        <DragNdrop
+          text={md5 ? LL.UPLOAD_MD5_RECEIVED() : text}
+          onFileSelected={setFile}
+        />
       )}
 
       {md5 && (
         <Box sx={{ mt: 2 }}>
-          <Typography variant="body2">{'MD5: ' + md5}</Typography>
+          <Typography variant="body2" color="success">
+            {'MD5: ' + md5}
+          </Typography>
         </Box>
       )}
     </>

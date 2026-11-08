@@ -1,6 +1,6 @@
 {
   "type": "systembackup",
-  "version": "3.8.2",
+  "version": "3.9.0",
   "systembackup": [
     {
       "type": "settings",
@@ -15,7 +15,8 @@
         "enableMDNS": true,
         "enableCORS": false,
         "CORSOrigin": "*",
-        "tx_power": 0
+        "tx_power": 0,
+        "eth_10mbit": false
       },
       "AP": {
         "provision_mode": 1,
@@ -37,7 +38,7 @@
         "base": "ems-esp",
         "username": "",
         "password": "",
-        "client_id": "esp32-b8ffc9ec",
+        "client_id": "ems-esp",
         "keep_alive": 60,
         "clean_session": false,
         "entity_format": 1,
@@ -64,7 +65,10 @@
         "enabled": false,
         "server": "time.google.com",
         "tz_label": "Europe/Amsterdam",
-        "tz_format": "CET-1CEST,M3.5.0,M10.5.0/3"
+        "tz_format": "CET-1CEST,M3.5.0,M10.5.0/3",
+        "thermostat_sync": 1,
+        "tz_label_t": "Europe/Amsterdam",
+        "tz_format_t": "CET-1CEST,M3.5.0,M10.5.0/3"
       },
       "Security": {
         "jwt_secret": "ems-esp-neo",
@@ -82,9 +86,10 @@
         ]
       },
       "Settings": {
-        "version": "3.8.2-dev.22",
+        "version": "3.9.0",
         "board_profile": "E32V2_2",
         "platform": "ESP32",
+        "system_name": "",
         "locale": "en",
         "tx_mode": 5,
         "ems_bus_id": 73,
@@ -131,7 +136,23 @@
         "modbus_port": 502,
         "modbus_max_clients": 10,
         "modbus_timeout": 300,
-        "developer_mode": false
+        "developer_mode": false,
+        "disable_reset": false,
+        "email_enabled": false,
+        "email_security": 2,
+        "email_server": "smtp.example.net",
+        "email_port": 587,
+        "email_login": "",
+        "email_pass": "",
+        "email_sender": "ems-esp@example.net",
+        "email_recp": "",
+        "email_subject": "ems-esp notification"
+      }
+    },
+    {
+      "type": "commands",
+      "Commands": {
+        "commands": []
       }
     },
     {
@@ -143,43 +164,8 @@
     {
       "type": "customizations",
       "Customizations": {
-        "ts": [
-          {
-            "id": "28_1767_7B13_2502",
-            "name": "gateway_temperature",
-            "offset": 0,
-            "is_system": true
-          }
-        ],
-        "as": [
-          {
-            "gpio": 39,
-            "name": "core_voltage",
-            "offset": 0,
-            "factor": 0.003771,
-            "uom": 23,
-            "type": 3,
-            "is_system": true
-          },
-          {
-            "gpio": 36,
-            "name": "supply_voltage",
-            "offset": 0,
-            "factor": 0.017,
-            "uom": 23,
-            "type": 3,
-            "is_system": true
-          },
-          {
-            "gpio": 2,
-            "name": "led",
-            "offset": 0,
-            "factor": 1,
-            "uom": 0,
-            "type": 6,
-            "is_system": true
-          }
-        ],
+        "ts": [],
+        "as": [],
         "masked_entities": []
       }
     },
@@ -194,16 +180,6 @@
       "Modules": {
         "modules": []
       }
-    },
-    {
-      "type": "nvs",
-      "nvs": [
-        {
-          "type": 1,
-          "key": "fresh_firmware",
-          "value": 0
-        }
-      ]
     }
   ]
 }

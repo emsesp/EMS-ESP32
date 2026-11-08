@@ -33,7 +33,7 @@ class String {
         return lhs;
     }
 
-    bool isEmpty() {
+    bool isEmpty() const {
         return _str.empty();
     }
 

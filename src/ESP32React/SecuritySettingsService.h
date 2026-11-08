@@ -62,6 +62,7 @@ class SecuritySettings {
             settings.users.emplace_back(FACTORY_ADMIN_USERNAME, FACTORY_ADMIN_PASSWORD, true);
             settings.users.emplace_back(FACTORY_GUEST_USERNAME, FACTORY_GUEST_PASSWORD, false);
         }
+
         return StateUpdateResult::CHANGED;
     }
 };
@@ -72,12 +73,9 @@ class SecuritySettingsService final : public StatefulService<SecuritySettings>, 
 
     void begin();
 
-    Authentication               authenticate(const String & username, const String & password) override;
-    Authentication               authenticateRequest(AsyncWebServerRequest * request) override;
-    String                       generateJWT(const User * user) override;
-    ArRequestFilterFunction      filterRequest(AuthenticationPredicate predicate) override;
-    ArRequestHandlerFunction     wrapRequest(ArRequestHandlerFunction onRequest, AuthenticationPredicate predicate) override;
-    ArJsonRequestHandlerFunction wrapCallback(ArJsonRequestHandlerFunction callback, AuthenticationPredicate predicate) override;
+    Authentication authenticate(const String & username, const String & password) override;
+    Authentication authenticateRequest(AsyncWebServerRequest * request) override;
+    String         generateJWT(const User * user) override;
 
   private:
     HttpEndpoint<SecuritySettings>  _httpEndpoint;

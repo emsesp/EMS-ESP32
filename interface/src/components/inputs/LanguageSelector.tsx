@@ -1,13 +1,14 @@
-import { memo, useCallback, useContext, useMemo } from 'react';
+import { memo, useContext } from 'react';
 import type { ChangeEventHandler } from 'react';
 import type { CSSProperties } from 'react';
 
 import { MenuItem, TextField } from '@mui/material';
 
-import CZflag from 'i18n/CZ.svg';
+import CZflag from 'i18n/CS.svg';
 import DEflag from 'i18n/DE.svg';
 import FRflag from 'i18n/FR.svg';
 import GBflag from 'i18n/GB.svg';
+import HUflag from 'i18n/HU.svg';
 import ITflag from 'i18n/IT.svg';
 import NLflag from 'i18n/NL.svg';
 import NOflag from 'i18n/NO.svg';
@@ -32,6 +33,7 @@ const LANGUAGE_OPTIONS: LanguageOption[] = [
   { key: 'de', flag: DEflag, label: 'DE' },
   { key: 'en', flag: GBflag, label: 'EN' },
   { key: 'fr', flag: FRflag, label: 'FR' },
+  { key: 'hu', flag: HUflag, label: 'HU' },
   { key: 'it', flag: ITflag, label: 'IT' },
   { key: 'nl', flag: NLflag, label: 'NL' },
   { key: 'no', flag: NOflag, label: 'NO' },
@@ -44,27 +46,14 @@ const LANGUAGE_OPTIONS: LanguageOption[] = [
 const LanguageSelector = () => {
   const { setLocale, locale, LL } = useContext(I18nContext);
 
-  const onLocaleSelected: ChangeEventHandler<HTMLInputElement> = useCallback(
-    async ({ target }) => {
-      const loc = target.value as Locales;
-      localStorage.setItem('lang', loc);
-      await loadLocaleAsync(loc);
-      setLocale(loc);
-    },
-    [setLocale]
-  );
-
-  // Memoize menu items to prevent recreation on every render
-  const menuItems = useMemo(
-    () =>
-      LANGUAGE_OPTIONS.map(({ key, flag, label }) => (
-        <MenuItem key={key} value={key}>
-          <img src={flag} style={flagStyle} alt={label} />
-          &nbsp;{label}
-        </MenuItem>
-      )),
-    []
-  );
+  const onLocaleSelected: ChangeEventHandler<HTMLInputElement> = async ({
+    target
+  }) => {
+    const loc = target.value as Locales;
+    localStorage.setItem('lang', loc);
+    await loadLocaleAsync(loc);
+    setLocale(loc);
+  };
 
   return (
     <TextField
@@ -76,7 +65,12 @@ const LanguageSelector = () => {
       size="small"
       select
     >
-      {menuItems}
+      {LANGUAGE_OPTIONS.map(({ key, flag, label }) => (
+        <MenuItem key={key} value={key}>
+          <img src={flag} style={flagStyle} alt={label} />
+          &nbsp;{label}
+        </MenuItem>
+      ))}
     </TextField>
   );
 };

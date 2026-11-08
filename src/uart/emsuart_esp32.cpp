@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include "freertos/task.h"
 #include "freertos/queue.h"
 #include "driver/uart.h"
+#include "driver/gpio.h"
 #include "soc/uart_reg.h"
 #include "uart/emsuart_esp32.h"
 #include "emsesp.h"
@@ -39,7 +40,7 @@ uint32_t             inverse_mask = 0;
 // receive task, wait for break and call incoming_telegram
 void EMSuart::uart_event_task(void * pvParameters) {
     uart_event_t event;
-    uint8_t      telegram[UART_FIFO_LEN + 1]; // same size as in driver_install
+    uint8_t      telegram[UART_HW_FIFO_LEN(EMSUART_NUM) + 1]; // same size as in driver_install
     uint8_t      length = 0;
 
     while (1) {
@@ -53,6 +54,7 @@ void EMSuart::uart_event_task(void * pvParameters) {
                 if (length == 2 || (length >= 6 && length <= EMS_MAXBUFFERSIZE)) {
                     EMSESP::incoming_telegram(telegram, (uint8_t)(length - 1));
                 }
+
                 length = 0;
             } else if (event.type == UART_BUFFER_FULL) {
                 uart_flush_input(EMSUART_NUM);
@@ -60,24 +62,30 @@ void EMSuart::uart_event_task(void * pvParameters) {
             }
         }
     }
+
     vTaskDelete(NULL);
 }
 
 // initialize UART driver
 void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t tx_gpio) {
     if (tx_mode_ == EMS_TXMODE_INIT) {
+#if CONFIG_IDF_TARGET_ESP32C6
+        uart_config_t uart_config = {.baud_rate           = EMSUART_BAUD,
+                                     .data_bits           = UART_DATA_8_BITS,
+                                     .parity              = UART_PARITY_DISABLE,
+                                     .stop_bits           = UART_STOP_BITS_1,
+                                     .flow_ctrl           = UART_HW_FLOWCTRL_DISABLE,
+                                     .rx_flow_ctrl_thresh = 0};
+#else
         uart_config_t uart_config = {.baud_rate           = EMSUART_BAUD,
                                      .data_bits           = UART_DATA_8_BITS,
                                      .parity              = UART_PARITY_DISABLE,
                                      .stop_bits           = UART_STOP_BITS_1,
                                      .flow_ctrl           = UART_HW_FLOWCTRL_DISABLE,
                                      .rx_flow_ctrl_thresh = 0,
-                                     .source_clk          = UART_SCLK_APB
-#if ESP_ARDUINO_VERSION_MAJOR >= 3
-                                     ,
-                                     .flags = {0}
+                                     .source_clk          = UART_SCLK_APB,
+                                     .flags               = {0}};
 #endif
-        };
 #if defined(EMSUART_RX_INVERT)
         inverse_mask |= UART_SIGNAL_RXD_INV;
 #endif
@@ -85,9 +93,18 @@ void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t 
         inverse_mask |= UART_SIGNAL_TXD_INV;
 #endif
         uart_param_config(EMSUART_NUM, &uart_config);
+        // IDF 5 uart_set_pin() no longer selects the GPIO function on the Rx pad when routing via the GPIO matrix.
+        // Pins that boot with another IO_MUX function (e.g. GPIO43/44 = UART0 on S3, JTAG pins) would never see the signal.
+        gpio_reset_pin((gpio_num_t)rx_gpio);
         uart_set_pin(EMSUART_NUM, tx_gpio, rx_gpio, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+        gpio_pullup_en((gpio_num_t)rx_gpio); // IDF 5 no longer enables the Rx pull-up, some custom interfaces rely on it
         uart_set_line_inverse(EMSUART_NUM, inverse_mask);
-        uart_driver_install(EMSUART_NUM, UART_FIFO_LEN + 1, 0, UART_FIFO_LEN + 3, &uart_queue, 0); // buffer must be > fifo, queue can hold data+break+overflow message
+        uart_driver_install(EMSUART_NUM,
+                            UART_HW_FIFO_LEN(EMSUART_NUM) + 1,
+                            0,
+                            UART_HW_FIFO_LEN(EMSUART_NUM) + 3,
+                            &uart_queue,
+                            0); // buffer must be > fifo, queue can hold data+break+overflow message
         uart_set_rx_full_threshold(EMSUART_NUM, 1);
         uart_set_rx_timeout(EMSUART_NUM, 0); // disable
 
@@ -98,9 +115,12 @@ void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t 
         xTaskCreatePinnedToCore(uart_event_task, "uart_event_task", EMSESP_UART_STACKSIZE, NULL, EMSESP_UART_PRIORITY, &xHandle, EMSESP_UART_RUNNING_CORE);
 #endif
     } else {
+        gpio_reset_pin((gpio_num_t)rx_gpio);
         uart_set_pin(EMSUART_NUM, tx_gpio, rx_gpio, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+        gpio_pullup_en((gpio_num_t)rx_gpio);
         vTaskResume(xHandle);
     }
+
     tx_mode_ = tx_mode;
     uart_enable_intr_mask(EMSUART_NUM, UART_BRK_DET_INT_ENA | UART_RXFIFO_FULL_INT_ENA);
 }
@@ -149,7 +169,9 @@ uint8_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
         return EMS_TX_STATUS_OK;
     }
 
-    auto tx_mode = tx_mode_ != EMS_TXMODE_AUTO ? tx_mode_ : EMSbus::is_ht3() ? EMS_TXMODE_HT3 : EMSbus::is_ems2() ? EMS_TXMODE_EMSPLUS : EMS_TXMODE_EMS;
+    // Auto: EMS+ if boiler monitor 0xE4 seen (is_ems2), else HT3 address mask, else EMS.
+    // Do not key off extended telegrams alone — Junkers HT3 uses those too (#3283, #3245).
+    auto tx_mode = tx_mode_ != EMS_TXMODE_AUTO ? tx_mode_ : EMSbus::is_ems2() ? EMS_TXMODE_EMSPLUS : EMSbus::is_ht3() ? EMS_TXMODE_HT3 : EMS_TXMODE_EMS;
 
     // TXMODE is EMS+ with long delay
     if (tx_mode == EMS_TXMODE_EMSPLUS) {
@@ -157,6 +179,7 @@ uint8_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
             uart_write_bytes(EMSUART_NUM, &buf[i], 1);
             delayMicroseconds(EMSUART_TX_WAIT_PLUS);
         }
+
         uart_gen_break(EMSUART_TX_BRK_PLUS);
         return EMS_TX_STATUS_OK;
     }
@@ -167,6 +190,7 @@ uint8_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
             uart_write_bytes(EMSUART_NUM, &buf[i], 1);
             delayMicroseconds(EMSUART_TX_WAIT_HT3);
         }
+
         uart_gen_break(EMSUART_TX_BRK_HT3);
         return EMS_TX_STATUS_OK;
     }
@@ -182,6 +206,7 @@ uint8_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
             uart_get_buffered_data_len(EMSUART_NUM, &rx1);
         } while ((rx1 == rx0) && (--timeoutcnt));
     }
+
     uart_gen_break(EMSUART_TX_BRK_EMS);
     return EMS_TX_STATUS_OK;
 }

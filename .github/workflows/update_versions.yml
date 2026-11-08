@@ -1,0 +1,40 @@
+name: 'Update versions'
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-version:
+    name: 'Update versions in Cloudflare KV store'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Get and Send EMS-ESP version to Cloudflare
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_NAMESPACE_ID: ${{ secrets.CF_NAMESPACE_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          version=$(grep -E '^#define EMSESP_APP_VERSION' ./src/emsesp_version.h | awk -F'"' '{print $2}')
+          if [ "$GITHUB_REF" = "refs/heads/main" ]; then
+            KV_ENV="stable"
+          else
+            KV_ENV="dev"
+          fi
+          JSON_DATA=$(jq -n \
+            --arg version "$version" \
+            --arg date "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{version: $version, date: $date}')
+          echo "KV_ENV: $KV_ENV"
+          echo "JSON_DATA: $JSON_DATA"
+          curl -sS --fail-with-body \
+            -X PUT "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_NAMESPACE_ID}/values/${KV_ENV}" \
+            -H "Authorization: Bearer ${CF_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "$JSON_DATA"
+          echo

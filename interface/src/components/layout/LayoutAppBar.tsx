@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo } from 'react';
+import { memo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -39,14 +39,11 @@ const LayoutAppBarComponent = ({ title, onToggleDrawer }: LayoutAppBarProps) => 
   const navigate = useNavigate();
   const location = useLocation();
 
-  const pathnames = useMemo(
-    () => location.pathname.split('/').filter((x) => x),
-    [location.pathname]
-  );
+  const pathnames = location.pathname.split('/').filter((x) => x);
 
-  const handleBackClick = useCallback(() => {
+  const handleBackClick = () => {
     void navigate('/' + pathnames[0]);
-  }, [navigate, pathnames]);
+  };
 
   return (
     <AppBar position="fixed" sx={appBarStyles}>

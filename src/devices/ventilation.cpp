@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,12 +51,12 @@ Ventilation::Ventilation(uint8_t device_type, uint8_t device_id, uint8_t product
 }
 
 // message 0x055C, data: 08 01 11 17
-void Ventilation::process_SetMessage(std::shared_ptr<const Telegram> telegram) {
+void Ventilation::process_SetMessage(const std::shared_ptr<const Telegram> & telegram) {
     has_update(telegram, bypass_, 1);
 }
 
 // message 583
-void Ventilation::process_MonitorMessage(std::shared_ptr<const Telegram> telegram) {
+void Ventilation::process_MonitorMessage(const std::shared_ptr<const Telegram> & telegram) {
     has_update(telegram, outEx_, 0);     // Fortluft
     has_update(telegram, inEx_, 7);      // Abluft
     has_update(telegram, outFresh_, 13); // Außenluft
@@ -69,25 +69,25 @@ void Ventilation::process_MonitorMessage(std::shared_ptr<const Telegram> telegra
 
 // message 585 26 bytes long
 // Data: 46 46 00 00 00 77 00 03 F4 09 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-void Ventilation::process_BlowerMessage(std::shared_ptr<const Telegram> telegram) {
+void Ventilation::process_BlowerMessage(const std::shared_ptr<const Telegram> & telegram) {
     has_update(telegram, ventOutSpeed_, 0);
     has_update(telegram, ventInSpeed_, 1);
 }
 
 // message 0x05D9, data: 03 9C FF
-void Ventilation::process_VOCMessage(std::shared_ptr<const Telegram> telegram) {
+void Ventilation::process_VOCMessage(const std::shared_ptr<const Telegram> & telegram) {
     has_update(telegram, voc_, 0);
     has_update(telegram, humidity_, 2);
 }
 
 // message 0x56B
 // level 0=0, 1=1, 2=2, 3=3, 4= 4, Auto 0xFF, demand 5, sleep 6, intense 7, bypass-8, party 9, fireplace 0A
-void Ventilation::process_ModeMessage(std::shared_ptr<const Telegram> telegram) {
+void Ventilation::process_ModeMessage(const std::shared_ptr<const Telegram> & telegram) {
     has_enumupdate(telegram, mode_, 0, -1);
 }
 
 // message 0x0587, data: 00 00 64 00 64 0A 00 01 54 01 00 01 00 00 00 46 00 00 00 02 00 A3 00 A3
-void Ventilation::process_BypassMessage(std::shared_ptr<const Telegram> telegram) {
+void Ventilation::process_BypassMessage(const std::shared_ptr<const Telegram> &) {
     // has_update(telegram, bypass_closing, 0);
     // has_update(telegram, bypass_opening, 1);
 }
@@ -97,6 +97,7 @@ bool Ventilation::set_ventMode(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, v, FL_(enum_ventMode))) {
         return false;
     }
+
     write_command(0x56B, 0, v - 1, 0x56B);
     return true;
 }
@@ -106,6 +107,7 @@ bool Ventilation::set_filter(const char * value, const int8_t id) {
     if (!Helpers::value2number(value, v)) {
         return false;
     }
+
     // write_command(0x5xx, 0, v, 0x5xx);
     return true;
 }
@@ -115,6 +117,7 @@ bool Ventilation::set_bypass(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
+
     write_command(0x55C, 1, b ? 1 : 0, 0x587);
     return true;
 }

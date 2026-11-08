@@ -22,9 +22,11 @@
 
 #include "shuntingYard.h"
 
+#include "emsesp_http_client.h"
+
 namespace emsesp {
 
-// find tokens - optimized to reduce string allocations
+// find tokens
 std::deque<Token> exprToTokens(const std::string & expr) {
     std::deque<Token> tokens;
 
@@ -39,6 +41,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                 i += (*p == '{') ? 1 : (*p == '}') ? -1 : 0;
                 ++p;
             }
+
             const auto s = std::string(b, p);
             tokens.emplace_back(Token::Type::String, s, -3);
             if (*p == '\0') {
@@ -82,6 +85,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
             while ((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') || (*p == '_') || (*p & 0x80)) {
                 ++p;
             }
+
             const auto s = std::string(b, p);
             tokens.emplace_back(Token::Type::String, s, -3);
             --p;
@@ -91,6 +95,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
             while (*p && *p != '"') {
                 ++p;
             }
+
             const auto s = std::string(b, p);
             tokens.emplace_back(Token::Type::String, s, -3);
             if (*p == '\0') {
@@ -102,6 +107,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
             while (*p && *p != '\'') {
                 ++p;
             }
+
             const auto s = std::string(b, p);
             tokens.emplace_back(Token::Type::String, s, -3);
             if (*p == '\0') {
@@ -112,6 +118,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
             while (isdigit(*p) || *p == '.') {
                 ++p;
             }
+
             const auto s = std::string(b, p);
             tokens.emplace_back(Token::Type::Number, s, -2);
             --p;
@@ -158,6 +165,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                         tokens.pop_back();
                         continue;
                     }
+
                     token      = Token::Type::Unary;
                     c          = 'm';
                     precedence = 5;
@@ -165,6 +173,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                     // otherwise, it's binary '-'
                     precedence = 2;
                 }
+
                 break;
             case '&':
                 if (p[1] == '&')
@@ -187,12 +196,14 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                     precedence = 2;
                     token      = Token::Type::Unary;
                 }
+
                 break;
             case '<':
                 if (p[1] == '=') {
                     ++p;
                     c = '{';
                 }
+
                 precedence = 1;
                 token      = Token::Type::Compare;
                 break;
@@ -201,6 +212,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                     ++p;
                     c = '}';
                 }
+
                 precedence = 1;
                 token      = Token::Type::Compare;
                 break;
@@ -211,6 +223,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                 token      = Token::Type::Compare;
                 break;
             }
+
             const auto s = std::string(1, c);
             tokens.emplace_back(token, s, precedence, rightAssociative);
         }
@@ -219,7 +232,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
     return tokens;
 }
 
-// sort tokens to RPN form - optimized for memory usage
+// sort tokens to RPN form
 std::deque<Token> shuntingYard(const std::deque<Token> & tokens) {
     std::deque<Token>  queue;
     std::vector<Token> stack;
@@ -319,26 +332,27 @@ std::deque<Token> shuntingYard(const std::deque<Token> & tokens) {
         queue.push_back(std::move(stack.back()));
         stack.pop_back();
     }
+
     return queue;
 }
 
-// check if string is a number
+// check if string is a number. Must contain at least one digit
 bool isnum(const std::string & s) {
     if (s.empty() || s.find_first_of("0123456789") == std::string::npos) {
         return false;
     }
+
     if (s.find_first_not_of("0123456789.") == std::string::npos || (s[0] == '-' && s.find_first_not_of("0123456789.", 1) == std::string::npos)) {
         return true;
     }
+
     return false;
 }
-
 
 // replace commands like "<device>/<hc>/<cmd>" with its value"
 std::string commands(std::string & expr, bool quotes) {
     auto expr_new = Helpers::toLower(expr);
     for (uint8_t device = 0; device < EMSdevice::DeviceType::UNKNOWN; device++) {
-        // Optimized: build string with reserve to avoid temporary allocations
         std::string d;
         d.reserve(32); // typical device name length + "/"
         d = EMSdevice::device_type_2_device_name(device);
@@ -350,23 +364,25 @@ std::string commands(std::string & expr, bool quotes) {
             if (e == std::string::npos) {
                 e = expr.length();
             }
+
             char   cmd[COMMAND_MAX_LENGTH];
             size_t l = e - f;
             if (l >= sizeof(cmd) - 1) {
                 break;
             }
+
             expr_new.copy(cmd, l, f);
             cmd[l] = '\0';
 
             if (strstr(cmd, "/value") == nullptr) {
                 strlcat(cmd, "/value", sizeof(cmd) - 6);
             }
+
             JsonDocument doc_out;
             JsonDocument doc_in;
             JsonObject   output = doc_out.to<JsonObject>();
             JsonObject   input  = doc_in.to<JsonObject>();
-            // Optimized: use stack buffer for small strings to avoid heap allocation
-            char cmd_s[COMMAND_MAX_LENGTH + 5]; // "api/" prefix + cmd
+            char         cmd_s[COMMAND_MAX_LENGTH + 5]; // "api/" prefix + cmd
             snprintf(cmd_s, sizeof(cmd_s), "api/%s", cmd);
 
             auto return_code = Command::process(cmd_s, true, input, output);
@@ -375,17 +391,24 @@ std::string commands(std::string & expr, bool quotes) {
                 return expr = "";
             }
 
-            std::string data = output["api_data"] | "";
-            if (!isnum(data) && quotes) {
-                data.insert(data.begin(), '"');
-                data.insert(data.end(), '"');
+            std::string data;
+            if (output["api_data"].is<std::string>()) {
+                data = output["api_data"].as<std::string>();
+                if (!isnum(data) && quotes) {
+                    data.insert(data.begin(), '"');
+                    data.insert(data.end(), '"');
+                }
+            } else {
+                serializeJson(output, data);
             }
+
             expr.replace(f, l, data);
             e        = f + data.length();
             expr_new = Helpers::toLower(expr);
             f        = expr_new.find(d, e);
         }
     }
+
     if (quotes) {
         // remove double quotes
         auto f = expr.find("\"\"");
@@ -394,6 +417,7 @@ std::string commands(std::string & expr, bool quotes) {
             f = expr.find("\"\"");
         }
     }
+
     return expr;
 }
 
@@ -403,6 +427,7 @@ int to_logic(const std::string & s) {
     if (!Helpers::value2bool(s.c_str(), value_b)) {
         return -1; // invalid
     }
+
     return value_b;
 
     // if (s.empty()) {
@@ -424,9 +449,11 @@ std::string to_string(double d) {
     while (!s.empty() && s.back() == '0') {
         s.pop_back();
     }
+
     if (!s.empty() && s.back() == '.') {
         s.pop_back();
     }
+
     return s;
 }
 
@@ -473,21 +500,39 @@ std::string calculate(const std::string & expr) {
             if (stack.empty()) {
                 return "";
             }
+
             const auto rhs = stack.back();
             stack.pop_back();
             if (token.str[0] == '!') {
-                if (to_logic(rhs) < 0) {
-                }
-                if (to_logic(rhs) >= 0) {
-                    stack.push_back(to_logic(rhs) == 0 ? "1" : "0");
+                const auto logic = to_logic(rhs);
+                if (logic >= 0) {
+                    stack.push_back(logic == 0 ? "1" : "0");
                 } else if (isnum(rhs)) {
                     stack.push_back(std::stod(rhs) == 0 ? "1" : "0");
                 } else {
-                    EMSESP::logger().warning("missing operator");
+                    // usually literal text that was left unquoted, so its '!' got read as a logical NOT
+                    EMSESP::logger().warning("'!' needs a boolean or numeric operand, got '%s'. Literal text must be quoted", rhs.c_str());
                     return "";
                 }
+
                 break;
             }
+
+            if (token.str[0] == 'h') {
+                // hex string to number
+                if (rhs.empty() || rhs.find_first_not_of("0123456789abcdefABCDEF") != std::string::npos) {
+                    return "";
+                }
+
+                stack.push_back(to_string(std::stoi(rhs, 0, 16)));
+                break;
+            }
+
+            // bail out on non-numeric operand
+            if (!isnum(rhs)) {
+                return "";
+            }
+
             auto rhd = std::stod(rhs);
             switch (token.str[0]) {
             default:
@@ -520,9 +565,6 @@ std::string calculate(const std::string & expr) {
             case 'p':
                 stack.push_back(to_string(std::pow(rhd, 2)));
                 break;
-            case 'h':
-                stack.push_back(to_string(std::stoi(rhs, 0, 16)));
-                break;
             case 'x':
                 stack.push_back(to_hex(static_cast<int>(rhd)));
                 break;
@@ -539,6 +581,7 @@ std::string calculate(const std::string & expr) {
             if (stack.size() < 2) {
                 return "";
             }
+
             const auto rhs = stack.back();
             stack.pop_back();
             const auto lhs = stack.back();
@@ -552,6 +595,7 @@ std::string calculate(const std::string & expr) {
                     stack.push_back((std::stod(lhs) < std::stod(rhs)) ? "1" : "0");
                     break;
                 }
+
                 stack.push_back((lhs < rhs) ? "1" : "0");
                 break;
             case '{':
@@ -559,6 +603,7 @@ std::string calculate(const std::string & expr) {
                     stack.push_back((std::stod(lhs) <= std::stod(rhs)) ? "1" : "0");
                     break;
                 }
+
                 stack.push_back((lhs <= rhs) ? "1" : "0");
                 break;
             case '>':
@@ -566,6 +611,7 @@ std::string calculate(const std::string & expr) {
                     stack.push_back((std::stod(lhs) > std::stod(rhs)) ? "1" : "0");
                     break;
                 }
+
                 stack.push_back((lhs > rhs) ? "1" : "0");
                 break;
             case '}':
@@ -573,6 +619,7 @@ std::string calculate(const std::string & expr) {
                     stack.push_back((std::stod(lhs) >= std::stod(rhs)) ? "1" : "0");
                     break;
                 }
+
                 stack.push_back((lhs >= rhs) ? "1" : "0");
                 break;
             case '=':
@@ -580,6 +627,7 @@ std::string calculate(const std::string & expr) {
                     stack.push_back((std::stod(lhs) == std::stod(rhs)) ? "1" : "0");
                     break;
                 }
+
                 // compare strings lower case
                 stack.push_back((Helpers::toLower(lhs) == Helpers::toLower(rhs)) ? "1" : "0");
                 break;
@@ -588,6 +636,7 @@ std::string calculate(const std::string & expr) {
                     stack.push_back((std::stod(lhs) != std::stod(rhs)) ? "1" : "0");
                     break;
                 }
+
                 // compare strings lower case
                 stack.push_back((Helpers::toLower(lhs) != Helpers::toLower(rhs)) ? "1" : "0");
                 break;
@@ -598,6 +647,7 @@ std::string calculate(const std::string & expr) {
             if (stack.size() < 2) {
                 return "";
             }
+
             const auto rhs = to_logic(stack.back());
             stack.pop_back();
             const auto lhs = to_logic(stack.back());
@@ -605,6 +655,7 @@ std::string calculate(const std::string & expr) {
             if (rhs < 0 || lhs < 0) {
                 return "";
             }
+
             switch (token.str[0]) {
             default:
                 return "";
@@ -622,6 +673,7 @@ std::string calculate(const std::string & expr) {
             if (stack.size() < 2) {
                 return "";
             }
+
             const auto rhs = stack.back();
             stack.pop_back();
             const auto lhs = stack.back();
@@ -630,10 +682,12 @@ std::string calculate(const std::string & expr) {
                 stack.push_back(lhs + rhs);
                 break;
             }
-            if (!isnum(rhs) || !isnum(lhs)) {
-                stack.push_back(lhs + token.str + rhs);
-                break;
+
+            // bail out on non-numeric operands
+            if (!isnum(lhs) || !isnum(rhs)) {
+                return "";
             }
+
             auto lhd = std::stod(lhs);
             auto rhd = std::stod(rhs);
             switch (token.str[0]) {
@@ -674,7 +728,27 @@ std::string calculate(const std::string & expr) {
     for (const auto & s : stack) {
         result += s;
     }
+
     return result;
+}
+
+// find the next occurrence of c at or after `from` that is not inside a quoted string, so that
+// literal text like "too hot?" is not mistaken for a ternary. Always scans from the start of the
+// string because the quote state at `from` depends on everything before it.
+static size_t find_unquoted(const std::string & s, char c, size_t from = 0) {
+    bool in_single = false;
+    bool in_double = false;
+    for (size_t i = 0; i < s.length(); i++) {
+        if (!in_single && s[i] == '"') {
+            in_double = !in_double;
+        } else if (!in_double && s[i] == '\'') {
+            in_single = !in_single;
+        } else if (!in_single && !in_double && s[i] == c && i >= from) {
+            return i;
+        }
+    }
+
+    return std::string::npos;
 }
 
 // check for multiple instances of <cond> ? <expr1> : <expr2>
@@ -695,6 +769,7 @@ std::string compute(const std::string & expr) {
                 i++;
             }
         }
+
         std::string  cmd = expr_new.substr(f, e - f).c_str();
         JsonDocument doc;
         if (DeserializationError::Ok == deserializeJson(doc, cmd)) {
@@ -717,88 +792,76 @@ std::string compute(const std::string & expr) {
                     keys_s = p.key().c_str();
                 }
             }
-            if (url.substr(0, 4) == "http") { // match http and https
-                HTTPClient * http = new HTTPClient;
-#ifndef EMSESP_STANDALONE
-                http->setConnectTimeout(10000);
-                http->setTimeout(10000);
-#endif
-                if (http->begin(url.c_str())) {
-                    int httpResult = 0;
-                    for (JsonPair p : doc[header_s].as<JsonObject>()) {
-                        http->addHeader(p.key().c_str(), p.value().as<std::string>().c_str());
-                    }
-                    std::string value  = doc[value_s] | "";
-                    std::string method = doc[method_s] | "get";
 
-                    // if there is data, force a POST
-                    if (value.length() || Helpers::toLower(method) == "post") {
-                        if (value.find_first_of('{') != std::string::npos) {
-                            http->addHeader(asyncsrv::T_Content_Type, asyncsrv::T_application_json, false); // auto-set to JSON
-                        }
-                        httpResult = http->POST(value.c_str());
-                    } else {
-                        httpResult = http->GET(); // normal GET
-                    }
+            std::string value  = doc[value_s] | "";
+            std::string method = doc[method_s] | "GET";
+            std::string result;
 
-                    if (httpResult > 0) {
-                        std::string  result = http->getString().c_str();
-                        std::string  key    = doc[key_s] | "";
-                        JsonDocument keys_doc; // JsonDocument to hold "keys" after doc is parsed with HTTP body
-                        if (doc[keys_s].is<JsonArray>()) {
-                            keys_doc.set(doc[keys_s].as<JsonArray>());
-                        }
-                        JsonArray keys = keys_doc.as<JsonArray>();
+            int httpResult = HttpClient::request(url, method, value, doc[header_s].as<JsonObjectConst>(), result);
+            if (httpResult == 200) {
+                std::string  key = doc[key_s] | "";
+                JsonDocument keys_doc; // JsonDocument to hold "keys" after doc is parsed with HTTP body
+                if (doc[keys_s].is<JsonArray>()) {
+                    keys_doc.set(doc[keys_s].as<JsonArray>());
+                }
 
-                        if (key.length() || !keys.isNull()) {
-                            doc.clear();
-                            if (DeserializationError::Ok == deserializeJson(doc, result)) {
-                                if (key.length()) {
-                                    result = doc[key.c_str()].as<std::string>();
+                JsonArray keys = keys_doc.as<JsonArray>();
+                if (key.length() || !keys.isNull()) {
+                    doc.clear();
+                    if (DeserializationError::Ok == deserializeJson(doc, result)) {
+                        if (key.length()) {
+                            result = doc[key.c_str()].as<std::string>();
+                        } else {
+                            JsonVariant json = doc.as<JsonVariant>();
+                            for (JsonVariant keys_key : keys) {
+                                if (keys_key.is<std::string>() && json.is<JsonObject>()) {
+                                    json = json[keys_key.as<std::string>()].as<JsonVariant>();
+                                } else if (keys_key.is<int>() && json.is<JsonArray>()) {
+                                    json = json[keys_key.as<int>()].as<JsonVariant>();
                                 } else {
-                                    JsonVariant json = doc.as<JsonVariant>();
-                                    for (JsonVariant keys_key : keys) {
-                                        if (keys_key.is<std::string>() && json.is<JsonObject>()) {
-                                            json = json[keys_key.as<std::string>()].as<JsonVariant>();
-                                        } else if (keys_key.is<int>() && json.is<JsonArray>()) {
-                                            json = json[keys_key.as<int>()].as<JsonVariant>();
-                                        } else {
-                                            break; // type mismatch
-                                        }
-                                    }
-                                    result = json.as<std::string>();
+                                    break; // type mismatch
                                 }
                             }
+
+                            result = json.as<std::string>();
                         }
+
                         expr_new.replace(f, e - f, result.c_str());
                     }
-                    http->end();
                 }
-                delete http;
+
+                expr_new.replace(f, e - f, result);
+            } else if (httpResult != 0) {
+                // httpResult of 0 means no url
+                EMSESP::logger().warning("URL command failed with https code: %d, response: %s", httpResult, result.c_str());
             }
         }
+
         f = expr_new.find_first_of('{', e);
     }
 
     // positions: q-questionmark, c-colon
-    auto q = expr_new.find_first_of('?');
+    auto q = find_unquoted(expr_new, '?');
     while (q != std::string::npos) {
         // find corresponding colon
-        auto c1 = expr_new.find_first_of(':', q + 1);
-        auto q1 = expr_new.find_first_of('?', q + 1);
+        auto c1 = find_unquoted(expr_new, ':', q + 1);
+        auto q1 = find_unquoted(expr_new, '?', q + 1);
         while (q1 < c1 && q1 != std::string::npos && c1 != std::string::npos) {
-            q1 = expr_new.find_first_of('?', q1 + 1);
-            c1 = expr_new.find_first_of(':', c1 + 1);
+            q1 = find_unquoted(expr_new, '?', q1 + 1);
+            c1 = find_unquoted(expr_new, ':', c1 + 1);
         }
+
         if (c1 == std::string::npos) {
             return ""; // error: missing colon
         }
+
         auto s  = q; // start search brackets
         int  br = 0; // count brackets
         while (s > 0 && (br || expr_new[s - 1] != '(')) {
             s--;
             br += (expr_new[s] == '(' ? -1 : expr_new[s] == ')' ? 1 : 0);
         }
+
         std::string cond = calculate(expr_new.substr(s, q - s));
         if (cond.length() == 0) {
             return "";
@@ -812,6 +875,7 @@ std::string compute(const std::string & expr) {
                     br += (expr_new[e] == ')' ? -1 : expr_new[e] == '(' ? 1 : 0);
                 }
             }
+
             expr_new.erase(c1, e + 1 - c1); // remove second expression after colon
             expr_new.erase(s, q + 1 - s);   // remove condition before questionmark
         } else if (cond[0] == '0') {
@@ -819,7 +883,8 @@ std::string compute(const std::string & expr) {
         } else {
             return ""; // error
         }
-        q = expr_new.find_first_of('?'); // search next instance
+
+        q = find_unquoted(expr_new, '?'); // search next instance
     }
 
     return calculate(expr_new);

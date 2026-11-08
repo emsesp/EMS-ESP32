@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -115,7 +115,6 @@ class Solar : public EMSdevice {
     // telegram 0x361 Differential control
     uint8_t diffControl_; // is *10
 
-
     // telegram 0x380
     uint8_t  climateZone_;    // climate zone identifier
     uint16_t collector1Area_; // Area of collector field 1
@@ -137,30 +136,30 @@ class Solar : public EMSdevice {
 
     std::deque<int16_t> energy;
 
-    void process_SM10Monitor(std::shared_ptr<const Telegram> telegram);
-    void process_SM10Config(std::shared_ptr<const Telegram> telegram);
-    void process_SM100SystemConfig(std::shared_ptr<const Telegram> telegram);
-    void process_SM100CircuitConfig(std::shared_ptr<const Telegram> telegram);
-    void process_SM100Circuit2Config(std::shared_ptr<const Telegram> telegram);
-    void process_SM100ParamCfg(std::shared_ptr<const Telegram> telegram);
-    void process_SM100Monitor(std::shared_ptr<const Telegram> telegram);
-    void process_SM100Monitor2(std::shared_ptr<const Telegram> telegram);
+    void process_SM10Monitor(const std::shared_ptr<const Telegram> & telegram);
+    void process_SM10Config(const std::shared_ptr<const Telegram> & telegram);
+    void process_SM100SystemConfig(const std::shared_ptr<const Telegram> & telegram);
+    void process_SM100CircuitConfig(const std::shared_ptr<const Telegram> & telegram);
+    void process_SM100Circuit2Config(const std::shared_ptr<const Telegram> & telegram);
+    void process_SM100ParamCfg(const std::shared_ptr<const Telegram> & telegram);
+    void process_SM100Monitor(const std::shared_ptr<const Telegram> & telegram);
+    void process_SM100Monitor2(const std::shared_ptr<const Telegram> & telegram);
 
-    void process_SM100Config(std::shared_ptr<const Telegram> telegram);
-    void process_SM100Config1(std::shared_ptr<const Telegram> telegram);
+    void process_SM100Config(const std::shared_ptr<const Telegram> & telegram);
+    void process_SM100Config1(const std::shared_ptr<const Telegram> & telegram);
 
-    void process_SM100Status(std::shared_ptr<const Telegram> telegram);
-    void process_SM100Status2(std::shared_ptr<const Telegram> telegram);
-    void process_SM100CollectorConfig(std::shared_ptr<const Telegram> telegram);
-    void process_SM100Energy(std::shared_ptr<const Telegram> telegram);
-    void process_SM100Time(std::shared_ptr<const Telegram> telegram);
+    void process_SM100Status(const std::shared_ptr<const Telegram> & telegram);
+    void process_SM100Status2(const std::shared_ptr<const Telegram> & telegram);
+    void process_SM100CollectorConfig(const std::shared_ptr<const Telegram> & telegram);
+    void process_SM100Energy(const std::shared_ptr<const Telegram> & telegram);
+    void process_SM100Time(const std::shared_ptr<const Telegram> & telegram);
 
-    void process_SM100HeatAssist(std::shared_ptr<const Telegram> telegram);
-    void process_SM100Differential(std::shared_ptr<const Telegram> telegram);
+    void process_SM100HeatAssist(const std::shared_ptr<const Telegram> & telegram);
+    void process_SM100Differential(const std::shared_ptr<const Telegram> & telegram);
 
-    void process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram);
-    void process_ISM1Set(std::shared_ptr<const Telegram> telegram);
-    void process_ISM2StatusMessage(std::shared_ptr<const Telegram> telegram);
+    void process_ISM1StatusMessage(const std::shared_ptr<const Telegram> & telegram);
+    void process_ISM1Set(const std::shared_ptr<const Telegram> & telegram);
+    void process_ISM2StatusMessage(const std::shared_ptr<const Telegram> & telegram);
 
     // settings
     bool set_CollectorMaxTemp(const char * value, const int8_t id);

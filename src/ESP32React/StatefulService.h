@@ -50,6 +50,7 @@ class StatefulService {
         if (!cb) {
             return 0;
         }
+
         StateUpdateHandlerInfo_t updateHandler(std::move(cb), allowRemove);
         _updateHandlers.push_back(std::move(updateHandler));
         return updateHandler._id;
@@ -73,6 +74,7 @@ class StatefulService {
         if (result == StateUpdateResult::CHANGED) {
             callUpdateHandlers();
         }
+
         return result;
     }
 
@@ -90,6 +92,7 @@ class StatefulService {
         if (result == StateUpdateResult::CHANGED) {
             callUpdateHandlers();
         }
+
         return result;
     }
 

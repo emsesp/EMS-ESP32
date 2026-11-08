@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,13 +41,13 @@ Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
 
 // message 0x9D switch on/off
 // Thermostat(0x10) -> Switch(0x11), ?(0x9D), data: 00
-void Switch::process_WM10SetMessage(std::shared_ptr<const Telegram> telegram) {
+void Switch::process_WM10SetMessage(const std::shared_ptr<const Telegram> & telegram) {
     has_update(telegram, activated_, 0);
 }
 
 // message 0x9C holds flowtemp and unknown status value
 // Switch(0x11) -> All(0x00), ?(0x9C), data: 01 BA 00 01 00
-void Switch::process_WM10MonitorMessage(std::shared_ptr<const Telegram> telegram) {
+void Switch::process_WM10MonitorMessage(const std::shared_ptr<const Telegram> & telegram) {
     has_update(telegram, flowTempHc_, 0); // is * 10
     has_update(telegram, status_, 2);
     // has_update(telegram, status2_, 3)); // unknown
@@ -55,7 +55,7 @@ void Switch::process_WM10MonitorMessage(std::shared_ptr<const Telegram> telegram
 
 // message 0x1E flow temperature, same as in 9C, published often, republished also by boiler UBAFast 0x18
 // Switch(0x11) -> Boiler(0x08), ?(0x1E), data: 01 BA
-void Switch::process_WM10TempMessage(std::shared_ptr<const Telegram> telegram) {
+void Switch::process_WM10TempMessage(const std::shared_ptr<const Telegram> & telegram) {
     has_update(telegram, flowTempHc_, 0); // is * 10
 }
 

@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,21 +38,22 @@ DeviceValue::DeviceValue(uint8_t               device_type,
                          int16_t               min,
                          uint32_t              max,
                          uint8_t               state)
-    : device_type(device_type)
-    , tag(tag)
-    , value_p(value_p)
-    , type(type)
-    , options(options)
-    , options_single(options_single)
-    , numeric_operator(numeric_operator)
+    // Initializer list ordered to match the reordered field declarations in
+    // emsdevicevalue.h (pointers first, then 1-byte block, then 2/4-byte, then std::string)
+    : value_p(value_p)
     , short_name(short_name)
     , fullname(fullname)
-    , custom_fullname(custom_fullname)
+    , options(options)
+    , options_single(options_single)
+    , device_type(device_type)
+    , tag(tag)
+    , type(type)
+    , state(state)
+    , numeric_operator(numeric_operator)
     , uom(uom)
     , has_cmd(has_cmd)
     , min(min)
-    , max(max)
-    , state(state) {
+    , max(max) {
     // calculate #options in options list
     if (options_single) {
         options_size = 1;
@@ -60,8 +61,10 @@ DeviceValue::DeviceValue(uint8_t               device_type,
         options_size = Helpers::count_items(options);
     }
 
-    // set the min/max
-    set_custom_minmax();
+    // store the custom name on the heap, but only if one was actually provided
+    if (!custom_fullname.empty()) {
+        custom_fullname_ = std::make_unique<std::string>(custom_fullname);
+    }
 
     /*
 #ifdef EMSESP_STANDALONE
@@ -108,10 +111,12 @@ DeviceValue::DeviceValue(uint8_t               device_type,
 const char * DeviceValue::DeviceValueUOM_s[] = {
 
     F_(uom_blank), // 0
-    F_(uom_degrees), F_(uom_degrees), F_(uom_percent), F_(uom_lmin), F_(uom_kwh),  F_(uom_wh),      FL_(hours)[0], FL_(minutes)[0],
-    F_(uom_ua),      F_(uom_bar),     F_(uom_kw),      F_(uom_w),    F_(uom_kb),   FL_(seconds)[0], F_(uom_dbm),   F_(uom_fahrenheit),
-    F_(uom_mv),      F_(uom_sqm),     F_(uom_m3),      F_(uom_l),    F_(uom_kmin), F_(uom_k),       F_(uom_volts), F_(uom_mbar),
-    F_(uom_lh),      F_(uom_ctkwh),   F_(uom_hz),      F_(uom_blank)
+    F_(uom_degrees), F_(uom_degrees), F_(uom_percent), F_(uom_lmin), F_(uom_kwh),     F_(uom_wh),   FL_(hours)[0],      FL_(minutes)[0], F_(uom_ua),
+    F_(uom_bar),     F_(uom_kw),      F_(uom_w),       F_(uom_kb),   FL_(seconds)[0], F_(uom_dbm),  F_(uom_fahrenheit), F_(uom_mv),      F_(uom_sqm),
+    F_(uom_m3),      F_(uom_l),       F_(uom_kmin),    F_(uom_k),    F_(uom_volts),   F_(uom_mbar), F_(uom_lh),         F_(uom_ctkwh),   F_(uom_hz),
+    F_(uom_blank), // connectivity
+    F_(uom_blank), // timestamp
+    F_(uom_blank)  // blank
 
 };
 
@@ -229,7 +234,6 @@ const char * const DeviceValue::DeviceValueTAG_mqtt[] = {
     FL_(tag_src15)[0],       // "src15"
     FL_(tag_src16)[0]        // "src16"
 
-
 };
 
 // count #tags once at compile time
@@ -289,11 +293,15 @@ bool DeviceValue::has_tag() const {
 bool DeviceValue::get_min_max(int16_t & dv_set_min, uint32_t & dv_set_max) {
     uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (uom == DeviceValueUOM::DEGREES) ? 2 : (uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
-    // if we have individual limits set already, just do the conversion
+    // Register limits stay in min/max. Custom limits, if any, are applied only here.
     // limits are not scaled with num operator and temperatures are °C
-    if (min != 0 || max != 0) {
-        dv_set_min = Helpers::transformNumFloat(min, 0, fahrenheit);
-        dv_set_max = Helpers::transformNumFloat(max, 0, fahrenheit);
+    int16_t  eff_min = min;
+    uint32_t eff_max = max;
+    apply_custom_minmax(eff_min, eff_max);
+
+    if (eff_min != 0 || eff_max != 0) {
+        dv_set_min = Helpers::transformNumFloat(eff_min, 0, fahrenheit);
+        dv_set_max = Helpers::transformNumFloat(eff_max, 0, fahrenheit);
         return true;
     }
 
@@ -319,6 +327,7 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, uint32_t & dv_set_max) {
         } else {
             dv_set_max = Helpers::transformNumFloat(EMS_VALUE_UINT8_NOTSET - 1, numeric_operator, fahrenheit);
         }
+
         return true;
     }
 
@@ -330,6 +339,7 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, uint32_t & dv_set_max) {
             dv_set_min = Helpers::transformNumFloat(-EMS_VALUE_INT8_NOTSET + 1, numeric_operator, fahrenheit);
             dv_set_max = Helpers::transformNumFloat(EMS_VALUE_INT8_NOTSET - 1, numeric_operator, fahrenheit);
         }
+
         return true;
     }
 
@@ -341,56 +351,110 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, uint32_t & dv_set_max) {
     return false; // nothing changed, not supported
 }
 
-// extract custom min from custom_fullname
-bool DeviceValue::get_custom_min(int16_t & val) {
-    auto    min_pos    = custom_fullname.find('>');
-    bool    has_min    = (min_pos != std::string::npos);
-    uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (uom == DeviceValueUOM::DEGREES) ? 2 : (uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
+// extract custom min from custom_fullname, in °C. Does not range-check against the register limits.
+bool DeviceValue::get_custom_min(int16_t & val) const {
+    const auto & cf         = custom_fullname();
+    auto         min_pos    = cf.find('>');
+    bool         has_min    = (min_pos != std::string::npos);
+    uint8_t      fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (uom == DeviceValueUOM::DEGREES) ? 2 : (uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
     if (has_min) {
-        int32_t v = Helpers::atoint(custom_fullname.substr(min_pos + 1).c_str());
+        int32_t v = Helpers::atoint(cf.substr(min_pos + 1).c_str());
         if (fahrenheit) {
             v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
         }
-        if (max > 0 && v > 0 && (uint32_t)v > max) {
-            return false;
-        }
+
         val = v;
     }
+
     return has_min;
 }
 
-// extract custom max from custom_fullname
-bool DeviceValue::get_custom_max(uint32_t & val) {
-    auto    max_pos    = custom_fullname.find('<');
-    bool    has_max    = (max_pos != std::string::npos);
-    uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (uom == DeviceValueUOM::DEGREES) ? 2 : (uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
+// extract custom max from custom_fullname, in °C. Does not range-check against the register limits.
+bool DeviceValue::get_custom_max(uint32_t & val) const {
+    const auto & cf         = custom_fullname();
+    auto         max_pos    = cf.find('<');
+    bool         has_max    = (max_pos != std::string::npos);
+    uint8_t      fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (uom == DeviceValueUOM::DEGREES) ? 2 : (uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
     if (has_max) {
-        int32_t v = Helpers::atoint(custom_fullname.substr(max_pos + 1).c_str());
+        int32_t v = Helpers::atoint(cf.substr(max_pos + 1).c_str());
         if (fahrenheit) {
             v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
         }
-        if (v < 0 || v < (int32_t)min) {
+
+        if (v < 0) {
             return false;
         }
+
         val = v;
     }
+
     return has_max;
 }
 
-// sets min max to stored custom values (if set)
-void DeviceValue::set_custom_minmax() {
-    get_custom_min(min);
-    get_custom_max(max);
+// Overlay custom limits onto copies of the register min/max. A custom min is checked against
+// the custom max when both are set, so a range outside the register limits is still accepted.
+void DeviceValue::apply_custom_minmax(int16_t & eff_min, uint32_t & eff_max, bool * min_custom, bool * max_custom) const {
+    int16_t  cmin     = 0;
+    uint32_t cmax     = 0;
+    bool     has_cmin = get_custom_min(cmin);
+    bool     has_cmax = get_custom_max(cmax);
+
+    if (has_cmin) {
+        uint32_t bound = has_cmax ? cmax : eff_max;
+        if (bound > 0 && cmin > 0 && (uint32_t)cmin > bound) {
+            has_cmin = false;
+        }
+    }
+
+    if (has_cmax) {
+        int32_t bound = has_cmin ? cmin : eff_min;
+        if ((int32_t)cmax < bound) {
+            has_cmax = false;
+        }
+    }
+
+    if (has_cmin) {
+        eff_min = cmin;
+    }
+    if (has_cmax) {
+        eff_max = cmax;
+    }
+
+    if (min_custom) {
+        *min_custom = has_cmin;
+    }
+    if (max_custom) {
+        *max_custom = has_cmax;
+    }
+}
+
+// raw stored custom name (empty string if none was set)
+const std::string & DeviceValue::custom_fullname() const {
+    static const std::string empty_string;
+    return custom_fullname_ ? *custom_fullname_ : empty_string;
+}
+
+// set or clear the custom name, only allocating heap when there's actually a name
+void DeviceValue::set_custom_fullname(const std::string & name) {
+    if (name.empty()) {
+        custom_fullname_.reset();
+    } else if (custom_fullname_) {
+        *custom_fullname_ = name;
+    } else {
+        custom_fullname_ = std::make_unique<std::string>(name);
+    }
 }
 
 std::string DeviceValue::get_custom_fullname() const {
-    auto min_pos    = custom_fullname.find('>');
-    auto max_pos    = custom_fullname.find('<');
-    auto minmax_pos = min_pos < max_pos ? min_pos : max_pos;
+    const auto & cf         = custom_fullname();
+    auto         min_pos    = cf.find('>');
+    auto         max_pos    = cf.find('<');
+    auto         minmax_pos = min_pos < max_pos ? min_pos : max_pos;
     if (minmax_pos != std::string::npos) {
-        return custom_fullname.substr(0, minmax_pos);
+        return cf.substr(0, minmax_pos);
     }
-    return custom_fullname;
+
+    return cf;
 }
 
 // returns the translated fullname or the custom fullname (if provided)
@@ -400,6 +464,7 @@ std::string DeviceValue::get_fullname() const {
     if (customname.empty()) {
         return Helpers::translated_word(fullname);
     }
+
     return customname;
 }
 
@@ -409,6 +474,7 @@ std::string DeviceValue::get_name(const std::string & entity) {
     if (pos != std::string::npos) {
         return entity.substr(2, pos - 2);
     }
+
     return entity.substr(2);
 }
 

@@ -1,5 +1,4 @@
 import { memo, useCallback, useContext, useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -23,10 +22,10 @@ import {
 
 import * as NetworkApi from 'api/network';
 import { API } from 'api/app';
+import { readSystemStatus } from 'api/system';
 
 import { updateState, useRequest } from 'alova/client';
 import type { APIcall } from 'app/main/types';
-import type { ValidateFieldsError } from 'async-validator';
 import {
   BlockFormControlLabel,
   BlockNavigation,
@@ -37,11 +36,13 @@ import {
   ValidatedPasswordField,
   ValidatedTextField
 } from 'components';
+import { toast } from 'components/toast';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { NetworkSettingsType } from 'types';
 import { updateValueDirty, useRest } from 'utils';
 import { ValidationError, validate } from 'validators';
 import { createNetworkSettingsValidator } from 'validators/network';
+import type { ValidateFieldsError } from 'validators/schema';
 
 import SystemMonitor from '../../status/SystemMonitor';
 import { WiFiConnectionContext } from './WiFiConnectionContext';
@@ -49,6 +50,8 @@ import { isNetworkOpen, networkSecurityMode } from './WiFiNetworkSelector';
 
 const NetworkSettings = () => {
   const { LL } = useI18nContext();
+
+  const { data: hardwareData } = useRequest(readSystemStatus);
 
   const { selectedNetwork, deselectNetwork } = useContext(WiFiConnectionContext);
 
@@ -89,10 +92,11 @@ const NetworkSettings = () => {
             static_ip_config: false,
             bandwidth20: false,
             tx_power: 0,
-            nosleep: false,
+            nosleep: true,
             enableMDNS: true,
             enableCORS: false,
-            CORSOrigin: '*'
+            CORSOrigin: '*',
+            eth_10mbit: current_data ? current_data.eth_10mbit : false
           })
         );
       }
@@ -121,22 +125,22 @@ const NetworkSettings = () => {
     deselectNetwork();
   }, [data, saveData, deselectNetwork]);
 
-  const setCancel = useCallback(async () => {
+  const setCancel = async () => {
     deselectNetwork();
     await loadData();
-  }, [deselectNetwork, loadData]);
+  };
 
-  const doRestart = useCallback(async () => {
+  const doRestart = async () => {
     setRestarting(true);
     await sendAPI({ device: 'system', cmd: 'restart', id: 0 }).catch(
       (error: Error) => {
         toast.error(error.message);
       }
     );
-  }, [sendAPI]);
+  };
 
   const content = () => {
-    if (!data) {
+    if (!data || !hardwareData) {
       return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
     }
 
@@ -173,7 +177,7 @@ const NetworkSettings = () => {
           <ValidatedTextField
             fieldErrors={fieldErrors || {}}
             name="ssid"
-            label={'SSID (' + LL.NETWORK_BLANK_SSID() + ')'}
+            label="SSID"
             fullWidth
             variant="outlined"
             value={data.ssid}
@@ -246,6 +250,23 @@ const NetworkSettings = () => {
           }
           label={LL.NETWORK_LOW_BAND()}
         />
+        {hardwareData.esp_platform === 'ESP32' && (
+          <>
+            <Typography sx={{ pt: 2 }} variant="h6" color="primary">
+              Ethernet
+            </Typography>
+            <BlockFormControlLabel
+              control={
+                <Checkbox
+                  name="eth_10mbit"
+                  checked={data.eth_10mbit}
+                  onChange={updateFormValue}
+                />
+              }
+              label="Force 10Mbit half-duplex"
+            />
+          </>
+        )}
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           {LL.GENERAL_OPTIONS()}
         </Typography>
@@ -332,28 +353,28 @@ const NetworkSettings = () => {
               onChange={updateFormValue}
               margin="normal"
             />
-            <ValidatedTextField
-              fieldErrors={fieldErrors || {}}
-              name="dns_ip_1"
-              label="DNS #1"
-              fullWidth
-              variant="outlined"
-              value={data.dns_ip_1}
-              onChange={updateFormValue}
-              margin="normal"
-            />
-            <ValidatedTextField
-              fieldErrors={fieldErrors || {}}
-              name="dns_ip_2"
-              label="DNS #2"
-              fullWidth
-              variant="outlined"
-              value={data.dns_ip_2}
-              onChange={updateFormValue}
-              margin="normal"
-            />
           </>
         )}
+        <ValidatedTextField
+          fieldErrors={fieldErrors || {}}
+          name="dns_ip_1"
+          label="DNS #1"
+          fullWidth
+          variant="outlined"
+          value={data.dns_ip_1}
+          onChange={updateFormValue}
+          margin="normal"
+        />
+        <ValidatedTextField
+          fieldErrors={fieldErrors || {}}
+          name="dns_ip_2"
+          label="DNS #2"
+          fullWidth
+          variant="outlined"
+          value={data.dns_ip_2}
+          onChange={updateFormValue}
+          margin="normal"
+        />
         {restartNeeded && (
           <MessageBox level="warning" message={LL.RESTART_TEXT(0)}>
             <Button

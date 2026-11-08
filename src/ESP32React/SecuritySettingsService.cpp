@@ -1,14 +1,14 @@
 #include "SecuritySettingsService.h"
 
+#include "../core/psram_async_json_response.h"
+
 SecuritySettingsService::SecuritySettingsService(AsyncWebServer * server, FS * fs)
     : _httpEndpoint(SecuritySettings::read, SecuritySettings::update, this, server, SECURITY_SETTINGS_PATH, this)
     , _fsPersistence(SecuritySettings::read, SecuritySettings::update, this, fs, SECURITY_SETTINGS_FILE)
     , _jwtHandler(FACTORY_JWT_SECRET) {
     addUpdateHandler([this] { configureJWTHandler(); }, false);
 
-    server->on(GENERATE_TOKEN_PATH,
-               HTTP_GET,
-               SecuritySettingsService::wrapRequest([this](AsyncWebServerRequest * request) { generateToken(request); }, AuthenticationPredicates::IS_ADMIN));
+    addEndpoint(server, GENERATE_TOKEN_PATH, AuthenticationPredicates::IS_ADMIN, [this](AsyncWebServerRequest * request) { generateToken(request); });
 }
 
 void SecuritySettingsService::begin() {
@@ -24,11 +24,12 @@ Authentication SecuritySettingsService::authenticateRequest(AsyncWebServerReques
             value = value.substring(AUTHORIZATION_HEADER_PREFIX_LEN);
             return authenticateJWT(value);
         }
-    } else if (request->hasParam(ACCESS_TOKEN_PARAMATER)) {
-        auto   tokenParamater = request->getParam(ACCESS_TOKEN_PARAMATER);
+    } else if (request->hasParam(ACCESS_TOKEN_PARAMETER)) {
+        auto   tokenParamater = request->getParam(ACCESS_TOKEN_PARAMETER);
         String value          = tokenParamater->value();
         return authenticateJWT(value);
     }
+
     return {};
 }
 
@@ -48,6 +49,7 @@ Authentication SecuritySettingsService::authenticateJWT(String & jwt) {
             }
         }
     }
+
     return {};
 }
 
@@ -57,6 +59,7 @@ Authentication SecuritySettingsService::authenticate(const String & username, co
             return Authentication(_user);
         }
     }
+
     return {};
 }
 
@@ -79,40 +82,11 @@ String SecuritySettingsService::generateJWT(const User * user) {
     return _jwtHandler.buildJWT(payload);
 }
 
-ArRequestFilterFunction SecuritySettingsService::filterRequest(AuthenticationPredicate predicate) {
-    return [this, predicate](AsyncWebServerRequest * request) {
-        Authentication authentication = authenticateRequest(request);
-        return predicate(authentication);
-    };
-}
-
-ArRequestHandlerFunction SecuritySettingsService::wrapRequest(ArRequestHandlerFunction onRequest, AuthenticationPredicate predicate) {
-    return [this, onRequest, predicate](AsyncWebServerRequest * request) {
-        Authentication authentication = authenticateRequest(request);
-        if (!predicate(authentication)) {
-            request->send(401);
-            return;
-        }
-        onRequest(request);
-    };
-}
-
-ArJsonRequestHandlerFunction SecuritySettingsService::wrapCallback(ArJsonRequestHandlerFunction onRequest, AuthenticationPredicate predicate) {
-    return [this, onRequest, predicate](AsyncWebServerRequest * request, JsonVariant json) {
-        Authentication authentication = authenticateRequest(request);
-        if (!predicate(authentication)) {
-            request->send(401);
-            return;
-        }
-        onRequest(request, json);
-    };
-}
-
 void SecuritySettingsService::generateToken(AsyncWebServerRequest * request) {
     auto usernameParam = request->getParam("username");
     for (const User & _user : _state.users) {
         if (_user.username == usernameParam->value()) {
-            auto *     response = new AsyncJsonResponse(false);
+            auto *     response = new emsesp::PsramAsyncJsonResponse(false);
             JsonObject root     = response->getRoot();
             root["token"]       = generateJWT(&_user);
             response->setLength();
@@ -120,5 +94,6 @@ void SecuritySettingsService::generateToken(AsyncWebServerRequest * request) {
             return;
         }
     }
+
     request->send(401);
 }

@@ -29,7 +29,8 @@ BreakBeforeBinaryOperators: NonAssignment
 BreakConstructorInitializersBeforeComma: true # Always break constructor initializers before commas and align the commas with the colon.
 ExperimentalAutoDetectBinPacking: false
 KeepEmptyLinesAtTheStartOfBlocks: false
-MaxEmptyLinesToKeep: 4
+MaxEmptyLinesToKeep: 1
+InsertNewlineAtEOF: true # clang-format 16+: one newline at end of file if missing
 PenaltyBreakBeforeFirstCallParameter: 200
 PenaltyExcessCharacter: 10
 PointerAlignment: Middle

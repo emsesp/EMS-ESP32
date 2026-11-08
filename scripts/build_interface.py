@@ -110,6 +110,12 @@ def build_webUI(*args, **kwargs):
     env.Exit(0)
 
 
+# The web interface is only built by the "build" target. Skip any other, e.g. `pio run -t upload` also runs this
+# environment when it's one of the default_envs, and it has nothing to upload
+if "build" not in [t.strip() for t in COMMAND_LINE_TARGETS]:
+    print("Skipping the web interface build, the target is not 'build'")
+    env.Exit(0)
+
 # Create custom target that only runs the script and then exits, without continuing with the pio workflow
 env.AddCustomTarget(
     name="build",

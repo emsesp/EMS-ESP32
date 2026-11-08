@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useBlocker, useLocation } from 'react-router';
-import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import EditIcon from '@mui/icons-material/Edit';
@@ -12,6 +11,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
@@ -46,6 +46,7 @@ import {
   SectionContent,
   useLayoutTitle
 } from 'components';
+import { toast } from 'components/toast';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import {
@@ -91,6 +92,8 @@ const Customizations = () => {
   const [deviceEntities, setDeviceEntities] = useState<DeviceEntity[]>([]);
   const [confirmReset, setConfirmReset] = useState<boolean>(false);
   const [selectedFilters, setSelectedFilters] = useState<number>(0);
+  const [modifiedOnly, setModifiedOnly] = useState<boolean>(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState('');
   const [selectedDeviceEntity, setSelectedDeviceEntity] = useState<DeviceEntity>();
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
@@ -171,30 +174,28 @@ const Customizations = () => {
     );
   };
 
-  const entities_theme = useMemo(
-    () =>
-      useTheme({
-        Table: `
-      --data-table-library_grid-template-columns: 156px repeat(1, minmax(80px, 1fr)) 45px minmax(45px, auto) minmax(120px, auto);
+  const entities_theme = useTheme({
+    Table: `
+      --data-table-library_grid-template-columns: 32px 156px repeat(1, minmax(80px, 1fr)) 45px minmax(45px, auto) minmax(120px, auto);
     `,
-        BaseRow: `
+    BaseRow: `
       font-size: 14px;
       .td {
         height: 32px;
       }
     `,
-        BaseCell: `
-      &:nth-of-type(3) {
+    BaseCell: `
+      &:nth-of-type(4) {
         text-align: right;
       }
-      &:nth-of-type(4) {
+      &:nth-of-type(5) {
         text-align: right;
       }
       &:last-of-type {
         text-align: right;
       }
     `,
-        HeaderRow: `
+    HeaderRow: `
       text-transform: uppercase;
       background-color: black;
       color: #90CAF9;
@@ -206,7 +207,7 @@ const Customizations = () => {
         text-align: center;
       }
     `,
-        Row: `
+    Row: `
       background-color: #1e1e1e;
       position: relative;
       cursor: pointer;
@@ -222,23 +223,21 @@ const Customizations = () => {
         background-color: #177ac9;
       }
     `,
-        Cell: `
-      &:nth-of-type(2) {
+    Cell: `
+      &:nth-of-type(3) {
         padding: 8px;
       }
-      &:nth-of-type(3) {
+      &:nth-of-type(4) {
         padding-right: 4px;
       }
-      &:nth-of-type(4) {
+      &:nth-of-type(5) {
         padding-right: 4px;
       }
       &:last-of-type {
         padding-right: 8px;
       }
     `
-      }),
-    []
-  );
+  });
 
   function hasEntityChanged(de: DeviceEntity) {
     return (
@@ -247,6 +246,11 @@ const Customizations = () => {
       de.ma !== de.o_ma ||
       de.mi !== de.o_mi
     );
+  }
+
+  // Saved customization (c), or an edit that is not applied yet.
+  function isModified(de: DeviceEntity) {
+    return !!de.c || hasEntityChanged(de);
   }
 
   useEffect(() => {
@@ -271,6 +275,7 @@ const Customizations = () => {
           setSelectedDeviceBrand(device.b);
         }
         setNumChanges(0);
+        setSelectedIds(new Set());
         setRestartNeeded(false);
       }
     }
@@ -287,26 +292,30 @@ const Customizations = () => {
     return value as string;
   }
 
-  const isCommand = useCallback((de: DeviceEntity) => {
-    return de.n && de.n[0] === '!';
-  }, []);
+  function formatLimit(value: number | null | undefined) {
+    if (value === null) {
+      return '';
+    }
+    return formatValue(value);
+  }
 
-  const formatName = useCallback(
-    (de: DeviceEntity, withShortname: boolean) => {
-      let name: string;
-      if (isCommand(de)) {
-        name = de.t
-          ? `${LL.COMMAND(1)}: ${de.t} ${de.n?.slice(1)}`
-          : `${LL.COMMAND(1)}: ${de.n?.slice(1)}`;
-      } else if (de.cn && de.cn !== '') {
-        name = de.t ? `${de.t} ${de.cn}` : de.cn;
-      } else {
-        name = de.t ? `${de.t} ${de.n}` : de.n || '';
-      }
-      return withShortname ? `${name} ${de.id}` : name;
-    },
-    [LL]
-  );
+  const isCommand = (de: DeviceEntity) => {
+    return de.n && de.n[0] === '!';
+  };
+
+  const formatName = (de: DeviceEntity, withShortname: boolean) => {
+    let name: string;
+    if (isCommand(de)) {
+      name = de.t
+        ? `${LL.COMMAND(1)}: ${de.t} ${de.n?.slice(1)}`
+        : `${LL.COMMAND(1)}: ${de.n?.slice(1)}`;
+    } else if (de.cn && de.cn !== '') {
+      name = de.t ? `${de.t} ${de.cn}` : de.cn;
+    } else {
+      name = de.t ? `${de.t} ${de.n}` : de.n || '';
+    }
+    return withShortname ? `${name} ${de.id}` : name;
+  };
 
   const getMaskNumber = (newMask: string[]) => {
     let new_mask = 0;
@@ -336,33 +345,67 @@ const Customizations = () => {
     return new_masks;
   };
 
-  const filter_entity = useCallback(
-    (de: DeviceEntity) =>
-      (de.m & selectedFilters || !selectedFilters) &&
-      formatName(de, true).toLowerCase().includes(search.toLowerCase()),
-    [selectedFilters, search, formatName]
-  );
+  const filter_entity = (de: DeviceEntity) =>
+    (de.m & selectedFilters || !selectedFilters) &&
+    (!modifiedOnly || isModified(de)) &&
+    formatName(de, true).toLowerCase().includes(search.toLowerCase());
 
-  const maskDisabled = useCallback(
-    (set: boolean) => {
-      setDeviceEntities((prev) =>
-        prev.map((de) => {
-          if (filter_entity(de)) {
-            const excludeMask =
-              DeviceEntityMask.DV_API_MQTT_EXCLUDE | DeviceEntityMask.DV_WEB_EXCLUDE;
-            return {
-              ...de,
-              m: set ? de.m | excludeMask : de.m & ~excludeMask
-            };
-          }
+  // Checked rows when any are checked, otherwise every row the filter is showing.
+  const inBulkTarget = (de: DeviceEntity) =>
+    selectedIds.size > 0 ? selectedIds.has(de.id) : filter_entity(de);
+
+  const maskDisabled = (set: boolean) => {
+    const excludeMask =
+      DeviceEntityMask.DV_API_MQTT_EXCLUDE | DeviceEntityMask.DV_WEB_EXCLUDE;
+    setDeviceEntities((prev) =>
+      prev.map((de) => {
+        if (!inBulkTarget(de)) {
           return de;
-        })
-      );
-    },
-    [filter_entity]
-  );
+        }
+        return {
+          ...de,
+          m: set ? de.m | excludeMask : de.m & ~excludeMask
+        };
+      })
+    );
+  };
 
-  const resetCustomization = useCallback(async () => {
+  const maskReadonly = (set: boolean) => {
+    setDeviceEntities((prev) =>
+      prev.map((de) => {
+        if (!inBulkTarget(de) || !de.w) {
+          return de;
+        }
+        return {
+          ...de,
+          m: set
+            ? de.m | DeviceEntityMask.DV_READONLY
+            : de.m & ~DeviceEntityMask.DV_READONLY
+        };
+      })
+    );
+  };
+
+  const resetSelected = () => {
+    setDeviceEntities((prev) =>
+      prev.map((de) => {
+        if (!selectedIds.has(de.id)) {
+          return de;
+        }
+        const next: DeviceEntity = { ...de, m: 0, cn: '', c: false };
+        if (de.mi !== undefined) {
+          next.mi = null;
+        }
+        if (de.ma !== undefined) {
+          next.ma = null;
+        }
+        return next;
+      })
+    );
+    setSelectedIds(new Set());
+  };
+
+  const resetCustomization = async () => {
     try {
       await sendResetCustomizations();
       toast.info(LL.CUSTOMIZATIONS_RESTART());
@@ -372,30 +415,27 @@ const Customizations = () => {
       setConfirmReset(false);
       setRestarting(true);
     }
-  }, [sendResetCustomizations, LL]);
+  };
 
   const onDialogClose = () => {
     setDialogOpen(false);
   };
 
-  const updateDeviceEntity = useCallback((updatedItem: DeviceEntity) => {
+  const updateDeviceEntity = (updatedItem: DeviceEntity) => {
     setDeviceEntities(
       (prev) =>
         prev?.map((de) =>
           de.id === updatedItem.id ? { ...de, ...updatedItem } : de
         ) ?? []
     );
-  }, []);
+  };
 
-  const onDialogSave = useCallback(
-    (updatedItem: DeviceEntity) => {
-      setDialogOpen(false);
-      updateDeviceEntity(updatedItem);
-    },
-    [updateDeviceEntity]
-  );
+  const onDialogSave = (updatedItem: DeviceEntity) => {
+    setDialogOpen(false);
+    updateDeviceEntity(updatedItem);
+  };
 
-  const editDeviceEntity = useCallback((de: DeviceEntity) => {
+  const editDeviceEntity = (de: DeviceEntity) => {
     if (de.n === undefined || (de.n && de.n[0] === '!')) {
       return;
     }
@@ -406,9 +446,9 @@ const Customizations = () => {
 
     setSelectedDeviceEntity(de);
     setDialogOpen(true);
-  }, []);
+  };
 
-  const saveCustomization = useCallback(async () => {
+  const saveCustomization = async () => {
     if (!devices || !deviceEntities || selectedDevice === -1) {
       return;
     }
@@ -430,6 +470,8 @@ const Customizations = () => {
     })
       .then(() => {
         toast.success(LL.CUSTOMIZATIONS_SAVED());
+        // Reload so cleared min/max fall back to the built-in limits and the modified flag matches the file.
+        void sendDeviceEntities(selectedDevice);
       })
       .catch((error: Error) => {
         if (error.message === 'Reboot required') {
@@ -441,9 +483,9 @@ const Customizations = () => {
       .finally(() => {
         setOriginalSettings(deviceEntities);
       });
-  }, [devices, deviceEntities, selectedDevice, sendCustomizationEntities, LL]);
+  };
 
-  const renameDevice = useCallback(async () => {
+  const renameDevice = async () => {
     await sendDeviceName({
       id: selectedDevice,
       name: selectedDeviceName,
@@ -459,14 +501,7 @@ const Customizations = () => {
         setRename(false);
         await fetchCoreData();
       });
-  }, [
-    selectedDevice,
-    selectedDeviceName,
-    selectedDeviceBrand,
-    sendDeviceName,
-    LL,
-    fetchCoreData
-  ]);
+  };
 
   const renderDeviceList = () => (
     <>
@@ -512,7 +547,8 @@ const Customizations = () => {
             </MenuItem>
             {devices.devices.map(
               (device: Device) =>
-                device.id < 90 && (
+                device.id < 90 &&
+                device.e !== 0 && (
                   <MenuItem key={device.id} value={device.id}>
                     {device.n}&nbsp;({device.tn})
                   </MenuItem>
@@ -562,10 +598,35 @@ const Customizations = () => {
     </>
   );
 
-  const filteredEntities = useMemo(
-    () => deviceEntities.filter((de) => filter_entity(de)),
-    [deviceEntities, filter_entity]
-  );
+  const filteredEntities = deviceEntities.filter((de) => filter_entity(de));
+  const allFilteredSelected =
+    filteredEntities.length > 0 &&
+    filteredEntities.every((de) => selectedIds.has(de.id));
+  const someFilteredSelected = filteredEntities.some((de) => selectedIds.has(de.id));
+
+  const toggleSelected = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectFiltered = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allFilteredSelected) {
+        filteredEntities.forEach((de) => next.delete(de.id));
+      } else {
+        filteredEntities.forEach((de) => next.add(de.id));
+      }
+      return next;
+    });
+  };
 
   const renderDeviceData = () => {
     return (
@@ -638,6 +699,17 @@ const Customizations = () => {
               size="small"
               sx={{ fontSize: 10 }}
               variant="outlined"
+              color={modifiedOnly ? 'secondary' : 'inherit'}
+              onClick={() => setModifiedOnly((current) => !current)}
+            >
+              {LL.MODIFIED()}
+            </Button>
+          </Grid>
+          <Grid>
+            <Button
+              size="small"
+              sx={{ fontSize: 10 }}
+              variant="outlined"
               color="inherit"
               onClick={() => maskDisabled(false)}
             >
@@ -660,6 +732,43 @@ const Customizations = () => {
             </Button>
           </Grid>
           <Grid>
+            <Button
+              size="small"
+              sx={{ fontSize: 10 }}
+              variant="outlined"
+              color="inherit"
+              onClick={() => maskReadonly(false)}
+            >
+              {LL.SET_ALL()}&nbsp;
+              <OptionIcon type="readonly" isSet={false} />
+            </Button>
+          </Grid>
+          <Grid>
+            <Button
+              size="small"
+              sx={{ fontSize: 10 }}
+              variant="outlined"
+              color="inherit"
+              onClick={() => maskReadonly(true)}
+            >
+              {LL.SET_ALL()}&nbsp;
+              <OptionIcon type="readonly" isSet={true} />
+            </Button>
+          </Grid>
+          {selectedIds.size > 0 && (
+            <Grid>
+              <Button
+                size="small"
+                sx={{ fontSize: 10 }}
+                variant="outlined"
+                color="error"
+                onClick={resetSelected}
+              >
+                {LL.RESET_SELECTED()} ({selectedIds.size})
+              </Button>
+            </Grid>
+          )}
+          <Grid>
             <Typography variant="subtitle2" color="grey">
               {LL.SHOWING()}&nbsp;{filteredEntities.length}/{deviceEntities.length}
               &nbsp;{LL.ENTITIES(deviceEntities.length)}
@@ -675,6 +784,16 @@ const Customizations = () => {
             <>
               <Header>
                 <HeaderRow>
+                  <HeaderCell stiff>
+                    <Checkbox
+                      size="small"
+                      sx={{ p: 0, color: 'inherit' }}
+                      checked={allFilteredSelected}
+                      indeterminate={!allFilteredSelected && someFilteredSelected}
+                      disabled={filteredEntities.length === 0}
+                      onChange={toggleSelectFiltered}
+                    />
+                  </HeaderCell>
                   <HeaderCell stiff>{LL.OPTIONS()}</HeaderCell>
                   <HeaderCell resize>{LL.NAME(1)}</HeaderCell>
                   <HeaderCell stiff>{LL.MIN()}</HeaderCell>
@@ -685,6 +804,14 @@ const Customizations = () => {
               <Body>
                 {tableList.map((de: DeviceEntity) => (
                   <Row key={de.id} item={de} onClick={() => editDeviceEntity(de)}>
+                    <Cell stiff onClick={(event) => event.stopPropagation()}>
+                      <Checkbox
+                        size="small"
+                        sx={{ p: 0 }}
+                        checked={selectedIds.has(de.id)}
+                        onChange={() => toggleSelected(de.id)}
+                      />
+                    </Cell>
                     <Cell stiff>
                       <EntityMaskToggle onUpdate={updateDeviceEntity} de={de} />
                     </Cell>
@@ -712,10 +839,10 @@ const Customizations = () => {
                       </span>
                     </Cell>
                     <Cell>
-                      {!(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.mi)}
+                      {!(de.m & DeviceEntityMask.DV_READONLY) && formatLimit(de.mi)}
                     </Cell>
                     <Cell>
-                      {!(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.ma)}
+                      {!(de.m & DeviceEntityMask.DV_READONLY) && formatLimit(de.ma)}
                     </Cell>
                     <Cell>{formatValue(de.v)}</Cell>
                   </Row>

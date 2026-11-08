@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useBlocker } from 'react-router';
-import { toast } from 'react-toastify';
 
 import AddIcon from '@mui/icons-material/Add';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -26,10 +25,11 @@ import {
   SectionContent,
   useLayoutTitle
 } from 'components';
+import { toast } from 'components/toast';
 import { useI18nContext } from 'i18n/i18n-react';
 import { useInterval } from 'utils';
 
-import { readSchedule, writeSchedule } from '../../api/app';
+import { readCommands, readSchedule, writeSchedule } from '../../api/app';
 import SettingsSchedulerDialog from './SchedulerDialog';
 import { ScheduleFlag } from './types';
 import type { Schedule, ScheduleItem } from './types';
@@ -54,14 +54,13 @@ const DEFAULT_SCHEDULE_ITEM: Omit<ScheduleItem, 'id' | 'o_id'> = {
   deleted: false,
   flags: FLAG_ALL_DAYS,
   time: '',
-  cmd: '',
-  value: '',
+  cmd_name: '',
   name: ''
 };
 
 const scheduleTheme = {
   Table: `
-    --data-table-library_grid-template-columns: 36px 210px 100px 192px repeat(1, minmax(100px, 1fr)) 160px;
+    --data-table-library_grid-template-columns: 36px 220px repeat(1, minmax(20px, 1fr)) 192px 160px;
   `,
   BaseRow: `
     font-size: 14px;
@@ -70,11 +69,8 @@ const scheduleTheme = {
     }
   `,
   BaseCell: `
-    &:nth-of-type(2) {
-      text-align: center;
-    }
     &:nth-of-type(1) {
-      text-align: center;
+      text-align: 8px;
     }
   `,
   HeaderRow: `
@@ -100,7 +96,6 @@ const scheduleTheme = {
 };
 
 const scheduleTypeLabels: Record<number, string> = {
-  [ScheduleFlag.SCHEDULE_IMMEDIATE]: 'Immediate',
   [ScheduleFlag.SCHEDULE_TIMER]: 'Timer',
   [ScheduleFlag.SCHEDULE_CONDITION]: 'Condition',
   [ScheduleFlag.SCHEDULE_ONCHANGE]: 'On Change'
@@ -125,6 +120,11 @@ const Scheduler = () => {
     initialData: []
   });
 
+  const { data: commandNames } = useRequest(readCommands, {
+    initialData: [],
+    initializing: true
+  });
+
   const { send: updateSchedule } = useRequest(
     (data: Schedule) => writeSchedule(data),
     {
@@ -132,7 +132,7 @@ const Scheduler = () => {
     }
   );
 
-  const hasScheduleChanged = useCallback((si: ScheduleItem) => {
+  const hasScheduleChanged = (si: ScheduleItem) => {
     return (
       si.id !== si.o_id ||
       (si.name || '') !== (si.o_name || '') ||
@@ -140,18 +140,15 @@ const Scheduler = () => {
       si.deleted !== si.o_deleted ||
       si.flags !== si.o_flags ||
       si.time !== si.o_time ||
-      si.cmd !== si.o_cmd ||
-      si.value !== si.o_value
+      si.cmd_name !== si.o_cmd_name
     );
-  }, []);
+  };
 
-  const intervalCallback = useCallback(() => {
+  useInterval(() => {
     if (numChanges === 0) {
       void fetchSchedule();
     }
-  }, [numChanges, fetchSchedule]);
-
-  useInterval(intervalCallback, INTERVAL_DELAY);
+  }, INTERVAL_DELAY);
 
   useEffect(() => {
     const formatter = new Intl.DateTimeFormat(locale, {
@@ -169,7 +166,7 @@ const Scheduler = () => {
 
   const schedule_theme = useTheme(scheduleTheme);
 
-  const saveSchedule = useCallback(async () => {
+  const saveSchedule = async () => {
     try {
       await updateSchedule({
         schedule: schedule
@@ -179,8 +176,7 @@ const Scheduler = () => {
             active: condensed_si.active,
             flags: condensed_si.flags,
             time: condensed_si.time,
-            cmd: condensed_si.cmd,
-            value: condensed_si.value,
+            cmd_name: condensed_si.cmd_name,
             name: condensed_si.name
           }))
       });
@@ -192,46 +188,43 @@ const Scheduler = () => {
       await fetchSchedule();
       setNumChanges(0);
     }
-  }, [LL, schedule, updateSchedule, fetchSchedule]);
+  };
 
-  const editScheduleItem = useCallback((si: ScheduleItem) => {
+  const editScheduleItem = (si: ScheduleItem) => {
     setCreating(false);
     setSelectedScheduleItem(si);
     setDialogOpen(true);
     if (si.o_name === undefined) {
       si.o_name = si.name;
     }
-  }, []);
+  };
 
-  const onDialogClose = useCallback(() => {
+  const onDialogClose = () => {
     setDialogOpen(false);
-  }, []);
+  };
 
-  const onDialogCancel = useCallback(async () => {
+  const onDialogCancel = async () => {
     await fetchSchedule().then(() => {
       setNumChanges(0);
     });
-  }, [fetchSchedule]);
+  };
 
-  const onDialogSave = useCallback(
-    (updatedItem: ScheduleItem) => {
-      setDialogOpen(false);
-      void updateState(readSchedule(), (data: ScheduleItem[]) => {
-        const new_data = creating
-          ? [...data, updatedItem]
-          : data.map((si) =>
-              si.id === updatedItem.id ? { ...si, ...updatedItem } : si
-            );
+  const onDialogSave = (updatedItem: ScheduleItem) => {
+    setDialogOpen(false);
+    void updateState(readSchedule(), (data: ScheduleItem[]) => {
+      const new_data = creating
+        ? [...data, updatedItem]
+        : data.map((si) =>
+            si.id === updatedItem.id ? { ...si, ...updatedItem } : si
+          );
 
-        setNumChanges(new_data.filter((si) => hasScheduleChanged(si)).length);
+      setNumChanges(new_data.filter((si) => hasScheduleChanged(si)).length);
 
-        return new_data;
-      });
-    },
-    [creating, hasScheduleChanged]
-  );
+      return new_data;
+    });
+  };
 
-  const addScheduleItem = useCallback(() => {
+  const addScheduleItem = () => {
     setCreating(true);
     const newItem: ScheduleItem = {
       id: Math.floor(Math.random() * (MAX_ID - MIN_ID) + MIN_ID),
@@ -239,36 +232,29 @@ const Scheduler = () => {
     };
     setSelectedScheduleItem(newItem);
     setDialogOpen(true);
-  }, []);
+  };
 
-  const filteredAndSortedSchedule = useMemo(
-    () =>
-      schedule
-        .filter((si: ScheduleItem) => !si.deleted)
-        .sort((a: ScheduleItem, b: ScheduleItem) => a.flags - b.flags),
-    [schedule]
-  );
+  const filteredAndSortedSchedule = schedule
+    .filter((si: ScheduleItem) => !si.deleted)
+    .sort((a: ScheduleItem, b: ScheduleItem) => a.flags - b.flags);
 
-  const dayBox = useCallback(
-    (si: ScheduleItem, flag: number) => {
-      const dayIndex = Math.log(flag) / LOG_2;
-      const isActive = (si.flags & flag) === flag;
+  const dayBox = (si: ScheduleItem, flag: number, isLast = false) => {
+    const dayIndex = Math.log(flag) / LOG_2;
+    const isActive = (si.flags & flag) === flag;
 
-      return (
-        <>
-          <Box>
-            <Typography sx={{ fontSize: 11 }} color={isActive ? 'primary' : 'grey'}>
-              {dow[dayIndex]}
-            </Typography>
-          </Box>
-          <Divider orientation="vertical" flexItem />
-        </>
-      );
-    },
-    [dow]
-  );
+    return (
+      <>
+        <Box>
+          <Typography sx={{ fontSize: 11 }} color={isActive ? 'primary' : 'grey'}>
+            {dow[dayIndex]}
+          </Typography>
+        </Box>
+        {!isLast && <Divider orientation="vertical" flexItem />}
+      </>
+    );
+  };
 
-  const scheduleType = useCallback((si: ScheduleItem) => {
+  const scheduleType = (si: ScheduleItem) => {
     const label = scheduleTypeLabels[si.flags];
 
     return (
@@ -278,9 +264,9 @@ const Scheduler = () => {
         </Typography>
       </Box>
     );
-  }, []);
+  };
 
-  const renderSchedule = useCallback(() => {
+  const renderSchedule = () => {
     if (!schedule) {
       return (
         <FormLoader onRetry={fetchSchedule} errorMessage={error?.message || ''} />
@@ -299,9 +285,10 @@ const Scheduler = () => {
               <HeaderRow>
                 <HeaderCell />
                 <HeaderCell stiff>{LL.SCHEDULE(0)}</HeaderCell>
-                <HeaderCell stiff>{LL.TIME(0)}/Cond.</HeaderCell>
+                <HeaderCell stiff>
+                  {LL.TIME(0)}/{LL.CONDITION()}
+                </HeaderCell>
                 <HeaderCell stiff>{LL.COMMAND(0)}</HeaderCell>
-                <HeaderCell stiff>{LL.VALUE(0)}</HeaderCell>
                 <HeaderCell stiff>{LL.NAME(0)}</HeaderCell>
               </HeaderRow>
             </Header>
@@ -311,12 +298,16 @@ const Scheduler = () => {
                   <Cell stiff>
                     <CircleIcon
                       color={si.active ? 'success' : 'error'}
-                      sx={{ fontSize: ICON_SIZE, verticalAlign: 'middle' }}
+                      sx={{
+                        fontSize: ICON_SIZE,
+                        ml: '4px',
+                        position: 'relative',
+                        top: '2px'
+                      }}
                     />
                   </Cell>
                   <Cell stiff>
                     <Stack spacing={0.5} direction="row">
-                      <Divider orientation="vertical" flexItem />
                       {si.flags > SCHEDULE_FLAG_THRESHOLD ? (
                         scheduleType(si)
                       ) : (
@@ -327,14 +318,13 @@ const Scheduler = () => {
                           {dayBox(si, ScheduleFlag.SCHEDULE_THU)}
                           {dayBox(si, ScheduleFlag.SCHEDULE_FRI)}
                           {dayBox(si, ScheduleFlag.SCHEDULE_SAT)}
-                          {dayBox(si, ScheduleFlag.SCHEDULE_SUN)}
+                          {dayBox(si, ScheduleFlag.SCHEDULE_SUN, true)}
                         </>
                       )}
                     </Stack>
                   </Cell>
-                  <Cell>{si.time}</Cell>
-                  <Cell>{si.cmd}</Cell>
-                  <Cell>{si.value}</Cell>
+                  <Cell>{si.time === '' ? LL.SCHEDULER_HELP_2() : si.time}</Cell>
+                  <Cell>{si.cmd_name}</Cell>
                   <Cell>{si.name}</Cell>
                 </Row>
               ))}
@@ -343,17 +333,7 @@ const Scheduler = () => {
         )}
       </Table>
     );
-  }, [
-    schedule,
-    error,
-    fetchSchedule,
-    filteredAndSortedSchedule,
-    schedule_theme,
-    editScheduleItem,
-    LL,
-    dayBox,
-    scheduleType
-  ]);
+  };
 
   return (
     <SectionContent>
@@ -372,6 +352,7 @@ const Scheduler = () => {
           selectedItem={selectedScheduleItem}
           validator={schedulerItemValidation(schedule, selectedScheduleItem)}
           dow={dow}
+          commandNames={commandNames.map((ci) => ci.name)}
         />
       )}
 

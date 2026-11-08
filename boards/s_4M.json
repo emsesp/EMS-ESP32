@@ -1,7 +1,6 @@
 {
     "build": {
       "core": "esp32",
-      "extra_flags": "-DTASMOTA_SDK",
       "f_cpu": "240000000L",
       "f_flash": "40000000L",
       "flash_mode": "dio",
@@ -18,7 +17,7 @@
       "arduino",
       "espidf"
     ],
-    "name": "Tasmota ESP32 4M Flash, 4608KB Code/OTA, 2MB FS",
+    "name": "ESP32 4M Flash, 4608KB Code/OTA, 2MB FS",
     "upload": {
       "flash_size": "4MB",
       "maximum_ram_size": 327680,

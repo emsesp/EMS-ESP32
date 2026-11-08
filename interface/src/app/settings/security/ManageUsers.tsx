@@ -1,4 +1,4 @@
-import { memo, useCallback, useContext, useMemo, useState } from 'react';
+import { memo, useCallback, useContext, useState } from 'react';
 import { useBlocker } from 'react-router';
 
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -55,16 +55,14 @@ const ManageUsers = () => {
   const blocker = useBlocker(changed !== 0);
   const { LL } = useI18nContext();
 
-  const table_theme = useMemo(
-    () =>
-      useTheme({
-        Table: `
+  const table_theme = useTheme({
+    Table: `
       --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) minmax(120px, max-content) 120px;
     `,
-        BaseRow: `
+    BaseRow: `
       font-size: 14px;
     `,
-        HeaderRow: `
+    HeaderRow: `
       text-transform: uppercase;
       background-color: black;
       color: #90CAF9;
@@ -74,7 +72,7 @@ const ManageUsers = () => {
         border-bottom: 1px solid #565656;
       }
     `,
-        Row: `
+    Row: `
       .td {
         padding: 8px;
         border-top: 1px solid #565656;
@@ -87,7 +85,7 @@ const ManageUsers = () => {
         background-color: #1e1e1e;
       }
     `,
-        BaseCell: `
+    BaseCell: `
       &:nth-of-type(2) {
         text-align: center;
       }
@@ -95,44 +93,36 @@ const ManageUsers = () => {
         text-align: right;
       }
     `
-      }),
-    []
-  );
+  });
 
-  const noAdminConfigured = useCallback(
-    () => !data?.users.find((u) => u.admin),
-    [data]
-  );
+  const noAdminConfigured = () => !data?.users.find((u) => u.admin);
 
-  const removeUser = useCallback(
-    (toRemove: UserType) => {
-      if (!data) return;
-      const users = data.users.filter((u) => u.username !== toRemove.username);
-      updateDataValue({ ...data, users });
-      setChanged(changed + 1);
-    },
-    [data, updateDataValue, changed]
-  );
+  const removeUser = (toRemove: UserType) => {
+    if (!data) return;
+    const users = data.users.filter((u) => u.username !== toRemove.username);
+    updateDataValue({ ...data, users });
+    setChanged(changed + 1);
+  };
 
-  const createUser = useCallback(() => {
+  const createUser = () => {
     setCreating(true);
     setUser({
       username: '',
       password: '',
       admin: true
     });
-  }, []);
+  };
 
-  const editUser = useCallback((toEdit: UserType) => {
+  const editUser = (toEdit: UserType) => {
     setCreating(false);
     setUser({ ...toEdit });
-  }, []);
+  };
 
-  const cancelEditingUser = useCallback(() => {
+  const cancelEditingUser = () => {
     setUser(undefined);
-  }, []);
+  };
 
-  const doneEditingUser = useCallback(() => {
+  const doneEditingUser = () => {
     if (user && data) {
       const users = [
         ...data.users.filter(
@@ -144,26 +134,26 @@ const ManageUsers = () => {
       setUser(undefined);
       setChanged(changed + 1);
     }
-  }, [user, data, updateDataValue, changed]);
+  };
 
   const closeGenerateToken = useCallback(() => {
     setGeneratingToken(undefined);
   }, []);
 
-  const generateTokenForUser = useCallback((username: string) => {
+  const generateTokenForUser = (username: string) => {
     setGeneratingToken(username);
-  }, []);
+  };
 
-  const onSubmit = useCallback(async () => {
+  const onSubmit = async () => {
     await saveData();
     await authenticatedContext.refresh();
     setChanged(0);
-  }, [saveData, authenticatedContext]);
+  };
 
-  const onCancelSubmit = useCallback(async () => {
+  const onCancelSubmit = async () => {
     await loadData();
     setChanged(0);
-  }, [loadData]);
+  };
 
   const content = () => {
     if (!data) {
@@ -177,15 +167,10 @@ const ManageUsers = () => {
       admin: boolean;
     }
 
-    // add id to the type, needed for the table
-    const user_table = useMemo(
-      () =>
-        data.users.map((u) => ({
-          ...u,
-          id: u.username
-        })) as UserType2[],
-      [data.users]
-    );
+    const user_table = data.users.map((u) => ({
+      ...u,
+      id: u.username
+    })) as UserType2[];
 
     return (
       <>

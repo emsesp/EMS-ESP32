@@ -1,8 +1,9 @@
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import CloseIcon from '@mui/icons-material/Close';
 import DoneIcon from '@mui/icons-material/Done';
+import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import {
   Box,
   Button,
@@ -57,23 +58,25 @@ const CustomizationsDialog = ({
   const [editItem, setEditItem] = useState<DeviceEntity>(selectedItem);
   const [error, setError] = useState<boolean>(false);
 
-  const updateFormValue = useMemo(
-    () =>
-      updateValue(
-        setEditItem as unknown as React.Dispatch<
-          React.SetStateAction<Record<string, unknown>>
-        >
-      ),
-    []
+  const updateFormValue = updateValue(
+    setEditItem as unknown as React.Dispatch<
+      React.SetStateAction<Record<string, unknown>>
+    >
   );
 
-  const isWriteableNumber = useMemo(
-    () =>
-      typeof editItem.v === 'number' &&
-      editItem.w &&
-      !(editItem.m & DeviceEntityMask.DV_READONLY),
-    [editItem.v, editItem.w, editItem.m]
-  );
+  const isWriteableNumber =
+    typeof editItem.v === 'number' &&
+    editItem.w &&
+    !(editItem.m & DeviceEntityMask.DV_READONLY);
+
+  // c is set by the firmware for a saved customization. Mask, name, and edited
+  // limits also count, including changes made in this dialog before they are saved.
+  const showReset =
+    !!editItem.c ||
+    editItem.m !== 0 ||
+    (editItem.cn ?? '') !== '' ||
+    editItem.mi !== editItem.o_mi ||
+    editItem.ma !== editItem.o_ma;
 
   useEffect(() => {
     if (open) {
@@ -82,16 +85,16 @@ const CustomizationsDialog = ({
     }
   }, [open, selectedItem]);
 
-  const handleClose = useCallback(
-    (_event: React.SyntheticEvent, reason: 'backdropClick' | 'escapeKeyDown') => {
-      if (reason !== 'backdropClick') {
-        onClose();
-      }
-    },
-    [onClose]
-  );
+  const handleClose = (
+    _event: React.SyntheticEvent,
+    reason: 'backdropClick' | 'escapeKeyDown'
+  ) => {
+    if (reason !== 'backdropClick') {
+      onClose();
+    }
+  };
 
-  const save = useCallback(() => {
+  const save = () => {
     if (
       isWriteableNumber &&
       editItem.mi &&
@@ -102,34 +105,42 @@ const CustomizationsDialog = ({
     } else {
       onSave(editItem);
     }
-  }, [isWriteableNumber, editItem, onSave]);
+  };
 
-  const updateDeviceEntity = useCallback((updatedItem: DeviceEntity) => {
+  const updateDeviceEntity = (updatedItem: DeviceEntity) => {
     setEditItem((prev) => ({ ...prev, m: updatedItem.m }));
-  }, []);
+  };
 
-  const dialogTitle = useMemo(() => `${LL.EDIT()} ${LL.ENTITY()}`, [LL]);
-
-  const writeableIcon = useMemo(
-    () =>
-      editItem.w ? (
-        <DoneIcon color="success" sx={{ fontSize: ICON_SIZE }} />
-      ) : (
-        <CloseIcon color="error" sx={{ fontSize: ICON_SIZE }} />
-      ),
-    [editItem.w]
-  );
+  const remove = () => {
+    const next: DeviceEntity = { ...editItem, m: 0, cn: '', c: false };
+    if (editItem.mi !== undefined) {
+      next.mi = null;
+    }
+    if (editItem.ma !== undefined) {
+      next.ma = null;
+    }
+    onSave(next);
+  };
 
   return (
     <Dialog sx={dialogStyle} open={open} onClose={handleClose}>
-      <DialogTitle>{dialogTitle}</DialogTitle>
+      <DialogTitle>{`${LL.EDIT()} ${LL.ENTITY()}`}</DialogTitle>
       <DialogContent dividers>
         <LabelValue label={LL.ID_OF(LL.ENTITY())} value={editItem.id} />
         <LabelValue
           label={`${LL.DEFAULT(1)} ${LL.ENTITY_NAME(1)}`}
           value={editItem.n}
         />
-        <LabelValue label={LL.WRITEABLE()} value={writeableIcon} />
+        <LabelValue
+          label={LL.WRITEABLE()}
+          value={
+            editItem.w ? (
+              <DoneIcon color="success" sx={{ fontSize: ICON_SIZE }} />
+            ) : (
+              <CloseIcon color="error" sx={{ fontSize: ICON_SIZE }} />
+            )
+          }
+        />
 
         <Box sx={{ mt: 1, mb: 2 }}>
           <EntityMaskToggle onUpdate={updateDeviceEntity} de={editItem} />
@@ -151,7 +162,9 @@ const CustomizationsDialog = ({
                 <TextField
                   name="mi"
                   label={LL.MIN()}
-                  value={numberValue(editItem.mi)}
+                  value={
+                    typeof editItem.mi === 'number' ? numberValue(editItem.mi) : ''
+                  }
                   sx={{ width: '11ch' }}
                   type="number"
                   onChange={updateFormValue}
@@ -161,7 +174,9 @@ const CustomizationsDialog = ({
                 <TextField
                   name="ma"
                   label={LL.MAX()}
-                  value={numberValue(editItem.ma)}
+                  value={
+                    typeof editItem.ma === 'number' ? numberValue(editItem.ma) : ''
+                  }
                   sx={{ width: '11ch' }}
                   type="number"
                   onChange={updateFormValue}
@@ -179,6 +194,17 @@ const CustomizationsDialog = ({
       </DialogContent>
 
       <DialogActions>
+        {showReset && (
+          <Button
+            startIcon={<SettingsBackupRestoreIcon />}
+            variant="outlined"
+            onClick={remove}
+            color="error"
+          >
+            {LL.RESET()}
+          </Button>
+        )}
+        <Box sx={{ flexGrow: 1 }} />
         <Button
           startIcon={<CancelIcon />}
           variant="outlined"

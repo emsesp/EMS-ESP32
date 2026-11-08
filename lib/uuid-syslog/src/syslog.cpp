@@ -231,7 +231,7 @@ SyslogService::QueuedLogMessage::QueuedLogMessage(unsigned long id, std::shared_
     : id_(id)
     , content_(std::move(content)) {
     // Added for EMS-ESP
-    if (time_good_ || emsesp::EMSESP::system_.network_connected()) {
+    if (time_good_ || emsesp::EMSESP::network_.network_connected()) {
 #if UUID_SYSLOG_HAVE_GETTIMEOFDAY
         if (gettimeofday(&time_, nullptr) != 0) {
             time_.tv_sec = (time_t)-1;

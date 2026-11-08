@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,8 +32,9 @@ Alert::Alert(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setFlowTemp_, DeviceValueType::UINT8, FL_(setFlowTemp), DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setBurnPow_, DeviceValueType::UINT8, FL_(setBurnPow), DeviceValueUOM::PERCENT);
 }
+
 // UBASetPoint 0x1A
-void Alert::process_UBASetPoints(std::shared_ptr<const Telegram> telegram) {
+void Alert::process_UBASetPoints(const std::shared_ptr<const Telegram> & telegram) {
     has_update(telegram, setFlowTemp_, 0); // boiler set temp from thermostat
     has_update(telegram, setBurnPow_, 1);  // max burner power in %
 }

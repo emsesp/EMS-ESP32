@@ -92,7 +92,7 @@ void shuntingYard_test21() {
 }
 
 void shuntingYard_test22() {
-    run_shuntingYard_test("", "boiler/storagetemp2 == ''");
+    run_shuntingYard_test("0", "boiler/storagetemp2 == ''");
 }
 
 void shuntingYard_test23() {
@@ -105,6 +105,44 @@ void shuntingYard_test24() {
 
 void shuntingYard_test25() {
     run_shuntingYard_test("hello world!", "'hello world!'");
+}
+
+// non-numeric operands must not crash. should return empty string
+void shuntingYard_test26() {
+    run_shuntingYard_test("", "info/x");
+}
+
+void shuntingYard_test27() {
+    run_shuntingYard_test("", "info-x");
+}
+
+void shuntingYard_test28() {
+    run_shuntingYard_test("", "-x");
+}
+
+// quoted text keeps its spaces and punctuation, unquoted text does not
+void shuntingYard_test29() {
+    run_shuntingYard_test("email test!", "\"email test!\"");
+}
+
+// a trailing '!' on unquoted text is read as a logical NOT and has no valid operand
+void shuntingYard_test30() {
+    run_shuntingYard_test("", "email test!");
+}
+
+// computing an already computed value is lossy - callers must run compute() only once
+void shuntingYard_test31() {
+    run_shuntingYard_test("", emsesp::compute("\"email test!\""));
+}
+
+// a '?' inside quotes is literal text, not a ternary
+void shuntingYard_test32() {
+    run_shuntingYard_test("Is it hot?", "\"Is it hot?\"");
+}
+
+// mixing quoted text with entity values keeps the punctuation of both parts
+void shuntingYard_test33() {
+    run_shuntingYard_test("temp is 40 C!", "\"temp is \" + boiler/flowtempoffset + \" C!\"");
 }
 
 void run_shuntingYard_tests() {
@@ -133,4 +171,12 @@ void run_shuntingYard_tests() {
     RUN_TEST(shuntingYard_test23);
     RUN_TEST(shuntingYard_test24);
     RUN_TEST(shuntingYard_test25);
+    RUN_TEST(shuntingYard_test26);
+    RUN_TEST(shuntingYard_test27);
+    RUN_TEST(shuntingYard_test28);
+    RUN_TEST(shuntingYard_test29);
+    RUN_TEST(shuntingYard_test30);
+    RUN_TEST(shuntingYard_test31);
+    RUN_TEST(shuntingYard_test32);
+    RUN_TEST(shuntingYard_test33);
 }

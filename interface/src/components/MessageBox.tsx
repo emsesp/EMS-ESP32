@@ -1,4 +1,4 @@
-import { type FC, type PropsWithChildren, memo, useMemo } from 'react';
+import { type FC, type PropsWithChildren, memo } from 'react';
 
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -38,18 +38,17 @@ const MessageBox: FC<PropsWithChildren<MessageBoxProps>> = ({
 }) => {
   const theme = useTheme();
 
-  const { Icon, backgroundColor } = useMemo(() => {
-    const Icon = LEVEL_ICONS[level];
-    const palettePath = LEVEL_PALETTE_PATHS[level];
-    const [key, shade] = palettePath.split('.') as [
-      keyof typeof theme.palette,
-      string
-    ];
-    const paletteKey = theme.palette[key] as unknown as Record<string, string>;
-    const backgroundColor = paletteKey[shade];
-
-    return { Icon, backgroundColor };
-  }, [level, theme]);
+  const Icon = LEVEL_ICONS[level];
+  const palettePath = LEVEL_PALETTE_PATHS[level];
+  const [paletteKeyName, shade] = palettePath.split('.') as [
+    keyof typeof theme.palette,
+    string
+  ];
+  const paletteKey = theme.palette[paletteKeyName] as unknown as Record<
+    string,
+    string
+  >;
+  const backgroundColor = paletteKey[shade];
 
   return (
     <Box

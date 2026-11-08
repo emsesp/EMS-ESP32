@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 #ifndef EMSESP_STANDALONE
 #include <esp_ota_ops.h>
 #endif
+#include "emsesp_http_client.h"
 
 namespace emsesp {
 
@@ -44,9 +45,10 @@ WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * se
 // This contains both system & hardware Status to avoid having multiple costly endpoints
 // This is also used for polling during the SystemMonitor to see if EMS-ESP is alive
 void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
-    EMSESP::system_.refreshHeapMem(); // refresh free heap and max alloc heap
+    EMSESP::system_.refreshHeapMem();           // refresh free heap and max alloc heap
+    EMSESP::system_.recovery_installed_apply(); // update the partition info if the recovery firmware was just downloaded
 
-    auto *     response = new AsyncJsonResponse(false);
+    auto *     response = new PsramAsyncJsonResponse(false);
     JsonObject root     = response->getRoot();
 
     //
@@ -67,6 +69,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     if (esp_sntp_enabled()) {
         ntp_status = (EMSESP::system_.ntp_connected()) ? 2 : 1;
     }
+
     root["ntp_status"] = ntp_status;
     if (ntp_status == 2) {
         // send back actual time if NTP enabled and active
@@ -79,9 +82,9 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     }
 #endif
 
-    root["ap_status"] = EMSESP::esp32React.apStatus();
+    root["ap_status"] = EMSESP::network_.ap_connected();
 
-    if (EMSESP::system_.ethernet_connected()) {
+    if (EMSESP::network_.ethernet_connected()) {
         root["network_status"] = 10; // custom code #10 - ETHERNET_STATUS_CONNECTED
         root["wifi_rssi"]      = 0;
     } else {
@@ -127,16 +130,20 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
         root["psram_size"] = EMSESP::system_.PSram();
         root["free_psram"] = ESP.getFreePsram() / 1024;
     }
+
     root["model"] = EMSESP::system_.getBBQKeesGatewayDetails();
     root["board"] = EMSESP::system_.getBBQKeesGatewayDetails(FUSE_VALUE::BOARD);
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
     root["temperature"] = (int)Helpers::transformNumFloat(EMSESP::system_.temperature(), 0, EMSESP::system_.fahrenheit() ? 2 : 0); // only 2 decimal places
 #endif
 
-    // check for a factory partition first
+    // factory partition is only on 16MB boards; recovery_version is empty until a recovery .bin is installed
     const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
-    root["has_loader"]                = partition != NULL && partition != esp_ota_get_running_partition();
-    partition                         = esp_ota_get_next_update_partition(nullptr);
+    if (partition != NULL) {
+        root["recovery_version"] = EMSESP::system_.recovery_version();
+    }
+
+    partition = esp_ota_get_next_update_partition(nullptr);
     if (partition) {
         uint64_t buffer;
         esp_partition_read(partition, 0, &buffer, 8);
@@ -155,6 +162,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
         if (partition.second.version.empty() || partition.second.size == 0) {
             continue;
         }
+
         JsonObject part   = partitions.add<JsonObject>();
         part["partition"] = partition.first;
         part["version"]   = partition.second.version;
@@ -170,6 +178,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     }
 
     root["developer_mode"] = EMSESP::system_.developer_mode();
+    root["disable_reset"]  = EMSESP::system_.disable_reset();
 
     // Also used in SystemMonitor.tsx
     root["status"] = EMSESP::system_.systemStatus(); // send the status. See System.h for status codes
@@ -177,6 +186,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
         // we're ready to do the actual restart ASAP
         EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED);
     }
+
     if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD) {
         // error is reported, back to normal state
         EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_NORMAL);
@@ -190,7 +200,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
 
 // generic action handler - as a POST
 void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json) {
-    auto *     response = new AsyncJsonResponse();
+    auto *     response = new PsramAsyncJsonResponse();
     JsonObject root     = response->getRoot();
 
     // param is optional - https://arduinojson.org/news/2024/09/18/arduinojson-7-2/
@@ -209,11 +219,11 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
     bool           is_admin       = AuthenticationPredicates::IS_ADMIN(authentication);
 
     // call action command
-    bool        ok     = false;
+    bool        ok     = true;
     std::string action = json["action"];
 
-    if (action == "checkUpgrade") {
-        ok = checkUpgrade(root, param); // param could be empty, if so only send back version
+    if (action == "getVersions") {
+        getVersions(root);
     } else if (action == "setPartition") {
         ok = EMSESP::system_.set_partition(param.c_str());
     } else if (action == "export") {
@@ -228,10 +238,10 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
         ok = setSystemStatus(param.c_str());
     } else if (action == "resetMQTT" && is_admin) {
         EMSESP::mqtt_.reset_mqtt();
-        ok = true;
     } else if (action == "upgradeImportantMessages") {
         root["upgradeImportantMessageType"] = upgradeImportantMessages(param);
-        ok                                  = true;
+    } else if (action == "executeCommand") {
+        ok = EMSESP::webCommandService.dispatchCommand(param.c_str()); // command worker task (ok = dispatched); fast internal commands run inline (ok = real result)
     }
 
 #if defined(EMSESP_STANDALONE) && !defined(EMSESP_UNITY)
@@ -256,9 +266,10 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
 
 // action = upgradeImportantMessages
 // returns the type of upgrade important message to display in the UI
-// 0 = no message (if just a minor version upgrade)
-// 1 = going from <= 3.8 to 3.9 (has new partition layout)
-// 2 = major version upgrade
+//  0 = no message (if just a minor version upgrade)
+//  1 = special message for upgrades (no longer used)
+//  2 = major version upgrade
+//  3 = upgrade to 3.10.x or later from an older version, which has breaking security changes
 // version can be like 3.8.2 or a filename like EMS-ESP-3_8_2-dev_13-ESP32-16MB+.bin
 uint8_t WebStatusService::upgradeImportantMessages(std::string & version) {
     if (version.empty()) {
@@ -267,7 +278,7 @@ uint8_t WebStatusService::upgradeImportantMessages(std::string & version) {
 
     // it's a filename with a .bin or .md extension, try and extract the version from it
     // e.g. EMS-ESP-3_8_2-dev_13-ESP32-16MB+.bin -> major=3 minor=8 patch=2
-    version::EMSESP_Version latest_version;
+    FirmwareVersion latest_version;
     if ((version.find(".bin") != std::string::npos) || (version.find(".md") != std::string::npos)) {
         std::string filename = version;
         auto        pos      = filename.find("EMS-ESP-");
@@ -288,74 +299,242 @@ uint8_t WebStatusService::upgradeImportantMessages(std::string & version) {
         std::string major_version = filename.substr(pos, underscore1 - pos);
         std::string minor_version = filename.substr(underscore1 + 1, underscore2 - underscore1 - 1);
         std::string patch_version = filename.substr(underscore2 + 1, dash - underscore2 - 1);
-        latest_version            = version::EMSESP_Version(major_version + "." + minor_version + "." + patch_version);
+        latest_version            = FirmwareVersion(major_version + "." + minor_version + "." + patch_version);
     } else {
         // if it's .json file exit
         if (version.find(".json") != std::string::npos) {
             return 0;
         } else {
             // treat it like a version string like "3.9.0"
-            latest_version = version::EMSESP_Version(version);
+            latest_version = FirmwareVersion(version);
         }
     }
 
-    version::EMSESP_Version current_version(current_version_s); // get current version
+    FirmwareVersion current_version(current_version_s); // get current version
 
-    if ((current_version.major() <= 3 && current_version.minor() <= 8) && (latest_version.major() == 3 && latest_version.minor() == 9)) {
-        return 1; // if moving from below 3.8.x to 3.9.x return 1
+    if (!(latest_version > current_version)) {
+        return 0; // no upgrade (same version or downgrade)
     }
 
-    if (latest_version > current_version && current_version.major() < latest_version.major()) {
-        return 2; // if it's a major version upgrade return 2
+    // case "1" is no longer used
+    // if (current_version < FirmwareVersion("3.9.0-dev.0") && latest_version.major() == 3 && latest_version.minor() == 9) {
+    //     return 1; // upgrading to 3.9.x from anything older - new partition layout warning
+    // }
+
+    if (current_version.major() < latest_version.major()) {
+        return 2; // major version upgrade
     }
 
-    if (latest_version > current_version && current_version.minor() < latest_version.minor()) {
-        return 0; // if it's just a minor version upgrade return 0
+    const FirmwareVersion security_version("3.10.0-dev.0");
+    if (current_version < security_version && latest_version >= security_version) {
+        return 3;
     }
 
-    return 0; // if it's not a valid version upgrade return 0
+    return 0; // minor or patch upgrade, no special message
 }
 
-// action = checkUpgrade
-// versions holds the latest development version and stable version in one string, comma separated
-bool WebStatusService::checkUpgrade(JsonObject root, std::string & version) {
-    if (!version.empty()) {
-        version::EMSESP_Version current_version(current_version_s);
-        version::EMSESP_Version latest_dev_version(version.substr(0, version.find(',')));
-        version::EMSESP_Version latest_stable_version(version.substr(version.find(',') + 1));
+// action = getVersions
+// returns the device's current version for dev and stable, plus the system name
+// The remote fetch runs from the main loop task via WebStatusService::loop() so that we never block the AsyncTCP callback
+void WebStatusService::getVersions(JsonObject root) {
+    FirmwareVersion current_version(current_version_s);
+    bool            is_dev = current_version.prerelease().find("dev") != std::string::npos;
 
-        bool dev_upgradeable    = latest_dev_version > current_version;
-        bool stable_upgradeable = latest_stable_version > current_version;
+    // the WebUI shows this in the menu drawer. It's included here because this action is called once after login
+    root["system_name"] = EMSESP::system_.system_name();
 
-#if defined(EMSESP_DEBUG)
-        // look for dev in the name to determine if we're using a dev release
-        bool using_dev_version = !current_version.prerelease().find("dev");
-        EMSESP::logger()
-            .debug("Checking version upgrade. This version=%d.%d.%d-%s (%s),latest dev=%d.%d.%d-%s (%s upgradeable),latest stable=%d.%d.%d-%s (%s upgradeable)",
-                   current_version.major(),
-                   current_version.minor(),
-                   current_version.patch(),
-                   current_version.prerelease().c_str(),
-                   using_dev_version ? "Dev" : "Stable",
-                   latest_dev_version.major(),
-                   latest_dev_version.minor(),
-                   latest_dev_version.patch(),
-                   latest_dev_version.prerelease().c_str(),
-                   dev_upgradeable ? "is" : "is not",
-                   latest_stable_version.major(),
-                   latest_stable_version.minor(),
-                   latest_stable_version.patch(),
-                   latest_stable_version.prerelease().c_str(),
-                   stable_upgradeable ? "is" : "is not");
-#endif
+    JsonObject current     = root["current"].to<JsonObject>();
+    current["version"]     = current_version_s;
+    current["type"]        = is_dev ? "dev" : "stable";
+    current["date"]        = "";
+    current["upgradeable"] = current_upgradeable(); // false if cache not valid yet
 
-        root["dev_upgradeable"]    = dev_upgradeable;
-        root["stable_upgradeable"] = stable_upgradeable;
+#ifndef EMSESP_STANDALONE
+    // pull the install_date for the running partition (if known)
+    const esp_partition_t * running = esp_ota_get_running_partition();
+    if (running != nullptr) {
+        const auto & info = EMSESP::system_.partition_info_;
+        auto         it   = info.find(running->label);
+        if (it != info.end() && it->second.install_date > 0) {
+            char   time_string[25];
+            time_t d = it->second.install_date;
+            strftime(time_string, sizeof(time_string), "%FT%T", localtime(&d));
+            current["date"] = time_string;
+        }
     }
 
-    root["emsesp_version"] = current_version_s; // always send back current version
+    // take a snapshot, since the loop task can be rewriting the cache while we run on AsyncTCP
+    VersionInfo stable;
+    VersionInfo dev;
+    bool        cache_valid;
+    {
+        std::lock_guard<std::mutex> lock{versions_mutex_};
+        cache_valid = versions_cache_valid_;
+        stable      = versions_stable_;
+        dev         = versions_dev_;
+    }
 
+    versions_fetch_requested_ = true;
+
+    if (!cache_valid) {
+        // no successful fetch yet (no network, fetch pending, or parse error)
+        return;
+    }
+
+    // copies a cached entry into root[key]
+    auto add_section = [&](const char * key, const VersionInfo & info) {
+        if (info.version.empty()) {
+            return;
+        }
+
+        JsonObject out     = root[key].to<JsonObject>();
+        out["version"]     = info.version;
+        out["date"]        = info.date;
+        out["upgradeable"] = info.upgradeable;
+    };
+
+    add_section("stable", stable);
+    add_section("dev", dev);
+#else
+    // standalone/test build: provide deterministic dummy data
+    JsonObject stable_out     = root["stable"].to<JsonObject>();
+    stable_out["version"]     = "3.8.3";
+    stable_out["date"]        = "2026-08-01";
+    stable_out["upgradeable"] = FirmwareVersion("3.8.3") > current_version;
+
+    JsonObject dev_out     = root["dev"].to<JsonObject>();
+    dev_out["version"]     = "3.9.0-dev.1";
+    dev_out["date"]        = "2026-08-02";
+    dev_out["upgradeable"] = FirmwareVersion("3.9.0-dev.1") > current_version;
+#endif
+}
+
+// schedule the next versions.json fetch a few seconds out so the network stack has time to settle
+// (DHCP completion, default-netif assignment and DNS server propagation through lwip)
+void WebStatusService::schedule_versions_refresh() {
+    versions_failures_ = 0; // a fresh link is a fresh chance, so start again from the short retry delay
+    uint32_t next      = uuid::get_uptime() + VERSIONS_INITIAL_FETCH_DELAY_MS;
+    if (next == 0) {
+        next = 1; // 0 is the "idle" sentinel — never let the wrap land there
+    }
+
+    versions_next_fetch_ms_ = next;
+}
+
+// refresh of the cached versions.json
+void WebStatusService::loop() {
+#ifndef EMSESP_STANDALONE
+
+    // need a network
+    if (!EMSESP::network_.network_connected()) {
+        return;
+    }
+
+    // a request from getVersions() always forces a fetch, bypassing the schedule and any backoff
+    if (!versions_fetch_requested_.exchange(false)) {
+        // with auto_fw_check off we only reach out to emsesp.org when the WebUI asks for version
+        // information, so an unattended system never contacts it at all
+        if (!EMSESP::system_.auto_fw_check()) {
+            return;
+        }
+
+        // 0 = idle, nothing scheduled
+        if (versions_next_fetch_ms_ == 0) {
+            return;
+        }
+
+        // not time yet (signed difference handles uint32 wrap)
+        if ((int32_t)(uuid::get_uptime() - versions_next_fetch_ms_) < 0) {
+            return;
+        }
+    }
+
+    uint32_t interval;
+    if (refresh_versions_cache()) {
+        versions_failures_ = 0;
+        interval           = VERSIONS_REFRESH_INTERVAL_MS;
+    } else {
+        if (versions_failures_ < VERSIONS_MAX_BACKOFF_STEPS) {
+            versions_failures_++;
+        }
+
+        interval = VERSIONS_RETRY_INTERVAL_MS << (versions_failures_ - 1);
+    }
+
+    uint32_t next = uuid::get_uptime() + interval;
+    if (next == 0) {
+        next = 1;
+    }
+
+    versions_next_fetch_ms_ = next;
+#endif
+}
+
+// runs on the main loop task — never call this from an AsyncWebServer handler
+bool WebStatusService::refresh_versions_cache() {
+#ifdef EMSESP_STANDALONE
+    return false;
+#else
+    std::string  result;
+    JsonDocument doc;
+    auto         http_code = HttpClient::request(VERSIONS_URL, "GET", "", doc.as<JsonObjectConst>(), result);
+    if (http_code != 200) {
+        EMSESP::logger().warning("Unable to retrieve online version information (HTTP error code %d)", http_code);
+        return false;
+    }
+
+    DeserializationError err = deserializeJson(doc, result);
+    if (err) {
+#if defined(EMSESP_DEBUG)
+        EMSESP::logger().debug("refresh_versions_cache() parse error");
+#endif
+        return false;
+    }
+
+    FirmwareVersion current_version(current_version_s);
+
+    auto read_section = [&doc, &current_version](const char * key, VersionInfo & out) {
+        JsonObjectConst section = doc[key];
+        if (section.isNull()) {
+            out = {};
+            return;
+        }
+
+        out.version     = section["version"] | "";
+        out.date        = section["date"] | "";
+        out.upgradeable = !out.version.empty() && FirmwareVersion(out.version) > current_version;
+    };
+
+    // parse into locals first, then publish in one go so the AsyncTCP task never sees a half-written cache
+    VersionInfo stable;
+    VersionInfo dev;
+    read_section("stable", stable);
+    read_section("dev", dev);
+
+    {
+        std::lock_guard<std::mutex> lock{versions_mutex_};
+        versions_stable_      = stable;
+        versions_dev_         = dev;
+        versions_cache_valid_ = true;
+    }
+
+#if defined(EMSESP_DEBUG)
+    EMSESP::logger().debug("Fetched from %s: stable=%s, dev=%s, current=%s", VERSIONS_URL, stable.version.c_str(), dev.version.c_str(), current_version_s.c_str());
+#endif
     return true;
+#endif
+}
+
+// returns if current dev/stable is upgradeable
+bool WebStatusService::current_upgradeable() const {
+    FirmwareVersion             current_version(current_version_s);
+    bool                        is_dev = current_version.prerelease().find("dev") != std::string::npos;
+    std::lock_guard<std::mutex> lock{versions_mutex_};
+    if (!versions_cache_valid_) {
+        return false;
+    }
+
+    return is_dev ? versions_dev_.upgradeable : versions_stable_.upgradeable;
 }
 
 // action = allvalues
@@ -417,7 +596,7 @@ bool WebStatusService::exportData(JsonObject root, std::string & type) {
 // action = getCustomSupport
 // reads any upload customSupport.json file and sends to to Help page to be shown as Guest
 bool WebStatusService::getCustomSupport(JsonObject root) {
-    JsonDocument doc;
+    JsonDocument doc(PSRAM_DOC);
 
 #if defined(EMSESP_STANDALONE)
     // dummy test data for "test api3"

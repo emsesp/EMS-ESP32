@@ -10,7 +10,7 @@ MqttStatus::MqttStatus(AsyncWebServer * server, MqttSettingsService * mqttSettin
 }
 
 void MqttStatus::mqttStatus(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false);
+    auto *     response = new emsesp::PsramAsyncJsonResponse(false);
     JsonObject root     = response->getRoot();
 
     root["enabled"]           = _mqttSettingsService->isEnabled();

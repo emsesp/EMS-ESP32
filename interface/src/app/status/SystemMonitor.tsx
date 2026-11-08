@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import { Box, Button, Typography } from '@mui/material';
@@ -14,7 +14,12 @@ import { useInterval } from 'utils';
 
 import { LinearProgressWithLabel } from '../../components/upload/LinearProgressWithLabel';
 
-const SystemMonitor = () => {
+interface SystemMonitorProps {
+  // when set the page isn't reloaded when done, e.g. when the firmware was installed without a restart
+  onDone?: (success: boolean) => void;
+}
+
+const SystemMonitor = ({ onDone }: SystemMonitorProps) => {
   const [errorMessage, setErrorMessage] = useState<string>();
   const hasInitialized = useRef(false);
   const { LL } = useI18nContext();
@@ -42,7 +47,11 @@ const SystemMonitor = () => {
         event.data.status === SystemStatusCodes.SYSTEM_STATUS_NORMAL ||
         event.data.status === undefined
       ) {
-        document.location.href = '/';
+        if (onDone) {
+          onDone(true);
+        } else {
+          document.location.href = '/';
+        }
       } else if (
         event.data.status === SystemStatusCodes.SYSTEM_STATUS_ERROR_UPLOAD
       ) {
@@ -57,39 +66,35 @@ const SystemMonitor = () => {
     void send();
   }, 1000); // check every 1 second
 
-  const { statusMessage, isUploading, progressValue } = useMemo(() => {
-    const status = data?.status;
+  const status = data?.status;
 
-    const message =
-      status && status >= SystemStatusCodes.SYSTEM_STATUS_UPLOADING
-        ? LL.WAIT_FIRMWARE()
-        : status === SystemStatusCodes.SYSTEM_STATUS_PENDING_RESTART
-          ? LL.APPLICATION_RESTARTING()
-          : status === SystemStatusCodes.SYSTEM_STATUS_NORMAL
-            ? LL.RESTARTING_PRE()
-            : status === SystemStatusCodes.SYSTEM_STATUS_ERROR_UPLOAD
-              ? 'Upload Failed'
-              : LL.RESTARTING_POST();
+  const statusMessage =
+    status && status >= SystemStatusCodes.SYSTEM_STATUS_UPLOADING
+      ? LL.WAIT_FIRMWARE()
+      : status === SystemStatusCodes.SYSTEM_STATUS_PENDING_RESTART
+        ? LL.APPLICATION_RESTARTING()
+        : status === SystemStatusCodes.SYSTEM_STATUS_NORMAL
+          ? LL.RESTARTING_PRE()
+          : status === SystemStatusCodes.SYSTEM_STATUS_ERROR_UPLOAD
+            ? 'Upload Failed'
+            : LL.RESTARTING_POST();
 
-    const uploading =
-      status !== undefined && status >= SystemStatusCodes.SYSTEM_STATUS_UPLOADING;
-    const progress =
-      uploading && status
-        ? Math.round(status - SystemStatusCodes.SYSTEM_STATUS_UPLOADING)
-        : 0;
+  const isUploading =
+    status !== undefined && status >= SystemStatusCodes.SYSTEM_STATUS_UPLOADING;
+  const progressValue =
+    isUploading && status
+      ? Math.round(status - SystemStatusCodes.SYSTEM_STATUS_UPLOADING)
+      : 0;
 
-    return {
-      statusMessage: message,
-      isUploading: uploading,
-      progressValue: progress
-    };
-  }, [data?.status, LL]);
-
-  const onCancel = useCallback(async () => {
+  const onCancel = async () => {
     setErrorMessage(undefined);
     await setSystemStatus(String(SystemStatusCodes.SYSTEM_STATUS_NORMAL));
-    document.location.href = '/';
-  }, [setSystemStatus]);
+    if (onDone) {
+      onDone(false);
+    } else {
+      document.location.href = '/';
+    }
+  };
 
   return (
     <Box
@@ -153,9 +158,21 @@ const SystemMonitor = () => {
                 {LL.PLEASE_WAIT()}&hellip;
               </Typography>
               {isUploading && (
-                <Box sx={{ width: '100%', pl: 2, pr: 2, py: 2 }}>
-                  <LinearProgressWithLabel value={progressValue} />
-                </Box>
+                <>
+                  <Box sx={{ width: '100%', pl: 2, pr: 2, py: 2 }}>
+                    <LinearProgressWithLabel value={progressValue} />
+                  </Box>
+
+                  <Button
+                    sx={{ ml: 2, mt: 2 }}
+                    startIcon={<CancelIcon />}
+                    variant="outlined"
+                    color="secondary"
+                    onClick={onCancel}
+                  >
+                    {LL.CANCEL()}
+                  </Button>
+                </>
               )}
             </>
           )}

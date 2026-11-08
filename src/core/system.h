@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2025  emsesp.org
+ * Copyright 2020-2026  emsesp.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,10 @@
 #include <ArduinoJson.h>
 
 #include "helpers.h"
-#include "console.h"
+#include "emsesp_console.h"
 #include "mqtt.h"
 #include "telegram.h"
+#include "led.h"
 
 #ifndef EMSESP_STANDALONE
 #include <esp_wifi.h>
@@ -37,20 +38,13 @@
 #include <uuid/log.h>
 #include <PButton.h>
 
-#include "rgb_led.h"
-
-
 #if CONFIG_IDF_TARGET_ESP32
 // there is no official API available on the original ESP32
 extern "C" {
 uint8_t temprature_sens_read();
 }
 #elif CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
-#if ESP_IDF_VERSION_MAJOR < 5
-#include "driver/temp_sensor.h"
-#else
 #include "driver/temperature_sensor.h"
-#endif
 #endif
 
 using uuid::console::Shell;
@@ -58,8 +52,6 @@ using uuid::console::Shell;
 #define EMSESP_FS_CONFIG_DIRECTORY "/config"
 
 #define EMSESP_CUSTOMSUPPORT_FILE "/config/customSupport.json"
-
-#define RGB_LED_BRIGHTNESS 20 // 255 is max brightness
 
 namespace emsesp {
 
@@ -77,6 +69,7 @@ enum SYSTEM_STATUS : uint8_t {
 
 enum FUSE_VALUE : uint8_t { ALL = 0, MFG = 1, MODEL = 2, BOARD = 3, REV = 4, BATCH = 5, FUSE = 6 };
 
+enum EMAIL_SECURITY : uint8_t { NONE = 0, SSL = 1, STARTTLS = 2 };
 struct PartitionInfo {
     std::string version;
     size_t      size;
@@ -87,6 +80,13 @@ class System {
   public:
     void start();
     bool loop(); // returns true if the LED flash is active
+
+    static void check_crash_loop(); // call at boot once NVS is open, may restart into the factory partition
+
+    void        recovery_installed();          // called on the AsyncTCP task after the recovery firmware was written
+    void        recovery_installed_deferred(); // called from the main loop after the recovery firmware was downloaded from a URL
+    void        recovery_installed_apply();    // called on the AsyncTCP task, handles the deferred call
+    std::string recovery_version() const;      // empty if there's no recovery firmware
 
     // commands
     static bool command_read(const char * value, const int8_t id);
@@ -100,7 +100,9 @@ class System {
     static bool command_info(const char * value, const int8_t id, JsonObject output);
     static bool command_response(const char * value, const int8_t id, JsonObject output);
     static bool command_service(const char * cmd, const char * value);
+    static bool command_sendmail(const char * value, const int8_t id);
     static bool command_txpause(const char * value, const int8_t id);
+    static bool command_led(const char * value, const int8_t id);
 
     static bool        get_value_info(JsonObject root, const char * cmd);
     static void        get_value_json(JsonObject output, const std::string & circuit, const std::string & name, JsonVariant val);
@@ -147,8 +149,6 @@ class System {
 
     static bool uploadFirmwareURL(const char * url = nullptr);
 
-    void led_init();
-    void network_init();
     void button_init();
     void commands_init();
     void uart_init();
@@ -170,10 +170,6 @@ class System {
 
     static String get_ip_or_hostname();
 
-    void dallas_gpio(uint8_t gpio) {
-        dallas_gpio_ = gpio;
-    }
-
     bool telnet_enabled() {
         return telnet_enabled_;
     }
@@ -194,18 +190,6 @@ class System {
         return modbus_timeout_;
     }
 
-    bool analog_enabled() {
-        return analog_enabled_;
-    }
-
-    void analog_enabled(bool b) {
-        analog_enabled_ = b;
-    }
-
-    void hide_led(bool b) {
-        hide_led_ = b;
-    }
-
     bool readonly_mode() {
         return readonly_mode_;
     }
@@ -220,6 +204,22 @@ class System {
 
     void developer_mode(bool developer_mode) {
         developer_mode_ = developer_mode;
+    }
+
+    bool disable_reset() {
+        return disable_reset_;
+    }
+
+    void disable_reset(bool disable_reset) {
+        disable_reset_ = disable_reset;
+    }
+
+    bool auto_fw_check() {
+        return auto_fw_check_;
+    }
+
+    void auto_fw_check(bool auto_fw_check) {
+        auto_fw_check_ = auto_fw_check;
     }
 
     // Boolean Format API/MQTT
@@ -267,32 +267,8 @@ class System {
         hostname_ = hostname;
     }
 
-    bool ethernet_connected() {
-        return ethernet_connected_;
-    }
-
-    void ethernet_connected(bool b) {
-        ethernet_connected_ = b;
-    }
-
-    void has_ipv6(bool b) {
-        has_ipv6_ = b;
-    }
-
-    bool has_ipv6() {
-        return has_ipv6_;
-    }
-
     void ntp_connected(bool b);
     bool ntp_connected();
-
-    bool network_connected() {
-#ifndef EMSESP_STANDALONE
-        return (ethernet_connected() || WiFi.isConnected());
-#else
-        return true;
-#endif
-    }
 
     void fahrenheit(bool b) {
         fahrenheit_ = b;
@@ -312,14 +288,16 @@ class System {
         return std::string(locale_.c_str());
     }
 
+    std::string system_name() {
+        return std::string(system_name_.c_str());
+    }
+
     void healthcheck(uint8_t healthcheck) {
         healthcheck_ = healthcheck;
     }
 
     void show_system(uuid::console::Shell & shell);
     void show_users(uuid::console::Shell & shell);
-
-    void wifi_reconnect();
 
     static std::string languages_string();
 
@@ -330,6 +308,7 @@ class System {
     void PSram(uint32_t psram) {
         psram_ = psram / 1024;
     }
+
     uint32_t PSram() {
         return psram_;
     }
@@ -337,6 +316,7 @@ class System {
     uint32_t appFree() {
         return appfree_;
     }
+
     uint32_t appUsed() {
         return appused_;
     }
@@ -345,19 +325,33 @@ class System {
     static uint32_t getMaxAllocMem() {
         return max_alloc_mem_;
     }
+
     static uint32_t getHeapMem() {
         return heap_mem_;
     }
+
+    // All-time low watermark of free internal heap (KB).
+    // Unlike getHeapMem() (sampled now), this captures the *lowest* free heap
+    // has ever been since boot — i.e. the worst transient dip during MQTT
+    // publishes, HA discovery, /api/system calls, TLS handshakes, etc.
+    // This is the number that actually reflects optimisations targeting
+    // transient JSON / buffer peaks (e.g. Phase C PSRAM JsonDocuments).
+    static uint32_t getMinFreeMem() {
+        return min_free_mem_;
+    }
+
     static void refreshHeapMem() {
 #ifndef EMSESP_STANDALONE
         max_alloc_mem_ = ESP.getMaxAllocHeap() / 1024;
         heap_mem_      = ESP.getFreeHeap() / 1024;
+        min_free_mem_  = ESP.getMinFreeHeap() / 1024;
 #endif
     }
 
     static bool test_set_all_active() {
         return test_set_all_active_;
     }
+
     static void test_set_all_active(bool n) {
 #if defined(EMSESP_TEST)
         if (n) {
@@ -384,16 +378,41 @@ class System {
 
     static bool set_partition(const char * partitionname);
 
+    // healthcheck flags - shared with LED for status visualization
+    static constexpr uint8_t HEALTHCHECK_NO_BUS     = (1 << 0); // 1
+    static constexpr uint8_t HEALTHCHECK_NO_NETWORK = (1 << 1); // 2
+    static constexpr uint8_t HEALTHCHECK_RESET      = (1 << 7); // 128
+
+    // smallest .bin accepted as a main firmware image, for both URL and web uploads - 1.6 MB
+    // recovery firmware uses OtaUpdater::MIN_RECOVERY_FIRMWARE_SIZE when the filename contains "recovery"
+    static constexpr size_t MIN_FIRMWARE_SIZE = 1677721;
+
   private:
     static uuid::log::Logger logger_;
 
     static bool     test_set_all_active_; // force all entities in a device to have a value
     static uint32_t max_alloc_mem_;
     static uint32_t heap_mem_;
+    static uint32_t min_free_mem_;
 
-    uint8_t systemStatus_; // uses SYSTEM_STATUS enum
+    volatile uint8_t systemStatus_; // uses SYSTEM_STATUS enum - written from the AsyncTCP task (e.g. cancel) and read from the main loop during OTA
+
+    uint32_t pending_restart_start_ = 0; // uptime (ms) when a pending restart was first seen in the main loop
+    // restart anyway if a pending restart hasn't been picked up by the WebUI within this time (in ms)
+    // the SystemMonitor polls every second, so this only kicks in when the browser tab was closed or lost connection
+    static constexpr uint32_t PENDING_RESTART_TIMEOUT = 10000;
 
     void set_partition_install_date();
+
+    volatile bool recovery_installed_pending_ = false; // set by the main loop, handled on the AsyncTCP task
+
+    // firmware is confirmed to the bootloader and the crash counter cleared once it has been up this long
+    static constexpr uint32_t FIRMWARE_HEALTHY_UPTIME = 120; // seconds
+    // consecutive crashes before falling back to the recovery firmware in the factory partition
+    static constexpr uint8_t CRASH_LOOP_LIMIT = 5;
+
+    bool firmware_healthy_ = false;
+    void check_firmware_health();
 
     // button
     static PButton            myPButton_; // PButton instance
@@ -404,18 +423,9 @@ class System {
     static constexpr uint32_t BUTTON_Debounce      = 40;  // Debounce period to prevent flickering when pressing or releasing the button (in ms)
     static constexpr uint32_t BUTTON_DblClickDelay = 250; // Max period between clicks for a double click event (in ms)
 
-    // LED flash timer
-    static bool     led_flash_timer_;
-    static uint8_t  led_flash_gpio_;
-    static uint8_t  led_flash_type_;
-    static uint32_t led_flash_start_time_;
-    static uint32_t led_flash_duration_;
-    static void     start_led_flash(uint8_t duration);
-    static void     led_flash();
-
     // button press delays
-    static constexpr uint32_t BUTTON_LongPressDelay  = 3000; // Hold period for a long press event (in ms) - ~3 seconds
-    static constexpr uint32_t BUTTON_VLongPressDelay = 9500; // Hold period for a very long press event (in ms) - !10 seconds
+    static constexpr uint32_t BUTTON_LongPressDelay  = 3000; // Hold period for a long press event (in ms) - 3 seconds
+    static constexpr uint32_t BUTTON_VLongPressDelay = 9500; // Hold period for a very long press event (in ms) - 9.5 seconds
 
     // healthcheck
 #ifdef EMSESP_PINGTEST
@@ -423,17 +433,23 @@ class System {
 #else
     static constexpr uint32_t SYSTEM_CHECK_FREQUENCY = 5000; // do a system check every 5 seconds
 #endif
-    static constexpr uint32_t HEALTHCHECK_LED_LONG_DUARATION  = 1500;     // 1.5 seconds
-    static constexpr uint32_t HEALTHCHECK_LED_FLASH_DUARATION = 150;      // 150ms
-    static constexpr uint8_t  HEALTHCHECK_NO_BUS              = (1 << 0); // 1
-    static constexpr uint8_t  HEALTHCHECK_NO_NETWORK          = (1 << 1); // 2
-    static constexpr uint8_t  LED_ON                          = HIGH;     // LED on
+
+    // NTP syncs about every hour, so allow one missed sync before treating it as lost (in seconds) - 2 hours
+    static constexpr uint32_t NTP_TIMEOUT_SEC = 7201;
+
+    // email
+    static constexpr uint32_t SMTP_TIMEOUT_MS = 5000; // socket read timeout (in ms) - 5 seconds
+
+    // firmware upload from URL
+    static constexpr uint32_t FIRMWARE_UPLOAD_RESPONSE_TIMEOUT = 8000;  // max wait for the first byte of the response headers/body (in ms) - 8 seconds
+    static constexpr uint32_t FIRMWARE_UPLOAD_READ_TIMEOUT_S   = 15;    // socket and Stream::readBytes timeout used by Update (in seconds)
+    static constexpr uint32_t FIRMWARE_UPLOAD_STALL_TIMEOUT    = 30000; // abort if no data arrives for a chunk (in ms) - 30 seconds
+    static constexpr size_t   FIRMWARE_UPLOAD_CHUNK_SIZE       = 1024;  // read buffer, on the stack
 
 #ifndef EMSESP_STANDALONE
     static uuid::syslog::SyslogService syslog_;
 #endif
 
-    void led_monitor();
     void system_check();
 
     static std::vector<uint8_t, AllocatorPSRAM<uint8_t>> string_range_to_vector(const std::string & range, const std::string & exclude = "");
@@ -443,6 +459,7 @@ class System {
         uint8_t     pin;
         std::string source;
     };
+
     static std::vector<uint8_t, AllocatorPSRAM<uint8_t>>     valid_system_gpios_; // list of valid GPIOs for the ESP32 board that can be used
     static std::vector<GpioUsage, AllocatorPSRAM<GpioUsage>> used_gpios_;         // list of GPIOs used by the application
 
@@ -451,29 +468,21 @@ class System {
     uint8_t  healthcheck_       = HEALTHCHECK_NO_NETWORK | HEALTHCHECK_NO_BUS; // start with all flags set, no wifi and no ems bus connection
     uint32_t last_system_check_ = 0;
 
-    bool upload_isrunning_   = false; // true if we're in the middle of a OTA firmware upload
-    bool ethernet_connected_ = false;
-    bool has_ipv6_           = false;
+    bool upload_isrunning_ = false; // true if we're in the middle of a OTA firmware upload
 
     bool     ntp_connected_  = false;
     uint32_t ntp_last_check_ = 0;
 
-    bool eth_present_ = false;
-
     // EMS-ESP settings
     std::string hostname_;
+    String      system_name_;
     String      locale_;
-    bool        hide_led_;
-    uint8_t     led_type_;
-    uint8_t     led_gpio_;
-    bool        analog_enabled_;
     bool        low_clock_;
     String      board_profile_;
     uint8_t     pbutton_gpio_;
     uint8_t     rx_gpio_;
     uint8_t     tx_gpio_;
     uint8_t     tx_mode_;
-    uint8_t     dallas_gpio_;
     bool        telnet_enabled_;
     bool        syslog_enabled_;
     int8_t      syslog_level_;
@@ -485,28 +494,20 @@ class System {
     uint8_t     bool_format_;
     uint8_t     enum_format_;
     bool        readonly_mode_;
-    String      version_;
     bool        modbus_enabled_;
     uint16_t    modbus_port_;
     uint8_t     modbus_max_clients_;
     uint32_t    modbus_timeout_;
     bool        developer_mode_;
-
-    // ethernet
-    uint8_t phy_type_;
-    int8_t  eth_power_;
-    uint8_t eth_phy_addr_;
-    uint8_t eth_clock_mode_;
-
-    uint32_t fstotal_;
-    uint32_t psram_;
-    uint32_t appused_;
-    uint32_t appfree_;
+    bool        disable_reset_;
+    bool        auto_fw_check_;
+    uint32_t    fstotal_;
+    uint32_t    psram_;
+    uint32_t    appused_;
+    uint32_t    appfree_;
 
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
-#if ESP_IDF_VERSION_MAJOR >= 5
     temperature_sensor_handle_t temperature_handle_ = NULL;
-#endif
 #endif
     float temperature_ = 0;
 };

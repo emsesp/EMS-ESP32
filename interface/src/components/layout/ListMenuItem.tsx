@@ -5,6 +5,7 @@ import { Link } from 'react-router';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import {
   Avatar,
+  Box,
   ListItem,
   ListItemAvatar,
   ListItemButton,
@@ -20,6 +21,7 @@ interface ListMenuItemProps {
   text: string;
   to?: string;
   disabled?: boolean;
+  badge?: boolean;
 }
 
 const iconStyles: CSSProperties = {
@@ -28,15 +30,40 @@ const iconStyles: CSSProperties = {
   verticalAlign: 'middle'
 };
 
+const Badge = () => (
+  <Box
+    component="span"
+    aria-label="update available"
+    sx={{
+      display: 'inline-block',
+      width: 8,
+      height: 8,
+      ml: 1,
+      verticalAlign: 'middle',
+      borderRadius: '50%',
+      backgroundColor: '#ffeb3b',
+      boxShadow: '0 0 6px rgba(255, 235, 59, 0.8)'
+    }}
+  />
+);
+
 const RenderIcon = memo(
-  ({ icon: Icon, bgcolor, label, text }: ListMenuItemProps) => (
+  ({ icon: Icon, bgcolor, label, text, badge }: ListMenuItemProps) => (
     <>
       <ListItemAvatar>
         <Avatar sx={{ bgcolor, color: 'white' }}>
           <Icon />
         </Avatar>
       </ListItemAvatar>
-      <ListItemText primary={label} secondary={text} />
+      <ListItemText
+        primary={
+          <>
+            {label}
+            {badge && <Badge />}
+          </>
+        }
+        secondary={text}
+      />
     </>
   )
 );
@@ -47,7 +74,8 @@ const LayoutMenuItem = ({
   label,
   text,
   to,
-  disabled
+  disabled,
+  badge
 }: ListMenuItemProps) => (
   <>
     {to && !disabled ? (
@@ -65,6 +93,7 @@ const LayoutMenuItem = ({
             {...(bgcolor && { bgcolor })}
             label={label}
             text={text}
+            {...(badge && { badge })}
           />
         </ListItemButton>
       </ListItem>
@@ -75,6 +104,7 @@ const LayoutMenuItem = ({
           {...(bgcolor && { bgcolor })}
           label={label}
           text={text}
+          {...(badge && { badge })}
         />
       </ListItem>
     )}
