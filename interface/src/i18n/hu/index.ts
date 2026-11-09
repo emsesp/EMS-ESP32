@@ -404,7 +404,7 @@ const hu: Translation = {
   RECOVERY_INSTALLED: 'Helyreállítási firmware telepítve',
   RESTART_INTO_RECOVERY: 'Újraindítás helyreállítási módba',
   RECOVERY_NOT_FOUND: 'A helyreállítási alkalmazás nem található az interneten',
-  VERSIONS: 'Verziók',
+  INSTALLED_VERSIONS: 'Telepített verziók',
   EMSESP_APP: 'EMS-ESP alkalmazás',
   UPDATE_AVAILABLE_BUTTON: 'Frissítés érhető el',
   NO_UPDATES_AVAILABLE: 'nincs elérhető frissítés',

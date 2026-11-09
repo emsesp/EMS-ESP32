@@ -404,7 +404,7 @@ const no: Translation = {
   RECOVERY_INSTALLED: 'Gjenopprettingsfirmware installert',
   RESTART_INTO_RECOVERY: 'Start på nytt i gjenopprettingsappen',
   RECOVERY_NOT_FOUND: 'Fant ikke gjenopprettingsappen på nettet',
-  VERSIONS: 'Versjoner',
+  INSTALLED_VERSIONS: 'Installerte versjoner',
   EMSESP_APP: 'EMS-ESP App',
   UPDATE_AVAILABLE_BUTTON: 'Det finnes en oppdatering',
   NO_UPDATES_AVAILABLE: 'ingen oppdateringer tilgjengelig',

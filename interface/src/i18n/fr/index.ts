@@ -404,7 +404,7 @@ const fr: Translation = {
   RECOVERY_INSTALLED: 'Firmware de récupération installé',
   RESTART_INTO_RECOVERY: 'Redémarrer dans l\'application de récupération',
   RECOVERY_NOT_FOUND: 'Application de récupération introuvable en ligne',
-  VERSIONS: 'Versions',
+  INSTALLED_VERSIONS: 'Versions installées',
   EMSESP_APP: 'Application EMS-ESP',
   UPDATE_AVAILABLE_BUTTON: 'Une mise à jour est disponible',
   NO_UPDATES_AVAILABLE: 'aucune mise à jour disponible',

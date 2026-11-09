@@ -404,7 +404,7 @@ const pl: BaseTranslation = {
   RECOVERY_INSTALLED: 'Zainstalowano firmware odzyskiwania',
   RESTART_INTO_RECOVERY: 'Uruchom ponownie w aplikacji odzyskiwania',
   RECOVERY_NOT_FOUND: 'Nie znaleziono aplikacji odzyskiwania online',
-  VERSIONS: 'Wersje',
+  INSTALLED_VERSIONS: 'Zainstalowane wersje',
   EMSESP_APP: 'Aplikacja EMS-ESP',
   UPDATE_AVAILABLE_BUTTON: 'Dostępna jest aktualizacja',
   NO_UPDATES_AVAILABLE: 'brak dostępnych aktualizacji',

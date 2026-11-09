@@ -771,7 +771,7 @@ const Version = () => {
     <SectionContent>
       <Box sx={{ p: 2, border: '1px solid #565656', borderRadius: 2 }}>
         <Typography sx={{ mb: 1 }} variant="h6" color="primary">
-          {LL.VERSIONS()}
+          {LL.INSTALLED_VERSIONS()}
         </Typography>
 
         <Table

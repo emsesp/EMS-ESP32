@@ -404,7 +404,7 @@ const tr: Translation = {
   RECOVERY_INSTALLED: 'Kurtarma firmware yüklendi',
   RESTART_INTO_RECOVERY: 'Kurtarma uygulamasına yeniden başlat',
   RECOVERY_NOT_FOUND: 'Kurtarma uygulaması çevrimiçi bulunamadı',
-  VERSIONS: 'Sürümler',
+  INSTALLED_VERSIONS: 'Yüklü sürümler',
   EMSESP_APP: 'EMS-ESP Uygulaması',
   UPDATE_AVAILABLE_BUTTON: 'Bir güncelleme mevcut',
   NO_UPDATES_AVAILABLE: 'güncelleme yok',

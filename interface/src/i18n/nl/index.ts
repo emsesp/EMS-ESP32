@@ -404,7 +404,7 @@ const nl: Translation = {
   RECOVERY_INSTALLED: 'Herstelfirmware geïnstalleerd',
   RESTART_INTO_RECOVERY: 'Herstart naar de herstel-app',
   RECOVERY_NOT_FOUND: 'Herstel-app niet online gevonden',
-  VERSIONS: 'Versies',
+  INSTALLED_VERSIONS: 'Geïnstalleerde versies',
   EMSESP_APP: 'EMS-ESP App',
   UPDATE_AVAILABLE_BUTTON: 'Er is een update beschikbaar',
   NO_UPDATES_AVAILABLE: 'geen updates beschikbaar',

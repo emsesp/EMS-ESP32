@@ -404,7 +404,7 @@ const it: Translation = {
   RECOVERY_INSTALLED: 'Firmware di ripristino installato',
   RESTART_INTO_RECOVERY: 'Riavvia nell\'app di ripristino',
   RECOVERY_NOT_FOUND: 'App di ripristino non trovata online',
-  VERSIONS: 'Versioni',
+  INSTALLED_VERSIONS: 'Versioni installate',
   EMSESP_APP: 'App EMS-ESP',
   UPDATE_AVAILABLE_BUTTON: 'È disponibile un aggiornamento',
   NO_UPDATES_AVAILABLE: 'nessun aggiornamento disponibile',

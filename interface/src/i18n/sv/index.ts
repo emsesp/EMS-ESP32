@@ -404,7 +404,7 @@ const sv: Translation = {
   RECOVERY_INSTALLED: 'Återställningsfirmware installerad',
   RESTART_INTO_RECOVERY: 'Starta om i återställningsappen',
   RECOVERY_NOT_FOUND: 'Återställningsappen hittades inte online',
-  VERSIONS: 'Versioner',
+  INSTALLED_VERSIONS: 'Installerade versioner',
   EMSESP_APP: 'EMS-ESP App',
   UPDATE_AVAILABLE_BUTTON: 'Det finns en uppdatering',
   NO_UPDATES_AVAILABLE: 'inga uppdateringar tillgängliga',

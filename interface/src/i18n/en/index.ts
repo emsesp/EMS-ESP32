@@ -404,7 +404,7 @@ const en: Translation = {
   RECOVERY_INSTALLED: 'Recovery firmware installed',
   RESTART_INTO_RECOVERY: 'Restart into Recovery App',
   RECOVERY_NOT_FOUND: 'Recovery App not found online',
-  VERSIONS: 'Versions',
+  INSTALLED_VERSIONS: 'Installed Versions',
   EMSESP_APP: 'EMS-ESP App',
   UPDATE_AVAILABLE_BUTTON: 'There is an update available',
   NO_UPDATES_AVAILABLE: 'no updates available',

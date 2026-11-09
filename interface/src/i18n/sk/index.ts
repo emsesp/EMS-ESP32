@@ -404,7 +404,7 @@ const sk: Translation = {
   RECOVERY_INSTALLED: 'Firmvér obnovy nainštalovaný',
   RESTART_INTO_RECOVERY: 'Reštartovať do aplikácie na obnovu',
   RECOVERY_NOT_FOUND: 'Aplikácia na obnovu sa online nenašla',
-  VERSIONS: 'Verzie',
+  INSTALLED_VERSIONS: 'Nainštalované verzie',
   EMSESP_APP: 'Aplikácia EMS-ESP',
   UPDATE_AVAILABLE_BUTTON: 'K dispozícii je aktualizácia',
   NO_UPDATES_AVAILABLE: 'žiadne aktualizácie nie sú k dispozícii',
