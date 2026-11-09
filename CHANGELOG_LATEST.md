@@ -39,6 +39,7 @@ Please read this before upgrading. Details are under "Changed" below.
 - after a crash, a summary of the core dump (task, PC and backtrace) is logged at boot and shown as `coredump` in `/api/system/info`. `call system coredump` erases it. Admins can download the full dump in Settings > Download/Upload, and the Recovery dashboard shows the summary with a download button. See `docs/Crash-Dumps.md` for how to decode it
 - console on the System Log page: admins can run console commands such as `show values` from the WebUI and see their output
 - uploading a settings file only changes the settings it contains, so a partial file can be used to change a few settings and keep the rest
+- mock server test page `/rest/mockVersions` (e.g. http://localhost:3080/rest/mockVersions) to switch scenarios at runtime without restarting: the current, stable and dev versions, offline, official or custom build, DEBUG, the installed and online Recovery version, and the board's flash size (4MB, 16MB or 32MB) and PSRAM. It has presets for common cases and can sign in as admin or guest. Values can also be set in the URL, like `?flash=4MB&psram=false`, and `?reset` goes back to the defaults
 
 ## Fixed
 
