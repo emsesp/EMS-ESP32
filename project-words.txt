@@ -1396,3 +1396,5 @@ vaddr
 Vjcm
 heatmode
 noslot
+wwcd
+auxheater

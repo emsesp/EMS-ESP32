@@ -144,29 +144,58 @@ void Network::begin() {
             },
             ARDUINO_EVENT_WIFI_STA_GOT_IP);
 
-        // with DHCP, replace the DNS servers handed out by the router with the ones configured by the user
+        // with DHCP, keep the IPv4 DNS servers from the lease (or the ones configured by the user) in place
         // IPv6 router advertisements arrive after the IPv4 lease and overwrite the slots again, so also re-apply on GOT_IP6
-        WiFi.onEvent([this](WiFiEvent_t /*event*/, WiFiEventInfo_t /*info*/) { applyDnsOverride(WiFi.STA.netif()); }, ARDUINO_EVENT_WIFI_STA_GOT_IP);
+        WiFi.onEvent(
+            [this](WiFiEvent_t /*event*/, WiFiEventInfo_t /*info*/) {
+                captureDhcpDns(WiFi.STA.netif());
+                applyDnsOverride(WiFi.STA.netif());
+            },
+            ARDUINO_EVENT_WIFI_STA_GOT_IP);
         WiFi.onEvent([this](WiFiEvent_t /*event*/, WiFiEventInfo_t /*info*/) { applyDnsOverride(WiFi.STA.netif()); }, ARDUINO_EVENT_WIFI_STA_GOT_IP6);
-        WiFi.onEvent([this](WiFiEvent_t /*event*/, WiFiEventInfo_t /*info*/) { applyDnsOverride(ETH.netif()); }, ARDUINO_EVENT_ETH_GOT_IP);
+        WiFi.onEvent(
+            [this](WiFiEvent_t /*event*/, WiFiEventInfo_t /*info*/) {
+                captureDhcpDns(ETH.netif());
+                applyDnsOverride(ETH.netif());
+            },
+            ARDUINO_EVENT_ETH_GOT_IP);
         WiFi.onEvent([this](WiFiEvent_t /*event*/, WiFiEventInfo_t /*info*/) { applyDnsOverride(ETH.netif()); }, ARDUINO_EVENT_ETH_GOT_IP6);
     }
 
 #endif
 }
 
-// When using DHCP, the DNS servers can be overridden by the optional DNS #1 and #2 settings.
-// This is useful when the router advertises a DNS server that doesn't resolve, e.g. only an unreachable IPv6 one.
+#ifndef EMSESP_STANDALONE
+// Called on GOT_IP, when the DHCP client has just written the lease's DNS servers into the slots.
+void Network::captureDhcpDns(esp_netif_t * netif) {
+    if (staticIPConfig_ || netif == nullptr) {
+        return;
+    }
+
+    const esp_netif_dns_type_t types[] = {ESP_NETIF_DNS_MAIN, ESP_NETIF_DNS_BACKUP};
+    for (uint8_t i = 0; i < 2; i++) {
+        esp_netif_dns_info_t current = {};
+        if (esp_netif_get_dns_info(netif, types[i], &current) == ESP_OK && current.ip.type == ESP_IPADDR_TYPE_V4 && current.ip.u_addr.ip4.addr != 0) {
+            dhcpDnsIP_[i] = IPAddress(current.ip.u_addr.ip4.addr);
+        } else {
+            dhcpDnsIP_[i] = INADDR_NONE;
+        }
+    }
+}
+
+// When using DHCP, the DNS servers can be overridden by the optional DNS #1 and #2 settings, otherwise the
+// IPv4 ones from the DHCP lease are kept.
 // Static IP configuration already sets the DNS servers through WiFi.config()/ETH.config().
 // lwIP's IPv6 RDNSS (router advertisements) and DHCPv6 write their servers from slot 0 onwards on every
-// advertisement, so this is called repeatedly and only touches a slot when it no longer holds our server.
-#ifndef EMSESP_STANDALONE
+// advertisement, replacing the IPv4 resolver with one that is often unreachable (e.g. a ULA the device has no
+// address for), so this is called repeatedly and only touches a slot when it no longer holds our server.
 void Network::applyDnsOverride(esp_netif_t * netif) const {
     if (staticIPConfig_ || netif == nullptr) {
         return;
     }
 
-    const IPAddress            servers[] = {dnsIP1_, dnsIP2_};
+    const bool                 custom    = IPUtils::isSet(dnsIP1_);
+    const IPAddress            servers[] = {custom ? dnsIP1_ : dhcpDnsIP_[0], custom ? dnsIP2_ : dhcpDnsIP_[1]};
     const esp_netif_dns_type_t types[]   = {ESP_NETIF_DNS_MAIN, ESP_NETIF_DNS_BACKUP};
 
     for (uint8_t i = 0; i < 2; i++) {
@@ -182,7 +211,7 @@ void Network::applyDnsOverride(esp_netif_t * netif) const {
         dns.ip.type              = ESP_IPADDR_TYPE_V4;
         dns.ip.u_addr.ip4.addr   = static_cast<uint32_t>(servers[i]);
         if (esp_netif_set_dns_info(netif, types[i], &dns) == ESP_OK) {
-            LOG_DEBUG("Using custom DNS server %s", servers[i].toString().c_str());
+            LOG_DEBUG("Using %s DNS server %s", custom ? "custom" : "DHCP", servers[i].toString().c_str());
         } else {
             LOG_WARNING("Failed to set custom DNS server %s", servers[i].toString().c_str());
         }
@@ -728,6 +757,14 @@ void Network::startWIFI() {
         startWiFiRadio();
     }
 
+    // a WiFi.begin() that never produced a GOT_IP or DISCONNECTED event would block reconnects forever, so give up on it after a timeout
+    if (wifi_connect_pending_ && static_cast<uint32_t>(uuid::get_uptime_ms() - wifi_connect_started_) >= NETWORK_WIFI_CONNECT_TIMEOUT) {
+        LOG_WARNING("WiFi connect attempt timed out, retrying");
+        WiFi.disconnect(false, true);
+        wifi_connect_pending_ = false;
+        return; // let the DISCONNECTED event settle, begin() again on the next tick        
+    }
+
     // exit if WiFi or Ethernet is already connected, or if we have no SSID or another Wifi.begin() is already in progress
     if (WiFi.isConnected() || ssid_.isEmpty() || ethernet_connected() || wifi_connect_pending_) {
         return;
@@ -739,6 +776,7 @@ void Network::startWIFI() {
     }
 
     wifi_connect_pending_ = true;
+    wifi_connect_started_ = uuid::get_uptime_ms();
 
     // attempt to connect to the wifi network
     // the event handlers handle error handling and retries

@@ -332,7 +332,6 @@ void TxService::send() {
         send_poll();
         return;
     }
-
     delayed_send_ = 0;
 
     // if we're in read-only mode (tx_mode 0) forget the Tx call

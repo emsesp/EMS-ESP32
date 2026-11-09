@@ -3,7 +3,7 @@
   "version": "3.10.0",
   "description": "mock api for EMS-ESP",
   "author": "proddy, emsesp.org",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "type": "module",
   "scripts": {
     "mock-rest": "bun --watch restServer.ts",

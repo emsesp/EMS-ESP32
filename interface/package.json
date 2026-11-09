@@ -4,7 +4,7 @@
   "description": "EMS-ESP WebUI",
   "homepage": "https://emsesp.org",
   "author": "emsesp.org",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "private": true,
   "type": "module",
   "scripts": {

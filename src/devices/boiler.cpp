@@ -102,6 +102,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x4AA, "HPPower2", true, MAKE_PF_CB(process_HpPower2), 2);
         register_telegram_type(0x4A7, "HPPowerLimit", true, MAKE_PF_CB(process_HpPowerLimit), 2);
         register_telegram_type(0x2D6, "HPPump2", true, MAKE_PF_CB(process_HpPump2), 11);
+        register_telegram_type(0x61E, "auxHeater", true, MAKE_PF_CB(process_auxHeater), 1);
     }
 
     // some gas boilers, see #1701
@@ -965,6 +966,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(hpPowerLimit),
                               DeviceValueUOM::W,
                               MAKE_CF_CB(set_hpPowerLimit));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &auxHeater_, DeviceValueType::BOOL, FL_(auxHeater), DeviceValueUOM::NONE, MAKE_CF_CB(set_auxHeater));
 
         // heatpump DHW settings
         register_device_value(DeviceValueTAG::TAG_DHW1,
@@ -2264,6 +2266,11 @@ void Boiler::process_HpPumps(const std::shared_ptr<const Telegram> & telegram) {
 void Boiler::process_HpPump2(const std::shared_ptr<const Telegram> & telegram) {
     has_update(telegram, pc1On_, 0);
     has_update(telegram, pc1Flow_, 9);
+}
+
+// 0x061E, https://github.com/emsesp/EMS-ESP32/issues/3315
+void Boiler::process_auxHeater(const std::shared_ptr<const Telegram> & telegram) {
+    has_update(telegram, auxHeater_, 0);
 }
 
 // Boiler(0x08) -> All(0x00), ?(0x0491), data: 03 01 00 00 00 02 64 00 00 14 01 2C 00 0A 00 1E 00 1E 00 00 1E 0A 1E 05 05
@@ -3866,6 +3873,16 @@ bool Boiler::set_pumpKickDelay(const char * value, const int8_t) {
     if (Helpers::value2number(value, v, 0, 32767)) {
         uint8_t data[2] = {(uint8_t)(v >> 8), (uint8_t)v};
         write_command(0xEB, 2, data, 2, 0xEB);
+        return true;
+    }
+
+    return false;
+}
+
+bool Boiler::set_auxHeater(const char * value, const int8_t) {
+    bool b;
+    if (Helpers::value2bool(value, b)) {
+        write_command(0x61E, 0, b ? 1 : 0, 0x61E);
         return true;
     }
 

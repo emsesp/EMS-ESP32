@@ -340,7 +340,7 @@ bool Connect::set_name(const char * value, const int8_t id) {
 
     Helpers::utf8tolatin1(rc->name_, value, sizeof(rc->name_));
     uint8_t len = strlen(rc->name_) * 2 + 2;
-    uint8_t data[len];
+    uint8_t data[sizeof(rc->name_) * 2];
     for (uint8_t i = 0; i < strlen(rc->name_) + 1; i++) { // include terminating '\0'
         data[2 * i]     = 0;
         data[2 * i + 1] = rc->name_[i];

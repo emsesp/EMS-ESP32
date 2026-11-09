@@ -104,6 +104,9 @@ class Module {}; // forward declaration
 // output which entity/setter commands ignore.
 #define MAKE_CF_CB(__f) [this](const char * value, const int8_t id, JsonObject output) { return __f(value, id); }
 
+// Same callback for static functions (System::command_*). No `this` capture: Clang warns when a capture is unused.
+#define MAKE_CF_CB_STATIC(__f) [](const char * value, const int8_t id, JsonObject output) { return __f(value, id); }
+
 namespace emsesp {
 
 using DeviceValueUOM   = DeviceValue::DeviceValueUOM;
