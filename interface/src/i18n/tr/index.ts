@@ -148,7 +148,7 @@ const tr: Translation = {
   OPTIONS: 'Seçenekler',
   NAME: 'İsim',
   CUSTOMIZATIONS_RESET: 'Bütün özelleştirmeleri kaldırmak istediğinizden emin misiniz?',
-  SUPPORT_INFORMATION: 'Destek Bilgileri',
+  SYSTEM_INFORMATION: 'Sistem Bilgileri',
   HELP_INFORMATION_1: 'EMS-ESPnin nasıl ayarlanacağı ile ilgili bilgileri edinmek için çevrimiçi WIKI sayfasını ziyaret edin',
   HELP_INFORMATION_2: 'Canlı topluluk sohbeti için Discord sunucumuza katılın',
   HELP_INFORMATION_3: 'Yeni bir özellik talep etmek yada hata bildirmek için',

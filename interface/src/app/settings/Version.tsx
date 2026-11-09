@@ -446,8 +446,14 @@ const InstallPartitionDialog = memo(
 );
 
 // Helper function moved outside component
+const getFlashSize = (data: VersionData): string => {
+  if (data.flash_chip_size >= 32768) return '32MB';
+  if (data.flash_chip_size >= 16384) return '16MB';
+  return '4MB';
+};
+
 const getPlatform = (data: VersionData): string => {
-  return `${data.esp_platform}-${data.flash_chip_size >= 16384 ? '16MB' : '4MB'}${data.psram ? '+' : ''}`;
+  return `${data.esp_platform}-${getFlashSize(data)}${data.psram ? '+' : ''}`;
 };
 
 const Version = () => {
@@ -593,7 +599,8 @@ const Version = () => {
     }
   };
 
-  const hasRecoverySlot = data?.recovery_version !== undefined;
+  const hasRecoverySlot =
+    data?.recovery_version !== undefined && getFlashSize(data) !== '4MB';
 
   // the recovery app in the release of the channel we're on, or the other one if that has none
   const onlineRecovery = (() => {

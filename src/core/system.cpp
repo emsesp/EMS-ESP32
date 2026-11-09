@@ -2897,7 +2897,16 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["uptimeSec"]   = uuid::get_uptime_sec();
     node["resetReason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 #ifndef EMSESP_STANDALONE
-    node["platform"]        = EMSESP_PLATFORM;
+    node["platform"] = EMSESP_PLATFORM;
+    {
+        // same as the firmware filenames, e.g. ESP32-16MB+ (+ is PSRAM)
+        const uint32_t flash_kb = ESP.getFlashChipSize() / 1024;
+        node["emsesp_platform"] = std::string(EMSESP_PLATFORM)
+                                  + (flash_kb >= 32768   ? "-32MB"
+                                     : flash_kb >= 16384 ? "-16MB"
+                                                         : "-4MB")
+                                  + (EMSESP::system_.PSram() ? "+" : "");
+    }
     node["cpuType"]         = ESP.getChipModel();
     node["arduino"]         = ARDUINO_VERSION;
     node["sdk"]             = ESP.getSdkVersion();

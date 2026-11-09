@@ -7,7 +7,7 @@ const DEMO = typeof (globalThis as any).Bun === 'undefined';
 const DEMO_MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 
 if (DEMO) {
-  console.log = () => { };
+  console.log = () => {};
 }
 
 // Minimal MessagePack encoder, the counterpart of interface/src/api/unpack.ts. Writes the same bytes as
@@ -248,7 +248,20 @@ let system_status = {
   // partitions: [],
   developer_mode: settings.developer_mode,
   disable_reset: settings.disable_reset,
-  languages: ['en', 'de', 'nl', 'sv', 'pl', 'no', 'fr', 'tr', 'it', 'sk', 'cs', 'hu'],
+  languages: [
+    'en',
+    'de',
+    'nl',
+    'sv',
+    'pl',
+    'no',
+    'fr',
+    'tr',
+    'it',
+    'sk',
+    'cs',
+    'hu'
+  ],
   // languages: ['en'], // 4MB flash boards
   model: 'BBQKees Electronics E32V2.2 rev.2.2/2024074',
   board: 'E32V2_2',
@@ -268,6 +281,8 @@ interface MockVersions {
   debug: boolean; // built with EMSESP_DEBUG
   recovery: string; // installed recovery app version, '' for not installed, 'noslot' for no factory partition
   recoveryLatest: string; // recovery app in the stable and dev releases online, '' for none
+  flash: string; // flash chip size: '4MB', '16MB' or '32MB'
+  psram: boolean; // board has PSRAM
 }
 
 const MOCK_VERSION_PRESETS: { name: string; values: Partial<MockVersions> }[] = [
@@ -310,6 +325,18 @@ const MOCK_VERSION_PRESETS: { name: string; values: Partial<MockVersions> }[] = 
   {
     name: 'offline',
     values: { offline: true }
+  },
+  {
+    name: '4MB board, no PSRAM',
+    values: { flash: '4MB', psram: false }
+  },
+  {
+    name: '16MB board, no PSRAM',
+    values: { flash: '16MB', psram: false }
+  },
+  {
+    name: '32MB board with PSRAM',
+    values: { flash: '32MB', psram: true }
   }
 ];
 
@@ -321,7 +348,19 @@ const MOCK_VERSIONS_DEFAULT: MockVersions = {
   official: true,
   debug: false,
   recovery: '1.1.0',
-  recoveryLatest: '1.1.0'
+  recoveryLatest: '1.1.0',
+  flash: '16MB',
+  psram: true
+};
+
+// sizes in KB from the partitions/esp32_partition_*.csv files
+const MOCK_FLASH_LAYOUTS: Record<
+  string,
+  { flash: number; app: number; app_used: number; fs: number }
+> = {
+  '4MB': { flash: 4096, app: 1984, app_used: 1850, fs: 64 },
+  '16MB': { flash: 16384, app: 4672, app_used: 2258, fs: 2048 },
+  '32MB': { flash: 32768, app: 9472, app_used: 2258, fs: 4096 }
 };
 
 let mock_versions: MockVersions = { ...MOCK_VERSIONS_DEFAULT };
@@ -359,9 +398,37 @@ function applyMockVersions() {
   system_status.official_build = v.official;
   system_status.build_flags = v.debug ? 'DEBUG' : '';
   system_status.recovery_version = v.recovery === 'noslot' ? undefined : v.recovery;
-}
 
-applyMockVersions();
+  const layout = MOCK_FLASH_LAYOUTS[v.flash] ?? MOCK_FLASH_LAYOUTS['16MB']!;
+  system_status.flash_chip_size = layout.flash;
+  system_status.app_used = layout.app_used;
+  system_status.app_free = layout.app - layout.app_used;
+  system_status.fs_free = layout.fs - system_status.fs_used;
+  // 4MB boards have no factory partition
+  system_status.partitions = system_status.partitions
+    .filter((p) => p.partition !== 'factory' || layout.flash > 4096)
+    .map((p) => ({ ...p, size: layout.app }));
+  if (
+    layout.flash > 4096 &&
+    !system_status.partitions.some((p) => p.partition === 'factory')
+  ) {
+    system_status.partitions.push({
+      partition: 'factory',
+      version: '3.8.4',
+      install_date: '2025-03-01T13:29:13.999Z',
+      size: layout.app
+    });
+  }
+  system_status.languages =
+    layout.flash > 4096
+      ? ['en', 'de', 'nl', 'sv', 'pl', 'no', 'fr', 'tr', 'it', 'sk', 'cs', 'hu']
+      : ['en'];
+
+  const psram_size = system_status.esp_platform === 'ESP32' ? 4096 : 8189;
+  system_status.psram = v.psram;
+  system_status.psram_size = v.psram ? psram_size : 0;
+  system_status.free_psram = v.psram ? psram_size - 23 : 0;
+}
 
 // set the ESP platform - using ESP32 will disable OTA and automatic version downloading
 let emulate_esp: string;
@@ -369,15 +436,12 @@ let emulate_esp: string;
 emulate_esp = 'ESP32';
 
 switch (emulate_esp) {
-  // ESP32 4MB
+  // ESP32, flash size and PSRAM are set by mock_versions
   case 'ESP32':
     system_status.esp_platform = 'ESP32';
     system_status.cpu_type = 'ESP32-D0WD-V3';
     system_status.arduino_version = 'Arduino v3.3.8';
     system_status.sdk_version = '5.5.4.260407';
-    system_status.psram = true;
-    system_status.psram_size = 4096;
-    system_status.free_psram = 4055;
     system_status.model = 'BBQKees Electronics E32V2.2 rev.2.2/2024073';
     system_status.board = 'E32V2_2';
 
@@ -391,15 +455,14 @@ switch (emulate_esp) {
     system_status.cpu_type = 'ESP32-S3';
     system_status.arduino_version = 'Arduino v3.3.8';
     system_status.sdk_version = '5.5.4.260407';
-    system_status.psram = true;
-    system_status.psram_size = 8189;
-    system_status.free_psram = 8166;
     system_status.model = 'BBQKees Electronics S32';
     system_status.board = 'S32S3';
 
     settings.board_profile = 'S32S3';
     break;
 }
+
+applyMockVersions();
 
 // simulate different ESP32 chips
 
@@ -507,10 +570,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-        old_custom_name +
-        ') with new (' +
-        new_custom_name +
-        ')'
+          old_custom_name +
+          ') with new (' +
+          new_custom_name +
+          ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -630,9 +693,9 @@ function upgradeImportantMessages(version: string) {
 
   console.log(
     'upgradeImportantMessageType: version=' +
-    version +
-    ' type=' +
-    upgradeImportantMessageType_n
+      version +
+      ' type=' +
+      upgradeImportantMessageType_n
   );
   return { upgradeImportantMessageType: upgradeImportantMessageType_n };
 }
@@ -703,20 +766,20 @@ function get_versions() {
 
   console.log(
     'getVersions: current=' +
-    v.current +
-    ' stable=' +
-    v.stable +
-    ' (upgradeable=' +
-    (stableUpgradeable ? 'YES' : 'NO') +
-    ') dev=' +
-    v.dev +
-    ' (upgradeable=' +
-    (devUpgradeable ? 'YES' : 'NO') +
-    ') recovery=' +
-    (v.recovery || 'not installed') +
-    ' recoveryLatest=' +
-    (v.recoveryLatest || 'not found') +
-    (v.offline ? ' [offline]' : '')
+      v.current +
+      ' stable=' +
+      v.stable +
+      ' (upgradeable=' +
+      (stableUpgradeable ? 'YES' : 'NO') +
+      ') dev=' +
+      v.dev +
+      ' (upgradeable=' +
+      (devUpgradeable ? 'YES' : 'NO') +
+      ') recovery=' +
+      (v.recovery || 'not installed') +
+      ' recoveryLatest=' +
+      (v.recoveryLatest || 'not found') +
+      (v.offline ? ' [offline]' : '')
   );
   return data;
 }
@@ -779,6 +842,11 @@ ${toggle('official')}
 ${toggle('debug')}
 ${choices('recovery', ['', '1.0.0', '1.1.0', 'noslot'])}
 ${choices('recoveryLatest', ['', '1.0.0', '1.1.0', '1.2.0'])}
+</ul>
+<h3>Board</h3>
+<ul>
+${choices('flash', Object.keys(MOCK_FLASH_LAYOUTS))}
+${toggle('psram')}
 </ul>
 <h3>User</h3>
 <p>Signed in as: <b id="user">?</b> <a href="#" data-token="admin">admin</a> | <a href="#" data-token="guest">guest</a></p>
