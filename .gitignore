@@ -85,4 +85,3 @@ test/test_api/package-lock.json
 mklittlefs
 .cursor
 *:Zone.Identifier
-package.json
