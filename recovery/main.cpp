@@ -903,9 +903,25 @@ static void handleCoreDump(AsyncWebServerRequest * request) {
     CoreDump::send(request);
 }
 
+static void handleEraseCoreDump(AsyncWebServerRequest * request) {
+    if (!isAuthorized(request)) {
+        request->send(401);
+        return;
+    }
+    if (!CoreDump::erase()) {
+        LOG("Crash dump erase failed");
+        request->send(500);
+        return;
+    }
+    LOG("Crash dump erased");
+    coredump.clear();
+    request->send(200);
+}
+
 static void startWebServer() {
     server.on("/rest/recovery/status", HTTP_GET, handleStatus);
     server.on("/rest/recovery/coredump", HTTP_GET, handleCoreDump);
+    server.on("/rest/recovery/coredump", HTTP_DELETE, handleEraseCoreDump);
     server.on("/rest/recovery/restart", HTTP_POST, handleRestart);
     server.on("/rest/recovery/format", HTTP_POST, handleFactoryReset);
     server.on("/rest/uploadFile", HTTP_POST, handleUploadComplete, handleUpload);

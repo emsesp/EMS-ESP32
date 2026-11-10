@@ -173,6 +173,11 @@ export default function recoveryMock() {
           return res.end(crypto.getRandomValues(new Uint8Array(1024)));
         }
 
+        if (url === '/rest/recovery/coredump' && req.method === 'DELETE') {
+          state.coredump = '';
+          return send(res, 200);
+        }
+
         if (url === '/rest/recovery/restart' && req.method === 'POST') {
           send(res, 200);
           return restart();

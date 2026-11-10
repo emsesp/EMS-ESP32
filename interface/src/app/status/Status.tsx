@@ -28,7 +28,7 @@ import ListMenuItem from 'components/layout/ListMenuItem';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { NTPSyncStatus, NetworkConnectionStatus, SystemStatusCodes } from 'types';
-import { useInterval } from 'utils';
+import { updateAvailable, useInterval } from 'utils';
 import { formatDateTime } from 'utils/time';
 
 const formatNumber = (num: number) => new Intl.NumberFormat().format(num);
@@ -222,7 +222,7 @@ const SystemStatus = () => {
                 : ''
             }
             to="/status/version"
-            badge={versions?.current?.upgradeable ?? false}
+            badge={updateAvailable(versions)}
           />
         )}
 

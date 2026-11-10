@@ -28,6 +28,7 @@ import {
 
 import * as SystemApi from 'api/system';
 import { API, callAction } from 'api/app';
+import { REQUEST_FAILED } from 'api/endpoints';
 
 import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova/client';
@@ -45,6 +46,7 @@ import { useI18nContext } from 'i18n/i18n-react';
 import type { TranslationFunctions } from 'i18n/i18n-types';
 import type { VersionInfo } from 'types';
 import { prettyDateTime } from 'utils/time';
+import { isNewerVersion, onlineRecoveryRelease } from 'utils/versions';
 
 // Constants moved outside component to avoid recreation
 const STABLE_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/';
@@ -73,41 +75,10 @@ interface VersionData {
   partition: string;
   partitions: PartitionData[];
   recovery_version?: string; // only on boards with a factory partition, empty if not installed
+  recovery_official?: boolean; // only when a recovery app is installed
   developer_mode: boolean;
   disable_reset: boolean;
 }
-
-// true if version a is newer than b, like 1.0.1 and 1.0.0. A prerelease, like 1.1.0-dev.1, is older than the release
-const isNewerVersion = (a: string, b: string) => {
-  const parse = (v: string) => {
-    const dash = v.indexOf('-');
-    const numbers = (text: string) =>
-      text.split('.').map((n) => Number.parseInt(n, 10) || 0);
-    return {
-      main: numbers(dash < 0 ? v : v.slice(0, dash)),
-      pre: dash < 0 ? [] : numbers(v.slice(dash + 1)),
-      isPre: dash >= 0
-    };
-  };
-  const x = parse(a);
-  const y = parse(b);
-  for (let i = 0; i < Math.max(x.main.length, y.main.length); i++) {
-    const diff = (x.main[i] ?? 0) - (y.main[i] ?? 0);
-    if (diff !== 0) {
-      return diff > 0;
-    }
-  }
-  if (x.isPre !== y.isPre) {
-    return !x.isPre;
-  }
-  for (let i = 0; i < Math.max(x.pre.length, y.pre.length); i++) {
-    const diff = (x.pre[i] ?? 0) - (y.pre[i] ?? 0);
-    if (diff !== 0) {
-      return diff > 0;
-    }
-  }
-  return false;
-};
 
 // Memoized components for better performance
 const VersionInfoDialog = memo(
@@ -337,7 +308,6 @@ const InstallDialog = memo(
             )}
           </Typography>
           {upgradeImportantMessageType === 2 && LL.UPGRADE_IMPORTANT_MESSAGES_2()}
-          {upgradeImportantMessageType === 1 && LL.UPGRADE_IMPORTANT_MESSAGES_1()}
           {upgradeImportantMessageType === 3 && LL.UPGRADE_IMPORTANT_MESSAGES_3()}
           <Typography sx={{ mt: 2 }}>
             <Link to="/settings/downloadUpload" style={{ color: 'lightblue' }}>
@@ -504,11 +474,19 @@ const Version = () => {
     return () => clearInterval(interval);
   }, [internetLive, refreshVersions]);
 
+  // a 400 means the device refused to boot from the partition, as the image in it doesn't pass verification
   const { send: sendSetPartition } = useRequest(
     (partition: string) => callAction({ action: 'setPartition', param: partition }),
     { immediate: false }
   ).onError((error) => {
-    toast.error(String(error.error?.message || 'An error occurred'));
+    const message = String(error.error?.message || 'An error occurred');
+    if (message !== REQUEST_FAILED) {
+      toast.error(message);
+    } else if (error.args[0] === 'boot') {
+      toast.error(LL.RECOVERY_START_FAILED());
+    } else {
+      toast.error(LL.PARTITION_START_FAILED());
+    }
   });
 
   const { data, send: loadData, error } = useRequest(SystemApi.readSystemStatus);
@@ -604,15 +582,9 @@ const Version = () => {
   const hasRecoverySlot =
     data?.recovery_version !== undefined && getFlashSize(data) !== '4MB';
 
-  // the recovery app in the release of the channel we're on, or the other one if that has none
   const onlineRecovery = (() => {
-    const releases = [
-      { info: versions?.dev, dev: true },
-      { info: versions?.stable, dev: false }
-    ];
-    if (!usingDevVersion) releases.reverse();
-    const release = releases.find((r) => r.info?.recovery);
-    if (!release?.info?.recovery || !platform) return undefined;
+    const release = onlineRecoveryRelease(versions);
+    if (!release || !platform) return undefined;
     const version = release.info.recovery;
     const filename = `EMS-ESP-Recovery-${version.replaceAll('.', '_')}-${platform}.bin`;
     return {
@@ -753,6 +725,7 @@ const Version = () => {
             toast.success(LL.RECOVERY_INSTALLED());
           }
           void loadData();
+          void refreshVersions();
         }}
       />
     );
@@ -858,9 +831,31 @@ const Version = () => {
                   <Typography color="secondary">{LL.RECOVERY_APP()}</Typography>
                 </TableCell>
                 <TableCell>
-                  <Typography component="span">
-                    {data.recovery_version || LL.RECOVERY_NOT_INSTALLED()}
-                  </Typography>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: 1
+                    }}
+                  >
+                    <Typography component="span">
+                      {data.recovery_version || LL.RECOVERY_NOT_INSTALLED()}
+                    </Typography>
+                    {data.recovery_version &&
+                      data.recovery_official !== undefined && (
+                        <Chip
+                          size="small"
+                          variant="outlined"
+                          color={data.recovery_official ? 'success' : 'default'}
+                          label={
+                            data.recovery_official
+                              ? LL.OFFICIAL_BUILD()
+                              : LL.CUSTOM_BUILD()
+                          }
+                        />
+                      )}
+                  </Box>
                 </TableCell>
                 <TableCell>
                   {updateCell(
@@ -930,7 +925,10 @@ const Version = () => {
               text={LL.UPLOAD_FIRMWARE_TEXT()}
               extensions={['.bin', '.md5']}
               doRestart={doRestart}
-              onRecoveryInstalled={() => void loadData()}
+              onRecoveryInstalled={() => {
+                void loadData();
+                void refreshVersions();
+              }}
             />
           </>
         )}

@@ -15,6 +15,7 @@ import { SectionContent, useLayoutTitle } from 'components';
 import ListMenuItem from 'components/layout/ListMenuItem';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
+import { updateAvailable } from 'utils';
 
 const Settings = () => {
   const { LL } = useI18nContext();
@@ -35,7 +36,7 @@ const Settings = () => {
           label="EMS-ESP Firmware"
           text={firmwareText}
           to="/settings/version"
-          badge={upgradeAvailable}
+          badge={updateAvailable(versions)}
         />
 
         {me.admin && (

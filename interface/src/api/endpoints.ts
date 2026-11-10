@@ -12,6 +12,9 @@ import { unpack } from './unpack';
 
 export const ACCESS_TOKEN = 'access_token' as const;
 
+// the error message for a 400 response
+export const REQUEST_FAILED = 'Request Failed';
+
 // Cached token to avoid repeated localStorage access
 let cachedToken: string | null = null;
 
@@ -44,7 +47,7 @@ const handleResponse = async (
     throw new Error('Reboot required');
   }
   if (response.status === 400) {
-    throw new Error('Request Failed');
+    throw new Error(REQUEST_FAILED);
   }
   if (response.status === 429) {
     throw new Error('Too Many Requests');

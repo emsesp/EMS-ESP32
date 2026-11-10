@@ -88,6 +88,7 @@ class System {
     void        recovery_installed_deferred(); // called from the main loop after the recovery firmware was downloaded from a URL
     void        recovery_installed_apply();    // called on the AsyncTCP task, handles the deferred call
     std::string recovery_version() const;      // empty if there's no recovery firmware
+    bool        recovery_official();           // the recovery firmware is signed by EMS-ESP, checked once per install
 
     // commands
     static bool    command_read(const char * value, const int8_t id);
@@ -416,6 +417,7 @@ class System {
     void set_partition_install_date();
 
     volatile bool recovery_installed_pending_ = false; // set by the main loop, handled on the AsyncTCP task
+    int8_t        recovery_official_          = -1;    // -1 not checked yet, only used on the AsyncTCP task
 
     // firmware is confirmed to the bootloader and the crash counter cleared once it has been up this long
     static constexpr uint32_t FIRMWARE_HEALTHY_UPTIME = 120; // seconds

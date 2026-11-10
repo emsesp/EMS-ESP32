@@ -154,7 +154,11 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     // factory partition is only on 16MB boards; recovery_version is empty until a recovery .bin is installed
     const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
     if (partition != NULL) {
-        root["recovery_version"] = EMSESP::system_.recovery_version();
+        const std::string recovery = EMSESP::system_.recovery_version();
+        root["recovery_version"]   = recovery;
+        if (!recovery.empty()) {
+            root["recovery_official"] = EMSESP::system_.recovery_official();
+        }
     }
 
     partition = esp_ota_get_next_update_partition(nullptr);
@@ -406,6 +410,12 @@ void WebStatusService::getVersions(JsonObject root) {
             strftime(time_string, sizeof(time_string), "%FT%T", localtime(&d));
             current["date"] = time_string;
         }
+    }
+
+    // the WebUI compares it with the recovery app in the online releases, for the update dot in the menu
+    const std::string recovery = EMSESP::system_.recovery_version();
+    if (!recovery.empty()) {
+        current["recovery"] = recovery;
     }
 
     // take a snapshot, since the loop task can be rewriting the cache while we run on AsyncTCP

@@ -224,6 +224,7 @@ let system_status = {
   psram_size: 8189,
   free_psram: 8166,
   recovery_version: '' as string | undefined, // set by mock_versions, or upload an EMS-ESP-Recovery-*.bin
+  recovery_official: undefined as boolean | undefined, // only when a recovery app is installed
   has_partition: true,
   partitions: [
     {
@@ -281,6 +282,7 @@ interface MockVersions {
   debug: boolean; // built with EMSESP_DEBUG
   recovery: string; // installed recovery app version, '' for not installed, 'noslot' for no factory partition
   recoveryLatest: string; // recovery app in the stable and dev releases online, '' for none
+  recoveryOfficial: boolean; // the installed recovery app is an official or custom build
   flash: string; // flash chip size: '4MB', '16MB' or '32MB'
   psram: boolean; // board has PSRAM
 }
@@ -311,12 +313,20 @@ const MOCK_VERSION_PRESETS: { name: string; values: Partial<MockVersions> }[] = 
     values: { recovery: '' }
   },
   {
-    name: 'recovery update available',
+    name: 'recovery update available, firmware up to date (yellow dot from the recovery only)',
     values: { recovery: '1.0.0', recoveryLatest: '1.1.0' }
+  },
+  {
+    name: 'firmware and recovery update available',
+    values: { current: '3.10.0-dev.0', recovery: '1.0.0', recoveryLatest: '1.2.0' }
   },
   {
     name: 'recovery not found online',
     values: { recovery: '1.0.0', recoveryLatest: '' }
+  },
+  {
+    name: 'custom recovery build',
+    values: { recoveryOfficial: false }
   },
   {
     name: 'no factory partition (no recovery row)',
@@ -349,6 +359,7 @@ const MOCK_VERSIONS_DEFAULT: MockVersions = {
   debug: false,
   recovery: '1.1.0',
   recoveryLatest: '1.1.0',
+  recoveryOfficial: true,
   flash: '16MB',
   psram: true
 };
@@ -398,6 +409,8 @@ function applyMockVersions() {
   system_status.official_build = v.official;
   system_status.build_flags = v.debug ? 'DEBUG' : '';
   system_status.recovery_version = v.recovery === 'noslot' ? undefined : v.recovery;
+  system_status.recovery_official =
+    v.recovery && v.recovery !== 'noslot' ? v.recoveryOfficial : undefined;
 
   const layout = MOCK_FLASH_LAYOUTS[v.flash] ?? MOCK_FLASH_LAYOUTS['16MB']!;
   system_status.flash_chip_size = layout.flash;
@@ -718,6 +731,7 @@ function get_versions() {
       type: 'stable' | 'dev';
       date: string;
       upgradeable: boolean;
+      recovery?: string;
     };
     stable?: {
       version: string;
@@ -737,6 +751,11 @@ function get_versions() {
       upgradeable: !v.offline && (isDev ? devUpgradeable : stableUpgradeable)
     }
   };
+
+  // like the device, only when a recovery app is installed. 4MB boards have no factory partition
+  if (v.recovery && v.recovery !== 'noslot' && v.flash !== '4MB') {
+    data.current.recovery = v.recovery;
+  }
 
   if (MOCK_TOKENS_RESET) {
     data.tokens_reset = true;
@@ -842,6 +861,7 @@ ${toggle('official')}
 ${toggle('debug')}
 ${choices('recovery', ['', '1.0.0', '1.1.0', 'noslot'])}
 ${choices('recoveryLatest', ['', '1.0.0', '1.1.0', '1.2.0'])}
+${toggle('recoveryOfficial')}
 </ul>
 <h3>Board</h3>
 <ul>
@@ -5156,7 +5176,8 @@ router
       const md5_ok = pendingFirmwareMd5;
       pendingFirmwareMd5 = false;
       if (!DEMO) {
-        mock_versions.recovery = '1.1.0';
+        mock_versions.recovery = mock_versions.recoveryLatest || '1.1.0';
+        mock_versions.recoveryOfficial = true;
         applyMockVersions();
       }
       console.log('Recovery firmware installed');
@@ -5995,6 +6016,7 @@ router
         if (!DEMO && String(content.param).toLowerCase().includes('recovery')) {
           // the recovery app is installed without a restart
           mock_versions.recovery = mock_versions.recoveryLatest || '1.0.1';
+          mock_versions.recoveryOfficial = true; // from the GitHub release, so signed
           applyMockVersions();
         }
         return status(200);

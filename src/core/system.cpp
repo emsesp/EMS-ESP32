@@ -617,6 +617,7 @@ void System::recovery_installed() {
 
         partition_info_.erase(factory->label); // on the AsyncTCP task, same as the web handlers reading it
     }
+    recovery_official_ = -1;
 
     LOG_INFO("Recovery firmware v%s installed", recovery_version().c_str());
 #endif
@@ -643,6 +644,19 @@ std::string System::recovery_version() const {
     }
 #endif
     return "";
+}
+
+bool System::recovery_official() {
+#ifdef EMSESP_HAS_RECOVERY
+    // reads the whole image
+    if (recovery_official_ < 0) {
+        const esp_partition_t * factory = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
+        recovery_official_              = OtaUpdater::isOfficialFirmware(factory) ? 1 : 0;
+    }
+    return recovery_official_ == 1;
+#else
+    return false;
+#endif
 }
 
 // set install time/date for the current partition, in UTC
@@ -677,19 +691,22 @@ bool System::set_partition([[maybe_unused]] const char * partitionname) {
     // Find the partition by label
     esp_partition_iterator_t it = esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_ANY, partitionname);
     if (it == nullptr) {
-        return false; // partition not found
+        LOG_ERROR("Partition '%s' not found", partitionname);
+        return false;
     }
 
     const esp_partition_t * partition = esp_partition_get(it);
     esp_partition_iterator_release(it);
 
     if (partition == nullptr) {
+        LOG_ERROR("Partition '%s' not found", partitionname);
         return false;
     }
 
-    // Set the boot partition
+    // fails with ESP_ERR_OTA_VALIDATE_FAILED if the image in the partition doesn't pass verification
     esp_err_t err = esp_ota_set_boot_partition(partition);
     if (err != ESP_OK) {
+        LOG_ERROR("Can't boot from partition '%s': %s", partitionname, esp_err_to_name(err));
         return false;
     }
 

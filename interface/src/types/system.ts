@@ -55,6 +55,7 @@ export interface SystemStatus {
   model: string;
   board: string;
   recovery_version?: string;
+  recovery_official?: boolean; // only when a recovery app is installed
   has_partition: boolean;
   partitions: {
     partition: string;
