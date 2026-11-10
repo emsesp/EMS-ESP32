@@ -70,6 +70,7 @@ class Connect : public EMSdevice {
     void    process_roomSchedule(const std::shared_ptr<const Telegram> & telegram);
     void    process_roomConfig(const std::shared_ptr<const Telegram> & telegram);
     uint8_t hp_operatingstate();
+    bool    has_heatpump();
     void    update_room_mode(std::shared_ptr<Connect::RoomCircuit> rc);
     bool    set_mode(const char * value, const int8_t id);
     bool    set_seltemp(const char * value, const int8_t id);

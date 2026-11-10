@@ -46,6 +46,7 @@ Please read this before upgrading. Details are under "Changed" below.
 - large numbers in analog sensor values (e.g. pulse counters above 1 million), custom entities and API/MQTT writes could be cut off or lose digits [#3367](https://github.com/emsesp/EMS-ESP32/issues/3367)
 - with no EMS bus attached (e.g. only powered over USB), noise on the Rx line was taken for a bus: a single random byte matching our poll marked the bus as connected, after which every noise frame was logged as `Incomplete Rx` or `Invalid source` and counted as an error. A noise frame passing the CRC could also set the wrong EMS bus type. A poll to our bus id is now only trusted when the 3 telegrams before it all had a valid CRC, the bus type is taken from the poll, and nothing is processed before then
 - RC300/RC310 `nofrostmode` missing `off` state [#3311](https://github.com/emsesp/EMS-ESP32/issues/3311)
+- SRC/MX300 wireless room thermostats: `seltemp` and `mode` were written to the cooling settings on systems without a heatpump, so the change was ignored (since 3.9.0) [#3414](https://github.com/emsesp/EMS-ESP32/discussions/3414)
 
 ## Changed
 
