@@ -44,6 +44,20 @@ pip install -U "pioarduino==6.2.0"
 platformio --version
 ```
 
+## Installing your own build
+
+From 3.10.0, EMS-ESP checks whether firmware is an official build, signed by EMS-ESP, when it's uploaded through the Web UI, installed from a URL, sent over the network with `pio run -t upload`, or uploaded in the Recovery firmware. A build from your fork, and any filesystem image, isn't, so the Web UI shows "This is not an official EMS-ESP build". Click "Install anyway" to install it. The Version page then shows "Custom build".
+
+`pio run -t upload` over the network (`scripts/upload.py`) and `scripts/upload_cli.py` install your build without asking. Flashing over a USB or serial cable (`pio run -e <env> -t upload` with the board connected, or esptool) isn't checked either. Your settings stay as they are.
+
+To check whether a file is an official build (needs `pip install cryptography`):
+
+```bash
+python3 scripts/sign_firmware.py verify build/firmware/<file>.bin
+```
+
+What makes a build official is in [SECURITY.md](SECURITY.md#firmware-signing).
+
 ## Opening New Issues
 
 1. Opening an issue means that a problem exists in the code and should be addressed by the project contributors.

@@ -9,6 +9,9 @@ import type { RequiredChildrenProps } from 'utils';
 
 import LayoutAppBar from './LayoutAppBar';
 import LayoutDrawer from './LayoutDrawer';
+import SetupDialog from './SetupDialog';
+import TelnetBanner from './TelnetBanner';
+import TokensResetBanner from './TokensResetBanner';
 import { LayoutContext } from './context';
 
 export const DRAWER_WIDTH = 210;
@@ -35,6 +38,9 @@ const LayoutComponent: FC<RequiredChildrenProps> = ({ children }) => {
       <LayoutDrawer mobileOpen={mobileOpen} onClose={handleDrawerToggle} />
       <Box component="main" sx={{ marginLeft: { md: `${DRAWER_WIDTH}px` } }}>
         <Toolbar />
+        <SetupDialog />
+        <TokensResetBanner />
+        <TelnetBanner />
         {children}
       </Box>
     </LayoutContext.Provider>

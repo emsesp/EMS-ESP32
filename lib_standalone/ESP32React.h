@@ -47,6 +47,7 @@ class DummySettings {
     bool     publish_single     = false;
     bool     publish_single2cmd = false;
     bool     send_response      = false; // don't send response
+    uint8_t  mqtt_commands      = 1;     // values and Commands
     String   host               = "192.168.1.4";
     uint16_t port               = 1883;
     String   clientId           = "ems-esp";
@@ -81,7 +82,6 @@ class DummySettings {
     uint32_t publish_time_water      = 0;
 
     String hostname  = "ems-esp";
-    String jwtSecret = "ems-esp";
     String ssid      = "ems-esp";
     String password  = "ems-esp";
 

@@ -535,6 +535,13 @@ void create_tests() {
     capture(); // always end with this, this will create the run_test() function
 }
 
+#include "test_security.h"
+#include "test_firmware_signature.h"
+
+#if defined(EMSESP_FUZZ)
+#include "test_fuzz.h"
+#endif
+
 // Main entry point
 int main() {
     webServer     = new AsyncWebServer(80);
@@ -562,6 +569,10 @@ int main() {
     return 0;
 #endif
 
+#if defined(EMSESP_FUZZ)
+    return fuzz::run();
+#endif
+
     //
     // Run the tests
     //
@@ -571,6 +582,8 @@ int main() {
     run_manual_tests();       // execute some other manual tests from this file
     run_console_tests();      // execute some console tests
     run_shuntingYard_tests(); // execute the shuntingYard tests
+    run_firmware_signature_tests();
+    run_security_tests();     // execute the permission tests, last as they change settings
 
     return UNITY_END();
 }

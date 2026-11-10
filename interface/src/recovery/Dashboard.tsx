@@ -1,6 +1,8 @@
 import { type ReactNode, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DownloadIcon from '@mui/icons-material/GetApp';
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -19,6 +21,7 @@ import {
   DialogTitle,
   Divider,
   IconButton,
+  Link,
   List,
   ListItem,
   ListItemAvatar,
@@ -39,7 +42,14 @@ import SectionContent from 'components/SectionContent';
 import { toast } from 'components/toast';
 
 import FirmwareUpload from './FirmwareUpload';
-import { HttpError, factoryReset, restart, setBootPartition } from './api';
+import {
+  HttpError,
+  downloadCoreDump,
+  eraseCoreDump,
+  factoryReset,
+  restart,
+  setBootPartition
+} from './api';
 import type { RecoveryPartition, RecoveryStatus } from './types';
 
 const formatMB = (bytes: number) => `${(bytes / 1048576).toFixed(2)} MB`;
@@ -117,12 +127,19 @@ interface DashboardProps {
   status: RecoveryStatus;
   onRestarting: (target: string) => void;
   onSignOut: () => void;
+  onChanged: () => void;
 }
 
-const Dashboard = ({ status, onRestarting, onSignOut }: DashboardProps) => {
+const Dashboard = ({
+  status,
+  onRestarting,
+  onSignOut,
+  onChanged
+}: DashboardProps) => {
   const [confirmBoot, setConfirmBoot] = useState<RecoveryPartition>();
   const [infoPartition, setInfoPartition] = useState<RecoveryPartition>();
   const [confirmFactoryReset, setConfirmFactoryReset] = useState(false);
+  const [confirmEraseCoreDump, setConfirmEraseCoreDump] = useState(false);
   const [pickedTarget, setPickedTarget] = useState<string>();
   const uploadTarget = pickedTarget ?? status.upload_target;
 
@@ -158,6 +175,25 @@ const Dashboard = ({ status, onRestarting, onSignOut }: DashboardProps) => {
     }
   };
 
+  const doDownloadCoreDump = async () => {
+    try {
+      await downloadCoreDump();
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+  const doEraseCoreDump = async () => {
+    setConfirmEraseCoreDump(false);
+    try {
+      await eraseCoreDump();
+      toast.success('Crash dump erased');
+      onChanged();
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
   const doFactoryReset = async () => {
     setConfirmFactoryReset(false);
     try {
@@ -185,6 +221,53 @@ const Dashboard = ({ status, onRestarting, onSignOut }: DashboardProps) => {
             : 'No EMS-ESP firmware is installed. Upload a firmware to continue.'}
         </MessageBox>
       </SectionContent>
+
+      {status.coredump && (
+        <SectionContent>
+          <SectionTitle>Crash Dump</SectionTitle>
+          <Typography sx={{ pb: 1 }} variant="body2" color="text.secondary">
+            The last crash left this summary. Copy it, or download the crash dump,
+            and add it to a GitHub issue so the crash can be decoded. See{' '}
+            <Link
+              href="https://docs.emsesp.org/FAQ#what-to-do-when-ems-esp-crashes"
+              target="_blank"
+              rel="noreferrer"
+            >
+              what to do when EMS-ESP crashes
+            </Link>
+            .
+          </Typography>
+          <Typography
+            sx={{
+              pb: 2,
+              fontFamily: 'monospace',
+              fontSize: 13,
+              wordBreak: 'break-all'
+            }}
+            variant="body2"
+          >
+            {status.coredump}
+          </Typography>
+          <ButtonRow>
+            <Button
+              startIcon={<DownloadIcon />}
+              variant="outlined"
+              color="primary"
+              onClick={() => void doDownloadCoreDump()}
+            >
+              Download crash dump
+            </Button>
+            <Button
+              startIcon={<DeleteIcon />}
+              variant="outlined"
+              color="error"
+              onClick={() => setConfirmEraseCoreDump(true)}
+            >
+              Erase crash dump
+            </Button>
+          </ButtonRow>
+        </SectionContent>
+      )}
 
       <SectionContent>
         <SectionTitle>Firmware</SectionTitle>
@@ -425,6 +508,36 @@ const Dashboard = ({ status, onRestarting, onSignOut }: DashboardProps) => {
             onClick={() => void doFactoryReset()}
           >
             Factory Reset
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        sx={dialogStyle}
+        open={confirmEraseCoreDump}
+        onClose={() => setConfirmEraseCoreDump(false)}
+      >
+        <DialogTitle>Erase Crash Dump</DialogTitle>
+        <DialogContent dividers>
+          Are you sure you want to erase the crash dump? Download it first if you
+          want to report the crash.
+        </DialogContent>
+        <DialogActions>
+          <Button
+            startIcon={<CancelIcon />}
+            variant="outlined"
+            color="secondary"
+            onClick={() => setConfirmEraseCoreDump(false)}
+          >
+            Cancel
+          </Button>
+          <Button
+            startIcon={<DeleteIcon />}
+            variant="outlined"
+            color="error"
+            onClick={() => void doEraseCoreDump()}
+          >
+            Erase
           </Button>
         </DialogActions>
       </Dialog>

@@ -4,11 +4,14 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import { Box, Button, Typography } from '@mui/material';
 
 import * as SystemApi from 'api/system';
+import { askPassword, passwordCancelledMessage } from 'api/passwordPrompt';
+import { readPasswordConfirmed } from 'api/security';
 
 import { useRequest } from 'alova/client';
 import { toast } from 'components/toast';
 import { useI18nContext } from 'i18n/i18n-react';
 
+import CustomBuildWarning from './CustomBuildWarning';
 import DragNdrop from './DragNdrop';
 import { LinearProgressWithLabel } from './LinearProgressWithLabel';
 
@@ -16,15 +19,19 @@ interface SingleUploadProps {
   doRestart: () => void;
   onRecoveryInstalled?: () => void;
   text: string;
+  extensions: string[];
 }
 
 const SingleUpload = ({
   doRestart,
   onRecoveryInstalled,
-  text
+  text,
+  extensions
 }: SingleUploadProps) => {
   const [md5, setMd5] = useState<string>();
   const [file, setFile] = useState<File>();
+  // the file the device stopped because it isn't an official build
+  const [customFile, setCustomFile] = useState<File>();
   const { LL } = useI18nContext();
 
   const {
@@ -42,6 +49,13 @@ const SingleUpload = ({
       } catch {
         payload = data;
       }
+    }
+    if (
+      payload &&
+      typeof payload === 'object' &&
+      (payload as { official?: boolean }).official
+    ) {
+      toast.success(LL.OFFICIAL_BUILD());
     }
     if (payload && typeof payload === 'object' && 'md5' in payload) {
       setMd5((payload as { md5: string }).md5);
@@ -61,19 +75,33 @@ const SingleUpload = ({
     }
   });
 
-  useEffect(() => {
-    const uploadFile = async () => {
-      if (file) {
-        await sendUpload(file).catch((error: Error) => {
-          if (error.message.includes('The user aborted a request')) {
-            toast.warning(LL.UPLOAD() + ' ' + LL.ABORTED());
-          } else {
-            toast.warning('Invalid file extension or incompatible bin file');
-          }
-        });
+  const upload = async (selected: File, custom: boolean) => {
+    setCustomFile(undefined);
+    // asked before sending, otherwise the whole file is sent first
+    const confirmed = await readPasswordConfirmed()
+      .then((state) => state.confirmed || askPassword())
+      .catch(() => false);
+    if (!confirmed) {
+      toast.warning(passwordCancelledMessage());
+      setFile(undefined);
+      return;
+    }
+    await sendUpload(selected, custom).catch((error: Error) => {
+      if (error.message.includes('The user aborted a request')) {
+        toast.warning(LL.UPLOAD() + ' ' + LL.ABORTED());
+      } else if (error.message === 'Precondition Failed') {
+        // 412, see OtaUpdater
+        setCustomFile(selected);
+      } else {
+        toast.warning('Invalid file extension or incompatible bin file');
       }
-    };
-    void uploadFile();
+    });
+  };
+
+  useEffect(() => {
+    if (file) {
+      void upload(file, false);
+    }
   }, [file]);
 
   return (
@@ -105,7 +133,17 @@ const SingleUpload = ({
       ) : (
         <DragNdrop
           text={md5 ? LL.UPLOAD_MD5_RECEIVED() : text}
+          extensions={extensions}
           onFileSelected={setFile}
+        />
+      )}
+
+      {customFile && !isUploading && (
+        <CustomBuildWarning
+          message={LL.UPLOAD_NOT_OFFICIAL()}
+          linkText={LL.UPLOAD_NOT_OFFICIAL_HELP()}
+          installText={LL.UPLOAD_INSTALL_ANYWAY()}
+          onInstall={() => void upload(customFile, true)}
         />
       )}
 

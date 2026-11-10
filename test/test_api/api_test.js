@@ -2,6 +2,13 @@
 // node api_test.js
 const axios = require('axios');
 
+// every /api call needs an API key, a "Read" one from Security > API Keys is enough here
+const apiKey = 'emsesp_...';
+const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${apiKey}`
+};
+
 async function testAPI(ip = "ems-esp.local", apiPath = "system", loopCount = 1, delayMs = 1000) {
     const baseUrl = `http://${ip}`;
     const url = `${baseUrl}/${apiPath}`;
@@ -19,9 +26,7 @@ async function testAPI(ip = "ems-esp.local", apiPath = "system", loopCount = 1, 
             const startTime = Date.now();
             const response = await axios.get(url, {
                 timeout: 5000,
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+                headers
             });
             logMessage += (logMessage ? ' ' : '') + `URL: ${url}, Status: ${response.status}`;
         } catch (error) {
@@ -34,7 +39,7 @@ async function testAPI(ip = "ems-esp.local", apiPath = "system", loopCount = 1, 
         }
 
         // if successful make another request to the /api/system/info endpoint to fetch the freeMem
-        const response = await axios.get(`${baseUrl}/api/system/info`);
+        const response = await axios.get(`${baseUrl}/api/system/info`, { headers });
         const freeMem = response.data?.freeMem || response.data?.system?.freeMem;
         if (freeMem !== undefined) {
             logMessage += `, freeMem: ${freeMem}`;

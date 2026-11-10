@@ -42,6 +42,9 @@ interface/src/i18n/i18n-util.ts
 interface/src/i18n/i18n-util.sync.ts
 interface/src/i18n/i18n-util.async.ts
 
+# firmware signing keys
+*.pem
+
 # scripts
 test.sh
 scripts/run.sh

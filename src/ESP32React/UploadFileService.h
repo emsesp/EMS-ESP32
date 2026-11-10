@@ -28,6 +28,7 @@ class UploadFileService {
     void handleUpload(AsyncWebServerRequest * request, const String & filename, size_t index, uint8_t * data, size_t len, bool final);
     void uploadComplete(AsyncWebServerRequest * request);
     void handleError(AsyncWebServerRequest * request, int code);
+    void logOfficial();
 
     void handleDisconnect();
 };

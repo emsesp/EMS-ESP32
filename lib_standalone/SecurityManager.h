@@ -6,9 +6,8 @@
 #include "AsyncJson.h"
 
 #include <memory>
+#include <vector>
 
-#define FACTORY_JWT_SECRET "ems-esp"
-#define ACCESS_TOKEN_PARAMETER "access_token"
 #define AUTHORIZATION_HEADER "Authorization"
 #define AUTHORIZATION_HEADER_PREFIX "Bearer "
 #define AUTHORIZATION_HEADER_PREFIX_LEN 7
@@ -17,22 +16,27 @@
 
 class User {
   public:
-    String username;
-    String password;
-    bool   admin;
+    String   username;
+    String   password;
+    bool     admin;
+    uint32_t ver;
 
   public:
-    User(String username, String password, bool admin)
+    User(String username, String password, bool admin, uint32_t ver = 0)
         : username(username)
         , password(password)
-        , admin(admin) {
+        , admin(admin)
+        , ver(ver) {
     }
 };
 
 class Authentication {
   public:
     std::unique_ptr<User> user;
-    boolean               authenticated = false;
+    boolean               authenticated      = false;
+    bool                  session            = false;
+    bool                  password_confirmed = false;
+    bool                  basic              = false;
 
   public:
     explicit Authentication(const User & u)
@@ -57,9 +61,24 @@ class AuthenticationPredicates {
     };
 };
 
+// a registered endpoint, kept so unit tests can check its permissions and call its handler
+struct StandaloneRoute {
+    String                       path;
+    WebRequestMethodComposite    method;
+    AuthenticationPredicate      predicate;
+    ArRequestHandlerFunction     plainHandler;
+    ArJsonRequestHandlerFunction jsonHandler;
+};
+
 class SecurityManager {
   public:
+    static constexpr int PASSWORD_REQUIRED = 428;
+
     virtual Authentication authenticateRequest(AsyncWebServerRequest * request) = 0;
+    virtual Authentication authenticate(const String & username, const String & password) = 0;
+    virtual Authentication authenticateApiRequest(AsyncWebServerRequest * request) {
+        return authenticateRequest(request);
+    }
 
     // Json endpoints - default POST. Registered with the shared dispatcher.
     void addEndpoint(AsyncWebServer *             server,
@@ -67,6 +86,7 @@ class SecurityManager {
                      AuthenticationPredicate      predicate,
                      ArJsonRequestHandlerFunction function,
                      WebRequestMethodComposite    method = HTTP_POST) {
+        routes().push_back({path, method, predicate, nullptr, function});
     }
 
     // non-Json endpoints - default GET
@@ -75,6 +95,22 @@ class SecurityManager {
                      AuthenticationPredicate   predicate,
                      ArRequestHandlerFunction  function,
                      WebRequestMethodComposite method = HTTP_GET) {
+        routes().push_back({path, method, predicate, function, nullptr});
+    }
+
+    // function-local static, services register from static constructors
+    static std::vector<StandaloneRoute> & routes() {
+        static std::vector<StandaloneRoute> routes_;
+        return routes_;
+    }
+
+    static const StandaloneRoute * findRoute(const String & path, WebRequestMethod method) {
+        for (const auto & route : routes()) {
+            if ((route.method & method) && route.path == path.c_str()) {
+                return &route;
+            }
+        }
+        return nullptr;
     }
 };
 

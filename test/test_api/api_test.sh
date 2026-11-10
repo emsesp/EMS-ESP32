@@ -5,18 +5,33 @@
 
 emsesp_url="http://ems-espT.local"
 
-# get the token from the Security page. This is the token for the admin user, unless changed it'll always be the same
-emsesp_token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWV9.2bHpWya2C7Q12WjNUBD6_7N3RCD7CMl-EGhyQVzFdDg"
+# every /api call needs an API key, create a "Read and Write" one in Security > API Keys
+emsesp_key="emsesp_..."
+
+# /rest needs a WebUI sign-in instead, the token is fetched by signin below
+emsesp_user="admin"
+emsesp_password="..."
+
+signin() {
+    emsesp_token=$(curl -s -X POST \
+        -H "Content-Type: application/json" \
+        -d "{\"username\":\"${emsesp_user}\",\"password\":\"${emsesp_password}\"}" \
+        ${emsesp_url}/rest/signIn | sed -n 's/.*"access_token":"\([^"]*\)".*/\1/p')
+    if [ -z "${emsesp_token}" ]; then
+        echo "sign-in failed"
+        exit 1
+    fi
+}
 
 # This example will get the system info, via a GET request
 test0() {
-    curl -X GET ${emsesp_url}/api/system/info
+    curl -X GET -H "Authorization: Bearer ${emsesp_key}" ${emsesp_url}/api/system/info
 }
 
 # This example will execute a read command on product ID 8 and type ID 1
 test1() {
     curl -X POST \
-        -H "Authorization: Bearer ${emsesp_token}" \
+        -H "Authorization: Bearer ${emsesp_key}" \
         -H "Content-Type: application/json" \
         -d '{"data":"8 1"}' \
         ${emsesp_url}/api/system/read
@@ -25,7 +40,7 @@ test1() {
 # This example will use the message command to get the locale (en)
 test2() {
     curl -X POST \
-        -H "Authorization: Bearer ${emsesp_token}" \
+        -H "Authorization: Bearer ${emsesp_key}" \
         -H "Content-Type: application/json" \
         -d '{"value":"system/settings/locale"}' \
         ${emsesp_url}/api/system/message
@@ -33,6 +48,7 @@ test2() {
 
 # This example will export all values to a json file, including custom entities, sensors and schedules
 test3() {
+    signin
     curl -X POST \
         -H "Authorization: Bearer ${emsesp_token}" \
         -H "Content-Type: application/json" \
@@ -42,6 +58,7 @@ test3() {
 
 # Get all versions
 test4() {
+    signin
     curl -X POST \
     -H "Authorization: Bearer ${emsesp_token}" \
     -H "Content-Type: application/json" \
@@ -52,7 +69,7 @@ test4() {
 # led tests
 test5() {
     curl -X POST \
-    -H "Authorization: Bearer ${emsesp_token}" \
+    -H "Authorization: Bearer ${emsesp_key}" \
     -H "Content-Type: application/json" \
     -d '{"data":"red:blink1"}' \
     ${emsesp_url}/api/system/led
@@ -60,7 +77,7 @@ test5() {
 
 test6() {
     curl -X POST \
-    -H "Authorization: Bearer ${emsesp_token}" \
+    -H "Authorization: Bearer ${emsesp_key}" \
     -H "Content-Type: application/json" \
     -d '{"data":"rgb"}' \
     ${emsesp_url}/api/system/led

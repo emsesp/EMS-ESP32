@@ -1,8 +1,109 @@
-import { Encoder } from '@msgpack/msgpack';
 import { AutoRouter, status } from 'itty-router';
 
-const encoder = new Encoder();
-const router = AutoRouter();
+// true when hosted as the public demo (demo.emsesp.org, a Cloudflare Worker), false when run locally with bun.
+// The demo is open to anyone without a login, and every visitor served by the same Worker shares the state
+// below, so it ignores changes, doesn't log request bodies and turns off the test-only pages
+const DEMO = typeof (globalThis as any).Bun === 'undefined';
+const DEMO_MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+
+if (DEMO) {
+  console.log = () => {};
+}
+
+// Minimal MessagePack encoder, the counterpart of interface/src/api/unpack.ts. Writes the same bytes as
+// @msgpack/msgpack's defaults: the smallest integer type, float64 for other numbers and nil for undefined
+const textEncoder = new TextEncoder();
+const encoder = {
+  encode(value: unknown): Uint8Array {
+    let buf = new Uint8Array(4096);
+    let view = new DataView(buf.buffer);
+    let pos = 0;
+
+    const ensure = (size: number) => {
+      if (pos + size <= buf.length) return;
+      const bigger = new Uint8Array(Math.max(buf.length * 2, pos + size));
+      bigger.set(buf);
+      buf = bigger;
+      view = new DataView(buf.buffer);
+    };
+    const byte = (b: number) => {
+      ensure(1);
+      buf[pos++] = b;
+    };
+    const typed = (type: number, size: number, write: (at: number) => void) => {
+      ensure(1 + size);
+      buf[pos++] = type;
+      write(pos);
+      pos += size;
+    };
+    const bytes = (data: Uint8Array) => {
+      ensure(data.length);
+      buf.set(data, pos);
+      pos += data.length;
+    };
+    // the header of a str, bin, array or map: fix is the fixed-size type, or -1 if there isn't one
+    const header = (
+      len: number,
+      fix: number,
+      fixMax: number,
+      t8: number,
+      t16: number,
+      t32: number
+    ) => {
+      if (fix >= 0 && len <= fixMax) byte(fix | len);
+      else if (t8 >= 0 && len <= 0xff) typed(t8, 1, (at) => view.setUint8(at, len));
+      else if (len <= 0xffff) typed(t16, 2, (at) => view.setUint16(at, len));
+      else typed(t32, 4, (at) => view.setUint32(at, len));
+    };
+
+    const write = (v: unknown) => {
+      if (v === null || v === undefined) {
+        byte(0xc0);
+      } else if (typeof v === 'boolean') {
+        byte(v ? 0xc3 : 0xc2);
+      } else if (typeof v === 'number') {
+        if (!Number.isSafeInteger(v)) {
+          typed(0xcb, 8, (at) => view.setFloat64(at, v));
+        } else if (v >= 0) {
+          if (v < 0x80) byte(v);
+          else if (v <= 0xff) typed(0xcc, 1, (at) => view.setUint8(at, v));
+          else if (v <= 0xffff) typed(0xcd, 2, (at) => view.setUint16(at, v));
+          else if (v <= 0xffffffff) typed(0xce, 4, (at) => view.setUint32(at, v));
+          else typed(0xcf, 8, (at) => view.setBigUint64(at, BigInt(v)));
+        } else {
+          if (v >= -0x20) byte(v & 0xff);
+          else if (v >= -0x80) typed(0xd0, 1, (at) => view.setInt8(at, v));
+          else if (v >= -0x8000) typed(0xd1, 2, (at) => view.setInt16(at, v));
+          else if (v >= -0x80000000) typed(0xd2, 4, (at) => view.setInt32(at, v));
+          else typed(0xd3, 8, (at) => view.setBigInt64(at, BigInt(v)));
+        }
+      } else if (typeof v === 'string') {
+        const data = textEncoder.encode(v);
+        header(data.length, 0xa0, 0x1f, 0xd9, 0xda, 0xdb);
+        bytes(data);
+      } else if (v instanceof Uint8Array) {
+        header(v.length, -1, 0, 0xc4, 0xc5, 0xc6);
+        bytes(v);
+      } else if (Array.isArray(v)) {
+        header(v.length, 0x90, 0x0f, -1, 0xdc, 0xdd);
+        v.forEach(write);
+      } else if (typeof v === 'object') {
+        const keys = Object.keys(v);
+        header(keys.length, 0x80, 0x0f, -1, 0xde, 0xdf);
+        for (const key of keys) {
+          write(key);
+          write((v as Record<string, unknown>)[key]);
+        }
+      } else {
+        throw new Error(`Can't encode ${typeof v} as MessagePack`);
+      }
+    };
+
+    write(value);
+    return buf.subarray(0, pos);
+  }
+};
+const router = AutoRouter({ before: [demoGuard] });
 
 const REST_ENDPOINT_ROOT = '/rest/';
 const API_ENDPOINT_ROOT = '/api/';
@@ -15,7 +116,7 @@ const headers = {
 
 // EMS-ESP Application Settings
 let settings = {
-  system_name: 'standalone',
+  system_name: DEMO ? 'demo' : 'standalone',
   locale: 'en',
   tx_mode: 1,
   ems_bus_id: 11,
@@ -40,9 +141,11 @@ let settings = {
   led_gpio: 2,
   hide_led: true,
   low_clock: false,
-  telnet_enabled: true,
-  notoken_api: false,
+  telnet_enabled: false,
   readonly_mode: false,
+  write_protection: true,
+  write_limit: 10,
+  write_limit_refuse: false,
   analog_enabled: true,
   pbutton_gpio: 34,
   solar_maxflow: 30,
@@ -91,6 +194,9 @@ let system_status = {
   ntp_status: 2,
   ntp_time: '2021-04-01T14:25:42Z',
   mqtt_status: true,
+  // summary of the last crash's dump, '' for none. Erased with `call system coredump`
+  coredump:
+    'task=loopTask pc=0x4012293f cause=0 vaddr=0x00000000 bt=0x4008d09c 0x4008d065 0x40090856 0x4012293f 0x4018091b 0x40207b4d sha=1e0b55050ab1c3f2 reason=abort() was called at PC 0x4012293f on core 1',
   ap_status: false,
   network_status: 3, // wifi connected
   // network_status: 10, // ethernet connected
@@ -106,6 +212,7 @@ let system_status = {
   arduino_version: 'Arduino v3.3.8',
   sdk_version: '5.5.4.260407',
   partition: 'app0',
+  official_build: true,
   flash_chip_size: 16384,
   flash_chip_speed: 80000000,
   app_used: 2258,
@@ -116,8 +223,8 @@ let system_status = {
   psram: true,
   psram_size: 8189,
   free_psram: 8166,
-  recovery_version: '', // upload an EMS-ESP-Recovery-*.bin to set it
-  // recovery_version: '1.0.0',
+  recovery_version: '' as string | undefined, // set by mock_versions, or upload an EMS-ESP-Recovery-*.bin
+  recovery_official: undefined as boolean | undefined, // only when a recovery app is installed
   has_partition: true,
   partitions: [
     {
@@ -142,63 +249,199 @@ let system_status = {
   // partitions: [],
   developer_mode: settings.developer_mode,
   disable_reset: settings.disable_reset,
+  languages: [
+    'en',
+    'de',
+    'nl',
+    'sv',
+    'pl',
+    'no',
+    'fr',
+    'tr',
+    'it',
+    'sk',
+    'cs',
+    'hu'
+  ],
+  // languages: ['en'], // 4MB flash boards
   model: 'BBQKees Electronics E32V2.2 rev.2.2/2024074',
   board: 'E32V2_2',
   status: 0
   // status: 3
 };
 
-// Test the versioning
-let DEV_VERSION_IS_UPGRADEABLE: boolean;
-let STABLE_VERSION_IS_UPGRADEABLE: boolean;
-let THIS_VERSION: string;
-let LATEST_STABLE_VERSION = '3.8.6';
-let LATEST_DEV_VERSION = '3.9.0-dev.1';
-
-// scenarios for testing versioning
-// let version_test = 0; // on latest stable, or switch to dev
-let version_test = 1; // on latest dev, or switch back to stable
-// let version_test = 2; // upgrade an older stable to latest stable or switch to latest dev
-// let version_test = 3; // upgrade dev to latest, or switch to stable
-// let version_test = 4; // downgrade to an older dev, or switch back to stable
-
-switch (version_test as number) {
-  case 0:
-  default:
-    // on latest stable, or switch to dev
-    THIS_VERSION = LATEST_STABLE_VERSION;
-    STABLE_VERSION_IS_UPGRADEABLE = false;
-    DEV_VERSION_IS_UPGRADEABLE = true;
-    break;
-  case 1:
-    // on latest dev, or switch back to stable
-    THIS_VERSION = LATEST_DEV_VERSION;
-    STABLE_VERSION_IS_UPGRADEABLE = false;
-    DEV_VERSION_IS_UPGRADEABLE = false;
-    break;
-  case 2:
-    // upgrade an older stable to latest stable or switch to latest dev
-    THIS_VERSION = '3.8.0';
-    STABLE_VERSION_IS_UPGRADEABLE = true;
-    DEV_VERSION_IS_UPGRADEABLE = true;
-    break;
-  case 3:
-    // upgrade dev to latest, or switch to stable
-    THIS_VERSION = '3.8.1-dev.3';
-    STABLE_VERSION_IS_UPGRADEABLE = false;
-    DEV_VERSION_IS_UPGRADEABLE = true;
-    break;
-  case 4:
-    // downgrade to an older dev, or switch back to stable
-    THIS_VERSION = '3.8.1-dev.1';
-    STABLE_VERSION_IS_UPGRADEABLE = true;
-    DEV_VERSION_IS_UPGRADEABLE = false;
-    break;
+// Test the versioning, used by the Version page
+// Change these defaults, or switch them at runtime by opening /rest/mockVersions in the browser
+// (e.g. http://localhost:3000/rest/mockVersions) and then reloading the Web UI
+interface MockVersions {
+  current: string; // this EMS-ESP version
+  stable: string; // latest stable release online
+  dev: string; // latest dev release online
+  offline: boolean; // no internet, getVersions omits stable and dev
+  official: boolean; // official or custom build
+  debug: boolean; // built with EMSESP_DEBUG
+  recovery: string; // installed recovery app version, '' for not installed, 'noslot' for no factory partition
+  recoveryLatest: string; // recovery app in the stable and dev releases online, '' for none
+  recoveryOfficial: boolean; // the installed recovery app is an official or custom build
+  flash: string; // flash chip size: '4MB', '16MB' or '32MB'
+  psram: boolean; // board has PSRAM
 }
 
-// set the version
-system_status.emsesp_version = THIS_VERSION;
-system_status.partitions[0].version = THIS_VERSION; // app0
+const MOCK_VERSION_PRESETS: { name: string; values: Partial<MockVersions> }[] = [
+  {
+    name: 'on latest stable, no updates',
+    values: { current: '3.9.0' }
+  },
+  {
+    name: 'on latest dev, no updates',
+    values: { current: '3.10.0-dev.1' }
+  },
+  {
+    name: 'older stable, update available',
+    values: { current: '3.8.0' }
+  },
+  {
+    name: 'older dev, update available',
+    values: { current: '3.10.0-dev.0' }
+  },
+  {
+    name: 'dev, DEBUG custom build',
+    values: { current: '3.10.0-dev.1', official: false, debug: true }
+  },
+  {
+    name: 'recovery not installed',
+    values: { recovery: '' }
+  },
+  {
+    name: 'recovery update available, firmware up to date (yellow dot from the recovery only)',
+    values: { recovery: '1.0.0', recoveryLatest: '1.1.0' }
+  },
+  {
+    name: 'firmware and recovery update available',
+    values: { current: '3.10.0-dev.0', recovery: '1.0.0', recoveryLatest: '1.2.0' }
+  },
+  {
+    name: 'recovery not found online',
+    values: { recovery: '1.0.0', recoveryLatest: '' }
+  },
+  {
+    name: 'custom recovery build',
+    values: { recoveryOfficial: false }
+  },
+  {
+    name: 'no factory partition (no recovery row)',
+    values: { recovery: 'noslot' }
+  },
+  {
+    name: 'offline',
+    values: { offline: true }
+  },
+  {
+    name: '4MB board, no PSRAM',
+    values: { flash: '4MB', psram: false }
+  },
+  {
+    name: '16MB board, no PSRAM',
+    values: { flash: '16MB', psram: false }
+  },
+  {
+    name: '32MB board with PSRAM',
+    values: { flash: '32MB', psram: true }
+  }
+];
+
+const MOCK_VERSIONS_DEFAULT: MockVersions = {
+  current: '3.10.0-dev.1',
+  stable: '3.9.0',
+  dev: '3.10.0-dev.1',
+  offline: false,
+  official: true,
+  debug: false,
+  recovery: '1.1.0',
+  recoveryLatest: '1.1.0',
+  recoveryOfficial: true,
+  flash: '16MB',
+  psram: true
+};
+
+// sizes in KB from the partitions/esp32_partition_*.csv files
+const MOCK_FLASH_LAYOUTS: Record<
+  string,
+  { flash: number; app: number; app_used: number; fs: number }
+> = {
+  '4MB': { flash: 4096, app: 1984, app_used: 1850, fs: 64 },
+  '16MB': { flash: 16384, app: 4672, app_used: 2258, fs: 2048 },
+  '32MB': { flash: 32768, app: 9472, app_used: 2258, fs: 4096 }
+};
+
+let mock_versions: MockVersions = { ...MOCK_VERSIONS_DEFAULT };
+
+// true if version a is newer than b, a prerelease like 1.1.0-dev.1 is older than the release 1.1.0
+function isNewerVersion(a: string, b: string) {
+  const parse = (v: string) => {
+    const dash = v.indexOf('-');
+    const numbers = (text: string) =>
+      text.split(/[.-]/).map((n) => Number.parseInt(n, 10) || 0);
+    return {
+      main: numbers(dash < 0 ? v : v.slice(0, dash)),
+      pre: dash < 0 ? [] : numbers(v.slice(dash + 1).replace(/^[a-z]+[.-]?/i, '')),
+      isPre: dash >= 0
+    };
+  };
+  const x = parse(a);
+  const y = parse(b);
+  for (let i = 0; i < Math.max(x.main.length, y.main.length); i++) {
+    const diff = (x.main[i] ?? 0) - (y.main[i] ?? 0);
+    if (diff !== 0) return diff > 0;
+  }
+  if (x.isPre !== y.isPre) return !x.isPre;
+  for (let i = 0; i < Math.max(x.pre.length, y.pre.length); i++) {
+    const diff = (x.pre[i] ?? 0) - (y.pre[i] ?? 0);
+    if (diff !== 0) return diff > 0;
+  }
+  return false;
+}
+
+function applyMockVersions() {
+  const v = mock_versions;
+  system_status.emsesp_version = v.current;
+  system_status.partitions[0].version = v.current; // app0
+  system_status.official_build = v.official;
+  system_status.build_flags = v.debug ? 'DEBUG' : '';
+  system_status.recovery_version = v.recovery === 'noslot' ? undefined : v.recovery;
+  system_status.recovery_official =
+    v.recovery && v.recovery !== 'noslot' ? v.recoveryOfficial : undefined;
+
+  const layout = MOCK_FLASH_LAYOUTS[v.flash] ?? MOCK_FLASH_LAYOUTS['16MB']!;
+  system_status.flash_chip_size = layout.flash;
+  system_status.app_used = layout.app_used;
+  system_status.app_free = layout.app - layout.app_used;
+  system_status.fs_free = layout.fs - system_status.fs_used;
+  // 4MB boards have no factory partition
+  system_status.partitions = system_status.partitions
+    .filter((p) => p.partition !== 'factory' || layout.flash > 4096)
+    .map((p) => ({ ...p, size: layout.app }));
+  if (
+    layout.flash > 4096 &&
+    !system_status.partitions.some((p) => p.partition === 'factory')
+  ) {
+    system_status.partitions.push({
+      partition: 'factory',
+      version: '3.8.4',
+      install_date: '2025-03-01T13:29:13.999Z',
+      size: layout.app
+    });
+  }
+  system_status.languages =
+    layout.flash > 4096
+      ? ['en', 'de', 'nl', 'sv', 'pl', 'no', 'fr', 'tr', 'it', 'sk', 'cs', 'hu']
+      : ['en'];
+
+  const psram_size = system_status.esp_platform === 'ESP32' ? 4096 : 8189;
+  system_status.psram = v.psram;
+  system_status.psram_size = v.psram ? psram_size : 0;
+  system_status.free_psram = v.psram ? psram_size - 23 : 0;
+}
 
 // set the ESP platform - using ESP32 will disable OTA and automatic version downloading
 let emulate_esp: string;
@@ -206,15 +449,12 @@ let emulate_esp: string;
 emulate_esp = 'ESP32';
 
 switch (emulate_esp) {
-  // ESP32 4MB
+  // ESP32, flash size and PSRAM are set by mock_versions
   case 'ESP32':
     system_status.esp_platform = 'ESP32';
     system_status.cpu_type = 'ESP32-D0WD-V3';
     system_status.arduino_version = 'Arduino v3.3.8';
     system_status.sdk_version = '5.5.4.260407';
-    system_status.psram = true;
-    system_status.psram_size = 4096;
-    system_status.free_psram = 4055;
     system_status.model = 'BBQKees Electronics E32V2.2 rev.2.2/2024073';
     system_status.board = 'E32V2_2';
 
@@ -228,15 +468,14 @@ switch (emulate_esp) {
     system_status.cpu_type = 'ESP32-S3';
     system_status.arduino_version = 'Arduino v3.3.8';
     system_status.sdk_version = '5.5.4.260407';
-    system_status.psram = true;
-    system_status.psram_size = 8189;
-    system_status.free_psram = 8166;
     system_status.model = 'BBQKees Electronics S32';
     system_status.board = 'S32S3';
 
     settings.board_profile = 'S32S3';
     break;
 }
+
+applyMockVersions();
 
 // simulate different ESP32 chips
 
@@ -474,16 +713,16 @@ function upgradeImportantMessages(version: string) {
   return { upgradeImportantMessageType: upgradeImportantMessageType_n };
 }
 
-// called by Action endpoint getVersions
-// Set MOCK_OFFLINE = true to simulate a device with no internet (omits stable/dev).
-const MOCK_OFFLINE = false;
-// const MOCK_OFFLINE = true;
+// called by Action endpoint getVersions, using mock_versions
+// Set to true to show the "API access tokens were reset" banner, until dismissed
+let MOCK_TOKENS_RESET = false;
+// let MOCK_TOKENS_RESET = true;
 
 function get_versions() {
-  const isDev = THIS_VERSION.includes('dev');
-  const currentUpgradeable =
-    !MOCK_OFFLINE &&
-    (isDev ? DEV_VERSION_IS_UPGRADEABLE : STABLE_VERSION_IS_UPGRADEABLE);
+  const v = mock_versions;
+  const isDev = v.current.includes('dev');
+  const stableUpgradeable = isNewerVersion(v.stable, v.current);
+  const devUpgradeable = isNewerVersion(v.dev, v.current);
 
   const data: {
     system_name: string;
@@ -492,47 +731,170 @@ function get_versions() {
       type: 'stable' | 'dev';
       date: string;
       upgradeable: boolean;
+      recovery?: string;
     };
-    stable?: { version: string; date: string; upgradeable: boolean };
-    dev?: { version: string; date: string; upgradeable: boolean };
+    stable?: {
+      version: string;
+      date: string;
+      upgradeable: boolean;
+      recovery?: string;
+    };
+    dev?: { version: string; date: string; upgradeable: boolean; recovery?: string };
+    tokens_reset?: boolean;
+    telnet_enabled?: boolean;
   } = {
     system_name: settings.system_name,
     current: {
-      version: THIS_VERSION,
+      version: v.current,
       type: isDev ? 'dev' : 'stable',
       date: '2026-04-25T12:00:00',
-      upgradeable: currentUpgradeable
+      upgradeable: !v.offline && (isDev ? devUpgradeable : stableUpgradeable)
     }
   };
 
-  if (!MOCK_OFFLINE) {
+  // like the device, only when a recovery app is installed. 4MB boards have no factory partition
+  if (v.recovery && v.recovery !== 'noslot' && v.flash !== '4MB') {
+    data.current.recovery = v.recovery;
+  }
+
+  if (MOCK_TOKENS_RESET) {
+    data.tokens_reset = true;
+  }
+
+  if (settings.telnet_enabled) {
+    data.telnet_enabled = true;
+  }
+
+  if (!v.offline) {
     data.stable = {
-      version: LATEST_STABLE_VERSION,
+      version: v.stable,
       date: '2026-04-25',
-      upgradeable: STABLE_VERSION_IS_UPGRADEABLE
+      upgradeable: stableUpgradeable
     };
     data.dev = {
-      version: LATEST_DEV_VERSION,
+      version: v.dev,
       date: '2026-04-25',
-      upgradeable: DEV_VERSION_IS_UPGRADEABLE
+      upgradeable: devUpgradeable
     };
+    // the recovery app version in each release, the Web UI builds the download URL from it
+    if (v.recoveryLatest) {
+      data.stable.recovery = v.recoveryLatest;
+      data.dev.recovery = v.recoveryLatest;
+    }
   }
 
   console.log(
     'getVersions: current=' +
-      THIS_VERSION +
+      v.current +
       ' stable=' +
-      LATEST_STABLE_VERSION +
+      v.stable +
       ' (upgradeable=' +
-      (STABLE_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
+      (stableUpgradeable ? 'YES' : 'NO') +
       ') dev=' +
-      LATEST_DEV_VERSION +
+      v.dev +
       ' (upgradeable=' +
-      (DEV_VERSION_IS_UPGRADEABLE ? 'YES' : 'NO') +
-      ')' +
-      (MOCK_OFFLINE ? ' [offline]' : '')
+      (devUpgradeable ? 'YES' : 'NO') +
+      ') recovery=' +
+      (v.recovery || 'not installed') +
+      ' recoveryLatest=' +
+      (v.recoveryLatest || 'not found') +
+      (v.offline ? ' [offline]' : '')
   );
   return data;
+}
+
+// GET /rest/mockVersions, a page to switch the version scenario at runtime
+// takes ?preset=N, ?reset, or any MockVersions field like ?current=3.8.0&debug=true
+function mock_versions_page(request: Request) {
+  const query = new URL(request.url).searchParams;
+  if (query.has('reset')) {
+    mock_versions = { ...MOCK_VERSIONS_DEFAULT };
+  }
+  const preset = MOCK_VERSION_PRESETS[Number(query.get('preset'))];
+  if (query.has('preset') && preset) {
+    mock_versions = { ...MOCK_VERSIONS_DEFAULT, ...preset.values };
+  }
+  for (const key of Object.keys(MOCK_VERSIONS_DEFAULT) as (keyof MockVersions)[]) {
+    const value = query.get(key);
+    if (value === null) continue;
+    if (typeof MOCK_VERSIONS_DEFAULT[key] === 'boolean') {
+      (mock_versions[key] as boolean) = value === 'true' || value === '1';
+    } else {
+      (mock_versions[key] as string) = value;
+    }
+  }
+  applyMockVersions();
+  console.log('mock versions set to', mock_versions);
+
+  const v = mock_versions;
+  // the values come from the query string
+  const escape = (text: unknown) =>
+    String(text).replace(
+      /[&<>"']/g,
+      (c) =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!
+    );
+  const link = (key: string, value: unknown, text: string) =>
+    `<a href="?${key}=${encodeURIComponent(String(value))}">${escape(text)}</a>`;
+  const toggle = (key: keyof MockVersions) =>
+    `<li>${key}: <b>${escape(v[key])}</b> ${link(key, !v[key], 'toggle')}</li>`;
+  const choices = (key: keyof MockVersions, options: string[]) =>
+    `<li>${key}: <b>${escape(v[key] || "''")}</b> ` +
+    options.map((o) => link(key, o, o || "''")).join(' | ') +
+    '</li>';
+
+  const html = `<!doctype html><html><head><title>Mock Versions</title>
+<style>body{font-family:sans-serif;background:#1e1e1e;color:#ddd;padding:1em}a{color:lightblue}li{margin:4px 0}</style>
+</head><body>
+<h2>Mock Versions</h2>
+<p>Change the scenario here, then reload the Web UI to fetch the new versions.</p>
+<h3>Presets</h3>
+<ol start="0">${MOCK_VERSION_PRESETS.map((p, i) => `<li>${link('preset', i, p.name)}</li>`).join('')}</ol>
+<p>${link('reset', '', 'reset to defaults')}</p>
+<h3>Current settings</h3>
+<ul>
+${choices('current', ['3.8.0', '3.9.0', '3.10.0-dev.0', '3.10.0-dev.1', '3.10.0-dev.2'])}
+${choices('stable', ['3.9.0', '3.9.1'])}
+${choices('dev', ['3.10.0-dev.1', '3.10.0-dev.2'])}
+${toggle('offline')}
+${toggle('official')}
+${toggle('debug')}
+${choices('recovery', ['', '1.0.0', '1.1.0', 'noslot'])}
+${choices('recoveryLatest', ['', '1.0.0', '1.1.0', '1.2.0'])}
+${toggle('recoveryOfficial')}
+</ul>
+<h3>Board</h3>
+<ul>
+${choices('flash', Object.keys(MOCK_FLASH_LAYOUTS))}
+${toggle('psram')}
+</ul>
+<h3>User</h3>
+<p>Signed in as: <b id="user">?</b> <a href="#" data-token="admin">admin</a> | <a href="#" data-token="guest">guest</a></p>
+<p id="origin" style="color:orange;display:none">The Web UI keeps its login per address, so open this page through the Web UI's address, e.g. http://localhost:3000/rest/mockVersions</p>
+<script>
+const tokens = ${JSON.stringify({ admin: admin_signin.access_token, guest: guest_signin.access_token })};
+const show = () => {
+  const token = localStorage.getItem('access_token');
+  let user = 'not signed in';
+  try {
+    const me = JSON.parse(atob(token.split('.')[1]));
+    user = me.username + (me.admin ? ' (admin)' : ' (guest)');
+  } catch {}
+  document.getElementById('user').textContent = user;
+  document.getElementById('origin').style.display = token ? 'none' : '';
+};
+document.querySelectorAll('[data-token]').forEach((a) =>
+  a.addEventListener('click', (e) => {
+    e.preventDefault();
+    localStorage.setItem('access_token', tokens[a.dataset.token]);
+    show();
+  })
+);
+show();
+</script>
+</body></html>`;
+
+  return new Response(html, { headers: { 'Content-Type': 'text/html' } });
 }
 
 // LOG
@@ -599,7 +961,8 @@ let network_settings = {
   static_ip_config: false,
   enableMDNS: true,
   enableCORS: false,
-  CORSOrigin: '*',
+  CORSOrigin: '',
+  allowed_hosts: '',
   eth_10mbit: false,
   local_ip: '',
   gateway_ip: '',
@@ -718,6 +1081,7 @@ let mqtt_settings = {
   discovery_type: 0,
   discovery_prefix: 'homeassistant',
   send_response: true,
+  mqtt_commands: 1,
   publish_single: false,
   enableTLS: true,
   rootCA: ''
@@ -737,15 +1101,23 @@ const ACTIVITY_ENDPOINT = REST_ENDPOINT_ROOT + 'activity';
 
 // SETTINGS
 const SYSTEM_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'systemStatus';
+const COREDUMP_ENDPOINT = REST_ENDPOINT_ROOT + 'coredump';
 const SECURITY_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'securitySettings';
 
 // SYSTEM SIGNIN
 const VERIFY_AUTHORIZATION_ENDPOINT = REST_ENDPOINT_ROOT + 'verifyAuthorization';
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn';
-const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken';
+const API_KEYS_ENDPOINT = REST_ENDPOINT_ROOT + 'apiKeys';
+const SETUP_ENDPOINT = REST_ENDPOINT_ROOT + 'setup';
+const CONFIRM_PASSWORD_ENDPOINT = REST_ENDPOINT_ROOT + 'confirmPassword';
+
+// the password entered again, counts for 5 minutes. The mock doesn't ask for it with 428
+let password_confirmed_until = 0;
+
+// which factory passwords are still in use. Set admin to true to test the setup screen
+let setup_state = { admin: false, ap: false, ap_required: false };
 
 let security_settings = {
-  jwt_secret: 'naughty!',
   users: [
     { username: 'admin', password: 'admin', admin: true },
     { username: 'guest', password: 'guest', admin: false }
@@ -754,20 +1126,24 @@ let security_settings = {
 
 const verify_authentication = { access_token: '1234' };
 
+// signed with 'ems-esp-mock-not-a-device-key'. Never sign these with a key a device has used (like the old
+// factory key 'ems-esp-neo'), or the public demo would hand out admin tokens that work on real devices
 const admin_signin = {
   access_token:
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWUsInZlcnNpb24iOiIzLjAuMmIwIn0.MsHSgoJKI1lyYz77EiT5ZN3ECMrb4mPv9FNy3udq0TU'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWUsInZlcnNpb24iOiIzLjAuMmIwIn0.YK19vdCyiQYmPv0ZzHeGpWceplwQ3PPFgBZjAAq4r3A'
 };
 const guest_signin = {
   access_token:
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imd1ZXN0IiwiYWRtaW4iOmZhbHNlfQ.E_lylR_vGIQFZUGNwcl5F6OkHoaELGsC5zqhi0pAiJE'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imd1ZXN0IiwiYWRtaW4iOmZhbHNlfQ.ZyLvq8RXQymLgR1qpF9q5CZjCJ2ZQtd6fPFdLYW7Yew'
 };
 
 // modify here to simulate admin and guest logins
 const signin = admin_signin;
 // const signin = guest_signin;
 
-const generate_token = { token: '1234' };
+let api_keys: { id: string; label: string; write: boolean; created: number }[] = [
+  { id: 'a1b2c3d4', label: 'Home Assistant', write: true, created: 1761900000 }
+];
 
 const EMSESP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'settings';
 const EMSESP_CORE_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'coreData';
@@ -804,7 +1180,7 @@ const EMSESP_SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info';
 
 const emsesp_info = {
   System: {
-    version: THIS_VERSION,
+    version: mock_versions.current,
     uptime: '001+06:40:34.018',
     'uptime (seconds)': 110434,
     freemem: 131,
@@ -4638,6 +5014,51 @@ const emsesp_deviceentities_7 = [
   { v: 102151, n: 'dhw active time', id: 'dhw/workm', m: 0, w: false }
 ];
 
+// in the demo, saves answer 200 like the device but change nothing, as every visitor would see them
+function demoGuard(request: Request) {
+  if (!DEMO) {
+    return;
+  }
+  const path = new URL(request.url).pathname;
+  if (path === MOCK_VERSIONS_ENDPOINT) {
+    return status(404);
+  }
+  if (request.method !== 'POST') {
+    return;
+  }
+  if (DEMO_IGNORED_SAVES.has(path)) {
+    return status(200);
+  }
+  if (path === EMSESP_UPLOAD_FILE_ENDPOINT) {
+    const length = Number(request.headers.get('content-length'));
+    if (!length || length > DEMO_MAX_UPLOAD_BYTES) {
+      return status(413);
+    }
+  }
+}
+
+const MOCK_VERSIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'mockVersions';
+const DEMO_IGNORED_SAVES = new Set([
+  LOG_SETTINGS_ENDPOINT,
+  NETWORK_SETTINGS_ENDPOINT,
+  AP_SETTINGS_ENDPOINT,
+  MQTT_SETTINGS_ENDPOINT,
+  TIME_ENDPOINT,
+  NTP_SETTINGS_ENDPOINT,
+  SECURITY_SETTINGS_ENDPOINT,
+  EMSESP_SETTINGS_ENDPOINT,
+  EMSESP_CUSTOMIZATION_ENTITIES_ENDPOINT,
+  EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT,
+  EMSESP_WRITE_DEVICENAME_ENDPOINT,
+  EMSESP_COMMANDS_ENDPOINT,
+  EMSESP_SCHEDULE_ENDPOINT,
+  EMSESP_MODULES_ENDPOINT,
+  EMSESP_CUSTOMENTITIES_ENDPOINT,
+  EMSESP_WRITE_DEVICEVALUE_ENDPOINT,
+  EMSESP_WRITE_TEMPSENSOR_ENDPOINT,
+  EMSESP_WRITE_ANALOGSENSOR_ENDPOINT
+]);
+
 // LOG
 router
   .get(LOG_SETTINGS_ENDPOINT, () => log_settings)
@@ -4645,6 +5066,13 @@ router
     log_settings = await request.json();
     console.log('log settings saved', log_settings);
     return status(200);
+  })
+  .post(REST_ENDPOINT_ROOT + 'console', async (request: any) => {
+    const { command } = await request.json();
+    console.log('console command', command);
+    return {
+      output: '\r\n\x1b[33mmock output for\x1b[0m: ' + command + '\r\n  line two\r\n'
+    };
   });
 
 // NETWORK
@@ -4747,7 +5175,11 @@ router
     if (fileExtension === 'bin' && fileName.startsWith('EMS-ESP-Recovery')) {
       const md5_ok = pendingFirmwareMd5;
       pendingFirmwareMd5 = false;
-      system_status.recovery_version = '1.0.0';
+      if (!DEMO) {
+        mock_versions.recovery = mock_versions.recoveryLatest || '1.1.0';
+        mock_versions.recoveryOfficial = true;
+        applyMockVersions();
+      }
       console.log('Recovery firmware installed');
       return md5_ok ? { recovery: true, md5_ok } : { recovery: true };
     }
@@ -4763,6 +5195,7 @@ router
     return status(200);
   })
   .get(ACTIVITY_ENDPOINT, () => activity)
+  .get(MOCK_VERSIONS_ENDPOINT, mock_versions_page)
   .get(SYSTEM_STATUS_ENDPOINT, async () => {
     if (countHardwarePoll >= 2) {
       countHardwarePoll = 0;
@@ -4778,15 +5211,96 @@ router
 
     return system_status;
   })
-  .get(SECURITY_SETTINGS_ENDPOINT, () => security_settings)
+  // a few bytes of random data in place of a real dump, it's only saved as coredump.bin
+  .get(COREDUMP_ENDPOINT, () => {
+    if (!system_status.coredump) {
+      return status(404);
+    }
+    return new Response(crypto.getRandomValues(new Uint8Array(1024)), {
+      headers: {
+        'Content-Type': 'application/octet-stream',
+        'Content-Disposition': 'attachment; filename="coredump.bin"'
+      }
+    });
+  })
+  // like the device, never return the stored passwords
+  .get(SECURITY_SETTINGS_ENDPOINT, () => ({
+    users: security_settings.users.map((u) => ({ ...u, password: '' }))
+  }))
   .post(SECURITY_SETTINGS_ENDPOINT, async (request: any) => {
-    security_settings = await request.json();
+    const content: any = await request.json();
+    // an empty password keeps the current one
+    security_settings = {
+      users: content.users.map((u: any) => ({
+        ...u,
+        password:
+          u.password ||
+          security_settings.users.find((o) => o.username === u.username)?.password ||
+          ''
+      }))
+    };
     console.log('security settings saved', security_settings);
     return status(200);
   })
   .get(VERIFY_AUTHORIZATION_ENDPOINT, () => verify_authentication)
-  .post(SIGN_IN_ENDPOINT, () => signin)
-  .get(GENERATE_TOKEN_ENDPOINT, () => generate_token);
+  .post(SIGN_IN_ENDPOINT, async (request: any) => {
+    const content: any = await request.json().catch(() => ({}));
+    return content.username === 'guest' ? guest_signin : signin;
+  })
+  .get(CONFIRM_PASSWORD_ENDPOINT, () => ({
+    confirmed: Date.now() < password_confirmed_until
+  }))
+  .post(CONFIRM_PASSWORD_ENDPOINT, async (request: any) => {
+    const content: any = await request.json();
+    if (content.password !== 'admin') {
+      return new Response(null, { status: 403 });
+    }
+    password_confirmed_until = Date.now() + 5 * 60 * 1000;
+    return status(200);
+  })
+  .get(API_KEYS_ENDPOINT, () => ({ keys: api_keys }))
+  .post(API_KEYS_ENDPOINT, async (request: any) => {
+    const content: any = await request.json();
+    if (content.action === 'create') {
+      const key =
+        'emsesp_' +
+        Array.from({ length: 40 }, () =>
+          Math.floor(Math.random() * 16).toString(16)
+        ).join('');
+      if (DEMO) {
+        return { key };
+      }
+      api_keys.push({
+        id: key.substring(7, 15),
+        label: content.label,
+        write: !!content.write,
+        created: Math.floor(Date.now() / 1000)
+      });
+      return { key };
+    }
+    if (content.action === 'revoke') {
+      if (DEMO) {
+        return status(200);
+      }
+      api_keys = api_keys.filter((k) => k.id !== content.id);
+      return status(200);
+    }
+    return status(400);
+  })
+  .get(SETUP_ENDPOINT, () => setup_state)
+  .post(SETUP_ENDPOINT, async (request: any) => {
+    const content: any = await request.json();
+    console.log('setup saved', content);
+    if (DEMO) {
+      return signin;
+    }
+    setup_state = {
+      admin: false,
+      ap: setup_state.ap && !content.ap_password,
+      ap_required: false
+    };
+    return signin;
+  });
 
 //
 //  EMS-ESP Project stuff
@@ -4845,8 +5359,8 @@ function getDashboardEntityData(id: number) {
   // filter device_data on
   //  - only add favorite (mask has bit 8 set) except for Custom Entities (type 99)
   let new_data = (device_data as any).nodes
-    .filter((item) => id === 99 || parseInt(item.id.slice(0, 2), 16) & 0x08)
-    .map((item, index) => ({
+    .filter((item: any) => id === 99 || parseInt(item.id.slice(0, 2), 16) & 0x08)
+    .map((item: any, index: number) => ({
       id: id * 100 + index, // mandatory unique id for table
       dv: item // devicevalue
     }));
@@ -4862,6 +5376,7 @@ router
     settings = await request.json();
     console.log('application settings saved', settings);
     system_status.developer_mode = settings.developer_mode;
+    log_settings.developer_mode = settings.developer_mode;
     system_status.disable_reset = settings.disable_reset;
     return status(200); // no restart needed
     // return status(205); // reboot required
@@ -5498,9 +6013,11 @@ router
       } else if (action === 'uploadURL') {
         // upload URL
         console.log('upload File from URL', content.param);
-        if (String(content.param).toLowerCase().includes('recovery')) {
+        if (!DEMO && String(content.param).toLowerCase().includes('recovery')) {
           // the recovery app is installed without a restart
-          system_status.recovery_version = '1.0.0';
+          mock_versions.recovery = mock_versions.recoveryLatest || '1.0.1';
+          mock_versions.recoveryOfficial = true; // from the GitHub release, so signed
+          applyMockVersions();
         }
         return status(200);
       } else if (action === 'resetMQTT') {
@@ -5510,6 +6027,9 @@ router
       } else if (action === 'setPartition') {
         // set partition
         console.log('setting partition to', content.param);
+        return status(200);
+      } else if (action === 'dismissTokensReset') {
+        if (!DEMO) MOCK_TOKENS_RESET = false;
         return status(200);
       } else if (action === 'upgradeImportantMessages') {
         // check upgrade important messages
@@ -5545,11 +6065,17 @@ router
         return status(200);
       } else if (cmd === 'restart') {
         console.log('restarting...');
-        system_status.status = 5;
-        countHardwarePoll = 0;
+        if (!DEMO) {
+          system_status.status = 5;
+          countHardwarePoll = 0;
+        }
         return status(200);
       } else if (cmd === 'read') {
         console.log('send read command:', data.data);
+        return status(200);
+      } else if (cmd === 'coredump') {
+        console.log('erasing the crash dump');
+        if (!DEMO) system_status.coredump = '';
         return status(200);
       }
     }
@@ -5566,12 +6092,11 @@ router
 //   );
 // };
 
+// Works for both Bun (uses port) and Cloudflare Workers (ignores port).
+// Don't export the router itself: its Proxy prototype makes Workers detect fake scheduled/queue/etc handlers.
 export default {
   port: 3080,
   fetch: router.fetch
   // missing: () => error(404, 'Error, endpoint not found'),
   // finally: [logger]
 };
-
-// use this with cloudflare workers instead
-// export default { ...router };

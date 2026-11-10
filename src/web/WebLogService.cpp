@@ -29,9 +29,20 @@ WebLogService::WebLogService(AsyncWebServer * server, SecurityManager * security
         server,
         EMSESP_LOG_SETTINGS_PATH,
         AuthenticationPredicates::IS_AUTHENTICATED,
-        [this](AsyncWebServerRequest * request, JsonVariant json) { getSetValues(request, json); },
+        [this, securityManager](AsyncWebServerRequest * request, JsonVariant json) {
+            // reading is for all logged-in users, changing the settings needs admin
+            if (request->method() != HTTP_GET && json.is<JsonObject>()) {
+                Authentication authentication = securityManager->authenticateRequest(request);
+                if (!AuthenticationPredicates::IS_ADMIN(authentication)) {
+                    request->send(403);
+                    return;
+                }
+            }
+            getSetValues(request, json);
+        },
         HTTP_ANY);
 
+    events_.authorizeConnect([securityManager](AsyncWebServerRequest * request) { return securityManager->authenticateRequest(request).authenticated; });
     server->addHandler(&events_);
 }
 

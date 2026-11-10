@@ -25,7 +25,7 @@ ModuleLibrary moduleLibrary; // Module Library
 EMSESP *      emsesp_;       // forward declaration
 
 WebModulesService::WebModulesService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
-    : _httpEndpoint(WebModules::read, WebModules::update, this, server, EMSESP_MODULES_SERVICE_PATH, securityManager, AuthenticationPredicates::IS_AUTHENTICATED)
+    : _httpEndpoint(WebModules::read, WebModules::update, this, server, EMSESP_MODULES_SERVICE_PATH, securityManager, AuthenticationPredicates::IS_ADMIN)
     , _fsPersistence(WebModules::read, WebModules::update, this, fs, EMSESP_MODULES_FILE) {
 }
 

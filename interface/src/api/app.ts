@@ -117,13 +117,18 @@ export const readCommands = () =>
   alovaInstance.Get<CommandItem[]>('/rest/commands', {
     transform(data) {
       const commands = (data as Commands).commands;
-      return commands.map((ci) => ({
-        ...ci,
-        o_id: ci.id,
-        o_cmd: ci.cmd,
-        o_value: ci.value,
-        o_name: ci.name
-      }));
+      return commands.map((ci) => {
+        const guest = ci.guest ?? true; // commands saved before the flag existed
+        return {
+          ...ci,
+          guest,
+          o_id: ci.id,
+          o_cmd: ci.cmd,
+          o_value: ci.value,
+          o_name: ci.name,
+          o_guest: guest
+        };
+      });
     }
   });
 export const writeCommands = (data: Commands) =>

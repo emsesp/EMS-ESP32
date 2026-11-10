@@ -25,8 +25,10 @@ export interface Settings {
   led_type: number;
   hide_led: boolean;
   low_clock: boolean;
-  notoken_api: boolean;
   readonly_mode: boolean;
+  write_protection: boolean;
+  write_limit: number;
+  write_limit_refuse: boolean;
   analog_enabled: boolean;
   pbutton_gpio: number;
   trace_raw: boolean;
@@ -177,8 +179,8 @@ export interface DeviceEntity {
   c?: boolean; // true when a customization is saved (mask, name, or min/max)
   o_m?: number; // original mask before edits
   o_cn?: string; // original cn before edits
-  o_mi?: number; // original min value
-  o_ma?: number; // original max value
+  o_mi?: number | null; // original min value
+  o_ma?: number | null; // original max value
 }
 
 export enum DeviceValueUOM {
@@ -341,6 +343,8 @@ export interface APIcall {
 export interface Action {
   action: string;
   param?: string; // optional
+  secrets?: boolean; // export: include passwords and keys
+  custom?: boolean; // uploadURL: install even if it isn't an official build
 }
 
 export interface WriteAnalogSensor {
@@ -390,11 +394,13 @@ export interface CommandItem {
   cmd: string;
   value: string;
   name: string;
+  guest: boolean; // logged-in non-admin users may run it
   deleted?: boolean;
   o_id?: number;
   o_cmd?: string;
   o_value?: string;
   o_name?: string;
+  o_guest?: boolean;
   o_deleted?: boolean;
 }
 

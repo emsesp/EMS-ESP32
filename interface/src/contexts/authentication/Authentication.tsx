@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { useNavigate } from 'react-router';
 
 import { callAction } from 'api/app';
-import { ACCESS_TOKEN } from 'api/endpoints';
+import { ACCESS_TOKEN, clearTokenCache } from 'api/endpoints';
 
 import * as AuthenticationApi from 'components/routing/authentication';
 import { useRequest } from 'alova/client';
@@ -49,6 +49,7 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
   const signIn = (accessToken: string) => {
     try {
       AuthenticationApi.getStorage().setItem(ACCESS_TOKEN, accessToken);
+      clearTokenCache();
       const decodedMe = AuthenticationApi.decodeMeJWT(accessToken);
       setMe(decodedMe);
       toast.success(LL.LOGGED_IN({ name: decodedMe.username }));
@@ -61,6 +62,7 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
 
   const signOut = (doRedirect: boolean) => {
     AuthenticationApi.clearAccessToken();
+    clearTokenCache();
     setMe(undefined);
     setVersions(undefined);
     setSystemName(undefined);

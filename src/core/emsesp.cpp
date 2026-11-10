@@ -87,6 +87,7 @@ WebStatusService   EMSESP::webStatusService   = WebStatusService(&webServer, EMS
 WebDataService     EMSESP::webDataService     = WebDataService(&webServer, EMSESP::esp32React.getSecurityManager());
 WebAPIService      EMSESP::webAPIService      = WebAPIService(&webServer, EMSESP::esp32React.getSecurityManager());
 WebLogService      EMSESP::webLogService      = WebLogService(&webServer, EMSESP::esp32React.getSecurityManager());
+WebConsoleService  EMSESP::webConsoleService  = WebConsoleService(&webServer, EMSESP::esp32React.getSecurityManager());
 
 using DeviceFlags = EMSdevice;
 using DeviceType  = EMSdevice::DeviceType;
@@ -175,6 +176,33 @@ bool EMSESP::cmd_is_readonly(const uint8_t device_type, const uint8_t device_id,
     }
 
     return false;
+}
+
+int16_t EMSESP::cmd_value_type(const uint8_t device_type, const uint8_t device_id, const char * cmd, const int8_t id) {
+    for (const auto & emsdevice : emsdevices) {
+        if (emsdevice && (emsdevice->device_type() == device_type) && (!device_id || emsdevice->device_id() == device_id)) {
+            return emsdevice->value_type(cmd, id);
+        }
+    }
+
+    return -1;
+}
+
+// false if a number is outside the entity's min and max, which include the custom limits from Customizations
+bool EMSESP::cmd_value_in_range(const uint8_t device_type,
+                                const uint8_t device_id,
+                                const char *  cmd,
+                                const int8_t  id,
+                                const char *  value,
+                                int16_t &     min,
+                                uint32_t &    max) {
+    for (const auto & emsdevice : emsdevices) {
+        if (emsdevice && (emsdevice->device_type() == device_type) && (!device_id || emsdevice->device_id() == device_id)) {
+            return emsdevice->value_in_range(cmd, id, value, min, max);
+        }
+    }
+
+    return true;
 }
 
 uint8_t EMSESP::device_id_from_cmd(const uint8_t device_type, const char * cmd, const int8_t id) {
@@ -574,9 +602,9 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
     }
 
     if (analogsensor_.have_sensors()) {
-        char s[10];
-        char s2[10];
-        char s3[10];
+        char s[24];
+        char s2[24];
+        char s3[24];
         shell.printfln("Analog sensors:");
         for (const auto & sensor : analogsensor_.sensors()) {
             switch (sensor.type()) {
@@ -1770,7 +1798,12 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     // check for poll
     if (length == 1) {
         // if ht3 poll must be ems_bus_id else if Buderus poll must be (ems_bus_id | 0x80)
-        uint8_t         poll_id      = (first_value ^ 0x80 ^ rxservice_.ems_mask());
+        // until the bus type is known, take it from the poll itself: Buderus polls with the MSB set, HT3 without
+        uint8_t mask = rxservice_.ems_mask();
+        if (mask == EMSbus::EMS_MASK_UNSET) {
+            mask = (first_value & 0x80) ^ 0x80;
+        }
+        uint8_t         poll_id      = (first_value ^ 0x80 ^ mask);
         static uint32_t connect_time = 0;
         if (!rxservice_.bus_connected()) {
             wait_km_     = true;
@@ -1778,7 +1811,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         }
 
         if (poll_id == EMSbus::ems_bus_id()) {
-            EMSbus::last_bus_activity(uuid::get_uptime()); // set the flag indication the EMS bus is active
+            EMSbus::poll_received(uuid::get_uptime(), mask); // sets the flag indicating the EMS bus is active
         }
 
         if (wait_km_) {
@@ -2040,6 +2073,9 @@ void EMSESP::start() {
 
     System::check_crash_loop();
 
+    // the result is kept, so the buffers for reading the whole image are only needed once, before the heap fragments
+    System::official_build();
+
     // set valid GPIOs list based on ESP32 chip/platform type
     system_.set_valid_system_gpios();
 
@@ -2159,7 +2195,8 @@ void EMSESP::start() {
     if (system_.telnet_enabled()) {
 #ifndef EMSESP_STANDALONE
         telnet_.start();
-        telnet_.initial_idle_timeout(3600);  // in sec, one hour idle timeout
+        telnet_.maximum_connections(2);
+        telnet_.initial_idle_timeout(600);   // in sec, 10 minutes idle timeout
         telnet_.default_write_timeout(1000); // in ms, socket timeout 1 second
 #endif
     }
@@ -2172,9 +2209,13 @@ void EMSESP::start() {
 
     // start web services
     LOG_INFO("Starting Web Server");
-    webLogService.start();     // apply settings to weblog service
+    webLogService.start(); // apply settings to weblog service
+    webConsoleService.begin(*this);
     webModulesService.begin(); // setup the external library modules
-    webServer.begin();         // start the web server
+#ifndef EMSESP_STANDALONE
+    esp32React.getSecurityManager()->compactRoutes(); // all routes are registered by now
+#endif
+    webServer.begin(); // start the web server
 }
 
 void EMSESP::start_serial_console() {
@@ -2187,7 +2228,6 @@ void EMSESP::start_serial_console() {
     shell_->start();
 #if defined(EMSESP_DEBUG)
     shell_->log_level(uuid::log::Level::DEBUG);
-    shell_->add_flags(CommandFlags::ADMIN); // always start in su/admin mode when compiled with debug
 #else
     shell_->log_level(uuid::log::Level::TRACE);
 #endif
@@ -2249,7 +2289,9 @@ void EMSESP::loop() {
             // upload failed, send a "reset" to reset the OTA URL
             Shell::loop_all(); // flush log buffers so latest error message are shown in console
             system_.uploadFirmwareURL("reset");
-            EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
+            if (EMSESP::system_.systemStatus() != SYSTEM_STATUS::SYSTEM_STATUS_ERROR_NOT_OFFICIAL) {
+                EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
+            }
         }
     }
 

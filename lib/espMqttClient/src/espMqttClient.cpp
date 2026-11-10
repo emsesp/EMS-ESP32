@@ -43,6 +43,11 @@ espMqttClientSecure & espMqttClientSecure::setCACert(const char * rootCA) {
     return *this;
 }
 
+espMqttClientSecure & espMqttClientSecure::setFingerprint(const char * fingerprint) {
+    _client.client.setFingerprint(fingerprint);
+    return *this;
+}
+
 espMqttClientSecure & espMqttClientSecure::setCertificate(const char * clientCa) {
     _client.client.setCertificate(clientCa);
     return *this;

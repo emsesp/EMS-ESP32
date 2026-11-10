@@ -17,13 +17,12 @@ import { Box, Divider, List, ListItemButton, ListItemText } from '@mui/material'
 import LayoutMenuItem from 'components/layout/LayoutMenuItem';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
+import { updateAvailable } from 'utils';
 
 const LayoutMenuComponent = () => {
   const { me, versions } = useContext(AuthenticatedContext);
   const { LL } = useI18nContext();
   const [menuOpen, setMenuOpen] = useState(true);
-
-  const upgradeAvailable = versions?.current?.upgradeable ?? false;
 
   const handleMenuToggle = () => {
     setMenuOpen((prev) => !prev);
@@ -112,9 +111,8 @@ const LayoutMenuComponent = () => {
         <LayoutMenuItem
           icon={SettingsIcon}
           label={LL.SETTINGS(0)}
-          disabled={!me.admin}
           to="/settings"
-          badge={upgradeAvailable}
+          badge={updateAvailable(versions)}
         />
         <LayoutMenuItem icon={LiveHelpIcon} label={LL.HELP()} to={`/help`} />
         <Divider />

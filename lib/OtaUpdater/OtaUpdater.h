@@ -2,16 +2,17 @@
 #define OtaUpdater_h
 
 #include <Arduino.h>
+#include <MD5Builder.h>
 #include <esp_ota_ops.h>
+
+#include <FirmwareSignature.h>
 
 #include <array>
 
-#ifdef OTA_UPDATER_ANY_PARTITION
-#include <MD5Builder.h>
-#endif
-
 // Validates and streams firmware (.bin), LittleFS images (*littlefs.bin) and MD5 digests (.md5) into flash.
 // Shared between the EMS-ESP application and the recovery application.
+// Firmware signed with an EMS-ESP key (see lib/FirmwareSignature) is an official build. Anything else, and every
+// filesystem image, is a custom build and is only installed after allowCustom(true), once the user agreed.
 class OtaUpdater {
   public:
     enum class FileType : uint8_t { UNSUPPORTED, FIRMWARE, FILESYSTEM, JSON, MD5 };
@@ -25,6 +26,8 @@ class OtaUpdater {
 
     // recovery firmware is much smaller than the main image (~512 KB–1 MB)
     static constexpr size_t MIN_RECOVERY_FIRMWARE_SIZE = 512 * 1024;
+
+    static constexpr char NOT_OFFICIAL_ERROR[] = "This is not an official EMS-ESP build";
 
     // checks the ESP image magic byte and that the chip id matches the chip we're running on
     static bool isCompatibleFirmware(const uint8_t * data, size_t len);
@@ -40,6 +43,15 @@ class OtaUpdater {
     // With bootloader rollback a new image boots as pending verification until confirmed, and the
     // IDF refuses to start another firmware update until then. Returns true if it was pending.
     static bool confirmRunningApp();
+
+    // the partition holds an image followed by a signature from one of the EMS-ESP keys, as written by end() or by
+    // flashing a signed file over USB. Reads the whole image, so it takes a moment
+    static bool isOfficialFirmware(const esp_partition_t * partition);
+
+    // set before begin, for that update only
+    void allowCustom(bool allow) {
+        _allow_custom = allow;
+    }
 
     bool setMd5(const uint8_t * data, size_t len);
     void clearMd5();
@@ -62,11 +74,29 @@ class OtaUpdater {
 
     size_t       progress() const;
     const char * errorString() const;
+    // the last begin or end failed because it's a custom build and allowCustom() wasn't set
+    bool notOfficial() const {
+        return _not_official;
+    }
+    // the firmware written by the last successful end() is an official build
+    bool isOfficial() const {
+        return _official;
+    }
 
   private:
+    static constexpr size_t READ_CHUNK = 1024;
+
     std::array<char, 33> _md5{};
     bool                 _md5_applied = false;
-    const char *         _error       = "";
+    MD5Builder           _md5Builder;
+    FirmwareSignature    _signature;
+    bool                 _filesystem   = false;
+    bool                 _allow_custom = false;
+    bool                 _not_official = false;
+    bool                 _official     = false;
+    const char *         _error        = "";
+
+    bool writeImage(const uint8_t * data, size_t len);
 
 #ifdef OTA_UPDATER_ANY_PARTITION
     // explicit target (factory/boot or an OTA slot) is written with the partition API;
@@ -75,7 +105,8 @@ class OtaUpdater {
     size_t                  _written  = 0;
     size_t                  _erased   = 0;
     bool                    _set_boot = true;
-    MD5Builder              _md5Builder;
+    // the start of the image is written last, so an image that fails a check is never bootable
+    uint8_t                 _header[16]{};
     // AsyncTCP may hand us PSRAM pointers; ESP32 flash DMA needs internal RAM
     uint8_t *               _dram      = nullptr;
     static constexpr size_t DRAM_CHUNK   = 1024;
@@ -84,6 +115,7 @@ class OtaUpdater {
 
     void setError(esp_err_t err);
     void releaseTarget();
+    bool commitTarget();
 #endif
 };
 

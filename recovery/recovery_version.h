@@ -1,1 +1,1 @@
-#define RECOVERY_VERSION "1.0.0"
+#define RECOVERY_VERSION "1.1.0"

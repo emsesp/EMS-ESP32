@@ -54,6 +54,7 @@
 #include "../web/WebCommandService.h"
 #include "../web/WebAPIService.h"
 #include "../web/WebLogService.h"
+#include "../web/WebConsoleService.h"
 #include "../web/WebCustomEntityService.h"
 #include "../web/WebModulesService.h"
 
@@ -121,6 +122,10 @@ class Shower;
 static constexpr const char * EMSESP_NVS_BOOT_NEW_FIRMWARE = "fresh_firmware"; // max 15 characters
 // why EMS-ESP switched to the recovery firmware, read and removed by the recovery app (recovery/main.cpp)
 static constexpr const char * EMSESP_NVS_RECOVERY_REASON = "rec_reason";
+// key that signs the web and API access tokens. Never exported
+static constexpr const char * EMSESP_NVS_JWT_KEY = "jwt_key";
+// set when an upgrade invalidated existing access tokens, cleared when an admin dismisses the notice
+static constexpr const char * EMSESP_NVS_TOKENS_RESET = "tokens_reset";
 
 class EMSESP {
   public:
@@ -161,6 +166,9 @@ class EMSESP {
     static bool    device_exists(const uint8_t device_id);
     static void    device_active(const uint8_t device_id, const bool active);
     static bool    cmd_is_readonly(const uint8_t device_type, const uint8_t device_id, const char * cmd, const int8_t id);
+    static int16_t cmd_value_type(const uint8_t device_type, const uint8_t device_id, const char * cmd, const int8_t id);
+    static bool
+    cmd_value_in_range(const uint8_t device_type, const uint8_t device_id, const char * cmd, const int8_t id, const char * value, int16_t & min, uint32_t & max);
     static uint8_t device_id_from_cmd(const uint8_t device_type, const char * cmd, const int8_t id);
     static uint8_t count_devices();
     static bool    get_device_value_info(JsonObject root, const char * cmd, const int8_t id, const uint8_t devicetype);
@@ -275,6 +283,7 @@ class EMSESP {
     static WebDataService          webDataService;
     static WebAPIService           webAPIService;
     static WebLogService           webLogService;
+    static WebConsoleService       webConsoleService;
     static WebCustomizationService webCustomizationService;
     static WebSchedulerService     webSchedulerService;
     static WebCommandService       webCommandService;

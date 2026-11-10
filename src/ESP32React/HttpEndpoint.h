@@ -13,10 +13,15 @@
 
 template <class T>
 class HttpEndpoint {
+  public:
+    using PasswordCheck = bool (*)(JsonObject json, T & current);
+
   protected:
     JsonStateReader<T>   _stateReader;
     JsonStateUpdater<T>  _stateUpdater;
     StatefulService<T> * _statefulService;
+    SecurityManager *    _securityManager;
+    PasswordCheck        _needsPassword = nullptr;
 
   public:
     HttpEndpoint(JsonStateReader<T>      stateReader,
@@ -28,10 +33,16 @@ class HttpEndpoint {
                  AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN)
         : _stateReader(stateReader)
         , _stateUpdater(stateUpdater)
-        , _statefulService(statefulService) {
+        , _statefulService(statefulService)
+        , _securityManager(securityManager) {
         // Create handler for both GET and POST endpoints
         securityManager->addEndpoint(
             server, servicePath, authenticationPredicate, [this](AsyncWebServerRequest * request, JsonVariant json) { handleRequest(request, json); }, HTTP_ANY); // ALL methods
+    }
+
+    // a change for which the user must have entered their password again in the last few minutes
+    void requirePassword(PasswordCheck when) {
+        _needsPassword = when;
     }
 
   protected:
@@ -42,6 +53,15 @@ class HttpEndpoint {
             if (!json.is<JsonObject>()) {
                 request->send(400); // error, bad request
                 return;
+            }
+
+            if (_needsPassword && !_securityManager->authenticateRequest(request).password_confirmed) {
+                bool needed = false;
+                _statefulService->read([&](T & current) { needed = _needsPassword(json.as<JsonObject>(), current); });
+                if (needed) {
+                    request->send(SecurityManager::PASSWORD_REQUIRED);
+                    return;
+                }
             }
 
             StateUpdateResult outcome = _statefulService->updateWithoutPropagation(json.as<JsonObject>(), _stateUpdater);

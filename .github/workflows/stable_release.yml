@@ -12,8 +12,11 @@ on:
 # Parallel graph (wall-clock is ~max of the firmware jobs, not the sum):
 #   webui ──────┐
 #               ├─► firmware (s_4M / s_16M / s_16M_P / s3_16M_P) ─┐
-#   modbus ─────┤                                                 ├─► release
-#               └─► standalone ───────────────────────────────────┘
+#   modbus ─────┤                                                 ├─► sign ─┐
+#               │   recovery ─────────────────────────────────────┘         ├─► release
+#               └─► standalone ─────────────────────────────────────────────┘
+#
+# Only the sign job has the signing key. The builds run without it, so build tools and libraries never see it.
 #
 # Extra -j on a single runner does not help: PlatformIO already compiles each
 # environment with all CPUs. The win is separate GitHub runners.
@@ -160,7 +163,7 @@ jobs:
             ${{ runner.os }}-pio-
 
       - name: Install pioarduino
-        run: uv pip install --system pioarduino==6.2.0
+        run: uv pip install --system pioarduino==6.2.0 cryptography
 
       - name: Restore WWWData.h
         uses: actions/download-artifact@v8
@@ -193,32 +196,13 @@ jobs:
           path: build/firmware
           if-no-files-found: error
 
-  release:
-    name: Create GitHub Release
-    needs: [firmware, standalone]
+  recovery:
+    name: Recovery firmware
+    if: github.event_name == 'workflow_dispatch' || github.repository == 'emsesp/EMS-ESP32'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
-
-      - name: Get the EMS-ESP version
-        id: build_info
-        run: |
-          version=`grep -E '^#define EMSESP_APP_VERSION' ./src/emsesp_version.h | awk -F'"' '{print $2}'`
-          echo "VERSION=$version" >> $GITHUB_OUTPUT
-
-      - name: Restore generated modbus header
-        uses: actions/download-artifact@v8
-        with:
-          name: modbus-header
-          path: src/core
-
-      - name: Restore firmware binaries
-        uses: actions/download-artifact@v8
-        with:
-          pattern: firmware-*
-          merge-multiple: true
-          path: build/firmware
 
       # the recovery build needs PlatformIO, and pnpm + Node.js to build its own WebUI (recovery/WWWData.h)
       - name: Install python 3.13
@@ -267,8 +251,86 @@ jobs:
             ${{ runner.os }}-pnpm-
 
       - name: Build the recovery firmware for the 16MB boards
+        run: platformio run -e recovery_s_16M -e recovery_s_16M_P -e recovery_s3_16M_P
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v7
+        with:
+          name: firmware-recovery
+          path: build/firmware
+          if-no-files-found: error
+
+  # The only job with the signing key: the 'release' environment is limited to dev, main and v* tags and needs an
+  # owner's approval. Keep it to GitHub's own actions and sign_firmware.py, nothing else may run with the key.
+  sign:
+    name: Sign firmware
+    needs: [firmware, recovery]
+    environment: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Install python 3.13
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Install cryptography
+        run: python3 -m pip install cryptography==46.0.7
+
+      - name: Restore firmware binaries
+        uses: actions/download-artifact@v8
+        with:
+          pattern: firmware-*
+          merge-multiple: true
+          path: build/firmware
+
+      - name: Sign the firmware
+        if: github.repository == 'emsesp/EMS-ESP32'
+        env:
+          EMSESP_SIGNING_KEY: ${{ secrets.EMSESP_SIGNING_KEY }}
+        run: python3 scripts/sign_firmware.py sign build/firmware/*.bin
+
+      # every published .bin must pass the check in lib/FirmwareSignature
+      - name: Check the firmware signatures
+        if: github.repository == 'emsesp/EMS-ESP32'
+        run: python3 scripts/sign_firmware.py verify build/firmware/*.bin
+
+      - name: Upload signed firmware
+        uses: actions/upload-artifact@v7
+        with:
+          name: signed-firmware
+          path: build/firmware
+          if-no-files-found: error
+
+  release:
+    name: Create GitHub Release
+    needs: [sign, standalone]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Get the EMS-ESP version
+        id: build_info
         run: |
-          platformio run -e recovery_s_16M -e recovery_s_16M_P -e recovery_s3_16M_P
+          version=`grep -E '^#define EMSESP_APP_VERSION' ./src/emsesp_version.h | awk -F'"' '{print $2}'`
+          echo "VERSION=$version" >> $GITHUB_OUTPUT
+
+      - name: Restore generated modbus header
+        uses: actions/download-artifact@v8
+        with:
+          name: modbus-header
+          path: src/core
+
+      - name: Restore signed firmware
+        uses: actions/download-artifact@v8
+        with:
+          name: signed-firmware
+          path: build/firmware
 
       - name: List firmware files
         run: ls -la build/firmware
@@ -290,10 +352,16 @@ jobs:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           VERSION: ${{ steps.build_info.outputs.VERSION }}
         run: |
+          # only list the recovery app if this release published one
+          recovery=""
+          if ls build/firmware/EMS-ESP-Recovery-*.bin >/dev/null 2>&1; then
+            recovery=$(grep -E '^#define RECOVERY_VERSION' ./recovery/recovery_version.h | awk -F'"' '{print $2}')
+          fi
           JSON_DATA=$(jq -n \
             --arg version "$VERSION" \
             --arg date "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-            '{version: $version, date: $date}')
+            --arg recovery "$recovery" \
+            '{version: $version, date: $date} + (if $recovery != "" then {recovery: $recovery} else {} end)')
           echo "JSON_DATA: $JSON_DATA"
           curl -sS --fail-with-body \
             -X PUT "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_NAMESPACE_ID}/values/stable" \

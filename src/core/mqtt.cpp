@@ -45,6 +45,7 @@ std::string Mqtt::discovery_prefix_;
 uint8_t     Mqtt::discovery_type_;
 uint8_t     Mqtt::ha_number_mode_;
 bool        Mqtt::send_response_;
+uint8_t     Mqtt::mqtt_commands_ = Mqtt::Commands::COMMANDS_VALUES;
 bool        Mqtt::publish_single_;
 bool        Mqtt::publish_single2cmd_;
 
@@ -215,7 +216,7 @@ void Mqtt::incoming(const char * topic, const char * payload) {
 // received an MQTT message that we subscribed too
 // topic is the full path
 // payload is json or a single string and converted to a json with key 'value'
-void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) {
+void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len, const bool retain) {
     // the payload is not terminated
     // convert payload to a null-terminated char string
     // see https://www.emelis.net/espMqttClient/#code-samples
@@ -239,6 +240,17 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) {
             LOG_DEBUG("Remove topic %s", topic);
         }
 
+        return;
+    }
+
+    // a retained command would run again on every reconnect, a restart would loop. With "publish to command topics"
+    // and the retain flag on, EMS-ESP's own values come back retained, so that's expected
+    if (retain) {
+        if (publish_single2cmd_ && mqtt_retain_) {
+            LOG_DEBUG("Ignoring retained message on %s", topic);
+        } else {
+            LOG_WARNING("Ignoring retained command on %s, publish commands without the retain flag", topic);
+        }
         return;
     }
 
@@ -274,8 +286,17 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) {
     }
 
     // parse and call the command
-    input               = input_doc.as<JsonObject>();
-    output              = output_doc.to<JsonObject>();
+    input  = input_doc.as<JsonObject>();
+    output = output_doc.to<JsonObject>();
+    // the broker's access control decides who may publish, the mqtt_commands setting what they may do.
+    // A factory reset or erasing the crash dump never comes from MQTT
+    Command::CallerSource caller("mqtt");
+    Command::CallerAccess access(mqtt_commands_ == Commands::COMMANDS_OFF      ? Command::Access::READ
+                                 : mqtt_commands_ == Commands::COMMANDS_VALUES ? Command::Access::VALUES
+                                                                               : Command::Access::NO_ERASE,
+                                 mqtt_commands_ == Commands::COMMANDS_OFF      ? "read only, MQTT commands are turned off in the MQTT settings"
+                                 : mqtt_commands_ == Commands::COMMANDS_VALUES ? "system commands over MQTT are turned off in the MQTT settings"
+                                                                               : "not allowed over MQTT");
     uint8_t return_code = Command::process(topic, true, input, output); // mqtt is always authenticated
 
     if (return_code != CommandRet::OK) {
@@ -286,7 +307,7 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) {
             snprintf(error, sizeof(error), "MQTT command failed with error %s", Command::return_code_string(return_code));
         }
 
-        LOG_ERROR(error);
+        LOG_ERROR("%s", error);
         Mqtt::queue_publish("response", error);
     } else {
         // all good, send back json output from call
@@ -371,6 +392,7 @@ void Mqtt::load_settings() {
         publish_single_     = mqttSettings.publish_single;
         publish_single2cmd_ = mqttSettings.publish_single2cmd;
         send_response_      = mqttSettings.send_response;
+        mqtt_commands_      = mqttSettings.mqtt_commands;
         discovery_prefix_   = mqttSettings.discovery_prefix.c_str();
         entity_format_      = mqttSettings.entity_format;
         discovery_type_     = mqttSettings.discovery_type;

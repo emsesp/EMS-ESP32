@@ -10,11 +10,13 @@ export interface VersionInfo {
 
 export interface RemoteVersionInfo extends VersionInfo {
   upgradeable: boolean;
+  recovery?: string; // version of the recovery app in this release, if it has one
 }
 
 export interface CurrentVersionInfo extends VersionInfo {
   type: 'stable' | 'dev';
   upgradeable: boolean;
+  recovery?: string; // the installed recovery app, only when there is one
 }
 
 export interface VersionsResponse {
@@ -22,4 +24,6 @@ export interface VersionsResponse {
   stable?: RemoteVersionInfo;
   dev?: RemoteVersionInfo;
   system_name?: string;
+  tokens_reset?: boolean; // admins only, set after an upgrade invalidated the API access tokens
+  telnet_enabled?: boolean; // admins only, the telnet console is on
 }

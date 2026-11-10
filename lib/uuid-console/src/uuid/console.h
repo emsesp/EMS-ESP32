@@ -1135,6 +1135,16 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
     void enter_password(const char * prompt, password_function function);
 
     /**
+	 * Prompt for a line of text, like enter_password() but the input is
+	 * visible. Added for EMS-ESP.
+	 *
+	 * @param[in] prompt Message to display prompting for input.
+	 * @param[in] function Function to be executed after the text has
+	 *                     been entered.
+	 */
+    void enter_text(const char * prompt, password_function function);
+
+    /**
 	 * Stop executing anything on this shell for a period of time.
 	 *
 	 * There is an assumption that 2^64 milliseconds uptime will always
@@ -1407,6 +1417,11 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
 	 */
     void invoke_command(const std::string & line);
 
+    // added for EMS-ESP, true while the shell waits for a password, a delay or a blocking function
+    inline bool waiting() const {
+        return mode_ != Mode::NORMAL;
+    }
+
   private:
     /**
 	 * Current mode of the shell.
@@ -1451,11 +1466,12 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
 		 *                              execution.
 		 * @since 0.1.0
 		 */
-        PasswordData(const char * password_prompt, password_function && password_function);
+        PasswordData(const char * password_prompt, password_function && password_function, bool echo = false);
         ~PasswordData() override = default;
 
         const char *      password_prompt_;   /*!< Prompt requesting password input. @since 0.1.0 */
         password_function password_function_; /*!< Function to execute after password entry. @since 0.1.0 */
+        bool              echo_;              /*!< Show the input, for enter_text(). Added for EMS-ESP */
     };
 
     /**

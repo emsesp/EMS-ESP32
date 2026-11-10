@@ -67,12 +67,12 @@ bool EMSdevice::has_entities() const {
 
 // return translated tag name based on tag id
 const char * EMSdevice::tag_to_string(int8_t tag, const bool translate) {
-    int8_t tag_n = tag > DeviceValue::NUM_TAGS ? 0 : tag;
+    int8_t tag_n = (tag < 0 || tag >= DeviceValue::NUM_TAGS) ? 0 : tag;
     return (translate ? Helpers::translated_word(DeviceValue::DeviceValueTAG_s[tag_n]) : DeviceValue::DeviceValueTAG_s[tag_n][0]);
 }
 
 const char * EMSdevice::tag_to_mqtt(int8_t tag) {
-    return (DeviceValue::DeviceValueTAG_mqtt[tag > DeviceValue::NUM_TAGS ? 0 : tag]);
+    return (DeviceValue::DeviceValueTAG_mqtt[(tag < 0 || tag >= DeviceValue::NUM_TAGS) ? 0 : tag]);
 }
 
 uint8_t EMSdevice::tag_to_flag(const uint8_t tag) {
@@ -858,6 +858,35 @@ bool EMSdevice::is_readonly(const std::string & cmd, const int8_t id) const {
     }
 
     return true; // not found, no write
+}
+
+// on/off, lists and text aren't checked here, and a value that isn't a number is left to the command
+bool EMSdevice::value_in_range(const std::string & cmd, const int8_t id, const char * value, int16_t & min, uint32_t & max) {
+    for (auto & dv : devicevalues_) {
+        if (dv.has_cmd && std::string(dv.short_name) == cmd && (dv.tag < DeviceValueTAG::TAG_HC1 || dv.tag == id || id == -1)) {
+            if (dv.type == DeviceValueType::BOOL || dv.type == DeviceValueType::ENUM || dv.type == DeviceValueType::STRING || dv.type == DeviceValueType::CMD) {
+                return true;
+            }
+            float v;
+            if (!Helpers::value2float(value, v) || !dv.get_min_max(min, max)) {
+                return true;
+            }
+            return v >= min && v <= static_cast<float>(max);
+        }
+    }
+
+    return true;
+}
+
+// the DeviceValueType of a writable entity, -1 if not found
+int16_t EMSdevice::value_type(const std::string & cmd, const int8_t id) const {
+    for (const auto & dv : devicevalues_) {
+        if (dv.has_cmd && std::string(dv.short_name) == cmd && (dv.tag < DeviceValueTAG::TAG_HC1 || dv.tag == id || id == -1)) {
+            return dv.type;
+        }
+    }
+
+    return -1;
 }
 
 // check if value has a registered command

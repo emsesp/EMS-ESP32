@@ -1,14 +1,15 @@
+import { gzipAsync } from '@gfx/zopfli';
 import etag from 'etag';
 import {
   createWriteStream,
   existsSync,
   readFileSync,
   readdirSync,
+  statSync,
   unlinkSync
 } from 'fs';
 import mime from 'mime-types';
 import { relative, resolve, sep } from 'path';
-import zlib from 'zlib';
 
 // optional args: --src <dir> --out <file> --index <html file served as /index.html>
 const getArg = (name, fallback) => {
@@ -108,14 +109,13 @@ const getFileType = (filePath) => {
   return 'other';
 };
 
-const writeFile = (relativeFilePath, buffer) => {
+const writeFile = (relativeFilePath, buffer, zipBuffer) => {
   const variable = `ESP_REACT_DATA_${fileInfo.length}`;
   const mimeType = mime.lookup(relativeFilePath);
   const fileType = getFileType(relativeFilePath);
   let size = 0;
   writeStream.write(`const uint8_t ${variable}[] = {`);
 
-  const zipBuffer = zlib.gzipSync(buffer, { level: 9 });
   // const hash = crypto.createHash('sha256').update(zipBuffer).digest('hex');
   const hash = etag(zipBuffer); // use smaller md5 instead of sha256
   const rawHash = hash.replace(/^"|"$/g, '');
@@ -151,21 +151,48 @@ const writeFile = (relativeFilePath, buffer) => {
   totalSize += size;
 };
 
+// the assets table of the existing output file, read before it's overwritten
+const readPreviousAssets = (path) => {
+  if (!existsSync(path)) return undefined;
+  const text = readFileSync(path, 'utf8');
+  const assets = new Map();
+  for (const m of text.matchAll(
+    /\{"([^"]+)", "[^"]*", \w+, (\d+), "\\"(.*?)\\""\}/g
+  )) {
+    assets.set(m[1], { size: Number(m[2]), etag: m[3] });
+  }
+  return {
+    assets,
+    generated: /Generated on: (\S+)/.exec(text)?.[1],
+    modified: statSync(path).mtime
+  };
+};
+
 console.log(`Generating ${outputPath} from ${sourcePath}`);
+const previous = readPreviousAssets(resolve(outputPath));
 const fileInfo = [];
 const writeStream = cleanAndOpen(resolve(outputPath));
 
 writeStream.write(ARDUINO_INCLUDES);
 
 const buildPath = resolve(sourcePath);
+const assets = [];
 for (const filePath of getFilesSync(buildPath)) {
   const relativeFilePath = relative(buildPath, filePath);
   if (isExcludedLocaleChunk(relativeFilePath)) {
     console.log(`Skipping locale (not in VITE_APP_LOCALES): ${relativeFilePath}`);
     continue;
   }
-  writeFile(relativeFilePath, readFileSync(filePath));
+  assets.push({ relativeFilePath, buffer: readFileSync(filePath) });
 }
+
+// Zopfli emits standard gzip, ~4% smaller than zlib level 9
+const zipped = await Promise.all(
+  assets.map(({ buffer }) => gzipAsync(buffer, { numiterations: 15 }))
+);
+assets.forEach(({ relativeFilePath, buffer }, i) =>
+  writeFile(relativeFilePath, buffer, Buffer.from(zipped[i]))
+);
 
 writeStream.write(generateWWWClass());
 writeStream.end();
@@ -202,3 +229,40 @@ Object.entries(bundleStats).forEach(([type, stats]) => {
   }
 });
 console.log('='.repeat(50));
+
+// Compare with the previous output, by URI and etag (the hash of the compressed content)
+if (!previous) {
+  console.log(`\n🆕 ${outputPath} didn't exist before`);
+} else {
+  const when = previous.generated ?? previous.modified.toISOString();
+  const added = fileInfo.filter((f) => !previous.assets.has(f.uri));
+  const changed = fileInfo.filter((f) => {
+    const old = previous.assets.get(f.uri);
+    return old && old.etag !== f.rawHash;
+  });
+  const current = new Set(fileInfo.map((f) => f.uri));
+  const removed = [...previous.assets.keys()].filter((uri) => !current.has(uri));
+  const previousSize = [...previous.assets.values()].reduce(
+    (sum, a) => sum + a.size,
+    0
+  );
+  const sizeDiff = totalSize - previousSize;
+
+  if (!added.length && !changed.length && !removed.length) {
+    console.log(`\n✅ No changes since the last generation (${when})`);
+  } else {
+    console.log(`\n🔄 Changes since the last generation (${when}):`);
+    changed.forEach((f) =>
+      console.log(
+        `  ~ ${f.uri} (${previous.assets.get(f.uri).size} → ${f.size} bytes)`
+      )
+    );
+    added.forEach((f) => console.log(`  + ${f.uri} (${f.size} bytes)`));
+    removed.forEach((uri) =>
+      console.log(`  - ${uri} (${previous.assets.get(uri).size} bytes)`)
+    );
+    console.log(
+      `  Total: ${(previousSize / 1000).toFixed(1)} KB → ${(totalSize / 1000).toFixed(1)} KB (${sizeDiff >= 0 ? '+' : ''}${(sizeDiff / 1000).toFixed(1)} KB)`
+    );
+  }
+}

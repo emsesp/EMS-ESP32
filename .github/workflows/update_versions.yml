@@ -21,6 +21,11 @@ jobs:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
         run: |
           version=$(grep -E '^#define EMSESP_APP_VERSION' ./src/emsesp_version.h | awk -F'"' '{print $2}')
+          # older branches have no recovery app
+          recovery=""
+          if [ -f ./recovery/recovery_version.h ]; then
+            recovery=$(grep -E '^#define RECOVERY_VERSION' ./recovery/recovery_version.h | awk -F'"' '{print $2}')
+          fi
           if [ "$GITHUB_REF" = "refs/heads/main" ]; then
             KV_ENV="stable"
           else
@@ -29,7 +34,8 @@ jobs:
           JSON_DATA=$(jq -n \
             --arg version "$version" \
             --arg date "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-            '{version: $version, date: $date}')
+            --arg recovery "$recovery" \
+            '{version: $version, date: $date} + (if $recovery != "" then {recovery: $recovery} else {} end)')
           echo "KV_ENV: $KV_ENV"
           echo "JSON_DATA: $JSON_DATA"
           curl -sS --fail-with-body \

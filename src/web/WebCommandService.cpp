@@ -29,7 +29,7 @@ QueueHandle_t WebCommandService::commandQueue_ = nullptr;
 #endif
 
 WebCommandService::WebCommandService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
-    : _httpEndpoint(WebCommands::read, WebCommands::update, this, server, EMSESP_COMMANDS_SERVICE_PATH, securityManager, AuthenticationPredicates::IS_AUTHENTICATED)
+    : _httpEndpoint(WebCommands::read, WebCommands::update, this, server, EMSESP_COMMANDS_SERVICE_PATH, securityManager, AuthenticationPredicates::IS_ADMIN)
     , _fsPersistence(WebCommands::read, WebCommands::update, this, fs, EMSESP_COMMANDS_FILE) {
 }
 
@@ -192,6 +192,7 @@ void WebCommands::read(WebCommands & webCommands, JsonObject root) {
         obj["cmd"]     = ci.cmd;
         obj["value"]   = ci.value;
         obj["name"]    = (const char *)ci.name;
+        obj["guest"]   = ci.guest;
     }
 }
 
@@ -205,6 +206,7 @@ StateUpdateResult WebCommands::update(JsonObject root, WebCommands & webCommands
         ci.cmd   = item["cmd"].as<std::string>();
         ci.value = item["value"].as<std::string>();
         strlcpy(ci.name, item["name"].as<const char *>(), sizeof(ci.name));
+        ci.guest = item["guest"] | true; // commands saved before the flag existed stay available to guests
 
         webCommands.commandItems.push_back(ci);
         Command::add(
@@ -214,7 +216,7 @@ StateUpdateResult WebCommands::update(JsonObject root, WebCommands & webCommands
                 return EMSESP::webCommandService.dispatchCommand(name.c_str(), value); // value is optional
             },
             FL_(command_cmd),
-            CommandFlag::ADMIN_ONLY);
+            CommandFlag::ADMIN_ONLY | (ci.guest ? CommandFlag::GUEST : CommandFlag::CMD_FLAG_DEFAULT));
     }
 
     return StateUpdateResult::CHANGED;
@@ -236,6 +238,11 @@ const CommandItem * WebCommandService::find(const char * name) {
     return nullptr;
 }
 
+bool WebCommandService::guest_allowed(const char * name) {
+    const CommandItem * ci = find(name);
+    return ci != nullptr && ci->guest;
+}
+
 // execute a named command — looks up by name and runs it
 bool WebCommandService::executeCommand(const char * name, const char * value) {
     const CommandItem * ci = find(name);
@@ -252,6 +259,14 @@ bool WebCommandService::executeCommand(const char * name, const char * value) {
 // execute a command with explicit cmd and value strings
 // handles both HTTP URLs (JSON format) and internal API commands
 bool WebCommandService::executeCommand(const char * name, const std::string & command, const std::string & data) {
+    Command::CallerRights admin(true); // the command and its value were saved by an admin
+    Command::CallerAccess all(Command::Access::ALL, nullptr);
+    std::string           source = std::string("command '") + name + "'";
+    if (Command::caller_source()) {
+        source += std::string(", ") + Command::caller_source();
+    }
+    Command::CallerSource caller(source.c_str());
+
     std::string cmd = Helpers::toLower(command);
 
     // run the value through the shunting-yard calculator so expressions like "custom/heatcnt + 1"
@@ -331,7 +346,7 @@ bool WebCommandService::executeCommand(const char * name, const std::string & co
         snprintf(error, sizeof(error), "Command '%s': %s failed with error %s", name, cmd.c_str(), Command::return_code_string(return_code));
     }
 
-    EMSESP::logger().warning(error);
+    EMSESP::logger().warning("%s", error);
     return false;
 }
 
@@ -457,6 +472,7 @@ void WebCommandService::load_test_data() {
         ci.cmd   = "system/fetch";
         ci.value = "10";
         strcpy(ci.name, "fetch_values");
+        ci.guest = false;
         webCommands.commandItems.push_back(ci);
 
         ci       = CommandItem();
@@ -481,7 +497,7 @@ void WebCommandService::load_test_data() {
                         return EMSESP::webCommandService.dispatchCommand(name.c_str(), value);
                     },
                     FL_(command_cmd),
-                    CommandFlag::ADMIN_ONLY);
+                    CommandFlag::ADMIN_ONLY | (item.guest ? CommandFlag::GUEST : CommandFlag::CMD_FLAG_DEFAULT));
             }
         }
 

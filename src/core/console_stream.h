@@ -34,6 +34,11 @@ class EMSESPConsole : public EMSESPShell {
 
     std::string console_name() override;
 
+  protected:
+#ifndef EMSESP_STANDALONE
+    std::string login_source() override;
+#endif
+
   private:
 #ifndef EMSESP_STANDALONE
     static std::vector<bool> ptys_;
@@ -45,6 +50,21 @@ class EMSESPConsole : public EMSESPShell {
     IPAddress addr_;
     uint16_t  port_;
 #endif
+};
+
+// runs command lines from the Web UI console, an admin shell that is never started so it has no prompt, banner or log output
+class EMSESPWebShell : public EMSESPShell {
+  public:
+    EMSESPWebShell(EMSESP & emsesp, Stream & stream);
+    ~EMSESPWebShell() override = default;
+
+    std::string console_name() override;
+
+    // commands can be separated by ';' like on telnet
+    void run(const std::string & line);
+
+  protected:
+    void stopped() override;
 };
 
 } // namespace emsesp

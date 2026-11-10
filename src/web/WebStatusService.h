@@ -3,6 +3,7 @@
 
 #define EMSESP_SYSTEM_STATUS_SERVICE_PATH "/rest/systemStatus"
 #define EMSESP_ACTION_SERVICE_PATH "/rest/action"
+#define EMSESP_COREDUMP_SERVICE_PATH "/rest/coredump"
 
 #include "../core/firmwareVersion.h"
 #include "../emsesp_version.h"
@@ -53,9 +54,9 @@ class WebStatusService {
 
     // actions
     void    getVersions(JsonObject root);
-    bool    exportData(JsonObject root, std::string & type);
+    bool    exportData(JsonObject root, std::string & type, const bool include_secrets);
     bool    getCustomSupport(JsonObject root);
-    bool    uploadURL(const char * url);
+    bool    uploadURL(const char * url, bool allow_custom);
     bool    setSystemStatus(const char * status);
     void    allvalues(JsonObject output);
     uint8_t upgradeImportantMessages(std::string & version);
@@ -66,6 +67,7 @@ class WebStatusService {
     struct VersionInfo {
         std::string version;
         std::string date;
+        std::string recovery; // recovery app version in this release, empty if there's none
         bool        upgradeable = false;
     };
 

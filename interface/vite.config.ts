@@ -2,7 +2,6 @@ import preact from '@preact/preset-vite';
 import fs from 'fs';
 import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
-import { optimize } from 'svgo';
 import { pathToFileURL } from 'url';
 import { Plugin, PluginOption, defineConfig } from 'vite';
 import zlib from 'zlib';
@@ -180,22 +179,6 @@ const createProductionTerserOptions = () => ({
   toplevel: true
 });
 
-// Image optimization plugin: runs svgo over emitted SVG assets.
-// Raster assets are committed pre-optimized.
-const imageOptimizationPlugin: Plugin = {
-  name: 'svg-optimize',
-  apply: 'build',
-  generateBundle(_, bundle) {
-    for (const asset of Object.values(bundle)) {
-      if (asset.type !== 'asset' || !asset.fileName.endsWith('.svg')) continue;
-      asset.source = optimize(asset.source.toString(), {
-        multipass: true,
-        plugins: ['removeViewBox']
-      }).data;
-    }
-  }
-};
-
 export default defineConfig(
   async ({ command, mode }: { command: string; mode: string }) => {
     if (command === 'serve' && mode === 'recovery') {
@@ -223,7 +206,7 @@ export default defineConfig(
     if (mode === 'recovery') {
       console.log('Preparing for Recovery WebUI, optimized build');
       return {
-        plugins: [...createBasePlugins(false, true), imageOptimizationPlugin],
+        plugins: createBasePlugins(false, true),
         resolve: {
           alias: RESOLVE_ALIASES,
           extensions: RESOLVE_EXTENSIONS,
@@ -325,7 +308,6 @@ export default defineConfig(
     return {
       plugins: [
         ...createBasePlugins(false, true),
-        imageOptimizationPlugin,
         visualizer({
           template: 'treemap',
           open: false,

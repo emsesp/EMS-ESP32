@@ -583,7 +583,7 @@ uint8_t Thermostat::HeatingCircuit::get_mode() const {
             return HeatingCircuit::Mode::AUTO;
         }
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC300 || model == EMSdevice::EMS_DEVICE_FLAG_R3000 || model == EMSdevice::EMS_DEVICE_FLAG_RC100
-               || model == EMSdevice::EMS_DEVICE_FLAG_HMC310 || EMS_DEVICE_FLAG_RC300V11) {
+               || model == EMSdevice::EMS_DEVICE_FLAG_HMC310 || model == EMSdevice::EMS_DEVICE_FLAG_RC300V11) {
         if (mode == 0) {
             return HeatingCircuit::Mode::MANUAL;
         } else if (mode == 1) {
@@ -638,7 +638,7 @@ uint8_t Thermostat::HeatingCircuit::get_mode_type() const {
             return HeatingCircuit::Mode::ON;
         }
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC300 || model == EMSdevice::EMS_DEVICE_FLAG_R3000 || model == EMSdevice::EMS_DEVICE_FLAG_BC400
-               || model == EMSdevice::EMS_DEVICE_FLAG_UI800 || model == EMSdevice::EMS_DEVICE_FLAG_HMC310 || EMS_DEVICE_FLAG_RC300V11) {
+               || model == EMSdevice::EMS_DEVICE_FLAG_UI800 || model == EMSdevice::EMS_DEVICE_FLAG_HMC310 || model == EMSdevice::EMS_DEVICE_FLAG_RC300V11) {
         if (modetype == 0) {
             return HeatingCircuit::Mode::ECO;
         } else if (modetype == 1) {
@@ -2700,7 +2700,7 @@ bool Thermostat::set_wwmode(const char * value, const int8_t id) {
         }
 
         write_command(0x02F5 + dhw->offset(), 2, set, 0x02F5 + dhw->offset());
-    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC300 || EMS_DEVICE_FLAG_RC300V11) {
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC300 || model() == EMSdevice::EMS_DEVICE_FLAG_RC300V11) {
         if (!Helpers::value2enum(value, set, FL_(enum_wwMode))) {
             return false;
         }
@@ -3723,7 +3723,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const int8_t id) {
     } else if (model_ == EMSdevice::EMS_DEVICE_FLAG_BC400 || model_ == EMSdevice::EMS_DEVICE_FLAG_UI800 || model_ == EMSdevice::EMS_DEVICE_FLAG_CR120) {
         hc->mode_new = set_mode_value;
     } else if (model_ == EMSdevice::EMS_DEVICE_FLAG_RC300 || model_ == EMSdevice::EMS_DEVICE_FLAG_R3000 || model_ == EMSdevice::EMS_DEVICE_FLAG_HMC310
-               || model_ == EMSdevice::EMS_DEVICE_FLAG_RC100 || EMS_DEVICE_FLAG_RC300V11) {
+               || model_ == EMSdevice::EMS_DEVICE_FLAG_RC100 || model_ == EMSdevice::EMS_DEVICE_FLAG_RC300V11) {
         hc->mode = set_mode_value == 0xFF ? 1 : 0;
     } else if (model_ == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
         hc->mode = set_mode_value - 1;

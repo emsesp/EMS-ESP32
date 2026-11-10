@@ -762,7 +762,7 @@ void Network::startWIFI() {
         LOG_WARNING("WiFi connect attempt timed out, retrying");
         WiFi.disconnect(false, true);
         wifi_connect_pending_ = false;
-        return; // let the DISCONNECTED event settle, begin() again on the next tick        
+        return; // let the DISCONNECTED event settle, begin() again on the next tick
     }
 
     // exit if WiFi or Ethernet is already connected, or if we have no SSID or another Wifi.begin() is already in progress

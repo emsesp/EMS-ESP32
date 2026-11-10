@@ -5,6 +5,7 @@ import DownloadIcon from '@mui/icons-material/GetApp';
 import WarningIcon from '@mui/icons-material/Warning';
 import {
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
@@ -21,6 +22,7 @@ import { useRequest } from 'alova/client';
 import type { APIcall } from 'app/main/types';
 import SystemMonitor from 'app/status/SystemMonitor';
 import {
+  BlockFormControlLabel,
   FormLoader,
   SectionContent,
   SingleUpload,
@@ -28,23 +30,36 @@ import {
 } from 'components';
 import { toast } from 'components/toast';
 import { useI18nContext } from 'i18n/i18n-react';
-import { saveFile } from 'utils';
+import { saveBlob, saveFile } from 'utils';
 
 const DownloadUpload = () => {
   const { LL } = useI18nContext();
 
   const [confirmBackup, setConfirmBackup] = useState<boolean>(false);
+  const [includeSecrets, setIncludeSecrets] = useState<boolean>(false);
 
   const [restarting, setRestarting] = useState<boolean>(false);
 
   const { send: sendExportData } = useRequest(
-    (type: string) => callAction({ action: 'export', param: type }),
+    (type: string, secrets = false) =>
+      callAction({ action: 'export', param: type, secrets }),
     {
       immediate: false
     }
   )
     .onSuccess((event) => {
       saveFile(event.data, event.args[0], '.json');
+      toast.info(LL.DOWNLOAD_SUCCESSFUL());
+    })
+    .onError((error) => {
+      toast.error(String(error.error?.message || 'An error occurred'));
+    });
+
+  const { send: sendCoreDump } = useRequest(SystemApi.readCoreDump, {
+    immediate: false
+  })
+    .onSuccess((event) => {
+      saveBlob(event.data, 'emsesp_coredump.bin');
       toast.info(LL.DOWNLOAD_SUCCESSFUL());
     })
     .onError((error) => {
@@ -71,11 +86,12 @@ const DownloadUpload = () => {
 
   const handleCloseBackupDialog = () => {
     setConfirmBackup(false);
+    setIncludeSecrets(false);
   };
 
   const handleDownload = (type: string) => () => {
-    void sendExportData(type);
-    setConfirmBackup(false);
+    void sendExportData(type, includeSecrets);
+    handleCloseBackupDialog();
   };
 
   if (restarting) {
@@ -102,6 +118,16 @@ const DownloadUpload = () => {
           <WarningIcon color="warning" sx={{ fontSize: 18 }} />
           &nbsp;
           {LL.WARNING_SYSTEM_BACKUP()}
+          <BlockFormControlLabel
+            sx={{ mt: 2 }}
+            control={
+              <Checkbox
+                checked={includeSecrets}
+                onChange={(event) => setIncludeSecrets(event.target.checked)}
+              />
+            }
+            label={LL.BACKUP_INCLUDE_SECRETS()}
+          />
         </DialogContent>
         <DialogActions>
           <Button
@@ -161,11 +187,31 @@ const DownloadUpload = () => {
         </Button>
       </Grid>
 
+      {data.coredump && (
+        <Grid container spacing={2} sx={{ mt: 2, alignItems: 'center' }}>
+          <Typography variant="body1" color="warning">
+            {LL.DOWNLOAD_COREDUMP_TEXT()}:
+          </Typography>
+          <Button
+            startIcon={<DownloadIcon />}
+            variant="outlined"
+            color="primary"
+            onClick={() => void sendCoreDump()}
+          >
+            {LL.COREDUMP()}
+          </Button>
+        </Grid>
+      )}
+
       <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
         {LL.UPLOAD()}
       </Typography>
 
-      <SingleUpload text={LL.UPLOAD_BACKUP_TEXT()} doRestart={doRestart} />
+      <SingleUpload
+        text={LL.UPLOAD_BACKUP_TEXT()}
+        extensions={['.json']}
+        doRestart={doRestart}
+      />
     </SectionContent>
   );
 };

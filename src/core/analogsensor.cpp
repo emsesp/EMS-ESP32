@@ -655,7 +655,7 @@ void AnalogSensor::publish_sensor(const Sensor & sensor) const {
             snprintf(topic, sizeof(topic), "%s%s/%s", F_(analogsensor), "_data", sensor.name());
         }
 
-        char result[12];
+        char result[24];
         if (sensor.type() == AnalogType::DIGITAL_IN || sensor.type() == AnalogType::DIGITAL_OUT) {
             Helpers::render_boolean(result, sensor.value() != 0);
         } else {
@@ -728,7 +728,7 @@ void AnalogSensor::publish_values(const bool force) {
 
     for (auto & sensor : sensors_) {
         if (Mqtt::is_nested()) {
-            char       s[10];
+            char       s[24];
             JsonObject dataSensor = obj[Helpers::smallitoa(s, sensor.gpio())].to<JsonObject>();
             dataSensor["name"]    = (const char *)sensor.name();
 #if CONFIG_IDF_TARGET_ESP32
@@ -743,7 +743,7 @@ void AnalogSensor::publish_values(const bool force) {
         } else if (sensor.type() == AnalogType::DIGITAL_IN || sensor.type() == AnalogType::DIGITAL_OUT || sensor.type() == AnalogType::PULSE) {
             Mqtt::add_value_bool(obj, (const char *)sensor.name(), sensor.value() != 0);
         } else {
-            char s[10];
+            char s[24];
             obj[sensor.name()] = serialized(Helpers::render_value(s, sensor.value(), 2));
         }
 
@@ -922,7 +922,7 @@ bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int
 std::string AnalogSensor::get_metrics_prometheus() {
     std::string result;
     result.reserve(sensors_.size() * 140);
-    char val[10];
+    char val[24];
     for (auto & sensor : sensors_) {
         result += (std::string) "# HELP emsesp_" + sensor.name() + " " + sensor.name();
         if (sensor.type() != AnalogType::DIGITAL_OUT && sensor.type() != AnalogType::DIGITAL_IN) {

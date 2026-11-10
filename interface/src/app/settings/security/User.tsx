@@ -108,6 +108,7 @@ const User: FC<UserFormProps> = ({
               value={user.password}
               onChange={updateFormValue}
               margin="normal"
+              {...(!creating && { helperText: LL.PASSWORD_KEEP() })}
             />
             <BlockFormControlLabel
               control={

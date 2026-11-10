@@ -1,0 +1,8 @@
+{
+  "name": "FirmwareSignature",
+  "version": "1.0.0",
+  "description": "Checks the ECDSA P-256 signature appended to an EMS-ESP firmware image",
+  "build": {
+    "srcFilter": ["+<*>", "-<micro-ecc/>"]
+  }
+}

@@ -10,7 +10,8 @@ export enum SystemStatusCodes {
   SYSTEM_STATUS_ERROR_UPLOAD = 3,
   SYSTEM_STATUS_PENDING_RESTART = 4,
   SYSTEM_STATUS_RESTART_REQUESTED = 5,
-  SYSTEM_STATUS_INVALID_GPIO = 6
+  SYSTEM_STATUS_INVALID_GPIO = 6,
+  SYSTEM_STATUS_ERROR_NOT_OFFICIAL = 7
 }
 
 export interface SystemStatus {
@@ -24,6 +25,7 @@ export interface SystemStatus {
   ntp_status: number;
   ntp_time?: string;
   mqtt_status: boolean;
+  coredump?: string; // summary of the dump the last crash left
   ap_status: boolean;
   network_status: NetworkConnectionStatus;
   wifi_rssi: number;
@@ -38,6 +40,7 @@ export interface SystemStatus {
   arduino_version: string;
   sdk_version: string;
   partition: string;
+  official_build?: boolean;
   flash_chip_size: number;
   flash_chip_speed: number;
   app_used: number;
@@ -52,6 +55,7 @@ export interface SystemStatus {
   model: string;
   board: string;
   recovery_version?: string;
+  recovery_official?: boolean; // only when a recovery app is installed
   has_partition: boolean;
   partitions: {
     partition: string;
@@ -62,6 +66,7 @@ export interface SystemStatus {
   status: number; // System Status Codes which matches SYSTEM_STATUS in System.h
   developer_mode: boolean;
   disable_reset: boolean;
+  languages: string[]; // supported entity languages, depends on the build
   temperature?: number;
 }
 
@@ -89,4 +94,9 @@ export interface LogSettings {
   compact: boolean;
   psram: boolean;
   developer_mode: boolean;
+}
+
+export interface ConsoleOutput {
+  output: string;
+  truncated?: boolean;
 }

@@ -18,6 +18,8 @@
 
 #include "emsesp.h"
 
+#include "../core/origin_check.h"
+
 namespace emsesp {
 
 uint32_t WebAPIService::api_count_ = 0;
@@ -25,7 +27,7 @@ uint16_t WebAPIService::api_fails_ = 0;
 
 WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager) {
-    // parse() does its own per-request admin check (with notoken_api), so no predicate.
+    // parse() does its own per-request check, so no predicate.
     // /api also matches /api/<device>/<entity> via the route's backward-compatible URI matcher.
     securityManager->addEndpoint(
         server,
@@ -83,12 +85,55 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
 // parse the URL looking for query or path parameters
 // reporting back any errors
 void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
-    // check if the user has admin privileges (token is included and authorized)
-    bool is_admin = false;
-    EMSESP::webSettingsService.read([&](WebSettings const & settings) {
-        Authentication authentication = _securityManager->authenticateRequest(request);
-        is_admin                      = settings.notoken_api || AuthenticationPredicates::IS_ADMIN(authentication);
-    });
+#ifndef EMSESP_STANDALONE
+    if (request->hasHeader("Origin")) {
+        bool allowed = false;
+        EMSESP::esp32React.getNetworkSettingsService()->read([&](NetworkSettings const & settings) {
+            allowed = origin_allowed(request->header("Origin").c_str(), request->header("Host").c_str(), settings.enableCORS, settings.CORSOrigin.c_str());
+        });
+        if (!allowed) {
+            api_fails_++;
+            request->send(403);
+            return;
+        }
+    }
+#endif
+
+    // every call needs a token or an API key, also reads. Admin rights need an admin token or a read+write API key
+    Authentication authentication = _securityManager->authenticateApiRequest(request);
+    if (!authentication.authenticated) {
+        api_fails_++;
+        EMSESP::logger().debug("API call without a token or API key refused: %s", request->url().c_str());
+        auto *     response = new PsramAsyncJsonResponse();
+        JsonObject output   = response->getRoot();
+        output["message"]   = "authentication failed";
+#if defined(EMSESP_UNITY)
+        storeResponse(output);
+#endif
+        response->setCode(401);
+#ifndef EMSESP_STANDALONE
+        // the browser shows its login prompt. Not for a rejected Bearer token, so the Web UI never gets that prompt
+        if (!request->hasHeader("Authorization") || request->header("Authorization").startsWith("Basic ")) {
+            response->addHeader("WWW-Authenticate", "Basic realm=\"EMS-ESP\", charset=\"UTF-8\"");
+        }
+#endif
+        response->setLength();
+        response->setContentType("application/json; charset=utf-8");
+        request->send(response);
+        return;
+    }
+
+    // a browser's Basic login is sent with every request to the device, also ones other web sites start, so it only reads
+    const bool  basic              = authentication.basic;
+    const bool  is_admin           = !basic && AuthenticationPredicates::IS_ADMIN(authentication);
+    const bool  is_user            = !basic;
+    const bool  password_confirmed = !authentication.session || authentication.password_confirmed; // only a Web UI session is asked for it
+    std::string source = std::string("api, ") + (authentication.session ? "" : basic ? "browser login " : "API key ") + authentication.user->username.c_str();
+#ifndef EMSESP_STANDALONE
+    source += std::string(", ") + request->client()->remoteIP().toString().c_str();
+#endif
+    Command::CallerSource caller(source.c_str());
+    Command::CallerAccess access(basic ? Command::Access::READ : Command::Access::ALL, "read only, use an API key to change values or run commands");
 
     // check for query parameters first, the old style from v2
     // api?device={device}&cmd={name}&data={value}&id={hc}
@@ -139,7 +184,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     JsonObject output = response->getRoot();
 
     // call command
-    uint8_t return_code = Command::process(request->url().c_str(), is_admin, input, output);
+    uint8_t return_code = Command::process(request->url().c_str(), is_admin, input, output, is_user, password_confirmed);
     if (return_code != CommandRet::OK) {
         api_fails_++;
     }
@@ -166,15 +211,15 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     api_count_++;
 
     // send the json that came back from the command call
-    // sequence matches CommandRet in command.h (FAIL, OK, NOT_FOUND, ERROR, NOT_ALLOWED, INVALID, NO_VALUE)
+    // sequence matches CommandRet in command.h (FAIL, OK, NOT_FOUND, ERROR, NOT_ALLOWED, INVALID, NO_VALUE, PASSWORD_REQUIRED, TOO_MANY_WRITES)
     // 400 (bad request)
     // 200 (OK)
     // 404 (not found)
     // 401 (unauthorized)
     // 400 (invalid)
-    int ret_codes[7] = {400, 200, 404, 400, 401, 400, 404};
+    int ret_codes[9] = {400, 200, 404, 400, 401, 400, 404, SecurityManager::PASSWORD_REQUIRED, 429};
 
-    response->setCode(ret_codes[return_code]);
+    response->setCode(return_code < 9 ? ret_codes[return_code] : 400);
     response->setLength();
     response->setContentType("application/json; charset=utf-8");
     request->send(response);

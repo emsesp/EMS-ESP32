@@ -17,6 +17,7 @@
  */
 
 #include "emsesp.h"
+#include "write_limiter.h"
 
 namespace emsesp {
 
@@ -30,6 +31,16 @@ WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, Securit
     });
 
     addUpdateHandler([this] { onUpdate(); }, false);
+
+    // turning on the unencrypted telnet console, or turning off read-only mode or write protection
+    _httpEndpoint.requirePassword([](JsonObject json, WebSettings & current) {
+        const bool    telnet      = json["telnet_enabled"] | EMSESP_DEFAULT_TELNET_ENABLED;
+        const bool    readonly    = json["readonly_mode"] | false;
+        const bool    protection  = json["write_protection"] | EMSESP_DEFAULT_WRITE_PROTECTION;
+        const uint8_t write_limit = json["write_limit"] | EMSESP_DEFAULT_WRITE_LIMIT;
+        return (telnet && !current.telnet_enabled) || (!readonly && current.readonly_mode) || (!protection && current.write_protection)
+               || (!write_limit && current.write_limit);
+    });
 }
 
 void WebSettings::read(WebSettings & settings, JsonObject root) {
@@ -63,8 +74,10 @@ void WebSettings::read(WebSettings & settings, JsonObject root) {
     root["led_type"]              = settings.led_type;
     root["low_clock"]             = settings.low_clock;
     root["telnet_enabled"]        = settings.telnet_enabled;
-    root["notoken_api"]           = settings.notoken_api;
     root["readonly_mode"]         = settings.readonly_mode;
+    root["write_protection"]      = settings.write_protection;
+    root["write_limit"]           = settings.write_limit;
+    root["write_limit_refuse"]    = settings.write_limit_refuse;
     root["analog_enabled"]        = settings.analog_enabled;
     root["pbutton_gpio"]          = settings.pbutton_gpio;
     root["solar_maxflow"]         = settings.solar_maxflow;
@@ -293,7 +306,6 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
     EMSESP::trace_raw(settings.trace_raw);
 
-    settings.notoken_api            = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
     settings.solar_maxflow          = root["solar_maxflow"] | EMSESP_DEFAULT_SOLAR_MAXFLOW;
     settings.boiler_heatingoff      = root["boiler_heatingoff"] | EMSESP_DEFAULT_BOILER_HEATINGOFF;
     settings.remote_timeout         = root["remote_timeout"] | EMSESP_DEFAULT_REMOTE_TIMEOUT;
@@ -305,6 +317,11 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
 
     settings.readonly_mode = root["readonly_mode"];
     EMSESP::system_.readonly_mode(settings.readonly_mode);
+
+    settings.write_protection   = root["write_protection"] | EMSESP_DEFAULT_WRITE_PROTECTION;
+    settings.write_limit        = root["write_limit"] | EMSESP_DEFAULT_WRITE_LIMIT;
+    settings.write_limit_refuse = root["write_limit_refuse"] | EMSESP_DEFAULT_WRITE_LIMIT_REFUSE;
+    WriteLimiter::instance().configure(settings.write_protection, settings.write_protection ? settings.write_limit : 0, settings.write_limit_refuse);
 
     settings.developer_mode = root["developer_mode"];
     EMSESP::system_.developer_mode(settings.developer_mode);

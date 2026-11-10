@@ -24,6 +24,9 @@
 #define SECURITY_SETTINGS_FILE "/config/securitySettings.json"
 #define SECURITY_SETTINGS_PATH "/rest/securitySettings"
 
+// who authenticateRequest() reports as the caller, set by unit tests. BASIC_ADMIN is the admin through a browser's Basic login
+enum class StandaloneIdentity : uint8_t { NONE, GUEST, ADMIN, BASIC_ADMIN };
+
 class SecuritySettingsService : public SecurityManager {
   public:
     SecuritySettingsService(AsyncWebServer * server, FS * fs);
@@ -31,6 +34,20 @@ class SecuritySettingsService : public SecurityManager {
 
     // minimal set of functions to support framework with security settings disabled
     Authentication authenticateRequest(AsyncWebServerRequest * request);
+    Authentication authenticate(const String & username, const String & password); // the factory admin and guest users
+
+    static void identity(StandaloneIdentity identity) {
+        identity_ = identity;
+    }
+
+    // whether the session entered its password again recently
+    static void password_confirmed(bool confirmed) {
+        password_confirmed_ = confirmed;
+    }
+
+  private:
+    static StandaloneIdentity identity_;
+    static bool               password_confirmed_;
 };
 
 #endif
