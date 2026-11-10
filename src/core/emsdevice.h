@@ -497,7 +497,8 @@ class EMSdevice {
     static constexpr uint16_t EMS_TYPE_MENUCONFIG  = 0xF7;
     static constexpr uint16_t EMS_TYPE_VALUECONFIG = 0xF9;
 
-    // device flags: The lower 4 bits hold the unique identifier, the upper 4 bits are used for specific flags
+    // device flags: the lower bits hold the model number, the upper bits independent flags that can be combined with it.
+    // Boilers use 4 bits for the model, thermostats 6 (see EMS_DEVICE_FLAG_THERMOSTAT_MODEL)
     static constexpr uint8_t EMS_DEVICE_FLAG_NONE = 0;
 
     // Controller
@@ -523,10 +524,11 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_IPM    = 3;
     static constexpr uint8_t EMS_DEVICE_FLAG_MP     = 4;
 
-    // Thermostats
-    static constexpr uint8_t EMS_DEVICE_FLAG_NO_WRITE    = (1 << 7); // last bit
-    static constexpr uint8_t EMS_DEVICE_FLAG_JUNKERS_OLD = (1 << 6); // 6th bit set if older models, like FR120, FR100
-    static constexpr uint8_t EMS_DEVICE_FLAG_EASY        = 1;
+    // Thermostats: bits 0-5 hold the model number (max 63), bits 6 and 7 are flags
+    static constexpr uint8_t EMS_DEVICE_FLAG_THERMOSTAT_MODEL = 0x3F;
+    static constexpr uint8_t EMS_DEVICE_FLAG_NO_WRITE         = (1 << 7); // bit 7, the thermostat is read-only
+    static constexpr uint8_t EMS_DEVICE_FLAG_JUNKERS_OLD      = (1 << 6); // bit 6, older Junkers models like FR120, FR100
+    static constexpr uint8_t EMS_DEVICE_FLAG_EASY             = 1;
     static constexpr uint8_t EMS_DEVICE_FLAG_RC10        = 2;
     static constexpr uint8_t EMS_DEVICE_FLAG_RC20        = 3;
     static constexpr uint8_t EMS_DEVICE_FLAG_RC20_N      = 4; // Variation on RC20, Older, like ES72
