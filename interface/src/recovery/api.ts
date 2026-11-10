@@ -61,7 +61,8 @@ export const restart = () => request<void>('POST', '/rest/recovery/restart');
 
 export const factoryReset = () => request<void>('POST', '/rest/recovery/format');
 
-export const eraseCoreDump = () => request<void>('DELETE', '/rest/recovery/coredump');
+export const eraseCoreDump = () =>
+  request<void>('DELETE', '/rest/recovery/coredump');
 
 export const downloadCoreDump = async (): Promise<void> => {
   const response = await fetch('/rest/recovery/coredump', {
