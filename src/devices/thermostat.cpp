@@ -638,8 +638,7 @@ uint8_t Thermostat::HeatingCircuit::get_mode_type() const {
             return HeatingCircuit::Mode::ON;
         }
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC300 || model == EMSdevice::EMS_DEVICE_FLAG_R3000 || model == EMSdevice::EMS_DEVICE_FLAG_BC400
-               || model == EMSdevice::EMS_DEVICE_FLAG_UI800 || model == EMSdevice::EMS_DEVICE_FLAG_HMC310
-               || model == EMSdevice::EMS_DEVICE_FLAG_RC300V11) {
+               || model == EMSdevice::EMS_DEVICE_FLAG_UI800 || model == EMSdevice::EMS_DEVICE_FLAG_HMC310 || model == EMSdevice::EMS_DEVICE_FLAG_RC300V11) {
         if (modetype == 0) {
             return HeatingCircuit::Mode::ECO;
         } else if (modetype == 1) {

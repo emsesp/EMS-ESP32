@@ -529,25 +529,25 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_NO_WRITE         = (1 << 7); // bit 7, the thermostat is read-only
     static constexpr uint8_t EMS_DEVICE_FLAG_JUNKERS_OLD      = (1 << 6); // bit 6, older Junkers models like FR120, FR100
     static constexpr uint8_t EMS_DEVICE_FLAG_EASY             = 1;
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC10        = 2;
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC20        = 3;
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC20_N      = 4; // Variation on RC20, Older, like ES72
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC25        = 5;
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC30_N      = 6; // variation on RC30, Newer models
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC30        = 7;
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC35        = 8;
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC300       = 9;
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC100       = 10;
-    static constexpr uint8_t EMS_DEVICE_FLAG_JUNKERS     = 11;
-    static constexpr uint8_t EMS_DEVICE_FLAG_CRF         = 12; // CRF200 only monitor
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC100H      = 13; // with humidity
-    static constexpr uint8_t EMS_DEVICE_FLAG_BC400       = 14; // mostly like RC300, but some changes
-    static constexpr uint8_t EMS_DEVICE_FLAG_R3000       = 15; // Rego3000, same as RC300 with different wwmodes
-    static constexpr uint8_t EMS_DEVICE_FLAG_CR120       = 16; // mostly like RC300, but some changes
-    static constexpr uint8_t EMS_DEVICE_FLAG_CR11        = 17; // CRF200 only monitor
-    static constexpr uint8_t EMS_DEVICE_FLAG_HMC310      = 18;
-    static constexpr uint8_t EMS_DEVICE_FLAG_UI800       = 19;
-    static constexpr uint8_t EMS_DEVICE_FLAG_RC300V11    = 20;
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC10             = 2;
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC20             = 3;
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC20_N           = 4; // Variation on RC20, Older, like ES72
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC25             = 5;
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC30_N           = 6; // variation on RC30, Newer models
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC30             = 7;
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC35             = 8;
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC300            = 9;
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC100            = 10;
+    static constexpr uint8_t EMS_DEVICE_FLAG_JUNKERS          = 11;
+    static constexpr uint8_t EMS_DEVICE_FLAG_CRF              = 12; // CRF200 only monitor
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC100H           = 13; // with humidity
+    static constexpr uint8_t EMS_DEVICE_FLAG_BC400            = 14; // mostly like RC300, but some changes
+    static constexpr uint8_t EMS_DEVICE_FLAG_R3000            = 15; // Rego3000, same as RC300 with different wwmodes
+    static constexpr uint8_t EMS_DEVICE_FLAG_CR120            = 16; // mostly like RC300, but some changes
+    static constexpr uint8_t EMS_DEVICE_FLAG_CR11             = 17; // CRF200 only monitor
+    static constexpr uint8_t EMS_DEVICE_FLAG_HMC310           = 18;
+    static constexpr uint8_t EMS_DEVICE_FLAG_UI800            = 19;
+    static constexpr uint8_t EMS_DEVICE_FLAG_RC300V11         = 20;
 
     uint8_t count_entities();
     uint8_t count_entities_fav();
