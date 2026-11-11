@@ -1,9 +1,14 @@
+import gzip
 import hashlib
 import shutil
 import re
 import os
+import sys
 from pathlib import Path
 Import("env")
+
+sys.path.insert(0, os.path.join(env.subst("$PROJECT_DIR"), "scripts"))
+import sign_firmware
 
 OUTPUT_DIR = Path("build")
 
@@ -83,6 +88,15 @@ def bin_copy(source, target, env):
     # Copy firmware.bin to firmware/<variant>.bin
     shutil.copy2(str(target[0]), str(bin_file))
 
+    # Signed with an EMS-ESP key it's an official build, otherwise a custom build. Releases are signed later, in the
+    # sign job of the release workflows
+    pem = sign_firmware.load_key_pem()
+    if pem:
+        sign_firmware.sign_file(bin_file, pem)
+        print("Signed: Yes")
+    else:
+        print("Signed: No, it installs as a custom build")
+
     # Calculate and write MD5 hash
     with bin_file.open("rb") as f:
         md5_hash = hashlib.md5(f.read()).hexdigest()
@@ -90,7 +104,35 @@ def bin_copy(source, target, env):
     print(f"MD5: {md5_hash}")
     md5_file.write_text(md5_hash)
 
+    elf_copy(variant, env)
+
     print("=" * 90)
+
+
+def elf_copy(variant, env):
+    """Keeps the ELF for decoding crash dumps, named by the ELF SHA256 prefix that the core dump summary reports."""
+    elf_file = Path(env.subst("$BUILD_DIR")) / f"{env.subst('$PROGNAME')}.elf"
+    if not elf_file.exists():
+        return
+
+    sha = hashlib.sha256()
+    with elf_file.open("rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            sha.update(chunk)
+
+    # length is CONFIG_APP_RETRIEVE_LEN_ELF_SHA
+    elf_dir = OUTPUT_DIR / "elf"
+    elf_dir.mkdir(parents=True, exist_ok=True)
+    elf_gz = elf_dir / f"{variant}-{sha.hexdigest()[:9]}.elf.gz"
+
+    # this runs for both the .bin and .md5 targets, the same hash means the same file
+    if not elf_gz.exists():
+        tmp = elf_gz.with_suffix(".tmp")
+        with elf_file.open("rb") as src, gzip.open(tmp, "wb", compresslevel=6) as dst:
+            shutil.copyfileobj(src, dst)
+        tmp.replace(elf_gz)
+
+    print(f"ELF: {elf_gz}")
 
 
 env.AddPostAction("$BUILD_DIR/${PROGNAME}.bin", [bin_copy])

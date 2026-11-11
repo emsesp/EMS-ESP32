@@ -1,10 +1,16 @@
 #include "ESP32React.h"
 
 #include "WWWData.h" // include auto-generated static web resources
+#include "../core/host_check.h"
 
 #include <string.h>
 
 static constexpr const char CACHE_CONTROL[] = "public,max-age=60";
+
+// MUI adds <style> elements at runtime, so styles need 'unsafe-inline'. No frame-ancestors, the WebUI can be embedded in Home Assistant
+static constexpr const char CONTENT_SECURITY_POLICY[] =
+    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; "
+    "connect-src 'self' https://api.github.com; object-src 'none'; base-uri 'self'; form-action 'self'";
 
 // Single static-content handler serving all assets embedded in WWWData.h
 class StaticContentHandler : public AsyncWebHandler {
@@ -41,6 +47,11 @@ class StaticContentHandler : public AsyncWebHandler {
         response->addHeader(asyncsrv::T_Content_Encoding, asyncsrv::T_gzip, false);
         response->addHeader(asyncsrv::T_ETag, asset->etag, false);
         response->addHeader(asyncsrv::T_Cache_Control, CACHE_CONTROL, false);
+        response->addHeader("X-Content-Type-Options", "nosniff", false);
+        if (asset == index_asset()) {
+            response->addHeader("Content-Security-Policy", CONTENT_SECURITY_POLICY, false);
+            response->addHeader("Referrer-Policy", "no-referrer", false);
+        }
         request->send(response);
     }
 
@@ -81,20 +92,42 @@ ESP32React::ESP32React(AsyncWebServer * server, FS * fs)
     , _uploadFileService(server, &_securitySettingsService)
     , _mqttSettingsService(server, fs, &_securitySettingsService)
     , _mqttStatus(server, &_mqttSettingsService, &_securitySettingsService)
-    , _authenticationService(server, &_securitySettingsService) {
+    , _authenticationService(server, &_securitySettingsService)
+    , _setupService(server, &_securitySettingsService, &_apSettingsService, &_networkSettingsService) {
 }
 
 void ESP32React::begin() {
     _networkSettingsService.begin();
     _networkSettingsService.read([&](NetworkSettings & networkSettings) {
         DefaultHeaders & defaultHeaders = DefaultHeaders::Instance();
-        if (networkSettings.enableCORS) {
+        // no Access-Control-Allow-Credentials: tokens are sent in the Authorization header, never as cookies
+        if (networkSettings.enableCORS && !networkSettings.CORSOrigin.isEmpty()) {
             defaultHeaders.addHeader(asyncsrv::T_CORS_ACAO, networkSettings.CORSOrigin);
             defaultHeaders.addHeader(asyncsrv::T_CORS_ACAH, "Accept, Content-Type, Authorization");
-            defaultHeaders.addHeader(asyncsrv::T_CORS_ACAC, "true");
         }
 
         defaultHeaders.addHeader(asyncsrv::T_Server, networkSettings.hostname);
+    });
+
+    // DNS rebinding only works through a browser, so requests without browser headers (Home Assistant, scripts) aren't checked.
+    // The captive portal on the access point answers every name, so requests through it aren't checked either
+    _server->addMiddleware([this](AsyncWebServerRequest * request, ArMiddlewareNext next) {
+        const bool browser = request->hasHeader("Sec-Fetch-Mode") || request->hasHeader("Sec-Fetch-Site") || request->hasHeader("Origin");
+        if (!browser || !request->hasHeader("Host") || ((WiFi.getMode() & WIFI_AP) && request->client()->localIP() == WiFi.softAPIP())) {
+            next();
+            return;
+        }
+        const String host    = request->header("Host");
+        bool         allowed = true;
+        _networkSettingsService.read(
+            [&](NetworkSettings & settings) { allowed = emsesp::host_allowed(host.c_str(), settings.hostname.c_str(), settings.allowedHosts.c_str()); });
+        if (allowed) {
+            next();
+            return;
+        }
+        request->send(403,
+                      "text/plain",
+                      "EMS-ESP can't be opened as " + host + ". Open it by its IP address and add this name under Network Settings > Allowed host names.");
     });
     _apSettingsService.begin();
     _ntpSettingsService.begin();

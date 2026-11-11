@@ -45,6 +45,7 @@ export interface MqttSettingsType {
   ha_enabled: boolean;
   nested_format: number;
   send_response: boolean;
+  mqtt_commands: number; // 0 off, 1 values and Commands, 2 everything
   publish_single: boolean;
   publish_single2cmd: boolean;
   discovery_prefix: string;

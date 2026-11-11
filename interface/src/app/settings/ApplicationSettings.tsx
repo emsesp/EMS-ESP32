@@ -43,6 +43,21 @@ import { BOARD_PROFILES } from '../main/types';
 import type { APIcall, BoardProfileKey, Settings } from '../main/types';
 import { createSettingsValidator } from '../main/validators';
 
+const ENTITY_LANGUAGES: Record<string, string> = {
+  cs: 'Česky',
+  de: 'Deutsch',
+  en: 'English',
+  fr: 'Français',
+  it: 'Italiano',
+  hu: 'Magyar',
+  nl: 'Nederlands',
+  no: 'Norsk',
+  pl: 'Polski',
+  sk: 'Slovenčina',
+  sv: 'Svenska',
+  tr: 'Türk'
+};
+
 export function boardProfileSelectItems() {
   return Object.keys(BOARD_PROFILES).map((code) => (
     <MenuItem key={code} value={code}>
@@ -213,17 +228,6 @@ const ApplicationSettings = () => {
         <Typography sx={{ pb: 1, pt: 2 }} variant="h6" color="primary">
           {LL.SERVICES()}
         </Typography>
-        <Typography color="secondary">API</Typography>
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.notoken_api}
-              onChange={updateFormValue}
-              name="notoken_api"
-            />
-          }
-          label={LL.BYPASS_TOKEN()}
-        />
         <Typography color="secondary">Console</Typography>
         <BlockFormControlLabel
           control={
@@ -571,18 +575,18 @@ const ApplicationSettings = () => {
               margin="normal"
               select
             >
-              <MenuItem value="cs">Česky (CS)</MenuItem>
-              <MenuItem value="de">Deutsch (DE)</MenuItem>
-              <MenuItem value="en">English (EN)</MenuItem>
-              <MenuItem value="fr">Français (FR)</MenuItem>
-              <MenuItem value="it">Italiano (IT)</MenuItem>
-              <MenuItem value="hu">Magyar (HU)</MenuItem>
-              <MenuItem value="nl">Nederlands (NL)</MenuItem>
-              <MenuItem value="no">Norsk (NO)</MenuItem>
-              <MenuItem value="pl">Polski (PL)</MenuItem>
-              <MenuItem value="sk">Slovenčina (SK)</MenuItem>
-              <MenuItem value="sv">Svenska (SV)</MenuItem>
-              <MenuItem value="tr">Türk (TR)</MenuItem>
+              {Object.entries(ENTITY_LANGUAGES)
+                .filter(
+                  ([code]) =>
+                    !hardwareData?.languages ||
+                    hardwareData.languages.includes(code) ||
+                    code === data.locale
+                )
+                .map(([code, name]) => (
+                  <MenuItem key={code} value={code}>
+                    {name} ({code.toUpperCase()})
+                  </MenuItem>
+                ))}
             </TextField>
           </Grid>
           <Grid size={3}>
@@ -892,6 +896,44 @@ const ApplicationSettings = () => {
           }
           label={LL.READONLY()}
         />
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.write_protection}
+              onChange={updateFormValue}
+              name="write_protection"
+            />
+          }
+          label={LL.WRITE_PROTECTION()}
+        />
+        {data.write_protection && (
+          <>
+            <Box sx={{ mt: 1, mb: 1 }}>
+              <ValidatedTextField
+                fieldErrors={fieldErrors || {}}
+                name="write_limit"
+                label={LL.WRITE_LIMIT()}
+                sx={{ minWidth: 320 }}
+                variant="outlined"
+                value={numberValue(data.write_limit)}
+                type="number"
+                onChange={updateFormValue}
+              />
+            </Box>
+            {data.write_limit !== 0 && (
+              <BlockFormControlLabel
+                control={
+                  <Checkbox
+                    checked={data.write_limit_refuse}
+                    onChange={updateFormValue}
+                    name="write_limit_refuse"
+                  />
+                }
+                label={LL.WRITE_LIMIT_REFUSE()}
+              />
+            )}
+          </>
+        )}
         {data.led_gpio !== 0 && (
           <BlockFormControlLabel
             control={

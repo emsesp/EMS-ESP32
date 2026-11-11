@@ -58,13 +58,14 @@ namespace emsesp {
 enum PHY_type : uint8_t { PHY_TYPE_NONE = 0, PHY_TYPE_LAN8720, PHY_TYPE_TLK110, PHY_TYPE_RTL8201 };
 
 enum SYSTEM_STATUS : uint8_t {
-    SYSTEM_STATUS_NORMAL            = 0,
-    SYSTEM_STATUS_PENDING_UPLOAD    = 1,
-    SYSTEM_STATUS_UPLOADING         = 100,
-    SYSTEM_STATUS_ERROR_UPLOAD      = 3,
-    SYSTEM_STATUS_PENDING_RESTART   = 4,
-    SYSTEM_STATUS_RESTART_REQUESTED = 5,
-    SYSTEM_STATUS_INVALID_GPIO      = 6
+    SYSTEM_STATUS_NORMAL             = 0,
+    SYSTEM_STATUS_PENDING_UPLOAD     = 1,
+    SYSTEM_STATUS_UPLOADING          = 100,
+    SYSTEM_STATUS_ERROR_UPLOAD       = 3,
+    SYSTEM_STATUS_PENDING_RESTART    = 4,
+    SYSTEM_STATUS_RESTART_REQUESTED  = 5,
+    SYSTEM_STATUS_INVALID_GPIO       = 6,
+    SYSTEM_STATUS_ERROR_NOT_OFFICIAL = 7 // upload from a URL stopped, a custom build the user hasn't agreed to
 };
 
 enum FUSE_VALUE : uint8_t { ALL = 0, MFG = 1, MODEL = 2, BOARD = 3, REV = 4, BATCH = 5, FUSE = 6 };
@@ -87,22 +88,24 @@ class System {
     void        recovery_installed_deferred(); // called from the main loop after the recovery firmware was downloaded from a URL
     void        recovery_installed_apply();    // called on the AsyncTCP task, handles the deferred call
     std::string recovery_version() const;      // empty if there's no recovery firmware
+    bool        recovery_official();           // the recovery firmware is signed by EMS-ESP, checked once per install
 
     // commands
-    static bool command_read(const char * value, const int8_t id);
-    static bool command_send(const char * value, const int8_t id);
-    static bool command_publish(const char * value, const int8_t id);
-    static bool command_fetch(const char * value, const int8_t id);
-    static bool command_restart(const char * value, const int8_t id);
-    static bool command_format(const char * value, const int8_t id);
-    static bool command_watch(const char * value, const int8_t id);
-    static bool command_message(const char * value, const int8_t id, JsonObject output);
-    static bool command_info(const char * value, const int8_t id, JsonObject output);
-    static bool command_response(const char * value, const int8_t id, JsonObject output);
-    static bool command_service(const char * cmd, const char * value);
-    static bool command_sendmail(const char * value, const int8_t id);
-    static bool command_txpause(const char * value, const int8_t id);
-    static bool command_led(const char * value, const int8_t id);
+    static bool    command_read(const char * value, const int8_t id);
+    static bool    command_send(const char * value, const int8_t id);
+    static bool    command_publish(const char * value, const int8_t id);
+    static bool    command_fetch(const char * value, const int8_t id);
+    static bool    command_restart(const char * value, const int8_t id);
+    static bool    command_format(const char * value, const int8_t id);
+    static bool    command_coredump(const char * value, const int8_t id);
+    static bool    command_watch(const char * value, const int8_t id);
+    static bool    command_message(const char * value, const int8_t id, JsonObject output);
+    static bool    command_info(const char * value, const int8_t id, JsonObject output);
+    static bool    command_response(const char * value, const int8_t id, JsonObject output);
+    static uint8_t command_service(const char * cmd, const char * value, const bool is_admin); // returns a CommandRet
+    static bool    command_sendmail(const char * value, const int8_t id);
+    static bool    command_txpause(const char * value, const int8_t id);
+    static bool    command_led(const char * value, const int8_t id);
 
     static bool        get_value_info(JsonObject root, const char * cmd);
     static void        get_value_json(JsonObject output, const std::string & circuit, const std::string & name, JsonVariant val);
@@ -115,6 +118,10 @@ class System {
 #endif
 
     std::string reset_reason(uint8_t cpu) const;
+
+    const std::string & coredump() const {
+        return coredump_;
+    }
 
     void store_nvs_values();
     void system_restart(const char * partition = nullptr);
@@ -147,7 +154,9 @@ class System {
 
     String getBBQKeesGatewayDetails(uint8_t detail = 0);
 
-    static bool uploadFirmwareURL(const char * url = nullptr);
+    static bool uploadFirmwareURL(const char * url = nullptr, bool allow_custom = false);
+    // the running firmware is signed by EMS-ESP, checked once
+    static bool official_build();
 
     void button_init();
     void commands_init();
@@ -156,8 +165,9 @@ class System {
     void    systemStatus(uint8_t status_code);
     uint8_t systemStatus();
 
-    static void exportSettings(const std::string & type, const char * filename, JsonObject output);
-    static void exportSystemBackup(JsonObject output);
+    // without include_secrets, passwords and keys are left out (see SettingsSecrets)
+    static void exportSettings(const std::string & type, const char * filename, JsonObject output, const bool include_secrets = false);
+    static void exportSystemBackup(JsonObject output, const bool include_secrets = false);
     static bool saveSettings(const char * filename, JsonObject input);
 
     static bool                 add_gpio(uint8_t pin, const char * source_name);
@@ -300,6 +310,7 @@ class System {
     void show_users(uuid::console::Shell & shell);
 
     static std::string languages_string();
+    static void        supported_languages(JsonArray output);
 
     uint32_t FStotal() {
         return fstotal_;
@@ -384,7 +395,8 @@ class System {
     static constexpr uint8_t HEALTHCHECK_RESET      = (1 << 7); // 128
 
     // smallest .bin accepted as a main firmware image, for both URL and web uploads - 1.6 MB
-    // recovery firmware uses OtaUpdater::MIN_RECOVERY_FIRMWARE_SIZE when the filename contains "recovery"
+    // the recovery firmware uses OtaUpdater::MIN_RECOVERY_FIRMWARE_SIZE: on upload when the image is the recovery,
+    // on install from a URL when the filename contains "recovery"
     static constexpr size_t MIN_FIRMWARE_SIZE = 1677721;
 
   private:
@@ -405,6 +417,7 @@ class System {
     void set_partition_install_date();
 
     volatile bool recovery_installed_pending_ = false; // set by the main loop, handled on the AsyncTCP task
+    int8_t        recovery_official_          = -1;    // -1 not checked yet, only used on the AsyncTCP task
 
     // firmware is confirmed to the bootloader and the crash counter cleared once it has been up this long
     static constexpr uint32_t FIRMWARE_HEALTHY_UPTIME = 120; // seconds
@@ -413,6 +426,9 @@ class System {
 
     bool firmware_healthy_ = false;
     void check_firmware_health();
+
+    std::string coredump_; // summary of the core dump left by the last crash, empty if there is none
+    void        read_coredump();
 
     // button
     static PButton            myPButton_; // PButton instance
@@ -500,6 +516,7 @@ class System {
     uint32_t    modbus_timeout_;
     bool        developer_mode_;
     bool        disable_reset_;
+    bool        wipe_fs_ = false; // set by a factory reset, the filesystem partition is erased just before the restart
     bool        auto_fw_check_;
     uint32_t    fstotal_;
     uint32_t    psram_;

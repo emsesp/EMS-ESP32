@@ -389,9 +389,10 @@ ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
     serializeJson(input, inputStr);
     LOG_DEBUG("input: %s\n", inputStr.c_str());
 
-    JsonDocument output_doc;
-    JsonObject   output      = output_doc.to<JsonObject>();
-    uint8_t      return_code = Command::process(path.c_str(), true, input, output); // modbus is always authenticated
+    JsonDocument          output_doc;
+    JsonObject            output = output_doc.to<JsonObject>();
+    Command::CallerSource caller("modbus");
+    uint8_t               return_code = Command::process(path.c_str(), true, input, output); // modbus is always authenticated
 
     if (return_code != CommandRet::OK) {
         char error[100];
@@ -405,8 +406,8 @@ ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
             snprintf(error, sizeof(error), "Modbus write command failed with error code (%s)", Command::return_code_string(return_code));
         }
 
-        LOG_ERROR(error);
-        response.setError(request.getServerID(), request.getFunctionCode(), ILLEGAL_DATA_VALUE);
+        LOG_ERROR("%s", error);
+        response.setError(request.getServerID(), request.getFunctionCode(), return_code == CommandRet::TOO_MANY_WRITES ? SERVER_DEVICE_BUSY : ILLEGAL_DATA_VALUE);
     } else {
         // all good
         response.add(request.getServerID());

@@ -38,6 +38,8 @@ const VALIDATION_LIMITS = {
   SHOWER_ALERT_COLDSHOT_MAX: 10,
   REMOTE_TIMEOUT_MIN: 1,
   REMOTE_TIMEOUT_MAX: 240,
+  WRITE_LIMIT_MIN: 0,
+  WRITE_LIMIT_MAX: 255,
   OFFSET_MIN: 0,
   OFFSET_MAX: 255,
   COMMAND_MIN: 1,
@@ -143,6 +145,15 @@ export const createSettingsValidator = (settings: Settings) => {
       }
     ];
   }
+
+  schema.write_limit = [
+    {
+      type: 'number',
+      min: VALIDATION_LIMITS.WRITE_LIMIT_MIN,
+      max: VALIDATION_LIMITS.WRITE_LIMIT_MAX,
+      message: `Write limit must be between ${VALIDATION_LIMITS.WRITE_LIMIT_MIN} and ${VALIDATION_LIMITS.WRITE_LIMIT_MAX}`
+    }
+  ];
 
   // Remote timeout validations
   if (settings.remote_timeout_en) {

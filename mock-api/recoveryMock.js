@@ -12,6 +12,8 @@ const state = {
   boot: 'boot',
   downUntil: 0,
   md5: null,
+  coredump:
+    'task=loopTask pc=0x4012293f cause=0 vaddr=0x00000000 bt=0x4008d09c 0x4008d065 0x40090856 0x4012293f 0x4018091b 0x40207b4d sha=1e0b55050ab1c3f2 reason=abort() was called at PC 0x4012293f on core 1',
   partitions: [
     {
       label: 'boot',
@@ -76,6 +78,8 @@ const status = (authenticated) => ({
   uptime: Math.floor((Date.now() - started) / 1000),
   reason: '',
   reset_reason: 'panic',
+  // like the device, only when signed in. Set state.coredump to '' to test without a dump
+  ...(authenticated && state.coredump && { coredump: state.coredump }),
   ap_ssid: 'ems-esp-recovery',
   ap_ip: '192.168.4.1',
   ap_clients: 1,
@@ -156,6 +160,22 @@ export default function recoveryMock() {
         if (!isAuthorized(req)) {
           await readBody(req);
           return send(res, 401);
+        }
+
+        // a few bytes of random data in place of a real dump, it's only saved as coredump.bin
+        if (url === '/rest/recovery/coredump' && req.method === 'GET') {
+          if (!state.coredump) return send(res, 404);
+          res.setHeader('Content-Type', 'application/octet-stream');
+          res.setHeader(
+            'Content-Disposition',
+            'attachment; filename="coredump.bin"'
+          );
+          return res.end(crypto.getRandomValues(new Uint8Array(1024)));
+        }
+
+        if (url === '/rest/recovery/coredump' && req.method === 'DELETE') {
+          state.coredump = '';
+          return send(res, 200);
         }
 
         if (url === '/rest/recovery/restart' && req.method === 'POST') {

@@ -41,6 +41,7 @@ const DEFAULT_COMMAND_ITEM: Omit<CommandItem, 'id'> = {
   cmd: '',
   value: '',
   name: '',
+  guest: false,
   deleted: false
 };
 
@@ -109,6 +110,7 @@ const Commands = () => {
     (ci.name || '') !== (ci.o_name || '') ||
     ci.cmd !== ci.o_cmd ||
     ci.value !== ci.o_value ||
+    ci.guest !== ci.o_guest ||
     ci.deleted !== ci.o_deleted;
 
   useInterval(() => {
@@ -128,7 +130,8 @@ const Commands = () => {
             id: ci.id,
             cmd: ci.cmd,
             value: ci.value,
-            name: ci.name
+            name: ci.name,
+            guest: ci.guest
           }))
       });
       toast.success(LL.UPDATED_OF(LL.COMMANDS()));

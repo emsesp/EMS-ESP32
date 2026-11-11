@@ -32,9 +32,9 @@ import Version from 'app/settings/Version';
 import Network from 'app/settings/network/Network';
 import NetworkSettings from 'app/settings/network/NetworkSettings';
 import WiFiNetworkScanner from 'app/settings/network/WiFiNetworkScanner';
+import ApiKeys from 'app/settings/security/ApiKeys';
 import ManageUsers from 'app/settings/security/ManageUsers';
 import Security from 'app/settings/security/Security';
-import SecuritySettings from 'app/settings/security/SecuritySettings';
 import APStatus from 'app/status/APStatus';
 import Activity from 'app/status/Activity';
 import HardwareStatus from 'app/status/HardwareStatus';
@@ -181,10 +181,11 @@ const router = createBrowserRouter(
         <Route path="status/ntp" element={<NTPStatus />} />
         <Route path="status/ap" element={<APStatus />} />
         <Route path="status/network" element={<NetworkStatus />} />
+        <Route path="status/version" element={<Version />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="settings/version" element={<Version />} />
 
         <Route element={<RequireAdmin />}>
-          <Route path="settings" element={<Settings />} />
-          <Route path="settings/version" element={<Version />} />
           <Route path="settings/application" element={<ApplicationSettings />} />
           <Route path="settings/mqtt" element={<MqttSettings />} />
           <Route path="settings/ntp" element={<NTPSettings />} />
@@ -208,13 +209,13 @@ const router = createBrowserRouter(
           <Route path="settings/security" element={<Security />}>
             <Route
               index
-              element={<Navigate replace to="/settings/security/settings" />}
+              element={<Navigate replace to="/settings/security/users" />}
             />
-            <Route path="settings" element={<SecuritySettings />} />
             <Route path="users" element={<ManageUsers />} />
+            <Route path="apikeys" element={<ApiKeys />} />
             <Route
               path="*"
-              element={<Navigate replace to="/settings/security/settings" />}
+              element={<Navigate replace to="/settings/security/users" />}
             />
           </Route>
 

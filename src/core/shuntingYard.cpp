@@ -36,7 +36,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
         } else if (*p == '{') { // json is stored as string including {}
             const auto * b = p;
             ++p;
-            uint8_t i = 1;
+            int i = 1;
             while (*p && i > 0) {
                 i += (*p == '{') ? 1 : (*p == '}') ? -1 : 0;
                 ++p;
@@ -290,8 +290,6 @@ std::deque<Token> shuntingYard(const std::deque<Token> & tokens) {
 
         case Token::Type::RightParen: {
             // If token is right parenthesis:
-            bool match = false;
-
             // Until the token at the top of the stack
             // is a left parenthesis,
             while (!stack.empty() && stack.back().type != Token::Type::LeftParen) {
@@ -299,10 +297,9 @@ std::deque<Token> shuntingYard(const std::deque<Token> & tokens) {
                 // onto the output queue.
                 queue.push_back(stack.back());
                 stack.pop_back();
-                match = true;
             }
 
-            if (!match && stack.empty()) {
+            if (stack.empty()) {
                 // If the stack runs out without finding a left parenthesis,
                 // then there are mismatched parentheses.
                 return {};
@@ -385,7 +382,7 @@ std::string commands(std::string & expr, bool quotes) {
             char         cmd_s[COMMAND_MAX_LENGTH + 5]; // "api/" prefix + cmd
             snprintf(cmd_s, sizeof(cmd_s), "api/%s", cmd);
 
-            auto return_code = Command::process(cmd_s, true, input, output);
+            auto return_code = Command::process(cmd_s, Command::caller_is_admin(), input, output);
             // check for no value (entity is valid but has no value set)
             if (return_code != CommandRet::OK && return_code != CommandRet::NO_VALUE) {
                 return expr = "";
@@ -441,6 +438,11 @@ int to_logic(const std::string & s) {
     //     return 0;
     // }
     // return -1;
+}
+
+// string to number. std::stod aborts on out-of-range input as the firmware has no exceptions
+static double to_double(const std::string & s) {
+    return strtod(s.c_str(), nullptr);
 }
 
 // number to string, remove trailing zeros
@@ -508,7 +510,7 @@ std::string calculate(const std::string & expr) {
                 if (logic >= 0) {
                     stack.push_back(logic == 0 ? "1" : "0");
                 } else if (isnum(rhs)) {
-                    stack.push_back(std::stod(rhs) == 0 ? "1" : "0");
+                    stack.push_back(to_double(rhs) == 0 ? "1" : "0");
                 } else {
                     // usually literal text that was left unquoted, so its '!' got read as a logical NOT
                     EMSESP::logger().warning("'!' needs a boolean or numeric operand, got '%s'. Literal text must be quoted", rhs.c_str());
@@ -520,11 +522,11 @@ std::string calculate(const std::string & expr) {
 
             if (token.str[0] == 'h') {
                 // hex string to number
-                if (rhs.empty() || rhs.find_first_not_of("0123456789abcdefABCDEF") != std::string::npos) {
+                if (rhs.empty() || rhs.length() > 8 || rhs.find_first_not_of("0123456789abcdefABCDEF") != std::string::npos) {
                     return "";
                 }
 
-                stack.push_back(to_string(std::stoi(rhs, 0, 16)));
+                stack.push_back(to_string(strtoul(rhs.c_str(), nullptr, 16)));
                 break;
             }
 
@@ -533,7 +535,7 @@ std::string calculate(const std::string & expr) {
                 return "";
             }
 
-            auto rhd = std::stod(rhs);
+            auto rhd = to_double(rhs);
             switch (token.str[0]) {
             default:
                 return "";
@@ -592,7 +594,7 @@ std::string calculate(const std::string & expr) {
                 break;
             case '<':
                 if (isnum(rhs) && isnum(lhs)) {
-                    stack.push_back((std::stod(lhs) < std::stod(rhs)) ? "1" : "0");
+                    stack.push_back((to_double(lhs) < to_double(rhs)) ? "1" : "0");
                     break;
                 }
 
@@ -600,7 +602,7 @@ std::string calculate(const std::string & expr) {
                 break;
             case '{':
                 if (isnum(rhs) && isnum(lhs)) {
-                    stack.push_back((std::stod(lhs) <= std::stod(rhs)) ? "1" : "0");
+                    stack.push_back((to_double(lhs) <= to_double(rhs)) ? "1" : "0");
                     break;
                 }
 
@@ -608,7 +610,7 @@ std::string calculate(const std::string & expr) {
                 break;
             case '>':
                 if (isnum(rhs) && isnum(lhs)) {
-                    stack.push_back((std::stod(lhs) > std::stod(rhs)) ? "1" : "0");
+                    stack.push_back((to_double(lhs) > to_double(rhs)) ? "1" : "0");
                     break;
                 }
 
@@ -616,7 +618,7 @@ std::string calculate(const std::string & expr) {
                 break;
             case '}':
                 if (isnum(rhs) && isnum(lhs)) {
-                    stack.push_back((std::stod(lhs) >= std::stod(rhs)) ? "1" : "0");
+                    stack.push_back((to_double(lhs) >= to_double(rhs)) ? "1" : "0");
                     break;
                 }
 
@@ -624,7 +626,7 @@ std::string calculate(const std::string & expr) {
                 break;
             case '=':
                 if (isnum(rhs) && isnum(lhs)) {
-                    stack.push_back((std::stod(lhs) == std::stod(rhs)) ? "1" : "0");
+                    stack.push_back((to_double(lhs) == to_double(rhs)) ? "1" : "0");
                     break;
                 }
 
@@ -633,7 +635,7 @@ std::string calculate(const std::string & expr) {
                 break;
             case '!':
                 if (isnum(rhs) && isnum(lhs)) {
-                    stack.push_back((std::stod(lhs) != std::stod(rhs)) ? "1" : "0");
+                    stack.push_back((to_double(lhs) != to_double(rhs)) ? "1" : "0");
                     break;
                 }
 
@@ -688,8 +690,8 @@ std::string calculate(const std::string & expr) {
                 return "";
             }
 
-            auto lhd = std::stod(lhs);
-            auto rhd = std::stod(rhs);
+            auto lhd = to_double(lhs);
+            auto rhd = to_double(rhs);
             switch (token.str[0]) {
             default:
                 return "";
@@ -704,7 +706,11 @@ std::string calculate(const std::string & expr) {
                 stack.push_back(to_string(lhd / rhd));
                 break;
             case '%':
-                stack.push_back(std::to_string(static_cast<int>(lhd) % static_cast<int>(rhd)));
+                // an integer division by zero crashes the ESP32
+                if (std::fabs(lhd) >= INT32_MAX || std::fabs(rhd) >= INT32_MAX || static_cast<int32_t>(rhd) == 0) {
+                    return "";
+                }
+                stack.push_back(std::to_string(static_cast<int32_t>(lhd) % static_cast<int32_t>(rhd)));
                 break;
             case '+':
                 stack.push_back(to_string(lhd + rhd));
@@ -760,7 +766,7 @@ std::string compute(const std::string & expr) {
     auto f = expr_new.find_first_of('{');
     while (f != std::string::npos) {
         auto e = f + 1;
-        for (uint8_t i = 1; i > 0; e++) {
+        for (int i = 1; i > 0; e++) {
             if (e >= expr_new.length()) {
                 return "";
             } else if (expr_new[e] == '}') {
@@ -791,6 +797,11 @@ std::string compute(const std::string & expr) {
                     key_s  = "";
                     keys_s = p.key().c_str();
                 }
+            }
+
+            if (!Command::caller_is_admin()) {
+                EMSESP::logger().warning("Only admins can fetch a URL in a value");
+                return "";
             }
 
             std::string value  = doc[value_s] | "";
@@ -825,8 +836,6 @@ std::string compute(const std::string & expr) {
 
                             result = json.as<std::string>();
                         }
-
-                        expr_new.replace(f, e - f, result.c_str());
                     }
                 }
 

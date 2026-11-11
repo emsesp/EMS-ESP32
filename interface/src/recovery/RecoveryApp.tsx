@@ -115,6 +115,7 @@ const RecoveryApp = () => {
             status={status}
             onRestarting={setRestartTarget}
             onSignOut={signOut}
+            onChanged={() => void loadStatus()}
           />
         </Box>
       </>

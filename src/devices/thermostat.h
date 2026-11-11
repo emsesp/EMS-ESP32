@@ -239,7 +239,7 @@ class Thermostat : public EMSdevice {
 
     // specific thermostat characteristics, stripping the top 2 bits
     inline uint8_t model() const {
-        return (flags() & 0x3F);
+        return (flags() & EMSdevice::EMS_DEVICE_FLAG_THERMOSTAT_MODEL);
     }
 
     // check to see if the thermostat is a hybrid of the R300

@@ -20,7 +20,8 @@
 
 namespace emsesp {
 
-WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securityManager) {
+WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securityManager)
+    : _securityManager(securityManager) {
     // write endpoints - POSTs
     securityManager->addEndpoint(server,
                                  EMSESP_WRITE_DEVICE_VALUE_SERVICE_PATH,
@@ -290,13 +291,20 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
             cmd = Command::parse_command_string(cmd, id); // extract hc or dhw
         }
 
+        Authentication authentication = _securityManager->authenticateRequest(request);
+        std::string    source         = std::string("web, ") + (authentication.authenticated ? authentication.user->username.c_str() : "");
+#ifndef EMSESP_STANDALONE
+        source += std::string(", ") + request->client()->remoteIP().toString().c_str();
+#endif
+        Command::CallerSource caller(source.c_str());
+
         if (data.is<const char *>()) {
             return_code = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
         } else if (data.is<int>()) {
-            char s[20];
+            char s[24];
             return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int32_t>(), 0), true, id, output);
         } else if (data.is<float>()) {
-            char s[20];
+            char s[32];
             return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<float>(), 1), true, id, output);
         } else if (data.is<bool>()) {
             return_code = Command::call(device_type, cmd, data.as<bool>() ? "true" : "false", true, id, output);
@@ -312,7 +320,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
 #endif
         }
 
-        response->setCode((return_code == CommandRet::OK) ? 200 : 400); // bad request
+        response->setCode(return_code == CommandRet::OK ? 200 : return_code == CommandRet::TOO_MANY_WRITES ? 429 : 400);
         response->setLength();
         request->send(response);
         return;

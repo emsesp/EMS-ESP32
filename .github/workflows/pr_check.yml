@@ -8,6 +8,8 @@ on:
     branches: dev
     paths:
       - 'src/**'
+      - 'lib/**'
+      - 'test/**'
       
 jobs:
   pre-release:
@@ -30,3 +32,11 @@ jobs:
       - name: Run unit tests
         run: |
           platformio run -e native-test -t exec
+
+      # a new seed on every run, the log shows it so a failure can be reproduced locally with FUZZ_SEED
+      - name: Fuzz the command parser
+        env:
+          FUZZ_ITERATIONS: 200000
+          FUZZ_SEED: ${{ github.run_number }}
+        run: |
+          platformio run -e native-fuzz -t exec

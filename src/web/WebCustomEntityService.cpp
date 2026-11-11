@@ -21,13 +21,7 @@
 namespace emsesp {
 
 WebCustomEntityService::WebCustomEntityService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
-    : _httpEndpoint(WebCustomEntity::read,
-                    WebCustomEntity::update,
-                    this,
-                    server,
-                    EMSESP_CUSTOMENTITY_SERVICE_PATH,
-                    securityManager,
-                    AuthenticationPredicates::IS_AUTHENTICATED)
+    : _httpEndpoint(WebCustomEntity::read, WebCustomEntity::update, this, server, EMSESP_CUSTOMENTITY_SERVICE_PATH, securityManager, AuthenticationPredicates::IS_ADMIN)
     , _fsPersistence(WebCustomEntity::read, WebCustomEntity::update, this, fs, EMSESP_CUSTOMENTITY_FILE) {
 }
 
@@ -172,6 +166,16 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
 }
 
 // set value by api command
+// false for entities that only live in RAM or NVS
+bool WebCustomEntityService::writes_to_bus(const char * name) {
+    for (const CustomEntityItem & entityItem : *customEntityItems_) {
+        if (Helpers::toLower(entityItem.name) == Helpers::toLower(name)) {
+            return entityItem.ram == 0;
+        }
+    }
+    return false;
+}
+
 bool WebCustomEntityService::command_setvalue(const char * value, const int8_t id, const char * name) {
     // don't write if there is no value, to prevent setting an empty value by mistake when parsing attributes
     if (!strlen(value)) {
@@ -265,7 +269,7 @@ bool WebCustomEntityService::command_setvalue(const char * value, const int8_t i
 // output of a single value
 // if add_uom is true it will add the UOM string to the value
 void WebCustomEntityService::render_value(JsonObject output, CustomEntityItem const & entity, const bool useVal, const bool web, const bool add_uom) {
-    char         payload[20];
+    char         payload[32];
     const char * name = useVal ? "value" : (const char *)entity.name;
 
     switch (entity.value_type) {
@@ -396,7 +400,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
 std::string WebCustomEntityService::get_metrics_prometheus() {
     std::string result;
     result.reserve(customEntityItems_->size() * 140);
-    char val[10];
+    char val[32];
     for (CustomEntityItem & entity : *customEntityItems_) {
         if (entity.hide || entity.name[0] == '\0') {
             continue;

@@ -8,6 +8,8 @@ import { readSystemStatus } from 'api/system';
 
 import { useRequest } from 'alova/client';
 import MessageBox from 'components/MessageBox';
+import { clearAccessToken } from 'components/routing/authentication';
+import CustomBuildWarning from 'components/upload/CustomBuildWarning';
 import { useI18nContext } from 'i18n/i18n-react';
 import { SystemStatusCodes } from 'types';
 import { useInterval } from 'utils';
@@ -17,11 +19,16 @@ import { LinearProgressWithLabel } from '../../components/upload/LinearProgressW
 interface SystemMonitorProps {
   // when set the page isn't reloaded when done, e.g. when the firmware was installed without a restart
   onDone?: (success: boolean) => void;
+  // installs the same firmware from its URL again, as a custom build
+  onInstallCustom?: () => Promise<unknown>;
 }
 
-const SystemMonitor = ({ onDone }: SystemMonitorProps) => {
+const SystemMonitor = ({ onDone, onInstallCustom }: SystemMonitorProps) => {
   const [errorMessage, setErrorMessage] = useState<string>();
+  const [notOfficial, setNotOfficial] = useState(false);
   const hasInitialized = useRef(false);
+  // the device reports an upload error once, then goes back to normal
+  const uploadFailed = useRef(false);
   const { LL } = useI18nContext();
 
   const { send: setSystemStatus } = useRequest(
@@ -43,6 +50,9 @@ const SystemMonitor = ({ onDone }: SystemMonitorProps) => {
     }
   })
     .onSuccess((event) => {
+      if (uploadFailed.current) {
+        return;
+      }
       if (
         event.data.status === SystemStatusCodes.SYSTEM_STATUS_NORMAL ||
         event.data.status === undefined
@@ -55,10 +65,23 @@ const SystemMonitor = ({ onDone }: SystemMonitorProps) => {
       } else if (
         event.data.status === SystemStatusCodes.SYSTEM_STATUS_ERROR_UPLOAD
       ) {
+        uploadFailed.current = true;
         setErrorMessage('Please check system logs for possible causes');
+      } else if (
+        event.data.status === SystemStatusCodes.SYSTEM_STATUS_ERROR_NOT_OFFICIAL
+      ) {
+        uploadFailed.current = true;
+        setErrorMessage(LL.UPLOAD_NOT_OFFICIAL());
+        setNotOfficial(true);
       }
     })
     .onError((error) => {
+      // the device is back but the sign-in is no longer valid, e.g. after a factory reset
+      if (error.error?.message === 'Unauthorized') {
+        clearAccessToken();
+        document.location.href = '/';
+        return;
+      }
       setErrorMessage(String(error.error?.message || 'An error occurred'));
     });
 
@@ -68,14 +91,16 @@ const SystemMonitor = ({ onDone }: SystemMonitorProps) => {
 
   const status = data?.status;
 
-  const statusMessage =
-    status && status >= SystemStatusCodes.SYSTEM_STATUS_UPLOADING
+  const statusMessage = uploadFailed.current
+    ? 'Upload Failed'
+    : status && status >= SystemStatusCodes.SYSTEM_STATUS_UPLOADING
       ? LL.WAIT_FIRMWARE()
       : status === SystemStatusCodes.SYSTEM_STATUS_PENDING_RESTART
         ? LL.APPLICATION_RESTARTING()
         : status === SystemStatusCodes.SYSTEM_STATUS_NORMAL
           ? LL.RESTARTING_PRE()
-          : status === SystemStatusCodes.SYSTEM_STATUS_ERROR_UPLOAD
+          : status === SystemStatusCodes.SYSTEM_STATUS_ERROR_UPLOAD ||
+              status === SystemStatusCodes.SYSTEM_STATUS_ERROR_NOT_OFFICIAL
             ? 'Upload Failed'
             : LL.RESTARTING_POST();
 
@@ -85,6 +110,19 @@ const SystemMonitor = ({ onDone }: SystemMonitorProps) => {
     isUploading && status
       ? Math.round(status - SystemStatusCodes.SYSTEM_STATUS_UPLOADING)
       : 0;
+
+  const installCustom = async () => {
+    if (!onInstallCustom) {
+      return;
+    }
+    setErrorMessage(undefined);
+    setNotOfficial(false);
+    uploadFailed.current = false;
+    await onInstallCustom().catch((error: Error) => {
+      uploadFailed.current = true;
+      setErrorMessage(error.message);
+    });
+  };
 
   const onCancel = async () => {
     setErrorMessage(undefined);
@@ -136,7 +174,26 @@ const SystemMonitor = ({ onDone }: SystemMonitorProps) => {
             {statusMessage}
           </Typography>
 
-          {errorMessage ? (
+          {notOfficial && onInstallCustom ? (
+            <>
+              <CustomBuildWarning
+                message={LL.UPLOAD_NOT_OFFICIAL()}
+                linkText={LL.UPLOAD_NOT_OFFICIAL_HELP()}
+                installText={LL.UPLOAD_INSTALL_ANYWAY()}
+                onInstall={() => void installCustom()}
+              />
+              <Button
+                sx={{ mt: 2 }}
+                size="small"
+                startIcon={<CancelIcon />}
+                variant="outlined"
+                color="secondary"
+                onClick={onCancel}
+              >
+                {LL.CANCEL()}
+              </Button>
+            </>
+          ) : errorMessage ? (
             <MessageBox level="error" message={errorMessage}>
               <Button
                 sx={{ ml: 2 }}

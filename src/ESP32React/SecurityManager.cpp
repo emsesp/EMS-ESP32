@@ -75,6 +75,22 @@ void SecurityManager::dispatchRest(AsyncWebServerRequest * request, JsonVariant 
     request->send(404);
 }
 
+// a body is only buffered for requests that will pass the route's login check, so anonymous
+// clients can't make the device hold large bodies
+bool SecurityManager::mayReceiveBody(AsyncWebServerRequest * request) {
+    for (auto & route : _restRoutes) {
+        if (route.method.matches(request->method()) && route.uri.matches(request)) {
+            if (!route.requiresAuth) {
+                return true;
+            }
+            Authentication authentication = authenticateRequest(request);
+            return route.predicate(authentication);
+        }
+    }
+
+    return false;
+}
+
 // ---- RestCatchAllHandler ----
 
 bool SecurityManager::RestCatchAllHandler::canHandle(AsyncWebServerRequest * request) const {
@@ -102,7 +118,14 @@ void SecurityManager::RestCatchAllHandler::handleBody(AsyncWebServerRequest * re
         return;
     }
 
+    if (index + len > total) {
+        return;
+    }
+
     if (index == 0 && request->_tempObject == nullptr) {
+        if (!_owner->mayReceiveBody(request)) {
+            return;
+        }
         request->_tempObject = calloc(total + 1, sizeof(uint8_t)); // freed by request destructor
         if (request->_tempObject == nullptr) {
             request->abort();
@@ -116,6 +139,11 @@ void SecurityManager::RestCatchAllHandler::handleBody(AsyncWebServerRequest * re
 }
 
 void SecurityManager::RestCatchAllHandler::handleRequest(AsyncWebServerRequest * request) {
+    if (request->contentLength() > kMaxBodySize && isJsonContent(request)) {
+        request->send(413);
+        return;
+    }
+
     JsonDocument doc;
     JsonVariant  json;
     if (request->_tempObject != nullptr) {

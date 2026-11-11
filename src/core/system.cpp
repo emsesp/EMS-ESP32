@@ -19,6 +19,7 @@
 #include "system.h"
 #include "emsesp_network.h"
 #include "emsesp.h" // for send_raw_telegram() command
+#include "write_limiter.h"
 
 #ifndef EMSESP_STANDALONE
 #include "esp_image_format.h"
@@ -27,14 +28,16 @@
 #include <esp_mac.h>
 #include "esp_efuse.h"
 #include <nvs.h>
-#include <Update.h>
 #endif
 
 #include <map>
 
 #include "firmwareVersion.h"
+#include "settings_secrets.h"
 #include "shuntingYard.h"       // for compute() used by the message and sendmail commands
 #include "emsesp_http_client.h" // for the shared TLS client settings
+#include "firmware_url.h"
+#include "fs_wipe.h"
 
 #if defined(EMSESP_TEST)
 #include "../test/test.h"
@@ -45,6 +48,7 @@
 #include <ESP_SSLClient.h>
 #include <ReadyMail.h>
 #include <OtaUpdater.h>
+#include <CoreDump.h>
 
 // Keeps new firmware in the bootloader's pending verification state until System::check_firmware_health()
 // confirms it, so a crash or restart before then rolls back to the previous image
@@ -337,6 +341,13 @@ std::string System::languages_string() {
     return languages_string;
 }
 
+// add the supported language codes to a JSON array
+void System::supported_languages(JsonArray output) {
+    for (uint8_t i = 0; i < NUM_LANGUAGES; i++) {
+        output.add(languages[i]);
+    }
+}
+
 // returns last response from MQTT
 bool System::command_response(const char * value, const int8_t id, JsonObject output) {
     JsonDocument doc;
@@ -606,6 +617,7 @@ void System::recovery_installed() {
 
         partition_info_.erase(factory->label); // on the AsyncTCP task, same as the web handlers reading it
     }
+    recovery_official_ = -1;
 
     LOG_INFO("Recovery firmware v%s installed", recovery_version().c_str());
 #endif
@@ -632,6 +644,19 @@ std::string System::recovery_version() const {
     }
 #endif
     return "";
+}
+
+bool System::recovery_official() {
+#ifdef EMSESP_HAS_RECOVERY
+    // reads the whole image
+    if (recovery_official_ < 0) {
+        const esp_partition_t * factory = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
+        recovery_official_              = OtaUpdater::isOfficialFirmware(factory) ? 1 : 0;
+    }
+    return recovery_official_ == 1;
+#else
+    return false;
+#endif
 }
 
 // set install time/date for the current partition, in UTC
@@ -666,19 +691,22 @@ bool System::set_partition([[maybe_unused]] const char * partitionname) {
     // Find the partition by label
     esp_partition_iterator_t it = esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_ANY, partitionname);
     if (it == nullptr) {
-        return false; // partition not found
+        LOG_ERROR("Partition '%s' not found", partitionname);
+        return false;
     }
 
     const esp_partition_t * partition = esp_partition_get(it);
     esp_partition_iterator_release(it);
 
     if (partition == nullptr) {
+        LOG_ERROR("Partition '%s' not found", partitionname);
         return false;
     }
 
-    // Set the boot partition
+    // fails with ESP_ERR_OTA_VALIDATE_FAILED if the image in the partition doesn't pass verification
     esp_err_t err = esp_ota_set_boot_partition(partition);
     if (err != ESP_OK) {
+        LOG_ERROR("Can't boot from partition '%s': %s", partitionname, esp_err_to_name(err));
         return false;
     }
 
@@ -697,6 +725,11 @@ bool System::set_partition([[maybe_unused]] const char * partitionname) {
 // restart EMS-ESP
 // app0 or app1, or boot/factory on 16MB boards
 void System::system_restart(const char * partitionname) {
+#ifndef EMSESP_STANDALONE
+    // a requested restart means the firmware works, so a new one isn't rolled back by restarting within the health check time
+    OtaUpdater::confirmRunningApp();
+#endif
+
     // see if we are forcing a partition to use
     if (partitionname != nullptr) {
 #ifndef EMSESP_STANDALONE
@@ -759,6 +792,10 @@ void System::system_restart(const char * partitionname) {
     Mqtt::disconnect(); // gracefully disconnect MQTT (flushes the DISCONNECT before reboot, needed for QOS1)
     EMSuart::stop();    // stop UART so there is no interference
 #ifndef EMSESP_STANDALONE
+    if (wipe_fs_) {
+        Serial.println(fs_wipe() ? "Filesystem erased" : "Filesystem erase failed");
+        Serial.flush();
+    }
     delay(500);    // wait 1/2 second
     ESP.restart(); // ka-boom! - this is the only place where the ESP32 restart is called
 #endif
@@ -891,23 +928,30 @@ void System::check_crash_loop() {
     }
 
 #ifdef EMSESP_HAS_RECOVERY
+    Serial.printf("Restarted after a crash (%lu in a row)\n", static_cast<unsigned long>(crash_count_));
     if (crash_count_ < CRASH_LOOP_LIMIT) {
         return;
     }
 
     const esp_partition_t * factory = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
-    if (factory == nullptr || factory == esp_ota_get_running_partition()) {
+    if (factory == nullptr) {
+        Serial.println("No factory partition, can't fall back to the recovery firmware");
+        return;
+    }
+    if (factory == esp_ota_get_running_partition()) {
         return;
     }
 
     // fails if the factory partition doesn't hold a valid image, then keep trying the current one
-    if (esp_ota_set_boot_partition(factory) == ESP_OK) {
+    const esp_err_t err = esp_ota_set_boot_partition(factory);
+    if (err == ESP_OK) {
         crash_count_ = 0;
         EMSESP::nvs_.putString(EMSESP_NVS_RECOVERY_REASON, "crash");
         Serial.printf("Crashed %d times in a row, restarting into the %s partition\n", CRASH_LOOP_LIMIT, factory->label);
         Serial.flush();
         esp_restart();
     }
+    Serial.printf("Can't fall back to the recovery firmware in the %s partition: %s\n", factory->label, esp_err_to_name(err));
 #endif
 #endif
 }
@@ -927,6 +971,16 @@ void System::check_firmware_health() {
 #endif
 }
 
+// summarises the core dump left in flash by the last crash, see docs/Crash-Dumps.md for decoding it
+void System::read_coredump() {
+#ifndef EMSESP_STANDALONE
+    coredump_ = CoreDump::summary();
+    if (!coredump_.empty()) {
+        LOG_WARNING("Crash dump found: %s", coredump_.c_str());
+    }
+#endif
+}
+
 // Starts up core services
 void System::start() {
     get_partition_info(); // get the partition info
@@ -940,6 +994,8 @@ void System::start() {
     if (invalid != nullptr) {
         LOG_WARNING("Firmware in partition %s failed to start and was rolled back", invalid->label);
     }
+
+    read_coredump();
 
     // disable bluetooth module
     // periph_module_disable(PERIPH_BT_MODULE);
@@ -1182,6 +1238,10 @@ void System::heartbeat_json(JsonObject output) {
 #endif
     output["apicalls"] = WebAPIService::api_count(); // + WebAPIService::api_fails();
     output["apifails"] = WebAPIService::api_fails();
+    if (WriteLimiter::instance().skipped() || WriteLimiter::instance().limited()) {
+        output["writesskipped"] = WriteLimiter::instance().skipped();
+        output["writeslimited"] = WriteLimiter::instance().limited();
+    }
 
     if (EMSESP::sensor_enabled() || EMSESP::analog_enabled()) {
         output["sensorreads"] = EMSESP::temperaturesensor_.reads() + EMSESP::analogsensor_.reads();
@@ -1277,6 +1337,7 @@ void System::commands_init() {
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(sendmail), MAKE_CF_CB_STATIC(System::command_sendmail), FL_(sendmail_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), MAKE_CF_CB_STATIC(System::command_restart), FL_(restart_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(format), MAKE_CF_CB_STATIC(System::command_format), FL_(format_cmd), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(coredump), MAKE_CF_CB_STATIC(System::command_coredump), FL_(coredump_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(txpause), MAKE_CF_CB_STATIC(System::command_txpause), FL_(txpause_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(led), MAKE_CF_CB_STATIC(System::command_led), FL_(led_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), MAKE_CF_CB_STATIC(System::command_watch), FL_(watch_cmd));
@@ -1321,7 +1382,7 @@ void System::show_users(uuid::console::Shell & shell) {
 #ifndef EMSESP_STANDALONE
     EMSESP::esp32React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
         for (const User & user : securitySettings.users) {
-            shell.printfln(" username: %s, password: %s, is_admin: %s", user.username.c_str(), user.password.c_str(), user.admin ? ("yes") : ("no"));
+            shell.printfln(" username: %s, is_admin: %s", user.username.c_str(), user.admin ? ("yes") : ("no"));
         }
     });
 #endif
@@ -1336,6 +1397,7 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.println();
     shell.println("System:");
     shell.printfln(" Version: %s", EMSESP_APP_VERSION);
+    shell.printfln(" Build: %s", official_build() ? "official" : "custom");
     shell.printfln(" System name: %s", system_name().c_str());
 #ifndef EMSESP_STANDALONE
     shell.printfln(" Platform: %s (%s)", EMSESP_PLATFORM, ESP.getChipModel());
@@ -1708,6 +1770,9 @@ bool System::check_restore() {
                         for (JsonObject entry : nvs_entries) {
                             std::string key  = entry["key"] | "";
                             int         type = entry["type"] | NVS_TYPE_ANY;
+                            if (SettingsSecrets::is_private_nvs_key(key.c_str())) {
+                                continue;
+                            }
 
                             switch (type) {
                             case NVS_TYPE_I8:
@@ -2109,7 +2174,7 @@ static const std::pair<const char *, const char *> SECTION_MAP[] = {
 #endif
 
 // convert a single config file into a section of the output json object
-void System::exportSettings(const std::string & type, [[maybe_unused]] const char * filename, JsonObject output) {
+void System::exportSettings(const std::string & type, [[maybe_unused]] const char * filename, JsonObject output, [[maybe_unused]] const bool include_secrets) {
     if (type != "settings") {
         output["type"] = type; // add the type to the output, not for settings as it's already added because its grouped
     }
@@ -2139,6 +2204,9 @@ void System::exportSettings(const std::string & type, [[maybe_unused]] const cha
             }
 
             output[section].set(jsonDocument.as<JsonObject>());
+            if (!include_secrets) {
+                SettingsSecrets::redact(section, output[section]);
+            }
         }
 
         LOG_DEBUG("Exported %s settings from file %s", section, filename);
@@ -2149,7 +2217,7 @@ void System::exportSettings(const std::string & type, [[maybe_unused]] const cha
 }
 
 // full system backup of all settings files
-void System::exportSystemBackup(JsonObject output) {
+void System::exportSystemBackup(JsonObject output, const bool include_secrets) {
     output["type"]    = "systembackup";     // add the type to the output
     output["version"] = EMSESP_APP_VERSION; // add the version to the output
 
@@ -2171,23 +2239,23 @@ void System::exportSystemBackup(JsonObject output) {
     // start with settings by grouping them together
     JsonObject node = nodes.add<JsonObject>();
     node["type"]    = "settings"; // add type once for this group
-    exportSettings("settings", NETWORK_SETTINGS_FILE, node);
-    exportSettings("settings", AP_SETTINGS_FILE, node);
-    exportSettings("settings", MQTT_SETTINGS_FILE, node);
-    exportSettings("settings", NTP_SETTINGS_FILE, node);
-    exportSettings("settings", SECURITY_SETTINGS_FILE, node);
-    exportSettings("settings", EMSESP_SETTINGS_FILE, node);
+    exportSettings("settings", NETWORK_SETTINGS_FILE, node, include_secrets);
+    exportSettings("settings", AP_SETTINGS_FILE, node, include_secrets);
+    exportSettings("settings", MQTT_SETTINGS_FILE, node, include_secrets);
+    exportSettings("settings", NTP_SETTINGS_FILE, node, include_secrets);
+    exportSettings("settings", SECURITY_SETTINGS_FILE, node, include_secrets);
+    exportSettings("settings", EMSESP_SETTINGS_FILE, node, include_secrets);
 
     node = nodes.add<JsonObject>();
-    exportSettings("commands", EMSESP_COMMANDS_FILE, node);
+    exportSettings("commands", EMSESP_COMMANDS_FILE, node, include_secrets);
     node = nodes.add<JsonObject>();
-    exportSettings("schedule", EMSESP_SCHEDULER_FILE, node);
+    exportSettings("schedule", EMSESP_SCHEDULER_FILE, node, include_secrets);
     node = nodes.add<JsonObject>();
-    exportSettings("customizations", EMSESP_CUSTOMIZATION_FILE, node);
+    exportSettings("customizations", EMSESP_CUSTOMIZATION_FILE, node, include_secrets);
     node = nodes.add<JsonObject>();
-    exportSettings("entities", EMSESP_CUSTOMENTITY_FILE, node);
+    exportSettings("entities", EMSESP_CUSTOMENTITY_FILE, node, include_secrets);
     node = nodes.add<JsonObject>();
-    exportSettings("modules", EMSESP_MODULES_FILE, node);
+    exportSettings("modules", EMSESP_MODULES_FILE, node, include_secrets);
 
 #ifndef EMSESP_STANDALONE
     // special case for custom support
@@ -2222,6 +2290,11 @@ void System::exportSystemBackup(JsonObject output) {
     while (err == ESP_OK) {
         nvs_entry_info_t info;
         nvs_entry_info(it, &info);
+        if (SettingsSecrets::is_private_nvs_key(info.key)) {
+            err = nvs_entry_next(&it);
+            continue;
+        }
+
         JsonObject entry = entries.add<JsonObject>();
         entry["type"]    = info.type;
         entry["key"]     = info.key;
@@ -2266,7 +2339,22 @@ void System::exportSystemBackup(JsonObject output) {
 #endif
 }
 
+#ifndef EMSESP_STANDALONE
+// overlay src onto dst, recursing into objects present in both. arrays and values are replaced
+static void merge_json(JsonObject dst, JsonObjectConst src) {
+    for (JsonPairConst kv : src) {
+        JsonVariant target = dst[kv.key()];
+        if (kv.value().is<JsonObjectConst>() && target.is<JsonObject>()) {
+            merge_json(target.as<JsonObject>(), kv.value().as<JsonObjectConst>());
+        } else {
+            dst[kv.key()] = kv.value();
+        }
+    }
+}
+#endif
+
 // write a settings file using input from a json object, called from upload/restore
+// the input is merged over the existing file, so a partial upload only changes the keys it contains
 bool System::saveSettings([[maybe_unused]] const char * filename, [[maybe_unused]] JsonObject input) {
 #ifndef EMSESP_STANDALONE
     const char * section = nullptr;
@@ -2283,10 +2371,28 @@ bool System::saveSettings([[maybe_unused]] const char * filename, [[maybe_unused
 
     JsonObject section_json = input[section];
     if (section_json) {
+        JsonDocument current(PSRAM_DOC);
+        bool         has_current  = false;
+        File         current_file = LittleFS.open(filename);
+        if (current_file) {
+            has_current = !deserializeJson(current, current_file) && current.is<JsonObject>();
+            current_file.close();
+        }
+
+        if (has_current) {
+            // keep the device's own secrets for any the backup left out
+            SettingsSecrets::merge(section, section_json, current.as<JsonObjectConst>());
+            merge_json(current.as<JsonObject>(), section_json);
+        }
+
         File section_file = LittleFS.open(filename, "w");
         if (section_file) {
             LOG_DEBUG("Applying new uploaded %s data", section);
-            serializeJson(section_json, section_file);
+            if (has_current) {
+                serializeJson(current, section_file);
+            } else {
+                serializeJson(section_json, section_file);
+            }
             section_file.close();
             return true; // reboot required
         }
@@ -2297,7 +2403,32 @@ bool System::saveSettings([[maybe_unused]] const char * filename, [[maybe_unused
 }
 
 // set a entity of services 'network', 'settings', 'mqtt', etc.
-bool System::command_service(const char * cmd, const char * value) {
+// returns NOT_FOUND if cmd is not a service command so the caller can try the command functions
+uint8_t System::command_service(const char * cmd, const char * value, const bool is_admin) {
+    static constexpr const char * service_commands[] = {"settings/showertimer",
+                                                        "settings/showeralert",
+                                                        "settings/hideled",
+                                                        "settings/analogenabled",
+                                                        "mqtt/enabled",
+                                                        "ap/enabled",
+                                                        "ntp/enabled",
+                                                        "syslog/enabled"};
+
+    bool found = false;
+    for (const char * service_command : service_commands) {
+        if (!strcmp(cmd, service_command)) {
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        return CommandRet::NOT_FOUND;
+    }
+
+    if (!is_admin) {
+        return CommandRet::NOT_ALLOWED;
+    }
+
     bool ok = false;
     bool b;
     if (Helpers::value2bool(value, b)) {
@@ -2358,9 +2489,10 @@ bool System::command_service(const char * cmd, const char * value) {
 
     if (ok) {
         LOG_INFO("System command '%s' with value '%s'", cmd, value);
+        return CommandRet::OK;
     }
 
-    return ok;
+    return CommandRet::NOT_FOUND;
 }
 
 // return back a system value
@@ -2782,7 +2914,16 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["uptimeSec"]   = uuid::get_uptime_sec();
     node["resetReason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 #ifndef EMSESP_STANDALONE
-    node["platform"]        = EMSESP_PLATFORM;
+    node["platform"] = EMSESP_PLATFORM;
+    {
+        // same as the firmware filenames, e.g. ESP32-16MB+ (+ is PSRAM)
+        const uint32_t flash_kb = ESP.getFlashChipSize() / 1024;
+        node["emsesp_platform"] = std::string(EMSESP_PLATFORM)
+                                  + (flash_kb >= 32768   ? "-32MB"
+                                     : flash_kb >= 16384 ? "-16MB"
+                                                         : "-4MB")
+                                  + (EMSESP::system_.PSram() ? "+" : "");
+    }
     node["cpuType"]         = ESP.getChipModel();
     node["arduino"]         = ARDUINO_VERSION;
     node["sdk"]             = ESP.getSdkVersion();
@@ -2793,8 +2934,9 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["usedApp"]         = EMSESP::system_.appUsed();                            // kilobytes
     node["freeApp"]         = EMSESP::system_.appFree();                            // kilobytes
     node["partition"]       = (const char *)esp_ota_get_running_partition()->label; // active partition
-    node["flash_chip_size"] = ESP.getFlashChipSize() / 1024;                        // kilobytes
-    node["psram"]           = (EMSESP::system_.PSram() > 0);                        // make boolean
+    node["build"]           = official_build() ? "official" : "custom";
+    node["flash_chip_size"] = ESP.getFlashChipSize() / 1024; // kilobytes
+    node["psram"]           = (EMSESP::system_.PSram() > 0); // make boolean
     if (EMSESP::system_.PSram()) {
         node["psramSize"] = EMSESP::system_.PSram();
         node["freePsram"] = ESP.getFreePsram() / 1024;
@@ -2804,6 +2946,9 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
     node["temperature"] = EMSESP::system_.temperature();
 #endif
+    if (!EMSESP::system_.coredump_.empty()) {
+        node["coredump"] = EMSESP::system_.coredump_;
+    }
 #endif
     node["txpause"] = EMSbus::tx_mode() == EMS_TXMODE_OFF;
 
@@ -2959,6 +3104,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["publishSingle"]         = settings.publish_single;
         node["publish2command"]       = settings.publish_single2cmd;
         node["sendResponse"]          = settings.send_response;
+        node["mqttCommands"]          = settings.mqtt_commands;
     });
 
     // Syslog Status
@@ -3010,6 +3156,8 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["APICalls"] = WebAPIService::api_count();
     node["APIFails"] = WebAPIService::api_fails();
 #endif
+    node["writesSkipped"] = WriteLimiter::instance().skipped();
+    node["writesLimited"] = WriteLimiter::instance().limited();
 
     // EMS Bus Status
     node = output["bus"].to<JsonObject>();
@@ -3069,17 +3217,19 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
             node["ledType"]     = settings.led_type;
         }
 
-        node["hideLed"]         = settings.hide_led;
-        node["noTokenApi"]      = settings.notoken_api;
-        node["readonlyMode"]    = settings.readonly_mode;
-        node["fahrenheit"]      = settings.fahrenheit;
-        node["dallasParasite"]  = settings.dallas_parasite;
-        node["boolFormat"]      = settings.bool_format;
-        node["boolDashboard"]   = settings.bool_dashboard;
-        node["enumFormat"]      = settings.enum_format;
-        node["analogEnabled"]   = settings.analog_enabled;
-        node["telnetEnabled"]   = settings.telnet_enabled;
-        node["maxWebLogBuffer"] = settings.weblog_buffer;
+        node["hideLed"]          = settings.hide_led;
+        node["readonlyMode"]     = settings.readonly_mode;
+        node["writeProtection"]  = settings.write_protection;
+        node["writeLimit"]       = settings.write_limit;
+        node["writeLimitRefuse"] = settings.write_limit_refuse;
+        node["fahrenheit"]       = settings.fahrenheit;
+        node["dallasParasite"]   = settings.dallas_parasite;
+        node["boolFormat"]       = settings.bool_format;
+        node["boolDashboard"]    = settings.bool_dashboard;
+        node["enumFormat"]       = settings.enum_format;
+        node["analogEnabled"]    = settings.analog_enabled;
+        node["telnetEnabled"]    = settings.telnet_enabled;
+        node["maxWebLogBuffer"]  = settings.weblog_buffer;
 
         /*
  #if defined(EMSESP_UNITY)
@@ -3345,9 +3495,17 @@ bool System::command_format(const char * value, const int8_t id) {
     } else {
         LOG_ERROR("Format failed");
     }
+    if (!CoreDump::erase()) {
+        LOG_ERROR("Failed to erase the crash dump");
+    }
+    EMSESP::system_.coredump_.clear();
+    EMSESP::system_.wipe_fs_ = true;
 #else
     LOG_ERROR("Format command not available in standalone or test mode");
 #endif
+
+    EMSESP::nvs_.remove(EMSESP_NVS_JWT_KEY);
+    EMSESP::nvs_.remove(EMSESP_NVS_TOKENS_RESET);
 
 // in debug we also remove all the NVS keys
 #ifdef EMSESP_DEBUG
@@ -3357,6 +3515,19 @@ bool System::command_format(const char * value, const int8_t id) {
 
     // restart will be handled by the main loop
     EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED);
+    return true;
+}
+
+// erases the core dump from the last crash, so the next one shows up as new
+bool System::command_coredump(const char * value, const int8_t id) {
+#if !defined(EMSESP_STANDALONE)
+    if (!CoreDump::erase()) {
+        LOG_ERROR("Failed to erase the crash dump");
+        return false;
+    }
+    EMSESP::system_.coredump_.clear();
+    LOG_INFO("Crash dump erased");
+#endif
     return true;
 }
 
@@ -3506,9 +3677,10 @@ String System::getBBQKeesGatewayDetails([[maybe_unused]] uint8_t detail) {
 //
 // This function needs to be called twice, 1st pass once with a url to persist it, 2nd pass with no arguments to start the upload
 // This is to avoid timeouts in callback functions, like calling from a web hook.
-bool System::uploadFirmwareURL(const char * url) {
+bool System::uploadFirmwareURL(const char * url, bool allow_custom) {
 #ifndef EMSESP_STANDALONE
     static String saved_url;
+    static bool   saved_allow_custom = false; // the user agreed to install a custom build
 
     if (url && strlen(url) > 0) {
         // if the passed URL is "reset" abort the current upload. This is called when an error happens during OTA
@@ -3518,8 +3690,15 @@ bool System::uploadFirmwareURL(const char * url) {
             return true;
         }
 
+        if (!FirmwareURL::allowed(url)) {
+            LOG_ERROR("Only EMS-ESP releases can be installed from a URL, upload the file instead");
+            saved_url.clear();
+            return false;
+        }
+
         // given a URL to download from, save it ready for the 2nd pass
-        saved_url = url;
+        saved_url          = url;
+        saved_allow_custom = allow_custom;
         LOG_INFO("Firmware location: %s", saved_url.c_str());
         EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_PENDING_UPLOAD); // we're ready to start the upload
         return true;
@@ -3533,10 +3712,13 @@ bool System::uploadFirmwareURL(const char * url) {
 
     Shell::loop_all(); // flush log buffers so latest messages are shown in console
 
-    String scheme = saved_url.substring(0, 8);
-    scheme.toLowerCase();
-    const bool is_https   = scheme.startsWith("https://");
-    const int  scheme_len = is_https ? 8 : 7; // "https://" vs "http://"
+    if (!FirmwareURL::allowed(saved_url.c_str())) {
+        LOG_ERROR("Only EMS-ESP releases can be installed from a URL, upload the file instead");
+        saved_url.clear();
+        return false;
+    }
+
+    const int scheme_len = 8; // "https://"
 
     WiFiClient    basic_client;
     ESP_SSLClient ssl_client;
@@ -3544,19 +3726,17 @@ bool System::uploadFirmwareURL(const char * url) {
     Stream * stream        = nullptr;
     int      firmware_size = 0;
 
-    if (is_https) {
-        ssl_client.setInsecure(); // no CA validation, matches the rest of the project
-        // a small (e.g. 1 KB) RX buffer makes the body unreadable: the headers still fit one small
-        // record, hence Content-Length looks fine, but the first body record cannot be decoded
-        ssl_client.setBufferSizes(HttpClient::TLS_RX_BUFFER_SIZE, HttpClient::TLS_TX_BUFFER_SIZE);
-        ssl_client.setSessionTimeout(HttpClient::TLS_SESSION_TIMEOUT_S);
-    }
+    ssl_client.setInsecure(); // no CA validation, matches the rest of the project. The firmware signature is checked instead
+    // a small (e.g. 1 KB) RX buffer makes the body unreadable: the headers still fit one small
+    // record, hence Content-Length looks fine, but the first body record cannot be decoded
+    ssl_client.setBufferSizes(HttpClient::TLS_RX_BUFFER_SIZE, HttpClient::TLS_TX_BUFFER_SIZE);
+    ssl_client.setSessionTimeout(HttpClient::TLS_SESSION_TIMEOUT_S);
 
     basic_client.setTimeout(FIRMWARE_UPLOAD_READ_TIMEOUT_S * 1000); // socket-level read timeout, in ms
-    ssl_client.setTimeout(FIRMWARE_UPLOAD_READ_TIMEOUT_S);          // Stream::readBytes timeout used by Update
-    ssl_client.setClient(&basic_client, is_https);                  // enableSSL = false for plain HTTP
+    ssl_client.setTimeout(FIRMWARE_UPLOAD_READ_TIMEOUT_S);          // Stream::readBytes timeout
+    ssl_client.setClient(&basic_client, true);
 
-    const uint16_t port           = is_https ? 443 : 80;
+    const uint16_t port           = 443;
     String         url_remain     = saved_url.substring(scheme_len);
     int            redirect_count = 0;
 
@@ -3634,24 +3814,17 @@ bool System::uploadFirmwareURL(const char * url) {
                 return false;
             }
 
-            String lower_loc = location;
-            lower_loc.toLowerCase();
-            if (lower_loc.startsWith("https://") || lower_loc.startsWith("http://")) {
-                // scheme-changing redirect is not supported - the SSL state is
-                // baked in at setClient() time and we don't want to re-init mid-flight
-                const bool new_is_https = lower_loc.startsWith("https://");
-                if (new_is_https != is_https) {
-                    LOG_ERROR("Firmware upload failed - cross-scheme redirect to %s", location.c_str());
-                    return false;
-                }
-
-                url_remain = location.substring(new_is_https ? 8 : 7);
-            } else if (location.startsWith("/")) {
-                url_remain = host + location; // relative redirect, same host
+            String next;
+            if (location.startsWith("/")) {
+                next = "https://" + host + location; // relative redirect, same host
             } else {
+                next = location;
+            }
+            if (!FirmwareURL::redirect_allowed(next.c_str())) {
                 LOG_ERROR("Firmware upload failed - unsupported redirect to %s", location.c_str());
                 return false;
             }
+            url_remain = next.substring(scheme_len);
 
             LOG_DEBUG("Following redirect to %s", url_remain.c_str());
             continue;
@@ -3696,7 +3869,9 @@ bool System::uploadFirmwareURL(const char * url) {
 #else
     const bool is_recovery = false;
 #endif
-    OtaUpdater ota; // only used for the recovery firmware
+    // on the heap, the loop task's stack is small
+    auto ota = std::make_unique<OtaUpdater>();
+    ota->allowCustom(saved_allow_custom);
 
     // check we have a valid size
     if (firmware_size < (int)(is_recovery ? OtaUpdater::MIN_RECOVERY_FIRMWARE_SIZE : MIN_FIRMWARE_SIZE)) {
@@ -3704,35 +3879,30 @@ bool System::uploadFirmwareURL(const char * url) {
         return false; // error
     }
 
-    OtaUpdater::confirmRunningApp();
-
-    if (is_recovery) {
+    const esp_partition_t * target = nullptr;
 #ifdef EMSESP_HAS_RECOVERY
-        const esp_partition_t * factory = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
-        if (factory == nullptr || factory == esp_ota_get_running_partition()) {
+    if (is_recovery) {
+        target = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
+        if (target == nullptr || target == esp_ota_get_running_partition()) {
             LOG_ERROR("The recovery firmware can't be installed on this board");
             return false; // error
         }
-
-        if (!ota.beginFirmware(firmware_size, factory, false)) {
-            LOG_ERROR("Recovery firmware upload failed - %s", ota.errorString());
-            return false; // error
-        }
+    }
 #endif
-    } else if (!Update.begin(firmware_size)) {
-        // check we have enough space for the upload in the ota partition
-        LOG_ERROR("Firmware upload failed - no space");
+
+    if (!ota->beginFirmware(firmware_size, target, !is_recovery)) {
+        LOG_ERROR("%s upload failed - %s", is_recovery ? "Recovery firmware" : "Firmware", ota->errorString());
         return false; // error
     }
 
-    LOG_INFO("%s uploading (size: %dKB) over %s. Please wait...", is_recovery ? "Recovery firmware" : "Firmware", firmware_size / 1024, is_https ? "HTTPS" : "HTTP");
+    LOG_INFO("%s uploading (size: %dKB) over HTTPS. Please wait...", is_recovery ? "Recovery firmware" : "Firmware", firmware_size / 1024);
 
     Shell::loop_all(); // flush log buffers so latest messages are shown in console
 
     // we're about to start the upload, set the status so the Web System Monitor spots it
     EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING);
 
-    // explicit chunked read loop instead of Update.writeStream():
+    // explicit chunked read loop instead of a stream copy:
     uint8_t buf[FIRMWARE_UPLOAD_CHUNK_SIZE];
     size_t  total_read = 0;
     bool    magic_ok   = false;
@@ -3743,11 +3913,7 @@ bool System::uploadFirmwareURL(const char * url) {
         // via the systemStatus action, which runs on the AsyncTCP task while we're blocked here
         if (EMSESP::system_.systemStatus() < SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING) {
             LOG_WARNING("Firmware upload cancelled at %u of %d bytes", (unsigned)total_read, firmware_size);
-            if (is_recovery) {
-                ota.abort();
-            } else {
-                Update.abort(); // release the OTA partition handle so a later attempt can start cleanly
-            }
+            ota->abort(); // release the OTA partition handle so a later attempt can start cleanly
 
             ssl_client.stop(); // drop the connection
             saved_url.clear(); // prevent it from downloading again
@@ -3782,9 +3948,7 @@ bool System::uploadFirmwareURL(const char * url) {
             }
 
             LOG_ERROR("Firmware upload failed - read stalled at %u of %d bytes", (unsigned)total_read, firmware_size);
-            if (is_recovery) {
-                ota.abort();
-            }
+            ota->abort();
 
             EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
             return false;
@@ -3798,9 +3962,7 @@ bool System::uploadFirmwareURL(const char * url) {
         size_t n = stream->readBytes(buf, want);
         if (n == 0) {
             LOG_ERROR("Firmware upload failed - read returned 0 at %u of %d bytes", (unsigned)total_read, firmware_size);
-            if (is_recovery) {
-                ota.abort();
-            }
+            ota->abort();
 
             EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
             return false;
@@ -3811,9 +3973,7 @@ bool System::uploadFirmwareURL(const char * url) {
         if (!magic_ok) {
             if (buf[0] != 0xE9) {
                 LOG_ERROR("Firmware upload failed - bad magic byte 0x%02X (expected 0xE9, not an ESP32 firmware image?)", buf[0]);
-                if (is_recovery) {
-                    ota.abort();
-                }
+                ota->abort();
 
                 EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
                 return false;
@@ -3822,9 +3982,7 @@ bool System::uploadFirmwareURL(const char * url) {
             // the recovery firmware must be for this chip, and really be the recovery
             if (is_recovery && !(OtaUpdater::isCompatibleFirmware(buf, n) && OtaUpdater::isRecoveryFirmware(buf, n))) {
                 LOG_ERROR("Recovery firmware upload failed - not a recovery firmware image for this chip");
-                if (is_recovery) {
-                    ota.abort();
-                }
+                ota->abort();
 
                 EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
                 return false;
@@ -3833,15 +3991,9 @@ bool System::uploadFirmwareURL(const char * url) {
             magic_ok = true;
         }
 
-        const bool written = is_recovery ? ota.write(buf, n) : (Update.write(buf, n) == n);
-        if (!written) {
-            LOG_ERROR("Firmware upload failed - flash write error at %u of %d bytes: %s",
-                      (unsigned)total_read,
-                      firmware_size,
-                      is_recovery ? ota.errorString() : Update.errorString());
-            if (is_recovery) {
-                ota.abort();
-            }
+        if (!ota->write(buf, n)) {
+            LOG_ERROR("Firmware upload failed - flash write error at %u of %d bytes: %s", (unsigned)total_read, firmware_size, ota->errorString());
+            ota->abort();
 
             EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
             return false;
@@ -3859,13 +4011,19 @@ bool System::uploadFirmwareURL(const char * url) {
         yield();
     }
 
-    if (!(is_recovery ? ota.end() : Update.end(true))) {
-        LOG_ERROR("Firmware upload failed - %s", is_recovery ? ota.errorString() : Update.errorString());
-        EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
+    if (!ota->end()) {
+        LOG_ERROR("Firmware upload failed - %s", ota->errorString());
+        EMSESP::system_.systemStatus(ota->notOfficial() ? SYSTEM_STATUS::SYSTEM_STATUS_ERROR_NOT_OFFICIAL : SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
         return false; // error
     }
 
     saved_url.clear(); // prevent from downloading again
+
+    if (ota->isOfficial()) {
+        LOG_INFO("Official EMS-ESP build, signature verified");
+    } else {
+        LOG_WARNING("Custom build installed, it isn't signed by EMS-ESP");
+    }
 
     if (is_recovery) {
         // no restart. The partition info is updated later on the AsyncTCP task, see recovery_installed_apply()
@@ -3880,6 +4038,18 @@ bool System::uploadFirmwareURL(const char * url) {
 #endif
 
     return true; // OK
+}
+
+bool System::official_build() {
+#ifndef EMSESP_STANDALONE
+    static int8_t official = -1; // reads the whole image, so only once
+    if (official < 0) {
+        official = OtaUpdater::isOfficialFirmware(esp_ota_get_running_partition()) ? 1 : 0;
+    }
+    return official == 1;
+#else
+    return false;
+#endif
 }
 
 // read command, e.g. read <deviceID> <type ID> [offset] [length] from console or API

@@ -1,16 +1,9 @@
-export const saveFile = (
-  json: unknown,
-  filename: string,
-  extension: string
-): void => {
+export const saveBlob = (blob: Blob, filename: string): void => {
   try {
-    const blob = new Blob([JSON.stringify(json, null, 2)], {
-      type: 'application/json'
-    });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
-    anchor.download = `emsesp_${filename}${extension}`;
+    anchor.download = filename;
 
     // Trigger download
     document.body.appendChild(anchor);
@@ -23,8 +16,19 @@ export const saveFile = (
     }, 100);
   } catch (error) {
     console.error('Failed to save file:', error);
-    throw new Error(`Unable to save file: ${filename}${extension}`, {
+    throw new Error(`Unable to save file: ${filename}`, {
       cause: error
     });
   }
+};
+
+export const saveFile = (
+  json: unknown,
+  filename: string,
+  extension: string
+): void => {
+  const blob = new Blob([JSON.stringify(json, null, 2)], {
+    type: 'application/json'
+  });
+  saveBlob(blob, `emsesp_${filename}${extension}`);
 };

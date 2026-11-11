@@ -3,12 +3,15 @@
 #include <Update.h>
 #include <esp_app_format.h>
 #include <esp_image_format.h>
+#include <esp_partition.h>
 #ifdef OTA_UPDATER_ANY_PARTITION
 #include <esp_heap_caps.h>
-#include <esp_partition.h>
 #endif
 
+#include <algorithm>
 #include <cstddef>
+#include <memory>
+#include <new>
 
 static String getFilenameExtension(const String & filename) {
     const auto pos = filename.lastIndexOf('.');
@@ -137,11 +140,49 @@ void OtaUpdater::releaseTarget() {
 }
 #endif
 
+bool OtaUpdater::isOfficialFirmware(const esp_partition_t * partition) {
+    if (partition == nullptr) {
+        return false;
+    }
+    const esp_partition_pos_t pos  = {.offset = partition->address, .size = partition->size};
+    esp_image_metadata_t      meta = {};
+    if (esp_image_get_metadata(&pos, &meta) != ESP_OK || meta.image_len + FirmwareSignature::SIGNATURE_SIZE > partition->size) {
+        return false;
+    }
+
+    // on the heap, this can run on a task with a small stack
+    std::unique_ptr<FirmwareSignature> signature(new (std::nothrow) FirmwareSignature());
+    std::unique_ptr<uint8_t[]>         buf(new (std::nothrow) uint8_t[READ_CHUNK]);
+    if (!signature || !buf) {
+        return false;
+    }
+    signature->begin();
+    const size_t total = meta.image_len + FirmwareSignature::SIGNATURE_SIZE;
+    for (size_t offset = 0; offset < total;) {
+        const size_t n = std::min(READ_CHUNK, total - offset);
+        if (esp_partition_read(partition, offset, buf.get(), n) != ESP_OK) {
+            return false;
+        }
+        signature->write(buf.get(), n, [](const uint8_t *, size_t) { return true; });
+        offset += n;
+    }
+    return signature->verify();
+}
+
 bool OtaUpdater::beginFirmware(size_t filesize, const esp_partition_t * target, bool set_boot) {
-    _md5_applied = false;
+    _md5_applied  = false;
+    _not_official = false;
+    _official     = false;
+    _filesystem   = false;
     _error       = "";
 
     confirmRunningApp();
+
+    _signature.begin();
+    if (hasMd5()) {
+        _md5Builder.begin();
+        _md5_applied = true;
+    }
 
     if (target != nullptr) {
 #ifdef OTA_UPDATER_ANY_PARTITION
@@ -158,10 +199,6 @@ bool OtaUpdater::beginFirmware(size_t filesize, const esp_partition_t * target, 
         _written  = 0;
         _erased   = 0;
         _set_boot = set_boot;
-        if (hasMd5()) {
-            _md5Builder.begin();
-            _md5_applied = true;
-        }
         return true;
 #else
         _error = "Writing to a specific partition is not supported";
@@ -169,30 +206,52 @@ bool OtaUpdater::beginFirmware(size_t filesize, const esp_partition_t * target, 
 #endif
     }
 
-    if (!Update.begin(filesize - sizeof(esp_image_header_t))) {
+    const esp_partition_t * next = esp_ota_get_next_update_partition(nullptr);
+    if (next != nullptr && filesize > next->size + 4096) {
+        _error = "Firmware does not fit in the partition";
         return false;
     }
-    if (hasMd5()) {
-        Update.setMD5(_md5.data());
-        _md5_applied = true;
-    }
-    return true;
+    // the content length isn't the image size, end() takes what was written
+    return Update.begin(UPDATE_SIZE_UNKNOWN);
 }
 
 bool OtaUpdater::beginFilesystem() {
-    clearMd5(); // so Update.end() doesn't compare against a stale digest
-    _error = "";
+    clearMd5(); // a digest is only for firmware
+    _not_official = false;
+    _official     = false;
+    _filesystem   = true;
+    _error        = "";
+    if (!_allow_custom) {
+        _not_official = true;
+        _error        = NOT_OFFICIAL_ERROR;
+        return false;
+    }
     // the HTTP content length is the multipart body size, not the file size, so it can exceed
     // the partition by a few hundred bytes. Let the Update library size against the whole partition.
     return Update.begin(UPDATE_SIZE_UNKNOWN, U_SPIFFS);
 }
 
 bool OtaUpdater::write(const uint8_t * data, size_t len) {
+    if (_md5_applied) {
+        _md5Builder.add(data, len);
+    }
+    if (_filesystem) {
+        return writeImage(data, len);
+    }
+    return _signature.write(data, len, [this](const uint8_t * d, size_t n) { return writeImage(d, n); });
+}
+
+bool OtaUpdater::writeImage(const uint8_t * data, size_t len) {
 #ifdef OTA_UPDATER_ANY_PARTITION
     if (_target != nullptr) {
         while (len) {
             const size_t n = len < DRAM_CHUNK ? len : DRAM_CHUNK;
             memcpy(_dram, data, n);
+            if (_written < sizeof(_header)) {
+                const size_t h = std::min(n, sizeof(_header) - _written);
+                memcpy(_header + _written, _dram, h);
+                memset(_dram, 0xFF, h); // erased flash, the image isn't valid until commitTarget()
+            }
 
             const size_t need = _written + n;
             if (need > _erased) {
@@ -216,9 +275,6 @@ bool OtaUpdater::write(const uint8_t * data, size_t len) {
                 setError(err);
                 return false;
             }
-            if (_md5_applied) {
-                _md5Builder.add(_dram, n);
-            }
             _written += n;
             data += n;
             len -= n;
@@ -230,39 +286,72 @@ bool OtaUpdater::write(const uint8_t * data, size_t len) {
 }
 
 bool OtaUpdater::end() {
-#ifdef OTA_UPDATER_ANY_PARTITION
-    if (_target != nullptr) {
-        const esp_partition_t * target   = _target;
-        const bool              set_boot = _set_boot;
-        releaseTarget();
-
-        if (_md5_applied) {
-            _md5Builder.calculate();
-            if (strcmp(_md5Builder.toString().c_str(), _md5.data()) != 0) {
-                _error = "MD5 check failed";
-                return false;
-            }
-        }
-
-        esp_image_metadata_t meta     = {};
-        esp_partition_pos_t  part_pos = {.offset = target->address, .size = target->size};
-        esp_err_t            err      = esp_image_verify(ESP_IMAGE_VERIFY_SILENT, &part_pos, &meta);
-        if (err != ESP_OK) {
-            setError(err);
+    if (_md5_applied) {
+        _md5Builder.calculate();
+        if (strcmp(_md5Builder.toString().c_str(), _md5.data()) != 0) {
+            _error = "MD5 check failed";
+            abort();
             return false;
         }
-        if (set_boot) {
-            err = esp_ota_set_boot_partition(target);
-            if (err != ESP_OK) {
-                setError(err);
-                return false;
-            }
-        }
-        return true;
     }
+
+    if (!_filesystem) {
+        _official = _signature.verify();
+        if (!_official && !_allow_custom) {
+            _not_official = true;
+            _error        = NOT_OFFICIAL_ERROR;
+            abort();
+            return false;
+        }
+        // the signature is kept after the image so isOfficialFirmware() can check it later, as when the file is
+        // flashed over USB. Without one, the held back bytes are the end of the image
+        if (!writeImage(_signature.tail(), _signature.tail_size())) {
+            abort();
+            return false;
+        }
+    }
+
+    bool ok;
+#ifdef OTA_UPDATER_ANY_PARTITION
+    if (_target != nullptr) {
+        ok = commitTarget();
+        releaseTarget();
+    } else
 #endif
-    return Update.end(true);
+    {
+        ok = Update.end(true);
+    }
+
+    return ok;
 }
+
+#ifdef OTA_UPDATER_ANY_PARTITION
+bool OtaUpdater::commitTarget() {
+    if (_written < sizeof(_header)) {
+        _error = "Firmware is too small";
+        return false;
+    }
+    memcpy(_dram, _header, sizeof(_header));
+    esp_err_t err = esp_partition_write(_target, 0, _dram, sizeof(_header));
+    if (err != ESP_OK) {
+        setError(err);
+        return false;
+    }
+
+    esp_image_metadata_t meta     = {};
+    esp_partition_pos_t  part_pos = {.offset = _target->address, .size = _target->size};
+    err                           = esp_image_verify(ESP_IMAGE_VERIFY_SILENT, &part_pos, &meta);
+    if (err == ESP_OK && _set_boot) {
+        err = esp_ota_set_boot_partition(_target);
+    }
+    if (err != ESP_OK) {
+        setError(err);
+        esp_partition_erase_range(_target, 0, FLASH_SECTOR); // so it can't be booted
+        return false;
+    }
+    return true;
+}
+#endif
 
 void OtaUpdater::abort() {
 #ifdef OTA_UPDATER_ANY_PARTITION

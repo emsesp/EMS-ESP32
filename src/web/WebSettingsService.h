@@ -85,8 +85,10 @@ class WebSettings {
     uint8_t  led_type;
     bool     low_clock;
     bool     telnet_enabled;
-    bool     notoken_api;
     bool     readonly_mode;
+    bool     write_protection; // skips repeated writes and applies write_limit
+    uint8_t  write_limit;      // writes a minute to one entity, 0 is no limit
+    bool     write_limit_refuse;
     bool     analog_enabled;
     uint8_t  pbutton_gpio;
     uint8_t  solar_maxflow;

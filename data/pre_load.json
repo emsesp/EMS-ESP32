@@ -1,144 +1,49 @@
 {
   "type": "systembackup",
-  "version": "3.9.0",
   "systembackup": [
     {
       "type": "settings",
       "Network": {
-        "ssid": "",
-        "bssid": "",
-        "password": "",
-        "hostname": "ems-esp",
-        "static_ip_config": false,
-        "bandwidth20": false,
-        "nosleep": true,
-        "enableMDNS": true,
-        "enableCORS": false,
-        "CORSOrigin": "*",
-        "tx_power": 0,
-        "eth_10mbit": false
+        "ssid": "home",
+        "password": "home-wifi-password",
+        "hostname": "ems-esp"
       },
       "AP": {
         "provision_mode": 1,
         "ssid": "ems-esp",
-        "password": "ems-esp-neo",
-        "channel": 1,
-        "ssid_hidden": false,
-        "max_clients": 4,
-        "local_ip": "192.168.4.1",
-        "gateway_ip": "192.168.4.1",
-        "subnet_mask": "255.255.255.0"
-      },
-      "MQTT": {
-        "enableTLS": false,
-        "rootCA": "",
-        "enabled": false,
-        "host": "",
-        "port": 1883,
-        "base": "ems-esp",
-        "username": "",
-        "password": "",
-        "client_id": "ems-esp",
-        "keep_alive": 60,
-        "clean_session": false,
-        "entity_format": 1,
-        "publish_time_boiler": 10,
-        "publish_time_thermostat": 10,
-        "publish_time_solar": 10,
-        "publish_time_mixer": 10,
-        "publish_time_water": 10,
-        "publish_time_other": 60,
-        "publish_time_sensor": 10,
-        "publish_time_heartbeat": 60,
-        "mqtt_qos": 0,
-        "mqtt_retain": false,
-        "ha_enabled": false,
-        "nested_format": 1,
-        "discovery_prefix": "homeassistant",
-        "discovery_type": 0,
-        "ha_number_mode": 0,
-        "publish_single": false,
-        "publish_single2cmd": false,
-        "send_response": false
+        "password": "ems-esp-neo"
       },
       "NTP": {
-        "enabled": false,
+        "enabled": true,
         "server": "time.google.com",
         "tz_label": "Europe/Amsterdam",
         "tz_format": "CET-1CEST,M3.5.0,M10.5.0/3",
-        "thermostat_sync": 1,
+        "thermostat_sync": 0,
         "tz_label_t": "Europe/Amsterdam",
         "tz_format_t": "CET-1CEST,M3.5.0,M10.5.0/3"
       },
       "Security": {
-        "jwt_secret": "ems-esp-neo",
         "users": [
           {
             "username": "admin",
-            "password": "admin",
-            "admin": true
-          },
-          {
-            "username": "guest",
-            "password": "guest",
-            "admin": false
+            "password": "$pbkdf2-sha256$10000$19f46c04f140f0c50fe6768d24d31b61$14582582ac450df7155514192ea5e8811bfbd0b429a5121b595f5e38952687c3",
+            "admin": true,
+            "ver": 1
           }
-        ]
+        ],
+        "api_keys": []
       },
       "Settings": {
-        "version": "3.9.0",
         "board_profile": "E32V2_2",
         "platform": "ESP32",
-        "system_name": "",
+        "system_name": "custom",
         "locale": "en",
         "tx_mode": 5,
         "ems_bus_id": 73,
-        "syslog_enabled": false,
-        "syslog_level": 3,
-        "trace_raw": false,
-        "syslog_mark_interval": 0,
-        "syslog_host": "",
-        "syslog_port": 514,
-        "boiler_heatingoff": false,
-        "remote_timeout": 24,
-        "remote_timeout_en": false,
-        "shower_timer": false,
-        "shower_alert": false,
-        "shower_alert_coldshot": 10,
-        "shower_alert_trigger": 7,
-        "shower_min_duration": 180,
-        "rx_gpio": 4,
-        "tx_gpio": 5,
-        "dallas_gpio": 14,
-        "dallas_parasite": false,
-        "led_gpio": 32,
-        "hide_led": false,
-        "led_type": 1,
-        "low_clock": false,
-        "telnet_enabled": true,
-        "notoken_api": false,
-        "readonly_mode": false,
-        "analog_enabled": true,
-        "pbutton_gpio": 34,
-        "solar_maxflow": 30,
-        "fahrenheit": false,
-        "bool_format": 1,
-        "bool_dashboard": 1,
-        "enum_format": 1,
-        "weblog_level": 6,
-        "weblog_buffer": 50,
-        "weblog_compact": true,
-        "phy_type": 1,
-        "eth_power": 15,
-        "eth_phy_addr": 0,
-        "eth_clock_mode": 1,
-        "modbus_enabled": false,
-        "modbus_port": 502,
-        "modbus_max_clients": 10,
-        "modbus_timeout": 300,
         "developer_mode": false,
-        "disable_reset": false,
-        "email_enabled": false,
+        "disable_reset": true,
+        "auto_fw_check": false,
+        "email_enabled": true,
         "email_security": 2,
         "email_server": "smtp.example.net",
         "email_port": 587,
@@ -150,35 +55,21 @@
       }
     },
     {
-      "type": "commands",
-      "Commands": {
-        "commands": []
-      }
-    },
-    {
-      "type": "schedule",
-      "Schedule": {
-        "schedule": []
-      }
-    },
-    {
-      "type": "customizations",
-      "Customizations": {
-        "ts": [],
-        "as": [],
-        "masked_entities": []
-      }
-    },
-    {
-      "type": "entities",
-      "Entities": {
-        "entities": []
-      }
-    },
-    {
-      "type": "modules",
-      "Modules": {
-        "modules": []
+      "type": "customSupport",
+      "Support": {
+        "html": [
+          "This product is installed and managed by:",
+          "",
+          "<b>Bosch Installer Example</b>",
+          "",
+          "Nefit Road 12",
+          "1234 AB Amsterdam",
+          "Phone: +31 123 456 789",
+          "email: support@boschinstaller.nl",
+          "",
+          "For help and questions please <a target='_blank' href='https://emsesp.org'>contact</a> your installer."
+        ],
+        "img_url": "https://emsesp.org/media/images/designer.png"
       }
     }
   ]

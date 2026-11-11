@@ -36,8 +36,20 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
         _is_filesystem = false;
         _is_recovery   = false;
         _response_sent = false;
+        _ota.allowCustom(request->hasParam("custom")); // the user agreed to install a custom build
 
-        switch (OtaUpdater::classify(filename, filesize, emsesp::System::MIN_FIRMWARE_SIZE)) {
+        if (!authentication.password_confirmed) {
+            handleError(request, SecurityManager::PASSWORD_REQUIRED);
+            return;
+        }
+
+#ifdef EMSESP_HAS_RECOVERY
+        // the recovery is smaller than EMS-ESP, whatever its file name. The image itself is checked below
+        constexpr size_t min_firmware_size = OtaUpdater::MIN_RECOVERY_FIRMWARE_SIZE;
+#else
+        constexpr size_t min_firmware_size = emsesp::System::MIN_FIRMWARE_SIZE;
+#endif
+        switch (OtaUpdater::classify(filename, filesize, min_firmware_size)) {
         case OtaUpdater::FileType::FILESYSTEM:
             _is_filesystem = true;
             _ota.clearMd5(); // clear any stale md5 so Update.end() doesn't compare against it
@@ -85,6 +97,11 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
             } else
 #endif
             {
+                if (filesize < emsesp::System::MIN_FIRMWARE_SIZE) {
+                    emsesp::EMSESP::logger().err("Unsupported file type: %s, size: %u", filename.c_str(), filesize);
+                    handleError(request, 406);
+                    return;
+                }
                 emsesp::EMSESP::logger().info("Firmware uploading (file %s, size: %dKB). Please wait...", filename.c_str(), filesize / 1024);
             }
 
@@ -114,8 +131,8 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
             if (_ota.beginFilesystem()) {
                 request->onDisconnect([this] { handleDisconnect(); });
             } else {
-                emsesp::EMSESP::logger().err("Update.begin(U_SPIFFS) failed: %s", _ota.errorString());
-                handleError(request, 507);
+                emsesp::EMSESP::logger().err("Filesystem upload failed: %s", _ota.errorString());
+                handleError(request, _ota.notOfficial() ? 412 : 507);
                 return;
             }
         } else {
@@ -140,7 +157,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
             if (final) {
                 if (!_ota.end()) {
                     emsesp::EMSESP::logger().err("OTA update failed: %s", _ota.errorString());
-                    handleError(request, 500); // internal error, failed
+                    handleError(request, _ota.notOfficial() ? 412 : 500); // 412 Precondition Failed, a custom build that wasn't agreed to
                     return;
                 }
             }
@@ -150,6 +167,14 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
         if (len && len != request->_tempFile.write(data, len)) {
             handleError(request, 507); // 507-Insufficient Storage
         }
+    }
+}
+
+void UploadFileService::logOfficial() {
+    if (_ota.isOfficial()) {
+        emsesp::EMSESP::logger().info("Official EMS-ESP build, signature verified");
+    } else {
+        emsesp::EMSESP::logger().warning("Custom build installed, it isn't signed by EMS-ESP");
     }
 }
 
@@ -165,6 +190,13 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
         _is_filesystem = false;
         _is_recovery   = false;
         emsesp::EMSESP::system_.systemStatus(emsesp::SYSTEM_STATUS::SYSTEM_STATUS_NORMAL);
+        return;
+    }
+
+    // a request without a file part never reaches handleUpload's check
+    Authentication authentication = _securityManager->authenticateRequest(request);
+    if (!AuthenticationPredicates::IS_ADMIN(authentication)) {
+        request->send(403);
         return;
     }
 
@@ -188,6 +220,8 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
         auto *     response = new emsesp::PsramAsyncJsonResponse(false);
         JsonObject root     = response->getRoot();
         root["recovery"]    = true;
+        root["official"]    = _ota.isOfficial();
+        logOfficial();
         if (_ota.md5Applied()) {
             emsesp::EMSESP::logger().info("Firmware MD5 matches");
             root["md5_ok"] = true;
@@ -208,14 +242,18 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
             emsesp::EMSESP::nvs_.putBool(emsesp::EMSESP_NVS_BOOT_NEW_FIRMWARE, true);
         }
 
-        if (_is_firmware && _ota.md5Applied()) {
-            emsesp::EMSESP::logger().info("Firmware MD5 matches");
+        if (_is_firmware) {
             auto *     response = new emsesp::PsramAsyncJsonResponse(false);
             JsonObject root     = response->getRoot();
-            root["md5_ok"]      = true;
+            root["official"]    = _ota.isOfficial();
+            logOfficial();
+            if (_ota.md5Applied()) {
+                emsesp::EMSESP::logger().info("Firmware MD5 matches");
+                root["md5_ok"] = true;
+                _ota.clearMd5();
+            }
             response->setLength();
             request->send(response);
-            _ota.clearMd5();
         } else {
             AsyncWebServerResponse * response = request->beginResponse(200);
             request->send(response);

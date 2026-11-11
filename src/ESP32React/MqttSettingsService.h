@@ -103,7 +103,9 @@ class MqttSettings {
     bool     publish_single2cmd      = EMSESP_DEFAULT_PUBLISH_SINGLE2CMD;
     bool     send_response           = EMSESP_DEFAULT_SEND_RESPONSE;
     uint8_t  entity_format           = EMSESP_DEFAULT_ENTITY_FORMAT;
+    uint8_t  mqtt_commands           = EMSESP_DEFAULT_MQTT_COMMANDS; // Mqtt::Commands
 
+    static uint8_t           commands(JsonObject root);
     static void              read(MqttSettings & settings, JsonObject root);
     static StateUpdateResult update(JsonObject root, MqttSettings & settings);
 };

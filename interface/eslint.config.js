@@ -23,7 +23,6 @@ export default defineConfig(
       'build/*',
       '*.js',
       '**/*.cjs',
-      '**/unpack.ts',
       'i18n*.*'
     ]
   },

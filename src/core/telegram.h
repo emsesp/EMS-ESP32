@@ -226,6 +226,32 @@ class EMSbus {
         bus_connected_     = true;
     }
 
+    // a poll to our bus id was received, mask is the bus type the poll implies
+    // a single poll byte is easily faked by noise on an unconnected Rx line, so it's only trusted
+    // when the last few telegrams before it all had a valid CRC, which noise practically never manages
+    static void poll_received(uint32_t timestamp, uint8_t mask) {
+        if (clean_rx_ < EMS_BUS_MIN_CLEAN_RX) {
+            return;
+        }
+
+        if (ems_mask_ == EMS_MASK_UNSET) {
+            ems_mask(mask);
+        }
+        last_bus_activity(timestamp);
+    }
+
+    // a telegram with a valid CRC was received
+    static void rx_valid() {
+        if (clean_rx_ < EMS_BUS_MIN_CLEAN_RX) {
+            clean_rx_++;
+        }
+    }
+
+    // a corrupt telegram was received, polls are not trusted until enough valid telegrams follow
+    static void rx_error() {
+        clean_rx_ = 0;
+    }
+
     // return bus uptime in seconds
     static uint32_t bus_uptime() {
         if (!bus_uptime_start_) {
@@ -246,9 +272,11 @@ class EMSbus {
     static uint8_t calculate_crc(const uint8_t * data, const uint8_t length);
 
   private:
-    static constexpr uint32_t EMS_BUS_TIMEOUT = 30000; // timeout in ms before recognizing the ems bus is offline (30 seconds)
+    static constexpr uint32_t EMS_BUS_TIMEOUT      = 30000; // timeout in ms before recognizing the ems bus is offline (30 seconds)
+    static constexpr uint8_t  EMS_BUS_MIN_CLEAN_RX = 3;     // consecutive valid telegrams needed before a poll to our id is trusted
 
     static uint32_t last_bus_activity_; // timestamp of last time a valid Rx came in
+    static uint8_t  clean_rx_;          // consecutive valid telegrams since the last corrupt one
     static uint32_t bus_uptime_start_;  // timestamp of first time we connected to the bus
     static bool     bus_connected_;     // start assuming the bus hasn't been connected
     static uint8_t  ems_mask_;          // unset=0xFF, buderus=0x00, junkers/ht3=0x80

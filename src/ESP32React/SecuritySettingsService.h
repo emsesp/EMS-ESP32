@@ -5,6 +5,11 @@
 #include "HttpEndpoint.h"
 #include "FSPersistence.h"
 
+#include "../core/api_key.h"
+#include "../core/password_hash.h"
+#include "../core/password_confirm.h"
+#include "../core/basic_auth.h"
+
 #ifndef FACTORY_ADMIN_USERNAME
 #define FACTORY_ADMIN_USERNAME "admin"
 #endif
@@ -13,57 +18,127 @@
 #define FACTORY_ADMIN_PASSWORD "admin"
 #endif
 
-#ifndef FACTORY_GUEST_USERNAME
-#define FACTORY_GUEST_USERNAME "guest"
-#endif
-
-#ifndef FACTORY_GUEST_PASSWORD
-#define FACTORY_GUEST_PASSWORD "guest"
-#endif
-
 #define SECURITY_SETTINGS_FILE "/config/securitySettings.json"
 #define SECURITY_SETTINGS_PATH "/rest/securitySettings"
 
-#define GENERATE_TOKEN_SIZE 512
-#define GENERATE_TOKEN_PATH "/rest/generateToken"
+#define API_KEYS_PATH "/rest/apiKeys"
+
+#define SESSION_TOKEN_LIFETIME (30 * 24 * 3600) // seconds
+
+struct ApiKeyEntry {
+    String      id; // the first hex digits of the key
+    String      label;
+    bool        write;   // read+write, otherwise read only
+    uint32_t    created; // unix time, 0 if the clock wasn't set
+    stringPSRAM hash;
+};
 
 class SecuritySettings {
   public:
-    String            jwtSecret;
-    std::vector<User> users;
+    std::vector<User>        users;
+    std::vector<ApiKeyEntry> api_keys;
+    bool                     hashed_on_load  = false; // plain text passwords were hashed, the file needs saving
+    bool                     dropped_on_load = false; // the old Super User password was in the file, the file needs saving
 
+    // the settings file. Passwords are hashed
     static void read(SecuritySettings & settings, JsonObject root) {
-        // secret
-        root["jwt_secret"] = settings.jwtSecret;
-
         // users
         JsonArray users = root["users"].to<JsonArray>();
         for (const User & user : settings.users) {
             JsonObject userRoot  = users.add<JsonObject>();
             userRoot["username"] = user.username;
-            userRoot["password"] = user.password;
+            userRoot["password"] = user.password.c_str();
             userRoot["admin"]    = user.admin;
+            userRoot["ver"]      = user.ver;
+        }
+
+        JsonArray keys = root["api_keys"].to<JsonArray>();
+        for (const ApiKeyEntry & key : settings.api_keys) {
+            JsonObject keyRoot = keys.add<JsonObject>();
+            keyRoot["id"]      = key.id;
+            keyRoot["label"]   = key.label;
+            keyRoot["write"]   = key.write;
+            keyRoot["created"] = key.created;
+            keyRoot["hash"]    = key.hash.c_str();
         }
     }
 
+    // the settings file, including ones from older versions or restored backups with plain text passwords
     static StateUpdateResult update(JsonObject root, SecuritySettings & settings) {
-        // secret
-        settings.jwtSecret = root["jwt_secret"] | FACTORY_JWT_SECRET;
+        // the Super User password of older versions is no longer used
+        settings.dropped_on_load = root["jwt_secret"].is<const char *>();
 
         // users
         settings.users.clear();
         if (root["users"].is<JsonArray>()) {
-            JsonArray users = root["users"].as<JsonArray>();
-            for (size_t i = 0; i < users.size(); i++) {
-                JsonObject user = users[i].as<JsonObject>();
-                settings.users.emplace_back(user["username"], user["password"], user["admin"]);
+            for (JsonObject user : root["users"].as<JsonArray>()) {
+                settings.users.emplace_back(user["username"] | "", hashed(settings, user["password"] | ""), user["admin"] | false, user["ver"] | 0u);
             }
         } else {
-            settings.users.emplace_back(FACTORY_ADMIN_USERNAME, FACTORY_ADMIN_PASSWORD, true);
-            settings.users.emplace_back(FACTORY_GUEST_USERNAME, FACTORY_GUEST_PASSWORD, false);
+            // a fresh install only has the admin user, the setup screen in the Web UI asks for new passwords
+            settings.users.emplace_back(FACTORY_ADMIN_USERNAME, hashed(settings, FACTORY_ADMIN_PASSWORD), true);
+        }
+
+        settings.api_keys.clear();
+        for (JsonObject key : root["api_keys"].as<JsonArray>()) {
+            settings.api_keys.push_back({key["id"] | "", key["label"] | "", key["write"] | false, key["created"] | 0u, key["hash"] | ""});
         }
 
         return StateUpdateResult::CHANGED;
+    }
+
+    // the web UI never gets the stored passwords
+    static void readForWeb(SecuritySettings & settings, JsonObject root) {
+        read(settings, root);
+        root.remove("api_keys"); // listed by API_KEYS_PATH, without the hashes
+        for (JsonObject user : root["users"].as<JsonArray>()) {
+            user["password"] = "";
+            user.remove("ver");
+        }
+    }
+
+    // an empty password from the web UI keeps the current one, anything else is a new password
+    static StateUpdateResult updateFromWeb(JsonObject root, SecuritySettings & settings) {
+        if (root["users"].is<JsonArray>()) {
+            std::vector<User> current = std::move(settings.users);
+            settings.users.clear();
+            for (JsonObject user : root["users"].as<JsonArray>()) {
+                const String username = user["username"] | "";
+                String       password = user["password"] | "";
+                const User * existing = nullptr;
+                for (const User & u : current) {
+                    if (u.username == username) {
+                        existing = &u;
+                        break;
+                    }
+                }
+
+                // a new password signs the user out everywhere. A new user doesn't get the tokens of a removed one with the same name
+                uint32_t ver;
+                if (!existing) {
+                    PasswordHash::random_bytes(reinterpret_cast<uint8_t *>(&ver), sizeof(ver));
+                } else {
+                    ver = password.isEmpty() ? existing->ver : existing->ver + 1;
+                }
+                if (password.isEmpty()) {
+                    password = existing ? existing->password.c_str() : "";
+                } else {
+                    password = PasswordHash::hash(password);
+                }
+                settings.users.emplace_back(username, password, user["admin"] | false, ver);
+            }
+        }
+
+        return StateUpdateResult::CHANGED;
+    }
+
+  private:
+    static String hashed(SecuritySettings & settings, const String & password) {
+        if (password.isEmpty() || PasswordHash::is_hashed(password)) {
+            return password;
+        }
+        settings.hashed_on_load = true;
+        return PasswordHash::hash(password);
     }
 };
 
@@ -75,18 +150,33 @@ class SecuritySettingsService final : public StatefulService<SecuritySettings>, 
 
     Authentication authenticate(const String & username, const String & password) override;
     Authentication authenticateRequest(AsyncWebServerRequest * request) override;
+    Authentication authenticateApiRequest(AsyncWebServerRequest * request) override;
     String         generateJWT(const User * user) override;
+    bool           confirmPassword(AsyncWebServerRequest * request, const String & password) override;
 
   private:
     HttpEndpoint<SecuritySettings>  _httpEndpoint;
     FSPersistence<SecuritySettings> _fsPersistence;
     ArduinoJsonJWT                  _jwtHandler;
+    FS *                            _fs;
+    PasswordHash::Digest            _adminCredentials{}; // to detect admin password changes
+    PasswordConfirm                 _passwordConfirm;
+    BasicAuthCache                  _basicAuthCache;
 
-    void generateToken(AsyncWebServerRequest * request);
+    Authentication authenticateApiKey(const char * key);
+    Authentication authenticateBasic(AsyncWebServerRequest * request, const String & header);
 
-    void configureJWTHandler();
+    void listApiKeys(AsyncWebServerRequest * request);
+    void apiKeyAction(AsyncWebServerRequest * request, JsonVariant json);
+
+    void                 loadSigningKey();
+    void                 rotateSigningKey();
+    void                 saveSigningKey(const String & key);
+    void                 onSettingsUpdated();
+    PasswordHash::Digest adminCredentials();
 
     Authentication authenticateJWT(String & jwt); // Lookup the user by JWT
+    static String  bearerToken(AsyncWebServerRequest * request);
 
     boolean validatePayload(JsonObject parsedPayload, const User * user); // Verify the payload is correct
 };

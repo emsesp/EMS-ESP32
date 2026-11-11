@@ -66,10 +66,11 @@ const FileName = styled(Typography)(({ theme }) => ({
 
 interface DragNdropProps {
   text: string;
+  extensions: string[];
   onFileSelected: (file: File) => void;
 }
 
-const DragNdrop = ({ text, onFileSelected }: DragNdropProps) => {
+const DragNdrop = ({ text, extensions, onFileSelected }: DragNdropProps) => {
   const [file, setFile] = useState<File>();
   const [dragged, setDragged] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -101,10 +102,9 @@ const DragNdrop = ({ text, onFileSelected }: DragNdropProps) => {
     });
 
   const checkFileExtension = (file: File) => {
-    const validExtensions = ['.json', '.bin', '.md5'];
-    const fileName = file.name;
+    const fileName = file.name.toLowerCase();
     const fileExtension = fileName.substring(fileName.lastIndexOf('.'));
-    if (validExtensions.includes(fileExtension)) {
+    if (extensions.includes(fileExtension)) {
       setFile(file);
     } else {
       alert('Invalid file type');
@@ -169,7 +169,7 @@ const DragNdrop = ({ text, onFileSelected }: DragNdropProps) => {
         hidden
         onChange={handleFileChange}
         ref={inputRef}
-        accept=".json,.txt,.csv,.bin,.md5"
+        accept={extensions.join(',')}
         multiple={false}
         style={{ display: 'none' }}
       />
@@ -215,8 +215,6 @@ const DragNdrop = ({ text, onFileSelected }: DragNdropProps) => {
               <DialogContent dividers>
                 {upgradeImportantMessageType === 2 &&
                   LL.UPGRADE_IMPORTANT_MESSAGES_2()}
-                {upgradeImportantMessageType === 1 &&
-                  LL.UPGRADE_IMPORTANT_MESSAGES_1()}
                 {upgradeImportantMessageType === 3 &&
                   LL.UPGRADE_IMPORTANT_MESSAGES_3()}
                 <Typography sx={{ mt: 2 }}>

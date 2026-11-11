@@ -3,6 +3,10 @@
 # Set `custom_app_offset` to the factory partition offset. The otadata image (boot_app0.bin) that
 # PlatformIO normally writes selects ota_0, so it's swapped for a blank one, which makes the
 # bootloader start the factory app.
+#
+# With `upload_protocol = custom` for the env (in pio_local.ini) it uploads over the network with
+# upload.py instead. EMS-ESP must be running (not the recovery), it puts a recovery image into the
+# factory partition itself.
 from pathlib import Path
 
 Import("env")
@@ -10,7 +14,9 @@ Import("env")
 OTADATA_SIZE = 0x2000
 
 offset = env.GetProjectOption("custom_app_offset", "")
-if offset:
+if env.get("UPLOAD_PROTOCOL") == "custom":
+    env.SConscript(str(Path(env.subst("$PROJECT_DIR")) / "scripts" / "upload.py"), exports="env")
+elif offset:
     # ESP32_APP_OFFSET itself is recalculated from the partition table later in the build
     env.Replace(UPLOADCMD=env.get("UPLOADCMD", "").replace("$ESP32_APP_OFFSET", offset))
 

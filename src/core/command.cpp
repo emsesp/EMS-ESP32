@@ -19,10 +19,17 @@
 #include "command.h"
 #include "emsdevice.h"
 #include "emsesp.h"
+#include "write_limiter.h"
 
 namespace emsesp {
 
 uuid::log::Logger Command::logger_{F_(command), uuid::log::Facility::DAEMON};
+
+thread_local Command::Access Command::caller_access_             = Command::Access::ALL;
+thread_local const char *    Command::caller_access_reason_      = nullptr;
+thread_local bool            Command::caller_is_admin_           = true;
+thread_local bool            Command::caller_password_confirmed_ = true;
+thread_local const char *    Command::caller_source_             = nullptr;
 
 std::vector<Command::CmdFunction, AllocatorPSRAM<Command::CmdFunction>> Command::cmdfunctions_;
 
@@ -30,7 +37,9 @@ std::vector<Command::CmdFunction, AllocatorPSRAM<Command::CmdFunction>> Command:
 // the path is leading so if duplicate keys are in the input JSON it will be ignored
 // the entry point will be either via the Web API (api/) or MQTT (<base>/)
 // returns a return code and json output
-uint8_t Command::process(const char * path, const bool is_admin, const JsonObject input, JsonObject output) {
+uint8_t Command::process(const char * path, const bool is_admin, const JsonObject input, JsonObject output, const bool is_user, const bool password_confirmed) {
+    CallerRights rights(is_admin, password_confirmed);
+
     // check for MQTT, if so strip the "<base>" from the path
     if (!strncmp(path, Mqtt::base().c_str(), Mqtt::base().length())) {
         path += Mqtt::base().length();
@@ -69,7 +78,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     uint8_t device_type = EMSdevice::device_name_2_device_type(device_s);
     if (!device_has_commands(device_type)) {
         char err[100];
-        snprintf(err, sizeof(err), "unknown device %s", device_s);
+        snprintf(err, sizeof(err), "unknown device %s", device_s ? device_s : "");
         LOG_WARNING("Command failed: %s", err);
         output["message"] = err;
         return CommandRet::NOT_FOUND;
@@ -171,14 +180,14 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
                 strlcat(data_s, "/value", sizeof(data_s) - 6);
             }
 
-            if (Command::call(device_type1, data_s, "", true, id_d, output) != CommandRet::OK) {
+            if (Command::call(device_type1, data_s, "", is_admin, id_d, output, is_user) != CommandRet::OK) {
                 return CommandRet::INVALID;
             }
 
             if (output["api_data"].is<std::string>()) {
                 std::string api_data = output["api_data"];
                 output.clear();
-                return Command::call(device_type, command_p, api_data.c_str(), is_admin, id_n, output);
+                return Command::call(device_type, command_p, api_data.c_str(), is_admin, id_n, output, is_user);
             }
 
             return CommandRet::INVALID;
@@ -189,17 +198,17 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
 
     // call the command based on the type
     if (data.is<const char *>()) {
-        return_code = Command::call(device_type, command_p, data.as<const char *>(), is_admin, id_n, output);
+        return_code = Command::call(device_type, command_p, data.as<const char *>(), is_admin, id_n, output, is_user);
     } else if (data.is<int>()) {
-        char data_str[10];
-        return_code = Command::call(device_type, command_p, Helpers::itoa(data.as<int32_t>(), data_str), is_admin, id_n, output);
+        char data_str[12];
+        return_code = Command::call(device_type, command_p, Helpers::itoa(data.as<int32_t>(), data_str), is_admin, id_n, output, is_user);
     } else if (data.is<float>()) {
-        char data_str[10];
-        return_code = Command::call(device_type, command_p, Helpers::render_value(data_str, data.as<float>(), 2), is_admin, id_n, output);
+        char data_str[32];
+        return_code = Command::call(device_type, command_p, Helpers::render_value(data_str, data.as<double>(), 2), is_admin, id_n, output, is_user);
     } else if (data.is<bool>()) {
-        return_code = Command::call(device_type, command_p, data.as<bool>() ? "1" : "0", is_admin, id_n, output);
+        return_code = Command::call(device_type, command_p, data.as<bool>() ? "1" : "0", is_admin, id_n, output, is_user);
     } else if (data.isNull()) {
-        return_code = Command::call(device_type, command_p, "", is_admin, id_n, output); // empty, will do a query instead
+        return_code = Command::call(device_type, command_p, "", is_admin, id_n, output, is_user); // empty, will do a query instead
     } else {
         return json_message(CommandRet::ERROR, "cannot parse command", output); // can't process
     }
@@ -221,6 +230,10 @@ const char * Command::return_code_string(const uint8_t return_code) {
         return "Failed";
     case CommandRet::INVALID:
         return "Invalid";
+    case CommandRet::PASSWORD_REQUIRED:
+        return "Password Required";
+    case CommandRet::TOO_MANY_WRITES:
+        return "Too Many Writes";
     default:
         break;
     }
@@ -364,10 +377,62 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     return call(device_type, cmd, value, true, id, output);
 }
 
+// false if the write doesn't reach the EMS bus, so isn't limited. An empty entity is a raw telegram.
+// The value is normalised so that "45", "45.0" and 45, or "on", "1" and true, are the same write.
+static bool write_limit_key(const uint8_t device_type,
+                            const uint8_t device_id,
+                            const char *  cmd,
+                            const int8_t  id,
+                            const char *  value,
+                            char *        entity,
+                            size_t        entity_len,
+                            char *        written,
+                            size_t        written_len) {
+    entity[0]    = '\0';
+    int16_t type = -1;
+    if (device_type == EMSdevice::DeviceType::SYSTEM) {
+        if (strcmp(cmd, F_(send))) {
+            return false;
+        }
+        strlcpy(written, value, written_len);
+        return true;
+    } else if (device_type == EMSdevice::DeviceType::CUSTOM) {
+        if (!EMSESP::webCustomEntityService.writes_to_bus(cmd)) {
+            return false;
+        }
+    } else if (device_type >= EMSdevice::DeviceType::BOILER) {
+        type = EMSESP::cmd_value_type(device_type, device_id, cmd, id);
+        if (type == DeviceValueType::CMD) {
+            return false;
+        }
+    } else {
+        return false;
+    }
+
+    const char * dname = EMSdevice::device_type_2_device_name(device_type);
+    if (id >= DeviceValueTAG::TAG_HC1) {
+        snprintf(entity, entity_len, "%s/%s/%s", dname, EMSdevice::tag_to_mqtt(id), cmd);
+    } else {
+        snprintf(entity, entity_len, "%s/%s", dname, cmd);
+    }
+
+    float f;
+    bool  b;
+    if (type == DeviceValueType::BOOL && Helpers::value2bool(value, b)) {
+        snprintf(written, written_len, "%d", b ? 1 : 0);
+    } else if (type != DeviceValueType::STRING && Helpers::value2float(value, f)) {
+        snprintf(written, written_len, "%.3f", f);
+    } else {
+        strlcpy(written, Helpers::toLower(value).c_str(), written_len);
+    }
+    return true;
+}
+
 // calls a command. Takes a json object for output.
 // id may be used to represent a heating circuit for example
 // returns 0 if the command errored, 1 (TRUE) if ok, 2 if not found, 3 if error or 4 if not allowed
-uint8_t Command::call(const uint8_t device_type, const char * command, const char * value, const bool is_admin, const int8_t id, JsonObject output) {
+uint8_t
+Command::call(const uint8_t device_type, const char * command, const char * value, const bool is_admin, const int8_t id, JsonObject output, const bool is_user) {
     if (command == nullptr) {
         return CommandRet::NOT_FOUND;
     }
@@ -381,6 +446,9 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
     // it could be an endpoint like a device's entity or attribute e.g. api/boiler/nrgheat or /api/boiler/nrgheat/value
     // or a special command like 'info', 'values', 'commands', 'entities' etc
     bool single_command = (!value || !strlen(value));
+    if (!single_command && !caller_may(device_type, nullptr)) {
+        return access_refused(dname, cmd, output);
+    }
     if (single_command) {
         if (!strcmp(cmd, F_(commands))) {
             return Command::list(device_type, output);
@@ -390,14 +458,27 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
         // rather than returning its definition, so skip the value-info lookup and fall through
         // to the registered command function. The list keywords above are still handled.
         bool is_named_command = (device_type == EMSdevice::DeviceType::COMMAND) && strcmp(cmd, F_(info)) && strcmp(cmd, F_(values)) && strcmp(cmd, F_(entities))
-                                && strcmp(cmd, F_(metrics)) && !strchr(cmd, '/') && is_admin;
+                                && strcmp(cmd, F_(metrics)) && !strchr(cmd, '/') && (is_admin || is_user);
+
+        // command definitions can hold credentials (URLs, mail settings), so only admins may read them
+        if (device_type == EMSdevice::DeviceType::COMMAND && !is_admin && !is_named_command && strcmp(cmd, F_(metrics))) {
+            LOG_WARNING("Command failed: authentication failed");
+            output["message"] = "authentication failed";
+            return CommandRet::NOT_ALLOWED;
+        }
         if (!is_named_command && EMSESP::get_device_value_info(output, cmd, id, device_type)) { // entity = cmd
             LOG_DEBUG("Fetched device entity/attributes for %s/%s (id=%d)", dname, cmd, id);
             return CommandRet::OK;
         }
     } else if (device_type == EMSdevice::DeviceType::SYSTEM && strchr(cmd, '/')) {
         // check service commands, if not found continue with command functions
-        if (EMSESP::system_.command_service(cmd, value)) {
+        uint8_t return_code = EMSESP::system_.command_service(cmd, value, is_admin);
+        if (return_code == CommandRet::NOT_ALLOWED) {
+            LOG_WARNING("Command failed: authentication failed");
+            output["message"] = "authentication failed";
+            return CommandRet::NOT_ALLOWED;
+        }
+        if (return_code == CommandRet::OK) {
             return CommandRet::OK;
         }
     }
@@ -442,38 +523,97 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
         return CommandRet::NOT_FOUND;
     }
 
+    // anything that isn't answered by the value lookup above runs a command
+    if (!caller_may(device_type, cf->cmd_)) {
+        return access_refused(dname, cmd, output);
+    }
+
     // before calling the command, check permissions and abort if not authorized
-    if (cf->has_flags(CommandFlag::ADMIN_ONLY) && !is_admin) {
+    if (cf->has_flags(CommandFlag::ADMIN_ONLY) && !is_admin && !(is_user && cf->has_flags(CommandFlag::GUEST))) {
         LOG_WARNING("Command failed: authentication failed");
         output["message"] = "authentication failed";
         return CommandRet::NOT_ALLOWED; // command not allowed
     }
 
+    // a factory reset from a Web UI session needs the password entered again. API keys, MQTT and the consoles don't
+    if (!caller_password_confirmed_ && device_type == EMSdevice::DeviceType::SYSTEM && !strcmp(cf->cmd_, F_(format))) {
+        output["message"] = "password required";
+        return CommandRet::PASSWORD_REQUIRED;
+    }
+
+    // a non-admin may run a guest-allowed custom Command, but only with the value the admin stored
+    if (device_type == EMSdevice::DeviceType::COMMAND && !single_command && !is_admin) {
+        LOG_WARNING("Command failed: only admins can pass a value to a Command");
+        output["message"] = "only admins can pass a value to a Command";
+        return CommandRet::NOT_ALLOWED;
+    }
+
     // call the function based on command function type
     // commands return true or false only (bool)
-    uint8_t return_code = CommandRet::OK;
+    uint8_t  return_code = CommandRet::OK;
+    char     reason[40]  = "";
+    int16_t  min         = 0;
+    uint32_t max         = 0;
     if (cf->cmdfunction_) {
         // JSON-output commands bypass the readonly check; for the rest, reject a write to a read-only entity
         if (!cf->has_json_output_ && !single_command && EMSESP::cmd_is_readonly(device_type, device_id, cmd, id)) {
             return_code = CommandRet::INVALID; // error on readonly or invalid hc
+        } else if (!cf->has_json_output_ && !single_command && !EMSESP::cmd_value_in_range(device_type, device_id, cmd, id, value, min, max)) {
+            return_code = CommandRet::INVALID;
+            snprintf(reason, sizeof(reason), "out of range %d to %lu", min, static_cast<unsigned long>(max));
         } else {
+            char       entity[64]  = "";
+            char       written[24] = "";
+            const bool limited     = !cf->has_json_output_ && !single_command
+                                 && write_limit_key(device_type, device_id, cmd, id, value, entity, sizeof(entity), written, sizeof(written));
+            const char * limited_entity = entity[0] ? entity : nullptr;
+            if (limited) {
+                auto &       limiter = WriteLimiter::instance();
+                uint32_t     ms;
+                bool         log;
+                const char * by      = caller_source_ ? caller_source_ : "unknown";
+                const auto   verdict = limiter.check(limited_entity, written, uuid::get_uptime(), ms, log);
+                const char * name    = limited_entity ? limited_entity : "system/send";
+                if (verdict == WriteLimiter::Verdict::SKIP) {
+                    LOG_DEBUG("Write %s %s skipped, same value sent %lus ago (by %s)", name, value, static_cast<unsigned long>(ms / 1000), by);
+                    return CommandRet::OK;
+                }
+                if (verdict == WriteLimiter::Verdict::REFUSE) {
+                    if (log) {
+                        LOG_WARNING("Too many writes to %s, refusing writes for %lus (by %s)", name, static_cast<unsigned long>((ms + 999) / 1000), by);
+                    }
+                    char message[100];
+                    snprintf(message, sizeof(message), "too many writes to %s, try again in %lus", name, static_cast<unsigned long>((ms + 999) / 1000));
+                    output.clear();
+                    output["message"] = message;
+                    return CommandRet::TOO_MANY_WRITES;
+                }
+                if (verdict == WriteLimiter::Verdict::OVER_LIMIT && log) {
+                    LOG_WARNING("Too many writes to %s in the last minute (by %s)", name, by);
+                }
+            }
+
             // call the command (the output object is ignored by non-JSON commands)
             return_code = ((cf->cmdfunction_)(value, id, output)) ? CommandRet::OK : CommandRet::ERROR;
+            if (limited && return_code == CommandRet::OK) {
+                WriteLimiter::instance().sent(limited_entity, written, uuid::get_uptime());
+            }
         }
     }
 
     // report back. If not OK show output from error, otherwise return the error code
     if (return_code != CommandRet::OK) {
-        char error[100];
+        char         error[100];
+        const char * why = reason[0] ? reason : return_code_string(return_code);
         if (single_command) {
-            snprintf(error, sizeof(error), "Command %s failed (%s)", cmd, return_code_string(return_code));
+            snprintf(error, sizeof(error), "Command %s failed (%s)", cmd, why);
         } else {
-            snprintf(error, sizeof(error), "Command %s: %s failed (%s)", cmd, value, return_code_string(return_code));
+            snprintf(error, sizeof(error), "Command %s: %s failed (%s)", cmd, value, why);
         }
 
         output.clear();
         output["message"] = error;
-        LOG_WARNING(error);
+        LOG_WARNING("%s", error);
     } else {
         // build up the log string for reporting back
         // We send the log message as Warning so it appears in the log (debug is only enabled when compiling with DEBUG)
@@ -486,20 +626,45 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
             snprintf(info_s, sizeof(info_s), "%s/%s", dname, cmd);
         }
 
+        char by[64] = "";
+        if (caller_source_) {
+            snprintf(by, sizeof(by), " (by %s)", caller_source_);
+        }
         if (single_command) {
             // log as DEBUG (TRACE) regardless if compiled with EMSESP_DEBUG
-            logger_.debug("%sCalled command %s", ro.c_str(), info_s);
+            logger_.debug("%sCalled command %s%s", ro.c_str(), info_s, by);
         } else {
             if (id > 0) {
-                (device_id) ? LOG_INFO(("%sCalled command %s with value %s and id %d on device 0x%02X"), ro.c_str(), info_s, value, id, device_id)
-                            : LOG_INFO(("%sCalled command %s with value %s and id %d"), ro.c_str(), info_s, value, id);
+                (device_id) ? LOG_INFO(("%sCalled command %s with value %s and id %d on device 0x%02X%s"), ro.c_str(), info_s, value, id, device_id, by)
+                            : LOG_INFO(("%sCalled command %s with value %s and id %d%s"), ro.c_str(), info_s, value, id, by);
             } else {
-                LOG_INFO(("%sCalled command %s with value %s"), ro.c_str(), info_s, value);
+                LOG_INFO(("%sCalled command %s with value %s%s"), ro.c_str(), info_s, value, by);
             }
         }
     }
 
     return return_code;
+}
+
+// cmd is the command about to run, or nullptr when a value is given but the command isn't looked up yet
+bool Command::caller_may(const uint8_t device_type, const char * cmd) {
+    switch (caller_access_) {
+    case Access::READ:
+        return false;
+    case Access::VALUES:
+        return device_type != EMSdevice::DeviceType::SYSTEM;
+    case Access::NO_ERASE:
+        return !(device_type == EMSdevice::DeviceType::SYSTEM && cmd && (!strcmp(cmd, F_(format)) || !strcmp(cmd, F_(coredump))));
+    default:
+        return true;
+    }
+}
+
+uint8_t Command::access_refused(const char * dname, const char * cmd, JsonObject output) {
+    const char * reason = caller_access_reason_ ? caller_access_reason_ : "not allowed";
+    LOG_WARNING("Command %s/%s refused (by %s): %s", dname, cmd, caller_source_ ? caller_source_ : "unknown", reason);
+    output["message"] = reason;
+    return CommandRet::NOT_ALLOWED;
 }
 
 // add a command to the list, which does not return json

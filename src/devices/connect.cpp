@@ -194,11 +194,25 @@ uint8_t Connect::hp_operatingstate() {
     return EMS_VALUE_UINT8_NOTSET;
 }
 
+// cooling is only possible with a heatpump, https://github.com/emsesp/EMS-ESP32/discussions/3414
+bool Connect::has_heatpump() {
+    for (const auto & emsdevice : EMSESP::emsdevices) {
+        if (emsdevice->device_type() == DeviceType::HEATPUMP
+            || (emsdevice->device_type() == DeviceType::BOILER && (emsdevice->flags() & EMSdevice::EMS_DEVICE_FLAG_HEATPUMP))) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 // heating/cooling is set system wide by the heatpump, the SRC uses the mode and setpoints of the active one
 void Connect::update_room_mode(std::shared_ptr<Connect::RoomCircuit> rc) {
     uint8_t state = hp_operatingstate();
     if (state == 0 || state == 2) {
         rc->coolmode_ = state == 2 ? 1 : 0;
+    } else if (!has_heatpump()) {
+        rc->coolmode_ = 0;
     } else if (state == EMS_VALUE_UINT8_NOTSET) {
         // no heatpump state, guess from the modes, both auto is resolved by MenuConfig 0xF7
         if (rc->coolmodeRaw_ == 3 || (rc->heatmodeRaw_ != 3 && rc->coolmodeRaw_ == 1)) {
@@ -252,7 +266,7 @@ void Connect::process_roomConfig(const std::shared_ptr<const Telegram> & telegra
             }
 
             uint8_t bits = telegram->message_data[3];
-            if (rc->mode_ == 2 && hp_operatingstate() == EMS_VALUE_UINT8_NOTSET) {
+            if (rc->mode_ == 2 && hp_operatingstate() == EMS_VALUE_UINT8_NOTSET && has_heatpump()) {
                 if (bits & 0x02) {
                     rc->coolmode_ = 0;
                 } else if (bits & 0x20) {

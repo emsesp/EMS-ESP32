@@ -60,6 +60,8 @@ class Mqtt {
 
     enum Operation : uint8_t { PUBLISH, SUBSCRIBE, UNSUBSCRIBE };
     enum NestedFormat : uint8_t { NESTED = 1, SINGLE };
+    // what commands received over MQTT may do, the mqtt_commands setting
+    enum Commands : uint8_t { COMMANDS_OFF, COMMANDS_VALUES, COMMANDS_ALL };
 
     static constexpr uint8_t  MQTT_TOPIC_MAX_SIZE     = 128; // fixed, not a user setting anymore
     static constexpr uint16_t MQTT_QUEUE_MAX_SIZE     = 300;
@@ -68,7 +70,7 @@ class Mqtt {
 
     static void on_connect();
     static void on_disconnect(espMqttClientTypes::DisconnectReason reason);
-    static void on_message(const char * topic, const uint8_t * payload, size_t len);
+    static void on_message(const char * topic, const uint8_t * payload, size_t len, const bool retain = false);
     static void subscribe(const uint8_t device_type, const std::string & topic, mqtt_sub_function_p cb);
     static void subscribe(const std::string & topic);
     static void resubscribe();
@@ -226,6 +228,10 @@ class Mqtt {
         ha_enabled_ = ha_enabled;
     }
 
+    static void mqtt_commands(uint8_t mqtt_commands) {
+        mqtt_commands_ = mqtt_commands;
+    }
+
     static const std::string & get_response() {
         return lastresponse_;
     }
@@ -327,6 +333,7 @@ class Mqtt {
     static bool        publish_single_;
     static bool        publish_single2cmd_;
     static bool        send_response_;
+    static uint8_t     mqtt_commands_;
 };
 
 } // namespace emsesp

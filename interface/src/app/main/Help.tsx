@@ -169,7 +169,7 @@ const HelpComponent = () => {
           color="primary"
           onClick={() => void sendAPI(SYSTEM_INFO_API)}
         >
-          {LL.SUPPORT_INFORMATION(0)}
+          {LL.SYSTEM_INFORMATION(0)}
         </Button>
       </Grid>
 

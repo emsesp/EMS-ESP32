@@ -7,3 +7,4 @@ export * from './useInterval';
 export * from './props';
 export * from './file';
 export * from './usePersistState';
+export * from './versions';

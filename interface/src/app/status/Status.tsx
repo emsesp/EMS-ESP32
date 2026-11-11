@@ -1,4 +1,7 @@
+import { useContext } from 'react';
+
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import BuildIcon from '@mui/icons-material/Build';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import LogoDevIcon from '@mui/icons-material/LogoDev';
@@ -22,9 +25,10 @@ import { useRequest } from 'alova/client';
 import { busConnectionStatus } from 'app/main/types';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import ListMenuItem from 'components/layout/ListMenuItem';
+import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { NTPSyncStatus, NetworkConnectionStatus, SystemStatusCodes } from 'types';
-import { useInterval } from 'utils';
+import { updateAvailable, useInterval } from 'utils';
 import { formatDateTime } from 'utils/time';
 
 const formatNumber = (num: number) => new Intl.NumberFormat().format(num);
@@ -50,6 +54,7 @@ const formatDurationSec = (
 
 const SystemStatus = () => {
   const { LL } = useI18nContext();
+  const { me, versions } = useContext(AuthenticatedContext);
 
   useLayoutTitle(LL.STATUS_OF(''));
 
@@ -82,6 +87,7 @@ const SystemStatus = () => {
       case SystemStatusCodes.SYSTEM_STATUS_UPLOADING:
         return LL.WAIT_FIRMWARE();
       case SystemStatusCodes.SYSTEM_STATUS_ERROR_UPLOAD:
+      case SystemStatusCodes.SYSTEM_STATUS_ERROR_NOT_OFFICIAL:
         return LL.ERROR();
       case SystemStatusCodes.SYSTEM_STATUS_PENDING_RESTART:
       case SystemStatusCodes.SYSTEM_STATUS_RESTART_REQUESTED:
@@ -204,6 +210,21 @@ const SystemStatus = () => {
             secondary={`${systemStatus} (${LL.UPTIME()}: ${formatDurationSec(data.uptime, LL)})`}
           />
         </ListItem>
+
+        {!me.admin && (
+          <ListMenuItem
+            icon={BuildIcon}
+            bgcolor="#72caf9"
+            label="EMS-ESP Firmware"
+            text={
+              versions?.current?.version
+                ? `v${versions.current.version}${versions.current.upgradeable ? ` (${LL.UPDATE_AVAILABLE()})` : ''}`
+                : ''
+            }
+            to="/status/version"
+            badge={updateAvailable(versions)}
+          />
+        )}
 
         <ListMenuItem
           icon={MemoryIcon}

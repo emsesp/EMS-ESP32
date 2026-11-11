@@ -5,33 +5,38 @@
 
 #include <ESPAsyncWebServer.h>
 #include <AsyncJson.h>
+#include <esp32-psram.h>
 
 #include <memory>
 #include <vector>
 
-#define ACCESS_TOKEN_PARAMETER "access_token"
 #define AUTHORIZATION_HEADER "Authorization"
 #define AUTHORIZATION_HEADER_PREFIX "Bearer "
 #define AUTHORIZATION_HEADER_PREFIX_LEN 7
 
 class User {
   public:
-    String username;
-    String password;
-    bool   admin;
+    String      username;
+    stringPSRAM password; // the PBKDF2 hash
+    bool        admin;
+    uint32_t    ver; // in the user's session tokens, changed with the password to sign the user out everywhere
 
   public:
-    User(String username, String password, bool admin)
+    User(String username, const String & password, bool admin, uint32_t ver = 0)
         : username(std::move(username))
-        , password(std::move(password))
-        , admin(admin) {
+        , password(password.c_str())
+        , admin(admin)
+        , ver(ver) {
     }
 };
 
 class Authentication {
   public:
     std::unique_ptr<User> user;
-    boolean               authenticated = false;
+    boolean               authenticated      = false;
+    bool                  session            = false; // a Web UI access token, not an API key
+    bool                  password_confirmed = false; // the session's password was entered again in the last few minutes
+    bool                  basic              = false; // HTTP Basic login from a browser, which only reads
 
   public:
     explicit Authentication(const User & u)
@@ -62,6 +67,9 @@ class AuthenticationPredicates {
 
 class SecurityManager {
   public:
+    // sent when a Web UI session has to enter its password again first, the Web UI asks for it and retries
+    static constexpr int PASSWORD_REQUIRED = 428;
+
     virtual ~SecurityManager() = default;
 
     // Authenticate, returning the user if found
@@ -72,6 +80,14 @@ class SecurityManager {
 
     // Check the request header for the Authorization token
     virtual Authentication authenticateRequest(AsyncWebServerRequest * request) = 0;
+
+    // for /api, also accepts API keys
+    virtual Authentication authenticateApiRequest(AsyncWebServerRequest * request) {
+        return authenticateRequest(request);
+    }
+
+    // checks the password of the request's session user, and if it's right confirms the session for a few minutes
+    virtual bool confirmPassword(AsyncWebServerRequest * request, const String & password) = 0;
 
     // Json endpoints - default POST. Registered with the shared dispatcher.
     void addEndpoint(AsyncWebServer *             server,
@@ -86,6 +102,11 @@ class SecurityManager {
                      AuthenticationPredicate   predicate,
                      ArRequestHandlerFunction  function,
                      WebRequestMethodComposite method = HTTP_GET);
+
+    // after the last addEndpoint, frees the capacity the route list grew beyond what it needs
+    void compactRoutes() {
+        _restRoutes.shrink_to_fit();
+    }
 
   private:
     // Single internal route record. Each route holds either a plain or JSON handler.
@@ -134,6 +155,7 @@ class SecurityManager {
 
     void ensureRestDispatcher(AsyncWebServer * server);
     void dispatchRest(AsyncWebServerRequest * request, JsonVariant json);
+    bool mayReceiveBody(AsyncWebServerRequest * request);
 
     std::vector<RestRoute> _restRoutes;
     bool                   _restDispatcherInstalled = false;

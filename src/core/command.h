@@ -38,6 +38,7 @@ enum CommandFlag : uint8_t {
     CMD_FLAG_AHS     = (1 << 2), // 4 TAG_AHS1
     CMD_FLAG_HS      = (1 << 3), // 8 TAG_HS1 - TAG_HS16
     CMD_FLAG_SRC     = (1 << 4), // 16 TAG_SRC1 - TAG_SRC16
+    GUEST            = (1 << 5), // 32 with ADMIN_ONLY, logged-in users may also call it
     HIDDEN           = (1 << 6), // 64 do not show in API or Web
     ADMIN_ONLY       = (1 << 7)  // 128 requires authentication
 
@@ -45,13 +46,15 @@ enum CommandFlag : uint8_t {
 
 // return status after calling a Command
 enum CommandRet : uint8_t {
-    FAIL = 0,    // 0 or FALSE
-    OK,          // 1 or TRUE
-    NOT_FOUND,   // 2
-    ERROR,       // 3
-    NOT_ALLOWED, // 4 - needs authentication
-    INVALID,     // 5 - invalid (tag)
-    NO_VALUE     // 6 - no value
+    FAIL = 0,          // 0 or FALSE
+    OK,                // 1 or TRUE
+    NOT_FOUND,         // 2
+    ERROR,             // 3
+    NOT_ALLOWED,       // 4 - needs authentication
+    INVALID,           // 5 - invalid (tag)
+    NO_VALUE,          // 6 - no value
+    PASSWORD_REQUIRED, // 7 - a Web UI session has to enter its password again first
+    TOO_MANY_WRITES    // 8 - refused by the write limit
 };
 
 using cmd_function_p = std::function<bool(const char * data, const int8_t id, JsonObject output)>;
@@ -104,7 +107,9 @@ class Command {
         return cmdfunctions_;
     }
 
-    static uint8_t call(const uint8_t device_type, const char * cmd, const char * value, const bool is_admin, const int8_t id, JsonObject output);
+    // is_user: caller is logged in, which allows ADMIN_ONLY commands flagged GUEST
+    static uint8_t
+    call(const uint8_t device_type, const char * cmd, const char * value, const bool is_admin, const int8_t id, JsonObject output, const bool is_user = false);
     static uint8_t call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id = -1);
 
     // with normal call back function taking a value and id
@@ -146,7 +151,9 @@ class Command {
 
     static bool list(const uint8_t device_type, JsonObject output);
 
-    static uint8_t process(const char * path, const bool is_admin, const JsonObject input, JsonObject output);
+    // password_confirmed: false for a Web UI session that hasn't entered its password again recently
+    static uint8_t
+    process(const char * path, const bool is_admin, const JsonObject input, JsonObject output, const bool is_user = false, const bool password_confirmed = true);
 
     static const char * parse_command_string(const char * command, int8_t & id);
     static const char * get_attribute(const char * cmd);
@@ -154,12 +161,96 @@ class Command {
 
     static const char * return_code_string(const uint8_t return_code);
 
+    // rights of the caller whose command runs on this task. compute() uses them so text sent by a
+    // non-admin can't fetch URLs or read admin-only values. Internal callers (scheduler, MQTT) are admin
+    static bool caller_is_admin() {
+        return caller_is_admin_;
+    }
+
+    static const char * caller_source() {
+        return caller_source_;
+    }
+
+    // who sent the commands that run on this task, for the log. The text must outlive the object
+    class CallerSource {
+      public:
+        explicit CallerSource(const char * source)
+            : prev_(caller_source_) {
+            caller_source_ = source;
+        }
+        ~CallerSource() {
+            caller_source_ = prev_;
+        }
+        CallerSource(const CallerSource &)             = delete;
+        CallerSource & operator=(const CallerSource &) = delete;
+
+      private:
+        const char * prev_;
+    };
+
+    class CallerRights {
+      public:
+        explicit CallerRights(const bool is_admin, const bool password_confirmed = true)
+            : prev_(caller_is_admin_)
+            , prev_password_confirmed_(caller_password_confirmed_) {
+            caller_is_admin_           = is_admin;
+            caller_password_confirmed_ = password_confirmed;
+        }
+        ~CallerRights() {
+            caller_is_admin_           = prev_;
+            caller_password_confirmed_ = prev_password_confirmed_;
+        }
+        CallerRights(const CallerRights &)             = delete;
+        CallerRights & operator=(const CallerRights &) = delete;
+
+      private:
+        bool prev_;
+        bool prev_password_confirmed_;
+    };
+
+    // what a caller may do on top of its rights, from most to least
+    enum class Access : uint8_t {
+        ALL,      // anything its rights allow
+        NO_ERASE, // not the factory reset or erasing the crash dump
+        VALUES,   // change values and run Commands, but no system commands
+        READ      // only read values (a browser's Basic login on /api, MQTT with commands off)
+    };
+
+    // reason is the message a refused caller gets back. It must outlive the object
+    class CallerAccess {
+      public:
+        CallerAccess(const Access access, const char * reason)
+            : prev_(caller_access_)
+            , prev_reason_(caller_access_reason_) {
+            caller_access_        = access;
+            caller_access_reason_ = reason;
+        }
+        ~CallerAccess() {
+            caller_access_        = prev_;
+            caller_access_reason_ = prev_reason_;
+        }
+        CallerAccess(const CallerAccess &)             = delete;
+        CallerAccess & operator=(const CallerAccess &) = delete;
+
+      private:
+        Access       prev_;
+        const char * prev_reason_;
+    };
+
   private:
     static uuid::log::Logger logger_;
+
+    static thread_local Access       caller_access_;
+    static thread_local const char * caller_access_reason_;
+    static thread_local bool         caller_is_admin_;
+    static thread_local bool         caller_password_confirmed_;
+    static thread_local const char * caller_source_;
 
     static std::vector<CmdFunction, AllocatorPSRAM<CmdFunction>> cmdfunctions_; // the list of commands
 
     static uint8_t json_message(uint8_t error_code, const char * message, JsonObject output, const char * object = nullptr);
+    static bool    caller_may(const uint8_t device_type, const char * cmd);
+    static uint8_t access_refused(const char * dname, const char * cmd, JsonObject output);
 };
 
 class SUrlParser {

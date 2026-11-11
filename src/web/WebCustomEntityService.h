@@ -61,6 +61,7 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
     void publish(const bool force = false);
     bool command_setvalue(const char * value, const int8_t id, const char * name);
     bool get_value_info(JsonObject output, const char * cmd);
+    bool writes_to_bus(const char * name);
     void get_value_json(JsonObject output, CustomEntityItem const & entity);
     bool get_value(const std::shared_ptr<const Telegram> & telegram);
     void fetch();

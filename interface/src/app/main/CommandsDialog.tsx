@@ -8,6 +8,7 @@ import RemoveIcon from '@mui/icons-material/RemoveCircleOutlined';
 import {
   Box,
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
@@ -18,7 +19,7 @@ import {
 import { callAction } from '@/api/app';
 import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova/client';
-import { ValidatedTextField } from 'components';
+import { BlockFormControlLabel, ValidatedTextField } from 'components';
 import { toast } from 'components/toast';
 import { useI18nContext } from 'i18n/i18n-react';
 import { updateValue } from 'utils';
@@ -68,6 +69,7 @@ const CommandsDialog = ({
     (ci.name || '') !== (ci.o_name || '') ||
     ci.cmd !== ci.o_cmd ||
     ci.value !== ci.o_value ||
+    ci.guest !== ci.o_guest ||
     ci.deleted !== ci.o_deleted;
 
   useEffect(() => {
@@ -152,6 +154,16 @@ const CommandsDialog = ({
           fullWidth
           margin="normal"
           onChange={updateFormValue}
+        />
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={editItem.guest}
+              onChange={updateFormValue}
+              name="guest"
+            />
+          }
+          label={LL.COMMAND_GUEST()}
         />
       </DialogContent>
 

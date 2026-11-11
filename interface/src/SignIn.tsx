@@ -53,6 +53,8 @@ const SignIn = memo(() => {
     await callSignIn(signInRequest).catch((event: Error) => {
       if (event.message === 'Unauthorized') {
         toast.warning(LL.INVALID_LOGIN());
+      } else if (event.message === 'Too Many Requests') {
+        toast.warning(LL.TOO_MANY_LOGINS());
       } else {
         toast.error(LL.ERROR() + ' ' + event.message);
       }

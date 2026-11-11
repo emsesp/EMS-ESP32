@@ -20,6 +20,7 @@
 
 #ifndef EMSESP_STANDALONE
 #include <esp_ota_ops.h>
+#include <CoreDump.h>
 #endif
 #include "emsesp_http_client.h"
 
@@ -39,6 +40,15 @@ WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * se
         AuthenticationPredicates::IS_AUTHENTICATED,
         [this](AsyncWebServerRequest * request, JsonVariant json) { action(request, json); },
         HTTP_ANY);
+
+    // GET - the raw crash dump, it holds memory contents so only for admins
+    securityManager->addEndpoint(server, EMSESP_COREDUMP_SERVICE_PATH, AuthenticationPredicates::IS_ADMIN, [](AsyncWebServerRequest * request) {
+#ifndef EMSESP_STANDALONE
+        CoreDump::send(request);
+#else
+        request->send(404);
+#endif
+    });
 }
 
 // /rest/systemStatus
@@ -63,6 +73,9 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     root["free_heap"]      = EMSESP::system_.getHeapMem();
     root["uptime"]         = uuid::get_uptime_sec();
     root["mqtt_status"]    = EMSESP::mqtt_.connected();
+    if (!EMSESP::system_.coredump().empty()) {
+        root["coredump"] = EMSESP::system_.coredump();
+    }
 
 #ifndef EMSESP_STANDALONE
     uint8_t ntp_status = 0; // 0=disabled, 1=enabled, 2=connected
@@ -117,6 +130,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     root["arduino_version"]  = ARDUINO_VERSION;
     root["sdk_version"]      = ESP.getSdkVersion();
     root["partition"]        = (const char *)esp_ota_get_running_partition()->label; // active partition
+    root["official_build"]   = EMSESP::system_.official_build();
     root["flash_chip_size"]  = ESP.getFlashChipSize() / 1024;
     root["flash_chip_speed"] = ESP.getFlashChipSpeed();
     root["app_used"]         = EMSESP::system_.appUsed();
@@ -140,7 +154,11 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     // factory partition is only on 16MB boards; recovery_version is empty until a recovery .bin is installed
     const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
     if (partition != NULL) {
-        root["recovery_version"] = EMSESP::system_.recovery_version();
+        const std::string recovery = EMSESP::system_.recovery_version();
+        root["recovery_version"]   = recovery;
+        if (!recovery.empty()) {
+            root["recovery_official"] = EMSESP::system_.recovery_official();
+        }
     }
 
     partition = esp_ota_get_next_update_partition(nullptr);
@@ -179,6 +197,11 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
 
     root["developer_mode"] = EMSESP::system_.developer_mode();
     root["disable_reset"]  = EMSESP::system_.disable_reset();
+#endif
+
+    System::supported_languages(root["languages"].to<JsonArray>()); // supported entity languages, depends on the build
+
+#ifndef EMSESP_STANDALONE
 
     // Also used in SystemMonitor.tsx
     root["status"] = EMSESP::system_.systemStatus(); // send the status. See System.h for status codes
@@ -187,7 +210,8 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
         EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED);
     }
 
-    if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD) {
+    if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD
+        || EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_ERROR_NOT_OFFICIAL) {
         // error is reported, back to normal state
         EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_NORMAL);
     }
@@ -214,7 +238,6 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
         has_param = false;
     }
 
-    // check if we're authenticated for admin tasks, some actions are only for admins
     Authentication authentication = _securityManager->authenticateRequest(request);
     bool           is_admin       = AuthenticationPredicates::IS_ADMIN(authentication);
 
@@ -222,25 +245,56 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
     bool        ok     = true;
     std::string action = json["action"];
 
+    // admin only, unless explicitly allowed for all logged-in users
+    bool user_action = (action == "getVersions") || (action == "getCustomSupport") || (action == "executeCommand");
+    if (!user_action && !is_admin) {
+        EMSESP::logger().warning("Action '%s' not allowed", action.c_str());
+        request->send(403);
+        delete response;
+        return;
+    }
+
+    // these need the password entered again, see SecurityManager::PASSWORD_REQUIRED
+    const bool needs_password = (action == "setPartition") || (action == "uploadURL") || (action == "export" && (json["secrets"] | false));
+    if (needs_password && !authentication.password_confirmed) {
+        request->send(SecurityManager::PASSWORD_REQUIRED);
+        delete response;
+        return;
+    }
+
     if (action == "getVersions") {
         getVersions(root);
+        if (is_admin && EMSESP::nvs_.isKey(EMSESP_NVS_TOKENS_RESET)) {
+            root["tokens_reset"] = true; // the WebUI asks the admin to regenerate API access tokens
+        }
+        if (is_admin && EMSESP::system_.telnet_enabled()) {
+            root["telnet_enabled"] = true; // the WebUI warns that the unencrypted telnet console is on
+        }
+    } else if (action == "dismissTokensReset") {
+        EMSESP::nvs_.remove(EMSESP_NVS_TOKENS_RESET);
     } else if (action == "setPartition") {
         ok = EMSESP::system_.set_partition(param.c_str());
     } else if (action == "export") {
         if (has_param) {
-            ok = exportData(root, param);
+            ok = exportData(root, param, json["secrets"] | false); // include passwords and keys, only if asked for
         }
     } else if (action == "getCustomSupport") {
         ok = getCustomSupport(root);
-    } else if (action == "uploadURL" && is_admin) {
-        ok = uploadURL(param.c_str());
-    } else if (action == "systemStatus" && is_admin) {
+    } else if (action == "uploadURL") {
+        ok = uploadURL(param.c_str(), json["custom"] | false);
+    } else if (action == "systemStatus") {
         ok = setSystemStatus(param.c_str());
-    } else if (action == "resetMQTT" && is_admin) {
+    } else if (action == "resetMQTT") {
         EMSESP::mqtt_.reset_mqtt();
     } else if (action == "upgradeImportantMessages") {
         root["upgradeImportantMessageType"] = upgradeImportantMessages(param);
     } else if (action == "executeCommand") {
+        if (!is_admin && !EMSESP::webCommandService.guest_allowed(param.c_str())) {
+            EMSESP::logger().warning("Command '%s' not allowed for this user", param.c_str());
+            request->send(403);
+            delete response;
+            return;
+        }
         ok = EMSESP::webCommandService.dispatchCommand(param.c_str()); // command worker task (ok = dispatched); fast internal commands run inline (ok = real result)
     }
 
@@ -267,7 +321,7 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
 // action = upgradeImportantMessages
 // returns the type of upgrade important message to display in the UI
 //  0 = no message (if just a minor version upgrade)
-//  1 = special message for upgrades (no longer used)
+//  1 = don't reuse, 3.8.x firmware shows it as "requires a factory reset" for upgrades to 3.9.x
 //  2 = major version upgrade
 //  3 = upgrade to 3.10.x or later from an older version, which has breaking security changes
 // version can be like 3.8.2 or a filename like EMS-ESP-3_8_2-dev_13-ESP32-16MB+.bin
@@ -316,11 +370,6 @@ uint8_t WebStatusService::upgradeImportantMessages(std::string & version) {
         return 0; // no upgrade (same version or downgrade)
     }
 
-    // case "1" is no longer used
-    // if (current_version < FirmwareVersion("3.9.0-dev.0") && latest_version.major() == 3 && latest_version.minor() == 9) {
-    //     return 1; // upgrading to 3.9.x from anything older - new partition layout warning
-    // }
-
     if (current_version.major() < latest_version.major()) {
         return 2; // major version upgrade
     }
@@ -363,6 +412,12 @@ void WebStatusService::getVersions(JsonObject root) {
         }
     }
 
+    // the WebUI compares it with the recovery app in the online releases, for the update dot in the menu
+    const std::string recovery = EMSESP::system_.recovery_version();
+    if (!recovery.empty()) {
+        current["recovery"] = recovery;
+    }
+
     // take a snapshot, since the loop task can be rewriting the cache while we run on AsyncTCP
     VersionInfo stable;
     VersionInfo dev;
@@ -391,6 +446,9 @@ void WebStatusService::getVersions(JsonObject root) {
         out["version"]     = info.version;
         out["date"]        = info.date;
         out["upgradeable"] = info.upgradeable;
+        if (!info.recovery.empty()) {
+            out["recovery"] = info.recovery;
+        }
     };
 
     add_section("stable", stable);
@@ -401,11 +459,13 @@ void WebStatusService::getVersions(JsonObject root) {
     stable_out["version"]     = "3.8.3";
     stable_out["date"]        = "2026-08-01";
     stable_out["upgradeable"] = FirmwareVersion("3.8.3") > current_version;
+    stable_out["recovery"]    = "1.1.0";
 
     JsonObject dev_out     = root["dev"].to<JsonObject>();
     dev_out["version"]     = "3.9.0-dev.1";
     dev_out["date"]        = "2026-08-02";
     dev_out["upgradeable"] = FirmwareVersion("3.9.0-dev.1") > current_version;
+    dev_out["recovery"]    = "1.1.0";
 #endif
 }
 
@@ -502,6 +562,7 @@ bool WebStatusService::refresh_versions_cache() {
 
         out.version     = section["version"] | "";
         out.date        = section["date"] | "";
+        out.recovery    = section["recovery"] | "";
         out.upgradeable = !out.version.empty() && FirmwareVersion(out.version) > current_version;
     };
 
@@ -567,15 +628,15 @@ void WebStatusService::allvalues(JsonObject output) {
 
 // action = export
 // returns data for a specific feature/settings as a json object
-bool WebStatusService::exportData(JsonObject root, std::string & type) {
+bool WebStatusService::exportData(JsonObject root, std::string & type, const bool include_secrets) {
     if (type == "settings") {
         root["type"] = type; // add settings as a group
-        System::exportSettings(type, NETWORK_SETTINGS_FILE, root);
-        System::exportSettings(type, AP_SETTINGS_FILE, root);
-        System::exportSettings(type, MQTT_SETTINGS_FILE, root);
-        System::exportSettings(type, NTP_SETTINGS_FILE, root);
-        System::exportSettings(type, SECURITY_SETTINGS_FILE, root);
-        System::exportSettings(type, EMSESP_SETTINGS_FILE, root);
+        System::exportSettings(type, NETWORK_SETTINGS_FILE, root, include_secrets);
+        System::exportSettings(type, AP_SETTINGS_FILE, root, include_secrets);
+        System::exportSettings(type, MQTT_SETTINGS_FILE, root, include_secrets);
+        System::exportSettings(type, NTP_SETTINGS_FILE, root, include_secrets);
+        System::exportSettings(type, SECURITY_SETTINGS_FILE, root, include_secrets);
+        System::exportSettings(type, EMSESP_SETTINGS_FILE, root, include_secrets);
     } else if (type == "schedule") {
         System::exportSettings(type, EMSESP_SCHEDULER_FILE, root);
     } else if (type == "customizations") {
@@ -585,7 +646,7 @@ bool WebStatusService::exportData(JsonObject root, std::string & type) {
     } else if (type == "allvalues") {
         allvalues(root);
     } else if (type == "systembackup") {
-        System::exportSystemBackup(root);
+        System::exportSystemBackup(root, include_secrets);
     } else {
         return false; // error
     }
@@ -633,10 +694,9 @@ bool WebStatusService::getCustomSupport(JsonObject root) {
 
 // action = uploadURL
 // uploads a firmware file from a URL
-bool WebStatusService::uploadURL(const char * url) {
+bool WebStatusService::uploadURL(const char * url, bool allow_custom) {
     // this will keep a copy of the URL, but won't initiate the download yet
-    EMSESP::system_.uploadFirmwareURL(url);
-    return true;
+    return EMSESP::system_.uploadFirmwareURL(url, allow_custom);
 }
 
 // action = systemStatus

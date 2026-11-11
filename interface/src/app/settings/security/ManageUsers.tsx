@@ -1,4 +1,4 @@
-import { memo, useCallback, useContext, useState } from 'react';
+import { memo, useContext, useState } from 'react';
 import { useBlocker } from 'react-router';
 
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -7,7 +7,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Done';
 import EditIcon from '@mui/icons-material/Edit';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, IconButton } from '@mui/material';
 
@@ -36,7 +35,6 @@ import type { SecuritySettingsType, UserType } from 'types';
 import { useRest } from 'utils';
 import { createUserValidator } from 'validators';
 
-import GenerateToken from './GenerateToken';
 import User from './User';
 
 const ManageUsers = () => {
@@ -49,7 +47,6 @@ const ManageUsers = () => {
   const [user, setUser] = useState<UserType>();
   const [creating, setCreating] = useState<boolean>(false);
   const [changed, setChanged] = useState<number>(0);
-  const [generatingToken, setGeneratingToken] = useState<string>();
   const authenticatedContext = useContext(AuthenticatedContext);
 
   const blocker = useBlocker(changed !== 0);
@@ -57,7 +54,7 @@ const ManageUsers = () => {
 
   const table_theme = useTheme({
     Table: `
-      --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) minmax(120px, max-content) 120px;
+      --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) minmax(120px, max-content) 90px;
     `,
     BaseRow: `
       font-size: 14px;
@@ -136,14 +133,6 @@ const ManageUsers = () => {
     }
   };
 
-  const closeGenerateToken = useCallback(() => {
-    setGeneratingToken(undefined);
-  }, []);
-
-  const generateTokenForUser = (username: string) => {
-    setGeneratingToken(username);
-  };
-
   const onSubmit = async () => {
     await saveData();
     await authenticatedContext.refresh();
@@ -194,14 +183,6 @@ const ManageUsers = () => {
                     <Cell>{u.username}</Cell>
                     <Cell stiff>{u.admin ? <CheckIcon /> : <CloseIcon />}</Cell>
                     <Cell stiff>
-                      <IconButton
-                        size="small"
-                        aria-label={LL.GENERATING_TOKEN()}
-                        disabled={!authenticatedContext.me.admin}
-                        onClick={() => generateTokenForUser(u.username)}
-                      >
-                        <VpnKeyIcon />
-                      </IconButton>
                       <IconButton
                         size="small"
                         onClick={() => removeUser(u)}
@@ -273,10 +254,6 @@ const ManageUsers = () => {
           </Box>
         </Box>
 
-        <GenerateToken
-          username={generatingToken || ''}
-          onClose={closeGenerateToken}
-        />
         {user && (
           <User
             user={user}

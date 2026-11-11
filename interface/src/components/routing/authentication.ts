@@ -47,13 +47,3 @@ export function fetchLoginRedirect(): Partial<Path> {
 
 export const clearAccessToken = () => localStorage.removeItem(ACCESS_TOKEN);
 export const decodeMeJWT = (accessToken: string): Me => jwtDecode(accessToken);
-
-export function addAccessTokenParameter(url: string) {
-  const accessToken = getStorage().getItem(ACCESS_TOKEN);
-  if (!accessToken) {
-    return url;
-  }
-  const parsedUrl = new URL(url);
-  parsedUrl.searchParams.set(ACCESS_TOKEN, accessToken);
-  return parsedUrl.toString();
-}

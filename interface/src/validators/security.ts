@@ -1,22 +1,9 @@
-import type { UserType } from 'types';
+import type { SetupStateType, SetupType, UserType } from 'types';
 import Schema from 'validators/schema';
 import type { InternalRuleItem } from 'validators/schema';
 
 const USERNAME_PATTERN = /^[a-zA-Z0-9_\\.]{1,24}$/;
-const JWT_SECRET_MAX_LENGTH = 64;
 const PASSWORD_MAX_LENGTH = 64;
-
-export const SECURITY_SETTINGS_VALIDATOR = new Schema({
-  jwt_secret: [
-    { required: true, message: 'JWT secret is required' },
-    {
-      type: 'string',
-      min: 1,
-      max: JWT_SECRET_MAX_LENGTH,
-      message: `JWT secret must be between 1 and ${JWT_SECRET_MAX_LENGTH} characters`
-    }
-  ]
-});
 
 /**
  * Creates a validator to ensure username uniqueness
@@ -54,13 +41,66 @@ export const createUserValidator = (users: UserType[], creating: boolean) =>
       },
       ...(creating ? [createUniqueUsernameValidator(users)] : [])
     ],
+    // an existing user keeps the current password when it's left empty
     password: [
-      { required: true, message: 'Please provide a password' },
+      ...(creating
+        ? [{ required: true, message: 'Please provide a password' }]
+        : []),
       {
         type: 'string',
-        min: 1,
         max: PASSWORD_MAX_LENGTH,
-        message: `Password must be 1-${PASSWORD_MAX_LENGTH} characters`
+        message: `Password must be at most ${PASSWORD_MAX_LENGTH} characters`
       }
     ]
+  });
+
+const notFactory = (factory: string) => ({
+  validator(
+    _rule: InternalRuleItem,
+    value: string,
+    callback: (error?: string) => void
+  ) {
+    callback(value === factory ? 'Choose a different password' : undefined);
+  }
+});
+
+const AP_PASSWORD_RULE = {
+  type: 'string' as const,
+  min: 8,
+  max: 63,
+  message: 'Password must be 8-63 characters'
+};
+
+export const createSetupValidator = (state: SetupStateType, setup: SetupType) =>
+  new Schema({
+    ...(state.admin && {
+      password: [
+        { required: true, message: 'Please provide a password' },
+        {
+          type: 'string',
+          max: PASSWORD_MAX_LENGTH,
+          message: `Password must be at most ${PASSWORD_MAX_LENGTH} characters`
+        },
+        notFactory('admin')
+      ]
+    }),
+    ...(state.ap && {
+      ap_password: [
+        ...(state.ap_required
+          ? [{ required: true, message: 'Please provide an access point password' }]
+          : []),
+        AP_PASSWORD_RULE,
+        notFactory('ems-esp-neo')
+      ]
+    }),
+    view_username: [
+      {
+        type: 'string',
+        pattern: USERNAME_PATTERN,
+        message: "Must be 1-24 characters: alphanumeric, '_' or '.'"
+      }
+    ],
+    ...(setup.view_username && {
+      view_password: [{ required: true, message: 'Please provide a password' }]
+    })
   });

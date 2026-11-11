@@ -10,6 +10,7 @@
 #include "NTPStatus.h"
 #include "UploadFileService.h"
 #include "SecuritySettingsService.h"
+#include "SetupService.h"
 #include "WiFiScanner.h"
 #include "NetworkSettingsService.h"
 #include "NetworkStatus.h"
@@ -68,6 +69,7 @@ class ESP32React {
     MqttSettingsService     _mqttSettingsService;
     MqttStatus              _mqttStatus;
     AuthenticationService   _authenticationService;
+    SetupService            _setupService;
 };
 
 #endif
