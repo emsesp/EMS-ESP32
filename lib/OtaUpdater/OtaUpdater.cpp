@@ -3,6 +3,7 @@
 #include <Update.h>
 #include <esp_app_format.h>
 #include <esp_image_format.h>
+#include <esp_ota_ops.h>
 #include <esp_partition.h>
 #ifdef OTA_UPDATER_ANY_PARTITION
 #include <esp_heap_caps.h>
@@ -105,12 +106,10 @@ bool OtaUpdater::parseMd5Digest(const uint8_t * data, size_t len, std::array<cha
 }
 
 bool OtaUpdater::confirmRunningApp() {
-#ifdef CONFIG_APP_ROLLBACK_ENABLE
     esp_ota_img_states_t state;
     if (esp_ota_get_state_partition(esp_ota_get_running_partition(), &state) == ESP_OK && state == ESP_OTA_IMG_PENDING_VERIFY) {
         return esp_ota_mark_app_valid_cancel_rollback() == ESP_OK;
     }
-#endif
     return false;
 }
 
