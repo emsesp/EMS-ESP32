@@ -941,6 +941,11 @@ void System::start() {
         LOG_WARNING("Firmware in partition %s failed to start and was rolled back", invalid->label);
     }
 
+    esp_ota_img_states_t ota_state;
+    if (esp_ota_get_state_partition(esp_ota_get_running_partition(), &ota_state) == ESP_OK && ota_state == ESP_OTA_IMG_PENDING_VERIFY) {
+        LOG_INFO("New firmware, it will be confirmed after running for %u seconds", FIRMWARE_HEALTHY_UPTIME);
+    }
+
     // disable bluetooth module
     // periph_module_disable(PERIPH_BT_MODULE);
     if (low_clock_) {
@@ -2084,6 +2089,13 @@ bool System::check_upgrade() {
     }
 
     if (reboot_required) {
+#ifndef EMSESP_STANDALONE
+        // otherwise the bootloader treats this restart as a failed start and rolls back to the
+        // previous firmware, which then runs on the already migrated settings
+        if (OtaUpdater::confirmRunningApp()) {
+            LOG_INFO("New firmware confirmed as working");
+        }
+#endif
         LOG_INFO("Upgrade: rebooting to apply changes");
         return true; // need reboot
     }

@@ -5,9 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.9.0] 8 November 2026
+## [3.9.1] 11 November 2026
 
 This release is based on the latest Espressif/Arduino core version 3. It brings in many memory and performance optimizations, for example 25% more available memory and 30% less PSRAM fragmentation.
+
+## **Breaking Changes**
+ See [this discussion](https://github.com/emsesp/EMS-ESP32/discussions/3418) for a list of breaking changes.
 
 **Added**
 

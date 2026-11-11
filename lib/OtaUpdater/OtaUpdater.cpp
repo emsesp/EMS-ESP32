@@ -26,8 +26,7 @@ OtaUpdater::FileType OtaUpdater::classify(const String & filename, size_t filesi
     if (extension == "bin") {
         String lower = filename;
         lower.toLowerCase();
-        const size_t min_size =
-            lower.indexOf("recovery") >= 0 ? MIN_RECOVERY_FIRMWARE_SIZE : min_firmware_size;
+        const size_t min_size = lower.indexOf("recovery") >= 0 ? MIN_RECOVERY_FIRMWARE_SIZE : min_firmware_size;
         if (filesize >= min_size) {
             return FileType::FIRMWARE;
         }
@@ -102,12 +101,10 @@ bool OtaUpdater::parseMd5Digest(const uint8_t * data, size_t len, std::array<cha
 }
 
 bool OtaUpdater::confirmRunningApp() {
-#ifdef CONFIG_APP_ROLLBACK_ENABLE
     esp_ota_img_states_t state;
     if (esp_ota_get_state_partition(esp_ota_get_running_partition(), &state) == ESP_OK && state == ESP_OTA_IMG_PENDING_VERIFY) {
         return esp_ota_mark_app_valid_cancel_rollback() == ESP_OK;
     }
-#endif
     return false;
 }
 
