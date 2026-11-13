@@ -6093,7 +6093,9 @@ router
 // };
 
 if (!DEMO) {
-  console.log('Switch mock versions at http://localhost:3000' + MOCK_VERSIONS_ENDPOINT);
+  console.log(
+    'Switch mock versions at http://localhost:3000' + MOCK_VERSIONS_ENDPOINT
+  );
 }
 
 // Works for both Bun (uses port) and Cloudflare Workers (ignores port).
