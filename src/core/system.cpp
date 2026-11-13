@@ -3274,6 +3274,8 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
                     obj["brand"]     = emsdevice->brand_to_char();
                     obj["version"]   = emsdevice->version();
                     obj["entities"]  = emsdevice->count_entities();
+                    obj["online"]    = emsdevice->is_online();
+                    obj["lastSeen"]  = emsdevice->last_seen_sec();
                     char result[1000];
                     (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::RECEIVED);
                     if (result[0] != '\0') {

@@ -49,6 +49,9 @@ uint16_t          EMSESP::wait_validate_    = 0;
 bool              EMSESP::wait_km_          = false;
 uint32_t          EMSESP::last_fetch_       = 0;
 
+uint32_t EMSESP::last_device_status_  = 0;
+bool     EMSESP::device_status_force_ = false;
+
 #ifdef EMSESP_GATEWAY_TX_HOLD
 uint32_t EMSESP::gateway_hold_until_        = 0;
 uint32_t EMSESP::gateway_hold_start_        = 0;
@@ -1228,6 +1231,13 @@ void EMSESP::process_version(const std::shared_ptr<const Telegram> & telegram) {
 // We also check for common telegram types, like the Version(0x02)
 // returns false if there are none found
 bool EMSESP::process_telegram(const std::shared_ptr<const Telegram> & telegram) {
+    // any telegram from a device, including reads and empty replies, shows it is alive
+    for (const auto & emsdevice : emsdevices) {
+        if (emsdevice->is_device_id(telegram->src)) {
+            emsdevice->last_rx(uuid::get_uptime());
+        }
+    }
+
     // if watching or reading...
     if ((telegram->type_id == read_id_ || telegram->type_id == response_id_) && (telegram->dest == EMSbus::ems_bus_id())) {
         if (telegram->type_id == response_id_) {
@@ -1618,6 +1628,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     // assign a unique ID. Note that this is not actual remain unique after a restart as it's dependent on the order that devices are found
     // can't be 0 otherwise web won't work
     emsdevices.back()->unique_id(++unique_id_count_);
+    emsdevices.back()->last_rx(uuid::get_uptime());
 
     // sort devices based on type
     std::sort(emsdevices.begin(), emsdevices.end(), [](const std::unique_ptr<EMSdevice> & a, const std::unique_ptr<EMSdevice> & b) {
@@ -1871,6 +1882,21 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 #endif
 
         rxservice_.add(data, length); // add to RxQueue
+    }
+}
+
+// log and publish when an EMS device goes offline or comes back
+void EMSESP::check_device_status() {
+    if (!device_status_force_ && (uuid::get_uptime() - last_device_status_ < DEVICE_STATUS_FREQUENCY)) {
+        return;
+    }
+
+    last_device_status_  = uuid::get_uptime();
+    bool force           = device_status_force_;
+    device_status_force_ = false;
+
+    for (const auto & emsdevice : emsdevices) {
+        emsdevice->publish_status(force);
     }
 }
 
@@ -2270,6 +2296,7 @@ void EMSESP::loop() {
         webModulesService.loop();     // loop through the external library modules
         webSchedulerService.loop();   // scheduler timing logic; command execution is offloaded to WebCommandService's worker task
         scheduled_fetch_values();     // force a query on the EMS devices to fetch latest data at a set interval (1 min)
+        check_device_status();        // publish EMS devices going offline or coming back
         compact_entities_if_stable(); // reclaim over-reserved entity vector capacity once device discovery settles
     }
 

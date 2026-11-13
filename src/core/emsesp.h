@@ -142,6 +142,11 @@ class EMSESP {
     static void publish_all(bool force = false);
     static void reset_mqtt_ha();
 
+    // republish the availability of all EMS devices with the next check, e.g. after an MQTT reconnect
+    static void force_device_status() {
+        device_status_force_ = true;
+    }
+
 #ifdef EMSESP_STANDALONE
     static void run_test(uuid::console::Shell & shell, const std::string & command); // only for testing
     static void dummy_mqtt_commands(const char * message);
@@ -297,6 +302,7 @@ class EMSESP {
     static void        process_version(const std::shared_ptr<const Telegram> & telegram);
     static void        publish_response(const std::shared_ptr<const Telegram> & telegram);
     static void        publish_all_loop();
+    static void        check_device_status();
     static void        reply_own_request(const uint8_t * data, const uint8_t length, const uint8_t tx_state);
 
     // one-time compaction of per-device/command vectors once registration has been stable
@@ -305,8 +311,9 @@ class EMSESP {
     void shell_prompt();
     void start_serial_console();
 
-    static constexpr uint32_t EMS_FETCH_FREQUENCY = 60000; // check every minute
-    static constexpr uint8_t  EMS_WAIT_KM_TIMEOUT = 60;    // wait one minute
+    static constexpr uint32_t EMS_FETCH_FREQUENCY     = 60000; // check every minute
+    static constexpr uint8_t  EMS_WAIT_KM_TIMEOUT     = 60;    // wait one minute
+    static constexpr uint32_t DEVICE_STATUS_FREQUENCY = 10000; // check every 10 seconds if EMS devices are still online
 
 #ifdef EMSESP_GATEWAY_TX_HOLD
     // hold our Tx while a gateway (K30RF/KM200 on 0x48) is doing its startup sync, see issue #3094
@@ -361,6 +368,8 @@ class EMSESP {
     static uint16_t wait_validate_;
     static bool     wait_km_;
     static uint32_t last_fetch_;
+    static uint32_t last_device_status_;
+    static bool     device_status_force_;
 
     // entity/telegram registration tracking, used to trigger a one-time vector compaction
     static constexpr uint32_t ENTITY_COMPACT_DELAY = 60000; // ms of stability before compacting
