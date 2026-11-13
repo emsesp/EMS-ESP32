@@ -1088,16 +1088,15 @@ void System::button_OnLongPress(PButton & b) {
 }
 
 // button indefinite press, held for BUTTON_VLongPressDelay (6000 ms, 6 seconds)
-// restart EMS_ESP into the Recovery boot menu, where you can optionally do a factory reset
+// do a factory reset - https://github.com/emsesp/EMS-ESP32/discussions/3427#discussioncomment-19589477
 void System::button_OnVLongPress(PButton & b) {
     if (EMSESP::system_.disable_reset()) {
-        LOG_NOTICE("reset disabled, can't boot");
+        LOG_NOTICE("reset disabled");
         return;
     }
 
-    LOG_NOTICE("Button pressed - very long press - perform factory reset in Recovery Mode");
-    EMSESP::system_.system_restart("boot");
-    // EMSESP::led_.start_led_fast_flash(5); // Start LED flash timer for 5 seconds
+    LOG_NOTICE("Button pressed - very long press - perform factory reset");
+    EMSESP::led_.start_led_fast_flash(5); // Start LED flash timer for 5 seconds, this will automatically restart the device after 5 seconds
 }
 
 // push button, held for BUTTON_Debounce (200 ms)
