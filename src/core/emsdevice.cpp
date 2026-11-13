@@ -409,6 +409,54 @@ void EMSdevice::fetch_values() {
     }
 }
 
+// ms since the last telegram, last_rx_ can be 1 ms ahead of the uptime as 0 is reserved for "never"
+uint32_t EMSdevice::since_last_rx() const {
+    uint32_t elapsed = uuid::get_uptime() - last_rx_;
+    return (!last_rx_ || elapsed == UINT32_MAX) ? 0 : elapsed;
+}
+
+uint32_t EMSdevice::last_seen_sec() const {
+    return since_last_rx() / 1000;
+}
+
+// only a device we poll is expected to answer regularly, others may legitimately stay quiet
+bool EMSdevice::is_online() const {
+    if (!active_ || !last_rx_ || EMSbus::tx_mode() == EMS_TXMODE_OFF) {
+        return true;
+    }
+
+    bool polled = false;
+    for (const auto & tf : telegram_functions_) {
+        if (tf.fetch_) {
+            polled = true;
+            break;
+        }
+    }
+
+    return !polled || (since_last_rx() < DEVICE_OFFLINE_TIMEOUT);
+}
+
+// publish the availability to e.g. ems-esp/status/thermostat_10, retained and only when it changes
+void EMSdevice::publish_status(const bool force) {
+    bool online = is_online();
+    if (online != online_) {
+        online_           = online;
+        status_published_ = false;
+        if (online) {
+            EMSESP::logger().info("%s (0x%02X) is back online", device_type_2_device_name(device_type_), device_id_);
+        } else {
+            EMSESP::logger().warning("%s (0x%02X) is offline, nothing received for %lu seconds",
+                                     device_type_2_device_name(device_type_),
+                                     device_id_,
+                                     (unsigned long)last_seen_sec());
+        }
+    }
+
+    if (force || !status_published_) {
+        status_published_ = Mqtt::queue_publish_retain(Mqtt::device_status_topic(device_type_, device_id_).c_str(), online ? "online" : "offline");
+    }
+}
+
 // toggle on/off automatic fetch for a telegramID
 void EMSdevice::toggle_fetch(uint16_t telegram_id, bool toggle) {
 #if defined(EMSESP_DEBUG)
@@ -2282,8 +2330,10 @@ bool EMSdevice::generate_values(JsonObject output, const int8_t tag_filter, cons
 // create the Home Assistant configs for each device value / entity
 // this is called when an MQTT publish is done via an EMS Device in emsesp.cpp::publish_device_values()
 void EMSdevice::mqtt_ha_entity_config_create() {
-    bool     create_device_config = !ha_config_done(); // do we need to create the main Discovery device config with this entity?
-    uint16_t count                = 0;
+    bool        create_device_config = !ha_config_done(); // do we need to create the main Discovery device config with this entity?
+    const bool  first_config         = create_device_config;
+    uint16_t    count                = 0;
+    std::string status_topic         = Mqtt::device_status_topic(device_type_, device_id_);
 
     // check the state of each of the device values
     // create the discovery topic if if hasn't already been created, not a command (like reset) and is active and visible
@@ -2307,7 +2357,7 @@ void EMSdevice::mqtt_ha_entity_config_create() {
                 }
 
                 bool has_room_temp = (haclimate_value == 1);
-                if (Mqtt::publish_ha_climate_config(dv, has_room_temp, mode_options, false)) {
+                if (Mqtt::publish_ha_climate_config(dv, has_room_temp, mode_options, false, nullptr, status_topic.c_str())) {
                     if (has_room_temp) {
                         dv.remove_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
                     } else {
@@ -2330,7 +2380,7 @@ void EMSdevice::mqtt_ha_entity_config_create() {
         if (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) && dv.has_state(DeviceValueState::DV_ACTIVE)
             && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE)) {
             // create_device_config is only done once for the EMS device. It can added to any entity, so we take the first
-            if (Mqtt::publish_ha_sensor_config_dv(dv, name().c_str(), brand_to_cstr(), to_string_version().c_str(), false, create_device_config)) {
+            if (Mqtt::publish_ha_sensor_config_dv(dv, name().c_str(), brand_to_cstr(), to_string_version().c_str(), false, create_device_config, status_topic.c_str())) {
                 dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
                 create_device_config = false; // only create the main config once
                 count++;
@@ -2358,7 +2408,7 @@ void EMSdevice::mqtt_ha_entity_config_create() {
                     }
                 }
 
-                Mqtt::publish_ha_climate_config(dv, true, mode_options, false, icon);
+                Mqtt::publish_ha_climate_config(dv, true, mode_options, false, icon, status_topic.c_str());
                 count++;
             }
 
@@ -2375,6 +2425,10 @@ void EMSdevice::mqtt_ha_entity_config_create() {
         EMSESP::logger().debug("Created %d HA-%s-configs", count, device_type_name());
     }
 #endif
+    if (first_config && !create_device_config) {
+        Mqtt::publish_ha_device_status_config(device_type_, device_id_, name().c_str());
+    }
+
     ha_config_done(!create_device_config);
 }
 

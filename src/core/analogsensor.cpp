@@ -119,8 +119,9 @@ void AnalogSensor::start(const bool factory_settings) {
 }
 
 void AnalogSensor::ha_reset() {
-    for (const auto & sensor : sensors_) {
+    for (auto & sensor : sensors_) {
         remove_ha_topic(sensor.type(), sensor.gpio());
+        sensor.ha_registered = false; // force HA configs to be re-created
     }
 }
 

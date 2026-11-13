@@ -41,6 +41,7 @@ A full list of breaking changes can be found in this [discussion](https://github
 - the LED flashes white while the Recovery is running, using the LED GPIO and type from the Application Settings (also when the LED is set to hidden)
 - uploading a settings file only changes the settings it contains, so a partial file can be used to change a few settings and keep the rest
 - mock server test page `/rest/mockVersions` (e.g. http://localhost:3080/rest/mockVersions) to switch scenarios at runtime without restarting: the current, stable and dev versions, offline, official or custom build, DEBUG, the installed and online Recovery version, and the board's flash size (4MB, 16MB or 32MB) and PSRAM. It has presets for common cases and can sign in as admin or guest. Values can also be set in the URL, like `?flash=4MB&psram=false`, and `?reset` goes back to the defaults
+- EMS devices that EMS-ESP polls and that send nothing for 5 minutes are reported offline: logged, published retained as `online`/`offline` to `ems-esp/status/<device>_<id>` (e.g. `ems-esp/status/thermostat_10`), and shown as `online` and `lastSeen` (seconds) per device in `/api/system/info`. In Home Assistant the device's entities become unavailable and each device gets a "status" connectivity sensor
 
 ## Fixed
 
@@ -48,6 +49,7 @@ A full list of breaking changes can be found in this [discussion](https://github
 - with no EMS bus attached (e.g. only powered over USB), noise on the Rx line was taken for a bus: a single random byte matching our poll marked the bus as connected, after which every noise frame was logged as `Incomplete Rx` or `Invalid source` and counted as an error. A noise frame passing the CRC could also set the wrong EMS bus type. A poll to our bus id is now only trusted when the 3 telegrams before it all had a valid CRC, the bus type is taken from the poll, and nothing is processed before then
 - RC300/RC310 `nofrostmode` missing `off` state [#3311](https://github.com/emsesp/EMS-ESP32/issues/3311)
 - SRC/MX300 wireless room thermostats: `seltemp` and `mode` were written to the cooling settings on systems without a heatpump, so the change was ignored (since 3.9.0) [#3414](https://github.com/emsesp/EMS-ESP32/discussions/3414)
+- Home Assistant entities of analog sensors disappeared after an MQTT reconnect or "Refresh MQTT" and only came back after a restart or saving a sensor (since 3.9.0) [#3422](https://github.com/emsesp/EMS-ESP32/issues/3422)
 
 ## Changed
 
