@@ -66,7 +66,7 @@ custom_emsesp_ip = ems-espP.local ; E32V2.2 (prod)
 
 ; lib_deps =
 ;   bblanchon/ArduinoJson @ 7.4.3
-;   ESP32Async/AsyncTCP @ 3.4.10
+;   ESP32Async/AsyncTCP @ 3.6.0
 ;   ESP32Async/ESPAsyncWebServer @ 3.11.0
 ;   https://github.com/mobizt/ReadyMail.git @ 0.4.0
 ;   https://github.com/mobizt/ESP_SSLClient.git @ 3.1.3
