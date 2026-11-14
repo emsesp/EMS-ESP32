@@ -1157,7 +1157,8 @@ void EMSESP::process_deviceName(const std::shared_ptr<const Telegram> & telegram
 // e.g. 09 0B 02 00 PP V1 V2
 void EMSESP::process_version(const std::shared_ptr<const Telegram> & telegram) {
     // check for valid telegram, just in case
-    if (telegram->offset != 0) {
+    // also skip the echo of our own reply to another device's version read
+    if (telegram->offset != 0 || telegram->src == EMSbus::ems_bus_id()) {
         return;
     }
 
@@ -1707,6 +1708,12 @@ void EMSESP::reply_own_request(const uint8_t * data, const uint8_t length, const
         reply[0] = our | mask;
         reply[1] = data[0] & 0x7F;
         if (data[2] < 0xF0) { // EMS read
+#ifdef EMSESP_OWN_IDENTITY
+            if ((data[2] == EMSdevice::EMS_TYPE_VERSION || data[2] == EMSdevice::EMS_TYPE_NAME) && length >= 6) {
+                reply_identity(reply[1], data[2], data[3], data[4], mask);
+                return;
+            }
+#endif
             reply[2] = data[2];
             reply[3] = data[3];
             reply[4] = EMSbus::calculate_crc(reply, 4);
@@ -1731,6 +1738,50 @@ void EMSESP::reply_own_request(const uint8_t * data, const uint8_t length, const
         LOG_DEBUG("Ack write from 0x%02X", data[0] & 0x7F);
     }
 }
+
+#ifdef EMSESP_OWN_IDENTITY
+// answer version (0x02) and name (0x01) reads like a real EMS device instead of with an empty telegram
+// the identity must never change, the K30RF re-reads it from every device on the bus about every 13 hours
+// layout as sent by the UI800/CR11: 0x02 = productID, version major, minor, padded to 12 bytes
+// 0x01 = 27 ascii digit serial number, ascii name at offset 27, 16 reserved bytes at offset 54
+// see https://github.com/emsesp/EMS-ESP32/issues/3094
+void EMSESP::reply_identity(const uint8_t dest, const uint8_t type_id, const uint8_t offset, const uint8_t length, const uint8_t mask) {
+    uint8_t identity[70] = {0};
+    uint8_t size;
+
+    if (type_id == EMSdevice::EMS_TYPE_VERSION) {
+        FirmwareVersion version(EMSESP_APP_VERSION);
+        identity[0] = EMSESP_OWN_PRODUCT_ID;
+        identity[1] = version.major();
+        identity[2] = version.minor();
+        size        = 12;
+    } else {
+        unsigned long long mac = 0;
+#ifndef EMSESP_STANDALONE
+        mac = ESP.getEfuseMac();
+#endif
+        char serial[28];
+        snprintf(serial, sizeof(serial), "%027llu", mac);
+        memcpy(identity, serial, 27);
+        memcpy(identity + 27, "EMS-ESP", 7);
+        size = sizeof(identity);
+    }
+
+    uint8_t reply[32];
+    reply[0]    = EMSbus::ems_bus_id() | mask;
+    reply[1]    = dest;
+    reply[2]    = type_id;
+    reply[3]    = offset;
+    uint8_t len = 0;
+    if (offset < size) {
+        len = std::min<uint8_t>(std::min<uint8_t>(length, size - offset), sizeof(reply) - 5);
+        memcpy(reply + 4, identity + offset, len);
+    }
+    reply[4 + len] = EMSbus::calculate_crc(reply, 4 + len);
+    EMSuart::transmit(reply, 5 + len);
+    LOG_DEBUG("Identity reply to 0x%02X read 0x%02X offset %d, %d bytes", dest, type_id, offset, len);
+}
+#endif
 
 // this is main entry point when data is received on the Rx line, via emsuart library
 // we check if its a complete telegram or just a single byte (which could be a poll or a return status)

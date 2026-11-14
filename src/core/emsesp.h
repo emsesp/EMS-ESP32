@@ -304,6 +304,9 @@ class EMSESP {
     static void        publish_all_loop();
     static void        check_device_status();
     static void        reply_own_request(const uint8_t * data, const uint8_t length, const uint8_t tx_state);
+#ifdef EMSESP_OWN_IDENTITY
+    static void reply_identity(const uint8_t dest, const uint8_t type_id, const uint8_t offset, const uint8_t length, const uint8_t mask);
+#endif
 
     // one-time compaction of per-device/command vectors once registration has been stable
     static void compact_entities_if_stable();
