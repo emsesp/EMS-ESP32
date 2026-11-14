@@ -4187,6 +4187,8 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
             on   = 7;
             time = 0x90;
             // LOG_INFO("switchtime %02d cleared", no);
+        } else if (day == 7) {
+            return false; // day 7 marks an empty slot, a switchpoint can't be set for all days
         }
     } else {
         if (strlen(value) > 1) {
