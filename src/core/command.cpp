@@ -554,7 +554,11 @@ Command::call(const uint8_t device_type, const char * command, const char * valu
     char     reason[40]  = "";
     int16_t  min         = 0;
     uint32_t max         = 0;
-    if (cf->cmdfunction_) {
+    // a command can register new commands while running (e.g. system/test adds devices), which
+    // reallocates cmdfunctions_ and leaves cf dangling, so cf must not be used after the call
+    const auto cmd_description = cf->description_;
+    const auto cmd_function    = cf->cmdfunction_;
+    if (cmd_function) {
         // JSON-output commands bypass the readonly check; for the rest, reject a write to a read-only entity
         if (!cf->has_json_output_ && !single_command && EMSESP::cmd_is_readonly(device_type, device_id, cmd, id)) {
             return_code = CommandRet::INVALID; // error on readonly or invalid hc
@@ -594,7 +598,7 @@ Command::call(const uint8_t device_type, const char * command, const char * valu
             }
 
             // call the command (the output object is ignored by non-JSON commands)
-            return_code = ((cf->cmdfunction_)(value, id, output)) ? CommandRet::OK : CommandRet::ERROR;
+            return_code = cmd_function(value, id, output) ? CommandRet::OK : CommandRet::ERROR;
             if (limited && return_code == CommandRet::OK) {
                 WriteLimiter::instance().sent(limited_entity, written, uuid::get_uptime());
             }
@@ -618,7 +622,7 @@ Command::call(const uint8_t device_type, const char * command, const char * valu
         // build up the log string for reporting back
         // We send the log message as Warning so it appears in the log (debug is only enabled when compiling with DEBUG)
         std::string ro          = EMSESP::system_.readonly_mode() ? "[readonly] " : "";
-        auto        description = Helpers::translated_word(cf->description_);
+        auto        description = Helpers::translated_word(cmd_description);
         char        info_s[100];
         if (strlen(description)) {
             snprintf(info_s, sizeof(info_s), "%s/%s (%s)", dname, cmd, description);
