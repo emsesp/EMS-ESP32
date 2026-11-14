@@ -79,7 +79,7 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
     if (flags == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         register_telegram_type(0x010C, "IPMStatusMessage", false, MAKE_PF_CB(process_IPMStatusMessage));
         register_telegram_type(0x011E, "IPMTempMessage", false, MAKE_PF_CB(process_IPMTempMessage));
-        // register_telegram_type(0x0123, "IPMSetMessage", false, MAKE_PF_CB(process_IPMSetMessage));
+        // register_telegram_type(0x23, "IPMSetMessage", false, MAKE_PF_CB(process_IPMSetMessage));
         register_device_value(tag, &flowTempHc_, DeviceValueType::UINT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(flowTempHc), DeviceValueUOM::DEGREES);
         register_device_value(tag, &status_, DeviceValueType::UINT8, FL_(mixerStatus), DeviceValueUOM::PERCENT);
         register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT8, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
@@ -197,7 +197,7 @@ bool Mixer::set_flowSetTemp(const char * value, const int8_t id) {
     }
 
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_IPM) {
-        write_command(0x123, 0, v, 0x10C);
+        write_command(0x23, 0, v, 0x10C);
         return true;
     }
 
@@ -224,7 +224,7 @@ bool Mixer::set_pump(const char * value, const int8_t id) {
     }
 
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_IPM) {
-        write_command(0x123, 1, b ? 0x64 : 0, 0x10C);
+        write_command(0x23, 1, b ? 0x64 : 0, 0x10C);
         return true;
     }
 
