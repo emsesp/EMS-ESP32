@@ -79,7 +79,7 @@ jobs:
           python-version: '3.13'
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           version: "latest"
           enable-cache: false
@@ -111,7 +111,7 @@ jobs:
           python-version: '3.13'
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           version: "latest"
           enable-cache: false
@@ -157,7 +157,7 @@ jobs:
           python-version: '3.13'
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           version: "latest"
           enable-cache: false
@@ -190,7 +190,7 @@ jobs:
           path: src/core
 
       - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2.24
+        uses: hendrikmuhs/ccache-action@v1.2.25
         with:
           key: firmware-${{ matrix.env }}
           restore-keys: firmware-${{ matrix.env }}-
@@ -223,7 +223,7 @@ jobs:
           python-version: '3.13'
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           version: "latest"
           enable-cache: false
