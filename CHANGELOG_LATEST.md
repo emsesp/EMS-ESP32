@@ -41,6 +41,7 @@ A full list of breaking changes can be found in this [discussion](https://github
 - the LED flashes white while the Recovery is running, using the LED GPIO and type from the Application Settings (also when the LED is set to hidden)
 - uploading a settings file only changes the settings it contains, so a partial file can be used to change a few settings and keep the rest
 - mock server test page `/rest/mockVersions` (e.g. http://localhost:3080/rest/mockVersions) to switch scenarios at runtime without restarting: the current, stable and dev versions, offline, official or custom build, DEBUG, the installed and online Recovery version, and the board's flash size (4MB, 16MB or 32MB) and PSRAM. It has presets for common cases and can sign in as admin or guest. Values can also be set in the URL, like `?flash=4MB&psram=false`, and `?reset` goes back to the defaults
+- RC300/RC310 pool circuit on a MM100: `poolmode` (off/on/auto) and `poolflowtemp`, both writable (telegram 0x67B) [#3420](https://github.com/emsesp/EMS-ESP32/issues/3420)
 - EMS devices that EMS-ESP polls and that send nothing for 5 minutes are reported offline: logged, published retained as `online`/`offline` to `ems-esp/status/<device>_<id>` (e.g. `ems-esp/status/thermostat_10`), and shown as `online` and `lastSeen` (seconds) per device in `/api/system/info`. In Home Assistant the device's entities become unavailable and each device gets a "status" connectivity sensor
 
 ## Fixed
@@ -53,6 +54,7 @@ A full list of breaking changes can be found in this [discussion](https://github
 - thermostat switchtimes: setting one in JSON with `"day":"all"` cleared that slot and reported success, it's now refused [#3434](https://github.com/emsesp/EMS-ESP32/discussions/3434)
 - custom entities on the EMS bus: a write of the value shown when the list was last saved was reported as done but never sent, until a restart [#3431](https://github.com/emsesp/EMS-ESP32/issues/3431)
 - writable number custom entities on the EMS bus had no min/max, so Home Assistant limited them to 1-100. They now get the full range of their type times the factor (e.g. 0 to 65535 for `uint16`), shown in Home Assistant, the Web UI and the API, and writes outside it are refused [#3416](https://github.com/emsesp/EMS-ESP32/issues/3416)
+- `uint8` custom entities with a value of 128 or more were shown as negative numbers in MQTT and the API (e.g. 200 as -56), the Web UI was correct
 
 ## Changed
 

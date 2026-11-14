@@ -348,7 +348,7 @@ void WebCustomEntityService::render_value(JsonObject output, CustomEntityItem co
         break;
     case DeviceValueType::UINT8:
         if ((uint8_t)entity.value != EMS_VALUE_UINT8_NOTSET) {
-            std::string v = Helpers::render_value(payload, entity.factor * (int8_t)entity.value, 2);
+            std::string v = Helpers::render_value(payload, entity.factor * (uint8_t)entity.value, 2);
             output[name]  = add_uom ? serialized(v + ' ' + EMSdevice::uom_to_string(entity.uom)) : serialized(v);
         }
 

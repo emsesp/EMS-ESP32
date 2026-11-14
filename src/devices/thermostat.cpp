@@ -227,6 +227,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(0x470, "RC300Summer3", true, MAKE_PF_CB(process_RC300Summer3), 8);
         }
         register_telegram_type(0x614, "RCauxHeaterMode", true, MAKE_PF_CB(process_auxHeaterMode));
+        register_telegram_type(0x67B, "RC300Pool", true, MAKE_PF_CB(process_RC300Pool), 2);
 
         EMSESP::send_read_request(0xC0, device_id, 0, 20); // read last errorcode on start (only published on errors)
 
@@ -1568,6 +1569,17 @@ void Thermostat::process_HPMode(const std::shared_ptr<const Telegram> & telegram
 // 0x416, see #3315
 void Thermostat::process_auxHeaterMode(const std::shared_ptr<const Telegram> & telegram) {
     has_update(telegram, auxHeaterMode_, 2); // 0-off, 1-on, 2-auto
+}
+
+// 0x67B pool circuit on a MM100, see #3420
+// Thermostat(0x10) -> All(0x00), ?(0x067B), data: FF 40
+// offset 0: mode 0-off, 1-on, FF-auto; offset 1: flow temperature
+void Thermostat::process_RC300Pool(const std::shared_ptr<const Telegram> & telegram) {
+    uint8_t mode;
+    if (telegram->read_value(mode, 0) && (mode <= 1 || mode == 0xFF)) {
+        has_update(poolMode_, mode == 0xFF ? 2 : mode);
+    }
+    has_update(telegram, poolFlowTemp_, 1);
 }
 
 // 0x467 ff HP settings
@@ -3326,6 +3338,26 @@ bool Thermostat::set_auxHeaterMode(const char * value, const int8_t) {
     uint8_t v;
     if (Helpers::value2enum(value, v, FL_(enum_wwMode2))) {
         write_command(0x614, 2, v, 0x614);
+        return true;
+    }
+
+    return false;
+}
+
+bool Thermostat::set_poolMode(const char * value, const int8_t) {
+    uint8_t v;
+    if (Helpers::value2enum(value, v, FL_(enum_wwMode2))) {
+        write_command(0x67B, 0, v == 2 ? 0xFF : v, 0x67B);
+        return true;
+    }
+
+    return false;
+}
+
+bool Thermostat::set_poolFlowTemp(const char * value, const int8_t) {
+    int v;
+    if (Helpers::value2temperature(value, v)) {
+        write_command(0x67B, 1, v, 0x67B);
         return true;
     }
 
@@ -5148,6 +5180,14 @@ void Thermostat::register_device_values() {
                               FL_(auxHeaterMode),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_auxHeaterMode));
+        register_device_value(
+            DeviceValueTAG::TAG_DEVICE_DATA, &poolMode_, DeviceValueType::ENUM, FL_(enum_wwMode2), FL_(poolMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_poolMode));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &poolFlowTemp_,
+                              DeviceValueType::UINT8,
+                              FL_(poolFlowTemp),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_poolFlowTemp));
 
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC10:
