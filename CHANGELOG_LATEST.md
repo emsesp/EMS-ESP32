@@ -55,6 +55,7 @@ A full list of breaking changes can be found in this [discussion](https://github
 - custom entities on the EMS bus: a write of the value shown when the list was last saved was reported as done but never sent, until a restart [#3431](https://github.com/emsesp/EMS-ESP32/issues/3431)
 - writable number custom entities on the EMS bus had no min/max, so Home Assistant limited them to 1-100. They now get the full range of their type times the factor (e.g. 0 to 65535 for `uint16`), shown in Home Assistant, the Web UI and the API, and writes outside it are refused [#3416](https://github.com/emsesp/EMS-ESP32/issues/3416)
 - `uint8` custom entities with a value of 128 or more were shown as negative numbers in MQTT and the API (e.g. 200 as -56), the Web UI was correct
+- RC300 firmware 11.x `dhw/chargeduration`: writes above 255 minutes are refused, because the thermostat set them to 15 minutes. Longer durations can only be set on the thermostat itself [#3318](https://github.com/emsesp/EMS-ESP32/issues/3318)
 
 ## Changed
 

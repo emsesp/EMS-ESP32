@@ -2812,7 +2812,11 @@ bool Thermostat::set_wwchargeduration(const char * value, const int8_t id) {
 
     t = (t + 8) / 15;
     if (model() == EMS_DEVICE_FLAG_RC300V11) { // V11 see #3318
-        t = (15 * t) % 256;
+        // thermostat accepts external writes only up to 255 min, the modulo encoding for higher values is ignored
+        if (15 * t > 255) {
+            return false;
+        }
+        t = 15 * t;
     }
 
     write_command(0x2F5 + dhw->offset(), 10, t, 0x02F5 + dhw->offset());
