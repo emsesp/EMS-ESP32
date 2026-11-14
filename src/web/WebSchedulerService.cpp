@@ -347,14 +347,15 @@ bool WebSchedulerService::runScheduleCommand(const ScheduleItem & si) {
 
 // queue schedules to be handled executed in WebSchedulerService::loop() called from emsesp.cpp
 bool WebSchedulerService::onChange(const char * cmd) {
+    bool changeTriggered = false;
     for (ScheduleItem & scheduleItem : *scheduleItems_) {
         if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_ONCHANGE && Helpers::toLower(scheduleItem.time.c_str()) == Helpers::toLower(cmd)) {
             cmd_changed_.push_back(&scheduleItem);
-            return true;
+            changeTriggered = true;
         }
     }
 
-    return false;
+    return changeTriggered;
 }
 
 // handle condition schedules, parse string stored in schedule.time field
