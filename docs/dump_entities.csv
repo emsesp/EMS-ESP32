@@ -4077,6 +4077,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "UI800, BC400",thermostat,4,pvlowercool,lower cooling with PV,int8 (>=-5<=0),K,true,number.thermostat_lower_cooling_with_PV,number.thermostat_pvlowercool,7,0,1,63,1
 "UI800, BC400",thermostat,4,absent,absent,boolean (>=0<=0), ,true,switch.thermostat_absent,switch.thermostat_absent,7,0,1,64,1
 "UI800, BC400",thermostat,4,auxheatermode,aux heater mode,enum [off\|on\|auto] (>=0<=0), ,true,select.thermostat_aux_heater_mode,select.thermostat_auxheatermode,7,0,1,65,1
+"UI800, BC400",thermostat,4,poolmode,pool mode,enum [off\|on\|auto] (>=0<=0), ,true,select.thermostat_pool_mode,select.thermostat_poolmode,7,0,1,66,1
+"UI800, BC400",thermostat,4,poolflowtemp,pool flow temperature,uint8 (>=0<=0),C,true,number.thermostat_pool_flow_temperature,number.thermostat_poolflowtemp,7,0,1,67,1
 "UI800, BC400",thermostat,4,hc1.seltemp,selected room temperature,int16 (>=0<=30),C,true,number.thermostat_hc1_selected_room_temperature,number.thermostat_hc1_seltemp,7,1,1/2,0,1
 "UI800, BC400",thermostat,4,hc1.currtemp,current room temperature,int16,C,false,sensor.thermostat_hc1_current_room_temperature,sensor.thermostat_hc1_currtemp,7,1,1/10,1,1
 "UI800, BC400",thermostat,4,hc1.haclimate,mqtt discovery current room temperature,enum [selTemp\|roomTemp], ,false,sensor.thermostat_hc1_mqtt_discovery_current_room_temperature,sensor.thermostat_hc1_haclimate,7,1,1,2,1
@@ -4182,13 +4184,13 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC30",thermostat,67,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "RC30",thermostat,67,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
 "RC30",thermostat,67,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,7,0,1,33,13
-"RC30",thermostat,67,display,display,enum [internal temperature\|internal setpoint\|external temperature\|burner temperature\|dhw temperature\|functioning mode\|time\|date\|smoke temperature] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,66,1
-"RC30",thermostat,67,language,language,enum [german\|dutch\|french\|italian], ,false,sensor.thermostat_language,sensor.thermostat_language,7,0,1,67,1
-"RC30",thermostat,67,clockoffset,clock offset,int8 (>=0<=0),seconds,true,number.thermostat_clock_offset,number.thermostat_clockoffset,7,0,1,68,1
+"RC30",thermostat,67,display,display,enum [internal temperature\|internal setpoint\|external temperature\|burner temperature\|dhw temperature\|functioning mode\|time\|date\|smoke temperature] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,68,1
+"RC30",thermostat,67,language,language,enum [german\|dutch\|french\|italian], ,false,sensor.thermostat_language,sensor.thermostat_language,7,0,1,69,1
+"RC30",thermostat,67,clockoffset,clock offset,int8 (>=0<=0),seconds,true,number.thermostat_clock_offset,number.thermostat_clockoffset,7,0,1,70,1
 "RC30",thermostat,67,intoffset,internal temperature offset,int8 (>=0<=0),C,true,number.thermostat_internal_temperature_offset,number.thermostat_intoffset,7,0,1/10,46,1
 "RC30",thermostat,67,minexttemp,minimal external temperature,int8 (>=0<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1
-"RC30",thermostat,67,inttemp1,temperature sensor 1,int16,C,false,sensor.thermostat_temperature_sensor_1,sensor.thermostat_inttemp1,7,0,1/10,69,1
-"RC30",thermostat,67,inttemp2,temperature sensor 2,int16,C,false,sensor.thermostat_temperature_sensor_2,sensor.thermostat_inttemp2,7,0,1/10,70,1
+"RC30",thermostat,67,inttemp1,temperature sensor 1,int16,C,false,sensor.thermostat_temperature_sensor_1,sensor.thermostat_inttemp1,7,0,1/10,71,1
+"RC30",thermostat,67,inttemp2,temperature sensor 2,int16,C,false,sensor.thermostat_temperature_sensor_2,sensor.thermostat_inttemp2,7,0,1/10,72,1
 "RC30",thermostat,67,damping,damping outdoor temperature,boolean (>=0<=0), ,true,switch.thermostat_damping_outdoor_temperature,switch.thermostat_damping,7,0,1,52,1
 "RC30",thermostat,67,dampedoutdoortemp,damped outdoor temperature,int8,C,false,sensor.thermostat_damped_outdoor_temperature,sensor.thermostat_dampedoutdoortemp,7,0,1,48,1
 "RC30",thermostat,67,building,building type,enum [light\|medium\|heavy] (>=0<=0), ,true,select.thermostat_building_type,select.thermostat_building,7,0,1,50,1
@@ -4261,15 +4263,15 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Moduline 400",thermostat,78,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "Moduline 400",thermostat,78,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
 "Moduline 400",thermostat,78,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,7,0,1,33,13
-"Moduline 400",thermostat,78,clockoffset,clock offset,int8 (>=0<=0),seconds,true,number.thermostat_clock_offset,number.thermostat_clockoffset,7,0,1,68,1
-"Moduline 400",thermostat,78,autodst,automatic change daylight saving time,boolean (>=0<=0), ,true,switch.thermostat_automatic_change_daylight_saving_time,switch.thermostat_autodst,7,0,1,71,1
-"Moduline 400",thermostat,78,language,language,enum [german\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,67,1
-"Moduline 400",thermostat,78,backlight,key backlight,boolean (>=0<=0), ,true,switch.thermostat_key_backlight,switch.thermostat_backlight,7,0,1,72,1
-"Moduline 400",thermostat,78,brightness,screen brightness,int8 (>=-15<=15), ,true,number.thermostat_screen_brightness,number.thermostat_brightness,7,0,1,73,1
-"Moduline 400",thermostat,78,mixingvalves,mixing valves,uint8 (>=0<=2), ,true,number.thermostat_mixing_valves,number.thermostat_mixingvalves,7,0,1,74,1
+"Moduline 400",thermostat,78,clockoffset,clock offset,int8 (>=0<=0),seconds,true,number.thermostat_clock_offset,number.thermostat_clockoffset,7,0,1,70,1
+"Moduline 400",thermostat,78,autodst,automatic change daylight saving time,boolean (>=0<=0), ,true,switch.thermostat_automatic_change_daylight_saving_time,switch.thermostat_autodst,7,0,1,73,1
+"Moduline 400",thermostat,78,language,language,enum [german\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,69,1
+"Moduline 400",thermostat,78,backlight,key backlight,boolean (>=0<=0), ,true,switch.thermostat_key_backlight,switch.thermostat_backlight,7,0,1,74,1
+"Moduline 400",thermostat,78,brightness,screen brightness,int8 (>=-15<=15), ,true,number.thermostat_screen_brightness,number.thermostat_brightness,7,0,1,75,1
+"Moduline 400",thermostat,78,mixingvalves,mixing valves,uint8 (>=0<=2), ,true,number.thermostat_mixing_valves,number.thermostat_mixingvalves,7,0,1,76,1
 "Moduline 400",thermostat,78,building,building type,enum [light\|medium\|heavy] (>=0<=0), ,true,select.thermostat_building_type,select.thermostat_building,7,0,1,50,1
-"Moduline 400",thermostat,78,heatingpid,heating PID,enum [fast\|medium\|slow] (>=0<=0), ,true,select.thermostat_heating_PID,select.thermostat_heatingpid,7,0,1,75,1
-"Moduline 400",thermostat,78,preheating,preheating in the clock program,boolean (>=0<=0), ,true,switch.thermostat_preheating_in_the_clock_program,switch.thermostat_preheating,7,0,1,76,1
+"Moduline 400",thermostat,78,heatingpid,heating PID,enum [fast\|medium\|slow] (>=0<=0), ,true,select.thermostat_heating_PID,select.thermostat_heatingpid,7,0,1,77,1
+"Moduline 400",thermostat,78,preheating,preheating in the clock program,boolean (>=0<=0), ,true,switch.thermostat_preheating_in_the_clock_program,switch.thermostat_preheating,7,0,1,78,1
 "Moduline 400",thermostat,78,intoffset,internal temperature offset,int8 (>=0<=0),C,true,number.thermostat_internal_temperature_offset,number.thermostat_intoffset,7,0,1/10,46,1
 "Moduline 400",thermostat,78,hc1.seltemp,selected room temperature,int16 (>=0<=30),C,true,number.thermostat_hc1_selected_room_temperature,number.thermostat_hc1_seltemp,7,1,1/2,0,1
 "Moduline 400",thermostat,78,hc1.currtemp,current room temperature,int16,C,false,sensor.thermostat_hc1_current_room_temperature,sensor.thermostat_hc1_currtemp,7,1,1/10,1,1
@@ -4303,8 +4305,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC10, Moduline 100",thermostat,79,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "RC10, Moduline 100",thermostat,79,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
 "RC10, Moduline 100",thermostat,79,intoffset,internal temperature offset,int8 (>=0<=0),C,true,number.thermostat_internal_temperature_offset,number.thermostat_intoffset,7,0,1/10,46,1
-"RC10, Moduline 100",thermostat,79,heatingpid,heating PID,enum [fast\|medium\|slow] (>=0<=0), ,true,select.thermostat_heating_PID,select.thermostat_heatingpid,7,0,1,75,1
-"RC10, Moduline 100",thermostat,79,backlight,key backlight,boolean (>=0<=0), ,true,switch.thermostat_key_backlight,switch.thermostat_backlight,7,0,1,72,1
+"RC10, Moduline 100",thermostat,79,heatingpid,heating PID,enum [fast\|medium\|slow] (>=0<=0), ,true,select.thermostat_heating_PID,select.thermostat_heatingpid,7,0,1,77,1
+"RC10, Moduline 100",thermostat,79,backlight,key backlight,boolean (>=0<=0), ,true,switch.thermostat_key_backlight,switch.thermostat_backlight,7,0,1,74,1
 "RC10, Moduline 100",thermostat,79,hc1.seltemp,selected room temperature,int16 (>=0<=30),C,true,number.thermostat_hc1_selected_room_temperature,number.thermostat_hc1_seltemp,7,1,1/2,0,1
 "RC10, Moduline 100",thermostat,79,hc1.currtemp,current room temperature,int16,C,false,sensor.thermostat_hc1_current_room_temperature,sensor.thermostat_hc1_currtemp,7,1,1/10,1,1
 "RC10, Moduline 100",thermostat,79,hc1.haclimate,mqtt discovery current room temperature,enum [selTemp\|roomTemp], ,false,sensor.thermostat_hc1_mqtt_discovery_current_room_temperature,sensor.thermostat_hc1_haclimate,7,1,1,2,1
@@ -4317,8 +4319,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Moduline 200",thermostat,80,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "Moduline 200",thermostat,80,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
 "Moduline 200",thermostat,80,intoffset,internal temperature offset,int8 (>=0<=0),C,true,number.thermostat_internal_temperature_offset,number.thermostat_intoffset,7,0,1/10,46,1
-"Moduline 200",thermostat,80,heatingpid,heating PID,enum [fast\|medium\|slow] (>=0<=0), ,true,select.thermostat_heating_PID,select.thermostat_heatingpid,7,0,1,75,1
-"Moduline 200",thermostat,80,backlight,key backlight,boolean (>=0<=0), ,true,switch.thermostat_key_backlight,switch.thermostat_backlight,7,0,1,72,1
+"Moduline 200",thermostat,80,heatingpid,heating PID,enum [fast\|medium\|slow] (>=0<=0), ,true,select.thermostat_heating_PID,select.thermostat_heatingpid,7,0,1,77,1
+"Moduline 200",thermostat,80,backlight,key backlight,boolean (>=0<=0), ,true,switch.thermostat_key_backlight,switch.thermostat_backlight,7,0,1,74,1
 "Moduline 200",thermostat,80,hc1.seltemp,selected room temperature,int16 (>=0<=30),C,true,number.thermostat_hc1_selected_room_temperature,number.thermostat_hc1_seltemp,7,1,1/2,0,1
 "Moduline 200",thermostat,80,hc1.currtemp,current room temperature,int16,C,false,sensor.thermostat_hc1_current_room_temperature,sensor.thermostat_hc1_currtemp,7,1,1/10,1,1
 "Moduline 200",thermostat,80,hc1.haclimate,mqtt discovery current room temperature,enum [selTemp\|roomTemp], ,false,sensor.thermostat_hc1_mqtt_discovery_current_room_temperature,sensor.thermostat_hc1_haclimate,7,1,1,2,1
@@ -4333,8 +4335,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC35",thermostat,86,datetime,date/time,string (>=0<=0), ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,7,0,1,33,13
 "RC35",thermostat,86,intoffset,internal temperature offset,int8 (>=-5<=5),C,true,number.thermostat_internal_temperature_offset,number.thermostat_intoffset,7,0,1/10,46,1
 "RC35",thermostat,86,minexttemp,minimal external temperature,int8 (>=-30<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1
-"RC35",thermostat,86,inttemp1,temperature sensor 1,int16,C,false,sensor.thermostat_temperature_sensor_1,sensor.thermostat_inttemp1,7,0,1/10,69,1
-"RC35",thermostat,86,inttemp2,temperature sensor 2,int16,C,false,sensor.thermostat_temperature_sensor_2,sensor.thermostat_inttemp2,7,0,1/10,70,1
+"RC35",thermostat,86,inttemp1,temperature sensor 1,int16,C,false,sensor.thermostat_temperature_sensor_1,sensor.thermostat_inttemp1,7,0,1/10,71,1
+"RC35",thermostat,86,inttemp2,temperature sensor 2,int16,C,false,sensor.thermostat_temperature_sensor_2,sensor.thermostat_inttemp2,7,0,1/10,72,1
 "RC35",thermostat,86,damping,damping outdoor temperature,boolean (>=0<=0), ,true,switch.thermostat_damping_outdoor_temperature,switch.thermostat_damping,7,0,1,52,1
 "RC35",thermostat,86,dampedoutdoortemp,damped outdoor temperature,int8,C,false,sensor.thermostat_damped_outdoor_temperature,sensor.thermostat_dampedoutdoortemp,7,0,1,48,1
 "RC35",thermostat,86,building,building type,enum [light\|medium\|heavy] (>=0<=0), ,true,select.thermostat_building_type,select.thermostat_building,7,0,1,50,1
@@ -4457,7 +4459,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC200, CW100, CR120, CR50",thermostat,157,minexttemp,minimal external temperature,int8 (>=0<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1
 "RC200, CW100, CR120, CR50",thermostat,157,damping,damping outdoor temperature,boolean (>=0<=0), ,true,switch.thermostat_damping_outdoor_temperature,switch.thermostat_damping,7,0,1,52,1
 "RC200, CW100, CR120, CR50",thermostat,157,solar,solar,boolean (>=0<=0), ,true,switch.thermostat_solar,switch.thermostat_solar,7,0,1,53,1
-"RC200, CW100, CR120, CR50",thermostat,157,vacations,vacation dates,string (>=0<=0), ,true,sensor.thermostat_vacation_dates,sensor.thermostat_vacations,7,0,1,77,13
+"RC200, CW100, CR120, CR50",thermostat,157,vacations,vacation dates,string (>=0<=0), ,true,sensor.thermostat_vacation_dates,sensor.thermostat_vacations,7,0,1,79,13
 "RC200, CW100, CR120, CR50",thermostat,157,hybridstrategy,hybrid control strategy,enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix] (>=0<=0), ,true,select.thermostat_hybrid_control_strategy,select.thermostat_hybridstrategy,7,0,1,54,1
 "RC200, CW100, CR120, CR50",thermostat,157,switchovertemp,outside switchover temperature,int8 (>=-20<=20),C,true,number.thermostat_outside_switchover_temperature,number.thermostat_switchovertemp,7,0,1,55,1
 "RC200, CW100, CR120, CR50",thermostat,157,energycostratio,energy cost ratio,uint8 (>=0<=20), ,true,number.thermostat_energy_cost_ratio,number.thermostat_energycostratio,7,0,1/10,56,1
@@ -4470,6 +4472,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC200, CW100, CR120, CR50",thermostat,157,pvlowercool,lower cooling with PV,int8 (>=-5<=0),K,true,number.thermostat_lower_cooling_with_PV,number.thermostat_pvlowercool,7,0,1,63,1
 "RC200, CW100, CR120, CR50",thermostat,157,absent,absent,boolean (>=0<=0), ,true,switch.thermostat_absent,switch.thermostat_absent,7,0,1,64,1
 "RC200, CW100, CR120, CR50",thermostat,157,auxheatermode,aux heater mode,enum [off\|on\|auto] (>=0<=0), ,true,select.thermostat_aux_heater_mode,select.thermostat_auxheatermode,7,0,1,65,1
+"RC200, CW100, CR120, CR50",thermostat,157,poolmode,pool mode,enum [off\|on\|auto] (>=0<=0), ,true,select.thermostat_pool_mode,select.thermostat_poolmode,7,0,1,66,1
+"RC200, CW100, CR120, CR50",thermostat,157,poolflowtemp,pool flow temperature,uint8 (>=0<=0),C,true,number.thermostat_pool_flow_temperature,number.thermostat_poolflowtemp,7,0,1,67,1
 "RC200, CW100, CR120, CR50",thermostat,157,hc1.seltemp,selected room temperature,int16 (>=0<=30),C,true,number.thermostat_hc1_selected_room_temperature,number.thermostat_hc1_seltemp,7,1,1/2,0,1
 "RC200, CW100, CR120, CR50",thermostat,157,hc1.currtemp,current room temperature,int16,C,false,sensor.thermostat_hc1_current_room_temperature,sensor.thermostat_hc1_currtemp,7,1,1/10,1,1
 "RC200, CW100, CR120, CR50",thermostat,157,hc1.haclimate,mqtt discovery current room temperature,enum [selTemp\|roomTemp], ,false,sensor.thermostat_hc1_mqtt_discovery_current_room_temperature,sensor.thermostat_hc1_haclimate,7,1,1,2,1
@@ -4566,6 +4570,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,pvlowercool,lower cooling with PV,int8 (>=-5<=0),K,true,number.thermostat_lower_cooling_with_PV,number.thermostat_pvlowercool,7,0,1,63,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,absent,absent,boolean (>=0<=0), ,true,switch.thermostat_absent,switch.thermostat_absent,7,0,1,64,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,auxheatermode,aux heater mode,enum [off\|on\|auto] (>=0<=0), ,true,select.thermostat_aux_heater_mode,select.thermostat_auxheatermode,7,0,1,65,1
+"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,poolmode,pool mode,enum [off\|on\|auto] (>=0<=0), ,true,select.thermostat_pool_mode,select.thermostat_poolmode,7,0,1,66,1
+"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,poolflowtemp,pool flow temperature,uint8 (>=0<=0),C,true,number.thermostat_pool_flow_temperature,number.thermostat_poolflowtemp,7,0,1,67,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,hc1.seltemp,selected room temperature,int16 (>=0<=30),C,true,number.thermostat_hc1_selected_room_temperature,number.thermostat_hc1_seltemp,7,1,1/2,0,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,hc1.currtemp,current room temperature,int16,C,false,sensor.thermostat_hc1_current_room_temperature,sensor.thermostat_hc1_currtemp,7,1,1/10,1,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,hc1.haclimate,mqtt discovery current room temperature,enum [selTemp\|roomTemp], ,false,sensor.thermostat_hc1_mqtt_discovery_current_room_temperature,sensor.thermostat_hc1_haclimate,7,1,1,2,1
@@ -4660,7 +4666,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Rego 2000/3000",thermostat,172,minexttemp,minimal external temperature,int8 (>=0<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1
 "Rego 2000/3000",thermostat,172,damping,damping outdoor temperature,boolean (>=0<=0), ,true,switch.thermostat_damping_outdoor_temperature,switch.thermostat_damping,7,0,1,52,1
 "Rego 2000/3000",thermostat,172,solar,solar,boolean (>=0<=0), ,true,switch.thermostat_solar,switch.thermostat_solar,7,0,1,53,1
-"Rego 2000/3000",thermostat,172,vacations,vacation dates,string (>=0<=0), ,true,sensor.thermostat_vacation_dates,sensor.thermostat_vacations,7,0,1,77,13
+"Rego 2000/3000",thermostat,172,vacations,vacation dates,string (>=0<=0), ,true,sensor.thermostat_vacation_dates,sensor.thermostat_vacations,7,0,1,79,13
 "Rego 2000/3000",thermostat,172,hybridstrategy,hybrid control strategy,enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix] (>=0<=0), ,true,select.thermostat_hybrid_control_strategy,select.thermostat_hybridstrategy,7,0,1,54,1
 "Rego 2000/3000",thermostat,172,switchovertemp,outside switchover temperature,int8 (>=-20<=20),C,true,number.thermostat_outside_switchover_temperature,number.thermostat_switchovertemp,7,0,1,55,1
 "Rego 2000/3000",thermostat,172,energycostratio,energy cost ratio,uint8 (>=0<=20), ,true,number.thermostat_energy_cost_ratio,number.thermostat_energycostratio,7,0,1/10,56,1
@@ -4673,6 +4679,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Rego 2000/3000",thermostat,172,pvlowercool,lower cooling with PV,int8 (>=-5<=0),K,true,number.thermostat_lower_cooling_with_PV,number.thermostat_pvlowercool,7,0,1,63,1
 "Rego 2000/3000",thermostat,172,absent,absent,boolean (>=0<=0), ,true,switch.thermostat_absent,switch.thermostat_absent,7,0,1,64,1
 "Rego 2000/3000",thermostat,172,auxheatermode,aux heater mode,enum [off\|on\|auto] (>=0<=0), ,true,select.thermostat_aux_heater_mode,select.thermostat_auxheatermode,7,0,1,65,1
+"Rego 2000/3000",thermostat,172,poolmode,pool mode,enum [off\|on\|auto] (>=0<=0), ,true,select.thermostat_pool_mode,select.thermostat_poolmode,7,0,1,66,1
+"Rego 2000/3000",thermostat,172,poolflowtemp,pool flow temperature,uint8 (>=0<=0),C,true,number.thermostat_pool_flow_temperature,number.thermostat_poolflowtemp,7,0,1,67,1
 "Rego 2000/3000",thermostat,172,hc1.seltemp,selected room temperature,int16 (>=0<=30),C,true,number.thermostat_hc1_selected_room_temperature,number.thermostat_hc1_seltemp,7,1,1/2,0,1
 "Rego 2000/3000",thermostat,172,hc1.currtemp,current room temperature,int16,C,false,sensor.thermostat_hc1_current_room_temperature,sensor.thermostat_hc1_currtemp,7,1,1/10,1,1
 "Rego 2000/3000",thermostat,172,hc1.haclimate,mqtt discovery current room temperature,enum [selTemp\|roomTemp], ,false,sensor.thermostat_hc1_mqtt_discovery_current_room_temperature,sensor.thermostat_hc1_haclimate,7,1,1,2,1
@@ -4797,15 +4805,17 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,pvraiseheat,raise heating with PV,int8 (>=0<=5),K,true,number.thermostat_raise_heating_with_PV,number.thermostat_pvraiseheat,7,0,1,62,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,pvlowercool,lower cooling with PV,int8 (>=-5<=0),K,true,number.thermostat_lower_cooling_with_PV,number.thermostat_pvlowercool,7,0,1,63,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,absent,absent,boolean (>=0<=0), ,true,switch.thermostat_absent,switch.thermostat_absent,7,0,1,64,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,hpoperatingmode,heatpump operating mode,enum [summer\|auto\|winter] (>=0<=0), ,true,select.thermostat_heatpump_operating_mode,select.thermostat_hpoperatingmode,7,0,1,90,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,summertemp,summer temperature,uint8 (>=10<=30),C,true,number.thermostat_summer_temperature,number.thermostat_summertemp,7,0,1,91,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,instantstart,instant start,uint8 (>=1<=10),K,true,number.thermostat_instant_start,number.thermostat_instantstart,7,0,1,92,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,coolstart,cooling starttemp,uint8 (>=24<=35),C,true,number.thermostat_cooling_starttemp,number.thermostat_coolstart,7,0,1,93,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,heatondelay,heat-on delay,uint8 (>=1<=48),hours,true,number.thermostat_heat-on_delay,number.thermostat_heatondelay,7,0,1/4,94,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,heatoffdelay,heat-off delay,uint8 (>=1<=48),hours,true,number.thermostat_heat-off_delay,number.thermostat_heatoffdelay,7,0,1/4,95,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,coolondelay,cooling on delay,uint8 (>=1<=48),hours,true,number.thermostat_cooling_on_delay,number.thermostat_coolondelay,7,0,1/4,96,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_cooling_off_delay,number.thermostat_cooloffdelay,7,0,1/4,97,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,hpoperatingmode,heatpump operating mode,enum [summer\|auto\|winter] (>=0<=0), ,true,select.thermostat_heatpump_operating_mode,select.thermostat_hpoperatingmode,7,0,1,92,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,summertemp,summer temperature,uint8 (>=10<=30),C,true,number.thermostat_summer_temperature,number.thermostat_summertemp,7,0,1,93,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,instantstart,instant start,uint8 (>=1<=10),K,true,number.thermostat_instant_start,number.thermostat_instantstart,7,0,1,94,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,coolstart,cooling starttemp,uint8 (>=24<=35),C,true,number.thermostat_cooling_starttemp,number.thermostat_coolstart,7,0,1,95,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,heatondelay,heat-on delay,uint8 (>=1<=48),hours,true,number.thermostat_heat-on_delay,number.thermostat_heatondelay,7,0,1/4,96,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,heatoffdelay,heat-off delay,uint8 (>=1<=48),hours,true,number.thermostat_heat-off_delay,number.thermostat_heatoffdelay,7,0,1/4,97,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,coolondelay,cooling on delay,uint8 (>=1<=48),hours,true,number.thermostat_cooling_on_delay,number.thermostat_coolondelay,7,0,1/4,98,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_cooling_off_delay,number.thermostat_cooloffdelay,7,0,1/4,99,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,auxheatermode,aux heater mode,enum [off\|on\|auto] (>=0<=0), ,true,select.thermostat_aux_heater_mode,select.thermostat_auxheatermode,7,0,1,65,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,poolmode,pool mode,enum [off\|on\|auto] (>=0<=0), ,true,select.thermostat_pool_mode,select.thermostat_poolmode,7,0,1,66,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,poolflowtemp,pool flow temperature,uint8 (>=0<=0),C,true,number.thermostat_pool_flow_temperature,number.thermostat_poolflowtemp,7,0,1,67,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,hc1.seltemp,selected room temperature,int16 (>=0<=30),C,true,number.thermostat_hc1_selected_room_temperature,number.thermostat_hc1_seltemp,7,1,1/2,0,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,hc1.currtemp,current room temperature,int16,C,false,sensor.thermostat_hc1_current_room_temperature,sensor.thermostat_hc1_currtemp,7,1,1/10,1,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,hc1.haclimate,mqtt discovery current room temperature,enum [selTemp\|roomTemp], ,false,sensor.thermostat_hc1_mqtt_discovery_current_room_temperature,sensor.thermostat_hc1_haclimate,7,1,1,2,1
@@ -4903,13 +4913,13 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "ES73",thermostat,76,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "ES73",thermostat,76,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
 "ES73",thermostat,76,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,7,0,1,33,13
-"ES73",thermostat,76,display,display,enum [internal temperature\|internal setpoint\|external temperature\|burner temperature\|dhw temperature\|functioning mode\|time\|date\|smoke temperature] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,66,1
-"ES73",thermostat,76,language,language,enum [german\|dutch\|french\|italian], ,false,sensor.thermostat_language,sensor.thermostat_language,7,0,1,67,1
-"ES73",thermostat,76,clockoffset,clock offset,int8 (>=0<=0),seconds,true,number.thermostat_clock_offset,number.thermostat_clockoffset,7,0,1,68,1
+"ES73",thermostat,76,display,display,enum [internal temperature\|internal setpoint\|external temperature\|burner temperature\|dhw temperature\|functioning mode\|time\|date\|smoke temperature] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,68,1
+"ES73",thermostat,76,language,language,enum [german\|dutch\|french\|italian], ,false,sensor.thermostat_language,sensor.thermostat_language,7,0,1,69,1
+"ES73",thermostat,76,clockoffset,clock offset,int8 (>=0<=0),seconds,true,number.thermostat_clock_offset,number.thermostat_clockoffset,7,0,1,70,1
 "ES73",thermostat,76,intoffset,internal temperature offset,int8 (>=0<=0),C,true,number.thermostat_internal_temperature_offset,number.thermostat_intoffset,7,0,1/10,46,1
 "ES73",thermostat,76,minexttemp,minimal external temperature,int8 (>=0<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1
-"ES73",thermostat,76,inttemp1,temperature sensor 1,int16,C,false,sensor.thermostat_temperature_sensor_1,sensor.thermostat_inttemp1,7,0,1/10,69,1
-"ES73",thermostat,76,inttemp2,temperature sensor 2,int16,C,false,sensor.thermostat_temperature_sensor_2,sensor.thermostat_inttemp2,7,0,1/10,70,1
+"ES73",thermostat,76,inttemp1,temperature sensor 1,int16,C,false,sensor.thermostat_temperature_sensor_1,sensor.thermostat_inttemp1,7,0,1/10,71,1
+"ES73",thermostat,76,inttemp2,temperature sensor 2,int16,C,false,sensor.thermostat_temperature_sensor_2,sensor.thermostat_inttemp2,7,0,1/10,72,1
 "ES73",thermostat,76,damping,damping outdoor temperature,boolean (>=0<=0), ,true,switch.thermostat_damping_outdoor_temperature,switch.thermostat_damping,7,0,1,52,1
 "ES73",thermostat,76,dampedoutdoortemp,damped outdoor temperature,int8,C,false,sensor.thermostat_damped_outdoor_temperature,sensor.thermostat_dampedoutdoortemp,7,0,1,48,1
 "ES73",thermostat,76,building,building type,enum [light\|medium\|heavy] (>=0<=0), ,true,select.thermostat_building_type,select.thermostat_building,7,0,1,50,1
@@ -4988,8 +4998,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "ES79",thermostat,156,datetime,date/time,string (>=0<=0), ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,7,0,1,33,13
 "ES79",thermostat,156,intoffset,internal temperature offset,int8 (>=-5<=5),C,true,number.thermostat_internal_temperature_offset,number.thermostat_intoffset,7,0,1/10,46,1
 "ES79",thermostat,156,minexttemp,minimal external temperature,int8 (>=-30<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1
-"ES79",thermostat,156,inttemp1,temperature sensor 1,int16,C,false,sensor.thermostat_temperature_sensor_1,sensor.thermostat_inttemp1,7,0,1/10,69,1
-"ES79",thermostat,156,inttemp2,temperature sensor 2,int16,C,false,sensor.thermostat_temperature_sensor_2,sensor.thermostat_inttemp2,7,0,1/10,70,1
+"ES79",thermostat,156,inttemp1,temperature sensor 1,int16,C,false,sensor.thermostat_temperature_sensor_1,sensor.thermostat_inttemp1,7,0,1/10,71,1
+"ES79",thermostat,156,inttemp2,temperature sensor 2,int16,C,false,sensor.thermostat_temperature_sensor_2,sensor.thermostat_inttemp2,7,0,1/10,72,1
 "ES79",thermostat,156,damping,damping outdoor temperature,boolean (>=0<=0), ,true,switch.thermostat_damping_outdoor_temperature,switch.thermostat_damping,7,0,1,52,1
 "ES79",thermostat,156,dampedoutdoortemp,damped outdoor temperature,int8,C,false,sensor.thermostat_damped_outdoor_temperature,sensor.thermostat_dampedoutdoortemp,7,0,1,48,1
 "ES79",thermostat,156,building,building type,enum [light\|medium\|heavy] (>=0<=0), ,true,select.thermostat_building_type,select.thermostat_building,7,0,1,50,1
@@ -5048,10 +5058,10 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FW100",thermostat,105,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FW100",thermostat,105,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
 "FW100",thermostat,105,datetime,date/time,string (>=0<=0), ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,7,0,1,33,13
-"FW100",thermostat,105,display,display,enum [dhw temperature\|date\|external temperature\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,66,1
-"FW100",thermostat,105,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,67,1
-"FW100",thermostat,105,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,98,1
-"FW100",thermostat,105,contrast,display contrast,uint8 (>=25<=75),%,true,number.thermostat_display_contrast,number.thermostat_contrast,7,0,1/2,99,1
+"FW100",thermostat,105,display,display,enum [dhw temperature\|date\|external temperature\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,68,1
+"FW100",thermostat,105,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,69,1
+"FW100",thermostat,105,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,100,1
+"FW100",thermostat,105,contrast,display contrast,uint8 (>=25<=75),%,true,number.thermostat_display_contrast,number.thermostat_contrast,7,0,1/2,101,1
 "FW100",thermostat,105,intoffset,internal temperature offset,int8 (>=-3<=3),C,true,number.thermostat_internal_temperature_offset,number.thermostat_intoffset,7,0,1/10,46,1
 "FW100",thermostat,105,building,building type,uint8 (>=0<=0),%,true,number.thermostat_building_type,number.thermostat_building,7,0,10,50,1
 "FW100",thermostat,105,minexttemp,minimal external temperature,int8 (>=0<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1
@@ -5089,10 +5099,10 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FW200",thermostat,106,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FW200",thermostat,106,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
 "FW200",thermostat,106,datetime,date/time,string (>=0<=0), ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,7,0,1,33,13
-"FW200",thermostat,106,display,display,enum [dhw temperature\|date\|external temperature\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,66,1
-"FW200",thermostat,106,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,67,1
-"FW200",thermostat,106,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,98,1
-"FW200",thermostat,106,contrast,display contrast,uint8 (>=25<=75),%,true,number.thermostat_display_contrast,number.thermostat_contrast,7,0,1/2,99,1
+"FW200",thermostat,106,display,display,enum [dhw temperature\|date\|external temperature\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,68,1
+"FW200",thermostat,106,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,69,1
+"FW200",thermostat,106,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,100,1
+"FW200",thermostat,106,contrast,display contrast,uint8 (>=25<=75),%,true,number.thermostat_display_contrast,number.thermostat_contrast,7,0,1/2,101,1
 "FW200",thermostat,106,intoffset,internal temperature offset,int8 (>=-3<=3),C,true,number.thermostat_internal_temperature_offset,number.thermostat_intoffset,7,0,1/10,46,1
 "FW200",thermostat,106,building,building type,uint8 (>=0<=0),%,true,number.thermostat_building_type,number.thermostat_building,7,0,10,50,1
 "FW200",thermostat,106,minexttemp,minimal external temperature,int8 (>=0<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1
@@ -5130,10 +5140,10 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FR100",thermostat,107,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FR100",thermostat,107,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
 "FR100",thermostat,107,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,7,0,1,33,13
-"FR100",thermostat,107,display,display,enum [dhw temperature\|date\|external temperature\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,66,1
-"FR100",thermostat,107,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,67,1
-"FR100",thermostat,107,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,98,1
-"FR100",thermostat,107,contrast,display contrast,uint8 (>=25<=75),%,true,number.thermostat_display_contrast,number.thermostat_contrast,7,0,1/2,99,1
+"FR100",thermostat,107,display,display,enum [dhw temperature\|date\|external temperature\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,68,1
+"FR100",thermostat,107,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,69,1
+"FR100",thermostat,107,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,100,1
+"FR100",thermostat,107,contrast,display contrast,uint8 (>=25<=75),%,true,number.thermostat_display_contrast,number.thermostat_contrast,7,0,1/2,101,1
 "FR100",thermostat,107,intoffset,internal temperature offset,int8 (>=-3<=3),C,true,number.thermostat_internal_temperature_offset,number.thermostat_intoffset,7,0,1/10,46,1
 "FR100",thermostat,107,building,building type,uint8 (>=0<=0),%,true,number.thermostat_building_type,number.thermostat_building,7,0,10,50,1
 "FR100",thermostat,107,minexttemp,minimal external temperature,int8 (>=0<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1
@@ -5165,10 +5175,10 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FR110",thermostat,108,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FR110",thermostat,108,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
 "FR110",thermostat,108,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,7,0,1,33,13
-"FR110",thermostat,108,display,display,enum [dhw temperature\|date\|external temperature\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,66,1
-"FR110",thermostat,108,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,67,1
-"FR110",thermostat,108,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,98,1
-"FR110",thermostat,108,contrast,display contrast,uint8 (>=25<=75),%,true,number.thermostat_display_contrast,number.thermostat_contrast,7,0,1/2,99,1
+"FR110",thermostat,108,display,display,enum [dhw temperature\|date\|external temperature\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,68,1
+"FR110",thermostat,108,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,69,1
+"FR110",thermostat,108,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,100,1
+"FR110",thermostat,108,contrast,display contrast,uint8 (>=25<=75),%,true,number.thermostat_display_contrast,number.thermostat_contrast,7,0,1/2,101,1
 "FR110",thermostat,108,intoffset,internal temperature offset,int8 (>=-3<=3),C,true,number.thermostat_internal_temperature_offset,number.thermostat_intoffset,7,0,1/10,46,1
 "FR110",thermostat,108,building,building type,uint8 (>=0<=0),%,true,number.thermostat_building_type,number.thermostat_building,7,0,10,50,1
 "FR110",thermostat,108,minexttemp,minimal external temperature,int8 (>=0<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1
@@ -5200,10 +5210,10 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FB10",thermostat,109,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FB10",thermostat,109,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
 "FB10",thermostat,109,datetime,date/time,string (>=0<=0), ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,7,0,1,33,13
-"FB10",thermostat,109,display,display,enum [dhw temperature\|date\|external temperature\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,66,1
-"FB10",thermostat,109,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,67,1
-"FB10",thermostat,109,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,98,1
-"FB10",thermostat,109,contrast,display contrast,uint8 (>=25<=75),%,true,number.thermostat_display_contrast,number.thermostat_contrast,7,0,1/2,99,1
+"FB10",thermostat,109,display,display,enum [dhw temperature\|date\|external temperature\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,68,1
+"FB10",thermostat,109,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,69,1
+"FB10",thermostat,109,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,100,1
+"FB10",thermostat,109,contrast,display contrast,uint8 (>=25<=75),%,true,number.thermostat_display_contrast,number.thermostat_contrast,7,0,1/2,101,1
 "FB10",thermostat,109,intoffset,internal temperature offset,int8 (>=-3<=3),C,true,number.thermostat_internal_temperature_offset,number.thermostat_intoffset,7,0,1/10,46,1
 "FB10",thermostat,109,building,building type,uint8 (>=0<=0),%,true,number.thermostat_building_type,number.thermostat_building,7,0,10,50,1
 "FB10",thermostat,109,minexttemp,minimal external temperature,int8 (>=0<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1
@@ -5241,10 +5251,10 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FB100",thermostat,110,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FB100",thermostat,110,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
 "FB100",thermostat,110,datetime,date/time,string (>=0<=0), ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,7,0,1,33,13
-"FB100",thermostat,110,display,display,enum [dhw temperature\|date\|external temperature\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,66,1
-"FB100",thermostat,110,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,67,1
-"FB100",thermostat,110,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,98,1
-"FB100",thermostat,110,contrast,display contrast,uint8 (>=25<=75),%,true,number.thermostat_display_contrast,number.thermostat_contrast,7,0,1/2,99,1
+"FB100",thermostat,110,display,display,enum [dhw temperature\|date\|external temperature\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,68,1
+"FB100",thermostat,110,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,69,1
+"FB100",thermostat,110,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,100,1
+"FB100",thermostat,110,contrast,display contrast,uint8 (>=25<=75),%,true,number.thermostat_display_contrast,number.thermostat_contrast,7,0,1/2,101,1
 "FB100",thermostat,110,intoffset,internal temperature offset,int8 (>=-3<=3),C,true,number.thermostat_internal_temperature_offset,number.thermostat_intoffset,7,0,1/10,46,1
 "FB100",thermostat,110,building,building type,uint8 (>=0<=0),%,true,number.thermostat_building_type,number.thermostat_building,7,0,10,50,1
 "FB100",thermostat,110,minexttemp,minimal external temperature,int8 (>=0<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1
@@ -5282,10 +5292,10 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FR10",thermostat,111,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FR10",thermostat,111,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
 "FR10",thermostat,111,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,7,0,1,33,13
-"FR10",thermostat,111,display,display,enum [dhw temperature\|date\|external temperature\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,66,1
-"FR10",thermostat,111,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,67,1
-"FR10",thermostat,111,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,98,1
-"FR10",thermostat,111,contrast,display contrast,uint8 (>=25<=75),%,true,number.thermostat_display_contrast,number.thermostat_contrast,7,0,1/2,99,1
+"FR10",thermostat,111,display,display,enum [dhw temperature\|date\|external temperature\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,68,1
+"FR10",thermostat,111,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,69,1
+"FR10",thermostat,111,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,100,1
+"FR10",thermostat,111,contrast,display contrast,uint8 (>=25<=75),%,true,number.thermostat_display_contrast,number.thermostat_contrast,7,0,1/2,101,1
 "FR10",thermostat,111,intoffset,internal temperature offset,int8 (>=-3<=3),C,true,number.thermostat_internal_temperature_offset,number.thermostat_intoffset,7,0,1/10,46,1
 "FR10",thermostat,111,building,building type,uint8 (>=0<=0),%,true,number.thermostat_building_type,number.thermostat_building,7,0,10,50,1
 "FR10",thermostat,111,minexttemp,minimal external temperature,int8 (>=0<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1
@@ -5317,10 +5327,10 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FW500",thermostat,116,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FW500",thermostat,116,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
 "FW500",thermostat,116,datetime,date/time,string (>=0<=0), ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,7,0,1,33,13
-"FW500",thermostat,116,display,display,enum [dhw temperature\|date\|external temperature\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,66,1
-"FW500",thermostat,116,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,67,1
-"FW500",thermostat,116,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,98,1
-"FW500",thermostat,116,contrast,display contrast,uint8 (>=25<=75),%,true,number.thermostat_display_contrast,number.thermostat_contrast,7,0,1/2,99,1
+"FW500",thermostat,116,display,display,enum [dhw temperature\|date\|external temperature\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,68,1
+"FW500",thermostat,116,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,69,1
+"FW500",thermostat,116,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,100,1
+"FW500",thermostat,116,contrast,display contrast,uint8 (>=25<=75),%,true,number.thermostat_display_contrast,number.thermostat_contrast,7,0,1/2,101,1
 "FW500",thermostat,116,intoffset,internal temperature offset,int8 (>=-3<=3),C,true,number.thermostat_internal_temperature_offset,number.thermostat_intoffset,7,0,1/10,46,1
 "FW500",thermostat,116,building,building type,uint8 (>=0<=0),%,true,number.thermostat_building_type,number.thermostat_building,7,0,10,50,1
 "FW500",thermostat,116,minexttemp,minimal external temperature,int8 (>=0<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1
@@ -5358,10 +5368,10 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FR50",thermostat,147,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FR50",thermostat,147,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
 "FR50",thermostat,147,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,7,0,1,33,13
-"FR50",thermostat,147,display,display,enum [dhw temperature\|date\|external temperature\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,66,1
-"FR50",thermostat,147,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,67,1
-"FR50",thermostat,147,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,98,1
-"FR50",thermostat,147,contrast,display contrast,uint8 (>=25<=75),%,true,number.thermostat_display_contrast,number.thermostat_contrast,7,0,1/2,99,1
+"FR50",thermostat,147,display,display,enum [dhw temperature\|date\|external temperature\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,68,1
+"FR50",thermostat,147,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,69,1
+"FR50",thermostat,147,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,100,1
+"FR50",thermostat,147,contrast,display contrast,uint8 (>=25<=75),%,true,number.thermostat_display_contrast,number.thermostat_contrast,7,0,1/2,101,1
 "FR50",thermostat,147,intoffset,internal temperature offset,int8 (>=-3<=3),C,true,number.thermostat_internal_temperature_offset,number.thermostat_intoffset,7,0,1/10,46,1
 "FR50",thermostat,147,building,building type,uint8 (>=0<=0),%,true,number.thermostat_building_type,number.thermostat_building,7,0,10,50,1
 "FR50",thermostat,147,minexttemp,minimal external temperature,int8 (>=0<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1
@@ -5393,10 +5403,10 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FR120",thermostat,191,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FR120",thermostat,191,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
 "FR120",thermostat,191,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,7,0,1,33,13
-"FR120",thermostat,191,display,display,enum [dhw temperature\|date\|external temperature\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,66,1
-"FR120",thermostat,191,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,67,1
-"FR120",thermostat,191,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,98,1
-"FR120",thermostat,191,contrast,display contrast,uint8 (>=25<=75),%,true,number.thermostat_display_contrast,number.thermostat_contrast,7,0,1/2,99,1
+"FR120",thermostat,191,display,display,enum [dhw temperature\|date\|external temperature\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,68,1
+"FR120",thermostat,191,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,69,1
+"FR120",thermostat,191,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,100,1
+"FR120",thermostat,191,contrast,display contrast,uint8 (>=25<=75),%,true,number.thermostat_display_contrast,number.thermostat_contrast,7,0,1/2,101,1
 "FR120",thermostat,191,intoffset,internal temperature offset,int8 (>=-3<=3),C,true,number.thermostat_internal_temperature_offset,number.thermostat_intoffset,7,0,1/10,46,1
 "FR120",thermostat,191,building,building type,uint8 (>=0<=0),%,true,number.thermostat_building_type,number.thermostat_building,7,0,10,50,1
 "FR120",thermostat,191,minexttemp,minimal external temperature,int8 (>=0<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1
@@ -5428,10 +5438,10 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "FW120",thermostat,192,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,7,0,1,0,8
 "FW120",thermostat,192,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,7,0,1,8,25
 "FW120",thermostat,192,datetime,date/time,string (>=0<=0), ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,7,0,1,33,13
-"FW120",thermostat,192,display,display,enum [dhw temperature\|date\|external temperature\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,66,1
-"FW120",thermostat,192,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,67,1
-"FW120",thermostat,192,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,98,1
-"FW120",thermostat,192,contrast,display contrast,uint8 (>=25<=75),%,true,number.thermostat_display_contrast,number.thermostat_contrast,7,0,1/2,99,1
+"FW120",thermostat,192,display,display,enum [dhw temperature\|date\|external temperature\|internal setpoint] (>=0<=0), ,true,select.thermostat_display,select.thermostat_display,7,0,1,68,1
+"FW120",thermostat,192,language,language,enum [german\|italian\|french\|dutch] (>=0<=0), ,true,select.thermostat_language,select.thermostat_language,7,0,1,69,1
+"FW120",thermostat,192,dateformat,date format,enum [dd.mm.yyyy\|mm/dd/yyyy] (>=0<=0), ,true,select.thermostat_date_format,select.thermostat_dateformat,7,0,1,100,1
+"FW120",thermostat,192,contrast,display contrast,uint8 (>=25<=75),%,true,number.thermostat_display_contrast,number.thermostat_contrast,7,0,1/2,101,1
 "FW120",thermostat,192,intoffset,internal temperature offset,int8 (>=-3<=3),C,true,number.thermostat_internal_temperature_offset,number.thermostat_intoffset,7,0,1/10,46,1
 "FW120",thermostat,192,building,building type,uint8 (>=0<=0),%,true,number.thermostat_building_type,number.thermostat_building,7,0,10,50,1
 "FW120",thermostat,192,minexttemp,minimal external temperature,int8 (>=0<=0),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,7,0,1,51,1

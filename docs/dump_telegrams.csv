@@ -104,7 +104,7 @@ telegram_type_id,name,is_fetched
 0x0292,HPMode,fetched
 0x0293,HPMode,fetched
 0x0294,HPMode,fetched
-0x029B,RC300Curves, 
+0x029B,RC300Curves,fetched
 0x029C,RC300Curves, 
 0x029D,RC300Curves, 
 0x029E,RC300Curves, 
@@ -113,9 +113,9 @@ telegram_type_id,name,is_fetched
 0x02A1,RC300Curves, 
 0x02A2,RC300Curves, 
 0x02A5,RC300Monitor, 
-0x02A6,CRFMonitor, 
-0x02A7,CRFMonitor, 
-0x02A8,CRFMonitor, 
+0x02A6,RC300Monitor, 
+0x02A7,RC300Monitor, 
+0x02A8,RC300Monitor, 
 0x02A9,RC300Monitor, 
 0x02AA,RC300Monitor, 
 0x02AB,RC300Monitor, 
@@ -213,6 +213,7 @@ telegram_type_id,name,is_fetched
 0x05D9,Airquality, 
 0x0614,RCauxHeaterMode,fetched
 0x061E,auxHeater,fetched
+0x067B,RC300Pool,fetched
 0x0772,HIUSettings, 
 0x0779,HIUMonitor, 
 0x07A5,SM100wwCirc,fetched
