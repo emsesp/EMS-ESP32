@@ -187,7 +187,8 @@ bool WebCustomEntityService::command_setvalue(const char * value, const int8_t i
 
     for (CustomEntityItem & entityItem : *customEntityItems_) {
         if (Helpers::toLower(entityItem.name) == Helpers::toLower(name)) {
-            if (entityItem.data == value) {
+            // data only holds the current value for RAM/NVS entities, bus entities must always be written
+            if (entityItem.ram > 0 && entityItem.data == value) {
                 return true; // no change
             }
 

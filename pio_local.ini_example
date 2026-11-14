@@ -66,7 +66,7 @@ custom_emsesp_ip = ems-espP.local ; E32V2.2 (prod)
 
 ; lib_deps =
 ;   bblanchon/ArduinoJson @ 7.4.3
-;   ESP32Async/AsyncTCP @ 3.6.0
+;   ESP32Async/AsyncTCP @ 3.6.1
 ;   ESP32Async/ESPAsyncWebServer @ 3.11.0
 ;   https://github.com/mobizt/ReadyMail.git @ 0.4.0
 ;   https://github.com/mobizt/ESP_SSLClient.git @ 3.1.3
@@ -99,3 +99,68 @@ debug_init_break =
 upload_speed = 2000000
 monitor_speed = 115200
 extra_scripts =
+
+[env:s_16M_P_custom]
+; same as s_16M_P, but the Arduino/IDF libs are rebuilt with HybridCompile using the custom_sdkconfig below
+; this is same procedure as in the esp32-arduino-lib-builder repository https://github.com/emsesp/esp32-arduino-lib-builder/blob/emsesp/configs/defconfig.ems-esp
+; SPI Ethernet is left enabled: Arduino ETH.cpp needs those types; unused W5500/DM9051 objects are GC'd
+extends = env:s_16M_P
+custom_sdkconfig =
+  '# CONFIG_BT_ENABLED is not set'
+  '# CONFIG_LWIP_PPP_SUPPORT is not set'
+  '# CONFIG_LWIP_IP_FORWARD is not set'
+  '# CONFIG_LWIP_IPV4_NAPT is not set'
+  '# CONFIG_LWIP_IPV4_NAPT_PORTMAP is not set'
+  '# CONFIG_ULP_COPROC_ENABLED is not set'
+  '# CONFIG_FREERTOS_GENERATE_RUN_TIME_STATS is not set'
+  '# CONFIG_FREERTOS_USE_TRACE_FACILITY is not set'
+  '# CONFIG_FREERTOS_ENABLE_TASK_SNAPSHOT is not set'
+  '# CONFIG_ESP_MODEM_USE_PPP_MODE is not set'
+  '# CONFIG_ESP_GDBSTUB_ENABLED is not set'
+  '# CONFIG_ESP_NETIF_REPORT_DATA_TRAFFIC is not set'
+  '# CONFIG_MDNS_ENABLE_CONSOLE_CLI is not set'
+  '# CONFIG_MDNS_ENABLE_BROWSE is not set'
+  '# CONFIG_I2S_ISR_IRAM_SAFE is not set'
+  # UART ISR must live in IRAM. Tasmota puts ringbuf ISRs in flash, which
+  # forces CONFIG_UART_ISR_IN_IRAM=n and panics (Cache error) when the EMS
+  # or console UART fires during a flash read (WiFi stop / mDNS / NVS).
+  # CONFIG_RINGBUF_PLACE_ISR_FUNCTIONS_INTO_FLASH is not set'
+  'CONFIG_UART_ISR_IN_IRAM=y'
+  'CONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL=256'
+  'CONFIG_SPIRAM_MALLOC_RESERVE_INTERNAL=1024'
+  'CONFIG_LWIP_LOCAL_HOSTNAME="ems-esp"'
+  'CONFIG_TINYUSB_DESC_CDC_STRING="EMS-ESP CDC Device"'
+
+  # Moderate buffer trims only. Avoid SPIRAM_TRY_ALLOCATE_WIFI_LWIP,
+  # SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY, and mDNS-from-SPIRAM on ESP32 —
+  # those caused boot loops on Ethernet boards.
+
+  'CONFIG_ESP_WIFI_ESPNOW_MAX_ENCRYPT_NUM=0'
+  'CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM=6'
+  'CONFIG_ESP_WIFI_DYNAMIC_RX_BUFFER_NUM=16'
+  'CONFIG_ESP_WIFI_DYNAMIC_TX_BUFFER_NUM=16'
+  'CONFIG_ESP_WIFI_MGMT_SBUF_NUM=16'
+  'CONFIG_ESP_WIFI_RX_BA_WIN=4'
+  'CONFIG_ESP_WIFI_TX_BA_WIN=4'
+
+  'CONFIG_MDNS_MAX_SERVICES=4'
+  'CONFIG_MDNS_ACTION_QUEUE_LEN=8'
+
+  'CONFIG_ETH_DMA_RX_BUFFER_NUM=6'
+  'CONFIG_ETH_DMA_TX_BUFFER_NUM=6'
+
+  'CONFIG_LWIP_MAX_ACTIVE_TCP=10'
+  'CONFIG_LWIP_MAX_LISTENING_TCP=8'
+  'CONFIG_LWIP_MAX_UDP_PCBS=8'
+  'CONFIG_LWIP_MAX_RAW_PCBS=4'
+  'CONFIG_LWIP_IPV6_NUM_ADDRESSES=2'
+
+  # Save a core dump to the coredump partition on a crash, EMS-ESP reads and reports it after the restart.
+  # Boards without a coredump partition (4MB) only log that there's none at boot.
+  'CONFIG_ESP_COREDUMP_ENABLE_TO_FLASH=y'
+  # CONFIG_ESP_COREDUMP_ENABLE_TO_NONE is not set
+  'CONFIG_ESP_COREDUMP_DATA_FORMAT_ELF=y'
+
+  # New firmware stays pending verification until EMS-ESP confirms it after 2 minutes, a crash or restart before
+  # then makes the bootloader roll back to the previous firmware. Only boards flashed over serial get the bootloader.
+  'CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y'

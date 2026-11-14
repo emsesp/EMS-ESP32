@@ -1179,8 +1179,9 @@ void System::send_info_mqtt() {
     _connection = connection;
     JsonDocument doc;
 
-    doc["version"]    = EMSESP_APP_VERSION;
-    doc["systemName"] = system_name_.isEmpty() ? "EMS-ESP" : system_name_;
+    doc["version"]          = EMSESP_APP_VERSION;
+    doc["recovery_version"] = recovery_version();
+    doc["systemName"]       = system_name_.isEmpty() ? "EMS-ESP" : system_name_;
 
     // if NTP is enabled send the boot_time in local time in ISO 8601 format (eg: 2022-11-15 20:46:38)
     // https://github.com/emsesp/EMS-ESP32/issues/751

@@ -1398,3 +1398,4 @@ heatmode
 noslot
 wwcd
 auxheater
+switchpoint

@@ -50,6 +50,8 @@ A full list of breaking changes can be found in this [discussion](https://github
 - RC300/RC310 `nofrostmode` missing `off` state [#3311](https://github.com/emsesp/EMS-ESP32/issues/3311)
 - SRC/MX300 wireless room thermostats: `seltemp` and `mode` were written to the cooling settings on systems without a heatpump, so the change was ignored (since 3.9.0) [#3414](https://github.com/emsesp/EMS-ESP32/discussions/3414)
 - Home Assistant entities of analog sensors disappeared after an MQTT reconnect or "Refresh MQTT" and only came back after a restart or saving a sensor (since 3.9.0) [#3422](https://github.com/emsesp/EMS-ESP32/issues/3422)
+- thermostat switchtimes: setting one in JSON with `"day":"all"` cleared that slot and reported success, it's now refused [#3434](https://github.com/emsesp/EMS-ESP32/discussions/3434)
+- custom entities on the EMS bus: a write of the value shown when the list was last saved was reported as done but never sent, until a restart [#3431](https://github.com/emsesp/EMS-ESP32/issues/3431)
 
 ## Changed
 
