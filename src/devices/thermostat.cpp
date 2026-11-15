@@ -5184,8 +5184,13 @@ void Thermostat::register_device_values() {
                               FL_(auxHeaterMode),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_auxHeaterMode));
-        register_device_value(
-            DeviceValueTAG::TAG_DEVICE_DATA, &poolMode_, DeviceValueType::ENUM, FL_(enum_wwMode2), FL_(poolMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_poolMode));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &poolMode_,
+                              DeviceValueType::ENUM,
+                              FL_(enum_wwMode2),
+                              FL_(poolMode),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_poolMode));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &poolFlowTemp_,
                               DeviceValueType::UINT8,

@@ -2380,7 +2380,8 @@ void EMSdevice::mqtt_ha_entity_config_create() {
         if (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) && dv.has_state(DeviceValueState::DV_ACTIVE)
             && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE)) {
             // create_device_config is only done once for the EMS device. It can added to any entity, so we take the first
-            if (Mqtt::publish_ha_sensor_config_dv(dv, name().c_str(), brand_to_cstr(), to_string_version().c_str(), false, create_device_config, status_topic.c_str())) {
+            if (Mqtt::publish_ha_sensor_config_dv(
+                    dv, name().c_str(), brand_to_cstr(), to_string_version().c_str(), false, create_device_config, status_topic.c_str())) {
                 dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
                 create_device_config = false; // only create the main config once
                 count++;
