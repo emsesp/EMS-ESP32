@@ -1270,7 +1270,7 @@ bool EMSESP::process_telegram(const std::shared_ptr<const Telegram> & telegram) 
     }
 
     // check for custom entities reding this telegram
-    webCustomEntityService.get_value(telegram);
+    webCustomEntityService.get_value(telegram, telegram->type_id == publish_id_ && telegram->dest == EMSbus::ems_bus_id());
 
     // check for common types, like the Version(0x02)
     if (telegram->type_id == EMSdevice::EMS_TYPE_VERSION) {

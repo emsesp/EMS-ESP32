@@ -829,8 +829,10 @@ void WebCustomEntityService::fetch() {
 }
 
 // called on process telegram, read from telegram
-bool WebCustomEntityService::get_value(const std::shared_ptr<const Telegram> & telegram) {
-    bool has_change = false;
+// is_validate is set when the telegram is the read-back after a write, and then changes are published immediately
+bool WebCustomEntityService::get_value(const std::shared_ptr<const Telegram> & telegram, const bool is_validate) {
+    bool       has_change     = false;
+    const bool publish_change = is_validate || EMSESP::mqtt_.get_publish_onchange(EMSdevice::DeviceType::SYSTEM);
     // read-length of BOOL, INT8, UINT8, INT16, UINT16, UINT24, TIME, UINT32
     const uint8_t len[] = {1, 1, 1, 2, 2, 3, 3, 4};
     for (auto & entity : *customEntityItems_) {
@@ -854,7 +856,7 @@ bool WebCustomEntityService::get_value(const std::shared_ptr<const Telegram> & t
                     entity.data = data.c_str();
                     if (Mqtt::publish_single()) {
                         publish_single(entity);
-                    } else if (EMSESP::mqtt_.get_publish_onchange(EMSdevice::DeviceType::SYSTEM)) {
+                    } else if (publish_change) {
                         has_change = true;
                     }
 
@@ -879,7 +881,7 @@ bool WebCustomEntityService::get_value(const std::shared_ptr<const Telegram> & t
                 entity.value = value;
                 if (Mqtt::publish_single()) {
                     publish_single(entity);
-                } else if (EMSESP::mqtt_.get_publish_onchange(EMSdevice::DeviceType::SYSTEM)) {
+                } else if (publish_change) {
                     has_change = true;
                 }
 
