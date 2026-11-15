@@ -871,6 +871,8 @@ MAKE_TRANSLATION(setDiffPress, "setdiffpress", "set differential pressure", "Pum
 
 // * pool
 MAKE_TRANSLATION(poolOn, "poolon", "pool on", "Pool ein", "zwembad aan*", "pool på*", "włącz basen*", "basseng på*", "piscine activée*", "havuz açık*", "piscina accesa*", "bazén zapnutý*", "bazén zapnutý*", "medence be")
+MAKE_TRANSLATION(poolMode, "poolmode", "pool mode", "Pool Betriebsart", "", "", "", "", "", "", "", "", "", "") // ToDo translate
+MAKE_TRANSLATION(poolFlowTemp, "poolflowtemp", "pool flow temperature", "Pool Vorlauftemperatur", "", "", "", "", "", "", "", "", "", "") // ToDo translate
 MAKE_TRANSLATION(poolSetTemp, "poolsettemp", "pool setpoint", "Pool Soll", "Streeftemperatuur zwembad", "Pool Temperatur Börvärde", "zadana temperatura basenu", "valgt temp basseng", "température consigne piscine", "hedef havuz sıcaklığı", "temperatura nominale piscina", "nastavená teplota bazéna", "cílová teplota bazénu", "medence alapjel")
 MAKE_TRANSLATION(poolTemp, "pooltemp", "pool temperature", "Pooltemperatur", "Zwembadtemperatuur", "Pooltemperatur", "temperatura basenu", "bassengtemperatur", "température piscine", "havuz sıcaklığı", "temperatura piscina", "teplota bazéna", "teplota bazénu", "medence hőmérséklet")
 MAKE_TRANSLATION(poolShuntStatus, "poolshuntstatus", "valve status", "Ventil Status", "Zwembadklep status openen/sluiten", "Pool Shunt-status öppen/stängd", "status bocznika basenu", "bassengshunt-status åpen/stengt", "état shunt piscine ouvert/fermé", "havuz şant durumu açılıyor/kapanıyor", "aprire/chiudere valvola regolazione piscina", "stav bazénového bočníka otváranie/zatváranie", "stav šoupátka bazénu (otevírání/zavírání)", "szelep állapot")

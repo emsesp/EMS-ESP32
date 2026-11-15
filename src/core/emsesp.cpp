@@ -52,18 +52,8 @@ uint32_t          EMSESP::last_fetch_       = 0;
 uint32_t EMSESP::last_device_status_  = 0;
 bool     EMSESP::device_status_force_ = false;
 
-#ifdef EMSESP_GATEWAY_TX_HOLD
-uint32_t EMSESP::gateway_hold_until_        = 0;
-uint32_t EMSESP::gateway_hold_start_        = 0;
-uint32_t EMSESP::gateway_hold_max_log_      = 0;
-uint32_t EMSESP::gateway_window_start_      = 0;
-uint8_t  EMSESP::gateway_window_count_      = 0;
-uint32_t EMSESP::gateway_fast_start_        = 0;
-uint8_t  EMSESP::gateway_fast_count_        = 0;
-uint32_t EMSESP::gateway_last_seen_         = 0;
 uint8_t  EMSESP::last_version_request_src_  = 0;
 uint32_t EMSESP::last_version_request_time_ = 0;
-#endif
 
 uint32_t EMSESP::last_entity_change_        = 0;
 bool     EMSESP::entity_compaction_pending_ = false;
@@ -1157,7 +1147,8 @@ void EMSESP::process_deviceName(const std::shared_ptr<const Telegram> & telegram
 // e.g. 09 0B 02 00 PP V1 V2
 void EMSESP::process_version(const std::shared_ptr<const Telegram> & telegram) {
     // check for valid telegram, just in case
-    if (telegram->offset != 0) {
+    // also skip the echo of our own reply to another device's version read
+    if (telegram->offset != 0 || telegram->src == EMSbus::ems_bus_id()) {
         return;
     }
 
@@ -1202,7 +1193,6 @@ void EMSESP::process_version(const std::shared_ptr<const Telegram> & telegram) {
         brand = EMSdevice::Brand::NO_BRAND; // unknown
     }
 
-#ifdef EMSESP_GATEWAY_TX_HOLD
     // skip the name request if we already know this device and its name
     bool known = false;
     for (const auto & emsdevice : emsdevices) {
@@ -1211,16 +1201,13 @@ void EMSESP::process_version(const std::shared_ptr<const Telegram> & telegram) {
             break;
         }
     }
-#endif
 
     // add it - will be overwritten if device already exists
     (void)add_device(device_id, product_id, version, brand);
 
-#ifdef EMSESP_GATEWAY_TX_HOLD
     if (known) {
         return;
     }
-#endif
 
     // request the deviceName from telegram 0x01
     send_read_request(EMSdevice::EMS_TYPE_NAME, device_id, 27);
@@ -1283,7 +1270,7 @@ bool EMSESP::process_telegram(const std::shared_ptr<const Telegram> & telegram) 
     }
 
     // check for custom entities reding this telegram
-    webCustomEntityService.get_value(telegram);
+    webCustomEntityService.get_value(telegram, telegram->type_id == publish_id_ && telegram->dest == EMSbus::ems_bus_id());
 
     // check for common types, like the Version(0x02)
     if (telegram->type_id == EMSdevice::EMS_TYPE_VERSION) {
@@ -1354,16 +1341,12 @@ bool EMSESP::process_telegram(const std::shared_ptr<const Telegram> & telegram) 
             }
 
             if (!wait_km_ && !found_device && (telegram->src != EMSbus::ems_bus_id()) && (telegram->message_length > 0)) {
-#ifdef EMSESP_GATEWAY_TX_HOLD
                 // a new device often sends several broadcasts before its version reply is processed, only ask once
                 if (telegram->src != last_version_request_src_ || uuid::get_uptime() - last_version_request_time_ > 5000) {
                     last_version_request_src_  = telegram->src;
                     last_version_request_time_ = uuid::get_uptime();
                     send_read_request(EMSdevice::EMS_TYPE_VERSION, telegram->src);
                 }
-#else
-                send_read_request(EMSdevice::EMS_TYPE_VERSION, telegram->src);
-#endif
             }
         }
     }
@@ -1640,15 +1623,6 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     // Print to LOG showing we've added a new device
     LOG_INFO("Detected EMS device: %s (0x%02X)", EMSdevice::device_type_2_device_name(device_type), device_id);
 
-#ifdef EMSESP_GATEWAY_TX_HOLD
-    // a gateway appearing while we're running is most likely starting up and about to sync
-    if (device_id == EMSdevice::EMS_DEVICE_ID_GATEWAY1) {
-        uint32_t now       = uuid::get_uptime();
-        gateway_last_seen_ = now ? now : 1;
-        gateway_tx_hold_start();
-    }
-#endif
-
     // register the MQTT subscribe topic for this device
     // except for controller and gateway
     if ((device_type == DeviceType::CONTROLLER) || (device_type == DeviceType::GATEWAY)) {
@@ -1707,6 +1681,12 @@ void EMSESP::reply_own_request(const uint8_t * data, const uint8_t length, const
         reply[0] = our | mask;
         reply[1] = data[0] & 0x7F;
         if (data[2] < 0xF0) { // EMS read
+#ifdef EMSESP_OWN_IDENTITY
+            if ((data[2] == EMSdevice::EMS_TYPE_VERSION || data[2] == EMSdevice::EMS_TYPE_NAME) && length >= 6) {
+                reply_identity(reply[1], data[2], data[3], data[4], mask);
+                return;
+            }
+#endif
             reply[2] = data[2];
             reply[3] = data[3];
             reply[4] = EMSbus::calculate_crc(reply, 4);
@@ -1731,6 +1711,50 @@ void EMSESP::reply_own_request(const uint8_t * data, const uint8_t length, const
         LOG_DEBUG("Ack write from 0x%02X", data[0] & 0x7F);
     }
 }
+
+#ifdef EMSESP_OWN_IDENTITY
+// answer version (0x02) and name (0x01) reads like a real EMS device instead of with an empty telegram
+// the identity must never change, the K30RF re-reads it from every device on the bus about every 13 hours
+// layout as sent by the UI800/CR11: 0x02 = productID, version major, minor, padded to 12 bytes
+// 0x01 = 27 ascii digit serial number, ascii name at offset 27, 16 reserved bytes at offset 54
+// see https://github.com/emsesp/EMS-ESP32/issues/3094
+void EMSESP::reply_identity(const uint8_t dest, const uint8_t type_id, const uint8_t offset, const uint8_t length, const uint8_t mask) {
+    uint8_t identity[70] = {0};
+    uint8_t size;
+
+    if (type_id == EMSdevice::EMS_TYPE_VERSION) {
+        FirmwareVersion version(EMSESP_APP_VERSION);
+        identity[0] = EMSESP_OWN_PRODUCT_ID;
+        identity[1] = version.major();
+        identity[2] = version.minor();
+        size        = 12;
+    } else {
+        unsigned long long mac = 0;
+#ifndef EMSESP_STANDALONE
+        mac = ESP.getEfuseMac();
+#endif
+        char serial[28];
+        snprintf(serial, sizeof(serial), "%027llu", mac);
+        memcpy(identity, serial, 27);
+        memcpy(identity + 27, "EMS-ESP", 7);
+        size = sizeof(identity);
+    }
+
+    uint8_t reply[32];
+    reply[0]    = EMSbus::ems_bus_id() | mask;
+    reply[1]    = dest;
+    reply[2]    = type_id;
+    reply[3]    = offset;
+    uint8_t len = 0;
+    if (offset < size) {
+        len = std::min<uint8_t>(std::min<uint8_t>(length, size - offset), sizeof(reply) - 5);
+        memcpy(reply + 4, identity + offset, len);
+    }
+    reply[4 + len] = EMSbus::calculate_crc(reply, 4 + len);
+    EMSuart::transmit(reply, 5 + len);
+    LOG_DEBUG("Identity reply to 0x%02X read 0x%02X offset %d, %d bytes", dest, type_id, offset, len);
+}
+#endif
 
 // this is main entry point when data is received on the Rx line, via emsuart library
 // we check if its a complete telegram or just a single byte (which could be a poll or a return status)
@@ -1833,13 +1857,6 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
             wait_km_ = false; // KM200 is polled, from now on it is safe to send
         }
 
-#ifdef EMSESP_GATEWAY_TX_HOLD
-        // master polling 0x48 again after a gap means the gateway (or heat pump) came back
-        if (poll_id == EMSdevice::EMS_DEVICE_ID_GATEWAY1) {
-            gateway_note_activity();
-        }
-#endif
-
 #ifdef EMSESP_UART_DEBUG
         char s[4];
         if (first_value & 0x80) {
@@ -1851,17 +1868,6 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         }
 #endif
         // check for poll to us, if so send top message from Tx queue immediately and quit
-#ifdef EMSESP_GATEWAY_TX_HOLD
-        // while the gateway is syncing, don't Tx anything (including Roomctrl) — only ack our own poll
-        // so the master keeps us in 0x07 and the gateway doesn't see the device list change
-        // (19d muted ACKs too; A21 was worse and never self-healed — back to 19c behaviour)
-        if (gateway_tx_hold()) {
-            if (poll_id == EMSbus::ems_bus_id()) {
-                txservice_.send_poll();
-            }
-            return;
-        }
-#endif
         if (poll_id == txservice_.get_send_id()) {
             txservice_.send();
         } else {
@@ -1876,10 +1882,6 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 #endif
         Roomctrl::check(data[1], data, length); // check if there is a message for the roomcontroller
         reply_own_request(data, length, tx_state);
-
-#ifdef EMSESP_GATEWAY_TX_HOLD
-        gateway_rx_check(data, length);
-#endif
 
         rxservice_.add(data, length); // add to RxQueue
     }
@@ -1903,11 +1905,6 @@ void EMSESP::check_device_status() {
 // fetch devices one by one
 void EMSESP::scheduled_fetch_values() {
     static uint8_t no = 0;
-#ifdef EMSESP_GATEWAY_TX_HOLD
-    if (gateway_tx_hold()) {
-        return;
-    }
-#endif
     if (no || (uuid::get_uptime() - last_fetch_ > EMS_FETCH_FREQUENCY)) {
         if (!no) {
             last_fetch_ = uuid::get_uptime();
@@ -1929,101 +1926,6 @@ void EMSESP::scheduled_fetch_values() {
         }
     }
 }
-
-#ifdef EMSESP_GATEWAY_TX_HOLD
-// any poll of or telegram from 0x48 — if it was silent (HP/K30RF restart) re-arm the Tx hold
-void EMSESP::gateway_note_activity() {
-    uint32_t now = uuid::get_uptime();
-    if (gateway_last_seen_ && (now - gateway_last_seen_ > GATEWAY_SILENCE_MS)) {
-        LOG_INFO("Gateway 0x%02X returned after %lu s silence, holding Tx", EMSdevice::EMS_DEVICE_ID_GATEWAY1, (unsigned long)((now - gateway_last_seen_) / 1000));
-        if (!gateway_hold_until_) {
-            gateway_hold_start_   = now;
-            gateway_hold_max_log_ = 0;
-        }
-        gateway_hold_until_ = (now + GATEWAY_HOLD_TIME) | 1;
-    }
-    gateway_last_seen_ = now ? now : 1; // keep 0 as "never seen"
-}
-
-// count read requests from the gateway to other devices, a high rate means it's doing its startup sync
-void EMSESP::gateway_rx_check(const uint8_t * data, const uint8_t length) {
-    if (length < 2 || (data[0] & 0x7F) != EMSdevice::EMS_DEVICE_ID_GATEWAY1) {
-        return;
-    }
-
-    gateway_note_activity();
-
-    if (length < 4 || !(data[1] & 0x80)) {
-        return;
-    }
-
-    uint8_t dest = data[1] & 0x7F;
-    if (dest == 0 || dest == EMSbus::ems_bus_id()) {
-        return;
-    }
-
-    uint32_t now = uuid::get_uptime();
-    if (now - gateway_window_start_ > GATEWAY_BURST_WINDOW) {
-        gateway_window_start_ = now;
-        gateway_window_count_ = 0;
-    }
-
-    if (now - gateway_fast_start_ > GATEWAY_FAST_WINDOW) {
-        gateway_fast_start_ = now;
-        gateway_fast_count_ = 0;
-    }
-
-    ++gateway_window_count_;
-    ++gateway_fast_count_;
-    if (gateway_window_count_ >= GATEWAY_BURST_THRESHOLD || gateway_fast_count_ >= GATEWAY_FAST_THRESHOLD) {
-        gateway_window_start_ = now;
-        gateway_window_count_ = 0;
-        gateway_fast_start_   = now;
-        gateway_fast_count_   = 0;
-        gateway_tx_hold_start();
-    }
-}
-
-void EMSESP::gateway_tx_hold_start() {
-    uint32_t now = uuid::get_uptime();
-
-    if (!gateway_hold_until_) {
-        gateway_hold_start_   = now;
-        gateway_hold_max_log_ = 0;
-        LOG_INFO("Gateway 0x%02X is busy, holding Tx", EMSdevice::EMS_DEVICE_ID_GATEWAY1);
-    }
-
-    gateway_hold_until_ = (now + GATEWAY_HOLD_TIME) | 1; // 0 means no hold
-}
-
-bool EMSESP::gateway_tx_hold() {
-    if (!gateway_hold_until_) {
-        return false;
-    }
-
-    uint32_t now = uuid::get_uptime();
-
-    // only resume when the gateway has been quiet for GATEWAY_HOLD_TIME — never force-resume
-    // while bursts keep extending the hold (that 10‑min flap prolonged A21 storm on #3094)
-    if ((int32_t)(now - gateway_hold_until_) >= 0) {
-        uint32_t held_s       = (now - gateway_hold_start_) / 1000;
-        gateway_hold_until_   = 0;
-        gateway_hold_max_log_ = 0;
-        LOG_INFO("Gateway 0x%02X is quiet, resuming Tx after %lu s", EMSdevice::EMS_DEVICE_ID_GATEWAY1, (unsigned long)held_s);
-        return false;
-    }
-
-    // still busy past HOLD_MAX — stay muted, just log periodically
-    if (now - gateway_hold_start_ > GATEWAY_HOLD_MAX && (!gateway_hold_max_log_ || now - gateway_hold_max_log_ > GATEWAY_HOLD_MAX)) {
-        gateway_hold_max_log_ = now;
-        LOG_WARNING("Gateway 0x%02X still busy after %lu s, continuing to hold Tx",
-                    EMSdevice::EMS_DEVICE_ID_GATEWAY1,
-                    (unsigned long)((now - gateway_hold_start_) / 1000));
-    }
-
-    return true;
-}
-#endif
 
 // EMSESP main class
 EMSESP::EMSESP()

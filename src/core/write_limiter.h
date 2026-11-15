@@ -26,10 +26,11 @@
 
 // Protects the heating devices from automations that write too often.
 // A write of the value last sent to the same entity within REPEAT_MS is skipped.
+// REPEAT_MS is under a minute, so a value repeated every minute (a 1 minute scheduler timer, a 60s heartbeat) is still sent.
 // More than limit writes to one entity, or GLOBAL_MAX writes to all entities, within WINDOW_MS are logged or refused.
 class WriteLimiter {
   public:
-    static constexpr uint32_t REPEAT_MS    = 60 * 1000;
+    static constexpr uint32_t REPEAT_MS    = 55 * 1000;
     static constexpr uint32_t WINDOW_MS    = 60 * 1000;
     static constexpr uint16_t GLOBAL_MAX   = 120;
     static constexpr size_t   MAX_ENTITIES = 16; // the entities written most recently, a full table forgets the oldest

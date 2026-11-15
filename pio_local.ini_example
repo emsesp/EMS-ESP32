@@ -11,7 +11,8 @@
 ;  -D EMSESP_DE_ONLY ; only DE translated entity names
 ;  -D EMSESP_EN_ONLY ; only EN translated entity names
 ;  -D EMSESP_PINGTEST ; send log message every 1/2 second
-;  -D EMSESP_GATEWAY_TX_HOLD ; hold Tx while a K30RF/KM200 gateway is syncing, see issue #3094
+;  -D EMSESP_OWN_IDENTITY ; answer version/name reads to our bus ID with a real identity instead of empty, see issue #3094
+;  -D EMSESP_OWN_PRODUCT_ID=250 ; productID used in that version reply
 
 ; my_build_flags = -DEMSESP_TEST -DEMSESP_DEBUG
 ; my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST -DEMSESP_PINGTEST
@@ -19,7 +20,7 @@
 ; my_build_flags = -DEMSESP_EN_ONLY -DEMSESP_TEST -DCORE_DEBUG_LEVEL=5 -DARDUINO_USB_CDC_ON_BOOT=1
 ; my_build_flags = -DEMSESP_EN_ONLY
 ; my_build_flags = -DEMSESP_DEBUG
-; my_build_flags = -D EMSESP_GATEWAY_TX_HOLD
+; my_build_flags = -D EMSESP_OWN_IDENTITY
 my_build_flags =
 
 [platformio]

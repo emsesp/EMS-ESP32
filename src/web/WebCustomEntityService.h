@@ -63,7 +63,7 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
     bool get_value_info(JsonObject output, const char * cmd);
     bool writes_to_bus(const char * name);
     void get_value_json(JsonObject output, CustomEntityItem const & entity);
-    bool get_value(const std::shared_ptr<const Telegram> & telegram);
+    bool get_value(const std::shared_ptr<const Telegram> & telegram, const bool is_validate = false);
     void fetch();
     void render_value(JsonObject output, CustomEntityItem const & entity, const bool useVal = false, const bool web = false, const bool add_uom = false);
     void show_values(JsonObject output);
@@ -85,6 +85,9 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
     FSPersistence<WebCustomEntity> _fsPersistence;
 
     void getEntities(AsyncWebServerRequest * request);
+
+    static bool get_raw_min_max(CustomEntityItem const & entity, int32_t & min, int32_t & max);
+    static bool get_min_max(CustomEntityItem const & entity, double & min, double & max);
 
     std::list<CustomEntityItem, AllocatorPSRAM<CustomEntityItem>> * customEntityItems_; // pointer to the list of entity items
 

@@ -37,6 +37,10 @@
 #define EMSESP_DEFAULT_EMS_BUS_ID 0x49 // gateway 2
 #endif
 
+#ifndef EMSESP_OWN_PRODUCT_ID
+#define EMSESP_OWN_PRODUCT_ID 250 // productID in our version reply with EMSESP_OWN_IDENTITY, not used by any device in the library
+#endif
+
 #ifndef EMSESP_DEFAULT_SYSLOG_ENABLED
 #define EMSESP_DEFAULT_SYSLOG_ENABLED false
 #endif

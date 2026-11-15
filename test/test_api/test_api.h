@@ -105,7 +105,7 @@ void test_21() {
 }
 
 void test_22() {
-    auto expected_response = "[{\"name\":\"test_custom\",\"fullname\":\"test_custom\",\"storage\":\"ems\",\"type\":\"number\",\"readable\":true,\"writeable\":true,\"visible\":true,\"device_id\":\"0x08\",\"type_id\":\"0x18\",\"offset\":0,\"factor\":1,\"ent_cat\":\"diagnostic\",\"uom\":\"°C\",\"state_class\":\"measurement\",\"device_class\":\"temperature\",\"value\":0}]";
+    auto expected_response = "[{\"name\":\"test_custom\",\"fullname\":\"test_custom\",\"storage\":\"ems\",\"type\":\"number\",\"readable\":true,\"writeable\":true,\"visible\":true,\"device_id\":\"0x08\",\"type_id\":\"0x18\",\"offset\":0,\"factor\":1,\"min\":-128,\"max\":127,\"ent_cat\":\"diagnostic\",\"uom\":\"°C\",\"state_class\":\"measurement\",\"device_class\":\"temperature\",\"value\":0}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/custom/test_custom"));
 }
 
