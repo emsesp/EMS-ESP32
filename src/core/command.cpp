@@ -232,14 +232,13 @@ const char * Command::return_code_string(const uint8_t return_code) {
         return "Invalid";
     case CommandRet::PASSWORD_REQUIRED:
         return "Password Required";
+    case CommandRet::NO_VALUE:
+        return "No Value";
     case CommandRet::TOO_MANY_WRITES:
         return "Too Many Writes";
     default:
-        break;
+        return "Unknown";
     }
-
-    static char s[4]; // static to avoid allocation on each call and loosing scope
-    return Helpers::smallitoa(s, return_code);
 }
 
 // takes a string like "hc1/seltemp" or "seltemp" or "dhw2.seltemp" and tries to get the id and cmd
