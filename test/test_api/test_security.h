@@ -823,6 +823,8 @@ void security_test_write_limiter_repeat() {
     TEST_ASSERT_TRUE(limiter.check("boiler/selflowtemp", "46.000", now + 12000, ms, log) == WriteLimiter::Verdict::SEND);
     TEST_ASSERT_TRUE(limiter.check("thermostat/hc2/seltemp", "45.000", now + 12000, ms, log) == WriteLimiter::Verdict::SEND);
     TEST_ASSERT_TRUE(limiter.check("boiler/selflowtemp", "45.000", now + WriteLimiter::REPEAT_MS, ms, log) == WriteLimiter::Verdict::SEND);
+    // a 1 minute scheduler timer can fire a few ms short of a minute after the last write
+    TEST_ASSERT_TRUE(limiter.check("boiler/selflowtemp", "45.000", now + 59990, ms, log) == WriteLimiter::Verdict::SEND);
 
     // a write the command didn't take isn't remembered
     TEST_ASSERT_TRUE(limiter.check("boiler/wwseltemp", "50.000", now, ms, log) == WriteLimiter::Verdict::SEND);
