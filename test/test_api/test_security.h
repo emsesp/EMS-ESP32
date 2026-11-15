@@ -784,11 +784,16 @@ void security_test_firmware_url() {
     TEST_ASSERT_FALSE(FirmwareURL::allowed(nullptr));
 
     TEST_ASSERT_TRUE(FirmwareURL::redirect_allowed("https://release-assets.githubusercontent.com/github-production-release-asset/1?sig=abc"));
+    // GitHub's signed URL encodes the expiry and the '+' in the filename
+    TEST_ASSERT_TRUE(FirmwareURL::redirect_allowed("https://release-assets.githubusercontent.com/github-production-release-asset/347619427/fd040dcb"
+                                                   "?sp=r&se=2026-11-15T11%3A51%3A32Z&rscd=attachment%3B+filename%3DEMS-ESP-Recovery-1_1_0-ESP32-16MB%2B.bin"
+                                                   "&sig=abc%2Fdef%3D"));
     TEST_ASSERT_TRUE(FirmwareURL::redirect_allowed("https://objects.githubusercontent.com/github-production-release-asset-2e65be/1"));
     TEST_ASSERT_TRUE(FirmwareURL::redirect_allowed("https://github.com/emsesp/EMS-ESP32/releases/download/v3.9.0/x.bin"));
     TEST_ASSERT_FALSE(FirmwareURL::redirect_allowed("http://release-assets.githubusercontent.com/x"));
     TEST_ASSERT_FALSE(FirmwareURL::redirect_allowed("https://release-assets.githubusercontent.com.evil.com/x"));
-    TEST_ASSERT_FALSE(FirmwareURL::redirect_allowed("https://evil.com/x.bin"));
+    TEST_ASSERT_FALSE(FirmwareURL::redirect_allowed("https://release-assets.githubusercontent.com/../x"));
+    TEST_ASSERT_FALSE(FirmwareURL::redirect_allowed("https://evil.com/x%2e.bin"));
     TEST_ASSERT_FALSE(FirmwareURL::redirect_allowed("https://github.com/someone/repo/releases/download/x.bin"));
 }
 

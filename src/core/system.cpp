@@ -3824,7 +3824,7 @@ bool System::uploadFirmwareURL(const char * url, bool allow_custom) {
             }
         }
 
-        // follow redirects manually (GitHub releases redirect to objects.githubusercontent.com)
+        // follow redirects manually (GitHub releases redirect to release-assets.githubusercontent.com)
         if (http_code == 301 || http_code == 302 || http_code == 303 || http_code == 307 || http_code == 308) {
             ssl_client.stop();
             if (location.isEmpty() || ++redirect_count > 5) {
