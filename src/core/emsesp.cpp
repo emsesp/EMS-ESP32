@@ -1798,7 +1798,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 txservice_.reset_retry_count();
                 tx_successful = true; // no retries
             } else {
-                LOG_ERROR("Last Tx write host reply: 0x%02X", first_value);
+                LOG_TRACE("Last Tx write host reply: 0x%02X", first_value);
             }
         } else if (tx_state == Telegram::Operation::TX_READ && length > 1) {
             // got a telegram with data in it. See if the src/dest matches that from the last one we sent and continue to process it
