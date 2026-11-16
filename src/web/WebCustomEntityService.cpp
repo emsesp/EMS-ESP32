@@ -308,17 +308,18 @@ bool WebCustomEntityService::command_setvalue(const char * value, const int8_t i
             }
 
             // a bus entity is published from the read-back, which carries the value the device stored.
-            // publishing here would send the previous value. RAM and NVS have no read-back.
+            // publishing or running an on-change schedule here would use the previous value. RAM and NVS have no read-back.
             if (entityItem.ram > 0) {
                 publish_single(entityItem);
                 if (EMSESP::mqtt_.get_publish_onchange(EMSdevice::DeviceType::SYSTEM)) {
                     publish();
                 }
+
+                char cmd[COMMAND_MAX_LENGTH];
+                snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), entityItem.name);
+                EMSESP::webSchedulerService.onChange(cmd);
             }
 
-            char cmd[COMMAND_MAX_LENGTH];
-            snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), entityItem.name);
-            EMSESP::webSchedulerService.onChange(cmd);
             return true;
         }
     }
