@@ -152,7 +152,7 @@ Status: `[ ]` todo, `[~]` in progress, `[x]` done. Add the PR link when one exis
 - [ ] S7.2 Replace `@table-library` if a plain table + sort/filter helper is enough
 - [ ] S7.3 Remove `@mui/*`, `@emotion/*`, `react-icons`; final size comparison
 - [ ] S7.4 Recovery UI (`src/recovery`) on the same components
-- [ ] S7.5 Changelog entries, remove `mockups/` from the branch, PR to upstream `dev`
+- [ ] S7.5 Changelog entries, remove `mockups/` and `.cursor/rules/webui-redesign.mdc` from the branch, PR to upstream `dev`
 
 ## Decisions
 
@@ -160,6 +160,7 @@ Short log of choices made along the way, newest last.
 
 - 2026-11-18: Migrate inside `interface/` page by page, no separate Preact port of the mockups.
 - 2026-11-18: Own component library with plain CSS and local SVG icons; MUI only as a temporary backend for complex components.
+- 2026-11-18: Cursor rule `.cursor/rules/webui-redesign.mdc` (force-added, `.cursor` is gitignored) makes every session read this file and record decisions. Branch-only.
 
 ## Working on two machines
 

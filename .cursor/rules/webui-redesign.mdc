@@ -1,0 +1,38 @@
+---
+description: Web UI redesign workflow - keep interface/REDESIGN.md in sync with the work
+alwaysApply: true
+---
+
+# Web UI redesign (branch webui-redesign)
+
+`interface/REDESIGN.md` is the shared memory between sessions and machines. Treat it as part of every change.
+
+## At the start of a session
+
+- Read `interface/REDESIGN.md` in full before planning or editing, including Context, Rules, Responsive rules and Decisions.
+- If the user names a step (e.g. `S2.1`), mark it `[~]` in the Steps list.
+
+## While working
+
+Whenever you make a choice the plan doesn't already cover, add one line to the **Decisions** list straight away, newest last, dated:
+
+```markdown
+- 2026-11-20: Dialog is full screen below 600 px; uses the native <dialog> element, no MUI. (S1.2)
+```
+
+Counts as a decision: picking or dropping a library, a component API or naming convention, a deviation from the mockups, a new or changed REST field, a responsive behaviour, anything postponed to a later step.
+
+Also keep these sections current as you go:
+
+- **Firmware / REST changes** table: every endpoint added or changed, with its step and status.
+- **Context**: new facts about the code that the next session would otherwise have to rediscover.
+
+## Before saying a step is done or committing
+
+1. Run `pnpm lint` and `pnpm build` in `interface/`.
+2. Add a row to the **Flash budget** table with the sizes from the build output.
+3. Tick the step `[x]` (or leave `[~]` with a short note of what's left).
+4. Check the Decisions list has an entry for every choice made in this session.
+5. Include `interface/REDESIGN.md` in the same commit as the work, and put the step ID in the commit message, e.g. `webui: status overview (S2.1)`.
+
+Don't commit or push unless the user asks (see AGENTS.md).
