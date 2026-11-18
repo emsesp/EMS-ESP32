@@ -106,6 +106,20 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
         root["wifi_rssi"] = WiFi.RSSI();
 #endif
     }
+    const std::string network_ip = EMSESP::network_.getIP();
+    if (!network_ip.empty()) {
+        root["network_ip"] = network_ip;
+    }
+
+    EMSESP::esp32React.getMqttSettingsService()->read([&](MqttSettings & settings) {
+        if (settings.enabled) {
+            root["mqtt_host"] = settings.host;
+            root["mqtt_port"] = settings.port;
+        }
+    });
+
+    root["log_errors"]   = EMSESP::webLogService.num_errors();
+    root["log_warnings"] = EMSESP::webLogService.num_warnings();
 
 #if defined(EMSESP_DEBUG)
 #ifdef EMSESP_TEST
@@ -127,6 +141,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     root["cpu_cores"]        = ESP.getChipCores();
     root["cpu_freq_mhz"]     = ESP.getCpuFreqMHz();
     root["max_alloc_heap"]   = EMSESP::system_.getMaxAllocMem();
+    root["heap_size"]        = ESP.getHeapSize() / 1024;
     root["arduino_version"]  = ARDUINO_VERSION;
     root["sdk_version"]      = ESP.getSdkVersion();
     root["partition"]        = (const char *)esp_ota_get_running_partition()->label; // active partition
@@ -626,6 +641,30 @@ void WebStatusService::allvalues(JsonObject output) {
     EMSESP::temperaturesensor_.get_value_info(device_output, value);
 }
 
+// action = heatingbackup
+// the settings stored in the EMS devices (all writeable entities), so they can be written back with API commands
+void WebStatusService::heatingbackup(JsonObject output) {
+    output["type"]       = "heatingbackup";
+    output["version"]    = current_version_s;
+    output["fahrenheit"] = EMSESP::system_.fahrenheit();
+
+    JsonArray devices = output["devices"].to<JsonArray>();
+    for (const auto & emsdevice : EMSESP::emsdevices) {
+        JsonDocument values(PSRAM_DOC);
+        if (!emsdevice->generate_values_backup(values.to<JsonObject>())) {
+            continue;
+        }
+
+        JsonObject device   = devices.add<JsonObject>();
+        device["type"]      = emsdevice->device_type_name();
+        device["name"]      = emsdevice->name();
+        device["deviceId"]  = emsdevice->device_id();
+        device["productId"] = emsdevice->product_id();
+        device["version"]   = emsdevice->version();
+        device["values"]    = values;
+    }
+}
+
 // action = export
 // returns data for a specific feature/settings as a json object
 bool WebStatusService::exportData(JsonObject root, std::string & type, const bool include_secrets) {
@@ -645,6 +684,8 @@ bool WebStatusService::exportData(JsonObject root, std::string & type, const boo
         System::exportSettings(type, EMSESP_CUSTOMENTITY_FILE, root);
     } else if (type == "allvalues") {
         allvalues(root);
+    } else if (type == "heatingbackup") {
+        heatingbackup(root);
     } else if (type == "systembackup") {
         System::exportSystemBackup(root, include_secrets);
     } else {

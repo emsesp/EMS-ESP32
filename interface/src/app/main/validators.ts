@@ -11,6 +11,7 @@ import type {
   Settings,
   TemperatureSensor
 } from './types';
+import { ScheduleFlag } from './types';
 
 // Constants
 const ERROR_MESSAGES = {
@@ -236,36 +237,60 @@ const NAME_PATTERN_REQUIRED = {
   message: NAME_PATTERN_MESSAGE
 };
 
-export const uniqueNameValidator = (schedule: ScheduleItem[], o_name?: string) =>
-  createUniqueNameValidator(schedule, o_name);
+export const uniqueNameValidator = (
+  schedule: ScheduleItem[],
+  originalName?: string
+) => createUniqueNameValidator(schedule, originalName);
 
+// scheduleItem is the edited item, originalName the name of the row being edited (none when adding)
 export const schedulerItemValidation = (
   schedule: ScheduleItem[],
-  scheduleItem: ScheduleItem
+  scheduleItem: ScheduleItem,
+  originalName?: string
 ) =>
   new Schema({
     name: [
       { required: true, message: 'Name is required' },
       NAME_PATTERN_REQUIRED,
-      uniqueNameValidator(schedule, scheduleItem.o_name)
+      uniqueNameValidator(schedule, originalName)
     ],
-    cmd_name: [{ required: true, message: 'Command is required' }]
+    cmd_name: [{ required: true, message: 'Command is required' }],
+    ...(scheduleItem.flags < ScheduleFlag.SCHEDULE_TIMER && {
+      flags: [
+        {
+          validator(
+            _rule: InternalRuleItem,
+            flags: number,
+            callback: (error?: string) => void
+          ) {
+            callback(flags === 0 ? 'Pick at least one day' : undefined);
+          }
+        }
+      ]
+    }),
+    ...(scheduleItem.flags === ScheduleFlag.SCHEDULE_ONCHANGE && {
+      time: [{ required: true, message: 'Entity is required' }]
+    }),
+    ...(scheduleItem.flags === ScheduleFlag.SCHEDULE_CONDITION && {
+      time: [{ required: true, message: 'Condition is required' }]
+    })
   });
 
 export const uniqueCommandNameValidator = (
   commands: CommandItem[],
-  o_name?: string
-) => createUniqueNameValidator(commands, o_name);
+  originalName?: string
+) => createUniqueNameValidator(commands, originalName);
 
+// originalName: the name of the edited row when its dialog opened, undefined for a new row
 export const commandItemValidation = (
   commands: CommandItem[],
-  commandItem: CommandItem
+  originalName?: string
 ) =>
   new Schema({
     name: [
       { required: true, message: 'Name is required' },
       NAME_PATTERN_REQUIRED,
-      uniqueCommandNameValidator(commands, commandItem.o_name)
+      uniqueCommandNameValidator(commands, originalName)
     ],
     cmd: [
       { required: true, message: 'Command is required' },
@@ -278,8 +303,10 @@ export const commandItemValidation = (
     ]
   });
 
-export const uniqueCustomNameValidator = (entity: EntityItem[], o_name?: string) =>
-  createUniqueNameValidator(entity, o_name);
+export const uniqueCustomNameValidator = (
+  entity: EntityItem[],
+  originalName?: string
+) => createUniqueNameValidator(entity, originalName);
 
 const hexValidator = {
   validator(
@@ -295,12 +322,13 @@ const hexValidator = {
   }
 };
 
-export const entityItemValidation = (entity: EntityItem[], entityItem: EntityItem) =>
+// originalName: the name of the edited row when its dialog opened, undefined for a new row
+export const entityItemValidation = (entity: EntityItem[], originalName?: string) =>
   new Schema({
     name: [
       { required: true, message: 'Name is required' },
       NAME_PATTERN_REQUIRED,
-      uniqueCustomNameValidator(entity, entityItem.o_name)
+      uniqueCustomNameValidator(entity, originalName)
     ],
     device_id: [hexValidator],
     type_id: [hexValidator],
@@ -323,10 +351,10 @@ export const uniqueTemperatureNameValidator = (
 
 export const temperatureSensorItemValidation = (
   sensors: TemperatureSensor[],
-  sensor: TemperatureSensor
+  originalName?: string
 ) =>
   new Schema({
-    n: [NAME_PATTERN, uniqueTemperatureNameValidator(sensors, sensor.o_n)]
+    n: [NAME_PATTERN, uniqueTemperatureNameValidator(sensors, originalName)]
   });
 
 export const uniqueAnalogNameValidator = (
@@ -336,17 +364,15 @@ export const uniqueAnalogNameValidator = (
 
 export const analogSensorItemValidation = (
   sensors: AnalogSensor[],
-  sensor: AnalogSensor
-) => {
-  return new Schema({
-    // name is required and must be unique
+  originalName?: string
+) =>
+  new Schema({
     n: [
       { required: true, message: 'Name is required' },
       NAME_PATTERN,
-      uniqueAnalogNameValidator(sensors, sensor.o_n)
+      uniqueAnalogNameValidator(sensors, originalName)
     ]
   });
-};
 
 export const deviceValueItemValidation = (dv: DeviceValue) =>
   new Schema({

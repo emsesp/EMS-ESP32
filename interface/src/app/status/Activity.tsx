@@ -1,137 +1,121 @@
-import {
-  Body,
-  Cell,
-  Header,
-  HeaderCell,
-  HeaderRow,
-  Row,
-  Table
-} from '@table-library/react-table-library/table';
-import { useTheme as tableTheme } from '@table-library/react-table-library/theme';
+import { useContext } from 'react';
+
+import { readActivity } from 'api/app';
+import { readSystemStatus } from 'api/system';
+
 import { useRequest } from 'alova/client';
-import { FormLoader, SectionContent, useLayoutTitle } from 'components';
+import {
+  ButtonLink,
+  Hero,
+  Loader,
+  ProgressBar,
+  Section,
+  SortHeader,
+  Table,
+  byNumber,
+  useTableSort
+} from 'components/ui';
+import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { Translation } from 'i18n/i18n-types';
 import { useInterval } from 'utils';
 
-import { readActivity } from '../../api/app';
 import type { Stat } from '../main/types';
+import './Status.css';
+import { busInfo, nf } from './status';
 
-const QUALITY_COLORS = {
-  PERFECT: '#00FF7F',
-  WARNING: 'orange',
-  POOR: 'red'
-} as const;
+const qualityColor = (q: number) =>
+  q === 100 ? 'success' : q >= 95 ? 'warning' : 'error';
 
-const SystemActivity = () => {
+const Activity = () => {
+  const { LL } = useI18nContext();
+  const { me } = useContext(AuthenticatedContext);
   const { data, send: loadData, error } = useRequest(readActivity);
+  const { data: system, send: loadSystem } = useRequest(readSystemStatus);
 
   useInterval(() => {
     void loadData();
+    void loadSystem();
   });
 
-  const { LL } = useI18nContext();
-
-  useLayoutTitle(LL.DATA_TRAFFIC());
-
-  const stats_theme = tableTheme({
-    Table: `
-      --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 90px 90px 80px;
-    `,
-    BaseRow: `
-      font-size: 14px;
-    `,
-    HeaderRow: `
-      text-transform: uppercase;
-      background-color: black;
-      color: #90CAF9;
-
-      .th {
-        height: 36px;
-        border-bottom: 1px solid #565656;
-      }
-    `,
-    Row: `
-      .td {
-        padding: 8px;
-        border-top: 1px solid #565656;
-        border-bottom: 1px solid #565656;
-      }
-
-      &:nth-of-type(odd) .td {
-        background-color: #303030;
-      }
-      &:nth-of-type(even) .td {
-        background-color: #1e1e1e;
-      }
-    `,
-    BaseCell: `
-      &:not(:first-of-type) {
-        text-align: center;
-      }
-    `
+  const sort = useTableSort(data?.stats ?? [], {
+    s: byNumber((st) => st.s),
+    f: byNumber((st) => st.f),
+    q: byNumber((st) => st.q)
   });
-
-  const showName = (id: number) => {
-    const name: keyof Translation['STATUS_NAMES'] =
-      id.toString() as keyof Translation['STATUS_NAMES'];
-    return LL.STATUS_NAMES[name]();
-  };
-
-  const showQuality = (stat: Stat) => {
-    if (stat.q === 0 || stat.s + stat.f === 0) {
-      return;
-    }
-    if (stat.q === 100) {
-      return <div style={{ color: QUALITY_COLORS.PERFECT }}>{stat.q}%</div>;
-    }
-    if (stat.q >= 95) {
-      return <div style={{ color: QUALITY_COLORS.WARNING }}>{stat.q}%</div>;
-    } else {
-      return <div style={{ color: QUALITY_COLORS.POOR }}>{stat.q}%</div>;
-    }
-  };
 
   if (!data) {
-    return (
-      <SectionContent>
-        <FormLoader onRetry={loadData} errorMessage={error?.message || ''} />
-      </SectionContent>
-    );
+    return <Loader error={error?.message} onRetry={() => void loadData()} />;
   }
 
+  const name = (id: number) =>
+    LL.STATUS_NAMES[id.toString() as keyof Translation['STATUS_NAMES']]();
+  const bus = system && busInfo(system.bus_status, system.bus_uptime, LL);
+
   return (
-    <SectionContent>
-      <Table
-        data={{ nodes: data.stats }}
-        theme={stats_theme}
-        layout={{ custom: true }}
-      >
-        {(tableList: Stat[]) => (
-          <>
-            <Header>
-              <HeaderRow>
-                <HeaderCell resize />
-                <HeaderCell stiff>{LL.SUCCESS()}</HeaderCell>
-                <HeaderCell stiff>{LL.FAIL()}</HeaderCell>
-                <HeaderCell stiff>{LL.QUALITY()}</HeaderCell>
-              </HeaderRow>
-            </Header>
-            <Body>
-              {tableList.map((stat: Stat) => (
-                <Row key={stat.id} item={stat}>
-                  <Cell>{showName(stat.id)}</Cell>
-                  <Cell stiff>{Intl.NumberFormat().format(stat.s)}</Cell>
-                  <Cell stiff>{Intl.NumberFormat().format(stat.f)}</Cell>
-                  <Cell stiff>{showQuality(stat)}</Cell>
-                </Row>
-              ))}
-            </Body>
-          </>
-        )}
-      </Table>
-    </SectionContent>
+    <>
+      {system && bus && (
+        <Hero
+          state={bus.state}
+          icon="swap_horiz"
+          title={bus.text}
+          text={`${system.num_devices} ${LL.DEVICES()}`}
+          actions={
+            me.admin && (
+              <ButtonLink to="/settings/application" color="secondary" icon="tune">
+                {LL.SETTINGS_OF(LL.EMS_BUS(2))}
+              </ButtonLink>
+            )
+          }
+        />
+      )}
+      <Section icon="monitoring" title={LL.DATA_TRAFFIC()}>
+        <Table className="st-activity">
+          <thead>
+            <tr>
+              <th />
+              <SortHeader className="r" {...sort.header('s')}>
+                {LL.SUCCESS()}
+              </SortHeader>
+              <SortHeader className="r" {...sort.header('f')}>
+                {LL.FAIL()}
+              </SortHeader>
+              <SortHeader className="r" {...sort.header('q')}>
+                {LL.QUALITY()}
+              </SortHeader>
+            </tr>
+          </thead>
+          <tbody>
+            {sort.rows.map((stat: Stat) => {
+              const active = stat.q !== 0 && stat.s + stat.f !== 0;
+              return (
+                <tr key={stat.id}>
+                  <td>{name(stat.id)}</td>
+                  <td className="r num">{nf.format(stat.s)}</td>
+                  <td className={stat.f ? 'r num warnc' : 'r num muted'}>
+                    {nf.format(stat.f)}
+                  </td>
+                  <td className="r num">
+                    {active && (
+                      <span className="st-quality">
+                        <ProgressBar
+                          value={stat.q}
+                          color={qualityColor(stat.q)}
+                          label={LL.QUALITY()}
+                        />
+                        <span>{stat.q}%</span>
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </Table>
+        <p className="cap st-help">{LL.ACTIVITY_HELP()}</p>
+      </Section>
+    </>
   );
 };
 
-export default SystemActivity;
+export default Activity;

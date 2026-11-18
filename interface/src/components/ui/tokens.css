@@ -1,0 +1,37 @@
+/*
+ * Design tokens, taken from mockups/base.css.
+ * Breakpoints can't be custom properties in media queries, so they are fixed values:
+ * phone < 600px, tablet 600-1199px (drawer collapses below 900px), desktop >= 1200px.
+ */
+:root {
+  --bg: #121212;
+  --paper: #1e1e1e;
+  --paper-2: #262626;
+  --drawer: #1b1b1b;
+  --border: rgb(65, 65, 65);
+  --divider: rgba(255, 255, 255, 0.12);
+  --text: #fff;
+  --text-2: rgba(255, 255, 255, 0.7);
+  --text-3: #9e9e9e;
+  --primary: #90caf9;
+  --secondary: #2196f3;
+  --info: #607d8b;
+  --success: #66bb6a;
+  --success-main: #4caf50;
+  --warning: #ffa726;
+  --error: #f44336;
+  --lightblue: lightblue;
+  --appbar: #2e586a;
+  --row: #1e1e1e;
+  --row-odd: #303030;
+  --row-hover: #177ac9;
+  --menu-group: rgba(71, 98, 130, 0.2);
+
+  --font: Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-size: 13px;
+
+  --drawer-w: 210px;
+  --appbar-h: 64px;
+  --radius: 12px;
+}

@@ -1,0 +1,48 @@
+/* page layout for the status pages; components bring their own CSS */
+.st-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+.st-help {
+  margin: 10px 0 0;
+}
+.st-bbq {
+  width: 16px;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.st-activity .warnc {
+  color: #ffcc80;
+}
+.st-quality {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.st-quality > .bar {
+  width: 120px;
+}
+.st-quality > span {
+  min-width: 44px;
+}
+
+@media (max-width: 599px) {
+  .st-actions > .btn {
+    flex: 1 1 auto;
+  }
+  .st-activity {
+    font-size: 13px;
+  }
+  .st-activity td,
+  .st-activity th {
+    padding: 4px;
+  }
+  .st-quality > .bar {
+    display: none;
+  }
+}

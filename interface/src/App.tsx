@@ -1,9 +1,8 @@
 import { memo, useEffect, useState } from 'react';
 import { Outlet } from 'react-router';
 
-import CustomTheme from 'CustomTheme';
 import PasswordConfirmDialog from 'components/layout/PasswordConfirmDialog';
-import { Toaster } from 'components/toast';
+import { Toaster } from 'components/ui';
 import { Authentication } from 'contexts/authentication';
 import TypesafeI18n from 'i18n/i18n-react';
 import type { Locales } from 'i18n/i18n-types';
@@ -64,13 +63,11 @@ const App = memo(() => {
 
   return (
     <TypesafeI18n locale={locale}>
-      <CustomTheme>
-        <Authentication>
-          <Outlet />
-        </Authentication>
-        <PasswordConfirmDialog />
-        <Toaster />
-      </CustomTheme>
+      <Authentication>
+        <Outlet />
+      </Authentication>
+      <PasswordConfirmDialog />
+      <Toaster />
     </TypesafeI18n>
   );
 });

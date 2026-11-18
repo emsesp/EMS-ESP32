@@ -1,12 +1,9 @@
 import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router';
 
-import { Box, Button } from '@mui/material';
-
+import { Button, Message } from 'components/ui';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
-
-import MessageBox from '../MessageBox';
 
 const DISMISSED_KEY = 'telnetBannerDismissed';
 
@@ -29,21 +26,22 @@ const TelnetBanner = () => {
   };
 
   return (
-    <Box sx={{ px: 2, pt: 2 }}>
-      <MessageBox level="info" message={LL.TELNET_ENABLED()}>
-        <Button
-          sx={{ ml: 2 }}
-          variant="contained"
-          color="info"
-          onClick={() => void navigate('/settings/application')}
-        >
-          {LL.SETTINGS_OF(LL.APPLICATION())}
-        </Button>
-        <Button sx={{ ml: 1 }} variant="contained" color="info" onClick={dismiss}>
-          {LL.CLOSE()}
-        </Button>
-      </MessageBox>
-    </Box>
+    <Message
+      level="info"
+      actions={
+        <>
+          <Button
+            variant="contained"
+            onClick={() => void navigate('/settings/application')}
+          >
+            {LL.SETTINGS_OF(LL.APPLICATION())}
+          </Button>
+          <Button onClick={dismiss}>{LL.CLOSE()}</Button>
+        </>
+      }
+    >
+      {LL.TELNET_ENABLED()}
+    </Message>
   );
 };
 

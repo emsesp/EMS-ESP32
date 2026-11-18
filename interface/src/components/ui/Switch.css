@@ -1,0 +1,90 @@
+.field.swrow {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 4px 0;
+}
+.swrow > .grow {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.swrow label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.swrow .cap {
+  margin-top: 2px;
+}
+.warnc {
+  color: var(--warning);
+}
+
+.switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 34px;
+  height: 14px;
+  margin-top: 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: #616161;
+  cursor: pointer;
+}
+.switch::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  transition: left 0.15s;
+}
+.switch.on {
+  background: rgba(144, 202, 249, 0.5);
+}
+.switch.on::after {
+  left: 16px;
+  background: var(--primary);
+}
+.switch:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+}
+.switch:disabled {
+  cursor: default;
+}
+
+/* a larger hit area without changing the look */
+@media (pointer: coarse) {
+  .switch::before {
+    content: '';
+    position: absolute;
+    inset: -13px -6px;
+  }
+}
+
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.checkbox input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+@media (pointer: coarse) {
+  .checkbox {
+    min-height: 40px;
+  }
+}

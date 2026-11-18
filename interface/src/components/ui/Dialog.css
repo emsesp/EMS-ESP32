@@ -1,0 +1,82 @@
+/* rounded paper with a grey 2px border */
+.dialog {
+  padding: 0;
+  width: calc(100% - 32px);
+  max-height: calc(100% - 32px);
+  background: #383838;
+  color: var(--text);
+  border: 2px solid #565656;
+  border-radius: 8px;
+  box-shadow:
+    0 11px 15px -7px rgba(0, 0, 0, 0.2),
+    0 24px 38px 3px rgba(0, 0, 0, 0.14);
+}
+.dialog.sm {
+  max-width: 444px;
+}
+.dialog.md {
+  max-width: 600px;
+}
+.dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+html:has(.dialog[open]) {
+  overflow: hidden;
+}
+
+.dialog-box {
+  display: flex;
+  flex-direction: column;
+  max-height: inherit;
+}
+.dialog h2 {
+  margin: 0;
+  padding: 16px 24px;
+  font-size: 20px;
+  font-weight: 400;
+}
+.dialog-content {
+  padding: 12px 24px 16px;
+  overflow-y: auto;
+  border-top: 1px solid var(--divider);
+  border-bottom: 1px solid var(--divider);
+}
+.dialog-content > p:first-child {
+  margin-top: 0;
+}
+.dialog-content .field {
+  margin-top: 14px;
+}
+.dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 8px 16px;
+}
+
+@media (max-width: 599px) {
+  .dialog.sm,
+  .dialog.md {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+  }
+  .dialog-box {
+    height: 100%;
+  }
+  .dialog-content {
+    flex: 1;
+  }
+}
+
+.dialog-content > .form:first-child {
+  margin-top: 4px;
+}
+.dialog-content .form .field {
+  margin-top: 0;
+}

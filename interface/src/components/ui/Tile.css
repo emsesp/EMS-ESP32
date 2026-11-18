@@ -1,0 +1,62 @@
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+  gap: 12px;
+}
+.tile {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--paper-2);
+  color: var(--text);
+  text-decoration: none;
+}
+.tile:hover {
+  border-color: var(--primary);
+  text-decoration: none;
+}
+.tile .grow {
+  min-width: 0;
+}
+.tile .k {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+}
+.tile .v {
+  display: block;
+  color: var(--text-3);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.tile-badge {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ffeb3b;
+  box-shadow: 0 0 6px rgba(255, 235, 59, 0.8);
+  flex-shrink: 0;
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+@media (max-width: 599px) {
+  .tiles {
+    gap: 8px;
+  }
+  .tile {
+    padding: 10px 12px;
+  }
+}

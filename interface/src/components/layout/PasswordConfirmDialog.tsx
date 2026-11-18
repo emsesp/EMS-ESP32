@@ -1,22 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 
-import LockIcon from '@mui/icons-material/Lock';
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Typography
-} from '@mui/material';
-
 import { setPasswordPrompt } from 'api/passwordPrompt';
 import { confirmPassword } from 'api/security';
 
-import { dialogStyle } from 'CustomTheme';
+import { Button, Dialog, TextField } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
-
-import { ValidatedPasswordField } from '../inputs';
 
 // asks for the password again before changes to the firmware, the users or the security settings
 const PasswordConfirmDialog = () => {
@@ -67,49 +55,45 @@ const PasswordConfirmDialog = () => {
 
   return (
     <Dialog
-      sx={dialogStyle}
       open={open}
+      title={LL.PASSWORD_CONFIRM_TITLE()}
       onClose={() => close(false)}
-      fullWidth
-      maxWidth="xs"
+      actions={
+        <>
+          <Button color="secondary" onClick={() => close(false)}>
+            {LL.CANCEL()}
+          </Button>
+          <Button
+            type="submit"
+            form="password-confirm"
+            icon="lock"
+            disabled={checking || password.length === 0}
+          >
+            {LL.PASSWORD_CONFIRM_BUTTON()}
+          </Button>
+        </>
+      }
     >
-      <DialogTitle>{LL.PASSWORD_CONFIRM_TITLE()}</DialogTitle>
-      <DialogContent dividers>
-        <Typography variant="body2">{LL.PASSWORD_CONFIRM_TEXT()}</Typography>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            void onConfirm();
-          }}
-        >
-          <ValidatedPasswordField
-            fieldErrors={error ? { password: [{ message: error }] } : {}}
-            name="password"
-            label={LL.PASSWORD()}
-            autoComplete="current-password"
-            autoFocus
-            fullWidth
-            variant="outlined"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            margin="normal"
-          />
-        </form>
-      </DialogContent>
-      <DialogActions>
-        <Button variant="outlined" color="secondary" onClick={() => close(false)}>
-          {LL.CANCEL()}
-        </Button>
-        <Button
-          startIcon={<LockIcon />}
-          variant="outlined"
-          color="primary"
-          disabled={checking || password.length === 0}
-          onClick={() => void onConfirm()}
-        >
-          {LL.PASSWORD_CONFIRM_BUTTON()}
-        </Button>
-      </DialogActions>
+      <p>{LL.PASSWORD_CONFIRM_TEXT()}</p>
+      <form
+        id="password-confirm"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (password) void onConfirm();
+        }}
+      >
+        <TextField
+          type="password"
+          name="password"
+          label={LL.PASSWORD()}
+          autoComplete="current-password"
+          autoFocus
+          fullWidth
+          error={error}
+          value={password}
+          onInput={(e) => setPassword(e.currentTarget.value)}
+        />
+      </form>
     </Dialog>
   );
 };

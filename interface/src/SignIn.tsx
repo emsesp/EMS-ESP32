@@ -1,28 +1,19 @@
-import { memo, useContext, useEffect, useState } from 'react';
-
-import ForwardIcon from '@mui/icons-material/Forward';
-import { Box, Button, Paper, Typography } from '@mui/material';
-import type { Theme } from '@mui/material/styles';
+import { memo, useContext, useState } from 'react';
 
 import * as AuthenticationApi from 'components/routing/authentication';
 import { useRequest } from 'alova/client';
-import {
-  LanguageSelector,
-  ValidatedPasswordField,
-  ValidatedTextField
-} from 'components';
-import { toast } from 'components/toast';
+import { Button, LanguageSelect, TextField, toast } from 'components/ui';
 import { AuthenticationContext } from 'contexts/authentication';
 import { PROJECT_NAME } from 'env';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { SignInRequest } from 'types';
-import { onEnterCallback, updateValue } from 'utils';
 import { SIGN_IN_REQUEST_VALIDATOR, ValidationError, validate } from 'validators';
 import type { ValidateFieldsError } from 'validators/schema';
 
+import './SignIn.css';
+
 const SignIn = memo(() => {
   const authenticationContext = useContext(AuthenticationContext);
-
   const { LL } = useI18nContext();
 
   const [signInRequest, setSignInRequest] = useState<SignInRequest>({
@@ -43,12 +34,6 @@ const SignIn = memo(() => {
     }
   });
 
-  const updateLoginRequestValue = updateValue((updater) =>
-    setSignInRequest(
-      updater as unknown as (prevState: SignInRequest) => SignInRequest
-    )
-  );
-
   const signIn = async () => {
     await callSignIn(signInRequest).catch((event: Error) => {
       if (event.message === 'Unauthorized') {
@@ -64,6 +49,7 @@ const SignIn = memo(() => {
 
   const validateAndSignIn = async () => {
     setProcessing(true);
+    setFieldErrors(undefined);
     SIGN_IN_REQUEST_VALIDATOR.messages({
       required: LL.IS_REQUIRED('%s')
     });
@@ -76,96 +62,56 @@ const SignIn = memo(() => {
     }
   };
 
-  const submitOnEnter = onEnterCallback(signIn);
-
-  // get rid of scrollbar
-  useEffect(() => {
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
-  }, []);
+  const field = (name: keyof SignInRequest) => ({
+    name,
+    fullWidth: true,
+    disabled: processing,
+    value: signInRequest[name],
+    error: fieldErrors?.[name]?.[0]?.message,
+    onInput: (e: { currentTarget: HTMLInputElement }) => {
+      const { value } = e.currentTarget;
+      setSignInRequest((prev) => ({ ...prev, [name]: value }));
+    }
+  });
 
   return (
-    <Box
-      sx={(theme: Theme) => ({
-        display: 'flex',
-        height: '100vh',
-        margin: 'auto',
-        padding: 2,
-        justifyContent: 'center',
-        flexDirection: 'column',
-        maxWidth: theme.breakpoints.values.sm
-      })}
-    >
-      <Paper
-        sx={(theme) => ({
-          textAlign: 'center',
-          padding: theme.spacing(2),
-          paddingTop: '172px',
-          backgroundImage: 'url("/app/icon.png")',
-          backgroundRepeat: 'no-repeat',
-          backgroundPosition: '50% ' + theme.spacing(2),
-          width: '100%'
-        })}
+    <main className="signin">
+      <form
+        className="signin-card"
+        noValidate
+        onSubmit={(e) => {
+          e.preventDefault();
+          void validateAndSignIn();
+        }}
       >
-        <Typography sx={{ mb: 1 }} variant="h4">
-          {PROJECT_NAME}
-        </Typography>
-        <LanguageSelector />
-        <Box
-          sx={{
-            mt: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 1,
-            alignItems: 'center'
-          }}
-        >
-          <ValidatedTextField
-            fieldErrors={fieldErrors || {}}
-            disabled={processing}
-            sx={{
-              width: '32ch'
-            }}
-            name="username"
-            label={LL.USERNAME(0)}
-            value={signInRequest.username}
-            onChange={updateLoginRequestValue}
-            slotProps={{
-              input: {
-                autoCapitalize: 'none',
-                autoCorrect: 'off'
-              }
-            }}
-          />
-          <ValidatedPasswordField
-            fieldErrors={fieldErrors || {}}
-            disabled={processing}
-            sx={{
-              width: '32ch'
-            }}
-            name="password"
-            label={LL.PASSWORD()}
-            value={signInRequest.password}
-            onChange={updateLoginRequestValue}
-            onKeyDown={submitOnEnter}
-          />
-        </Box>
-
+        <LanguageSelect className="signin-lang" />
+        <img className="signin-logo" src="/app/icon.png" alt="" />
+        <h1>{PROJECT_NAME}</h1>
+        <TextField
+          label={LL.USERNAME(0)}
+          autoComplete="username"
+          autoCapitalize="none"
+          autoCorrect="off"
+          autoFocus
+          {...field('username')}
+        />
+        <TextField
+          type="password"
+          label={LL.PASSWORD()}
+          autoComplete="current-password"
+          {...field('password')}
+        />
         <Button
+          type="submit"
           variant="contained"
-          color="primary"
-          sx={{ mt: 2 }}
-          onClick={validateAndSignIn}
+          icon="login"
+          className="signin-submit"
           disabled={processing}
         >
-          <ForwardIcon sx={{ mr: 1 }} />
           {LL.SIGN_IN()}
         </Button>
-      </Paper>
-    </Box>
+      </form>
+    </main>
   );
 });
 

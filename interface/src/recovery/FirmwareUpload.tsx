@@ -1,29 +1,9 @@
-import { type ChangeEvent, type DragEvent, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
-import CancelIcon from '@mui/icons-material/Cancel';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import UploadIcon from '@mui/icons-material/Upload';
-import { Box, Button, Typography, styled } from '@mui/material';
-
-import { toast } from 'components/toast';
-import CustomBuildWarning from 'components/upload/CustomBuildWarning';
-import { LinearProgressWithLabel } from 'components/upload/LinearProgressWithLabel';
+import { Button, FileUpload, Message, toast } from 'components/ui';
+import { CUSTOM_BUILD_URL } from 'utils/versions';
 
 import { HttpError, type UploadHandle, uploadFile } from './api';
-
-const DocumentUploader = styled(Box)<{ active?: boolean }>(({ theme, active }) => ({
-  border: `2px dashed ${active ? '#6dc24b' : '#4282fe'}`,
-  backgroundColor: '#2e3339',
-  padding: theme.spacing(1.25),
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  borderRadius: theme.spacing(1),
-  cursor: 'pointer',
-  minHeight: '120px',
-  transition: 'border-color 0.2s ease-in-out'
-}));
 
 const uploadErrorMessage = (status: number, chip: string) => {
   switch (status) {
@@ -50,49 +30,30 @@ interface FirmwareUploadProps {
   chip: string;
   onUploaded: () => void;
   onUnauthorized: () => void;
+  // reports while an upload runs, so the target can't be changed meanwhile
+  onBusy: (busy: boolean) => void;
 }
 
 const FirmwareUpload = ({
   target,
   chip,
   onUploaded,
-  onUnauthorized
+  onUnauthorized,
+  onBusy
 }: FirmwareUploadProps) => {
-  const [file, setFile] = useState<File>();
-  const [dragged, setDragged] = useState(false);
+  const [uploading, setUploading] = useState<File>();
   const [md5, setMd5] = useState<string>();
   // the file the device stopped because it isn't an official build
   const [customFile, setCustomFile] = useState<File>();
   const [progress, setProgress] = useState<number>();
   const uploadRef = useRef<UploadHandle | null>(null);
-  const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const selectFile = (selected?: File) => {
-    if (!selected) return;
-    if (/\.(bin|md5)$/i.test(selected.name)) {
-      setFile(selected);
-    } else {
-      toast.warning('Please select an EMS-ESP firmware .bin or .md5 file');
-    }
-  };
-
-  const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    selectFile(e.target.files?.[0]);
-    e.target.value = ''; // allow the same file to be selected again
-  };
-
-  const onDrop = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setDragged(false);
-    selectFile(e.dataTransfer.files[0]);
-  };
-
-  const startUpload = async (selected = file, custom = false) => {
-    if (!selected) return;
-    setFile(selected);
+  const startUpload = async (file: File, custom = false) => {
+    setUploading(file);
     setProgress(0);
     setCustomFile(undefined);
-    uploadRef.current = uploadFile(selected, target, setProgress, custom);
+    onBusy(true);
+    uploadRef.current = uploadFile(file, target, setProgress, custom);
     try {
       const result = await uploadRef.current.promise;
       if (result.md5) {
@@ -113,7 +74,7 @@ const FirmwareUpload = ({
       if (status === -1) {
         toast.warning('Upload aborted');
       } else if (status === 412) {
-        setCustomFile(selected);
+        setCustomFile(file);
       } else {
         toast.error(uploadErrorMessage(status, chip));
         if (status === 401 || status === 403) onUnauthorized();
@@ -121,104 +82,52 @@ const FirmwareUpload = ({
     } finally {
       uploadRef.current = null;
       setProgress(undefined);
-      setFile(undefined);
+      setUploading(undefined);
+      onBusy(false);
     }
   };
 
-  if (progress !== undefined) {
-    return (
-      <>
-        <Typography sx={{ mb: 1 }}>
-          Uploading {file?.name} to {target}&hellip;
-        </Typography>
-        <LinearProgressWithLabel value={progress} />
-        <Button
-          sx={{ mt: 2 }}
-          startIcon={<CancelIcon />}
-          variant="outlined"
-          color="secondary"
-          onClick={() => uploadRef.current?.abort()}
-        >
-          Cancel
-        </Button>
-      </>
-    );
-  }
-
   return (
     <>
-      <DocumentUploader
-        active={!!(file || dragged)}
-        onDrop={onDrop}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragged(true);
-        }}
-        onDragLeave={() => setDragged(false)}
-        onClick={() => inputRef.current?.click()}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <CloudUploadIcon sx={{ mr: 4 }} color="primary" fontSize="large" />
-          <Typography>
-            {md5
-              ? 'MD5 received. Now drop the firmware .bin file here, or click to browse'
-              : 'Drop an EMS-ESP firmware .bin file here, or click to browse'}
-          </Typography>
-        </Box>
-        <input
-          type="file"
-          hidden
-          ref={inputRef}
-          accept=".bin,.md5"
-          onChange={onFileChange}
-          style={{ display: 'none' }}
-        />
-        {file && (
-          <>
-            <Typography sx={{ fontSize: 14, color: '#6dc24b', my: 1 }}>
-              {file.name}
-            </Typography>
-            <Box>
-              <Button
-                startIcon={<CancelIcon />}
-                variant="outlined"
-                color="secondary"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setFile(undefined);
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                sx={{ ml: 2 }}
-                startIcon={<UploadIcon />}
-                variant="outlined"
-                color="primary"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  void startUpload();
-                }}
-              >
-                Upload
-              </Button>
-            </Box>
-          </>
-        )}
-      </DocumentUploader>
+      {uploading && (
+        <p className="rc-p">
+          Uploading <span className="mono">{uploading.name}</span> to {target}
+          &hellip;
+        </p>
+      )}
+      <FileUpload
+        text={
+          md5
+            ? 'MD5 received. Now drop the firmware .bin file here, or click to browse'
+            : 'Drop an EMS-ESP firmware .bin file here, or click to browse'
+        }
+        accept={['.bin', '.md5']}
+        onUpload={(file) => void startUpload(file)}
+        progress={progress}
+        onCancel={() => uploadRef.current?.abort()}
+      />
       {customFile && (
-        <CustomBuildWarning
-          message="This is not an official EMS-ESP build. Only install firmware you trust"
-          linkText="About official and custom builds"
-          installText="Install anyway"
-          onInstall={() => void startUpload(customFile, true)}
-        />
+        <Message
+          level="warning"
+          className="rc-msg"
+          actions={
+            <Button
+              size="sm"
+              color="warning"
+              icon="warning"
+              onClick={() => void startUpload(customFile, true)}
+            >
+              Install anyway
+            </Button>
+          }
+        >
+          This is not an official EMS-ESP build. Only install firmware you trust.{' '}
+          <a href={CUSTOM_BUILD_URL} target="_blank" rel="noreferrer">
+            About official and custom builds
+          </a>
+        </Message>
       )}
-      {md5 && (
-        <Typography sx={{ mt: 2 }} variant="body2" color="success">
-          {'MD5: ' + md5}
-        </Typography>
-      )}
+      {md5 && <p className="cap mono rc-md5">MD5: {md5}</p>}
     </>
   );
 };

@@ -202,6 +202,11 @@ let system_status = {
   // network_status: 10, // ethernet connected
   // network_status: 6, // wifi disconnected
   wifi_rssi: -41,
+  network_ip: '10.10.10.101', // only when connected over WiFi or Ethernet
+  mqtt_host: '192.168.1.4', // only when MQTT is enabled
+  mqtt_port: 1883,
+  log_errors: 2, // since boot
+  log_warnings: 5,
   esp_platform: 'ESP32',
   build_flags: 'DEMO',
   cpu_type: 'ESP32-D0WD-V3',
@@ -209,6 +214,7 @@ let system_status = {
   cpu_cores: 2,
   cpu_freq_mhz: 240,
   max_alloc_heap: 191,
+  heap_size: 312, // total heap, in KB
   arduino_version: 'Arduino v3.3.8',
   sdk_version: '5.5.4.260407',
   partition: 'app0',
@@ -646,6 +652,8 @@ function export_data(type: string) {
       return emsesp_modules;
     case 'allvalues':
       return emsesp_allvalues;
+    case 'heatingbackup':
+      return emsesp_heatingbackup;
     case 'systembackup':
       return emsesp_systembackup;
     default:
@@ -914,7 +922,10 @@ let ntp_settings = {
   enabled: true,
   server: 'time.google.com',
   tz_label: 'Europe/Amsterdam',
-  tz_format: 'CET-1CEST,M3.5.0,M10.5.0/3'
+  tz_format: 'CET-1CEST,M3.5.0,M10.5.0/3',
+  thermostat_sync: 0,
+  tz_label_t: 'Europe/Amsterdam',
+  tz_format_t: 'CET-1CEST,M3.5.0,M10.5.0/3'
 };
 let ntp_status = {
   status: 0, // 0 = disabled, 1 = inactive, 2 = active
@@ -1090,9 +1101,25 @@ const mqtt_status = {
   connected: true,
   client_id: 'ems-esp',
   disconnect_reason: 0,
+  host: '192.168.1.4', // broker, from the MQTT settings
+  port: 1883,
   mqtt_fails: 0,
   mqtt_queued: 1,
   connect_count: 2
+};
+// seconds since connect and since the last lost connection, counted from mock start
+const mqtt_start = Date.now();
+const mqtt_connected_for = 5 * 86400 + 3600;
+const mqtt_last_disconnect_ago = 5 * 86400 + 3660;
+const mqttStatus = () => {
+  const secs = Math.trunc((Date.now() - mqtt_start) / 1000);
+  return {
+    ...mqtt_status,
+    base: mqtt_settings.base,
+    ...(mqtt_status.connected && { connected_for: mqtt_connected_for + secs }),
+    last_disconnect_ago: mqtt_last_disconnect_ago + secs,
+    last_disconnect_reason: 7 // TCP disconnected
+  };
 };
 
 // STATUS
@@ -1226,6 +1253,129 @@ const emsesp_info = {
 };
 
 const emsesp_systembackup = {};
+
+// heating settings backup: the writeable values per EMS device, keyed by command name
+// API writes to these devices update the values, so a restore can be checked against a new export
+const emsesp_heatingbackup = {
+  type: 'heatingbackup',
+  version: '3.10.0-dev.5',
+  fahrenheit: false,
+  devices: [
+    {
+      type: 'boiler',
+      name: 'Nefit Trendline HRC30/Generic Heatronic 3',
+      deviceId: 8,
+      productId: 123,
+      version: '06.01',
+      values: {
+        heatingoff: false,
+        heatingactivated: true,
+        heatingtemp: 70,
+        burnmaxpower: 100,
+        burnminpower: 30,
+        boilhyston: -5,
+        boilhystoff: 5,
+        burnminperiod: 10,
+        pumpmodmax: 100,
+        pumpmodmin: 30,
+        pumpdelay: 2,
+        pumpmode: 'auto',
+        selflowtemp: 75,
+        'dhw/tapactivated': true,
+        'dhw/settemp': 55,
+        'dhw/comfort': 'hot',
+        'dhw/disinfectiontemp': 70,
+        'dhw/circpump': false
+      }
+    },
+    {
+      type: 'thermostat',
+      name: 'RC35',
+      deviceId: 24,
+      productId: 86,
+      version: '04.01',
+      values: {
+        minexttemp: -12,
+        building: 'medium',
+        damping: true,
+        'hc1/mode': 'auto',
+        'hc1/daytemp': 21,
+        'hc1/nighttemp': 16,
+        'hc1/holidaytemp': 15,
+        'hc1/designtemp': 60,
+        'hc1/offsettemp': 0,
+        'hc1/minflowtemp': 25,
+        'hc1/maxflowtemp': 75,
+        'hc1/summertemp': 18,
+        'hc1/summermode': 'auto',
+        'hc1/heatingtype': 'radiator',
+        'hc1/program': 'own 1',
+        'hc1/pause': 0,
+        'hc1/party': 0,
+        'hc2/mode': 'night',
+        'hc2/daytemp': 22.5,
+        'hc2/nighttemp': 17,
+        'hc2/designtemp': 45,
+        'hc2/heatingtype': 'floor',
+        'dhw/mode': 'own',
+        'dhw/circmode': 'off',
+        'dhw/settemp': 52
+      }
+    },
+    {
+      type: 'mixer',
+      name: 'MM10',
+      deviceId: 32,
+      productId: 69,
+      version: '01.01',
+      values: {
+        'hc2/flowsettemp': 38,
+        'hc2/setvalvetime': 120
+      }
+    },
+    {
+      type: 'solar',
+      name: 'SM10',
+      deviceId: 48,
+      productId: 73,
+      version: '01.02',
+      values: {
+        collectormaxtemp: 120,
+        tankmaxtemp: 80,
+        solarpumpmode: 'PWM'
+      }
+    }
+  ]
+};
+
+// the boiler refuses this write, so the restore shows a failure
+const MOCK_REJECTED_WRITES = ['boiler/pumpmodmax'];
+
+function write_heating_value(device: string, cmd: string, data: unknown) {
+  const dev = emsesp_heatingbackup.devices.find((d) => d.type === device);
+  const values = dev?.values as Record<string, unknown> | undefined;
+  if (!values || !(cmd in values)) {
+    return status(404);
+  }
+  if (MOCK_REJECTED_WRITES.includes(device + '/' + cmd)) {
+    return new Response(JSON.stringify({ message: 'write refused by device' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  const text = String(data);
+  const old = values[cmd];
+  if (!DEMO) {
+    values[cmd] =
+      typeof old === 'number'
+        ? Number(text)
+        : typeof old === 'boolean'
+          ? ['true', 'on', '1'].includes(text.toLowerCase())
+          : text;
+  }
+  console.log('write ' + device + '/' + cmd + ' = ' + text);
+  return {};
+}
 
 const emsesp_allvalues = {
   'Boiler Nefit Trendline HRC30 (DeviceID:0x08, ProductID:123, Version:06.01)': {
@@ -5095,7 +5245,7 @@ router
   .post(NETWORK_SETTINGS_ENDPOINT, async (request: any) => {
     network_settings = await request.json();
     console.log('network settings saved', network_settings);
-    return status(200);
+    return status(205); // like the firmware: network changes need a restart
   });
 
 // AP
@@ -5111,7 +5261,7 @@ router
 // MQTT
 router
   .get(MQTT_SETTINGS_ENDPOINT, () => mqtt_settings)
-  .get(MQTT_STATUS_ENDPOINT, () => mqtt_status)
+  .get(MQTT_STATUS_ENDPOINT, () => mqttStatus())
   .post(MQTT_SETTINGS_ENDPOINT, async (request: any) => {
     mqtt_settings = await request.json();
     console.log('mqtt settings saved', mqtt_settings);
@@ -5372,13 +5522,24 @@ router
   // EMS-ESP Settings
   .get(EMSESP_SETTINGS_ENDPOINT, () => settings)
   .post(EMSESP_SETTINGS_ENDPOINT, async (request: any) => {
-    settings = await request.json();
+    const new_settings = await request.json();
+    // like WebSettings::update, these set ChangeFlags::RESTART
+    const restart = [
+      'board_profile',
+      'phy_type',
+      'eth_power',
+      'eth_phy_addr',
+      'eth_clock_mode',
+      'ems_bus_id',
+      'telnet_enabled',
+      'low_clock'
+    ].some((k) => new_settings[k] !== settings[k]);
+    settings = new_settings;
     console.log('application settings saved', settings);
     system_status.developer_mode = settings.developer_mode;
     log_settings.developer_mode = settings.developer_mode;
     system_status.disable_reset = settings.disable_reset;
-    return status(200); // no restart needed
-    // return status(205); // reboot required
+    return status(restart ? 205 : 200);
   })
 
   // Device Data
@@ -5632,7 +5793,10 @@ router
       }
     }
     console.log('customization saved', content);
-    return status(200);
+    // like the firmware: removing an entity (mask 0x80) needs a restart
+    return status(
+      content.entity_ids.some((e: string) => e[0] === '8') ? 205 : 200
+    );
   })
   .post(EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT, async (request: any) => {
     return status(200);
@@ -5775,7 +5939,7 @@ router
   // Temperature & Analog Sensors
   .post(EMSESP_WRITE_TEMPSENSOR_ENDPOINT, async (request: any) => {
     const ts = await request.json();
-    var objIndex = emsesp_sensordata.ts.findIndex((obj) => obj.id == ts.id_str);
+    var objIndex = emsesp_sensordata.ts.findIndex((obj) => obj.id == ts.id);
     if (objIndex !== -1) {
       emsesp_sensordata.ts[objIndex].n = ts.name;
       emsesp_sensordata.ts[objIndex].o = ts.offset;
@@ -5828,7 +5992,7 @@ router
     const board_profile = request.query.boardProfile;
 
     const data = {
-      board_profile: settings.board_profile,
+      board_profile: board_profile,
       led_gpio: settings.led_gpio,
       dallas_gpio: settings.dallas_gpio,
       rx_gpio: settings.rx_gpio,
@@ -6077,6 +6241,8 @@ router
         if (!DEMO) system_status.coredump = '';
         return status(200);
       }
+    } else if (data.device) {
+      return write_heating_value(data.device, cmd, data.data ?? data.value);
     }
     return status(404); // not found
   });

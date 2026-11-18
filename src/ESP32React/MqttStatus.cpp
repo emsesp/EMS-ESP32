@@ -17,6 +17,23 @@ void MqttStatus::mqttStatus(AsyncWebServerRequest * request) {
     root["connected"]         = _mqttSettingsService->isConnected();
     root["client_id"]         = _mqttSettingsService->getClientId();
     root["disconnect_reason"] = (uint8_t)_mqttSettingsService->getDisconnectReason();
+    _mqttSettingsService->read([&](MqttSettings & settings) {
+        root["host"] = settings.host;
+        root["port"] = settings.port;
+        root["base"] = settings.base;
+    });
+
+    // seconds ago, so the web UI doesn't depend on the device clock
+    const uint32_t now         = uuid::get_uptime_sec();
+    const uint32_t connectedAt = _mqttSettingsService->getConnectedAt();
+    if (connectedAt) {
+        root["connected_for"] = now - connectedAt;
+    }
+    const uint32_t lastDisconnectAt = _mqttSettingsService->getLastDisconnectAt();
+    if (lastDisconnectAt) {
+        root["last_disconnect_ago"]    = now - lastDisconnectAt;
+        root["last_disconnect_reason"] = (uint8_t)_mqttSettingsService->getLastDisconnectReason();
+    }
 
     root["mqtt_queued"]   = emsesp::Mqtt::publish_queued();
     root["mqtt_fails"]    = emsesp::Mqtt::publish_fails();

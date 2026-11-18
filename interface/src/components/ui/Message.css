@@ -1,0 +1,45 @@
+.msg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+.msg > .grow {
+  min-width: 200px;
+}
+.msg.info {
+  background: rgba(33, 150, 243, 0.12);
+  border: 1px solid rgba(33, 150, 243, 0.4);
+}
+.msg.info > .icon {
+  color: var(--primary);
+}
+.msg.warning {
+  background: rgba(255, 167, 38, 0.15);
+  border: 1px solid rgba(255, 167, 38, 0.4);
+}
+.msg.warning > .icon {
+  color: var(--warning);
+}
+.msg.error {
+  background: rgba(244, 67, 54, 0.15);
+  border: 1px solid rgba(244, 67, 54, 0.4);
+}
+.msg.error > .icon {
+  color: #ff8a80;
+}
+.msg.success {
+  background: rgba(102, 187, 106, 0.15);
+  border: 1px solid rgba(102, 187, 106, 0.4);
+}
+.msg.success > .icon {
+  color: var(--success);
+}
+.msg-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}

@@ -1,0 +1,133 @@
+.dv-msg {
+  margin: 12px;
+}
+
+/* device list */
+.dv-devices .dv-ic {
+  width: 40px;
+}
+.dv-devices .dv-ic .icon {
+  vertical-align: middle;
+}
+.dv-devices tbody tr.sel,
+.dv-devices tbody tr.sel:hover {
+  background: rgba(144, 202, 249, 0.25);
+}
+.dv-devices .dv-sub {
+  display: none;
+}
+
+/* selected device */
+.dv-head .dv-title {
+  gap: 10px;
+}
+.dv-head .dv-title > .icon {
+  flex-shrink: 0;
+}
+.dv-back {
+  display: none;
+}
+.dv-caption {
+  margin: 2px 0 0 32px;
+}
+.dv-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 8px;
+}
+.dv-scroll {
+  max-height: max(240px, calc(100vh - 260px));
+  overflow: auto;
+  border-radius: 6px;
+}
+.dv-values .dv-val {
+  overflow-wrap: anywhere;
+}
+.dv-values .dv-act {
+  width: 40px;
+  text-align: center;
+}
+.dv-values .dv-act .icon {
+  vertical-align: middle;
+}
+.dv-ename {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.dv-mask.b8 {
+  color: #ffeb3b;
+}
+.dv-mask.b4 {
+  color: var(--warning);
+}
+.dv-mask.b2 {
+  color: #ce93d8;
+}
+.dv-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 8px 0 0;
+}
+.dv-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+@media (max-width: 599px) {
+  .dv-page.has-sel .dv-list {
+    display: none;
+  }
+  .dv-devices .dv-type {
+    display: none;
+  }
+  .dv-devices .dv-sub {
+    display: block;
+  }
+  .dv-back {
+    display: inline-flex;
+    margin-bottom: 8px;
+  }
+  .dv-close {
+    display: none;
+  }
+  .dv-caption {
+    margin-left: 0;
+  }
+  .dv-toolbar .search {
+    flex-basis: 100%;
+  }
+  .dv-scroll {
+    max-height: none;
+    overflow: visible;
+  }
+  .dv-values .dv-val {
+    max-width: 55vw;
+  }
+}
+
+@media (pointer: coarse) {
+  .dv-values td {
+    height: 40px;
+  }
+}
+
+/* value dialog */
+.dvd-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 0;
+  color: var(--lightblue);
+}
+.dvd-value {
+  margin: 14px 0 0;
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}

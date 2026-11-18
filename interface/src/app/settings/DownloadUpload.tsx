@@ -1,51 +1,47 @@
 import { useState } from 'react';
 
-import CancelIcon from '@mui/icons-material/Cancel';
-import DownloadIcon from '@mui/icons-material/GetApp';
-import WarningIcon from '@mui/icons-material/Warning';
-import {
-  Button,
-  Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  Typography
-} from '@mui/material';
-
 import * as SystemApi from 'api/system';
 import { API, callAction } from 'api/app';
+import { askPassword, passwordCancelledMessage } from 'api/passwordPrompt';
+import { readPasswordConfirmed } from 'api/security';
 
-import { dialogStyle } from '@/CustomTheme';
 import { useRequest } from 'alova/client';
 import type { APIcall } from 'app/main/types';
 import SystemMonitor from 'app/status/SystemMonitor';
 import {
-  BlockFormControlLabel,
-  FormLoader,
-  SectionContent,
-  SingleUpload,
-  useLayoutTitle
-} from 'components';
-import { toast } from 'components/toast';
+  Button,
+  ButtonLink,
+  Checkbox,
+  Dialog,
+  FileUpload,
+  Section,
+  toast
+} from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 import { saveBlob, saveFile } from 'utils';
+
+import './DownloadUpload.css';
+import HeatingBackupDialog from './HeatingBackupDialog';
+
+const uploadPercent = ({ loaded, total }: { loaded: number; total: number }) =>
+  total === 0 || loaded === 0
+    ? 0
+    : loaded <= total
+      ? Math.round((loaded * 100) / total)
+      : Math.round((total * 100) / loaded);
 
 const DownloadUpload = () => {
   const { LL } = useI18nContext();
 
-  const [confirmBackup, setConfirmBackup] = useState<boolean>(false);
-  const [includeSecrets, setIncludeSecrets] = useState<boolean>(false);
-
-  const [restarting, setRestarting] = useState<boolean>(false);
+  const [confirmBackup, setConfirmBackup] = useState(false);
+  const [includeSecrets, setIncludeSecrets] = useState(false);
+  const [heatingBackup, setHeatingBackup] = useState(false);
+  const [restarting, setRestarting] = useState(false);
 
   const { send: sendExportData } = useRequest(
     (type: string, secrets = false) =>
       callAction({ action: 'export', param: type, secrets }),
-    {
-      immediate: false
-    }
+    { immediate: false }
   )
     .onSuccess((event) => {
       saveFile(event.data, event.args[0], '.json');
@@ -70,7 +66,14 @@ const DownloadUpload = () => {
     immediate: false
   });
 
-  const { data, send: loadData, error } = useRequest(SystemApi.readSystemStatus);
+  const { data } = useRequest(SystemApi.readSystemStatus);
+
+  const {
+    loading: uploading,
+    uploading: uploadProgress,
+    send: sendUpload,
+    abort: cancelUpload
+  } = useRequest(SystemApi.uploadFile, { immediate: false });
 
   const doRestart = async () => {
     setRestarting(true);
@@ -82,137 +85,122 @@ const DownloadUpload = () => {
     }
   };
 
-  useLayoutTitle(LL.DOWNLOAD_UPLOAD());
+  const upload = async (file: File) => {
+    // asked before sending, otherwise the whole file is sent first
+    const confirmed = await readPasswordConfirmed()
+      .then((state) => state.confirmed || askPassword())
+      .catch(() => false);
+    if (!confirmed) {
+      toast.warning(passwordCancelledMessage());
+      return;
+    }
+    try {
+      await sendUpload(file);
+      toast.success(LL.UPLOAD_SUCCESSFUL());
+      await doRestart();
+    } catch (error) {
+      const message = (error as Error).message;
+      if (message.includes('The user aborted a request')) {
+        toast.warning(LL.UPLOAD() + ' ' + LL.ABORTED());
+      } else {
+        toast.error(message);
+      }
+    }
+  };
 
-  const handleCloseBackupDialog = () => {
+  const closeBackup = () => {
     setConfirmBackup(false);
     setIncludeSecrets(false);
   };
 
-  const handleDownload = (type: string) => () => {
-    void sendExportData(type, includeSecrets);
-    handleCloseBackupDialog();
+  const downloadBackup = () => {
+    void sendExportData('systembackup', includeSecrets);
+    closeBackup();
   };
 
   if (restarting) {
     return <SystemMonitor />;
   }
 
-  if (!data) {
-    return (
-      <SectionContent>
-        <FormLoader onRetry={loadData} errorMessage={error?.message || ''} />
-      </SectionContent>
-    );
-  }
-
   return (
-    <SectionContent>
-      <Dialog
-        sx={dialogStyle}
-        open={confirmBackup}
-        onClose={handleCloseBackupDialog}
-      >
-        <DialogTitle>{LL.DOWNLOAD_SYSTEM_BACKUP()}</DialogTitle>
-        <DialogContent dividers>
-          <WarningIcon color="warning" sx={{ fontSize: 18 }} />
-          &nbsp;
-          {LL.WARNING_SYSTEM_BACKUP()}
-          <BlockFormControlLabel
-            sx={{ mt: 2 }}
-            control={
-              <Checkbox
-                checked={includeSecrets}
-                onChange={(event) => setIncludeSecrets(event.target.checked)}
-              />
-            }
-            label={LL.BACKUP_INCLUDE_SECRETS()}
+    <>
+      <Section title={LL.DU_SETTINGS()} icon="settings_applications">
+        <p className="du-text">{LL.DU_SETTINGS_TEXT()}</p>
+        <div className="du-actions">
+          <Button icon="download" onClick={() => setConfirmBackup(true)}>
+            {LL.DOWNLOAD_SYSTEM_BACKUP()}
+          </Button>
+        </div>
+        <div className="du-upload">
+          <FileUpload
+            text={LL.UPLOAD_BACKUP_TEXT()}
+            accept={['.json']}
+            onUpload={(file) => void upload(file)}
+            progress={uploading ? uploadPercent(uploadProgress) : undefined}
+            onCancel={cancelUpload}
           />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            startIcon={<CancelIcon />}
-            variant="outlined"
-            onClick={handleCloseBackupDialog}
+        </div>
+      </Section>
+
+      <Section title={LL.HB_TITLE()} icon="thermostat">
+        <p className="du-text">{LL.HB_TEXT()}</p>
+        <div className="du-actions">
+          <Button icon="download" onClick={() => setHeatingBackup(true)}>
+            {LL.HB_BACKUP()}
+          </Button>
+          <ButtonLink
+            to="/settings/downloadUpload/restore"
             color="secondary"
+            icon="settings_backup_restore"
           >
-            {LL.CANCEL()}
+            {LL.HB_RESTORE()}
+          </ButtonLink>
+        </div>
+      </Section>
+
+      <Section title={LL.DATA_EXPORT()} icon="data_object">
+        <p className="du-text">{LL.DATA_EXPORT_TEXT()}</p>
+        <div className="du-actions">
+          <Button icon="download" onClick={() => void sendExportData('allvalues')}>
+            {LL.ALLVALUES()}
           </Button>
-          <Button
-            startIcon={<DownloadIcon />}
-            variant="outlined"
-            onClick={handleDownload('systembackup')}
-            color="primary"
-          >
-            {LL.DOWNLOAD(0)}
-          </Button>
-        </DialogActions>
+          {data?.coredump && (
+            <Button icon="download" onClick={() => void sendCoreDump()}>
+              {LL.COREDUMP()}
+            </Button>
+          )}
+        </div>
+      </Section>
+
+      <Dialog
+        open={confirmBackup}
+        title={LL.DOWNLOAD_SYSTEM_BACKUP()}
+        onClose={closeBackup}
+        actions={
+          <>
+            <Button color="secondary" icon="cancel" onClick={closeBackup}>
+              {LL.CANCEL()}
+            </Button>
+            <Button variant="contained" icon="download" onClick={downloadBackup}>
+              {LL.DOWNLOAD(0)}
+            </Button>
+          </>
+        }
+      >
+        <p>{LL.WARNING_SYSTEM_BACKUP()}</p>
+        <Checkbox
+          className="du-secrets"
+          label={LL.BACKUP_INCLUDE_SECRETS()}
+          checked={includeSecrets}
+          onChange={setIncludeSecrets}
+        />
       </Dialog>
 
-      <Typography sx={{ pb: 2 }} variant="h6" color="primary">
-        {LL.DOWNLOAD(0)}
-      </Typography>
-
-      <Grid
-        container
-        spacing={2}
-        sx={{
-          alignItems: 'center'
-        }}
-      >
-        <Typography variant="body1" color="warning">
-          {LL.DOWNLOAD_SETTINGS_TEXT()}:
-        </Typography>
-        <Button
-          startIcon={<DownloadIcon />}
-          variant="outlined"
-          color="primary"
-          onClick={() => setConfirmBackup(true)}
-        >
-          {LL.DOWNLOAD_SYSTEM_BACKUP()}
-        </Button>
-      </Grid>
-
-      <Grid container spacing={2} sx={{ mt: 2, alignItems: 'center' }}>
-        <Typography variant="body1" color="warning">
-          {LL.DOWNLOAD_SETTINGS_TEXT2()}:
-        </Typography>
-        <Button
-          startIcon={<DownloadIcon />}
-          variant="outlined"
-          color="primary"
-          onClick={handleDownload('allvalues')}
-        >
-          {LL.ALLVALUES()}
-        </Button>
-      </Grid>
-
-      {data.coredump && (
-        <Grid container spacing={2} sx={{ mt: 2, alignItems: 'center' }}>
-          <Typography variant="body1" color="warning">
-            {LL.DOWNLOAD_COREDUMP_TEXT()}:
-          </Typography>
-          <Button
-            startIcon={<DownloadIcon />}
-            variant="outlined"
-            color="primary"
-            onClick={() => void sendCoreDump()}
-          >
-            {LL.COREDUMP()}
-          </Button>
-        </Grid>
-      )}
-
-      <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
-        {LL.UPLOAD()}
-      </Typography>
-
-      <SingleUpload
-        text={LL.UPLOAD_BACKUP_TEXT()}
-        extensions={['.json']}
-        doRestart={doRestart}
+      <HeatingBackupDialog
+        open={heatingBackup}
+        onClose={() => setHeatingBackup(false)}
       />
-    </SectionContent>
+    </>
   );
 };
 

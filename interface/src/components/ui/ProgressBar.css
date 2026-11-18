@@ -1,0 +1,20 @@
+.bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.bar > div {
+  height: 100%;
+  background: var(--primary);
+  transition: width 0.3s;
+}
+.bar.success > div {
+  background: var(--success);
+}
+.bar.warning > div {
+  background: var(--warning);
+}
+.bar.error > div {
+  background: var(--error);
+}

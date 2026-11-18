@@ -1,56 +1,44 @@
 import { memo } from 'react';
-import type { IconType } from 'react-icons';
-import { AiOutlineAlert, AiOutlineControl, AiOutlineGateway } from 'react-icons/ai';
-import { CgSmartHomeBoiler } from 'react-icons/cg';
-import { FaSolarPanel } from 'react-icons/fa';
-import { GiHeatHaze, GiTap } from 'react-icons/gi';
-import {
-  MdMoreTime,
-  MdOutlineDevices,
-  MdOutlinePool,
-  MdOutlineSensors,
-  MdPlaylistAdd,
-  MdThermostatAuto
-} from 'react-icons/md';
-import { PiFan, PiGauge } from 'react-icons/pi';
-import { TiFlowSwitch, TiThermometer } from 'react-icons/ti';
-import { VscVmConnect } from 'react-icons/vsc';
+
+import { Icon, type IconName } from 'components/ui';
 
 import { DeviceType } from './types';
 
-const deviceIconLookup: Record<DeviceType, IconType | null> = {
-  [DeviceType.TEMPERATURESENSOR]: TiThermometer,
-  [DeviceType.ANALOGSENSOR]: PiGauge,
-  [DeviceType.BOILER]: CgSmartHomeBoiler,
-  [DeviceType.HEATSOURCE]: CgSmartHomeBoiler,
-  [DeviceType.THERMOSTAT]: MdThermostatAuto,
-  [DeviceType.MIXER]: AiOutlineControl,
-  [DeviceType.SOLAR]: FaSolarPanel,
-  [DeviceType.HEATPUMP]: GiHeatHaze,
-  [DeviceType.GATEWAY]: AiOutlineGateway,
-  [DeviceType.SWITCH]: TiFlowSwitch,
-  [DeviceType.CONTROLLER]: VscVmConnect,
-  [DeviceType.CONNECT]: VscVmConnect,
-  [DeviceType.ALERT]: AiOutlineAlert,
-  [DeviceType.EXTENSION]: MdOutlineDevices,
-  [DeviceType.WATER]: GiTap,
-  [DeviceType.POOL]: MdOutlinePool,
-  [DeviceType.CUSTOM]: MdPlaylistAdd,
-  [DeviceType.UNKNOWN]: MdOutlineSensors,
+const deviceIconLookup: Record<DeviceType, IconName | null> = {
+  [DeviceType.TEMPERATURESENSOR]: 'device_thermostat',
+  [DeviceType.ANALOGSENSOR]: 'speed',
+  [DeviceType.BOILER]: 'local_fire_department',
+  [DeviceType.HEATSOURCE]: 'local_fire_department',
+  [DeviceType.THERMOSTAT]: 'thermostat',
+  [DeviceType.MIXER]: 'valve',
+  [DeviceType.SOLAR]: 'solar_power',
+  [DeviceType.HEATPUMP]: 'heat_pump',
+  [DeviceType.GATEWAY]: 'router',
+  [DeviceType.SWITCH]: 'toggle_on',
+  [DeviceType.CONTROLLER]: 'settings_input_component',
+  [DeviceType.CONNECT]: 'settings_input_component',
+  [DeviceType.ALERT]: 'notification_important',
+  [DeviceType.EXTENSION]: 'extension',
+  [DeviceType.WATER]: 'water_drop',
+  [DeviceType.POOL]: 'pool',
+  [DeviceType.CUSTOM]: 'playlist_add',
+  [DeviceType.UNKNOWN]: 'sensors',
   [DeviceType.SYSTEM]: null,
-  [DeviceType.COMMAND]: MdPlaylistAdd,
-  [DeviceType.SCHEDULER]: MdMoreTime,
-  [DeviceType.GENERIC]: MdOutlineSensors,
-  [DeviceType.VENTILATION]: PiFan
+  [DeviceType.COMMAND]: 'playlist_add',
+  [DeviceType.SCHEDULER]: 'more_time',
+  [DeviceType.GENERIC]: 'sensors',
+  [DeviceType.VENTILATION]: 'mode_fan'
 };
 
 interface DeviceIconProps {
   type_id: DeviceType;
+  size?: 'sm' | 'xs';
+  className?: string;
 }
 
-const DeviceIcon = memo(({ type_id }: DeviceIconProps) => {
-  const Icon = deviceIconLookup[type_id];
-  return Icon ? <Icon /> : null;
+const DeviceIcon = memo(({ type_id, size, className }: DeviceIconProps) => {
+  const name = deviceIconLookup[type_id];
+  return name ? <Icon name={name} size={size} className={className} /> : null;
 });
 
 export default DeviceIcon;

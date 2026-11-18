@@ -1,97 +1,154 @@
-import { useEffect, useRef, useState } from 'react';
-
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import CancelIcon from '@mui/icons-material/Cancel';
-import WarningIcon from '@mui/icons-material/Warning';
-import {
-  Box,
-  Button,
-  Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  MenuItem,
-  TextField,
-  Typography
-} from '@mui/material';
+import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 
 import * as NTPApi from 'api/ntp';
-import { readNTPSettings } from 'api/ntp';
 
-import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova/client';
-import { updateState } from 'alova/client';
+import { ntpInfo } from 'app/status/status';
 import {
-  BlockFormControlLabel,
-  BlockNavigation,
-  ButtonRow,
-  FormLoader,
-  SectionContent,
-  ValidatedTextField,
-  useLayoutTitle
-} from 'components';
-import { toast } from 'components/toast';
+  Button,
+  Dialog,
+  FormSection,
+  Icon,
+  Section,
+  Select,
+  Switch,
+  TextField,
+  toast
+} from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
-import type { NTPSettingsType, Time } from 'types';
-import { formatLocalDateTime, updateValueDirty, useRest } from 'utils';
-import { ValidationError, validate } from 'validators';
+import type { NTPSettingsType, NTPStatusType, Time } from 'types';
+import { formatDateTime, formatLocalDateTime, useInterval } from 'utils';
 import { NTP_SETTINGS_VALIDATOR } from 'validators/ntp';
-import type { ValidateFieldsError } from 'validators/schema';
 
+import FormPage, { useFormPage } from './FormPage';
+import './NTPSettings.css';
 import {
   TIME_ZONES,
+  TIME_ZONE_OPTIONS,
   migrateNtpTimeZones,
-  selectedTimeZone,
-  timeZoneSelectItemsT,
-  useTimeZoneSelectItems
+  selectedTimeZone
 } from './TZ';
 
-const NTPSettings = () => {
-  const {
-    loadData,
-    saving,
-    data,
-    updateDataValue,
-    origData,
-    dirtyFlags,
-    setDirtyFlags,
-    setOrigData,
-    blocker,
-    saveData,
-    errorMessage
-  } = useRest<NTPSettingsType>({
-    read: NTPApi.readNTPSettings,
-    update: NTPApi.updateNTPSettings
-  });
+const parseLocal = (status: NTPStatusType) => ({
+  base: Date.parse(status.local_time.substring(0, 19)),
+  at: Date.now()
+});
 
+// ticks every second between polls, so it lives apart from the form
+const NTPClock = ({ canSetTime }: { canSetTime: boolean }) => {
   const { LL } = useI18nContext();
-  useLayoutTitle('NTP');
+  const [clock, setClock] = useState<{ base: number; at: number }>();
+  const [now, setNow] = useState(() => Date.now());
+  const [setting, setSetting] = useState(false);
+  const [localTime, setLocalTime] = useState('');
+  const [processing, setProcessing] = useState(false);
 
-  const timeZoneItems = useTimeZoneSelectItems();
-  const timeZoneItemsT = timeZoneSelectItemsT();
+  const { data: status, send: loadStatus } = useRequest(
+    NTPApi.readNTPStatus
+  ).onSuccess((event) => setClock(parseLocal(event.data)));
+  const { send: updateTime } = useRequest(
+    (local_time: Time) => NTPApi.updateTime(local_time),
+    { immediate: false }
+  );
 
-  const selectedTzValue = data
-    ? selectedTimeZone(data.tz_label, data.tz_format)
-    : undefined;
+  useInterval(() => setNow(Date.now()), 1000);
+  useInterval(() => void loadStatus(), 30000);
 
-  const selectedTzValueT = data
-    ? selectedTimeZone(data.tz_label_t, data.tz_format_t)
-    : undefined;
-  const [localTime, setLocalTime] = useState<string>('');
-  const [settingTime, setSettingTime] = useState<boolean>(false);
-  const [processing, setProcessing] = useState<boolean>(false);
-  const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
+  const openSetTime = () => {
+    setLocalTime(formatLocalDateTime(new Date()));
+    setSetting(true);
+  };
+
+  const configureTime = async () => {
+    setProcessing(true);
+    try {
+      await updateTime({ local_time: formatLocalDateTime(new Date(localTime)) });
+      toast.success(LL.TIME_SET());
+      setSetting(false);
+      await loadStatus();
+    } catch {
+      toast.error(LL.PROBLEM_UPDATING());
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const time = clock
+    ? formatDateTime(
+        formatLocalDateTime(new Date(clock.base + Math.max(now - clock.at, 0)))
+      )
+    : '…';
+
+  return (
+    <Section className="ntp-clock">
+      <Icon name="schedule" />
+      <div className="grow">
+        <div className="ntp-time">{time}</div>
+        <div className="cap">
+          {LL.NTP_TIME_ON_DEVICE()}
+          {status && ` · NTP ${ntpInfo(status.status, LL).text}`}
+        </div>
+      </div>
+      {canSetTime && (
+        <Button icon="edit_calendar" onClick={openSetTime}>
+          {LL.SET_TIME(0)}
+        </Button>
+      )}
+      <Dialog
+        open={setting}
+        title={LL.SET_TIME(1)}
+        onClose={() => setSetting(false)}
+        actions={
+          <>
+            <Button color="secondary" onClick={() => setSetting(false)}>
+              {LL.CANCEL()}
+            </Button>
+            <Button
+              variant="contained"
+              icon="schedule"
+              disabled={processing || !localTime}
+              onClick={() => void configureTime()}
+            >
+              {LL.UPDATE()}
+            </Button>
+          </>
+        }
+      >
+        <p className="ntp-dialog-text">{LL.SET_TIME_TEXT()}</p>
+        <TextField
+          label={LL.LOCAL_TIME(0)}
+          name="local_time"
+          type="datetime-local"
+          step={1}
+          fullWidth
+          value={localTime}
+          disabled={processing}
+          onChange={(e) => setLocalTime(e.currentTarget.value)}
+        />
+      </Dialog>
+    </Section>
+  );
+};
+
+type TzKeys = ['tz_label', 'tz_format'] | ['tz_label_t', 'tz_format_t'];
+
+const NTPSettings = () => {
+  const { LL } = useI18nContext();
+  const form = useFormPage<NTPSettingsType>({
+    read: NTPApi.readNTPSettings,
+    update: NTPApi.updateNTPSettings,
+    validator: () => NTP_SETTINGS_VALIDATOR
+  });
+  const { data: settings, dirtyFlags, setOrigData, updateDataValue } = form;
   const migratingTz = useRef(false);
 
   // If firmware has not yet rewritten tz_format from the label (or the user
   // landed here before reboot), persist the current TIME_ZONES values quietly.
   useEffect(() => {
-    if (!data || migratingTz.current || dirtyFlags.length > 0) {
+    if (!settings || migratingTz.current || dirtyFlags.length > 0) {
       return;
     }
-    const migrated = migrateNtpTimeZones(data);
+    const migrated = migrateNtpTimeZones(settings);
     if (!migrated) {
       return;
     }
@@ -107,249 +164,68 @@ const NTPSettings = () => {
         migratingTz.current = false;
       }
     })();
-  }, [data, dirtyFlags.length, setOrigData, updateDataValue]);
+  }, [settings, dirtyFlags.length, setOrigData, updateDataValue]);
 
-  const { send: updateTime } = useRequest(
-    (local_time: Time) => NTPApi.updateTime(local_time),
-    {
-      immediate: false
-    }
-  );
-
-  const updateFormValue = updateValueDirty(
-    origData as unknown as Record<string, unknown>,
-    dirtyFlags,
-    setDirtyFlags,
-    updateDataValue as (value: unknown) => void
-  );
-
-  const updateLocalTime = (event: React.ChangeEvent<HTMLInputElement>) =>
-    setLocalTime(event.target.value);
-
-  const openSetTime = () => {
-    setLocalTime(formatLocalDateTime(new Date()));
-    setSettingTime(true);
-  };
-
-  const configureTime = async () => {
-    setProcessing(true);
-
-    try {
-      await updateTime({ local_time: formatLocalDateTime(new Date(localTime)) });
-      toast.success(LL.TIME_SET());
-      setSettingTime(false);
-      await loadData();
-    } catch {
-      toast.error(LL.PROBLEM_UPDATING());
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  const handleCloseSetTime = () => setSettingTime(false);
-
-  const validateAndSubmit = async () => {
-    if (!data) return;
-    try {
-      setFieldErrors(undefined);
-      await validate(NTP_SETTINGS_VALIDATOR, data);
-      await saveData();
-    } catch (error) {
-      setFieldErrors((error as ValidationError).fieldErrors);
-    }
-  };
-
-  const changeTimeZone = (event: React.ChangeEvent<HTMLInputElement>) => {
-    void updateState(readNTPSettings(), (settings: NTPSettingsType) => ({
-      ...settings,
-      tz_label: event.target.value,
-      tz_format: TIME_ZONES[event.target.value]
-    }));
-    updateFormValue(event);
-  };
-
-  const changeTimeZoneT = (event: React.ChangeEvent<HTMLInputElement>) => {
-    void updateState(readNTPSettings(), (settings: NTPSettingsType) => ({
-      ...settings,
-      tz_label_t: event.target.value,
-      tz_format_t: TIME_ZONES[event.target.value]
-    }));
-    updateFormValue(event);
-  };
-
-  const renderContent = () => {
-    if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
-    }
-
-    return (
-      <>
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              name="enabled"
-              checked={data.enabled}
-              onChange={updateFormValue}
-            />
-          }
-          label={LL.ENABLE_NTP()}
-        />
-        <ValidatedTextField
-          fieldErrors={fieldErrors || {}}
-          name="server"
-          label={LL.NTP_SERVER()}
-          fullWidth
-          variant="outlined"
-          disabled={!data.enabled}
-          value={data.server}
-          onChange={updateFormValue}
-          margin="normal"
-        />
-        <ValidatedTextField
-          fieldErrors={fieldErrors || {}}
-          name="tz_label"
-          label={LL.TIME_ZONE()}
-          fullWidth
-          variant="outlined"
-          value={selectedTzValue}
-          onChange={changeTimeZone}
-          margin="normal"
-          select
-        >
-          <MenuItem disabled>{LL.TIME_ZONE()}...</MenuItem>
-          {timeZoneItems}
-        </ValidatedTextField>
-        {data.enabled && (
-          <Grid container spacing={2} rowSpacing={0}>
-            <Grid>
-              <ValidatedTextField
-                fieldErrors={fieldErrors || {}}
-                name="thermostat_sync"
-                label="Sync EMS-Thermostat"
-                variant="outlined"
-                sx={{ width: '30ch' }}
-                value={data.thermostat_sync}
-                onChange={updateFormValue}
-                margin="normal"
-                select
-              >
-                <MenuItem value={0}>{LL.OFF()}</MenuItem>
-                <MenuItem value={1}>{LL.ON()}</MenuItem>
-                <MenuItem value={2}>
-                  {LL.USE()} {LL.TIME_ZONE()}
-                </MenuItem>
-              </ValidatedTextField>
-            </Grid>
-            <Grid>
-              {data.thermostat_sync === 2 && (
-                <ValidatedTextField
-                  fieldErrors={fieldErrors || {}}
-                  name="tz_label_t"
-                  label={LL.TIME_ZONE() + ' Thermostat'}
-                  sx={{ width: '30ch' }}
-                  variant="outlined"
-                  value={selectedTzValueT}
-                  onChange={changeTimeZoneT}
-                  margin="normal"
-                  select
-                >
-                  <MenuItem disabled>{LL.TIME_ZONE()}...</MenuItem>
-                  {timeZoneItemsT}
-                </ValidatedTextField>
-              )}
-            </Grid>
-          </Grid>
-        )}
-        <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
-          {!data.enabled && !dirtyFlags.length && (
-            <Box sx={{ flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
-              <ButtonRow>
-                <Button
-                  onClick={openSetTime}
-                  variant="outlined"
-                  color="primary"
-                  startIcon={<AccessTimeIcon />}
-                >
-                  {LL.SET_TIME(0)}
-                </Button>
-              </ButtonRow>
-            </Box>
-          )}
-        </Box>
-
-        {dirtyFlags && dirtyFlags.length !== 0 && (
-          <ButtonRow>
-            <Button
-              startIcon={<CancelIcon />}
-              disabled={saving}
-              variant="outlined"
-              color="secondary"
-              type="submit"
-              onClick={loadData}
-            >
-              {LL.CANCEL()}
-            </Button>
-            <Button
-              startIcon={<WarningIcon color="warning" />}
-              disabled={saving}
-              variant="contained"
-              color="info"
-              type="submit"
-              onClick={validateAndSubmit}
-            >
-              {LL.APPLY_CHANGES(dirtyFlags.length)}
-            </Button>
-          </ButtonRow>
-        )}
-      </>
-    );
+  // the POSIX format follows the label, so it doesn't count as a second change
+  const timeZone = ([label, format]: TzKeys) => {
+    const value = settings
+      ? (selectedTimeZone(settings[label], settings[format]) ?? '')
+      : '';
+    return {
+      ...form.select(label),
+      value,
+      options: value
+        ? TIME_ZONE_OPTIONS
+        : [{ value: '', label: `${LL.TIME_ZONE()}...` }, ...TIME_ZONE_OPTIONS],
+      onChange: (e: ChangeEvent<HTMLSelectElement>) => {
+        const tz = e.currentTarget.value;
+        form.set({ [label]: tz, [format]: TIME_ZONES[tz] ?? '' });
+        form.setDirtyFlags((flags) => flags.filter((k) => k !== format));
+      }
+    };
   };
 
   return (
-    <SectionContent>
-      {blocker ? <BlockNavigation blocker={blocker} /> : null}
-      {renderContent()}
-      <Dialog sx={dialogStyle} open={settingTime} onClose={handleCloseSetTime}>
-        <DialogTitle>{LL.SET_TIME(1)}</DialogTitle>
-        <DialogContent dividers>
-          <Typography color="warning" variant="body2">
-            {LL.SET_TIME_TEXT()}
-          </Typography>
-          <TextField
-            label={LL.LOCAL_TIME(0)}
-            type="datetime-local"
-            value={localTime}
-            onChange={updateLocalTime}
-            disabled={processing}
-            fullWidth
-            slotProps={{
-              inputLabel: {
-                shrink: true
-              }
-            }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            startIcon={<CancelIcon />}
-            variant="outlined"
-            onClick={handleCloseSetTime}
-            color="secondary"
-          >
-            {LL.CANCEL()}
-          </Button>
-          <Button
-            startIcon={<AccessTimeIcon />}
-            variant="outlined"
-            onClick={configureTime}
-            disabled={processing}
-            color="primary"
-          >
-            {LL.UPDATE()}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </SectionContent>
+    <FormPage form={form}>
+      {(data) => (
+        <>
+          <NTPClock canSetTime={!data.enabled && dirtyFlags.length === 0} />
+          <FormSection icon="schedule" title={LL.NTP_TIME_SERVER()}>
+            <Switch label={LL.ENABLE_NTP()} {...form.check('enabled')} />
+            <TextField
+              label={LL.NTP_SERVER()}
+              mono
+              disabled={!data.enabled}
+              {...form.text('server')}
+            />
+            <Select
+              label={LL.TIME_ZONE()}
+              {...timeZone(['tz_label', 'tz_format'])}
+            />
+          </FormSection>
+          {data.enabled && (
+            <FormSection icon="thermostat" title={LL.NTP_THERMOSTAT_CLOCK()}>
+              <Select
+                label={LL.NTP_THERMOSTAT_SYNC()}
+                helperText={LL.NTP_THERMOSTAT_SYNC_HELP()}
+                options={[
+                  { value: '0', label: LL.OFF() },
+                  { value: '1', label: LL.NTP_THERMOSTAT_SYNC_1() },
+                  { value: '2', label: LL.NTP_THERMOSTAT_SYNC_2() }
+                ]}
+                {...form.select('thermostat_sync')}
+              />
+              {data.thermostat_sync === 2 && (
+                <Select
+                  label={LL.NTP_THERMOSTAT_TZ()}
+                  {...timeZone(['tz_label_t', 'tz_format_t'])}
+                />
+              )}
+            </FormSection>
+          )}
+        </>
+      )}
+    </FormPage>
   );
 };
 

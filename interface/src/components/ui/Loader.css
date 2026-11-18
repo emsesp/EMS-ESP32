@@ -1,0 +1,31 @@
+.loader {
+  display: flex;
+  justify-content: center;
+  padding: 48px 12px;
+}
+.loader.page {
+  align-items: center;
+  min-height: 100vh;
+}
+.loader .msg {
+  max-width: 560px;
+  width: 100%;
+}
+.spinner {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid rgba(144, 202, 249, 0.2);
+  border-top-color: var(--primary);
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 3s;
+  }
+}

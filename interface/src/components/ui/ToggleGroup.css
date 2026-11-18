@@ -1,0 +1,38 @@
+.toggle-group {
+  display: inline-flex;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.toggle-group button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: transparent;
+  border: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-2);
+  padding: 5px 10px;
+  font: inherit;
+  font-size: 12px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.toggle-group button:last-child {
+  border-right: 0;
+}
+.toggle-group button:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+.toggle-group button.on {
+  background: rgba(144, 202, 249, 0.16);
+  color: var(--primary);
+}
+
+@media (pointer: coarse) {
+  .toggle-group button {
+    min-height: 40px;
+  }
+}

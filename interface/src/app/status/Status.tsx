@@ -1,292 +1,277 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import BuildIcon from '@mui/icons-material/Build';
-import DeviceHubIcon from '@mui/icons-material/DeviceHub';
-import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
-import LogoDevIcon from '@mui/icons-material/LogoDev';
-import MemoryIcon from '@mui/icons-material/Memory';
-import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
-import RouterIcon from '@mui/icons-material/Router';
-import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
-import WifiIcon from '@mui/icons-material/Wifi';
-import {
-  Avatar,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  useTheme
-} from '@mui/material';
-
+import { API } from 'api/app';
 import { readSystemStatus } from 'api/system';
 
 import { useRequest } from 'alova/client';
-import { busConnectionStatus } from 'app/main/types';
-import { FormLoader, SectionContent, useLayoutTitle } from 'components';
-import ListMenuItem from 'components/layout/ListMenuItem';
+import type { APIcall } from 'app/main/types';
+import {
+  Button,
+  Dialog,
+  Hero,
+  Loader,
+  Meter,
+  Section,
+  Tile,
+  Tiles,
+  toast
+} from 'components/ui';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
-import { NTPSyncStatus, NetworkConnectionStatus, SystemStatusCodes } from 'types';
-import { updateAvailable, useInterval } from 'utils';
-import { formatDateTime } from 'utils/time';
+import { NTPSyncStatus } from 'types';
+import { formatDateTime, updateAvailable, useInterval } from 'utils';
 
-const formatNumber = (num: number) => new Intl.NumberFormat().format(num);
-
-const formatDurationSec = (
-  duration_sec: number,
-  LL: ReturnType<typeof useI18nContext>['LL']
-) => {
-  const ms = duration_sec * 1000;
-  const days = Math.trunc(ms / 86400000);
-  const hours = Math.trunc(ms / 3600000) % 24;
-  const minutes = Math.trunc(ms / 60000) % 60;
-  const seconds = Math.trunc(ms / 1000) % 60;
-
-  const parts: string[] = [];
-  if (days) parts.push(LL.NUM_DAYS({ num: days }));
-  if (hours) parts.push(LL.NUM_HOURS({ num: hours }));
-  if (minutes) parts.push(LL.NUM_MINUTES({ num: minutes }));
-  parts.push(LL.NUM_SECONDS({ num: seconds }));
-
-  return parts.join(' ');
-};
+import './Status.css';
+import SystemMonitor from './SystemMonitor';
+import {
+  STATE_COLORS,
+  busInfo,
+  formatDuration,
+  formatTemperature,
+  mqttInfo,
+  networkIcon,
+  networkInfo,
+  nf,
+  ntpInfo,
+  systemInfo
+} from './status';
 
 const SystemStatus = () => {
   const { LL } = useI18nContext();
   const { me, versions } = useContext(AuthenticatedContext);
-
-  useLayoutTitle(LL.STATUS_OF(''));
+  const [confirm, setConfirm] = useState<'restart' | 'format'>();
+  const [restarting, setRestarting] = useState(false);
 
   const { data, send: loadData, error } = useRequest(readSystemStatus);
+  const { send: sendAPI, loading: sending } = useRequest(
+    (call: APIcall) => API(call),
+    { immediate: false }
+  );
 
   useInterval(() => {
-    void loadData();
+    if (!restarting) void loadData();
   });
 
-  const theme = useTheme();
-
-  const busStatus = (() => {
-    if (!data) return 'EMS state unknown';
-    switch (data.bus_status) {
-      case busConnectionStatus.BUS_STATUS_CONNECTED:
-        return `EMS ${LL.CONNECTED(0)} (${formatDurationSec(data.bus_uptime, LL)})`;
-      case busConnectionStatus.BUS_STATUS_TX_ERRORS:
-        return 'EMS ' + LL.TX_ISSUES();
-      case busConnectionStatus.BUS_STATUS_OFFLINE:
-        return 'EMS ' + LL.DISCONNECTED();
-      default:
-        return 'EMS state unknown';
-    }
-  })();
-
-  const systemStatus = (() => {
-    if (!data) return '??';
-    switch (data.status) {
-      case SystemStatusCodes.SYSTEM_STATUS_PENDING_UPLOAD:
-      case SystemStatusCodes.SYSTEM_STATUS_UPLOADING:
-        return LL.WAIT_FIRMWARE();
-      case SystemStatusCodes.SYSTEM_STATUS_ERROR_UPLOAD:
-      case SystemStatusCodes.SYSTEM_STATUS_ERROR_NOT_OFFICIAL:
-        return LL.ERROR();
-      case SystemStatusCodes.SYSTEM_STATUS_PENDING_RESTART:
-      case SystemStatusCodes.SYSTEM_STATUS_RESTART_REQUESTED:
-        return LL.RESTARTING_PRE();
-      case SystemStatusCodes.SYSTEM_STATUS_INVALID_GPIO:
-        return LL.GPIO_OF(LL.FAILED(0));
-      default:
-        return 'OK';
-    }
-  })();
-
-  const busStatusHighlight = (() => {
-    if (!data) return theme.palette.warning.main;
-    switch (data.bus_status) {
-      case busConnectionStatus.BUS_STATUS_TX_ERRORS:
-        return theme.palette.warning.main;
-      case busConnectionStatus.BUS_STATUS_CONNECTED:
-        return theme.palette.success.main;
-      case busConnectionStatus.BUS_STATUS_OFFLINE:
-        return theme.palette.error.main;
-      default:
-        return theme.palette.warning.main;
-    }
-  })();
-
-  const ntpStatus = (() => {
-    if (!data) return LL.UNKNOWN();
-    switch (data.ntp_status) {
-      case NTPSyncStatus.NTP_DISABLED:
-        return LL.NOT_ENABLED();
-      case NTPSyncStatus.NTP_INACTIVE:
-        return LL.INACTIVE(0);
-      case NTPSyncStatus.NTP_ACTIVE:
-        return data.ntp_time
-          ? `${LL.ACTIVE()} (${formatDateTime(data.ntp_time)})`
-          : LL.ACTIVE();
-      default:
-        return LL.UNKNOWN();
-    }
-  })();
-
-  const ntpStatusHighlight = (() => {
-    if (!data) return theme.palette.error.main;
-    switch (data.ntp_status) {
-      case NTPSyncStatus.NTP_DISABLED:
-        return theme.palette.info.main;
-      case NTPSyncStatus.NTP_INACTIVE:
-        return theme.palette.error.main;
-      case NTPSyncStatus.NTP_ACTIVE:
-        return theme.palette.success.main;
-      default:
-        return theme.palette.error.main;
-    }
-  })();
-
-  const networkStatusHighlight = (() => {
-    if (!data) return theme.palette.warning.main;
-    switch (data.network_status) {
-      case NetworkConnectionStatus.WIFI_STATUS_IDLE:
-      case NetworkConnectionStatus.WIFI_STATUS_DISCONNECTED:
-      case NetworkConnectionStatus.WIFI_STATUS_NO_SHIELD:
-        return theme.palette.info.main;
-      case NetworkConnectionStatus.WIFI_STATUS_CONNECTED:
-      case NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED:
-        return theme.palette.success.main;
-      case NetworkConnectionStatus.WIFI_STATUS_CONNECT_FAILED:
-      case NetworkConnectionStatus.WIFI_STATUS_CONNECTION_LOST:
-        return theme.palette.error.main;
-      default:
-        return theme.palette.warning.main;
-    }
-  })();
-
-  const networkStatus = (() => {
-    if (!data) return LL.UNKNOWN();
-    switch (data.network_status) {
-      case NetworkConnectionStatus.WIFI_STATUS_NO_SHIELD:
-        return LL.INACTIVE(1);
-      case NetworkConnectionStatus.WIFI_STATUS_IDLE:
-        return LL.IDLE();
-      case NetworkConnectionStatus.WIFI_STATUS_NO_SSID_AVAIL:
-        return 'No SSID Available';
-      case NetworkConnectionStatus.WIFI_STATUS_CONNECTED:
-        return `${LL.CONNECTED(0)} (WiFi, ${data.wifi_rssi} dBm)`;
-      case NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED:
-        return `${LL.CONNECTED(0)} (Ethernet)`;
-      case NetworkConnectionStatus.WIFI_STATUS_CONNECT_FAILED:
-        return `${LL.CONNECTED(1)} ${LL.FAILED(0)}`;
-      case NetworkConnectionStatus.WIFI_STATUS_CONNECTION_LOST:
-        return `${LL.CONNECTED(1)} ${LL.LOST()}`;
-      case NetworkConnectionStatus.WIFI_STATUS_DISCONNECTED:
-        return LL.DISCONNECTED();
-      default:
-        return LL.UNKNOWN();
-    }
-  })();
-
-  const activeHighlight = (value: boolean) =>
-    value ? theme.palette.success.main : theme.palette.info.main;
-
-  if (!data || !LL) {
-    return (
-      <SectionContent>
-        <FormLoader onRetry={loadData} errorMessage={error?.message || ''} />
-      </SectionContent>
-    );
+  if (restarting) {
+    return <SystemMonitor />;
   }
 
+  if (!data) {
+    return <Loader error={error?.message} onRetry={() => void loadData()} />;
+  }
+
+  const run = async (cmd: 'restart' | 'format') => {
+    try {
+      await sendAPI({ device: 'system', cmd, id: 0 });
+      setConfirm(undefined);
+      setRestarting(true);
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  };
+
+  const system = systemInfo(data.status, LL);
+  const bus = busInfo(data.bus_status, data.bus_uptime, LL);
+  const network = networkInfo(data.network_status, LL);
+  const mqtt = mqttInfo(
+    { enabled: !!data.mqtt_host || data.mqtt_status, connected: data.mqtt_status },
+    LL
+  );
+  const ntp = ntpInfo(data.ntp_status, LL);
+  const update = updateAvailable(versions);
+  const errors = data.log_errors ?? 0;
+  const warnings = data.log_warnings ?? 0;
+  const hasLogCounts = data.log_errors !== undefined;
+  const join = (...parts: (string | false | undefined)[]) =>
+    parts.filter(Boolean).join(' · ');
+
   return (
-    <SectionContent>
-      <List>
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar sx={{ bgcolor: '#c5572c', color: 'white' }}>
-              <MonitorHeartIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText
-            primary={LL.STATUS_OF(LL.SYSTEM(0))}
-            secondary={`${systemStatus} (${LL.UPTIME()}: ${formatDurationSec(data.uptime, LL)})`}
-          />
-        </ListItem>
-
-        {!me.admin && (
-          <ListMenuItem
-            icon={BuildIcon}
-            bgcolor="#72caf9"
-            label="EMS-ESP Firmware"
-            text={
-              versions?.current?.version
-                ? `v${versions.current.version}${versions.current.upgradeable ? ` (${LL.UPDATE_AVAILABLE()})` : ''}`
-                : ''
-            }
-            to="/status/version"
-            badge={updateAvailable(versions)}
-          />
+    <>
+      <Hero
+        state={system.state}
+        icon={system.state === 'ok' ? 'check_circle' : 'warning'}
+        title={system.text}
+        text={join(
+          data.model || data.board,
+          `${LL.UPTIME()} ${formatDuration(data.uptime, LL)}`
         )}
+      />
 
-        <ListMenuItem
-          icon={MemoryIcon}
-          bgcolor="#68374d"
-          label={LL.HARDWARE()}
-          text={`${formatNumber(data.free_heap)} KB ${LL.FREE_MEMORY()}`}
-          to="/status/hardwarestatus"
-        />
+      <Section>
+        <Tiles>
+          <Tile
+            to="/settings/version"
+            icon="new_releases"
+            color="#c5572c"
+            title="EMS-ESP Firmware"
+            text={join(
+              versions?.current?.version && `v${versions.current.version}`,
+              update && LL.UPDATE_AVAILABLE()
+            )}
+            state={update ? 'warn' : 'ok'}
+            badge={update}
+          />
+          <Tile
+            to="/status/hardwarestatus"
+            icon="memory"
+            color="#72caf9"
+            title={LL.HARDWARE()}
+            text={join(
+              `${nf.format(data.free_heap)} KB ${LL.FREE_MEMORY()}`,
+              data.temperature !== undefined && formatTemperature(data.temperature)
+            )}
+            state="ok"
+          />
+          <Tile
+            to="/status/activity"
+            icon="swap_horiz"
+            color="#68374d"
+            title={LL.DATA_TRAFFIC()}
+            text={bus.text}
+            state={bus.state}
+          />
+          <Tile
+            to="/status/network"
+            icon={networkIcon(data.network_status)}
+            color={STATE_COLORS[network.state]}
+            title={LL.NETWORK(1)}
+            text={join(
+              network.text,
+              data.network_ip,
+              data.wifi_rssi < 0 && `${data.wifi_rssi} dBm`
+            )}
+            state={network.state}
+          />
+          <Tile
+            to="/status/mqtt"
+            icon="device_hub"
+            color={STATE_COLORS[mqtt.state]}
+            title="MQTT"
+            text={join(
+              mqtt.text,
+              data.mqtt_host && `${data.mqtt_host}:${data.mqtt_port}`
+            )}
+            state={mqtt.state}
+          />
+          <Tile
+            to="/status/ntp"
+            icon="schedule"
+            color={STATE_COLORS[ntp.state]}
+            title="NTP"
+            text={join(
+              ntp.text,
+              data.ntp_status === NTPSyncStatus.NTP_ACTIVE &&
+                data.ntp_time &&
+                formatDateTime(data.ntp_time)
+            )}
+            state={ntp.state}
+          />
+          <Tile
+            to="/status/ap"
+            icon={data.ap_status ? 'wifi_tethering' : 'wifi_tethering_off'}
+            color={STATE_COLORS[data.ap_status ? 'ok' : 'off']}
+            title={LL.ACCESS_POINT(0)}
+            text={data.ap_status ? LL.ACTIVE() : LL.INACTIVE(0)}
+            state={data.ap_status ? 'ok' : 'off'}
+          />
+          <Tile
+            to="/status/log"
+            icon="list_alt"
+            color="#40828f"
+            title={LL.LOG_OF(LL.SYSTEM(0))}
+            text={
+              hasLogCounts
+                ? join(
+                    LL.NUM_ERRORS({ num: errors }),
+                    LL.NUM_WARNINGS({ num: warnings })
+                  )
+                : LL.VIEW_LOG()
+            }
+            state={
+              !hasLogCounts ? undefined : errors ? 'err' : warnings ? 'warn' : 'ok'
+            }
+          />
+        </Tiles>
+      </Section>
 
-        <ListMenuItem
-          icon={DirectionsBusIcon}
-          bgcolor={busStatusHighlight}
-          label={LL.DATA_TRAFFIC()}
-          text={busStatus}
-          to="/status/activity"
-        />
+      <Section>
+        <div className="meters">
+          {data.heap_size !== undefined && (
+            <Meter
+              label={LL.HEAP()}
+              used={data.heap_size - data.free_heap}
+              total={data.heap_size}
+              unit="KB"
+            />
+          )}
+          {data.psram_size !== undefined && data.free_psram !== undefined && (
+            <Meter
+              label="PSRAM"
+              used={data.psram_size - data.free_psram}
+              total={data.psram_size}
+              unit="KB"
+            />
+          )}
+          <Meter
+            label={LL.FILE_SYSTEM()}
+            used={data.fs_used}
+            total={data.fs_used + data.fs_free}
+            unit="KB"
+          />
+        </div>
+        {me.admin && (
+          <div className="st-actions">
+            <Button
+              color="warning"
+              icon="restart_alt"
+              onClick={() => setConfirm('restart')}
+            >
+              {LL.RESTART()}
+            </Button>
+            {!data.disable_reset && (
+              <Button
+                variant="contained"
+                color="error"
+                icon="delete_forever"
+                onClick={() => setConfirm('format')}
+              >
+                {LL.FACTORY_RESET()}
+              </Button>
+            )}
+          </div>
+        )}
+      </Section>
 
-        <ListMenuItem
-          icon={
-            data.network_status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED
-              ? WifiIcon
-              : RouterIcon
-          }
-          bgcolor={networkStatusHighlight}
-          label={LL.NETWORK(1)}
-          text={networkStatus}
-          to="/status/network"
-        />
-
-        <ListMenuItem
-          icon={DeviceHubIcon}
-          bgcolor={activeHighlight(data.mqtt_status)}
-          label="MQTT"
-          text={data.mqtt_status ? LL.CONNECTED(0) : LL.INACTIVE(0)}
-          to="/status/mqtt"
-        />
-
-        <ListMenuItem
-          icon={AccessTimeIcon}
-          bgcolor={ntpStatusHighlight}
-          label="NTP"
-          text={ntpStatus}
-          to="/status/ntp"
-        />
-
-        <ListMenuItem
-          icon={SettingsInputAntennaIcon}
-          bgcolor={activeHighlight(data.ap_status)}
-          label={LL.ACCESS_POINT(0)}
-          text={data.ap_status ? LL.ACTIVE() : LL.INACTIVE(0)}
-          to="/status/ap"
-        />
-
-        <ListMenuItem
-          icon={LogoDevIcon}
-          bgcolor="#40828f"
-          label={LL.LOG_OF(LL.SYSTEM(0))}
-          text={LL.VIEW_LOG()}
-          to="/status/log"
-        />
-      </List>
-    </SectionContent>
+      <Dialog
+        open={confirm !== undefined}
+        title={confirm === 'format' ? LL.FACTORY_RESET() : LL.RESTART()}
+        onClose={() => setConfirm(undefined)}
+        actions={
+          <>
+            <Button
+              color="secondary"
+              icon="cancel"
+              onClick={() => setConfirm(undefined)}
+            >
+              {LL.CANCEL()}
+            </Button>
+            <Button
+              variant="contained"
+              color={confirm === 'format' ? 'error' : 'warning'}
+              icon={confirm === 'format' ? 'delete_forever' : 'restart_alt'}
+              disabled={sending}
+              onClick={() => confirm && void run(confirm)}
+            >
+              {confirm === 'format' ? LL.FACTORY_RESET() : LL.RESTART()}
+            </Button>
+          </>
+        }
+      >
+        {confirm === 'format'
+          ? LL.SYSTEM_FACTORY_TEXT_DIALOG()
+          : LL.RESTART_CONFIRM()}
+      </Dialog>
+    </>
   );
 };
 

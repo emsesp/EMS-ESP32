@@ -1,26 +1,18 @@
-import { useContext, useRef, useState } from 'react';
+import { useContext, useState } from 'react';
 
-import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
-import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
-import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
-import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
-import { Box, Button, Typography } from '@mui/material';
-
-import { SortToggleType, useSort } from '@table-library/react-table-library/sort';
-import {
-  Body,
-  Cell,
-  Header,
-  HeaderCell,
-  HeaderRow,
-  Row,
-  Table
-} from '@table-library/react-table-library/table';
-import { useTheme } from '@table-library/react-table-library/theme';
-import type { State } from '@table-library/react-table-library/types/common';
 import { useRequest } from 'alova/client';
-import { SectionContent, useLayoutTitle } from 'components';
-import { toast } from 'components/toast';
+import {
+  Button,
+  Loader,
+  SearchField,
+  Section,
+  SortHeader,
+  Table,
+  Tag,
+  rowAction,
+  toast,
+  useTableSort
+} from 'components/ui';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { useInterval } from 'utils';
@@ -30,542 +22,290 @@ import {
   writeAnalogSensor,
   writeTemperatureSensor
 } from '../../api/app';
-import DashboardSensorsAnalogDialog from './SensorsAnalogDialog';
-import DashboardSensorsTemperatureDialog from './SensorsTemperatureDialog';
+import './Sensors.css';
+import SensorsAnalogDialog from './SensorsAnalogDialog';
+import SensorsTemperatureDialog from './SensorsTemperatureDialog';
+import { formatValue } from './deviceValue';
 import {
   AnalogType,
   AnalogTypeNames,
   DeviceValueUOM,
   DeviceValueUOM_s
 } from './types';
-import type {
-  AnalogSensor,
-  TemperatureSensor,
-  WriteAnalogSensor,
-  WriteTemperatureSensor
-} from './types';
-import {
-  analogSensorItemValidation,
-  temperatureSensorItemValidation
-} from './validators';
+import type { AnalogSensor, TemperatureSensor } from './types';
 
-// Constants
-const MS_PER_SECOND = 1000;
-const MS_PER_MINUTE = 60 * MS_PER_SECOND;
-const MS_PER_HOUR = 60 * MS_PER_MINUTE;
-const MS_PER_DAY = 24 * MS_PER_HOUR;
-const MIN_TEMP_ID = -100;
-const MAX_TEMP_ID = 100;
-const GPIO_25 = 25;
-const GPIO_26 = 26;
+const MIN_ID = -100;
+const MAX_ID = 100;
 
-const HEADER_BUTTON_STYLE: React.CSSProperties = {
-  fontSize: '14px',
-  justifyContent: 'flex-start'
+const num = (v: unknown) => {
+  const n = Number(v);
+  return isNaN(n) ? 0 : n;
 };
 
-const HEADER_BUTTON_STYLE_END: React.CSSProperties = {
-  fontSize: '14px',
-  justifyContent: 'flex-end'
-};
-
-const common_theme = {
-  BaseRow: `
-    font-size: 14px;
-    .td {
-      height: 32px;
-    }
-  `,
-  HeaderRow: `
-    text-transform: uppercase;
-    background-color: black;
-    color: #90CAF9;
-    .th {
-      border-bottom: 1px solid #565656;
-      height: 36px;
-    }
-  `,
-  Row: `
-    background-color: #1e1e1e;
-    position: relative;
-    cursor: pointer;
-    .td {
-      padding: 8px;
-      border-bottom: 1px solid #565656;
-    }
-    &:hover .td {
-      background-color: #177ac9;
-      color: white;
-    }
-  `,
-  Cell: `
-    &:last-of-type {
-      text-align: right;
-    },
-  `
-};
-
-const temperature_theme_config = {
-  Table: `
-    --data-table-library_grid-template-columns: minmax(0, 1fr) 35%;
-  `
-};
-
-const analog_theme_config = {
-  Table: `
-    --data-table-library_grid-template-columns: 80px repeat(1, minmax(0, 1fr)) 120px 110px;
-  `
-};
+// digital types show on/off; a Digital Out on a DAC pin has a 0-255 value
+const isOnOff = (as: AnalogSensor) =>
+  as.t === AnalogType.DIGITAL_IN ||
+  as.t === AnalogType.PULSE ||
+  (as.t === AnalogType.DIGITAL_OUT && as.g !== 25 && as.g !== 26);
 
 const Sensors = () => {
   const { LL } = useI18nContext();
   const { me } = useContext(AuthenticatedContext);
+  const [query, setQuery] = useState('');
+  const [temp, setTemp] = useState<TemperatureSensor>();
+  const [analog, setAnalog] = useState<AnalogSensor>();
+  const [creating, setCreating] = useState(false);
 
-  const [selectedTemperatureSensor, setSelectedTemperatureSensor] =
-    useState<TemperatureSensor>();
-  const [selectedAnalogSensor, setSelectedAnalogSensor] = useState<AnalogSensor>();
-  const [temperatureDialogOpen, setTemperatureDialogOpen] = useState<boolean>(false);
-  const [analogDialogOpen, setAnalogDialogOpen] = useState<boolean>(false);
-  const [creating, setCreating] = useState<boolean>(false);
-  const firstAvailableGPIO = useRef<number>(undefined);
-
-  const { data: sensorData, send: fetchSensorData } = useRequest(readSensorData, {
-    initialData: {
-      ts: [],
-      as: [],
-      analog_enabled: false,
-      available_gpios: [] as number[],
-      platform: 'ESP32'
-    }
-  }).onSuccess((event) => {
-    // store the first available GPIO in a ref
-    if (event.data.available_gpios.length > 0) {
-      firstAvailableGPIO.current = event.data.available_gpios[0];
-    }
-  });
-
-  const { send: sendTemperatureSensor } = useRequest(
-    (data: WriteTemperatureSensor) => writeTemperatureSensor(data),
-    {
-      immediate: false
-    }
-  );
-
-  const { send: sendAnalogSensor } = useRequest(
-    (data: WriteAnalogSensor) => writeAnalogSensor(data),
-    {
-      immediate: false
-    }
-  );
+  const { data, error, send: fetchSensorData } = useRequest(readSensorData);
 
   useInterval(() => {
-    if (!temperatureDialogOpen && !analogDialogOpen) {
-      void fetchSensorData();
-    }
+    if (!temp && !analog) void fetchSensorData();
   });
 
-  const temperature_theme = useTheme([common_theme, temperature_theme_config]);
-  const analog_theme = useTheme([common_theme, analog_theme_config]);
+  const tempSort = useTableSort(data?.ts ?? [], {
+    name: (a, b) => a.n.localeCompare(b.n),
+    value: (a, b) => (a.t ?? 0) - (b.t ?? 0)
+  });
 
-  const getSortIcon = (state: State, sortKey: unknown) => {
-    if (state.sortKey === sortKey && state.reverse) {
-      return <KeyboardArrowDownOutlinedIcon />;
-    }
-    if (state.sortKey === sortKey && !state.reverse) {
-      return <KeyboardArrowUpOutlinedIcon />;
-    }
-    return <UnfoldMoreOutlinedIcon />;
-  };
+  const analogSort = useTableSort(data?.as ?? [], {
+    gpio: (a, b) => a.g - b.g,
+    name: (a, b) => a.n.localeCompare(b.n),
+    type: (a, b) => a.t - b.t,
+    value: (a, b) => a.v - b.v
+  });
 
-  const analog_sort = useSort(
-    { nodes: sensorData.as },
-    {},
-    {
-      sortIcon: {
-        iconDefault: <UnfoldMoreOutlinedIcon />,
-        iconUp: <KeyboardArrowUpOutlinedIcon />,
-        iconDown: <KeyboardArrowDownOutlinedIcon />
-      },
-      sortToggleType: SortToggleType.AlternateWithReset,
-      sortFns: {
-        GPIO: (array) =>
-          [...array].sort(
-            (a, b) => ((a as AnalogSensor)?.g ?? 0) - ((b as AnalogSensor)?.g ?? 0)
-          ),
-        NAME: (array) =>
-          [...array].sort((a, b) =>
-            ((a as AnalogSensor)?.n ?? '').localeCompare(
-              (b as AnalogSensor)?.n ?? ''
-            )
-          ),
-        TYPE: (array) =>
-          [...array].sort((a, b) => (a as AnalogSensor).t - (b as AnalogSensor).t),
-        VALUE: (array) =>
-          [...array].sort((a, b) => (a as AnalogSensor).v - (b as AnalogSensor).v)
-      }
-    }
-  );
+  if (!data) {
+    return <Loader error={error?.message} onRetry={() => void fetchSensorData()} />;
+  }
 
-  const temperature_sort = useSort(
-    { nodes: sensorData.ts },
-    {},
-    {
-      sortIcon: {
-        iconDefault: <UnfoldMoreOutlinedIcon />,
-        iconUp: <KeyboardArrowUpOutlinedIcon />,
-        iconDown: <KeyboardArrowDownOutlinedIcon />
-      },
-      sortToggleType: SortToggleType.AlternateWithReset,
-      sortFns: {
-        NAME: (array) =>
-          [...array].sort((a, b) =>
-            (a as TemperatureSensor).n.localeCompare((b as TemperatureSensor).n)
-          ),
-        VALUE: (array) =>
-          [...array].sort(
-            (a, b) =>
-              ((a as TemperatureSensor).t ?? 0) - ((b as TemperatureSensor).t ?? 0)
-          )
-      }
-    }
-  );
+  const q = query.trim().toLowerCase();
+  const match = (...fields: (string | number)[]) =>
+    !q || fields.join(' ').toLowerCase().includes(q);
+  const temps = tempSort.rows.filter((ts) => match(ts.n, ts.id));
+  const analogs = analogSort.rows.filter((as) => match(as.n, as.g));
 
-  useLayoutTitle(LL.SENSORS());
-
-  const formatDurationMin = (duration_min: number) => {
-    const totalMs = duration_min * MS_PER_MINUTE;
-    const days = Math.trunc(totalMs / MS_PER_DAY);
-    const hours = Math.trunc(totalMs / MS_PER_HOUR) % 24;
-    const minutes = Math.trunc(totalMs / MS_PER_MINUTE) % 60;
-
-    const parts: string[] = [];
-    if (days > 0) {
-      parts.push(LL.NUM_DAYS({ num: days }));
-    }
-    if (hours > 0) {
-      parts.push(LL.NUM_HOURS({ num: hours }));
-    }
-    if (minutes > 0) {
-      parts.push(LL.NUM_MINUTES({ num: minutes }));
-    }
-    return parts.join(' ');
-  };
-
-  const formatValue = (value: unknown, uom: DeviceValueUOM) => {
-    if (value === undefined) {
-      return '';
-    }
-    if (typeof value !== 'number') {
-      return value as string;
-    }
-    switch (uom) {
-      case DeviceValueUOM.HOURS:
-        return value ? formatDurationMin(value * 60) : LL.NUM_HOURS({ num: 0 });
-      case DeviceValueUOM.MINUTES:
-        return value ? formatDurationMin(value) : LL.NUM_MINUTES({ num: 0 });
-      case DeviceValueUOM.SECONDS:
-        return LL.NUM_SECONDS({ num: value });
-      case DeviceValueUOM.NONE:
-        return new Intl.NumberFormat().format(value);
-      case DeviceValueUOM.DEGREES:
-      case DeviceValueUOM.DEGREES_R:
-      case DeviceValueUOM.FAHRENHEIT:
-        return (
-          new Intl.NumberFormat(undefined, {
-            minimumFractionDigits: 1
-          }).format(value) +
-          ' ' +
-          DeviceValueUOM_s[uom]
-        );
-      default:
-        return new Intl.NumberFormat().format(value) + ' ' + DeviceValueUOM_s[uom];
-    }
-  };
-
-  const updateTemperatureSensor = (ts: TemperatureSensor) => {
-    if (me.admin) {
-      ts.o_n = ts.n;
-      setSelectedTemperatureSensor(ts);
-      setTemperatureDialogOpen(true);
-    }
-  };
-
-  const onTemperatureDialogClose = () => {
-    setTemperatureDialogOpen(false);
-    void fetchSensorData();
-  };
-
-  const onTemperatureDialogSave = async (ts: TemperatureSensor) => {
-    await sendTemperatureSensor({
-      id: ts.id,
-      name: ts.n,
-      offset: ts.o,
-      is_system: ts.s
-    })
-      .then(() => {
-        toast.success(LL.UPDATED_OF(LL.SENSOR(1)));
-      })
-      .catch(() => {
-        toast.error(LL.UPDATE_OF(LL.SENSOR(2)) + ' ' + LL.FAILED(1));
-      })
-      .finally(() => {
-        setTemperatureDialogOpen(false);
-        setSelectedTemperatureSensor(undefined);
-        void fetchSensorData();
+  const saveTemperatureSensor = async (ts: TemperatureSensor) => {
+    setTemp(undefined);
+    try {
+      await writeTemperatureSensor({
+        id: ts.id,
+        name: ts.n,
+        offset: num(ts.o),
+        is_system: ts.s
       });
-  };
-
-  const updateAnalogSensor = (as: AnalogSensor) => {
-    if (me.admin) {
-      setCreating(false);
-      as.o_n = as.n;
-      setSelectedAnalogSensor(as);
-      setAnalogDialogOpen(true);
+      toast.success(LL.UPDATED_OF(LL.SENSOR(1)));
+    } catch {
+      toast.error(`${LL.UPDATE_OF(LL.SENSOR(2))} ${LL.FAILED(1)}`);
     }
+    await fetchSensorData();
   };
 
-  const onAnalogDialogClose = () => {
-    setAnalogDialogOpen(false);
-    void fetchSensorData();
+  const saveAnalogSensor = async (as: AnalogSensor) => {
+    setAnalog(undefined);
+    try {
+      await writeAnalogSensor({
+        id: as.id,
+        gpio: num(as.g),
+        name: as.n,
+        offset: num(as.o),
+        factor: num(as.f),
+        uom: num(as.u),
+        type: num(as.t),
+        deleted: as.d,
+        is_system: as.s
+      });
+      toast.success(LL.UPDATED_OF(LL.ANALOG_SENSOR(2)));
+    } catch {
+      toast.error(`${LL.UPDATE_OF(LL.ANALOG_SENSOR(5))} ${LL.FAILED(1)}`);
+    }
+    await fetchSensorData();
   };
 
   const addAnalogSensor = () => {
-    if (firstAvailableGPIO.current === undefined) {
+    const gpio = data.available_gpios[0];
+    if (gpio === undefined) {
       toast.error(LL.NO_GPIO());
       return;
     }
     setCreating(true);
-    setSelectedAnalogSensor({
-      id: Math.floor(Math.random() * (MAX_TEMP_ID - MIN_TEMP_ID) + MIN_TEMP_ID),
+    setAnalog({
+      id: Math.floor(Math.random() * (MAX_ID - MIN_ID) + MIN_ID),
       n: '',
-      g: firstAvailableGPIO.current,
+      g: gpio,
       u: DeviceValueUOM.NONE,
       v: 0,
       o: 0,
       f: 1,
-      t: AnalogType.DIGITAL_IN, // default to digital in 1
+      t: AnalogType.DIGITAL_IN,
       d: false,
-      s: false,
-      o_n: ''
+      s: false
     });
-    setAnalogDialogOpen(true);
   };
 
-  const onAnalogDialogSave = async (as: AnalogSensor) => {
-    await sendAnalogSensor({
-      id: as.id,
-      gpio: as.g,
-      name: as.n,
-      offset: as.o,
-      factor: as.f,
-      uom: as.u,
-      type: as.t,
-      deleted: as.d,
-      is_system: as.s
-    })
-      .then(() => {
-        toast.success(LL.UPDATED_OF(LL.ANALOG_SENSOR(2)));
-      })
-      .catch(() => {
-        toast.error(LL.UPDATE_OF(LL.ANALOG_SENSOR(5)) + ' ' + LL.FAILED(1));
-      })
-      .finally(() => {
-        setAnalogDialogOpen(false);
-        setSelectedAnalogSensor(undefined);
-        void fetchSensorData();
-      });
+  const editAnalogSensor = (as: AnalogSensor) => {
+    setCreating(false);
+    setAnalog(as);
   };
 
-  const RenderAnalogSensors = (
-    <Table
-      data={{ nodes: sensorData.as }}
-      theme={analog_theme}
-      sort={analog_sort}
-      layout={{ custom: true }}
-    >
-      {(tableList: AnalogSensor[]) => (
-        <>
-          <Header>
-            <HeaderRow>
-              <HeaderCell stiff>
-                <Button
-                  fullWidth
-                  style={HEADER_BUTTON_STYLE}
-                  endIcon={getSortIcon(analog_sort.state, 'GPIO')}
-                  onClick={() => analog_sort.fns.onToggleSort({ sortKey: 'GPIO' })}
-                >
-                  GPIO
-                </Button>
-              </HeaderCell>
-              <HeaderCell resize>
-                <Button
-                  fullWidth
-                  style={HEADER_BUTTON_STYLE}
-                  endIcon={getSortIcon(analog_sort.state, 'NAME')}
-                  onClick={() => analog_sort.fns.onToggleSort({ sortKey: 'NAME' })}
-                >
-                  {LL.NAME(0)}
-                </Button>
-              </HeaderCell>
-              <HeaderCell stiff>
-                <Button
-                  fullWidth
-                  style={HEADER_BUTTON_STYLE}
-                  endIcon={getSortIcon(analog_sort.state, 'TYPE')}
-                  onClick={() => analog_sort.fns.onToggleSort({ sortKey: 'TYPE' })}
-                >
-                  {LL.TYPE(0)}
-                </Button>
-              </HeaderCell>
-              <HeaderCell stiff>
-                <Button
-                  fullWidth
-                  style={HEADER_BUTTON_STYLE_END}
-                  endIcon={getSortIcon(analog_sort.state, 'VALUE')}
-                  onClick={() => analog_sort.fns.onToggleSort({ sortKey: 'VALUE' })}
-                >
-                  {LL.VALUE(0)}
-                </Button>
-              </HeaderCell>
-            </HeaderRow>
-          </Header>
-          <Body>
-            {tableList.map((as: AnalogSensor) => (
-              <Row
-                style={{ color: as.s ? 'grey' : 'inherit' }}
-                key={as.id}
-                item={as}
-                onClick={() => updateAnalogSensor(as)}
-              >
-                <Cell stiff>{as.g}</Cell>
-                <Cell>{as.n}</Cell>
-                <Cell stiff>{AnalogTypeNames[as.t - 1]} </Cell>
-                {(as.t === AnalogType.DIGITAL_OUT &&
-                  as.g !== GPIO_25 &&
-                  as.g !== GPIO_26) ||
-                as.t === AnalogType.DIGITAL_IN ||
-                as.t === AnalogType.PULSE ? (
-                  <Cell stiff>{as.v ? LL.ON() : LL.OFF()}</Cell>
-                ) : (
-                  <Cell stiff>{formatValue(as.v, as.u)}</Cell>
-                )}
-              </Row>
-            ))}
-          </Body>
-        </>
-      )}
-    </Table>
-  );
+  const offsetText = (ts: TemperatureSensor) =>
+    `${ts.o > 0 ? '+' : ''}${ts.o} ${DeviceValueUOM_s[ts.u]}`;
 
-  const RenderTemperatureSensors = (
-    <Table
-      data={{ nodes: sensorData.ts }}
-      theme={temperature_theme}
-      sort={temperature_sort}
-      layout={{ custom: true }}
-    >
-      {(tableList: TemperatureSensor[]) => (
-        <>
-          <Header>
-            <HeaderRow>
-              <HeaderCell resize>
-                <Button
-                  fullWidth
-                  style={HEADER_BUTTON_STYLE}
-                  endIcon={getSortIcon(temperature_sort.state, 'NAME')}
-                  onClick={() =>
-                    temperature_sort.fns.onToggleSort({ sortKey: 'NAME' })
-                  }
-                >
-                  {LL.NAME(0)}
-                </Button>
-              </HeaderCell>
-              <HeaderCell stiff>
-                <Button
-                  fullWidth
-                  style={HEADER_BUTTON_STYLE_END}
-                  endIcon={getSortIcon(temperature_sort.state, 'VALUE')}
-                  onClick={() =>
-                    temperature_sort.fns.onToggleSort({ sortKey: 'VALUE' })
-                  }
-                >
-                  {LL.VALUE(0)}
-                </Button>
-              </HeaderCell>
-            </HeaderRow>
-          </Header>
-          <Body>
-            {tableList.map((ts: TemperatureSensor) => (
-              <Row
-                style={{ color: ts.s ? 'grey' : 'inherit' }}
-                key={ts.id}
-                item={ts}
-                onClick={() => updateTemperatureSensor(ts)}
-              >
-                <Cell>{ts.n}</Cell>
-                <Cell>{formatValue(ts.t, ts.u)}</Cell>
-              </Row>
-            ))}
-          </Body>
-        </>
-      )}
-    </Table>
+  const empty = (cols: number) => (
+    <tr>
+      <td colSpan={cols} className="tbl-empty">
+        {q ? LL.NO_SENSORS_MATCH() : LL.NO_SENSORS()}
+      </td>
+    </tr>
   );
 
   return (
-    <SectionContent>
-      <Typography sx={{ pb: 1 }} variant="h6" color="primary">
-        {LL.TEMP_SENSORS()}
-      </Typography>
-      {RenderTemperatureSensors}
-      {selectedTemperatureSensor && (
-        <DashboardSensorsTemperatureDialog
-          open={temperatureDialogOpen}
-          onClose={onTemperatureDialogClose}
-          onSave={onTemperatureDialogSave}
-          selectedItem={selectedTemperatureSensor}
-          validator={temperatureSensorItemValidation(
-            sensorData.ts,
-            selectedTemperatureSensor
-          )}
+    <>
+      <Section
+        title={LL.SENSORS()}
+        icon="sensors"
+        actions={
+          <SearchField
+            label={LL.SEARCH_SENSORS()}
+            value={query}
+            onInput={(e) => setQuery(e.currentTarget.value)}
+          />
+        }
+      >
+        {me.admin && data.analog_enabled && (
+          <p className="cap sns-desc">
+            {LL.FREE_GPIOS()}:{' '}
+            <span className="mono">{data.available_gpios.join(', ') || '–'}</span>
+          </p>
+        )}
+      </Section>
+
+      <Section
+        title={`${LL.TEMP_SENSORS()} (${data.ts.length})`}
+        icon="thermostat"
+        actions={me.admin && <span className="cap">{LL.TEMP_SENSORS_HELP()}</span>}
+      >
+        <div className="tbl-wrap">
+          <Table stack>
+            <thead>
+              <tr>
+                <SortHeader {...tempSort.header('name')}>{LL.NAME(0)}</SortHeader>
+                <th>ID</th>
+                <th className="r">{LL.OFFSET()}</th>
+                <SortHeader className="r" {...tempSort.header('value')}>
+                  {LL.VALUE(0)}
+                </SortHeader>
+              </tr>
+            </thead>
+            <tbody>
+              {temps.length === 0 && empty(4)}
+              {temps.map((ts) => (
+                <tr
+                  key={ts.id}
+                  {...(me.admin ? rowAction(() => setTemp(ts), ts.n) : {})}
+                >
+                  <td data-label={LL.NAME(0)}>
+                    <span>
+                      {ts.n}
+                      {ts.s && <Tag kind="sys">{LL.SYSTEM(0)}</Tag>}
+                    </span>
+                  </td>
+                  <td data-label="ID" className="mono muted">
+                    {ts.id}
+                  </td>
+                  <td
+                    data-label={LL.OFFSET()}
+                    className={ts.o ? 'r num lb' : 'r num muted'}
+                  >
+                    {offsetText(ts)}
+                  </td>
+                  <td data-label={LL.VALUE(0)} className="r num">
+                    {formatValue(LL, ts.t, ts.u)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+      </Section>
+
+      <Section
+        title={`${LL.ANALOG_SENSORS()} (${data.as.length})`}
+        icon="sensors"
+        actions={
+          me.admin &&
+          data.analog_enabled && (
+            <Button size="sm" icon="add" onClick={addAnalogSensor}>
+              {LL.ADD(0)}
+            </Button>
+          )
+        }
+      >
+        <div className="tbl-wrap">
+          <Table stack>
+            <thead>
+              <tr>
+                <SortHeader {...analogSort.header('name')}>{LL.NAME(0)}</SortHeader>
+                <SortHeader {...analogSort.header('gpio')}>GPIO</SortHeader>
+                <SortHeader {...analogSort.header('type')}>{LL.TYPE(0)}</SortHeader>
+                <SortHeader className="r" {...analogSort.header('value')}>
+                  {LL.VALUE(0)}
+                </SortHeader>
+              </tr>
+            </thead>
+            <tbody>
+              {analogs.length === 0 && empty(4)}
+              {analogs.map((as) => (
+                <tr
+                  key={as.id}
+                  {...(me.admin ? rowAction(() => editAnalogSensor(as), as.n) : {})}
+                >
+                  <td data-label={LL.NAME(0)}>
+                    <span>
+                      {as.n}
+                      {as.s && <Tag kind="sys">{LL.SYSTEM(0)}</Tag>}
+                    </span>
+                  </td>
+                  <td data-label="GPIO">
+                    <span className="sns-gpio">{as.g}</span>
+                  </td>
+                  <td data-label={LL.TYPE(0)}>
+                    <Tag kind="type">{AnalogTypeNames[as.t - 1]}</Tag>
+                  </td>
+                  <td data-label={LL.VALUE(0)} className="r num">
+                    {isOnOff(as)
+                      ? as.v
+                        ? LL.ON()
+                        : LL.OFF()
+                      : formatValue(LL, as.v, as.u)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+      </Section>
+
+      {temp && (
+        <SensorsTemperatureDialog
+          item={temp}
+          sensors={data.ts}
+          onClose={() => setTemp(undefined)}
+          onSave={(ts) => void saveTemperatureSensor(ts)}
         />
       )}
-      <Typography sx={{ pt: 4, pb: 1 }} variant="h6" color="primary">
-        {LL.ANALOG_SENSORS()}
-      </Typography>
-      {RenderAnalogSensors}
-      {selectedAnalogSensor && (
-        <DashboardSensorsAnalogDialog
-          open={analogDialogOpen}
-          onClose={onAnalogDialogClose}
-          onSave={onAnalogDialogSave}
+      {analog && (
+        <SensorsAnalogDialog
+          item={analog}
           creating={creating}
-          selectedItem={selectedAnalogSensor}
-          analogGPIOList={sensorData.available_gpios}
-          disabledTypeList={sensorData.exclude_types}
-          validator={analogSensorItemValidation(sensorData.as, selectedAnalogSensor)}
+          sensors={data.as}
+          gpios={data.available_gpios}
+          excludeTypes={data.exclude_types ?? []}
+          onClose={() => setAnalog(undefined)}
+          onSave={(as) => void saveAnalogSensor(as)}
+          onRemove={() => void saveAnalogSensor({ ...analog, d: true })}
         />
       )}
-      {sensorData?.analog_enabled === true && me.admin && (
-        <Box
-          sx={{
-            mt: 2,
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'flex-end'
-          }}
-        >
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<AddCircleOutlineOutlinedIcon />}
-            onClick={addAnalogSensor}
-          >
-            {LL.ADD(0)}
-          </Button>
-        </Box>
-      )}
-    </SectionContent>
+    </>
   );
 };
 

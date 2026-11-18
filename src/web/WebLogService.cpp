@@ -83,6 +83,12 @@ WebLogService::QueuedLogMessage::QueuedLogMessage(unsigned long id, uint64_t upt
 }
 
 void WebLogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
+    if (message->level <= uuid::log::Level::ERR) {
+        ++num_errors_;
+    } else if (message->level == uuid::log::Level::WARNING) {
+        ++num_warnings_;
+    }
+
 #ifndef EMSESP_STANDALONE
     if (emsesp::EMSESP::system_.PSram()) {
         limit_log_messages_ = maximum_log_messages_;

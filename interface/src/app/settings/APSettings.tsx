@@ -1,246 +1,98 @@
-import { useState } from 'react';
-
-import CancelIcon from '@mui/icons-material/Cancel';
-import WarningIcon from '@mui/icons-material/Warning';
-import { Button, Checkbox, MenuItem } from '@mui/material';
-
 import * as APApi from 'api/ap';
 
 import {
-  BlockFormControlLabel,
-  BlockNavigation,
-  ButtonRow,
-  FormLoader,
-  SectionContent,
-  ValidatedPasswordField,
-  ValidatedTextField,
-  useLayoutTitle
-} from 'components';
+  FormSection,
+  Segmented,
+  Select,
+  Switch,
+  TextField
+} from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { APSettingsType } from 'types';
 import { APProvisionMode } from 'types';
-import { numberValue, updateValueDirty, useRest } from 'utils';
-import { ValidationError, createAPSettingsValidator, validate } from 'validators';
-import type { ValidateFieldsError } from 'validators/schema';
+import { createAPSettingsValidator } from 'validators';
+
+import FormPage, { useFormPage } from './FormPage';
 
 export const isAPEnabled = ({ provision_mode }: APSettingsType) =>
   provision_mode === APProvisionMode.AP_MODE_DISCONNECTED;
 
-// Efficient range function without recursion
-const createRange = (start: number, end: number): number[] => {
-  const result: number[] = [];
-  for (let i = start; i <= end; i++) {
-    result.push(i);
-  }
-  return result;
-};
-
-// Pre-computed ranges for better performance
-const CHANNEL_RANGE = createRange(1, 14);
-const MAX_CLIENTS_RANGE = createRange(1, 9);
-
-const APSettings = () => {
-  const {
-    loadData,
-    saving,
-    data,
-    updateDataValue,
-    origData,
-    dirtyFlags,
-    setDirtyFlags,
-    blocker,
-    saveData,
-    errorMessage
-  } = useRest<APSettingsType>({
-    read: APApi.readAPSettings,
-    update: APApi.updateAPSettings
+const range = (from: number, to: number) =>
+  Array.from({ length: to - from + 1 }, (_, i) => {
+    const v = String(from + i);
+    return { value: v, label: v };
   });
 
+const CHANNELS = range(1, 14);
+const MAX_CLIENTS = range(1, 9);
+
+const APSettings = () => {
   const { LL } = useI18nContext();
-
-  useLayoutTitle(LL.ACCESS_POINT(0));
-
-  const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
-
-  const updateFormValue = updateValueDirty(
-    origData as unknown as Record<string, unknown>,
-    dirtyFlags,
-    setDirtyFlags,
-    updateDataValue as (value: unknown) => void
-  );
-
-  const apEnabled = data ? isAPEnabled(data) : false;
-
-  const validateAndSubmit = async () => {
-    if (!data) return;
-
-    try {
-      setFieldErrors(undefined);
-      await validate(createAPSettingsValidator(data), data);
-      await saveData();
-    } catch (error) {
-      setFieldErrors((error as ValidationError).fieldErrors);
-    }
-  };
-
-  const content = () => {
-    if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
-    }
-
-    return (
-      <>
-        <ValidatedTextField
-          fieldErrors={fieldErrors || {}}
-          name="provision_mode"
-          label={LL.AP_PROVIDE() + '...'}
-          value={data.provision_mode}
-          fullWidth
-          select
-          variant="outlined"
-          onChange={updateFormValue}
-          margin="normal"
-        >
-          <MenuItem value={APProvisionMode.AP_MODE_DISCONNECTED}>
-            {LL.AP_PROVIDE_TEXT_2()}
-          </MenuItem>
-          <MenuItem value={APProvisionMode.AP_NEVER}>
-            {LL.AP_PROVIDE_TEXT_3()}
-          </MenuItem>
-        </ValidatedTextField>
-        {apEnabled && (
-          <>
-            <ValidatedTextField
-              fieldErrors={fieldErrors || {}}
-              name="ssid"
-              label={LL.ACCESS_POINT(2) + ' SSID'}
-              fullWidth
-              variant="outlined"
-              value={data.ssid}
-              onChange={updateFormValue}
-              margin="normal"
-            />
-            <ValidatedPasswordField
-              fieldErrors={fieldErrors || {}}
-              name="password"
-              label={LL.ACCESS_POINT(2) + ' ' + LL.PASSWORD()}
-              fullWidth
-              variant="outlined"
-              value={data.password}
-              onChange={updateFormValue}
-              margin="normal"
-            />
-            <ValidatedTextField
-              fieldErrors={fieldErrors || {}}
-              name="channel"
-              label={LL.AP_PREFERRED_CHANNEL()}
-              value={numberValue(data.channel)}
-              fullWidth
-              select
-              type="number"
-              variant="outlined"
-              onChange={updateFormValue}
-              margin="normal"
-            >
-              {CHANNEL_RANGE.map((i) => (
-                <MenuItem key={i} value={i}>
-                  {i}
-                </MenuItem>
-              ))}
-            </ValidatedTextField>
-            <BlockFormControlLabel
-              control={
-                <Checkbox
-                  name="ssid_hidden"
-                  checked={data.ssid_hidden}
-                  onChange={updateFormValue}
-                />
-              }
-              label={LL.AP_HIDE_SSID()}
-            />
-            <ValidatedTextField
-              fieldErrors={fieldErrors || {}}
-              name="max_clients"
-              label={LL.AP_MAX_CLIENTS()}
-              value={numberValue(data.max_clients)}
-              fullWidth
-              select
-              type="number"
-              variant="outlined"
-              onChange={updateFormValue}
-              margin="normal"
-            >
-              {MAX_CLIENTS_RANGE.map((i) => (
-                <MenuItem key={i} value={i}>
-                  {i}
-                </MenuItem>
-              ))}
-            </ValidatedTextField>
-            <ValidatedTextField
-              fieldErrors={fieldErrors || {}}
-              name="local_ip"
-              label={LL.AP_LOCAL_IP()}
-              fullWidth
-              variant="outlined"
-              value={data.local_ip}
-              onChange={updateFormValue}
-              margin="normal"
-            />
-            <ValidatedTextField
-              fieldErrors={fieldErrors || {}}
-              name="gateway_ip"
-              label={LL.NETWORK_GATEWAY()}
-              fullWidth
-              variant="outlined"
-              value={data.gateway_ip}
-              onChange={updateFormValue}
-              margin="normal"
-            />
-            <ValidatedTextField
-              fieldErrors={fieldErrors || {}}
-              name="subnet_mask"
-              label={LL.NETWORK_SUBNET()}
-              fullWidth
-              variant="outlined"
-              value={data.subnet_mask}
-              onChange={updateFormValue}
-              margin="normal"
-            />
-          </>
-        )}
-        {dirtyFlags && dirtyFlags.length !== 0 && (
-          <ButtonRow>
-            <Button
-              startIcon={<CancelIcon />}
-              disabled={saving}
-              variant="outlined"
-              color="secondary"
-              type="submit"
-              onClick={loadData}
-            >
-              {LL.CANCEL()}
-            </Button>
-            <Button
-              startIcon={<WarningIcon color="warning" />}
-              disabled={saving}
-              variant="contained"
-              color="info"
-              type="submit"
-              onClick={validateAndSubmit}
-            >
-              {LL.APPLY_CHANGES(dirtyFlags.length)}
-            </Button>
-          </ButtonRow>
-        )}
-      </>
-    );
-  };
+  const form = useFormPage<APSettingsType>({
+    read: APApi.readAPSettings,
+    update: APApi.updateAPSettings,
+    validator: createAPSettingsValidator
+  });
 
   return (
-    <SectionContent>
-      {blocker ? <BlockNavigation blocker={blocker} /> : null}
-      {content()}
-    </SectionContent>
+    <FormPage form={form}>
+      {(data) => (
+        <>
+          <FormSection icon="wifi_tethering" title={LL.AP_PROVIDE()}>
+            <Segmented
+              label={LL.AP_PROVIDE()}
+              hideLabel
+              fullWidth
+              options={[
+                {
+                  value: String(APProvisionMode.AP_MODE_DISCONNECTED),
+                  label: LL.AP_PROVIDE_TEXT_2()
+                },
+                { value: String(APProvisionMode.AP_NEVER), label: LL.AP_PROVIDE_TEXT_3() }
+              ]}
+              {...form.segmented('provision_mode')}
+            />
+          </FormSection>
+          {isAPEnabled(data) && (
+            <>
+              <FormSection icon="wifi" title={LL.ACCESS_POINT(0)}>
+                <TextField label="SSID" {...form.text('ssid')} />
+                <TextField
+                  label={LL.PASSWORD()}
+                  type="password"
+                  autoComplete="new-password"
+                  {...form.text('password')}
+                />
+                <Select
+                  label={LL.AP_PREFERRED_CHANNEL()}
+                  options={CHANNELS}
+                  {...form.select('channel')}
+                />
+                <Select
+                  label={LL.AP_MAX_CLIENTS()}
+                  options={MAX_CLIENTS}
+                  {...form.select('max_clients')}
+                />
+                <Switch label={LL.AP_HIDE_SSID()} {...form.check('ssid_hidden')} />
+              </FormSection>
+              <FormSection icon="router" title={LL.ADDRESSES()}>
+                <TextField label={LL.AP_LOCAL_IP()} mono {...form.text('local_ip')} />
+                <TextField
+                  label={LL.NETWORK_GATEWAY()}
+                  mono
+                  {...form.text('gateway_ip')}
+                />
+                <TextField
+                  label={LL.NETWORK_SUBNET()}
+                  mono
+                  {...form.text('subnet_mask')}
+                />
+              </FormSection>
+            </>
+          )}
+        </>
+      )}
+    </FormPage>
   );
 };
 

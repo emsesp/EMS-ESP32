@@ -15,7 +15,7 @@ SOURCES = [
     INTERFACE_DIR / "progmem-generator.js",
     INTERFACE_DIR / "src" / "recovery",
     INTERFACE_DIR / "src" / "components",
-    INTERFACE_DIR / "src" / "CustomTheme.tsx",
+    INTERFACE_DIR / "src" / "utils" / "versions.ts",
     INTERFACE_DIR / "public",
 ]
 

@@ -1,52 +1,29 @@
 import { useEffect, useState } from 'react';
 import { useBlocker, useLocation } from 'react-router';
 
-import CancelIcon from '@mui/icons-material/Cancel';
-import EditIcon from '@mui/icons-material/Edit';
-import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
-import SaveIcon from '@mui/icons-material/Save';
-import SearchIcon from '@mui/icons-material/Search';
-import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
-import WarningIcon from '@mui/icons-material/Warning';
+import { useRequest } from 'alova/client';
+import SystemMonitor from 'app/status/SystemMonitor';
+import BlockNavigation from 'components/routing/BlockNavigation';
 import {
-  Box,
   Button,
   Checkbox,
   Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  InputAdornment,
-  Link,
-  MenuItem,
+  Icon,
+  Loader,
+  SaveBar,
+  SearchField,
+  Section,
+  Select,
+  SortHeader,
+  Table,
   TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-  Typography
-} from '@mui/material';
-
-import {
-  Body,
-  Cell,
-  Header,
-  HeaderCell,
-  HeaderRow,
-  Row,
-  Table
-} from '@table-library/react-table-library/table';
-import { useTheme } from '@table-library/react-table-library/theme';
-import { dialogStyle } from 'CustomTheme';
-import { useRequest } from 'alova/client';
-import SystemMonitor from 'app/status/SystemMonitor';
-import {
-  BlockNavigation,
-  ButtonRow,
-  MessageBox,
-  SectionContent,
-  useLayoutTitle
-} from 'components';
-import { toast } from 'components/toast';
+  byNumber,
+  byText,
+  byValue,
+  cx,
+  toast,
+  useTableSort
+} from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import {
@@ -57,17 +34,18 @@ import {
   writeCustomizationEntities,
   writeDeviceName
 } from '../../api/app';
-import SettingsCustomizationsDialog from './CustomizationsDialog';
-import EntityMaskToggle from './EntityMaskToggle';
-import OptionIcon from './OptionIcon';
+import './Customizations.css';
+import CustomizationsDialog from './CustomizationsDialog';
+import EntityMaskToggle, { MASKS, maskAllowed, withMask } from './EntityMaskToggle';
+import { PendingTag } from './ListPage';
 import { DeviceEntityMask } from './types';
-import type { APIcall, Device, DeviceEntity } from './types';
+import type { APIcall, DeviceEntity } from './types';
 
-export const APIURL = `${window.location.origin}/api/`;
+const APIURL = `${window.location.origin}/api/`;
 
+// the firmware reads the list into a 2048 byte buffer
 const MAX_BUFFER_SIZE = 2000;
 
-// Helper function to create masked entity ID - extracted to avoid duplication
 const createMaskedEntityId = (de: DeviceEntity): string => {
   const maskHex = de.m.toString(16).padStart(2, '0');
   const hasCustomizations = !!(de.cn || de.mi || de.ma);
@@ -82,226 +60,119 @@ const createMaskedEntityId = (de: DeviceEntity): string => {
   return `${maskHex}${de.id}${hasCustomizations ? `|${customizations}` : ''}`;
 };
 
+const hasChanged = (de: DeviceEntity, o: DeviceEntity | undefined) =>
+  !o ||
+  (de.cn || '') !== (o.cn || '') ||
+  de.m !== o.m ||
+  de.mi !== o.mi ||
+  de.ma !== o.ma;
+
+const resetEntity = (de: DeviceEntity): DeviceEntity => {
+  const next: DeviceEntity = { ...de, m: 0, cn: '', c: false };
+  if (de.mi !== undefined) next.mi = null;
+  if (de.ma !== undefined) next.ma = null;
+  return next;
+};
+
+const isCommand = (de: DeviceEntity) => !!de.n && de.n[0] === '!';
+
+const formatValue = (value: unknown) => {
+  if (typeof value === 'number') return new Intl.NumberFormat().format(value);
+  if (value === undefined || value === null) return '';
+  if (typeof value === 'boolean') return value ? 'true' : 'false';
+  return value as string;
+};
+
 const Customizations = () => {
   const { LL } = useI18nContext();
-  const [numChanges, setNumChanges] = useState<number>(0);
-  const blocker = useBlocker(numChanges !== 0);
-
-  const [restarting, setRestarting] = useState<boolean>(false);
-  const [restartNeeded, setRestartNeeded] = useState<boolean>(false);
-  const [deviceEntities, setDeviceEntities] = useState<DeviceEntity[]>([]);
-  const [confirmReset, setConfirmReset] = useState<boolean>(false);
-  const [selectedFilters, setSelectedFilters] = useState<number>(0);
-  const [modifiedOnly, setModifiedOnly] = useState<boolean>(false);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [search, setSearch] = useState('');
-  const [selectedDeviceEntity, setSelectedDeviceEntity] = useState<DeviceEntity>();
-  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-  const [rename, setRename] = useState<boolean>(false);
-
-  useLayoutTitle(LL.CUSTOMIZATIONS());
-
-  // fetch devices first from coreData
-  const { data: devices, send: fetchCoreData } = useRequest(readCoreData);
-
-  const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
-    immediate: false
-  });
+  const location = useLocation();
 
   const [selectedDevice, setSelectedDevice] = useState<number>(
-    Number(useLocation().state) || -1
+    Number(location.state) || -1
   );
-  const [selectedDeviceTypeNameURL, setSelectedDeviceTypeNameURL] =
-    useState<string>(''); // needed for API URL
-  const [selectedDeviceName, setSelectedDeviceName] = useState<string>('');
-  const [selectedDeviceBrand, setSelectedDeviceBrand] = useState<string>('');
+  const [entities, setEntities] = useState<DeviceEntity[]>([]);
+  const [original, setOriginal] = useState<Map<string, DeviceEntity>>(new Map());
+  const [maskFilter, setMaskFilter] = useState(0);
+  const [modifiedOnly, setModifiedOnly] = useState(false);
+  const [search, setSearch] = useState('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [editing, setEditing] = useState<DeviceEntity>();
+  const [renaming, setRenaming] = useState<{ name: string; brand: string }>();
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [restartNeeded, setRestartNeeded] = useState(false);
+  const [restarting, setRestarting] = useState(false);
 
+  const {
+    data: coreData,
+    error: coreError,
+    send: fetchCoreData
+  } = useRequest(readCoreData);
+  const { send: sendAPI, loading: restartSending } = useRequest(
+    (call: APIcall) => API(call),
+    { immediate: false }
+  );
   const { send: sendResetCustomizations } = useRequest(resetCustomizations(), {
     immediate: false
   });
-
-  const { send: sendDeviceName } = useRequest(
+  const { send: sendDeviceName, loading: renameSending } = useRequest(
     (data: { id: number; name: string; brand: string }) => writeDeviceName(data),
-    {
-      immediate: false
-    }
+    { immediate: false }
   );
-
-  const { send: sendCustomizationEntities } = useRequest(
+  const { send: sendCustomizationEntities, loading: saving } = useRequest(
     (data: { id: number; entity_ids: string[] }) => writeCustomizationEntities(data),
-    {
-      immediate: false
-    }
+    { immediate: false }
   );
 
-  const { send: sendDeviceEntities } = useRequest(
-    (data: number) => readDeviceEntities(data),
-    {
-      initialData: [],
-      immediate: false
+  const setLoaded = (data: DeviceEntity[]) => {
+    setEntities(data);
+    setOriginal(new Map(data.map((de) => [de.id, de])));
+  };
+
+  const {
+    loading: entitiesLoading,
+    error: entitiesError,
+    send: loadEntities
+  } = useRequest((id: number) => readDeviceEntities(id), {
+    initialData: [],
+    immediate: false
+  }).onSuccess((event) => setLoaded(event.data));
+
+  useEffect(() => {
+    setLoaded([]);
+    setSelectedIds(new Set());
+    setRestartNeeded(false);
+    if (selectedDevice !== -1) void loadEntities(selectedDevice);
+  }, [selectedDevice]);
+
+  useEffect(() => {
+    if (
+      coreData &&
+      selectedDevice !== -1 &&
+      !coreData.devices.some((d) => d.id === selectedDevice)
+    ) {
+      setSelectedDevice(-1);
     }
-  ).onSuccess((event) => {
-    setOriginalSettings(event.data);
+  }, [coreData]);
+
+  const changed = (de: DeviceEntity) => hasChanged(de, original.get(de.id));
+  const numChanges = entities.filter(changed).length;
+  const blocker = useBlocker(numChanges !== 0);
+  const sort = useTableSort(entities, {
+    options: byNumber((de) => de.m),
+    name: byText((de) => `${de.t ?? ''} ${de.cn || de.n || ''}`.trim()),
+    value: byValue((de) => de.v),
+    range: byNumber((de) => de.mi ?? de.ma ?? undefined)
   });
 
-  const setOriginalSettings = (data: DeviceEntity[]) => {
-    setDeviceEntities(
-      data.map((de) => {
-        const result: DeviceEntity = {
-          ...de,
-          o_m: de.m
-        };
-        if (de.cn !== undefined) {
-          result.o_cn = de.cn;
-        }
-        if (de.mi !== undefined) {
-          result.o_mi = de.mi;
-        }
-        if (de.ma !== undefined) {
-          result.o_ma = de.ma;
-        }
-        return result;
-      })
-    );
-  };
-
-  const doRestart = async () => {
-    setRestarting(true);
-    await sendAPI({ device: 'system', cmd: 'restart', id: 0 }).catch(
-      (error: Error) => {
-        toast.error(error.message);
-      }
-    );
-  };
-
-  const entities_theme = useTheme({
-    Table: `
-      --data-table-library_grid-template-columns: 32px 156px repeat(1, minmax(80px, 1fr)) 45px minmax(45px, auto) minmax(120px, auto);
-    `,
-    BaseRow: `
-      font-size: 14px;
-      .td {
-        height: 32px;
-      }
-    `,
-    BaseCell: `
-      &:nth-of-type(4) {
-        text-align: right;
-      }
-      &:nth-of-type(5) {
-        text-align: right;
-      }
-      &:last-of-type {
-        text-align: right;
-      }
-    `,
-    HeaderRow: `
-      text-transform: uppercase;
-      background-color: black;
-      color: #90CAF9;
-      .th {
-        border-bottom: 1px solid #565656;
-        height: 36px;
-      }
-      &:nth-of-type(1) .th {
-        text-align: center;
-      }
-    `,
-    Row: `
-      background-color: #1e1e1e;
-      position: relative;
-      cursor: pointer;
-      .td {
-        border-top: 1px solid #565656;
-        border-bottom: 1px solid #565656;
-      }
-      &.tr.tr-body.row-select.row-select-single-selected {
-        background-color: #3d4752;
-      }
-      &:hover .td {
-        border-top: 1px solid #177ac9;
-        background-color: #177ac9;
-      }
-    `,
-    Cell: `
-      &:nth-of-type(3) {
-        padding: 8px;
-      }
-      &:nth-of-type(4) {
-        padding-right: 4px;
-      }
-      &:nth-of-type(5) {
-        padding-right: 4px;
-      }
-      &:last-of-type {
-        padding-right: 8px;
-      }
-    `
-  });
-
-  function hasEntityChanged(de: DeviceEntity) {
+  if (restarting) return <SystemMonitor />;
+  if (!coreData) {
     return (
-      (de?.cn || '') !== (de?.o_cn || '') ||
-      de.m !== de.o_m ||
-      de.ma !== de.o_ma ||
-      de.mi !== de.o_mi
+      <Loader error={coreError?.message} onRetry={() => void fetchCoreData()} />
     );
   }
 
-  // Saved customization (c), or an edit that is not applied yet.
-  function isModified(de: DeviceEntity) {
-    return !!de.c || hasEntityChanged(de);
-  }
-
-  useEffect(() => {
-    if (deviceEntities.length) {
-      const changedEntities = deviceEntities.filter((de) => hasEntityChanged(de));
-      setNumChanges(changedEntities.length);
-    }
-  }, [deviceEntities]);
-
-  useEffect(() => {
-    if (devices && selectedDevice !== -1) {
-      void sendDeviceEntities(selectedDevice);
-      const index = devices.devices.findIndex((d) => d.id === selectedDevice);
-      if (index === -1) {
-        setSelectedDevice(-1);
-        setSelectedDeviceTypeNameURL('');
-      } else {
-        const device = devices.devices[index];
-        if (device) {
-          setSelectedDeviceTypeNameURL(device.url || '');
-          setSelectedDeviceName(device.n);
-          setSelectedDeviceBrand(device.b);
-        }
-        setNumChanges(0);
-        setSelectedIds(new Set());
-        setRestartNeeded(false);
-      }
-    }
-  }, [devices, selectedDevice]);
-
-  function formatValue(value: unknown) {
-    if (typeof value === 'number') {
-      return new Intl.NumberFormat().format(value);
-    } else if (value === undefined) {
-      return '';
-    } else if (typeof value === 'boolean') {
-      return value ? 'true' : 'false';
-    }
-    return value as string;
-  }
-
-  function formatLimit(value: number | null | undefined) {
-    if (value === null) {
-      return '';
-    }
-    return formatValue(value);
-  }
-
-  const isCommand = (de: DeviceEntity) => {
-    return de.n && de.n[0] === '!';
-  };
+  const devices = coreData.devices.filter((d) => d.id < 90 && d.e !== 0);
+  const device = coreData.devices.find((d) => d.id === selectedDevice);
 
   const formatName = (de: DeviceEntity, withShortname: boolean) => {
     let name: string;
@@ -317,95 +188,104 @@ const Customizations = () => {
     return withShortname ? `${name} ${de.id}` : name;
   };
 
-  const getMaskNumber = (newMask: string[]) => {
-    let new_mask = 0;
-    for (const entry of newMask) {
-      new_mask |= Number(entry);
-    }
-    return new_mask;
-  };
-
-  const getMaskString = (m: number) => {
-    const new_masks: string[] = [];
-    if ((m & 1) === 1) {
-      new_masks.push('1');
-    }
-    if ((m & 2) === 2) {
-      new_masks.push('2');
-    }
-    if ((m & 4) === 4) {
-      new_masks.push('4');
-    }
-    if ((m & 8) === 8) {
-      new_masks.push('8');
-    }
-    if ((m & 128) === 128) {
-      new_masks.push('128');
-    }
-    return new_masks;
-  };
-
-  const filter_entity = (de: DeviceEntity) =>
-    (de.m & selectedFilters || !selectedFilters) &&
-    (!modifiedOnly || isModified(de)) &&
+  const filterEntity = (de: DeviceEntity) =>
+    (!maskFilter || de.m & maskFilter) &&
+    (!modifiedOnly || !!de.c || changed(de)) &&
     formatName(de, true).toLowerCase().includes(search.toLowerCase());
 
-  // Checked rows when any are checked, otherwise every row the filter is showing.
-  const inBulkTarget = (de: DeviceEntity) =>
-    selectedIds.size > 0 ? selectedIds.has(de.id) : filter_entity(de);
+  const filtered = sort.rows.filter(filterEntity);
+  const allFilteredSelected =
+    filtered.length > 0 && filtered.every((de) => selectedIds.has(de.id));
+  const someFilteredSelected = filtered.some((de) => selectedIds.has(de.id));
 
-  const maskDisabled = (set: boolean) => {
-    const excludeMask =
-      DeviceEntityMask.DV_API_MQTT_EXCLUDE | DeviceEntityMask.DV_WEB_EXCLUDE;
-    setDeviceEntities((prev) =>
-      prev.map((de) => {
-        if (!inBulkTarget(de)) {
-          return de;
-        }
-        return {
-          ...de,
-          m: set ? de.m | excludeMask : de.m & ~excludeMask
-        };
-      })
-    );
+  // the ticked rows, or every row the filter shows when none are ticked
+  const targets =
+    selectedIds.size > 0
+      ? entities.filter((de) => selectedIds.has(de.id))
+      : filtered;
+
+  const update = (id: string, change: (de: DeviceEntity) => DeviceEntity) =>
+    setEntities((prev) => prev.map((de) => (de.id === id ? change(de) : de)));
+
+  const bulkTargets = (bit: DeviceEntityMask) =>
+    targets.filter((de) => maskAllowed(de, de.m, bit));
+
+  const bulkOn = (bit: DeviceEntityMask) => {
+    const list = bulkTargets(bit);
+    return list.length > 0 && list.every((de) => (de.m & bit) === bit);
   };
 
-  const maskReadonly = (set: boolean) => {
-    setDeviceEntities((prev) =>
-      prev.map((de) => {
-        if (!inBulkTarget(de) || !de.w) {
-          return de;
-        }
-        return {
-          ...de,
-          m: set
-            ? de.m | DeviceEntityMask.DV_READONLY
-            : de.m & ~DeviceEntityMask.DV_READONLY
-        };
-      })
+  const bulkMask = (bit: DeviceEntityMask) => {
+    const ids = new Set(bulkTargets(bit).map((de) => de.id));
+    const on = !bulkOn(bit);
+    setEntities((prev) =>
+      prev.map((de) =>
+        ids.has(de.id) ? { ...de, m: withMask(de, de.m, bit, on) } : de
+      )
     );
   };
 
   const resetSelected = () => {
-    setDeviceEntities((prev) =>
-      prev.map((de) => {
-        if (!selectedIds.has(de.id)) {
-          return de;
-        }
-        const next: DeviceEntity = { ...de, m: 0, cn: '', c: false };
-        if (de.mi !== undefined) {
-          next.mi = null;
-        }
-        if (de.ma !== undefined) {
-          next.ma = null;
-        }
-        return next;
-      })
+    setEntities((prev) =>
+      prev.map((de) => (selectedIds.has(de.id) ? resetEntity(de) : de))
     );
     setSelectedIds(new Set());
   };
 
-  const resetCustomization = async () => {
+  const toggleSelected = (id: string) =>
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const toggleSelectFiltered = () =>
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      filtered.forEach((de) =>
+        allFilteredSelected ? next.delete(de.id) : next.add(de.id)
+      );
+      return next;
+    });
+
+  const cancel = () =>
+    setEntities((prev) => prev.map((de) => original.get(de.id) ?? de));
+
+  const save = async () => {
+    const masked = entities.filter(changed).map(createMaskedEntityId);
+    if (new TextEncoder().encode(JSON.stringify(masked)).length > MAX_BUFFER_SIZE) {
+      toast.warning(LL.CUSTOMIZATIONS_FULL());
+      return;
+    }
+    await sendCustomizationEntities({ id: selectedDevice, entity_ids: masked })
+      .then(() => {
+        toast.success(LL.CUSTOMIZATIONS_SAVED());
+        // reload so cleared limits show the built-in ones and the saved flag matches the file
+        void loadEntities(selectedDevice);
+      })
+      .catch((error: Error) => {
+        if (error.message === 'Reboot required') {
+          setOriginal(new Map(entities.map((de) => [de.id, de])));
+          setRestartNeeded(true);
+        } else {
+          toast.error(error.message);
+        }
+      });
+  };
+
+  const renameDevice = async () => {
+    if (!renaming) return;
+    await sendDeviceName({ id: selectedDevice, ...renaming })
+      .then(() => toast.success(LL.UPDATED_OF(LL.NAME(1))))
+      .catch(() => toast.error(`${LL.UPDATE_OF(LL.NAME(1))} ${LL.FAILED(1)}`))
+      .finally(() => {
+        setRenaming(undefined);
+        void fetchCoreData();
+      });
+  };
+
+  const resetAll = async () => {
     try {
       await sendResetCustomizations();
       toast.info(LL.CUSTOMIZATIONS_RESTART());
@@ -417,538 +297,400 @@ const Customizations = () => {
     }
   };
 
-  const onDialogClose = () => {
-    setDialogOpen(false);
-  };
+  const count = (bit: number) => entities.filter((de) => de.m & bit).length;
 
-  const updateDeviceEntity = (updatedItem: DeviceEntity) => {
-    setDeviceEntities(
-      (prev) =>
-        prev?.map((de) =>
-          de.id === updatedItem.id ? { ...de, ...updatedItem } : de
-        ) ?? []
+  const renderFilters = () => (
+    <div className="cz-filters" role="group" aria-label={LL.SEARCH()}>
+      <button
+        type="button"
+        className={cx('cz-chip', !maskFilter && !modifiedOnly && 'on')}
+        aria-pressed={!maskFilter && !modifiedOnly}
+        onClick={() => {
+          setMaskFilter(0);
+          setModifiedOnly(false);
+        }}
+      >
+        {LL.FILTER_ALL()} {entities.length}
+      </button>
+      {MASKS.map((o) => (
+        <button
+          key={o.bit}
+          type="button"
+          className={cx('cz-chip', !!(maskFilter & o.bit) && 'on')}
+          aria-pressed={!!(maskFilter & o.bit)}
+          onClick={() => setMaskFilter((f) => f ^ o.bit)}
+        >
+          <Icon name={o.icon} size="xs" />
+          {o.label(LL)} {count(o.bit)}
+        </button>
+      ))}
+      <button
+        type="button"
+        className={cx('cz-chip', modifiedOnly && 'on')}
+        aria-pressed={modifiedOnly}
+        onClick={() => setModifiedOnly((v) => !v)}
+      >
+        <Icon name="tune" size="xs" />
+        {LL.MODIFIED()}
+      </button>
+    </div>
+  );
+
+  const renderBulk = () => (
+    <div className="cz-bulk">
+      <span className="lb">
+        {selectedIds.size > 0
+          ? LL.NUM_SELECTED({ num: selectedIds.size })
+          : LL.ALL_SHOWN({ num: filtered.length })}
+      </span>
+      {MASKS.map((o) => {
+        const on = bulkOn(o.bit);
+        return (
+          <Button
+            key={o.bit}
+            size="sm"
+            color="secondary"
+            icon={o.icon}
+            className={cx(`b${o.bit}`, on && 'on')}
+            aria-pressed={on}
+            disabled={bulkTargets(o.bit).length === 0}
+            onClick={() => bulkMask(o.bit)}
+          >
+            {o.label(LL)}
+          </Button>
+        );
+      })}
+      {selectedIds.size > 0 && (
+        <>
+          <Button size="sm" color="error" icon="restart_alt" onClick={resetSelected}>
+            {LL.RESET_SELECTED()}
+          </Button>
+          <Button
+            size="sm"
+            variant="text"
+            icon="close"
+            onClick={() => setSelectedIds(new Set())}
+          >
+            {LL.CLEAR_SELECTION()}
+          </Button>
+        </>
+      )}
+    </div>
+  );
+
+  const renderRow = (de: DeviceEntity) => {
+    const isChanged = changed(de);
+    const readonly =
+      (de.m & DeviceEntityMask.DV_READONLY) === DeviceEntityMask.DV_READONLY;
+    const hasLimit =
+      !readonly && (typeof de.mi === 'number' || typeof de.ma === 'number');
+    const editable = de.n !== undefined && !isCommand(de);
+    const name = formatName(de, false);
+    return (
+      <tr
+        key={de.id}
+        className={cx(
+          isChanged && 'st-mod',
+          ((de.v === undefined && !isCommand(de)) ||
+            !!(de.m & DeviceEntityMask.DV_DELETED)) &&
+            'dim'
+        )}
+      >
+        <td className="chk">
+          <Checkbox
+            aria-label={name}
+            checked={selectedIds.has(de.id)}
+            onChange={() => toggleSelected(de.id)}
+          />
+        </td>
+        <td className="cz-opts" data-label={LL.OPTIONS()}>
+          <EntityMaskToggle
+            de={de}
+            onChange={(m) => update(de.id, (prev) => ({ ...prev, m }))}
+          />
+        </td>
+        <td className="cz-name">
+          {editable ? (
+            <button type="button" className="cz-edit" onClick={() => setEditing(de)}>
+              {name}
+            </button>
+          ) : (
+            <span>{name}</span>
+          )}{' '}
+          <a
+            className="mono cz-id"
+            target="_blank"
+            rel="noreferrer"
+            href={`${APIURL}${device?.url || ''}/${de.id}`}
+          >
+            {de.id}
+          </a>
+          {isChanged && <PendingTag state="mod" />}
+        </td>
+        <td className="r num" data-label={LL.VALUE(0)}>
+          {formatValue(de.v)}
+        </td>
+        <td className="r num" data-label={`${LL.MIN()} – ${LL.MAX()}`}>
+          {hasLimit && `${formatValue(de.mi)} – ${formatValue(de.ma)}`}
+        </td>
+      </tr>
     );
   };
 
-  const onDialogSave = (updatedItem: DeviceEntity) => {
-    setDialogOpen(false);
-    updateDeviceEntity(updatedItem);
-  };
-
-  const editDeviceEntity = (de: DeviceEntity) => {
-    if (de.n === undefined || (de.n && de.n[0] === '!')) {
-      return;
+  const renderEntities = () => {
+    if (!entities.length && (entitiesLoading || entitiesError)) {
+      return (
+        <Loader
+          error={entitiesError?.message}
+          onRetry={() => void loadEntities(selectedDevice)}
+        />
+      );
     }
-
-    if (de.cn === undefined) {
-      de.cn = '';
-    }
-
-    setSelectedDeviceEntity(de);
-    setDialogOpen(true);
-  };
-
-  const saveCustomization = async () => {
-    if (!devices || !deviceEntities || selectedDevice === -1) {
-      return;
-    }
-
-    const masked_entities = deviceEntities
-      .filter((de: DeviceEntity) => hasEntityChanged(de))
-      .map((new_de) => createMaskedEntityId(new_de));
-
-    // check size in bytes to match buffer in CPP, which is 2048
-    const bytes = new TextEncoder().encode(JSON.stringify(masked_entities)).length;
-    if (bytes > MAX_BUFFER_SIZE) {
-      toast.warning(LL.CUSTOMIZATIONS_FULL());
-      return;
-    }
-
-    await sendCustomizationEntities({
-      id: selectedDevice,
-      entity_ids: masked_entities
-    })
-      .then(() => {
-        toast.success(LL.CUSTOMIZATIONS_SAVED());
-        // Reload so cleared min/max fall back to the built-in limits and the modified flag matches the file.
-        void sendDeviceEntities(selectedDevice);
-      })
-      .catch((error: Error) => {
-        if (error.message === 'Reboot required') {
-          setRestartNeeded(true);
-        } else {
-          toast.error(error.message);
-        }
-      })
-      .finally(() => {
-        setOriginalSettings(deviceEntities);
-      });
-  };
-
-  const renameDevice = async () => {
-    await sendDeviceName({
-      id: selectedDevice,
-      name: selectedDeviceName,
-      brand: selectedDeviceBrand
-    })
-      .then(() => {
-        toast.success(LL.UPDATED_OF(LL.NAME(1)));
-      })
-      .catch(() => {
-        toast.error(`${LL.UPDATE_OF(LL.NAME(1))} ${LL.FAILED(1)}`);
-      })
-      .finally(async () => {
-        setRename(false);
-        await fetchCoreData();
-      });
-  };
-
-  const renderDeviceList = () => (
-    <>
-      <Typography sx={{ mb: 1 }} color="warning" variant="body1">
-        {LL.CUSTOMIZATIONS_HELP_1()}.
-      </Typography>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 2 }}>
-        {rename ? (
-          <>
-            <TextField
-              name="device"
-              label={LL.EMS_DEVICE()}
-              style={{ minWidth: '48%' }}
-              variant="outlined"
-              value={selectedDeviceName}
-              onChange={(e) => setSelectedDeviceName(e.target.value)}
-              margin="normal"
-            />
-            <TextField
-              name="brand"
-              label={LL.BRAND()}
-              style={{ minWidth: '48%' }}
-              variant="outlined"
-              value={selectedDeviceBrand}
-              onChange={(e) => setSelectedDeviceBrand(e.target.value)}
-              margin="normal"
-            />
-          </>
-        ) : (
-          <TextField
-            name="device"
-            label={LL.EMS_DEVICE()}
-            variant="outlined"
-            value={selectedDevice}
-            disabled={numChanges !== 0}
-            onChange={(e) => setSelectedDevice(parseInt(e.target.value))}
-            margin="normal"
-            style={{ minWidth: '50%' }}
-            select
-          >
-            <MenuItem disabled key={-1} value={-1}>
-              {LL.SELECT_DEVICE()}...
-            </MenuItem>
-            {devices.devices.map(
-              (device: Device) =>
-                device.id < 90 &&
-                device.e !== 0 && (
-                  <MenuItem key={device.id} value={device.id}>
-                    {device.n}&nbsp;({device.tn})
-                  </MenuItem>
-                )
-            )}
-          </TextField>
-        )}
-        {selectedDevice !== -1 &&
-          (rename ? (
-            <>
-              <Button
-                startIcon={<CancelIcon />}
-                variant="outlined"
-                color="secondary"
-                onClick={() => setRename(false)}
-              >
-                {LL.CANCEL()}
-              </Button>
-              <Button
-                startIcon={<SaveIcon />}
-                variant="outlined"
-                onClick={() => renameDevice()}
-              >
-                {LL.RENAME()}
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                startIcon={<EditIcon />}
-                variant="outlined"
-                onClick={() => setRename(true)}
-              >
-                {LL.RENAME()}
-              </Button>
-              <Button
-                startIcon={<SettingsBackupRestoreIcon />}
-                variant="outlined"
-                color="error"
-                onClick={() => setConfirmReset(true)}
-              >
-                {LL.REMOVE_ALL()}
-              </Button>
-            </>
-          ))}
-      </Box>
-    </>
-  );
-
-  const filteredEntities = deviceEntities.filter((de) => filter_entity(de));
-  const allFilteredSelected =
-    filteredEntities.length > 0 &&
-    filteredEntities.every((de) => selectedIds.has(de.id));
-  const someFilteredSelected = filteredEntities.some((de) => selectedIds.has(de.id));
-
-  const toggleSelected = (id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
-
-  const toggleSelectFiltered = () => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (allFilteredSelected) {
-        filteredEntities.forEach((de) => next.delete(de.id));
-      } else {
-        filteredEntities.forEach((de) => next.add(de.id));
-      }
-      return next;
-    });
-  };
-
-  const renderDeviceData = () => {
     return (
-      <>
-        <Typography sx={{ mt: 1, mb: 1 }} color="warning" variant="body2">
-          <OptionIcon type="favorite" isSet={true} />={LL.CUSTOMIZATIONS_HELP_2()}
-          &nbsp;&nbsp;
-          <OptionIcon type="readonly" isSet={true} />={LL.CUSTOMIZATIONS_HELP_3()}
-          &nbsp;&nbsp;
-          <OptionIcon type="api_mqtt_exclude" isSet={true} />=
-          {LL.CUSTOMIZATIONS_HELP_4()}&nbsp;&nbsp;
-          <OptionIcon type="web_exclude" isSet={true} />={LL.CUSTOMIZATIONS_HELP_5()}
-          &nbsp;&nbsp;
-          <OptionIcon type="deleted" isSet={true} />={LL.CUSTOMIZATIONS_HELP_6()}
-        </Typography>
-        <Grid
-          container
-          spacing={2}
-          direction="row"
-          sx={{ mb: 1, mt: 0, justifyContent: 'flex-start', alignItems: 'center' }}
-        >
-          <Grid>
-            <TextField
-              size="small"
-              variant="outlined"
-              placeholder={LL.SEARCH()}
-              aria-label={LL.SEARCH()}
-              onChange={(event) => {
-                setSearch(event.target.value);
-              }}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon color="primary" sx={{ fontSize: 16 }} />
-                    </InputAdornment>
-                  )
-                }
-              }}
-            />
-          </Grid>
-          <Grid>
-            <ToggleButtonGroup
-              size="small"
-              color="secondary"
-              value={getMaskString(selectedFilters)}
-              onChange={(_, mask: string[]) => {
-                setSelectedFilters(getMaskNumber(mask));
-              }}
-            >
-              <ToggleButton value="8">
-                <OptionIcon type="favorite" isSet={true} />
-              </ToggleButton>
-              <ToggleButton value="4">
-                <OptionIcon type="readonly" isSet={true} />
-              </ToggleButton>
-              <ToggleButton value="2">
-                <OptionIcon type="api_mqtt_exclude" isSet={true} />
-              </ToggleButton>
-              <ToggleButton value="1">
-                <OptionIcon type="web_exclude" isSet={true} />
-              </ToggleButton>
-              <ToggleButton value="128">
-                <OptionIcon type="deleted" isSet={true} />
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </Grid>
-          <Grid>
-            <Button
-              size="small"
-              sx={{ fontSize: 10 }}
-              variant="outlined"
-              color={modifiedOnly ? 'secondary' : 'inherit'}
-              onClick={() => setModifiedOnly((current) => !current)}
-            >
-              {LL.MODIFIED()}
-            </Button>
-          </Grid>
-          <Grid>
-            <Button
-              size="small"
-              sx={{ fontSize: 10 }}
-              variant="outlined"
-              color="inherit"
-              onClick={() => maskDisabled(false)}
-            >
-              {LL.SET_ALL()}&nbsp;
-              <OptionIcon type="api_mqtt_exclude" isSet={false} />
-              <OptionIcon type="web_exclude" isSet={false} />
-            </Button>
-          </Grid>
-          <Grid>
-            <Button
-              size="small"
-              sx={{ fontSize: 10 }}
-              variant="outlined"
-              color="inherit"
-              onClick={() => maskDisabled(true)}
-            >
-              {LL.SET_ALL()}&nbsp;
-              <OptionIcon type="api_mqtt_exclude" isSet={true} />
-              <OptionIcon type="web_exclude" isSet={true} />
-            </Button>
-          </Grid>
-          <Grid>
-            <Button
-              size="small"
-              sx={{ fontSize: 10 }}
-              variant="outlined"
-              color="inherit"
-              onClick={() => maskReadonly(false)}
-            >
-              {LL.SET_ALL()}&nbsp;
-              <OptionIcon type="readonly" isSet={false} />
-            </Button>
-          </Grid>
-          <Grid>
-            <Button
-              size="small"
-              sx={{ fontSize: 10 }}
-              variant="outlined"
-              color="inherit"
-              onClick={() => maskReadonly(true)}
-            >
-              {LL.SET_ALL()}&nbsp;
-              <OptionIcon type="readonly" isSet={true} />
-            </Button>
-          </Grid>
-          {selectedIds.size > 0 && (
-            <Grid>
-              <Button
-                size="small"
-                sx={{ fontSize: 10 }}
-                variant="outlined"
-                color="error"
-                onClick={resetSelected}
-              >
-                {LL.RESET_SELECTED()} ({selectedIds.size})
-              </Button>
-            </Grid>
-          )}
-          <Grid>
-            <Typography variant="subtitle2" color="grey">
-              {LL.SHOWING()}&nbsp;{filteredEntities.length}/{deviceEntities.length}
-              &nbsp;{LL.ENTITIES(deviceEntities.length)}
-            </Typography>
-          </Grid>
-        </Grid>
-        <Table
-          data={{ nodes: filteredEntities }}
-          theme={entities_theme}
-          layout={{ custom: true }}
-        >
-          {(tableList: DeviceEntity[]) => (
-            <>
-              <Header>
-                <HeaderRow>
-                  <HeaderCell stiff>
-                    <Checkbox
-                      size="small"
-                      sx={{ p: 0, color: 'inherit' }}
+      <Section className="cz-entities">
+        {renderFilters()}
+        <div className="cz-toolbar">
+          <SearchField
+            label={LL.SEARCH()}
+            value={search}
+            onInput={(e) => setSearch(e.currentTarget.value)}
+          />
+          <span className="cap">
+            {LL.SHOWING()} {filtered.length}/{entities.length}{' '}
+            {LL.ENTITIES(entities.length)}
+          </span>
+        </div>
+        {renderBulk()}
+        <p className="cap cz-hint">{LL.BULK_HINT()}</p>
+        <div className="tbl-wrap">
+          <Table stack className="cz-tbl">
+            <thead>
+              <tr>
+                <th className="chk">
+                  <label className="checkbox">
+                    <input
+                      type="checkbox"
+                      aria-label={LL.FILTER_ALL()}
                       checked={allFilteredSelected}
-                      indeterminate={!allFilteredSelected && someFilteredSelected}
-                      disabled={filteredEntities.length === 0}
+                      ref={(el) => {
+                        if (el)
+                          el.indeterminate =
+                            !allFilteredSelected && someFilteredSelected;
+                      }}
+                      disabled={filtered.length === 0}
                       onChange={toggleSelectFiltered}
                     />
-                  </HeaderCell>
-                  <HeaderCell stiff>{LL.OPTIONS()}</HeaderCell>
-                  <HeaderCell resize>{LL.NAME(1)}</HeaderCell>
-                  <HeaderCell stiff>{LL.MIN()}</HeaderCell>
-                  <HeaderCell stiff>{LL.MAX()}</HeaderCell>
-                  <HeaderCell resize>{LL.VALUE(0)}</HeaderCell>
-                </HeaderRow>
-              </Header>
-              <Body>
-                {tableList.map((de: DeviceEntity) => (
-                  <Row key={de.id} item={de} onClick={() => editDeviceEntity(de)}>
-                    <Cell stiff onClick={(event) => event.stopPropagation()}>
-                      <Checkbox
-                        size="small"
-                        sx={{ p: 0 }}
-                        checked={selectedIds.has(de.id)}
-                        onChange={() => toggleSelected(de.id)}
-                      />
-                    </Cell>
-                    <Cell stiff>
-                      <EntityMaskToggle onUpdate={updateDeviceEntity} de={de} />
-                    </Cell>
-                    <Cell>
-                      <span
-                        style={{
-                          color:
-                            de.v === undefined && !isCommand(de) ? 'grey' : 'inherit'
-                        }}
-                      >
-                        {formatName(de, false)}&nbsp;(
-                        <Link
-                          style={{
-                            color:
-                              de.v === undefined && !isCommand(de)
-                                ? 'grey'
-                                : 'primary'
-                          }}
-                          target="_blank"
-                          href={APIURL + selectedDeviceTypeNameURL + '/' + de.id}
-                        >
-                          {de.id}
-                        </Link>
-                        )
-                      </span>
-                    </Cell>
-                    <Cell>
-                      {!(de.m & DeviceEntityMask.DV_READONLY) && formatLimit(de.mi)}
-                    </Cell>
-                    <Cell>
-                      {!(de.m & DeviceEntityMask.DV_READONLY) && formatLimit(de.ma)}
-                    </Cell>
-                    <Cell>{formatValue(de.v)}</Cell>
-                  </Row>
-                ))}
-              </Body>
-            </>
-          )}
-        </Table>
-      </>
+                  </label>
+                </th>
+                <SortHeader {...sort.header('options')}>{LL.OPTIONS()}</SortHeader>
+                <SortHeader {...sort.header('name')}>{LL.NAME(1)}</SortHeader>
+                <SortHeader className="r" {...sort.header('value')}>
+                  {LL.VALUE(0)}
+                </SortHeader>
+                <SortHeader className="r" {...sort.header('range')}>
+                  {LL.MIN()} – {LL.MAX()}
+                </SortHeader>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length ? (
+                filtered.map(renderRow)
+              ) : (
+                <tr>
+                  <td colSpan={5} className="tbl-empty">
+                    {LL.NO_ENTITIES_MATCH()}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        </div>
+        <div className="cz-legend">
+          {MASKS.map((o) => (
+            <span key={o.bit}>
+              <Icon name={o.icon} size="xs" className={`b${o.bit}`} />
+              {o.label(LL)}: {o.help(LL)}
+            </span>
+          ))}
+        </div>
+      </Section>
     );
   };
 
-  const renderResetDialog = () => (
-    <Dialog
-      sx={dialogStyle}
-      open={confirmReset}
-      onClose={() => setConfirmReset(false)}
-    >
-      <DialogTitle>{LL.REMOVE_ALL()}</DialogTitle>
-      <DialogContent dividers>{LL.CUSTOMIZATIONS_RESET()}</DialogContent>
-      <DialogActions>
-        <Button
-          startIcon={<CancelIcon />}
-          variant="outlined"
-          onClick={() => setConfirmReset(false)}
-          color="secondary"
-        >
-          {LL.CANCEL()}
-        </Button>
-        <Button
-          startIcon={<SettingsBackupRestoreIcon />}
-          variant="outlined"
-          onClick={resetCustomization}
-          color="error"
-        >
-          {LL.REMOVE_ALL()}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-
-  const renderContent = () => (
+  return (
     <>
-      {devices && renderDeviceList()}
-      {selectedDevice !== -1 && !rename && renderDeviceData()}
-      {restartNeeded ? (
-        <MessageBox level="warning" message={LL.RESTART_TEXT(0)}>
+      {blocker && <BlockNavigation blocker={blocker} />}
+      <Section
+        title={LL.CUSTOMIZATIONS()}
+        icon="construction"
+        actions={
           <Button
-            sx={{ ml: 2 }}
-            startIcon={<PowerSettingsNewIcon />}
-            variant="contained"
             color="error"
-            onClick={doRestart}
+            icon="delete_sweep"
+            onClick={() => setConfirmReset(true)}
           >
-            {LL.RESTART()}
+            {LL.REMOVE_ALL()}
           </Button>
-        </MessageBox>
-      ) : (
-        <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
-          <Box sx={{ flexGrow: 1 }}>
-            {numChanges !== 0 && (
-              <ButtonRow>
-                <Button
-                  startIcon={<CancelIcon />}
-                  variant="outlined"
-                  color="secondary"
-                  onClick={() => {
-                    if (devices) {
-                      void sendDeviceEntities(selectedDevice);
-                    }
-                  }}
-                >
-                  {LL.CANCEL()}
-                </Button>
-                <Button
-                  startIcon={<WarningIcon color="warning" />}
-                  variant="contained"
-                  color="info"
-                  onClick={saveCustomization}
-                >
-                  {LL.APPLY_CHANGES(numChanges)}
-                </Button>
-              </ButtonRow>
-            )}
-          </Box>
-        </Box>
-      )}
-      {renderResetDialog()}
-    </>
-  );
+        }
+      >
+        <p className="cap">{LL.CUSTOMIZATIONS_HELP_1()}.</p>
+        <div className="cz-device">
+          <Select
+            label={LL.EMS_DEVICE()}
+            value={String(selectedDevice)}
+            disabled={numChanges !== 0}
+            onChange={(e) => setSelectedDevice(Number(e.currentTarget.value))}
+            options={[
+              { value: '-1', label: `${LL.SELECT_DEVICE()}...`, disabled: true },
+              ...devices.map((d) => ({
+                value: String(d.id),
+                label: `${d.n} (${d.tn})`
+              }))
+            ]}
+          />
+          {device && (
+            <Button
+              icon="edit"
+              onClick={() => setRenaming({ name: device.n, brand: device.b })}
+            >
+              {LL.RENAME()}
+            </Button>
+          )}
+        </div>
+      </Section>
 
-  return restarting ? (
-    <SystemMonitor />
-  ) : (
-    <SectionContent>
-      {blocker ? <BlockNavigation blocker={blocker} /> : null}
-      {renderContent()}
-      {selectedDeviceEntity && (
-        <SettingsCustomizationsDialog
-          open={dialogOpen}
-          onClose={onDialogClose}
-          onSave={onDialogSave}
-          selectedItem={selectedDeviceEntity}
+      {selectedDevice !== -1 && renderEntities()}
+
+      {numChanges > 0 ? (
+        <SaveBar message={LL.UNSAVED_CHANGES({ num: numChanges })}>
+          <Button color="secondary" icon="undo" disabled={saving} onClick={cancel}>
+            {LL.CANCEL()}
+          </Button>
+          <Button
+            variant="contained"
+            icon="check"
+            disabled={saving}
+            onClick={() => void save()}
+          >
+            {LL.SAVE()}
+          </Button>
+        </SaveBar>
+      ) : (
+        restartNeeded && (
+          <SaveBar warning icon="restart_alt" message={LL.SAVED_RESTART()}>
+            <Button
+              variant="contained"
+              color="warning"
+              icon="restart_alt"
+              disabled={restartSending}
+              onClick={() =>
+                void sendAPI({ device: 'system', cmd: 'restart', id: 0 })
+                  .then(() => setRestarting(true))
+                  .catch((error: Error) => toast.error(error.message))
+              }
+            >
+              {LL.RESTART_NOW()}
+            </Button>
+          </SaveBar>
+        )
+      )}
+
+      {editing && (
+        <CustomizationsDialog
+          open
+          entity={editing}
+          original={original.get(editing.id)}
+          onClose={() => setEditing(undefined)}
+          onSave={(de) => {
+            update(de.id, () => de);
+            setEditing(undefined);
+          }}
+          onReset={() => {
+            update(editing.id, resetEntity);
+            setEditing(undefined);
+          }}
         />
       )}
-    </SectionContent>
+
+      <Dialog
+        open={!!renaming}
+        title={LL.RENAME_DEVICE()}
+        onClose={() => setRenaming(undefined)}
+        actions={
+          <>
+            <Button
+              color="secondary"
+              icon="cancel"
+              onClick={() => setRenaming(undefined)}
+            >
+              {LL.CANCEL()}
+            </Button>
+            <Button
+              variant="contained"
+              icon="check"
+              disabled={renameSending}
+              onClick={() => void renameDevice()}
+            >
+              {LL.RENAME()}
+            </Button>
+          </>
+        }
+      >
+        {renaming && (
+          <form
+            className="form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void renameDevice();
+            }}
+          >
+            <TextField
+              label={LL.EMS_DEVICE()}
+              name="device"
+              value={renaming.name}
+              onInput={(e) =>
+                setRenaming({ ...renaming, name: e.currentTarget.value })
+              }
+            />
+            <TextField
+              label={LL.BRAND()}
+              name="brand"
+              value={renaming.brand}
+              onInput={(e) =>
+                setRenaming({ ...renaming, brand: e.currentTarget.value })
+              }
+            />
+          </form>
+        )}
+      </Dialog>
+
+      <Dialog
+        open={confirmReset}
+        title={LL.REMOVE_ALL()}
+        onClose={() => setConfirmReset(false)}
+        actions={
+          <>
+            <Button
+              color="secondary"
+              icon="cancel"
+              onClick={() => setConfirmReset(false)}
+            >
+              {LL.CANCEL()}
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              icon="delete_sweep"
+              onClick={() => void resetAll()}
+            >
+              {LL.REMOVE_ALL()}
+            </Button>
+          </>
+        }
+      >
+        <p>{LL.CUSTOMIZATIONS_RESET()}</p>
+      </Dialog>
+    </>
   );
 };
 

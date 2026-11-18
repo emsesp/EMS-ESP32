@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { pathToFileURL } from 'url';
-import { Plugin, PluginOption, defineConfig } from 'vite';
+import { Plugin, PluginOption, defineConfig, normalizePath } from 'vite';
 import zlib from 'zlib';
 
 // Constants
@@ -30,6 +30,30 @@ const RESOLVE_ALIASES = {
   'react-dom': 'preact/compat',
   react: REACT_SHIM
 };
+
+// The recovery app is flashed into the small factory partition. components/ui/Icon.tsx imports
+// the full icon registry; in the recovery app it gets src/recovery/icons.ts, which lists only
+// the icons the recovery shows.
+const ICON_COMPONENT = normalizePath(
+  path.resolve(import.meta.dirname, 'src/components/ui/Icon.tsx')
+);
+const RECOVERY_ICONS = normalizePath(
+  path.resolve(import.meta.dirname, 'src/recovery/icons.ts')
+);
+const recoveryIcons = (): Plugin => ({
+  name: 'recovery-icons',
+  enforce: 'pre',
+  resolveId(source, importer) {
+    if (
+      source === './icons' &&
+      importer &&
+      normalizePath(importer.split('?')[0] ?? '') === ICON_COMPONENT
+    ) {
+      return RECOVERY_ICONS;
+    }
+    return null;
+  }
+});
 
 // Common resolve extensions - prioritize TypeScript/React files for Windows compatibility
 const RESOLVE_EXTENSIONS = ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'];
@@ -190,7 +214,11 @@ export default defineConfig(
         /* @vite-ignore */ recoveryMockUrl
       )) as { default: () => PluginOption };
       return {
-        plugins: [...createBasePlugins(true, false), recoveryMock()],
+        plugins: [
+          ...createBasePlugins(true, false),
+          recoveryIcons(),
+          recoveryMock()
+        ],
         resolve: {
           alias: RESOLVE_ALIASES,
           extensions: RESOLVE_EXTENSIONS,
@@ -206,7 +234,7 @@ export default defineConfig(
     if (mode === 'recovery') {
       console.log('Preparing for Recovery WebUI, optimized build');
       return {
-        plugins: createBasePlugins(false, true),
+        plugins: [...createBasePlugins(false, true), recoveryIcons()],
         resolve: {
           alias: RESOLVE_ALIASES,
           extensions: RESOLVE_EXTENSIONS,

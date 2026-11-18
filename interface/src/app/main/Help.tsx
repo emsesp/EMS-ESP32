@@ -1,42 +1,24 @@
-import { memo, useContext, useState } from 'react';
-import type { ReactElement } from 'react';
-
-import CommentIcon from '@mui/icons-material/CommentTwoTone';
-import DownloadIcon from '@mui/icons-material/GetApp';
-import GitHubIcon from '@mui/icons-material/GitHub';
-import MenuBookIcon from '@mui/icons-material/MenuBookTwoTone';
-import {
-  Avatar,
-  Box,
-  Button,
-  Divider,
-  Grid,
-  Link,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemButton,
-  ListItemText,
-  Stack,
-  Typography
-} from '@mui/material';
-import type { SxProps, Theme } from '@mui/material/styles';
+import { useContext, useState } from 'react';
 
 import { useRequest } from 'alova/client';
-import { SectionContent, useLayoutTitle } from 'components';
-import { toast } from 'components/toast';
+import { readSystemStatus } from 'api/system';
+
+import {
+  Button,
+  ButtonLink,
+  LinkList,
+  type LinkListItem,
+  Section,
+  toast
+} from 'components/ui';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
+import { NetworkConnectionStatus, type SystemStatus } from 'types';
 import { saveFile } from 'utils';
 
 import { API, callAction } from '../../api/app';
-import type { APIcall } from './types';
-
-interface HelpLink {
-  href: string;
-  icon: ReactElement;
-  label: () => string;
-}
+import './Help.css';
+import { type APIcall, busConnectionStatus } from './types';
 
 interface CustomSupport {
   img_url: string | null;
@@ -44,35 +26,42 @@ interface CustomSupport {
 }
 
 const DEFAULT_IMAGE_URL = 'https://emsesp.org/media/images/installer.jpeg';
-
-const SUPPORT_BOX_STYLES: SxProps<Theme> = {
-  borderRadius: 3,
-  border: '1px solid lightblue',
-  justifyContent: 'space-evenly',
-  alignItems: 'center'
-};
-
-const IMAGE_STYLES: SxProps<Theme> = {
-  maxHeight: { xs: 100, md: 250 }
-};
-
-const AVATAR_STYLES: SxProps<Theme> = {
-  bgcolor: '#72caf9'
-};
-
+const ISSUE_URL = 'https://github.com/emsesp/EMS-ESP32/issues/new/choose';
 const SYSTEM_INFO_API: APIcall = { device: 'system', cmd: 'info', id: 0 };
 
-const HelpComponent = () => {
-  const { LL } = useI18nContext();
-  useLayoutTitle(LL.HELP());
+const BUS_TEXT: Record<number, string> = {
+  [busConnectionStatus.BUS_STATUS_CONNECTED]: 'connected',
+  [busConnectionStatus.BUS_STATUS_TX_ERRORS]: 'connected with Tx errors',
+  [busConnectionStatus.BUS_STATUS_OFFLINE]: 'offline'
+};
 
+const duration = (s: number) =>
+  `${Math.trunc(s / 86400)}d ${Math.trunc(s / 3600) % 24}h ${Math.trunc(s / 60) % 60}m`;
+
+// in English whatever the UI language, it is pasted into GitHub and Discord
+const summary = (s: SystemStatus) =>
+  [
+    `EMS-ESP v${s.emsesp_version} on ${s.model || s.board || s.esp_platform} (${s.esp_platform}, ${s.partition})`,
+    `uptime ${duration(s.uptime)}, free heap ${s.free_heap} KB, max block ${s.max_alloc_heap} KB`,
+    `EMS bus ${BUS_TEXT[s.bus_status] ?? 'unknown'}, ${s.num_devices} devices, ${s.num_sensors} temperature and ${s.num_analogs} analog sensors`,
+    `network ${
+      s.network_status === NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED
+        ? 'Ethernet'
+        : s.network_status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED
+          ? `WiFi (${s.wifi_rssi} dBm)`
+          : 'not connected'
+    }, MQTT ${s.mqtt_status ? 'connected' : 'not connected'}`
+  ].join('\n');
+
+const Help = () => {
+  const { LL } = useI18nContext();
   const { me } = useContext(AuthenticatedContext);
 
   const [customSupport, setCustomSupport] = useState<CustomSupport>({
     img_url: null,
     html: null
   });
-  const [imgError, setImgError] = useState<boolean>(false);
+  const [imgError, setImgError] = useState(false);
 
   useRequest(callAction({ action: 'getCustomSupport' })).onSuccess((event) => {
     if (event?.data && Object.keys(event.data).length !== 0) {
@@ -86,9 +75,12 @@ const HelpComponent = () => {
     }
   });
 
-  const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
-    immediate: false
-  })
+  const { data: status } = useRequest(readSystemStatus);
+
+  const { send: sendAPI, loading: downloading } = useRequest(
+    (data: APIcall) => API(data),
+    { immediate: false }
+  )
     .onSuccess((event) => {
       saveFile(event.data, 'system_info', '.json');
       toast.info(LL.DOWNLOAD_SUCCESSFUL());
@@ -97,99 +89,130 @@ const HelpComponent = () => {
       toast.error(String(error.error?.message || 'An error occurred'));
     });
 
-  const helpLinks: HelpLink[] = [
+  const copySummary = (text: string) => {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => toast.success(LL.COPIED()))
+      .catch(() => toast.error(LL.COPY_FAILED()));
+  };
+
+  const links: LinkListItem[] = [
     {
       href: 'https://emsesp.org',
-      icon: <MenuBookIcon />,
-      label: () => LL.HELP_INFORMATION_1()
+      icon: 'menu_book',
+      color: '#72caf9',
+      title: LL.DOCUMENTATION(),
+      text: LL.HELP_INFORMATION_1(),
+      note: 'emsesp.org'
     },
     {
       href: 'https://discord.gg/GP9DPSgeJq',
-      icon: <CommentIcon />,
-      label: () => LL.HELP_INFORMATION_2()
+      icon: 'forum',
+      color: '#5865f2',
+      title: LL.COMMUNITY_CHAT(),
+      text: LL.HELP_INFORMATION_2(),
+      note: 'discord.gg'
     },
     {
-      href: 'https://github.com/emsesp/EMS-ESP32/issues/new/choose',
-      icon: <GitHubIcon />,
-      label: () => LL.HELP_INFORMATION_3()
+      href: ISSUE_URL,
+      icon: 'bug_report',
+      color: '#c5572c',
+      title: LL.REPORT_ISSUE(),
+      text: LL.HELP_INFORMATION_3(),
+      note: 'github.com/emsesp'
     }
   ];
 
   const imageSrc =
     imgError || !customSupport.img_url ? DEFAULT_IMAGE_URL : customSupport.img_url;
+  const text = status ? summary(status) : '';
 
   return (
-    <SectionContent>
+    <>
       {customSupport.html && (
-        <Stack
-          direction="row"
-          divider={<Divider orientation="vertical" flexItem />}
-          sx={{ padding: 1, mb: 2, ...SUPPORT_BOX_STYLES }}
-        >
-          <Typography variant="subtitle1">
-            <div dangerouslySetInnerHTML={{ __html: customSupport.html }} />
-          </Typography>
-          <Box
-            component="img"
-            referrerPolicy="no-referrer"
-            sx={IMAGE_STYLES}
-            onError={() => setImgError(true)}
-            src={imageSrc}
+        <Section className="support-box">
+          <div
+            className="grow support-html"
+            dangerouslySetInnerHTML={{ __html: customSupport.html }}
           />
-        </Stack>
+          <img
+            className="support-img"
+            alt=""
+            referrerPolicy="no-referrer"
+            src={imageSrc}
+            onError={() => setImgError(true)}
+          />
+        </Section>
       )}
 
-      {me?.admin && (
-        <List>
-          {helpLinks.map(({ href, icon, label }) => (
-            <ListItem key={href}>
-              <ListItemButton
-                component="a"
-                target="_blank"
-                rel="noreferrer"
-                href={href}
-              >
-                <ListItemAvatar>
-                  <Avatar sx={AVATAR_STYLES}>{icon}</Avatar>
-                </ListItemAvatar>
-                <ListItemText primary={label()} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
+      {me.admin && (
+        <Section title={LL.GET_HELP()} icon="live_help">
+          <LinkList items={links} />
+        </Section>
       )}
 
-      <Grid container spacing={2} sx={{ mt: 2, alignItems: 'center' }}>
-        <Typography sx={{ mb: 1 }} color="warning" variant="body1">
-          {LL.HELP_INFORMATION_4()}:
-        </Typography>
-        <Button
-          startIcon={<DownloadIcon />}
-          variant="outlined"
-          color="primary"
-          onClick={() => void sendAPI(SYSTEM_INFO_API)}
-        >
-          {LL.SYSTEM_INFORMATION(0)}
-        </Button>
-      </Grid>
+      <Section title={LL.REPORT_PROBLEM()} icon="bug_report">
+        <p className="sec-text">{LL.HELP_INFORMATION_4()}</p>
+        <ol className="help-steps">
+          <li>
+            <span className="num">1</span>
+            <span className="grow">
+              {LL.REPORT_STEP_1()}
+              <span className="cap">{LL.REPORT_STEP_1_TEXT()}</span>
+            </span>
+            <Button
+              icon="download"
+              disabled={downloading}
+              onClick={() => void sendAPI(SYSTEM_INFO_API)}
+            >
+              {LL.SYSTEM_INFORMATION(0)}
+            </Button>
+          </li>
+          {me.admin && (
+            <li>
+              <span className="num">2</span>
+              <span className="grow">
+                {LL.REPORT_STEP_2()}
+                <span className="cap">{LL.REPORT_STEP_2_TEXT()}</span>
+              </span>
+              <ButtonLink to="/status/log" color="secondary" icon="list_alt">
+                {LL.LOG_OF(LL.SYSTEM(0))}
+              </ButtonLink>
+            </li>
+          )}
+          <li>
+            <span className="num">{me.admin ? 3 : 2}</span>
+            <span className="grow">
+              {LL.REPORT_STEP_3()}
+              <span className="cap">{LL.REPORT_STEP_3_TEXT()}</span>
+            </span>
+            <ButtonLink href={ISSUE_URL} color="secondary" icon="open_in_new">
+              {LL.NEW_ISSUE()}
+            </ButtonLink>
+          </li>
+        </ol>
+        {text && (
+          <>
+            <div className="sum-head">
+              <span className="cap grow">{LL.SHORT_SUMMARY()}</span>
+              <Button size="sm" icon="content_copy" onClick={() => copySummary(text)}>
+                {LL.COPY()}
+              </Button>
+            </div>
+            <pre className="summary mono">{text}</pre>
+          </>
+        )}
+      </Section>
 
-      <Divider sx={{ mt: 4 }} />
-
-      <Typography color="white" variant="subtitle1" align="center" sx={{ mt: 1 }}>
-        &copy;&nbsp;
-        <Link
-          target="_blank"
-          rel="noreferrer"
-          href="https://emsesp.org"
-          color="primary"
-        >
+      <p className="about">
+        EMS-ESP {status ? `v${status.emsesp_version}` : ''} · &copy;{' '}
+        <a href="https://emsesp.org" target="_blank" rel="noreferrer">
           emsesp.org
-        </Link>
-      </Typography>
-    </SectionContent>
+        </a>{' '}
+        · {LL.LICENSE_TEXT()}
+      </p>
+    </>
   );
 };
-
-const Help = memo(HelpComponent);
 
 export default Help;

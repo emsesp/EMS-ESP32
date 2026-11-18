@@ -93,7 +93,7 @@ function getRelativeTimeFormatter(locale: string): Intl.RelativeTimeFormat {
 /**
  * Format a date as relative time (e.g., "2 hours ago", "in 3 days")
  */
-function formatTimeAgo(locale: string, date: Date): string {
+export function formatTimeAgo(locale: string, date: Date): string {
   const now = Date.now();
   const targetTime = date.getTime();
   let duration = (targetTime - now) / 1000;
@@ -145,6 +145,19 @@ export const formatDateTime = (dateTime: string): string => {
     return 'Invalid date';
   }
 };
+
+/**
+ * Format a date to minutes, e.g. "13 Nov 2026, 18:02"
+ */
+export const formatDateTimeMinutes = (date: Date): string =>
+  getDateTimeFormatter({
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: false
+  }).format(date);
 
 /**
  * Convert a Date object to local date-time string (ISO format without timezone)

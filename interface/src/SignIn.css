@@ -1,0 +1,50 @@
+.signin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 16px;
+}
+.signin-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 360px;
+  padding: 24px;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.signin-lang {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+.signin-lang .input {
+  padding: 4px 8px;
+  font-size: 13px;
+}
+.signin-logo {
+  align-self: center;
+  width: 120px;
+  height: 120px;
+  margin-top: 24px;
+}
+.signin-card h1 {
+  margin: 0 0 4px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 400;
+}
+.signin-submit {
+  margin-top: 8px;
+}
+
+@media (max-width: 599px) {
+  .signin-lang .input {
+    font-size: 16px;
+  }
+}

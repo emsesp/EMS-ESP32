@@ -67,6 +67,9 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
       const message = error instanceof Error ? error.message : String(error);
 
       if (message === REBOOT_ERROR_MESSAGE) {
+        // saved; the new values only apply after a restart
+        setOrigData(data as D);
+        setDirtyFlags([]);
         setRestartNeeded(true);
         return;
       }

@@ -1,146 +1,99 @@
-import { memo, useEffect, useState } from 'react';
-import type { FC } from 'react';
+import { memo, useState } from 'react';
+import type { FC, FormEvent } from 'react';
 
-import CancelIcon from '@mui/icons-material/Cancel';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import SaveIcon from '@mui/icons-material/Save';
-import {
-  Button,
-  Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle
-} from '@mui/material';
-
-import { dialogStyle } from 'CustomTheme';
-import {
-  BlockFormControlLabel,
-  ValidatedPasswordField,
-  ValidatedTextField
-} from 'components';
+import { Button, Dialog, Switch, TextField } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { UserType } from 'types';
-import { updateValue } from 'utils';
 import { ValidationError, validate } from 'validators';
 import type Schema from 'validators/schema';
 import type { ValidateFieldsError } from 'validators/schema';
 
-interface UserFormProps {
+interface UserProps {
+  user: UserType;
   creating: boolean;
   validator: Schema;
-  user?: UserType;
-  setUser: React.Dispatch<React.SetStateAction<UserType | undefined>>;
-  onDoneEditing: () => void;
-  onCancelEditing: () => void;
+  onDone: (user: UserType) => void;
+  onClose: () => void;
 }
 
-const User: FC<UserFormProps> = ({
-  creating,
-  validator,
-  user,
-  setUser,
-  onDoneEditing,
-  onCancelEditing
-}) => {
+// add or edit one user; the change is kept in the page list until Save
+const User: FC<UserProps> = ({ user, creating, validator, onDone, onClose }) => {
   const { LL } = useI18nContext();
-
-  const updateFormValue = updateValue((updater) => {
-    setUser((prevState) => {
-      if (!prevState) return prevState;
-      return updater(
-        prevState as unknown as Record<string, unknown>
-      ) as unknown as UserType;
-    });
-  });
+  const [value, setValue] = useState<UserType>(user);
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
-  const open = !!user;
 
-  useEffect(() => {
-    if (open) {
-      setFieldErrors(undefined);
-    }
-  }, [open]);
+  const set = (patch: Partial<UserType>) => {
+    setValue((v) => ({ ...v, ...patch }));
+    setFieldErrors((errs) => {
+      if (!errs) return errs;
+      const left = { ...errs };
+      for (const k of Object.keys(patch)) delete left[k];
+      return left;
+    });
+  };
 
-  const validateAndDone = async () => {
-    if (user) {
-      try {
-        setFieldErrors(undefined);
-        await validate(validator, user);
-        onDoneEditing();
-      } catch (error) {
-        setFieldErrors((error as ValidationError).fieldErrors);
-      }
+  const submit = async (e?: FormEvent) => {
+    e?.preventDefault();
+    try {
+      await validate(validator, value);
+      onDone(value);
+    } catch (error) {
+      setFieldErrors((error as ValidationError).fieldErrors);
     }
   };
 
+  const err = (name: keyof UserType) => fieldErrors?.[name]?.[0]?.message;
+
   return (
     <Dialog
-      sx={dialogStyle}
-      onClose={onCancelEditing}
-      open={!!user}
-      fullWidth
-      maxWidth="sm"
-    >
-      {user && (
+      open
+      title={creating ? LL.ADD_USER() : LL.EDIT_USER()}
+      onClose={onClose}
+      actions={
         <>
-          <DialogTitle id="user-form-dialog-title">
-            {creating ? LL.ADD(1) : LL.MODIFY()}&nbsp;{LL.USER(1)}
-          </DialogTitle>
-          <DialogContent dividers>
-            <ValidatedTextField
-              fieldErrors={fieldErrors || {}}
-              name="username"
-              label={LL.USERNAME(1)}
-              fullWidth
-              variant="outlined"
-              value={user.username}
-              disabled={!creating}
-              onChange={updateFormValue}
-              margin="normal"
-            />
-            <ValidatedPasswordField
-              fieldErrors={fieldErrors || {}}
-              name="password"
-              label={LL.PASSWORD()}
-              fullWidth
-              variant="outlined"
-              value={user.password}
-              onChange={updateFormValue}
-              margin="normal"
-              {...(!creating && { helperText: LL.PASSWORD_KEEP() })}
-            />
-            <BlockFormControlLabel
-              control={
-                <Checkbox
-                  name="admin"
-                  checked={user.admin}
-                  onChange={updateFormValue}
-                />
-              }
-              label={LL.IS_ADMIN(1)}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button
-              startIcon={<CancelIcon />}
-              variant="outlined"
-              onClick={onCancelEditing}
-              color="secondary"
-            >
-              {LL.CANCEL()}
-            </Button>
-            <Button
-              startIcon={creating ? <PersonAddIcon /> : <SaveIcon />}
-              variant="outlined"
-              onClick={validateAndDone}
-              color="primary"
-            >
-              {creating ? LL.ADD(0) : LL.UPDATE()}
-            </Button>
-          </DialogActions>
+          <Button color="secondary" onClick={onClose}>
+            {LL.CANCEL()}
+          </Button>
+          <Button
+            variant="contained"
+            icon={creating ? 'person_add' : 'check'}
+            onClick={() => void submit()}
+          >
+            {creating ? LL.ADD(0) : LL.UPDATE()}
+          </Button>
         </>
-      )}
+      }
+    >
+      <form className="form" onSubmit={(e) => void submit(e)} noValidate>
+        <TextField
+          label={LL.USERNAME(1)}
+          name="username"
+          fullWidth
+          autoComplete="off"
+          value={value.username}
+          disabled={!creating}
+          error={err('username')}
+          onChange={(e) => set({ username: e.currentTarget.value })}
+        />
+        <TextField
+          label={creating ? LL.PASSWORD() : LL.NEW_PASSWORD()}
+          name="password"
+          type="password"
+          fullWidth
+          autoComplete="new-password"
+          value={value.password}
+          error={err('password')}
+          helperText={creating ? undefined : LL.PASSWORD_KEEP()}
+          onChange={(e) => set({ password: e.currentTarget.value })}
+        />
+        <Switch
+          label={LL.ADMIN()}
+          helperText={value.admin ? LL.ADMIN_ACCESS_TEXT() : LL.GUEST_ACCESS_TEXT()}
+          checked={value.admin}
+          onChange={(admin) => set({ admin })}
+        />
+        <button type="submit" hidden />
+      </form>
     </Dialog>
   );
 };

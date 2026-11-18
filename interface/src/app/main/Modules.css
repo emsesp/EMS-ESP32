@@ -1,0 +1,35 @@
+.mods-desc {
+  margin: 4px 0 0;
+}
+.mods-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.mods-card {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-left-width: 3px;
+  border-radius: 10px;
+  background: var(--paper-2);
+}
+.mods-card.on {
+  border-color: rgba(102, 187, 106, 0.5);
+}
+.mods-card.changed {
+  border-left-color: var(--primary);
+}
+.mods-card .swrow label {
+  font-size: 15px;
+  font-weight: 500;
+}
+.mods-status {
+  margin-top: 10px;
+}
+.mods-status .tag {
+  margin-left: 0;
+}
+.mods-status .btn {
+  margin-left: auto;
+}

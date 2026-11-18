@@ -1,0 +1,6 @@
+/* long topic lines scroll sideways instead of wrapping */
+.summary.mq-preview {
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre;
+}

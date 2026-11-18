@@ -1,35 +1,16 @@
-import { useEffect, useState } from 'react';
-
-import CancelIcon from '@mui/icons-material/Cancel';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import WarningIcon from '@mui/icons-material/Warning';
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormHelperText,
-  Grid,
-  InputAdornment,
-  MenuItem,
-  TextField,
-  Typography
-} from '@mui/material';
+import { type ChangeEvent, useEffect, useId, useState } from 'react';
 
 import { callAction } from '@/api/app';
-import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova/client';
-import { ValidatedTextField } from 'components';
-import { toast } from 'components/toast';
+import { Button, Dialog, Segmented, Select, TextField, toast } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
-import { numberValue, updateValue } from 'utils';
+import { extractEventValue, numberValue } from 'utils';
 import { ValidationError, validate } from 'validators';
 import type Schema from 'validators/schema';
 import type { ValidateFieldsError } from 'validators/schema';
 
+import './Devices.css';
+import { formatValue } from './deviceValue';
 import { DeviceValueUOM, DeviceValueUOM_s, getDeviceValueKind } from './types';
 import type { DeviceValue } from './types';
 
@@ -43,6 +24,34 @@ interface DevicesDialogProps {
   progress: boolean;
 }
 
+const isNumberField = (dv: DeviceValue) =>
+  !dv.l && (!!dv.s || dv.u !== DeviceValueUOM.NONE);
+
+// short lists (e.g. off/on) are buttons, longer ones a select
+const isShortList = (l: string[]) => l.length <= 3 && l.every((o) => o.length <= 12);
+
+// the firmware sends the step as a number although the type says string
+const decimals = (step?: string | number) => {
+  const d = String(step ?? '').split('.')[1];
+  return d ? d.length : 0;
+};
+
+const initialValue = (dv: DeviceValue): DeviceValue => {
+  if (typeof dv.v !== 'number' || !isNumberField(dv)) return dv;
+  const f = 10 ** Math.max(1, decimals(dv.s));
+  return { ...dv, v: Math.round(dv.v * f) / f };
+};
+
+// a value typed into a number field can still be text like "1." or NaN when empty
+const toSend = (dv: DeviceValue): DeviceValue => {
+  if (!isNumberField(dv)) return dv;
+  if (typeof dv.v === 'number') return { ...dv, v: isNaN(dv.v) ? '' : dv.v };
+  if (typeof dv.v === 'string' && dv.v !== '' && !isNaN(Number(dv.v))) {
+    return { ...dv, v: Number(dv.v) };
+  }
+  return dv;
+};
+
 const DevicesDialog = ({
   open,
   onClose,
@@ -53,15 +62,14 @@ const DevicesDialog = ({
   progress
 }: DevicesDialogProps) => {
   const { LL } = useI18nContext();
+  const formId = useId();
   const [editItem, setEditItem] = useState<DeviceValue>(selectedItem);
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
-
-  const updateFormValue = updateValue(setEditItem);
 
   useEffect(() => {
     if (open) {
       setFieldErrors(undefined);
-      setEditItem(selectedItem);
+      setEditItem(initialValue(selectedItem));
     }
   }, [open, selectedItem]);
 
@@ -76,25 +84,32 @@ const DevicesDialog = ({
       toast.error(String(error.error?.message || 'An error occurred'));
     });
 
+  const setValue = (v: unknown) => {
+    setEditItem((dv) => ({ ...dv, v }));
+    setFieldErrors(undefined);
+  };
+
   const doAction = async () => {
+    const item = toSend(editItem);
     try {
       setFieldErrors(undefined);
-      if (editItem.v === undefined && editItem.c !== undefined) {
-        await executeCommand(editItem.c);
+      if (item.v === undefined && item.c !== undefined) {
+        await executeCommand(item.c);
       } else {
-        await validate(validator, editItem);
+        await validate(validator, item);
       }
-      onSave(editItem);
+      onSave(item);
     } catch (error) {
-      setFieldErrors((error as ValidationError).fieldErrors);
+      if (error instanceof ValidationError) {
+        setFieldErrors(error.fieldErrors);
+      }
     }
   };
 
-  const setUom = (uom?: DeviceValueUOM) => {
-    if (uom === undefined) {
-      return;
-    }
+  const unitText = (uom?: number) => {
     switch (uom) {
+      case undefined:
+        return undefined;
       case DeviceValueUOM.HOURS:
         return LL.HOURS();
       case DeviceValueUOM.MINUTES:
@@ -102,163 +117,145 @@ const DevicesDialog = ({
       case DeviceValueUOM.SECONDS:
         return LL.SECONDS();
       default:
-        return DeviceValueUOM_s[uom];
+        return DeviceValueUOM_s[uom as DeviceValueUOM] || undefined;
     }
-  };
-
-  const showHelperText = (dv: DeviceValue) => {
-    if (dv.h) return dv.h;
-    if (dv.l) return dv.l.join(' | ');
-    if (dv.m !== undefined && dv.x !== undefined) {
-      return (
-        <>
-          {dv.m}&nbsp;&rarr;&nbsp;{dv.x}
-        </>
-      );
-    }
-    return undefined;
   };
 
   const kind = getDeviceValueKind(selectedItem);
+  const isRun =
+    kind === 'command' || (kind === 'deviceCommand' && selectedItem.v === '');
 
-  const dialogTitle =
-    kind === 'command' || kind === 'deviceCommand'
-      ? LL.RUN() + ' ' + LL.COMMAND(0)
-      : kind === 'scheduler'
-        ? LL.UPDATE() + ' ' + LL.SCHEDULE(0)
-        : writeable
-          ? LL.CHANGE_VALUE()
-          : LL.VALUE(0);
+  const title = isRun
+    ? `${LL.RUN()} ${LL.COMMAND(0)}`
+    : kind === 'scheduler'
+      ? `${LL.UPDATE()} ${LL.SCHEDULE(0)}`
+      : writeable
+        ? LL.CHANGE_VALUE()
+        : LL.VALUE(0);
 
-  const buttonLabel =
-    kind === 'command' || kind === 'deviceCommand' ? LL.RUN() : LL.UPDATE();
+  const dv = editItem;
+  const error = fieldErrors?.v?.[0]?.message;
+  const label = LL.VALUE(0);
+  const range =
+    dv.m !== undefined && dv.x !== undefined ? `${dv.m} → ${dv.x}` : undefined;
+  const value = typeof dv.v === 'string' || typeof dv.v === 'number' ? dv.v : '';
 
-  const helperText = showHelperText(editItem);
-
-  const valueLabel = LL.VALUE(0);
+  const renderField = () => {
+    if (kind === 'command') return null;
+    if (!writeable) {
+      return (
+        <p className="dvd-value">
+          {formatValue(LL, selectedItem.v, selectedItem.u)}
+        </p>
+      );
+    }
+    if (dv.l) {
+      const options = dv.l.map((o) => ({ value: o, label: o }));
+      if (!dv.l.includes(String(value))) {
+        options.unshift({ value: String(value), label: String(value) });
+      }
+      return isShortList(dv.l) ? (
+        <Segmented
+          label={label}
+          options={options}
+          value={String(value)}
+          onChange={setValue}
+          helperText={error ?? dv.h}
+          fullWidth
+        />
+      ) : (
+        <Select
+          label={label}
+          name="v"
+          options={options}
+          value={String(value)}
+          onChange={(e) => setValue(e.currentTarget.value)}
+          error={error}
+          helperText={dv.h}
+          fullWidth
+        />
+      );
+    }
+    if (isNumberField(dv)) {
+      return (
+        <TextField
+          label={label}
+          name="v"
+          type="number"
+          autoFocus
+          value={typeof value === 'number' ? numberValue(value) : value}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setValue(extractEventValue(e))
+          }
+          min={dv.s ? dv.m : undefined}
+          max={dv.s ? dv.x : undefined}
+          step={dv.s ?? 'any'}
+          unit={unitText(dv.u)}
+          error={error}
+          helperText={dv.h ?? range}
+          fullWidth
+        />
+      );
+    }
+    return (
+      <TextField
+        label={label}
+        name="v"
+        autoFocus
+        value={String(value)}
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          setValue(e.currentTarget.value)
+        }
+        error={error}
+        helperText={dv.h}
+        fullWidth
+      />
+    );
+  };
 
   return (
-    <Dialog sx={dialogStyle} open={open} onClose={onClose}>
-      <DialogTitle>{dialogTitle}</DialogTitle>
-      <DialogContent dividers>
-        <Typography sx={{ mb: 2 }} color="warning" variant="body2">
-          {editItem.id.slice(2)}
-        </Typography>
-        {kind !== 'command' && (
-          <Grid container>
-            <Grid size={12}>
-              {editItem.l ? (
-                <TextField
-                  name="v"
-                  value={editItem.v}
-                  aria-label={valueLabel}
-                  disabled={!writeable}
-                  sx={{ width: '30ch' }}
-                  select
-                  onChange={updateFormValue}
-                >
-                  {editItem.l.map((val) => (
-                    <MenuItem value={val} key={val}>
-                      {val}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              ) : editItem.s || editItem.u !== DeviceValueUOM.NONE ? (
-                <ValidatedTextField
-                  fieldErrors={fieldErrors || {}}
-                  name="v"
-                  label={valueLabel}
-                  value={numberValue(Math.round((editItem.v as number) * 10) / 10)}
-                  autoFocus
-                  disabled={!writeable}
-                  type="number"
-                  sx={{ width: '30ch' }}
-                  onChange={updateFormValue}
-                  slotProps={{
-                    htmlInput: editItem.s
-                      ? { min: editItem.m, max: editItem.x, step: editItem.s }
-                      : {},
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          {setUom(editItem.u)}
-                        </InputAdornment>
-                      )
-                    }
-                  }}
-                />
-              ) : (
-                <ValidatedTextField
-                  fieldErrors={fieldErrors || {}}
-                  name="v"
-                  label={valueLabel}
-                  value={editItem.v}
-                  disabled={!writeable}
-                  sx={{ width: '30ch' }}
-                  multiline={!editItem.u}
-                  onChange={updateFormValue}
-                />
-              )}
-            </Grid>
-            {writeable && helperText && (
-              <Grid>
-                <FormHelperText>{helperText}</FormHelperText>
-              </Grid>
-            )}
-          </Grid>
-        )}
-      </DialogContent>
-
-      <DialogActions>
-        {writeable ? (
-          <Box
-            sx={{
-              '& button, & a, & .MuiCard-root': {
-                mx: 0.6
-              },
-              position: 'relative'
-            }}
-          >
-            <Button
-              startIcon={<CancelIcon />}
-              variant="outlined"
-              onClick={onClose}
-              color="secondary"
-            >
+    <Dialog
+      open={open}
+      title={title}
+      onClose={onClose}
+      actions={
+        writeable ? (
+          <>
+            <Button color="secondary" icon="cancel" onClick={onClose}>
               {LL.CANCEL()}
             </Button>
             <Button
-              startIcon={
-                kind === 'command' ? (
-                  <PlayArrowIcon />
-                ) : kind === 'deviceEntity' || kind === 'deviceCommand' ? (
-                  <WarningIcon color="warning" />
-                ) : undefined
-              }
-              variant="outlined"
-              onClick={doAction}
-              color={kind !== 'value' ? 'success' : 'primary'}
+              type="submit"
+              form={formId}
+              variant="contained"
+              icon={isRun ? 'play_arrow' : 'check'}
+              disabled={progress}
             >
-              {buttonLabel}
+              {isRun ? LL.RUN() : LL.UPDATE()}
             </Button>
-            {progress && (
-              <CircularProgress
-                size={24}
-                sx={{
-                  color: '#4caf50',
-                  position: 'absolute',
-                  right: '20%',
-                  marginTop: '6px'
-                }}
-              />
-            )}
-          </Box>
+          </>
         ) : (
-          <Button variant="outlined" onClick={onClose} color="secondary">
+          <Button color="secondary" onClick={onClose}>
             {LL.CLOSE()}
           </Button>
-        )}
-      </DialogActions>
+        )
+      }
+    >
+      <form
+        id={formId}
+        className="dvd-form"
+        noValidate
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (writeable && !progress) void doAction();
+        }}
+      >
+        <p className="dvd-name">
+          <span>{dv.id.slice(2)}</span>
+          {dv.c && <span className="mono muted">{dv.c}</span>}
+        </p>
+        {renderField()}
+      </form>
     </Dialog>
   );
 };

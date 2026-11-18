@@ -40,5 +40,27 @@ export default defineConfig(
         }
       ]
     }
+  },
+  {
+    files: ['src/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '@mui/*',
+                '@emotion/*',
+                'react-icons',
+                'react-icons/*',
+                '@table-library/*'
+              ],
+              message: 'Import UI only from components/ui.'
+            }
+          ]
+        }
+      ]
+    }
   }
 );

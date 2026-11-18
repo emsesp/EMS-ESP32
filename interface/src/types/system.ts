@@ -29,9 +29,15 @@ export interface SystemStatus {
   ap_status: boolean;
   network_status: NetworkConnectionStatus;
   wifi_rssi: number;
+  network_ip?: string; // only when connected over WiFi or Ethernet
+  mqtt_host?: string; // only when MQTT is enabled
+  mqtt_port?: number;
+  log_errors?: number; // since boot, counted while the log level shows them
+  log_warnings?: number;
   build_flags: string;
   esp_platform: string;
   max_alloc_heap: number;
+  heap_size?: number; // total heap in KB, not in older firmware
   cpu_type: string;
   cpu_rev: number;
   cpu_cores: number;

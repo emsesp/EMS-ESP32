@@ -1,0 +1,255 @@
+/*
+ * App shell from mockups/base.css.
+ * >= 1200px: fixed drawer. 900-1199px: icon rail, the menu button opens the full drawer over the page.
+ * < 900px: drawer hidden, opened over the page from the menu button.
+ */
+.drawer {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: var(--drawer-w);
+  background: var(--drawer);
+  border-right: 1px solid var(--divider);
+  display: flex;
+  flex-direction: column;
+  z-index: 1200;
+  overflow-x: hidden;
+  overflow-y: auto;
+  transition:
+    transform 0.2s,
+    width 0.2s;
+}
+.drawer-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 13px 16px;
+  min-height: var(--appbar-h);
+  border-bottom: 1px solid var(--divider);
+}
+.drawer-head img {
+  height: 38px;
+}
+.drawer-name {
+  font-size: 14px;
+  white-space: nowrap;
+}
+.drawer-name .sub {
+  color: var(--secondary);
+  font-size: 12px;
+}
+
+.nav {
+  list-style: none;
+  margin: 0;
+  padding: 8px 0;
+}
+.nav .nav {
+  padding: 0;
+}
+.nav.bottom {
+  margin-top: auto;
+}
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 2px 8px;
+  padding: 8px 12px;
+  min-height: 40px;
+  border-radius: 8px;
+  color: #f5f5f5;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.nav-item > .icon {
+  color: var(--text-3);
+}
+.nav-item:hover {
+  background: rgba(68, 82, 211, 0.39);
+}
+.nav-item.active {
+  background: rgba(144, 202, 249, 0.1);
+  color: var(--primary);
+}
+.nav-item.active > .icon {
+  color: var(--primary);
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--primary);
+}
+.nav-item.disabled {
+  opacity: 0.38;
+  pointer-events: none;
+}
+.nav-group {
+  background: var(--menu-group);
+  padding-bottom: 8px;
+}
+.nav-group-title {
+  padding: 8px 20px 2px;
+  color: var(--lightblue);
+  font-size: 14px;
+  white-space: nowrap;
+}
+.nav-divider {
+  height: 1px;
+  background: var(--divider);
+  margin: 4px 0;
+}
+.badge-dot {
+  width: 8px;
+  height: 8px;
+  margin-left: auto;
+  border-radius: 50%;
+  background: #ffeb3b;
+  box-shadow: 0 0 6px rgba(255, 235, 59, 0.8);
+  flex-shrink: 0;
+}
+
+.appbar {
+  position: fixed;
+  top: 0;
+  left: var(--drawer-w);
+  right: 0;
+  height: var(--appbar-h);
+  background: var(--appbar);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 24px;
+  z-index: 1100;
+}
+.appbar h1 {
+  min-width: 0;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0.15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.appbar .menu-btn,
+.appbar .crumb-back {
+  display: none;
+  color: #fff;
+}
+.appbar .crumb {
+  color: var(--primary);
+  margin: 0 10px;
+}
+.appbar .crumb-link {
+  color: rgba(255, 255, 255, 0.75);
+}
+.appbar .crumb-link:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.main {
+  margin-left: var(--drawer-w);
+  padding-top: var(--appbar-h);
+  min-height: 100vh;
+}
+.main > .msg {
+  margin: 16px 16px 0;
+}
+.savebar-slot {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+}
+.savebar-slot:empty {
+  display: none;
+}
+
+.scrim {
+  display: none;
+}
+
+@media (max-width: 1199px) {
+  .appbar {
+    padding: 0 12px;
+  }
+  .appbar .menu-btn {
+    display: inline-flex;
+  }
+  .shell.drawer-open .drawer {
+    width: var(--drawer-w);
+    transform: none;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  }
+  .shell.drawer-open .scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1150;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1199px) {
+  .shell:not(.drawer-open) {
+    --drawer-rail: 64px;
+  }
+  .shell:not(.drawer-open) .drawer {
+    width: var(--drawer-rail);
+  }
+  .shell:not(.drawer-open) .drawer-head {
+    padding: 13px;
+  }
+  .shell:not(.drawer-open) .drawer-name,
+  .shell:not(.drawer-open) .nav-label,
+  .shell:not(.drawer-open) .nav-group-title {
+    display: none;
+  }
+  .shell:not(.drawer-open) .nav-group {
+    padding: 4px 0;
+  }
+  .shell:not(.drawer-open) .badge-dot {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+  }
+  .appbar {
+    left: 64px;
+  }
+  .main {
+    margin-left: 64px;
+  }
+}
+
+@media (max-width: 899px) {
+  .drawer {
+    transform: translateX(-100%);
+  }
+  .appbar {
+    left: 0;
+  }
+  .main {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 599px) {
+  .appbar h1 {
+    font-size: 18px;
+  }
+  .appbar .crumb-link,
+  .appbar .crumb {
+    display: none;
+  }
+  .appbar .crumb-back {
+    display: inline-flex;
+  }
+  .main > .msg {
+    margin: 8px 8px 0;
+  }
+}

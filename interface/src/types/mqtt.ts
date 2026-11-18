@@ -14,6 +14,12 @@ export interface MqttStatusType {
   connected: boolean;
   client_id: string;
   disconnect_reason: MqttDisconnectReason;
+  host?: string; // broker, from the settings
+  port?: number;
+  base?: string;
+  connected_for?: number; // seconds, while connected
+  last_disconnect_ago?: number; // seconds, once a connection was lost
+  last_disconnect_reason?: MqttDisconnectReason;
   mqtt_fails: number;
   mqtt_queued: number;
   connect_count: number;

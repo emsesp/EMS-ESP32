@@ -1,45 +1,18 @@
-import { type ReactNode, useState } from 'react';
+import { useState } from 'react';
 
-import CancelIcon from '@mui/icons-material/Cancel';
-import DeleteIcon from '@mui/icons-material/Delete';
-import DownloadIcon from '@mui/icons-material/GetApp';
-import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import LogoutIcon from '@mui/icons-material/Logout';
-import MemoryIcon from '@mui/icons-material/Memory';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import {
-  Avatar,
-  Box,
   Button,
-  Chip,
   Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
+  Icon,
   IconButton,
-  Link,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  MenuItem,
+  KeyValueList,
+  Message,
+  Section,
+  Select,
   Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  TextField,
-  Typography
-} from '@mui/material';
-
-import { dialogStyle } from 'CustomTheme';
-import ButtonRow from 'components/ButtonRow';
-import MessageBox from 'components/MessageBox';
-import SectionContent from 'components/SectionContent';
-import { toast } from 'components/toast';
+  Tag,
+  toast
+} from 'components/ui';
 
 import FirmwareUpload from './FirmwareUpload';
 import {
@@ -94,34 +67,18 @@ const recoveryReason = (status: RecoveryStatus, failed: RecoveryPartition[]) => 
   return undefined;
 };
 
-const SectionTitle = ({ children }: { children: ReactNode }) => (
-  <Typography sx={{ pb: 1 }} variant="h6" color="primary">
-    {children}
-  </Typography>
-);
-
-// same look as the version info dialog in the EMS-ESP app
-const InfoRow = ({ label, value }: { label: string; value: ReactNode }) => (
-  <TableRow sx={{ height: 24, borderBottom: 'none' }}>
-    <TableCell
-      component="th"
-      scope="row"
-      sx={{
-        color: 'lightblue',
-        borderBottom: 'none',
-        pr: 1,
-        py: 0.5,
-        fontSize: 13,
-        width: 140
-      }}
-    >
-      {label}
-    </TableCell>
-    <TableCell sx={{ borderBottom: 'none', py: 0.5, fontSize: 13 }}>
-      {value}
-    </TableCell>
-  </TableRow>
-);
+const wifiText = (status: RecoveryStatus) => {
+  if (!status.wifi_ssid) return 'not configured';
+  if (status.wifi_connected) {
+    return `${status.wifi_ssid}, ${status.wifi_ip ?? ''} (${status.wifi_rssi ?? 0} dBm)${status.static_ip ? ', static IP' : ''}`;
+  }
+  if (!status.wifi_started) {
+    return status.eth_state === 'connected'
+      ? 'not used, Ethernet is connected'
+      : 'waiting for Ethernet';
+  }
+  return `connecting to ${status.wifi_ssid}`;
+};
 
 interface DashboardProps {
   status: RecoveryStatus;
@@ -141,6 +98,7 @@ const Dashboard = ({
   const [confirmFactoryReset, setConfirmFactoryReset] = useState(false);
   const [confirmEraseCoreDump, setConfirmEraseCoreDump] = useState(false);
   const [pickedTarget, setPickedTarget] = useState<string>();
+  const [uploading, setUploading] = useState(false);
   const uploadTarget = pickedTarget ?? status.upload_target;
 
   const handleError = (error: unknown) => {
@@ -213,415 +171,326 @@ const Dashboard = ({
 
   return (
     <>
-      <SectionContent>
-        {reason && <MessageBox sx={{ mb: 2 }} level="error" message={reason} />}
-        <MessageBox level={hasFirmware ? 'info' : 'warning'}>
+      <div className="rc-msgs">
+        {reason && <Message level="error">{reason}</Message>}
+        <Message level={hasFirmware ? 'info' : 'warning'}>
           {hasFirmware
             ? 'This device is running the EMS-ESP Recovery. Start one of the installed firmwares, or upload a new one.'
             : 'No EMS-ESP firmware is installed. Upload a firmware to continue.'}
-        </MessageBox>
-      </SectionContent>
+        </Message>
+      </div>
 
       {status.coredump && (
-        <SectionContent>
-          <SectionTitle>Crash Dump</SectionTitle>
-          <Typography sx={{ pb: 1 }} variant="body2" color="text.secondary">
+        <Section icon="bug_report" title="Crash Dump">
+          <p className="rc-p muted">
             The last crash left this summary. Copy it, or download the crash dump,
             and add it to a GitHub issue so the crash can be decoded. See{' '}
-            <Link
+            <a
               href="https://docs.emsesp.org/FAQ#what-to-do-when-ems-esp-crashes"
               target="_blank"
               rel="noreferrer"
             >
               what to do when EMS-ESP crashes
-            </Link>
+            </a>
             .
-          </Typography>
-          <Typography
-            sx={{
-              pb: 2,
-              fontFamily: 'monospace',
-              fontSize: 13,
-              wordBreak: 'break-all'
-            }}
-            variant="body2"
-          >
-            {status.coredump}
-          </Typography>
-          <ButtonRow>
-            <Button
-              startIcon={<DownloadIcon />}
-              variant="outlined"
-              color="primary"
-              onClick={() => void doDownloadCoreDump()}
-            >
+          </p>
+          <pre className="summary mono rc-dump">{status.coredump}</pre>
+          <div className="rc-actions">
+            <Button icon="download" onClick={() => void doDownloadCoreDump()}>
               Download crash dump
             </Button>
             <Button
-              startIcon={<DeleteIcon />}
-              variant="outlined"
               color="error"
+              icon="delete"
               onClick={() => setConfirmEraseCoreDump(true)}
             >
               Erase crash dump
             </Button>
-          </ButtonRow>
-        </SectionContent>
+          </div>
+        </Section>
       )}
 
-      <SectionContent>
-        <SectionTitle>Firmware</SectionTitle>
-        <List dense>
-          {status.partitions.map((p, index) => (
-            <Box key={p.label}>
-              {index > 0 && <Divider component="li" />}
-              <ListItem
-                secondaryAction={
-                  !p.factory &&
-                  p.valid && (
-                    <Button
-                      startIcon={<PlayArrowIcon />}
-                      variant="outlined"
-                      color="primary"
-                      size="small"
-                      onClick={() => setConfirmBoot(p)}
-                    >
-                      Start
-                    </Button>
-                  )
-                }
-              >
-                <ListItemAvatar>
-                  <Avatar
-                    sx={{
-                      bgcolor: p.factory
-                        ? '#5d89f7'
-                        : p.valid
-                          ? '#2e586a'
-                          : '#5f5f5f'
-                    }}
-                  >
-                    {p.factory ? <HealthAndSafetyIcon /> : <MemoryIcon />}
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        flexWrap: 'wrap'
-                      }}
-                    >
-                      <span>{p.factory ? `Recovery (${p.label})` : p.label}</span>
-                      {p.label === status.running && (
-                        <Chip size="small" color="success" label="running" />
-                      )}
-                      {p.label === status.boot && p.label !== status.running && (
-                        <Chip size="small" color="secondary" label="next boot" />
-                      )}
-                      {p.label === uploadTarget && (
-                        <Chip
-                          size="small"
-                          variant="outlined"
-                          label="upload target"
-                        />
-                      )}
-                      {!p.valid && (
-                        <Chip
-                          size="small"
-                          color="warning"
-                          variant="outlined"
-                          label="empty"
-                        />
-                      )}
-                      {p.valid && failedToStart(p) && (
-                        <Chip size="small" color="error" label="failed to start" />
-                      )}
-                      {p.valid && p.ota_state === 'pending' && (
-                        <Chip
-                          size="small"
-                          color="warning"
-                          variant="outlined"
-                          label="unconfirmed"
-                        />
-                      )}
-                      {p.valid && (
-                        <IconButton
-                          size="small"
-                          onClick={() => setInfoPartition(p)}
-                          aria-label="Firmware version info"
-                          sx={{ p: 0.5 }}
-                        >
-                          <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
-                        </IconButton>
-                      )}
-                    </Box>
-                  }
-                  secondary={
-                    p.valid
-                      ? `${p.version ? 'v' + p.version + ' · ' : ''}${formatMB(p.image_size)} of ${formatMB(p.size)}`
-                      : formatMB(p.size)
-                  }
-                />
-              </ListItem>
-            </Box>
-          ))}
-        </List>
-      </SectionContent>
+      <Section icon="memory" title="Firmware">
+        <Table stack className="rc-tbl">
+          <tbody>
+            {status.partitions.map((p) => (
+              <tr key={p.label} className={p.valid ? undefined : 'dim'}>
+                <td>
+                  <span className="rc-part">
+                    <Icon name={p.factory ? 'build' : 'memory'} className="lb" />
+                    {p.factory ? `Recovery (${p.label})` : p.label}
+                  </span>
+                </td>
+                <td data-label="Version">
+                  {p.valid &&
+                    (p.version ? (
+                      <span className="mono">v{p.version}</span>
+                    ) : (
+                      <span className="muted">unknown</span>
+                    ))}
+                </td>
+                <td data-label="Size" className="num">
+                  {p.valid
+                    ? `${formatMB(p.image_size)} of ${formatMB(p.size)}`
+                    : formatMB(p.size)}
+                </td>
+                <td className="rc-tags">
+                  {p.label === status.running && <Tag kind="ok">running</Tag>}
+                  {p.label === status.boot && p.label !== status.running && (
+                    <Tag kind="type">next boot</Tag>
+                  )}
+                  {p.label === uploadTarget && <Tag>upload target</Tag>}
+                  {!p.valid && <Tag kind="warn">empty</Tag>}
+                  {p.valid && failedToStart(p) && (
+                    <Tag kind="err">failed to start</Tag>
+                  )}
+                  {p.valid && p.ota_state === 'pending' && (
+                    <Tag kind="warn">unconfirmed</Tag>
+                  )}
+                </td>
+                <td className="act">
+                  <div className="rc-row-act">
+                    {p.valid && (
+                      <IconButton
+                        icon="info"
+                        label="Firmware version info"
+                        onClick={() => setInfoPartition(p)}
+                      />
+                    )}
+                    {!p.factory && p.valid && (
+                      <Button
+                        size="sm"
+                        icon="play_arrow"
+                        onClick={() => setConfirmBoot(p)}
+                      >
+                        Start
+                      </Button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </Section>
 
-      <SectionContent>
-        <SectionTitle>Upload Firmware</SectionTitle>
-        <Typography sx={{ pb: 2 }} variant="body2" color="text.secondary">
+      <Section icon="upload_file" title="Upload Firmware">
+        <p className="rc-p muted">
           The firmware is started automatically after the upload. To enable the MD5
           check, upload the matching .md5 file first.
-        </Typography>
-        <TextField
-          select
-          size="small"
-          sx={{ mb: 2, minWidth: 260 }}
+        </p>
+        <Select
           label="Write to"
+          className="rc-target"
+          disabled={uploading}
           value={uploadTarget}
-          onChange={(e) => setPickedTarget(e.target.value)}
-        >
-          {otaPartitions.map((p) => (
-            <MenuItem key={p.label} value={p.label}>
-              {p.label}
-              {p.valid
+          onChange={(e) => setPickedTarget(e.currentTarget.value)}
+          options={otaPartitions.map((p) => ({
+            value: p.label,
+            label:
+              p.label +
+              (p.valid
                 ? ` (replaces ${p.version ? 'v' + p.version : 'installed firmware'})`
-                : ' (empty)'}
-            </MenuItem>
-          ))}
-        </TextField>
+                : ' (empty)')
+          }))}
+        />
         <FirmwareUpload
           target={uploadTarget}
           chip={status.chip}
           onUploaded={() => void doRestart(uploadTarget)}
           onUnauthorized={onSignOut}
+          onBusy={setUploading}
         />
-      </SectionContent>
+      </Section>
 
-      <SectionContent>
-        <SectionTitle>System</SectionTitle>
-        <Table size="small" sx={{ borderCollapse: 'collapse', minWidth: 0 }}>
-          <TableBody>
-            <InfoRow
-              label="Recovery version"
-              value={'v' + status.recovery_version}
-            />
-            <InfoRow
-              label="Chip"
-              value={`${status.chip}, ${formatMB(status.flash_size)} flash${status.psram_size ? ', ' + formatMB(status.psram_size) + ' PSRAM' : ''}`}
-            />
-            <InfoRow
-              label="Free heap"
-              value={`${Math.round(status.free_heap / 1024)} KB`}
-            />
-            <InfoRow label="Uptime" value={formatUptime(status.uptime)} />
-            <InfoRow label="MAC address" value={status.mac} />
-            <InfoRow
-              label="Access point"
-              value={`${status.ap_ssid} on ${status.ap_ip} (${status.ap_clients} connected)`}
-            />
-            {status.eth_state && (
-              <InfoRow
-                label="Ethernet"
-                value={
-                  status.eth_state === 'connected'
-                    ? `connected, ${status.eth_ip ?? ''}${status.static_ip ? ' (static IP)' : ''}`
-                    : ETH_STATE_TEXT[status.eth_state]
-                }
-              />
-            )}
-            <InfoRow
-              label="WiFi"
-              value={
-                !status.wifi_ssid
-                  ? 'not configured'
-                  : status.wifi_connected
-                    ? `${status.wifi_ssid}, ${status.wifi_ip ?? ''} (${status.wifi_rssi ?? 0} dBm)${status.static_ip ? ', static IP' : ''}`
-                    : !status.wifi_started
-                      ? status.eth_state === 'connected'
-                        ? 'not used, Ethernet is connected'
-                        : 'waiting for Ethernet'
-                      : `connecting to ${status.wifi_ssid}`
-              }
-            />
-            <InfoRow label="Hostname" value={status.hostname} />
-          </TableBody>
-        </Table>
-
-        <ButtonRow>
+      <Section icon="developer_board" title="System">
+        <KeyValueList
+          rows={[
+            {
+              label: 'Recovery version',
+              value: <span className="mono">v{status.recovery_version}</span>
+            },
+            {
+              label: 'Chip',
+              value: `${status.chip}, ${formatMB(status.flash_size)} flash${status.psram_size ? ', ' + formatMB(status.psram_size) + ' PSRAM' : ''}`
+            },
+            {
+              label: 'Free heap',
+              value: `${Math.round(status.free_heap / 1024)} KB`
+            },
+            { label: 'Uptime', value: formatUptime(status.uptime) },
+            {
+              label: 'MAC address',
+              value: <span className="mono">{status.mac}</span>
+            },
+            {
+              label: 'Access point',
+              value: `${status.ap_ssid} on ${status.ap_ip} (${status.ap_clients} connected)`
+            },
+            status.eth_state && {
+              label: 'Ethernet',
+              value:
+                status.eth_state === 'connected'
+                  ? `connected, ${status.eth_ip ?? ''}${status.static_ip ? ' (static IP)' : ''}`
+                  : ETH_STATE_TEXT[status.eth_state]
+            },
+            { label: 'WiFi', value: wifiText(status) },
+            { label: 'Hostname', value: status.hostname }
+          ]}
+        />
+        <div className="rc-actions rc-system-actions">
+          <Button
+            color="warning"
+            icon="restart_alt"
+            onClick={() => void doRestart(status.boot)}
+          >
+            Restart{status.boot !== status.running ? ` (boots ${status.boot})` : ''}
+          </Button>
           {!status.disable_reset && (
             <Button
-              startIcon={<SettingsBackupRestoreIcon />}
-              variant="outlined"
+              variant="contained"
               color="error"
+              icon="delete_forever"
               onClick={() => setConfirmFactoryReset(true)}
             >
               Factory Reset
             </Button>
           )}
-          <Button
-            startIcon={<RestartAltIcon />}
-            variant="outlined"
-            color="success"
-            onClick={() => void doRestart(status.boot)}
-          >
-            Restart{status.boot !== status.running ? ` (boots ${status.boot})` : ''}
-          </Button>
-          <Button
-            startIcon={<LogoutIcon />}
-            variant="outlined"
-            color="secondary"
-            sx={{ float: 'right' }}
-            onClick={onSignOut}
-          >
-            Sign Out
-          </Button>
-        </ButtonRow>
-      </SectionContent>
+        </div>
+      </Section>
 
       <Dialog
-        sx={dialogStyle}
         open={confirmFactoryReset}
+        title="Factory Reset"
         onClose={() => setConfirmFactoryReset(false)}
+        actions={
+          <>
+            <Button
+              color="secondary"
+              icon="cancel"
+              onClick={() => setConfirmFactoryReset(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              icon="delete_forever"
+              onClick={() => void doFactoryReset()}
+            >
+              Factory Reset
+            </Button>
+          </>
+        }
       >
-        <DialogTitle>Factory Reset</DialogTitle>
-        <DialogContent dividers>
-          Are you sure you want to reset EMS-ESP to its factory defaults?
-        </DialogContent>
-        <DialogActions>
-          <Button
-            startIcon={<CancelIcon />}
-            variant="outlined"
-            color="secondary"
-            onClick={() => setConfirmFactoryReset(false)}
-          >
-            Cancel
-          </Button>
-          <Button
-            startIcon={<SettingsBackupRestoreIcon />}
-            variant="outlined"
-            color="error"
-            onClick={() => void doFactoryReset()}
-          >
-            Factory Reset
-          </Button>
-        </DialogActions>
+        Are you sure you want to reset EMS-ESP to its factory defaults?
       </Dialog>
 
       <Dialog
-        sx={dialogStyle}
         open={confirmEraseCoreDump}
+        title="Erase Crash Dump"
         onClose={() => setConfirmEraseCoreDump(false)}
+        actions={
+          <>
+            <Button
+              color="secondary"
+              icon="cancel"
+              onClick={() => setConfirmEraseCoreDump(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              icon="delete"
+              onClick={() => void doEraseCoreDump()}
+            >
+              Erase
+            </Button>
+          </>
+        }
       >
-        <DialogTitle>Erase Crash Dump</DialogTitle>
-        <DialogContent dividers>
-          Are you sure you want to erase the crash dump? Download it first if you
-          want to report the crash.
-        </DialogContent>
-        <DialogActions>
-          <Button
-            startIcon={<CancelIcon />}
-            variant="outlined"
-            color="secondary"
-            onClick={() => setConfirmEraseCoreDump(false)}
-          >
-            Cancel
-          </Button>
-          <Button
-            startIcon={<DeleteIcon />}
-            variant="outlined"
-            color="error"
-            onClick={() => void doEraseCoreDump()}
-          >
-            Erase
-          </Button>
-        </DialogActions>
+        Are you sure you want to erase the crash dump? Download it first if you want
+        to report the crash.
       </Dialog>
 
       <Dialog
-        sx={dialogStyle}
         open={!!confirmBoot}
+        title="Start Firmware"
         onClose={() => setConfirmBoot(undefined)}
+        actions={
+          <>
+            <Button
+              color="secondary"
+              icon="cancel"
+              onClick={() => setConfirmBoot(undefined)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              icon="play_arrow"
+              onClick={() => confirmBoot && void doBoot(confirmBoot)}
+            >
+              Start
+            </Button>
+          </>
+        }
       >
-        <DialogTitle>Start Firmware</DialogTitle>
-        <DialogContent dividers>
+        <p className="rc-p">
           Restart and run
           {confirmBoot?.version ? ` EMS-ESP v${confirmBoot.version}` : ''} from{' '}
           {confirmBoot?.label}?
-          {confirmBoot && failedToStart(confirmBoot) && (
-            <MessageBox
-              sx={{ mt: 2 }}
-              level="warning"
-              message="This firmware failed to start before. If it fails again the device falls back to the other firmware, or to the recovery."
-            />
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button
-            startIcon={<CancelIcon />}
-            variant="outlined"
-            color="secondary"
-            onClick={() => setConfirmBoot(undefined)}
-          >
-            Cancel
-          </Button>
-          <Button
-            startIcon={<PlayArrowIcon />}
-            variant="outlined"
-            color="primary"
-            onClick={() => confirmBoot && void doBoot(confirmBoot)}
-          >
-            Start
-          </Button>
-        </DialogActions>
+        </p>
+        {confirmBoot && failedToStart(confirmBoot) && (
+          <Message level="warning">
+            This firmware failed to start before. If it fails again the device falls
+            back to the other firmware, or to the recovery.
+          </Message>
+        )}
       </Dialog>
 
       <Dialog
-        sx={dialogStyle}
         open={!!infoPartition}
+        title="Firmware Version Info"
         onClose={() => setInfoPartition(undefined)}
-      >
-        <DialogTitle>Firmware Version Info</DialogTitle>
-        <DialogContent dividers>
-          {infoPartition && (
-            <Table size="small" sx={{ borderCollapse: 'collapse', minWidth: 0 }}>
-              <TableBody>
-                <InfoRow
-                  label="Version"
-                  value={
-                    infoPartition.version ? 'v' + infoPartition.version : 'unknown'
-                  }
-                />
-                <InfoRow
-                  label="Type"
-                  value={infoPartition.factory ? 'Recovery App' : 'EMS-ESP Firmware'}
-                />
-                <InfoRow label="Partition" value={infoPartition.label} />
-                <InfoRow
-                  label="Size"
-                  value={`${formatMB(infoPartition.image_size)} of ${formatMB(infoPartition.size)}`}
-                />
-                <InfoRow
-                  label="Install Date"
-                  value={formatInstallDate(infoPartition.install_date)}
-                />
-              </TableBody>
-            </Table>
-          )}
-        </DialogContent>
-        <DialogActions>
+        actions={
           <Button
-            variant="outlined"
             color="secondary"
+            icon="close"
             onClick={() => setInfoPartition(undefined)}
           >
             Close
           </Button>
-        </DialogActions>
+        }
+      >
+        {infoPartition && (
+          <KeyValueList
+            rows={[
+              {
+                label: 'Version',
+                value: infoPartition.version ? (
+                  <span className="mono">v{infoPartition.version}</span>
+                ) : (
+                  'unknown'
+                )
+              },
+              {
+                label: 'Type',
+                value: infoPartition.factory ? 'Recovery App' : 'EMS-ESP Firmware'
+              },
+              { label: 'Partition', value: infoPartition.label },
+              {
+                label: 'Size',
+                value: `${formatMB(infoPartition.image_size)} of ${formatMB(infoPartition.size)}`
+              },
+              {
+                label: 'Install Date',
+                value: formatInstallDate(infoPartition.install_date)
+              }
+            ]}
+          />
+        )}
       </Dialog>
     </>
   );

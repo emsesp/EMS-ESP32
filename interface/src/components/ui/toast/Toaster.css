@@ -1,0 +1,75 @@
+/* resets the browser's popover box; z-index covers browsers without popover and MUI modals (1300) */
+.toaster {
+  position: fixed;
+  inset: auto auto 24px 50%;
+  transform: translateX(-50%);
+  z-index: 1400;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  max-width: calc(100% - 16px);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  overflow: visible;
+}
+.toaster:empty {
+  display: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 280px;
+  max-width: 480px;
+  padding: 4px 4px 4px 16px;
+  border-radius: 4px;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  animation: toast-in 0.2s ease-out;
+}
+.toast .icon-btn {
+  color: inherit;
+}
+.toast.success {
+  background: var(--success-main);
+  color: rgba(0, 0, 0, 0.87);
+}
+.toast.warning {
+  background: var(--warning);
+  color: rgba(0, 0, 0, 0.87);
+}
+.toast.error {
+  background: var(--error);
+  color: #fff;
+}
+.toast.info {
+  background: var(--secondary);
+  color: #fff;
+}
+
+@keyframes toast-in {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 599px) {
+  .toaster {
+    inset: auto 8px 8px 8px;
+    transform: none;
+    width: auto;
+    max-width: none;
+    align-items: stretch;
+  }
+  .toast {
+    min-width: 0;
+    max-width: none;
+  }
+}

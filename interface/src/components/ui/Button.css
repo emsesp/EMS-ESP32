@@ -1,0 +1,110 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid rgba(144, 202, 249, 0.5);
+  background: transparent;
+  color: var(--primary);
+  border-radius: 4px;
+  padding: 5px 15px;
+  font: inherit;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.btn:hover {
+  background: rgba(144, 202, 249, 0.08);
+  border-color: var(--primary);
+}
+.btn.sm {
+  padding: 3px 10px;
+  font-size: 12px;
+}
+.btn.text {
+  border-color: transparent;
+}
+
+.btn.secondary {
+  color: var(--secondary);
+  border-color: rgba(33, 150, 243, 0.5);
+}
+.btn.warning {
+  color: var(--warning);
+  border-color: rgba(255, 167, 38, 0.5);
+}
+.btn.warning:hover {
+  background: rgba(255, 167, 38, 0.08);
+  border-color: var(--warning);
+}
+.btn.error {
+  color: #ff8a80;
+  border-color: rgba(244, 67, 54, 0.5);
+}
+.btn.error:hover {
+  background: rgba(244, 67, 54, 0.08);
+  border-color: var(--error);
+}
+
+.btn.contained {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: rgba(0, 0, 0, 0.87);
+}
+.btn.contained:hover {
+  background: #42a5f5;
+}
+.btn.contained.secondary {
+  background: var(--secondary);
+  border-color: var(--secondary);
+  color: #fff;
+}
+.btn.contained.warning {
+  background: var(--warning);
+  border-color: var(--warning);
+  color: rgba(0, 0, 0, 0.87);
+}
+.btn.contained.error {
+  background: var(--error);
+  border-color: var(--error);
+  color: #fff;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  cursor: pointer;
+}
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.icon-btn.plain {
+  color: var(--text-2);
+}
+
+.btn:disabled,
+.icon-btn:disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+@media (pointer: coarse) {
+  .btn {
+    min-height: 40px;
+  }
+  .icon-btn {
+    width: 40px;
+    height: 40px;
+  }
+}

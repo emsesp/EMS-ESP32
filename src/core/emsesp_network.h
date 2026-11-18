@@ -138,6 +138,9 @@ class Network {
         return reconnect_count_;
     }
 
+    // IPv4 address on WiFi or Ethernet, empty when not connected
+    std::string getIP() const;
+
     // the soft-AP's own details, which are what the Access Point status page reports
     std::string getAPIP() const;
     std::string getAPMacAddress() const;

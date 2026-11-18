@@ -1,379 +1,454 @@
 import { useState } from 'react';
-import { useBlocker } from 'react-router';
 
-import AddIcon from '@mui/icons-material/Add';
-import CancelIcon from '@mui/icons-material/Cancel';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import WarningIcon from '@mui/icons-material/Warning';
-import { Box, Button, Typography } from '@mui/material';
+import { readCustomEntities, writeCustomEntities } from 'api/app';
 
 import {
-  Body,
-  Cell,
-  Header,
-  HeaderCell,
-  HeaderRow,
-  Row,
-  Table
-} from '@table-library/react-table-library/table';
-import { useTheme } from '@table-library/react-table-library/theme';
-import { updateState, useRequest } from 'alova/client';
-import {
-  BlockNavigation,
-  ButtonRow,
-  FormLoader,
-  SectionContent,
-  useLayoutTitle
-} from 'components';
-import { toast } from 'components/toast';
+  Button,
+  Icon,
+  SearchField,
+  Section,
+  Segmented,
+  Select,
+  SortHeader,
+  Switch,
+  Table,
+  Tag,
+  TextField,
+  ToggleButton,
+  ToggleGroup,
+  byNumber,
+  byText,
+  byValue,
+  cx,
+  rowAction,
+  useTableSort
+} from 'components/ui';
+import type { IconName } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
-import { useInterval } from 'utils';
+import { usePendingList } from 'utils';
 
-import { readCustomEntities, writeCustomEntities } from '../../api/app';
-import SettingsCustomEntitiesDialog from './CustomEntitiesDialog';
-import { DeviceValueTypeNames, DeviceValueUOM_s } from './types';
-import type { Entities, EntityItem } from './types';
+import './CustomEntities.css';
+import EntityDialog from './EntityDialog';
+import ListPage, { PendingTag, pendingClass } from './ListPage';
+import { DeviceValueType, DeviceValueTypeNames, DeviceValueUOM_s } from './types';
+import type { EntityItem } from './types';
 import { entityItemValidation } from './validators';
 
 const MIN_ID = -100;
 const MAX_ID = 100;
-const ICON_SIZE = 12;
+
+const STORAGE: { ram: number; label: string; icon: IconName }[] = [
+  { ram: 0, label: 'EMS', icon: 'swap_horiz' },
+  { ram: 1, label: 'RAM', icon: 'memory' },
+  { ram: 2, label: 'NVS', icon: 'save' }
+];
+
+const VALUE_TYPE_OPTIONS = [
+  DeviceValueType.BOOL,
+  DeviceValueType.INT8,
+  DeviceValueType.UINT8,
+  DeviceValueType.INT16,
+  DeviceValueType.UINT16,
+  DeviceValueType.UINT24,
+  DeviceValueType.TIME,
+  DeviceValueType.UINT32,
+  DeviceValueType.STRING
+].map((t) => ({ value: String(t), label: DeviceValueTypeNames[t] }));
+
+const UOM_OPTIONS = DeviceValueUOM_s.map((u, i) => ({
+  value: String(i),
+  label: u || '-'
+}));
+
+// a random id in the range the firmware expects, not used by another row
+const newId = (items: EntityItem[]) => {
+  let id: number;
+  do {
+    id = Math.floor(Math.random() * (MAX_ID - MIN_ID) + MIN_ID);
+  } while (items.some((ei) => ei.id === id));
+  return id;
+};
+
+const showHex = (value: number | string, digits: number) =>
+  `0x${Number(value).toString(16).toUpperCase().padStart(digits, '0')}`;
+
+// parseInt with radix 16 also accepts a leading 0x
+const parseHex = (value: number | string) =>
+  typeof value === 'string' ? Number.parseInt(value, 16) : value;
+
+const isBool = (ei: EntityItem) => ei.value_type === DeviceValueType.BOOL;
+
+// the dialog edits device id, type id and the bool bit mask as hex text
+const toForm = (ei: EntityItem): EntityItem => ({
+  ...ei,
+  device_id: showHex(ei.device_id, 2),
+  type_id: showHex(ei.type_id, 2),
+  factor: isBool(ei) ? showHex(ei.factor, 2) : ei.factor
+});
+
+const fromForm = (v: EntityItem): EntityItem => ({
+  ...v,
+  device_id: parseHex(v.device_id),
+  type_id: parseHex(v.type_id),
+  offset: Number(v.offset),
+  factor: isBool(v) ? parseHex(v.factor) : Number(v.factor)
+});
+
+const formatValue = (value: unknown, uom: number) => {
+  if (value === undefined) return '';
+  const unit = uom === 0 ? '' : ` ${DeviceValueUOM_s[uom]}`;
+  return typeof value === 'number'
+    ? new Intl.NumberFormat().format(value) + unit
+    : `${value as string}${unit}`;
+};
+
+interface Editing {
+  // undefined while adding
+  key?: string;
+  originalName?: string;
+  item: EntityItem;
+}
 
 const CustomEntities = () => {
   const { LL } = useI18nContext();
-  const [numChanges, setNumChanges] = useState<number>(0);
-  const blocker = useBlocker(numChanges !== 0);
-  const [selectedEntityItem, setSelectedEntityItem] = useState<EntityItem>();
-  const [creating, setCreating] = useState<boolean>(false);
-  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const [query, setQuery] = useState('');
+  const [storage, setStorage] = useState(-1);
+  const [editing, setEditing] = useState<Editing>();
 
-  useLayoutTitle(LL.CUSTOM_ENTITIES(0));
-
-  const {
-    data: entities,
-    send: fetchEntities,
-    error
-  } = useRequest(readCustomEntities, {
-    initialData: []
-  });
-
-  useInterval(() => {
-    if (!dialogOpen && !numChanges) {
-      void fetchEntities();
-    }
-  });
-
-  const { send: writeEntities } = useRequest(
-    (data: Entities) => writeCustomEntities(data),
-    { immediate: false }
-  );
-
-  const hasEntityChanged = (ei: EntityItem) => {
-    return (
-      ei.id !== ei.o_id ||
-      ei.ram !== ei.o_ram ||
-      (ei?.name || '') !== (ei?.o_name || '') ||
-      ei.device_id !== ei.o_device_id ||
-      ei.type_id !== ei.o_type_id ||
-      ei.offset !== ei.o_offset ||
-      ei.uom !== ei.o_uom ||
-      ei.factor !== ei.o_factor ||
-      ei.value_type !== ei.o_value_type ||
-      ei.writeable !== ei.o_writeable ||
-      ei.hide !== ei.o_hide ||
-      ei.deleted !== ei.o_deleted ||
-      (ei.value || '') !== (ei.o_value || '')
-    );
-  };
-
-  const entity_theme = useTheme({
-    Table: `
-      --data-table-library_grid-template-columns: repeat(1, minmax(60px, 1fr)) minmax(80px, auto) 80px 80px 80px 120px;
-    `,
-    BaseRow: `
-      font-size: 14px;
-      .td {
-        height: 32px;
-      }
-    `,
-    BaseCell: `
-      &:nth-of-type(1) {
-        padding: 8px;
-      }
-      &:nth-of-type(2) {
-        text-align: center;
-      }
-      &:nth-of-type(3) {
-        text-align: center;
-      }
-      &:nth-of-type(4) {
-        text-align: center;
-      }
-      &:nth-of-type(5) {
-        text-align: center;
-      }
-      &:nth-of-type(6) {
-        text-align: center;
-      }
-    `,
-    HeaderRow: `
-      text-transform: uppercase;
-      background-color: black;
-      color: #90CAF9;
-      .th {
-        border-bottom: 1px solid #565656;
-        height: 36px;
-      }
-    `,
-    Row: `
-      background-color: #1e1e1e;
-      position: relative;
-      cursor: pointer;
-      .td {
-        border-bottom: 1px solid #565656;
-      }
-      &:hover .td {
-        background-color: #177ac9;
-      }
-    `
-  });
-
-  const saveEntities = async () => {
-    await writeEntities({
-      entities: entities
-        .filter((ei: EntityItem) => !ei.deleted)
-        .map((condensed_ei: EntityItem) => ({
-          id: condensed_ei.id,
-          ram: condensed_ei.ram,
-          name: condensed_ei.name,
-          device_id: condensed_ei.device_id,
-          type_id: condensed_ei.type_id,
-          offset: condensed_ei.offset,
-          factor: condensed_ei.factor,
-          uom: condensed_ei.uom,
-          writeable: condensed_ei.writeable,
-          hide: condensed_ei.hide,
-          value_type: condensed_ei.value_type,
-          value: condensed_ei.value
+  const list = usePendingList<EntityItem>({
+    read: readCustomEntities,
+    write: (items) =>
+      writeCustomEntities({
+        entities: items.map((ei) => ({
+          id: ei.id,
+          ram: ei.ram,
+          name: ei.name,
+          device_id: ei.device_id,
+          type_id: ei.type_id,
+          offset: ei.offset,
+          factor: ei.factor,
+          uom: ei.uom,
+          writeable: ei.writeable,
+          hide: ei.hide,
+          value_type: ei.value_type,
+          value: ei.value
         }))
-    })
-      .then(() => {
-        toast.success(LL.ENTITIES_UPDATED());
+      }),
+    // live values; no reload while a dialog is open
+    ...(!editing && { pollMs: 3000 }),
+    savedText: LL.ENTITIES_UPDATED()
+  });
+
+  const add = () =>
+    setEditing({
+      item: toForm({
+        id: newId(list.items),
+        name: '',
+        ram: 0,
+        device_id: 0,
+        type_id: 0,
+        offset: 0,
+        factor: 1,
+        uom: 0,
+        value_type: 0,
+        writeable: false,
+        hide: false,
+        value: ''
       })
-      .catch((error: Error) => {
-        toast.error(error.message);
-      })
-      .finally(async () => {
-        await fetchEntities();
-        setNumChanges(0);
-      });
-  };
-
-  const editEntityItem = (ei: EntityItem) => {
-    setCreating(false);
-    setSelectedEntityItem(ei);
-    setDialogOpen(true);
-  };
-
-  const onDialogClose = () => {
-    setDialogOpen(false);
-  };
-
-  const onDialogCancel = async () => {
-    await fetchEntities().then(() => {
-      setNumChanges(0);
     });
-  };
 
-  const onDialogSave = (updatedItem: EntityItem) => {
-    setDialogOpen(false);
-    void updateState(readCustomEntities(), (data: EntityItem[]) => {
-      const new_data = creating
-        ? [
-            ...data.filter((ei) => creating || ei.o_id !== updatedItem.o_id),
-            updatedItem
-          ]
-        : data.map((ei) =>
-            ei.id === updatedItem.id ? { ...ei, ...updatedItem } : ei
-          );
-      setNumChanges(new_data.filter((ei) => hasEntityChanged(ei)).length);
-      return new_data;
+  const duplicate = (v: EntityItem) =>
+    setEditing({
+      item: { ...v, id: newId(list.items), name: `${v.name}_` }
     });
+
+  const save = (v: EntityItem) => {
+    const item = fromForm(v);
+    if (editing?.key) list.update(editing.key, item);
+    else list.add(item);
+    setEditing(undefined);
   };
 
-  const onDialogDup = (item: EntityItem) => {
-    setCreating(true);
-    setSelectedEntityItem({
-      id: Math.floor(Math.random() * (MAX_ID - MIN_ID) + MIN_ID),
-      name: item.name + '_',
-      ram: item.ram,
-      device_id: item.device_id,
-      type_id: item.type_id,
-      offset: item.offset,
-      factor: item.factor,
-      uom: item.uom,
-      value_type: item.value_type,
-      writeable: item.writeable,
-      deleted: false,
-      hide: item.hide,
-      value: item.value
-    });
-    setDialogOpen(true);
+  const source = (ei: EntityItem) => {
+    if (ei.ram === 1) return LL.CE_RAM_TEXT();
+    if (ei.ram === 2) return LL.CE_NVS_TEXT();
+    const factor =
+      ei.factor !== 1 && !isBool(ei) && ei.value_type !== DeviceValueType.STRING
+        ? ` ×${ei.factor}`
+        : '';
+    return `${LL.CE_EMS_SOURCE({
+      device: showHex(ei.device_id, 2),
+      type: showHex(ei.type_id, 3),
+      offset: ei.offset
+    })} · ${DeviceValueTypeNames[ei.value_type]}${factor}`;
   };
 
-  const addEntityItem = () => {
-    setCreating(true);
-    setSelectedEntityItem({
-      id: Math.floor(Math.random() * (MAX_ID - MIN_ID) + MIN_ID),
-      name: '',
-      ram: 0,
-      device_id: '0',
-      type_id: '0',
-      offset: 0,
-      factor: 1,
-      uom: 0,
-      value_type: 0,
-      writeable: false,
-      deleted: false,
-      hide: false,
-      value: ''
-    });
-    setDialogOpen(true);
-  };
-
-  const formatValue = (value: unknown, uom: number) => {
-    return value === undefined
-      ? ''
-      : typeof value === 'number'
-        ? new Intl.NumberFormat().format(value) +
-          (uom === 0 ? '' : ` ${DeviceValueUOM_s[uom]}`)
-        : `${value as string}${uom === 0 ? '' : ` ${DeviceValueUOM_s[uom]}`}`;
-  };
-
-  const showHex = (value: number, digit: number) => {
-    return `0x${value.toString(16).toUpperCase().padStart(digit, '0')}`;
-  };
-
-  const filteredAndSortedEntities =
-    entities
-      ?.filter((ei: EntityItem) => !ei.deleted)
-      .sort((a: EntityItem, b: EntityItem) => a.name.localeCompare(b.name)) ?? [];
-
-  const renderEntity = () => {
-    if (!entities) {
-      return (
-        <FormLoader onRetry={fetchEntities} errorMessage={error?.message || ''} />
-      );
-    }
-
-    return (
-      <Table
-        data={{
-          nodes: filteredAndSortedEntities
-        }}
-        theme={entity_theme}
-        layout={{ custom: true }}
-      >
-        {(tableList: EntityItem[]) => (
-          <>
-            <Header>
-              <HeaderRow>
-                <HeaderCell>{LL.NAME(0)}</HeaderCell>
-                <HeaderCell stiff>{LL.ID_OF(LL.DEVICE())}</HeaderCell>
-                <HeaderCell stiff>{LL.ID_OF(LL.TYPE(1))}</HeaderCell>
-                <HeaderCell stiff>{LL.OFFSET()}</HeaderCell>
-                <HeaderCell stiff>{LL.TYPE(0)}</HeaderCell>
-                <HeaderCell stiff>{LL.VALUE(0)}</HeaderCell>
-              </HeaderRow>
-            </Header>
-            <Body>
-              {tableList.map((ei: EntityItem) => (
-                <Row key={ei.name} item={ei} onClick={() => editEntityItem(ei)}>
-                  <Cell>
-                    {ei.name}&nbsp;
-                    {ei.writeable && (
-                      <EditOutlinedIcon
-                        color="primary"
-                        sx={{ fontSize: ICON_SIZE }}
-                      />
-                    )}
-                  </Cell>
-                  <Cell>{ei.ram > 0 ? '' : showHex(ei.device_id as number, 2)}</Cell>
-                  <Cell>{ei.ram > 0 ? '' : showHex(ei.type_id as number, 3)}</Cell>
-                  <Cell>{ei.ram > 0 ? '' : ei.offset}</Cell>
-                  <Cell>
-                    {ei.ram === 1
-                      ? 'RAM'
-                      : ei.ram === 2
-                        ? 'NVS'
-                        : DeviceValueTypeNames[ei.value_type]}
-                  </Cell>
-                  <Cell>{formatValue(ei.value, ei.uom)}</Cell>
-                </Row>
-              ))}
-            </Body>
-          </>
-        )}
-      </Table>
-    );
-  };
+  const live = list.rows.filter((r) => r.state !== 'del');
+  const q = query.trim().toLowerCase();
+  const rows = list.rows
+    .filter(
+      ({ item }) =>
+        (storage < 0 || item.ram === storage) &&
+        (!q || item.name.toLowerCase().includes(q))
+    )
+    .sort((a, b) => a.item.name.localeCompare(b.item.name));
+  const sort = useTableSort(rows, {
+    name: byText((r) => r.item.name),
+    storage: byNumber((r) => r.item.ram),
+    source: byText((r) => source(r.item)),
+    api: byNumber((r) => r.item.hide),
+    value: byValue((r) => r.item.value)
+  });
 
   return (
-    <SectionContent>
-      {blocker ? <BlockNavigation blocker={blocker} /> : null}
-      <Typography sx={{ mb: 2 }} color="warning" variant="body1">
-        {LL.ENTITIES_HELP_1()}.
-      </Typography>
+    <ListPage list={list}>
+      <Section
+        title={LL.CUSTOM_ENTITIES(0)}
+        icon="playlist_add"
+        actions={
+          <>
+            <SearchField
+              label={LL.SEARCH()}
+              value={query}
+              onInput={(e) => setQuery(e.currentTarget.value)}
+            />
+            <Button variant="contained" icon="add" onClick={add}>
+              {LL.ADD(0)}
+            </Button>
+          </>
+        }
+      >
+        <p className="cap">{LL.ENTITIES_HELP_1()}.</p>
+        <div className="ce-filter">
+          <ToggleGroup label={LL.CE_STORAGE()}>
+            <ToggleButton on={storage < 0} onClick={() => setStorage(-1)}>
+              {LL.CE_ALL()} {live.length}
+            </ToggleButton>
+            {STORAGE.map((s) => (
+              <ToggleButton
+                key={s.ram}
+                on={storage === s.ram}
+                icon={s.icon}
+                onClick={() => setStorage(s.ram)}
+              >
+                {s.label} {live.filter((r) => r.item.ram === s.ram).length}
+              </ToggleButton>
+            ))}
+          </ToggleGroup>
+        </div>
+        <div className="tbl-wrap">
+          <Table stack className="ce-tbl">
+            <thead>
+              <tr>
+                <SortHeader {...sort.header('name')}>{LL.NAME(0)}</SortHeader>
+                <SortHeader {...sort.header('storage')}>
+                  {LL.CE_STORAGE()}
+                </SortHeader>
+                <SortHeader {...sort.header('source')}>{LL.CE_SOURCE()}</SortHeader>
+                <SortHeader {...sort.header('api')}>API / MQTT</SortHeader>
+                <SortHeader className="r" {...sort.header('value')}>
+                  {LL.VALUE(0)}
+                </SortHeader>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {sort.rows.map(({ key, item, state }) => {
+                const st = STORAGE[item.ram] ?? STORAGE[0]!;
+                return (
+                  <tr
+                    key={key}
+                    {...(state !== 'del' &&
+                      rowAction(
+                        () =>
+                          setEditing({
+                            key,
+                            originalName: item.name,
+                            item: toForm(item)
+                          }),
+                        `${LL.EDIT()} ${item.name}`
+                      ))}
+                    className={cx(state !== 'del' && 'click', pendingClass(state))}
+                  >
+                    <td>
+                      {item.name}
+                      {item.writeable && (
+                        <Icon
+                          name="edit"
+                          size="xs"
+                          className="lb"
+                          label={LL.WRITEABLE()}
+                        />
+                      )}
+                      <PendingTag state={state} />
+                    </td>
+                    <td data-label={LL.CE_STORAGE()}>
+                      <Tag kind="plain" icon={st.icon} className={`ce-s${item.ram}`}>
+                        {st.label}
+                      </Tag>
+                    </td>
+                    <td
+                      data-label={LL.CE_SOURCE()}
+                      className={cx('muted', item.ram === 0 && 'mono')}
+                    >
+                      {source(item)}
+                    </td>
+                    <td data-label="API / MQTT">
+                      {item.hide ? (
+                        <Tag kind="sys" icon="visibility_off">
+                          {LL.CE_EXCLUDED()}
+                        </Tag>
+                      ) : (
+                        <span className="mono muted">custom/{item.name}</span>
+                      )}
+                    </td>
+                    <td data-label={LL.VALUE(0)} className="r num ce-val">
+                      {formatValue(item.value, item.uom)}
+                    </td>
+                    <td className="act">
+                      {state === 'del' && (
+                        <Button
+                          size="sm"
+                          color="secondary"
+                          icon="undo"
+                          onClick={() => list.undo(key)}
+                        >
+                          {LL.UNDO()}
+                        </Button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+              {rows.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="tbl-empty">
+                    {LL.CE_NONE()}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        </div>
+      </Section>
 
-      {renderEntity()}
-
-      {selectedEntityItem && (
-        <SettingsCustomEntitiesDialog
-          open={dialogOpen}
-          creating={creating}
-          onClose={onDialogClose}
-          onSave={onDialogSave}
-          onDup={onDialogDup}
-          selectedItem={selectedEntityItem}
-          validator={entityItemValidation(entities, selectedEntityItem)}
-        />
+      {editing && (
+        <EntityDialog
+          open
+          title={
+            editing.key
+              ? `${LL.EDIT()} ${LL.ENTITY()}`
+              : `${LL.ADD(1)} ${LL.NEW(1)} ${LL.ENTITY()}`
+          }
+          item={editing.item}
+          creating={!editing.key}
+          validator={() => entityItemValidation(list.items, editing.originalName)}
+          onClose={() => setEditing(undefined)}
+          onSave={save}
+          onRemove={
+            editing.key
+              ? () => {
+                  list.remove(editing.key!);
+                  setEditing(undefined);
+                }
+              : undefined
+          }
+          extraActions={(v) =>
+            editing.key && (
+              <Button icon="content_copy" onClick={() => duplicate(v)}>
+                {LL.DUPLICATE()}
+              </Button>
+            )
+          }
+          size="md"
+        >
+          {(f) => {
+            const v = f.values;
+            const ems = v.ram === 0;
+            const numeric =
+              v.value_type !== DeviceValueType.BOOL &&
+              v.value_type !== DeviceValueType.STRING;
+            return (
+              <>
+                <TextField label={LL.NAME(0)} mono fullWidth {...f.text('name')} />
+                <Segmented
+                  label={LL.CE_STORAGE()}
+                  fullWidth
+                  options={STORAGE.map((s) => ({
+                    value: String(s.ram),
+                    label: s.label
+                  }))}
+                  {...f.segmented('ram')}
+                />
+                {ems ? (
+                  <>
+                    <TextField
+                      label={LL.ID_OF(LL.DEVICE())}
+                      mono
+                      placeholder="0x08"
+                      {...f.text('device_id')}
+                    />
+                    <TextField
+                      label={LL.ID_OF(LL.TYPE(1))}
+                      mono
+                      placeholder="0x18"
+                      {...f.text('type_id')}
+                    />
+                    <TextField label={LL.OFFSET()} {...f.number('offset')} />
+                    <Select
+                      label={`${LL.VALUE(0)} ${LL.TYPE(1)}`}
+                      options={VALUE_TYPE_OPTIONS}
+                      {...f.select('value_type')}
+                    />
+                    {numeric && (
+                      <>
+                        <TextField
+                          label={LL.FACTOR()}
+                          step="0.001"
+                          {...f.number('factor')}
+                        />
+                        <Select
+                          label={LL.UNIT()}
+                          options={UOM_OPTIONS}
+                          {...f.select('uom')}
+                        />
+                      </>
+                    )}
+                    {v.value_type === DeviceValueType.STRING &&
+                      parseHex(v.device_id) !== 0 && (
+                        <TextField
+                          label={LL.BYTES()}
+                          min="1"
+                          max="255"
+                          step="1"
+                          {...f.number('factor')}
+                        />
+                      )}
+                    {v.value_type === DeviceValueType.BOOL && (
+                      <TextField label={LL.BITMASK()} mono {...f.text('factor')} />
+                    )}
+                    <Switch label={LL.WRITEABLE()} {...f.check('writeable')} />
+                  </>
+                ) : (
+                  <>
+                    <TextField
+                      label={`${LL.DEFAULT(0)} ${LL.VALUE(0)}`}
+                      {...f.text('value')}
+                    />
+                    <Select
+                      label={LL.UNIT()}
+                      options={UOM_OPTIONS}
+                      {...f.select('uom')}
+                    />
+                  </>
+                )}
+                <Switch label={LL.CUSTOMIZATIONS_HELP_4()} {...f.check('hide')} />
+              </>
+            );
+          }}
+        </EntityDialog>
       )}
-
-      <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap' }}>
-        <Box sx={{ flexGrow: 1 }}>
-          {numChanges > 0 && (
-            <ButtonRow>
-              <Button
-                startIcon={<CancelIcon />}
-                variant="outlined"
-                onClick={onDialogCancel}
-                color="secondary"
-              >
-                {LL.CANCEL()}
-              </Button>
-              <Button
-                startIcon={<WarningIcon color="warning" />}
-                variant="contained"
-                color="info"
-                onClick={saveEntities}
-              >
-                {LL.APPLY_CHANGES(numChanges)}
-              </Button>
-            </ButtonRow>
-          )}
-        </Box>
-        <Box sx={{ flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
-          <Button
-            startIcon={<AddIcon />}
-            variant="outlined"
-            color="primary"
-            onClick={addEntityItem}
-          >
-            {LL.ADD(0)}
-          </Button>
-        </Box>
-      </Box>
-    </SectionContent>
+    </ListPage>
   );
 };
 

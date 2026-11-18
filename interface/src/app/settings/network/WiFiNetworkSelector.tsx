@@ -1,25 +1,22 @@
-import { memo, useContext } from 'react';
+import { useContext } from 'react';
 
-import LockIcon from '@mui/icons-material/Lock';
-import LockOpenIcon from '@mui/icons-material/LockOpen';
-import WifiIcon from '@mui/icons-material/Wifi';
 import {
-  Avatar,
-  Badge,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemIcon,
-  ListItemText,
-  useTheme
-} from '@mui/material';
-import type { Theme } from '@mui/material';
-
-import { MessageBox } from 'components';
+  Button,
+  Icon,
+  Message,
+  SortHeader,
+  Table,
+  Tag,
+  byNumber,
+  byText,
+  cx,
+  useTableSort
+} from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { WiFiNetwork, WiFiNetworkList } from 'types';
 import { WiFiEncryptionType } from 'types';
 
+import './Network.css';
 import { WiFiConnectionContext } from './WiFiConnectionContext';
 
 export const isNetworkOpen = ({ encryption_type }: WiFiNetwork) =>
@@ -48,53 +45,87 @@ export const networkSecurityMode = ({ encryption_type }: WiFiNetwork) => {
   }
 };
 
-const networkQualityHighlight = ({ rssi }: WiFiNetwork, theme: Theme) => {
-  if (rssi <= -85) {
-    return theme.palette.error.main;
-  } else if (rssi <= -75) {
-    return theme.palette.warning.main;
-  }
-  return theme.palette.success.main;
-};
+const bars = (rssi: number) =>
+  rssi > -60 ? 4 : rssi > -70 ? 3 : rssi > -80 ? 2 : 1;
+
+const quality = (rssi: number) =>
+  rssi <= -85 ? 'err' : rssi <= -75 ? 'warn' : 'ok';
+
+const Signal = ({ rssi }: { rssi: number }) => (
+  <span className={cx('net-sig', `s${bars(rssi)}`, quality(rssi))} aria-hidden>
+    <i />
+    <i />
+    <i />
+    <i />
+  </span>
+);
 
 const WiFiNetworkSelector = ({ networkList }: { networkList: WiFiNetworkList }) => {
   const { LL } = useI18nContext();
-  const theme = useTheme();
-
-  const wifiConnectionContext = useContext(WiFiConnectionContext);
-
-  const renderNetwork = (network: WiFiNetwork) => (
-    <ListItem
-      key={network.bssid}
-      onClick={() => wifiConnectionContext.selectNetwork(network)}
-    >
-      <ListItemAvatar>
-        <Avatar>{isNetworkOpen(network) ? <LockOpenIcon /> : <LockIcon />}</Avatar>
-      </ListItemAvatar>
-      <ListItemText
-        primary={network.ssid}
-        secondary={
-          'Security: ' +
-          networkSecurityMode(network) +
-          ', Ch: ' +
-          network.channel +
-          ', bssid: ' +
-          network.bssid
-        }
-      />
-      <ListItemIcon>
-        <Badge badgeContent={network.rssi + 'dBm'}>
-          <WifiIcon sx={{ color: networkQualityHighlight(network, theme) }} />
-        </Badge>
-      </ListItemIcon>
-    </ListItem>
-  );
+  const { form, selectNetwork } = useContext(WiFiConnectionContext);
+  const sort = useTableSort(networkList.networks, {
+    ssid: byText((n) => n.ssid),
+    signal: byNumber((n) => n.rssi),
+    channel: byNumber((n) => n.channel),
+    security: byText((n) => (isNetworkOpen(n) ? '' : networkSecurityMode(n)))
+  });
 
   if (networkList.networks.length === 0) {
-    return <MessageBox message={LL.NETWORK_NO_WIFI()} level="info" />;
+    return <Message level="info">{LL.NETWORK_NO_WIFI()}</Message>;
   }
 
-  return <List>{networkList.networks.map(renderNetwork)}</List>;
+  return (
+    <Table className="stack net-tbl">
+      <thead>
+        <tr>
+          <SortHeader {...sort.header('ssid')}>SSID</SortHeader>
+          <SortHeader {...sort.header('signal')}>{LL.SIGNAL()}</SortHeader>
+          <SortHeader {...sort.header('channel')}>{LL.CHANNEL()}</SortHeader>
+          <SortHeader {...sort.header('security')}>{LL.SECURITY(0)}</SortHeader>
+          <th />
+        </tr>
+      </thead>
+      <tbody>
+        {sort.rows.map((n) => (
+          <tr key={n.bssid} className="click" onClick={() => selectNetwork(n)}>
+            <td>
+              <div>
+                <span>{n.ssid}</span>
+                {n.ssid === form.origData?.ssid && (
+                  <Tag kind="mod">{LL.WIFI_SAVED()}</Tag>
+                )}
+              </div>
+              <div className="cap mono">{n.bssid}</div>
+            </td>
+            <td className="num" data-label={LL.SIGNAL()}>
+              <span>
+                <Signal rssi={n.rssi} /> <span className="cap">{n.rssi} dBm</span>
+              </span>
+            </td>
+            <td className="num" data-label={LL.CHANNEL()}>
+              {n.channel}
+            </td>
+            <td data-label={LL.SECURITY(0)}>
+              {isNetworkOpen(n) ? (
+                <span className="net-sec warnc">
+                  <Icon name="lock_open" size="xs" />
+                  {LL.WIFI_OPEN()}
+                </span>
+              ) : (
+                <span className="net-sec">
+                  <Icon name="lock" size="xs" />
+                  {networkSecurityMode(n)}
+                </span>
+              )}
+            </td>
+            <td className="act">
+              <Button size="sm">{LL.USE()}</Button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  );
 };
 
-export default memo(WiFiNetworkSelector);
+export default WiFiNetworkSelector;

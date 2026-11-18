@@ -1,0 +1,37 @@
+.section {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin: 12px;
+}
+.sec-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.sec-head + * {
+  margin-top: 10px;
+}
+
+/* cards side by side, one column on narrow screens */
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(380px, 100%), 1fr));
+  gap: 12px;
+  margin: 12px;
+}
+.grid2 > .section {
+  margin: 0;
+}
+
+@media (max-width: 599px) {
+  .section {
+    margin: 8px;
+  }
+  .grid2 {
+    margin: 8px;
+    gap: 8px;
+  }
+}

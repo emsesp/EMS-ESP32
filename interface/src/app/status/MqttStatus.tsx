@@ -1,30 +1,14 @@
-import { type FC, memo } from 'react';
-
-import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
-import DeviceHubIcon from '@mui/icons-material/DeviceHub';
-import ReportIcon from '@mui/icons-material/Report';
-import SpeakerNotesOffIcon from '@mui/icons-material/SpeakerNotesOff';
-import {
-  Avatar,
-  Divider,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  useTheme
-} from '@mui/material';
-import type { Theme } from '@mui/material';
-
 import * as MqttApi from 'api/mqtt';
 
 import { useRequest } from 'alova/client';
-import { FormLoader, SectionContent, useLayoutTitle } from 'components';
+import { Loader, Stat, StatRow } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
-import type { MqttStatusType } from 'types';
 import { MqttDisconnectReason } from 'types';
-import { useInterval } from 'utils';
+import { formatDateTimeMinutes, formatTimeAgo, useInterval } from 'utils';
 
-// Disconnect reason lookup table - created once, reused across renders
+import StatusPage from './StatusPage';
+import { mqttInfo, nf } from './status';
+
 const DISCONNECT_REASONS: Record<MqttDisconnectReason, string> = {
   [MqttDisconnectReason.USER_OK]: 'User disconnected',
   [MqttDisconnectReason.TCP_DISCONNECTED]: 'TCP disconnected',
@@ -37,129 +21,74 @@ const DISCONNECT_REASONS: Record<MqttDisconnectReason, string> = {
   [MqttDisconnectReason.TLS_BAD_FINGERPRINT]: 'TLS fingerprint invalid'
 };
 
-const getDisconnectReason = (disconnect_reason: MqttDisconnectReason): string =>
-  DISCONNECT_REASONS[disconnect_reason] ?? 'Unknown';
-
-export const mqttStatusHighlight = (
-  { enabled, connected }: MqttStatusType,
-  theme: Theme
-) => {
-  if (!enabled) return theme.palette.info.main;
-  return connected ? theme.palette.success.main : theme.palette.error.main;
-};
-
-export const mqttPublishHighlight = (
-  { mqtt_fails }: MqttStatusType,
-  theme: Theme
-) => {
-  if (mqtt_fails === 0) return theme.palette.success.main;
-  if (mqtt_fails < 10) return theme.palette.warning.main;
-  return theme.palette.error.main;
-};
-
-export const mqttQueueHighlight = ({ mqtt_queued }: MqttStatusType, theme: Theme) =>
-  mqtt_queued <= 1 ? theme.palette.success.main : theme.palette.warning.main;
-
-interface ConnectionStatusProps {
-  data: MqttStatusType;
-  theme: Theme;
-}
-
-// Memoized component to prevent unnecessary re-renders when parent updates
-const ConnectionStatus: FC<ConnectionStatusProps> = memo(({ data, theme }) => {
-  const { LL } = useI18nContext();
-
-  return (
-    <>
-      {!data.connected && (
-        <>
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar>
-                <ReportIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText
-              primary={LL.DISCONNECT_REASON()}
-              secondary={getDisconnectReason(data.disconnect_reason)}
-            />
-          </ListItem>
-          <Divider variant="inset" component="li" />
-        </>
-      )}
-      <ListItem>
-        <ListItemAvatar>
-          <Avatar>#</Avatar>
-        </ListItemAvatar>
-        <ListItemText primary={LL.ID_OF(LL.CLIENT())} secondary={data.client_id} />
-      </ListItem>
-      <Divider variant="inset" component="li" />
-      <ListItem>
-        <ListItemAvatar>
-          <Avatar sx={{ bgcolor: mqttQueueHighlight(data, theme) }}>
-            <AutoAwesomeMotionIcon />
-          </Avatar>
-        </ListItemAvatar>
-        <ListItemText primary={LL.MQTT_QUEUE()} secondary={data.mqtt_queued} />
-      </ListItem>
-      <Divider variant="inset" component="li" />
-      <ListItem>
-        <ListItemAvatar>
-          <Avatar sx={{ bgcolor: mqttPublishHighlight(data, theme) }}>
-            <SpeakerNotesOffIcon />
-          </Avatar>
-        </ListItemAvatar>
-        <ListItemText primary={LL.ERRORS_OF('MQTT')} secondary={data.mqtt_fails} />
-      </ListItem>
-      <Divider variant="inset" component="li" />
-    </>
-  );
-});
+const secondsAgo = (seconds: number) => new Date(Date.now() - seconds * 1000);
 
 const MqttStatus = () => {
+  const { LL, locale } = useI18nContext();
   const { data, send: loadData, error } = useRequest(MqttApi.readMqttStatus);
-  const { LL } = useI18nContext();
-  const theme = useTheme();
-
-  useLayoutTitle('MQTT');
 
   useInterval(() => {
     void loadData();
   });
 
-  const errorMessage = error?.message || '';
-
-  const mqttStatusText = !data
-    ? ''
-    : !data.enabled
-      ? LL.NOT_ENABLED()
-      : data.connected
-        ? `${LL.CONNECTED(0)} (${data.connect_count})`
-        : `${LL.DISCONNECTED()} (${data.connect_count})`;
-
   if (!data) {
-    return (
-      <SectionContent>
-        <FormLoader onRetry={loadData} errorMessage={errorMessage} />
-      </SectionContent>
-    );
+    return <Loader error={error?.message} onRetry={() => void loadData()} />;
   }
 
+  const { state, text } = mqttInfo(data, LL);
+  const reasonText = (reason: MqttDisconnectReason) =>
+    DISCONNECT_REASONS[reason] ?? LL.UNKNOWN();
+  const disconnectAgo =
+    data.last_disconnect_ago !== undefined &&
+    formatTimeAgo(locale, secondsAgo(data.last_disconnect_ago));
+
   return (
-    <SectionContent>
-      <List>
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar sx={{ bgcolor: mqttStatusHighlight(data, theme) }}>
-              <DeviceHubIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText primary={LL.STATUS_OF('')} secondary={mqttStatusText} />
-        </ListItem>
-        <Divider variant="inset" component="li" />
-        {data.enabled && <ConnectionStatus data={data} theme={theme} />}
-      </List>
-    </SectionContent>
+    <StatusPage
+      state={state}
+      icon="device_hub"
+      title={`MQTT ${text}`}
+      text={data.host && `${data.host}:${data.port}`}
+      settings={{ to: '/settings/mqtt', label: LL.SETTINGS_OF('MQTT') }}
+      rows={
+        data.enabled
+          ? [
+              { label: LL.ID_OF(LL.CLIENT()), value: data.client_id },
+              data.base !== undefined && {
+                label: LL.MQTT_BASE_TOPIC(),
+                value: <span className="mono">{data.base}/</span>
+              },
+              !data.connected && {
+                label: LL.DISCONNECT_REASON(),
+                value: reasonText(data.disconnect_reason),
+                extra: disconnectAgo
+              },
+              data.connected &&
+                !!disconnectAgo &&
+                data.last_disconnect_reason !== undefined && {
+                  label: LL.LAST_DISCONNECT(),
+                  value: reasonText(data.last_disconnect_reason),
+                  extra: disconnectAgo
+                },
+              data.connected_for !== undefined && {
+                label: LL.CONNECTED_SINCE(),
+                value: formatDateTimeMinutes(secondsAgo(data.connected_for))
+              }
+            ]
+          : []
+      }
+    >
+      {data.enabled && (
+        <StatRow>
+          <Stat value={nf.format(data.mqtt_queued)} label={LL.MQTT_QUEUE()} />
+          <Stat
+            value={nf.format(data.mqtt_fails)}
+            label={LL.ERRORS_OF('MQTT')}
+            warn={data.mqtt_fails > 0}
+          />
+          <Stat value={nf.format(data.connect_count)} label={LL.CONNECTS()} />
+        </StatRow>
+      )}
+    </StatusPage>
   );
 };
 

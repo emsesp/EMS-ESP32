@@ -1,0 +1,72 @@
+.support-box {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-color: lightblue;
+}
+.support-img {
+  max-width: 40%;
+  max-height: 160px;
+  border-radius: 8px;
+}
+.sec-text {
+  margin: 8px 0 12px;
+  color: var(--text-2);
+}
+.help-steps {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.help-steps li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--paper-2);
+}
+.help-steps .grow {
+  display: flex;
+  flex-direction: column;
+}
+.help-steps .num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(144, 202, 249, 0.16);
+  color: var(--primary);
+}
+.sum-head {
+  display: flex;
+  align-items: center;
+  margin: 14px 0 6px;
+}
+.about {
+  margin: 18px 12px 24px;
+  color: var(--text-3);
+  font-size: 12px;
+  text-align: center;
+}
+
+@media (max-width: 599px) {
+  .support-box {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .support-img {
+    max-width: 100%;
+  }
+  .help-steps li {
+    flex-wrap: wrap;
+  }
+  .help-steps li > .btn {
+    margin-left: 40px;
+  }
+}

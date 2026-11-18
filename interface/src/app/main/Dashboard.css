@@ -1,0 +1,117 @@
+.db-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+  margin: 12px 12px 0;
+}
+.db-bar .cap {
+  margin: 0;
+  min-width: 200px;
+}
+.db-msg {
+  margin: 12px 12px 0;
+}
+
+.db-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+  align-items: start;
+  gap: 12px;
+  margin: 12px;
+}
+.db-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.db-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.db-head:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+.db-head[aria-expanded='true'] {
+  border-bottom: 1px solid var(--divider);
+}
+.db-name {
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+.db-chev {
+  margin-left: auto;
+  color: var(--text-2);
+  transition: transform 0.15s;
+}
+.db-chev.open {
+  transform: rotate(90deg);
+}
+
+.db-tbl td {
+  height: 28px;
+  overflow-wrap: anywhere;
+}
+.db-tbl td.db-val {
+  white-space: normal;
+}
+.db-tbl td.db-act {
+  width: 36px;
+  text-align: right;
+  white-space: nowrap;
+}
+.db-act .icon + .icon {
+  margin-left: 2px;
+}
+.db-act .icon:not(.lb) {
+  color: var(--text-3);
+}
+
+.db-foot {
+  display: flex;
+  justify-content: flex-end;
+  padding: 6px 12px;
+  border-top: 1px solid var(--divider);
+}
+.db-foot a {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+}
+
+@media (max-width: 599px) {
+  .db-bar,
+  .db-msg {
+    margin: 8px 8px 0;
+  }
+  .db-cards {
+    margin: 8px;
+    gap: 8px;
+  }
+}
+
+@media (pointer: coarse) {
+  .db-head {
+    min-height: 44px;
+  }
+  .db-tbl tr.click td {
+    height: 40px;
+  }
+  .db-foot a {
+    min-height: 40px;
+  }
+}

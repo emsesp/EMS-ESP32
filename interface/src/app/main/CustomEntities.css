@@ -1,0 +1,28 @@
+.ce-filter {
+  margin: 10px 0;
+}
+.tag.ce-s0 {
+  background: rgba(104, 55, 77, 0.5);
+  color: #f8bbd0;
+}
+.tag.ce-s1 {
+  background: rgba(33, 150, 243, 0.16);
+  color: var(--primary);
+}
+.tag.ce-s2 {
+  background: rgba(255, 167, 38, 0.16);
+  color: #ffcc80;
+}
+.ce-tbl td:first-child {
+  white-space: nowrap;
+}
+.ce-tbl td > .icon {
+  margin-left: 4px;
+  vertical-align: middle;
+}
+/* string values can be long JSON */
+.ce-tbl td.ce-val {
+  max-width: 320px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

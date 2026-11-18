@@ -1,12 +1,9 @@
-import { memo, useRef, useState } from 'react';
-
-import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
-import { Button } from '@mui/material';
+import { useRef, useState } from 'react';
 
 import * as NetworkApi from 'api/network';
 
 import { updateState, useRequest } from 'alova/client';
-import { ButtonRow, FormLoader, SectionContent } from 'components';
+import { Button, Loader, Section } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import WiFiNetworkSelector from './WiFiNetworkSelector';
@@ -19,7 +16,7 @@ const WiFiNetworkScanner = () => {
   const { LL } = useI18nContext();
   const [errorMessage, setErrorMessage] = useState<string>();
 
-  // is called on page load to start network scan
+  // starts a scan on page load, then polls the list until the scan is done
   const { send: scanNetworks } = useRequest(NetworkApi.scanNetworks).onComplete(
     () => {
       pollCount.current = 0;
@@ -31,11 +28,8 @@ const WiFiNetworkScanner = () => {
 
   const { data: networkList, send: getNetworkList } = useRequest(
     NetworkApi.listNetworks,
-    {
-      immediate: false
-    }
+    { immediate: false }
   ).onSuccess((event) => {
-    // is called when network scan is completed
     if (!event.data) {
       const completedPollCount = pollCount.current + 1;
       if (completedPollCount < NUM_POLLS) {
@@ -48,29 +42,30 @@ const WiFiNetworkScanner = () => {
     }
   });
 
-  const renderNetworkScanner = () => {
-    if (!networkList) {
-      return <FormLoader errorMessage={errorMessage || ''} />;
-    }
-    return <WiFiNetworkSelector networkList={networkList} />;
-  };
+  const scanning = !errorMessage && !networkList;
 
   return (
-    <SectionContent>
-      {renderNetworkScanner()}
-      <ButtonRow>
+    <Section
+      icon="wifi_find"
+      title={LL.NETWORKS_NEARBY()}
+      actions={
         <Button
-          startIcon={<PermScanWifiIcon />}
-          variant="outlined"
-          color="secondary"
-          onClick={scanNetworks}
-          disabled={!errorMessage && !networkList}
+          size="sm"
+          icon="refresh"
+          disabled={scanning}
+          onClick={() => void scanNetworks()}
         >
-          {LL.SCAN_AGAIN()}&hellip;
+          {LL.SCAN_AGAIN()}
         </Button>
-      </ButtonRow>
-    </SectionContent>
+      }
+    >
+      {networkList ? (
+        <WiFiNetworkSelector networkList={networkList} />
+      ) : (
+        <Loader error={errorMessage} />
+      )}
+    </Section>
   );
 };
 
-export default memo(WiFiNetworkScanner);
+export default WiFiNetworkScanner;

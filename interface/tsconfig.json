@@ -70,7 +70,6 @@
       // Support for bare imports from src directory
       "App": ["src/App"],
       "AppRouting": ["src/AppRouting"],
-      "CustomTheme": ["src/CustomTheme"],
       "SignIn": ["src/SignIn"],
       "AuthenticatedRouting": ["src/AuthenticatedRouting"],
       "env": ["src/env"],

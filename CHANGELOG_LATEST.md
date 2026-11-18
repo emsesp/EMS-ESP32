@@ -45,6 +45,10 @@ A full list of breaking changes can be found in this [discussion](https://github
 - RC300/RC310 pool circuit on a MM100: `poolmode` (off/on/auto) and `poolflowtemp`, both writable (telegram 0x67B) [#3420](https://github.com/emsesp/EMS-ESP32/issues/3420)
 - EMS devices that EMS-ESP polls and that send nothing for 5 minutes are reported offline: logged, published retained as `online`/`offline` to `ems-esp/status/<device>_<id>` (e.g. `ems-esp/status/thermostat_10`), and shown as `online` and `lastSeen` (seconds) per device in `/api/system/info`. In Home Assistant the device's entities become unavailable and each device gets a "status" connectivity sensor
 - test build flag `EMSESP_OWN_IDENTITY`: when another device reads the version (0x02) or name (0x01) from EMS-ESP's bus ID, it answers like a real EMS device instead of with an empty telegram: a fixed productID (`EMSESP_OWN_PRODUCT_ID`, default 250) with the EMS-ESP version, a serial number made from the MAC address and the name "EMS-ESP". The K30RF reads these from every device on the bus about every 13 hours, and on Bosch heat pumps a full re-sync of the UI800 often followed within minutes, ending in A21/A91 errors and HomeCom dropping out. Off by default [#3094](https://github.com/emsesp/EMS-ESP32/issues/3094)
+- heating settings backup and restore: Settings > Download/Upload saves the writable heating settings of all EMS devices (for example set temperatures, heating curves and switch times) to a file with an optional note, and the restore page shows what differs from the device now, lets you pick values and writes them back one by one with a result per value. Devices are matched by type and device ID, a different product or another temperature unit is refused. New `heatingbackup` export type in `POST /rest/action` [#2707](https://github.com/emsesp/EMS-ESP32/discussions/2707)
+- MQTT status shows the base topic, since when the connection is up and the reason and time of the last lost connection. `/rest/mqttStatus` has new `host`, `port`, `base`, `connected_for`, `last_disconnect_ago` and `last_disconnect_reason` fields
+- every table in the Web UI with column headers can be sorted by clicking a header (ascending, descending, back to the original order); on phones the headers are buttons above the list
+- `/rest/systemStatus` has new `network_ip`, `mqtt_host`, `mqtt_port`, `log_errors`, `log_warnings` (since boot) and `heap_size` fields for the Status overview
 
 ## Fixed
 
@@ -61,6 +65,9 @@ A full list of breaking changes can be found in this [discussion](https://github
 - custom entities on the EMS bus: after a write, MQTT and Home Assistant could show the old value until the next "Other" publish interval. The new value is now published as soon as the write is confirmed [#3416](https://github.com/emsesp/EMS-ESP32/issues/3416)
 - `uint8` custom entities with a value of 128 or more were shown as negative numbers in MQTT and the API (e.g. 200 as -56), the Web UI was correct
 - RC300 firmware 11.x `dhw/chargeduration`: writes above 255 minutes are refused, because the thermostat set them to 15 minutes. Longer durations can only be set on the thermostat itself [#3318](https://github.com/emsesp/EMS-ESP32/issues/3318)
+- Modules: changes made in the Web UI were never applied, because each module was sent in its own request that the firmware ignored. They are now saved in one request, and a module that fails to enable or disable makes the save fail with an error instead of reporting success
+- saving settings that need a restart no longer shows the "unsaved changes" warning when leaving the page afterwards
+- Customizations: a save that failed was shown as saved; the changes now stay so the save can be retried
 
 ## Changed
 
@@ -105,3 +112,5 @@ A full list of breaking changes can be found in this [discussion](https://github
 - CI release workflows sign the firmware in a separate job after the builds, so build tools and libraries never have the signing key
 - fewer repeated requests on the EMS bus: a device that sends several unknown telegrams is asked for its version only once in 5 seconds, and a device that drops out of the bus device list and comes back is no longer asked for its name again if it's already known [#3094](https://github.com/emsesp/EMS-ESP32/issues/3094)
 - a write that isn't acknowledged straight away (for example because the boiler already polled the next device) is no longer logged as an error, as it is retried. The error is only logged when all retries fail [#3438](https://github.com/emsesp/EMS-ESP32/discussions/3438)
+- new Web UI design, the same pages and addresses with a new look: a fixed side menu on desktop, a menu button on tablets and phones, breadcrumbs, cards instead of long tables on phones, a save bar for unsaved changes on every settings and list page, and larger touch targets. The Dashboard shows a card per device, Devices keeps the selected device in the address (`/devices?device=<id>`), Firmware moved to Settings > Firmware (`/status/version` still works), and Help has a "Reporting a problem" section that copies a short system summary
+- the Web UI no longer uses MUI, Emotion, react-table-library or react-icons. Icons are built-in SVGs, nothing is loaded from the internet. The Web UI takes 16% less flash (about 295 KB instead of 352 KB) and the Recovery Web UI 66% less (47 KB instead of 137 KB)

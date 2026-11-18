@@ -1,47 +1,44 @@
-import { useContext, useEffect, useState } from 'react';
-
-import CancelIcon from '@mui/icons-material/Cancel';
-import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
-import SendIcon from '@mui/icons-material/Send';
-import WarningIcon from '@mui/icons-material/Warning';
 import {
-  Box,
-  Button,
-  Checkbox,
-  Divider,
-  Grid,
-  InputAdornment,
-  MenuItem,
-  TextField,
-  Typography
-} from '@mui/material';
+  Fragment,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState
+} from 'react';
 
+import { API, getBoardProfile, readSettings, writeSettings } from 'api/app';
 import { readSystemStatus } from 'api/system';
 
 import { useRequest } from 'alova/client';
-import SystemMonitor from 'app/status/SystemMonitor';
+import { BOARD_PROFILES } from 'app/main/types';
+import type {
+  APIcall,
+  BoardProfile,
+  BoardProfileKey,
+  Settings
+} from 'app/main/types';
+import { createSettingsValidator } from 'app/main/validators';
 import {
-  BlockFormControlLabel,
-  BlockNavigation,
-  ButtonRow,
-  FormLoader,
-  MessageBox,
-  SectionContent,
-  ValidatedPasswordField,
-  ValidatedTextField,
-  useLayoutTitle
-} from 'components';
-import { toast } from 'components/toast';
+  Button,
+  FormSection,
+  Icon,
+  type IconName,
+  Loader,
+  SearchField,
+  Section,
+  Select,
+  type SelectOption,
+  Switch,
+  TextField,
+  toast
+} from 'components/ui';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
-import { numberValue, updateValueDirty, useRest } from 'utils';
-import { ValidationError, validate } from 'validators';
-import type { ValidateFieldsError } from 'validators/schema';
 
-import { API, getBoardProfile, readSettings, writeSettings } from '../../api/app';
-import { BOARD_PROFILES } from '../main/types';
-import type { APIcall, BoardProfileKey, Settings } from '../main/types';
-import { createSettingsValidator } from '../main/validators';
+import './ApplicationSettings.css';
+import FormPage, { useFormPage } from './FormPage';
 
 const ENTITY_LANGUAGES: Record<string, string> = {
   cs: 'Česky',
@@ -58,1089 +55,512 @@ const ENTITY_LANGUAGES: Record<string, string> = {
   tr: 'Türk'
 };
 
-export function boardProfileSelectItems() {
-  return Object.keys(BOARD_PROFILES).map((code) => (
-    <MenuItem key={code} value={code}>
-      {BOARD_PROFILES[code as BoardProfileKey]}
-    </MenuItem>
-  ));
+const EMS_BUS_IDS: SelectOption[] = [
+  [0x0a, 'Terminal (0x0A)'],
+  [0x0b, 'Service Key (0x0B)'],
+  [0x0d, 'Modem (0x0D)'],
+  [0x0e, 'Converter (0x0E)'],
+  [0x0f, 'Time Module (0x0F)'],
+  [0x48, 'Gateway 1 (0x48)'],
+  [0x49, 'Gateway 2 (0x49)'],
+  [0x4a, 'Gateway 3 (0x4A)'],
+  [0x4b, 'Gateway 4 (0x4B)'],
+  [0x4c, 'Gateway 5 (0x4C)'],
+  [0x4d, 'Gateway 7 (0x4D)']
+].map(([value, label]) => ({ value: String(value), label: String(label) }));
+
+const SYSLOG_LEVELS: SelectOption[] = [
+  ['-1', 'OFF'],
+  ['3', 'ERR'],
+  ['4', 'WARN'],
+  ['5', 'NOTICE'],
+  ['6', 'INFO'],
+  ['9', 'ALL']
+].map(([value = '', label = '']) => ({ value, label }));
+
+const opts = (labels: string[], first = 0): SelectOption[] =>
+  labels.map((label, i) => ({ value: String(first + i), label }));
+
+const PHY_NAMES = ['LAN8720', 'TLK110', 'RTL8201'];
+const ETH_CLOCKS = opts(['GPIO0_IN', 'GPIO0_OUT', 'GPIO16_OUT', 'GPIO17_OUT']);
+
+// firmware returns 205 when one of these changes (ChangeFlags::RESTART in WebSettingsService.cpp)
+const RESTART_KEYS = [
+  'board_profile',
+  'phy_type',
+  'eth_power',
+  'eth_phy_addr',
+  'eth_clock_mode',
+  'ems_bus_id',
+  'telnet_enabled',
+  'low_clock'
+] as const;
+
+interface Item {
+  key: string;
+  label: string;
+  help?: string | undefined;
+  node: ReactNode;
+}
+
+interface Group {
+  id: string;
+  icon: IconName;
+  title: string;
+  desc?: string;
+  items: (Item | false)[];
 }
 
 const ApplicationSettings = () => {
-  const { data: hardwareData } = useRequest(readSystemStatus);
-
-  const {
-    loadData,
-    saveData,
-    updateDataValue,
-    data,
-    origData,
-    dirtyFlags,
-    setDirtyFlags,
-    blocker,
-    errorMessage,
-    restartNeeded
-  } = useRest<Settings>({
-    read: readSettings,
-    update: writeSettings
-  });
-
-  // the menu drawer reads the system name from the authentication context
-  const { setSystemName } = useContext(AuthenticatedContext);
-  useEffect(() => {
-    if (origData?.system_name !== undefined) {
-      setSystemName(origData.system_name);
-    }
-  }, [origData?.system_name, setSystemName]);
-
-  const [restarting, setRestarting] = useState<boolean>();
-
   const { LL } = useI18nContext();
+  const { data: hardware } = useRequest(readSystemStatus);
+  const form = useFormPage<Settings>({
+    read: readSettings,
+    update: writeSettings,
+    validator: createSettingsValidator,
+    restartKeys: RESTART_KEYS
+  });
+  const latest = useRef(form);
+  latest.current = form;
 
-  const updateFormValue = updateValueDirty(
-    origData as unknown as Record<string, unknown>,
-    dirtyFlags,
-    setDirtyFlags,
-    updateDataValue as (value: unknown) => void
-  );
+  // the drawer reads the system name from the authentication context
+  const { setSystemName } = useContext(AuthenticatedContext);
+  const savedName = form.origData?.system_name;
+  useEffect(() => {
+    if (savedName !== undefined) setSystemName(savedName);
+  }, [savedName, setSystemName]);
 
-  const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
+  const [query, setQuery] = useState('');
 
-  const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
+  // the group cards scroll to just below the sticky search card, whose height depends on wrapping
+  const observer = useRef<ResizeObserver>(undefined);
+  const indexRef = useCallback((el: HTMLDivElement | null) => {
+    observer.current?.disconnect();
+    if (!el) return;
+    observer.current = new ResizeObserver(() =>
+      el.parentElement?.style.setProperty('--app-index-h', `${el.offsetHeight}px`)
+    );
+    observer.current.observe(el);
+  }, []);
+
+  const { send: sendAPI } = useRequest((call: APIcall) => API(call), {
     immediate: false
   });
+  const { loading: loadingProfile, send: readBoardProfile } = useRequest(
+    (profile: string) => getBoardProfile(profile),
+    { immediate: false }
+  );
 
-  const { loading: processingBoard, send: readBoardProfile } = useRequest(
-    (boardProfile: string) => getBoardProfile(boardProfile),
-    {
-      immediate: false
-    }
-  ).onSuccess((event) => {
-    const response = event.data as Settings;
-    updateDataValue({
-      ...data,
-      board_profile: response.board_profile,
-      led_gpio: response.led_gpio,
-      dallas_gpio: response.dallas_gpio,
-      rx_gpio: response.rx_gpio,
-      tx_gpio: response.tx_gpio,
-      pbutton_gpio: response.pbutton_gpio,
-      phy_type: response.phy_type,
-      eth_power: response.eth_power,
-      eth_phy_addr: response.eth_phy_addr,
-      eth_clock_mode: response.eth_clock_mode
-    });
-  });
-
-  const SecondsInputProps = {
-    endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+  const changeBoardProfile = (profile: string) => {
+    form.set({ board_profile: profile });
+    if (profile === 'CUSTOM') return;
+    readBoardProfile(profile)
+      .then((res) => {
+        const p = res as BoardProfile;
+        latest.current.set({
+          led_gpio: p.led_gpio,
+          led_type: p.led_type,
+          dallas_gpio: p.dallas_gpio,
+          rx_gpio: p.rx_gpio,
+          tx_gpio: p.tx_gpio,
+          pbutton_gpio: p.pbutton_gpio,
+          phy_type: p.phy_type,
+          eth_power: p.eth_power,
+          eth_phy_addr: p.eth_phy_addr,
+          eth_clock_mode: p.eth_clock_mode
+        });
+      })
+      .catch((error: Error) => toast.error(error.message));
   };
 
-  const MinutesInputProps = {
-    endAdornment: <InputAdornment position="end">{LL.MINUTES()}</InputAdornment>
-  };
-
-  const HoursInputProps = {
-    endAdornment: <InputAdornment position="end">{LL.HOURS()}</InputAdornment>
-  };
-
-  const doRestart = async () => {
-    setRestarting(true);
-    await sendAPI({ device: 'system', cmd: 'restart', id: 0 }).catch(
-      (error: Error) => {
-        toast.error(error.message);
-      }
-    );
-  };
-
-  const updateBoardProfile = async (board_profile: string) => {
-    await readBoardProfile(board_profile).catch((error: Error) => {
-      toast.error(error.message);
-    });
-  };
-
-  useLayoutTitle(LL.APPLICATION());
-
-  const validateAndSubmit = async () => {
-    try {
-      setFieldErrors(undefined);
-      await validate(createSettingsValidator(data), data);
-      await saveData();
-    } catch (error) {
-      setFieldErrors((error as ValidationError).fieldErrors);
-    }
-  };
-
-  const changeBoardProfile = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const boardProfile = event.target.value;
-    updateFormValue(event);
-    if (boardProfile === 'CUSTOM') {
-      updateDataValue({
-        ...data,
-        board_profile: boardProfile
-      });
-    } else {
-      void updateBoardProfile(boardProfile);
-    }
-  };
-
-  const restart = async () => {
-    await validateAndSubmit();
-    await doRestart();
-  };
-
-  const sendmail = async () => {
-    await sendAPI({
+  const sendTestEmail = () =>
+    sendAPI({
       device: 'system',
       cmd: 'sendmail',
       data: '"Email notification test successful!"',
       id: 0
     })
-      .then(() => {
-        toast.success(LL.TEST_EMAIL_SUCCESSFUL());
-      })
-      .catch((error: Error) => {
-        toast.error(error.message);
-      });
-  };
+      .then(() => toast.success(LL.TEST_EMAIL_SUCCESSFUL()))
+      .catch((error: Error) => toast.error(error.message));
 
-  const boardProfileItems = boardProfileSelectItems();
+  const jump = (id: string) =>
+    document
+      .getElementById(`app-${id}`)
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-  const content = () => {
-    if (!data || !hardwareData) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />;
+  type K = keyof Settings;
+  const sw = (
+    key: K,
+    label: string,
+    help?: string,
+    warn?: boolean,
+    disabled?: boolean
+  ) => ({
+    key,
+    label,
+    help,
+    node: (
+      <Switch
+        label={label}
+        helperText={help}
+        warn={!!warn}
+        disabled={!!disabled}
+        {...form.check(key)}
+      />
+    )
+  });
+  const num = (key: K, label: string, unit?: string, disabled?: boolean) => ({
+    key,
+    label,
+    node: (
+      <TextField
+        label={label}
+        unit={unit}
+        disabled={disabled}
+        {...form.number(key)}
+      />
+    )
+  });
+  const txt = (
+    key: K,
+    label: string,
+    extra: { mono?: boolean; type?: string } = {}
+  ) => ({
+    key,
+    label,
+    node: <TextField label={label} {...extra} {...form.text(key)} />
+  });
+  const sel = (key: K, label: string, options: SelectOption[]) => ({
+    key,
+    label,
+    node: <Select label={label} options={options} {...form.select(key)} />
+  });
+
+  const groups = (data: Settings): Group[] => {
+    if (!hardware) return [];
+    const custom = data.board_profile === 'CUSTOM';
+    const noPsram = hardware.psram ? undefined : LL.IS_REQUIRED('PSRAM');
+    const off = ` (0=${LL.DISABLED(1)})`;
+
+    const profiles: SelectOption[] = (
+      hardware.model.startsWith('BBQKees')
+        ? [hardware.board]
+        : Object.keys(BOARD_PROFILES)
+    ).map((code) => ({
+      value: code,
+      label: BOARD_PROFILES[code as BoardProfileKey] ?? code
+    }));
+    if (custom || data.developer_mode) {
+      profiles.push({ value: 'CUSTOM', label: `${LL.CUSTOM()}…` });
+    }
+    if (!profiles.some((p) => p.value === data.board_profile)) {
+      profiles.unshift({ value: data.board_profile, label: data.board_profile });
     }
 
-    return (
-      <>
-        <Typography variant="h6" color="primary">
-          {LL.SYSTEM(0)}&nbsp;
-          {LL.CUSTOMIZATIONS()}
-        </Typography>
-        <TextField
-          name="system_name"
-          label={LL.SYSTEM_NAME()}
-          value={data.system_name}
-          variant="outlined"
-          onChange={updateFormValue}
-          margin="normal"
-        />
-        <Typography sx={{ pb: 1, pt: 2 }} variant="h6" color="primary">
-          {LL.SERVICES()}
-        </Typography>
-        <Typography color="secondary">Console</Typography>
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.telnet_enabled}
-              onChange={updateFormValue}
-              name="telnet_enabled"
-            />
-          }
-          label={LL.ENABLE_TELNET()}
-        />
-        <Typography color="secondary">Modbus</Typography>
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.modbus_enabled}
-              onChange={updateFormValue}
-              name="modbus_enabled"
-              disabled={!hardwareData.psram}
-            />
-          }
-          label={
-            <Typography color={!hardwareData.psram ? 'grey' : 'default'}>
-              {LL.ENABLE_MODBUS()}
-              {!hardwareData.psram && (
-                <Typography variant="caption">
-                  &nbsp; &#40;{LL.IS_REQUIRED('PSRAM')}&#41;
-                </Typography>
-              )}
-            </Typography>
-          }
-        />
-        {data.modbus_enabled && (
-          <Grid container spacing={2} rowSpacing={0}>
-            <Grid>
-              <ValidatedTextField
-                fieldErrors={fieldErrors || {}}
-                name="modbus_max_clients"
-                label={LL.AP_MAX_CLIENTS()}
-                variant="outlined"
-                value={numberValue(data.modbus_max_clients)}
-                type="number"
-                onChange={updateFormValue}
-                margin="normal"
-              />
-            </Grid>
-            <Grid>
-              <ValidatedTextField
-                fieldErrors={fieldErrors || {}}
-                name="modbus_port"
-                label="Port"
-                variant="outlined"
-                value={numberValue(data.modbus_port)}
-                type="number"
-                onChange={updateFormValue}
-                margin="normal"
-              />
-            </Grid>
-            <Grid>
-              <ValidatedTextField
-                fieldErrors={fieldErrors || {}}
-                name="modbus_timeout"
-                label="Timeout"
-                slotProps={{
-                  input: SecondsInputProps
-                }}
-                variant="outlined"
-                value={numberValue(data.modbus_timeout)}
-                type="number"
-                onChange={updateFormValue}
-                margin="normal"
-              />
-            </Grid>
-          </Grid>
-        )}
-        <Typography color="secondary">Syslog</Typography>
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.syslog_enabled}
-              onChange={updateFormValue}
-              name="syslog_enabled"
-            />
-          }
-          label={LL.ENABLE_SYSLOG()}
-        />
-        {data.syslog_enabled && (
-          <Grid container spacing={2} rowSpacing={0}>
-            <Grid>
-              <ValidatedTextField
-                fieldErrors={fieldErrors || {}}
-                name="syslog_host"
-                label="Host"
-                variant="outlined"
-                value={data.syslog_host}
-                onChange={updateFormValue}
-                margin="normal"
-              />
-            </Grid>
-            <Grid>
-              <ValidatedTextField
-                fieldErrors={fieldErrors || {}}
-                name="syslog_port"
-                label="Port"
-                variant="outlined"
-                value={numberValue(data.syslog_port)}
-                type="number"
-                onChange={updateFormValue}
-                margin="normal"
-              />
-            </Grid>
-            <Grid>
-              <TextField
-                name="syslog_level"
-                label={LL.LOG_LEVEL()}
-                value={data.syslog_level}
+    const pins: [string, ReactNode][] = [
+      ['Rx', data.rx_gpio],
+      ['Tx', data.tx_gpio],
+      [LL.BUTTON(), data.pbutton_gpio],
+      [LL.TEMPERATURE(), data.dallas_gpio || '–'],
+      ['LED', data.led_gpio || '–'],
+      ['PHY', PHY_NAMES[data.phy_type - 1] ?? '–']
+    ];
+
+    return [
+      {
+        id: 'general',
+        icon: 'badge',
+        title: LL.GENERAL(),
+        items: [
+          txt('system_name', LL.SYSTEM_NAME()),
+          sel(
+            'locale',
+            LL.LANGUAGE_ENTITIES(),
+            Object.entries(ENTITY_LANGUAGES)
+              .filter(
+                ([code]) =>
+                  !hardware.languages ||
+                  hardware.languages.includes(code) ||
+                  code === data.locale
+              )
+              .map(([code, name]) => ({
+                value: code,
+                label: `${name} (${code.toUpperCase()})`
+              }))
+          ),
+          sw('auto_fw_check', LL.AUTO_FW_CHECK()),
+          sw('fahrenheit', LL.CONVERT_FAHRENHEIT())
+        ]
+      },
+      {
+        id: 'ems',
+        icon: 'swap_horiz',
+        title: LL.EMS_BUS(0),
+        desc: LL.EMS_BUS_DESC(),
+        items: [
+          sel('tx_mode', LL.TX_MODE(), [
+            ...(data.developer_mode ? [{ value: '0', label: LL.OFF() }] : []),
+            ...opts(['EMS', 'EMS+', 'HT3', LL.HARDWARE(), 'Auto'], 1)
+          ]),
+          sel('ems_bus_id', LL.ID_OF(LL.EMS_BUS(0)), EMS_BUS_IDS),
+          sw('readonly_mode', LL.READONLY()),
+          sw('write_protection', LL.WRITE_PROTECTION()),
+          data.write_protection && num('write_limit', LL.WRITE_LIMIT()),
+          data.write_protection &&
+            data.write_limit !== 0 &&
+            sw('write_limit_refuse', LL.WRITE_LIMIT_REFUSE()),
+          sw('boiler_heatingoff', LL.HEATINGOFF()),
+          sw('remote_timeout_en', LL.REMOTE_TIMEOUT_EN()),
+          data.remote_timeout_en &&
+            num('remote_timeout', LL.REMOTE_TIMEOUT(), LL.HOURS()),
+          sw('shower_timer', LL.ENABLE_SHOWER_TIMER()),
+          data.shower_timer &&
+            num('shower_min_duration', LL.MIN_DURATION(), LL.SECONDS()),
+          sw(
+            'shower_alert',
+            LL.ENABLE_SHOWER_ALERT(),
+            undefined,
+            false,
+            !data.shower_timer
+          ),
+          data.shower_alert &&
+            num(
+              'shower_alert_trigger',
+              LL.TRIGGER_TIME(),
+              LL.MINUTES(),
+              !data.shower_timer
+            ),
+          data.shower_alert &&
+            num(
+              'shower_alert_coldshot',
+              LL.COLD_SHOT_DURATION(),
+              LL.SECONDS(),
+              !data.shower_timer
+            )
+        ]
+      },
+      {
+        id: 'board',
+        icon: 'developer_board',
+        title: LL.BOARD(),
+        desc: LL.BOARD_DESC(),
+        items: [
+          {
+            key: 'board_profile',
+            label: LL.BOARD_PROFILE(),
+            node: (
+              <Select
+                label={LL.BOARD_PROFILE()}
+                options={profiles}
                 fullWidth
-                variant="outlined"
-                onChange={updateFormValue}
-                margin="normal"
-                select
-              >
-                <MenuItem value={-1}>OFF</MenuItem>
-                <MenuItem value={3}>ERR</MenuItem>
-                <MenuItem value={4}>WARN</MenuItem>
-                <MenuItem value={5}>NOTICE</MenuItem>
-                <MenuItem value={6}>INFO</MenuItem>
-                <MenuItem value={9}>ALL</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid>
-              <ValidatedTextField
-                fieldErrors={fieldErrors || {}}
-                name="syslog_mark_interval"
-                label={LL.MARK_INTERVAL()}
-                slotProps={{
-                  input: SecondsInputProps
-                }}
-                variant="outlined"
-                value={numberValue(data.syslog_mark_interval)}
-                type="number"
-                onChange={updateFormValue}
-                margin="normal"
+                {...form.select('board_profile')}
+                disabled={loadingProfile}
+                onChange={(e) => changeBoardProfile(e.currentTarget.value)}
               />
-            </Grid>
-          </Grid>
-        )}
-        <Typography color="secondary">eMail</Typography>
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.email_enabled}
-              onChange={updateFormValue}
-              name="email_enabled"
-              disabled={!hardwareData.psram}
-            />
-          }
-          label={
-            <Typography color={!hardwareData.psram ? 'grey' : 'default'}>
-              Enable eMail notification
-              {!hardwareData.psram && (
-                <Typography variant="caption">
-                  &nbsp; &#40;{LL.IS_REQUIRED('PSRAM')}&#41;
-                </Typography>
-              )}
-            </Typography>
-          }
-        />
-        {data.email_enabled && (
-          <>
-            <Grid
-              container
-              spacing={2}
-              direction="row"
-              sx={{ justifyContent: 'flex-start', alignItems: 'flex-start' }}
-            >
-              <Grid>
-                <ValidatedTextField
-                  fieldErrors={fieldErrors || {}}
-                  name="email_server"
-                  label="SMTP Server"
-                  variant="outlined"
-                  value={data.email_server}
-                  onChange={updateFormValue}
-                  margin="normal"
-                />
-              </Grid>
-              <Grid>
-                <ValidatedTextField
-                  fieldErrors={fieldErrors || {}}
-                  sx={{ width: '12ch' }}
-                  name="email_port"
-                  variant="outlined"
-                  label="Port"
-                  value={numberValue(data.email_port)}
-                  type="number"
-                  onChange={updateFormValue}
-                  margin="normal"
-                />
-              </Grid>
-              <Grid>
-                <TextField
-                  sx={{ width: '20ch' }}
-                  name="email_security"
-                  label={LL.SECURITY(0)}
-                  value={data.email_security}
-                  variant="outlined"
-                  onChange={updateFormValue}
-                  margin="normal"
-                  select
-                >
-                  <MenuItem value={0}>{LL.OFF()}</MenuItem>
-                  <MenuItem value={1}>SSL</MenuItem>
-                  <MenuItem value={2}>StartTLS</MenuItem>
-                </TextField>
-              </Grid>
-            </Grid>
-            <Grid container spacing={2} rowSpacing={0}>
-              <Grid>
-                <ValidatedTextField
-                  fieldErrors={fieldErrors || {}}
-                  name="email_login"
-                  label="Login"
-                  variant="outlined"
-                  value={data.email_login}
-                  onChange={updateFormValue}
-                  margin="normal"
-                />
-              </Grid>
-              <Grid>
-                <ValidatedPasswordField
-                  fieldErrors={fieldErrors || {}}
-                  name="email_pass"
-                  label="Password"
-                  variant="outlined"
-                  value={data.email_pass}
-                  onChange={updateFormValue}
-                  margin="normal"
-                />
-              </Grid>
-            </Grid>
-            <Grid container spacing={2} rowSpacing={0}>
-              <Grid>
-                <ValidatedTextField
-                  fieldErrors={fieldErrors || {}}
-                  name="email_sender"
-                  label="From"
-                  variant="outlined"
-                  value={data.email_sender}
-                  onChange={updateFormValue}
-                  margin="normal"
-                />
-              </Grid>
-              <Grid>
-                <ValidatedTextField
-                  fieldErrors={fieldErrors || {}}
-                  name="email_recp"
-                  label="To"
-                  variant="outlined"
-                  value={data.email_recp}
-                  onChange={updateFormValue}
-                  margin="normal"
-                />
-              </Grid>
-              <Grid>
-                <ValidatedTextField
-                  fieldErrors={fieldErrors || {}}
-                  name="email_subject"
-                  label="Subject"
-                  variant="outlined"
-                  value={data.email_subject}
-                  onChange={updateFormValue}
-                  margin="normal"
-                />
-              </Grid>
-              <Grid>
+            )
+          },
+          !custom && {
+            key: 'board_pins gpio',
+            label: LL.BOARD_PINS(),
+            node: (
+              <div className="field full">
+                <span className="app-label">{LL.BOARD_PINS()}</span>
+                <div className="app-pins">
+                  {pins.map(([name, value]) => (
+                    <span key={name} className="app-pin">
+                      <span className="cap">{name}</span>
+                      {value}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )
+          },
+          custom && num('rx_gpio', LL.GPIO_OF('Rx')),
+          custom && num('tx_gpio', LL.GPIO_OF('Tx')),
+          custom && num('pbutton_gpio', LL.GPIO_OF(LL.BUTTON())),
+          custom && num('dallas_gpio', LL.GPIO_OF(LL.TEMPERATURE()) + off),
+          custom && num('led_gpio', LL.GPIO_OF('LED') + off),
+          custom &&
+            data.led_gpio !== 0 &&
+            sel('led_type', `LED ${LL.TYPE(0)}`, opts(['LED', 'RGB-LED'])),
+          custom &&
+            sel('phy_type', LL.PHY_TYPE(), opts([LL.DISABLED(1), ...PHY_NAMES])),
+          custom &&
+            data.phy_type !== 0 &&
+            num('eth_power', `${LL.GPIO_OF('PHY Power')} (-1=${LL.DISABLED(1)})`),
+          custom &&
+            data.phy_type !== 0 &&
+            num('eth_phy_addr', LL.ADDRESS_OF('PHY I²C')),
+          custom &&
+            data.phy_type !== 0 &&
+            sel('eth_clock_mode', 'PHY Clk', ETH_CLOCKS)
+        ]
+      },
+      {
+        id: 'sensors',
+        icon: 'sensors',
+        title: LL.SENSORS(),
+        items: [
+          sw('analog_enabled', LL.ENABLE_ANALOG()),
+          data.dallas_gpio !== 0 && sw('dallas_parasite', LL.ENABLE_PARASITE())
+        ]
+      },
+      {
+        id: 'format',
+        icon: 'text_format',
+        title: LL.FORMATTING_OPTIONS(),
+        desc: LL.FORMAT_DESC(),
+        items: [
+          sel('bool_dashboard', LL.BOOLEAN_FORMAT_DASHBOARD(), [
+            ...opts([LL.ONOFF(), LL.ONOFF_CAP(), 'true/false'], 1),
+            { value: '5', label: '1/0' }
+          ]),
+          sel(
+            'bool_format',
+            LL.BOOLEAN_FORMAT_API(),
+            opts(
+              [
+                LL.ONOFF(),
+                LL.ONOFF_CAP(),
+                '"true"/"false"',
+                'true/false',
+                '"1"/"0"',
+                '1/0'
+              ],
+              1
+            )
+          ),
+          sel('enum_format', LL.ENUM_FORMAT(), opts([LL.VALUE(5), LL.INDEX()], 1))
+        ]
+      },
+      {
+        id: 'services',
+        icon: 'hub',
+        title: LL.SERVICES(),
+        items: [
+          sw('telnet_enabled', LL.ENABLE_TELNET()),
+          sw('modbus_enabled', LL.ENABLE_MODBUS(), noPsram, false, !hardware.psram),
+          data.modbus_enabled && num('modbus_port', 'Port'),
+          data.modbus_enabled && num('modbus_max_clients', LL.AP_MAX_CLIENTS()),
+          data.modbus_enabled && num('modbus_timeout', 'Timeout', LL.SECONDS()),
+          sw('syslog_enabled', LL.ENABLE_SYSLOG()),
+          data.syslog_enabled && txt('syslog_host', 'Host', { mono: true }),
+          data.syslog_enabled && num('syslog_port', 'Port'),
+          data.syslog_enabled && sel('syslog_level', LL.LOG_LEVEL(), SYSLOG_LEVELS),
+          data.syslog_enabled &&
+            num('syslog_mark_interval', LL.MARK_INTERVAL(), LL.SECONDS()),
+          sw('email_enabled', LL.ENABLE_EMAIL(), noPsram, false, !hardware.psram),
+          data.email_enabled && txt('email_server', 'SMTP Server', { mono: true }),
+          data.email_enabled && num('email_port', 'Port'),
+          data.email_enabled &&
+            sel(
+              'email_security',
+              LL.SECURITY(0),
+              opts([LL.OFF(), 'SSL', 'StartTLS'])
+            ),
+          data.email_enabled && txt('email_login', 'Login'),
+          data.email_enabled &&
+            txt('email_pass', LL.PASSWORD(), { type: 'password' }),
+          data.email_enabled && txt('email_sender', LL.EMAIL_FROM()),
+          data.email_enabled && txt('email_recp', LL.EMAIL_TO()),
+          data.email_enabled && txt('email_subject', LL.EMAIL_SUBJECT()),
+          data.email_enabled && {
+            key: 'email_test',
+            label: LL.SEND_TEST_EMAIL(),
+            node: (
+              <div className="field app-test">
                 <Button
-                  startIcon={<SendIcon />}
-                  sx={{ mt: 3 }}
-                  variant="outlined"
-                  color="primary"
-                  disabled={dirtyFlags.length !== 0}
-                  onClick={sendmail}
+                  icon="send"
+                  disabled={form.dirtyFlags.length !== 0}
+                  onClick={() => void sendTestEmail()}
                 >
-                  Send test email
+                  {LL.SEND_TEST_EMAIL()}
                 </Button>
-              </Grid>
-            </Grid>
-          </>
-        )}
-        <Typography color="secondary">Firmware</Typography>
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.auto_fw_check}
-              onChange={updateFormValue}
-              name="auto_fw_check"
-            />
+              </div>
+            )
           }
-          label={LL.AUTO_FW_CHECK()}
-        />
-
-        <Typography sx={{ pb: 1, pt: 2 }} variant="h6" color="primary">
-          {LL.SENSORS()}
-        </Typography>
-        <Typography color="secondary">Analog</Typography>
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.analog_enabled}
-              onChange={updateFormValue}
-              name="analog_enabled"
-            />
-          }
-          label={LL.ENABLE_ANALOG()}
-        />
-        {data.dallas_gpio !== 0 && (
-          <>
-            <Typography color="secondary">{LL.TEMPERATURE()}</Typography>
-            <BlockFormControlLabel
-              control={
-                <Checkbox
-                  checked={data.dallas_parasite}
-                  onChange={updateFormValue}
-                  name="dallas_parasite"
-                />
-              }
-              label={LL.ENABLE_PARASITE()}
-            />
-          </>
-        )}
-
-        <Typography sx={{ pb: 1, pt: 2 }} variant="h6" color="primary">
-          {LL.FORMATTING_OPTIONS()}
-        </Typography>
-        <Grid container spacing={2}>
-          <Grid size={3}>
-            <TextField
-              name="locale"
-              label={LL.LANGUAGE_ENTITIES()}
-              value={data.locale}
-              fullWidth
-              variant="outlined"
-              onChange={updateFormValue}
-              margin="normal"
-              select
-            >
-              {Object.entries(ENTITY_LANGUAGES)
-                .filter(
-                  ([code]) =>
-                    !hardwareData?.languages ||
-                    hardwareData.languages.includes(code) ||
-                    code === data.locale
-                )
-                .map(([code, name]) => (
-                  <MenuItem key={code} value={code}>
-                    {name} ({code.toUpperCase()})
-                  </MenuItem>
-                ))}
-            </TextField>
-          </Grid>
-          <Grid size={3}>
-            <TextField
-              name="bool_dashboard"
-              label={LL.BOOLEAN_FORMAT_DASHBOARD()}
-              value={data.bool_dashboard}
-              variant="outlined"
-              fullWidth
-              onChange={updateFormValue}
-              margin="normal"
-              select
-            >
-              <MenuItem value={1}>{LL.ONOFF()}</MenuItem>
-              <MenuItem value={2}>{LL.ONOFF_CAP()}</MenuItem>
-              <MenuItem value={3}>true/false</MenuItem>
-              <MenuItem value={5}>1/0</MenuItem>
-            </TextField>
-          </Grid>
-          <Grid size={3}>
-            <TextField
-              name="bool_format"
-              label={LL.BOOLEAN_FORMAT_API()}
-              value={data.bool_format}
-              variant="outlined"
-              fullWidth
-              onChange={updateFormValue}
-              margin="normal"
-              select
-            >
-              <MenuItem value={1}>{LL.ONOFF()}</MenuItem>
-              <MenuItem value={2}>{LL.ONOFF_CAP()}</MenuItem>
-              <MenuItem value={3}>&quot;true&quot;/&quot;false&quot;</MenuItem>
-              <MenuItem value={4}>true/false</MenuItem>
-              <MenuItem value={5}>&quot;1&quot;/&quot;0&quot;</MenuItem>
-              <MenuItem value={6}>1/0</MenuItem>
-            </TextField>
-          </Grid>
-          <Grid size={3}>
-            <TextField
-              name="enum_format"
-              label={LL.ENUM_FORMAT()}
-              value={data.enum_format}
-              variant="outlined"
-              fullWidth
-              onChange={updateFormValue}
-              margin="normal"
-              select
-            >
-              <MenuItem value={1}>{LL.VALUE(5)}</MenuItem>
-              <MenuItem value={2}>{LL.INDEX()}</MenuItem>
-            </TextField>
-          </Grid>
-        </Grid>
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.fahrenheit}
-              onChange={updateFormValue}
-              name="fahrenheit"
-            />
-          }
-          label={LL.CONVERT_FAHRENHEIT()}
-        />
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.trace_raw}
-              onChange={updateFormValue}
-              name="trace_raw"
-            />
-          }
-          label={LL.LOG_HEX()}
-        />
-
-        <Typography sx={{ pb: 1, pt: 2 }} variant="h6" color="primary">
-          {LL.SETTINGS_OF(LL.HARDWARE())}
-        </Typography>
-        <TextField
-          name="board_profile"
-          label={LL.BOARD_PROFILE()}
-          value={data.board_profile}
-          disabled={processingBoard}
-          variant="outlined"
-          onChange={changeBoardProfile}
-          margin="normal"
-          select
-        >
-          {hardwareData.model.startsWith('BBQKees') ? (
-            <MenuItem key={hardwareData.board} value={hardwareData.board}>
-              {BOARD_PROFILES[hardwareData.board as BoardProfileKey]}
-            </MenuItem>
-          ) : (
-            boardProfileItems
-          )}
-          {(data.board_profile === 'CUSTOM' || data.developer_mode) && <Divider />}
-          {(data.board_profile === 'CUSTOM' || data.developer_mode) && (
-            <MenuItem key={'CUSTOM'} value={'CUSTOM'}>
-              {LL.CUSTOM()}&hellip;
-            </MenuItem>
-          )}
-        </TextField>
-        {data.board_profile === 'CUSTOM' && (
-          <>
-            <Grid container spacing={2} rowSpacing={0}>
-              <Grid>
-                <ValidatedTextField
-                  fieldErrors={fieldErrors || {}}
-                  name="rx_gpio"
-                  label={LL.GPIO_OF('Rx')}
-                  fullWidth
-                  variant="outlined"
-                  value={numberValue(data.rx_gpio)}
-                  type="number"
-                  onChange={updateFormValue}
-                  margin="normal"
-                />
-              </Grid>
-              <Grid>
-                <ValidatedTextField
-                  fieldErrors={fieldErrors || {}}
-                  name="tx_gpio"
-                  label={LL.GPIO_OF('Tx')}
-                  fullWidth
-                  variant="outlined"
-                  value={numberValue(data.tx_gpio)}
-                  type="number"
-                  onChange={updateFormValue}
-                  margin="normal"
-                />
-              </Grid>
-              <Grid>
-                <ValidatedTextField
-                  fieldErrors={fieldErrors || {}}
-                  name="pbutton_gpio"
-                  label={LL.GPIO_OF(LL.BUTTON())}
-                  fullWidth
-                  variant="outlined"
-                  value={numberValue(data.pbutton_gpio)}
-                  type="number"
-                  onChange={updateFormValue}
-                  margin="normal"
-                />
-              </Grid>
-              <Grid>
-                <ValidatedTextField
-                  fieldErrors={fieldErrors || {}}
-                  name="dallas_gpio"
-                  label={
-                    LL.GPIO_OF(LL.TEMPERATURE()) + ' (0=' + LL.DISABLED(1) + ')'
-                  }
-                  fullWidth
-                  variant="outlined"
-                  value={numberValue(data.dallas_gpio)}
-                  type="number"
-                  onChange={updateFormValue}
-                  margin="normal"
-                />
-              </Grid>
-              <Grid>
-                <ValidatedTextField
-                  fieldErrors={fieldErrors || {}}
-                  name="led_gpio"
-                  label={LL.GPIO_OF('LED') + ' (0=' + LL.DISABLED(1) + ')'}
-                  fullWidth
-                  variant="outlined"
-                  value={numberValue(data.led_gpio)}
-                  type="number"
-                  onChange={updateFormValue}
-                  margin="normal"
-                />
-              </Grid>
-              {data.led_gpio !== 0 && (
-                <Grid>
-                  <TextField
-                    name="led_type"
-                    label={'LED ' + LL.TYPE(0)}
-                    value={data.led_type}
-                    fullWidth
-                    variant="outlined"
-                    onChange={updateFormValue}
-                    margin="normal"
-                    select
-                  >
-                    <MenuItem value={0}>LED</MenuItem>
-                    <MenuItem value={1}>RGB-LED</MenuItem>
-                  </TextField>
-                </Grid>
-              )}
-              <Grid>
-                <TextField
-                  name="phy_type"
-                  label={LL.PHY_TYPE()}
-                  value={data.phy_type}
-                  fullWidth
-                  variant="outlined"
-                  onChange={updateFormValue}
-                  margin="normal"
-                  select
-                >
-                  <MenuItem value={0}>{LL.DISABLED(1)}</MenuItem>
-                  <MenuItem value={1}>LAN8720</MenuItem>
-                  <MenuItem value={2}>TLK110</MenuItem>
-                  <MenuItem value={3}>RTL8201</MenuItem>
-                </TextField>
-              </Grid>
-            </Grid>
-            {data.phy_type !== 0 && (
-              <Grid container spacing={2} rowSpacing={0}>
-                <Grid>
-                  <TextField
-                    name="eth_power"
-                    label={LL.GPIO_OF('PHY Power') + ' (-1=' + LL.DISABLED(1) + ')'}
-                    fullWidth
-                    variant="outlined"
-                    value={numberValue(data.eth_power)}
-                    type="number"
-                    onChange={updateFormValue}
-                    margin="normal"
-                  />
-                </Grid>
-                <Grid>
-                  <TextField
-                    name="eth_phy_addr"
-                    label={LL.ADDRESS_OF('PHY I²C')}
-                    fullWidth
-                    variant="outlined"
-                    value={numberValue(data.eth_phy_addr)}
-                    type="number"
-                    onChange={updateFormValue}
-                    margin="normal"
-                  />
-                </Grid>
-                <Grid>
-                  <TextField
-                    name="eth_clock_mode"
-                    label="PHY Clk"
-                    value={data.eth_clock_mode}
-                    fullWidth
-                    variant="outlined"
-                    onChange={updateFormValue}
-                    margin="normal"
-                    select
-                  >
-                    <MenuItem value={0}>GPIO0_IN</MenuItem>
-                    <MenuItem value={1}>GPIO0_OUT</MenuItem>
-                    <MenuItem value={2}>GPIO16_OUT</MenuItem>
-                    <MenuItem value={3}>GPIO17_OUT</MenuItem>
-                  </TextField>
-                </Grid>
-              </Grid>
-            )}
-          </>
-        )}
-        <Grid container spacing={2} rowSpacing={0}>
-          <Grid>
-            <TextField
-              name="tx_mode"
-              label={LL.TX_MODE()}
-              value={data.tx_mode}
-              variant="outlined"
-              onChange={updateFormValue}
-              margin="normal"
-              sx={{ width: '15ch' }}
-              select
-            >
-              {data.developer_mode && <MenuItem value={0}>{LL.OFF()}</MenuItem>}
-              <MenuItem value={1}>EMS</MenuItem>
-              <MenuItem value={2}>EMS+</MenuItem>
-              <MenuItem value={3}>HT3</MenuItem>
-              <MenuItem value={4}>{LL.HARDWARE()}</MenuItem>
-              <MenuItem value={5}>Auto</MenuItem>
-            </TextField>
-          </Grid>
-          <Grid>
-            <TextField
-              name="ems_bus_id"
-              label={LL.ID_OF(LL.EMS_BUS(0))}
-              value={data.ems_bus_id}
-              fullWidth
-              variant="outlined"
-              onChange={updateFormValue}
-              margin="normal"
-              select
-            >
-              <MenuItem value={0x0a}>Terminal (0x0A)</MenuItem>
-              <MenuItem value={0x0b}>Service Key (0x0B)</MenuItem>
-              <MenuItem value={0x0d}>Modem (0x0D)</MenuItem>
-              <MenuItem value={0x0e}>Converter (0x0E)</MenuItem>
-              <MenuItem value={0x0f}>Time Module (0x0F)</MenuItem>
-              <MenuItem value={0x48}>Gateway 1 (0x48)</MenuItem>
-              <MenuItem value={0x49}>Gateway 2 (0x49)</MenuItem>
-              <MenuItem value={0x4a}>Gateway 3 (0x4A)</MenuItem>
-              <MenuItem value={0x4b}>Gateway 4 (0x4B)</MenuItem>
-              <MenuItem value={0x4c}>Gateway 5 (0x4C)</MenuItem>
-              <MenuItem value={0x4d}>Gateway 7 (0x4D)</MenuItem>
-            </TextField>
-          </Grid>
-        </Grid>
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.readonly_mode}
-              onChange={updateFormValue}
-              name="readonly_mode"
-            />
-          }
-          label={LL.READONLY()}
-        />
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.write_protection}
-              onChange={updateFormValue}
-              name="write_protection"
-            />
-          }
-          label={LL.WRITE_PROTECTION()}
-        />
-        {data.write_protection && (
-          <>
-            <Box sx={{ mt: 1, mb: 1 }}>
-              <ValidatedTextField
-                fieldErrors={fieldErrors || {}}
-                name="write_limit"
-                label={LL.WRITE_LIMIT()}
-                sx={{ minWidth: 320 }}
-                variant="outlined"
-                value={numberValue(data.write_limit)}
-                type="number"
-                onChange={updateFormValue}
-              />
-            </Box>
-            {data.write_limit !== 0 && (
-              <BlockFormControlLabel
-                control={
-                  <Checkbox
-                    checked={data.write_limit_refuse}
-                    onChange={updateFormValue}
-                    name="write_limit_refuse"
-                  />
-                }
-                label={LL.WRITE_LIMIT_REFUSE()}
-              />
-            )}
-          </>
-        )}
-        {data.led_gpio !== 0 && (
-          <BlockFormControlLabel
-            control={
-              <Checkbox
-                checked={data.hide_led}
-                onChange={updateFormValue}
-                name="hide_led"
-              />
-            }
-            label={LL.HIDE_LED()}
-          />
-        )}
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.low_clock}
-              onChange={updateFormValue}
-              name="low_clock"
-            />
-          }
-          label={LL.UNDERCLOCK_CPU()}
-        />
-
-        <Typography sx={{ pb: 1, pt: 2 }} variant="h6" color="primary">
-          {LL.SPECIAL_FUNCTIONS()}
-        </Typography>
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.developer_mode}
-              onChange={updateFormValue}
-              name="developer_mode"
-            />
-          }
-          label={LL.DEVELOPER_MODE()}
-        />
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.disable_reset}
-              onChange={updateFormValue}
-              name="disable_reset"
-            />
-          }
-          label={LL.DISABLE_RESET()}
-        />
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.boiler_heatingoff}
-              onChange={updateFormValue}
-              name="boiler_heatingoff"
-            />
-          }
-          label={LL.HEATINGOFF()}
-        />
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.remote_timeout_en}
-              onChange={updateFormValue}
-              name="remote_timeout_en"
-            />
-          }
-          label={LL.REMOTE_TIMEOUT_EN()}
-        />
-        {data.remote_timeout_en && (
-          <Box sx={{ mt: 2 }}>
-            <ValidatedTextField
-              fieldErrors={fieldErrors || {}}
-              name="remote_timeout"
-              label={LL.REMOTE_TIMEOUT()}
-              slotProps={{
-                input: HoursInputProps
-              }}
-              variant="outlined"
-              value={numberValue(data.remote_timeout)}
-              type="number"
-              onChange={updateFormValue}
-            />
-          </Box>
-        )}
-        <Grid container spacing={2} rowSpacing={0}>
-          <BlockFormControlLabel
-            control={
-              <Checkbox
-                checked={data.shower_timer}
-                onChange={updateFormValue}
-                name="shower_timer"
-              />
-            }
-            label={LL.ENABLE_SHOWER_TIMER()}
-          />
-          <BlockFormControlLabel
-            control={
-              <Checkbox
-                checked={data.shower_alert}
-                onChange={updateFormValue}
-                name="shower_alert"
-              />
-            }
-            label={LL.ENABLE_SHOWER_ALERT()}
-            disabled={!data.shower_timer}
-          />
-        </Grid>
-        <Grid container spacing={2} sx={{ pt: 2 }}>
-          {data.shower_timer && (
-            <Grid>
-              <ValidatedTextField
-                fieldErrors={fieldErrors || {}}
-                name="shower_min_duration"
-                label={LL.MIN_DURATION()}
-                slotProps={{
-                  input: SecondsInputProps
-                }}
-                variant="outlined"
-                value={numberValue(data.shower_min_duration)}
-                fullWidth
-                type="number"
-                onChange={updateFormValue}
-              />
-            </Grid>
-          )}
-          {data.shower_alert && (
-            <>
-              <Grid>
-                <ValidatedTextField
-                  fieldErrors={fieldErrors || {}}
-                  name="shower_alert_trigger"
-                  label={LL.TRIGGER_TIME()}
-                  slotProps={{
-                    input: MinutesInputProps
-                  }}
-                  variant="outlined"
-                  value={numberValue(data.shower_alert_trigger)}
-                  fullWidth
-                  type="number"
-                  onChange={updateFormValue}
-                  disabled={!data.shower_timer}
-                />
-              </Grid>
-              <Grid>
-                <ValidatedTextField
-                  fieldErrors={fieldErrors || {}}
-                  name="shower_alert_coldshot"
-                  label={LL.COLD_SHOT_DURATION()}
-                  slotProps={{
-                    input: SecondsInputProps
-                  }}
-                  variant="outlined"
-                  value={numberValue(data.shower_alert_coldshot)}
-                  fullWidth
-                  type="number"
-                  onChange={updateFormValue}
-                  disabled={!data.shower_timer}
-                />
-              </Grid>
-            </>
-          )}
-        </Grid>
-
-        {restartNeeded && (
-          <MessageBox level="warning" message={LL.RESTART_TEXT(0)}>
-            <Button
-              sx={{ ml: 2 }}
-              startIcon={<PowerSettingsNewIcon />}
-              variant="contained"
-              color="error"
-              onClick={restart}
-            >
-              {LL.RESTART()}
-            </Button>
-          </MessageBox>
-        )}
-        {!restartNeeded && dirtyFlags && dirtyFlags.length !== 0 && (
-          <ButtonRow>
-            <Button
-              startIcon={<CancelIcon />}
-              variant="outlined"
-              color="secondary"
-              type="submit"
-              onClick={loadData}
-            >
-              {LL.CANCEL()}
-            </Button>
-            <Button
-              startIcon={<WarningIcon color="warning" />}
-              variant="contained"
-              color="info"
-              type="submit"
-              onClick={validateAndSubmit}
-            >
-              {LL.APPLY_CHANGES(dirtyFlags.length)}
-            </Button>
-          </ButtonRow>
-        )}
-      </>
-    );
+        ]
+      },
+      {
+        id: 'advanced',
+        icon: 'science',
+        title: LL.ADVANCED(),
+        items: [
+          sw('trace_raw', LL.LOG_HEX()),
+          data.led_gpio !== 0 && sw('hide_led', LL.HIDE_LED()),
+          sw('low_clock', LL.UNDERCLOCK_CPU()),
+          sw('developer_mode', LL.DEVELOPER_MODE()),
+          sw('disable_reset', LL.DISABLE_RESET())
+        ]
+      }
+    ];
   };
 
-  return restarting ? (
-    <SystemMonitor />
-  ) : (
-    <SectionContent>
-      {blocker ? <BlockNavigation blocker={blocker} /> : null}
-      {content()}
-    </SectionContent>
+  const q = query.trim().toLowerCase();
+  // keys match by word start, so "led" finds led_gpio but not telnet_enabled
+  const matches = (item: Item) =>
+    !q ||
+    `${item.label} ${item.help ?? ''}`.toLowerCase().includes(q) ||
+    (q.includes('_')
+      ? item.key.includes(q)
+      : item.key.split(/[_ ]/).some((w) => w.startsWith(q)));
+
+  return (
+    <FormPage form={form}>
+      {(data) => {
+        if (!hardware) return <Loader />;
+        const shown = groups(data).map((g) => ({
+          ...g,
+          items: g.items.filter((i): i is Item => !!i && matches(i))
+        }));
+        return (
+          <div>
+            <div ref={indexRef} className="section app-index">
+              <SearchField
+                label={LL.SEARCH_SETTINGS()}
+                value={query}
+                onChange={(e) => setQuery(e.currentTarget.value)}
+              />
+              <nav className="app-jumps">
+                {shown.map((g) => (
+                  <button
+                    key={g.id}
+                    type="button"
+                    className="app-jump"
+                    disabled={!g.items.length}
+                    onClick={() => jump(g.id)}
+                  >
+                    <Icon name={g.icon} size="xs" />
+                    {g.title}
+                  </button>
+                ))}
+              </nav>
+            </div>
+            {shown.map(
+              (g) =>
+                g.items.length > 0 && (
+                  <FormSection
+                    key={g.id}
+                    id={`app-${g.id}`}
+                    className="app-group"
+                    icon={g.icon}
+                    title={g.title}
+                    desc={g.desc}
+                  >
+                    {g.items.map((i) => (
+                      <Fragment key={i.key}>{i.node}</Fragment>
+                    ))}
+                  </FormSection>
+                )
+            )}
+            {shown.every((g) => !g.items.length) && (
+              <Section className="muted">{LL.NO_SETTINGS_MATCH()}</Section>
+            )}
+          </div>
+        );
+      }}
+    </FormPage>
   );
 };
 
