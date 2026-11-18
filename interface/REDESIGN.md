@@ -6,6 +6,44 @@ Working plan for moving the web UI to the new design. This file is the source of
 - Visual spec: the mockups, hosted at <https://emsesp-mockups.emsesp.org>
 - Step IDs (`S2.3` etc.) are used in commit messages and PR titles, for example `webui: status overview (S2.1)`
 
+## Context (read first)
+
+Findings from the analysis, so a new session doesn't have to rediscover them.
+
+**Current UI**
+
+- Preact runs through `preact/compat`. `react` is aliased to `src/preact-react-shim.ts` in `vite.config.ts` (react-router v8 needs `useOptimistic`). Keep that.
+- Routes: `src/index.tsx` (react-router v8, `RequireAuthenticated`, `RequireAdmin`). Menu: `components/layout/LayoutMenu.tsx`, separate from the routes today.
+- REST: alova in `src/api/endpoints.ts` (bearer token, `PASSWORD_REQUIRED` re-prompt via `passwordPrompt.ts`, MessagePack unpack for `arraybuffer` responses). Calls per area in `src/api/*.ts`.
+- Settings forms use `src/utils/useRest.ts`: keeps `origData`, `dirtyFlags`, `useBlocker` for the unsaved-changes guard, and handles the 205 "Reboot required" response. The new save bar should sit on top of this, not replace it.
+- List pages (Scheduler, Commands, Custom Entities, Modules, Customizations) keep original values as `o_*` fields added in `src/api/app.ts` transforms. `usePendingList` (S5.1) is meant to replace those.
+- Theme: `src/CustomTheme.tsx` (MUI dark theme, font size 13). Shared components: `src/components/` (layout, inputs, loading, routing, toast, upload).
+- i18n: typesafe-i18n, `LL.*` keys, `src/i18n/<lang>/index.ts`.
+- MUI is imported in 79 files, about 393 `sx` props, MUI icons in 58 files, `@table-library` in 11, `react-icons` in 3.
+- Biggest pages: ApplicationSettings 1147 lines, Version 1045, Customizations 955, Devices 834, Recovery Dashboard 630.
+
+**Mockups to real pages**
+
+| Mockup | Real page |
+| --- | --- |
+| `shell.js` (drawer, breadcrumbs via `parents`, dialog, toast) | `components/layout/*` |
+| `system.js` `status`, `status-*` | `app/status/*` |
+| `system.js` `settings`, `settings-*`, `FORMS` + `formPage` (prototype for `FormPage`) | `app/settings/*` |
+| `a-classic.html` `downloadupload`, `restore`, backup dialog | `app/settings/DownloadUpload.tsx` + new restore page |
+| `a-classic.html` `dashboard`, `devices` | `app/main/Dashboard.tsx`, `Devices.tsx` |
+| `modules.js` (sensors, customizations, commands, scheduler, customentities, `openForm` = prototype for `EntityDialog`) | `app/main/*` |
+| `account.js` (help, user) | `app/main/Help.tsx`, `UserProfile.tsx` |
+| `base.css` (all tokens and styles) | `components/ui/tokens.css` + component CSS |
+| `data.js` (mock data) | shapes are illustrative; real shapes are in `src/types/*` and `app/main/types.ts` |
+
+Run the mockups with `cd mockups && python3 -m http.server 8765`.
+
+**Icons**
+
+The mockups use Material Symbols Rounded by name (`<span class="ms">name</span>`). Copy each used icon as SVG from `google/material-design-icons` (`symbols/web/<name>/materialsymbolsrounded/<name>_24px.svg`) or the `@material-symbols/svg-400` package, keep only the path data, and register it in `components/ui/icons/`. No font, no CDN.
+
+**Firmware already supports** (no change needed): hashed API keys shown once on create (`/rest/apiKeys`), `auto_fw_check`, `write_limit` / `write_limit_refuse`, GPIO lists in sensor and settings data, `setPartition` / `getVersions` / `uploadURL` / `recovery_version`, `/rest/console`, `/rest/logSettings`, `/rest/time`, product ID per device in `/rest/coreData` (`p`), all export types except `heatingbackup`.
+
 ## Goals
 
 - Look and behave like the mockups
