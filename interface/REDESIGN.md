@@ -114,7 +114,7 @@ Status: `[ ]` todo, `[~]` in progress, `[x]` done. Add the PR link when one exis
 - [ ] S7.2 Replace `@table-library` if a plain table + sort/filter helper is enough
 - [ ] S7.3 Remove `@mui/*`, `@emotion/*`, `react-icons`; final size comparison
 - [ ] S7.4 Recovery UI (`src/recovery`) on the same components
-- [ ] S7.5 Changelog entries, PR to upstream `dev`
+- [ ] S7.5 Changelog entries, remove `mockups/` from the branch, PR to upstream `dev`
 
 ## Decisions
 
