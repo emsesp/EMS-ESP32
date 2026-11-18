@@ -1,0 +1,11 @@
+node_modules
+.wrangler
+wrangler.jsonc
+package.json
+pnpm-lock.yaml
+pnpm-workspace.yaml
+.gitignore
+.assetsignore
+README.md
+*.png
+!assets/*.png

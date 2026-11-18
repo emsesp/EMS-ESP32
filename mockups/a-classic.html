@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EMS-ESP mockup A - Refined classic</title>
+  <link rel="icon" href="assets/icon.png">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0">
+  <link rel="stylesheet" href="base.css">
+  <style>
+    .strip { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 12px 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; margin: 12px; }
+    .card { background: var(--paper); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; }
+    .card-head { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--divider); }
+    .card-head .ms { color: var(--lightblue); }
+    .card-head .name { font-size: 15px; }
+    .card-head .count { color: var(--lightblue); }
+    .card .tbl td { height: 28px; }
+    .card .tbl td:last-child { width: 36px; text-align: right; }
+    .card-foot { margin-top: auto; padding: 6px 12px; border-top: 1px solid var(--divider); display: flex; justify-content: space-between; align-items: center; }
+    .state { margin-left: auto; }
+    .state.heating { background: rgba(244, 67, 54, 0.18); color: #ff8a80; }
+    .state.auto, .state.open { background: rgba(102, 187, 106, 0.18); color: #a5d6a7; }
+
+    .dev-tbl td:first-child { width: 40px; }
+    .dev-tbl tbody tr.sel { background: rgba(144, 202, 249, 0.25) !important; }
+    .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 12px 0 8px; }
+    .scroll { max-height: calc(100vh - 380px); min-height: 240px; overflow: auto; border-radius: 6px; }
+
+    .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+    .tile { display: flex; gap: 14px; align-items: center; padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--paper-2); cursor: pointer; }
+    .tile:hover { border-color: var(--primary); }
+    .avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; }
+    .tile .k { font-size: 15px; }
+    .tile .v { color: var(--text-3); font-size: 12px; }
+    .bar { height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+    .bar > div { height: 100%; background: var(--primary); }
+
+    .set-list .set-item { display: flex; align-items: center; gap: 16px; padding: 10px 12px; border-radius: 8px; cursor: pointer; }
+    .set-list .set-item:hover { background: rgba(255, 255, 255, 0.06); }
+    .set-list .set-item .k { font-size: 15px; }
+    .set-list .set-item .v { color: var(--text-3); font-size: 12px; }
+    .set-list .set-item.new .k::after { content: 'new'; margin-left: 8px; font-size: 10px; padding: 1px 6px; border-radius: 8px; background: rgba(144, 202, 249, 0.16); color: var(--primary); text-transform: uppercase; }
+    .sec-title { color: var(--primary); font-size: 18px; margin: 0 0 4px; font-weight: 400; }
+    .sec-text { color: var(--text-2); margin: 0 0 12px; }
+    .actions-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .drop { border: 2px dashed rgba(255, 255, 255, 0.23); border-radius: 8px; padding: 22px; text-align: center; color: var(--text-2); cursor: pointer; margin-top: 12px; }
+    .drop:hover { border-color: var(--primary); color: var(--primary); }
+    .drop .ms { font-size: 32px; display: block; margin: 0 auto 6px; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 12px; font-size: 12px; }
+    .pill.ok { background: rgba(102, 187, 106, 0.16); color: #a5d6a7; }
+    .pill.warn { background: rgba(255, 167, 38, 0.16); color: #ffcc80; }
+    .pill.err { background: rgba(244, 67, 54, 0.16); color: #ff8a80; }
+    .pill.ro { background: rgba(255, 255, 255, 0.08); color: var(--text-3); }
+    input[type='checkbox'] { accent-color: var(--primary); width: 16px; height: 16px; vertical-align: middle; cursor: pointer; }
+    input[type='checkbox']:disabled { cursor: default; opacity: 0.4; }
+    .rtbl tbody tr { cursor: default; }
+    .rtbl tbody tr:hover { background: inherit; }
+    .rtbl tbody tr.dim td { color: var(--text-3); }
+    .rtbl td.chk, .rtbl th.chk { width: 36px; text-align: center; }
+    .rtbl .changed { color: #fff59d; }
+    .file-head { display: flex; gap: 14px; align-items: flex-start; }
+    .file-head .ms.big { font-size: 36px; color: var(--lightblue); }
+    .note { background: var(--paper-2); border-left: 3px solid var(--primary); padding: 6px 10px; margin-top: 8px; color: var(--text-2); font-style: italic; }
+    .dlg-dev { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
+    .dlg-dev .grow { display: flex; flex-direction: column; }
+    .progress { height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; margin: 8px 0 0; }
+    .progress > div { height: 100%; background: var(--primary); transition: width 0.3s; }
+  </style>
+</head>
+<body>
+<script src="data.js"></script>
+<script src="shell.js"></script>
+<script src="modules.js"></script>
+<script src="account.js"></script>
+<script src="system.js"></script>
+<script>
+  const { fmt, h, editDialog, M } = Shell;
+  let selDev = 1, favOnly = false, query = '';
+
+  const icon = (d) => `<span class="ms sm">${d.icon}</span>`;
+  const editBtn = (e) =>
+    e.w && e.m & 4 ? '<span class="ms xs muted" title="write disabled in Customizations">lock</span>' :
+    e.w ? `<button class="icon-btn" title="${e.w.type === 'cmd' ? 'Run' : 'Change value'}"><span class="ms xs">${e.w.type === 'cmd' ? 'play_arrow' : 'edit'}</span></button>` : '';
+
+  function dashboard() {
+    const s = M.system;
+    const strip = `<div class="strip">
+      <span class="chip"><span class="dot ok"></span>EMS bus ${s.bus.tx}</span>
+      <span class="chip"><span class="dot ok"></span>MQTT</span>
+      <span class="chip"><span class="dot ok"></span>${s.network.type} ${s.network.ip}</span>
+      <span class="chip"><span class="ms xs">schedule</span>${s.uptime}</span>
+      <span class="chip clickable" data-nav="settings" style="background:rgba(255,235,59,.12);color:#fff59d"><span class="ms xs">system_update</span>${s.latest} available</span>
+    </div>`;
+    const cards = M.devices.map((d) => {
+      const favs = d.entities.filter((e) => e.fav);
+      return `<div class="card">
+        <div class="card-head">${icon(d)}<span class="name">${d.name}</span><span class="count">(${favs.length})</span>
+          <span class="cap">${d.brand} ${d.model}</span><span class="chip state ${d.state}">${d.state}</span></div>
+        <table class="tbl"><tbody>${favs.map((e) => `<tr data-dev="${d.id}" data-ent="${e.id}"><td>${h(e.name)}</td><td class="r">${fmt(e)}</td><td>${editBtn(e)}</td></tr>`).join('')}</tbody></table>
+        <div class="card-foot"><span class="cap">${d.entities.length} entities</span><a href="#devices" data-sel="${d.id}">open device <span class="ms xs">chevron_right</span></a></div>
+      </div>`;
+    });
+    const sensors = `<div class="card"><div class="card-head"><span class="ms sm">sensors</span><span class="name">Temperature Sensors</span><span class="count">(${M.sensors.temp.length})</span></div>
+      <table class="tbl"><tbody>${M.sensors.temp.map((t) => `<tr><td>${t.name}</td><td class="r">${fmt(t)}</td><td></td></tr>`).join('')}</tbody></table></div>`;
+    const sched = `<div class="card"><div class="card-head"><span class="ms sm">more_time</span><span class="name">Scheduler</span><span class="count">(${M.schedules.length})</span></div>
+      <table class="tbl"><tbody>${M.schedules.map((t) => `<tr data-nav="scheduler"><td>${t.name}</td><td class="r muted">${Modules.whenText(t, false)}</td><td><div class="switch ${t.active ? 'on' : ''}" style="margin-left:auto"></div></td></tr>`).join('')}</tbody></table></div>`;
+    return strip + `<div class="cards">${cards.join('')}${sensors}${sched}</div>`;
+  }
+
+  function devices() {
+    const d = M.devices.find((x) => x.id === selDev);
+    const list = d.entities.filter((e) => !(e.m & 129) && (!favOnly || e.fav) && (!query || (e.name + e.id).toLowerCase().includes(query)));
+    return `<div class="section">
+      <table class="tbl dev-tbl"><thead><tr><th></th><th>Device</th><th>Model</th><th class="r">Entities</th></tr></thead><tbody>
+      ${M.devices.map((x) => `<tr class="${x.id === selDev ? 'sel' : ''}" data-pick="${x.id}"><td class="lb">${icon(x)}</td><td>${x.name}</td><td>${x.brand} ${x.model}</td><td class="r">${x.entities.length}</td></tr>`).join('')}
+      </tbody></table>
+    </div>
+    <div class="section">
+      <div class="row"><span class="lb">${icon(d)}</span><span class="h6">${d.name}</span><span class="cap">${d.brand} ${d.model} · product ${d.productId} · id ${d.deviceId} · v${d.version}</span></div>
+      <div class="toolbar">
+        <span class="search"><span class="ms">search</span><input class="input" id="q" placeholder="Search entities" value="${h(query)}"></span>
+        <span class="toggle-group"><button class="${!favOnly ? 'on' : ''}" data-fav="0">All</button><button class="${favOnly ? 'on' : ''}" data-fav="1"><span class="ms xs">star</span>Favorites</button></span>
+        <span class="grow"></span>
+        <button class="btn sm"><span class="ms xs">download</span>Export</button>
+        <button class="btn sm secondary"><span class="ms xs">construction</span>Customize</button>
+      </div>
+      <div class="scroll"><table class="tbl"><thead><tr><th>Entity</th><th class="r">Value</th><th style="width:40px"></th></tr></thead><tbody>
+      ${list.map((e) => `<tr data-dev="${d.id}" data-ent="${e.id}"><td>${e.fav ? '<span class="ms xs fill" style="color:#ffeb3b">star</span> ' : ''}${h(e.name)}</td><td class="r">${fmt(e)}</td><td class="r">${editBtn(e)}</td></tr>`).join('') || '<tr><td colspan="3" class="muted">no entities match</td></tr>'}
+      </tbody></table></div>
+    </div>`;
+  }
+
+  // ---------- heating settings backup / restore ----------
+  const REJECTS = new Set(['boiler:pumpmodmax']); // the boiler refuses this write in the demo
+  const MISSING_VALUES = 2; // entities registered but not read from the bus yet
+  let tipDismissed = false;
+  let rs = null; // loaded restore file and its rows
+  let onlyChanged = true, rquery = '', running = false, done = null;
+
+  const backupValues = (d) => d.entities.filter((e) => e.w && e.w.type !== 'cmd' && e.v !== '' && e.v !== undefined);
+  const today = () => new Date().toISOString().slice(0, 10);
+  const valueText = (v, e) => (v === undefined ? '<span class="muted">-</span>' : h(fmt({ v, u: e ? e.u : '' })));
+
+  function buildBackup(devs, note) {
+    return {
+      type: 'heatingbackup',
+      version: M.system.version,
+      created: new Date().toISOString().slice(0, 16).replace('T', ' '),
+      fahrenheit: false,
+      note,
+      devices: devs.map((d) => ({
+        type: d.type,
+        name: d.name,
+        deviceId: d.deviceId,
+        productId: d.productId,
+        version: d.version,
+        values: Object.fromEntries(backupValues(d).map((e) => [e.id, e.v]))
+      }))
+    };
+  }
+
+  function downloadupload() {
+    return `<div class="section">
+      <h2 class="sec-title">EMS-ESP Settings</h2>
+      <p class="sec-text">Backup of the EMS-ESP settings: network, MQTT, customizations, scheduler, custom entities and modules. Uploading a settings file restarts EMS-ESP.</p>
+      <div class="actions-row"><button class="btn" id="sysbackup"><span class="ms xs">download</span>System Backup</button></div>
+      <div class="drop" id="sysdrop"><span class="ms">upload_file</span>Drop a settings or system backup file here, or click to select one</div>
+    </div>
+    <div class="section">
+      <h2 class="sec-title">Heating Settings</h2>
+      <p class="sec-text">Saves the current values of your boiler, thermostat and other EMS devices, so you can put them back later.
+        Write-protected entities and commands are never changed by a restore.</p>
+      <div class="actions-row">
+        <button class="btn" id="hbackup"><span class="ms xs">download</span>Backup Heating Settings</button>
+        <button class="btn secondary" data-nav="restore"><span class="ms xs">settings_backup_restore</span>Restore Heating Settings</button>
+      </div>
+    </div>
+    <div class="section">
+      <h2 class="sec-title">Data Export</h2>
+      <p class="sec-text">For support and analysis. These files can't be uploaded back.</p>
+      <div class="actions-row">
+        <button class="btn" id="allvalues"><span class="ms xs">download</span>All Values</button>
+        <button class="btn" id="coredump"><span class="ms xs">download</span>Core Dump</button>
+      </div>
+    </div>`;
+  }
+
+  function openBackupDialog() {
+    const bd = document.getElementById('dialog');
+    const rows = M.devices
+      .map((d) => {
+        const n = backupValues(d).length;
+        return `<label class="dlg-dev"><input type="checkbox" data-bdev="${d.id}" ${n ? 'checked' : 'disabled'}>
+          <span class="ms sm lb">${d.icon}</span><span class="grow"><span>${d.name} <span class="muted">${d.brand} ${d.model}</span></span>
+          <span class="cap">ProductID ${d.productId} · DeviceID ${d.deviceId}</span></span>
+          <span class="cap">${n ? `${n} values` : 'nothing to back up'}</span></label>`;
+      })
+      .join('');
+    bd.innerHTML = `<div class="dialog" style="width:520px" onclick="event.stopPropagation()">
+      <h2>Backup Heating Settings</h2>
+      <div class="content">
+        <p class="cap" style="margin:12px 0 4px">Devices</p>${rows}
+        <div class="field" style="width:100%;margin-top:12px"><label>File name</label>
+          <div class="row"><input id="bk-name" class="input grow" value="heating_${today()}"><span class="muted">.json</span></div></div>
+        <div class="field" style="width:100%;margin-top:12px"><label>Note (optional, shown again when you restore)</label>
+          <input id="bk-note" class="input" placeholder="e.g. before changing the heating curve"></div>
+        <div class="msg warning" style="margin:14px 0 0"><span class="ms">schedule</span>
+          <span>${MISSING_VALUES} values haven't been read from the bus yet and won't be included. Wait a few minutes after a restart for a complete backup.</span></div>
+        <p class="cap" style="margin:12px 0 0">To stop EMS-ESP ever changing a value, mark it <b>disable write</b> in <a data-nav="customizations">Customizations</a>.</p>
+      </div>
+      <div class="actions">
+        <button class="btn secondary" data-close><span class="ms sm">cancel</span>Cancel</button>
+        <button class="btn contained" data-ok><span class="ms sm">download</span>Download</button>
+      </div></div>`;
+    bd.classList.add('open');
+    const close = () => bd.classList.remove('open');
+    bd.onclick = close;
+    bd.querySelector('[data-close]').onclick = close;
+    bd.querySelector('[data-nav]').addEventListener('click', close);
+    bd.querySelector('[data-ok]').onclick = () => {
+      const ids = [...bd.querySelectorAll('[data-bdev]:checked')].map((c) => +c.dataset.bdev);
+      const file = buildBackup(M.devices.filter((d) => ids.includes(d.id)), document.getElementById('bk-note').value);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(file, null, 2)], { type: 'application/json' }));
+      a.download = (document.getElementById('bk-name').value || 'heating') + '.json';
+      a.click();
+      close();
+      Shell.toast('Download successful');
+    };
+  }
+
+  // demo file: taken a week ago, before a few values were changed
+  function demoBackupFile() {
+    const changes = {
+      'thermostat:hc1/daytemp': 21,
+      'thermostat:hc1/nighttemp': 16,
+      'thermostat:hc2/mode': 'manual',
+      'thermostat:building': 'heavy',
+      'thermostat:dhw/settemp': 50,
+      'boiler:heatingtemp': 65,
+      'boiler:pumpmodmax': 80
+    };
+    const file = buildBackup(M.devices.filter((d) => backupValues(d).length), 'before changing the heating curve on hc1');
+    file.created = '2026-11-09 19:40';
+    file.version = '3.10.0-dev.2';
+    file.devices.forEach((fd) => Object.keys(fd.values).forEach((id) => (fd.values[id] = changes[`${fd.type}:${id}`] ?? fd.values[id])));
+    file.devices.push({ type: 'mixer', name: 'Mixer', deviceId: '0x21', productId: 161, version: '25.02', values: { 'hc2/flowsettemp': 38 } });
+    return { name: 'heating_2026-11-09.json', file };
+  }
+
+  function loadRestore({ name, file }) {
+    const rows = [];
+    for (const fd of file.devices) {
+      const d = M.devices.find((x) => x.type === fd.type && x.deviceId === fd.deviceId);
+      const same = d && d.productId === fd.productId;
+      for (const [id, bk] of Object.entries(fd.values)) {
+        const e = d && d.entities.find((x) => x.id === id);
+        const key = `${fd.type}:${id}`;
+        const status = !same ? 'mismatch' : !e ? 'missing' : e.m & 4 ? 'readonly' : 'ok';
+        rows.push({ key, fd, d, e, id, bk, status, checked: status === 'ok' && e.v !== bk, result: null });
+      }
+    }
+    rs = { name, file, rows };
+    done = null;
+  }
+
+  const isChanged = (r) => !r.e || r.e.v !== r.bk;
+
+  function restore() {
+    if (!rs) {
+      return `<div class="section">
+        <h2 class="sec-title">Restore Heating Settings</h2>
+        <p class="sec-text">Choose a heating settings backup. Nothing is written until you have checked the changes and confirmed.</p>
+        <div class="drop" id="rdrop"><span class="ms">upload_file</span>Drop a heating backup file here, or click to select one</div>
+        <p class="cap" style="margin-top:12px">Settings and system backups go in <a data-nav="downloadupload">Download/Upload</a>.</p>
+      </div>`;
+    }
+    const f = rs.file;
+    const devChips = f.devices
+      .map((fd) => {
+        const d = M.devices.find((x) => x.type === fd.type && x.deviceId === fd.deviceId);
+        if (!d) return `<span class="pill err"><span class="ms xs">link_off</span>${fd.name}: not connected</span>`;
+        if (d.productId !== fd.productId)
+          return `<span class="pill warn"><span class="ms xs">warning</span>${fd.name}: different device (backup ProductID ${fd.productId}, connected ${d.productId}), skipped</span>`;
+        return `<span class="pill ok"><span class="ms xs">check_circle</span>${fd.name} ${d.model}: same device</span>`;
+      })
+      .join('');
+    const changedCount = rs.rows.filter(isChanged).length;
+    const list = rs.rows.filter(
+      (r) => (!onlyChanged || isChanged(r)) && (!rquery || `${r.fd.name} ${r.e ? r.e.name : ''} ${r.id}`.toLowerCase().includes(rquery))
+    );
+    const selectable = list.filter((r) => r.status === 'ok' && isChanged(r));
+    const nSel = rs.rows.filter((r) => r.checked).length;
+    const statusCell = (r) => {
+      if (r.result === 'pending') return '<span class="pill ro"><span class="ms xs">hourglass_top</span>sending</span>';
+      if (r.result === 'ok') return '<span class="pill ok"><span class="ms xs">check</span>written</span>';
+      if (r.result === 'rejected') return '<span class="pill err"><span class="ms xs">block</span>rejected by device</span>';
+      if (r.status === 'mismatch') return '<span class="pill warn">different device</span>';
+      if (r.status === 'missing') return '<span class="pill ro">not found</span>';
+      if (r.status === 'readonly') return '<span class="pill ro"><span class="ms xs">lock</span>write disabled</span>';
+      if (!isChanged(r)) return '<span class="cap">unchanged</span>';
+      return '';
+    };
+    return `<div class="section">
+      <div class="file-head"><span class="ms big">description</span><div class="grow">
+        <div class="h6">${h(rs.name)}</div>
+        <div class="cap">created ${f.created} · EMS-ESP v${f.version} · temperatures in °${f.fahrenheit ? 'F' : 'C'}</div>
+        ${f.note ? `<div class="note">${h(f.note)}</div>` : ''}
+      </div><button class="btn sm secondary" id="rclear"><span class="ms xs">close</span>Choose another file</button></div>
+      <div class="row wrap" style="margin-top:12px">${devChips}</div>
+    </div>
+    <div class="section">
+      ${done ? `<div class="msg ${done.rejected ? 'warning' : 'info'}"><span class="ms">${done.rejected ? 'warning' : 'check_circle'}</span>
+        <span class="grow">${done.ok} value${done.ok === 1 ? '' : 's'} written${done.rejected ? `, ${done.rejected} rejected by the device. Devices often refuse installer-level values. See the System Log for details.` : '.'}</span></div>` : ''}
+      <div class="toolbar" style="margin-top:0">
+        <span class="search"><span class="ms">search</span><input class="input" id="rq" placeholder="Search" value="${h(rquery)}"></span>
+        <span class="toggle-group"><button class="${onlyChanged ? 'on' : ''}" data-oc="1">Changed (${changedCount})</button><button class="${!onlyChanged ? 'on' : ''}" data-oc="0">All (${rs.rows.length})</button></span>
+        <span class="grow"></span>
+      </div>
+      <div class="scroll"><table class="tbl rtbl"><thead><tr>
+        <th class="chk"><input type="checkbox" id="rall" ${selectable.length && selectable.every((r) => r.checked) ? 'checked' : ''} ${selectable.length && !running ? '' : 'disabled'}></th>
+        <th>Device</th><th>Entity</th><th class="r">Now</th><th class="r">Backup</th><th style="width:170px"></th></tr></thead><tbody>
+      ${list
+        .map((r) => {
+          const can = r.status === 'ok' && isChanged(r) && !running;
+          return `<tr class="${r.status !== 'ok' ? 'dim' : ''}">
+          <td class="chk"><input type="checkbox" data-rk="${r.key}" ${r.checked ? 'checked' : ''} ${can ? '' : 'disabled'}></td>
+          <td>${h(r.fd.name)}</td>
+          <td>${h(r.e ? r.e.name : r.id)} <span class="mono muted">${r.id}</span></td>
+          <td class="r" data-now="${r.key}">${valueText(r.e && r.e.v, r.e)}</td>
+          <td class="r ${isChanged(r) && r.status === 'ok' ? 'changed' : ''}">${valueText(r.bk, r.e)}</td>
+          <td class="r" data-res="${r.key}">${statusCell(r)}</td></tr>`;
+        })
+        .join('') || '<tr><td colspan="6" class="muted">nothing differs from the backup</td></tr>'}
+      </tbody></table></div>
+      <div class="progress" id="rprog" style="display:${running ? 'block' : 'none'}"><div style="width:0"></div></div>
+      <div class="row" style="margin-top:12px; justify-content:flex-end">
+        <button class="btn secondary" data-nav="downloadupload"><span class="ms sm">cancel</span>Cancel</button>
+        <button class="btn contained" id="rgo" ${nSel && !running ? '' : 'disabled style="opacity:.4;pointer-events:none"'}><span class="ms sm">settings_backup_restore</span>Restore ${nSel} value${nSel === 1 ? '' : 's'}</button>
+      </div>
+    </div>`;
+  }
+
+  function confirmRestore() {
+    const sel = rs.rows.filter((r) => r.checked);
+    const devs = [...new Set(sel.map((r) => r.fd.name))].join(' and ');
+    const bd = document.getElementById('dialog');
+    bd.innerHTML = `<div class="dialog" style="width:460px" onclick="event.stopPropagation()">
+      <h2>Restore Heating Settings</h2>
+      <div class="content">
+        <p style="margin:12px 0 0">Write <b>${sel.length}</b> value${sel.length === 1 ? '' : 's'} to ${devs} from <b>${h(rs.name)}</b>?</p>
+        ${rs.file.note ? `<div class="note">${h(rs.file.note)}</div>` : ''}
+        <p class="cap" style="margin:12px 0 0">Values are sent one at a time. If the device rejects one, the rest are still sent.</p>
+      </div>
+      <div class="actions">
+        <button class="btn secondary" data-close><span class="ms sm">cancel</span>Cancel</button>
+        <button class="btn contained" data-ok><span class="ms sm">settings_backup_restore</span>Restore</button>
+      </div></div>`;
+    bd.classList.add('open');
+    const close = () => bd.classList.remove('open');
+    bd.onclick = close;
+    bd.querySelector('[data-close]').onclick = close;
+    bd.querySelector('[data-ok]').onclick = () => {
+      close();
+      runRestore(sel);
+    };
+  }
+
+  async function runRestore(sel) {
+    running = true;
+    done = { ok: 0, rejected: 0 };
+    Shell.route();
+    const bar = document.querySelector('#rprog > div');
+    for (let i = 0; i < sel.length; i++) {
+      const r = sel[i];
+      r.result = 'pending';
+      paintRow(r);
+      await new Promise((res) => setTimeout(res, 700));
+      if (REJECTS.has(r.key)) {
+        r.result = 'rejected';
+        done.rejected++;
+      } else {
+        r.result = 'ok';
+        r.e.v = r.bk;
+        done.ok++;
+      }
+      r.checked = false;
+      paintRow(r);
+      bar.style.width = `${((i + 1) / sel.length) * 100}%`;
+    }
+    running = false;
+    onlyChanged = false;
+    Shell.route();
+  }
+
+  function paintRow(r) {
+    const res = document.querySelector(`[data-res="${r.key}"]`);
+    const now = document.querySelector(`[data-now="${r.key}"]`);
+    if (res) res.innerHTML = { pending: '<span class="pill ro"><span class="ms xs">hourglass_top</span>sending</span>', ok: '<span class="pill ok"><span class="ms xs">check</span>written</span>', rejected: '<span class="pill err"><span class="ms xs">block</span>rejected by device</span>' }[r.result];
+    if (now && r.result === 'ok') now.innerHTML = valueText(r.e.v, r.e);
+  }
+
+  function addBackupTip() {
+    if (tipDismissed) return;
+    const content = document.querySelector('#dialog .content');
+    if (!content) return;
+    content.insertAdjacentHTML(
+      'afterbegin',
+      `<div class="msg info" style="margin:12px 0 0"><span class="ms">lightbulb</span>
+        <span class="grow">Tip: back up your heating settings before you change installer values, so you can put them back.</span></div>
+       <div class="row" style="justify-content:flex-end;margin-top:6px">
+        <button class="btn sm secondary" id="tip-hide">Don't show again</button>
+        <button class="btn sm" id="tip-backup"><span class="ms xs">download</span>Backup now</button></div>`
+    );
+    document.getElementById('tip-hide').onclick = () => {
+      tipDismissed = true;
+      document.getElementById('tip-hide').closest('.row').remove();
+      content.querySelector('.msg.info').remove();
+    };
+    document.getElementById('tip-backup').onclick = () => {
+      tipDismissed = true;
+      openBackupDialog();
+    };
+  }
+
+  Shell.init({
+    views: { dashboard, devices, downloadupload, restore, ...Modules.views, ...Account.views, ...System.views },
+    titles: { downloadupload: 'Download/Upload', restore: 'Restore Heating Settings', ...Modules.titles, ...Account.titles, ...System.titles },
+    parents: System.parents,
+    afterRender(key, el) {
+      Modules.afterRender(key, el, Shell.route);
+      Account.afterRender(key, el, Shell.route);
+      System.afterRender(key, el, Shell.route);
+      el.querySelectorAll('[data-ent]').forEach((r) =>
+        r.addEventListener('click', () => {
+          const d = M.devices.find((x) => x.id == r.dataset.dev);
+          const e = d.entities.find((x) => x.id === r.dataset.ent);
+          if (e.w && e.m & 4) Shell.toast('Write disabled in Customizations');
+          else if (e.w) {
+            editDialog(e, d, Shell.route);
+            if (e.w.type !== 'cmd') addBackupTip();
+          }
+        })
+      );
+      if (key === 'downloadupload') {
+        el.querySelector('#hbackup').onclick = openBackupDialog;
+        ['#sysbackup', '#allvalues', '#coredump'].forEach((s) => (el.querySelector(s).onclick = () => Shell.toast('Download successful')));
+        el.querySelector('#sysdrop').onclick = () => Shell.toast('Not part of this mockup');
+      }
+      if (key === 'restore') {
+        const drop = el.querySelector('#rdrop');
+        if (drop) drop.onclick = () => { loadRestore(demoBackupFile()); Shell.route(); };
+        const clr = el.querySelector('#rclear');
+        if (clr) clr.onclick = () => { rs = null; done = null; Shell.route(); };
+        el.querySelectorAll('[data-oc]').forEach((b) => b.addEventListener('click', () => { onlyChanged = b.dataset.oc === '1'; Shell.route(); }));
+        el.querySelectorAll('[data-rk]').forEach((c) => c.addEventListener('change', () => { rs.rows.find((r) => r.key === c.dataset.rk).checked = c.checked; Shell.route(); }));
+        const all = el.querySelector('#rall');
+        if (all) all.addEventListener('change', () => {
+          rs.rows
+            .filter((r) => r.status === 'ok' && isChanged(r) && (!rquery || `${r.fd.name} ${r.e ? r.e.name : ''} ${r.id}`.toLowerCase().includes(rquery)))
+            .forEach((r) => (r.checked = all.checked));
+          Shell.route();
+        });
+        const go = el.querySelector('#rgo');
+        if (go) go.onclick = confirmRestore;
+        const rq = el.querySelector('#rq');
+        if (rq) rq.addEventListener('input', () => {
+          rquery = rq.value.toLowerCase();
+          const pos = rq.selectionStart;
+          Shell.route();
+          const n = document.getElementById('rq');
+          n.focus();
+          n.setSelectionRange(pos, pos);
+        });
+      }
+      el.querySelectorAll('[data-sel]').forEach((a) => a.addEventListener('click', () => (selDev = +a.dataset.sel)));
+      el.querySelectorAll('[data-pick]').forEach((r) => r.addEventListener('click', () => { selDev = +r.dataset.pick; Shell.route(); }));
+      el.querySelectorAll('[data-fav]').forEach((b) => b.addEventListener('click', () => { favOnly = b.dataset.fav === '1'; Shell.route(); }));
+      const q = el.querySelector('#q');
+      if (q) q.addEventListener('input', () => {
+        query = q.value.toLowerCase();
+        const pos = q.selectionStart;
+        Shell.route();
+        const n = document.getElementById('q');
+        n.focus();
+        n.setSelectionRange(pos, pos);
+      });
+    }
+  });
+</script>
+</body>
+</html>

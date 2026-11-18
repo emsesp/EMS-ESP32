@@ -1,0 +1,12 @@
+{
+  "name": "emsesp-mockups",
+  "private": true,
+  "scripts": {
+    "start": "python3 -m http.server 8765",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "4.162.0"
+  }
+}
