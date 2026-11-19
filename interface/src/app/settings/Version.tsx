@@ -482,9 +482,7 @@ const Version = () => {
         <Table stack className="fw-tbl">
           <tbody>
             <tr>
-              <td>
-                <b>{LL.EMSESP_APP()}</b>
-              </td>
+              <td>{LL.EMSESP_APP()}</td>
               <td data-label={LL.VERSION()}>
                 <span className="fw-ver-cell">
                   <span className="mono">{data.emsesp_version}</span>
@@ -501,7 +499,7 @@ const Version = () => {
                     ) : (
                       <Tag kind="warn">{LL.CUSTOM_BUILD()}</Tag>
                     ))}
-                  <Tag kind={isDevBuild ? 'type' : 'sys'}>
+                  <Tag kind={isDevBuild ? 'type' : 'muted'}>
                     {channelName(isDevBuild)}
                   </Tag>
                   {isDebugBuild && <Tag kind="err">DEBUG</Tag>}

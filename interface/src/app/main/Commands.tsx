@@ -190,7 +190,7 @@ const Commands = () => {
               {rows.length === 0 && (
                 <tr>
                   <td colSpan={5} className="tbl-empty">
-                    {LL.CMD_NONE()}
+                    {q ? LL.CMD_NONE_MATCH() : LL.CMD_NONE()}
                   </td>
                 </tr>
               )}

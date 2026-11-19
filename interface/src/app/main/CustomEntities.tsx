@@ -5,10 +5,10 @@ import { readCustomEntities, writeCustomEntities } from 'api/app';
 import {
   Button,
   Icon,
+  Listbox,
   SearchField,
   Section,
   Segmented,
-  Select,
   SortHeader,
   Switch,
   Table,
@@ -295,7 +295,7 @@ const CustomEntities = () => {
                     </td>
                     <td data-label="API / MQTT">
                       {item.hide ? (
-                        <Tag kind="sys" icon="visibility_off">
+                        <Tag kind="muted" icon="visibility_off">
                           {LL.CE_EXCLUDED()}
                         </Tag>
                       ) : (
@@ -323,7 +323,7 @@ const CustomEntities = () => {
               {rows.length === 0 && (
                 <tr>
                   <td colSpan={6} className="tbl-empty">
-                    {LL.CE_NONE()}
+                    {live.length ? LL.NO_ENTITIES_MATCH() : LL.CE_NONE()}
                   </td>
                 </tr>
               )}
@@ -390,7 +390,7 @@ const CustomEntities = () => {
                       {...f.text('type_id')}
                     />
                     <TextField label={LL.OFFSET()} {...f.number('offset')} />
-                    <Select
+                    <Listbox
                       label={LL.VALUE_TYPE()}
                       options={VALUE_TYPE_OPTIONS}
                       {...f.select('value_type')}
@@ -402,7 +402,7 @@ const CustomEntities = () => {
                           step="0.001"
                           {...f.number('factor')}
                         />
-                        <Select
+                        <Listbox
                           label={LL.UNIT()}
                           options={UOM_OPTIONS}
                           {...f.select('uom')}
@@ -427,7 +427,7 @@ const CustomEntities = () => {
                 ) : (
                   <>
                     <TextField label={LL.DEFAULT_VALUE()} {...f.text('value')} />
-                    <Select
+                    <Listbox
                       label={LL.UNIT()}
                       options={UOM_OPTIONS}
                       {...f.select('uom')}

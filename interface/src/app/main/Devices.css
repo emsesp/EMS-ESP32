@@ -109,13 +109,13 @@
   gap: 4px;
 }
 .dv-mask.b8 {
-  color: #ffeb3b;
+  color: var(--flag-fav);
 }
 .dv-mask.b4 {
   color: var(--warning);
 }
 .dv-mask.b2 {
-  color: #ce93d8;
+  color: var(--flag-nomqtt);
 }
 .dv-legend {
   display: flex;

@@ -318,7 +318,17 @@ const Gallery = () => {
         />
         <div className="row wrap gal-demo">
           {(
-            ['plain', 'new', 'mod', 'sys', 'type', 'ok', 'warn', 'err'] as const
+            [
+              'plain',
+              'muted',
+              'new',
+              'mod',
+              'sys',
+              'type',
+              'ok',
+              'warn',
+              'err'
+            ] as const
           ).map((k) => (
             <Tag key={k} kind={k}>
               {k}

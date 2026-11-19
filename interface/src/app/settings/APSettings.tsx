@@ -1,6 +1,6 @@
 import * as APApi from 'api/ap';
 
-import { FormSection, Segmented, Select, Switch, TextField } from 'components/ui';
+import { FormSection, Listbox, Segmented, Switch, TextField } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { APSettingsType } from 'types';
 import { APProvisionMode } from 'types';
@@ -60,12 +60,12 @@ const APSettings = () => {
                   autoComplete="new-password"
                   {...form.text('password')}
                 />
-                <Select
+                <Listbox
                   label={LL.AP_PREFERRED_CHANNEL()}
                   options={CHANNELS}
                   {...form.select('channel')}
                 />
-                <Select
+                <Listbox
                   label={LL.AP_MAX_CLIENTS()}
                   options={MAX_CLIENTS}
                   {...form.select('max_clients')}

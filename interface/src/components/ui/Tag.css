@@ -28,10 +28,18 @@
   color: var(--primary);
   text-transform: uppercase;
 }
+/* 1px less padding so the border keeps it the size of the other tags */
+.tag.muted {
+  padding: 0 7px;
+  border: 1px solid var(--outline);
+  background: transparent;
+  color: var(--text-2);
+}
+/* only for things EMS-ESP provides itself, e.g. the built-in sensors */
 .tag.sys {
   margin-left: 8px;
-  background: var(--hover);
-  color: var(--text-3);
+  background: rgba(179, 157, 219, 0.16);
+  color: #b39ddb;
 }
 .tag.type {
   background: rgba(64, 130, 143, 0.3);

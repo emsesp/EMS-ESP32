@@ -1,4 +1,5 @@
 import {
+  type CSSProperties,
   type FC,
   type KeyboardEvent,
   type ReactNode,
@@ -9,6 +10,7 @@ import {
 } from 'react';
 
 import './Field.css';
+import FieldFlags from './FieldFlags';
 import Icon from './Icon';
 import './Listbox.css';
 import { cx } from './cx';
@@ -26,30 +28,60 @@ export interface ListboxProps {
   label: string;
   // label is for screen readers only
   hideLabel?: boolean;
+  name?: string;
   value: string | undefined;
   options: ListboxOption[];
   onChange: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
   fullWidth?: boolean;
-  className?: string;
+  className?: string | undefined;
+  error?: string | undefined;
+  helperText?: ReactNode;
+  changed?: boolean | undefined;
+  restart?: boolean | undefined;
 }
 
-// a select whose options can have an icon and a count, which a native <select> can't show
+// the list is fixed to the viewport so a scrolling dialog or section can't clip it
+const GAP = 4;
+const MARGIN = 8;
+const MAX_HEIGHT = 360;
+const MIN_BELOW = 200;
+
+const placeList = (trigger: HTMLElement): CSSProperties => {
+  const r = trigger.getBoundingClientRect();
+  const below = window.innerHeight - r.bottom - GAP - MARGIN;
+  const above = r.top - GAP - MARGIN;
+  const up = below < MIN_BELOW && above > below;
+  return {
+    left: r.left,
+    width: r.width,
+    maxHeight: Math.min(MAX_HEIGHT, up ? above : below),
+    ...(up ? { bottom: window.innerHeight - r.top + GAP } : { top: r.bottom + GAP })
+  };
+};
+
+// a select with the kit's own menu; options can have an icon and a count
 const Listbox: FC<ListboxProps> = ({
   label,
   hideLabel,
+  name,
   value,
   options,
   onChange,
   placeholder,
   disabled,
   fullWidth,
-  className
+  className,
+  error,
+  helperText,
+  changed,
+  restart
 }) => {
   const id = useId();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
+  const [pos, setPos] = useState<CSSProperties>();
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
@@ -57,10 +89,13 @@ const Listbox: FC<ListboxProps> = ({
 
   const selected = options.find((o) => o.value === value);
   const enabled = options.flatMap((o, i) => (o.disabled ? [] : [i]));
+  const help = error ?? helperText;
+  const hasIcon = options.some((o) => o.icon !== undefined);
 
   const show = () => {
     const i = options.findIndex((o) => o.value === value && !o.disabled);
     setActive(i >= 0 ? i : (enabled[0] ?? -1));
+    if (triggerRef.current) setPos(placeList(triggerRef.current));
     setOpen(true);
   };
 
@@ -78,6 +113,22 @@ const Listbox: FC<ListboxProps> = ({
 
   useEffect(() => {
     if (!open) return;
+    const place = () => {
+      if (triggerRef.current) setPos(placeList(triggerRef.current));
+    };
+    const onScroll = (e: Event) => {
+      if (e.target !== listRef.current) place();
+    };
+    window.addEventListener('resize', place);
+    document.addEventListener('scroll', onScroll, true);
+    return () => {
+      window.removeEventListener('resize', place);
+      document.removeEventListener('scroll', onScroll, true);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
     listRef.current?.focus();
     const onPointerDown = (e: PointerEvent) => {
       if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
@@ -90,11 +141,11 @@ const Listbox: FC<ListboxProps> = ({
     if (open && active >= 0) {
       listRef.current?.children[active]?.scrollIntoView({ block: 'nearest' });
     }
-  }, [open, active]);
+  }, [open, active, pos]);
 
   const move = (delta: number) => {
-    const pos = enabled.indexOf(active) + delta;
-    const next = enabled[Math.min(enabled.length - 1, Math.max(0, pos))];
+    const p = enabled.indexOf(active) + delta;
+    const next = enabled[Math.min(enabled.length - 1, Math.max(0, p))];
     if (next !== undefined) setActive(next);
   };
 
@@ -122,11 +173,19 @@ const Listbox: FC<ListboxProps> = ({
       case 'End':
         setActive(enabled[enabled.length - 1] ?? -1);
         break;
+      case 'PageDown':
+        move(8);
+        break;
+      case 'PageUp':
+        move(-8);
+        break;
       case 'Enter':
       case ' ':
         pick(active);
         break;
       case 'Escape':
+        // keep a dialog around the list open
+        e.stopPropagation();
         hide();
         break;
       case 'Tab':
@@ -148,22 +207,27 @@ const Listbox: FC<ListboxProps> = ({
         'field',
         'lbx',
         fullWidth && 'full',
+        error && 'invalid',
         disabled && 'disabled',
         className
       )}
     >
       <label htmlFor={id} className={cx(hideLabel && 'sr-only')}>
         {label}
+        <FieldFlags restart={restart} changed={changed} />
       </label>
       <button
         ref={triggerRef}
         id={id}
+        name={name}
         type="button"
-        className="input lbx-trigger"
+        className={cx('input', 'lbx-trigger', hasIcon && 'with-icon')}
         disabled={disabled}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={open ? `${id}-list` : undefined}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={help ? `${id}-help` : undefined}
         onClick={() => (open ? hide() : show())}
         onKeyDown={(e) => {
           if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
@@ -185,6 +249,7 @@ const Listbox: FC<ListboxProps> = ({
           role="listbox"
           tabIndex={-1}
           className="lbx-list"
+          style={pos}
           aria-label={label}
           aria-activedescendant={active >= 0 ? optionId(active) : undefined}
           onKeyDown={onListKeyDown}
@@ -212,6 +277,11 @@ const Listbox: FC<ListboxProps> = ({
             </li>
           ))}
         </ul>
+      )}
+      {help && (
+        <span id={`${id}-help`} className={cx('cap', error && 'err')}>
+          {help}
+        </span>
       )}
     </div>
   );

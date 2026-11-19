@@ -5,8 +5,8 @@ import { useRequest } from 'alova/client';
 import {
   Button,
   Dialog,
+  Listbox,
   Segmented,
-  Select,
   TextField,
   focusInvalid,
   toast
@@ -166,12 +166,12 @@ const DevicesDialog = ({
           fullWidth
         />
       ) : (
-        <Select
+        <Listbox
           label={label}
           name="v"
           options={options}
           value={String(value)}
-          onChange={(e) => setValue(e.currentTarget.value)}
+          onChange={setValue}
           error={error}
           helperText={dv.h}
           fullWidth

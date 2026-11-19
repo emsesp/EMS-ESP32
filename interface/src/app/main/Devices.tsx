@@ -259,7 +259,8 @@ const Devices = () => {
 
   const renderDeviceList = () => (
     <Section
-      title={`${LL.DEVICES()} (${coreData.devices.length})`}
+      title={LL.DEVICES()}
+      count={coreData.devices.length}
       icon="category"
       className="dv-list"
     >

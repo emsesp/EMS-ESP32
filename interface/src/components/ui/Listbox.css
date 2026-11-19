@@ -1,15 +1,14 @@
-.lbx {
-  position: relative;
-}
 .lbx-trigger {
   display: flex;
   align-items: center;
   gap: 10px;
-  min-height: 44px;
-  padding: 6px 8px;
   text-align: left;
   font-weight: 400;
   cursor: pointer;
+}
+.lbx-trigger.with-icon {
+  min-height: 44px;
+  padding: 6px 8px;
 }
 .lbx-trigger:disabled {
   cursor: default;
@@ -48,16 +47,16 @@
   font-size: 18px;
 }
 
+/* top, left, width and max-height are set from the trigger's position */
 .lbx-list {
-  position: absolute;
-  z-index: 30;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
+  position: fixed;
+  /* above the app bar and drawer, below the system monitor and toasts */
+  z-index: 1250;
+  box-sizing: border-box;
+  min-width: 120px;
   margin: 0;
   padding: 4px;
   list-style: none;
-  max-height: min(360px, 60vh);
   overflow-y: auto;
   background: var(--paper-2);
   border: 1px solid var(--border);

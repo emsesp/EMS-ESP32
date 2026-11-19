@@ -52,6 +52,9 @@
   --error-tint: rgba(244, 67, 54, 0.16);
   --error-line: rgba(244, 67, 54, 0.5);
   --error-text: #ff8a80;
+  /* entity flags on Devices and Customizations: favorite, no MQTT/API */
+  --flag-fav: #ffeb3b;
+  --flag-nomqtt: #ce93d8;
   /* menus, toasts and bars floating over the page */
   --shadow-pop: 0 8px 24px rgba(0, 0, 0, 0.5);
   --font: Roboto, Helvetica, Arial, sans-serif;

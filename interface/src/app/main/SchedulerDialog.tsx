@@ -3,9 +3,9 @@ import { useMemo } from 'react';
 import {
   Button,
   ButtonLink,
+  Listbox,
   Message,
   Segmented,
-  Select,
   Switch,
   TextArea,
   TextField,
@@ -196,7 +196,7 @@ const SchedulerDialog = ({
                 {LL.SCHEDULER_NO_COMMANDS()}
               </Message>
             )}
-            <Select
+            <Listbox
               label={LL.COMMAND(0)}
               fullWidth
               options={options}

@@ -14,6 +14,13 @@
 .sec-head h2 {
   color: var(--primary);
 }
+.sec-head h2 .count {
+  display: inline-block;
+  margin-left: 8px;
+  font-weight: normal;
+  line-height: 18px;
+  vertical-align: middle;
+}
 .sec-head + * {
   margin-top: 10px;
 }

@@ -182,7 +182,8 @@ const Sensors = () => {
       </Section>
 
       <Section
-        title={`${LL.TEMP_SENSORS()} (${data.ts.length})`}
+        title={LL.TEMP_SENSORS()}
+        count={data.ts.length}
         icon="thermostat"
         desc={me.admin && LL.TEMP_SENSORS_HELP()}
       >
@@ -231,7 +232,8 @@ const Sensors = () => {
       </Section>
 
       <Section
-        title={`${LL.ANALOG_SENSORS()} (${data.as.length})`}
+        title={LL.ANALOG_SENSORS()}
+        count={data.as.length}
         icon="sensors"
         actions={
           me.admin &&

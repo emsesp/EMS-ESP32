@@ -4,8 +4,8 @@ import { isEthernet } from 'app/status/status';
 import {
   ButtonLink,
   FormSection,
+  Listbox,
   Message,
-  Select,
   Switch,
   TextField
 } from 'components/ui';
@@ -55,7 +55,7 @@ const NetworkSettings = () => {
           placeholder={LL.NETWORK_BLANK_BSSID()}
           {...form.text('bssid')}
         />
-        <Select
+        <Listbox
           label={LL.TX_POWER()}
           options={[{ value: '0', label: LL.AUTO() }, ...TX_POWER]}
           {...form.select('tx_power')}

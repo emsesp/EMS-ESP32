@@ -63,7 +63,8 @@ select.input option {
 }
 @media (pointer: coarse) {
   input.input,
-  select.input {
+  select.input,
+  button.input {
     min-height: var(--touch);
   }
 }

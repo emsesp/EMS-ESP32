@@ -5,7 +5,7 @@ import type { Locales } from 'i18n/i18n-types';
 import { loadLocaleAsync } from 'i18n/i18n-util.async';
 
 import './LinkList.css';
-import Select from './Select';
+import Listbox from './Listbox';
 import { cx } from './cx';
 
 // language names in their own language, so they are found whatever the current language
@@ -39,14 +39,14 @@ const LanguageSelect: FC<{ className?: string }> = ({ className }) => {
   const change = useChangeLocale();
 
   return (
-    <Select
+    <Listbox
       label={LL.LANGUAGE()}
       hideLabel
       name="locale"
       className={className}
       options={LANGUAGES}
       value={locale}
-      onChange={(e) => void change(e.currentTarget.value as Locales)}
+      onChange={(v) => void change(v as Locales)}
     />
   );
 };

@@ -1,4 +1,4 @@
-import { type ChangeEvent, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import * as NTPApi from 'api/ntp';
 
@@ -9,8 +9,8 @@ import {
   Dialog,
   FormSection,
   Icon,
+  Listbox,
   Section,
-  Select,
   Switch,
   TextField,
   toast
@@ -176,11 +176,9 @@ const NTPSettings = () => {
     return {
       ...form.select(label),
       value,
-      options: value
-        ? TIME_ZONE_OPTIONS
-        : [{ value: '', label: `${LL.TIME_ZONE()}...` }, ...TIME_ZONE_OPTIONS],
-      onChange: (e: ChangeEvent<HTMLSelectElement>) => {
-        const tz = e.currentTarget.value;
+      options: TIME_ZONE_OPTIONS,
+      placeholder: `${LL.TIME_ZONE()}…`,
+      onChange: (tz: string) => {
         form.set({ [label]: tz, [format]: TIME_ZONES[tz] ?? '' });
         form.setDirtyFlags((flags) => flags.filter((k) => k !== format));
       }
@@ -200,14 +198,14 @@ const NTPSettings = () => {
               disabled={!data.enabled}
               {...form.text('server')}
             />
-            <Select
+            <Listbox
               label={LL.TIME_ZONE()}
               {...timeZone(['tz_label', 'tz_format'])}
             />
           </FormSection>
           {data.enabled && (
             <FormSection icon="thermostat" title={LL.NTP_THERMOSTAT_CLOCK()}>
-              <Select
+              <Listbox
                 label={LL.NTP_THERMOSTAT_SYNC()}
                 helperText={LL.NTP_THERMOSTAT_SYNC_HELP()}
                 options={[
@@ -218,7 +216,7 @@ const NTPSettings = () => {
                 {...form.select('thermostat_sync')}
               />
               {data.thermostat_sync === 2 && (
-                <Select
+                <Listbox
                   label={LL.NTP_THERMOSTAT_TZ()}
                   {...timeZone(['tz_label_t', 'tz_format_t'])}
                 />

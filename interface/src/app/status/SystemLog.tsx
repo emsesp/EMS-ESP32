@@ -19,10 +19,10 @@ import { useRequest, useSSE } from 'alova/client';
 import {
   Button,
   IconButton,
+  Listbox,
   Loader,
   SearchField,
   Section,
-  Select,
   ToggleButton,
   ToggleGroup,
   cx,
@@ -266,24 +266,20 @@ const SystemLog = () => {
   return (
     <Section className="log-page">
       <div className="log-toolbar">
-        <Select
+        <Listbox
           label={LL.LOG_LEVEL()}
           options={LEVEL_OPTIONS}
           value={String(settings.level)}
           disabled={!me.admin}
-          onChange={(e) =>
-            void changeSetting({ level: Number(e.currentTarget.value) })
-          }
+          onChange={(v) => void changeSetting({ level: Number(v) })}
         />
         {settings.psram && (
-          <Select
+          <Listbox
             label={LL.BUFFER_SIZE()}
             options={BUFFER_OPTIONS}
             value={String(settings.max_messages)}
             disabled={!me.admin}
-            onChange={(e) =>
-              void changeSetting({ max_messages: Number(e.currentTarget.value) })
-            }
+            onChange={(v) => void changeSetting({ max_messages: Number(v) })}
           />
         )}
         <SearchField

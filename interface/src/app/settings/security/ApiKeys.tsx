@@ -23,6 +23,7 @@ import {
 } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { ApiKeyType } from 'types';
+import { formatDateTimeMinutes } from 'utils';
 
 const MAX_KEYS = 10;
 const MAX_LABEL = 32;
@@ -81,7 +82,7 @@ const ApiKeys = () => {
   };
 
   const formatCreated = (created: number) =>
-    created ? new Date(created * 1000).toLocaleString() : LL.UNKNOWN();
+    created ? formatDateTimeMinutes(new Date(created * 1000)) : LL.UNKNOWN();
 
   const sort = useTableSort(data?.keys ?? [], {
     name: byText((k) => k.label),
@@ -131,7 +132,7 @@ const ApiKeys = () => {
                       {LL.API_KEY_READ_WRITE()}
                     </Tag>
                   ) : (
-                    <Tag kind="sys">{LL.API_KEY_READ()}</Tag>
+                    <Tag kind="muted">{LL.API_KEY_READ()}</Tag>
                   )}
                 </td>
                 <td data-label={LL.CREATED()} className="cap">

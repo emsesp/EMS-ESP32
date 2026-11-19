@@ -1,4 +1,4 @@
-import { Message, Select, TextField } from 'components/ui';
+import { Listbox, Message, TextField } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import EntityDialog from './EntityDialog';
@@ -84,23 +84,21 @@ const SensorsAnalogDialog = ({
         return (
           <>
             <TextField label={LL.NAME(0)} fullWidth {...f.text('n')} />
-            <Select
+            <Listbox
               label="GPIO"
               options={gpioOptions}
               disabled={sys || !creating}
               {...f.select('g')}
             />
-            <Select
+            <Listbox
               label={LL.TYPE(0)}
               options={typeOptions}
               disabled={sys}
               {...f.select('t')}
-              onChange={(e) =>
-                f.set({ t: Number(e.currentTarget.value), o: 0, f: 1, u: 0 })
-              }
+              onChange={(v) => f.set({ t: Number(v), o: 0, f: 1, u: 0 })}
             />
             {hasScale && (
-              <Select
+              <Listbox
                 label={LL.UNIT()}
                 options={uomOptions}
                 disabled={sys}
@@ -108,7 +106,7 @@ const SensorsAnalogDialog = ({
               />
             )}
             {t === AnalogType.DIGITAL_IN && (
-              <Select
+              <Listbox
                 label={LL.POLARITY()}
                 options={polarityOptions(1, 0)}
                 disabled={sys}
@@ -172,7 +170,7 @@ const SensorsAnalogDialog = ({
             )}
             {isDigitalOut && !dac && (
               <>
-                <Select
+                <Listbox
                   label={LL.VALUE(0)}
                   options={[
                     { value: '0', label: LL.OFF() },
@@ -181,13 +179,13 @@ const SensorsAnalogDialog = ({
                   disabled={sys}
                   {...f.select('o')}
                 />
-                <Select
+                <Listbox
                   label={LL.POLARITY()}
                   options={polarityOptions(1, -1)}
                   disabled={sys}
                   {...f.select('f')}
                 />
-                <Select
+                <Listbox
                   label={LL.STARTVALUE()}
                   options={[
                     { value: '0', label: LL.UNCHANGED() },
@@ -223,7 +221,7 @@ const SensorsAnalogDialog = ({
             )}
             {t === AnalogType.PULSE && (
               <>
-                <Select
+                <Listbox
                   label={LL.POLARITY()}
                   options={polarityOptions(0, 1)}
                   disabled={sys}

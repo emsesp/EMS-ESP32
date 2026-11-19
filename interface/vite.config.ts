@@ -1,20 +1,19 @@
 import preact from '@preact/preset-vite';
-import fs from 'fs';
 import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { pathToFileURL } from 'url';
-import { Plugin, PluginOption, defineConfig, normalizePath } from 'vite';
-import zlib from 'zlib';
+import {
+  type BuildEnvironmentOptions,
+  type Plugin,
+  type PluginOption,
+  type UserConfig,
+  defineConfig,
+  normalizePath
+} from 'vite';
 
-// Constants
-const KB_DIVISOR = 1024;
-const REPEAT_CHAR = '=';
-const REPEAT_COUNT = 50;
-const DEFAULT_OUT_DIR = 'dist';
 const RECOVERY_OUT_DIR = 'dist-recovery';
-const ES_TARGET = 'es2020';
+const ES_TARGET = 'es2022';
 const CHUNK_SIZE_WARNING_LIMIT = 1024;
-const ASSETS_INLINE_LIMIT = 4096;
 
 // Common resolve aliases
 // `react` points at a local shim (preact/compat + a useOptimistic stub) because
@@ -58,70 +57,6 @@ const recoveryIcons = (): Plugin => ({
 // Common resolve extensions - prioritize TypeScript/React files for Windows compatibility
 const RESOLVE_EXTENSIONS = ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'];
 
-// Bundle file interface
-interface BundleFile {
-  name: string;
-  size: number;
-  gzipSize: number;
-}
-
-// Plugin to display bundle size information
-const bundleSizeReporter = (): Plugin => {
-  return {
-    name: 'bundle-size-reporter',
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    writeBundle(options: any, bundle: any) {
-      console.log('\n📦 Bundle Size Report:');
-      console.log(REPEAT_CHAR.repeat(REPEAT_COUNT));
-
-      const files: BundleFile[] = [];
-      const outDir = options.dir || DEFAULT_OUT_DIR;
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-      const bundleEntries: Array<[string, any]> = Object.entries(bundle);
-      for (const [fileName, chunk] of bundleEntries) {
-        if (chunk?.type === 'chunk' || chunk?.type === 'asset') {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          const filePath = path.join(outDir, fileName);
-          try {
-            const stats = fs.statSync(filePath);
-            const size = stats.size;
-            const fileContent = fs.readFileSync(filePath);
-            const gzipSize = zlib.gzipSync(fileContent).length;
-
-            files.push({ name: fileName, size, gzipSize });
-          } catch (error) {
-            console.warn(`Could not read file ${fileName}:`, error);
-          }
-        }
-      }
-
-      files.sort((a, b) => b.size - a.size);
-
-      // files.forEach((file) => {
-      //   const sizeKB = (file.size / KB_DIVISOR).toFixed(2);
-      //   const gzipKB = (file.gzipSize / KB_DIVISOR).toFixed(2);
-      //   console.log(
-      //     `📄 ${file.name.padEnd(30)} ${sizeKB.padStart(8)} KB (${gzipKB} KB gzipped)`
-      //   );
-      // });
-
-      const totalSize = files.reduce((sum, file) => sum + file.size, 0);
-      const totalGzipSize = files.reduce((sum, file) => sum + file.gzipSize, 0);
-      const compressionRatio = ((totalSize - totalGzipSize) / totalSize) * 100;
-
-      console.log(REPEAT_CHAR.repeat(REPEAT_COUNT));
-      console.log(`📊 Total Bundle Size: ${(totalSize / KB_DIVISOR).toFixed(2)} KB`);
-      console.log(
-        `🗜️  Total Gzipped Size: ${(totalGzipSize / KB_DIVISOR).toFixed(2)} KB`
-      );
-      console.log(`📈 Compression Ratio: ${compressionRatio.toFixed(1)}%`);
-      console.log(REPEAT_CHAR.repeat(REPEAT_COUNT));
-    }
-  };
-};
-
-// Common preact plugin config
 const createPreactPlugin = (devToolsEnabled: boolean): PluginOption[] => {
   const plugins = preact({
     devToolsEnabled,
@@ -140,237 +75,138 @@ const createPreactPlugin = (devToolsEnabled: boolean): PluginOption[] => {
     : plugins.filter((p) => !p || !devToolsOnly.has(p.name));
 };
 
-// Common base plugins
-const createBasePlugins = (
-  devToolsEnabled: boolean,
-  includeBundleReporter = true
-): PluginOption[] => {
-  const plugins: PluginOption[] = [...createPreactPlugin(devToolsEnabled)];
-  if (includeBundleReporter) {
-    plugins.push(bundleSizeReporter());
-  }
-  return plugins;
+const baseConfig = (devToolsEnabled: boolean, plugins: PluginOption[] = []) =>
+  ({
+    plugins: [...createPreactPlugin(devToolsEnabled), ...plugins],
+    resolve: {
+      alias: RESOLVE_ALIASES,
+      extensions: RESOLVE_EXTENSIONS,
+      tsconfigPaths: true
+    }
+  }) satisfies UserConfig;
+
+const loadMockPlugin = async (file: string): Promise<PluginOption> => {
+  const url = pathToFileURL(path.resolve(import.meta.dirname, '../mock-api', file)).href;
+  const { default: plugin } = (await import(/* @vite-ignore */ url)) as {
+    default: () => PluginOption;
+  };
+  return plugin();
 };
 
-const manualChunks = (id: string): string | undefined => {
-  if (id.includes('node_modules')) return 'vendor';
-  return undefined;
-};
-
-// Common build base configuration
-const createBaseBuildConfig = () => ({
+// A separate vendor chunk compresses ~2 KB smaller for the main UI, but is larger for the
+// small recovery app, which therefore ships as a single JS file.
+const createBuildConfig = (
+  aggressive: boolean,
+  { input, vendorChunk = true }: { input?: string; vendorChunk?: boolean } = {}
+): BuildEnvironmentOptions => ({
   target: ES_TARGET,
   chunkSizeWarningLimit: CHUNK_SIZE_WARNING_LIMIT,
-  cssMinify: true,
-  assetsInlineLimit: ASSETS_INLINE_LIMIT
+  // progmem-generator.js reports the real (zopfli) sizes that end up in flash
+  reportCompressedSize: false,
+  minify: 'terser',
+  terserOptions: {
+    module: true,
+    ecma: 2022,
+    compress: {
+      passes: aggressive ? 3 : 2,
+      drop_console: ['log', 'debug', 'info']
+    }
+  },
+  rolldownOptions: {
+    ...(input && { input }),
+    checks: {
+      pluginTimings: false
+    },
+    treeshake: aggressive
+      ? {
+          moduleSideEffects: false,
+          propertyReadSideEffects: false,
+          unknownGlobalSideEffects: false
+        }
+      : { moduleSideEffects: false },
+    ...(vendorChunk && {
+      output: {
+        codeSplitting: { groups: [{ name: 'vendor', test: /[\\/]node_modules[\\/]/ }] }
+      }
+    })
+  }
 });
 
-// Terser options for hosted builds
-const createHostedTerserOptions = () => ({
-  compress: {
-    passes: 3,
-    drop_console: true,
-    drop_debugger: true,
-    dead_code: true,
-    unused: true
-  },
-  mangle: {
-    toplevel: true
-  },
-  ecma: 2020 as const
-});
-
-// Terser options for production builds
-const createProductionTerserOptions = () => ({
-  compress: {
-    passes: 6,
-    arrows: true,
-    drop_console: true,
-    drop_debugger: true,
-    sequences: true
-  },
-  mangle: {
-    toplevel: true,
-    module: true
-  },
-  ecma: 2020 as const,
-  enclose: false,
-  keep_classnames: false,
-  keep_fnames: false,
-  ie8: false,
-  module: false,
-  safari10: false,
-  toplevel: true
-});
-
-export default defineConfig(
-  async ({ command, mode }: { command: string; mode: string }) => {
-    if (command === 'serve' && mode === 'recovery') {
-      console.log('Preparing Recovery WebUI with mock server');
-      const recoveryMockUrl = pathToFileURL(
-        path.resolve(import.meta.dirname, '../mock-api/recoveryMock.js')
-      ).href;
-      const { default: recoveryMock } = (await import(
-        /* @vite-ignore */ recoveryMockUrl
-      )) as { default: () => PluginOption };
-      return {
-        plugins: [
-          ...createBasePlugins(true, false),
-          recoveryIcons(),
-          recoveryMock()
-        ],
-        resolve: {
-          alias: RESOLVE_ALIASES,
-          extensions: RESOLVE_EXTENSIONS,
-          tsconfigPaths: true
-        },
-        server: {
-          open: '/recovery.html',
-          port: 3001
-        }
-      };
-    }
-
-    if (mode === 'recovery') {
-      console.log('Preparing for Recovery WebUI, optimized build');
-      return {
-        plugins: [...createBasePlugins(false, true), recoveryIcons()],
-        resolve: {
-          alias: RESOLVE_ALIASES,
-          extensions: RESOLVE_EXTENSIONS,
-          tsconfigPaths: true
-        },
-        build: {
-          ...createBaseBuildConfig(),
-          outDir: RECOVERY_OUT_DIR,
-          emptyOutDir: true,
-          minify: 'terser' as const,
-          terserOptions: createProductionTerserOptions(),
-          rollupOptions: {
-            input: path.resolve(import.meta.dirname, 'recovery.html'),
-            checks: {
-              pluginTimings: false
-            },
-            treeshake: {
-              moduleSideEffects: false,
-              propertyReadSideEffects: false as const,
-              unknownGlobalSideEffects: false
-            },
-            output: {
-              chunkFileNames: 'assets/[name]-[hash].js',
-              entryFileNames: 'assets/[name]-[hash].js',
-              assetFileNames: 'assets/[name]-[hash].[ext]',
-              manualChunks,
-              sourcemap: false
-            }
-          }
-        }
-      };
-    }
-
-    if (command === 'serve') {
-      console.log(`Preparing for standalone build with server, mode=${mode}`);
-      const mockServerUrl = pathToFileURL(
-        path.resolve(import.meta.dirname, '../mock-api/mockServer.js')
-      ).href;
-      const { default: mockServer } = (await import(
-        /* @vite-ignore */ mockServerUrl
-      )) as { default: () => PluginOption };
-      return {
-        plugins: [...createBasePlugins(true, true), mockServer()],
-        resolve: {
-          alias: RESOLVE_ALIASES,
-          extensions: RESOLVE_EXTENSIONS,
-          tsconfigPaths: true
-        },
-        server: {
-          open: true,
-          port: mode === 'production' ? 4173 : 3000,
-          proxy: {
-            '/api': {
-              target: 'http://localhost:3080',
-              changeOrigin: true,
-              secure: false
-            },
-            '/rest': 'http://localhost:3080'
-          }
-        },
-        build: {
-          target: ES_TARGET,
-          minify: false,
-          sourcemap: true
-        }
-      };
-    }
-
-    if (mode === 'hosted') {
-      console.log('Preparing for hosted build');
-      return {
-        plugins: createBasePlugins(false, true),
-        resolve: {
-          alias: RESOLVE_ALIASES,
-          extensions: RESOLVE_EXTENSIONS,
-          tsconfigPaths: true
-        },
-        build: {
-          ...createBaseBuildConfig(),
-          minify: 'terser' as const,
-          terserOptions: createHostedTerserOptions(),
-          rollupOptions: {
-            checks: {
-              pluginTimings: false
-            },
-            treeshake: {
-              moduleSideEffects: false
-            },
-            output: {
-              manualChunks
-            }
-          }
-        }
-      };
-    }
-
-    console.log('Preparing for production, optimized build');
-
+export default defineConfig(async ({ command, mode }) => {
+  if (command === 'serve' && mode === 'recovery') {
+    console.log('Preparing Recovery WebUI with mock server');
     return {
-      plugins: [
-        ...createBasePlugins(false, true),
-        visualizer({
-          template: 'treemap',
-          open: false,
-          gzipSize: true,
-          brotliSize: true,
-          filename: '../analyse.html'
-        })
-      ],
-      resolve: {
-        alias: RESOLVE_ALIASES,
-        extensions: RESOLVE_EXTENSIONS,
-        tsconfigPaths: true
-      },
-      build: {
-        ...createBaseBuildConfig(),
-        minify: 'terser' as const,
-        terserOptions: createProductionTerserOptions(),
-        rollupOptions: {
-          checks: {
-            pluginTimings: false
-          },
-          treeshake: {
-            moduleSideEffects: false,
-            propertyReadSideEffects: false as const,
-            unknownGlobalSideEffects: false
-          },
-          output: {
-            chunkFileNames: 'assets/[name]-[hash].js',
-            entryFileNames: 'assets/[name]-[hash].js',
-            assetFileNames: 'assets/[name]-[hash].[ext]',
-            manualChunks,
-            sourcemap: false
-          }
-        }
+      ...baseConfig(true, [recoveryIcons(), await loadMockPlugin('recoveryMock.js')]),
+      server: {
+        open: '/recovery.html',
+        port: 3001
       }
     };
   }
-);
+
+  if (mode === 'recovery') {
+    console.log('Preparing for Recovery WebUI, optimized build');
+    return {
+      ...baseConfig(false, [recoveryIcons()]),
+      build: {
+        ...createBuildConfig(true, {
+          input: path.resolve(import.meta.dirname, 'recovery.html'),
+          vendorChunk: false
+        }),
+        outDir: RECOVERY_OUT_DIR,
+        emptyOutDir: true
+      }
+    };
+  }
+
+  if (command === 'serve') {
+    console.log(`Preparing for standalone build with server, mode=${mode}`);
+    return {
+      ...baseConfig(true, [await loadMockPlugin('mockServer.js')]),
+      server: {
+        open: true,
+        port: mode === 'production' ? 4173 : 3000,
+        proxy: {
+          '/api': {
+            target: 'http://localhost:3080',
+            changeOrigin: true,
+            secure: false
+          },
+          '/rest': 'http://localhost:3080'
+        }
+      },
+      build: {
+        target: ES_TARGET,
+        minify: false,
+        sourcemap: true
+      }
+    };
+  }
+
+  if (mode === 'hosted') {
+    console.log('Preparing for hosted build');
+    return {
+      ...baseConfig(false),
+      build: createBuildConfig(false)
+    };
+  }
+
+  console.log('Preparing for production, optimized build');
+  return {
+    ...baseConfig(
+      false,
+      process.env.ANALYZE
+        ? [
+            visualizer({
+              template: 'treemap',
+              open: false,
+              gzipSize: true,
+              brotliSize: true,
+              filename: '../analyse.html'
+            })
+          ]
+        : []
+    ),
+    build: createBuildConfig(true)
+  };
+});

@@ -12,8 +12,11 @@
   gap: 10px 12px;
 }
 .log-toolbar .field .input {
-  padding: 5px 8px;
+  padding: 6px 8px;
   font-size: 13px;
+}
+.log-toolbar .lbx {
+  min-width: 120px;
 }
 
 .console {

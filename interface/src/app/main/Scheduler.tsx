@@ -253,7 +253,7 @@ const Scheduler = () => {
               {rows.length === 0 && (
                 <tr>
                   <td colSpan={5} className="tbl-empty">
-                    {LL.SCHEDULE_NONE()}
+                    {q ? LL.SCHEDULE_NONE_MATCH() : LL.SCHEDULE_NONE()}
                   </td>
                 </tr>
               )}

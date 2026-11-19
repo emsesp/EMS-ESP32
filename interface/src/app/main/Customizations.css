@@ -67,7 +67,7 @@
 }
 .cz-tog.on.b8,
 .cz-legend .b8 {
-  color: #ffeb3b;
+  color: var(--flag-fav);
 }
 .cz-tog.on.b4,
 .cz-legend .b4 {
@@ -75,7 +75,7 @@
 }
 .cz-tog.on.b2,
 .cz-legend .b2 {
-  color: #ce93d8;
+  color: var(--flag-nomqtt);
 }
 .cz-tog.on.b1,
 .cz-legend .b1 {

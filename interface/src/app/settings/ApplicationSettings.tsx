@@ -25,10 +25,10 @@ import {
   FormSection,
   Icon,
   type IconName,
+  Listbox,
   Loader,
   SearchField,
   Section,
-  Select,
   type SelectOption,
   Switch,
   TextField,
@@ -255,7 +255,7 @@ const ApplicationSettings = () => {
   const sel = (key: K, label: string, options: SelectOption[]) => ({
     key,
     label,
-    node: <Select label={label} options={options} {...form.select(key)} />
+    node: <Listbox label={label} options={options} {...form.select(key)} />
   });
 
   const groups = (data: Settings): Group[] => {
@@ -387,13 +387,13 @@ const ApplicationSettings = () => {
             key: 'board_profile',
             label: LL.BOARD_PROFILE(),
             node: (
-              <Select
+              <Listbox
                 label={LL.BOARD_PROFILE()}
                 options={profiles}
                 fullWidth
                 {...form.select('board_profile')}
                 disabled={loadingProfile}
-                onChange={(e) => changeBoardProfile(e.currentTarget.value)}
+                onChange={changeBoardProfile}
               />
             )
           },

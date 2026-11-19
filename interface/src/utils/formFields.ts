@@ -58,12 +58,12 @@ export const formFields = <D extends object>(
         onChange: (checked: boolean) => patch(name, checked)
       };
     },
+    // Listbox
     select: (name: K) => ({
       name,
       ...meta(name),
       value: str(v(name)),
-      onChange: (e: ChangeEvent<HTMLSelectElement>) =>
-        patch(name, parse(name, e.currentTarget.value))
+      onChange: (s: string) => patch(name, parse(name, s))
     }),
     segmented: (name: K) => {
       const { changed, restart } = meta(name);

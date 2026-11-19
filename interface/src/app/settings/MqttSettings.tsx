@@ -8,8 +8,8 @@ import {
   Dialog,
   FormSection,
   IconButton,
+  Listbox,
   Message,
-  Select,
   Switch,
   TextArea,
   TextField,
@@ -174,7 +174,7 @@ const MqttSettings = () => {
                   min={1}
                   {...form.number('keep_alive')}
                 />
-                <Select
+                <Listbox
                   label="QoS"
                   options={opts(['0', '1', '2'])}
                   {...form.select('mqtt_qos')}
@@ -184,7 +184,7 @@ const MqttSettings = () => {
                 )}
                 {data.enableTLS === true && (
                   <>
-                    <Select
+                    <Listbox
                       label={LL.TLS_CHECK()}
                       name="tlsCheck"
                       fullWidth
@@ -198,9 +198,7 @@ const MqttSettings = () => {
                         { value: 'ca', label: LL.TLS_CHECK_CA() },
                         { value: 'fingerprint', label: LL.TLS_CHECK_FINGERPRINT() }
                       ]}
-                      onChange={(e) =>
-                        changeTlsCheck(e.currentTarget.value as TlsCheck)
-                      }
+                      onChange={(v) => changeTlsCheck(v as TlsCheck)}
                     />
                     {tlsCheck === 'ca' && (
                       <TextArea
@@ -233,7 +231,7 @@ const MqttSettings = () => {
           {data.enabled && (
             <>
               <FormSection icon="tune" title={LL.MQTT_BEHAVIOUR()}>
-                <Select
+                <Listbox
                   label={LL.MQTT_COMMANDS()}
                   fullWidth
                   options={opts([
@@ -258,7 +256,7 @@ const MqttSettings = () => {
               </FormSection>
 
               <FormSection icon="data_object" title={LL.MQTT_TOPICS()}>
-                <Select
+                <Listbox
                   label={LL.MQTT_FORMAT()}
                   fullWidth
                   options={[
@@ -296,7 +294,7 @@ const MqttSettings = () => {
                 />
                 {data.ha_enabled && (
                   <>
-                    <Select
+                    <Listbox
                       label={LL.MQTT_PUBLISH_TEXT_5()}
                       options={opts(DISCOVERY_TYPES)}
                       {...form.select('discovery_type')}
@@ -306,7 +304,7 @@ const MqttSettings = () => {
                       mono
                       {...form.text('discovery_prefix')}
                     />
-                    <Select
+                    <Listbox
                       label={LL.MQTT_ENTITY_FORMAT()}
                       helperText={
                         <span className="warnc">{LL.MQTT_ENTITY_FORMAT_WARN()}</span>
@@ -327,7 +325,7 @@ const MqttSettings = () => {
                       {...form.select('entity_format')}
                     />
                     {data.discovery_type === 0 && (
-                      <Select
+                      <Listbox
                         label={LL.MQTT_INPUT_NUMBER_FORMAT()}
                         options={opts(['Box', 'Slider'])}
                         {...form.select('ha_number_mode')}
