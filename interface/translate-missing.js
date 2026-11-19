@@ -2,7 +2,8 @@
 // Translates from English: keys a language doesn't have yet, keys whose English text changed
 // since a git ref (--since), keys named with --keys, or every key (--all, replaces reviewed
 // translations). Machine translations are marked `// DeepL`.
-// Strings with plural syntax ({{s}}, {{a|b}}) and arrays are listed for manual translation.
+// Strings with plural syntax ({{s}}, {{a|b}}) in English or in the translation, and arrays, are
+// listed for manual translation.
 // usage: DEEPL_API_KEY=... node translate-missing.js [--lang de,nl] [--since <git ref>] [--keys A,B] [--all]
 //        [--list] list what would be translated, no DeepL calls
 //        (default) translate and print, files are not changed
@@ -105,7 +106,12 @@ for (const lang of langs) {
   const todo = [];
   for (const key of keys) {
     const text = en[key];
-    if (typeof text !== 'string' || text.includes('{{'))
+    const old = current[key];
+    if (
+      typeof text !== 'string' ||
+      text.includes('{{') ||
+      (typeof old === 'string' && old.includes('{{'))
+    )
       manual.push(`${lang} ${key}`);
     else todo.push(key);
   }

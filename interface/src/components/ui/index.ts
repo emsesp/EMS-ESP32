@@ -39,6 +39,8 @@ export { default as Listbox } from './Listbox';
 export type { ListboxOption, ListboxProps } from './Listbox';
 export { default as Loader } from './Loader';
 export type { LoaderProps } from './Loader';
+export { default as Menu } from './Menu';
+export type { MenuItem, MenuProps } from './Menu';
 export { default as Message } from './Message';
 export type { MessageLevel, MessageProps } from './Message';
 export { default as Meter } from './Meter';

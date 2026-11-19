@@ -7,7 +7,7 @@ const pl: BaseTranslation = {
   SIGN_IN: 'Zaloguj się',
   SIGN_IN_SUBTITLE: 'Brama dla systemów grzewczych EMS', // DeepL
   SIGN_OUT: 'Wyloguj się',
-  USERNAME: 'Nazwa użytkownika', // DeepL
+  USERNAME: '{{Użytkownik|Nazwa użytkownika|}}',
   PASSWORD: 'Hasło',
   SETTINGS_OF: '{0} Ustawienia', // DeepL
   HELP: 'Pomoc',
@@ -16,12 +16,12 @@ const pl: BaseTranslation = {
   UPLOAD_SUCCESSFUL: 'Przesłanie zakończone sukcesem', // DeepL
   DOWNLOAD_SUCCESSFUL: 'Pobierz udane', // DeepL
   INVALID_LOGIN: 'Nieprawidłowa nazwa użytkownika lub hasło', // DeepL
-  NETWORK: 'Sieć', // DeepL
-  SECURITY: 'Bezpieczeństwo', // DeepL
+  NETWORK: '{{Sieć|sieci|}}',
+  SECURITY: '{{B|b|}}ezpieczeństw{{o|a|}}',
   ONOFF_CAP: 'WŁ./WYŁ.', // DeepL
   ONOFF: 'włącz/wyłącz', // DeepL
-  TYPE: 'Typ', // DeepL
-  ENTITIES: 'entities', // DeepL
+  TYPE: '{{T|t|}}yp{{|u|}}',
+  ENTITIES: 'encj{{i|a|e|e|i}}',
   EXPORT: 'Eksportuj',
   FAVORITES: "Ulubione",
   ID_OF: 'ID {0}',
@@ -29,7 +29,7 @@ const pl: BaseTranslation = {
   PRODUCT: 'Produkt', // DeepL
   BRAND: 'Marka',
   VERSION: 'Wersja',
-  ENTITY_NAME: 'Nazwa encji', // DeepL
+  ENTITY_NAME: '{{N|n|}}azwa encji',
   VALUE: '{{W|w|w}}artość',
   DEVICES: 'Urządzenia',
   SENSORS: 'Czujniki',
@@ -45,9 +45,9 @@ const pl: BaseTranslation = {
   RESET: 'Resetuj',
   PROBLEM_UPDATING: 'Problem z aktualizacją', // DeepL
   PROBLEM_LOADING: 'Problem z ładowaniem', // DeepL
-  ANALOG_SENSOR: 'Urządzenia podłączone do EMS-ESP', // DeepL
+  ANALOG_SENSOR: '{{u|u||ustawienia u|ustawień u}}rządzeni{{a podłączonego do EMS-ESP|e||a podłączonego do EMS-ESP|a podłączonego do EMS-ESP}}',
   ANALOG_SENSORS: 'Urządzenia podłączone do EMS-ESP',
-  SETTINGS: 'Ustawienia', // DeepL
+  SETTINGS: '{{U|u|}}stawienia',
   UPDATED_OF: 'Zaktualizowano {0}', // DeepL
   OFFSET: 'Przesunięcie', // DeepL
   FACTOR: 'Czynnik', // DeepL
@@ -56,11 +56,11 @@ const pl: BaseTranslation = {
   UNIT: 'Jednostka miary', // DeepL
   STARTVALUE: 'Wartość początkowa',
   EDIT: 'Edytuj', // DeepL
-  SENSOR: 'Czujnik', // DeepL
+  SENSOR: '{{c|ustawienia c||ustawień c|}}zujnika',
   TEMP_SENSORS: 'Czujniki temperatury 1-Wire®',
   WRITE_CMD_SENT: 'Wysłano polecenie', // DeepL
   EMS_BUS_WARNING: 'Rozłączono magistralę EMS. Jeśli to ostrzeżenie nadal się pojawia po kilku sekundach, sprawdź ustawienia i profil płyty.', // DeepL
-  CONNECTED: 'Połączone', // DeepL
+  CONNECTED: '{{połączono|połączenie|}}',
   TX_ISSUES: 'Problemy z transmisją – sprawdź tryb transmisji', // DeepL
   DISCONNECTED: 'Brak połączenia', // DeepL
   DATA_TRAFFIC: 'Ruch danych', // DeepL
@@ -91,7 +91,7 @@ const pl: BaseTranslation = {
   BUTTON: 'Przycisk', // DeepL
   TEMPERATURE: 'Temperatura', // DeepL
   PHY_TYPE: 'Typ Eth PHY', // DeepL
-  DISABLED: 'wyłączone', // DeepL
+  DISABLED: '{{wyłączono|brak|}}',
   TX_MODE: 'Tryb EMS Tx', // DeepL
   EMS_BUS: '{{magistrali EMS|na magistrali|}}',
   HARDWARE: 'Sprzęt', // DeepL
@@ -127,9 +127,9 @@ const pl: BaseTranslation = {
   MINUTES: 'minuty', // DeepL
   HOURS: 'godziny', // DeepL
   RESTART: 'Uruchom ponownie', // DeepL
-  RESTART_TEXT: 'Aby zastosować zmienione ustawienia systemowe, należy ponownie uruchomić EMS-ESP', // DeepL
+  RESTART_TEXT: 'Aby zastosować wprowadzone zmiany, interfejs EMS-ESP {{musi zostać|zostanie|}} uruchomiony ponowni{{e.|e|}}',
   RESTART_CONFIRM: 'Czy na pewno chcesz ponownie uruchomić EMS-ESP?', // DeepL
-  COMMAND: 'Komenda', // DeepL
+  COMMAND: '{{Komenda|KOMENDA|}}',
   CUSTOMIZATIONS_RESTART: 'Wszystka personalizacja została usunięta. Uruchamianie od nowa…', // DeepL
   CUSTOMIZATIONS_FULL: 'Liczba wybranych elementów przekroczyła limit. Proszę zapisywać partiami.', // DeepL
   CUSTOMIZATIONS_SAVED: 'Zaktualizowano personalizację', // DeepL
@@ -143,9 +143,9 @@ const pl: BaseTranslation = {
   MODIFIED: 'Zmodyfikowano', // DeepL
   RESET_SELECTED: 'Zresetuj zaznaczone', // DeepL
   OPTIONS: 'Opcje',
-  NAME: 'Nazwa', // DeepL
+  NAME: '{{Nazwa|nazwa|}}',
   CUSTOMIZATIONS_RESET: 'Czy na pewno chcesz usunąć wszystkie personalizacje?', // DeepL
-  SYSTEM_INFORMATION: 'Informacje o systemie', // DeepL
+  SYSTEM_INFORMATION: '{{I|i|}}nformacj{{e|i|}} o systemie',
   HELP_INFORMATION_1: 'Odwiedź wiki online, aby uzyskać instrukcje dotyczące konfiguracji EMS-ESP', // DeepL
   HELP_INFORMATION_2: 'Aby dołączyć do czatu społeczności na żywo, dołącz do naszego serwera Discord', // DeepL
   HELP_INFORMATION_3: 'Aby zgłosić prośbę o dodanie funkcji lub zgłosić błąd', // DeepL
@@ -153,8 +153,8 @@ const pl: BaseTranslation = {
   UPLOAD: 'Prześlij', // DeepL
   DOWNLOAD: '{{P|p||P}}obier{{anie|z||z}}',
   INSTALL: 'Zainstaluj', // DeepL
-  FAILED: 'nie powiodło się', // DeepL
-  SYSTEM: 'System', // DeepL
+  FAILED: 'nie powiodł{{o|a|}} się!',
+  SYSTEM: '{{S|s||s}}yste{{m|mu||mowy}}',
   LOG_OF: '{0} Dziennik', // DeepL
   STATUS_OF: '{0} Stan', // DeepL
   DOWNLOAD_UPLOAD: 'Pobierz/Prześlij', // DeepL
@@ -190,7 +190,7 @@ const pl: BaseTranslation = {
   TIME_SET: 'Ustawiony czas', // DeepL
   MANAGE_USERS: 'Zarządzanie użytkownikami',
   USER_WARNING: 'Należy skonfigurować co najmniej jednego użytkownika z uprawnieniami administratora', // DeepL
-  ADD: 'Dodaj', // DeepL
+  ADD: 'Doda{{j|wanie|}}',
   TELNET_ENABLED: 'Konsola Telnet jest włączona. Telnet nie jest szyfrowany, więc jeśli go nie używasz, wyłącz go w ustawieniach aplikacji.', // DeepL
   TOO_MANY_LOGINS: 'Zbyt wiele nieudanych prób logowania. Spróbuj ponownie za kilka minut.', // DeepL
   PASSWORD_KEEP: 'Pozostaw puste, aby zachować aktualne hasło', // DeepL
@@ -234,7 +234,7 @@ const pl: BaseTranslation = {
   MQTT_INT_MIXER: 'Moduły mieszające', // DeepL
   MQTT_INT_WATER: 'Moduły wodne', // DeepL
   MQTT_QUEUE: 'Kolejka MQTT',
-  DEFAULT: 'Domyślnie', // DeepL
+  DEFAULT: '{{Pozostałe|Domyślna|}}',
   MQTT_ENTITY_FORMAT: 'Format identyfikatora encji', // DeepL
   MQTT_ENTITY_FORMAT_0: 'Pojedynczy egzemplarz, długa nazwa (wersja 3.4)', // DeepL
   MQTT_ENTITY_FORMAT_1: 'Pojedyncza instancja, krótka nazwa', // DeepL
@@ -245,17 +245,17 @@ const pl: BaseTranslation = {
   MQTT_COMMANDS_0: 'Wyłączone, tylko odczyt wartości',
   MQTT_COMMANDS_1: 'Zmiana wartości i uruchamianie komend', // DeepL
   MQTT_COMMANDS_2: 'Wszystko, w tym komendy systemowe', // DeepL
-  INACTIVE: 'Nieaktywne', // DeepL
+  INACTIVE: 'nieaktywn{{y|a|}}',
   ACTIVE: 'Aktywne', // DeepL
   UNKNOWN: 'Nieznane', // DeepL
-  SET_TIME: 'Ustaw czas', // DeepL
+  SET_TIME: '{{Ustaw zegar|Ustawianie zegara|}}',
   SET_TIME_TEXT: 'Wprowadź poniżej lokalną datę i godzinę, aby ustawić czas', // DeepL
-  LOCAL_TIME: 'Czas lokalny', // DeepL
+  LOCAL_TIME: '{{Czas|czasu|}} lokaln{{y|ego|}}',
   UTC_TIME: 'Czas UTC',
   ENABLE_NTP: 'Włącz NTP', // DeepL
   NTP_SERVER: 'Serwer NTP',
   TIME_ZONE: 'Strefa czasowa',
-  ACCESS_POINT: 'Punkt dostępowy', // DeepL
+  ACCESS_POINT: '{{Punkt|punktu|}} {{dostępowy|dostępowego|}}',
   AP_PROVIDE: 'Włącz punkt dostępowy', // DeepL
   AP_PROVIDE_TEXT_2: 'W przypadku braku łączności sieciowej', // DeepL
   AP_PROVIDE_TEXT_3: 'Nigdy', // DeepL
@@ -282,7 +282,7 @@ const pl: BaseTranslation = {
   ADDRESS_OF: 'Adres {0}',
   ADMINISTRATOR: 'Administrator', // DeepL
   GUEST: 'Gość', // DeepL
-  NEW: 'Nowe', // DeepL
+  NEW: 'nowe{{go|j|}}',
   NEW_NAME_OF: 'Nowa nazwa {0}',
   ENTITY: 'entity', // DeepL
   MIN: 'min', // DeepL
@@ -370,13 +370,13 @@ const pl: BaseTranslation = {
   SCHEDULER: 'Harmonogram',
   SCHEDULER_HELP_1: 'Zautomatyzuj komendy, dodając poniżej zaplanowane zdarzenia w Harmonogramie', // DeepL
   SCHEDULER_HELP_2: 'przy uruchomieniu', // DeepL
-  SCHEDULE: 'Harmonogram', // DeepL
-  TIME: 'Czas', // DeepL
-  TIMER: 'Timer', // DeepL
+  SCHEDULE: '{{H|h|}}armonogram{{|u|}}',
+  TIME: '{{Czas|Godzina|}}',
+  TIMER: '{{m|M|}}inutnik',
   ONCHANGE: 'W przypadku zmian', // DeepL
   CONDITION: 'Warunek', // DeepL
   SCHEDULE_UPDATED: 'Harmonogram zaktualizowany', // DeepL
-  CUSTOM_ENTITIES: 'Entities niestandardowe', // DeepL
+  CUSTOM_ENTITIES: '{{N|n|}}iestandardowe{{|j|}} encj{{e|i|}}',
   ENTITIES_HELP_1: 'Zdefiniuj niestandardowe jednostki EMS lub dynamiczne zmienne użytkownika', // DeepL
   ENTITIES_UPDATED: 'Zaktualizowane elementy', // DeepL
   WRITEABLE: 'Możliwość edycji', // DeepL

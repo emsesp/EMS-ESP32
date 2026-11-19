@@ -7,6 +7,7 @@ import {
   Icon,
   IconButton,
   Loader,
+  Menu,
   SearchField,
   Section,
   SortHeader,
@@ -18,6 +19,7 @@ import {
   toast,
   useTableSort
 } from 'components/ui';
+import type { MenuItem } from 'components/ui';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { saveBlob, useInterval } from 'utils';
@@ -47,6 +49,10 @@ const SHOWN_MASKS = MASKS.filter((o) =>
   ].includes(o.bit)
 );
 
+// circuit tags the firmware puts in front of entity names, in every language (tag_* in locale_translations.h)
+const TAGGED =
+  /^((?:hc|hk|vk|og|id|ahs|ahq|avk|aźc|hs|hq|źc|src)\d{1,2}|(?:dhw|wwk|vvk|cwu|sks|tuv|túv|ecs|hmv)\d{0,2}) (.+)$/iu;
+
 const hex = (n: number) => '0x' + n.toString(16).toUpperCase().padStart(2, '0');
 
 const text = (v: unknown) =>
@@ -66,6 +72,26 @@ const compareValues = (a: DeviceValue, b: DeviceValue) =>
     ? a.v - b.v
     : text(a.v).localeCompare(text(b.v));
 
+const highlight = (s: string, q: string) => {
+  const i = q ? s.toLowerCase().indexOf(q) : -1;
+  if (i < 0) return s;
+  return (
+    <>
+      {s.slice(0, i)}
+      <mark>{s.slice(i, i + q.length)}</mark>
+      {s.slice(i + q.length)}
+    </>
+  );
+};
+
+interface Row {
+  dv: DeviceValue;
+  name: string;
+  tag: string;
+  short: string;
+  value: string;
+}
+
 const Devices = () => {
   const { LL } = useI18nContext();
   const { me } = useContext(AuthenticatedContext);
@@ -73,9 +99,14 @@ const Devices = () => {
   const [params, setParams] = useSearchParams();
   const [onlyFav, setOnlyFav] = useState(false);
   const [search, setSearch] = useState('');
+  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
+  const [changed, setChanged] = useState<ReadonlySet<string>>(new Set());
   const [selectedValue, setSelectedValue] = useState<DeviceValue>();
   const [loadedId, setLoadedId] = useState<number>();
   const detailRef = useRef<HTMLElement>(null);
+  const lastValues = useRef<{ id?: number; values: Map<string, unknown> }>({
+    values: new Map()
+  });
 
   const selectedId = Number(params.get('device')) || undefined;
 
@@ -91,7 +122,21 @@ const Devices = () => {
     send: fetchDeviceData
   } = useRequest((id: number) => readDeviceData(id), {
     immediate: false
-  }).onSuccess((event) => setLoadedId(event.args[0]));
+  }).onSuccess(({ args: [id], data }) => {
+    const values = new Map(data.nodes.map((dv) => [dv.id.slice(2), dv.v]));
+    const last = lastValues.current;
+    setChanged(
+      new Set(
+        last.id === id
+          ? [...values.keys()].filter(
+              (k) => last.values.has(k) && last.values.get(k) !== values.get(k)
+            )
+          : []
+      )
+    );
+    lastValues.current = { id, values };
+    setLoadedId(id);
+  });
 
   const { loading: submitting, send: sendDeviceValue } = useRequest(
     (data: { id: number; c: string; v: unknown }) => writeDeviceValue(data),
@@ -111,6 +156,7 @@ const Devices = () => {
   useEffect(() => {
     if (selectedId === undefined || !selectable) return;
     setSearch('');
+    setCollapsed(new Set());
     void fetchDeviceData(selectedId);
   }, [selectedId, selectable]);
 
@@ -159,15 +205,28 @@ const Devices = () => {
     );
   }
 
-  const favNodes = onlyFav
-    ? nodes.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE))
-    : nodes;
   const q = search.trim().toLowerCase();
-  const shown = sort.rows.filter(
-    (dv) =>
-      (!onlyFav || hasMask(dv.id, DeviceEntityMask.DV_FAVORITE)) &&
-      dv.id.slice(2).toLowerCase().includes(q)
-  );
+  const shown: Row[] = sort.rows.flatMap((dv) => {
+    if (onlyFav && !hasMask(dv.id, DeviceEntityMask.DV_FAVORITE)) return [];
+    const name = dv.id.slice(2);
+    const value = formatValue(LL, dv.v, dv.u);
+    if (q && !name.toLowerCase().includes(q) && !value.toLowerCase().includes(q)) {
+      return [];
+    }
+    const m = TAGGED.exec(name);
+    return [{ dv, name, tag: m?.[1] ?? '', short: m?.[2] ?? name, value }];
+  });
+
+  // untagged entities first, then each circuit in the order the device lists them
+  const groups = new Map<string, Row[]>([['', []]]);
+  for (const row of shown) {
+    const key = row.tag.toLowerCase();
+    const group = groups.get(key);
+    if (group) group.push(row);
+    else groups.set(key, [row]);
+  }
+  if (!groups.get('')?.length) groups.delete('');
+  const grouped = groups.size > 1;
 
   const canWrite = (dv: DeviceValue) =>
     me.admin && dv.c !== undefined && !hasMask(dv.id, DeviceEntityMask.DV_READONLY);
@@ -180,9 +239,16 @@ const Devices = () => {
     }
   };
 
-  const download = () => {
+  const toggleGroup = (key: string) => {
+    const next = new Set(collapsed);
+    if (!next.delete(key)) next.add(key);
+    setCollapsed(next);
+  };
+
+  const filename = (d: Device, ext: string) => `${d.tn}_${d.n}.${ext}`;
+
+  const exportCsv = () => {
     if (!device) return;
-    const filename = device.tn + '_' + device.n;
     const columns: [string, (dv: DeviceValue) => unknown][] = [
       [LL.ENTITY_NAME(0), (dv) => dv.id.slice(2)],
       [
@@ -217,15 +283,21 @@ const Devices = () => {
     const line = (cells: unknown[]) => cells.map(escapeCsvCell).join(';') + '\r\n';
     const csv =
       line(columns.map(([name]) => name)) +
-      favNodes.map((dv) => line(columns.map(([, get]) => get(dv)))).join('');
+      shown.map(({ dv }) => line(columns.map(([, get]) => get(dv)))).join('');
+    saveBlob(
+      new Blob([csv], { type: 'text/csv;charset=utf-8' }),
+      filename(device, 'csv')
+    );
+  };
 
+  const exportJson = () => {
+    if (!device) return;
     saveBlob(
       new Blob([JSON.stringify({ device, ...deviceData }, null, 2)], {
         type: 'application/json'
       }),
-      filename + '.json'
+      filename(device, 'json')
     );
-    saveBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), filename + '.csv');
   };
 
   const saveValue = async (dv: DeviceValue) => {
@@ -299,10 +371,85 @@ const Devices = () => {
     </Section>
   );
 
+  const renderRow = ({ dv, name, short, value }: Row) => (
+    <tr key={dv.id} {...rowAction(() => setSelectedValue(dv), name)}>
+      <td>
+        <span className="dv-ename">
+          <span>{highlight(grouped ? short : name, q)}</span>
+          {SHOWN_MASKS.map(
+            (o) =>
+              hasMask(dv.id, o.bit) && (
+                <Icon
+                  key={o.bit}
+                  name={o.icon}
+                  size="xs"
+                  label={o.label(LL)}
+                  className={cx('dv-mask', `b${o.bit}`)}
+                />
+              )
+          )}
+        </span>
+      </td>
+      <td className="r dv-val">
+        <span key={text(dv.v)} className={cx(changed.has(name) && 'dv-chg')}>
+          {highlight(value, q)}
+        </span>
+      </td>
+      {me.admin && (
+        <td className="dv-act">
+          {canWrite(dv) && (
+            <Icon
+              name={dv.v === '' ? 'play_arrow' : 'edit'}
+              size="xs"
+              className="lb"
+            />
+          )}
+        </td>
+      )}
+    </tr>
+  );
+
+  const renderGroup = (key: string, rows: Row[]) => {
+    const open = !!q || !collapsed.has(key);
+    return [
+      <tr key={`g-${key}`} className="dv-grp">
+        <td colSpan={me.admin ? 3 : 2}>
+          <button
+            type="button"
+            aria-expanded={open}
+            disabled={!!q}
+            onClick={() => toggleGroup(key)}
+          >
+            <Icon name="chevron_right" size="sm" className="dv-chev" />
+            {rows[0]?.tag || LL.GENERAL()}
+            <span className="count">{rows.length}</span>
+          </button>
+        </td>
+      </tr>,
+      ...(open ? rows.map(renderRow) : [])
+    ];
+  };
+
   const renderDevice = (d: Device) => {
     const masksShown = SHOWN_MASKS.filter((o) =>
-      shown.some((dv) => hasMask(dv.id, o.bit))
+      shown.some(({ dv }) => hasMask(dv.id, o.bit))
     );
+    const exportItems: MenuItem[] = [
+      { label: 'CSV', icon: 'list_alt', onSelect: exportCsv },
+      { label: 'JSON', icon: 'data_object', onSelect: exportJson }
+    ];
+    const moreItems: MenuItem[] = [
+      ...exportItems.map((o) => ({ ...o, label: `${LL.EXPORT()} ${o.label}` })),
+      ...(me.admin
+        ? [
+            {
+              label: LL.CUSTOMIZATIONS(),
+              icon: 'construction' as const,
+              onSelect: customize
+            }
+          ]
+        : [])
+    ];
     return (
       <section className="section dv-detail" ref={detailRef} aria-label={d.n}>
         <div className="dv-head">
@@ -319,6 +466,30 @@ const Devices = () => {
             <DeviceIcon type_id={d.t} className="lb" />
             <h2 className="h6">{d.n}</h2>
             <span className="grow" />
+            <Menu
+              className="dv-wide"
+              icon="download"
+              label={LL.EXPORT()}
+              items={exportItems}
+              disabled={!nodes.length}
+            />
+            {me.admin && (
+              <Button
+                className="dv-wide"
+                color="secondary"
+                icon="construction"
+                onClick={customize}
+              >
+                {LL.CUSTOMIZATIONS()}
+              </Button>
+            )}
+            <Menu
+              className="dv-narrow"
+              iconOnly
+              icon="more_vert"
+              label={LL.MORE()}
+              items={moreItems}
+            />
             <IconButton
               className="dv-close"
               icon="close"
@@ -347,15 +518,6 @@ const Devices = () => {
           <span className="cap dv-count">
             {LL.SHOWING()} {shown.length}/{d.e} {LL.ENTITIES(shown.length)}
           </span>
-          <span className="grow" />
-          <Button icon="download" onClick={download} disabled={!nodes.length}>
-            {LL.EXPORT()}
-          </Button>
-          {me.admin && (
-            <Button color="secondary" icon="construction" onClick={customize}>
-              {LL.CUSTOMIZATIONS()}
-            </Button>
-          )}
         </div>
 
         {loadedId !== selectedId ? (
@@ -364,66 +526,29 @@ const Devices = () => {
             onRetry={() => void fetchDeviceData(d.id)}
           />
         ) : (
-          <div className="dv-scroll">
-            <Table className="dv-values">
-              <thead>
+          <Table className="dv-values">
+            <thead>
+              <tr>
+                <SortHeader {...sort.header('name')}>{LL.ENTITY_NAME(0)}</SortHeader>
+                <SortHeader className="r" {...sort.header('value')}>
+                  {LL.VALUE(0)}
+                </SortHeader>
+                {me.admin && <th className="dv-act" />}
+              </tr>
+            </thead>
+            <tbody>
+              {shown.length === 0 && (
                 <tr>
-                  <SortHeader {...sort.header('name')}>
-                    {LL.ENTITY_NAME(0)}
-                  </SortHeader>
-                  <SortHeader className="r" {...sort.header('value')}>
-                    {LL.VALUE(0)}
-                  </SortHeader>
-                  {me.admin && <th className="dv-act" />}
+                  <td colSpan={3} className="tbl-empty">
+                    {LL.NO_ENTITIES_MATCH()}
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {shown.length === 0 && (
-                  <tr>
-                    <td colSpan={3} className="tbl-empty">
-                      {LL.NO_ENTITIES_MATCH()}
-                    </td>
-                  </tr>
-                )}
-                {shown.map((dv) => (
-                  <tr
-                    key={dv.id}
-                    {...rowAction(() => setSelectedValue(dv), dv.id.slice(2))}
-                  >
-                    <td>
-                      <span className="dv-ename">
-                        {dv.id.slice(2)}
-                        {SHOWN_MASKS.map(
-                          (o) =>
-                            hasMask(dv.id, o.bit) && (
-                              <Icon
-                                key={o.bit}
-                                name={o.icon}
-                                size="xs"
-                                label={o.label(LL)}
-                                className={cx('dv-mask', `b${o.bit}`)}
-                              />
-                            )
-                        )}
-                      </span>
-                    </td>
-                    <td className="r dv-val">{formatValue(LL, dv.v, dv.u)}</td>
-                    {me.admin && (
-                      <td className="dv-act">
-                        {canWrite(dv) && (
-                          <Icon
-                            name={dv.v === '' ? 'play_arrow' : 'edit'}
-                            size="xs"
-                            className="lb"
-                          />
-                        )}
-                      </td>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </div>
+              )}
+              {grouped
+                ? [...groups].flatMap(([key, rows]) => renderGroup(key, rows))
+                : shown.map(renderRow)}
+            </tbody>
+          </Table>
         )}
         {masksShown.length > 0 && (
           <p className="cap dv-legend">

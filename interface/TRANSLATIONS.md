@@ -70,7 +70,7 @@ pnpm check-layout --route /the/page
 ### What the script takes care of
 
 - **Placeholders**: `{name}` and `{0}` are protected from DeepL. If a translation comes back with different placeholders it's rejected and listed under "Not applied".
-- **Plurals**: strings with `{{...}}`, and values that aren't plain strings (`STATUS_NAMES`), are never sent. They're listed under "Translate by hand".
+- **Plurals**: strings with `{{...}}` in English or in the existing translation (Polish uses them for grammatical cases), and values that aren't plain strings (`STATUS_NAMES`), are never sent. They're listed under "Translate by hand".
 - **Consistent terms**: each language's existing translations of core terms (Devices, Entities, Customizations, Dashboard and so on, see `GLOSSARY_KEYS`) become a temporary DeepL glossary, so new text reuses the same words. EMS-ESP, EMS, MQTT, NTP, GPIO, API and Home Assistant are kept as they are. The glossary is deleted after the run.
 - **Tone**: formal "you" for German and French, informal for Dutch and Italian, matching the existing files (`FORMALITY` in the script). DeepL ignores this for languages without the distinction.
 - **Context**: DeepL is told the text is short UI labels for a heating-system web app, which helps with ambiguous words like "Reset" or "Value".
@@ -104,7 +104,7 @@ pnpm typesafe-i18n && npx tsc --noEmit
 pnpm check-layout                                  # with `pnpm standalone` running
 ```
 
-Review the diff before committing: where the old translation was right and DeepL only rephrased it, restore the old line with your editor or `git checkout -p src/i18n/<lang>/index.ts`. The 16 plural and list strings per language (`{{...}}`, `STATUS_NAMES`) are never changed by the script; update those by hand if their English changed.
+Review the diff before committing: where the old translation was right and DeepL only rephrased it, restore the old line with your editor or `git checkout -p src/i18n/<lang>/index.ts`. Plural and list strings (`{{...}}` in English or in the translation, `STATUS_NAMES`) are never changed by the script; update those by hand if their English changed.
 
 ### Reviewing
 

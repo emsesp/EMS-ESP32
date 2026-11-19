@@ -42,7 +42,12 @@ const ROUTES = [
       '/settings/security': '/settings/security/users'
     })[p] ?? p
 );
-ROUTES.push('/settings/network/scan', '/settings/security/apikeys');
+// the heat pump has the longest entity list in the mock data
+ROUTES.push(
+  '/devices?device=8',
+  '/settings/network/scan',
+  '/settings/security/apikeys'
+);
 const DIALOG_ROUTES = [
   '/sensors',
   '/commands',

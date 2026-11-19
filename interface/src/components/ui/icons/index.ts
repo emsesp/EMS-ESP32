@@ -65,6 +65,7 @@ import menu_book from './menu_book.svg?raw';
 import mode_fan from './mode_fan.svg?raw';
 import monitoring from './monitoring.svg?raw';
 import more_time from './more_time.svg?raw';
+import more_vert from './more_vert.svg?raw';
 import new_releases from './new_releases.svg?raw';
 import notification_important from './notification_important.svg?raw';
 import open_in_new from './open_in_new.svg?raw';
@@ -187,6 +188,7 @@ export const icons = {
   mode_fan,
   monitoring,
   more_time,
+  more_vert,
   new_releases,
   notification_important,
   open_in_new,
