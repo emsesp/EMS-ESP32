@@ -1,4 +1,5 @@
 import preact from '@preact/preset-vite';
+import fs from 'fs';
 import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { pathToFileURL } from 'url';
@@ -8,7 +9,8 @@ import {
   type PluginOption,
   type UserConfig,
   defineConfig,
-  normalizePath
+  normalizePath,
+  transformWithOxc
 } from 'vite';
 
 const RECOVERY_OUT_DIR = 'dist-recovery';
@@ -53,6 +55,68 @@ const recoveryIcons = (): Plugin => ({
     return null;
   }
 });
+
+// Every locale chunk repeats all translation keys, and each chunk is gzipped on its own for
+// flash. At build time the locale modules export only their values (in the key order of
+// the `en` dictionary) and i18n-util.async.ts zips them back together with a single copy
+// of the keys, which saves ~40 KB of flash. The dev server uses the sources unchanged.
+const I18N_DIR = normalizePath(path.resolve(import.meta.dirname, 'src/i18n'));
+const LOCALE_RE = /\/src\/i18n\/([a-z]{2})\/index\.ts$/;
+const I18N_LOADER = `${I18N_DIR}/i18n-util.async.ts`;
+const I18N_LOADER_IMPORT = '(await localeTranslationLoaders[locale]()).default';
+
+const evalLocale = async (code: string, id: string) => {
+  const { code: js } = await transformWithOxc(code, id, { lang: 'ts' });
+  if (/^\s*import\s/m.test(js)) {
+    throw new Error(`${id}: locale modules must not import anything at runtime`);
+  }
+  const url = `data:text/javascript;base64,${Buffer.from(js).toString('base64')}`;
+  const { default: dictionary } = (await import(/* @vite-ignore */ url)) as {
+    default: Record<string, unknown>;
+  };
+  return dictionary;
+};
+
+const compactTranslations = (): Plugin => {
+  let keys: string[] = [];
+  return {
+    name: 'compact-translations',
+    apply: 'build',
+    enforce: 'pre',
+    async buildStart() {
+      const en = `${I18N_DIR}/en/index.ts`;
+      keys = Object.keys(await evalLocale(fs.readFileSync(en, 'utf8'), en));
+    },
+    async transform(code, id) {
+      const file = normalizePath(id.split('?')[0] ?? '');
+      if (file === `${I18N_DIR}/i18n-util.sync.ts`) {
+        this.error('i18n-util.sync.ts cannot be bundled: locale modules are compacted');
+      }
+      if (file === I18N_LOADER) {
+        if (!code.includes(I18N_LOADER_IMPORT)) {
+          this.error(`compact-translations: "${I18N_LOADER_IMPORT}" not found`);
+        }
+        return (
+          code.replace(I18N_LOADER_IMPORT, `unpackLocale(${I18N_LOADER_IMPORT})`) +
+          `\nconst LOCALE_KEYS = ${JSON.stringify(keys)};\n` +
+          'const unpackLocale = (values: unknown[]) =>\n' +
+          '  Object.fromEntries(LOCALE_KEYS.map((key, i) => [key, values[i]]));\n'
+        );
+      }
+      const locale = LOCALE_RE.exec(file)?.[1];
+      if (!locale) return null;
+      const dictionary = await evalLocale(code, id);
+      const extra = Object.keys(dictionary).filter((k) => !keys.includes(k));
+      const missing = keys.filter((k) => !(k in dictionary));
+      if (extra.length || missing.length) {
+        this.error(
+          `${locale}: keys differ from en (extra: ${extra.join(', ') || '-'}; missing: ${missing.join(', ') || '-'})`
+        );
+      }
+      return `export default ${JSON.stringify(keys.map((k) => dictionary[k]))};`;
+    }
+  };
+};
 
 // Common resolve extensions - prioritize TypeScript/React files for Windows compatibility
 const RESOLVE_EXTENSIONS = ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'];
@@ -186,16 +250,16 @@ export default defineConfig(async ({ command, mode }) => {
   if (mode === 'hosted') {
     console.log('Preparing for hosted build');
     return {
-      ...baseConfig(false),
+      ...baseConfig(false, [compactTranslations()]),
       build: createBuildConfig(false)
     };
   }
 
   console.log('Preparing for production, optimized build');
   return {
-    ...baseConfig(
-      false,
-      process.env.ANALYZE
+    ...baseConfig(false, [
+      compactTranslations(),
+      ...(process.env.ANALYZE
         ? [
             visualizer({
               template: 'treemap',
@@ -205,8 +269,8 @@ export default defineConfig(async ({ command, mode }) => {
               filename: '../analyse.html'
             })
           ]
-        : []
-    ),
+        : [])
+    ]),
     build: createBuildConfig(true)
   };
 });
