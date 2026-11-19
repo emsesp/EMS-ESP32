@@ -1401,3 +1401,4 @@ auxheater
 switchpoint
 DEMS
 rscd
+eebus
