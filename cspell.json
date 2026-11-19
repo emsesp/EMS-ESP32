@@ -19,6 +19,7 @@
     "lib/espMqttClient", 
     "analyse.html", 
     "dist", 
+    "dist-recovery",
     "locale_translations.h", 
     "TZ.tsx", 
     "build/**", 

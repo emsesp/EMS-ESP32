@@ -235,6 +235,15 @@ bool Network::formatBSSID([[maybe_unused]] const String & bssid, [[maybe_unused]
 }
 
 // get the soft-AP's own IP address, empty when the AP isn't running
+std::string Network::getIP() const {
+#ifndef EMSESP_STANDALONE
+    if (network_connected()) {
+        return IPAddress(network_ip_).toString().c_str();
+    }
+#endif
+    return "";
+}
+
 std::string Network::getAPIP() const {
 #ifndef EMSESP_STANDALONE
     const IPAddress ip = WiFi.softAPIP();

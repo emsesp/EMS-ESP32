@@ -1,0 +1,48 @@
+/* also used directly on buttons: filters, jump links, commands, weekdays */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: var(--fill);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  white-space: nowrap;
+}
+button.chip {
+  cursor: pointer;
+}
+button.chip:hover {
+  background: var(--fill-hover);
+}
+button.chip:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+button.chip:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.chip.outline {
+  border-color: var(--outline);
+  background: transparent;
+}
+button.chip.outline:hover {
+  border-color: var(--primary);
+}
+.chip.on {
+  border-color: var(--primary);
+  background: var(--primary-tint);
+  color: var(--primary);
+}
+@media (pointer: coarse) {
+  button.chip {
+    min-height: var(--touch);
+    border-radius: 20px;
+  }
+}

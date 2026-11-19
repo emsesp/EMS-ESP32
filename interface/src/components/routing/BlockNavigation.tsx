@@ -1,41 +1,32 @@
 import { memo } from 'react';
 import type { Blocker } from 'react-router';
 
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle
-} from '@mui/material';
-
-import { dialogStyle } from 'CustomTheme';
+import { ConfirmDialog } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 
-const BlockNavigation = ({ blocker }: { blocker: Blocker }) => {
+interface BlockNavigationProps {
+  blocker: Blocker;
+  // an upload or restore is running, rather than unsaved changes
+  busy?: boolean;
+}
+
+// asks before leaving the page; open while the blocker holds a navigation
+const BlockNavigation = ({ blocker, busy }: BlockNavigationProps) => {
   const { LL } = useI18nContext();
 
-  const handleReset = () => {
-    blocker.reset?.();
-  };
-
-  const handleProceed = () => {
-    blocker.proceed?.();
-  };
-
   return (
-    <Dialog sx={dialogStyle} open={blocker.state === 'blocked'}>
-      <DialogTitle>{LL.BLOCK_NAVIGATE_1()}</DialogTitle>
-      <DialogContent dividers>{LL.BLOCK_NAVIGATE_2()}</DialogContent>
-      <DialogActions>
-        <Button variant="outlined" onClick={handleReset} color="secondary">
-          {LL.STAY()}
-        </Button>
-        <Button variant="contained" onClick={handleProceed} color="primary">
-          {LL.LEAVE()}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <ConfirmDialog
+      open={blocker.state === 'blocked'}
+      title={busy ? LL.BLOCK_BUSY_1() : LL.BLOCK_NAVIGATE_1()}
+      label={LL.LEAVE()}
+      icon="logout"
+      cancelLabel={LL.STAY()}
+      cancelIcon="undo"
+      onClose={() => blocker.reset?.()}
+      onConfirm={() => blocker.proceed?.()}
+    >
+      {busy ? LL.BLOCK_BUSY_2() : LL.BLOCK_NAVIGATE_2()}
+    </ConfirmDialog>
   );
 };
 

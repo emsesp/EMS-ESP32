@@ -1,0 +1,200 @@
+/* Recovery app */
+.rc-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: var(--appbar-h);
+  padding: 0 16px 0 24px;
+  background: var(--appbar);
+}
+.rc-bar img {
+  width: 32px;
+  height: 32px;
+}
+.rc-bar h1 {
+  min-width: 0;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0.15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rc-sep {
+  margin: 0 10px;
+  color: var(--primary);
+}
+.rc-main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--appbar-h) 0 24px;
+}
+
+.rc-msgs {
+  display: grid;
+  gap: 8px;
+  margin: 16px 12px 0;
+}
+.rc-p {
+  margin: 0 0 12px;
+}
+.rc-dump {
+  margin-bottom: 12px;
+  overflow-wrap: anywhere;
+}
+.rc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.rc-system-actions {
+  justify-content: space-between;
+  margin-top: 12px;
+}
+.rc-msg {
+  margin-top: 12px;
+}
+.rc-md5 {
+  margin: 10px 0 0;
+  overflow-wrap: anywhere;
+}
+.rc-target {
+  max-width: 340px;
+  margin-bottom: 12px;
+}
+
+.rc-tbl td {
+  height: 44px;
+}
+.rc-part {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.rc-tags {
+  line-height: 1.8;
+}
+.rc-row-act {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* covers the page while the device restarts */
+.rc-restart {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.rc-restart-box {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+.rc-restart-box img {
+  width: 40px;
+  height: 40px;
+}
+.rc-restart-box h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 400;
+}
+.rc-restart-box .msg {
+  width: 100%;
+  text-align: left;
+}
+.rc-restart-box .cap {
+  margin: 0;
+}
+.rc-wait {
+  margin: 0;
+  color: var(--text-2);
+}
+.rc-indeterminate {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: rgba(144, 202, 249, 0.2);
+}
+.rc-indeterminate::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  border-radius: 3px;
+  background: var(--primary);
+  animation: rc-slide 1.4s ease-in-out infinite;
+}
+@keyframes rc-slide {
+  from {
+    left: -40%;
+  }
+  to {
+    left: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rc-indeterminate::before {
+    animation-duration: 4s;
+  }
+}
+
+@media (max-width: 599px) {
+  .rc-bar {
+    padding: 0 8px 0 16px;
+  }
+  .rc-bar h1 {
+    font-size: 18px;
+  }
+  .rc-signout > span {
+    display: none;
+  }
+  .rc-msgs {
+    margin: 8px 8px 0;
+  }
+  .rc-target {
+    max-width: none;
+  }
+  .rc-tbl td {
+    height: auto;
+  }
+  .rc-tbl td:empty {
+    display: none;
+  }
+  .rc-tbl .rc-tags {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .rc-tags > .tag {
+    margin-left: 0;
+  }
+  .rc-actions > .btn {
+    flex: 1 1 auto;
+  }
+}

@@ -1,0 +1,94 @@
+/* resets the browser's popover box; z-index covers browsers without popover and MUI modals (1300) */
+.toaster {
+  position: fixed;
+  inset: auto auto calc(24px + var(--tabbar-h, 0px)) 50%;
+  transform: translateX(-50%);
+  z-index: 1400;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  width: min(420px, calc(100% - 16px));
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  overflow: visible;
+}
+.toaster:empty {
+  display: none;
+}
+
+.toast {
+  --c: var(--primary);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 4px 8px 14px;
+  background: var(--paper-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--c);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-pop);
+  line-height: 1.4;
+  overflow: hidden;
+  cursor: pointer;
+  animation: toast-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.toast > .icon {
+  color: var(--c);
+}
+.toast.success {
+  --c: var(--success);
+}
+.toast.warning {
+  --c: var(--warning);
+}
+.toast.error {
+  --c: var(--error);
+}
+
+/* countdown line; runs as long as the auto-close timer and stops with it */
+.toast-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--c);
+  opacity: 0.7;
+  transform-origin: left;
+  animation: toast-countdown linear forwards;
+}
+.toast.paused .toast-bar {
+  animation-play-state: paused;
+}
+
+@keyframes toast-in {
+  from {
+    transform: translateY(16px) scale(0.96);
+    opacity: 0;
+  }
+}
+@keyframes toast-countdown {
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+}
+
+@media (max-width: 599px) {
+  .toaster {
+    inset: auto 8px calc(8px + var(--tabbar-h, 0px)) 8px;
+    transform: none;
+    width: auto;
+  }
+}

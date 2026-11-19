@@ -1,129 +1,42 @@
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import DnsIcon from '@mui/icons-material/Dns';
-import SwapVerticalCircleIcon from '@mui/icons-material/SwapVerticalCircle';
-import UpdateIcon from '@mui/icons-material/Update';
-import {
-  Avatar,
-  Divider,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  useTheme
-} from '@mui/material';
-import type { Theme } from '@mui/material';
-
 import * as NTPApi from 'api/ntp';
 
 import { useRequest } from 'alova/client';
-import { FormLoader, SectionContent, useLayoutTitle } from 'components';
+import { Loader } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
-import type { NTPStatusType } from 'types';
 import { NTPSyncStatus } from 'types';
-import { useInterval } from 'utils';
-import { formatDateTime } from 'utils';
+import { formatDateTime, useInterval } from 'utils';
 
-// Utility functions
-const isNtpEnabled = ({ status }: NTPStatusType) =>
-  status !== NTPSyncStatus.NTP_DISABLED;
-
-const ntpStatusHighlight = ({ status }: NTPStatusType, theme: Theme) => {
-  switch (status) {
-    case NTPSyncStatus.NTP_DISABLED:
-      return theme.palette.info.main;
-    case NTPSyncStatus.NTP_INACTIVE:
-      return theme.palette.error.main;
-    case NTPSyncStatus.NTP_ACTIVE:
-      return theme.palette.success.main;
-    default:
-      return theme.palette.error.main;
-  }
-};
+import StatusPage from './StatusPage';
+import { ntpInfo } from './status';
 
 const NTPStatus = () => {
+  const { LL } = useI18nContext();
   const { data, send: loadData, error } = useRequest(NTPApi.readNTPStatus);
 
   useInterval(() => {
     void loadData();
   });
 
-  const { LL } = useI18nContext();
-  useLayoutTitle('NTP');
-
-  const theme = useTheme();
-
-  const ntpStatus = ({ status }: NTPStatusType) => {
-    switch (status) {
-      case NTPSyncStatus.NTP_DISABLED:
-        return LL.NOT_ENABLED();
-      case NTPSyncStatus.NTP_INACTIVE:
-        return LL.INACTIVE(0);
-      case NTPSyncStatus.NTP_ACTIVE:
-        return LL.ACTIVE();
-      default:
-        return LL.UNKNOWN();
-    }
-  };
-
   if (!data) {
-    return (
-      <SectionContent>
-        <FormLoader onRetry={loadData} errorMessage={error?.message || ''} />
-      </SectionContent>
-    );
+    return <Loader error={error?.message} onRetry={() => void loadData()} />;
   }
 
+  const enabled = data.status !== NTPSyncStatus.NTP_DISABLED;
+  const { state, text } = ntpInfo(data.status, LL);
+
   return (
-    <SectionContent>
-      <List>
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar sx={{ bgcolor: ntpStatusHighlight(data, theme) }}>
-              <UpdateIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText primary={LL.STATUS_OF('')} secondary={ntpStatus(data)} />
-        </ListItem>
-        <Divider variant="inset" component="li" />
-        {isNtpEnabled(data) && (
-          <>
-            <ListItem>
-              <ListItemAvatar>
-                <Avatar>
-                  <DnsIcon />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText primary={LL.NTP_SERVER()} secondary={data.server} />
-            </ListItem>
-            <Divider variant="inset" component="li" />
-          </>
-        )}
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>
-              <AccessTimeIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText
-            primary={LL.LOCAL_TIME(0)}
-            secondary={formatDateTime(data.local_time)}
-          />
-        </ListItem>
-        <Divider variant="inset" component="li" />
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>
-              <SwapVerticalCircleIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText
-            primary={LL.UTC_TIME()}
-            secondary={formatDateTime(data.utc_time)}
-          />
-        </ListItem>
-        <Divider variant="inset" component="li" />
-      </List>
-    </SectionContent>
+    <StatusPage
+      state={state}
+      icon="schedule"
+      title={`NTP ${text}`}
+      text={enabled ? data.server : undefined}
+      settings={{ to: '/settings/ntp', label: LL.SETTINGS_OF('NTP') }}
+      rows={[
+        enabled && { label: LL.NTP_SERVER(), value: data.server },
+        { label: LL.LOCAL_TIME(0), value: formatDateTime(data.local_time) },
+        { label: LL.UTC_TIME(), value: formatDateTime(data.utc_time) }
+      ]}
+    />
   );
 };
 

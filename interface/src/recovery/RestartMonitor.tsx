@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import RefreshIcon from '@mui/icons-material/Refresh';
-import { Box, Button, LinearProgress, Typography } from '@mui/material';
-
-import MessageBox from 'components/MessageBox';
+import { Button, Message } from 'components/ui';
 
 import { STATUS_URL } from './api';
 
@@ -70,79 +67,40 @@ const RestartMonitor = ({
   }, []);
 
   return (
-    <Box
-      sx={{
-        position: 'fixed',
-        inset: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}
-    >
-      <Box
-        sx={{
-          width: '30%',
-          minWidth: '300px',
-          maxWidth: '500px',
-          backgroundColor: '#393939',
-          border: 2,
-          borderColor: '#565656',
-          borderRadius: '8px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-          p: 3,
-          display: 'flex',
-          alignItems: 'center',
-          flexDirection: 'column'
-        }}
-      >
-        <img
-          src="/app/icon.png"
-          alt="EMS-ESP"
-          style={{ width: '40px', height: '40px', marginBottom: '16px' }}
-        />
-        <Typography sx={{ textAlign: 'center' }} variant="h6">
-          Restarting{target ? ` from ${target}` : ''}
-        </Typography>
-
+    <div className="rc-restart">
+      <div className="rc-restart-box">
+        <img src="/app/icon.png" alt="" />
+        <h1>Restarting{target ? ` from ${target}` : ''}</h1>
         {gaveUp ? (
           <>
-            <MessageBox sx={{ mt: 2 }} level="warning">
+            <Message level="warning">
               The device has not come back on this address.
               {viaAccessPoint &&
                 ` If you were connected to the recovery access point, reconnect to your normal network and open http://${hostname}.local`}
-            </MessageBox>
-            <Button
-              sx={{ mt: 2 }}
-              startIcon={<RefreshIcon />}
-              variant="outlined"
-              onClick={() => window.location.reload()}
-            >
+            </Message>
+            <Button icon="refresh" onClick={() => window.location.reload()}>
               Reload
             </Button>
           </>
         ) : (
           <>
-            <Typography sx={{ mt: 2, textAlign: 'center' }} variant="h6">
-              Please wait&hellip;
-            </Typography>
-            <Box sx={{ width: '100%', mt: 2 }}>
-              <LinearProgress />
-            </Box>
+            <p className="rc-wait">Please wait&hellip;</p>
+            <div
+              className="rc-indeterminate"
+              role="progressbar"
+              aria-label="Restarting"
+            />
             {viaAccessPoint && (
-              <Typography
-                sx={{ mt: 2, textAlign: 'center' }}
-                variant="body2"
-                color="text.secondary"
-              >
+              <p className="cap">
                 EMS-ESP does not use the recovery access point. If this page does not
                 reload, reconnect to your normal network and open http://{hostname}
                 .local
-              </Typography>
+              </p>
             )}
           </>
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };
 

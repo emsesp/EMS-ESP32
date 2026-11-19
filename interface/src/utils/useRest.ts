@@ -48,9 +48,7 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
     try {
       await readData();
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      toast.error(message);
-      setErrorMessage(message);
+      setErrorMessage(error instanceof Error ? error.message : String(error));
     }
   }, [readData]);
 
@@ -67,16 +65,15 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
       const message = error instanceof Error ? error.message : String(error);
 
       if (message === REBOOT_ERROR_MESSAGE) {
+        // saved; the new values only apply after a restart
+        setOrigData(data as D);
+        setDirtyFlags([]);
         setRestartNeeded(true);
         return;
       }
 
-      if (origData) {
-        updateData({ data: origData });
-      }
+      // keep the edits so the user can fix them or try again
       toast.error(message);
-      setErrorMessage(message);
-      setDirtyFlags([]);
     }
   };
 

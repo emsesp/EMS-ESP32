@@ -1,0 +1,109 @@
+.du-actions,
+.du-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.du-footer {
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+.du-upload,
+.du-msg,
+.du-chips {
+  margin-top: 12px;
+}
+.du-secrets {
+  margin-top: 16px;
+}
+
+/* heating backup dialog */
+.du-label {
+  margin: 0 0 4px;
+}
+.checkbox.du-dev {
+  display: flex;
+  gap: 10px;
+  padding: 6px 0;
+}
+.du-dev-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+/* restore */
+.du-file {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: flex-start;
+}
+.du-file-main {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+.du-chips .tag {
+  margin-left: 0;
+  white-space: normal;
+}
+.du-file-icon {
+  font-size: 36px;
+  color: var(--lightblue);
+}
+.du-name {
+  overflow-wrap: anywhere;
+}
+.du-note {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-left: 3px solid var(--primary);
+  background: var(--paper-2);
+  color: var(--text-2);
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+.du-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.du-selall {
+  display: none;
+}
+.du-done {
+  margin-bottom: 12px;
+}
+.du-tbl .du-changed {
+  color: #fff59d;
+}
+.du-tbl td.du-status {
+  white-space: nowrap;
+}
+.du-res {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.du-progress {
+  margin-top: 8px;
+}
+.dialog-content > .du-note {
+  margin-bottom: 12px;
+}
+
+@media (max-width: 599px) {
+  .du-selall.checkbox {
+    display: inline-flex;
+    min-height: var(--touch);
+  }
+  .du-footer > * {
+    flex: 1 1 0;
+  }
+  .du-tbl.stack td.du-status:empty {
+    display: none;
+  }
+}

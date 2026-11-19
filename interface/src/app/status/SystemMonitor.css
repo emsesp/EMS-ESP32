@@ -1,0 +1,54 @@
+/* covers the whole app while the device restarts or installs firmware */
+.sysmon {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.6);
+}
+.sysmon-box {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+.sysmon-box .msg {
+  width: 100%;
+  margin: 0;
+  text-align: left;
+}
+.sysmon-title {
+  font-size: 18px;
+  font-weight: 400;
+  margin: 0;
+}
+.sysmon-wait {
+  margin: 0;
+  color: var(--text-2);
+}
+.sysmon-progress {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sysmon-progress > .bar {
+  flex: 1;
+}
+.sysmon-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}

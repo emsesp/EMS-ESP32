@@ -1,0 +1,89 @@
+/* Firmware page */
+.fw-tbl td {
+  height: 44px;
+}
+@media (min-width: 600px) {
+  .tbl.fw-tbl tbody tr:nth-child(odd) {
+    background: var(--row);
+  }
+}
+.fw-act {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fw-tags {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.fw-ver-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.fw-update {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  background: var(--paper-2);
+}
+.fw-update > .grow {
+  min-width: 200px;
+}
+.fw-update-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+.fw-big {
+  font-size: 36px;
+  color: var(--success);
+}
+.fw-big.new {
+  color: #fff59d;
+}
+.fw-ver {
+  text-transform: none;
+}
+.fw-checking {
+  margin: 0;
+}
+
+.fw-msg {
+  margin: 12px 0;
+}
+.fw-msg:last-child {
+  margin-bottom: 0;
+}
+.fw-md5 {
+  margin: 10px 0 0;
+  overflow-wrap: anywhere;
+}
+.fw-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+@media (max-width: 599px) {
+  .fw-tbl td {
+    height: auto;
+  }
+  .fw-tbl td:empty {
+    display: none;
+  }
+  .fw-update > .btn,
+  .fw-actions > .btn {
+    flex: 1 1 auto;
+  }
+}

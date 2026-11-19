@@ -1,40 +1,29 @@
 import { memo, useState } from 'react';
 
-import AddIcon from '@mui/icons-material/Add';
-import CancelIcon from '@mui/icons-material/Cancel';
-import CloseIcon from '@mui/icons-material/Close';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import DeleteIcon from '@mui/icons-material/Delete';
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  MenuItem,
-  TextField
-} from '@mui/material';
-
 import * as SecurityApi from 'api/security';
 
-import {
-  Body,
-  Cell,
-  Header,
-  HeaderCell,
-  HeaderRow,
-  Row,
-  Table
-} from '@table-library/react-table-library/table';
-import { useTheme } from '@table-library/react-table-library/theme';
-import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova/client';
-import { ButtonRow, FormLoader, MessageBox, SectionContent } from 'components';
-import { toast } from 'components/toast';
+import {
+  Button,
+  ConfirmDialog,
+  Dialog,
+  IconButton,
+  Loader,
+  Message,
+  Section,
+  Segmented,
+  SortHeader,
+  Table,
+  Tag,
+  TextField,
+  byNumber,
+  byText,
+  toast,
+  useTableSort
+} from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { ApiKeyType } from 'types';
+import { formatDateTimeMinutes } from 'utils';
 
 const MAX_KEYS = 10;
 const MAX_LABEL = 32;
@@ -42,59 +31,19 @@ const MAX_LABEL = 32;
 const ApiKeys = () => {
   const { LL } = useI18nContext();
 
-  const [creating, setCreating] = useState<boolean>(false);
-  const [label, setLabel] = useState<string>('');
-  const [write, setWrite] = useState<boolean>(false);
+  const [creating, setCreating] = useState(false);
+  const [label, setLabel] = useState('');
+  const [write, setWrite] = useState(false);
   const [newKey, setNewKey] = useState<string>();
+  const [revoking, setRevoking] = useState<ApiKeyType>();
 
-  const {
-    data,
-    send: loadKeys,
-    error
-  } = useRequest(SecurityApi.readApiKeys, { initialData: { keys: [] } });
+  const { data, send: loadKeys, error } = useRequest(SecurityApi.readApiKeys);
 
-  const { send: sendAction } = useRequest(
+  const { send: sendAction, loading: sending } = useRequest(
     (action: { action: string; label?: string; write?: boolean; id?: string }) =>
       SecurityApi.apiKeyAction(action),
     { immediate: false }
   );
-
-  const table_theme = useTheme({
-    Table: `
-      --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) minmax(120px, max-content) minmax(120px, max-content) 60px;
-    `,
-    BaseRow: `
-      font-size: 14px;
-    `,
-    HeaderRow: `
-      text-transform: uppercase;
-      background-color: black;
-      color: #90CAF9;
-      .th {
-        padding: 8px;
-        height: 36px;
-        border-bottom: 1px solid #565656;
-      }
-    `,
-    Row: `
-      .td {
-        padding: 8px;
-        border-top: 1px solid #565656;
-        border-bottom: 1px solid #565656;
-      }
-      &:nth-of-type(odd) .td {
-        background-color: #303030;
-      }
-      &:nth-of-type(even) .td {
-        background-color: #1e1e1e;
-      }
-    `,
-    BaseCell: `
-      &:last-of-type {
-        text-align: right;
-      }
-    `
-  });
 
   const openCreate = () => {
     setLabel('');
@@ -103,6 +52,7 @@ const ApiKeys = () => {
   };
 
   const create = async () => {
+    if (!label.trim() || sending) return;
     await sendAction({ action: 'create', label, write })
       .then((response) => {
         setNewKey((response as { key: string }).key);
@@ -115,177 +65,181 @@ const ApiKeys = () => {
   };
 
   const revoke = async (key: ApiKeyType) => {
+    setRevoking(undefined);
     await sendAction({ action: 'revoke', id: key.id }).catch((err: Error) => {
       toast.error(err.message);
     });
     await loadKeys();
   };
 
+  // navigator.clipboard is missing on plain http, e.g. when opened by IP address
   const copyKey = () => {
-    if (newKey) {
-      void navigator.clipboard.writeText(newKey).then(() => {
-        toast.success(LL.COPIED());
-      });
-    }
+    if (!newKey) return;
+    void Promise.resolve()
+      .then(() => navigator.clipboard.writeText(newKey))
+      .then(() => toast.success(LL.COPIED()))
+      .catch(() => toast.error(LL.COPY_FAILED()));
   };
 
   const formatCreated = (created: number) =>
-    created ? new Date(created * 1000).toLocaleString() : LL.UNKNOWN();
+    created ? formatDateTimeMinutes(new Date(created * 1000)) : LL.UNKNOWN();
 
-  const content = () => {
-    if (!data) {
-      return <FormLoader onRetry={loadKeys} errorMessage={error?.message || ''} />;
-    }
+  const sort = useTableSort(data?.keys ?? [], {
+    name: byText((k) => k.label),
+    access: byNumber((k) => k.write),
+    created: byNumber((k) => k.created)
+  });
 
-    const keys = data.keys.map((k) => ({ ...k }));
+  if (!data) {
+    return <Loader error={error?.message} onRetry={() => void loadKeys()} />;
+  }
 
-    return (
-      <>
-        <MessageBox level="info" message={LL.API_KEYS_TEXT()} sx={{ mb: 2 }} />
-        <Table data={{ nodes: keys }} theme={table_theme} layout={{ custom: true }}>
-          {(tableList: ApiKeyType[]) => (
-            <>
-              <Header>
-                <HeaderRow>
-                  <HeaderCell resize>{LL.NAME(0)}</HeaderCell>
-                  <HeaderCell stiff>{LL.API_KEY_ACCESS()}</HeaderCell>
-                  <HeaderCell stiff>{LL.CREATED()}</HeaderCell>
-                  <HeaderCell stiff />
-                </HeaderRow>
-              </Header>
-              <Body>
-                {tableList.map((k: ApiKeyType) => (
-                  <Row key={k.id} item={k}>
-                    <Cell>{k.label}</Cell>
-                    <Cell stiff>
-                      {k.write ? LL.API_KEY_READ_WRITE() : LL.API_KEY_READ()}
-                    </Cell>
-                    <Cell stiff>{formatCreated(k.created)}</Cell>
-                    <Cell stiff>
-                      <IconButton
-                        size="small"
-                        onClick={() => void revoke(k)}
-                        aria-label={LL.REMOVE()}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Cell>
-                  </Row>
-                ))}
-              </Body>
-            </>
-          )}
+  const full = data.keys.length >= MAX_KEYS;
+
+  return (
+    <>
+      <Section
+        desc={LL.API_KEYS_TEXT()}
+        title={LL.API_KEYS()}
+        icon="key"
+        actions={
+          <Button icon="add" disabled={full} onClick={openCreate}>
+            {LL.CREATE_KEY()}
+          </Button>
+        }
+      >
+        {full && (
+          <Message level="warning">{LL.API_KEYS_LIMIT({ num: MAX_KEYS })}</Message>
+        )}
+        <Table stack>
+          <thead>
+            <tr>
+              <SortHeader {...sort.header('name')}>{LL.NAME(0)}</SortHeader>
+              <SortHeader {...sort.header('access')}>
+                {LL.API_KEY_ACCESS()}
+              </SortHeader>
+              <SortHeader {...sort.header('created')}>{LL.CREATED()}</SortHeader>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            {sort.rows.map((k) => (
+              <tr key={k.id}>
+                <td className="mono">{k.label}</td>
+                <td data-label={LL.API_KEY_ACCESS()}>
+                  {k.write ? (
+                    <Tag kind="warn" icon="edit">
+                      {LL.API_KEY_READ_WRITE()}
+                    </Tag>
+                  ) : (
+                    <Tag kind="muted">{LL.API_KEY_READ()}</Tag>
+                  )}
+                </td>
+                <td data-label={LL.CREATED()} className="cap">
+                  {formatCreated(k.created)}
+                </td>
+                <td className="act">
+                  <IconButton
+                    icon="delete"
+                    label={LL.REVOKE()}
+                    disabled={sending}
+                    onClick={() => setRevoking(k)}
+                  />
+                </td>
+              </tr>
+            ))}
+            {data.keys.length === 0 && (
+              <tr>
+                <td colSpan={4} className="tbl-empty">
+                  {LL.NO_API_KEYS()}
+                </td>
+              </tr>
+            )}
+          </tbody>
         </Table>
+      </Section>
 
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <ButtonRow>
+      <Dialog
+        open={creating}
+        title={LL.CREATE_KEY()}
+        onClose={() => setCreating(false)}
+        onSubmit={() => void create()}
+        actions={
+          <>
             <Button
-              startIcon={<AddIcon />}
-              variant="outlined"
-              color="secondary"
-              disabled={data.keys.length >= MAX_KEYS}
-              onClick={openCreate}
-            >
-              {LL.ADD(0)}
-            </Button>
-          </ButtonRow>
-        </Box>
-
-        <Dialog
-          sx={dialogStyle}
-          open={creating}
-          onClose={() => setCreating(false)}
-          fullWidth
-          maxWidth="sm"
-        >
-          <DialogTitle>
-            {LL.ADD(1)}&nbsp;{LL.API_KEYS()}
-          </DialogTitle>
-          <DialogContent dividers>
-            <TextField
-              label={LL.NAME(0)}
-              value={label}
-              onChange={(event) => setLabel(event.target.value.slice(0, MAX_LABEL))}
-              fullWidth
-              margin="normal"
-            />
-            <TextField
-              select
-              label={LL.API_KEY_ACCESS()}
-              value={write ? 'write' : 'read'}
-              onChange={(event) => setWrite(event.target.value === 'write')}
-              fullWidth
-              margin="normal"
-            >
-              <MenuItem value="read">{LL.API_KEY_READ()}</MenuItem>
-              <MenuItem value="write">{LL.API_KEY_READ_WRITE()}</MenuItem>
-            </TextField>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              startIcon={<CancelIcon />}
-              variant="outlined"
+              icon="cancel"
               color="secondary"
               onClick={() => setCreating(false)}
             >
               {LL.CANCEL()}
             </Button>
-            <Button
-              startIcon={<AddIcon />}
-              variant="outlined"
-              color="primary"
-              disabled={!label.trim()}
-              onClick={() => void create()}
-            >
-              {LL.ADD(0)}
+            <Button type="submit" icon="add" disabled={!label.trim() || sending}>
+              {LL.CREATE_KEY()}
             </Button>
-          </DialogActions>
-        </Dialog>
+          </>
+        }
+      >
+        <div className="form">
+          <TextField
+            label={LL.NAME(0)}
+            name="label"
+            fullWidth
+            mono
+            autoComplete="off"
+            placeholder="home_assistant"
+            value={label}
+            maxLength={MAX_LABEL}
+            onChange={(e) => setLabel(e.currentTarget.value.slice(0, MAX_LABEL))}
+          />
+          <Segmented
+            label={LL.API_KEY_ACCESS()}
+            fullWidth
+            options={[
+              { value: 'read', label: LL.API_KEY_READ() },
+              { value: 'write', label: LL.API_KEY_READ_WRITE() }
+            ]}
+            value={write ? 'write' : 'read'}
+            onChange={(v) => setWrite(v === 'write')}
+          />
+        </div>
+      </Dialog>
 
-        <Dialog
-          sx={dialogStyle}
-          open={!!newKey}
-          onClose={() => setNewKey(undefined)}
-          fullWidth
-          maxWidth="sm"
-        >
-          <DialogTitle>{LL.API_KEYS()}</DialogTitle>
-          <DialogContent dividers>
-            <MessageBox
-              level="warning"
-              message={LL.API_KEY_SHOW_ONCE()}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              value={newKey || ''}
-              fullWidth
-              slotProps={{ input: { readOnly: true } }}
-            />
-          </DialogContent>
-          <DialogActions>
+      {/* the key is shown only once, so only the Close button closes this */}
+      <Dialog
+        open={!!newKey}
+        title={LL.NEW_API_KEY()}
+        actions={
+          <>
             <Button
-              startIcon={<ContentCopyIcon />}
-              variant="outlined"
-              color="primary"
-              onClick={copyKey}
-            >
-              {LL.COPY()}
-            </Button>
-            <Button
-              startIcon={<CloseIcon />}
-              variant="outlined"
               color="secondary"
+              icon="close"
               onClick={() => setNewKey(undefined)}
             >
               {LL.CLOSE()}
             </Button>
-          </DialogActions>
-        </Dialog>
-      </>
-    );
-  };
+            <Button icon="content_copy" onClick={copyKey}>
+              {LL.COPY()}
+            </Button>
+          </>
+        }
+      >
+        <Message level="warning">{LL.API_KEY_SHOW_ONCE()}</Message>
+        <div className="mono sc-key">{newKey}</div>
+      </Dialog>
 
-  return <SectionContent>{content()}</SectionContent>;
+      <ConfirmDialog
+        open={!!revoking}
+        title={LL.REVOKE_KEY()}
+        label={LL.REVOKE()}
+        icon="delete"
+        color="error"
+        onClose={() => setRevoking(undefined)}
+        onConfirm={() => revoking && revoke(revoking)}
+      >
+        {LL.REVOKE_KEY_TEXT({ name: revoking?.label ?? '' })}
+      </ConfirmDialog>
+    </>
+  );
 };
 
 export default memo(ApiKeys);

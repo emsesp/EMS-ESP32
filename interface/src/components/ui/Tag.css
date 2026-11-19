@@ -1,0 +1,76 @@
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: var(--fill);
+  color: var(--text-2);
+  font-size: 11px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+* + .tag {
+  margin-left: 6px;
+}
+/* `* + .tag` doesn't match after a bare text node, e.g. a row name */
+.tag.new,
+.tag.mod {
+  margin-left: 10px;
+}
+.tag.new {
+  background: var(--success-tint);
+  color: var(--success-text);
+  text-transform: uppercase;
+}
+.tag.mod {
+  background: var(--primary-tint);
+  color: var(--primary);
+  text-transform: uppercase;
+}
+/* 1px less padding so the border keeps it the size of the other tags */
+.tag.muted {
+  padding: 0 7px;
+  border: 1px solid var(--outline);
+  background: transparent;
+  color: var(--text-2);
+}
+/* only for things EMS-ESP provides itself, e.g. the built-in sensors */
+.tag.sys {
+  margin-left: 8px;
+  background: rgba(179, 157, 219, 0.16);
+  color: #b39ddb;
+}
+.tag.type {
+  background: rgba(64, 130, 143, 0.3);
+  color: #b2ebf2;
+}
+.tag.ok {
+  background: var(--success-tint);
+  color: var(--success-text);
+}
+.tag.warn {
+  background: var(--warning-tint);
+  color: var(--warning-text);
+}
+.tag.err {
+  background: var(--error-tint);
+  color: var(--error-text);
+}
+
+/* a number in a pill, e.g. the entities of a device */
+.count {
+  flex-shrink: 0;
+  min-width: 28px;
+  padding: 1px 8px;
+  border-radius: 12px;
+  background: var(--fill);
+  color: var(--text-2);
+  font-size: 12px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.count.primary {
+  background: var(--primary-tint);
+  color: var(--primary);
+}

@@ -12,44 +12,16 @@ import {
 
 import App from 'App';
 import SignIn from 'SignIn';
-import Commands from 'app/main/Commands';
-import CustomEntities from 'app/main/CustomEntities';
-import Customizations from 'app/main/Customizations';
-import Dashboard from 'app/main/Dashboard';
-import Devices from 'app/main/Devices';
-import Help from 'app/main/Help';
-import Modules from 'app/main/Modules';
-import Scheduler from 'app/main/Scheduler';
-import Sensors from 'app/main/Sensors';
-import UserProfile from 'app/main/UserProfile';
-import APSettings from 'app/settings/APSettings';
-import ApplicationSettings from 'app/settings/ApplicationSettings';
-import DownloadUpload from 'app/settings/DownloadUpload';
-import MqttSettings from 'app/settings/MqttSettings';
-import NTPSettings from 'app/settings/NTPSettings';
-import Settings from 'app/settings/Settings';
-import Version from 'app/settings/Version';
-import Network from 'app/settings/network/Network';
-import NetworkSettings from 'app/settings/network/NetworkSettings';
-import WiFiNetworkScanner from 'app/settings/network/WiFiNetworkScanner';
-import ApiKeys from 'app/settings/security/ApiKeys';
-import ManageUsers from 'app/settings/security/ManageUsers';
-import Security from 'app/settings/security/Security';
-import APStatus from 'app/status/APStatus';
-import Activity from 'app/status/Activity';
-import HardwareStatus from 'app/status/HardwareStatus';
-import MqttStatus from 'app/status/MqttStatus';
-import NTPStatus from 'app/status/NTPStatus';
-import NetworkStatus from 'app/status/NetworkStatus';
-import Status from 'app/status/Status';
-import SystemLog from 'app/status/SystemLog';
+import { renderRoute, routes } from 'app/routes';
+import { Layout } from 'components/layout';
 import {
-  Layout,
   RequireAdmin,
   RequireAuthenticated,
   RequireUnauthenticated,
   RootRedirect
-} from 'components';
+} from 'components/routing';
+import 'components/ui/base.css';
+import 'components/ui/tokens.css';
 
 const errorPageStyles = {
   container: {
@@ -157,6 +129,14 @@ const router = createBrowserRouter(
       />
       <Route path="unauthorized" element={<RootRedirect kind="unauthorized" />} />
       <Route path="fileUpdated" element={<RootRedirect kind="fileUpdated" />} />
+      {import.meta.env.DEV && (
+        <Route
+          path="ui"
+          lazy={async () => ({
+            Component: (await import('components/ui/gallery/Gallery')).default
+          })}
+        />
+      )}
 
       <Route
         element={
@@ -167,62 +147,9 @@ const router = createBrowserRouter(
           </RequireAuthenticated>
         }
       >
-        <Route path="dashboard/*" element={<Dashboard />} />
-        <Route path="devices/*" element={<Devices />} />
-        <Route path="sensors/*" element={<Sensors />} />
-        <Route path="help/*" element={<Help />} />
-        <Route path="user/*" element={<UserProfile />} />
-
-        <Route path="status/*" element={<Status />} />
-        <Route path="status/hardwarestatus/*" element={<HardwareStatus />} />
-        <Route path="status/activity" element={<Activity />} />
-        <Route path="status/log" element={<SystemLog />} />
-        <Route path="status/mqtt" element={<MqttStatus />} />
-        <Route path="status/ntp" element={<NTPStatus />} />
-        <Route path="status/ap" element={<APStatus />} />
-        <Route path="status/network" element={<NetworkStatus />} />
-        <Route path="status/version" element={<Version />} />
-        <Route path="settings" element={<Settings />} />
-        <Route path="settings/version" element={<Version />} />
-
+        {routes.filter((r) => !r.admin).map(renderRoute)}
         <Route element={<RequireAdmin />}>
-          <Route path="settings/application" element={<ApplicationSettings />} />
-          <Route path="settings/mqtt" element={<MqttSettings />} />
-          <Route path="settings/ntp" element={<NTPSettings />} />
-          <Route path="settings/ap" element={<APSettings />} />
-          <Route path="settings/modules" element={<Modules />} />
-          <Route path="settings/downloadUpload" element={<DownloadUpload />} />
-
-          <Route path="settings/network" element={<Network />}>
-            <Route
-              index
-              element={<Navigate replace to="/settings/network/settings" />}
-            />
-            <Route path="settings" element={<NetworkSettings />} />
-            <Route path="scan" element={<WiFiNetworkScanner />} />
-            <Route
-              path="*"
-              element={<Navigate replace to="/settings/network/settings" />}
-            />
-          </Route>
-
-          <Route path="settings/security" element={<Security />}>
-            <Route
-              index
-              element={<Navigate replace to="/settings/security/users" />}
-            />
-            <Route path="users" element={<ManageUsers />} />
-            <Route path="apikeys" element={<ApiKeys />} />
-            <Route
-              path="*"
-              element={<Navigate replace to="/settings/security/users" />}
-            />
-          </Route>
-
-          <Route path="customizations" element={<Customizations />} />
-          <Route path="commands" element={<Commands />} />
-          <Route path="scheduler" element={<Scheduler />} />
-          <Route path="customentities" element={<CustomEntities />} />
+          {routes.filter((r) => r.admin).map(renderRoute)}
         </Route>
 
         <Route path="*" element={<Navigate replace to="/" />} />

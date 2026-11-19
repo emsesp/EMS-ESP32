@@ -2,6 +2,9 @@ import type { SetupStateType, SetupType, UserType } from 'types';
 import Schema from 'validators/schema';
 import type { InternalRuleItem } from 'validators/schema';
 
+import { vLL } from './messages';
+import { required } from './shared';
+
 const USERNAME_PATTERN = /^[a-zA-Z0-9_\\.]{1,24}$/;
 const PASSWORD_MAX_LENGTH = 64;
 
@@ -17,7 +20,7 @@ export const createUniqueUsernameValidator = (users: UserType[]) => ({
     callback: (error?: string) => void
   ) {
     if (username && users.some((u) => u.username === username)) {
-      callback('Username already in use');
+      callback(vLL().V_IN_USE());
     } else {
       callback();
     }
@@ -33,23 +36,21 @@ export const createUniqueUsernameValidator = (users: UserType[]) => ({
 export const createUserValidator = (users: UserType[], creating: boolean) =>
   new Schema({
     username: [
-      { required: true, message: 'Username is required' },
+      required(),
       {
         type: 'string',
         pattern: USERNAME_PATTERN,
-        message: "Must be 1-24 characters: alphanumeric, '_' or '.'"
+        message: vLL().V_USERNAME({ max: 24 })
       },
       ...(creating ? [createUniqueUsernameValidator(users)] : [])
     ],
     // an existing user keeps the current password when it's left empty
     password: [
-      ...(creating
-        ? [{ required: true, message: 'Please provide a password' }]
-        : []),
+      ...(creating ? [required()] : []),
       {
         type: 'string',
         max: PASSWORD_MAX_LENGTH,
-        message: `Password must be at most ${PASSWORD_MAX_LENGTH} characters`
+        message: vLL().V_MAX_CHARS({ max: PASSWORD_MAX_LENGTH })
       }
     ]
   });
@@ -60,36 +61,34 @@ const notFactory = (factory: string) => ({
     value: string,
     callback: (error?: string) => void
   ) {
-    callback(value === factory ? 'Choose a different password' : undefined);
+    callback(value === factory ? vLL().V_NOT_DEFAULT() : undefined);
   }
 });
 
-const AP_PASSWORD_RULE = {
+const AP_PASSWORD_RULE = () => ({
   type: 'string' as const,
   min: 8,
   max: 63,
-  message: 'Password must be 8-63 characters'
-};
+  message: vLL().V_CHARS({ min: 8, max: 63 })
+});
 
 export const createSetupValidator = (state: SetupStateType, setup: SetupType) =>
   new Schema({
     ...(state.admin && {
       password: [
-        { required: true, message: 'Please provide a password' },
+        required(),
         {
           type: 'string',
           max: PASSWORD_MAX_LENGTH,
-          message: `Password must be at most ${PASSWORD_MAX_LENGTH} characters`
+          message: vLL().V_MAX_CHARS({ max: PASSWORD_MAX_LENGTH })
         },
         notFactory('admin')
       ]
     }),
     ...(state.ap && {
       ap_password: [
-        ...(state.ap_required
-          ? [{ required: true, message: 'Please provide an access point password' }]
-          : []),
-        AP_PASSWORD_RULE,
+        ...(state.ap_required ? [required()] : []),
+        AP_PASSWORD_RULE(),
         notFactory('ems-esp-neo')
       ]
     }),
@@ -97,10 +96,10 @@ export const createSetupValidator = (state: SetupStateType, setup: SetupType) =>
       {
         type: 'string',
         pattern: USERNAME_PATTERN,
-        message: "Must be 1-24 characters: alphanumeric, '_' or '.'"
+        message: vLL().V_USERNAME({ max: 24 })
       }
     ],
     ...(setup.view_username && {
-      view_password: [{ required: true, message: 'Please provide a password' }]
+      view_password: [required()]
     })
   });

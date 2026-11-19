@@ -1,49 +1,53 @@
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import type { FC } from 'react';
 import { useLocation } from 'react-router';
 
-import { Box, Toolbar } from '@mui/material';
-
-import { PROJECT_NAME } from 'env';
+import { routeTrail } from 'app/routes';
+import { SaveBarSlotContext, cx } from 'components/ui';
 import type { RequiredChildrenProps } from 'utils';
 
+import './Layout.css';
 import LayoutAppBar from './LayoutAppBar';
 import LayoutDrawer from './LayoutDrawer';
+import LayoutTabBar from './LayoutTabBar';
 import SetupDialog from './SetupDialog';
 import TelnetBanner from './TelnetBanner';
 import TokensResetBanner from './TokensResetBanner';
-import { LayoutContext } from './context';
-
-export const DRAWER_WIDTH = 210;
 
 const LayoutComponent: FC<RequiredChildrenProps> = ({ children }) => {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [title, setTitle] = useState(PROJECT_NAME);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [saveBarSlot, setSaveBarSlot] = useState<HTMLElement | null>(null);
   const { pathname } = useLocation();
+  const trail = routeTrail(pathname);
 
-  const handleDrawerToggle = useCallback(() => {
-    setMobileOpen((prev) => !prev);
-  }, []);
+  const toggleDrawer = useCallback(() => setDrawerOpen((open) => !open), []);
+  const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
-  // Close drawer when route changes
+  useEffect(closeDrawer, [pathname, closeDrawer]);
+
   useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
-
-  const contextValue = useMemo(() => ({ title, setTitle }), [title]);
+    if (!drawerOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && closeDrawer();
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [drawerOpen, closeDrawer]);
 
   return (
-    <LayoutContext.Provider value={contextValue}>
-      <LayoutAppBar title={title} onToggleDrawer={handleDrawerToggle} />
-      <LayoutDrawer mobileOpen={mobileOpen} onClose={handleDrawerToggle} />
-      <Box component="main" sx={{ marginLeft: { md: `${DRAWER_WIDTH}px` } }}>
-        <Toolbar />
+    <div className={cx('shell', drawerOpen && 'drawer-open')}>
+      <LayoutDrawer active={trail[0]?.path} />
+      <div className="scrim" onClick={closeDrawer} />
+      <LayoutAppBar trail={trail} onToggleDrawer={toggleDrawer} />
+      <main className="main">
         <SetupDialog />
         <TokensResetBanner />
         <TelnetBanner />
-        {children}
-      </Box>
-    </LayoutContext.Provider>
+        <SaveBarSlotContext.Provider value={saveBarSlot}>
+          {children}
+        </SaveBarSlotContext.Provider>
+        <div className="savebar-slot" ref={setSaveBarSlot} />
+      </main>
+      <LayoutTabBar active={trail[0]?.path} onMore={toggleDrawer} />
+    </div>
   );
 };
 

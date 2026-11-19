@@ -1,160 +1,60 @@
-import { useEffect, useState } from 'react';
-
-import CancelIcon from '@mui/icons-material/Cancel';
-import DoneIcon from '@mui/icons-material/Done';
-import WarningIcon from '@mui/icons-material/Warning';
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  InputAdornment,
-  TextField,
-  Typography
-} from '@mui/material';
-
-import { dialogStyle } from 'CustomTheme';
-import { ValidatedTextField } from 'components';
+import { Message, TextField } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
-import { numberValue, updateValue } from 'utils';
-import { ValidationError, validate } from 'validators';
-import type Schema from 'validators/schema';
-import type { ValidateFieldsError } from 'validators/schema';
 
+import EntityDialog from './EntityDialog';
+import { formatValue } from './deviceValue';
+import { DeviceValueUOM, DeviceValueUOM_s } from './types';
 import type { TemperatureSensor } from './types';
+import { temperatureSensorItemValidation } from './validators';
 
 interface SensorsTemperatureDialogProps {
-  open: boolean;
+  item: TemperatureSensor;
+  sensors: TemperatureSensor[];
   onClose: () => void;
   onSave: (ts: TemperatureSensor) => void;
-  selectedItem: TemperatureSensor;
-  validator: Schema;
 }
 
-// Constants
-const OFFSET_MIN = -5;
-const OFFSET_MAX = 5;
-const OFFSET_STEP = 0.1;
-const TEMP_UNIT = '°C';
-
 const SensorsTemperatureDialog = ({
-  open,
+  item,
+  sensors,
   onClose,
-  onSave,
-  selectedItem,
-  validator
+  onSave
 }: SensorsTemperatureDialogProps) => {
   const { LL } = useI18nContext();
-  const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
-  const [editItem, setEditItem] = useState<TemperatureSensor>(selectedItem);
-
-  const updateFormValue = updateValue(
-    setEditItem as unknown as (
-      updater: (
-        prevState: Readonly<Record<string, unknown>>
-      ) => Record<string, unknown>
-    ) => void
-  );
-
-  useEffect(() => {
-    if (open) {
-      setFieldErrors(undefined);
-      setEditItem(selectedItem);
-    }
-  }, [open, selectedItem]);
-
-  const handleClose = (_event: React.SyntheticEvent, reason?: string) => {
-    if (reason !== 'backdropClick') {
-      onClose();
-    }
-  };
-
-  const save = async () => {
-    try {
-      setFieldErrors(undefined);
-      await validate(validator, editItem);
-      onSave(editItem);
-    } catch (error) {
-      setFieldErrors((error as ValidationError).fieldErrors);
-    }
-  };
+  // ±5 °C, the same span in °F when the system shows Fahrenheit
+  const maxOffset = item.u === DeviceValueUOM.FAHRENHEIT ? 9 : 5;
 
   return (
-    <Dialog sx={dialogStyle} open={open} onClose={handleClose}>
-      <DialogTitle>{`${LL.EDIT()} ${LL.TEMP_SENSOR()}`}</DialogTitle>
-      <DialogContent dividers>
-        <Typography sx={{ mb: 2 }} color="warning" variant="body2">
-          {LL.ID_OF(LL.SENSOR(0))}: {editItem.id}
-        </Typography>
-        <Grid container spacing={2}>
-          <Grid>
-            <ValidatedTextField
-              fieldErrors={fieldErrors ?? {}}
-              name="n"
-              label={LL.NAME(0)}
-              value={editItem.n}
-              sx={{ width: '30ch' }}
-              onChange={updateFormValue}
-            />
-          </Grid>
-          <Grid>
-            <TextField
-              name="o"
-              label={LL.OFFSET()}
-              value={numberValue(editItem.o)}
-              sx={{ width: '11ch' }}
-              type="number"
-              variant="outlined"
-              onChange={updateFormValue}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">{TEMP_UNIT}</InputAdornment>
-                  )
-                },
-                htmlInput: {
-                  min: OFFSET_MIN,
-                  max: OFFSET_MAX,
-                  step: OFFSET_STEP
-                }
-              }}
-            />
-          </Grid>
-        </Grid>
-        {editItem.s && (
-          <Grid>
-            <Typography sx={{ mt: 1 }} color="warning" variant="body2">
-              <WarningIcon
-                fontSize="small"
-                sx={{ mr: 1, verticalAlign: 'middle' }}
-                color="warning"
-              />
-              {LL.SYSTEM(0)} {LL.SENSOR(0)}
-            </Typography>
-          </Grid>
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button
-          startIcon={<CancelIcon />}
-          variant="outlined"
-          onClick={onClose}
-          color="secondary"
-        >
-          {LL.CANCEL()}
-        </Button>
-        <Button
-          startIcon={<DoneIcon />}
-          variant="outlined"
-          onClick={save}
-          color="primary"
-        >
-          {LL.UPDATE()}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <EntityDialog
+      title={LL.EDIT_TEMP_SENSOR()}
+      item={item}
+      validator={() => temperatureSensorItemValidation(sensors, item.n)}
+      onClose={onClose}
+      onSave={onSave}
+    >
+      {(f) => (
+        <>
+          <p className="cap full">
+            {LL.ID_OF(LL.SENSOR(0))} <span className="mono lb">{item.id}</span>
+            {item.t !== undefined && ` · ${formatValue(LL, item.t, item.u)}`}
+          </p>
+          <TextField label={LL.NAME(0)} fullWidth {...f.text('n')} />
+          <TextField
+            label={LL.OFFSET()}
+            unit={DeviceValueUOM_s[item.u]}
+            min={-maxOffset}
+            max={maxOffset}
+            step={0.1}
+            {...f.number('o')}
+          />
+          {item.s && (
+            <Message level="info" className="full">
+              {LL.SYSTEM_SENSOR()}
+            </Message>
+          )}
+        </>
+      )}
+    </EntityDialog>
   );
 };
 

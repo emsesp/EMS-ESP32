@@ -37,6 +37,14 @@ class WebLogService : public uuid::log::Handler {
     void   begin();
     void   start();
     size_t num_log_messages() const;
+
+    // errors and warnings logged since boot, only counted while the log level shows them
+    uint32_t num_errors() const {
+        return num_errors_;
+    }
+    uint32_t num_warnings() const {
+        return num_warnings_;
+    }
     void   loop();
     void   show(Shell & shell);
 
@@ -80,6 +88,8 @@ class WebLogService : public uuid::log::Handler {
     size_t           limit_log_messages_   = 1;                                   // dynamic limit
     unsigned long    log_message_id_       = 0;                                   // The next identifier to use for queued log messages
     unsigned long    log_message_id_tail_  = 0;                                   // last event shown on the screen after fetch
+    uint32_t         num_errors_           = 0;
+    uint32_t         num_warnings_         = 0;
     bool             compact_              = true;
     uuid::log::Level level_                = uuid::log::Level::INFO;
 

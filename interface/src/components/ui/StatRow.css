@@ -1,0 +1,27 @@
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 12px;
+}
+.stat {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+.stat .n {
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+}
+.stat .n.warnc {
+  color: var(--warning-text);
+}
+
+@media (max-width: 599px) {
+  .stat-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin: 8px;
+  }
+}

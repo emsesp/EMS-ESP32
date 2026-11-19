@@ -1,0 +1,99 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--primary-line);
+  background: transparent;
+  color: var(--primary);
+  border-radius: 4px;
+  padding: 5px 15px;
+  font: inherit;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.btn:hover {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+.btn.sm {
+  padding: 3px 10px;
+  font-size: 12px;
+}
+.btn.secondary {
+  color: var(--secondary);
+  border-color: var(--secondary-line);
+}
+.btn.warning {
+  color: var(--warning);
+  border-color: var(--warning-line);
+}
+.btn.warning:hover {
+  background: var(--warning-soft);
+  border-color: var(--warning);
+}
+.btn.error {
+  color: var(--error-text);
+  border-color: var(--error-line);
+}
+.btn.error:hover {
+  background: var(--error-soft);
+  border-color: var(--error);
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  cursor: pointer;
+}
+.icon-btn:hover {
+  background: var(--fill);
+}
+.icon-btn.plain {
+  color: var(--text-2);
+}
+
+.btn:disabled,
+.icon-btn:disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* on phones a long translated label wraps rather than pushing the button off screen */
+@media (max-width: 599px) {
+  .btn {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  .btn > .icon {
+    flex-shrink: 0;
+  }
+  .tbl .act .btn {
+    white-space: nowrap;
+  }
+}
+
+@media (pointer: coarse) {
+  .btn {
+    min-height: var(--touch);
+  }
+  .icon-btn {
+    width: var(--touch);
+    height: var(--touch);
+  }
+}

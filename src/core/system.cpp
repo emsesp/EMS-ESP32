@@ -73,14 +73,14 @@ RTC_NOINIT_ATTR static uint32_t crash_count_;
 // Languages supported. Note: the order is important
 // and must match locale_translations.h and common.h
 #if defined(EMSESP_TEST)
-// in Test mode use two languages (en & de) to save flash memory needed for the tests
-const char * const languages[] = {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE};
+const char * const languages[] = {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE}; // EN + DE
+
 #elif defined(EMSESP_EN_ONLY)
-// EN only
-const char * const languages[] = {EMSESP_LOCALE_EN};
-#elif defined(EMSESP_DE_ONLY)
-// EN + DE
-const char * const languages[] = {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE};
+const char * const languages[] = {EMSESP_LOCALE_EN}; // EN only
+
+#elif defined(EMSESP_EN_DE_ONLY)
+const char * const languages[] = {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE}; // EN + DE
+
 #else
 const char * const languages[] = {EMSESP_LOCALE_EN,
                                   EMSESP_LOCALE_DE,
@@ -3603,6 +3603,41 @@ std::string System::reset_reason(uint8_t cpu) const {
         return ("Brownout reset");
     case RESET_REASON_SYS_RTC_WDT:
         return ("RTC watch dog reset: CPU+RTC");
+    default:
+        break;
+    }
+#endif
+    return "Unknown";
+}
+
+// unlike the ROM reason per CPU, this tells a crash or watchdog apart from a normal software restart
+const char * System::restart_reason() const {
+#ifndef EMSESP_STANDALONE
+    switch (esp_reset_reason()) {
+    case ESP_RST_POWERON:
+        return "Power on";
+    case ESP_RST_EXT:
+        return "Reset pin";
+    case ESP_RST_SW:
+        return "Software restart";
+    case ESP_RST_PANIC:
+        return "Crash";
+    case ESP_RST_INT_WDT:
+        return "Interrupt watchdog";
+    case ESP_RST_TASK_WDT:
+        return "Task watchdog";
+    case ESP_RST_WDT:
+        return "Watchdog";
+    case ESP_RST_DEEPSLEEP:
+        return "Deep sleep wake-up";
+    case ESP_RST_BROWNOUT:
+        return "Brownout";
+    case ESP_RST_SDIO:
+        return "SDIO reset";
+    case ESP_RST_USB:
+        return "USB reset";
+    case ESP_RST_JTAG:
+        return "JTAG reset";
     default:
         break;
     }

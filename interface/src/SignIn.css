@@ -1,0 +1,97 @@
+.signin {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 56px 16px 16px;
+  background:
+    radial-gradient(
+      ellipse 60% 45% at 50% 0%,
+      rgba(33, 150, 243, 0.28),
+      transparent
+    ),
+    radial-gradient(
+      ellipse 50% 40% at 0% 100%,
+      rgba(46, 88, 106, 0.55),
+      transparent
+    ),
+    radial-gradient(circle, var(--divider-soft) 1px, transparent 1px) 0 0 / 22px 22px,
+    var(--bg);
+}
+.signin-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 360px;
+  padding: 32px 28px 28px;
+  background: rgba(30, 30, 30, 0.72);
+  border: 1px solid var(--divider);
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+}
+.signin-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.signin-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.signin-lang {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+.signin-lang .input {
+  padding: 4px 8px;
+  font-size: 13px;
+}
+.signin-logo {
+  width: 88px;
+  height: 88px;
+  padding: 10px;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  box-shadow:
+    0 0 0 1px var(--primary-line),
+    0 0 32px rgba(33, 150, 243, 0.35);
+}
+.signin h1 {
+  margin: 14px 0 0;
+  font-size: 24px;
+  font-weight: 400;
+}
+.signin-sub {
+  margin: 2px 0 0;
+  color: var(--text-2);
+}
+.signin-submit {
+  margin-top: 8px;
+}
+.signin-foot {
+  display: flex;
+  gap: 8px;
+  color: var(--text-3);
+}
+.signin-foot a {
+  color: var(--text-2);
+  text-decoration: none;
+}
+.signin-foot a:hover {
+  color: var(--primary);
+}
+
+@media (max-width: 599px) {
+  .signin-lang .input {
+    font-size: 16px;
+  }
+}

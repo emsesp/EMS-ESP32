@@ -124,6 +124,11 @@ class MqttSettingsService : public StatefulService<MqttSettings> {
     espMqttClientTypes::DisconnectReason getDisconnectReason();
     MqttClient *                         getMqttClient();
 
+    // uptime in seconds of the current connection and of the last lost connection, 0 if none
+    uint32_t                             getConnectedAt();
+    uint32_t                             getLastDisconnectAt();
+    espMqttClientTypes::DisconnectReason getLastDisconnectReason();
+
   protected:
     void onConfigUpdated();
 
@@ -137,6 +142,9 @@ class MqttSettingsService : public StatefulService<MqttSettings> {
 
     // connection status
     volatile espMqttClientTypes::DisconnectReason _disconnectReason;
+    volatile uint32_t                             _connectedAt;
+    volatile uint32_t                             _lastDisconnectAt;
+    volatile espMqttClientTypes::DisconnectReason _lastDisconnectReason;
 
     // the MQTT client instance
     MqttClient * _mqttClient;

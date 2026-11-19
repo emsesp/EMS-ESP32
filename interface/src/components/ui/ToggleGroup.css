@@ -1,0 +1,48 @@
+.toggle-group {
+  display: inline-flex;
+  max-width: 100%;
+  border: 1px solid var(--divider);
+  border-radius: 4px;
+  overflow: hidden;
+}
+/* labels wrap inside their button when the row is too narrow for the translation */
+.toggle-group button {
+  display: inline-flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  border-right: 1px solid var(--divider);
+  color: var(--text-2);
+  padding: 5px 10px;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.25;
+  text-align: center;
+  text-transform: uppercase;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  cursor: pointer;
+}
+.toggle-group button > .icon {
+  flex-shrink: 0;
+}
+.toggle-group button:last-child {
+  border-right: 0;
+}
+.toggle-group button:hover {
+  background: var(--hover);
+}
+.toggle-group button.on {
+  background: var(--primary-tint);
+  color: var(--primary);
+}
+
+@media (pointer: coarse) {
+  .toggle-group button {
+    min-height: var(--touch);
+  }
+}

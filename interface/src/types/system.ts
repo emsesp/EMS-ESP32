@@ -29,9 +29,18 @@ export interface SystemStatus {
   ap_status: boolean;
   network_status: NetworkConnectionStatus;
   wifi_rssi: number;
+  network_ip?: string; // only when connected over WiFi or Ethernet
+  mqtt_host?: string; // only when MQTT is enabled
+  mqtt_port?: number;
+  log_errors?: number; // since boot, counted while the log level shows them
+  log_warnings?: number;
+  reset_reason?: string; // why the board last restarted, English text; not in older firmware
+  bus_id?: number; // EMS bus ID of EMS-ESP; not in older firmware
+  tx_mode?: number; // 0 off (or Tx paused), 1 EMS, 2 EMS+, 3 HT3, 4 hardware, 5 auto; not in older firmware
   build_flags: string;
   esp_platform: string;
   max_alloc_heap: number;
+  heap_size?: number; // total heap in KB, not in older firmware
   cpu_type: string;
   cpu_rev: number;
   cpu_cores: number;

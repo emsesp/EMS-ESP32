@@ -10,6 +10,9 @@ MqttSettingsService::MqttSettingsService(AsyncWebServer * server, FS * fs, Secur
     , _reconfigureMqtt(false)
     , _disconnectedAt(0)
     , _disconnectReason(espMqttClientTypes::DisconnectReason::USER_OK)
+    , _connectedAt(0)
+    , _lastDisconnectAt(0)
+    , _lastDisconnectReason(espMqttClientTypes::DisconnectReason::USER_OK)
     , _mqttClient(nullptr) {
     addUpdateHandler([this] { onConfigUpdated(); }, false);
 
@@ -148,6 +151,18 @@ espMqttClientTypes::DisconnectReason MqttSettingsService::getDisconnectReason() 
     return _disconnectReason;
 }
 
+uint32_t MqttSettingsService::getConnectedAt() {
+    return _connectedAt;
+}
+
+uint32_t MqttSettingsService::getLastDisconnectAt() {
+    return _lastDisconnectAt;
+}
+
+espMqttClientTypes::DisconnectReason MqttSettingsService::getLastDisconnectReason() {
+    return _lastDisconnectReason;
+}
+
 MqttClient * MqttSettingsService::getMqttClient() {
     return _mqttClient;
 }
@@ -156,9 +171,17 @@ void MqttSettingsService::onMqttConnect(bool sessionPresent) {
     (void)sessionPresent;
     emsesp::EMSESP::mqtt_.on_connect();
     _disconnectReason = espMqttClientTypes::DisconnectReason::USER_OK;
+    _connectedAt      = uuid::get_uptime_sec() | 1; // never 0
 }
 
 void MqttSettingsService::onMqttDisconnect(espMqttClientTypes::DisconnectReason reason) {
+    // failed reconnect attempts also end up here, only a lost connection counts as a disconnect
+    if (_connectedAt) {
+        _lastDisconnectAt     = uuid::get_uptime_sec() | 1;
+        _lastDisconnectReason = reason;
+        _connectedAt          = 0;
+    }
+
     if (reason != _disconnectReason) {
         emsesp::EMSESP::mqtt_.on_disconnect(reason);
         _disconnectReason = reason;

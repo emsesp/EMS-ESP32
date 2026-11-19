@@ -1,51 +1,70 @@
-import { memo, useState } from 'react';
-import { Outlet, useMatch, useNavigate } from 'react-router';
+import { useEffect } from 'react';
+import { type Blocker, Outlet, useNavigate } from 'react-router';
 
-import { Tab } from '@mui/material';
+import * as NetworkApi from 'api/network';
+import { readSystemStatus } from 'api/system';
 
-import { RouterTabs, useLayoutTitle } from 'components';
+import { useRequest } from 'alova/client';
+import FormPage, { useFormPage } from 'app/settings/FormPage';
+import { TabNav } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
-import type { WiFiNetwork } from 'types';
+import type { NetworkSettingsType, WiFiNetwork } from 'types';
+import { createNetworkSettingsValidator } from 'validators/network';
 
 import { WiFiConnectionContext } from './WiFiConnectionContext';
+import { isNetworkOpen } from './WiFiNetworkSelector';
 
+const BASE = '/settings/network/';
+
+const UNBLOCKED = { state: 'unblocked' } as Blocker;
+
+// both tabs share one form, so unsaved edits survive a visit to the scan tab
 const Network = () => {
   const { LL } = useI18nContext();
-  useLayoutTitle(LL.NETWORK(0));
-
-  const routerTab = useMatch('/settings/network/:tab')?.pathname || false;
-
   const navigate = useNavigate();
+  const { data: status } = useRequest(readSystemStatus);
 
-  const [selectedNetwork, setSelectedNetwork] = useState<WiFiNetwork>();
+  const form = useFormPage<NetworkSettingsType>({
+    read: NetworkApi.readNetworkSettings,
+    update: NetworkApi.updateNetworkSettings,
+    validator: createNetworkSettingsValidator
+  });
+
+  const { blocker } = form;
+  const tabSwitch =
+    blocker.state === 'blocked' && blocker.location.pathname.startsWith(BASE);
+
+  useEffect(() => {
+    if (tabSwitch) blocker.proceed();
+  }, [tabSwitch, blocker]);
 
   const selectNetwork = (network: WiFiNetwork) => {
-    setSelectedNetwork(network);
-    void navigate('/settings/network/settings');
-  };
-
-  const deselectNetwork = () => {
-    setSelectedNetwork(undefined);
-  };
-
-  const contextValue = {
-    ...(selectedNetwork && { selectedNetwork }),
-    selectNetwork,
-    deselectNetwork
+    form.set({
+      ssid: network.ssid,
+      bssid: network.bssid,
+      ...(isNetworkOpen(network) && { password: '' })
+    });
+    void navigate(BASE + 'settings');
   };
 
   return (
-    <WiFiConnectionContext.Provider value={contextValue}>
-      <RouterTabs value={routerTab}>
-        <Tab
-          value="/settings/network/settings"
-          label={LL.SETTINGS_OF(LL.NETWORK(1))}
-        />
-        <Tab value="/settings/network/scan" label={LL.NETWORK_SCAN()} />
-      </RouterTabs>
-      <Outlet />
+    <WiFiConnectionContext.Provider value={{ form, status, selectNetwork }}>
+      <TabNav
+        label={LL.NETWORK(0)}
+        items={[
+          {
+            to: BASE + 'settings',
+            label: LL.SETTINGS(0),
+            icon: 'settings_ethernet'
+          },
+          { to: BASE + 'scan', label: LL.WIFI_SCAN(), icon: 'wifi_find' }
+        ]}
+      />
+      <FormPage form={tabSwitch ? { ...form, blocker: UNBLOCKED } : form}>
+        {() => <Outlet />}
+      </FormPage>
     </WiFiConnectionContext.Provider>
   );
 };
 
-export default memo(Network);
+export default Network;

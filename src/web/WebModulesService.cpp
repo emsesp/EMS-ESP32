@@ -83,7 +83,9 @@ StateUpdateResult WebModules::update(JsonObject root, WebModules & webModules) {
             auto license = module["license"].as<const char *>();
             auto enable  = module["enabled"].as<bool>();
 
-            err &= moduleLibrary.enable(key, license, enable);
+            if (!moduleLibrary.enable(key, license, enable)) {
+                err = true;
+            }
         }
     }
 

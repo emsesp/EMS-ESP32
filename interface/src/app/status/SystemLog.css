@@ -1,0 +1,123 @@
+/* the log fills the window below the app bar; the console takes the space left */
+.log-page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - var(--appbar-h) - 24px);
+  min-height: 420px;
+}
+.log-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px 12px;
+}
+.log-toolbar .field .input {
+  padding: 6px 8px;
+  font-size: 13px;
+}
+.log-toolbar .lbx {
+  min-width: 120px;
+}
+
+.console {
+  flex: 1;
+  min-height: 240px;
+  margin-top: 12px;
+  background: #000;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.console .ln {
+  display: flex;
+  gap: 10px;
+  padding: 1px 0;
+  white-space: pre-wrap;
+}
+.console .t {
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+.console .l {
+  width: 58px;
+  flex-shrink: 0;
+}
+.console.compact .l {
+  width: 12px;
+}
+.console .m {
+  width: 120px;
+  flex-shrink: 0;
+  color: var(--lightblue);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.console .s {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.console .ln.error .l,
+.console .ln.error .s {
+  color: var(--error-text);
+}
+.console .ln.warning .l,
+.console .ln.warning .s {
+  color: var(--warning-text);
+}
+.console .ln.notice .l {
+  color: var(--success-text);
+}
+.console .ln.info .l {
+  color: var(--primary);
+}
+.console .ln.debug .l,
+.console .ln.debug .s,
+.console .ln.trace .l,
+.console .ln.trace .s {
+  color: var(--text-3);
+}
+.console .ln.cmd .s {
+  color: var(--success-text);
+}
+
+.cmdline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.cmdline .input {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+.log-foot {
+  margin: 8px 0 0;
+}
+
+@media (max-width: 599px) {
+  .log-page {
+    height: calc(100dvh - var(--appbar-h) - 16px);
+  }
+  .log-toolbar .field {
+    flex: 1 1 40%;
+  }
+  .log-toolbar .field .input,
+  .cmdline .input {
+    font-size: 16px;
+  }
+  /* time, level and module on one line, the message below */
+  .console .ln {
+    flex-wrap: wrap;
+    gap: 0 8px;
+    padding: 2px 0;
+  }
+  .console .m {
+    width: auto;
+  }
+  .console .s {
+    flex-basis: 100%;
+  }
+}

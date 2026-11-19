@@ -1,0 +1,53 @@
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.hero > .grow {
+  min-width: 200px;
+}
+.hero-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.hero-icon .icon {
+  font-size: 28px;
+}
+.hero.ok .hero-icon {
+  background: var(--success-tint);
+  color: var(--success);
+}
+.hero.warn .hero-icon {
+  background: var(--warning-tint);
+  color: var(--warning);
+}
+.hero.err .hero-icon {
+  background: var(--error-tint);
+  color: var(--error);
+}
+.hero.off .hero-icon {
+  background: var(--fill);
+  color: var(--text-3);
+}
+.hero-title {
+  font-size: 17px;
+  font-weight: 400;
+  margin: 0;
+}
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 599px) {
+  .hero-actions {
+    width: 100%;
+  }
+}

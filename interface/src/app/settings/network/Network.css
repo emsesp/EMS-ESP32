@@ -1,0 +1,58 @@
+.net-msg {
+  margin: 12px;
+}
+
+.net-sig {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+  vertical-align: middle;
+}
+.net-sig i {
+  width: 4px;
+  border-radius: 1px;
+  background: var(--fill-hover);
+}
+.net-sig i:nth-child(1) {
+  height: 4px;
+}
+.net-sig i:nth-child(2) {
+  height: 7px;
+}
+.net-sig i:nth-child(3) {
+  height: 10px;
+}
+.net-sig i:nth-child(4) {
+  height: 14px;
+}
+.net-sig.s1 i:nth-child(-n + 1),
+.net-sig.s2 i:nth-child(-n + 2),
+.net-sig.s3 i:nth-child(-n + 3),
+.net-sig.s4 i {
+  background: currentColor;
+}
+.net-sig.ok {
+  color: var(--success);
+}
+.net-sig.warn {
+  color: var(--warning);
+}
+.net-sig.err {
+  color: var(--error);
+}
+
+.net-sec {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+@media (max-width: 599px) {
+  .net-msg {
+    margin: 8px;
+  }
+  .tbl.net-tbl td:first-child {
+    display: block;
+  }
+}

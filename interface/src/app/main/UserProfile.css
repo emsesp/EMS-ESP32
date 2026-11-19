@@ -1,0 +1,35 @@
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.profile .avatar.big {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #2196f3;
+  color: #fff;
+}
+.profile .avatar.big .icon {
+  font-size: 30px;
+}
+.profile-name {
+  margin-bottom: 4px;
+  font-size: 20px;
+}
+.profile-note {
+  margin: 10px 0 0;
+}
+
+@media (max-width: 599px) {
+  .profile {
+    flex-wrap: wrap;
+  }
+  .profile > .btn {
+    width: 100%;
+  }
+}
