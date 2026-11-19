@@ -70,48 +70,50 @@ const Activity = () => {
         />
       )}
       <Section icon="monitoring" title={LL.DATA_TRAFFIC()}>
-        <Table className="st-activity">
-          <thead>
-            <tr>
-              <th />
-              <SortHeader className="r" {...sort.header('s')}>
-                {LL.SUCCESS()}
-              </SortHeader>
-              <SortHeader className="r" {...sort.header('f')}>
-                {LL.FAIL()}
-              </SortHeader>
-              <SortHeader className="r" {...sort.header('q')}>
-                {LL.QUALITY()}
-              </SortHeader>
-            </tr>
-          </thead>
-          <tbody>
-            {sort.rows.map((stat: Stat) => {
-              const active = stat.q !== 0 && stat.s + stat.f !== 0;
-              return (
-                <tr key={stat.id}>
-                  <td>{name(stat.id)}</td>
-                  <td className="r num">{nf.format(stat.s)}</td>
-                  <td className={stat.f ? 'r num warnc' : 'r num muted'}>
-                    {nf.format(stat.f)}
-                  </td>
-                  <td className="r num">
-                    {active && (
-                      <span className="st-quality">
-                        <ProgressBar
-                          value={stat.q}
-                          color={qualityColor(stat.q)}
-                          label={LL.QUALITY()}
-                        />
-                        <span>{stat.q}%</span>
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </Table>
+        <div className="tbl-wrap">
+          <Table className="st-activity">
+            <thead>
+              <tr>
+                <th />
+                <SortHeader className="r" {...sort.header('s')}>
+                  {LL.SUCCESS()}
+                </SortHeader>
+                <SortHeader className="r" {...sort.header('f')}>
+                  {LL.FAIL()}
+                </SortHeader>
+                <SortHeader className="r" {...sort.header('q')}>
+                  {LL.QUALITY()}
+                </SortHeader>
+              </tr>
+            </thead>
+            <tbody>
+              {sort.rows.map((stat: Stat) => {
+                const active = stat.q !== 0 && stat.s + stat.f !== 0;
+                return (
+                  <tr key={stat.id}>
+                    <td>{name(stat.id)}</td>
+                    <td className="r num">{nf.format(stat.s)}</td>
+                    <td className={stat.f ? 'r num warnc' : 'r num muted'}>
+                      {nf.format(stat.f)}
+                    </td>
+                    <td className="r num">
+                      {active && (
+                        <span className="st-quality">
+                          <ProgressBar
+                            value={stat.q}
+                            color={qualityColor(stat.q)}
+                            label={LL.QUALITY()}
+                          />
+                          <span>{stat.q}%</span>
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </Table>
+        </div>
         <p className="cap st-help">{LL.ACTIVITY_HELP()}</p>
       </Section>
     </>

@@ -13,12 +13,15 @@
 .lbx-trigger:disabled {
   cursor: default;
 }
+/* a long selected option wraps to a second line before it is cut off */
 .lbx-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: break-word;
 }
 .lbx-ph {
   padding-left: 4px;

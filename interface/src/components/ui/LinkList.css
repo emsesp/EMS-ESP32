@@ -36,10 +36,11 @@
   outline: 2px solid var(--primary);
   outline-offset: -2px;
 }
+/* the title keeps its longest word; the value next to it is the part that gets truncated */
 .linklist .grow {
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  min-width: min-content;
 }
 .linklist .val {
   display: flex;
@@ -64,6 +65,8 @@
 .linklist .v {
   color: var(--text-2);
   font-size: 12px;
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }
 .linklist .v .badge-dot {
   display: inline-block;

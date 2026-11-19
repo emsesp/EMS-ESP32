@@ -57,9 +57,20 @@
   border-radius: 20px;
   color: #f5f5f5;
   font-size: 14px;
-  white-space: nowrap;
+}
+/* long translations wrap to a second line instead of running under the drawer edge */
+.nav-label {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  min-width: 0;
+  overflow: hidden;
+  line-height: 1.25;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 .nav-item > .icon {
+  flex-shrink: 0;
   color: var(--text-3);
 }
 .nav-item:hover {
@@ -365,9 +376,15 @@
     background: var(--primary-tint);
   }
   .tab-label {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
     max-width: 100%;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    padding: 0 2px;
+    line-height: 1.1;
+    text-align: center;
+    overflow-wrap: break-word;
+    hyphens: auto;
   }
 }

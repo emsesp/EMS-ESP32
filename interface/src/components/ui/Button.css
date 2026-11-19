@@ -71,6 +71,23 @@
   pointer-events: none;
 }
 
+/* on phones a long translated label wraps rather than pushing the button off screen */
+@media (max-width: 599px) {
+  .btn {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  .btn > .icon {
+    flex-shrink: 0;
+  }
+  .tbl .act .btn {
+    white-space: nowrap;
+  }
+}
+
 @media (pointer: coarse) {
   .btn {
     min-height: var(--touch);
