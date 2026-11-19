@@ -83,7 +83,7 @@ const nl: Translation = {
   NUM_HOURS: '{num} {{uur|uren}}',
   NUM_MINUTES: '{num} {{minuut|minuten}}',
   APPLICATION: 'Applicatie',
-  CUSTOMIZATIONS: 'Aanpassingen van entiteiten',
+  CUSTOMIZATIONS: 'Aanpassingen',
   APPLICATION_RESTARTING: 'EMS-ESP herstarten',
   BOARD_PROFILE: 'Apparaatprofiel',
   CUSTOM: 'Custom',
