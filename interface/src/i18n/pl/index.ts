@@ -2,72 +2,72 @@ import type { BaseTranslation } from '../i18n-types';
 
 const pl: BaseTranslation = {
   LANGUAGE: 'Język',
-  RETRY: 'Ponów',
-  IS_REQUIRED: 'Pole {0} nie może być puste!',
+  RETRY: 'Spróbuj ponownie', // DeepL
+  IS_REQUIRED: 'Pole {0} jest obowiązkowe', // DeepL
   SIGN_IN: 'Zaloguj się',
-  SIGN_IN_SUBTITLE: 'Bramka dla systemów grzewczych EMS',
+  SIGN_IN_SUBTITLE: 'Brama dla systemów grzewczych EMS', // DeepL
   SIGN_OUT: 'Wyloguj się',
-  USERNAME: '{{Użytkownik|Nazwa użytkownika|}}',
+  USERNAME: 'Nazwa użytkownika', // DeepL
   PASSWORD: 'Hasło',
-  SETTINGS_OF: 'Ustawienia {0}',
+  SETTINGS_OF: '{0} Ustawienia', // DeepL
   HELP: 'Pomoc',
-  LOGGED_IN: 'Zalogowano użytkownika {name}.',
-  PLEASE_SIGNIN: 'Zaloguj się aby kontynuować.',
-  UPLOAD_SUCCESSFUL: 'Wysyłanie zakończone.',
-  DOWNLOAD_SUCCESSFUL: 'Pobieranie zakończone.',
-  INVALID_LOGIN: 'Nieprawidłowy użytkownik lub hasło!',
-  NETWORK: '{{Sieć|sieci|}}',
-  SECURITY: '{{B|b|}}ezpieczeństw{{o|a|}}',
-  ONOFF_CAP: 'wł./wył.',
-  ONOFF: 'włączono/wyłączono',
-  TYPE: '{{T|t|}}yp{{|u|}}',
-  ENTITIES: 'encj{{i|a|e|e|i}}',
+  LOGGED_IN: 'Zalogowano się jako {name}', // DeepL
+  PLEASE_SIGNIN: 'Zaloguj się, aby kontynuować', // DeepL
+  UPLOAD_SUCCESSFUL: 'Przesłanie zakończone sukcesem', // DeepL
+  DOWNLOAD_SUCCESSFUL: 'Pobierz udane', // DeepL
+  INVALID_LOGIN: 'Nieprawidłowa nazwa użytkownika lub hasło', // DeepL
+  NETWORK: 'Sieć', // DeepL
+  SECURITY: 'Bezpieczeństwo', // DeepL
+  ONOFF_CAP: 'WŁ./WYŁ.', // DeepL
+  ONOFF: 'włącz/wyłącz', // DeepL
+  TYPE: 'Typ', // DeepL
+  ENTITIES: 'entities', // DeepL
   EXPORT: 'Eksportuj',
   FAVORITES: "Ulubione",
   ID_OF: 'ID {0}',
   DEVICE: 'urządzenia',
-  PRODUCT: 'produktu',
+  PRODUCT: 'Produkt', // DeepL
   BRAND: 'Marka',
   VERSION: 'Wersja',
-  ENTITY_NAME: '{{N|n|}}azwa encji',
+  ENTITY_NAME: 'Nazwa encji', // DeepL
   VALUE: '{{W|w|w}}artość',
   DEVICES: 'Urządzenia',
   SENSORS: 'Czujniki',
   AUTOMATION: 'Automatyzacja',
   CONNECTIVITY: 'Łączność',
   MAINTENANCE: 'Konserwacja',
-  CHANGE_VALUE: 'Zmiana wartości',
+  CHANGE_VALUE: 'Zmień wartość', // DeepL
   CANCEL: 'Anuluj',
-  REMOVE_ALL: 'Usuń wszystko',
-  APPLY_CHANGES: 'Zapisz zmiany ({0})',
-  UPDATE: 'Zmień',
+  REMOVE_ALL: 'Usuń wszystkie', // DeepL
+  APPLY_CHANGES: 'Zastosuj zmiany ({0})', // DeepL
+  UPDATE: 'Aktualizacja', // DeepL
   REMOVE: 'Usuń',
   RESET: 'Resetuj',
-  PROBLEM_UPDATING: 'Problem z uaktualnieniem!',
-  PROBLEM_LOADING: 'Problem z załadowaniem!',
-  ANALOG_SENSOR: '{{u|u||ustawienia u|ustawień u}}rządzeni{{a podłączonego do EMS-ESP|e||a podłączonego do EMS-ESP|a podłączonego do EMS-ESP}}',
+  PROBLEM_UPDATING: 'Problem z aktualizacją', // DeepL
+  PROBLEM_LOADING: 'Problem z ładowaniem', // DeepL
+  ANALOG_SENSOR: 'Urządzenia podłączone do EMS-ESP', // DeepL
   ANALOG_SENSORS: 'Urządzenia podłączone do EMS-ESP',
-  SETTINGS: '{{U|u|}}stawienia',
-  UPDATED_OF: 'Zaktualizowano {0}.',
-  OFFSET: 'Korekta ±',
-  FACTOR: 'Mnożnik',
+  SETTINGS: 'Ustawienia', // DeepL
+  UPDATED_OF: 'Zaktualizowano {0}', // DeepL
+  OFFSET: 'Przesunięcie', // DeepL
+  FACTOR: 'Czynnik', // DeepL
   FREQ: 'Częstotliwość',
-  DUTY_CYCLE: 'Wypełnienie',
-  UNIT: 'J.m.',
+  DUTY_CYCLE: 'Cykl pracy', // DeepL
+  UNIT: 'Jednostka miary', // DeepL
   STARTVALUE: 'Wartość początkowa',
-  EDIT: 'Edycja',
-  SENSOR: '{{c|ustawienia c||ustawień c|}}zujnika',
+  EDIT: 'Edytuj', // DeepL
+  SENSOR: 'Czujnik', // DeepL
   TEMP_SENSORS: 'Czujniki temperatury 1-Wire®',
-  WRITE_CMD_SENT: 'Komenda zapisu została wysłana.',
-  EMS_BUS_WARNING: 'Brak połączenia z magistralą EMS. Jeśli ten błąd występuje dłużej niż kilka sekund, sprawdź ustawienia oraz profil płytki interfejsu.',
-  CONNECTED: '{{połączono|połączenie|}}',
-  TX_ISSUES: 'problem z zapisem na magistralę EMS, spróbuj wybrać inny "Tryb transmisji (Tx)"',
-  DISCONNECTED: 'brak połączenia',
-  DATA_TRAFFIC: 'Ruch Danych',
+  WRITE_CMD_SENT: 'Wysłano polecenie', // DeepL
+  EMS_BUS_WARNING: 'Rozłączono magistralę EMS. Jeśli to ostrzeżenie nadal się pojawia po kilku sekundach, sprawdź ustawienia i profil płyty.', // DeepL
+  CONNECTED: 'Połączone', // DeepL
+  TX_ISSUES: 'Problemy z transmisją – sprawdź tryb transmisji', // DeepL
+  DISCONNECTED: 'Brak połączenia', // DeepL
+  DATA_TRAFFIC: 'Ruch danych', // DeepL
   EMS_DEVICE: 'Urządzenie EMS',
-  SUCCESS: 'Udane',
-  FAIL: 'Nieudane',
-  QUALITY: 'Jakość',
+  SUCCESS: 'SUKCES', // DeepL
+  FAIL: 'NIEZGODNOŚĆ', // DeepL
+  QUALITY: 'JAKOŚĆ', // DeepL
   STATUS_NAMES: [
     'EMS, telegramy odebrane (Rx)',
     'EMS, wysłane telegramy "odczyt" (Tx)',
@@ -82,236 +82,236 @@ const pl: BaseTranslation = {
   NUM_SECONDS: '{num} sekun{{d|da|dy|dy|d}}',
   NUM_HOURS: '{num} godzi{{n|na|ny|ny|n}}',
   NUM_MINUTES: '{num} minu{{t|ta|ty|ty|t}}',
-  APPLICATION: 'Aplikacji',
+  APPLICATION: 'Aplikacja', // DeepL
   CUSTOMIZATIONS: 'Personalizacja',
-  APPLICATION_RESTARTING: 'Trwa ponowne uruchamianie',
-  BOARD_PROFILE: 'Profil płytki',
-  CUSTOM: 'własny',
-  GPIO_OF: 'GPIO {0}',
-  BUTTON: 'przycisku',
-  TEMPERATURE: '1-Wire®',
-  PHY_TYPE: 'Typ układu ethernetowego (PHY)',
-  DISABLED: '{{wyłączono|brak|}}',
-  TX_MODE: 'EMS Tryb transmisji (Tx)',
+  APPLICATION_RESTARTING: 'EMS-ESP uruchamia się ponownie', // DeepL
+  BOARD_PROFILE: 'Profil płyty głównej', // DeepL
+  CUSTOM: 'Niestandardowe', // DeepL
+  GPIO_OF: '{0} GPIO', // DeepL
+  BUTTON: 'Przycisk', // DeepL
+  TEMPERATURE: 'Temperatura', // DeepL
+  PHY_TYPE: 'Typ Eth PHY', // DeepL
+  DISABLED: 'wyłączone', // DeepL
+  TX_MODE: 'Tryb EMS Tx', // DeepL
   EMS_BUS: '{{magistrali EMS|na magistrali|}}',
-  HARDWARE: 'sprzętowy',
-  LANGUAGE_ENTITIES: 'Język encji',
-  HIDE_LED: 'Wyłącz LED',
-  ENABLE_TELNET: 'Aktywuj dostęp dla konsoli Telnet',
-  ENABLE_ANALOG: 'Aktywuj urządzenia GPIO (czujniki analogowe i cyfrowe oraz wyjścia cyfrowe)',
-  CONVERT_FAHRENHEIT: 'Konwertuj temperatury do skali Fahrenheita',
-  READONLY: 'Tryb pracy "tylko do odczytu" (blokuje wszystkie komendy zapisu na magistralę EMS)',
-  WRITE_PROTECTION: 'Chroń urządzenia EMS przed powtarzanymi i częstymi zapisami',
-  WRITE_LIMIT: 'Maks. liczba zapisów na minutę (0 = bez limitu)',
-  WRITE_LIMIT_REFUSE: 'Odrzucaj zapisy ponad limit (w przeciwnym razie tylko ostrzeżenie w logu)',
-  UNDERCLOCK_CPU: 'Obniż taktowanie CPU',
-  REMOTE_TIMEOUT: 'Limit czasu termostatu zdalnego',
-  REMOTE_TIMEOUT_EN: 'Wyłącz kontrolę zdalną przy braku temperatury pomieszczenia',
-  HEATINGOFF: 'Uruchom kocioł z wymuszonym wyłączonym grzaniem',
-  MIN_DURATION: 'Wait time',
-  ENABLE_SHOWER_TIMER: 'Aktywuj minutnik prysznica',
-  ENABLE_SHOWER_ALERT: 'Aktywuj alarm prysznica',
-  TRIGGER_TIME: 'Wyzwalaj po czasie',
-  COLD_SHOT_DURATION: 'Czas trwania tryśnięcia zimnej wody',
+  HARDWARE: 'Sprzęt', // DeepL
+  LANGUAGE_ENTITIES: 'Język (dla elementów urządzeń)', // DeepL
+  HIDE_LED: 'Ukryj diodę LED', // DeepL
+  ENABLE_TELNET: 'Włącz konsolę Telnet', // DeepL
+  ENABLE_ANALOG: 'Włącz czujniki analogowe', // DeepL
+  CONVERT_FAHRENHEIT: 'Przelicz wartości temperatury na stopnie Fahrenheita', // DeepL
+  READONLY: 'Włącz tryb tylko do odczytu (blokuje wszystkie wychodzące komendy zapisu EMS Tx)', // DeepL
+  WRITE_PROTECTION: 'Należy chronić urządzenia EMS przed powtarzającym się i częstym zapisem danych', // DeepL
+  WRITE_LIMIT: 'Maksymalna liczba operacji zapisu na minutę (0 = bez ograniczeń)', // DeepL
+  WRITE_LIMIT_REFUSE: 'Odrzucaj wpisy przekraczające limit (w przeciwnym razie rejestrowane jest jedynie ostrzeżenie)', // DeepL
+  UNDERCLOCK_CPU: 'Zmniejsz taktowanie procesora', // DeepL
+  REMOTE_TIMEOUT: 'Limit czasu połączenia zdalnego', // DeepL
+  REMOTE_TIMEOUT_EN: 'Wyłącz zdalne sterowanie w przypadku braku danych o temperaturze w pomieszczeniu', // DeepL
+  HEATINGOFF: 'Uruchom kocioł przy wyłączonym ogrzewaniu wymuszonym', // DeepL
+  MIN_DURATION: 'Czas oczekiwania', // DeepL
+  ENABLE_SHOWER_TIMER: 'Włącz licznik czasu prysznica', // DeepL
+  ENABLE_SHOWER_ALERT: 'Włącz powiadomienie o prysznicu', // DeepL
+  TRIGGER_TIME: 'Czas wyzwolenia', // DeepL
+  COLD_SHOT_DURATION: 'Czas trwania zimnego strzału', // DeepL
   FORMATTING_OPTIONS: 'Opcje formatowania',
-  BOOLEAN_FORMAT_DASHBOARD: 'Wartości dwustanowe na pulpicie',
-  BOOLEAN_FORMAT_API: 'Wartości dwustanowe w API/MQTT',
-  ENUM_FORMAT: 'Wartości z listy w API/MQTT',
-  INDEX: 'indeks',
-  ENABLE_PARASITE: 'Aktywuj zasilanie 1-wire pasożytnicze',
-  LOG_HEX: 'Loguj telegramy EMS w systemie szesnastkowym (hex)',
-  ENABLE_SYSLOG: 'Aktywuj SysLog',
+  BOOLEAN_FORMAT_DASHBOARD: 'Format boolowski w sieci', // DeepL
+  BOOLEAN_FORMAT_API: 'Format boolowski API/MQTT', // DeepL
+  ENUM_FORMAT: 'Format enum API/MQTT', // DeepL
+  INDEX: 'Indeks', // DeepL
+  ENABLE_PARASITE: 'Włącz zasilanie pasożytnicze 1-Wire', // DeepL
+  LOG_HEX: 'Rejestruj telegramy EMS w formacie szesnastkowym', // DeepL
+  ENABLE_SYSLOG: 'Włącz Syslog', // DeepL
   LOG_LEVEL: 'Poziom logowania',
-  MARK_INTERVAL: 'Znaczniki interwałów (0=brak)',
+  MARK_INTERVAL: 'Zaznacz przedział', // DeepL
   SECONDS: 'sekund',
-  MINUTES: 'minut',
-  HOURS: 'godzin',
-  RESTART: 'Restart',
-  RESTART_TEXT: 'Aby zastosować wprowadzone zmiany, interfejs EMS-ESP {{musi zostać|zostanie|}} uruchomiony ponowni{{e.|e|}}',
-  RESTART_CONFIRM: 'Na pewno chcesz zrestartować interfejs EMS-ESP?',
-  COMMAND: '{{Komenda|KOMENDA|}}',
-  CUSTOMIZATIONS_RESTART: 'Wszystkie personalizacje zostały usunięte. Restartuję…',
-  CUSTOMIZATIONS_FULL: 'Wybrano za dużo obiektów. Wprowadzaj zmiany w mniejszych partiach.',
-  CUSTOMIZATIONS_SAVED: 'Personalizacje zostały zapisane.',
-  CUSTOMIZATIONS_HELP_1: 'Wybierz urządzenie EMS, a następnie dostosuj opcje lub kliknij na nazwie encji by tę nazwę zmienić',
-  CUSTOMIZATIONS_HELP_2: 'oznacz jako ulubioną',
-  CUSTOMIZATIONS_HELP_3: 'zablokuj akcje zapisu',
+  MINUTES: 'minuty', // DeepL
+  HOURS: 'godziny', // DeepL
+  RESTART: 'Uruchom ponownie', // DeepL
+  RESTART_TEXT: 'Aby zastosować zmienione ustawienia systemowe, należy ponownie uruchomić EMS-ESP', // DeepL
+  RESTART_CONFIRM: 'Czy na pewno chcesz ponownie uruchomić EMS-ESP?', // DeepL
+  COMMAND: 'Komenda', // DeepL
+  CUSTOMIZATIONS_RESTART: 'Wszystka personalizacja została usunięta. Uruchamianie od nowa…', // DeepL
+  CUSTOMIZATIONS_FULL: 'Liczba wybranych elementów przekroczyła limit. Proszę zapisywać partiami.', // DeepL
+  CUSTOMIZATIONS_SAVED: 'Zaktualizowano personalizację', // DeepL
+  CUSTOMIZATIONS_HELP_1: 'Wybierz urządzenie i dostosuj opcje elementów', // DeepL
+  CUSTOMIZATIONS_HELP_2: 'dodaj do Ulubionych', // DeepL
+  CUSTOMIZATIONS_HELP_3: 'wyłącz akcję zapisu', // DeepL
   CUSTOMIZATIONS_HELP_4: 'wyklucz z MQTT i API',
-  CUSTOMIZATIONS_HELP_5: 'ukryć przed urządzeniami',
-  CUSTOMIZATIONS_HELP_6: 'usuń z pamięci',
-  SELECT_DEVICE: 'wybierz urządzenie',
-  MODIFIED: 'Zmienione',
-  RESET_SELECTED: 'Resetuj zaznaczone',
+  CUSTOMIZATIONS_HELP_5: 'ukryj z poziomu Urządzeń', // DeepL
+  CUSTOMIZATIONS_HELP_6: 'usunąć z pamięci', // DeepL
+  SELECT_DEVICE: 'Wybierz urządzenie', // DeepL
+  MODIFIED: 'Zmodyfikowano', // DeepL
+  RESET_SELECTED: 'Zresetuj zaznaczone', // DeepL
   OPTIONS: 'Opcje',
-  NAME: '{{Nazwa|nazwa|}}',
-  CUSTOMIZATIONS_RESET: 'Na pewno chcesz usunąć wszystkie personalizacje?',
-  SYSTEM_INFORMATION: '{{I|i|}}nformacj{{e|i|}} o systemie',
-  HELP_INFORMATION_1: 'Skorzystaj z wiki w internecie aby uzyskać instrukcje dotyczące konfiguracji EMS-ESP',
-  HELP_INFORMATION_2: 'Dołącz do naszego serwera Discord by komunikować się na żywo ze społecznością',
-  HELP_INFORMATION_3: 'Zaproponuj nową funkcjonalność lub zgłoś problem',
-  HELP_INFORMATION_4: 'Zgłaszając problem, nie zapomnij dołączyć informacji o swoim systemie!',
-  UPLOAD: 'Wysyłanie',
+  NAME: 'Nazwa', // DeepL
+  CUSTOMIZATIONS_RESET: 'Czy na pewno chcesz usunąć wszystkie personalizacje?', // DeepL
+  SYSTEM_INFORMATION: 'Informacje o systemie', // DeepL
+  HELP_INFORMATION_1: 'Odwiedź wiki online, aby uzyskać instrukcje dotyczące konfiguracji EMS-ESP', // DeepL
+  HELP_INFORMATION_2: 'Aby dołączyć do czatu społeczności na żywo, dołącz do naszego serwera Discord', // DeepL
+  HELP_INFORMATION_3: 'Aby zgłosić prośbę o dodanie funkcji lub zgłosić błąd', // DeepL
+  HELP_INFORMATION_4: 'Podaj informacje o swoim systemie podczas zgłaszania problemu, aby uzyskać szybszą odpowiedź', // DeepL
+  UPLOAD: 'Prześlij', // DeepL
   DOWNLOAD: '{{P|p||P}}obier{{anie|z||z}}',
-  INSTALL: 'Zainstalować',
-  FAILED: 'nie powiodł{{o|a|}} się!',
-  SYSTEM: '{{S|s||s}}yste{{m|mu||mowy}}',
-  LOG_OF: 'Log {0}',
-  STATUS_OF: 'Status {0}',
-  DOWNLOAD_UPLOAD: 'Plików przesyłanie',
+  INSTALL: 'Zainstaluj', // DeepL
+  FAILED: 'nie powiodło się', // DeepL
+  SYSTEM: 'System', // DeepL
+  LOG_OF: '{0} Dziennik', // DeepL
+  STATUS_OF: '{0} Stan', // DeepL
+  DOWNLOAD_UPLOAD: 'Pobierz/Prześlij', // DeepL
   CLOSE: 'Zamknij',
-  COMMAND_GUEST: 'Goście mogą uruchamiać to polecenie',
-  TOKENS_RESET: 'Ta aktualizacja podpisuje tokeny dostępu nowym kluczem urządzenia, więc dotychczasowe tokeny dostępu API przestały działać. Utwórz klucz API dla każdej integracji korzystającej z API, np. Home Assistant, i używaj go zamiast starego tokena.',
+  COMMAND_GUEST: 'Goście mogą wykonać tę komendę', // DeepL
+  TOKENS_RESET: 'Ta aktualizacja podpisuje tokeny dostępu nowym kluczem urządzenia, więc dotychczasowe tokeny dostępu do API przestały działać. Utwórz klucz API dla każdej integracji korzystającej z API, takiej jak Home Assistant, i używaj go zamiast starego tokenu.', // DeepL
   API_KEYS: 'Klucze API',
-  API_KEYS_TEXT: 'Klucze API pozwalają integracjom, takim jak Home Assistant, i skryptom korzystać z API. Wyślij klucz w nagłówku "Authorization: Bearer <klucz>". Klucze do odczytu mogą odczytywać wartości i uruchamiać polecenia dozwolone dla gości, klucze do odczytu i zapisu mogą przez API wszystko, co administrator.',
+  API_KEYS_TEXT: 'Klucze API umożliwiają integrację z takimi rozwiązaniami jak Home Assistant oraz skryptami korzystającym z API. Klucz należy przesłać w nagłówku „Authorization: Bearer <KLUCZ>”. Klucze typu „Read” umożliwiają odczyt wartości i wykonywanie komend, które mogą wykonywać goście, natomiast klucze typu „Read” i „Write” umożliwiają wykonywanie wszystkich czynności, które administrator może wykonać za pośrednictwem API.', // DeepL
   API_KEY_ACCESS: 'Dostęp',
-  API_KEY_READ: 'Odczyt',
-  API_KEY_READ_WRITE: 'Odczyt i Zapis',
-  API_KEY_SHOW_ONCE: 'Skopiuj teraz ten klucz i przechowuj go bezpiecznie. Nie zostanie pokazany ponownie.',
+  API_KEY_READ: 'Przeczytaj', // DeepL
+  API_KEY_READ_WRITE: 'Odczyt i zapis', // DeepL
+  API_KEY_SHOW_ONCE: 'Skopiuj ten klucz teraz i przechowuj go w bezpiecznym miejscu. Nie zostanie on ponownie wyświetlony.', // DeepL
   CREATED: 'Utworzono',
-  COPY: 'Kopiuj',
+  COPY: 'Tekst', // DeepL
   COPIED: 'Skopiowano',
-  USE: 'Aby zaktualizować firmware skorzystaj z funkcji',
-  FACTORY_RESET: 'Ustawienia fabryczne',
-  SYSTEM_FACTORY_TEXT_DIALOG: 'Na pewno chcesz przywrócić ustawienia fabryczne interfejsu EMS-ESP?',
-  STABLE: 'Stabilna',
-  DEVELOPMENT: 'Testowa',
-  UPTIME: 'Czas działania systemu',
-  LAST_RESTART: 'Ostatni restart',
-  POWER_AND_RESET: 'Zasilanie i restart',
-  FREE_MEMORY: 'Wolne Memory',
-  BUFFER_SIZE: 'Maksymalna pojemność bufora (ilość wpisów)',
-  COMPACT: 'Kompaktowy',
+  USE: 'Używaj', // DeepL
+  FACTORY_RESET: 'Przywrócenie ustawień fabrycznych', // DeepL
+  SYSTEM_FACTORY_TEXT_DIALOG: 'Czy na pewno chcesz przywrócić ustawienia fabryczne EMS-ESP?', // DeepL
+  STABLE: 'Stabilny', // DeepL
+  DEVELOPMENT: 'Rozwój', // DeepL
+  UPTIME: 'Czas sprawności systemu', // DeepL
+  LAST_RESTART: 'Ostatnie ponowne uruchomienie', // DeepL
+  POWER_AND_RESET: 'Zasilanie i reset', // DeepL
+  FREE_MEMORY: 'Wolna pamięć', // DeepL
+  BUFFER_SIZE: 'Maksymalny rozmiar bufora', // DeepL
+  COMPACT: 'Zwięzły', // DeepL
   SUMMARY: 'Podsumowanie',
-  SHOW_MORE: 'Pokaż jeszcze {n}',
+  SHOW_MORE: 'Pokaż {n} więcej', // DeepL
   SHOW_LESS: 'Pokaż mniej',
-  COREDUMP: 'Zrzut awarii',
+  COREDUMP: 'Zrzut pamięci po awarii', // DeepL
   DOWNLOAD_SYSTEM_BACKUP: 'Kopia zapasowa systemu',
-  ERROR: 'Nieoczekiwany błąd, spróbuj ponownie!',
-  TIME_SET: 'Zegar został ustawiony.',
+  ERROR: 'Wystąpił nieoczekiwany błąd, spróbuj ponownie', // DeepL
+  TIME_SET: 'Ustawiony czas', // DeepL
   MANAGE_USERS: 'Zarządzanie użytkownikami',
-  USER_WARNING: 'Przynajmniej jeden użytkownik musi mieć uprawnienia administratora!',
-  ADD: 'Doda{{j|wanie|}}',
-  TELNET_ENABLED: 'Konsola Telnet jest włączona. Telnet nie jest szyfrowany, więc wyłącz go w ustawieniach aplikacji, jeśli z niego nie korzystasz.',
-  TOO_MANY_LOGINS: 'Zbyt wiele nieudanych logowań, spróbuj ponownie za kilka minut',
-  PASSWORD_KEEP: 'Pozostaw puste, aby zachować obecne hasło',
-  SETUP_TITLE: 'Ustaw swoje hasła',
-  SETUP_TEXT: 'To urządzenie nadal używa haseł fabrycznych. Ustaw własne, zanim przejdziesz dalej.',
+  USER_WARNING: 'Należy skonfigurować co najmniej jednego użytkownika z uprawnieniami administratora', // DeepL
+  ADD: 'Dodaj', // DeepL
+  TELNET_ENABLED: 'Konsola Telnet jest włączona. Telnet nie jest szyfrowany, więc jeśli go nie używasz, wyłącz go w ustawieniach aplikacji.', // DeepL
+  TOO_MANY_LOGINS: 'Zbyt wiele nieudanych prób logowania. Spróbuj ponownie za kilka minut.', // DeepL
+  PASSWORD_KEEP: 'Pozostaw puste, aby zachować aktualne hasło', // DeepL
+  SETUP_TITLE: 'Ustaw hasła', // DeepL
+  SETUP_TEXT: 'To urządzenie nadal korzysta z haseł fabrycznych. Przed kontynuowaniem należy ustawić własne hasło.', // DeepL
   SETUP_ADMIN_PASSWORD: 'Nowe hasło dla {name}',
-  SETUP_AP_PASSWORD: 'Nowe hasło punktu dostępowego',
-  SETUP_AP_REQUIRED: 'Nie skonfigurowano jeszcze sieci WiFi, więc dostęp jest przez punkt dostępowy. 8-63 znaków, użyte przy następnym uruchomieniu punktu dostępowego.',
-  SETUP_AP_OPTIONAL: 'Zalecane. 8-63 znaków, użyte przy następnym uruchomieniu punktu dostępowego. Pozostaw puste, aby zachować obecne.',
-  SETUP_AP_DEFAULT: 'Punkt dostępowy nadal używa hasła fabrycznego. Ustaw własne w ustawieniach punktu dostępowego.',
-  SETUP_VIEW_USER: 'Opcjonalnie: dodaj użytkownika gościa tylko do podglądu.',
-  NETWORK_CORS_ORIGIN_HELP: 'Adres strony, która może wywoływać API z przeglądarki, na przykład http://homeassistant.local:8123',
-  NETWORK_CORS_WILDCARD: 'Przy * każda strona otwarta w przeglądarce w Twojej sieci może wywoływać API. Zamiast tego wpisz dokładny adres.',
-  NETWORK_ALLOWED_HOSTS: 'Dozwolone nazwy hosta',
-  NETWORK_ALLOWED_HOSTS_HELP: 'Dodatkowe nazwy, pod którymi to urządzenie można otworzyć w przeglądarce, na przykład ems-esp.fritz.box lub nazwa reverse proxy. Adres IP, nazwa hosta i nazwa-hosta.local działają zawsze',
-  NOT_ENABLED: 'nie aktywowano',
-  ERRORS_OF: 'Błędy {0}',
-  DISCONNECT_REASON: 'Przyczyna braku połączenia',
-  MQTT_BASE_TOPIC: 'Temat bazowy',
-  LAST_DISCONNECT: 'Ostatnie rozłączenie',
-  CONNECTED_SINCE: 'Połączono od',
-  ENABLE_MQTT: 'Aktywuj MQTT',
-  BROKER: 'brokera',
-  CLIENT: 'klienta',
-  BASE_TOPIC: 'Prefiks bazowy (unikalny!)',
-  OPTIONAL: 'opcjonalny',
-  MQTT_FORMAT: 'Sposób publikowania danych',
-  MQTT_NEST_1: 'zagnieżdżone w jednym temacie',
-  MQTT_NEST_2: 'jako oddzielne tematy',
-  MQTT_RESPONSE: 'Rezultat wykonania komendy publikuj w temacie "response"',
-  MQTT_PUBLISH_TEXT_1: 'Tematy z pojedynczą wartością publikuj po jej zmianie',
-  MQTT_PUBLISH_TEXT_2: 'Publikuj w tematach "command" (ioBroker)',
-  MQTT_PUBLISH_TEXT_3: 'Włącz opcję "MQTT discovery"',
-  MQTT_PUBLISH_TEXT_4: 'Prefiks dla "MQTT discovery"',
-  MQTT_PUBLISH_TEXT_5: 'Typ "MQTT discovery"',
-  MQTT_INPUT_NUMBER_FORMAT: 'Format liczby',
-  MQTT_PUBLISH_INTERVALS: 'Interwały publikowania',
+  SETUP_AP_PASSWORD: 'Nowe hasło do punktu dostępowego', // DeepL
+  SETUP_AP_REQUIRED: 'Sieć Wi-Fi nie została jeszcze skonfigurowana, więc dostęp odbywa się poprzez punkt dostępowy. 8–63 znaków; zostanie użyte przy następnym uruchomieniu punktu dostępowego.', // DeepL
+  SETUP_AP_OPTIONAL: 'Zalecane: 8–63 znaków; zostanie zastosowane przy następnym uruchomieniu punktu dostępowego. Pozostaw puste, aby zachować bieżącą wartość.', // DeepL
+  SETUP_AP_DEFAULT: 'Punkt dostępowy nadal korzysta z hasła fabrycznego. Ustaw własne hasło w ustawieniach punktu dostępowego.', // DeepL
+  SETUP_VIEW_USER: 'Opcjonalnie: dodaj użytkownika-gościa z uprawnieniami wyłącznie do przeglądania.', // DeepL
+  NETWORK_CORS_ORIGIN_HELP: 'Adres internetowy umożliwiający wywołanie interfejsu API z poziomu przeglądarki, na przykład http://homeassistant.local:8123', // DeepL
+  NETWORK_CORS_WILDCARD: 'Z * każda strona internetowa otwarta w przeglądarce w Twojej sieci może wywołać API. Zamiast tego ustaw dokładny adres.', // DeepL
+  NETWORK_ALLOWED_HOSTS: 'Dopuszczalne nazwy hostów', // DeepL
+  NETWORK_ALLOWED_HOSTS_HELP: 'Dodatkowe nazwy, pod którymi urządzenie to można otworzyć w przeglądarce, to na przykład ems-esp.fritz.box lub nazwa odwrotnego serwera proxy. Jego adres IP, nazwa hosta oraz nazwa hosta.local zawsze działają', // DeepL
+  NOT_ENABLED: 'Nie włączono', // DeepL
+  ERRORS_OF: '{0} błędów', // DeepL
+  DISCONNECT_REASON: 'Przyczyna odłączenia', // DeepL
+  MQTT_BASE_TOPIC: 'Temat podstawowy', // DeepL
+  LAST_DISCONNECT: 'Ostatnie odłączenie', // DeepL
+  CONNECTED_SINCE: 'Podłączony od', // DeepL
+  ENABLE_MQTT: 'Włącz MQTT', // DeepL
+  BROKER: 'Broker', // DeepL
+  CLIENT: 'Klient', // DeepL
+  BASE_TOPIC: 'Podstawa', // DeepL
+  OPTIONAL: 'opcjonalnie', // DeepL
+  MQTT_FORMAT: 'Format tematu/danych użytkowych', // DeepL
+  MQTT_NEST_1: 'Zagnieżdżone w jednym temacie', // DeepL
+  MQTT_NEST_2: 'Poszczególne tematy', // DeepL
+  MQTT_RESPONSE: 'Publikuj wyniki komend w temacie `response`', // DeepL
+  MQTT_PUBLISH_TEXT_1: 'Publikuj tematy o pojedynczej wartości po wystąpieniu zmiany', // DeepL
+  MQTT_PUBLISH_TEXT_2: 'Publikuj w tematach komend (ioBroker)', // DeepL
+  MQTT_PUBLISH_TEXT_3: 'Włącz wykrywanie urządzeń MQTT', // DeepL
+  MQTT_PUBLISH_TEXT_4: 'Prefiks dla tematów wykrywania', // DeepL
+  MQTT_PUBLISH_TEXT_5: 'Typ odkrycia', // DeepL
+  MQTT_INPUT_NUMBER_FORMAT: 'Format liczb wprowadzanych', // DeepL
+  MQTT_PUBLISH_INTERVALS: 'Częstotliwość publikacji', // DeepL
   MQTT_INT_BOILER: 'Kotły i pompy ciepła',
   MQTT_INT_THERMOSTATS: 'Termostaty',
-  MQTT_INT_SOLAR: 'Panele solarne',
-  MQTT_INT_MIXER: 'Mieszacze',
-  MQTT_INT_WATER: 'Woda',
+  MQTT_INT_SOLAR: 'Moduły słoneczne', // DeepL
+  MQTT_INT_MIXER: 'Moduły mieszające', // DeepL
+  MQTT_INT_WATER: 'Moduły wodne', // DeepL
   MQTT_QUEUE: 'Kolejka MQTT',
-  DEFAULT: '{{Pozostałe|Domyślna|}}',
-  MQTT_ENTITY_FORMAT: 'Format "Entity ID"',
-  MQTT_ENTITY_FORMAT_0: 'długa nazwa (jak w v3.4)',
-  MQTT_ENTITY_FORMAT_1: 'krótka nazwa',
-  MQTT_ENTITY_FORMAT_2: 'prefiks bazowy + krótka nazwa',
-  MQTT_CLEAN_SESSION: 'Ustawiaj flagę "Clean session"',
-  MQTT_RETAIN_FLAG: 'Ustawiaj flagę "Retain"',
-  MQTT_COMMANDS: 'Polecenia odbierane przez MQTT',
+  DEFAULT: 'Domyślnie', // DeepL
+  MQTT_ENTITY_FORMAT: 'Format identyfikatora encji', // DeepL
+  MQTT_ENTITY_FORMAT_0: 'Pojedynczy egzemplarz, długa nazwa (wersja 3.4)', // DeepL
+  MQTT_ENTITY_FORMAT_1: 'Pojedyncza instancja, krótka nazwa', // DeepL
+  MQTT_ENTITY_FORMAT_2: 'Wiele instancji, krótka nazwa', // DeepL
+  MQTT_CLEAN_SESSION: 'Ustaw czystą sesję', // DeepL
+  MQTT_RETAIN_FLAG: 'Zawsze należy ustawić flagę zachowania', // DeepL
+  MQTT_COMMANDS: 'Komendy odbierane przez protokół MQTT', // DeepL
   MQTT_COMMANDS_0: 'Wyłączone, tylko odczyt wartości',
-  MQTT_COMMANDS_1: 'Zmiana wartości i wykonywanie Poleceń',
-  MQTT_COMMANDS_2: 'Wszystko, także polecenia systemowe',
-  INACTIVE: 'nieaktywn{{y|a|}}',
-  ACTIVE: 'aktywny',
-  UNKNOWN: 'nieznany',
-  SET_TIME: '{{Ustaw zegar|Ustawianie zegara|}}',
-  SET_TIME_TEXT: 'Wprowadź aktualną datę i godzinę',
-  LOCAL_TIME: '{{Czas|czasu|}} lokaln{{y|ego|}}',
+  MQTT_COMMANDS_1: 'Zmiana wartości i uruchamianie komend', // DeepL
+  MQTT_COMMANDS_2: 'Wszystko, w tym komendy systemowe', // DeepL
+  INACTIVE: 'Nieaktywne', // DeepL
+  ACTIVE: 'Aktywne', // DeepL
+  UNKNOWN: 'Nieznane', // DeepL
+  SET_TIME: 'Ustaw czas', // DeepL
+  SET_TIME_TEXT: 'Wprowadź poniżej lokalną datę i godzinę, aby ustawić czas', // DeepL
+  LOCAL_TIME: 'Czas lokalny', // DeepL
   UTC_TIME: 'Czas UTC',
-  ENABLE_NTP: 'Aktywuj NTP (data i godzina będą automatycznie synchronizowane z poniższym serwerem czasu)',
+  ENABLE_NTP: 'Włącz NTP', // DeepL
   NTP_SERVER: 'Serwer NTP',
   TIME_ZONE: 'Strefa czasowa',
-  ACCESS_POINT: '{{Punkt|punktu|}} {{dostępowy|dostępowego|}}',
-  AP_PROVIDE: 'Punkt dostępowy',
-  AP_PROVIDE_TEXT_2: 'gdy nie znaleziono połączenia z siecią',
-  AP_PROVIDE_TEXT_3: 'nieaktywny',
+  ACCESS_POINT: 'Punkt dostępowy', // DeepL
+  AP_PROVIDE: 'Włącz punkt dostępowy', // DeepL
+  AP_PROVIDE_TEXT_2: 'W przypadku braku łączności sieciowej', // DeepL
+  AP_PROVIDE_TEXT_3: 'Nigdy', // DeepL
   AP_PREFERRED_CHANNEL: 'Preferowany kanał',
-  AP_HIDE_SSID: 'Ukryj SSID',
-  AP_CLIENTS: 'Liczba klientów',
+  AP_HIDE_SSID: 'Ukryj identyfikator SSID', // DeepL
+  AP_CLIENTS: 'Klienci AP', // DeepL
   AP_MAX_CLIENTS: 'Maksymalna liczba klientów',
   AP_LOCAL_IP: 'Lokalny adres IP',
-  IDLE: 'bezczynna',
-  SCAN_AGAIN: 'Skanuj ponownie',
-  NETWORK_NO_WIFI: 'Brak sieci WiFi w zasięgu',
-  NETWORK_BLANK_BSSID: 'pozostaw puste aby używać tylko SSID',
-  TX_POWER: 'Moc nadawania',
-  HOSTNAME: 'Nazwa w sieci',
-  NETWORK_DISABLE_SLEEP: 'Wyłącz tryb uśpienia WiFi',
-  NETWORK_LOW_BAND: 'Używaj mniejszej szerokości pasma WiFi (20MHz)',
-  NETWORK_USE_DNS: 'Włącz wsparcie dla mDNS',
-  NETWORK_ENABLE_CORS: 'Włącz wsparcie dla CORS',
-  NETWORK_CORS_ORIGIN: 'CORS Origin',
-  NETWORK_FIXED_IP: 'Użyj stałego adresu IP',
+  IDLE: 'Bezczynność', // DeepL
+  SCAN_AGAIN: 'Przeskanuj ponownie', // DeepL
+  NETWORK_NO_WIFI: 'Nie znaleziono sieci Wi-Fi', // DeepL
+  NETWORK_BLANK_BSSID: 'pozostaw puste, aby używać wyłącznie identyfikatora SSID', // DeepL
+  TX_POWER: 'Moc nadawcza', // DeepL
+  HOSTNAME: 'Nazwa hosta', // DeepL
+  NETWORK_DISABLE_SLEEP: 'Wyłącz tryb uśpienia Wi-Fi', // DeepL
+  NETWORK_LOW_BAND: 'Należy korzystać z niższej przepustowości sieci Wi-Fi', // DeepL
+  NETWORK_USE_DNS: 'Włącz usługę mDNS', // DeepL
+  NETWORK_ENABLE_CORS: 'Włącz CORS', // DeepL
+  NETWORK_CORS_ORIGIN: 'Źródło CORS', // DeepL
+  NETWORK_FIXED_IP: 'Należy używać stałego adresu IP', // DeepL
   NETWORK_GATEWAY: 'Brama',
   NETWORK_SUBNET: 'Maska podsieci',
   NETWORK_DNS: 'Serwery DNS',
   ADDRESS_OF: 'Adres {0}',
-  ADMINISTRATOR: 'administratora',
-  GUEST: 'gościa',
-  NEW: 'nowe{{go|j|}}',
+  ADMINISTRATOR: 'Administrator', // DeepL
+  GUEST: 'Gość', // DeepL
+  NEW: 'Nowe', // DeepL
   NEW_NAME_OF: 'Nowa nazwa {0}',
-  ENTITY: 'encji',
-  MIN: 'Min.',
-  MAX: 'Maks.',
-  BLOCK_NAVIGATE_1: 'Niezapisane zmiany!',
-  BLOCK_NAVIGATE_2: 'Jeśli przejdziesz do innej strony, wprowadzone zmiany w ustawieniach zostaną utracone. Na pewno chcesz opuścić tę stronę?',
-  UPLOAD_ABORTED: 'Przesyłanie przerwane',
-  BLOCK_BUSY_1: 'Operacja w toku',
-  BLOCK_BUSY_2: 'Opuszczenie strony teraz przerwie operację. Na pewno chcesz wyjść?',
+  ENTITY: 'entity', // DeepL
+  MIN: 'min', // DeepL
+  MAX: 'max', // DeepL
+  BLOCK_NAVIGATE_1: 'Masz niezapisane zmiany', // DeepL
+  BLOCK_NAVIGATE_2: 'Jeśli przejdziesz do innej strony, niezapisane zmiany zostaną utracone. Czy na pewno chcesz opuścić tę stronę?', // DeepL
+  UPLOAD_ABORTED: 'Przerwano przesyłanie', // DeepL
+  BLOCK_BUSY_1: 'W trakcie opracowywania', // DeepL
+  BLOCK_BUSY_2: 'Opuszczenie tej strony spowoduje jej zamknięcie. Czy na pewno chcesz ją opuścić?', // DeepL
   DISCARD: 'Odrzuć',
-  COMMANDS_UPDATED: 'Zaktualizowano komendy',
+  COMMANDS_UPDATED: 'Zaktualizowane komendy', // DeepL
   V_REQUIRED: 'Wymagane',
-  V_BETWEEN: 'Musi być od {min} do {max}',
-  V_MAX_CHARS: 'Maksymalnie {max} znaków',
-  V_CHARS: 'Musi mieć {min}–{max} znaków',
+  V_BETWEEN: 'Długość musi mieścić się w przedziale od {min} do {max}', // DeepL
+  V_MAX_CHARS: 'Musi mieć maksymalnie {max} znaków', // DeepL
+  V_CHARS: 'Długość musi wynosić od {min} do {max} znaków', // DeepL
   V_IN_USE: 'Już w użyciu',
-  V_IP: 'Musi być adresem IP',
-  V_HOSTNAME: 'Musi być poprawną nazwą hosta',
-  V_IP_OR_HOSTNAME: 'Musi być adresem IP lub nazwą hosta',
-  V_NAME: 'Do {max} znaków: litery, cyfry lub _',
-  V_USERNAME: 'Do {max} znaków: litery, cyfry, _ lub .',
+  V_IP: 'Musi to być adres IP', // DeepL
+  V_HOSTNAME: 'Musi to być poprawna nazwa hosta', // DeepL
+  V_IP_OR_HOSTNAME: 'Musi to być adres IP lub nazwa hosta', // DeepL
+  V_NAME: 'Maksymalnie {max} znaków: litery, cyfry lub znak _', // DeepL
+  V_USERNAME: 'Maksymalnie {max} znaków: litery, cyfry, znak „_” lub „.”', // DeepL
   V_DAY: 'Wybierz co najmniej jeden dzień',
-  V_HEX: 'Musi być liczbą szesnastkową',
-  V_FINGERPRINT: 'Musi być odciskiem SHA-1 (40 cyfr szesnastkowych)',
-  V_EXAMPLE: 'Musi wyglądać jak {example}',
+  V_HEX: 'Musi to być liczba szesnastkowa', // DeepL
+  V_FINGERPRINT: 'Musi to być odcisk SHA-1 (40 cyfr szesnastkowych)', // DeepL
+  V_EXAMPLE: 'Powinny wyglądać tak: {example}', // DeepL
   V_NOT_DEFAULT: 'Wybierz inne hasło',
-  ZERO_DISABLES: '0 wyłącza',
-  MINUS_ONE_DISABLES: '-1 wyłącza',
-  LED_TYPE: 'Typ LED',
+  ZERO_DISABLES: '0 wyłącza urządzenie', // DeepL
+  MINUS_ONE_DISABLES: '-1 wyłącza urządzenie', // DeepL
+  LED_TYPE: 'Typ diody LED', // DeepL
   PHY_POWER: 'Zasilanie PHY',
   PHY_CLOCK: 'Zegar PHY',
   AUTO: 'Auto',
@@ -319,34 +319,34 @@ const pl: BaseTranslation = {
   TIMEOUT: 'Limit czasu',
   HOST: 'Host',
   SMTP_SERVER: 'Serwer SMTP',
-  KEEP_ALIVE: 'Keep-alive',
+  KEEP_ALIVE: 'Utrzymuj połączenie', // DeepL
   MQTT_REFRESH: 'Odśwież MQTT',
-  MQTT_REFRESHED: 'Odświeżono MQTT',
-  MQTT_R_USER: 'Rozłączono przez użytkownika',
-  MQTT_R_TCP: 'Połączenie TCP zamknięte',
-  MQTT_R_PROTOCOL: 'Wersja protokołu nieakceptowana',
-  MQTT_R_ID: 'Odrzucono ID klienta',
+  MQTT_REFRESHED: 'Aktualizacja MQTT', // DeepL
+  MQTT_R_USER: 'Odłączone przez użytkownika', // DeepL
+  MQTT_R_TCP: 'Połączenie TCP zostało zamknięte', // DeepL
+  MQTT_R_PROTOCOL: 'Wersja protokołu nie została zaakceptowana', // DeepL
+  MQTT_R_ID: 'Odrzucono identyfikator klienta', // DeepL
   MQTT_R_SERVER: 'Serwer niedostępny',
-  MQTT_R_CREDENTIALS: 'Nieprawidłowe dane logowania',
-  MQTT_R_AUTH: 'Brak autoryzacji',
+  MQTT_R_CREDENTIALS: 'Nieprawidłowe dane uwierzytelniające', // DeepL
+  MQTT_R_AUTH: 'Brak uprawnień', // DeepL
   MQTT_R_FINGERPRINT: 'Odcisk TLS nie pasuje',
   GPIO_INVALID: 'Nieprawidłowe ustawienia GPIO',
-  CONNECTED_VIA: 'Połączono przez {0}',
+  CONNECTED_VIA: 'Połączono za pośrednictwem {0}', // DeepL
   NETWORK_NOT_FOUND: 'Nie znaleziono sieci',
-  CONNECTION_FAILED: 'Połączenie nieudane',
+  CONNECTION_FAILED: 'Nie udało się nawiązać połączenia', // DeepL
   CONNECTION_LOST: 'Utracono połączenie',
-  AP_LINGERING: 'Oczekiwanie na bezczynność',
+  AP_LINGERING: 'Oczekiwanie do momentu bezczynności', // DeepL
   NONE: 'Brak',
-  LOG_NO_CONNECTION: 'Brak połączenia z usługą logów',
-  CHECK_SYSTEM_LOG: 'Sprawdź log systemowy, aby poznać przyczynę',
+  LOG_NO_CONNECTION: 'Brak łączności z usługą logowania', // DeepL
+  CHECK_SYSTEM_LOG: 'Sprawdź dziennik systemowy pod kątem możliwych przyczyn', // DeepL
   VALUE_TYPE: 'Typ wartości',
   DEFAULT_VALUE: 'Wartość domyślna',
   DEFAULT_NAME: 'Nazwa domyślna',
   ALWAYS_OFF: 'Zawsze wyłączone',
   ALWAYS_ON: 'Zawsze włączone',
-  NO_DATA: 'Brak ulubionych encji. Oznacz je w {customizations} lub zobacz wszystkie encje w {devices}.',
+  NO_DATA: 'Nie ma jeszcze żadnych ulubionych elementów. Zaznacz je w sekcji {customizations} lub przejrzyj wszystkie elementy w sekcji {devices}.', // DeepL
   STAY: 'Pozostań',
-  LEAVE: 'Opuść',
+  LEAVE: 'Zostaw', // DeepL
   MENU: 'Menu',
   MORE: 'Więcej',
   SHOW_PASSWORD: 'Pokaż hasło',
@@ -354,319 +354,319 @@ const pl: BaseTranslation = {
   NUM_ERRORS: '{num} {{błędów|błąd|błędy|błędy|błędów|błędu}}',
   NUM_WARNINGS: '{num} ostrzeże{{ń|nie|nia|nia|ń|nia}}',
   HEAP: 'Heap',
-  METER_USED: '{used} / {total} {unit} zajęte',
-  MAX_BLOCK: '{num} KB największy blok',
-  MAX_BLOCK_HELP: 'Największy blok to największa część sterty, którą można przydzielić naraz. Poniżej 40 KB interfejs WWW i MQTT mogą przestać działać.',
-  FLASH_CHIP: 'Układ flash',
+  METER_USED: '{used} / {total} {unit} zużyte', // DeepL
+  MAX_BLOCK: 'Maksymalna długość bloku: {num} KB', // DeepL
+  MAX_BLOCK_HELP: 'Max block to największy fragment pamięci dynamicznej, jaki można przydzielić jednorazowo. Przy wartości poniżej 40 KB interfejs internetowy i protokół MQTT mogą przestać działać.', // DeepL
+  FLASH_CHIP: 'Układ Flash', // DeepL
   FILE_SYSTEM: 'System plików',
   DETAILS: 'Szczegóły',
-  RECONNECTS: 'Ponowne połączenia',
-  CONNECTS: 'Połączenia',
-  ACTIVITY_HELP: 'Kilka błędów Rx jest normalne. Wiele błędów Tx zwykle oznacza zły tryb Tx dla kotła.',
-  PAUSE: 'Wstrzymaj',
-  RESUME: 'Wznów',
-  LOG_PAUSED: 'Wstrzymano, zatrzymane wiersze: {num}',
-  FILTER_LINES: 'Filtruj wiersze',
+  RECONNECTS: 'Ponowne połączenie', // DeepL
+  CONNECTS: 'Łączy', // DeepL
+  ACTIVITY_HELP: 'Kilka nieudanych prób odbioru (Rx) jest normalne. Liczne nieudane próby wysyłania (Tx) zazwyczaj oznaczają, że tryb wysyłania (Tx) jest nieodpowiedni dla danego kotła.', // DeepL
+  PAUSE: 'Pauza', // DeepL
+  RESUME: 'Wznowienie', // DeepL
+  LOG_PAUSED: 'Wstrzymane, nowe wiersze wstrzymane: {num}', // DeepL
+  FILTER_LINES: 'Wiersze filtru', // DeepL
   SCHEDULER: 'Harmonogram',
-  SCHEDULER_HELP_1: 'Zautomatyzuj wykonywanie komend, dodając poniżej harmonogram zdarzeń',
-  SCHEDULER_HELP_2: 'przy starcie',
-  SCHEDULE: '{{H|h|}}armonogram{{|u|}}',
-  TIME: '{{Czas|Godzina|}}',
-  TIMER: '{{m|M|}}inutnik',
-  ONCHANGE: 'O zmianie',
-  CONDITION: 'Stan',
-  SCHEDULE_UPDATED: 'Harmonogram został uaktualniony.',
-  CUSTOM_ENTITIES: '{{N|n|}}iestandardowe{{|j|}} encj{{e|i|}}',
-  ENTITIES_HELP_1: 'Zdefiniuj niestandardowe encje dla magistrali EMS',
-  ENTITIES_UPDATED: 'Niestandardowe encje zostały uaktualnione.',
-  WRITEABLE: 'Zapisywalna',
-  SHOWING: 'Wyświetlane',
-  SEARCH: 'Szukaj',
+  SCHEDULER_HELP_1: 'Zautomatyzuj komendy, dodając poniżej zaplanowane zdarzenia w Harmonogramie', // DeepL
+  SCHEDULER_HELP_2: 'przy uruchomieniu', // DeepL
+  SCHEDULE: 'Harmonogram', // DeepL
+  TIME: 'Czas', // DeepL
+  TIMER: 'Timer', // DeepL
+  ONCHANGE: 'W przypadku zmian', // DeepL
+  CONDITION: 'Warunek', // DeepL
+  SCHEDULE_UPDATED: 'Harmonogram zaktualizowany', // DeepL
+  CUSTOM_ENTITIES: 'Entities niestandardowe', // DeepL
+  ENTITIES_HELP_1: 'Zdefiniuj niestandardowe jednostki EMS lub dynamiczne zmienne użytkownika', // DeepL
+  ENTITIES_UPDATED: 'Zaktualizowane elementy', // DeepL
+  WRITEABLE: 'Możliwość edycji', // DeepL
+  SHOWING: 'Wyświetlanie', // DeepL
+  SEARCH: 'Wyszukiwanie', // DeepL
   CERT: 'Certyfikat CA (PEM)',
-  ENABLE_TLS: 'Włącz wsparcie dla TLS',
-  TLS_CHECK: 'Sprawdzaj brokera za pomocą',
+  ENABLE_TLS: 'Włącz TLS', // DeepL
+  TLS_CHECK: 'Sprawdź brokera za pomocą', // DeepL
   TLS_CHECK_CA: 'Certyfikat CA',
   TLS_CHECK_FINGERPRINT: 'Odcisk certyfikatu (SHA-1)',
-  TLS_CHECK_NONE: 'Nic, bez sprawdzania',
-  TLS_NOT_CHECKED: 'Połączenie jest szyfrowane, ale broker nie jest sprawdzany, więc inne urządzenie w sieci może się pod niego podszyć',
-  ON: 'włączony',
-  OFF: 'wyłączony',
-  POLARITY: 'Typ przekaźnika',
-  ACTIVEHIGH: 'Wyzwalany stanem wysokim',
-  ACTIVELOW: 'Wyzwalany stanem niskim',
-  UNCHANGED: 'Zachowaj stan',
-  SECURITY_1: 'Dodawanie i usuwanie użytkowników',
-  DOWNLOAD_UPLOAD_1: 'Pobieranie/wysyłanie ustawień',
+  TLS_CHECK_NONE: 'Brak, niezaznaczone', // DeepL
+  TLS_NOT_CHECKED: 'Połączenie jest szyfrowane, ale broker nie jest weryfikowany, więc inne urządzenie w sieci mogłoby podszywać się pod niego', // DeepL
+  ON: 'W', // DeepL
+  OFF: 'Wyłączone', // DeepL
+  POLARITY: 'Polarność', // DeepL
+  ACTIVEHIGH: 'Aktywny wysoki', // DeepL
+  ACTIVELOW: 'Aktywny niski poziom', // DeepL
+  UNCHANGED: 'Bez zmian', // DeepL
+  SECURITY_1: 'Dodawanie lub usuwanie użytkowników', // DeepL
+  DOWNLOAD_UPLOAD_1: 'Pobieranie i wysyłanie ustawień', // DeepL
   MODULES: 'Moduł',
-  MODULES_1: 'Aktywuj lub dezaktywuj moduły zewnętrzne',
-  MODULES_UPDATED: 'Zaktualizowano moduły',
-  MODULES_NONE: 'Brak wykrytych modułów zewnętrznych',
+  MODULES_1: 'Włączanie lub wyłączanie modułów zewnętrznych', // DeepL
+  MODULES_UPDATED: 'Zaktualizowane moduły', // DeepL
+  MODULES_NONE: 'Nie wykryto żadnych modułów zewnętrznych', // DeepL
   RENAME: 'Zmień nazwę',
-  ENABLE_MODBUS: 'Aktywuj Modbus',
-  VIEW_LOG: 'Zdiagnozuj problemy',
+  ENABLE_MODBUS: 'Włącz Modbus', // DeepL
+  VIEW_LOG: 'Przejrzyj dziennik, aby zdiagnozować problemy', // DeepL
   SERVICES: 'Usługi',
   ALLVALUES: 'Wszystkie wartości',
-  WAIT_FIRMWARE: 'Firmware ściąga się i instaluje',
-  INSTALL_VERSION: 'To zainstaluje wersję {1} {0}',
-  UPDATE_AVAILABLE: 'aktualizacja dostępna',
-  LATEST_VERSION: 'Jesteś używając najnowszej wersji firmware {0}',
+  WAIT_FIRMWARE: 'Trwa przesyłanie i instalacja oprogramowania sprzętowego', // DeepL
+  INSTALL_VERSION: 'To będzie wersja {0} {1}', // DeepL
+  UPDATE_AVAILABLE: 'dostępna aktualizacja', // DeepL
+  LATEST_VERSION: 'Korzystasz z najnowszej wersji oprogramowania sprzętowego {0}', // DeepL
   PLEASE_WAIT: 'Proszę czekać',
   RESTARTING_PRE: 'Uruchamianie',
   RESTARTING_POST: 'Przygotowanie',
-  AUTO_SCROLL: 'Auto Scroll',
+  AUTO_SCROLL: 'Automatyczne przewijanie', // DeepL
   DASHBOARD: 'Pulpit',
   DEVELOPER_MODE: 'Tryb programisty',
-  DISABLE_RESET: 'Wyłącz reset fabryczny',
-  AUTO_FW_CHECK: 'Automatycznie sprawdzaj aktualizacje firmware',
+  DISABLE_RESET: 'Wyłącz przywracanie ustawień fabrycznych', // DeepL
+  AUTO_FW_CHECK: 'Automatyczne sprawdzanie dostępności aktualizacji oprogramowania sprzętowego', // DeepL
   BYTES: 'Bajty',
-  BITMASK: 'Bit Mask',
-  DUPLICATE: 'Duplicate',
-  DASHBOARD_1: 'Poniżej widoczne są wszystkie aktywne encje EMS oznaczone jako ulubione oraz wszystkie encje własne, harmonogramy i czujniki zewnętrzne.',
+  BITMASK: 'Maska bitowa', // DeepL
+  DUPLICATE: 'Duplikat', // DeepL
+  DASHBOARD_1: 'Poniżej wyświetlane są wszystkie aktywne elementy systemu EMS oznaczone jako ulubione, a także wszystkie elementy niestandardowe, harmonogramy i czujniki zewnętrzne.', // DeepL
   NO_GPIO: 'Nie znaleziono dostępnych pinów GPIO',
   PLATFORM: 'Platforma',
   RELEASE_TYPE: 'Typ wydania',
-  FIRMWARE_VERSION_INFO: 'Informacje o wersji firmware',
+  FIRMWARE_VERSION_INFO: 'Informacje o wersji oprogramowania układowego', // DeepL
   USER_PROFILE: 'Profil użytkownika',
   ONLINE_HELP: 'pomoc online',
-  UPGRADE_IMPORTANT_MESSAGES: 'Ważne informacje o aktualizacji',
-  UPGRADE_IMPORTANT_MESSAGES_2: 'Aktualizujesz się na nową major wersję. Jest to zalecane, aby najpierw utworzyć kopię zapasową systemu. Sprawdź również online pomoc dla ewentualnych istotnych zmian.',
-  UPGRADE_IMPORTANT_MESSAGES_3: 'Wersja 3.10 zawiera istotne zmiany bezpieczeństwa. Najpierw utwórz kopię zapasową systemu: po aktualizacji hasła są przechowywane jako skróty (hash) i starsze wersje nie mogą ich odczytać, więc powrót wymaga tej kopii. Każde wywołanie API wymaga potem klucza API, więc integracje takie jak Home Assistant trzeba zaktualizować. Przed kontynuowaniem przeczytaj istotne zmiany w pomocy online.',
-  WARNING_SYSTEM_BACKUP: 'Spowoduje to utworzenie kopii zapasowej całej konfiguracji i ustawień systemu. Hasła i klucze są pomijane, chyba że je dołączysz poniżej; przywrócenie kopii zachowuje hasła zapisane na urządzeniu. Polecenia są zawsze dołączane i mogą zawierać dane logowania, więc zachowaj ostrożność przy udostępnianiu. Czy chcesz kontynuować?',
-  BACKUP_INCLUDE_SECRETS: 'Dołącz hasła i klucze (potrzebne do przywrócenia na nowym urządzeniu)',
-  TEST_EMAIL_SUCCESSFUL: 'Test email wysłany pomyślnie',
+  UPGRADE_IMPORTANT_MESSAGES: 'Ważne komunikaty dotyczące aktualizacji', // DeepL
+  UPGRADE_IMPORTANT_MESSAGES_2: 'Przeprowadzasz aktualizację do nowej głównej wersji. Zaleca się najpierw wykonać kopię zapasową systemu. Sprawdź również pomoc online pod kątem ewentualnych zmian powodujących niekompatybilność.', // DeepL
+  UPGRADE_IMPORTANT_MESSAGES_3: 'Wersja 3.10 zawiera istotne zmiany dotyczące bezpieczeństwa. Najpierw należy wykonać kopię zapasową systemu: po aktualizacji hasła są przechowywane w postaci zaszyfrowanej, a starsze wersje nie są w stanie ich odczytać, więc powrót do poprzedniej wersji wymaga tej kopii zapasowej. Każde wywołanie API wymaga teraz klucza API, więc integracje takie jak Home Assistant muszą zostać zaktualizowane. Przed kontynuowaniem należy zapoznać się z informacjami o istotnych zmianach w pomocy online.', // DeepL
+  WARNING_SYSTEM_BACKUP: 'Spowoduje to utworzenie kopii zapasowej pełnej konfiguracji i ustawień systemu. Hasła i klucze nie są uwzględniane, chyba że zostaną podane poniżej; przywrócenie kopii zapasowej zachowuje hasła już zapisane w urządzeniu. Komendy są zawsze uwzględniane i mogą zawierać dane uwierzytelniające, dlatego należy zachować ostrożność przy udostępnianiu. Czy chcesz kontynuować?', // DeepL
+  BACKUP_INCLUDE_SECRETS: 'Należy uwzględnić hasła i klucze (niezbędne do przywrócenia ustawień na nowym urządzeniu)', // DeepL
+  TEST_EMAIL_SUCCESSFUL: 'Wysłano wiadomość e-mail testową', // DeepL
   SYSTEM_NAME: 'Nazwa systemu',
   COMMANDS: 'Komendy',
-  COMMANDS_HELP_1: 'Zdefiniuj niestandardowe komendy dla magistrali EMS',
-  COMMAND_EXECUTED: 'Komenda wykonana pomyślnie',
-  RUN: 'Wykonaj',
-  INTERNET_CONNECTION_CHECK: 'Sprawdzanie online dla dostępnych wersji',
-  UPLOAD_BACKUP_TEXT: 'Kliknij, aby wybrać, lub drop plik kopii zapasowej (.json) tutaj',
-  UPLOAD_FIRMWARE_TEXT: 'Kliknij, aby wybrać, lub drop plik firmware .bin/.md5 tutaj',
-  UPLOAD_MD5_RECEIVED: 'Suma MD5 odebrana, teraz wgraj plik firmware .bin',
-  UPLOAD_MD5_MATCHED: 'MD5 zgodne, instalowanie firmware…',
-  UPLOAD_NOT_OFFICIAL: 'To nie jest oficjalna kompilacja EMS-ESP. Instaluj tylko firmware, któremu ufasz',
-  UPLOAD_NOT_OFFICIAL_HELP: 'O oficjalnych i własnych kompilacjach',
-  UPLOAD_INSTALL_ANYWAY: 'Zainstaluj mimo to',
-  OFFICIAL_BUILD: 'Oficjalna wersja',
-  CUSTOM_BUILD: 'Własna wersja',
-  PASSWORD_CONFIRM_TITLE: 'Wpisz ponownie hasło',
-  PASSWORD_CONFIRM_TEXT: 'Dla bezpieczeństwa wpisz hasło przed tą zmianą. Przez 5 minut nie będzie ponownie wymagane.',
+  COMMANDS_HELP_1: 'Poniżej zdefiniuj nazwane komendy wielokrotnego użytku. Można je wykonywać z konsoli, za pośrednictwem API/MQTT lub odwoływać się do nich w harmonogramie.', // DeepL
+  COMMAND_EXECUTED: 'Komenda wykonana', // DeepL
+  RUN: 'Uruchom', // DeepL
+  INTERNET_CONNECTION_CHECK: 'Sprawdzanie dostępnych wersji online', // DeepL
+  UPLOAD_BACKUP_TEXT: 'Kliknij, aby wybrać, lub przeciągnij tutaj plik kopii zapasowej (.json)', // DeepL
+  UPLOAD_FIRMWARE_TEXT: 'Kliknij, aby wybrać, lub upuść tutaj plik oprogramowania układowego .bin/.md5', // DeepL
+  UPLOAD_MD5_RECEIVED: 'Otrzymano podsumowanie, teraz należy przesłać plik oprogramowania układowego .bin', // DeepL
+  UPLOAD_MD5_MATCHED: 'Zgodność MD5, instalacja oprogramowania układowego…', // DeepL
+  UPLOAD_NOT_OFFICIAL: 'To nie jest oficjalna wersja EMS-ESP. Instaluj wyłącznie oprogramowanie, któremu ufasz', // DeepL
+  UPLOAD_NOT_OFFICIAL_HELP: 'Informacje o wersjach oficjalnych i niestandardowych', // DeepL
+  UPLOAD_INSTALL_ANYWAY: 'Zainstaluj mimo wszystko', // DeepL
+  OFFICIAL_BUILD: 'Oficjalna kompilacja', // DeepL
+  CUSTOM_BUILD: 'Konfiguracja niestandardowa', // DeepL
+  PASSWORD_CONFIRM_TITLE: 'Wprowadź hasło ponownie', // DeepL
+  PASSWORD_CONFIRM_TEXT: 'Dla własnego bezpieczeństwa wprowadź hasło przed dokonaniem tej zmiany. Przez 5 minut nie będziesz ponownie proszony o jego podanie.', // DeepL
   PASSWORD_CONFIRM_BUTTON: 'Potwierdź',
   PASSWORD_WRONG: 'Nieprawidłowe hasło',
-  PASSWORD_NOT_CONFIRMED: 'Anulowano, hasło nie zostało wpisane',
-  RECOVERY_APP: 'Aplikacja odzyskiwania',
+  PASSWORD_NOT_CONFIRMED: 'Operacja została anulowana, hasło nie zostało wprowadzone', // DeepL
+  RECOVERY_APP: 'Aplikacja do przywracania danych', // DeepL
   RECOVERY_NOT_INSTALLED: 'Nie zainstalowano',
-  RECOVERY_INSTALLED: 'Zainstalowano firmware odzyskiwania',
-  RESTART_INTO_RECOVERY: 'Uruchom ponownie w aplikacji odzyskiwania',
-  RECOVERY_NOT_FOUND: 'Nie znaleziono aplikacji odzyskiwania online',
-  RECOVERY_START_FAILED: 'Nie można uruchomić aplikacji odzyskiwania, może być nieaktualna lub uszkodzona. Najpierw zainstaluj najnowszą wersję',
-  PARTITION_START_FAILED: 'Nie można uruchomić tego oprogramowania, może być uszkodzone',
+  RECOVERY_INSTALLED: 'Zainstalowano oprogramowanie naprawcze', // DeepL
+  RESTART_INTO_RECOVERY: 'Uruchom ponownie aplikację w trybie odzyskiwania', // DeepL
+  RECOVERY_NOT_FOUND: 'Nie znaleziono aplikacji Recovery w Internecie', // DeepL
+  RECOVERY_START_FAILED: 'Nie można uruchomić aplikacji Recovery App – może być ona nieaktualna lub uszkodzona. Najpierw zainstaluj najnowszą wersję', // DeepL
+  PARTITION_START_FAILED: 'Nie można uruchomić tego oprogramowania sprzętowego, może być uszkodzone', // DeepL
   INSTALLED_VERSIONS: 'Zainstalowane wersje',
   EMSESP_APP: 'Aplikacja EMS-ESP',
   NO_UPDATES_AVAILABLE: 'brak dostępnych aktualizacji',
-  SWITCH_TO_DEV: 'Przełącz na dev {0}',
-  SWITCH_TO_STABLE: 'Przełącz na wersję stabilną {0}',
+  SWITCH_TO_DEV: 'Przejdź do gałęzi dev {0}', // DeepL
+  SWITCH_TO_STABLE: 'Przejdź do stabilnej wersji {0}', // DeepL
   SAVE: 'Zapisz',
-  NEEDS_RESTART: 'wymaga restartu',
+  NEEDS_RESTART: 'wymagane jest ponowne uruchomienie', // DeepL
   CHANGED_SETTINGS: '{num} {{zmienionych ustawień|zmienione ustawienie|zmienione ustawienia|zmienione ustawienia|zmienionych ustawień|zmienionego ustawienia}}',
-  SAVED_RESTART: 'Zapisano. Uruchom ponownie EMS-ESP, aby użyć nowych ustawień.',
+  SAVED_RESTART: 'Zapisano. Uruchom ponownie EMS-ESP, aby zastosować nowe ustawienia.', // DeepL
   RESTART_NOW: 'Uruchom ponownie teraz',
-  COPY_FAILED: 'Nie udało się skopiować, zaznacz tekst i skopiuj go samodzielnie',
+  COPY_FAILED: 'Nie udało się skopiować – zaznacz tekst i skopiuj go samodzielnie', // DeepL
   DOCUMENTATION: 'Dokumentacja',
-  COMMUNITY_CHAT: 'Czat społeczności',
-  REPORT_ISSUE: 'Zgłoś błąd lub zaproponuj funkcję',
-  GET_HELP: 'Uzyskaj pomoc',
-  REPORT_PROBLEM: 'Zgłaszanie problemu',
+  COMMUNITY_CHAT: 'Czat społecznościowy', // DeepL
+  REPORT_ISSUE: 'Zgłoś błąd lub poproś o dodanie funkcji', // DeepL
+  GET_HELP: 'Pomoc', // DeepL
+  REPORT_PROBLEM: 'Zgłoś problem', // DeepL
   REPORT_STEP_1: 'Pobierz informacje o systemie',
-  REPORT_STEP_1_TEXT: 'wersja, płytka, stan magistrali EMS, urządzenia i ustawienia, bez haseł',
+  REPORT_STEP_1_TEXT: 'wersja, płyta główna, stan magistrali EMS, podłączone urządzenia i ustawienia, bez haseł', // DeepL
   REPORT_STEP_2: 'Zapisz ostatni dziennik',
-  REPORT_STEP_2_TEXT: 'jeśli problem dotyczy urządzenia, najpierw ustaw poziom dziennika na DEBUG',
-  REPORT_STEP_3: 'Utwórz zgłoszenie lub zapytaj na Discordzie',
-  REPORT_STEP_3_TEXT: 'dołącz oba pliki lub wklej poniższe podsumowanie do czatu',
-  NEW_ISSUE: 'Nowe zgłoszenie',
+  REPORT_STEP_2_TEXT: 'jeśli problem dotyczy urządzeń, najpierw ustaw poziom logowania na DEBUG', // DeepL
+  REPORT_STEP_3: 'Zgłoś problem lub zadaj pytanie na Discordzie', // DeepL
+  REPORT_STEP_3_TEXT: 'załącz oba pliki lub wklej poniższe krótkie streszczenie na czacie', // DeepL
+  NEW_ISSUE: 'Nowa sprawa', // DeepL
   SHORT_SUMMARY: 'Krótkie podsumowanie',
-  LICENSE_TEXT: 'open source na licencji LGPL-3.0',
+  LICENSE_TEXT: 'oprogramowanie typu open source na licencji LGPL-3.0', // DeepL
   ADMIN_ACCESS_TEXT: 'pełny dostęp do ustawień, urządzeń i API',
-  GUEST_ACCESS_TEXT: 'może przeglądać wartości i uruchamiać polecenia dozwolone dla gości',
-  LANGUAGE_BROWSER_ONLY: 'dotyczy tylko tej przeglądarki',
-  LANGUAGE_ENTITIES_HINT: 'Język nazw encji w MQTT i API ustawia się w',
+  GUEST_ACCESS_TEXT: 'można wyświetlać wartości i uruchamiać komendy, które mogą uruchamiać goście', // DeepL
+  LANGUAGE_BROWSER_ONLY: 'zmiany dotyczą wyłącznie tej przeglądarki', // DeepL
+  LANGUAGE_ENTITIES_HINT: 'Język nazw encji urządzeń w protokole MQTT i interfejsie API jest określony w', // DeepL
   ADMINISTRATION: 'Administracja',
   API_KEYS_SHORT: 'klucze dla Home Assistant i skryptów',
   ADDRESSES: 'Adresy',
-  SEARCH_SETTINGS: 'Szukaj ustawień',
-  NO_SETTINGS_MATCH: 'Żadne ustawienie nie pasuje do wyszukiwania',
+  SEARCH_SETTINGS: 'Ustawienia wyszukiwania', // DeepL
+  NO_SETTINGS_MATCH: 'Nie znaleziono ustawień odpowiadających Twojemu wyszukiwaniu', // DeepL
   GENERAL: 'Ogólne',
-  BOARD: 'Płytka',
+  BOARD: 'Płytka drukowana', // DeepL
   ADVANCED: 'Zaawansowane',
-  EMS_BUS_DESC: 'Jak EMS-ESP komunikuje się z systemem grzewczym.',
-  BOARD_DESC: 'Piny pochodzą z profilu płytki. Aby ustawić je samodzielnie, włącz tryb programisty i wybierz własny.',
-  FORMAT_DESC: 'Jak wartości wyglądają w interfejsie WWW i w wiadomościach MQTT/API.',
-  BOARD_PINS: 'Piny z profilu',
-  ENABLE_EMAIL: 'Włącz powiadomienia e-mail',
-  SEND_TEST_EMAIL: 'Wyślij testowy e-mail',
-  EMAIL_FROM: 'Od',
+  EMS_BUS_DESC: 'W jaki sposób EMS-ESP komunikuje się z Twoim systemem grzewczym.', // DeepL
+  BOARD_DESC: 'Piny pochodzą z profilu płytki. Aby ustawić je samodzielnie, włącz tryb programisty i wybierz opcję „Niestandardowe”.', // DeepL
+  FORMAT_DESC: 'Jak wartości wyglądają w interfejsie użytkownika oraz w danych przesyłanych przez MQTT/API.', // DeepL
+  BOARD_PINS: 'Pinezki z profilu', // DeepL
+  ENABLE_EMAIL: 'Włącz powiadomienia e-mailowe', // DeepL
+  SEND_TEST_EMAIL: 'Wyślij e-mail testowy', // DeepL
+  EMAIL_FROM: 'Źródło:', // DeepL
   EMAIL_TO: 'Do',
   EMAIL_SUBJECT: 'Temat',
-  WIFI_SCAN: 'Skanowanie Wi-Fi',
+  WIFI_SCAN: 'Skanowanie sieci Wi-Fi', // DeepL
   SCAN: 'Skanuj',
   NETWORKS_NEARBY: 'Sieci w pobliżu',
   SIGNAL: 'Sygnał',
   CHANNEL: 'Kanał',
-  WIFI_OPEN: 'otwarta',
-  WIFI_SAVED: 'zapisana',
-  NETWORK_ETHERNET_INFO: 'Połączono teraz przez Ethernet ({ip}). Wi-Fi jest używane tylko bez kabla.',
-  HOSTNAME_ACCESS: 'Nazwa w sieci i dostęp',
+  WIFI_OPEN: 'otwórz', // DeepL
+  WIFI_SAVED: 'zapisano', // DeepL
+  NETWORK_ETHERNET_INFO: 'Obecnie podłączono przez Ethernet ({ip}). Wi-Fi jest używane wyłącznie w przypadku braku kabla.', // DeepL
+  HOSTNAME_ACCESS: 'Nazwa hosta i dostęp', // DeepL
   IP_ADDRESS: 'Adres IP',
-  NETWORK_ETH_10MBIT: 'Wymuś 10 Mbit półdupleks',
-  NETWORK_ETH_10MBIT_HELP: 'tylko dla problematycznych przełączników lub długich kabli',
-  NETWORK_DISABLE_SLEEP_HELP: 'bardziej niezawodne, zużywa trochę więcej energii',
-  NETWORK_MDNS_HELP: 'dostępne jako {host}.local przez mDNS',
-  NETWORK_FIXED_IP_HELP: 'w przeciwnym razie używany jest DHCP',
-  NETWORK_CORS_HELP: 'potrzebne tylko, gdy inna strona internetowa wywołuje API',
-  NTP_TIME_ON_DEVICE: 'czas w EMS-ESP',
+  NETWORK_ETH_10MBIT: 'Wymuszony tryb półdupleksowy 10 Mbit', // DeepL
+  NETWORK_ETH_10MBIT_HELP: 'tylko w przypadku wadliwych przełączników lub długich kabli', // DeepL
+  NETWORK_DISABLE_SLEEP_HELP: 'bardziej niezawodny, zużywa nieco więcej energii', // DeepL
+  NETWORK_MDNS_HELP: 'dostęp do niej pod adresem {host}.local za pomocą mDNS', // DeepL
+  NETWORK_FIXED_IP_HELP: 'w przeciwnym razie wykorzystywany jest protokół DHCP', // DeepL
+  NETWORK_CORS_HELP: 'wymagane tylko wtedy, gdy inna strona internetowa wywołuje API', // DeepL
+  NTP_TIME_ON_DEVICE: 'czas spędzony w EMS-ESP', // DeepL
   NTP_TIME_SERVER: 'Serwer czasu',
   NTP_THERMOSTAT_CLOCK: 'Zegar termostatu',
-  NTP_THERMOSTAT_SYNC: 'Ustawiaj zegar termostatu',
+  NTP_THERMOSTAT_SYNC: 'Ustaw zegar termostatu', // DeepL
   NTP_THERMOSTAT_SYNC_HELP: 'ustawia datę i godzinę na termostacie EMS',
-  NTP_THERMOSTAT_SYNC_1: 'Wł., strefa czasowa EMS-ESP',
-  NTP_THERMOSTAT_SYNC_2: 'Wł., własna strefa czasowa',
+  NTP_THERMOSTAT_SYNC_1: 'Włącz, strefa czasowa EMS-ESP', // DeepL
+  NTP_THERMOSTAT_SYNC_2: 'Włączone, własna strefa czasowa', // DeepL
   NTP_THERMOSTAT_TZ: 'Strefa czasowa termostatu',
   MQTT_PREVIEW: 'Co jest publikowane',
-  MQTT_PREVIEW_CMD: 'przyjmowane jako polecenie',
-  MQTT_PREVIEW_RESPONSE: 'wynik poleceń',
+  MQTT_PREVIEW_CMD: 'akceptowane jako polecenie', // DeepL
+  MQTT_PREVIEW_RESPONSE: 'wyniki komend', // DeepL
   MQTT_BEHAVIOUR: 'Zachowanie',
-  MQTT_TOPICS: 'Tematy i dane',
-  MQTT_DISCOVERY: 'Wykrywanie',
-  MQTT_INTERVALS_HELP: 'Sekundy między publikacjami, 0 = publikuj przy każdej zmianie.',
-  MQTT_SINGLE_NO_DISCOVERY: 'niedostępne przy włączonym wykrywaniu',
-  MQTT_DISCOVERY_NO_SINGLE: 'niedostępne przy włączonych tematach pojedynczych wartości',
-  MQTT_DISCOVERY_HELP: 'automatycznie tworzy encje w Home Assistant lub Domoticz',
-  MQTT_ENTITY_FORMAT_WARN: 'zmiana zmienia nazwy wszystkich encji w Home Assistant',
+  MQTT_TOPICS: 'Tematy i dane użytkowe', // DeepL
+  MQTT_DISCOVERY: 'Odkrycie', // DeepL
+  MQTT_INTERVALS_HELP: 'Liczba sekund między publikacjami, 0 = publikuj przy każdej zmianie.', // DeepL
+  MQTT_SINGLE_NO_DISCOVERY: 'niedostępne przy włączonej funkcji wykrywania', // DeepL
+  MQTT_DISCOVERY_NO_SINGLE: 'niedostępne w przypadku tematów o pojedynczej wartości w', // DeepL
+  MQTT_DISCOVERY_HELP: 'automatycznie tworzy obiekty w Home Assistant lub Domoticz', // DeepL
+  MQTT_ENTITY_FORMAT_WARN: 'Zmiana tego spowoduje zmianę nazw wszystkich elementów w Home Assistant', // DeepL
   USERS: 'Użytkownicy',
-  USERS_TEXT: 'Administratorzy mogą zmieniać wszystko. Goście mogą przeglądać i uruchamiać polecenia dozwolone dla gości.',
+  USERS_TEXT: 'Administratorzy mogą zmieniać wszystko. Goście mogą przeglądać zawartość oraz uruchamiać komendy przeznaczone dla gości.', // DeepL
   ADD_USER: 'Dodaj użytkownika',
   EDIT_USER: 'Edytuj użytkownika',
   ROLE: 'Rola',
-  ROLE_ADMIN: 'administrator',
+  ROLE_ADMIN: 'admin', // DeepL
   ROLE_GUEST: 'gość',
-  ADMIN: 'Administrator',
+  ADMIN: 'Admin', // DeepL
   YOU: 'ty',
   NEW_PASSWORD: 'Nowe hasło',
   UNSAVED_CHANGES: '{num} {{niezapisanych zmian|niezapisana zmiana|niezapisane zmiany|niezapisane zmiany|niezapisanych zmian|niezapisanej zmiany}}',
   CREATE_KEY: 'Utwórz klucz',
   NEW_API_KEY: 'Nowy klucz API',
   NO_API_KEYS: 'Brak kluczy API',
-  API_KEYS_LIMIT: 'Możesz mieć maksymalnie {num} kluczy.',
-  REVOKE: 'Unieważnij',
-  REVOKE_KEY: 'Unieważnij klucz API',
-  REVOKE_KEY_TEXT: 'Wszystko, co używa "{name}", od razu przestanie działać.',
-  MODULES_TEXT: 'Opcjonalne funkcje wbudowane w to oprogramowanie. Włącz je lub wyłącz tutaj.',
+  API_KEYS_LIMIT: 'Możesz mieć maksymalnie {num} klawiszy.', // DeepL
+  REVOKE: 'Cofnij', // DeepL
+  REVOKE_KEY: 'Cofnij klucz API', // DeepL
+  REVOKE_KEY_TEXT: 'Wszelkie fragmenty zawierające „{name}” natychmiast przestają działać.', // DeepL
+  MODULES_TEXT: 'Opcjonalne funkcje wbudowane w to oprogramowanie sprzętowe. Tutaj można je włączyć lub wyłączyć.', // DeepL
   BY_AUTHOR: 'autor: {name}',
   LICENSE_KEY: 'Klucz licencyjny',
-  MODULE_ACTIVATED: 'aktywowany',
+  MODULE_ACTIVATED: 'aktywowane', // DeepL
   MODULE_PENDING: 'oczekuje na aktywację',
-  ENABLED: 'Włączony',
+  ENABLED: 'Włączone', // DeepL
   UNDO: 'Cofnij',
   FW_UPDATES: 'Aktualizacje',
   FW_VERSION_AVAILABLE: 'Dostępna jest wersja {version}',
   FW_RELEASE_NOTES: 'Informacje o wydaniu',
-  FW_UPDATES_OFFLINE: 'Nie udało się sprawdzić nowych wersji online. EMS-ESP potrzebuje do tego połączenia z internetem.',
-  FW_RESTART_RESET: 'Restart i reset',
-  FW_RECOVERY_TEXT: 'Uruchomić ponownie w aplikacji Recovery? Łączy się ona z Twoją siecią i uruchamia też własny punkt dostępowy, w którym można wgrać firmware.',
+  FW_UPDATES_OFFLINE: 'Nie udało się sprawdzić dostępności nowych wersji online. EMS-ESP potrzebuje do tego połączenia z Internetem.', // DeepL
+  FW_RESTART_RESET: 'Ponowne uruchomienie i resetowanie', // DeepL
+  FW_RECOVERY_TEXT: 'Czy chcesz uruchomić ponownie w trybie aplikacji odzyskiwania? Aplikacja łączy się z Twoją siecią i uruchamia własny punkt dostępowy, za pomocą którego można wgrać oprogramowanie sprzętowe.', // DeepL
   FW_SIZE: 'Rozmiar',
-  FW_INSTALL_DATE: 'Data instalacji',
-  FW_UPLOAD_FAILED: 'Wysyłanie nie powiodło się: zły typ pliku lub firmware dla innej płytki',
+  FW_INSTALL_DATE: 'Zainstalowano na', // DeepL
+  FW_UPLOAD_FAILED: 'Przesyłanie nie powiodło się: nieprawidłowy typ pliku lub oprogramowanie układowe przeznaczone dla innej płytki', // DeepL
   FILE_TYPE_INVALID: 'Ten typ pliku nie jest obsługiwany, wybierz plik {types}',
   WHO_CAN_RUN: 'Kto może uruchomić',
-  CMD_NONE: 'Nie znaleziono poleceń',
-  CMD_NONE_MATCH: 'Żadne polecenie nie pasuje do wyszukiwania',
+  CMD_NONE: 'Nie znaleziono żadnych komend', // DeepL
+  CMD_NONE_MATCH: 'Nie znaleziono komend pasujących do wyszukiwania', // DeepL
   SCHEDULE_NONE: 'Nie znaleziono harmonogramów',
-  SCHEDULE_NONE_MATCH: 'Żaden harmonogram nie pasuje do wyszukiwania',
-  CE_NONE: 'Nie znaleziono encji',
+  SCHEDULE_NONE_MATCH: 'Nie znaleziono harmonogramów pasujących do Twojego wyszukiwania', // DeepL
+  CE_NONE: 'Nie znaleziono żadnych elementów', // DeepL
   CE_ALL: 'Wszystkie',
   CE_STORAGE: 'Przechowywanie',
   CE_SOURCE: 'Źródło',
   CE_EMS_SOURCE: 'urządzenie {device} · telegram {type} · przesunięcie {offset}',
-  CE_RAM_TEXT: 'zachowane do restartu',
-  CE_NVS_TEXT: 'zachowane po restarcie',
-  CE_EXCLUDED: 'poza API/MQTT',
-  SEARCH_SENSORS: 'Szukaj nazwy, ID lub GPIO',
+  CE_RAM_TEXT: 'zachowane do momentu ponownego uruchomienia', // DeepL
+  CE_NVS_TEXT: 'zachowywane po ponownym uruchomieniu', // DeepL
+  CE_EXCLUDED: 'nie dotyczy API/MQTT', // DeepL
+  SEARCH_SENSORS: 'Wyszukaj nazwę, identyfikator lub GPIO', // DeepL
   NO_SENSORS: 'Nie znaleziono czujników',
-  NO_SENSORS_MATCH: 'Żaden czujnik nie pasuje do wyszukiwania',
-  TEMP_SENSORS_HELP: 'Wykryte automatycznie. Kliknij czujnik, aby zmienić jego nazwę lub ustawić korektę',
-  FREE_GPIOS: 'Wolne GPIO',
+  NO_SENSORS_MATCH: 'Żadne czujniki nie pasują do Twojego wyszukiwania', // DeepL
+  TEMP_SENSORS_HELP: 'Wykryto automatycznie. Kliknij czujnik, aby zmienić jego nazwę lub ustawić przesunięcie', // DeepL
+  FREE_GPIOS: 'Wolne piny GPIO', // DeepL
   SYSTEM_SENSOR: 'Czujnik systemowy',
   MASK_FAVORITE: 'Ulubione',
-  MASK_READONLY: 'Zapis wyłączony',
-  MASK_NO_API: 'Bez MQTT/API',
+  MASK_READONLY: 'Pisanie zablokowane', // DeepL
+  MASK_NO_API: 'Brak MQTT/API', // DeepL
   MASK_HIDDEN: 'Ukryte',
-  MASK_REMOVED: 'Usunięte',
+  MASK_REMOVED: 'Usunięto', // DeepL
   FILTER_ALL: 'Wszystkie',
-  NUM_SELECTED: 'Zaznaczono: {num}',
-  ALL_SHOWN: 'Wszystkie widoczne: {num}',
-  BULK_HINT: 'Przyciski zmieniają zaznaczone wiersze albo wszystkie widoczne, gdy żaden nie jest zaznaczony.',
-  CLEAR_SELECTION: 'Wyczyść zaznaczenie',
-  NO_ENTITIES_MATCH: 'Brak pasujących encji',
-  LIMIT_HELP: 'puste = wbudowany limit',
-  MIN_ABOVE_MAX: 'Minimum nie może być większe od maksimum',
+  NUM_SELECTED: 'Wybrano: {num}', // DeepL
+  ALL_SHOWN: 'Wyświetl wszystkie: {num}', // DeepL
+  BULK_HINT: 'Przyciski powodują zmianę zaznaczonych wierszy lub wyświetlanie wszystkich wierszy, gdy żaden nie jest zaznaczony.', // DeepL
+  CLEAR_SELECTION: 'Przejrzysty wybór', // DeepL
+  NO_ENTITIES_MATCH: 'Nie znaleziono żadnych wyników', // DeepL
+  LIMIT_HELP: 'pozostaw puste, aby zachować domyślne ograniczenie', // DeepL
+  MIN_ABOVE_MAX: 'Wartość minimalna nie może przekraczać wartości maksymalnej', // DeepL
   RENAME_DEVICE: 'Zmień nazwę urządzenia',
-  WEEKLY: 'Tygodniowo',
+  WEEKLY: 'Co tydzień', // DeepL
   EVERY_DAY: 'Codziennie',
-  SCHEDULER_NO_COMMANDS: 'Najpierw dodaj komendę na stronie Komendy',
+  SCHEDULER_NO_COMMANDS: 'Najpierw dodaj polecenie na stronie Komendy', // DeepL
   DU_SETTINGS: 'Ustawienia EMS-ESP',
-  DU_SETTINGS_TEXT: 'Kopia zapasowa ustawień EMS-ESP: sieć, MQTT, personalizacje, harmonogram, własne encje i moduły. Wgranie pliku ustawień lub kopii zapasowej uruchamia EMS-ESP ponownie.',
+  DU_SETTINGS_TEXT: 'Kopia zapasowa ustawień EMS-ESP: sieć, MQTT, Personalizacja, Harmonogram, niestandardowe encje i moduły. Przesłanie pliku ustawień lub kopii zapasowej powoduje ponowne uruchomienie EMS-ESP.', // DeepL
   HB_TITLE: 'Ustawienia ogrzewania',
-  HB_TEXT: 'Zapisuje bieżące wartości kotła, termostatu i innych urządzeń EMS, aby można je było później przywrócić, np. po wymianie urządzenia. Encje tylko do odczytu i polecenia nigdy nie są zmieniane przez przywracanie.',
-  HB_BACKUP: 'Kopia ustawień ogrzewania',
+  HB_TEXT: 'Zapisuje aktualne wartości kotła, termostatu i innych urządzeń EMS, dzięki czemu można je później przywrócić, na przykład po wymianie urządzenia. Elementy i komendy tylko do odczytu nigdy nie są modyfikowane podczas przywracania.', // DeepL
+  HB_BACKUP: 'Tworzenie kopii zapasowej ustawień ogrzewania', // DeepL
   HB_RESTORE: 'Przywróć ustawienia ogrzewania',
   DATA_EXPORT: 'Eksport danych',
-  DATA_EXPORT_TEXT: 'Do wsparcia i analizy. Tych plików nie można wgrać z powrotem.',
+  DATA_EXPORT_TEXT: 'Do celów wsparcia technicznego i analizy. Pliki te nie mogą zostać ponownie przesłane.', // DeepL
   NUM_VALUES: '{num} {{wartości|wartość|wartości|wartości|wartości|wartości}}',
-  HB_NOTHING: 'brak danych do kopii',
+  HB_NOTHING: 'nie ma co uzupełniać', // DeepL
   FILE_NAME: 'Nazwa pliku',
-  HB_NOTE: 'Notatka (opcjonalna, pokazywana przy przywracaniu)',
-  HB_INCOMPLETE: 'Wartości, które nie zostały jeszcze odczytane z magistrali, są pomijane. Dla pełnej kopii odczekaj kilka minut po ponownym uruchomieniu.',
-  HB_RESTORE_TEXT: 'Wybierz kopię ustawień ogrzewania. Nic nie zostanie zapisane, dopóki nie sprawdzisz zmian i ich nie potwierdzisz.',
-  HB_DROP: 'Kliknij, aby wybrać, lub upuść tutaj plik kopii ustawień ogrzewania (.json)',
-  HB_INVALID: 'To nie jest kopia ustawień ogrzewania',
+  HB_NOTE: 'Uwaga (opcjonalna, wyświetlana ponownie po przywróceniu)', // DeepL
+  HB_INCOMPLETE: 'Wartości, które nie zostały jeszcze odczytane z magistrali, są pomijane. Po ponownym uruchomieniu należy odczekać kilka minut, aby uzyskać pełną kopię zapasową.', // DeepL
+  HB_RESTORE_TEXT: 'Wybierz kopię zapasową ustawień ogrzewania. Żadne zmiany nie zostaną zapisane, dopóki ich nie sprawdzisz i nie potwierdzisz.', // DeepL
+  HB_DROP: 'Kliknij, aby wybrać, lub przeciągnij tutaj plik rezerwowy systemu grzewczego (.json)', // DeepL
+  HB_INVALID: 'Nie jest to kopia zapasowa ustawień ogrzewania', // DeepL
   HB_OTHER_FILE: 'Wybierz inny plik',
   HB_SAME_DEVICE: 'to samo urządzenie',
-  HB_NOT_CONNECTED: 'nie podłączone',
-  HB_OTHER_DEVICE: 'inne urządzenie (ID produktu {backup} w kopii, podłączone {now}), pominięte',
-  HB_UNIT_MISMATCH: 'Ta kopia zawiera temperatury w {unit}. Przed przywróceniem zmień jednostkę temperatury w ustawieniach aplikacji.',
-  HB_CHANGED: 'Zmienione',
+  HB_NOT_CONNECTED: 'brak połączenia', // DeepL
+  HB_OTHER_DEVICE: 'inne urządzenie (identyfikator produktu {backup} w trybie rezerwowym, {now} podłączone), pominięto', // DeepL
+  HB_UNIT_MISMATCH: 'Ta kopia zapasowa zawiera temperatury w {unit}. Przed przywróceniem kopii zapasowej zmień jednostkę temperatury w ustawieniach aplikacji.', // DeepL
+  HB_CHANGED: 'Zmieniono', // DeepL
   ALL: 'Wszystkie',
   HB_NOW: 'Teraz',
-  HB_BACKUP_VALUE: 'Kopia',
+  HB_BACKUP_VALUE: 'Kopia zapasowa', // DeepL
   HB_NOT_AVAILABLE: 'niedostępne',
   HB_SENDING: 'wysyłanie',
-  HB_WRITTEN: 'zapisano',
+  HB_WRITTEN: 'napisane', // DeepL
   HB_RESTORE_NUM: 'Przywróć {num} {{wartości|wartość|wartości|wartości|wartości|wartości}}',
   RESTORE: 'Przywróć',
   HB_CONFIRM: 'Zapisać {num} {{wartości|wartość|wartości|wartości|wartości|wartości}} z {file} do urządzeń EMS?',
-  HB_CONFIRM_TEXT: 'Wartości są wysyłane pojedynczo. Jeśli urządzenie odrzuci którąś, pozostałe i tak zostaną wysłane.',
+  HB_CONFIRM_TEXT: 'Wartości są wysyłane pojedynczo. Jeśli urządzenie odrzuci jedną z nich, pozostałe nadal zostaną wysłane.', // DeepL
   HB_DONE: '{num} {{wartości zapisano|wartość zapisana|wartości zapisane|wartości zapisane|wartości zapisano|wartości zapisano}}',
-  HB_DONE_FAILED: '{num} nieudane. Urządzenia często odrzucają wartości poziomu instalatora; szczegóły są w dzienniku systemowym.',
-  HB_NO_CHANGES: 'Nic nie różni się od kopii',
-  HB_DIFFERENT_DEVICE: 'inne urządzenie',
+  HB_DONE_FAILED: 'Wystąpił błąd {num}. Urządzenia często odrzucają wartości ustawione na poziomie instalatora; szczegóły znajdują się w dzienniku systemowym.', // DeepL
+  HB_NO_CHANGES: 'Nie różni się nic od wersji zapasowej', // DeepL
+  HB_DIFFERENT_DEVICE: 'inne urządzenia', // DeepL
   SELECT_ALL: 'Zaznacz wszystko',
   DASHBOARD_EMPTY: 'Na razie nie ma nic do wyświetlenia',
-  NO_DEVICES: 'Nie znaleziono jeszcze urządzeń EMS',
+  NO_DEVICES: 'Nie znaleziono jeszcze żadnych urządzeń EMS', // DeepL
   ADD_COMMAND: 'Dodaj komendę',
-  EDIT_COMMAND: 'Edytuj komendę',
-  RUN_COMMAND: 'Wykonaj komendę',
+  EDIT_COMMAND: 'Komenda edycji', // DeepL
+  RUN_COMMAND: 'Uruchom polecenie', // DeepL
   ADD_SCHEDULE: 'Dodaj harmonogram',
   EDIT_SCHEDULE: 'Edytuj harmonogram',
-  ADD_ENTITY: 'Dodaj encję',
-  EDIT_ENTITY: 'Edytuj encję',
+  ADD_ENTITY: 'Dodaj element', // DeepL
+  EDIT_ENTITY: 'Edytuj element', // DeepL
   ADD_ANALOG_SENSOR: 'Dodaj czujnik analogowy',
   EDIT_ANALOG_SENSOR: 'Edytuj czujnik analogowy',
   REMOVE_ANALOG_SENSOR: 'Usuń czujnik analogowy',
-  REMOVE_SENSOR_TEXT: 'Czujnik "{name}" zostanie od razu usunięty.',
+  REMOVE_SENSOR_TEXT: 'Czujnik „{name}” jest natychmiast usuwany.', // DeepL
   EDIT_TEMP_SENSOR: 'Edytuj czujnik temperatury',
-  INSTALL_FIRMWARE: 'Zainstaluj firmware ({channel})',
-  PARTITION: 'Partycja',
-  PULSE: 'Impuls'
+  INSTALL_FIRMWARE: 'Zainstaluj oprogramowanie układowe ({channel})', // DeepL
+  PARTITION: 'Podział', // DeepL
+  PULSE: 'Pulse', // DeepL
 };
 
 export default pl;

@@ -16,6 +16,15 @@ const ValidatorLanguage = () => {
   return null;
 };
 
+// <html lang> lets the browser hyphenate long translated words instead of overflowing
+const DocumentLanguage = () => {
+  const { locale } = useI18nContext();
+  useEffect(() => {
+    document.documentElement.lang = locale === 'no' ? 'nb' : locale;
+  }, [locale]);
+  return null;
+};
+
 const ALL_LOCALES = [
   'cs',
   'de',
@@ -71,6 +80,7 @@ const App = memo(() => {
   return (
     <TypesafeI18n locale={locale}>
       <ValidatorLanguage />
+      <DocumentLanguage />
       <Authentication>
         <Outlet />
       </Authentication>

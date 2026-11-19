@@ -2,29 +2,29 @@ import type { Translation } from '../i18n-types';
 
 const tr: Translation = {
   LANGUAGE: 'Dil',
-  RETRY: 'Tekrar Dene',
-  IS_REQUIRED: '{0} gerekiyor',
+  RETRY: 'Tekrar dene', // DeepL
+  IS_REQUIRED: '{0} zorunludur', // DeepL
   SIGN_IN: 'Giriş Yap',
   SIGN_IN_SUBTITLE: 'EMS ısıtma sistemleri için ağ geçidi',
-  SIGN_OUT: 'Çıkış Yap',
-  USERNAME: 'Kullanıcı Adı',
+  SIGN_OUT: 'Çıkış', // DeepL
+  USERNAME: 'Kullanıcı adı', // DeepL
   PASSWORD: 'Şifre',
   SETTINGS_OF: '{0} Ayarlar',
   HELP: 'Yardım',
-  LOGGED_IN: '{name} olarak giriş yapıldı',
-  PLEASE_SIGNIN: 'Lütfen devam etmek için giriş yapın',
-  UPLOAD_SUCCESSFUL: 'Yükleme tamamlandı',
-  DOWNLOAD_SUCCESSFUL: 'İndirme tamamlandı',
-  INVALID_LOGIN: 'Giriş bilgileri hatalı',
+  LOGGED_IN: '{name} olarak oturum açıldı', // DeepL
+  PLEASE_SIGNIN: 'Devam etmek için lütfen oturum açın', // DeepL
+  UPLOAD_SUCCESSFUL: 'Yükleme başarıyla tamamlandı', // DeepL
+  DOWNLOAD_SUCCESSFUL: 'İndirme işlemi başarılı', // DeepL
+  INVALID_LOGIN: 'Yanlış kullanıcı adı veya şifre', // DeepL
   NETWORK: 'Ağ',
   SECURITY: 'Güvenlik',
   ONOFF_CAP: 'AÇIK/KAPALI',
   ONOFF: 'açık/kapalı',
   TYPE: 'Tür',
   ENTITIES: 'varlıklar',
-  EXPORT: 'Dışarı al',
+  EXPORT: 'Dışa aktar', // DeepL
   FAVORITES: "Favoriler",
-  ID_OF: 'Kimlik {0}',
+  ID_OF: '{0} Kimliği', // DeepL
   DEVICE: 'Cihaz',
   PRODUCT: 'Ürün',
   BRAND: 'Marka',
@@ -38,35 +38,35 @@ const tr: Translation = {
   MAINTENANCE: 'Bakım',
   CHANGE_VALUE: 'Değeri değiştir',
   CANCEL: 'İptal',
-  REMOVE_ALL: 'Tümünü kaldır',
+  REMOVE_ALL: 'Tümünü kaldırın', // DeepL
   APPLY_CHANGES: 'Değişiklikleri Uygula ({0})',
-  UPDATE: 'Update',
+  UPDATE: 'Güncelleme', // DeepL
   REMOVE: 'Kaldır',
   RESET: 'Sıfırla',
-  PROBLEM_UPDATING: 'Güncelleme Sorunu',
-  PROBLEM_LOADING: 'Yükleme Sorunu',
-  ANALOG_SENSOR: 'Analog Sensör',
+  PROBLEM_UPDATING: 'Güncelleme sorunu', // DeepL
+  PROBLEM_LOADING: 'Yükleme sorunu', // DeepL
+  ANALOG_SENSOR: 'Analog Sensörler', // DeepL
   ANALOG_SENSORS: 'Analog Sensörler',
   SETTINGS: 'Ayarlar',
-  UPDATED_OF: '{0} Güncellendi',
-  OFFSET: 'Fark',
-  FACTOR: 'Etmen',
-  FREQ: 'Frekans',
-  DUTY_CYCLE: 'Görev Çevrimi',
-  UNIT: 'ÖB',
+  UPDATED_OF: '{0} güncellendi', // DeepL
+  OFFSET: 'Ofset', // DeepL
+  FACTOR: 'Faktör', // DeepL
+  FREQ: 'Sıklık', // DeepL
+  DUTY_CYCLE: 'Çalışma döngüsü', // DeepL
+  UNIT: 'UoM', // DeepL
   STARTVALUE: 'Başlangıç değeri',
-  EDIT: 'Değiştir',
+  EDIT: 'Düzenle', // DeepL
   SENSOR: 'Sensör',
   TEMP_SENSORS: 'Sıcaklık Sensörleri',
-  WRITE_CMD_SENT: 'Yazma komutu gönderildi',
-  EMS_BUS_WARNING: 'EMS hat bağlantısı kesildi. Eğer bu uyarı birkaç saniye sonra devam ediyorsa lütfen ayarları ve kart tipini kontrol edin',
-  CONNECTED: 'Bağlandı',
-  TX_ISSUES: 'Tx sorunu - başka bir Tx Modu deneyin',
+  WRITE_CMD_SENT: 'Komut gönderildi', // DeepL
+  EMS_BUS_WARNING: 'EMS veriyolu bağlantısı kesildi. Bu uyarı birkaç saniye sonra hala devam ediyorsa lütfen ayarları ve kart profilini kontrol edin', // DeepL
+  CONNECTED: 'Bağlı', // DeepL
+  TX_ISSUES: 'Tx sorunları - Tx modunu kontrol edin', // DeepL
   DISCONNECTED: 'Bağlantı kesildi',
-  DATA_TRAFFIC: 'Veri trafiği',
-  EMS_DEVICE: 'EMS Cihazı',
+  DATA_TRAFFIC: 'Veri Trafiği', // DeepL
+  EMS_DEVICE: 'EMS cihazı', // DeepL
   SUCCESS: 'BAŞARILI',
-  FAIL: 'HATA',
+  FAIL: 'YANLIŞ', // DeepL
   QUALITY: 'KALİTE',
   STATUS_NAMES: [
     'EMS Telegramlar Alındı (Rx)',
@@ -85,588 +85,588 @@ const tr: Translation = {
   APPLICATION: 'Uygulama',
   CUSTOMIZATIONS: 'Özelleştirme',
   APPLICATION_RESTARTING: 'EMS-ESP yeniden başlatılıyor',
-  BOARD_PROFILE: 'Kart Profili',
+  BOARD_PROFILE: 'Kart profili', // DeepL
   CUSTOM: 'Özel',
   GPIO_OF: '{0} GPIO',
   BUTTON: 'Düğme',
   TEMPERATURE: 'Sıcaklık',
-  PHY_TYPE: 'Eth PHY Tipi',
+  PHY_TYPE: 'Eth PHY türü', // DeepL
   DISABLED: 'devre dışı',
-  TX_MODE: 'EMS Tx Modu',
+  TX_MODE: 'EMS Tx modu', // DeepL
   EMS_BUS: '{{Hat|EMS Hatti}}',
   HARDWARE: 'Donanım',
   LANGUAGE_ENTITIES: 'Dil (cihaz varlıkları için)',
-  HIDE_LED: 'LEDi kapa',
-  ENABLE_TELNET: 'Telnet Konsolunu Aktif Hale Getir',
-  ENABLE_ANALOG: 'Analog Sensörleri Aktif Hale Getir',
-  CONVERT_FAHRENHEIT: 'Sıcaklık değerlerini Fahrenheit a çevir',
-  READONLY: 'Salt okunur modu devreye al (bütün giden EMS Tx Yazma komutlarını engeller)',
-  WRITE_PROTECTION: 'EMS cihazlarını tekrarlanan ve sık yazmalara karşı koru',
-  WRITE_LIMIT: 'Dakikada en fazla yazma sayısı (0 = sınırsız)',
-  WRITE_LIMIT_REFUSE: 'Sınırın üzerindeki yazmaları reddet (aksi halde yalnızca bir uyarı kaydedilir)',
-  UNDERCLOCK_CPU: 'İşlemci hızını düşür',
-  REMOTE_TIMEOUT: 'Uzak termostat zaman aşımı',
-  REMOTE_TIMEOUT_EN: 'Oda sıcaklığı yoksa uzak termostatı devre dışı bırak',
-  HEATINGOFF: 'Kazanı ısıtma zorla kapalı olarak başlat',
-  MIN_DURATION: 'Wait time',
-  ENABLE_SHOWER_TIMER: 'Duş Sayacını Devreye Al',
-  ENABLE_SHOWER_ALERT: 'Duş Alarmını Devreye Al',
-  TRIGGER_TIME: 'Tetikleme Zamanı',
-  COLD_SHOT_DURATION: 'Soğuk Atış Süreci',
-  FORMATTING_OPTIONS: 'Formatlama Seçenekleri',
-  BOOLEAN_FORMAT_DASHBOARD: 'Boolean Biçimleme Göstergesi',
-  BOOLEAN_FORMAT_API: 'Boolean Biçimleme API/MQTT',
-  ENUM_FORMAT: 'Enum Biçimleme API/MQTT',
-  INDEX: 'İndeks',
-  ENABLE_PARASITE: '1-wire parazit gücü devreye al',
-  LOG_HEX: 'EMS telegramlarını hexadecimal olarak kayıt et',
-  ENABLE_SYSLOG: 'Sistem Kaydını Devreye Al',
-  LOG_LEVEL: 'Kayıt Seviyesi',
-  MARK_INTERVAL: 'İşaret Aralığı',
-  SECONDS: 'saniyeler',
-  MINUTES: 'dakikalar',
-  HOURS: 'saatler',
-  RESTART: 'Yeniden Başlat',
-  RESTART_TEXT: 'EMS-ESP Sistem ayarlarının uygulanabilmesi için yeinden başlatılmalı',
-  RESTART_CONFIRM: 'EMS-ESP yeniden başlatmak istediğinize emin misiniz?',
-  COMMAND: 'Komut',
-  CUSTOMIZATIONS_RESTART: 'Bütün özelleştirmeler kaldırıldı. Yeniden başlatılıyor…',
-  CUSTOMIZATIONS_FULL: 'Seçilen varlıklar sınırı aşmaktadır. Lütfen parçalar halinde kaydedin',
-  CUSTOMIZATIONS_SAVED: 'Özelleştirmeler kaydedildi',
-  CUSTOMIZATIONS_HELP_1: 'Bir cihaz seçip varlıkların seçeneklerini özelleştirin veya yeniden adlandırmak için tıklayın',
-  CUSTOMIZATIONS_HELP_2: 'favori olarak işaretle',
+  HIDE_LED: 'LED\'i gizle', // DeepL
+  ENABLE_TELNET: 'Telnet konsolunu etkinleştirin', // DeepL
+  ENABLE_ANALOG: 'Analog sensörleri etkinleştirin', // DeepL
+  CONVERT_FAHRENHEIT: 'Sıcaklık değerlerini Fahrenheit\'e dönüştürün', // DeepL
+  READONLY: 'Salt okunur modunu etkinleştirin (tüm giden EMS Tx yazma komutlarını engeller)', // DeepL
+  WRITE_PROTECTION: 'EMS cihazlarını tekrarlanan ve sık yazma işlemlerinden koruyun', // DeepL
+  WRITE_LIMIT: 'Dakikada maksimum yazma sayısı (0 = sınır yok)', // DeepL
+  WRITE_LIMIT_REFUSE: 'Sınırı aşan yazılar reddedilir (aksi takdirde sadece bir uyarı kaydedilir)', // DeepL
+  UNDERCLOCK_CPU: 'CPU hızını düşürün', // DeepL
+  REMOTE_TIMEOUT: 'Uzaktan erişim zaman aşımı', // DeepL
+  REMOTE_TIMEOUT_EN: 'Oda sıcaklığı eksik olduğunda uzaktan kumandayı devre dışı bırakın', // DeepL
+  HEATINGOFF: 'Zorunlu ısıtma kapalıyken kazanı çalıştır', // DeepL
+  MIN_DURATION: 'Bekleme süresi', // DeepL
+  ENABLE_SHOWER_TIMER: 'Duş zamanlayıcısını etkinleştir', // DeepL
+  ENABLE_SHOWER_ALERT: 'Duş uyarısını etkinleştir', // DeepL
+  TRIGGER_TIME: 'Tetikleme zamanı', // DeepL
+  COLD_SHOT_DURATION: 'Soğuk atış süresi', // DeepL
+  FORMATTING_OPTIONS: 'Biçimlendirme Seçenekleri', // DeepL
+  BOOLEAN_FORMAT_DASHBOARD: 'Boole biçimli web', // DeepL
+  BOOLEAN_FORMAT_API: 'Boole biçimi API/MQTT', // DeepL
+  ENUM_FORMAT: 'Enum formatı API/MQTT', // DeepL
+  INDEX: 'Dizin', // DeepL
+  ENABLE_PARASITE: '1-Wire parazit gücünü etkinleştirin', // DeepL
+  LOG_HEX: 'EMS telgraflarını onaltılık olarak kaydedin', // DeepL
+  ENABLE_SYSLOG: 'Syslog\'u etkinleştirin', // DeepL
+  LOG_LEVEL: 'Günlük seviyesi', // DeepL
+  MARK_INTERVAL: 'Aralık işareti', // DeepL
+  SECONDS: 'saniye', // DeepL
+  MINUTES: 'dakika', // DeepL
+  HOURS: 'saat', // DeepL
+  RESTART: 'Yeniden başlat', // DeepL
+  RESTART_TEXT: 'Değiştirilen sistem ayarlarının uygulanması için EMS-ESP\'nin yeniden başlatılması gerekir', // DeepL
+  RESTART_CONFIRM: 'EMS-ESP\'yi yeniden başlatmak istediğinizden emin misiniz?', // DeepL
+  COMMAND: 'Komutlar', // DeepL
+  CUSTOMIZATIONS_RESTART: 'Tüm özelleştirmeler kaldırıldı. Yeniden başlatılıyor…', // DeepL
+  CUSTOMIZATIONS_FULL: 'Seçilen varlıkların sayısı sınırı aştı. Lütfen gruplar halinde kaydedin', // DeepL
+  CUSTOMIZATIONS_SAVED: 'Özelleştirmeler güncellendi', // DeepL
+  CUSTOMIZATIONS_HELP_1: 'Bir cihaz seçin ve varlıklar için seçenekleri özelleştirin', // DeepL
+  CUSTOMIZATIONS_HELP_2: 'Favorilere ekle', // DeepL
   CUSTOMIZATIONS_HELP_3: 'yazma işlemini devre dışı bırak',
-  CUSTOMIZATIONS_HELP_4: 'MQTT ve APInin dışında bırak',
+  CUSTOMIZATIONS_HELP_4: 'MQTT ve API\'dan hariç tutun', // DeepL
   CUSTOMIZATIONS_HELP_5: 'Cihazlardan gizle',
-  CUSTOMIZATIONS_HELP_6: 'bellekten kaldır',
-  SELECT_DEVICE: 'Bir cihaz seç',
-  MODIFIED: 'Değiştirilmiş',
-  RESET_SELECTED: 'Seçilenleri sıfırla',
+  CUSTOMIZATIONS_HELP_6: 'bellekten sil', // DeepL
+  SELECT_DEVICE: 'Bir cihaz seçin', // DeepL
+  MODIFIED: 'Değiştirildi', // DeepL
+  RESET_SELECTED: 'Seçileni sıfırla', // DeepL
   OPTIONS: 'Seçenekler',
-  NAME: 'İsim',
-  CUSTOMIZATIONS_RESET: 'Bütün özelleştirmeleri kaldırmak istediğinizden emin misiniz?',
+  NAME: 'Ad', // DeepL
+  CUSTOMIZATIONS_RESET: 'Tüm özelleştirmeleri silmek istediğinizden emin misiniz?', // DeepL
   SYSTEM_INFORMATION: 'Sistem Bilgileri',
-  HELP_INFORMATION_1: 'EMS-ESPnin nasıl ayarlanacağı ile ilgili bilgileri edinmek için çevrimiçi WIKI sayfasını ziyaret edin',
-  HELP_INFORMATION_2: 'Canlı topluluk sohbeti için Discord sunucumuza katılın',
-  HELP_INFORMATION_3: 'Yeni bir özellik talep etmek yada hata bildirmek için',
-  HELP_INFORMATION_4: 'Bir sorun bildirirken daha hızlı bir dönüş için sistem bilginizi indirip eklemeyi unutmayın',
-  UPLOAD: 'Yükleme',
+  HELP_INFORMATION_1: 'EMS-ESP\'yi nasıl yapılandıracağınızla ilgili talimatlar için çevrimiçi wiki sayfasını ziyaret edin', // DeepL
+  HELP_INFORMATION_2: 'Canlı topluluk sohbetine katılmak için Discord sunucumuza katılın', // DeepL
+  HELP_INFORMATION_3: 'Bir özellik talebinde bulunmak veya bir hata bildirmek için', // DeepL
+  HELP_INFORMATION_4: 'Daha hızlı yanıt alabilmek için bir sorun bildirirken sistem bilgilerinizi ekleyin', // DeepL
+  UPLOAD: 'Yükle', // DeepL
   DOWNLOAD: '{{İ|i|i}}İndirme',
-  INSTALL: 'Düzenlemek',
+  INSTALL: 'Yükle', // DeepL
   FAILED: 'başarısız',
   SYSTEM: 'Sistem',
-  LOG_OF: '{0} Kaydı',
-  STATUS_OF: '{0} Durumu',
-  DOWNLOAD_UPLOAD: 'İndirme/Yükleme',
+  LOG_OF: '{0} Günlüğü', // DeepL
+  STATUS_OF: '{0} Durum', // DeepL
+  DOWNLOAD_UPLOAD: 'İndir/Yükle', // DeepL
   CLOSE: 'Kapat',
-  COMMAND_GUEST: 'Misafirler bu komutu çalıştırabilir',
-  TOKENS_RESET: 'Bu güncelleme erişim jetonlarını yeni bir cihaz anahtarıyla imzalar, bu nedenle mevcut API erişim jetonları artık çalışmaz. API\'yi kullanan her entegrasyon için, örneğin Home Assistant, bir API anahtarı oluşturun ve eski jeton yerine onu kullanın.',
+  COMMAND_GUEST: 'Konuklar bu komutu çalıştırabilir', // DeepL
+  TOKENS_RESET: 'Bu güncelleme, erişim jetonlarını yeni bir cihaz anahtarıyla imzalar; bu nedenle mevcut API erişim jetonları artık çalışmaz. Home Assistant gibi API\'yi kullanan her entegrasyon için bir API anahtarı oluşturun ve eski jeton yerine bunu kullanın.', // DeepL
   API_KEYS: 'API Anahtarları',
-  API_KEYS_TEXT: 'API anahtarları, Home Assistant gibi entegrasyonların ve betiklerin API\'yi kullanmasını sağlar. Anahtarı "Authorization: Bearer <anahtar>" başlığında gönderin. Okuma anahtarları değerleri okuyabilir ve misafirlerin çalıştırabildiği komutları çalıştırabilir, okuma ve yazma anahtarları API üzerinden bir yöneticinin yapabildiği her şeyi yapabilir.',
+  API_KEYS_TEXT: 'API anahtarları, Home Assistant gibi entegrasyonların ve komut dosyalarının API\'yi kullanmasını sağlar. Anahtarı "Authorization: Bearer <ANAHTAR>" başlığında gönderin. Okuma anahtarları, değerleri okuyabilir ve misafirlerin çalıştırabileceği komutları çalıştırabilir; Okuma ve Yazma anahtarları ise bir yöneticinin API aracılığıyla yapabileceği her şeyi yapabilir.', // DeepL
   API_KEY_ACCESS: 'Erişim',
-  API_KEY_READ: 'Okuma',
-  API_KEY_READ_WRITE: 'Okuma ve Yazma',
-  API_KEY_SHOW_ONCE: 'Bu anahtarı şimdi kopyalayın ve güvenli bir yerde saklayın. Tekrar gösterilmeyecek.',
+  API_KEY_READ: 'Oku', // DeepL
+  API_KEY_READ_WRITE: 'Okuma ve yazma', // DeepL
+  API_KEY_SHOW_ONCE: 'Bu anahtarı şimdi kopyalayın ve güvenli bir yerde saklayın. Bir daha gösterilmeyecektir.', // DeepL
   CREATED: 'Oluşturuldu',
-  COPY: 'Kopyala',
+  COPY: 'Metin', // DeepL
   COPIED: 'Kopyalandı',
-  USE: 'KUllan',
-  FACTORY_RESET: 'Fabrika ayarına dönme',
-  SYSTEM_FACTORY_TEXT_DIALOG: 'Cihazı fabrika ayarlarına döndürmek istediğinize emin misiniz?',
+  USE: 'Kullanım', // DeepL
+  FACTORY_RESET: 'Fabrika ayarlarına sıfırla', // DeepL
+  SYSTEM_FACTORY_TEXT_DIALOG: 'EMS-ESP\'yi fabrika ayarlarına sıfırlamak istediğinizden emin misiniz?', // DeepL
   STABLE: 'Kararlı',
   DEVELOPMENT: 'Geliştirme',
   UPTIME: 'Sistem çalışma süresi',
   LAST_RESTART: 'Son yeniden başlatma',
-  POWER_AND_RESET: 'Güç ve yeniden başlatma',
-  FREE_MEMORY: 'Yığın Memory',
-  BUFFER_SIZE: 'En fazla bellek boyutu',
-  COMPACT: 'Sıkışık',
+  POWER_AND_RESET: 'Güç ve Sıfırlama', // DeepL
+  FREE_MEMORY: 'Boş Bellek', // DeepL
+  BUFFER_SIZE: 'Maksimum tampon boyutu', // DeepL
+  COMPACT: 'Özet', // DeepL
   SUMMARY: 'Özet',
   SHOW_MORE: '{n} tane daha göster',
   SHOW_LESS: 'Daha az göster',
-  COREDUMP: 'Çökme Dökümü',
-  DOWNLOAD_SYSTEM_BACKUP: 'Sistem yedekleme',
-  ERROR: 'Beklenemedik hata, lütfen tekrar deneyin.',
+  COREDUMP: 'Hata Dökümü', // DeepL
+  DOWNLOAD_SYSTEM_BACKUP: 'Sistem yedeklemesi', // DeepL
+  ERROR: 'Beklenmedik bir hata oluştu, lütfen tekrar deneyin', // DeepL
   TIME_SET: 'Zaman ayarı',
-  MANAGE_USERS: 'Kullanıcıları yönet',
-  USER_WARNING: 'En az bir yönetici kullanıcısı ayarlamanız gerekmektedir',
+  MANAGE_USERS: 'Kullanıcıları Yönet', // DeepL
+  USER_WARNING: 'En az bir yönetici kullanıcısı yapılandırılmış olmalıdır', // DeepL
   ADD: 'Ekle',
-  TELNET_ENABLED: 'Telnet konsolu etkin. Telnet şifrelenmez, kullanmıyorsanız Uygulama Ayarları\'ndan kapatın.',
-  TOO_MANY_LOGINS: 'Çok fazla başarısız giriş, birkaç dakika sonra tekrar deneyin',
+  TELNET_ENABLED: 'Telnet konsolu etkindir. Telnet şifrelenmez; bu nedenle kullanmıyorsanız Uygulama Ayarları\'ndan devre dışı bırakın.', // DeepL
+  TOO_MANY_LOGINS: 'Çok fazla başarısız oturum açma denemesi yapıldı, birkaç dakika sonra tekrar deneyin', // DeepL
   PASSWORD_KEEP: 'Mevcut şifreyi korumak için boş bırakın',
   SETUP_TITLE: 'Şifrelerinizi belirleyin',
-  SETUP_TEXT: 'Bu cihaz hâlâ fabrika şifrelerini kullanıyor. Devam etmeden önce kendi şifrelerinizi belirleyin.',
+  SETUP_TEXT: 'Bu cihaz hâlâ fabrika şifrelerini kullanmaktadır. Devam etmeden önce kendi şifrenizi belirleyin.', // DeepL
   SETUP_ADMIN_PASSWORD: '{name} için yeni şifre',
   SETUP_AP_PASSWORD: 'Yeni erişim noktası şifresi',
-  SETUP_AP_REQUIRED: 'Henüz bir WiFi ağı ayarlanmadı, bu yüzden giriş yolu erişim noktasıdır. 8-63 karakter, erişim noktası bir sonraki başladığında kullanılır.',
-  SETUP_AP_OPTIONAL: 'Önerilir. 8-63 karakter, erişim noktası bir sonraki başladığında kullanılır. Mevcut şifreyi korumak için boş bırakın.',
+  SETUP_AP_REQUIRED: 'Henüz bir Wi-Fi ağı kurulmadığından, erişim noktası giriş yoludur. 8-63 karakterden oluşur ve erişim noktası bir sonraki başlatıldığında kullanılır.', // DeepL
+  SETUP_AP_OPTIONAL: 'Önerilen: 8-63 karakter; erişim noktası bir sonraki başlatıldığında kullanılır. Mevcut değeri korumak için boş bırakın.', // DeepL
   SETUP_AP_DEFAULT: 'Erişim noktası hâlâ fabrika şifresini kullanıyor. Erişim Noktası ayarlarından kendi şifrenizi belirleyin.',
-  SETUP_VIEW_USER: 'İsteğe bağlı: yalnızca görüntüleyebilen bir misafir kullanıcı ekleyin.',
-  NETWORK_CORS_ORIGIN_HELP: 'API\'yi bir tarayıcıdan çağırmasına izin verilen web adresi, örneğin http://homeassistant.local:8123',
-  NETWORK_CORS_WILDCARD: '* ile ağınızdaki bir tarayıcıda açık olan her web sitesi API\'yi çağırabilir. Bunun yerine tam adresi girin.',
+  SETUP_VIEW_USER: 'İsteğe bağlı: Yalnızca görüntüleme yetkisine sahip bir misafir kullanıcısı ekleyin.', // DeepL
+  NETWORK_CORS_ORIGIN_HELP: 'Tarayıcıdan API\'yi çağırmak için izin verilen web adresi, örneğin http://homeassistant.local:8123', // DeepL
+  NETWORK_CORS_WILDCARD: '* ile ağınızdaki bir tarayıcıda açık olan herhangi bir web sitesi API\'yi çağırabilir. Bunun yerine tam adresi girin.', // DeepL
   NETWORK_ALLOWED_HOSTS: 'İzin verilen ana bilgisayar adları',
-  NETWORK_ALLOWED_HOSTS_HELP: 'Bu cihazın tarayıcıda açılabileceği ek adlar, örneğin ems-esp.fritz.box veya bir ters vekil sunucu adı. IP adresi, ana bilgisayar adı ve adı.local her zaman çalışır',
-  NOT_ENABLED: 'Etkinleştirilmedi',
+  NETWORK_ALLOWED_HOSTS_HELP: 'Bu cihaz, tarayıcıda EMS-ESP.fritz.box veya bir ters proxy adı gibi farklı adlarla da açılabilir. IP adresi, ana bilgisayar adı ve hostname.local her zaman çalışır.', // DeepL
+  NOT_ENABLED: 'Etkin değil', // DeepL
   ERRORS_OF: '{0} hata',
-  DISCONNECT_REASON: 'Bağlantının kopma nedeni',
+  DISCONNECT_REASON: 'Bağlantı kesilme nedeni', // DeepL
   MQTT_BASE_TOPIC: 'Temel konu',
-  LAST_DISCONNECT: 'Son bağlantı kopması',
-  CONNECTED_SINCE: 'Bağlantı başlangıcı',
-  ENABLE_MQTT: 'MQTTyi devreye al',
-  BROKER: 'Aracı',
-  CLIENT: 'İstemci',
-  BASE_TOPIC: 'Merkez',
-  OPTIONAL: 'seçenekli',
-  MQTT_FORMAT: 'Konu/Mesaj Biçimi',
-  MQTT_NEST_1: 'Tek konu üzerine yerleşmiş',
-  MQTT_NEST_2: 'Ayrı konular olarak',
-  MQTT_RESPONSE: 'Komut çıktısını bir `cevap` konusuna yayınla',
-  MQTT_PUBLISH_TEXT_1: 'Değişimde tek değerli konuları yayınla',
-  MQTT_PUBLISH_TEXT_2: 'Komut konularına yayınla (ioBroker)',
-  MQTT_PUBLISH_TEXT_3: 'MQTT keşfi etkinleştir (Home Assistant, Domoticz)',
-  MQTT_PUBLISH_TEXT_4: 'Keşif konuları için ön ek',
-  MQTT_PUBLISH_TEXT_5: 'Domoticz Format',
-  MQTT_INPUT_NUMBER_FORMAT: 'Sayı Biçimi',
-  MQTT_PUBLISH_INTERVALS: 'Yayınlama aralıkları',
+  LAST_DISCONNECT: 'Son bağlantı kesme', // DeepL
+  CONNECTED_SINCE: 'Bağlantı tarihi:', // DeepL
+  ENABLE_MQTT: 'MQTT\'yi etkinleştirin', // DeepL
+  BROKER: 'Broker', // DeepL
+  CLIENT: 'Müşteri', // DeepL
+  BASE_TOPIC: 'Temel', // DeepL
+  OPTIONAL: 'isteğe bağlı', // DeepL
+  MQTT_FORMAT: 'Konu/içerik biçimi', // DeepL
+  MQTT_NEST_1: 'Tek bir konu altında yer alan', // DeepL
+  MQTT_NEST_2: 'Tek tek konular olarak', // DeepL
+  MQTT_RESPONSE: 'Komut çıktısını bir `response` konusuna yayınlayın', // DeepL
+  MQTT_PUBLISH_TEXT_1: 'Değişiklik olduğunda tek değerli konuları yayınlayın', // DeepL
+  MQTT_PUBLISH_TEXT_2: 'Komut konularına (ioBroker) yayınlayın', // DeepL
+  MQTT_PUBLISH_TEXT_3: 'MQTT keşfini etkinleştirin', // DeepL
+  MQTT_PUBLISH_TEXT_4: 'Keşif konularının öneki', // DeepL
+  MQTT_PUBLISH_TEXT_5: 'Keşif türü', // DeepL
+  MQTT_INPUT_NUMBER_FORMAT: 'Sayı girişi biçimi', // DeepL
+  MQTT_PUBLISH_INTERVALS: 'Yayın Aralıkları', // DeepL
   MQTT_INT_BOILER: 'Kazanlar ve Isı Pompaları',
   MQTT_INT_THERMOSTATS: 'Termostatlar',
-  MQTT_INT_SOLAR: 'Güneş Enerjisi Modülleri',
-  MQTT_INT_MIXER: 'Karışım Modülleri',
+  MQTT_INT_SOLAR: 'Güneş Modülleri', // DeepL
+  MQTT_INT_MIXER: 'Karıştırıcı Modüller', // DeepL
   MQTT_INT_WATER: 'Su Modülleri',
-  MQTT_QUEUE: 'MQTT sırası',
+  MQTT_QUEUE: 'MQTT kuyruğu', // DeepL
   DEFAULT: 'Varsayılan',
-  MQTT_ENTITY_FORMAT: 'Varlık Kimlik biçimi',
-  MQTT_ENTITY_FORMAT_0: 'Tekil örnek, uzun ad (v3.4)',
-  MQTT_ENTITY_FORMAT_1: 'Tekil örnek, kısa ad',
-  MQTT_ENTITY_FORMAT_2: 'Çoklu örnekler, kısa ad',
-  MQTT_CLEAN_SESSION: 'Temiz Oturum ayarla',
-  MQTT_RETAIN_FLAG: 'Herzaman hazır bayrağı ayarla',
+  MQTT_ENTITY_FORMAT: 'Varlık Kimliği biçimi', // DeepL
+  MQTT_ENTITY_FORMAT_0: 'Tek örnek, uzun ad (v3.4)', // DeepL
+  MQTT_ENTITY_FORMAT_1: 'Tek örnek, kısa ad', // DeepL
+  MQTT_ENTITY_FORMAT_2: 'Birden fazla örnek, kısa ad', // DeepL
+  MQTT_CLEAN_SESSION: 'Temiz oturum oluştur', // DeepL
+  MQTT_RETAIN_FLAG: 'Her zaman saklama bayrağını ayarlayın', // DeepL
   MQTT_COMMANDS: 'MQTT üzerinden alınan komutlar',
-  MQTT_COMMANDS_0: 'Kapalı, yalnızca değerleri oku',
-  MQTT_COMMANDS_1: 'Değerleri değiştir ve Komutları çalıştır',
-  MQTT_COMMANDS_2: 'Her şey, sistem komutları dahil',
-  INACTIVE: 'Faal değil',
-  ACTIVE: 'Faal',
-  UNKNOWN: 'Bilinmeyen',
+  MQTT_COMMANDS_0: 'Kapalı, sadece değerleri okur', // DeepL
+  MQTT_COMMANDS_1: 'Değerleri değiştirin ve komutları çalıştırın', // DeepL
+  MQTT_COMMANDS_2: 'Her şey, sistem komutları da dahil', // DeepL
+  INACTIVE: 'Etkin değil', // DeepL
+  ACTIVE: 'Etkin', // DeepL
+  UNKNOWN: 'Bilinmiyor', // DeepL
   SET_TIME: 'Zamanı ayarla',
-  SET_TIME_TEXT: 'Zamanı ayarlamak için yerel tarih ve saati aşağıya giriniz',
-  LOCAL_TIME: 'Yerel Saat',
+  SET_TIME_TEXT: 'Zamanı ayarlamak için aşağıya yerel tarih ve saati girin', // DeepL
+  LOCAL_TIME: 'Yerel saat', // DeepL
   UTC_TIME: 'UTC saati',
-  ENABLE_NTP: 'NTP yi çalıştır',
-  NTP_SERVER: 'NTP Sunucusu',
+  ENABLE_NTP: 'NTP\'yi etkinleştirin', // DeepL
+  NTP_SERVER: 'NTP sunucusu', // DeepL
   TIME_ZONE: 'Saat dilimi',
   ACCESS_POINT: 'Erişim Noktası',
-  AP_PROVIDE: 'Erişim noktasını çalıştır',
+  AP_PROVIDE: 'Erişim Noktasını Etkinleştir', // DeepL
   AP_PROVIDE_TEXT_2: 'Ağ bağlantısı bulunamadığında',
-  AP_PROVIDE_TEXT_3: 'asla',
+  AP_PROVIDE_TEXT_3: 'Asla', // DeepL
   AP_PREFERRED_CHANNEL: 'Tercih edilen kanal',
-  AP_HIDE_SSID: 'SSID yi gizle',
-  AP_CLIENTS: 'AP kullanıcıları',
-  AP_MAX_CLIENTS: 'Maks Kullanıcılar',
+  AP_HIDE_SSID: 'SSID\'yi gizle', // DeepL
+  AP_CLIENTS: 'AP istemcileri', // DeepL
+  AP_MAX_CLIENTS: 'Maksimum istemci sayısı', // DeepL
   AP_LOCAL_IP: 'Yerel IP',
-  IDLE: 'Serbest',
-  SCAN_AGAIN: 'Tekrar tara',
-  NETWORK_NO_WIFI: 'Hiçbir Kablosuz Ağ bulunamadı',
-  NETWORK_BLANK_BSSID: 'sadece SSID kullanmak için boş bırakın',
-  TX_POWER: 'Aktarım gücü',
-  HOSTNAME: 'Ana Makine Adı',
-  NETWORK_DISABLE_SLEEP: 'Kablosuz uyku modunu devre dışına al',
-  NETWORK_LOW_BAND: 'Düşük kablosuz bant genişliği kullan',
-  NETWORK_USE_DNS: 'mDNS Servisini deveye al',
-  NETWORK_ENABLE_CORS: 'CORS u devreye al',
+  IDLE: 'Bekleme', // DeepL
+  SCAN_AGAIN: 'Tekrar tarayın', // DeepL
+  NETWORK_NO_WIFI: 'Wi-Fi ağı bulunamadı', // DeepL
+  NETWORK_BLANK_BSSID: 'Yalnızca SSID\'yi kullanmak için boş bırakın', // DeepL
+  TX_POWER: 'Gönderim gücü', // DeepL
+  HOSTNAME: 'Ana bilgisayar adı', // DeepL
+  NETWORK_DISABLE_SLEEP: 'Wi-Fi uyku modunu devre dışı bırakın', // DeepL
+  NETWORK_LOW_BAND: 'Daha düşük Wi-Fi bant genişliği kullanın', // DeepL
+  NETWORK_USE_DNS: 'mDNS hizmetini etkinleştirin', // DeepL
+  NETWORK_ENABLE_CORS: 'CORS\'u etkinleştirin', // DeepL
   NETWORK_CORS_ORIGIN: 'CORS kaynağı',
-  NETWORK_FIXED_IP: 'Sabit IP adresi kullan',
-  NETWORK_GATEWAY: 'Aü geçidi',
-  NETWORK_SUBNET: 'Ağ Alt Maskesi',
+  NETWORK_FIXED_IP: 'Sabit IP adresi kullanın', // DeepL
+  NETWORK_GATEWAY: 'Ağ Geçidi', // DeepL
+  NETWORK_SUBNET: 'Alt ağ maskesi', // DeepL
   NETWORK_DNS: 'DNS Sunucuları',
-  ADDRESS_OF: '{0} Adresi',
+  ADDRESS_OF: '{0} adresi', // DeepL
   ADMINISTRATOR: 'Yönetici',
   GUEST: 'Misafir',
   NEW: 'Yeni',
-  NEW_NAME_OF: 'Yeni {0} adı',
-  ENTITY: 'varlık',
+  NEW_NAME_OF: '{0}\'nin yeni adı', // DeepL
+  ENTITY: 'varlıklar', // DeepL
   MIN: 'min',
-  MAX: 'maks',
-  BLOCK_NAVIGATE_1: 'Değiştirilmişleriniz var',
-  BLOCK_NAVIGATE_2: 'Farklı bir sayfaya geçerseniz değiştirilmişleriniz kaybolacak. Bu sayfadan çıkmak istediğinize emin misiniz?',
+  MAX: 'max', // DeepL
+  BLOCK_NAVIGATE_1: 'Kaydedilmemiş değişiklikleriniz var', // DeepL
+  BLOCK_NAVIGATE_2: 'Başka bir sayfaya geçerseniz, kaydedilmemiş değişiklikleriniz kaybolacaktır. Bu sayfadan ayrılmak istediğinizden emin misiniz?', // DeepL
   UPLOAD_ABORTED: 'Yükleme iptal edildi',
-  BLOCK_BUSY_1: 'Hâlâ devam ediyor',
-  BLOCK_BUSY_2: 'Bu sayfadan şimdi ayrılırsanız işlem durur. Ayrılmak istediğinize emin misiniz?',
-  DISCARD: 'Vazgeç',
+  BLOCK_BUSY_1: 'Halen devam ediyor', // DeepL
+  BLOCK_BUSY_2: 'Bu sayfadan şimdi çıkarsanız işlem durdurulur. Çıkmak istediğinizden emin misiniz?', // DeepL
+  DISCARD: 'Sil', // DeepL
   COMMANDS_UPDATED: 'Komutlar güncellendi',
-  V_REQUIRED: 'Gerekli',
-  V_BETWEEN: '{min} ile {max} arasında olmalı',
-  V_MAX_CHARS: 'En fazla {max} karakter',
-  V_CHARS: '{min}–{max} karakter olmalı',
-  V_IN_USE: 'Zaten kullanılıyor',
-  V_IP: 'Bir IP adresi olmalı',
-  V_HOSTNAME: 'Geçerli bir ana bilgisayar adı olmalı',
-  V_IP_OR_HOSTNAME: 'Bir IP adresi veya ana bilgisayar adı olmalı',
-  V_NAME: 'En fazla {max} karakter: harf, rakam veya _',
-  V_USERNAME: 'En fazla {max} karakter: harf, rakam, _ veya .',
+  V_REQUIRED: 'Zorunlu', // DeepL
+  V_BETWEEN: '{min} ile {max} arasında olmalıdır', // DeepL
+  V_MAX_CHARS: '{max} karakter veya daha az olmalıdır', // DeepL
+  V_CHARS: '{min}–{max} karakter arasında olmalıdır', // DeepL
+  V_IN_USE: 'Halihazırda kullanımda', // DeepL
+  V_IP: 'Bir IP adresi olmalıdır', // DeepL
+  V_HOSTNAME: 'Geçerli bir ana bilgisayar adı olmalıdır', // DeepL
+  V_IP_OR_HOSTNAME: 'Bir IP adresi veya ana bilgisayar adı olmalıdır', // DeepL
+  V_NAME: '{max} karakterden fazla olmamalıdır: harfler, rakamlar veya _', // DeepL
+  V_USERNAME: '{max} karakterden fazla olmamalıdır: harfler, rakamlar, _ veya .', // DeepL
   V_DAY: 'En az bir gün seçin',
-  V_HEX: 'Onaltılık bir sayı olmalı',
-  V_FINGERPRINT: 'SHA-1 parmak izi olmalı (40 onaltılık basamak)',
-  V_EXAMPLE: 'Şuna benzemeli: {example}',
+  V_HEX: 'Onaltılık sayı olmalıdır', // DeepL
+  V_FINGERPRINT: 'SHA-1 parmak izi (40 onaltılık basamak) olmalıdır', // DeepL
+  V_EXAMPLE: '{example} gibi görünmelidir', // DeepL
   V_NOT_DEFAULT: 'Farklı bir şifre seçin',
-  ZERO_DISABLES: '0 kapatır',
-  MINUS_ONE_DISABLES: '-1 kapatır',
+  ZERO_DISABLES: '0, cihazı kapatır', // DeepL
+  MINUS_ONE_DISABLES: '-1, cihazı kapatır', // DeepL
   LED_TYPE: 'LED türü',
-  PHY_POWER: 'PHY güç',
+  PHY_POWER: 'PHY gücü', // DeepL
   PHY_CLOCK: 'PHY saati',
   AUTO: 'Otomatik',
   PORT: 'Port',
   TIMEOUT: 'Zaman aşımı',
-  HOST: 'Sunucu',
+  HOST: 'Ana Bilgisayar', // DeepL
   SMTP_SERVER: 'SMTP sunucusu',
-  KEEP_ALIVE: 'Keep-alive',
+  KEEP_ALIVE: 'Bağlantıyı canlı tutun', // DeepL
   MQTT_REFRESH: 'MQTT\'yi yenile',
-  MQTT_REFRESHED: 'MQTT yenilendi',
-  MQTT_R_USER: 'Kullanıcı bağlantıyı kesti',
-  MQTT_R_TCP: 'TCP bağlantısı kapandı',
+  MQTT_REFRESHED: 'MQTT güncellendi', // DeepL
+  MQTT_R_USER: 'Kullanıcı tarafından bağlantısı kesildi', // DeepL
+  MQTT_R_TCP: 'TCP bağlantısı kapatıldı', // DeepL
   MQTT_R_PROTOCOL: 'Protokol sürümü kabul edilmedi',
-  MQTT_R_ID: 'İstemci kimliği reddedildi',
+  MQTT_R_ID: 'Müşteri Kimliği reddedildi', // DeepL
   MQTT_R_SERVER: 'Sunucu kullanılamıyor',
-  MQTT_R_CREDENTIALS: 'Hatalı kimlik bilgileri',
-  MQTT_R_AUTH: 'Yetkisiz',
+  MQTT_R_CREDENTIALS: 'Yanlış biçimlendirilmiş kimlik bilgileri', // DeepL
+  MQTT_R_AUTH: 'Yetki yok', // DeepL
   MQTT_R_FINGERPRINT: 'TLS parmak izi eşleşmiyor',
   GPIO_INVALID: 'Geçersiz GPIO ayarları',
-  CONNECTED_VIA: '{0} ile bağlı',
+  CONNECTED_VIA: '{0} üzerinden bağlanıyor', // DeepL
   NETWORK_NOT_FOUND: 'Ağ bulunamadı',
   CONNECTION_FAILED: 'Bağlantı başarısız',
-  CONNECTION_LOST: 'Bağlantı koptu',
-  AP_LINGERING: 'Boşta kalması bekleniyor',
+  CONNECTION_LOST: 'Bağlantı kesildi', // DeepL
+  AP_LINGERING: 'Boşta kalana kadar bekleme', // DeepL
   NONE: 'Yok',
-  LOG_NO_CONNECTION: 'Günlük hizmetine bağlantı yok',
-  CHECK_SYSTEM_LOG: 'Olası nedenler için sistem günlüğünü kontrol edin',
+  LOG_NO_CONNECTION: 'Günlük hizmetiyle bağlantı yok', // DeepL
+  CHECK_SYSTEM_LOG: 'Olası nedenleri belirlemek için sistem günlüğünü kontrol edin', // DeepL
   VALUE_TYPE: 'Değer türü',
   DEFAULT_VALUE: 'Varsayılan değer',
   DEFAULT_NAME: 'Varsayılan ad',
   ALWAYS_OFF: 'Her zaman kapalı',
   ALWAYS_ON: 'Her zaman açık',
-  NO_DATA: 'Henüz favori varlık yok. {customizations} içinde işaretleyin veya tüm varlıkları {devices} içinde görün.',
-  STAY: 'Kal',
-  LEAVE: 'Çık',
+  NO_DATA: 'Henüz Favorilere eklenmiş varlık yok. Bunları {customizations} içinde işaretleyin veya {devices} içindeki tüm varlıkları görüntüleyin.', // DeepL
+  STAY: 'Devam', // DeepL
+  LEAVE: 'Bırakın', // DeepL
   MENU: 'Menü',
   MORE: 'Daha fazla',
   SHOW_PASSWORD: 'Şifreyi göster',
   STATUS_RUNNING: 'EMS-ESP çalışıyor',
   NUM_ERRORS: '{num} hata',
   NUM_WARNINGS: '{num} uyarı',
-  HEAP: 'Heap',
-  METER_USED: '{used} / {total} {unit} kullanılıyor',
-  MAX_BLOCK: '{num} KB en büyük blok',
-  MAX_BLOCK_HELP: "En büyük blok, heap'in tek seferde ayrılabilen en büyük parçasıdır. 40 KB'ın altında web arayüzü ve MQTT çalışmayabilir.",
-  FLASH_CHIP: 'Flash yonga',
+  HEAP: 'Yığın', // DeepL
+  METER_USED: '{used} / {total} {unit} kullanıldı', // DeepL
+  MAX_BLOCK: '{num} KB\'lik maksimum blok', // DeepL
+  MAX_BLOCK_HELP: 'Maksimum blok, tek seferde ayrılabilen en büyük yığın parçasıdır. 40 KB\'nin altında kalınmazsa web arayüzü ve MQTT çalışmayabilir.', // DeepL
+  FLASH_CHIP: 'Flash yongası', // DeepL
   FILE_SYSTEM: 'Dosya sistemi',
   DETAILS: 'Ayrıntılar',
-  RECONNECTS: 'Yeniden bağlanmalar',
+  RECONNECTS: 'Yeniden bağlanır', // DeepL
   CONNECTS: 'Bağlantılar',
-  ACTIVITY_HELP: 'Birkaç Rx hatası normaldir. Çok sayıda Tx hatası genellikle kazan için yanlış Tx modu anlamına gelir.',
+  ACTIVITY_HELP: 'Birkaç Rx hatası normaldir. Çok sayıda Tx hatası genellikle kazanınız için yanlış Tx modunun kullanıldığı anlamına gelir.', // DeepL
   PAUSE: 'Duraklat',
-  RESUME: 'Devam et',
-  LOG_PAUSED: 'Duraklatıldı, bekletilen satırlar: {num}',
+  RESUME: 'Özet', // DeepL
+  LOG_PAUSED: 'Duraklatıldı, yeni satırlar ertelendi: {num}', // DeepL
   FILTER_LINES: 'Satırları filtrele',
   SCHEDULER: 'Zamanlayıcı',
-  SCHEDULER_HELP_1: 'Komutları zamanlayarak otomatikleştirin',
+  SCHEDULER_HELP_1: 'Aşağıya zamanlanmış olaylar ekleyerek komutları otomatikleştirin', // DeepL
   SCHEDULER_HELP_2: 'başlangıçta',
   SCHEDULE: 'Zamanlama',
   TIME: 'Zaman',
   TIMER: 'Zamanlayıcı',
-  ONCHANGE: 'Değişimde',
-  CONDITION: 'Durum',
-  SCHEDULE_UPDATED: 'Zamanlama güncellendi',
+  ONCHANGE: 'Değişiklik durumunda', // DeepL
+  CONDITION: 'Koşul', // DeepL
+  SCHEDULE_UPDATED: 'Zaman çizelgesi güncellendi', // DeepL
   CUSTOM_ENTITIES: 'Özel Varlıklar',
-  ENTITIES_HELP_1: 'Özel varlıkları EMS hattından alın',
-  ENTITIES_UPDATED: 'Varlıklar güncellendi',
+  ENTITIES_HELP_1: 'Özel EMS varlıklarını veya dinamik kullanıcı değişkenlerini tanımlayın', // DeepL
+  ENTITIES_UPDATED: 'Güncellenen varlıklar', // DeepL
   WRITEABLE: 'Yazılabilir',
-  SHOWING: 'Görüntüleniyor',
-  SEARCH: 'Ara',
+  SHOWING: 'Gösteriliyor', // DeepL
+  SEARCH: 'Arama', // DeepL
   CERT: 'CA sertifikası (PEM)',
-  ENABLE_TLS: 'TLS deveye al',
-  TLS_CHECK: "Broker'ı şununla doğrula",
+  ENABLE_TLS: 'TLS\'yi etkinleştirin', // DeepL
+  TLS_CHECK: 'Aracıyı şu adresle kontrol edin:', // DeepL
   TLS_CHECK_CA: 'CA sertifikası',
   TLS_CHECK_FINGERPRINT: 'Sertifika parmak izi (SHA-1)',
-  TLS_CHECK_NONE: 'Hiçbir şey, doğrulanmaz',
-  TLS_NOT_CHECKED: 'Bağlantı şifreli, ancak broker doğrulanmıyor; ağdaki başka bir cihaz kendini broker gibi gösterebilir',
+  TLS_CHECK_NONE: 'Yok, işaretlenmemiş', // DeepL
+  TLS_NOT_CHECKED: 'Bağlantı şifrelenmiştir, ancak aracı kontrol edilmez; bu nedenle ağdaki başka bir cihaz, aracı gibi davranabilir.', // DeepL
   ON: 'On',
-  OFF: 'Off',
-  POLARITY: 'Polarity',
-  ACTIVEHIGH: 'Aktif Yüksek',
-  ACTIVELOW: 'Aktif Düşük',
+  OFF: 'Kapalı', // DeepL
+  POLARITY: 'Polarite', // DeepL
+  ACTIVEHIGH: 'Aktif yüksek', // DeepL
+  ACTIVELOW: 'Aktif düşük', // DeepL
   UNCHANGED: 'Değiştirilmedi',
-  SECURITY_1: 'Kullanıcıları ekle veya kaldır',
-  DOWNLOAD_UPLOAD_1: 'Ayarları indir ve yükle',
+  SECURITY_1: 'Kullanıcı ekleyin veya kaldırın', // DeepL
+  DOWNLOAD_UPLOAD_1: 'Ayarları indirme ve yükleme', // DeepL
   MODULES: 'Modül',
   MODULES_1: 'Harici modülleri etkinleştirin veya devre dışı bırakın',
-  MODULES_UPDATED: 'Modülleri güncellendi',
-  MODULES_NONE: 'Hiçbir harici modül tespit edilmedi',
-  RENAME: 'Yeniden Adlandır',
-  ENABLE_MODBUS: 'Modbus\'ı etkinleştir',
-  VIEW_LOG: 'Sorunu tanımlamak için günlüğü görüntüleyin',
+  MODULES_UPDATED: 'Modüller güncellendi', // DeepL
+  MODULES_NONE: 'Harici modül algılanmadı', // DeepL
+  RENAME: 'Yeniden adlandırın', // DeepL
+  ENABLE_MODBUS: 'Modbus\'u etkinleştirin', // DeepL
+  VIEW_LOG: 'Sorunları teşhis etmek için günlüğü görüntüleyin', // DeepL
   SERVICES: 'Hizmetler',
-  ALLVALUES: 'Tüm Değerler',
-  WAIT_FIRMWARE: 'Firmware yükleniyor ve yükleniyor',
-  INSTALL_VERSION: 'Bu {0} sürümü {1} yükleyecek',
-  UPDATE_AVAILABLE: 'güncellendi!',
-  LATEST_VERSION: 'En son {0} firmware sürümünü kullanıyorsunuz.',
+  ALLVALUES: 'Tüm değerler', // DeepL
+  WAIT_FIRMWARE: 'Yazılım yükleniyor ve kuruluyor', // DeepL
+  INSTALL_VERSION: 'Bu, {0} sürüm {1} olacaktır', // DeepL
+  UPDATE_AVAILABLE: 'güncelleme mevcut', // DeepL
+  LATEST_VERSION: '{0} numaralı en son aygıt yazılımı sürümünü kullanıyorsunuz', // DeepL
   PLEASE_WAIT: 'Lütfen bekleyin',
-  RESTARTING_PRE: 'Yükleniyor',
-  RESTARTING_POST: 'Hazırlanıyor',
-  AUTO_SCROLL: 'Otomatik kaydırma',
+  RESTARTING_PRE: 'Başlatma', // DeepL
+  RESTARTING_POST: 'Hazırlık', // DeepL
+  AUTO_SCROLL: 'Otomatik Kaydırma', // DeepL
   DASHBOARD: 'Kontrol Paneli',
-  DEVELOPER_MODE: 'Geliştirici Modu',
-  DISABLE_RESET: 'Fabrika ayarlarını devre dışı bırak',
-  AUTO_FW_CHECK: 'Firmware güncellemelerini otomatik olarak denetle',
+  DEVELOPER_MODE: 'Geliştirici modu', // DeepL
+  DISABLE_RESET: 'Fabrika ayarlarına sıfırlama özelliğini devre dışı bırakın', // DeepL
+  AUTO_FW_CHECK: 'Firmware güncellemelerini otomatik olarak kontrol edin', // DeepL
   BYTES: 'Bayt',
-  BITMASK: 'Bit Maskesi',
-  DUPLICATE: 'Çift',
-  DASHBOARD_1: 'Tüm aktif ve Favori olarak işaretlenmiş EMS varlıkları, artı tüm özel varlıklar, zamanlayıcılar ve harici sensör verileri aşağıda görüntüleniyor.',
+  BITMASK: 'Bit maskesi', // DeepL
+  DUPLICATE: 'Yinelenen', // DeepL
+  DASHBOARD_1: 'Favoriler olarak işaretlenmiş tüm aktif EMS varlıkları aşağıda gösterilir; buna ek olarak tüm özel varlıklar, zamanlamalar ve harici Sensörler de listelenir.', // DeepL
   NO_GPIO: 'Kullanılabilir GPIO bulunamadı',
-  PLATFORM: 'Platforma',
-  RELEASE_TYPE: 'Sürüm Tipi',
-  FIRMWARE_VERSION_INFO: 'Firmware sürüm bilgisi',
+  PLATFORM: 'Platform', // DeepL
+  RELEASE_TYPE: 'Sürüm türü', // DeepL
+  FIRMWARE_VERSION_INFO: 'Firmware sürümü bilgileri', // DeepL
   USER_PROFILE: 'Kullanıcı Profili',
-  ONLINE_HELP: 'online yardım',
-  UPGRADE_IMPORTANT_MESSAGES: 'Yükseltmeyle ilgili önemli mesajlar',
-  UPGRADE_IMPORTANT_MESSAGES_2: 'Yeni bir major sürüme güncelleme yapıyorsunuz. Sistem yedeklemesi yapmanız önerilir. Ayrıca online yardımı kontrol ederek önemli değişiklikleri gözden geçirin.',
-  UPGRADE_IMPORTANT_MESSAGES_3: 'Sürüm 3.10 önemli güvenlik değişiklikleri içerir. Önce bir sistem yedeği oluşturun: güncellemeden sonra parolalar hash olarak saklanır ve eski sürümler bunları okuyamaz, bu nedenle geri dönmek için bu yedek gerekir. Ardından her API çağrısı bir API anahtarı gerektirir, bu yüzden Home Assistant gibi entegrasyonların güncellenmesi gerekir. Devam etmeden önce online yardımdaki önemli değişiklikleri okuyun.',
-  WARNING_SYSTEM_BACKUP: 'Bu, tüm sistem yapılandırmanızın ve ayarlarınızın yedeğini oluşturur. Şifreler ve anahtarlar, aşağıda dahil etmediğiniz sürece yedeğe alınmaz; geri yükleme cihazdaki mevcut şifreleri korur. Komutlar her zaman dahil edilir ve kimlik bilgileri içerebilir, bu yüzden paylaşırken dikkatli olun. Devam etmek istiyor musunuz?',
-  BACKUP_INCLUDE_SECRETS: 'Şifreleri ve anahtarları dahil et (yeni bir cihaza geri yüklemek için gerekli)',
-  TEST_EMAIL_SUCCESSFUL: 'Test email başarıyla gönderildi',
-  SYSTEM_NAME: 'Sistem Adı',
+  ONLINE_HELP: 'çevrimiçi yardım', // DeepL
+  UPGRADE_IMPORTANT_MESSAGES: 'Önemli güncelleme mesajları', // DeepL
+  UPGRADE_IMPORTANT_MESSAGES_2: 'Yeni bir ana sürüme yükseltme yapıyorsunuz. Öncelikle sistem yedeği almanız tavsiye edilir. Ayrıca, önemli değişiklikler olup olmadığını öğrenmek için çevrimiçi yardıma bakın.', // DeepL
+  UPGRADE_IMPORTANT_MESSAGES_3: '3.10 sürümünde önemli güvenlik değişiklikleri bulunmaktadır. Öncelikle sistem yedeği alın: yükseltme işleminden sonra şifreler karma olarak saklanır ve eski sürümler bunları okuyamaz; bu nedenle geri dönmek için bu yedeğe ihtiyaç duyulur. Artık her API çağrısı için bir API anahtarı gereklidir; dolayısıyla Home Assistant gibi entegrasyonların güncellenmesi gerekir. Devam etmeden önce çevrimiçi yardım bölümündeki önemli değişiklikleri okuyun.', // DeepL
+  WARNING_SYSTEM_BACKUP: 'Bu işlem, sistem yapılandırmanızın ve ayarlarınızın tam bir yedeğini oluşturur. Aşağıda belirtmediğiniz sürece şifreler ve anahtarlar yedeğe dahil edilmez; yedeği geri yüklediğinizde cihazda zaten bulunan şifreler korunur. Komutlar her zaman yedeğe dahil edilir ve kimlik bilgilerini içerebilir, bu nedenle paylaşırken dikkatli olun. Devam etmek istiyor musunuz?', // DeepL
+  BACKUP_INCLUDE_SECRETS: 'Şifreleri ve anahtarları (yeni bir cihaza geri yüklemek için gerekli olan) ekleyin.', // DeepL
+  TEST_EMAIL_SUCCESSFUL: 'Test e-postası gönderildi', // DeepL
+  SYSTEM_NAME: 'Sistem adı', // DeepL
   COMMANDS: 'Komutlar',
-  COMMANDS_HELP_1: 'Özel komutları EMS hattına tanımlayın',
-  COMMAND_EXECUTED: 'Komut başarıyla çalıştırıldı',
-  RUN: 'Komutu çalıştır',
-  INTERNET_CONNECTION_CHECK: 'Online bağlantısı kontrol ediliyor',
-  UPLOAD_BACKUP_TEXT: 'Bir yedek dosyası (.json), buraya drop yapın',
-  UPLOAD_FIRMWARE_TEXT: 'Bir firmware .bin dosyası, buraya drop yapın',
-  UPLOAD_MD5_RECEIVED: 'Özet alındı, şimdi firmware .bin dosyasını yükleyin',
-  UPLOAD_MD5_MATCHED: 'MD5 eşleşti, firmware yükleniyor…',
-  UPLOAD_NOT_OFFICIAL: "Bu resmi bir EMS-ESP sürümü değil. Yalnızca güvendiğiniz firmware'i yükleyin",
+  COMMANDS_HELP_1: 'Aşağıda yeniden kullanılabilir, adlandırılmış komutları tanımlayın. Bunlar konsoldan, API/MQTT üzerinden çalıştırılabilir veya Zamanlayıcı tarafından referans alınabilir.', // DeepL
+  COMMAND_EXECUTED: 'Komut yürütüldü', // DeepL
+  RUN: 'Çalıştır', // DeepL
+  INTERNET_CONNECTION_CHECK: 'Çevrimiçi olarak mevcut sürümleri kontrol etme', // DeepL
+  UPLOAD_BACKUP_TEXT: 'Seçmek için tıklayın veya bir yedekleme dosyasını (.json) buraya bırakın', // DeepL
+  UPLOAD_FIRMWARE_TEXT: 'Seçmek için tıklayın veya bir firmware .bin/.md5 dosyasını buraya bırakın', // DeepL
+  UPLOAD_MD5_RECEIVED: 'Özet alındı, şimdi .bin formatındaki donanım yazılımı dosyasını yükleyin', // DeepL
+  UPLOAD_MD5_MATCHED: 'MD5 eşleşmeleri, donanım yazılımı yükleniyor…', // DeepL
+  UPLOAD_NOT_OFFICIAL: 'Bu, resmi bir EMS-ESP sürümü değildir. Yalnızca güvendiğiniz donanım yazılımını yükleyin', // DeepL
   UPLOAD_NOT_OFFICIAL_HELP: 'Resmi ve özel sürümler hakkında',
-  UPLOAD_INSTALL_ANYWAY: 'Yine de yükle',
+  UPLOAD_INSTALL_ANYWAY: 'Yine de yükleyin', // DeepL
   OFFICIAL_BUILD: 'Resmi sürüm',
-  CUSTOM_BUILD: 'Özel sürüm',
+  CUSTOM_BUILD: 'Özel yapılandırma', // DeepL
   PASSWORD_CONFIRM_TITLE: 'Şifrenizi tekrar girin',
-  PASSWORD_CONFIRM_TEXT: 'Güvenliğiniz için bu değişiklikten önce şifrenizi girin. 5 dakika boyunca tekrar sorulmayacak.',
+  PASSWORD_CONFIRM_TEXT: 'Güvenliğiniz için, bu değişikliği yapmadan önce şifrenizi girin. 5 dakika boyunca tekrar şifre sorulmayacaktır.', // DeepL
   PASSWORD_CONFIRM_BUTTON: 'Onayla',
   PASSWORD_WRONG: 'Yanlış şifre',
-  PASSWORD_NOT_CONFIRMED: 'İptal edildi, şifre girilmedi',
+  PASSWORD_NOT_CONFIRMED: 'İşlem iptal edildi, şifre girilmedi', // DeepL
   RECOVERY_APP: 'Kurtarma Uygulaması',
-  RECOVERY_NOT_INSTALLED: 'Yüklü değil',
-  RECOVERY_INSTALLED: 'Kurtarma firmware yüklendi',
-  RESTART_INTO_RECOVERY: 'Kurtarma uygulamasına yeniden başlat',
-  RECOVERY_NOT_FOUND: 'Kurtarma uygulaması çevrimiçi bulunamadı',
-  RECOVERY_START_FAILED: 'Kurtarma uygulaması başlatılamıyor, eski veya bozuk olabilir. Önce en son sürümü yükleyin',
-  PARTITION_START_FAILED: 'Bu donanım yazılımı başlatılamıyor, bozuk olabilir',
-  INSTALLED_VERSIONS: 'Yüklü sürümler',
+  RECOVERY_NOT_INSTALLED: 'Yüklenmemiş', // DeepL
+  RECOVERY_INSTALLED: 'Kurtarma yazılımı yüklendi', // DeepL
+  RESTART_INTO_RECOVERY: 'Kurtarma Modunda Yeniden Başlat Uygulaması', // DeepL
+  RECOVERY_NOT_FOUND: 'Recovery App çevrimiçi olarak bulunamadı', // DeepL
+  RECOVERY_START_FAILED: 'Recovery Uygulaması başlatılamıyor; uygulama güncel olmayabilir veya bozulmuş olabilir. Önce en son sürümü yükleyin', // DeepL
+  PARTITION_START_FAILED: 'Bu donanım yazılımı başlatılamıyor, hasar görmüş olabilir', // DeepL
+  INSTALLED_VERSIONS: 'Yüklü Sürümler', // DeepL
   EMSESP_APP: 'EMS-ESP Uygulaması',
   NO_UPDATES_AVAILABLE: 'güncelleme yok',
-  SWITCH_TO_DEV: 'Dev {0} sürümüne geç',
-  SWITCH_TO_STABLE: 'Kararlı {0} sürümüne geç',
+  SWITCH_TO_DEV: 'dev {0}\'e geçin', // DeepL
+  SWITCH_TO_STABLE: '{0} numaralı kararlı sürüme geçin', // DeepL
   SAVE: 'Kaydet',
-  NEEDS_RESTART: 'yeniden başlatma gerekir',
+  NEEDS_RESTART: 'yeniden başlatılması gerekiyor', // DeepL
   CHANGED_SETTINGS: '{num} değiştirilmiş ayar',
   SAVED_RESTART: 'Kaydedildi. Yeni ayarları kullanmak için EMS-ESP\'yi yeniden başlatın.',
   RESTART_NOW: 'Şimdi yeniden başlat',
   COPY_FAILED: 'Kopyalanamadı, metni seçip kendiniz kopyalayın',
   DOCUMENTATION: 'Belgeler',
   COMMUNITY_CHAT: 'Topluluk sohbeti',
-  REPORT_ISSUE: 'Hata bildir veya özellik iste',
-  GET_HELP: 'Yardım al',
-  REPORT_PROBLEM: 'Sorun bildirme',
+  REPORT_ISSUE: 'Bir hata bildirin veya bir özellik talebinde bulunun', // DeepL
+  GET_HELP: 'Yardım Alın', // DeepL
+  REPORT_PROBLEM: 'Bir Sorun Bildirin', // DeepL
   REPORT_STEP_1: 'Sistem bilgilerini indirin',
-  REPORT_STEP_1_TEXT: 'sürüm, kart, EMS veri yolu durumu, cihazlar ve ayarlar, parolalar olmadan',
-  REPORT_STEP_2: 'Son günlüğü kaydedin',
-  REPORT_STEP_2_TEXT: 'sorun bir cihazla ilgiliyse önce günlük seviyesini DEBUG yapın',
-  REPORT_STEP_3: 'Bir kayıt açın veya Discord\'da sorun',
-  REPORT_STEP_3_TEXT: 'iki dosyayı ekleyin veya aşağıdaki kısa özeti bir sohbete yapıştırın',
-  NEW_ISSUE: 'Yeni kayıt',
+  REPORT_STEP_1_TEXT: 'sürüm, anakart, EMS veriyolu durumu, bağlı cihazlar ve ayarlar (şifreler hariç)', // DeepL
+  REPORT_STEP_2: 'Son günlüğü kaydet', // DeepL
+  REPORT_STEP_2_TEXT: 'Sorun bir cihazla ilgiliyse, önce günlük düzeyini DEBUG olarak ayarlayın', // DeepL
+  REPORT_STEP_3: 'Bir sorun bildir veya Discord\'da soru sor', // DeepL
+  REPORT_STEP_3_TEXT: 'Her iki dosyayı da ekleyin veya aşağıdaki kısa özeti bir sohbet penceresine yapıştırın', // DeepL
+  NEW_ISSUE: 'Yeni sorun', // DeepL
   SHORT_SUMMARY: 'Kısa özet',
-  LICENSE_TEXT: 'LGPL-3.0 lisansı ile açık kaynak',
-  ADMIN_ACCESS_TEXT: 'ayarlara, cihazlara ve API\'ye tam erişim',
-  GUEST_ACCESS_TEXT: 'değerleri görebilir ve misafirlere izin verilen komutları çalıştırabilir',
-  LANGUAGE_BROWSER_ONLY: 'yalnızca bu tarayıcıyı etkiler',
-  LANGUAGE_ENTITIES_HINT: 'MQTT ve API\'deki varlık adlarının dili burada ayarlanır:',
+  LICENSE_TEXT: 'LGPL-3.0 lisansı altında açık kaynak kodlu', // DeepL
+  ADMIN_ACCESS_TEXT: 'ayarlar, cihazlar ve API\'ye tam erişim', // DeepL
+  GUEST_ACCESS_TEXT: 'değerleri görüntüleyebilir ve misafirlerin çalıştırabileceği komutları çalıştırabilir', // DeepL
+  LANGUAGE_BROWSER_ONLY: 'Bu değişiklik yalnızca bu tarayıcıyı etkiler', // DeepL
+  LANGUAGE_ENTITIES_HINT: 'MQTT ve API\'daki cihaz varlık adları için dil, şu dosyada ayarlanır:', // DeepL
   ADMINISTRATION: 'Yönetim',
-  API_KEYS_SHORT: 'Home Assistant ve betikler için anahtarlar',
+  API_KEYS_SHORT: 'Home Assistant için tuşlar ve komut dosyaları', // DeepL
   ADDRESSES: 'Adresler',
-  SEARCH_SETTINGS: 'Ayarlarda ara',
-  NO_SETTINGS_MATCH: 'Aramanızla eşleşen ayar yok',
+  SEARCH_SETTINGS: 'Arama ayarları', // DeepL
+  NO_SETTINGS_MATCH: 'Aramanızla eşleşen ayar bulunamadı', // DeepL
   GENERAL: 'Genel',
   BOARD: 'Kart',
   ADVANCED: 'Gelişmiş',
-  EMS_BUS_DESC: 'EMS-ESP\'nin ısıtma sisteminizle nasıl iletişim kurduğu.',
-  BOARD_DESC: 'Pinler kart profilinden gelir. Kendiniz ayarlamak için geliştirici modunu açın ve Özel\'i seçin.',
-  FORMAT_DESC: 'Değerlerin web arayüzünde ve MQTT/API mesajlarında nasıl göründüğü.',
-  BOARD_PINS: 'Profildeki pinler',
-  ENABLE_EMAIL: 'E-posta bildirimlerini etkinleştir',
+  EMS_BUS_DESC: 'EMS-ESP, ısıtma sisteminizle nasıl iletişim kurar?', // DeepL
+  BOARD_DESC: 'Pimler, kart profilinden alınır. Bunları kendiniz ayarlamak için Geliştirici modunu etkinleştirin ve "Özel" seçeneğini seçin.', // DeepL
+  FORMAT_DESC: 'Değerlerin web kullanıcı arayüzünde ve MQTT/API yüklerinde nasıl göründüğü.', // DeepL
+  BOARD_PINS: 'Profilden alınan pimler', // DeepL
+  ENABLE_EMAIL: 'E-posta bildirimlerini etkinleştirin', // DeepL
   SEND_TEST_EMAIL: 'Test e-postası gönder',
-  EMAIL_FROM: 'Kimden',
-  EMAIL_TO: 'Kime',
+  EMAIL_FROM: 'Kaynak:', // DeepL
+  EMAIL_TO: '-', // DeepL
   EMAIL_SUBJECT: 'Konu',
-  WIFI_SCAN: 'Wi-Fi Tarama',
+  WIFI_SCAN: 'Wi-Fi Taraması', // DeepL
   SCAN: 'Tara',
-  NETWORKS_NEARBY: 'Yakındaki ağlar',
+  NETWORKS_NEARBY: 'Yakındaki Ağlar', // DeepL
   SIGNAL: 'Sinyal',
   CHANNEL: 'Kanal',
   WIFI_OPEN: 'açık',
-  WIFI_SAVED: 'kayıtlı',
-  NETWORK_ETHERNET_INFO: 'Şu anda Ethernet ile bağlı ({ip}). Wi-Fi yalnızca kablo yokken kullanılır.',
-  HOSTNAME_ACCESS: 'Ana bilgisayar adı ve erişim',
+  WIFI_SAVED: 'kaydedildi', // DeepL
+  NETWORK_ETHERNET_INFO: 'Şu anda Ethernet üzerinden bağlanıyor ({ip}). Wi-Fi yalnızca kablosuz bağlantı için kullanılır.', // DeepL
+  HOSTNAME_ACCESS: 'Ana Bilgisayar Adı ve Erişim', // DeepL
   IP_ADDRESS: 'IP adresi',
-  NETWORK_ETH_10MBIT: '10 Mbit yarı çift yönü zorla',
-  NETWORK_ETH_10MBIT_HELP: 'yalnızca sorunlu anahtarlar veya uzun kablolar için',
-  NETWORK_DISABLE_SLEEP_HELP: 'daha güvenilir, biraz daha fazla güç kullanır',
-  NETWORK_MDNS_HELP: 'mDNS ile {host}.local olarak erişilir',
-  NETWORK_FIXED_IP_HELP: 'aksi halde DHCP kullanılır',
-  NETWORK_CORS_HELP: 'yalnızca başka bir web sayfası API\'yi çağırdığında gerekir',
-  NTP_TIME_ON_DEVICE: 'EMS-ESP üzerindeki saat',
-  NTP_TIME_SERVER: 'Zaman sunucusu',
-  NTP_THERMOSTAT_CLOCK: 'Termostat saati',
-  NTP_THERMOSTAT_SYNC: 'Termostat saatini ayarla',
-  NTP_THERMOSTAT_SYNC_HELP: 'EMS termostatında tarihi ve saati ayarlar',
+  NETWORK_ETH_10MBIT: '10 Mbit yarı çift yönlü zorla', // DeepL
+  NETWORK_ETH_10MBIT_HELP: 'sadece sorunlu anahtarlar veya uzun kablolar için', // DeepL
+  NETWORK_DISABLE_SLEEP_HELP: 'daha güvenilirdir, biraz daha fazla enerji tüketir', // DeepL
+  NETWORK_MDNS_HELP: 'mDNS ile {host}.local şeklinde erişin', // DeepL
+  NETWORK_FIXED_IP_HELP: 'aksi takdirde DHCP kullanılır', // DeepL
+  NETWORK_CORS_HELP: 'yalnızca başka bir web sayfası API\'yi çağırdığında gereklidir', // DeepL
+  NTP_TIME_ON_DEVICE: 'EMS-ESP\'de geçirilen süre', // DeepL
+  NTP_TIME_SERVER: 'Zaman Sunucusu', // DeepL
+  NTP_THERMOSTAT_CLOCK: 'Termostat Saati', // DeepL
+  NTP_THERMOSTAT_SYNC: 'Termostat saatini ayarlayın', // DeepL
+  NTP_THERMOSTAT_SYNC_HELP: 'EMS termostatında tarih ve saati ayarlar', // DeepL
   NTP_THERMOSTAT_SYNC_1: 'Açık, EMS-ESP saat dilimi',
   NTP_THERMOSTAT_SYNC_2: 'Açık, kendi saat dilimi',
   NTP_THERMOSTAT_TZ: 'Termostat saat dilimi',
-  MQTT_PREVIEW: 'Ne yayınlanır',
+  MQTT_PREVIEW: 'Neler yayınlanır?', // DeepL
   MQTT_PREVIEW_CMD: 'komut olarak kabul edilir',
   MQTT_PREVIEW_RESPONSE: 'komutların çıktısı',
   MQTT_BEHAVIOUR: 'Davranış',
-  MQTT_TOPICS: 'Konular ve yükler',
+  MQTT_TOPICS: 'Konular ve Yükler', // DeepL
   MQTT_DISCOVERY: 'Keşif',
-  MQTT_INTERVALS_HELP: 'Yayınlar arasındaki saniye, 0 = her değişiklikte yayınla.',
-  MQTT_SINGLE_NO_DISCOVERY: 'keşif açıkken kullanılamaz',
-  MQTT_DISCOVERY_NO_SINGLE: 'tek değer konuları açıkken kullanılamaz',
-  MQTT_DISCOVERY_HELP: 'varlıkları Home Assistant veya Domoticz\'te otomatik olarak oluşturur',
-  MQTT_ENTITY_FORMAT_WARN: 'değiştirmek Home Assistant\'taki tüm varlıkları yeniden adlandırır',
+  MQTT_INTERVALS_HELP: 'Yayınlar arasındaki saniye aralığı, 0 = her değişiklikte yayınla.', // DeepL
+  MQTT_SINGLE_NO_DISCOVERY: 'keşif özelliği ile kullanılamaz', // DeepL
+  MQTT_DISCOVERY_NO_SINGLE: 'tek değerli konularla kullanılamaz', // DeepL
+  MQTT_DISCOVERY_HELP: 'Home Assistant veya Domoticz\'de varlıklar otomatik olarak oluşturulur', // DeepL
+  MQTT_ENTITY_FORMAT_WARN: 'Bunu değiştirmek, Home Assistant\'taki tüm varlıkların adını değiştirir', // DeepL
   USERS: 'Kullanıcılar',
-  USERS_TEXT: 'Yöneticiler her şeyi değiştirebilir. Misafirler görüntüleyebilir ve misafirlere izin verilen komutları çalıştırabilir.',
+  USERS_TEXT: 'Yöneticiler her şeyi değiştirebilir. Misafirler ise sadece görüntüleyebilir ve misafirler için işaretlenmiş komutları çalıştırabilir.', // DeepL
   ADD_USER: 'Kullanıcı ekle',
   EDIT_USER: 'Kullanıcıyı düzenle',
-  ROLE: 'Rol',
-  ROLE_ADMIN: 'yönetici',
+  ROLE: 'Görev', // DeepL
+  ROLE_ADMIN: 'admin', // DeepL
   ROLE_GUEST: 'misafir',
   ADMIN: 'Yönetici',
   YOU: 'siz',
-  NEW_PASSWORD: 'Yeni parola',
+  NEW_PASSWORD: 'Yeni şifre', // DeepL
   UNSAVED_CHANGES: '{num} kaydedilmemiş değişiklik',
-  CREATE_KEY: 'Anahtar oluştur',
+  CREATE_KEY: 'Anahtar oluşturun', // DeepL
   NEW_API_KEY: 'Yeni API anahtarı',
   NO_API_KEYS: 'Henüz API anahtarı yok',
-  API_KEYS_LIMIT: 'En fazla {num} anahtarınız olabilir.',
+  API_KEYS_LIMIT: 'En fazla {num} tuşunuz olabilir.', // DeepL
   REVOKE: 'İptal et',
   REVOKE_KEY: 'API anahtarını iptal et',
-  REVOKE_KEY_TEXT: '"{name}" anahtarını kullanan her şey hemen çalışmayı durdurur.',
-  MODULES_TEXT: 'Bu yazılımdaki isteğe bağlı özellikler. Buradan açıp kapatabilirsiniz.',
-  BY_AUTHOR: 'yazar: {name}',
+  REVOKE_KEY_TEXT: '"{name}" ifadesini içeren her şey anında çalışmaz hale gelir.', // DeepL
+  MODULES_TEXT: 'Bu donanım yazılımına entegre edilmiş isteğe bağlı özellikler. Bunları buradan etkinleştirebilir veya devre dışı bırakabilirsiniz.', // DeepL
+  BY_AUTHOR: '{name} tarafından', // DeepL
   LICENSE_KEY: 'Lisans anahtarı',
   MODULE_ACTIVATED: 'etkinleştirildi',
-  MODULE_PENDING: 'etkinleştirme bekleniyor',
+  MODULE_PENDING: 'etkinleştirilmeyi bekliyor', // DeepL
   ENABLED: 'Etkin',
   UNDO: 'Geri al',
   FW_UPDATES: 'Güncellemeler',
-  FW_VERSION_AVAILABLE: '{version} kullanılabilir',
+  FW_VERSION_AVAILABLE: '{version} sürümü mevcuttur', // DeepL
   FW_RELEASE_NOTES: 'Sürüm notları',
-  FW_UPDATES_OFFLINE: 'Yeni sürümler çevrimiçi kontrol edilemedi. EMS-ESP bunun için internet bağlantısına ihtiyaç duyar.',
+  FW_UPDATES_OFFLINE: 'Yeni sürümler için çevrimiçi kontrol yapılamadı. EMS-ESP\'nin bunun için internet bağlantısına ihtiyacı vardır.', // DeepL
   FW_RESTART_RESET: 'Yeniden başlatma ve sıfırlama',
-  FW_RECOVERY_TEXT: 'Kurtarma uygulamasına yeniden başlatılsın mı? Ağınıza bağlanır ve ayrıca bellenim yükleyebileceğiniz kendi erişim noktasını başlatır.',
+  FW_RECOVERY_TEXT: 'Kurtarma Uygulamasına yeniden başlatmak ister misiniz? Uygulama, ağınıza bağlanır ve ayrıca kendi Erişim Noktasını başlatır; buradan yazılım güncellemesini yükleyebilirsiniz.', // DeepL
   FW_SIZE: 'Boyut',
-  FW_INSTALL_DATE: 'Kurulum tarihi',
-  FW_UPLOAD_FAILED: 'Yükleme başarısız: yanlış dosya türü veya başka bir kart için bellenim',
+  FW_INSTALL_DATE: 'Yüklendiği yer', // DeepL
+  FW_UPLOAD_FAILED: 'Yükleme başarısız: yanlış dosya türü veya başka bir kart için yazılmış donanım yazılımı', // DeepL
   FILE_TYPE_INVALID: 'Bu dosya türü desteklenmiyor, bir {types} dosyası seçin',
-  WHO_CAN_RUN: 'Kim çalıştırabilir',
-  CMD_NONE: 'Komut bulunamadı',
-  CMD_NONE_MATCH: 'Aramayla eşleşen komut yok',
-  SCHEDULE_NONE: 'Zamanlama bulunamadı',
-  SCHEDULE_NONE_MATCH: 'Aramayla eşleşen zamanlama yok',
-  CE_NONE: 'Varlık bulunamadı',
+  WHO_CAN_RUN: 'Kimler çalıştırabilir', // DeepL
+  CMD_NONE: 'Komutlar bulunamadı', // DeepL
+  CMD_NONE_MATCH: 'Aramanızla eşleşen komut bulunamadı', // DeepL
+  SCHEDULE_NONE: 'Zaman çizelgesi bulunamadı', // DeepL
+  SCHEDULE_NONE_MATCH: 'Aramanızla eşleşen hiçbir zamanlayıcı bulunamadı', // DeepL
+  CE_NONE: 'Hiçbir varlık bulunamadı', // DeepL
   CE_ALL: 'Tümü',
   CE_STORAGE: 'Depolama',
   CE_SOURCE: 'Kaynak',
-  CE_EMS_SOURCE: 'cihaz {device} · telegram {type} · ofset {offset}',
-  CE_RAM_TEXT: 'yeniden başlatmaya kadar saklanır',
-  CE_NVS_TEXT: 'yeniden başlatmadan sonra da saklanır',
-  CE_EXCLUDED: 'API/MQTT\'de yok',
-  SEARCH_SENSORS: 'Ad, ID veya GPIO ara',
+  CE_EMS_SOURCE: 'cihaz {device} · telgraf {type} · ofset {offset}', // DeepL
+  CE_RAM_TEXT: 'yeniden başlatılana kadar korunur', // DeepL
+  CE_NVS_TEXT: 'yeniden başlatmalarda korunur', // DeepL
+  CE_EXCLUDED: 'API/MQTT\'de yer almaz', // DeepL
+  SEARCH_SENSORS: 'Ad, kimlik numarası veya GPIO\'ya göre arama yapın', // DeepL
   NO_SENSORS: 'Sensör bulunamadı',
-  NO_SENSORS_MATCH: 'Aramayla eşleşen sensör yok',
-  TEMP_SENSORS_HELP: 'Otomatik olarak bulunur. Yeniden adlandırmak veya fark ayarlamak için bir sensöre tıklayın',
+  NO_SENSORS_MATCH: 'Aramanızla eşleşen sensör bulunamadı', // DeepL
+  TEMP_SENSORS_HELP: 'Otomatik olarak bulunur. Bir sensöre tıklayarak adını değiştirebilir veya ofset ayarlayabilirsiniz', // DeepL
   FREE_GPIOS: 'Boş GPIO\'lar',
   SYSTEM_SENSOR: 'Sistem sensörü',
-  MASK_FAVORITE: 'Favori',
-  MASK_READONLY: 'Yazma kapalı',
+  MASK_FAVORITE: 'Favoriler', // DeepL
+  MASK_READONLY: 'Engelli için yazın', // DeepL
   MASK_NO_API: 'MQTT/API yok',
   MASK_HIDDEN: 'Gizli',
   MASK_REMOVED: 'Kaldırıldı',
   FILTER_ALL: 'Tümü',
   NUM_SELECTED: 'Seçili: {num}',
-  ALL_SHOWN: 'Gösterilenlerin tümü: {num}',
-  BULK_HINT: 'Düğmeler işaretli satırları, hiçbiri işaretli değilse gösterilen tüm satırları değiştirir.',
-  CLEAR_SELECTION: 'Seçimi temizle',
+  ALL_SHOWN: 'Tümünü göster: {num}', // DeepL
+  BULK_HINT: 'Düğmeler, işaretli satırları değiştirir; hiçbir satır işaretli değilse ise görüntülenen tüm satırları değiştirir.', // DeepL
+  CLEAR_SELECTION: 'Seçimi netleştirin', // DeepL
   NO_ENTITIES_MATCH: 'Eşleşen varlık yok',
   LIMIT_HELP: 'yerleşik sınır için boş bırakın',
-  MIN_ABOVE_MAX: 'Minimum, maksimumdan büyük olamaz',
-  RENAME_DEVICE: 'Cihazı yeniden adlandır',
+  MIN_ABOVE_MAX: 'Minimum değer, maksimum değerden fazla olmamalıdır', // DeepL
+  RENAME_DEVICE: 'Cihazın adını değiştir', // DeepL
   WEEKLY: 'Haftalık',
   EVERY_DAY: 'Her gün',
-  SCHEDULER_NO_COMMANDS: 'Önce Komutlar sayfasından bir komut ekleyin',
-  DU_SETTINGS: 'EMS-ESP ayarları',
-  DU_SETTINGS_TEXT: 'EMS-ESP ayarlarının yedeği: ağ, MQTT, özelleştirmeler, zamanlayıcı, özel varlıklar ve modüller. Bir ayar veya yedek dosyası yüklemek EMS-ESP\'yi yeniden başlatır.',
-  HB_TITLE: 'Isıtma ayarları',
-  HB_TEXT: 'Kazan, termostat ve diğer EMS cihazlarının güncel değerlerini kaydeder, böylece bunları daha sonra, örneğin bir cihazı değiştirdikten sonra geri yükleyebilirsiniz. Salt okunur varlıklar ve komutlar geri yüklemede asla değiştirilmez.',
-  HB_BACKUP: 'Isıtma ayarlarını yedekle',
-  HB_RESTORE: 'Isıtma ayarlarını geri yükle',
-  DATA_EXPORT: 'Veri dışa aktarma',
-  DATA_EXPORT_TEXT: 'Destek ve analiz için. Bu dosyalar geri yüklenemez.',
+  SCHEDULER_NO_COMMANDS: 'Önce Komutlar sayfasına bir komut ekleyin', // DeepL
+  DU_SETTINGS: 'EMS-ESP Ayarları', // DeepL
+  DU_SETTINGS_TEXT: 'EMS-ESP ayarlarının yedeklenmesi: ağ, MQTT, Özelleştirme, Zamanlayıcı, Özel Varlıklar ve Modüller. Bir ayar veya yedekleme dosyasının yüklenmesi, EMS-ESP\'yi yeniden başlatır.', // DeepL
+  HB_TITLE: 'Isıtma Ayarları', // DeepL
+  HB_TEXT: 'Kazanın, termostatın ve diğer EMS cihazlarının mevcut değerlerini kaydeder; böylece, örneğin bir cihazı değiştirdikten sonra bu değerleri daha sonra geri yükleyebilirsiniz. Salt okunur varlıklar ve komutlar, geri yükleme işlemiyle asla değiştirilmez.', // DeepL
+  HB_BACKUP: 'Isıtma ayarlarını yedekleyin', // DeepL
+  HB_RESTORE: 'Isıtma Ayarlarını Geri Yükle', // DeepL
+  DATA_EXPORT: 'Veri Dışa Aktarma', // DeepL
+  DATA_EXPORT_TEXT: 'Destek ve analiz amaçlıdır. Bu dosyalar geri yüklenemez.', // DeepL
   NUM_VALUES: '{num} değer',
-  HB_NOTHING: 'yedeklenecek bir şey yok',
+  HB_NOTHING: 'destekleyecek bir şey yok', // DeepL
   FILE_NAME: 'Dosya adı',
-  HB_NOTE: 'Not (isteğe bağlı, geri yüklerken tekrar gösterilir)',
-  HB_INCOMPLETE: 'Henüz veri yolundan okunmamış değerler dahil edilmez. Eksiksiz bir yedek için yeniden başlatmadan sonra birkaç dakika bekleyin.',
-  HB_RESTORE_TEXT: 'Bir ısıtma ayarları yedeği seçin. Değişiklikleri kontrol edip onaylayana kadar hiçbir şey yazılmaz.',
-  HB_DROP: 'Seçmek için tıklayın veya bir ısıtma yedeği dosyasını (.json) buraya bırakın',
-  HB_INVALID: 'Bu bir ısıtma ayarları yedeği değil',
-  HB_OTHER_FILE: 'Başka bir dosya seç',
+  HB_NOTE: 'Not (isteğe bağlı, geri yüklediğinizde tekrar gösterilir)', // DeepL
+  HB_INCOMPLETE: 'Henüz veriyolundan okunmamış değerler gösterilmez. Tam bir yedekleme için yeniden başlatmanın ardından birkaç dakika bekleyin.', // DeepL
+  HB_RESTORE_TEXT: 'Bir ısıtma ayarları yedeği seçin. Değişiklikleri kontrol edip onaylayana kadar hiçbir şey kaydedilmez.', // DeepL
+  HB_DROP: 'Seçmek için tıklayın veya bir ısıtma yedekleme dosyasını (.json) buraya bırakın', // DeepL
+  HB_INVALID: 'Bu, ısıtma ayarlarının yedeklenmesi değildir', // DeepL
+  HB_OTHER_FILE: 'Başka bir dosya seçin', // DeepL
   HB_SAME_DEVICE: 'aynı cihaz',
   HB_NOT_CONNECTED: 'bağlı değil',
-  HB_OTHER_DEVICE: 'farklı cihaz (yedekte ürün kimliği {backup}, bağlı olan {now}), atlandı',
-  HB_UNIT_MISMATCH: 'Bu yedekteki sıcaklıklar {unit} cinsindendir. Geri yüklemeden önce uygulama ayarlarında sıcaklık birimini değiştirin.',
-  HB_CHANGED: 'Değişen',
+  HB_OTHER_DEVICE: 'farklı cihaz (yedeklemede ürün kimliği {backup}, {now} bağlı), atlandı', // DeepL
+  HB_UNIT_MISMATCH: 'Bu yedeklemede sıcaklıklar {unit} biriminde belirtilmiştir. Geri yüklemeden önce Uygulama ayarlarından sıcaklık birimini değiştirin.', // DeepL
+  HB_CHANGED: 'Değiştirildi', // DeepL
   ALL: 'Tümü',
   HB_NOW: 'Şimdi',
-  HB_BACKUP_VALUE: 'Yedek',
-  HB_NOT_AVAILABLE: 'kullanılamıyor',
-  HB_SENDING: 'gönderiliyor',
-  HB_WRITTEN: 'yazıldı',
+  HB_BACKUP_VALUE: 'Yedekleme', // DeepL
+  HB_NOT_AVAILABLE: 'mevcut değil', // DeepL
+  HB_SENDING: 'gönderme', // DeepL
+  HB_WRITTEN: 'yazılmış', // DeepL
   HB_RESTORE_NUM: '{num} değeri geri yükle',
   RESTORE: 'Geri yükle',
   HB_CONFIRM: '{file} dosyasındaki {num} değer EMS cihazlarına yazılsın mı?',
-  HB_CONFIRM_TEXT: 'Değerler tek tek gönderilir. Bir cihaz birini reddederse diğerleri yine de gönderilir.',
+  HB_CONFIRM_TEXT: 'Değerler teker teker gönderilir. Bir cihaz bir değeri reddederse, geri kalanlar yine de gönderilir.', // DeepL
   HB_DONE: '{num} değer yazıldı',
-  HB_DONE_FAILED: '{num} başarısız. Cihazlar kurulumcu seviyesindeki değerleri sıklıkla reddeder; ayrıntılar sistem günlüğündedir.',
-  HB_NO_CHANGES: 'Yedekten farklı bir şey yok',
+  HB_DONE_FAILED: '{num} başarısız oldu. Cihazlar genellikle kurulumcu düzeyindeki değerleri kabul etmez; ayrıntılar Sistem Günlüğü\'nde yer almaktadır.', // DeepL
+  HB_NO_CHANGES: 'Yedeklemeden hiçbir farkı yoktur', // DeepL
   HB_DIFFERENT_DEVICE: 'farklı cihaz',
   SELECT_ALL: 'Tümünü seç',
   DASHBOARD_EMPTY: 'Henüz gösterilecek bir şey yok',
-  NO_DEVICES: 'Henüz EMS cihazı bulunamadı',
+  NO_DEVICES: 'Henüz hiçbir EMS cihazı bulunamadı', // DeepL
   ADD_COMMAND: 'Komut ekle',
-  EDIT_COMMAND: 'Komutu düzenle',
+  EDIT_COMMAND: 'Düzenle komutu', // DeepL
   RUN_COMMAND: 'Komutu çalıştır',
   ADD_SCHEDULE: 'Zamanlama ekle',
-  EDIT_SCHEDULE: 'Zamanlamayı düzenle',
+  EDIT_SCHEDULE: 'Programı düzenle', // DeepL
   ADD_ENTITY: 'Varlık ekle',
   EDIT_ENTITY: 'Varlığı düzenle',
-  ADD_ANALOG_SENSOR: 'Analog sensör ekle',
+  ADD_ANALOG_SENSOR: 'Analog sensör ekleyin', // DeepL
   EDIT_ANALOG_SENSOR: 'Analog sensörü düzenle',
-  REMOVE_ANALOG_SENSOR: 'Analog sensörü kaldır',
+  REMOVE_ANALOG_SENSOR: 'Analog sensörü kaldırın', // DeepL
   REMOVE_SENSOR_TEXT: '"{name}" sensörü hemen kaldırılır.',
   EDIT_TEMP_SENSOR: 'Sıcaklık sensörünü düzenle',
-  INSTALL_FIRMWARE: 'Yazılımı yükle ({channel})',
+  INSTALL_FIRMWARE: 'Firmware\'i yükleyin ({channel})', // DeepL
   PARTITION: 'Bölüm',
-  PULSE: 'Darbe'
+  PULSE: 'Pulse', // DeepL
 };
 
 export default tr;

@@ -3,28 +3,28 @@ import type { Translation } from '../i18n-types';
 const cs: Translation = {
   LANGUAGE: 'Jazyk',
   RETRY: 'Zkusit znovu',
-  IS_REQUIRED: '{0} je vyžadováno',
+  IS_REQUIRED: 'Pole {0} je povinné', // DeepL
   SIGN_IN: 'Přihlásit se',
   SIGN_IN_SUBTITLE: 'Brána pro topné systémy EMS',
   SIGN_OUT: 'Odhlásit se',
   USERNAME: 'Uživatelské jméno',
   PASSWORD: 'Heslo',
-  SETTINGS_OF: '{0} Nastavení ',
+  SETTINGS_OF: 'Nastavení {0}', // DeepL
   HELP: 'Nápověda',
   LOGGED_IN: 'Přihlášen jako {name}',
-  PLEASE_SIGNIN: 'Pro pokračování se prosím přihlaste',
-  UPLOAD_SUCCESSFUL: 'Nahrání bylo úspěšné',
-  DOWNLOAD_SUCCESSFUL: 'Stažení bylo úspěšné',
-  INVALID_LOGIN: 'Neplatné přihlašovací údaje',
+  PLEASE_SIGNIN: 'Přihlaste se, prosím, abyste mohli pokračovat', // DeepL
+  UPLOAD_SUCCESSFUL: 'Nahrání proběhlo úspěšně', // DeepL
+  DOWNLOAD_SUCCESSFUL: 'Stáhnout úspěšně', // DeepL
+  INVALID_LOGIN: 'Nesprávné uživatelské jméno nebo heslo', // DeepL
   NETWORK: 'Síť',
   SECURITY: 'Zabezpečení',
   ONOFF_CAP: 'ZAP/VYP',
-  ONOFF: 'zap/vyp',
+  ONOFF: 'zapnuto/vypnuto', // DeepL
   TYPE: 'Typ',
   ENTITIES: 'entity',
   EXPORT: 'Exportovat',
   FAVORITES: "Oblíbené",
-  ID_OF: '{0} ID',
+  ID_OF: 'ID {0}', // DeepL
   DEVICE: 'Zařízení',
   PRODUCT: 'Produkt',
   BRAND: 'Značka',
@@ -40,33 +40,33 @@ const cs: Translation = {
   CANCEL: 'Zrušit',
   REMOVE_ALL: 'Odebrat vše',
   APPLY_CHANGES: 'Použít změny ({0})',
-  UPDATE: 'Aktualizovat',
-  REMOVE: 'Odebrat',
+  UPDATE: 'Aktualizace', // DeepL
+  REMOVE: 'Odstranit', // DeepL
   RESET: 'Obnovit',
   PROBLEM_UPDATING: 'Problém s aktualizací',
   PROBLEM_LOADING: 'Problém s načítáním',
-  ANALOG_SENSOR: 'Analogový senzor',
+  ANALOG_SENSOR: 'Analogové senzory', // DeepL
   ANALOG_SENSORS: 'Analogové senzory',
   SETTINGS: 'Nastavení',
-  UPDATED_OF: '{0} Aktualizováno',
+  UPDATED_OF: '{0} aktualizováno', // DeepL
   OFFSET: 'Offset',
   FACTOR: 'Faktor',
-  FREQ: 'Frekvence',
+  FREQ: 'Četnost', // DeepL
   DUTY_CYCLE: 'Pracovní cyklus',
-  UNIT: 'Jednotka',
+  UNIT: 'UoM', // DeepL
   STARTVALUE: 'Počáteční hodnota',
   EDIT: 'Upravit',
   SENSOR: 'Senzor',
   TEMP_SENSORS: 'Teplotní senzory',
-  WRITE_CMD_SENT: 'Zapisovací příkaz odeslán',
-  EMS_BUS_WARNING: 'EMS sběrnice je odpojena. Pokud toto varování přetrvává i po několika sekundách, zkontrolujte nastavení a profil desky',
+  WRITE_CMD_SENT: 'Odeslán příkaz', // DeepL
+  EMS_BUS_WARNING: 'Sběrnice EMS je odpojena. Pokud toto varování přetrvává i po několika sekundách, zkontrolujte prosím nastavení a profil desky.', // DeepL
   CONNECTED: 'Připojeno',
-  TX_ISSUES: 'Problémy s Tx - zkontrolujte režim Tx',
+  TX_ISSUES: 'Problémy s vysíláním – zkontrolujte režim vysílání', // DeepL
   DISCONNECTED: 'Odpojeno',
   DATA_TRAFFIC: 'Datový provoz',
-  EMS_DEVICE: 'EMS zařízení',
+  EMS_DEVICE: 'Zařízení EMS', // DeepL
   SUCCESS: 'ÚSPĚCH',
-  FAIL: 'SELHÁNÍ',
+  FAIL: 'NEÚSPĚCH', // DeepL
   QUALITY: 'KVALITA',
   STATUS_NAMES: [
     'Přijaté EMS telegramy (Rx)',
@@ -87,127 +87,127 @@ const cs: Translation = {
   APPLICATION_RESTARTING: 'EMS-ESP se restartuje',
   BOARD_PROFILE: 'Profil desky',
   CUSTOM: 'Vlastní',
-  GPIO_OF: 'GPIO {0}',
+  GPIO_OF: '{0} GPIO', // DeepL
   BUTTON: 'Tlačítko',
   TEMPERATURE: 'Teplota',
   PHY_TYPE: 'Typ Eth PHY',
   DISABLED: 'zakázáno',
-  TX_MODE: 'EMS Tx režim',
+  TX_MODE: 'Režim EMS Tx', // DeepL
   EMS_BUS: '{{Bus|EMS Bus}}',
   HARDWARE: 'Hardware',
   LANGUAGE_ENTITIES: 'Jazyk (pro entity zařízení)',
   HIDE_LED: 'Skrýt LED',
-  ENABLE_TELNET: 'Povolit Telnet konzoli',
+  ENABLE_TELNET: 'Zapnout konzoli Telnet', // DeepL
   ENABLE_ANALOG: 'Povolit analogové senzory',
-  CONVERT_FAHRENHEIT: 'Převést hodnoty teploty na Fahrenheit',
-  READONLY: 'Povolit režim jen pro čtení (blokuje všechny odchozí příkazy EMS Tx Write)',
-  WRITE_PROTECTION: 'Chránit zařízení EMS před opakovanými a častými zápisy',
-  WRITE_LIMIT: 'Max. počet zápisů za minutu (0 = bez limitu)',
-  WRITE_LIMIT_REFUSE: 'Odmítnout zápisy nad limit (jinak se jen zapíše varování do logu)',
-  UNDERCLOCK_CPU: 'Snížit takt CPU',
-  REMOTE_TIMEOUT: 'Časový limit vzdáleného připojení',
-  REMOTE_TIMEOUT_EN: 'Zakázat vzdálený přístup při chybějící teplotě v místnosti',
-  HEATINGOFF: 'Vynutit vypnuté topení při spuštění kotle',
-  MIN_DURATION: 'Čekací doba',
-  ENABLE_SHOWER_TIMER: 'Povolit časovač sprchy',
-  ENABLE_SHOWER_ALERT: 'Povolit upozornění na sprchu',
+  CONVERT_FAHRENHEIT: 'Převádějte hodnoty teploty na stupně Fahrenheita', // DeepL
+  READONLY: 'Zapněte režim pouze pro čtení (blokuje všechny odchozí příkazy EMS Tx pro zápis)', // DeepL
+  WRITE_PROTECTION: 'Chraňte zařízení EMS před opakovaným a častým zapisováním', // DeepL
+  WRITE_LIMIT: 'Max. počet zápisů za minutu (0 = bez omezení)', // DeepL
+  WRITE_LIMIT_REFUSE: 'Zápisy přesahující limit se odmítají (v opačném případě se zaznamená pouze varování)', // DeepL
+  UNDERCLOCK_CPU: 'Snižte taktovací frekvenci procesoru', // DeepL
+  REMOTE_TIMEOUT: 'Časový limit pro vzdálené připojení', // DeepL
+  REMOTE_TIMEOUT_EN: 'Vypnout dálkové ovládání při chybějící teplotě v místnosti', // DeepL
+  HEATINGOFF: 'Spustit kotel s vypnutým nuceným vytápěním', // DeepL
+  MIN_DURATION: 'Doba čekání', // DeepL
+  ENABLE_SHOWER_TIMER: 'Zapnout časovač sprchy', // DeepL
+  ENABLE_SHOWER_ALERT: 'Zapnout upozornění na sprchu', // DeepL
   TRIGGER_TIME: 'Čas spuštění',
-  COLD_SHOT_DURATION: 'Délka studeného výtrysku',
+  COLD_SHOT_DURATION: 'Doba trvání studeného spouštění', // DeepL
   FORMATTING_OPTIONS: 'Možnosti formátování',
-  BOOLEAN_FORMAT_DASHBOARD: 'Formát booleovské hodnoty na webu',
-  BOOLEAN_FORMAT_API: 'Formát booleovské hodnoty v API/MQTT',
-  ENUM_FORMAT: 'Formát enum v API/MQTT',
-  INDEX: 'Index',
-  ENABLE_PARASITE: 'Povolit 1-Wire parazitní napájení',
-  LOG_HEX: 'Protokolovat EMS telegramy v hexadecimálním formátu',
-  ENABLE_SYSLOG: 'Povolit Syslog',
+  BOOLEAN_FORMAT_DASHBOARD: 'Web ve formátu Boolean', // DeepL
+  BOOLEAN_FORMAT_API: 'Boolovský formát API/MQTT', // DeepL
+  ENUM_FORMAT: 'Formát Enum API/MQTT', // DeepL
+  INDEX: 'Rejstřík', // DeepL
+  ENABLE_PARASITE: 'Zapnout napájení z 1-Wire', // DeepL
+  LOG_HEX: 'Zaznamenávejte telegramy EMS v hexadecimálním formátu', // DeepL
+  ENABLE_SYSLOG: 'Zapnout Syslog', // DeepL
   LOG_LEVEL: 'Úroveň protokolování',
-  MARK_INTERVAL: 'Interval označení',
-  SECONDS: 'sekundy',
-  MINUTES: 'minuty',
+  MARK_INTERVAL: 'Označit interval', // DeepL
+  SECONDS: 'sekund', // DeepL
+  MINUTES: 'minut', // DeepL
   HOURS: 'hodiny',
-  RESTART: 'Restart',
-  RESTART_TEXT: 'Pro projevení změn musí být zařízení EMS-ESP restartováno',
-  RESTART_CONFIRM: 'Opravdu chcete restartovat zařízení EMS-ESP?',
+  RESTART: 'Restartovat', // DeepL
+  RESTART_TEXT: 'Aby se změna nastavení systému projevila, je třeba EMS-ESP restartovat', // DeepL
+  RESTART_CONFIRM: 'Opravdu chcete restartovat EMS-ESP?', // DeepL
   COMMAND: 'Příkaz',
-  CUSTOMIZATIONS_RESTART: 'Všechna přizpůsobení byla odstraněna. Restartování…',
-  CUSTOMIZATIONS_FULL: 'Vybrané entity překročily limit. Ukládejte je postupně',
-  CUSTOMIZATIONS_SAVED: 'Přizpůsobení uloženo',
-  CUSTOMIZATIONS_HELP_1: 'Vyberte zařízení a přizpůsobte možnosti entit nebo klikněte pro přejmenování',
+  CUSTOMIZATIONS_RESTART: 'Všechna přizpůsobení byla odstraněna. Restartuji…', // DeepL
+  CUSTOMIZATIONS_FULL: 'Počet vybraných entit překročil limit. Ukládejte prosím po částech.', // DeepL
+  CUSTOMIZATIONS_SAVED: 'Aktualizovány přizpůsobení', // DeepL
+  CUSTOMIZATIONS_HELP_1: 'Vyberte zařízení a přizpůsobte si možnosti entit', // DeepL
   CUSTOMIZATIONS_HELP_2: 'označit jako oblíbené',
   CUSTOMIZATIONS_HELP_3: 'zakázat akci zápisu',
   CUSTOMIZATIONS_HELP_4: 'vyloučit z MQTT a API',
-  CUSTOMIZATIONS_HELP_5: 'skrýt ze Zařízení',
-  CUSTOMIZATIONS_HELP_6: 'odstranit z paměti',
+  CUSTOMIZATIONS_HELP_5: 'skrýt ze zařízení', // DeepL
+  CUSTOMIZATIONS_HELP_6: 'vymazat z paměti', // DeepL
   SELECT_DEVICE: 'Vyberte zařízení',
-  MODIFIED: 'Upravené',
-  RESET_SELECTED: 'Obnovit vybrané',
+  MODIFIED: 'Upraveno', // DeepL
+  RESET_SELECTED: 'Vynulovat výběr', // DeepL
   OPTIONS: 'Možnosti',
   NAME: 'Název',
   CUSTOMIZATIONS_RESET: 'Opravdu chcete odstranit všechna přizpůsobení?',
   SYSTEM_INFORMATION: 'Informace o systému',
-  HELP_INFORMATION_1: 'Navštivte online wiki pro pokyny, jak konfigurovat EMS-ESP',
-  HELP_INFORMATION_2: 'Pro živý chat s komunitou se připojte k našemu serveru Discord',
-  HELP_INFORMATION_3: 'Požádejte o funkci nebo nahlášte chybu',
-  HELP_INFORMATION_4: 'Připojte informace o systému při hlášení problému pro rychlejší odezvu',
+  HELP_INFORMATION_1: 'Navštivte online wiki, kde najdete pokyny k nastavení EMS-ESP', // DeepL
+  HELP_INFORMATION_2: 'Chcete-li se zapojit do živého komunitního chatu, připojte se k našemu serveru Discord', // DeepL
+  HELP_INFORMATION_3: 'Chcete-li požádat o novou funkci nebo nahlásit chybu', // DeepL
+  HELP_INFORMATION_4: 'Při hlášení problému uveďte informace o svém systému, aby byla reakce rychlejší', // DeepL
   UPLOAD: 'Nahrát',
   DOWNLOAD: '{{S|s|s}}táhnout',
-  INSTALL: 'Instalovat',
-  FAILED: 'neúspěšné',
+  INSTALL: 'Instalace', // DeepL
+  FAILED: 'selhalo', // DeepL
   SYSTEM: 'Systém',
-  LOG_OF: '{0} Záznam',
-  STATUS_OF: '{0} Stav',
+  LOG_OF: '{0} Protokol', // DeepL
+  STATUS_OF: 'Stav {0}', // DeepL
   DOWNLOAD_UPLOAD: 'Stáhnout/Nahrát',
   CLOSE: 'Zavřít',
   COMMAND_GUEST: 'Hosté mohou spustit tento příkaz',
-  TOKENS_RESET: 'Tato aktualizace podepisuje přístupové tokeny novým klíčem zařízení, proto stávající přístupové tokeny API už nefungují. Pro každou integraci, která používá API, například Home Assistant, vytvořte klíč API a použijte ho místo starého tokenu.',
+  TOKENS_RESET: 'Tato aktualizace podepisuje přístupové tokeny novým klíčem zařízení, takže stávající přístupové tokeny API již nefungují. Vytvořte klíč API pro každou integraci, která API využívá, například Home Assistant, a použijte jej namísto starého tokenu.', // DeepL
   API_KEYS: 'Klíče API',
-  API_KEYS_TEXT: 'Klíče API umožňují integracím jako Home Assistant a skriptům používat API. Klíč pošlete v hlavičce "Authorization: Bearer <klíč>". Klíče pro čtení mohou číst hodnoty a spouštět příkazy povolené hostům, klíče pro čtení a zápis mohou přes API vše, co správce.',
+  API_KEYS_TEXT: 'Díky API klíčům mohou integrace, jako je Home Assistant, a skripty využívat API. Klíč odešlete v hlavičce „Authorization: Bearer <KLÍČ>“. Klíče typu „Read“ mohou číst hodnoty a spouštět příkazy, které mohou spouštět hosté, zatímco klíče typu „Read“ a „Write“ mohou provádět vše, co může správce provádět prostřednictvím API.', // DeepL
   API_KEY_ACCESS: 'Přístup',
-  API_KEY_READ: 'Čtení',
-  API_KEY_READ_WRITE: 'Čtení a Zápis',
-  API_KEY_SHOW_ONCE: 'Zkopírujte tento klíč hned a uložte ho bezpečně. Znovu se nezobrazí.',
+  API_KEY_READ: 'Číst', // DeepL
+  API_KEY_READ_WRITE: 'Čtení a zápis', // DeepL
+  API_KEY_SHOW_ONCE: 'Zkopírujte si tento klíč hned teď a uschovejte jej na bezpečném místě. Znovu se již nezobrazí.', // DeepL
   CREATED: 'Vytvořeno',
-  COPY: 'Kopírovat',
+  COPY: 'Text', // DeepL
   COPIED: 'Zkopírováno',
-  USE: 'Použít',
+  USE: 'Použijte', // DeepL
   FACTORY_RESET: 'Obnovení továrního nastavení',
-  SYSTEM_FACTORY_TEXT_DIALOG: 'Opravdu chcete resetovat zařízení EMS-ESP do továrního nastavení?',
+  SYSTEM_FACTORY_TEXT_DIALOG: 'Opravdu chcete obnovit tovární nastavení EMS-ESP?', // DeepL
   STABLE: 'Stabilní',
-  DEVELOPMENT: 'Vývojová verze',
-  UPTIME: 'Doba provozu systému',
+  DEVELOPMENT: 'Vývoj', // DeepL
+  UPTIME: 'Dostupnost systému', // DeepL
   LAST_RESTART: 'Poslední restart',
-  POWER_AND_RESET: 'Napájení a restart',
+  POWER_AND_RESET: 'Napájení a reset', // DeepL
   FREE_MEMORY: 'Volná paměť',
   BUFFER_SIZE: 'Maximální velikost vyrovnávací paměti',
-  COMPACT: 'Kompaktní',
-  SUMMARY: 'Přehled',
+  COMPACT: 'Stručně', // DeepL
+  SUMMARY: 'Shrnutí', // DeepL
   SHOW_MORE: 'Zobrazit dalších {n}',
   SHOW_LESS: 'Zobrazit méně',
-  COREDUMP: 'Výpis pádu',
-  DOWNLOAD_SYSTEM_BACKUP: 'Systémová záloha',
-  ERROR: 'Neočekávaná chyba, zkuste to prosím znovu',
-  TIME_SET: 'Čas nastaven',
-  MANAGE_USERS: 'Spravovat uživatele',
-  USER_WARNING: 'Musí být nastaven alespoň jeden uživatel s oprávněním admin',
+  COREDUMP: 'Crash Dump', // DeepL
+  DOWNLOAD_SYSTEM_BACKUP: 'Zálohování systému', // DeepL
+  ERROR: 'Došlo k neočekávané chybě, zkuste to prosím znovu', // DeepL
+  TIME_SET: 'Nastavený čas', // DeepL
+  MANAGE_USERS: 'Správa uživatelů', // DeepL
+  USER_WARNING: 'Musíte mít nakonfigurovaného alespoň jednoho uživatele s oprávněními správce', // DeepL
   ADD: 'Přidat',
-  TELNET_ENABLED: 'Konzole Telnet je zapnutá. Telnet není šifrovaný, proto ji vypněte v nastavení aplikace, pokud ji nepoužíváte.',
-  TOO_MANY_LOGINS: 'Příliš mnoho neúspěšných přihlášení, zkuste to znovu za několik minut',
-  PASSWORD_KEEP: 'Ponechte prázdné, chcete-li zachovat aktuální heslo',
+  TELNET_ENABLED: 'Telnetová konzole je zapnutá. Telnet není šifrovaný, proto jej v nastavení aplikace vypněte, pokud jej nepoužíváte.', // DeepL
+  TOO_MANY_LOGINS: 'Došlo k příliš mnoha neúspěšným pokusům o přihlášení, zkuste to znovu za několik minut', // DeepL
+  PASSWORD_KEEP: 'Nechte pole prázdné, chcete-li zachovat aktuální heslo', // DeepL
   SETUP_TITLE: 'Nastavte si hesla',
-  SETUP_TEXT: 'Toto zařízení stále používá tovární hesla. Před pokračováním si nastavte vlastní.',
+  SETUP_TEXT: 'Toto zařízení stále používá výchozí hesla. Než budete pokračovat, nastavte si vlastní.', // DeepL
   SETUP_ADMIN_PASSWORD: 'Nové heslo pro {name}',
-  SETUP_AP_PASSWORD: 'Nové heslo přístupového bodu',
-  SETUP_AP_REQUIRED: 'Zatím není nastavena žádná WiFi síť, takže přístup je přes přístupový bod. 8-63 znaků, použije se při dalším spuštění přístupového bodu.',
-  SETUP_AP_OPTIONAL: 'Doporučeno. 8-63 znaků, použije se při dalším spuštění přístupového bodu. Ponechte prázdné pro zachování aktuálního.',
+  SETUP_AP_PASSWORD: 'Nové heslo k přístupovému bodu', // DeepL
+  SETUP_AP_REQUIRED: 'Wi-Fi síť zatím není nastavena, takže přístupovým bodem je vstupní brána. 8–63 znaků, použije se při příštím spuštění přístupového bodu.', // DeepL
+  SETUP_AP_OPTIONAL: 'Doporučeno: 8–63 znaků, použije se při příštím spuštění přístupového bodu. Nechte pole prázdné, chcete-li zachovat aktuální hodnotu.', // DeepL
   SETUP_AP_DEFAULT: 'Přístupový bod stále používá tovární heslo. Nastavte si vlastní v nastavení přístupového bodu.',
-  SETUP_VIEW_USER: 'Volitelné: přidejte hostujícího uživatele jen pro prohlížení.',
-  NETWORK_CORS_ORIGIN_HELP: 'Webová adresa, která smí volat API z prohlížeče, například http://homeassistant.local:8123',
-  NETWORK_CORS_WILDCARD: 'S * může API volat každá webová stránka otevřená v prohlížeči ve vaší síti. Místo toho zadejte přesnou adresu.',
-  NETWORK_ALLOWED_HOSTS: 'Povolené názvy hostitele',
-  NETWORK_ALLOWED_HOSTS_HELP: 'Další názvy, pod kterými lze toto zařízení otevřít v prohlížeči, například ems-esp.fritz.box nebo název reverse proxy. IP adresa, název hostitele a název.local fungují vždy',
-  NOT_ENABLED: 'Nepovoleno',
-  ERRORS_OF: '{0} chyby',
+  SETUP_VIEW_USER: 'Volitelně: přidejte hosta s právy pouze pro prohlížení.', // DeepL
+  NETWORK_CORS_ORIGIN_HELP: 'Webová adresa umožňující volání API z prohlížeče, například http://homeassistant.local:8123', // DeepL
+  NETWORK_CORS_WILDCARD: 'Pomocí * může API volat jakákoli webová stránka otevřená v prohlížeči ve vaší síti. Místo toho zadejte přesnou adresu.', // DeepL
+  NETWORK_ALLOWED_HOSTS: 'Povolené názvy hostitelů', // DeepL
+  NETWORK_ALLOWED_HOSTS_HELP: 'Další názvy, pod kterými lze toto zařízení otevřít v prohlížeči, jsou například ems-esp.fritz.box nebo název reverzního proxy serveru. Jeho IP adresa, název hostitele a hostname.local fungují vždy.', // DeepL
+  NOT_ENABLED: 'Není povoleno', // DeepL
+  ERRORS_OF: '{0} chyb', // DeepL
   DISCONNECT_REASON: 'Důvod odpojení',
   MQTT_BASE_TOPIC: 'Základní téma',
   LAST_DISCONNECT: 'Poslední odpojení',
@@ -215,102 +215,102 @@ const cs: Translation = {
   ENABLE_MQTT: 'Povolit MQTT',
   BROKER: 'Broker',
   CLIENT: 'Klient',
-  BASE_TOPIC: 'Základní téma',
+  BASE_TOPIC: 'Základ', // DeepL
   OPTIONAL: 'volitelné',
-  MQTT_FORMAT: 'Formát Téma/Payload',
-  MQTT_NEST_1: 'Vnořené do jednoho tématu',
-  MQTT_NEST_2: 'Jako samostatná témata',
-  MQTT_RESPONSE: 'Publikovat výstup příkazů do tématu `response`',
-  MQTT_PUBLISH_TEXT_1: 'Publikovat témata jednotlivých hodnot při změně',
-  MQTT_PUBLISH_TEXT_2: 'Publikovat do příkazových témat (ioBroker)',
-  MQTT_PUBLISH_TEXT_3: 'Povolit MQTT Discovery',
-  MQTT_PUBLISH_TEXT_4: 'Prefix pro Discovery témata',
-  MQTT_PUBLISH_TEXT_5: 'Typ Discovery',
-  MQTT_INPUT_NUMBER_FORMAT: 'Formát čísla',
+  MQTT_FORMAT: 'Formát tématu/užitečného obsahu', // DeepL
+  MQTT_NEST_1: 'Vnořeno do jediného tématu', // DeepL
+  MQTT_NEST_2: 'Jako jednotlivá témata', // DeepL
+  MQTT_RESPONSE: 'Zveřejňujte výstup příkazů do tématu `response`', // DeepL
+  MQTT_PUBLISH_TEXT_1: 'Publikujte témata s jednou hodnotou při změně', // DeepL
+  MQTT_PUBLISH_TEXT_2: 'Publikujte do témat příkazů (ioBroker)', // DeepL
+  MQTT_PUBLISH_TEXT_3: 'Povolit vyhledávání MQTT', // DeepL
+  MQTT_PUBLISH_TEXT_4: 'Předpona pro témata vyhledávání', // DeepL
+  MQTT_PUBLISH_TEXT_5: 'Typ zjištění', // DeepL
+  MQTT_INPUT_NUMBER_FORMAT: 'Formát zadávaných čísel', // DeepL
   MQTT_PUBLISH_INTERVALS: 'Intervaly publikování',
   MQTT_INT_BOILER: 'Kotle a tepelná čerpadla',
   MQTT_INT_THERMOSTATS: 'Termostaty',
   MQTT_INT_SOLAR: 'Solární moduly',
-  MQTT_INT_MIXER: 'Směšovací moduly',
+  MQTT_INT_MIXER: 'Moduly směšovačů', // DeepL
   MQTT_INT_WATER: 'Vodní moduly',
-  MQTT_QUEUE: 'MQTT fronta',
-  DEFAULT: 'Výchozí',
-  MQTT_ENTITY_FORMAT: 'Formát ID entity',
-  MQTT_ENTITY_FORMAT_0: 'Jediná instance, dlouhý název (v3.4)',
-  MQTT_ENTITY_FORMAT_1: 'Jediná instance, krátký název',
+  MQTT_QUEUE: 'Fronta MQTT', // DeepL
+  DEFAULT: 'Výchozí nastavení', // DeepL
+  MQTT_ENTITY_FORMAT: 'Formát identifikátoru entity', // DeepL
+  MQTT_ENTITY_FORMAT_0: 'Jedna instance, dlouhý název (v3.4)', // DeepL
+  MQTT_ENTITY_FORMAT_1: 'Jedna instance, krátký název', // DeepL
   MQTT_ENTITY_FORMAT_2: 'Více instancí, krátký název',
   MQTT_CLEAN_SESSION: 'Nastavit čistou relaci',
-  MQTT_RETAIN_FLAG: 'Vždy nastavit příznak Retain',
+  MQTT_RETAIN_FLAG: 'Vždy nastavte příznak zachování', // DeepL
   MQTT_COMMANDS: 'Příkazy přijaté přes MQTT',
   MQTT_COMMANDS_0: 'Vypnuto, pouze čtení hodnot',
-  MQTT_COMMANDS_1: 'Měnit hodnoty a spouštět Příkazy',
-  MQTT_COMMANDS_2: 'Vše, i systémové příkazy',
+  MQTT_COMMANDS_1: 'Změna hodnot a spouštění příkazů', // DeepL
+  MQTT_COMMANDS_2: 'Vše, včetně systémových příkazů', // DeepL
   INACTIVE: 'Neaktivní',
   ACTIVE: 'Aktivní',
   UNKNOWN: 'Neznámé',
   SET_TIME: 'Nastavit čas',
-  SET_TIME_TEXT: 'Zadejte místní datum a čas pro nastavení času',
+  SET_TIME_TEXT: 'Zadejte níže místní datum a čas pro nastavení času', // DeepL
   LOCAL_TIME: 'Místní čas',
   UTC_TIME: 'Čas UTC',
-  ENABLE_NTP: 'Povolit NTP',
-  NTP_SERVER: 'NTP server',
-  TIME_ZONE: 'Časová zóna',
+  ENABLE_NTP: 'Zapněte NTP', // DeepL
+  NTP_SERVER: 'Server NTP', // DeepL
+  TIME_ZONE: 'Časové pásmo', // DeepL
   ACCESS_POINT: 'Přístupový bod',
-  AP_PROVIDE: 'Povolit přístupový bod',
-  AP_PROVIDE_TEXT_2: 'Když není síťové připojení nalezeno',
+  AP_PROVIDE: 'Zapnout přístupový bod', // DeepL
+  AP_PROVIDE_TEXT_2: 'Pokud není nalezeno síťové připojení', // DeepL
   AP_PROVIDE_TEXT_3: 'Nikdy',
   AP_PREFERRED_CHANNEL: 'Preferovaný kanál',
   AP_HIDE_SSID: 'Skrýt SSID',
   AP_CLIENTS: 'Klienti AP',
   AP_MAX_CLIENTS: 'Maximální počet klientů',
-  AP_LOCAL_IP: 'Místní IP',
-  IDLE: 'Nečinný',
-  SCAN_AGAIN: 'Skenovat znovu',
-  NETWORK_NO_WIFI: 'Nenalezeny žádné WiFi sítě',
-  NETWORK_BLANK_BSSID: 'ponechte prázdné pokud použijete jen SSID',
-  TX_POWER: 'Vysílací výkon',
+  AP_LOCAL_IP: 'Lokální IP adresa', // DeepL
+  IDLE: 'Nečinnost', // DeepL
+  SCAN_AGAIN: 'Zkontrolujte znovu', // DeepL
+  NETWORK_NO_WIFI: 'Nebyly nalezeny žádné sítě Wi-Fi', // DeepL
+  NETWORK_BLANK_BSSID: 'nechte prázdné, chcete-li použít pouze SSID', // DeepL
+  TX_POWER: 'Výkon vysílače', // DeepL
   HOSTNAME: 'Název hostitele',
-  NETWORK_DISABLE_SLEEP: 'Zakázat režim spánku WiFi',
-  NETWORK_LOW_BAND: 'Použít nižší šířku pásma WiFi',
-  NETWORK_USE_DNS: 'Povolit mDNS službu',
+  NETWORK_DISABLE_SLEEP: 'Vypněte režim spánku Wi-Fi', // DeepL
+  NETWORK_LOW_BAND: 'Využijte nižší šířku pásma Wi-Fi', // DeepL
+  NETWORK_USE_DNS: 'Povolte službu mDNS', // DeepL
   NETWORK_ENABLE_CORS: 'Povolit CORS',
   NETWORK_CORS_ORIGIN: 'Původ CORS',
-  NETWORK_FIXED_IP: 'Použít pevnou IP adresu',
+  NETWORK_FIXED_IP: 'Používejte pevnou IP adresu', // DeepL
   NETWORK_GATEWAY: 'Brána',
   NETWORK_SUBNET: 'Maska podsítě',
   NETWORK_DNS: 'DNS servery',
-  ADDRESS_OF: '{0} Adresa',
-  ADMINISTRATOR: 'Administrátor',
+  ADDRESS_OF: 'Adresa {0}', // DeepL
+  ADMINISTRATOR: 'Správce', // DeepL
   GUEST: 'Host',
-  NEW: 'Nový',
-  NEW_NAME_OF: '{0} Nový název',
+  NEW: 'Nové', // DeepL
+  NEW_NAME_OF: 'Nové jméno {0}', // DeepL
   ENTITY: 'entita',
   MIN: 'min',
   MAX: 'max',
   BLOCK_NAVIGATE_1: 'Máte neuložené změny',
-  BLOCK_NAVIGATE_2: 'Pokud přejdete na jinou stránku, vaše neuložené změny budou ztraceny. Opravdu chcete opustit tuto stránku?',
-  UPLOAD_ABORTED: 'Nahrávání přerušeno',
-  BLOCK_BUSY_1: 'Operace probíhá',
-  BLOCK_BUSY_2: 'Opuštěním stránky nyní operaci přerušíte. Opravdu chcete odejít?',
-  DISCARD: 'Zahodit',
-  COMMANDS_UPDATED: 'Příkazy aktualizovány',
+  BLOCK_NAVIGATE_2: 'Pokud přejdete na jinou stránku, vaše neuložené změny budou ztraceny. Opravdu chcete tuto stránku opustit?', // DeepL
+  UPLOAD_ABORTED: 'Nahrávání bylo přerušeno', // DeepL
+  BLOCK_BUSY_1: 'Stále ve vývoji', // DeepL
+  BLOCK_BUSY_2: 'Opuštění této stránky ji zastaví. Opravdu chcete stránku opustit?', // DeepL
+  DISCARD: 'Zrušit', // DeepL
+  COMMANDS_UPDATED: 'Aktualizované příkazy', // DeepL
   V_REQUIRED: 'Povinné',
-  V_BETWEEN: 'Musí být mezi {min} a {max}',
-  V_MAX_CHARS: 'Nejvýše {max} znaků',
+  V_BETWEEN: 'Musí být v rozmezí {min} a {max}', // DeepL
+  V_MAX_CHARS: 'Musí mít maximálně {max} znaků', // DeepL
   V_CHARS: 'Musí mít {min}–{max} znaků',
-  V_IN_USE: 'Již se používá',
-  V_IP: 'Musí být IP adresa',
-  V_HOSTNAME: 'Musí být platný název hostitele',
-  V_IP_OR_HOSTNAME: 'Musí být IP adresa nebo název hostitele',
-  V_NAME: 'Až {max} znaků: písmena, číslice nebo _',
-  V_USERNAME: 'Až {max} znaků: písmena, číslice, _ nebo .',
+  V_IN_USE: 'Již v používání', // DeepL
+  V_IP: 'Musí se jednat o IP adresu', // DeepL
+  V_HOSTNAME: 'Musí se jednat o platný název hostitele', // DeepL
+  V_IP_OR_HOSTNAME: 'Musí se jednat o IP adresu nebo název hostitele', // DeepL
+  V_NAME: 'Maximálně {max} znaků: písmena, číslice nebo _', // DeepL
+  V_USERNAME: 'Maximálně {max} znaků: písmena, číslice, _ nebo .', // DeepL
   V_DAY: 'Vyberte alespoň jeden den',
-  V_HEX: 'Musí být šestnáctkové číslo',
-  V_FINGERPRINT: 'Musí být otisk SHA-1 (40 šestnáctkových číslic)',
-  V_EXAMPLE: 'Musí vypadat jako {example}',
+  V_HEX: 'Musí se jednat o hexadecimální číslo', // DeepL
+  V_FINGERPRINT: 'Musí se jednat o otisk SHA-1 (40 hexadecimálních číslic)', // DeepL
+  V_EXAMPLE: 'Musí vypadat takto: {example}', // DeepL
   V_NOT_DEFAULT: 'Zvolte jiné heslo',
   ZERO_DISABLES: '0 vypne',
-  MINUS_ONE_DISABLES: '-1 vypne',
+  MINUS_ONE_DISABLES: '-1 vypne zařízení', // DeepL
   LED_TYPE: 'Typ LED',
   PHY_POWER: 'Napájení PHY',
   PHY_CLOCK: 'Hodiny PHY',
@@ -318,355 +318,355 @@ const cs: Translation = {
   PORT: 'Port',
   TIMEOUT: 'Časový limit',
   HOST: 'Hostitel',
-  SMTP_SERVER: 'Server SMTP',
-  KEEP_ALIVE: 'Keep-alive',
+  SMTP_SERVER: 'SMTP server', // DeepL
+  KEEP_ALIVE: 'Udržujte spojení', // DeepL
   MQTT_REFRESH: 'Obnovit MQTT',
-  MQTT_REFRESHED: 'MQTT obnoveno',
+  MQTT_REFRESHED: 'MQTT aktualizováno', // DeepL
   MQTT_R_USER: 'Odpojeno uživatelem',
-  MQTT_R_TCP: 'Spojení TCP ukončeno',
-  MQTT_R_PROTOCOL: 'Verze protokolu nepřijata',
-  MQTT_R_ID: 'ID klienta odmítnuto',
-  MQTT_R_SERVER: 'Server nedostupný',
-  MQTT_R_CREDENTIALS: 'Neplatné přihlašovací údaje',
-  MQTT_R_AUTH: 'Neautorizováno',
-  MQTT_R_FINGERPRINT: 'Otisk TLS nesouhlasí',
-  GPIO_INVALID: 'Neplatné nastavení GPIO',
+  MQTT_R_TCP: 'TCP připojení uzavřeno', // DeepL
+  MQTT_R_PROTOCOL: 'Verze protokolu není přijata', // DeepL
+  MQTT_R_ID: 'ID klienta bylo odmítnuto', // DeepL
+  MQTT_R_SERVER: 'Server není k dispozici', // DeepL
+  MQTT_R_CREDENTIALS: 'Nesprávně zadané přihlašovací údaje', // DeepL
+  MQTT_R_AUTH: 'Bez oprávnění', // DeepL
+  MQTT_R_FINGERPRINT: 'Otisek TLS se neshoduje', // DeepL
+  GPIO_INVALID: 'Neplatná nastavení GPIO', // DeepL
   CONNECTED_VIA: 'Připojeno přes {0}',
-  NETWORK_NOT_FOUND: 'Síť nenalezena',
-  CONNECTION_FAILED: 'Připojení selhalo',
-  CONNECTION_LOST: 'Spojení ztraceno',
-  AP_LINGERING: 'Čeká na nečinnost',
+  NETWORK_NOT_FOUND: 'Síť nebyla nalezena', // DeepL
+  CONNECTION_FAILED: 'Připojení se nezdařilo', // DeepL
+  CONNECTION_LOST: 'Ztráta připojení', // DeepL
+  AP_LINGERING: 'Čekání v nečinnosti', // DeepL
   NONE: 'Žádné',
-  LOG_NO_CONNECTION: 'Žádné spojení se službou protokolu',
-  CHECK_SYSTEM_LOG: 'Možné příčiny najdete v systémovém protokolu',
+  LOG_NO_CONNECTION: 'Žádné připojení ke službě protokolování', // DeepL
+  CHECK_SYSTEM_LOG: 'Zkontrolujte systémový protokol, zda nenajdete možné příčiny', // DeepL
   VALUE_TYPE: 'Typ hodnoty',
   DEFAULT_VALUE: 'Výchozí hodnota',
   DEFAULT_NAME: 'Výchozí název',
   ALWAYS_OFF: 'Vždy vypnuto',
   ALWAYS_ON: 'Vždy zapnuto',
-  NO_DATA: 'Zatím žádné oblíbené entity. Označte je v {customizations} nebo zobrazte všechny entity v {devices}.',
-  STAY: 'Zůstat',
-  LEAVE: 'Odejít',
+  NO_DATA: 'Zatím žádné oblíbené entity. Označte je v sekci {customizations} nebo si prohlédněte všechny entity v sekci {devices}.', // DeepL
+  STAY: 'Zůstaňte', // DeepL
+  LEAVE: 'Nechte', // DeepL
   MENU: 'Nabídka',
   MORE: 'Více',
   SHOW_PASSWORD: 'Zobrazit heslo',
-  STATUS_RUNNING: 'EMS-ESP běží',
+  STATUS_RUNNING: 'EMS-ESP je spuštěno', // DeepL
   NUM_ERRORS: '{num} {{chyb|chyba|chyby|chyby|chyb|chyb}}',
   NUM_WARNINGS: '{num} varování',
   HEAP: 'Heap',
-  METER_USED: '{used} / {total} {unit} využito',
-  MAX_BLOCK: '{num} KB největší blok',
-  MAX_BLOCK_HELP: 'Největší blok je největší část haldy, kterou lze přidělit najednou. Pod 40 KB může webové rozhraní a MQTT selhávat.',
-  FLASH_CHIP: 'Flash čip',
+  METER_USED: '{used} / {total} {unit} spotřebováno', // DeepL
+  MAX_BLOCK: 'Maximální velikost bloku {num} KB', // DeepL
+  MAX_BLOCK_HELP: 'Max block je největší část paměti heap, kterou lze najednou alokovat. Při velikosti pod 40 KB může dojít k selhání webového rozhraní a protokolu MQTT.', // DeepL
+  FLASH_CHIP: 'Čip Flash', // DeepL
   FILE_SYSTEM: 'Souborový systém',
   DETAILS: 'Podrobnosti',
-  RECONNECTS: 'Opětovná připojení',
-  CONNECTS: 'Připojení',
-  ACTIVITY_HELP: 'Několik chyb Rx je normální. Mnoho chyb Tx obvykle znamená špatný režim Tx pro váš kotel.',
-  PAUSE: 'Pozastavit',
-  RESUME: 'Pokračovat',
-  LOG_PAUSED: 'Pozastaveno, zadržené řádky: {num}',
-  FILTER_LINES: 'Filtrovat řádky',
+  RECONNECTS: 'Opětovné připojení', // DeepL
+  CONNECTS: 'Připojuje', // DeepL
+  ACTIVITY_HELP: 'Několik selhání příjmu (Rx) je normální. Mnoho selhání vysílání (Tx) obvykle znamená, že je pro váš kotel nastaven nesprávný režim vysílání.', // DeepL
+  PAUSE: 'Pauza', // DeepL
+  RESUME: 'Životopis', // DeepL
+  LOG_PAUSED: 'Pozastaveno, nové řádky zadrženy: {num}', // DeepL
+  FILTER_LINES: 'Řádky filtru', // DeepL
   SCHEDULER: 'Plánovač',
   SCHEDULER_HELP_1: 'Automatizujte příkazy přidáním naplánovaných událostí níže',
-  SCHEDULER_HELP_2: 'při startu',
-  SCHEDULE: 'Harmonogram',
+  SCHEDULER_HELP_2: 'při spuštění', // DeepL
+  SCHEDULE: 'Časový plán', // DeepL
   TIME: 'Čas',
   TIMER: 'Časovač',
   ONCHANGE: 'Při změně',
   CONDITION: 'Podmínka',
-  SCHEDULE_UPDATED: 'Harmonogram aktualizován',
+  SCHEDULE_UPDATED: 'Aktualizovaný rozvrh', // DeepL
   CUSTOM_ENTITIES: 'Vlastní entity',
-  ENTITIES_HELP_1: 'Definujte vlastní EMS entity nebo dynamické uživatelské proměnné',
-  ENTITIES_UPDATED: 'Entity aktualizovány',
-  WRITEABLE: 'Zapisovatelné',
-  SHOWING: 'Zobrazuje se',
+  ENTITIES_HELP_1: 'Definujte vlastní entity EMS nebo dynamické uživatelské proměnné', // DeepL
+  ENTITIES_UPDATED: 'Aktualizované entity', // DeepL
+  WRITEABLE: 'Upravitelné', // DeepL
+  SHOWING: 'Zobrazit', // DeepL
   SEARCH: 'Hledat',
   CERT: 'Certifikát CA (PEM)',
-  ENABLE_TLS: 'Povolit TLS',
-  TLS_CHECK: 'Ověřit broker pomocí',
+  ENABLE_TLS: 'Zapněte TLS', // DeepL
+  TLS_CHECK: 'Zkontrolujte zprostředkovatele pomocí', // DeepL
   TLS_CHECK_CA: 'Certifikát CA',
   TLS_CHECK_FINGERPRINT: 'Otisk certifikátu (SHA-1)',
-  TLS_CHECK_NONE: 'Nic, neověřuje se',
-  TLS_NOT_CHECKED: 'Spojení je šifrované, ale broker se neověřuje, takže jiné zařízení v síti se za něj může vydávat',
-  ON: 'Zapnuto',
+  TLS_CHECK_NONE: 'Nic, nezaškrtnuto', // DeepL
+  TLS_NOT_CHECKED: 'Připojení je šifrované, ale zprostředkovatel není ověřován, takže se za něj může vydávat jiné zařízení v síti', // DeepL
+  ON: 'Na', // DeepL
   OFF: 'Vypnuto',
   POLARITY: 'Polarita',
-  ACTIVEHIGH: 'Aktivní vysoká',
-  ACTIVELOW: 'Aktivní nízká',
-  UNCHANGED: 'Beze změny',
-  SECURITY_1: 'Přidat nebo odebrat uživatele',
-  DOWNLOAD_UPLOAD_1: 'Stáhnout a nahrát nastavení',
+  ACTIVEHIGH: 'Aktivní vysoká úroveň', // DeepL
+  ACTIVELOW: 'Aktivní nízká úroveň', // DeepL
+  UNCHANGED: 'Beze změn', // DeepL
+  SECURITY_1: 'Přidání nebo odebrání uživatelů', // DeepL
+  DOWNLOAD_UPLOAD_1: 'Stahování a nahrávání nastavení', // DeepL
   MODULES: 'Moduly',
-  MODULES_1: 'Aktivovat nebo deaktivovat externí moduly',
-  MODULES_UPDATED: 'Moduly aktualizovány',
-  MODULES_NONE: 'Nenalezeny žádné externí moduly',
+  MODULES_1: 'Aktivace nebo deaktivace externích modulů', // DeepL
+  MODULES_UPDATED: 'Aktualizované moduly', // DeepL
+  MODULES_NONE: 'Nebyly detekovány žádné externí moduly', // DeepL
   RENAME: 'Přejmenovat',
   ENABLE_MODBUS: 'Povolit Modbus',
-  VIEW_LOG: 'Zobrazit záznam pro diagnostiku problémů',
+  VIEW_LOG: 'Prohlédněte si protokol a diagnostikujte problémy', // DeepL
   SERVICES: 'Služby',
   ALLVALUES: 'Všechny hodnoty',
-  WAIT_FIRMWARE: 'Firmware se nahrává a instaluje',
-  INSTALL_VERSION: 'Tímto se {0} verze {1}',
-  UPDATE_AVAILABLE: 'aktualizace dostupná',
-  LATEST_VERSION: 'Používáte nejnovější verzi {0}firmwaru',
-  PLEASE_WAIT: 'Prosím čekejte',
-  RESTARTING_PRE: 'Bootování',
+  WAIT_FIRMWARE: 'Probíhá nahrávání a instalace firmwaru', // DeepL
+  INSTALL_VERSION: 'Toto bude verze {0} {1}', // DeepL
+  UPDATE_AVAILABLE: 'k dispozici je aktualizace', // DeepL
+  LATEST_VERSION: 'Používáte nejnovější verzi firmwaru {0}', // DeepL
+  PLEASE_WAIT: 'Prosím, počkejte', // DeepL
+  RESTARTING_PRE: 'Spouštění', // DeepL
   RESTARTING_POST: 'Příprava',
-  AUTO_SCROLL: 'Automatické rolování',
+  AUTO_SCROLL: 'Automatické posouvání', // DeepL
   DASHBOARD: 'Dashboard',
-  DEVELOPER_MODE: 'Režim vývojáře',
+  DEVELOPER_MODE: 'Režim pro vývojáře', // DeepL
   DISABLE_RESET: 'Zakázat obnovení továrního nastavení',
-  AUTO_FW_CHECK: 'Automaticky kontrolovat aktualizace firmwaru',
+  AUTO_FW_CHECK: 'Automaticky kontrolovat dostupnost aktualizací firmwaru', // DeepL
   BYTES: 'Bajty',
-  BITMASK: 'Bit Mask',
+  BITMASK: 'Bitová maska', // DeepL
   DUPLICATE: 'Duplikát',
-  DASHBOARD_1: 'Všechny aktivní entity EMS jsou označené jako oblíbené. Všechny vlastní entity, harmonogramy a externí sensory jsou zobrazeny níže.',
-  NO_GPIO: 'Nebylo nalezeno žádné volné GPIO',
+  DASHBOARD_1: 'Níže jsou zobrazeny všechny aktivní entity systému EMS označené jako oblíbené, plus všechny vlastní entity, časové plány a externí senzory.', // DeepL
+  NO_GPIO: 'Nebylo nalezeno žádné dostupné GPIO', // DeepL
   PLATFORM: 'Platforma',
-  RELEASE_TYPE: 'Typ sestavení',
+  RELEASE_TYPE: 'Typ vydání', // DeepL
   FIRMWARE_VERSION_INFO: 'Informace o verzi firmwaru',
-  USER_PROFILE: 'Uživatelský profil',
+  USER_PROFILE: 'Profil uživatele', // DeepL
   ONLINE_HELP: 'online nápověda',
-  UPGRADE_IMPORTANT_MESSAGES: 'Důležité zprávy k aktualizaci',
-  UPGRADE_IMPORTANT_MESSAGES_2: 'Aktualizujete se na novou major verzi. Je vhodné nejprve vytvořit systémovou zálohu. Také zkontrolujte online nápovědu pro jakékoliv závažné změny.',
-  UPGRADE_IMPORTANT_MESSAGES_3: 'Verze 3.10 obsahuje důležité bezpečnostní změny. Nejprve vytvořte systémovou zálohu: po aktualizaci jsou hesla uložena jako hash a starší verze je nedokážou přečíst, takže návrat vyžaduje tuto zálohu. Každé volání API pak vyžaduje klíč API, takže integrace jako Home Assistant je nutné aktualizovat. Před pokračováním si přečtěte důležité změny v online nápovědě.',
-  WARNING_SYSTEM_BACKUP: 'Tímto se vytvoří záloha celé konfigurace a nastavení systému. Hesla a klíče se vynechají, pokud je níže nezahrnete; při obnově zůstanou zachována hesla, která už jsou v zařízení. Příkazy jsou vždy zahrnuty a mohou obsahovat přihlašovací údaje, proto buďte při sdílení opatrní. Chcete pokračovat?',
-  BACKUP_INCLUDE_SECRETS: 'Zahrnout hesla a klíče (nutné pro obnovu na novém zařízení)',
-  TEST_EMAIL_SUCCESSFUL: 'Test email byl úspěšně odeslán',
+  UPGRADE_IMPORTANT_MESSAGES: 'Důležité zprávy o aktualizacích', // DeepL
+  UPGRADE_IMPORTANT_MESSAGES_2: 'Provádíte aktualizaci na novou hlavní verzi. Doporučujeme nejprve vytvořit zálohu systému. Zkontrolujte také online nápovědu, zda neobsahuje nějaké zásadní změny.', // DeepL
+  UPGRADE_IMPORTANT_MESSAGES_3: 'Verze 3.10 obsahuje zásadní změny v oblasti zabezpečení. Nejprve si vytvořte zálohu systému: po aktualizaci jsou hesla ukládána v hashované podobě a starší verze je nedokážou přečíst, takže pro návrat k původnímu stavu je tato záloha nezbytná. Každé volání API pak vyžaduje API klíč, takže je nutné aktualizovat integrace, jako je například Home Assistant. Než budete pokračovat, přečtěte si informace o zásadních změnách v online nápovědě.', // DeepL
+  WARNING_SYSTEM_BACKUP: 'Tímto se vytvoří záloha celé konfigurace a nastavení vašeho systému. Hesla a klíče nejsou zahrnuty, pokud je níže neuvedete; při obnovení zálohy zůstanou hesla již uložená v zařízení zachována. Příkazy jsou vždy zahrnuty a mohou obsahovat přihlašovací údaje, proto buďte při sdílení opatrní. Chcete pokračovat?', // DeepL
+  BACKUP_INCLUDE_SECRETS: 'Uveďte hesla a klíče (potřebné k obnovení na novém zařízení)', // DeepL
+  TEST_EMAIL_SUCCESSFUL: 'Odeslán testovací e-mail', // DeepL
   SYSTEM_NAME: 'Název systému',
   COMMANDS: 'Příkazy',
-  COMMANDS_HELP_1: 'Definujte vlastní příkazy pro magistrali EMS',
-  COMMAND_EXECUTED: 'Příkaz úspěšně spuštěn',
-  RUN: 'Spustit příkaz',
-  INTERNET_CONNECTION_CHECK: 'Kontrola online pro dostupné verze',
-  UPLOAD_BACKUP_TEXT: 'Klikněte, abyste vybrali, nebo drop soubor zálohy (.json) sem',
-  UPLOAD_FIRMWARE_TEXT: 'Klikněte, abyste vybrali, nebo drop soubor firmware .bin/.md5 sem',
-  UPLOAD_MD5_RECEIVED: 'Digest přijat, nyní nahrajte firmware .bin',
-  UPLOAD_MD5_MATCHED: 'MD5 souhlasí, firmware se instaluje…',
-  UPLOAD_NOT_OFFICIAL: 'Toto není oficiální sestavení EMS-ESP. Instalujte jen firmware, kterému důvěřujete',
+  COMMANDS_HELP_1: 'Níže definujte opakovaně použitelné pojmenované příkazy. Ty lze spouštět z konzole, přes API/MQTT nebo na ně odkazovat v Plánovači.', // DeepL
+  COMMAND_EXECUTED: 'Příkaz proveden', // DeepL
+  RUN: 'Spustit', // DeepL
+  INTERNET_CONNECTION_CHECK: 'Kontrola dostupných verzí online', // DeepL
+  UPLOAD_BACKUP_TEXT: 'Kliknutím vyberte nebo sem přetáhněte záložní soubor (.json)', // DeepL
+  UPLOAD_FIRMWARE_TEXT: 'Kliknutím vyberte nebo sem přetáhněte soubor firmwaru ve formátu .bin/.md5', // DeepL
+  UPLOAD_MD5_RECEIVED: 'Shrnutí přijato, nyní nahrajte soubor firmwaru .bin', // DeepL
+  UPLOAD_MD5_MATCHED: 'Shody MD5, instalace firmwaru…', // DeepL
+  UPLOAD_NOT_OFFICIAL: 'Toto není oficiální verze EMS-ESP. Instalujte pouze firmware, kterému důvěřujete.', // DeepL
   UPLOAD_NOT_OFFICIAL_HELP: 'O oficiálních a vlastních sestaveních',
-  UPLOAD_INSTALL_ANYWAY: 'Přesto nainstalovat',
+  UPLOAD_INSTALL_ANYWAY: 'Nainstalujte to i tak', // DeepL
   OFFICIAL_BUILD: 'Oficiální sestavení',
   CUSTOM_BUILD: 'Vlastní sestavení',
-  PASSWORD_CONFIRM_TITLE: 'Zadejte znovu své heslo',
-  PASSWORD_CONFIRM_TEXT: 'Pro vaši bezpečnost zadejte před touto změnou své heslo. Po dobu 5 minut už nebude vyžadováno.',
+  PASSWORD_CONFIRM_TITLE: 'Zadejte heslo znovu', // DeepL
+  PASSWORD_CONFIRM_TEXT: 'Z bezpečnostních důvodů zadejte před provedením této změny své heslo. Po dobu 5 minut již nebudete znovu vyzváni k jeho zadání.', // DeepL
   PASSWORD_CONFIRM_BUTTON: 'Potvrdit',
   PASSWORD_WRONG: 'Nesprávné heslo',
   PASSWORD_NOT_CONFIRMED: 'Zrušeno, heslo nebylo zadáno',
-  RECOVERY_APP: 'Aplikace pro obnovu',
-  RECOVERY_NOT_INSTALLED: 'Nenainstalováno',
-  RECOVERY_INSTALLED: 'Firmware pro obnovu nainstalován',
-  RESTART_INTO_RECOVERY: 'Restartovat do aplikace pro obnovu',
-  RECOVERY_NOT_FOUND: 'Aplikace pro obnovu nebyla online nalezena',
-  RECOVERY_START_FAILED: 'Aplikaci pro obnovu nelze spustit, může být zastaralá nebo poškozená. Nejprve nainstalujte nejnovější verzi',
-  PARTITION_START_FAILED: 'Tento firmware nelze spustit, může být poškozený',
+  RECOVERY_APP: 'Aplikace pro obnovení', // DeepL
+  RECOVERY_NOT_INSTALLED: 'Není nainstalováno', // DeepL
+  RECOVERY_INSTALLED: 'Nainstalován obnovovací firmware', // DeepL
+  RESTART_INTO_RECOVERY: 'Restartovat do aplikace Recovery', // DeepL
+  RECOVERY_NOT_FOUND: 'Aplikace Recovery nebyla nalezena online', // DeepL
+  RECOVERY_START_FAILED: 'Aplikaci Recovery nelze spustit, může být zastaralá nebo poškozená. Nejprve nainstalujte nejnovější verzi', // DeepL
+  PARTITION_START_FAILED: 'Tento firmware nelze spustit, může být poškozen', // DeepL
   INSTALLED_VERSIONS: 'Nainstalované verze',
   EMSESP_APP: 'Aplikace EMS-ESP',
-  NO_UPDATES_AVAILABLE: 'žádné aktualizace nejsou k dispozici',
-  SWITCH_TO_DEV: 'Přepnout na dev {0}',
-  SWITCH_TO_STABLE: 'Přepnout na stabilní verzi {0}',
+  NO_UPDATES_AVAILABLE: 'nejsou k dispozici žádné aktualizace', // DeepL
+  SWITCH_TO_DEV: 'Přepněte na dev {0}', // DeepL
+  SWITCH_TO_STABLE: 'Přepněte na stabilní verzi {0}', // DeepL
   SAVE: 'Uložit',
-  NEEDS_RESTART: 'vyžaduje restart',
+  NEEDS_RESTART: 'je třeba restartovat', // DeepL
   CHANGED_SETTINGS: '{num} {{změněných nastavení|změněné nastavení|změněná nastavení|změněná nastavení|změněných nastavení|změněného nastavení}}',
-  SAVED_RESTART: 'Uloženo. Restartujte EMS-ESP, aby se použila nová nastavení.',
+  SAVED_RESTART: 'Uloženo. Restartujte EMS-ESP, aby se nová nastavení uplatnila.', // DeepL
   RESTART_NOW: 'Restartovat nyní',
-  COPY_FAILED: 'Kopírování se nezdařilo, označte text a zkopírujte ho sami',
+  COPY_FAILED: 'Kopírování se nezdařilo, vyberte text a zkopírujte jej ručně', // DeepL
   DOCUMENTATION: 'Dokumentace',
   COMMUNITY_CHAT: 'Komunitní chat',
-  REPORT_ISSUE: 'Nahlásit chybu nebo navrhnout funkci',
-  GET_HELP: 'Získat pomoc',
-  REPORT_PROBLEM: 'Nahlášení problému',
-  REPORT_STEP_1: 'Stáhněte informace o systému',
-  REPORT_STEP_1_TEXT: 'verze, deska, stav sběrnice EMS, zařízení a nastavení, bez hesel',
-  REPORT_STEP_2: 'Uložte nedávný protokol',
-  REPORT_STEP_2_TEXT: 'pokud jde o problém se zařízením, nastavte nejdříve úroveň protokolu na DEBUG',
-  REPORT_STEP_3: 'Založte hlášení nebo se zeptejte na Discordu',
-  REPORT_STEP_3_TEXT: 'přiložte oba soubory nebo vložte krátké shrnutí níže do chatu',
-  NEW_ISSUE: 'Nové hlášení',
-  SHORT_SUMMARY: 'Krátké shrnutí',
+  REPORT_ISSUE: 'Nahlásit chybu nebo požádat o novou funkci', // DeepL
+  GET_HELP: 'Nápověda', // DeepL
+  REPORT_PROBLEM: 'Nahlásit problém', // DeepL
+  REPORT_STEP_1: 'Stáhnout informace o systému', // DeepL
+  REPORT_STEP_1_TEXT: 'verze, deska, stav sběrnice EMS, připojená zařízení a nastavení, bez hesel', // DeepL
+  REPORT_STEP_2: 'Uložit poslední záznam', // DeepL
+  REPORT_STEP_2_TEXT: 'Pokud se problém týká zařízení, nejprve nastavte úroveň protokolování na DEBUG', // DeepL
+  REPORT_STEP_3: 'Otevřete ticket nebo se zeptejte na Discord', // DeepL
+  REPORT_STEP_3_TEXT: 'připojte oba soubory, nebo vložte krátké shrnutí níže do chatu', // DeepL
+  NEW_ISSUE: 'Nový problém', // DeepL
+  SHORT_SUMMARY: 'Stručné shrnutí', // DeepL
   LICENSE_TEXT: 'open source pod licencí LGPL-3.0',
-  ADMIN_ACCESS_TEXT: 'plný přístup k nastavení, zařízením a API',
-  GUEST_ACCESS_TEXT: 'může zobrazit hodnoty a spouštět příkazy povolené hostům',
-  LANGUAGE_BROWSER_ONLY: 'platí jen pro tento prohlížeč',
-  LANGUAGE_ENTITIES_HINT: 'Jazyk názvů entit v MQTT a API se nastavuje v',
+  ADMIN_ACCESS_TEXT: 'plný přístup k nastavením, zařízením a API', // DeepL
+  GUEST_ACCESS_TEXT: 'mohou zobrazovat hodnoty a spouštět příkazy, které mohou spouštět hosté', // DeepL
+  LANGUAGE_BROWSER_ONLY: 'tato změna se týká pouze tohoto prohlížeče', // DeepL
+  LANGUAGE_ENTITIES_HINT: 'Jazyk pro názvy entit zařízení v MQTT a API se nastavuje v', // DeepL
   ADMINISTRATION: 'Správa',
   API_KEYS_SHORT: 'klíče pro Home Assistant a skripty',
   ADDRESSES: 'Adresy',
-  SEARCH_SETTINGS: 'Hledat nastavení',
-  NO_SETTINGS_MATCH: 'Hledání neodpovídá žádné nastavení',
-  GENERAL: 'Obecné',
+  SEARCH_SETTINGS: 'Nastavení vyhledávání', // DeepL
+  NO_SETTINGS_MATCH: 'Vašemu vyhledávání neodpovídá žádné nastavení', // DeepL
+  GENERAL: 'Obecné informace', // DeepL
   BOARD: 'Deska',
   ADVANCED: 'Pokročilé',
-  EMS_BUS_DESC: 'Jak EMS-ESP komunikuje s topným systémem.',
-  BOARD_DESC: 'Piny pocházejí z profilu desky. Chcete-li je nastavit sami, zapněte režim vývojáře a zvolte Vlastní.',
-  FORMAT_DESC: 'Jak hodnoty vypadají ve webovém rozhraní a ve zprávách MQTT/API.',
+  EMS_BUS_DESC: 'Jak EMS-ESP komunikuje s vaším topným systémem.', // DeepL
+  BOARD_DESC: 'Piny jsou převzaty z profilu desky. Chcete-li je nastavit sami, zapněte režim pro vývojáře a vyberte možnost Vlastní.', // DeepL
+  FORMAT_DESC: 'Jak hodnoty vypadají ve webovém uživatelském rozhraní a v datových paketech MQTT/API.', // DeepL
   BOARD_PINS: 'Piny z profilu',
-  ENABLE_EMAIL: 'Povolit e-mailová upozornění',
+  ENABLE_EMAIL: 'Zapněte e-mailová upozornění', // DeepL
   SEND_TEST_EMAIL: 'Odeslat testovací e-mail',
-  EMAIL_FROM: 'Od',
-  EMAIL_TO: 'Komu',
+  EMAIL_FROM: 'Z', // DeepL
+  EMAIL_TO: 'K', // DeepL
   EMAIL_SUBJECT: 'Předmět',
-  WIFI_SCAN: 'Hledání Wi-Fi',
-  SCAN: 'Hledat',
+  WIFI_SCAN: 'Skenování Wi-Fi', // DeepL
+  SCAN: 'Prohlédnout', // DeepL
   NETWORKS_NEARBY: 'Sítě v okolí',
   SIGNAL: 'Signál',
   CHANNEL: 'Kanál',
-  WIFI_OPEN: 'otevřená',
-  WIFI_SAVED: 'uložená',
-  NETWORK_ETHERNET_INFO: 'Nyní připojeno přes Ethernet ({ip}). Wi-Fi se používá jen bez kabelu.',
+  WIFI_OPEN: 'otevřít', // DeepL
+  WIFI_SAVED: 'uloženo', // DeepL
+  NETWORK_ETHERNET_INFO: 'Nyní připojeno přes Ethernet ({ip}). Wi-Fi se používá pouze bez kabelu.', // DeepL
   HOSTNAME_ACCESS: 'Název hostitele a přístup',
   IP_ADDRESS: 'IP adresa',
-  NETWORK_ETH_10MBIT: 'Vynutit 10 Mbit poloviční duplex',
-  NETWORK_ETH_10MBIT_HELP: 'jen pro problematické switche nebo dlouhé kabely',
-  NETWORK_DISABLE_SLEEP_HELP: 'spolehlivější, spotřebuje trochu více energie',
-  NETWORK_MDNS_HELP: 'dostupné jako {host}.local přes mDNS',
-  NETWORK_FIXED_IP_HELP: 'jinak se použije DHCP',
-  NETWORK_CORS_HELP: 'potřeba jen tehdy, když API volá jiná webová stránka',
-  NTP_TIME_ON_DEVICE: 'čas v EMS-ESP',
+  NETWORK_ETH_10MBIT: 'Nastavit 10 Mbit v režimu half-duplex', // DeepL
+  NETWORK_ETH_10MBIT_HELP: 'pouze pro poruchové spínače nebo dlouhé kabely', // DeepL
+  NETWORK_DISABLE_SLEEP_HELP: 'spolehlivější, spotřebovává o něco více energie', // DeepL
+  NETWORK_MDNS_HELP: 'přístup k ní je možný jako {host}.local pomocí mDNS', // DeepL
+  NETWORK_FIXED_IP_HELP: 'v opačném případě se používá DHCP', // DeepL
+  NETWORK_CORS_HELP: 'potřebné pouze v případě, že API volá jiná webová stránka', // DeepL
+  NTP_TIME_ON_DEVICE: 'čas strávený na EMS-ESP', // DeepL
   NTP_TIME_SERVER: 'Časový server',
   NTP_THERMOSTAT_CLOCK: 'Hodiny termostatu',
-  NTP_THERMOSTAT_SYNC: 'Nastavovat hodiny termostatu',
+  NTP_THERMOSTAT_SYNC: 'Nastavte hodiny na termostatu', // DeepL
   NTP_THERMOSTAT_SYNC_HELP: 'nastaví datum a čas na termostatu EMS',
-  NTP_THERMOSTAT_SYNC_1: 'Zap., časové pásmo EMS-ESP',
-  NTP_THERMOSTAT_SYNC_2: 'Zap., vlastní časové pásmo',
+  NTP_THERMOSTAT_SYNC_1: 'Zapnuto, časové pásmo EMS-ESP', // DeepL
+  NTP_THERMOSTAT_SYNC_2: 'Zapnuto, vlastní časové pásmo', // DeepL
   NTP_THERMOSTAT_TZ: 'Časové pásmo termostatu',
-  MQTT_PREVIEW: 'Co se publikuje',
+  MQTT_PREVIEW: 'Co se zveřejňuje', // DeepL
   MQTT_PREVIEW_CMD: 'přijato jako příkaz',
   MQTT_PREVIEW_RESPONSE: 'výstup příkazů',
   MQTT_BEHAVIOUR: 'Chování',
-  MQTT_TOPICS: 'Témata a data',
-  MQTT_DISCOVERY: 'Discovery',
-  MQTT_INTERVALS_HELP: 'Sekundy mezi publikacemi, 0 = publikovat při každé změně.',
-  MQTT_SINGLE_NO_DISCOVERY: 'není k dispozici při zapnutém discovery',
-  MQTT_DISCOVERY_NO_SINGLE: 'není k dispozici při zapnutých tématech jednotlivých hodnot',
+  MQTT_TOPICS: 'Témata a užitečná data', // DeepL
+  MQTT_DISCOVERY: 'Objevování', // DeepL
+  MQTT_INTERVALS_HELP: 'Interval v sekundách mezi publikacemi, 0 = publikovat při každé změně.', // DeepL
+  MQTT_SINGLE_NO_DISCOVERY: 'není k dispozici při vyhledávání na', // DeepL
+  MQTT_DISCOVERY_NO_SINGLE: 'není k dispozici u témat s jednou hodnotou na', // DeepL
   MQTT_DISCOVERY_HELP: 'automaticky vytvoří entity v Home Assistant nebo Domoticz',
-  MQTT_ENTITY_FORMAT_WARN: 'změna přejmenuje všechny entity v Home Assistant',
+  MQTT_ENTITY_FORMAT_WARN: 'Změna tohoto nastavení přejmenuje všechny entity v Home Assistant', // DeepL
   USERS: 'Uživatelé',
-  USERS_TEXT: 'Správci mohou měnit vše. Hosté si mohou vše prohlížet a spouštět příkazy povolené pro hosty.',
+  USERS_TEXT: 'Správci mohou měnit vše. Hosté mohou prohlížet obsah a spouštět příkazy označené pro hosty.', // DeepL
   ADD_USER: 'Přidat uživatele',
   EDIT_USER: 'Upravit uživatele',
   ROLE: 'Role',
-  ROLE_ADMIN: 'správce',
+  ROLE_ADMIN: 'admin', // DeepL
   ROLE_GUEST: 'host',
-  ADMIN: 'Správce',
+  ADMIN: 'Admin', // DeepL
   YOU: 'vy',
   NEW_PASSWORD: 'Nové heslo',
   UNSAVED_CHANGES: '{num} {{neuložených změn|neuložená změna|neuložené změny|neuložené změny|neuložených změn|neuložené změny}}',
   CREATE_KEY: 'Vytvořit klíč',
   NEW_API_KEY: 'Nový klíč API',
-  NO_API_KEYS: 'Zatím žádné klíče API',
-  API_KEYS_LIMIT: 'Můžete mít nejvýše {num} klíčů.',
-  REVOKE: 'Zrušit platnost',
-  REVOKE_KEY: 'Zrušit platnost klíče API',
-  REVOKE_KEY_TEXT: 'Vše, co používá "{name}", okamžitě přestane fungovat.',
-  MODULES_TEXT: 'Volitelné funkce tohoto firmwaru. Zde je zapnete nebo vypnete.',
+  NO_API_KEYS: 'Zatím nejsou k dispozici žádné klíče API', // DeepL
+  API_KEYS_LIMIT: 'Můžete mít maximálně {num} kláves.', // DeepL
+  REVOKE: 'Zrušit', // DeepL
+  REVOKE_KEY: 'Zrušit klíč API', // DeepL
+  REVOKE_KEY_TEXT: 'Cokoli, co obsahuje „{name}“, přestane okamžitě fungovat.', // DeepL
+  MODULES_TEXT: 'Volitelné funkce zabudované do tohoto firmwaru. Zde je můžete zapnout nebo vypnout.', // DeepL
   BY_AUTHOR: 'autor: {name}',
   LICENSE_KEY: 'Licenční klíč',
   MODULE_ACTIVATED: 'aktivováno',
   MODULE_PENDING: 'čeká na aktivaci',
-  ENABLED: 'Zapnuto',
-  UNDO: 'Vrátit',
+  ENABLED: 'Povoleno', // DeepL
+  UNDO: 'Zpět', // DeepL
   FW_UPDATES: 'Aktualizace',
   FW_VERSION_AVAILABLE: 'K dispozici je {version}',
   FW_RELEASE_NOTES: 'Poznámky k vydání',
-  FW_UPDATES_OFFLINE: 'Nové verze se nepodařilo ověřit online. EMS-ESP k tomu potřebuje připojení k internetu.',
-  FW_RESTART_RESET: 'Restart a obnovení',
-  FW_RECOVERY_TEXT: 'Restartovat do aplikace Recovery? Připojí se k vaší síti a spustí také vlastní přístupový bod, přes který můžete nahrát firmware.',
+  FW_UPDATES_OFFLINE: 'Nelze online zkontrolovat, zda jsou k dispozici nové verze. EMS-ESP k tomu potřebuje připojení k internetu.', // DeepL
+  FW_RESTART_RESET: 'Restart a reset', // DeepL
+  FW_RECOVERY_TEXT: 'Restartovat do aplikace Recovery? Aplikace se připojí k vaší síti a zároveň spustí vlastní přístupový bod, do kterého můžete nahrát firmware.', // DeepL
   FW_SIZE: 'Velikost',
-  FW_INSTALL_DATE: 'Nainstalováno',
-  FW_UPLOAD_FAILED: 'Nahrávání selhalo: nesprávný typ souboru nebo firmware pro jinou desku',
-  FILE_TYPE_INVALID: 'Tento typ souboru není podporován, vyberte soubor {types}',
+  FW_INSTALL_DATE: 'Nainstalováno na', // DeepL
+  FW_UPLOAD_FAILED: 'Nahrání se nezdařilo: nesprávný typ souboru nebo firmware pro jinou desku', // DeepL
+  FILE_TYPE_INVALID: 'Tento typ souboru není podporován, vyberte soubor typu {types}', // DeepL
   WHO_CAN_RUN: 'Kdo může spustit',
-  CMD_NONE: 'Žádné příkazy nenalezeny',
-  CMD_NONE_MATCH: 'Hledání neodpovídá žádný příkaz',
-  SCHEDULE_NONE: 'Žádné plány nenalezeny',
-  SCHEDULE_NONE_MATCH: 'Hledání neodpovídá žádný plán',
-  CE_NONE: 'Žádné entity nenalezeny',
+  CMD_NONE: 'Nebyly nalezeny žádné příkazy', // DeepL
+  CMD_NONE_MATCH: 'Vašemu vyhledávání neodpovídá žádný příkaz', // DeepL
+  SCHEDULE_NONE: 'Nebyly nalezeny žádné časové plány', // DeepL
+  SCHEDULE_NONE_MATCH: 'Vašemu vyhledávání neodpovídá žádný časový plán v Plánovači', // DeepL
+  CE_NONE: 'Nebyly nalezeny žádné entity', // DeepL
   CE_ALL: 'Vše',
   CE_STORAGE: 'Úložiště',
   CE_SOURCE: 'Zdroj',
   CE_EMS_SOURCE: 'zařízení {device} · telegram {type} · offset {offset}',
   CE_RAM_TEXT: 'uchováno do restartu',
-  CE_NVS_TEXT: 'uchováno i po restartu',
-  CE_EXCLUDED: 'není v API/MQTT',
-  SEARCH_SENSORS: 'Hledat název, ID nebo GPIO',
+  CE_NVS_TEXT: 'zachovávají se i po restartu', // DeepL
+  CE_EXCLUDED: 'ne v API/MQTT', // DeepL
+  SEARCH_SENSORS: 'Vyhledat podle názvu, ID nebo GPIO', // DeepL
   NO_SENSORS: 'Nebyly nalezeny žádné senzory',
-  NO_SENSORS_MATCH: 'Hledání neodpovídá žádný senzor',
-  TEMP_SENSORS_HELP: 'Nalezeny automaticky. Klepnutím na senzor jej přejmenujete nebo nastavíte offset',
+  NO_SENSORS_MATCH: 'Žádný senzor neodpovídá vašemu vyhledávání', // DeepL
+  TEMP_SENSORS_HELP: 'Nalezeno automaticky. Kliknutím na senzor jej můžete přejmenovat nebo nastavit odchylku', // DeepL
   FREE_GPIOS: 'Volné GPIO',
   SYSTEM_SENSOR: 'Systémový senzor',
   MASK_FAVORITE: 'Oblíbené',
-  MASK_READONLY: 'Zápis zakázán',
-  MASK_NO_API: 'Bez MQTT/API',
+  MASK_READONLY: 'Psát s omezením', // DeepL
+  MASK_NO_API: 'Žádné MQTT/API', // DeepL
   MASK_HIDDEN: 'Skryté',
-  MASK_REMOVED: 'Odebrané',
+  MASK_REMOVED: 'Odstraněno', // DeepL
   FILTER_ALL: 'Vše',
   NUM_SELECTED: 'Vybráno: {num}',
-  ALL_SHOWN: 'Všechny zobrazené: {num}',
-  BULK_HINT: 'Tlačítka mění zaškrtnuté řádky, nebo všechny zobrazené, když není žádný zaškrtnutý.',
-  CLEAR_SELECTION: 'Zrušit výběr',
-  NO_ENTITIES_MATCH: 'Žádné odpovídající entity',
-  LIMIT_HELP: 'prázdné = výchozí limit',
-  MIN_ABOVE_MAX: 'Minimum nesmí být větší než maximum',
+  ALL_SHOWN: 'Zobrazit vše: {num}', // DeepL
+  BULK_HINT: 'Tlačítka mění zaškrtnuté řádky, případně zobrazují všechny řádky, pokud není zaškrtnut žádný.', // DeepL
+  CLEAR_SELECTION: 'Jasný výběr', // DeepL
+  NO_ENTITIES_MATCH: 'Nenašly se žádné odpovídající entity', // DeepL
+  LIMIT_HELP: 'nechte prázdné pro vestavěný limit', // DeepL
+  MIN_ABOVE_MAX: 'Minimální hodnota nesmí být vyšší než maximální hodnota', // DeepL
   RENAME_DEVICE: 'Přejmenovat zařízení',
-  WEEKLY: 'Týdně',
+  WEEKLY: 'Týdenní', // DeepL
   EVERY_DAY: 'Každý den',
   SCHEDULER_NO_COMMANDS: 'Nejprve přidejte příkaz na stránce Příkazy',
   DU_SETTINGS: 'Nastavení EMS-ESP',
-  DU_SETTINGS_TEXT: 'Záloha nastavení EMS-ESP: síť, MQTT, přizpůsobení, plánovač, vlastní entity a moduly. Nahrání souboru s nastavením nebo zálohou EMS-ESP restartuje.',
+  DU_SETTINGS_TEXT: 'Zálohování nastavení EMS-ESP: síť, MQTT, Přizpůsobení, Plánovač, vlastní entity a Moduly. Nahrání souboru s nastavením nebo zálohou způsobí restart EMS-ESP.', // DeepL
   HB_TITLE: 'Nastavení vytápění',
-  HB_TEXT: 'Uloží aktuální hodnoty kotle, termostatu a dalších zařízení EMS, abyste je mohli později vrátit, například po výměně zařízení. Entity jen pro čtení a příkazy obnovení nikdy nezmění.',
-  HB_BACKUP: 'Zálohovat nastavení vytápění',
+  HB_TEXT: 'Ukládá aktuální hodnoty vašeho kotle, termostatu a dalších zařízení EMS, abyste je mohli později obnovit, například po výměně zařízení. Entity a Příkazy určené pouze ke čtení se při obnově nikdy nemění.', // DeepL
+  HB_BACKUP: 'Zálohujte nastavení vytápění', // DeepL
   HB_RESTORE: 'Obnovit nastavení vytápění',
   DATA_EXPORT: 'Export dat',
-  DATA_EXPORT_TEXT: 'Pro podporu a analýzu. Tyto soubory nelze nahrát zpět.',
+  DATA_EXPORT_TEXT: 'Pro účely podpory a analýzy. Tyto soubory nelze nahrát zpět.', // DeepL
   NUM_VALUES: '{num} {{hodnot|hodnota|hodnoty|hodnoty|hodnot|hodnoty}}',
-  HB_NOTHING: 'nic k zálohování',
+  HB_NOTHING: 'není co zálohovat', // DeepL
   FILE_NAME: 'Název souboru',
-  HB_NOTE: 'Poznámka (volitelná, zobrazí se při obnovení)',
-  HB_INCOMPLETE: 'Hodnoty, které ještě nebyly přečteny ze sběrnice, chybí. Pro úplnou zálohu počkejte po restartu několik minut.',
-  HB_RESTORE_TEXT: 'Vyberte zálohu nastavení vytápění. Nic se nezapíše, dokud změny nezkontrolujete a nepotvrdíte.',
-  HB_DROP: 'Klikněte pro výběr nebo sem přetáhněte soubor zálohy vytápění (.json)',
-  HB_INVALID: 'Toto není záloha nastavení vytápění',
-  HB_OTHER_FILE: 'Vybrat jiný soubor',
+  HB_NOTE: 'Poznámka (volitelná, zobrazí se znovu při obnovení)', // DeepL
+  HB_INCOMPLETE: 'Hodnoty, které ještě nebyly načteny ze sběrnice, nejsou zobrazeny. Po restartu počkejte několik minut, než se načte kompletní záloha.', // DeepL
+  HB_RESTORE_TEXT: 'Vyberte si záložní nastavení vytápění. Dokud změny nezkontrolujete a nepotvrdíte, nic se nezapíše.', // DeepL
+  HB_DROP: 'Kliknutím vyberte nebo sem přetáhněte záložní soubor topení (.json)', // DeepL
+  HB_INVALID: 'Nejedná se o zálohu nastavení vytápění', // DeepL
+  HB_OTHER_FILE: 'Vyberte jiný soubor', // DeepL
   HB_SAME_DEVICE: 'stejné zařízení',
-  HB_NOT_CONNECTED: 'nepřipojeno',
-  HB_OTHER_DEVICE: 'jiné zařízení (ID produktu {backup} v záloze, připojeno {now}), přeskočeno',
-  HB_UNIT_MISMATCH: 'Tato záloha obsahuje teploty v {unit}. Před obnovením změňte jednotku teploty v nastavení aplikace.',
-  HB_CHANGED: 'Změněné',
+  HB_NOT_CONNECTED: 'není připojeno', // DeepL
+  HB_OTHER_DEVICE: 'jiné zařízení (ID produktu {backup} v záloze, {now} připojeno), přeskočeno', // DeepL
+  HB_UNIT_MISMATCH: 'Tato záloha obsahuje teploty v jednotkách {unit}. Před obnovením zálohy změňte jednotku teploty v nastavení aplikace.', // DeepL
+  HB_CHANGED: 'Změněno', // DeepL
   ALL: 'Vše',
   HB_NOW: 'Nyní',
   HB_BACKUP_VALUE: 'Záloha',
-  HB_NOT_AVAILABLE: 'nedostupné',
-  HB_SENDING: 'odesílá se',
-  HB_WRITTEN: 'zapsáno',
+  HB_NOT_AVAILABLE: 'není k dispozici', // DeepL
+  HB_SENDING: 'odesílání', // DeepL
+  HB_WRITTEN: 'napsáno', // DeepL
   HB_RESTORE_NUM: 'Obnovit {num} {{hodnot|hodnotu|hodnoty|hodnoty|hodnot|hodnoty}}',
   RESTORE: 'Obnovit',
   HB_CONFIRM: 'Zapsat {num} {{hodnot|hodnotu|hodnoty|hodnoty|hodnot|hodnoty}} ze souboru {file} do zařízení EMS?',
-  HB_CONFIRM_TEXT: 'Hodnoty se odesílají po jedné. Pokud zařízení některou odmítne, ostatní se odešlou i tak.',
+  HB_CONFIRM_TEXT: 'Hodnoty se odesílají po jedné. Pokud zařízení jednu z nich odmítne, ostatní se i tak odešlou.', // DeepL
   HB_DONE: '{num} {{hodnot zapsáno|hodnota zapsána|hodnoty zapsány|hodnoty zapsány|hodnot zapsáno|hodnoty zapsáno}}',
-  HB_DONE_FAILED: '{num} selhalo. Zařízení často odmítají hodnoty úrovně instalatéra; podrobnosti jsou v systémovém protokolu.',
-  HB_NO_CHANGES: 'Nic se neliší od zálohy',
-  HB_DIFFERENT_DEVICE: 'jiné zařízení',
+  HB_DONE_FAILED: 'Došlo k chybě {num}. Zařízení často odmítají hodnoty na úrovni instalátora; podrobnosti najdete v systémovém protokolu.', // DeepL
+  HB_NO_CHANGES: 'Nic se neliší od záložní verze', // DeepL
+  HB_DIFFERENT_DEVICE: 'různá zařízení', // DeepL
   SELECT_ALL: 'Vybrat vše',
   DASHBOARD_EMPTY: 'Zatím není co zobrazit',
   NO_DEVICES: 'Zatím nebyla nalezena žádná zařízení EMS',
   ADD_COMMAND: 'Přidat příkaz',
   EDIT_COMMAND: 'Upravit příkaz',
   RUN_COMMAND: 'Spustit příkaz',
-  ADD_SCHEDULE: 'Přidat harmonogram',
-  EDIT_SCHEDULE: 'Upravit harmonogram',
+  ADD_SCHEDULE: 'Přidat časový plán', // DeepL
+  EDIT_SCHEDULE: 'Upravit plán', // DeepL
   ADD_ENTITY: 'Přidat entitu',
   EDIT_ENTITY: 'Upravit entitu',
   ADD_ANALOG_SENSOR: 'Přidat analogový senzor',
   EDIT_ANALOG_SENSOR: 'Upravit analogový senzor',
-  REMOVE_ANALOG_SENSOR: 'Odebrat analogový senzor',
-  REMOVE_SENSOR_TEXT: 'Senzor "{name}" bude okamžitě odebrán.',
+  REMOVE_ANALOG_SENSOR: 'Odstranit analogový senzor', // DeepL
+  REMOVE_SENSOR_TEXT: 'Senzor „{name}“ je okamžitě odstraněn.', // DeepL
   EDIT_TEMP_SENSOR: 'Upravit teplotní senzor',
-  INSTALL_FIRMWARE: 'Nainstalovat firmware ({channel})',
+  INSTALL_FIRMWARE: 'Nainstalujte firmware ({channel})', // DeepL
   PARTITION: 'Oddíl',
-  PULSE: 'Pulz'
+  PULSE: 'Pulse', // DeepL
 };
 
 export default cs;

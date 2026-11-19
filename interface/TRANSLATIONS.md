@@ -53,8 +53,9 @@ Options (combine with any of the above):
 - `--lang it,nl` limits the run to some languages.
 - `--keys SETTINGS,LOGGED_IN` (re)translates these keys, even when a translation exists.
 - `--since <git ref>` also retranslates keys whose English text changed since that commit, e.g. `--since origin/dev`.
+- `--all` retranslates every key. This replaces reviewed community translations, see [Updating all translations](#updating-all-translations).
 
-Without `--keys` or `--since`, only keys a language doesn't have yet are translated.
+Without `--keys`, `--since` or `--all`, only keys a language doesn't have yet are translated.
 
 Typical flow after adding new English strings:
 
@@ -74,6 +75,36 @@ pnpm check-layout --route /the/page
 - **Tone**: formal "you" for German and French, informal for Dutch and Italian, matching the existing files (`FORMALITY` in the script). DeepL ignores this for languages without the distinction.
 - **Context**: DeepL is told the text is short UI labels for a heating-system web app, which helps with ambiguous words like "Reset" or "Value".
 - **File layout**: an existing line is replaced in place; a missing key is inserted at the same position as in the English file. Prettier formats the changed files.
+
+### Updating all translations
+
+There are two levels. Start with the first; the second throws away the community's work.
+
+**Strings whose English changed** (recommended). Retranslates only keys whose English text differs from a base commit, here the point where this branch left `dev`:
+
+```sh
+BASE=$(git merge-base HEAD origin/dev)
+pnpm translate --since $BASE --list               # which keys changed (about 80 per language)
+pnpm translate --since $BASE --lang de             # preview one language
+pnpm translate --since $BASE --write               # all languages
+```
+
+**Everything** (`--all`). Retranslates all 641 plain-string keys in all 11 languages, about 180,000 characters:
+
+```sh
+pnpm translate --all --lang nl                     # preview, compare with the current file
+pnpm translate --all --write                       # all languages
+```
+
+After either one:
+
+```sh
+git diff --stat src/i18n                           # what changed
+pnpm typesafe-i18n && npx tsc --noEmit
+pnpm check-layout                                  # with `pnpm standalone` running
+```
+
+Review the diff before committing: where the old translation was right and DeepL only rephrased it, restore the old line with your editor or `git checkout -p src/i18n/<lang>/index.ts`. The 16 plural and list strings per language (`{{...}}`, `STATUS_NAMES`) are never changed by the script; update those by hand if their English changed.
 
 ### Reviewing
 

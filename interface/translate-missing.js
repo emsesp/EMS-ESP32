@@ -1,8 +1,9 @@
 // Drafts missing web UI translations with DeepL, for a native speaker to review.
 // Translates from English: keys a language doesn't have yet, keys whose English text changed
-// since a git ref (--since), or keys named with --keys. Machine translations are marked `// DeepL`.
+// since a git ref (--since), keys named with --keys, or every key (--all, replaces reviewed
+// translations). Machine translations are marked `// DeepL`.
 // Strings with plural syntax ({{s}}, {{a|b}}) and arrays are listed for manual translation.
-// usage: DEEPL_API_KEY=... node translate-missing.js [--lang de,nl] [--since <git ref>] [--keys A,B]
+// usage: DEEPL_API_KEY=... node translate-missing.js [--lang de,nl] [--since <git ref>] [--keys A,B] [--all]
 //        [--list] list what would be translated, no DeepL calls
 //        (default) translate and print, files are not changed
 //        [--write] translate and update src/i18n/<lang>/index.ts
@@ -16,6 +17,7 @@ const { values: args } = parseArgs({
     lang: { type: 'string' },
     since: { type: 'string' },
     keys: { type: 'string' },
+    all: { type: 'boolean', default: false },
     list: { type: 'boolean', default: false },
     write: { type: 'boolean', default: false }
   }
@@ -94,7 +96,11 @@ for (const lang of langs) {
   const source = readFileSync(fileOf(lang), 'utf8');
   const current = await evalLocale(source, fileOf(lang));
   const keys = enKeys.filter(
-    (k) => !(k in current) || changedKeys.includes(k) || forcedKeys.includes(k)
+    (k) =>
+      args.all ||
+      !(k in current) ||
+      changedKeys.includes(k) ||
+      forcedKeys.includes(k)
   );
   const todo = [];
   for (const key of keys) {
@@ -143,17 +149,19 @@ const xml = (s) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const unxml = (s) =>
   s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+// the placeholder stays visible inside an ignored tag: an empty tag makes DeepL invent a noun
+// for the gap ("tag {0}", "element {0}")
 const protect = (text) => {
   const found = text.match(PLACEHOLDER) ?? [];
   let i = 0;
   return {
     found,
-    xml: xml(text).replace(PLACEHOLDER, () => `<x id="${i++}"/>`)
+    xml: xml(text).replace(PLACEHOLDER, (p) => `<x id="${i++}">${p}</x>`)
   };
 };
 const restore = (out, found) =>
   unxml(
-    out.replace(/<x id="(\d+)"\s*\/>/g, (_, i) => found[Number(i)] ?? `{?${i}}`)
+    out.replace(/<x id="(\d+)">.*?<\/x>/g, (_, i) => found[Number(i)] ?? `{?${i}}`)
   );
 const sameArgs = (a, b) =>
   JSON.stringify((a.match(PLACEHOLDER) ?? []).sort()) ===
@@ -240,6 +248,10 @@ for (const p of plan.filter((x) => x.todo.length)) {
       const text = results[i];
       if (!sameArgs(en[key], text)) {
         failed.push(`${lang} ${key}: placeholders changed ("${text}")`);
+        return;
+      }
+      if (text === p.current[key]) {
+        console.log(`  ${key}: (unchanged) ${text}`);
         return;
       }
       console.log(`  ${key}: ${text}`);

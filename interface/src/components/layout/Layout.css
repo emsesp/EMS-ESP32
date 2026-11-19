@@ -301,8 +301,16 @@
 }
 
 @media (max-width: 599px) {
+  /* only the page title is shown here, so a long translation gets a second line */
   .appbar h1 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
     font-size: 18px;
+    line-height: 1.2;
+    white-space: normal;
+    overflow-wrap: break-word;
+    hyphens: auto;
   }
   .appbar .crumb-link,
   .appbar .crumb {
