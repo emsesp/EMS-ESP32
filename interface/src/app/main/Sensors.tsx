@@ -176,7 +176,9 @@ const Sensors = () => {
         {me.admin && data.analog_enabled && (
           <p className="cap sns-desc">
             {LL.FREE_GPIOS()}:{' '}
-            <span className="mono">{data.available_gpios.join(', ') || LL.NONE()}</span>
+            <span className="mono">
+              {data.available_gpios.join(', ') || LL.NONE()}
+            </span>
           </p>
         )}
       </Section>

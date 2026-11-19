@@ -1429,3 +1429,4 @@ larr
 setvalvetime
 tankmaxtemp
 deepsleep
+nomqtt

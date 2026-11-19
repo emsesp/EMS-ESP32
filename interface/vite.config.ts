@@ -90,7 +90,9 @@ const compactTranslations = (): Plugin => {
     async transform(code, id) {
       const file = normalizePath(id.split('?')[0] ?? '');
       if (file === `${I18N_DIR}/i18n-util.sync.ts`) {
-        this.error('i18n-util.sync.ts cannot be bundled: locale modules are compacted');
+        this.error(
+          'i18n-util.sync.ts cannot be bundled: locale modules are compacted'
+        );
       }
       if (file === I18N_LOADER) {
         if (!code.includes(I18N_LOADER_IMPORT)) {
@@ -150,7 +152,9 @@ const baseConfig = (devToolsEnabled: boolean, plugins: PluginOption[] = []) =>
   }) satisfies UserConfig;
 
 const loadMockPlugin = async (file: string): Promise<PluginOption> => {
-  const url = pathToFileURL(path.resolve(import.meta.dirname, '../mock-api', file)).href;
+  const url = pathToFileURL(
+    path.resolve(import.meta.dirname, '../mock-api', file)
+  ).href;
   const { default: plugin } = (await import(/* @vite-ignore */ url)) as {
     default: () => PluginOption;
   };
@@ -190,7 +194,9 @@ const createBuildConfig = (
       : { moduleSideEffects: false },
     ...(vendorChunk && {
       output: {
-        codeSplitting: { groups: [{ name: 'vendor', test: /[\\/]node_modules[\\/]/ }] }
+        codeSplitting: {
+          groups: [{ name: 'vendor', test: /[\\/]node_modules[\\/]/ }]
+        }
       }
     })
   }
@@ -200,7 +206,10 @@ export default defineConfig(async ({ command, mode }) => {
   if (command === 'serve' && mode === 'recovery') {
     console.log('Preparing Recovery WebUI with mock server');
     return {
-      ...baseConfig(true, [recoveryIcons(), await loadMockPlugin('recoveryMock.js')]),
+      ...baseConfig(true, [
+        recoveryIcons(),
+        await loadMockPlugin('recoveryMock.js')
+      ]),
       server: {
         open: '/recovery.html',
         port: 3001
