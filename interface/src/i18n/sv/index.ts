@@ -140,7 +140,7 @@ const sv: Translation = {
   CUSTOMIZATIONS_HELP_5: 'Dölj under Enheter',
   CUSTOMIZATIONS_HELP_6: 'Ta bort',
   SELECT_DEVICE: 'Välj en enhet',
-  MODIFIED: 'ändrade',
+  MODIFIED: 'Ändrade',
   RESET_SELECTED: 'Återställ markerade',
   OPTIONS: 'Alternativ',
   NAME: 'Namn',

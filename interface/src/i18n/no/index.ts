@@ -140,7 +140,7 @@ const no: Translation = {
   CUSTOMIZATIONS_HELP_5: 'skjul fra enheter',
   CUSTOMIZATIONS_HELP_6: 'fjern fra minnet',
   SELECT_DEVICE: 'Velg en enhet',
-  MODIFIED: 'endret',
+  MODIFIED: 'Endret',
   RESET_SELECTED: 'Tilbakestill valgte',
   OPTIONS: 'Alternativ',
   NAME: 'Navn',

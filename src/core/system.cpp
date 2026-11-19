@@ -73,14 +73,14 @@ RTC_NOINIT_ATTR static uint32_t crash_count_;
 // Languages supported. Note: the order is important
 // and must match locale_translations.h and common.h
 #if defined(EMSESP_TEST)
-// in Test mode use two languages (en & de) to save flash memory needed for the tests
-const char * const languages[] = {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE};
+const char * const languages[] = {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE}; // EN + DE
+
 #elif defined(EMSESP_EN_ONLY)
-// EN only
-const char * const languages[] = {EMSESP_LOCALE_EN};
-#elif defined(EMSESP_DE_ONLY)
-// EN + DE
-const char * const languages[] = {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE};
+const char * const languages[] = {EMSESP_LOCALE_EN}; // EN only
+
+#elif defined(EMSESP_EN_DE_ONLY)
+const char * const languages[] = {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE}; // EN + DE
+
 #else
 const char * const languages[] = {EMSESP_LOCALE_EN,
                                   EMSESP_LOCALE_DE,

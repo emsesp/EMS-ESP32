@@ -140,7 +140,7 @@ const fr: Translation = {
   CUSTOMIZATIONS_HELP_5: 'cacher des appareils',
   CUSTOMIZATIONS_HELP_6: 'supprimer de la mémoire',
   SELECT_DEVICE: 'Sélectionnez un appareil',
-  MODIFIED: 'modifié',
+  MODIFIED: 'Modifié',
   RESET_SELECTED: 'Réinitialiser la sélection',
   OPTIONS: 'Options',
   NAME: 'Nom',

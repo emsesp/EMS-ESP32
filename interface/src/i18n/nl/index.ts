@@ -140,7 +140,7 @@ const nl: Translation = {
   CUSTOMIZATIONS_HELP_5: 'verbergen voor apparaten',
   CUSTOMIZATIONS_HELP_6: 'verwijderen van memory',
   SELECT_DEVICE: 'Selecteer een apparaat',
-  MODIFIED: 'gewijzigd',
+  MODIFIED: 'Gewijzigd',
   RESET_SELECTED: 'Selectie resetten',
   OPTIONS: 'Opties',
   NAME: 'Naam',

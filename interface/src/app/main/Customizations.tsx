@@ -318,7 +318,7 @@ const Customizations = () => {
           aria-pressed={!!(maskFilter & o.bit)}
           onClick={() => setMaskFilter((f) => f ^ o.bit)}
         >
-          <Icon name={o.icon} size="xs" />
+          <Icon name={o.icon} size="xs" className={`b${o.bit}`} />
           {o.label(LL)} {count(o.bit)}
         </button>
       ))}

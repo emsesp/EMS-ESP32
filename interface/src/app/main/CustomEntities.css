@@ -1,16 +1,28 @@
 .ce-filter {
   margin: 10px 0;
 }
-.tag.ce-s0 {
+.tag.ce-s0,
+.toggle-group button.ce-s0.on {
   background: rgba(104, 55, 77, 0.5);
   color: #f8bbd0;
 }
-.tag.ce-s1 {
+.tag.ce-s1,
+.toggle-group button.ce-s1.on {
   background: var(--secondary-tint);
   color: var(--primary);
 }
-.tag.ce-s2 {
+.tag.ce-s2,
+.toggle-group button.ce-s2.on {
   background: var(--warning-tint);
+  color: var(--warning-text);
+}
+.toggle-group button.ce-s0 .icon {
+  color: #f8bbd0;
+}
+.toggle-group button.ce-s1 .icon {
+  color: var(--primary);
+}
+.toggle-group button.ce-s2 .icon {
   color: var(--warning-text);
 }
 .ce-tbl td:first-child {

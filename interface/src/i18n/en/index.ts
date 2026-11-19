@@ -140,7 +140,7 @@ const en: Translation = {
   CUSTOMIZATIONS_HELP_5: 'hide from Devices',
   CUSTOMIZATIONS_HELP_6: 'remove from memory',
   SELECT_DEVICE: 'Select a device',
-  MODIFIED: 'modified',
+  MODIFIED: 'Modified',
   RESET_SELECTED: 'Reset selected',
   OPTIONS: 'Options',
   NAME: 'Name',

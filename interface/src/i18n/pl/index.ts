@@ -140,7 +140,7 @@ const pl: BaseTranslation = {
   CUSTOMIZATIONS_HELP_5: 'ukryć przed urządzeniami',
   CUSTOMIZATIONS_HELP_6: 'usuń z pamięci',
   SELECT_DEVICE: 'wybierz urządzenie',
-  MODIFIED: 'zmienione',
+  MODIFIED: 'Zmienione',
   RESET_SELECTED: 'Resetuj zaznaczone',
   OPTIONS: 'Opcje',
   NAME: '{{Nazwa|nazwa|}}',

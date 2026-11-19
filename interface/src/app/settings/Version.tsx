@@ -601,7 +601,7 @@ const Version = () => {
             <div className="fw-actions">
               <Button
                 color="warning"
-                icon="restart_alt"
+                icon="power_settings_new"
                 onClick={() => setConfirm('restart')}
               >
                 {LL.RESTART()}

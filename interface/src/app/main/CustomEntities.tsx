@@ -229,6 +229,7 @@ const CustomEntities = () => {
                 key={s.ram}
                 on={storage === s.ram}
                 icon={s.icon}
+                className={`ce-s${s.ram}`}
                 onClick={() => setStorage(s.ram)}
               >
                 {s.label} {live.filter((r) => r.item.ram === s.ram).length}

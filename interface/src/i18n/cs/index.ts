@@ -140,7 +140,7 @@ const cs: Translation = {
   CUSTOMIZATIONS_HELP_5: 'skrýt ze Zařízení',
   CUSTOMIZATIONS_HELP_6: 'odstranit z paměti',
   SELECT_DEVICE: 'Vyberte zařízení',
-  MODIFIED: 'upravené',
+  MODIFIED: 'Upravené',
   RESET_SELECTED: 'Obnovit vybrané',
   OPTIONS: 'Možnosti',
   NAME: 'Název',

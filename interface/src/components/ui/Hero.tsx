@@ -16,11 +16,12 @@ export interface HeroProps {
   text?: ReactNode;
   // buttons at the right, below the text on phones
   actions?: ReactNode;
+  className?: string;
 }
 
 // the summary card at the top of a status page
-const Hero: FC<HeroProps> = ({ state, icon, title, text, actions }) => (
-  <section className={cx('section', 'hero', state)}>
+const Hero: FC<HeroProps> = ({ state, icon, title, text, actions, className }) => (
+  <section className={cx('section', 'hero', state, className)}>
     <div className="hero-icon">
       <Icon name={icon} />
     </div>

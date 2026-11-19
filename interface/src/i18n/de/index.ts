@@ -140,7 +140,7 @@ const de: Translation = {
   CUSTOMIZATIONS_HELP_5: 'In Geräte ausblenden',
   CUSTOMIZATIONS_HELP_6: 'Aus dem Speicher entfernen',
   SELECT_DEVICE: 'Wählen Sie ein Gerät aus',
-  MODIFIED: 'geändert',
+  MODIFIED: 'Geändert',
   RESET_SELECTED: 'Auswahl zurücksetzen',
   OPTIONS: 'Optionen',
   NAME: 'Name',

@@ -2,6 +2,11 @@
 .fw-tbl td {
   height: 44px;
 }
+@media (min-width: 600px) {
+  .tbl.fw-tbl tbody tr:nth-child(odd) {
+    background: var(--row);
+  }
+}
 .fw-act {
   display: inline-flex;
   align-items: center;

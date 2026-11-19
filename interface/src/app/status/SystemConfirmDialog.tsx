@@ -26,7 +26,7 @@ const SystemConfirmDialog = ({
       open={confirm !== undefined}
       title={format ? LL.FACTORY_RESET() : LL.RESTART()}
       label={format ? LL.FACTORY_RESET() : LL.RESTART()}
-      icon={format ? 'delete_forever' : 'restart_alt'}
+      icon={format ? 'delete_forever' : 'power_settings_new'}
       color={format ? 'error' : 'warning'}
       disabled={disabled}
       onClose={onClose}

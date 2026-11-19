@@ -8,7 +8,7 @@
 ;  -D EMSESP_DEBUG_SENSOR ; additional debug for the sensors
 ;  -D CORE_DEBUG_LEVEL=5 ; verbose core level debugging 5=verbose, 4=debug, 3=info
 ;  -D EMSESP_TEST ; enable the tests. EN language only
-;  -D EMSESP_DE_ONLY ; only DE translated entity names
+;  -D EMSESP_EN_DE_ONLY ; only DE translated entity names
 ;  -D EMSESP_EN_ONLY ; only EN translated entity names
 ;  -D EMSESP_PINGTEST ; send log message every 1/2 second
 ;  -D EMSESP_OWN_IDENTITY ; answer version/name reads to our bus ID with a real identity instead of empty, see issue #3094

@@ -66,23 +66,33 @@
   pointer-events: none;
 }
 .cz-tog.on.b8,
-.cz-legend .b8 {
+.cz-legend .b8,
+.cz-filters .b8,
+.cz-bulk .b8 .icon {
   color: var(--flag-fav);
 }
 .cz-tog.on.b4,
-.cz-legend .b4 {
+.cz-legend .b4,
+.cz-filters .b4,
+.cz-bulk .b4 .icon {
   color: var(--warning);
 }
 .cz-tog.on.b2,
-.cz-legend .b2 {
+.cz-legend .b2,
+.cz-filters .b2,
+.cz-bulk .b2 .icon {
   color: var(--flag-nomqtt);
 }
 .cz-tog.on.b1,
-.cz-legend .b1 {
+.cz-legend .b1,
+.cz-filters .b1,
+.cz-bulk .b1 .icon {
   color: var(--primary);
 }
 .cz-tog.on.b128,
-.cz-legend .b128 {
+.cz-legend .b128,
+.cz-filters .b128,
+.cz-bulk .b128 .icon {
   color: var(--error);
 }
 

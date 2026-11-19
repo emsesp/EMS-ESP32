@@ -6,8 +6,8 @@ import { readSystemStatus } from 'api/system';
 import { useRequest } from 'alova/client';
 import type { APIcall } from 'app/main/types';
 import {
-  Button,
   Hero,
+  IconButton,
   Loader,
   Meter,
   Section,
@@ -39,7 +39,7 @@ import {
 const SystemStatus = () => {
   const { LL } = useI18nContext();
   const { me, versions } = useContext(AuthenticatedContext);
-  const [confirm, setConfirm] = useState<'restart' | 'format'>();
+  const [confirm, setConfirm] = useState<'restart'>();
   const [restarting, setRestarting] = useState(false);
 
   const { data, send: loadData, error } = useRequest(readSystemStatus);
@@ -88,6 +88,7 @@ const SystemStatus = () => {
   return (
     <>
       <Hero
+        className="st-hero"
         state={system.state}
         icon={system.state === 'ok' ? 'check_circle' : 'warning'}
         title={system.text}
@@ -96,6 +97,15 @@ const SystemStatus = () => {
           `${LL.UPTIME()} ${formatDuration(data.uptime, LL)}`,
           !!data.reset_reason && `${LL.LAST_RESTART()}: ${data.reset_reason}`
         )}
+        actions={
+          me.admin && (
+            <IconButton
+              icon="power_settings_new"
+              label={LL.RESTART()}
+              onClick={() => setConfirm('restart')}
+            />
+          )
+        }
       />
 
       <Section>
@@ -219,26 +229,6 @@ const SystemStatus = () => {
             unit="KB"
           />
         </div>
-        {me.admin && (
-          <div className="st-actions">
-            <Button
-              color="warning"
-              icon="restart_alt"
-              onClick={() => setConfirm('restart')}
-            >
-              {LL.RESTART()}
-            </Button>
-            {!data.disable_reset && (
-              <Button
-                color="error"
-                icon="delete_forever"
-                onClick={() => setConfirm('format')}
-              >
-                {LL.FACTORY_RESET()}
-              </Button>
-            )}
-          </div>
-        )}
       </Section>
 
       <SystemConfirmDialog

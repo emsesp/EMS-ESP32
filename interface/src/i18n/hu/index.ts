@@ -140,7 +140,7 @@ const hu: Translation = {
   CUSTOMIZATIONS_HELP_5: 'elrejtés az Eszközök közül',
   CUSTOMIZATIONS_HELP_6: 'eltávolítás a memóriából',
   SELECT_DEVICE: 'Válassz ki egy eszközt',
-  MODIFIED: 'módosítva',
+  MODIFIED: 'Módosítva',
   RESET_SELECTED: 'Kiválasztottak visszaállítása',
   OPTIONS: 'Opciók',
   NAME: 'Név',

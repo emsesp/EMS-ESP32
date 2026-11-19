@@ -1,10 +1,15 @@
 /* page layout for the status pages; components bring their own CSS */
-.st-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 16px;
+.st-hero {
+  flex-wrap: nowrap;
+}
+.st-hero > .grow {
+  min-width: 0;
+}
+.st-hero > .hero-actions {
+  width: auto;
+}
+.st-hero .icon-btn {
+  color: var(--warning);
 }
 .st-help {
   margin: 10px 0 0;
@@ -32,9 +37,6 @@
 }
 
 @media (max-width: 599px) {
-  .st-actions > .btn {
-    flex: 1 1 auto;
-  }
   .st-activity {
     font-size: 13px;
   }

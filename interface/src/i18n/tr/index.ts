@@ -140,7 +140,7 @@ const tr: Translation = {
   CUSTOMIZATIONS_HELP_5: 'Cihazlardan gizle',
   CUSTOMIZATIONS_HELP_6: 'bellekten kaldır',
   SELECT_DEVICE: 'Bir cihaz seç',
-  MODIFIED: 'değiştirilmiş',
+  MODIFIED: 'Değiştirilmiş',
   RESET_SELECTED: 'Seçilenleri sıfırla',
   OPTIONS: 'Seçenekler',
   NAME: 'İsim',
