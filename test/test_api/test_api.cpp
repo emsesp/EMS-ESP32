@@ -535,6 +535,33 @@ void create_tests() {
     capture(); // always end with this, this will create the run_test() function
 }
 
+// a polled device that stays silent is reported offline, and is back online with its next telegram
+// moves the clock forward, so must run last
+void device_status_test() {
+    EMSdevice * thermostat = nullptr;
+    for (const auto & emsdevice : EMSESP::emsdevices) {
+        if (emsdevice->device_id() == 0x10) {
+            thermostat = emsdevice.get();
+        }
+    }
+
+    TEST_ASSERT_NOT_NULL(thermostat);
+    if (EMSbus::tx_mode() == EMS_TXMODE_OFF) {
+        EMSbus::tx_mode(1);
+    }
+    TEST_ASSERT_TRUE(thermostat->is_online());
+
+    delay((EMSdevice::DEVICE_OFFLINE_TIMEOUT + 1000) * 1000UL); // standalone uptime is esp_timer_get_time() in us
+    uuid::set_uptime();
+    TEST_ASSERT_FALSE(thermostat->is_online());
+    TEST_ASSERT_GREATER_OR_EQUAL_UINT32(EMSdevice::DEVICE_OFFLINE_TIMEOUT / 1000, thermostat->last_seen_sec());
+
+    uart_telegram({0x90, 0x00, 0xFF, 0x00, 0x00, 0x6F, 0x03, 0x02, 0x00, 0xCD, 0x00, 0xE4});
+    EMSESP::rxservice_.loop();
+    TEST_ASSERT_TRUE(thermostat->is_online());
+    TEST_ASSERT_EQUAL_UINT32(0, thermostat->last_seen_sec());
+}
+
 #include "test_security.h"
 #include "test_firmware_signature.h"
 
@@ -584,6 +611,7 @@ int main() {
     run_shuntingYard_tests(); // execute the shuntingYard tests
     run_firmware_signature_tests();
     run_security_tests();     // execute the permission tests, last as they change settings
+    RUN_TEST(device_status_test);
 
     return UNITY_END();
 }

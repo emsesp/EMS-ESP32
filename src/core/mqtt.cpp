@@ -570,6 +570,7 @@ void Mqtt::on_connect() {
 
     // publish to the last will topic (see Mqtt::start() function) to say we're alive
     queue_publish_retain("status", "online"); // retain: https://github.com/emsesp/EMS-ESP32/discussions/2086
+    EMSESP::force_device_status();
 
     // send initial MQTT messages for some of our services
     EMSESP::system_.send_heartbeat(); // send heartbeat
@@ -826,7 +827,8 @@ bool Mqtt::publish_ha_sensor_config_dv(DeviceValue & dv,
                                        const char *  brand,
                                        const char *  version,
                                        const bool    remove,
-                                       const bool    create_device_config) {
+                                       const bool    create_device_config,
+                                       const char *  status_topic) {
     // calculate the min and max
     int16_t  dv_set_min;
     uint32_t dv_set_max;
@@ -854,7 +856,8 @@ bool Mqtt::publish_ha_sensor_config_dv(DeviceValue & dv,
                                     model,
                                     brand,
                                     version,
-                                    create_device_config);
+                                    create_device_config,
+                                    status_topic);
 }
 
 // publish HA sensor specific for System using the heartbeat tag
@@ -882,7 +885,8 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
                                     const char * const    model,
                                     const char * const    brand,
                                     const char * const    version,
-                                    const bool            create_device_config) {
+                                    const bool            create_device_config,
+                                    const char * const    status_topic) {
     // ignore if name (fullname) is empty
     if (!fullname || !en_name) {
         return false;
@@ -1186,7 +1190,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
                 doc["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else 'None'}}";
             }
 
-            add_ha_avty_section(doc.as<JsonObject>()); // adds availability section
+            add_ha_avty_section(doc.as<JsonObject>(), status_topic); // adds availability section
         } else {
             // Domoticz doesn't support value templates, so we just use the value directly
             // Also omit the uom and other state classes
@@ -1430,7 +1434,12 @@ void Mqtt::add_ha_classes(JsonObject doc, const uint8_t device_type, const uint8
 
 // publish the HA climate config
 // https://www.home-assistant.io/integrations/climate.mqtt/
-bool Mqtt::publish_ha_climate_config(const DeviceValue & dv, const bool has_roomtemp, const char * const ** mode_options, const bool remove, const char * icon) {
+bool Mqtt::publish_ha_climate_config(const DeviceValue &   dv,
+                                     const bool            has_roomtemp,
+                                     const char * const ** mode_options,
+                                     const bool            remove,
+                                     const char *          icon,
+                                     const char *          status_topic) {
     int8_t        tag         = dv.tag;
     int16_t       min         = dv.min;
     uint32_t      max         = dv.max;
@@ -1616,9 +1625,57 @@ bool Mqtt::publish_ha_climate_config(const DeviceValue & dv, const bool has_room
     }
 
     add_ha_dev_section(doc.as<JsonObject>(), devicename);
-    add_ha_avty_section(doc.as<JsonObject>());
+    add_ha_avty_section(doc.as<JsonObject>(), status_topic);
 
     return queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
+}
+
+// availability topic of a single EMS device, without the base, e.g. status/thermostat_10
+// not under <device>/ as that is subscribed to for commands
+std::string Mqtt::device_status_topic(const uint8_t device_type, const uint8_t device_id) {
+    char topic[40];
+    snprintf(topic, sizeof(topic), "status/%s_%02x", EMSdevice::device_type_2_device_name(device_type), device_id);
+    return topic;
+}
+
+// HA binary_sensor showing if an EMS device is still talking on the bus, e.g. binary_sensor.thermostat_10_status
+bool Mqtt::publish_ha_device_status_config(const uint8_t device_type, const uint8_t device_id, const char * name) {
+    if (discovery_type() != discoveryType::HOMEASSISTANT) {
+        return false;
+    }
+
+    const char * device_name = EMSdevice::device_type_2_device_name(device_type);
+
+    char entity[40];
+    snprintf(entity, sizeof(entity), "%s_%02x_status", device_name, device_id);
+
+    char uniq_id[80];
+    if (entity_format() == entityFormat::MULTI_SHORT || entity_format() == entityFormat::MULTI_OLD) {
+        snprintf(uniq_id, sizeof(uniq_id), "%s_%s", Mqtt::basename().c_str(), entity);
+    } else {
+        strlcpy(uniq_id, entity, sizeof(uniq_id));
+    }
+
+    char ha_name[70];
+    snprintf(ha_name, sizeof(ha_name), "%s status", name);
+
+    JsonDocument doc(PSRAM_DOC);
+    doc["~"]          = Mqtt::base();
+    doc["uniq_id"]    = uniq_id;
+    doc["def_ent_id"] = "binary_sensor." + Helpers::toLower(uniq_id);
+    doc["name"]       = ha_name;
+    doc["stat_t"]     = "~/" + device_status_topic(device_type, device_id);
+    doc["pl_on"]      = "online";
+    doc["pl_off"]     = "offline";
+    doc["dev_cla"]    = "connectivity";
+    doc["ent_cat"]    = "diagnostic";
+
+    add_ha_dev_section(doc.as<JsonObject>(), device_name);
+    add_ha_avty_section(doc.as<JsonObject>());
+
+    char topic[MQTT_TOPIC_MAX_SIZE];
+    snprintf(topic, sizeof(topic), "binary_sensor/%s/%s/config", Mqtt::basename().c_str(), entity);
+    return queue_ha(topic, doc.as<JsonObject>());
 }
 
 // based on the device and tag, create the MQTT topic name (without the basename)
@@ -1681,7 +1738,8 @@ void Mqtt::add_ha_dev_section(JsonObject doc, const char * name, const bool crea
 }
 
 // adds avty section for HA Discovery to an existing JSON doc, using the LWT (Last Will and Testament) topic
-void Mqtt::add_ha_avty_section(JsonObject doc) {
+// and optionally the status topic of the EMS device the entity belongs to
+void Mqtt::add_ha_avty_section(JsonObject doc, const char * status_topic) {
     // only works for HA
     if (discovery_type() != discoveryType::HOMEASSISTANT) {
         return;
@@ -1690,6 +1748,11 @@ void Mqtt::add_ha_avty_section(JsonObject doc) {
     JsonArray  avty = doc["avty"].to<JsonArray>();
     JsonObject lwt  = avty.add<JsonObject>();
     lwt["t"]        = "~/status";
+
+    if (status_topic) {
+        JsonObject device = avty.add<JsonObject>();
+        device["t"]       = std::string("~/") + status_topic;
+    }
 
     doc["avty_mode"] = "all";
 }

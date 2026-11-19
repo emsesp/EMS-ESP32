@@ -717,7 +717,6 @@ function upgradeImportantMessages(version: string) {
 // Set to true to show the "API access tokens were reset" banner, until dismissed
 let MOCK_TOKENS_RESET = false;
 // let MOCK_TOKENS_RESET = true;
-
 function get_versions() {
   const v = mock_versions;
   const isDev = v.current.includes('dev');
@@ -6091,6 +6090,12 @@ router
 //     new Date().toLocaleString()
 //   );
 // };
+
+if (!DEMO) {
+  console.log(
+    'Switch mock versions at http://localhost:3000' + MOCK_VERSIONS_ENDPOINT
+  );
+}
 
 // Works for both Bun (uses port) and Cloudflare Workers (ignores port).
 // Don't export the router itself: its Proxy prototype makes Workers detect fake scheduled/queue/etc handlers.

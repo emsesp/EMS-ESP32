@@ -142,6 +142,11 @@ class EMSESP {
     static void publish_all(bool force = false);
     static void reset_mqtt_ha();
 
+    // republish the availability of all EMS devices with the next check, e.g. after an MQTT reconnect
+    static void force_device_status() {
+        device_status_force_ = true;
+    }
+
 #ifdef EMSESP_STANDALONE
     static void run_test(uuid::console::Shell & shell, const std::string & command); // only for testing
     static void dummy_mqtt_commands(const char * message);
@@ -297,7 +302,11 @@ class EMSESP {
     static void        process_version(const std::shared_ptr<const Telegram> & telegram);
     static void        publish_response(const std::shared_ptr<const Telegram> & telegram);
     static void        publish_all_loop();
+    static void        check_device_status();
     static void        reply_own_request(const uint8_t * data, const uint8_t length, const uint8_t tx_state);
+#ifdef EMSESP_OWN_IDENTITY
+    static void reply_identity(const uint8_t dest, const uint8_t type_id, const uint8_t offset, const uint8_t length, const uint8_t mask);
+#endif
 
     // one-time compaction of per-device/command vectors once registration has been stable
     static void compact_entities_if_stable();
@@ -305,37 +314,12 @@ class EMSESP {
     void shell_prompt();
     void start_serial_console();
 
-    static constexpr uint32_t EMS_FETCH_FREQUENCY = 60000; // check every minute
-    static constexpr uint8_t  EMS_WAIT_KM_TIMEOUT = 60;    // wait one minute
+    static constexpr uint32_t EMS_FETCH_FREQUENCY     = 60000; // check every minute
+    static constexpr uint8_t  EMS_WAIT_KM_TIMEOUT     = 60;    // wait one minute
+    static constexpr uint32_t DEVICE_STATUS_FREQUENCY = 10000; // check every 10 seconds if EMS devices are still online
 
-#ifdef EMSESP_GATEWAY_TX_HOLD
-    // hold our Tx while a gateway (K30RF/KM200 on 0x48) is doing its startup sync, see issue #3094
-    // (still ack our own poll so we stay in 0x07 — muting ACKs in 19d made A21 worse)
-    // a startup sync is 55-250 read requests/min to other devices, normal operation is <10/min
-    static void gateway_rx_check(const uint8_t * data, const uint8_t length);
-    static void gateway_note_activity(); // poll or telegram from 0x48 — re-arm hold if it was silent
-    static bool gateway_tx_hold();
-    static void gateway_tx_hold_start();
-
-    static constexpr uint32_t GATEWAY_BURST_WINDOW    = 30000;  // ms window for counting gateway read requests
-    static constexpr uint8_t  GATEWAY_BURST_THRESHOLD = 15;     // read requests within window to treat gateway as busy
-    static constexpr uint32_t GATEWAY_FAST_WINDOW     = 5000;   // short window to catch the start of a burst quickly
-    static constexpr uint8_t  GATEWAY_FAST_THRESHOLD  = 8;      // normal polling is ~1 read per 2s, a sync starts at >10/s
-    static constexpr uint32_t GATEWAY_HOLD_TIME       = 60000;  // keep holding Tx this long after the last busy window
-    static constexpr uint32_t GATEWAY_HOLD_MAX        = 600000; // log every 10 minutes while still busy; do not force-resume (see #3094)
-    static constexpr uint32_t GATEWAY_SILENCE_MS      = 60000;  // no 0x48 traffic for this long = gone; next sighting re-arms hold
-
-    static uint32_t gateway_hold_until_;
-    static uint32_t gateway_hold_start_;
-    static uint32_t gateway_hold_max_log_; // last time we logged a HOLD_MAX "still busy" warning
-    static uint32_t gateway_window_start_;
-    static uint8_t  gateway_window_count_;
-    static uint32_t gateway_fast_start_;
-    static uint8_t  gateway_fast_count_;
-    static uint32_t gateway_last_seen_; // last poll or telegram from 0x48
     static uint8_t  last_version_request_src_;
     static uint32_t last_version_request_time_;
-#endif
 
     static constexpr uint32_t SYSTEM_STATUS_RESET_TIMEOUT = 300000; // return a non-normal system status to normal after this (in ms) - 5 minutes
 
@@ -361,6 +345,8 @@ class EMSESP {
     static uint16_t wait_validate_;
     static bool     wait_km_;
     static uint32_t last_fetch_;
+    static uint32_t last_device_status_;
+    static bool     device_status_force_;
 
     // entity/telegram registration tracking, used to trigger a one-time vector compaction
     static constexpr uint32_t ENTITY_COMPACT_DELAY = 60000; // ms of stability before compacting

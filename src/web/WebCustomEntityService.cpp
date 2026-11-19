@@ -176,6 +176,56 @@ bool WebCustomEntityService::writes_to_bus(const char * name) {
     return false;
 }
 
+// unscaled range of a numeric bus entity, limited to what command_setvalue can write (max 3 bytes)
+bool WebCustomEntityService::get_raw_min_max(CustomEntityItem const & entity, int32_t & min, int32_t & max) {
+    if (entity.ram > 0) {
+        return false;
+    }
+
+    switch (entity.value_type) {
+    case DeviceValueType::INT8:
+        min = INT8_MIN;
+        max = INT8_MAX;
+        return true;
+    case DeviceValueType::UINT8:
+        min = 0;
+        max = UINT8_MAX;
+        return true;
+    case DeviceValueType::INT16:
+        min = INT16_MIN;
+        max = INT16_MAX;
+        return true;
+    case DeviceValueType::UINT16:
+        min = 0;
+        max = UINT16_MAX;
+        return true;
+    case DeviceValueType::UINT24:
+    case DeviceValueType::TIME:
+    case DeviceValueType::UINT32:
+        min = 0;
+        max = 0xFFFFFF;
+        return true;
+    default:
+        return false;
+    }
+}
+
+// range scaled with the factor, as shown in the web and HA
+bool WebCustomEntityService::get_min_max(CustomEntityItem const & entity, double & min, double & max) {
+    int32_t raw_min, raw_max;
+    if (!get_raw_min_max(entity, raw_min, raw_max)) {
+        return false;
+    }
+
+    min = Helpers::transformNumFloat(entity.factor * raw_min);
+    max = Helpers::transformNumFloat(entity.factor * raw_max);
+    if (min > max) {
+        std::swap(min, max);
+    }
+
+    return true;
+}
+
 bool WebCustomEntityService::command_setvalue(const char * value, const int8_t id, const char * name) {
     // don't write if there is no value, to prevent setting an empty value by mistake when parsing attributes
     if (!strlen(value)) {
@@ -187,7 +237,8 @@ bool WebCustomEntityService::command_setvalue(const char * value, const int8_t i
 
     for (CustomEntityItem & entityItem : *customEntityItems_) {
         if (Helpers::toLower(entityItem.name) == Helpers::toLower(name)) {
-            if (entityItem.data == value) {
+            // data only holds the current value for RAM/NVS entities, bus entities must always be written
+            if (entityItem.ram > 0 && entityItem.data == value) {
                 return true; // no change
             }
 
@@ -239,7 +290,12 @@ bool WebCustomEntityService::command_setvalue(const char * value, const int8_t i
                     return false;
                 }
 
-                int v = (f / entityItem.factor + (f >= 0 ? 0.5 : -0.5));
+                int     v = (f / entityItem.factor + (f >= 0 ? 0.5 : -0.5));
+                int32_t raw_min, raw_max;
+                if (get_raw_min_max(entityItem, raw_min, raw_max) && (v < raw_min || v > raw_max)) {
+                    return false;
+                }
+
                 if (entityItem.value_type == DeviceValueType::UINT8 || entityItem.value_type == DeviceValueType::INT8) {
                     EMSESP::send_write_request(entityItem.type_id, entityItem.device_id, entityItem.offset, v, entityItem.type_id);
                 } else if (entityItem.value_type == DeviceValueType::UINT16 || entityItem.value_type == DeviceValueType::INT16) {
@@ -251,14 +307,19 @@ bool WebCustomEntityService::command_setvalue(const char * value, const int8_t i
                 }
             }
 
-            publish_single(entityItem);
-            if (EMSESP::mqtt_.get_publish_onchange(EMSdevice::DeviceType::SYSTEM)) {
-                publish();
+            // a bus entity is published from the read-back, which carries the value the device stored.
+            // publishing or running an on-change schedule here would use the previous value. RAM and NVS have no read-back.
+            if (entityItem.ram > 0) {
+                publish_single(entityItem);
+                if (EMSESP::mqtt_.get_publish_onchange(EMSdevice::DeviceType::SYSTEM)) {
+                    publish();
+                }
+
+                char cmd[COMMAND_MAX_LENGTH];
+                snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), entityItem.name);
+                EMSESP::webSchedulerService.onChange(cmd);
             }
 
-            char cmd[COMMAND_MAX_LENGTH];
-            snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), entityItem.name);
-            EMSESP::webSchedulerService.onChange(cmd);
             return true;
         }
     }
@@ -292,7 +353,7 @@ void WebCustomEntityService::render_value(JsonObject output, CustomEntityItem co
         break;
     case DeviceValueType::UINT8:
         if ((uint8_t)entity.value != EMS_VALUE_UINT8_NOTSET) {
-            std::string v = Helpers::render_value(payload, entity.factor * (int8_t)entity.value, 2);
+            std::string v = Helpers::render_value(payload, entity.factor * (uint8_t)entity.value, 2);
             output[name]  = add_uom ? serialized(v + ' ' + EMSdevice::uom_to_string(entity.uom)) : serialized(v);
         }
 
@@ -465,6 +526,11 @@ void WebCustomEntityService::get_value_json(JsonObject output, CustomEntityItem 
         output["offset"]    = entity.offset;
         if (entity.value_type != DeviceValueType::BOOL && entity.value_type != DeviceValueType::STRING) {
             output["factor"] = entity.factor;
+            double min, max;
+            if (entity.writeable && get_min_max(entity, min, max)) {
+                output["min"] = min;
+                output["max"] = max;
+            }
         } else if (entity.value_type == DeviceValueType::STRING) {
             output["bytes"] = (uint8_t)entity.factor;
         }
@@ -558,6 +624,13 @@ void WebCustomEntityService::publish(const bool force) {
                     snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name);
                 } else if (Mqtt::discovery_type() == Mqtt::discoveryType::HOMEASSISTANT || Mqtt::discovery_type() == Mqtt::discoveryType::DOMOTICZ_LATEST) {
                     snprintf(topic, sizeof(topic), "number/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name);
+                    double min, max;
+                    if (get_min_max(entityItem, min, max)) {
+                        config["min"]  = min;
+                        config["max"]  = max;
+                        config["step"] = entityItem.factor;
+                        config["mode"] = "box";
+                    }
                 } else {
                     snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name);
                 }
@@ -653,6 +726,12 @@ void WebCustomEntityService::generate_value_web(JsonObject output, const bool is
             if (entity.value_type != DeviceValueType::BOOL && entity.value_type != DeviceValueType::STRING) {
                 char s[20];
                 obj["s"] = Helpers::render_value(s, entity.factor, 1);
+            }
+
+            double min, max;
+            if (get_min_max(entity, min, max)) {
+                obj["m"] = min;
+                obj["x"] = max;
             }
         }
 
@@ -755,8 +834,10 @@ void WebCustomEntityService::fetch() {
 }
 
 // called on process telegram, read from telegram
-bool WebCustomEntityService::get_value(const std::shared_ptr<const Telegram> & telegram) {
-    bool has_change = false;
+// is_validate is set when the telegram is the read-back after a write, and then changes are published immediately
+bool WebCustomEntityService::get_value(const std::shared_ptr<const Telegram> & telegram, const bool is_validate) {
+    bool       has_change     = false;
+    const bool publish_change = is_validate || EMSESP::mqtt_.get_publish_onchange(EMSdevice::DeviceType::SYSTEM);
     // read-length of BOOL, INT8, UINT8, INT16, UINT16, UINT24, TIME, UINT32
     const uint8_t len[] = {1, 1, 1, 2, 2, 3, 3, 4};
     for (auto & entity : *customEntityItems_) {
@@ -780,7 +861,7 @@ bool WebCustomEntityService::get_value(const std::shared_ptr<const Telegram> & t
                     entity.data = data.c_str();
                     if (Mqtt::publish_single()) {
                         publish_single(entity);
-                    } else if (EMSESP::mqtt_.get_publish_onchange(EMSdevice::DeviceType::SYSTEM)) {
+                    } else if (publish_change) {
                         has_change = true;
                     }
 
@@ -805,7 +886,7 @@ bool WebCustomEntityService::get_value(const std::shared_ptr<const Telegram> & t
                 entity.value = value;
                 if (Mqtt::publish_single()) {
                     publish_single(entity);
-                } else if (EMSESP::mqtt_.get_publish_onchange(EMSdevice::DeviceType::SYSTEM)) {
+                } else if (publish_change) {
                     has_change = true;
                 }
 

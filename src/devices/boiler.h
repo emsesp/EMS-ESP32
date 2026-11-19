@@ -321,6 +321,8 @@ class Boiler : public EMSdevice {
     uint8_t  elHeatStep3_;
     uint16_t hpPowerLimit_;
     uint16_t hpCurrPower_;
+    uint32_t eebusPowerLimit_; // uint16 on the bus, 65535 (no limit) is above the uint16 notset
+    uint8_t  eebusLimitActive_;
     uint16_t pc0lpm_;
     uint16_t pc0Flow_;
     uint8_t  pc0FlowInvalidCount_ = 0; // consecutive 0xFFFF at 0xE4:36 before clearing (#3224 / #3385)
@@ -411,6 +413,7 @@ class Boiler : public EMSdevice {
     void process_HpFan(const std::shared_ptr<const Telegram> & telegram);
     void process_HpPower2(const std::shared_ptr<const Telegram> & telegram);
     void process_HpPowerLimit(const std::shared_ptr<const Telegram> & telegram);
+    void process_EebusPowerLimit(const std::shared_ptr<const Telegram> & telegram);
     void process_PumpKick(const std::shared_ptr<const Telegram> & telegram);
     void process_auxHeater(const std::shared_ptr<const Telegram> & telegram);
 
@@ -527,6 +530,7 @@ class Boiler : public EMSdevice {
     bool set_pvMaxComp(const char * value, const int8_t id);
     bool set_hpDiffPress(const char * value, const int8_t id);
     bool set_hpPowerLimit(const char * value, const int8_t id);
+    bool set_eebusPowerLimit(const char * value, const int8_t id);
     bool set_powerReduction(const char * value, const int8_t id);
 
     bool        set_auxLimit(const char * value, const int8_t id);

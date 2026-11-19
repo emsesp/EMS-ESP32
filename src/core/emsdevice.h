@@ -181,6 +181,20 @@ class EMSdevice {
         publish_value(value);
     }
 
+    // uptime (ms) of the last telegram sent by this device, 0 is kept for "never"
+    void last_rx(const uint32_t timestamp) {
+        last_rx_ = timestamp ? timestamp : 1;
+    }
+
+    uint32_t last_rx() const {
+        return last_rx_;
+    }
+
+    uint32_t since_last_rx() const;
+    uint32_t last_seen_sec() const;
+    bool     is_online() const;
+    void     publish_status(const bool force);
+
     void has_update(char * value, const char * newvalue, size_t len) {
         if (value && newvalue && strcmp(value, newvalue) != 0) {
             strlcpy(value, newvalue, len);
@@ -452,6 +466,9 @@ class EMSdevice {
     // keep fetching telegrams the bus master doesn't recognise for this long after boot, then give up (in seconds) - 10 minutes
     static constexpr uint32_t FETCH_RETRY_DURATION_SEC = 600;
 
+    // a polled device that sends nothing for this long is reported offline (in ms) - 5 minutes
+    static constexpr uint32_t DEVICE_OFFLINE_TIMEOUT = 300000;
+
     // static device IDs
     static constexpr uint8_t EMS_DEVICE_ID_BOILER         = 0x08; // fixed device_id for Master Boiler/UBA
     static constexpr uint8_t EMS_DEVICE_ID_HS1            = 0x70; // fixed device_id for 1st. Cascade Boiler/UBA
@@ -603,6 +620,10 @@ class EMSdevice {
 
     bool ha_config_done_ = false;
     bool has_update_     = false;
+
+    uint32_t last_rx_          = 0;
+    bool     online_           = true;
+    bool     status_published_ = false;
 
     struct TelegramFunction {
         const uint16_t           telegram_type_id_;   // it's type_id

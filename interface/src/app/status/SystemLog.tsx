@@ -366,7 +366,6 @@ const SystemLog = () => {
               <MenuItem value={4}>WARNING</MenuItem>
               <MenuItem value={5}>NOTICE</MenuItem>
               <MenuItem value={6}>INFO</MenuItem>
-              <MenuItem value={9}>ALL</MenuItem>
             </TextField>
           </Grid>
           {data.psram && (

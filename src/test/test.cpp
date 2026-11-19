@@ -995,6 +995,17 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         ok = true;
     }
 
+    if (command == "rc300pool") {
+        shell.printfln("Testing RC300 pool circuit on a MM100...");
+        add_device(0x10, 158); // RC310
+        // pool mode auto, flow temp 64 C
+        uart_telegram({0x10, 0x00, 0xFF, 0x00, 0x05, 0x7B, 0xFF, 0x40});
+        shell.invoke_command("show values");
+        shell.invoke_command("call thermostat poolmode on");
+        shell.invoke_command("call thermostat poolflowtemp 60");
+        ok = true;
+    }
+
     if (command == "healthcheck") {
         // n=1 = EMSESP::system_.HEALTHCHECK_NO_BUS
         // n=2 = EMSESP::system_.HEALTHCHECK_NO_NETWORK

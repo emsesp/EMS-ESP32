@@ -101,6 +101,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x4A5, "HPFan", true, MAKE_PF_CB(process_HpFan), 15);
         register_telegram_type(0x4AA, "HPPower2", true, MAKE_PF_CB(process_HpPower2), 2);
         register_telegram_type(0x4A7, "HPPowerLimit", true, MAKE_PF_CB(process_HpPowerLimit), 2);
+        register_telegram_type(0x4D8, "EebusPowerLimit", false, MAKE_PF_CB(process_EebusPowerLimit), 2);
         register_telegram_type(0x2D6, "HPPump2", true, MAKE_PF_CB(process_HpPump2), 11);
         register_telegram_type(0x61E, "auxHeater", true, MAKE_PF_CB(process_auxHeater), 1);
     }
@@ -966,6 +967,15 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(hpPowerLimit),
                               DeviceValueUOM::W,
                               MAKE_CF_CB(set_hpPowerLimit));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &eebusPowerLimit_,
+                              DeviceValueType::UINT24,
+                              FL_(eebusPowerLimit),
+                              DeviceValueUOM::W,
+                              MAKE_CF_CB(set_eebusPowerLimit),
+                              0,
+                              65535);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &eebusLimitActive_, DeviceValueType::BOOL, FL_(eebusLimitActive), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &auxHeater_, DeviceValueType::BOOL, FL_(auxHeater), DeviceValueUOM::NONE, MAKE_CF_CB(set_auxHeater));
 
         // heatpump DHW settings
@@ -1888,7 +1898,9 @@ void Boiler::process_HpPool(const std::shared_ptr<const Telegram> & telegram) {
 // Boiler(0x08) -> All(0x00), ?(0x04A2), data: 02 01 01 00 01 00
 // Boiler(0x08) -W-> Me(0x0B), HpInput(0x04A2), data: 20 07 06 01 00 (from #802)
 // see https://github.com/emsesp/EMS-ESP32/issues/2844#issuecomment-3689049155
-void Boiler::process_HpInput(const std::shared_ptr<const Telegram> &) {
+// byte 4 bit 2 is set while the compressor is held back by the EEBUS power limit (#3416)
+void Boiler::process_HpInput(const std::shared_ptr<const Telegram> & telegram) {
+    has_bitupdate(telegram, eebusLimitActive_, 4, 2);
 }
 
 // Heatpump inputs settings- type 0x486 (https://github.com/emsesp/EMS-ESP32/issues/600)
@@ -2361,6 +2373,12 @@ void Boiler::process_HpPower2(const std::shared_ptr<const Telegram> & telegram) 
 // 0x4A7
 void Boiler::process_HpPowerLimit(const std::shared_ptr<const Telegram> & telegram) {
     has_update(telegram, hpPowerLimit_, 0);
+}
+
+// EEBUS power limit in W, 65535 is no limit (#3416)
+// gateway(0x4B) -W-> boiler(0x08), ?(0x04D8), data: 03 E8
+void Boiler::process_EebusPowerLimit(const std::shared_ptr<const Telegram> & telegram) {
+    has_update(telegram, eebusPowerLimit_, 0, 2);
 }
 
 // 0x0EB
@@ -3591,6 +3609,18 @@ bool Boiler::set_hpPowerLimit(const char * value, const int8_t id) {
     if (Helpers::value2number(value, v)) {
         uint8_t data[2] = {(uint8_t)(v >> 8), (uint8_t)v};
         write_command(0x4A7, 0, data, 2, 0x4A7);
+        return true;
+    }
+
+    return false;
+}
+
+// written to the EEBUS gateway, which forwards it to the heat pump every 60 seconds
+bool Boiler::set_eebusPowerLimit(const char * value, const int8_t id) {
+    int v;
+    if (Helpers::value2number(value, v, 0, 65535)) {
+        uint8_t data[2] = {(uint8_t)(v >> 8), (uint8_t)v};
+        EMSESP::send_write_request(0x4D8, EMSdevice::EMS_DEVICE_ID_GATEWAY4, 0, data, 2, 0);
         return true;
     }
 

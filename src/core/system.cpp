@@ -50,6 +50,10 @@
 #include <OtaUpdater.h>
 #include <CoreDump.h>
 
+#ifndef CONFIG_APP_ROLLBACK_ENABLE
+#error "EMS-ESP firmware health check requires CONFIG_APP_ROLLBACK_ENABLE"
+#endif
+
 // Keeps new firmware in the bootloader's pending verification state until System::check_firmware_health()
 // confirms it, so a crash or restart before then rolls back to the previous image
 extern "C" bool verifyRollbackLater() {
@@ -995,6 +999,11 @@ void System::start() {
         LOG_WARNING("Firmware in partition %s failed to start and was rolled back", invalid->label);
     }
 
+    esp_ota_img_states_t ota_state;
+    if (esp_ota_get_state_partition(esp_ota_get_running_partition(), &ota_state) == ESP_OK && ota_state == ESP_OTA_IMG_PENDING_VERIFY) {
+        LOG_INFO("New firmware, it will be confirmed after running for %u seconds", FIRMWARE_HEALTHY_UPTIME);
+    }
+
     read_coredump();
 
     // disable bluetooth module
@@ -1079,16 +1088,15 @@ void System::button_OnLongPress(PButton & b) {
 }
 
 // button indefinite press, held for BUTTON_VLongPressDelay (6000 ms, 6 seconds)
-// restart EMS_ESP into the Recovery boot menu, where you can optionally do a factory reset
+// do a factory reset - https://github.com/emsesp/EMS-ESP32/discussions/3427#discussioncomment-19589477
 void System::button_OnVLongPress(PButton & b) {
     if (EMSESP::system_.disable_reset()) {
-        LOG_NOTICE("reset disabled, can't boot");
+        LOG_NOTICE("reset disabled");
         return;
     }
 
-    LOG_NOTICE("Button pressed - very long press - perform factory reset in Recovery Mode");
-    EMSESP::system_.system_restart("boot");
-    // EMSESP::led_.start_led_fast_flash(5); // Start LED flash timer for 5 seconds
+    LOG_NOTICE("Button pressed - very long press - perform factory reset");
+    EMSESP::led_.start_led_fast_flash(5); // Start LED flash timer for 5 seconds, this will automatically restart the device after 5 seconds
 }
 
 // push button, held for BUTTON_Debounce (200 ms)
@@ -1171,8 +1179,9 @@ void System::send_info_mqtt() {
     _connection = connection;
     JsonDocument doc;
 
-    doc["version"]    = EMSESP_APP_VERSION;
-    doc["systemName"] = system_name_.isEmpty() ? "EMS-ESP" : system_name_;
+    doc["version"]          = EMSESP_APP_VERSION;
+    doc["recovery_version"] = recovery_version();
+    doc["systemName"]       = system_name_.isEmpty() ? "EMS-ESP" : system_name_;
 
     // if NTP is enabled send the boot_time in local time in ISO 8601 format (eg: 2022-11-15 20:46:38)
     // https://github.com/emsesp/EMS-ESP32/issues/751
@@ -2149,6 +2158,13 @@ bool System::check_upgrade() {
     }
 
     if (reboot_required) {
+#ifndef EMSESP_STANDALONE
+        // otherwise the bootloader treats this restart as a failed start and rolls back to the
+        // previous firmware, which then runs on the already migrated settings
+        if (OtaUpdater::confirmRunningApp()) {
+            LOG_INFO("New firmware confirmed as working");
+        }
+#endif
         LOG_INFO("Upgrade: rebooting to apply changes");
         return true; // need reboot
     }
@@ -3259,6 +3275,8 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
                     obj["brand"]     = emsdevice->brand_to_char();
                     obj["version"]   = emsdevice->version();
                     obj["entities"]  = emsdevice->count_entities();
+                    obj["online"]    = emsdevice->is_online();
+                    obj["lastSeen"]  = emsdevice->last_seen_sec();
                     char result[1000];
                     (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::RECEIVED);
                     if (result[0] != '\0') {
@@ -3806,7 +3824,7 @@ bool System::uploadFirmwareURL(const char * url, bool allow_custom) {
             }
         }
 
-        // follow redirects manually (GitHub releases redirect to objects.githubusercontent.com)
+        // follow redirects manually (GitHub releases redirect to release-assets.githubusercontent.com)
         if (http_code == 301 || http_code == 302 || http_code == 303 || http_code == 307 || http_code == 308) {
             ssl_client.stop();
             if (location.isEmpty() || ++redirect_count > 5) {

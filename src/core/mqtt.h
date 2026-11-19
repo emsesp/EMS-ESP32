@@ -95,7 +95,8 @@ class Mqtt {
                                             const char *  brand,
                                             const char *  version,
                                             const bool    remove,
-                                            const bool    create_device_config = false);
+                                            const bool    create_device_config = false,
+                                            const char *  status_topic         = nullptr);
 
     static bool publish_ha_sensor_config(uint8_t               type,
                                          int8_t                tag,
@@ -114,14 +115,19 @@ class Mqtt {
                                          const char * const    model                = nullptr,
                                          const char * const    brand                = nullptr,
                                          const char * const    version              = nullptr,
-                                         const bool            create_device_config = false);
+                                         const bool            create_device_config = false,
+                                         const char * const    status_topic         = nullptr);
 
     static bool publish_system_ha_sensor_config(uint8_t type, const char * name, const char * entity, const uint8_t uom);
     static bool publish_ha_climate_config(const DeviceValue &   dv,
                                           const bool            has_roomtemp,
                                           const char * const ** mode_options,
-                                          const bool            remove = false,
-                                          const char *          icon   = nullptr);
+                                          const bool            remove       = false,
+                                          const char *          icon         = nullptr,
+                                          const char *          status_topic = nullptr);
+    static bool publish_ha_device_status_config(const uint8_t device_type, const uint8_t device_id, const char * name);
+
+    static std::string device_status_topic(const uint8_t device_type, const uint8_t device_id);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
     static void show_mqtt(uuid::console::Shell & shell);
@@ -258,7 +264,7 @@ class Mqtt {
                                    const char * model        = nullptr,
                                    const char * brand        = nullptr,
                                    const char * version      = nullptr);
-    static void add_ha_avty_section(JsonObject doc);
+    static void add_ha_avty_section(JsonObject doc, const char * status_topic = nullptr);
     static void add_ha_bool(JsonObject doc);
     static void add_value_bool(JsonObject doc, const char * name, bool value);
 

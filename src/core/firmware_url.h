@@ -31,11 +31,12 @@ constexpr const char * RELEASES = "https://github.com/emsesp/EMS-ESP32/releases/
 // where GitHub redirects release downloads to
 constexpr const char * DOWNLOAD_HOSTS[] = {"release-assets.githubusercontent.com", "objects.githubusercontent.com"};
 
-// no spaces or control characters (they would end up in the request line), no user info, and no ".." or
-// escapes: the path must stay in the releases
-inline bool clean(const char * url) {
+// no spaces or control characters (they would end up in the request line), no user info, and no "..".
+// A URL the user supplies may not contain percent-encoding, which can hide "..". A redirect may: GitHub's
+// signed download URLs encode ':' and '+' that way, and that encoding is forwarded to the download host as-is
+inline bool clean(const char * url, bool allow_percent) {
     for (const char * c = url; *c; c++) {
-        if (static_cast<unsigned char>(*c) <= 0x20 || static_cast<unsigned char>(*c) >= 0x7f || *c == '\\' || *c == '@' || *c == '%') {
+        if (static_cast<unsigned char>(*c) <= 0x20 || static_cast<unsigned char>(*c) >= 0x7f || *c == '\\' || *c == '@' || (*c == '%' && !allow_percent)) {
             return false;
         }
     }
@@ -44,7 +45,7 @@ inline bool clean(const char * url) {
 
 // the URL given to install from
 inline bool allowed(const char * url) {
-    return url && clean(url) && strncasecmp(url, RELEASES, strlen(RELEASES)) == 0 && url[strlen(RELEASES)] != '\0';
+    return url && clean(url, false) && strncasecmp(url, RELEASES, strlen(RELEASES)) == 0 && url[strlen(RELEASES)] != '\0';
 }
 
 // a URL that the download is redirected to. Those hosts serve files of any repository, but only the redirect
@@ -53,7 +54,7 @@ inline bool redirect_allowed(const char * url) {
     if (allowed(url)) {
         return true;
     }
-    if (!url || !clean(url) || strncasecmp(url, "https://", 8) != 0) {
+    if (!url || !clean(url, true) || strncasecmp(url, "https://", 8) != 0) {
         return false;
     }
     const char * host = url + 8;

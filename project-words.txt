@@ -1398,3 +1398,7 @@ heatmode
 noslot
 wwcd
 auxheater
+switchpoint
+DEMS
+rscd
+eebus
