@@ -1,6 +1,7 @@
+import { vLL } from 'validators/messages';
 import Schema from 'validators/schema';
 import type { InternalRuleItem } from 'validators/schema';
-import { IP_OR_HOSTNAME_VALIDATOR } from 'validators/shared';
+import { IP_OR_HOSTNAME_VALIDATOR, required } from 'validators/shared';
 
 import type {
   AnalogSensor,
@@ -11,17 +12,9 @@ import type {
   Settings,
   TemperatureSensor
 } from './types';
+import { ScheduleFlag } from './types';
 
-// Constants
-const ERROR_MESSAGES = {
-  GPIO_INVALID: 'Must be an valid GPIO port',
-  NAME_DUPLICATE: 'Name already in use',
-  GPIO_DUPLICATE: 'GPIO already in use',
-  VALUE_OUT_OF_RANGE: 'Value out of range',
-  HEX_REQUIRED: 'Is required and must be in hex format'
-} as const;
-
-const VALIDATION_LIMITS = {
+export const VALIDATION_LIMITS = {
   PORT_MIN: 0,
   PORT_MAX: 65535,
   MODBUS_MAX_CLIENTS_MIN: 0,
@@ -54,116 +47,99 @@ type ValidationRules = Array<{
   [key: string]: unknown;
 }>;
 
+const between = (min: number, max: number) => ({
+  type: 'number',
+  min,
+  max,
+  message: vLL().V_BETWEEN({ min, max })
+});
+
 export const createSettingsValidator = (settings: Settings) => {
   const schema: Record<string, ValidationRules> = {};
 
   // Syslog validations
   if (settings.syslog_enabled) {
-    schema.syslog_host = [
-      { required: true, message: 'Host is required' },
-      IP_OR_HOSTNAME_VALIDATOR
-    ];
+    schema.syslog_host = [required(), IP_OR_HOSTNAME_VALIDATOR];
     schema.syslog_port = [
-      { required: true, message: 'Port is required' },
-      {
-        type: 'number',
-        min: VALIDATION_LIMITS.PORT_MIN,
-        max: VALIDATION_LIMITS.PORT_MAX,
-        message: 'Invalid Port'
-      }
+      required(),
+      between(VALIDATION_LIMITS.PORT_MIN, VALIDATION_LIMITS.PORT_MAX)
     ];
     schema.syslog_mark_interval = [
-      { required: true, message: 'Mark interval is required' },
-      {
-        type: 'number',
-        min: VALIDATION_LIMITS.SYSLOG_MARK_INTERVAL_MIN,
-        max: VALIDATION_LIMITS.SYSLOG_MARK_INTERVAL_MAX,
-        message: `Must be between ${VALIDATION_LIMITS.SYSLOG_MARK_INTERVAL_MIN} and ${VALIDATION_LIMITS.SYSLOG_MARK_INTERVAL_MAX}`
-      }
+      required(),
+      between(
+        VALIDATION_LIMITS.SYSLOG_MARK_INTERVAL_MIN,
+        VALIDATION_LIMITS.SYSLOG_MARK_INTERVAL_MAX
+      )
     ];
   }
 
   // Modbus validations
   if (settings.modbus_enabled) {
     schema.modbus_max_clients = [
-      { required: true, message: 'Max clients is required' },
-      {
-        type: 'number',
-        min: VALIDATION_LIMITS.MODBUS_MAX_CLIENTS_MIN,
-        max: VALIDATION_LIMITS.MODBUS_MAX_CLIENTS_MAX,
-        message: 'Invalid number'
-      }
+      required(),
+      between(
+        VALIDATION_LIMITS.MODBUS_MAX_CLIENTS_MIN,
+        VALIDATION_LIMITS.MODBUS_MAX_CLIENTS_MAX
+      )
     ];
     schema.modbus_port = [
-      { required: true, message: 'Port is required' },
-      {
-        type: 'number',
-        min: VALIDATION_LIMITS.PORT_MIN,
-        max: VALIDATION_LIMITS.PORT_MAX,
-        message: 'Invalid Port'
-      }
+      required(),
+      between(VALIDATION_LIMITS.PORT_MIN, VALIDATION_LIMITS.PORT_MAX)
     ];
     schema.modbus_timeout = [
-      { required: true, message: 'Timeout is required' },
-      {
-        type: 'number',
-        min: VALIDATION_LIMITS.MODBUS_TIMEOUT_MIN,
-        max: VALIDATION_LIMITS.MODBUS_TIMEOUT_MAX,
-        message: `Must be between ${VALIDATION_LIMITS.MODBUS_TIMEOUT_MIN} and ${VALIDATION_LIMITS.MODBUS_TIMEOUT_MAX}`
-      }
+      required(),
+      between(
+        VALIDATION_LIMITS.MODBUS_TIMEOUT_MIN,
+        VALIDATION_LIMITS.MODBUS_TIMEOUT_MAX
+      )
+    ];
+  }
+
+  if (settings.email_enabled) {
+    schema.email_server = [required(), IP_OR_HOSTNAME_VALIDATOR];
+    schema.email_port = [
+      required(),
+      between(VALIDATION_LIMITS.PORT_MIN, VALIDATION_LIMITS.PORT_MAX)
     ];
   }
 
   // Shower timer validations
   if (settings.shower_timer) {
     schema.shower_min_duration = [
-      {
-        type: 'number',
-        min: VALIDATION_LIMITS.SHOWER_MIN_DURATION_MIN,
-        max: VALIDATION_LIMITS.SHOWER_MIN_DURATION_MAX,
-        message: `Time must be between ${VALIDATION_LIMITS.SHOWER_MIN_DURATION_MIN} and ${VALIDATION_LIMITS.SHOWER_MIN_DURATION_MAX} seconds`
-      }
+      between(
+        VALIDATION_LIMITS.SHOWER_MIN_DURATION_MIN,
+        VALIDATION_LIMITS.SHOWER_MIN_DURATION_MAX
+      )
     ];
   }
 
   // Shower alert validations
   if (settings.shower_alert) {
     schema.shower_alert_trigger = [
-      {
-        type: 'number',
-        min: VALIDATION_LIMITS.SHOWER_ALERT_TRIGGER_MIN,
-        max: VALIDATION_LIMITS.SHOWER_ALERT_TRIGGER_MAX,
-        message: `Time must be between ${VALIDATION_LIMITS.SHOWER_ALERT_TRIGGER_MIN} and ${VALIDATION_LIMITS.SHOWER_ALERT_TRIGGER_MAX} minutes`
-      }
+      between(
+        VALIDATION_LIMITS.SHOWER_ALERT_TRIGGER_MIN,
+        VALIDATION_LIMITS.SHOWER_ALERT_TRIGGER_MAX
+      )
     ];
     schema.shower_alert_coldshot = [
-      {
-        type: 'number',
-        min: VALIDATION_LIMITS.SHOWER_ALERT_COLDSHOT_MIN,
-        max: VALIDATION_LIMITS.SHOWER_ALERT_COLDSHOT_MAX,
-        message: `Time must be between ${VALIDATION_LIMITS.SHOWER_ALERT_COLDSHOT_MIN} and ${VALIDATION_LIMITS.SHOWER_ALERT_COLDSHOT_MAX} seconds`
-      }
+      between(
+        VALIDATION_LIMITS.SHOWER_ALERT_COLDSHOT_MIN,
+        VALIDATION_LIMITS.SHOWER_ALERT_COLDSHOT_MAX
+      )
     ];
   }
 
   schema.write_limit = [
-    {
-      type: 'number',
-      min: VALIDATION_LIMITS.WRITE_LIMIT_MIN,
-      max: VALIDATION_LIMITS.WRITE_LIMIT_MAX,
-      message: `Write limit must be between ${VALIDATION_LIMITS.WRITE_LIMIT_MIN} and ${VALIDATION_LIMITS.WRITE_LIMIT_MAX}`
-    }
+    between(VALIDATION_LIMITS.WRITE_LIMIT_MIN, VALIDATION_LIMITS.WRITE_LIMIT_MAX)
   ];
 
   // Remote timeout validations
   if (settings.remote_timeout_en) {
     schema.remote_timeout = [
-      {
-        type: 'number',
-        min: VALIDATION_LIMITS.REMOTE_TIMEOUT_MIN,
-        max: VALIDATION_LIMITS.REMOTE_TIMEOUT_MAX,
-        message: `Timeout must be between ${VALIDATION_LIMITS.REMOTE_TIMEOUT_MIN} and ${VALIDATION_LIMITS.REMOTE_TIMEOUT_MAX} hours`
-      }
+      between(
+        VALIDATION_LIMITS.REMOTE_TIMEOUT_MIN,
+        VALIDATION_LIMITS.REMOTE_TIMEOUT_MAX
+      )
     ];
   }
 
@@ -186,7 +162,7 @@ const createUniqueNameValidator = <T extends { name: string }>(
         originalName.toLowerCase() !== name.toLowerCase()) &&
       items.find((item) => item.name.toLowerCase() === name.toLowerCase())
     ) {
-      callback(ERROR_MESSAGES.NAME_DUPLICATE);
+      callback(vLL().V_IN_USE());
       return;
     }
     callback();
@@ -210,7 +186,7 @@ const createUniqueFieldNameValidator = <T>(
         originalName.toLowerCase() !== name.toLowerCase()) &&
       items.find((item) => getName(item).toLowerCase() === name.toLowerCase())
     ) {
-      callback(ERROR_MESSAGES.NAME_DUPLICATE);
+      callback(vLL().V_IN_USE());
       return;
     }
     callback();
@@ -218,102 +194,113 @@ const createUniqueFieldNameValidator = <T>(
 });
 
 const NAME_PATTERN_BASE = '[a-zA-Z0-9_]';
-const NAME_PATTERN_MESSAGE = `Must be <${VALIDATION_LIMITS.NAME_MAX_LENGTH + 1} characters: alphanumeric or '_'`;
-
-const NAME_PATTERN = {
+const namePattern = (min: 0 | 1) => ({
   type: 'string' as const,
   pattern: new RegExp(
-    `^${NAME_PATTERN_BASE}{0,${VALIDATION_LIMITS.NAME_MAX_LENGTH}}$`
+    `^${NAME_PATTERN_BASE}{${min},${VALIDATION_LIMITS.NAME_MAX_LENGTH}}$`
   ),
-  message: NAME_PATTERN_MESSAGE
-};
+  message: vLL().V_NAME({ max: VALIDATION_LIMITS.NAME_MAX_LENGTH })
+});
 
-const NAME_PATTERN_REQUIRED = {
-  type: 'string' as const,
-  pattern: new RegExp(
-    `^${NAME_PATTERN_BASE}{1,${VALIDATION_LIMITS.NAME_MAX_LENGTH}}$`
-  ),
-  message: NAME_PATTERN_MESSAGE
-};
+export const uniqueNameValidator = (
+  schedule: ScheduleItem[],
+  originalName?: string
+) => createUniqueNameValidator(schedule, originalName);
 
-export const uniqueNameValidator = (schedule: ScheduleItem[], o_name?: string) =>
-  createUniqueNameValidator(schedule, o_name);
-
+// scheduleItem is the edited item, originalName the name of the row being edited (none when adding)
 export const schedulerItemValidation = (
   schedule: ScheduleItem[],
-  scheduleItem: ScheduleItem
+  scheduleItem: ScheduleItem,
+  originalName?: string
 ) =>
   new Schema({
-    name: [
-      { required: true, message: 'Name is required' },
-      NAME_PATTERN_REQUIRED,
-      uniqueNameValidator(schedule, scheduleItem.o_name)
-    ],
-    cmd_name: [{ required: true, message: 'Command is required' }]
+    name: [required(), namePattern(1), uniqueNameValidator(schedule, originalName)],
+    cmd_name: [required()],
+    ...(scheduleItem.flags < ScheduleFlag.SCHEDULE_TIMER && {
+      flags: [
+        {
+          validator(
+            _rule: InternalRuleItem,
+            flags: number,
+            callback: (error?: string) => void
+          ) {
+            callback(flags === 0 ? vLL().V_DAY() : undefined);
+          }
+        }
+      ]
+    }),
+    ...(scheduleItem.flags === ScheduleFlag.SCHEDULE_ONCHANGE && {
+      time: [required()]
+    }),
+    ...(scheduleItem.flags === ScheduleFlag.SCHEDULE_CONDITION && {
+      time: [required()]
+    })
   });
 
 export const uniqueCommandNameValidator = (
   commands: CommandItem[],
-  o_name?: string
-) => createUniqueNameValidator(commands, o_name);
+  originalName?: string
+) => createUniqueNameValidator(commands, originalName);
 
+// originalName: the name of the edited row when its dialog opened, undefined for a new row
 export const commandItemValidation = (
   commands: CommandItem[],
-  commandItem: CommandItem
+  originalName?: string
 ) =>
   new Schema({
     name: [
-      { required: true, message: 'Name is required' },
-      NAME_PATTERN_REQUIRED,
-      uniqueCommandNameValidator(commands, commandItem.o_name)
+      required(),
+      namePattern(1),
+      uniqueCommandNameValidator(commands, originalName)
     ],
     cmd: [
-      { required: true, message: 'Command is required' },
+      required(),
       {
         type: 'string',
         min: VALIDATION_LIMITS.COMMAND_MIN,
         max: VALIDATION_LIMITS.COMMAND_MAX,
-        message: `Command must be ${VALIDATION_LIMITS.COMMAND_MIN}-${VALIDATION_LIMITS.COMMAND_MAX} characters`
+        message: vLL().V_CHARS({
+          min: VALIDATION_LIMITS.COMMAND_MIN,
+          max: VALIDATION_LIMITS.COMMAND_MAX
+        })
       }
     ]
   });
 
-export const uniqueCustomNameValidator = (entity: EntityItem[], o_name?: string) =>
-  createUniqueNameValidator(entity, o_name);
+export const uniqueCustomNameValidator = (
+  entity: EntityItem[],
+  originalName?: string
+) => createUniqueNameValidator(entity, originalName);
 
-const hexValidator = {
+const hexValidator = () => ({
   validator(
     _rule: InternalRuleItem,
     value: string,
     callback: (error?: string) => void
   ) {
     if (!value || Number.isNaN(Number.parseInt(value, VALIDATION_LIMITS.HEX_BASE))) {
-      callback(ERROR_MESSAGES.HEX_REQUIRED);
+      callback(vLL().V_HEX());
       return;
     }
     callback();
   }
-};
+});
 
-export const entityItemValidation = (entity: EntityItem[], entityItem: EntityItem) =>
+// originalName: the name of the edited row when its dialog opened, undefined for a new row
+export const entityItemValidation = (entity: EntityItem[], originalName?: string) =>
   new Schema({
     name: [
-      { required: true, message: 'Name is required' },
-      NAME_PATTERN_REQUIRED,
-      uniqueCustomNameValidator(entity, entityItem.o_name)
+      required(),
+      namePattern(1),
+      uniqueCustomNameValidator(entity, originalName)
     ],
-    device_id: [hexValidator],
-    type_id: [hexValidator],
+    device_id: [hexValidator()],
+    type_id: [hexValidator()],
     offset: [
-      { required: true, message: 'Offset is required' },
-      {
-        type: 'number',
-        min: VALIDATION_LIMITS.OFFSET_MIN,
-        max: VALIDATION_LIMITS.OFFSET_MAX,
-        message: `Must be between ${VALIDATION_LIMITS.OFFSET_MIN} and ${VALIDATION_LIMITS.OFFSET_MAX}`
-      }
+      required(),
+      between(VALIDATION_LIMITS.OFFSET_MIN, VALIDATION_LIMITS.OFFSET_MAX)
     ],
-    factor: [{ required: true, message: 'is required' }]
+    factor: [required()]
   });
 
 export const uniqueTemperatureNameValidator = (
@@ -323,10 +310,10 @@ export const uniqueTemperatureNameValidator = (
 
 export const temperatureSensorItemValidation = (
   sensors: TemperatureSensor[],
-  sensor: TemperatureSensor
+  originalName?: string
 ) =>
   new Schema({
-    n: [NAME_PATTERN, uniqueTemperatureNameValidator(sensors, sensor.o_n)]
+    n: [namePattern(0), uniqueTemperatureNameValidator(sensors, originalName)]
   });
 
 export const uniqueAnalogNameValidator = (
@@ -336,22 +323,16 @@ export const uniqueAnalogNameValidator = (
 
 export const analogSensorItemValidation = (
   sensors: AnalogSensor[],
-  sensor: AnalogSensor
-) => {
-  return new Schema({
-    // name is required and must be unique
-    n: [
-      { required: true, message: 'Name is required' },
-      NAME_PATTERN,
-      uniqueAnalogNameValidator(sensors, sensor.o_n)
-    ]
+  originalName?: string
+) =>
+  new Schema({
+    n: [required(), namePattern(0), uniqueAnalogNameValidator(sensors, originalName)]
   });
-};
 
 export const deviceValueItemValidation = (dv: DeviceValue) =>
   new Schema({
     v: [
-      { required: true, message: 'Value is required' },
+      required(),
       {
         validator(
           _rule: InternalRuleItem,
@@ -364,7 +345,7 @@ export const deviceValueItemValidation = (dv: DeviceValue) =>
             dv.x !== undefined &&
             (value < dv.m || value > dv.x)
           ) {
-            callback(ERROR_MESSAGES.VALUE_OUT_OF_RANGE);
+            callback(vLL().V_BETWEEN({ min: dv.m, max: dv.x }));
             return;
           }
           callback();

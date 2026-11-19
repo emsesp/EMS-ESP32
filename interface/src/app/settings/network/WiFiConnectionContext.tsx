@@ -1,14 +1,13 @@
 import { createContext } from 'react';
 
-import type { WiFiNetwork } from 'types';
+import type { FormState } from 'app/settings/FormPage';
+import type { NetworkSettingsType, SystemStatus, WiFiNetwork } from 'types';
 
 export interface WiFiConnectionContextValue {
-  selectedNetwork?: WiFiNetwork;
+  form: FormState<NetworkSettingsType>;
+  status?: SystemStatus | undefined;
+  // fills the SSID from a scanned network and goes back to the settings tab
   selectNetwork: (network: WiFiNetwork) => void;
-  deselectNetwork: () => void;
 }
 
-const WiFiConnectionContextDefaultValue = {} as WiFiConnectionContextValue;
-export const WiFiConnectionContext = createContext(
-  WiFiConnectionContextDefaultValue
-);
+export const WiFiConnectionContext = createContext({} as WiFiConnectionContextValue);

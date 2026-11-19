@@ -1,0 +1,21 @@
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-3);
+  flex-shrink: 0;
+}
+.dot.ok {
+  background: var(--success);
+  box-shadow: 0 0 6px rgba(102, 187, 106, 0.7);
+}
+.dot.warn {
+  background: var(--warning);
+}
+.dot.err {
+  background: var(--error);
+}
+.dot.off {
+  background: #616161;
+}

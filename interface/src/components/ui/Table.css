@@ -1,0 +1,143 @@
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.tbl th {
+  text-align: left;
+  font-weight: 700;
+  color: var(--text-2);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--divider);
+  background: #000;
+  position: sticky;
+  top: 0;
+}
+.tbl td {
+  padding: 4px 8px;
+  height: 36px;
+}
+.tbl tbody tr {
+  background: var(--row);
+}
+.tbl tbody tr:nth-child(odd) {
+  background: var(--row-odd);
+}
+.tbl .r {
+  text-align: right;
+}
+.tbl .num {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tbl tbody tr.click {
+  cursor: pointer;
+}
+.tbl tbody tr.click:hover,
+.tbl.hover tbody tr:hover {
+  background: var(--row-hover);
+}
+.tbl tbody tr.click:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+/* pending changes in list pages */
+.tbl tbody tr {
+  border-left: 3px solid transparent;
+}
+.tbl tbody tr.st-new {
+  border-left-color: var(--success);
+}
+.tbl tbody tr.st-mod {
+  border-left-color: var(--primary);
+}
+.tbl tbody tr.st-del {
+  border-left-color: var(--error);
+  cursor: default;
+}
+.tbl tbody tr.st-del td:not(.act) {
+  color: var(--text-3);
+  text-decoration: line-through;
+}
+.tbl tbody tr.dim td {
+  color: var(--text-3);
+}
+.tbl td.act {
+  width: 1%;
+  text-align: right;
+  white-space: nowrap;
+}
+.tbl td.chk,
+.tbl th.chk {
+  width: 36px;
+  text-align: center;
+}
+.tbl-wrap {
+  overflow-x: auto;
+}
+.tbl-empty {
+  padding: 16px 8px;
+  color: var(--text-3);
+  text-align: center;
+}
+
+@media (max-width: 599px) {
+  .tbl.stack thead {
+    display: none;
+  }
+  .tbl.stack,
+  .tbl.stack tbody,
+  .tbl.stack tr,
+  .tbl.stack td {
+    display: block;
+    width: auto;
+  }
+  .tbl.stack tbody tr {
+    margin-bottom: 8px;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--paper-2);
+  }
+  .tbl.stack td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    height: auto;
+    min-height: 28px;
+    padding: 2px 0;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+  .tbl.stack td[data-label]::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    color: var(--text-3);
+    font-size: 12px;
+    text-align: left;
+  }
+  .tbl.stack td:first-child {
+    font-weight: 500;
+    text-align: left;
+  }
+  .tbl.stack tbody tr:has(> td.tbl-empty) {
+    padding: 0;
+    background: transparent;
+  }
+  .tbl.stack td.tbl-empty {
+    display: block;
+    padding: 16px 8px;
+    font-weight: 400;
+    text-align: center;
+  }
+  .tbl.stack td.act {
+    justify-content: flex-end;
+  }
+  .tbl.stack td.act:empty {
+    display: none;
+  }
+}

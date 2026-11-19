@@ -1,0 +1,110 @@
+.sch-tbl td.sch-act,
+.sch-tbl th.sch-act {
+  width: 56px;
+}
+.sch-tbl .sch-act .swrow {
+  padding: 0;
+}
+.sch-when {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.sch-when > * {
+  flex-shrink: 0;
+}
+.sch-when.sch-expr {
+  white-space: normal;
+}
+.sch-when.sch-expr > .mono {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.sch-days {
+  display: inline-flex;
+  gap: 2px;
+}
+.sch-days span {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  font-size: 10px;
+  line-height: 16px;
+  text-align: center;
+  background: var(--hover);
+  color: var(--text-3);
+}
+.sch-days span.on {
+  background: var(--primary-tint-2);
+  color: var(--primary);
+}
+.sch-cmd {
+  font-size: 12px;
+}
+
+.sch-days-edit {
+  gap: 8px;
+}
+.sch-pills {
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.chip.sch-pill {
+  min-width: 38px;
+  min-height: 32px;
+  padding: 0 6px;
+}
+.chip.sch-pill:not(.on) {
+  color: var(--text-2);
+}
+.field.invalid .chip.sch-pill {
+  border-color: var(--error);
+}
+@media (pointer: coarse) {
+  .chip.sch-pill {
+    min-width: var(--touch);
+    min-height: var(--touch);
+  }
+}
+
+/* phone cards: name and switch on the title line */
+@media (max-width: 599px) {
+  .sch-pills {
+    flex: 1 1 100%;
+    flex-wrap: nowrap;
+    gap: 3px;
+  }
+  .chip.sch-pill {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0;
+  }
+  .sch-tbl.stack tbody tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .sch-tbl.stack td {
+    flex: 1 1 100%;
+  }
+  .sch-tbl.stack td.sch-name {
+    order: -2;
+    flex: 1 1 0;
+    justify-content: flex-start;
+    font-weight: 500;
+    text-align: left;
+  }
+  .sch-tbl.stack td.sch-act {
+    order: -1;
+    flex: 0 0 auto;
+    width: auto;
+  }
+  .sch-tbl.stack td.act:empty {
+    display: none;
+  }
+  .sch-tbl.stack .sch-when.sch-expr {
+    justify-content: flex-end;
+  }
+}

@@ -1,0 +1,74 @@
+.tbl th.sort {
+  padding: 0;
+}
+.tbl th.sort button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 6px 8px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+.tbl th.sort.r button {
+  justify-content: flex-end;
+}
+.tbl th.sort button:hover {
+  color: var(--text);
+}
+.tbl th.sort .icon {
+  opacity: 0.5;
+}
+.tbl th.sort[aria-sort] .icon {
+  opacity: 1;
+  color: var(--primary);
+}
+.tbl th.sort .icon.down {
+  transform: rotate(180deg);
+}
+
+/* stacked tables have no header row on phones; the sortable headers become a row of buttons */
+@media (max-width: 599px) {
+  .tbl.stack thead:has(th.sort) {
+    display: block;
+  }
+  .tbl.stack thead tr {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .tbl.stack thead th {
+    display: none;
+  }
+  .tbl.stack thead th.sort {
+    display: block;
+    position: static;
+    width: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+  .tbl.stack th.sort button {
+    width: auto;
+    min-height: 32px;
+    padding: 4px 10px;
+    border: 1px solid var(--divider);
+    border-radius: 16px;
+  }
+  .tbl.stack th.sort[aria-sort] button {
+    border-color: var(--primary);
+    color: var(--text);
+  }
+}
+@media (max-width: 599px) and (pointer: coarse) {
+  .tbl.stack th.sort button {
+    min-height: var(--touch);
+  }
+}

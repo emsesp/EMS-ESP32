@@ -1,0 +1,42 @@
+.savebar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: #2b3a46;
+  border: 1px solid var(--primary-line);
+  box-shadow: var(--shadow-pop);
+}
+.savebar > .icon {
+  color: var(--primary);
+}
+.savebar.warning {
+  background: #46392b;
+  border-color: var(--warning-line);
+}
+.savebar.warning > .icon {
+  color: var(--warning);
+}
+.savebar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}
+
+@media (max-width: 599px) {
+  .savebar {
+    margin: 0;
+    border-radius: 0;
+    border-width: 1px 0 0;
+  }
+  .savebar-actions {
+    width: 100%;
+  }
+  .savebar-actions > .btn {
+    flex: 1 1 auto;
+  }
+}

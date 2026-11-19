@@ -1238,6 +1238,71 @@ void EMSdevice::generate_values_web(JsonObject output, const bool is_dashboard) 
     }
 }
 
+// the current values of all writeable entities, keyed by the command name (e.g. hc1/seltemp) so they can be sent back as commands
+// used by the heating settings backup (export type heatingbackup). Enums are the English text, temperatures in the user's unit
+// returns false if there is nothing to back up
+bool EMSdevice::generate_values_backup(JsonObject output) {
+    bool has_values = false;
+
+    for (auto & dv : devicevalues_) {
+        // the clock is set from NTP or the WebUI, putting back an old time makes no sense
+        if (!dv.has_cmd || dv.has_state(DeviceValueState::DV_READONLY) || dv.type == DeviceValueType::CMD || !dv.hasValue()
+            || !strcmp(dv.short_name, FL_(dateTime)[0])) {
+            continue;
+        }
+
+        char name[50];
+        if (dv.tag >= DeviceValueTAG::TAG_HC1) {
+            snprintf(name, sizeof(name), "%s/%s", tag_to_mqtt(dv.tag), dv.short_name);
+        } else {
+            strlcpy(name, dv.short_name, sizeof(name));
+        }
+
+        uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
+        char    val[55];
+
+        switch (dv.type) {
+        case DeviceValueType::BOOL:
+            output[name] = (bool)*(uint8_t *)(dv.value_p);
+            break;
+        case DeviceValueType::ENUM: {
+            auto index = *(uint8_t *)(dv.value_p);
+            if (index >= dv.options_size || !strlen(Helpers::translated_word(dv.options[index], true))) {
+                continue;
+            }
+            output[name] = Helpers::translated_word(dv.options[index], true);
+            break;
+        }
+        case DeviceValueType::STRING:
+            output[name] = Helpers::render_string(val, (char *)(dv.value_p), sizeof(val));
+            break;
+        case DeviceValueType::INT8:
+            output[name] = serialized(Helpers::render_value(val, *(int8_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
+            break;
+        case DeviceValueType::UINT8:
+            output[name] = serialized(Helpers::render_value(val, *(uint8_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
+            break;
+        case DeviceValueType::INT16:
+            output[name] = serialized(Helpers::render_value(val, *(int16_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
+            break;
+        case DeviceValueType::UINT16:
+            output[name] = serialized(Helpers::render_value(val, *(uint16_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
+            break;
+        case DeviceValueType::UINT24:
+        case DeviceValueType::UINT32:
+        case DeviceValueType::TIME:
+            output[name] = serialized(Helpers::render_value(val, *(uint32_t *)(dv.value_p), dv.numeric_operator));
+            break;
+        default:
+            continue;
+        }
+
+        has_values = true;
+    }
+
+    return has_values;
+}
+
 // as generate_values_web() but with extra data for WebCustomizationService::device_entities() (rest/deviceEntities?id=n)
 // also show commands and entities that have an empty fullname
 // see types.ts::DeviceEntity for the structure

@@ -1,0 +1,26 @@
+/* a readable column on wide screens, so values stay close to their titles */
+.set-groups {
+  max-width: 760px;
+}
+.set-gtitle {
+  margin: 20px 24px 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.set-group .section {
+  margin-top: 8px;
+  padding: 0;
+  overflow: hidden;
+}
+.set-group .linklist {
+  margin: 0;
+}
+
+@media (max-width: 599px) {
+  .set-gtitle {
+    margin: 16px 20px 0;
+  }
+}

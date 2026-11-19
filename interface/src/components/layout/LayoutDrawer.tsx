@@ -1,86 +1,122 @@
 import { memo, useContext } from 'react';
+import { Link } from 'react-router';
 
-import { Box, Divider, Drawer, Toolbar, Typography, styled } from '@mui/material';
-
+import { type AppRoute, type MenuGroup, menuRoutes } from 'app/routes';
+import { Icon, IconButton, cx } from 'components/ui';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { PROJECT_NAME } from 'env';
-
-import { DRAWER_WIDTH } from './Layout';
-import LayoutMenu from './LayoutMenu';
-
-const LayoutDrawerLogo = styled('img')(({ theme }) => ({
-  [theme.breakpoints.down('sm')]: {
-    height: 24,
-    marginRight: theme.spacing(2)
-  },
-  [theme.breakpoints.up('sm')]: {
-    height: 38,
-    marginRight: theme.spacing(2)
-  }
-}));
+import { useI18nContext } from 'i18n/i18n-react';
+import { updateAvailable } from 'utils';
 
 interface LayoutDrawerProps {
-  mobileOpen: boolean;
-  onClose: () => void;
+  // path of the top-level route of the current page
+  active: string | undefined;
 }
 
-const LayoutDrawerComponent = ({ mobileOpen, onClose }: LayoutDrawerProps) => {
-  const { systemName } = useContext(AuthenticatedContext);
+const LayoutDrawerComponent = ({ active }: LayoutDrawerProps) => {
+  const { LL } = useI18nContext();
+  const { me, versions, systemName, signOut } = useContext(AuthenticatedContext);
 
-  const drawer = (
-    <>
-      <Toolbar disableGutters>
-        <Box sx={{ display: 'flex', alignItems: 'center', p: 2 }}>
-          <LayoutDrawerLogo src="/app/icon.png" alt={PROJECT_NAME} />
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center'
-            }}
-          >
-            <Typography>{PROJECT_NAME}</Typography>
-            {systemName && (
-              <Typography color="secondary" variant="body2">
-                {systemName}
-              </Typography>
-            )}
-          </Box>
-        </Box>
-        <Divider absolute />
-      </Toolbar>
-      <Divider />
-      <LayoutMenu />
-    </>
+  const item = (route: AppRoute) => {
+    const label = route.menu === 'account' ? me.username : route.title(LL);
+    const content = (
+      <>
+        <Icon name={route.icon} />
+        <span className="nav-label">{label}</span>
+        {route.badge === 'update' && updateAvailable(versions) && (
+          <span className="badge-dot" />
+        )}
+      </>
+    );
+    if (route.admin && !me.admin) {
+      return (
+        <li key={route.path}>
+          <span className="nav-item disabled" aria-disabled="true" title={label}>
+            {content}
+          </span>
+        </li>
+      );
+    }
+    const current = route.path === active;
+    return (
+      <li key={route.path}>
+        <Link
+          to={route.path}
+          className={cx('nav-item', current && 'active')}
+          aria-current={current ? 'page' : undefined}
+          title={label}
+        >
+          {content}
+        </Link>
+      </li>
+    );
+  };
+
+  const group = (name: MenuGroup) => menuRoutes(name).map(item);
+
+  const section = (title: string, name: MenuGroup) => (
+    <li className="nav-group">
+      <div className="nav-group-title">{title}</div>
+      <ul className="nav">{group(name)}</ul>
+    </li>
   );
 
+  const account = menuRoutes('account')[0];
+  const accountCurrent = account?.path === active;
+
   return (
-    <Box component="nav" sx={{ width: { md: DRAWER_WIDTH }, flexShrink: { md: 0 } }}>
-      <Drawer
-        variant="temporary"
-        open={mobileOpen}
-        onClose={onClose}
-        ModalProps={{
-          keepMounted: true
-        }}
-        sx={{
-          display: { xs: 'block', md: 'none' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: DRAWER_WIDTH }
-        }}
-      >
-        {drawer}
-      </Drawer>
-      <Drawer
-        variant="permanent"
-        sx={{
-          display: { xs: 'none', md: 'block' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: DRAWER_WIDTH }
-        }}
-        open
-      >
-        {drawer}
-      </Drawer>
-    </Box>
+    <nav className="drawer" aria-label={LL.MENU()}>
+      <div className="drawer-head">
+        <img src="/app/icon.png" alt="" />
+        <div className="drawer-name">
+          <div>{PROJECT_NAME}</div>
+          {systemName && <div className="sub">{systemName}</div>}
+        </div>
+        {import.meta.env.DEV && (
+          <a
+            href="/rest/mockData"
+            target="_blank"
+            rel="noreferrer"
+            title="Mock Data"
+            style={{ marginLeft: 'auto', color: '#ffeb3b', display: 'flex' }}
+          >
+            <Icon name="bug_report" label="Mock Data" />
+          </a>
+        )}
+      </div>
+      <ul className="nav">
+        {group('main')}
+        {section(LL.MODULES(), 'modules')}
+        {section(LL.SYSTEM(0), 'system')}
+      </ul>
+      {account && (
+        <div className="nav-user">
+          <Link
+            to={account.path}
+            className={cx('nav-user-link', accountCurrent && 'active')}
+            aria-current={accountCurrent ? 'page' : undefined}
+            title={account.title(LL)}
+          >
+            <span className="nav-avatar" aria-hidden="true">
+              {me.username.charAt(0).toUpperCase()}
+            </span>
+            <span className="nav-user-text">
+              <span>{me.username}</span>
+              <span className="cap">
+                {me.admin ? LL.ADMINISTRATOR() : LL.GUEST()}
+              </span>
+            </span>
+          </Link>
+          <IconButton
+            className="nav-out"
+            icon="logout"
+            label={LL.SIGN_OUT()}
+            plain
+            onClick={() => signOut(true)}
+          />
+        </div>
+      )}
+    </nav>
   );
 };
 

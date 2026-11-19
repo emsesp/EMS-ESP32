@@ -1,5 +1,8 @@
 import type { RemoteVersionInfo, VersionsResponse } from 'types';
 
+export const CUSTOM_BUILD_URL =
+  'https://docs.emsesp.org/FAQ#official-and-custom-builds';
+
 // true if version a is newer than b, like 1.0.1 and 1.0.0. A prerelease, like 1.1.0-dev.1, is older than the release
 export const isNewerVersion = (a: string, b: string) => {
   const parse = (v: string) => {

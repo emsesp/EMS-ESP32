@@ -117,7 +117,8 @@ class System {
     static bool command_test(const char * value, const int8_t id);
 #endif
 
-    std::string reset_reason(uint8_t cpu) const;
+    std::string  reset_reason(uint8_t cpu) const;
+    const char * restart_reason() const;
 
     const std::string & coredump() const {
         return coredump_;

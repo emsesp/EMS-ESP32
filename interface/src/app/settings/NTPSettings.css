@@ -1,0 +1,22 @@
+.ntp-clock {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.ntp-clock > .icon {
+  font-size: 36px;
+  color: var(--lightblue);
+}
+.ntp-clock > .grow {
+  min-width: 180px;
+}
+.ntp-time {
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 599px) {
+  .ntp-clock > .btn {
+    flex: 1 1 100%;
+  }
+}

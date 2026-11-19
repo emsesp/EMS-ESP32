@@ -1,834 +1,590 @@
-import {
-  memo,
-  useCallback,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useState
-} from 'react';
-import { IconContext } from 'react-icons';
-import { Link, useNavigate } from 'react-router';
+import { useContext, useEffect, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router';
 
-import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
-import ConstructionIcon from '@mui/icons-material/Construction';
-import EditIcon from '@mui/icons-material/Edit';
-import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
-import DownloadIcon from '@mui/icons-material/GetApp';
-import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
-import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import SearchIcon from '@mui/icons-material/Search';
-import StarIcon from '@mui/icons-material/Star';
-import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
-import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  InputAdornment,
-  List,
-  ListItem,
-  ListItemText,
-  TextField,
-  ToggleButton,
-  Typography
-} from '@mui/material';
-
-import { useRowSelect } from '@table-library/react-table-library/select';
-import { SortToggleType, useSort } from '@table-library/react-table-library/sort';
-import {
-  Body,
-  Cell,
-  Header,
-  HeaderCell,
-  HeaderRow,
-  Row,
-  Table
-} from '@table-library/react-table-library/table';
-import { useTheme } from '@table-library/react-table-library/theme';
-import type { Action, State } from '@table-library/react-table-library/types/common';
-import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova/client';
 import {
-  ButtonTooltip,
-  MessageBox,
-  SectionContent,
-  useLayoutTitle
-} from 'components';
-import { toast } from 'components/toast';
+  Button,
+  Icon,
+  IconButton,
+  Loader,
+  Menu,
+  SearchField,
+  Section,
+  SortHeader,
+  Table,
+  ToggleButton,
+  ToggleGroup,
+  cx,
+  rowAction,
+  toast,
+  useTableSort
+} from 'components/ui';
+import type { MenuItem } from 'components/ui';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
-import { useInterval } from 'utils';
+import { saveBlob, useInterval } from 'utils';
 
 import { readCoreData, readDeviceData, writeDeviceValue } from '../../api/app';
 import DeviceIcon from './DeviceIcon';
+import './Devices.css';
 import DevicesDialog from './DevicesDialog';
+import EmsBusWarning from './EmsBusWarning';
+import { MASKS } from './EntityMaskToggle';
 import { formatValue } from './deviceValue';
 import { DeviceEntityMask, DeviceType, DeviceValueUOM_s } from './types';
 import type { Device, DeviceValue } from './types';
 import { deviceValueItemValidation } from './validators';
 
-const Devices = memo(() => {
+// the custom entities "device" always has this id
+const CUSTOM_DEVICE_ID = 99;
+
+const hasMask = (id: string, mask: number) =>
+  (parseInt(id.slice(0, 2), 16) & mask) === mask;
+
+const SHOWN_MASKS = MASKS.filter((o) =>
+  [
+    DeviceEntityMask.DV_FAVORITE,
+    DeviceEntityMask.DV_READONLY,
+    DeviceEntityMask.DV_API_MQTT_EXCLUDE
+  ].includes(o.bit)
+);
+
+// circuit tags the firmware puts in front of entity names, in every language (tag_* in locale_translations.h)
+const TAGGED =
+  /^((?:hc|hk|vk|og|id|ahs|ahq|avk|aźc|hs|hq|źc|src)\d{1,2}|(?:dhw|wwk|vvk|cwu|sks|tuv|túv|ecs|hmv)\d{0,2}) (.+)$/iu;
+
+const hex = (n: number) => '0x' + n.toString(16).toUpperCase().padStart(2, '0');
+
+const text = (v: unknown) =>
+  typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'
+    ? String(v)
+    : '';
+
+const escapeCsvCell = (cell: unknown) => {
+  const sc = text(cell).trim();
+  if (sc === '' || sc === '""') return sc;
+  if (/["\n\r;]/.test(sc)) return '"' + sc.replace(/"/g, '""') + '"';
+  return sc;
+};
+
+const compareValues = (a: DeviceValue, b: DeviceValue) =>
+  typeof a.v === 'number' && typeof b.v === 'number'
+    ? a.v - b.v
+    : text(a.v).localeCompare(text(b.v));
+
+const highlight = (s: string, q: string) => {
+  const i = q ? s.toLowerCase().indexOf(q) : -1;
+  if (i < 0) return s;
+  return (
+    <>
+      {s.slice(0, i)}
+      <mark>{s.slice(i, i + q.length)}</mark>
+      {s.slice(i + q.length)}
+    </>
+  );
+};
+
+interface Row {
+  dv: DeviceValue;
+  name: string;
+  tag: string;
+  short: string;
+  value: string;
+}
+
+const Devices = () => {
   const { LL } = useI18nContext();
   const { me } = useContext(AuthenticatedContext);
-
-  const [size, setSize] = useState([0, 0]);
-  const [selectedDeviceValue, setSelectedDeviceValue] = useState<DeviceValue>();
-  const [onlyFav, setOnlyFav] = useState(false);
-  const [deviceValueDialogOpen, setDeviceValueDialogOpen] = useState(false);
-  const [showDeviceInfo, setShowDeviceInfo] = useState(false);
-  const [selectedDevice, setSelectedDevice] = useState<number>();
-  const [search, setSearch] = useState('');
-
   const navigate = useNavigate();
-
-  useLayoutTitle(LL.DEVICES());
-
-  const { data: coreData, send: sendCoreData } = useRequest(readCoreData, {
-    initialData: {
-      connected: true,
-      devices: []
-    }
+  const [params, setParams] = useSearchParams();
+  const [onlyFav, setOnlyFav] = useState(false);
+  const [search, setSearch] = useState('');
+  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
+  const [changed, setChanged] = useState<ReadonlySet<string>>(new Set());
+  const [selectedValue, setSelectedValue] = useState<DeviceValue>();
+  const [loadedId, setLoadedId] = useState<number>();
+  const detailRef = useRef<HTMLElement>(null);
+  const lastValues = useRef<{ id?: number; values: Map<string, unknown> }>({
+    values: new Map()
   });
 
-  const { data: deviceData, send: sendDeviceData } = useRequest(
-    (id: number) => readDeviceData(id),
-    {
-      initialData: {
-        nodes: []
-      },
-      immediate: false
-    }
-  );
+  const selectedId = Number(params.get('device')) || undefined;
+
+  const {
+    data: coreData,
+    error: coreError,
+    send: fetchCoreData
+  } = useRequest(readCoreData);
+
+  const {
+    data: deviceData,
+    error: deviceError,
+    send: fetchDeviceData
+  } = useRequest((id: number) => readDeviceData(id), {
+    immediate: false
+  }).onSuccess(({ args: [id], data }) => {
+    const values = new Map(data.nodes.map((dv) => [dv.id.slice(2), dv.v]));
+    const last = lastValues.current;
+    setChanged(
+      new Set(
+        last.id === id
+          ? [...values.keys()].filter(
+              (k) => last.values.has(k) && last.values.get(k) !== values.get(k)
+            )
+          : []
+      )
+    );
+    lastValues.current = { id, values };
+    setLoadedId(id);
+  });
 
   const { loading: submitting, send: sendDeviceValue } = useRequest(
     (data: { id: number; c: string; v: unknown }) => writeDeviceValue(data),
-    {
-      immediate: false
-    }
+    { immediate: false }
   );
 
-  useLayoutEffect(() => {
-    let raf = 0;
-    const updateSize = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        setSize([window.innerWidth, window.innerHeight]);
-      });
-    };
-    window.addEventListener('resize', updateSize);
-    updateSize();
-    return () => {
-      window.removeEventListener('resize', updateSize);
-      cancelAnimationFrame(raf);
-    };
-  }, []);
-
-  const leftOffset = () => {
-    const devicesWindow = document.getElementById('devices-window');
-    if (!devicesWindow) return 0;
-    const { left, right } = devicesWindow.getBoundingClientRect();
-    if (!left || !right) return 0;
-    return left + (right - left < 400 ? 0 : 200);
-  };
-
-  const common_theme = useTheme({
-    BaseRow: `
-      font-size: 14px;
-    `,
-    HeaderRow: `
-      text-transform: uppercase;
-      background-color: black;
-      color: #90CAF9;
-      .th {
-        border-bottom: 1px solid #565656;
-      }
-    `,
-    Row: `
-      cursor: pointer;
-      background-color: #1E1E1E;
-      .td {
-        padding: 8px;
-      }
-      &.tr.tr-body.row-select.row-select-single-selected {
-        background-color: #177ac9;
-      }
-    `
-  });
-
-  const device_theme = useTheme([
-    common_theme,
-    {
-      BaseRow: `
-        font-size: 15px;
-        .td {
-         height: 28px;
-        }
-      `,
-      Table: `
-      --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 170px;
-    `,
-      HeaderRow: `
-      .th {
-        padding: 8px;
-    `,
-      Row: `
-      &:nth-of-type(odd) .td {
-          background-color: #303030;
-      },
-      &:hover .td {
-        background-color: #177ac9;
-      },
-    `
-    }
-  ]);
-
-  const data_theme = useTheme([
-    common_theme,
-    {
-      Table: `
-      --data-table-library_grid-template-columns: minmax(200px, auto) minmax(150px, auto) 40px;
-      height: auto;
-      max-height: 100%;
-      overflow-y: scroll;
-      ::-webkit-scrollbar {
-        display:none;
-      }
-    `,
-      BaseRow: `
-    .td {
-      height: 32px;
-    }
-   `,
-      BaseCell: `
-      &:nth-of-type(1) {
-        border-left: 1px solid #177ac9;
-      },
-      &:nth-of-type(2) {
-        text-align: right;
-      },
-      &:nth-of-type(3) {
-        border-right: 1px solid #177ac9;
-      }
-    `,
-      HeaderRow: `
-      .th {
-        border-top: 1px solid #565656;
-      }
-    `,
-      Row: `
-      &:nth-of-type(odd) .td {
-        background-color: #303030;
-      },
-      &:hover .td {
-        background-color: #177ac9;
-    }
-    `
-    }
-  ]);
-
-  const getSortIcon = (state: State, sortKey: unknown) => {
-    if (state.sortKey === sortKey && state.reverse) {
-      return <KeyboardArrowDownOutlinedIcon />;
-    }
-    if (state.sortKey === sortKey && !state.reverse) {
-      return <KeyboardArrowUpOutlinedIcon />;
-    }
-    return <UnfoldMoreOutlinedIcon />;
-  };
-
-  const dv_sort = useSort(
-    { nodes: [...deviceData.nodes] },
-    {},
-    {
-      sortIcon: {
-        iconDefault: <UnfoldMoreOutlinedIcon />,
-        iconUp: <KeyboardArrowUpOutlinedIcon />,
-        iconDown: <KeyboardArrowDownOutlinedIcon />
-      },
-      sortToggleType: SortToggleType.AlternateWithReset,
-      sortFns: {
-        NAME: (array) =>
-          array.sort((a, b) =>
-            a.id.toString().slice(2).localeCompare(b.id.toString().slice(2))
-          ),
-
-        VALUE: (array) =>
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          array.sort((a, b) => a.v.toString().localeCompare(b.v.toString()))
-      }
-    }
-  );
-
-  async function onSelectChange(action: Action, state: State) {
-    setSelectedDevice(state.id as number);
-    if (action.type === 'ADD_BY_ID_EXCLUSIVELY') {
-      await sendDeviceData(state.id as number);
-    }
-  }
-
-  const device_select = useRowSelect(
-    { nodes: [...coreData.devices] },
-    {
-      onChange: onSelectChange
-    }
-  );
-
-  const resetDeviceSelect = () => {
-    device_select.fns.onRemoveAll();
-    setSearch('');
-  };
-
-  const escFunction = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        if (device_select) {
-          device_select.fns.onRemoveAll();
-        }
-      }
-    },
-    [device_select]
-  );
+  const device = coreData?.devices.find((d) => d.id === selectedId);
+  const coreLoaded = !!coreData;
+  const selectable = !!device && device.e !== 0;
 
   useEffect(() => {
-    document.addEventListener('keydown', escFunction);
-    return () => {
-      document.removeEventListener('keydown', escFunction);
+    if (selectedId !== undefined && coreLoaded && !selectable) {
+      setParams({}, { replace: true });
+    }
+  }, [selectedId, coreLoaded, selectable]);
+
+  useEffect(() => {
+    if (selectedId === undefined || !selectable) return;
+    setSearch('');
+    setCollapsed(new Set());
+    void fetchDeviceData(selectedId);
+  }, [selectedId, selectable]);
+
+  useEffect(() => {
+    const el = detailRef.current;
+    if (!el || selectedId === undefined) return;
+    const { top } = el.getBoundingClientRect();
+    if (top < 0 || top > window.innerHeight * 0.6) {
+      el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }
+  }, [selectedId, loadedId]);
+
+  const selectDevice = (id?: number) => {
+    setParams(id === undefined ? {} : { device: String(id) });
+  };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (
+        e.key === 'Escape' &&
+        !e.defaultPrevented &&
+        !document.querySelector('dialog[open]') &&
+        !(e.target instanceof HTMLInputElement)
+      ) {
+        setParams({});
+      }
     };
-  }, [escFunction]);
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [setParams]);
+
+  useInterval(() => {
+    if (selectedValue) return;
+    void fetchCoreData();
+    if (selectedId !== undefined) void fetchDeviceData(selectedId);
+  });
+
+  const nodes = loadedId === selectedId ? (deviceData?.nodes ?? []) : [];
+  const sort = useTableSort(nodes, {
+    name: (a, b) => a.id.slice(2).localeCompare(b.id.slice(2)),
+    value: compareValues
+  });
+  if (!coreData) {
+    return (
+      <Loader error={coreError?.message} onRetry={() => void fetchCoreData()} />
+    );
+  }
+
+  const q = search.trim().toLowerCase();
+  const shown: Row[] = sort.rows.flatMap((dv) => {
+    if (onlyFav && !hasMask(dv.id, DeviceEntityMask.DV_FAVORITE)) return [];
+    const name = dv.id.slice(2);
+    const value = formatValue(LL, dv.v, dv.u);
+    if (q && !name.toLowerCase().includes(q) && !value.toLowerCase().includes(q)) {
+      return [];
+    }
+    const m = TAGGED.exec(name);
+    return [{ dv, name, tag: m?.[1] ?? '', short: m?.[2] ?? name, value }];
+  });
+
+  // untagged entities first, then each circuit in the order the device lists them
+  const groups = new Map<string, Row[]>([['', []]]);
+  for (const row of shown) {
+    const key = row.tag.toLowerCase();
+    const group = groups.get(key);
+    if (group) group.push(row);
+    else groups.set(key, [row]);
+  }
+  if (!groups.get('')?.length) groups.delete('');
+  const grouped = groups.size > 1;
+
+  const canWrite = (dv: DeviceValue) =>
+    me.admin && dv.c !== undefined && !hasMask(dv.id, DeviceEntityMask.DV_READONLY);
 
   const customize = () => {
-    if (selectedDevice === 99) {
+    if (selectedId === CUSTOM_DEVICE_ID) {
       void navigate('/customentities');
     } else {
-      void navigate('/customizations', { state: selectedDevice });
+      void navigate('/customizations', { state: selectedId });
     }
   };
 
-  const escapeCsvCell = (cell: string) => {
-    if (cell == null) {
-      return '';
-    }
-    const sc = cell.toString().trim();
-    if (sc === '' || sc === '""') {
-      return sc;
-    }
-    if (
-      sc.includes('"') ||
-      sc.includes(';') ||
-      sc.includes('\n') ||
-      sc.includes('\r')
-    ) {
-      return '"' + sc.replace(/"/g, '""') + '"';
-    }
-    return sc;
+  const toggleGroup = (key: string) => {
+    const next = new Set(collapsed);
+    if (!next.delete(key)) next.add(key);
+    setCollapsed(next);
   };
 
-  const hasMask = (id: string, mask: number) =>
-    (parseInt(id.slice(0, 2), 16) & mask) === mask;
+  const filename = (d: Device, ext: string) => `${d.tn}_${d.n}.${ext}`;
 
-  const handleDownloadCsv = () => {
-    const deviceIndex = coreData.devices.findIndex(
-      (d: Device) => d.id === device_select.state.id
-    );
-    if (deviceIndex === -1) {
-      return;
-    }
-    const selectedDevice = coreData.devices[deviceIndex];
-    if (!selectedDevice) {
-      return;
-    }
-    const filename = selectedDevice.tn + '_' + selectedDevice.n;
-
-    const columns = [
-      {
-        accessor: (dv: DeviceValue) => dv.id.slice(2),
-        name: LL.ENTITY_NAME(0)
-      },
-      {
-        accessor: (dv: DeviceValue) =>
-          typeof dv.v === 'number' ? new Intl.NumberFormat().format(dv.v) : dv.v,
-        name: LL.VALUE(0)
-      },
-      {
-        accessor: (dv: DeviceValue) =>
+  const exportCsv = () => {
+    if (!device) return;
+    const columns: [string, (dv: DeviceValue) => unknown][] = [
+      [LL.ENTITY_NAME(0), (dv) => dv.id.slice(2)],
+      [
+        LL.VALUE(0),
+        (dv) =>
+          typeof dv.v === 'number' ? new Intl.NumberFormat().format(dv.v) : dv.v
+      ],
+      [
+        'UoM',
+        (dv) =>
           dv.u !== undefined && DeviceValueUOM_s[dv.u]
             ? DeviceValueUOM_s[dv.u]?.replace(/[^a-zA-Z0-9]/g, '')
-            : '',
-        name: 'UoM'
-      },
-      {
-        accessor: (dv: DeviceValue) =>
-          dv.c && !hasMask(dv.id, DeviceEntityMask.DV_READONLY) ? 'yes' : 'no',
-        name: LL.WRITEABLE()
-      },
-      {
-        accessor: (dv: DeviceValue) =>
+            : ''
+      ],
+      [
+        LL.WRITEABLE(),
+        (dv) =>
+          dv.c && !hasMask(dv.id, DeviceEntityMask.DV_READONLY) ? 'yes' : 'no'
+      ],
+      [
+        'Range',
+        (dv) =>
           dv.h
             ? dv.h
             : dv.l
               ? dv.l.join(' | ')
               : dv.m !== undefined && dv.x !== undefined
                 ? dv.m + ', ' + dv.x
-                : '',
-        name: 'Range'
-      }
+                : ''
+      ]
     ];
-
-    const data = onlyFav
-      ? deviceData.nodes.filter((dv: DeviceValue) =>
-          hasMask(dv.id, DeviceEntityMask.DV_FAVORITE)
-        )
-      : deviceData.nodes;
-
-    const csvData = data.reduce(
-      (csvString: string, rowItem: DeviceValue) =>
-        csvString +
-        columns
-          .map(({ accessor }: { accessor: (dv: DeviceValue) => unknown }) =>
-            escapeCsvCell(accessor(rowItem) as string)
-          )
-          .join(';') +
-        '\r\n',
-      columns.map(({ name }: { name: string }) => escapeCsvCell(name)).join(';') +
-        '\r\n'
+    const line = (cells: unknown[]) => cells.map(escapeCsvCell).join(';') + '\r\n';
+    const csv =
+      line(columns.map(([name]) => name)) +
+      shown.map(({ dv }) => line(columns.map(([, get]) => get(dv)))).join('');
+    saveBlob(
+      new Blob([csv], { type: 'text/csv;charset=utf-8' }),
+      filename(device, 'csv')
     );
-
-    const downloadBlob = (blob: Blob) => {
-      const downloadLink = document.createElement('a');
-      downloadLink.download = filename;
-      downloadLink.href = window.URL.createObjectURL(blob);
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
-    };
-
-    const device = { ...{ device: coreData.devices[deviceIndex] }, ...deviceData };
-    downloadBlob(
-      new Blob([JSON.stringify(device, null, 2)], {
-        type: 'text;charset:utf-8'
-      })
-    );
-
-    downloadBlob(new Blob([csvData], { type: 'text/csv;charset:utf-8' }));
   };
 
-  useInterval(() => {
-    if (!deviceValueDialogOpen) {
-      selectedDevice ? void sendDeviceData(selectedDevice) : void sendCoreData();
-    }
-  });
+  const exportJson = () => {
+    if (!device) return;
+    saveBlob(
+      new Blob([JSON.stringify({ device, ...deviceData }, null, 2)], {
+        type: 'application/json'
+      }),
+      filename(device, 'json')
+    );
+  };
 
-  const deviceValueDialogSave = async (devicevalue: DeviceValue) => {
-    const id = Number(device_select.state.id);
-    await sendDeviceValue({ id, c: devicevalue.c ?? '', v: devicevalue.v })
-      .then(() => {
-        toast.success(LL.WRITE_CMD_SENT());
-      })
-      .catch((error: Error) => {
-        toast.error(error.message);
-      })
-      .finally(async () => {
-        setDeviceValueDialogOpen(false);
-        await sendDeviceData(id);
-        setSelectedDeviceValue(undefined);
+  const saveValue = async (dv: DeviceValue) => {
+    if (selectedId === undefined) return;
+    await sendDeviceValue({ id: selectedId, c: dv.c ?? '', v: dv.v })
+      .then(() => toast.success(LL.WRITE_CMD_SENT()))
+      .catch((error: Error) => toast.error(error.message))
+      .finally(() => {
+        setSelectedValue(undefined);
+        void fetchDeviceData(selectedId);
       });
   };
 
-  const renderDeviceDetails = () => {
-    if (showDeviceInfo) {
-      const deviceIndex = coreData.devices.findIndex(
-        (d: Device) => d.id === device_select.state.id
-      );
-      if (deviceIndex === -1) {
-        return null;
-      }
-      const deviceDetails = coreData.devices[deviceIndex];
-      if (!deviceDetails) {
-        return null;
-      }
-
-      return (
-        <Dialog
-          sx={dialogStyle}
-          open={showDeviceInfo}
-          onClose={() => setShowDeviceInfo(false)}
-        >
-          <DialogTitle>{LL.DEVICE_DETAILS()}</DialogTitle>
-          <DialogContent dividers>
-            <List dense={true}>
-              <ListItem>
-                <ListItemText primary={LL.TYPE(0)} secondary={deviceDetails.tn} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary={LL.NAME(0)} secondary={deviceDetails.n} />
-              </ListItem>
-              {deviceDetails.t !== DeviceType.CUSTOM && (
-                <>
-                  <ListItem>
-                    <ListItemText primary={LL.BRAND()} secondary={deviceDetails.b} />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemText
-                      primary={LL.ID_OF(LL.DEVICE())}
-                      secondary={
-                        '0x' +
-                        ('00' + deviceDetails.d.toString(16).toUpperCase()).slice(-2)
-                      }
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemText
-                      primary={LL.ID_OF(LL.PRODUCT())}
-                      secondary={deviceDetails.p}
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemText
-                      primary={LL.VERSION()}
-                      secondary={deviceDetails.v}
-                    />
-                  </ListItem>
-                </>
-              )}
-            </List>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              variant="outlined"
-              onClick={() => setShowDeviceInfo(false)}
-              color="secondary"
-            >
-              {LL.CLOSE()}
-            </Button>
-          </DialogActions>
-        </Dialog>
-      );
-    }
-    return null;
+  const closeValue = () => {
+    setSelectedValue(undefined);
+    if (selectedId !== undefined) void fetchDeviceData(selectedId);
   };
 
-  const renderCoreData = () => (
-    <>
-      {!coreData.connected ? (
-        <MessageBox level="error" message={LL.EMS_BUS_WARNING() + '.'}>
-          &nbsp;(
-          <Link
-            target="_blank"
-            to="https://docs.emsesp.org/Troubleshooting#ems-bus-is-not-connecting"
-            style={{ color: 'white' }}
-          >
-            {LL.ONLINE_HELP()}
-          </Link>
-          )
-        </MessageBox>
+  const deviceCaption = (d: Device) =>
+    d.t === DeviceType.CUSTOM
+      ? d.tn
+      : [
+          d.tn,
+          d.b,
+          `${LL.ID_OF(LL.DEVICE())} ${hex(d.d)}`,
+          `${LL.ID_OF(LL.PRODUCT())} ${d.p}`,
+          d.v && `${LL.VERSION()} ${d.v}`
+        ]
+          .filter(Boolean)
+          .join(' · ');
+
+  const renderDeviceList = () => (
+    <Section
+      title={LL.DEVICES()}
+      count={coreData.devices.length}
+      icon="category"
+      className="dv-list"
+    >
+      {coreData.devices.length === 0 ? (
+        <p className="tbl-empty dv-empty">{LL.NO_DEVICES()}</p>
       ) : (
-        <Box sx={{ justifyContent: 'center', flexDirection: 'column' }}>
-          <IconContext.Provider
-            value={{
-              color: 'lightblue',
-              size: '18',
-              style: { verticalAlign: 'middle' }
-            }}
-          >
-            <Table
-              data={{ nodes: [...coreData.devices] }}
-              select={device_select}
-              theme={device_theme}
-              layout={{ custom: true }}
+        <div className="dv-cards">
+          {coreData.devices.map((d) => (
+            <button
+              key={d.id}
+              type="button"
+              className={cx('dv-card', d.id === selectedId && 'sel')}
+              disabled={d.e === 0}
+              aria-current={d.id === selectedId || undefined}
+              onClick={() => selectDevice(d.id)}
             >
-              {(tableList: Device[]) => (
-                <>
-                  <Header>
-                    <HeaderRow>
-                      <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
-                      <HeaderCell stiff>{LL.TYPE(0)}</HeaderCell>
-                    </HeaderRow>
-                  </Header>
-                  <Body>
-                    {tableList.length === 0 && (
-                      <CircularProgress sx={{ margin: 1 }} size={18} />
-                    )}
-                    {tableList.map((device: Device) => (
-                      <Row key={device.id} item={device} disabled={device.e === 0}>
-                        <Cell>
-                          <DeviceIcon type_id={device.t} />
-                          &nbsp;&nbsp;
-                          <span style={{ color: device.e === 0 ? 'grey' : 'white' }}>
-                            {device.n}
-                          </span>
-                          {device.e !== 0 && (
-                            <span style={{ color: 'lightblue' }}>
-                              &nbsp;&nbsp;({device.e})
-                            </span>
-                          )}
-                        </Cell>
-                        <Cell stiff>
-                          <ButtonTooltip
-                            title={`DeviceID: 0x${('00' + device.d.toString(16).toUpperCase()).slice(-2)}, ProductID: ${device.p}`}
-                          >
-                            <span>{device.tn}</span>
-                          </ButtonTooltip>
-                        </Cell>
-                      </Row>
-                    ))}
-                  </Body>
-                </>
-              )}
-            </Table>
-          </IconContext.Provider>
-        </Box>
+              <span className="dv-av">
+                <DeviceIcon type_id={d.t} size="sm" />
+              </span>
+              <span className="dv-text">
+                <span className="dv-dname" title={d.n}>
+                  {d.n}
+                </span>
+                <span className="cap">
+                  {d.tn}
+                  {d.b && ` · ${d.b}`}
+                </span>
+              </span>
+              <span className="count" title={LL.ENTITIES(d.e)}>
+                {d.e}
+              </span>
+            </button>
+          ))}
+        </div>
       )}
-    </>
+    </Section>
   );
 
-  const deviceValueDialogClose = () => {
-    setDeviceValueDialogOpen(false);
-    setSelectedDeviceValue(undefined);
-    if (selectedDevice !== undefined) {
-      void sendDeviceData(selectedDevice);
-    }
+  const renderRow = ({ dv, name, short, value }: Row) => (
+    <tr key={dv.id} {...rowAction(() => setSelectedValue(dv), name)}>
+      <td>
+        <span className="dv-ename">
+          <span>{highlight(grouped ? short : name, q)}</span>
+          {SHOWN_MASKS.map(
+            (o) =>
+              hasMask(dv.id, o.bit) && (
+                <Icon
+                  key={o.bit}
+                  name={o.icon}
+                  size="xs"
+                  label={o.label(LL)}
+                  className={cx('dv-mask', `b${o.bit}`)}
+                />
+              )
+          )}
+        </span>
+      </td>
+      <td className="r dv-val">
+        <span key={text(dv.v)} className={cx(changed.has(name) && 'dv-chg')}>
+          {highlight(value, q)}
+        </span>
+      </td>
+      {me.admin && (
+        <td className="dv-act">
+          {canWrite(dv) && (
+            <Icon
+              name={dv.v === '' ? 'play_arrow' : 'edit'}
+              size="xs"
+              className="lb"
+            />
+          )}
+        </td>
+      )}
+    </tr>
+  );
+
+  const renderGroup = (key: string, rows: Row[]) => {
+    const open = !!q || !collapsed.has(key);
+    return [
+      <tr key={`g-${key}`} className="dv-grp">
+        <td colSpan={me.admin ? 3 : 2}>
+          <button
+            type="button"
+            aria-expanded={open}
+            disabled={!!q}
+            onClick={() => toggleGroup(key)}
+          >
+            <Icon name="chevron_right" size="sm" className="dv-chev" />
+            {rows[0]?.tag || LL.GENERAL()}
+            <span className="count">{rows.length}</span>
+          </button>
+        </td>
+      </tr>,
+      ...(open ? rows.map(renderRow) : [])
+    ];
   };
 
-  const renderDeviceData = () => {
-    if (!selectedDevice) {
-      return;
-    }
-
-    const showDeviceValue = (dv: DeviceValue) => {
-      setSelectedDeviceValue(dv);
-      setDeviceValueDialogOpen(true);
-    };
-
-    const renderNameCell = (dv: DeviceValue) => (
-      <>
-        {dv.id.slice(2)}&nbsp;
-        {hasMask(dv.id, DeviceEntityMask.DV_FAVORITE) && (
-          <StarIcon color="primary" sx={{ fontSize: 12 }} />
-        )}
-        {hasMask(dv.id, DeviceEntityMask.DV_READONLY) && (
-          <EditOffOutlinedIcon color="primary" sx={{ fontSize: 12 }} />
-        )}
-        {hasMask(dv.id, DeviceEntityMask.DV_API_MQTT_EXCLUDE) && (
-          <CommentsDisabledOutlinedIcon color="primary" sx={{ fontSize: 12 }} />
-        )}
-      </>
+  const renderDevice = (d: Device) => {
+    const masksShown = SHOWN_MASKS.filter((o) =>
+      shown.some(({ dv }) => hasMask(dv.id, o.bit))
     );
-
-    const shown_data = onlyFav
-      ? deviceData.nodes.filter(
-          (dv: DeviceValue) =>
-            hasMask(dv.id, DeviceEntityMask.DV_FAVORITE) &&
-            dv.id.slice(2).toLowerCase().includes(search.toLowerCase())
-        )
-      : deviceData.nodes.filter((dv: DeviceValue) =>
-          dv.id.slice(2).toLowerCase().includes(search.toLowerCase())
-        );
-
-    const deviceIndex = coreData.devices.findIndex(
-      (d: Device) => d.id === device_select.state.id
-    );
-    if (deviceIndex === -1) {
-      return;
-    }
-    const deviceInfo = coreData.devices[deviceIndex];
-    if (!deviceInfo) {
-      return;
-    }
-
-    const [, height] = size;
+    const exportItems: MenuItem[] = [
+      { label: 'CSV', icon: 'list_alt', onSelect: exportCsv },
+      { label: 'JSON', icon: 'data_object', onSelect: exportJson }
+    ];
+    const moreItems: MenuItem[] = [
+      ...exportItems.map((o) => ({ ...o, label: `${LL.EXPORT()} ${o.label}` })),
+      ...(me.admin
+        ? [
+            {
+              label: LL.CUSTOMIZATIONS(),
+              icon: 'construction' as const,
+              onSelect: customize
+            }
+          ]
+        : [])
+    ];
     return (
-      <Box
-        sx={{
-          backgroundColor: 'black',
-          position: 'absolute',
-          left: leftOffset,
-          right: 0,
-          bottom: 0,
-          top: 64,
-          zIndex: 'modal',
-          maxHeight: () => (height || 0) - 126,
-          border: '1px solid #177ac9'
-        }}
-      >
-        <Box sx={{ p: 1 }}>
-          <Grid container sx={{ justifyContent: 'space-between' }}>
-            <Typography noWrap variant="subtitle1" color="warning">
-              {deviceInfo.n}&nbsp;(
-              {deviceInfo.tn})
-            </Typography>
-            <Grid sx={{ justifyContent: 'flex-end' }}>
-              <ButtonTooltip title={LL.CLOSE()}>
-                <IconButton onClick={resetDeviceSelect} aria-label={LL.CLOSE()}>
-                  <HighlightOffIcon color="primary" sx={{ fontSize: 18 }} />
-                </IconButton>
-              </ButtonTooltip>
-            </Grid>
-          </Grid>
-
-          <TextField
-            size="small"
-            variant="outlined"
-            sx={{ width: '22ch' }}
-            placeholder={LL.SEARCH()}
-            aria-label={LL.SEARCH()}
-            onChange={(event) => {
-              setSearch(event.target.value);
-            }}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon color="primary" sx={{ fontSize: 16 }} />
-                  </InputAdornment>
-                )
-              }
-            }}
-          />
-          <ButtonTooltip title={LL.DEVICE_DETAILS()}>
+      <section className="section dv-detail" ref={detailRef} aria-label={d.n}>
+        <div className="dv-head">
+          <Button
+            className="dv-back"
+            color="secondary"
+            size="sm"
+            icon="arrow_back"
+            onClick={() => selectDevice()}
+          >
+            {LL.DEVICES()}
+          </Button>
+          <div className="row dv-title">
+            <DeviceIcon type_id={d.t} className="lb" />
+            <h2 className="h6">{d.n}</h2>
+            <span className="grow" />
+            <Menu
+              className="dv-wide"
+              icon="download"
+              label={LL.EXPORT()}
+              items={exportItems}
+              disabled={!nodes.length}
+            />
+            {me.admin && (
+              <Button
+                className="dv-wide"
+                color="secondary"
+                icon="construction"
+                onClick={customize}
+              >
+                {LL.CUSTOMIZATIONS()}
+              </Button>
+            )}
+            <Menu
+              className="dv-narrow"
+              iconOnly
+              icon="more_vert"
+              label={LL.MORE()}
+              items={moreItems}
+            />
             <IconButton
-              onClick={() => setShowDeviceInfo(true)}
-              aria-label={LL.DEVICE_DETAILS()}
-            >
-              <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
-            </IconButton>
-          </ButtonTooltip>
-          {me.admin && (
-            <ButtonTooltip title={LL.CUSTOMIZATIONS()}>
-              <IconButton onClick={customize} aria-label={LL.CUSTOMIZATIONS()}>
-                <ConstructionIcon color="primary" sx={{ fontSize: 18 }} />
-              </IconButton>
-            </ButtonTooltip>
-          )}
-          <ButtonTooltip title={LL.EXPORT()}>
-            <IconButton onClick={handleDownloadCsv} aria-label={LL.EXPORT()}>
-              <DownloadIcon color="primary" sx={{ fontSize: 18 }} />
-            </IconButton>
-          </ButtonTooltip>
+              className="dv-close"
+              icon="close"
+              label={LL.CLOSE()}
+              plain
+              onClick={() => selectDevice()}
+            />
+          </div>
+          <p className="cap dv-caption">{deviceCaption(d)}</p>
+        </div>
 
-          <ButtonTooltip title={LL.FAVORITES()}>
-            <ToggleButton
-              value="1"
-              size="small"
-              selected={onlyFav}
-              onChange={() => {
-                setOnlyFav(!onlyFav);
-              }}
-            >
-              {onlyFav ? (
-                <StarIcon color="primary" sx={{ fontSize: 18 }} />
-              ) : (
-                <StarBorderOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
-              )}{' '}
+        <div className="dv-toolbar">
+          <SearchField
+            label={LL.SEARCH()}
+            value={search}
+            onInput={(e) => setSearch(e.currentTarget.value)}
+          />
+          <ToggleGroup label={LL.FAVORITES()}>
+            <ToggleButton on={!onlyFav} onClick={() => setOnlyFav(false)}>
+              {LL.ALL()}
             </ToggleButton>
-          </ButtonTooltip>
-
-          <span style={{ color: 'grey', fontSize: '12px' }}>
-            &nbsp;
-            {LL.SHOWING() +
-              ' ' +
-              shown_data.length +
-              '/' +
-              deviceInfo.e +
-              ' ' +
-              LL.ENTITIES(shown_data.length)}
+            <ToggleButton on={onlyFav} icon="star" onClick={() => setOnlyFav(true)}>
+              {LL.FAVORITES()}
+            </ToggleButton>
+          </ToggleGroup>
+          <span className="cap dv-count">
+            {LL.SHOWING()} {shown.length}/{d.e} {LL.ENTITIES(shown.length)}
           </span>
-        </Box>
+        </div>
 
-        <Table
-          data={{ nodes: Array.from(shown_data) }}
-          theme={data_theme}
-          sort={dv_sort}
-          layout={{ custom: true, fixedHeader: true }}
-        >
-          {(tableList: DeviceValue[]) => (
-            <>
-              <Header>
-                <HeaderRow>
-                  <HeaderCell resize>
-                    <Button
-                      fullWidth
-                      style={{ fontSize: '14px', justifyContent: 'flex-start' }}
-                      endIcon={getSortIcon(dv_sort.state, 'NAME')}
-                      onClick={() => dv_sort.fns.onToggleSort({ sortKey: 'NAME' })}
-                    >
-                      {LL.ENTITY_NAME(0)}
-                    </Button>
-                  </HeaderCell>
-                  <HeaderCell resize>
-                    <Button
-                      fullWidth
-                      style={{ fontSize: '14px', justifyContent: 'flex-end' }}
-                      endIcon={getSortIcon(dv_sort.state, 'VALUE')}
-                      onClick={() => dv_sort.fns.onToggleSort({ sortKey: 'VALUE' })}
-                    >
-                      {LL.VALUE(0)}
-                    </Button>
-                  </HeaderCell>
-                  <HeaderCell stiff />
-                </HeaderRow>
-              </Header>
-              <Body>
-                {tableList.map((dv: DeviceValue) => (
-                  <Row key={dv.id} item={dv} onClick={() => showDeviceValue(dv)}>
-                    <Cell>{renderNameCell(dv)}</Cell>
-                    <Cell>{formatValue(LL, dv.v, dv.u)}</Cell>
-                    <Cell stiff>
-                      {me.admin &&
-                        dv.c &&
-                        !hasMask(dv.id, DeviceEntityMask.DV_READONLY) && (
-                          <IconButton
-                            size="small"
-                            onClick={() => showDeviceValue(dv)}
-                            style={{ backgroundColor: 'transparent' }}
-                          >
-                            {dv.v === '' ? (
-                              <PlayArrowIcon color="primary" sx={{ fontSize: 16 }} />
-                            ) : (
-                              <EditIcon color="primary" sx={{ fontSize: 16 }} />
-                            )}
-                          </IconButton>
-                        )}
-                    </Cell>
-                  </Row>
-                ))}
-              </Body>
-            </>
-          )}
-        </Table>
-      </Box>
+        {loadedId !== selectedId ? (
+          <Loader
+            error={deviceError?.message}
+            onRetry={() => void fetchDeviceData(d.id)}
+          />
+        ) : (
+          <Table className="dv-values">
+            <thead>
+              <tr>
+                <SortHeader {...sort.header('name')}>{LL.ENTITY_NAME(0)}</SortHeader>
+                <SortHeader className="r" {...sort.header('value')}>
+                  {LL.VALUE(0)}
+                </SortHeader>
+                {me.admin && <th className="dv-act" />}
+              </tr>
+            </thead>
+            <tbody>
+              {shown.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="tbl-empty">
+                    {LL.NO_ENTITIES_MATCH()}
+                  </td>
+                </tr>
+              )}
+              {grouped
+                ? [...groups].flatMap(([key, rows]) => renderGroup(key, rows))
+                : shown.map(renderRow)}
+            </tbody>
+          </Table>
+        )}
+        {masksShown.length > 0 && (
+          <p className="cap dv-legend">
+            {masksShown.map((o) => (
+              <span key={o.bit}>
+                <Icon
+                  name={o.icon}
+                  size="xs"
+                  className={cx('dv-mask', `b${o.bit}`)}
+                />
+                {o.label(LL)}
+              </span>
+            ))}
+          </p>
+        )}
+      </section>
     );
   };
 
   return (
-    <SectionContent id="devices-window">
-      {renderCoreData()}
-      {renderDeviceData()}
-      {renderDeviceDetails()}
-      {selectedDeviceValue && (
+    <div className={cx('dv-page', device && 'has-sel')}>
+      {!coreData.connected && <EmsBusWarning className="dv-msg" />}
+      {coreData.connected && renderDeviceList()}
+      {coreData.connected && device && renderDevice(device)}
+      {selectedValue && (
         <DevicesDialog
-          open={deviceValueDialogOpen}
-          onClose={deviceValueDialogClose}
-          onSave={deviceValueDialogSave}
-          selectedItem={selectedDeviceValue}
-          writeable={
-            selectedDeviceValue.c !== undefined &&
-            !hasMask(selectedDeviceValue.id, DeviceEntityMask.DV_READONLY)
-          }
-          validator={deviceValueItemValidation(selectedDeviceValue)}
+          onClose={closeValue}
+          onSave={(dv) => void saveValue(dv)}
+          selectedItem={selectedValue}
+          writeable={canWrite(selectedValue)}
+          validator={deviceValueItemValidation(selectedValue)}
           progress={submitting}
         />
       )}
-    </SectionContent>
+    </div>
   );
-});
+};
 
 export default Devices;

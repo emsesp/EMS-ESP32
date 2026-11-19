@@ -2,72 +2,71 @@ import type { Translation } from '../i18n-types';
 
 const no: Translation = {
   LANGUAGE: 'Språk',
-  RETRY: 'Forsøk igjen',
-  IS_REQUIRED: '{0} er nødvendig',
+  RETRY: 'Prøv på nytt', // DeepL
+  IS_REQUIRED: '{0} er obligatorisk', // DeepL
   SIGN_IN: 'Logg inn',
+  SIGN_IN_SUBTITLE: 'Gateway for EMS-varmesystemer', // DeepL
   SIGN_OUT: 'Logg ut',
   USERNAME: 'Brukernavn',
   PASSWORD: 'Passord',
   SETTINGS_OF: '{0} Innstillinger',
   HELP: 'Hjelp',
-  LOGGED_IN: 'Logget in som {name}',
-  PLEASE_SIGNIN: 'Venligst logge inn for å fortsetta',
-  UPLOAD_SUCCESSFUL: 'Opplasting lykkes',
-  DOWNLOAD_SUCCESSFUL: 'Nedlasting lykkes',
-  INVALID_LOGIN: 'Ugyldig innlogging',
+  LOGGED_IN: 'Logg inn som {name}', // DeepL
+  PLEASE_SIGNIN: 'Logg inn for å fortsette', // DeepL
+  UPLOAD_SUCCESSFUL: 'Opplastingen lyktes', // DeepL
+  DOWNLOAD_SUCCESSFUL: 'Last ned vellykket', // DeepL
+  INVALID_LOGIN: 'Feil brukernavn eller passord', // DeepL
   NETWORK: 'Nettverk',
   SECURITY: 'Sikkerhet',
   ONOFF_CAP: 'PÅ/AV',
   ONOFF: 'på/av',
   TYPE: 'Type',
-  DESCRIPTION: 'Beskrivelse',
   ENTITIES: 'Ojekter',
-  REFRESH: 'Oppdater',
-  EXPORT: 'Eksport',
+  EXPORT: 'Eksporter', // DeepL
   FAVORITES: "Favoritter",
-  DEVICE_DETAILS: 'Enhetsdetaljer',
   ID_OF: '{0}-ID',
   DEVICE: 'Enhets',
   PRODUCT: 'Produkt',
-  BRAND: 'Fabrikat',
+  BRAND: 'Merke', // DeepL
   VERSION: 'Versjon',
   ENTITY_NAME: 'Objektsnavn',
   VALUE: '{{verdi|Verdi}}',
   DEVICES: 'Enheter',
   SENSORS: 'Sensorer',
-  CHANGE_VALUE: 'Endre Verdi',
+  AUTOMATION: 'Automatisering',
+  CONNECTIVITY: 'Tilkobling',
+  MAINTENANCE: 'Vedlikehold',
+  CHANGE_VALUE: 'Endre verdi',
   CANCEL: 'Avbryt',
-  REMOVE_ALL: 'Fjern alles',
-  APPLY_CHANGES: 'Utfør endringer({0})',
+  REMOVE_ALL: 'Fjern alt', // DeepL
+  APPLY_CHANGES: 'Bruk endringer ({0})', // DeepL
   UPDATE: 'Oppdater',
   REMOVE: 'Fjern',
   RESET: 'Tilbakestill',
-  PROBLEM_UPDATING: 'Problem med oppdatering',
-  PROBLEM_LOADING: 'Problem med opplasting',
-  ANALOG_SENSOR: 'Analog Sensor',
+  PROBLEM_UPDATING: 'Problemer med oppdatering', // DeepL
+  PROBLEM_LOADING: 'Problemer med innlasting', // DeepL
+  ANALOG_SENSOR: 'Analoger Sensor', // DeepL
   ANALOG_SENSORS: 'Analoge Sensorer',
   SETTINGS: 'Innstillinger',
-  UPDATED_OF: '{0} Oppdatert',
-  UPDATE_OF: '{0} Oppdater',
-  OFFSET: 'Kompensering',
+  UPDATED_OF: '{0} oppdatert', // DeepL
+  OFFSET: 'Offset', // DeepL
   FACTOR: 'Faktor',
-  FREQ: 'Frekvens',
-  DUTY_CYCLE: 'Duty Cycle',
+  FREQ: 'Hyppighet', // DeepL
+  DUTY_CYCLE: 'Driftssyklus', // DeepL
   UNIT: 'UoM',
   STARTVALUE: 'Startverdi',
-  EDIT: 'Endre',
+  EDIT: 'Rediger', // DeepL
   SENSOR: 'Sensor',
-  TEMP_SENSOR: 'Temperatursensor',
   TEMP_SENSORS: 'Temperaturesensorer',
-  WRITE_CMD_SENT: 'Skriv kommando sent',
-  EMS_BUS_WARNING: 'EMS bussen koblet ned. Hvis denne advarselen fortsetter etter noen f¨sekunder sjekk instillinger og  prosessorkort',
+  WRITE_CMD_SENT: 'Kommando sendt', // DeepL
+  EMS_BUS_WARNING: 'EMS-bussen er frakoblet. Hvis denne advarselen fortsatt vises etter noen sekunder, må du sjekke innstillingene og kortprofilen', // DeepL
   CONNECTED: 'Tilkoblet',
-  TX_ISSUES: 'Tx problemer - prøv en annen Tx Modus',
+  TX_ISSUES: 'Tx-problemer – sjekk Tx-modus', // DeepL
   DISCONNECTED: 'Frakoblet',
-  DATA_TRAFFIC: 'Data trafikk',
-  EMS_DEVICE: 'EMS Enhet',
-  SUCCESS: 'VELLYKKET',
-  FAIL: 'MISLYKKET',
+  DATA_TRAFFIC: 'Datatrafikk', // DeepL
+  EMS_DEVICE: 'EMS-enhet', // DeepL
+  SUCCESS: 'SUCCESS', // DeepL
+  FAIL: 'FEIL', // DeepL
   QUALITY: 'KVALITET',
   STATUS_NAMES: [
     'EMS Telegrammer Mottatt (Rx)',
@@ -83,336 +82,591 @@ const no: Translation = {
   NUM_SECONDS: '{num} Sekund{{er}}',
   NUM_HOURS: '{num} Time{{r}}',
   NUM_MINUTES: '{num} Minutt{{er}}',
-  APPLICATION: 'Søknad',
+  APPLICATION: 'Applikasjon', // DeepL
   CUSTOMIZATIONS: 'Tilpasninger',
-  APPLICATION_RESTARTING: 'EMS-ESP restarter',
-  BOARD_PROFILE: 'Prosessor Profil',
-  CUSTOM: 'Custom',
+  APPLICATION_RESTARTING: 'EMS-ESP starter på nytt', // DeepL
+  BOARD_PROFILE: 'Brettprofil', // DeepL
+  CUSTOM: 'Tilpasset', // DeepL
   GPIO_OF: '{0} GPIO',
   BUTTON: 'Knapp',
   TEMPERATURE: 'Temperatur',
-  PHY_TYPE: 'Eth PHY Type',
-  DISABLED: 'avslått',
-  TX_MODE: 'EMS Tx Mode',
+  PHY_TYPE: 'Eth PHY-type', // DeepL
+  DISABLED: 'deaktivert', // DeepL
+  TX_MODE: 'EMS Tx-modus', // DeepL
   EMS_BUS: '{{Bus|EMS Bus}}',
-  HARDWARE: 'Hardware',
-  GENERAL_OPTIONS: 'Generelle Innstillinger',
-  LANGUAGE_ENTITIES: 'Språk (for objekter)',
+  HARDWARE: 'Maskinvare', // DeepL
+  LANGUAGE_ENTITIES: 'Språk (for enhetsojekter)', // DeepL
   HIDE_LED: 'Skjul LED',
-  ENABLE_TELNET: 'Aktiver Telnet',
-  ENABLE_ANALOG: 'Aktiver Analoge Sensorer',
-  CONVERT_FAHRENHEIT: 'Konverter temperatur til Fahrenheit',
-  READONLY: 'Aktiver read-only modus (blokker all EMS Tx Skriving)',
-  WRITE_PROTECTION: 'Beskytt EMS-enhetene mot gjentatte og hyppige skrivinger',
-  WRITE_LIMIT: 'Maks antall skrivinger per minutt (0 = ingen grense)',
-  WRITE_LIMIT_REFUSE: 'Avvis skrivinger over grensen (ellers logges bare en advarsel)',
-  UNDERCLOCK_CPU: 'Underklokking av prosessorhastighet',
-  REMOTE_TIMEOUT: 'Remote timeout',
-  REMOTE_TIMEOUT_EN: 'Deaktiver fjernstyring på manglende romtemperatur',
-  HEATINGOFF: 'Start kjele med tvingt oppvarming av',
+  ENABLE_TELNET: 'Aktiver Telnet-konsoll', // DeepL
+  ENABLE_ANALOG: 'Aktiver analoge Sensorer', // DeepL
+  CONVERT_FAHRENHEIT: 'Konverter temperaturverdier til Fahrenheit', // DeepL
+  READONLY: 'Aktiver skrivebeskyttet modus (blokkerer alle utgående EMS Tx-skrivekommandoer)', // DeepL
+  WRITE_PROTECTION: 'Beskytt EMS-enhetene mot gjentatte og hyppige skrivoperasjoner', // DeepL
+  WRITE_LIMIT: 'Maks. antall skrivninger per minutt (0 = ingen begrensning)', // DeepL
+  WRITE_LIMIT_REFUSE: 'Avvis innskrivinger som overskrider grensen (ellers logges det kun en advarsel)', // DeepL
+  UNDERCLOCK_CPU: 'Reduser CPU-hastigheten', // DeepL
+  REMOTE_TIMEOUT: 'Tidsavbrudd ved fjernstyring', // DeepL
+  REMOTE_TIMEOUT_EN: 'Deaktiver fjernstyring ved manglende romtemperatur', // DeepL
+  HEATINGOFF: 'Start kjelen med tvungen oppvarming slått av', // DeepL
   MIN_DURATION: 'Ventetid',
-  ENABLE_SHOWER_TIMER: 'Aktiver Dusjtimer',
-  ENABLE_SHOWER_ALERT: 'Aktiver Dusj-varsling',
-  TRIGGER_TIME: 'Aktiveringstid',
-  COLD_SHOT_DURATION: 'Tid på kaldt vann',
-  FORMATTING_OPTIONS: 'Formatteringsalternativs',
-  BOOLEAN_FORMAT_DASHBOARD: 'Bool Format Web',
-  BOOLEAN_FORMAT_API: 'Bool Format API/MQTT',
-  ENUM_FORMAT: 'Enum Format API/MQTT',
+  ENABLE_SHOWER_TIMER: 'Aktiver dusjtimer', // DeepL
+  ENABLE_SHOWER_ALERT: 'Aktiver dusjvarsel', // DeepL
+  TRIGGER_TIME: 'Utløsertid', // DeepL
+  COLD_SHOT_DURATION: 'Varighet av kaldinnsprøytning', // DeepL
+  FORMATTING_OPTIONS: 'Formateringsalternativer', // DeepL
+  BOOLEAN_FORMAT_DASHBOARD: 'Web i boolsk format', // DeepL
+  BOOLEAN_FORMAT_API: 'Boolsk format API/MQTT', // DeepL
+  ENUM_FORMAT: 'Enum-format API/MQTT', // DeepL
   INDEX: 'Indeks',
-  ENABLE_PARASITE: 'Aktiver 1-wire parasitt strømforsyning',
-  LOG_HEX: 'Logg EMS telegrammer i hexadesimal',
+  ENABLE_PARASITE: 'Aktiver 1-Wire-parasittstrøm', // DeepL
+  LOG_HEX: 'Logg EMS-telegrammer i heksadesimalformat', // DeepL
   ENABLE_SYSLOG: 'Aktiver Syslog',
-  LOG_LEVEL: 'Log Level',
-  MARK_INTERVAL: 'Oppdateringsintervall',
+  LOG_LEVEL: 'Lognivå', // DeepL
+  MARK_INTERVAL: 'Merk intervall', // DeepL
   SECONDS: 'sekunder',
   MINUTES: 'minutter',
   HOURS: 'timer',
-  RESTART: 'Omstart',
-  RESTART_TEXT: 'EMS-ESP må omstartes for å iverksette endrede systeminstillinger',
-  RESTART_CONFIRM: 'Er du sikker på at du vil omstarte EMS-ESP?',
+  RESTART: 'Start på nytt', // DeepL
+  RESTART_TEXT: 'EMS-ESP må startes på nytt for at endrede systeminnstillinger skal tre i kraft', // DeepL
+  RESTART_CONFIRM: 'Er du sikker på at du vil starte EMS-ESP på nytt?', // DeepL
   COMMAND: 'Kommando',
-  CUSTOMIZATIONS_RESTART: 'Alle tilpasninger har blitt slettet. Restarter...',
-  CUSTOMIZATIONS_FULL: 'Antall valgte objekter for høyt. Largre i mindre antall om gangen',
-  CUSTOMIZATIONS_SAVED: 'Tilpasninger lagret',
-  CUSTOMIZATIONS_HELP_1: 'Velg en enhet og tilpass underenheter med hjelp av alternativer eller velg å gi nytt navn',
+  CUSTOMIZATIONS_RESTART: 'Alle tilpasninger er fjernet. Starter på nytt…', // DeepL
+  CUSTOMIZATIONS_FULL: 'Antall valgte ojekter har overskredet grensen. Lagre i omganger', // DeepL
+  CUSTOMIZATIONS_SAVED: 'Tilpasninger oppdatert', // DeepL
+  CUSTOMIZATIONS_HELP_1: 'Velg en enhet og tilpass alternativene for ojektene', // DeepL
   CUSTOMIZATIONS_HELP_2: 'merk som favoritt',
-  CUSTOMIZATIONS_HELP_3: 'inaktiviser skriving',
-  CUSTOMIZATIONS_HELP_4: 'ekskludere fra MQTT og API',
-  CUSTOMIZATIONS_HELP_5: 'skjul fra enheter',
+  CUSTOMIZATIONS_HELP_3: 'deaktiver skrivehandling', // DeepL
+  CUSTOMIZATIONS_HELP_4: 'ekskluder fra MQTT og API', // DeepL
+  CUSTOMIZATIONS_HELP_5: 'skjul fra Enheter', // DeepL
   CUSTOMIZATIONS_HELP_6: 'fjern fra minnet',
   SELECT_DEVICE: 'Velg en enhet',
-  SET_ALL: 'sett alle',
-  MODIFIED: 'endret',
-  RESET_SELECTED: 'Tilbakestill valgte',
-  OPTIONS: 'Alternativ',
+  MODIFIED: 'Endret',
+  RESET_SELECTED: 'Tilbakestill valgt', // DeepL
+  OPTIONS: 'Alternativer', // DeepL
   NAME: 'Navn',
-  CUSTOMIZATIONS_RESET: 'Er du sikker på att du vil fjerne tilpassninger?',
+  CUSTOMIZATIONS_RESET: 'Er du sikker på at du vil fjerne alle tilpasningene?', // DeepL
   SYSTEM_INFORMATION: 'Systeminformasjon',
-  HELP_INFORMATION_1: 'Besøk wiki for instruksjoner for å konfigurere EMS-ESP',
-  HELP_INFORMATION_2: 'For community-support besøk vår Discord-server',
-  HELP_INFORMATION_3: 'For å be om en ny funksjon eller melde feil',
-  HELP_INFORMATION_4: 'Husk å legg ved din systeminformasjon for en raskere respons når du rapporterer et problem',
-  UPLOAD: 'Opplasning',
+  HELP_INFORMATION_1: 'Besøk nettwikien for å få instruksjoner om hvordan du konfigurerer EMS-ESP', // DeepL
+  HELP_INFORMATION_2: 'For live-chat med fellesskapet, bli med på Discord-serveren vår', // DeepL
+  HELP_INFORMATION_3: 'For å be om en funksjon eller rapportere en feil', // DeepL
+  HELP_INFORMATION_4: 'Oppgi systeminformasjonen din når du rapporterer et problem, for å få raskere svar', // DeepL
+  UPLOAD: 'Last opp', // DeepL
   DOWNLOAD: '{{N|n|n}}edlasting',
   INSTALL: 'Installer',
-  REINSTALL: 'Ominstaller',
-  ABORTED: 'avbrutt',
-  FAILED: 'feilet',
-  SUCCESSFUL: 'vellykket',
+  FAILED: 'mislyktes', // DeepL
   SYSTEM: 'System',
   LOG_OF: '{0} Logg',
-  STATUS_OF: '{0} Status',
-  DOWNLOAD_UPLOAD: 'Nedlasting/Opp',
-  CLOSE: 'Steng',
+  STATUS_OF: '{0}-status', // DeepL
+  DOWNLOAD_UPLOAD: 'Last ned/Last opp', // DeepL
+  CLOSE: 'Lukk', // DeepL
   COMMAND_GUEST: 'Gjester kan kjøre denne kommandoen',
-  TOKENS_RESET: 'Denne oppgraderingen signerer tilgangstokens med en ny enhetsnøkkel, så eksisterende API-tilgangstokens fungerer ikke lenger. Opprett en API-nøkkel for hver integrasjon som bruker API-et, for eksempel Home Assistant, og bruk den i stedet for det gamle tokenet.',
+  TOKENS_RESET: 'Denne oppgraderingen signerer tilgangstokener med en ny enhetsnøkkel, slik at eksisterende API-tilgangstokener ikke lenger fungerer. Opprett en API-nøkkel for hver integrasjon som bruker API-et, for eksempel Home Assistant, og bruk den i stedet for det gamle tokenet.', // DeepL
   API_KEYS: 'API-nøkler',
-  API_KEYS_TEXT: 'API-nøkler lar integrasjoner som Home Assistant og skript bruke API-et. Send nøkkelen i headeren "Authorization: Bearer <nøkkel>". Lesenøkler kan lese verdier og kjøre kommandoer som gjester kan kjøre, lese- og skrivenøkler kan gjøre alt en admin kan gjøre via API-et.',
+  API_KEYS_TEXT: 'API-nøkler gjør det mulig for integrasjoner som Home Assistant og skript å bruke API-et. Send nøkkelen i overskriften «Authorization: Bearer <NØKKEL>». Les-nøkler kan lese verdier og utføre kommandoer som gjester kan utføre, mens lese- og skrive-nøkler kan gjøre alt det en administrator kan gjøre via API-et.', // DeepL
   API_KEY_ACCESS: 'Tilgang',
-  API_KEY_READ: 'Lese',
-  API_KEY_READ_WRITE: 'Lese og Skrive',
-  API_KEY_SHOW_ONCE: 'Kopier denne nøkkelen nå og oppbevar den trygt. Den vises ikke igjen.',
+  API_KEY_READ: 'Les', // DeepL
+  API_KEY_READ_WRITE: 'Les og skriv', // DeepL
+  API_KEY_SHOW_ONCE: 'Kopier denne nøkkelen nå og oppbevar den på et trygt sted. Den vil ikke vises igjen.', // DeepL
   CREATED: 'Opprettet',
-  COPY: 'Kopier',
+  COPY: 'Tekst', // DeepL
   COPIED: 'Kopiert',
   USE: 'Bruk',
-  FACTORY_RESET: 'Sett tilbake til fabrikkinstilling',
-  SYSTEM_FACTORY_TEXT_DIALOG: 'Er du sikker på at du vil resette enheten til fabrikkinstillinger?',
-  AVAILABLE_VERSION: 'Tilgjengelige versjoner',
+  FACTORY_RESET: 'Tilbakestill til fabrikkinnstillinger', // DeepL
+  SYSTEM_FACTORY_TEXT_DIALOG: 'Er du sikker på at du vil tilbakestille EMS-ESP til fabrikkinnstillingene?', // DeepL
   STABLE: 'Stabil',
   DEVELOPMENT: 'Utvikling',
-  UPTIME: 'System Oppetid',
-  FREE_MEMORY: 'Ledig Memory',
-  PSRAM: 'PSRAM (Størrelse / Ledig)',
-  FLASH: 'Flash Chip (Størrelse , Hastighet)',
-  APPSIZE: 'Applikasjon (Partition: Brukt / Ledig)',
-  FILESYSTEM: 'File System (Brukt / Ledig)',
-  BUFFER_SIZE: 'Max Buffer Størrelse',
-  COMPACT: 'Komprimere',
-  DOWNLOAD_SETTINGS_TEXT: 'Lag en sikkerhetskopi av dine konfigurasjon og innstillinger',
-  DOWNLOAD_SETTINGS_TEXT2: 'Eksporter alle verdier',
-  DOWNLOAD_COREDUMP_TEXT: 'Last ned krasjdumpen fra siste krasj, for å legge den ved en GitHub-sak',
-  COREDUMP: 'Krasjdump',
-  DOWNLOAD_SYSTEM_BACKUP: 'System Sikkerhetskopi',
-  ERROR: 'Ukjent feil, prøv igjen',
-  TIME_SET: 'Still in tid',
-  MANAGE_USERS: 'Administrer Brukere',
-  IS_ADMIN: 'er Admin',
-  USER_WARNING: 'Du må ha minst en admin bruker konfigurert',
+  UPTIME: 'Systemets oppetid', // DeepL
+  LAST_RESTART: 'Siste omstart',
+  POWER_AND_RESET: 'Strøm og tilbakestilling', // DeepL
+  FREE_MEMORY: 'Ledig minne', // DeepL
+  BUFFER_SIZE: 'Maksimal bufferstørrelse', // DeepL
+  COMPACT: 'Kortfattet', // DeepL
+  SUMMARY: 'Sammendrag', // DeepL
+  SHOW_MORE: 'Vis {n} flere', // DeepL
+  SHOW_LESS: 'Vis mindre', // DeepL
+  COREDUMP: 'Krasjlogg', // DeepL
+  DOWNLOAD_SYSTEM_BACKUP: 'Sikkerhetskopiering av systemet', // DeepL
+  ERROR: 'Uventet feil, prøv igjen', // DeepL
+  TIME_SET: 'Tid innstilt', // DeepL
+  MANAGE_USERS: 'Administrer brukere', // DeepL
+  USER_WARNING: 'Du må ha konfigurert minst én administratorbruker', // DeepL
   ADD: 'Legg til',
-  USER: 'Bruker',
-  MODIFY: 'Endre',
-  TELNET_ENABLED: 'Telnet-konsollen er aktivert. Telnet er ikke kryptert, så slå den av i applikasjonsinnstillingene hvis du ikke bruker den.',
-  TOO_MANY_LOGINS: 'For mange mislykkede pålogginger, prøv igjen om noen minutter',
-  PASSWORD_KEEP: 'La stå tomt for å beholde gjeldende passord',
+  TELNET_ENABLED: 'Telnet-konsollen er aktivert. Telnet er ikke kryptert, så deaktiver den i programinnstillingene hvis du ikke bruker den.', // DeepL
+  TOO_MANY_LOGINS: 'For mange mislykkede innloggingsforsøk. Prøv igjen om noen minutter.', // DeepL
+  PASSWORD_KEEP: 'La feltet stå tomt for å beholde det nåværende passordet', // DeepL
   SETUP_TITLE: 'Angi passordene dine',
-  SETUP_TEXT: 'Denne enheten bruker fortsatt fabrikkpassord. Angi dine egne før du fortsetter.',
+  SETUP_TEXT: 'Denne enheten bruker fortsatt fabrikkinnstilte passord. Angi ditt eget passord før du fortsetter.', // DeepL
   SETUP_ADMIN_PASSWORD: 'Nytt passord for {name}',
   SETUP_AP_PASSWORD: 'Nytt passord for tilgangspunktet',
-  SETUP_AP_REQUIRED: 'Det er ikke satt opp noe WiFi-nettverk ennå, så tilgangspunktet er veien inn. 8-63 tegn, brukes neste gang tilgangspunktet starter.',
-  SETUP_AP_OPTIONAL: 'Anbefalt. 8-63 tegn, brukes neste gang tilgangspunktet starter. La stå tomt for å beholde det nåværende.',
-  SETUP_AP_DEFAULT: 'Tilgangspunktet bruker fortsatt fabrikkpassordet. Angi ditt eget i innstillingene for tilgangspunktet.',
-  SETUP_VIEW_USER: 'Valgfritt: legg til en gjestebruker som bare kan se.',
-  NETWORK_CORS_ORIGIN_HELP: 'Nettadressen som kan kalle API-et fra en nettleser, for eksempel http://homeassistant.local:8123',
-  NETWORK_CORS_WILDCARD: 'Med * kan alle nettsider som er åpne i en nettleser på nettverket ditt kalle API-et. Angi den nøyaktige adressen i stedet.',
+  SETUP_AP_REQUIRED: 'Det er ikke konfigurert noe Wi-Fi-nettverk ennå, så tilgangspunktet er inngangsveien. 8–63 tegn, brukes neste gang tilgangspunktet starter.', // DeepL
+  SETUP_AP_OPTIONAL: 'Anbefalt: 8–63 tegn, tas i bruk neste gang tilgangspunktet starter. La feltet stå tomt for å beholde den nåværende.', // DeepL
+  SETUP_AP_DEFAULT: 'Tilgangspunktet bruker fortsatt fabrikkpassordet. Angi ditt eget passord i innstillingene for tilgangspunktet.', // DeepL
+  SETUP_VIEW_USER: 'Valgfritt: Legg til en gjestebruker med lesetilgang.', // DeepL
+  NETWORK_CORS_ORIGIN_HELP: 'Nettadressen som brukes til å kalle opp API-et fra en nettleser, for eksempel http://homeassistant.local:8123', // DeepL
+  NETWORK_CORS_WILDCARD: 'Med * kan ethvert nettsted som er åpent i en nettleser på nettverket ditt, kalle opp API-et. Angi den eksakte adressen i stedet.', // DeepL
   NETWORK_ALLOWED_HOSTS: 'Tillatte vertsnavn',
-  NETWORK_ALLOWED_HOSTS_HELP: 'Ekstra navn enheten kan åpnes som i en nettleser, for eksempel ems-esp.fritz.box eller navnet på en omvendt proxy. IP-adressen, vertsnavnet og vertsnavn.local fungerer alltid',
-  NOT_ENABLED: 'Ikke aktiv',
-  ERRORS_OF: '{0} Feil',
-  DISCONNECT_REASON: 'Årsak til nedkobling',
+  NETWORK_ALLOWED_HOSTS_HELP: 'Denne enheten kan åpnes i en nettleser under ulike navn, for eksempel ems-esp.fritz.box eller et omvendt proxy-navn. IP-adressen, vertsnavnet og vertsnavn.local fungerer alltid', // DeepL
+  NOT_ENABLED: 'Ikke aktivert', // DeepL
+  ERRORS_OF: '{0} feil',
+  DISCONNECT_REASON: 'Årsak til frakobling', // DeepL
+  MQTT_BASE_TOPIC: 'Grunnleggende tema', // DeepL
+  LAST_DISCONNECT: 'Siste frakobling',
+  CONNECTED_SINCE: 'Tilkoblet siden',
   ENABLE_MQTT: 'Aktiver MQTT',
   BROKER: 'Broker',
-  CLIENT: 'Client',
-  BASE_TOPIC: 'Base',
+  CLIENT: 'Klient', // DeepL
+  BASE_TOPIC: 'Grunnlag', // DeepL
   OPTIONAL: 'valgfritt',
-  FORMATTING: 'Formatering',
-  MQTT_FORMAT: 'Topic/Payload Format',
-  MQTT_NEST_1: 'Nestet i en topic',
-  MQTT_NEST_2: 'Som individuelle topics',
-  MQTT_RESPONSE: 'Publiser kommandoer til en `response` topic',
-  MQTT_PUBLISH_TEXT_1: 'Publiser singel verdi topics ved endringer',
-  MQTT_PUBLISH_TEXT_2: 'Publiser til kommando topics (ioBroker)',
-  MQTT_PUBLISH_TEXT_3: 'Aktiver MQTT Discovery',
-  MQTT_PUBLISH_TEXT_4: 'Prefiks for Discovery topics',
-  MQTT_PUBLISH_TEXT_5: 'Discovery type',
-  MQTT_INPUT_NUMBER_FORMAT: 'Nummerformat',
-  MQTT_PUBLISH_INTERVALS: 'Publiseringsintervall',
-  MQTT_INT_BOILER: 'Fyr/Varmepumpe',
-  MQTT_INT_THERMOSTATS: 'Termostat',
-  MQTT_INT_SOLAR: 'Solpaneler',
-  MQTT_INT_MIXER: 'Blandeventil',
-  MQTT_INT_WATER: 'Vannmoduler',
-  MQTT_QUEUE: 'MQTT Queue',
+  MQTT_FORMAT: 'Emne-/innholdsformat', // DeepL
+  MQTT_NEST_1: 'Innebygd i ett enkelt emne', // DeepL
+  MQTT_NEST_2: 'Som enkeltstående emner', // DeepL
+  MQTT_RESPONSE: 'Publiser kommandoens utdata til et `response`-emne', // DeepL
+  MQTT_PUBLISH_TEXT_1: 'Publiser emner med én verdi ved endring', // DeepL
+  MQTT_PUBLISH_TEXT_2: 'Publiser til kommandoemner (ioBroker)', // DeepL
+  MQTT_PUBLISH_TEXT_3: 'Aktiver MQTT-oppdagelse', // DeepL
+  MQTT_PUBLISH_TEXT_4: 'Prefiks for oppdagelsestemaene', // DeepL
+  MQTT_PUBLISH_TEXT_5: 'Oppdagelsestype', // DeepL
+  MQTT_INPUT_NUMBER_FORMAT: 'Inndataformat for tall', // DeepL
+  MQTT_PUBLISH_INTERVALS: 'Publiseringsintervaller', // DeepL
+  MQTT_INT_BOILER: 'Varmekjeler og varmepumper', // DeepL
+  MQTT_INT_THERMOSTATS: 'Termostater', // DeepL
+  MQTT_INT_SOLAR: 'Solcellemodul', // DeepL
+  MQTT_INT_MIXER: 'Blandermodul', // DeepL
+  MQTT_INT_WATER: 'Vannmodul', // DeepL
+  MQTT_QUEUE: 'MQTT-kø',
   DEFAULT: 'Standard',
-  MQTT_ENTITY_FORMAT: 'Enhets ID format',
-  MQTT_ENTITY_FORMAT_0: 'Enkel instans, fullt nane (v3.4)',
-  MQTT_ENTITY_FORMAT_1: 'Enkel instans, kort nave',
-  MQTT_ENTITY_FORMAT_2: 'Multiple instanser, kort name',
-  MQTT_CLEAN_SESSION: 'Benytt Clean Session',
-  MQTT_RETAIN_FLAG: 'Alltid sett Retain flag',
-  MQTT_COMMANDS: 'Kommandoer mottatt over MQTT',
-  MQTT_COMMANDS_0: 'Av, kun lese verdier',
-  MQTT_COMMANDS_1: 'Endre verdier og kjøre Kommandoer',
+  MQTT_ENTITY_FORMAT: 'Format for enhets-ID', // DeepL
+  MQTT_ENTITY_FORMAT_0: 'Enkelt forekomst, langt navn (v3.4)', // DeepL
+  MQTT_ENTITY_FORMAT_1: 'Enkelt forekomst, kort navn', // DeepL
+  MQTT_ENTITY_FORMAT_2: 'Flere forekomster, kort navn', // DeepL
+  MQTT_CLEAN_SESSION: 'Opprett ny økt', // DeepL
+  MQTT_RETAIN_FLAG: 'Sett alltid «retain»-flagget', // DeepL
+  MQTT_COMMANDS: 'Kommandoer mottatt via MQTT', // DeepL
+  MQTT_COMMANDS_0: 'Av, kun leseverdier', // DeepL
+  MQTT_COMMANDS_1: 'Endre verdier og utfør kommandoer', // DeepL
   MQTT_COMMANDS_2: 'Alt, også systemkommandoer',
-  INACTIVE: 'Innaktiv',
+  INACTIVE: 'Inaktiv', // DeepL
   ACTIVE: 'Aktiv',
   UNKNOWN: 'Ukjent',
-  SET_TIME: 'Sett Tid',
-  SET_TIME_TEXT: 'Skriv inn dato og klokke nedenfor',
-  LOCAL_TIME: 'Lokaltid',
-  UTC_TIME: 'UTC Tid',
+  SET_TIME: 'Still inn tid', // DeepL
+  SET_TIME_TEXT: 'Skriv inn lokal dato og klokkeslett nedenfor for å stille inn klokkeslettet', // DeepL
+  LOCAL_TIME: 'Lokal tid', // DeepL
+  UTC_TIME: 'UTC-tid',
   ENABLE_NTP: 'Aktiver NTP',
-  NTP_SERVER: 'NTP Server',
+  NTP_SERVER: 'NTP-server', // DeepL
   TIME_ZONE: 'Tidssone',
-  ACCESS_POINT: 'Aksesspunkt',
-  AP_PROVIDE: 'Aktiver Aksesspunkt',
-  AP_PROVIDE_TEXT_2: 'når nettverksforbindelsen ikke finnes',
-  AP_PROVIDE_TEXT_3: 'aldri',
+  ACCESS_POINT: 'Tilgangspunkt', // DeepL
+  AP_PROVIDE: 'Aktiver tilgangspunkt', // DeepL
+  AP_PROVIDE_TEXT_2: 'Når nettverkstilkobling ikke blir funnet', // DeepL
+  AP_PROVIDE_TEXT_3: 'Aldri', // DeepL
   AP_PREFERRED_CHANNEL: 'Foretrukket kanal',
   AP_HIDE_SSID: 'Skjul SSID',
-  AP_CLIENTS: 'AP Clients',
-  AP_MAX_CLIENTS: 'Max Clients',
-  AP_LOCAL_IP: 'Local IP',
-  NETWORK_SCAN: 'Søk etter trådløst nettverk',
-  IDLE: 'Klar',
-  LOST: 'Mistet',
-  SCAN_AGAIN: 'Søk igjen',
-  NETWORK_NO_WIFI: 'Ingen trådløse nett funnet',
-  NETWORK_BLANK_BSSID: 'la feltet være blankt for å bruke kun SSID',
-  TX_POWER: 'Tx Effekt',
-  HOSTNAME: 'Hostname',
-  NETWORK_DISABLE_SLEEP: 'Hindre at trådløst nettverk går i Sleep Mode',
-  NETWORK_LOW_BAND: 'Benytt smalere båndbredde på trådløst nettverk',
-  NETWORK_USE_DNS: 'Aktiviser mDNS Service',
-  NETWORK_ENABLE_CORS: 'Aktiviser CORS',
-  NETWORK_CORS_ORIGIN: 'CORS origin',
-  NETWORK_FIXED_IP: 'Benytt statisk IP adresse',
+  AP_CLIENTS: 'AP-klienter',
+  AP_MAX_CLIENTS: 'Maks antall klienter', // DeepL
+  AP_LOCAL_IP: 'Lokal IP', // DeepL
+  IDLE: 'Inaktiv', // DeepL
+  SCAN_AGAIN: 'Skann på nytt', // DeepL
+  NETWORK_NO_WIFI: 'Ingen Wi-Fi-nettverk funnet', // DeepL
+  NETWORK_BLANK_BSSID: 'La feltet stå tomt for å bruke kun SSID', // DeepL
+  TX_POWER: 'Sendeeffekt', // DeepL
+  HOSTNAME: 'Vertsnavn', // DeepL
+  NETWORK_DISABLE_SLEEP: 'Deaktiver Wi-Fi-hvilemodus', // DeepL
+  NETWORK_LOW_BAND: 'Bruk lavere Wi-Fi-båndbredde', // DeepL
+  NETWORK_USE_DNS: 'Aktiver mDNS-tjenesten', // DeepL
+  NETWORK_ENABLE_CORS: 'Aktiver CORS', // DeepL
+  NETWORK_CORS_ORIGIN: 'CORS-opprinnelse', // DeepL
+  NETWORK_FIXED_IP: 'Bruk fast IP-adresse', // DeepL
   NETWORK_GATEWAY: 'Gateway',
   NETWORK_SUBNET: 'Nettverksmaske',
-  NETWORK_DNS: 'DNS Servers',
-  ADDRESS_OF: '{0} Address',
+  NETWORK_DNS: 'DNS-servere', // DeepL
+  ADDRESS_OF: '{0}-adresse', // DeepL
   ADMINISTRATOR: 'Administrator',
   GUEST: 'Gjest',
   NEW: 'Ny',
-  NEW_NAME_OF: 'Bytt navn {0}',
-  ENTITY: 'Entitet',
+  NEW_NAME_OF: 'Nytt navn på {0}', // DeepL
+  ENTITY: 'enhet', // DeepL
   MIN: 'min',
   MAX: 'max',
-  BLOCK_NAVIGATE_1: 'You har ulagrede endringer',
-  BLOCK_NAVIGATE_2: 'Hvis du navigerer til en annen side blir dine ikke lagrede endringer gå tapt. Are du sikker på at du vil forlate denne siden ?',
-  STAY: 'Bli her',
-  LEAVE: 'Forlat',
+  BLOCK_NAVIGATE_1: 'Du har ubehandlede endringer', // DeepL
+  BLOCK_NAVIGATE_2: 'Hvis du går til en annen side, vil endringer du ikke har lagret gå tapt. Er du sikker på at du vil forlate denne siden?', // DeepL
+  UPLOAD_ABORTED: 'Opplastingen ble avbrutt', // DeepL
+  BLOCK_BUSY_1: 'Fortsatt under utvikling', // DeepL
+  BLOCK_BUSY_2: 'Hvis du forlater denne siden nå, avsluttes den. Er du sikker på at du vil forlate siden?', // DeepL
+  DISCARD: 'Kast', // DeepL
+  COMMANDS_UPDATED: 'Kommandoer oppdatert',
+  V_REQUIRED: 'Påkrevd',
+  V_BETWEEN: 'Må være mellom {min} og {max}',
+  V_MAX_CHARS: 'Må være {max} tegn eller færre', // DeepL
+  V_CHARS: 'Må være {min}–{max} tegn',
+  V_IN_USE: 'Allerede i bruk', // DeepL
+  V_IP: 'Må være en IP-adresse',
+  V_HOSTNAME: 'Må være et gyldig vertsnavn',
+  V_IP_OR_HOSTNAME: 'Må være en IP-adresse eller et vertsnavn',
+  V_NAME: 'Opptil {max} tegn: bokstaver, tall eller _', // DeepL
+  V_USERNAME: 'Opptil {max} tegn: bokstaver, tall, _ eller .', // DeepL
+  V_DAY: 'Velg minst én dag',
+  V_HEX: 'Må være et heksadesimaltall', // DeepL
+  V_FINGERPRINT: 'Må være et SHA-1-fingeravtrykk (40 heksadesimale siffer)', // DeepL
+  V_EXAMPLE: 'Må se ut som {example}',
+  V_NOT_DEFAULT: 'Velg et annet passord',
+  ZERO_DISABLES: '0 slår den av', // DeepL
+  MINUS_ONE_DISABLES: '-1 slår den av', // DeepL
+  LED_TYPE: 'LED-type',
+  PHY_POWER: 'PHY-strøm',
+  PHY_CLOCK: 'PHY-klokke',
+  AUTO: 'Auto',
+  PORT: 'Port',
+  TIMEOUT: 'Tidsavbrudd',
+  HOST: 'Vert',
+  SMTP_SERVER: 'SMTP-server',
+  KEEP_ALIVE: 'Hold det i gang', // DeepL
+  MQTT_REFRESH: 'Oppdater MQTT',
+  MQTT_REFRESHED: 'MQTT oppdatert',
+  MQTT_R_USER: 'Koblet fra av brukeren', // DeepL
+  MQTT_R_TCP: 'TCP-forbindelsen er avsluttet', // DeepL
+  MQTT_R_PROTOCOL: 'Protokollversjon godtas ikke', // DeepL
+  MQTT_R_ID: 'Klient-ID avvist',
+  MQTT_R_SERVER: 'Serveren er utilgjengelig',
+  MQTT_R_CREDENTIALS: 'Feilformaterte påloggingsopplysninger', // DeepL
+  MQTT_R_AUTH: 'Ikke autorisert',
+  MQTT_R_FINGERPRINT: 'TLS-fingeravtrykket stemmer ikke overens', // DeepL
+  GPIO_INVALID: 'Ugyldige GPIO-innstillinger',
+  CONNECTED_VIA: 'Koblet til via {0}', // DeepL
+  NETWORK_NOT_FOUND: 'Nettverk ikke funnet', // DeepL
+  CONNECTION_FAILED: 'Tilkoblingen mislyktes',
+  CONNECTION_LOST: 'Tilkoblingen ble brutt',
+  AP_LINGERING: 'Venter til systemet er inaktivt', // DeepL
+  NONE: 'Ingen',
+  LOG_NO_CONNECTION: 'Ingen tilkobling til loggtjenesten',
+  CHECK_SYSTEM_LOG: 'Sjekk systemloggen for mulige årsaker', // DeepL
+  VALUE_TYPE: 'Verditype',
+  DEFAULT_VALUE: 'Standardverdi',
+  DEFAULT_NAME: 'Standardnavn',
+  ALWAYS_OFF: 'Alltid av',
+  ALWAYS_ON: 'Alltid på',
+  NO_DATA: 'Ingen favoritter ennå. Merk dem i {customizations}, eller se alle ojekter i {devices}.', // DeepL
+  STAY: 'Hold deg', // DeepL
+  LEAVE: 'La være', // DeepL
+  MENU: 'Meny',
+  MORE: 'Mer',
+  SHOW_PASSWORD: 'Vis passord',
+  STATUS_RUNNING: 'EMS-ESP kjører',
+  NUM_ERRORS: '{num} feil',
+  NUM_WARNINGS: '{num} {{advarsel|advarsler}}',
+  HEAP: 'Heap',
+  METER_USED: '{used} / {total} {unit} brukt',
+  MAX_BLOCK: '{num} KB maks. blokk', // DeepL
+  MAX_BLOCK_HELP: '«Max block» er den største delen av heap-minnet som kan tildeles på én gang. Under 40 KB kan nettgrensesnittet og MQTT svikte.', // DeepL
+  FLASH_CHIP: 'Flash-brikke', // DeepL
+  FILE_SYSTEM: 'Filsystem',
+  DETAILS: 'Detaljer',
+  RECONNECTS: 'Kobler til på nytt', // DeepL
+  CONNECTS: 'Kobler til', // DeepL
+  ACTIVITY_HELP: 'Noen få Rx-feil er normalt. Mange Tx-feil betyr vanligvis at du har valgt feil Tx-modus for kjelen din.', // DeepL
+  PAUSE: 'Pause',
+  RESUME: 'CV', // DeepL
+  LOG_PAUSED: 'Pauset, nye linjer holdt tilbake: {num}', // DeepL
+  FILTER_LINES: 'Filterlinjer', // DeepL
   SCHEDULER: 'Planlegger',
-  SCHEDULER_HELP_1: 'Automatiser kommandoer ved å legge til skedulerte hendelser nedenfor',
+  SCHEDULER_HELP_1: 'Automatiser kommandoer ved å legge til planlagte hendelser nedenfor', // DeepL
   SCHEDULER_HELP_2: 'ved oppstart',
-  SCHEDULE: 'Planlegg',
+  SCHEDULE: 'Tidsplan', // DeepL
   TIME: 'Tid',
   TIMER: 'Timer',
-  ONCHANGE: 'På endring',
-  CONDITION: 'Betingelse',
-  SCHEDULE_UPDATED: 'Planlegger er oppdatert',
-  CUSTOM_ENTITIES: 'Personlige entiteter',
-  ENTITIES_HELP_1: 'Hent personlige entiteter fra EMS bussen',
-  ENTITIES_UPDATED: 'Entiteter oppdatert',
+  ONCHANGE: 'Ved endring', // DeepL
+  CONDITION: 'Tilstand', // DeepL
+  SCHEDULE_UPDATED: 'Tidsplan oppdatert', // DeepL
+  CUSTOM_ENTITIES: 'Egendefinerte ojekter', // DeepL
+  ENTITIES_HELP_1: 'Definer egendefinerte EMS-ojekter eller dynamiske brukervariabler', // DeepL
+  ENTITIES_UPDATED: 'Oppdaterede ojekter', // DeepL
   WRITEABLE: 'Skrivbar',
   SHOWING: 'Viser',
   SEARCH: 'Søk',
   CERT: 'CA-sertifikat (PEM)',
-  ENABLE_TLS: 'Aktiviser TLS',
-  TLS_CHECK: 'Kontroller brokeren med',
+  ENABLE_TLS: 'Aktiver TLS', // DeepL
+  TLS_CHECK: 'Sjekk megleren med', // DeepL
   TLS_CHECK_CA: 'CA-sertifikat',
   TLS_CHECK_FINGERPRINT: 'Sertifikatets fingeravtrykk (SHA-1)',
-  TLS_CHECK_NONE: 'Ingenting, ikke kontrollert',
-  TLS_NOT_CHECKED: 'Tilkoblingen er kryptert, men brokeren kontrolleres ikke, så en annen enhet på nettverket kan utgi seg for å være den',
+  TLS_CHECK_NONE: 'Ingenting, ikke merket av', // DeepL
+  TLS_NOT_CHECKED: 'Forbindelsen er kryptert, men mellomleddet blir ikke sjekket, så en annen enhet på nettverket kan utgi seg for å være det', // DeepL
   ON: 'På',
   OFF: 'Av',
-  POLARITY: 'Polarity',
-  ACTIVEHIGH: 'Active High',
-  ACTIVELOW: 'Active Low',
-  UNCHANGED: 'Unchanged',
-  ALWAYS: 'Always',
-  CONFIGURE: 'Konfigurer {0}',
-  APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings',
-  SECURITY_1: 'Add or remove users',
-  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings',
+  POLARITY: 'Polaritet', // DeepL
+  ACTIVEHIGH: 'Aktiv høy', // DeepL
+  ACTIVELOW: 'Aktiv lav', // DeepL
+  UNCHANGED: 'Uendret', // DeepL
+  SECURITY_1: 'Legg til eller fjern brukere',
+  DOWNLOAD_UPLOAD_1: 'Last ned og last opp innstillinger',
   MODULES: 'Modul',
   MODULES_1: 'Aktiver eller deaktiver eksterne moduler',
-  MODULES_UPDATED: 'Moduler oppdatert',
-  MODULES_DESCRIPTION: 'Klikk på modulen for å aktivere eller deaktivere EMS-ESP biblioteksmoduler',
-  MODULES_NONE: 'Ingen eksterne moduler funnet',
+  MODULES_UPDATED: 'Modul oppdatert', // DeepL
+  MODULES_NONE: 'Ingen eksterne moduler oppdaget', // DeepL
   RENAME: 'Gi nytt navn',
   ENABLE_MODBUS: 'Aktiver Modbus',
-  VIEW_LOG: 'Se logg for å diagnostisere problemer',
+  VIEW_LOG: 'Se loggen for å diagnostisere problemer', // DeepL
   SERVICES: 'Tjenester',
   ALLVALUES: 'Alle verdier',
-  SPECIAL_FUNCTIONS: 'Spesielle funksjoner',
-  WAIT_FIRMWARE: 'Firmware er i opplasting og installasjon',
+  WAIT_FIRMWARE: 'Firmware lastes opp og installeres', // DeepL
   INSTALL_VERSION: 'Dette vil {0} versjon {1}',
   UPDATE_AVAILABLE: 'oppdatering tilgjengelig',
-  LATEST_VERSION: 'Du bruker den nyeste {0} firmware versjonen',
+  LATEST_VERSION: 'Du bruker den nyeste firmwareversjonen {0}', // DeepL
   PLEASE_WAIT: 'Vennligst vent',
-  RESTARTING_PRE: 'Starte',
-  RESTARTING_POST: 'Forbereder',
+  RESTARTING_PRE: 'Oppstart', // DeepL
+  RESTARTING_POST: 'Forberedelser', // DeepL
   AUTO_SCROLL: 'Automatisk rulling',
   DASHBOARD: 'Dashboard',
-  DEVELOPER_MODE: 'Utvikler modus',
-  DISABLE_RESET: 'Deaktiver fabrikkinnstillinger',
-  AUTO_FW_CHECK: 'Se automatisk etter nye firmware versjoner',
+  DEVELOPER_MODE: 'Utviklermodus', // DeepL
+  DISABLE_RESET: 'Deaktiver tilbakestilling til fabrikkinnstillinger', // DeepL
+  AUTO_FW_CHECK: 'Sjekk automatisk etter firmwareoppdateringer', // DeepL
   BYTES: 'Bytes',
-  BITMASK: 'Bitmask',
+  BITMASK: 'Bitmaske', // DeepL
   DUPLICATE: 'Duplikat',
-  DASHBOARD_1: 'Alle EMS enheter som er aktive og merket som favoritt, pluss alle personlige enheter, planlegg og eksterne sensor data er vist nedenfor.',
-  NO_DATA_1: 'Ingen favoritte EMS enheter funnet enda. Bruk',
-  NO_DATA_2: 'modul for å markere dem.',
-  NO_DATA_3: 'For å se alle tilgjengelige enheter, gå til',
-  NO_GPIO: 'Det ble ikke funnet noen tilgjengelige GPIO-porter',
-  THIS_VERSION: 'Denne versjonen',
+  DASHBOARD_1: 'Alle aktive EMS-enheter som er merket som favoritter, vises nedenfor, i tillegg til alle tilpassede ojekter, tidsplaner og eksterne sensorer.', // DeepL
+  NO_GPIO: 'Ingen tilgjengelige GPIO-porter funnet', // DeepL
   PLATFORM: 'Plattform',
-  RELEASE_TYPE: 'Utgivelses type',
-  SWITCH_RELEASE_TYPE: 'Bytt til {0} utgivelse',
+  RELEASE_TYPE: 'Utgivelsestype', // DeepL
   FIRMWARE_VERSION_INFO: 'Informasjon om firmwareversjon',
   USER_PROFILE: 'Brukerprofil',
   ONLINE_HELP: 'online hjelp',
-  UPGRADE_IMPORTANT_MESSAGES: 'Oppdater viktige meldinger',
-  UPGRADE_IMPORTANT_MESSAGES_2: 'Du oppdaterer til en ny major versjon. Det er anbefalt å først lage en systembackup. Kontroller også onlinehjelp for eventuelle viktige endringer.',
-  UPGRADE_IMPORTANT_MESSAGES_3: 'Versjon 3.10 har viktige sikkerhetsendringer. Lag først en systembackup: etter oppdateringen lagres passordene hashet og eldre versjoner kan ikke lese dem, så for å gå tilbake trengs denne backupen. Hvert API-kall krever deretter en API-nøkkel, så integrasjoner som Home Assistant må oppdateres. Les de viktige endringene i onlinehjelpen før du fortsetter.',
-  WARNING_SYSTEM_BACKUP: 'Dette lager en sikkerhetskopi av hele systemkonfigurasjonen og innstillingene. Passord og nøkler utelates med mindre du tar dem med nedenfor; ved gjenoppretting beholdes passordene som allerede er på enheten. Kommandoer tas alltid med og kan inneholde påloggingsdata, så vær forsiktig med deling. Vil du fortsette?',
-  BACKUP_INCLUDE_SECRETS: 'Ta med passord og nøkler (nødvendig for å gjenopprette på en ny enhet)',
-  TEST_EMAIL_SUCCESSFUL: 'Test email sendt suksessfullt',
+  UPGRADE_IMPORTANT_MESSAGES: 'Viktige oppgraderingsmeldinger', // DeepL
+  UPGRADE_IMPORTANT_MESSAGES_2: 'Du oppgraderer til en ny hovedversjon. Det anbefales å ta en sikkerhetskopi av systemet først. Sjekk også den elektroniske hjelpen for eventuelle vesentlige endringer.', // DeepL
+  UPGRADE_IMPORTANT_MESSAGES_3: 'Versjon 3.10 inneholder sikkerhetsendringer som medfører kompatibilitetsbrudd. Ta først en sikkerhetskopi av systemet: etter oppgraderingen lagres passordene i hashform, og eldre versjoner kan ikke lese dem, så du trenger denne sikkerhetskopien hvis du skal gå tilbake. Hvert API-kall krever da en API-nøkkel, så integrasjoner som Home Assistant må oppdateres. Les om endringene som medfører kompatibilitetsbrudd i den elektroniske hjelpen før du fortsetter.', // DeepL
+  WARNING_SYSTEM_BACKUP: 'Dette oppretter en sikkerhetskopi av hele systemkonfigurasjonen og innstillingene dine. Passord og nøkler utelates med mindre du oppgir dem nedenfor; når du gjenoppretter sikkerhetskopien, beholdes passordene som allerede finnes på enheten. Kommandoer inkluderes alltid og kan inneholde påloggingsopplysninger, så vær forsiktig med å dele dem. Vil du fortsette?', // DeepL
+  BACKUP_INCLUDE_SECRETS: 'Inkluder passord og nøkler (nødvendig for å gjenopprette på en ny enhet)', // DeepL
+  TEST_EMAIL_SUCCESSFUL: 'Test-e-post sendt', // DeepL
   SYSTEM_NAME: 'Systemnavn',
   COMMANDS: 'Kommandoer',
-  COMMANDS_HELP_1: 'Definer egne kommandoer for EMS-Magistral',
-  COMMAND_EXECUTED: 'Kommando kjørt lykkes',
+  COMMANDS_HELP_1: 'Definer gjenbrukbare, navngitte kommandoer nedenfor. Disse kan utføres fra konsollen, API/MQTT eller refereres til av Planleggeren', // DeepL
+  COMMAND_EXECUTED: 'Kommando utført', // DeepL
   RUN: 'Kjør',
-  INTERNET_CONNECTION_CHECK: 'Kontrollerer online for tilgjengelige versjoner',
-  UPLOAD_BACKUP_TEXT: 'Klikk for å velge, eller drop en sikkerhetskopi (.json) her',
-  UPLOAD_FIRMWARE_TEXT: 'Klikk for å velge, eller drop en firmware .bin/.md5 her',
-  UPLOAD_MD5_RECEIVED: 'MD5 mottatt, last nå opp firmware .bin-filen',
-  UPLOAD_MD5_MATCHED: 'MD5 stemmer, firmware installeres...',
-  UPLOAD_NOT_OFFICIAL: 'Dette er ikke en offisiell EMS-ESP-build. Installer bare firmware du stoler på',
-  UPLOAD_NOT_OFFICIAL_HELP: 'Om offisielle og egne builds',
-  UPLOAD_INSTALL_ANYWAY: 'Installer likevel',
+  INTERNET_CONNECTION_CHECK: 'Sjekk på nettet for tilgjengelige versjoner', // DeepL
+  UPLOAD_BACKUP_TEXT: 'Klikk for å velge, eller dra en sikkerhetskopifil (.json) hit', // DeepL
+  UPLOAD_FIRMWARE_TEXT: 'Klikk for å velge, eller dra en firmwarefil (.bin/.md5) hit', // DeepL
+  UPLOAD_MD5_RECEIVED: 'Sammendrag mottatt, last nå opp firmware-filen (.bin)', // DeepL
+  UPLOAD_MD5_MATCHED: 'MD5-samsvar, installerer fastvare…', // DeepL
+  UPLOAD_NOT_OFFICIAL: 'Dette er ikke en offisiell EMS-ESP-versjon. Installer kun fastvare du stoler på', // DeepL
+  UPLOAD_NOT_OFFICIAL_HELP: 'Om offisielle og tilpassede versjoner', // DeepL
+  UPLOAD_INSTALL_ANYWAY: 'Installer uansett', // DeepL
   OFFICIAL_BUILD: 'Offisiell versjon',
-  CUSTOM_BUILD: 'Egen versjon',
-  PASSWORD_CONFIRM_TITLE: 'Skriv inn passordet på nytt',
-  PASSWORD_CONFIRM_TEXT: 'Av sikkerhetshensyn må du skrive inn passordet før denne endringen. Du blir ikke spurt igjen på 5 minutter.',
+  CUSTOM_BUILD: 'Spesialtilpasset', // DeepL
+  PASSWORD_CONFIRM_TITLE: 'Skriv inn passordet ditt på nytt', // DeepL
+  PASSWORD_CONFIRM_TEXT: 'For din egen sikkerhet må du oppgi passordet ditt før denne endringen. Du vil ikke bli bedt om det igjen på 5 minutter.', // DeepL
   PASSWORD_CONFIRM_BUTTON: 'Bekreft',
   PASSWORD_WRONG: 'Feil passord',
-  PASSWORD_NOT_CONFIRMED: 'Avbrutt, passordet ble ikke skrevet inn',
+  PASSWORD_NOT_CONFIRMED: 'Avbrutt, passordet ble ikke angitt', // DeepL
   RECOVERY_APP: 'Gjenopprettingsapp',
   RECOVERY_NOT_INSTALLED: 'Ikke installert',
   RECOVERY_INSTALLED: 'Gjenopprettingsfirmware installert',
   RESTART_INTO_RECOVERY: 'Start på nytt i gjenopprettingsappen',
-  RECOVERY_NOT_FOUND: 'Fant ikke gjenopprettingsappen på nettet',
-  RECOVERY_START_FAILED: 'Gjenopprettingsappen kan ikke startes, den kan være utdatert eller skadet. Installer den nyeste versjonen først',
+  RECOVERY_NOT_FOUND: 'Recovery-appen ble ikke funnet på nettet', // DeepL
+  RECOVERY_START_FAILED: 'Recovery-appen kan ikke startes; den kan være utdatert eller skadet. Installer først den nyeste versjonen', // DeepL
   PARTITION_START_FAILED: 'Denne fastvaren kan ikke startes, den kan være skadet',
   INSTALLED_VERSIONS: 'Installerte versjoner',
-  EMSESP_APP: 'EMS-ESP App',
-  UPDATE_AVAILABLE_BUTTON: 'Det finnes en oppdatering',
+  EMSESP_APP: 'EMS-ESP-appen', // DeepL
   NO_UPDATES_AVAILABLE: 'ingen oppdateringer tilgjengelig',
   SWITCH_TO_DEV: 'Bytt til dev {0}',
-  SWITCH_TO_STABLE: 'Bytt til stabil versjon {0}'
+  SWITCH_TO_STABLE: 'Bytt til stabil versjon {0}',
+  SAVE: 'Lagre',
+  NEEDS_RESTART: 'må startes på nytt', // DeepL
+  CHANGED_SETTINGS: '{num} {{endret innstilling|endrede innstillinger}}',
+  SAVED_RESTART: 'Lagret. Start EMS-ESP på nytt for å bruke de nye innstillingene.',
+  RESTART_NOW: 'Start på nytt nå',
+  COPY_FAILED: 'Kunne ikke kopiere, velg teksten og kopier den selv', // DeepL
+  DOCUMENTATION: 'Dokumentasjon',
+  COMMUNITY_CHAT: 'Fellesskapschat',
+  REPORT_ISSUE: 'Rapporter en feil eller be om en funksjon',
+  GET_HELP: 'Få hjelp',
+  REPORT_PROBLEM: 'Meld fra om et problem', // DeepL
+  REPORT_STEP_1: 'Last ned systeminformasjonen',
+  REPORT_STEP_1_TEXT: 'versjon, hovedkort, EMS-bussstatus, tilkoblede enheter og innstillinger, uten passord', // DeepL
+  REPORT_STEP_2: 'Lagre den siste loggen',
+  REPORT_STEP_2_TEXT: 'Sett først loggnivået til DEBUG hvis problemet ligger i en enhet', // DeepL
+  REPORT_STEP_3: 'Opprett en sak eller spør på Discord',
+  REPORT_STEP_3_TEXT: 'Legg ved begge filene, eller lim inn den korte oppsummeringen nedenfor i en chat', // DeepL
+  NEW_ISSUE: 'Nytt problem', // DeepL
+  SHORT_SUMMARY: 'Kort oppsummering', // DeepL
+  LICENSE_TEXT: 'Åpen kildekode under LGPL-3.0-lisensen', // DeepL
+  ADMIN_ACCESS_TEXT: 'full tilgang til innstillinger, enheter og API-et',
+  GUEST_ACCESS_TEXT: 'kan vise verdier og utføre kommandoer som gjester kan utføre', // DeepL
+  LANGUAGE_BROWSER_ONLY: 'endrer kun denne nettleseren', // DeepL
+  LANGUAGE_ENTITIES_HINT: 'Språket for objektsnavnene i MQTT og API-et angis i', // DeepL
+  ADMINISTRATION: 'Administrasjon',
+  API_KEYS_SHORT: 'taster for Home Assistant og skript', // DeepL
+  ADDRESSES: 'Adresser',
+  SEARCH_SETTINGS: 'Søkeinnstillinger', // DeepL
+  NO_SETTINGS_MATCH: 'Ingen innstillinger samsvarer med søket ditt', // DeepL
+  GENERAL: 'Generelt',
+  BOARD: 'Styret', // DeepL
+  ADVANCED: 'Avansert',
+  EMS_BUS_DESC: 'Slik kommuniserer EMS-ESP med varmesystemet ditt.', // DeepL
+  BOARD_DESC: 'Pin-kodene hentes fra kortprofilen. For å angi dem selv må du slå på utviklermodus og velge «Custom».', // DeepL
+  FORMAT_DESC: 'Hvordan verdiene vises i nettgrensesnittet og i MQTT/API-payloads.', // DeepL
+  BOARD_PINS: 'Pins fra profilen', // DeepL
+  ENABLE_EMAIL: 'Aktiver e-postvarsler',
+  SEND_TEST_EMAIL: 'Send test-e-post',
+  EMAIL_FROM: 'Fra',
+  EMAIL_TO: 'Til',
+  EMAIL_SUBJECT: 'Emne',
+  WIFI_SCAN: 'Wi-Fi-skanning', // DeepL
+  SCAN: 'Skann', // DeepL
+  NETWORKS_NEARBY: 'Nettverk i nærheten',
+  SIGNAL: 'Signal',
+  CHANNEL: 'Kanal',
+  WIFI_OPEN: 'åpen',
+  WIFI_SAVED: 'lagret',
+  NETWORK_ETHERNET_INFO: 'Nå tilkoblet via Ethernet ({ip}). Wi-Fi brukes kun uten kabel.', // DeepL
+  HOSTNAME_ACCESS: 'Vertsnavn og tilgang',
+  IP_ADDRESS: 'IP-adresse',
+  NETWORK_ETH_10MBIT: 'Tving 10 Mbit halvdupleks', // DeepL
+  NETWORK_ETH_10MBIT_HELP: 'kun for feilbrytere eller lange kabler', // DeepL
+  NETWORK_DISABLE_SLEEP_HELP: 'mer pålitelig, bruker litt mer strøm',
+  NETWORK_MDNS_HELP: 'Du når den via {host}.local med mDNS', // DeepL
+  NETWORK_FIXED_IP_HELP: 'ellers brukes DHCP',
+  NETWORK_CORS_HELP: 'kun nødvendig når en annen nettside påkaller API-et', // DeepL
+  NTP_TIME_ON_DEVICE: 'tid på EMS-ESP',
+  NTP_TIME_SERVER: 'Tidsserver',
+  NTP_THERMOSTAT_CLOCK: 'Termostatklokke',
+  NTP_THERMOSTAT_SYNC: 'Still inn klokken på termostaten', // DeepL
+  NTP_THERMOSTAT_SYNC_HELP: 'stiller inn dato og klokkeslett på EMS-termostaten', // DeepL
+  NTP_THERMOSTAT_SYNC_1: 'På, EMS-ESP-tidssone', // DeepL
+  NTP_THERMOSTAT_SYNC_2: 'På, egen tidssone',
+  NTP_THERMOSTAT_TZ: 'Termostatens tidssone',
+  MQTT_PREVIEW: 'Hva blir publisert', // DeepL
+  MQTT_PREVIEW_CMD: 'godkjent som en kommando', // DeepL
+  MQTT_PREVIEW_RESPONSE: 'utdata fra kommandoer',
+  MQTT_BEHAVIOUR: 'Atferd', // DeepL
+  MQTT_TOPICS: 'Emner og nyttelast', // DeepL
+  MQTT_DISCOVERY: 'Oppdagelse', // DeepL
+  MQTT_INTERVALS_HELP: 'Sekunder mellom publiseringer, 0 = publiser ved hver endring.',
+  MQTT_SINGLE_NO_DISCOVERY: 'ikke tilgjengelig med oppdagingsfunksjonen på', // DeepL
+  MQTT_DISCOVERY_NO_SINGLE: 'ikke tilgjengelig med emner med én verdi på', // DeepL
+  MQTT_DISCOVERY_HELP: 'oppretter ojektene i Home Assistant eller Domoticz automatisk', // DeepL
+  MQTT_ENTITY_FORMAT_WARN: 'Hvis du endrer dette, vil alle ojekter i Home Assistant få nytt navn', // DeepL
+  USERS: 'Brukere',
+  USERS_TEXT: 'Administratorer kan endre alt. Gjester kan se på og utføre kommandoer som er merket for gjester.', // DeepL
+  ADD_USER: 'Legg til bruker',
+  EDIT_USER: 'Rediger bruker',
+  ROLE: 'Rolle',
+  ROLE_ADMIN: 'admin', // DeepL
+  ROLE_GUEST: 'gjest',
+  ADMIN: 'Admin', // DeepL
+  YOU: 'du', // DeepL
+  NEW_PASSWORD: 'Nytt passord',
+  UNSAVED_CHANGES: '{num} {{ulagret endring|ulagrede endringer}}',
+  CREATE_KEY: 'Opprett nøkkel',
+  NEW_API_KEY: 'Ny API-nøkkel',
+  NO_API_KEYS: 'Ingen API-nøkler ennå',
+  API_KEYS_LIMIT: 'Du kan ha maksimalt {num}-taster.', // DeepL
+  REVOKE: 'Tilbakekall',
+  REVOKE_KEY: 'Tilbakekall API-nøkkel',
+  REVOKE_KEY_TEXT: 'Alt som bruker «{name}» slutter å fungere umiddelbart.', // DeepL
+  MODULES_TEXT: 'Valgfrie funksjoner som er innebygd i denne fastvaren. Slå dem på eller av her.', // DeepL
+  BY_AUTHOR: 'av {name}',
+  LICENSE_KEY: 'Lisensnøkkel',
+  MODULE_ACTIVATED: 'aktivert',
+  MODULE_PENDING: 'venter på aktivering',
+  ENABLED: 'Aktivert',
+  UNDO: 'Angre',
+  FW_UPDATES: 'Oppdateringer',
+  FW_VERSION_AVAILABLE: '{version} er tilgjengelig',
+  FW_RELEASE_NOTES: 'Utgivelsesnotater', // DeepL
+  FW_UPDATES_OFFLINE: 'Kunne ikke sjekke om det finnes nye versjoner på nettet. EMS-ESP trenger en internettforbindelse for dette.', // DeepL
+  FW_RESTART_RESET: 'Omstart og tilbakestilling',
+  FW_RECOVERY_TEXT: 'Skal du starte på nytt i Recovery-appen? Den kobler seg til nettverket ditt og starter også sitt eget tilgangspunkt, der du kan laste opp fastvare.', // DeepL
+  FW_SIZE: 'Størrelse',
+  FW_INSTALL_DATE: 'Installert på', // DeepL
+  FW_UPLOAD_FAILED: 'Opplastingen mislyktes: feil filtype eller firmware for et annet kort', // DeepL
+  FILE_TYPE_INVALID: 'Denne filtypen støttes ikke, velg en {types}-fil',
+  WHO_CAN_RUN: 'Hvem kan kjøre',
+  CMD_NONE: 'Ingen kommandoer funnet',
+  CMD_NONE_MATCH: 'Ingen kommandoer samsvarer med søket ditt', // DeepL
+  SCHEDULE_NONE: 'Ingen tidsplaner funnet',
+  SCHEDULE_NONE_MATCH: 'Ingen tidsplaner samsvarer med søket ditt', // DeepL
+  CE_NONE: 'Ingen ojekter funnet', // DeepL
+  CE_ALL: 'Alle',
+  CE_STORAGE: 'Lagring',
+  CE_SOURCE: 'Kilde',
+  CE_EMS_SOURCE: 'enhet {device} · telegram {type} · offset {offset}',
+  CE_RAM_TEXT: 'bevares til omstart', // DeepL
+  CE_NVS_TEXT: 'bevares ved omstart', // DeepL
+  CE_EXCLUDED: 'ikke i API/MQTT',
+  SEARCH_SENSORS: 'Søk etter navn, ID eller GPIO',
+  NO_SENSORS: 'Ingen sensorer funnet',
+  NO_SENSORS_MATCH: 'Ingen sensorer samsvarer med søket ditt', // DeepL
+  TEMP_SENSORS_HELP: 'Funnet automatisk. Klikk på en sensor for å gi den nytt navn eller angi en forskyvning', // DeepL
+  FREE_GPIOS: 'Ledige GPIO-er',
+  SYSTEM_SENSOR: 'Systemsensor',
+  MASK_FAVORITE: 'Favoritt',
+  MASK_READONLY: 'Skriv for funksjonshemmede', // DeepL
+  MASK_NO_API: 'Ingen MQTT/API', // DeepL
+  MASK_HIDDEN: 'Skjult',
+  MASK_REMOVED: 'Fjernet',
+  FILTER_ALL: 'Alle',
+  NUM_SELECTED: 'Valgt: {num}',
+  ALL_SHOWN: 'Alle vises: {num}', // DeepL
+  BULK_HINT: 'Knappene endrer de merkede radene, eller viser alle radene når ingen er merket.', // DeepL
+  CLEAR_SELECTION: 'Tydelig valg', // DeepL
+  NO_ENTITIES_MATCH: 'Ingen ojekter samsvarer', // DeepL
+  LIMIT_HELP: 'La feltet stå tomt for den innebygde grensen', // DeepL
+  MIN_ABOVE_MAX: 'Minimum må ikke være høyere enn maksimum', // DeepL
+  RENAME_DEVICE: 'Gi enheten nytt navn',
+  WEEKLY: 'Ukentlig',
+  EVERY_DAY: 'Hver dag',
+  SCHEDULER_NO_COMMANDS: 'Legg først til en kommando på siden «Kommandoer»', // DeepL
+  DU_SETTINGS: 'EMS-ESP-innstillinger',
+  DU_SETTINGS_TEXT: 'Sikkerhetskopi av EMS-ESP-innstillingene: nettverk, MQTT, Tilpasninger, Planlegger, egendefinerte ojekter og moduler. Når du laster opp en innstillings- eller sikkerhetskopifil, startes EMS-ESP på nytt.', // DeepL
+  HB_TITLE: 'Oppvarmingsinnstillinger', // DeepL
+  HB_TEXT: 'Lagrer gjeldende verdier for kjelen, termostaten og andre EMS-enheter, slik at du kan gjenopprette dem senere, for eksempel etter at du har byttet ut en enhet. Skrivebeskyttede ojekter og kommandoer endres aldri ved en gjenoppretting.', // DeepL
+  HB_BACKUP: 'Sikkerhetskopier oppvarmingsinnstillingene', // DeepL
+  HB_RESTORE: 'Gjenopprett oppvarmingsinnstillinger', // DeepL
+  DATA_EXPORT: 'Dataeksport',
+  DATA_EXPORT_TEXT: 'For support og analyse. Disse filene kan ikke lastes opp igjen.', // DeepL
+  NUM_VALUES: '{num} {{verdi|verdier}}',
+  HB_NOTHING: 'ingenting å sikkerhetskopiere',
+  FILE_NAME: 'Filnavn',
+  HB_NOTE: 'Merknad (valgfritt, vises igjen når du gjenoppretter)', // DeepL
+  HB_INCOMPLETE: 'Verdier som ennå ikke er lest inn fra bussen, utelates. Vent noen minutter etter en omstart for å få en fullstendig sikkerhetskopi.', // DeepL
+  HB_RESTORE_TEXT: 'Velg en sikkerhetskopi av oppvarmingsinnstillingene. Ingenting blir lagret før du har sjekket endringene og bekreftet dem.', // DeepL
+  HB_DROP: 'Klikk for å velge, eller dra og slipp en reservefil for oppvarming (.json) her', // DeepL
+  HB_INVALID: 'Dette er ikke en sikkerhetskopi av oppvarmingsinnstillingene', // DeepL
+  HB_OTHER_FILE: 'Velg en annen fil',
+  HB_SAME_DEVICE: 'samma enhet', // DeepL
+  HB_NOT_CONNECTED: 'ikke tilkoblet',
+  HB_OTHER_DEVICE: 'annen enhet (produkt-ID {backup} i backupen, {now} tilkoblet), hoppet over', // DeepL
+  HB_UNIT_MISMATCH: 'Denne sikkerhetskopien inneholder temperaturer i {unit}. Endre temperaturenheten i applikasjonsinnstillingene før du gjenoppretter den.', // DeepL
+  HB_CHANGED: 'Endret',
+  ALL: 'Alle',
+  HB_NOW: 'Nå',
+  HB_BACKUP_VALUE: 'Sikkerhetskopi',
+  HB_NOT_AVAILABLE: 'ikke tilgjengelig',
+  HB_SENDING: 'sending', // DeepL
+  HB_WRITTEN: 'skrevet',
+  HB_RESTORE_NUM: 'Gjenopprett {num} {{verdi|verdier}}',
+  RESTORE: 'Gjenopprett',
+  HB_CONFIRM: 'Skrive {num} {{verdi|verdier}} fra {file} til EMS-enhetene?',
+  HB_CONFIRM_TEXT: 'Verdiene sendes én om gangen. Hvis en enhet avviser én, sendes resten likevel.',
+  HB_DONE: '{num} {{verdi|verdier}} skrevet',
+  HB_DONE_FAILED: '{num} mislyktes. Enheter avviser ofte verdier på installatørnivå; systemloggen inneholder detaljene.', // DeepL
+  HB_NO_CHANGES: 'Ingenting skiller seg fra sikkerhetskopien', // DeepL
+  HB_DIFFERENT_DEVICE: 'annen enhet',
+  SELECT_ALL: 'Velg alt', // DeepL
+  DASHBOARD_EMPTY: 'Ingenting å vise ennå',
+  NO_DEVICES: 'Ingen EMS-enhet funnet ennå', // DeepL
+  ADD_COMMAND: 'Legg til kommando',
+  EDIT_COMMAND: 'Rediger kommando',
+  RUN_COMMAND: 'Kjør kommando',
+  ADD_SCHEDULE: 'Legg til tidsplan', // DeepL
+  EDIT_SCHEDULE: 'Rediger tidsplan', // DeepL
+  ADD_ENTITY: 'Legg til enhet', // DeepL
+  EDIT_ENTITY: 'Rediger enhet', // DeepL
+  ADD_ANALOG_SENSOR: 'Legg til analog sensor',
+  EDIT_ANALOG_SENSOR: 'Rediger analog sensor',
+  REMOVE_ANALOG_SENSOR: 'Fjern analog sensor',
+  REMOVE_SENSOR_TEXT: 'Sensorer «{name}» fjernes umiddelbart.', // DeepL
+  EDIT_TEMP_SENSOR: 'Rediger temperatursensor',
+  INSTALL_FIRMWARE: 'Installer fastvare ({channel})',
+  PARTITION: 'Partisjon',
+  PULSE: 'Pulse', // DeepL
 };
 
 export default no;

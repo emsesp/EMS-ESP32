@@ -1,14 +1,29 @@
 import { memo, useEffect, useState } from 'react';
 import { Outlet } from 'react-router';
 
-import CustomTheme from 'CustomTheme';
 import PasswordConfirmDialog from 'components/layout/PasswordConfirmDialog';
-import { Toaster } from 'components/toast';
+import { Toaster } from 'components/ui';
 import { Authentication } from 'contexts/authentication';
-import TypesafeI18n from 'i18n/i18n-react';
+import TypesafeI18n, { useI18nContext } from 'i18n/i18n-react';
 import type { Locales } from 'i18n/i18n-types';
 import { loadLocaleAsync } from 'i18n/i18n-util.async';
 import { detectLocale, navigatorDetector } from 'typesafe-i18n/detectors';
+import { setValidatorLL } from 'validators/messages';
+
+// keeps the form error messages in the current language
+const ValidatorLanguage = () => {
+  setValidatorLL(useI18nContext().LL);
+  return null;
+};
+
+// <html lang> lets the browser hyphenate long translated words instead of overflowing
+const DocumentLanguage = () => {
+  const { locale } = useI18nContext();
+  useEffect(() => {
+    document.documentElement.lang = locale === 'no' ? 'nb' : locale;
+  }, [locale]);
+  return null;
+};
 
 const ALL_LOCALES = [
   'cs',
@@ -64,13 +79,13 @@ const App = memo(() => {
 
   return (
     <TypesafeI18n locale={locale}>
-      <CustomTheme>
-        <Authentication>
-          <Outlet />
-        </Authentication>
-        <PasswordConfirmDialog />
-        <Toaster />
-      </CustomTheme>
+      <ValidatorLanguage />
+      <DocumentLanguage />
+      <Authentication>
+        <Outlet />
+      </Authentication>
+      <PasswordConfirmDialog />
+      <Toaster />
     </TypesafeI18n>
   );
 });

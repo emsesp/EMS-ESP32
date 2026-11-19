@@ -97,7 +97,6 @@ export interface TemperatureSensor {
   o: number; // offset
   u: number; // uom
   s: boolean; // system sensor flag
-  o_n?: string;
 }
 
 export interface AnalogSensor {
@@ -111,7 +110,6 @@ export interface AnalogSensor {
   t: number; // type
   d: boolean; // deleted flag
   s: boolean; // system sensor flag
-  o_n?: string; // original name
 }
 
 export interface WriteTemperatureSensor {
@@ -156,7 +154,7 @@ export interface DeviceValue {
   c?: string; // command, optional
   l?: string[]; // list, optional
   h?: string; // help text, optional
-  s?: string; // steps for up/down, optional
+  s?: number | string; // steps for up/down, optional; the firmware sends a number
   m?: number; // min, optional
   x?: number; // max, optional
   [key: string]: unknown;
@@ -177,10 +175,6 @@ export interface DeviceEntity {
   mi?: number | null; // min value; null means cleared and the original returns after restart
   ma?: number | null; // max value; null means cleared and the original returns after restart
   c?: boolean; // true when a customization is saved (mask, name, or min/max)
-  o_m?: number; // original mask before edits
-  o_cn?: string; // original cn before edits
-  o_mi?: number | null; // original min value
-  o_ma?: number | null; // original max value
 }
 
 export enum DeviceValueUOM {
@@ -376,13 +370,6 @@ export interface ScheduleItem {
   time: string; // also used for Condition and On Change
   cmd_name: string; // references a named Command
   name: string;
-  o_id?: number;
-  o_active?: boolean;
-  o_deleted?: boolean;
-  o_flags?: number;
-  o_time?: string;
-  o_cmd_name?: string;
-  o_name?: string;
 }
 
 export interface Schedule {
@@ -396,12 +383,6 @@ export interface CommandItem {
   name: string;
   guest: boolean; // logged-in non-admin users may run it
   deleted?: boolean;
-  o_id?: number;
-  o_cmd?: string;
-  o_value?: string;
-  o_name?: string;
-  o_guest?: boolean;
-  o_deleted?: boolean;
 }
 
 export interface Commands {
@@ -418,8 +399,6 @@ export interface ModuleItem {
   message: string;
   enabled: boolean;
   license: string;
-  o_enabled?: boolean;
-  o_license?: string;
 }
 
 export interface Modules {
@@ -455,19 +434,6 @@ export interface EntityItem {
   writeable: boolean;
   hide: boolean;
   deleted?: boolean;
-  o_id?: number;
-  o_ram?: number;
-  o_name?: string;
-  o_device_id?: number | string;
-  o_type_id?: number | string;
-  o_offset?: number;
-  o_factor?: number | string;
-  o_uom?: number;
-  o_value_type?: number;
-  o_deleted?: boolean;
-  o_writeable?: boolean;
-  o_value?: unknown;
-  o_hide?: boolean;
 }
 
 export interface Entities {

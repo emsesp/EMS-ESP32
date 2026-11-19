@@ -1,105 +1,70 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
-import CancelIcon from '@mui/icons-material/Cancel';
-import DoneIcon from '@mui/icons-material/Done';
-import {
-  Box,
-  Button,
-  Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  TextField
-} from '@mui/material';
-
-import { dialogStyle } from 'CustomTheme';
-import { BlockFormControlLabel } from 'components';
+import { Button, Dialog, Switch, TextArea } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
-import { updateValue } from 'utils';
 
 import type { ModuleItem } from './types';
 
 interface ModulesDialogProps {
-  open: boolean;
   onClose: () => void;
   onSave: (mi: ModuleItem) => void;
   selectedItem: ModuleItem;
+  // the module as loaded, for the changed markers
+  original: ModuleItem | undefined;
 }
 
 const ModulesDialog = ({
-  open,
   onClose,
   onSave,
-  selectedItem
+  selectedItem,
+  original
 }: ModulesDialogProps) => {
   const { LL } = useI18nContext();
   const [editItem, setEditItem] = useState<ModuleItem>(selectedItem);
 
-  const updateFormValue = updateValue(
-    setEditItem as unknown as React.Dispatch<
-      React.SetStateAction<Record<string, unknown>>
-    >
-  );
-
-  // Sync form state when dialog opens or selected item changes
-  useEffect(() => {
-    if (open) {
-      setEditItem(selectedItem);
-    }
-  }, [open, selectedItem]);
-
-  const handleSave = () => {
-    onSave(editItem);
-  };
-
   return (
-    <Dialog sx={dialogStyle} fullWidth maxWidth="xs" open={open} onClose={onClose}>
-      <DialogTitle>{`${LL.EDIT()} ${editItem.key}`}</DialogTitle>
-      <DialogContent dividers>
-        <Grid container>
-          <BlockFormControlLabel
-            control={
-              <Checkbox
-                checked={editItem.enabled}
-                onChange={updateFormValue}
-                name="enabled"
-              />
+    <Dialog
+      open
+      title={selectedItem.name}
+      onClose={onClose}
+      onSubmit={() => onSave(editItem)}
+      actions={
+        <>
+          <Button icon="cancel" color="secondary" onClick={onClose}>
+            {LL.CANCEL()}
+          </Button>
+          <Button
+            type="submit"
+            icon="check"
+            disabled={
+              editItem.enabled === selectedItem.enabled &&
+              editItem.license === selectedItem.license
             }
-            label="Enabled"
-          />
-        </Grid>
-        <Box sx={{ mt: 2, mb: 1 }}>
-          <TextField
-            name="license"
-            label="License Key"
-            multiline
-            rows={6}
-            fullWidth
-            value={editItem.license}
-            onChange={updateFormValue}
-          />
-        </Box>
-      </DialogContent>
-      <DialogActions>
-        <Button
-          startIcon={<CancelIcon />}
-          variant="outlined"
-          onClick={onClose}
-          color="secondary"
-        >
-          {LL.CANCEL()}
-        </Button>
-        <Button
-          startIcon={<DoneIcon />}
-          variant="outlined"
-          onClick={handleSave}
-          color="primary"
-        >
-          {LL.UPDATE()}
-        </Button>
-      </DialogActions>
+          >
+            {LL.UPDATE()}
+          </Button>
+        </>
+      }
+    >
+      <div className="form">
+        <Switch
+          label={LL.ENABLED()}
+          checked={editItem.enabled}
+          changed={editItem.enabled !== original?.enabled}
+          onChange={(enabled) => setEditItem((mi) => ({ ...mi, enabled }))}
+        />
+        <TextArea
+          label={LL.LICENSE_KEY()}
+          name="license"
+          rows={6}
+          value={editItem.license}
+          changed={editItem.license !== original?.license}
+          onChange={(e) => {
+            const license = e.currentTarget.value;
+            setEditItem((mi) => ({ ...mi, license }));
+          }}
+        />
+      </div>
     </Dialog>
   );
 };

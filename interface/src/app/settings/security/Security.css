@@ -1,0 +1,11 @@
+.sc-user {
+  gap: 6px;
+}
+.sc-key {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--paper-2);
+  overflow-wrap: anywhere;
+  user-select: all;
+}

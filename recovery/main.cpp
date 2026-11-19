@@ -97,6 +97,7 @@ struct PartitionInfo {
     uint32_t address;
     uint32_t size;
     bool     valid;
+    bool     official; // signed by EMS-ESP, only checked for valid images
     uint32_t image_size;
     String   version;
     uint32_t install_date; // UTC epoch, 0 if unknown
@@ -299,8 +300,10 @@ static void loadPartitions() {
         esp_image_metadata_t meta = {};
         esp_partition_pos_t  pos  = {.offset = part->address, .size = part->size};
         info.valid                = esp_image_verify(ESP_IMAGE_VERIFY_SILENT, &pos, &meta) == ESP_OK;
+        info.official             = false;
         if (info.valid) {
             info.image_size = meta.image_len;
+            info.official   = OtaUpdater::isOfficialFirmware(part);
         }
 
         esp_ota_img_states_t state;
@@ -329,7 +332,7 @@ static void loadPartitions() {
         LOG("Partition %s: %s%s, %uKB at 0x%x%s%s%s%s",
             info.label.c_str(),
             info.factory ? "factory, " : "",
-            info.valid ? "valid" : "empty",
+            info.valid ? (info.official ? "valid, official" : "valid, custom") : "empty",
             static_cast<unsigned>(info.size / 1024),
             static_cast<unsigned>(info.address),
             info.version.isEmpty() ? "" : ", v",
@@ -526,6 +529,7 @@ static void handleStatus(AsyncWebServerRequest * request) {
         p["address"]      = info.address;
         p["size"]         = info.size;
         p["valid"]        = info.valid;
+        p["official"]     = info.official;
         p["image_size"]   = info.image_size;
         p["version"]      = info.version;
         p["install_date"] = info.install_date;

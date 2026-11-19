@@ -35,7 +35,7 @@ export function formatValue(
 ) {
   // Handle non-numeric values or missing data
   if (typeof value !== 'number' || uom === undefined || value === undefined) {
-    if (value === undefined || typeof value === 'boolean') {
+    if (value === undefined || value === null || typeof value === 'boolean') {
       return '';
     }
     // Type assertion is safe here since we know it's not a number, boolean, or undefined

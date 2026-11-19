@@ -1,228 +1,170 @@
-import { memo, useEffect, useState } from 'react';
+import { useMemo } from 'react';
 
-import CancelIcon from '@mui/icons-material/Cancel';
-import CloseIcon from '@mui/icons-material/Close';
-import DoneIcon from '@mui/icons-material/Done';
-import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  TextField,
-  Typography
-} from '@mui/material';
-
-import { dialogStyle } from 'CustomTheme';
+import { Button, Icon, KeyValueList, TextField } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
-import { numberValue, updateValue } from 'utils';
+import Schema from 'validators/schema';
+import type { InternalRuleItem } from 'validators/schema';
 
+import EntityDialog from './EntityDialog';
 import EntityMaskToggle from './EntityMaskToggle';
 import { DeviceEntityMask } from './types';
 import type { DeviceEntity } from './types';
 
-interface SettingsCustomizationsDialogProps {
-  open: boolean;
+interface CustomizationForm {
+  m: number;
+  cn: string;
+  // a number, or text while a number is typed or the field is empty
+  mi: number | string | undefined;
+  ma: number | string | undefined;
+}
+
+interface CustomizationsDialogProps {
+  entity: DeviceEntity;
+  // the entity as loaded, to tell whether there is anything to reset
+  original: DeviceEntity | undefined;
   onClose: () => void;
-  onSave: (di: DeviceEntity) => void;
-  selectedItem: DeviceEntity;
+  onSave: (de: DeviceEntity) => void;
+  onReset: () => void;
 }
 
-interface LabelValueProps {
-  label: string;
-  value: React.ReactNode;
-}
+const toNumber = (v: number | string | undefined) => {
+  const n = typeof v === 'string' ? (v.trim() === '' ? NaN : Number(v)) : (v ?? NaN);
+  return Number.isNaN(n) ? undefined : n;
+};
 
-const LabelValue = memo(({ label, value }: LabelValueProps) => (
-  <Grid container direction="row">
-    <Typography variant="body2" color="warning">
-      {label}:&nbsp;
-    </Typography>
-    <Typography variant="body2">{value}</Typography>
-  </Grid>
-));
-LabelValue.displayName = 'LabelValue';
-
-const ICON_SIZE = 16;
+// an empty limit is sent as null when the entity had one, so the built-in limit returns
+const limit = (v: number | string | undefined, before: number | null | undefined) =>
+  toNumber(v) ?? (before === undefined ? undefined : null);
 
 const CustomizationsDialog = ({
-  open,
+  entity,
+  original,
   onClose,
   onSave,
-  selectedItem
-}: SettingsCustomizationsDialogProps) => {
+  onReset
+}: CustomizationsDialogProps) => {
   const { LL } = useI18nContext();
-  const [editItem, setEditItem] = useState<DeviceEntity>(selectedItem);
-  const [error, setError] = useState<boolean>(false);
 
-  const updateFormValue = updateValue(
-    setEditItem as unknown as React.Dispatch<
-      React.SetStateAction<Record<string, unknown>>
-    >
+  const item = useMemo<CustomizationForm>(
+    () => ({
+      m: entity.m,
+      cn: entity.cn ?? '',
+      mi: entity.mi ?? undefined,
+      ma: entity.ma ?? undefined
+    }),
+    [entity]
   );
 
-  const isWriteableNumber =
-    typeof editItem.v === 'number' &&
-    editItem.w &&
-    !(editItem.m & DeviceEntityMask.DV_READONLY);
+  const isWriteableNumber = (m: number) =>
+    typeof entity.v === 'number' && entity.w && !(m & DeviceEntityMask.DV_READONLY);
 
-  // c is set by the firmware for a saved customization. Mask, name, and edited
-  // limits also count, including changes made in this dialog before they are saved.
-  const showReset =
-    !!editItem.c ||
-    editItem.m !== 0 ||
-    (editItem.cn ?? '') !== '' ||
-    editItem.mi !== editItem.o_mi ||
-    editItem.ma !== editItem.o_ma;
+  const showReset = (v: CustomizationForm) =>
+    !!entity.c ||
+    v.m !== 0 ||
+    v.cn !== '' ||
+    entity.mi !== original?.mi ||
+    entity.ma !== original?.ma;
 
-  useEffect(() => {
-    if (open) {
-      setError(false);
-      setEditItem(selectedItem);
-    }
-  }, [open, selectedItem]);
+  const validator = (v: CustomizationForm) =>
+    new Schema({
+      ma: {
+        validator(
+          _rule: InternalRuleItem,
+          _value: unknown,
+          callback: (error?: string) => void
+        ) {
+          const mi = toNumber(v.mi);
+          const ma = toNumber(v.ma);
+          if (
+            isWriteableNumber(v.m) &&
+            mi !== undefined &&
+            ma !== undefined &&
+            mi > ma
+          ) {
+            callback(LL.MIN_ABOVE_MAX());
+            return;
+          }
+          callback();
+        }
+      }
+    });
 
-  const handleClose = (
-    _event: React.SyntheticEvent,
-    reason: 'backdropClick' | 'escapeKeyDown'
-  ) => {
-    if (reason !== 'backdropClick') {
-      onClose();
-    }
-  };
-
-  const save = () => {
-    if (
-      isWriteableNumber &&
-      editItem.mi &&
-      editItem.ma &&
-      editItem.mi > editItem.ma
-    ) {
-      setError(true);
-    } else {
-      onSave(editItem);
-    }
-  };
-
-  const updateDeviceEntity = (updatedItem: DeviceEntity) => {
-    setEditItem((prev) => ({ ...prev, m: updatedItem.m }));
-  };
-
-  const remove = () => {
-    const next: DeviceEntity = { ...editItem, m: 0, cn: '', c: false };
-    if (editItem.mi !== undefined) {
-      next.mi = null;
-    }
-    if (editItem.ma !== undefined) {
-      next.ma = null;
-    }
+  const save = (v: CustomizationForm) => {
+    const next: DeviceEntity = { ...entity, m: v.m, cn: v.cn };
+    delete next.mi;
+    delete next.ma;
+    const mi = isWriteableNumber(v.m) ? limit(v.mi, entity.mi) : entity.mi;
+    const ma = isWriteableNumber(v.m) ? limit(v.ma, entity.ma) : entity.ma;
+    if (mi !== undefined) next.mi = mi;
+    if (ma !== undefined) next.ma = ma;
     onSave(next);
   };
 
   return (
-    <Dialog sx={dialogStyle} open={open} onClose={handleClose}>
-      <DialogTitle>{`${LL.EDIT()} ${LL.ENTITY()}`}</DialogTitle>
-      <DialogContent dividers>
-        <LabelValue label={LL.ID_OF(LL.ENTITY())} value={editItem.id} />
-        <LabelValue
-          label={`${LL.DEFAULT(1)} ${LL.ENTITY_NAME(1)}`}
-          value={editItem.n}
-        />
-        <LabelValue
-          label={LL.WRITEABLE()}
-          value={
-            editItem.w ? (
-              <DoneIcon color="success" sx={{ fontSize: ICON_SIZE }} />
-            ) : (
-              <CloseIcon color="error" sx={{ fontSize: ICON_SIZE }} />
-            )
-          }
-        />
-
-        <Box sx={{ mt: 1, mb: 2 }}>
-          <EntityMaskToggle onUpdate={updateDeviceEntity} de={editItem} />
-        </Box>
-
-        <Grid container spacing={2}>
-          <Grid>
-            <TextField
-              name="cn"
-              label={LL.NEW_NAME_OF(LL.ENTITY())}
-              value={editItem.cn}
-              sx={{ width: '30ch' }}
-              onChange={updateFormValue}
-            />
-          </Grid>
-          {isWriteableNumber && (
-            <>
-              <Grid>
-                <TextField
-                  name="mi"
-                  label={LL.MIN()}
-                  value={
-                    typeof editItem.mi === 'number' ? numberValue(editItem.mi) : ''
-                  }
-                  sx={{ width: '11ch' }}
-                  type="number"
-                  onChange={updateFormValue}
-                />
-              </Grid>
-              <Grid>
-                <TextField
-                  name="ma"
-                  label={LL.MAX()}
-                  value={
-                    typeof editItem.ma === 'number' ? numberValue(editItem.ma) : ''
-                  }
-                  sx={{ width: '11ch' }}
-                  type="number"
-                  onChange={updateFormValue}
-                />
-              </Grid>
-            </>
-          )}
-        </Grid>
-
-        {error && (
-          <Typography sx={{ mt: 2 }} variant="body2" color="error">
-            Error: Check min and max values
-          </Typography>
-        )}
-      </DialogContent>
-
-      <DialogActions>
-        {showReset && (
-          <Button
-            startIcon={<SettingsBackupRestoreIcon />}
-            variant="outlined"
-            onClick={remove}
-            color="error"
-          >
+    <EntityDialog
+      title={LL.EDIT_ENTITY()}
+      item={item}
+      validator={validator}
+      onClose={onClose}
+      onSave={save}
+      extraActions={(v) =>
+        showReset(v) && (
+          <Button color="error" icon="settings_backup_restore" onClick={onReset}>
             {LL.RESET()}
           </Button>
-        )}
-        <Box sx={{ flexGrow: 1 }} />
-        <Button
-          startIcon={<CancelIcon />}
-          variant="outlined"
-          onClick={onClose}
-          color="secondary"
-        >
-          {LL.CANCEL()}
-        </Button>
-        <Button
-          startIcon={<DoneIcon />}
-          variant="outlined"
-          onClick={save}
-          color="primary"
-        >
-          {LL.UPDATE()}
-        </Button>
-      </DialogActions>
-    </Dialog>
+        )
+      }
+    >
+      {(f) => (
+        <>
+          <div className="full">
+            <KeyValueList
+              rows={[
+                {
+                  label: LL.ID_OF(LL.ENTITY()),
+                  value: <span className="mono">{entity.id}</span>
+                },
+                { label: LL.DEFAULT_NAME(), value: entity.n },
+                {
+                  label: LL.WRITEABLE(),
+                  value: (
+                    <Icon
+                      name={entity.w ? 'check' : 'close'}
+                      size="sm"
+                      label={entity.w ? 'true' : 'false'}
+                      className={entity.w ? 'cz-yes' : 'cz-no'}
+                    />
+                  )
+                }
+              ]}
+            />
+          </div>
+          <div className="full">
+            <EntityMaskToggle
+              de={entity}
+              mask={f.values.m}
+              onChange={(m) => f.set({ m })}
+            />
+          </div>
+          <TextField
+            label={LL.NEW_NAME_OF(LL.ENTITY())}
+            placeholder={entity.n}
+            fullWidth
+            {...f.text('cn')}
+          />
+          {isWriteableNumber(f.values.m) && (
+            <>
+              <TextField
+                label={LL.MIN()}
+                helperText={LL.LIMIT_HELP()}
+                {...f.number('mi')}
+              />
+              <TextField label={LL.MAX()} {...f.number('ma')} />
+            </>
+          )}
+        </>
+      )}
+    </EntityDialog>
   );
 };
 

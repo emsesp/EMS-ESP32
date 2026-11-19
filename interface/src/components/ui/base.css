@@ -1,0 +1,99 @@
+/* Global element styles and layout utilities, from mockups/base.css. Roboto is loaded by public/css/roboto.css. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--font-size);
+  line-height: 1.43;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* iOS zooms the page when a focused input has a font size below 16px */
+@media (max-width: 599px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.wrap {
+  flex-wrap: wrap;
+}
+.grow {
+  flex: 1;
+}
+.grid {
+  display: grid;
+  gap: 12px;
+}
+.nowrap {
+  white-space: nowrap;
+}
+
+.h6 {
+  font-size: 16px;
+  margin: 0;
+  font-weight: 400;
+}
+.cap {
+  font-size: 12px;
+  color: var(--text-3);
+}
+.mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.muted {
+  color: var(--text-3);
+}
+.lb {
+  color: var(--lightblue);
+}
+
+/* a block of monospaced text, e.g. a summary to copy */
+.summary {
+  margin: 0;
+  padding: 10px 12px;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #000;
+  color: var(--text-2);
+  white-space: pre-wrap;
+}

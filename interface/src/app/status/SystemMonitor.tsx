@@ -1,20 +1,16 @@
 import { useRef, useState } from 'react';
 
-import CancelIcon from '@mui/icons-material/Cancel';
-import { Box, Button, Typography } from '@mui/material';
-
 import { callAction } from 'api/app';
 import { readSystemStatus } from 'api/system';
 
 import { useRequest } from 'alova/client';
-import MessageBox from 'components/MessageBox';
 import { clearAccessToken } from 'components/routing/authentication';
-import CustomBuildWarning from 'components/upload/CustomBuildWarning';
+import { Button, Message, ProgressBar } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 import { SystemStatusCodes } from 'types';
-import { useInterval } from 'utils';
+import { CUSTOM_BUILD_URL, useInterval } from 'utils';
 
-import { LinearProgressWithLabel } from '../../components/upload/LinearProgressWithLabel';
+import './SystemMonitor.css';
 
 interface SystemMonitorProps {
   // when set the page isn't reloaded when done, e.g. when the firmware was installed without a restart
@@ -33,9 +29,7 @@ const SystemMonitor = ({ onDone, onInstallCustom }: SystemMonitorProps) => {
 
   const { send: setSystemStatus } = useRequest(
     (status: string) => callAction({ action: 'systemStatus', param: status }),
-    {
-      immediate: false
-    }
+    { immediate: false }
   );
 
   const { data, send } = useRequest(readSystemStatus, {
@@ -66,7 +60,7 @@ const SystemMonitor = ({ onDone, onInstallCustom }: SystemMonitorProps) => {
         event.data.status === SystemStatusCodes.SYSTEM_STATUS_ERROR_UPLOAD
       ) {
         uploadFailed.current = true;
-        setErrorMessage('Please check system logs for possible causes');
+        setErrorMessage(LL.CHECK_SYSTEM_LOG());
       } else if (
         event.data.status === SystemStatusCodes.SYSTEM_STATUS_ERROR_NOT_OFFICIAL
       ) {
@@ -82,7 +76,7 @@ const SystemMonitor = ({ onDone, onInstallCustom }: SystemMonitorProps) => {
         document.location.href = '/';
         return;
       }
-      setErrorMessage(String(error.error?.message || 'An error occurred'));
+      setErrorMessage(String(error.error?.message || LL.ERROR()));
     });
 
   useInterval(() => {
@@ -106,7 +100,7 @@ const SystemMonitor = ({ onDone, onInstallCustom }: SystemMonitorProps) => {
 
   const isUploading =
     status !== undefined && status >= SystemStatusCodes.SYSTEM_STATUS_UPLOADING;
-  const progressValue =
+  const progress =
     isUploading && status
       ? Math.round(status - SystemStatusCodes.SYSTEM_STATUS_UPLOADING)
       : 0;
@@ -134,108 +128,82 @@ const SystemMonitor = ({ onDone, onInstallCustom }: SystemMonitorProps) => {
     }
   };
 
-  return (
-    <Box
-      sx={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-        // backdropFilter: 'blur(8px)'
-      }}
-    >
-      <Box
-        sx={{
-          width: '30%',
-          minWidth: '300px',
-          maxWidth: '500px',
-          backgroundColor: '#393939',
-          border: 2,
-          borderColor: '#565656',
-          borderRadius: '8px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-          p: 3
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
-          <img
-            src="/app/icon.png"
-            alt="EMS-ESP"
-            style={{ width: '40px', height: '40px', marginBottom: '16px' }}
-          />
-          <Typography
-            sx={{ color: 'secondary', fontWeight: 400, textAlign: 'center' }}
-            variant="h6"
-          >
-            {statusMessage}
-          </Typography>
-
-          {notOfficial && onInstallCustom ? (
-            <>
-              <CustomBuildWarning
-                message={LL.UPLOAD_NOT_OFFICIAL()}
-                linkText={LL.UPLOAD_NOT_OFFICIAL_HELP()}
-                installText={LL.UPLOAD_INSTALL_ANYWAY()}
-                onInstall={() => void installCustom()}
-              />
+  const body = () => {
+    if (notOfficial && onInstallCustom) {
+      return (
+        <>
+          <Message level="warning">
+            {LL.UPLOAD_NOT_OFFICIAL()}.{' '}
+            <a href={CUSTOM_BUILD_URL} target="_blank" rel="noreferrer">
+              {LL.UPLOAD_NOT_OFFICIAL_HELP()}
+            </a>
+          </Message>
+          <div className="sysmon-actions">
+            <Button color="secondary" icon="cancel" onClick={() => void onCancel()}>
+              {LL.CANCEL()}
+            </Button>
+            <Button
+              color="warning"
+              icon="warning"
+              onClick={() => void installCustom()}
+            >
+              {LL.UPLOAD_INSTALL_ANYWAY()}
+            </Button>
+          </div>
+        </>
+      );
+    }
+    if (errorMessage) {
+      return (
+        <Message
+          level="error"
+          actions={
+            <Button
+              size="sm"
+              color="warning"
+              icon="restart_alt"
+              onClick={() => void onCancel()}
+            >
+              {LL.RESTART()}
+            </Button>
+          }
+        >
+          {errorMessage}
+        </Message>
+      );
+    }
+    return (
+      <>
+        <p className="sysmon-wait">{LL.PLEASE_WAIT()}&hellip;</p>
+        {isUploading && (
+          <>
+            <div className="sysmon-progress">
+              <ProgressBar value={progress} label={LL.WAIT_FIRMWARE()} />
+              <span className="cap">{progress}%</span>
+            </div>
+            <div className="sysmon-actions">
               <Button
-                sx={{ mt: 2 }}
-                size="small"
-                startIcon={<CancelIcon />}
-                variant="outlined"
                 color="secondary"
-                onClick={onCancel}
+                icon="cancel"
+                onClick={() => void onCancel()}
               >
                 {LL.CANCEL()}
               </Button>
-            </>
-          ) : errorMessage ? (
-            <MessageBox level="error" message={errorMessage}>
-              <Button
-                sx={{ ml: 2 }}
-                size="small"
-                startIcon={<CancelIcon />}
-                variant="contained"
-                color="error"
-                onClick={onCancel}
-              >
-                {LL.RESTART()}
-              </Button>
-            </MessageBox>
-          ) : (
-            <>
-              <Typography
-                sx={{ mt: 2, fontWeight: 400, textAlign: 'center' }}
-                variant="h6"
-              >
-                {LL.PLEASE_WAIT()}&hellip;
-              </Typography>
-              {isUploading && (
-                <>
-                  <Box sx={{ width: '100%', pl: 2, pr: 2, py: 2 }}>
-                    <LinearProgressWithLabel value={progressValue} />
-                  </Box>
+            </div>
+          </>
+        )}
+      </>
+    );
+  };
 
-                  <Button
-                    sx={{ ml: 2, mt: 2 }}
-                    startIcon={<CancelIcon />}
-                    variant="outlined"
-                    color="secondary"
-                    onClick={onCancel}
-                  >
-                    {LL.CANCEL()}
-                  </Button>
-                </>
-              )}
-            </>
-          )}
-        </Box>
-      </Box>
-    </Box>
+  return (
+    <div className="sysmon" role="status" aria-live="polite">
+      <div className="sysmon-box">
+        <img src="/app/icon.png" alt="" width={40} height={40} />
+        <h2 className="sysmon-title">{statusMessage}</h2>
+        {body()}
+      </div>
+    </div>
   );
 };
 

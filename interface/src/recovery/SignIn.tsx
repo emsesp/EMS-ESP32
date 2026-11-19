@@ -1,21 +1,8 @@
-import { type KeyboardEvent, useState } from 'react';
+import { useState } from 'react';
 
-import ForwardIcon from '@mui/icons-material/Forward';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import {
-  Box,
-  Button,
-  IconButton,
-  InputAdornment,
-  Paper,
-  TextField,
-  Typography
-} from '@mui/material';
-import type { Theme } from '@mui/material/styles';
+import { Button, TextField, toast } from 'components/ui';
 
-import { toast } from 'components/toast';
-
+import '../SignIn.css';
 import { HttpError, setToken, signIn } from './api';
 
 interface SignInProps {
@@ -25,7 +12,6 @@ interface SignInProps {
 const SignIn = ({ onSignedIn }: SignInProps) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [processing, setProcessing] = useState(false);
 
   const doSignIn = async () => {
@@ -50,94 +36,68 @@ const SignIn = ({ onSignedIn }: SignInProps) => {
     }
   };
 
-  const onKeyDown = (event: KeyboardEvent) => {
-    if (event.key === 'Enter') {
-      void doSignIn();
-    }
-  };
-
   return (
-    <Box
-      sx={(theme: Theme) => ({
-        display: 'flex',
-        height: '100vh',
-        margin: 'auto',
-        padding: 2,
-        justifyContent: 'center',
-        flexDirection: 'column',
-        maxWidth: theme.breakpoints.values.sm
-      })}
-    >
-      <Paper
-        sx={(theme) => ({
-          textAlign: 'center',
-          padding: theme.spacing(2),
-          paddingTop: '172px',
-          backgroundImage: 'url("/app/icon.png")',
-          backgroundRepeat: 'no-repeat',
-          backgroundPosition: '50% ' + theme.spacing(2),
-          width: '100%'
-        })}
+    <main className="signin">
+      <form
+        className="signin-card"
+        noValidate
+        onSubmit={(e) => {
+          e.preventDefault();
+          void doSignIn();
+        }}
       >
-        <Typography variant="h4">EMS-ESP</Typography>
-        <Typography sx={{ mb: 2 }} variant="h6" color="secondary">
-          Recovery
-        </Typography>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 1,
-            alignItems: 'center'
-          }}
-        >
+        <div className="signin-brand">
+          <img className="signin-logo" src="/app/icon.png" alt="" />
+          <h1>EMS-ESP</h1>
+          <p className="signin-sub">Recovery</p>
+        </div>
+        <div className="signin-fields">
           <TextField
-            disabled={processing}
-            sx={{ width: '32ch' }}
-            name="username"
             label="Username"
+            name="username"
+            autoComplete="username"
+            autoCapitalize="none"
+            autoCorrect="off"
+            autoFocus
+            fullWidth
+            disabled={processing}
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            slotProps={{ input: { autoCapitalize: 'none', autoCorrect: 'off' } }}
+            onInput={(e) => setUsername(e.currentTarget.value)}
           />
           <TextField
-            disabled={processing}
-            sx={{ width: '32ch' }}
-            name="password"
+            type="password"
             label="Password"
-            type={showPassword ? 'text' : 'password'}
+            name="password"
+            autoComplete="current-password"
+            fullWidth
+            disabled={processing}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={onKeyDown}
-            slotProps={{
-              input: {
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowPassword(!showPassword)}
-                      edge="end"
-                    >
-                      {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
-                    </IconButton>
-                  </InputAdornment>
-                )
-              }
-            }}
+            onInput={(e) => setPassword(e.currentTarget.value)}
           />
-        </Box>
-
-        <Button
-          variant="contained"
-          color="primary"
-          sx={{ mt: 2 }}
-          onClick={doSignIn}
-          disabled={processing}
+          <Button
+            type="submit"
+            icon="login"
+            className="signin-submit"
+            disabled={processing}
+          >
+            Sign In
+          </Button>
+        </div>
+      </form>
+      <footer className="signin-foot">
+        <a href="https://emsesp.org" target="_blank" rel="noreferrer">
+          Documentation
+        </a>
+        <span>·</span>
+        <a
+          href="https://github.com/emsesp/EMS-ESP32"
+          target="_blank"
+          rel="noreferrer"
         >
-          <ForwardIcon sx={{ mr: 1 }} />
-          Sign In
-        </Button>
-      </Paper>
-    </Box>
+          GitHub
+        </a>
+      </footer>
+    </main>
   );
 };
 

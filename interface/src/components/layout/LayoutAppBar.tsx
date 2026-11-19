@@ -1,88 +1,56 @@
-import { memo } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router';
+import { Fragment, memo } from 'react';
+import { Link } from 'react-router';
 
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import MenuIcon from '@mui/icons-material/Menu';
-import { AppBar, IconButton, Toolbar, Typography } from '@mui/material';
-import type { SxProps, Theme } from '@mui/material/styles';
-
+import type { AppRoute } from 'app/routes';
+import { Icon, IconButton } from 'components/ui';
+import { PROJECT_NAME } from 'env';
 import { useI18nContext } from 'i18n/i18n-react';
 
-export const DRAWER_WIDTH = 210;
-
 interface LayoutAppBarProps {
-  title: string;
+  trail: AppRoute[];
   onToggleDrawer: () => void;
 }
 
-// Extract static styles
-const appBarStyles: SxProps<Theme> = {
-  width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
-  ml: { md: `${DRAWER_WIDTH}px` },
-  boxShadow: 'none',
-  backgroundColor: '#2e586a'
-};
-
-const menuButtonStyles: SxProps<Theme> = {
-  mr: 2,
-  display: { md: 'none' }
-};
-
-const backButtonStyles: SxProps<Theme> = {
-  mr: 1,
-  fontSize: 20,
-  verticalAlign: 'middle'
-};
-
-const LayoutAppBarComponent = ({ title, onToggleDrawer }: LayoutAppBarProps) => {
+// breadcrumbs from the route table; on phones only a back arrow to the parent and the title
+const LayoutAppBarComponent = ({ trail, onToggleDrawer }: LayoutAppBarProps) => {
   const { LL } = useI18nContext();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const pathnames = location.pathname.split('/').filter((x) => x);
-
-  const handleBackClick = () => {
-    void navigate('/' + pathnames[0]);
-  };
+  const current = trail[trail.length - 1];
+  const parent = trail[trail.length - 2];
 
   return (
-    <AppBar position="fixed" sx={appBarStyles}>
-      <Toolbar>
-        <IconButton
-          color="inherit"
-          edge="start"
-          onClick={onToggleDrawer}
-          sx={menuButtonStyles}
+    <header className="appbar">
+      <IconButton
+        className="menu-btn"
+        plain
+        icon="menu"
+        label={LL.MENU()}
+        onClick={onToggleDrawer}
+      />
+      {parent && (
+        <Link
+          className="crumb-back icon-btn"
+          to={parent.path}
+          title={parent.title(LL)}
         >
-          <MenuIcon />
-        </IconButton>
-
-        {pathnames.length > 1 && (
-          <>
-            <IconButton
-              sx={backButtonStyles}
-              color="primary"
-              edge="start"
-              onClick={handleBackClick}
-            >
-              <ArrowBackIcon />
-            </IconButton>
-
-            <Link
-              to={'/' + pathnames[0]}
-              style={{ textDecoration: 'none', color: 'white' }}
-            >
-              <Typography variant="h6">
-                {pathnames[0] === 'status' ? LL.STATUS_OF('') : LL.SETTINGS(0)}
-                <span style={{ color: '#90caf9' }}>&nbsp;&nbsp;|&nbsp;&nbsp;</span>
-              </Typography>
+          <Icon name="arrow_back" label={parent.title(LL)} />
+        </Link>
+      )}
+      <h1>
+        {trail.slice(0, -1).map((r) => (
+          <Fragment key={r.path}>
+            <Link className="crumb-link" to={r.path}>
+              {r.title(LL)}
             </Link>
-          </>
-        )}
-
-        <Typography variant="h6">{title}</Typography>
-      </Toolbar>
-    </AppBar>
+            <span className="crumb" aria-hidden="true">
+              ›
+            </span>
+          </Fragment>
+        ))}
+        <span className="crumb-current">
+          {current ? current.title(LL) : PROJECT_NAME}
+        </span>
+      </h1>
+    </header>
   );
 };
 

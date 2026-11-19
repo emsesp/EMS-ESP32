@@ -1,555 +1,359 @@
-import { useState } from 'react';
-
-import CancelIcon from '@mui/icons-material/Cancel';
-import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
-import WarningIcon from '@mui/icons-material/Warning';
-import {
-  Box,
-  Button,
-  Checkbox,
-  Grid,
-  InputAdornment,
-  MenuItem,
-  TextField,
-  Typography
-} from '@mui/material';
+import { useEffect, useState } from 'react';
 
 import * as MqttApi from 'api/mqtt';
+import { callAction } from 'api/app';
 
 import {
-  BlockFormControlLabel,
-  BlockNavigation,
-  ButtonRow,
-  FormLoader,
-  MessageBox,
-  SectionContent,
-  ValidatedPasswordField,
-  ValidatedTextField,
-  useLayoutTitle
-} from 'components';
-import { toast } from 'components/toast';
+  Button,
+  Dialog,
+  FormSection,
+  IconButton,
+  Listbox,
+  Message,
+  Switch,
+  TextArea,
+  TextField,
+  toast
+} from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
+import type { TranslationFunctions } from 'i18n/i18n-types';
 import type { MqttSettingsType } from 'types';
-import { numberValue, updateValueDirty, useRest } from 'utils';
-import { ValidationError, createMqttSettingsValidator, validate } from 'validators';
+import { createMqttSettingsValidator } from 'validators';
 import { type TlsCheck, tlsCheckOf } from 'validators/mqtt';
-import type { ValidateFieldsError } from 'validators/schema';
 
-import { callAction } from '../../api/app';
+import FormPage, { useFormPage } from './FormPage';
+import './MqttSettings.css';
+
+const DISCOVERY_TYPES = ['Home Assistant', 'Domoticz', 'Domoticz (latest)'];
+
+const opts = (labels: string[]) =>
+  labels.map((label, i) => ({ value: String(i), label }));
+
+// an illustration of the topics, not the exact payloads
+const mqttPreview = (d: MqttSettingsType, LL: TranslationFunctions) => {
+  const b = d.base;
+  const lines = [
+    `${b}/heartbeat   {"bus_status":"connected","uptime":"…"}`,
+    `${b}/boiler_data   {"curflowtemp":58.4,"selflowtemp":60,…}`,
+    d.nested_format === 1
+      ? `${b}/thermostat_data   {"hc1":{"seltemp":21.5,"mode":"auto"},"hc2":{…}}`
+      : `${b}/thermostat_data_hc1   {"seltemp":21.5,"mode":"auto"}`
+  ];
+  if (d.publish_single) lines.push(`${b}/boiler/curflowtemp   58.4`);
+  if (d.mqtt_commands)
+    lines.push(`${b}/thermostat/hc1/seltemp   ← ${LL.MQTT_PREVIEW_CMD()}`);
+  if (d.ha_enabled)
+    lines.push(
+      `${d.discovery_prefix}/climate/${b}/thermostat_hc1/config   ← ${DISCOVERY_TYPES[d.discovery_type] ?? ''}`
+    );
+  if (d.send_response) lines.push(`${b}/response   ← ${LL.MQTT_PREVIEW_RESPONSE()}`);
+  return lines.join('\n');
+};
 
 const MqttSettings = () => {
-  const {
-    loadData,
-    saving,
-    data,
-    updateDataValue,
-    origData,
-    dirtyFlags,
-    setDirtyFlags,
-    blocker,
-    saveData,
-    errorMessage
-  } = useRest<MqttSettingsType>({
-    read: MqttApi.readMqttSettings,
-    update: MqttApi.updateMqttSettings
-  });
-
   const { LL } = useI18nContext();
-  useLayoutTitle('MQTT');
-
-  const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
   // chosen in the form, otherwise what the stored rootCA holds
   const [chosenTlsCheck, setChosenTlsCheck] = useState<TlsCheck>();
-  const tlsCheck = chosenTlsCheck ?? tlsCheckOf(data?.rootCA);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const form = useFormPage<MqttSettingsType>({
+    read: MqttApi.readMqttSettings,
+    update: MqttApi.updateMqttSettings,
+    validator: (d) =>
+      createMqttSettingsValidator(d, chosenTlsCheck ?? tlsCheckOf(d.rootCA))
+  });
+  const tlsCheck = chosenTlsCheck ?? tlsCheckOf(form.data?.rootCA);
+
+  // back to the stored check after Cancel or Save
+  useEffect(() => {
+    if (form.data === form.origData) setChosenTlsCheck(undefined);
+  }, [form.data, form.origData]);
+
+  const changeTlsCheck = (next: TlsCheck) => {
+    setChosenTlsCheck(next);
+    const current = form.data?.rootCA ?? '';
+    form.set({
+      rootCA:
+        next === 'none' ? 'insecure' : tlsCheckOf(current) === next ? current : ''
+    });
+  };
 
   const sendResetMQTT = () => {
     void callAction({ action: 'resetMQTT' })
       .then(() => {
-        toast.success('MQTT ' + LL.REFRESH() + ' successful');
+        toast.success(LL.MQTT_REFRESHED());
       })
-      .catch((error) => {
-        toast.error(String(error.error?.message || 'An error occurred'));
+      .catch((error: { error?: { message?: string } }) => {
+        toast.error(String(error.error?.message || LL.ERROR()));
       });
   };
 
-  const updateFormValue = updateValueDirty(
-    origData as unknown as Record<string, unknown>,
-    dirtyFlags,
-    setDirtyFlags,
-    updateDataValue as (value: unknown) => void
+  const seconds = (name: keyof MqttSettingsType, label: string) => (
+    <TextField key={name} label={label} unit="s" min={0} {...form.number(name)} />
   );
 
-  const changeTlsCheck = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const next = event.target.value as TlsCheck;
-    setChosenTlsCheck(next);
-    const current = data?.rootCA ?? '';
-    const rootCA =
-      next === 'none' ? 'insecure' : tlsCheckOf(current) === next ? current : '';
-    updateFormValue({
-      target: { name: 'rootCA', value: rootCA, type: 'text' }
-    } as React.ChangeEvent<HTMLInputElement>);
-  };
-
-  const SecondsInputProps = {
-    endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
-  };
-
-  const validateAndSubmit = async () => {
-    if (!data) return;
-    try {
-      setFieldErrors(undefined);
-      await validate(createMqttSettingsValidator(data, tlsCheck), data);
-      await saveData();
-    } catch (error) {
-      setFieldErrors((error as ValidationError).fieldErrors);
-    }
-  };
-
-  const publishIntervalFields = [
-    { name: 'publish_time_heartbeat', label: 'Heartbeat', validated: true },
-    { name: 'publish_time_boiler', label: LL.MQTT_INT_BOILER(), validated: false },
-    {
-      name: 'publish_time_thermostat',
-      label: LL.MQTT_INT_THERMOSTATS(),
-      validated: false
-    },
-    { name: 'publish_time_solar', label: LL.MQTT_INT_SOLAR(), validated: false },
-    { name: 'publish_time_mixer', label: LL.MQTT_INT_MIXER(), validated: false },
-    { name: 'publish_time_water', label: LL.MQTT_INT_WATER(), validated: false },
-    { name: 'publish_time_sensor', label: LL.SENSORS(), validated: false },
-    { name: 'publish_time_other', label: LL.DEFAULT(0), validated: false }
-  ];
-
-  if (!data) {
-    return (
-      <SectionContent>
-        {blocker ? <BlockNavigation blocker={blocker} /> : null}
-        <FormLoader onRetry={loadData} errorMessage={errorMessage || ''} />
-      </SectionContent>
-    );
-  }
-
   return (
-    <SectionContent>
-      {blocker ? <BlockNavigation blocker={blocker} /> : null}
-      <>
-        <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
-          <BlockFormControlLabel
-            control={
-              <Checkbox
-                name="enabled"
-                checked={data.enabled}
-                onChange={updateFormValue}
-              />
+    <FormPage form={form}>
+      {(data) => (
+        <>
+          <Dialog
+            open={previewOpen && data.enabled}
+            title={LL.MQTT_PREVIEW()}
+            size="md"
+            onClose={() => setPreviewOpen(false)}
+            actions={
+              <Button
+                icon="close"
+                color="secondary"
+                onClick={() => setPreviewOpen(false)}
+              >
+                {LL.CLOSE()}
+              </Button>
             }
-            label={LL.ENABLE_MQTT()}
-          />
-          {data.enabled && (
-            <Button
-              startIcon={<SettingsBackupRestoreIcon />}
-              color="secondary"
-              variant="outlined"
-              onClick={sendResetMQTT}
-            >
-              {LL.REFRESH() + ' MQTT'}
-            </Button>
-          )}
-        </Box>
-        <Grid container spacing={2} rowSpacing={0}>
-          <Grid>
-            <ValidatedTextField
-              fieldErrors={fieldErrors ?? {}}
-              name="host"
-              label={LL.ADDRESS_OF(LL.BROKER())}
-              multiline
-              variant="outlined"
-              value={data.host}
-              onChange={updateFormValue}
-              margin="normal"
-            />
-          </Grid>
-          <Grid>
-            <ValidatedTextField
-              fieldErrors={fieldErrors ?? {}}
-              name="port"
-              label="Port"
-              variant="outlined"
-              value={numberValue(data.port)}
-              type="number"
-              onChange={updateFormValue}
-              margin="normal"
-            />
-          </Grid>
-          <Grid>
-            <ValidatedTextField
-              fieldErrors={fieldErrors ?? {}}
-              name="base"
-              label={LL.BASE_TOPIC()}
-              variant="outlined"
-              value={data.base}
-              onChange={updateFormValue}
-              margin="normal"
-            />
-          </Grid>
-          <Grid>
-            <TextField
-              name="client_id"
-              label={`${LL.ID_OF(LL.CLIENT())} (${LL.OPTIONAL()})`}
-              variant="outlined"
-              value={data.client_id}
-              onChange={updateFormValue}
-              margin="normal"
-            />
-          </Grid>
-          <Grid>
-            <TextField
-              name="username"
-              label={LL.USERNAME(0)}
-              variant="outlined"
-              value={data.username}
-              onChange={updateFormValue}
-              margin="normal"
-            />
-          </Grid>
-          <Grid>
-            <ValidatedPasswordField
-              name="password"
-              label={LL.PASSWORD()}
-              variant="outlined"
-              value={data.password}
-              onChange={updateFormValue}
-              margin="normal"
-            />
-          </Grid>
-          <Grid>
-            <ValidatedTextField
-              fieldErrors={fieldErrors ?? {}}
-              name="keep_alive"
-              label="Keep Alive"
-              slotProps={{
-                input: SecondsInputProps
-              }}
-              variant="outlined"
-              value={numberValue(data.keep_alive)}
-              type="number"
-              onChange={updateFormValue}
-              margin="normal"
-            />
-          </Grid>
-          <Grid>
-            <TextField
-              name="mqtt_qos"
-              label="QoS"
-              value={data.mqtt_qos}
-              variant="outlined"
-              onChange={updateFormValue}
-              margin="normal"
-              select
-            >
-              <MenuItem value={0}>0</MenuItem>
-              <MenuItem value={1}>1</MenuItem>
-              <MenuItem value={2}>2</MenuItem>
-            </TextField>
-          </Grid>
-        </Grid>
-        {data.enableTLS !== undefined && (
-          <BlockFormControlLabel
-            control={
-              <Checkbox
-                name="enableTLS"
-                checked={data.enableTLS}
-                onChange={updateFormValue}
-              />
+          >
+            <pre className="summary mono mq-preview">{mqttPreview(data, LL)}</pre>
+          </Dialog>
+
+          <FormSection
+            icon="dns"
+            title={LL.BROKER()}
+            actions={
+              data.enabled && (
+                <Button color="secondary" icon="refresh" onClick={sendResetMQTT}>
+                  {LL.MQTT_REFRESH()}
+                </Button>
+              )
             }
-            label={LL.ENABLE_TLS()}
-          />
-        )}
-        {data.enableTLS === true && (
-          <>
-            <TextField
-              name="tlsCheck"
-              label={LL.TLS_CHECK()}
-              value={tlsCheck}
-              sx={{ width: '50ch' }}
-              variant="outlined"
-              onChange={changeTlsCheck}
-              margin="normal"
-              select
-            >
-              <MenuItem value="ca">{LL.TLS_CHECK_CA()}</MenuItem>
-              <MenuItem value="fingerprint">{LL.TLS_CHECK_FINGERPRINT()}</MenuItem>
-              <MenuItem value="none">{LL.TLS_CHECK_NONE()}</MenuItem>
-            </TextField>
-            {tlsCheck === 'ca' && (
-              <ValidatedPasswordField
-                fieldErrors={fieldErrors ?? {}}
-                name="rootCA"
-                label={LL.CERT()}
-                variant="outlined"
-                value={data.rootCA}
-                sx={{ width: '50ch' }}
-                onChange={updateFormValue}
-                margin="normal"
-              />
-            )}
-            {tlsCheck === 'fingerprint' && (
-              <ValidatedTextField
-                fieldErrors={fieldErrors ?? {}}
-                name="rootCA"
-                label={LL.TLS_CHECK_FINGERPRINT()}
-                placeholder="AB:CD:EF:..."
-                variant="outlined"
-                value={data.rootCA}
-                sx={{ width: '50ch' }}
-                onChange={updateFormValue}
-                margin="normal"
-              />
-            )}
-            {tlsCheck === 'none' && (
-              <MessageBox level="warning" message={LL.TLS_NOT_CHECKED()} />
-            )}
-          </>
-        )}
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              name="clean_session"
-              checked={data.clean_session}
-              onChange={updateFormValue}
-            />
-          }
-          label={LL.MQTT_CLEAN_SESSION()}
-        />
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              name="mqtt_retain"
-              checked={data.mqtt_retain}
-              onChange={updateFormValue}
-            />
-          }
-          label={LL.MQTT_RETAIN_FLAG()}
-        />
-        <TextField
-          name="mqtt_commands"
-          label={LL.MQTT_COMMANDS()}
-          value={data.mqtt_commands}
-          sx={{ width: '50ch' }}
-          variant="outlined"
-          onChange={updateFormValue}
-          margin="normal"
-          select
-        >
-          <MenuItem value={0}>{LL.MQTT_COMMANDS_0()}</MenuItem>
-          <MenuItem value={1}>{LL.MQTT_COMMANDS_1()}</MenuItem>
-          <MenuItem value={2}>{LL.MQTT_COMMANDS_2()}</MenuItem>
-        </TextField>
-        <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-          {LL.FORMATTING()}
-        </Typography>
-        <TextField
-          name="nested_format"
-          label={LL.MQTT_FORMAT()}
-          value={data.nested_format}
-          variant="outlined"
-          onChange={updateFormValue}
-          margin="normal"
-          select
-        >
-          <MenuItem value={1}>{LL.MQTT_NEST_1()}</MenuItem>
-          <MenuItem value={2}>{LL.MQTT_NEST_2()}</MenuItem>
-        </TextField>
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              name="send_response"
-              checked={data.send_response}
-              onChange={updateFormValue}
-            />
-          }
-          label={LL.MQTT_RESPONSE()}
-        />
-        <Grid container spacing={2} rowSpacing={0}>
-          <Grid>
-            <BlockFormControlLabel
-              control={
-                <Checkbox
-                  name="publish_single"
-                  checked={data.publish_single}
-                  onChange={updateFormValue}
-                  disabled={data.ha_enabled}
-                />
-              }
-              label={LL.MQTT_PUBLISH_TEXT_1()}
-            />
-          </Grid>
-          {data.publish_single && (
-            <Grid>
-              <BlockFormControlLabel
-                control={
-                  <Checkbox
-                    name="publish_single2cmd"
-                    checked={data.publish_single2cmd}
-                    onChange={updateFormValue}
+          >
+            <Switch
+              label={LL.ENABLE_MQTT()}
+              adornment={
+                data.enabled && (
+                  <IconButton
+                    icon="info"
+                    label={LL.MQTT_PREVIEW()}
+                    plain
+                    onClick={() => setPreviewOpen(true)}
                   />
-                }
-                label={LL.MQTT_PUBLISH_TEXT_2()}
-              />
-            </Grid>
+                )
+              }
+              {...form.check('enabled')}
+            />
+            {data.enabled && (
+              <>
+                <TextField
+                  label={LL.ADDRESS_OF(LL.BROKER())}
+                  mono
+                  {...form.text('host')}
+                />
+                <TextField
+                  label={LL.PORT()}
+                  min={0}
+                  max={65535}
+                  {...form.number('port')}
+                />
+                <TextField
+                  label={LL.USERNAME(0)}
+                  autoComplete="off"
+                  {...form.text('username')}
+                />
+                <TextField
+                  label={LL.PASSWORD()}
+                  type="password"
+                  autoComplete="new-password"
+                  {...form.text('password')}
+                />
+                <TextField
+                  label={`${LL.ID_OF(LL.CLIENT())} (${LL.OPTIONAL()})`}
+                  mono
+                  {...form.text('client_id')}
+                />
+                <TextField label={LL.BASE_TOPIC()} mono {...form.text('base')} />
+                <TextField
+                  label={LL.KEEP_ALIVE()}
+                  unit="s"
+                  min={1}
+                  {...form.number('keep_alive')}
+                />
+                <Listbox
+                  label="QoS"
+                  options={opts(['0', '1', '2'])}
+                  {...form.select('mqtt_qos')}
+                />
+                {data.enableTLS !== undefined && (
+                  <Switch label={LL.ENABLE_TLS()} {...form.check('enableTLS')} />
+                )}
+                {data.enableTLS === true && (
+                  <>
+                    <Listbox
+                      label={LL.TLS_CHECK()}
+                      name="tlsCheck"
+                      fullWidth
+                      value={tlsCheck}
+                      changed={
+                        chosenTlsCheck !== undefined &&
+                        chosenTlsCheck !== tlsCheckOf(form.origData?.rootCA)
+                      }
+                      options={[
+                        { value: 'none', label: LL.TLS_CHECK_NONE() },
+                        { value: 'ca', label: LL.TLS_CHECK_CA() },
+                        { value: 'fingerprint', label: LL.TLS_CHECK_FINGERPRINT() }
+                      ]}
+                      onChange={(v) => changeTlsCheck(v as TlsCheck)}
+                    />
+                    {tlsCheck === 'ca' && (
+                      <TextArea
+                        label={LL.CERT()}
+                        rows={6}
+                        placeholder="-----BEGIN CERTIFICATE-----"
+                        {...form.text('rootCA')}
+                      />
+                    )}
+                    {tlsCheck === 'fingerprint' && (
+                      <TextField
+                        label={LL.TLS_CHECK_FINGERPRINT()}
+                        mono
+                        fullWidth
+                        placeholder="AB:CD:EF:..."
+                        {...form.text('rootCA')}
+                      />
+                    )}
+                    {tlsCheck === 'none' && (
+                      <Message level="warning" className="full">
+                        {LL.TLS_NOT_CHECKED()}
+                      </Message>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+          </FormSection>
+
+          {data.enabled && (
+            <>
+              <FormSection icon="tune" title={LL.MQTT_BEHAVIOUR()}>
+                <Listbox
+                  label={LL.MQTT_COMMANDS()}
+                  fullWidth
+                  options={opts([
+                    LL.MQTT_COMMANDS_0(),
+                    LL.MQTT_COMMANDS_1(),
+                    LL.MQTT_COMMANDS_2()
+                  ])}
+                  {...form.select('mqtt_commands')}
+                />
+                <Switch
+                  label={LL.MQTT_CLEAN_SESSION()}
+                  {...form.check('clean_session')}
+                />
+                <Switch
+                  label={LL.MQTT_RETAIN_FLAG()}
+                  {...form.check('mqtt_retain')}
+                />
+                <Switch
+                  label={LL.MQTT_RESPONSE()}
+                  {...form.check('send_response')}
+                />
+              </FormSection>
+
+              <FormSection icon="data_object" title={LL.MQTT_TOPICS()}>
+                <Listbox
+                  label={LL.MQTT_FORMAT()}
+                  fullWidth
+                  options={[
+                    { value: '1', label: LL.MQTT_NEST_1() },
+                    { value: '2', label: LL.MQTT_NEST_2() }
+                  ]}
+                  {...form.select('nested_format')}
+                />
+                <Switch
+                  label={LL.MQTT_PUBLISH_TEXT_1()}
+                  disabled={data.ha_enabled}
+                  helperText={
+                    data.ha_enabled ? LL.MQTT_SINGLE_NO_DISCOVERY() : undefined
+                  }
+                  {...form.check('publish_single')}
+                />
+                {data.publish_single && (
+                  <Switch
+                    label={LL.MQTT_PUBLISH_TEXT_2()}
+                    {...form.check('publish_single2cmd')}
+                  />
+                )}
+              </FormSection>
+
+              <FormSection icon="travel_explore" title={LL.MQTT_DISCOVERY()}>
+                <Switch
+                  label={LL.MQTT_PUBLISH_TEXT_3()}
+                  disabled={data.publish_single}
+                  helperText={
+                    data.publish_single
+                      ? LL.MQTT_DISCOVERY_NO_SINGLE()
+                      : LL.MQTT_DISCOVERY_HELP()
+                  }
+                  {...form.check('ha_enabled')}
+                />
+                {data.ha_enabled && (
+                  <>
+                    <Listbox
+                      label={LL.MQTT_PUBLISH_TEXT_5()}
+                      options={opts(DISCOVERY_TYPES)}
+                      {...form.select('discovery_type')}
+                    />
+                    <TextField
+                      label={LL.MQTT_PUBLISH_TEXT_4()}
+                      mono
+                      {...form.text('discovery_prefix')}
+                    />
+                    <Listbox
+                      label={LL.MQTT_ENTITY_FORMAT()}
+                      helperText={
+                        <span className="warnc">{LL.MQTT_ENTITY_FORMAT_WARN()}</span>
+                      }
+                      options={[
+                        { value: '0', label: LL.MQTT_ENTITY_FORMAT_0() },
+                        { value: '3', label: `${LL.MQTT_ENTITY_FORMAT_1()} (v3.5)` },
+                        { value: '4', label: `${LL.MQTT_ENTITY_FORMAT_2()} (v3.5)` },
+                        {
+                          value: '1',
+                          label: `${LL.MQTT_ENTITY_FORMAT_1()} (latest)`
+                        },
+                        {
+                          value: '2',
+                          label: `${LL.MQTT_ENTITY_FORMAT_2()} (latest)`
+                        }
+                      ]}
+                      {...form.select('entity_format')}
+                    />
+                    {data.discovery_type === 0 && (
+                      <Listbox
+                        label={LL.MQTT_INPUT_NUMBER_FORMAT()}
+                        options={opts(['Box', 'Slider'])}
+                        {...form.select('ha_number_mode')}
+                      />
+                    )}
+                  </>
+                )}
+              </FormSection>
+
+              <FormSection
+                icon="timer"
+                title={LL.MQTT_PUBLISH_INTERVALS()}
+                desc={LL.MQTT_INTERVALS_HELP()}
+              >
+                {seconds('publish_time_boiler', LL.MQTT_INT_BOILER())}
+                {seconds('publish_time_thermostat', LL.MQTT_INT_THERMOSTATS())}
+                {seconds('publish_time_solar', LL.MQTT_INT_SOLAR())}
+                {seconds('publish_time_mixer', LL.MQTT_INT_MIXER())}
+                {seconds('publish_time_water', LL.MQTT_INT_WATER())}
+                {seconds('publish_time_sensor', LL.SENSORS())}
+                {seconds('publish_time_other', LL.DEFAULT(0))}
+                {seconds('publish_time_heartbeat', 'Heartbeat')}
+              </FormSection>
+            </>
           )}
-        </Grid>
-        {/* <Grid container spacing={2} rowSpacing={0}> */}
-        <Grid>
-          <BlockFormControlLabel
-            control={
-              <Checkbox
-                name="ha_enabled"
-                checked={data.ha_enabled}
-                onChange={updateFormValue}
-                disabled={data.publish_single}
-              />
-            }
-            label={LL.MQTT_PUBLISH_TEXT_3()}
-          />
-        </Grid>
-        {data.ha_enabled && (
-          <Grid container spacing={2} rowSpacing={0}>
-            <Grid>
-              <TextField
-                name="discovery_type"
-                label={LL.MQTT_PUBLISH_TEXT_5()}
-                value={data.discovery_type}
-                variant="outlined"
-                onChange={updateFormValue}
-                margin="normal"
-                select
-              >
-                <MenuItem value={0}>Home Assistant</MenuItem>
-                <MenuItem value={1}>Domoticz</MenuItem>
-                <MenuItem value={2}>Domoticz (latest)</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid>
-              <TextField
-                name="discovery_prefix"
-                label={LL.MQTT_PUBLISH_TEXT_4()}
-                variant="outlined"
-                value={data.discovery_prefix}
-                onChange={updateFormValue}
-                margin="normal"
-              />
-            </Grid>
-            <Grid>
-              <TextField
-                name="entity_format"
-                label={LL.MQTT_ENTITY_FORMAT()}
-                value={data.entity_format}
-                variant="outlined"
-                onChange={updateFormValue}
-                margin="normal"
-                select
-              >
-                <MenuItem value={0}>{LL.MQTT_ENTITY_FORMAT_0()}</MenuItem>
-                <MenuItem value={3}>
-                  {LL.MQTT_ENTITY_FORMAT_1()}&nbsp;(v3.5)
-                </MenuItem>
-                <MenuItem value={4}>
-                  {LL.MQTT_ENTITY_FORMAT_2()}&nbsp;(v3.5)
-                </MenuItem>
-                <MenuItem value={1}>
-                  {LL.MQTT_ENTITY_FORMAT_1()}&nbsp;(latest)
-                </MenuItem>
-                <MenuItem value={2}>
-                  {LL.MQTT_ENTITY_FORMAT_2()}&nbsp;(latest)
-                </MenuItem>
-              </TextField>
-            </Grid>
-            <Grid>
-              {data.discovery_type === 0 && (
-                <TextField
-                  name="ha_number_mode"
-                  label={LL.MQTT_INPUT_NUMBER_FORMAT()}
-                  value={data.ha_number_mode}
-                  variant="outlined"
-                  onChange={updateFormValue}
-                  sx={{ width: '20ch' }}
-                  margin="normal"
-                  select
-                >
-                  <MenuItem value={0}>Box</MenuItem>
-                  <MenuItem value={1}>Slider</MenuItem>
-                </TextField>
-              )}
-            </Grid>
-          </Grid>
-        )}
-        <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-          {LL.MQTT_PUBLISH_INTERVALS()}&nbsp;(0=auto)
-        </Typography>
-        <Grid container spacing={2} rowSpacing={0}>
-          {publishIntervalFields.map((field) => (
-            <Grid key={field.name}>
-              {field.validated ? (
-                <ValidatedTextField
-                  fieldErrors={fieldErrors ?? {}}
-                  name={field.name}
-                  label={field.label}
-                  slotProps={{
-                    input: SecondsInputProps
-                  }}
-                  variant="outlined"
-                  value={numberValue(
-                    data[field.name as keyof MqttSettingsType] as number
-                  )}
-                  type="number"
-                  onChange={updateFormValue}
-                  margin="normal"
-                />
-              ) : (
-                <TextField
-                  name={field.name}
-                  label={field.label}
-                  variant="outlined"
-                  value={numberValue(
-                    data[field.name as keyof MqttSettingsType] as number
-                  )}
-                  type="number"
-                  onChange={updateFormValue}
-                  margin="normal"
-                  slotProps={{
-                    input: SecondsInputProps
-                  }}
-                />
-              )}
-            </Grid>
-          ))}
-        </Grid>
-        {dirtyFlags && dirtyFlags.length !== 0 && (
-          <ButtonRow>
-            <Button
-              startIcon={<CancelIcon />}
-              disabled={saving}
-              variant="outlined"
-              color="secondary"
-              type="submit"
-              onClick={loadData}
-            >
-              {LL.CANCEL()}
-            </Button>
-            <Button
-              startIcon={<WarningIcon color="warning" />}
-              disabled={saving}
-              variant="contained"
-              color="info"
-              type="submit"
-              onClick={validateAndSubmit}
-            >
-              {LL.APPLY_CHANGES(dirtyFlags.length)}
-            </Button>
-          </ButtonRow>
-        )}
-      </>
-    </SectionContent>
+        </>
+      )}
+    </FormPage>
   );
 };
 

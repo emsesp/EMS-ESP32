@@ -1,0 +1,85 @@
+/* Layout of the dev-only gallery page; gal- prefix keeps it apart from component classes */
+.gal {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+}
+.gal-title {
+  font-size: 20px;
+  font-weight: 400;
+  margin: 0;
+}
+.gal-sample {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin: 12px 0;
+}
+.gal-sample > .h6 {
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+.gal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px 16px;
+}
+.gal-icons {
+  margin-top: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+.gal-swatch {
+  width: 28px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid var(--divider);
+}
+.gal-demo {
+  margin-top: 8px;
+}
+.gal-fill {
+  background: var(--paper-2);
+  padding: 0 8px;
+}
+.gal-big {
+  color: var(--warning);
+}
+.gal-big .icon {
+  font-size: 36px;
+}
+.gal-nav {
+  padding: 4px 0;
+}
+.gal-path {
+  width: 220px;
+}
+.gal-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ffeb3b;
+}
+.gal-scroll {
+  overflow-x: auto;
+}
+.gal-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.gal-table th,
+.gal-table td {
+  text-align: left;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--divider);
+}
+.gal-table th {
+  color: var(--text-2);
+  font-weight: 400;
+}
+@media (max-width: 599px) {
+  .gal-table th:nth-child(n + 4),
+  .gal-table td:nth-child(n + 4) {
+    display: none;
+  }
+}

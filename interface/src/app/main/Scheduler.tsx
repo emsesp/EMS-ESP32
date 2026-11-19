@@ -1,398 +1,286 @@
-import { useEffect, useState } from 'react';
-import { useBlocker } from 'react-router';
+import { useMemo, useState } from 'react';
 
-import AddIcon from '@mui/icons-material/Add';
-import CancelIcon from '@mui/icons-material/Cancel';
-import CircleIcon from '@mui/icons-material/Circle';
-import WarningIcon from '@mui/icons-material/Warning';
-import { Box, Button, Divider, Stack, Typography } from '@mui/material';
-
+import { useRequest } from 'alova/client';
 import {
-  Body,
-  Cell,
-  Header,
-  HeaderCell,
-  HeaderRow,
-  Row,
-  Table
-} from '@table-library/react-table-library/table';
-import { useTheme } from '@table-library/react-table-library/theme';
-import { updateState, useRequest } from 'alova/client';
-import {
-  BlockNavigation,
-  ButtonRow,
-  FormLoader,
-  SectionContent,
-  useLayoutTitle
-} from 'components';
-import { toast } from 'components/toast';
+  Button,
+  Icon,
+  SearchField,
+  Section,
+  SortHeader,
+  Switch,
+  Table,
+  Tag,
+  byNumber,
+  byText,
+  cx,
+  rowAction,
+  useTableSort
+} from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
-import { useInterval } from 'utils';
+import { type PendingRow, usePendingList } from 'utils';
 
 import { readCommands, readSchedule, writeSchedule } from '../../api/app';
-import SettingsSchedulerDialog from './SchedulerDialog';
+import ListPage, { PendingTag, pendingClass } from './ListPage';
+import './Scheduler.css';
+import SchedulerDialog from './SchedulerDialog';
+import {
+  ALL_DAYS,
+  DAY_FLAGS,
+  SCHEDULE_TYPES,
+  scheduleType,
+  weekdayNames
+} from './schedule';
 import { ScheduleFlag } from './types';
-import type { Schedule, ScheduleItem } from './types';
-import { schedulerItemValidation } from './validators';
+import type { CommandItem, ScheduleItem } from './types';
 
-// Constants
-const INTERVAL_DELAY = 30000; // 30 seconds
-const MIN_ID = -100;
-const MAX_ID = 100;
-const ICON_SIZE = 16;
-const SCHEDULE_FLAG_THRESHOLD = 127;
-const FLAG_ALL_DAYS = 127;
-const REFERENCE_YEAR = 2017;
-const REFERENCE_MONTH = '01';
-const LOG_2 = Math.log(2);
+const POLL_MS = 30000;
 
-// Days of week starting from Monday (1-7)
-const WEEK_DAYS = [1, 2, 3, 4, 5, 6, 7] as const;
-
-const DEFAULT_SCHEDULE_ITEM: Omit<ScheduleItem, 'id' | 'o_id'> = {
+const DEFAULT_ITEM: Omit<ScheduleItem, 'id' | 'cmd_name'> = {
   active: false,
-  deleted: false,
-  flags: FLAG_ALL_DAYS,
-  time: '',
-  cmd_name: '',
+  flags: ALL_DAYS,
+  time: '00:00',
   name: ''
 };
 
-const scheduleTheme = {
-  Table: `
-    --data-table-library_grid-template-columns: 36px 220px repeat(1, minmax(20px, 1fr)) 192px 160px;
-  `,
-  BaseRow: `
-    font-size: 14px;
-    .td {
-      height: 32px;
-    }
-  `,
-  BaseCell: `
-    &:nth-of-type(1) {
-      text-align: 8px;
-    }
-  `,
-  HeaderRow: `
-    text-transform: uppercase;
-    background-color: black;
-    color: #90CAF9;
-    .th {
-      border-bottom: 1px solid #565656;
-      height: 36px;
-    }
-  `,
-  Row: `
-    background-color: #1e1e1e;
-    position: relative;
-    cursor: pointer;
-    .td {
-      border-bottom: 1px solid #565656;
-    }
-    &:hover .td {
-      background-color: #177ac9;
-    }
-  `
-};
-
-const scheduleTypeLabels: Record<number, string> = {
-  [ScheduleFlag.SCHEDULE_TIMER]: 'Timer',
-  [ScheduleFlag.SCHEDULE_CONDITION]: 'Condition',
-  [ScheduleFlag.SCHEDULE_ONCHANGE]: 'On Change'
-};
+interface Editing {
+  // missing when adding
+  key?: string;
+  item: ScheduleItem;
+}
 
 const Scheduler = () => {
   const { LL, locale } = useI18nContext();
-  const [numChanges, setNumChanges] = useState<number>(0);
-  const blocker = useBlocker(numChanges !== 0);
-  const [selectedScheduleItem, setSelectedScheduleItem] = useState<ScheduleItem>();
-  const [dow, setDow] = useState<string[]>([]);
-  const [creating, setCreating] = useState<boolean>(false);
-  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const [query, setQuery] = useState('');
+  const [editing, setEditing] = useState<Editing>();
+  const days = useMemo(() => weekdayNames(locale, 'narrow'), [locale]);
 
-  useLayoutTitle(LL.SCHEDULER());
-
-  const {
-    data: schedule,
-    send: fetchSchedule,
-    error
-  } = useRequest(readSchedule, {
-    initialData: []
+  const list = usePendingList<ScheduleItem>({
+    read: readSchedule,
+    write: (items) =>
+      writeSchedule({
+        schedule: items.map(({ id, active, flags, time, cmd_name, name }) => ({
+          id,
+          active,
+          flags,
+          time,
+          cmd_name,
+          name
+        }))
+      }),
+    pollMs: POLL_MS,
+    savedText: LL.SCHEDULE_UPDATED()
   });
 
-  const { data: commandNames } = useRequest(readCommands, {
-    initialData: [],
-    initializing: true
+  const { data: commands } = useRequest(readCommands, {
+    initialData: [] as CommandItem[]
   });
 
-  const { send: updateSchedule } = useRequest(
-    (data: Schedule) => writeSchedule(data),
-    {
-      immediate: false
-    }
-  );
-
-  const hasScheduleChanged = (si: ScheduleItem) => {
-    return (
-      si.id !== si.o_id ||
-      (si.name || '') !== (si.o_name || '') ||
-      si.active !== si.o_active ||
-      si.deleted !== si.o_deleted ||
-      si.flags !== si.o_flags ||
-      si.time !== si.o_time ||
-      si.cmd_name !== si.o_cmd_name
-    );
+  const q = query.trim().toLowerCase();
+  const matches = ({ item }: PendingRow<ScheduleItem>) => {
+    if (!q) return true;
+    const c = commands.find((x) => x.name === item.cmd_name);
+    return `${item.name} ${item.time} ${item.cmd_name} ${c?.cmd ?? ''} ${c?.value ?? ''}`
+      .toLowerCase()
+      .includes(q);
   };
+  const rows = list.rows.filter(matches).sort((a, b) => a.item.flags - b.item.flags);
+  const byFlags = byNumber<PendingRow<ScheduleItem>>((r) => r.item.flags);
+  const byTime = byText<PendingRow<ScheduleItem>>((r) => r.item.time);
+  const sort = useTableSort(rows, {
+    active: byNumber((r) => r.item.active),
+    name: byText((r) => r.item.name),
+    schedule: (a, b) => byFlags(a, b) || byTime(a, b),
+    command: byText((r) => r.item.cmd_name)
+  });
 
-  useInterval(() => {
-    if (numChanges === 0) {
-      void fetchSchedule();
-    }
-  }, INTERVAL_DELAY);
-
-  useEffect(() => {
-    const formatter = new Intl.DateTimeFormat(locale, {
-      weekday: 'short',
-      timeZone: 'UTC'
+  const add = () =>
+    setEditing({
+      item: {
+        ...DEFAULT_ITEM,
+        id: list.items.reduce((max, si) => Math.max(max, si.id), 0) + 1,
+        cmd_name: commands[0]?.name ?? ''
+      }
     });
-    const days = WEEK_DAYS.map((day) => {
-      const dayStr = String(day).padStart(2, '0');
-      return new Date(
-        `${REFERENCE_YEAR}-${REFERENCE_MONTH}-${dayStr}T00:00:00+00:00`
-      );
-    });
-    setDow(days.map((date) => formatter.format(date)));
-  }, [locale]);
 
-  const schedule_theme = useTheme(scheduleTheme);
-
-  const saveSchedule = async () => {
-    try {
-      await updateSchedule({
-        schedule: schedule
-          .filter((si: ScheduleItem) => !si.deleted)
-          .map((condensed_si: ScheduleItem) => ({
-            id: condensed_si.id,
-            active: condensed_si.active,
-            flags: condensed_si.flags,
-            time: condensed_si.time,
-            cmd_name: condensed_si.cmd_name,
-            name: condensed_si.name
-          }))
-      });
-      toast.success(LL.SCHEDULE_UPDATED());
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
-      toast.error(message);
-    } finally {
-      await fetchSchedule();
-      setNumChanges(0);
-    }
+  const save = (item: ScheduleItem) => {
+    if (editing?.key) list.update(editing.key, item);
+    else list.add(item);
+    setEditing(undefined);
   };
 
-  const editScheduleItem = (si: ScheduleItem) => {
-    setCreating(false);
-    setSelectedScheduleItem(si);
-    setDialogOpen(true);
-    if (si.o_name === undefined) {
-      si.o_name = si.name;
-    }
-  };
-
-  const onDialogClose = () => {
-    setDialogOpen(false);
-  };
-
-  const onDialogCancel = async () => {
-    await fetchSchedule().then(() => {
-      setNumChanges(0);
-    });
-  };
-
-  const onDialogSave = (updatedItem: ScheduleItem) => {
-    setDialogOpen(false);
-    void updateState(readSchedule(), (data: ScheduleItem[]) => {
-      const new_data = creating
-        ? [...data, updatedItem]
-        : data.map((si) =>
-            si.id === updatedItem.id ? { ...si, ...updatedItem } : si
-          );
-
-      setNumChanges(new_data.filter((si) => hasScheduleChanged(si)).length);
-
-      return new_data;
-    });
-  };
-
-  const addScheduleItem = () => {
-    setCreating(true);
-    const newItem: ScheduleItem = {
-      id: Math.floor(Math.random() * (MAX_ID - MIN_ID) + MIN_ID),
-      ...DEFAULT_SCHEDULE_ITEM
-    };
-    setSelectedScheduleItem(newItem);
-    setDialogOpen(true);
-  };
-
-  const filteredAndSortedSchedule = schedule
-    .filter((si: ScheduleItem) => !si.deleted)
-    .sort((a: ScheduleItem, b: ScheduleItem) => a.flags - b.flags);
-
-  const dayBox = (si: ScheduleItem, flag: number, isLast = false) => {
-    const dayIndex = Math.log(flag) / LOG_2;
-    const isActive = (si.flags & flag) === flag;
-
-    return (
-      <>
-        <Box>
-          <Typography sx={{ fontSize: 11 }} color={isActive ? 'primary' : 'grey'}>
-            {dow[dayIndex]}
-          </Typography>
-        </Box>
-        {!isLast && <Divider orientation="vertical" flexItem />}
-      </>
-    );
-  };
-
-  const scheduleType = (si: ScheduleItem) => {
-    const label = scheduleTypeLabels[si.flags];
-
-    return (
-      <Box>
-        <Typography sx={{ fontSize: 11 }} color="primary">
-          {label || ''}
-        </Typography>
-      </Box>
-    );
-  };
-
-  const renderSchedule = () => {
-    if (!schedule) {
+  const when = (si: ScheduleItem) => {
+    const type = scheduleType(si.flags);
+    const t = SCHEDULE_TYPES.find((x) => x.flag === type)!;
+    if (type === ScheduleFlag.SCHEDULE_DAY) {
       return (
-        <FormLoader onRetry={fetchSchedule} errorMessage={error?.message || ''} />
+        <span className="sch-when">
+          <Icon name={t.icon} size="xs" className="muted" label={t.label(LL)} />
+          <span className="sch-days">
+            {DAY_FLAGS.map((flag, i) => (
+              <span key={flag} className={cx((si.flags & flag) === flag && 'on')}>
+                {days[i]}
+              </span>
+            ))}
+          </span>
+          <b>{si.time}</b>
+        </span>
       );
     }
-
+    const atStart =
+      type === ScheduleFlag.SCHEDULE_TIMER &&
+      (si.time === '' || si.time === '00:00');
     return (
-      <Table
-        data={{ nodes: filteredAndSortedSchedule }}
-        theme={schedule_theme}
-        layout={{ custom: true }}
-      >
-        {(tableList: ScheduleItem[]) => (
-          <>
-            <Header>
-              <HeaderRow>
-                <HeaderCell />
-                <HeaderCell stiff>{LL.SCHEDULE(0)}</HeaderCell>
-                <HeaderCell stiff>
-                  {LL.TIME(0)}/{LL.CONDITION()}
-                </HeaderCell>
-                <HeaderCell stiff>{LL.COMMAND(0)}</HeaderCell>
-                <HeaderCell stiff>{LL.NAME(0)}</HeaderCell>
-              </HeaderRow>
-            </Header>
-            <Body>
-              {tableList.map((si: ScheduleItem) => (
-                <Row key={si.id} item={si} onClick={() => editScheduleItem(si)}>
-                  <Cell stiff>
-                    <CircleIcon
-                      color={si.active ? 'success' : 'error'}
-                      sx={{
-                        fontSize: ICON_SIZE,
-                        ml: '4px',
-                        position: 'relative',
-                        top: '2px'
-                      }}
-                    />
-                  </Cell>
-                  <Cell stiff>
-                    <Stack spacing={0.5} direction="row">
-                      {si.flags > SCHEDULE_FLAG_THRESHOLD ? (
-                        scheduleType(si)
-                      ) : (
-                        <>
-                          {dayBox(si, ScheduleFlag.SCHEDULE_MON)}
-                          {dayBox(si, ScheduleFlag.SCHEDULE_TUE)}
-                          {dayBox(si, ScheduleFlag.SCHEDULE_WED)}
-                          {dayBox(si, ScheduleFlag.SCHEDULE_THU)}
-                          {dayBox(si, ScheduleFlag.SCHEDULE_FRI)}
-                          {dayBox(si, ScheduleFlag.SCHEDULE_SAT)}
-                          {dayBox(si, ScheduleFlag.SCHEDULE_SUN, true)}
-                        </>
-                      )}
-                    </Stack>
-                  </Cell>
-                  <Cell>{si.time === '' ? LL.SCHEDULER_HELP_2() : si.time}</Cell>
-                  <Cell>{si.cmd_name}</Cell>
-                  <Cell>{si.name}</Cell>
-                </Row>
-              ))}
-            </Body>
-          </>
+      <span
+        className={cx(
+          'sch-when',
+          type !== ScheduleFlag.SCHEDULE_TIMER && 'sch-expr'
         )}
-      </Table>
+      >
+        <Icon name={t.icon} size="xs" className="muted" />
+        <span className="muted">{t.label(LL)}</span>
+        {atStart ? (
+          LL.SCHEDULER_HELP_2()
+        ) : (
+          <span className={cx(type === ScheduleFlag.SCHEDULE_TIMER ? 'lb' : 'mono')}>
+            {si.time}
+          </span>
+        )}
+      </span>
+    );
+  };
+
+  const command = (si: ScheduleItem) => {
+    const c = commands.find((x) => x.name === si.cmd_name);
+    if (!c) {
+      return (
+        <Tag kind="err" icon="link_off">
+          {si.cmd_name || '-'}
+        </Tag>
+      );
+    }
+    return (
+      <div>
+        <div>{c.name}</div>
+        <div className="mono muted sch-cmd">
+          {c.cmd}
+          {c.value ? ` = ${c.value}` : ''}
+        </div>
+      </div>
+    );
+  };
+
+  const renderRow = ({ key, item: si, state }: PendingRow<ScheduleItem>) => {
+    const deleted = state === 'del';
+    const open = deleted
+      ? undefined
+      : rowAction(() => setEditing({ key, item: si }), si.name);
+    return (
+      <tr
+        key={key}
+        {...open}
+        className={cx(
+          open?.className,
+          pendingClass(state),
+          !si.active && !deleted && 'dim'
+        )}
+      >
+        <td className="sch-act" onClick={(e) => e.stopPropagation()}>
+          <Switch
+            label={<span className="sr-only">{`${LL.ACTIVE()} ${si.name}`}</span>}
+            checked={si.active}
+            disabled={deleted}
+            onChange={(active) => list.update(key, { ...si, active })}
+          />
+        </td>
+        <td className="sch-name">
+          {si.name}
+          <PendingTag state={state} />
+        </td>
+        <td data-label={LL.SCHEDULE(0)}>{when(si)}</td>
+        <td data-label={LL.COMMAND(0)}>{command(si)}</td>
+        <td className="act">
+          {deleted && (
+            <Button
+              size="sm"
+              color="secondary"
+              icon="undo"
+              onClick={() => list.undo(key)}
+            >
+              {LL.UNDO()}
+            </Button>
+          )}
+        </td>
+      </tr>
     );
   };
 
   return (
-    <SectionContent>
-      {blocker ? <BlockNavigation blocker={blocker} /> : null}
-      <Typography sx={{ mb: 2 }} color="warning" variant="body1">
-        {LL.SCHEDULER_HELP_1()}.
-      </Typography>
-      {renderSchedule()}
-
-      {selectedScheduleItem && (
-        <SettingsSchedulerDialog
-          open={dialogOpen}
-          creating={creating}
-          onClose={onDialogClose}
-          onSave={onDialogSave}
-          selectedItem={selectedScheduleItem}
-          validator={schedulerItemValidation(schedule, selectedScheduleItem)}
-          dow={dow}
-          commandNames={commandNames.map((ci) => ci.name)}
-        />
-      )}
-
-      <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
-        <Box sx={{ flexGrow: 1 }}>
-          {numChanges !== 0 && (
-            <ButtonRow>
-              <Button
-                startIcon={<CancelIcon />}
-                variant="outlined"
-                onClick={onDialogCancel}
-                color="secondary"
-              >
-                {LL.CANCEL()}
-              </Button>
-              <Button
-                startIcon={<WarningIcon color="warning" />}
-                variant="contained"
-                color="info"
-                onClick={saveSchedule}
-              >
-                {LL.APPLY_CHANGES(numChanges)}
-              </Button>
-            </ButtonRow>
-          )}
-        </Box>
-        <Box sx={{ flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
-          <ButtonRow>
-            <Button
-              startIcon={<AddIcon />}
-              variant="outlined"
-              color="primary"
-              onClick={addScheduleItem}
-            >
+    <ListPage list={list}>
+      <Section
+        desc={LL.SCHEDULER_HELP_1()}
+        title={LL.SCHEDULER()}
+        icon="more_time"
+        actions={
+          <>
+            <SearchField
+              label={LL.SEARCH()}
+              value={query}
+              onInput={(e) => setQuery(e.currentTarget.value)}
+            />
+            <Button icon="add" onClick={add}>
               {LL.ADD(0)}
             </Button>
-          </ButtonRow>
-        </Box>
-      </Box>
-    </SectionContent>
+          </>
+        }
+      >
+        <div className="tbl-wrap">
+          <Table stack className="sch-tbl">
+            <thead>
+              <tr>
+                <SortHeader className="sch-act" {...sort.header('active')}>
+                  {LL.ACTIVE()}
+                </SortHeader>
+                <SortHeader {...sort.header('name')}>{LL.NAME(0)}</SortHeader>
+                <SortHeader {...sort.header('schedule')}>
+                  {LL.SCHEDULE(0)}
+                </SortHeader>
+                <SortHeader {...sort.header('command')}>{LL.COMMAND(0)}</SortHeader>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {sort.rows.map(renderRow)}
+              {rows.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="tbl-empty">
+                    {q ? LL.SCHEDULE_NONE_MATCH() : LL.SCHEDULE_NONE()}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        </div>
+      </Section>
+
+      {editing && (
+        <SchedulerDialog
+          creating={!editing.key}
+          item={editing.item}
+          items={list.items}
+          commands={commands}
+          onClose={() => setEditing(undefined)}
+          onSave={save}
+          onRemove={
+            editing.key
+              ? () => {
+                  list.remove(editing.key!);
+                  setEditing(undefined);
+                }
+              : undefined
+          }
+        />
+      )}
+    </ListPage>
   );
 };
 

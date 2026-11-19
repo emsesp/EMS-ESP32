@@ -1,0 +1,45 @@
+.msg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+.msg > .grow {
+  min-width: 200px;
+}
+.msg.info {
+  background: var(--secondary-tint);
+  border: 1px solid var(--secondary-line);
+}
+.msg.info > .icon {
+  color: var(--primary);
+}
+.msg.warning {
+  background: var(--warning-tint);
+  border: 1px solid var(--warning-line);
+}
+.msg.warning > .icon {
+  color: var(--warning);
+}
+.msg.error {
+  background: var(--error-tint);
+  border: 1px solid var(--error-line);
+}
+.msg.error > .icon {
+  color: var(--error-text);
+}
+.msg.success {
+  background: var(--success-tint);
+  border: 1px solid var(--success-line);
+}
+.msg.success > .icon {
+  color: var(--success);
+}
+.msg-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}

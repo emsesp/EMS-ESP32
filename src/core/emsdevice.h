@@ -308,6 +308,7 @@ class EMSdevice {
     bool generate_values(JsonObject output, const int8_t tag_filter, const bool nested, const uint8_t output_target);
     void generate_values_web(JsonObject output, const bool is_dashboard = false);
     void generate_values_web_customization(JsonArray output);
+    bool generate_values_backup(JsonObject output);
 
     void add_device_value(int8_t                 tag,
                           void *                 value_p,

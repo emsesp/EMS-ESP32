@@ -1,0 +1,36 @@
+.kv {
+  margin: 0;
+}
+.kv-row {
+  display: flex;
+  gap: 12px;
+  padding: 7px 2px;
+  border-bottom: 1px solid var(--divider);
+  align-items: baseline;
+}
+.kv-row:last-child {
+  border-bottom: 0;
+}
+.kv-row dd {
+  margin: 0;
+}
+.kv-row .k {
+  width: 170px;
+  flex-shrink: 0;
+  color: var(--text-3);
+}
+.kv-row .v {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.kv-row .x {
+  color: var(--text-3);
+  font-size: 12px;
+}
+
+@media (max-width: 599px) {
+  .kv-row .k {
+    width: 38%;
+  }
+}

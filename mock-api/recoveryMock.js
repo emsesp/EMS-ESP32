@@ -1,5 +1,6 @@
 // Vite plugin that mocks the EMS-ESP Recovery firmware REST API, used by `pnpm recovery`
-// Sign in with admin/admin. Uploading any *.bin >= 512KB "flashes" it into the next OTA partition.
+// Sign in with admin/admin. Uploading any *.bin >= 512KB "flashes" it into the next OTA partition,
+// custom*.bin answers 412 (not an official build) until it is sent again with custom=1.
 // It starts as if an update in app1 failed to start and the bootloader fell back to the recovery.
 
 const MIN_FIRMWARE_SIZE = 512 * 1024;
@@ -21,6 +22,7 @@ const state = {
       address: 0x10000,
       size: 0x480000,
       valid: true,
+      official: true,
       image_size: 0.8 * MB,
       version: '1.0.0',
       install_date: 0,
@@ -32,6 +34,7 @@ const state = {
       address: 0x490000,
       size: 0x490000,
       valid: true,
+      official: true,
       image_size: 1.86 * MB,
       version: '3.8.1',
       install_date: 1767225600,
@@ -43,6 +46,7 @@ const state = {
       address: 0x920000,
       size: 0x490000,
       valid: true,
+      official: false,
       image_size: 1.91 * MB,
       version: '3.9.0-dev.16',
       install_date: 1790000000,
@@ -217,12 +221,18 @@ export default function recoveryMock() {
           if (filename.startsWith('EMS-ESP-Recovery')) {
             return send(res, 409);
           }
+          // a file named custom*.bin acts as an unsigned build: refused until the user agrees
+          if (filename.startsWith('custom') && params.get('custom') !== '1') {
+            return send(res, 412);
+          }
           const target = state.partitions.find(
             (x) => x.label === (params.get('partition') ?? nextUploadTarget())
           );
           if (!target || target.factory) return send(res, 400);
+          const official = !filename.startsWith('custom');
           Object.assign(target, {
             valid: true,
+            official,
             image_size: body.length,
             version: '',
             install_date: Math.floor(Date.now() / 1000),
@@ -231,7 +241,7 @@ export default function recoveryMock() {
           state.boot = target.label;
           const md5_ok = !!state.md5;
           state.md5 = null;
-          return md5_ok ? send(res, 200, { md5_ok }) : send(res, 200);
+          return send(res, 200, md5_ok ? { official, md5_ok } : { official });
         }
 
         return send(res, 404);

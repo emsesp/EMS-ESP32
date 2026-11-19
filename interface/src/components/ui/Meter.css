@@ -1,0 +1,21 @@
+.meter + .meter,
+.kv + .meter {
+  margin-top: 12px;
+}
+.meter-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 8px;
+  margin-bottom: 4px;
+}
+
+/* meters side by side, e.g. on the status overview */
+.meters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px 24px;
+}
+.meters > .meter {
+  margin: 0;
+}

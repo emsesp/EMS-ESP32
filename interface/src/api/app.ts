@@ -69,18 +69,7 @@ export const callAction = (action: Action) =>
 export const readDeviceEntities = (id: number) =>
   alovaInstance.Get<DeviceEntity[]>('/rest/deviceEntities', {
     params: { id },
-    ...MSGPACK_CONFIG,
-    // @ts-expect-error - exactOptionalPropertyTypes compatibility issue
-    transform(data) {
-      const entities = data as DeviceEntity[];
-      return entities.map((de) => ({
-        ...de,
-        o_m: de.m,
-        o_cn: de.cn,
-        o_mi: de.mi,
-        o_ma: de.ma
-      }));
-    }
+    ...MSGPACK_CONFIG
   });
 export const resetCustomizations = () =>
   alovaInstance.Post('/rest/resetCustomizations');
@@ -94,19 +83,8 @@ export const writeDeviceName = (data: { id: number; name: string }) =>
 // SettingsScheduler
 export const readSchedule = () =>
   alovaInstance.Get<ScheduleItem[]>('/rest/schedule', {
-    // @ts-expect-error - exactOptionalPropertyTypes compatibility issue
     transform(data) {
-      const schedule = (data as Schedule).schedule;
-      return schedule.map((si) => ({
-        ...si,
-        o_id: si.id,
-        o_active: si.active,
-        o_deleted: si.deleted,
-        o_flags: si.flags,
-        o_time: si.time,
-        o_cmd_name: si.cmd_name,
-        o_name: si.name
-      }));
+      return [...(data as Schedule).schedule];
     }
   });
 export const writeSchedule = (data: Schedule) =>
@@ -117,18 +95,8 @@ export const readCommands = () =>
   alovaInstance.Get<CommandItem[]>('/rest/commands', {
     transform(data) {
       const commands = (data as Commands).commands;
-      return commands.map((ci) => {
-        const guest = ci.guest ?? true; // commands saved before the flag existed
-        return {
-          ...ci,
-          guest,
-          o_id: ci.id,
-          o_cmd: ci.cmd,
-          o_value: ci.value,
-          o_name: ci.name,
-          o_guest: guest
-        };
-      });
+      // commands saved before the guest flag existed
+      return commands.map((ci) => ({ ...ci, guest: ci.guest ?? true }));
     }
   });
 export const writeCommands = (data: Commands) =>
@@ -138,42 +106,18 @@ export const writeCommands = (data: Commands) =>
 export const readModules = () =>
   alovaInstance.Get<ModuleItem[]>('/rest/modules', {
     transform(data) {
-      const modules = (data as Modules).modules;
-      return modules.map((mi) => ({
-        ...mi,
-        o_enabled: mi.enabled,
-        o_license: mi.license
-      }));
+      return [...(data as Modules).modules];
     }
   });
 export const writeModules = (data: {
-  key: string;
-  enabled: boolean;
-  license: string;
+  modules: { key: string; enabled: boolean; license: string }[];
 }) => alovaInstance.Post('/rest/modules', data);
 
 // CustomEntities
 export const readCustomEntities = () =>
   alovaInstance.Get<EntityItem[]>('/rest/customEntities', {
-    // @ts-expect-error - exactOptionalPropertyTypes compatibility issue
     transform(data) {
-      const entities = (data as Entities).entities;
-      return entities.map((ei) => ({
-        ...ei,
-        o_id: ei.id,
-        o_ram: ei.ram,
-        o_device_id: ei.device_id,
-        o_type_id: ei.type_id,
-        o_offset: ei.offset,
-        o_factor: ei.factor,
-        o_uom: ei.uom,
-        o_value_type: ei.value_type,
-        o_name: ei.name,
-        o_writeable: ei.writeable,
-        o_value: ei.value,
-        o_deleted: ei.deleted,
-        o_hide: ei.hide
-      }));
+      return [...(data as Entities).entities];
     }
   });
 export const writeCustomEntities = (data: Entities) =>

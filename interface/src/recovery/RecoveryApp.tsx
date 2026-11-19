@@ -1,21 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import RefreshIcon from '@mui/icons-material/Refresh';
-import {
-  AppBar,
-  Box,
-  Button,
-  CircularProgress,
-  Toolbar,
-  Typography
-} from '@mui/material';
-
-import CustomTheme from 'CustomTheme';
-import MessageBox from 'components/MessageBox';
-import SectionContent from 'components/SectionContent';
-import { Toaster } from 'components/toast';
+import { Button, Loader, Toaster } from 'components/ui';
 
 import Dashboard from './Dashboard';
+import './Recovery.css';
 import RestartMonitor from './RestartMonitor';
 import SignIn from './SignIn';
 import { getToken, readStatus, setToken } from './api';
@@ -66,67 +54,43 @@ const RecoveryApp = () => {
       />
     );
   } else if (!status) {
-    content = (
-      <SectionContent>
-        {error ? (
-          <MessageBox level="error" message={error}>
-            <Button
-              sx={{ ml: 2 }}
-              startIcon={<RefreshIcon />}
-              variant="contained"
-              color="error"
-              onClick={() => void loadStatus()}
-            >
-              Retry
-            </Button>
-          </MessageBox>
-        ) : (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-            <CircularProgress size={100} />
-          </Box>
-        )}
-      </SectionContent>
-    );
+    content = <Loader page error={error} onRetry={() => void loadStatus()} />;
   } else if (!status.authenticated) {
     content = <SignIn onSignedIn={() => void loadStatus()} />;
   } else {
     content = (
       <>
-        <AppBar
-          position="fixed"
-          sx={{ boxShadow: 'none', backgroundColor: '#2e586a' }}
-        >
-          <Toolbar>
-            <img
-              src="/app/icon.png"
-              alt="EMS-ESP"
-              style={{ height: 32, marginRight: 16 }}
-            />
-            <Typography variant="h6">EMS-ESP</Typography>
-            <Typography variant="h6" sx={{ color: '#90caf9' }}>
-              &nbsp;&nbsp;|&nbsp;&nbsp;
-            </Typography>
-            <Typography variant="h6">Recovery</Typography>
-          </Toolbar>
-        </AppBar>
-        <Box component="main" sx={{ maxWidth: 900, mx: 'auto' }}>
-          <Toolbar />
+        <header className="rc-bar">
+          <img src="/app/icon.png" alt="" />
+          <h1 className="grow">
+            EMS-ESP<span className="rc-sep">|</span>Recovery
+          </h1>
+          <Button
+            icon="logout"
+            aria-label="Sign Out"
+            className="rc-signout"
+            onClick={signOut}
+          >
+            <span>Sign Out</span>
+          </Button>
+        </header>
+        <main className="rc-main">
           <Dashboard
             status={status}
             onRestarting={setRestartTarget}
             onSignOut={signOut}
             onChanged={() => void loadStatus()}
           />
-        </Box>
+        </main>
       </>
     );
   }
 
   return (
-    <CustomTheme>
+    <>
       {content}
       <Toaster />
-    </CustomTheme>
+    </>
   );
 };
 

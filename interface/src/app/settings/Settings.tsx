@@ -1,112 +1,151 @@
 import { useContext } from 'react';
 
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import BuildIcon from '@mui/icons-material/Build';
-import DeviceHubIcon from '@mui/icons-material/DeviceHub';
-import ImportExportIcon from '@mui/icons-material/ImportExport';
-import LockIcon from '@mui/icons-material/Lock';
-import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
-import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
-import TuneIcon from '@mui/icons-material/Tune';
-import ViewModuleIcon from '@mui/icons-material/ViewModule';
-import { List } from '@mui/material';
+import { readSystemStatus } from 'api/system';
 
-import { SectionContent, useLayoutTitle } from 'components';
-import ListMenuItem from 'components/layout/ListMenuItem';
+import { useRequest } from 'alova/client';
+import { mqttInfo, networkInfo, ntpInfo } from 'app/status/status';
+import { LinkList, type LinkListItem, Section } from 'components/ui';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
+import { NetworkConnectionStatus } from 'types';
 import { updateAvailable } from 'utils';
+
+import './Settings.css';
 
 const Settings = () => {
   const { LL } = useI18nContext();
   const { me, versions } = useContext(AuthenticatedContext);
-  useLayoutTitle(LL.SETTINGS(0));
 
-  const upgradeAvailable = versions?.current?.upgradeable ?? false;
-  const firmwareText = versions?.current?.version
-    ? `v${versions.current.version}${upgradeAvailable ? ` (${LL.UPDATE_AVAILABLE()})` : ''}`
-    : '';
+  // only admins see the rows that show live values
+  const { data } = useRequest(readSystemStatus, { immediate: me.admin });
+
+  const update = updateAvailable(versions);
+  const firmware: LinkListItem = {
+    to: 'version',
+    icon: 'new_releases',
+    color: '#2a7fb0',
+    title: 'EMS-ESP Firmware',
+    value: versions?.current?.version && (
+      <>
+        v{versions.current.version}
+        {update && ` · ${LL.UPDATE_AVAILABLE()}`}
+      </>
+    ),
+    state: update ? 'warn' : undefined
+  };
+
+  const network = data && networkInfo(data.network_status, LL);
+  const mqtt =
+    data &&
+    mqttInfo(
+      { enabled: !!data.mqtt_host || data.mqtt_status, connected: data.mqtt_status },
+      LL
+    );
+  const ntp = data && ntpInfo(data.ntp_status, LL);
+  const networkValue =
+    data && network?.state === 'ok'
+      ? [
+          data.network_status === NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED
+            ? 'Ethernet'
+            : 'WiFi',
+          data.network_ip
+        ]
+          .filter(Boolean)
+          .join(' · ')
+      : network?.text;
+
+  const groups: { title: string; items: LinkListItem[] }[] = me.admin
+    ? [
+        {
+          title: LL.CONNECTIVITY(),
+          items: [
+            {
+              to: 'network',
+              icon: 'settings_ethernet',
+              color: '#40828f',
+              title: LL.NETWORK(0),
+              value: networkValue,
+              state: network?.state
+            },
+            {
+              to: 'ap',
+              icon: 'wifi_tethering',
+              color: '#5f9a5f',
+              title: LL.ACCESS_POINT(0),
+              value: data && (data.ap_status ? LL.ACTIVE() : LL.INACTIVE(0)),
+              state: data && (data.ap_status ? 'ok' : 'off')
+            },
+            {
+              to: 'mqtt',
+              icon: 'device_hub',
+              color: '#68374d',
+              title: 'MQTT',
+              value: mqtt?.text,
+              state: mqtt?.state
+            }
+          ]
+        },
+        {
+          title: LL.SYSTEM(0),
+          items: [
+            {
+              to: 'application',
+              icon: 'settings_applications',
+              color: '#134ba2',
+              title: LL.APPLICATION(),
+              value: data && (data.model || data.board)
+            },
+            {
+              to: 'ntp',
+              icon: 'schedule',
+              color: '#c5572c',
+              title: 'NTP',
+              value: ntp?.text,
+              state: ntp?.state
+            },
+            {
+              to: 'security',
+              icon: 'lock',
+              color: '#757575',
+              title: LL.SECURITY(0),
+              text: LL.SECURITY_1()
+            },
+            {
+              to: 'modules',
+              icon: 'extension',
+              color: '#b28a1f',
+              title: LL.MODULES(),
+              text: LL.MODULES_1()
+            }
+          ]
+        },
+        {
+          title: LL.MAINTENANCE(),
+          items: [
+            {
+              to: 'downloadUpload',
+              icon: 'import_export',
+              color: '#5d89f7',
+              title: LL.DOWNLOAD_UPLOAD(),
+              text: LL.DOWNLOAD_UPLOAD_1()
+            },
+            firmware
+          ]
+        }
+      ]
+    : [{ title: LL.MAINTENANCE(), items: [firmware] }];
 
   return (
-    <SectionContent>
-      <List>
-        <ListMenuItem
-          icon={BuildIcon}
-          bgcolor="#72caf9"
-          label="EMS-ESP Firmware"
-          text={firmwareText}
-          to="/settings/version"
-          badge={updateAvailable(versions)}
-        />
-
-        {me.admin && (
-          <>
-            <ListMenuItem
-              icon={TuneIcon}
-              bgcolor="#134ba2"
-              label={LL.APPLICATION()}
-              text={LL.APPLICATION_SETTINGS_1()}
-              to="application"
-            />
-
-            <ListMenuItem
-              icon={SettingsEthernetIcon}
-              bgcolor="#40828f"
-              label={LL.NETWORK(0)}
-              text={LL.CONFIGURE(LL.SETTINGS_OF(LL.NETWORK(1)))}
-              to="network"
-            />
-
-            <ListMenuItem
-              icon={SettingsInputAntennaIcon}
-              bgcolor="#5f9a5f"
-              label={LL.ACCESS_POINT(0)}
-              text={LL.CONFIGURE(LL.ACCESS_POINT(1))}
-              to="ap"
-            />
-
-            <ListMenuItem
-              icon={AccessTimeIcon}
-              bgcolor="#c5572c"
-              label="NTP"
-              text={LL.CONFIGURE(LL.LOCAL_TIME(1))}
-              to="ntp"
-            />
-
-            <ListMenuItem
-              icon={DeviceHubIcon}
-              bgcolor="#68374d"
-              label="MQTT"
-              text={LL.CONFIGURE('MQTT')}
-              to="mqtt"
-            />
-
-            <ListMenuItem
-              icon={LockIcon}
-              label={LL.SECURITY(0)}
-              text={LL.SECURITY_1()}
-              to="security"
-            />
-
-            <ListMenuItem
-              icon={ViewModuleIcon}
-              bgcolor="#efc34b"
-              label={LL.MODULES()}
-              text={LL.MODULES_1()}
-              to="modules"
-            />
-
-            <ListMenuItem
-              icon={ImportExportIcon}
-              bgcolor="#5d89f7"
-              label={LL.DOWNLOAD_UPLOAD()}
-              text={LL.DOWNLOAD_UPLOAD_1()}
-              to="downloadUpload"
-            />
-          </>
-        )}
-      </List>
-    </SectionContent>
+    <div className="set-groups">
+      {groups.map(({ title, items }) => (
+        <section key={title} className="set-group" aria-label={title}>
+          <h2 className="set-gtitle">{title}</h2>
+          <Section>
+            <LinkList items={items} layout="rows" />
+          </Section>
+        </section>
+      ))}
+    </div>
   );
 };
 

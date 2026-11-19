@@ -1,0 +1,16 @@
+/* Resize from parent CSS with `.parent .icon { font-size }`, like `.parent .ms` in the mockups */
+.icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  font-size: 22px;
+  vertical-align: middle;
+  flex-shrink: 0;
+  fill: currentColor;
+}
+.icon.sm {
+  font-size: 18px;
+}
+.icon.xs {
+  font-size: 16px;
+}

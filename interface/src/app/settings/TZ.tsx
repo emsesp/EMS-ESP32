@@ -1,5 +1,3 @@
-import { MenuItem } from '@mui/material';
-
 export const TIME_ZONES: Record<string, string> = {
   'Africa/Abidjan': 'GMT0',
   'Africa/Accra': 'GMT0',
@@ -501,20 +499,7 @@ export function migrateNtpTimeZones<
   return changed ? next : null;
 }
 
-const precomputedTimeZoneItems = TIME_ZONE_LABELS.map((label) => (
-  <MenuItem key={label} value={label}>
-    {label}
-  </MenuItem>
-));
-
-export function useTimeZoneSelectItems() {
-  return precomputedTimeZoneItems;
-}
-
-export function timeZoneSelectItems() {
-  return precomputedTimeZoneItems;
-}
-
-export function timeZoneSelectItemsT() {
-  return precomputedTimeZoneItems;
-}
+export const TIME_ZONE_OPTIONS = TIME_ZONE_LABELS.map((label) => ({
+  value: label,
+  label
+}));

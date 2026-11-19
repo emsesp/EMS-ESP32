@@ -8,11 +8,10 @@
 ;  -D EMSESP_DEBUG_SENSOR ; additional debug for the sensors
 ;  -D CORE_DEBUG_LEVEL=5 ; verbose core level debugging 5=verbose, 4=debug, 3=info
 ;  -D EMSESP_TEST ; enable the tests. EN language only
-;  -D EMSESP_DE_ONLY ; only DE translated entity names
+;  -D EMSESP_EN_DE_ONLY ; only DE translated entity names
 ;  -D EMSESP_EN_ONLY ; only EN translated entity names
 ;  -D EMSESP_PINGTEST ; send log message every 1/2 second
-;  -D EMSESP_OWN_IDENTITY ; answer version/name reads to our bus ID with a real identity instead of empty, see issue #3094
-;  -D EMSESP_OWN_PRODUCT_ID=250 ; productID used in that version reply
+;  -D EMSESP_GATEWAY_TX_HOLD ; hold Tx while a K30RF/KM200 gateway is syncing, see issue #3094
 
 ; my_build_flags = -DEMSESP_TEST -DEMSESP_DEBUG
 ; my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST -DEMSESP_PINGTEST
@@ -20,12 +19,12 @@
 ; my_build_flags = -DEMSESP_EN_ONLY -DEMSESP_TEST -DCORE_DEBUG_LEVEL=5 -DARDUINO_USB_CDC_ON_BOOT=1
 ; my_build_flags = -DEMSESP_EN_ONLY
 ; my_build_flags = -DEMSESP_DEBUG
-; my_build_flags = -D EMSESP_OWN_IDENTITY
+; my_build_flags = -D EMSESP_GATEWAY_TX_HOLD
 my_build_flags =
 
 [platformio]
-; default_envs = s_16M_P, recovery_s_16M_P, build-recovery, build-webUI
-default_envs = s_16M_P ; BBQKees E32V2
+default_envs = build-recovery, build-webUI, s_16M_P, recovery_s_16M_P
+; default_envs = s_16M_P ; BBQKees E32V2
 ; default_envs = s_16M_P_custom ; BBQKees E32V2 with custom Arduino/IDF libs
 ; default_envs = recovery_s_16M_P ; recovery firmware
 ; default_envs = crashtest_s_16M_P ; crash test
@@ -46,7 +45,7 @@ extra_scripts =
 
 ; set the username and password for the admin account (default password is admin)
 custom_username = admin
-custom_password = admin2
+custom_password = admin
 
 ; ** upload settings **
 ; for direct USB, which is the default you can set an optional port for example:

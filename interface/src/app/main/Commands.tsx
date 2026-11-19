@@ -1,286 +1,255 @@
 import { useState } from 'react';
-import { useBlocker } from 'react-router';
 
-import AddIcon from '@mui/icons-material/Add';
-import CancelIcon from '@mui/icons-material/Cancel';
-import WarningIcon from '@mui/icons-material/Warning';
-import { Box, Button, Typography } from '@mui/material';
+import { callAction, readCommands, writeCommands } from 'api/app';
 
+import { useRequest } from 'alova/client';
 import {
-  Body,
-  Cell,
-  Header,
-  HeaderCell,
-  HeaderRow,
-  Row,
-  Table
-} from '@table-library/react-table-library/table';
-import { useTheme } from '@table-library/react-table-library/theme';
-import { updateState, useRequest } from 'alova/client';
-import {
-  BlockNavigation,
-  ButtonRow,
-  FormLoader,
-  SectionContent,
-  useLayoutTitle
-} from 'components';
-import { toast } from 'components/toast';
+  Button,
+  IconButton,
+  SearchField,
+  Section,
+  SortHeader,
+  Switch,
+  Table,
+  Tag,
+  TextField,
+  byNumber,
+  byText,
+  cx,
+  rowAction,
+  toast,
+  useTableSort
+} from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
-import { useInterval } from 'utils';
+import { usePendingList } from 'utils';
+import type { PendingState } from 'utils';
 
-import { readCommands, writeCommands } from '../../api/app';
-import CommandsDialog from './CommandsDialog';
-import type { CommandItem, Commands as CommandsType } from './types';
+import EntityDialog from './EntityDialog';
+import ListPage, { PendingTag, pendingClass } from './ListPage';
+import type { CommandItem } from './types';
 import { commandItemValidation } from './validators';
 
-const INTERVAL_DELAY = 30000;
 const MIN_ID = -100;
 const MAX_ID = 100;
 
-const DEFAULT_COMMAND_ITEM: Omit<CommandItem, 'id'> = {
-  cmd: '',
-  value: '',
-  name: '',
-  guest: false,
-  deleted: false
+// a random id in the range the firmware expects, not used by another row
+const newId = (items: CommandItem[]) => {
+  let id: number;
+  do {
+    id = Math.floor(Math.random() * (MAX_ID - MIN_ID) + MIN_ID);
+  } while (items.some((ci) => ci.id === id));
+  return id;
 };
 
-const commandsTheme = {
-  Table: `
-    --data-table-library_grid-template-columns: repeat(1, minmax(100px, 1fr)) repeat(1, minmax(100px, 1fr)) 160px;
-  `,
-  BaseRow: `
-    font-size: 14px;
-    .td {
-      height: 32px;
-    }
-  `,
-  BaseCell: `
-  &:nth-of-type(1) {
-    padding: 8px;
-  }
-  `,
-  HeaderRow: `
-    text-transform: uppercase;
-    background-color: black;
-    color: #90CAF9;
-    .th {
-      border-bottom: 1px solid #565656;
-      height: 36px;
-    }
-  `,
-  Row: `
-    background-color: #1e1e1e;
-    position: relative;
-    cursor: pointer;
-    .td {
-      border-bottom: 1px solid #565656;
-    }
-    &:hover .td {
-      background-color: #177ac9;
-    }
-  `
-};
+interface Editing {
+  // undefined while adding
+  key?: string;
+  state?: PendingState;
+  item: CommandItem;
+}
 
 const Commands = () => {
   const { LL } = useI18nContext();
-  const [numChanges, setNumChanges] = useState<number>(0);
-  const blocker = useBlocker(numChanges !== 0);
-  const [selectedItem, setSelectedItem] = useState<CommandItem>();
-  const [creating, setCreating] = useState<boolean>(false);
-  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const [query, setQuery] = useState('');
+  const [editing, setEditing] = useState<Editing>();
 
-  useLayoutTitle(LL.COMMANDS());
-
-  const {
-    data: commands,
-    send: fetchCommands,
-    error
-  } = useRequest(readCommands, {
-    initialData: []
+  const list = usePendingList<CommandItem>({
+    read: readCommands,
+    write: (items) =>
+      writeCommands({
+        commands: items.map(({ id, cmd, value, name, guest }) => ({
+          id,
+          cmd,
+          value,
+          name,
+          guest
+        }))
+      }),
+    pollMs: 30000,
+    savedText: LL.COMMANDS_UPDATED()
   });
 
-  const { send: updateCommands } = useRequest(
-    (data: CommandsType) => writeCommands(data),
+  const { send: execute } = useRequest(
+    (name: string) => callAction({ action: 'executeCommand', param: name }),
     { immediate: false }
+  )
+    .onSuccess(() => toast.success(LL.COMMAND_EXECUTED()))
+    .onError((e) => toast.error(String(e.error?.message || e.error)));
+
+  const add = () =>
+    setEditing({
+      item: { id: newId(list.items), cmd: '', value: '', name: '', guest: false }
+    });
+
+  const save = (item: CommandItem) => {
+    if (editing?.key) list.update(editing.key, item);
+    else list.add(item);
+    setEditing(undefined);
+  };
+
+  const q = query.trim().toLowerCase();
+  const rows = list.rows.filter(
+    ({ item }) =>
+      !q || `${item.name} ${item.cmd} ${item.value}`.toLowerCase().includes(q)
   );
-
-  const hasChanged = (ci: CommandItem) =>
-    ci.id !== ci.o_id ||
-    (ci.name || '') !== (ci.o_name || '') ||
-    ci.cmd !== ci.o_cmd ||
-    ci.value !== ci.o_value ||
-    ci.guest !== ci.o_guest ||
-    ci.deleted !== ci.o_deleted;
-
-  useInterval(() => {
-    if (numChanges === 0) {
-      void fetchCommands();
-    }
-  }, INTERVAL_DELAY);
-
-  const theme = useTheme(commandsTheme);
-
-  const saveCommands = async () => {
-    try {
-      await updateCommands({
-        commands: commands
-          .filter((ci: CommandItem) => !ci.deleted)
-          .map((ci: CommandItem) => ({
-            id: ci.id,
-            cmd: ci.cmd,
-            value: ci.value,
-            name: ci.name,
-            guest: ci.guest
-          }))
-      });
-      toast.success(LL.UPDATED_OF(LL.COMMANDS()));
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
-      toast.error(message);
-    } finally {
-      await fetchCommands();
-      setNumChanges(0);
-    }
-  };
-
-  const editItem = (ci: CommandItem) => {
-    setCreating(false);
-    setSelectedItem(ci);
-    setDialogOpen(true);
-    if (ci.o_name === undefined) {
-      ci.o_name = ci.name;
-    }
-  };
-
-  const onDialogClose = () => {
-    setDialogOpen(false);
-  };
-
-  const onDialogCancel = async () => {
-    await fetchCommands().then(() => {
-      setNumChanges(0);
-    });
-  };
-
-  const onDialogSave = (updatedItem: CommandItem) => {
-    setDialogOpen(false);
-    void updateState(readCommands(), (data: CommandItem[]) => {
-      const new_data = creating
-        ? [...data, updatedItem]
-        : data.map((ci) =>
-            ci.id === updatedItem.id ? { ...ci, ...updatedItem } : ci
-          );
-      setNumChanges(new_data.filter((ci) => hasChanged(ci)).length);
-      return new_data;
-    });
-  };
-
-  const addItem = () => {
-    setCreating(true);
-    const newItem: CommandItem = {
-      id: Math.floor(Math.random() * (MAX_ID - MIN_ID) + MIN_ID),
-      ...DEFAULT_COMMAND_ITEM
-    };
-    setSelectedItem(newItem);
-    setDialogOpen(true);
-  };
-
-  const filteredCommands = commands.filter((ci: CommandItem) => !ci.deleted);
-
-  const renderCommands = () => {
-    if (!commands) {
-      return (
-        <FormLoader onRetry={fetchCommands} errorMessage={error?.message || ''} />
-      );
-    }
-
-    return (
-      <Table
-        data={{ nodes: filteredCommands }}
-        theme={theme}
-        layout={{ custom: true }}
-      >
-        {(tableList: CommandItem[]) => (
-          <>
-            <Header>
-              <HeaderRow>
-                <HeaderCell stiff>{LL.COMMAND(0)}</HeaderCell>
-                <HeaderCell stiff>{LL.VALUE(0)}</HeaderCell>
-                <HeaderCell stiff>{LL.NAME(0)}</HeaderCell>
-              </HeaderRow>
-            </Header>
-            <Body>
-              {tableList.map((ci: CommandItem) => (
-                <Row key={ci.id} item={ci} onClick={() => editItem(ci)}>
-                  <Cell>{ci.cmd}</Cell>
-                  <Cell>{ci.value}</Cell>
-                  <Cell>{ci.name}</Cell>
-                </Row>
-              ))}
-            </Body>
-          </>
-        )}
-      </Table>
-    );
-  };
+  const sort = useTableSort(rows, {
+    name: byText((r) => r.item.name),
+    cmd: byText((r) => r.item.cmd),
+    value: byText((r) => r.item.value),
+    guest: byNumber((r) => r.item.guest)
+  });
 
   return (
-    <SectionContent>
-      {blocker ? <BlockNavigation blocker={blocker} /> : null}
-      <Typography sx={{ mb: 2 }} color="warning" variant="body1">
-        {LL.COMMANDS_HELP_1()}.
-      </Typography>
-      {renderCommands()}
-
-      {selectedItem && (
-        <CommandsDialog
-          open={dialogOpen}
-          creating={creating}
-          onClose={onDialogClose}
-          onSave={onDialogSave}
-          selectedItem={selectedItem}
-          validator={commandItemValidation(commands, selectedItem)}
-        />
-      )}
-
-      <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
-        <Box sx={{ flexGrow: 1 }}>
-          {numChanges !== 0 && (
-            <ButtonRow>
-              <Button
-                startIcon={<CancelIcon />}
-                variant="outlined"
-                onClick={onDialogCancel}
-                color="secondary"
-              >
-                {LL.CANCEL()}
-              </Button>
-              <Button
-                startIcon={<WarningIcon color="warning" />}
-                variant="contained"
-                color="info"
-                onClick={saveCommands}
-              >
-                {LL.APPLY_CHANGES(numChanges)}
-              </Button>
-            </ButtonRow>
-          )}
-        </Box>
-        <Box sx={{ flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
-          <ButtonRow>
-            <Button
-              startIcon={<AddIcon />}
-              variant="outlined"
-              color="primary"
-              onClick={addItem}
-            >
+    <ListPage list={list}>
+      <Section
+        desc={`${LL.COMMANDS_HELP_1()}.`}
+        title={LL.COMMANDS()}
+        icon="playlist_play"
+        actions={
+          <>
+            <SearchField
+              label={LL.SEARCH()}
+              value={query}
+              onInput={(e) => setQuery(e.currentTarget.value)}
+            />
+            <Button icon="add" onClick={add}>
               {LL.ADD(0)}
             </Button>
-          </ButtonRow>
-        </Box>
-      </Box>
-    </SectionContent>
+          </>
+        }
+      >
+        <div className="tbl-wrap">
+          <Table stack>
+            <thead>
+              <tr>
+                <SortHeader {...sort.header('name')}>{LL.NAME(0)}</SortHeader>
+                <SortHeader {...sort.header('cmd')}>{LL.COMMAND(0)}</SortHeader>
+                <SortHeader {...sort.header('value')}>{LL.VALUE(0)}</SortHeader>
+                <SortHeader {...sort.header('guest')}>{LL.WHO_CAN_RUN()}</SortHeader>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {sort.rows.map(({ key, item, state }) => (
+                <tr
+                  key={key}
+                  {...(state !== 'del' &&
+                    rowAction(
+                      () => setEditing({ key, state, item }),
+                      `${LL.EDIT()} ${item.name}`
+                    ))}
+                  className={cx(state !== 'del' && 'click', pendingClass(state))}
+                >
+                  <td>
+                    {item.name}
+                    <PendingTag state={state} />
+                  </td>
+                  <td data-label={LL.COMMAND(0)} className="mono lb">
+                    {item.cmd}
+                  </td>
+                  <td data-label={LL.VALUE(0)} className="mono">
+                    {item.value || <span className="muted">-</span>}
+                  </td>
+                  <td data-label={LL.WHO_CAN_RUN()}>
+                    {item.guest ? (
+                      <Tag kind="ok" icon="group">
+                        {LL.ROLE_GUEST()}
+                      </Tag>
+                    ) : (
+                      <Tag kind="warn" icon="admin_panel_settings">
+                        {LL.ROLE_ADMIN()}
+                      </Tag>
+                    )}
+                  </td>
+                  <td className="act">
+                    {state === 'del' ? (
+                      <Button
+                        size="sm"
+                        color="secondary"
+                        icon="undo"
+                        onClick={() => list.undo(key)}
+                      >
+                        {LL.UNDO()}
+                      </Button>
+                    ) : (
+                      !state &&
+                      item.cmd !== '' && (
+                        <IconButton
+                          icon="play_arrow"
+                          label={`${LL.RUN()} ${item.name}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            void execute(item.name);
+                          }}
+                        />
+                      )
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {rows.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="tbl-empty">
+                    {q ? LL.CMD_NONE_MATCH() : LL.CMD_NONE()}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        </div>
+      </Section>
+
+      {editing && (
+        <EntityDialog
+          title={editing.key ? LL.EDIT_COMMAND() : LL.ADD_COMMAND()}
+          item={editing.item}
+          creating={!editing.key}
+          validator={() =>
+            commandItemValidation(
+              list.items,
+              editing.key ? editing.item.name : undefined
+            )
+          }
+          onClose={() => setEditing(undefined)}
+          onSave={save}
+          onRemove={
+            editing.key
+              ? () => {
+                  list.remove(editing.key!);
+                  setEditing(undefined);
+                }
+              : undefined
+          }
+          extraActions={(v) =>
+            // only the saved command can run, so not while it has unsaved edits
+            editing.key &&
+            !editing.state &&
+            v.cmd !== '' &&
+            JSON.stringify(v) === JSON.stringify(editing.item) && (
+              <Button icon="play_arrow" onClick={() => void execute(v.name)}>
+                {LL.RUN()}
+              </Button>
+            )
+          }
+          size="md"
+        >
+          {(f) => (
+            <>
+              <TextField label={LL.NAME(0)} mono fullWidth {...f.text('name')} />
+              <TextField
+                label={LL.COMMAND(0)}
+                mono
+                fullWidth
+                placeholder="thermostat/hc1/seltemp"
+                {...f.text('cmd')}
+              />
+              <TextField label={LL.VALUE(0)} mono fullWidth {...f.text('value')} />
+              <Switch label={LL.COMMAND_GUEST()} {...f.check('guest')} />
+            </>
+          )}
+        </EntityDialog>
+      )}
+    </ListPage>
   );
 };
 

@@ -1,374 +1,213 @@
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 
-import AddIcon from '@mui/icons-material/Add';
-import CancelIcon from '@mui/icons-material/Cancel';
-import CircleIcon from '@mui/icons-material/Circle';
-import DoneIcon from '@mui/icons-material/Done';
-import RemoveIcon from '@mui/icons-material/RemoveCircleOutlined';
 import {
-  Box,
   Button,
-  Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  MenuItem,
+  ButtonLink,
+  Listbox,
+  Message,
+  Segmented,
+  Switch,
+  TextArea,
   TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-  Typography
-} from '@mui/material';
-
-import { dialogStyle } from 'CustomTheme';
-import { BlockFormControlLabel, ValidatedTextField } from 'components';
+  cx
+} from 'components/ui';
+import 'components/ui/Chip.css';
 import { useI18nContext } from 'i18n/i18n-react';
-import { updateValue } from 'utils';
-import { ValidationError, validate } from 'validators';
-import type Schema from 'validators/schema';
-import type { ValidateFieldsError } from 'validators/schema';
 
+import EntityDialog from './EntityDialog';
+import './Scheduler.css';
+import {
+  ALL_DAYS,
+  DAY_FLAGS,
+  SCHEDULE_TYPES,
+  WORK_DAYS,
+  scheduleType,
+  weekdayNames
+} from './schedule';
 import { ScheduleFlag } from './types';
-import type { ScheduleItem } from './types';
-
-// Constants
-const FLAG_MASK_127 = 127;
-const SCHEDULE_TYPE_THRESHOLD = 127;
-const FLAG_ALL_DAYS = 127;
-const DEFAULT_TIME = '00:00';
-const TYPOGRAPHY_FONT_SIZE = 10;
-
-// Day of week flag configuration (static, defined outside component)
-const DAY_FLAGS = [
-  { value: '2', flag: ScheduleFlag.SCHEDULE_MON },
-  { value: '4', flag: ScheduleFlag.SCHEDULE_TUE },
-  { value: '8', flag: ScheduleFlag.SCHEDULE_WED },
-  { value: '16', flag: ScheduleFlag.SCHEDULE_THU },
-  { value: '32', flag: ScheduleFlag.SCHEDULE_FRI },
-  { value: '64', flag: ScheduleFlag.SCHEDULE_SAT },
-  { value: '1', flag: ScheduleFlag.SCHEDULE_SUN }
-] as const;
-
-// Day of week flag values array (static)
-const FLAG_VALUES = [
-  ScheduleFlag.SCHEDULE_SUN,
-  ScheduleFlag.SCHEDULE_MON,
-  ScheduleFlag.SCHEDULE_TUE,
-  ScheduleFlag.SCHEDULE_WED,
-  ScheduleFlag.SCHEDULE_THU,
-  ScheduleFlag.SCHEDULE_FRI,
-  ScheduleFlag.SCHEDULE_SAT
-] as const;
-
-const getFlagDOWnumber = (flags: string[]) =>
-  flags.reduce((acc, flag) => acc | Number(flag), 0) & FLAG_MASK_127;
-
-const getFlagDOWstring = (f: number) =>
-  FLAG_VALUES.filter((flag) => (f & flag) === flag).map((flag) => String(flag));
+import type { CommandItem, ScheduleItem } from './types';
+import { schedulerItemValidation } from './validators';
 
 interface SchedulerDialogProps {
-  open: boolean;
   creating: boolean;
+  item: ScheduleItem;
+  // the list without deleted rows, for the duplicate name check
+  items: ScheduleItem[];
+  commands: CommandItem[];
   onClose: () => void;
-  onSave: (ei: ScheduleItem) => void;
-  selectedItem: ScheduleItem;
-  validator: Schema;
-  dow: string[];
-  commandNames: string[];
+  onSave: (item: ScheduleItem) => void;
+  onRemove?: (() => void) | undefined;
 }
 
+const DEFAULT_TIME = '00:00';
+
 const SchedulerDialog = ({
-  open,
   creating,
+  item,
+  items,
+  commands,
   onClose,
   onSave,
-  selectedItem,
-  validator,
-  dow,
-  commandNames
+  onRemove
 }: SchedulerDialogProps) => {
-  const { LL } = useI18nContext();
-  const [editItem, setEditItem] = useState<ScheduleItem>(selectedItem);
-  const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
-  const [scheduleType, setScheduleType] = useState<ScheduleFlag>();
+  const { LL, locale } = useI18nContext();
+  const days = useMemo(() => weekdayNames(locale, 'short'), [locale]);
 
-  const updateFormValue = updateValue(
-    setEditItem as unknown as React.Dispatch<
-      React.SetStateAction<Record<string, unknown>>
-    >
-  );
-
-  useEffect(() => {
-    if (open) {
-      setFieldErrors(undefined);
-      setEditItem(selectedItem);
-      setScheduleType(
-        selectedItem.flags <= SCHEDULE_TYPE_THRESHOLD
-          ? ScheduleFlag.SCHEDULE_DAY
-          : selectedItem.flags
-      );
-    }
-  }, [open, selectedItem]);
-
-  const handleSave = async (itemToSave: ScheduleItem) => {
-    try {
-      setFieldErrors(undefined);
-      await validate(validator, itemToSave);
-      onSave(itemToSave);
-    } catch (error) {
-      setFieldErrors((error as ValidationError).fieldErrors);
-    }
-  };
-
-  const save = async () => {
-    await handleSave(editItem);
-  };
-
-  const remove = () => {
-    onSave({ ...editItem, deleted: true });
-  };
-
-  const DayOfWeekButton = (flag: number) => {
-    const dayIndex = Math.log2(flag);
-    const isSelected = (editItem.flags & flag) === flag;
-    return (
-      <Typography
-        sx={{ fontSize: TYPOGRAPHY_FONT_SIZE }}
-        color={isSelected ? 'primary' : 'grey'}
-      >
-        {dow[dayIndex]}
-      </Typography>
-    );
-  };
-
-  const handleClose = (
-    _event: React.SyntheticEvent,
-    reason: 'backdropClick' | 'escapeKeyDown'
-  ) => {
-    if (reason !== 'backdropClick') {
-      onClose();
-    }
-  };
-
-  const handleScheduleTypeChange = (
-    _event: React.SyntheticEvent<HTMLElement>,
-    flag: ScheduleFlag | null
-  ) => {
-    if (flag !== null) {
-      setFieldErrors(undefined); // clear any validation errors
-      setScheduleType(flag);
-      // wipe the time field when changing the schedule type
-      // set the flags based on type
-      const newFlags = flag === ScheduleFlag.SCHEDULE_DAY ? FLAG_ALL_DAYS : flag;
-      setEditItem((prev) => ({ ...prev, time: '', flags: newFlags }));
-    }
-  };
-
-  const handleDOWChange = (
-    _event: React.SyntheticEvent<HTMLElement>,
-    flags: string[]
-  ) => {
-    const newFlags =
-      getFlagDOWnumber(flags) === 0 ? FLAG_ALL_DAYS : getFlagDOWnumber(flags);
-    setEditItem((prev) => ({ ...prev, flags: newFlags }));
-  };
-
-  const isDaySchedule = scheduleType === ScheduleFlag.SCHEDULE_DAY;
-  const isTimerSchedule = scheduleType === ScheduleFlag.SCHEDULE_TIMER;
-  const needsTimeField = isDaySchedule || isTimerSchedule;
-
-  const dowFlags = getFlagDOWstring(editItem.flags);
-
-  const timeFieldValue = needsTimeField
-    ? editItem.time === ''
-      ? DEFAULT_TIME
-      : editItem.time
-    : editItem.time === DEFAULT_TIME
-      ? ''
-      : editItem.time;
-
-  const timeFieldLabel = (() => {
-    if (scheduleType === ScheduleFlag.SCHEDULE_TIMER) return LL.TIMER(1);
-    if (scheduleType === ScheduleFlag.SCHEDULE_CONDITION) return LL.CONDITION();
-    if (scheduleType === ScheduleFlag.SCHEDULE_ONCHANGE) return LL.ONCHANGE();
-    return LL.TIME(1);
-  })();
+  const commandOptions = commands.map((c) => ({
+    value: c.name,
+    label: `${c.name} (${c.cmd}${c.value ? ` = ${c.value}` : ''})`
+  }));
 
   return (
-    <Dialog sx={dialogStyle} open={open} onClose={handleClose}>
-      <DialogTitle>
-        {creating ? `${LL.ADD(1)} ${LL.NEW(0)}` : LL.EDIT()}&nbsp;
-        {LL.SCHEDULE(1)}
-      </DialogTitle>
-      <DialogContent dividers>
-        <ToggleButtonGroup
-          size="small"
-          color="secondary"
-          value={scheduleType}
-          exclusive
-          disabled={!creating}
-          onChange={handleScheduleTypeChange}
-        >
-          <ToggleButton value={ScheduleFlag.SCHEDULE_DAY}>
-            <Typography
-              sx={{ fontSize: TYPOGRAPHY_FONT_SIZE }}
-              color={isDaySchedule ? 'primary' : 'grey'}
-            >
-              {LL.SCHEDULE(0)}
-            </Typography>
-          </ToggleButton>
-          <ToggleButton value={ScheduleFlag.SCHEDULE_TIMER}>
-            <Typography
-              sx={{ fontSize: TYPOGRAPHY_FONT_SIZE }}
-              color={isTimerSchedule ? 'primary' : 'grey'}
-            >
-              {LL.TIMER(0)}
-            </Typography>
-          </ToggleButton>
-          <ToggleButton value={ScheduleFlag.SCHEDULE_ONCHANGE}>
-            <Typography
-              sx={{ fontSize: TYPOGRAPHY_FONT_SIZE }}
-              color={
-                scheduleType === ScheduleFlag.SCHEDULE_ONCHANGE ? 'primary' : 'grey'
-              }
-            >
-              {LL.ONCHANGE()}
-            </Typography>
-          </ToggleButton>
-          <ToggleButton value={ScheduleFlag.SCHEDULE_CONDITION}>
-            <Typography
-              sx={{ fontSize: TYPOGRAPHY_FONT_SIZE }}
-              color={
-                scheduleType === ScheduleFlag.SCHEDULE_CONDITION ? 'primary' : 'grey'
-              }
-            >
-              {LL.CONDITION()}
-            </Typography>
-          </ToggleButton>
-        </ToggleButtonGroup>
+    <EntityDialog
+      title={creating ? LL.ADD_SCHEDULE() : LL.EDIT_SCHEDULE()}
+      item={item}
+      creating={creating}
+      validator={(v) =>
+        schedulerItemValidation(items, v, creating ? undefined : item.name)
+      }
+      onClose={onClose}
+      onSave={onSave}
+      onRemove={onRemove}
+      size="md"
+    >
+      {(f) => {
+        const { flags, time, cmd_name } = f.values;
+        const type = scheduleType(flags);
+        const daysError = f.errors?.flags?.[0]?.message;
+        const toggleDay = (flag: number) => f.set({ flags: flags ^ flag });
+        const options =
+          cmd_name && !commands.some((c) => c.name === cmd_name)
+            ? [...commandOptions, { value: cmd_name, label: cmd_name }]
+            : commandOptions;
 
-        {isDaySchedule && (
-          <ToggleButtonGroup
-            size="small"
-            color="secondary"
-            value={dowFlags}
-            onChange={handleDOWChange}
-          >
-            {DAY_FLAGS.map(({ value, flag }) => (
-              <ToggleButton key={value} value={value}>
-                {DayOfWeekButton(flag)}
-              </ToggleButton>
-            ))}
-          </ToggleButtonGroup>
-        )}
-
-        <Grid container>
-          <BlockFormControlLabel
-            control={
-              <Checkbox
-                checked={editItem.active}
-                onChange={updateFormValue}
-                name="active"
-              />
-            }
-            label={LL.ACTIVE()}
-          />
-          <CircleIcon
-            color={editItem.active ? 'success' : 'error'}
-            sx={{
-              fontSize: 16,
-              mt: '12px'
-            }}
-          />
-        </Grid>
-
-        <Grid container>
-          {needsTimeField ? (
-            <>
-              <TextField
-                name="time"
-                type="time"
-                label={timeFieldLabel}
-                value={timeFieldValue}
-                margin="normal"
-                onChange={updateFormValue}
-              />
-              {isTimerSchedule && (
-                <Typography sx={{ ml: 2, mt: 4 }} color="warning" variant="body2">
-                  00:00 = {LL.SCHEDULER_HELP_2()}
-                </Typography>
-              )}
-            </>
-          ) : (
-            <TextField
-              name="time"
-              label={timeFieldLabel}
-              multiline
+        return (
+          <>
+            <Segmented
+              label={LL.TYPE(0)}
               fullWidth
-              value={timeFieldValue}
-              margin="normal"
-              onChange={updateFormValue}
+              options={SCHEDULE_TYPES.map((t) => ({
+                value: String(t.flag),
+                label: t.label(LL)
+              }))}
+              value={String(type)}
+              onChange={(s) => {
+                const t = Number(s) as ScheduleFlag;
+                if (t === type) return;
+                f.set(
+                  t === ScheduleFlag.SCHEDULE_DAY
+                    ? { flags: ALL_DAYS, time: DEFAULT_TIME }
+                    : { flags: t, time: '' }
+                );
+              }}
             />
-          )}
-        </Grid>
-        <TextField
-          name="cmd_name"
-          label={LL.COMMAND(0)}
-          value={editItem.cmd_name}
-          fullWidth
-          select
-          margin="normal"
-          onChange={updateFormValue}
-        >
-          {commandNames.map((name) => (
-            <MenuItem key={name} value={name}>
-              {name}
-            </MenuItem>
-          ))}
-        </TextField>
-        <ValidatedTextField
-          fieldErrors={fieldErrors || {}}
-          name="name"
-          label={LL.NAME(0)}
-          value={editItem.name}
-          fullWidth
-          margin="normal"
-          onChange={updateFormValue}
-        />
-      </DialogContent>
 
-      <DialogActions>
-        {!creating && (
-          <Box sx={{ flexGrow: 1 }}>
-            <Button
-              startIcon={<RemoveIcon />}
-              variant="outlined"
-              color="warning"
-              onClick={remove}
-            >
-              {LL.REMOVE()}
-            </Button>
-          </Box>
-        )}
-        <Button
-          startIcon={<CancelIcon />}
-          variant="outlined"
-          onClick={onClose}
-          color="secondary"
-        >
-          {LL.CANCEL()}
-        </Button>
-        <Button
-          startIcon={creating ? <AddIcon /> : <DoneIcon />}
-          variant="outlined"
-          onClick={save}
-          color="primary"
-        >
-          {creating ? LL.ADD(0) : LL.UPDATE()}
-        </Button>
-      </DialogActions>
-    </Dialog>
+            {type === ScheduleFlag.SCHEDULE_DAY && (
+              <div className={cx('field', 'full', daysError && 'invalid')}>
+                <span className="seg-label">{LL.SCHEDULE(0)}</span>
+                <div className="row wrap sch-days-edit">
+                  <span
+                    className="row sch-pills"
+                    role="group"
+                    aria-label={LL.SCHEDULE(0)}
+                  >
+                    {DAY_FLAGS.map((flag, i) => (
+                      <button
+                        key={flag}
+                        type="button"
+                        className={cx(
+                          'chip',
+                          'outline',
+                          'sch-pill',
+                          (flags & flag) === flag && 'on'
+                        )}
+                        aria-pressed={(flags & flag) === flag}
+                        onClick={() => toggleDay(flag)}
+                      >
+                        {days[i]}
+                      </button>
+                    ))}
+                  </span>
+                  <span className="grow" />
+                  <Button
+                    size="sm"
+                    color="secondary"
+                    onClick={() => f.set({ flags: WORK_DAYS })}
+                  >
+                    {`${days[0]}–${days[4]}`}
+                  </Button>
+                  <Button
+                    size="sm"
+                    color="secondary"
+                    onClick={() => f.set({ flags: ALL_DAYS })}
+                  >
+                    {LL.EVERY_DAY()}
+                  </Button>
+                </div>
+                {daysError && <span className="cap err">{daysError}</span>}
+              </div>
+            )}
+
+            {type === ScheduleFlag.SCHEDULE_DAY && (
+              <TextField
+                label={LL.TIME(1)}
+                type="time"
+                {...f.text('time')}
+                value={time || DEFAULT_TIME}
+              />
+            )}
+            {type === ScheduleFlag.SCHEDULE_TIMER && (
+              <TextField
+                label={LL.TIMER(1)}
+                type="time"
+                helperText={`${DEFAULT_TIME} = ${LL.SCHEDULER_HELP_2()}`}
+                {...f.text('time')}
+                value={time || DEFAULT_TIME}
+              />
+            )}
+            {type === ScheduleFlag.SCHEDULE_ONCHANGE && (
+              <TextField
+                label={LL.ONCHANGE()}
+                mono
+                fullWidth
+                placeholder="boiler/outdoortemp"
+                {...f.text('time')}
+              />
+            )}
+            {type === ScheduleFlag.SCHEDULE_CONDITION && (
+              <TextArea
+                label={LL.CONDITION()}
+                rows={2}
+                placeholder="boiler/outdoortemp < 0"
+                {...f.text('time')}
+              />
+            )}
+
+            {commands.length === 0 && (
+              <Message
+                level="warning"
+                className="full"
+                actions={
+                  <ButtonLink to="/commands" size="sm" icon="playlist_play">
+                    {LL.COMMANDS()}
+                  </ButtonLink>
+                }
+              >
+                {LL.SCHEDULER_NO_COMMANDS()}
+              </Message>
+            )}
+            <Listbox
+              label={LL.COMMAND(0)}
+              fullWidth
+              options={options}
+              {...f.select('cmd_name')}
+            />
+            <TextField label={LL.NAME(0)} mono {...f.text('name')} />
+            <Switch label={LL.ACTIVE()} {...f.check('active')} />
+          </>
+        );
+      }}
+    </EntityDialog>
   );
 };
 

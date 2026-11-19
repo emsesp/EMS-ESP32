@@ -7,9 +7,9 @@ import { ACCESS_TOKEN, clearTokenCache } from 'api/endpoints';
 
 import * as AuthenticationApi from 'components/routing/authentication';
 import { useRequest } from 'alova/client';
-import { LoadingSpinner } from 'components';
 import { verifyAuthorization } from 'components/routing/authentication';
 import { toast } from 'components/toast';
+import { Loader } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { Me, VersionsResponse } from 'types';
 import type { RequiredChildrenProps } from 'utils';
@@ -113,7 +113,7 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
     );
   }
 
-  return <LoadingSpinner height="100vh" />;
+  return <Loader page />;
 };
 
 export default Authentication;

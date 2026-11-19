@@ -7,7 +7,7 @@ const DEMO = typeof (globalThis as any).Bun === 'undefined';
 const DEMO_MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 
 if (DEMO) {
-  console.log = () => {};
+  console.log = () => { };
 }
 
 // Minimal MessagePack encoder, the counterpart of interface/src/api/unpack.ts. Writes the same bytes as
@@ -202,6 +202,14 @@ let system_status = {
   // network_status: 10, // ethernet connected
   // network_status: 6, // wifi disconnected
   wifi_rssi: -41,
+  network_ip: '10.10.10.101', // only when connected over WiFi or Ethernet
+  mqtt_host: '192.168.1.4', // only when MQTT is enabled
+  mqtt_port: 1883,
+  log_errors: 2, // since boot
+  log_warnings: 5,
+  reset_reason: 'Software restart', // why the board last restarted, English text from the firmware
+  bus_id: 0x0b,
+  tx_mode: 2, // EMS+
   esp_platform: 'ESP32',
   build_flags: 'DEMO',
   cpu_type: 'ESP32-D0WD-V3',
@@ -209,6 +217,7 @@ let system_status = {
   cpu_cores: 2,
   cpu_freq_mhz: 240,
   max_alloc_heap: 191,
+  heap_size: 312, // total heap, in KB
   arduino_version: 'Arduino v3.3.8',
   sdk_version: '5.5.4.260407',
   partition: 'app0',
@@ -223,7 +232,7 @@ let system_status = {
   psram: true,
   psram_size: 8189,
   free_psram: 8166,
-  recovery_version: '' as string | undefined, // set by mock_versions, or upload an EMS-ESP-Recovery-*.bin
+  recovery_version: '' as string | undefined, // set by mock_data, or upload an EMS-ESP-Recovery-*.bin
   recovery_official: undefined as boolean | undefined, // only when a recovery app is installed
   has_partition: true,
   partitions: [
@@ -271,9 +280,9 @@ let system_status = {
 };
 
 // Test the versioning, used by the Version page
-// Change these defaults, or switch them at runtime by opening /rest/mockVersions in the browser
-// (e.g. http://localhost:3000/rest/mockVersions) and then reloading the Web UI
-interface MockVersions {
+// Change these defaults, or switch them at runtime by opening /rest/mockData in the browser
+// (e.g. http://localhost:3000/rest/mockData) and then reloading the Web UI
+interface MockData {
   current: string; // this EMS-ESP version
   stable: string; // latest stable release online
   dev: string; // latest dev release online
@@ -287,7 +296,7 @@ interface MockVersions {
   psram: boolean; // board has PSRAM
 }
 
-const MOCK_VERSION_PRESETS: { name: string; values: Partial<MockVersions> }[] = [
+const MOCK_DATA_PRESETS: { name: string; values: Partial<MockData> }[] = [
   {
     name: 'on latest stable, no updates',
     values: { current: '3.9.0' }
@@ -350,7 +359,7 @@ const MOCK_VERSION_PRESETS: { name: string; values: Partial<MockVersions> }[] = 
   }
 ];
 
-const MOCK_VERSIONS_DEFAULT: MockVersions = {
+const MOCK_DATA_DEFAULT: MockData = {
   current: '3.10.0-dev.1',
   stable: '3.9.0',
   dev: '3.10.0-dev.1',
@@ -374,7 +383,7 @@ const MOCK_FLASH_LAYOUTS: Record<
   '32MB': { flash: 32768, app: 9472, app_used: 2258, fs: 4096 }
 };
 
-let mock_versions: MockVersions = { ...MOCK_VERSIONS_DEFAULT };
+let mock_data: MockData = { ...MOCK_DATA_DEFAULT };
 
 // true if version a is newer than b, a prerelease like 1.1.0-dev.1 is older than the release 1.1.0
 function isNewerVersion(a: string, b: string) {
@@ -402,8 +411,8 @@ function isNewerVersion(a: string, b: string) {
   return false;
 }
 
-function applyMockVersions() {
-  const v = mock_versions;
+function applyMockData() {
+  const v = mock_data;
   system_status.emsesp_version = v.current;
   system_status.partitions[0].version = v.current; // app0
   system_status.official_build = v.official;
@@ -449,7 +458,7 @@ let emulate_esp: string;
 emulate_esp = 'ESP32';
 
 switch (emulate_esp) {
-  // ESP32, flash size and PSRAM are set by mock_versions
+  // ESP32, flash size and PSRAM are set by mock_data
   case 'ESP32':
     system_status.esp_platform = 'ESP32';
     system_status.cpu_type = 'ESP32-D0WD-V3';
@@ -475,7 +484,7 @@ switch (emulate_esp) {
     break;
 }
 
-applyMockVersions();
+applyMockData();
 
 // simulate different ESP32 chips
 
@@ -583,10 +592,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-          old_custom_name +
-          ') with new (' +
-          new_custom_name +
-          ')'
+        old_custom_name +
+        ') with new (' +
+        new_custom_name +
+        ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -646,6 +655,8 @@ function export_data(type: string) {
       return emsesp_modules;
     case 'allvalues':
       return emsesp_allvalues;
+    case 'heatingbackup':
+      return emsesp_heatingbackup;
     case 'systembackup':
       return emsesp_systembackup;
     default:
@@ -706,19 +717,19 @@ function upgradeImportantMessages(version: string) {
 
   console.log(
     'upgradeImportantMessageType: version=' +
-      version +
-      ' type=' +
-      upgradeImportantMessageType_n
+    version +
+    ' type=' +
+    upgradeImportantMessageType_n
   );
   return { upgradeImportantMessageType: upgradeImportantMessageType_n };
 }
 
-// called by Action endpoint getVersions, using mock_versions
+// called by Action endpoint getVersions, using mock_data
 // Set to true to show the "API access tokens were reset" banner, until dismissed
 let MOCK_TOKENS_RESET = false;
 // let MOCK_TOKENS_RESET = true;
 function get_versions() {
-  const v = mock_versions;
+  const v = mock_data;
   const isDev = v.current.includes('dev');
   const stableUpgradeable = isNewerVersion(v.stable, v.current);
   const devUpgradeable = isNewerVersion(v.dev, v.current);
@@ -784,48 +795,48 @@ function get_versions() {
 
   console.log(
     'getVersions: current=' +
-      v.current +
-      ' stable=' +
-      v.stable +
-      ' (upgradeable=' +
-      (stableUpgradeable ? 'YES' : 'NO') +
-      ') dev=' +
-      v.dev +
-      ' (upgradeable=' +
-      (devUpgradeable ? 'YES' : 'NO') +
-      ') recovery=' +
-      (v.recovery || 'not installed') +
-      ' recoveryLatest=' +
-      (v.recoveryLatest || 'not found') +
-      (v.offline ? ' [offline]' : '')
+    v.current +
+    ' stable=' +
+    v.stable +
+    ' (upgradeable=' +
+    (stableUpgradeable ? 'YES' : 'NO') +
+    ') dev=' +
+    v.dev +
+    ' (upgradeable=' +
+    (devUpgradeable ? 'YES' : 'NO') +
+    ') recovery=' +
+    (v.recovery || 'not installed') +
+    ' recoveryLatest=' +
+    (v.recoveryLatest || 'not found') +
+    (v.offline ? ' [offline]' : '')
   );
   return data;
 }
 
-// GET /rest/mockVersions, a page to switch the version scenario at runtime
-// takes ?preset=N, ?reset, or any MockVersions field like ?current=3.8.0&debug=true
-function mock_versions_page(request: Request) {
+// GET /rest/mockData, a page to switch the version scenario at runtime
+// takes ?preset=N, ?reset, or any MockData field like ?current=3.8.0&debug=true
+function mock_data_page(request: Request) {
   const query = new URL(request.url).searchParams;
   if (query.has('reset')) {
-    mock_versions = { ...MOCK_VERSIONS_DEFAULT };
+    mock_data = { ...MOCK_DATA_DEFAULT };
   }
-  const preset = MOCK_VERSION_PRESETS[Number(query.get('preset'))];
+  const preset = MOCK_DATA_PRESETS[Number(query.get('preset'))];
   if (query.has('preset') && preset) {
-    mock_versions = { ...MOCK_VERSIONS_DEFAULT, ...preset.values };
+    mock_data = { ...MOCK_DATA_DEFAULT, ...preset.values };
   }
-  for (const key of Object.keys(MOCK_VERSIONS_DEFAULT) as (keyof MockVersions)[]) {
+  for (const key of Object.keys(MOCK_DATA_DEFAULT) as (keyof MockData)[]) {
     const value = query.get(key);
     if (value === null) continue;
-    if (typeof MOCK_VERSIONS_DEFAULT[key] === 'boolean') {
-      (mock_versions[key] as boolean) = value === 'true' || value === '1';
+    if (typeof MOCK_DATA_DEFAULT[key] === 'boolean') {
+      (mock_data[key] as boolean) = value === 'true' || value === '1';
     } else {
-      (mock_versions[key] as string) = value;
+      (mock_data[key] as string) = value;
     }
   }
-  applyMockVersions();
-  console.log('mock versions set to', mock_versions);
+  applyMockData();
+  console.log('mock data set to', mock_data);
 
-  const v = mock_versions;
+  const v = mock_data;
   // the values come from the query string
   const escape = (text: unknown) =>
     String(text).replace(
@@ -835,20 +846,24 @@ function mock_versions_page(request: Request) {
     );
   const link = (key: string, value: unknown, text: string) =>
     `<a href="?${key}=${encodeURIComponent(String(value))}">${escape(text)}</a>`;
-  const toggle = (key: keyof MockVersions) =>
+  const toggle = (key: keyof MockData) =>
     `<li>${key}: <b>${escape(v[key])}</b> ${link(key, !v[key], 'toggle')}</li>`;
-  const choices = (key: keyof MockVersions, options: string[]) =>
+  const choices = (key: keyof MockData, options: string[]) =>
     `<li>${key}: <b>${escape(v[key] || "''")}</b> ` +
     options.map((o) => link(key, o, o || "''")).join(' | ') +
     '</li>';
 
-  const html = `<!doctype html><html><head><title>Mock Versions</title>
-<style>body{font-family:sans-serif;background:#1e1e1e;color:#ddd;padding:1em}a{color:lightblue}li{margin:4px 0}</style>
+  const html = `<!doctype html><html><head><title>Mock Data</title>
+<style>body{font-family:sans-serif;background:#1e1e1e;color:#ddd;padding:1em}a{color:lightblue}li{margin:4px 0}
+a.app{display:inline-block;margin:0.5em 0 1em;padding:14px 28px;font-size:1.2em;font-weight:bold;color:#fff;background:#2196f3;border-radius:8px;text-decoration:none}
+a.app:hover{background:#1976d2}
+a.app.gallery{margin-left:0.5em;background:#455a64}a.app.gallery:hover{background:#37474f}</style>
 </head><body>
-<h2>Mock Versions</h2>
-<p>Change the scenario here, then reload the Web UI to fetch the new versions.</p>
+<h2>Mock Data</h2>
+<p>Change the scenario here, then go back to the Web UI to fetch the new versions.</p>
+<a class="app" href="/">&larr; Back to the Web UI</a><a class="app gallery" href="/ui">Component gallery</a>
 <h3>Presets</h3>
-<ol start="0">${MOCK_VERSION_PRESETS.map((p, i) => `<li>${link('preset', i, p.name)}</li>`).join('')}</ol>
+<ol start="0">${MOCK_DATA_PRESETS.map((p, i) => `<li>${link('preset', i, p.name)}</li>`).join('')}</ol>
 <p>${link('reset', '', 'reset to defaults')}</p>
 <h3>Current settings</h3>
 <ul>
@@ -869,7 +884,7 @@ ${toggle('psram')}
 </ul>
 <h3>User</h3>
 <p>Signed in as: <b id="user">?</b> <a href="#" data-token="admin">admin</a> | <a href="#" data-token="guest">guest</a></p>
-<p id="origin" style="color:orange;display:none">The Web UI keeps its login per address, so open this page through the Web UI's address, e.g. http://localhost:3000/rest/mockVersions</p>
+<p id="origin" style="color:orange;display:none">The Web UI keeps its login per address, so open this page through the Web UI's address, e.g. http://localhost:3000/rest/mockData</p>
 <script>
 const tokens = ${JSON.stringify({ admin: admin_signin.access_token, guest: guest_signin.access_token })};
 const show = () => {
@@ -914,10 +929,13 @@ let ntp_settings = {
   enabled: true,
   server: 'time.google.com',
   tz_label: 'Europe/Amsterdam',
-  tz_format: 'CET-1CEST,M3.5.0,M10.5.0/3'
+  tz_format: 'CET-1CEST,M3.5.0,M10.5.0/3',
+  thermostat_sync: 0,
+  tz_label_t: 'Europe/Amsterdam',
+  tz_format_t: 'CET-1CEST,M3.5.0,M10.5.0/3'
 };
 let ntp_status = {
-  status: 0, // 0 = disabled, 1 = inactive, 2 = active
+  status: 2, // 0 = disabled, 1 = inactive, 2 = active; same as system_status.ntp_status
   utc_time: '2021-04-01T14:25:42Z',
   local_time: '2021-04-01T16:25:42',
   server: 'time.google.com',
@@ -1090,9 +1108,25 @@ const mqtt_status = {
   connected: true,
   client_id: 'ems-esp',
   disconnect_reason: 0,
+  host: '192.168.1.4', // broker, from the MQTT settings
+  port: 1883,
   mqtt_fails: 0,
   mqtt_queued: 1,
   connect_count: 2
+};
+// seconds since connect and since the last lost connection, counted from mock start
+const mqtt_start = Date.now();
+const mqtt_connected_for = 5 * 86400 + 3600;
+const mqtt_last_disconnect_ago = 5 * 86400 + 3660;
+const mqttStatus = () => {
+  const secs = Math.trunc((Date.now() - mqtt_start) / 1000);
+  return {
+    ...mqtt_status,
+    base: mqtt_settings.base,
+    ...(mqtt_status.connected && { connected_for: mqtt_connected_for + secs }),
+    last_disconnect_ago: mqtt_last_disconnect_ago + secs,
+    last_disconnect_reason: 7 // TCP disconnected
+  };
 };
 
 // STATUS
@@ -1179,7 +1213,7 @@ const EMSESP_SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info';
 
 const emsesp_info = {
   System: {
-    version: mock_versions.current,
+    version: mock_data.current,
     uptime: '001+06:40:34.018',
     'uptime (seconds)': 110434,
     freemem: 131,
@@ -1226,6 +1260,129 @@ const emsesp_info = {
 };
 
 const emsesp_systembackup = {};
+
+// heating settings backup: the writeable values per EMS device, keyed by command name
+// API writes to these devices update the values, so a restore can be checked against a new export
+const emsesp_heatingbackup = {
+  type: 'heatingbackup',
+  version: '3.10.0-dev.5',
+  fahrenheit: false,
+  devices: [
+    {
+      type: 'boiler',
+      name: 'Nefit Trendline HRC30/Generic Heatronic 3',
+      deviceId: 8,
+      productId: 123,
+      version: '06.01',
+      values: {
+        heatingoff: false,
+        heatingactivated: true,
+        heatingtemp: 70,
+        burnmaxpower: 100,
+        burnminpower: 30,
+        boilhyston: -5,
+        boilhystoff: 5,
+        burnminperiod: 10,
+        pumpmodmax: 100,
+        pumpmodmin: 30,
+        pumpdelay: 2,
+        pumpmode: 'auto',
+        selflowtemp: 75,
+        'dhw/tapactivated': true,
+        'dhw/settemp': 55,
+        'dhw/comfort': 'hot',
+        'dhw/disinfectiontemp': 70,
+        'dhw/circpump': false
+      }
+    },
+    {
+      type: 'thermostat',
+      name: 'RC35',
+      deviceId: 24,
+      productId: 86,
+      version: '04.01',
+      values: {
+        minexttemp: -12,
+        building: 'medium',
+        damping: true,
+        'hc1/mode': 'auto',
+        'hc1/daytemp': 21,
+        'hc1/nighttemp': 16,
+        'hc1/holidaytemp': 15,
+        'hc1/designtemp': 60,
+        'hc1/offsettemp': 0,
+        'hc1/minflowtemp': 25,
+        'hc1/maxflowtemp': 75,
+        'hc1/summertemp': 18,
+        'hc1/summermode': 'auto',
+        'hc1/heatingtype': 'radiator',
+        'hc1/program': 'own 1',
+        'hc1/pause': 0,
+        'hc1/party': 0,
+        'hc2/mode': 'night',
+        'hc2/daytemp': 22.5,
+        'hc2/nighttemp': 17,
+        'hc2/designtemp': 45,
+        'hc2/heatingtype': 'floor',
+        'dhw/mode': 'own',
+        'dhw/circmode': 'off',
+        'dhw/settemp': 52
+      }
+    },
+    {
+      type: 'mixer',
+      name: 'MM10',
+      deviceId: 32,
+      productId: 69,
+      version: '01.01',
+      values: {
+        'hc2/flowsettemp': 38,
+        'hc2/setvalvetime': 120
+      }
+    },
+    {
+      type: 'solar',
+      name: 'SM10',
+      deviceId: 48,
+      productId: 73,
+      version: '01.02',
+      values: {
+        collectormaxtemp: 120,
+        tankmaxtemp: 80,
+        solarpumpmode: 'PWM'
+      }
+    }
+  ]
+};
+
+// the boiler refuses this write, so the restore shows a failure
+const MOCK_REJECTED_WRITES = ['boiler/pumpmodmax'];
+
+function write_heating_value(device: string, cmd: string, data: unknown) {
+  const dev = emsesp_heatingbackup.devices.find((d) => d.type === device);
+  const values = dev?.values as Record<string, unknown> | undefined;
+  if (!values || !(cmd in values)) {
+    return status(404);
+  }
+  if (MOCK_REJECTED_WRITES.includes(device + '/' + cmd)) {
+    return new Response(JSON.stringify({ message: 'write refused by device' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  const text = String(data);
+  const old = values[cmd];
+  if (!DEMO) {
+    values[cmd] =
+      typeof old === 'number'
+        ? Number(text)
+        : typeof old === 'boolean'
+          ? ['true', 'on', '1'].includes(text.toLowerCase())
+          : text;
+  }
+  console.log('write ' + device + '/' + cmd + ' = ' + text);
+  return {};
+}
 
 const emsesp_allvalues = {
   'Boiler Nefit Trendline HRC30 (DeviceID:0x08, ProductID:123, Version:06.01)': {
@@ -1405,7 +1562,8 @@ const emsesp_coredata = {
       d: 32,
       p: 69,
       v: '01.01',
-      e: 6
+      e: 6,
+      url: 'mixer'
     },
     {
       id: 6,
@@ -1509,10 +1667,10 @@ const emsesp_coredata_custom = {
 const emsesp_sensordata = {
   // ts: [],
   ts: [
-    { id: '28-233D-9497-0C03', n: 'Dallas 1', t: 25.7, o: 1.2, u: 1, s: false },
+    { id: '28-233D-9497-0C03', n: 'Dallas_1', t: 25.7, o: 1.2, u: 1, s: false },
     {
       id: '28-243D-7437-1E3A',
-      n: 'Dallas 2 outside',
+      n: 'Dallas_2_outside',
       t: 26.1,
       o: 0,
       u: 1,
@@ -5019,7 +5177,7 @@ function demoGuard(request: Request) {
     return;
   }
   const path = new URL(request.url).pathname;
-  if (path === MOCK_VERSIONS_ENDPOINT) {
+  if (path === MOCK_DATA_ENDPOINT) {
     return status(404);
   }
   if (request.method !== 'POST') {
@@ -5036,7 +5194,7 @@ function demoGuard(request: Request) {
   }
 }
 
-const MOCK_VERSIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'mockVersions';
+const MOCK_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'mockData';
 const DEMO_IGNORED_SAVES = new Set([
   LOG_SETTINGS_ENDPOINT,
   NETWORK_SETTINGS_ENDPOINT,
@@ -5095,7 +5253,7 @@ router
   .post(NETWORK_SETTINGS_ENDPOINT, async (request: any) => {
     network_settings = await request.json();
     console.log('network settings saved', network_settings);
-    return status(200);
+    return status(205); // like the firmware: network changes need a restart
   });
 
 // AP
@@ -5111,7 +5269,7 @@ router
 // MQTT
 router
   .get(MQTT_SETTINGS_ENDPOINT, () => mqtt_settings)
-  .get(MQTT_STATUS_ENDPOINT, () => mqtt_status)
+  .get(MQTT_STATUS_ENDPOINT, () => mqttStatus())
   .post(MQTT_SETTINGS_ENDPOINT, async (request: any) => {
     mqtt_settings = await request.json();
     console.log('mqtt settings saved', mqtt_settings);
@@ -5133,6 +5291,8 @@ router
   })
   .post(NTP_SETTINGS_ENDPOINT, async (request: any) => {
     ntp_settings = await request.json();
+    ntp_status.status = ntp_settings.enabled ? 2 : 0;
+    system_status.ntp_status = ntp_status.status;
     console.log('ntp settings saved', ntp_settings);
     return status(200);
   });
@@ -5175,9 +5335,9 @@ router
       const md5_ok = pendingFirmwareMd5;
       pendingFirmwareMd5 = false;
       if (!DEMO) {
-        mock_versions.recovery = mock_versions.recoveryLatest || '1.1.0';
-        mock_versions.recoveryOfficial = true;
-        applyMockVersions();
+        mock_data.recovery = mock_data.recoveryLatest || '1.1.0';
+        mock_data.recoveryOfficial = true;
+        applyMockData();
       }
       console.log('Recovery firmware installed');
       return md5_ok ? { recovery: true, md5_ok } : { recovery: true };
@@ -5194,7 +5354,7 @@ router
     return status(200);
   })
   .get(ACTIVITY_ENDPOINT, () => activity)
-  .get(MOCK_VERSIONS_ENDPOINT, mock_versions_page)
+  .get(MOCK_DATA_ENDPOINT, mock_data_page)
   .get(SYSTEM_STATUS_ENDPOINT, async () => {
     if (countHardwarePoll >= 2) {
       countHardwarePoll = 0;
@@ -5372,13 +5532,24 @@ router
   // EMS-ESP Settings
   .get(EMSESP_SETTINGS_ENDPOINT, () => settings)
   .post(EMSESP_SETTINGS_ENDPOINT, async (request: any) => {
-    settings = await request.json();
+    const new_settings = await request.json();
+    // like WebSettings::update, these set ChangeFlags::RESTART
+    const restart = [
+      'board_profile',
+      'phy_type',
+      'eth_power',
+      'eth_phy_addr',
+      'eth_clock_mode',
+      'ems_bus_id',
+      'telnet_enabled',
+      'low_clock'
+    ].some((k) => new_settings[k] !== settings[k]);
+    settings = new_settings;
     console.log('application settings saved', settings);
     system_status.developer_mode = settings.developer_mode;
     log_settings.developer_mode = settings.developer_mode;
     system_status.disable_reset = settings.disable_reset;
-    return status(200); // no restart needed
-    // return status(205); // reboot required
+    return status(restart ? 205 : 200);
   })
 
   // Device Data
@@ -5632,7 +5803,8 @@ router
       }
     }
     console.log('customization saved', content);
-    return status(200);
+    // like the firmware: removing an entity (mask 0x80) needs a restart
+    return status(content.entity_ids.some((e: string) => e[0] === '8') ? 205 : 200);
   })
   .post(EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT, async (request: any) => {
     return status(200);
@@ -5775,7 +5947,7 @@ router
   // Temperature & Analog Sensors
   .post(EMSESP_WRITE_TEMPSENSOR_ENDPOINT, async (request: any) => {
     const ts = await request.json();
-    var objIndex = emsesp_sensordata.ts.findIndex((obj) => obj.id == ts.id_str);
+    var objIndex = emsesp_sensordata.ts.findIndex((obj) => obj.id == ts.id);
     if (objIndex !== -1) {
       emsesp_sensordata.ts[objIndex].n = ts.name;
       emsesp_sensordata.ts[objIndex].o = ts.offset;
@@ -5828,7 +6000,7 @@ router
     const board_profile = request.query.boardProfile;
 
     const data = {
-      board_profile: settings.board_profile,
+      board_profile: board_profile,
       led_gpio: settings.led_gpio,
       dallas_gpio: settings.dallas_gpio,
       rx_gpio: settings.rx_gpio,
@@ -6014,9 +6186,9 @@ router
         console.log('upload File from URL', content.param);
         if (!DEMO && String(content.param).toLowerCase().includes('recovery')) {
           // the recovery app is installed without a restart
-          mock_versions.recovery = mock_versions.recoveryLatest || '1.0.1';
-          mock_versions.recoveryOfficial = true; // from the GitHub release, so signed
-          applyMockVersions();
+          mock_data.recovery = mock_data.recoveryLatest || '1.0.1';
+          mock_data.recoveryOfficial = true; // from the GitHub release, so signed
+          applyMockData();
         }
         return status(200);
       } else if (action === 'resetMQTT') {
@@ -6077,6 +6249,8 @@ router
         if (!DEMO) system_status.coredump = '';
         return status(200);
       }
+    } else if (data.device) {
+      return write_heating_value(data.device, cmd, data.data ?? data.value);
     }
     return status(404); // not found
   });
@@ -6092,9 +6266,7 @@ router
 // };
 
 if (!DEMO) {
-  console.log(
-    'Switch mock versions at http://localhost:3000' + MOCK_VERSIONS_ENDPOINT
-  );
+  console.log('Switch mock data at http://localhost:3000' + MOCK_DATA_ENDPOINT);
 }
 
 // Works for both Bun (uses port) and Cloudflare Workers (ignores port).

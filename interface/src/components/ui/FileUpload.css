@@ -1,0 +1,30 @@
+.upl {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  background: var(--paper-2);
+}
+.upl-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.upl-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+.upl-busy > .bar {
+  min-width: 120px;
+}
+
+@media (max-width: 599px) {
+  .upl-actions {
+    width: 100%;
+  }
+  .upl-actions > .btn {
+    flex: 1 1 0;
+  }
+}

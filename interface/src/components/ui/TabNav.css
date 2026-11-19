@@ -1,0 +1,31 @@
+.tabnav {
+  display: flex;
+  gap: 4px;
+  margin: 12px 12px 0;
+  border-bottom: 1px solid var(--divider);
+  overflow-x: auto;
+}
+.tabnav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-bottom: 2px solid transparent;
+  color: var(--text-2);
+  font-size: 13px;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.tabnav a:hover {
+  color: var(--text);
+}
+.tabnav a.on {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+@media (pointer: coarse) {
+  .tabnav a {
+    min-height: var(--touch);
+  }
+}

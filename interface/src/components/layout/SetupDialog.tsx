@@ -1,32 +1,23 @@
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 
-import SaveIcon from '@mui/icons-material/Save';
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Typography
-} from '@mui/material';
-
 import { readSetup, saveSetup } from 'api/security';
 
-import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova/client';
+import {
+  Button,
+  Dialog,
+  Message,
+  TextField,
+  focusInvalid,
+  toast
+} from 'components/ui';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { SetupType } from 'types';
-import { updateValue } from 'utils';
 import { ValidationError, validate } from 'validators';
 import type { ValidateFieldsError } from 'validators/schema';
 import { createSetupValidator } from 'validators/security';
-
-import MessageBox from '../MessageBox';
-import { ValidatedPasswordField, ValidatedTextField } from '../inputs';
-import { toast } from '../toast';
 
 const DISMISSED_KEY = 'apPasswordBannerDismissed';
 
@@ -60,13 +51,6 @@ const SetupDialog = () => {
     }
   }, [me.admin, me.username]);
 
-  const updateFormValue = updateValue((updater) =>
-    setSetup(
-      (prev) =>
-        updater(prev as unknown as Record<string, unknown>) as unknown as SetupType
-    )
-  );
-
   if (!me.admin || !state) {
     return null;
   }
@@ -82,28 +66,38 @@ const SetupDialog = () => {
       setDismissed(true);
     };
     return (
-      <Box sx={{ px: 2, pt: 2 }}>
-        <MessageBox level="warning" message={LL.SETUP_AP_DEFAULT()}>
-          <Button
-            sx={{ ml: 2 }}
-            variant="contained"
-            color="warning"
-            onClick={() => void navigate('/settings/ap')}
-          >
-            {LL.SETTINGS_OF(LL.ACCESS_POINT(0))}
-          </Button>
-          <Button
-            sx={{ ml: 1 }}
-            variant="contained"
-            color="warning"
-            onClick={dismiss}
-          >
-            {LL.CLOSE()}
-          </Button>
-        </MessageBox>
-      </Box>
+      <Message
+        level="warning"
+        actions={
+          <>
+            <Button
+              icon="settings"
+              color="warning"
+              onClick={() => void navigate('/settings/ap')}
+            >
+              {LL.SETTINGS_OF(LL.ACCESS_POINT(0))}
+            </Button>
+            <Button icon="close" color="secondary" onClick={dismiss}>
+              {LL.CLOSE()}
+            </Button>
+          </>
+        }
+      >
+        {LL.SETUP_AP_DEFAULT()}
+      </Message>
     );
   }
+
+  const field = (name: keyof SetupType) => ({
+    name,
+    fullWidth: true,
+    value: setup[name],
+    error: fieldErrors?.[name]?.[0]?.message,
+    onInput: (e: { currentTarget: HTMLInputElement }) => {
+      const { value } = e.currentTarget;
+      setSetup((prev) => ({ ...prev, [name]: value }));
+    }
+  });
 
   const onSave = async () => {
     try {
@@ -111,6 +105,7 @@ const SetupDialog = () => {
       await validate(createSetupValidator(state, setup), setup);
     } catch (error) {
       setFieldErrors((error as ValidationError).fieldErrors);
+      focusInvalid();
       return;
     }
     setSaving(true);
@@ -127,75 +122,57 @@ const SetupDialog = () => {
   };
 
   return (
-    <Dialog sx={dialogStyle} open fullWidth maxWidth="sm">
-      <DialogTitle>{LL.SETUP_TITLE()}</DialogTitle>
-      <DialogContent dividers>
-        <Typography variant="body2">{LL.SETUP_TEXT()}</Typography>
+    <Dialog
+      open
+      size="md"
+      title={LL.SETUP_TITLE()}
+      onSubmit={() => void onSave()}
+      actions={
+        <>
+          <Button icon="logout" color="secondary" onClick={() => signOut(true)}>
+            {LL.SIGN_OUT()}
+          </Button>
+          <Button type="submit" icon="check" disabled={saving}>
+            {LL.UPDATE()}
+          </Button>
+        </>
+      }
+    >
+      <p>{LL.SETUP_TEXT()}</p>
+      <div className="form">
         {state.admin && (
-          <ValidatedPasswordField
-            fieldErrors={fieldErrors || {}}
-            name="password"
+          <TextField
+            type="password"
+            autoComplete="new-password"
             label={LL.SETUP_ADMIN_PASSWORD({ name: me.username })}
-            fullWidth
-            variant="outlined"
-            value={setup.password}
-            onChange={updateFormValue}
-            margin="normal"
+            {...field('password')}
           />
         )}
         {state.ap && (
-          <ValidatedPasswordField
-            fieldErrors={fieldErrors || {}}
-            name="ap_password"
+          <TextField
+            type="password"
+            autoComplete="new-password"
             label={LL.SETUP_AP_PASSWORD()}
             helperText={
               state.ap_required ? LL.SETUP_AP_REQUIRED() : LL.SETUP_AP_OPTIONAL()
             }
-            fullWidth
-            variant="outlined"
-            value={setup.ap_password}
-            onChange={updateFormValue}
-            margin="normal"
+            {...field('ap_password')}
           />
         )}
-        <Typography variant="body2" sx={{ mt: 2 }}>
-          {LL.SETUP_VIEW_USER()}
-        </Typography>
-        <ValidatedTextField
-          fieldErrors={fieldErrors || {}}
-          name="view_username"
+        <p className="full">{LL.SETUP_VIEW_USER()}</p>
+        <TextField
+          autoComplete="off"
+          autoCapitalize="none"
           label={LL.USERNAME(1)}
-          fullWidth
-          variant="outlined"
-          value={setup.view_username}
-          onChange={updateFormValue}
-          margin="normal"
+          {...field('view_username')}
         />
-        <ValidatedPasswordField
-          fieldErrors={fieldErrors || {}}
-          name="view_password"
+        <TextField
+          type="password"
+          autoComplete="new-password"
           label={LL.PASSWORD()}
-          fullWidth
-          variant="outlined"
-          value={setup.view_password}
-          onChange={updateFormValue}
-          margin="normal"
+          {...field('view_password')}
         />
-      </DialogContent>
-      <DialogActions>
-        <Button variant="outlined" color="secondary" onClick={() => signOut(true)}>
-          {LL.SIGN_OUT()}
-        </Button>
-        <Button
-          startIcon={<SaveIcon />}
-          variant="outlined"
-          color="primary"
-          disabled={saving}
-          onClick={onSave}
-        >
-          {LL.UPDATE()}
-        </Button>
-      </DialogActions>
+      </div>
     </Dialog>
   );
 };
