@@ -112,6 +112,7 @@ device_type_names = [
     "ANALOGSENSOR",
     "SCHEDULER",
     "CUSTOM",
+    "COMMAND",
     "BOILER",
     "THERMOSTAT",
     "MIXER",
