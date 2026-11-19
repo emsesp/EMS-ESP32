@@ -1,6 +1,3 @@
-.sch-desc {
-  margin: 4px 0 10px;
-}
 .sch-tbl td.sch-act,
 .sch-tbl th.sch-act {
   width: 56px;
@@ -36,11 +33,11 @@
   font-size: 10px;
   line-height: 16px;
   text-align: center;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--hover);
   color: var(--text-3);
 }
 .sch-days span.on {
-  background: rgba(144, 202, 249, 0.25);
+  background: var(--primary-tint-2);
   color: var(--primary);
 }
 .sch-cmd {
@@ -54,35 +51,21 @@
   gap: 4px;
   flex-wrap: wrap;
 }
-.sch-pill {
+.chip.sch-pill {
   min-width: 38px;
-  height: 32px;
+  min-height: 32px;
   padding: 0 6px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
-  background: transparent;
+}
+.chip.sch-pill:not(.on) {
   color: var(--text-2);
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
 }
-.sch-pill.on {
-  border-color: var(--primary);
-  background: rgba(144, 202, 249, 0.2);
-  color: var(--primary);
-}
-.sch-pill:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-.field.invalid .sch-pill {
+.field.invalid .chip.sch-pill {
   border-color: var(--error);
 }
 @media (pointer: coarse) {
-  .sch-pill {
-    height: 40px;
-    min-width: 40px;
-    border-radius: 20px;
+  .chip.sch-pill {
+    min-width: var(--touch);
+    min-height: var(--touch);
   }
 }
 
@@ -93,7 +76,7 @@
     flex-wrap: nowrap;
     gap: 3px;
   }
-  .sch-pill {
+  .chip.sch-pill {
     flex: 1 1 0;
     min-width: 0;
     padding: 0;

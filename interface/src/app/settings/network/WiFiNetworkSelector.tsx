@@ -119,7 +119,9 @@ const WiFiNetworkSelector = ({ networkList }: { networkList: WiFiNetworkList }) 
               )}
             </td>
             <td className="act">
-              <Button size="sm">{LL.USE()}</Button>
+              <Button icon="check" size="sm">
+                {LL.USE()}
+              </Button>
             </td>
           </tr>
         ))}

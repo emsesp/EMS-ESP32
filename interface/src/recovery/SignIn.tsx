@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import { Button, TextField, toast } from 'components/ui';
 
+import '../SignIn.css';
 import { HttpError, setToken, signIn } from './api';
 
 interface SignInProps {
@@ -36,50 +37,66 @@ const SignIn = ({ onSignedIn }: SignInProps) => {
   };
 
   return (
-    <main className="rc-signin">
+    <main className="signin">
       <form
-        className="rc-signin-card"
+        className="signin-card"
         noValidate
         onSubmit={(e) => {
           e.preventDefault();
           void doSignIn();
         }}
       >
-        <img className="rc-signin-logo" src="/app/icon.png" alt="" />
-        <h1>EMS-ESP</h1>
-        <p className="rc-signin-sub">Recovery</p>
-        <TextField
-          label="Username"
-          name="username"
-          autoComplete="username"
-          autoCapitalize="none"
-          autoCorrect="off"
-          autoFocus
-          fullWidth
-          disabled={processing}
-          value={username}
-          onInput={(e) => setUsername(e.currentTarget.value)}
-        />
-        <TextField
-          type="password"
-          label="Password"
-          name="password"
-          autoComplete="current-password"
-          fullWidth
-          disabled={processing}
-          value={password}
-          onInput={(e) => setPassword(e.currentTarget.value)}
-        />
-        <Button
-          type="submit"
-          variant="contained"
-          icon="login"
-          className="rc-signin-submit"
-          disabled={processing}
-        >
-          Sign In
-        </Button>
+        <div className="signin-brand">
+          <img className="signin-logo" src="/app/icon.png" alt="" />
+          <h1>EMS-ESP</h1>
+          <p className="signin-sub">Recovery</p>
+        </div>
+        <div className="signin-fields">
+          <TextField
+            label="Username"
+            name="username"
+            autoComplete="username"
+            autoCapitalize="none"
+            autoCorrect="off"
+            autoFocus
+            fullWidth
+            disabled={processing}
+            value={username}
+            onInput={(e) => setUsername(e.currentTarget.value)}
+          />
+          <TextField
+            type="password"
+            label="Password"
+            name="password"
+            autoComplete="current-password"
+            fullWidth
+            disabled={processing}
+            value={password}
+            onInput={(e) => setPassword(e.currentTarget.value)}
+          />
+          <Button
+            type="submit"
+            icon="login"
+            className="signin-submit"
+            disabled={processing}
+          >
+            Sign In
+          </Button>
+        </div>
       </form>
+      <footer className="signin-foot">
+        <a href="https://emsesp.org" target="_blank" rel="noreferrer">
+          Documentation
+        </a>
+        <span>·</span>
+        <a
+          href="https://github.com/emsesp/EMS-ESP32"
+          target="_blank"
+          rel="noreferrer"
+        >
+          GitHub
+        </a>
+      </footer>
     </main>
   );
 };

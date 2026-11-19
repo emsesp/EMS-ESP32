@@ -2,7 +2,7 @@ import { memo, useContext } from 'react';
 import { Link } from 'react-router';
 
 import { type AppRoute, type MenuGroup, menuRoutes } from 'app/routes';
-import { Icon, cx } from 'components/ui';
+import { Icon, IconButton, cx } from 'components/ui';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { PROJECT_NAME } from 'env';
 import { useI18nContext } from 'i18n/i18n-react';
@@ -15,7 +15,7 @@ interface LayoutDrawerProps {
 
 const LayoutDrawerComponent = ({ active }: LayoutDrawerProps) => {
   const { LL } = useI18nContext();
-  const { me, versions, systemName } = useContext(AuthenticatedContext);
+  const { me, versions, systemName, signOut } = useContext(AuthenticatedContext);
 
   const item = (route: AppRoute) => {
     const label = route.menu === 'account' ? me.username : route.title(LL);
@@ -54,6 +54,16 @@ const LayoutDrawerComponent = ({ active }: LayoutDrawerProps) => {
 
   const group = (name: MenuGroup) => menuRoutes(name).map(item);
 
+  const section = (title: string, name: MenuGroup) => (
+    <li className="nav-group">
+      <div className="nav-group-title">{title}</div>
+      <ul className="nav">{group(name)}</ul>
+    </li>
+  );
+
+  const account = menuRoutes('account')[0];
+  const accountCurrent = account?.path === active;
+
   return (
     <nav className="drawer" aria-label={LL.MENU()}>
       <div className="drawer-head">
@@ -62,20 +72,50 @@ const LayoutDrawerComponent = ({ active }: LayoutDrawerProps) => {
           <div>{PROJECT_NAME}</div>
           {systemName && <div className="sub">{systemName}</div>}
         </div>
+        {import.meta.env.DEV && (
+          <a
+            href="/rest/mockData"
+            target="_blank"
+            rel="noreferrer"
+            title="Mock Data"
+            style={{ marginLeft: 'auto', color: '#ffeb3b', display: 'flex' }}
+          >
+            <Icon name="bug_report" label="Mock Data" />
+          </a>
+        )}
       </div>
       <ul className="nav">
         {group('main')}
-        <li className="nav-divider" role="separator" />
-        <li className="nav-group">
-          <div className="nav-group-title">{LL.MODULES()}</div>
-          <ul className="nav">{group('modules')}</ul>
-        </li>
+        {section(LL.MODULES(), 'modules')}
+        {section(LL.SYSTEM(0), 'system')}
       </ul>
-      <ul className="nav bottom">
-        {group('system')}
-        <li className="nav-divider" role="separator" />
-        {group('account')}
-      </ul>
+      {account && (
+        <div className="nav-user">
+          <Link
+            to={account.path}
+            className={cx('nav-user-link', accountCurrent && 'active')}
+            aria-current={accountCurrent ? 'page' : undefined}
+            title={account.title(LL)}
+          >
+            <span className="nav-avatar" aria-hidden="true">
+              {me.username.charAt(0).toUpperCase()}
+            </span>
+            <span className="nav-user-text">
+              <span>{me.username}</span>
+              <span className="cap">
+                {me.admin ? LL.ADMINISTRATOR() : LL.GUEST()}
+              </span>
+            </span>
+          </Link>
+          <IconButton
+            className="nav-out"
+            icon="logout"
+            label={LL.SIGN_OUT()}
+            plain
+            onClick={() => signOut(true)}
+          />
+        </div>
+      )}
     </nav>
   );
 };

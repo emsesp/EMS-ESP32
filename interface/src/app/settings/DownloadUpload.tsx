@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useBlocker } from 'react-router';
 
 import * as SystemApi from 'api/system';
 import { API, callAction } from 'api/app';
@@ -8,11 +9,12 @@ import { readPasswordConfirmed } from 'api/security';
 import { useRequest } from 'alova/client';
 import type { APIcall } from 'app/main/types';
 import SystemMonitor from 'app/status/SystemMonitor';
+import BlockNavigation from 'components/routing/BlockNavigation';
 import {
   Button,
   ButtonLink,
   Checkbox,
-  Dialog,
+  ConfirmDialog,
   FileUpload,
   Section,
   toast
@@ -45,10 +47,10 @@ const DownloadUpload = () => {
   )
     .onSuccess((event) => {
       saveFile(event.data, event.args[0], '.json');
-      toast.info(LL.DOWNLOAD_SUCCESSFUL());
+      toast.success(LL.DOWNLOAD_SUCCESSFUL());
     })
     .onError((error) => {
-      toast.error(String(error.error?.message || 'An error occurred'));
+      toast.error(String(error.error?.message || LL.ERROR()));
     });
 
   const { send: sendCoreDump } = useRequest(SystemApi.readCoreDump, {
@@ -56,10 +58,10 @@ const DownloadUpload = () => {
   })
     .onSuccess((event) => {
       saveBlob(event.data, 'emsesp_coredump.bin');
-      toast.info(LL.DOWNLOAD_SUCCESSFUL());
+      toast.success(LL.DOWNLOAD_SUCCESSFUL());
     })
     .onError((error) => {
-      toast.error(String(error.error?.message || 'An error occurred'));
+      toast.error(String(error.error?.message || LL.ERROR()));
     });
 
   const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
@@ -74,6 +76,7 @@ const DownloadUpload = () => {
     send: sendUpload,
     abort: cancelUpload
   } = useRequest(SystemApi.uploadFile, { immediate: false });
+  const blocker = useBlocker(uploading);
 
   const doRestart = async () => {
     setRestarting(true);
@@ -101,7 +104,7 @@ const DownloadUpload = () => {
     } catch (error) {
       const message = (error as Error).message;
       if (message.includes('The user aborted a request')) {
-        toast.warning(LL.UPLOAD() + ' ' + LL.ABORTED());
+        toast.warning(LL.UPLOAD_ABORTED());
       } else {
         toast.error(message);
       }
@@ -124,8 +127,11 @@ const DownloadUpload = () => {
 
   return (
     <>
-      <Section title={LL.DU_SETTINGS()} icon="settings_applications">
-        <p className="du-text">{LL.DU_SETTINGS_TEXT()}</p>
+      <Section
+        desc={LL.DU_SETTINGS_TEXT()}
+        title={LL.DU_SETTINGS()}
+        icon="settings_applications"
+      >
         <div className="du-actions">
           <Button icon="download" onClick={() => setConfirmBackup(true)}>
             {LL.DOWNLOAD_SYSTEM_BACKUP()}
@@ -142,8 +148,7 @@ const DownloadUpload = () => {
         </div>
       </Section>
 
-      <Section title={LL.HB_TITLE()} icon="thermostat">
-        <p className="du-text">{LL.HB_TEXT()}</p>
+      <Section desc={LL.HB_TEXT()} title={LL.HB_TITLE()} icon="thermostat">
         <div className="du-actions">
           <Button icon="download" onClick={() => setHeatingBackup(true)}>
             {LL.HB_BACKUP()}
@@ -158,8 +163,11 @@ const DownloadUpload = () => {
         </div>
       </Section>
 
-      <Section title={LL.DATA_EXPORT()} icon="data_object">
-        <p className="du-text">{LL.DATA_EXPORT_TEXT()}</p>
+      <Section
+        desc={LL.DATA_EXPORT_TEXT()}
+        title={LL.DATA_EXPORT()}
+        icon="data_object"
+      >
         <div className="du-actions">
           <Button icon="download" onClick={() => void sendExportData('allvalues')}>
             {LL.ALLVALUES()}
@@ -172,20 +180,13 @@ const DownloadUpload = () => {
         </div>
       </Section>
 
-      <Dialog
+      <ConfirmDialog
         open={confirmBackup}
         title={LL.DOWNLOAD_SYSTEM_BACKUP()}
+        label={LL.DOWNLOAD(0)}
+        icon="download"
         onClose={closeBackup}
-        actions={
-          <>
-            <Button color="secondary" icon="cancel" onClick={closeBackup}>
-              {LL.CANCEL()}
-            </Button>
-            <Button variant="contained" icon="download" onClick={downloadBackup}>
-              {LL.DOWNLOAD(0)}
-            </Button>
-          </>
-        }
+        onConfirm={downloadBackup}
       >
         <p>{LL.WARNING_SYSTEM_BACKUP()}</p>
         <Checkbox
@@ -194,12 +195,14 @@ const DownloadUpload = () => {
           checked={includeSecrets}
           onChange={setIncludeSecrets}
         />
-      </Dialog>
+      </ConfirmDialog>
 
       <HeatingBackupDialog
         open={heatingBackup}
         onClose={() => setHeatingBackup(false)}
       />
+
+      <BlockNavigation blocker={blocker} busy />
     </>
   );
 };

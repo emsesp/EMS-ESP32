@@ -3,10 +3,10 @@
   padding: 0;
   width: calc(100% - 32px);
   max-height: calc(100% - 32px);
-  background: #383838;
+  background: var(--dialog);
   color: var(--text);
-  border: 2px solid #565656;
-  border-radius: 8px;
+  border: 2px solid var(--dialog-border);
+  border-radius: var(--radius-sm);
   box-shadow:
     0 11px 15px -7px rgba(0, 0, 0, 0.2),
     0 24px 38px 3px rgba(0, 0, 0, 0.14);
@@ -41,11 +41,12 @@ html:has(.dialog[open]) {
   border-top: 1px solid var(--divider);
   border-bottom: 1px solid var(--divider);
 }
-.dialog-content > p:first-child {
-  margin-top: 0;
+/* no specificity, so a page class can still set its own spacing */
+:where(.dialog-content > p) {
+  margin: 0 0 12px;
 }
-.dialog-content .field {
-  margin-top: 14px;
+:where(.dialog-content > p:last-child) {
+  margin-bottom: 0;
 }
 .dialog-actions {
   display: flex;
@@ -74,9 +75,7 @@ html:has(.dialog[open]) {
   }
 }
 
+/* fields in a dialog always sit in a .form grid */
 .dialog-content > .form:first-child {
   margin-top: 4px;
-}
-.dialog-content .form .field {
-  margin-top: 0;
 }

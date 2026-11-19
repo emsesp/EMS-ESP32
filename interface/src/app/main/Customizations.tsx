@@ -7,13 +7,13 @@ import BlockNavigation from 'components/routing/BlockNavigation';
 import {
   Button,
   Checkbox,
+  ConfirmDialog,
   Dialog,
   Icon,
+  Listbox,
   Loader,
-  SaveBar,
   SearchField,
   Section,
-  Select,
   SortHeader,
   Table,
   TextField,
@@ -24,22 +24,24 @@ import {
   toast,
   useTableSort
 } from 'components/ui';
+import 'components/ui/Chip.css';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import {
-  API,
   readCoreData,
   readDeviceEntities,
   resetCustomizations,
   writeCustomizationEntities,
   writeDeviceName
 } from '../../api/app';
+import { ChangesBar, RestartBar } from './ChangesBar';
 import './Customizations.css';
 import CustomizationsDialog from './CustomizationsDialog';
+import DeviceIcon from './DeviceIcon';
 import EntityMaskToggle, { MASKS, maskAllowed, withMask } from './EntityMaskToggle';
 import { PendingTag } from './ListPage';
 import { DeviceEntityMask } from './types';
-import type { APIcall, DeviceEntity } from './types';
+import type { DeviceEntity } from './types';
 
 const APIURL = `${window.location.origin}/api/`;
 
@@ -107,10 +109,6 @@ const Customizations = () => {
     error: coreError,
     send: fetchCoreData
   } = useRequest(readCoreData);
-  const { send: sendAPI, loading: restartSending } = useRequest(
-    (call: APIcall) => API(call),
-    { immediate: false }
-  );
   const { send: sendResetCustomizations } = useRequest(resetCustomizations(), {
     immediate: false
   });
@@ -278,7 +276,7 @@ const Customizations = () => {
     if (!renaming) return;
     await sendDeviceName({ id: selectedDevice, ...renaming })
       .then(() => toast.success(LL.UPDATED_OF(LL.NAME(1))))
-      .catch(() => toast.error(`${LL.UPDATE_OF(LL.NAME(1))} ${LL.FAILED(1)}`))
+      .catch((error: Error) => toast.error(error.message || LL.ERROR()))
       .finally(() => {
         setRenaming(undefined);
         void fetchCoreData();
@@ -303,7 +301,7 @@ const Customizations = () => {
     <div className="cz-filters" role="group" aria-label={LL.SEARCH()}>
       <button
         type="button"
-        className={cx('cz-chip', !maskFilter && !modifiedOnly && 'on')}
+        className={cx('chip', !maskFilter && !modifiedOnly && 'on')}
         aria-pressed={!maskFilter && !modifiedOnly}
         onClick={() => {
           setMaskFilter(0);
@@ -316,7 +314,7 @@ const Customizations = () => {
         <button
           key={o.bit}
           type="button"
-          className={cx('cz-chip', !!(maskFilter & o.bit) && 'on')}
+          className={cx('chip', !!(maskFilter & o.bit) && 'on')}
           aria-pressed={!!(maskFilter & o.bit)}
           onClick={() => setMaskFilter((f) => f ^ o.bit)}
         >
@@ -326,7 +324,7 @@ const Customizations = () => {
       ))}
       <button
         type="button"
-        className={cx('cz-chip', modifiedOnly && 'on')}
+        className={cx('chip', modifiedOnly && 'on')}
         aria-pressed={modifiedOnly}
         onClick={() => setModifiedOnly((v) => !v)}
       >
@@ -362,12 +360,17 @@ const Customizations = () => {
       })}
       {selectedIds.size > 0 && (
         <>
-          <Button size="sm" color="error" icon="restart_alt" onClick={resetSelected}>
+          <Button
+            size="sm"
+            color="error"
+            icon="settings_backup_restore"
+            onClick={resetSelected}
+          >
             {LL.RESET_SELECTED()}
           </Button>
           <Button
             size="sm"
-            variant="text"
+            color="secondary"
             icon="close"
             onClick={() => setSelectedIds(new Set())}
           >
@@ -463,7 +466,7 @@ const Customizations = () => {
         {renderBulk()}
         <p className="cap cz-hint">{LL.BULK_HINT()}</p>
         <div className="tbl-wrap">
-          <Table stack className="cz-tbl">
+          <Table stack className="cz-tbl hover">
             <thead>
               <tr>
                 <th className="chk">
@@ -521,6 +524,7 @@ const Customizations = () => {
     <>
       {blocker && <BlockNavigation blocker={blocker} />}
       <Section
+        desc={`${LL.CUSTOMIZATIONS_HELP_1()}.`}
         title={LL.CUSTOMIZATIONS()}
         icon="construction"
         actions={
@@ -533,20 +537,19 @@ const Customizations = () => {
           </Button>
         }
       >
-        <p className="cap">{LL.CUSTOMIZATIONS_HELP_1()}.</p>
         <div className="cz-device">
-          <Select
+          <Listbox
             label={LL.EMS_DEVICE()}
             value={String(selectedDevice)}
             disabled={numChanges !== 0}
-            onChange={(e) => setSelectedDevice(Number(e.currentTarget.value))}
-            options={[
-              { value: '-1', label: `${LL.SELECT_DEVICE()}...`, disabled: true },
-              ...devices.map((d) => ({
-                value: String(d.id),
-                label: `${d.n} (${d.tn})`
-              }))
-            ]}
+            placeholder={`${LL.SELECT_DEVICE()}…`}
+            onChange={(v) => setSelectedDevice(Number(v))}
+            options={devices.map((d) => ({
+              value: String(d.id),
+              label: d.n,
+              icon: <DeviceIcon type_id={d.t} />,
+              meta: d.e
+            }))}
           />
           {device && (
             <Button
@@ -562,42 +565,18 @@ const Customizations = () => {
       {selectedDevice !== -1 && renderEntities()}
 
       {numChanges > 0 ? (
-        <SaveBar message={LL.UNSAVED_CHANGES({ num: numChanges })}>
-          <Button color="secondary" icon="undo" disabled={saving} onClick={cancel}>
-            {LL.CANCEL()}
-          </Button>
-          <Button
-            variant="contained"
-            icon="check"
-            disabled={saving}
-            onClick={() => void save()}
-          >
-            {LL.SAVE()}
-          </Button>
-        </SaveBar>
+        <ChangesBar
+          message={LL.UNSAVED_CHANGES({ num: numChanges })}
+          saving={saving}
+          onDiscard={cancel}
+          onSave={() => void save()}
+        />
       ) : (
-        restartNeeded && (
-          <SaveBar warning icon="restart_alt" message={LL.SAVED_RESTART()}>
-            <Button
-              variant="contained"
-              color="warning"
-              icon="restart_alt"
-              disabled={restartSending}
-              onClick={() =>
-                void sendAPI({ device: 'system', cmd: 'restart', id: 0 })
-                  .then(() => setRestarting(true))
-                  .catch((error: Error) => toast.error(error.message))
-              }
-            >
-              {LL.RESTART_NOW()}
-            </Button>
-          </SaveBar>
-        )
+        restartNeeded && <RestartBar onRestarted={() => setRestarting(true)} />
       )}
 
       {editing && (
         <CustomizationsDialog
-          open
           entity={editing}
           original={original.get(editing.id)}
           onClose={() => setEditing(undefined)}
@@ -616,6 +595,7 @@ const Customizations = () => {
         open={!!renaming}
         title={LL.RENAME_DEVICE()}
         onClose={() => setRenaming(undefined)}
+        onSubmit={() => void renameDevice()}
         actions={
           <>
             <Button
@@ -626,10 +606,12 @@ const Customizations = () => {
               {LL.CANCEL()}
             </Button>
             <Button
-              variant="contained"
+              type="submit"
               icon="check"
-              disabled={renameSending}
-              onClick={() => void renameDevice()}
+              disabled={
+                renameSending ||
+                (renaming?.name === device?.n && renaming?.brand === device?.b)
+              }
             >
               {LL.RENAME()}
             </Button>
@@ -637,13 +619,7 @@ const Customizations = () => {
         }
       >
         {renaming && (
-          <form
-            className="form"
-            onSubmit={(e) => {
-              e.preventDefault();
-              void renameDevice();
-            }}
-          >
+          <div className="form">
             <TextField
               label={LL.EMS_DEVICE()}
               name="device"
@@ -660,36 +636,21 @@ const Customizations = () => {
                 setRenaming({ ...renaming, brand: e.currentTarget.value })
               }
             />
-          </form>
+          </div>
         )}
       </Dialog>
 
-      <Dialog
+      <ConfirmDialog
         open={confirmReset}
         title={LL.REMOVE_ALL()}
+        label={LL.REMOVE_ALL()}
+        icon="delete_sweep"
+        color="error"
         onClose={() => setConfirmReset(false)}
-        actions={
-          <>
-            <Button
-              color="secondary"
-              icon="cancel"
-              onClick={() => setConfirmReset(false)}
-            >
-              {LL.CANCEL()}
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
-              icon="delete_sweep"
-              onClick={() => void resetAll()}
-            >
-              {LL.REMOVE_ALL()}
-            </Button>
-          </>
-        }
+        onConfirm={resetAll}
       >
-        <p>{LL.CUSTOMIZATIONS_RESET()}</p>
-      </Dialog>
+        {LL.CUSTOMIZATIONS_RESET()}
+      </ConfirmDialog>
     </>
   );
 };

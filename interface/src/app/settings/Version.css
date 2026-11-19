@@ -10,13 +10,25 @@
   gap: 8px;
 }
 
+.fw-tags {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.fw-ver-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .fw-update {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 16px;
   padding: 14px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: var(--paper-2);
 }
 .fw-update > .grow {
@@ -51,13 +63,6 @@
   margin: 10px 0 0;
   overflow-wrap: anywhere;
 }
-.fw-p {
-  margin: 0 0 12px;
-}
-.fw-p:last-child {
-  margin-bottom: 0;
-}
-
 .fw-actions {
   display: flex;
   flex-wrap: wrap;

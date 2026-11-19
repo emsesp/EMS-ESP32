@@ -10,6 +10,8 @@ export interface SwitchProps {
   onChange: (checked: boolean) => void;
   name?: string;
   helperText?: ReactNode;
+  // next to the label but outside it, e.g. an IconButton
+  adornment?: ReactNode;
   // helper text in the warning colour
   warn?: boolean;
   disabled?: boolean | undefined;
@@ -25,6 +27,7 @@ const Switch: FC<SwitchProps> = ({
   onChange,
   name,
   helperText,
+  adornment,
   warn,
   disabled,
   changed,
@@ -46,10 +49,13 @@ const Switch: FC<SwitchProps> = ({
         onClick={() => onChange(!checked)}
       />
       <div className="grow">
-        <label htmlFor={id}>
-          {label}
-          <FieldFlags restart={restart} changed={changed} />
-        </label>
+        <div className="sw-head">
+          <label htmlFor={id}>
+            {label}
+            <FieldFlags restart={restart} changed={changed} />
+          </label>
+          {adornment}
+        </div>
         {helperText && (
           <span id={`${id}-help`} className={cx('cap', warn && 'warnc')}>
             {helperText}

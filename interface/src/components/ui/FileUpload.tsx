@@ -1,19 +1,12 @@
-import {
-  type ChangeEvent,
-  type DragEvent,
-  type FC,
-  useEffect,
-  useRef,
-  useState
-} from 'react';
+import { type FC, useEffect, useState } from 'react';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
 import Button from './Button';
+import DropZone from './DropZone';
 import './FileUpload.css';
 import Icon from './Icon';
 import ProgressBar from './ProgressBar';
-import { cx } from './cx';
 import { toast } from './toast/store';
 
 export interface FileUploadProps {
@@ -38,8 +31,6 @@ const FileUpload: FC<FileUploadProps> = ({
 }) => {
   const { LL } = useI18nContext();
   const [file, setFile] = useState<File>();
-  const [over, setOver] = useState(false);
-  const input = useRef<HTMLInputElement>(null);
   const uploading = progress !== undefined;
 
   useEffect(() => {
@@ -54,17 +45,6 @@ const FileUpload: FC<FileUploadProps> = ({
     } else {
       toast.error(LL.FILE_TYPE_INVALID({ types: accept.join(', ') }));
     }
-  };
-
-  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
-    choose(e.currentTarget.files?.[0]);
-    e.currentTarget.value = ''; // lets the same file be chosen again
-  };
-
-  const onDrop = (e: DragEvent) => {
-    e.preventDefault();
-    setOver(false);
-    choose(e.dataTransfer?.files[0]);
   };
 
   if (uploading) {
@@ -90,7 +70,7 @@ const FileUpload: FC<FileUploadProps> = ({
           <Button color="secondary" icon="cancel" onClick={() => setFile(undefined)}>
             {LL.CANCEL()}
           </Button>
-          <Button variant="contained" icon="upload" onClick={() => onUpload(file)}>
+          <Button icon="upload" onClick={() => onUpload(file)}>
             {LL.UPLOAD()}
           </Button>
         </div>
@@ -98,31 +78,7 @@ const FileUpload: FC<FileUploadProps> = ({
     );
   }
 
-  return (
-    <>
-      <button
-        type="button"
-        className={cx('upl-drop', over && 'on')}
-        onClick={() => input.current?.click()}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setOver(true);
-        }}
-        onDragLeave={() => setOver(false)}
-        onDrop={onDrop}
-      >
-        <Icon name="upload_file" />
-        {text}
-      </button>
-      <input
-        ref={input}
-        type="file"
-        hidden
-        accept={accept.join(',')}
-        onChange={onChange}
-      />
-    </>
-  );
+  return <DropZone text={text} accept={accept.join(',')} onFile={choose} />;
 };
 
 export default FileUpload;

@@ -31,12 +31,14 @@ const TelnetBanner = () => {
       actions={
         <>
           <Button
-            variant="contained"
+            icon="settings"
             onClick={() => void navigate('/settings/application')}
           >
             {LL.SETTINGS_OF(LL.APPLICATION())}
           </Button>
-          <Button onClick={dismiss}>{LL.CLOSE()}</Button>
+          <Button icon="close" color="secondary" onClick={dismiss}>
+            {LL.CLOSE()}
+          </Button>
         </>
       }
     >

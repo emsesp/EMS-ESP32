@@ -10,6 +10,8 @@ export interface SectionProps {
   icon?: IconName;
   // shown at the right of the title, e.g. a chip or a button
   actions?: ReactNode;
+  // a line of text under the title
+  desc?: ReactNode;
   className?: string;
   id?: string;
   children?: ReactNode;
@@ -20,6 +22,7 @@ const Section: FC<SectionProps> = ({
   title,
   icon,
   actions,
+  desc,
   className,
   id,
   children
@@ -32,6 +35,7 @@ const Section: FC<SectionProps> = ({
         {actions}
       </div>
     )}
+    {desc && <p className="sec-desc">{desc}</p>}
     {children}
   </section>
 );

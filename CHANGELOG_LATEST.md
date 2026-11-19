@@ -4,7 +4,7 @@ For more details go to [emsesp.org](https://emsesp.org/).
 
 ## [3.10.0]
 
-This release is primarlity a security hardening one. Please read the Breaking Changes below carefully before upgrading.
+This release is primarlity a security hardening one with a new UI frontend. Please read the Breaking Changes below carefully before upgrading.
 
 ## **Breaking Changes**
 
@@ -40,15 +40,16 @@ A full list of breaking changes can be found in this [discussion](https://github
 - console on the System Log page: admins can run console commands such as `show values` from the WebUI and see their output
 - the LED flashes white while the Recovery is running, using the LED GPIO and type from the Application Settings (also when the LED is set to hidden)
 - uploading a settings file only changes the settings it contains, so a partial file can be used to change a few settings and keep the rest
-- mock server test page `/rest/mockVersions` (e.g. http://localhost:3080/rest/mockVersions) to switch scenarios at runtime without restarting: the current, stable and dev versions, offline, official or custom build, DEBUG, the installed and online Recovery version, and the board's flash size (4MB, 16MB or 32MB) and PSRAM. It has presets for common cases and can sign in as admin or guest. Values can also be set in the URL, like `?flash=4MB&psram=false`, and `?reset` goes back to the defaults
+- mock server test page `/rest/mockData` (e.g. http://localhost:3080/rest/mockData) to switch scenarios at runtime without restarting: the current, stable and dev versions, offline, official or custom build, DEBUG, the installed and online Recovery version, and the board's flash size (4MB, 16MB or 32MB) and PSRAM. It has presets for common cases and can sign in as admin or guest. Values can also be set in the URL, like `?flash=4MB&psram=false`, and `?reset` goes back to the defaults
 - heat pumps with an EEBUS gateway (e.g. WLW176i/WLW186i): `eebuspowerlimit` (writable, 0 to 65535 W, 65535 is no limit, written to the gateway at 0x4B, telegram 0x4D8) and `eebuslimitactive`, on while the compressor is held back by the limit (telegram 0x4A2) [#3416](https://github.com/emsesp/EMS-ESP32/issues/3416)
 - RC300/RC310 pool circuit on a MM100: `poolmode` (off/on/auto) and `poolflowtemp`, both writable (telegram 0x67B) [#3420](https://github.com/emsesp/EMS-ESP32/issues/3420)
 - EMS devices that EMS-ESP polls and that send nothing for 5 minutes are reported offline: logged, published retained as `online`/`offline` to `ems-esp/status/<device>_<id>` (e.g. `ems-esp/status/thermostat_10`), and shown as `online` and `lastSeen` (seconds) per device in `/api/system/info`. In Home Assistant the device's entities become unavailable and each device gets a "status" connectivity sensor
 - test build flag `EMSESP_OWN_IDENTITY`: when another device reads the version (0x02) or name (0x01) from EMS-ESP's bus ID, it answers like a real EMS device instead of with an empty telegram: a fixed productID (`EMSESP_OWN_PRODUCT_ID`, default 250) with the EMS-ESP version, a serial number made from the MAC address and the name "EMS-ESP". The K30RF reads these from every device on the bus about every 13 hours, and on Bosch heat pumps a full re-sync of the UI800 often followed within minutes, ending in A21/A91 errors and HomeCom dropping out. Off by default [#3094](https://github.com/emsesp/EMS-ESP32/issues/3094)
-- heating settings backup and restore: Settings > Download/Upload saves the writable heating settings of all EMS devices (for example set temperatures, heating curves and switch times) to a file with an optional note, and the restore page shows what differs from the device now, lets you pick values and writes them back one by one with a result per value. Devices are matched by type and device ID, a different product or another temperature unit is refused. New `heatingbackup` export type in `POST /rest/action` [#2707](https://github.com/emsesp/EMS-ESP32/discussions/2707)
+- heating settings backup and restore: Settings > Download/Upload saves the writable heating settings of the EMS devices you pick (for example set temperatures, heating curves and switch times) to a file with your own file name and an optional note. Enums are stored by name and the temperature unit is recorded, so a file still restores after an update. Commands, values not read from the bus yet and entities set to write-disabled in Customizations are left out. Restoring writes nothing when the file is opened: it shows the note and which devices match, lists the values that differ from the device now, lets you untick values, asks for confirmation and then writes them one by one through the API, so read-only mode, write-disabled entities, min/max and the write limits still apply, with a result per value. Devices are matched by type and device ID, a different product or another temperature unit is refused. "All Values" moved to a separate Data Export section, as it can't be uploaded. New `heatingbackup` export type in `POST /rest/action` [#2707](https://github.com/emsesp/EMS-ESP32/discussions/2707)
 - MQTT status shows the base topic, since when the connection is up and the reason and time of the last lost connection. `/rest/mqttStatus` has new `host`, `port`, `base`, `connected_for`, `last_disconnect_ago` and `last_disconnect_reason` fields
 - every table in the Web UI with column headers can be sorted by clicking a header (ascending, descending, back to the original order); on phones the headers are buttons above the list
-- `/rest/systemStatus` has new `network_ip`, `mqtt_host`, `mqtt_port`, `log_errors`, `log_warnings` (since boot) and `heap_size` fields for the Status overview
+- `/rest/systemStatus` has new `network_ip`, `mqtt_host`, `mqtt_port`, `log_errors`, `log_warnings` (since boot), `heap_size` and `reset_reason` fields for the Status overview; the last restart reason (for example software restart, crash, watchdog or brownout) is shown on the Status overview and in a new "Power and reset" card on the Hardware page
+- the short summary on the Help page, to paste into an issue or chat, also shows the Tx mode, EMS-ESP's bus ID, the bus quality and Tx failures, and lists every EMS device with its type, device ID and product ID. `/rest/systemStatus` has new `bus_id` and `tx_mode` fields for it
 
 ## Fixed
 
@@ -65,9 +66,6 @@ A full list of breaking changes can be found in this [discussion](https://github
 - custom entities on the EMS bus: after a write, MQTT and Home Assistant could show the old value until the next "Other" publish interval. The new value is now published as soon as the write is confirmed [#3416](https://github.com/emsesp/EMS-ESP32/issues/3416)
 - `uint8` custom entities with a value of 128 or more were shown as negative numbers in MQTT and the API (e.g. 200 as -56), the Web UI was correct
 - RC300 firmware 11.x `dhw/chargeduration`: writes above 255 minutes are refused, because the thermostat set them to 15 minutes. Longer durations can only be set on the thermostat itself [#3318](https://github.com/emsesp/EMS-ESP32/issues/3318)
-- Modules: changes made in the Web UI were never applied, because each module was sent in its own request that the firmware ignored. They are now saved in one request, and a module that fails to enable or disable makes the save fail with an error instead of reporting success
-- saving settings that need a restart no longer shows the "unsaved changes" warning when leaving the page afterwards
-- Customizations: a save that failed was shown as saved; the changes now stay so the save can be retried
 
 ## Changed
 

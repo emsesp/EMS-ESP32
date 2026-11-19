@@ -27,12 +27,20 @@ const ModulesDialog = ({
       open
       title={selectedItem.name}
       onClose={onClose}
+      onSubmit={() => onSave(editItem)}
       actions={
         <>
-          <Button color="secondary" onClick={onClose}>
+          <Button icon="cancel" color="secondary" onClick={onClose}>
             {LL.CANCEL()}
           </Button>
-          <Button variant="contained" icon="check" onClick={() => onSave(editItem)}>
+          <Button
+            type="submit"
+            icon="check"
+            disabled={
+              editItem.enabled === selectedItem.enabled &&
+              editItem.license === selectedItem.license
+            }
+          >
             {LL.UPDATE()}
           </Button>
         </>

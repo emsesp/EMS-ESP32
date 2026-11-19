@@ -28,13 +28,13 @@ const TokensResetBanner = () => {
       actions={
         <>
           <Button
-            variant="contained"
+            icon="key"
             color="warning"
             onClick={() => void navigate('/settings/security/apikeys')}
           >
             {LL.API_KEYS()}
           </Button>
-          <Button color="warning" onClick={() => void dismiss()}>
+          <Button icon="close" color="secondary" onClick={() => void dismiss()}>
             {LL.CLOSE()}
           </Button>
         </>

@@ -26,8 +26,7 @@ const SensorsTemperatureDialog = ({
 
   return (
     <EntityDialog
-      open
-      title={`${LL.EDIT()} ${LL.TEMP_SENSOR()}`}
+      title={LL.EDIT_TEMP_SENSOR()}
       item={item}
       validator={() => temperatureSensorItemValidation(sensors, item.n)}
       onClose={onClose}
@@ -35,7 +34,7 @@ const SensorsTemperatureDialog = ({
     >
       {(f) => (
         <>
-          <p className="cap full sns-intro">
+          <p className="cap full">
             {LL.ID_OF(LL.SENSOR(0))} <span className="mono lb">{item.id}</span>
             {item.t !== undefined && ` · ${formatValue(LL, item.t, item.u)}`}
           </p>

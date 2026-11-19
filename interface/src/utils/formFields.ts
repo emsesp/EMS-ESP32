@@ -23,7 +23,8 @@ export const formFields = <D extends object>(
   const v = (name: K) => (values as Record<string, unknown> | undefined)?.[name];
   const patch = (name: K, value: unknown) => set({ [name]: value } as Partial<D>);
   // a select keeps numbers as numbers
-  const parse = (name: K, s: string) => (typeof v(name) === 'number' ? Number(s) : s);
+  const parse = (name: K, s: string) =>
+    typeof v(name) === 'number' ? Number(s) : s;
 
   return {
     // TextField / TextArea

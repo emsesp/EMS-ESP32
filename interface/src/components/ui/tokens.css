@@ -8,6 +8,8 @@
   --paper: #1e1e1e;
   --paper-2: #262626;
   --drawer: #1b1b1b;
+  --dialog: #383838;
+  --dialog-border: #565656;
   --border: rgb(65, 65, 65);
   --divider: rgba(255, 255, 255, 0.12);
   --text: #fff;
@@ -24,9 +26,34 @@
   --appbar: #2e586a;
   --row: #1e1e1e;
   --row-odd: #303030;
-  --row-hover: #177ac9;
-  --menu-group: rgba(71, 98, 130, 0.2);
-
+  --row-hover: var(--primary-tint);
+  /* white overlays on the dark surfaces */
+  --hover: rgba(255, 255, 255, 0.06);
+  --fill: rgba(255, 255, 255, 0.08);
+  --fill-hover: rgba(255, 255, 255, 0.14);
+  --outline: rgba(255, 255, 255, 0.23);
+  --divider-soft: rgba(255, 255, 255, 0.05);
+  /* primary tints: hover, selected, selected and hovered, borders */
+  --primary-soft: rgba(144, 202, 249, 0.08);
+  --primary-tint: rgba(144, 202, 249, 0.16);
+  --primary-tint-2: rgba(144, 202, 249, 0.24);
+  --primary-line: rgba(144, 202, 249, 0.5);
+  /* status colours: hover, fill, border, and text on a dark or tinted surface */
+  --secondary-tint: rgba(33, 150, 243, 0.16);
+  --secondary-line: rgba(33, 150, 243, 0.5);
+  --success-tint: rgba(102, 187, 106, 0.16);
+  --success-line: rgba(102, 187, 106, 0.5);
+  --success-text: #a5d6a7;
+  --warning-soft: rgba(255, 167, 38, 0.08);
+  --warning-tint: rgba(255, 167, 38, 0.16);
+  --warning-line: rgba(255, 167, 38, 0.5);
+  --warning-text: #ffcc80;
+  --error-soft: rgba(244, 67, 54, 0.08);
+  --error-tint: rgba(244, 67, 54, 0.16);
+  --error-line: rgba(244, 67, 54, 0.5);
+  --error-text: #ff8a80;
+  /* menus, toasts and bars floating over the page */
+  --shadow-pop: 0 8px 24px rgba(0, 0, 0, 0.5);
   --font: Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-size: 13px;
@@ -34,4 +61,8 @@
   --drawer-w: 210px;
   --appbar-h: 64px;
   --radius: 12px;
+  /* boxes inside a section, floating bars and dialogs */
+  --radius-sm: 8px;
+  /* height or width of anything tapped on a touch screen */
+  --touch: 40px;
 }

@@ -11,6 +11,7 @@ import {
   TextField,
   cx
 } from 'components/ui';
+import 'components/ui/Chip.css';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import EntityDialog from './EntityDialog';
@@ -28,7 +29,6 @@ import type { CommandItem, ScheduleItem } from './types';
 import { schedulerItemValidation } from './validators';
 
 interface SchedulerDialogProps {
-  open: boolean;
   creating: boolean;
   item: ScheduleItem;
   // the list without deleted rows, for the duplicate name check
@@ -42,7 +42,6 @@ interface SchedulerDialogProps {
 const DEFAULT_TIME = '00:00';
 
 const SchedulerDialog = ({
-  open,
   creating,
   item,
   items,
@@ -61,8 +60,7 @@ const SchedulerDialog = ({
 
   return (
     <EntityDialog
-      open={open}
-      title={`${creating ? `${LL.ADD(1)} ${LL.NEW(0)}` : LL.EDIT()} ${LL.SCHEDULE(1)}`}
+      title={creating ? LL.ADD_SCHEDULE() : LL.EDIT_SCHEDULE()}
       item={item}
       creating={creating}
       validator={(v) =>
@@ -117,7 +115,12 @@ const SchedulerDialog = ({
                       <button
                         key={flag}
                         type="button"
-                        className={cx('sch-pill', (flags & flag) === flag && 'on')}
+                        className={cx(
+                          'chip',
+                          'outline',
+                          'sch-pill',
+                          (flags & flag) === flag && 'on'
+                        )}
                         aria-pressed={(flags & flag) === flag}
                         onClick={() => toggleDay(flag)}
                       >

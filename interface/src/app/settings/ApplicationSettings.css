@@ -16,28 +16,6 @@
   flex-wrap: wrap;
   gap: 8px;
 }
-.app-jump {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 26px;
-  padding: 0 10px;
-  border: 1px solid transparent;
-  border-radius: 13px;
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text);
-  font: inherit;
-  font-size: 12px;
-  white-space: nowrap;
-  cursor: pointer;
-}
-.app-jump:hover {
-  background: rgba(255, 255, 255, 0.14);
-}
-.app-jump:disabled {
-  opacity: 0.38;
-  cursor: default;
-}
 .app-group,
 .app-group .input,
 .app-group .switch {
@@ -61,7 +39,7 @@
   min-width: 64px;
   padding: 6px 10px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: #000;
   color: var(--lightblue);
   font-family: var(--font-mono);
@@ -72,13 +50,6 @@
 .app-test {
   justify-content: flex-end;
   align-items: flex-start;
-}
-
-@media (pointer: coarse) {
-  .app-jump {
-    min-height: 40px;
-    border-radius: 20px;
-  }
 }
 
 @media (max-width: 599px) {

@@ -15,7 +15,7 @@
   font-variant-numeric: tabular-nums;
 }
 .stat .n.warnc {
-  color: #ffcc80;
+  color: var(--warning-text);
 }
 
 @media (max-width: 599px) {

@@ -7,7 +7,7 @@ import { useInterval } from 'utils';
 
 import './Status.css';
 import BBQKeesIcon from './bbqkees.svg';
-import { formatTemperature, nf } from './status';
+import { formatDuration, formatTemperature, nf } from './status';
 
 const HardwareStatus = () => {
   const { LL } = useI18nContext();
@@ -109,6 +109,18 @@ const HardwareStatus = () => {
           used={data.fs_used}
           total={data.fs_used + data.fs_free}
           unit="KB"
+        />
+      </Section>
+
+      <Section icon="battery_charging_full" title={LL.POWER_AND_RESET()}>
+        <KeyValueList
+          rows={[
+            !!data.reset_reason && {
+              label: LL.LAST_RESTART(),
+              value: data.reset_reason
+            },
+            { label: LL.UPTIME(), value: formatDuration(data.uptime, LL) }
+          ]}
         />
       </Section>
     </div>

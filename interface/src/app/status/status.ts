@@ -51,7 +51,7 @@ export const systemInfo = (status: number, LL: LL): StatusInfo => {
     case SystemStatusCodes.SYSTEM_STATUS_RESTART_REQUESTED:
       return { state: 'warn', text: LL.RESTARTING_PRE() };
     case SystemStatusCodes.SYSTEM_STATUS_INVALID_GPIO:
-      return { state: 'err', text: LL.GPIO_OF(LL.FAILED(0)) };
+      return { state: 'err', text: LL.GPIO_INVALID() };
     default:
       return { state: 'ok', text: LL.STATUS_RUNNING() };
   }
@@ -89,19 +89,19 @@ export const networkIcon = (status: NetworkConnectionStatus): IconName =>
 export const networkInfo = (status: NetworkConnectionStatus, LL: LL): StatusInfo => {
   switch (status) {
     case NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED:
-      return { state: 'ok', text: `${LL.CONNECTED(0)} (Ethernet)` };
+      return { state: 'ok', text: LL.CONNECTED_VIA('Ethernet') };
     case NetworkConnectionStatus.WIFI_STATUS_CONNECTED:
-      return { state: 'ok', text: `${LL.CONNECTED(0)} (WiFi)` };
+      return { state: 'ok', text: LL.CONNECTED_VIA('Wi-Fi') };
     case NetworkConnectionStatus.WIFI_STATUS_NO_SHIELD:
       return { state: 'off', text: LL.INACTIVE(1) };
     case NetworkConnectionStatus.WIFI_STATUS_IDLE:
       return { state: 'off', text: LL.IDLE() };
     case NetworkConnectionStatus.WIFI_STATUS_NO_SSID_AVAIL:
-      return { state: 'warn', text: 'No SSID Available' };
+      return { state: 'warn', text: LL.NETWORK_NOT_FOUND() };
     case NetworkConnectionStatus.WIFI_STATUS_CONNECT_FAILED:
-      return { state: 'err', text: `${LL.CONNECTED(1)} ${LL.FAILED(0)}` };
+      return { state: 'err', text: LL.CONNECTION_FAILED() };
     case NetworkConnectionStatus.WIFI_STATUS_CONNECTION_LOST:
-      return { state: 'err', text: `${LL.CONNECTED(1)} ${LL.LOST()}` };
+      return { state: 'err', text: LL.CONNECTION_LOST() };
     case NetworkConnectionStatus.WIFI_STATUS_DISCONNECTED:
       return { state: 'off', text: LL.DISCONNECTED() };
     default:
@@ -139,7 +139,7 @@ export const apInfo = (status: APStatusType['status'], LL: LL): StatusInfo => {
     case APNetworkStatus.INACTIVE:
       return { state: 'off', text: LL.INACTIVE(0) };
     case APNetworkStatus.LINGERING:
-      return { state: 'warn', text: 'Lingering until idle' };
+      return { state: 'warn', text: LL.AP_LINGERING() };
     default:
       return { state: 'warn', text: LL.UNKNOWN() };
   }

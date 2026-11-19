@@ -16,6 +16,7 @@ import {
   LanguageGrid,
   LanguageSelect,
   LinkList,
+  Listbox,
   Loader,
   Message,
   Meter,
@@ -67,11 +68,47 @@ const TOKENS = [
   'appbar',
   'row',
   'row-odd',
-  'row-hover',
-  'menu-group'
+  'row-hover'
 ];
 
 const MENU_GROUPS: MenuGroup[] = ['main', 'modules', 'system', 'account'];
+
+const LISTBOX_SAMPLE: { value: string; label: string; icon: IconName; n: number }[] =
+  [
+    {
+      value: '8',
+      label: 'GBx72/Trendline/Cerapur/Greenstar Si',
+      icon: 'local_fire_department',
+      n: 132
+    },
+    {
+      value: '16',
+      label: 'RC310/Moduline 3000/1010H/CW400',
+      icon: 'thermostat',
+      n: 87
+    },
+    { value: '32', label: 'MM100', icon: 'valve', n: 9 },
+    { value: '48', label: 'SM100', icon: 'solar_power', n: 0 }
+  ];
+
+const ListboxSample = () => {
+  const [value, setValue] = useState<string>();
+  return (
+    <Listbox
+      label="EMS Device"
+      placeholder="Select a device…"
+      value={value}
+      onChange={setValue}
+      options={LISTBOX_SAMPLE.map((o) => ({
+        value: o.value,
+        label: o.label,
+        icon: <Icon name={o.icon} />,
+        meta: o.n,
+        disabled: o.n === 0
+      }))}
+    />
+  );
+};
 
 const TRAIL_EXAMPLES = [
   '/dashboard',
@@ -157,21 +194,19 @@ const Gallery = () => {
       </Sample>
 
       <Sample title="Button, IconButton">
-        {(['outlined', 'contained', 'text'] as const).map((variant) => (
-          <div key={variant} className="row wrap gal-demo">
-            {COLORS.map((color) => (
-              <Button key={color} variant={variant} color={color} icon="check">
-                {color}
-              </Button>
-            ))}
-            <Button variant={variant} size="sm" icon="undo">
-              small
+        <div className="row wrap gal-demo">
+          {COLORS.map((color) => (
+            <Button key={color} color={color} icon="check">
+              {color}
             </Button>
-            <Button variant={variant} disabled>
-              disabled
-            </Button>
-          </div>
-        ))}
+          ))}
+          <Button size="sm" icon="undo">
+            small
+          </Button>
+          <Button icon="check" disabled>
+            disabled
+          </Button>
+        </div>
         <div className="row gal-demo">
           <IconButton icon="settings" label="Settings" />
           <IconButton icon="close" label="Close" plain />
@@ -179,7 +214,7 @@ const Gallery = () => {
         </div>
       </Sample>
 
-      <Sample title="TextField, Select, LanguageSelect">
+      <Sample title="TextField, Select, LanguageSelect, Listbox">
         <div className="gal-grid">
           <TextField
             name="text"
@@ -209,11 +244,16 @@ const Gallery = () => {
             }))}
           />
           <LanguageSelect />
+          <ListboxSample />
         </div>
       </Sample>
 
       <Sample title="FormSection, Switch, Checkbox, Segmented, TextArea, field flags (settings forms)">
-        <FormSection icon="tune" title="Behaviour" desc="A line of text under the title.">
+        <FormSection
+          icon="tune"
+          title="Behaviour"
+          desc="A line of text under the title."
+        >
           <TextField
             name="port"
             label="Port"
@@ -228,7 +268,11 @@ const Gallery = () => {
             label="SSID"
             mono
             value="home"
-            action={<Button size="sm" icon="search">Scan</Button>}
+            action={
+              <Button size="sm" icon="search">
+                Scan
+              </Button>
+            }
           />
           <Switch
             label="Enable MQTT"
@@ -256,7 +300,11 @@ const Gallery = () => {
             value={seg}
             onChange={setSeg}
           />
-          <TextArea name="ca" label="Root CA" placeholder="-----BEGIN CERTIFICATE-----" />
+          <TextArea
+            name="ca"
+            label="Root CA"
+            placeholder="-----BEGIN CERTIFICATE-----"
+          />
           <Checkbox label="A checkbox" checked={toggle} onChange={setToggle} />
         </FormSection>
       </Sample>
@@ -269,7 +317,9 @@ const Gallery = () => {
           ]}
         />
         <div className="row wrap gal-demo">
-          {(['plain', 'new', 'mod', 'sys', 'type', 'ok', 'warn', 'err'] as const).map((k) => (
+          {(
+            ['plain', 'new', 'mod', 'sys', 'type', 'ok', 'warn', 'err'] as const
+          ).map((k) => (
             <Tag key={k} kind={k}>
               {k}
             </Tag>
@@ -278,7 +328,13 @@ const Gallery = () => {
         </div>
         <LinkList
           items={[
-            { to: '/settings', icon: 'settings', title: 'Grid card', text: 'a route', badge: true },
+            {
+              to: '/settings',
+              icon: 'settings',
+              title: 'Grid card',
+              text: 'a route',
+              badge: true
+            },
             {
               href: 'https://emsesp.org',
               icon: 'menu_book',
@@ -292,8 +348,20 @@ const Gallery = () => {
         <LinkList
           layout="rows"
           items={[
-            { to: '/settings/ap', icon: 'wifi_tethering', title: 'Rows', text: 'one card' },
-            { to: '/settings/ntp', icon: 'schedule', color: '#c5572c', title: 'NTP' }
+            {
+              to: '/settings/ap',
+              icon: 'wifi_tethering',
+              title: 'Rows',
+              text: 'one card'
+            },
+            {
+              to: '/settings/ntp',
+              icon: 'schedule',
+              color: '#c5572c',
+              title: 'NTP',
+              value: 'value at the right',
+              state: 'ok'
+            }
           ]}
         />
         <LanguageGrid />
@@ -304,7 +372,11 @@ const Gallery = () => {
           <Message level="info">Info message.</Message>
           <Message
             level="warning"
-            actions={<Button color="warning">{LL.CLOSE()}</Button>}
+            actions={
+              <Button icon="close" color="warning">
+                {LL.CLOSE()}
+              </Button>
+            }
           >
             Warning with an action.
           </Message>
@@ -315,20 +387,35 @@ const Gallery = () => {
 
       <Sample title="Dialog, toast">
         <div className="row wrap">
-          <Button onClick={() => setDialogOpen(true)}>Open dialog</Button>
+          <Button icon="open_in_new" onClick={() => setDialogOpen(true)}>
+            Open dialog
+          </Button>
           <Button
+            icon="check_circle"
             color="secondary"
             onClick={() => toast.success(LL.UPDATED_OF(LL.SETTINGS(1)))}
           >
             success
           </Button>
-          <Button color="secondary" onClick={() => toast.info('Information')}>
+          <Button
+            icon="info"
+            color="secondary"
+            onClick={() => toast.info('Information')}
+          >
             info
           </Button>
-          <Button color="warning" onClick={() => toast.warning(LL.INVALID_LOGIN())}>
+          <Button
+            icon="warning"
+            color="warning"
+            onClick={() => toast.warning(LL.INVALID_LOGIN())}
+          >
             warning
           </Button>
-          <Button color="error" onClick={() => toast.error('Something failed')}>
+          <Button
+            icon="error"
+            color="error"
+            onClick={() => toast.error('Something failed')}
+          >
             error
           </Button>
         </div>
@@ -338,20 +425,23 @@ const Gallery = () => {
           onClose={() => setDialogOpen(false)}
           actions={
             <>
-              <Button color="secondary" onClick={() => setDialogOpen(false)}>
+              <Button
+                icon="cancel"
+                color="secondary"
+                onClick={() => setDialogOpen(false)}
+              >
                 {LL.CANCEL()}
               </Button>
-              <Button
-                variant="contained"
-                onClick={() => toast.info('Toast above dialog')}
-              >
+              <Button icon="check" onClick={() => toast.info('Toast above dialog')}>
                 Toast
               </Button>
             </>
           }
         >
           <p>{LL.BLOCK_NAVIGATE_2()}</p>
-          <TextField name="d" label="Field in a dialog" fullWidth />
+          <div className="form">
+            <TextField name="d" label="Field in a dialog" fullWidth />
+          </div>
         </Dialog>
       </Sample>
 
@@ -360,12 +450,10 @@ const Gallery = () => {
           <Button color="secondary" icon="undo">
             {LL.RESET()}
           </Button>
-          <Button variant="contained" icon="check">
-            {LL.APPLY_CHANGES(2)}
-          </Button>
+          <Button icon="check">{LL.APPLY_CHANGES(2)}</Button>
         </SaveBar>
         <SaveBar warning icon="restart_alt" message={LL.RESTART_TEXT(0)}>
-          <Button variant="contained" color="warning" icon="restart_alt">
+          <Button color="warning" icon="restart_alt">
             {LL.RESTART()}
           </Button>
         </SaveBar>

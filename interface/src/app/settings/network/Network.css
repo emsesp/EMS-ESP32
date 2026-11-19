@@ -12,7 +12,7 @@
 .net-sig i {
   width: 4px;
   border-radius: 1px;
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--fill-hover);
 }
 .net-sig i:nth-child(1) {
   height: 4px;

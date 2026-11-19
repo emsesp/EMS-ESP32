@@ -16,6 +16,7 @@ SOURCES = [
     INTERFACE_DIR / "src" / "recovery",
     INTERFACE_DIR / "src" / "components",
     INTERFACE_DIR / "src" / "utils" / "versions.ts",
+    INTERFACE_DIR / "src" / "SignIn.css",
     INTERFACE_DIR / "public",
 ]
 

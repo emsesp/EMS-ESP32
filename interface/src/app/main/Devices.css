@@ -3,18 +3,65 @@
 }
 
 /* device list */
-.dv-devices .dv-ic {
-  width: 40px;
+.dv-empty {
+  margin: 0;
 }
-.dv-devices .dv-ic .icon {
-  vertical-align: middle;
+.dv-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+  gap: 8px;
 }
-.dv-devices tbody tr.sel,
-.dv-devices tbody tr.sel:hover {
-  background: rgba(144, 202, 249, 0.25);
+.dv-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 8px 10px;
+  font: inherit;
+  color: var(--text);
+  text-align: left;
+  background: var(--row);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
 }
-.dv-devices .dv-sub {
-  display: none;
+.dv-card:hover {
+  border-color: var(--primary);
+}
+.dv-card.sel {
+  border-color: var(--primary);
+  background: var(--primary-tint);
+}
+.dv-card:disabled {
+  opacity: 0.45;
+  cursor: default;
+  border-color: var(--border);
+}
+.dv-av {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary-tint);
+  color: var(--lightblue);
+}
+.dv-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.dv-text > span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dv-card.sel .count {
+  background: var(--primary);
+  color: rgba(0, 0, 0, 0.87);
 }
 
 /* selected device */
@@ -23,6 +70,9 @@
 }
 .dv-head .dv-title > .icon {
   flex-shrink: 0;
+}
+.dv-head .dv-title h2 {
+  color: var(--primary);
 }
 .dv-back {
   display: none;
@@ -83,12 +133,6 @@
   .dv-page.has-sel .dv-list {
     display: none;
   }
-  .dv-devices .dv-type {
-    display: none;
-  }
-  .dv-devices .dv-sub {
-    display: block;
-  }
   .dv-back {
     display: inline-flex;
     margin-bottom: 8px;
@@ -113,7 +157,7 @@
 
 @media (pointer: coarse) {
   .dv-values td {
-    height: 40px;
+    height: var(--touch);
   }
 }
 
@@ -127,7 +171,7 @@
   color: var(--lightblue);
 }
 .dvd-value {
-  margin: 14px 0 0;
+  margin: 0;
   font-size: 18px;
   overflow-wrap: anywhere;
 }

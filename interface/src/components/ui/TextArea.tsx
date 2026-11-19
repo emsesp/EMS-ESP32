@@ -1,7 +1,7 @@
 import { type FC, type ReactNode, type TextareaHTMLAttributes, useId } from 'react';
 
-import FieldFlags from './FieldFlags';
 import './Field.css';
+import FieldFlags from './FieldFlags';
 import { cx } from './cx';
 
 export interface TextAreaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {

@@ -1,0 +1,104 @@
+.lbx {
+  position: relative;
+}
+.lbx-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 6px 8px;
+  text-align: left;
+  font-weight: 400;
+  cursor: pointer;
+}
+.lbx-trigger:disabled {
+  cursor: default;
+}
+.lbx-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lbx-ph {
+  padding-left: 4px;
+  color: var(--text-2);
+}
+.lbx-chev {
+  color: var(--text-2);
+  transform: rotate(90deg);
+  transition: transform 0.15s;
+}
+.lbx-trigger[aria-expanded='true'] .lbx-chev {
+  transform: rotate(-90deg);
+}
+.lbx-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--primary-tint);
+  color: var(--lightblue);
+}
+.lbx-icon .icon {
+  font-size: 18px;
+}
+
+.lbx-list {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  max-height: min(360px, 60vh);
+  overflow-y: auto;
+  background: var(--paper-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-pop);
+}
+/* the active option is the focus indicator */
+.lbx-list:focus-visible {
+  outline: none;
+}
+.lbx-opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.lbx-opt.active {
+  background: var(--fill);
+}
+.lbx-opt.sel {
+  color: var(--primary);
+  background: var(--primary-tint);
+}
+.lbx-opt.sel.active {
+  background: var(--primary-tint-2);
+}
+.lbx-opt[aria-disabled='true'] {
+  opacity: 0.45;
+  cursor: default;
+}
+@media (pointer: coarse) {
+  .lbx-opt {
+    min-height: var(--touch);
+  }
+}
+@media (max-width: 599px) {
+  .lbx-opt {
+    font-size: 16px;
+  }
+}

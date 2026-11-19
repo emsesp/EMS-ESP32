@@ -21,6 +21,7 @@ import refresh from 'components/ui/icons/refresh.svg?raw';
 import restart_alt from 'components/ui/icons/restart_alt.svg?raw';
 import upload from 'components/ui/icons/upload.svg?raw';
 import upload_file from 'components/ui/icons/upload_file.svg?raw';
+import verified from 'components/ui/icons/verified.svg?raw';
 import visibility from 'components/ui/icons/visibility.svg?raw';
 import visibility_off from 'components/ui/icons/visibility_off.svg?raw';
 import warning from 'components/ui/icons/warning.svg?raw';
@@ -45,6 +46,7 @@ export const icons: Partial<Record<IconName, string>> = {
   restart_alt,
   upload,
   upload_file,
+  verified,
   visibility,
   visibility_off,
   warning

@@ -22,6 +22,7 @@ const state = {
       address: 0x10000,
       size: 0x480000,
       valid: true,
+      official: true,
       image_size: 0.8 * MB,
       version: '1.0.0',
       install_date: 0,
@@ -33,6 +34,7 @@ const state = {
       address: 0x490000,
       size: 0x490000,
       valid: true,
+      official: true,
       image_size: 1.86 * MB,
       version: '3.8.1',
       install_date: 1767225600,
@@ -44,6 +46,7 @@ const state = {
       address: 0x920000,
       size: 0x490000,
       valid: true,
+      official: false,
       image_size: 1.91 * MB,
       version: '3.9.0-dev.16',
       install_date: 1790000000,
@@ -226,8 +229,10 @@ export default function recoveryMock() {
             (x) => x.label === (params.get('partition') ?? nextUploadTarget())
           );
           if (!target || target.factory) return send(res, 400);
+          const official = !filename.startsWith('custom');
           Object.assign(target, {
             valid: true,
+            official,
             image_size: body.length,
             version: '',
             install_date: Math.floor(Date.now() / 1000),
@@ -236,7 +241,7 @@ export default function recoveryMock() {
           state.boot = target.label;
           const md5_ok = !!state.md5;
           state.md5 = null;
-          return md5_ok ? send(res, 200, { md5_ok }) : send(res, 200);
+          return send(res, 200, md5_ok ? { official, md5_ok } : { official });
         }
 
         return send(res, 404);

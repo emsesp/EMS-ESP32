@@ -2,26 +2,29 @@ import { memo, useContext, useState } from 'react';
 
 import * as SecurityApi from 'api/security';
 
+import { ChangesBar } from 'app/main/ChangesBar';
+import { PendingTag, pendingClass } from 'app/main/ListPage';
 import BlockNavigation from 'components/routing/BlockNavigation';
 import {
   Button,
   Icon,
-  IconButton,
   Loader,
   Message,
-  SaveBar,
   Section,
   SortHeader,
   Table,
   Tag,
   byNumber,
   byText,
+  cx,
+  rowAction,
   useTableSort
 } from 'components/ui';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { SecuritySettingsType, UserType } from 'types';
 import { useRest } from 'utils';
+import type { PendingState } from 'utils';
 import { createUserValidator } from 'validators';
 
 import User from './User';
@@ -98,24 +101,34 @@ const ManageUsers = () => {
     await rest.loadData();
   };
 
-  const rowState = (u: UserType) => {
+  const removeUser = (u: UserType) => {
+    setUsers(data.users.filter((x) => x.username !== u.username));
+    setUser(undefined);
+  };
+
+  const rowState = (u: UserType): PendingState => {
     if (!dirtyFlags.includes(u.username)) return undefined;
-    return orig.some((o) => o.username === u.username) ? 'st-mod' : 'st-new';
+    return orig.some((o) => o.username === u.username) ? 'mod' : 'new';
   };
 
   const roleTag = (u: UserType) =>
     u.admin ? (
-      <Tag kind="mod">{LL.ROLE_ADMIN()}</Tag>
+      <Tag kind="warn" icon="admin_panel_settings">
+        {LL.ROLE_ADMIN()}
+      </Tag>
     ) : (
-      <Tag kind="sys">{LL.ROLE_GUEST()}</Tag>
+      <Tag kind="ok" icon="group">
+        {LL.ROLE_GUEST()}
+      </Tag>
     );
 
-  const nameCell = (u: UserType) => (
+  const nameCell = (u: UserType, state: PendingState) => (
     <td>
       <span className="row sc-user">
         <Icon name="person" size="sm" className="muted" />
         {u.username}
         {u.username === me.username && <span className="cap">· {LL.YOU()}</span>}
+        <PendingTag state={state} />
       </span>
     </td>
   );
@@ -124,20 +137,16 @@ const ManageUsers = () => {
     <>
       {rest.blocker && <BlockNavigation blocker={rest.blocker} />}
       <Section
+        desc={LL.USERS_TEXT()}
         title={LL.USERS()}
         icon="group"
         actions={
-          <Button variant="contained" icon="person_add" onClick={addUser}>
-            {LL.ADD_USER()}
+          <Button icon="add" onClick={addUser}>
+            {LL.ADD(0)}
           </Button>
         }
       >
-        <p className="cap sc-desc">{LL.USERS_TEXT()}</p>
-        {noAdmin && (
-          <Message level="warning" className="sc-msg">
-            {LL.USER_WARNING()}
-          </Message>
-        )}
+        {noAdmin && <Message level="warning">{LL.USER_WARNING()}</Message>}
         <Table stack>
           <thead>
             <tr>
@@ -147,36 +156,33 @@ const ManageUsers = () => {
             </tr>
           </thead>
           <tbody>
-            {sort.rows.map((u) => (
-              <tr key={u.username} className={rowState(u)}>
-                {nameCell(u)}
-                <td data-label={LL.ROLE()}>{roleTag(u)}</td>
-                <td className="act">
-                  <IconButton
-                    icon="edit"
-                    label={LL.EDIT()}
-                    onClick={() => editUser(u)}
-                  />
-                  <IconButton
-                    icon="delete"
-                    label={LL.REMOVE()}
-                    onClick={() =>
-                      setUsers(data.users.filter((x) => x.username !== u.username))
-                    }
-                  />
-                </td>
-              </tr>
-            ))}
+            {sort.rows.map((u) => {
+              const state = rowState(u);
+              return (
+                <tr
+                  key={u.username}
+                  {...rowAction(() => editUser(u), `${LL.EDIT()} ${u.username}`)}
+                  className={cx('click', pendingClass(state))}
+                >
+                  {nameCell(u, state)}
+                  <td data-label={LL.ROLE()}>{roleTag(u)}</td>
+                  <td className="act" />
+                </tr>
+              );
+            })}
             {removed.map((u) => (
-              <tr key={u.username} className="st-del">
-                {nameCell(u)}
+              <tr key={u.username} className={pendingClass('del')}>
+                {nameCell(u, 'del')}
                 <td data-label={LL.ROLE()}>{roleTag(u)}</td>
                 <td className="act">
-                  <IconButton
+                  <Button
+                    size="sm"
+                    color="secondary"
                     icon="undo"
-                    label={LL.UNDO()}
                     onClick={() => setUsers([...data.users, u])}
-                  />
+                  >
+                    {LL.UNDO()}
+                  </Button>
                 </td>
               </tr>
             ))}
@@ -185,31 +191,18 @@ const ManageUsers = () => {
       </Section>
 
       {dirtyFlags.length > 0 && (
-        <SaveBar
+        <ChangesBar
           message={
             <>
               {LL.UNSAVED_CHANGES({ num: dirtyFlags.length })}
               {noAdmin && <span className="warnc"> · {LL.USER_WARNING()}</span>}
             </>
           }
-        >
-          <Button
-            color="secondary"
-            icon="undo"
-            disabled={rest.saving}
-            onClick={cancel}
-          >
-            {LL.CANCEL()}
-          </Button>
-          <Button
-            variant="contained"
-            icon="check"
-            disabled={rest.saving || noAdmin}
-            onClick={() => void save()}
-          >
-            {LL.SAVE()}
-          </Button>
-        </SaveBar>
+          saving={rest.saving}
+          saveDisabled={noAdmin}
+          onDiscard={cancel}
+          onSave={() => void save()}
+        />
       )}
 
       {user && (
@@ -218,6 +211,7 @@ const ManageUsers = () => {
           creating={creating}
           validator={createUserValidator(data.users, creating)}
           onDone={doneEditing}
+          onRemove={creating ? undefined : () => removeUser(user)}
           onClose={() => setUser(undefined)}
         />
       )}

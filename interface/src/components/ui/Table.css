@@ -5,7 +5,7 @@
 }
 .tbl th {
   text-align: left;
-  font-weight: 400;
+  font-weight: 700;
   color: var(--text-2);
   font-size: 12px;
   text-transform: uppercase;
@@ -36,7 +36,8 @@
 .tbl tbody tr.click {
   cursor: pointer;
 }
-.tbl tbody tr.click:hover {
+.tbl tbody tr.click:hover,
+.tbl.hover tbody tr:hover {
   background: var(--row-hover);
 }
 .tbl tbody tr.click:focus-visible {
@@ -98,7 +99,7 @@
   .tbl.stack tbody tr {
     margin-bottom: 8px;
     padding: 6px 10px;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     background: var(--paper-2);
   }
   .tbl.stack td {
@@ -122,6 +123,16 @@
   .tbl.stack td:first-child {
     font-weight: 500;
     text-align: left;
+  }
+  .tbl.stack tbody tr:has(> td.tbl-empty) {
+    padding: 0;
+    background: transparent;
+  }
+  .tbl.stack td.tbl-empty {
+    display: block;
+    padding: 16px 8px;
+    font-weight: 400;
+    text-align: center;
   }
   .tbl.stack td.act {
     justify-content: flex-end;

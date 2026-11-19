@@ -4,6 +4,7 @@ import { useRequest } from 'alova/client';
 import {
   Button,
   Icon,
+  SearchField,
   Section,
   SortHeader,
   Switch,
@@ -49,6 +50,7 @@ interface Editing {
 
 const Scheduler = () => {
   const { LL, locale } = useI18nContext();
+  const [query, setQuery] = useState('');
   const [editing, setEditing] = useState<Editing>();
   const days = useMemo(() => weekdayNames(locale, 'narrow'), [locale]);
 
@@ -73,7 +75,15 @@ const Scheduler = () => {
     initialData: [] as CommandItem[]
   });
 
-  const rows = [...list.rows].sort((a, b) => a.item.flags - b.item.flags);
+  const q = query.trim().toLowerCase();
+  const matches = ({ item }: PendingRow<ScheduleItem>) => {
+    if (!q) return true;
+    const c = commands.find((x) => x.name === item.cmd_name);
+    return `${item.name} ${item.time} ${item.cmd_name} ${c?.cmd ?? ''} ${c?.value ?? ''}`
+      .toLowerCase()
+      .includes(q);
+  };
+  const rows = list.rows.filter(matches).sort((a, b) => a.item.flags - b.item.flags);
   const byFlags = byNumber<PendingRow<ScheduleItem>>((r) => r.item.flags);
   const byTime = byText<PendingRow<ScheduleItem>>((r) => r.item.time);
   const sort = useTableSort(rows, {
@@ -207,15 +217,22 @@ const Scheduler = () => {
   return (
     <ListPage list={list}>
       <Section
+        desc={LL.SCHEDULER_HELP_1()}
         title={LL.SCHEDULER()}
         icon="more_time"
         actions={
-          <Button variant="contained" icon="add" onClick={add}>
-            {LL.ADD(0)}
-          </Button>
+          <>
+            <SearchField
+              label={LL.SEARCH()}
+              value={query}
+              onInput={(e) => setQuery(e.currentTarget.value)}
+            />
+            <Button icon="add" onClick={add}>
+              {LL.ADD(0)}
+            </Button>
+          </>
         }
       >
-        <p className="cap sch-desc">{LL.SCHEDULER_HELP_1()}</p>
         <div className="tbl-wrap">
           <Table stack className="sch-tbl">
             <thead>
@@ -231,14 +248,22 @@ const Scheduler = () => {
                 <th />
               </tr>
             </thead>
-            <tbody>{sort.rows.map(renderRow)}</tbody>
+            <tbody>
+              {sort.rows.map(renderRow)}
+              {rows.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="tbl-empty">
+                    {LL.SCHEDULE_NONE()}
+                  </td>
+                </tr>
+              )}
+            </tbody>
           </Table>
         </div>
       </Section>
 
       {editing && (
         <SchedulerDialog
-          open
           creating={!editing.key}
           item={editing.item}
           items={list.items}

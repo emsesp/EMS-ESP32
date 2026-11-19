@@ -1,7 +1,3 @@
-.du-text {
-  margin: 0 0 12px;
-  color: var(--text-2);
-}
 .du-actions,
 .du-footer {
   display: flex;
@@ -36,36 +32,7 @@
   flex-direction: column;
   min-width: 0;
 }
-.du-fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 12px;
-}
-
 /* restore */
-.du-drop {
-  display: block;
-  width: 100%;
-  padding: 22px;
-  border: 2px dashed rgba(255, 255, 255, 0.23);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text-2);
-  font: inherit;
-  text-align: center;
-  cursor: pointer;
-}
-.du-drop:hover,
-.du-drop.on {
-  border-color: var(--primary);
-  color: var(--primary);
-}
-.du-drop > .icon {
-  display: block;
-  margin: 0 auto 6px;
-  font-size: 32px;
-}
 .du-file {
   display: flex;
   flex-wrap: wrap;
@@ -124,17 +91,14 @@
 .du-progress {
   margin-top: 8px;
 }
-.du-confirm-text {
-  margin-top: 12px;
+.dialog-content > .du-note {
+  margin-bottom: 12px;
 }
 
 @media (max-width: 599px) {
-  .du-fields {
-    grid-template-columns: 1fr;
-  }
   .du-selall.checkbox {
     display: inline-flex;
-    min-height: 40px;
+    min-height: var(--touch);
   }
   .du-footer > * {
     flex: 1 1 0;

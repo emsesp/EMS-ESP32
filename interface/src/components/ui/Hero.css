@@ -20,19 +20,19 @@
   font-size: 28px;
 }
 .hero.ok .hero-icon {
-  background: rgba(102, 187, 106, 0.18);
+  background: var(--success-tint);
   color: var(--success);
 }
 .hero.warn .hero-icon {
-  background: rgba(255, 167, 38, 0.18);
+  background: var(--warning-tint);
   color: var(--warning);
 }
 .hero.err .hero-icon {
-  background: rgba(244, 67, 54, 0.18);
+  background: var(--error-tint);
   color: var(--error);
 }
 .hero.off .hero-icon {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--fill);
   color: var(--text-3);
 }
 .hero-title {

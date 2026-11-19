@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useSyncExternalStore } from 'react';
+import { memo, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
@@ -23,43 +23,59 @@ const ICONS: Record<ToastSeverity, IconName> = {
   info: 'info'
 };
 
-// auto-closes, but the countdown stops while the browser tab is hidden
+// auto-closes; the countdown (and its bar) stops while the pointer or focus is on
+// the toast, or the browser tab is hidden
 const Toast = memo(({ item }: { item: ToastItem }) => {
   const { LL } = useI18nContext();
+  const ref = useRef<HTMLDivElement>(null);
+  const remaining = useRef(AUTO_CLOSE_MS);
+  const [hover, setHover] = useState(false);
+  const [focus, setFocus] = useState(false);
+  const [hidden, setHidden] = useState(document.hidden);
+  const paused = hover || focus || hidden;
 
   useEffect(() => {
-    let remaining = AUTO_CLOSE_MS;
-    let started = Date.now();
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const start = () => {
-      started = Date.now();
-      timer = setTimeout(() => removeToast(item.id), remaining);
-    };
-    const onVisibility = () => {
-      if (document.hidden) {
-        clearTimeout(timer);
-        remaining -= Date.now() - started;
-      } else {
-        start();
-      }
-    };
-    if (!document.hidden) start();
+    const el = ref.current;
+    const onVisibility = () => setHidden(document.hidden);
+    const onFocusIn = () => setFocus(true);
+    const onFocusOut = (e: FocusEvent) =>
+      setFocus(el?.contains(e.relatedTarget as Node | null) ?? false);
     document.addEventListener('visibilitychange', onVisibility);
+    el?.addEventListener('focusin', onFocusIn);
+    el?.addEventListener('focusout', onFocusOut);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      el?.removeEventListener('focusin', onFocusIn);
+      el?.removeEventListener('focusout', onFocusOut);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (paused) return;
+    const started = Date.now();
+    const timer = setTimeout(() => removeToast(item.id), remaining.current);
     return () => {
       clearTimeout(timer);
-      document.removeEventListener('visibilitychange', onVisibility);
+      remaining.current -= Date.now() - started;
     };
-  }, [item.id]);
+  }, [paused, item.id]);
 
   return (
     <div
-      className={`toast ${item.severity}`}
+      ref={ref}
+      className={`toast ${item.severity}${paused ? ' paused' : ''}`}
       role={item.severity === 'error' ? 'alert' : 'status'}
       onClick={() => removeToast(item.id)}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
     >
-      <Icon name={ICONS[item.severity]} size="sm" />
+      <Icon name={ICONS[item.severity]} />
       <span className="grow">{item.message}</span>
-      <IconButton icon="close" label={LL.CLOSE()} />
+      <IconButton icon="close" label={LL.CLOSE()} plain />
+      <span
+        className="toast-bar"
+        style={{ animationDuration: `${AUTO_CLOSE_MS}ms` }}
+      />
     </div>
   );
 });
@@ -72,19 +88,19 @@ const supportsPopover =
 const Toaster = memo(() => {
   const toasts = useSyncExternalStore(subscribe, getSnapshot);
   const ref = useRef<HTMLDivElement>(null);
-  const count = useRef(0);
+  const lastId = useRef(0);
 
   useEffect(() => {
     const el = ref.current;
+    const newest = toasts.at(-1)?.id ?? 0;
+    const added = newest > lastId.current;
     if (el && supportsPopover) {
       const isOpen = el.matches(':popover-open');
-      if (toasts.length > count.current && isOpen) el.hidePopover();
-      if (toasts.length && (!isOpen || toasts.length > count.current)) {
-        el.showPopover();
-      }
+      if (added && isOpen) el.hidePopover();
+      if (toasts.length && (!isOpen || added)) el.showPopover();
       if (!toasts.length && isOpen) el.hidePopover();
     }
-    count.current = toasts.length;
+    lastId.current = Math.max(lastId.current, newest);
   }, [toasts]);
 
   return (

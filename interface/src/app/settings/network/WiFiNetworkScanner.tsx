@@ -50,7 +50,6 @@ const WiFiNetworkScanner = () => {
       title={LL.NETWORKS_NEARBY()}
       actions={
         <Button
-          size="sm"
           icon="refresh"
           disabled={scanning}
           onClick={() => void scanNetworks()}
@@ -62,7 +61,7 @@ const WiFiNetworkScanner = () => {
       {networkList ? (
         <WiFiNetworkSelector networkList={networkList} />
       ) : (
-        <Loader error={errorMessage} />
+        <Loader error={errorMessage} onRetry={() => void scanNetworks()} />
       )}
     </Section>
   );

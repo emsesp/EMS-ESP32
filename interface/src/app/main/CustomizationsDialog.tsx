@@ -19,7 +19,6 @@ interface CustomizationForm {
 }
 
 interface CustomizationsDialogProps {
-  open: boolean;
   entity: DeviceEntity;
   // the entity as loaded, to tell whether there is anything to reset
   original: DeviceEntity | undefined;
@@ -38,7 +37,6 @@ const limit = (v: number | string | undefined, before: number | null | undefined
   toNumber(v) ?? (before === undefined ? undefined : null);
 
 const CustomizationsDialog = ({
-  open,
   entity,
   original,
   onClose,
@@ -104,15 +102,14 @@ const CustomizationsDialog = ({
 
   return (
     <EntityDialog
-      open={open}
-      title={`${LL.EDIT()} ${LL.ENTITY()}`}
+      title={LL.EDIT_ENTITY()}
       item={item}
       validator={validator}
       onClose={onClose}
       onSave={save}
       extraActions={(v) =>
         showReset(v) && (
-          <Button color="error" icon="restart_alt" onClick={onReset}>
+          <Button color="error" icon="settings_backup_restore" onClick={onReset}>
             {LL.RESET()}
           </Button>
         )
@@ -127,7 +124,7 @@ const CustomizationsDialog = ({
                   label: LL.ID_OF(LL.ENTITY()),
                   value: <span className="mono">{entity.id}</span>
                 },
-                { label: `${LL.DEFAULT(1)} ${LL.ENTITY_NAME(1)}`, value: entity.n },
+                { label: LL.DEFAULT_NAME(), value: entity.n },
                 {
                   label: LL.WRITEABLE(),
                   value: (

@@ -7,11 +7,7 @@
 .support-img {
   max-width: 40%;
   max-height: 160px;
-  border-radius: 8px;
-}
-.sec-text {
-  margin: 8px 0 12px;
-  color: var(--text-2);
+  border-radius: var(--radius-sm);
 }
 .help-steps {
   display: grid;
@@ -25,7 +21,7 @@
   align-items: center;
   gap: 14px;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--paper-2);
 }
 .help-steps .grow {
@@ -40,7 +36,7 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: rgba(144, 202, 249, 0.16);
+  background: var(--primary-tint);
   color: var(--primary);
 }
 .sum-head {

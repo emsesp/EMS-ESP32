@@ -4,7 +4,14 @@ import { useNavigate } from 'react-router';
 import { readSetup, saveSetup } from 'api/security';
 
 import { useRequest } from 'alova/client';
-import { Button, Dialog, Message, TextField, toast } from 'components/ui';
+import {
+  Button,
+  Dialog,
+  Message,
+  TextField,
+  focusInvalid,
+  toast
+} from 'components/ui';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { SetupType } from 'types';
@@ -64,13 +71,13 @@ const SetupDialog = () => {
         actions={
           <>
             <Button
-              variant="contained"
+              icon="settings"
               color="warning"
               onClick={() => void navigate('/settings/ap')}
             >
               {LL.SETTINGS_OF(LL.ACCESS_POINT(0))}
             </Button>
-            <Button color="warning" onClick={dismiss}>
+            <Button icon="close" color="secondary" onClick={dismiss}>
               {LL.CLOSE()}
             </Button>
           </>
@@ -98,6 +105,7 @@ const SetupDialog = () => {
       await validate(createSetupValidator(state, setup), setup);
     } catch (error) {
       setFieldErrors((error as ValidationError).fieldErrors);
+      focusInvalid();
       return;
     }
     setSaving(true);
@@ -118,50 +126,53 @@ const SetupDialog = () => {
       open
       size="md"
       title={LL.SETUP_TITLE()}
+      onSubmit={() => void onSave()}
       actions={
         <>
-          <Button color="secondary" onClick={() => signOut(true)}>
+          <Button icon="logout" color="secondary" onClick={() => signOut(true)}>
             {LL.SIGN_OUT()}
           </Button>
-          <Button icon="save" disabled={saving} onClick={() => void onSave()}>
+          <Button type="submit" icon="check" disabled={saving}>
             {LL.UPDATE()}
           </Button>
         </>
       }
     >
       <p>{LL.SETUP_TEXT()}</p>
-      {state.admin && (
+      <div className="form">
+        {state.admin && (
+          <TextField
+            type="password"
+            autoComplete="new-password"
+            label={LL.SETUP_ADMIN_PASSWORD({ name: me.username })}
+            {...field('password')}
+          />
+        )}
+        {state.ap && (
+          <TextField
+            type="password"
+            autoComplete="new-password"
+            label={LL.SETUP_AP_PASSWORD()}
+            helperText={
+              state.ap_required ? LL.SETUP_AP_REQUIRED() : LL.SETUP_AP_OPTIONAL()
+            }
+            {...field('ap_password')}
+          />
+        )}
+        <p className="full">{LL.SETUP_VIEW_USER()}</p>
+        <TextField
+          autoComplete="off"
+          autoCapitalize="none"
+          label={LL.USERNAME(1)}
+          {...field('view_username')}
+        />
         <TextField
           type="password"
           autoComplete="new-password"
-          label={LL.SETUP_ADMIN_PASSWORD({ name: me.username })}
-          {...field('password')}
+          label={LL.PASSWORD()}
+          {...field('view_password')}
         />
-      )}
-      {state.ap && (
-        <TextField
-          type="password"
-          autoComplete="new-password"
-          label={LL.SETUP_AP_PASSWORD()}
-          helperText={
-            state.ap_required ? LL.SETUP_AP_REQUIRED() : LL.SETUP_AP_OPTIONAL()
-          }
-          {...field('ap_password')}
-        />
-      )}
-      <p>{LL.SETUP_VIEW_USER()}</p>
-      <TextField
-        autoComplete="off"
-        autoCapitalize="none"
-        label={LL.USERNAME(1)}
-        {...field('view_username')}
-      />
-      <TextField
-        type="password"
-        autoComplete="new-password"
-        label={LL.PASSWORD()}
-        {...field('view_password')}
-      />
+      </div>
     </Dialog>
   );
 };

@@ -19,7 +19,7 @@ import type {
   BoardProfileKey,
   Settings
 } from 'app/main/types';
-import { createSettingsValidator } from 'app/main/validators';
+import { VALIDATION_LIMITS, createSettingsValidator } from 'app/main/validators';
 import {
   Button,
   FormSection,
@@ -34,11 +34,15 @@ import {
   TextField,
   toast
 } from 'components/ui';
+import 'components/ui/Chip.css';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import './ApplicationSettings.css';
 import FormPage, { useFormPage } from './FormPage';
+
+// highest GPIO number on the supported chips (ESP32-S3)
+const GPIO_MAX = 48;
 
 const ENTITY_LANGUAGES: Record<string, string> = {
   cs: 'Česky',
@@ -113,7 +117,11 @@ interface Group {
 
 const ApplicationSettings = () => {
   const { LL } = useI18nContext();
-  const { data: hardware } = useRequest(readSystemStatus);
+  const {
+    data: hardware,
+    error: hardwareError,
+    send: readHardware
+  } = useRequest(readSystemStatus);
   const form = useFormPage<Settings>({
     read: readSettings,
     update: writeSettings,
@@ -209,14 +217,28 @@ const ApplicationSettings = () => {
       />
     )
   });
-  const num = (key: K, label: string, unit?: string, disabled?: boolean) => ({
+  const num = (
+    key: K,
+    label: string,
+    extra: {
+      unit?: string;
+      min?: number;
+      max?: number;
+      help?: string;
+      disabled?: boolean;
+    } = {}
+  ) => ({
     key,
     label,
+    help: extra.help,
     node: (
       <TextField
         label={label}
-        unit={unit}
-        disabled={disabled}
+        unit={extra.unit}
+        min={extra.min}
+        max={extra.max}
+        helperText={extra.help}
+        disabled={extra.disabled}
         {...form.number(key)}
       />
     )
@@ -240,7 +262,11 @@ const ApplicationSettings = () => {
     if (!hardware) return [];
     const custom = data.board_profile === 'CUSTOM';
     const noPsram = hardware.psram ? undefined : LL.IS_REQUIRED('PSRAM');
-    const off = ` (0=${LL.DISABLED(1)})`;
+    const gpio = { min: 0, max: GPIO_MAX };
+    const port = {
+      min: VALIDATION_LIMITS.PORT_MIN,
+      max: VALIDATION_LIMITS.PORT_MAX
+    };
 
     const profiles: SelectOption[] = (
       hardware.model.startsWith('BBQKees')
@@ -300,22 +326,34 @@ const ApplicationSettings = () => {
         items: [
           sel('tx_mode', LL.TX_MODE(), [
             ...(data.developer_mode ? [{ value: '0', label: LL.OFF() }] : []),
-            ...opts(['EMS', 'EMS+', 'HT3', LL.HARDWARE(), 'Auto'], 1)
+            ...opts(['EMS', 'EMS+', 'HT3', LL.HARDWARE(), LL.AUTO()], 1)
           ]),
           sel('ems_bus_id', LL.ID_OF(LL.EMS_BUS(0)), EMS_BUS_IDS),
           sw('readonly_mode', LL.READONLY()),
           sw('write_protection', LL.WRITE_PROTECTION()),
-          data.write_protection && num('write_limit', LL.WRITE_LIMIT()),
+          data.write_protection &&
+            num('write_limit', LL.WRITE_LIMIT(), {
+              min: VALIDATION_LIMITS.WRITE_LIMIT_MIN,
+              max: VALIDATION_LIMITS.WRITE_LIMIT_MAX
+            }),
           data.write_protection &&
             data.write_limit !== 0 &&
             sw('write_limit_refuse', LL.WRITE_LIMIT_REFUSE()),
           sw('boiler_heatingoff', LL.HEATINGOFF()),
           sw('remote_timeout_en', LL.REMOTE_TIMEOUT_EN()),
           data.remote_timeout_en &&
-            num('remote_timeout', LL.REMOTE_TIMEOUT(), LL.HOURS()),
+            num('remote_timeout', LL.REMOTE_TIMEOUT(), {
+              unit: LL.HOURS(),
+              min: VALIDATION_LIMITS.REMOTE_TIMEOUT_MIN,
+              max: VALIDATION_LIMITS.REMOTE_TIMEOUT_MAX
+            }),
           sw('shower_timer', LL.ENABLE_SHOWER_TIMER()),
           data.shower_timer &&
-            num('shower_min_duration', LL.MIN_DURATION(), LL.SECONDS()),
+            num('shower_min_duration', LL.MIN_DURATION(), {
+              unit: LL.SECONDS(),
+              min: VALIDATION_LIMITS.SHOWER_MIN_DURATION_MIN,
+              max: VALIDATION_LIMITS.SHOWER_MIN_DURATION_MAX
+            }),
           sw(
             'shower_alert',
             LL.ENABLE_SHOWER_ALERT(),
@@ -324,19 +362,19 @@ const ApplicationSettings = () => {
             !data.shower_timer
           ),
           data.shower_alert &&
-            num(
-              'shower_alert_trigger',
-              LL.TRIGGER_TIME(),
-              LL.MINUTES(),
-              !data.shower_timer
-            ),
+            num('shower_alert_trigger', LL.TRIGGER_TIME(), {
+              unit: LL.MINUTES(),
+              min: VALIDATION_LIMITS.SHOWER_ALERT_TRIGGER_MIN,
+              max: VALIDATION_LIMITS.SHOWER_ALERT_TRIGGER_MAX,
+              disabled: !data.shower_timer
+            }),
           data.shower_alert &&
-            num(
-              'shower_alert_coldshot',
-              LL.COLD_SHOT_DURATION(),
-              LL.SECONDS(),
-              !data.shower_timer
-            )
+            num('shower_alert_coldshot', LL.COLD_SHOT_DURATION(), {
+              unit: LL.SECONDS(),
+              min: VALIDATION_LIMITS.SHOWER_ALERT_COLDSHOT_MIN,
+              max: VALIDATION_LIMITS.SHOWER_ALERT_COLDSHOT_MAX,
+              disabled: !data.shower_timer
+            })
         ]
       },
       {
@@ -376,25 +414,37 @@ const ApplicationSettings = () => {
               </div>
             )
           },
-          custom && num('rx_gpio', LL.GPIO_OF('Rx')),
-          custom && num('tx_gpio', LL.GPIO_OF('Tx')),
-          custom && num('pbutton_gpio', LL.GPIO_OF(LL.BUTTON())),
-          custom && num('dallas_gpio', LL.GPIO_OF(LL.TEMPERATURE()) + off),
-          custom && num('led_gpio', LL.GPIO_OF('LED') + off),
+          custom && num('rx_gpio', LL.GPIO_OF('Rx'), gpio),
+          custom && num('tx_gpio', LL.GPIO_OF('Tx'), gpio),
+          custom && num('pbutton_gpio', LL.GPIO_OF(LL.BUTTON()), gpio),
+          custom &&
+            num('dallas_gpio', LL.GPIO_OF(LL.TEMPERATURE()), {
+              ...gpio,
+              help: LL.ZERO_DISABLES()
+            }),
+          custom &&
+            num('led_gpio', LL.GPIO_OF('LED'), {
+              ...gpio,
+              help: LL.ZERO_DISABLES()
+            }),
           custom &&
             data.led_gpio !== 0 &&
-            sel('led_type', `LED ${LL.TYPE(0)}`, opts(['LED', 'RGB-LED'])),
+            sel('led_type', LL.LED_TYPE(), opts(['LED', 'RGB-LED'])),
           custom &&
             sel('phy_type', LL.PHY_TYPE(), opts([LL.DISABLED(1), ...PHY_NAMES])),
           custom &&
             data.phy_type !== 0 &&
-            num('eth_power', `${LL.GPIO_OF('PHY Power')} (-1=${LL.DISABLED(1)})`),
+            num('eth_power', LL.GPIO_OF(LL.PHY_POWER()), {
+              min: -1,
+              max: GPIO_MAX,
+              help: LL.MINUS_ONE_DISABLES()
+            }),
           custom &&
             data.phy_type !== 0 &&
-            num('eth_phy_addr', LL.ADDRESS_OF('PHY I²C')),
+            num('eth_phy_addr', LL.ADDRESS_OF('PHY I²C'), { min: 0, max: 31 }),
           custom &&
             data.phy_type !== 0 &&
-            sel('eth_clock_mode', 'PHY Clk', ETH_CLOCKS)
+            sel('eth_clock_mode', LL.PHY_CLOCK(), ETH_CLOCKS)
         ]
       },
       {
@@ -441,25 +491,39 @@ const ApplicationSettings = () => {
         items: [
           sw('telnet_enabled', LL.ENABLE_TELNET()),
           sw('modbus_enabled', LL.ENABLE_MODBUS(), noPsram, false, !hardware.psram),
-          data.modbus_enabled && num('modbus_port', 'Port'),
-          data.modbus_enabled && num('modbus_max_clients', LL.AP_MAX_CLIENTS()),
-          data.modbus_enabled && num('modbus_timeout', 'Timeout', LL.SECONDS()),
+          data.modbus_enabled && num('modbus_port', LL.PORT(), port),
+          data.modbus_enabled &&
+            num('modbus_max_clients', LL.AP_MAX_CLIENTS(), {
+              min: VALIDATION_LIMITS.MODBUS_MAX_CLIENTS_MIN,
+              max: VALIDATION_LIMITS.MODBUS_MAX_CLIENTS_MAX
+            }),
+          data.modbus_enabled &&
+            num('modbus_timeout', LL.TIMEOUT(), {
+              unit: LL.SECONDS(),
+              min: VALIDATION_LIMITS.MODBUS_TIMEOUT_MIN,
+              max: VALIDATION_LIMITS.MODBUS_TIMEOUT_MAX
+            }),
           sw('syslog_enabled', LL.ENABLE_SYSLOG()),
-          data.syslog_enabled && txt('syslog_host', 'Host', { mono: true }),
-          data.syslog_enabled && num('syslog_port', 'Port'),
+          data.syslog_enabled && txt('syslog_host', LL.HOST(), { mono: true }),
+          data.syslog_enabled && num('syslog_port', LL.PORT(), port),
           data.syslog_enabled && sel('syslog_level', LL.LOG_LEVEL(), SYSLOG_LEVELS),
           data.syslog_enabled &&
-            num('syslog_mark_interval', LL.MARK_INTERVAL(), LL.SECONDS()),
+            num('syslog_mark_interval', LL.MARK_INTERVAL(), {
+              unit: LL.SECONDS(),
+              min: VALIDATION_LIMITS.SYSLOG_MARK_INTERVAL_MIN,
+              max: VALIDATION_LIMITS.SYSLOG_MARK_INTERVAL_MAX
+            }),
           sw('email_enabled', LL.ENABLE_EMAIL(), noPsram, false, !hardware.psram),
-          data.email_enabled && txt('email_server', 'SMTP Server', { mono: true }),
-          data.email_enabled && num('email_port', 'Port'),
+          data.email_enabled &&
+            txt('email_server', LL.SMTP_SERVER(), { mono: true }),
+          data.email_enabled && num('email_port', LL.PORT(), port),
           data.email_enabled &&
             sel(
               'email_security',
               LL.SECURITY(0),
               opts([LL.OFF(), 'SSL', 'StartTLS'])
             ),
-          data.email_enabled && txt('email_login', 'Login'),
+          data.email_enabled && txt('email_login', LL.USERNAME(0)),
           data.email_enabled &&
             txt('email_pass', LL.PASSWORD(), { type: 'password' }),
           data.email_enabled && txt('email_sender', LL.EMAIL_FROM()),
@@ -509,7 +573,14 @@ const ApplicationSettings = () => {
   return (
     <FormPage form={form}>
       {(data) => {
-        if (!hardware) return <Loader />;
+        if (!hardware) {
+          return (
+            <Loader
+              error={hardwareError?.message}
+              onRetry={() => void readHardware()}
+            />
+          );
+        }
         const shown = groups(data).map((g) => ({
           ...g,
           items: g.items.filter((i): i is Item => !!i && matches(i))
@@ -527,7 +598,7 @@ const ApplicationSettings = () => {
                   <button
                     key={g.id}
                     type="button"
-                    className="app-jump"
+                    className="chip"
                     disabled={!g.items.length}
                     onClick={() => jump(g.id)}
                   >

@@ -7,7 +7,6 @@ import { useRequest } from 'alova/client';
 import type { APIcall } from 'app/main/types';
 import {
   Button,
-  Dialog,
   Hero,
   Loader,
   Meter,
@@ -22,6 +21,7 @@ import { NTPSyncStatus } from 'types';
 import { formatDateTime, updateAvailable, useInterval } from 'utils';
 
 import './Status.css';
+import SystemConfirmDialog from './SystemConfirmDialog';
 import SystemMonitor from './SystemMonitor';
 import {
   STATE_COLORS,
@@ -93,7 +93,8 @@ const SystemStatus = () => {
         title={system.text}
         text={join(
           data.model || data.board,
-          `${LL.UPTIME()} ${formatDuration(data.uptime, LL)}`
+          `${LL.UPTIME()} ${formatDuration(data.uptime, LL)}`,
+          !!data.reset_reason && `${LL.LAST_RESTART()}: ${data.reset_reason}`
         )}
       />
 
@@ -109,7 +110,6 @@ const SystemStatus = () => {
               update && LL.UPDATE_AVAILABLE()
             )}
             state={update ? 'warn' : 'ok'}
-            badge={update}
           />
           <Tile
             to="/status/hardwarestatus"
@@ -230,7 +230,6 @@ const SystemStatus = () => {
             </Button>
             {!data.disable_reset && (
               <Button
-                variant="contained"
                 color="error"
                 icon="delete_forever"
                 onClick={() => setConfirm('format')}
@@ -242,35 +241,12 @@ const SystemStatus = () => {
         )}
       </Section>
 
-      <Dialog
-        open={confirm !== undefined}
-        title={confirm === 'format' ? LL.FACTORY_RESET() : LL.RESTART()}
+      <SystemConfirmDialog
+        confirm={confirm}
+        disabled={sending}
         onClose={() => setConfirm(undefined)}
-        actions={
-          <>
-            <Button
-              color="secondary"
-              icon="cancel"
-              onClick={() => setConfirm(undefined)}
-            >
-              {LL.CANCEL()}
-            </Button>
-            <Button
-              variant="contained"
-              color={confirm === 'format' ? 'error' : 'warning'}
-              icon={confirm === 'format' ? 'delete_forever' : 'restart_alt'}
-              disabled={sending}
-              onClick={() => confirm && void run(confirm)}
-            >
-              {confirm === 'format' ? LL.FACTORY_RESET() : LL.RESTART()}
-            </Button>
-          </>
-        }
-      >
-        {confirm === 'format'
-          ? LL.SYSTEM_FACTORY_TEXT_DIALOG()
-          : LL.RESTART_CONFIRM()}
-      </Dialog>
+        onConfirm={run}
+      />
     </>
   );
 };

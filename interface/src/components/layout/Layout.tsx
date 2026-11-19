@@ -9,6 +9,7 @@ import type { RequiredChildrenProps } from 'utils';
 import './Layout.css';
 import LayoutAppBar from './LayoutAppBar';
 import LayoutDrawer from './LayoutDrawer';
+import LayoutTabBar from './LayoutTabBar';
 import SetupDialog from './SetupDialog';
 import TelnetBanner from './TelnetBanner';
 import TokensResetBanner from './TokensResetBanner';
@@ -45,6 +46,7 @@ const LayoutComponent: FC<RequiredChildrenProps> = ({ children }) => {
         </SaveBarSlotContext.Provider>
         <div className="savebar-slot" ref={setSaveBarSlot} />
       </main>
+      <LayoutTabBar active={trail[0]?.path} onMore={toggleDrawer} />
     </div>
   );
 };

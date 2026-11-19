@@ -9,7 +9,7 @@
   align-items: center;
   padding: 14px;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: var(--paper-2);
   color: var(--text);
   text-decoration: none;

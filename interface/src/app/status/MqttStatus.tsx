@@ -3,22 +3,26 @@ import * as MqttApi from 'api/mqtt';
 import { useRequest } from 'alova/client';
 import { Loader, Stat, StatRow } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
+import type { TranslationFunctions } from 'i18n/i18n-types';
 import { MqttDisconnectReason } from 'types';
 import { formatDateTimeMinutes, formatTimeAgo, useInterval } from 'utils';
 
 import StatusPage from './StatusPage';
 import { mqttInfo, nf } from './status';
 
-const DISCONNECT_REASONS: Record<MqttDisconnectReason, string> = {
-  [MqttDisconnectReason.USER_OK]: 'User disconnected',
-  [MqttDisconnectReason.TCP_DISCONNECTED]: 'TCP disconnected',
-  [MqttDisconnectReason.MQTT_UNACCEPTABLE_PROTOCOL_VERSION]:
-    'Unacceptable protocol version',
-  [MqttDisconnectReason.MQTT_IDENTIFIER_REJECTED]: 'Client ID rejected',
-  [MqttDisconnectReason.MQTT_SERVER_UNAVAILABLE]: 'Server unavailable',
-  [MqttDisconnectReason.MQTT_MALFORMED_CREDENTIALS]: 'Malformed credentials',
-  [MqttDisconnectReason.MQTT_NOT_AUTHORIZED]: 'Not authorized',
-  [MqttDisconnectReason.TLS_BAD_FINGERPRINT]: 'TLS fingerprint invalid'
+const DISCONNECT_REASONS: Record<
+  MqttDisconnectReason,
+  (LL: TranslationFunctions) => string
+> = {
+  [MqttDisconnectReason.USER_OK]: (LL) => LL.MQTT_R_USER(),
+  [MqttDisconnectReason.TCP_DISCONNECTED]: (LL) => LL.MQTT_R_TCP(),
+  [MqttDisconnectReason.MQTT_UNACCEPTABLE_PROTOCOL_VERSION]: (LL) =>
+    LL.MQTT_R_PROTOCOL(),
+  [MqttDisconnectReason.MQTT_IDENTIFIER_REJECTED]: (LL) => LL.MQTT_R_ID(),
+  [MqttDisconnectReason.MQTT_SERVER_UNAVAILABLE]: (LL) => LL.MQTT_R_SERVER(),
+  [MqttDisconnectReason.MQTT_MALFORMED_CREDENTIALS]: (LL) => LL.MQTT_R_CREDENTIALS(),
+  [MqttDisconnectReason.MQTT_NOT_AUTHORIZED]: (LL) => LL.MQTT_R_AUTH(),
+  [MqttDisconnectReason.TLS_BAD_FINGERPRINT]: (LL) => LL.MQTT_R_FINGERPRINT()
 };
 
 const secondsAgo = (seconds: number) => new Date(Date.now() - seconds * 1000);
@@ -37,7 +41,7 @@ const MqttStatus = () => {
 
   const { state, text } = mqttInfo(data, LL);
   const reasonText = (reason: MqttDisconnectReason) =>
-    DISCONNECT_REASONS[reason] ?? LL.UNKNOWN();
+    DISCONNECT_REASONS[reason]?.(LL) ?? LL.UNKNOWN();
   const disconnectAgo =
     data.last_disconnect_ago !== undefined &&
     formatTimeAgo(locale, secondsAgo(data.last_disconnect_ago));

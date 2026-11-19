@@ -56,7 +56,7 @@ const HeatingBackupDialog = ({
       new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' }),
       (fileName.trim() || 'heating') + '.json'
     );
-    toast.info(LL.DOWNLOAD_SUCCESSFUL());
+    toast.success(LL.DOWNLOAD_SUCCESSFUL());
     onClose();
   };
 
@@ -68,6 +68,7 @@ const HeatingBackupDialog = ({
       open={open}
       title={LL.HB_BACKUP()}
       onClose={onClose}
+      onSubmit={download}
       size="md"
       actions={
         <>
@@ -75,10 +76,9 @@ const HeatingBackupDialog = ({
             {LL.CANCEL()}
           </Button>
           <Button
-            variant="contained"
+            type="submit"
             icon="download"
             disabled={loading || !data || selected.length === 0}
-            onClick={download}
           >
             {LL.DOWNLOAD(0)}
           </Button>
@@ -104,7 +104,8 @@ const HeatingBackupDialog = ({
                       {d.name} <span className="muted">{d.type}</span>
                     </span>
                     <span className="cap">
-                      ProductID {d.productId} · DeviceID {hex(d.deviceId)}
+                      {LL.ID_OF(LL.DEVICE())} {hex(d.deviceId)} ·{' '}
+                      {LL.ID_OF(LL.PRODUCT())} {d.productId}
                     </span>
                   </span>
                   <span className="cap">
@@ -114,7 +115,7 @@ const HeatingBackupDialog = ({
               }
             />
           ))}
-          <div className="du-fields">
+          <div className="form">
             <TextField
               label={LL.FILE_NAME()}
               name="filename"

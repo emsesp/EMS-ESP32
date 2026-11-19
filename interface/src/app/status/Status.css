@@ -16,7 +16,7 @@
 }
 
 .st-activity .warnc {
-  color: #ffcc80;
+  color: var(--warning-text);
 }
 .st-quality {
   display: inline-flex;

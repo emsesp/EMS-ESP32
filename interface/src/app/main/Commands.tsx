@@ -66,7 +66,7 @@ const Commands = () => {
         }))
       }),
     pollMs: 30000,
-    savedText: LL.UPDATED_OF(LL.COMMANDS())
+    savedText: LL.COMMANDS_UPDATED()
   });
 
   const { send: execute } = useRequest(
@@ -102,6 +102,7 @@ const Commands = () => {
   return (
     <ListPage list={list}>
       <Section
+        desc={`${LL.COMMANDS_HELP_1()}.`}
         title={LL.COMMANDS()}
         icon="playlist_play"
         actions={
@@ -111,13 +112,12 @@ const Commands = () => {
               value={query}
               onInput={(e) => setQuery(e.currentTarget.value)}
             />
-            <Button variant="contained" icon="add" onClick={add}>
+            <Button icon="add" onClick={add}>
               {LL.ADD(0)}
             </Button>
           </>
         }
       >
-        <p className="cap">{LL.COMMANDS_HELP_1()}.</p>
         <div className="tbl-wrap">
           <Table stack>
             <thead>
@@ -156,7 +156,9 @@ const Commands = () => {
                         {LL.ROLE_GUEST()}
                       </Tag>
                     ) : (
-                      <Tag kind="sys">{LL.ROLE_ADMIN()}</Tag>
+                      <Tag kind="warn" icon="admin_panel_settings">
+                        {LL.ROLE_ADMIN()}
+                      </Tag>
                     )}
                   </td>
                   <td className="act">
@@ -199,8 +201,7 @@ const Commands = () => {
 
       {editing && (
         <EntityDialog
-          open
-          title={`${editing.key ? LL.EDIT() : LL.ADD(1)} ${LL.COMMAND(0)}`}
+          title={editing.key ? LL.EDIT_COMMAND() : LL.ADD_COMMAND()}
           item={editing.item}
           creating={!editing.key}
           validator={() =>

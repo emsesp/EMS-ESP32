@@ -7,15 +7,12 @@ import {
   Icon,
   IconButton,
   Loader,
-  Message,
   SearchField,
   Section,
   SortHeader,
   Table,
   ToggleButton,
   ToggleGroup,
-  byNumber,
-  byText,
   cx,
   rowAction,
   toast,
@@ -29,6 +26,7 @@ import { readCoreData, readDeviceData, writeDeviceValue } from '../../api/app';
 import DeviceIcon from './DeviceIcon';
 import './Devices.css';
 import DevicesDialog from './DevicesDialog';
+import EmsBusWarning from './EmsBusWarning';
 import { MASKS } from './EntityMaskToggle';
 import { formatValue } from './deviceValue';
 import { DeviceEntityMask, DeviceType, DeviceValueUOM_s } from './types';
@@ -105,14 +103,16 @@ const Devices = () => {
   const selectable = !!device && device.e !== 0;
 
   useEffect(() => {
-    if (selectedId === undefined || !coreLoaded) return;
-    if (!selectable) {
+    if (selectedId !== undefined && coreLoaded && !selectable) {
       setParams({}, { replace: true });
-      return;
     }
+  }, [selectedId, coreLoaded, selectable]);
+
+  useEffect(() => {
+    if (selectedId === undefined || !selectable) return;
     setSearch('');
     void fetchDeviceData(selectedId);
-  }, [selectedId, coreLoaded]);
+  }, [selectedId, selectable]);
 
   useEffect(() => {
     const el = detailRef.current;
@@ -144,8 +144,8 @@ const Devices = () => {
 
   useInterval(() => {
     if (selectedValue) return;
+    void fetchCoreData();
     if (selectedId !== undefined) void fetchDeviceData(selectedId);
-    else void fetchCoreData();
   });
 
   const nodes = loadedId === selectedId ? (deviceData?.nodes ?? []) : [];
@@ -153,12 +153,6 @@ const Devices = () => {
     name: (a, b) => a.id.slice(2).localeCompare(b.id.slice(2)),
     value: compareValues
   });
-  const deviceSort = useTableSort(coreData?.devices ?? [], {
-    name: byText((d) => d.n),
-    type: byText((d) => d.tn),
-    entities: byNumber((d) => d.e)
-  });
-
   if (!coreData) {
     return (
       <Loader error={coreError?.message} onRetry={() => void fetchCoreData()} />
@@ -269,61 +263,38 @@ const Devices = () => {
       icon="category"
       className="dv-list"
     >
-      <div className="tbl-wrap">
-        <Table className="dv-devices">
-          <thead>
-            <tr>
-              <th className="dv-ic" />
-              <SortHeader {...deviceSort.header('name')}>{LL.DEVICE()}</SortHeader>
-              <SortHeader className="dv-type" {...deviceSort.header('type')}>
-                {LL.TYPE(0)}
-              </SortHeader>
-              <SortHeader className="r" {...deviceSort.header('entities')}>
-                {LL.ENTITIES(2)}
-              </SortHeader>
-            </tr>
-          </thead>
-          <tbody>
-            {coreData.devices.length === 0 && (
-              <tr>
-                <td colSpan={4} className="tbl-empty">
-                  {LL.NO_DEVICES()}
-                </td>
-              </tr>
-            )}
-            {deviceSort.rows.map((d) => {
-              const sel = d.id === selectedId;
-              return (
-                <tr
-                  key={d.id}
-                  className={cx(sel && 'sel', d.e === 0 && 'dim')}
-                  aria-current={sel || undefined}
-                  {...(d.e !== 0 && {
-                    ...rowAction(() => selectDevice(d.id), d.n),
-                    className: cx('click', sel && 'sel')
-                  })}
-                >
-                  <td className="dv-ic lb">
-                    <DeviceIcon type_id={d.t} size="sm" />
-                  </td>
-                  <td>
-                    <span className="dv-dname">{d.n}</span>
-                    <span className="cap dv-sub">
-                      {d.tn}
-                      {d.b && ` · ${d.b}`}
-                    </span>
-                  </td>
-                  <td className="dv-type">
-                    {d.tn}
-                    {d.b && <span className="muted"> · {d.b}</span>}
-                  </td>
-                  <td className="r num">{d.e}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </Table>
-      </div>
+      {coreData.devices.length === 0 ? (
+        <p className="tbl-empty dv-empty">{LL.NO_DEVICES()}</p>
+      ) : (
+        <div className="dv-cards">
+          {coreData.devices.map((d) => (
+            <button
+              key={d.id}
+              type="button"
+              className={cx('dv-card', d.id === selectedId && 'sel')}
+              disabled={d.e === 0}
+              aria-current={d.id === selectedId || undefined}
+              onClick={() => selectDevice(d.id)}
+            >
+              <span className="dv-av">
+                <DeviceIcon type_id={d.t} size="sm" />
+              </span>
+              <span className="dv-text">
+                <span className="dv-dname" title={d.n}>
+                  {d.n}
+                </span>
+                <span className="cap">
+                  {d.tn}
+                  {d.b && ` · ${d.b}`}
+                </span>
+              </span>
+              <span className="count" title={LL.ENTITIES(d.e)}>
+                {d.e}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
     </Section>
   );
 
@@ -376,21 +347,11 @@ const Devices = () => {
             {LL.SHOWING()} {shown.length}/{d.e} {LL.ENTITIES(shown.length)}
           </span>
           <span className="grow" />
-          <Button
-            size="sm"
-            icon="download"
-            onClick={download}
-            disabled={!nodes.length}
-          >
+          <Button icon="download" onClick={download} disabled={!nodes.length}>
             {LL.EXPORT()}
           </Button>
           {me.admin && (
-            <Button
-              size="sm"
-              color="secondary"
-              icon="construction"
-              onClick={customize}
-            >
+            <Button color="secondary" icon="construction" onClick={customize}>
               {LL.CUSTOMIZATIONS()}
             </Button>
           )}
@@ -483,24 +444,11 @@ const Devices = () => {
 
   return (
     <div className={cx('dv-page', device && 'has-sel')}>
-      {!coreData.connected && (
-        <Message level="error" className="dv-msg">
-          {LL.EMS_BUS_WARNING()}. (
-          <a
-            target="_blank"
-            rel="noreferrer"
-            href="https://docs.emsesp.org/Troubleshooting#ems-bus-is-not-connecting"
-          >
-            {LL.ONLINE_HELP()}
-          </a>
-          )
-        </Message>
-      )}
+      {!coreData.connected && <EmsBusWarning className="dv-msg" />}
       {coreData.connected && renderDeviceList()}
       {coreData.connected && device && renderDevice(device)}
       {selectedValue && (
         <DevicesDialog
-          open
           onClose={closeValue}
           onSave={(dv) => void saveValue(dv)}
           selectedItem={selectedValue}

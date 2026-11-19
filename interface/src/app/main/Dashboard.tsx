@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { Fragment, type ReactNode, useContext, useState } from 'react';
 import { Link } from 'react-router';
 
 import { useRequest } from 'alova/client';
@@ -13,6 +13,7 @@ import {
   rowAction,
   toast
 } from 'components/ui';
+import 'components/ui/Chip.css';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { useInterval, usePersistState } from 'utils';
@@ -21,6 +22,7 @@ import { readDashboard, writeDeviceValue } from '../../api/app';
 import './Dashboard.css';
 import DeviceIcon from './DeviceIcon';
 import DevicesDialog from './DevicesDialog';
+import EmsBusWarning from './EmsBusWarning';
 import { formatValue } from './deviceValue';
 import {
   type DashboardItem,
@@ -36,12 +38,63 @@ const hasMask = (id: string, mask: number) =>
 // a value without v is a command that can only be run
 const isCommand = (dv: DeviceValue) => dv.v === '' || dv.v === undefined;
 
+// values a card shows in Summary mode
+const PEEK = 3;
+
+// puts the links where the translated sentence has their marker characters
+const withLinks = (text: string, links: Record<string, ReactNode>) =>
+  text
+    .split(/([\uE000\uE001])/)
+    .map((part, i) => <Fragment key={i}>{links[part] ?? part}</Fragment>);
+
+// the firmware's boolean renderings (bool_dashboard setting, all 12 languages)
+const BOOL_PAIRS = new Set([
+  'off|on',
+  'aus|an',
+  'uit|aan',
+  'av|på',
+  'wyłączono|włączono',
+  'wył.|wł.',
+  'kapalı|açık',
+  'vyp|zap',
+  'ki|be',
+  'false|true',
+  '0|1'
+]);
+
+// writeable booleans come with their two renderings in l, off first
+const boolState = (dv: DeviceValue) => {
+  const l = dv.l;
+  if (l?.length !== 2 || !BOOL_PAIRS.has(l.join('|').toLowerCase())) return;
+  const v = String(dv.v);
+  return v === l[1] ? true : v === l[0] ? false : undefined;
+};
+
+const enum Group {
+  DEVICES,
+  SENSORS,
+  AUTOMATION
+}
+
+const groupOf = (t?: number) => {
+  switch (t) {
+    case DeviceType.TEMPERATURESENSOR:
+    case DeviceType.ANALOGSENSOR:
+      return Group.SENSORS;
+    case DeviceType.SCHEDULER:
+    case DeviceType.COMMAND:
+      return Group.AUTOMATION;
+    default:
+      return Group.DEVICES;
+  }
+};
+
 const Dashboard = () => {
   const { LL } = useI18nContext();
   const { me } = useContext(AuthenticatedContext);
 
   const [showAll, setShowAll] = usePersistState(true, 'showAll');
-  // per device open/closed; devices not in here follow showAll
+  // per device all values or summary; devices not in here follow showAll
   const [open, setOpen] = useState<Record<number, boolean>>({});
   const [deviceCount, setDeviceCount] = useState(0);
   const [selected, setSelected] = useState<DashboardItem>();
@@ -65,7 +118,7 @@ const Dashboard = () => {
       toast.success(LL.WRITE_CMD_SENT());
     })
     .onError((error) => {
-      toast.error(String(error.error?.message || 'An error occurred'));
+      toast.error(String(error.error?.message || LL.ERROR()));
     });
 
   useInterval(() => {
@@ -150,6 +203,7 @@ const Dashboard = () => {
     const editable = canEdit(dv);
     const command = editable && isCommand(dv);
     const locked = me.admin && hasMask(dv.id, DeviceEntityMask.DV_READONLY);
+    const on = boolState(dv);
     return (
       <tr
         key={di.id}
@@ -163,7 +217,13 @@ const Dashboard = () => {
           : {})}
       >
         <td>{name}</td>
-        <td className="r num db-val">{value}</td>
+        <td className="r num db-val">
+          {on === undefined ? (
+            value
+          ) : (
+            <span className={cx('switch', 'db-sw', on && 'on')} aria-hidden="true" />
+          )}
+        </td>
         <td className="db-act">
           {editable && (
             <Icon name={command ? 'play_arrow' : 'edit'} size="xs" className="lb" />
@@ -176,79 +236,132 @@ const Dashboard = () => {
 
   const renderCard = (device: DashboardItem) => {
     const items = device.nodes ?? [];
-    const expanded = isOpen(device.id);
+    const full = isOpen(device.id);
+    const isCommands = device.t === DeviceType.COMMAND;
+    // the summary leaves out commands and empty values
+    const peek = items.filter((di) => di.dv && !isCommand(di.dv)).slice(0, PEEK);
+    const hidden = isCommands ? 0 : items.length - peek.length;
+    const shown = hidden && !full ? peek : items;
     const link = pageLink(device.t, device.id);
+    const name = device.n || typeName(device.t);
     return (
       <section key={device.id} className="db-card">
-        <button
-          type="button"
-          className="db-head"
-          aria-expanded={expanded}
-          onClick={() => setOpen({ ...open, [device.id]: !expanded })}
-        >
-          <DeviceIcon type_id={device.t ?? 0} size="sm" className="lb" />
-          <span className="db-name">{device.n || typeName(device.t)}</span>
-          <span className="lb">({items.length})</span>
-          <Icon
-            name="chevron_right"
-            size="sm"
-            className={cx('db-chev', expanded && 'open')}
-          />
-        </button>
-        {expanded && (
-          <>
+        <div className={cx('db-top', shown.length > 0 && 'open')}>
+          <div className="db-head">
+            <DeviceIcon type_id={device.t ?? 0} size="sm" className="lb" />
+            <span className="db-name" title={name}>
+              {name}
+            </span>
+            <span className="count primary">{items.length}</span>
+          </div>
+          {link && (
+            <Link
+              to={link.to}
+              className="db-link"
+              aria-label={link.label}
+              title={link.label}
+            >
+              <Icon name="open_in_new" size="xs" />
+            </Link>
+          )}
+        </div>
+        {isCommands ? (
+          <div className="db-chips">
+            {items.map((di) => renderCommand(device, di))}
+          </div>
+        ) : (
+          shown.length > 0 && (
             <Table className="db-tbl">
-              <tbody>{items.map((di) => renderValue(device, di))}</tbody>
+              <tbody>{shown.map((di) => renderValue(device, di))}</tbody>
             </Table>
-            {link && (
-              <div className="db-foot">
-                <Link to={link.to}>
-                  {link.label}
-                  <Icon name="chevron_right" size="xs" />
-                </Link>
-              </div>
-            )}
-          </>
+          )
+        )}
+        {hidden > 0 && !(full && showAll) && (
+          <button
+            type="button"
+            className="db-more"
+            aria-expanded={full}
+            onClick={() => setOpen({ ...open, [device.id]: !full })}
+          >
+            {full ? LL.SHOW_LESS() : LL.SHOW_MORE({ n: hidden })}
+          </button>
         )}
       </section>
     );
   };
+
+  const renderCommand = (device: DashboardItem, di: DashboardItem) => {
+    const name = di.dv?.id.slice(2) ?? '';
+    return canEdit(di.dv) ? (
+      <button
+        key={di.id}
+        type="button"
+        className="chip outline"
+        aria-label={`${LL.RUN()}: ${name}`}
+        onClick={() => setSelected({ ...di, parentNode: device })}
+      >
+        <Icon name="play_arrow" size="xs" className="lb" />
+        {name}
+      </button>
+    ) : (
+      <span key={di.id} className="chip outline">
+        {name}
+      </span>
+    );
+  };
+
+  const groups = [
+    { g: Group.DEVICES, title: LL.DEVICES() },
+    { g: Group.SENSORS, title: LL.SENSORS() },
+    { g: Group.AUTOMATION, title: LL.AUTOMATION() }
+  ]
+    .map(({ g, title }) => ({
+      title,
+      items: devices.filter((d) => groupOf(d.t) === g)
+    }))
+    .filter(({ items }) => items.length > 0);
 
   return (
     <>
       <div className="db-bar">
         <p className="cap grow">{LL.DASHBOARD_1()}</p>
         <ToggleGroup>
-          <ToggleButton on={showAll} icon="unfold_more" onClick={() => setAll(true)}>
-            {LL.ALLVALUES()}
-          </ToggleButton>
           <ToggleButton
             on={!showAll}
             icon="unfold_less"
             onClick={() => setAll(false)}
           >
-            {LL.COMPACT()}
+            {LL.SUMMARY()}
+          </ToggleButton>
+          <ToggleButton on={showAll} icon="unfold_more" onClick={() => setAll(true)}>
+            {LL.ALLVALUES()}
           </ToggleButton>
         </ToggleGroup>
       </div>
 
+      {!data.connected && <EmsBusWarning className="db-msg" />}
       {data.connected && !hasFavEntities && (
         <Message level="warning" className="db-msg">
-          {LL.NO_DATA_1()} <Link to="/customizations">{LL.CUSTOMIZATIONS()}</Link>{' '}
-          {LL.NO_DATA_2()} {LL.NO_DATA_3()} <Link to="/devices">{LL.DEVICES()}</Link>
-          .
+          {withLinks(LL.NO_DATA({ customizations: '\uE000', devices: '\uE001' }), {
+            '\uE000': <Link to="/customizations">{LL.CUSTOMIZATIONS()}</Link>,
+            '\uE001': <Link to="/devices">{LL.DEVICES()}</Link>
+          })}
         </Message>
       )}
 
       {devices.length > 0 ? (
-        <div className="db-cards">{devices.map(renderCard)}</div>
+        groups.map(({ title, items }) => (
+          <section key={title} className="db-group" aria-label={title}>
+            <h2 className="db-gtitle">{title}</h2>
+            <div className="db-cards">{items.map(renderCard)}</div>
+          </section>
+        ))
       ) : (
         <p className="tbl-empty">{LL.DASHBOARD_EMPTY()}</p>
       )}
 
       {selected?.dv && (
         <DevicesDialog
-          open
           onClose={() => setSelected(undefined)}
           onSave={deviceValueDialogSave}
           selectedItem={selected.dv}

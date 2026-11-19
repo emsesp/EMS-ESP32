@@ -9,14 +9,12 @@ export interface ButtonProps extends Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
   'color'
 > {
-  variant?: 'outlined' | 'contained' | 'text';
   color?: 'primary' | 'secondary' | 'warning' | 'error';
   size?: 'sm' | undefined;
   icon?: IconName | undefined;
 }
 
 const Button: FC<ButtonProps> = ({
-  variant = 'outlined',
   color = 'primary',
   size,
   icon,
@@ -25,11 +23,7 @@ const Button: FC<ButtonProps> = ({
   children,
   ...rest
 }) => (
-  <button
-    type={type}
-    className={cx('btn', variant, color, size, className)}
-    {...rest}
-  >
+  <button type={type} className={cx('btn', color, size, className)} {...rest}>
     {icon && <Icon name={icon} size={size ? 'xs' : 'sm'} />}
     {children}
   </button>

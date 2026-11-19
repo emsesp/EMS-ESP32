@@ -1,4 +1,4 @@
-import { type ChangeEvent, type DragEvent, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useBlocker } from 'react-router';
 
 import { API } from 'api/app';
@@ -11,7 +11,8 @@ import {
   Button,
   ButtonLink,
   Checkbox,
-  Dialog,
+  ConfirmDialog,
+  DropZone,
   Icon,
   Loader,
   Message,
@@ -86,8 +87,6 @@ const text = (v: BackupValue | undefined) => (v === undefined ? '-' : String(v))
 
 const HeatingRestore = () => {
   const { LL } = useI18nContext();
-  const input = useRef<HTMLInputElement>(null);
-  const [over, setOver] = useState(false);
   const [file, setFile] = useState<{ name: string; backup: HeatingBackup }>();
   const [rows, setRows] = useState<Row[]>([]);
   const [checked, setChecked] = useState<Set<string>>(new Set());
@@ -129,10 +128,8 @@ const HeatingRestore = () => {
       toast.error(LL.HB_INVALID());
       return;
     }
-    const now = await loadCurrent().catch((e: Error) => {
-      toast.error(e.message);
-      return undefined;
-    });
+    // a failed read is shown in the section below
+    const now = await loadCurrent().catch(() => undefined);
     if (!now) return;
     const all = buildRows(backup, now);
     setFile({ name: f.name, backup });
@@ -148,17 +145,6 @@ const HeatingRestore = () => {
     setDone(undefined);
     setOnlyChanged(true);
     setQuery('');
-  };
-
-  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
-    void open(e.currentTarget.files?.[0]);
-    e.currentTarget.value = '';
-  };
-
-  const onDrop = (e: DragEvent) => {
-    e.preventDefault();
-    setOver(false);
-    void open(e.dataTransfer?.files[0]);
   };
 
   const run = async () => {
@@ -215,32 +201,19 @@ const HeatingRestore = () => {
 
   if (!file) {
     return (
-      <Section title={LL.HB_RESTORE()} icon="settings_backup_restore">
-        <p className="du-text">{LL.HB_RESTORE_TEXT()}</p>
+      <Section
+        desc={LL.HB_RESTORE_TEXT()}
+        title={LL.HB_RESTORE()}
+        icon="settings_backup_restore"
+      >
         {loading ? (
           <Loader />
         ) : (
           <>
-            <button
-              type="button"
-              className={cx('du-drop', over && 'on')}
-              onClick={() => input.current?.click()}
-              onDragOver={(e) => {
-                e.preventDefault();
-                setOver(true);
-              }}
-              onDragLeave={() => setOver(false)}
-              onDrop={onDrop}
-            >
-              <Icon name="upload_file" />
-              {LL.HB_DROP()}
-            </button>
-            <input
-              ref={input}
-              type="file"
-              hidden
+            <DropZone
+              text={LL.HB_DROP()}
               accept=".json"
-              onChange={onChange}
+              onFile={(f) => void open(f)}
             />
           </>
         )}
@@ -328,7 +301,7 @@ const HeatingRestore = () => {
           <Button
             size="sm"
             color="secondary"
-            icon="close"
+            icon="upload_file"
             disabled={running}
             onClick={() => setFile(undefined)}
           >
@@ -468,7 +441,6 @@ const HeatingRestore = () => {
             {LL.CANCEL()}
           </ButtonLink>
           <Button
-            variant="contained"
             icon="settings_backup_restore"
             disabled={checked.size === 0 || running}
             onClick={() => setConfirm(true)}
@@ -478,36 +450,22 @@ const HeatingRestore = () => {
         </div>
       </Section>
 
-      <Dialog
+      <ConfirmDialog
         open={confirm}
-        title={LL.HB_RESTORE()}
+        title={LL.RESTORE()}
+        label={LL.RESTORE()}
+        icon="settings_backup_restore"
+        color="warning"
         onClose={() => setConfirm(false)}
-        actions={
-          <>
-            <Button
-              color="secondary"
-              icon="cancel"
-              onClick={() => setConfirm(false)}
-            >
-              {LL.CANCEL()}
-            </Button>
-            <Button
-              variant="contained"
-              icon="settings_backup_restore"
-              onClick={() => void run()}
-            >
-              {LL.RESTORE()}
-            </Button>
-          </>
-        }
+        onConfirm={run}
       >
         <p>{LL.HB_CONFIRM({ num: checked.size, file: file.name })}</p>
         <p className="cap">{devices.join(', ')}</p>
         {backup.note && <div className="du-note">{backup.note}</div>}
-        <p className="cap du-confirm-text">{LL.HB_CONFIRM_TEXT()}</p>
-      </Dialog>
+        <p className="cap">{LL.HB_CONFIRM_TEXT()}</p>
+      </ConfirmDialog>
 
-      <BlockNavigation blocker={blocker} />
+      <BlockNavigation blocker={blocker} busy />
     </>
   );
 };

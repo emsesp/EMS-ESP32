@@ -3,6 +3,7 @@ import { useContext, useState } from 'react';
 import { useRequest } from 'alova/client';
 import {
   Button,
+  ConfirmDialog,
   Loader,
   SearchField,
   Section,
@@ -55,6 +56,7 @@ const Sensors = () => {
   const [temp, setTemp] = useState<TemperatureSensor>();
   const [analog, setAnalog] = useState<AnalogSensor>();
   const [creating, setCreating] = useState(false);
+  const [removing, setRemoving] = useState(false);
 
   const { data, error, send: fetchSensorData } = useRequest(readSensorData);
 
@@ -94,8 +96,8 @@ const Sensors = () => {
         is_system: ts.s
       });
       toast.success(LL.UPDATED_OF(LL.SENSOR(1)));
-    } catch {
-      toast.error(`${LL.UPDATE_OF(LL.SENSOR(2))} ${LL.FAILED(1)}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : LL.ERROR());
     }
     await fetchSensorData();
   };
@@ -114,9 +116,9 @@ const Sensors = () => {
         deleted: as.d,
         is_system: as.s
       });
-      toast.success(LL.UPDATED_OF(LL.ANALOG_SENSOR(2)));
-    } catch {
-      toast.error(`${LL.UPDATE_OF(LL.ANALOG_SENSOR(5))} ${LL.FAILED(1)}`);
+      toast.success(LL.UPDATED_OF(LL.ANALOG_SENSOR(1)));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : LL.ERROR());
     }
     await fetchSensorData();
   };
@@ -182,7 +184,7 @@ const Sensors = () => {
       <Section
         title={`${LL.TEMP_SENSORS()} (${data.ts.length})`}
         icon="thermostat"
-        actions={me.admin && <span className="cap">{LL.TEMP_SENSORS_HELP()}</span>}
+        desc={me.admin && LL.TEMP_SENSORS_HELP()}
       >
         <div className="tbl-wrap">
           <Table stack>
@@ -234,7 +236,7 @@ const Sensors = () => {
         actions={
           me.admin &&
           data.analog_enabled && (
-            <Button size="sm" icon="add" onClick={addAnalogSensor}>
+            <Button icon="add" onClick={addAnalogSensor}>
               {LL.ADD(0)}
             </Button>
           )
@@ -302,9 +304,24 @@ const Sensors = () => {
           excludeTypes={data.exclude_types ?? []}
           onClose={() => setAnalog(undefined)}
           onSave={(as) => void saveAnalogSensor(as)}
-          onRemove={() => void saveAnalogSensor({ ...analog, d: true })}
+          onRemove={() => setRemoving(true)}
         />
       )}
+      {/* opens on top of the analog sensor dialog; Cancel goes back to it */}
+      <ConfirmDialog
+        open={removing && !!analog}
+        title={LL.REMOVE_ANALOG_SENSOR()}
+        label={LL.REMOVE()}
+        icon="delete"
+        color="error"
+        onClose={() => setRemoving(false)}
+        onConfirm={() => {
+          setRemoving(false);
+          return analog && saveAnalogSensor({ ...analog, d: true });
+        }}
+      >
+        {LL.REMOVE_SENSOR_TEXT({ name: analog?.n ?? '' })}
+      </ConfirmDialog>
     </>
   );
 };

@@ -66,7 +66,6 @@ const RecoveryApp = () => {
             EMS-ESP<span className="rc-sep">|</span>Recovery
           </h1>
           <Button
-            variant="text"
             icon="logout"
             aria-label="Sign Out"
             className="rc-signout"

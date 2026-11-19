@@ -15,10 +15,6 @@
   font-size: 20px;
   font-variant-numeric: tabular-nums;
 }
-.ntp-dialog-text {
-  margin: 0 0 12px;
-}
-
 @media (max-width: 599px) {
   .ntp-clock > .btn {
     flex: 1 1 100%;

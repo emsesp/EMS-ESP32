@@ -1,14 +1,7 @@
 import { useContext } from 'react';
 import { Link } from 'react-router';
 
-import {
-  Button,
-  Icon,
-  LanguageGrid,
-  LinkList,
-  Section,
-  Tag
-} from 'components/ui';
+import { Button, Icon, LanguageGrid, LinkList, Section, Tag } from 'components/ui';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 
@@ -28,7 +21,10 @@ const UserProfile = () => {
           <div className="grow">
             <div className="h6 profile-name">{me.username}</div>
             <div className="row wrap">
-              <Tag kind={me.admin ? 'mod' : 'ok'}>
+              <Tag
+                kind={me.admin ? 'warn' : 'ok'}
+                icon={me.admin ? 'admin_panel_settings' : 'group'}
+              >
                 {me.admin ? LL.ADMINISTRATOR() : LL.GUEST()}
               </Tag>
               <span className="cap">
@@ -45,7 +41,7 @@ const UserProfile = () => {
       <Section
         title={LL.LANGUAGE()}
         icon="translate"
-        actions={<span className="cap">{LL.LANGUAGE_BROWSER_ONLY()}</span>}
+        desc={LL.LANGUAGE_BROWSER_ONLY()}
       >
         <LanguageGrid />
         {me.admin && (

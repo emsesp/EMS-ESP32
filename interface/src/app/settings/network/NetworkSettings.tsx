@@ -15,7 +15,6 @@ import './Network.css';
 import { WiFiConnectionContext } from './WiFiConnectionContext';
 
 const TX_POWER = [
-  { value: '0', label: 'Auto' },
   ...[78, 76, 74, 68, 60, 52, 44, 34, 28, 20, 8].map((v) => ({
     value: String(v),
     label: `${v / 4} dBm`
@@ -58,7 +57,7 @@ const NetworkSettings = () => {
         />
         <Select
           label={LL.TX_POWER()}
-          options={TX_POWER}
+          options={[{ value: '0', label: LL.AUTO() }, ...TX_POWER]}
           {...form.select('tx_power')}
         />
         <Switch

@@ -1,94 +1,151 @@
 import { useContext } from 'react';
 
+import { readSystemStatus } from 'api/system';
+
+import { useRequest } from 'alova/client';
+import { mqttInfo, networkInfo, ntpInfo } from 'app/status/status';
 import { LinkList, type LinkListItem, Section } from 'components/ui';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
+import { NetworkConnectionStatus } from 'types';
 import { updateAvailable } from 'utils';
+
+import './Settings.css';
 
 const Settings = () => {
   const { LL } = useI18nContext();
   const { me, versions } = useContext(AuthenticatedContext);
 
-  const upgradeAvailable = versions?.current?.upgradeable ?? false;
-  const firmwareText = versions?.current?.version
-    ? `v${versions.current.version}${upgradeAvailable ? ` · ${LL.UPDATE_AVAILABLE()}` : ''}`
-    : '';
+  // only admins see the rows that show live values
+  const { data } = useRequest(readSystemStatus, { immediate: me.admin });
 
-  const items: LinkListItem[] = [
-    ...(me.admin
-      ? ([
-          {
-            to: 'application',
-            icon: 'settings_applications',
-            color: '#134ba2',
-            title: LL.APPLICATION(),
-            text: LL.APPLICATION_SETTINGS_1()
-          },
-          {
-            to: 'network',
-            icon: 'settings_ethernet',
-            color: '#40828f',
-            title: LL.NETWORK(0),
-            text: LL.CONFIGURE(LL.SETTINGS_OF(LL.NETWORK(1)))
-          },
-          {
-            to: 'ap',
-            icon: 'wifi_tethering',
-            color: '#5f9a5f',
-            title: LL.ACCESS_POINT(0),
-            text: LL.CONFIGURE(LL.ACCESS_POINT(1))
-          },
-          {
-            to: 'ntp',
-            icon: 'schedule',
-            color: '#c5572c',
-            title: 'NTP',
-            text: LL.CONFIGURE(LL.LOCAL_TIME(1))
-          },
-          {
-            to: 'mqtt',
-            icon: 'device_hub',
-            color: '#68374d',
-            title: 'MQTT',
-            text: LL.CONFIGURE('MQTT')
-          },
-          {
-            to: 'security',
-            icon: 'lock',
-            color: '#757575',
-            title: LL.SECURITY(0),
-            text: LL.SECURITY_1()
-          },
-          {
-            to: 'modules',
-            icon: 'extension',
-            color: '#b28a1f',
-            title: LL.MODULES(),
-            text: LL.MODULES_1()
-          },
-          {
-            to: 'downloadUpload',
-            icon: 'import_export',
-            color: '#5d89f7',
-            title: LL.DOWNLOAD_UPLOAD(),
-            text: LL.DOWNLOAD_UPLOAD_1()
-          }
-        ] satisfies LinkListItem[])
-      : []),
-    {
-      to: 'version',
-      icon: 'new_releases',
-      color: '#2a7fb0',
-      title: 'EMS-ESP Firmware',
-      text: firmwareText,
-      badge: updateAvailable(versions)
-    }
-  ];
+  const update = updateAvailable(versions);
+  const firmware: LinkListItem = {
+    to: 'version',
+    icon: 'new_releases',
+    color: '#2a7fb0',
+    title: 'EMS-ESP Firmware',
+    value: versions?.current?.version && (
+      <>
+        v{versions.current.version}
+        {update && ` · ${LL.UPDATE_AVAILABLE()}`}
+      </>
+    ),
+    state: update ? 'warn' : undefined
+  };
+
+  const network = data && networkInfo(data.network_status, LL);
+  const mqtt =
+    data &&
+    mqttInfo(
+      { enabled: !!data.mqtt_host || data.mqtt_status, connected: data.mqtt_status },
+      LL
+    );
+  const ntp = data && ntpInfo(data.ntp_status, LL);
+  const networkValue =
+    data && network?.state === 'ok'
+      ? [
+          data.network_status === NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED
+            ? 'Ethernet'
+            : 'WiFi',
+          data.network_ip
+        ]
+          .filter(Boolean)
+          .join(' · ')
+      : network?.text;
+
+  const groups: { title: string; items: LinkListItem[] }[] = me.admin
+    ? [
+        {
+          title: LL.CONNECTIVITY(),
+          items: [
+            {
+              to: 'network',
+              icon: 'settings_ethernet',
+              color: '#40828f',
+              title: LL.NETWORK(0),
+              value: networkValue,
+              state: network?.state
+            },
+            {
+              to: 'ap',
+              icon: 'wifi_tethering',
+              color: '#5f9a5f',
+              title: LL.ACCESS_POINT(0),
+              value: data && (data.ap_status ? LL.ACTIVE() : LL.INACTIVE(0)),
+              state: data && (data.ap_status ? 'ok' : 'off')
+            },
+            {
+              to: 'mqtt',
+              icon: 'device_hub',
+              color: '#68374d',
+              title: 'MQTT',
+              value: mqtt?.text,
+              state: mqtt?.state
+            }
+          ]
+        },
+        {
+          title: LL.SYSTEM(0),
+          items: [
+            {
+              to: 'application',
+              icon: 'settings_applications',
+              color: '#134ba2',
+              title: LL.APPLICATION(),
+              value: data && (data.model || data.board)
+            },
+            {
+              to: 'ntp',
+              icon: 'schedule',
+              color: '#c5572c',
+              title: 'NTP',
+              value: ntp?.text,
+              state: ntp?.state
+            },
+            {
+              to: 'security',
+              icon: 'lock',
+              color: '#757575',
+              title: LL.SECURITY(0),
+              text: LL.SECURITY_1()
+            },
+            {
+              to: 'modules',
+              icon: 'extension',
+              color: '#b28a1f',
+              title: LL.MODULES(),
+              text: LL.MODULES_1()
+            }
+          ]
+        },
+        {
+          title: LL.MAINTENANCE(),
+          items: [
+            {
+              to: 'downloadUpload',
+              icon: 'import_export',
+              color: '#5d89f7',
+              title: LL.DOWNLOAD_UPLOAD(),
+              text: LL.DOWNLOAD_UPLOAD_1()
+            },
+            firmware
+          ]
+        }
+      ]
+    : [{ title: LL.MAINTENANCE(), items: [firmware] }];
 
   return (
-    <Section>
-      <LinkList items={items} layout="rows" />
-    </Section>
+    <div className="set-groups">
+      {groups.map(({ title, items }) => (
+        <section key={title} className="set-group" aria-label={title}>
+          <h2 className="set-gtitle">{title}</h2>
+          <Section>
+            <LinkList items={items} layout="rows" />
+          </Section>
+        </section>
+      ))}
+    </div>
   );
 };
 

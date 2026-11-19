@@ -58,14 +58,14 @@
 }
 .console .ln.error .l,
 .console .ln.error .s {
-  color: #ff8a80;
+  color: var(--error-text);
 }
 .console .ln.warning .l,
 .console .ln.warning .s {
-  color: #ffcc80;
+  color: var(--warning-text);
 }
 .console .ln.notice .l {
-  color: #a5d6a7;
+  color: var(--success-text);
 }
 .console .ln.info .l {
   color: var(--primary);
@@ -77,7 +77,7 @@
   color: var(--text-3);
 }
 .console .ln.cmd .s {
-  color: #a5d6a7;
+  color: var(--success-text);
 }
 
 .cmdline {

@@ -1,14 +1,11 @@
 import { type ReactNode, useCallback, useRef, useState } from 'react';
 
 import type { AlovaGenerics, Method } from 'alova';
-import { useRequest } from 'alova/client';
-import { API } from 'api/app';
+import { ChangesBar, RestartBar } from 'app/main/ChangesBar';
 import SystemMonitor from 'app/status/SystemMonitor';
-
 import BlockNavigation from 'components/routing/BlockNavigation';
-import { Button, Loader, SaveBar } from 'components/ui';
+import { Loader } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
-import type { APIcall } from 'app/main/types';
 import { formFields, useRest } from 'utils';
 import { ValidationError, validate } from 'validators';
 import type Schema from 'validators/schema';
@@ -126,16 +123,10 @@ interface FormPageProps<D extends object> {
 const FormPage = <D extends object>({ form, children }: FormPageProps<D>) => {
   const { LL } = useI18nContext();
   const [restarting, setRestarting] = useState(false);
-  const { send: sendAPI, loading: restartSending } = useRequest(
-    (call: APIcall) => API(call),
-    { immediate: false }
-  );
 
   if (restarting) return <SystemMonitor />;
   if (!form.data) {
-    return (
-      <Loader error={form.errorMessage} onRetry={() => void form.loadData()} />
-    );
+    return <Loader error={form.errorMessage} onRetry={() => void form.loadData()} />;
   }
 
   const changes = form.dirtyFlags.length;
@@ -145,7 +136,7 @@ const FormPage = <D extends object>({ form, children }: FormPageProps<D>) => {
       {form.blocker && <BlockNavigation blocker={form.blocker} />}
       {children(form.data)}
       {changes > 0 ? (
-        <SaveBar
+        <ChangesBar
           message={
             <>
               {LL.CHANGED_SETTINGS({ num: changes })}
@@ -154,37 +145,12 @@ const FormPage = <D extends object>({ form, children }: FormPageProps<D>) => {
               )}
             </>
           }
-        >
-          <Button color="secondary" icon="undo" disabled={form.saving} onClick={form.cancel}>
-            {LL.CANCEL()}
-          </Button>
-          <Button
-            variant="contained"
-            icon="check"
-            disabled={form.saving}
-            onClick={() => void form.save()}
-          >
-            {LL.SAVE()}
-          </Button>
-        </SaveBar>
+          saving={form.saving}
+          onDiscard={form.cancel}
+          onSave={() => void form.save()}
+        />
       ) : (
-        form.restartNeeded && (
-          <SaveBar warning icon="restart_alt" message={LL.SAVED_RESTART()}>
-            <Button
-              variant="contained"
-              color="warning"
-              icon="restart_alt"
-              disabled={restartSending}
-              onClick={() =>
-                void sendAPI({ device: 'system', cmd: 'restart', id: 0 }).then(() =>
-                  setRestarting(true)
-                )
-              }
-            >
-              {LL.RESTART_NOW()}
-            </Button>
-          </SaveBar>
-        )
+        form.restartNeeded && <RestartBar onRestarted={() => setRestarting(true)} />
       )}
     </>
   );

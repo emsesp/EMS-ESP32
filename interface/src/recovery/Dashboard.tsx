@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import {
   Button,
+  ConfirmDialog,
   Dialog,
   Icon,
   IconButton,
@@ -235,6 +236,15 @@ const Dashboard = ({
                     : formatMB(p.size)}
                 </td>
                 <td className="rc-tags">
+                  {p.valid &&
+                    p.official !== undefined &&
+                    (p.official ? (
+                      <Tag kind="ok" icon="verified">
+                        official
+                      </Tag>
+                    ) : (
+                      <Tag kind="warn">custom</Tag>
+                    ))}
                   {p.label === status.running && <Tag kind="ok">running</Tag>}
                   {p.label === status.boot && p.label !== status.running && (
                     <Tag kind="type">next boot</Tag>
@@ -348,7 +358,6 @@ const Dashboard = ({
           </Button>
           {!status.disable_reset && (
             <Button
-              variant="contained"
               color="error"
               icon="delete_forever"
               onClick={() => setConfirmFactoryReset(true)}
@@ -359,85 +368,40 @@ const Dashboard = ({
         </div>
       </Section>
 
-      <Dialog
+      <ConfirmDialog
         open={confirmFactoryReset}
-        title="Factory Reset"
+        title="Factory reset"
+        label="Factory Reset"
+        icon="delete_forever"
+        color="error"
         onClose={() => setConfirmFactoryReset(false)}
-        actions={
-          <>
-            <Button
-              color="secondary"
-              icon="cancel"
-              onClick={() => setConfirmFactoryReset(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
-              icon="delete_forever"
-              onClick={() => void doFactoryReset()}
-            >
-              Factory Reset
-            </Button>
-          </>
-        }
+        onConfirm={doFactoryReset}
       >
         Are you sure you want to reset EMS-ESP to its factory defaults?
-      </Dialog>
+      </ConfirmDialog>
 
-      <Dialog
+      <ConfirmDialog
         open={confirmEraseCoreDump}
-        title="Erase Crash Dump"
+        title="Erase crash dump"
+        label="Erase"
+        icon="delete"
+        color="error"
         onClose={() => setConfirmEraseCoreDump(false)}
-        actions={
-          <>
-            <Button
-              color="secondary"
-              icon="cancel"
-              onClick={() => setConfirmEraseCoreDump(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
-              icon="delete"
-              onClick={() => void doEraseCoreDump()}
-            >
-              Erase
-            </Button>
-          </>
-        }
+        onConfirm={doEraseCoreDump}
       >
         Are you sure you want to erase the crash dump? Download it first if you want
         to report the crash.
-      </Dialog>
+      </ConfirmDialog>
 
-      <Dialog
+      <ConfirmDialog
         open={!!confirmBoot}
-        title="Start Firmware"
+        title="Start firmware"
+        label="Start"
+        icon="play_arrow"
         onClose={() => setConfirmBoot(undefined)}
-        actions={
-          <>
-            <Button
-              color="secondary"
-              icon="cancel"
-              onClick={() => setConfirmBoot(undefined)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              icon="play_arrow"
-              onClick={() => confirmBoot && void doBoot(confirmBoot)}
-            >
-              Start
-            </Button>
-          </>
-        }
+        onConfirm={() => confirmBoot && doBoot(confirmBoot)}
       >
-        <p className="rc-p">
+        <p>
           Restart and run
           {confirmBoot?.version ? ` EMS-ESP v${confirmBoot.version}` : ''} from{' '}
           {confirmBoot?.label}?
@@ -448,11 +412,11 @@ const Dashboard = ({
             back to the other firmware, or to the recovery.
           </Message>
         )}
-      </Dialog>
+      </ConfirmDialog>
 
       <Dialog
         open={!!infoPartition}
-        title="Firmware Version Info"
+        title="Firmware version information"
         onClose={() => setInfoPartition(undefined)}
         actions={
           <Button
@@ -478,6 +442,12 @@ const Dashboard = ({
               {
                 label: 'Type',
                 value: infoPartition.factory ? 'Recovery App' : 'EMS-ESP Firmware'
+              },
+              infoPartition.official !== undefined && {
+                label: 'Build',
+                value: infoPartition.official
+                  ? 'Official, signed by EMS-ESP'
+                  : 'Custom, not signed by EMS-ESP'
               },
               { label: 'Partition', value: infoPartition.label },
               {

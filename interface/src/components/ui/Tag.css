@@ -4,7 +4,7 @@
   gap: 4px;
   padding: 1px 8px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--fill);
   color: var(--text-2);
   font-size: 11px;
   white-space: nowrap;
@@ -13,18 +13,24 @@
 * + .tag {
   margin-left: 6px;
 }
+/* `* + .tag` doesn't match after a bare text node, e.g. a row name */
+.tag.new,
+.tag.mod {
+  margin-left: 10px;
+}
 .tag.new {
-  background: rgba(102, 187, 106, 0.18);
-  color: #a5d6a7;
+  background: var(--success-tint);
+  color: var(--success-text);
   text-transform: uppercase;
 }
 .tag.mod {
-  background: rgba(144, 202, 249, 0.16);
+  background: var(--primary-tint);
   color: var(--primary);
   text-transform: uppercase;
 }
 .tag.sys {
-  background: rgba(255, 255, 255, 0.06);
+  margin-left: 8px;
+  background: var(--hover);
   color: var(--text-3);
 }
 .tag.type {
@@ -32,14 +38,31 @@
   color: #b2ebf2;
 }
 .tag.ok {
-  background: rgba(102, 187, 106, 0.14);
-  color: #a5d6a7;
+  background: var(--success-tint);
+  color: var(--success-text);
 }
 .tag.warn {
-  background: rgba(255, 167, 38, 0.16);
-  color: #ffcc80;
+  background: var(--warning-tint);
+  color: var(--warning-text);
 }
 .tag.err {
-  background: rgba(244, 67, 54, 0.16);
-  color: #ff8a80;
+  background: var(--error-tint);
+  color: var(--error-text);
+}
+
+/* a number in a pill, e.g. the entities of a device */
+.count {
+  flex-shrink: 0;
+  min-width: 28px;
+  padding: 1px 8px;
+  border-radius: 12px;
+  background: var(--fill);
+  color: var(--text-2);
+  font-size: 12px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.count.primary {
+  background: var(--primary-tint);
+  color: var(--primary);
 }

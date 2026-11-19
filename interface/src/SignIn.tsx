@@ -41,7 +41,7 @@ const SignIn = memo(() => {
       } else if (event.message === 'Too Many Requests') {
         toast.warning(LL.TOO_MANY_LOGINS());
       } else {
-        toast.error(LL.ERROR() + ' ' + event.message);
+        toast.error(event.message || LL.ERROR());
       }
       setProcessing(false);
     });
@@ -76,6 +76,7 @@ const SignIn = memo(() => {
 
   return (
     <main className="signin">
+      <LanguageSelect className="signin-lang" />
       <form
         className="signin-card"
         noValidate
@@ -84,33 +85,49 @@ const SignIn = memo(() => {
           void validateAndSignIn();
         }}
       >
-        <LanguageSelect className="signin-lang" />
-        <img className="signin-logo" src="/app/icon.png" alt="" />
-        <h1>{PROJECT_NAME}</h1>
-        <TextField
-          label={LL.USERNAME(0)}
-          autoComplete="username"
-          autoCapitalize="none"
-          autoCorrect="off"
-          autoFocus
-          {...field('username')}
-        />
-        <TextField
-          type="password"
-          label={LL.PASSWORD()}
-          autoComplete="current-password"
-          {...field('password')}
-        />
-        <Button
-          type="submit"
-          variant="contained"
-          icon="login"
-          className="signin-submit"
-          disabled={processing}
-        >
-          {LL.SIGN_IN()}
-        </Button>
+        <div className="signin-brand">
+          <img className="signin-logo" src="/app/icon.png" alt="" />
+          <h1>{PROJECT_NAME}</h1>
+          <p className="signin-sub">{LL.SIGN_IN_SUBTITLE()}</p>
+        </div>
+        <div className="signin-fields">
+          <TextField
+            label={LL.USERNAME(0)}
+            autoComplete="username"
+            autoCapitalize="none"
+            autoCorrect="off"
+            autoFocus
+            {...field('username')}
+          />
+          <TextField
+            type="password"
+            label={LL.PASSWORD()}
+            autoComplete="current-password"
+            {...field('password')}
+          />
+          <Button
+            type="submit"
+            icon="login"
+            className="signin-submit"
+            disabled={processing}
+          >
+            {LL.SIGN_IN()}
+          </Button>
+        </div>
       </form>
+      <footer className="signin-foot">
+        <a href="https://emsesp.org" target="_blank" rel="noreferrer">
+          {LL.DOCUMENTATION()}
+        </a>
+        <span>·</span>
+        <a
+          href="https://github.com/emsesp/EMS-ESP32"
+          target="_blank"
+          rel="noreferrer"
+        >
+          GitHub
+        </a>
+      </footer>
     </main>
   );
 });

@@ -60,7 +60,7 @@ const SystemMonitor = ({ onDone, onInstallCustom }: SystemMonitorProps) => {
         event.data.status === SystemStatusCodes.SYSTEM_STATUS_ERROR_UPLOAD
       ) {
         uploadFailed.current = true;
-        setErrorMessage('Please check system logs for possible causes');
+        setErrorMessage(LL.CHECK_SYSTEM_LOG());
       } else if (
         event.data.status === SystemStatusCodes.SYSTEM_STATUS_ERROR_NOT_OFFICIAL
       ) {
@@ -76,7 +76,7 @@ const SystemMonitor = ({ onDone, onInstallCustom }: SystemMonitorProps) => {
         document.location.href = '/';
         return;
       }
-      setErrorMessage(String(error.error?.message || 'An error occurred'));
+      setErrorMessage(String(error.error?.message || LL.ERROR()));
     });
 
   useInterval(() => {
@@ -160,8 +160,7 @@ const SystemMonitor = ({ onDone, onInstallCustom }: SystemMonitorProps) => {
           actions={
             <Button
               size="sm"
-              variant="contained"
-              color="error"
+              color="warning"
               icon="restart_alt"
               onClick={() => void onCancel()}
             >

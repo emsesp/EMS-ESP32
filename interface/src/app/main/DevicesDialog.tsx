@@ -1,8 +1,16 @@
-import { type ChangeEvent, useEffect, useId, useState } from 'react';
+import { type ChangeEvent, useState } from 'react';
 
 import { callAction } from '@/api/app';
 import { useRequest } from 'alova/client';
-import { Button, Dialog, Segmented, Select, TextField, toast } from 'components/ui';
+import {
+  Button,
+  Dialog,
+  Segmented,
+  Select,
+  TextField,
+  focusInvalid,
+  toast
+} from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 import { extractEventValue, numberValue } from 'utils';
 import { ValidationError, validate } from 'validators';
@@ -14,8 +22,8 @@ import { formatValue } from './deviceValue';
 import { DeviceValueUOM, DeviceValueUOM_s, getDeviceValueKind } from './types';
 import type { DeviceValue } from './types';
 
+// mount only while it is open
 interface DevicesDialogProps {
-  open: boolean;
   onClose: () => void;
   onSave: (as: DeviceValue) => void;
   selectedItem: DeviceValue;
@@ -53,7 +61,6 @@ const toSend = (dv: DeviceValue): DeviceValue => {
 };
 
 const DevicesDialog = ({
-  open,
   onClose,
   onSave,
   selectedItem,
@@ -62,16 +69,10 @@ const DevicesDialog = ({
   progress
 }: DevicesDialogProps) => {
   const { LL } = useI18nContext();
-  const formId = useId();
-  const [editItem, setEditItem] = useState<DeviceValue>(selectedItem);
+  const [editItem, setEditItem] = useState<DeviceValue>(() =>
+    initialValue(selectedItem)
+  );
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
-
-  useEffect(() => {
-    if (open) {
-      setFieldErrors(undefined);
-      setEditItem(initialValue(selectedItem));
-    }
-  }, [open, selectedItem]);
 
   const { send: executeCommand } = useRequest(
     (id: string) => callAction({ action: 'executeCommand', param: id }),
@@ -81,7 +82,7 @@ const DevicesDialog = ({
       toast.success(LL.COMMAND_EXECUTED());
     })
     .onError((error) => {
-      toast.error(String(error.error?.message || 'An error occurred'));
+      toast.error(String(error.error?.message || LL.ERROR()));
     });
 
   const setValue = (v: unknown) => {
@@ -102,6 +103,7 @@ const DevicesDialog = ({
     } catch (error) {
       if (error instanceof ValidationError) {
         setFieldErrors(error.fieldErrors);
+        focusInvalid();
       }
     }
   };
@@ -126,9 +128,9 @@ const DevicesDialog = ({
     kind === 'command' || (kind === 'deviceCommand' && selectedItem.v === '');
 
   const title = isRun
-    ? `${LL.RUN()} ${LL.COMMAND(0)}`
+    ? LL.RUN_COMMAND()
     : kind === 'scheduler'
-      ? `${LL.UPDATE()} ${LL.SCHEDULE(0)}`
+      ? LL.EDIT_SCHEDULE()
       : writeable
         ? LL.CHANGE_VALUE()
         : LL.VALUE(0);
@@ -144,7 +146,7 @@ const DevicesDialog = ({
     if (kind === 'command') return null;
     if (!writeable) {
       return (
-        <p className="dvd-value">
+        <p className="dvd-value full">
           {formatValue(LL, selectedItem.v, selectedItem.u)}
         </p>
       );
@@ -215,9 +217,16 @@ const DevicesDialog = ({
 
   return (
     <Dialog
-      open={open}
+      open
       title={title}
       onClose={onClose}
+      onSubmit={
+        writeable
+          ? () => {
+              if (!progress) void doAction();
+            }
+          : undefined
+      }
       actions={
         writeable ? (
           <>
@@ -226,8 +235,6 @@ const DevicesDialog = ({
             </Button>
             <Button
               type="submit"
-              form={formId}
-              variant="contained"
               icon={isRun ? 'play_arrow' : 'check'}
               disabled={progress}
             >
@@ -235,27 +242,19 @@ const DevicesDialog = ({
             </Button>
           </>
         ) : (
-          <Button color="secondary" onClick={onClose}>
+          <Button icon="close" color="secondary" onClick={onClose}>
             {LL.CLOSE()}
           </Button>
         )
       }
     >
-      <form
-        id={formId}
-        className="dvd-form"
-        noValidate
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (writeable && !progress) void doAction();
-        }}
-      >
-        <p className="dvd-name">
+      <div className="form">
+        <p className="dvd-name full">
           <span>{dv.id.slice(2)}</span>
           {dv.c && <span className="mono muted">{dv.c}</span>}
         </p>
         {renderField()}
-      </form>
+      </div>
     </Dialog>
   );
 };

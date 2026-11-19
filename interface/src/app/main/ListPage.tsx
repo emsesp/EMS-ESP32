@@ -1,9 +1,11 @@
 import type { ReactNode } from 'react';
 
 import BlockNavigation from 'components/routing/BlockNavigation';
-import { Button, Loader, SaveBar, Tag } from 'components/ui';
+import { Loader, Tag } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { PendingList, PendingState } from 'utils';
+
+import { ChangesBar } from './ChangesBar';
 
 interface ListPageProps<T> {
   list: PendingList<T>;
@@ -15,9 +17,7 @@ const ListPage = <T,>({ list, children }: ListPageProps<T>) => {
   const { LL } = useI18nContext();
 
   if (!list.data) {
-    return (
-      <Loader error={list.error?.message} onRetry={() => void list.reload()} />
-    );
+    return <Loader error={list.error?.message} onRetry={() => void list.reload()} />;
   }
 
   return (
@@ -25,26 +25,20 @@ const ListPage = <T,>({ list, children }: ListPageProps<T>) => {
       {list.blocker && <BlockNavigation blocker={list.blocker} />}
       {children}
       {list.changes > 0 && (
-        <SaveBar message={LL.UNSAVED_CHANGES({ num: list.changes })}>
-          <Button color="secondary" icon="undo" disabled={list.saving} onClick={list.cancel}>
-            {LL.CANCEL()}
-          </Button>
-          <Button
-            variant="contained"
-            icon="check"
-            disabled={list.saving}
-            onClick={() => void list.save()}
-          >
-            {LL.SAVE()}
-          </Button>
-        </SaveBar>
+        <ChangesBar
+          message={LL.UNSAVED_CHANGES({ num: list.changes })}
+          saving={list.saving}
+          onDiscard={list.cancel}
+          onSave={() => void list.save()}
+        />
       )}
     </>
   );
 };
 
 // row class for the coloured left edge of a pending row
-export const pendingClass = (state: PendingState) => (state ? `st-${state}` : undefined);
+export const pendingClass = (state: PendingState) =>
+  state ? `st-${state}` : undefined;
 
 // "new" / "changed" after the name of a pending row
 export const PendingTag = ({ state }: { state: PendingState }) => {

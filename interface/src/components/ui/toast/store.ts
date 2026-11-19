@@ -6,6 +6,8 @@ export interface ToastItem {
   message: string;
 }
 
+const MAX_TOASTS = 3;
+
 let toasts: ToastItem[] = [];
 let nextId = 1;
 const listeners = new Set<() => void>();
@@ -25,7 +27,11 @@ export const getSnapshot = (): ToastItem[] => toasts;
 
 const add = (severity: ToastSeverity, message: string): number => {
   const id = nextId++;
-  toasts = [...toasts, { id, severity, message }];
+  // a repeated message replaces the earlier one, so it moves to the end with a fresh timer
+  const rest = toasts.filter(
+    (t) => t.severity !== severity || t.message !== message
+  );
+  toasts = [...rest, { id, severity, message }].slice(-MAX_TOASTS);
   emit();
   return id;
 };

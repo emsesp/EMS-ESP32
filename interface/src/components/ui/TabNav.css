@@ -26,6 +26,6 @@
 }
 @media (pointer: coarse) {
   .tabnav a {
-    min-height: 44px;
+    min-height: var(--touch);
   }
 }

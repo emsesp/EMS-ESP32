@@ -8,8 +8,8 @@ import {
 
 import { useI18nContext } from 'i18n/i18n-react';
 
-import FieldFlags from './FieldFlags';
 import './Field.css';
+import FieldFlags from './FieldFlags';
 import IconButton from './IconButton';
 import { cx } from './cx';
 

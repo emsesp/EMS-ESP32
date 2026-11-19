@@ -18,7 +18,7 @@ import {
 import { useI18nContext } from 'i18n/i18n-react';
 import type { NTPSettingsType, NTPStatusType, Time } from 'types';
 import { formatDateTime, formatLocalDateTime, useInterval } from 'utils';
-import { NTP_SETTINGS_VALIDATOR } from 'validators/ntp';
+import { createNTPSettingsValidator } from 'validators/ntp';
 
 import FormPage, { useFormPage } from './FormPage';
 import './NTPSettings.css';
@@ -98,33 +98,35 @@ const NTPClock = ({ canSetTime }: { canSetTime: boolean }) => {
         open={setting}
         title={LL.SET_TIME(1)}
         onClose={() => setSetting(false)}
+        onSubmit={() => void configureTime()}
         actions={
           <>
-            <Button color="secondary" onClick={() => setSetting(false)}>
+            <Button
+              icon="cancel"
+              color="secondary"
+              onClick={() => setSetting(false)}
+            >
               {LL.CANCEL()}
             </Button>
-            <Button
-              variant="contained"
-              icon="schedule"
-              disabled={processing || !localTime}
-              onClick={() => void configureTime()}
-            >
+            <Button type="submit" icon="check" disabled={processing || !localTime}>
               {LL.UPDATE()}
             </Button>
           </>
         }
       >
-        <p className="ntp-dialog-text">{LL.SET_TIME_TEXT()}</p>
-        <TextField
-          label={LL.LOCAL_TIME(0)}
-          name="local_time"
-          type="datetime-local"
-          step={1}
-          fullWidth
-          value={localTime}
-          disabled={processing}
-          onChange={(e) => setLocalTime(e.currentTarget.value)}
-        />
+        <p>{LL.SET_TIME_TEXT()}</p>
+        <div className="form">
+          <TextField
+            label={LL.LOCAL_TIME(0)}
+            name="local_time"
+            type="datetime-local"
+            step={1}
+            fullWidth
+            value={localTime}
+            disabled={processing}
+            onChange={(e) => setLocalTime(e.currentTarget.value)}
+          />
+        </div>
       </Dialog>
     </Section>
   );
@@ -137,7 +139,7 @@ const NTPSettings = () => {
   const form = useFormPage<NTPSettingsType>({
     read: NTPApi.readNTPSettings,
     update: NTPApi.updateNTPSettings,
-    validator: () => NTP_SETTINGS_VALIDATOR
+    validator: createNTPSettingsValidator
   });
   const { data: settings, dirtyFlags, setOrigData, updateDataValue } = form;
   const migratingTz = useRef(false);

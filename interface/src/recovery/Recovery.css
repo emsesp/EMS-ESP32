@@ -89,47 +89,6 @@
   gap: 8px;
 }
 
-.rc-signin {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  min-height: 100dvh;
-  padding: 16px;
-}
-.rc-signin-card {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  width: 100%;
-  max-width: 360px;
-  padding: 24px;
-  background: var(--paper);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-.rc-signin-logo {
-  align-self: center;
-  width: 120px;
-  height: 120px;
-  margin-top: 8px;
-}
-.rc-signin-card h1 {
-  margin: 0;
-  text-align: center;
-  font-size: 24px;
-  font-weight: 400;
-}
-.rc-signin-sub {
-  margin: -12px 0 4px;
-  text-align: center;
-  font-size: 16px;
-  color: var(--secondary);
-}
-.rc-signin-submit {
-  margin-top: 8px;
-}
-
 /* covers the page while the device restarts */
 .rc-restart {
   position: fixed;

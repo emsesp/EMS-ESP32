@@ -1,12 +1,6 @@
 import * as APApi from 'api/ap';
 
-import {
-  FormSection,
-  Segmented,
-  Select,
-  Switch,
-  TextField
-} from 'components/ui';
+import { FormSection, Segmented, Select, Switch, TextField } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { APSettingsType } from 'types';
 import { APProvisionMode } from 'types';
@@ -48,7 +42,10 @@ const APSettings = () => {
                   value: String(APProvisionMode.AP_MODE_DISCONNECTED),
                   label: LL.AP_PROVIDE_TEXT_2()
                 },
-                { value: String(APProvisionMode.AP_NEVER), label: LL.AP_PROVIDE_TEXT_3() }
+                {
+                  value: String(APProvisionMode.AP_NEVER),
+                  label: LL.AP_PROVIDE_TEXT_3()
+                }
               ]}
               {...form.segmented('provision_mode')}
             />
@@ -76,7 +73,11 @@ const APSettings = () => {
                 <Switch label={LL.AP_HIDE_SSID()} {...form.check('ssid_hidden')} />
               </FormSection>
               <FormSection icon="router" title={LL.ADDRESSES()}>
-                <TextField label={LL.AP_LOCAL_IP()} mono {...form.text('local_ip')} />
+                <TextField
+                  label={LL.AP_LOCAL_IP()}
+                  mono
+                  {...form.text('local_ip')}
+                />
                 <TextField
                   label={LL.NETWORK_GATEWAY()}
                   mono

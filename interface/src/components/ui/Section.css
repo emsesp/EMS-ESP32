@@ -11,8 +11,22 @@
   gap: 10px;
   flex-wrap: wrap;
 }
+.sec-head h2 {
+  color: var(--primary);
+}
 .sec-head + * {
   margin-top: 10px;
+}
+.sec-desc {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.sec-head + .sec-desc {
+  margin-top: 4px;
+}
+.sec-desc:last-child {
+  margin-bottom: 0;
 }
 
 /* cards side by side, one column on narrow screens */

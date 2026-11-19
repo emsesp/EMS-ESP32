@@ -5,9 +5,10 @@ import { callAction } from 'api/app';
 
 import {
   Button,
+  Dialog,
   FormSection,
+  IconButton,
   Message,
-  Section,
   Select,
   Switch,
   TextArea,
@@ -30,7 +31,6 @@ const opts = (labels: string[]) =>
 
 // an illustration of the topics, not the exact payloads
 const mqttPreview = (d: MqttSettingsType, LL: TranslationFunctions) => {
-  if (!d.enabled) return LL.MQTT_PREVIEW_OFF();
   const b = d.base;
   const lines = [
     `${b}/heartbeat   {"bus_status":"connected","uptime":"…"}`,
@@ -54,6 +54,7 @@ const MqttSettings = () => {
   const { LL } = useI18nContext();
   // chosen in the form, otherwise what the stored rootCA holds
   const [chosenTlsCheck, setChosenTlsCheck] = useState<TlsCheck>();
+  const [previewOpen, setPreviewOpen] = useState(false);
   const form = useFormPage<MqttSettingsType>({
     read: MqttApi.readMqttSettings,
     update: MqttApi.updateMqttSettings,
@@ -79,10 +80,10 @@ const MqttSettings = () => {
   const sendResetMQTT = () => {
     void callAction({ action: 'resetMQTT' })
       .then(() => {
-        toast.success('MQTT ' + LL.REFRESH() + ' successful');
+        toast.success(LL.MQTT_REFRESHED());
       })
       .catch((error: { error?: { message?: string } }) => {
-        toast.error(String(error.error?.message || 'An error occurred'));
+        toast.error(String(error.error?.message || LL.ERROR()));
       });
   };
 
@@ -94,31 +95,49 @@ const MqttSettings = () => {
     <FormPage form={form}>
       {(data) => (
         <>
-          <Section
-            icon="preview"
+          <Dialog
+            open={previewOpen && data.enabled}
             title={LL.MQTT_PREVIEW()}
-            actions={<span className="cap">{LL.MQTT_PREVIEW_HINT()}</span>}
+            size="md"
+            onClose={() => setPreviewOpen(false)}
+            actions={
+              <Button
+                icon="close"
+                color="secondary"
+                onClick={() => setPreviewOpen(false)}
+              >
+                {LL.CLOSE()}
+              </Button>
+            }
           >
             <pre className="summary mono mq-preview">{mqttPreview(data, LL)}</pre>
-          </Section>
+          </Dialog>
 
           <FormSection
             icon="dns"
             title={LL.BROKER()}
             actions={
               data.enabled && (
-                <Button
-                  size="sm"
-                  color="secondary"
-                  icon="refresh"
-                  onClick={sendResetMQTT}
-                >
-                  {LL.REFRESH() + ' MQTT'}
+                <Button color="secondary" icon="refresh" onClick={sendResetMQTT}>
+                  {LL.MQTT_REFRESH()}
                 </Button>
               )
             }
           >
-            <Switch label={LL.ENABLE_MQTT()} {...form.check('enabled')} />
+            <Switch
+              label={LL.ENABLE_MQTT()}
+              adornment={
+                data.enabled && (
+                  <IconButton
+                    icon="info"
+                    label={LL.MQTT_PREVIEW()}
+                    plain
+                    onClick={() => setPreviewOpen(true)}
+                  />
+                )
+              }
+              {...form.check('enabled')}
+            />
             {data.enabled && (
               <>
                 <TextField
@@ -127,7 +146,7 @@ const MqttSettings = () => {
                   {...form.text('host')}
                 />
                 <TextField
-                  label="Port"
+                  label={LL.PORT()}
                   min={0}
                   max={65535}
                   {...form.number('port')}
@@ -150,7 +169,7 @@ const MqttSettings = () => {
                 />
                 <TextField label={LL.BASE_TOPIC()} mono {...form.text('base')} />
                 <TextField
-                  label="Keep Alive"
+                  label={LL.KEEP_ALIVE()}
                   unit="s"
                   min={1}
                   {...form.number('keep_alive')}

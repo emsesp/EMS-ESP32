@@ -67,6 +67,8 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     root["emsesp_version"] = EMSESP_APP_VERSION;
     root["bus_status"]     = EMSESP::bus_status(); // 0, 1 or 2
     root["bus_uptime"]     = EMSbus::bus_uptime();
+    root["bus_id"]         = EMSbus::ems_bus_id();
+    root["tx_mode"]        = EMSbus::tx_mode(); // 0 while Tx is paused
     root["num_devices"]    = EMSESP::count_devices();
     root["num_sensors"]    = EMSESP::temperaturesensor_.count_entities();
     root["num_analogs"]    = EMSESP::analogsensor_.count_entities();
@@ -120,6 +122,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
 
     root["log_errors"]   = EMSESP::webLogService.num_errors();
     root["log_warnings"] = EMSESP::webLogService.num_warnings();
+    root["reset_reason"] = EMSESP::system_.restart_reason();
 
 #if defined(EMSESP_DEBUG)
 #ifdef EMSESP_TEST

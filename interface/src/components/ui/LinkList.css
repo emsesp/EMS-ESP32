@@ -20,7 +20,7 @@
   height: 100%;
   box-sizing: border-box;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: var(--paper-2);
 }
 .linklist.grid a:hover {
@@ -30,7 +30,7 @@
   border-top: 1px solid var(--divider);
 }
 .linklist.rows a:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--hover);
 }
 .linklist a:focus-visible {
   outline: 2px solid var(--primary);
@@ -41,6 +41,20 @@
   flex-direction: column;
   min-width: 0;
 }
+.linklist .val {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 50%;
+  color: var(--text-2);
+  font-size: 13px;
+}
+.linklist .val .txt {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .linklist .k {
   display: flex;
   align-items: center;
@@ -50,6 +64,11 @@
 .linklist .v {
   color: var(--text-2);
   font-size: 12px;
+}
+.linklist .v .badge-dot {
+  display: inline-block;
+  margin-left: 6px;
+  vertical-align: middle;
 }
 .linklist .avatar {
   display: flex;
@@ -81,7 +100,7 @@
   gap: 10px;
   padding: 8px 10px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--text);
   font: inherit;
@@ -93,20 +112,20 @@
   border-color: var(--primary);
 }
 .lang.on {
-  background: rgba(144, 202, 249, 0.14);
+  background: var(--primary-tint);
   border-color: var(--primary);
   color: var(--primary);
 }
 .lang .code {
   padding: 1px 5px;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--fill);
   color: var(--text-2);
   font-family: var(--font-mono);
   font-size: 11px;
 }
 @media (pointer: coarse) {
   .lang {
-    min-height: 44px;
+    min-height: var(--touch);
   }
 }

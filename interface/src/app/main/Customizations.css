@@ -8,35 +8,15 @@
 .cz-device .field {
   min-width: min(360px, 100%);
 }
+.cz-device > .btn {
+  min-height: 44px;
+}
 
 .cz-filters {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
-.cz-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 28px;
-  padding: 0 12px;
-  border: 1px solid transparent;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text);
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
-}
-.cz-chip:hover {
-  background: rgba(255, 255, 255, 0.14);
-}
-.cz-chip.on {
-  border-color: var(--primary);
-  background: rgba(144, 202, 249, 0.16);
-  color: var(--primary);
-}
-
 .cz-toolbar,
 .cz-bulk {
   display: flex;
@@ -52,7 +32,7 @@
   margin-right: 6px;
 }
 .cz-bulk .btn.on {
-  background: rgba(33, 150, 243, 0.16);
+  background: var(--secondary-tint);
   border-color: var(--secondary);
 }
 .cz-hint {
@@ -77,7 +57,7 @@
   cursor: pointer;
 }
 .cz-tog:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--fill);
   color: var(--text-2);
 }
 .cz-tog:disabled {
@@ -131,7 +111,6 @@
 .cz-tbl tr.dim .cz-id {
   color: var(--text-3);
 }
-
 .cz-legend {
   display: flex;
   flex-wrap: wrap;
@@ -155,11 +134,8 @@
 
 @media (pointer: coarse) {
   .cz-tog {
-    width: 40px;
-    height: 40px;
-  }
-  .cz-chip {
-    min-height: 40px;
+    width: var(--touch);
+    height: var(--touch);
   }
 }
 
@@ -186,10 +162,6 @@
   }
   .cz-tbl.stack td:empty {
     display: none;
-  }
-  .cz-tbl.stack td.tbl-empty {
-    display: block;
-    text-align: center;
   }
   .cz-bulk .lb {
     width: 100%;

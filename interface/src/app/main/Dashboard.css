@@ -13,57 +13,122 @@
   margin: 12px 12px 0;
 }
 
+.db-group {
+  margin: 0 12px;
+}
+.db-gtitle {
+  margin: 16px 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* columns, so a short card doesn't leave a gap below it */
 .db-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
-  align-items: start;
-  gap: 12px;
-  margin: 12px;
+  columns: 3 300px;
+  column-gap: 12px;
 }
 .db-card {
+  break-inside: avoid;
   display: flex;
   flex-direction: column;
+  margin-bottom: 12px;
   overflow: hidden;
   background: var(--paper);
   border: 1px solid var(--border);
   border-radius: var(--radius);
 }
 
-.db-head {
+.db-top {
   display: flex;
   align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 10px 12px;
-  border: 0;
+}
+.db-top.open {
+  border-bottom: 1px solid var(--divider);
+}
+.db-head {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px 4px 10px 12px;
+}
+.db-name {
+  min-width: 0;
+  font-size: 15px;
+  color: var(--primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.db-link {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  margin-right: 6px;
+  border-radius: 50%;
+  color: var(--text-2);
+}
+.db-link:hover {
+  background: var(--fill);
+  color: var(--primary);
+}
+
+.db-tbl tbody tr,
+.db-tbl tbody tr:nth-child(odd) {
   background: transparent;
-  color: var(--text);
+}
+.db-tbl tbody tr + tr {
+  border-top: 1px solid var(--divider-soft);
+}
+.db-tbl td {
+  height: 30px;
+  overflow-wrap: anywhere;
+}
+.db-tbl td:first-child {
+  color: var(--text-2);
+}
+
+.db-more {
+  padding: 7px 12px;
+  border: 0;
+  border-top: 1px solid var(--divider-soft);
+  background: transparent;
+  color: var(--primary);
   font: inherit;
+  font-size: 13px;
   text-align: left;
   cursor: pointer;
 }
-.db-head:hover {
-  background: rgba(255, 255, 255, 0.04);
+.db-more:hover {
+  background: var(--hover);
 }
-.db-head[aria-expanded='true'] {
-  border-bottom: 1px solid var(--divider);
-}
-.db-name {
-  font-size: 15px;
-  overflow-wrap: anywhere;
-}
-.db-chev {
-  margin-left: auto;
-  color: var(--text-2);
-  transition: transform 0.15s;
-}
-.db-chev.open {
-  transform: rotate(90deg);
+.db-top.open + .db-more {
+  border-top: 0;
 }
 
-.db-tbl td {
-  height: 28px;
-  overflow-wrap: anywhere;
+.db-sw {
+  display: inline-block;
+  margin: 0 2px;
+  vertical-align: middle;
+  cursor: inherit;
+}
+
+.db-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px;
+}
+.db-chips button.chip {
+  padding-left: 6px;
 }
 .db-tbl td.db-val {
   white-space: normal;
@@ -80,38 +145,28 @@
   color: var(--text-3);
 }
 
-.db-foot {
-  display: flex;
-  justify-content: flex-end;
-  padding: 6px 12px;
-  border-top: 1px solid var(--divider);
-}
-.db-foot a {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  font-size: 12px;
-}
-
 @media (max-width: 599px) {
   .db-bar,
   .db-msg {
     margin: 8px 8px 0;
   }
-  .db-cards {
-    margin: 8px;
-    gap: 8px;
+  .db-group {
+    margin: 0 8px;
+  }
+  .db-card {
+    margin-bottom: 8px;
   }
 }
 
 @media (pointer: coarse) {
-  .db-head {
-    min-height: 44px;
+  .db-more {
+    min-height: var(--touch);
+  }
+  .db-link {
+    width: var(--touch);
+    height: var(--touch);
   }
   .db-tbl tr.click td {
-    height: 40px;
-  }
-  .db-foot a {
-    min-height: 40px;
+    height: var(--touch);
   }
 }

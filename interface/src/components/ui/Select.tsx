@@ -1,7 +1,7 @@
 import { type FC, type ReactNode, type SelectHTMLAttributes, useId } from 'react';
 
-import FieldFlags from './FieldFlags';
 import './Field.css';
+import FieldFlags from './FieldFlags';
 import { cx } from './cx';
 
 export interface SelectOption {

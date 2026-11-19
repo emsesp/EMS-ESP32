@@ -52,14 +52,9 @@ const SensorsAnalogDialog = ({
     { value: String(low), label: LL.ACTIVELOW() }
   ];
 
-  const title = creating
-    ? `${LL.ADD(1)} ${LL.NEW(0)} ${LL.ANALOG_SENSOR(0)}`
-    : `${LL.EDIT()} ${LL.ANALOG_SENSOR(0)}`;
-
   return (
     <EntityDialog
-      open
-      title={title}
+      title={creating ? LL.ADD_ANALOG_SENSOR() : LL.EDIT_ANALOG_SENSOR()}
       item={item}
       creating={creating}
       validator={() =>
@@ -196,8 +191,8 @@ const SensorsAnalogDialog = ({
                   label={LL.STARTVALUE()}
                   options={[
                     { value: '0', label: LL.UNCHANGED() },
-                    { value: '1', label: `${LL.ALWAYS()} ${LL.OFF()}` },
-                    { value: '2', label: `${LL.ALWAYS()} ${LL.ON()}` }
+                    { value: '1', label: LL.ALWAYS_OFF() },
+                    { value: '2', label: LL.ALWAYS_ON() }
                   ]}
                   disabled={sys}
                   {...f.select('u')}
@@ -235,7 +230,7 @@ const SensorsAnalogDialog = ({
                   {...f.select('o')}
                 />
                 <TextField
-                  label="Pulse"
+                  label={LL.PULSE()}
                   unit="s"
                   min={0}
                   max={10000}

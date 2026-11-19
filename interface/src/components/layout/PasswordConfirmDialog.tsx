@@ -58,14 +58,16 @@ const PasswordConfirmDialog = () => {
       open={open}
       title={LL.PASSWORD_CONFIRM_TITLE()}
       onClose={() => close(false)}
+      onSubmit={() => {
+        if (password && !checking) void onConfirm();
+      }}
       actions={
         <>
-          <Button color="secondary" onClick={() => close(false)}>
+          <Button icon="cancel" color="secondary" onClick={() => close(false)}>
             {LL.CANCEL()}
           </Button>
           <Button
             type="submit"
-            form="password-confirm"
             icon="lock"
             disabled={checking || password.length === 0}
           >
@@ -75,13 +77,7 @@ const PasswordConfirmDialog = () => {
       }
     >
       <p>{LL.PASSWORD_CONFIRM_TEXT()}</p>
-      <form
-        id="password-confirm"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (password) void onConfirm();
-        }}
-      >
+      <div className="form">
         <TextField
           type="password"
           name="password"
@@ -93,7 +89,7 @@ const PasswordConfirmDialog = () => {
           value={password}
           onInput={(e) => setPassword(e.currentTarget.value)}
         />
-      </form>
+      </div>
     </Dialog>
   );
 };

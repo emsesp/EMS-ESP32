@@ -16,10 +16,15 @@ const FieldFlags: FC<FieldFlagsProps> = ({ restart, changed }) => {
   const { LL } = useI18nContext();
   return (
     <>
-      {restart && <Icon name="restart_alt" size="xs" className="muted" label={LL.NEEDS_RESTART()} />}
-      {changed && (
-        <span className="chg" role="img" aria-label={LL.MODIFIED()} />
+      {restart && (
+        <Icon
+          name="restart_alt"
+          size="xs"
+          className="muted"
+          label={LL.NEEDS_RESTART()}
+        />
       )}
+      {changed && <span className="chg" role="img" aria-label={LL.MODIFIED()} />}
     </>
   );
 };

@@ -3609,6 +3609,41 @@ std::string System::reset_reason(uint8_t cpu) const {
 #endif
     return "Unknown";
 }
+
+// unlike the ROM reason per CPU, this tells a crash or watchdog apart from a normal software restart
+const char * System::restart_reason() const {
+#ifndef EMSESP_STANDALONE
+    switch (esp_reset_reason()) {
+    case ESP_RST_POWERON:
+        return "Power on";
+    case ESP_RST_EXT:
+        return "Reset pin";
+    case ESP_RST_SW:
+        return "Software restart";
+    case ESP_RST_PANIC:
+        return "Crash";
+    case ESP_RST_INT_WDT:
+        return "Interrupt watchdog";
+    case ESP_RST_TASK_WDT:
+        return "Task watchdog";
+    case ESP_RST_WDT:
+        return "Watchdog";
+    case ESP_RST_DEEPSLEEP:
+        return "Deep sleep wake-up";
+    case ESP_RST_BROWNOUT:
+        return "Brownout";
+    case ESP_RST_SDIO:
+        return "SDIO reset";
+    case ESP_RST_USB:
+        return "USB reset";
+    case ESP_RST_JTAG:
+        return "JTAG reset";
+    default:
+        break;
+    }
+#endif
+    return "Unknown";
+}
 #pragma GCC diagnostic pop
 
 // set NTP status

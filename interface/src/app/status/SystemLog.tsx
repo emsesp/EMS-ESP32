@@ -142,7 +142,7 @@ const SystemLog = () => {
       });
     })
     .onError(() => {
-      toast.error('No connection to Log service');
+      toast.error(LL.LOG_NO_CONNECTION());
     });
 
   const shown = useMemo(() => {

@@ -1,10 +1,10 @@
 import type { FC, ReactNode } from 'react';
 
-import FieldFlags from './FieldFlags';
 import './Field.css';
+import FieldFlags from './FieldFlags';
+import type { SelectOption } from './Select';
 import { ToggleButton, ToggleGroup } from './ToggleGroup';
 import { cx } from './cx';
-import type { SelectOption } from './Select';
 
 export interface SegmentedProps {
   label: string;
@@ -38,7 +38,11 @@ const Segmented: FC<SegmentedProps> = ({
     </span>
     <ToggleGroup label={label}>
       {options.map((o) => (
-        <ToggleButton key={o.value} on={o.value === value} onClick={() => onChange(o.value)}>
+        <ToggleButton
+          key={o.value}
+          on={o.value === value}
+          onClick={() => onChange(o.value)}
+        >
           {o.label}
         </ToggleButton>
       ))}

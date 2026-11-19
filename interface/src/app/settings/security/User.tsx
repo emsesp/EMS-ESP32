@@ -1,7 +1,7 @@
 import { memo, useState } from 'react';
-import type { FC, FormEvent } from 'react';
+import type { FC } from 'react';
 
-import { Button, Dialog, Switch, TextField } from 'components/ui';
+import { Button, Dialog, Switch, TextField, focusInvalid } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { UserType } from 'types';
 import { ValidationError, validate } from 'validators';
@@ -13,11 +13,19 @@ interface UserProps {
   creating: boolean;
   validator: Schema;
   onDone: (user: UserType) => void;
+  onRemove?: (() => void) | undefined;
   onClose: () => void;
 }
 
 // add or edit one user; the change is kept in the page list until Save
-const User: FC<UserProps> = ({ user, creating, validator, onDone, onClose }) => {
+const User: FC<UserProps> = ({
+  user,
+  creating,
+  validator,
+  onDone,
+  onRemove,
+  onClose
+}) => {
   const { LL } = useI18nContext();
   const [value, setValue] = useState<UserType>(user);
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
@@ -32,13 +40,13 @@ const User: FC<UserProps> = ({ user, creating, validator, onDone, onClose }) => 
     });
   };
 
-  const submit = async (e?: FormEvent) => {
-    e?.preventDefault();
+  const submit = async () => {
     try {
       await validate(validator, value);
       onDone(value);
     } catch (error) {
       setFieldErrors((error as ValidationError).fieldErrors);
+      focusInvalid();
     }
   };
 
@@ -49,22 +57,29 @@ const User: FC<UserProps> = ({ user, creating, validator, onDone, onClose }) => 
       open
       title={creating ? LL.ADD_USER() : LL.EDIT_USER()}
       onClose={onClose}
+      onSubmit={() => void submit()}
       actions={
         <>
-          <Button color="secondary" onClick={onClose}>
+          {onRemove && (
+            <Button color="error" icon="delete" onClick={onRemove}>
+              {LL.REMOVE()}
+            </Button>
+          )}
+          <span className="grow" />
+          <Button icon="cancel" color="secondary" onClick={onClose}>
             {LL.CANCEL()}
           </Button>
           <Button
-            variant="contained"
-            icon={creating ? 'person_add' : 'check'}
-            onClick={() => void submit()}
+            type="submit"
+            icon={creating ? 'add' : 'check'}
+            disabled={!creating && JSON.stringify(value) === JSON.stringify(user)}
           >
             {creating ? LL.ADD(0) : LL.UPDATE()}
           </Button>
         </>
       }
     >
-      <form className="form" onSubmit={(e) => void submit(e)} noValidate>
+      <div className="form">
         <TextField
           label={LL.USERNAME(1)}
           name="username"
@@ -92,8 +107,7 @@ const User: FC<UserProps> = ({ user, creating, validator, onDone, onClose }) => 
           checked={value.admin}
           onChange={(admin) => set({ admin })}
         />
-        <button type="submit" hidden />
-      </form>
+      </div>
     </Dialog>
   );
 };

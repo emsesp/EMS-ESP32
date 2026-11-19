@@ -5,6 +5,8 @@ import type {
 } from 'validators/schema';
 import type Schema from 'validators/schema';
 
+import { vLL } from './messages';
+
 export class ValidationError extends Error {
   readonly fieldErrors: ValidateFieldsError;
 
@@ -44,31 +46,30 @@ const isValidIpAddress = (value: string): boolean =>
 const isValidHostname = (value: string): boolean =>
   HOSTNAME_PATTERN.test(value.trim());
 
-// Factory function to create validators with consistent structure
+export const required = () => ({ required: true, message: vLL().V_REQUIRED() });
+
 const createValidator = (
   validatorFn: (value: string) => boolean,
-  errorMessage: string
+  errorMessage: () => string
 ) => ({
   validator(
     _rule: InternalRuleItem,
     value: string,
     callback: (error?: string) => void
   ) {
-    callback(value && !validatorFn(value) ? errorMessage : undefined);
+    callback(value && !validatorFn(value) ? errorMessage() : undefined);
   }
 });
 
-export const IP_ADDRESS_VALIDATOR = createValidator(
-  isValidIpAddress,
-  'Must be an IP address'
+export const IP_ADDRESS_VALIDATOR = createValidator(isValidIpAddress, () =>
+  vLL().V_IP()
 );
 
-export const HOSTNAME_VALIDATOR = createValidator(
-  isValidHostname,
-  'Must be a valid hostname'
+export const HOSTNAME_VALIDATOR = createValidator(isValidHostname, () =>
+  vLL().V_HOSTNAME()
 );
 
 export const IP_OR_HOSTNAME_VALIDATOR = createValidator(
   (value) => isValidIpAddress(value) || isValidHostname(value),
-  'Must be a valid IP address or hostname'
+  () => vLL().V_IP_OR_HOSTNAME()
 );

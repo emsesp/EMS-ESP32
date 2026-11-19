@@ -15,7 +15,12 @@ export interface TabNavItem {
 const TabNav: FC<{ items: TabNavItem[]; label?: string }> = ({ items, label }) => (
   <nav className="tabnav" aria-label={label}>
     {items.map((t) => (
-      <NavLink key={t.to} to={t.to} end className={({ isActive }) => (isActive ? 'on' : undefined)}>
+      <NavLink
+        key={t.to}
+        to={t.to}
+        end
+        className={({ isActive }) => (isActive ? 'on' : undefined)}
+      >
         {t.icon && <Icon name={t.icon} size="sm" />}
         {t.label}
       </NavLink>

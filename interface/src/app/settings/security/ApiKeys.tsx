@@ -1,11 +1,11 @@
 import { memo, useState } from 'react';
-import type { FormEvent } from 'react';
 
 import * as SecurityApi from 'api/security';
 
 import { useRequest } from 'alova/client';
 import {
   Button,
+  ConfirmDialog,
   Dialog,
   IconButton,
   Loader,
@@ -50,9 +50,8 @@ const ApiKeys = () => {
     setCreating(true);
   };
 
-  const create = async (e?: FormEvent) => {
-    e?.preventDefault();
-    if (!label.trim()) return;
+  const create = async () => {
+    if (!label.trim() || sending) return;
     await sendAction({ action: 'create', label, write })
       .then((response) => {
         setNewKey((response as { key: string }).key);
@@ -99,21 +98,18 @@ const ApiKeys = () => {
   return (
     <>
       <Section
+        desc={LL.API_KEYS_TEXT()}
         title={LL.API_KEYS()}
         icon="key"
         actions={
-          <Button
-            variant="contained"
-            icon="add"
-            disabled={full}
-            onClick={openCreate}
-          >
+          <Button icon="add" disabled={full} onClick={openCreate}>
             {LL.CREATE_KEY()}
           </Button>
         }
       >
-        <p className="cap sc-desc">{LL.API_KEYS_TEXT()}</p>
-        {full && <p className="cap warnc">{LL.API_KEYS_LIMIT({ num: MAX_KEYS })}</p>}
+        {full && (
+          <Message level="warning">{LL.API_KEYS_LIMIT({ num: MAX_KEYS })}</Message>
+        )}
         <Table stack>
           <thead>
             <tr>
@@ -131,7 +127,9 @@ const ApiKeys = () => {
                 <td className="mono">{k.label}</td>
                 <td data-label={LL.API_KEY_ACCESS()}>
                   {k.write ? (
-                    <Tag kind="mod">{LL.API_KEY_READ_WRITE()}</Tag>
+                    <Tag kind="warn" icon="edit">
+                      {LL.API_KEY_READ_WRITE()}
+                    </Tag>
                   ) : (
                     <Tag kind="sys">{LL.API_KEY_READ()}</Tag>
                   )}
@@ -149,34 +147,38 @@ const ApiKeys = () => {
                 </td>
               </tr>
             ))}
+            {data.keys.length === 0 && (
+              <tr>
+                <td colSpan={4} className="tbl-empty">
+                  {LL.NO_API_KEYS()}
+                </td>
+              </tr>
+            )}
           </tbody>
         </Table>
-        {data.keys.length === 0 && (
-          <div className="tbl-empty">{LL.NO_API_KEYS()}</div>
-        )}
       </Section>
 
       <Dialog
         open={creating}
         title={LL.CREATE_KEY()}
         onClose={() => setCreating(false)}
+        onSubmit={() => void create()}
         actions={
           <>
-            <Button color="secondary" onClick={() => setCreating(false)}>
+            <Button
+              icon="cancel"
+              color="secondary"
+              onClick={() => setCreating(false)}
+            >
               {LL.CANCEL()}
             </Button>
-            <Button
-              variant="contained"
-              icon="key"
-              disabled={!label.trim() || sending}
-              onClick={() => void create()}
-            >
+            <Button type="submit" icon="add" disabled={!label.trim() || sending}>
               {LL.CREATE_KEY()}
             </Button>
           </>
         }
       >
-        <form className="form" onSubmit={(e) => void create(e)}>
+        <div className="form">
           <TextField
             label={LL.NAME(0)}
             name="label"
@@ -198,21 +200,24 @@ const ApiKeys = () => {
             value={write ? 'write' : 'read'}
             onChange={(v) => setWrite(v === 'write')}
           />
-          <button type="submit" hidden />
-        </form>
+        </div>
       </Dialog>
 
+      {/* the key is shown only once, so only the Close button closes this */}
       <Dialog
         open={!!newKey}
         title={LL.NEW_API_KEY()}
-        onClose={() => setNewKey(undefined)}
         actions={
           <>
+            <Button
+              color="secondary"
+              icon="close"
+              onClick={() => setNewKey(undefined)}
+            >
+              {LL.CLOSE()}
+            </Button>
             <Button icon="content_copy" onClick={copyKey}>
               {LL.COPY()}
-            </Button>
-            <Button variant="contained" onClick={() => setNewKey(undefined)}>
-              {LL.CLOSE()}
             </Button>
           </>
         }
@@ -221,28 +226,17 @@ const ApiKeys = () => {
         <div className="mono sc-key">{newKey}</div>
       </Dialog>
 
-      <Dialog
+      <ConfirmDialog
         open={!!revoking}
         title={LL.REVOKE_KEY()}
+        label={LL.REVOKE()}
+        icon="delete"
+        color="error"
         onClose={() => setRevoking(undefined)}
-        actions={
-          <>
-            <Button color="secondary" onClick={() => setRevoking(undefined)}>
-              {LL.CANCEL()}
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
-              icon="delete"
-              onClick={() => revoking && void revoke(revoking)}
-            >
-              {LL.REVOKE()}
-            </Button>
-          </>
-        }
+        onConfirm={() => revoking && revoke(revoking)}
       >
-        <p>{LL.REVOKE_KEY_TEXT({ name: revoking?.label ?? '' })}</p>
-      </Dialog>
+        {LL.REVOKE_KEY_TEXT({ name: revoking?.label ?? '' })}
+      </ConfirmDialog>
     </>
   );
 };

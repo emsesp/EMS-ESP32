@@ -68,7 +68,7 @@ export const routes: AppRoute[] = [
   { path: '/scheduler', element: Scheduler, title: (LL) => LL.SCHEDULER(), icon: 'more_time', menu: 'modules', admin: true },
   { path: '/customentities', element: CustomEntities, title: (LL) => LL.CUSTOM_ENTITIES(0), icon: 'playlist_add', menu: 'modules', admin: true },
 
-  { path: '/status', element: Status, title: (LL) => LL.STATUS_OF(''), icon: 'assessment', menu: 'system', wildcard: true },
+  { path: '/status', element: Status, title: (LL) => LL.STATUS_OF('').trim(), icon: 'assessment', menu: 'system', wildcard: true },
   { path: '/status/hardwarestatus', element: HardwareStatus, title: (LL) => LL.HARDWARE(), icon: 'memory', parent: '/status', wildcard: true },
   { path: '/status/activity', element: Activity, title: (LL) => LL.DATA_TRAFFIC(), icon: 'swap_horiz', parent: '/status' },
   { path: '/status/network', element: NetworkStatus, title: (LL) => LL.NETWORK(1), icon: 'lan', parent: '/status' },

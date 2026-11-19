@@ -1,8 +1,8 @@
 import { useContext, useState } from 'react';
 
-import { useRequest } from 'alova/client';
 import { readSystemStatus } from 'api/system';
 
+import { useRequest } from 'alova/client';
 import {
   Button,
   ButtonLink,
@@ -16,9 +16,15 @@ import { useI18nContext } from 'i18n/i18n-react';
 import { NetworkConnectionStatus, type SystemStatus } from 'types';
 import { saveFile } from 'utils';
 
-import { API, callAction } from '../../api/app';
+import { API, callAction, readActivity, readCoreData } from '../../api/app';
 import './Help.css';
-import { type APIcall, busConnectionStatus } from './types';
+import {
+  type APIcall,
+  type Device,
+  DeviceType,
+  type Stat,
+  busConnectionStatus
+} from './types';
 
 interface CustomSupport {
   img_url: string | null;
@@ -38,12 +44,46 @@ const BUS_TEXT: Record<number, string> = {
 const duration = (s: number) =>
   `${Math.trunc(s / 86400)}d ${Math.trunc(s / 3600) % 24}h ${Math.trunc(s / 60) % 60}m`;
 
+const TX_MODE_TEXT = ['off', 'EMS', 'EMS+', 'HT3', 'hardware', 'auto'];
+
+const hex = (n: number) => `0x${n.toString(16).toUpperCase().padStart(2, '0')}`;
+
+// stats ids as in /rest/activity: 0 received, 1 Tx reads, 2 Tx writes
+const busLine = (s: SystemStatus, stats?: readonly Stat[]) => {
+  const rx = stats?.find((st) => st.id === 0);
+  const tx = stats?.filter((st) => st.id === 1 || st.id === 2);
+  return [
+    `EMS bus ${BUS_TEXT[s.bus_status] ?? 'unknown'}`,
+    s.tx_mode !== undefined && `Tx mode ${TX_MODE_TEXT[s.tx_mode] ?? s.tx_mode}`,
+    s.bus_id !== undefined && `bus ID ${hex(s.bus_id)}`,
+    rx && `${rx.q}% quality`,
+    tx?.length && `${tx.reduce((n, st) => n + st.f, 0)} Tx fails`,
+    `${s.num_sensors} temperature and ${s.num_analogs} analog sensors`
+  ]
+    .filter(Boolean)
+    .join(', ');
+};
+
+// the untranslated type name from `url`, so the line stays English
+const devicesLine = (s: SystemStatus, devices?: readonly Device[]) => {
+  const ems = devices?.filter((d) => d.t !== DeviceType.CUSTOM);
+  if (!ems?.length) {
+    return `${s.num_devices} devices`;
+  }
+  return `${ems.length} devices (type/device ID/product ID): ${ems.map((d) => `${d.url ?? d.tn}/${hex(d.d)}/${d.p}`).join(', ')}`;
+};
+
 // in English whatever the UI language, it is pasted into GitHub and Discord
-const summary = (s: SystemStatus) =>
+const summary = (
+  s: SystemStatus,
+  devices?: readonly Device[],
+  stats?: readonly Stat[]
+) =>
   [
     `EMS-ESP v${s.emsesp_version} on ${s.model || s.board || s.esp_platform} (${s.esp_platform}, ${s.partition})`,
     `uptime ${duration(s.uptime)}, free heap ${s.free_heap} KB, max block ${s.max_alloc_heap} KB`,
-    `EMS bus ${BUS_TEXT[s.bus_status] ?? 'unknown'}, ${s.num_devices} devices, ${s.num_sensors} temperature and ${s.num_analogs} analog sensors`,
+    busLine(s, stats),
+    devicesLine(s, devices),
     `network ${
       s.network_status === NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED
         ? 'Ethernet'
@@ -76,6 +116,8 @@ const Help = () => {
   });
 
   const { data: status } = useRequest(readSystemStatus);
+  const { data: coreData } = useRequest(readCoreData);
+  const { data: activity } = useRequest(readActivity);
 
   const { send: sendAPI, loading: downloading } = useRequest(
     (data: APIcall) => API(data),
@@ -83,10 +125,10 @@ const Help = () => {
   )
     .onSuccess((event) => {
       saveFile(event.data, 'system_info', '.json');
-      toast.info(LL.DOWNLOAD_SUCCESSFUL());
+      toast.success(LL.DOWNLOAD_SUCCESSFUL());
     })
     .onError((error) => {
-      toast.error(String(error.error?.message || 'An error occurred'));
+      toast.error(String(error.error?.message || LL.ERROR()));
     });
 
   const copySummary = (text: string) => {
@@ -125,7 +167,7 @@ const Help = () => {
 
   const imageSrc =
     imgError || !customSupport.img_url ? DEFAULT_IMAGE_URL : customSupport.img_url;
-  const text = status ? summary(status) : '';
+  const text = status ? summary(status, coreData?.devices, activity?.stats) : '';
 
   return (
     <>
@@ -151,8 +193,11 @@ const Help = () => {
         </Section>
       )}
 
-      <Section title={LL.REPORT_PROBLEM()} icon="bug_report">
-        <p className="sec-text">{LL.HELP_INFORMATION_4()}</p>
+      <Section
+        desc={LL.HELP_INFORMATION_4()}
+        title={LL.REPORT_PROBLEM()}
+        icon="bug_report"
+      >
         <ol className="help-steps">
           <li>
             <span className="num">1</span>
@@ -195,7 +240,7 @@ const Help = () => {
           <>
             <div className="sum-head">
               <span className="cap grow">{LL.SHORT_SUMMARY()}</span>
-              <Button size="sm" icon="content_copy" onClick={() => copySummary(text)}>
+              <Button icon="content_copy" onClick={() => copySummary(text)}>
                 {LL.COPY()}
               </Button>
             </div>

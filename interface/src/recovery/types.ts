@@ -4,6 +4,7 @@ export interface RecoveryPartition {
   address: number;
   size: number;
   valid: boolean;
+  official?: boolean; // signed by EMS-ESP; missing on recovery firmware that doesn't check it
   image_size: number;
   version: string;
   install_date: number;

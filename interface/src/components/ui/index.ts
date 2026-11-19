@@ -10,8 +10,12 @@ export { default as Checkbox } from './Checkbox';
 export type { CheckboxProps } from './Checkbox';
 export { default as Chip } from './Chip';
 export type { ChipProps } from './Chip';
-export { default as Dialog } from './Dialog';
+export { default as ConfirmDialog } from './ConfirmDialog';
+export type { ConfirmDialogProps } from './ConfirmDialog';
+export { default as Dialog, focusInvalid } from './Dialog';
 export type { DialogProps } from './Dialog';
+export { default as DropZone } from './DropZone';
+export type { DropZoneProps } from './DropZone';
 export { default as FileUpload } from './FileUpload';
 export type { FileUploadProps } from './FileUpload';
 export { default as FormSection } from './FormSection';
@@ -24,9 +28,15 @@ export { default as IconButton } from './IconButton';
 export type { IconButtonProps } from './IconButton';
 export { default as KeyValueList } from './KeyValueList';
 export type { KeyValueListProps, KeyValueRow } from './KeyValueList';
-export { default as LanguageSelect, LanguageGrid, LANGUAGES } from './LanguageSelect';
+export {
+  default as LanguageSelect,
+  LanguageGrid,
+  LANGUAGES
+} from './LanguageSelect';
 export { default as LinkList } from './LinkList';
 export type { LinkListItem, LinkListProps } from './LinkList';
+export { default as Listbox } from './Listbox';
+export type { ListboxOption, ListboxProps } from './Listbox';
 export { default as Loader } from './Loader';
 export type { LoaderProps } from './Loader';
 export { default as Message } from './Message';

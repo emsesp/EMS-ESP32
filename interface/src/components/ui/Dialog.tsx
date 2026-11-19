@@ -8,16 +8,27 @@ export interface DialogProps {
   title: string;
   // called on Escape and on a click outside; leave out for a dialog that must be answered
   onClose?: (() => void) | undefined;
+  // makes the dialog a form: Enter in a field submits it, so the primary action needs type="submit"
+  onSubmit?: (() => void) | undefined;
   actions?: ReactNode;
   size?: 'sm' | 'md';
   children?: ReactNode;
 }
+
+// after a failed validation, once the errors have rendered
+export const focusInvalid = () =>
+  setTimeout(() =>
+    document
+      .querySelector<HTMLElement>('.dialog[open] [aria-invalid="true"]')
+      ?.focus()
+  );
 
 // Native modal <dialog>: top layer, focus trap and Escape come from the browser
 const Dialog: FC<DialogProps> = ({
   open,
   title,
   onClose,
+  onSubmit,
   actions,
   size = 'sm',
   children
@@ -32,6 +43,14 @@ const Dialog: FC<DialogProps> = ({
     if (!open && dialog.open) dialog.close();
   }, [open]);
 
+  const body = (
+    <>
+      <h2 id={titleId}>{title}</h2>
+      <div className="dialog-content">{children}</div>
+      {actions && <div className="dialog-actions">{actions}</div>}
+    </>
+  );
+
   return (
     <dialog
       ref={ref}
@@ -41,21 +60,30 @@ const Dialog: FC<DialogProps> = ({
         e.preventDefault();
         onClose?.();
       }}
+      // a click outside a form would throw away what was typed; Escape and Cancel still close it
       onClick={(e) => {
-        if (e.target === ref.current) onClose?.();
+        if (e.target === ref.current && !onSubmit) onClose?.();
       }}
       // closed by the browser rather than by `open`, e.g. a form with method="dialog"
       onClose={() => {
         if (open) onClose?.();
       }}
     >
-      {open && (
-        <div className="dialog-box">
-          <h2 id={titleId}>{title}</h2>
-          <div className="dialog-content">{children}</div>
-          {actions && <div className="dialog-actions">{actions}</div>}
-        </div>
-      )}
+      {open &&
+        (onSubmit ? (
+          <form
+            className="dialog-box"
+            noValidate
+            onSubmit={(e) => {
+              e.preventDefault();
+              onSubmit();
+            }}
+          >
+            {body}
+          </form>
+        ) : (
+          <div className="dialog-box">{body}</div>
+        ))}
     </dialog>
   );
 };

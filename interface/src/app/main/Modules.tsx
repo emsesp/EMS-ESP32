@@ -34,8 +34,7 @@ const Modules = () => {
 
   return (
     <ListPage list={list}>
-      <Section title={LL.MODULES()} icon="extension">
-        <p className="cap mods-desc">{LL.MODULES_TEXT()}</p>
+      <Section desc={LL.MODULES_TEXT()} title={LL.MODULES()} icon="extension">
         {list.rows.length === 0 ? (
           <Message level="info">{LL.MODULES_NONE()}</Message>
         ) : (

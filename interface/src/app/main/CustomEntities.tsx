@@ -203,6 +203,7 @@ const CustomEntities = () => {
   return (
     <ListPage list={list}>
       <Section
+        desc={`${LL.ENTITIES_HELP_1()}.`}
         title={LL.CUSTOM_ENTITIES(0)}
         icon="playlist_add"
         actions={
@@ -212,13 +213,12 @@ const CustomEntities = () => {
               value={query}
               onInput={(e) => setQuery(e.currentTarget.value)}
             />
-            <Button variant="contained" icon="add" onClick={add}>
+            <Button icon="add" onClick={add}>
               {LL.ADD(0)}
             </Button>
           </>
         }
       >
-        <p className="cap">{LL.ENTITIES_HELP_1()}.</p>
         <div className="ce-filter">
           <ToggleGroup label={LL.CE_STORAGE()}>
             <ToggleButton on={storage < 0} onClick={() => setStorage(-1)}>
@@ -334,12 +334,7 @@ const CustomEntities = () => {
 
       {editing && (
         <EntityDialog
-          open
-          title={
-            editing.key
-              ? `${LL.EDIT()} ${LL.ENTITY()}`
-              : `${LL.ADD(1)} ${LL.NEW(1)} ${LL.ENTITY()}`
-          }
+          title={editing.key ? LL.EDIT_ENTITY() : LL.ADD_ENTITY()}
           item={editing.item}
           creating={!editing.key}
           validator={() => entityItemValidation(list.items, editing.originalName)}
@@ -396,7 +391,7 @@ const CustomEntities = () => {
                     />
                     <TextField label={LL.OFFSET()} {...f.number('offset')} />
                     <Select
-                      label={`${LL.VALUE(0)} ${LL.TYPE(1)}`}
+                      label={LL.VALUE_TYPE()}
                       options={VALUE_TYPE_OPTIONS}
                       {...f.select('value_type')}
                     />
@@ -431,10 +426,7 @@ const CustomEntities = () => {
                   </>
                 ) : (
                   <>
-                    <TextField
-                      label={`${LL.DEFAULT(0)} ${LL.VALUE(0)}`}
-                      {...f.text('value')}
-                    />
+                    <TextField label={LL.DEFAULT_VALUE()} {...f.text('value')} />
                     <Select
                       label={LL.UNIT()}
                       options={UOM_OPTIONS}

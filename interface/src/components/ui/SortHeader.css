@@ -69,6 +69,6 @@
 }
 @media (max-width: 599px) and (pointer: coarse) {
   .tbl.stack th.sort button {
-    min-height: 40px;
+    min-height: var(--touch);
   }
 }

@@ -1,22 +1,23 @@
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useState } from 'react';
 
-import { Button, Dialog } from 'components/ui';
+import { Button, Dialog, focusInvalid } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 import { formFields } from 'utils';
 import { ValidationError, validate } from 'validators';
 import type Schema from 'validators/schema';
 import type { ValidateFieldsError } from 'validators/schema';
 
-export interface EntityForm<T extends object> extends ReturnType<typeof formFields<T>> {
+export interface EntityForm<T extends object> extends ReturnType<
+  typeof formFields<T>
+> {
   values: T;
   set: (patch: Partial<T>) => void;
   errors: ValidateFieldsError | undefined;
 }
 
 interface EntityDialogProps<T extends object> {
-  open: boolean;
   title: string;
-  // the values the dialog starts with, copied when it opens
+  // the values the dialog starts with; mount the dialog only while it is open
   item: T;
   creating?: boolean;
   validator?: ((item: T) => Schema) | undefined;
@@ -32,7 +33,6 @@ interface EntityDialogProps<T extends object> {
 
 // add/edit dialog for one row of a list page; the change is kept until the page is saved
 const EntityDialog = <T extends object>({
-  open,
   title,
   item,
   creating,
@@ -47,13 +47,7 @@ const EntityDialog = <T extends object>({
   const { LL } = useI18nContext();
   const [values, setValues] = useState<T>(item);
   const [errors, setErrors] = useState<ValidateFieldsError>();
-
-  useEffect(() => {
-    if (open) {
-      setValues(item);
-      setErrors(undefined);
-    }
-  }, [open, item]);
+  const unchanged = !creating && JSON.stringify(values) === JSON.stringify(item);
 
   const set = (patch: Partial<T>) => {
     setValues((v) => ({ ...v, ...patch }));
@@ -76,21 +70,18 @@ const EntityDialog = <T extends object>({
     } catch (error) {
       if (error instanceof ValidationError) {
         setErrors(error.fieldErrors);
-        setTimeout(() =>
-          document
-            .querySelector<HTMLElement>('.dialog [aria-invalid="true"]')
-            ?.focus()
-        );
+        focusInvalid();
       } else throw error;
     }
   };
 
   return (
     <Dialog
-      open={open}
+      open
       title={title}
       size={size}
       onClose={onClose}
+      onSubmit={() => void save()}
       actions={
         <>
           {onRemove && (
@@ -103,21 +94,17 @@ const EntityDialog = <T extends object>({
           <Button color="secondary" icon="cancel" onClick={onClose}>
             {LL.CANCEL()}
           </Button>
-          <Button variant="contained" icon={creating ? 'add' : 'check'} onClick={() => void save()}>
+          <Button
+            type="submit"
+            icon={creating ? 'add' : 'check'}
+            disabled={unchanged}
+          >
             {creating ? LL.ADD(0) : LL.UPDATE()}
           </Button>
         </>
       }
     >
-      <form
-        className="form"
-        onSubmit={(e) => {
-          e.preventDefault();
-          void save();
-        }}
-      >
-        {children({ ...fields, values, set, errors })}
-      </form>
+      <div className="form">{children({ ...fields, values, set, errors })}</div>
     </Dialog>
   );
 };

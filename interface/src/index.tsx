@@ -13,13 +13,13 @@ import {
 import App from 'App';
 import SignIn from 'SignIn';
 import { renderRoute, routes } from 'app/routes';
+import { Layout } from 'components/layout';
 import {
   RequireAdmin,
   RequireAuthenticated,
   RequireUnauthenticated,
   RootRedirect
 } from 'components/routing';
-import { Layout } from 'components/layout';
 import 'components/ui/base.css';
 import 'components/ui/tokens.css';
 

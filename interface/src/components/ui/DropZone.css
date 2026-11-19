@@ -1,0 +1,25 @@
+.drop {
+  display: block;
+  width: 100%;
+  padding: 22px;
+  border: 2px dashed var(--outline);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-2);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
+}
+.drop:hover,
+.drop.on {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.drop > .icon {
+  display: block;
+  margin: 0 auto 6px;
+  font-size: 32px;
+}

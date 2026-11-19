@@ -5,7 +5,8 @@ import './Tag.css';
 import { cx } from './cx';
 import type { IconName } from './icons';
 
-export type TagKind = 'plain' | 'new' | 'mod' | 'sys' | 'type' | 'ok' | 'warn' | 'err';
+export type TagKind =
+  'plain' | 'new' | 'mod' | 'sys' | 'type' | 'ok' | 'warn' | 'err';
 
 export interface TagProps {
   kind?: TagKind;

@@ -15,6 +15,20 @@
   gap: 6px;
   cursor: pointer;
 }
+.sw-head {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+/* keeps the row as tall as one without a button */
+.sw-head .icon-btn {
+  margin-block: -8px;
+}
+@media (pointer: coarse) {
+  .sw-head .icon-btn {
+    margin-block: -12px;
+  }
+}
 .swrow .cap {
   margin-top: 2px;
 }
@@ -47,7 +61,7 @@
   transition: left 0.15s;
 }
 .switch.on {
-  background: rgba(144, 202, 249, 0.5);
+  background: var(--primary-line);
 }
 .switch.on::after {
   left: 16px;
@@ -85,6 +99,6 @@
 }
 @media (pointer: coarse) {
   .checkbox {
-    min-height: 40px;
+    min-height: var(--touch);
   }
 }

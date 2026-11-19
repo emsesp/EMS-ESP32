@@ -5,17 +5,17 @@
   gap: 10px;
   margin: 12px;
   padding: 10px 14px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: #2b3a46;
-  border: 1px solid rgba(144, 202, 249, 0.5);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--primary-line);
+  box-shadow: var(--shadow-pop);
 }
 .savebar > .icon {
   color: var(--primary);
 }
 .savebar.warning {
   background: #46392b;
-  border-color: rgba(255, 167, 38, 0.5);
+  border-color: var(--warning-line);
 }
 .savebar.warning > .icon {
   color: var(--warning);

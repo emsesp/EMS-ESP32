@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useBlocker } from 'react-router';
 
 import * as SystemApi from 'api/system';
 import { API, callAction } from 'api/app';
@@ -9,10 +9,13 @@ import { readPasswordConfirmed } from 'api/security';
 
 import { useRequest } from 'alova/client';
 import type { APIcall } from 'app/main/types';
+import SystemConfirmDialog from 'app/status/SystemConfirmDialog';
 import SystemMonitor from 'app/status/SystemMonitor';
+import BlockNavigation from 'components/routing/BlockNavigation';
 import {
   Button,
   ButtonLink,
+  ConfirmDialog,
   Dialog,
   FileUpload,
   Icon,
@@ -21,6 +24,7 @@ import {
   Loader,
   Message,
   Section,
+  StatusDot,
   Table,
   Tag,
   ToggleButton,
@@ -124,7 +128,7 @@ const Version = () => {
     (partition: string) => callAction({ action: 'setPartition', param: partition }),
     { immediate: false }
   ).onError((error) => {
-    const message = String(error.error?.message || 'An error occurred');
+    const message = String(error.error?.message || LL.ERROR());
     if (message !== REQUEST_FAILED) {
       toast.error(message);
     } else if (error.args[0] === RECOVERY_PARTITION) {
@@ -161,7 +165,7 @@ const Version = () => {
           (d as { upgradeImportantMessageType: number }).upgradeImportantMessageType
       )
       .catch((e: Error) => {
-        toast.error(e.message || 'An error occurred');
+        toast.error(e.message || LL.ERROR());
         return undefined;
       });
 
@@ -231,6 +235,8 @@ const Version = () => {
       });
   };
 
+  const blocker = useBlocker(uploading);
+
   const upload = async (file: File, custom = false) => {
     setUploadWarning(undefined);
     setCustomFile(undefined);
@@ -244,7 +250,7 @@ const Version = () => {
     }
     await sendUpload(file, custom).catch((error: Error) => {
       if (error.message.includes('The user aborted a request')) {
-        toast.warning(LL.UPLOAD() + ' ' + LL.ABORTED());
+        toast.warning(LL.UPLOAD_ABORTED());
       } else if (error.message === 'Precondition Failed') {
         // 412, see OtaUpdater
         setCustomFile(file);
@@ -429,9 +435,8 @@ const Version = () => {
         </div>
         {me.admin && isNew && (
           <Button
-            variant="contained"
             color={isSwitch ? 'warning' : 'primary'}
-            icon={isSwitch ? 'swap_horiz' : 'download'}
+            icon={isSwitch ? 'swap_horiz' : 'system_update'}
             onClick={() => void showInstall(shown === 'dev')}
           >
             {LL.INSTALL()} <span className="fw-ver">{target.version}</span>
@@ -441,43 +446,32 @@ const Version = () => {
     );
   };
 
-  const recoveryActions = () => {
-    const update =
-      internetLive && recoveryUpdateAvailable ? (
-        me.admin ? (
-          <Button
-            size="sm"
-            icon="download"
-            disabled={installing}
-            onClick={() => void installRecovery()}
-          >
-            {data.recovery_version ? LL.UPDATE() : LL.INSTALL()}
-          </Button>
-        ) : (
-          data.recovery_version && <Tag kind="warn">{LL.UPDATE_AVAILABLE()}</Tag>
-        )
-      ) : (
-        internetLive &&
-        data.recovery_version && (
-          <span className="cap">{LL.NO_UPDATES_AVAILABLE()}</span>
-        )
-      );
-    return (
-      <div className="fw-act">
-        {update}
-        {me.admin && data.recovery_version && (
-          <Button
-            size="sm"
-            color="secondary"
-            icon="build"
-            onClick={() => setConfirmRecovery(true)}
-          >
-            {LL.RESTART_INTO_RECOVERY()}
-          </Button>
-        )}
-      </div>
-    );
-  };
+  const updateStatus = (available: boolean) =>
+    internetLive &&
+    (available ? (
+      <Tag kind="warn">
+        <StatusDot state="warn" />
+        {LL.UPDATE_AVAILABLE()}
+      </Tag>
+    ) : (
+      <span className="cap">{LL.NO_UPDATES_AVAILABLE()}</span>
+    ));
+
+  const recoveryActions = () => (
+    <div className="fw-act">
+      {data.recovery_version && updateStatus(recoveryUpdateAvailable)}
+      {me.admin && internetLive && recoveryUpdateAvailable && (
+        <Button
+          size="sm"
+          icon="system_update"
+          disabled={installing}
+          onClick={() => void installRecovery()}
+        >
+          {data.recovery_version ? LL.UPDATE() : LL.INSTALL()}
+        </Button>
+      )}
+    </div>
+  );
 
   const uploadMessage = uploadWarning && upgradeMessage(uploadWarning.type, LL);
   const installMessage = install && upgradeMessage(install.messages, LL);
@@ -492,26 +486,29 @@ const Version = () => {
                 <b>{LL.EMSESP_APP()}</b>
               </td>
               <td data-label={LL.VERSION()}>
-                <span className="mono">{data.emsesp_version}</span>
+                <span className="fw-ver-cell">
+                  <span className="mono">{data.emsesp_version}</span>
+                  {infoButton(running)}
+                </span>
               </td>
               <td>
-                {data.official_build !== undefined &&
-                  (data.official_build ? (
-                    <Tag kind="ok" icon="verified">
-                      {LL.OFFICIAL_BUILD()}
-                    </Tag>
-                  ) : (
-                    <Tag kind="warn">{LL.CUSTOM_BUILD()}</Tag>
-                  ))}
-              </td>
-              <td className="act">
-                <div className="fw-act">
+                <div className="fw-tags">
+                  {data.official_build !== undefined &&
+                    (data.official_build ? (
+                      <Tag kind="ok" icon="verified">
+                        {LL.OFFICIAL_BUILD()}
+                      </Tag>
+                    ) : (
+                      <Tag kind="warn">{LL.CUSTOM_BUILD()}</Tag>
+                    ))}
                   <Tag kind={isDevBuild ? 'type' : 'sys'}>
                     {channelName(isDevBuild)}
                   </Tag>
                   {isDebugBuild && <Tag kind="err">DEBUG</Tag>}
-                  {infoButton(running)}
                 </div>
+              </td>
+              <td className="act">
+                <div className="fw-act">{updateStatus(upgradeAvailable)}</div>
               </td>
             </tr>
 
@@ -613,12 +610,20 @@ const Version = () => {
               </Button>
               {!data.disable_reset && (
                 <Button
-                  variant="contained"
                   color="error"
                   icon="delete_forever"
                   onClick={() => setConfirm('format')}
                 >
                   {LL.FACTORY_RESET()}
+                </Button>
+              )}
+              {hasRecoverySlot && data.recovery_version && (
+                <Button
+                  color="secondary"
+                  icon="build"
+                  onClick={() => setConfirmRecovery(true)}
+                >
+                  {LL.RESTART_INTO_RECOVERY()}
                 </Button>
               )}
             </div>
@@ -644,7 +649,7 @@ const Version = () => {
                 value: <span className="mono">{info.version}</span>
               },
               {
-                label: 'Partition',
+                label: LL.PARTITION(),
                 value: info.partition,
                 extra: info.partition === data.partition && LL.ACTIVE()
               },
@@ -666,7 +671,7 @@ const Version = () => {
         <>
           <Dialog
             open={install !== undefined}
-            title={`${LL.INSTALL()} ${channelName(!!install?.dev)} Firmware`}
+            title={LL.INSTALL_FIRMWARE({ channel: channelName(!!install?.dev) })}
             onClose={() => setInstall(undefined)}
             size="md"
             actions={
@@ -679,14 +684,13 @@ const Version = () => {
                   {LL.CANCEL()}
                 </Button>
                 {installBinURL && (
-                  <ButtonLink href={installBinURL} icon="download">
+                  <ButtonLink href={installBinURL} color="secondary" icon="download">
                     {LL.DOWNLOAD(0)}
                   </ButtonLink>
                 )}
                 <Button
-                  variant="contained"
                   color="warning"
-                  icon="warning"
+                  icon="system_update"
                   disabled={!installBinURL || installing || sending}
                   onClick={() => void installFirmwareURL(installBinURL)}
                 >
@@ -695,13 +699,13 @@ const Version = () => {
               </>
             }
           >
-            <p className="fw-p">{LL.INSTALL_VERSION(LL.INSTALL(), installTarget)}</p>
+            <p>{LL.INSTALL_VERSION(LL.INSTALL(), installTarget)}</p>
             {installMessage && (
               <Message level="warning" className="fw-msg">
                 {installMessage}
               </Message>
             )}
-            <p className="fw-p">
+            <p>
               <Link to="/settings/downloadUpload">
                 {LL.DOWNLOAD_SYSTEM_BACKUP()}
               </Link>
@@ -712,102 +716,48 @@ const Version = () => {
             </p>
           </Dialog>
 
-          <Dialog
+          <ConfirmDialog
             open={confirmRecovery}
-            title={LL.RECOVERY_APP()}
+            title={LL.RESTART_INTO_RECOVERY()}
+            label={LL.RESTART()}
+            icon="restart_alt"
+            color="warning"
+            disabled={switching}
             onClose={() => setConfirmRecovery(false)}
-            actions={
-              <>
-                <Button
-                  color="secondary"
-                  icon="cancel"
-                  onClick={() => setConfirmRecovery(false)}
-                >
-                  {LL.CANCEL()}
-                </Button>
-                <Button
-                  variant="contained"
-                  color="warning"
-                  icon="build"
-                  disabled={switching}
-                  onClick={() => void restartIntoRecovery()}
-                >
-                  {LL.RESTART()}
-                </Button>
-              </>
-            }
+            onConfirm={restartIntoRecovery}
           >
             {LL.FW_RECOVERY_TEXT()}
-          </Dialog>
+          </ConfirmDialog>
 
-          <Dialog
+          <ConfirmDialog
             open={uploadWarning !== undefined}
             title={LL.UPGRADE_IMPORTANT_MESSAGES()}
+            label={LL.UPLOAD()}
+            icon="upload"
             onClose={() => setUploadWarning(undefined)}
-            actions={
-              <>
-                <Button
-                  color="secondary"
-                  icon="cancel"
-                  onClick={() => setUploadWarning(undefined)}
-                >
-                  {LL.CANCEL()}
-                </Button>
-                <Button
-                  variant="contained"
-                  icon="upload"
-                  onClick={() => uploadWarning && void upload(uploadWarning.file)}
-                >
-                  {LL.UPLOAD()}
-                </Button>
-              </>
-            }
+            onConfirm={() => uploadWarning && upload(uploadWarning.file)}
           >
             {uploadMessage && (
               <Message level="warning" className="fw-msg">
                 {uploadMessage}
               </Message>
             )}
-            <p className="fw-p">
+            <p>
               <a href={UPGRADE_HELP_URL} target="_blank" rel="noreferrer">
                 {LL.ONLINE_HELP()}
               </a>
             </p>
-          </Dialog>
+          </ConfirmDialog>
 
-          <Dialog
-            open={confirm !== undefined}
-            title={confirm === 'format' ? LL.FACTORY_RESET() : LL.RESTART()}
+          <SystemConfirmDialog
+            confirm={confirm}
+            disabled={sending}
             onClose={() => setConfirm(undefined)}
-            actions={
-              <>
-                <Button
-                  color="secondary"
-                  icon="cancel"
-                  onClick={() => setConfirm(undefined)}
-                >
-                  {LL.CANCEL()}
-                </Button>
-                <Button
-                  variant="contained"
-                  color={confirm === 'format' ? 'error' : 'warning'}
-                  icon={confirm === 'format' ? 'delete_forever' : 'restart_alt'}
-                  disabled={sending}
-                  onClick={() =>
-                    void (confirm === 'format' ? doFormat() : doRestart())
-                  }
-                >
-                  {confirm === 'format' ? LL.FACTORY_RESET() : LL.RESTART()}
-                </Button>
-              </>
-            }
-          >
-            {confirm === 'format'
-              ? LL.SYSTEM_FACTORY_TEXT_DIALOG()
-              : LL.RESTART_CONFIRM()}
-          </Dialog>
+            onConfirm={(cmd) => (cmd === 'format' ? doFormat() : doRestart())}
+          />
         </>
       )}
+      <BlockNavigation blocker={blocker} busy />
     </>
   );
 };

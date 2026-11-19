@@ -11,7 +11,6 @@ export interface ButtonLinkProps {
   // a route; or href for an external page, opened in a new tab
   to?: string;
   href?: string;
-  variant?: ButtonProps['variant'];
   color?: ButtonProps['color'];
   size?: ButtonProps['size'];
   icon?: IconName | undefined;
@@ -22,13 +21,12 @@ export interface ButtonLinkProps {
 const ButtonLink: FC<ButtonLinkProps> = ({
   to,
   href,
-  variant = 'outlined',
   color = 'primary',
   size,
   icon,
   children
 }) => {
-  const className = cx('btn', variant, color, size);
+  const className = cx('btn', color, size);
   const body = (
     <>
       {icon && <Icon name={icon} size={size ? 'xs' : 'sm'} />}

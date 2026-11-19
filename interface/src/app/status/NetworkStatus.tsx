@@ -16,8 +16,9 @@ interface Address {
 
 // one address per line, with an optional dimmed note such as the IPv6 scope
 const AddressList = ({ addresses }: { addresses: Address[] }) => {
+  const { LL } = useI18nContext();
   if (addresses.length === 0) {
-    return 'none';
+    return LL.NONE();
   }
   return addresses.map(({ value, note }) => (
     <div key={value}>

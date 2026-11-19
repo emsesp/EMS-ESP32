@@ -1,36 +1,10 @@
-.upl-drop {
-  display: block;
-  width: 100%;
-  padding: 22px;
-  border: 2px dashed rgba(255, 255, 255, 0.23);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text-2);
-  font: inherit;
-  text-align: center;
-  cursor: pointer;
-  transition:
-    border-color 0.2s,
-    color 0.2s;
-}
-.upl-drop:hover,
-.upl-drop.on {
-  border-color: var(--primary);
-  color: var(--primary);
-}
-.upl-drop > .icon {
-  display: block;
-  margin: 0 auto 6px;
-  font-size: 32px;
-}
-
 .upl {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
   padding: 14px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--paper-2);
 }
 .upl-name {

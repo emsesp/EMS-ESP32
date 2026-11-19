@@ -47,18 +47,19 @@ It requires a small circuit to interface with the EMS bus which can be purchased
 ## 📦&nbsp; **Key Features**
 
 - Compatible with EMS, EMS+, EMS2, EMS Plus, Logamatic EMS, Junkers 2-wire, Heatronic 3 and 4
-- Supporting over 120 different EMS compatible devices such as thermostats, boilers, heat pumps, mixing units, solar modules, connect modules, ventilation units, switches and more
-- Easy to add external Temperature and Analog sensors that are attached to GPIO pins on the ESP32 board
-- A multi-user, multi-language web interface to change settings and monitor incoming data
-- A simple to use console, accessible via Serial/USB or Telnet for advanced operations and detailed monitoring
-- Native integration with Home Assistant, Domoticz, openHAB and Modbus
-- Easy setup and install with automatic updates
-- Simulation of remote thermostats
-- Localized in 11 languages, and customizable to rename any device or sensor
-- Extendable by adding own custom EMS entities
-- Expandable via adding user-built external modules
-- A powerful Scheduler to automate tasks and trigger events based data changes
-- A Notification service to alert you of important events
+- Supports over 120 EMS devices, including thermostats, boilers, heat pumps, mixing units, solar modules, connect modules, ventilation units and switches
+- Add your own temperature and analog sensors on the ESP32's GPIO pins
+- A responsive, multi-user web interface for desktop, tablet and phone to monitor live data and change settings
+- Native integration with Home Assistant (MQTT Discovery), Domoticz, openHAB, Modbus and a REST API
+- Reports EMS devices that go offline, so integrations can mark their entities as unavailable
+- Localized in 12 languages, and any device or sensor can be renamed
+- Simulates remote room thermostats
+- Add your own custom EMS entities, Commands and user-built modules
+- A Scheduler to run tasks on a timer or when values change, and Notifications to alert you to important events
+- Back up and restore your heating settings, such as set temperatures, heating curves and switch times
+- Secure by design: hashed passwords, API keys with read or read-and-write access, MQTT over TLS and limits on writes to the boiler
+- Signed firmware updates from the Web UI with automatic rollback, plus a Recovery mode for when things go wrong
+- A console over Serial/USB, Telnet or the Web UI for advanced operations and detailed monitoring
 
 ## 🚀&nbsp; **Installing**
 
@@ -66,7 +67,7 @@ Head over to the [Installation Guide](https://emsesp.org/Installing) section of 
 
 ## 📋&nbsp; **Documentation**
 
-Visit [emsesp.org](https://emsesp.org) for more details on how to setup and configure EMS-ESP. You'll also find more a collection of example configuarations, Frequently Asked Questions and Troubleshooting tips.
+Visit [emsesp.org](https://emsesp.org) for more details on how to setup and configure EMS-ESP. You'll also find more a collection of example configurations, Frequently Asked Questions and Troubleshooting tips.
 
 ## 💬&nbsp; **Getting Support**
 
@@ -76,7 +77,7 @@ If you find an issue or have a request, see the [Getting Support](https://emsesp
 
 ## 🎥&nbsp; **Live Demo**
 
-To see a live demo go to [demo.emsesp.org](https://demo.emsesp.org). Pick a language and use any username and password to log in. Note whast you're seeing is static example data so not all features are operational.
+To see a live demo go to [demo.emsesp.org](https://demo.emsesp.org). Pick a language and use any username and password to log in. Note what you're seeing is static example data so not all features are operational.
 
 ## 💖&nbsp; **Contributors**
 
