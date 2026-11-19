@@ -394,13 +394,13 @@ bool Water::set_wwKeepWarm(const char * value, const int8_t id) {
 }
 
 bool Water::set_wwDiffTemp(const char * value, const int8_t id) {
-    float v;
+    int v;
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
 
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
-        write_command(0x313 + dhw_, 7, (int8_t)(v * 10), 0x313 + dhw_);
+        write_command(0x313 + dhw_, 7, (int8_t)v, 0x313 + dhw_);
         return true;
     }
 

@@ -61,6 +61,8 @@ A full list of breaking changes can be found in this [discussion](https://github
 - custom entities on the EMS bus: after a write, MQTT and Home Assistant could show the old value until the next "Other" publish interval. The new value is now published as soon as the write is confirmed [#3416](https://github.com/emsesp/EMS-ESP32/issues/3416)
 - `uint8` custom entities with a value of 128 or more were shown as negative numbers in MQTT and the API (e.g. 200 as -56), the Web UI was correct
 - RC300 firmware 11.x `dhw/chargeduration`: writes above 255 minutes are refused, because the thermostat set them to 15 minutes. Longer durations can only be set on the thermostat itself [#3318](https://github.com/emsesp/EMS-ESP32/issues/3318)
+- Factor for setting wwDiffTemp [#3456](https://github.com/emsesp/EMS-ESP32/issues/3456)
+- crash on setting thermostat switchonoptimisation for RC30 [#3452](https://github.com/emsesp/EMS-ESP32/issues/3452)
 
 ## Changed
 
