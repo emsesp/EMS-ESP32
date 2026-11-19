@@ -3905,7 +3905,7 @@ bool Thermostat::set_switchonoptimization(const char * value, const int8_t id) {
         return false;
     }
 
-    if (model() == EMSdevice::EMS_DEVICE_FLAG_RC35) {
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_RC35 || model() == EMSdevice::EMS_DEVICE_FLAG_RC30_N) {
         write_command(set_typeids[hc->hc()], 19, b ? 0xFF : 0x00, set_typeids[hc->hc()]);
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS && has_flags(EMSdevice::EMS_DEVICE_FLAG_JUNKERS_OLD)) {
         write_command(set_typeids[hc->hc()], 9, b ? 0xFF : 0x00, set_typeids[hc->hc()]);
