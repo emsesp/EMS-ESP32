@@ -395,7 +395,7 @@ bool Water::set_wwKeepWarm(const char * value, const int8_t id) {
 
 bool Water::set_wwDiffTemp(const char * value, const int8_t id) {
     int v;
-    if (!Helpers::value2temperature(value, v)) {
+    if (!Helpers::value2temperature(value, v, true, -128, 127)) {
         return false;
     }
 
