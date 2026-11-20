@@ -275,7 +275,7 @@ const Customizations = () => {
   const renameDevice = async () => {
     if (!renaming) return;
     await sendDeviceName({ id: selectedDevice, ...renaming })
-      .then(() => toast.success(LL.UPDATED_OF(LL.NAME(1))))
+      .then(() => toast.success(LL.NAME_UPDATED()))
       .catch((error: Error) => toast.error(error.message || LL.ERROR()))
       .finally(() => {
         setRenaming(undefined);
@@ -430,7 +430,7 @@ const Customizations = () => {
           </a>
           {isChanged && <PendingTag state="mod" />}
         </td>
-        <td className="r num" data-label={LL.VALUE(0)}>
+        <td className="r num" data-label={LL.VALUE()}>
           {formatValue(de.v)}
         </td>
         <td className="r num" data-label={`${LL.MIN()} – ${LL.MAX()}`}>
@@ -488,7 +488,7 @@ const Customizations = () => {
                 <SortHeader {...sort.header('options')}>{LL.OPTIONS()}</SortHeader>
                 <SortHeader {...sort.header('name')}>{LL.NAME(1)}</SortHeader>
                 <SortHeader className="r" {...sort.header('value')}>
-                  {LL.VALUE(0)}
+                  {LL.VALUE()}
                 </SortHeader>
                 <SortHeader className="r" {...sort.header('range')}>
                   {LL.MIN()} – {LL.MAX()}

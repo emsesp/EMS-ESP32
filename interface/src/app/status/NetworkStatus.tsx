@@ -72,7 +72,7 @@ const NetworkStatus = () => {
         .join(' · ')}
       settings={{
         to: '/settings/network',
-        label: LL.SETTINGS_OF(LL.NETWORK(0)),
+        label: LL.NETWORK_SETTINGS(),
         icon: 'settings_ethernet'
       }}
       rows={[

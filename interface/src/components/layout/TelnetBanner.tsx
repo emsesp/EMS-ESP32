@@ -34,7 +34,7 @@ const TelnetBanner = () => {
             icon="settings"
             onClick={() => void navigate('/settings/application')}
           >
-            {LL.SETTINGS_OF(LL.APPLICATION())}
+            {LL.APPLICATION_SETTINGS()}
           </Button>
           <Button icon="close" color="secondary" onClick={dismiss}>
             {LL.CLOSE()}

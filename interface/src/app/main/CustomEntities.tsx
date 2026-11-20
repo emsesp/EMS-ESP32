@@ -248,7 +248,7 @@ const CustomEntities = () => {
                 <SortHeader {...sort.header('source')}>{LL.CE_SOURCE()}</SortHeader>
                 <SortHeader {...sort.header('api')}>API / MQTT</SortHeader>
                 <SortHeader className="r" {...sort.header('value')}>
-                  {LL.VALUE(0)}
+                  {LL.VALUE()}
                 </SortHeader>
                 <th />
               </tr>
@@ -303,7 +303,7 @@ const CustomEntities = () => {
                         <span className="mono muted">custom/{item.name}</span>
                       )}
                     </td>
-                    <td data-label={LL.VALUE(0)} className="r num ce-val">
+                    <td data-label={LL.VALUE()} className="r num ce-val">
                       {formatValue(item.value, item.uom)}
                     </td>
                     <td className="act">
@@ -379,13 +379,13 @@ const CustomEntities = () => {
                 {ems ? (
                   <>
                     <TextField
-                      label={LL.ID_OF(LL.DEVICE())}
+                      label={LL.DEVICE_ID()}
                       mono
                       placeholder="0x08"
                       {...f.text('device_id')}
                     />
                     <TextField
-                      label={LL.ID_OF(LL.TYPE(1))}
+                      label={LL.TYPE_ID()}
                       mono
                       placeholder="0x18"
                       {...f.text('type_id')}

@@ -252,7 +252,7 @@ const Devices = () => {
     const columns: [string, (dv: DeviceValue) => unknown][] = [
       [LL.ENTITY_NAME(0), (dv) => dv.id.slice(2)],
       [
-        LL.VALUE(0),
+        LL.VALUE(),
         (dv) =>
           typeof dv.v === 'number' ? new Intl.NumberFormat().format(dv.v) : dv.v
       ],
@@ -322,8 +322,8 @@ const Devices = () => {
       : [
           d.tn,
           d.b,
-          `${LL.ID_OF(LL.DEVICE())} ${hex(d.d)}`,
-          `${LL.ID_OF(LL.PRODUCT())} ${d.p}`,
+          `${LL.DEVICE_ID()} ${hex(d.d)}`,
+          `${LL.PRODUCT_ID()} ${d.p}`,
           d.v && `${LL.VERSION()} ${d.v}`
         ]
           .filter(Boolean)
@@ -531,7 +531,7 @@ const Devices = () => {
               <tr>
                 <SortHeader {...sort.header('name')}>{LL.ENTITY_NAME(0)}</SortHeader>
                 <SortHeader className="r" {...sort.header('value')}>
-                  {LL.VALUE(0)}
+                  {LL.VALUE()}
                 </SortHeader>
                 {me.admin && <th className="dv-act" />}
               </tr>

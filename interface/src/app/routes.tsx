@@ -68,14 +68,14 @@ export const routes: AppRoute[] = [
   { path: '/scheduler', element: Scheduler, title: (LL) => LL.SCHEDULER(), icon: 'more_time', menu: 'modules', admin: true },
   { path: '/customentities', element: CustomEntities, title: (LL) => LL.CUSTOM_ENTITIES(0), icon: 'playlist_add', menu: 'modules', admin: true },
 
-  { path: '/status', element: Status, title: (LL) => LL.STATUS_OF('').trim(), icon: 'assessment', menu: 'system', wildcard: true },
+  { path: '/status', element: Status, title: (LL) => LL.STATUS(), icon: 'assessment', menu: 'system', wildcard: true },
   { path: '/status/hardwarestatus', element: HardwareStatus, title: (LL) => LL.HARDWARE(), icon: 'memory', parent: '/status', wildcard: true },
   { path: '/status/activity', element: Activity, title: (LL) => LL.DATA_TRAFFIC(), icon: 'swap_horiz', parent: '/status' },
   { path: '/status/network', element: NetworkStatus, title: (LL) => LL.NETWORK(1), icon: 'lan', parent: '/status' },
   { path: '/status/mqtt', element: MqttStatus, title: () => 'MQTT', icon: 'device_hub', parent: '/status' },
   { path: '/status/ntp', element: NTPStatus, title: () => 'NTP', icon: 'schedule', parent: '/status' },
   { path: '/status/ap', element: APStatus, title: (LL) => LL.ACCESS_POINT(0), icon: 'wifi_tethering', parent: '/status' },
-  { path: '/status/log', element: SystemLog, title: (LL) => LL.LOG_OF(LL.SYSTEM(0)), icon: 'list_alt', parent: '/status' },
+  { path: '/status/log', element: SystemLog, title: (LL) => LL.SYSTEM_LOG(), icon: 'list_alt', parent: '/status' },
   // old address of the firmware page, kept for bookmarks
   { path: '/status/version', element: () => <Navigate replace to="/settings/version" />, title: () => 'EMS-ESP Firmware', icon: 'new_releases', parent: '/settings' },
 

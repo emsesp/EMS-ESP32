@@ -145,7 +145,7 @@ const SensorsAnalogDialog = ({
             )}
             {t === AnalogType.RGB && (
               <TextField
-                label={`RGB ${LL.VALUE(0)}`}
+                label={`RGB ${LL.VALUE()}`}
                 disabled={sys}
                 {...f.number('o')}
               />
@@ -160,7 +160,7 @@ const SensorsAnalogDialog = ({
             )}
             {dac && (
               <TextField
-                label={LL.VALUE(0)}
+                label={LL.VALUE()}
                 min={0}
                 max={255}
                 step={1}
@@ -171,7 +171,7 @@ const SensorsAnalogDialog = ({
             {isDigitalOut && !dac && (
               <>
                 <Listbox
-                  label={LL.VALUE(0)}
+                  label={LL.VALUE()}
                   options={[
                     { value: '0', label: LL.OFF() },
                     { value: '1', label: LL.ON() }

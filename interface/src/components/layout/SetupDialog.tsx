@@ -75,7 +75,7 @@ const SetupDialog = () => {
               color="warning"
               onClick={() => void navigate('/settings/ap')}
             >
-              {LL.SETTINGS_OF(LL.ACCESS_POINT(0))}
+              {LL.AP_SETTINGS()}
             </Button>
             <Button icon="close" color="secondary" onClick={dismiss}>
               {LL.CLOSE()}

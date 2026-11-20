@@ -63,7 +63,7 @@ const Activity = () => {
           actions={
             me.admin && (
               <ButtonLink to="/settings/application" color="secondary" icon="tune">
-                {LL.SETTINGS_OF(LL.EMS_BUS(2))}
+                {LL.EMS_BUS_SETTINGS()}
               </ButtonLink>
             )
           }

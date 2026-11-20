@@ -9,7 +9,12 @@ const it: Translation = {
   SIGN_OUT: 'Esci', // DeepL
   USERNAME: 'Nome utente', // DeepL
   PASSWORD: 'Password',
-  SETTINGS_OF: '{0} Impostazioni', // DeepL
+  APPLICATION_SETTINGS: 'Impostazioni applicazione',
+  AP_SETTINGS: 'Impostazioni punto di accesso',
+  NETWORK_SETTINGS: 'Impostazioni di rete',
+  NTP_SETTINGS: 'Impostazioni NTP',
+  MQTT_SETTINGS: 'Impostazioni MQTT',
+  EMS_BUS_SETTINGS: 'Impostazioni bus EMS',
   HELP: 'Aiuto',
   LOGGED_IN: 'Hai effettuato l\'accesso come {name}', // DeepL
   PLEASE_SIGNIN: 'Accedi per continuare', // DeepL
@@ -24,13 +29,17 @@ const it: Translation = {
   ENTITIES: 'entità',
   EXPORT: 'Esporta',
   FAVORITES: "Preferiti",
-  ID_OF: 'ID {0}', // DeepL
+  CLIENT_ID: 'ID client',
+  DEVICE_ID: 'ID dispositivo',
+  PRODUCT_ID: 'ID prodotto',
+  ENTITY_ID: 'ID entità',
+  SENSOR_ID: 'ID sensore',
+  TYPE_ID: 'ID tipo',
   DEVICE: 'Dispositivo',
-  PRODUCT: 'Prodotto',
   BRAND: 'Marchio', // DeepL
   VERSION: 'Versione',
   ENTITY_NAME: 'Nome Entità',
-  VALUE: '{{valore|Valore}}',
+  VALUE: 'Valore',
   DEVICES: 'Dispositivi',
   SENSORS: 'Sensori',
   AUTOMATION: 'Automazione',
@@ -45,10 +54,12 @@ const it: Translation = {
   RESET: 'Reimposta',
   PROBLEM_UPDATING: 'Problema di aggiornamento', // DeepL
   PROBLEM_LOADING: 'Problema di caricamento', // DeepL
-  ANALOG_SENSOR: 'Sensori Analogici', // DeepL
   ANALOG_SENSORS: 'Sensori Analogici',
   SETTINGS: 'Impostazioni',
-  UPDATED_OF: '{0} aggiornato', // DeepL
+  SETTINGS_UPDATED: 'Impostazioni aggiornate',
+  NAME_UPDATED: 'Nome aggiornato',
+  SENSOR_UPDATED: 'Sensore aggiornato',
+  ANALOG_SENSOR_UPDATED: 'Sensore analogico aggiornato',
   OFFSET: 'Offset',
   FACTOR: 'Fattore',
   FREQ: 'Frequenza',
@@ -56,7 +67,6 @@ const it: Translation = {
   UNIT: 'UoM',
   STARTVALUE: 'Valore iniziale', // DeepL
   EDIT: 'Modifica',
-  SENSOR: 'Sensore',
   TEMP_SENSORS: 'Sensori Temperatura',
   WRITE_CMD_SENT: 'Comando "scrivi" inviato', // DeepL
   EMS_BUS_WARNING: 'Bus EMS scollegato. Se questo avviso persiste dopo qualche secondo, controlla le impostazioni e il profilo della scheda', // DeepL
@@ -93,7 +103,8 @@ const it: Translation = {
   PHY_TYPE: 'Tipo di PHY Eth', // DeepL
   DISABLED: 'disabilitato', // DeepL
   TX_MODE: 'Modalità EMS Tx', // DeepL
-  EMS_BUS: '{{Bus|EMS Bus}}',
+  EMS_BUS: 'EMS Bus',
+  EMS_BUS_ID: 'ID EMS Bus',
   HARDWARE: 'Hardware',
   LANGUAGE_ENTITIES: 'Lingua (per le entità dei dispositivi)', // DeepL
   HIDE_LED: 'Nascondi LED',
@@ -155,8 +166,8 @@ const it: Translation = {
   INSTALL: 'Installa', // DeepL
   FAILED: 'non riuscito', // DeepL
   SYSTEM: 'Sistema',
-  LOG_OF: '{0} Registro', // DeepL
-  STATUS_OF: 'Stato {0}',
+  SYSTEM_LOG: 'Registro di sistema',
+  STATUS: 'Stato',
   DOWNLOAD_UPLOAD: 'Scarica/Carica', // DeepL
   CLOSE: 'Chiudi', // DeepL
   COMMAND_GUEST: 'Gli ospiti possono eseguire questo comando',
@@ -207,14 +218,13 @@ const it: Translation = {
   NETWORK_ALLOWED_HOSTS: 'Nomi host consentiti',
   NETWORK_ALLOWED_HOSTS_HELP: 'Nomi alternativi: questo dispositivo può essere aperto in un browser, ad esempio come ems-esp.fritz.box o con il nome di un proxy inverso. Il suo indirizzo IP, il nome host e il nome host.local funzionano sempre', // DeepL
   NOT_ENABLED: 'Non abilitato',
-  ERRORS_OF: '{0} errori', // DeepL
+  MQTT_ERRORS: 'Errori MQTT',
   DISCONNECT_REASON: 'Motivo della disconnessione', // DeepL
   MQTT_BASE_TOPIC: 'Argomento di base', // DeepL
   LAST_DISCONNECT: 'Ultima disconnessione',
   CONNECTED_SINCE: 'Connesso da', // DeepL
   ENABLE_MQTT: 'Abilita MQTT',
   BROKER: 'Broker',
-  CLIENT: 'Cliente',
   BASE_TOPIC: 'Base',
   OPTIONAL: 'facoltativo', // DeepL
   MQTT_FORMAT: 'Formato argomento/payload', // DeepL
@@ -283,8 +293,7 @@ const it: Translation = {
   ADMINISTRATOR: 'Amministratore',
   GUEST: 'Ospite',
   NEW: 'Nuovo',
-  NEW_NAME_OF: 'Nuovo nome {0}',
-  ENTITY: 'entità',
+  NEW_ENTITY_NAME: 'Nuovo nome entità',
   MIN: 'min',
   MAX: 'max',
   BLOCK_NAVIGATE_1: 'Hai delle modifiche non salvate', // DeepL
@@ -399,6 +408,12 @@ const it: Translation = {
   DOWNLOAD_UPLOAD_1: 'Scarica e carica le impostazioni',
   MODULES: 'Module',
   MODULES_1: 'Attiva o disattiva i moduli esterni',
+  NETWORK_DESC: 'Wi-Fi, Ethernet e nome host',
+  AP_DESC: 'Hotspot integrato per la configurazione e l\'accesso di riserva',
+  MQTT_DESC: 'Broker, topic e discovery',
+  APPLICATION_DESC: 'Bus EMS, scheda, sensori e formattazione',
+  NTP_DESC: 'Server dell\'ora e fuso orario',
+  FIRMWARE_DESC: 'Versione, aggiornamenti e ripristino',
   MODULES_UPDATED: 'Moduli aggiornati',
   MODULES_NONE: 'Nessun modulo esterno rilevato',
   RENAME: 'Rinomina', // DeepL
@@ -407,9 +422,9 @@ const it: Translation = {
   SERVICES: 'Servizi',
   ALLVALUES: 'Tutti i valori',
   WAIT_FIRMWARE: 'Il firmware è in fase di caricamento e installazione', // DeepL
-  INSTALL_VERSION: 'Questa sarà la versione {0} {1}', // DeepL
+  INSTALL_VERSION: 'Verrà installata la versione {0}',
   UPDATE_AVAILABLE: 'aggiornamento disponibile',
-  LATEST_VERSION: 'Stai utilizzando l\'ultima versione del firmware {0}', // DeepL
+  LATEST_VERSION: 'Stai utilizzando l\'ultima versione del firmware ({0})',
   PLEASE_WAIT: 'Attendi, per favore', // DeepL
   RESTARTING_PRE: 'Avvio', // DeepL
   RESTARTING_POST: 'Preparazione',

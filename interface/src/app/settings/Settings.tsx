@@ -25,6 +25,7 @@ const Settings = () => {
     icon: 'new_releases',
     color: '#2a7fb0',
     title: 'EMS-ESP Firmware',
+    text: LL.FIRMWARE_DESC(),
     value: versions?.current?.version && (
       <>
         v{versions.current.version}
@@ -64,6 +65,7 @@ const Settings = () => {
               icon: 'settings_ethernet',
               color: '#40828f',
               title: LL.NETWORK(0),
+              text: LL.NETWORK_DESC(),
               value: networkValue,
               state: network?.state
             },
@@ -72,6 +74,7 @@ const Settings = () => {
               icon: 'wifi_tethering',
               color: '#5f9a5f',
               title: LL.ACCESS_POINT(0),
+              text: LL.AP_DESC(),
               value: data && (data.ap_status ? LL.ACTIVE() : LL.INACTIVE(0)),
               state: data && (data.ap_status ? 'ok' : 'off')
             },
@@ -80,6 +83,7 @@ const Settings = () => {
               icon: 'device_hub',
               color: '#68374d',
               title: 'MQTT',
+              text: LL.MQTT_DESC(),
               value: mqtt?.text,
               state: mqtt?.state
             }
@@ -93,6 +97,7 @@ const Settings = () => {
               icon: 'settings_applications',
               color: '#134ba2',
               title: LL.APPLICATION(),
+              text: LL.APPLICATION_DESC(),
               value: data && (data.model || data.board)
             },
             {
@@ -100,6 +105,7 @@ const Settings = () => {
               icon: 'schedule',
               color: '#c5572c',
               title: 'NTP',
+              text: LL.NTP_DESC(),
               value: ntp?.text,
               state: ntp?.state
             },

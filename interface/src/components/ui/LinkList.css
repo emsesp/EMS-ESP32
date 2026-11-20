@@ -47,7 +47,7 @@
   align-items: center;
   gap: 8px;
   min-width: 0;
-  max-width: 50%;
+  max-width: 40%;
   color: var(--text-2);
   font-size: 13px;
 }

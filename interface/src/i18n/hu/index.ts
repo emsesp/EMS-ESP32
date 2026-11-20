@@ -9,7 +9,12 @@ const hu: Translation = {
   SIGN_OUT: 'Kijelentkezés',
   USERNAME: 'Felhasználónév',
   PASSWORD: 'Jelszó',
-  SETTINGS_OF: '{0} Beállítások', // DeepL
+  APPLICATION_SETTINGS: 'Alkalmazásbeállítások',
+  AP_SETTINGS: 'Hozzáférési pont beállításai',
+  NETWORK_SETTINGS: 'Hálózati beállítások',
+  NTP_SETTINGS: 'NTP-beállítások',
+  MQTT_SETTINGS: 'MQTT-beállítások',
+  EMS_BUS_SETTINGS: 'EMS busz beállításai',
   HELP: 'Súgó',
   LOGGED_IN: 'Bejelentkezett: {name}', // DeepL
   PLEASE_SIGNIN: 'Kérjük, jelentkezzen be a folytatáshoz', // DeepL
@@ -24,13 +29,17 @@ const hu: Translation = {
   ENTITIES: 'entitások',
   EXPORT: 'Export', // DeepL
   FAVORITES: 'Kedvencek',
-  ID_OF: '{0} azonosító',
+  CLIENT_ID: 'Kliensazonosító',
+  DEVICE_ID: 'Eszközazonosító',
+  PRODUCT_ID: 'Termékazonosító',
+  ENTITY_ID: 'Entitásazonosító',
+  SENSOR_ID: 'Szenzorazonosító',
+  TYPE_ID: 'Típusazonosító',
   DEVICE: 'Eszköz',
-  PRODUCT: 'Termék',
   BRAND: 'Márka',
   VERSION: 'Verzió',
   ENTITY_NAME: 'Entitás neve',
-  VALUE: '{{value|Érték}}',
+  VALUE: 'Érték',
   DEVICES: 'Eszközök',
   SENSORS: 'Szenzorok',
   AUTOMATION: 'Automatizálás',
@@ -45,10 +54,12 @@ const hu: Translation = {
   RESET: 'Visszaállítás', // DeepL
   PROBLEM_UPDATING: 'Frissítési probléma', // DeepL
   PROBLEM_LOADING: 'Betöltési hiba', // DeepL
-  ANALOG_SENSOR: 'Analóg szenzorok', // DeepL
   ANALOG_SENSORS: 'Analóg szenzorok',
   SETTINGS: 'Beállítások',
-  UPDATED_OF: '{0} frissítve',
+  SETTINGS_UPDATED: 'Beállítások frissítve',
+  NAME_UPDATED: 'Név frissítve',
+  SENSOR_UPDATED: 'Szenzor frissítve',
+  ANALOG_SENSOR_UPDATED: 'Analóg szenzor frissítve',
   OFFSET: 'Eltolás', // DeepL
   FACTOR: 'Tényező', // DeepL
   FREQ: 'Gyakoriság', // DeepL
@@ -56,7 +67,6 @@ const hu: Translation = {
   UNIT: 'UoM', // DeepL
   STARTVALUE: 'Kezdőérték', // DeepL
   EDIT: 'Szerkesztés',
-  SENSOR: 'Szenzor',
   TEMP_SENSORS: 'Hőmérséklet-szenzorok',
   WRITE_CMD_SENT: 'Parancs elküldve', // DeepL
   EMS_BUS_WARNING: 'Az EMS-busz kapcsolata megszakadt. Ha ez a figyelmeztetés néhány másodperc elteltével is fennáll, kérjük, ellenőrizze a beállításokat és a kártya profilját.', // DeepL
@@ -93,7 +103,8 @@ const hu: Translation = {
   PHY_TYPE: 'Eth PHY típus', // DeepL
   DISABLED: 'letiltva',
   TX_MODE: 'EMS Tx üzemmód', // DeepL
-  EMS_BUS: '{{Bus|EMS busz}}',
+  EMS_BUS: 'EMS busz',
+  EMS_BUS_ID: 'EMS busz azonosító',
   HARDWARE: 'Hardver',
   LANGUAGE_ENTITIES: 'Nyelv (eszközök esetében)', // DeepL
   HIDE_LED: 'LED elrejtése',
@@ -151,12 +162,12 @@ const hu: Translation = {
   HELP_INFORMATION_3: 'Funkció igénylése vagy hiba jelentése', // DeepL
   HELP_INFORMATION_4: 'Probléma bejelentésekor adja meg a rendszer adatait a gyorsabb válasz érdekében', // DeepL
   UPLOAD: 'Feltöltés',
-  DOWNLOAD: '{{D|l|l}}etöltés',
+  DOWNLOAD: 'Letöltés',
   INSTALL: 'Telepítés',
   FAILED: 'sikertelen',
   SYSTEM: 'Rendszer',
-  LOG_OF: '{0} Napló', // DeepL
-  STATUS_OF: '{0} Állapot', // DeepL
+  SYSTEM_LOG: 'Rendszernapló',
+  STATUS: 'Állapot',
   DOWNLOAD_UPLOAD: 'Letöltés/Feltöltés',
   CLOSE: 'Bezárás',
   COMMAND_GUEST: 'A vendégek futtathatják ezt a parancsot', // DeepL
@@ -207,14 +218,13 @@ const hu: Translation = {
   NETWORK_ALLOWED_HOSTS: 'Megengedett gazdagépnevek', // DeepL
   NETWORK_ALLOWED_HOSTS_HELP: 'Az eszköz böngészőben megnyitható további nevek, például EMS-ESP.fritz.box vagy egy fordított proxy neve. IP-címe, gazdagépneve és gazdagépnév.local mindig működnek.', // DeepL
   NOT_ENABLED: 'Nincs engedélyezve',
-  ERRORS_OF: '{0} hiba',
+  MQTT_ERRORS: 'MQTT hibák',
   DISCONNECT_REASON: 'A kapcsolat megszakításának oka', // DeepL
   MQTT_BASE_TOPIC: 'Alapvető téma', // DeepL
   LAST_DISCONNECT: 'Utolsó lekapcsolás', // DeepL
   CONNECTED_SINCE: 'Csatlakozva:', // DeepL
   ENABLE_MQTT: 'MQTT engedélyezése',
   BROKER: 'Broker', // DeepL
-  CLIENT: 'Ügyfél', // DeepL
   BASE_TOPIC: 'Alap', // DeepL
   OPTIONAL: 'opcionális', // DeepL
   MQTT_FORMAT: 'Téma/adatformátum', // DeepL
@@ -283,8 +293,7 @@ const hu: Translation = {
   ADMINISTRATOR: 'Rendszergazda',
   GUEST: 'Vendég',
   NEW: 'Új',
-  NEW_NAME_OF: '{0} új neve', // DeepL
-  ENTITY: 'entitás',
+  NEW_ENTITY_NAME: 'Az entitás új neve',
   MIN: 'min',
   MAX: 'max',
   BLOCK_NAVIGATE_1: 'Vannak mentetlen módosításai', // DeepL
@@ -331,7 +340,7 @@ const hu: Translation = {
   MQTT_R_AUTH: 'Nincs jogosultság',
   MQTT_R_FINGERPRINT: 'A TLS ujjlenyomat nem egyezik',
   GPIO_INVALID: 'Érvénytelen GPIO-beállítások',
-  CONNECTED_VIA: '{0} keresztül csatlakozik', // DeepL
+  CONNECTED_VIA: 'Kapcsolat: {0}',
   NETWORK_NOT_FOUND: 'A hálózat nem található', // DeepL
   CONNECTION_FAILED: 'A csatlakozás nem sikerült', // DeepL
   CONNECTION_LOST: 'Megszakadt a kapcsolat',
@@ -399,6 +408,12 @@ const hu: Translation = {
   DOWNLOAD_UPLOAD_1: 'Beállítások letöltése és feltöltése',
   MODULES: 'Modulok',
   MODULES_1: 'Külső modulok aktiválása vagy deaktiválása',
+  NETWORK_DESC: 'Wi-Fi, Ethernet és gépnév',
+  AP_DESC: 'Saját hotspot a beállításhoz és tartalék hozzáféréshez',
+  MQTT_DESC: 'Broker, témák és felderítés',
+  APPLICATION_DESC: 'EMS busz, panel, szenzorok és formázás',
+  NTP_DESC: 'Időszerver és időzóna',
+  FIRMWARE_DESC: 'Verzió, frissítések és helyreállítás',
   MODULES_UPDATED: 'Frissített modulok', // DeepL
   MODULES_NONE: 'Nem észlelt külső modulokat', // DeepL
   RENAME: 'Átnevezés',
@@ -407,9 +422,9 @@ const hu: Translation = {
   SERVICES: 'Szolgáltatások',
   ALLVALUES: 'Minden érték', // DeepL
   WAIT_FIRMWARE: 'A firmware feltöltése és telepítése folyamatban van', // DeepL
-  INSTALL_VERSION: 'Ez a {0}-es verzió {1}', // DeepL
+  INSTALL_VERSION: 'Ez telepíti a következő verziót: {0}',
   UPDATE_AVAILABLE: 'frissítés elérhető', // DeepL
-  LATEST_VERSION: '{0}-es firmware-verziót használja', // DeepL
+  LATEST_VERSION: 'A legújabb firmware-verziót használja ({0})',
   PLEASE_WAIT: 'Kérjük, várjon', // DeepL
   RESTARTING_PRE: 'Indítás',
   RESTARTING_POST: 'Előkészítés',

@@ -121,7 +121,7 @@ const CustomizationsDialog = ({
             <KeyValueList
               rows={[
                 {
-                  label: LL.ID_OF(LL.ENTITY()),
+                  label: LL.ENTITY_ID(),
                   value: <span className="mono">{entity.id}</span>
                 },
                 { label: LL.DEFAULT_NAME(), value: entity.n },
@@ -147,7 +147,7 @@ const CustomizationsDialog = ({
             />
           </div>
           <TextField
-            label={LL.NEW_NAME_OF(LL.ENTITY())}
+            label={LL.NEW_ENTITY_NAME()}
             placeholder={entity.n}
             fullWidth
             {...f.text('cn')}

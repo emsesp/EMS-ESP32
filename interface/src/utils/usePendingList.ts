@@ -127,7 +127,7 @@ export const usePendingList = <T>({
   const save = async () => {
     try {
       await sendWrite(rows.filter((r) => r.state !== 'del').map((r) => r.item));
-      toast.success(savedText ?? LL.UPDATED_OF(LL.SETTINGS(1)));
+      toast.success(savedText ?? LL.SETTINGS_UPDATED());
       await reload();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : String(err));

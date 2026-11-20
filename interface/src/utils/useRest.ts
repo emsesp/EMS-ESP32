@@ -33,7 +33,7 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
     (newData: D) => update(newData),
     { immediate: false }
   ).onSuccess(() => {
-    toast.success(LL.UPDATED_OF(LL.SETTINGS(1)));
+    toast.success(LL.SETTINGS_UPDATED());
     setDirtyFlags([]);
   });
 

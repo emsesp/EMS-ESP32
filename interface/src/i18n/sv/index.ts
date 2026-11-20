@@ -9,7 +9,12 @@ const sv: Translation = {
   SIGN_OUT: 'Logga ut',
   USERNAME: 'Användarnamn',
   PASSWORD: 'Lösenord',
-  SETTINGS_OF: '{0} Inställningar',
+  APPLICATION_SETTINGS: 'Applikationsinställningar',
+  AP_SETTINGS: 'Åtkomstpunktsinställningar',
+  NETWORK_SETTINGS: 'Nätverksinställningar',
+  NTP_SETTINGS: 'NTP-inställningar',
+  MQTT_SETTINGS: 'MQTT-inställningar',
+  EMS_BUS_SETTINGS: 'EMS-bussinställningar',
   HELP: 'Hjälp',
   LOGGED_IN: 'Inloggad som {name}',
   PLEASE_SIGNIN: 'Logga in för att fortsätta', // DeepL
@@ -24,13 +29,17 @@ const sv: Translation = {
   ENTITIES: 'entiteter',
   EXPORT: 'Exportera',
   FAVORITES: "Favoriter",
-  ID_OF: '{0}-ID',
+  CLIENT_ID: 'Klient-ID',
+  DEVICE_ID: 'Enhets-ID',
+  PRODUCT_ID: 'Produkt-ID',
+  ENTITY_ID: 'Entitets-ID',
+  SENSOR_ID: 'Sensor-ID',
+  TYPE_ID: 'Typ-ID',
   DEVICE: 'Enhet',
-  PRODUCT: 'Produkt',
   BRAND: 'Varumärke', // DeepL
   VERSION: 'Version',
   ENTITY_NAME: 'Entitetsnamn',
-  VALUE: '{{värde|Värde}}',
+  VALUE: 'Värde',
   DEVICES: 'Enheter',
   SENSORS: 'Sensorer',
   AUTOMATION: 'Automatisering',
@@ -45,10 +54,12 @@ const sv: Translation = {
   RESET: 'Återställ',
   PROBLEM_UPDATING: 'Problem med uppdatering', // DeepL
   PROBLEM_LOADING: 'Problem med inläsningen', // DeepL
-  ANALOG_SENSOR: 'Analoga sensorer', // DeepL
   ANALOG_SENSORS: 'Analoga sensorer',
   SETTINGS: 'Inställningar',
-  UPDATED_OF: '{0} uppdaterad', // DeepL
+  SETTINGS_UPDATED: 'Inställningar uppdaterade',
+  NAME_UPDATED: 'Namn uppdaterat',
+  SENSOR_UPDATED: 'Sensor uppdaterad',
+  ANALOG_SENSOR_UPDATED: 'Analog sensor uppdaterad',
   OFFSET: 'Offset',
   FACTOR: 'Faktor',
   FREQ: 'Frekvens',
@@ -56,7 +67,6 @@ const sv: Translation = {
   UNIT: 'UoM', // DeepL
   STARTVALUE: 'Startvärde',
   EDIT: 'Redigera', // DeepL
-  SENSOR: 'Sensor',
   TEMP_SENSORS: 'Temperatursensorer',
   WRITE_CMD_SENT: 'Skriv kommando skickat', // DeepL
   EMS_BUS_WARNING: 'EMS-bussen är frånkopplad. Om denna varning kvarstår efter några sekunder, kontrollera inställningarna och kortprofilen', // DeepL
@@ -93,7 +103,8 @@ const sv: Translation = {
   PHY_TYPE: 'Eth PHY-typ',
   DISABLED: 'inaktiverad',
   TX_MODE: 'EMS Tx-läge',
-  EMS_BUS: '{{Buss|EMS-Buss}}',
+  EMS_BUS: 'EMS-Buss',
+  EMS_BUS_ID: 'EMS-Buss-ID',
   HARDWARE: 'Hårdvara',
   LANGUAGE_ENTITIES: 'Språk (för enhetsentiteter)', // DeepL
   HIDE_LED: 'Dölj LED', // DeepL
@@ -151,12 +162,12 @@ const sv: Translation = {
   HELP_INFORMATION_3: 'För att begära en funktion eller rapportera ett fel', // DeepL
   HELP_INFORMATION_4: 'Ange din systeminformation när du rapporterar ett problem för att få ett snabbare svar', // DeepL
   UPLOAD: 'Ladda upp', // DeepL
-  DOWNLOAD: '{{N|n|n}}edladdning',
+  DOWNLOAD: 'Nedladdning',
   INSTALL: 'Installera',
   FAILED: 'misslyckades', // DeepL
   SYSTEM: 'System',
-  LOG_OF: '{0} Logg',
-  STATUS_OF: '{0}-status', // DeepL
+  SYSTEM_LOG: 'Systemlogg',
+  STATUS: 'Status',
   DOWNLOAD_UPLOAD: 'Ladda ner/Ladda upp', // DeepL
   CLOSE: 'Stäng',
   COMMAND_GUEST: 'Gäster kan köra detta kommando', // DeepL
@@ -207,14 +218,13 @@ const sv: Translation = {
   NETWORK_ALLOWED_HOSTS: 'Tillåtna värdnamn',
   NETWORK_ALLOWED_HOSTS_HELP: 'Alternativa namn som enheten kan öppnas med i en webbläsare, till exempel ems-ESP.fritz.box eller ett omvänd proxynamn. Dess IP-adress, värdnamn och värdnamn.local fungerar alltid', // DeepL
   NOT_ENABLED: 'Inte aktiverat', // DeepL
-  ERRORS_OF: '{0}-fel', // DeepL
+  MQTT_ERRORS: 'MQTT-fel',
   DISCONNECT_REASON: 'Orsak till frånkoppling', // DeepL
   MQTT_BASE_TOPIC: 'Grundläggande ämne', // DeepL
   LAST_DISCONNECT: 'Senaste frånkoppling', // DeepL
   CONNECTED_SINCE: 'Ansluten sedan',
   ENABLE_MQTT: 'Aktivera MQTT',
-  BROKER: 'Mäklare', // DeepL
-  CLIENT: 'Klient',
+  BROKER: 'Broker',
   BASE_TOPIC: 'Grundläggande', // DeepL
   OPTIONAL: 'valfritt',
   MQTT_FORMAT: 'Ämne/innehållsformat', // DeepL
@@ -283,8 +293,7 @@ const sv: Translation = {
   ADMINISTRATOR: 'Administratör',
   GUEST: 'Gäst',
   NEW: 'Ny', // DeepL
-  NEW_NAME_OF: 'Nytt namn på {0}', // DeepL
-  ENTITY: 'entitet', // DeepL
+  NEW_ENTITY_NAME: 'Nytt entitetsnamn',
   MIN: 'min',
   MAX: 'max',
   BLOCK_NAVIGATE_1: 'Du har osparade ändringar',
@@ -399,6 +408,12 @@ const sv: Translation = {
   DOWNLOAD_UPLOAD_1: 'Ladda ner och ladda upp inställningar', // DeepL
   MODULES: 'Moduler',
   MODULES_1: 'Aktivera eller inaktivera externa moduler', // DeepL
+  NETWORK_DESC: 'Wi-Fi, Ethernet och värdnamn',
+  AP_DESC: 'Egen hotspot för installation och reservåtkomst',
+  MQTT_DESC: 'Broker, ämnen och discovery',
+  APPLICATION_DESC: 'EMS-buss, kort, sensorer och formatering',
+  NTP_DESC: 'Tidsserver och tidszon',
+  FIRMWARE_DESC: 'Version, uppdateringar och återställning',
   MODULES_UPDATED: 'Moduler uppdaterade', // DeepL
   MODULES_NONE: 'Inga externa moduler har upptäckts', // DeepL
   RENAME: 'Byt namn',
@@ -407,9 +422,9 @@ const sv: Translation = {
   SERVICES: 'Tjänster',
   ALLVALUES: 'Alla värden',
   WAIT_FIRMWARE: 'Firmware laddas upp och installeras',
-  INSTALL_VERSION: 'Detta kommer att {0} version {1}', // DeepL
+  INSTALL_VERSION: 'Detta installerar version {0}',
   UPDATE_AVAILABLE: 'uppdatering tillgänglig',
-  LATEST_VERSION: 'Du använder den senaste firmwareversionen {0}', // DeepL
+  LATEST_VERSION: 'Du använder den senaste firmwareversionen ({0})',
   PLEASE_WAIT: 'Vänta', // DeepL
   RESTARTING_PRE: 'Uppstart', // DeepL
   RESTARTING_POST: 'Förberedelser', // DeepL

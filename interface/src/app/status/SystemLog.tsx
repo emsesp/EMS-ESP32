@@ -312,7 +312,7 @@ const SystemLog = () => {
           </ToggleButton>
         </ToggleGroup>
         <Button icon="download" size="sm" onClick={onDownload}>
-          {LL.DOWNLOAD(0)}
+          {LL.DOWNLOAD()}
         </Button>
       </div>
 
@@ -320,7 +320,7 @@ const SystemLog = () => {
         ref={consoleRef}
         className={cx('console', compact && 'compact')}
         role="log"
-        aria-label={LL.LOG_OF(LL.SYSTEM(0))}
+        aria-label={LL.SYSTEM_LOG()}
       >
         <ConsoleLines blocks={blocksAfter.get(0)} />
         {shown.map((e) => (

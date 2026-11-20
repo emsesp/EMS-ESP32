@@ -188,7 +188,7 @@ const SystemStatus = () => {
             to="/status/log"
             icon="list_alt"
             color="#40828f"
-            title={LL.LOG_OF(LL.SYSTEM(0))}
+            title={LL.SYSTEM_LOG()}
             text={
               hasLogCounts
                 ? join(

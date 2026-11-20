@@ -80,7 +80,7 @@ const HeatingBackupDialog = ({
             icon="download"
             disabled={loading || !data || selected.length === 0}
           >
-            {LL.DOWNLOAD(0)}
+            {LL.DOWNLOAD()}
           </Button>
         </>
       }
@@ -104,8 +104,8 @@ const HeatingBackupDialog = ({
                       {d.name} <span className="muted">{d.type}</span>
                     </span>
                     <span className="cap">
-                      {LL.ID_OF(LL.DEVICE())} {hex(d.deviceId)} ·{' '}
-                      {LL.ID_OF(LL.PRODUCT())} {d.productId}
+                      {LL.DEVICE_ID()} {hex(d.deviceId)} ·{' '}
+                      {LL.PRODUCT_ID()} {d.productId}
                     </span>
                   </span>
                   <span className="cap">

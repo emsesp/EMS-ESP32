@@ -221,7 +221,7 @@ const Help = () => {
                 <span className="cap">{LL.REPORT_STEP_2_TEXT()}</span>
               </span>
               <ButtonLink to="/status/log" color="secondary" icon="list_alt">
-                {LL.LOG_OF(LL.SYSTEM(0))}
+                {LL.SYSTEM_LOG()}
               </ButtonLink>
             </li>
           )}

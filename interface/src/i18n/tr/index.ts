@@ -9,7 +9,12 @@ const tr: Translation = {
   SIGN_OUT: 'Çıkış', // DeepL
   USERNAME: 'Kullanıcı adı', // DeepL
   PASSWORD: 'Şifre',
-  SETTINGS_OF: '{0} Ayarlar',
+  APPLICATION_SETTINGS: 'Uygulama Ayarları',
+  AP_SETTINGS: 'Erişim Noktası Ayarları',
+  NETWORK_SETTINGS: 'Ağ Ayarları',
+  NTP_SETTINGS: 'NTP Ayarları',
+  MQTT_SETTINGS: 'MQTT Ayarları',
+  EMS_BUS_SETTINGS: 'EMS Hattı Ayarları',
   HELP: 'Yardım',
   LOGGED_IN: '{name} olarak oturum açıldı', // DeepL
   PLEASE_SIGNIN: 'Devam etmek için lütfen oturum açın', // DeepL
@@ -24,13 +29,17 @@ const tr: Translation = {
   ENTITIES: 'varlıklar',
   EXPORT: 'Dışa aktar', // DeepL
   FAVORITES: "Favoriler",
-  ID_OF: '{0} Kimliği', // DeepL
+  CLIENT_ID: 'İstemci Kimliği',
+  DEVICE_ID: 'Cihaz Kimliği',
+  PRODUCT_ID: 'Ürün Kimliği',
+  ENTITY_ID: 'Varlık Kimliği',
+  SENSOR_ID: 'Sensör Kimliği',
+  TYPE_ID: 'Tür Kimliği',
   DEVICE: 'Cihaz',
-  PRODUCT: 'Ürün',
   BRAND: 'Marka',
   VERSION: 'Sürüm',
   ENTITY_NAME: 'Valık Adı',
-  VALUE: '{{değer|Değer}}',
+  VALUE: 'Değer',
   DEVICES: 'Cihazlar',
   SENSORS: 'Sensörler',
   AUTOMATION: 'Otomasyon',
@@ -45,10 +54,12 @@ const tr: Translation = {
   RESET: 'Sıfırla',
   PROBLEM_UPDATING: 'Güncelleme sorunu', // DeepL
   PROBLEM_LOADING: 'Yükleme sorunu', // DeepL
-  ANALOG_SENSOR: 'Analog Sensörler', // DeepL
   ANALOG_SENSORS: 'Analog Sensörler',
   SETTINGS: 'Ayarlar',
-  UPDATED_OF: '{0} güncellendi', // DeepL
+  SETTINGS_UPDATED: 'Ayarlar güncellendi',
+  NAME_UPDATED: 'Ad güncellendi',
+  SENSOR_UPDATED: 'Sensör güncellendi',
+  ANALOG_SENSOR_UPDATED: 'Analog sensör güncellendi',
   OFFSET: 'Ofset', // DeepL
   FACTOR: 'Faktör', // DeepL
   FREQ: 'Sıklık', // DeepL
@@ -56,7 +67,6 @@ const tr: Translation = {
   UNIT: 'UoM', // DeepL
   STARTVALUE: 'Başlangıç değeri',
   EDIT: 'Düzenle', // DeepL
-  SENSOR: 'Sensör',
   TEMP_SENSORS: 'Sıcaklık Sensörleri',
   WRITE_CMD_SENT: 'Komut gönderildi', // DeepL
   EMS_BUS_WARNING: 'EMS veriyolu bağlantısı kesildi. Bu uyarı birkaç saniye sonra hala devam ediyorsa lütfen ayarları ve kart profilini kontrol edin', // DeepL
@@ -93,7 +103,8 @@ const tr: Translation = {
   PHY_TYPE: 'Eth PHY türü', // DeepL
   DISABLED: 'devre dışı',
   TX_MODE: 'EMS Tx modu', // DeepL
-  EMS_BUS: '{{Hat|EMS Hatti}}',
+  EMS_BUS: 'EMS Hattı',
+  EMS_BUS_ID: 'EMS Hattı Kimliği',
   HARDWARE: 'Donanım',
   LANGUAGE_ENTITIES: 'Dil (cihaz varlıkları için)',
   HIDE_LED: 'LED\'i gizle', // DeepL
@@ -151,12 +162,12 @@ const tr: Translation = {
   HELP_INFORMATION_3: 'Bir özellik talebinde bulunmak veya bir hata bildirmek için', // DeepL
   HELP_INFORMATION_4: 'Daha hızlı yanıt alabilmek için bir sorun bildirirken sistem bilgilerinizi ekleyin', // DeepL
   UPLOAD: 'Yükle', // DeepL
-  DOWNLOAD: '{{İ|i|i}}İndirme',
+  DOWNLOAD: 'İndirme',
   INSTALL: 'Yükle', // DeepL
   FAILED: 'başarısız',
   SYSTEM: 'Sistem',
-  LOG_OF: '{0} Günlüğü', // DeepL
-  STATUS_OF: '{0} Durum', // DeepL
+  SYSTEM_LOG: 'Sistem Günlüğü',
+  STATUS: 'Durum',
   DOWNLOAD_UPLOAD: 'İndir/Yükle', // DeepL
   CLOSE: 'Kapat',
   COMMAND_GUEST: 'Konuklar bu komutu çalıştırabilir', // DeepL
@@ -207,14 +218,13 @@ const tr: Translation = {
   NETWORK_ALLOWED_HOSTS: 'İzin verilen ana bilgisayar adları',
   NETWORK_ALLOWED_HOSTS_HELP: 'Bu cihaz, tarayıcıda EMS-ESP.fritz.box veya bir ters proxy adı gibi farklı adlarla da açılabilir. IP adresi, ana bilgisayar adı ve hostname.local her zaman çalışır.', // DeepL
   NOT_ENABLED: 'Etkin değil', // DeepL
-  ERRORS_OF: '{0} hata',
+  MQTT_ERRORS: 'MQTT hataları',
   DISCONNECT_REASON: 'Bağlantı kesilme nedeni', // DeepL
   MQTT_BASE_TOPIC: 'Temel konu',
   LAST_DISCONNECT: 'Son bağlantı kesme', // DeepL
   CONNECTED_SINCE: 'Bağlantı tarihi:', // DeepL
   ENABLE_MQTT: 'MQTT\'yi etkinleştirin', // DeepL
   BROKER: 'Broker', // DeepL
-  CLIENT: 'Müşteri', // DeepL
   BASE_TOPIC: 'Temel', // DeepL
   OPTIONAL: 'isteğe bağlı', // DeepL
   MQTT_FORMAT: 'Konu/içerik biçimi', // DeepL
@@ -283,8 +293,7 @@ const tr: Translation = {
   ADMINISTRATOR: 'Yönetici',
   GUEST: 'Misafir',
   NEW: 'Yeni',
-  NEW_NAME_OF: '{0}\'nin yeni adı', // DeepL
-  ENTITY: 'varlıklar', // DeepL
+  NEW_ENTITY_NAME: 'Yeni varlık adı',
   MIN: 'min',
   MAX: 'max', // DeepL
   BLOCK_NAVIGATE_1: 'Kaydedilmemiş değişiklikleriniz var', // DeepL
@@ -399,6 +408,12 @@ const tr: Translation = {
   DOWNLOAD_UPLOAD_1: 'Ayarları indirme ve yükleme', // DeepL
   MODULES: 'Modül',
   MODULES_1: 'Harici modülleri etkinleştirin veya devre dışı bırakın',
+  NETWORK_DESC: 'Wi-Fi, Ethernet ve ana bilgisayar adı',
+  AP_DESC: 'Kurulum ve yedek erişim için dahili erişim noktası',
+  MQTT_DESC: 'Broker, konular ve keşif',
+  APPLICATION_DESC: 'EMS hattı, kart, sensörler ve biçimlendirme',
+  NTP_DESC: 'Zaman sunucusu ve saat dilimi',
+  FIRMWARE_DESC: 'Sürüm, güncellemeler ve kurtarma',
   MODULES_UPDATED: 'Modüller güncellendi', // DeepL
   MODULES_NONE: 'Harici modül algılanmadı', // DeepL
   RENAME: 'Yeniden adlandırın', // DeepL
@@ -407,9 +422,9 @@ const tr: Translation = {
   SERVICES: 'Hizmetler',
   ALLVALUES: 'Tüm değerler', // DeepL
   WAIT_FIRMWARE: 'Yazılım yükleniyor ve kuruluyor', // DeepL
-  INSTALL_VERSION: 'Bu, {0} sürüm {1} olacaktır', // DeepL
+  INSTALL_VERSION: 'Bu işlem {0} sürümünü yükleyecek',
   UPDATE_AVAILABLE: 'güncelleme mevcut', // DeepL
-  LATEST_VERSION: '{0} numaralı en son aygıt yazılımı sürümünü kullanıyorsunuz', // DeepL
+  LATEST_VERSION: 'En son aygıt yazılımı sürümünü kullanıyorsunuz ({0})',
   PLEASE_WAIT: 'Lütfen bekleyin',
   RESTARTING_PRE: 'Başlatma', // DeepL
   RESTARTING_POST: 'Hazırlık', // DeepL

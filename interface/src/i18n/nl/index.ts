@@ -9,7 +9,12 @@ const nl: Translation = {
   SIGN_OUT: 'Uitloggen',
   USERNAME: 'Gebruikersnaam',
   PASSWORD: 'Wachtwoord',
-  SETTINGS_OF: '{0} Instellingen',
+  APPLICATION_SETTINGS: 'Toepassingsinstellingen',
+  AP_SETTINGS: 'Toegangspuntinstellingen',
+  NETWORK_SETTINGS: 'Netwerkinstellingen',
+  NTP_SETTINGS: 'NTP-instellingen',
+  MQTT_SETTINGS: 'MQTT-instellingen',
+  EMS_BUS_SETTINGS: 'EMS-businstellingen',
   HELP: 'Help',
   LOGGED_IN: 'Ingelogd als {name}',
   PLEASE_SIGNIN: 'Log in om verder te gaan',
@@ -24,13 +29,17 @@ const nl: Translation = {
   ENTITIES: 'entiteiten',
   EXPORT: 'Exporteren', // DeepL
   FAVORITES: "Favorieten",
-  ID_OF: '{0}-ID', // DeepL
+  CLIENT_ID: 'Client-ID',
+  DEVICE_ID: 'Apparaat-ID',
+  PRODUCT_ID: 'Product-ID',
+  ENTITY_ID: 'Entiteit-ID',
+  SENSOR_ID: 'Sensor-ID',
+  TYPE_ID: 'Type-ID',
   DEVICE: 'Apparaat',
-  PRODUCT: 'Product',
   BRAND: 'Merk',
   VERSION: 'Versie',
   ENTITY_NAME: 'Entiteit',
-  VALUE: '{{waarde|Waarde}}',
+  VALUE: 'Waarde',
   DEVICES: 'Apparaten',
   SENSORS: 'Sensoren',
   AUTOMATION: 'Automatisering',
@@ -45,10 +54,12 @@ const nl: Translation = {
   RESET: 'Resetten',
   PROBLEM_UPDATING: 'Probleem bij het bijwerken', // DeepL
   PROBLEM_LOADING: 'Probleem bij het laden', // DeepL
-  ANALOG_SENSOR: 'Analoge Sensoren', // DeepL
   ANALOG_SENSORS: 'Analoge Sensoren',
   SETTINGS: 'Instellingen',
-  UPDATED_OF: '{0} bijgewerkt', // DeepL
+  SETTINGS_UPDATED: 'Instellingen bijgewerkt',
+  NAME_UPDATED: 'Naam bijgewerkt',
+  SENSOR_UPDATED: 'Sensor bijgewerkt',
+  ANALOG_SENSOR_UPDATED: 'Analoge sensor bijgewerkt',
   OFFSET: 'Offset',
   FACTOR: 'Factor',
   FREQ: 'Frequentie',
@@ -56,7 +67,6 @@ const nl: Translation = {
   UNIT: 'UoM',
   STARTVALUE: 'Startwaarde',
   EDIT: 'Bewerken', // DeepL
-  SENSOR: 'Sensor',
   TEMP_SENSORS: 'Temperatuur Sensoren',
   WRITE_CMD_SENT: 'Commando verzonden', // DeepL
   EMS_BUS_WARNING: 'EMS-bus is losgekoppeld. Als deze waarschuwing na een paar seconden nog steeds verschijnt, controleer dan de instellingen en het bordprofiel', // DeepL
@@ -93,7 +103,8 @@ const nl: Translation = {
   PHY_TYPE: 'Eth PHY-type', // DeepL
   DISABLED: 'uitgeschakeld', // DeepL
   TX_MODE: 'EMS Tx-modus', // DeepL
-  EMS_BUS: '{{Bus|EMS Bus}}',
+  EMS_BUS: 'EMS Bus',
+  EMS_BUS_ID: 'EMS Bus-ID',
   HARDWARE: 'Hardware',
   LANGUAGE_ENTITIES: 'Taal (voor apparaatentiteiten)', // DeepL
   HIDE_LED: 'LED verbergen', // DeepL
@@ -151,12 +162,12 @@ const nl: Translation = {
   HELP_INFORMATION_3: 'Om een functie aan te vragen of een bug te melden', // DeepL
   HELP_INFORMATION_4: 'Vermeld je systeemgegevens als je een probleem meldt, zodat je sneller antwoord krijgt', // DeepL
   UPLOAD: 'Uploaden', // DeepL
-  DOWNLOAD: '{{D|d|d}}ownload',
+  DOWNLOAD: 'Download',
   INSTALL: 'Installeren',
   FAILED: 'mislukt',
   SYSTEM: 'Systeem',
-  LOG_OF: '{0} Logboek', // DeepL
-  STATUS_OF: '{0} Status',
+  SYSTEM_LOG: 'Systeemlogboek',
+  STATUS: 'Status',
   DOWNLOAD_UPLOAD: 'Downloaden/Uploaden', // DeepL
   CLOSE: 'Sluiten',
   COMMAND_GUEST: 'Gasten kunnen deze opdracht uitvoeren', // DeepL
@@ -207,14 +218,13 @@ const nl: Translation = {
   NETWORK_ALLOWED_HOSTS: 'Toegestane hostnamen',
   NETWORK_ALLOWED_HOSTS_HELP: 'Dit apparaat kan ook via een browser worden geopend onder verschillende namen, bijvoorbeeld ems-esp.fritz.box of een reverse proxy-naam. Het IP-adres, de hostnaam en hostnaam.local werken altijd', // DeepL
   NOT_ENABLED: 'Niet ingeschakeld', // DeepL
-  ERRORS_OF: '{0} fouten', // DeepL
+  MQTT_ERRORS: 'MQTT-fouten',
   DISCONNECT_REASON: 'Reden voor het verbreken van de verbinding', // DeepL
   MQTT_BASE_TOPIC: 'Basisonderwerp', // DeepL
   LAST_DISCONNECT: 'Laatste verbinding verbroken', // DeepL
   CONNECTED_SINCE: 'Verbonden sinds',
   ENABLE_MQTT: 'Schakel MQTT in', // DeepL
   BROKER: 'Broker',
-  CLIENT: 'Klant', // DeepL
   BASE_TOPIC: 'Basis', // DeepL
   OPTIONAL: 'optioneel',
   MQTT_FORMAT: 'Onderwerp/payload-formaat', // DeepL
@@ -283,8 +293,7 @@ const nl: Translation = {
   ADMINISTRATOR: 'Beheerder',
   GUEST: 'Gast', // DeepL
   NEW: 'Nieuw', // DeepL
-  NEW_NAME_OF: 'Nieuwe naam voor {0}', // DeepL
-  ENTITY: 'entiteit', // DeepL
+  NEW_ENTITY_NAME: 'Nieuwe entiteitnaam',
   MIN: 'min',
   MAX: 'max',
   BLOCK_NAVIGATE_1: 'Je hebt onopgeslagen wijzigingen', // DeepL
@@ -399,6 +408,12 @@ const nl: Translation = {
   DOWNLOAD_UPLOAD_1: 'Instellingen downloaden en uploaden', // DeepL
   MODULES: 'Module',
   MODULES_1: 'Externe modules in- of uitschakelen', // DeepL
+  NETWORK_DESC: 'Wi-Fi, ethernet en hostnaam',
+  AP_DESC: 'Eigen hotspot voor installatie en noodtoegang',
+  MQTT_DESC: 'Broker, topics en discovery',
+  APPLICATION_DESC: 'EMS-bus, board, sensoren en opmaak',
+  NTP_DESC: 'Tijdserver en tijdzone',
+  FIRMWARE_DESC: 'Versie, updates en herstel',
   MODULES_UPDATED: 'Modules bijgewerkt', // DeepL
   MODULES_NONE: 'Er zijn geen externe modules gedetecteerd', // DeepL
   RENAME: 'Hernoemen',
@@ -407,9 +422,9 @@ const nl: Translation = {
   SERVICES: 'Diensten', // DeepL
   ALLVALUES: 'Alle waarden', // DeepL
   WAIT_FIRMWARE: 'De firmware wordt geüpload en geïnstalleerd', // DeepL
-  INSTALL_VERSION: 'Dit wordt versie {0} van {1}', // DeepL
+  INSTALL_VERSION: 'Dit installeert versie {0}',
   UPDATE_AVAILABLE: 'update beschikbaar',
-  LATEST_VERSION: 'Je gebruikt de nieuwste firmwareversie {0}', // DeepL
+  LATEST_VERSION: 'Je gebruikt de nieuwste firmwareversie ({0})',
   PLEASE_WAIT: 'Even geduld a.u.b.', // DeepL
   RESTARTING_PRE: 'Opstarten', // DeepL
   RESTARTING_POST: 'Voorbereiding',

@@ -133,11 +133,11 @@ const DevicesDialog = ({
       ? LL.EDIT_SCHEDULE()
       : writeable
         ? LL.CHANGE_VALUE()
-        : LL.VALUE(0);
+        : LL.VALUE();
 
   const dv = editItem;
   const error = fieldErrors?.v?.[0]?.message;
-  const label = LL.VALUE(0);
+  const label = LL.VALUE();
   const range =
     dv.m !== undefined && dv.x !== undefined ? `${dv.m} → ${dv.x}` : undefined;
   const value = typeof dv.v === 'string' || typeof dv.v === 'number' ? dv.v : '';

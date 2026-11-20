@@ -9,7 +9,12 @@ const pl: BaseTranslation = {
   SIGN_OUT: 'Wyloguj się',
   USERNAME: '{{Użytkownik|Nazwa użytkownika|}}',
   PASSWORD: 'Hasło',
-  SETTINGS_OF: '{0} Ustawienia', // DeepL
+  APPLICATION_SETTINGS: 'Ustawienia aplikacji',
+  AP_SETTINGS: 'Ustawienia punktu dostępowego',
+  NETWORK_SETTINGS: 'Ustawienia sieci',
+  NTP_SETTINGS: 'Ustawienia NTP',
+  MQTT_SETTINGS: 'Ustawienia MQTT',
+  EMS_BUS_SETTINGS: 'Ustawienia magistrali EMS',
   HELP: 'Pomoc',
   LOGGED_IN: 'Zalogowano się jako {name}', // DeepL
   PLEASE_SIGNIN: 'Zaloguj się, aby kontynuować', // DeepL
@@ -24,13 +29,17 @@ const pl: BaseTranslation = {
   ENTITIES: 'encj{{i|a|e|e|i}}',
   EXPORT: 'Eksportuj',
   FAVORITES: "Ulubione",
-  ID_OF: 'ID {0}',
+  CLIENT_ID: 'ID klienta',
+  DEVICE_ID: 'ID urządzenia',
+  PRODUCT_ID: 'ID produktu',
+  ENTITY_ID: 'ID encji',
+  SENSOR_ID: 'ID czujnika',
+  TYPE_ID: 'ID typu',
   DEVICE: 'urządzenia',
-  PRODUCT: 'Produkt', // DeepL
   BRAND: 'Marka',
   VERSION: 'Wersja',
   ENTITY_NAME: '{{N|n|}}azwa encji',
-  VALUE: '{{W|w|w}}artość',
+  VALUE: 'Wartość',
   DEVICES: 'Urządzenia',
   SENSORS: 'Czujniki',
   AUTOMATION: 'Automatyzacja',
@@ -45,10 +54,12 @@ const pl: BaseTranslation = {
   RESET: 'Resetuj',
   PROBLEM_UPDATING: 'Problem z aktualizacją', // DeepL
   PROBLEM_LOADING: 'Problem z ładowaniem', // DeepL
-  ANALOG_SENSOR: '{{u|u||ustawienia u|ustawień u}}rządzeni{{a podłączonego do EMS-ESP|e||a podłączonego do EMS-ESP|a podłączonego do EMS-ESP}}',
   ANALOG_SENSORS: 'Urządzenia podłączone do EMS-ESP',
   SETTINGS: '{{U|u|}}stawienia',
-  UPDATED_OF: 'Zaktualizowano {0}', // DeepL
+  SETTINGS_UPDATED: 'Zaktualizowano ustawienia',
+  NAME_UPDATED: 'Zaktualizowano nazwę',
+  SENSOR_UPDATED: 'Zaktualizowano czujnik',
+  ANALOG_SENSOR_UPDATED: 'Zaktualizowano czujnik analogowy',
   OFFSET: 'Przesunięcie', // DeepL
   FACTOR: 'Czynnik', // DeepL
   FREQ: 'Częstotliwość',
@@ -56,7 +67,6 @@ const pl: BaseTranslation = {
   UNIT: 'Jednostka miary', // DeepL
   STARTVALUE: 'Wartość początkowa',
   EDIT: 'Edytuj', // DeepL
-  SENSOR: '{{c|ustawienia c||ustawień c|}}zujnika',
   TEMP_SENSORS: 'Czujniki temperatury 1-Wire®',
   WRITE_CMD_SENT: 'Wysłano polecenie', // DeepL
   EMS_BUS_WARNING: 'Rozłączono magistralę EMS. Jeśli to ostrzeżenie nadal się pojawia po kilku sekundach, sprawdź ustawienia i profil płyty.', // DeepL
@@ -93,7 +103,8 @@ const pl: BaseTranslation = {
   PHY_TYPE: 'Typ Eth PHY', // DeepL
   DISABLED: '{{wyłączono|brak|}}',
   TX_MODE: 'Tryb EMS Tx', // DeepL
-  EMS_BUS: '{{magistrali EMS|na magistrali|}}',
+  EMS_BUS: 'Magistrala EMS',
+  EMS_BUS_ID: 'ID magistrali EMS',
   HARDWARE: 'Sprzęt', // DeepL
   LANGUAGE_ENTITIES: 'Język (dla elementów urządzeń)', // DeepL
   HIDE_LED: 'Ukryj diodę LED', // DeepL
@@ -151,12 +162,12 @@ const pl: BaseTranslation = {
   HELP_INFORMATION_3: 'Aby zgłosić prośbę o dodanie funkcji lub zgłosić błąd', // DeepL
   HELP_INFORMATION_4: 'Podaj informacje o swoim systemie podczas zgłaszania problemu, aby uzyskać szybszą odpowiedź', // DeepL
   UPLOAD: 'Prześlij', // DeepL
-  DOWNLOAD: '{{P|p||P}}obier{{anie|z||z}}',
+  DOWNLOAD: 'Pobieranie',
   INSTALL: 'Zainstaluj', // DeepL
   FAILED: 'nie powiodł{{o|a|}} się!',
   SYSTEM: '{{S|s||s}}yste{{m|mu||mowy}}',
-  LOG_OF: '{0} Dziennik', // DeepL
-  STATUS_OF: '{0} Stan', // DeepL
+  SYSTEM_LOG: 'Dziennik systemowy',
+  STATUS: 'Stan',
   DOWNLOAD_UPLOAD: 'Pobierz/Prześlij', // DeepL
   CLOSE: 'Zamknij',
   COMMAND_GUEST: 'Goście mogą wykonać tę komendę', // DeepL
@@ -207,14 +218,13 @@ const pl: BaseTranslation = {
   NETWORK_ALLOWED_HOSTS: 'Dopuszczalne nazwy hostów', // DeepL
   NETWORK_ALLOWED_HOSTS_HELP: 'Dodatkowe nazwy, pod którymi urządzenie to można otworzyć w przeglądarce, to na przykład ems-esp.fritz.box lub nazwa odwrotnego serwera proxy. Jego adres IP, nazwa hosta oraz nazwa hosta.local zawsze działają', // DeepL
   NOT_ENABLED: 'Nie włączono', // DeepL
-  ERRORS_OF: '{0} błędów', // DeepL
+  MQTT_ERRORS: 'Błędy MQTT',
   DISCONNECT_REASON: 'Przyczyna odłączenia', // DeepL
   MQTT_BASE_TOPIC: 'Temat podstawowy', // DeepL
   LAST_DISCONNECT: 'Ostatnie odłączenie', // DeepL
   CONNECTED_SINCE: 'Podłączony od', // DeepL
   ENABLE_MQTT: 'Włącz MQTT', // DeepL
   BROKER: 'Broker', // DeepL
-  CLIENT: 'Klient', // DeepL
   BASE_TOPIC: 'Podstawa', // DeepL
   OPTIONAL: 'opcjonalnie', // DeepL
   MQTT_FORMAT: 'Format tematu/danych użytkowych', // DeepL
@@ -283,8 +293,7 @@ const pl: BaseTranslation = {
   ADMINISTRATOR: 'Administrator', // DeepL
   GUEST: 'Gość', // DeepL
   NEW: 'nowe{{go|j|}}',
-  NEW_NAME_OF: 'Nowa nazwa {0}',
-  ENTITY: 'entity', // DeepL
+  NEW_ENTITY_NAME: 'Nowa nazwa encji',
   MIN: 'min', // DeepL
   MAX: 'max', // DeepL
   BLOCK_NAVIGATE_1: 'Masz niezapisane zmiany', // DeepL
@@ -399,6 +408,12 @@ const pl: BaseTranslation = {
   DOWNLOAD_UPLOAD_1: 'Pobieranie i wysyłanie ustawień', // DeepL
   MODULES: 'Moduł',
   MODULES_1: 'Włączanie lub wyłączanie modułów zewnętrznych', // DeepL
+  NETWORK_DESC: 'Wi-Fi, Ethernet i nazwa hosta',
+  AP_DESC: 'Własny hotspot do konfiguracji i dostępu awaryjnego',
+  MQTT_DESC: 'Broker, tematy i wykrywanie',
+  APPLICATION_DESC: 'Magistrala EMS, płytka, czujniki i formatowanie',
+  NTP_DESC: 'Serwer czasu i strefa czasowa',
+  FIRMWARE_DESC: 'Wersja, aktualizacje i odzyskiwanie',
   MODULES_UPDATED: 'Zaktualizowane moduły', // DeepL
   MODULES_NONE: 'Nie wykryto żadnych modułów zewnętrznych', // DeepL
   RENAME: 'Zmień nazwę',
@@ -407,9 +422,9 @@ const pl: BaseTranslation = {
   SERVICES: 'Usługi',
   ALLVALUES: 'Wszystkie wartości',
   WAIT_FIRMWARE: 'Trwa przesyłanie i instalacja oprogramowania sprzętowego', // DeepL
-  INSTALL_VERSION: 'To będzie wersja {0} {1}', // DeepL
+  INSTALL_VERSION: 'Zostanie zainstalowana wersja {0}',
   UPDATE_AVAILABLE: 'dostępna aktualizacja', // DeepL
-  LATEST_VERSION: 'Korzystasz z najnowszej wersji oprogramowania sprzętowego {0}', // DeepL
+  LATEST_VERSION: 'Korzystasz z najnowszej wersji oprogramowania sprzętowego ({0})',
   PLEASE_WAIT: 'Proszę czekać',
   RESTARTING_PRE: 'Uruchamianie',
   RESTARTING_POST: 'Przygotowanie',

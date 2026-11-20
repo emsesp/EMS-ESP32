@@ -30,7 +30,7 @@ const NTPStatus = () => {
       icon="schedule"
       title={`NTP ${text}`}
       text={enabled ? data.server : undefined}
-      settings={{ to: '/settings/ntp', label: LL.SETTINGS_OF('NTP') }}
+      settings={{ to: '/settings/ntp', label: LL.NTP_SETTINGS() }}
       rows={[
         enabled && { label: LL.NTP_SERVER(), value: data.server },
         { label: LL.LOCAL_TIME(0), value: formatDateTime(data.local_time) },
