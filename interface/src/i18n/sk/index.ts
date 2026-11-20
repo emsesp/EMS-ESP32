@@ -9,7 +9,12 @@ const sk: Translation = {
   SIGN_OUT: 'Odhlásiť sa',
   USERNAME: 'Používateľské meno', // DeepL
   PASSWORD: 'Heslo',
-  SETTINGS_OF: '{0} Nastavenia',
+  APPLICATION_SETTINGS: 'Nastavenia aplikácie',
+  AP_SETTINGS: 'Nastavenia prístupového bodu',
+  NETWORK_SETTINGS: 'Nastavenia siete',
+  NTP_SETTINGS: 'Nastavenia NTP',
+  MQTT_SETTINGS: 'Nastavenia MQTT',
+  EMS_BUS_SETTINGS: 'Nastavenia zbernice EMS',
   HELP: 'Pomoc',
   LOGGED_IN: 'Prihlásený ako {name}',
   PLEASE_SIGNIN: 'Prihláste sa, prosím, aby ste mohli pokračovať', // DeepL
@@ -24,13 +29,17 @@ const sk: Translation = {
   ENTITIES: 'entity',
   EXPORT: 'Export',
   FAVORITES: "Obľúbené",
-  ID_OF: 'ID {0}', // DeepL
+  CLIENT_ID: 'ID klienta',
+  DEVICE_ID: 'ID zariadenia',
+  PRODUCT_ID: 'ID produktu',
+  ENTITY_ID: 'ID entity',
+  SENSOR_ID: 'ID snímača',
+  TYPE_ID: 'ID typu',
   DEVICE: 'Zariadenie',
-  PRODUCT: 'Produkt',
   BRAND: 'Značka',
   VERSION: 'Verzia',
   ENTITY_NAME: 'Názov entity',
-  VALUE: '{{hodnota|Hodnota}}',
+  VALUE: 'Hodnota',
   DEVICES: 'Zariadenia',
   SENSORS: 'Snímače',
   AUTOMATION: 'Automatizácia',
@@ -45,10 +54,12 @@ const sk: Translation = {
   RESET: 'Resetovať', // DeepL
   PROBLEM_UPDATING: 'Problém s aktualizáciou',
   PROBLEM_LOADING: 'Problém s načítaním',
-  ANALOG_SENSOR: 'Analógové snímače', // DeepL
   ANALOG_SENSORS: 'Analógové snímače',
   SETTINGS: 'Nastavenia',
-  UPDATED_OF: '{0} aktualizované', // DeepL
+  SETTINGS_UPDATED: 'Nastavenia aktualizované',
+  NAME_UPDATED: 'Názov aktualizovaný',
+  SENSOR_UPDATED: 'Snímač aktualizovaný',
+  ANALOG_SENSOR_UPDATED: 'Analógový snímač aktualizovaný',
   OFFSET: 'Posun', // DeepL
   FACTOR: 'Faktor',
   FREQ: 'Frekvencia',
@@ -56,7 +67,6 @@ const sk: Translation = {
   UNIT: 'UoM',
   STARTVALUE: 'Počiatočná hodnota',
   EDIT: 'Upraviť', // DeepL
-  SENSOR: 'Snímač',
   TEMP_SENSORS: 'Snímače teploty',
   WRITE_CMD_SENT: 'Odoslaný príkaz', // DeepL
   EMS_BUS_WARNING: 'Zbernica EMS je odpojená. Ak toto varovanie pretrváva aj po niekoľkých sekundách, skontrolujte prosím nastavenia a profil dosky.', // DeepL
@@ -93,7 +103,8 @@ const sk: Translation = {
   PHY_TYPE: 'Typ Eth PHY', // DeepL
   DISABLED: 'vypnuté', // DeepL
   TX_MODE: 'Režim EMS Tx', // DeepL
-  EMS_BUS: '{{Bus|EMS Bus}}',
+  EMS_BUS: 'EMS Bus',
+  EMS_BUS_ID: 'ID EMS Bus',
   HARDWARE: 'Hardvér', // DeepL
   LANGUAGE_ENTITIES: 'Jazyk (pre entity zariadení)', // DeepL
   HIDE_LED: 'Skryť LED',
@@ -151,12 +162,12 @@ const sk: Translation = {
   HELP_INFORMATION_3: 'Ak chcete požiadať o novú funkciu alebo nahlásiť chybu', // DeepL
   HELP_INFORMATION_4: 'Pri hlásení problému uveďte informácie o vašom systéme, aby sme mohli rýchlejšie reagovať', // DeepL
   UPLOAD: 'Nahrať',
-  DOWNLOAD: '{{S|s|s}}tiahnuť',
+  DOWNLOAD: 'Stiahnuť',
   INSTALL: 'Inštalácia', // DeepL
   FAILED: 'neúspešné', // DeepL
   SYSTEM: 'Systém',
-  LOG_OF: '{0} Protokol', // DeepL
-  STATUS_OF: 'Stav {0}', // DeepL
+  SYSTEM_LOG: 'Systémový protokol',
+  STATUS: 'Stav',
   DOWNLOAD_UPLOAD: 'Stiahnuť/Nahrať',
   CLOSE: 'Zatvoriť',
   COMMAND_GUEST: 'Hostia môžu spustiť tento príkaz',
@@ -207,14 +218,13 @@ const sk: Translation = {
   NETWORK_ALLOWED_HOSTS: 'Povolené názvy hostiteľov', // DeepL
   NETWORK_ALLOWED_HOSTS_HELP: 'Toto zariadenie je možné otvoriť v prehliadači aj pod inými názvami, napríklad EMS-ESP.fritz.box alebo názov reverzného proxy servera. Jeho IP adresa, názov hostiteľa a názov hostiteľa.local vždy fungujú', // DeepL
   NOT_ENABLED: 'Nie je povolené',
-  ERRORS_OF: '{0} chýb', // DeepL
+  MQTT_ERRORS: 'Chyby MQTT',
   DISCONNECT_REASON: 'Dôvod odpojenia',
   MQTT_BASE_TOPIC: 'Základná téma',
   LAST_DISCONNECT: 'Posledné odpojenie',
   CONNECTED_SINCE: 'Pripojené od',
   ENABLE_MQTT: 'Aktivujte MQTT', // DeepL
   BROKER: 'Broker',
-  CLIENT: 'Klient',
   BASE_TOPIC: 'Základ', // DeepL
   OPTIONAL: 'voliteľné',
   MQTT_FORMAT: 'Formát témy/užitočného obsahu', // DeepL
@@ -283,8 +293,7 @@ const sk: Translation = {
   ADMINISTRATOR: 'Správca', // DeepL
   GUEST: 'Hosť',
   NEW: 'Nové', // DeepL
-  NEW_NAME_OF: 'Nové meno {0}', // DeepL
-  ENTITY: 'entita', // DeepL
+  NEW_ENTITY_NAME: 'Nový názov entity',
   MIN: 'min',
   MAX: 'max',
   BLOCK_NAVIGATE_1: 'Máte neuložené zmeny',
@@ -399,6 +408,12 @@ const sk: Translation = {
   DOWNLOAD_UPLOAD_1: 'Stiahnutie a nahratie nastavení', // DeepL
   MODULES: 'Moduly',
   MODULES_1: 'Aktivácia alebo deaktivácia externých modulov', // DeepL
+  NETWORK_DESC: 'Wi-Fi, Ethernet a názov hostiteľa',
+  AP_DESC: 'Vlastný hotspot na nastavenie a záložný prístup',
+  MQTT_DESC: 'Broker, témy a discovery',
+  APPLICATION_DESC: 'Zbernica EMS, doska, snímače a formátovanie',
+  NTP_DESC: 'Časový server a časové pásmo',
+  FIRMWARE_DESC: 'Verzia, aktualizácie a obnova',
   MODULES_UPDATED: 'Aktualizované moduly',
   MODULES_NONE: 'Neboli zistené žiadne externé moduly',
   RENAME: 'Pomenovať', // DeepL
@@ -407,9 +422,9 @@ const sk: Translation = {
   SERVICES: 'Služby',
   ALLVALUES: 'Všetky hodnoty',
   WAIT_FIRMWARE: 'Firmware sa nahráva a inštaluje', // DeepL
-  INSTALL_VERSION: 'Toto bude verzia {0} {1}', // DeepL
+  INSTALL_VERSION: 'Týmto sa nainštaluje verzia {0}',
   UPDATE_AVAILABLE: 'k dispozícii je aktualizácia', // DeepL
-  LATEST_VERSION: 'Používate najnovšiu verziu firmvéru {0}', // DeepL
+  LATEST_VERSION: 'Používate najnovšiu verziu firmvéru ({0})',
   PLEASE_WAIT: 'Prosím, počkajte', // DeepL
   RESTARTING_PRE: 'Spúšťanie', // DeepL
   RESTARTING_POST: 'Príprava',

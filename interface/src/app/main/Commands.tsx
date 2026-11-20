@@ -124,7 +124,7 @@ const Commands = () => {
               <tr>
                 <SortHeader {...sort.header('name')}>{LL.NAME(0)}</SortHeader>
                 <SortHeader {...sort.header('cmd')}>{LL.COMMAND(0)}</SortHeader>
-                <SortHeader {...sort.header('value')}>{LL.VALUE(0)}</SortHeader>
+                <SortHeader {...sort.header('value')}>{LL.VALUE()}</SortHeader>
                 <SortHeader {...sort.header('guest')}>{LL.WHO_CAN_RUN()}</SortHeader>
                 <th />
               </tr>
@@ -147,7 +147,7 @@ const Commands = () => {
                   <td data-label={LL.COMMAND(0)} className="mono lb">
                     {item.cmd}
                   </td>
-                  <td data-label={LL.VALUE(0)} className="mono">
+                  <td data-label={LL.VALUE()} className="mono">
                     {item.value || <span className="muted">-</span>}
                   </td>
                   <td data-label={LL.WHO_CAN_RUN()}>
@@ -243,7 +243,7 @@ const Commands = () => {
                 placeholder="thermostat/hc1/seltemp"
                 {...f.text('cmd')}
               />
-              <TextField label={LL.VALUE(0)} mono fullWidth {...f.text('value')} />
+              <TextField label={LL.VALUE()} mono fullWidth {...f.text('value')} />
               <Switch label={LL.COMMAND_GUEST()} {...f.check('guest')} />
             </>
           )}

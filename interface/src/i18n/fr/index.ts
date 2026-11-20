@@ -9,11 +9,16 @@ const fr: Translation = {
   SIGN_OUT: 'Se déconnecter',
   USERNAME: "Nom d'utilisateur",
   PASSWORD: 'Mot de passe',
-  SETTINGS_OF: '{0} Paramètres', // DeepL
+  APPLICATION_SETTINGS: 'Paramètres de l\'application',
+  AP_SETTINGS: 'Paramètres du point d\'accès',
+  NETWORK_SETTINGS: 'Paramètres réseau',
+  NTP_SETTINGS: 'Paramètres NTP',
+  MQTT_SETTINGS: 'Paramètres MQTT',
+  EMS_BUS_SETTINGS: 'Paramètres du bus EMS',
   HELP: 'Aide',
   LOGGED_IN: 'Connecté en tant que {name}',
   PLEASE_SIGNIN: 'Veuillez vous connecter pour continuer',
-  UPLOAD_SUCCESSFUL: 'Téléchargement réussi', // DeepL
+  UPLOAD_SUCCESSFUL: 'Téléversement réussi',
   DOWNLOAD_SUCCESSFUL: 'Téléchargement réussi', // DeepL
   INVALID_LOGIN: 'Nom d\'utilisateur ou mot de passe incorrect', // DeepL
   NETWORK: 'Réseau',
@@ -24,9 +29,13 @@ const fr: Translation = {
   ENTITIES: 'entités',
   EXPORT: 'Exporter',
   FAVORITES: "Favoris",
-  ID_OF: 'ID {0}',
+  CLIENT_ID: 'ID client',
+  DEVICE_ID: 'ID de l\'appareil',
+  PRODUCT_ID: 'ID du produit',
+  ENTITY_ID: 'ID de l\'entité',
+  SENSOR_ID: 'ID du capteur',
+  TYPE_ID: 'ID du type',
   DEVICE: 'Appareil',
-  PRODUCT: 'Produit',
   BRAND: 'Marque',
   VERSION: 'Version',
   ENTITY_NAME: "Nom de l'entité",
@@ -45,10 +54,12 @@ const fr: Translation = {
   RESET: 'Réinitialiser',
   PROBLEM_UPDATING: 'Problème de mise à jour', // DeepL
   PROBLEM_LOADING: 'Problème de chargement', // DeepL
-  ANALOG_SENSOR: 'Capteur analogique',
   ANALOG_SENSORS: 'Capteurs analogiques',
   SETTINGS: 'Paramètres',
-  UPDATED_OF: '{0} mis à jour',
+  SETTINGS_UPDATED: 'Paramètres mis à jour',
+  NAME_UPDATED: 'Nom mis à jour',
+  SENSOR_UPDATED: 'Capteur mis à jour',
+  ANALOG_SENSOR_UPDATED: 'Capteur analogique mis à jour',
   OFFSET: 'Décalage', // DeepL
   FACTOR: 'Facteur',
   FREQ: 'Fréquence',
@@ -56,7 +67,6 @@ const fr: Translation = {
   UNIT: 'UoM', // DeepL
   STARTVALUE: 'Valeur initiale', // DeepL
   EDIT: 'Modifier', // DeepL
-  SENSOR: 'Capteur',
   TEMP_SENSORS: 'Capteurs de température',
   WRITE_CMD_SENT: 'Commande « Write » envoyée', // DeepL
   EMS_BUS_WARNING: 'Bus EMS déconnecté. Si cet avertissement persiste après quelques secondes, veuillez vérifier les paramètres et le profil de la carte.', // DeepL
@@ -93,7 +103,8 @@ const fr: Translation = {
   PHY_TYPE: 'Type de module PHY Eth', // DeepL
   DISABLED: 'désactivé',
   TX_MODE: 'Mode EMS Tx', // DeepL
-  EMS_BUS: '{{Bus|EMS Bus}}',
+  EMS_BUS: 'EMS Bus',
+  EMS_BUS_ID: 'ID EMS Bus',
   HARDWARE: 'Matériel', // DeepL
   LANGUAGE_ENTITIES: 'Langue (pour les entités d\'appareils)', // DeepL
   HIDE_LED: 'Masquer la LED', // DeepL
@@ -150,14 +161,14 @@ const fr: Translation = {
   HELP_INFORMATION_2: 'Pour participer au chat en direct de la communauté, rejoignez notre serveur Discord', // DeepL
   HELP_INFORMATION_3: 'Pour demander une fonctionnalité ou signaler un bug', // DeepL
   HELP_INFORMATION_4: 'Veuillez indiquer les informations relatives à votre système lorsque vous signalez un problème afin d\'obtenir une réponse plus rapide', // DeepL
-  UPLOAD: 'Télécharger', // DeepL
-  DOWNLOAD: '{{D|d|d}}ownload',
+  UPLOAD: 'Téléverser',
+  DOWNLOAD: 'Télécharger',
   INSTALL: 'Installer',
   FAILED: 'Échec', // DeepL
   SYSTEM: 'Système',
-  LOG_OF: '{0} Journal', // DeepL
-  STATUS_OF: '{0} État', // DeepL
-  DOWNLOAD_UPLOAD: 'Télécharger/Mettre en ligne', // DeepL
+  SYSTEM_LOG: 'Journal système',
+  STATUS: 'État',
+  DOWNLOAD_UPLOAD: 'Télécharger/Téléverser',
   CLOSE: 'Fermer',
   COMMAND_GUEST: 'Les invités peuvent exécuter cette commande',
   TOKENS_RESET: 'Cette mise à jour signe les jetons d\'accès à l\'aide d\'une nouvelle clé d\'appareil ; par conséquent, les jetons d\'accès à l\'API existants ne fonctionnent plus. Créez une clé API pour chaque intégration utilisant l\'API, telle que Home Assistant, et utilisez-la à la place de l\'ancien jeton.', // DeepL
@@ -207,14 +218,13 @@ const fr: Translation = {
   NETWORK_ALLOWED_HOSTS: 'Noms d\'hôtes autorisés', // DeepL
   NETWORK_ALLOWED_HOSTS_HELP: 'Autres noms : cet appareil peut être ouvert dans un navigateur, par exemple sous le nom « ems-esp.fritz.box » ou sous le nom d’un proxy inverse. Son adresse IP, son nom d’hôte et son nom d’hôte.local fonctionnent toujours.', // DeepL
   NOT_ENABLED: 'Non activé',
-  ERRORS_OF: '{0} erreurs', // DeepL
+  MQTT_ERRORS: 'Erreurs MQTT',
   DISCONNECT_REASON: 'Motif de la déconnexion', // DeepL
   MQTT_BASE_TOPIC: 'Rubrique de base', // DeepL
   LAST_DISCONNECT: 'Dernière déconnexion',
   CONNECTED_SINCE: 'Connecté depuis',
   ENABLE_MQTT: 'Activer MQTT', // DeepL
   BROKER: 'Broker',
-  CLIENT: 'Client',
   BASE_TOPIC: 'Base',
   OPTIONAL: 'facultatif', // DeepL
   MQTT_FORMAT: 'Format du sujet/de la charge utile', // DeepL
@@ -283,13 +293,12 @@ const fr: Translation = {
   ADMINISTRATOR: 'Administrateur', // DeepL
   GUEST: 'Invité',
   NEW: 'Nouveau',
-  NEW_NAME_OF: 'Nouveau nom {0}', // DeepL
-  ENTITY: 'entité',
+  NEW_ENTITY_NAME: 'Nouveau nom de l\'entité',
   MIN: 'min',
   MAX: 'max',
   BLOCK_NAVIGATE_1: 'Vous avez des modifications non enregistrées',
   BLOCK_NAVIGATE_2: 'Si vous accédez à une autre page, vos modifications non enregistrées seront perdues. Êtes-vous sûr de vouloir quitter cette page ?', // DeepL
-  UPLOAD_ABORTED: 'Téléchargement interrompu', // DeepL
+  UPLOAD_ABORTED: 'Téléversement interrompu',
   BLOCK_BUSY_1: 'En cours de rédaction', // DeepL
   BLOCK_BUSY_2: 'Si vous quittez cette page maintenant, l\'opération sera interrompue. Êtes-vous sûr de vouloir quitter cette page ?', // DeepL
   DISCARD: 'Ignorer', // DeepL
@@ -396,9 +405,15 @@ const fr: Translation = {
   ACTIVELOW: 'Actif bas',
   UNCHANGED: 'Inchangé',
   SECURITY_1: 'Ajouter ou supprimer des utilisateurs',
-  DOWNLOAD_UPLOAD_1: 'Téléchargement et chargement des paramètres', // DeepL
+  DOWNLOAD_UPLOAD_1: 'Télécharger et téléverser les paramètres',
   MODULES: 'Module',
   MODULES_1: 'Activer ou désactiver des modules externes', // DeepL
+  NETWORK_DESC: 'Wi-Fi, Ethernet et nom d\'hôte',
+  AP_DESC: 'Point d\'accès intégré pour la configuration et l\'accès de secours',
+  MQTT_DESC: 'Broker, topics et découverte',
+  APPLICATION_DESC: 'Bus EMS, carte, capteurs et formatage',
+  NTP_DESC: 'Serveur de temps et fuseau horaire',
+  FIRMWARE_DESC: 'Version, mises à jour et récupération',
   MODULES_UPDATED: 'Modules mis à jour',
   MODULES_NONE: 'Aucun module externe détecté',
   RENAME: 'Renommer',
@@ -406,10 +421,10 @@ const fr: Translation = {
   VIEW_LOG: 'Consultez le journal pour diagnostiquer les problèmes', // DeepL
   SERVICES: 'Services',
   ALLVALUES: 'Toutes les valeurs',
-  WAIT_FIRMWARE: 'Le micrologiciel est en cours de téléchargement et d\'installation', // DeepL
-  INSTALL_VERSION: 'Cela concernera la version {0} {1}', // DeepL
+  WAIT_FIRMWARE: 'Le micrologiciel est en cours de téléversement et d\'installation',
+  INSTALL_VERSION: 'Cela installera la version {0}',
   UPDATE_AVAILABLE: 'Mise à jour disponible', // DeepL
-  LATEST_VERSION: 'Vous utilisez la dernière version du micrologiciel {0}', // DeepL
+  LATEST_VERSION: 'Vous utilisez la dernière version du micrologiciel ({0})',
   PLEASE_WAIT: 'Veuillez patienter',
   RESTARTING_PRE: 'Démarrage',
   RESTARTING_POST: 'Préparation',
@@ -442,7 +457,7 @@ const fr: Translation = {
   INTERNET_CONNECTION_CHECK: 'Vérification en ligne des versions disponibles', // DeepL
   UPLOAD_BACKUP_TEXT: 'Cliquez pour sélectionner, ou déposez un fichier de sauvegarde (.json) ici', // DeepL
   UPLOAD_FIRMWARE_TEXT: 'Cliquez pour sélectionner ou déposez ici un fichier de micrologiciel au format .bin/.md5', // DeepL
-  UPLOAD_MD5_RECEIVED: 'Digest reçu, veuillez maintenant télécharger le fichier .bin du micrologiciel', // DeepL
+  UPLOAD_MD5_RECEIVED: 'Digest reçu, téléversez maintenant le fichier .bin du micrologiciel',
   UPLOAD_MD5_MATCHED: 'Correspondances MD5, installation du micrologiciel…', // DeepL
   UPLOAD_NOT_OFFICIAL: 'Il ne s\'agit pas d\'une version officielle d\'EMS-ESP. N\'installez que des micrologiciels auxquels vous faites confiance', // DeepL
   UPLOAD_NOT_OFFICIAL_HELP: 'À propos des versions officielles et personnalisées',
@@ -572,10 +587,10 @@ const fr: Translation = {
   FW_RELEASE_NOTES: 'Notes de mise à jour', // DeepL
   FW_UPDATES_OFFLINE: 'Impossible de vérifier en ligne la disponibilité de nouvelles versions. EMS-ESP a besoin d\'une connexion Internet pour cela.', // DeepL
   FW_RESTART_RESET: 'Redémarrage et réinitialisation',
-  FW_RECOVERY_TEXT: 'Redémarrer dans l’application de récupération ? Elle se connecte à votre réseau et lance également son propre point d’accès, sur lequel vous pouvez télécharger le micrologiciel.', // DeepL
+  FW_RECOVERY_TEXT: 'Redémarrer dans l’application de récupération ? Elle se connecte à votre réseau et lance également son propre point d’accès, sur lequel vous pouvez téléverser le micrologiciel.',
   FW_SIZE: 'Taille',
   FW_INSTALL_DATE: 'Installé sur', // DeepL
-  FW_UPLOAD_FAILED: 'Échec du téléchargement : type de fichier incorrect ou micrologiciel destiné à une autre carte', // DeepL
+  FW_UPLOAD_FAILED: 'Échec du téléversement : type de fichier incorrect ou micrologiciel destiné à une autre carte',
   FILE_TYPE_INVALID: 'Ce type de fichier n\'est pas pris en charge, veuillez choisir un fichier {types}', // DeepL
   WHO_CAN_RUN: 'Qui peut exécuter', // DeepL
   CMD_NONE: 'Aucune commande trouvée',
@@ -614,7 +629,7 @@ const fr: Translation = {
   EVERY_DAY: 'Chaque jour', // DeepL
   SCHEDULER_NO_COMMANDS: 'Commencez par ajouter une commande sur la page « Commandes »', // DeepL
   DU_SETTINGS: 'Paramètres d\'EMS-ESP', // DeepL
-  DU_SETTINGS_TEXT: 'Sauvegarde des paramètres d’EMS-ESP : réseau, MQTT, personnalisation, Scheduler, entités et modules personnalisés. Le chargement d’un fichier de paramètres ou de sauvegarde redémarre EMS-ESP.', // DeepL
+  DU_SETTINGS_TEXT: 'Sauvegarde des paramètres d’EMS-ESP : réseau, MQTT, personnalisation, Scheduler, entités et modules personnalisés. Le téléversement d’un fichier de paramètres ou de sauvegarde redémarre EMS-ESP.',
   HB_TITLE: 'Paramètres de chauffage',
   HB_TEXT: 'Enregistre les valeurs actuelles de votre chaudière, de votre thermostat et des autres appareils EMS, afin que vous puissiez les rétablir ultérieurement, par exemple après le remplacement d’un appareil. Les entités et Commandes en lecture seule ne sont jamais modifiées par une restauration.', // DeepL
   HB_BACKUP: 'Sauvegarder les paramètres de chauffage',

@@ -403,7 +403,7 @@ const Gallery = () => {
           <Button
             icon="check_circle"
             color="secondary"
-            onClick={() => toast.success(LL.UPDATED_OF(LL.SETTINGS(1)))}
+            onClick={() => toast.success(LL.SETTINGS_UPDATED())}
           >
             success
           </Button>
@@ -523,7 +523,7 @@ const Gallery = () => {
             to="/ui"
             icon="list_alt"
             color="#40828f"
-            title={LL.LOG_OF(LL.SYSTEM(0))}
+            title={LL.SYSTEM_LOG()}
             text={LL.NUM_ERRORS({ num: 2 })}
             state="err"
           />
@@ -556,7 +556,7 @@ const Gallery = () => {
         </div>
         <StatRow>
           <Stat value="1" label={LL.MQTT_QUEUE()} />
-          <Stat value="3" label={LL.ERRORS_OF('MQTT')} warn />
+          <Stat value="3" label={LL.MQTT_ERRORS()} warn />
         </StatRow>
       </Sample>
 

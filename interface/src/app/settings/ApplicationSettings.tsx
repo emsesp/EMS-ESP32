@@ -321,14 +321,14 @@ const ApplicationSettings = () => {
       {
         id: 'ems',
         icon: 'swap_horiz',
-        title: LL.EMS_BUS(0),
+        title: LL.EMS_BUS(),
         desc: LL.EMS_BUS_DESC(),
         items: [
           sel('tx_mode', LL.TX_MODE(), [
             ...(data.developer_mode ? [{ value: '0', label: LL.OFF() }] : []),
             ...opts(['EMS', 'EMS+', 'HT3', LL.HARDWARE(), LL.AUTO()], 1)
           ]),
-          sel('ems_bus_id', LL.ID_OF(LL.EMS_BUS(0)), EMS_BUS_IDS),
+          sel('ems_bus_id', LL.EMS_BUS_ID(), EMS_BUS_IDS),
           sw('readonly_mode', LL.READONLY()),
           sw('write_protection', LL.WRITE_PROTECTION()),
           data.write_protection &&
@@ -481,7 +481,7 @@ const ApplicationSettings = () => {
               1
             )
           ),
-          sel('enum_format', LL.ENUM_FORMAT(), opts([LL.VALUE(5), LL.INDEX()], 1))
+          sel('enum_format', LL.ENUM_FORMAT(), opts([LL.VALUE(), LL.INDEX()], 1))
         ]
       },
       {

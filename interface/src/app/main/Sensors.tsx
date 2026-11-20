@@ -95,7 +95,7 @@ const Sensors = () => {
         offset: num(ts.o),
         is_system: ts.s
       });
-      toast.success(LL.UPDATED_OF(LL.SENSOR(1)));
+      toast.success(LL.SENSOR_UPDATED());
     } catch (error) {
       toast.error(error instanceof Error ? error.message : LL.ERROR());
     }
@@ -116,7 +116,7 @@ const Sensors = () => {
         deleted: as.d,
         is_system: as.s
       });
-      toast.success(LL.UPDATED_OF(LL.ANALOG_SENSOR(1)));
+      toast.success(LL.ANALOG_SENSOR_UPDATED());
     } catch (error) {
       toast.error(error instanceof Error ? error.message : LL.ERROR());
     }
@@ -197,7 +197,7 @@ const Sensors = () => {
                 <th>ID</th>
                 <th className="r">{LL.OFFSET()}</th>
                 <SortHeader className="r" {...tempSort.header('value')}>
-                  {LL.VALUE(0)}
+                  {LL.VALUE()}
                 </SortHeader>
               </tr>
             </thead>
@@ -223,7 +223,7 @@ const Sensors = () => {
                   >
                     {offsetText(ts)}
                   </td>
-                  <td data-label={LL.VALUE(0)} className="r num">
+                  <td data-label={LL.VALUE()} className="r num">
                     {formatValue(LL, ts.t, ts.u)}
                   </td>
                 </tr>
@@ -254,7 +254,7 @@ const Sensors = () => {
                 <SortHeader {...analogSort.header('gpio')}>GPIO</SortHeader>
                 <SortHeader {...analogSort.header('type')}>{LL.TYPE(0)}</SortHeader>
                 <SortHeader className="r" {...analogSort.header('value')}>
-                  {LL.VALUE(0)}
+                  {LL.VALUE()}
                 </SortHeader>
               </tr>
             </thead>
@@ -277,7 +277,7 @@ const Sensors = () => {
                   <td data-label={LL.TYPE(0)}>
                     <Tag kind="type">{AnalogTypeNames[as.t - 1]}</Tag>
                   </td>
-                  <td data-label={LL.VALUE(0)} className="r num">
+                  <td data-label={LL.VALUE()} className="r num">
                     {isOnOff(as)
                       ? as.v
                         ? LL.ON()

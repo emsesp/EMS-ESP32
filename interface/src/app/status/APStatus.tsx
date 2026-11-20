@@ -33,7 +33,7 @@ const APStatus = () => {
       }
       title={`${LL.ACCESS_POINT(0)}: ${text}`}
       text={data.ip_address || undefined}
-      settings={{ to: '/settings/ap', label: LL.SETTINGS_OF(LL.ACCESS_POINT(0)) }}
+      settings={{ to: '/settings/ap', label: LL.AP_SETTINGS() }}
       rows={[
         { label: LL.ADDRESS_OF('IP'), value: data.ip_address || LL.NONE() },
         { label: LL.ADDRESS_OF('MAC'), value: data.mac_address || LL.NONE() },

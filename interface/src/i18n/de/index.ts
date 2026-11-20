@@ -9,7 +9,12 @@ const de: Translation = {
   SIGN_OUT: 'Abmelden', // DeepL
   USERNAME: 'Benutzername', // DeepL
   PASSWORD: 'Passwort',
-  SETTINGS_OF: '{0}-Einstellungen', // DeepL
+  APPLICATION_SETTINGS: 'Anwendungseinstellungen',
+  AP_SETTINGS: 'Access-Point-Einstellungen',
+  NETWORK_SETTINGS: 'Netzwerkeinstellungen',
+  NTP_SETTINGS: 'NTP-Einstellungen',
+  MQTT_SETTINGS: 'MQTT-Einstellungen',
+  EMS_BUS_SETTINGS: 'EMS-Bus-Einstellungen',
   HELP: 'Hilfe',
   LOGGED_IN: 'Angemeldet als {name}', // DeepL
   PLEASE_SIGNIN: 'Bitte melden Sie sich an, um fortzufahren', // DeepL
@@ -24,13 +29,17 @@ const de: Translation = {
   ENTITIES: 'Entitäten',
   EXPORT: 'Exportieren',
   FAVORITES: "Favoriten",
-  ID_OF: 'ID {0}', // DeepL
+  CLIENT_ID: 'Client-ID',
+  DEVICE_ID: 'Geräte-ID',
+  PRODUCT_ID: 'Produkt-ID',
+  ENTITY_ID: 'Entitäts-ID',
+  SENSOR_ID: 'Sensor-ID',
+  TYPE_ID: 'Typ-ID',
   DEVICE: 'Geräte',
-  PRODUCT: 'Produkt',
   BRAND: 'Marke',
   VERSION: 'Version',
   ENTITY_NAME: 'Entitätsname',
-  VALUE: '{{wert|Wert}}',
+  VALUE: 'Wert',
   DEVICES: 'Geräte',
   SENSORS: 'Sensoren',
   AUTOMATION: 'Automatisierung',
@@ -45,10 +54,12 @@ const de: Translation = {
   RESET: 'Zurücksetzen',
   PROBLEM_UPDATING: 'Problem bei der Aktualisierung', // DeepL
   PROBLEM_LOADING: 'Problem beim Laden',
-  ANALOG_SENSOR: 'Analogsensor',
   ANALOG_SENSORS: 'Analogsensoren',
   SETTINGS: 'Einstellungen',
-  UPDATED_OF: '{0} aktualisiert', // DeepL
+  SETTINGS_UPDATED: 'Einstellungen aktualisiert',
+  NAME_UPDATED: 'Name aktualisiert',
+  SENSOR_UPDATED: 'Sensor aktualisiert',
+  ANALOG_SENSOR_UPDATED: 'Analogsensor aktualisiert',
   OFFSET: 'Versatz', // DeepL
   FACTOR: 'Faktor',
   FREQ: 'Häufigkeit', // DeepL
@@ -56,7 +67,6 @@ const de: Translation = {
   UNIT: 'Maßeinheit',
   STARTVALUE: 'Startwert',
   EDIT: 'Bearbeiten', // DeepL
-  SENSOR: 'Sensor',
   TEMP_SENSORS: 'Temperatursensoren',
   WRITE_CMD_SENT: 'Befehl „Write“ gesendet', // DeepL
   EMS_BUS_WARNING: 'EMS-Bus getrennt. Sollte diese Warnung nach einigen Sekunden weiterhin bestehen, überprüfen Sie bitte die Einstellungen und das Board-Profil.', // DeepL
@@ -88,12 +98,13 @@ const de: Translation = {
   BOARD_PROFILE: 'Board-Profil',
   CUSTOM: 'Benutzerdefiniert',
   GPIO_OF: '{0} GPIO',
-  BUTTON: 'Schaltfläche', // DeepL
+  BUTTON: 'Taster',
   TEMPERATURE: 'Temperatur',
   PHY_TYPE: 'Eth-PHY-Typ', // DeepL
   DISABLED: 'deaktiviert',
   TX_MODE: 'EMS-Tx-Modus', // DeepL
-  EMS_BUS: '{{Bus|EMS Bus}}',
+  EMS_BUS: 'EMS Bus',
+  EMS_BUS_ID: 'ID EMS Bus',
   HARDWARE: 'Hardware',
   LANGUAGE_ENTITIES: 'Sprache (für Geräte-Entitäten)', // DeepL
   HIDE_LED: 'LED ausblenden',
@@ -151,12 +162,12 @@ const de: Translation = {
   HELP_INFORMATION_3: 'Um eine Funktion anzufragen oder einen Fehler zu melden', // DeepL
   HELP_INFORMATION_4: 'Geben Sie bei der Meldung eines Problems Ihre Systeminformationen an, um eine schnellere Bearbeitung zu gewährleisten', // DeepL
   UPLOAD: 'Hochladen',
-  DOWNLOAD: '{{Herunterladen|heruntergeladen|}}',
+  DOWNLOAD: 'Herunterladen',
   INSTALL: 'Installieren',
   FAILED: 'fehlgeschlagen', // DeepL
   SYSTEM: 'System',
-  LOG_OF: '{0}-Protokoll', // DeepL
-  STATUS_OF: '{0}-Status', // DeepL
+  SYSTEM_LOG: 'Systemprotokoll',
+  STATUS: 'Status',
   DOWNLOAD_UPLOAD: 'Herunterladen/Hochladen',
   CLOSE: 'Schließen',
   COMMAND_GUEST: 'Gäste können diesen Befehl ausführen', // DeepL
@@ -207,14 +218,13 @@ const de: Translation = {
   NETWORK_ALLOWED_HOSTS: 'Zulässige Hostnamen', // DeepL
   NETWORK_ALLOWED_HOSTS_HELP: 'Diese Geräte können unter verschiedenen Namen in einem Browser aufgerufen werden, beispielsweise „ems-esp.fritz.box“ oder einem Reverse-Proxy-Namen. Ihre IP-Adresse, ihr Hostname und „hostname.local“ funktionieren stets.', // DeepL
   NOT_ENABLED: 'Nicht aktiviert',
-  ERRORS_OF: '{0} Fehler',
+  MQTT_ERRORS: 'MQTT-Fehler',
   DISCONNECT_REASON: 'Grund für die Unterbrechung', // DeepL
   MQTT_BASE_TOPIC: 'Grundlegendes Thema', // DeepL
   LAST_DISCONNECT: 'Letzte Unterbrechung', // DeepL
   CONNECTED_SINCE: 'Verbunden seit',
   ENABLE_MQTT: 'MQTT aktivieren',
   BROKER: 'Broker',
-  CLIENT: 'Auftraggeber', // DeepL
   BASE_TOPIC: 'Grundlagen', // DeepL
   OPTIONAL: 'optional', // DeepL
   MQTT_FORMAT: 'Thema/Payload-Format', // DeepL
@@ -279,12 +289,11 @@ const de: Translation = {
   NETWORK_GATEWAY: 'Gateway',
   NETWORK_SUBNET: 'Subnetzmaske', // DeepL
   NETWORK_DNS: 'DNS-Server',
-  ADDRESS_OF: 'Adresse {0}', // DeepL
+  ADDRESS_OF: '{0}-Adresse',
   ADMINISTRATOR: 'Administrator',
   GUEST: 'Gast',
   NEW: 'Neu', // DeepL
-  NEW_NAME_OF: 'Neuer Name für {0}', // DeepL
-  ENTITY: 'Entitäten', // DeepL
+  NEW_ENTITY_NAME: 'Neuer Entitätsname',
   MIN: 'min',
   MAX: 'max',
   BLOCK_NAVIGATE_1: 'Sie haben ungespeicherte Änderungen', // DeepL
@@ -399,6 +408,12 @@ const de: Translation = {
   DOWNLOAD_UPLOAD_1: 'Einstellungen herunterladen und hochladen', // DeepL
   MODULES: 'Module',
   MODULES_1: 'Externe Module aktivieren oder deaktivieren',
+  NETWORK_DESC: 'WLAN, Ethernet und Hostname',
+  AP_DESC: 'Eigener Hotspot für Einrichtung und Notfallzugriff',
+  MQTT_DESC: 'Broker, Topics und Discovery',
+  APPLICATION_DESC: 'EMS-Bus, Board, Sensoren und Formatierung',
+  NTP_DESC: 'Zeitserver und Zeitzone',
+  FIRMWARE_DESC: 'Version, Updates und Wiederherstellung',
   MODULES_UPDATED: 'Module aktualisiert',
   MODULES_NONE: 'Es wurden keine externen Module erkannt', // DeepL
   RENAME: 'Umbenennen',
@@ -407,9 +422,9 @@ const de: Translation = {
   SERVICES: 'Dienste',
   ALLVALUES: 'Alle Werte',
   WAIT_FIRMWARE: 'Die Firmware wird hochgeladen und installiert', // DeepL
-  INSTALL_VERSION: 'Dies wird {0}-Version {1}', // DeepL
+  INSTALL_VERSION: 'Dies installiert Version {0}',
   UPDATE_AVAILABLE: 'Update verfügbar', // DeepL
-  LATEST_VERSION: 'Sie verwenden die aktuellste Firmware-Version {0}', // DeepL
+  LATEST_VERSION: 'Sie verwenden die aktuellste Firmware-Version ({0})',
   PLEASE_WAIT: 'Bitte warten Sie', // DeepL
   RESTARTING_PRE: 'Systemstart', // DeepL
   RESTARTING_POST: 'Vorbereitung',

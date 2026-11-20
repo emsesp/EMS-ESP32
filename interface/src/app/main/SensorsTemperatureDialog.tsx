@@ -35,7 +35,7 @@ const SensorsTemperatureDialog = ({
       {(f) => (
         <>
           <p className="cap full">
-            {LL.ID_OF(LL.SENSOR(0))} <span className="mono lb">{item.id}</span>
+            {LL.SENSOR_ID()} <span className="mono lb">{item.id}</span>
             {item.t !== undefined && ` · ${formatValue(LL, item.t, item.u)}`}
           </p>
           <TextField label={LL.NAME(0)} fullWidth {...f.text('n')} />

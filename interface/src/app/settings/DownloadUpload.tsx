@@ -183,7 +183,7 @@ const DownloadUpload = () => {
       <ConfirmDialog
         open={confirmBackup}
         title={LL.DOWNLOAD_SYSTEM_BACKUP()}
-        label={LL.DOWNLOAD(0)}
+        label={LL.DOWNLOAD()}
         icon="download"
         onClose={closeBackup}
         onConfirm={downloadBackup}

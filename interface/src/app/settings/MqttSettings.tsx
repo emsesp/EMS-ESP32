@@ -163,7 +163,7 @@ const MqttSettings = () => {
                   {...form.text('password')}
                 />
                 <TextField
-                  label={`${LL.ID_OF(LL.CLIENT())} (${LL.OPTIONAL()})`}
+                  label={`${LL.CLIENT_ID()} (${LL.OPTIONAL()})`}
                   mono
                   {...form.text('client_id')}
                 />

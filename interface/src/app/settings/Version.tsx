@@ -683,7 +683,7 @@ const Version = () => {
                 </Button>
                 {installBinURL && (
                   <ButtonLink href={installBinURL} color="secondary" icon="download">
-                    {LL.DOWNLOAD(0)}
+                    {LL.DOWNLOAD()}
                   </ButtonLink>
                 )}
                 <Button
@@ -697,7 +697,7 @@ const Version = () => {
               </>
             }
           >
-            <p>{LL.INSTALL_VERSION(LL.INSTALL(), installTarget)}</p>
+            <p>{LL.INSTALL_VERSION(installTarget)}</p>
             {installMessage && (
               <Message level="warning" className="fw-msg">
                 {installMessage}

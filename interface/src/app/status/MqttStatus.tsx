@@ -52,11 +52,11 @@ const MqttStatus = () => {
       icon="device_hub"
       title={`MQTT ${text}`}
       text={data.host && `${data.host}:${data.port}`}
-      settings={{ to: '/settings/mqtt', label: LL.SETTINGS_OF('MQTT') }}
+      settings={{ to: '/settings/mqtt', label: LL.MQTT_SETTINGS() }}
       rows={
         data.enabled
           ? [
-              { label: LL.ID_OF(LL.CLIENT()), value: data.client_id },
+              { label: LL.CLIENT_ID(), value: data.client_id },
               data.base !== undefined && {
                 label: LL.MQTT_BASE_TOPIC(),
                 value: <span className="mono">{data.base}/</span>
@@ -86,7 +86,7 @@ const MqttStatus = () => {
           <Stat value={nf.format(data.mqtt_queued)} label={LL.MQTT_QUEUE()} />
           <Stat
             value={nf.format(data.mqtt_fails)}
-            label={LL.ERRORS_OF('MQTT')}
+            label={LL.MQTT_ERRORS()}
             warn={data.mqtt_fails > 0}
           />
           <Stat value={nf.format(data.connect_count)} label={LL.CONNECTS()} />
