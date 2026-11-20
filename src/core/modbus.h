@@ -25,7 +25,8 @@ namespace emsesp {
 
 class Modbus {
   public:
-    static const int REGISTER_BLOCK_SIZE = 1000;
+    static const int      REGISTER_BLOCK_SIZE = 1000;
+    static const uint16_t REGISTER_MAP_VERSION; // defined in modbus_entity_parameters.hpp
 
     void start(uint8_t systemServerId, uint16_t port, uint8_t max_clients, uint32_t timeout);
     void stop();

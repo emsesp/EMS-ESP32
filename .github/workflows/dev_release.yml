@@ -136,6 +136,9 @@ jobs:
             docs/dump_entities.csv
             docs/dump_telegrams.csv
             docs/Modbus-Entity-Registers.md
+            docs/Modbus-Server-IDs.md
+            docs/Modbus-Register-Blocks.md
+            docs/Modbus-System-Server.md
           if-no-files-found: error
 
   firmware:

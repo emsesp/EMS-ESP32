@@ -7,10 +7,16 @@ from pathlib import Path
 # This creates the files
 # - dump_entities.csv
 # - Modbus-Entity-Registers.md
+# - Modbus-Server-IDs.md
+# - Modbus-Register-Blocks.md
+# - Modbus-System-Server.md
 # - dump_telegrams.csv
+#
+# The Modbus*.md files are used in the emsesp.org documentation (https://github.com/emsesp/docs).
+# You can also create them manually with:
+#   cat ./docs/dump_entities.csv | python3 ./scripts/generate-modbus-register-doc.py > ./docs/Modbus-Entity-Registers.md
+#   python3 ./scripts/generate-modbus-reference-docs.py
 
-# Modbus-Entity-Registers.md is used in the emsesp.org documentation. You can also create it manually with the generate-modbus-register-doc.py script.
-# cat ./docs/dump_entities.csv | python3 ./scripts/generate-modbus-register-doc.py    # Import the streaming function from the separate module
 from run_executable import run_with_streaming_input
 
 
@@ -58,6 +64,12 @@ def main(program_path="./emsesp"):
 
     # generate the MD file
     csv_to_md(csv_file, output_file, script_file)
+
+    # generate the Modbus reference pages from the C++ enums and system server registers
+    reference_script = os.path.join("scripts", "generate-modbus-reference-docs.py")
+    python_exe = get_python_executable()
+    print(f"Running: {reference_script}")
+    subprocess.run([python_exe, reference_script], check=True)
 
     # final step is to run the telegram_dump test command and generate the dump_telegrams.csv file
     # run the test command and generate the dump_telegrams.csv file

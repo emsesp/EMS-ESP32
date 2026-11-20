@@ -2550,7 +2550,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             shell.println();
             shell.printfln("Testing modbus->handleRead():");
 
-            uint16_t reg = Modbus::REGISTER_BLOCK_SIZE * DeviceValueTAG::TAG_DEVICE_DATA + 214; // mintempsilent is tag 2 (TAG_DEVICE_DATA), offset 214
+            uint16_t reg = Modbus::REGISTER_BLOCK_SIZE * DeviceValueTAG::TAG_DEVICE_DATA + 237; // mintempsilent is tag 2 (TAG_DEVICE_DATA), offset 237
 
             ModbusMessage request({boiler_dev->device_type(), 0x03, static_cast<unsigned char>(reg >> 8), static_cast<unsigned char>(reg & 0xff), 0, 1});
             auto          response = EMSESP::modbus_->handleRead(request);
@@ -2573,12 +2573,28 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             }
         }
 
+        // handleSystemRead register map version
+        {
+            shell.println();
+            shell.printfln("Testing modbus->handleSystemRead() register map version:");
+
+            ModbusMessage request({EMSdevice::DeviceType::SYSTEM, 0x04, 0, 2, 0, 1});
+            auto          response = EMSESP::modbus_->handleSystemRead(request);
+
+            if (response.getError() == SUCCESS && response._data.size() == 5) {
+                uint16_t version = (response._data[3] << 8) | response._data[4];
+                shell.printfln("register map version: %d %s", version, version == Modbus::REGISTER_MAP_VERSION ? "[OK]" : "[ERROR]");
+            } else {
+                shell.printfln("register map version [MODBUS ERROR %d]", response.getError());
+            }
+        }
+
         // handleWrite boiler
         {
             shell.println();
             shell.printfln("Testing modbus->handleWrite() for boiler:");
 
-            uint16_t reg = Modbus::REGISTER_BLOCK_SIZE * DeviceValueTAG::TAG_DEVICE_DATA + 4; // selflowtemp
+            uint16_t reg = Modbus::REGISTER_BLOCK_SIZE * DeviceValueTAG::TAG_DEVICE_DATA + 5; // selflowtemp
             ModbusMessage request({boiler_dev->device_type(), 0x06, static_cast<unsigned char>(reg >> 8), static_cast<unsigned char>(reg & 0xff), 0, 1, 2, 0, 45});
             auto response = EMSESP::modbus_->handleWrite(request);
 
@@ -2599,7 +2615,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             shell.println();
             shell.printfln("Testing modbus->handleWrite() for thermostat:");
 
-            uint16_t      reg = Modbus::REGISTER_BLOCK_SIZE * DeviceValueTAG::TAG_HC1 + 41; // remotetemp
+            uint16_t      reg = Modbus::REGISTER_BLOCK_SIZE * DeviceValueTAG::TAG_HC1 + 45; // remotetemp
             ModbusMessage request(
                 {thermostat_dev->device_type(), 0x06, static_cast<unsigned char>(reg >> 8), static_cast<unsigned char>(reg & 0xff), 0, 1, 2, 0, 45});
             auto response = EMSESP::modbus_->handleWrite(request);

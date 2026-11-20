@@ -2,15 +2,32 @@
 # Update modbus parameters from entity definitions.
 # This script generates c++ code for the modbus parameter definitions.
 #
-# Called by /scripts/generate_csv_and_headers.sh and pio build_modbus target.
-# can be called manually with:
-#   cat ./docs/dump_entities.csv | python3 ./scripts/update_modbus_registers.py > ./src/core/modbus_entity_parameters.hpp
+# Register offsets are stable: every entity keeps the offset it has in the previous map (--previous),
+# new entities are appended after the highest offset ever used, and removed entities are kept as
+# RETIRED comments so their offsets are never handed out again. An entity whose register count grows
+# is moved to the end. Moving or retiring a register bumps REGISTER_MAP_VERSION.
+#
+# Called by the pio build_modbus target. Can be called manually with:
+#   cp ./src/core/modbus_entity_parameters.hpp /tmp/prev.hpp
+#   python3 ./scripts/update_modbus_registers.py --previous /tmp/prev.hpp < ./docs/dump_entities.csv > ./src/core/modbus_entity_parameters.hpp
 
+import argparse
 import fileinput
 import csv
 import json
 import re
+import sys
 from string import Template
+
+from modbus_register_map import read_header_file
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--previous", required=True,
+                    help="previous modbus_entity_parameters.hpp whose offsets must be kept")
+parser.add_argument("--allow-new-map", action="store_true",
+                    help="allow a previous map without entries, i.e. renumber everything from scratch")
+parser.add_argument("csv", nargs="*", help="entity dump csv (default: stdin)")
+args = parser.parse_args()
 
 modbus_block_size = 1000  # block size of a register block for each tag
 
@@ -127,7 +144,8 @@ device_type_names = [
     "GENERIC",
     "HEATSOURCE",
     "VENTILATION",
-    "WATER"
+    "WATER",
+    "POOL"
 ]
 
 cpp_file_template = Template('''#include "modbus.h"
@@ -145,14 +163,19 @@ using dt = EMSdevice::DeviceType;
 
 #define REGISTER_MAPPING(device_type, device_value_tag_type, long_name, modbus_register_offset, modbus_register_count) \\
     { device_type, device_value_tag_type, long_name[0], modbus_register_offset, modbus_register_count }
-    
-// IMPORTANT: This list MUST be ordered by keys "device_type", "device_value_tag_type" and "modbus_register_offset" in this order.    
+
+// Increases whenever an existing register is moved or retired. Readable at address 2 of the system unit.
+const uint16_t Modbus::REGISTER_MAP_VERSION = $version;
+
+// IMPORTANT: This list MUST be ordered by keys "device_type", "device_value_tag_type" and "modbus_register_offset" in this order.
 const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_mappings = {
 $entries};
 
+// Registers of removed entities. Their offsets stay reserved and must never be reused.
+$retired
 } // namespace emsesp
 
-// clang-format off
+// clang-format on
 ''')
 # cpp_entry_template = Template(
 #    '    {std::make_tuple($devtype, $tagtype, std::string(\"$shortname\")), {$registeroffset, $registercount}},\n')
@@ -172,9 +195,14 @@ except FileNotFoundError:
     # Handle case where file doesn't exist
     raise Exception('Error! locale_translations.h not found')
 
+previous_version, previous_active, previous_retired, previous_names = read_header_file(args.previous)
+if not previous_active and not args.allow_new_map:
+    raise Exception('Error! Previous modbus map "' + args.previous + '" has no entries. All register offsets would be renumbered. '
+                    'Use --allow-new-map if that is really intended.')
+
 entities = []
 
-with fileinput.input(encoding='utf-8', errors='replace') as f_input:
+with fileinput.input(files=args.csv or ('-',), encoding='utf-8', errors='replace') as f_input:
     entities_reader = csv.reader(f_input, delimiter=',', quotechar='"')
     headers = next(entities_reader)
 
@@ -182,26 +210,15 @@ with fileinput.input(encoding='utf-8', errors='replace') as f_input:
         entity = {headers[i]: val for i, val in enumerate(row)}
         entities.append(entity)
 
-# print(json.dumps(entities, indent="  "))
-
-device_types = {}
-string_entities = []
-
-entity_modbus_property_names = [
-    "modbus block",
-    "modbus offset",
-    "modbus count"
-]
+# (device type, tag type) -> {fl_name: {"shortname", "count"}}, in order of first appearance
+groups = {}
 
 for entity in entities:
     device_type_name = entity['device type'].upper()
-    if device_type_name not in device_types:
-        device_types[device_type_name] = {}
-    device_type = device_types[device_type_name]
-    tag_name = entity['modbus block']
-    if tag_name not in device_type:
-        device_type[tag_name] = {}
-    tag = device_type[tag_name]
+    tag = int(entity['modbus block'])
+    if tag not in tag_to_tagtype or tag_to_tagtype[tag] == "TAG_TYPE_NONE":
+        continue
+    tag_type = tag_to_tagtype[tag]
     entity_shortname = entity['shortname']
     entity_dev_name = (device_type_name + "/" + entity_shortname).lower()
 
@@ -210,84 +227,103 @@ for entity in entities:
         entity["modbus count"] = - \
             (-string_sizes[entity_dev_name] // 2)  # divide and round up
 
-    if int(entity["modbus count"]) <= 0:
+    register_count = int(entity["modbus count"])
+    if register_count <= 0:
         raise Exception('Error! Entity "' + entity_dev_name + ' (' + entity_shortname + ')' +
                         '" does not have a size - string sizes need to be added manually to update_modbus_registers.py/string_sizes[]')
 
-    #    if entity["modbus count"] == "0":
-    #        print("ignoring " + entity_dev_name + " - it has a register length of zero")
+    # Strip device type prefix (e.g., "dhw.nrg" -> "nrg") for translation lookup
+    lookup_name = entity_shortname.split('.')[-1]
+    if lookup_name not in listNames:
+        raise KeyError(f"Error! Translation not found for '{lookup_name}' (entity: '{entity_shortname}'). Please add it to locale_translations.h")
+    fl_name = listNames[lookup_name]
 
-    if entity_shortname in tag:
-        for entity_property_name in entity_modbus_property_names:
-            if tag[entity_shortname][entity_property_name] != entity[entity_property_name]:
-                raise Exception(
-                    "Property mismatch between instances of the same entity for property '" + entity_property_name + "':\n" +
-                    json.dumps(tag[entity_shortname]) +
-                    json.dumps(entity))
+    group = groups.setdefault((device_type_name, tag_type), {})
+    if fl_name in group:
+        if group[fl_name]["count"] != register_count:
+            raise Exception("Register count mismatch between instances of the same entity:\n" +
+                            json.dumps(group[fl_name]) + json.dumps(entity))
     else:
-        tag[entity_shortname] = {}
-        for entity_property_name in entity_modbus_property_names:
-            tag[entity_shortname][entity_property_name] = entity[entity_property_name]
-
-# print(json.dumps(device_types, indent="  "))
+        group[fl_name] = {"shortname": lookup_name, "count": register_count}
 
 # ASSIGN REGISTERS
 
-for device_type_name, device_type in device_types.items():
-    for tag, entities in device_type.items():
-        # Pre-calculate all register info to avoid repeated int() conversions
-        register_info = []
-        next_free_offset = 0
+active = {}  # (device type, tag type, fl_name) -> (offset, count, shortname)
+retired = list(previous_retired)  # [((device type, tag type, fl_name), (offset, count))]
+breaking_changes = []
 
-        for entity_name, modbus_info in entities.items():
-            register_offset = int(modbus_info['modbus offset'])
-            register_count = int(modbus_info['modbus count'])
-            register_info.append(
-                (entity_name, modbus_info, register_offset, register_count))
+for group_key in set(groups) | {k[:2] for k in previous_active} | {k[:2] for k, _ in previous_retired}:
+    used = [v for k, v in previous_active.items() if k[:2] == group_key] + \
+        [v for k, v in previous_retired if k[:2] == group_key]
+    next_free_offset = max((offset + count for offset, count in used), default=0)
 
-            if register_offset >= 0 and register_offset + register_count > next_free_offset:
-                next_free_offset = register_offset + register_count
+    for fl_name, info in groups.get(group_key, {}).items():
+        key = group_key + (fl_name,)
+        count = info["count"]
+        previous = previous_active.get(key)
+        if previous is not None and previous[1] == count:
+            offset = previous[0]
+        else:
+            revived = next((r for r in retired if r[0] == key and r[1][1] == count), None)
+            if revived is not None:
+                retired.remove(revived)
+                offset = revived[1][0]
+            else:
+                offset = next_free_offset
+                next_free_offset += count
+            if previous is not None:
+                retired.append((key, previous))
+                breaking_changes.append(f"moved {key}: {previous} -> {(offset, count)}")
+        active[key] = (offset, count, info["shortname"])
 
-        # Assign registers for unassigned entities
-        for entity_name, modbus_info, register_offset, register_count in register_info:
-            if register_offset < 0 and register_count > 0:
-                modbus_info['modbus offset'] = str(next_free_offset)
-                next_free_offset += register_count
+for key, value in previous_active.items():
+    if key not in active:
+        retired.append((key, value))
+        breaking_changes.append(f"retired {key}: {value}")
+
+for group_key in {k[:2] for k in active} | {k[:2] for k, _ in retired}:
+    ranges = sorted([(v[0], v[1], k[2]) for k, v in active.items() if k[:2] == group_key] +
+                    [(v[0], v[1], "retired " + k[2]) for k, v in retired if k[:2] == group_key])
+    for a, b in zip(ranges, ranges[1:]):
+        if a[0] + a[1] > b[0]:
+            raise Exception(f"Error! Overlapping modbus registers in {group_key}: {a} and {b}")
+    if ranges and ranges[-1][0] + ranges[-1][1] > modbus_block_size:
+        raise Exception(f"Error! Modbus register {ranges[-1]} in {group_key} exceeds the register block size of {modbus_block_size}")
+
+version = (previous_version or 1) + (1 if breaking_changes else 0)
+for change in breaking_changes:
+    print("Modbus register map change: " + change, file=sys.stderr)
 
 # OUTPUT
 
+tag_type_order = ["TAG_TYPE_DEVICE_DATA", "TAG_TYPE_HC", "TAG_TYPE_DHW", "TAG_TYPE_AHS", "TAG_TYPE_HS", "TAG_TYPE_SRC"]
+
+
+def sort_key(item):
+    (device_type_name, tag_type, _), value = item
+    return (device_type_names.index(device_type_name), tag_type_order.index(tag_type), value[0])
+
+
 cpp_entries = []
+for (device_type_name, tag_type, fl_name), (offset, count, shortname) in sorted(active.items(), key=sort_key):
+    cpp_entries.append(cpp_entry_template.substitute({
+        'devtype': "dt::" + device_type_name,
+        "tagtype": tag_type,
+        "shortname": 'FL_(' + fl_name + ")",
+        "entity_name": shortname,
+        'registeroffset': offset,
+        'registercount': count
+    }))
 
-# traverse all elements in correct order so they are correctly sorted
-for device_type_name in device_type_names:
-    if device_type_name in device_types:
-        device_type = device_types[device_type_name]
-        for ntag in range(0, 40):
-            tag = str(ntag)
-            if tag in device_type:
-                entities = device_type[tag]
-                # Sort once and reuse
-                sorted_entities = sorted(
-                    entities.items(), key=lambda x: int(x[1]["modbus offset"]))
-                for entity_name, modbus_info in sorted_entities:
-                    # Strip device type prefix (e.g., "dhw.nrg" -> "nrg") for translation lookup
-                    lookup_name = entity_name.split('.')[-1] if '.' in entity_name else entity_name
-                    
-                    if lookup_name not in listNames:
-                        raise KeyError(f"Error! Translation not found for '{lookup_name}' (entity: '{entity_name}'). Please add it to locale_translations.h")
-                    
-                    params = {
-                        'devtype': "dt::" + device_type_name,
-                        "tagtype": tag_to_tagtype[int(tag)],
-                        "shortname": 'FL_(' + listNames[lookup_name] + ")",
-                        "entity_name": entity_name,
-                        'registeroffset': modbus_info["modbus offset"],
-                        'registercount': modbus_info["modbus count"]
-                    }
-                    cpp_entries.append(cpp_entry_template.substitute(params))
+retired_entries = []
+for (device_type_name, tag_type, fl_name), (offset, count) in sorted(retired, key=sort_key):
+    shortname = previous_names.get((device_type_name, tag_type, fl_name), fl_name.lower())
+    retired_entries.append(f"// RETIRED REGISTER_MAPPING(dt::{device_type_name}, {tag_type}, FL_({fl_name}), {offset}, {count}) // {shortname}\n")
 
-# Join all entries at once
-cpp_entries_str = "".join(cpp_entries)
-
-cpp_src = cpp_file_template.substitute({'entries': cpp_entries_str})
+cpp_src = cpp_file_template.substitute({
+    'version': version,
+    'entries': "".join(cpp_entries),
+    'retired': "".join(retired_entries)
+})
 print(cpp_src)
+
