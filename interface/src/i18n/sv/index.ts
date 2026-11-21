@@ -685,6 +685,55 @@ const sv: Translation = {
   INSTALL_FIRMWARE: 'Installera Firmware ({channel})',
   PARTITION: 'Avsnitt', // DeepL
   PULSE: 'Pulse', // DeepL
+  SYS_HOME: 'Hem', // draft, please review
+  SYS_HOME_HELP: 'Det viktigaste i överblick. Allt annat finns i systemmenyn.', // draft, please review
+  SYS_MENU: 'Systemmeny', // draft, please review
+  SYS_MENU_HELP: 'Alla värden och inställningar för din anläggning, sorterade efter ämne.', // draft, please review
+  SYS_FAV_HELP: 'Dina viktigaste inställningar. Använd stjärnan vid ett värde för att ändra listan.', // draft, please review
+  SYS_FAV_NONE: 'Inga favoriter ännu. Markera värden med stjärnan.', // draft, please review
+  SYS_GROUP_HEATING: 'Värme', // draft, please review
+  SYS_GROUP_PLANT: 'Anläggning', // draft, please review
+  SYS_GROUP_OVERVIEW: 'Översikt', // draft, please review
+  SYS_HC: 'Värmekrets {0}', // draft, please review
+  SYS_DHW: 'Varmvatten', // draft, please review
+  SYS_AHS: 'Tillsatsvärme', // draft, please review
+  SYS_HS: 'Värmekälla', // draft, please review
+  SYS_SRC: 'Källa', // draft, please review
+  SYS_OTHER_DEVICES: 'Övriga enheter', // draft, please review
+  SYS_SERVICE: 'Underhåll och fel', // draft, please review
+  SYS_ENERGY: 'Energi och drifttider', // draft, please review
+  SYS_SEC_MODE: 'Drift', // draft, please review
+  SYS_SEC_TEMPS: 'Temperaturer', // draft, please review
+  SYS_SEC_STATUS: 'Status', // draft, please review
+  SYS_SEC_ADVANCED: 'Värmekurva och installation', // draft, please review
+  SYS_SEC_MEASURE: 'Mätvärden', // draft, please review
+  SYS_SEC_OTHER: 'Övriga värden', // draft, please review
+  SYS_LEVEL_NORMAL: 'Normal', // draft, please review
+  SYS_NO_RESULTS: 'Inget hittades. Prova alla värden eller ett annat sökord.', // draft, please review
+  SYS_NOTHING_HERE: 'Inget att visa här på nivån Normal.', // draft, please review
+  SYS_HIDDEN: 'Dolda expertvärden: {num}', // draft, please review
+  SYS_SEARCH_RESULTS: 'Sökresultat', // draft, please review
+  SYS_CHANGED_WAS: 'ändrat (var: {0})', // draft, please review
+  SYS_NO_DEVICES: 'Inga enheter hittades ännu.', // draft, please review
+  SYS_ROOM_TEMP: 'Rumstemperatur', // draft, please review
+  SYS_WISH: 'Önskad', // draft, please review
+  SYS_CURRENT: 'Aktuell temperatur', // draft, please review
+  SYS_OUTDOOR: 'Utetemperatur', // draft, please review
+  SYS_FLOW: 'Framledning', // draft, please review
+  SYS_RETURN: 'Retur', // draft, please review
+  SYS_PRESSURE: 'Systemtryck', // draft, please review
+  SYS_POWER: 'Effekt', // draft, please review
+  SYS_BURNER_ON: 'Brännaren går', // draft, please review
+  SYS_BURNER_OFF: 'Brännaren av', // draft, please review
+  SYS_DHW_HEATING: 'Värms upp', // draft, please review
+  SYS_READY: 'Redo', // draft, please review
+  SYS_ONE_TIME: 'Engångsladdning', // draft, please review
+  SYS_NOTES: 'Anmärkningar', // draft, please review
+  SYS_NOTES_SUB: 'Fel och underhåll', // draft, please review
+  SYS_LAST_FAULT: 'Senaste fel', // draft, please review
+  SYS_MAINT_MSG: 'Underhållsmeddelande', // draft, please review
+  SYS_NEXT_MAINT: 'Nästa underhåll', // draft, please review
+  SYS_GOTO_SERVICE: 'Gå till underhåll och fel', // draft, please review
 };
 
 export default sv;
