@@ -4,7 +4,7 @@ import { Button, Icon, Segmented, Select, cx } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import { formatValue } from '../main/deviceValue';
-import { favoriteId, rangeOf, str } from './model';
+import { isFavorite, rangeOf, str } from './model';
 import type { SysItem } from './model';
 import type { Edits } from './useSystemData';
 
@@ -143,49 +143,47 @@ export const ValueControl = ({
 interface RowProps {
   item: SysItem;
   edits: Edits;
-  favorites: readonly string[];
-  onFavorite: (id: string) => void;
+  // undefined when the favorite can't be changed (no administrator)
+  onFavorite?: (item: SysItem) => void;
   // where the value lives, shown in search results and favorites
   where?: string;
 }
 
-export const ValueRow = memo(
-  ({ item, edits, favorites, onFavorite, where }: RowProps) => {
-    const { LL } = useI18nContext();
-    const format = useFormat();
-    const changed = edits.pending.has(item.uid);
-    const fid = favoriteId(item);
-    const isFav = favorites.includes(fid);
-    return (
-      <div className={cx('sys-row', changed && 'pend')}>
-        <div className="sys-lab">
-          <button
-            type="button"
-            className={cx('sys-star', isFav && 'on')}
-            aria-label={LL.FAVORITES()}
-            aria-pressed={isFav}
-            onClick={() => onFavorite(fid)}
-          >
-            <Icon name="star" size="sm" />
-          </button>
-          <span className="txt">
-            <b>{item.label}</b>
-            <small>
-              {where ? `${where} · ` : ''}
-              {item.dv.c ?? shortId(item)}
-              {changed && ` · ${LL.SYS_CHANGED_WAS(format(item.dv.v, item.dv.u))}`}
-            </small>
-          </span>
-        </div>
-        <div className="sys-ctl">
-          <ValueControl
-            item={item}
-            value={edits.value(item)}
-            onChange={(v) => edits.set(item, v)}
-            onRun={() => void edits.run(item, LL.WRITE_CMD_SENT())}
-          />
-        </div>
+export const ValueRow = memo(({ item, edits, onFavorite, where }: RowProps) => {
+  const { LL } = useI18nContext();
+  const format = useFormat();
+  const changed = edits.pending.has(item.uid);
+  const isFav = isFavorite(item);
+  return (
+    <div className={cx('sys-row', changed && 'pend')}>
+      <div className="sys-lab">
+        <button
+          type="button"
+          className={cx('sys-star', isFav && 'on')}
+          aria-label={LL.FAVORITES()}
+          aria-pressed={isFav}
+          disabled={!onFavorite}
+          onClick={() => onFavorite?.(item)}
+        >
+          <Icon name="star" size="sm" />
+        </button>
+        <span className="txt">
+          <b>{item.label}</b>
+          <small>
+            {where ? `${where} · ` : ''}
+            {item.dv.c ?? shortId(item)}
+            {changed && ` · ${LL.SYS_CHANGED_WAS(format(item.dv.v, item.dv.u))}`}
+          </small>
+        </span>
       </div>
-    );
-  }
-);
+      <div className="sys-ctl">
+        <ValueControl
+          item={item}
+          value={edits.value(item)}
+          onChange={(v) => edits.set(item, v)}
+          onRun={() => void edits.run(item, LL.WRITE_CMD_SENT())}
+        />
+      </div>
+    </div>
+  );
+});

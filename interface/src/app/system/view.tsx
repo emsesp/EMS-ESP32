@@ -28,23 +28,12 @@ interface SystemBarProps {
   view: SystemView;
 }
 
-// switch between Home and System menu, search and detail level; the same on both pages
+// search on both pages; the detail level only applies to the System menu
 export const SystemBar = ({ page, view }: SystemBarProps) => {
   const { LL } = useI18nContext();
   const navigate = useNavigate();
   return (
     <div className="sys-bar">
-      <ToggleGroup label={LL.SYS_HOME()}>
-        <ToggleButton on={page === 'home'} onClick={() => void navigate('/home')}>
-          {LL.SYS_HOME()}
-        </ToggleButton>
-        <ToggleButton
-          on={page === 'system'}
-          onClick={() => void navigate('/system')}
-        >
-          {LL.SYS_MENU()}
-        </ToggleButton>
-      </ToggleGroup>
       <SearchField
         label={LL.SEARCH()}
         value={view.q}
@@ -58,14 +47,16 @@ export const SystemBar = ({ page, view }: SystemBarProps) => {
         }}
       />
       <span className="grow" />
-      <ToggleGroup label={LL.SYS_LEVEL_NORMAL()}>
-        <ToggleButton on={view.level === 1} onClick={() => view.setLevel(1)}>
-          {LL.SYS_LEVEL_NORMAL()}
-        </ToggleButton>
-        <ToggleButton on={view.level === 2} onClick={() => view.setLevel(2)}>
-          {LL.ALLVALUES()}
-        </ToggleButton>
-      </ToggleGroup>
+      {page === 'system' && (
+        <ToggleGroup label={LL.SYS_LEVEL_NORMAL()}>
+          <ToggleButton on={view.level === 1} onClick={() => view.setLevel(1)}>
+            {LL.SYS_LEVEL_NORMAL()}
+          </ToggleButton>
+          <ToggleButton on={view.level === 2} onClick={() => view.setLevel(2)}>
+            {LL.ALLVALUES()}
+          </ToggleButton>
+        </ToggleGroup>
+      )}
     </div>
   );
 };

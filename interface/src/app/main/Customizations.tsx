@@ -38,7 +38,12 @@ import { ChangesBar, RestartBar } from './ChangesBar';
 import './Customizations.css';
 import CustomizationsDialog from './CustomizationsDialog';
 import DeviceIcon from './DeviceIcon';
-import EntityMaskToggle, { MASKS, maskAllowed, withMask } from './EntityMaskToggle';
+import EntityMaskToggle, {
+  MASKS,
+  createMaskedEntityId,
+  maskAllowed,
+  withMask
+} from './EntityMaskToggle';
 import { PendingTag } from './ListPage';
 import { DeviceEntityMask } from './types';
 import type { DeviceEntity } from './types';
@@ -47,20 +52,6 @@ const APIURL = `${window.location.origin}/api/`;
 
 // the firmware reads the list into a 2048 byte buffer
 const MAX_BUFFER_SIZE = 2000;
-
-const createMaskedEntityId = (de: DeviceEntity): string => {
-  const maskHex = de.m.toString(16).padStart(2, '0');
-  const hasCustomizations = !!(de.cn || de.mi || de.ma);
-  const customizations = [
-    de.cn || '',
-    de.mi ? `>${de.mi}` : '',
-    de.ma ? `<${de.ma}` : ''
-  ]
-    .filter(Boolean)
-    .join('');
-
-  return `${maskHex}${de.id}${hasCustomizations ? `|${customizations}` : ''}`;
-};
 
 const hasChanged = (de: DeviceEntity, o: DeviceEntity | undefined) =>
   !o ||

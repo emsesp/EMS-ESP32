@@ -1,4 +1,4 @@
-import { DeviceType } from '../main/types';
+import { DeviceEntityMask, DeviceType } from '../main/types';
 import type { Device, DeviceEntity, DeviceValue } from '../main/types';
 import { CATALOG } from './catalog';
 import type { CatalogEntry, SectionId } from './catalog';
@@ -35,6 +35,7 @@ export interface SysItem {
   tag: string; // z. B. hc1, dhw, '' (kein Tag)
   label: string; // plain text from the firmware (without the tag prefix)
   dv: DeviceValue;
+  ent?: DeviceEntity; // entity of the device, only known to administrators
   section: SectionId;
   level: 1 | 2;
   order: number;
@@ -143,6 +144,7 @@ export const buildItems = (
       menu: menuOf(devType, tag, section)
     };
     if (cat?.range) item.range = cat.range;
+    if (ent) item.ent = ent;
     return item;
   });
 };
@@ -232,7 +234,9 @@ export const findItem = (
 ): SysItem | undefined =>
   items.find((i) => i.key === key && (tag === undefined || i.tag === tag));
 
-export const favoriteId = (i: SysItem): string => `${i.devType}:${i.dv.id.slice(2)}`;
+// the favorite flag is the same as on the Devices page and the Dashboard (kept on the device)
+export const isFavorite = (i: SysItem): boolean =>
+  (parseInt(i.dv.id.slice(0, 2), 16) & DeviceEntityMask.DV_FAVORITE) !== 0;
 
 // numeric range and step; the firmware (m, x, s) wins over the catalog
 export const rangeOf = (
