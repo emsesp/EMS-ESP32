@@ -164,6 +164,8 @@ const de: Translation = {
   UPLOAD: 'Hochladen',
   DOWNLOAD: 'Herunterladen',
   INSTALL: 'Installieren',
+  REINSTALL: 'Erneut installieren',
+  REINSTALL_CONFIRM: 'Möchten Sie Version {0} wirklich erneut installieren?',
   FAILED: 'fehlgeschlagen', // DeepL
   SYSTEM: 'System',
   SYSTEM_LOG: 'Systemprotokoll',
@@ -182,7 +184,7 @@ const de: Translation = {
   COPY: 'Text', // DeepL
   COPIED: 'Kopiert',
   USE: 'Verwenden Sie',
-  FACTORY_RESET: 'Auf Werkseinstellungen zurücksetzen', // DeepL
+  FACTORY_RESET: 'Werksreset', // DeepL
   SYSTEM_FACTORY_TEXT_DIALOG: 'Sind Sie sicher, dass Sie EMS-ESP auf die Werkseinstellungen zurücksetzen möchten?', // DeepL
   STABLE: 'Stabil',
   DEVELOPMENT: 'Entwicklung',
@@ -439,8 +441,8 @@ const de: Translation = {
   DASHBOARD_1: 'Alle aktiven EMS-Entitäten, die als Favoriten markiert sind, werden im Folgenden angezeigt, ebenso wie alle benutzerdefinierten Entitäten, Zeitpläne und externen Sensoren.', // DeepL
   NO_GPIO: 'Es wurde kein verfügbarer GPIO gefunden', // DeepL
   PLATFORM: 'Plattform',
-  RELEASE_TYPE: 'Art der Veröffentlichung', // DeepL
-  FIRMWARE_VERSION_INFO: 'Informationen zur Firmware-Version', // DeepL
+  RELEASE_TYPE: 'Release-Typ', // DeepL
+  FIRMWARE_VERSION_INFO: 'Firmware-Version', // DeepL
   USER_PROFILE: 'Benutzerprofil',
   ONLINE_HELP: 'Online-Hilfe',
   UPGRADE_IMPORTANT_MESSAGES: 'Wichtige Update-Meldungen', // DeepL
@@ -463,7 +465,8 @@ const de: Translation = {
   UPLOAD_NOT_OFFICIAL_HELP: 'Informationen zu offiziellen und benutzerdefinierten Builds', // DeepL
   UPLOAD_INSTALL_ANYWAY: 'Trotzdem installieren',
   OFFICIAL_BUILD: 'Offizielle Version', // DeepL
-  CUSTOM_BUILD: 'Maßgeschneiderte Lösung', // DeepL
+  CUSTOM_BUILD: 'Benutzerdefinierte Version', // DeepL
+  USING_CUSTOM_FIRMWARE: 'Sie verwenden eine benutzerdefinierte Firmware', // DeepL
   PASSWORD_CONFIRM_TITLE: 'Geben Sie Ihr Passwort erneut ein', // DeepL
   PASSWORD_CONFIRM_TEXT: 'Zu Ihrer Sicherheit geben Sie bitte vor dieser Änderung Ihr Passwort ein. Sie werden 5 Minuten lang nicht erneut dazu aufgefordert.', // DeepL
   PASSWORD_CONFIRM_BUTTON: 'Bestätigen',
@@ -673,10 +676,10 @@ const de: Translation = {
   ADD_SCHEDULE: 'Zeitplan hinzufügen',
   EDIT_SCHEDULE: 'Zeitplan bearbeiten',
   ADD_ENTITY: 'Entität hinzufügen',
-  EDIT_ENTITY: 'Entitäten bearbeiten', // DeepL
+  EDIT_ENTITY: 'Entität bearbeiten', // DeepL
   ADD_ANALOG_SENSOR: 'Analogen Sensor hinzufügen', // DeepL
   EDIT_ANALOG_SENSOR: 'Analogsensoren bearbeiten', // DeepL
-  REMOVE_ANALOG_SENSOR: 'Analogen Sensor entfernen', // DeepL
+  REMOVE_ANALOG_SENSOR: 'Analogsensor entfernen', // DeepL
   REMOVE_SENSOR_TEXT: 'Der Sensor „{name}“ wird sofort entfernt.', // DeepL
   EDIT_TEMP_SENSOR: 'Temperatursensor bearbeiten',
   INSTALL_FIRMWARE: 'Firmware installieren ({channel})',

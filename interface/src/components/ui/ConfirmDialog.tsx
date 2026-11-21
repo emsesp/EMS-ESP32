@@ -59,7 +59,7 @@ const ConfirmDialog: FC<ConfirmDialogProps> = ({
       onClose={onClose}
       actions={
         <>
-          <Button color="secondary" icon={cancelIcon} onClick={onClose}>
+          <Button color="neutral" icon={cancelIcon} onClick={onClose}>
             {cancelLabel ?? LL.CANCEL()}
           </Button>
           <Button

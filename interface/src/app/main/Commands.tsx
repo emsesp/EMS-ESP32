@@ -165,7 +165,7 @@ const Commands = () => {
                     {state === 'del' ? (
                       <Button
                         size="sm"
-                        color="secondary"
+                        color="neutral"
                         icon="undo"
                         onClick={() => list.undo(key)}
                       >

@@ -455,14 +455,16 @@ class TxService : public EMSbus {
         const std::shared_ptr<const Telegram> telegram_;
         const bool                            retry_; // true if its a retry
         const uint16_t                        validateid_;
+        const bool                            priority_; // true if this jumps ahead of background reads
 
         ~QueuedTxTelegram() = default;
         // replaced && im std::shared_ptr<Telegram> telegram in 3.7.0-dev.43
-        QueuedTxTelegram(uint16_t id, std::shared_ptr<Telegram> telegram, bool retry, uint16_t validateid)
+        QueuedTxTelegram(uint16_t id, std::shared_ptr<Telegram> telegram, bool retry, uint16_t validateid, bool priority = false)
             : id_(id)
             , telegram_(std::move(telegram))
             , retry_(retry)
-            , validateid_(validateid) {
+            , validateid_(validateid)
+            , priority_(priority) {
         }
     };
 
@@ -496,6 +498,7 @@ class TxService : public EMSbus {
     uint8_t tx_telegram_id_ = 0; // queue counter
 
     void send_telegram(const QueuedTxTelegram & tx_telegram);
+    void queue_telegram(std::shared_ptr<Telegram> telegram, const bool retry, const uint16_t validateid, const bool front);
 };
 
 } // namespace emsesp

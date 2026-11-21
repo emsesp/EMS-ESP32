@@ -468,6 +468,58 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
     tx_state(telegram->operation); // tx now in a wait state
 }
 
+// add a telegram to the Tx queue.
+// retries and priority reads go to the very front.
+// a priority write still jumps ahead of background reads, but stays behind writes already waiting
+// (and behind retries), so several commands leave in the order they were received.
+// QueuedTxTelegram can't be move-assigned (its members are const), so inserting behind
+// an earlier write rebuilds the queue. One write on an empty priority section still goes to the front.
+// see https://github.com/emsesp/EMS-ESP32/issues/3464
+void TxService::queue_telegram(std::shared_ptr<Telegram> telegram, const bool retry, const uint16_t validateid, const bool front) {
+    const uint16_t id = tx_telegram_id_++;
+
+    if (retry || (front && telegram->operation != Telegram::Operation::TX_WRITE)) {
+        tx_telegrams_.emplace_front(id, std::move(telegram), retry, validateid, true);
+        return;
+    }
+
+    if (!front) {
+        tx_telegrams_.emplace_back(id, std::move(telegram), false, validateid, false);
+        return;
+    }
+
+    size_t insert_index = 0;
+    size_t index        = 0;
+    for (const auto & item : tx_telegrams_) {
+        ++index;
+        if (item.retry_ || (item.priority_ && item.telegram_->operation == Telegram::Operation::TX_WRITE)) {
+            insert_index = index;
+        }
+    }
+
+    if (insert_index == 0) {
+        tx_telegrams_.emplace_front(id, std::move(telegram), false, validateid, true);
+        return;
+    }
+
+    std::deque<QueuedTxTelegram, AllocatorPSRAM<QueuedTxTelegram>> rebuilt;
+    index = 0;
+    for (const auto & item : tx_telegrams_) {
+        if (index == insert_index) {
+            rebuilt.emplace_back(id, std::move(telegram), false, validateid, true);
+        }
+
+        rebuilt.push_back(item);
+        ++index;
+    }
+
+    if (index == insert_index) {
+        rebuilt.emplace_back(id, std::move(telegram), false, validateid, true);
+    }
+
+    tx_telegrams_.swap(rebuilt);
+}
+
 void TxService::add(const uint8_t  operation,
                     const uint8_t  dest,
                     const uint16_t type_id,
@@ -494,11 +546,7 @@ void TxService::add(const uint8_t  operation,
     }
 #endif
 
-    if (front) {
-        tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram), false, validateid); // add to front of queue
-    } else {
-        tx_telegrams_.emplace_back(tx_telegram_id_++, std::move(telegram), false, validateid); // add to back of queue
-    }
+    queue_telegram(std::move(telegram), false, validateid, front);
 
     if (validateid != 0) {
         EMSESP::wait_validate(validateid);
@@ -577,11 +625,9 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
 
     LOG_DEBUG("New Tx [#%d] telegram, length %d", tx_telegram_id_, message_length);
 
-    if (front && (operation != Telegram::Operation::TX_RAW || EMSESP::response_id() == 0)) {
-        tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram), false, validate_id); // add to front of queue
-    } else {
-        tx_telegrams_.emplace_back(tx_telegram_id_++, std::move(telegram), false, validate_id); // add to back of queue
-    }
+    // a raw read waits behind an unanswered read; everything else requested at the front still jumps the queue
+    const bool to_front = front && (operation != Telegram::Operation::TX_RAW || EMSESP::response_id() == 0);
+    queue_telegram(std::move(telegram), false, validate_id, to_front);
 
     if (validate_id != 0) {
         EMSESP::wait_validate(validate_id);
@@ -686,7 +732,7 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
 
     // for the last try wait 2 sec before sending.
     delayed_send_ = (retry_count_ < MAXIMUM_TX_RETRIES) ? 0 : (uuid::get_uptime() + POST_SEND_DELAY);
-    tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram_last_), true, get_post_send_query());
+    queue_telegram(std::move(telegram_last_), true, get_post_send_query(), true); // retry goes out before anything else
 }
 
 // send a request to read the next block of data from longer telegrams

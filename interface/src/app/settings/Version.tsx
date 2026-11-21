@@ -98,6 +98,7 @@ const Version = () => {
   const [install, setInstall] = useState<{ dev: boolean; messages: number }>();
   // restart from another partition, or into the recovery app
   const [confirmRecovery, setConfirmRecovery] = useState(false);
+  const [confirmReinstall, setConfirmReinstall] = useState(false);
   const [info, setInfo] = useState<Partition>();
   const [installURL, setInstallURL] = useState<string>();
   const [polls, setPolls] = useState(0);
@@ -405,6 +406,22 @@ const Version = () => {
       return <Message level="info">{LL.FW_UPDATES_OFFLINE()}</Message>;
     }
     const isNew = isSwitch || upgradeAvailable;
+    // custom build newer than the official release for this channel: no "latest" /
+    // reinstall for the older GitHub build
+    const customAhead =
+      data.official_build === false &&
+      !isNew &&
+      isNewerVersion(data.emsesp_version, target.version);
+    if (customAhead) {
+      return (
+        <div className="fw-update">
+          <Icon name="check_circle" className="fw-big" />
+          <div className="grow">
+            <div className="fw-update-title">{LL.USING_CUSTOM_FIRMWARE()}</div>
+          </div>
+        </div>
+      );
+    }
     const title = isSwitch
       ? shown === 'dev'
         ? LL.SWITCH_TO_DEV(target.version)
@@ -433,15 +450,24 @@ const Version = () => {
             </a>
           </div>
         </div>
-        {me.admin && isNew && (
-          <Button
-            color={isSwitch ? 'warning' : 'primary'}
-            icon={isSwitch ? 'swap_horiz' : 'system_update'}
-            onClick={() => void showInstall(shown === 'dev')}
-          >
-            {LL.INSTALL()} <span className="fw-ver">{target.version}</span>
-          </Button>
-        )}
+        {me.admin &&
+          (isNew ? (
+            <Button
+              color={isSwitch ? 'warning' : 'primary'}
+              icon={isSwitch ? 'swap_horiz' : 'system_update'}
+              onClick={() => void showInstall(shown === 'dev')}
+            >
+              {LL.INSTALL()} <span className="fw-ver">{target.version}</span>
+            </Button>
+          ) : (
+            <Button
+              color="primary"
+              icon="refresh"
+              onClick={() => setConfirmReinstall(true)}
+            >
+              {LL.REINSTALL()}
+            </Button>
+          ))}
       </div>
     );
   };
@@ -634,7 +660,7 @@ const Version = () => {
         title={LL.FIRMWARE_VERSION_INFO()}
         onClose={() => setInfo(undefined)}
         actions={
-          <Button color="secondary" icon="close" onClick={() => setInfo(undefined)}>
+          <Button color="neutral" icon="close" onClick={() => setInfo(undefined)}>
             {LL.CLOSE()}
           </Button>
         }
@@ -675,7 +701,7 @@ const Version = () => {
             actions={
               <>
                 <Button
-                  color="secondary"
+                  color="neutral"
                   icon="cancel"
                   onClick={() => setInstall(undefined)}
                 >
@@ -725,6 +751,25 @@ const Version = () => {
             onConfirm={restartIntoRecovery}
           >
             {LL.FW_RECOVERY_TEXT()}
+          </ConfirmDialog>
+
+          <ConfirmDialog
+            open={confirmReinstall && !!target}
+            title={LL.REINSTALL()}
+            label={LL.REINSTALL()}
+            icon="refresh"
+            color="warning"
+            disabled={installing || sending}
+            onClose={() => setConfirmReinstall(false)}
+            onConfirm={async () => {
+              if (!target) return;
+              setConfirmReinstall(false);
+              await installFirmwareURL(
+                firmwareURL(target.version, shown === 'dev', platform)
+              );
+            }}
+          >
+            {target && LL.REINSTALL_CONFIRM(target.version)}
           </ConfirmDialog>
 
           <ConfirmDialog

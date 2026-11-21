@@ -47,7 +47,7 @@ const hu: Translation = {
   MAINTENANCE: 'Karbantartás',
   CHANGE_VALUE: 'Érték módosítása',
   CANCEL: 'Mégse', // DeepL
-  REMOVE_ALL: 'Távolítson el mindent', // DeepL
+  REMOVE_ALL: 'Összes Eltávolítása', // DeepL
   APPLY_CHANGES: 'Változtatások alkalmazása ({0})',
   UPDATE: 'Frissítés',
   REMOVE: 'Törlés', // DeepL
@@ -164,6 +164,8 @@ const hu: Translation = {
   UPLOAD: 'Feltöltés',
   DOWNLOAD: 'Letöltés',
   INSTALL: 'Telepítés',
+  REINSTALL: 'Újratelepítés',
+  REINSTALL_CONFIRM: 'Biztosan újra szeretné telepíteni a(z) {0} verziót?',
   FAILED: 'sikertelen',
   SYSTEM: 'Rendszer',
   SYSTEM_LOG: 'Rendszernapló',
@@ -176,13 +178,13 @@ const hu: Translation = {
   API_KEYS_TEXT: 'Az API-kulcsok lehetővé teszik, hogy olyan integrációk, mint a Home Assistant és a szkriptek, használhassák az API-t. A kulcsot az „Authorization: Bearer <KULCS>” fejlécben kell elküldeni. Az olvasási kulcsok értékeket olvashatnak és olyan parancsokat futtathatnak, amelyeket a vendégek is futtathatnak, míg az olvasási és írási kulcsok mindent megtehetnek, amit egy rendszergazda az API-n keresztül megtehet.', // DeepL
   API_KEY_ACCESS: 'Hozzáférés',
   API_KEY_READ: 'Olvasás',
-  API_KEY_READ_WRITE: 'Olvasás és írás', // DeepL
+  API_KEY_READ_WRITE: 'Olvasás és Írás', // DeepL
   API_KEY_SHOW_ONCE: 'Másolja ki most ezt a kulcsot, és őrizze meg biztonságos helyen. Ezután már nem jelenik meg újra.', // DeepL
   CREATED: 'Létrehozva',
   COPY: 'Szöveg', // DeepL
   COPIED: 'Másolva',
   USE: 'Használja', // DeepL
-  FACTORY_RESET: 'Gyári beállítások visszaállítása', // DeepL
+  FACTORY_RESET: 'Gyári Beállítások', // DeepL
   SYSTEM_FACTORY_TEXT_DIALOG: 'Biztosan vissza szeretné állítani az EMS-ESP-t a gyári alapbeállításokra?', // DeepL
   STABLE: 'Stabil',
   DEVELOPMENT: 'Fejlesztés', // DeepL
@@ -258,7 +260,7 @@ const hu: Translation = {
   INACTIVE: 'Inaktív',
   ACTIVE: 'Aktív',
   UNKNOWN: 'Ismeretlen',
-  SET_TIME: 'Idő beállítása',
+  SET_TIME: 'Idő Beállítása',
   SET_TIME_TEXT: 'Az idő beállításához írja be az alábbi mezőbe a helyi dátumot és időt', // DeepL
   LOCAL_TIME: 'Helyi idő',
   UTC_TIME: 'UTC-idő', // DeepL
@@ -439,11 +441,11 @@ const hu: Translation = {
   DASHBOARD_1: 'Az alábbiakban az összes kedvenceként megjelölt aktív EMS-entitás, valamint az összes egyéni entitás, ütemezés és külső szenzor látható.', // DeepL
   NO_GPIO: 'Nincs elérhető GPIO', // DeepL
   PLATFORM: 'Platform',
-  RELEASE_TYPE: 'Kiadás típusa',
-  FIRMWARE_VERSION_INFO: 'A firmware-verzióra vonatkozó információk', // DeepL
+  RELEASE_TYPE: 'Kiadás Típusa',
+  FIRMWARE_VERSION_INFO: 'Firmware-verzió Információk', // DeepL
   USER_PROFILE: 'Felhasználói profil',
   ONLINE_HELP: 'online súgó',
-  UPGRADE_IMPORTANT_MESSAGES: 'Fontos frissítési üzenetek', // DeepL
+  UPGRADE_IMPORTANT_MESSAGES: 'Fontos Frissítési Üzenetek', // DeepL
   UPGRADE_IMPORTANT_MESSAGES_2: 'Új főverzióra frissít. Célszerű először biztonsági másolatot készíteni a rendszerről. Ellenőrizze az online súgót is, hátha vannak olyan változások, amelyek a rendszer működését megzavarhatják.', // DeepL
   UPGRADE_IMPORTANT_MESSAGES_3: 'A 3.10-es verzió jelentős biztonsági változásokat tartalmaz. Először készítsen rendszermentést: a frissítés után a jelszavak hash-elt formában kerülnek tárolásra, és a régebbi verziók nem tudják azokat olvasni, ezért a visszaállításhoz szükség van erre a mentésre. Minden API-híváshoz API-kulcsra lesz szükség, ezért az olyan integrációkat, mint például a Home Assistant, frissíteni kell. Mielőtt továbbmenne, olvassa el a jelentős változásokat az online súgóban.', // DeepL
   WARNING_SYSTEM_BACKUP: 'Ezzel biztonsági másolatot készít a rendszer teljes konfigurációjáról és beállításairól. A jelszavak és kulcsok nem kerülnek bele, hacsak azokat alább nem adja meg; a biztonsági másolat visszaállítása során az eszközön már meglévő jelszavak megmaradnak. A parancsok mindig benne vannak, és tartalmazhatnak hitelesítő adatokat, ezért legyen óvatos a megosztásukkal. Folytatni szeretné?', // DeepL
@@ -462,8 +464,9 @@ const hu: Translation = {
   UPLOAD_NOT_OFFICIAL: 'Ez nem egy hivatalos EMS-ESP-verzió. Csak olyan firmware-t telepítsen, amelyben megbízik.', // DeepL
   UPLOAD_NOT_OFFICIAL_HELP: 'A hivatalos és az egyéni összeállításokról', // DeepL
   UPLOAD_INSTALL_ANYWAY: 'Telepítsd mindenképp', // DeepL
-  OFFICIAL_BUILD: 'Hivatalos kiadás',
-  CUSTOM_BUILD: 'Egyedi kialakítás', // DeepL
+  OFFICIAL_BUILD: 'Hivatalos Kiadás',
+  CUSTOM_BUILD: 'Egyedi Kiadás', // DeepL
+  USING_CUSTOM_FIRMWARE: 'Egyedi firmware-t használ', // DeepL
   PASSWORD_CONFIRM_TITLE: 'Írja be újra a jelszavát', // DeepL
   PASSWORD_CONFIRM_TEXT: 'Biztonsági okokból kérjük, adja meg jelszavát a módosítás előtt. 5 percig nem kell újra megadnia.', // DeepL
   PASSWORD_CONFIRM_BUTTON: 'Megerősítés',
@@ -568,12 +571,12 @@ const hu: Translation = {
   YOU: 'te', // DeepL
   NEW_PASSWORD: 'Új jelszó',
   UNSAVED_CHANGES: '{num} nem mentett módosítás',
-  CREATE_KEY: 'Kulcsszó létrehozása', // DeepL
+  CREATE_KEY: 'Kulcs Létrehozása', // DeepL
   NEW_API_KEY: 'Új API-kulcs',
   NO_API_KEYS: 'Még nincsenek API-kulcsok', // DeepL
   API_KEYS_LIMIT: 'Legfeljebb {num} gombot használhat.', // DeepL
   REVOKE: 'Visszavonás',
-  REVOKE_KEY: 'API-kulcs visszavonása',
+  REVOKE_KEY: 'API-kulcs Visszavonása',
   REVOKE_KEY_TEXT: 'Bármi, ami a „{name}” kifejezést tartalmazza, azonnal leáll.', // DeepL
   MODULES_TEXT: 'A firmware-be beépített opcionális funkciók. Itt kapcsolhatja be vagy ki őket.', // DeepL
   BY_AUTHOR: 'szerző: {name}',
@@ -586,7 +589,7 @@ const hu: Translation = {
   FW_VERSION_AVAILABLE: 'A {version}-es verzió elérhető', // DeepL
   FW_RELEASE_NOTES: 'Kiadási megjegyzések',
   FW_UPDATES_OFFLINE: 'Nem sikerült online ellenőrizni az új verziókat. Ehhez az EMS-ESP-nek internetkapcsolatra van szüksége.', // DeepL
-  FW_RESTART_RESET: 'Újraindítás és visszaállítás',
+  FW_RESTART_RESET: 'Újraindítás és Visszaállítás',
   FW_RECOVERY_TEXT: 'Újraindítás a Recovery App alkalmazásba? Csatlakozik a hálózatához, és elindítja a saját hozzáférési pontját is, ahová feltöltheti a firmware-t.', // DeepL
   FW_SIZE: 'Méret',
   FW_INSTALL_DATE: 'Telepítve a', // DeepL
@@ -624,7 +627,7 @@ const hu: Translation = {
   NO_ENTITIES_MATCH: 'Nincs találat', // DeepL
   LIMIT_HELP: 'hagyja üresen a beépített korlát miatt', // DeepL
   MIN_ABOVE_MAX: 'A minimum nem haladhatja meg a maximumot', // DeepL
-  RENAME_DEVICE: 'Eszköz átnevezése',
+  RENAME_DEVICE: 'Eszköz Átnevezése',
   WEEKLY: 'Heti',
   EVERY_DAY: 'Minden nap',
   SCHEDULER_NO_COMMANDS: 'Először adjon hozzá egy parancsot a Parancsok oldalon',
@@ -632,7 +635,7 @@ const hu: Translation = {
   DU_SETTINGS_TEXT: 'Az EMS-ESP beállításainak biztonsági mentése: hálózat, MQTT, egyedi beállítások, Ütemező, egyéni entitások és Modulok. A beállítások vagy a biztonsági mentés fájljának feltöltése újraindítja az EMS-ESP-t.', // DeepL
   HB_TITLE: 'Fűtési beállítások',
   HB_TEXT: 'Elmentek a kazán, a termosztát és más EMS-eszközök aktuális értékeit, így azokat később visszaállíthatja, például egy eszköz cseréje után. Az írásvédett entitások és parancsok soha nem változnak meg egy visszaállítás során.', // DeepL
-  HB_BACKUP: 'A fűtési beállítások mentése', // DeepL
+  HB_BACKUP: 'Fűtési Beállítások Mentése', // DeepL
   HB_RESTORE: 'Fűtési beállítások visszaállítása',
   DATA_EXPORT: 'Adatexport', // DeepL
   DATA_EXPORT_TEXT: 'Támogatás és elemzés céljából. Ezeket a fájlokat nem lehet visszatölteni.', // DeepL
@@ -673,13 +676,13 @@ const hu: Translation = {
   ADD_SCHEDULE: 'Ütemezés hozzáadása',
   EDIT_SCHEDULE: 'Ütemezés szerkesztése',
   ADD_ENTITY: 'Entitások hozzáadása', // DeepL
-  EDIT_ENTITY: 'Entitások szerkesztése', // DeepL
+  EDIT_ENTITY: 'Entitás Szerkesztése', // DeepL
   ADD_ANALOG_SENSOR: 'Analóg szenzor hozzáadása',
   EDIT_ANALOG_SENSOR: 'Analóg szenzor szerkesztése',
-  REMOVE_ANALOG_SENSOR: 'Az analóg szenzor eltávolítása', // DeepL
+  REMOVE_ANALOG_SENSOR: 'Analóg Szenzor Eltávolítása', // DeepL
   REMOVE_SENSOR_TEXT: 'A „{name}” szenzort azonnal eltávolítjuk.', // DeepL
-  EDIT_TEMP_SENSOR: 'Hőmérséklet-érzékelő szerkesztése', // DeepL
-  INSTALL_FIRMWARE: 'Firmware telepítése ({channel})',
+  EDIT_TEMP_SENSOR: 'Hőmérséklet-érzékelő Szerkesztése', // DeepL
+  INSTALL_FIRMWARE: 'Firmware Telepítése ({channel})',
   PARTITION: 'Partíció',
   PULSE: 'Pulse', // DeepL
 };

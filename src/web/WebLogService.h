@@ -45,8 +45,8 @@ class WebLogService : public uuid::log::Handler {
     uint32_t num_warnings() const {
         return num_warnings_;
     }
-    void   loop();
-    void   show(Shell & shell);
+    void loop();
+    void show(Shell & shell);
 
     virtual void operator<<(std::shared_ptr<uuid::log::Message> message);
 

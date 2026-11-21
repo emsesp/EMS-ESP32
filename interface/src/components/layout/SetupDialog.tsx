@@ -77,7 +77,7 @@ const SetupDialog = () => {
             >
               {LL.AP_SETTINGS()}
             </Button>
-            <Button icon="close" color="secondary" onClick={dismiss}>
+            <Button icon="close" color="neutral" onClick={dismiss}>
               {LL.CLOSE()}
             </Button>
           </>

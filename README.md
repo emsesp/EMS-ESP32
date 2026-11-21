@@ -51,7 +51,7 @@ It requires a small circuit to interface with the EMS bus which can be purchased
 - A responsive, multi-user web interface for desktop, tablet and phone to monitor live data and change settings
 - Native integration with Home Assistant (MQTT Discovery), Domoticz, openHAB, Modbus and a REST API
 - Reports EMS devices that go offline, so integrations can mark their entities as unavailable
-- Localized in 12 languages, and any device or sensor can be renamed
+- Localized in 13 languages, and any device or sensor can be renamed
 - Simulates remote room thermostats
 - Add your own custom EMS entities, Commands and user-built modules
 - A Scheduler to run tasks on a timer or when values change, and Notifications to alert you to important events

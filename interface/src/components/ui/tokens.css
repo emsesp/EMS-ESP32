@@ -16,7 +16,8 @@
   --text-2: rgba(255, 255, 255, 0.7);
   --text-3: #9e9e9e;
   --primary: #90caf9;
-  --secondary: #2196f3;
+  /* Blue 300 — readable on dark surfaces; primary stays lighter (Blue 200) */
+  --secondary: #64b5f6;
   --info: #607d8b;
   --success: #66bb6a;
   --success-main: #4caf50;
@@ -39,8 +40,8 @@
   --primary-tint-2: rgba(144, 202, 249, 0.24);
   --primary-line: rgba(144, 202, 249, 0.5);
   /* status colours: hover, fill, border, and text on a dark or tinted surface */
-  --secondary-tint: rgba(33, 150, 243, 0.16);
-  --secondary-line: rgba(33, 150, 243, 0.5);
+  --secondary-tint: rgba(100, 181, 246, 0.16);
+  --secondary-line: rgba(100, 181, 246, 0.5);
   --success-tint: rgba(102, 187, 106, 0.16);
   --success-line: rgba(102, 187, 106, 0.5);
   --success-text: #a5d6a7;

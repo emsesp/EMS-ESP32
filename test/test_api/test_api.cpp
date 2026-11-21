@@ -562,6 +562,56 @@ void device_status_test() {
     TEST_ASSERT_EQUAL_UINT32(0, thermostat->last_seen_sec());
 }
 
+// several writes waiting for a bus poll must leave in the order they were requested,
+// still ahead of background reads, and a read inserted at the front must not reverse them.
+// see https://github.com/emsesp/EMS-ESP32/issues/3464
+void tx_write_order_test() {
+    EMSESP::send_read_request(0xF0, 0x08); // background read, goes to the back
+
+    uint8_t value = 55;
+    EMSESP::send_write_request(0xF1, 0x08, 10, &value, 1, 0);
+    value = 42;
+    EMSESP::send_write_request(0xF2, 0x08, 27, &value, 1, 0);
+
+    EMSESP::send_read_request(0xF3, 0x08, 0, 1, true); // priority read, like the read-back after a write
+
+    value = 49;
+    EMSESP::send_write_request(0xF1, 0x08, 10, &value, 1, 0);
+
+    uint8_t low = 1;
+    EMSESP::txservice_.add(Telegram::Operation::TX_WRITE, 0x08, 0xF4, 0, &low, 1, 0, false); // unchanged value, no priority
+
+    value = 7;
+    EMSESP::send_write_request(0xF5, 0x08, 0, &value, 1, 0);
+
+    uint16_t got[8];
+    uint8_t  n = 0;
+    for (const auto & item : EMSESP::txservice_.queue()) {
+        const auto & telegram = *item.telegram_;
+        if (telegram.type_id < 0xF0 || telegram.type_id > 0xF5) {
+            continue;
+        }
+
+        TEST_ASSERT_LESS_THAN_UINT8(8, n);
+        got[n++] = (telegram.type_id << 8) | telegram.message_data[0];
+    }
+
+    const uint16_t expected[] = {
+        (0xF3 << 8) | 1,    // priority read
+        (0xF1 << 8) | 55,   // first write
+        (0xF2 << 8) | 42,   // second write
+        (0xF1 << 8) | 49,   // third write, same telegram as the first, still after it
+        (0xF5 << 8) | 7,    // write after a low-priority one was queued, still with the other writes
+        (0xF0 << 8) | 0xFF, // background read
+        (0xF4 << 8) | 1,    // low-priority write stays at the back
+    };
+
+    TEST_ASSERT_EQUAL_UINT8(7, n);
+    for (uint8_t i = 0; i < 7; i++) {
+        TEST_ASSERT_EQUAL_UINT16(expected[i], got[i]);
+    }
+}
+
 #include "test_security.h"
 #include "test_firmware_signature.h"
 
@@ -612,6 +662,7 @@ int main() {
     run_firmware_signature_tests();
     run_security_tests();     // execute the permission tests, last as they change settings
     RUN_TEST(device_status_test);
+    RUN_TEST(tx_write_order_test);
 
     return UNITY_END();
 }
