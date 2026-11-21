@@ -52,6 +52,7 @@ A full list of breaking changes can be found in this [discussion](https://github
 - Modbus register map version at address 2 of the system unit (input register). It goes up whenever an existing register is moved or removed, so a Modbus client can check it and stop instead of using wrong registers. `scripts/modbus_register_diff.py` lists the moved, removed and new registers between two releases [#3454](https://github.com/emsesp/EMS-ESP32/issues/3454)
 - Modbus registers for pool devices (unit ID 21), which had none [#3454](https://github.com/emsesp/EMS-ESP32/issues/3454)
 - the short summary on the Help page, to paste into an issue or chat, also shows the Tx mode, EMS-ESP's bus ID, the bus quality and Tx failures, and lists every EMS device with its type, device ID and product ID. `/rest/systemStatus` has new `bus_id` and `tx_mode` fields for it
+- Simplified Chinese translation (zh-CN) by HJ
 
 ## Fixed
 
