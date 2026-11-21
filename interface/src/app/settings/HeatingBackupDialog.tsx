@@ -104,8 +104,8 @@ const HeatingBackupDialog = ({
                       {d.name} <span className="muted">{d.type}</span>
                     </span>
                     <span className="cap">
-                      {LL.DEVICE_ID()} {hex(d.deviceId)} ·{' '}
-                      {LL.PRODUCT_ID()} {d.productId}
+                      {LL.DEVICE_ID()} {hex(d.deviceId)} · {LL.PRODUCT_ID()}{' '}
+                      {d.productId}
                     </span>
                   </span>
                   <span className="cap">
