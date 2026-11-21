@@ -685,6 +685,55 @@ const no: Translation = {
   INSTALL_FIRMWARE: 'Installer Fastvare ({channel})',
   PARTITION: 'Partisjon',
   PULSE: 'Pulse', // DeepL
+  SYS_HOME: 'Hjem', // draft, please review
+  SYS_HOME_HELP: 'De viktigste tingene på et øyeblikk. Alt annet finner du i systemmenyen.', // draft, please review
+  SYS_MENU: 'Systemmeny', // draft, please review
+  SYS_MENU_HELP: 'Alle verdier og innstillinger for anlegget ditt, sortert etter tema.', // draft, please review
+  SYS_FAV_HELP: 'Dine viktigste innstillinger. Bruk stjernen ved en verdi for å endre listen.', // draft, please review
+  SYS_FAV_NONE: 'Ingen favoritter ennå. Merk verdier med stjernen.', // draft, please review
+  SYS_GROUP_HEATING: 'Oppvarming', // draft, please review
+  SYS_GROUP_PLANT: 'Anlegg', // draft, please review
+  SYS_GROUP_OVERVIEW: 'Oversikt', // draft, please review
+  SYS_HC: 'Varmekrets {0}', // draft, please review
+  SYS_DHW: 'Varmtvann', // draft, please review
+  SYS_AHS: 'Tilleggsvarme', // draft, please review
+  SYS_HS: 'Varmekilde', // draft, please review
+  SYS_SRC: 'Kilde', // draft, please review
+  SYS_OTHER_DEVICES: 'Andre enheter', // draft, please review
+  SYS_SERVICE: 'Vedlikehold og feil', // draft, please review
+  SYS_ENERGY: 'Energi og driftstider', // draft, please review
+  SYS_SEC_MODE: 'Drift', // draft, please review
+  SYS_SEC_TEMPS: 'Temperaturer', // draft, please review
+  SYS_SEC_STATUS: 'Status', // draft, please review
+  SYS_SEC_ADVANCED: 'Varmekurve og installasjon', // draft, please review
+  SYS_SEC_MEASURE: 'Måleverdier', // draft, please review
+  SYS_SEC_OTHER: 'Andre verdier', // draft, please review
+  SYS_LEVEL_NORMAL: 'Normal', // draft, please review
+  SYS_NO_RESULTS: 'Ingen treff. Prøv alle verdier eller et annet søkeord.', // draft, please review
+  SYS_NOTHING_HERE: 'Ingenting å vise her på nivå Normal.', // draft, please review
+  SYS_HIDDEN: 'Skjulte ekspertverdier: {num}', // draft, please review
+  SYS_SEARCH_RESULTS: 'Søkeresultater', // draft, please review
+  SYS_CHANGED_WAS: 'endret (var: {0})', // draft, please review
+  SYS_NO_DEVICES: 'Ingen enheter funnet ennå.', // draft, please review
+  SYS_ROOM_TEMP: 'Romtemperatur', // draft, please review
+  SYS_WISH: 'Ønsket', // draft, please review
+  SYS_CURRENT: 'Gjeldende temperatur', // draft, please review
+  SYS_OUTDOOR: 'Utetemperatur', // draft, please review
+  SYS_FLOW: 'Fremløp', // draft, please review
+  SYS_RETURN: 'Retur', // draft, please review
+  SYS_PRESSURE: 'Anleggstrykk', // draft, please review
+  SYS_POWER: 'Effekt', // draft, please review
+  SYS_BURNER_ON: 'Brenneren går', // draft, please review
+  SYS_BURNER_OFF: 'Brenneren av', // draft, please review
+  SYS_DHW_HEATING: 'Varmes opp', // draft, please review
+  SYS_READY: 'Klar', // draft, please review
+  SYS_ONE_TIME: 'Engangsopplading', // draft, please review
+  SYS_NOTES: 'Merknader', // draft, please review
+  SYS_NOTES_SUB: 'Feil og vedlikehold', // draft, please review
+  SYS_LAST_FAULT: 'Siste feil', // draft, please review
+  SYS_MAINT_MSG: 'Vedlikeholdsmelding', // draft, please review
+  SYS_NEXT_MAINT: 'Neste vedlikehold', // draft, please review
+  SYS_GOTO_SERVICE: 'Gå til vedlikehold og feil', // draft, please review
 };
 
 export default no;

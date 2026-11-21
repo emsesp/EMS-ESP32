@@ -53,6 +53,7 @@ A full list of breaking changes can be found in this [discussion](https://github
 - Modbus registers for pool devices (unit ID 21), which had none [#3454](https://github.com/emsesp/EMS-ESP32/issues/3454)
 - the short summary on the Help page, to paste into an issue or chat, also shows the Tx mode, EMS-ESP's bus ID, the bus quality and Tx failures, and lists every EMS device with its type, device ID and product ID. `/rest/systemStatus` has new `bus_id` and `tx_mode` fields for it
 - Simplified Chinese translation (zh-CN) by HJ
+- new Home and System menu pages in the Web UI. Home shows tiles for the heating circuits, hot water, boiler and notes that can be operated directly. The System menu lists all values and settings of all devices as a tree (heating circuits, hot water, boiler, mixers, maintenance, ...) with search, favorites and the levels Normal and All values; changes are collected and saved together. The names, units and ranges come from the firmware, so it works for every device, and values that aren't known yet are listed automatically. The existing pages are unchanged
 
 ## Fixed
 

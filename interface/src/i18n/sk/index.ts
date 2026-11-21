@@ -685,6 +685,55 @@ const sk: Translation = {
   INSTALL_FIRMWARE: 'Inštalácia Firmvéru ({channel})', // DeepL
   PARTITION: 'Oddiel',
   PULSE: 'Pulse', // DeepL
+  SYS_HOME: 'Domov', // draft, please review
+  SYS_HOME_HELP: 'Najdôležitejšie veci na prvý pohľad. Všetko ostatné nájdete v systémovej ponuke.', // draft, please review
+  SYS_MENU: 'Systémová ponuka', // draft, please review
+  SYS_MENU_HELP: 'Všetky hodnoty a nastavenia vášho systému, zoradené podľa tém.', // draft, please review
+  SYS_FAV_HELP: 'Vaše najdôležitejšie nastavenia. Hviezdičkou pri hodnote zmeníte tento zoznam.', // draft, please review
+  SYS_FAV_NONE: 'Zatiaľ žiadne obľúbené. Označte hodnoty hviezdičkou.', // draft, please review
+  SYS_GROUP_HEATING: 'Kúrenie', // draft, please review
+  SYS_GROUP_PLANT: 'Zariadenie', // draft, please review
+  SYS_GROUP_OVERVIEW: 'Prehľad', // draft, please review
+  SYS_HC: 'Vykurovací okruh {0}', // draft, please review
+  SYS_DHW: 'Teplá voda', // draft, please review
+  SYS_AHS: 'Prídavné kúrenie', // draft, please review
+  SYS_HS: 'Zdroj tepla', // draft, please review
+  SYS_SRC: 'Zdroj', // draft, please review
+  SYS_OTHER_DEVICES: 'Ďalšie zariadenia', // draft, please review
+  SYS_SERVICE: 'Údržba a poruchy', // draft, please review
+  SYS_ENERGY: 'Energia a prevádzkové časy', // draft, please review
+  SYS_SEC_MODE: 'Prevádzka', // draft, please review
+  SYS_SEC_TEMPS: 'Teploty', // draft, please review
+  SYS_SEC_STATUS: 'Stav', // draft, please review
+  SYS_SEC_ADVANCED: 'Vykurovacia krivka a inštalácia', // draft, please review
+  SYS_SEC_MEASURE: 'Namerané hodnoty', // draft, please review
+  SYS_SEC_OTHER: 'Ďalšie hodnoty', // draft, please review
+  SYS_LEVEL_NORMAL: 'Bežné', // draft, please review
+  SYS_NO_RESULTS: 'Nič sa nenašlo. Skúste všetky hodnoty alebo iný výraz.', // draft, please review
+  SYS_NOTHING_HERE: 'V úrovni Bežné sa tu nič nezobrazuje.', // draft, please review
+  SYS_HIDDEN: 'Skryté expertné hodnoty: {num}', // draft, please review
+  SYS_SEARCH_RESULTS: 'Výsledky vyhľadávania', // draft, please review
+  SYS_CHANGED_WAS: 'zmenené (predtým: {0})', // draft, please review
+  SYS_NO_DEVICES: 'Zatiaľ sa nenašli žiadne zariadenia.', // draft, please review
+  SYS_ROOM_TEMP: 'Izbová teplota', // draft, please review
+  SYS_WISH: 'Cieľová', // draft, please review
+  SYS_CURRENT: 'Aktuálna teplota', // draft, please review
+  SYS_OUTDOOR: 'Vonkajšia teplota', // draft, please review
+  SYS_FLOW: 'Prívod', // draft, please review
+  SYS_RETURN: 'Spiatočka', // draft, please review
+  SYS_PRESSURE: 'Tlak v systéme', // draft, please review
+  SYS_POWER: 'Výkon', // draft, please review
+  SYS_BURNER_ON: 'Horák beží', // draft, please review
+  SYS_BURNER_OFF: 'Horák vypnutý', // draft, please review
+  SYS_DHW_HEATING: 'Prebieha ohrev', // draft, please review
+  SYS_READY: 'Pripravené', // draft, please review
+  SYS_ONE_TIME: 'Jednorazový ohrev', // draft, please review
+  SYS_NOTES: 'Upozornenia', // draft, please review
+  SYS_NOTES_SUB: 'Poruchy a údržba', // draft, please review
+  SYS_LAST_FAULT: 'Posledná porucha', // draft, please review
+  SYS_MAINT_MSG: 'Hlásenie údržby', // draft, please review
+  SYS_NEXT_MAINT: 'Ďalšia údržba', // draft, please review
+  SYS_GOTO_SERVICE: 'Prejsť na údržbu a poruchy', // draft, please review
 };
 
 export default sk;

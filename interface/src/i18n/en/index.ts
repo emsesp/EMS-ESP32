@@ -684,7 +684,56 @@ const en: Translation = {
   EDIT_TEMP_SENSOR: 'Edit Temperature Sensor',
   INSTALL_FIRMWARE: 'Install Firmware ({channel})',
   PARTITION: 'Partition',
-  PULSE: 'Pulse'
+  PULSE: 'Pulse',
+  SYS_HOME: 'Home', // draft, please review
+  SYS_HOME_HELP: 'The most important things at a glance. Everything else is in the System menu.', // draft, please review
+  SYS_MENU: 'System menu', // draft, please review
+  SYS_MENU_HELP: 'All values and settings of your system, sorted by topic.', // draft, please review
+  SYS_FAV_HELP: 'Your most important settings. Use the star next to a value to change this list.', // draft, please review
+  SYS_FAV_NONE: 'No favorites yet. Mark values with the star.', // draft, please review
+  SYS_GROUP_HEATING: 'Heating', // draft, please review
+  SYS_GROUP_PLANT: 'System parts', // draft, please review
+  SYS_GROUP_OVERVIEW: 'Overview', // draft, please review
+  SYS_HC: 'Heating circuit {0}', // draft, please review
+  SYS_DHW: 'Hot water', // draft, please review
+  SYS_AHS: 'Auxiliary heater', // draft, please review
+  SYS_HS: 'Heat source', // draft, please review
+  SYS_SRC: 'Source', // draft, please review
+  SYS_OTHER_DEVICES: 'Other devices', // draft, please review
+  SYS_SERVICE: 'Maintenance & faults', // draft, please review
+  SYS_ENERGY: 'Energy & running times', // draft, please review
+  SYS_SEC_MODE: 'Operation', // draft, please review
+  SYS_SEC_TEMPS: 'Temperatures', // draft, please review
+  SYS_SEC_STATUS: 'Status', // draft, please review
+  SYS_SEC_ADVANCED: 'Heating curve & installation', // draft, please review
+  SYS_SEC_MEASURE: 'Measured values', // draft, please review
+  SYS_SEC_OTHER: 'Other values', // draft, please review
+  SYS_LEVEL_NORMAL: 'Normal', // draft, please review
+  SYS_NO_RESULTS: 'Nothing found. Try all values or another term.', // draft, please review
+  SYS_NOTHING_HERE: 'There is nothing to show here at the Normal level.', // draft, please review
+  SYS_HIDDEN: 'Expert values hidden: {num}', // draft, please review
+  SYS_SEARCH_RESULTS: 'Search results', // draft, please review
+  SYS_CHANGED_WAS: 'changed (was: {0})', // draft, please review
+  SYS_NO_DEVICES: 'No devices found yet.', // draft, please review
+  SYS_ROOM_TEMP: 'Room temperature', // draft, please review
+  SYS_WISH: 'Target', // draft, please review
+  SYS_CURRENT: 'Current temperature', // draft, please review
+  SYS_OUTDOOR: 'Outdoor temperature', // draft, please review
+  SYS_FLOW: 'Flow', // draft, please review
+  SYS_RETURN: 'Return', // draft, please review
+  SYS_PRESSURE: 'System pressure', // draft, please review
+  SYS_POWER: 'Power', // draft, please review
+  SYS_BURNER_ON: 'Burner running', // draft, please review
+  SYS_BURNER_OFF: 'Burner off', // draft, please review
+  SYS_DHW_HEATING: 'Being heated', // draft, please review
+  SYS_READY: 'Ready', // draft, please review
+  SYS_ONE_TIME: 'One-time charge', // draft, please review
+  SYS_NOTES: 'Notes', // draft, please review
+  SYS_NOTES_SUB: 'Faults and maintenance', // draft, please review
+  SYS_LAST_FAULT: 'Last fault', // draft, please review
+  SYS_MAINT_MSG: 'Maintenance message', // draft, please review
+  SYS_NEXT_MAINT: 'Next maintenance', // draft, please review
+  SYS_GOTO_SERVICE: 'Go to maintenance & faults', // draft, please review
 };
 
 export default en;

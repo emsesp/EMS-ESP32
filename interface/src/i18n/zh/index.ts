@@ -685,6 +685,55 @@ const zh: Translation = {
   INSTALL_FIRMWARE: "安装固件（{channel}）",
   PARTITION: "分区",
   PULSE: "脉冲",
+  SYS_HOME: '主页', // draft, please review
+  SYS_HOME_HELP: '最重要的内容一目了然,其他内容请见系统菜单。', // draft, please review
+  SYS_MENU: '系统菜单', // draft, please review
+  SYS_MENU_HELP: '系统的所有数值和设置,按主题分类。', // draft, please review
+  SYS_FAV_HELP: '您最重要的设置。点击数值旁的星标即可修改此列表。', // draft, please review
+  SYS_FAV_NONE: '暂无收藏。用星标标记数值。', // draft, please review
+  SYS_GROUP_HEATING: '供暖', // draft, please review
+  SYS_GROUP_PLANT: '设备', // draft, please review
+  SYS_GROUP_OVERVIEW: '概览', // draft, please review
+  SYS_HC: '供暖回路 {0}', // draft, please review
+  SYS_DHW: '热水', // draft, please review
+  SYS_AHS: '辅助加热', // draft, please review
+  SYS_HS: '热源', // draft, please review
+  SYS_SRC: '来源', // draft, please review
+  SYS_OTHER_DEVICES: '其他设备', // draft, please review
+  SYS_SERVICE: '维护与故障', // draft, please review
+  SYS_ENERGY: '能耗与运行时间', // draft, please review
+  SYS_SEC_MODE: '运行', // draft, please review
+  SYS_SEC_TEMPS: '温度', // draft, please review
+  SYS_SEC_STATUS: '状态', // draft, please review
+  SYS_SEC_ADVANCED: '供暖曲线与安装', // draft, please review
+  SYS_SEC_MEASURE: '测量值', // draft, please review
+  SYS_SEC_OTHER: '其他数值', // draft, please review
+  SYS_LEVEL_NORMAL: '常规', // draft, please review
+  SYS_NO_RESULTS: '未找到结果。请尝试显示所有数值或更换关键词。', // draft, please review
+  SYS_NOTHING_HERE: '在“常规”级别下此处没有可显示的内容。', // draft, please review
+  SYS_HIDDEN: '已隐藏的专家数值:{num}', // draft, please review
+  SYS_SEARCH_RESULTS: '搜索结果', // draft, please review
+  SYS_CHANGED_WAS: '已更改(原值:{0})', // draft, please review
+  SYS_NO_DEVICES: '尚未找到设备。', // draft, please review
+  SYS_ROOM_TEMP: '室温', // draft, please review
+  SYS_WISH: '目标', // draft, please review
+  SYS_CURRENT: '当前温度', // draft, please review
+  SYS_OUTDOOR: '室外温度', // draft, please review
+  SYS_FLOW: '供水', // draft, please review
+  SYS_RETURN: '回水', // draft, please review
+  SYS_PRESSURE: '系统压力', // draft, please review
+  SYS_POWER: '功率', // draft, please review
+  SYS_BURNER_ON: '燃烧器运行中', // draft, please review
+  SYS_BURNER_OFF: '燃烧器已关闭', // draft, please review
+  SYS_DHW_HEATING: '正在加热', // draft, please review
+  SYS_READY: '就绪', // draft, please review
+  SYS_ONE_TIME: '单次加热', // draft, please review
+  SYS_NOTES: '提示', // draft, please review
+  SYS_NOTES_SUB: '故障与维护', // draft, please review
+  SYS_LAST_FAULT: '最近故障', // draft, please review
+  SYS_MAINT_MSG: '维护信息', // draft, please review
+  SYS_NEXT_MAINT: '下次维护', // draft, please review
+  SYS_GOTO_SERVICE: '前往维护与故障', // draft, please review
 };
 
 export default zh;

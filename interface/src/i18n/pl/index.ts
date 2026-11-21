@@ -685,6 +685,55 @@ const pl: BaseTranslation = {
   INSTALL_FIRMWARE: 'Zainstaluj Oprogramowanie ({channel})', // DeepL
   PARTITION: 'Podział', // DeepL
   PULSE: 'Pulse', // DeepL
+  SYS_HOME: 'Dom', // draft, please review
+  SYS_HOME_HELP: 'Najważniejsze rzeczy na pierwszy rzut oka. Wszystko inne znajdziesz w menu systemowym.', // draft, please review
+  SYS_MENU: 'Menu systemowe', // draft, please review
+  SYS_MENU_HELP: 'Wszystkie wartości i ustawienia instalacji, uporządkowane tematycznie.', // draft, please review
+  SYS_FAV_HELP: 'Twoje najważniejsze ustawienia. Gwiazdką przy wartości zmienisz tę listę.', // draft, please review
+  SYS_FAV_NONE: 'Brak ulubionych. Oznacz wartości gwiazdką.', // draft, please review
+  SYS_GROUP_HEATING: 'Ogrzewanie', // draft, please review
+  SYS_GROUP_PLANT: 'Instalacja', // draft, please review
+  SYS_GROUP_OVERVIEW: 'Przegląd', // draft, please review
+  SYS_HC: 'Obieg grzewczy {0}', // draft, please review
+  SYS_DHW: 'Ciepła woda', // draft, please review
+  SYS_AHS: 'Ogrzewanie dodatkowe', // draft, please review
+  SYS_HS: 'Źródło ciepła', // draft, please review
+  SYS_SRC: 'Źródło', // draft, please review
+  SYS_OTHER_DEVICES: 'Pozostałe urządzenia', // draft, please review
+  SYS_SERVICE: 'Konserwacja i błędy', // draft, please review
+  SYS_ENERGY: 'Energia i czasy pracy', // draft, please review
+  SYS_SEC_MODE: 'Praca', // draft, please review
+  SYS_SEC_TEMPS: 'Temperatury', // draft, please review
+  SYS_SEC_STATUS: 'Stan', // draft, please review
+  SYS_SEC_ADVANCED: 'Krzywa grzewcza i instalacja', // draft, please review
+  SYS_SEC_MEASURE: 'Wartości pomiarowe', // draft, please review
+  SYS_SEC_OTHER: 'Pozostałe wartości', // draft, please review
+  SYS_LEVEL_NORMAL: 'Normalny', // draft, please review
+  SYS_NO_RESULTS: 'Nic nie znaleziono. Spróbuj wszystkich wartości lub innego terminu.', // draft, please review
+  SYS_NOTHING_HERE: 'Na poziomie Normalny nie ma tu nic do pokazania.', // draft, please review
+  SYS_HIDDEN: 'Ukryte wartości eksperckie: {num}', // draft, please review
+  SYS_SEARCH_RESULTS: 'Wyniki wyszukiwania', // draft, please review
+  SYS_CHANGED_WAS: 'zmieniono (było: {0})', // draft, please review
+  SYS_NO_DEVICES: 'Nie znaleziono jeszcze urządzeń.', // draft, please review
+  SYS_ROOM_TEMP: 'Temperatura pokojowa', // draft, please review
+  SYS_WISH: 'Zadana', // draft, please review
+  SYS_CURRENT: 'Temperatura bieżąca', // draft, please review
+  SYS_OUTDOOR: 'Temperatura zewnętrzna', // draft, please review
+  SYS_FLOW: 'Zasilanie', // draft, please review
+  SYS_RETURN: 'Powrót', // draft, please review
+  SYS_PRESSURE: 'Ciśnienie w instalacji', // draft, please review
+  SYS_POWER: 'Moc', // draft, please review
+  SYS_BURNER_ON: 'Palnik pracuje', // draft, please review
+  SYS_BURNER_OFF: 'Palnik wyłączony', // draft, please review
+  SYS_DHW_HEATING: 'Trwa podgrzewanie', // draft, please review
+  SYS_READY: 'Gotowe', // draft, please review
+  SYS_ONE_TIME: 'Jednorazowe ładowanie', // draft, please review
+  SYS_NOTES: 'Uwagi', // draft, please review
+  SYS_NOTES_SUB: 'Błędy i konserwacja', // draft, please review
+  SYS_LAST_FAULT: 'Ostatni błąd', // draft, please review
+  SYS_MAINT_MSG: 'Komunikat konserwacyjny', // draft, please review
+  SYS_NEXT_MAINT: 'Następna konserwacja', // draft, please review
+  SYS_GOTO_SERVICE: 'Przejdź do konserwacji i błędów', // draft, please review
 };
 
 export default pl;
