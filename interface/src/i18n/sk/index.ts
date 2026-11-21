@@ -47,7 +47,7 @@ const sk: Translation = {
   MAINTENANCE: 'Údržba',
   CHANGE_VALUE: 'Zmeniť hodnotu', // DeepL
   CANCEL: 'Zrušiť',
-  REMOVE_ALL: 'Odstráňte všetko', // DeepL
+  REMOVE_ALL: 'Odstrániť Všetko', // DeepL
   APPLY_CHANGES: 'Použiť zmeny ({0})', // DeepL
   UPDATE: 'Aktualizácia', // DeepL
   REMOVE: 'Odstrániť',
@@ -178,13 +178,13 @@ const sk: Translation = {
   API_KEYS_TEXT: 'Kľúče API umožňujú integráciám, ako je Home Assistant, a skriptom využívať API. Kľúč odošlite v hlavičke „Authorization: Bearer <KEY>“. Kľúče typu „Read“ môžu čítať hodnoty a spúšťať príkazy, ktoré môžu spúšťať hostia, kľúče typu „Read“ a „Write“ môžu robiť všetko, čo môže robiť správca prostredníctvom API.', // DeepL
   API_KEY_ACCESS: 'Prístup',
   API_KEY_READ: 'Prečítajte si', // DeepL
-  API_KEY_READ_WRITE: 'Čítanie a zapisovanie', // DeepL
+  API_KEY_READ_WRITE: 'Čítanie a Zapisovanie', // DeepL
   API_KEY_SHOW_ONCE: 'Tento kľúč si teraz skopírujte a uschovajte na bezpečnom mieste. Už sa viac nezobrazí.', // DeepL
   CREATED: 'Vytvorené',
   COPY: 'Text', // DeepL
   COPIED: 'Skopírované',
   USE: 'Používajte', // DeepL
-  FACTORY_RESET: 'Obnovenie továrenských nastavení', // DeepL
+  FACTORY_RESET: 'Továrenský Reset', // DeepL
   SYSTEM_FACTORY_TEXT_DIALOG: 'Naozaj chcete obnoviť továrenské nastavenia EMS-ESP?', // DeepL
   STABLE: 'Stabilné', // DeepL
   DEVELOPMENT: 'Vývoj', // DeepL
@@ -198,7 +198,7 @@ const sk: Translation = {
   SHOW_MORE: 'Zobraziť ďalších {n}',
   SHOW_LESS: 'Zobraziť menej',
   COREDUMP: 'Crash Dump', // DeepL
-  DOWNLOAD_SYSTEM_BACKUP: 'Zálohovanie systému', // DeepL
+  DOWNLOAD_SYSTEM_BACKUP: 'Záloha Systému', // DeepL
   ERROR: 'Došlo k neočakávanej chybe, skúste to prosím znova', // DeepL
   TIME_SET: 'Nastavený čas',
   MANAGE_USERS: 'Správa používateľov',
@@ -260,7 +260,7 @@ const sk: Translation = {
   INACTIVE: 'Neaktívne',
   ACTIVE: 'Aktívne',
   UNKNOWN: 'Neznáme',
-  SET_TIME: 'Nastaviť čas',
+  SET_TIME: 'Nastaviť Čas',
   SET_TIME_TEXT: 'Do nižšie uvedeného poľa zadajte miestny dátum a čas, aby ste nastavili čas', // DeepL
   LOCAL_TIME: 'Miestny čas', // DeepL
   UTC_TIME: 'Čas UTC', // DeepL
@@ -441,11 +441,11 @@ const sk: Translation = {
   DASHBOARD_1: 'Nižšie sa zobrazujú všetky aktívne entity EMS označené ako obľúbené, ako aj všetky vlastné entity, časové plány a externé snímače.', // DeepL
   NO_GPIO: 'Nenašiel sa žiadny dostupný GPIO', // DeepL
   PLATFORM: 'Platforma',
-  RELEASE_TYPE: 'Typ vydania',
-  FIRMWARE_VERSION_INFO: 'Informácie o verzii firmvéru', // DeepL
+  RELEASE_TYPE: 'Typ Vydania',
+  FIRMWARE_VERSION_INFO: 'Informácie o Verzii Firmvéru', // DeepL
   USER_PROFILE: 'Profil používateľa',
   ONLINE_HELP: 'online pomoc',
-  UPGRADE_IMPORTANT_MESSAGES: 'Dôležité správy o aktualizáciách', // DeepL
+  UPGRADE_IMPORTANT_MESSAGES: 'Dôležité Správy o Aktualizáciách', // DeepL
   UPGRADE_IMPORTANT_MESSAGES_2: 'Aktualizujete na novú hlavnú verziu. Odporúča sa najskôr vytvoriť zálohu systému. Skontrolujte tiež online pomoc, či neobsahuje žiadne zásadné zmeny.', // DeepL
   UPGRADE_IMPORTANT_MESSAGES_3: 'Verzia 3.10 obsahuje zásadné zmeny týkajúce sa bezpečnosti. Najskôr si vytvorte zálohu systému: po aktualizácii sa heslá ukladajú v hashovanej podobe a staršie verzie ich nedokážu prečítať, takže na návrat k predchádzajúcej verzii budete potrebovať túto zálohu. Každé volanie API potom vyžaduje kľúč API, takže integrácie, ako napríklad Home Assistant, je potrebné aktualizovať. Pred pokračovaním si prečítajte informácie o zásadných zmenách v online nápovede.', // DeepL
   WARNING_SYSTEM_BACKUP: 'Týmto sa vytvorí záloha vašej kompletnej konfigurácie a nastavení systému. Heslá a kľúče sa do zálohy nezahrnú, pokiaľ ich neuvádzate nižšie; obnovenie zálohy zachová heslá, ktoré sú už v zariadení. Príkazy sú vždy zahrnuté a môžu obsahovať prihlasovacie údaje, preto buďte opatrní pri ich zdieľaní. Chcete pokračovať?', // DeepL
@@ -464,8 +464,8 @@ const sk: Translation = {
   UPLOAD_NOT_OFFICIAL: 'Toto nie je oficiálna verzia EMS-ESP. Inštalujte iba firmware, ktorému dôverujete.', // DeepL
   UPLOAD_NOT_OFFICIAL_HELP: 'O oficiálnych a vlastných zostaveniach',
   UPLOAD_INSTALL_ANYWAY: 'Nainštalujte to aj tak', // DeepL
-  OFFICIAL_BUILD: 'Oficiálna verzia', // DeepL
-  CUSTOM_BUILD: 'Vlastná konfigurácia', // DeepL
+  OFFICIAL_BUILD: 'Oficiálna Verzia', // DeepL
+  CUSTOM_BUILD: 'Vlastná Konfigurácia', // DeepL
   PASSWORD_CONFIRM_TITLE: 'Zadajte heslo ešte raz', // DeepL
   PASSWORD_CONFIRM_TEXT: 'Pre vašu bezpečnosť zadajte heslo pred vykonaním tejto zmeny. Počas nasledujúcich 5 minút nebudete opäť vyzvaní na jeho zadanie.', // DeepL
   PASSWORD_CONFIRM_BUTTON: 'Potvrdiť',
@@ -533,7 +533,7 @@ const sk: Translation = {
   WIFI_SAVED: 'uložené', // DeepL
   NETWORK_ETHERNET_INFO: 'Teraz je zariadenie pripojené cez Ethernet ({ip}). Wi-Fi sa používa len bez kábla.', // DeepL
   HOSTNAME_ACCESS: 'Názov hostiteľa a prístup',
-  IP_ADDRESS: 'IP adresa',
+  IP_ADDRESS: 'IP Adresa',
   NETWORK_ETH_10MBIT: 'Vynútiť 10 Mbit poloduplex', // DeepL
   NETWORK_ETH_10MBIT_HELP: 'len v prípade problémových vypínačov alebo dlhých káblov', // DeepL
   NETWORK_DISABLE_SLEEP_HELP: 'spoľahlivejšie, spotrebuje o niečo viac energie', // DeepL
@@ -570,12 +570,12 @@ const sk: Translation = {
   YOU: 'vy',
   NEW_PASSWORD: 'Nové heslo',
   UNSAVED_CHANGES: '{num} {{neuložených zmien|neuložená zmena|neuložené zmeny|neuložené zmeny|neuložených zmien|neuloženej zmeny}}',
-  CREATE_KEY: 'Vytvorte kľúč', // DeepL
-  NEW_API_KEY: 'Nový kľúč API',
+  CREATE_KEY: 'Vytvoriť Kľúč', // DeepL
+  NEW_API_KEY: 'Nový Kľúč API',
   NO_API_KEYS: 'Zatiaľ nie sú k dispozícii žiadne kľúče API', // DeepL
   API_KEYS_LIMIT: 'Môžete mať maximálne {num} klávesov.', // DeepL
   REVOKE: 'Zrušiť', // DeepL
-  REVOKE_KEY: 'Zrušiť kľúč API', // DeepL
+  REVOKE_KEY: 'Zrušiť Kľúč API', // DeepL
   REVOKE_KEY_TEXT: 'Všetko, čo obsahuje „{name}“, prestane okamžite fungovať.', // DeepL
   MODULES_TEXT: 'Voliteľné funkcie zabudované v tomto firmvéri. Tu ich môžete zapnúť alebo vypnúť.', // DeepL
   BY_AUTHOR: 'autor: {name}',
@@ -588,7 +588,7 @@ const sk: Translation = {
   FW_VERSION_AVAILABLE: 'K dispozícii je verzia {version}', // DeepL
   FW_RELEASE_NOTES: 'Poznámky k vydaniu',
   FW_UPDATES_OFFLINE: 'Nepodarilo sa overiť dostupnosť nových verzií online. Na tento účel potrebuje EMS-ESP pripojenie k internetu.', // DeepL
-  FW_RESTART_RESET: 'Reštart a reset', // DeepL
+  FW_RESTART_RESET: 'Reštart a Reset', // DeepL
   FW_RECOVERY_TEXT: 'Reštartovať do aplikácie Recovery? Pripojí sa k vašej sieti a zároveň spustí vlastný prístupový bod, kde môžete nahrať firmvér.', // DeepL
   FW_SIZE: 'Veľkosť',
   FW_INSTALL_DATE: 'Inštalované na', // DeepL
@@ -626,7 +626,7 @@ const sk: Translation = {
   NO_ENTITIES_MATCH: 'Nenašli sa žiadne zodpovedajúce entity', // DeepL
   LIMIT_HELP: 'nechajte prázdne pre prednastavený limit', // DeepL
   MIN_ABOVE_MAX: 'Minimálna hodnota nesmie prekročiť maximálnu hodnotu', // DeepL
-  RENAME_DEVICE: 'Pomenovať zariadenie', // DeepL
+  RENAME_DEVICE: 'Premenovať Zariadenie', // DeepL
   WEEKLY: 'Týždenne',
   EVERY_DAY: 'Každý deň',
   SCHEDULER_NO_COMMANDS: 'Najskôr pridajte príkaz na stránke Príkazy', // DeepL
@@ -634,7 +634,7 @@ const sk: Translation = {
   DU_SETTINGS_TEXT: 'Záloha nastavení EMS-ESP: sieť, MQTT, Prispôsobenia, Plánovač, vlastné entity a Moduly. Nahraním súboru s nastaveniami alebo zálohy sa EMS-ESP reštartuje.', // DeepL
   HB_TITLE: 'Nastavenia kúrenia',
   HB_TEXT: 'Ukladá aktuálne hodnoty vášho kotla, termostatu a ďalších zariadení EMS, aby ste ich mohli neskôr obnoviť, napríklad po výmene zariadenia. Entity a príkazy určené len na čítanie sa pri obnovení nikdy nemenia.', // DeepL
-  HB_BACKUP: 'Zálohujte nastavenia vykurovania', // DeepL
+  HB_BACKUP: 'Zálohovať Nastavenia Vykurovania', // DeepL
   HB_RESTORE: 'Obnoviť nastavenia vykurovania', // DeepL
   DATA_EXPORT: 'Export údajov',
   DATA_EXPORT_TEXT: 'Na účely podpory a analýzy. Tieto súbory nie je možné nahrať späť.', // DeepL
@@ -675,13 +675,13 @@ const sk: Translation = {
   ADD_SCHEDULE: 'Pridať časový plán', // DeepL
   EDIT_SCHEDULE: 'Upraviť harmonogram', // DeepL
   ADD_ENTITY: 'Pridať entitu',
-  EDIT_ENTITY: 'Upraviť entitu',
+  EDIT_ENTITY: 'Upraviť Entitu',
   ADD_ANALOG_SENSOR: 'Pridať analógový snímač',
   EDIT_ANALOG_SENSOR: 'Úprava analógového snímače', // DeepL
-  REMOVE_ANALOG_SENSOR: 'Odstráňte analógový snímač', // DeepL
+  REMOVE_ANALOG_SENSOR: 'Odstrániť Analógový Snímač', // DeepL
   REMOVE_SENSOR_TEXT: 'Snímač „{name}“ sa ihneď odstráni.', // DeepL
-  EDIT_TEMP_SENSOR: 'Úprava snímače teploty', // DeepL
-  INSTALL_FIRMWARE: 'Inštalácia firmvéru ({channel})', // DeepL
+  EDIT_TEMP_SENSOR: 'Upraviť Snímač Teploty', // DeepL
+  INSTALL_FIRMWARE: 'Inštalácia Firmvéru ({channel})', // DeepL
   PARTITION: 'Oddiel',
   PULSE: 'Pulse', // DeepL
 };

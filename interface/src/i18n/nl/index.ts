@@ -47,7 +47,7 @@ const nl: Translation = {
   MAINTENANCE: 'Onderhoud',
   CHANGE_VALUE: 'Waarde wijzigen', // DeepL
   CANCEL: 'Annuleren',
-  REMOVE_ALL: 'Verwijder alles', // DeepL
+  REMOVE_ALL: 'Alles Verwijderen', // DeepL
   APPLY_CHANGES: 'Wijzigingen toepassen ({0})', // DeepL
   UPDATE: 'Update',
   REMOVE: 'Verwijderen',
@@ -178,13 +178,13 @@ const nl: Translation = {
   API_KEYS_TEXT: 'Met API-sleutels kunnen integraties zoals Home Assistant en scripts de API gebruiken. Stuur de sleutel mee in de header „Authorization: Bearer <SLEUTEL>“. Lees-sleutels kunnen waarden uitlezen en Commando\'s uitvoeren die gasten ook mogen uitvoeren; lees- en schrijf-sleutels kunnen alles doen wat een beheerder via de API kan doen.', // DeepL
   API_KEY_ACCESS: 'Toegang',
   API_KEY_READ: 'Lees verder', // DeepL
-  API_KEY_READ_WRITE: 'Lezen en schrijven', // DeepL
+  API_KEY_READ_WRITE: 'Lezen en Schrijven', // DeepL
   API_KEY_SHOW_ONCE: 'Kopieer deze sleutel nu en bewaar hem goed. Hij wordt niet meer getoond.', // DeepL
   CREATED: 'Gemaakt', // DeepL
   COPY: 'Tekst', // DeepL
   COPIED: 'Gekopieerd',
   USE: 'Gebruik',
-  FACTORY_RESET: 'Terugzetten naar fabrieksinstellingen', // DeepL
+  FACTORY_RESET: 'Fabrieksreset', // DeepL
   SYSTEM_FACTORY_TEXT_DIALOG: 'Weet je zeker dat je EMS-ESP wilt terugzetten naar de fabrieksinstellingen?', // DeepL
   STABLE: 'Stabiel', // DeepL
   DEVELOPMENT: 'Ontwikkeling', // DeepL
@@ -260,7 +260,7 @@ const nl: Translation = {
   INACTIVE: 'Inactief',
   ACTIVE: 'Actief',
   UNKNOWN: 'Onbekend',
-  SET_TIME: 'Tijd instellen',
+  SET_TIME: 'Tijd Instellen',
   SET_TIME_TEXT: 'Voer hieronder de lokale datum en tijd in om de tijd in te stellen', // DeepL
   LOCAL_TIME: 'Lokale tijd', // DeepL
   UTC_TIME: 'UTC-tijd',
@@ -441,11 +441,11 @@ const nl: Translation = {
   DASHBOARD_1: 'Alle actieve EMS-entiteiten die als favoriet zijn gemarkeerd, worden hieronder weergegeven, plus alle aangepaste entiteiten, schema’s en externe sensoren.', // DeepL
   NO_GPIO: 'Er is geen beschikbare GPIO gevonden',
   PLATFORM: 'Platform',
-  RELEASE_TYPE: 'Type release', // DeepL
-  FIRMWARE_VERSION_INFO: 'Informatie over de firmwareversie', // DeepL
+  RELEASE_TYPE: 'Release Type', // DeepL
+  FIRMWARE_VERSION_INFO: 'Firmwareversie-informatie', // DeepL
   USER_PROFILE: 'Gebruikersprofiel',
   ONLINE_HELP: 'online hulp',
-  UPGRADE_IMPORTANT_MESSAGES: 'Belangrijke upgrade-berichten', // DeepL
+  UPGRADE_IMPORTANT_MESSAGES: 'Belangrijke Upgradeberichten', // DeepL
   UPGRADE_IMPORTANT_MESSAGES_2: 'Je gaat upgraden naar een nieuwe hoofdversie. Het is aan te raden om eerst een back-up van het systeem te maken. Kijk ook even in de online help of er belangrijke wijzigingen zijn.', // DeepL
   UPGRADE_IMPORTANT_MESSAGES_3: 'Versie 3.10 bevat ingrijpende beveiligingswijzigingen. Maak eerst een systeemback-up: na de upgrade worden de wachtwoorden gehashte opgeslagen en kunnen oudere versies ze niet meer lezen, dus om terug te gaan heb je deze back-up nodig. Elke API-aanroep heeft dan een API-sleutel nodig, dus integraties zoals Home Assistant moeten worden bijgewerkt. Lees de ingrijpende wijzigingen in de online help voordat je verdergaat.', // DeepL
   WARNING_SYSTEM_BACKUP: 'Hiermee maak je een back-up van je volledige systeemconfiguratie en instellingen. Wachtwoorden en sleutels worden weggelaten, tenzij je ze hieronder opgeeft; bij het terugzetten van de back-up blijven de wachtwoorden die al op het Apparaat staan behouden. Commando\'s worden altijd meegenomen en kunnen inloggegevens bevatten, dus wees voorzichtig met het delen ervan. Wil je doorgaan?', // DeepL
@@ -464,8 +464,8 @@ const nl: Translation = {
   UPLOAD_NOT_OFFICIAL: 'Dit is geen officiële EMS-ESP-build. Installeer alleen firmware die je vertrouwt', // DeepL
   UPLOAD_NOT_OFFICIAL_HELP: 'Over officiële en aangepaste versies', // DeepL
   UPLOAD_INSTALL_ANYWAY: 'Installeer het toch maar', // DeepL
-  OFFICIAL_BUILD: 'Officiële build',
-  CUSTOM_BUILD: 'Op maat gemaakt', // DeepL
+  OFFICIAL_BUILD: 'Officiële Build',
+  CUSTOM_BUILD: 'Aangepaste Build', // DeepL
   PASSWORD_CONFIRM_TITLE: 'Voer je wachtwoord nogmaals in', // DeepL
   PASSWORD_CONFIRM_TEXT: 'Voer voor je eigen veiligheid je wachtwoord in voordat je deze wijziging doorvoert. Je hoeft het de komende 5 minuten niet nog een keer in te voeren.', // DeepL
   PASSWORD_CONFIRM_BUTTON: 'Bevestig', // DeepL
@@ -570,12 +570,12 @@ const nl: Translation = {
   YOU: 'jij',
   NEW_PASSWORD: 'Nieuw wachtwoord',
   UNSAVED_CHANGES: '{num} niet-opgeslagen wijziging{{en}}',
-  CREATE_KEY: 'Maak een sleutel', // DeepL
+  CREATE_KEY: 'Sleutel Maken', // DeepL
   NEW_API_KEY: 'Nieuwe API-sleutel',
   NO_API_KEYS: 'Nog geen API-sleutels',
   API_KEYS_LIMIT: 'Je kunt maximaal {num} toetsen hebben.', // DeepL
   REVOKE: 'Intrekken',
-  REVOKE_KEY: 'API-sleutel intrekken',
+  REVOKE_KEY: 'API-sleutel Intrekken',
   REVOKE_KEY_TEXT: 'Alles waarin „{name}“ voorkomt, werkt meteen niet meer.', // DeepL
   MODULES_TEXT: 'Optionele functies die in deze firmware zijn ingebouwd. Je kunt ze hier in- of uitschakelen.', // DeepL
   BY_AUTHOR: 'door {name}',
@@ -588,7 +588,7 @@ const nl: Translation = {
   FW_VERSION_AVAILABLE: '{version} is beschikbaar',
   FW_RELEASE_NOTES: 'Release-opmerkingen', // DeepL
   FW_UPDATES_OFFLINE: 'Er kon niet online worden gecontroleerd of er nieuwe versies beschikbaar zijn. EMS-ESP heeft hiervoor een internetverbinding nodig.', // DeepL
-  FW_RESTART_RESET: 'Opnieuw opstarten en resetten', // DeepL
+  FW_RESTART_RESET: 'Opnieuw Opstarten en Reset', // DeepL
   FW_RECOVERY_TEXT: 'Opnieuw opstarten via de Recovery-app? Deze maakt verbinding met je netwerk en start ook een eigen toegangspunt, waar je firmware kunt uploaden.', // DeepL
   FW_SIZE: 'Grootte',
   FW_INSTALL_DATE: 'Geïnstalleerd op',
@@ -626,7 +626,7 @@ const nl: Translation = {
   NO_ENTITIES_MATCH: 'Er zijn geen overeenkomende entiteiten', // DeepL
   LIMIT_HELP: 'laat leeg voor de ingebouwde limiet', // DeepL
   MIN_ABOVE_MAX: 'Het minimum mag niet hoger zijn dan het maximum', // DeepL
-  RENAME_DEVICE: 'Apparaat hernoemen',
+  RENAME_DEVICE: 'Apparaat Hernoemen',
   WEEKLY: 'Wekelijks',
   EVERY_DAY: 'Elke dag',
   SCHEDULER_NO_COMMANDS: 'Voeg eerst een commando toe op de pagina Commando\'s',
@@ -634,7 +634,7 @@ const nl: Translation = {
   DU_SETTINGS_TEXT: 'Back-up van de EMS-ESP-instellingen: netwerk, MQTT, Aanpassingen, Scheduler, aangepaste entiteiten en modules. Als je een instellingen- of back-upbestand uploadt, wordt EMS-ESP opnieuw opgestart.', // DeepL
   HB_TITLE: 'Verwarmingsinstellingen',
   HB_TEXT: 'Slaat de huidige waarden van je ketel, thermostaat en andere EMS-apparaten op, zodat je ze later weer kunt terugzetten, bijvoorbeeld na het vervangen van een apparaat. Alleen-lezen entiteiten en commando\'s worden nooit gewijzigd door een herstelbewerking.', // DeepL
-  HB_BACKUP: 'Maak een back-up van de verwarmingsinstellingen', // DeepL
+  HB_BACKUP: 'Verwarmingsinstellingen Back-uppen', // DeepL
   HB_RESTORE: 'Verwarmingsinstellingen herstellen',
   DATA_EXPORT: 'Gegevens exporteren', // DeepL
   DATA_EXPORT_TEXT: 'Voor ondersteuning en analyse. Deze bestanden kunnen niet opnieuw worden geüpload.', // DeepL
@@ -675,13 +675,13 @@ const nl: Translation = {
   ADD_SCHEDULE: 'Schema toevoegen',
   EDIT_SCHEDULE: 'Schema bewerken', // DeepL
   ADD_ENTITY: 'Entiteit toevoegen',
-  EDIT_ENTITY: 'Entiteit bewerken', // DeepL
+  EDIT_ENTITY: 'Entiteit Bewerken', // DeepL
   ADD_ANALOG_SENSOR: 'Analoge Sensor toevoegen', // DeepL
   EDIT_ANALOG_SENSOR: 'Analoge Sensoren bewerken', // DeepL
-  REMOVE_ANALOG_SENSOR: 'Analoge Sensor verwijderen', // DeepL
+  REMOVE_ANALOG_SENSOR: 'Analoge Sensor Verwijderen', // DeepL
   REMOVE_SENSOR_TEXT: 'De Sensor „{name}“ wordt meteen verwijderd.', // DeepL
-  EDIT_TEMP_SENSOR: 'Temperatuursensor bewerken', // DeepL
-  INSTALL_FIRMWARE: 'Firmware installeren ({channel})',
+  EDIT_TEMP_SENSOR: 'Temperatuursensor Bewerken', // DeepL
+  INSTALL_FIRMWARE: 'Firmware Installeren ({channel})',
   PARTITION: 'Sectie', // DeepL
   PULSE: 'Pulse', // DeepL
 };

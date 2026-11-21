@@ -47,7 +47,7 @@ const tr: Translation = {
   MAINTENANCE: 'Bakım',
   CHANGE_VALUE: 'Değeri değiştir',
   CANCEL: 'İptal',
-  REMOVE_ALL: 'Tümünü kaldırın', // DeepL
+  REMOVE_ALL: 'Tümünü Kaldır', // DeepL
   APPLY_CHANGES: 'Değişiklikleri Uygula ({0})',
   UPDATE: 'Güncelleme', // DeepL
   REMOVE: 'Kaldır',
@@ -178,13 +178,13 @@ const tr: Translation = {
   API_KEYS_TEXT: 'API anahtarları, Home Assistant gibi entegrasyonların ve komut dosyalarının API\'yi kullanmasını sağlar. Anahtarı "Authorization: Bearer <ANAHTAR>" başlığında gönderin. Okuma anahtarları, değerleri okuyabilir ve misafirlerin çalıştırabileceği komutları çalıştırabilir; Okuma ve Yazma anahtarları ise bir yöneticinin API aracılığıyla yapabileceği her şeyi yapabilir.', // DeepL
   API_KEY_ACCESS: 'Erişim',
   API_KEY_READ: 'Oku', // DeepL
-  API_KEY_READ_WRITE: 'Okuma ve yazma', // DeepL
+  API_KEY_READ_WRITE: 'Okuma ve Yazma', // DeepL
   API_KEY_SHOW_ONCE: 'Bu anahtarı şimdi kopyalayın ve güvenli bir yerde saklayın. Bir daha gösterilmeyecektir.', // DeepL
   CREATED: 'Oluşturuldu',
   COPY: 'Metin', // DeepL
   COPIED: 'Kopyalandı',
   USE: 'Kullanım', // DeepL
-  FACTORY_RESET: 'Fabrika ayarlarına sıfırla', // DeepL
+  FACTORY_RESET: 'Fabrika Ayarlarına Sıfırla', // DeepL
   SYSTEM_FACTORY_TEXT_DIALOG: 'EMS-ESP\'yi fabrika ayarlarına sıfırlamak istediğinizden emin misiniz?', // DeepL
   STABLE: 'Kararlı',
   DEVELOPMENT: 'Geliştirme',
@@ -198,7 +198,7 @@ const tr: Translation = {
   SHOW_MORE: '{n} tane daha göster',
   SHOW_LESS: 'Daha az göster',
   COREDUMP: 'Hata Dökümü', // DeepL
-  DOWNLOAD_SYSTEM_BACKUP: 'Sistem yedeklemesi', // DeepL
+  DOWNLOAD_SYSTEM_BACKUP: 'Sistem Yedeklemesi', // DeepL
   ERROR: 'Beklenmedik bir hata oluştu, lütfen tekrar deneyin', // DeepL
   TIME_SET: 'Zaman ayarı',
   MANAGE_USERS: 'Kullanıcıları Yönet', // DeepL
@@ -260,7 +260,7 @@ const tr: Translation = {
   INACTIVE: 'Etkin değil', // DeepL
   ACTIVE: 'Etkin', // DeepL
   UNKNOWN: 'Bilinmiyor', // DeepL
-  SET_TIME: 'Zamanı ayarla',
+  SET_TIME: 'Zamanı Ayarla',
   SET_TIME_TEXT: 'Zamanı ayarlamak için aşağıya yerel tarih ve saati girin', // DeepL
   LOCAL_TIME: 'Yerel saat', // DeepL
   UTC_TIME: 'UTC saati',
@@ -441,11 +441,11 @@ const tr: Translation = {
   DASHBOARD_1: 'Favoriler olarak işaretlenmiş tüm aktif EMS varlıkları aşağıda gösterilir; buna ek olarak tüm özel varlıklar, zamanlamalar ve harici Sensörler de listelenir.', // DeepL
   NO_GPIO: 'Kullanılabilir GPIO bulunamadı',
   PLATFORM: 'Platform', // DeepL
-  RELEASE_TYPE: 'Sürüm türü', // DeepL
-  FIRMWARE_VERSION_INFO: 'Firmware sürümü bilgileri', // DeepL
+  RELEASE_TYPE: 'Sürüm Türü', // DeepL
+  FIRMWARE_VERSION_INFO: 'Firmware Sürümü Bilgileri', // DeepL
   USER_PROFILE: 'Kullanıcı Profili',
   ONLINE_HELP: 'çevrimiçi yardım', // DeepL
-  UPGRADE_IMPORTANT_MESSAGES: 'Önemli güncelleme mesajları', // DeepL
+  UPGRADE_IMPORTANT_MESSAGES: 'Önemli Güncelleme Mesajları', // DeepL
   UPGRADE_IMPORTANT_MESSAGES_2: 'Yeni bir ana sürüme yükseltme yapıyorsunuz. Öncelikle sistem yedeği almanız tavsiye edilir. Ayrıca, önemli değişiklikler olup olmadığını öğrenmek için çevrimiçi yardıma bakın.', // DeepL
   UPGRADE_IMPORTANT_MESSAGES_3: '3.10 sürümünde önemli güvenlik değişiklikleri bulunmaktadır. Öncelikle sistem yedeği alın: yükseltme işleminden sonra şifreler karma olarak saklanır ve eski sürümler bunları okuyamaz; bu nedenle geri dönmek için bu yedeğe ihtiyaç duyulur. Artık her API çağrısı için bir API anahtarı gereklidir; dolayısıyla Home Assistant gibi entegrasyonların güncellenmesi gerekir. Devam etmeden önce çevrimiçi yardım bölümündeki önemli değişiklikleri okuyun.', // DeepL
   WARNING_SYSTEM_BACKUP: 'Bu işlem, sistem yapılandırmanızın ve ayarlarınızın tam bir yedeğini oluşturur. Aşağıda belirtmediğiniz sürece şifreler ve anahtarlar yedeğe dahil edilmez; yedeği geri yüklediğinizde cihazda zaten bulunan şifreler korunur. Komutlar her zaman yedeğe dahil edilir ve kimlik bilgilerini içerebilir, bu nedenle paylaşırken dikkatli olun. Devam etmek istiyor musunuz?', // DeepL
@@ -464,8 +464,8 @@ const tr: Translation = {
   UPLOAD_NOT_OFFICIAL: 'Bu, resmi bir EMS-ESP sürümü değildir. Yalnızca güvendiğiniz donanım yazılımını yükleyin', // DeepL
   UPLOAD_NOT_OFFICIAL_HELP: 'Resmi ve özel sürümler hakkında',
   UPLOAD_INSTALL_ANYWAY: 'Yine de yükleyin', // DeepL
-  OFFICIAL_BUILD: 'Resmi sürüm',
-  CUSTOM_BUILD: 'Özel yapılandırma', // DeepL
+  OFFICIAL_BUILD: 'Resmi Sürüm',
+  CUSTOM_BUILD: 'Özel Yapılandırma', // DeepL
   PASSWORD_CONFIRM_TITLE: 'Şifrenizi tekrar girin',
   PASSWORD_CONFIRM_TEXT: 'Güvenliğiniz için, bu değişikliği yapmadan önce şifrenizi girin. 5 dakika boyunca tekrar şifre sorulmayacaktır.', // DeepL
   PASSWORD_CONFIRM_BUTTON: 'Onayla',
@@ -533,7 +533,7 @@ const tr: Translation = {
   WIFI_SAVED: 'kaydedildi', // DeepL
   NETWORK_ETHERNET_INFO: 'Şu anda Ethernet üzerinden bağlanıyor ({ip}). Wi-Fi yalnızca kablosuz bağlantı için kullanılır.', // DeepL
   HOSTNAME_ACCESS: 'Ana Bilgisayar Adı ve Erişim', // DeepL
-  IP_ADDRESS: 'IP adresi',
+  IP_ADDRESS: 'IP Adresi',
   NETWORK_ETH_10MBIT: '10 Mbit yarı çift yönlü zorla', // DeepL
   NETWORK_ETH_10MBIT_HELP: 'sadece sorunlu anahtarlar veya uzun kablolar için', // DeepL
   NETWORK_DISABLE_SLEEP_HELP: 'daha güvenilirdir, biraz daha fazla enerji tüketir', // DeepL
@@ -570,12 +570,12 @@ const tr: Translation = {
   YOU: 'siz',
   NEW_PASSWORD: 'Yeni şifre', // DeepL
   UNSAVED_CHANGES: '{num} kaydedilmemiş değişiklik',
-  CREATE_KEY: 'Anahtar oluşturun', // DeepL
-  NEW_API_KEY: 'Yeni API anahtarı',
+  CREATE_KEY: 'Anahtar Oluştur', // DeepL
+  NEW_API_KEY: 'Yeni API Anahtarı',
   NO_API_KEYS: 'Henüz API anahtarı yok',
   API_KEYS_LIMIT: 'En fazla {num} tuşunuz olabilir.', // DeepL
   REVOKE: 'İptal et',
-  REVOKE_KEY: 'API anahtarını iptal et',
+  REVOKE_KEY: 'API Anahtarını İptal Et',
   REVOKE_KEY_TEXT: '"{name}" ifadesini içeren her şey anında çalışmaz hale gelir.', // DeepL
   MODULES_TEXT: 'Bu donanım yazılımına entegre edilmiş isteğe bağlı özellikler. Bunları buradan etkinleştirebilir veya devre dışı bırakabilirsiniz.', // DeepL
   BY_AUTHOR: '{name} tarafından', // DeepL
@@ -588,7 +588,7 @@ const tr: Translation = {
   FW_VERSION_AVAILABLE: '{version} sürümü mevcuttur', // DeepL
   FW_RELEASE_NOTES: 'Sürüm notları',
   FW_UPDATES_OFFLINE: 'Yeni sürümler için çevrimiçi kontrol yapılamadı. EMS-ESP\'nin bunun için internet bağlantısına ihtiyacı vardır.', // DeepL
-  FW_RESTART_RESET: 'Yeniden başlatma ve sıfırlama',
+  FW_RESTART_RESET: 'Yeniden Başlatma ve Sıfırlama',
   FW_RECOVERY_TEXT: 'Kurtarma Uygulamasına yeniden başlatmak ister misiniz? Uygulama, ağınıza bağlanır ve ayrıca kendi Erişim Noktasını başlatır; buradan yazılım güncellemesini yükleyebilirsiniz.', // DeepL
   FW_SIZE: 'Boyut',
   FW_INSTALL_DATE: 'Yüklendiği yer', // DeepL
@@ -626,7 +626,7 @@ const tr: Translation = {
   NO_ENTITIES_MATCH: 'Eşleşen varlık yok',
   LIMIT_HELP: 'yerleşik sınır için boş bırakın',
   MIN_ABOVE_MAX: 'Minimum değer, maksimum değerden fazla olmamalıdır', // DeepL
-  RENAME_DEVICE: 'Cihazın adını değiştir', // DeepL
+  RENAME_DEVICE: 'Cihazın Adını Değiştir', // DeepL
   WEEKLY: 'Haftalık',
   EVERY_DAY: 'Her gün',
   SCHEDULER_NO_COMMANDS: 'Önce Komutlar sayfasına bir komut ekleyin', // DeepL
@@ -634,7 +634,7 @@ const tr: Translation = {
   DU_SETTINGS_TEXT: 'EMS-ESP ayarlarının yedeklenmesi: ağ, MQTT, Özelleştirme, Zamanlayıcı, Özel Varlıklar ve Modüller. Bir ayar veya yedekleme dosyasının yüklenmesi, EMS-ESP\'yi yeniden başlatır.', // DeepL
   HB_TITLE: 'Isıtma Ayarları', // DeepL
   HB_TEXT: 'Kazanın, termostatın ve diğer EMS cihazlarının mevcut değerlerini kaydeder; böylece, örneğin bir cihazı değiştirdikten sonra bu değerleri daha sonra geri yükleyebilirsiniz. Salt okunur varlıklar ve komutlar, geri yükleme işlemiyle asla değiştirilmez.', // DeepL
-  HB_BACKUP: 'Isıtma ayarlarını yedekleyin', // DeepL
+  HB_BACKUP: 'Isıtma Ayarlarını Yedekle', // DeepL
   HB_RESTORE: 'Isıtma Ayarlarını Geri Yükle', // DeepL
   DATA_EXPORT: 'Veri Dışa Aktarma', // DeepL
   DATA_EXPORT_TEXT: 'Destek ve analiz amaçlıdır. Bu dosyalar geri yüklenemez.', // DeepL
@@ -675,13 +675,13 @@ const tr: Translation = {
   ADD_SCHEDULE: 'Zamanlama ekle',
   EDIT_SCHEDULE: 'Programı düzenle', // DeepL
   ADD_ENTITY: 'Varlık ekle',
-  EDIT_ENTITY: 'Varlığı düzenle',
+  EDIT_ENTITY: 'Varlığı Düzenle',
   ADD_ANALOG_SENSOR: 'Analog sensör ekleyin', // DeepL
   EDIT_ANALOG_SENSOR: 'Analog sensörü düzenle',
-  REMOVE_ANALOG_SENSOR: 'Analog sensörü kaldırın', // DeepL
+  REMOVE_ANALOG_SENSOR: 'Analog Sensörü Kaldır', // DeepL
   REMOVE_SENSOR_TEXT: '"{name}" sensörü hemen kaldırılır.',
-  EDIT_TEMP_SENSOR: 'Sıcaklık sensörünü düzenle',
-  INSTALL_FIRMWARE: 'Firmware\'i yükleyin ({channel})', // DeepL
+  EDIT_TEMP_SENSOR: 'Sıcaklık Sensörünü Düzenle',
+  INSTALL_FIRMWARE: 'Firmware\'i Yükle ({channel})', // DeepL
   PARTITION: 'Bölüm',
   PULSE: 'Pulse', // DeepL
 };

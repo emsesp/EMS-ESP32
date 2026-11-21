@@ -47,7 +47,7 @@ const fr: Translation = {
   MAINTENANCE: 'Maintenance',
   CHANGE_VALUE: 'Modifier la valeur', // DeepL
   CANCEL: 'Annuler',
-  REMOVE_ALL: 'Supprimez tout', // DeepL
+  REMOVE_ALL: 'Tout Supprimer', // DeepL
   APPLY_CHANGES: 'Appliquer les modifications ({0})', // DeepL
   UPDATE: 'Mise à jour', // DeepL
   REMOVE: 'Supprimer', // DeepL
@@ -178,13 +178,13 @@ const fr: Translation = {
   API_KEYS_TEXT: 'Les clés API permettent à des intégrations telles que Home Assistant et à des scripts d\'utiliser l\'API. Envoyez la clé dans l\'en-tête « Authorization: Bearer <CLÉ> ». Les clés en lecture permettent de lire des valeurs et d\'exécuter des Commandes que les invités peuvent exécuter ; les clés en lecture et en écriture permettent d\'effectuer toutes les actions qu\'un administrateur peut effectuer via l\'API.', // DeepL
   API_KEY_ACCESS: 'Accès',
   API_KEY_READ: 'Lire', // DeepL
-  API_KEY_READ_WRITE: 'Lecture et écriture', // DeepL
+  API_KEY_READ_WRITE: 'Lecture et Écriture', // DeepL
   API_KEY_SHOW_ONCE: 'Copiez cette clé dès maintenant et conservez-la en lieu sûr. Elle ne s\'affichera plus par la suite.', // DeepL
   CREATED: 'Créé', // DeepL
   COPY: 'Texte', // DeepL
   COPIED: 'Copié',
   USE: 'Utilisez', // DeepL
-  FACTORY_RESET: 'Réinitialisation aux paramètres d\'usine', // DeepL
+  FACTORY_RESET: 'Réinitialisation d\'Usine', // DeepL
   SYSTEM_FACTORY_TEXT_DIALOG: 'Êtes-vous sûr de vouloir réinitialiser EMS-ESP à ses paramètres d\'usine ?', // DeepL
   STABLE: 'Stable',
   DEVELOPMENT: 'Développement',
@@ -198,7 +198,7 @@ const fr: Translation = {
   SHOW_MORE: 'Afficher {n} autres', // DeepL
   SHOW_LESS: 'Afficher moins',
   COREDUMP: 'Fichier de vidage mémoire', // DeepL
-  DOWNLOAD_SYSTEM_BACKUP: 'Sauvegarde du système', // DeepL
+  DOWNLOAD_SYSTEM_BACKUP: 'Sauvegarde Système', // DeepL
   ERROR: 'Erreur inattendue, veuillez réessayer',
   TIME_SET: 'Heure programmée', // DeepL
   MANAGE_USERS: 'Gérer les utilisateurs',
@@ -260,7 +260,7 @@ const fr: Translation = {
   INACTIVE: 'Inactif',
   ACTIVE: 'Actif',
   UNKNOWN: 'Inconnu',
-  SET_TIME: 'Régler l\'heure', // DeepL
+  SET_TIME: 'Régler l\'Heure', // DeepL
   SET_TIME_TEXT: 'Saisissez ci-dessous la date et l\'heure locales pour régler l\'heure', // DeepL
   LOCAL_TIME: 'Heure locale',
   UTC_TIME: 'Heure UTC',
@@ -441,11 +441,11 @@ const fr: Translation = {
   DASHBOARD_1: 'Toutes les entités EMS actives marquées comme Favoris sont affichées ci-dessous, ainsi que toutes les entités personnalisées, les programmations et les capteurs externes.', // DeepL
   NO_GPIO: 'Aucun GPIO disponible', // DeepL
   PLATFORM: 'Plateforme',
-  RELEASE_TYPE: 'Type de version',
-  FIRMWARE_VERSION_INFO: 'Informations sur la version du micrologiciel', // DeepL
+  RELEASE_TYPE: 'Type de Version',
+  FIRMWARE_VERSION_INFO: 'Informations sur la Version du Micrologiciel', // DeepL
   USER_PROFILE: 'Profil utilisateur',
   ONLINE_HELP: 'Aide en ligne', // DeepL
-  UPGRADE_IMPORTANT_MESSAGES: 'Messages importants concernant les mises à jour', // DeepL
+  UPGRADE_IMPORTANT_MESSAGES: 'Messages Importants de Mise à Jour', // DeepL
   UPGRADE_IMPORTANT_MESSAGES_2: 'Vous effectuez une mise à niveau vers une nouvelle version majeure. Il est conseillé de commencer par effectuer une sauvegarde du système. Consultez également l’aide en ligne pour prendre connaissance des éventuelles modifications importantes.', // DeepL
   UPGRADE_IMPORTANT_MESSAGES_3: 'La version 3.10 comporte des modifications majeures en matière de sécurité. Effectuez d’abord une sauvegarde du système : après la mise à jour, les mots de passe sont stockés sous forme hachée et les anciennes versions ne peuvent plus les lire ; cette sauvegarde est donc indispensable pour revenir à une version antérieure. Chaque appel à l’API nécessite désormais une clé API ; les intégrations telles que Home Assistant doivent donc être mises à jour. Veuillez consulter les modifications majeures dans l’aide en ligne avant de poursuivre.', // DeepL
   WARNING_SYSTEM_BACKUP: 'Cette opération crée une sauvegarde de l’intégralité de la configuration et des paramètres de votre système. Les mots de passe et les clés ne sont pas inclus, sauf si vous les indiquez ci-dessous ; la restauration de la sauvegarde conserve les mots de passe déjà enregistrés sur l’Appareil. Les Commandes sont toujours incluses et peuvent contenir des identifiants d’authentification ; veillez donc à ne pas les partager à la légère. Souhaitez-vous continuer ?', // DeepL
@@ -464,8 +464,8 @@ const fr: Translation = {
   UPLOAD_NOT_OFFICIAL: 'Il ne s\'agit pas d\'une version officielle d\'EMS-ESP. N\'installez que des micrologiciels auxquels vous faites confiance', // DeepL
   UPLOAD_NOT_OFFICIAL_HELP: 'À propos des versions officielles et personnalisées',
   UPLOAD_INSTALL_ANYWAY: 'Installez-le quand même', // DeepL
-  OFFICIAL_BUILD: 'Version officielle',
-  CUSTOM_BUILD: 'Configuration personnalisée', // DeepL
+  OFFICIAL_BUILD: 'Version Officielle',
+  CUSTOM_BUILD: 'Version Personnalisée', // DeepL
   PASSWORD_CONFIRM_TITLE: 'Veuillez saisir à nouveau votre mot de passe', // DeepL
   PASSWORD_CONFIRM_TEXT: 'Pour votre sécurité, veuillez saisir votre mot de passe avant d\'effectuer cette modification. Il ne vous sera plus demandé avant 5 minutes.', // DeepL
   PASSWORD_CONFIRM_BUTTON: 'Confirmer',
@@ -570,12 +570,12 @@ const fr: Translation = {
   YOU: 'vous',
   NEW_PASSWORD: 'Nouveau mot de passe',
   UNSAVED_CHANGES: '{num} modification{{s}} non enregistrée{{s}}',
-  CREATE_KEY: 'Créer une clé',
-  NEW_API_KEY: 'Nouvelle clé API',
+  CREATE_KEY: 'Créer une Clé',
+  NEW_API_KEY: 'Nouvelle Clé API',
   NO_API_KEYS: 'Pas encore de clés API', // DeepL
   API_KEYS_LIMIT: 'Vous pouvez disposer d\'un maximum de {num} touches.', // DeepL
   REVOKE: 'Révoquer',
-  REVOKE_KEY: 'Révoquer la clé API',
+  REVOKE_KEY: 'Révoquer la Clé API',
   REVOKE_KEY_TEXT: 'Tout élément contenant « {name} » cesse immédiatement de fonctionner.', // DeepL
   MODULES_TEXT: 'Fonctionnalités optionnelles intégrées à ce micrologiciel. Vous pouvez les activer ou les désactiver ici.', // DeepL
   BY_AUTHOR: 'par {name}',
@@ -588,7 +588,7 @@ const fr: Translation = {
   FW_VERSION_AVAILABLE: 'La {version} est disponible', // DeepL
   FW_RELEASE_NOTES: 'Notes de mise à jour', // DeepL
   FW_UPDATES_OFFLINE: 'Impossible de vérifier en ligne la disponibilité de nouvelles versions. EMS-ESP a besoin d\'une connexion Internet pour cela.', // DeepL
-  FW_RESTART_RESET: 'Redémarrage et réinitialisation',
+  FW_RESTART_RESET: 'Redémarrage et Réinitialisation',
   FW_RECOVERY_TEXT: 'Redémarrer dans l’application de récupération ? Elle se connecte à votre réseau et lance également son propre point d’accès, sur lequel vous pouvez téléverser le micrologiciel.',
   FW_SIZE: 'Taille',
   FW_INSTALL_DATE: 'Installé sur', // DeepL
@@ -626,7 +626,7 @@ const fr: Translation = {
   NO_ENTITIES_MATCH: 'Aucune entité ne correspond',
   LIMIT_HELP: 'Laissez ce champ vide pour la limite intégrée', // DeepL
   MIN_ABOVE_MAX: 'La valeur minimale ne doit pas dépasser la valeur maximale', // DeepL
-  RENAME_DEVICE: 'Renommer un appareil', // DeepL
+  RENAME_DEVICE: 'Renommer l\'Appareil', // DeepL
   WEEKLY: 'Hebdomadaire',
   EVERY_DAY: 'Chaque jour', // DeepL
   SCHEDULER_NO_COMMANDS: 'Commencez par ajouter une commande sur la page « Commandes »', // DeepL
@@ -634,7 +634,7 @@ const fr: Translation = {
   DU_SETTINGS_TEXT: 'Sauvegarde des paramètres d’EMS-ESP : réseau, MQTT, personnalisation, Scheduler, entités et modules personnalisés. Le téléversement d’un fichier de paramètres ou de sauvegarde redémarre EMS-ESP.',
   HB_TITLE: 'Paramètres de chauffage',
   HB_TEXT: 'Enregistre les valeurs actuelles de votre chaudière, de votre thermostat et des autres appareils EMS, afin que vous puissiez les rétablir ultérieurement, par exemple après le remplacement d’un appareil. Les entités et Commandes en lecture seule ne sont jamais modifiées par une restauration.', // DeepL
-  HB_BACKUP: 'Sauvegarder les paramètres de chauffage',
+  HB_BACKUP: 'Sauvegarder les Paramètres de Chauffage',
   HB_RESTORE: 'Restaurer les paramètres de chauffage',
   DATA_EXPORT: 'Exportation des données', // DeepL
   DATA_EXPORT_TEXT: 'À des fins d\'assistance et d\'analyse. Ces fichiers ne peuvent pas être réimportés.', // DeepL
@@ -675,13 +675,13 @@ const fr: Translation = {
   ADD_SCHEDULE: 'Ajouter un programme',
   EDIT_SCHEDULE: 'Modifier le programme',
   ADD_ENTITY: 'Ajouter une entité',
-  EDIT_ENTITY: 'Modifier l\'entité',
+  EDIT_ENTITY: 'Modifier l\'Entité',
   ADD_ANALOG_SENSOR: 'Ajouter un capteur analogique',
   EDIT_ANALOG_SENSOR: 'Modifier un capteur analogique', // DeepL
-  REMOVE_ANALOG_SENSOR: 'Retirer le capteur analogique', // DeepL
+  REMOVE_ANALOG_SENSOR: 'Retirer le Capteur Analogique', // DeepL
   REMOVE_SENSOR_TEXT: 'Le capteur « {name} » est immédiatement supprimé.', // DeepL
-  EDIT_TEMP_SENSOR: 'Modifier le capteur de température',
-  INSTALL_FIRMWARE: 'Installer le micrologiciel ({channel})', // DeepL
+  EDIT_TEMP_SENSOR: 'Modifier le Capteur de Température',
+  INSTALL_FIRMWARE: 'Installer le Micrologiciel ({channel})', // DeepL
   PARTITION: 'Partition',
   PULSE: 'Pulse', // DeepL
 };

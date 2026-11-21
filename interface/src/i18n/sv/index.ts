@@ -47,7 +47,7 @@ const sv: Translation = {
   MAINTENANCE: 'Underhåll',
   CHANGE_VALUE: 'Ändra värde',
   CANCEL: 'Avbryt',
-  REMOVE_ALL: 'Ta bort alla', // DeepL
+  REMOVE_ALL: 'Ta Bort Alla', // DeepL
   APPLY_CHANGES: 'Verkställ ändringar ({0})', // DeepL
   UPDATE: 'Uppdatera',
   REMOVE: 'Ta bort',
@@ -178,13 +178,13 @@ const sv: Translation = {
   API_KEYS_TEXT: 'API-nycklar gör det möjligt för integrationer som Home Assistant och skript att använda API:et. Skicka nyckeln i rubriken ”Authorization: Bearer <NYCKEL>”. Läsnycklar kan läsa av värden och köra kommandon som gäster kan köra, medan läs- och skrivnycklar kan göra allt som en administratör kan göra via API:et.', // DeepL
   API_KEY_ACCESS: 'Åtkomst',
   API_KEY_READ: 'Läs', // DeepL
-  API_KEY_READ_WRITE: 'Läs och skriv', // DeepL
+  API_KEY_READ_WRITE: 'Läs och Skriv', // DeepL
   API_KEY_SHOW_ONCE: 'Kopiera den här nyckeln nu och förvara den på ett säkert ställe. Den kommer inte att visas igen.', // DeepL
   CREATED: 'Skapad',
   COPY: 'Text', // DeepL
   COPIED: 'Kopierat', // DeepL
   USE: 'Använd',
-  FACTORY_RESET: 'Återställ till fabriksinställningar', // DeepL
+  FACTORY_RESET: 'Fabriksåterställning', // DeepL
   SYSTEM_FACTORY_TEXT_DIALOG: 'Är du säker på att du vill återställa EMS-ESP till fabriksinställningarna?', // DeepL
   STABLE: 'Stabil',
   DEVELOPMENT: 'Utveckling',
@@ -198,7 +198,7 @@ const sv: Translation = {
   SHOW_MORE: 'Visa {n} fler', // DeepL
   SHOW_LESS: 'Visa mindre', // DeepL
   COREDUMP: 'Kraschdump',
-  DOWNLOAD_SYSTEM_BACKUP: 'Säkerhetskopiering av systemet', // DeepL
+  DOWNLOAD_SYSTEM_BACKUP: 'Systembackup', // DeepL
   ERROR: 'Oväntat fel, försök igen', // DeepL
   TIME_SET: 'Tidsinställning', // DeepL
   MANAGE_USERS: 'Hantera användare', // DeepL
@@ -260,7 +260,7 @@ const sv: Translation = {
   INACTIVE: 'Inaktiv',
   ACTIVE: 'Aktiv',
   UNKNOWN: 'Okänt',
-  SET_TIME: 'Ställ in tid', // DeepL
+  SET_TIME: 'Ställ In Tid', // DeepL
   SET_TIME_TEXT: 'Ange lokalt datum och tid nedan för att ställa in tiden', // DeepL
   LOCAL_TIME: 'Lokal tid', // DeepL
   UTC_TIME: 'UTC-tid', // DeepL
@@ -441,11 +441,11 @@ const sv: Translation = {
   DASHBOARD_1: 'Alla aktiva EMS-entiteter som är markerade som Favoriter visas nedan, tillsammans med alla anpassade entiteter, scheman och externa sensorer.', // DeepL
   NO_GPIO: 'Ingen tillgänglig GPIO hittades', // DeepL
   PLATFORM: 'Plattform',
-  RELEASE_TYPE: 'Typ av utgåva', // DeepL
-  FIRMWARE_VERSION_INFO: 'Information om firmwareversion',
+  RELEASE_TYPE: 'Utgåvetyp', // DeepL
+  FIRMWARE_VERSION_INFO: 'Firmwareversionsinformation',
   USER_PROFILE: 'Användarprofil',
   ONLINE_HELP: 'onlinehjälp', // DeepL
-  UPGRADE_IMPORTANT_MESSAGES: 'Viktiga uppdateringsmeddelanden', // DeepL
+  UPGRADE_IMPORTANT_MESSAGES: 'Viktiga Uppdateringsmeddelanden', // DeepL
   UPGRADE_IMPORTANT_MESSAGES_2: 'Du uppgraderar till en ny huvudversion. Det rekommenderas att du först gör en säkerhetskopia av systemet. Kontrollera även onlinehjälpen för eventuella avgörande ändringar.', // DeepL
   UPGRADE_IMPORTANT_MESSAGES_3: 'Version 3.10 innehåller säkerhetsändringar som medför bakåtkompatibilitetsproblem. Gör först en säkerhetskopia av systemet: efter uppgraderingen lagras lösenorden i hashform och äldre versioner kan inte läsa dem, så för att återgå till en tidigare version krävs denna säkerhetskopia. Varje API-anrop kräver då en API-nyckel, så integrationer som Home Assistant måste uppdateras. Läs om de bakåtkompatibilitetsproblem som medförs i onlinehjälpen innan du fortsätter.', // DeepL
   WARNING_SYSTEM_BACKUP: 'Detta skapar en säkerhetskopia av hela din systemkonfiguration och dina inställningar. Lösenord och nycklar utelämnas om du inte anger dem nedan; när säkerhetskopian återställs behålls de lösenord som redan finns på enheten. Kommandon inkluderas alltid och kan innehålla inloggningsuppgifter, så var försiktig med att dela dem. Vill du fortsätta?', // DeepL
@@ -464,8 +464,8 @@ const sv: Translation = {
   UPLOAD_NOT_OFFICIAL: 'Detta är inte en officiell version av EMS-ESP. Installera endast firmware som du litar på', // DeepL
   UPLOAD_NOT_OFFICIAL_HELP: 'Om officiella och anpassade versioner', // DeepL
   UPLOAD_INSTALL_ANYWAY: 'Installera ändå',
-  OFFICIAL_BUILD: 'Officiell version',
-  CUSTOM_BUILD: 'Skräddarsydd lösning', // DeepL
+  OFFICIAL_BUILD: 'Officiell Version',
+  CUSTOM_BUILD: 'Anpassad Version', // DeepL
   PASSWORD_CONFIRM_TITLE: 'Ange ditt lösenord igen',
   PASSWORD_CONFIRM_TEXT: 'För din säkerhet, ange ditt lösenord innan denna ändring. Du kommer inte att bli ombedd att ange det igen på 5 minuter.', // DeepL
   PASSWORD_CONFIRM_BUTTON: 'Bekräfta',
@@ -570,7 +570,7 @@ const sv: Translation = {
   YOU: 'du',
   NEW_PASSWORD: 'Nytt lösenord',
   UNSAVED_CHANGES: '{num} {{osparad ändring|osparade ändringar}}',
-  CREATE_KEY: 'Skapa nyckel',
+  CREATE_KEY: 'Skapa Nyckel',
   NEW_API_KEY: 'Ny API-nyckel',
   NO_API_KEYS: 'Inga API-nycklar ännu',
   API_KEYS_LIMIT: 'Du kan ha högst {num}-tangenter.', // DeepL
@@ -588,7 +588,7 @@ const sv: Translation = {
   FW_VERSION_AVAILABLE: '{version} är tillgänglig',
   FW_RELEASE_NOTES: 'Releaseanteckningar', // DeepL
   FW_UPDATES_OFFLINE: 'Det gick inte att söka efter nya versioner online. EMS-ESP behöver en internetanslutning för detta.', // DeepL
-  FW_RESTART_RESET: 'Omstart och återställning',
+  FW_RESTART_RESET: 'Omstart och Återställning',
   FW_RECOVERY_TEXT: 'Ska du starta om i återställningsappen? Den ansluter till ditt nätverk och startar även en egen åtkomstpunkt, där du kan ladda upp firmware.', // DeepL
   FW_SIZE: 'Storlek',
   FW_INSTALL_DATE: 'Installerad på', // DeepL
@@ -626,7 +626,7 @@ const sv: Translation = {
   NO_ENTITIES_MATCH: 'Inga entiteter matchar',
   LIMIT_HELP: 'Lämna tomt för det inbyggda gränsvärdet', // DeepL
   MIN_ABOVE_MAX: 'Minimivärdet får inte överstiga maximivärdet', // DeepL
-  RENAME_DEVICE: 'Byt namn på enheten', // DeepL
+  RENAME_DEVICE: 'Byt Namn på Enheten', // DeepL
   WEEKLY: 'Veckovis',
   EVERY_DAY: 'Varje dag',
   SCHEDULER_NO_COMMANDS: 'Lägg först till ett kommando på sidan Kommandon',
@@ -634,7 +634,7 @@ const sv: Translation = {
   DU_SETTINGS_TEXT: 'Säkerhetskopiering av EMS-ESP-inställningarna: nätverk, MQTT, anpassningar, Schemaläggning, anpassade entiteter och moduler. När du laddar upp en inställnings- eller säkerhetskopieringsfil startas EMS-ESP om.', // DeepL
   HB_TITLE: 'Värmeinställningar',
   HB_TEXT: 'Sparar de aktuella värdena för din värmepanna, termostat och andra EMS-enheter, så att du kan återställa dem senare, till exempel efter att du bytt ut en enhet. Skrivskyddade entiteter och kommandon ändras aldrig vid en återställning.', // DeepL
-  HB_BACKUP: 'Säkerhetskopiera värmeinställningarna', // DeepL
+  HB_BACKUP: 'Säkerhetskopiera Värmeinställningarna', // DeepL
   HB_RESTORE: 'Återställ värmeinställningar',
   DATA_EXPORT: 'Dataexport',
   DATA_EXPORT_TEXT: 'För support och analys. Dessa filer kan inte laddas upp igen.',
@@ -675,13 +675,13 @@ const sv: Translation = {
   ADD_SCHEDULE: 'Lägg till schema',
   EDIT_SCHEDULE: 'Redigera schema',
   ADD_ENTITY: 'Lägg till enhet', // DeepL
-  EDIT_ENTITY: 'Redigera entiteter', // DeepL
+  EDIT_ENTITY: 'Redigera Entitet', // DeepL
   ADD_ANALOG_SENSOR: 'Lägg till analog sensor',
   EDIT_ANALOG_SENSOR: 'Redigera analoga sensorer', // DeepL
-  REMOVE_ANALOG_SENSOR: 'Ta bort analog sensor',
+  REMOVE_ANALOG_SENSOR: 'Ta Bort Analog Sensor',
   REMOVE_SENSOR_TEXT: 'Sensor ”{name}” tas bort direkt.', // DeepL
-  EDIT_TEMP_SENSOR: 'Redigera temperaturgivare', // DeepL
-  INSTALL_FIRMWARE: 'Installera firmware ({channel})',
+  EDIT_TEMP_SENSOR: 'Redigera Temperaturgivare', // DeepL
+  INSTALL_FIRMWARE: 'Installera Firmware ({channel})',
   PARTITION: 'Avsnitt', // DeepL
   PULSE: 'Pulse', // DeepL
 };
