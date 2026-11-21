@@ -270,7 +270,8 @@ let system_status = {
     'it',
     'sk',
     'cs',
-    'hu'
+    'hu',
+    'zh'
   ],
   // languages: ['en'], // 4MB flash boards
   model: 'BBQKees Electronics E32V2.2 rev.2.2/2024074',
@@ -444,7 +445,7 @@ function applyMockData() {
   }
   system_status.languages =
     layout.flash > 4096
-      ? ['en', 'de', 'nl', 'sv', 'pl', 'no', 'fr', 'tr', 'it', 'sk', 'cs', 'hu']
+      ? ['en', 'de', 'nl', 'sv', 'pl', 'no', 'fr', 'tr', 'it', 'sk', 'cs', 'hu', 'zh']
       : ['en'];
 
   const psram_size = system_status.esp_platform === 'ESP32' ? 4096 : 8189;

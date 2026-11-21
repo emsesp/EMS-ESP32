@@ -164,6 +164,8 @@ const zh: Translation = {
   UPLOAD: "上传",
   DOWNLOAD: "下载",
   INSTALL: "安装",
+  REINSTALL: '重新安装', // DeepL
+  REINSTALL_CONFIRM: '您确定要重新安装版本 {0} 吗？', // DeepL
   FAILED: "失败",
   SYSTEM: "系统",
   SYSTEM_LOG: "系统日志",

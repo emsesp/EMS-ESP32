@@ -24,7 +24,20 @@ const { values: args } = parseArgs({
   }
 });
 
-const LANGS = ['cs', 'de', 'fr', 'hu', 'it', 'nl', 'no', 'pl', 'sk', 'sv', 'tr'];
+const LANGS = [
+  'cs',
+  'de',
+  'fr',
+  'hu',
+  'it',
+  'nl',
+  'no',
+  'pl',
+  'sk',
+  'sv',
+  'tr',
+  'zh'
+];
 const DEEPL_LANG = { no: 'NB' };
 // match the tone of the existing translations; ignored by DeepL where unsupported
 const FORMALITY = {
