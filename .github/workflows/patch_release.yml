@@ -11,27 +11,60 @@ on:
 permissions:
   contents: write
 
+# Single-job release for the patch branch. Toolchain matches dev_release /
+# stable_release (Node 26, pnpm from interface/package.json, pioarduino 6.2.0).
+
 jobs:
   patch-release:
     name: 'Build Patch Release'
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
 
       - name: Install python 3.13
         uses: actions/setup-python@v7
         with:
           python-version: '3.13'
 
-      - name: Install Node.js 24
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          package_json_file: interface/package.json
+
+      - name: Install Node.js 26
         uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version: 26
 
-      - name: Checkout repository
-        uses: actions/checkout@v7
+      - name: Cache pnpm store
+        uses: actions/cache@v6
+        with:
+          path: ~/.local/share/pnpm/store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('interface/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
 
-      - name: Enable Corepack
-        run: corepack enable pnpm
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.3.3
+        with:
+          version: "latest"
+          enable-cache: false
+
+      - name: Cache PlatformIO packages
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.platformio/.cache
+            ~/.platformio/packages
+            ~/.platformio/platforms
+          key: ${{ runner.os }}-pio-patch-${{ hashFiles('platformio.ini') }}
+          restore-keys: |
+            ${{ runner.os }}-pio-patch-
+            ${{ runner.os }}-pio-
+
+      - name: Install pioarduino
+        run: uv pip install --system pioarduino==6.2.0
 
       - name: Get the EMS-ESP version
         id: build_info
@@ -39,27 +72,22 @@ jobs:
           version=`grep -E '^#define EMSESP_APP_VERSION' ./src/emsesp_version.h | awk -F'"' '{print $2}'`
           echo "VERSION=$version" >> $GITHUB_OUTPUT
 
-      - name: Install PlatformIO
-        run: |
-          python -m pip install --upgrade pip
-          pip install -U platformio
-          python -m pip install intelhex
-
       - name: Build webUI
+        env:
+          CI: true
+        working-directory: interface
         run: |
-          platformio run -e build-webUI
+          pnpm install --frozen-lockfile
+          pnpm build-webUI
 
       - name: Build modbus
-        run: |
-          platformio run -e build_modbus
+        run: platformio run -e build_modbus
 
       - name: Build standalone
-        run: |
-          platformio run -e build_standalone
+        run: platformio run -e build_standalone
 
       - name: Build all PIO target environments, from default_envs
-        run: |
-          platformio run
+        run: platformio run
 
       - name: Commit the generated files
         uses: stefanzweifel/git-auto-commit-action@v7
