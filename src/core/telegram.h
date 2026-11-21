@@ -453,7 +453,7 @@ class TxService : public EMSbus {
     struct QueuedTxTelegram {
         const uint16_t                        id_;
         const std::shared_ptr<const Telegram> telegram_;
-        const bool                            retry_;    // true if its a retry
+        const bool                            retry_; // true if its a retry
         const uint16_t                        validateid_;
         const bool                            priority_; // true if this jumps ahead of background reads
 
