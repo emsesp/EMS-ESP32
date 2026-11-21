@@ -370,7 +370,7 @@ const Customizations = () => {
           </Button>
           <Button
             size="sm"
-            color="secondary"
+            color="neutral"
             icon="close"
             onClick={() => setSelectedIds(new Set())}
           >
@@ -599,7 +599,7 @@ const Customizations = () => {
         actions={
           <>
             <Button
-              color="secondary"
+              color="neutral"
               icon="cancel"
               onClick={() => setRenaming(undefined)}
             >

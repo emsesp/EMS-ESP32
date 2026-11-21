@@ -27,6 +27,19 @@
   color: var(--secondary);
   border-color: var(--secondary-line);
 }
+.btn.secondary:hover {
+  background: var(--secondary-tint);
+  border-color: var(--secondary);
+}
+.btn.neutral {
+  color: var(--text-2);
+  border-color: var(--outline);
+}
+.btn.neutral:hover {
+  background: var(--hover);
+  border-color: var(--text-3);
+  color: var(--text);
+}
 .btn.warning {
   color: var(--warning);
   border-color: var(--warning-line);

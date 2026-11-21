@@ -164,6 +164,8 @@ const sv: Translation = {
   UPLOAD: 'Ladda upp', // DeepL
   DOWNLOAD: 'Nedladdning',
   INSTALL: 'Installera',
+  REINSTALL: 'Installera om',
+  REINSTALL_CONFIRM: 'Är du säker på att du vill installera om version {0}?',
   FAILED: 'misslyckades', // DeepL
   SYSTEM: 'System',
   SYSTEM_LOG: 'Systemlogg',

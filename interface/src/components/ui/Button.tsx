@@ -9,7 +9,7 @@ export interface ButtonProps extends Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
   'color'
 > {
-  color?: 'primary' | 'secondary' | 'warning' | 'error';
+  color?: 'primary' | 'secondary' | 'neutral' | 'warning' | 'error';
   size?: 'sm' | undefined;
   icon?: IconName | undefined;
 }

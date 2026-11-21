@@ -36,7 +36,7 @@ const TelnetBanner = () => {
           >
             {LL.APPLICATION_SETTINGS()}
           </Button>
-          <Button icon="close" color="secondary" onClick={dismiss}>
+          <Button icon="close" color="neutral" onClick={dismiss}>
             {LL.CLOSE()}
           </Button>
         </>

@@ -164,6 +164,8 @@ const sk: Translation = {
   UPLOAD: 'Nahrať',
   DOWNLOAD: 'Stiahnuť',
   INSTALL: 'Inštalácia', // DeepL
+  REINSTALL: 'Preinštalovať', // DeepL
+  REINSTALL_CONFIRM: 'Naozaj chcete preinštalovať verziu {0}?', // DeepL
   FAILED: 'neúspešné', // DeepL
   SYSTEM: 'Systém',
   SYSTEM_LOG: 'Systémový protokol',

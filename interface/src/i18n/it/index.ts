@@ -164,6 +164,8 @@ const it: Translation = {
   UPLOAD: 'Carica',
   DOWNLOAD: 'Scarica',
   INSTALL: 'Installa', // DeepL
+  REINSTALL: 'Reinstalla', // DeepL
+  REINSTALL_CONFIRM: 'Sei sicuro di voler reinstallare la versione {0}?', // DeepL
   FAILED: 'non riuscito', // DeepL
   SYSTEM: 'Sistema',
   SYSTEM_LOG: 'Registro di sistema',

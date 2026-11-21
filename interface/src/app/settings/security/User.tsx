@@ -66,7 +66,7 @@ const User: FC<UserProps> = ({
             </Button>
           )}
           <span className="grow" />
-          <Button icon="cancel" color="secondary" onClick={onClose}>
+          <Button icon="cancel" color="neutral" onClick={onClose}>
             {LL.CANCEL()}
           </Button>
           <Button

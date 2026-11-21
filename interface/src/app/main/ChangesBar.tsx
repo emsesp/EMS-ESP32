@@ -28,7 +28,7 @@ export const ChangesBar = ({
   const { LL } = useI18nContext();
   return (
     <SaveBar message={message}>
-      <Button color="secondary" icon="undo" disabled={saving} onClick={onDiscard}>
+      <Button color="neutral" icon="undo" disabled={saving} onClick={onDiscard}>
         {LL.DISCARD()}
       </Button>
       <Button icon="check" disabled={saving || !!saveDisabled} onClick={onSave}>

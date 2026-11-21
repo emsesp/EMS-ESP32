@@ -437,7 +437,7 @@ const HeatingRestore = () => {
           />
         )}
         <div className="du-footer">
-          <ButtonLink to="/settings/downloadUpload" color="secondary" icon="cancel">
+          <ButtonLink to="/settings/downloadUpload" color="neutral" icon="cancel">
             {LL.CANCEL()}
           </ButtonLink>
           <Button

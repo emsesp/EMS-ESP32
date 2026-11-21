@@ -164,6 +164,8 @@ const no: Translation = {
   UPLOAD: 'Last opp', // DeepL
   DOWNLOAD: 'Nedlasting',
   INSTALL: 'Installer',
+  REINSTALL: 'Installer på nytt',
+  REINSTALL_CONFIRM: 'Er du sikker på at du vil installere versjon {0} på nytt?',
   FAILED: 'mislyktes', // DeepL
   SYSTEM: 'System',
   SYSTEM_LOG: 'Systemlogg',

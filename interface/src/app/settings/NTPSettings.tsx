@@ -103,7 +103,7 @@ const NTPClock = ({ canSetTime }: { canSetTime: boolean }) => {
           <>
             <Button
               icon="cancel"
-              color="secondary"
+              color="neutral"
               onClick={() => setSetting(false)}
             >
               {LL.CANCEL()}

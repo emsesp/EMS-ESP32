@@ -158,6 +158,15 @@ const router = createBrowserRouter(
   )
 );
 
+// /rest/mockData posts on this channel when a preset or field changes
+if (import.meta.env.DEV) {
+  new BroadcastChannel('emsesp-mock-data').addEventListener('message', (event) => {
+    if (event.data === 'changed') {
+      location.reload();
+    }
+  });
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <RouterProvider router={router} />

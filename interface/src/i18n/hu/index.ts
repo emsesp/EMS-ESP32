@@ -164,6 +164,8 @@ const hu: Translation = {
   UPLOAD: 'Feltöltés',
   DOWNLOAD: 'Letöltés',
   INSTALL: 'Telepítés',
+  REINSTALL: 'Újratelepítés',
+  REINSTALL_CONFIRM: 'Biztosan újra szeretné telepíteni a(z) {0} verziót?',
   FAILED: 'sikertelen',
   SYSTEM: 'Rendszer',
   SYSTEM_LOG: 'Rendszernapló',

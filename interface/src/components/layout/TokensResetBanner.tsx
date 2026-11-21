@@ -34,7 +34,7 @@ const TokensResetBanner = () => {
           >
             {LL.API_KEYS()}
           </Button>
-          <Button icon="close" color="secondary" onClick={() => void dismiss()}>
+          <Button icon="close" color="neutral" onClick={() => void dismiss()}>
             {LL.CLOSE()}
           </Button>
         </>

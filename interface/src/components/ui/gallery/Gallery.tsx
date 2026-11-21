@@ -124,7 +124,7 @@ const Sample: FC<{ title: string; children: ReactNode }> = ({ title, children })
   </section>
 );
 
-const COLORS = ['primary', 'secondary', 'warning', 'error'] as const;
+const COLORS = ['primary', 'secondary', 'neutral', 'warning', 'error'] as const;
 
 const Gallery = () => {
   const { LL } = useI18nContext();
@@ -437,7 +437,7 @@ const Gallery = () => {
             <>
               <Button
                 icon="cancel"
-                color="secondary"
+                color="neutral"
                 onClick={() => setDialogOpen(false)}
               >
                 {LL.CANCEL()}
@@ -457,7 +457,7 @@ const Gallery = () => {
 
       <Sample title="SaveBar (inline here; in the app it docks to the bottom of the page)">
         <SaveBar message={LL.BLOCK_NAVIGATE_1()}>
-          <Button color="secondary" icon="undo">
+          <Button color="neutral" icon="undo">
             {LL.RESET()}
           </Button>
           <Button icon="check">{LL.APPLY_CHANGES(2)}</Button>

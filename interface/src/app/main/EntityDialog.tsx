@@ -91,7 +91,7 @@ const EntityDialog = <T extends object>({
           )}
           {extraActions?.(values)}
           <span className="grow" />
-          <Button color="secondary" icon="cancel" onClick={onClose}>
+          <Button color="neutral" icon="cancel" onClick={onClose}>
             {LL.CANCEL()}
           </Button>
           <Button

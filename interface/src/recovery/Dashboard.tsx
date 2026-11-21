@@ -420,7 +420,7 @@ const Dashboard = ({
         onClose={() => setInfoPartition(undefined)}
         actions={
           <Button
-            color="secondary"
+            color="neutral"
             icon="close"
             onClick={() => setInfoPartition(undefined)}
           >

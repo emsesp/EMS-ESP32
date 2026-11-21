@@ -455,7 +455,7 @@ const Devices = () => {
         <div className="dv-head">
           <Button
             className="dv-back"
-            color="secondary"
+            color="neutral"
             size="sm"
             icon="arrow_back"
             onClick={() => selectDevice()}

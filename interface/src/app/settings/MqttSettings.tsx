@@ -103,7 +103,7 @@ const MqttSettings = () => {
             actions={
               <Button
                 icon="close"
-                color="secondary"
+                color="neutral"
                 onClick={() => setPreviewOpen(false)}
               >
                 {LL.CLOSE()}

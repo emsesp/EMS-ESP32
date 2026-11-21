@@ -164,6 +164,8 @@ const cs: Translation = {
   UPLOAD: 'Nahrát',
   DOWNLOAD: 'Stáhnout',
   INSTALL: 'Instalace', // DeepL
+  REINSTALL: 'Přeinstalovat', // DeepL
+  REINSTALL_CONFIRM: 'Opravdu chcete přeinstalovat verzi {0}?', // DeepL
   FAILED: 'selhalo', // DeepL
   SYSTEM: 'Systém',
   SYSTEM_LOG: 'Systémový protokol',

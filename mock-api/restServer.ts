@@ -7,7 +7,7 @@ const DEMO = typeof (globalThis as any).Bun === 'undefined';
 const DEMO_MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 
 if (DEMO) {
-  console.log = () => {};
+  console.log = () => { };
 }
 
 // Minimal MessagePack encoder, the counterpart of interface/src/api/unpack.ts. Writes the same bytes as
@@ -281,7 +281,8 @@ let system_status = {
 
 // Test the versioning, used by the Version page
 // Change these defaults, or switch them at runtime by opening /rest/mockData in the browser
-// (e.g. http://localhost:3000/rest/mockData) and then reloading the Web UI
+// (e.g. http://localhost:3000/rest/mockData). The Web UI reloads via BroadcastChannel when a
+// preset or field changes.
 interface MockData {
   current: string; // this EMS-ESP version
   stable: string; // latest stable release online
@@ -592,10 +593,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-          old_custom_name +
-          ') with new (' +
-          new_custom_name +
-          ')'
+        old_custom_name +
+        ') with new (' +
+        new_custom_name +
+        ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -717,9 +718,9 @@ function upgradeImportantMessages(version: string) {
 
   console.log(
     'upgradeImportantMessageType: version=' +
-      version +
-      ' type=' +
-      upgradeImportantMessageType_n
+    version +
+    ' type=' +
+    upgradeImportantMessageType_n
   );
   return { upgradeImportantMessageType: upgradeImportantMessageType_n };
 }
@@ -795,20 +796,20 @@ function get_versions() {
 
   console.log(
     'getVersions: current=' +
-      v.current +
-      ' stable=' +
-      v.stable +
-      ' (upgradeable=' +
-      (stableUpgradeable ? 'YES' : 'NO') +
-      ') dev=' +
-      v.dev +
-      ' (upgradeable=' +
-      (devUpgradeable ? 'YES' : 'NO') +
-      ') recovery=' +
-      (v.recovery || 'not installed') +
-      ' recoveryLatest=' +
-      (v.recoveryLatest || 'not found') +
-      (v.offline ? ' [offline]' : '')
+    v.current +
+    ' stable=' +
+    v.stable +
+    ' (upgradeable=' +
+    (stableUpgradeable ? 'YES' : 'NO') +
+    ') dev=' +
+    v.dev +
+    ' (upgradeable=' +
+    (devUpgradeable ? 'YES' : 'NO') +
+    ') recovery=' +
+    (v.recovery || 'not installed') +
+    ' recoveryLatest=' +
+    (v.recoveryLatest || 'not found') +
+    (v.offline ? ' [offline]' : '')
   );
   return data;
 }
@@ -860,8 +861,8 @@ a.app:hover{background:#1976d2}
 a.app.gallery{margin-left:0.5em;background:#455a64}a.app.gallery:hover{background:#37474f}</style>
 </head><body>
 <h2>Mock Data</h2>
-<p>Change the scenario here, then go back to the Web UI to fetch the new versions.</p>
-<a class="app" href="/">&larr; Back to the Web UI</a><a class="app gallery" href="/ui">Component gallery</a>
+<p>Change the scenario here. The Web UI reloads automatically if it is open.</p>
+<a class="app" href="/">Web UI</a><a class="app gallery" href="/ui">Component gallery</a>
 <h3>Presets</h3>
 <ol start="0">${MOCK_DATA_PRESETS.map((p, i) => `<li>${link('preset', i, p.name)}</li>`).join('')}</ol>
 <p>${link('reset', '', 'reset to defaults')}</p>
@@ -905,6 +906,12 @@ document.querySelectorAll('[data-token]').forEach((a) =>
   })
 );
 show();
+// Notify the Web UI tab to reload after a preset or field change
+if (location.search) {
+  try {
+    new BroadcastChannel('emsesp-mock-data').postMessage('changed');
+  } catch {}
+}
 </script>
 </body></html>`;
 

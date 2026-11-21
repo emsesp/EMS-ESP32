@@ -53,7 +53,7 @@ const FileUpload: FC<FileUploadProps> = ({
         <ProgressBar value={progress} label={LL.UPLOAD()} className="grow" />
         <span className="cap num">{Math.round(progress)}%</span>
         {onCancel && (
-          <Button color="secondary" icon="cancel" onClick={onCancel}>
+          <Button color="neutral" icon="cancel" onClick={onCancel}>
             {LL.CANCEL()}
           </Button>
         )}
@@ -67,7 +67,7 @@ const FileUpload: FC<FileUploadProps> = ({
         <Icon name="upload_file" className="lb" />
         <span className="grow mono upl-name">{file.name}</span>
         <div className="upl-actions">
-          <Button color="secondary" icon="cancel" onClick={() => setFile(undefined)}>
+          <Button color="neutral" icon="cancel" onClick={() => setFile(undefined)}>
             {LL.CANCEL()}
           </Button>
           <Button icon="upload" onClick={() => onUpload(file)}>

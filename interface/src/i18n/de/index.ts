@@ -164,6 +164,8 @@ const de: Translation = {
   UPLOAD: 'Hochladen',
   DOWNLOAD: 'Herunterladen',
   INSTALL: 'Installieren',
+  REINSTALL: 'Erneut installieren',
+  REINSTALL_CONFIRM: 'Möchten Sie Version {0} wirklich erneut installieren?',
   FAILED: 'fehlgeschlagen', // DeepL
   SYSTEM: 'System',
   SYSTEM_LOG: 'Systemprotokoll',

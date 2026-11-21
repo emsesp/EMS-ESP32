@@ -168,7 +168,7 @@ const ApiKeys = () => {
           <>
             <Button
               icon="cancel"
-              color="secondary"
+              color="neutral"
               onClick={() => setCreating(false)}
             >
               {LL.CANCEL()}
@@ -211,7 +211,7 @@ const ApiKeys = () => {
         actions={
           <>
             <Button
-              color="secondary"
+              color="neutral"
               icon="close"
               onClick={() => setNewKey(undefined)}
             >

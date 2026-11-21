@@ -164,6 +164,8 @@ const nl: Translation = {
   UPLOAD: 'Uploaden', // DeepL
   DOWNLOAD: 'Download',
   INSTALL: 'Installeren',
+  REINSTALL: 'Opnieuw installeren',
+  REINSTALL_CONFIRM: 'Weet je zeker dat je versie {0} opnieuw wilt installeren?',
   FAILED: 'mislukt',
   SYSTEM: 'Systeem',
   SYSTEM_LOG: 'Systeemlogboek',

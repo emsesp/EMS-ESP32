@@ -177,7 +177,7 @@ const ManageUsers = () => {
                 <td className="act">
                   <Button
                     size="sm"
-                    color="secondary"
+                    color="neutral"
                     icon="undo"
                     onClick={() => setUsers([...data.users, u])}
                   >

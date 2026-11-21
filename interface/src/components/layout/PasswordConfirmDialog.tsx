@@ -63,7 +63,7 @@ const PasswordConfirmDialog = () => {
       }}
       actions={
         <>
-          <Button icon="cancel" color="secondary" onClick={() => close(false)}>
+          <Button icon="cancel" color="neutral" onClick={() => close(false)}>
             {LL.CANCEL()}
           </Button>
           <Button

@@ -164,6 +164,8 @@ const en: Translation = {
   UPLOAD: 'Upload',
   DOWNLOAD: 'Download',
   INSTALL: 'Install',
+  REINSTALL: 'Re-install',
+  REINSTALL_CONFIRM: 'Are you sure you want to re-install version {0}?',
   FAILED: 'failed',
   SYSTEM: 'System',
   SYSTEM_LOG: 'System Log',

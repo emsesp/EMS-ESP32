@@ -30,7 +30,7 @@ const ModulesDialog = ({
       onSubmit={() => onSave(editItem)}
       actions={
         <>
-          <Button icon="cancel" color="secondary" onClick={onClose}>
+          <Button icon="cancel" color="neutral" onClick={onClose}>
             {LL.CANCEL()}
           </Button>
           <Button

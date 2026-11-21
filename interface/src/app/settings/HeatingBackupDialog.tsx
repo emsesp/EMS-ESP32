@@ -72,7 +72,7 @@ const HeatingBackupDialog = ({
       size="md"
       actions={
         <>
-          <Button color="secondary" icon="cancel" onClick={onClose}>
+          <Button color="neutral" icon="cancel" onClick={onClose}>
             {LL.CANCEL()}
           </Button>
           <Button

@@ -230,7 +230,7 @@ const DevicesDialog = ({
       actions={
         writeable ? (
           <>
-            <Button color="secondary" icon="cancel" onClick={onClose}>
+            <Button color="neutral" icon="cancel" onClick={onClose}>
               {LL.CANCEL()}
             </Button>
             <Button
@@ -242,7 +242,7 @@ const DevicesDialog = ({
             </Button>
           </>
         ) : (
-          <Button icon="close" color="secondary" onClick={onClose}>
+          <Button icon="close" color="neutral" onClick={onClose}>
             {LL.CLOSE()}
           </Button>
         )

@@ -164,6 +164,8 @@ const tr: Translation = {
   UPLOAD: 'Yükle', // DeepL
   DOWNLOAD: 'İndirme',
   INSTALL: 'Yükle', // DeepL
+  REINSTALL: 'Yeniden yükle', // DeepL
+  REINSTALL_CONFIRM: '{0} sürümünü yeniden yüklemek istediğinizden emin misiniz?', // DeepL
   FAILED: 'başarısız',
   SYSTEM: 'Sistem',
   SYSTEM_LOG: 'Sistem Günlüğü',

@@ -164,6 +164,8 @@ const pl: BaseTranslation = {
   UPLOAD: 'Prześlij', // DeepL
   DOWNLOAD: 'Pobieranie',
   INSTALL: 'Zainstaluj', // DeepL
+  REINSTALL: 'Zainstaluj ponownie', // DeepL
+  REINSTALL_CONFIRM: 'Czy na pewno chcesz ponownie zainstalować wersję {0}?', // DeepL
   FAILED: 'nie powiodł{{o|a|}} się!',
   SYSTEM: '{{S|s||s}}yste{{m|mu||mowy}}',
   SYSTEM_LOG: 'Dziennik systemowy',

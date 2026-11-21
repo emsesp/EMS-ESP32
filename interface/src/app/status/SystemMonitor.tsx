@@ -139,7 +139,7 @@ const SystemMonitor = ({ onDone, onInstallCustom }: SystemMonitorProps) => {
             </a>
           </Message>
           <div className="sysmon-actions">
-            <Button color="secondary" icon="cancel" onClick={() => void onCancel()}>
+            <Button color="neutral" icon="cancel" onClick={() => void onCancel()}>
               {LL.CANCEL()}
             </Button>
             <Button
@@ -183,7 +183,7 @@ const SystemMonitor = ({ onDone, onInstallCustom }: SystemMonitorProps) => {
             </div>
             <div className="sysmon-actions">
               <Button
-                color="secondary"
+                color="neutral"
                 icon="cancel"
                 onClick={() => void onCancel()}
               >
