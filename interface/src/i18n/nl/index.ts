@@ -466,6 +466,7 @@ const nl: Translation = {
   UPLOAD_INSTALL_ANYWAY: 'Installeer het toch maar', // DeepL
   OFFICIAL_BUILD: 'Officiële Build',
   CUSTOM_BUILD: 'Aangepaste Build', // DeepL
+  USING_CUSTOM_FIRMWARE: 'U gebruikt een aangepaste firmware', // DeepL
   PASSWORD_CONFIRM_TITLE: 'Voer je wachtwoord nogmaals in', // DeepL
   PASSWORD_CONFIRM_TEXT: 'Voer voor je eigen veiligheid je wachtwoord in voordat je deze wijziging doorvoert. Je hoeft het de komende 5 minuten niet nog een keer in te voeren.', // DeepL
   PASSWORD_CONFIRM_BUTTON: 'Bevestig', // DeepL

@@ -466,6 +466,7 @@ const tr: Translation = {
   UPLOAD_INSTALL_ANYWAY: 'Yine de yükleyin', // DeepL
   OFFICIAL_BUILD: 'Resmi Sürüm',
   CUSTOM_BUILD: 'Özel Yapılandırma', // DeepL
+  USING_CUSTOM_FIRMWARE: 'Özel yapım bir firmware kullanıyorsunuz', // DeepL
   PASSWORD_CONFIRM_TITLE: 'Şifrenizi tekrar girin',
   PASSWORD_CONFIRM_TEXT: 'Güvenliğiniz için, bu değişikliği yapmadan önce şifrenizi girin. 5 dakika boyunca tekrar şifre sorulmayacaktır.', // DeepL
   PASSWORD_CONFIRM_BUTTON: 'Onayla',

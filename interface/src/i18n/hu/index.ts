@@ -466,6 +466,7 @@ const hu: Translation = {
   UPLOAD_INSTALL_ANYWAY: 'Telepítsd mindenképp', // DeepL
   OFFICIAL_BUILD: 'Hivatalos Kiadás',
   CUSTOM_BUILD: 'Egyedi Kiadás', // DeepL
+  USING_CUSTOM_FIRMWARE: 'Egyedi firmware-t használ', // DeepL
   PASSWORD_CONFIRM_TITLE: 'Írja be újra a jelszavát', // DeepL
   PASSWORD_CONFIRM_TEXT: 'Biztonsági okokból kérjük, adja meg jelszavát a módosítás előtt. 5 percig nem kell újra megadnia.', // DeepL
   PASSWORD_CONFIRM_BUTTON: 'Megerősítés',

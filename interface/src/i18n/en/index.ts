@@ -466,6 +466,7 @@ const en: Translation = {
   UPLOAD_INSTALL_ANYWAY: 'Install anyway',
   OFFICIAL_BUILD: 'Official Build',
   CUSTOM_BUILD: 'Custom Build',
+  USING_CUSTOM_FIRMWARE: 'You are using a custom built firmware',
   PASSWORD_CONFIRM_TITLE: 'Enter your password again',
   PASSWORD_CONFIRM_TEXT: "For your security, enter your password before this change. You won't be asked again for 5 minutes.",
   PASSWORD_CONFIRM_BUTTON: 'Confirm',

@@ -466,6 +466,7 @@ const zh: Translation = {
   UPLOAD_INSTALL_ANYWAY: "仍然安装",
   OFFICIAL_BUILD: "官方构建",
   CUSTOM_BUILD: "自定义构建",
+  USING_CUSTOM_FIRMWARE: "您正在使用自定义构建的固件",
   PASSWORD_CONFIRM_TITLE: "请再次输入密码",
   PASSWORD_CONFIRM_TEXT: "为了您的安全，请在进行此更改前输入密码。5 分钟内不会再次询问。",
   PASSWORD_CONFIRM_BUTTON: "确认",

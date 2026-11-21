@@ -466,6 +466,7 @@ const cs: Translation = {
   UPLOAD_INSTALL_ANYWAY: 'Nainstalujte to i tak', // DeepL
   OFFICIAL_BUILD: 'Oficiální Sestavení',
   CUSTOM_BUILD: 'Vlastní Sestavení',
+  USING_CUSTOM_FIRMWARE: 'Používáte vlastní firmware',
   PASSWORD_CONFIRM_TITLE: 'Zadejte heslo znovu', // DeepL
   PASSWORD_CONFIRM_TEXT: 'Z bezpečnostních důvodů zadejte před provedením této změny své heslo. Po dobu 5 minut již nebudete znovu vyzváni k jeho zadání.', // DeepL
   PASSWORD_CONFIRM_BUTTON: 'Potvrdit',

@@ -466,6 +466,7 @@ const it: Translation = {
   UPLOAD_INSTALL_ANYWAY: 'Installa comunque',
   OFFICIAL_BUILD: 'Versione Ufficiale', // DeepL
   CUSTOM_BUILD: 'Configurazione Personalizzata', // DeepL
+  USING_CUSTOM_FIRMWARE: 'Stai utilizzando un firmware personalizzato', // DeepL
   PASSWORD_CONFIRM_TITLE: 'Inserisci nuovamente la tua password', // DeepL
   PASSWORD_CONFIRM_TEXT: 'Per la tua sicurezza, inserisci la password prima di apportare questa modifica. Non ti verrà richiesta nuovamente per 5 minuti.', // DeepL
   PASSWORD_CONFIRM_BUTTON: 'Conferma',

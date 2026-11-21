@@ -466,6 +466,7 @@ const no: Translation = {
   UPLOAD_INSTALL_ANYWAY: 'Installer uansett', // DeepL
   OFFICIAL_BUILD: 'Offisiell Versjon',
   CUSTOM_BUILD: 'Tilpasset Versjon', // DeepL
+  USING_CUSTOM_FIRMWARE: 'Du bruker en tilpasset firmware', // DeepL
   PASSWORD_CONFIRM_TITLE: 'Skriv inn passordet ditt på nytt', // DeepL
   PASSWORD_CONFIRM_TEXT: 'For din egen sikkerhet må du oppgi passordet ditt før denne endringen. Du vil ikke bli bedt om det igjen på 5 minutter.', // DeepL
   PASSWORD_CONFIRM_BUTTON: 'Bekreft',

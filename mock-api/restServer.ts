@@ -320,6 +320,14 @@ const MOCK_DATA_PRESETS: { name: string; values: Partial<MockData> }[] = [
     values: { current: '3.10.0-dev.1', official: false, debug: true }
   },
   {
+    name: 'custom build ahead of GitHub (higher than official)',
+    values: { current: '3.10.0-dev.5', official: false }
+  },
+  {
+    name: 'custom DEBUG build ahead of GitHub',
+    values: { current: '3.10.0-dev.5', official: false, debug: true }
+  },
+  {
     name: 'recovery not installed',
     values: { recovery: '' }
   },

@@ -466,6 +466,7 @@ const sk: Translation = {
   UPLOAD_INSTALL_ANYWAY: 'Nainštalujte to aj tak', // DeepL
   OFFICIAL_BUILD: 'Oficiálna Verzia', // DeepL
   CUSTOM_BUILD: 'Vlastná Konfigurácia', // DeepL
+  USING_CUSTOM_FIRMWARE: 'Používate vlastný firmvér', // DeepL
   PASSWORD_CONFIRM_TITLE: 'Zadajte heslo ešte raz', // DeepL
   PASSWORD_CONFIRM_TEXT: 'Pre vašu bezpečnosť zadajte heslo pred vykonaním tejto zmeny. Počas nasledujúcich 5 minút nebudete opäť vyzvaní na jeho zadanie.', // DeepL
   PASSWORD_CONFIRM_BUTTON: 'Potvrdiť',

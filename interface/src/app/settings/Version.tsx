@@ -406,6 +406,22 @@ const Version = () => {
       return <Message level="info">{LL.FW_UPDATES_OFFLINE()}</Message>;
     }
     const isNew = isSwitch || upgradeAvailable;
+    // custom build newer than the official release for this channel: no "latest" /
+    // reinstall for the older GitHub build
+    const customAhead =
+      data.official_build === false &&
+      !isNew &&
+      isNewerVersion(data.emsesp_version, target.version);
+    if (customAhead) {
+      return (
+        <div className="fw-update">
+          <Icon name="check_circle" className="fw-big" />
+          <div className="grow">
+            <div className="fw-update-title">{LL.USING_CUSTOM_FIRMWARE()}</div>
+          </div>
+        </div>
+      );
+    }
     const title = isSwitch
       ? shown === 'dev'
         ? LL.SWITCH_TO_DEV(target.version)

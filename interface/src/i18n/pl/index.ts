@@ -466,6 +466,7 @@ const pl: BaseTranslation = {
   UPLOAD_INSTALL_ANYWAY: 'Zainstaluj mimo wszystko', // DeepL
   OFFICIAL_BUILD: 'Oficjalna Kompilacja', // DeepL
   CUSTOM_BUILD: 'Kompilacja Niestandardowa', // DeepL
+  USING_CUSTOM_FIRMWARE: 'Używasz niestandardowego oprogramowania układowego', // DeepL
   PASSWORD_CONFIRM_TITLE: 'Wprowadź hasło ponownie', // DeepL
   PASSWORD_CONFIRM_TEXT: 'Dla własnego bezpieczeństwa wprowadź hasło przed dokonaniem tej zmiany. Przez 5 minut nie będziesz ponownie proszony o jego podanie.', // DeepL
   PASSWORD_CONFIRM_BUTTON: 'Potwierdź',

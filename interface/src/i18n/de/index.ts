@@ -466,6 +466,7 @@ const de: Translation = {
   UPLOAD_INSTALL_ANYWAY: 'Trotzdem installieren',
   OFFICIAL_BUILD: 'Offizielle Version', // DeepL
   CUSTOM_BUILD: 'Benutzerdefinierte Version', // DeepL
+  USING_CUSTOM_FIRMWARE: 'Sie verwenden eine benutzerdefinierte Firmware', // DeepL
   PASSWORD_CONFIRM_TITLE: 'Geben Sie Ihr Passwort erneut ein', // DeepL
   PASSWORD_CONFIRM_TEXT: 'Zu Ihrer Sicherheit geben Sie bitte vor dieser Änderung Ihr Passwort ein. Sie werden 5 Minuten lang nicht erneut dazu aufgefordert.', // DeepL
   PASSWORD_CONFIRM_BUTTON: 'Bestätigen',
