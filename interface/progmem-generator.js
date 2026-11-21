@@ -69,7 +69,8 @@ const ALL_LOCALES = [
   'pl',
   'sk',
   'sv',
-  'tr'
+  'tr',
+  'zh'
 ];
 const localeAllowList = (process.env.VITE_APP_LOCALES || '')
   .split(',')

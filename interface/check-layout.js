@@ -28,7 +28,8 @@ const LANGS = [
   'pl',
   'sk',
   'sv',
-  'tr'
+  'tr',
+  'zh'
 ];
 // full drawer, icon rail, phone
 const WIDTHS = [1280, 1000, 390];

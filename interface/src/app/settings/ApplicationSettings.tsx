@@ -56,7 +56,8 @@ const ENTITY_LANGUAGES: Record<string, string> = {
   pl: 'Polski',
   sk: 'Slovenčina',
   sv: 'Svenska',
-  tr: 'Türk'
+  tr: 'Türk',
+  zh: '简体中文'
 };
 
 const EMS_BUS_IDS: SelectOption[] = [
