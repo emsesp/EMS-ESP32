@@ -49,6 +49,8 @@ A full list of breaking changes can be found in this [discussion](https://github
 - MQTT status shows the base topic, since when the connection is up and the reason and time of the last lost connection. `/rest/mqttStatus` has new `host`, `port`, `base`, `connected_for`, `last_disconnect_ago` and `last_disconnect_reason` fields
 - every table in the Web UI with column headers can be sorted by clicking a header (ascending, descending, back to the original order); on phones the headers are buttons above the list
 - `/rest/systemStatus` has new `network_ip`, `mqtt_host`, `mqtt_port`, `log_errors`, `log_warnings` (since boot), `heap_size` and `reset_reason` fields for the Status overview; the last restart reason (for example software restart, crash, watchdog or brownout) is shown on the Status overview and in a new "Power and reset" card on the Hardware page
+- Modbus register map version at address 2 of the system unit (input register). It goes up whenever an existing register is moved or removed, so a Modbus client can check it and stop instead of using wrong registers. `scripts/modbus_register_diff.py` lists the moved, removed and new registers between two releases [#3454](https://github.com/emsesp/EMS-ESP32/issues/3454)
+- Modbus registers for pool devices (unit ID 21), which had none [#3454](https://github.com/emsesp/EMS-ESP32/issues/3454)
 - the short summary on the Help page, to paste into an issue or chat, also shows the Tx mode, EMS-ESP's bus ID, the bus quality and Tx failures, and lists every EMS device with its type, device ID and product ID. `/rest/systemStatus` has new `bus_id` and `tx_mode` fields for it
 
 ## Fixed
@@ -68,6 +70,7 @@ A full list of breaking changes can be found in this [discussion](https://github
 - RC300 firmware 11.x `dhw/chargeduration`: writes above 255 minutes are refused, because the thermostat set them to 15 minutes. Longer durations can only be set on the thermostat itself [#3318](https://github.com/emsesp/EMS-ESP32/issues/3318)
 - Factor for setting wwDiffTemp [#3456](https://github.com/emsesp/EMS-ESP32/issues/3456)
 - crash on setting thermostat switchonoptimisation for RC30 [#3452](https://github.com/emsesp/EMS-ESP32/issues/3452)
+- Modbus register offsets moved whenever an entity was added to a device, so a PLC or SCADA system silently read or wrote a different entity after an update (for example boiler `burnmaxpower` went from 260 in 3.8.x to 267 in 3.9.1). Offsets are now kept between versions: 3.10.0 uses the 3.9.1 offsets, new entities are added at the end of their block, and the offsets of removed entities are never reused, a read or write there returns an error. Development builds of 3.10.0 before this fix used other offsets [#3454](https://github.com/emsesp/EMS-ESP32/issues/3454)
 
 ## Changed
 

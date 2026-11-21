@@ -192,6 +192,13 @@ ModbusMessage Modbus::handleSystemRead(const ModbusMessage & request) {
             response.add((uint16_t)EMSESP::emsdevices.size());
             break;
 
+        case 2:
+            response.add(request.getServerID());
+            response.add(request.getFunctionCode());
+            response.add((uint8_t)2);
+            response.add(REGISTER_MAP_VERSION);
+            break;
+
         default:
             response.setError(request.getServerID(), request.getFunctionCode(), ILLEGAL_DATA_ADDRESS);
         }
