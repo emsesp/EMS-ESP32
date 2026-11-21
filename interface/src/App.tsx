@@ -37,7 +37,8 @@ const ALL_LOCALES = [
   'pl',
   'sk',
   'sv',
-  'tr'
+  'tr',
+  'zh'
 ] as Locales[];
 
 // Optional build-time allow-list (e.g. VITE_APP_LOCALES="en,de,nl"). When unset,

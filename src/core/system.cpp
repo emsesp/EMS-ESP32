@@ -93,7 +93,8 @@ const char * const languages[] = {EMSESP_LOCALE_EN,
                                   EMSESP_LOCALE_IT,
                                   EMSESP_LOCALE_SK,
                                   EMSESP_LOCALE_CS,
-                                  EMSESP_LOCALE_HU};
+                                  EMSESP_LOCALE_HU,
+                                  EMSESP_LOCALE_ZH};
 #endif
 
 static constexpr uint8_t NUM_LANGUAGES = sizeof(languages) / sizeof(const char *);

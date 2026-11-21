@@ -21,7 +21,8 @@ export const LANGUAGES: { value: Locales; label: string }[] = [
   { value: 'pl', label: 'Polski' },
   { value: 'sk', label: 'Slovenčina' },
   { value: 'sv', label: 'Svenska' },
-  { value: 'tr', label: 'Türkçe' }
+  { value: 'tr', label: 'Türkçe' },
+  { value: 'zh', label: '简体中文' }
 ];
 
 // the web UI language, kept in this browser only
