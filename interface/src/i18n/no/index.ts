@@ -736,6 +736,14 @@ const no: Translation = {
   SYS_LAST_FAULT: 'Siste feil', // draft, please review
   SYS_MAINT_MSG: 'Vedlikeholdsmelding', // draft, please review
   SYS_NEXT_MAINT: 'Neste vedlikehold', // draft, please review
+  SYS_FAULT_LAST: 'Siste feil / melding', // draft, please review
+  SYS_FAULT_CTRL: 'Siste regulatorfeil', // draft, please review
+  SYS_FAULT_SERVICE: 'Servicekode', // draft, please review
+  SYS_FAULT_ADD: 'Tilleggskode {0}', // draft, please review
+  SYS_FAULT_RAW_ONLY: 'Ingen forklaring tilgjengelig for denne enheten.', // draft, please review
+  SYS_FAULT_NONE: 'Ingen lagret feil.', // draft, please review
+  SYS_FAULT_UNTIL_NOW: 'til nå', // draft, please review
+  SYS_MAINTENANCE: 'Vedlikehold', // draft, please review
   SYS_GOTO_SERVICE: 'Gå til vedlikehold og feil', // draft, please review
 };
 

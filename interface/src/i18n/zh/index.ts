@@ -736,6 +736,14 @@ const zh: Translation = {
   SYS_LAST_FAULT: '最近故障', // draft, please review
   SYS_MAINT_MSG: '维护信息', // draft, please review
   SYS_NEXT_MAINT: '下次维护', // draft, please review
+  SYS_FAULT_LAST: '最近故障/信息', // draft, please review
+  SYS_FAULT_CTRL: '控制器最近故障', // draft, please review
+  SYS_FAULT_SERVICE: '服务代码', // draft, please review
+  SYS_FAULT_ADD: '附加代码 {0}', // draft, please review
+  SYS_FAULT_RAW_ONLY: '此设备没有可用的说明。', // draft, please review
+  SYS_FAULT_NONE: '没有已存储的故障。', // draft, please review
+  SYS_FAULT_UNTIL_NOW: '至今', // draft, please review
+  SYS_MAINTENANCE: '维护', // draft, please review
   SYS_GOTO_SERVICE: '前往维护与故障', // draft, please review
 };
 

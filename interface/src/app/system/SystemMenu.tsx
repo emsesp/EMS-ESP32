@@ -12,6 +12,7 @@ import Commands from '../main/Commands';
 import CustomEntities from '../main/CustomEntities';
 import Scheduler from '../main/Scheduler';
 import Sensors from '../main/Sensors';
+import { FaultPanel } from './Faults';
 import Home from './Home';
 import {
   BoilerTile,
@@ -249,6 +250,7 @@ const SystemMenu = memo(() => {
     body = (
       <>
         {!searching && tiles}
+        {!searching && current === 'service' && <FaultPanel items={data.items} />}
         {groups.map((g) => (
           <section
             key={`${g.title}|${g.section}|${g.items[0]?.devId}`}

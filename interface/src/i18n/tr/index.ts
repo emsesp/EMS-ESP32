@@ -736,6 +736,14 @@ const tr: Translation = {
   SYS_LAST_FAULT: 'Son arıza', // draft, please review
   SYS_MAINT_MSG: 'Bakım mesajı', // draft, please review
   SYS_NEXT_MAINT: 'Sonraki bakım', // draft, please review
+  SYS_FAULT_LAST: 'Son arıza / mesaj', // draft, please review
+  SYS_FAULT_CTRL: 'Denetleyicinin son arızası', // draft, please review
+  SYS_FAULT_SERVICE: 'Servis kodu', // draft, please review
+  SYS_FAULT_ADD: 'Ek kod {0}', // draft, please review
+  SYS_FAULT_RAW_ONLY: 'Bu cihaz için açıklama yok.', // draft, please review
+  SYS_FAULT_NONE: 'Kayıtlı arıza yok.', // draft, please review
+  SYS_FAULT_UNTIL_NOW: 'şimdiye kadar', // draft, please review
+  SYS_MAINTENANCE: 'Bakım', // draft, please review
   SYS_GOTO_SERVICE: 'Bakım ve arızalara git', // draft, please review
 };
 

@@ -736,6 +736,14 @@ const nl: Translation = {
   SYS_LAST_FAULT: 'Laatste storing', // draft, please review
   SYS_MAINT_MSG: 'Onderhoudsmelding', // draft, please review
   SYS_NEXT_MAINT: 'Volgend onderhoud', // draft, please review
+  SYS_FAULT_LAST: 'Laatste storing / melding', // draft, please review
+  SYS_FAULT_CTRL: 'Laatste regelaarstoring', // draft, please review
+  SYS_FAULT_SERVICE: 'Servicecode', // draft, please review
+  SYS_FAULT_ADD: 'Aanvullende code {0}', // draft, please review
+  SYS_FAULT_RAW_ONLY: 'Geen uitleg beschikbaar voor dit apparaat.', // draft, please review
+  SYS_FAULT_NONE: 'Geen opgeslagen storing.', // draft, please review
+  SYS_FAULT_UNTIL_NOW: 'tot nu', // draft, please review
+  SYS_MAINTENANCE: 'Onderhoud', // draft, please review
   SYS_GOTO_SERVICE: 'Naar onderhoud & storingen', // draft, please review
 };
 

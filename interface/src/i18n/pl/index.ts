@@ -736,6 +736,14 @@ const pl: BaseTranslation = {
   SYS_LAST_FAULT: 'Ostatni błąd', // draft, please review
   SYS_MAINT_MSG: 'Komunikat konserwacyjny', // draft, please review
   SYS_NEXT_MAINT: 'Następna konserwacja', // draft, please review
+  SYS_FAULT_LAST: 'Ostatnia usterka / komunikat', // draft, please review
+  SYS_FAULT_CTRL: 'Ostatni błąd regulatora', // draft, please review
+  SYS_FAULT_SERVICE: 'Kod serwisowy', // draft, please review
+  SYS_FAULT_ADD: 'Kod dodatkowy {0}', // draft, please review
+  SYS_FAULT_RAW_ONLY: 'Brak objaśnienia dla tego urządzenia.', // draft, please review
+  SYS_FAULT_NONE: 'Brak zapisanych usterek.', // draft, please review
+  SYS_FAULT_UNTIL_NOW: 'do teraz', // draft, please review
+  SYS_MAINTENANCE: 'Konserwacja', // draft, please review
   SYS_GOTO_SERVICE: 'Przejdź do konserwacji i błędów', // draft, please review
 };
 

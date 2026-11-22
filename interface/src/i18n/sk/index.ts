@@ -736,6 +736,14 @@ const sk: Translation = {
   SYS_LAST_FAULT: 'Posledná porucha', // draft, please review
   SYS_MAINT_MSG: 'Hlásenie údržby', // draft, please review
   SYS_NEXT_MAINT: 'Ďalšia údržba', // draft, please review
+  SYS_FAULT_LAST: 'Posledná porucha / hlásenie', // draft, please review
+  SYS_FAULT_CTRL: 'Posledná porucha regulátora', // draft, please review
+  SYS_FAULT_SERVICE: 'Servisný kód', // draft, please review
+  SYS_FAULT_ADD: 'Doplnkový kód {0}', // draft, please review
+  SYS_FAULT_RAW_ONLY: 'Pre toto zariadenie nie je k dispozícii vysvetlenie.', // draft, please review
+  SYS_FAULT_NONE: 'Žiadna uložená porucha.', // draft, please review
+  SYS_FAULT_UNTIL_NOW: 'do teraz', // draft, please review
+  SYS_MAINTENANCE: 'Údržba', // draft, please review
   SYS_GOTO_SERVICE: 'Prejsť na údržbu a poruchy', // draft, please review
 };
 

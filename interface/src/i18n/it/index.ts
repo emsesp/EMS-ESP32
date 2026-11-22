@@ -736,6 +736,14 @@ const it: Translation = {
   SYS_LAST_FAULT: 'Ultimo guasto', // draft, please review
   SYS_MAINT_MSG: 'Messaggio di manutenzione', // draft, please review
   SYS_NEXT_MAINT: 'Prossima manutenzione', // draft, please review
+  SYS_FAULT_LAST: 'Ultimo guasto / messaggio', // draft, please review
+  SYS_FAULT_CTRL: 'Ultimo guasto del regolatore', // draft, please review
+  SYS_FAULT_SERVICE: 'Codice di servizio', // draft, please review
+  SYS_FAULT_ADD: 'Codice aggiuntivo {0}', // draft, please review
+  SYS_FAULT_RAW_ONLY: 'Nessuna spiegazione disponibile per questo dispositivo.', // draft, please review
+  SYS_FAULT_NONE: 'Nessun guasto memorizzato.', // draft, please review
+  SYS_FAULT_UNTIL_NOW: 'fino ad ora', // draft, please review
+  SYS_MAINTENANCE: 'Manutenzione', // draft, please review
   SYS_GOTO_SERVICE: 'Vai a manutenzione e guasti', // draft, please review
 };
 

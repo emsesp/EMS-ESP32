@@ -736,6 +736,14 @@ const sv: Translation = {
   SYS_LAST_FAULT: 'Senaste fel', // draft, please review
   SYS_MAINT_MSG: 'Underhållsmeddelande', // draft, please review
   SYS_NEXT_MAINT: 'Nästa underhåll', // draft, please review
+  SYS_FAULT_LAST: 'Senaste fel / meddelande', // draft, please review
+  SYS_FAULT_CTRL: 'Senaste regulatorfel', // draft, please review
+  SYS_FAULT_SERVICE: 'Servicekod', // draft, please review
+  SYS_FAULT_ADD: 'Tilläggskod {0}', // draft, please review
+  SYS_FAULT_RAW_ONLY: 'Ingen förklaring finns för den här enheten.', // draft, please review
+  SYS_FAULT_NONE: 'Inget lagrat fel.', // draft, please review
+  SYS_FAULT_UNTIL_NOW: 'tills nu', // draft, please review
+  SYS_MAINTENANCE: 'Underhåll', // draft, please review
   SYS_GOTO_SERVICE: 'Gå till underhåll och fel', // draft, please review
 };
 

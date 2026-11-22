@@ -736,6 +736,14 @@ const fr: Translation = {
   SYS_LAST_FAULT: 'Dernier défaut', // draft, please review
   SYS_MAINT_MSG: 'Message de maintenance', // draft, please review
   SYS_NEXT_MAINT: 'Prochaine maintenance', // draft, please review
+  SYS_FAULT_LAST: 'Dernier défaut / message', // draft, please review
+  SYS_FAULT_CTRL: 'Dernier défaut du régulateur', // draft, please review
+  SYS_FAULT_SERVICE: 'Code de service', // draft, please review
+  SYS_FAULT_ADD: 'Code supplémentaire {0}', // draft, please review
+  SYS_FAULT_RAW_ONLY: 'Aucune explication disponible pour cet appareil.', // draft, please review
+  SYS_FAULT_NONE: 'Aucun défaut enregistré.', // draft, please review
+  SYS_FAULT_UNTIL_NOW: 'jusqu’à maintenant', // draft, please review
+  SYS_MAINTENANCE: 'Maintenance', // draft, please review
   SYS_GOTO_SERVICE: 'Aller à maintenance et défauts', // draft, please review
 };
 

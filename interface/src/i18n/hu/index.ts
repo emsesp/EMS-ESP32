@@ -736,6 +736,14 @@ const hu: Translation = {
   SYS_LAST_FAULT: 'Utolsó hiba', // draft, please review
   SYS_MAINT_MSG: 'Karbantartási üzenet', // draft, please review
   SYS_NEXT_MAINT: 'Következő karbantartás', // draft, please review
+  SYS_FAULT_LAST: 'Utolsó hiba / üzenet', // draft, please review
+  SYS_FAULT_CTRL: 'A szabályozó utolsó hibája', // draft, please review
+  SYS_FAULT_SERVICE: 'Szervizkód', // draft, please review
+  SYS_FAULT_ADD: 'Kiegészítő kód {0}', // draft, please review
+  SYS_FAULT_RAW_ONLY: 'Ehhez a készülékhez nincs elérhető magyarázat.', // draft, please review
+  SYS_FAULT_NONE: 'Nincs tárolt hiba.', // draft, please review
+  SYS_FAULT_UNTIL_NOW: 'mostanáig', // draft, please review
+  SYS_MAINTENANCE: 'Karbantartás', // draft, please review
   SYS_GOTO_SERVICE: 'Ugrás a karbantartáshoz és hibákhoz', // draft, please review
 };
 

@@ -736,6 +736,14 @@ const en: Translation = {
   SYS_LAST_FAULT: 'Last fault', // draft, please review
   SYS_MAINT_MSG: 'Maintenance message', // draft, please review
   SYS_NEXT_MAINT: 'Next maintenance', // draft, please review
+  SYS_FAULT_LAST: 'Last fault / message', // draft, please review
+  SYS_FAULT_CTRL: 'Last controller fault', // draft, please review
+  SYS_FAULT_SERVICE: 'Service code', // draft, please review
+  SYS_FAULT_ADD: 'Additional code {0}', // draft, please review
+  SYS_FAULT_RAW_ONLY: 'No explanation available for this device.', // draft, please review
+  SYS_FAULT_NONE: 'No stored fault.', // draft, please review
+  SYS_FAULT_UNTIL_NOW: 'until now', // draft, please review
+  SYS_MAINTENANCE: 'Maintenance', // draft, please review
   SYS_GOTO_SERVICE: 'Go to maintenance & faults', // draft, please review
 };
 

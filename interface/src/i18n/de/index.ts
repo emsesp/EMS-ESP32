@@ -736,6 +736,14 @@ const de: Translation = {
   SYS_LAST_FAULT: 'Letzter Fehler', // draft, please review
   SYS_MAINT_MSG: 'Wartungsmeldung', // draft, please review
   SYS_NEXT_MAINT: 'Nächste Wartung', // draft, please review
+  SYS_FAULT_LAST: 'Letzte Störung / Meldung', // draft, please review
+  SYS_FAULT_CTRL: 'Letzter Reglerfehler', // draft, please review
+  SYS_FAULT_SERVICE: 'Servicecode', // draft, please review
+  SYS_FAULT_ADD: 'Zusatzcode {0}', // draft, please review
+  SYS_FAULT_RAW_ONLY: 'Für dieses Gerät ist keine Erklärung verfügbar.', // draft, please review
+  SYS_FAULT_NONE: 'Keine gespeicherte Störung.', // draft, please review
+  SYS_FAULT_UNTIL_NOW: 'bis jetzt', // draft, please review
+  SYS_MAINTENANCE: 'Wartung', // draft, please review
   SYS_GOTO_SERVICE: 'Zu Wartung & Fehler', // draft, please review
 };
 
