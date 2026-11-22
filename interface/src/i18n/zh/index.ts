@@ -744,7 +744,6 @@ const zh: Translation = {
   SYS_FAULT_NONE: '没有已存储的故障。', // draft, please review
   SYS_FAULT_UNTIL_NOW: '至今', // draft, please review
   SYS_MAINTENANCE: '维护', // draft, please review
-  SYS_GOTO_SERVICE: '前往维护与故障', // draft, please review
 };
 
 export default zh;

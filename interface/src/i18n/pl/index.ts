@@ -744,7 +744,6 @@ const pl: BaseTranslation = {
   SYS_FAULT_NONE: 'Brak zapisanych usterek.', // draft, please review
   SYS_FAULT_UNTIL_NOW: 'do teraz', // draft, please review
   SYS_MAINTENANCE: 'Konserwacja', // draft, please review
-  SYS_GOTO_SERVICE: 'Przejdź do konserwacji i błędów', // draft, please review
 };
 
 export default pl;

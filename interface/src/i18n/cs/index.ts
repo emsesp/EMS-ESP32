@@ -744,7 +744,6 @@ const cs: Translation = {
   SYS_FAULT_NONE: 'Žádná uložená porucha.', // draft, please review
   SYS_FAULT_UNTIL_NOW: 'do nynějška', // draft, please review
   SYS_MAINTENANCE: 'Údržba', // draft, please review
-  SYS_GOTO_SERVICE: 'Přejít na údržbu a poruchy', // draft, please review
 };
 
 export default cs;

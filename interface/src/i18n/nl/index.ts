@@ -744,7 +744,6 @@ const nl: Translation = {
   SYS_FAULT_NONE: 'Geen opgeslagen storing.', // draft, please review
   SYS_FAULT_UNTIL_NOW: 'tot nu', // draft, please review
   SYS_MAINTENANCE: 'Onderhoud', // draft, please review
-  SYS_GOTO_SERVICE: 'Naar onderhoud & storingen', // draft, please review
 };
 
 export default nl;

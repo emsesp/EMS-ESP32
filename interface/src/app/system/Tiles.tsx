@@ -30,15 +30,25 @@ const ON = new Set([
 const isOn = (item: SysItem | undefined): boolean =>
   !!item && ON.has(str(item.dv.v).trim().toLowerCase());
 
+// a tile; with `link` it ends with the button to the page of its topic (on the Dashboard overview), which
+// has the icon and the name of the menu entry
+interface TileLink {
+  to: string;
+  icon: IconName;
+  label: string;
+}
+
 const Tile = ({
   icon,
   title,
   sub,
+  link,
   children
 }: {
   icon: IconName;
   title: string;
   sub?: ReactNode;
+  link?: TileLink | undefined;
   children: ReactNode;
 }) => (
   <section className="sys-tile">
@@ -48,6 +58,14 @@ const Tile = ({
     </div>
     <div className="sys-tile-sub">{sub}</div>
     {children}
+    {link && (
+      <div className="sys-tile-link">
+        <ButtonLink to={link.to} color="neutral" icon={link.icon}>
+          {link.label}
+          <Icon name="open_in_new" size="sm" />
+        </ButtonLink>
+      </div>
+    )}
   </section>
 );
 
@@ -79,11 +97,13 @@ const Big = ({ item }: { item: SysItem | undefined }) => {
 
 const Kv = ({ label, item }: { label: string; item: SysItem | undefined }) => {
   const format = useFormat();
+  const { LL } = useI18nContext();
   if (!item) return null;
+  const text = format(item.dv.v, item.dv.u) || '–';
   return (
     <>
       <span>{label}</span>
-      <span>{format(item.dv.v, item.dv.u) || '–'}</span>
+      <span>{text.replace(/\s*-\s*now$/i, ` ${LL.SYS_FAULT_UNTIL_NOW()}`)}</span>
     </>
   );
 };
@@ -111,6 +131,8 @@ const Line = ({ label, children }: { label: string; children: ReactNode }) => (
 interface TileProps {
   items: readonly SysItem[];
   edits: Edits;
+  // the page of the tile's topic, for the link at its end
+  to?: string | undefined;
 }
 
 // the heating circuits that have a thermostat, e.g. ['hc1', 'hc2']
@@ -123,7 +145,7 @@ export const heatingCircuits = (items: readonly SysItem[]): string[] =>
     )
   ].sort();
 
-export const HcTile = ({ tag, items, edits }: TileProps & { tag: string }) => {
+export const HcTile = ({ tag, items, edits, to }: TileProps & { tag: string }) => {
   const { LL } = useI18nContext();
   const f = (key: string) => findItem(items, key, tag);
   const modeType = f('thermostat:hc/modetype');
@@ -136,6 +158,11 @@ export const HcTile = ({ tag, items, edits }: TileProps & { tag: string }) => {
   return (
     <Tile
       icon="device_thermostat"
+      link={
+        to
+          ? { to, icon: 'device_thermostat', label: LL.SYS_HC(tag.slice(2)) }
+          : undefined
+      }
       title={LL.SYS_HC(tag.slice(2))}
       sub={
         modeType && (
@@ -162,7 +189,7 @@ export const HcTile = ({ tag, items, edits }: TileProps & { tag: string }) => {
   );
 };
 
-export const DhwTile = ({ items, edits }: TileProps) => {
+export const DhwTile = ({ items, edits, to }: TileProps) => {
   const { LL } = useI18nContext();
   const f = (key: string) => findItem(items, key);
   const dhwCur = f('boiler:dhw/curtemp');
@@ -174,6 +201,7 @@ export const DhwTile = ({ items, edits }: TileProps) => {
   return (
     <Tile
       icon="water_drop"
+      link={to ? { to, icon: 'water_drop', label: LL.SYS_DHW() } : undefined}
       title={LL.SYS_DHW()}
       sub={
         isOn(f('boiler:tapwateractive')) ? (
@@ -202,13 +230,30 @@ export const DhwTile = ({ items, edits }: TileProps) => {
   );
 };
 
-export const BoilerTile = ({ items }: { items: readonly SysItem[] }) => {
+export const BoilerTile = ({
+  items,
+  to
+}: {
+  items: readonly SysItem[];
+  to?: string | undefined;
+}) => {
   const { LL } = useI18nContext();
   const f = (key: string) => findItem(items, key);
   if (!f('boiler:curflowtemp')) return null;
   return (
     <Tile
       icon="local_fire_department"
+      link={
+        to
+          ? {
+              to,
+              icon: 'local_fire_department',
+              label:
+                items.find((i) => i.menu === 'boiler')?.typeName ??
+                LL.SYS_GROUP_HEATING()
+            }
+          : undefined
+      }
       title={LL.SYS_GROUP_HEATING()}
       sub={
         isOn(f('boiler:burngas')) ? (
@@ -232,16 +277,26 @@ export const BoilerTile = ({ items }: { items: readonly SysItem[] }) => {
 export const NotesTile = ({ items }: { items: readonly SysItem[] }) => {
   const { LL } = useI18nContext();
   const f = (key: string) => findItem(items, key);
+  const maintenance = ['boiler:maintenance', 'boiler:maintenancetime'].map((k) =>
+    f(k)
+  );
   return (
-    <Tile icon="build" title={LL.SYS_NOTES()} sub={LL.SYS_NOTES_SUB()}>
+    <Tile
+      icon="build"
+      title={LL.SYS_NOTES()}
+      sub={LL.SYS_NOTES_SUB()}
+      link={{ to: '/dashboard/service', icon: 'build', label: LL.SYS_SERVICE() }}
+    >
       <div className="sys-kv">
         <Kv label={LL.SYS_LAST_FAULT()} item={f('boiler:lastcode')} />
+        <Kv label={LL.SYS_FAULT_CTRL()} item={f('thermostat:lastcode')} />
+        <Kv label={LL.SYS_FAULT_SERVICE()} item={f('boiler:servicecode')} />
         <Kv label={LL.SYS_MAINT_MSG()} item={f('boiler:maintenancemessage')} />
+        {maintenance.map((i) => (
+          <Kv key={i?.uid} label={i?.label ?? ''} item={i} />
+        ))}
         <Kv label={LL.SYS_NEXT_MAINT()} item={f('boiler:maintenancedate')} />
       </div>
-      <ButtonLink to="/dashboard/service" color="neutral" icon="build">
-        {LL.SYS_GOTO_SERVICE()}
-      </ButtonLink>
     </Tile>
   );
 };
@@ -295,14 +350,25 @@ const SUMMARIES: Record<string, SummaryDef> = {
 
 export const hasSummary = (menu: string): boolean => menu in SUMMARIES;
 
+// the name of the device type of a menu entry (Solar module, Ventilation, ...)
+export const typeNameOf = (items: readonly SysItem[], menu: string): string =>
+  items.find((i) => i.menu === menu && i.devType === menu)?.typeName ??
+  items.find((i) => i.menu === menu)?.typeName ??
+  '';
+
+// the menu entries that have a summary tile
+export const summaryMenus = (): string[] => Object.keys(SUMMARIES);
+
 export const SummaryTile = ({
   menu,
   title,
-  items
+  items,
+  to
 }: {
   menu: string;
   title: string;
   items: readonly SysItem[];
+  to?: string | undefined;
 }) => {
   const format = useFormat();
   const def = SUMMARIES[menu];
@@ -316,6 +382,7 @@ export const SummaryTile = ({
     <Tile
       icon={def.icon}
       title={title}
+      link={to ? { to, icon: def.icon, label: title } : undefined}
       sub={
         status && (
           <Status state={isOn(status) ? 'warn' : 'off'}>

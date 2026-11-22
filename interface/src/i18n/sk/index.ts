@@ -744,7 +744,6 @@ const sk: Translation = {
   SYS_FAULT_NONE: 'Žiadna uložená porucha.', // draft, please review
   SYS_FAULT_UNTIL_NOW: 'do teraz', // draft, please review
   SYS_MAINTENANCE: 'Údržba', // draft, please review
-  SYS_GOTO_SERVICE: 'Prejsť na údržbu a poruchy', // draft, please review
 };
 
 export default sk;

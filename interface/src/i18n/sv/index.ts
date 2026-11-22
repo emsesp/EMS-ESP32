@@ -744,7 +744,6 @@ const sv: Translation = {
   SYS_FAULT_NONE: 'Inget lagrat fel.', // draft, please review
   SYS_FAULT_UNTIL_NOW: 'tills nu', // draft, please review
   SYS_MAINTENANCE: 'Underhåll', // draft, please review
-  SYS_GOTO_SERVICE: 'Gå till underhåll och fel', // draft, please review
 };
 
 export default sv;

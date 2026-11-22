@@ -744,7 +744,6 @@ const en: Translation = {
   SYS_FAULT_NONE: 'No stored fault.', // draft, please review
   SYS_FAULT_UNTIL_NOW: 'until now', // draft, please review
   SYS_MAINTENANCE: 'Maintenance', // draft, please review
-  SYS_GOTO_SERVICE: 'Go to maintenance & faults', // draft, please review
 };
 
 export default en;

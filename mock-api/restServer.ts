@@ -4943,11 +4943,28 @@ const dummy_deviceentities = [
 const emsesp_deviceentities_1 = dummy_deviceentities;
 const emsesp_deviceentities_3 = dummy_deviceentities;
 const emsesp_deviceentities_5 = dummy_deviceentities;
-const emsesp_deviceentities_6 = dummy_deviceentities;
+// the short names are the ones of the firmware, as the Dashboard tiles look the values up by them
+const demoEntities = (list: [string, string][]) =>
+  list.map(([n, id]) => ({ v: '', n, id, m: 0, w: false }));
+const emsesp_deviceentities_6 = demoEntities([
+  ['collector temperature (TS1)', 'collectortemp'],
+  ['cylinder bottom temperature (TS2)', 'cylbottomtemp'],
+  ['pump (PS1)', 'solarpump'],
+  ['pump modulation (PS1)', 'solarpumpmod'],
+  ['actual solar power', 'solarpower'],
+  ['pump working time', 'pumpworktime']
+]);
 const emsesp_deviceentities_8 = dummy_deviceentities;
 const emsesp_deviceentities_9 = dummy_deviceentities;
 const emsesp_deviceentities_10 = dummy_deviceentities;
-const emsesp_deviceentities_11 = dummy_deviceentities;
+const emsesp_deviceentities_11 = demoEntities([
+  ['indoor fresh air', 'infresh'],
+  ['outdoor exhaust air', 'outexhaust'],
+  ['in blower speed', 'ventinspeed'],
+  ['out blower speed', 'ventoutspeed'],
+  ['air quality (voc)', 'airquality'],
+  ['relative air humidity', 'airhumidity']
+]);
 const emsesp_deviceentities_none = dummy_deviceentities;
 
 const emsesp_deviceentities_2 = [
@@ -5511,7 +5528,8 @@ const DEVICE_ENTITIES_MAP: Record<number, any> = {
   7: emsesp_deviceentities_7,
   8: emsesp_deviceentities_8,
   9: emsesp_deviceentities_9,
-  10: emsesp_deviceentities_10
+  10: emsesp_deviceentities_10,
+  11: emsesp_deviceentities_11
 };
 
 function deviceData(id: number) {

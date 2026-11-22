@@ -744,7 +744,6 @@ const fr: Translation = {
   SYS_FAULT_NONE: 'Aucun défaut enregistré.', // draft, please review
   SYS_FAULT_UNTIL_NOW: 'jusqu’à maintenant', // draft, please review
   SYS_MAINTENANCE: 'Maintenance', // draft, please review
-  SYS_GOTO_SERVICE: 'Aller à maintenance et défauts', // draft, please review
 };
 
 export default fr;

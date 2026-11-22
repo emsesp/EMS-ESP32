@@ -744,7 +744,6 @@ const it: Translation = {
   SYS_FAULT_NONE: 'Nessun guasto memorizzato.', // draft, please review
   SYS_FAULT_UNTIL_NOW: 'fino ad ora', // draft, please review
   SYS_MAINTENANCE: 'Manutenzione', // draft, please review
-  SYS_GOTO_SERVICE: 'Vai a manutenzione e guasti', // draft, please review
 };
 
 export default it;

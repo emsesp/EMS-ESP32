@@ -744,7 +744,6 @@ const de: Translation = {
   SYS_FAULT_NONE: 'Keine gespeicherte Störung.', // draft, please review
   SYS_FAULT_UNTIL_NOW: 'bis jetzt', // draft, please review
   SYS_MAINTENANCE: 'Wartung', // draft, please review
-  SYS_GOTO_SERVICE: 'Zu Wartung & Fehler', // draft, please review
 };
 
 export default de;

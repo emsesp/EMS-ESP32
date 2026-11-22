@@ -38,7 +38,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 12px;
-  align-items: start;
+  align-items: stretch;
   margin: 0 12px;
 }
 .sys-tiles-one {
@@ -46,10 +46,16 @@
   margin: 0 0 14px;
 }
 .sys-tile {
+  display: flex;
+  flex-direction: column;
   background: var(--paper);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 14px;
+}
+.sys-tile-link {
+  margin-top: auto;
+  padding-top: 12px;
 }
 .sys-tile-head {
   display: flex;

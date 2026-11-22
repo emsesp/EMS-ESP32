@@ -744,7 +744,6 @@ const tr: Translation = {
   SYS_FAULT_NONE: 'Kayıtlı arıza yok.', // draft, please review
   SYS_FAULT_UNTIL_NOW: 'şimdiye kadar', // draft, please review
   SYS_MAINTENANCE: 'Bakım', // draft, please review
-  SYS_GOTO_SERVICE: 'Bakım ve arızalara git', // draft, please review
 };
 
 export default tr;

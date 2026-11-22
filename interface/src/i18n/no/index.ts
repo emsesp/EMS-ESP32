@@ -744,7 +744,6 @@ const no: Translation = {
   SYS_FAULT_NONE: 'Ingen lagret feil.', // draft, please review
   SYS_FAULT_UNTIL_NOW: 'til nå', // draft, please review
   SYS_MAINTENANCE: 'Vedlikehold', // draft, please review
-  SYS_GOTO_SERVICE: 'Gå til vedlikehold og feil', // draft, please review
 };
 
 export default no;

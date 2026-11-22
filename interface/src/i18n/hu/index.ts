@@ -744,7 +744,6 @@ const hu: Translation = {
   SYS_FAULT_NONE: 'Nincs tárolt hiba.', // draft, please review
   SYS_FAULT_UNTIL_NOW: 'mostanáig', // draft, please review
   SYS_MAINTENANCE: 'Karbantartás', // draft, please review
-  SYS_GOTO_SERVICE: 'Ugrás a karbantartáshoz és hibákhoz', // draft, please review
 };
 
 export default hu;

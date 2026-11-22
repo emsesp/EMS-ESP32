@@ -1,6 +1,15 @@
 import { useI18nContext } from 'i18n/i18n-react';
 
-import { BoilerTile, DhwTile, HcTile, NotesTile, heatingCircuits } from './Tiles';
+import {
+  BoilerTile,
+  DhwTile,
+  HcTile,
+  NotesTile,
+  SummaryTile,
+  heatingCircuits,
+  summaryMenus,
+  typeNameOf
+} from './Tiles';
 import { ValueRow } from './ValueRow';
 import type { SysItem } from './model';
 import type { useFavorites } from './useFavorites';
@@ -22,10 +31,25 @@ const Home = ({
     <>
       <div className="sys-tiles">
         {heatingCircuits(items).map((tag) => (
-          <HcTile key={tag} tag={tag} items={items} edits={edits} />
+          <HcTile
+            key={tag}
+            tag={tag}
+            items={items}
+            edits={edits}
+            to={`/dashboard/${tag}`}
+          />
         ))}
-        <DhwTile items={items} edits={edits} />
-        <BoilerTile items={items} />
+        <DhwTile items={items} edits={edits} to="/dashboard/dhw" />
+        <BoilerTile items={items} to="/dashboard/boiler" />
+        {summaryMenus().map((menu) => (
+          <SummaryTile
+            key={menu}
+            menu={menu}
+            title={typeNameOf(items, menu)}
+            items={items}
+            to={`/dashboard/${menu}`}
+          />
+        ))}
         <NotesTile items={items} />
       </div>
 
