@@ -691,10 +691,10 @@ const tr: Translation = {
   SYS_MENU_HELP: 'Sisteminizin tüm değerleri ve ayarları, konulara göre sıralı.', // draft, please review
   SYS_FAV_HELP: 'En önemli ayarlarınız. Bu listeyi değiştirmek için değerin yanındaki yıldızı kullanın.', // draft, please review
   SYS_FAV_NONE: 'Henüz favori yok. Değerleri yıldızla işaretleyin.', // draft, please review
+  SYS_FAV_REMOVED: 'Favorilerden kaldırıldı', // draft, please review
   SYS_GROUP_HEATING: 'Isıtma', // draft, please review
   SYS_GROUP_PLANT: 'Tesisat', // draft, please review
   SYS_GROUP_OVERVIEW: 'Genel bakış', // draft, please review
-  SYS_GROUP_TOOLS: 'Sensörler ve otomasyon', // draft, please review
   SYS_LEVEL_MOVE_ALL: 'Yalnızca tüm değerlerde göster', // draft, please review
   SYS_LEVEL_MOVE_NORMAL: 'Normal görünümde göster', // draft, please review
   SYS_HC: 'Isıtma devresi {0}', // draft, please review

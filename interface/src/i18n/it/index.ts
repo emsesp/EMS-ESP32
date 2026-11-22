@@ -691,10 +691,10 @@ const it: Translation = {
   SYS_MENU_HELP: 'Tutti i valori e le impostazioni del tuo impianto, ordinati per argomento.', // draft, please review
   SYS_FAV_HELP: 'Le tue impostazioni più importanti. Usa la stella accanto a un valore per modificare l’elenco.', // draft, please review
   SYS_FAV_NONE: 'Ancora nessun preferito. Contrassegna i valori con la stella.', // draft, please review
+  SYS_FAV_REMOVED: 'Rimosso dai preferiti', // draft, please review
   SYS_GROUP_HEATING: 'Riscaldamento', // draft, please review
   SYS_GROUP_PLANT: 'Impianto', // draft, please review
   SYS_GROUP_OVERVIEW: 'Panoramica', // draft, please review
-  SYS_GROUP_TOOLS: 'Sensori e automazione', // draft, please review
   SYS_LEVEL_MOVE_ALL: 'Mostra solo in tutti i valori', // draft, please review
   SYS_LEVEL_MOVE_NORMAL: 'Mostra nella vista normale', // draft, please review
   SYS_HC: 'Circuito di riscaldamento {0}', // draft, please review

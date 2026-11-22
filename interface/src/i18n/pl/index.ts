@@ -691,10 +691,10 @@ const pl: BaseTranslation = {
   SYS_MENU_HELP: 'Wszystkie wartości i ustawienia instalacji, uporządkowane tematycznie.', // draft, please review
   SYS_FAV_HELP: 'Twoje najważniejsze ustawienia. Gwiazdką przy wartości zmienisz tę listę.', // draft, please review
   SYS_FAV_NONE: 'Brak ulubionych. Oznacz wartości gwiazdką.', // draft, please review
+  SYS_FAV_REMOVED: 'Usunięto z ulubionych', // draft, please review
   SYS_GROUP_HEATING: 'Ogrzewanie', // draft, please review
   SYS_GROUP_PLANT: 'Instalacja', // draft, please review
   SYS_GROUP_OVERVIEW: 'Przegląd', // draft, please review
-  SYS_GROUP_TOOLS: 'Czujniki i automatyka', // draft, please review
   SYS_LEVEL_MOVE_ALL: 'Pokaż tylko we wszystkich wartościach', // draft, please review
   SYS_LEVEL_MOVE_NORMAL: 'Pokaż w widoku normalnym', // draft, please review
   SYS_HC: 'Obieg grzewczy {0}', // draft, please review

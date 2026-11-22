@@ -691,10 +691,10 @@ const nl: Translation = {
   SYS_MENU_HELP: 'Alle waarden en instellingen van je installatie, per onderwerp gesorteerd.', // draft, please review
   SYS_FAV_HELP: 'Je belangrijkste instellingen. Met de ster bij een waarde pas je deze lijst aan.', // draft, please review
   SYS_FAV_NONE: 'Nog geen favorieten. Markeer waarden met de ster.', // draft, please review
+  SYS_FAV_REMOVED: 'Verwijderd uit favorieten', // draft, please review
   SYS_GROUP_HEATING: 'Verwarming', // draft, please review
   SYS_GROUP_PLANT: 'Installatie', // draft, please review
   SYS_GROUP_OVERVIEW: 'Overzicht', // draft, please review
-  SYS_GROUP_TOOLS: 'Sensoren en automatisering', // draft, please review
   SYS_LEVEL_MOVE_ALL: 'Alleen bij alle waarden tonen', // draft, please review
   SYS_LEVEL_MOVE_NORMAL: 'Tonen in de normale weergave', // draft, please review
   SYS_HC: 'Verwarmingskring {0}', // draft, please review

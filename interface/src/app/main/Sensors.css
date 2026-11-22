@@ -13,3 +13,14 @@
   font-size: 12px;
   text-align: center;
 }
+
+.sns-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 0 6px;
+}
+.tbl-wrap + .sns-sub {
+  border-top: 1px solid var(--divider);
+  margin-top: 8px;
+}

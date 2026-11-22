@@ -691,10 +691,10 @@ const de: Translation = {
   SYS_MENU_HELP: 'Alle Werte und Einstellungen deiner Anlage, nach Themen geordnet.', // draft, please review
   SYS_FAV_HELP: 'Deine wichtigsten Einstellungen. Mit dem Stern bei einem Wert änderst du die Liste.', // draft, please review
   SYS_FAV_NONE: 'Noch keine Favoriten. Markiere Werte mit dem Stern.', // draft, please review
+  SYS_FAV_REMOVED: 'Aus den Favoriten entfernt', // draft, please review
   SYS_GROUP_HEATING: 'Heizung', // draft, please review
   SYS_GROUP_PLANT: 'Anlage', // draft, please review
   SYS_GROUP_OVERVIEW: 'Überblick', // draft, please review
-  SYS_GROUP_TOOLS: 'Sensoren & Automatisierung', // draft, please review
   SYS_LEVEL_MOVE_ALL: 'Nur unter Alle Werte anzeigen', // draft, please review
   SYS_LEVEL_MOVE_NORMAL: 'In der Ansicht Normal anzeigen', // draft, please review
   SYS_HC: 'Heizkreis {0}', // draft, please review

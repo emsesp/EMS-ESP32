@@ -691,10 +691,10 @@ const en: Translation = {
   SYS_MENU_HELP: 'All values and settings of your system, sorted by topic.', // draft, please review
   SYS_FAV_HELP: 'Your most important settings. Use the star next to a value to change this list.', // draft, please review
   SYS_FAV_NONE: 'No favorites yet. Mark values with the star.', // draft, please review
+  SYS_FAV_REMOVED: 'Removed from favorites', // draft, please review
   SYS_GROUP_HEATING: 'Heating', // draft, please review
   SYS_GROUP_PLANT: 'System parts', // draft, please review
   SYS_GROUP_OVERVIEW: 'Overview', // draft, please review
-  SYS_GROUP_TOOLS: 'Sensors & Automation', // draft, please review
   SYS_LEVEL_MOVE_ALL: 'Show in All values only', // draft, please review
   SYS_LEVEL_MOVE_NORMAL: 'Show in Normal view', // draft, please review
   SYS_HC: 'Heating circuit {0}', // draft, please review

@@ -691,10 +691,10 @@ const no: Translation = {
   SYS_MENU_HELP: 'Alle verdier og innstillinger for anlegget ditt, sortert etter tema.', // draft, please review
   SYS_FAV_HELP: 'Dine viktigste innstillinger. Bruk stjernen ved en verdi for å endre listen.', // draft, please review
   SYS_FAV_NONE: 'Ingen favoritter ennå. Merk verdier med stjernen.', // draft, please review
+  SYS_FAV_REMOVED: 'Fjernet fra favoritter', // draft, please review
   SYS_GROUP_HEATING: 'Oppvarming', // draft, please review
   SYS_GROUP_PLANT: 'Anlegg', // draft, please review
   SYS_GROUP_OVERVIEW: 'Oversikt', // draft, please review
-  SYS_GROUP_TOOLS: 'Sensorer og automatisering', // draft, please review
   SYS_LEVEL_MOVE_ALL: 'Vis bare under alle verdier', // draft, please review
   SYS_LEVEL_MOVE_NORMAL: 'Vis i normalvisning', // draft, please review
   SYS_HC: 'Varmekrets {0}', // draft, please review

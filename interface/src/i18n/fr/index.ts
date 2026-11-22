@@ -691,10 +691,10 @@ const fr: Translation = {
   SYS_MENU_HELP: 'Toutes les valeurs et tous les réglages de votre installation, classés par thème.', // draft, please review
   SYS_FAV_HELP: 'Vos réglages les plus importants. Utilisez l’étoile à côté d’une valeur pour modifier cette liste.', // draft, please review
   SYS_FAV_NONE: 'Aucun favori pour l’instant. Marquez des valeurs avec l’étoile.', // draft, please review
+  SYS_FAV_REMOVED: 'Retiré des favoris', // draft, please review
   SYS_GROUP_HEATING: 'Chauffage', // draft, please review
   SYS_GROUP_PLANT: 'Installation', // draft, please review
   SYS_GROUP_OVERVIEW: 'Aperçu', // draft, please review
-  SYS_GROUP_TOOLS: 'Capteurs et automatisation', // draft, please review
   SYS_LEVEL_MOVE_ALL: 'Afficher seulement dans toutes les valeurs', // draft, please review
   SYS_LEVEL_MOVE_NORMAL: 'Afficher dans la vue normale', // draft, please review
   SYS_HC: 'Circuit de chauffage {0}', // draft, please review

@@ -5538,10 +5538,9 @@ function deviceData(id: number) {
     emsesp_devicedata_8.nodes[4].v = Math.floor(Math.random() * 100);
   }
 
-  const data = DEVICE_DATA_MAP[id];
-  if (data) {
-    return new Response(encoder.encode(data) as BodyInit, { headers });
-  }
+  // a device without values, like a gateway, has an empty list; it is not an error
+  const data = DEVICE_DATA_MAP[id] ?? { nodes: [] };
+  return new Response(encoder.encode(data) as BodyInit, { headers });
 }
 
 function deviceEntities(id: number) {

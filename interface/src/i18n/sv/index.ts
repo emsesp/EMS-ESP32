@@ -691,10 +691,10 @@ const sv: Translation = {
   SYS_MENU_HELP: 'Alla värden och inställningar för din anläggning, sorterade efter ämne.', // draft, please review
   SYS_FAV_HELP: 'Dina viktigaste inställningar. Använd stjärnan vid ett värde för att ändra listan.', // draft, please review
   SYS_FAV_NONE: 'Inga favoriter ännu. Markera värden med stjärnan.', // draft, please review
+  SYS_FAV_REMOVED: 'Borttagen från favoriter', // draft, please review
   SYS_GROUP_HEATING: 'Värme', // draft, please review
   SYS_GROUP_PLANT: 'Anläggning', // draft, please review
   SYS_GROUP_OVERVIEW: 'Översikt', // draft, please review
-  SYS_GROUP_TOOLS: 'Sensorer och automatisering', // draft, please review
   SYS_LEVEL_MOVE_ALL: 'Visa bara under alla värden', // draft, please review
   SYS_LEVEL_MOVE_NORMAL: 'Visa i normalvyn', // draft, please review
   SYS_HC: 'Värmekrets {0}', // draft, please review

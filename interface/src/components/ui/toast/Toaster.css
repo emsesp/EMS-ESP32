@@ -51,6 +51,23 @@
   --c: var(--error);
 }
 
+.toast-action {
+  flex: none;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--c);
+  font: inherit;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+.toast-action:hover {
+  background: var(--hover);
+}
+
 /* countdown line; runs as long as the auto-close timer and stops with it */
 .toast-bar {
   position: absolute;

@@ -691,10 +691,10 @@ const hu: Translation = {
   SYS_MENU_HELP: 'A rendszer összes értéke és beállítása, témák szerint rendezve.', // draft, please review
   SYS_FAV_HELP: 'A legfontosabb beállításaid. Az érték melletti csillaggal módosíthatod a listát.', // draft, please review
   SYS_FAV_NONE: 'Még nincs kedvenc. Jelölj meg értékeket a csillaggal.', // draft, please review
+  SYS_FAV_REMOVED: 'Eltávolítva a kedvencek közül', // draft, please review
   SYS_GROUP_HEATING: 'Fűtés', // draft, please review
   SYS_GROUP_PLANT: 'Berendezés', // draft, please review
   SYS_GROUP_OVERVIEW: 'Áttekintés', // draft, please review
-  SYS_GROUP_TOOLS: 'Szenzorok és automatizálás', // draft, please review
   SYS_LEVEL_MOVE_ALL: 'Csak az összes értéknél jelenjen meg', // draft, please review
   SYS_LEVEL_MOVE_NORMAL: 'Megjelenítés a normál nézetben', // draft, please review
   SYS_HC: 'Fűtési kör {0}', // draft, please review

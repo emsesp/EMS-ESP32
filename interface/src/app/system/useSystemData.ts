@@ -31,10 +31,17 @@ export const useSystemData = (): SystemData => {
   }>({ loading: true, error: null, items: [] });
   const entities = useRef(new Map<number, readonly DeviceEntity[] | null>());
   const busy = useRef(false);
+  // a reload that was asked for while another one ran, e.g. after a write
+  const again = useRef(false);
+  // the items of the last successful read of each device
+  const last = useRef(new Map<number, SysItem[]>());
   const mounted = useRef(true);
 
   const reload = useCallback(async () => {
-    if (busy.current) return;
+    if (busy.current) {
+      again.current = true;
+      return;
+    }
     busy.current = true;
     try {
       const core = await readCoreData();
@@ -51,9 +58,17 @@ export const useSystemData = (): SystemData => {
         }
         try {
           const data = await readDeviceData(d.id);
-          all.push(...buildItems(d, data.nodes, entities.current.get(d.id) ?? null));
+          const items = buildItems(
+            d,
+            data.nodes,
+            entities.current.get(d.id) ?? null
+          );
+          last.current.set(d.id, items);
+          all.push(...items);
         } catch {
-          // a single device without data (e.g. a gateway) must not block the page
+          // a single device without data (e.g. a gateway) must not block the page, and one that
+          // doesn't answer for a moment (the gateway is busy after a write) keeps its last values
+          all.push(...(last.current.get(d.id) ?? []));
         }
       }
       if (mounted.current) setState({ loading: false, error: null, items: all });
@@ -67,6 +82,10 @@ export const useSystemData = (): SystemData => {
       }
     } finally {
       busy.current = false;
+      if (again.current && mounted.current) {
+        again.current = false;
+        void reload();
+      }
     }
   }, []);
 

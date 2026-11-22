@@ -691,10 +691,10 @@ const zh: Translation = {
   SYS_MENU_HELP: '系统的所有数值和设置,按主题分类。', // draft, please review
   SYS_FAV_HELP: '您最重要的设置。点击数值旁的星标即可修改此列表。', // draft, please review
   SYS_FAV_NONE: '暂无收藏。用星标标记数值。', // draft, please review
+  SYS_FAV_REMOVED: '已从收藏中移除', // draft, please review
   SYS_GROUP_HEATING: '供暖', // draft, please review
   SYS_GROUP_PLANT: '设备', // draft, please review
   SYS_GROUP_OVERVIEW: '概览', // draft, please review
-  SYS_GROUP_TOOLS: '传感器与自动化', // draft, please review
   SYS_LEVEL_MOVE_ALL: '仅在“全部值”中显示', // draft, please review
   SYS_LEVEL_MOVE_NORMAL: '在“常规”视图中显示', // draft, please review
   SYS_HC: '供暖回路 {0}', // draft, please review

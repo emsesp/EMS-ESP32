@@ -215,7 +215,7 @@ const SystemMenu = memo(() => {
       : g === 'plant'
         ? LL.SYS_GROUP_PLANT()
         : g === 'tools'
-          ? LL.SYS_GROUP_TOOLS()
+          ? LL.MODULES()
           : LL.SYS_GROUP_OVERVIEW();
 
   // the tile of the page (as on the Dashboard overview), above its values
@@ -240,7 +240,8 @@ const SystemMenu = memo(() => {
 
   let body: ReactNode;
   if (embedded) {
-    body = pageView();
+    // the pages of the other parts of the web interface keep their own cards, with their padding
+    body = <div className="sys-embed">{pageView()}</div>;
   } else if (data.loading && data.items.length === 0) {
     body = <Loader />;
   } else if (data.items.length === 0) {

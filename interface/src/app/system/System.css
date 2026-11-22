@@ -212,6 +212,10 @@
   padding: 0;
   overflow: hidden;
 }
+.sys-main .sys-embed .section {
+  padding: 12px;
+  overflow: visible;
+}
 .sys-sec-head {
   display: flex;
   align-items: center;

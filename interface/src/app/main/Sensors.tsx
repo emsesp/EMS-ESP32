@@ -4,6 +4,7 @@ import { useRequest } from 'alova/client';
 import {
   Button,
   ConfirmDialog,
+  Icon,
   Loader,
   SearchField,
   Section,
@@ -181,14 +182,15 @@ const Sensors = () => {
             </span>
           </p>
         )}
-      </Section>
 
-      <Section
-        title={LL.TEMP_SENSORS()}
-        count={data.ts.length}
-        icon="thermostat"
-        desc={me.admin && LL.TEMP_SENSORS_HELP()}
-      >
+        <div className="sns-sub">
+          <Icon name="thermostat" className="lb" />
+          <h3 className="h6 grow">
+            {LL.TEMP_SENSORS()}
+            <span className="count primary">{data.ts.length}</span>
+          </h3>
+        </div>
+        {me.admin && <p className="sec-desc">{LL.TEMP_SENSORS_HELP()}</p>}
         <div className="tbl-wrap">
           <Table stack>
             <thead>
@@ -231,21 +233,19 @@ const Sensors = () => {
             </tbody>
           </Table>
         </div>
-      </Section>
 
-      <Section
-        title={LL.ANALOG_SENSORS()}
-        count={data.as.length}
-        icon="sensors"
-        actions={
-          me.admin &&
-          data.analog_enabled && (
+        <div className="sns-sub">
+          <Icon name="sensors" className="lb" />
+          <h3 className="h6 grow">
+            {LL.ANALOG_SENSORS()}
+            <span className="count primary">{data.as.length}</span>
+          </h3>
+          {me.admin && data.analog_enabled && (
             <Button icon="add" onClick={addAnalogSensor}>
               {LL.ADD(0)}
             </Button>
-          )
-        }
-      >
+          )}
+        </div>
         <div className="tbl-wrap">
           <Table stack>
             <thead>
