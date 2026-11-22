@@ -694,6 +694,9 @@ const nl: Translation = {
   SYS_GROUP_HEATING: 'Verwarming', // draft, please review
   SYS_GROUP_PLANT: 'Installatie', // draft, please review
   SYS_GROUP_OVERVIEW: 'Overzicht', // draft, please review
+  SYS_GROUP_TOOLS: 'Sensoren en automatisering', // draft, please review
+  SYS_LEVEL_MOVE_ALL: 'Alleen bij alle waarden tonen', // draft, please review
+  SYS_LEVEL_MOVE_NORMAL: 'Tonen in de normale weergave', // draft, please review
   SYS_HC: 'Verwarmingskring {0}', // draft, please review
   SYS_DHW: 'Warm water', // draft, please review
   SYS_AHS: 'Bijverwarming', // draft, please review

@@ -686,7 +686,7 @@ const en: Translation = {
   PARTITION: 'Partition',
   PULSE: 'Pulse',
   SYS_HOME: 'Home', // draft, please review
-  SYS_HOME_HELP: 'The most important things at a glance. Everything else is in the System menu.', // draft, please review
+  SYS_HOME_HELP: 'The most important things at a glance. Everything else is in the menu.', // draft, please review
   SYS_MENU: 'System menu', // draft, please review
   SYS_MENU_HELP: 'All values and settings of your system, sorted by topic.', // draft, please review
   SYS_FAV_HELP: 'Your most important settings. Use the star next to a value to change this list.', // draft, please review
@@ -694,6 +694,9 @@ const en: Translation = {
   SYS_GROUP_HEATING: 'Heating', // draft, please review
   SYS_GROUP_PLANT: 'System parts', // draft, please review
   SYS_GROUP_OVERVIEW: 'Overview', // draft, please review
+  SYS_GROUP_TOOLS: 'Sensors & Automation', // draft, please review
+  SYS_LEVEL_MOVE_ALL: 'Show in All values only', // draft, please review
+  SYS_LEVEL_MOVE_NORMAL: 'Show in Normal view', // draft, please review
   SYS_HC: 'Heating circuit {0}', // draft, please review
   SYS_DHW: 'Hot water', // draft, please review
   SYS_AHS: 'Auxiliary heater', // draft, please review

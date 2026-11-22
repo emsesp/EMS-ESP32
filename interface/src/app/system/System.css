@@ -41,6 +41,10 @@
   align-items: start;
   margin: 0 12px;
 }
+.sys-tiles-one {
+  grid-template-columns: minmax(280px, 420px);
+  margin: 0 0 14px;
+}
 .sys-tile {
   background: var(--paper);
   border: 1px solid var(--border);
@@ -166,6 +170,17 @@
 .sys-nav-item.on .icon {
   color: var(--primary);
 }
+.sys-nav-item.fav .icon {
+  color: var(--flag-fav);
+}
+.sys-sec-link {
+  display: grid;
+  place-items: center;
+  color: var(--text-3);
+}
+.sys-sec-link:hover {
+  color: var(--primary);
+}
 .sys-nav-item .grow {
   flex: 1;
 }
@@ -192,6 +207,10 @@
   overflow: hidden;
 }
 .sys-sec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   padding: 10px 14px;
   font-size: 11px;
   font-weight: 500;
@@ -255,6 +274,10 @@
 }
 .sys-star.on {
   color: var(--flag-fav);
+}
+.sys-eye.expert {
+  color: var(--text-3);
+  opacity: 0.6;
 }
 .sys-ctl {
   display: flex;

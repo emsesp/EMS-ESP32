@@ -694,6 +694,9 @@ const fr: Translation = {
   SYS_GROUP_HEATING: 'Chauffage', // draft, please review
   SYS_GROUP_PLANT: 'Installation', // draft, please review
   SYS_GROUP_OVERVIEW: 'Aperçu', // draft, please review
+  SYS_GROUP_TOOLS: 'Capteurs et automatisation', // draft, please review
+  SYS_LEVEL_MOVE_ALL: 'Afficher seulement dans toutes les valeurs', // draft, please review
+  SYS_LEVEL_MOVE_NORMAL: 'Afficher dans la vue normale', // draft, please review
   SYS_HC: 'Circuit de chauffage {0}', // draft, please review
   SYS_DHW: 'Eau chaude', // draft, please review
   SYS_AHS: 'Chauffage d’appoint', // draft, please review

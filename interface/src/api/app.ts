@@ -122,3 +122,10 @@ export const readCustomEntities = () =>
   });
 export const writeCustomEntities = (data: Entities) =>
   alovaInstance.Post('/rest/customEntities', data);
+
+// What the user moved between Normal and All values in the Dashboard menu: the key of a value -> its level
+export type ViewLevels = Record<string, 1 | 2>;
+export const readViewLevels = () =>
+  alovaInstance.Get<ViewLevels>('/rest/viewLevels');
+export const writeViewLevels = (data: ViewLevels) =>
+  alovaInstance.Post('/rest/viewLevels', data);

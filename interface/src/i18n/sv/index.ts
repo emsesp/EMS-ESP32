@@ -694,6 +694,9 @@ const sv: Translation = {
   SYS_GROUP_HEATING: 'Värme', // draft, please review
   SYS_GROUP_PLANT: 'Anläggning', // draft, please review
   SYS_GROUP_OVERVIEW: 'Översikt', // draft, please review
+  SYS_GROUP_TOOLS: 'Sensorer och automatisering', // draft, please review
+  SYS_LEVEL_MOVE_ALL: 'Visa bara under alla värden', // draft, please review
+  SYS_LEVEL_MOVE_NORMAL: 'Visa i normalvyn', // draft, please review
   SYS_HC: 'Värmekrets {0}', // draft, please review
   SYS_DHW: 'Varmvatten', // draft, please review
   SYS_AHS: 'Tillsatsvärme', // draft, please review

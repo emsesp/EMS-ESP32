@@ -1223,6 +1223,10 @@ const EMSESP_CUSTOMENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customEntities';
 const EMSESP_MODULES_ENDPOINT = REST_ENDPOINT_ROOT + 'modules';
 const EMSESP_ACTION_ENDPOINT = REST_ENDPOINT_ROOT + 'action';
 const EMSESP_UPLOAD_FILE_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFile';
+const EMSESP_VIEWLEVELS_ENDPOINT = REST_ENDPOINT_ROOT + 'viewLevels';
+
+// what the user moved between Normal and All values in the Dashboard menu, like /viewlevels.json on the gateway
+let viewLevels: Record<string, number> = {};
 
 // these are used in the API calls only
 const EMSESP_SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info';
@@ -5868,6 +5872,13 @@ router
     return status(200);
   })
   .get(EMSESP_MODULES_ENDPOINT, () => emsesp_modules)
+
+  // Levels of the values (Normal or All values)
+  .get(EMSESP_VIEWLEVELS_ENDPOINT, () => viewLevels)
+  .post(EMSESP_VIEWLEVELS_ENDPOINT, async (request: any) => {
+    viewLevels = await request.json();
+    return status(200);
+  })
 
   // Custom Entities
   .post(EMSESP_CUSTOMENTITIES_ENDPOINT, async (request: any) => {

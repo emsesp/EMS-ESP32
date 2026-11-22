@@ -694,6 +694,9 @@ const cs: Translation = {
   SYS_GROUP_HEATING: 'Topení', // draft, please review
   SYS_GROUP_PLANT: 'Zařízení', // draft, please review
   SYS_GROUP_OVERVIEW: 'Přehled', // draft, please review
+  SYS_GROUP_TOOLS: 'Senzory a automatizace', // draft, please review
+  SYS_LEVEL_MOVE_ALL: 'Zobrazit jen ve všech hodnotách', // draft, please review
+  SYS_LEVEL_MOVE_NORMAL: 'Zobrazit v normálním zobrazení', // draft, please review
   SYS_HC: 'Topný okruh {0}', // draft, please review
   SYS_DHW: 'Teplá voda', // draft, please review
   SYS_AHS: 'Přídavné topení', // draft, please review

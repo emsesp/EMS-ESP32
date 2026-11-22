@@ -694,6 +694,9 @@ const hu: Translation = {
   SYS_GROUP_HEATING: 'Fűtés', // draft, please review
   SYS_GROUP_PLANT: 'Berendezés', // draft, please review
   SYS_GROUP_OVERVIEW: 'Áttekintés', // draft, please review
+  SYS_GROUP_TOOLS: 'Szenzorok és automatizálás', // draft, please review
+  SYS_LEVEL_MOVE_ALL: 'Csak az összes értéknél jelenjen meg', // draft, please review
+  SYS_LEVEL_MOVE_NORMAL: 'Megjelenítés a normál nézetben', // draft, please review
   SYS_HC: 'Fűtési kör {0}', // draft, please review
   SYS_DHW: 'Melegvíz', // draft, please review
   SYS_AHS: 'Kiegészítő fűtés', // draft, please review

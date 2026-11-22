@@ -694,6 +694,9 @@ const sk: Translation = {
   SYS_GROUP_HEATING: 'Kúrenie', // draft, please review
   SYS_GROUP_PLANT: 'Zariadenie', // draft, please review
   SYS_GROUP_OVERVIEW: 'Prehľad', // draft, please review
+  SYS_GROUP_TOOLS: 'Senzory a automatizácia', // draft, please review
+  SYS_LEVEL_MOVE_ALL: 'Zobraziť len vo všetkých hodnotách', // draft, please review
+  SYS_LEVEL_MOVE_NORMAL: 'Zobraziť v normálnom zobrazení', // draft, please review
   SYS_HC: 'Vykurovací okruh {0}', // draft, please review
   SYS_DHW: 'Teplá voda', // draft, please review
   SYS_AHS: 'Prídavné kúrenie', // draft, please review

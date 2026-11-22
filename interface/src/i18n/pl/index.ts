@@ -694,6 +694,9 @@ const pl: BaseTranslation = {
   SYS_GROUP_HEATING: 'Ogrzewanie', // draft, please review
   SYS_GROUP_PLANT: 'Instalacja', // draft, please review
   SYS_GROUP_OVERVIEW: 'Przegląd', // draft, please review
+  SYS_GROUP_TOOLS: 'Czujniki i automatyka', // draft, please review
+  SYS_LEVEL_MOVE_ALL: 'Pokaż tylko we wszystkich wartościach', // draft, please review
+  SYS_LEVEL_MOVE_NORMAL: 'Pokaż w widoku normalnym', // draft, please review
   SYS_HC: 'Obieg grzewczy {0}', // draft, please review
   SYS_DHW: 'Ciepła woda', // draft, please review
   SYS_AHS: 'Ogrzewanie dodatkowe', // draft, please review

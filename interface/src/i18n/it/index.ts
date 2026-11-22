@@ -694,6 +694,9 @@ const it: Translation = {
   SYS_GROUP_HEATING: 'Riscaldamento', // draft, please review
   SYS_GROUP_PLANT: 'Impianto', // draft, please review
   SYS_GROUP_OVERVIEW: 'Panoramica', // draft, please review
+  SYS_GROUP_TOOLS: 'Sensori e automazione', // draft, please review
+  SYS_LEVEL_MOVE_ALL: 'Mostra solo in tutti i valori', // draft, please review
+  SYS_LEVEL_MOVE_NORMAL: 'Mostra nella vista normale', // draft, please review
   SYS_HC: 'Circuito di riscaldamento {0}', // draft, please review
   SYS_DHW: 'Acqua calda', // draft, please review
   SYS_AHS: 'Riscaldatore ausiliario', // draft, please review

@@ -156,7 +156,6 @@ export interface MenuDef {
 
 const GROUP_ORDER: Record<string, number> = { heating: 0, plant: 1, overview: 2 };
 const PLANT_ORDER = [
-  'dhw',
   'boiler',
   'heatpump',
   'ahs',
@@ -175,18 +174,21 @@ export const buildMenus = (items: readonly SysItem[]): MenuDef[] => {
   const ids = [...new Set(items.map((i) => i.menu))];
   const defs: MenuDef[] = ids.map((id) => ({
     id,
-    group: /^hc\d$/.test(id)
-      ? 'heating'
-      : id === 'service' || id === 'energy' || id === 'thermostat'
-        ? 'overview'
-        : 'plant'
+    group:
+      /^hc\d$/.test(id) || id === 'dhw'
+        ? 'heating'
+        : id === 'service' || id === 'energy' || id === 'thermostat'
+          ? 'overview'
+          : 'plant'
   }));
   const rank = (d: MenuDef): number =>
     d.group === 'plant'
       ? PLANT_ORDER.indexOf(d.id)
       : d.group === 'overview'
         ? OVERVIEW_ORDER.indexOf(d.id)
-        : Number(d.id.slice(2));
+        : d.id === 'dhw'
+          ? 99 // hot water follows the heating circuits
+          : Number(d.id.slice(2));
   return defs.sort(
     (a, b) =>
       (GROUP_ORDER[a.group] ?? 9) - (GROUP_ORDER[b.group] ?? 9) ||

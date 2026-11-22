@@ -19,7 +19,6 @@ import { useI18nContext } from 'i18n/i18n-react';
 import { useInterval, usePersistState } from 'utils';
 
 import { readDashboard, writeDeviceValue } from '../../api/app';
-import Home from '../system/Home';
 import './Dashboard.css';
 import DeviceIcon from './DeviceIcon';
 import DevicesDialog from './DevicesDialog';
@@ -90,8 +89,7 @@ const groupOf = (t?: number) => {
   }
 };
 
-// the values of the devices, sensors and automation as cards, unchanged
-const DashboardCards = () => {
+const Dashboard = () => {
   const { LL } = useI18nContext();
   const { me } = useContext(AuthenticatedContext);
 
@@ -375,14 +373,5 @@ const DashboardCards = () => {
     </>
   );
 };
-
-// The Dashboard starts with the guided Home tiles and the favorites; below them
-// everything stays as it was.
-const Dashboard = () => (
-  <>
-    <Home />
-    <DashboardCards />
-  </>
-);
 
 export default Dashboard;

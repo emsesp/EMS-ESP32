@@ -694,6 +694,9 @@ const zh: Translation = {
   SYS_GROUP_HEATING: '供暖', // draft, please review
   SYS_GROUP_PLANT: '设备', // draft, please review
   SYS_GROUP_OVERVIEW: '概览', // draft, please review
+  SYS_GROUP_TOOLS: '传感器与自动化', // draft, please review
+  SYS_LEVEL_MOVE_ALL: '仅在“全部值”中显示', // draft, please review
+  SYS_LEVEL_MOVE_NORMAL: '在“常规”视图中显示', // draft, please review
   SYS_HC: '供暖回路 {0}', // draft, please review
   SYS_DHW: '热水', // draft, please review
   SYS_AHS: '辅助加热', // draft, please review

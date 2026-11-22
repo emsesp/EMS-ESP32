@@ -694,6 +694,9 @@ const no: Translation = {
   SYS_GROUP_HEATING: 'Oppvarming', // draft, please review
   SYS_GROUP_PLANT: 'Anlegg', // draft, please review
   SYS_GROUP_OVERVIEW: 'Oversikt', // draft, please review
+  SYS_GROUP_TOOLS: 'Sensorer og automatisering', // draft, please review
+  SYS_LEVEL_MOVE_ALL: 'Vis bare under alle verdier', // draft, please review
+  SYS_LEVEL_MOVE_NORMAL: 'Vis i normalvisning', // draft, please review
   SYS_HC: 'Varmekrets {0}', // draft, please review
   SYS_DHW: 'Varmtvann', // draft, please review
   SYS_AHS: 'Tilleggsvarme', // draft, please review

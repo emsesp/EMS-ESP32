@@ -145,45 +145,71 @@ interface RowProps {
   edits: Edits;
   // undefined when the favorite can't be changed (no administrator)
   onFavorite?: (item: SysItem) => void;
+  // moves the value between Normal and All values; only on the pages of the menu, not on the favorites
+  onLevel?: (item: SysItem) => void;
   // where the value lives, shown in search results and favorites
   where?: string;
 }
 
-export const ValueRow = memo(({ item, edits, onFavorite, where }: RowProps) => {
-  const { LL } = useI18nContext();
-  const format = useFormat();
-  const changed = edits.pending.has(item.uid);
-  const isFav = isFavorite(item);
-  return (
-    <div className={cx('sys-row', changed && 'pend')}>
-      <div className="sys-lab">
-        <button
-          type="button"
-          className={cx('sys-star', isFav && 'on')}
-          aria-label={LL.FAVORITES()}
-          aria-pressed={isFav}
-          disabled={!onFavorite}
-          onClick={() => onFavorite?.(item)}
-        >
-          <Icon name="star" size="sm" />
-        </button>
-        <span className="txt">
-          <b>{item.label}</b>
-          <small>
-            {where ? `${where} · ` : ''}
-            {item.dv.c ?? shortId(item)}
-            {changed && ` · ${LL.SYS_CHANGED_WAS(format(item.dv.v, item.dv.u))}`}
-          </small>
-        </span>
+export const ValueRow = memo(
+  ({ item, edits, onFavorite, onLevel, where }: RowProps) => {
+    const { LL } = useI18nContext();
+    const format = useFormat();
+    const changed = edits.pending.has(item.uid);
+    const isFav = isFavorite(item);
+    return (
+      <div className={cx('sys-row', changed && 'pend')}>
+        <div className="sys-lab">
+          <button
+            type="button"
+            className={cx('sys-star', isFav && 'on')}
+            aria-label={LL.FAVORITES()}
+            aria-pressed={isFav}
+            disabled={!onFavorite}
+            onClick={() => onFavorite?.(item)}
+          >
+            <Icon name="star" size="sm" />
+          </button>
+          {onLevel && (
+            <button
+              type="button"
+              className={cx('sys-star', 'sys-eye', item.level === 2 && 'expert')}
+              aria-label={
+                item.level === 1
+                  ? LL.SYS_LEVEL_MOVE_ALL()
+                  : LL.SYS_LEVEL_MOVE_NORMAL()
+              }
+              title={
+                item.level === 1
+                  ? LL.SYS_LEVEL_MOVE_ALL()
+                  : LL.SYS_LEVEL_MOVE_NORMAL()
+              }
+              onClick={() => onLevel(item)}
+            >
+              <Icon
+                name={item.level === 1 ? 'visibility' : 'visibility_off'}
+                size="sm"
+              />
+            </button>
+          )}
+          <span className="txt">
+            <b>{item.label}</b>
+            <small>
+              {where ? `${where} · ` : ''}
+              {item.dv.c ?? shortId(item)}
+              {changed && ` · ${LL.SYS_CHANGED_WAS(format(item.dv.v, item.dv.u))}`}
+            </small>
+          </span>
+        </div>
+        <div className="sys-ctl">
+          <ValueControl
+            item={item}
+            value={edits.value(item)}
+            onChange={(v) => edits.set(item, v)}
+            onRun={() => void edits.run(item, LL.WRITE_CMD_SENT())}
+          />
+        </div>
       </div>
-      <div className="sys-ctl">
-        <ValueControl
-          item={item}
-          value={edits.value(item)}
-          onChange={(v) => edits.set(item, v)}
-          onRun={() => void edits.run(item, LL.WRITE_CMD_SENT())}
-        />
-      </div>
-    </div>
-  );
-});
+    );
+  }
+);

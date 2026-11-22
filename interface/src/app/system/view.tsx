@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router';
 
 import { SearchField, ToggleButton, ToggleGroup } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
@@ -13,7 +13,7 @@ export interface SystemView {
   setQ: (q: string) => void;
 }
 
-// detail level (remembered) and search term, shared by Home and the System menu
+// detail level (remembered) and search term, of the Dashboard
 export const useSystemView = (): SystemView => {
   const [level, setLevel] = usePersistState<1 | 2>(1, 'system-level');
   const [params, setParams] = useSearchParams();
@@ -24,30 +24,23 @@ export const useSystemView = (): SystemView => {
 };
 
 interface SystemBarProps {
-  page: 'home' | 'system';
   view: SystemView;
+  // the level only matters where values are hidden by it; not on the Favorites page
+  showLevel?: boolean;
 }
 
-// search on both pages; the detail level only applies to the System menu
-export const SystemBar = ({ page, view }: SystemBarProps) => {
+// search, and the detail level of the values
+export const SystemBar = ({ view, showLevel = true }: SystemBarProps) => {
   const { LL } = useI18nContext();
-  const navigate = useNavigate();
   return (
     <div className="sys-bar">
       <SearchField
         label={LL.SEARCH()}
         value={view.q}
-        onChange={(e) => {
-          // a search on Home opens the System menu with the hits
-          if (page === 'home') {
-            void navigate(`/system?q=${encodeURIComponent(e.target.value)}`);
-          } else {
-            view.setQ(e.target.value);
-          }
-        }}
+        onChange={(e) => view.setQ(e.target.value)}
       />
       <span className="grow" />
-      {page === 'system' && (
+      {showLevel && (
         <ToggleGroup label={LL.SYS_LEVEL_NORMAL()}>
           <ToggleButton on={view.level === 1} onClick={() => view.setLevel(1)}>
             {LL.SYS_LEVEL_NORMAL()}
