@@ -30,8 +30,7 @@ class Thermostat : public EMSdevice {
       public:
         HeatingCircuit(const uint8_t hc_num, const uint8_t model)
             : hc_num_(hc_num)
-            , model_(model)
-            , statusbyte(EMS_VALUE_UINT8_NOTSET) {
+            , model_(model) {
         }
 
         ~HeatingCircuit() = default;
@@ -91,7 +90,7 @@ class Thermostat : public EMSdevice {
         char    switchtime2[16];
         uint8_t climate;
         uint8_t switchonoptimization;
-        uint8_t statusbyte; // from RC300monitor
+        uint8_t statusbyte = EMS_VALUE_UINT8_NOTSET; // from RC300monitor, #3471
         uint8_t switchProgMode;
         int8_t  redThreshold;
         // BC400
