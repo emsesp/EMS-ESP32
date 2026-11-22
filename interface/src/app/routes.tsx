@@ -33,7 +33,6 @@ import NTPStatus from 'app/status/NTPStatus';
 import NetworkStatus from 'app/status/NetworkStatus';
 import SystemLog from 'app/status/SystemLog';
 import Status from 'app/status/SystemStatus';
-import Home from 'app/system/Home';
 import SystemMenu from 'app/system/SystemMenu';
 import type { IconName } from 'components/ui';
 import type { TranslationFunctions } from 'i18n/i18n-types';
@@ -61,7 +60,6 @@ export interface AppRoute {
 
 // prettier-ignore
 export const routes: AppRoute[] = [
-  { path: '/home', element: Home, title: (LL) => LL.SYS_HOME(), icon: 'thermostat', menu: 'main' },
   { path: '/system', element: SystemMenu, title: (LL) => LL.SYS_MENU(), icon: 'tune', menu: 'main', wildcard: true },
   { path: '/dashboard', element: Dashboard, title: (LL) => LL.DASHBOARD(), icon: 'star', menu: 'main', wildcard: true },
   { path: '/devices', element: Devices, title: (LL) => LL.DEVICES(), icon: 'category', menu: 'main', wildcard: true },
