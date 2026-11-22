@@ -56,6 +56,7 @@ A full list of breaking changes can be found in this [discussion](https://github
 
 ## Fixed
 
+- BC400/UI800 heatpump operating mode (`0x0470`) no longer drops “Always cooling”: enum is `summer`/`auto`/`winter`/`cooling` again so index 3 publishes and can be written [#3470](https://github.com/emsesp/EMS-ESP32/issues/3470)
 - after a restart, `summermode` could briefly publish `summer` then `winter` when the first RC300Monitor (`0x02A5`) fragment arrived at offset 20 before offset 0. `summermode` is now left unpublished until the status byte is known [#3471](https://github.com/emsesp/EMS-ESP32/issues/3471)
 - writes waiting on the EMS bus were sent newest first, so a later setting could be applied before an earlier one. With DHW temperatures that depend on each other, the heat pump was left on the wrong stop temperature. Writes still go out before queued reads, and in the order they were received [#3464](https://github.com/emsesp/EMS-ESP32/issues/3464)
 - use-after-free in `Command::call` when a command registers new commands while running (e.g. `system/test`) [#3398](https://github.com/emsesp/EMS-ESP32/pull/3398)

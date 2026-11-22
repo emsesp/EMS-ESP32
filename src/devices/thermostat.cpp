@@ -3783,7 +3783,8 @@ bool Thermostat::set_mode_n(const uint8_t mode, const int8_t id) {
 bool Thermostat::set_summermode(const char * value, const int8_t id) {
     uint8_t set;
     if (has_summer3()) {
-        if (Helpers::value2enum(value, set, FL_(enum_summermode))) {
+        // 0=summer, 1=auto, 2=winter, 3=cooling (#3230, #3470)
+        if (Helpers::value2enum(value, set, FL_(enum_summermode4))) {
             write_command(0x470, 0, set, 0x470);
             return true;
         }
@@ -5125,7 +5126,7 @@ void Thermostat::register_device_values() {
             register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                                   &hpoperatingmode,
                                   DeviceValueType::ENUM,
-                                  FL_(enum_summermode),
+                                  FL_(enum_summermode4),
                                   FL_(hpoperatingmode),
                                   DeviceValueUOM::NONE,
                                   MAKE_CF_CB(set_summermode));

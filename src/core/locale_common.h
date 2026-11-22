@@ -346,6 +346,7 @@ MAKE_ENUM(enum_heatingtype, FL_(off), FL_(radiator), FL_(convector), FL_(floor))
 MAKE_ENUM(enum_heatingtype1, FL_(off), FL_(curve), FL_(radiator), FL_(convector), FL_(floor))
 MAKE_ENUM(enum_heatingtype2, FL_(off), FL_(radiator), FL_(convector), FL_(floor), FL_(roomflow), FL_(roomload))
 MAKE_ENUM(enum_summermode, FL_(summer), FL_(auto), FL_(winter))
+MAKE_ENUM(enum_summermode4, FL_(summer), FL_(auto), FL_(winter), FL_(cooling)) // RC300Summer3 0x470, #3230 #3470
 MAKE_ENUM(enum_hpoperatingmode, FL_(off), FL_(auto), FL_(heating), FL_(cooling))
 MAKE_ENUM(enum_summer, FL_(winter), FL_(summer))
 MAKE_ENUM(enum_operatingstate, FL_(heating), FL_(off), FL_(cooling))
