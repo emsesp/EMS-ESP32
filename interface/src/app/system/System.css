@@ -1,11 +1,18 @@
 /* Home and System menu. Uses only the design tokens of the web UI. */
 
 .sys-bar {
+  /* stays below the app bar while the content scrolls underneath */
+  --sys-bar-h: 64px;
+  position: sticky;
+  top: var(--appbar-h);
+  z-index: 4;
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
   gap: 10px 14px;
-  margin: 12px;
+  min-height: var(--sys-bar-h);
+  padding: 0 12px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
 }
 .sys-bar .search {
   flex: 1;
@@ -17,7 +24,7 @@
 }
 
 .sys-title {
-  margin: 4px 12px 0;
+  margin: 12px 12px 0;
   font-size: 22px;
   font-weight: 500;
 }
@@ -112,14 +119,14 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  margin: 0 12px;
+  margin: 12px 12px 0;
 }
 .sys-nav {
   position: sticky;
-  top: calc(var(--appbar-h) + 12px);
+  top: calc(var(--appbar-h) + 64px + 12px);
   flex: none;
   width: 250px;
-  max-height: calc(100vh - var(--appbar-h) - 24px);
+  max-height: calc(100vh - var(--appbar-h) - 64px - 24px);
   overflow-y: auto;
 }
 .sys-nav-group {
@@ -175,7 +182,11 @@
   flex: 1;
   min-width: 0;
 }
-.sys-main .section {
+.sys-home-fav {
+  margin: 12px;
+}
+.sys-main .section,
+.sys-home-fav .section {
   margin: 0 0 12px;
   padding: 0;
   overflow: hidden;
@@ -367,6 +378,9 @@
 }
 
 @media (max-width: 860px) {
+  .sys-bar .search {
+    min-width: 0;
+  }
   .sys-layout {
     flex-direction: column;
     align-items: stretch;

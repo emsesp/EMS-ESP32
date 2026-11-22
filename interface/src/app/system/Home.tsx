@@ -6,9 +6,10 @@ import type { IconName, StatusState } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import { ChangesBar } from '../main/ChangesBar';
-import { ValueControl, useFormat } from './ValueRow';
+import { ValueControl, ValueRow, useFormat } from './ValueRow';
 import { findItem, str } from './model';
 import type { SysItem } from './model';
+import { useFavorites } from './useFavorites';
 import { useEdits, useSystemData } from './useSystemData';
 import type { Edits } from './useSystemData';
 import { SystemBar, useSystemView } from './view';
@@ -115,6 +116,7 @@ const Home = memo(() => {
   const view = useSystemView();
   const data = useSystemData();
   const edits = useEdits(data);
+  const fav = useFavorites(data);
   const it = data.items;
   const f = (key: string, tag?: string) => findItem(it, key, tag);
 
@@ -251,6 +253,24 @@ const Home = memo(() => {
             {LL.SYS_GOTO_SERVICE()}
           </ButtonLink>
         </Tile>
+      </div>
+
+      <div className="sys-home-fav">
+        <section className="section">
+          <div className="sys-sec-head">{LL.FAVORITES()}</div>
+          {fav.items.map((i) => (
+            <ValueRow
+              key={i.uid}
+              item={i}
+              edits={edits}
+              where={i.typeName}
+              {...(fav.canToggle(i) && fav.toggle ? { onFavorite: fav.toggle } : {})}
+            />
+          ))}
+          {fav.items.length === 0 && (
+            <div className="sys-empty">{LL.SYS_FAV_NONE()}</div>
+          )}
+        </section>
       </div>
       {edits.pending.size > 0 && (
         <ChangesBar

@@ -2,22 +2,16 @@ import { memo, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router';
 
-import { Icon, Loader, Message, Select, cx, toast } from 'components/ui';
+import { Icon, Loader, Message, Select, cx } from 'components/ui';
 import type { IconName } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 
-import { writeCustomizationEntities } from '../../api/app';
 import { ChangesBar } from '../main/ChangesBar';
-import {
-  createMaskedEntityId,
-  maskAllowed,
-  withMask
-} from '../main/EntityMaskToggle';
-import { DeviceEntityMask } from '../main/types';
 import { ValueRow } from './ValueRow';
 import type { SectionId } from './catalog';
-import { buildMenus, groupItems, isFavorite } from './model';
+import { buildMenus, groupItems } from './model';
 import type { SysItem } from './model';
+import { useFavorites } from './useFavorites';
 import { useEdits, useSystemData } from './useSystemData';
 import { SystemBar, useSystemView } from './view';
 
@@ -62,7 +56,8 @@ const SystemMenu = memo(() => {
   const edits = useEdits(data);
   const navigate = useNavigate();
   const menu = useParams()['*'];
-  const favs = useMemo(() => data.items.filter(isFavorite), [data.items]);
+  const fav = useFavorites(data);
+  const favs = fav.items;
 
   const menus = useMemo(() => buildMenus(data.items), [data.items]);
   const current =
@@ -111,32 +106,6 @@ const SystemMenu = memo(() => {
       other: LL.SYS_SEC_OTHER()
     };
     return names[s];
-  };
-
-  // The star sets the favorite flag of the entity on the device, the same flag the
-  // Devices page and the Dashboard use. Only administrators can change it.
-  // the current mask comes with the value; the entity list is only loaded once
-  const maskOf = (i: SysItem): number => parseInt(i.dv.id.slice(0, 2), 16);
-  const canFavorite = (i: SysItem): boolean =>
-    !!i.ent && maskAllowed(i.ent, maskOf(i), DeviceEntityMask.DV_FAVORITE);
-
-  const toggleFav = async (i: SysItem) => {
-    if (!i.ent) return;
-    const mask = withMask(
-      i.ent,
-      maskOf(i),
-      DeviceEntityMask.DV_FAVORITE,
-      !isFavorite(i)
-    );
-    try {
-      await writeCustomizationEntities({
-        id: i.devId,
-        entity_ids: [createMaskedEntityId({ ...i.ent, m: mask })]
-      });
-      await data.reload();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : String(error));
-    }
   };
 
   const visibleCount = (id: string) =>
@@ -212,8 +181,8 @@ const SystemMenu = memo(() => {
                 key={i.uid}
                 item={i}
                 edits={edits}
-                {...(canFavorite(i)
-                  ? { onFavorite: (it: SysItem) => void toggleFav(it) }
+                {...(fav.canToggle(i) && fav.toggle
+                  ? { onFavorite: fav.toggle }
                   : {})}
                 {...(searching || current === 'fav'
                   ? { where: menuName(i.menu) }
