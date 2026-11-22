@@ -6046,6 +6046,14 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "HRV176, HRV156, 5000c, MV200",ventilation,231,airquality,air quality (voc),uint16, ,false,sensor.ventilation_air_quality_(voc),sensor.ventilation_airquality,19,0,1,7,1
 "HRV176, HRV156, 5000c, MV200",ventilation,231,airhumidity,relative air humidity,uint8,%,false,sensor.ventilation_relative_air_humidity,sensor.ventilation_airhumidity,19,0,1,8,1
 "HRV176, HRV156, 5000c, MV200",ventilation,231,bypass,bypass,boolean (>=0<=0), ,true,switch.ventilation_bypass,switch.ventilation_bypass,19,0,1,9,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,ventoutrpm,exhaust fan speed,uint16, ,false,sensor.ventilation_exhaust_fan_speed,sensor.ventilation_ventoutrpm,19,0,1,10,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,ventinrpm,supply fan speed,uint16, ,false,sensor.ventilation_supply_fan_speed,sensor.ventilation_ventinrpm,19,0,1,11,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,ventoutvoltage,exhaust fan voltage,uint8,V,false,sensor.ventilation_exhaust_fan_voltage,sensor.ventilation_ventoutvoltage,19,0,1/10,12,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,ventinvoltage,supply fan voltage,uint8,V,false,sensor.ventilation_supply_fan_voltage,sensor.ventilation_ventinvoltage,19,0,1/10,13,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,ventbalance,volume flow balance exhaust,uint8 (>=90<=110),%,true,number.ventilation_volume_flow_balance_exhaust,number.ventilation_ventbalance,19,0,1,14,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,level1pct,level L1,uint8 (>=0<=150),%,true,number.ventilation_level_L1,number.ventilation_level1pct,19,0,1,15,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,level2pct,level L2,uint8 (>=0<=150),%,true,number.ventilation_level_L2,number.ventilation_level2pct,19,0,1,16,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,level4pct,level L4,uint8 (>=0<=150),%,true,number.ventilation_level_L4,number.ventilation_level4pct,19,0,1,17,1
 "IPM",water,100,dhw.seltemp,selected temperature,uint8 (>=0<=0),C,true,number.water_dhw_selected_temperature,number.water_dhw_seltemp,20,9,1,0,1
 "IPM",water,100,dhw.temp,current temperature,uint16,C,false,sensor.water_dhw_current_temperature,sensor.water_dhw_temp,20,9,1/10,1,1
 "IPM",water,100,dhw.curtemp2,current extern temperature,uint16,C,false,sensor.water_dhw_current_extern_temperature,sensor.water_dhw_curtemp2,20,9,1/10,2,1

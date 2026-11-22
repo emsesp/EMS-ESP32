@@ -8438,10 +8438,14 @@ uint8
 | ventinrpm | supply fan speed | uint16 |   | false | DEVICE_DATA | 11 | 1 | 1 |
 | ventoutvoltage | exhaust fan voltage | uint8 | V | false | DEVICE_DATA | 12 | 1 | 1/10 |
 | ventinvoltage | supply fan voltage | uint8 | V | false | DEVICE_DATA | 13 | 1 | 1/10 |
-| ventbalance | volume flow balance exhaust | uint8 | % | true | DEVICE_DATA | 14 | 1 | 1 |
-| level1pct | level L1 | uint8 | % | true | DEVICE_DATA | 15 | 1 | 1 |
-| level2pct | level L2 | uint8 | % | true | DEVICE_DATA | 16 | 1 | 1 |
-| level4pct | level L4 | uint8 | % | true | DEVICE_DATA | 17 | 1 | 1 |
+uint8
+| ventbalance | volume flow balance exhaust | uint8 (&gt;=90&lt;=110) | % | true | DEVICE_DATA | 14 | 1 | 1 |
+uint8
+| level1pct | level L1 | uint8 (&gt;=0&lt;=150) | % | true | DEVICE_DATA | 15 | 1 | 1 |
+uint8
+| level2pct | level L2 | uint8 (&gt;=0&lt;=150) | % | true | DEVICE_DATA | 16 | 1 | 1 |
+uint8
+| level4pct | level L4 | uint8 (&gt;=0&lt;=150) | % | true | DEVICE_DATA | 17 | 1 | 1 |
 
 ## Devices of type \_water
 
