@@ -35,6 +35,8 @@ A full list of breaking changes can be found in this [discussion](https://github
 
 ## Added
 
+- Logavent HRV156/HRV176: `ventbalance` (writable volume flow balance for the exhaust fan, 90–110 %), `level1pct`/`level2pct`/`level4pct` (writable level percentages), `ventoutrpm`/`ventinrpm` and `ventoutvoltage`/`ventinvoltage` (fan rpm and 0–10 V control voltage) [#3478](https://github.com/emsesp/EMS-ESP32/discussions/3478)
+- "Support the project" link on the Help page to tip EMS-ESP on Ko-fi, which replaces the PayPal donation link in the README
 - firmware rollback: a newly installed firmware is only kept once it has run for 2 minutes or is restarted from EMS-ESP. If it crashes or loses power before then, the device goes back to the previous firmware, or to the Recovery if there is none. Needs the bootloader of 3.10.0, which only a flash over USB installs, a firmware upload keeps the existing bootloader
 - after a crash, a summary of the core dump (task, PC and backtrace) is logged at boot and shown as `coredump` in `/api/system/info`. `call system coredump` erases it. Admins can download the full dump in Settings > Download/Upload, and the Recovery dashboard shows the summary with a download button. See `docs/Crash-Dumps.md` for how to decode it
 - console on the System Log page: admins can run console commands such as `show values` from the WebUI and see their output

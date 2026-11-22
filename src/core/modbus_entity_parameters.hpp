@@ -645,6 +645,14 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(airquality), 7, 1), // airquality
     REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(airHumidity), 8, 1), // airhumidity
     REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(airbypass), 9, 1), // bypass
+    REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(ventOutRpm), 10, 1), // ventoutrpm
+    REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(ventInRpm), 11, 1), // ventinrpm
+    REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(ventOutVoltage), 12, 1), // ventoutvoltage
+    REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(ventInVoltage), 13, 1), // ventinvoltage
+    REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(ventBalance), 14, 1), // ventbalance
+    REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(level1Pct), 15, 1), // level1pct
+    REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(level2Pct), 16, 1), // level2pct
+    REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(level4Pct), 17, 1), // level4pct
     REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(selRoomTemp), 0, 1), // seltemp
     REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwTemp), 1, 1), // temp
     REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwCurTemp2), 2, 1), // curtemp2

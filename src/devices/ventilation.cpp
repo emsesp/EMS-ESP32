@@ -24,13 +24,15 @@ REGISTER_FACTORY(Ventilation, EMSdevice::DeviceType::VENTILATION);
 
 Ventilation::Ventilation(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    // HRV176 module, device_id 0x51
+    // HRV176/HRV156 module, device_id 0x51
     register_telegram_type(0x56B, "VentilationMode", true, MAKE_PF_CB(process_ModeMessage), 1);
     register_telegram_type(0x585, "Blowerspeed", false, MAKE_PF_CB(process_BlowerMessage));
     register_telegram_type(0x583, "VentilationMonitor", false, MAKE_PF_CB(process_MonitorMessage));
     register_telegram_type(0x5D9, "Airquality", false, MAKE_PF_CB(process_VOCMessage));
     register_telegram_type(0x587, "Bypass", false, MAKE_PF_CB(process_BypassMessage));
     register_telegram_type(0x55C, "VentilationSet", true, MAKE_PF_CB(process_SetMessage), 2);
+    register_telegram_type(0x556, "VentilationBalance", true, MAKE_PF_CB(process_BalanceMessage));
+    register_telegram_type(0x561, "VentilationLevel", true, MAKE_PF_CB(process_LevelMessage));
 
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &outFresh_,
@@ -48,6 +50,52 @@ Ventilation::Ventilation(uint8_t device_type, uint8_t device_id, uint8_t product
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &voc_, DeviceValueType::UINT16, FL_(airquality), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &humidity_, DeviceValueType::UINT8, FL_(airHumidity), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &bypass_, DeviceValueType::BOOL, FL_(airbypass), DeviceValueUOM::NONE, MAKE_CF_CB(set_bypass));
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &ventOutRpm_, DeviceValueType::UINT16, FL_(ventOutRpm), DeviceValueUOM::NONE);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &ventInRpm_, DeviceValueType::UINT16, FL_(ventInRpm), DeviceValueUOM::NONE);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &ventOutVoltage_,
+                          DeviceValueType::UINT8,
+                          DeviceValueNumOp::DV_NUMOP_DIV10,
+                          FL_(ventOutVoltage),
+                          DeviceValueUOM::VOLTS);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &ventInVoltage_,
+                          DeviceValueType::UINT8,
+                          DeviceValueNumOp::DV_NUMOP_DIV10,
+                          FL_(ventInVoltage),
+                          DeviceValueUOM::VOLTS);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &ventBalance_,
+                          DeviceValueType::UINT8,
+                          FL_(ventBalance),
+                          DeviceValueUOM::PERCENT,
+                          MAKE_CF_CB(set_ventBalance),
+                          90,
+                          110);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &level1Pct_,
+                          DeviceValueType::UINT8,
+                          FL_(level1Pct),
+                          DeviceValueUOM::PERCENT,
+                          MAKE_CF_CB(set_level1Pct),
+                          0,
+                          150);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &level2Pct_,
+                          DeviceValueType::UINT8,
+                          FL_(level2Pct),
+                          DeviceValueUOM::PERCENT,
+                          MAKE_CF_CB(set_level2Pct),
+                          0,
+                          150);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &level4Pct_,
+                          DeviceValueType::UINT8,
+                          FL_(level4Pct),
+                          DeviceValueUOM::PERCENT,
+                          MAKE_CF_CB(set_level4Pct),
+                          0,
+                          150);
 }
 
 // message 0x055C, data: 08 01 11 17
@@ -55,12 +103,14 @@ void Ventilation::process_SetMessage(const std::shared_ptr<const Telegram> & tel
     has_update(telegram, bypass_, 1);
 }
 
-// message 583
+// message 0x0583
 void Ventilation::process_MonitorMessage(const std::shared_ptr<const Telegram> & telegram) {
-    has_update(telegram, outEx_, 0);     // Fortluft
-    has_update(telegram, inEx_, 7);      // Abluft
-    has_update(telegram, outFresh_, 13); // Außenluft
-    has_update(telegram, inFresh_, 15);  // Zuluft
+    has_update(telegram, outEx_, 0);       // Fortluft
+    has_update(telegram, ventOutRpm_, 2);  // Abluft rpm
+    has_update(telegram, inEx_, 7);        // Abluft
+    has_update(telegram, outFresh_, 13);   // Außenluft
+    has_update(telegram, inFresh_, 15);    // Zuluft
+    has_update(telegram, ventInRpm_, 17);  // Zuluft rpm
 }
 
 // message 575 10 bytes
@@ -87,9 +137,22 @@ void Ventilation::process_ModeMessage(const std::shared_ptr<const Telegram> & te
 }
 
 // message 0x0587, data: 00 00 64 00 64 0A 00 01 54 01 00 01 00 00 00 46 00 00 00 02 00 A3 00 A3
-void Ventilation::process_BypassMessage(const std::shared_ptr<const Telegram> &) {
-    // has_update(telegram, bypass_closing, 0);
-    // has_update(telegram, bypass_opening, 1);
+// offset 2/4: exhaust/supply fan control voltage (0.1 V), confirmed with multimeter
+void Ventilation::process_BypassMessage(const std::shared_ptr<const Telegram> & telegram) {
+    has_update(telegram, ventOutVoltage_, 2);
+    has_update(telegram, ventInVoltage_, 4);
+}
+
+// message 0x0556 — volume flow balance (do not write offset 7: forces L3)
+void Ventilation::process_BalanceMessage(const std::shared_ptr<const Telegram> & telegram) {
+    has_update(telegram, ventBalance_, 8);
+}
+
+// message 0x0561 — level percentages (L3 is fixed at 100 %)
+void Ventilation::process_LevelMessage(const std::shared_ptr<const Telegram> & telegram) {
+    has_update(telegram, level4Pct_, 13);
+    has_update(telegram, level1Pct_, 14);
+    has_update(telegram, level2Pct_, 15);
 }
 
 bool Ventilation::set_ventMode(const char * value, const int8_t id) {
@@ -119,6 +182,46 @@ bool Ventilation::set_bypass(const char * value, const int8_t id) {
     }
 
     write_command(0x55C, 1, b ? 1 : 0, 0x587);
+    return true;
+}
+
+bool Ventilation::set_ventBalance(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+
+    write_command(0x556, 8, v, 0x556);
+    return true;
+}
+
+bool Ventilation::set_level1Pct(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+
+    write_command(0x561, 14, v, 0x561);
+    return true;
+}
+
+bool Ventilation::set_level2Pct(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+
+    write_command(0x561, 15, v, 0x561);
+    return true;
+}
+
+bool Ventilation::set_level4Pct(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+
+    write_command(0x561, 13, v, 0x561);
     return true;
 }
 
