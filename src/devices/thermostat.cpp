@@ -1224,7 +1224,14 @@ void Thermostat::process_RC300Monitor(const std::shared_ptr<const Telegram> & te
     // use summertemp or hpoperatingstate, https://github.com/emsesp/EMS-ESP32/issues/747, #550, #503
     // 0x470 or any 0x471+ means offset 20 is the heat-pump state. Publish it on every circuit:
     // some BC400/UI800 only answer 0x471, while hc2+ still broadcast the state in 0x2A6 ff. #3097
-    if ((hc->statusbyte & 1) || !has_hpoperatingstate()) {
+    // An early offset-20 fragment leaves statusbyte unset (0xFF). (0xFF & 0x50) would
+    // wrongly publish summer before the offset-0 frame arrives. #3471
+    if (!Helpers::hasValue(hc->statusbyte)) {
+        if (has_hpoperatingstate()) {
+            has_enumupdate(telegram, hc->hpoperatingstate, 20, 1); // 1:heating, 2:off, 3:cooling
+        }
+        // leave summermode unpublished until statusbyte is known
+    } else if ((hc->statusbyte & 1) || !has_hpoperatingstate()) {
         has_update(hc->summermode, hc->statusbyte & 0x50 ? 1 : 0);
         has_update(hc->hpoperatingstate, EMS_VALUE_UINT8_NOTSET);
     } else {

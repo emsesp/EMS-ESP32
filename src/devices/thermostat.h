@@ -30,7 +30,8 @@ class Thermostat : public EMSdevice {
       public:
         HeatingCircuit(const uint8_t hc_num, const uint8_t model)
             : hc_num_(hc_num)
-            , model_(model) {
+            , model_(model)
+            , statusbyte(EMS_VALUE_UINT8_NOTSET) {
         }
 
         ~HeatingCircuit() = default;
