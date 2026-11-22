@@ -1,4 +1,4 @@
-import { memo, useContext, useMemo } from 'react';
+import { memo, useContext, useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 
@@ -106,6 +106,11 @@ const SystemMenu = memo(() => {
       : (menus.find((m) => m.id === menu)?.id ??
         // while the devices load there are no menus yet; keep the page of the address
         (data.items.length === 0 && menu ? menu : 'home'));
+
+  // a page starts at the top, also when it was opened from a tile far down on Home
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [current]);
 
   // Menu names: the heating circuits and groups are translated here, the device types
   // (boiler, thermostat, mixer, ...) come translated from the firmware
