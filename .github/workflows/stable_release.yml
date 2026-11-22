@@ -175,7 +175,7 @@ jobs:
           path: src/core
 
       - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2.25
+        uses: hendrikmuhs/ccache-action@v1.2.26
         with:
           key: firmware-${{ matrix.env }}
           restore-keys: firmware-${{ matrix.env }}-
