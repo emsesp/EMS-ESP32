@@ -263,7 +263,9 @@ class Boiler : public EMSdevice {
     // Inputs
     struct {
         uint8_t state;
-        char option[16]; // logic, block_comp, block_dhw, block_heat, block_cool, overheat_protect, evu_blocktime1,2,3, block_heater, Solar, brine lowpressure, brine pump modulation
+        // must start empty: 0x0486 is fetched in fragments with holes, and unread
+        // digits keep the previous char — uninitialized heap can look like '1' (#3476)
+        char option[16] = {};
     } hpInput[4];
 
     // Heater limits

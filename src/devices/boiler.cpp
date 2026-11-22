@@ -1908,34 +1908,57 @@ void Boiler::process_HpInput(const std::shared_ptr<const Telegram> & telegram) {
 // Boiler(0x08) -> All(0x00), ?(0x0486), data: 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 01 00 00 00 00 00 (offset 25)
 // Boiler(0x08) -> All(0x00), ?(0x0486), data: 00 00 (offset 51)
 void Boiler::process_HpInConfig(const std::shared_ptr<const Telegram> & telegram) {
-    char option[16];
+    char option[16]{};
     // inputs 1,2,3 <inv>[<evu1><evu2><evu3><comp><aux><cool><heat><dhw><pv><prot><pres><mod>]
+    // 0x0486 arrives in fragments with holes (e.g. reply offset jumps 23→25, 45→52).
+    // Only treat a prior digit as known if it is literally '0'/'1'; anything else
+    // (empty / garbage) must not become a sticky '1' (#3476, see also #2585).
     uint8_t index[] = {0, 3, 6, 9, 12, 15, 18, 21, 24, 39, 36, 30, 27};
     for (uint8_t i = 0; i < 3; i++) {
+        bool any = false;
         for (uint8_t j = 0; j < 12; j++) {
-            option[j] = hpInput[i].option[j] - '0';
-            telegram->read_value(option[j], index[j] + i);
-            option[j] = option[j] == 1 ? '1' : '0';
+            uint8_t v = (hpInput[i].option[j] == '1') ? 1 : 0;
+            if (telegram->read_value(v, index[j] + i)) {
+                any = true;
+            }
+            option[j] = (v == 1) ? '1' : '0';
         }
 
-        option[12] = atoi(&hpInput[i].option[12]);
-        telegram->read_value(option[12], 27 + i); // modulation
-        Helpers::smallitoa(&option[12], (uint16_t)option[12]);
-        has_update(hpInput[i].option, option, 16);
+        uint8_t mod = 0;
+        if (hpInput[i].option[12] >= '0' && hpInput[i].option[12] <= '9') {
+            mod = atoi(&hpInput[i].option[12]);
+        }
+        if (telegram->read_value(mod, 27 + i)) { // modulation
+            any = true;
+        }
+        Helpers::smallitoa(&option[12], (uint16_t)mod);
+        if (any) {
+            has_update(hpInput[i].option, option, 16);
+        }
     }
 
     // input 4 <inv>[<comp><aux><cool><heat><dhw><pv><prot><pres><mod>]
     uint8_t index4[] = {42, 43, 44, 45, 46, 47, 52, 50, 49, 48};
+    bool any4 = false;
     for (uint8_t j = 0; j < 9; j++) {
-        option[j] = hpInput[3].option[j] - '0';
-        telegram->read_value(option[j], index4[j]);
-        option[j] = option[j] == 1 ? '1' : '0';
+        uint8_t v = (hpInput[3].option[j] == '1') ? 1 : 0;
+        if (telegram->read_value(v, index4[j])) {
+            any4 = true;
+        }
+        option[j] = (v == 1) ? '1' : '0';
     }
 
-    option[9] = atoi(&hpInput[3].option[9]);
-    telegram->read_value(option[9], 48); // modulation
-    Helpers::smallitoa(&option[9], (uint16_t)option[9]);
-    has_update(hpInput[3].option, option, 13);
+    uint8_t mod4 = 0;
+    if (hpInput[3].option[9] >= '0' && hpInput[3].option[9] <= '9') {
+        mod4 = atoi(&hpInput[3].option[9]);
+    }
+    if (telegram->read_value(mod4, 48)) { // modulation
+        any4 = true;
+    }
+    Helpers::smallitoa(&option[9], (uint16_t)mod4);
+    if (any4) {
+        has_update(hpInput[3].option, option, 13);
+    }
 }
 
 // Boiler(0x08) -W-> Me(0x0B), HpHeaterConfig(0x0485)
