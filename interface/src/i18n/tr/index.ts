@@ -161,6 +161,7 @@ const tr: Translation = {
   HELP_INFORMATION_2: 'Canlı topluluk sohbetine katılmak için Discord sunucumuza katılın', // DeepL
   HELP_INFORMATION_3: 'Bir özellik talebinde bulunmak veya bir hata bildirmek için', // DeepL
   HELP_INFORMATION_4: 'Daha hızlı yanıt alabilmek için bir sorun bildirirken sistem bilgilerinizi ekleyin', // DeepL
+  HELP_INFORMATION_5: 'EMS-ESP gönüllüler tarafından geliştiriliyor. Ko-fi üzerinden bir bahşiş proje devamına yardımcı olur',
   UPLOAD: 'Yükle', // DeepL
   DOWNLOAD: 'İndirme',
   INSTALL: 'Yükle', // DeepL
@@ -493,6 +494,7 @@ const tr: Translation = {
   DOCUMENTATION: 'Belgeler',
   COMMUNITY_CHAT: 'Topluluk sohbeti',
   REPORT_ISSUE: 'Bir hata bildirin veya bir özellik talebinde bulunun', // DeepL
+  SUPPORT_PROJECT: 'Projeyi destekleyin',
   GET_HELP: 'Yardım Alın', // DeepL
   REPORT_PROBLEM: 'Bir Sorun Bildirin', // DeepL
   REPORT_STEP_1: 'Sistem bilgilerini indirin',

@@ -33,6 +33,7 @@ interface CustomSupport {
 
 const DEFAULT_IMAGE_URL = 'https://emsesp.org/media/images/installer.jpeg';
 const ISSUE_URL = 'https://github.com/emsesp/EMS-ESP32/issues/new/choose';
+const SUPPORT_URL = 'https://ko-fi.com/emsesp';
 const SYSTEM_INFO_API: APIcall = { device: 'system', cmd: 'info', id: 0 };
 
 const BUS_TEXT: Record<number, string> = {
@@ -162,6 +163,14 @@ const Help = () => {
       title: LL.REPORT_ISSUE(),
       text: LL.HELP_INFORMATION_3(),
       note: 'github.com/emsesp'
+    },
+    {
+      href: SUPPORT_URL,
+      icon: 'favorite',
+      color: '#ff5e5b',
+      title: LL.SUPPORT_PROJECT(),
+      text: LL.HELP_INFORMATION_5(),
+      note: 'ko-fi.com'
     }
   ];
 

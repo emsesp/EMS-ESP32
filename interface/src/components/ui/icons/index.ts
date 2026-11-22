@@ -41,6 +41,7 @@ import edit_off from './edit_off.svg?raw';
 import engineering from './engineering.svg?raw';
 import error from './error.svg?raw';
 import extension from './extension.svg?raw';
+import favorite from './favorite.svg?raw';
 import forum from './forum.svg?raw';
 import group from './group.svg?raw';
 import heat_pump from './heat_pump.svg?raw';
@@ -164,6 +165,7 @@ export const icons = {
   engineering,
   error,
   extension,
+  favorite,
   forum,
   group,
   heat_pump,

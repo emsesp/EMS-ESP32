@@ -161,6 +161,7 @@ const pl: BaseTranslation = {
   HELP_INFORMATION_2: 'Aby dołączyć do czatu społeczności na żywo, dołącz do naszego serwera Discord', // DeepL
   HELP_INFORMATION_3: 'Aby zgłosić prośbę o dodanie funkcji lub zgłosić błąd', // DeepL
   HELP_INFORMATION_4: 'Podaj informacje o swoim systemie podczas zgłaszania problemu, aby uzyskać szybszą odpowiedź', // DeepL
+  HELP_INFORMATION_5: 'EMS-ESP jest tworzony przez wolontariuszy. Napiwek na Ko-fi pomaga w dalszym rozwoju projektu',
   UPLOAD: 'Prześlij', // DeepL
   DOWNLOAD: 'Pobieranie',
   INSTALL: 'Zainstaluj', // DeepL
@@ -493,6 +494,7 @@ const pl: BaseTranslation = {
   DOCUMENTATION: 'Dokumentacja',
   COMMUNITY_CHAT: 'Czat społecznościowy', // DeepL
   REPORT_ISSUE: 'Zgłoś błąd lub poproś o dodanie funkcji', // DeepL
+  SUPPORT_PROJECT: 'Wesprzyj projekt',
   GET_HELP: 'Pomoc', // DeepL
   REPORT_PROBLEM: 'Zgłoś problem', // DeepL
   REPORT_STEP_1: 'Pobierz informacje o systemie',

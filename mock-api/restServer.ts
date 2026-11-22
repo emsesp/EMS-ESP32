@@ -4712,6 +4712,50 @@ const emsesp_devicedata_11 = {
       v: 53,
       u: 3,
       id: '00relative air humidity'
+    },
+    {
+      v: 2100,
+      u: 0,
+      id: '00exhaust fan speed'
+    },
+    {
+      v: 2900,
+      u: 0,
+      id: '00supply fan speed'
+    },
+    {
+      v: 5.3,
+      u: 23,
+      id: '00exhaust fan voltage'
+    },
+    {
+      v: 5.3,
+      u: 23,
+      id: '00supply fan voltage'
+    },
+    {
+      v: 100,
+      u: 3,
+      id: '00volume flow balance exhaust',
+      c: 'ventbalance'
+    },
+    {
+      v: 30,
+      u: 3,
+      id: '00level L1',
+      c: 'level1pct'
+    },
+    {
+      v: 70,
+      u: 3,
+      id: '00level L2',
+      c: 'level2pct'
+    },
+    {
+      v: 130,
+      u: 3,
+      id: '00level L4',
+      c: 'level4pct'
     }
   ]
 };

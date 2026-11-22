@@ -161,6 +161,7 @@ const hu: Translation = {
   HELP_INFORMATION_2: 'Ha élő közösségi csevegésben szeretnél részt venni, csatlakozz a Discord-szerverünkhöz', // DeepL
   HELP_INFORMATION_3: 'Funkció igénylése vagy hiba jelentése', // DeepL
   HELP_INFORMATION_4: 'Probléma bejelentésekor adja meg a rendszer adatait a gyorsabb válasz érdekében', // DeepL
+  HELP_INFORMATION_5: 'Az EMS-ESP-t önkéntesek fejlesztik. Egy borravaló a Ko-fi-n segít a projekt folytatásában',
   UPLOAD: 'Feltöltés',
   DOWNLOAD: 'Letöltés',
   INSTALL: 'Telepítés',
@@ -493,6 +494,7 @@ const hu: Translation = {
   DOCUMENTATION: 'Dokumentáció',
   COMMUNITY_CHAT: 'Közösségi csevegés',
   REPORT_ISSUE: 'Hiba jelentése vagy funkciókérés', // DeepL
+  SUPPORT_PROJECT: 'Támogassa a projektet',
   GET_HELP: 'Segítség', // DeepL
   REPORT_PROBLEM: 'Probléma jelentése', // DeepL
   REPORT_STEP_1: 'A rendszerinformációk letöltése', // DeepL

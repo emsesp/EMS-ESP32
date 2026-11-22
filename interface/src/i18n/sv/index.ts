@@ -161,6 +161,7 @@ const sv: Translation = {
   HELP_INFORMATION_2: 'För livechatt med communityn, gå med i vår Discord-server', // DeepL
   HELP_INFORMATION_3: 'För att begära en funktion eller rapportera ett fel', // DeepL
   HELP_INFORMATION_4: 'Ange din systeminformation när du rapporterar ett problem för att få ett snabbare svar', // DeepL
+  HELP_INFORMATION_5: 'EMS-ESP utvecklas av frivilliga. Ett tips via Ko-fi hjälper projektet att fortsätta',
   UPLOAD: 'Ladda upp', // DeepL
   DOWNLOAD: 'Nedladdning',
   INSTALL: 'Installera',
@@ -493,6 +494,7 @@ const sv: Translation = {
   DOCUMENTATION: 'Dokumentation',
   COMMUNITY_CHAT: 'Community-chatt', // DeepL
   REPORT_ISSUE: 'Rapportera ett fel eller begär en funktion', // DeepL
+  SUPPORT_PROJECT: 'Stöd projektet',
   GET_HELP: 'Få hjälp',
   REPORT_PROBLEM: 'Rapportera ett problem',
   REPORT_STEP_1: 'Ladda ner systeminformationen',
