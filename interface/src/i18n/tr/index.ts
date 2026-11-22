@@ -713,6 +713,7 @@ const tr: Translation = {
   SYS_SEC_OTHER: 'Diğer değerler', // draft, please review
   SYS_LEVEL_NORMAL: 'Normal', // draft, please review
   SYS_NO_RESULTS: 'Sonuç bulunamadı. Tüm değerleri veya başka bir terimi deneyin.', // draft, please review
+  SYS_SEARCH_PLACES: 'Sayfalar ve modüller', // draft, please review
   SYS_NOTHING_HERE: 'Normal düzeyinde burada gösterilecek bir şey yok.', // draft, please review
   SYS_HIDDEN: 'Gizli uzman değerleri: {num}', // draft, please review
   SYS_SEARCH_RESULTS: 'Arama sonuçları', // draft, please review

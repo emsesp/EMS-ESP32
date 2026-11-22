@@ -26,6 +26,7 @@ import { ValueRow } from './ValueRow';
 import type { SectionId } from './catalog';
 import { buildMenus, groupItems } from './model';
 import type { SysItem } from './model';
+import { matchEntries, useModuleIndex } from './moduleSearch';
 import { useFavorites } from './useFavorites';
 import { useEdits, useSystemData } from './useSystemData';
 import { SystemBar, useSystemView } from './view';
@@ -88,6 +89,8 @@ const SystemMenu = memo(() => {
   const { me } = useContext(AuthenticatedContext);
   const view = useSystemView();
   const { level, q } = view;
+  // names of sensors, scheduler entries, custom entities and commands, read when the first search starts
+  const moduleIndex = useModuleIndex(q.trim() !== '', me.admin);
   const data = useSystemData();
   const edits = useEdits(data);
   const navigate = useNavigate();
@@ -169,6 +172,14 @@ const SystemMenu = memo(() => {
     leveled.filter((i) => i.menu === id && (level === 2 || i.level === 1)).length;
 
   const searching = q.trim() !== '';
+  // what else the search finds: the pages of the menu and the entries of the modules
+  const needle = q.trim().toLowerCase();
+  const pageHits = searching
+    ? [...menus.map((m) => m.id), ...pages.map((p) => p.id)].filter((id) =>
+        menuName(id).toLowerCase().includes(needle)
+      )
+    : [];
+  const moduleHits = searching ? matchEntries(moduleIndex, needle) : [];
   let list: SysItem[];
   if (searching) {
     const needle = q.trim().toLowerCase();
@@ -255,6 +266,47 @@ const SystemMenu = memo(() => {
   } else {
     body = (
       <>
+        {pageHits.length + moduleHits.length > 0 && (
+          <section className="section">
+            <div className="sys-sec-head">
+              <span>{LL.SYS_SEARCH_PLACES()}</span>
+            </div>
+            {pageHits.map((id) => (
+              <button
+                key={id}
+                type="button"
+                className="sys-row sys-hit"
+                onClick={() => go(id)}
+              >
+                <span className="sys-lab">
+                  <Icon name={menuIcon(id)} size="sm" />
+                  <span className="txt">
+                    <b>{menuName(id)}</b>
+                  </span>
+                </span>
+              </button>
+            ))}
+            {moduleHits.map((e, i) => (
+              <button
+                key={`${e.page}-${i}`}
+                type="button"
+                className="sys-row sys-hit"
+                onClick={() => go(e.page)}
+              >
+                <span className="sys-lab">
+                  <Icon name={menuIcon(e.page)} size="sm" />
+                  <span className="txt">
+                    <b>{e.name}</b>
+                    <small>
+                      {menuName(e.page)}
+                      {e.hint ? ` · ${e.hint}` : ''}
+                    </small>
+                  </span>
+                </span>
+              </button>
+            ))}
+          </section>
+        )}
         {!searching && tiles}
         {!searching && current === 'service' && <FaultPanel items={data.items} />}
         {groups.map((g) => (
@@ -296,7 +348,7 @@ const SystemMenu = memo(() => {
             ))}
           </section>
         ))}
-        {groups.length === 0 && (
+        {groups.length === 0 && pageHits.length + moduleHits.length === 0 && (
           <section className="section">
             <div className="sys-empty">
               {searching

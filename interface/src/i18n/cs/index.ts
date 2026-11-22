@@ -713,6 +713,7 @@ const cs: Translation = {
   SYS_SEC_OTHER: 'Další hodnoty', // draft, please review
   SYS_LEVEL_NORMAL: 'Běžné', // draft, please review
   SYS_NO_RESULTS: 'Nic nenalezeno. Zkuste všechny hodnoty nebo jiný výraz.', // draft, please review
+  SYS_SEARCH_PLACES: 'Stránky a moduly', // draft, please review
   SYS_NOTHING_HERE: 'V úrovni Běžné se zde nic nezobrazuje.', // draft, please review
   SYS_HIDDEN: 'Skryté expertní hodnoty: {num}', // draft, please review
   SYS_SEARCH_RESULTS: 'Výsledky hledání', // draft, please review

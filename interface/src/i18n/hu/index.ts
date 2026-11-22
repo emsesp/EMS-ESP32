@@ -713,6 +713,7 @@ const hu: Translation = {
   SYS_SEC_OTHER: 'További értékek', // draft, please review
   SYS_LEVEL_NORMAL: 'Normál', // draft, please review
   SYS_NO_RESULTS: 'Nincs találat. Próbáld az összes értéket vagy másik kifejezést.', // draft, please review
+  SYS_SEARCH_PLACES: 'Oldalak és modulok', // draft, please review
   SYS_NOTHING_HERE: 'Normál szinten itt nincs megjeleníthető elem.', // draft, please review
   SYS_HIDDEN: 'Elrejtett szakértői értékek: {num}', // draft, please review
   SYS_SEARCH_RESULTS: 'Keresési találatok', // draft, please review

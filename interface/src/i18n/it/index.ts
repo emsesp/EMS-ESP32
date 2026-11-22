@@ -713,6 +713,7 @@ const it: Translation = {
   SYS_SEC_OTHER: 'Altri valori', // draft, please review
   SYS_LEVEL_NORMAL: 'Normale', // draft, please review
   SYS_NO_RESULTS: 'Nessun risultato. Prova con tutti i valori o un altro termine.', // draft, please review
+  SYS_SEARCH_PLACES: 'Pagine e moduli', // draft, please review
   SYS_NOTHING_HERE: 'Nessun elemento da mostrare qui al livello Normale.', // draft, please review
   SYS_HIDDEN: 'Valori esperti nascosti: {num}', // draft, please review
   SYS_SEARCH_RESULTS: 'Risultati della ricerca', // draft, please review

@@ -713,6 +713,7 @@ const pl: BaseTranslation = {
   SYS_SEC_OTHER: 'Pozostałe wartości', // draft, please review
   SYS_LEVEL_NORMAL: 'Normalny', // draft, please review
   SYS_NO_RESULTS: 'Nic nie znaleziono. Spróbuj wszystkich wartości lub innego terminu.', // draft, please review
+  SYS_SEARCH_PLACES: 'Strony i moduły', // draft, please review
   SYS_NOTHING_HERE: 'Na poziomie Normalny nie ma tu nic do pokazania.', // draft, please review
   SYS_HIDDEN: 'Ukryte wartości eksperckie: {num}', // draft, please review
   SYS_SEARCH_RESULTS: 'Wyniki wyszukiwania', // draft, please review

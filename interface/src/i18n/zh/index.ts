@@ -713,6 +713,7 @@ const zh: Translation = {
   SYS_SEC_OTHER: '其他数值', // draft, please review
   SYS_LEVEL_NORMAL: '常规', // draft, please review
   SYS_NO_RESULTS: '未找到结果。请尝试显示所有数值或更换关键词。', // draft, please review
+  SYS_SEARCH_PLACES: '页面和模块', // draft, please review
   SYS_NOTHING_HERE: '在“常规”级别下此处没有可显示的内容。', // draft, please review
   SYS_HIDDEN: '已隐藏的专家数值:{num}', // draft, please review
   SYS_SEARCH_RESULTS: '搜索结果', // draft, please review

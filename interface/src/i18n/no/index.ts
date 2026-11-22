@@ -713,6 +713,7 @@ const no: Translation = {
   SYS_SEC_OTHER: 'Andre verdier', // draft, please review
   SYS_LEVEL_NORMAL: 'Normal', // draft, please review
   SYS_NO_RESULTS: 'Ingen treff. Prøv alle verdier eller et annet søkeord.', // draft, please review
+  SYS_SEARCH_PLACES: 'Sider og moduler', // draft, please review
   SYS_NOTHING_HERE: 'Ingenting å vise her på nivå Normal.', // draft, please review
   SYS_HIDDEN: 'Skjulte ekspertverdier: {num}', // draft, please review
   SYS_SEARCH_RESULTS: 'Søkeresultater', // draft, please review

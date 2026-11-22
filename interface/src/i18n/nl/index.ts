@@ -713,6 +713,7 @@ const nl: Translation = {
   SYS_SEC_OTHER: 'Overige waarden', // draft, please review
   SYS_LEVEL_NORMAL: 'Normaal', // draft, please review
   SYS_NO_RESULTS: 'Niets gevonden. Probeer alle waarden of een andere term.', // draft, please review
+  SYS_SEARCH_PLACES: 'Pagina\'s en modules', // draft, please review
   SYS_NOTHING_HERE: 'Op niveau Normaal is hier niets te tonen.', // draft, please review
   SYS_HIDDEN: 'Verborgen expertwaarden: {num}', // draft, please review
   SYS_SEARCH_RESULTS: 'Zoekresultaten', // draft, please review

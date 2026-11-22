@@ -4,7 +4,6 @@ import { useRequest } from 'alova/client';
 import {
   Button,
   Icon,
-  SearchField,
   Section,
   SortHeader,
   Switch,
@@ -50,7 +49,6 @@ interface Editing {
 
 const Scheduler = () => {
   const { LL, locale } = useI18nContext();
-  const [query, setQuery] = useState('');
   const [editing, setEditing] = useState<Editing>();
   const days = useMemo(() => weekdayNames(locale, 'narrow'), [locale]);
 
@@ -75,15 +73,7 @@ const Scheduler = () => {
     initialData: [] as CommandItem[]
   });
 
-  const q = query.trim().toLowerCase();
-  const matches = ({ item }: PendingRow<ScheduleItem>) => {
-    if (!q) return true;
-    const c = commands.find((x) => x.name === item.cmd_name);
-    return `${item.name} ${item.time} ${item.cmd_name} ${c?.cmd ?? ''} ${c?.value ?? ''}`
-      .toLowerCase()
-      .includes(q);
-  };
-  const rows = list.rows.filter(matches).sort((a, b) => a.item.flags - b.item.flags);
+  const rows = [...list.rows].sort((a, b) => a.item.flags - b.item.flags);
   const byFlags = byNumber<PendingRow<ScheduleItem>>((r) => r.item.flags);
   const byTime = byText<PendingRow<ScheduleItem>>((r) => r.item.time);
   const sort = useTableSort(rows, {
@@ -221,16 +211,9 @@ const Scheduler = () => {
         title={LL.SCHEDULER()}
         icon="more_time"
         actions={
-          <>
-            <SearchField
-              label={LL.SEARCH()}
-              value={query}
-              onInput={(e) => setQuery(e.currentTarget.value)}
-            />
-            <Button icon="add" onClick={add}>
-              {LL.ADD(0)}
-            </Button>
-          </>
+          <Button icon="add" onClick={add}>
+            {LL.ADD(0)}
+          </Button>
         }
       >
         <div className="tbl-wrap">
@@ -253,7 +236,7 @@ const Scheduler = () => {
               {rows.length === 0 && (
                 <tr>
                   <td colSpan={5} className="tbl-empty">
-                    {q ? LL.SCHEDULE_NONE_MATCH() : LL.SCHEDULE_NONE()}
+                    {LL.SCHEDULE_NONE()}
                   </td>
                 </tr>
               )}

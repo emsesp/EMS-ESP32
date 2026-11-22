@@ -6,7 +6,6 @@ import { useRequest } from 'alova/client';
 import {
   Button,
   IconButton,
-  SearchField,
   Section,
   SortHeader,
   Switch,
@@ -50,7 +49,6 @@ interface Editing {
 
 const Commands = () => {
   const { LL } = useI18nContext();
-  const [query, setQuery] = useState('');
   const [editing, setEditing] = useState<Editing>();
 
   const list = usePendingList<CommandItem>({
@@ -87,11 +85,7 @@ const Commands = () => {
     setEditing(undefined);
   };
 
-  const q = query.trim().toLowerCase();
-  const rows = list.rows.filter(
-    ({ item }) =>
-      !q || `${item.name} ${item.cmd} ${item.value}`.toLowerCase().includes(q)
-  );
+  const rows = list.rows;
   const sort = useTableSort(rows, {
     name: byText((r) => r.item.name),
     cmd: byText((r) => r.item.cmd),
@@ -106,16 +100,9 @@ const Commands = () => {
         title={LL.COMMANDS()}
         icon="playlist_play"
         actions={
-          <>
-            <SearchField
-              label={LL.SEARCH()}
-              value={query}
-              onInput={(e) => setQuery(e.currentTarget.value)}
-            />
-            <Button icon="add" onClick={add}>
-              {LL.ADD(0)}
-            </Button>
-          </>
+          <Button icon="add" onClick={add}>
+            {LL.ADD(0)}
+          </Button>
         }
       >
         <div className="tbl-wrap">
@@ -190,7 +177,7 @@ const Commands = () => {
               {rows.length === 0 && (
                 <tr>
                   <td colSpan={5} className="tbl-empty">
-                    {q ? LL.CMD_NONE_MATCH() : LL.CMD_NONE()}
+                    {LL.CMD_NONE()}
                   </td>
                 </tr>
               )}

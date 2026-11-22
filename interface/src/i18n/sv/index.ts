@@ -713,6 +713,7 @@ const sv: Translation = {
   SYS_SEC_OTHER: 'Övriga värden', // draft, please review
   SYS_LEVEL_NORMAL: 'Normal', // draft, please review
   SYS_NO_RESULTS: 'Inget hittades. Prova alla värden eller ett annat sökord.', // draft, please review
+  SYS_SEARCH_PLACES: 'Sidor och moduler', // draft, please review
   SYS_NOTHING_HERE: 'Inget att visa här på nivån Normal.', // draft, please review
   SYS_HIDDEN: 'Dolda expertvärden: {num}', // draft, please review
   SYS_SEARCH_RESULTS: 'Sökresultat', // draft, please review
