@@ -22,6 +22,7 @@ const sv: Translation = {
   DOWNLOAD_SUCCESSFUL: 'Ladda ner framgångsrikt', // DeepL
   INVALID_LOGIN: 'Felaktigt användarnamn eller lösenord', // DeepL
   NETWORK: 'Nätverk',
+  NTP: 'NTP',
   SECURITY: 'Säkerhet',
   ONOFF_CAP: 'PÅ/AV',
   ONOFF: 'på/av',

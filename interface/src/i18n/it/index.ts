@@ -22,6 +22,7 @@ const it: Translation = {
   DOWNLOAD_SUCCESSFUL: 'Scarica con successo', // DeepL
   INVALID_LOGIN: 'Nome utente o password errati', // DeepL
   NETWORK: 'Rete',
+  NTP: 'NTP',
   SECURITY: 'Sicurezza',
   ONOFF_CAP: 'ON/OFF',
   ONOFF: 'on/off',

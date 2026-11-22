@@ -22,6 +22,7 @@ const nl: Translation = {
   DOWNLOAD_SUCCESSFUL: 'Download succesvol', // DeepL
   INVALID_LOGIN: 'Onjuiste gebruikersnaam of wachtwoord', // DeepL
   NETWORK: 'Netwerk',
+  NTP: 'NTP',
   SECURITY: 'Beveiliging',
   ONOFF_CAP: 'AAN/UIT',
   ONOFF: 'aan/uit',

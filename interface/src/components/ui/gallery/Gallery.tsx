@@ -368,7 +368,7 @@ const Gallery = () => {
               to: '/settings/ntp',
               icon: 'schedule',
               color: '#c5572c',
-              title: 'NTP',
+              title: LL.NTP(),
               value: 'value at the right',
               state: 'ok'
             }

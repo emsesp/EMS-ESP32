@@ -86,7 +86,7 @@ const NTPClock = ({ canSetTime }: { canSetTime: boolean }) => {
         <div className="ntp-time">{time}</div>
         <div className="cap">
           {LL.NTP_TIME_ON_DEVICE()}
-          {status && ` · NTP ${ntpInfo(status.status, LL).text}`}
+          {status && ` · ${LL.NTP()} ${ntpInfo(status.status, LL).text}`}
         </div>
       </div>
       {canSetTime && (

@@ -22,6 +22,7 @@ const tr: Translation = {
   DOWNLOAD_SUCCESSFUL: 'İndirme işlemi başarılı', // DeepL
   INVALID_LOGIN: 'Yanlış kullanıcı adı veya şifre', // DeepL
   NETWORK: 'Ağ',
+  NTP: 'NTP',
   SECURITY: 'Güvenlik',
   ONOFF_CAP: 'AÇIK/KAPALI',
   ONOFF: 'açık/kapalı',

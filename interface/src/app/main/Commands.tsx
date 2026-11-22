@@ -102,7 +102,7 @@ const Commands = () => {
   return (
     <ListPage list={list}>
       <Section
-        desc={`${LL.COMMANDS_HELP_1()}.`}
+        desc={`${LL.COMMANDS_HELP_1()}`}
         title={LL.COMMANDS()}
         icon="playlist_play"
         actions={

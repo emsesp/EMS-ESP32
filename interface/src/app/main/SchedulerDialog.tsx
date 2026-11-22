@@ -176,7 +176,7 @@ const SchedulerDialog = ({
             )}
             {type === ScheduleFlag.SCHEDULE_CONDITION && (
               <TextArea
-                label={LL.CONDITION()}
+                label={LL.CONDITION(1)}
                 rows={2}
                 placeholder="boiler/outdoortemp < 0"
                 {...f.text('time')}
@@ -203,7 +203,7 @@ const SchedulerDialog = ({
               {...f.select('cmd_name')}
             />
             <TextField label={LL.NAME(0)} mono {...f.text('name')} />
-            <Switch label={LL.ACTIVE()} {...f.check('active')} />
+            <Switch label={LL.ACTIVE(2)} {...f.check('active')} />
           </>
         );
       }}

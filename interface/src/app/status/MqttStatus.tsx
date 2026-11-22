@@ -86,10 +86,10 @@ const MqttStatus = () => {
           <Stat value={nf.format(data.mqtt_queued)} label={LL.MQTT_QUEUE()} />
           <Stat
             value={nf.format(data.mqtt_fails)}
-            label={LL.MQTT_ERRORS()}
+            label={LL.MQTT_ERRORS(data.mqtt_fails)}
             warn={data.mqtt_fails > 0}
           />
-          <Stat value={nf.format(data.connect_count)} label={LL.CONNECTS()} />
+          <Stat value={nf.format(data.connect_count)} label={LL.CONNECTS(data.connect_count)} />
         </StatRow>
       )}
     </StatusPage>

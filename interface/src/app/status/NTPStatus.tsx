@@ -28,7 +28,7 @@ const NTPStatus = () => {
     <StatusPage
       state={state}
       icon="schedule"
-      title={`NTP ${text}`}
+      title={`${LL.NTP()} ${text}`}
       text={enabled ? data.server : undefined}
       settings={{ to: '/settings/ntp', label: LL.NTP_SETTINGS() }}
       rows={[

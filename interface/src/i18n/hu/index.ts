@@ -22,6 +22,7 @@ const hu: Translation = {
   DOWNLOAD_SUCCESSFUL: 'Sikeres letöltés',
   INVALID_LOGIN: 'Helytelen felhasználónév vagy jelszó', // DeepL
   NETWORK: 'Hálózat',
+  NTP: 'NTP',
   SECURITY: 'Biztonság',
   ONOFF_CAP: 'BE/KI',
   ONOFF: 'be/ki',

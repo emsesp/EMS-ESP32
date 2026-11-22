@@ -22,6 +22,7 @@ const sk: Translation = {
   DOWNLOAD_SUCCESSFUL: 'Stiahnuť úspešné', // DeepL
   INVALID_LOGIN: 'Nesprávne používateľské meno alebo heslo', // DeepL
   NETWORK: 'Sieť',
+  NTP: 'NTP',
   SECURITY: 'Bezpečnosť', // DeepL
   ONOFF_CAP: 'ZAP/VYPN', // DeepL
   ONOFF: 'zapnuté/vypnuté', // DeepL

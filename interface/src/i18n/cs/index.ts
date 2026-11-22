@@ -22,6 +22,7 @@ const cs: Translation = {
   DOWNLOAD_SUCCESSFUL: 'Stáhnout úspěšně', // DeepL
   INVALID_LOGIN: 'Nesprávné uživatelské jméno nebo heslo', // DeepL
   NETWORK: 'Síť',
+  NTP: 'NTP',
   SECURITY: 'Zabezpečení',
   ONOFF_CAP: 'ZAP/VYP',
   ONOFF: 'zapnuto/vypnuto', // DeepL
