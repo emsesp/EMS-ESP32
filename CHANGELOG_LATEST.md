@@ -56,6 +56,7 @@ A full list of breaking changes can be found in this [discussion](https://github
 
 ## Fixed
 
+- after a restart, `summermode` could briefly publish `summer` then `winter` when the first RC300Monitor (`0x02A5`) fragment arrived at offset 20 before offset 0. `summermode` is now left unpublished until the status byte is known [#3471](https://github.com/emsesp/EMS-ESP32/issues/3471)
 - writes waiting on the EMS bus were sent newest first, so a later setting could be applied before an earlier one. With DHW temperatures that depend on each other, the heat pump was left on the wrong stop temperature. Writes still go out before queued reads, and in the order they were received [#3464](https://github.com/emsesp/EMS-ESP32/issues/3464)
 - use-after-free in `Command::call` when a command registers new commands while running (e.g. `system/test`) [#3398](https://github.com/emsesp/EMS-ESP32/pull/3398)
 - large numbers in analog sensor values (e.g. pulse counters above 1 million), custom entities and API/MQTT writes could be cut off or lose digits [#3367](https://github.com/emsesp/EMS-ESP32/issues/3367)
