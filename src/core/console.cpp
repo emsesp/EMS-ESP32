@@ -329,11 +329,11 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                     return StateUpdateResult::CHANGED;
                 });
             } else {
-                shell.println("Must be 0B, 0D, 0A, 0E, 0F or 48-4D");
+                shell.println("Must be 0A, 0B, 0D, 0E, 0F or 49-4D");
             }
         },
         [](Shell & shell, const std::vector<std::string> & current_arguments, const std::string & next_argument) -> std::vector<std::string> {
-            return std::vector<std::string>{"0B", "0D", "0A", "0E", "0F", "48", "49", "4A", "4B", "4C", "4D"};
+            return std::vector<std::string>{"0A", "0B", "0D", "0E", "0F", "49", "4A", "4B", "4C", "4D"};
         });
 
     commands->add_command(ShellContext::MAIN,

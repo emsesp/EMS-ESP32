@@ -1850,7 +1850,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         }
 
         if (wait_km_) {
-            if (poll_id != 0x48 && (uuid::get_uptime_sec() - connect_time) < EMS_WAIT_KM_TIMEOUT) {
+            if (poll_id != EMSdevice::EMS_DEVICE_ID_MODEM && (uuid::get_uptime_sec() - connect_time) < EMS_WAIT_KM_TIMEOUT) {
                 return;
             }
 
