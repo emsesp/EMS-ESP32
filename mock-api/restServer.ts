@@ -7,7 +7,7 @@ const DEMO = typeof (globalThis as any).Bun === 'undefined';
 const DEMO_MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 
 if (DEMO) {
-  console.log = () => { };
+  console.log = () => {};
 }
 
 // Minimal MessagePack encoder, the counterpart of interface/src/api/unpack.ts. Writes the same bytes as
@@ -453,7 +453,21 @@ function applyMockData() {
   }
   system_status.languages =
     layout.flash > 4096
-      ? ['en', 'de', 'nl', 'sv', 'pl', 'no', 'fr', 'tr', 'it', 'sk', 'cs', 'hu', 'zh']
+      ? [
+          'en',
+          'de',
+          'nl',
+          'sv',
+          'pl',
+          'no',
+          'fr',
+          'tr',
+          'it',
+          'sk',
+          'cs',
+          'hu',
+          'zh'
+        ]
       : ['en'];
 
   const psram_size = system_status.esp_platform === 'ESP32' ? 4096 : 8189;
@@ -602,10 +616,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-        old_custom_name +
-        ') with new (' +
-        new_custom_name +
-        ')'
+          old_custom_name +
+          ') with new (' +
+          new_custom_name +
+          ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -727,9 +741,9 @@ function upgradeImportantMessages(version: string) {
 
   console.log(
     'upgradeImportantMessageType: version=' +
-    version +
-    ' type=' +
-    upgradeImportantMessageType_n
+      version +
+      ' type=' +
+      upgradeImportantMessageType_n
   );
   return { upgradeImportantMessageType: upgradeImportantMessageType_n };
 }
@@ -805,20 +819,20 @@ function get_versions() {
 
   console.log(
     'getVersions: current=' +
-    v.current +
-    ' stable=' +
-    v.stable +
-    ' (upgradeable=' +
-    (stableUpgradeable ? 'YES' : 'NO') +
-    ') dev=' +
-    v.dev +
-    ' (upgradeable=' +
-    (devUpgradeable ? 'YES' : 'NO') +
-    ') recovery=' +
-    (v.recovery || 'not installed') +
-    ' recoveryLatest=' +
-    (v.recoveryLatest || 'not found') +
-    (v.offline ? ' [offline]' : '')
+      v.current +
+      ' stable=' +
+      v.stable +
+      ' (upgradeable=' +
+      (stableUpgradeable ? 'YES' : 'NO') +
+      ') dev=' +
+      v.dev +
+      ' (upgradeable=' +
+      (devUpgradeable ? 'YES' : 'NO') +
+      ') recovery=' +
+      (v.recovery || 'not installed') +
+      ' recoveryLatest=' +
+      (v.recoveryLatest || 'not found') +
+      (v.offline ? ' [offline]' : '')
   );
   return data;
 }

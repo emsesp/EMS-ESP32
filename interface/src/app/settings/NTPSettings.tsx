@@ -101,11 +101,7 @@ const NTPClock = ({ canSetTime }: { canSetTime: boolean }) => {
         onSubmit={() => void configureTime()}
         actions={
           <>
-            <Button
-              icon="cancel"
-              color="neutral"
-              onClick={() => setSetting(false)}
-            >
+            <Button icon="cancel" color="neutral" onClick={() => setSetting(false)}>
               {LL.CANCEL()}
             </Button>
             <Button type="submit" icon="check" disabled={processing || !localTime}>

@@ -182,11 +182,7 @@ const SystemMonitor = ({ onDone, onInstallCustom }: SystemMonitorProps) => {
               <span className="cap">{progress}%</span>
             </div>
             <div className="sysmon-actions">
-              <Button
-                color="neutral"
-                icon="cancel"
-                onClick={() => void onCancel()}
-              >
+              <Button color="neutral" icon="cancel" onClick={() => void onCancel()}>
                 {LL.CANCEL()}
               </Button>
             </div>
