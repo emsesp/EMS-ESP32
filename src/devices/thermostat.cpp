@@ -3783,8 +3783,13 @@ bool Thermostat::set_mode_n(const uint8_t mode, const int8_t id) {
 bool Thermostat::set_summermode(const char * value, const int8_t id) {
     uint8_t set;
     if (has_summer3()) {
-        // 0=summer, 1=auto, 2=winter, 3=cooling (#3230, #3470)
-        if (Helpers::value2enum(value, set, FL_(enum_summermode4))) {
+        // 0x0470 offset 0, tested on a BC400 / WLW176i (#3470):
+        // 0 off     - menu "Summer", app "Idle"; heating and cooling both disabled
+        // 1 auto    - switches between heating and cooling on outdoor temperature
+        // 2 heating - menu "Heating only", app "Always heating"
+        // 3 cooling - menu "Cooling only", app "Always cooling"
+        // Heating-only menus call 0 summer and 2 winter; those still write (#3230).
+        if (Helpers::value2enum(value, set, FL_(enum_hpoperatingmode)) || Helpers::value2enum(value, set, FL_(enum_summermode))) {
             write_command(0x470, 0, set, 0x470);
             return true;
         }
@@ -5126,7 +5131,7 @@ void Thermostat::register_device_values() {
             register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                                   &hpoperatingmode,
                                   DeviceValueType::ENUM,
-                                  FL_(enum_summermode4),
+                                  FL_(enum_hpoperatingmode),
                                   FL_(hpoperatingmode),
                                   DeviceValueUOM::NONE,
                                   MAKE_CF_CB(set_summermode));
