@@ -4811,7 +4811,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,pvraiseheat,raise heating with PV,int8 (>=0<=5),K,true,number.thermostat_raise_heating_with_PV,number.thermostat_pvraiseheat,7,0,1,62,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,pvlowercool,lower cooling with PV,int8 (>=-5<=0),K,true,number.thermostat_lower_cooling_with_PV,number.thermostat_pvlowercool,7,0,1,63,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,absent,absent,boolean (>=0<=0), ,true,switch.thermostat_absent,switch.thermostat_absent,7,0,1,64,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,hpoperatingmode,heatpump operating mode,enum [summer\|auto\|winter\|cooling] (>=0<=0), ,true,select.thermostat_heatpump_operating_mode,select.thermostat_hpoperatingmode,7,0,1,90,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,hpoperatingmode,heatpump operating mode,enum [off\|auto\|heating\|cooling] (>=0<=0), ,true,select.thermostat_heatpump_operating_mode,select.thermostat_hpoperatingmode,7,0,1,90,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,summertemp,summer temperature,uint8 (>=10<=30),C,true,number.thermostat_summer_temperature,number.thermostat_summertemp,7,0,1,91,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,instantstart,instant start,uint8 (>=1<=10),K,true,number.thermostat_instant_start,number.thermostat_instantstart,7,0,1,92,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,coolstart,cooling starttemp,uint8 (>=24<=35),C,true,number.thermostat_cooling_starttemp,number.thermostat_coolstart,7,0,1,93,1
