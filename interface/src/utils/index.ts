@@ -4,6 +4,7 @@ export * from './submit';
 export * from './time';
 export * from './useRest';
 export * from './useInterval';
+export * from './demoIdle';
 export * from './props';
 export * from './file';
 export * from './usePersistState';

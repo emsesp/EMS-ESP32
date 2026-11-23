@@ -1,5 +1,11 @@
 import { useEffect, useRef } from 'react';
 
+import { demoPaused, subscribeDemoPaused } from './demoIdle';
+
+// Vite replaces import.meta.env.MODE at build time, so in device/production builds
+// this is `false` and the demo-idle code below is removed by the bundler.
+const DEMO = import.meta.env.MODE === 'hosted';
+
 const DEFAULT_DELAY = 5000;
 
 /**
@@ -10,6 +16,9 @@ const DEFAULT_DELAY = 5000;
  * @param delay - Delay in milliseconds (default: 3000ms)
  * @param immediate - If true, executes callback immediately on mount (default: false)
  * @returns Reference to the interval ID
+ *
+ * In the hosted demo, ticks are skipped while the tab is hidden or idle (see demoIdle.ts),
+ * and one tick runs straight away when the user comes back so the data is fresh.
  */
 export const useInterval = (
   callback: () => void,
@@ -25,7 +34,12 @@ export const useInterval = (
   }, [callback]);
 
   useEffect(() => {
-    const tick = () => savedCallback.current();
+    const run = () => savedCallback.current();
+    const tick = DEMO
+      ? () => {
+          if (!demoPaused()) run();
+        }
+      : run;
 
     // Execute immediately if requested
     if (immediate) {
@@ -33,10 +47,19 @@ export const useInterval = (
     }
 
     intervalRef.current = setInterval(tick, delay);
+
+    // refresh as soon as the demo wakes up again
+    const unsubscribe = DEMO
+      ? subscribeDemoPaused(() => {
+          if (!demoPaused()) run();
+        })
+      : undefined;
+
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
+      unsubscribe?.();
     };
   }, [delay, immediate]);
 
