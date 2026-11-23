@@ -34,6 +34,7 @@ modbus_block_size = 1000  # block size of a register block for each tag
 # string sizes including terminating NUL. Extracted from the source code.
 string_sizes = {
     "boiler/lastcode": 55,
+    "boiler/errorcode": 16,
     "boiler/servicecode": 4,
     "boiler/maintenancemessage": 4,
     "boiler/maintenancedate": 12,

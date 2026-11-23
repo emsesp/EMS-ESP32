@@ -6,8 +6,8 @@ import { routeTrail } from 'app/routes';
 import { SaveBarSlotContext, cx } from 'components/ui';
 import type { RequiredChildrenProps } from 'utils';
 
-import './Layout.css';
 import DemoPausedBanner from './DemoPausedBanner';
+import './Layout.css';
 import LayoutAppBar from './LayoutAppBar';
 import LayoutDrawer from './LayoutDrawer';
 import LayoutTabBar from './LayoutTabBar';

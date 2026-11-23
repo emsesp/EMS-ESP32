@@ -16,8 +16,8 @@ const DemoPausedBanner = () => {
         </Button>
       }
     >
-      Live updates are paused while the demo is idle. Move the mouse or click
-      Resume to continue.
+      Live updates are paused while the demo is idle. Move the mouse or click Resume
+      to continue.
     </Message>
   );
 };

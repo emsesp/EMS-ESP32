@@ -52,6 +52,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -371,6 +372,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -532,6 +534,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -693,6 +696,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -854,6 +858,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -1015,6 +1020,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -1176,6 +1182,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -1337,6 +1344,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -1498,6 +1506,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -1659,6 +1668,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -1820,6 +1830,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -1981,6 +1992,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -2142,6 +2154,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -2303,6 +2316,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -2464,6 +2478,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -2625,6 +2640,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -2786,6 +2802,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -2947,6 +2964,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -3108,6 +3126,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -3269,6 +3288,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -3430,6 +3450,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -3558,6 +3579,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -3844,6 +3866,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -4163,6 +4186,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -4324,6 +4348,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -4485,6 +4510,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -4646,6 +4672,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -4807,6 +4834,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -4968,6 +4996,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -5104,6 +5133,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |
@@ -5258,6 +5288,7 @@ uint8
 | heatstarts | burner starts heating | uint24 |   | false | DEVICE_DATA | 33 | 2 | 1 |
 | ubauptime | total UBA operating time | time | minutes | false | DEVICE_DATA | 35 | 2 | 1 |
 | lastcode | last error code | string |   | false | DEVICE_DATA | 37 | 28 | 1 |
+| errorcode | error code | string |   | false | DEVICE_DATA | 294 | 8 | 1 |
 | servicecode | service code | string |   | false | DEVICE_DATA | 65 | 2 | 1 |
 | servicecodenumber | service code number | uint16 |   | false | DEVICE_DATA | 67 | 1 | 1 |
 | maintenancemessage | maintenance message | string |   | false | DEVICE_DATA | 68 | 2 | 1 |

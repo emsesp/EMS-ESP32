@@ -107,9 +107,9 @@ const sentenceCaseSuggestion = (value, badWords) => {
 };
 
 const checkEnglishCasing = (src) => {
-  const entries = [
-    ...src.matchAll(/^\s*([A-Z0-9_]+):\s*'((?:\\'|[^'])*)'/gm)
-  ].map(([, key, value]) => [key, value.replace(/\\'/g, "'")]);
+  const entries = [...src.matchAll(/^\s*([A-Z0-9_]+):\s*'((?:\\'|[^'])*)'/gm)].map(
+    ([, key, value]) => [key, value.replace(/\\'/g, "'")]
+  );
   const issues = [];
   for (const [key, value] of entries) {
     if (!isShortLabel(value)) continue;
@@ -134,7 +134,9 @@ const checkEnglishCasing = (src) => {
   return issues;
 };
 
-const casingIssues = checkEnglishCasing(readFileSync('src/i18n/en/index.ts', 'utf8'));
+const casingIssues = checkEnglishCasing(
+  readFileSync('src/i18n/en/index.ts', 'utf8')
+);
 if (casingIssues.length) {
   console.log('English casing (short labels, sentence case):');
   for (const { key, value, suggest, bad } of casingIssues) {
