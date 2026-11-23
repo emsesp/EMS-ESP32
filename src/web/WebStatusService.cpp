@@ -163,8 +163,9 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
         root["free_psram"] = ESP.getFreePsram() / 1024;
     }
 
-    root["model"] = EMSESP::system_.getBBQKeesGatewayDetails();
-    root["board"] = EMSESP::system_.getBBQKeesGatewayDetails(FUSE_VALUE::BOARD);
+    root["model"]         = EMSESP::system_.getBBQKeesGatewayDetails();
+    root["board"]         = EMSESP::system_.getBBQKeesGatewayDetails(FUSE_VALUE::BOARD); // from eFuse, if set
+    root["board_profile"] = EMSESP::system_.board_profile();                             // active settings profile
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
     root["temperature"] = (int)Helpers::transformNumFloat(EMSESP::system_.temperature(), 0, EMSESP::system_.fahrenheit() ? 2 : 0); // only 2 decimal places
 #endif

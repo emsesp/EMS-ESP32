@@ -149,7 +149,7 @@ let settings = {
   analog_enabled: true,
   pbutton_gpio: 34,
   solar_maxflow: 30,
-  board_profile: 'E32V2',
+  board_profile: 'E32V2_2',
   fahrenheit: false,
   bool_format: 1,
   bool_dashboard: 1,
@@ -275,7 +275,8 @@ let system_status = {
   ],
   // languages: ['en'], // 4MB flash boards
   model: 'BBQKees Electronics E32V2.2 rev.2.2/2024074',
-  board: 'E32V2_2',
+  board: 'E32V2_2', // from eFuse
+  board_profile: settings.board_profile, // active settings profile
   status: 0
   // status: 3
 };
@@ -297,7 +298,7 @@ interface MockData {
   flash: string; // flash chip size: '4MB', '16MB' or '32MB'
   psram: boolean; // board has PSRAM
   model: string; // BBQKees eFuse model string, '' when not a BBQKees gateway
-  board: string; // board profile ID (system status board + settings.board_profile)
+  board: string; // eFuse board ID (system status board), independent of settings.board_profile
 }
 
 const MOCK_DATA_PRESETS: { name: string; values: Partial<MockData> }[] = [
@@ -371,7 +372,7 @@ const MOCK_DATA_PRESETS: { name: string; values: Partial<MockData> }[] = [
   },
   {
     name: 'no model set (generic board, not BBQKees)',
-    values: { model: '', board: 'CUSTOM' }
+    values: { model: '', board: '' }
   }
 ];
 
@@ -502,8 +503,8 @@ function applyMockData() {
   system_status.psram_size = v.psram ? psram_size : 0;
   system_status.free_psram = v.psram ? psram_size - 23 : 0;
   system_status.model = v.model;
-  system_status.board = v.board;
-  settings.board_profile = v.board;
+  system_status.board = v.board; // eFuse only; board_profile comes from Application settings
+  system_status.board_profile = settings.board_profile;
 }
 
 // set the ESP platform - using ESP32 will disable OTA and automatic version downloading
@@ -898,10 +899,12 @@ function mock_data_page(request: Request) {
     `<a href="?${key}=${encodeURIComponent(String(value))}">${escape(text)}</a>`;
   const toggle = (key: keyof MockData) =>
     `<li>${key}: <b>${escape(v[key])}</b> ${link(key, !v[key], 'toggle')}</li>`;
+  const empty = '<none>';
   const choices = (key: keyof MockData, options: string[]) =>
-    `<li>${key}: <b>${escape(v[key] || "''")}</b> ` +
-    options.map((o) => link(key, o, o || "''")).join(' | ') +
+    `<li>${key}: <b>${escape(v[key] || empty)}</b> ` +
+    options.map((o) => link(key, o, o || empty)).join(' | ') +
     '</li>';
+  const boardChoices = ['', ...MOCK_BOARD_PROFILES.filter((b) => b !== 'CUSTOM')];
 
   const html = `<!doctype html><html><head><title>Mock Data</title>
 <style>body{font-family:sans-serif;background:#1e1e1e;color:#ddd;padding:1em}a{color:lightblue}li{margin:4px 0}
@@ -932,8 +935,9 @@ ${toggle('recoveryOfficial')}
 ${choices('flash', Object.keys(MOCK_FLASH_LAYOUTS))}
 ${toggle('psram')}
 ${choices('model', ['', 'BBQKees Electronics E32V2.2 rev.2.2/2024073', 'BBQKees Electronics S32'])}
-${choices('board', MOCK_BOARD_PROFILES)}
+${choices('board', boardChoices)}
 </ul>
+<p>Board profile is set in Application settings (not here).</p>
 <h3>User</h3>
 <p>Signed in as: <b id="user">?</b> <a href="#" data-token="admin">admin</a> | <a href="#" data-token="guest">guest</a></p>
 <p id="origin" style="color:orange;display:none">The Web UI keeps its login per address, so open this page through the Web UI's address, e.g. http://localhost:3000/rest/mockData</p>
@@ -5651,6 +5655,7 @@ router
     system_status.developer_mode = settings.developer_mode;
     log_settings.developer_mode = settings.developer_mode;
     system_status.disable_reset = settings.disable_reset;
+    system_status.board_profile = settings.board_profile;
     return status(restart ? 205 : 200);
   })
 

@@ -62,7 +62,8 @@ export interface SystemStatus {
   free_psram?: number;
   free_caps: number;
   model: string;
-  board: string;
+  board: string; // from eFuse, if set (BBQKees board ID)
+  board_profile?: string; // active settings board profile (e.g. E32V2_2, CUSTOM)
   recovery_version?: string;
   recovery_official?: boolean; // only when a recovery app is installed
   has_partition: boolean;

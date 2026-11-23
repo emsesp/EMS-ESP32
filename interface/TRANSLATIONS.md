@@ -1,12 +1,12 @@
 # Web UI translations
 
-How the web UI text is translated, how to add or change a string, and the two helper scripts: `pnpm translate` drafts translations with DeepL, and `pnpm check-layout` finds text that doesn't fit.
+How the web UI text is translated, how to add or change a string, and the two helper scripts: `pnpm translate` drafts translations with DeepL, and `pnpm check-layout` finds text that doesn't fit and English labels that break sentence case.
 
 The firmware has its own translations (entity names in `src/core/locale_translations.h`). They are not covered here.
 
 ## Where the text lives
 
-- One file per language: `src/i18n/<lang>/index.ts`, a flat object of keys like `SIGN_IN: 'Sign In'`. English (`en`) is the source for new text.
+- One file per language: `src/i18n/<lang>/index.ts`, a flat object of keys like `SIGN_IN: 'Sign in'`. English (`en`) is the source for new text.
 - Languages: cs, de, en, fr, hu, it, nl, no, pl, sk, sv, tr.
 - [typesafe-i18n](https://github.com/ivanhofer/typesafe-i18n) generates `src/i18n/i18n-types.ts` from the base locale set in `.typesafe-i18n.json` (currently `pl`). Every language must have every key, otherwise TypeScript fails.
 - Code uses the keys through `LL`, for example `LL.SIGN_IN()`.
@@ -25,6 +25,10 @@ The firmware has its own translations (entity names in `src/core/locale_translat
 5. Ask a native speaker to review machine translations (lines marked `// DeepL`).
 
 Keep labels short. A menu item has about 130 px; long labels wrap to a second line and are cut off with "…" after that.
+
+**English casing (sentence case):** short UI labels in `en` (about 2–4 words, no `.!?`) capitalize the first word only. Later words stay lowercase unless they are an acronym (`MQTT`, `API`, `IP`, `Wi-Fi`, …) or a proper noun (`Home Assistant`, `Fahrenheit`, …). Examples: `File system`, `Board profile`, `Sign in`, `Free memory` — not `Free Memory` or `Sign In`.
+
+`pnpm check-layout` enforces this on `src/i18n/en/index.ts`. It does **not** check other languages, help/paragraph text, hard-coded strings outside the i18n files, or whether related labels use the same wording (only capitalization).
 
 ## Drafting translations with DeepL: `pnpm translate`
 
@@ -124,19 +128,23 @@ The whole English UI is about 16,000 characters, so translating everything into 
 
 ## Checking the layout: `pnpm check-layout`
 
-Translations are often longer than English. `check-layout.js` opens every page, plus the "add" dialogs, in every language at desktop (1280 px), tablet (1000 px) and phone (390 px) width, and lists text that is cut off, truncated or pushed off screen.
+`check-layout.js` does two things:
+
+1. **English casing** — scans `src/i18n/en/index.ts` for short labels that break sentence case (for example `Free Memory` → suggested `Free memory`). Runs first; does not need the mock server or Chromium. Other languages and long help strings are skipped.
+2. **Layout** — opens every page, plus the "add" dialogs, in every language at desktop (1280 px), tablet (1000 px) and phone (390 px) width, and lists text that is cut off, truncated or pushed off screen. Prints progress per language/width; a full run takes several minutes.
 
 ```sh
 pnpm standalone                  # in another terminal: mock API + dev server
-pnpm check-layout                # everything, about 6 minutes
+pnpm check-layout                # casing + everything, several minutes
+pnpm check-layout --lang en --width 1280 --route /status/hardware   # quick smoke test
 pnpm check-layout --lang nl,de --width 390 --route /status/log,/settings
 ```
 
-It exits with an error and lists each problem by page, width, element and language. Device names that are shortened on purpose are ignored.
+It exits with an error if either casing or layout problems are found. Layout issues are listed by page, width, element and language. Device names that are shortened on purpose are ignored.
 
-It needs Chromium for `playwright-core`; install it once with `pnpm exec playwright-core install chromium`.
+It needs Chromium for `playwright-core`; install it once with `pnpm exec playwright-core install chromium` (not `playwright install` — this project depends on `playwright-core`).
 
-It only finds text that doesn't fit, not wrapping that looks awkward, so look at the page too. Not covered: edit and confirm dialogs, dropdown option lists, notifications and the recovery app.
+Layout only finds text that doesn't fit, not wrapping that looks awkward, so look at the page too. Not covered: edit and confirm dialogs, dropdown option lists, notifications and the recovery app.
 
 ### When something doesn't fit
 

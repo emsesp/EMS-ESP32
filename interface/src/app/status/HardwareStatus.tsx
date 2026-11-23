@@ -40,9 +40,12 @@ const HardwareStatus = () => {
                 data.cpu_type
               )
             },
-            !!data.board && {
+            !!data.board_profile && {
               label: LL.BOARD_PROFILE(),
-              value: boardProfileName(data.board)
+              value:
+                data.board_profile === 'CUSTOM'
+                  ? LL.CUSTOM()
+                  : boardProfileName(data.board_profile)
             },
             {
               label: 'CPU',
