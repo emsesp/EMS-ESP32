@@ -12,13 +12,8 @@ import { API, getBoardProfile, readSettings, writeSettings } from 'api/app';
 import { readSystemStatus } from 'api/system';
 
 import { useRequest } from 'alova/client';
-import { BOARD_PROFILES } from 'app/main/types';
-import type {
-  APIcall,
-  BoardProfile,
-  BoardProfileKey,
-  Settings
-} from 'app/main/types';
+import { BOARD_PROFILES, boardProfileName } from 'app/main/types';
+import type { APIcall, BoardProfile, Settings } from 'app/main/types';
 import { VALIDATION_LIMITS, createSettingsValidator } from 'app/main/validators';
 import {
   Button,
@@ -274,13 +269,16 @@ const ApplicationSettings = () => {
         : Object.keys(BOARD_PROFILES)
     ).map((code) => ({
       value: code,
-      label: BOARD_PROFILES[code as BoardProfileKey] ?? code
+      label: boardProfileName(code)
     }));
     if (custom || data.developer_mode) {
       profiles.push({ value: 'CUSTOM', label: `${LL.CUSTOM()}…` });
     }
     if (!profiles.some((p) => p.value === data.board_profile)) {
-      profiles.unshift({ value: data.board_profile, label: data.board_profile });
+      profiles.unshift({
+        value: data.board_profile,
+        label: boardProfileName(data.board_profile)
+      });
     }
 
     const pins: [string, ReactNode][] = [

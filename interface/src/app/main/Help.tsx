@@ -23,6 +23,7 @@ import {
   type Device,
   DeviceType,
   type Stat,
+  boardProfileName,
   busConnectionStatus
 } from './types';
 
@@ -81,7 +82,7 @@ const summary = (
   stats?: readonly Stat[]
 ) =>
   [
-    `EMS-ESP v${s.emsesp_version} on ${s.model || s.board || s.esp_platform} (${s.esp_platform}, ${s.partition})`,
+    `EMS-ESP v${s.emsesp_version} on ${s.model || boardProfileName(s.board) || s.esp_platform} (${s.esp_platform}, ${s.partition})`,
     `uptime ${duration(s.uptime)}, free heap ${s.free_heap} KB, max block ${s.max_alloc_heap} KB`,
     busLine(s, stats),
     devicesLine(s, devices),
