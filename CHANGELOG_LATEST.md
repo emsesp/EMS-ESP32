@@ -35,6 +35,7 @@ A full list of breaking changes can be found in this [discussion](https://github
 
 ## Added
 
+- boiler and thermostat `errorcode` from telegram 0xBF (the currently active fault, e.g. `" --(5141)"` / `"A11(3221)"`), so heat pumps without `servicecode` show locking alarms while they are active [#3475](https://github.com/emsesp/EMS-ESP32/issues/3475)
 - Logavent HRV156/HRV176: `ventbalance` (writable volume flow balance for the exhaust fan, 90–110 %), `level1pct`/`level2pct`/`level4pct` (writable level percentages), `ventoutrpm`/`ventinrpm` and `ventoutvoltage`/`ventinvoltage` (fan rpm and 0–10 V control voltage) [#3478](https://github.com/emsesp/EMS-ESP32/discussions/3478)
 - "Support the project" link on the Help page to tip EMS-ESP on Ko-fi, which replaces the PayPal donation link in the README
 - firmware rollback: a newly installed firmware is only kept once it has run for 2 minutes or is restarted from EMS-ESP. If it crashes or loses power before then, the device goes back to the previous firmware, or to the Recovery if there is none. Needs the bootloader of 3.10.0, which only a flash over USB installs, a firmware upload keeps the existing bootloader
@@ -58,6 +59,7 @@ A full list of breaking changes can be found in this [discussion](https://github
 
 ## Fixed
 
+- `lastcode` on heat pumps (0xC6/0xC2/0xC0) only read the first history record and ranked open faults by start time against finished ones by end time, so an active locking fault in a later record (e.g. 5141 after a finished 5140) was missed; the first three records are read and open faults are preferred [#3475](https://github.com/emsesp/EMS-ESP32/issues/3475)
 - BC400/UI800 heatpump operating mode (`0x0470`) no longer drops “Always cooling”. The values are `off`/`auto`/`heating`/`cooling` (MyBuderus Idle / Automatic / Always heating / Always cooling; value 0 disables both). `summer` and `winter` still write as `off` and `heating` [#3470](https://github.com/emsesp/EMS-ESP32/issues/3470) [#3230](https://github.com/emsesp/EMS-ESP32/issues/3230)
 - after a restart, `summermode` could briefly publish `summer` then `winter` when the first RC300Monitor (`0x02A5`) fragment arrived at offset 20 before offset 0. `summermode` is now left unpublished until the status byte is known [#3471](https://github.com/emsesp/EMS-ESP32/issues/3471)
 - heat pump `hpin1opt`–`hpin4opt` could publish wrong digits after a restart (and leave them stuck when `0x0486` has holes). Options are initialized empty, only `'0'`/`'1'` are treated as known, and MQTT is updated only when that input’s bytes are in the fragment [#3476](https://github.com/emsesp/EMS-ESP32/issues/3476)
@@ -81,6 +83,7 @@ A full list of breaking changes can be found in this [discussion](https://github
 
 ## Changed
 
+- on WLW176i/BC400-style heat pumps, locking alarms (e.g. 5141, 6257) clear with `boiler/reset message`; H-warnings with `boiler/reset hp_error` [#3475](https://github.com/emsesp/EMS-ESP32/issues/3475) [#2933](https://github.com/emsesp/EMS-ESP32/issues/2933)
 - security: Web UI sign-in tokens are signed with a random key that is unique to each device, so existing access tokens stop working after the upgrade. Admins see a notice in the WebUI until it is closed. Changing an admin password replaces the key, which signs everyone out
 - security: Web UI sign-ins expire after 30 days (once the clock is set by NTP), and changing a user's password, or removing the user, signs that user out everywhere [#3353](https://github.com/emsesp/EMS-ESP32/issues/3353)
 - security: API keys replace the per-user access tokens for `/api`. Admins create them in Security > API Keys with a name and "Read" or "Read and Write" access, and can revoke each one. A key is shown once when created and only stored as a hash. Read keys act like a guest user, Read and Write keys like an admin, and keys only work on `/api`, not for the Web UI [#3354](https://github.com/emsesp/EMS-ESP32/issues/3354)

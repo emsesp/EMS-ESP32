@@ -324,6 +324,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatStarts_, DeviceValueType::UINT24, FL_(heatStarts), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &UBAuptime_, DeviceValueType::TIME, FL_(UBAuptime), DeviceValueUOM::MINUTES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &lastCode_, DeviceValueType::STRING, FL_(lastCode), DeviceValueUOM::NONE);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &errorCode_, DeviceValueType::STRING, FL_(errorCode), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &serviceCode_, DeviceValueType::STRING, FL_(serviceCode), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &serviceCodeNumber_, DeviceValueType::UINT16, FL_(serviceCodeNumber), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &maintenanceMessage_, DeviceValueType::STRING, FL_(maintenanceMessage), DeviceValueUOM::NONE);
@@ -1182,8 +1183,13 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     EMSESP::send_read_request(0x11, device_id, 0, 11); // read last errorcode on start (only published on errors)
     EMSESP::send_read_request(0x15, device_id);        // read maintenance data on start (only published on change)
     EMSESP::send_read_request(0x1C, device_id);        // read maintenance status on start (only published on change)
-    EMSESP::send_read_request(0xC2, device_id, 0, 20); // read last errorcode on start (not broadcasted)
-    EMSESP::send_read_request(0xC6, device_id, 0, 21); // read last errorcode on start (not broadcasted)
+    // read first three error-history records on start (not broadcasted) - #3475
+    EMSESP::send_read_request(0xC2, device_id, 0, 20);
+    EMSESP::send_read_request(0xC2, device_id, 20, 20);
+    EMSESP::send_read_request(0xC2, device_id, 40, 20);
+    EMSESP::send_read_request(0xC6, device_id, 0, 21);
+    EMSESP::send_read_request(0xC6, device_id, 21, 21);
+    EMSESP::send_read_request(0xC6, device_id, 42, 21);
 
     if (!isHeatPump() && model() != EMSdevice::EMS_DEVICE_FLAG_HIU) {
         register_telegram_type(0x04, "UBAFactory", true, MAKE_PF_CB(process_UBAFactory), 21);
@@ -2046,10 +2052,38 @@ void Boiler::process_UBAMaintenanceStatus(const std::shared_ptr<const Telegram> 
     }
 }
 
-// 0xBF
-void Boiler::process_ErrorMessage(const std::shared_ptr<const Telegram> &) {
-    EMSESP::send_read_request(0xC2, device_id(), 0, 20); // read last errorcode
-    EMSESP::send_read_request(0xC6, device_id(), 0, 21); // read last errorcode
+// 0xBF - active fault: bytes 5-7 display code (ASCII), bytes 8-9 code number (BE); 0 = none
+// https://github.com/emsesp/EMS-ESP32/issues/3475
+void Boiler::process_ErrorMessage(const std::shared_ptr<const Telegram> & telegram) {
+    if (telegram->offset == 0 && telegram->message_length >= 10) {
+        uint16_t codeNo = EMS_VALUE_UINT16_NOTSET;
+        telegram->read_value(codeNo, 8);
+        if (Helpers::hasValue(codeNo) && codeNo != 0) {
+            char code[4] = {0};
+            code[0]      = telegram->message_data[5];
+            code[1]      = telegram->message_data[6];
+            code[2]      = telegram->message_data[7];
+            if (std::isprint(code[0]) && std::isprint(code[1]) && std::isprint(code[2])) {
+                char newCode[sizeof(errorCode_)];
+                snprintf(newCode, sizeof(newCode), "%s(%d)", code, codeNo);
+                has_update(errorCode_, newCode, sizeof(errorCode_));
+            }
+        } else {
+            // no active fault - clear and allow finished history to refresh lastcode
+            has_update(errorCode_, "", sizeof(errorCode_));
+            lastCodeDate_ = 0;
+            lastCodeOpen_ = false;
+            lastCodeNo_   = 0;
+        }
+    }
+
+    // refresh first three error-history records
+    EMSESP::send_read_request(0xC2, device_id(), 0, 20);
+    EMSESP::send_read_request(0xC2, device_id(), 20, 20);
+    EMSESP::send_read_request(0xC2, device_id(), 40, 20);
+    EMSESP::send_read_request(0xC6, device_id(), 0, 21);
+    EMSESP::send_read_request(0xC6, device_id(), 21, 21);
+    EMSESP::send_read_request(0xC6, device_id(), 42, 21);
 }
 
 // 0x10, 0x11
@@ -2090,14 +2124,38 @@ void Boiler::process_UBAErrorMessage(const std::shared_ptr<const Telegram> & tel
     }
 }
 
+// Prefer open (active) faults over finished ones when ranking lastcode - #3475
+bool Boiler::update_lastCode(const char * code, uint16_t codeNo, uint32_t date, bool is_open) {
+    bool take = false;
+    if (is_open) {
+        take = !lastCodeOpen_ || date >= lastCodeDate_;
+    } else if (lastCodeOpen_) {
+        // finished entry replaces open only when it is the same fault resolving
+        take = (codeNo == lastCodeNo_);
+    } else {
+        take = date > lastCodeDate_;
+    }
+
+    if (!take) {
+        return false;
+    }
+
+    lastCodeDate_ = date;
+    lastCodeOpen_ = is_open;
+    lastCodeNo_   = codeNo;
+    has_update(lastCode_, code, sizeof(lastCode_));
+    return true;
+}
+
 // 0xC2, without clock in system it stores 3 bytes uptime in 11 and 16, with clock date in 10-14, and 15-19
-// date is marked with 0x80 to year-field
+// date is marked with 0x80 to year-field; records are 20 bytes (offsets 0, 20, 40, ...)
 void Boiler::process_UBAErrorMessage2(const std::shared_ptr<const Telegram> & telegram) {
-    if (telegram->offset > 0 || telegram->message_length < 20) {
+    if ((telegram->offset % 20) != 0 || telegram->message_length < 20) {
         return;
     }
 
     uint32_t date                    = 0;
+    bool     is_open                 = false;
     char     code[sizeof(lastCode_)] = {0};
     uint16_t codeNo                  = EMS_VALUE_INT16_NOTSET;
     code[0]                          = telegram->message_data[5];
@@ -2139,7 +2197,8 @@ void Boiler::process_UBAErrorMessage2(const std::shared_ptr<const Telegram> & te
                      end_hour,
                      end_min);
         } else { // no valid end date means error still persists
-            date = (start_year - 2000) * 535680UL + start_month * 44640UL + start_day * 1440UL + start_hour * 60 + start_min;
+            is_open = true;
+            date    = (start_year - 2000) * 535680UL + start_month * 44640UL + start_day * 1440UL + start_hour * 60 + start_min;
             snprintf(&code[3], sizeof(code) - 3, "(%d) %02d.%02d.%04d %02d:%02d - now", codeNo, start_day, start_month, start_year, start_hour, start_min);
         }
     } else { // no clock, the uptime is stored https://github.com/emsesp/EMS-ESP32/issues/121
@@ -2151,20 +2210,18 @@ void Boiler::process_UBAErrorMessage2(const std::shared_ptr<const Telegram> & te
         date = starttime;
     }
 
-    if (date > lastCodeDate_) {
-        lastCodeDate_ = date;
-        has_update(lastCode_, code, sizeof(lastCode_));
-    }
+    update_lastCode(code, codeNo, date, is_open);
 }
 
 // C6, C7 https://github.com/emsesp/EMS-ESP32/issues/938#issuecomment-1425813815
-// as C2, but offset shifted one byte
+// as C2, but offset shifted one byte; records are 21 bytes (offsets 0, 21, 42, ...)
 void Boiler::process_UBAErrorMessage3(const std::shared_ptr<const Telegram> & telegram) {
-    if (telegram->offset > 0 || telegram->message_length < 21) {
+    if ((telegram->offset % 21) != 0 || telegram->message_length < 21) {
         return;
     }
 
     uint32_t date                    = 0;
+    bool     is_open                 = false;
     char     code[sizeof(lastCode_)] = {0};
     uint16_t codeNo                  = EMS_VALUE_INT16_NOTSET;
     code[0]                          = telegram->message_data[6];
@@ -2206,7 +2263,8 @@ void Boiler::process_UBAErrorMessage3(const std::shared_ptr<const Telegram> & te
                      end_hour,
                      end_min);
         } else { // no valid end date means error still persists
-            date = (start_year - 2000) * 535680UL + start_month * 44640UL + start_day * 1440UL + start_hour * 60 + start_min;
+            is_open = true;
+            date    = (start_year - 2000) * 535680UL + start_month * 44640UL + start_day * 1440UL + start_hour * 60 + start_min;
             snprintf(&code[3], sizeof(code) - 3, "(%d) %02d.%02d.%04d %02d:%02d - now", codeNo, start_day, start_month, start_year, start_hour, start_min);
         }
     } else { // no clock, the uptime is stored https://github.com/emsesp/EMS-ESP32/issues/121
@@ -2218,10 +2276,7 @@ void Boiler::process_UBAErrorMessage3(const std::shared_ptr<const Telegram> & te
         date = starttime;
     }
 
-    if (date > lastCodeDate_) {
-        lastCodeDate_ = date;
-        has_update(lastCode_, code, sizeof(lastCode_));
-    }
+    update_lastCode(code, codeNo, date, is_open);
 }
 
 // 0x15 maintenance data

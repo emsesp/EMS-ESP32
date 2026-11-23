@@ -155,9 +155,12 @@ class Boiler : public EMSdevice {
     uint32_t heatWorkMin_;       // Total heat operating time
     uint32_t UBAuptime_;         // Total UBA working hours
     char     lastCode_[55];      // last error code
+    char     errorCode_[15];     // active error from 0xBF, e.g. " --(5141)"
     char     serviceCode_[4];    // 3 character status/service code
     uint16_t serviceCodeNumber_; // error/service code
     uint32_t lastCodeDate_ = 0;  // last code date
+    uint16_t lastCodeNo_   = 0;  // code number of lastCode_
+    bool     lastCodeOpen_ = false; // lastCode_ is an open (active) fault
     uint8_t  emergencyOps_;
     uint8_t  emergencyTemp_;
     uint16_t headertemp_; // see #1317
@@ -386,6 +389,7 @@ class Boiler : public EMSdevice {
     void process_UBAErrorMessage(const std::shared_ptr<const Telegram> & telegram);
     void process_UBAErrorMessage2(const std::shared_ptr<const Telegram> & telegram);
     void process_UBAErrorMessage3(const std::shared_ptr<const Telegram> & telegram);
+    bool update_lastCode(const char * code, uint16_t codeNo, uint32_t date, bool is_open);
     void process_UBAMonitorWWPlus(const std::shared_ptr<const Telegram> & telegram);
     void process_UBAInformation(const std::shared_ptr<const Telegram> & telegram);
     void process_UBAEnergySupplied(const std::shared_ptr<const Telegram> & telegram);

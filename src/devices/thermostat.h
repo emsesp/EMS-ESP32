@@ -268,9 +268,12 @@ class Thermostat : public EMSdevice {
     // standard for all thermostats
     char     status_[20];    // online or offline
     char     dateTime_[30];  // date and time stamp
-    char     errorCode_[15]; // code from 0xA2 as string i.e. "A22(816)"
+    char     errorCode_[15]; // code from 0xA2/0xBF as string i.e. "A22(816)"
     uint16_t errorNumber_;   // used internally to build error code
     char     lastCode_[50];  // error log
+    uint32_t lastCodeDate_ = 0;  // last code date for ranking
+    uint16_t lastCodeNo_   = 0;  // code number of lastCode_
+    bool     lastCodeOpen_ = false; // lastCode_ is an open (active) fault
 
     // Installation parameters
     uint8_t ibaMainDisplay_; // display on Thermostat: 0 int temp, 1 int setpoint, 2 ext temp, 3 burner temp, 4 ww temp, 5 functioning mode, 6 time, 7 data, 9 smoke temp
@@ -448,6 +451,7 @@ class Thermostat : public EMSdevice {
     void process_RCErrorMessage(const std::shared_ptr<const Telegram> & telegram);
     void process_RCErrorMessage2(const std::shared_ptr<const Telegram> & telegram);
     void process_ErrorMessageBF(const std::shared_ptr<const Telegram> & telegram);
+    bool update_lastCode(const char * code, uint16_t codeNo, uint32_t date, bool is_open);
     void process_RC35wwSettings(const std::shared_ptr<const Telegram> & telegram);
     void process_RC35wwTimer(const std::shared_ptr<const Telegram> & telegram);
     void process_RC35Monitor(const std::shared_ptr<const Telegram> & telegram);
