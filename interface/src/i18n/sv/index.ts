@@ -613,6 +613,7 @@ const sv: Translation = {
   SEARCH_SENSORS: 'Sök på namn, ID eller GPIO', // DeepL
   NO_SENSORS: 'Inga sensorer hittades',
   NO_SENSORS_MATCH: 'Inga sensorer matchar din sökning', // DeepL
+  SENSORS_HELP_1: 'Hantera temperaturgivare och analoga sensorer anslutna till den här enheten', // DeepL
   TEMP_SENSORS_HELP: 'Hittas automatiskt. Klicka på en Sensor för att byta namn på den eller ställa in en förskjutning', // DeepL
   FREE_GPIOS: 'Lediga GPIO-portar', // DeepL
   SYSTEM_SENSOR: 'Systemsensor',

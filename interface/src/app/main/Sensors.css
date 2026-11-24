@@ -1,6 +1,14 @@
-/* temperature and analog cards sit inside the sensors card */
+/* temperature and analog blocks sit inside the sensors card without their own borders */
 .sns > .section {
-  margin: 12px 0 0;
+  margin: 16px 0 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+/* only the page-level help is warning-colored; nested section hints stay muted */
+.sns > .section .sec-desc {
+  color: var(--text-3);
 }
 
 .sns-gpio {

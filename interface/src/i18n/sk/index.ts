@@ -613,6 +613,7 @@ const sk: Translation = {
   SEARCH_SENSORS: 'Vyhľadávanie podľa názvu, ID alebo GPIO', // DeepL
   NO_SENSORS: 'Nenašli sa žiadne snímače',
   NO_SENSORS_MATCH: 'Žiadne snímače nezodpovedajú vášmu vyhľadávaniu', // DeepL
+  SENSORS_HELP_1: 'Spravujte teplotné a analógové senzory pripojené k tomuto zariadeniu', // DeepL
   TEMP_SENSORS_HELP: 'Nájdené automaticky. Kliknutím na snímač ho môžete premenovať alebo nastaviť posun', // DeepL
   FREE_GPIOS: 'Voľné GPIO',
   SYSTEM_SENSOR: 'Systémový snímač',

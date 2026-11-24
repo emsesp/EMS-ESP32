@@ -613,6 +613,7 @@ const no: Translation = {
   SEARCH_SENSORS: 'Søk etter navn, ID eller GPIO',
   NO_SENSORS: 'Ingen sensorer funnet',
   NO_SENSORS_MATCH: 'Ingen sensorer samsvarer med søket ditt', // DeepL
+  SENSORS_HELP_1: 'Administrer temperaturfølere og analoge sensorer koblet til denne enheten', // DeepL
   TEMP_SENSORS_HELP: 'Funnet automatisk. Klikk på en sensor for å gi den nytt navn eller angi en forskyvning', // DeepL
   FREE_GPIOS: 'Ledige GPIO-er',
   SYSTEM_SENSOR: 'Systemsensor',

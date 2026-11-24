@@ -613,6 +613,7 @@ const cs: Translation = {
   SEARCH_SENSORS: 'Vyhledat podle názvu, ID nebo GPIO', // DeepL
   NO_SENSORS: 'Nebyly nalezeny žádné senzory',
   NO_SENSORS_MATCH: 'Žádný senzor neodpovídá vašemu vyhledávání', // DeepL
+  SENSORS_HELP_1: 'Spravujte teplotní a analogové senzory připojené k tomuto zařízení', // DeepL
   TEMP_SENSORS_HELP: 'Nalezeno automaticky. Kliknutím na senzor jej můžete přejmenovat nebo nastavit odchylku', // DeepL
   FREE_GPIOS: 'Volné GPIO',
   SYSTEM_SENSOR: 'Systémový senzor',

@@ -204,8 +204,6 @@ const CustomEntities = () => {
     <ListPage list={list}>
       <Section
         desc={`${LL.ENTITIES_HELP_1()}.`}
-        title={LL.CUSTOM_ENTITIES(0)}
-        icon="playlist_add"
         actions={
           <>
             <SearchField

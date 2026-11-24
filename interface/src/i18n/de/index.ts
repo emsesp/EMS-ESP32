@@ -613,6 +613,7 @@ const de: Translation = {
   SEARCH_SENSORS: 'Suche nach Name, ID oder GPIO', // DeepL
   NO_SENSORS: 'Es wurden keine Sensoren gefunden', // DeepL
   NO_SENSORS_MATCH: 'Es wurden keine Sensoren gefunden, die Ihrer Suche entsprechen', // DeepL
+  SENSORS_HELP_1: 'Verwalten Sie Temperaturfühler und Analogsensoren, die an dieses Gerät angeschlossen sind', // DeepL
   TEMP_SENSORS_HELP: 'Automatisch erkannt. Klicken Sie auf einen Sensor, um ihn umzubenennen oder einen Offset festzulegen', // DeepL
   FREE_GPIOS: 'Freie GPIOs',
   SYSTEM_SENSOR: 'Systemsensor',

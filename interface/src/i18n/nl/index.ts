@@ -613,6 +613,7 @@ const nl: Translation = {
   SEARCH_SENSORS: 'Zoek op naam, ID of GPIO', // DeepL
   NO_SENSORS: 'Geen Sensoren gevonden', // DeepL
   NO_SENSORS_MATCH: 'Er zijn geen Sensoren die aan je zoekopdracht voldoen', // DeepL
+  SENSORS_HELP_1: 'Beheer temperatuursensoren en analoge sensoren die op dit apparaat zijn aangesloten', // DeepL
   TEMP_SENSORS_HELP: 'Automatisch gevonden. Klik op een Sensor om hem een andere naam te geven of een offset in te stellen', // DeepL
   FREE_GPIOS: 'Vrije GPIO\'s',
   SYSTEM_SENSOR: 'Systeemsensor',

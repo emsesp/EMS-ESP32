@@ -613,6 +613,7 @@ const tr: Translation = {
   SEARCH_SENSORS: 'Ad, kimlik numarası veya GPIO\'ya göre arama yapın', // DeepL
   NO_SENSORS: 'Sensör bulunamadı',
   NO_SENSORS_MATCH: 'Aramanızla eşleşen sensör bulunamadı', // DeepL
+  SENSORS_HELP_1: 'Bu cihaza bağlı sıcaklık problarını ve analog sensörleri yönetin', // DeepL
   TEMP_SENSORS_HELP: 'Otomatik olarak bulunur. Bir sensöre tıklayarak adını değiştirebilir veya ofset ayarlayabilirsiniz', // DeepL
   FREE_GPIOS: 'Boş GPIO\'lar',
   SYSTEM_SENSOR: 'Sistem sensörü',

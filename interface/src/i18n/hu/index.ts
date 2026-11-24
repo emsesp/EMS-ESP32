@@ -613,6 +613,7 @@ const hu: Translation = {
   SEARCH_SENSORS: 'Név, azonosító vagy GPIO keresése', // DeepL
   NO_SENSORS: 'Nem található senkivel sem', // DeepL
   NO_SENSORS_MATCH: 'A keresésnek nem felel meg egyetlen szensor sem', // DeepL
+  SENSORS_HELP_1: 'Kezelje az ehhez az eszközhöz csatlakoztatott hőmérséklet- és analóg érzékelőket', // DeepL
   TEMP_SENSORS_HELP: 'Automatikusan felismerve. Kattintson egy szenzorra annak átnevezéséhez vagy az eltolás beállításához', // DeepL
   FREE_GPIOS: 'Szabad GPIO-k',
   SYSTEM_SENSOR: 'Rendszer-szenzor', // DeepL

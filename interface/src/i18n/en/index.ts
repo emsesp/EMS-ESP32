@@ -613,6 +613,7 @@ const en: BaseTranslation = {
   SEARCH_SENSORS: 'Search name, ID or GPIO',
   NO_SENSORS: 'No sensors found',
   NO_SENSORS_MATCH: 'No sensors match your search',
+  SENSORS_HELP_1: 'Manage temperature probes and analog sensors connected to this device',
   TEMP_SENSORS_HELP: 'Found automatically. Click a sensor to rename it or set an offset',
   FREE_GPIOS: 'Free GPIOs',
   SYSTEM_SENSOR: 'System sensor',

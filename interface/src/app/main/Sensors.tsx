@@ -164,8 +164,7 @@ const Sensors = () => {
     <>
       <Section
         className="sns"
-        title={LL.SENSORS()}
-        icon="sensors"
+        desc={`${LL.SENSORS_HELP_1()}.`}
         actions={
           <SearchField
             label={LL.SEARCH_SENSORS()}

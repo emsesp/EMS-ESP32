@@ -30,23 +30,29 @@ const Section: FC<SectionProps> = ({
   className,
   id,
   children
-}) => (
-  <section id={id} className={cx('section', className)}>
-    {(title || actions) && (
-      <div className="sec-head">
-        {icon && <Icon name={icon} className="lb" />}
-        {title && (
-          <h2 className="h6 grow">
-            {title}
-            {count !== undefined && <span className="count primary">{count}</span>}
-          </h2>
-        )}
-        {actions}
-      </div>
-    )}
-    {desc && <p className="sec-desc">{desc}</p>}
-    {children}
-  </section>
-);
+}) => {
+  // without a title, help text sits on the same row as the actions
+  const inlineDesc = !title && !!desc;
+
+  return (
+    <section id={id} className={cx('section', className)}>
+      {(title || actions || inlineDesc) && (
+        <div className="sec-head">
+          {icon && <Icon name={icon} className="lb" />}
+          {title && (
+            <h2 className="h6 grow">
+              {title}
+              {count !== undefined && <span className="count primary">{count}</span>}
+            </h2>
+          )}
+          {inlineDesc && <p className="sec-desc grow">{desc}</p>}
+          {actions && <div className="sec-actions">{actions}</div>}
+        </div>
+      )}
+      {!inlineDesc && desc && <p className="sec-desc">{desc}</p>}
+      {children}
+    </section>
+  );
+};
 
 export default Section;

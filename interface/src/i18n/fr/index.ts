@@ -613,6 +613,7 @@ const fr: Translation = {
   SEARCH_SENSORS: 'Rechercher un nom, un identifiant ou un GPIO', // DeepL
   NO_SENSORS: 'Aucun capteur détecté', // DeepL
   NO_SENSORS_MATCH: 'Aucun capteur ne correspond à votre recherche', // DeepL
+  SENSORS_HELP_1: 'Gérez les sondes de température et les capteurs analogiques connectés à cet appareil', // DeepL
   TEMP_SENSORS_HELP: 'Détecté automatiquement. Cliquez sur un capteur pour le renommer ou définir un décalage', // DeepL
   FREE_GPIOS: 'GPIO libres',
   SYSTEM_SENSOR: 'Capteur du système', // DeepL

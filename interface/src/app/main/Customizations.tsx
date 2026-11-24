@@ -525,8 +525,6 @@ const Customizations = () => {
       {blocker && <BlockNavigation blocker={blocker} />}
       <Section
         desc={`${LL.CUSTOMIZATIONS_HELP_1()}.`}
-        title={LL.CUSTOMIZATIONS()}
-        icon="construction"
         actions={
           <Button
             color="error"
