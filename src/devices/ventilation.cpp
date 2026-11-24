@@ -26,13 +26,15 @@ Ventilation::Ventilation(uint8_t device_type, uint8_t device_id, uint8_t product
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     // HRV176/HRV156 module, device_id 0x51
     register_telegram_type(0x56B, "VentilationMode", true, MAKE_PF_CB(process_ModeMessage), 1);
-    register_telegram_type(0x585, "Blowerspeed", false, MAKE_PF_CB(process_BlowerMessage));
+    register_telegram_type(0x589, "VentilationAutoLevel", true, MAKE_PF_CB(process_AutoLevelMessage), 2);
+    register_telegram_type(0x575, "VentilationBlower", false, MAKE_PF_CB(process_BlowerMessage));
     register_telegram_type(0x583, "VentilationMonitor", false, MAKE_PF_CB(process_MonitorMessage));
     register_telegram_type(0x5D9, "Airquality", false, MAKE_PF_CB(process_VOCMessage));
     register_telegram_type(0x587, "Bypass", false, MAKE_PF_CB(process_BypassMessage));
     register_telegram_type(0x55C, "VentilationSet", true, MAKE_PF_CB(process_SetMessage), 2);
     register_telegram_type(0x556, "VentilationBalance", true, MAKE_PF_CB(process_BalanceMessage));
     register_telegram_type(0x561, "VentilationLevel", true, MAKE_PF_CB(process_LevelMessage));
+    register_telegram_type(0x557, "VentilationAirflow", true, MAKE_PF_CB(process_AirflowMessage), 3);
 
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &outFresh_,
@@ -96,11 +98,38 @@ Ventilation::Ventilation(uint8_t device_type, uint8_t device_id, uint8_t product
                           MAKE_CF_CB(set_level4Pct),
                           0,
                           150);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &bypassMinOutdoorTemp_,
+                          DeviceValueType::UINT8,
+                          FL_(bypassMinOutdoorTemp),
+                          DeviceValueUOM::DEGREES,
+                          MAKE_CF_CB(set_bypassMinOutdoorTemp),
+                          12,
+                          19);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &bypassMaxSupplyTemp_,
+                          DeviceValueType::UINT8,
+                          FL_(bypassMaxSupplyTemp),
+                          DeviceValueUOM::DEGREES,
+                          MAKE_CF_CB(set_bypassMaxSupplyTemp),
+                          21,
+                          30);
+    // min/max limits taken from the device's ValueConfig (0xF9) responses
+    register_device_value(
+        DeviceValueTAG::TAG_DEVICE_DATA, &airflowNominal_, DeviceValueType::UINT16, FL_(airflowNom), DeviceValueUOM::NONE, MAKE_CF_CB(set_airflowNominal), 75, 450);
 }
 
-// message 0x055C, data: 08 01 11 17
+// message 0x55C (04 5C on the bus), data: 08 01 11 17
+// 1: bypass on/off, 2: bypass minimum outdoor temperature, 3: bypass maximum supply air temperature
 void Ventilation::process_SetMessage(const std::shared_ptr<const Telegram> & telegram) {
     has_update(telegram, bypass_, 1);
+    has_update(telegram, bypassMinOutdoorTemp_, 2);
+    has_update(telegram, bypassMaxSupplyTemp_, 3);
+}
+
+// message 0x0557, nominal airflow in m³/h as 16-bit value at offset 1, e.g. data: 00 DC (offset 1) = 220
+void Ventilation::process_AirflowMessage(const std::shared_ptr<const Telegram> & telegram) {
+    has_update(telegram, airflowNominal_, 1);
 }
 
 // message 0x0583
@@ -113,15 +142,13 @@ void Ventilation::process_MonitorMessage(const std::shared_ptr<const Telegram> &
     has_update(telegram, ventInRpm_, 17);  // Zuluft rpm
 }
 
-// message 575 10 bytes
+// message 0x575 10 bytes
 // data: 02 02 46 46 00 00 FF 80 00 01
-// 0-level out, 1-level in, 2-mod out, 3-mod in,  9-mode:1-manual/2-auto/3-prog
-
-// message 585 26 bytes long
-// Data: 46 46 00 00 00 77 00 03 F4 09 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+// 0-level out, 1-level in, 2-mod out, 3-mod in, 9-mode:1-manual/2-auto/3-prog
+// in demand mode the modulation is set freely (e.g. 43%), it does not follow the fixed L1-L4 percentages
 void Ventilation::process_BlowerMessage(const std::shared_ptr<const Telegram> & telegram) {
-    has_update(telegram, ventOutSpeed_, 0);
-    has_update(telegram, ventInSpeed_, 1);
+    has_update(telegram, ventOutSpeed_, 2);
+    has_update(telegram, ventInSpeed_, 3);
 }
 
 // message 0x05D9, data: 03 9C FF
@@ -133,7 +160,32 @@ void Ventilation::process_VOCMessage(const std::shared_ptr<const Telegram> & tel
 // message 0x56B
 // level 0=0, 1=1, 2=2, 3=3, 4= 4, Auto 0xFF, demand 5, sleep 6, intense 7, bypass-8, party 9, fireplace 0A
 void Ventilation::process_ModeMessage(const std::shared_ptr<const Telegram> & telegram) {
-    has_enumupdate(telegram, mode_, 0, -1);
+    telegram->read_enumvalue(rawMode_, 0, -1); // 0xFF (auto) -> 0
+    update_mode();
+}
+
+// message 0x0589, data: 01 FF
+// auto level: 00=L0, 01=L1, 02=L2, 03=L3, 04=L4, 05=demand (second byte always FF)
+void Ventilation::process_AutoLevelMessage(const std::shared_ptr<const Telegram> & telegram) {
+    telegram->read_value(autoLevel_, 0);
+    update_mode();
+}
+
+// combine the mode (0x56B) and the auto level (0x589) into the single ventmode value:
+// in auto mode show autoL0..autodemand, otherwise the plain mode
+void Ventilation::update_mode() {
+    if (rawMode_ == EMS_VALUE_UINT8_NOTSET) {
+        return;
+    }
+
+    uint8_t m;
+    if (rawMode_ == 0) { // auto
+        m = (autoLevel_ <= 5) ? (VENTMODE_AUTOL0 + autoLevel_) : 0; // plain auto until the level is known
+    } else {
+        m = rawMode_;
+    }
+
+    has_update(mode_, m);
 }
 
 // message 0x0587, data: 00 00 64 00 64 0A 00 01 54 01 00 01 00 00 00 46 00 00 00 02 00 A3 00 A3
@@ -159,6 +211,16 @@ bool Ventilation::set_ventMode(const char * value, const int8_t id) {
     uint8_t v;
     if (!Helpers::value2enum(value, v, FL_(enum_ventMode))) {
         return false;
+    }
+
+    // autoL0..autodemand: select the auto level via 0x0589, switching to auto mode first if needed
+    if (v >= VENTMODE_AUTOL0) {
+        if (rawMode_ != 0) {
+            write_command(0x56B, 0, 0xFF, 0x56B);
+        }
+        uint8_t data[2] = {static_cast<uint8_t>(v - VENTMODE_AUTOL0), 0xFF};
+        write_command(0x589, 0, data, 2, 0x589);
+        return true;
     }
 
     write_command(0x56B, 0, v - 1, 0x56B);
@@ -224,5 +286,41 @@ bool Ventilation::set_level4Pct(const char * value, const int8_t id) {
     write_command(0x561, 13, v, 0x561);
     return true;
 }
+
+
+// sets the minimum outdoor temperature for bypass at offset 2 of 0x55C
+bool Ventilation::set_bypassMinOutdoorTemp(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+
+    write_command(0x55C, 2, static_cast<uint8_t>(v), 0x55C);
+    return true;
+}
+
+// sets the maximum supply air temperature for bypass at offset 3 of 0x55C
+bool Ventilation::set_bypassMaxSupplyTemp(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+
+    write_command(0x55C, 3, static_cast<uint8_t>(v), 0x55C);
+    return true;
+}
+
+// sets the nominal airflow in m³/h, 16-bit value at offset 1 of 0x0557
+bool Ventilation::set_airflowNominal(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+
+    uint8_t data[2] = {static_cast<uint8_t>(v >> 8), static_cast<uint8_t>(v & 0xFF)};
+    write_command(0x557, 1, data, 2, 0x557);
+    return true;
+}
+
 
 } // namespace emsesp

@@ -30,6 +30,10 @@ class Controller : public EMSdevice {
     void process_dateTime(const std::shared_ptr<const Telegram> & telegram);
 
     char dateTime_[25];
+
+  private:
+    void process_CV200DateTime(const std::shared_ptr<const Telegram> & telegram); // 0x06 from the CV200 ventilation controller
+    bool set_datetime(const char * value, const int8_t id);
 };
 
 } // namespace emsesp
