@@ -454,7 +454,7 @@ const no: Translation = {
   TEST_EMAIL_SUCCESSFUL: 'Test-e-post sendt', // DeepL
   SYSTEM_NAME: 'Systemnavn',
   COMMANDS: 'Kommandoer',
-  COMMANDS_HELP_1: 'Definer gjenbrukbare, navngitte kommandoer nedenfor. Disse kan utføres fra konsollen, API/MQTT eller refereres til av Planleggeren', // DeepL
+  COMMANDS_HELP_1: 'Definer gjenbrukbare, navngitte kommandoer nedenfor. Disse kan utføres fra konsollen, API/MQTT eller refereres til av Planleggeren.', // DeepL
   COMMAND_EXECUTED: 'Kommando utført', // DeepL
   RUN: 'Kjør',
   INTERNET_CONNECTION_CHECK: 'Sjekk på nettet for tilgjengelige versjoner', // DeepL

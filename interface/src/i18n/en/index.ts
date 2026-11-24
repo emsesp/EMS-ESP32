@@ -454,7 +454,7 @@ const en: Translation = {
   TEST_EMAIL_SUCCESSFUL: 'Test email sent',
   SYSTEM_NAME: 'System name',
   COMMANDS: 'Commands',
-  COMMANDS_HELP_1: 'Define reusable named commands below. These can be executed from the console, API/MQTT, or referenced by the Scheduler',
+  COMMANDS_HELP_1: 'Define reusable named commands below. These can be executed from the console, API/MQTT, or referenced by the Scheduler.',
   COMMAND_EXECUTED: 'Command executed',
   RUN: 'Run',
   INTERNET_CONNECTION_CHECK: 'Checking online for available versions',

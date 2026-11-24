@@ -454,7 +454,7 @@ const it: Translation = {
   TEST_EMAIL_SUCCESSFUL: 'Email di prova inviata', // DeepL
   SYSTEM_NAME: 'Nome del sistema',
   COMMANDS: 'Comandi',
-  COMMANDS_HELP_1: 'Definisci qui sotto i comandi con nome riutilizzabili. Questi possono essere eseguiti dalla console, tramite API/MQTT o richiamati dal Programma eventi', // DeepL
+  COMMANDS_HELP_1: 'Definisci qui sotto i comandi con nome riutilizzabili. Questi possono essere eseguiti dalla console, tramite API/MQTT o richiamati dal Programma eventi.', // DeepL
   COMMAND_EXECUTED: 'Comando eseguito', // DeepL
   RUN: 'Esegui', // DeepL
   INTERNET_CONNECTION_CHECK: 'Verifica online le versioni disponibili', // DeepL

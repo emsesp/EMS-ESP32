@@ -454,7 +454,7 @@ const nl: Translation = {
   TEST_EMAIL_SUCCESSFUL: 'Testmail verzonden',
   SYSTEM_NAME: 'Systeemnaam',
   COMMANDS: 'Commando\'s',
-  COMMANDS_HELP_1: 'Definieer hieronder herbruikbare, benoemde commando’s. Deze kun je uitvoeren via de console, API/MQTT, of ernaar verwijzen vanuit de Scheduler', // DeepL
+  COMMANDS_HELP_1: 'Definieer hieronder herbruikbare, benoemde commando’s. Deze kun je uitvoeren via de console, API/MQTT, of ernaar verwijzen vanuit de Scheduler.', // DeepL
   COMMAND_EXECUTED: 'Commando uitgevoerd',
   RUN: 'Uitvoeren', // DeepL
   INTERNET_CONNECTION_CHECK: 'Online kijken welke versies er beschikbaar zijn', // DeepL

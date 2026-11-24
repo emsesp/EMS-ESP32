@@ -454,7 +454,7 @@ const sv: Translation = {
   TEST_EMAIL_SUCCESSFUL: 'Testmejl skickat', // DeepL
   SYSTEM_NAME: 'Systemnamn',
   COMMANDS: 'Kommandon',
-  COMMANDS_HELP_1: 'Definiera återanvändbara namngivna kommandon nedan. Dessa kan köras från konsolen, via API/MQTT eller refereras till under schemaläggning', // DeepL
+  COMMANDS_HELP_1: 'Definiera återanvändbara namngivna kommandon nedan. Dessa kan köras från konsolen, via API/MQTT eller refereras till under schemaläggning.', // DeepL
   COMMAND_EXECUTED: 'Kommandon har utförts', // DeepL
   RUN: 'Kör', // DeepL
   INTERNET_CONNECTION_CHECK: 'Kontrollera tillgängliga versioner online', // DeepL
