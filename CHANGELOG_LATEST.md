@@ -85,6 +85,7 @@ A full list of breaking changes can be found in this [discussion](https://github
 
 ## Changed
 
+- Web UI i18n: typesafe-i18n `baseLocale` is English again (was Polish so call sites could pass case indexes for PL). A few English strings use dummy `{{…}}` plurals for that; the build no longer rewrites generated `i18n-util.ts` from `pl` to `en` [#695](https://github.com/emsesp/EMS-ESP32/issues/695)
 - on WLW176i/BC400-style heat pumps, locking alarms (e.g. 5141, 6257) clear with `boiler/reset message`; H-warnings with `boiler/reset hp_error` [#3475](https://github.com/emsesp/EMS-ESP32/issues/3475) [#2933](https://github.com/emsesp/EMS-ESP32/issues/2933)
 - security: Web UI sign-in tokens are signed with a random key that is unique to each device, so existing access tokens stop working after the upgrade. Admins see a notice in the WebUI until it is closed. Changing an admin password replaces the key, which signs everyone out
 - security: Web UI sign-ins expire after 30 days (once the clock is set by NTP), and changing a user's password, or removing the user, signs that user out everywhere [#3353](https://github.com/emsesp/EMS-ESP32/issues/3353)
