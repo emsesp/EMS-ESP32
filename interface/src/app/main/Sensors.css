@@ -1,6 +1,8 @@
-.sns-desc {
-  margin: 0;
+/* temperature and analog cards sit inside the sensors card */
+.sns > .section {
+  margin: 12px 0 0;
 }
+
 .sns-gpio {
   display: inline-block;
   min-width: 34px;
