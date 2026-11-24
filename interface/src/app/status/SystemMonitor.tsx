@@ -79,9 +79,14 @@ const SystemMonitor = ({ onDone, onInstallCustom }: SystemMonitorProps) => {
       setErrorMessage(String(error.error?.message || LL.ERROR()));
     });
 
-  useInterval(() => {
-    void send();
-  }, 1000, false, true); // check every 1 second
+  useInterval(
+    () => {
+      void send();
+    },
+    1000,
+    false,
+    true
+  ); // check every 1 second
 
   const status = data?.status;
 
