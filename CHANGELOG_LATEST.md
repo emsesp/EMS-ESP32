@@ -59,6 +59,7 @@ A full list of breaking changes can be found in this [discussion](https://github
 
 ## Fixed
 
+- MQTT with TLS left the TCP socket open after a failed TLS handshake, so the client waited until the broker closed it before it could retry and could stay disconnected [#3482](https://github.com/emsesp/EMS-ESP32/discussions/3482)
 - `lastcode` on heat pumps (0xC6/0xC2/0xC0) only read the first history record and ranked open faults by start time against finished ones by end time, so an active locking fault in a later record (e.g. 5141 after a finished 5140) was missed; the first three records are read and open faults are preferred [#3475](https://github.com/emsesp/EMS-ESP32/issues/3475)
 - `boiler/lastcode` showed `(32000)` for history records not at offset 0, because the fault number was read with an absolute telegram index that failed for the 2nd/3rd record; `thermostat/lastcode` on BC400 showed finished faults as `- now` because that device does not set the 0x80 year bit used on the heat pump [#3475](https://github.com/emsesp/EMS-ESP32/issues/3475)
 - BC400/UI800 heatpump operating mode (`0x0470`) no longer drops “Always cooling”. The values are `off`/`auto`/`heating`/`cooling` (MyBuderus Idle / Automatic / Always heating / Always cooling; value 0 disables both). `summer` and `winter` still write as `off` and `heating` [#3470](https://github.com/emsesp/EMS-ESP32/issues/3470) [#3230](https://github.com/emsesp/EMS-ESP32/issues/3230)
