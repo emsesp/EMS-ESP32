@@ -22,6 +22,7 @@ const cs: Translation = {
   DOWNLOAD_SUCCESSFUL: 'Stáhnout úspěšně', // DeepL
   INVALID_LOGIN: 'Nesprávné uživatelské jméno nebo heslo', // DeepL
   NETWORK: 'Síť',
+  NTP: 'Synchronizace času (NTP)', // DeepL
   SECURITY: 'Zabezpečení',
   ONOFF_CAP: 'ZAP/VYP',
   ONOFF: 'zapnuto/vypnuto', // DeepL
@@ -385,7 +386,7 @@ const cs: Translation = {
   TIME: 'Čas',
   TIMER: 'Časovač',
   ONCHANGE: 'Při změně',
-  CONDITION: 'Podmínka',
+  CONDITION: 'Podmín{{ka|ěný}}',
   SCHEDULE_UPDATED: 'Aktualizovaný rozvrh', // DeepL
   CUSTOM_ENTITIES: 'Vlastní entity',
   ENTITIES_HELP_1: 'Definujte vlastní entity EMS nebo dynamické uživatelské proměnné', // DeepL

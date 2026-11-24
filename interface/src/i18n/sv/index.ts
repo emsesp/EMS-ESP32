@@ -22,6 +22,7 @@ const sv: Translation = {
   DOWNLOAD_SUCCESSFUL: 'Ladda ner framgångsrikt', // DeepL
   INVALID_LOGIN: 'Felaktigt användarnamn eller lösenord', // DeepL
   NETWORK: 'Nätverk',
+  NTP: 'Tidssynkronisering (NTP)',
   SECURITY: 'Säkerhet',
   ONOFF_CAP: 'PÅ/AV',
   ONOFF: 'på/av',
@@ -385,7 +386,7 @@ const sv: Translation = {
   TIME: 'Tid',
   TIMER: 'Timer',
   ONCHANGE: 'Vid ändring', // DeepL
-  CONDITION: 'Villkor',
+  CONDITION: 'Villkor{{|lig}}',
   SCHEDULE_UPDATED: 'Schemat har uppdaterats', // DeepL
   CUSTOM_ENTITIES: 'Anpassade enheter', // DeepL
   ENTITIES_HELP_1: 'Definiera anpassade EMS-entiteter eller dynamiska användarvariabler', // DeepL
@@ -453,7 +454,7 @@ const sv: Translation = {
   TEST_EMAIL_SUCCESSFUL: 'Testmejl skickat', // DeepL
   SYSTEM_NAME: 'Systemnamn',
   COMMANDS: 'Kommandon',
-  COMMANDS_HELP_1: 'Definiera återanvändbara namngivna kommandon nedan. Dessa kan köras från konsolen, via API/MQTT eller refereras till under schemaläggning', // DeepL
+  COMMANDS_HELP_1: 'Definiera återanvändbara namngivna kommandon nedan. Dessa kan köras från konsolen, via API/MQTT eller refereras till under schemaläggning.', // DeepL
   COMMAND_EXECUTED: 'Kommandon har utförts', // DeepL
   RUN: 'Kör', // DeepL
   INTERNET_CONNECTION_CHECK: 'Kontrollera tillgängliga versioner online', // DeepL

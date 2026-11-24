@@ -64,7 +64,7 @@ const Settings = () => {
               to: 'network',
               icon: 'settings_ethernet',
               color: '#40828f',
-              title: LL.NETWORK(0),
+              title: LL.NETWORK(),
               text: LL.NETWORK_DESC(),
               value: networkValue,
               state: network?.state
@@ -75,7 +75,7 @@ const Settings = () => {
               color: '#5f9a5f',
               title: LL.ACCESS_POINT(0),
               text: LL.AP_DESC(),
-              value: data && (data.ap_status ? LL.ACTIVE() : LL.INACTIVE(0)),
+              value: data && (data.ap_status ? LL.ACTIVE(2) : LL.INACTIVE(0)),
               state: data && (data.ap_status ? 'ok' : 'off')
             },
             {
@@ -96,7 +96,7 @@ const Settings = () => {
               to: 'application',
               icon: 'settings_applications',
               color: '#134ba2',
-              title: LL.APPLICATION(),
+              title: LL.APPLICATION(0),
               text: LL.APPLICATION_DESC(),
               value: data && (data.model || data.board)
             },
@@ -104,7 +104,7 @@ const Settings = () => {
               to: 'ntp',
               icon: 'schedule',
               color: '#c5572c',
-              title: 'NTP',
+              title: LL.NTP(),
               text: LL.NTP_DESC(),
               value: ntp?.text,
               state: ntp?.state

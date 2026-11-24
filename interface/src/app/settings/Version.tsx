@@ -675,7 +675,7 @@ const Version = () => {
               {
                 label: LL.PARTITION(),
                 value: info.partition,
-                extra: info.partition === data.partition && LL.ACTIVE()
+                extra: info.partition === data.partition && LL.ACTIVE(1)
               },
               info.partition === data.partition && {
                 label: LL.PLATFORM(),

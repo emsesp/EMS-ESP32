@@ -144,7 +144,7 @@ const SystemStatus = () => {
             to="/status/network"
             icon={networkIcon(data.network_status)}
             color={STATE_COLORS[network.state]}
-            title={LL.NETWORK(1)}
+            title={LL.NETWORK()}
             text={join(
               network.text,
               data.network_ip,
@@ -167,7 +167,7 @@ const SystemStatus = () => {
             to="/status/ntp"
             icon="schedule"
             color={STATE_COLORS[ntp.state]}
-            title="NTP"
+            title={LL.NTP()}
             text={join(
               ntp.text,
               data.ntp_status === NTPSyncStatus.NTP_ACTIVE &&
@@ -181,7 +181,7 @@ const SystemStatus = () => {
             icon={data.ap_status ? 'wifi_tethering' : 'wifi_tethering_off'}
             color={STATE_COLORS[data.ap_status ? 'ok' : 'off']}
             title={LL.ACCESS_POINT(0)}
-            text={data.ap_status ? LL.ACTIVE() : LL.INACTIVE(0)}
+            text={data.ap_status ? LL.ACTIVE(2) : LL.INACTIVE(0)}
             state={data.ap_status ? 'ok' : 'off'}
           />
           <Tile

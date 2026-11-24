@@ -112,11 +112,11 @@ export const networkInfo = (status: NetworkConnectionStatus, LL: LL): StatusInfo
 export const ntpInfo = (status: NTPSyncStatus, LL: LL): StatusInfo => {
   switch (status) {
     case NTPSyncStatus.NTP_DISABLED:
-      return { state: 'off', text: LL.NOT_ENABLED() };
+      return { state: 'off', text: LL.NOT_ENABLED(0) };
     case NTPSyncStatus.NTP_INACTIVE:
       return { state: 'err', text: LL.INACTIVE(0) };
     case NTPSyncStatus.NTP_ACTIVE:
-      return { state: 'ok', text: LL.ACTIVE() };
+      return { state: 'ok', text: LL.ACTIVE(3) };
     default:
       return { state: 'warn', text: LL.UNKNOWN() };
   }
@@ -126,7 +126,7 @@ export const mqttInfo = (
   { enabled, connected }: Pick<MqttStatusType, 'enabled' | 'connected'>,
   LL: LL
 ): StatusInfo => {
-  if (!enabled) return { state: 'off', text: LL.NOT_ENABLED() };
+  if (!enabled) return { state: 'off', text: LL.NOT_ENABLED(2) };
   return connected
     ? { state: 'ok', text: LL.CONNECTED(0) }
     : { state: 'err', text: LL.DISCONNECTED() };
@@ -135,7 +135,7 @@ export const mqttInfo = (
 export const apInfo = (status: APStatusType['status'], LL: LL): StatusInfo => {
   switch (status) {
     case APNetworkStatus.ACTIVE:
-      return { state: 'ok', text: LL.ACTIVE() };
+      return { state: 'ok', text: LL.ACTIVE(2) };
     case APNetworkStatus.INACTIVE:
       return { state: 'off', text: LL.INACTIVE(0) };
     case APNetworkStatus.LINGERING:

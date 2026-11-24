@@ -22,6 +22,7 @@ const tr: Translation = {
   DOWNLOAD_SUCCESSFUL: 'İndirme işlemi başarılı', // DeepL
   INVALID_LOGIN: 'Yanlış kullanıcı adı veya şifre', // DeepL
   NETWORK: 'Ağ',
+  NTP: 'Zaman senkronizasyonu (NTP)',
   SECURITY: 'Güvenlik',
   ONOFF_CAP: 'AÇIK/KAPALI',
   ONOFF: 'açık/kapalı',
@@ -385,7 +386,7 @@ const tr: Translation = {
   TIME: 'Zaman',
   TIMER: 'Zamanlayıcı',
   ONCHANGE: 'Değişiklik durumunda', // DeepL
-  CONDITION: 'Koşul', // DeepL
+  CONDITION: 'Koşul{{|lu}}', // DeepL
   SCHEDULE_UPDATED: 'Zaman çizelgesi güncellendi', // DeepL
   CUSTOM_ENTITIES: 'Özel Varlıklar',
   ENTITIES_HELP_1: 'Özel EMS varlıklarını veya dinamik kullanıcı değişkenlerini tanımlayın', // DeepL

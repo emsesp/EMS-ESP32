@@ -22,6 +22,7 @@ const it: Translation = {
   DOWNLOAD_SUCCESSFUL: 'Scarica con successo', // DeepL
   INVALID_LOGIN: 'Nome utente o password errati', // DeepL
   NETWORK: 'Rete',
+  NTP: 'Sincronizzazione dell\'ora (NTP)', // DeepL
   SECURITY: 'Sicurezza',
   ONOFF_CAP: 'ON/OFF',
   ONOFF: 'on/off',
@@ -385,7 +386,7 @@ const it: Translation = {
   TIME: 'Ora',
   TIMER: 'Timer', // DeepL
   ONCHANGE: 'In caso di modifica', // DeepL
-  CONDITION: 'Condizione',
+  CONDITION: 'Condizion{{e|ale}}',
   SCHEDULE_UPDATED: 'Programma eventi aggiornato', // DeepL
   CUSTOM_ENTITIES: 'Entità personalizzate',
   ENTITIES_HELP_1: 'Definisci entità EMS personalizzate o variabili utente dinamiche', // DeepL
@@ -453,7 +454,7 @@ const it: Translation = {
   TEST_EMAIL_SUCCESSFUL: 'Email di prova inviata', // DeepL
   SYSTEM_NAME: 'Nome del sistema',
   COMMANDS: 'Comandi',
-  COMMANDS_HELP_1: 'Definisci qui sotto i comandi con nome riutilizzabili. Questi possono essere eseguiti dalla console, tramite API/MQTT o richiamati dal Programma eventi', // DeepL
+  COMMANDS_HELP_1: 'Definisci qui sotto i comandi con nome riutilizzabili. Questi possono essere eseguiti dalla console, tramite API/MQTT o richiamati dal Programma eventi.', // DeepL
   COMMAND_EXECUTED: 'Comando eseguito', // DeepL
   RUN: 'Esegui', // DeepL
   INTERNET_CONNECTION_CHECK: 'Verifica online le versioni disponibili', // DeepL

@@ -22,6 +22,7 @@ const no: Translation = {
   DOWNLOAD_SUCCESSFUL: 'Last ned vellykket', // DeepL
   INVALID_LOGIN: 'Feil brukernavn eller passord', // DeepL
   NETWORK: 'Nettverk',
+  NTP: 'Tidssynkronisering (NTP)', // DeepL
   SECURITY: 'Sikkerhet',
   ONOFF_CAP: 'PÅ/AV',
   ONOFF: 'på/av',
@@ -385,7 +386,7 @@ const no: Translation = {
   TIME: 'Tid',
   TIMER: 'Timer',
   ONCHANGE: 'Ved endring', // DeepL
-  CONDITION: 'Tilstand', // DeepL
+  CONDITION: '{{Vilkår|Betinget}}', // DeepL
   SCHEDULE_UPDATED: 'Tidsplan oppdatert', // DeepL
   CUSTOM_ENTITIES: 'Egendefinerte ojekter', // DeepL
   ENTITIES_HELP_1: 'Definer egendefinerte EMS-ojekter eller dynamiske brukervariabler', // DeepL
@@ -453,7 +454,7 @@ const no: Translation = {
   TEST_EMAIL_SUCCESSFUL: 'Test-e-post sendt', // DeepL
   SYSTEM_NAME: 'Systemnavn',
   COMMANDS: 'Kommandoer',
-  COMMANDS_HELP_1: 'Definer gjenbrukbare, navngitte kommandoer nedenfor. Disse kan utføres fra konsollen, API/MQTT eller refereres til av Planleggeren', // DeepL
+  COMMANDS_HELP_1: 'Definer gjenbrukbare, navngitte kommandoer nedenfor. Disse kan utføres fra konsollen, API/MQTT eller refereres til av Planleggeren.', // DeepL
   COMMAND_EXECUTED: 'Kommando utført', // DeepL
   RUN: 'Kjør',
   INTERNET_CONNECTION_CHECK: 'Sjekk på nettet for tilgjengelige versjoner', // DeepL

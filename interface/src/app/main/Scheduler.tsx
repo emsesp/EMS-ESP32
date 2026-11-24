@@ -186,7 +186,7 @@ const Scheduler = () => {
       >
         <td className="sch-act" onClick={(e) => e.stopPropagation()}>
           <Switch
-            label={<span className="sr-only">{`${LL.ACTIVE()} ${si.name}`}</span>}
+            label={<span className="sr-only">{`${LL.ACTIVE(2)} ${si.name}`}</span>}
             checked={si.active}
             disabled={deleted}
             onChange={(active) => list.update(key, { ...si, active })}
@@ -238,7 +238,7 @@ const Scheduler = () => {
             <thead>
               <tr>
                 <SortHeader className="sch-act" {...sort.header('active')}>
-                  {LL.ACTIVE()}
+                  {LL.ACTIVE(2)}
                 </SortHeader>
                 <SortHeader {...sort.header('name')}>{LL.NAME(0)}</SortHeader>
                 <SortHeader {...sort.header('schedule')}>

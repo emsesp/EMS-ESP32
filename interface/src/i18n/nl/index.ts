@@ -22,6 +22,7 @@ const nl: Translation = {
   DOWNLOAD_SUCCESSFUL: 'Download succesvol', // DeepL
   INVALID_LOGIN: 'Onjuiste gebruikersnaam of wachtwoord', // DeepL
   NETWORK: 'Netwerk',
+  NTP: 'Tijdsynchronisatie (NTP)', // DeepL
   SECURITY: 'Beveiliging',
   ONOFF_CAP: 'AAN/UIT',
   ONOFF: 'aan/uit',
@@ -385,7 +386,7 @@ const nl: Translation = {
   TIME: 'Tijd',
   TIMER: 'Timer',
   ONCHANGE: 'Bij wijzigingen', // DeepL
-  CONDITION: 'Voorwaarde',
+  CONDITION: 'Voorwaarde{{|lijk}}',
   SCHEDULE_UPDATED: 'Schema bijgewerkt',
   CUSTOM_ENTITIES: 'Aangepaste entiteiten', // DeepL
   ENTITIES_HELP_1: 'Definieer aangepaste EMS-entiteiten of dynamische gebruikersvariabelen', // DeepL
@@ -453,7 +454,7 @@ const nl: Translation = {
   TEST_EMAIL_SUCCESSFUL: 'Testmail verzonden',
   SYSTEM_NAME: 'Systeemnaam',
   COMMANDS: 'Commando\'s',
-  COMMANDS_HELP_1: 'Definieer hieronder herbruikbare, benoemde commando’s. Deze kun je uitvoeren via de console, API/MQTT, of ernaar verwijzen vanuit de Scheduler', // DeepL
+  COMMANDS_HELP_1: 'Definieer hieronder herbruikbare, benoemde commando’s. Deze kun je uitvoeren via de console, API/MQTT, of ernaar verwijzen vanuit de Scheduler.', // DeepL
   COMMAND_EXECUTED: 'Commando uitgevoerd',
   RUN: 'Uitvoeren', // DeepL
   INTERNET_CONNECTION_CHECK: 'Online kijken welke versies er beschikbaar zijn', // DeepL

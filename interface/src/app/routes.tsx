@@ -71,20 +71,20 @@ export const routes: AppRoute[] = [
   { path: '/status', element: Status, title: (LL) => LL.STATUS(), icon: 'assessment', menu: 'system', wildcard: true },
   { path: '/status/hardwarestatus', element: HardwareStatus, title: (LL) => LL.HARDWARE(), icon: 'memory', parent: '/status', wildcard: true },
   { path: '/status/activity', element: Activity, title: (LL) => LL.DATA_TRAFFIC(), icon: 'swap_horiz', parent: '/status' },
-  { path: '/status/network', element: NetworkStatus, title: (LL) => LL.NETWORK(1), icon: 'lan', parent: '/status' },
+  { path: '/status/network', element: NetworkStatus, title: (LL) => LL.NETWORK(), icon: 'lan', parent: '/status' },
   { path: '/status/mqtt', element: MqttStatus, title: () => 'MQTT', icon: 'device_hub', parent: '/status' },
-  { path: '/status/ntp', element: NTPStatus, title: () => 'NTP', icon: 'schedule', parent: '/status' },
+  { path: '/status/ntp', element: NTPStatus, title: (LL) => LL.NTP(), icon: 'schedule', parent: '/status' },
   { path: '/status/ap', element: APStatus, title: (LL) => LL.ACCESS_POINT(0), icon: 'wifi_tethering', parent: '/status' },
   { path: '/status/log', element: SystemLog, title: (LL) => LL.SYSTEM_LOG(), icon: 'list_alt', parent: '/status' },
   // old address of the firmware page, kept for bookmarks
   { path: '/status/version', element: () => <Navigate replace to="/settings/version" />, title: () => 'EMS-ESP Firmware', icon: 'new_releases', parent: '/settings' },
 
   { path: '/settings', element: Settings, title: (LL) => LL.SETTINGS(0), icon: 'settings', menu: 'system', badge: 'update' },
-  { path: '/settings/application', element: ApplicationSettings, title: (LL) => LL.APPLICATION(), icon: 'settings_applications', parent: '/settings', admin: true },
+  { path: '/settings/application', element: ApplicationSettings, title: (LL) => LL.APPLICATION(0), icon: 'settings_applications', parent: '/settings', admin: true },
   {
     path: '/settings/network',
     element: Network,
-    title: (LL) => LL.NETWORK(0),
+    title: (LL) => LL.NETWORK(),
     icon: 'settings_ethernet',
     parent: '/settings',
     admin: true,
@@ -98,7 +98,7 @@ export const routes: AppRoute[] = [
     )
   },
   { path: '/settings/ap', element: APSettings, title: (LL) => LL.ACCESS_POINT(0), icon: 'wifi_tethering', parent: '/settings', admin: true },
-  { path: '/settings/ntp', element: NTPSettings, title: () => 'NTP', icon: 'schedule', parent: '/settings', admin: true },
+  { path: '/settings/ntp', element: NTPSettings, title: (LL) => LL.NTP(), icon: 'schedule', parent: '/settings', admin: true },
   { path: '/settings/mqtt', element: MqttSettings, title: () => 'MQTT', icon: 'device_hub', parent: '/settings', admin: true },
   {
     path: '/settings/security',

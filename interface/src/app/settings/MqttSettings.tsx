@@ -115,7 +115,7 @@ const MqttSettings = () => {
 
           <FormSection
             icon="dns"
-            title={LL.BROKER()}
+            title={LL.BROKER(0)}
             actions={
               data.enabled && (
                 <Button color="secondary" icon="refresh" onClick={sendResetMQTT}>
@@ -141,7 +141,7 @@ const MqttSettings = () => {
             {data.enabled && (
               <>
                 <TextField
-                  label={LL.ADDRESS_OF(LL.BROKER())}
+                  label={LL.ADDRESS_OF(LL.BROKER(1))}
                   mono
                   {...form.text('host')}
                 />

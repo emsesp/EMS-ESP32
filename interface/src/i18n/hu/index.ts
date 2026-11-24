@@ -22,6 +22,7 @@ const hu: Translation = {
   DOWNLOAD_SUCCESSFUL: 'Sikeres letöltés',
   INVALID_LOGIN: 'Helytelen felhasználónév vagy jelszó', // DeepL
   NETWORK: 'Hálózat',
+  NTP: 'Időszinkronizálás (NTP)', // DeepL
   SECURITY: 'Biztonság',
   ONOFF_CAP: 'BE/KI',
   ONOFF: 'be/ki',
@@ -385,7 +386,7 @@ const hu: Translation = {
   TIME: 'Idő', // DeepL
   TIMER: 'Időzítő',
   ONCHANGE: 'Változás esetén', // DeepL
-  CONDITION: 'Feltétel',
+  CONDITION: 'Feltétel{{|es}}',
   SCHEDULE_UPDATED: 'Ütemező frissült', // DeepL
   CUSTOM_ENTITIES: 'Egyéni entitások', // DeepL
   ENTITIES_HELP_1: 'Egyéni EMS-entitások vagy dinamikus felhasználói változók definiálása', // DeepL

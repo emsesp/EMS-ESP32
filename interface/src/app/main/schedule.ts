@@ -38,7 +38,7 @@ export const SCHEDULE_TYPES: {
     icon: 'calendar_month',
     label: (LL) => LL.WEEKLY()
   },
-  { flag: ScheduleFlag.SCHEDULE_TIMER, icon: 'timer', label: (LL) => LL.TIMER(0) },
+  { flag: ScheduleFlag.SCHEDULE_TIMER, icon: 'timer', label: (LL) => LL.TIMER(1) },
   {
     flag: ScheduleFlag.SCHEDULE_ONCHANGE,
     icon: 'change_circle',
@@ -47,7 +47,7 @@ export const SCHEDULE_TYPES: {
   {
     flag: ScheduleFlag.SCHEDULE_CONDITION,
     icon: 'rule',
-    label: (LL) => LL.CONDITION()
+    label: (LL) => LL.CONDITION(0)
   }
 ];
 

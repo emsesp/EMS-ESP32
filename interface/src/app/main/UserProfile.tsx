@@ -47,7 +47,7 @@ const UserProfile = () => {
         {me.admin && (
           <p className="cap profile-note">
             {LL.LANGUAGE_ENTITIES_HINT()}{' '}
-            <Link to="/settings/application">{LL.APPLICATION()}</Link>
+            <Link to="/settings/application">{LL.APPLICATION(1)}</Link>
           </p>
         )}
       </Section>
