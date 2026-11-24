@@ -2081,8 +2081,8 @@ void Thermostat::process_RCErrorMessage2(const std::shared_ptr<const Telegram> &
         uint32_t min2 = 65536UL * telegram->message_data[11] + 256UL * telegram->message_data[12] + telegram->message_data[13];
         snprintf(buf, sizeof(buf), "%s(%d) %d min", code, codeNo, min2);
         date = min2;
-    } else if (!(telegram->message_data[15] & 0x80) || year1 == 2000) {
-        // no valid end date - error still persists
+    } else if (year1 == 2000) {
+        // no end date - error still persists (BC400 0xC0 does not set 0x80 on year bytes) - #3475
         is_open = true;
         date    = (year - 2000) * 535680UL + month * 44640UL + day * 1440UL + hour * 60 + min;
         snprintf(buf, sizeof(buf), "%s(%d) %02d.%02d.%d %02d:%02d - now", code, codeNo, day, month, year, hour, min);

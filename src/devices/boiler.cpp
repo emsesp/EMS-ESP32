@@ -2162,7 +2162,8 @@ void Boiler::process_UBAErrorMessage2(const std::shared_ptr<const Telegram> & te
     code[1]                          = telegram->message_data[6];
     code[2]                          = telegram->message_data[7];
     code[3]                          = 0;
-    telegram->read_value(codeNo, 8);
+    // read_value uses absolute index; offset is 0/20/40 for each record - #3475
+    telegram->read_value(codeNo, telegram->offset + 8);
     if (!std::isprint(code[0]) || !std::isprint(code[1]) || !std::isprint(code[2])) {
         return;
     }
@@ -2204,8 +2205,8 @@ void Boiler::process_UBAErrorMessage2(const std::shared_ptr<const Telegram> & te
     } else { // no clock, the uptime is stored https://github.com/emsesp/EMS-ESP32/issues/121
         uint32_t starttime = 0;
         uint32_t endtime   = 0;
-        telegram->read_value(starttime, 11, 3);
-        telegram->read_value(endtime, 16, 3);
+        telegram->read_value(starttime, telegram->offset + 11, 3);
+        telegram->read_value(endtime, telegram->offset + 16, 3);
         snprintf(&code[3], sizeof(code) - 3, "(%d) @uptime %lu - %lu min", codeNo, starttime, endtime);
         date = starttime;
     }
@@ -2228,7 +2229,8 @@ void Boiler::process_UBAErrorMessage3(const std::shared_ptr<const Telegram> & te
     code[1]                          = telegram->message_data[7];
     code[2]                          = telegram->message_data[8];
     code[3]                          = 0;
-    telegram->read_value(codeNo, 9);
+    // read_value uses absolute index; offset is 0/21/42 for each record - #3475
+    telegram->read_value(codeNo, telegram->offset + 9);
     if (!std::isprint(code[0]) || !std::isprint(code[1]) || !std::isprint(code[2])) {
         return;
     }
@@ -2270,8 +2272,8 @@ void Boiler::process_UBAErrorMessage3(const std::shared_ptr<const Telegram> & te
     } else { // no clock, the uptime is stored https://github.com/emsesp/EMS-ESP32/issues/121
         uint32_t starttime = 0;
         uint32_t endtime   = 0;
-        telegram->read_value(starttime, 12, 3);
-        telegram->read_value(endtime, 17, 3);
+        telegram->read_value(starttime, telegram->offset + 12, 3);
+        telegram->read_value(endtime, telegram->offset + 17, 3);
         snprintf(&code[3], sizeof(code) - 3, "(%d) @uptime %lu - %lu min", codeNo, starttime, endtime);
         date = starttime;
     }
