@@ -1,13 +1,13 @@
-import type { Translation } from '../i18n-types';
+import type { BaseTranslation } from '../i18n-types';
 
-const en: Translation = {
+const en: BaseTranslation = {
   LANGUAGE: 'Language',
   RETRY: 'Retry',
   IS_REQUIRED: '{0} is required',
   SIGN_IN: 'Sign in',
   SIGN_IN_SUBTITLE: 'Gateway for EMS heating systems',
   SIGN_OUT: 'Sign out',
-  USERNAME: 'Username',
+  USERNAME: '{{Username|Username|Username}}', // plural arity for PL case forms (baseLocale=en)
   PASSWORD: 'Password',
   APPLICATION_SETTINGS: 'Application settings',
   AP_SETTINGS: 'Access point settings',
@@ -21,12 +21,12 @@ const en: Translation = {
   UPLOAD_SUCCESSFUL: 'Upload successful',
   DOWNLOAD_SUCCESSFUL: 'Download successful',
   INVALID_LOGIN: 'Incorrect username or password',
-  NETWORK: 'Network',
-  SECURITY: 'Security',
+  NETWORK: '{{Network|Network|Network}}', // plural arity for PL case forms (baseLocale=en)
+  SECURITY: '{{Security|Security|Security}}', // plural arity for PL case forms (baseLocale=en)
   ONOFF_CAP: 'ON/OFF',
   ONOFF: 'on/off',
-  TYPE: 'Type',
-  ENTITIES: 'entities',
+  TYPE: '{{Type|Type|Type}}', // plural arity for PL case forms (baseLocale=en)
+  ENTITIES: 'entit{{y|ies}}', // plural arity for PL case forms (baseLocale=en)
   EXPORT: 'Export',
   FAVORITES: "Favorites",
   CLIENT_ID: 'Client ID',
@@ -38,7 +38,7 @@ const en: Translation = {
   DEVICE: 'Device',
   BRAND: 'Brand',
   VERSION: 'Version',
-  ENTITY_NAME: 'Entity name',
+  ENTITY_NAME: '{{Entity name|Entity name|Entity name}}', // plural arity for PL case forms (baseLocale=en)
   VALUE: 'Value',
   DEVICES: 'Devices',
   SENSORS: 'Sensors',
@@ -55,7 +55,7 @@ const en: Translation = {
   PROBLEM_UPDATING: 'Problem updating',
   PROBLEM_LOADING: 'Problem loading',
   ANALOG_SENSORS: 'Analog sensors',
-  SETTINGS: 'Settings',
+  SETTINGS: '{{Settings|Settings|Settings}}', // plural arity for PL case forms (baseLocale=en)
   SETTINGS_UPDATED: 'Settings updated',
   NAME_UPDATED: 'Name updated',
   SENSOR_UPDATED: 'Sensor updated',
@@ -70,7 +70,7 @@ const en: Translation = {
   TEMP_SENSORS: 'Temperature sensors',
   WRITE_CMD_SENT: 'Write command sent',
   EMS_BUS_WARNING: 'EMS bus disconnected. If this warning still persists after a few seconds please check settings and board profile',
-  CONNECTED: 'Connected',
+  CONNECTED: '{{Connected|Connected|Connected}}', // plural arity for PL case forms (baseLocale=en)
   TX_ISSUES: 'Tx issues - check Tx mode',
   DISCONNECTED: 'Disconnected',
   DATA_TRAFFIC: 'Data traffic',
@@ -101,7 +101,7 @@ const en: Translation = {
   BUTTON: 'Button',
   TEMPERATURE: 'Temperature',
   PHY_TYPE: 'Eth PHY type',
-  DISABLED: 'disabled',
+  DISABLED: '{{disabled|disabled|disabled}}', // plural arity for PL case forms (baseLocale=en)
   TX_MODE: 'EMS Tx mode',
   EMS_BUS: 'EMS bus',
   EMS_BUS_ID: 'EMS bus ID',
@@ -138,9 +138,9 @@ const en: Translation = {
   MINUTES: 'minutes',
   HOURS: 'hours',
   RESTART: 'Restart',
-  RESTART_TEXT: 'EMS-ESP needs to be restarted to apply changed system settings',
+  RESTART_TEXT: '{{EMS-ESP needs to be restarted to apply changed system settings|EMS-ESP needs to be restarted to apply changed system settings|EMS-ESP needs to be restarted to apply changed system settings}}', // plural arity for PL case forms (baseLocale=en)
   RESTART_CONFIRM: 'Are you sure you want to restart EMS-ESP?',
-  COMMAND: 'Command',
+  COMMAND: '{{Command|Command|Command}}', // plural arity for PL case forms (baseLocale=en)
   CUSTOMIZATIONS_RESTART: 'All customizations have been removed. Restarting…',
   CUSTOMIZATIONS_FULL: 'Selected entities exceeded limit. Please save in batches',
   CUSTOMIZATIONS_SAVED: 'Customizations updated',
@@ -154,9 +154,9 @@ const en: Translation = {
   MODIFIED: 'Modified',
   RESET_SELECTED: 'Reset selected',
   OPTIONS: 'Options',
-  NAME: 'Name',
+  NAME: '{{Name|Name|Name}}', // plural arity for PL case forms (baseLocale=en)
   CUSTOMIZATIONS_RESET: 'Are you sure you want remove all the customizations?',
-  SYSTEM_INFORMATION: 'System information',
+  SYSTEM_INFORMATION: '{{System information|System information|System information}}', // plural arity for PL case forms (baseLocale=en)
   HELP_INFORMATION_1: 'Visit the online wiki to get instructions on how to configure EMS-ESP',
   HELP_INFORMATION_2: 'For live community chat join our Discord server',
   HELP_INFORMATION_3: 'To request a feature or report a bug',
@@ -167,8 +167,8 @@ const en: Translation = {
   INSTALL: 'Install',
   REINSTALL: 'Re-install',
   REINSTALL_CONFIRM: 'Are you sure you want to re-install version {0}?',
-  FAILED: 'failed',
-  SYSTEM: 'System',
+  FAILED: '{{failed|failed|failed}}', // plural arity for PL case forms (baseLocale=en)
+  SYSTEM: '{{System|System|System|System}}', // plural arity for PL case forms (baseLocale=en)
   SYSTEM_LOG: 'System log',
   STATUS: 'Status',
   DOWNLOAD_UPLOAD: 'Download/Upload',
@@ -204,7 +204,7 @@ const en: Translation = {
   TIME_SET: 'Time set',
   MANAGE_USERS: 'Manage users',
   USER_WARNING: 'You must have at least one admin user configured',
-  ADD: 'Add',
+  ADD: '{{Add|Add|Add}}', // plural arity for PL case forms (baseLocale=en)
   TELNET_ENABLED: 'The Telnet console is enabled. Telnet is not encrypted, so turn it off in the Application Settings if you don\'t use it.',
   TOO_MANY_LOGINS: 'Too many failed sign-ins, try again in a few minutes',
   PASSWORD_KEEP: 'Leave empty to keep the current password',
@@ -247,7 +247,7 @@ const en: Translation = {
   MQTT_INT_MIXER: 'Mixer modules',
   MQTT_INT_WATER: 'Water modules',
   MQTT_QUEUE: 'MQTT queue',
-  DEFAULT: 'Default',
+  DEFAULT: '{{Default|Default|Default}}', // plural arity for PL case forms (baseLocale=en)
   MQTT_ENTITY_FORMAT: 'Entity ID format',
   MQTT_ENTITY_FORMAT_0: 'Single instance, long name (v3.4)',
   MQTT_ENTITY_FORMAT_1: 'Single instance, short name',
@@ -258,17 +258,17 @@ const en: Translation = {
   MQTT_COMMANDS_0: 'Off, only read values',
   MQTT_COMMANDS_1: 'Change values and run commands',
   MQTT_COMMANDS_2: 'Everything, also system commands',
-  INACTIVE: 'Inactive',
+  INACTIVE: '{{Inactive|Inactive|Inactive}}', // plural arity for PL case forms (baseLocale=en)
   ACTIVE: 'Active',
   UNKNOWN: 'Unknown',
-  SET_TIME: 'Set time',
+  SET_TIME: '{{Set time|Set time|Set time}}', // plural arity for PL case forms (baseLocale=en)
   SET_TIME_TEXT: 'Enter local date and time below to set the time',
-  LOCAL_TIME: 'Local time',
+  LOCAL_TIME: '{{Local time|Local time|Local time}}', // plural arity for PL case forms (baseLocale=en)
   UTC_TIME: 'UTC time',
   ENABLE_NTP: 'Enable NTP',
   NTP_SERVER: 'NTP server',
   TIME_ZONE: 'Time zone',
-  ACCESS_POINT: 'Access point',
+  ACCESS_POINT: '{{Access point|Access point|Access point}}', // plural arity for PL case forms (baseLocale=en)
   AP_PROVIDE: 'Enable access point',
   AP_PROVIDE_TEXT_2: 'When network connection not found',
   AP_PROVIDE_TEXT_3: 'Never',
@@ -295,7 +295,7 @@ const en: Translation = {
   ADDRESS_OF: '{0} address',
   ADMINISTRATOR: 'Administrator',
   GUEST: 'Guest',
-  NEW: 'New',
+  NEW: '{{New|New|New}}', // plural arity for PL case forms (baseLocale=en)
   NEW_ENTITY_NAME: 'New entity name',
   MIN: 'min',
   MAX: 'max',
@@ -382,13 +382,13 @@ const en: Translation = {
   SCHEDULER: 'Scheduler',
   SCHEDULER_HELP_1: 'Automate commands by adding scheduled events below',
   SCHEDULER_HELP_2: 'at start-up',
-  SCHEDULE: 'Schedule',
-  TIME: 'Time',
-  TIMER: 'Timer',
+  SCHEDULE: '{{Schedule|Schedule|Schedule}}', // plural arity for PL case forms (baseLocale=en)
+  TIME: '{{Time|Time|Time}}', // plural arity for PL case forms (baseLocale=en)
+  TIMER: '{{Timer|Timer|Timer}}', // plural arity for PL case forms (baseLocale=en)
   ONCHANGE: 'On change',
   CONDITION: 'Condition',
   SCHEDULE_UPDATED: 'Schedule updated',
-  CUSTOM_ENTITIES: 'Custom entities',
+  CUSTOM_ENTITIES: '{{Custom entities|Custom entities|Custom entities}}', // plural arity for PL case forms (baseLocale=en)
   ENTITIES_HELP_1: 'Define custom EMS entities or dynamic user variables',
   ENTITIES_UPDATED: 'Entities updated',
   WRITEABLE: 'Writeable',

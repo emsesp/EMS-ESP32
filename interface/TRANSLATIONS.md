@@ -8,7 +8,8 @@ The firmware has its own translations (entity names in `src/core/locale_translat
 
 - One file per language: `src/i18n/<lang>/index.ts`, a flat object of keys like `SIGN_IN: 'Sign in'`. English (`en`) is the source for new text.
 - Languages: cs, de, en, fr, hu, it, nl, no, pl, sk, sv, tr.
-- [typesafe-i18n](https://github.com/ivanhofer/typesafe-i18n) generates `src/i18n/i18n-types.ts` from the base locale set in `.typesafe-i18n.json` (currently `pl`). Every language must have every key, otherwise TypeScript fails.
+- [typesafe-i18n](https://github.com/ivanhofer/typesafe-i18n) generates `src/i18n/i18n-types.ts` from the base locale set in `.typesafe-i18n.json` (currently `en`). Every language must have every key, otherwise TypeScript fails.
+- A few English strings use dummy `{{…|…|…}}` plurals so call sites can pass a case index for Polish (`LL.NETWORK(0)` / `LL.NETWORK(1)`). Other languages keep a plain string; Polish keeps the real forms. Do not remove those English plurals without updating the call sites.
 - Code uses the keys through `LL`, for example `LL.SIGN_IN()`.
 
 ### Placeholders and plurals

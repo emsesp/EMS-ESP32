@@ -1,6 +1,6 @@
-import type { BaseTranslation } from '../i18n-types';
+import type { Translation } from '../i18n-types';
 
-const pl: BaseTranslation = {
+const pl: Translation = {
   LANGUAGE: 'Język',
   RETRY: 'Spróbuj ponownie', // DeepL
   IS_REQUIRED: 'Pole {0} jest obowiązkowe', // DeepL

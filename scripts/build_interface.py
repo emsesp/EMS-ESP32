@@ -82,18 +82,6 @@ def buildWeb():
             if not run_command_in_directory(command, interface_dir):
                 return False
 
-        # Modify i18n-util.ts file
-        i18n_file = interface_dir / "src" / "i18n" / "i18n-util.ts"
-        if i18n_file.exists():
-            with open(i18n_file, 'r') as r:
-                text = r.read().replace("Locales = 'pl'", "Locales = 'en'")
-            with open(i18n_file, 'w') as w:
-                w.write(text)
-            print("Setting WebUI locale to 'en'")
-        else:
-            print(
-                f"Warning: {i18n_file} not found, skipping locale modification")
-
         print("Web interface build completed successfully!")
         return True
 
