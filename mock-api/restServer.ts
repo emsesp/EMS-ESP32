@@ -1723,7 +1723,8 @@ const emsesp_coredata_custom = {
   d: 1,
   p: 1,
   v: '',
-  e: 2
+  e: 2,
+  url: 'custom'
 };
 
 const emsesp_sensordata = {
