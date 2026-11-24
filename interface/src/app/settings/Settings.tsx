@@ -64,7 +64,7 @@ const Settings = () => {
               to: 'network',
               icon: 'settings_ethernet',
               color: '#40828f',
-              title: LL.NETWORK(0),
+              title: LL.NETWORK(),
               text: LL.NETWORK_DESC(),
               value: networkValue,
               state: network?.state

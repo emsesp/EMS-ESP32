@@ -21,8 +21,8 @@ const pl: BaseTranslation = {
   UPLOAD_SUCCESSFUL: 'Przesłanie zakończone sukcesem', // DeepL
   DOWNLOAD_SUCCESSFUL: 'Pobierz udane', // DeepL
   INVALID_LOGIN: 'Nieprawidłowa nazwa użytkownika lub hasło', // DeepL
-  NETWORK: '{{Sieć|sieci|}}',
-  NTP: 'Synchronizacja czasu',
+  NETWORK: 'Sieć',
+  NTP: 'Synchronizacja czasu (NTP)',
   SECURITY: '{{B|b|}}ezpieczeństw{{o|a|}}',
   ONOFF_CAP: 'WŁ./WYŁ.', // DeepL
   ONOFF: 'włącz/wyłącz', // DeepL

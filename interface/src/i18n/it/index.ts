@@ -22,7 +22,7 @@ const it: Translation = {
   DOWNLOAD_SUCCESSFUL: 'Scarica con successo', // DeepL
   INVALID_LOGIN: 'Nome utente o password errati', // DeepL
   NETWORK: 'Rete',
-  NTP: 'NTP',
+  NTP: 'Sincronizzazione dell\'ora (NTP)', // DeepL
   SECURITY: 'Sicurezza',
   ONOFF_CAP: 'ON/OFF',
   ONOFF: 'on/off',
@@ -386,7 +386,7 @@ const it: Translation = {
   TIME: 'Ora',
   TIMER: 'Timer', // DeepL
   ONCHANGE: 'In caso di modifica', // DeepL
-  CONDITION: 'Condizione',
+  CONDITION: 'Condizion{{e|ale}}',
   SCHEDULE_UPDATED: 'Programma eventi aggiornato', // DeepL
   CUSTOM_ENTITIES: 'Entità personalizzate',
   ENTITIES_HELP_1: 'Definisci entità EMS personalizzate o variabili utente dinamiche', // DeepL

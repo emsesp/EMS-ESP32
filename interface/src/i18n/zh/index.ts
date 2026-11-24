@@ -22,7 +22,7 @@ const zh: Translation = {
   DOWNLOAD_SUCCESSFUL: "下载成功",
   INVALID_LOGIN: "用户名或密码错误",
   NETWORK: "网络",
-  NTP: 'NTP',
+  NTP: '時間同步（NTP）',
   SECURITY: "安全",
   ONOFF_CAP: "开/关",
   ONOFF: "开/关",

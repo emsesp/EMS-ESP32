@@ -50,7 +50,7 @@ const Network = () => {
   return (
     <WiFiConnectionContext.Provider value={{ form, status, selectNetwork }}>
       <TabNav
-        label={LL.NETWORK(0)}
+        label={LL.NETWORK()}
         items={[
           {
             to: BASE + 'settings',

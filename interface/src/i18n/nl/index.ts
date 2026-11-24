@@ -22,7 +22,7 @@ const nl: Translation = {
   DOWNLOAD_SUCCESSFUL: 'Download succesvol', // DeepL
   INVALID_LOGIN: 'Onjuiste gebruikersnaam of wachtwoord', // DeepL
   NETWORK: 'Netwerk',
-  NTP: 'NTP',
+  NTP: 'Tijdsynchronisatie (NTP)', // DeepL
   SECURITY: 'Beveiliging',
   ONOFF_CAP: 'AAN/UIT',
   ONOFF: 'aan/uit',
@@ -386,7 +386,7 @@ const nl: Translation = {
   TIME: 'Tijd',
   TIMER: 'Timer',
   ONCHANGE: 'Bij wijzigingen', // DeepL
-  CONDITION: 'Voorwaarde',
+  CONDITION: 'Voorwaarde{{|lijk}}',
   SCHEDULE_UPDATED: 'Schema bijgewerkt',
   CUSTOM_ENTITIES: 'Aangepaste entiteiten', // DeepL
   ENTITIES_HELP_1: 'Definieer aangepaste EMS-entiteiten of dynamische gebruikersvariabelen', // DeepL

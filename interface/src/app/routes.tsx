@@ -71,7 +71,7 @@ export const routes: AppRoute[] = [
   { path: '/status', element: Status, title: (LL) => LL.STATUS(), icon: 'assessment', menu: 'system', wildcard: true },
   { path: '/status/hardwarestatus', element: HardwareStatus, title: (LL) => LL.HARDWARE(), icon: 'memory', parent: '/status', wildcard: true },
   { path: '/status/activity', element: Activity, title: (LL) => LL.DATA_TRAFFIC(), icon: 'swap_horiz', parent: '/status' },
-  { path: '/status/network', element: NetworkStatus, title: (LL) => LL.NETWORK(0), icon: 'lan', parent: '/status' },
+  { path: '/status/network', element: NetworkStatus, title: (LL) => LL.NETWORK(), icon: 'lan', parent: '/status' },
   { path: '/status/mqtt', element: MqttStatus, title: () => 'MQTT', icon: 'device_hub', parent: '/status' },
   { path: '/status/ntp', element: NTPStatus, title: (LL) => LL.NTP(), icon: 'schedule', parent: '/status' },
   { path: '/status/ap', element: APStatus, title: (LL) => LL.ACCESS_POINT(0), icon: 'wifi_tethering', parent: '/status' },
@@ -84,7 +84,7 @@ export const routes: AppRoute[] = [
   {
     path: '/settings/network',
     element: Network,
-    title: (LL) => LL.NETWORK(0),
+    title: (LL) => LL.NETWORK(),
     icon: 'settings_ethernet',
     parent: '/settings',
     admin: true,

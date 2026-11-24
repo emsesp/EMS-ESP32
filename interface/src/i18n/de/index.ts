@@ -22,7 +22,7 @@ const de: Translation = {
   DOWNLOAD_SUCCESSFUL: 'Erfolgreicher Download', // DeepL
   INVALID_LOGIN: 'Falscher Benutzername oder falsches Passwort', // DeepL
   NETWORK: 'Netzwerk',
-  NTP: 'NTP',
+  NTP: 'Zeitsynchronisation (NTP)',
   SECURITY: 'Sicherheit',
   ONOFF_CAP: 'EIN/AUS', // DeepL
   ONOFF: 'Ein/Aus', // DeepL
@@ -386,7 +386,7 @@ const de: Translation = {
   TIME: 'Zeit',
   TIMER: 'Timer',
   ONCHANGE: 'Bei Änderungen', // DeepL
-  CONDITION: 'Bedingung', // DeepL
+  CONDITION: 'Beding{{ung|ter}}', // DeepL
   SCHEDULE_UPDATED: 'Zeitplan aktualisiert',
   CUSTOM_ENTITIES: 'Benutzerdefinierte Entitäten', // DeepL
   ENTITIES_HELP_1: 'Definieren Sie benutzerdefinierte EMS-Entitäten oder dynamische Benutzervariablen', // DeepL

@@ -22,7 +22,7 @@ const sv: Translation = {
   DOWNLOAD_SUCCESSFUL: 'Ladda ner framgångsrikt', // DeepL
   INVALID_LOGIN: 'Felaktigt användarnamn eller lösenord', // DeepL
   NETWORK: 'Nätverk',
-  NTP: 'NTP',
+  NTP: 'Tidssynkronisering (NTP)',
   SECURITY: 'Säkerhet',
   ONOFF_CAP: 'PÅ/AV',
   ONOFF: 'på/av',
@@ -386,7 +386,7 @@ const sv: Translation = {
   TIME: 'Tid',
   TIMER: 'Timer',
   ONCHANGE: 'Vid ändring', // DeepL
-  CONDITION: 'Villkor',
+  CONDITION: 'Villkor{{|lig}}',
   SCHEDULE_UPDATED: 'Schemat har uppdaterats', // DeepL
   CUSTOM_ENTITIES: 'Anpassade enheter', // DeepL
   ENTITIES_HELP_1: 'Definiera anpassade EMS-entiteter eller dynamiska användarvariabler', // DeepL

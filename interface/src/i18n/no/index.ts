@@ -22,7 +22,7 @@ const no: Translation = {
   DOWNLOAD_SUCCESSFUL: 'Last ned vellykket', // DeepL
   INVALID_LOGIN: 'Feil brukernavn eller passord', // DeepL
   NETWORK: 'Nettverk',
-  NTP: 'NTP',
+  NTP: 'Tidssynkronisering (NTP)', // DeepL
   SECURITY: 'Sikkerhet',
   ONOFF_CAP: 'PÅ/AV',
   ONOFF: 'på/av',
@@ -386,7 +386,7 @@ const no: Translation = {
   TIME: 'Tid',
   TIMER: 'Timer',
   ONCHANGE: 'Ved endring', // DeepL
-  CONDITION: 'Tilstand', // DeepL
+  CONDITION: '{{Vilkår|Betinget}}', // DeepL
   SCHEDULE_UPDATED: 'Tidsplan oppdatert', // DeepL
   CUSTOM_ENTITIES: 'Egendefinerte ojekter', // DeepL
   ENTITIES_HELP_1: 'Definer egendefinerte EMS-ojekter eller dynamiske brukervariabler', // DeepL

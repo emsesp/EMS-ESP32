@@ -22,7 +22,7 @@ const en: Translation = {
   DOWNLOAD_SUCCESSFUL: 'Download successful',
   INVALID_LOGIN: 'Incorrect username or password',
   NETWORK: 'Network',
-  NTP: 'NTP',
+  NTP: 'Time synchronisation (NTP)',
   SECURITY: 'Security',
   ONOFF_CAP: 'ON/OFF',
   ONOFF: 'on/off',

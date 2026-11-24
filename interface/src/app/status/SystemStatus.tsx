@@ -144,7 +144,7 @@ const SystemStatus = () => {
             to="/status/network"
             icon={networkIcon(data.network_status)}
             color={STATE_COLORS[network.state]}
-            title={LL.NETWORK(0)}
+            title={LL.NETWORK()}
             text={join(
               network.text,
               data.network_ip,
