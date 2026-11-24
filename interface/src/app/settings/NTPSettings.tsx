@@ -51,7 +51,7 @@ const NTPClock = ({ canSetTime }: { canSetTime: boolean }) => {
     { immediate: false }
   );
 
-  useInterval(() => setNow(Date.now()), 1000);
+  useInterval(() => setNow(Date.now()), 1000, false, true);
   useInterval(() => void loadStatus(), 30000);
 
   const openSetTime = () => {

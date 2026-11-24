@@ -81,7 +81,7 @@ const SystemMonitor = ({ onDone, onInstallCustom }: SystemMonitorProps) => {
 
   useInterval(() => {
     void send();
-  }, 1000); // check every 1 second
+  }, 1000, false, true); // check every 1 second
 
   const status = data?.status;
 

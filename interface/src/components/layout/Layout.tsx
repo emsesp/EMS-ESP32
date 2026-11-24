@@ -6,7 +6,6 @@ import { routeTrail } from 'app/routes';
 import { SaveBarSlotContext, cx } from 'components/ui';
 import type { RequiredChildrenProps } from 'utils';
 
-import DemoPausedBanner from './DemoPausedBanner';
 import './Layout.css';
 import LayoutAppBar from './LayoutAppBar';
 import LayoutDrawer from './LayoutDrawer';
@@ -40,8 +39,6 @@ const LayoutComponent: FC<RequiredChildrenProps> = ({ children }) => {
       <LayoutAppBar trail={trail} onToggleDrawer={toggleDrawer} />
       <main className="main">
         <SetupDialog />
-        {/* hosted demo only: folded to `false` and dropped from device/production builds */}
-        {import.meta.env.MODE === 'hosted' && <DemoPausedBanner />}
         <TokensResetBanner />
         <TelnetBanner />
         <SaveBarSlotContext.Provider value={saveBarSlot}>
