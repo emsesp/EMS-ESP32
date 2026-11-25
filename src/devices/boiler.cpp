@@ -1919,23 +1919,28 @@ void Boiler::process_HpInConfig(const std::shared_ptr<const Telegram> & telegram
     // 0x0486 arrives in fragments with holes (e.g. reply offset jumps 23→25, 45→52).
     // Only treat a prior digit as known if it is literally '0'/'1'; anything else
     // (empty / garbage) must not become a sticky '1' (#3476, see also #2585).
+    // read_value() is true only when the value *changes*, so seed with NOTSET to detect
+    // presence — otherwise all-zero inputs never publish.
     uint8_t index[] = {0, 3, 6, 9, 12, 15, 18, 21, 24, 39, 36, 30, 27};
     for (uint8_t i = 0; i < 3; i++) {
         bool any = false;
         for (uint8_t j = 0; j < 12; j++) {
-            uint8_t v = (hpInput[i].option[j] == '1') ? 1 : 0;
+            uint8_t v = EMS_VALUE_UINT8_NOTSET;
             if (telegram->read_value(v, index[j] + i)) {
-                any = true;
+                any      = true;
+                option[j] = (v == 1) ? '1' : '0';
+            } else {
+                option[j] = (hpInput[i].option[j] == '1') ? '1' : '0';
             }
-            option[j] = (v == 1) ? '1' : '0';
         }
 
-        uint8_t mod = 0;
-        if (hpInput[i].option[12] >= '0' && hpInput[i].option[12] <= '9') {
-            mod = atoi(&hpInput[i].option[12]);
-        }
+        uint8_t mod = EMS_VALUE_UINT8_NOTSET;
         if (telegram->read_value(mod, 27 + i)) { // modulation
             any = true;
+        } else if (hpInput[i].option[12] >= '0' && hpInput[i].option[12] <= '9') {
+            mod = atoi(&hpInput[i].option[12]);
+        } else {
+            mod = 0;
         }
         Helpers::smallitoa(&option[12], (uint16_t)mod);
         if (any) {
@@ -1945,21 +1950,24 @@ void Boiler::process_HpInConfig(const std::shared_ptr<const Telegram> & telegram
 
     // input 4 <inv>[<comp><aux><cool><heat><dhw><pv><prot><pres><mod>]
     uint8_t index4[] = {42, 43, 44, 45, 46, 47, 52, 50, 49, 48};
-    bool any4 = false;
+    bool    any4     = false;
     for (uint8_t j = 0; j < 9; j++) {
-        uint8_t v = (hpInput[3].option[j] == '1') ? 1 : 0;
+        uint8_t v = EMS_VALUE_UINT8_NOTSET;
         if (telegram->read_value(v, index4[j])) {
-            any4 = true;
+            any4     = true;
+            option[j] = (v == 1) ? '1' : '0';
+        } else {
+            option[j] = (hpInput[3].option[j] == '1') ? '1' : '0';
         }
-        option[j] = (v == 1) ? '1' : '0';
     }
 
-    uint8_t mod4 = 0;
-    if (hpInput[3].option[9] >= '0' && hpInput[3].option[9] <= '9') {
-        mod4 = atoi(&hpInput[3].option[9]);
-    }
+    uint8_t mod4 = EMS_VALUE_UINT8_NOTSET;
     if (telegram->read_value(mod4, 48)) { // modulation
         any4 = true;
+    } else if (hpInput[3].option[9] >= '0' && hpInput[3].option[9] <= '9') {
+        mod4 = atoi(&hpInput[3].option[9]);
+    } else {
+        mod4 = 0;
     }
     Helpers::smallitoa(&option[9], (uint16_t)mod4);
     if (any4) {
