@@ -2,13 +2,22 @@
 
 How the web UI text is translated, how to add or change a string, and the two helper scripts: `pnpm translate` drafts translations with DeepL, and `pnpm check-layout` finds text that doesn't fit and English labels that break sentence case.
 
-The firmware has its own translations (entity names in `src/core/locale_translations.h`). They are not covered here.
+The firmware has its own translations (entity names in `src/core/locale_translations.h`). They are not covered here — use the Entity Translation Editor linked below.
+
+## Editing in the browser
+
+For day-to-day translation work you do not need this repo's scripts. Two web apps on the docs site edit the files and write them back so you can commit to GitHub:
+
+- **[WebUI Translation Editor](https://docs.emsesp.org/webui-translation-editor)** — the strings in `interface/src/i18n/<lang>/index.ts` (this document). Loads the `i18n` folder, shows all languages side by side, flags empty values.
+- **[Entity Translation Editor](https://docs.emsesp.org/entity-translation-editor)** — firmware entity names in `src/core/locale_translations.h` (MQTT, API, console). Table of every entity, highlights missing translations.
+
+Overview and how to add a whole new language: [Adding Languages](https://docs.emsesp.org/Adding-Languages).
 
 ## Where the text lives
 
 - One file per language: `src/i18n/<lang>/index.ts`, a flat object of keys like `SIGN_IN: 'Sign in'`. English (`en`) is the source for new text.
-- Languages: cs, de, en, fr, hu, it, nl, no, pl, sk, sv, tr.
-- [typesafe-i18n](https://github.com/ivanhofer/typesafe-i18n) generates `src/i18n/i18n-types.ts` from the base locale set in `.typesafe-i18n.json` (currently `en`). Every language must have every key, otherwise TypeScript fails.
+- Languages: cs, de, en, fr, hu, it, nl, no, pl, sk, sv, tr, zh.
+- [typesafe-i18n](https://github.com/ivanhofer/typesafe-i18n) generates `src/i18n/i18n-types.ts` (gitignored) from the base locale set in `.typesafe-i18n.json` (currently `en`). Every language must have every key, otherwise TypeScript fails. After changing `baseLocale`, restart `pnpm standalone` (or delete the generated `i18n-*.ts` / `i18n-react.tsx` and run `pnpm typesafe-i18n`) so the generator picks up the new base.
 - A few English strings use dummy `{{…|…|…}}` plurals so call sites can pass a case index for Polish (`LL.NETWORK(0)` / `LL.NETWORK(1)`). Other languages keep a plain string; Polish keeps the real forms. Do not remove those English plurals without updating the call sites.
 - Code uses the keys through `LL`, for example `LL.SIGN_IN()`.
 
@@ -20,7 +29,7 @@ The firmware has its own translations (entity names in `src/core/locale_translat
 ## Adding or changing a string
 
 1. Add or change the key in `src/i18n/en/index.ts`.
-2. Fill in the other languages: write them yourself, or draft them with DeepL (next section).
+2. Fill in the other languages: [WebUI Translation Editor](https://docs.emsesp.org/webui-translation-editor), write them yourself, or draft them with DeepL (next section).
 3. Run `pnpm typesafe-i18n` (or keep `pnpm standalone` running, which watches the files) and check that `npx tsc --noEmit` passes.
 4. Run `pnpm check-layout` if the text appears in a menu, button, tab or table header.
 5. Ask a native speaker to review machine translations (lines marked `// DeepL`).
@@ -94,7 +103,7 @@ pnpm translate --since $BASE --lang de             # preview one language
 pnpm translate --since $BASE --write               # all languages
 ```
 
-**Everything** (`--all`). Retranslates all 641 plain-string keys in all 11 languages, about 180,000 characters:
+**Everything** (`--all`). Retranslates all ~640 plain-string keys in all 12 other languages, about 180,000 characters:
 
 ```sh
 pnpm translate --all --lang nl                     # preview, compare with the current file
@@ -125,14 +134,14 @@ Be careful with `--since` on a large range: during the redesign many English str
 
 ### Cost
 
-The whole English UI is about 16,000 characters, so translating everything into all 11 languages is about 180,000 characters. Normal use, a few new strings at a time, is a few hundred characters.
+The whole English UI is about 16,000 characters, so translating everything into all 12 other languages is about 180,000 characters. Normal use, a few new strings at a time, is a few hundred characters.
 
 ## Checking the layout: `pnpm check-layout`
 
 `check-layout.js` does two things:
 
 1. **English casing** — scans `src/i18n/en/index.ts` for short labels that break sentence case (for example `Free Memory` → suggested `Free memory`). Runs first; does not need the mock server or Chromium. Other languages and long help strings are skipped.
-2. **Layout** — opens every page, plus the "add" dialogs, in every language at desktop (1280 px), tablet (1000 px) and phone (390 px) width, and lists text that is cut off, truncated or pushed off screen. Prints progress per language/width; a full run takes several minutes.
+2. **Layout** — opens every page, plus the "add" dialogs, in every language (including Polish case forms and Swedish plurals as the UI actually renders them) at desktop (1280 px), tablet (1000 px) and phone (390 px) width, and lists text that is cut off, truncated or pushed off screen. Prints progress per language/width; a full run takes several minutes. It does not walk unused plural indexes in the translation files.
 
 ```sh
 pnpm standalone                  # in another terminal: mock API + dev server
