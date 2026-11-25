@@ -131,13 +131,26 @@ std::string Telegram::to_string_message() const {
 }
 
 // checks if we have an Rx telegram that needs processing
+// pop under lock, process outside — process_telegram may log/MQTT/enqueue Tx
 void RxService::loop() {
-    while (!rx_telegrams_.empty()) {
-        auto telegram = rx_telegrams_.front().telegram_;
-        (void)EMSESP::process_telegram(telegram); // further process the telegram
-        increment_telegram_count();               // increase rx count
-        rx_telegrams_.pop_front();                // remove it from the queue
+    for (;;) {
+        std::shared_ptr<const Telegram> telegram;
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            if (rx_telegrams_.empty()) {
+                return;
+            }
+            telegram = rx_telegrams_.front().telegram_;
+            rx_telegrams_.pop_front();
+        }
+        (void)EMSESP::process_telegram(telegram);
+        increment_telegram_count();
     }
+}
+
+std::deque<RxService::QueuedRxTelegram, AllocatorPSRAM<RxService::QueuedRxTelegram>> RxService::queue() const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    return rx_telegrams_;
 }
 
 // add a new rx telegram object
@@ -252,9 +265,10 @@ void RxService::add(uint8_t * data, uint8_t length) {
 
     LOG_DEBUG("New Rx telegram, message length %d", message_length);
 
-    // create the telegram
+    // create the telegram outside the lock (allocates)
     auto telegram = std::make_shared<Telegram>(operation, src, dest, type_id, offset, message_data, message_length);
 
+    std::lock_guard<std::mutex> lock(mutex_);
 // check if queue is full, if so remove top item to make space, except if we're in standalone mode
 #ifndef EMSESP_STANDALONE
     if (rx_telegrams_.size() >= MAX_RX_TELEGRAMS) {
@@ -267,7 +281,8 @@ void RxService::add(uint8_t * data, uint8_t length) {
 
 // add empty telegram to rx-queue
 void RxService::add_empty(const uint8_t src, const uint8_t dest, const uint16_t type_id, uint8_t offset) {
-    auto telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, offset, nullptr, 0);
+    auto                        telegram = std::make_shared<Telegram>(Telegram::Operation::RX, src, dest, type_id, offset, nullptr, 0);
+    std::lock_guard<std::mutex> lock(mutex_);
     // only if queue is not full
     if (rx_telegrams_.size() < MAX_RX_TELEGRAMS) {
         rx_telegrams_.emplace_back(rx_telegram_id_++, std::move(telegram)); // add to queue
@@ -304,7 +319,8 @@ void TxService::send_poll() const {
 
 // get src id from next telegram to check poll in incoming_telegram() in emsesp.cpp
 uint8_t TxService::get_send_id() {
-    static uint32_t count = 0;
+    static uint32_t             count = 0;
+    std::lock_guard<std::mutex> lock(mutex_);
     if (!tx_telegrams_.empty() && tx_telegrams_.front().telegram_->src != ems_bus_id()) {
         if (++count > MAX_POLLS_WITHOUT_MASTER) {
             tx_telegrams_.pop_front();
@@ -319,35 +335,58 @@ uint8_t TxService::get_send_id() {
     return ems_bus_id();
 }
 
+std::deque<TxService::QueuedTxTelegram, AllocatorPSRAM<TxService::QueuedTxTelegram>> TxService::queue() const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    return tx_telegrams_;
+}
+
+bool TxService::tx_queue_empty() const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    return tx_telegrams_.empty();
+}
+
 // Process the next telegram on the Tx queue
 // This is sent when we receive a poll request
+// dequeue under lock, UART transmit outside — never hold the mutex across EMSuart::transmit
 void TxService::send() {
     // don't process if we don't have a connection to the EMS bus
     if (!bus_connected()) {
         return;
     }
 
-    // if there's nothing in the queue to transmit or sending should be delayed, send back a poll and quit
-    if (tx_telegrams_.empty() || (delayed_send_ && uuid::get_uptime() < delayed_send_)) {
+    std::shared_ptr<const Telegram> telegram;
+    uint16_t                        id         = 0;
+    uint16_t                        validateid = 0;
+    bool                            have       = false;
+
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        // if there's nothing in the queue to transmit or sending should be delayed, send back a poll and quit
+        if (!(tx_telegrams_.empty() || (delayed_send_ && uuid::get_uptime() < delayed_send_))) {
+            delayed_send_      = 0;
+            const auto & front = tx_telegrams_.front();
+            telegram           = front.telegram_;
+            id                 = front.id_;
+            validateid         = front.validateid_;
+            tx_telegrams_.pop_front();
+            have = true;
+        }
+    }
+
+    if (!have) {
         send_poll();
         return;
     }
-    delayed_send_ = 0;
 
     // if we're in read-only mode (tx_mode 0) forget the Tx call
     if (tx_mode() != EMS_TXMODE_OFF) {
-        send_telegram(tx_telegrams_.front());
+        send_telegram(telegram, id, validateid);
     }
-
-    tx_telegrams_.pop_front(); // remove the telegram from the queue
 }
 
 // process a Tx telegram
-void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
+void TxService::send_telegram(const std::shared_ptr<const Telegram> & telegram, const uint16_t id, const uint16_t validateid) {
     static uint8_t telegram_raw[EMS_MAX_TELEGRAM_LENGTH];
-
-    // build the header
-    auto telegram = tx_telegram.telegram_;
 
     // src - set MSB if it's Junkers/HT3
     uint8_t src = telegram->src;
@@ -430,10 +469,10 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
 
     LOG_DEBUG("Sending %s Tx [#%d], telegram: %s",
               (telegram->operation != Telegram::Operation::TX_READ) ? "write" : "read",
-              tx_telegram.id_,
+              id,
               Helpers::data_to_hex(telegram_raw, length - 1).c_str()); // exclude the last CRC byte
 
-    set_post_send_query(tx_telegram.validateid_);
+    set_post_send_query(validateid);
 
     //
     // this is the core send command to the UART
@@ -530,23 +569,36 @@ void TxService::add(const uint8_t  operation,
                     const bool     front) {
     auto telegram = std::make_shared<Telegram>(operation, ems_bus_id(), dest, type_id, offset, message_data, message_length);
 
-    LOG_DEBUG("New Tx [#%d] telegram, length %d", tx_telegram_id_, message_length);
+#ifndef EMSESP_STANDALONE
+    bool    overflow    = false;
+    uint8_t overflow_op = 0;
+#endif
+
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+#ifndef EMSESP_STANDALONE
+        // if the queue is full, make room by removing the last one
+        if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
+            overflow_op = tx_telegrams_.front().telegram_->operation;
+            tx_telegrams_.pop_front();
+            overflow = true;
+        }
+#endif
+
+        LOG_DEBUG("New Tx [#%d] telegram, length %d", tx_telegram_id_, message_length);
+        queue_telegram(std::move(telegram), false, validateid, front);
+    }
 
 #ifndef EMSESP_STANDALONE
-    // if the queue is full, make room by removing the last one
-    if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
+    if (overflow) {
         LOG_WARNING("Tx queue overflow, skip one message");
-        if (tx_telegrams_.front().telegram_->operation == Telegram::Operation::TX_WRITE) {
+        if (overflow_op == Telegram::Operation::TX_WRITE) {
             telegram_write_fail_count_++;
         } else {
             telegram_read_fail_count_++;
         }
-
-        tx_telegrams_.pop_front();
     }
 #endif
-
-    queue_telegram(std::move(telegram), false, validateid, front);
 
     if (validateid != 0) {
         EMSESP::wait_validate(validateid);
@@ -611,23 +663,33 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
 
     auto telegram = std::make_shared<Telegram>(operation, src, dest, type_id, offset, message_data, message_length); // operation is TX_WRITE or TX_READ
 
-    // if the queue is full, make room by removing the last one
-    if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
+    // a raw read waits behind an unanswered read; everything else requested at the front still jumps the queue
+    const bool to_front = front && (operation != Telegram::Operation::TX_RAW || EMSESP::response_id() == 0);
+
+    bool    overflow    = false;
+    uint8_t overflow_op = 0;
+
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        // if the queue is full, make room by removing the last one
+        if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
+            overflow_op = tx_telegrams_.front().telegram_->operation;
+            tx_telegrams_.pop_front();
+            overflow = true;
+        }
+
+        LOG_DEBUG("New Tx [#%d] telegram, length %d", tx_telegram_id_, message_length);
+        queue_telegram(std::move(telegram), false, validate_id, to_front);
+    }
+
+    if (overflow) {
         LOG_WARNING("Tx queue overflow, skip one message");
-        if (tx_telegrams_.front().telegram_->operation == Telegram::Operation::TX_WRITE) {
+        if (overflow_op == Telegram::Operation::TX_WRITE) {
             telegram_write_fail_count_++;
         } else {
             telegram_read_fail_count_++;
         }
-
-        tx_telegrams_.pop_front();
     }
-
-    LOG_DEBUG("New Tx [#%d] telegram, length %d", tx_telegram_id_, message_length);
-
-    // a raw read waits behind an unanswered read; everything else requested at the front still jumps the queue
-    const bool to_front = front && (operation != Telegram::Operation::TX_RAW || EMSESP::response_id() == 0);
-    queue_telegram(std::move(telegram), false, validate_id, to_front);
 
     if (validate_id != 0) {
         EMSESP::wait_validate(validate_id);
@@ -710,6 +772,7 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
                   telegram_last_->to_string().c_str());
 
         if (operation == Telegram::Operation::TX_READ) {
+            // add_empty takes the Rx mutex — never hold the Tx mutex here
             EMSESP::rxservice_.add_empty(telegram_last_->dest, telegram_last_->src, telegram_last_->type_id, telegram_last_->offset);
         }
 
@@ -722,17 +785,24 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
               telegram_last_->to_string().c_str(),
               Helpers::data_to_hex(data, length - 1).c_str());
 
-    // add to the top of the queue
-    if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
+    bool skip_retry = false;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        // add to the top of the queue
+        if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
+            skip_retry = true;
+        } else {
+            // for the last try wait 2 sec before sending.
+            delayed_send_ = (retry_count_ < MAXIMUM_TX_RETRIES) ? 0 : (uuid::get_uptime() + POST_SEND_DELAY);
+            queue_telegram(std::move(telegram_last_), true, get_post_send_query(), true); // retry goes out before anything else
+        }
+    }
+
+    if (skip_retry) {
         LOG_WARNING("Tx queue overflow, skip retry");
         reset_retry_count();      // give up
         EMSESP::wait_validate(0); // do not wait for validation
-        return;
     }
-
-    // for the last try wait 2 sec before sending.
-    delayed_send_ = (retry_count_ < MAXIMUM_TX_RETRIES) ? 0 : (uuid::get_uptime() + POST_SEND_DELAY);
-    queue_telegram(std::move(telegram_last_), true, get_post_send_query(), true); // retry goes out before anything else
 }
 
 // send a request to read the next block of data from longer telegrams
@@ -781,14 +851,16 @@ uint16_t TxService::post_send_query() {
     if (post_typeid) {
         uint8_t dest = (this->telegram_last_->dest & 0x7F);
         // when set a value with large offset before and validate on same type and offset, or complete telegram
-        uint8_t length = (this->telegram_last_->type_id == post_typeid) ? this->telegram_last_->message_length : 0xFF;
-        uint8_t offset = (this->telegram_last_->type_id == post_typeid) ? this->telegram_last_->offset : 0;
+        uint8_t length           = (this->telegram_last_->type_id == post_typeid) ? this->telegram_last_->message_length : 0xFF;
+        uint8_t offset           = (this->telegram_last_->type_id == post_typeid) ? this->telegram_last_->offset : 0;
+        uint32_t delay_until     = (this->telegram_last_->type_id == post_typeid) ? 0 : (uuid::get_uptime() + POST_SEND_DELAY);
         this->add(Telegram::Operation::TX_READ, dest, post_typeid, offset, &length, 1, 0, true); // add to top/front of queue
         // read_request(telegram_last_post_send_query_, dest, 0); // no offset
         LOG_DEBUG("Sending post validate read, type ID 0x%02X to dest 0x%02X", post_typeid, dest);
         set_post_send_query(0); // reset
         // delay the request if we have a different type_id for post_send_query
-        delayed_send_ = (this->telegram_last_->type_id == post_typeid) ? 0 : (uuid::get_uptime() + POST_SEND_DELAY);
+        std::lock_guard<std::mutex> lock(mutex_);
+        delayed_send_ = delay_until;
     }
 
     return post_typeid;
