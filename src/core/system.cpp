@@ -1030,15 +1030,10 @@ void System::start() {
 #endif
 #endif
 
-    EMSESP::esp32React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
-        hostname(networkSettings.hostname.c_str()); // sets the hostname
-    });
-
     commands_init();     // console & api commands
     EMSESP::led_.init(); // init LED
     button_init();       // button
     uart_init();         // start UART
-    syslog_init();       // start syslog
     modbus_init();       // start modbus
 }
 
