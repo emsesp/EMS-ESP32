@@ -1588,8 +1588,12 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
             default_name = "Cascaded Controller";
             device_type  = DeviceType::CONTROLLER;
         } else {
-            LOG_WARNING("Unrecognized EMS device (deviceID 0x%02X, no productID). Please report on GitHub.", device_id);
-            return false;
+            // listed in UBADevices but never answers version. Register once, otherwise every scan
+            // requests 0x02 again and the failure is logged forever (#3486)
+            default_name = "unknown";
+            device_type  = DeviceType::GENERIC;
+            flags        = DeviceFlags::EMS_DEVICE_FLAG_NONE;
+            LOG_WARNING("Unrecognized EMS device (deviceID 0x%02X, no productID). Adding as unknown. Please report on GitHub.", device_id);
         }
     }
 
