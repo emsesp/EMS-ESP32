@@ -161,6 +161,7 @@ const sv: Translation = {
   HELP_INFORMATION_2: 'För livechatt med communityn, gå med i vår Discord-server', // DeepL
   HELP_INFORMATION_3: 'För att begära en funktion eller rapportera ett fel', // DeepL
   HELP_INFORMATION_4: 'Ange din systeminformation när du rapporterar ett problem för att få ett snabbare svar', // DeepL
+  HELP_INFORMATION_5: 'EMS-ESP utvecklas av frivilliga. Ett tips via Ko-fi hjälper projektet att fortsätta',
   UPLOAD: 'Ladda upp', // DeepL
   DOWNLOAD: 'Nedladdning',
   INSTALL: 'Installera',
@@ -493,6 +494,7 @@ const sv: Translation = {
   DOCUMENTATION: 'Dokumentation',
   COMMUNITY_CHAT: 'Community-chatt', // DeepL
   REPORT_ISSUE: 'Rapportera ett fel eller begär en funktion', // DeepL
+  SUPPORT_PROJECT: 'Stöd projektet',
   GET_HELP: 'Få hjälp',
   REPORT_PROBLEM: 'Rapportera ett problem',
   REPORT_STEP_1: 'Ladda ner systeminformationen',
@@ -611,6 +613,7 @@ const sv: Translation = {
   SEARCH_SENSORS: 'Sök på namn, ID eller GPIO', // DeepL
   NO_SENSORS: 'Inga sensorer hittades',
   NO_SENSORS_MATCH: 'Inga sensorer matchar din sökning', // DeepL
+  SENSORS_HELP_1: 'Hantera temperaturgivare och analoga sensorer anslutna till den här enheten', // DeepL
   TEMP_SENSORS_HELP: 'Hittas automatiskt. Klicka på en Sensor för att byta namn på den eller ställa in en förskjutning', // DeepL
   FREE_GPIOS: 'Lediga GPIO-portar', // DeepL
   SYSTEM_SENSOR: 'Systemsensor',

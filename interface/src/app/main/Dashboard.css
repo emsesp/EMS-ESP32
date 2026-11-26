@@ -8,6 +8,7 @@
 .db-bar .cap {
   margin: 0;
   min-width: 200px;
+  color: var(--warning);
 }
 .db-msg {
   margin: 12px 12px 0;

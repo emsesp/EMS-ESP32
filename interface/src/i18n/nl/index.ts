@@ -161,6 +161,7 @@ const nl: Translation = {
   HELP_INFORMATION_2: 'Kom naar onze Discord-server voor live community-chat', // DeepL
   HELP_INFORMATION_3: 'Om een functie aan te vragen of een bug te melden', // DeepL
   HELP_INFORMATION_4: 'Vermeld je systeemgegevens als je een probleem meldt, zodat je sneller antwoord krijgt', // DeepL
+  HELP_INFORMATION_5: 'EMS-ESP wordt gemaakt door vrijwilligers. Een fooi via Ko-fi helpt het project draaiende te houden',
   UPLOAD: 'Uploaden', // DeepL
   DOWNLOAD: 'Download',
   INSTALL: 'Installeren',
@@ -493,6 +494,7 @@ const nl: Translation = {
   DOCUMENTATION: 'Documentatie',
   COMMUNITY_CHAT: 'Community-chat',
   REPORT_ISSUE: 'Meld een bug of vraag een functie aan', // DeepL
+  SUPPORT_PROJECT: 'Steun het project',
   GET_HELP: 'Hulp zoeken', // DeepL
   REPORT_PROBLEM: 'Een probleem melden',
   REPORT_STEP_1: 'Download de systeeminformatie',
@@ -611,6 +613,7 @@ const nl: Translation = {
   SEARCH_SENSORS: 'Zoek op naam, ID of GPIO', // DeepL
   NO_SENSORS: 'Geen Sensoren gevonden', // DeepL
   NO_SENSORS_MATCH: 'Er zijn geen Sensoren die aan je zoekopdracht voldoen', // DeepL
+  SENSORS_HELP_1: 'Beheer temperatuursensoren en analoge sensoren die op dit apparaat zijn aangesloten', // DeepL
   TEMP_SENSORS_HELP: 'Automatisch gevonden. Klik op een Sensor om hem een andere naam te geven of een offset in te stellen', // DeepL
   FREE_GPIOS: 'Vrije GPIO\'s',
   SYSTEM_SENSOR: 'Systeemsensor',

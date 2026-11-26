@@ -161,6 +161,7 @@ const sk: Translation = {
   HELP_INFORMATION_2: 'Ak sa chcete zapojiť do živého komunitného chatu, pripojte sa k nášmu serveru Discord', // DeepL
   HELP_INFORMATION_3: 'Ak chcete požiadať o novú funkciu alebo nahlásiť chybu', // DeepL
   HELP_INFORMATION_4: 'Pri hlásení problému uveďte informácie o vašom systéme, aby sme mohli rýchlejšie reagovať', // DeepL
+  HELP_INFORMATION_5: 'EMS-ESP vytvárajú dobrovoľníci. Prepitné na Ko-fi pomáha projektu pokračovať',
   UPLOAD: 'Nahrať',
   DOWNLOAD: 'Stiahnuť',
   INSTALL: 'Inštalácia', // DeepL
@@ -493,6 +494,7 @@ const sk: Translation = {
   DOCUMENTATION: 'Dokumentácia',
   COMMUNITY_CHAT: 'Komunitný chat',
   REPORT_ISSUE: 'Nahláste chybu alebo požiadajte o novú funkciu', // DeepL
+  SUPPORT_PROJECT: 'Podporte projekt',
   GET_HELP: 'Pomoc', // DeepL
   REPORT_PROBLEM: 'Nahlásiť problém', // DeepL
   REPORT_STEP_1: 'Stiahnite si informácie o systéme', // DeepL
@@ -611,6 +613,7 @@ const sk: Translation = {
   SEARCH_SENSORS: 'Vyhľadávanie podľa názvu, ID alebo GPIO', // DeepL
   NO_SENSORS: 'Nenašli sa žiadne snímače',
   NO_SENSORS_MATCH: 'Žiadne snímače nezodpovedajú vášmu vyhľadávaniu', // DeepL
+  SENSORS_HELP_1: 'Spravujte teplotné a analógové senzory pripojené k tomuto zariadeniu', // DeepL
   TEMP_SENSORS_HELP: 'Nájdené automaticky. Kliknutím na snímač ho môžete premenovať alebo nastaviť posun', // DeepL
   FREE_GPIOS: 'Voľné GPIO',
   SYSTEM_SENSOR: 'Systémový snímač',

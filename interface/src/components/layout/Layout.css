@@ -27,7 +27,7 @@
   border-bottom: 1px solid var(--divider);
 }
 .drawer-head img {
-  height: 38px;
+  height: 34px;
 }
 .drawer-name {
   font-size: 14px;
@@ -169,7 +169,8 @@
   left: var(--drawer-w);
   right: 0;
   height: var(--appbar-h);
-  background: var(--appbar);
+  background: var(--bg);
+  border-bottom: 1px solid var(--divider);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -201,6 +202,9 @@
 .appbar .crumb-link:hover {
   color: #fff;
   text-decoration: underline;
+}
+.appbar .crumb-current {
+  color: var(--text);
 }
 
 .main {

@@ -140,6 +140,7 @@ const Dashboard = () => {
       await sendDeviceValue({ id: selected.parentNode.id, c: dv.c ?? '', v: dv.v });
     }
     setSelected(undefined);
+    void fetchDashboard();
   };
 
   const canEdit = (dv?: DeviceValue): dv is DeviceValue =>

@@ -161,6 +161,7 @@ const hu: Translation = {
   HELP_INFORMATION_2: 'Ha élő közösségi csevegésben szeretnél részt venni, csatlakozz a Discord-szerverünkhöz', // DeepL
   HELP_INFORMATION_3: 'Funkció igénylése vagy hiba jelentése', // DeepL
   HELP_INFORMATION_4: 'Probléma bejelentésekor adja meg a rendszer adatait a gyorsabb válasz érdekében', // DeepL
+  HELP_INFORMATION_5: 'Az EMS-ESP-t önkéntesek fejlesztik. Egy borravaló a Ko-fi-n segít a projekt folytatásában',
   UPLOAD: 'Feltöltés',
   DOWNLOAD: 'Letöltés',
   INSTALL: 'Telepítés',
@@ -493,6 +494,7 @@ const hu: Translation = {
   DOCUMENTATION: 'Dokumentáció',
   COMMUNITY_CHAT: 'Közösségi csevegés',
   REPORT_ISSUE: 'Hiba jelentése vagy funkciókérés', // DeepL
+  SUPPORT_PROJECT: 'Támogassa a projektet',
   GET_HELP: 'Segítség', // DeepL
   REPORT_PROBLEM: 'Probléma jelentése', // DeepL
   REPORT_STEP_1: 'A rendszerinformációk letöltése', // DeepL
@@ -611,6 +613,7 @@ const hu: Translation = {
   SEARCH_SENSORS: 'Név, azonosító vagy GPIO keresése', // DeepL
   NO_SENSORS: 'Nem található senkivel sem', // DeepL
   NO_SENSORS_MATCH: 'A keresésnek nem felel meg egyetlen szensor sem', // DeepL
+  SENSORS_HELP_1: 'Kezelje az ehhez az eszközhöz csatlakoztatott hőmérséklet- és analóg érzékelőket', // DeepL
   TEMP_SENSORS_HELP: 'Automatikusan felismerve. Kattintson egy szenzorra annak átnevezéséhez vagy az eltolás beállításához', // DeepL
   FREE_GPIOS: 'Szabad GPIO-k',
   SYSTEM_SENSOR: 'Rendszer-szenzor', // DeepL

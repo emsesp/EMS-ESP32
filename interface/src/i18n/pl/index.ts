@@ -1,6 +1,6 @@
-import type { BaseTranslation } from '../i18n-types';
+import type { Translation } from '../i18n-types';
 
-const pl: BaseTranslation = {
+const pl: Translation = {
   LANGUAGE: 'Język',
   RETRY: 'Spróbuj ponownie', // DeepL
   IS_REQUIRED: 'Pole {0} jest obowiązkowe', // DeepL
@@ -161,6 +161,7 @@ const pl: BaseTranslation = {
   HELP_INFORMATION_2: 'Aby dołączyć do czatu społeczności na żywo, dołącz do naszego serwera Discord', // DeepL
   HELP_INFORMATION_3: 'Aby zgłosić prośbę o dodanie funkcji lub zgłosić błąd', // DeepL
   HELP_INFORMATION_4: 'Podaj informacje o swoim systemie podczas zgłaszania problemu, aby uzyskać szybszą odpowiedź', // DeepL
+  HELP_INFORMATION_5: 'EMS-ESP jest tworzony przez wolontariuszy. Napiwek na Ko-fi pomaga w dalszym rozwoju projektu',
   UPLOAD: 'Prześlij', // DeepL
   DOWNLOAD: 'Pobieranie',
   INSTALL: 'Zainstaluj', // DeepL
@@ -493,6 +494,7 @@ const pl: BaseTranslation = {
   DOCUMENTATION: 'Dokumentacja',
   COMMUNITY_CHAT: 'Czat społecznościowy', // DeepL
   REPORT_ISSUE: 'Zgłoś błąd lub poproś o dodanie funkcji', // DeepL
+  SUPPORT_PROJECT: 'Wesprzyj projekt',
   GET_HELP: 'Pomoc', // DeepL
   REPORT_PROBLEM: 'Zgłoś problem', // DeepL
   REPORT_STEP_1: 'Pobierz informacje o systemie',
@@ -611,6 +613,7 @@ const pl: BaseTranslation = {
   SEARCH_SENSORS: 'Wyszukaj nazwę, identyfikator lub GPIO', // DeepL
   NO_SENSORS: 'Nie znaleziono czujników',
   NO_SENSORS_MATCH: 'Żadne czujniki nie pasują do Twojego wyszukiwania', // DeepL
+  SENSORS_HELP_1: 'Zarządzaj czujnikami temperatury i analogowymi podłączonymi do tego urządzenia', // DeepL
   TEMP_SENSORS_HELP: 'Wykryto automatycznie. Kliknij czujnik, aby zmienić jego nazwę lub ustawić przesunięcie', // DeepL
   FREE_GPIOS: 'Wolne piny GPIO', // DeepL
   SYSTEM_SENSOR: 'Czujnik systemowy',

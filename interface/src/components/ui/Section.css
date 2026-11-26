@@ -11,6 +11,13 @@
   gap: 10px;
   flex-wrap: wrap;
 }
+.sec-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
 .sec-head h2 {
   color: var(--primary);
 }
@@ -27,7 +34,11 @@
 .sec-desc {
   margin: 0 0 12px;
   font-size: 12px;
-  color: var(--text-3);
+  color: var(--warning);
+}
+.sec-head .sec-desc {
+  margin: 0;
+  min-width: 12rem;
 }
 .sec-head + .sec-desc {
   margin-top: 4px;

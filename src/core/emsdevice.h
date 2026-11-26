@@ -471,12 +471,9 @@ class EMSdevice {
     static constexpr uint32_t DEVICE_OFFLINE_TIMEOUT = 300000;
 
     // static device IDs
-    static constexpr uint8_t EMS_DEVICE_ID_BOILER         = 0x08; // fixed device_id for Master Boiler/UBA
-    static constexpr uint8_t EMS_DEVICE_ID_HS1            = 0x70; // fixed device_id for 1st. Cascade Boiler/UBA
-    static constexpr uint8_t EMS_DEVICE_ID_HS16           = 0x7F; // fixed device_id for last Cascade Boiler/UBA
-    static constexpr uint8_t EMS_DEVICE_ID_AHS1           = 0x60; // fixed device_id for alternative Heating AM200
-    static constexpr uint8_t EMS_DEVICE_ID_CONTROLLER     = 0x09;
     static constexpr uint8_t EMS_DEVICE_ID_RS232          = 0x04;
+    static constexpr uint8_t EMS_DEVICE_ID_BOILER         = 0x08; // fixed device_id for Master Boiler/UBA
+    static constexpr uint8_t EMS_DEVICE_ID_CONTROLLER     = 0x09;
     static constexpr uint8_t EMS_DEVICE_ID_TERMINAL       = 0x0A;
     static constexpr uint8_t EMS_DEVICE_ID_SERVICEKEY     = 0x0B;
     static constexpr uint8_t EMS_DEVICE_ID_CASCADE        = 0x0C;
@@ -486,9 +483,6 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_ID_SWITCH         = 0x11; // Switch WM10
     static constexpr uint8_t EMS_DEVICE_ID_ALERT          = 0x12; // Error module EM10
     static constexpr uint8_t EMS_DEVICE_ID_EXTENSION      = 0x15; // Extension module EM1000, Pump module PM10
-    static constexpr uint8_t EMS_DEVICE_ID_MODEM          = 0x48;
-    static constexpr uint8_t EMS_DEVICE_ID_RFSENSOR       = 0x40; // RF sensor only sending, no reply
-    static constexpr uint8_t EMS_DEVICE_ID_RFBASE         = 0x50;
     static constexpr uint8_t EMS_DEVICE_ID_ROOMTHERMOSTAT = 0x17; // TADO using this with no version reply #174
     static constexpr uint8_t EMS_DEVICE_ID_TADO_OLD       = 0x19; // older TADO using this with no version reply, #1031
     static constexpr uint8_t EMS_DEVICE_ID_MIXER1         = 0x20; // e.g MH210 module as mixer
@@ -496,8 +490,9 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_ID_DHW1           = 0x28; // MM100 module as water station
     static constexpr uint8_t EMS_DEVICE_ID_DHW2           = 0x29; // MM100 module as water station
     static constexpr uint8_t EMS_DEVICE_ID_DHW8           = 0x2F; // last DHW module id?
+    static constexpr uint8_t EMS_DEVICE_ID_RFSENSOR       = 0x40; // RF sensor only sending, no reply
     static constexpr uint8_t EMS_DEVICE_ID_IPM_DHW        = 0x41; // IPM module as water station
-    static constexpr uint8_t EMS_DEVICE_ID_GATEWAY1       = 0x48; // KM200, MX300, MX400
+    static constexpr uint8_t EMS_DEVICE_ID_MODEM          = 0x48; // modem or gateway KM200, MX300, MX400
     static constexpr uint8_t EMS_DEVICE_ID_GATEWAY2       = 0x49;
     static constexpr uint8_t EMS_DEVICE_ID_GATEWAY3       = 0x4A;
     static constexpr uint8_t EMS_DEVICE_ID_GATEWAY4       = 0x4B;
@@ -505,6 +500,10 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_ID_GATEWAY6       = 0x4D;
     static constexpr uint8_t EMS_DEVICE_ID_GATEWAY7       = 0x4E;
     static constexpr uint8_t EMS_DEVICE_ID_GATEWAY8       = 0x4F;
+    static constexpr uint8_t EMS_DEVICE_ID_RFBASE         = 0x50;
+    static constexpr uint8_t EMS_DEVICE_ID_AHS1           = 0x60; // fixed device_id for alternative Heating AM200
+    static constexpr uint8_t EMS_DEVICE_ID_HS1            = 0x70; // fixed device_id for first Cascade Boiler/UBA
+    static constexpr uint8_t EMS_DEVICE_ID_HS16           = 0x7F; // fixed device_id for last Cascade Boiler/UBA
 
     // generic type IDs
     static constexpr uint16_t EMS_TYPE_NAME        = 0x01; // device config for ems devices, name ascii on offset 27ff  for ems+

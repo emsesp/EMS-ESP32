@@ -1,6 +1,7 @@
 import { readSystemStatus } from 'api/system';
 
 import { useRequest } from 'alova/client';
+import { boardProfileName } from 'app/main/types';
 import { KeyValueList, Loader, Meter, Section } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 import { useInterval } from 'utils';
@@ -39,7 +40,13 @@ const HardwareStatus = () => {
                 data.cpu_type
               )
             },
-            !!data.board && { label: LL.BOARD_PROFILE(), value: data.board },
+            !!data.board_profile && {
+              label: LL.BOARD_PROFILE(),
+              value:
+                data.board_profile === 'CUSTOM'
+                  ? LL.CUSTOM()
+                  : boardProfileName(data.board_profile)
+            },
             {
               label: 'CPU',
               value: `${data.esp_platform} / ${data.cpu_type} rev ${data.cpu_rev}`,

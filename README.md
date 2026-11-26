@@ -36,7 +36,7 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/emsesp/EMS-ESP32.svg?style=social&label=Star)](https://github.com/emsesp/EMS-ESP32/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/emsesp/EMS-ESP32.svg?style=social&label=Fork)](https://github.com/emsesp/EMS-ESP32/network)
-[![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.com/paypalme/prderbyshire/2)
+[![ko-fi](https://img.shields.io/badge/Ko--fi-Support%20EMS--ESP-ff5e5b?logo=ko-fi&logoColor=white)](https://ko-fi.com/emsesp)
 
 **EMS-ESP** is an open-source firmware for the Espressif ESP32 microcontroller to communicate with **EMS** (Energy Management System) compatible equipment from manufacturers such as Bosch, Buderus, Nefit, Junkers, Worcester, Sieger, elm.leblanc and iVT.
 
@@ -82,7 +82,7 @@ To see a live demo go to [demo.emsesp.org](https://demo.emsesp.org). Pick a lang
 
 EMS-ESP is a project originally created by [proddy](https://github.com/proddy) and maintained by the ems-esp community.
 
-If you like **EMS-ESP**, please give it a ✨ on GitHub, or even better fork it and contribute. You can also offer a small donation. This is an open-source project maintained by volunteers, and your support is greatly appreciated.
+If you like **EMS-ESP**, please give it a ✨ on GitHub, or even better fork it and contribute. This is an open-source project maintained by volunteers, and if it is useful to you, please consider [supporting it on Ko-fi](https://ko-fi.com/emsesp). One-off tips and monthly support both help keep the project going.
 
 ## 📦&nbsp; **Building**
 

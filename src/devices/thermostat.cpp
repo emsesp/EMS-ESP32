@@ -229,7 +229,10 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         register_telegram_type(0x614, "RCauxHeaterMode", true, MAKE_PF_CB(process_auxHeaterMode));
         register_telegram_type(0x67B, "RC300Pool", true, MAKE_PF_CB(process_RC300Pool), 2);
 
-        EMSESP::send_read_request(0xC0, device_id, 0, 20); // read last errorcode on start (only published on errors)
+        // read first three error-history records on start (only published on errors) - #3475
+        EMSESP::send_read_request(0xC0, device_id, 0, 20);
+        EMSESP::send_read_request(0xC0, device_id, 20, 20);
+        EMSESP::send_read_request(0xC0, device_id, 40, 20);
 
         // JUNKERS/HT3
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
@@ -1224,7 +1227,14 @@ void Thermostat::process_RC300Monitor(const std::shared_ptr<const Telegram> & te
     // use summertemp or hpoperatingstate, https://github.com/emsesp/EMS-ESP32/issues/747, #550, #503
     // 0x470 or any 0x471+ means offset 20 is the heat-pump state. Publish it on every circuit:
     // some BC400/UI800 only answer 0x471, while hc2+ still broadcast the state in 0x2A6 ff. #3097
-    if ((hc->statusbyte & 1) || !has_hpoperatingstate()) {
+    // An early offset-20 fragment leaves statusbyte unset (0xFF). (0xFF & 0x50) would
+    // wrongly publish summer before the offset-0 frame arrives. #3471
+    if (!Helpers::hasValue(hc->statusbyte)) {
+        if (has_hpoperatingstate()) {
+            has_enumupdate(telegram, hc->hpoperatingstate, 20, 1); // 1:heating, 2:off, 3:cooling
+        }
+        // leave summermode unpublished until statusbyte is known
+    } else if ((hc->statusbyte & 1) || !has_hpoperatingstate()) {
         has_update(hc->summermode, hc->statusbyte & 0x50 ? 1 : 0);
         has_update(hc->hpoperatingstate, EMS_VALUE_UINT8_NOTSET);
     } else {
@@ -1989,14 +1999,61 @@ void Thermostat::process_RCErrorMessage(const std::shared_ptr<const Telegram> & 
     }
 }
 
-// 0xBF
-void Thermostat::process_ErrorMessageBF(const std::shared_ptr<const Telegram> &) {
-    EMSESP::send_read_request(0xC0, device_id(), 0, 20); // read last errorcode
+// 0xBF - active fault: bytes 5-7 display code (ASCII), bytes 8-9 code number (BE); 0 = none
+// https://github.com/emsesp/EMS-ESP32/issues/3475
+void Thermostat::process_ErrorMessageBF(const std::shared_ptr<const Telegram> & telegram) {
+    if (telegram->offset == 0 && telegram->message_length >= 10) {
+        uint16_t codeNo = EMS_VALUE_UINT16_NOTSET;
+        telegram->read_value(codeNo, 8);
+        if (Helpers::hasValue(codeNo) && codeNo != 0) {
+            char code[4] = {0};
+            code[0]      = telegram->message_data[5];
+            code[1]      = telegram->message_data[6];
+            code[2]      = telegram->message_data[7];
+            if (std::isprint(code[0]) && std::isprint(code[1]) && std::isprint(code[2])) {
+                char newCode[sizeof(errorCode_)];
+                snprintf(newCode, sizeof(newCode), "%s(%d)", code, codeNo);
+                has_update(errorCode_, newCode, sizeof(errorCode_));
+            }
+        } else {
+            has_update(errorCode_, "", sizeof(errorCode_));
+            lastCodeDate_ = 0;
+            lastCodeOpen_ = false;
+            lastCodeNo_   = 0;
+        }
+    }
+
+    // refresh first three error-history records
+    EMSESP::send_read_request(0xC0, device_id(), 0, 20);
+    EMSESP::send_read_request(0xC0, device_id(), 20, 20);
+    EMSESP::send_read_request(0xC0, device_id(), 40, 20);
 }
 
-// 0xC0 error log for RC300
+// Prefer open (active) faults over finished ones when ranking lastcode - #3475
+bool Thermostat::update_lastCode(const char * code, uint16_t codeNo, uint32_t date, bool is_open) {
+    bool take = false;
+    if (is_open) {
+        take = !lastCodeOpen_ || date >= lastCodeDate_;
+    } else if (lastCodeOpen_) {
+        take = (codeNo == lastCodeNo_);
+    } else {
+        take = date > lastCodeDate_;
+    }
+
+    if (!take) {
+        return false;
+    }
+
+    lastCodeDate_ = date;
+    lastCodeOpen_ = is_open;
+    lastCodeNo_   = codeNo;
+    has_update(lastCode_, code, sizeof(lastCode_));
+    return true;
+}
+
+// 0xC0 error log for RC300; records are 20 bytes (offsets 0, 20, 40, ...)
 void Thermostat::process_RCErrorMessage2(const std::shared_ptr<const Telegram> & telegram) {
-    if (telegram->offset > 0 || telegram->message_length < 20) {
+    if ((telegram->offset % 20) != 0 || telegram->message_length < 20) {
         return;
     }
 
@@ -2012,32 +2069,43 @@ void Thermostat::process_RCErrorMessage2(const std::shared_ptr<const Telegram> &
     uint8_t  day1    = telegram->message_data[18];
     uint8_t  hour1   = telegram->message_data[17];
     uint8_t  min1    = telegram->message_data[19];
-    if (isprint(code[0]) && isprint(code[1]) && isprint(code[2])) {
-        if (year == 2000) { // no clock
-            uint32_t min2 = 65536 * telegram->message_data[11] + 256 * telegram->message_data[12] + telegram->message_data[13];
-            snprintf(lastCode_, sizeof(lastCode_), "%s(%d) %d min", code, codeNo, min2);
-        } else if (year1 == 2000) {
-            snprintf(lastCode_, sizeof(lastCode_), "%s(%d) %02d.%02d.%d %02d:%02d", code, codeNo, day, month, year, hour, min);
-        } else {
-            snprintf(lastCode_,
-                     sizeof(lastCode_),
-                     "%s(%d) %02d.%02d.%d %02d:%02d-%02d.%02d.%d %02d:%02d",
-                     code,
-                     codeNo,
-                     day,
-                     month,
-                     year,
-                     hour,
-                     min,
-                     day1,
-                     month1,
-                     year1,
-                     hour1,
-                     min1);
-        }
-
-        has_update(lastCode_);
+    if (!isprint(code[0]) || !isprint(code[1]) || !isprint(code[2])) {
+        return;
     }
+
+    char     buf[sizeof(lastCode_)] = {0};
+    uint32_t date                   = 0;
+    bool     is_open                = false;
+
+    if (year == 2000) { // no clock
+        uint32_t min2 = 65536UL * telegram->message_data[11] + 256UL * telegram->message_data[12] + telegram->message_data[13];
+        snprintf(buf, sizeof(buf), "%s(%d) %d min", code, codeNo, min2);
+        date = min2;
+    } else if (year1 == 2000) {
+        // no end date - error still persists (BC400 0xC0 does not set 0x80 on year bytes) - #3475
+        is_open = true;
+        date    = (year - 2000) * 535680UL + month * 44640UL + day * 1440UL + hour * 60 + min;
+        snprintf(buf, sizeof(buf), "%s(%d) %02d.%02d.%d %02d:%02d - now", code, codeNo, day, month, year, hour, min);
+    } else {
+        date = (year1 - 2000) * 535680UL + month1 * 44640UL + day1 * 1440UL + hour1 * 60 + min1;
+        snprintf(buf,
+                 sizeof(buf),
+                 "%s(%d) %02d.%02d.%d %02d:%02d-%02d.%02d.%d %02d:%02d",
+                 code,
+                 codeNo,
+                 day,
+                 month,
+                 year,
+                 hour,
+                 min,
+                 day1,
+                 month1,
+                 year1,
+                 hour1,
+                 min1);
+    }
+
+    update_lastCode(buf, codeNo, date, is_open);
 }
 
 /*
@@ -3776,7 +3844,13 @@ bool Thermostat::set_mode_n(const uint8_t mode, const int8_t id) {
 bool Thermostat::set_summermode(const char * value, const int8_t id) {
     uint8_t set;
     if (has_summer3()) {
-        if (Helpers::value2enum(value, set, FL_(enum_summermode))) {
+        // 0x0470 offset 0, tested on a BC400 / WLW176i (#3470):
+        // 0 off     - menu "Summer", app "Idle"; heating and cooling both disabled
+        // 1 auto    - switches between heating and cooling on outdoor temperature
+        // 2 heating - menu "Heating only", app "Always heating"
+        // 3 cooling - menu "Cooling only", app "Always cooling"
+        // Heating-only menus call 0 summer and 2 winter; those still write (#3230).
+        if (Helpers::value2enum(value, set, FL_(enum_hpoperatingmode)) || Helpers::value2enum(value, set, FL_(enum_summermode))) {
             write_command(0x470, 0, set, 0x470);
             return true;
         }
@@ -5118,7 +5192,7 @@ void Thermostat::register_device_values() {
             register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                                   &hpoperatingmode,
                                   DeviceValueType::ENUM,
-                                  FL_(enum_summermode),
+                                  FL_(enum_hpoperatingmode),
                                   FL_(hpoperatingmode),
                                   DeviceValueUOM::NONE,
                                   MAKE_CF_CB(set_summermode));

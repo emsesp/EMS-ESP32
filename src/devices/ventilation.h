@@ -36,21 +36,34 @@ class Ventilation : public EMSdevice {
     uint16_t voc_;
     uint8_t  humidity_;
     uint8_t  bypass_;
-    // uint16_t filterRemain_;
-    uint8_t ventInSpeed_;
-    uint8_t ventOutSpeed_;
+    uint8_t  ventInSpeed_;
+    uint8_t  ventOutSpeed_;
+    uint16_t ventOutRpm_;
+    uint16_t ventInRpm_;
+    uint8_t  ventOutVoltage_;
+    uint8_t  ventInVoltage_;
+    uint8_t  ventBalance_;
+    uint8_t  level1Pct_;
+    uint8_t  level2Pct_;
+    uint8_t  level4Pct_;
 
-    // handlers: 0x056B 0x0575 0x0583 0x0585 0x0586 0x0587 0x0588 0x058D 0x058E 0x058F 0x0590 0x05CF 0x05D9 0x05E3
-    void process_SetMessage(const std::shared_ptr<const Telegram> & telegram); // 0x55C
-    void process_MonitorMessage(const std::shared_ptr<const Telegram> & telegram);
-    void process_ModeMessage(const std::shared_ptr<const Telegram> & telegram);   // 0x56B
-    void process_BlowerMessage(const std::shared_ptr<const Telegram> & telegram); // 0x56B
-    void process_VOCMessage(const std::shared_ptr<const Telegram> & telegram);    // 0x56B
-    void process_BypassMessage(const std::shared_ptr<const Telegram> & telegram); // 0x56B
+    // handlers: 0x0556 0x055C 0x0561 0x056B 0x0575 0x0583 0x0585 0x0586 0x0587 0x0588 0x058D 0x058E 0x058F 0x0590 0x05CF 0x05D9 0x05E3
+    void process_SetMessage(const std::shared_ptr<const Telegram> & telegram);     // 0x55C
+    void process_MonitorMessage(const std::shared_ptr<const Telegram> & telegram); // 0x583
+    void process_ModeMessage(const std::shared_ptr<const Telegram> & telegram);    // 0x56B
+    void process_BlowerMessage(const std::shared_ptr<const Telegram> & telegram);  // 0x585
+    void process_VOCMessage(const std::shared_ptr<const Telegram> & telegram);     // 0x5D9
+    void process_BypassMessage(const std::shared_ptr<const Telegram> & telegram);  // 0x587
+    void process_BalanceMessage(const std::shared_ptr<const Telegram> & telegram); // 0x556
+    void process_LevelMessage(const std::shared_ptr<const Telegram> & telegram);   // 0x561
 
     bool set_ventMode(const char * value, const int8_t id);
     bool set_bypass(const char * value, const int8_t id);
     bool set_filter(const char * value, const int8_t id);
+    bool set_ventBalance(const char * value, const int8_t id);
+    bool set_level1Pct(const char * value, const int8_t id);
+    bool set_level2Pct(const char * value, const int8_t id);
+    bool set_level4Pct(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

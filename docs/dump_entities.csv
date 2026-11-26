@@ -31,6 +31,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "CS5800i, CS6800i, WLW176i, WLW186i",boiler,8,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -280,6 +281,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Greenstar 2000",boiler,11,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Greenstar 2000",boiler,11,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Greenstar 2000",boiler,11,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Greenstar 2000",boiler,11,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Greenstar 2000",boiler,11,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Greenstar 2000",boiler,11,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Greenstar 2000",boiler,11,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -401,6 +403,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "C1200W",boiler,12,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "C1200W",boiler,12,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "C1200W",boiler,12,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"C1200W",boiler,12,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "C1200W",boiler,12,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "C1200W",boiler,12,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "C1200W",boiler,12,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -522,6 +525,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "CS5800iG",boiler,16,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "CS5800iG",boiler,16,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "CS5800iG",boiler,16,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"CS5800iG",boiler,16,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "CS5800iG",boiler,16,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "CS5800iG",boiler,16,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "CS5800iG",boiler,16,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -643,6 +647,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "BK13/BK15, Smartline, GB1*2",boiler,64,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "BK13/BK15, Smartline, GB1*2",boiler,64,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "BK13/BK15, Smartline, GB1*2",boiler,64,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"BK13/BK15, Smartline, GB1*2",boiler,64,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "BK13/BK15, Smartline, GB1*2",boiler,64,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "BK13/BK15, Smartline, GB1*2",boiler,64,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "BK13/BK15, Smartline, GB1*2",boiler,64,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -764,6 +769,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Logano GB1*5, Logamatic MC10",boiler,72,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Logano GB1*5, Logamatic MC10",boiler,72,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Logano GB1*5, Logamatic MC10",boiler,72,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Logano GB1*5, Logamatic MC10",boiler,72,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Logano GB1*5, Logamatic MC10",boiler,72,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Logano GB1*5, Logamatic MC10",boiler,72,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Logano GB1*5, Logamatic MC10",boiler,72,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -885,6 +891,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Cascade CM10",boiler,81,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Cascade CM10",boiler,81,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Cascade CM10",boiler,81,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Cascade CM10",boiler,81,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Cascade CM10",boiler,81,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Cascade CM10",boiler,81,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Cascade CM10",boiler,81,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -1006,6 +1013,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Logamax Plus GB022",boiler,84,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Logamax Plus GB022",boiler,84,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Logamax Plus GB022",boiler,84,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Logamax Plus GB022",boiler,84,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Logamax Plus GB022",boiler,84,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Logamax Plus GB022",boiler,84,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Logamax Plus GB022",boiler,84,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -1127,6 +1135,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Condens, Logamax/Logomatic, Cerapur Top, Greenstar, Generic HT3",boiler,95,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Condens, Logamax/Logomatic, Cerapur Top, Greenstar, Generic HT3",boiler,95,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Condens, Logamax/Logomatic, Cerapur Top, Greenstar, Generic HT3",boiler,95,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Condens, Logamax/Logomatic, Cerapur Top, Greenstar, Generic HT3",boiler,95,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Condens, Logamax/Logomatic, Cerapur Top, Greenstar, Generic HT3",boiler,95,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Condens, Logamax/Logomatic, Cerapur Top, Greenstar, Generic HT3",boiler,95,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Condens, Logamax/Logomatic, Cerapur Top, Greenstar, Generic HT3",boiler,95,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -1248,6 +1257,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Topline, GB162",boiler,115,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Topline, GB162",boiler,115,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Topline, GB162",boiler,115,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Topline, GB162",boiler,115,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Topline, GB162",boiler,115,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Topline, GB162",boiler,115,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Topline, GB162",boiler,115,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -1369,6 +1379,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Cascade MCM10",boiler,121,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Cascade MCM10",boiler,121,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Cascade MCM10",boiler,121,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Cascade MCM10",boiler,121,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Cascade MCM10",boiler,121,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Cascade MCM10",boiler,121,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Cascade MCM10",boiler,121,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -1490,6 +1501,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Proline",boiler,122,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Proline",boiler,122,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Proline",boiler,122,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Proline",boiler,122,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Proline",boiler,122,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Proline",boiler,122,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Proline",boiler,122,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -1611,6 +1623,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "GB*72, Trendline, Cerapur, Greenstar Si",boiler,123,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "GB*72, Trendline, Cerapur, Greenstar Si",boiler,123,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "GB*72, Trendline, Cerapur, Greenstar Si",boiler,123,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"GB*72, Trendline, Cerapur, Greenstar Si",boiler,123,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "GB*72, Trendline, Cerapur, Greenstar Si",boiler,123,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "GB*72, Trendline, Cerapur, Greenstar Si",boiler,123,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "GB*72, Trendline, Cerapur, Greenstar Si",boiler,123,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -1732,6 +1745,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "GB212",boiler,131,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "GB212",boiler,131,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "GB212",boiler,131,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"GB212",boiler,131,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "GB212",boiler,131,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "GB212",boiler,131,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "GB212",boiler,131,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -1853,6 +1867,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "GC7000F",boiler,132,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "GC7000F",boiler,132,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "GC7000F",boiler,132,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"GC7000F",boiler,132,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "GC7000F",boiler,132,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "GC7000F",boiler,132,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "GC7000F",boiler,132,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -1974,6 +1989,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Logano GB125/KB195i, Logamatic MC110",boiler,133,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Logano GB125/KB195i, Logamatic MC110",boiler,133,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Logano GB125/KB195i, Logamatic MC110",boiler,133,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Logano GB125/KB195i, Logamatic MC110",boiler,133,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Logano GB125/KB195i, Logamatic MC110",boiler,133,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Logano GB125/KB195i, Logamatic MC110",boiler,133,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Logano GB125/KB195i, Logamatic MC110",boiler,133,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -2095,6 +2111,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Greenstar 30Ri Compact",boiler,154,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Greenstar 30Ri Compact",boiler,154,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Greenstar 30Ri Compact",boiler,154,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Greenstar 30Ri Compact",boiler,154,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Greenstar 30Ri Compact",boiler,154,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Greenstar 30Ri Compact",boiler,154,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Greenstar 30Ri Compact",boiler,154,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -2216,6 +2233,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Suprapur-o",boiler,155,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Suprapur-o",boiler,155,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Suprapur-o",boiler,155,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Suprapur-o",boiler,155,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Suprapur-o",boiler,155,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Suprapur-o",boiler,155,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Suprapur-o",boiler,155,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -2337,6 +2355,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Cerapur Aero",boiler,167,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Cerapur Aero",boiler,167,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Cerapur Aero",boiler,167,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Cerapur Aero",boiler,167,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Cerapur Aero",boiler,167,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Cerapur Aero",boiler,167,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Cerapur Aero",boiler,167,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -2458,6 +2477,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Hybrid Heatpump",boiler,168,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Hybrid Heatpump",boiler,168,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Hybrid Heatpump",boiler,168,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Hybrid Heatpump",boiler,168,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Hybrid Heatpump",boiler,168,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Hybrid Heatpump",boiler,168,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Hybrid Heatpump",boiler,168,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -2579,6 +2599,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Logano GB212",boiler,170,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Logano GB212",boiler,170,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Logano GB212",boiler,170,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Logano GB212",boiler,170,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Logano GB212",boiler,170,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Logano GB212",boiler,170,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Logano GB212",boiler,170,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -2678,6 +2699,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -2905,6 +2927,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Geo 5xx",boiler,173,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Geo 5xx",boiler,173,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Geo 5xx",boiler,173,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Geo 5xx",boiler,173,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Geo 5xx",boiler,173,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Geo 5xx",boiler,173,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Geo 5xx",boiler,173,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -3154,6 +3177,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Condens 5000i, Greenstar 8000/GC9800IW, GB192i*2",boiler,195,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Condens 5000i, Greenstar 8000/GC9800IW, GB192i*2",boiler,195,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Condens 5000i, Greenstar 8000/GC9800IW, GB192i*2",boiler,195,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Condens 5000i, Greenstar 8000/GC9800IW, GB192i*2",boiler,195,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Condens 5000i, Greenstar 8000/GC9800IW, GB192i*2",boiler,195,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Condens 5000i, Greenstar 8000/GC9800IW, GB192i*2",boiler,195,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Condens 5000i, Greenstar 8000/GC9800IW, GB192i*2",boiler,195,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -3275,6 +3299,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Logamax U122, Cerapur",boiler,203,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Logamax U122, Cerapur",boiler,203,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Logamax U122, Cerapur",boiler,203,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Logamax U122, Cerapur",boiler,203,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Logamax U122, Cerapur",boiler,203,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Logamax U122, Cerapur",boiler,203,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Logamax U122, Cerapur",boiler,203,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -3396,6 +3421,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Ecomline Excellent",boiler,206,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Ecomline Excellent",boiler,206,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Ecomline Excellent",boiler,206,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Ecomline Excellent",boiler,206,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Ecomline Excellent",boiler,206,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Ecomline Excellent",boiler,206,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Ecomline Excellent",boiler,206,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -3517,6 +3543,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Logamax Plus, GB192, Condens GC9000, Greenstar ErP",boiler,208,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Logamax Plus, GB192, Condens GC9000, Greenstar ErP",boiler,208,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Logamax Plus, GB192, Condens GC9000, Greenstar ErP",boiler,208,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Logamax Plus, GB192, Condens GC9000, Greenstar ErP",boiler,208,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Logamax Plus, GB192, Condens GC9000, Greenstar ErP",boiler,208,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Logamax Plus, GB192, Condens GC9000, Greenstar ErP",boiler,208,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Logamax Plus, GB192, Condens GC9000, Greenstar ErP",boiler,208,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -3638,6 +3665,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Cascade MC400",boiler,210,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Cascade MC400",boiler,210,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Cascade MC400",boiler,210,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Cascade MC400",boiler,210,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Cascade MC400",boiler,210,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Cascade MC400",boiler,210,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Cascade MC400",boiler,210,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -3759,6 +3787,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "EasyControl Adapter",boiler,211,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "EasyControl Adapter",boiler,211,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "EasyControl Adapter",boiler,211,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"EasyControl Adapter",boiler,211,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "EasyControl Adapter",boiler,211,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "EasyControl Adapter",boiler,211,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "EasyControl Adapter",boiler,211,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -3864,6 +3893,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Greenstar HIU, Logamax kompakt WS170",boiler,219,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Greenstar HIU, Logamax kompakt WS170",boiler,219,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Greenstar HIU, Logamax kompakt WS170",boiler,219,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Greenstar HIU, Logamax kompakt WS170",boiler,219,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Greenstar HIU, Logamax kompakt WS170",boiler,219,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Greenstar HIU, Logamax kompakt WS170",boiler,219,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Greenstar HIU, Logamax kompakt WS170",boiler,219,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -3981,6 +4011,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Logamax Plus GB122, Condense 2300, Junkers Cerapur GC2200W",boiler,234,heatstarts,burner starts heating,uint24, ,false,sensor.boiler_burner_starts_heating,sensor.boiler_heatstarts,6,0,1,33,2
 "Logamax Plus GB122, Condense 2300, Junkers Cerapur GC2200W",boiler,234,ubauptime,total UBA operating time,time,minutes,false,sensor.boiler_total_UBA_operating_time,sensor.boiler_ubauptime,6,0,1,35,2
 "Logamax Plus GB122, Condense 2300, Junkers Cerapur GC2200W",boiler,234,lastcode,last error code,string, ,false,sensor.boiler_last_error_code,sensor.boiler_lastcode,6,0,1,37,28
+"Logamax Plus GB122, Condense 2300, Junkers Cerapur GC2200W",boiler,234,errorcode,error code,string, ,false,sensor.boiler_error_code,sensor.boiler_errorcode,6,0,1,294,8
 "Logamax Plus GB122, Condense 2300, Junkers Cerapur GC2200W",boiler,234,servicecode,service code,string, ,false,sensor.boiler_service_code,sensor.boiler_servicecode,6,0,1,65,2
 "Logamax Plus GB122, Condense 2300, Junkers Cerapur GC2200W",boiler,234,servicecodenumber,service code number,uint16, ,false,sensor.boiler_service_code_number,sensor.boiler_servicecodenumber,6,0,1,67,1
 "Logamax Plus GB122, Condense 2300, Junkers Cerapur GC2200W",boiler,234,maintenancemessage,maintenance message,string, ,false,sensor.boiler_maintenance_message,sensor.boiler_maintenancemessage,6,0,1,68,2
@@ -4811,7 +4842,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,pvraiseheat,raise heating with PV,int8 (>=0<=5),K,true,number.thermostat_raise_heating_with_PV,number.thermostat_pvraiseheat,7,0,1,62,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,pvlowercool,lower cooling with PV,int8 (>=-5<=0),K,true,number.thermostat_lower_cooling_with_PV,number.thermostat_pvlowercool,7,0,1,63,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,absent,absent,boolean (>=0<=0), ,true,switch.thermostat_absent,switch.thermostat_absent,7,0,1,64,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,hpoperatingmode,heatpump operating mode,enum [summer\|auto\|winter] (>=0<=0), ,true,select.thermostat_heatpump_operating_mode,select.thermostat_hpoperatingmode,7,0,1,90,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,hpoperatingmode,heatpump operating mode,enum [off\|auto\|heating\|cooling] (>=0<=0), ,true,select.thermostat_heatpump_operating_mode,select.thermostat_hpoperatingmode,7,0,1,90,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,summertemp,summer temperature,uint8 (>=10<=30),C,true,number.thermostat_summer_temperature,number.thermostat_summertemp,7,0,1,91,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,instantstart,instant start,uint8 (>=1<=10),K,true,number.thermostat_instant_start,number.thermostat_instantstart,7,0,1,92,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,coolstart,cooling starttemp,uint8 (>=24<=35),C,true,number.thermostat_cooling_starttemp,number.thermostat_coolstart,7,0,1,93,1
@@ -6046,6 +6077,14 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "HRV176, HRV156, 5000c, MV200",ventilation,231,airquality,air quality (voc),uint16, ,false,sensor.ventilation_air_quality_(voc),sensor.ventilation_airquality,19,0,1,7,1
 "HRV176, HRV156, 5000c, MV200",ventilation,231,airhumidity,relative air humidity,uint8,%,false,sensor.ventilation_relative_air_humidity,sensor.ventilation_airhumidity,19,0,1,8,1
 "HRV176, HRV156, 5000c, MV200",ventilation,231,bypass,bypass,boolean (>=0<=0), ,true,switch.ventilation_bypass,switch.ventilation_bypass,19,0,1,9,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,ventoutrpm,exhaust fan speed,uint16, ,false,sensor.ventilation_exhaust_fan_speed,sensor.ventilation_ventoutrpm,19,0,1,10,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,ventinrpm,supply fan speed,uint16, ,false,sensor.ventilation_supply_fan_speed,sensor.ventilation_ventinrpm,19,0,1,11,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,ventoutvoltage,exhaust fan voltage,uint8,V,false,sensor.ventilation_exhaust_fan_voltage,sensor.ventilation_ventoutvoltage,19,0,1/10,12,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,ventinvoltage,supply fan voltage,uint8,V,false,sensor.ventilation_supply_fan_voltage,sensor.ventilation_ventinvoltage,19,0,1/10,13,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,ventbalance,volume flow balance exhaust,uint8 (>=90<=110),%,true,number.ventilation_volume_flow_balance_exhaust,number.ventilation_ventbalance,19,0,1,14,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,level1pct,level L1,uint8 (>=0<=150),%,true,number.ventilation_level_L1,number.ventilation_level1pct,19,0,1,15,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,level2pct,level L2,uint8 (>=0<=150),%,true,number.ventilation_level_L2,number.ventilation_level2pct,19,0,1,16,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,level4pct,level L4,uint8 (>=0<=150),%,true,number.ventilation_level_L4,number.ventilation_level4pct,19,0,1,17,1
 "IPM",water,100,dhw.seltemp,selected temperature,uint8 (>=0<=0),C,true,number.water_dhw_selected_temperature,number.water_dhw_seltemp,20,9,1,0,1
 "IPM",water,100,dhw.temp,current temperature,uint16,C,false,sensor.water_dhw_current_temperature,sensor.water_dhw_temp,20,9,1/10,1,1
 "IPM",water,100,dhw.curtemp2,current extern temperature,uint16,C,false,sensor.water_dhw_current_extern_temperature,sensor.water_dhw_curtemp2,20,9,1/10,2,1

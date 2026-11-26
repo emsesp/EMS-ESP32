@@ -161,6 +161,7 @@ const cs: Translation = {
   HELP_INFORMATION_2: 'Chcete-li se zapojit do živého komunitního chatu, připojte se k našemu serveru Discord', // DeepL
   HELP_INFORMATION_3: 'Chcete-li požádat o novou funkci nebo nahlásit chybu', // DeepL
   HELP_INFORMATION_4: 'Při hlášení problému uveďte informace o svém systému, aby byla reakce rychlejší', // DeepL
+  HELP_INFORMATION_5: 'EMS-ESP vytvářejí dobrovolníci. Spropitné na Ko-fi pomáhá projektu pokračovat',
   UPLOAD: 'Nahrát',
   DOWNLOAD: 'Stáhnout',
   INSTALL: 'Instalace', // DeepL
@@ -493,6 +494,7 @@ const cs: Translation = {
   DOCUMENTATION: 'Dokumentace',
   COMMUNITY_CHAT: 'Komunitní chat',
   REPORT_ISSUE: 'Nahlásit chybu nebo požádat o novou funkci', // DeepL
+  SUPPORT_PROJECT: 'Podpořte projekt',
   GET_HELP: 'Nápověda', // DeepL
   REPORT_PROBLEM: 'Nahlásit problém', // DeepL
   REPORT_STEP_1: 'Stáhnout informace o systému', // DeepL
@@ -611,6 +613,7 @@ const cs: Translation = {
   SEARCH_SENSORS: 'Vyhledat podle názvu, ID nebo GPIO', // DeepL
   NO_SENSORS: 'Nebyly nalezeny žádné senzory',
   NO_SENSORS_MATCH: 'Žádný senzor neodpovídá vašemu vyhledávání', // DeepL
+  SENSORS_HELP_1: 'Spravujte teplotní a analogové senzory připojené k tomuto zařízení', // DeepL
   TEMP_SENSORS_HELP: 'Nalezeno automaticky. Kliknutím na senzor jej můžete přejmenovat nebo nastavit odchylku', // DeepL
   FREE_GPIOS: 'Volné GPIO',
   SYSTEM_SENSOR: 'Systémový senzor',
