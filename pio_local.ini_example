@@ -85,7 +85,8 @@ upload_protocol = custom
 [env:debug]
 board = esp32-s3-devkitc-1
 framework = arduino
-platform = espressif32@6.12.0 ; Arduino Core v2.0.17 / IDF v4.4.7
+platform = https://github.com/tasmota/platform-espressif32/releases/download/2026.11.51/platform-espressif32.zip
+platform_packages = framework-arduinoespressif32 @ https://github.com/emsesp/esp32-arduino-lib-builder/releases/download/1411-1037-5.5_gcc153/framework-arduinoespressif32-release_v5.5_gcc153-e9beae0f.tar.xz
 board_build.partitions = partitions/esp32_partition_16M.csv
 board_upload.flash_size = 16MB
 board_build.app_partition_name = app0
