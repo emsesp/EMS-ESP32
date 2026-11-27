@@ -5461,8 +5461,7 @@ router
 
     // like the firmware / recovery mock: refuse an unsigned build until the user agrees (custom=1)
     // enabled by the refuseUnofficial mock-data preset, or by naming the file custom*.bin
-    const allowCustom =
-      new URL(request.url).searchParams.get('custom') === '1';
+    const allowCustom = new URL(request.url).searchParams.get('custom') === '1';
     const treatAsCustom =
       mock_data.refuseUnofficial || fileName.toLowerCase().startsWith('custom');
     if (fileExtension === 'bin' && treatAsCustom && !allowCustom) {
@@ -5473,9 +5472,7 @@ router
     if (fileExtension === 'bin' && pendingFirmwareMd5) {
       pendingFirmwareMd5 = false;
       console.log('Firmware MD5 matches');
-      return treatAsCustom
-        ? { official: false, md5_ok: true }
-        : { md5_ok: true };
+      return treatAsCustom ? { official: false, md5_ok: true } : { md5_ok: true };
     }
 
     pendingFirmwareMd5 = false;
