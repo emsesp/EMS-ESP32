@@ -353,6 +353,33 @@ static const esp_partition_t * findAppPartition(const char * label) {
     return esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_ANY, label);
 }
 
+// after an upload, refresh that slot only. loadPartitions() re-hashes every app image and would
+// trip the async_tcp task watchdog on a multi-MB EMS-ESP binary
+static void applyUploadedPartition(const String & label, bool official, size_t image_size) {
+    for (auto & info : partitions) {
+        if (info.label != label) {
+            continue;
+        }
+        info.valid        = true;
+        info.official     = official;
+        info.image_size   = image_size;
+        info.install_date = UINT32_MAX; // most recent, so it isn't the default target for the next upload
+        info.ota_state.clear();         // boot wasn't switched
+        info.version.clear();
+        const esp_partition_t * part = findAppPartition(label.c_str());
+        esp_app_desc_t          desc;
+        if (part != nullptr && esp_ota_get_partition_description(part, &desc) == ESP_OK) {
+            info.version = desc.version;
+        }
+        LOG("Partition %s updated after upload: %s%s%s",
+            info.label.c_str(),
+            official ? "official" : "custom",
+            info.version.isEmpty() ? "" : ", v",
+            info.version.c_str());
+        return;
+    }
+}
+
 static bool failedToStart(const PartitionInfo & info) {
     return info.ota_state == "aborted" || info.ota_state == "invalid";
 }
@@ -703,7 +730,8 @@ static void handleUpload(AsyncWebServerRequest * request, const String & filenam
             return;
         }
         ota.allowCustom(request->hasParam("custom")); // the user agreed to install a custom build
-        if (!ota.beginFirmware(filesize, target)) {
+        // don't switch the boot partition: the user starts the new firmware from the UI when ready
+        if (!ota.beginFirmware(filesize, target, false)) {
             LOG("Cannot write to %s: %s", target->label, ota.errorString());
             uploadFail(request, 507, "cannot start the update");
             return;
@@ -746,7 +774,6 @@ static void handleUpload(AsyncWebServerRequest * request, const String & filenam
     }
 
     if (final) {
-        // on success this also makes the new partition the boot partition
         if (!ota.end()) {
             LOG("Upload failed: %s", ota.errorString());
             uploadFail(request, ota.notOfficial() ? 412 : 500, ota.notOfficial() ? "not an official EMS-ESP build" : "image check failed");
@@ -765,13 +792,8 @@ static void handleUploadComplete(AsyncWebServerRequest * request) {
     if (upload_done) {
         LOG("Firmware written to %s", upload_target.c_str());
         markFreshFirmware(upload_target);
-        loadPartitions();
-        // treat the new upload as the most recent, so it isn't the default target for the next one
-        for (auto & info : partitions) {
-            if (info.label == upload_target) {
-                info.install_date = UINT32_MAX;
-            }
-        }
+        // ota.end() already verified this image; don't call loadPartitions() here (watchdog)
+        applyUploadedPartition(upload_target, ota.isOfficial(), upload_size);
 
         LOG("%s", ota.isOfficial() ? "Official EMS-ESP build, signature verified" : "Custom build, it isn't signed by EMS-ESP");
         auto *     response = new AsyncJsonResponse();

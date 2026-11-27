@@ -601,6 +601,10 @@ bool WebStatusService::refresh_versions_cache() {
 #if defined(EMSESP_DEBUG)
     EMSESP::logger().debug("Fetched from %s: stable=%s, dev=%s, current=%s", VERSIONS_URL, stable.version.c_str(), dev.version.c_str(), current_version_s.c_str());
 #endif
+
+    // refresh the Home Assistant MQTT Update entity (and firmware topic) with the new versions
+    Mqtt::publish_firmware_update();
+
     return true;
 #endif
 }
@@ -615,6 +619,18 @@ bool WebStatusService::current_upgradeable() const {
     }
 
     return is_dev ? versions_dev_.upgradeable : versions_stable_.upgradeable;
+}
+
+// latest version for the channel matching the installed build (dev vs stable)
+std::string WebStatusService::current_latest_version() const {
+    FirmwareVersion             current_version(current_version_s);
+    bool                        is_dev = current_version.prerelease().find("dev") != std::string::npos;
+    std::lock_guard<std::mutex> lock{versions_mutex_};
+    if (!versions_cache_valid_) {
+        return {};
+    }
+
+    return is_dev ? versions_dev_.version : versions_stable_.version;
 }
 
 // action = allvalues

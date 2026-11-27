@@ -42,6 +42,9 @@ class WebStatusService {
 
     bool current_upgradeable() const; // true if a newer version is available
 
+    // latest version string for the current channel (stable or dev), empty if the cache is not valid yet
+    std::string current_latest_version() const;
+
 // make action function public so we can test in the debug and standalone mode
 #ifndef EMSESP_STANDALONE
   protected:

@@ -295,6 +295,8 @@ interface MockData {
   recovery: string; // installed recovery app version, '' for not installed, 'noslot' for no factory partition
   recoveryLatest: string; // recovery app in the stable and dev releases online, '' for none
   recoveryOfficial: boolean; // the installed recovery app is an official or custom build
+  // .bin uploads return 412 until retried with custom=1 (shows the install-anyway warning)
+  refuseUnofficial: boolean;
   flash: string; // flash chip size: '4MB', '16MB' or '32MB'
   psram: boolean; // board has PSRAM
   model: string; // BBQKees eFuse model string, '' when not a BBQKees gateway
@@ -351,6 +353,10 @@ const MOCK_DATA_PRESETS: { name: string; values: Partial<MockData> }[] = [
     values: { recoveryOfficial: false }
   },
   {
+    name: 'firmware upload skips unofficial warning',
+    values: { refuseUnofficial: false }
+  },
+  {
     name: 'no factory partition (no recovery row)',
     values: { recovery: 'noslot' }
   },
@@ -386,6 +392,8 @@ const MOCK_DATA_DEFAULT: MockData = {
   recovery: '1.1.0',
   recoveryLatest: '1.1.0',
   recoveryOfficial: true,
+  // local standalone: on so a .bin upload shows the install-anyway warning; off on the public demo
+  refuseUnofficial: !DEMO,
   flash: '16MB',
   psram: true,
   model: 'BBQKees Electronics E32V2.2 rev.2.2/2024073',
@@ -929,6 +937,7 @@ ${toggle('debug')}
 ${choices('recovery', ['', '1.0.0', '1.1.0', 'noslot'])}
 ${choices('recoveryLatest', ['', '1.0.0', '1.1.0', '1.2.0'])}
 ${toggle('recoveryOfficial')}
+${toggle('refuseUnofficial')}
 </ul>
 <h3>Board</h3>
 <ul>
@@ -5450,15 +5459,28 @@ router
       return md5_ok ? { recovery: true, md5_ok } : { recovery: true };
     }
 
+    // like the firmware / recovery mock: refuse an unsigned build until the user agrees (custom=1)
+    // enabled by the refuseUnofficial mock-data preset, or by naming the file custom*.bin
+    const allowCustom =
+      new URL(request.url).searchParams.get('custom') === '1';
+    const treatAsCustom =
+      mock_data.refuseUnofficial || fileName.toLowerCase().startsWith('custom');
+    if (fileExtension === 'bin' && treatAsCustom && !allowCustom) {
+      console.log('Refusing unofficial firmware (412)');
+      return status(412);
+    }
+
     if (fileExtension === 'bin' && pendingFirmwareMd5) {
       pendingFirmwareMd5 = false;
       console.log('Firmware MD5 matches');
-      return { md5_ok: true };
+      return treatAsCustom
+        ? { official: false, md5_ok: true }
+        : { md5_ok: true };
     }
 
     pendingFirmwareMd5 = false;
     console.log('File uploaded successfully!');
-    return status(200);
+    return treatAsCustom ? { official: false } : status(200);
   })
   .get(ACTIVITY_ENDPOINT, () => activity)
   .get(MOCK_DATA_ENDPOINT, mock_data_page)

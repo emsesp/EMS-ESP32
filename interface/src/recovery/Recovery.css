@@ -45,6 +45,9 @@
 .rc-p {
   margin: 0 0 12px;
 }
+.sec-head + .rc-p {
+  margin-top: 20px;
+}
 .rc-dump {
   margin-bottom: 12px;
   overflow-wrap: anywhere;

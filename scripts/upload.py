@@ -57,6 +57,8 @@ UPLOAD_ERRORS = {
     400: "The device didn't accept the file. It isn't a firmware file, or the upload was cut off.",
     401: "The device didn't accept the sign-in. Check custom_username and custom_password in pio_local.ini.",
     403: "This user isn't an admin. Set custom_username to an admin user in pio_local.ini.",
+    409: "The device is running the Recovery app, which can't install a recovery image into itself. "
+         "Start EMS-ESP from the Recovery UI first, then upload again.",
     412: "The device refused it because it isn't an official EMS-ESP build. Firmware from 2 Nov 2026 onwards installs it anyway "
          "when uploaded with this script. An older 3.9.0 dev build only accepts it after running 'allow unsigned' in its console, "
          "or flash it over USB once.",
@@ -221,8 +223,22 @@ def on_upload(source, target, env):
                        str(response.status_code) + ")")
             return 1
 
-        print_success("Authentication with EMS-ESP successful")
         access_token = response.json().get('access_token')
+        # recovery also has /rest/signIn. EMS-ESP serves the SPA (HTTP 200 HTML) for unknown
+        # paths, so only treat it as Recovery when the JSON body has recovery_version
+        running_recovery = False
+        try:
+            probe = session.get(
+                f"{emsesp_url}/rest/recovery/status",
+                headers=build_headers(host_ip, emsesp_url, access_token=access_token),
+                timeout=15)
+            running_recovery = (
+                probe.status_code == 200 and 'recovery_version' in probe.json())
+        except ValueError:
+            pass
+        print_success(
+            "Authentication with Recovery successful" if running_recovery
+            else "Authentication with EMS-ESP successful")
 
         # firmware uploads need the password entered again (404 on firmware older than 3.10.0)
         response = session.post(
@@ -242,6 +258,9 @@ def on_upload(source, target, env):
         # EMS-ESP only accepts a recovery image below the normal minimum firmware size when the name contains "recovery"
         fw_name = env.GetProjectOption('custom_fw_name', '')
         filename = f"{fw_name}.bin" if fw_name else os.path.basename(firmware_path)
+        if running_recovery and 'recovery' in filename.lower():
+            print_fail(UPLOAD_ERRORS[409])
+            return 1
         # Device enables MD5 check only after a file whose name ends in .md5
         # (same as the WebUI). An ElegantOTA "MD5" form field is ignored.
         md5_name = os.path.splitext(filename)[0] + '.md5'

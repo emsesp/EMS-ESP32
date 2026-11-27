@@ -134,6 +134,10 @@ class Mqtt {
 
     static void ha_status();
 
+    // Home Assistant MQTT Update entity (notify-only): discovery config + retained state on "firmware"
+    static bool publish_ha_firmware_update_config();
+    static void publish_firmware_update();
+
 #if defined(EMSESP_TEST)
     void incoming(const char * topic, const char * payload = ""); // for testing only
 #endif

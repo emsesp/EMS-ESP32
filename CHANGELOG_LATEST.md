@@ -35,6 +35,7 @@ A full list of breaking changes can be found in this [discussion](https://github
 
 ## Added
 
+- Home Assistant MQTT Update entity for EMS-ESP firmware (notify-only): with MQTT discovery it shows when a newer version is available, using the existing automatic firmware check. There is no Install button yet; update from the EMS-ESP WebUI. Publishes retained `ems-esp/firmware` with `installed_version` / `latest_version`
 - boiler and thermostat `errorcode` from telegram 0xBF (the currently active fault, e.g. `" --(5141)"` / `"A11(3221)"`), so heat pumps without `servicecode` show locking alarms while they are active [#3475](https://github.com/emsesp/EMS-ESP32/issues/3475)
 - Logavent HRV156/HRV176: `ventbalance` (writable volume flow balance for the exhaust fan, 90–110 %), `level1pct`/`level2pct`/`level4pct` (writable level percentages), `ventoutrpm`/`ventinrpm` and `ventoutvoltage`/`ventinvoltage` (fan rpm and 0–10 V control voltage) [#3478](https://github.com/emsesp/EMS-ESP32/discussions/3478)
 - "Support the project" link on the Help page to tip EMS-ESP on Ko-fi, which replaces the PayPal donation link in the README
@@ -59,6 +60,8 @@ A full list of breaking changes can be found in this [discussion](https://github
 
 ## Fixed
 
+- Recovery 1.1.1 crashed with a task watchdog after uploading EMS-ESP firmware, because it re-checked every partition on the web server task; 1.1.2 only updates the slot that was written [#3488](https://github.com/emsesp/EMS-ESP32/issues/3488)
+- after "Install anyway" for a custom firmware build, the upload progress bar opened near 100% from the refused upload instead of starting at 0
 - Rx and Tx telegram queues are locked so the UART task and the main loop no longer race on the same `std::deque`, which could crash in `shared_ptr` teardown when the Rx queue was full (more likely with a virtual RC100H and heavy bus traffic) [#3483](https://github.com/emsesp/EMS-ESP32/issues/3483)
 - MQTT with TLS left the TCP socket open after a failed TLS handshake, so the client waited until the broker closed it before it could retry and could stay disconnected [#3482](https://github.com/emsesp/EMS-ESP32/discussions/3482)
 - `lastcode` on heat pumps (0xC6/0xC2/0xC0) only read the first history record and ranked open faults by start time against finished ones by end time, so an active locking fault in a later record (e.g. 5141 after a finished 5140) was missed; the first three records are read and open faults are preferred [#3475](https://github.com/emsesp/EMS-ESP32/issues/3475)
@@ -86,6 +89,8 @@ A full list of breaking changes can be found in this [discussion](https://github
 
 ## Changed
 
+- Recovery no longer starts the firmware after an upload; use Start on that partition when you are ready. Buttons are disabled while an upload is running
+- remove unused ccache from CI and PlatformIO (the wrap never reached the compilers)
 - Web UI i18n: typesafe-i18n `baseLocale` is English again (was Polish so call sites could pass case indexes for PL). A few English strings use dummy `{{…}}` plurals for that; the build no longer rewrites generated `i18n-util.ts` from `pl` to `en` [#695](https://github.com/emsesp/EMS-ESP32/issues/695)
 - on WLW176i/BC400-style heat pumps, locking alarms (e.g. 5141, 6257) clear with `boiler/reset message`; H-warnings with `boiler/reset hp_error` [#3475](https://github.com/emsesp/EMS-ESP32/issues/3475) [#2933](https://github.com/emsesp/EMS-ESP32/issues/2933)
 - security: Web UI sign-in tokens are signed with a random key that is unique to each device, so existing access tokens stop working after the upgrade. Admins see a notice in the WebUI until it is closed. Changing an admin password replaces the key, which signs everyone out
