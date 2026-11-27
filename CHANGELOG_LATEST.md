@@ -35,6 +35,7 @@ A full list of breaking changes can be found in this [discussion](https://github
 
 ## Added
 
+- Home Assistant MQTT Update entity for EMS-ESP firmware (notify-only): with MQTT discovery it shows when a newer version is available, using the existing automatic firmware check. There is no Install button yet; update from the EMS-ESP WebUI. Publishes retained `ems-esp/firmware` with `installed_version` / `latest_version`
 - boiler and thermostat `errorcode` from telegram 0xBF (the currently active fault, e.g. `" --(5141)"` / `"A11(3221)"`), so heat pumps without `servicecode` show locking alarms while they are active [#3475](https://github.com/emsesp/EMS-ESP32/issues/3475)
 - Logavent HRV156/HRV176: `ventbalance` (writable volume flow balance for the exhaust fan, 90–110 %), `level1pct`/`level2pct`/`level4pct` (writable level percentages), `ventoutrpm`/`ventinrpm` and `ventoutvoltage`/`ventinvoltage` (fan rpm and 0–10 V control voltage) [#3478](https://github.com/emsesp/EMS-ESP32/discussions/3478)
 - "Support the project" link on the Help page to tip EMS-ESP on Ko-fi, which replaces the PayPal donation link in the README
