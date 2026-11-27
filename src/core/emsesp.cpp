@@ -2026,6 +2026,12 @@ void EMSESP::start() {
     // loads core system services settings (mqtt, ap, ntp etc)
     esp32React.begin();
 
+    webSettingsService.begin(); // load EMS-ESP application settings
+    esp32React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
+        system_.hostname(networkSettings.hostname.c_str());
+    });
+    system_.syslog_init(); // queue boot diagnostics until the network is ready
+
 // output filesystem folders and files for debugging
 #if defined(EMSESP_DEBUG)
     LOG_DEBUG("Listing root directory after:");
@@ -2077,8 +2083,6 @@ void EMSESP::start() {
 #else
     LOG_INFO("Last system reset reason Core0: %s, Core1: %s", system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
 #endif
-
-    webSettingsService.begin(); // load EMS-ESP Application settings
 
     LOG_DEBUG("System name: %s", system_.system_name().c_str());
     LOG_DEBUG("eFuse BBQKees Gateway Model: %s", system_.getBBQKeesGatewayDetails().isEmpty() ? "not set" : system_.getBBQKeesGatewayDetails().c_str());
@@ -2134,7 +2138,7 @@ void EMSESP::start() {
     }
 
     mqtt_.start();                                                           // mqtt init
-    system_.start();                                                         // starts commands, led, adc, button, network (sets hostname), syslog & uart
+    system_.start();                                                         // starts commands, LED, button, UART and Modbus
     shower_.start();                                                         // initialize shower timer and shower alert
     temperaturesensor_.start(factory_settings || force_temperature_sensors); // Temperature external sensors
     analogsensor_.start(factory_settings || force_analog_sensors);           // Analog external sensors
