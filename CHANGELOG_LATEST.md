@@ -60,6 +60,7 @@ A full list of breaking changes can be found in this [discussion](https://github
 
 ## Fixed
 
+- Comfort+2RF (CR110 RF, product 246): mode stayed `auto` when the thermostat was Off, because the CRF200 bit fields in byte 2 were used instead of the mode byte at offset 10 of `0x02A5` (`0`=off, `1`=auto, `4`=manual). Off is now reported correctly; manual still shows as auto. Writing seltemp/mode is still not supported (no set telegram) [#3473](https://github.com/emsesp/EMS-ESP32/discussions/3473)
 - Recovery 1.1.1 crashed with a task watchdog after uploading EMS-ESP firmware, because it re-checked every partition on the web server task; 1.1.2 only updates the slot that was written [#3488](https://github.com/emsesp/EMS-ESP32/issues/3488)
 - after "Install anyway" for a custom firmware build, the upload progress bar opened near 100% from the refused upload instead of starting at 0
 - Rx and Tx telegram queues are locked so the UART task and the main loop no longer race on the same `std::deque`, which could crash in `shared_ptr` teardown when the Rx queue was full (more likely with a virtual RC100H and heavy bus traffic) [#3483](https://github.com/emsesp/EMS-ESP32/issues/3483)
