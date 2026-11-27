@@ -60,6 +60,8 @@ A full list of breaking changes can be found in this [discussion](https://github
 
 ## Fixed
 
+- Recovery 1.1.1 crashed with a task watchdog after uploading EMS-ESP firmware, because it re-checked every partition on the web server task; 1.1.2 only updates the slot that was written [#3488](https://github.com/emsesp/EMS-ESP32/issues/3488)
+- after "Install anyway" for a custom firmware build, the upload progress bar opened near 100% from the refused upload instead of starting at 0
 - Rx and Tx telegram queues are locked so the UART task and the main loop no longer race on the same `std::deque`, which could crash in `shared_ptr` teardown when the Rx queue was full (more likely with a virtual RC100H and heavy bus traffic) [#3483](https://github.com/emsesp/EMS-ESP32/issues/3483)
 - MQTT with TLS left the TCP socket open after a failed TLS handshake, so the client waited until the broker closed it before it could retry and could stay disconnected [#3482](https://github.com/emsesp/EMS-ESP32/discussions/3482)
 - `lastcode` on heat pumps (0xC6/0xC2/0xC0) only read the first history record and ranked open faults by start time against finished ones by end time, so an active locking fault in a later record (e.g. 5141 after a finished 5140) was missed; the first three records are read and open faults are preferred [#3475](https://github.com/emsesp/EMS-ESP32/issues/3475)
@@ -87,6 +89,7 @@ A full list of breaking changes can be found in this [discussion](https://github
 
 ## Changed
 
+- Recovery no longer starts the firmware after an upload; use Start on that partition when you are ready. Buttons are disabled while an upload is running
 - remove unused ccache from CI and PlatformIO (the wrap never reached the compilers)
 - Web UI i18n: typesafe-i18n `baseLocale` is English again (was Polish so call sites could pass case indexes for PL). A few English strings use dummy `{{…}}` plurals for that; the build no longer rewrites generated `i18n-util.ts` from `pl` to `en` [#695](https://github.com/emsesp/EMS-ESP32/issues/695)
 - on WLW176i/BC400-style heat pumps, locking alarms (e.g. 5141, 6257) clear with `boiler/reset message`; H-warnings with `boiler/reset hp_error` [#3475](https://github.com/emsesp/EMS-ESP32/issues/3475) [#2933](https://github.com/emsesp/EMS-ESP32/issues/2933)
