@@ -2088,21 +2088,7 @@ void Thermostat::process_RCErrorMessage2(const std::shared_ptr<const Telegram> &
         snprintf(buf, sizeof(buf), "%s(%d) %02d.%02d.%d %02d:%02d - now", code, codeNo, day, month, year, hour, min);
     } else {
         date = (year1 - 2000) * 535680UL + month1 * 44640UL + day1 * 1440UL + hour1 * 60 + min1;
-        snprintf(buf,
-                 sizeof(buf),
-                 "%s(%d) %02d.%02d.%d %02d:%02d-%02d.%02d.%d %02d:%02d",
-                 code,
-                 codeNo,
-                 day,
-                 month,
-                 year,
-                 hour,
-                 min,
-                 day1,
-                 month1,
-                 year1,
-                 hour1,
-                 min1);
+        snprintf(buf, sizeof(buf), "%s(%d) %02d.%02d.%d %02d:%02d-%02d.%02d.%d %02d:%02d", code, codeNo, day, month, year, hour, min, day1, month1, year1, hour1, min1);
     }
 
     update_lastCode(buf, codeNo, date, is_open);

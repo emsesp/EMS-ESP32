@@ -50,6 +50,7 @@ class DummySettings {
     uint8_t  mqtt_commands      = 1;     // values and Commands
     String   host               = "192.168.1.4";
     uint16_t port               = 1883;
+    bool     enableTLS          = false;
     String   clientId           = "ems-esp";
     String   username           = "";
     uint16_t keepAlive          = 60;

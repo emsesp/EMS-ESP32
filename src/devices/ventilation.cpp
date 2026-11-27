@@ -64,38 +64,14 @@ Ventilation::Ventilation(uint8_t device_type, uint8_t device_id, uint8_t product
                           DeviceValueNumOp::DV_NUMOP_DIV10,
                           FL_(ventInVoltage),
                           DeviceValueUOM::VOLTS);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                          &ventBalance_,
-                          DeviceValueType::UINT8,
-                          FL_(ventBalance),
-                          DeviceValueUOM::PERCENT,
-                          MAKE_CF_CB(set_ventBalance),
-                          90,
-                          110);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                          &level1Pct_,
-                          DeviceValueType::UINT8,
-                          FL_(level1Pct),
-                          DeviceValueUOM::PERCENT,
-                          MAKE_CF_CB(set_level1Pct),
-                          0,
-                          150);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                          &level2Pct_,
-                          DeviceValueType::UINT8,
-                          FL_(level2Pct),
-                          DeviceValueUOM::PERCENT,
-                          MAKE_CF_CB(set_level2Pct),
-                          0,
-                          150);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                          &level4Pct_,
-                          DeviceValueType::UINT8,
-                          FL_(level4Pct),
-                          DeviceValueUOM::PERCENT,
-                          MAKE_CF_CB(set_level4Pct),
-                          0,
-                          150);
+    register_device_value(
+        DeviceValueTAG::TAG_DEVICE_DATA, &ventBalance_, DeviceValueType::UINT8, FL_(ventBalance), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_ventBalance), 90, 110);
+    register_device_value(
+        DeviceValueTAG::TAG_DEVICE_DATA, &level1Pct_, DeviceValueType::UINT8, FL_(level1Pct), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_level1Pct), 0, 150);
+    register_device_value(
+        DeviceValueTAG::TAG_DEVICE_DATA, &level2Pct_, DeviceValueType::UINT8, FL_(level2Pct), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_level2Pct), 0, 150);
+    register_device_value(
+        DeviceValueTAG::TAG_DEVICE_DATA, &level4Pct_, DeviceValueType::UINT8, FL_(level4Pct), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_level4Pct), 0, 150);
 }
 
 // message 0x055C, data: 08 01 11 17
@@ -105,12 +81,12 @@ void Ventilation::process_SetMessage(const std::shared_ptr<const Telegram> & tel
 
 // message 0x0583
 void Ventilation::process_MonitorMessage(const std::shared_ptr<const Telegram> & telegram) {
-    has_update(telegram, outEx_, 0);       // Fortluft
-    has_update(telegram, ventOutRpm_, 2);  // Abluft rpm
-    has_update(telegram, inEx_, 7);        // Abluft
-    has_update(telegram, outFresh_, 13);   // Außenluft
-    has_update(telegram, inFresh_, 15);    // Zuluft
-    has_update(telegram, ventInRpm_, 17);  // Zuluft rpm
+    has_update(telegram, outEx_, 0);      // Fortluft
+    has_update(telegram, ventOutRpm_, 2); // Abluft rpm
+    has_update(telegram, inEx_, 7);       // Abluft
+    has_update(telegram, outFresh_, 13);  // Außenluft
+    has_update(telegram, inFresh_, 15);   // Zuluft
+    has_update(telegram, ventInRpm_, 17); // Zuluft rpm
 }
 
 // message 575 10 bytes
