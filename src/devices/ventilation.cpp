@@ -27,11 +27,11 @@ Ventilation::Ventilation(uint8_t device_type, uint8_t device_id, uint8_t product
     // HRV176/HRV156 module, device_id 0x51
     register_telegram_type(0x56B, "VentilationMode", true, MAKE_PF_CB(process_ModeMessage), 1);
     register_telegram_type(0x589, "VentilationAutoLevel", true, MAKE_PF_CB(process_AutoLevelMessage), 2);
-    register_telegram_type(0x575, "VentilationBlower", false, MAKE_PF_CB(process_BlowerMessage));
+    register_telegram_type(0x585, "Blowerspeed", false, MAKE_PF_CB(process_BlowerMessage));
     register_telegram_type(0x583, "VentilationMonitor", false, MAKE_PF_CB(process_MonitorMessage));
     register_telegram_type(0x5D9, "Airquality", false, MAKE_PF_CB(process_VOCMessage));
     register_telegram_type(0x587, "Bypass", false, MAKE_PF_CB(process_BypassMessage));
-    register_telegram_type(0x55C, "VentilationSet", true, MAKE_PF_CB(process_SetMessage), 2);
+    register_telegram_type(0x55C, "VentilationSet", true, MAKE_PF_CB(process_SetMessage), 4);
     register_telegram_type(0x556, "VentilationBalance", true, MAKE_PF_CB(process_BalanceMessage));
     register_telegram_type(0x561, "VentilationLevel", true, MAKE_PF_CB(process_LevelMessage));
     register_telegram_type(0x557, "VentilationAirflow", true, MAKE_PF_CB(process_AirflowMessage), 3);
@@ -142,13 +142,13 @@ void Ventilation::process_MonitorMessage(const std::shared_ptr<const Telegram> &
     has_update(telegram, ventInRpm_, 17);  // Zuluft rpm
 }
 
-// message 0x575 10 bytes
-// data: 02 02 46 46 00 00 FF 80 00 01
-// 0-level out, 1-level in, 2-mod out, 3-mod in, 9-mode:1-manual/2-auto/3-prog
-// in demand mode the modulation is set freely (e.g. 43%), it does not follow the fixed L1-L4 percentages
+// message 0x585, 26 bytes: offsets 0/1 are exhaust/supply fan percentages
+// Observed on a Bosch 5000c identifying as MV200: 0x575 also reports these percentages at offsets 2/3.
+// Its 10-byte payload was 01 01 1E 1E 00 00 FF 80 00 02: L1/L1, 30%/30%.
+// Offsets 0/1 are exhaust/supply levels; 0x575 is not registered to preserve 0x585 compatibility.
 void Ventilation::process_BlowerMessage(const std::shared_ptr<const Telegram> & telegram) {
-    has_update(telegram, ventOutSpeed_, 2);
-    has_update(telegram, ventInSpeed_, 3);
+    has_update(telegram, ventOutSpeed_, 0);
+    has_update(telegram, ventInSpeed_, 1);
 }
 
 // message 0x05D9, data: 03 9C FF

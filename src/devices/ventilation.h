@@ -51,9 +51,9 @@ class Ventilation : public EMSdevice {
     uint8_t  level1Pct_;
     uint8_t  level2Pct_;
     uint8_t  level4Pct_;
-    uint8_t  bypassMinOutdoorTemp_;
-    uint8_t  bypassMaxSupplyTemp_;
-    uint16_t airflowNominal_; // nominal airflow in m³/h (0x557)
+    uint8_t  bypassMinOutdoorTemp_ = EMS_VALUE_UINT8_NOTSET;
+    uint8_t  bypassMaxSupplyTemp_  = EMS_VALUE_UINT8_NOTSET;
+    uint16_t airflowNominal_      = EMS_VALUE_UINT16_NOTSET; // nominal airflow in m³/h (0x557)
 
     // handlers: 0x0556 0x055C 0x0561 0x056B 0x0575 0x0583 0x0585 0x0586 0x0587 0x0588 0x058D 0x058E 0x058F 0x0590 0x05CF 0x05D9 0x05E3
     void process_SetMessage(const std::shared_ptr<const Telegram> & telegram);     // 0x55C
@@ -71,7 +71,6 @@ class Ventilation : public EMSdevice {
     bool set_bypass(const char * value, const int8_t id);
     bool set_bypassMinOutdoorTemp(const char * value, const int8_t id);
     bool set_bypassMaxSupplyTemp(const char * value, const int8_t id);
-    bool set_airflowBalance(const char * value, const int8_t id);
     bool set_filter(const char * value, const int8_t id);
     bool set_ventBalance(const char * value, const int8_t id);
     bool set_level1Pct(const char * value, const int8_t id);

@@ -57,7 +57,7 @@ A full list of breaking changes can be found in this [discussion](https://github
 - the short summary on the Help page, to paste into an issue or chat, also shows the Tx mode, EMS-ESP's bus ID, the bus quality and Tx failures, and lists every EMS device with its type, device ID and product ID. `/rest/systemStatus` has new `bus_id` and `tx_mode` fields for it
 - Simplified Chinese translation (zh-CN) by HJ
 - CV200: Recognize the CV200 as a ventilation controller, publish its date and time, and correct an invalid or drifting controller clock using NTP.
-- HRV156/HRV176: Add writable `nominalairflow` in m³/h. Add writable bypass thresholds: `bypassminoutdoortemp` and `bypassmaxsupplytemp`. `ventmode` now reports automatic levels (`autoL0` - `autoL4`, `autodemand`). Changes sent through EMS-ESP may be overwritten by the connected controller, which continues to send its own setting.
+- MV200 ventilation module (tested on a Bosch 5000c): Add writable `nominalairflow` in m³/h. Add writable bypass thresholds: `bypassminoutdoortemp` and `bypassmaxsupplytemp`. `ventmode` now reports automatic levels (`autoL0` - `autoL4`, `autodemand`). Changes sent through EMS-ESP may be overwritten by the connected controller, which continues to send its own setting.
 
 
 ## Fixed
