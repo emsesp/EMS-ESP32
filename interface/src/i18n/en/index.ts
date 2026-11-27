@@ -591,7 +591,7 @@ const en: BaseTranslation = {
   FW_VERSION_AVAILABLE: '{version} is available',
   FW_RELEASE_NOTES: 'Release notes',
   FW_UPDATES_OFFLINE: 'Could not check online for new versions. EMS-ESP needs an internet connection for this.',
-  FW_RESTART_RESET: 'Restart and reset',
+  FW_RESTART_RESET: 'Restart and Reset',
   FW_RECOVERY_TEXT: 'Restart into the Recovery App? It connects to your network and also starts its own Access Point, where you can upload firmware.',
   FW_SIZE: 'Size',
   FW_INSTALL_DATE: 'Installed on',
