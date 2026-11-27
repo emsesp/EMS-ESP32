@@ -15,6 +15,7 @@ const RecoveryApp = () => {
   const [status, setStatus] = useState<RecoveryStatus>();
   const [error, setError] = useState<string>();
   const [restartTarget, setRestartTarget] = useState<string>();
+  const [uploading, setUploading] = useState(false);
 
   const loadStatus = useCallback(async () => {
     try {
@@ -69,6 +70,7 @@ const RecoveryApp = () => {
             icon="logout"
             aria-label="Sign Out"
             className="rc-signout"
+            disabled={uploading}
             onClick={signOut}
           >
             <span>Sign Out</span>
@@ -80,6 +82,7 @@ const RecoveryApp = () => {
             onRestarting={setRestartTarget}
             onSignOut={signOut}
             onChanged={() => void loadStatus()}
+            onBusy={setUploading}
           />
         </main>
       </>
