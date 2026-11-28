@@ -401,6 +401,7 @@ const it: Translation = {
   TLS_CHECK_FINGERPRINT: 'Impronta del certificato (SHA-1)',
   TLS_CHECK_NONE: 'Niente, non selezionato', // DeepL
   TLS_NOT_CHECKED: 'La connessione è crittografata, ma il broker non viene verificato, quindi un altro dispositivo sulla rete potrebbe fingersi il broker stesso', // DeepL
+  TLS_CA_NEEDS_TIME: 'Il controllo delle date del certificato richiede un’ora corretta sul dispositivo — attiva NTP oppure imposta l’ora manualmente', // DeepL
   ON: 'Su', // DeepL
   OFF: 'Off',
   POLARITY: 'Polarità', // DeepL

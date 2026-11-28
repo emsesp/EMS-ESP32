@@ -401,6 +401,7 @@ const fr: Translation = {
   TLS_CHECK_FINGERPRINT: 'Empreinte du certificat (SHA-1)',
   TLS_CHECK_NONE: 'Rien, non coché', // DeepL
   TLS_NOT_CHECKED: 'La connexion est cryptée, mais le serveur intermédiaire n’est pas vérifié ; un autre appareil du réseau pourrait donc se faire passer pour celui-ci', // DeepL
+  TLS_CA_NEEDS_TIME: 'La vérification des dates du certificat nécessite une heure correcte sur l’appareil — activez NTP, ou réglez l’heure manuellement', // DeepL
   ON: 'Sur', // DeepL
   OFF: 'Désactivé', // DeepL
   POLARITY: 'Polarité', // DeepL

@@ -401,6 +401,7 @@ const hu: Translation = {
   TLS_CHECK_FINGERPRINT: 'Tanúsítvány ujjlenyomata (SHA-1)',
   TLS_CHECK_NONE: 'Nincs, nem jelölve', // DeepL
   TLS_NOT_CHECKED: 'A kapcsolat titkosított, de a közvetítő hitelességét nem ellenőrzik, így a hálózaton lévő egy másik eszköz is eljátszhatja a szerepét.', // DeepL
+  TLS_CA_NEEDS_TIME: 'A tanúsítvány dátumellenőrzéséhez helyes eszközidő szükséges — engedélyezze az NTP-t, vagy állítsa be az időt kézzel', // DeepL
   ON: 'A', // DeepL
   OFF: 'Ki',
   POLARITY: 'Polaritás',

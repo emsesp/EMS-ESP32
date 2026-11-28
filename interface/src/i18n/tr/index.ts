@@ -401,6 +401,7 @@ const tr: Translation = {
   TLS_CHECK_FINGERPRINT: 'Sertifika parmak izi (SHA-1)',
   TLS_CHECK_NONE: 'Yok, işaretlenmemiş', // DeepL
   TLS_NOT_CHECKED: 'Bağlantı şifrelenmiştir, ancak aracı kontrol edilmez; bu nedenle ağdaki başka bir cihaz, aracı gibi davranabilir.', // DeepL
+  TLS_CA_NEEDS_TIME: 'Sertifika tarih denetimleri için doğru cihaz saati gerekir — NTP’yi etkinleştirin veya saati elle ayarlayın', // DeepL
   ON: 'On',
   OFF: 'Kapalı', // DeepL
   POLARITY: 'Polarite', // DeepL
