@@ -187,6 +187,42 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* controls of a page: they start where the content of a page with a side menu starts (12px margin,
+   250px menu, 12px gap), so the search is right above the page title; the last control is at the right */
+.appbar-actions {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 274px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px 14px;
+  pointer-events: none;
+}
+.appbar-actions > * {
+  pointer-events: auto;
+}
+.appbar-actions > :last-child:not(:first-child) {
+  margin-left: auto;
+}
+@media (max-width: 1199px) {
+  .appbar-actions {
+    right: 12px;
+  }
+}
+@media (max-width: 860px) {
+  /* no side menu: the controls are at the right */
+  .appbar-actions {
+    left: auto;
+  }
+}
+.appbar-actions:empty {
+  display: none;
+}
+.appbar-actions .search > .input {
+  width: 200px;
+}
 .appbar .menu-btn,
 .appbar .crumb-back {
   display: none;

@@ -134,10 +134,10 @@
 }
 .sys-nav {
   position: sticky;
-  top: calc(var(--appbar-h) + 64px + 12px);
+  top: calc(var(--appbar-h) + 12px);
   flex: none;
   width: 250px;
-  max-height: calc(100vh - var(--appbar-h) - 64px - 24px);
+  max-height: calc(100vh - var(--appbar-h) - 24px);
   overflow-y: auto;
 }
 .sys-nav-group {
