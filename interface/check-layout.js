@@ -1,11 +1,13 @@
 // Opens every page (and the "add" dialogs) in every language at desktop, tablet and phone
 // width and lists translated text that is clipped, truncated or pushed off screen.
-// Also checks English short labels for sentence case (see checkEnglishCasing).
+// Also checks English short labels in the web UI for title case (see checkEnglishCasing).
+// Firmware names in ../src/core/locale_translations.h are not checked.
 // Needs the mock server running (`pnpm standalone`) and Chromium (`pnpm exec playwright-core install chromium`).
 // usage: node check-layout.js [--url http://localhost:3000] [--lang nl,de] [--width 390] [--route /status/log]
 import { readFileSync } from 'fs';
 import { chromium } from 'playwright-core';
 import { parseArgs } from 'util';
+import { checkEnglishCasing } from './english-casing.js';
 
 const { values: args } = parseArgs({
   options: {
@@ -17,128 +19,11 @@ const { values: args } = parseArgs({
   }
 });
 
-// Short English UI labels use sentence case: first word capital, later words lowercase
-// unless they are an acronym or proper noun. Help text (with .!?) is not checked.
-const CASING_ACRONYMS = new Set([
-  'EMS',
-  'ESP',
-  'MQTT',
-  'NTP',
-  'API',
-  'GPIO',
-  'LED',
-  'PHY',
-  'ID',
-  'Tx',
-  'Rx',
-  'TX',
-  'RX',
-  'ON',
-  'OFF',
-  'DHW',
-  'KB',
-  'MB',
-  'OTA',
-  'WiFi',
-  'Wi-Fi',
-  'AP',
-  'HTTP',
-  'HTTPS',
-  'IP',
-  'DNS',
-  'DHCP',
-  'SSL',
-  'TLS',
-  'RGB',
-  'PWM',
-  'NTC',
-  'HT3',
-  'CRC',
-  'UART',
-  'USB',
-  'SDK',
-  'CPU',
-  'PSRAM',
-  'RSSI',
-  'HA',
-  'JSON',
-  'CSV',
-  'URL',
-  'UI',
-  'N/A',
-  'UoM'
-]);
-const CASING_PROPER = new Set([
-  'Fahrenheit',
-  'Celsius',
-  'Telnet',
-  'Syslog',
-  'Ethernet',
-  'Modbus',
-  'Dallas',
-  'Discord',
-  'Arduino',
-  'Espressif',
-  'LittleFS',
-  'Home',
-  'Assistant',
-  'BBQKees',
-  'EMS-ESP',
-  'Bearer'
-]);
-
-const isShortLabel = (value) => {
-  if (/[.!?]/.test(value)) return false;
-  const words = value.trim().split(/\s+/);
-  return words.length >= 2 && words.length <= 4;
-};
-
-const sentenceCaseSuggestion = (value, badWords) => {
-  const bad = new Set(badWords);
-  return value
-    .split(/(\s+)/)
-    .map((part, i) => {
-      if (/^\s+$/.test(part) || i === 0) return part;
-      const bare = part.replace(/^[^A-Za-z0-9]+|[^A-Za-z0-9]+$/g, '');
-      if (!bad.has(bare)) return part;
-      return part.replace(bare, bare.charAt(0).toLowerCase() + bare.slice(1));
-    })
-    .join('');
-};
-
-const checkEnglishCasing = (src) => {
-  const entries = [...src.matchAll(/^\s*([A-Z0-9_]+):\s*'((?:\\'|[^'])*)'/gm)].map(
-    ([, key, value]) => [key, value.replace(/\\'/g, "'")]
-  );
-  const issues = [];
-  for (const [key, value] of entries) {
-    if (!isShortLabel(value)) continue;
-    const words = value.trim().split(/\s+/);
-    const bad = [];
-    for (let i = 1; i < words.length; i++) {
-      const bare = words[i].replace(/^[^A-Za-z0-9]+|[^A-Za-z0-9]+$/g, '');
-      if (!bare || /^[a-z]/.test(bare)) continue;
-      if (/^[A-Z0-9]{1,5}$/.test(bare)) continue; // short all-caps / digits
-      if (CASING_ACRONYMS.has(bare) || CASING_PROPER.has(bare)) continue;
-      if (/^[A-Z][a-z]+(?:-[A-Z][a-z]+)*$/.test(bare)) bad.push(bare);
-    }
-    if (bad.length) {
-      issues.push({
-        key,
-        value,
-        bad,
-        suggest: sentenceCaseSuggestion(value, bad)
-      });
-    }
-  }
-  return issues;
-};
-
-const casingIssues = checkEnglishCasing(
-  readFileSync('src/i18n/en/index.ts', 'utf8')
-);
+// Rules live in english-casing.js. Short labels use title case
+// ("Custom Entities"). Help text and firmware names are not checked.
+const casingIssues = checkEnglishCasing(readFileSync('src/i18n/en/index.ts', 'utf8'));
 if (casingIssues.length) {
-  console.log('English casing (short labels, sentence case):');
+  console.log('English casing (short labels, title case):');
   for (const { key, value, suggest, bad } of casingIssues) {
     console.log(`  ${key}: "${value}" → "${suggest}" (${bad.join(', ')})`);
   }
