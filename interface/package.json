@@ -48,7 +48,7 @@
     "@types/react-dom": "^19.3.0",
     "concurrently": "^10.0.7",
     "eslint": "^10.15.0",
-    "eslint-config-prettier": "^10.1.8",
+    "eslint-config-prettier": "^10.1.9",
     "etag": "^1.8.1",
     "mime-types": "^3.0.2",
     "playwright-core": "^1.65.1",
