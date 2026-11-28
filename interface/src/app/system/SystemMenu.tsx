@@ -334,7 +334,11 @@ const SystemMenu = memo(() => {
                 {...(fav.canToggle(i) && fav.toggle
                   ? { onFavorite: fav.toggle }
                   : {})}
-                {...(current !== 'fav' && lv.toggle && lv.canToggle(i)
+                {...(current !== 'fav' &&
+                // in All values only the values the user moved have the eye, to bring them back
+                (level === 1 || lv.changed(i)) &&
+                lv.toggle &&
+                lv.canToggle(i)
                   ? { onLevel: lv.toggle }
                   : {})}
                 {...(searching || current === 'fav'

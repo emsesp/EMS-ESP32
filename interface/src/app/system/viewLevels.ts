@@ -30,6 +30,8 @@ export interface LevelItems {
   // undefined when the level can't be changed (not an administrator, firmware without the feature)
   toggle: ((item: SysItem) => void) | undefined;
   canToggle: (item: SysItem) => boolean;
+  // the user moved this value away from its built-in level
+  changed: (item: SysItem) => boolean;
 }
 
 // Which values are in Normal and which only in All values. The Web UI has a built-in level for every well known
@@ -72,6 +74,8 @@ export const useViewLevels = (items: readonly SysItem[]): LevelItems => {
   const canToggle = (i: SysItem): boolean =>
     me.admin && supported && storable(i.key);
 
+  const changed = (i: SysItem): boolean => levels[i.key] !== undefined;
+
   const toggle = async (item: SysItem) => {
     const base = items.find((i) => i.uid === item.uid)?.level ?? item.level;
     const now = current.current;
@@ -97,6 +101,7 @@ export const useViewLevels = (items: readonly SysItem[]): LevelItems => {
   return {
     items: leveled,
     toggle: me.admin && supported ? (i) => void toggle(i) : undefined,
-    canToggle
+    canToggle,
+    changed
   };
 };
