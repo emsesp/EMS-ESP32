@@ -123,6 +123,11 @@ const compactTranslations = (): Plugin => {
 // Common resolve extensions - prioritize TypeScript/React files for Windows compatibility
 const RESOLVE_EXTENSIONS = ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'];
 
+// Vite 8.4 allow-list FS checks (default in next major). Empty allow = only files
+// reachable from the HTML entry / registered safe modules. Especially useful when
+// the dev server is exposed with `--host` (standalone-devcontainer).
+const SERVE_FS = { strict: 'extended' as const, allow: [] as string[] };
+
 const createPreactPlugin = (devToolsEnabled: boolean): PluginOption[] => {
   const plugins = preact({
     devToolsEnabled,
@@ -211,6 +216,7 @@ export default defineConfig(async ({ command, mode }) => {
         await loadMockPlugin('recoveryMock.js')
       ]),
       server: {
+        fs: SERVE_FS,
         open: '/recovery.html',
         port: 3001
       }
@@ -237,6 +243,7 @@ export default defineConfig(async ({ command, mode }) => {
     return {
       ...baseConfig(true, [await loadMockPlugin('mockServer.js')]),
       server: {
+        fs: SERVE_FS,
         open: true,
         port: mode === 'production' ? 4173 : 3000,
         proxy: {

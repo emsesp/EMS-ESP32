@@ -2028,9 +2028,7 @@ void EMSESP::start() {
     esp32React.begin();
 
     webSettingsService.begin(); // load EMS-ESP application settings
-    esp32React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
-        system_.hostname(networkSettings.hostname.c_str());
-    });
+    esp32React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) { system_.hostname(networkSettings.hostname.c_str()); });
     system_.syslog_init(); // queue boot diagnostics until the network is ready
 
 // output filesystem folders and files for debugging

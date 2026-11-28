@@ -401,6 +401,7 @@ const sv: Translation = {
   TLS_CHECK_FINGERPRINT: 'Certifikatets fingeravtryck (SHA-1)',
   TLS_CHECK_NONE: 'Inget, inte markerat', // DeepL
   TLS_NOT_CHECKED: 'Anslutningen är krypterad, men mäklaren kontrolleras inte, vilket innebär att en annan enhet i nätverket skulle kunna utge sig för att vara den.', // DeepL
+  TLS_CA_NEEDS_TIME: 'Kontroll av certifikatdatum kräver korrekt enhetstid — aktivera NTP, eller ställ in tiden manuellt', // DeepL
   ON: 'På',
   OFF: 'Av',
   POLARITY: 'Polaritet',

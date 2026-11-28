@@ -266,13 +266,13 @@ class Thermostat : public EMSdevice {
     std::vector<uint16_t, AllocatorPSRAM<uint16_t>> hpmode_typeids;
 
     // standard for all thermostats
-    char     status_[20];    // online or offline
-    char     dateTime_[30];  // date and time stamp
-    char     errorCode_[15]; // code from 0xA2/0xBF as string i.e. "A22(816)"
-    uint16_t errorNumber_;   // used internally to build error code
-    char     lastCode_[50];  // error log
-    uint32_t lastCodeDate_ = 0;  // last code date for ranking
-    uint16_t lastCodeNo_   = 0;  // code number of lastCode_
+    char     status_[20];           // online or offline
+    char     dateTime_[30];         // date and time stamp
+    char     errorCode_[15];        // code from 0xA2/0xBF as string i.e. "A22(816)"
+    uint16_t errorNumber_;          // used internally to build error code
+    char     lastCode_[50];         // error log
+    uint32_t lastCodeDate_ = 0;     // last code date for ranking
+    uint16_t lastCodeNo_   = 0;     // code number of lastCode_
     bool     lastCodeOpen_ = false; // lastCode_ is an open (active) fault
 
     // Installation parameters

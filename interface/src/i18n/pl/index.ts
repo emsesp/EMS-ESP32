@@ -401,6 +401,7 @@ const pl: Translation = {
   TLS_CHECK_FINGERPRINT: 'Odcisk certyfikatu (SHA-1)',
   TLS_CHECK_NONE: 'Brak, niezaznaczone', // DeepL
   TLS_NOT_CHECKED: 'Połączenie jest szyfrowane, ale broker nie jest weryfikowany, więc inne urządzenie w sieci mogłoby podszywać się pod niego', // DeepL
+  TLS_CA_NEEDS_TIME: 'Sprawdzanie daty certyfikatu wymaga poprawnego czasu urządzenia — włącz NTP lub ustaw czas ręcznie', // DeepL
   ON: 'W', // DeepL
   OFF: 'Wyłączone', // DeepL
   POLARITY: 'Polarność', // DeepL

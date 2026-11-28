@@ -401,6 +401,7 @@ const de: Translation = {
   TLS_CHECK_FINGERPRINT: 'Zertifikats-Fingerabdruck (SHA-1)', // DeepL
   TLS_CHECK_NONE: 'Keine Angabe, nicht angekreuzt', // DeepL
   TLS_NOT_CHECKED: 'Die Verbindung ist verschlüsselt, der Broker wird jedoch nicht überprüft, sodass sich ein anderes Gerät im Netzwerk als dieser ausgeben könnte', // DeepL
+  TLS_CA_NEEDS_TIME: 'Zertifikatsdatum-Prüfungen benötigen eine korrekte Gerätezeit — NTP aktivieren oder die Zeit manuell einstellen', // DeepL
   ON: 'Auf', // DeepL
   OFF: 'Aus',
   POLARITY: 'Polarität',

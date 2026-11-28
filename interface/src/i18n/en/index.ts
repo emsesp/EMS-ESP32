@@ -401,6 +401,7 @@ const en: BaseTranslation = {
   TLS_CHECK_FINGERPRINT: 'Certificate fingerprint (SHA-1)',
   TLS_CHECK_NONE: 'Nothing, not checked',
   TLS_NOT_CHECKED: "The connection is encrypted, but the broker isn't checked, so another device on the network could pretend to be it",
+  TLS_CA_NEEDS_TIME: 'Certificate date checks need a correct device time — enable NTP, or set the time manually',
   ON: 'On',
   OFF: 'Off',
   POLARITY: 'Polarity',

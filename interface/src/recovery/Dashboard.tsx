@@ -300,8 +300,8 @@ const Dashboard = ({
 
       <Section icon="upload_file" title="Upload Firmware">
         <p className="rc-p muted">
-          After the upload, start the firmware from the list above when you are ready.
-          To enable the MD5 check, upload the matching .md5 file first.
+          After the upload, start the firmware from the list above when you are
+          ready. To enable the MD5 check, upload the matching .md5 file first.
         </p>
         <Select
           label="Write to"

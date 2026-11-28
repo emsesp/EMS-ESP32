@@ -401,6 +401,7 @@ const zh: Translation = {
   TLS_CHECK_FINGERPRINT: "证书指纹（SHA-1）",
   TLS_CHECK_NONE: "不验证",
   TLS_NOT_CHECKED: "连接已加密，但未验证 Broker，因此网络中的其他设备可能冒充它",
+  TLS_CA_NEEDS_TIME: "证书日期检查需要正确的设备时间 — 启用 NTP，或手动设置时间", // DeepL
   ON: "开",
   OFF: "关",
   POLARITY: "极性",

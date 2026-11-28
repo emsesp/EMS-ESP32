@@ -6002,6 +6002,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "WM10",switch,71,activated,activated,boolean, ,false,binary_sensor.switch_activated,binary_sensor.switch_activated,12,0,1,0,1
 "WM10",switch,71,flowtemphc,flow temperature (TC1),uint16,C,false,sensor.switch_flow_temperature_(TC1),sensor.switch_flowtemphc,12,0,1/10,1,1
 "WM10",switch,71,status,status,int8, ,false,sensor.switch_status,sensor.switch_status,12,0,1,2,1
+"CV200",controller,233,datetime,date/time,string (>=0<=0), ,true,sensor.controller_date/time,sensor.controller_datetime,13,0,1,0,13
 "Rego 3000",controller,240,datetime,date/time,string, ,false,sensor.controller_date/time,sensor.controller_datetime,13,0,1,0,13
 "MX400",connect,17,datetime,date/time,string, ,false,sensor.connect_date/time,sensor.connect_datetime,14,0,1,0,13
 "MX400",connect,17,outdoortemp,outside temperature,int16,C,false,sensor.connect_outside_temperature,sensor.connect_outdoortemp,14,0,1/10,13,1
@@ -6073,7 +6074,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "HRV176, HRV156, 5000c, MV200",ventilation,231,inexhaust,indoor exhaust air,int16,C,false,sensor.ventilation_indoor_exhaust_air,sensor.ventilation_inexhaust,19,0,1/10,3,1
 "HRV176, HRV156, 5000c, MV200",ventilation,231,ventinspeed,in blower speed,uint8,%,false,sensor.ventilation_in_blower_speed,sensor.ventilation_ventinspeed,19,0,1,4,1
 "HRV176, HRV156, 5000c, MV200",ventilation,231,ventoutspeed,out blower speed,uint8,%,false,sensor.ventilation_out_blower_speed,sensor.ventilation_ventoutspeed,19,0,1,5,1
-"HRV176, HRV156, 5000c, MV200",ventilation,231,ventmode,ventilation mode,enum [auto\|off\|L1\|L2\|L3\|L4\|demand\|sleep\|intense\|bypass\|party\|fireplace] (>=0<=0), ,true,select.ventilation_ventilation_mode,select.ventilation_ventmode,19,0,1,6,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,ventmode,ventilation mode,enum [auto\|off\|L1\|L2\|L3\|L4\|demand\|sleep\|intense\|bypass\|party\|fireplace\|autol0\|autol1\|autol2\|autol3\|autol4\|autodemand] (>=0<=0), ,true,select.ventilation_ventilation_mode,select.ventilation_ventmode,19,0,1,6,1
 "HRV176, HRV156, 5000c, MV200",ventilation,231,airquality,air quality (voc),uint16, ,false,sensor.ventilation_air_quality_(voc),sensor.ventilation_airquality,19,0,1,7,1
 "HRV176, HRV156, 5000c, MV200",ventilation,231,airhumidity,relative air humidity,uint8,%,false,sensor.ventilation_relative_air_humidity,sensor.ventilation_airhumidity,19,0,1,8,1
 "HRV176, HRV156, 5000c, MV200",ventilation,231,bypass,bypass,boolean (>=0<=0), ,true,switch.ventilation_bypass,switch.ventilation_bypass,19,0,1,9,1
@@ -6085,6 +6086,9 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "HRV176, HRV156, 5000c, MV200",ventilation,231,level1pct,level L1,uint8 (>=0<=150),%,true,number.ventilation_level_L1,number.ventilation_level1pct,19,0,1,15,1
 "HRV176, HRV156, 5000c, MV200",ventilation,231,level2pct,level L2,uint8 (>=0<=150),%,true,number.ventilation_level_L2,number.ventilation_level2pct,19,0,1,16,1
 "HRV176, HRV156, 5000c, MV200",ventilation,231,level4pct,level L4,uint8 (>=0<=150),%,true,number.ventilation_level_L4,number.ventilation_level4pct,19,0,1,17,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,bypassminoutdoortemp,bypass minimum outdoor temperature,uint8 (>=12<=19),C,true,number.ventilation_bypass_minimum_outdoor_temperature,number.ventilation_bypassminoutdoortemp,19,0,1,18,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,bypassmaxsupplytemp,bypass maximum supply air temperature,uint8 (>=21<=30),C,true,number.ventilation_bypass_maximum_supply_air_temperature,number.ventilation_bypassmaxsupplytemp,19,0,1,19,1
+"HRV176, HRV156, 5000c, MV200",ventilation,231,nominalairflow,nominal airflow (m³/h),uint16 (>=75<=450), ,true,number.ventilation_nominal_airflow_(m³/h),number.ventilation_nominalairflow,19,0,1,20,1
 "IPM",water,100,dhw.seltemp,selected temperature,uint8 (>=0<=0),C,true,number.water_dhw_selected_temperature,number.water_dhw_seltemp,20,9,1,0,1
 "IPM",water,100,dhw.temp,current temperature,uint16,C,false,sensor.water_dhw_current_temperature,sensor.water_dhw_temp,20,9,1/10,1,1
 "IPM",water,100,dhw.curtemp2,current extern temperature,uint16,C,false,sensor.water_dhw_current_extern_temperature,sensor.water_dhw_curtemp2,20,9,1/10,2,1

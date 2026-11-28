@@ -157,9 +157,11 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_CRF) {
         monitor_typeids = {0x02A5, 0x02A6, 0x02A7, 0x02A8};
         set_typeids.clear();
-        const size_t size = monitor_typeids.size();
+        // Comfort+2RF (246) needs offset 10 for mode; CRF200 only uses the first 7 bytes
+        const uint8_t fetch_len = (product_id == 246) ? 11 : 7;
+        const size_t  size      = monitor_typeids.size();
         for (uint8_t i = 0; i < size; i++) {
-            register_telegram_type(monitor_typeids[i], "CRFMonitor", false, MAKE_PF_CB(process_CRFMonitor), 7);
+            register_telegram_type(monitor_typeids[i], "CRFMonitor", false, MAKE_PF_CB(process_CRFMonitor), fetch_len);
         }
 
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_CR11) {
@@ -1164,18 +1166,30 @@ void Thermostat::process_JunkersDisp(const std::shared_ptr<const Telegram> & tel
     has_update(telegram, ibaBuildingType_, 17); // percent /10
 }
 
-// type 0x02A5 - data from Worchester CRF200
+// type 0x02A5 - data from Worcester CRF200 / Comfort+2RF
+// Comfort+2RF (product 246): https://github.com/emsesp/EMS-ESP32/discussions/3473
+//   00 B2 21 18 FF FF 18 00 00 00 01 ...  — roomTemp*10, selTemp*2 at 3 and 6, mode at 10 (0=off, 1=auto, 4=manual)
 void Thermostat::process_CRFMonitor(const std::shared_ptr<const Telegram> & telegram) {
     auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
 
-    has_update(telegram, hc->roomTemp, 0);       // is * 10
-    has_bitupdate(telegram, hc->modetype, 2, 0); // bit 0, modetype (off=0 , on=1)
-    has_bitupdate(telegram, hc->mode, 2, 4);     // bit 4, mode (auto=0, off=1)
-    has_update(telegram, hc->selTemp, 6, 1);     // is * 2, force as single byte
-    has_update(telegram, hc->targetflowtemp, 4);
+    has_update(telegram, hc->roomTemp, 0);   // is * 10
+    has_update(telegram, hc->selTemp, 6, 1); // is * 2, force as single byte
+
+    if (product_id() == 246) {
+        // Comfort+2RF: mode is a full byte at offset 10, not the CRF200 bit fields in byte 2.
+        // Map into enum_mode5 (auto=0, off=1). Manual (4) is reported as auto (heating on).
+        uint8_t mode_raw = EMS_VALUE_UINT8_NOTSET;
+        if (telegram->read_value(mode_raw, 10)) {
+            has_update(hc->mode, static_cast<uint8_t>(mode_raw == 0 ? 1 : 0));
+        }
+    } else {
+        has_bitupdate(telegram, hc->modetype, 2, 0); // bit 0, modetype (off=0 , on=1)
+        has_bitupdate(telegram, hc->mode, 2, 4);     // bit 4, mode (auto=0, off=1)
+        has_update(telegram, hc->targetflowtemp, 4);
+    }
 
     add_ha_climate(hc);
 }
@@ -2088,21 +2102,7 @@ void Thermostat::process_RCErrorMessage2(const std::shared_ptr<const Telegram> &
         snprintf(buf, sizeof(buf), "%s(%d) %02d.%02d.%d %02d:%02d - now", code, codeNo, day, month, year, hour, min);
     } else {
         date = (year1 - 2000) * 535680UL + month1 * 44640UL + day1 * 1440UL + hour1 * 60 + min1;
-        snprintf(buf,
-                 sizeof(buf),
-                 "%s(%d) %02d.%02d.%d %02d:%02d-%02d.%02d.%d %02d:%02d",
-                 code,
-                 codeNo,
-                 day,
-                 month,
-                 year,
-                 hour,
-                 min,
-                 day1,
-                 month1,
-                 year1,
-                 hour1,
-                 min1);
+        snprintf(buf, sizeof(buf), "%s(%d) %02d.%02d.%d %02d:%02d-%02d.%02d.%d %02d:%02d", code, codeNo, day, month, year, hour, min, day1, month1, year1, hour1, min1);
     }
 
     update_lastCode(buf, codeNo, date, is_open);

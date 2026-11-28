@@ -343,7 +343,7 @@ class RxService : public EMSbus {
     std::shared_ptr<const Telegram> rx_telegram;               // the incoming Rx telegram
 
     std::deque<QueuedRxTelegram, AllocatorPSRAM<QueuedRxTelegram>> rx_telegrams_; // the Rx Queue
-    mutable std::mutex                                             mutex_;       // guards rx_telegrams_ / rx_telegram_id_
+    mutable std::mutex                                             mutex_;        // guards rx_telegrams_ / rx_telegram_id_
 };
 
 class TxService : public EMSbus {
@@ -482,7 +482,7 @@ class TxService : public EMSbus {
 
   private:
     std::deque<QueuedTxTelegram, AllocatorPSRAM<QueuedTxTelegram>> tx_telegrams_; // the Tx queue
-    mutable std::mutex                                             mutex_;       // guards tx_telegrams_ / tx_telegram_id_ / delayed_send_
+    mutable std::mutex                                             mutex_;        // guards tx_telegrams_ / tx_telegram_id_ / delayed_send_
 
     uint32_t telegram_read_count_       = 0; // # Tx successful reads
     uint32_t telegram_write_count_      = 0; // # Tx successful writes
