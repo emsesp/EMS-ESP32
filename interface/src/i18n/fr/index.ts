@@ -689,6 +689,70 @@ const fr: Translation = {
   INSTALL_FIRMWARE: 'Installer le Micrologiciel ({channel})', // DeepL
   PARTITION: 'Partition',
   PULSE: 'Pulse', // DeepL
+  SYS_HOME: 'Accueil', // draft, please review
+  SYS_HOME_HELP: 'L\'essentiel en un coup d\'œil. Tout le reste se trouve dans le menu Système.', // draft, please review
+  SYS_SENSORS_HELP: 'Les capteurs raccordés à la passerelle. Pour les modifier, ouvrez Capteurs dans le menu principal.', // draft, please review
+  SYS_MENU: 'Menu Système', // draft, please review
+  SYS_MENU_HELP: 'Toutes les valeurs de {name} dans votre installation.', // draft, please review
+  SYS_SEARCH_HELP: 'Valeurs correspondantes de tous les appareils.', // draft, please review
+  SYS_FAV_HELP: 'Vos entités d’appareil les plus importantes. Utilisez l’étoile à côté d’une valeur pour modifier cette liste.', // draft, please review
+  SYS_FAV_NONE: 'Aucun favori pour l’instant. Marquez des valeurs avec l’étoile.', // draft, please review
+  SYS_FAV_REMOVED: 'Retiré des favoris', // draft, please review
+  SYS_GROUP_HEATING: 'Chauffage', // draft, please review
+  SYS_GROUP_PLANT: 'Installation', // draft, please review
+  SYS_GROUP_OVERVIEW: 'Aperçu', // draft, please review
+  SYS_LEVEL_MOVE_ALL: 'Afficher seulement dans toutes les valeurs', // draft, please review
+  SYS_LEVEL_MOVE_NORMAL: 'Afficher dans la vue normale', // draft, please review
+  SYS_LEVEL_NOW_ALL: 'Affiché désormais seulement dans toutes les valeurs', // draft, please review
+  SYS_LEVEL_NOW_NORMAL: 'Affiché désormais aussi dans la vue normale', // draft, please review
+  SYS_HC: 'Circuit de chauffage {0}', // draft, please review
+  SYS_DHW: 'Eau chaude', // draft, please review
+  SYS_AHS: 'Chauffage d’appoint', // draft, please review
+  SYS_HS: 'Source de chaleur', // draft, please review
+  SYS_SRC: 'Source', // draft, please review
+  SYS_OTHER_DEVICES: 'Autres appareils', // draft, please review
+  SYS_SERVICE: 'Maintenance et défauts', // draft, please review
+  SYS_ENERGY: 'Énergie et durées de fonctionnement', // draft, please review
+  SYS_SEC_MODE: 'Fonctionnement', // draft, please review
+  SYS_SEC_TEMPS: 'Températures', // draft, please review
+  SYS_SEC_STATUS: 'État', // draft, please review
+  SYS_SEC_ADVANCED: 'Courbe de chauffe et installation', // draft, please review
+  SYS_SEC_MEASURE: 'Valeurs mesurées', // draft, please review
+  SYS_SEC_OTHER: 'Autres valeurs', // draft, please review
+  SYS_LEVEL_NORMAL: 'Normal', // draft, please review
+  SYS_NO_RESULTS: 'Aucun résultat. Essayez toutes les valeurs ou un autre terme.', // draft, please review
+  SYS_SEARCH_PLACES: 'Pages et modules', // draft, please review
+  SYS_NOTHING_HERE: 'Rien à afficher ici au niveau Normal.', // draft, please review
+  SYS_HIDDEN: 'Valeurs expert masquées : {num}', // draft, please review
+  SYS_SEARCH_RESULTS: 'Résultats de la recherche', // draft, please review
+  SYS_CHANGED_WAS: 'modifié (avant : {0})', // draft, please review
+  SYS_NO_DEVICES: 'Aucun appareil trouvé pour l’instant.', // draft, please review
+  SYS_ROOM_TEMP: 'Température ambiante', // draft, please review
+  SYS_WISH: 'Consigne', // draft, please review
+  SYS_CURRENT: 'Température actuelle', // draft, please review
+  SYS_OUTDOOR: 'Température extérieure', // draft, please review
+  SYS_FLOW: 'Départ', // draft, please review
+  SYS_RETURN: 'Retour', // draft, please review
+  SYS_PRESSURE: 'Pression de l’installation', // draft, please review
+  SYS_POWER: 'Puissance', // draft, please review
+  SYS_BURNER_ON: 'Brûleur en marche', // draft, please review
+  SYS_BURNER_OFF: 'Brûleur éteint', // draft, please review
+  SYS_DHW_HEATING: 'En cours de chauffe', // draft, please review
+  SYS_READY: 'Prêt', // draft, please review
+  SYS_ONE_TIME: 'Charge unique', // draft, please review
+  SYS_NOTES: 'Remarques', // draft, please review
+  SYS_NOTES_SUB: 'Défauts et maintenance', // draft, please review
+  SYS_LAST_FAULT: 'Dernier défaut', // draft, please review
+  SYS_MAINT_MSG: 'Message de maintenance', // draft, please review
+  SYS_NEXT_MAINT: 'Prochaine maintenance', // draft, please review
+  SYS_FAULT_LAST: 'Dernier défaut / message', // draft, please review
+  SYS_FAULT_CTRL: 'Dernier défaut du régulateur', // draft, please review
+  SYS_FAULT_SERVICE: 'Code de service', // draft, please review
+  SYS_FAULT_ADD: 'Code supplémentaire {0}', // draft, please review
+  SYS_FAULT_RAW_ONLY: 'Aucune explication disponible pour cet appareil.', // draft, please review
+  SYS_FAULT_NONE: 'Aucun défaut enregistré.', // draft, please review
+  SYS_FAULT_UNTIL_NOW: 'jusqu’à maintenant', // draft, please review
+  SYS_MAINTENANCE: 'Maintenance', // draft, please review
 };
 
 export default fr;

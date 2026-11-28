@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { useLocation } from 'react-router';
 
 import { routeTrail } from 'app/routes';
-import { SaveBarSlotContext, cx } from 'components/ui';
+import { AppBarSlotContext, SaveBarSlotContext, cx } from 'components/ui';
 import type { RequiredChildrenProps } from 'utils';
 
 import './Layout.css';
@@ -17,6 +17,7 @@ import TokensResetBanner from './TokensResetBanner';
 const LayoutComponent: FC<RequiredChildrenProps> = ({ children }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [saveBarSlot, setSaveBarSlot] = useState<HTMLElement | null>(null);
+  const [appBarSlot, setAppBarSlot] = useState<HTMLElement | null>(null);
   const { pathname } = useLocation();
   const trail = routeTrail(pathname);
 
@@ -36,14 +37,20 @@ const LayoutComponent: FC<RequiredChildrenProps> = ({ children }) => {
     <div className={cx('shell', drawerOpen && 'drawer-open')}>
       <LayoutDrawer active={trail[0]?.path} />
       <div className="scrim" onClick={closeDrawer} />
-      <LayoutAppBar trail={trail} onToggleDrawer={toggleDrawer} />
+      <LayoutAppBar
+        trail={trail}
+        onToggleDrawer={toggleDrawer}
+        actionsRef={setAppBarSlot}
+      />
       <main className="main">
         <SetupDialog />
         <TokensResetBanner />
         <TelnetBanner />
-        <SaveBarSlotContext.Provider value={saveBarSlot}>
-          {children}
-        </SaveBarSlotContext.Provider>
+        <AppBarSlotContext.Provider value={appBarSlot}>
+          <SaveBarSlotContext.Provider value={saveBarSlot}>
+            {children}
+          </SaveBarSlotContext.Provider>
+        </AppBarSlotContext.Provider>
         <div className="savebar-slot" ref={setSaveBarSlot} />
       </main>
       <LayoutTabBar active={trail[0]?.path} onMore={toggleDrawer} />

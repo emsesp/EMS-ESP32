@@ -689,6 +689,70 @@ const tr: Translation = {
   INSTALL_FIRMWARE: 'Firmware\'i Yükle ({channel})', // DeepL
   PARTITION: 'Bölüm',
   PULSE: 'Pulse', // DeepL
+  SYS_HOME: 'Ev', // draft, please review
+  SYS_HOME_HELP: 'En önemli şeyler bir bakışta. Geri kalan her şey Sistem menüsünde.', // draft, please review
+  SYS_SENSORS_HELP: 'Ağ geçidine bağlı sensörler. Değiştirmek için ana menüdeki Sensörler sayfasını açın.', // draft, please review
+  SYS_MENU: 'Sistem menüsü', // draft, please review
+  SYS_MENU_HELP: 'Sisteminizdeki {name} için tüm değerler.', // draft, please review
+  SYS_SEARCH_HELP: 'Tüm cihazlardaki eşleşen değerler.', // draft, please review
+  SYS_FAV_HELP: 'En önemli cihaz varlıklarınız. Bu listeyi değiştirmek için değerin yanındaki yıldızı kullanın.', // draft, please review
+  SYS_FAV_NONE: 'Henüz favori yok. Değerleri yıldızla işaretleyin.', // draft, please review
+  SYS_FAV_REMOVED: 'Favorilerden kaldırıldı', // draft, please review
+  SYS_GROUP_HEATING: 'Isıtma', // draft, please review
+  SYS_GROUP_PLANT: 'Tesisat', // draft, please review
+  SYS_GROUP_OVERVIEW: 'Genel bakış', // draft, please review
+  SYS_LEVEL_MOVE_ALL: 'Yalnızca tüm değerlerde göster', // draft, please review
+  SYS_LEVEL_MOVE_NORMAL: 'Normal görünümde göster', // draft, please review
+  SYS_LEVEL_NOW_ALL: 'Artık yalnızca tüm değerlerde gösteriliyor', // draft, please review
+  SYS_LEVEL_NOW_NORMAL: 'Artık normal görünümde de gösteriliyor', // draft, please review
+  SYS_HC: 'Isıtma devresi {0}', // draft, please review
+  SYS_DHW: 'Sıcak su', // draft, please review
+  SYS_AHS: 'Yardımcı ısıtıcı', // draft, please review
+  SYS_HS: 'Isı kaynağı', // draft, please review
+  SYS_SRC: 'Kaynak', // draft, please review
+  SYS_OTHER_DEVICES: 'Diğer cihazlar', // draft, please review
+  SYS_SERVICE: 'Bakım ve arızalar', // draft, please review
+  SYS_ENERGY: 'Enerji ve çalışma süreleri', // draft, please review
+  SYS_SEC_MODE: 'Çalışma', // draft, please review
+  SYS_SEC_TEMPS: 'Sıcaklıklar', // draft, please review
+  SYS_SEC_STATUS: 'Durum', // draft, please review
+  SYS_SEC_ADVANCED: 'Isıtma eğrisi ve kurulum', // draft, please review
+  SYS_SEC_MEASURE: 'Ölçülen değerler', // draft, please review
+  SYS_SEC_OTHER: 'Diğer değerler', // draft, please review
+  SYS_LEVEL_NORMAL: 'Normal', // draft, please review
+  SYS_NO_RESULTS: 'Sonuç bulunamadı. Tüm değerleri veya başka bir terimi deneyin.', // draft, please review
+  SYS_SEARCH_PLACES: 'Sayfalar ve modüller', // draft, please review
+  SYS_NOTHING_HERE: 'Normal düzeyinde burada gösterilecek bir şey yok.', // draft, please review
+  SYS_HIDDEN: 'Gizli uzman değerleri: {num}', // draft, please review
+  SYS_SEARCH_RESULTS: 'Arama sonuçları', // draft, please review
+  SYS_CHANGED_WAS: 'değiştirildi (önceki: {0})', // draft, please review
+  SYS_NO_DEVICES: 'Henüz cihaz bulunamadı.', // draft, please review
+  SYS_ROOM_TEMP: 'Oda sıcaklığı', // draft, please review
+  SYS_WISH: 'Hedef', // draft, please review
+  SYS_CURRENT: 'Mevcut sıcaklık', // draft, please review
+  SYS_OUTDOOR: 'Dış sıcaklık', // draft, please review
+  SYS_FLOW: 'Gidiş', // draft, please review
+  SYS_RETURN: 'Dönüş', // draft, please review
+  SYS_PRESSURE: 'Sistem basıncı', // draft, please review
+  SYS_POWER: 'Güç', // draft, please review
+  SYS_BURNER_ON: 'Brülör çalışıyor', // draft, please review
+  SYS_BURNER_OFF: 'Brülör kapalı', // draft, please review
+  SYS_DHW_HEATING: 'Isıtılıyor', // draft, please review
+  SYS_READY: 'Hazır', // draft, please review
+  SYS_ONE_TIME: 'Tek seferlik ısıtma', // draft, please review
+  SYS_NOTES: 'Notlar', // draft, please review
+  SYS_NOTES_SUB: 'Arızalar ve bakım', // draft, please review
+  SYS_LAST_FAULT: 'Son arıza', // draft, please review
+  SYS_MAINT_MSG: 'Bakım mesajı', // draft, please review
+  SYS_NEXT_MAINT: 'Sonraki bakım', // draft, please review
+  SYS_FAULT_LAST: 'Son arıza / mesaj', // draft, please review
+  SYS_FAULT_CTRL: 'Denetleyicinin son arızası', // draft, please review
+  SYS_FAULT_SERVICE: 'Servis kodu', // draft, please review
+  SYS_FAULT_ADD: 'Ek kod {0}', // draft, please review
+  SYS_FAULT_RAW_ONLY: 'Bu cihaz için açıklama yok.', // draft, please review
+  SYS_FAULT_NONE: 'Kayıtlı arıza yok.', // draft, please review
+  SYS_FAULT_UNTIL_NOW: 'şimdiye kadar', // draft, please review
+  SYS_MAINTENANCE: 'Bakım', // draft, please review
 };
 
 export default tr;

@@ -689,6 +689,70 @@ const pl: Translation = {
   INSTALL_FIRMWARE: 'Zainstaluj Oprogramowanie ({channel})', // DeepL
   PARTITION: 'Podział', // DeepL
   PULSE: 'Pulse', // DeepL
+  SYS_HOME: 'Dom', // draft, please review
+  SYS_HOME_HELP: 'Najważniejsze rzeczy na pierwszy rzut oka. Wszystko inne znajdziesz w menu systemowym.', // draft, please review
+  SYS_SENSORS_HELP: 'Czujniki podłączone do bramy. Aby je zmienić, otwórz Czujniki w menu głównym.', // draft, please review
+  SYS_MENU: 'Menu systemowe', // draft, please review
+  SYS_MENU_HELP: 'Wszystkie wartości {name} w Twojej instalacji.', // draft, please review
+  SYS_SEARCH_HELP: 'Pasujące wartości ze wszystkich urządzeń.', // draft, please review
+  SYS_FAV_HELP: 'Twoje najważniejsze encje urządzeń. Gwiazdką przy wartości zmienisz tę listę.', // draft, please review
+  SYS_FAV_NONE: 'Brak ulubionych. Oznacz wartości gwiazdką.', // draft, please review
+  SYS_FAV_REMOVED: 'Usunięto z ulubionych', // draft, please review
+  SYS_GROUP_HEATING: 'Ogrzewanie', // draft, please review
+  SYS_GROUP_PLANT: 'Instalacja', // draft, please review
+  SYS_GROUP_OVERVIEW: 'Przegląd', // draft, please review
+  SYS_LEVEL_MOVE_ALL: 'Pokaż tylko we wszystkich wartościach', // draft, please review
+  SYS_LEVEL_MOVE_NORMAL: 'Pokaż w widoku normalnym', // draft, please review
+  SYS_LEVEL_NOW_ALL: 'Teraz tylko we wszystkich wartościach', // draft, please review
+  SYS_LEVEL_NOW_NORMAL: 'Teraz także w widoku normalnym', // draft, please review
+  SYS_HC: 'Obieg grzewczy {0}', // draft, please review
+  SYS_DHW: 'Ciepła woda', // draft, please review
+  SYS_AHS: 'Ogrzewanie dodatkowe', // draft, please review
+  SYS_HS: 'Źródło ciepła', // draft, please review
+  SYS_SRC: 'Źródło', // draft, please review
+  SYS_OTHER_DEVICES: 'Pozostałe urządzenia', // draft, please review
+  SYS_SERVICE: 'Konserwacja i błędy', // draft, please review
+  SYS_ENERGY: 'Energia i czasy pracy', // draft, please review
+  SYS_SEC_MODE: 'Praca', // draft, please review
+  SYS_SEC_TEMPS: 'Temperatury', // draft, please review
+  SYS_SEC_STATUS: 'Stan', // draft, please review
+  SYS_SEC_ADVANCED: 'Krzywa grzewcza i instalacja', // draft, please review
+  SYS_SEC_MEASURE: 'Wartości pomiarowe', // draft, please review
+  SYS_SEC_OTHER: 'Pozostałe wartości', // draft, please review
+  SYS_LEVEL_NORMAL: 'Normalny', // draft, please review
+  SYS_NO_RESULTS: 'Nic nie znaleziono. Spróbuj wszystkich wartości lub innego terminu.', // draft, please review
+  SYS_SEARCH_PLACES: 'Strony i moduły', // draft, please review
+  SYS_NOTHING_HERE: 'Na poziomie Normalny nie ma tu nic do pokazania.', // draft, please review
+  SYS_HIDDEN: 'Ukryte wartości eksperckie: {num}', // draft, please review
+  SYS_SEARCH_RESULTS: 'Wyniki wyszukiwania', // draft, please review
+  SYS_CHANGED_WAS: 'zmieniono (było: {0})', // draft, please review
+  SYS_NO_DEVICES: 'Nie znaleziono jeszcze urządzeń.', // draft, please review
+  SYS_ROOM_TEMP: 'Temperatura pokojowa', // draft, please review
+  SYS_WISH: 'Zadana', // draft, please review
+  SYS_CURRENT: 'Temperatura bieżąca', // draft, please review
+  SYS_OUTDOOR: 'Temperatura zewnętrzna', // draft, please review
+  SYS_FLOW: 'Zasilanie', // draft, please review
+  SYS_RETURN: 'Powrót', // draft, please review
+  SYS_PRESSURE: 'Ciśnienie w instalacji', // draft, please review
+  SYS_POWER: 'Moc', // draft, please review
+  SYS_BURNER_ON: 'Palnik pracuje', // draft, please review
+  SYS_BURNER_OFF: 'Palnik wyłączony', // draft, please review
+  SYS_DHW_HEATING: 'Trwa podgrzewanie', // draft, please review
+  SYS_READY: 'Gotowe', // draft, please review
+  SYS_ONE_TIME: 'Jednorazowe ładowanie', // draft, please review
+  SYS_NOTES: 'Uwagi', // draft, please review
+  SYS_NOTES_SUB: 'Błędy i konserwacja', // draft, please review
+  SYS_LAST_FAULT: 'Ostatni błąd', // draft, please review
+  SYS_MAINT_MSG: 'Komunikat konserwacyjny', // draft, please review
+  SYS_NEXT_MAINT: 'Następna konserwacja', // draft, please review
+  SYS_FAULT_LAST: 'Ostatnia usterka / komunikat', // draft, please review
+  SYS_FAULT_CTRL: 'Ostatni błąd regulatora', // draft, please review
+  SYS_FAULT_SERVICE: 'Kod serwisowy', // draft, please review
+  SYS_FAULT_ADD: 'Kod dodatkowy {0}', // draft, please review
+  SYS_FAULT_RAW_ONLY: 'Brak objaśnienia dla tego urządzenia.', // draft, please review
+  SYS_FAULT_NONE: 'Brak zapisanych usterek.', // draft, please review
+  SYS_FAULT_UNTIL_NOW: 'do teraz', // draft, please review
+  SYS_MAINTENANCE: 'Konserwacja', // draft, please review
 };
 
 export default pl;

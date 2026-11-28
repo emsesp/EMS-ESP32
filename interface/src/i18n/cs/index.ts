@@ -689,6 +689,70 @@ const cs: Translation = {
   INSTALL_FIRMWARE: 'Nainstalovat Firmware ({channel})', // DeepL
   PARTITION: 'Oddíl',
   PULSE: 'Pulse', // DeepL
+  SYS_HOME: 'Domů', // draft, please review
+  SYS_HOME_HELP: 'Nejdůležitější věci na první pohled. Vše ostatní najdete v systémové nabídce.', // draft, please review
+  SYS_SENSORS_HELP: 'Senzory připojené k bráně. Chcete-li je změnit, otevřete Senzory v hlavní nabídce.', // draft, please review
+  SYS_MENU: 'Systémová nabídka', // draft, please review
+  SYS_MENU_HELP: 'Všechny hodnoty {name} ve vašem systému.', // draft, please review
+  SYS_SEARCH_HELP: 'Odpovídající hodnoty všech zařízení.', // draft, please review
+  SYS_FAV_HELP: 'Vaše nejdůležitější entity zařízení. Hvězdičkou u hodnoty tento seznam změníte.', // draft, please review
+  SYS_FAV_NONE: 'Zatím žádné oblíbené. Označte hodnoty hvězdičkou.', // draft, please review
+  SYS_FAV_REMOVED: 'Odebráno z oblíbených', // draft, please review
+  SYS_GROUP_HEATING: 'Topení', // draft, please review
+  SYS_GROUP_PLANT: 'Zařízení', // draft, please review
+  SYS_GROUP_OVERVIEW: 'Přehled', // draft, please review
+  SYS_LEVEL_MOVE_ALL: 'Zobrazit jen ve všech hodnotách', // draft, please review
+  SYS_LEVEL_MOVE_NORMAL: 'Zobrazit v normálním zobrazení', // draft, please review
+  SYS_LEVEL_NOW_ALL: 'Nyní se zobrazuje jen ve všech hodnotách', // draft, please review
+  SYS_LEVEL_NOW_NORMAL: 'Nyní se zobrazuje i v normálním zobrazení', // draft, please review
+  SYS_HC: 'Topný okruh {0}', // draft, please review
+  SYS_DHW: 'Teplá voda', // draft, please review
+  SYS_AHS: 'Přídavné topení', // draft, please review
+  SYS_HS: 'Zdroj tepla', // draft, please review
+  SYS_SRC: 'Zdroj', // draft, please review
+  SYS_OTHER_DEVICES: 'Další zařízení', // draft, please review
+  SYS_SERVICE: 'Údržba a poruchy', // draft, please review
+  SYS_ENERGY: 'Energie a doby provozu', // draft, please review
+  SYS_SEC_MODE: 'Provoz', // draft, please review
+  SYS_SEC_TEMPS: 'Teploty', // draft, please review
+  SYS_SEC_STATUS: 'Stav', // draft, please review
+  SYS_SEC_ADVANCED: 'Topná křivka a instalace', // draft, please review
+  SYS_SEC_MEASURE: 'Naměřené hodnoty', // draft, please review
+  SYS_SEC_OTHER: 'Další hodnoty', // draft, please review
+  SYS_LEVEL_NORMAL: 'Běžné', // draft, please review
+  SYS_NO_RESULTS: 'Nic nenalezeno. Zkuste všechny hodnoty nebo jiný výraz.', // draft, please review
+  SYS_SEARCH_PLACES: 'Stránky a moduly', // draft, please review
+  SYS_NOTHING_HERE: 'V úrovni Běžné se zde nic nezobrazuje.', // draft, please review
+  SYS_HIDDEN: 'Skryté expertní hodnoty: {num}', // draft, please review
+  SYS_SEARCH_RESULTS: 'Výsledky hledání', // draft, please review
+  SYS_CHANGED_WAS: 'změněno (dříve: {0})', // draft, please review
+  SYS_NO_DEVICES: 'Zatím nebyla nalezena žádná zařízení.', // draft, please review
+  SYS_ROOM_TEMP: 'Pokojová teplota', // draft, please review
+  SYS_WISH: 'Cílová', // draft, please review
+  SYS_CURRENT: 'Aktuální teplota', // draft, please review
+  SYS_OUTDOOR: 'Venkovní teplota', // draft, please review
+  SYS_FLOW: 'Přívod', // draft, please review
+  SYS_RETURN: 'Zpátečka', // draft, please review
+  SYS_PRESSURE: 'Tlak v systému', // draft, please review
+  SYS_POWER: 'Výkon', // draft, please review
+  SYS_BURNER_ON: 'Hořák běží', // draft, please review
+  SYS_BURNER_OFF: 'Hořák vypnut', // draft, please review
+  SYS_DHW_HEATING: 'Probíhá ohřev', // draft, please review
+  SYS_READY: 'Připraveno', // draft, please review
+  SYS_ONE_TIME: 'Jednorázový ohřev', // draft, please review
+  SYS_NOTES: 'Upozornění', // draft, please review
+  SYS_NOTES_SUB: 'Poruchy a údržba', // draft, please review
+  SYS_LAST_FAULT: 'Poslední porucha', // draft, please review
+  SYS_MAINT_MSG: 'Hlášení údržby', // draft, please review
+  SYS_NEXT_MAINT: 'Další údržba', // draft, please review
+  SYS_FAULT_LAST: 'Poslední porucha / hlášení', // draft, please review
+  SYS_FAULT_CTRL: 'Poslední porucha regulátoru', // draft, please review
+  SYS_FAULT_SERVICE: 'Servisní kód', // draft, please review
+  SYS_FAULT_ADD: 'Doplňkový kód {0}', // draft, please review
+  SYS_FAULT_RAW_ONLY: 'Pro toto zařízení není k dispozici vysvětlení.', // draft, please review
+  SYS_FAULT_NONE: 'Žádná uložená porucha.', // draft, please review
+  SYS_FAULT_UNTIL_NOW: 'do nynějška', // draft, please review
+  SYS_MAINTENANCE: 'Údržba', // draft, please review
 };
 
 export default cs;

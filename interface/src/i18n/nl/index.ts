@@ -689,6 +689,70 @@ const nl: Translation = {
   INSTALL_FIRMWARE: 'Firmware Installeren ({channel})',
   PARTITION: 'Sectie', // DeepL
   PULSE: 'Pulse', // DeepL
+  SYS_HOME: 'Thuis', // draft, please review
+  SYS_HOME_HELP: 'De belangrijkste dingen in één oogopslag. Al het andere vind je in het systeemmenu.', // draft, please review
+  SYS_SENSORS_HELP: 'De sensoren die op de gateway zijn aangesloten. Om ze te wijzigen, open Sensoren in het hoofdmenu.', // draft, please review
+  SYS_MENU: 'Systeemmenu', // draft, please review
+  SYS_MENU_HELP: 'Alle waarden van {name} in je installatie.', // draft, please review
+  SYS_SEARCH_HELP: 'Overeenkomende waarden van alle apparaten.', // draft, please review
+  SYS_FAV_HELP: 'Je belangrijkste apparaat-entiteiten. Met de ster bij een waarde pas je deze lijst aan.', // draft, please review
+  SYS_FAV_NONE: 'Nog geen favorieten. Markeer waarden met de ster.', // draft, please review
+  SYS_FAV_REMOVED: 'Verwijderd uit favorieten', // draft, please review
+  SYS_GROUP_HEATING: 'Verwarming', // draft, please review
+  SYS_GROUP_PLANT: 'Installatie', // draft, please review
+  SYS_GROUP_OVERVIEW: 'Overzicht', // draft, please review
+  SYS_LEVEL_MOVE_ALL: 'Alleen bij alle waarden tonen', // draft, please review
+  SYS_LEVEL_MOVE_NORMAL: 'Tonen in de normale weergave', // draft, please review
+  SYS_LEVEL_NOW_ALL: 'Wordt nu alleen bij alle waarden getoond', // draft, please review
+  SYS_LEVEL_NOW_NORMAL: 'Wordt nu ook in de normale weergave getoond', // draft, please review
+  SYS_HC: 'Verwarmingskring {0}', // draft, please review
+  SYS_DHW: 'Warm water', // draft, please review
+  SYS_AHS: 'Bijverwarming', // draft, please review
+  SYS_HS: 'Warmtebron', // draft, please review
+  SYS_SRC: 'Bron', // draft, please review
+  SYS_OTHER_DEVICES: 'Overige apparaten', // draft, please review
+  SYS_SERVICE: 'Onderhoud & storingen', // draft, please review
+  SYS_ENERGY: 'Energie & looptijden', // draft, please review
+  SYS_SEC_MODE: 'Bedrijf', // draft, please review
+  SYS_SEC_TEMPS: 'Temperaturen', // draft, please review
+  SYS_SEC_STATUS: 'Status', // draft, please review
+  SYS_SEC_ADVANCED: 'Stooklijn & installatie', // draft, please review
+  SYS_SEC_MEASURE: 'Meetwaarden', // draft, please review
+  SYS_SEC_OTHER: 'Overige waarden', // draft, please review
+  SYS_LEVEL_NORMAL: 'Normaal', // draft, please review
+  SYS_NO_RESULTS: 'Niets gevonden. Probeer alle waarden of een andere term.', // draft, please review
+  SYS_SEARCH_PLACES: 'Pagina\'s en modules', // draft, please review
+  SYS_NOTHING_HERE: 'Op niveau Normaal is hier niets te tonen.', // draft, please review
+  SYS_HIDDEN: 'Verborgen expertwaarden: {num}', // draft, please review
+  SYS_SEARCH_RESULTS: 'Zoekresultaten', // draft, please review
+  SYS_CHANGED_WAS: 'gewijzigd (was: {0})', // draft, please review
+  SYS_NO_DEVICES: 'Nog geen apparaten gevonden.', // draft, please review
+  SYS_ROOM_TEMP: 'Kamertemperatuur', // draft, please review
+  SYS_WISH: 'Gewenst', // draft, please review
+  SYS_CURRENT: 'Huidige temperatuur', // draft, please review
+  SYS_OUTDOOR: 'Buitentemperatuur', // draft, please review
+  SYS_FLOW: 'Aanvoer', // draft, please review
+  SYS_RETURN: 'Retour', // draft, please review
+  SYS_PRESSURE: 'Systeemdruk', // draft, please review
+  SYS_POWER: 'Vermogen', // draft, please review
+  SYS_BURNER_ON: 'Brander draait', // draft, please review
+  SYS_BURNER_OFF: 'Brander uit', // draft, please review
+  SYS_DHW_HEATING: 'Wordt opgewarmd', // draft, please review
+  SYS_READY: 'Gereed', // draft, please review
+  SYS_ONE_TIME: 'Eenmalig laden', // draft, please review
+  SYS_NOTES: 'Meldingen', // draft, please review
+  SYS_NOTES_SUB: 'Storingen en onderhoud', // draft, please review
+  SYS_LAST_FAULT: 'Laatste storing', // draft, please review
+  SYS_MAINT_MSG: 'Onderhoudsmelding', // draft, please review
+  SYS_NEXT_MAINT: 'Volgend onderhoud', // draft, please review
+  SYS_FAULT_LAST: 'Laatste storing / melding', // draft, please review
+  SYS_FAULT_CTRL: 'Laatste regelaarstoring', // draft, please review
+  SYS_FAULT_SERVICE: 'Servicecode', // draft, please review
+  SYS_FAULT_ADD: 'Aanvullende code {0}', // draft, please review
+  SYS_FAULT_RAW_ONLY: 'Geen uitleg beschikbaar voor dit apparaat.', // draft, please review
+  SYS_FAULT_NONE: 'Geen opgeslagen storing.', // draft, please review
+  SYS_FAULT_UNTIL_NOW: 'tot nu', // draft, please review
+  SYS_MAINTENANCE: 'Onderhoud', // draft, please review
 };
 
 export default nl;

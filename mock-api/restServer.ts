@@ -1278,6 +1278,10 @@ const EMSESP_CUSTOMENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customEntities';
 const EMSESP_MODULES_ENDPOINT = REST_ENDPOINT_ROOT + 'modules';
 const EMSESP_ACTION_ENDPOINT = REST_ENDPOINT_ROOT + 'action';
 const EMSESP_UPLOAD_FILE_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFile';
+const EMSESP_VIEWLEVELS_ENDPOINT = REST_ENDPOINT_ROOT + 'viewLevels';
+
+// what the user moved between Normal and All values in the Dashboard menu, like /viewlevels.json on the gateway
+let viewLevels: Record<string, number> = {};
 
 // these are used in the API calls only
 const EMSESP_SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info';
@@ -5039,11 +5043,28 @@ const dummy_deviceentities = [
 const emsesp_deviceentities_1 = dummy_deviceentities;
 const emsesp_deviceentities_3 = dummy_deviceentities;
 const emsesp_deviceentities_5 = dummy_deviceentities;
-const emsesp_deviceentities_6 = dummy_deviceentities;
+// the short names are the ones of the firmware, as the Dashboard tiles look the values up by them
+const demoEntities = (list: [string, string][]) =>
+  list.map(([n, id]) => ({ v: '', n, id, m: 0, w: false }));
+const emsesp_deviceentities_6 = demoEntities([
+  ['collector temperature (TS1)', 'collectortemp'],
+  ['cylinder bottom temperature (TS2)', 'cylbottomtemp'],
+  ['pump (PS1)', 'solarpump'],
+  ['pump modulation (PS1)', 'solarpumpmod'],
+  ['actual solar power', 'solarpower'],
+  ['pump working time', 'pumpworktime']
+]);
 const emsesp_deviceentities_8 = dummy_deviceentities;
 const emsesp_deviceentities_9 = dummy_deviceentities;
 const emsesp_deviceentities_10 = dummy_deviceentities;
-const emsesp_deviceentities_11 = dummy_deviceentities;
+const emsesp_deviceentities_11 = demoEntities([
+  ['indoor fresh air', 'infresh'],
+  ['outdoor exhaust air', 'outexhaust'],
+  ['in blower speed', 'ventinspeed'],
+  ['out blower speed', 'ventoutspeed'],
+  ['air quality (voc)', 'airquality'],
+  ['relative air humidity', 'airhumidity']
+]);
 const emsesp_deviceentities_none = dummy_deviceentities;
 
 const emsesp_deviceentities_2 = [
@@ -5617,7 +5638,8 @@ const DEVICE_ENTITIES_MAP: Record<number, any> = {
   7: emsesp_deviceentities_7,
   8: emsesp_deviceentities_8,
   9: emsesp_deviceentities_9,
-  10: emsesp_deviceentities_10
+  10: emsesp_deviceentities_10,
+  11: emsesp_deviceentities_11
 };
 
 function deviceData(id: number) {
@@ -5626,10 +5648,9 @@ function deviceData(id: number) {
     emsesp_devicedata_8.nodes[4].v = Math.floor(Math.random() * 100);
   }
 
-  const data = DEVICE_DATA_MAP[id];
-  if (data) {
-    return new Response(encoder.encode(data) as BodyInit, { headers });
-  }
+  // a device without values, like a gateway, has an empty list; it is not an error
+  const data = DEVICE_DATA_MAP[id] ?? { nodes: [] };
+  return new Response(encoder.encode(data) as BodyInit, { headers });
 }
 
 function deviceEntities(id: number) {
@@ -5979,6 +6000,13 @@ router
     return status(200);
   })
   .get(EMSESP_MODULES_ENDPOINT, () => emsesp_modules)
+
+  // Levels of the values (Normal or All values)
+  .get(EMSESP_VIEWLEVELS_ENDPOINT, () => viewLevels)
+  .post(EMSESP_VIEWLEVELS_ENDPOINT, async (request: any) => {
+    viewLevels = await request.json();
+    return status(200);
+  })
 
   // Custom Entities
   .post(EMSESP_CUSTOMENTITIES_ENDPOINT, async (request: any) => {

@@ -5,7 +5,6 @@ import {
   Button,
   ConfirmDialog,
   Loader,
-  SearchField,
   Section,
   SortHeader,
   Table,
@@ -44,7 +43,7 @@ const num = (v: unknown) => {
 };
 
 // digital types show on/off; a Digital Out on a DAC pin has a 0-255 value
-const isOnOff = (as: AnalogSensor) =>
+export const isOnOff = (as: AnalogSensor) =>
   as.t === AnalogType.DIGITAL_IN ||
   as.t === AnalogType.PULSE ||
   (as.t === AnalogType.DIGITAL_OUT && as.g !== 25 && as.g !== 26);
@@ -52,7 +51,6 @@ const isOnOff = (as: AnalogSensor) =>
 const Sensors = () => {
   const { LL } = useI18nContext();
   const { me } = useContext(AuthenticatedContext);
-  const [query, setQuery] = useState('');
   const [temp, setTemp] = useState<TemperatureSensor>();
   const [analog, setAnalog] = useState<AnalogSensor>();
   const [creating, setCreating] = useState(false);
@@ -80,11 +78,8 @@ const Sensors = () => {
     return <Loader error={error?.message} onRetry={() => void fetchSensorData()} />;
   }
 
-  const q = query.trim().toLowerCase();
-  const match = (...fields: (string | number)[]) =>
-    !q || fields.join(' ').toLowerCase().includes(q);
-  const temps = tempSort.rows.filter((ts) => match(ts.n, ts.id));
-  const analogs = analogSort.rows.filter((as) => match(as.n, as.g));
+  const temps = tempSort.rows;
+  const analogs = analogSort.rows;
 
   const saveTemperatureSensor = async (ts: TemperatureSensor) => {
     setTemp(undefined);
@@ -155,24 +150,14 @@ const Sensors = () => {
   const empty = (cols: number) => (
     <tr>
       <td colSpan={cols} className="tbl-empty">
-        {q ? LL.NO_SENSORS_MATCH() : LL.NO_SENSORS()}
+        {LL.NO_SENSORS()}
       </td>
     </tr>
   );
 
   return (
     <>
-      <Section
-        className="sns"
-        desc={`${LL.SENSORS_HELP_1()}.`}
-        actions={
-          <SearchField
-            label={LL.SEARCH_SENSORS()}
-            value={query}
-            onInput={(e) => setQuery(e.currentTarget.value)}
-          />
-        }
-      >
+      <Section className="sns" desc={`${LL.SENSORS_HELP_1()}.`}>
         <Section
           title={LL.TEMP_SENSORS()}
           count={data.ts.length}

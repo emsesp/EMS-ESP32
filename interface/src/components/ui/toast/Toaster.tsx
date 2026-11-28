@@ -15,6 +15,8 @@ import {
 } from './store';
 
 const AUTO_CLOSE_MS = 3000;
+// a toast with a button stays longer, so there is time to use it
+const ACTION_CLOSE_MS = 7000;
 
 const ICONS: Record<ToastSeverity, IconName> = {
   success: 'check_circle',
@@ -28,7 +30,8 @@ const ICONS: Record<ToastSeverity, IconName> = {
 const Toast = memo(({ item }: { item: ToastItem }) => {
   const { LL } = useI18nContext();
   const ref = useRef<HTMLDivElement>(null);
-  const remaining = useRef(AUTO_CLOSE_MS);
+  const closeMs = item.action ? ACTION_CLOSE_MS : AUTO_CLOSE_MS;
+  const remaining = useRef(closeMs);
   const [hover, setHover] = useState(false);
   const [focus, setFocus] = useState(false);
   const [hidden, setHidden] = useState(document.hidden);
@@ -71,11 +74,21 @@ const Toast = memo(({ item }: { item: ToastItem }) => {
     >
       <Icon name={ICONS[item.severity]} />
       <span className="grow">{item.message}</span>
+      {item.action && (
+        <button
+          type="button"
+          className="toast-action"
+          onClick={(e) => {
+            e.stopPropagation();
+            item.action?.onClick();
+            removeToast(item.id);
+          }}
+        >
+          {item.action.label}
+        </button>
+      )}
       <IconButton icon="close" label={LL.CLOSE()} plain />
-      <span
-        className="toast-bar"
-        style={{ animationDuration: `${AUTO_CLOSE_MS}ms` }}
-      />
+      <span className="toast-bar" style={{ animationDuration: `${closeMs}ms` }} />
     </div>
   );
 });

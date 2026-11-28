@@ -689,6 +689,70 @@ const it: Translation = {
   INSTALL_FIRMWARE: 'Installa Firmware ({channel})', // DeepL
   PARTITION: 'Partizione',
   PULSE: 'Pulse', // DeepL
+  SYS_HOME: 'Casa', // draft, please review
+  SYS_HOME_HELP: 'Le cose più importanti a colpo d’occhio. Tutto il resto è nel menu Sistema.', // draft, please review
+  SYS_SENSORS_HELP: 'I sensori collegati al gateway. Per modificarli, apri Sensori nel menu principale.', // draft, please review
+  SYS_MENU: 'Menu Sistema', // draft, please review
+  SYS_MENU_HELP: 'Tutti i valori di {name} nel tuo impianto.', // draft, please review
+  SYS_SEARCH_HELP: 'Valori corrispondenti di tutti i dispositivi.', // draft, please review
+  SYS_FAV_HELP: 'Le tue entità dei dispositivi più importanti. Usa la stella accanto a un valore per modificare l’elenco.', // draft, please review
+  SYS_FAV_NONE: 'Ancora nessun preferito. Contrassegna i valori con la stella.', // draft, please review
+  SYS_FAV_REMOVED: 'Rimosso dai preferiti', // draft, please review
+  SYS_GROUP_HEATING: 'Riscaldamento', // draft, please review
+  SYS_GROUP_PLANT: 'Impianto', // draft, please review
+  SYS_GROUP_OVERVIEW: 'Panoramica', // draft, please review
+  SYS_LEVEL_MOVE_ALL: 'Mostra solo in tutti i valori', // draft, please review
+  SYS_LEVEL_MOVE_NORMAL: 'Mostra nella vista normale', // draft, please review
+  SYS_LEVEL_NOW_ALL: 'Ora mostrato solo in tutti i valori', // draft, please review
+  SYS_LEVEL_NOW_NORMAL: 'Ora mostrato anche nella vista normale', // draft, please review
+  SYS_HC: 'Circuito di riscaldamento {0}', // draft, please review
+  SYS_DHW: 'Acqua calda', // draft, please review
+  SYS_AHS: 'Riscaldatore ausiliario', // draft, please review
+  SYS_HS: 'Fonte di calore', // draft, please review
+  SYS_SRC: 'Sorgente', // draft, please review
+  SYS_OTHER_DEVICES: 'Altri dispositivi', // draft, please review
+  SYS_SERVICE: 'Manutenzione e guasti', // draft, please review
+  SYS_ENERGY: 'Energia e tempi di funzionamento', // draft, please review
+  SYS_SEC_MODE: 'Funzionamento', // draft, please review
+  SYS_SEC_TEMPS: 'Temperature', // draft, please review
+  SYS_SEC_STATUS: 'Stato', // draft, please review
+  SYS_SEC_ADVANCED: 'Curva di riscaldamento e installazione', // draft, please review
+  SYS_SEC_MEASURE: 'Valori misurati', // draft, please review
+  SYS_SEC_OTHER: 'Altri valori', // draft, please review
+  SYS_LEVEL_NORMAL: 'Normale', // draft, please review
+  SYS_NO_RESULTS: 'Nessun risultato. Prova con tutti i valori o un altro termine.', // draft, please review
+  SYS_SEARCH_PLACES: 'Pagine e moduli', // draft, please review
+  SYS_NOTHING_HERE: 'Nessun elemento da mostrare qui al livello Normale.', // draft, please review
+  SYS_HIDDEN: 'Valori esperti nascosti: {num}', // draft, please review
+  SYS_SEARCH_RESULTS: 'Risultati della ricerca', // draft, please review
+  SYS_CHANGED_WAS: 'modificato (prima: {0})', // draft, please review
+  SYS_NO_DEVICES: 'Nessun dispositivo trovato.', // draft, please review
+  SYS_ROOM_TEMP: 'Temperatura ambiente', // draft, please review
+  SYS_WISH: 'Obiettivo', // draft, please review
+  SYS_CURRENT: 'Temperatura attuale', // draft, please review
+  SYS_OUTDOOR: 'Temperatura esterna', // draft, please review
+  SYS_FLOW: 'Mandata', // draft, please review
+  SYS_RETURN: 'Ritorno', // draft, please review
+  SYS_PRESSURE: 'Pressione dell’impianto', // draft, please review
+  SYS_POWER: 'Potenza', // draft, please review
+  SYS_BURNER_ON: 'Bruciatore in funzione', // draft, please review
+  SYS_BURNER_OFF: 'Bruciatore spento', // draft, please review
+  SYS_DHW_HEATING: 'In riscaldamento', // draft, please review
+  SYS_READY: 'Pronto', // draft, please review
+  SYS_ONE_TIME: 'Carica singola', // draft, please review
+  SYS_NOTES: 'Note', // draft, please review
+  SYS_NOTES_SUB: 'Guasti e manutenzione', // draft, please review
+  SYS_LAST_FAULT: 'Ultimo guasto', // draft, please review
+  SYS_MAINT_MSG: 'Messaggio di manutenzione', // draft, please review
+  SYS_NEXT_MAINT: 'Prossima manutenzione', // draft, please review
+  SYS_FAULT_LAST: 'Ultimo guasto / messaggio', // draft, please review
+  SYS_FAULT_CTRL: 'Ultimo guasto del regolatore', // draft, please review
+  SYS_FAULT_SERVICE: 'Codice di servizio', // draft, please review
+  SYS_FAULT_ADD: 'Codice aggiuntivo {0}', // draft, please review
+  SYS_FAULT_RAW_ONLY: 'Nessuna spiegazione disponibile per questo dispositivo.', // draft, please review
+  SYS_FAULT_NONE: 'Nessun guasto memorizzato.', // draft, please review
+  SYS_FAULT_UNTIL_NOW: 'fino ad ora', // draft, please review
+  SYS_MAINTENANCE: 'Manutenzione', // draft, please review
 };
 
 export default it;

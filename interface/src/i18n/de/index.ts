@@ -689,6 +689,70 @@ const de: Translation = {
   INSTALL_FIRMWARE: 'Firmware installieren ({channel})',
   PARTITION: 'Abschnitt', // DeepL
   PULSE: 'Pulse', // DeepL
+  SYS_HOME: 'Zuhause', // draft, please review
+  SYS_HOME_HELP: 'Das Wichtigste auf einen Blick. Alles andere findest du im Menü.', // draft, please review
+  SYS_SENSORS_HELP: 'Die am Gateway angeschlossenen Sensoren. Zum Ändern öffne Sensoren im Hauptmenü.', // draft, please review
+  SYS_MENU: 'Systemmenü', // draft, please review
+  SYS_MENU_HELP: 'Alle Werte von {name} in deiner Anlage.', // draft, please review
+  SYS_SEARCH_HELP: 'Passende Werte aller Geräte.', // draft, please review
+  SYS_FAV_HELP: 'Deine wichtigsten Geräte-Entitäten. Mit dem Stern bei einem Wert änderst du die Liste.', // draft, please review
+  SYS_FAV_NONE: 'Noch keine Favoriten. Markiere Werte mit dem Stern.', // draft, please review
+  SYS_FAV_REMOVED: 'Aus den Favoriten entfernt', // draft, please review
+  SYS_GROUP_HEATING: 'Heizung', // draft, please review
+  SYS_GROUP_PLANT: 'Anlage', // draft, please review
+  SYS_GROUP_OVERVIEW: 'Überblick', // draft, please review
+  SYS_LEVEL_MOVE_ALL: 'Nur unter Alle Werte anzeigen', // draft, please review
+  SYS_LEVEL_MOVE_NORMAL: 'In der Ansicht Normal anzeigen', // draft, please review
+  SYS_LEVEL_NOW_ALL: 'Wird jetzt nur unter Alle Werte angezeigt', // draft, please review
+  SYS_LEVEL_NOW_NORMAL: 'Wird jetzt auch unter Normal angezeigt', // draft, please review
+  SYS_HC: 'Heizkreis {0}', // draft, please review
+  SYS_DHW: 'Warmwasser', // draft, please review
+  SYS_AHS: 'Zusatzheizung', // draft, please review
+  SYS_HS: 'Wärmequelle', // draft, please review
+  SYS_SRC: 'Quelle', // draft, please review
+  SYS_OTHER_DEVICES: 'Weitere Geräte', // draft, please review
+  SYS_SERVICE: 'Wartung & Fehler', // draft, please review
+  SYS_ENERGY: 'Energie & Betriebszeiten', // draft, please review
+  SYS_SEC_MODE: 'Betrieb', // draft, please review
+  SYS_SEC_TEMPS: 'Temperaturen', // draft, please review
+  SYS_SEC_STATUS: 'Status', // draft, please review
+  SYS_SEC_ADVANCED: 'Heizkurve & Anlage', // draft, please review
+  SYS_SEC_MEASURE: 'Messwerte', // draft, please review
+  SYS_SEC_OTHER: 'Weitere Werte', // draft, please review
+  SYS_LEVEL_NORMAL: 'Normal', // draft, please review
+  SYS_NO_RESULTS: 'Nichts gefunden. Probiere alle Werte oder einen anderen Begriff.', // draft, please review
+  SYS_SEARCH_PLACES: 'Seiten und Module', // draft, please review
+  SYS_NOTHING_HERE: 'Hier gibt es in der Stufe Normal nichts anzuzeigen.', // draft, please review
+  SYS_HIDDEN: 'Ausgeblendete Expertenwerte: {num}', // draft, please review
+  SYS_SEARCH_RESULTS: 'Suchergebnisse', // draft, please review
+  SYS_CHANGED_WAS: 'geändert (vorher: {0})', // draft, please review
+  SYS_NO_DEVICES: 'Noch keine Geräte gefunden.', // draft, please review
+  SYS_ROOM_TEMP: 'Raumtemperatur', // draft, please review
+  SYS_WISH: 'Wunsch', // draft, please review
+  SYS_CURRENT: 'Aktuelle Temperatur', // draft, please review
+  SYS_OUTDOOR: 'Außentemperatur', // draft, please review
+  SYS_FLOW: 'Vorlauf', // draft, please review
+  SYS_RETURN: 'Rücklauf', // draft, please review
+  SYS_PRESSURE: 'Anlagendruck', // draft, please review
+  SYS_POWER: 'Leistung', // draft, please review
+  SYS_BURNER_ON: 'Brenner läuft', // draft, please review
+  SYS_BURNER_OFF: 'Brenner aus', // draft, please review
+  SYS_DHW_HEATING: 'Wird gerade erwärmt', // draft, please review
+  SYS_READY: 'Bereit', // draft, please review
+  SYS_ONE_TIME: 'Einmalladung', // draft, please review
+  SYS_NOTES: 'Hinweise', // draft, please review
+  SYS_NOTES_SUB: 'Fehler und Wartung', // draft, please review
+  SYS_LAST_FAULT: 'Letzter Fehler', // draft, please review
+  SYS_MAINT_MSG: 'Wartungsmeldung', // draft, please review
+  SYS_NEXT_MAINT: 'Nächste Wartung', // draft, please review
+  SYS_FAULT_LAST: 'Letzte Störung / Meldung', // draft, please review
+  SYS_FAULT_CTRL: 'Letzter Reglerfehler', // draft, please review
+  SYS_FAULT_SERVICE: 'Servicecode', // draft, please review
+  SYS_FAULT_ADD: 'Zusatzcode {0}', // draft, please review
+  SYS_FAULT_RAW_ONLY: 'Für dieses Gerät ist keine Erklärung verfügbar.', // draft, please review
+  SYS_FAULT_NONE: 'Keine gespeicherte Störung.', // draft, please review
+  SYS_FAULT_UNTIL_NOW: 'bis jetzt', // draft, please review
+  SYS_MAINTENANCE: 'Wartung', // draft, please review
 };
 
 export default de;

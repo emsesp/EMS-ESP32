@@ -1,9 +1,16 @@
 export type ToastSeverity = 'success' | 'error' | 'info' | 'warning';
 
+// a button on the toast, e.g. to undo what the toast reports
+export interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
+
 export interface ToastItem {
   id: number;
   severity: ToastSeverity;
   message: string;
+  action?: ToastAction | undefined;
 }
 
 const MAX_TOASTS = 3;
@@ -25,13 +32,17 @@ export const subscribe = (listener: () => void): (() => void) => {
 
 export const getSnapshot = (): ToastItem[] => toasts;
 
-const add = (severity: ToastSeverity, message: string): number => {
+const add = (
+  severity: ToastSeverity,
+  message: string,
+  action?: ToastAction
+): number => {
   const id = nextId++;
   // a repeated message replaces the earlier one, so it moves to the end with a fresh timer
   const rest = toasts.filter(
     (t) => t.severity !== severity || t.message !== message
   );
-  toasts = [...rest, { id, severity, message }].slice(-MAX_TOASTS);
+  toasts = [...rest, { id, severity, message, action }].slice(-MAX_TOASTS);
   emit();
   return id;
 };
@@ -48,6 +59,6 @@ export const removeToast = (id: number): void => {
 export const toast = {
   success: (message: string) => add('success', message),
   error: (message: string) => add('error', message),
-  info: (message: string) => add('info', message),
+  info: (message: string, action?: ToastAction) => add('info', message, action),
   warning: (message: string) => add('warning', message)
 };

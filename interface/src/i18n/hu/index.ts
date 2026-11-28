@@ -689,6 +689,70 @@ const hu: Translation = {
   INSTALL_FIRMWARE: 'Firmware Telepítése ({channel})',
   PARTITION: 'Partíció',
   PULSE: 'Pulse', // DeepL
+  SYS_HOME: 'Főoldal', // draft, please review
+  SYS_HOME_HELP: 'A legfontosabb dolgok egy pillantással. Minden más a Rendszer menüben található.', // draft, please review
+  SYS_SENSORS_HELP: 'Az átjáróra csatlakoztatott érzékelők. Módosításukhoz nyisd meg az Érzékelők oldalt a főmenüben.', // draft, please review
+  SYS_MENU: 'Rendszer menü', // draft, please review
+  SYS_MENU_HELP: 'A(z) {name} összes értéke a rendszeredben.', // draft, please review
+  SYS_SEARCH_HELP: 'Az összes eszköz egyező értékei.', // draft, please review
+  SYS_FAV_HELP: 'A legfontosabb eszközentitásaid. Az érték melletti csillaggal módosíthatod a listát.', // draft, please review
+  SYS_FAV_NONE: 'Még nincs kedvenc. Jelölj meg értékeket a csillaggal.', // draft, please review
+  SYS_FAV_REMOVED: 'Eltávolítva a kedvencek közül', // draft, please review
+  SYS_GROUP_HEATING: 'Fűtés', // draft, please review
+  SYS_GROUP_PLANT: 'Berendezés', // draft, please review
+  SYS_GROUP_OVERVIEW: 'Áttekintés', // draft, please review
+  SYS_LEVEL_MOVE_ALL: 'Csak az összes értéknél jelenjen meg', // draft, please review
+  SYS_LEVEL_MOVE_NORMAL: 'Megjelenítés a normál nézetben', // draft, please review
+  SYS_LEVEL_NOW_ALL: 'Mostantól csak az összes értéknél jelenik meg', // draft, please review
+  SYS_LEVEL_NOW_NORMAL: 'Mostantól a normál nézetben is megjelenik', // draft, please review
+  SYS_HC: 'Fűtési kör {0}', // draft, please review
+  SYS_DHW: 'Melegvíz', // draft, please review
+  SYS_AHS: 'Kiegészítő fűtés', // draft, please review
+  SYS_HS: 'Hőforrás', // draft, please review
+  SYS_SRC: 'Forrás', // draft, please review
+  SYS_OTHER_DEVICES: 'További eszközök', // draft, please review
+  SYS_SERVICE: 'Karbantartás és hibák', // draft, please review
+  SYS_ENERGY: 'Energia és üzemidők', // draft, please review
+  SYS_SEC_MODE: 'Üzemmód', // draft, please review
+  SYS_SEC_TEMPS: 'Hőmérsékletek', // draft, please review
+  SYS_SEC_STATUS: 'Állapot', // draft, please review
+  SYS_SEC_ADVANCED: 'Fűtési görbe és telepítés', // draft, please review
+  SYS_SEC_MEASURE: 'Mért értékek', // draft, please review
+  SYS_SEC_OTHER: 'További értékek', // draft, please review
+  SYS_LEVEL_NORMAL: 'Normál', // draft, please review
+  SYS_NO_RESULTS: 'Nincs találat. Próbáld az összes értéket vagy másik kifejezést.', // draft, please review
+  SYS_SEARCH_PLACES: 'Oldalak és modulok', // draft, please review
+  SYS_NOTHING_HERE: 'Normál szinten itt nincs megjeleníthető elem.', // draft, please review
+  SYS_HIDDEN: 'Elrejtett szakértői értékek: {num}', // draft, please review
+  SYS_SEARCH_RESULTS: 'Keresési találatok', // draft, please review
+  SYS_CHANGED_WAS: 'módosítva (előtte: {0})', // draft, please review
+  SYS_NO_DEVICES: 'Még nem található eszköz.', // draft, please review
+  SYS_ROOM_TEMP: 'Szobahőmérséklet', // draft, please review
+  SYS_WISH: 'Kívánt', // draft, please review
+  SYS_CURRENT: 'Aktuális hőmérséklet', // draft, please review
+  SYS_OUTDOOR: 'Külső hőmérséklet', // draft, please review
+  SYS_FLOW: 'Előremenő', // draft, please review
+  SYS_RETURN: 'Visszatérő', // draft, please review
+  SYS_PRESSURE: 'Rendszernyomás', // draft, please review
+  SYS_POWER: 'Teljesítmény', // draft, please review
+  SYS_BURNER_ON: 'Az égő működik', // draft, please review
+  SYS_BURNER_OFF: 'Az égő ki van kapcsolva', // draft, please review
+  SYS_DHW_HEATING: 'Fűtés alatt', // draft, please review
+  SYS_READY: 'Kész', // draft, please review
+  SYS_ONE_TIME: 'Egyszeri töltés', // draft, please review
+  SYS_NOTES: 'Megjegyzések', // draft, please review
+  SYS_NOTES_SUB: 'Hibák és karbantartás', // draft, please review
+  SYS_LAST_FAULT: 'Utolsó hiba', // draft, please review
+  SYS_MAINT_MSG: 'Karbantartási üzenet', // draft, please review
+  SYS_NEXT_MAINT: 'Következő karbantartás', // draft, please review
+  SYS_FAULT_LAST: 'Utolsó hiba / üzenet', // draft, please review
+  SYS_FAULT_CTRL: 'A szabályozó utolsó hibája', // draft, please review
+  SYS_FAULT_SERVICE: 'Szervizkód', // draft, please review
+  SYS_FAULT_ADD: 'Kiegészítő kód {0}', // draft, please review
+  SYS_FAULT_RAW_ONLY: 'Ehhez a készülékhez nincs elérhető magyarázat.', // draft, please review
+  SYS_FAULT_NONE: 'Nincs tárolt hiba.', // draft, please review
+  SYS_FAULT_UNTIL_NOW: 'mostanáig', // draft, please review
+  SYS_MAINTENANCE: 'Karbantartás', // draft, please review
 };
 
 export default hu;

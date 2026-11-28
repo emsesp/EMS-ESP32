@@ -9,10 +9,16 @@ import { useI18nContext } from 'i18n/i18n-react';
 interface LayoutAppBarProps {
   trail: AppRoute[];
   onToggleDrawer: () => void;
+  // the element for the controls of the page (search, ...) at the right end
+  actionsRef: (el: HTMLElement | null) => void;
 }
 
 // breadcrumbs from the route table; on phones only a back arrow to the parent and the title
-const LayoutAppBarComponent = ({ trail, onToggleDrawer }: LayoutAppBarProps) => {
+const LayoutAppBarComponent = ({
+  trail,
+  onToggleDrawer,
+  actionsRef
+}: LayoutAppBarProps) => {
   const { LL } = useI18nContext();
   const current = trail[trail.length - 1];
   const parent = trail[trail.length - 2];
@@ -50,6 +56,7 @@ const LayoutAppBarComponent = ({ trail, onToggleDrawer }: LayoutAppBarProps) => 
           {current ? current.title(LL) : PROJECT_NAME}
         </span>
       </h1>
+      <div className="appbar-actions" ref={actionsRef} />
     </header>
   );
 };

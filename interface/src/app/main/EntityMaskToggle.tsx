@@ -76,6 +76,21 @@ export const withMask = (de: DeviceEntity, m: number, bit: number, on: boolean) 
   return next;
 };
 
+// the entry the firmware expects in the customization list: mask, short name and custom values
+export const createMaskedEntityId = (de: DeviceEntity): string => {
+  const maskHex = de.m.toString(16).padStart(2, '0');
+  const hasCustomizations = !!(de.cn || de.mi || de.ma);
+  const customizations = [
+    de.cn || '',
+    de.mi ? `>${de.mi}` : '',
+    de.ma ? `<${de.ma}` : ''
+  ]
+    .filter(Boolean)
+    .join('');
+
+  return `${maskHex}${de.id}${hasCustomizations ? `|${customizations}` : ''}`;
+};
+
 interface EntityMaskToggleProps {
   de: DeviceEntity;
   // the mask shown, defaults to de.m

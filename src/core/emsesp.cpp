@@ -70,6 +70,7 @@ FS * const fsRef = &LittleFS;
 ESP32React              EMSESP::esp32React(&webServer, fsRef);
 WebSettingsService      EMSESP::webSettingsService      = WebSettingsService(&webServer, fsRef, EMSESP::esp32React.getSecurityManager());
 WebCustomizationService EMSESP::webCustomizationService = WebCustomizationService(&webServer, fsRef, EMSESP::esp32React.getSecurityManager());
+WebViewLevelService     EMSESP::webViewLevelService     = WebViewLevelService(&webServer, EMSESP::esp32React.getSecurityManager());
 WebSchedulerService     EMSESP::webSchedulerService     = WebSchedulerService(&webServer, fsRef, EMSESP::esp32React.getSecurityManager());
 WebCommandService       EMSESP::webCommandService       = WebCommandService(&webServer, fsRef, EMSESP::esp32React.getSecurityManager());
 WebCustomEntityService  EMSESP::webCustomEntityService  = WebCustomEntityService(&webServer, fsRef, EMSESP::esp32React.getSecurityManager());

@@ -47,6 +47,7 @@ export { default as Meter } from './Meter';
 export type { MeterProps } from './Meter';
 export { default as ProgressBar } from './ProgressBar';
 export type { ProgressBarProps } from './ProgressBar';
+export { default as AppBarActions, AppBarSlotContext } from './AppBarSlot';
 export { default as SaveBar, SaveBarSlotContext } from './SaveBar';
 export type { SaveBarProps } from './SaveBar';
 export { default as SearchField } from './SearchField';

@@ -4,7 +4,6 @@ import { Navigate, Route } from 'react-router';
 import Commands from 'app/main/Commands';
 import CustomEntities from 'app/main/CustomEntities';
 import Customizations from 'app/main/Customizations';
-import Dashboard from 'app/main/Dashboard';
 import Devices from 'app/main/Devices';
 import Help from 'app/main/Help';
 import Modules from 'app/main/Modules';
@@ -33,6 +32,7 @@ import NTPStatus from 'app/status/NTPStatus';
 import NetworkStatus from 'app/status/NetworkStatus';
 import SystemLog from 'app/status/SystemLog';
 import Status from 'app/status/SystemStatus';
+import SystemMenu from 'app/system/SystemMenu';
 import type { IconName } from 'components/ui';
 import type { TranslationFunctions } from 'i18n/i18n-types';
 import { routeMatches } from 'utils';
@@ -59,7 +59,7 @@ export interface AppRoute {
 
 // prettier-ignore
 export const routes: AppRoute[] = [
-  { path: '/dashboard', element: Dashboard, title: (LL) => LL.DASHBOARD(), icon: 'star', menu: 'main', wildcard: true },
+  { path: '/dashboard', element: SystemMenu, title: (LL) => LL.DASHBOARD(), icon: 'tune', menu: 'main', wildcard: true },
   { path: '/devices', element: Devices, title: (LL) => LL.DEVICES(), icon: 'category', menu: 'main', wildcard: true },
 
   { path: '/sensors', element: Sensors, title: (LL) => LL.SENSORS(), icon: 'sensors', menu: 'modules', wildcard: true },

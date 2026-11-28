@@ -6,7 +6,6 @@ import {
   Button,
   Icon,
   Listbox,
-  SearchField,
   Section,
   Segmented,
   SortHeader,
@@ -111,7 +110,6 @@ interface Editing {
 
 const CustomEntities = () => {
   const { LL } = useI18nContext();
-  const [query, setQuery] = useState('');
   const [storage, setStorage] = useState(-1);
   const [editing, setEditing] = useState<Editing>();
 
@@ -184,13 +182,8 @@ const CustomEntities = () => {
   };
 
   const live = list.rows.filter((r) => r.state !== 'del');
-  const q = query.trim().toLowerCase();
   const rows = list.rows
-    .filter(
-      ({ item }) =>
-        (storage < 0 || item.ram === storage) &&
-        (!q || item.name.toLowerCase().includes(q))
-    )
+    .filter(({ item }) => storage < 0 || item.ram === storage)
     .sort((a, b) => a.item.name.localeCompare(b.item.name));
   const sort = useTableSort(rows, {
     name: byText((r) => r.item.name),
@@ -205,16 +198,9 @@ const CustomEntities = () => {
       <Section
         desc={`${LL.ENTITIES_HELP_1()}.`}
         actions={
-          <>
-            <SearchField
-              label={LL.SEARCH()}
-              value={query}
-              onInput={(e) => setQuery(e.currentTarget.value)}
-            />
-            <Button icon="add" onClick={add}>
-              {LL.ADD(0)}
-            </Button>
-          </>
+          <Button icon="add" onClick={add}>
+            {LL.ADD(0)}
+          </Button>
         }
       >
         <div className="ce-filter">
