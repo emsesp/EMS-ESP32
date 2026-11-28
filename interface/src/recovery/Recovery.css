@@ -10,7 +10,8 @@
   gap: 12px;
   height: var(--appbar-h);
   padding: 0 16px 0 24px;
-  background: var(--appbar);
+  background: var(--bg);
+  border-bottom: 1px solid var(--divider);
 }
 .rc-bar img {
   width: 32px;
@@ -43,6 +44,9 @@
 }
 .rc-p {
   margin: 0 0 12px;
+}
+.sec-head + .rc-p {
+  margin-top: 20px;
 }
 .rc-dump {
   margin-bottom: 12px;

@@ -192,16 +192,7 @@ jobs:
           name: modbus-header
           path: src/core
 
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2.25
-        with:
-          key: firmware-${{ matrix.env }}
-          restore-keys: firmware-${{ matrix.env }}-
-          max-size: 1G
-
       - name: Build ${{ matrix.env }}
-        env:
-          CCACHE_COMPILERCHECK: content
         run: platformio run -e ${{ matrix.env }}
 
       - name: Upload firmware

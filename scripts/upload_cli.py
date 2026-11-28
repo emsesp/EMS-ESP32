@@ -44,6 +44,8 @@ UPLOAD_ERRORS = {
     400: "The device didn't accept the file. It isn't a firmware file, or the upload was cut off.",
     401: "The device didn't accept the sign-in. Check the username and password.",
     403: "This user isn't an admin. Use an admin user with -u and -p.",
+    409: "The device is running the Recovery app, which can't install a recovery image into itself. "
+         "Start EMS-ESP from the Recovery UI first, then upload again.",
     412: "The device refused it because it isn't an official EMS-ESP build. Firmware from 2 Nov 2026 onwards installs it anyway "
          "when uploaded with this script. An older 3.9.0 dev build only accepts it after running 'allow unsigned' in its console, "
          "or flash it over USB once.",
@@ -183,8 +185,24 @@ def upload(file, ip, username, password):
             print_fail(f"Authentication failed (code {response.status_code})")
             sys.exit(1)
 
-        print_success("Authentication successful")
         access_token = response.json().get('access_token')
+        # recovery also has /rest/signIn. EMS-ESP serves the SPA (HTTP 200 HTML) for unknown
+        # paths, so only treat it as Recovery when the JSON body has recovery_version
+        status_headers = create_base_headers(host_ip, emsesp_url)
+        status_headers['Authorization'] = f'Bearer {access_token}'
+        running_recovery = False
+        try:
+            probe = session.get(
+                f"{emsesp_url}/rest/recovery/status",
+                headers=status_headers,
+                timeout=15)
+            running_recovery = (
+                probe.status_code == 200 and 'recovery_version' in probe.json())
+        except ValueError:
+            pass
+        print_success(
+            "Authentication with Recovery successful" if running_recovery
+            else "Authentication with EMS-ESP successful")
 
         # firmware uploads need the password entered again (404 on firmware older than 3.10.0)
         confirm_headers = create_base_headers(host_ip, emsesp_url)
@@ -200,6 +218,9 @@ def upload(file, ip, username, password):
 
         firmware = file_path.read_bytes()
         md5 = hashlib.md5(firmware).hexdigest()
+        if running_recovery and 'recovery' in file_path.name.lower():
+            print_fail(UPLOAD_ERRORS[409])
+            sys.exit(1)
         # Device enables MD5 check only after a file whose name ends in .md5
         # (same as the WebUI). An ElegantOTA "MD5" form field is ignored.
         md5_name = file_path.with_suffix('.md5').name

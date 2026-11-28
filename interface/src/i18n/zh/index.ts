@@ -161,6 +161,7 @@ const zh: Translation = {
   HELP_INFORMATION_2: "加入我们的 Discord 服务器与社区实时交流",
   HELP_INFORMATION_3: "请求新功能或报告问题",
   HELP_INFORMATION_4: "报告问题时请附上系统信息，以便更快得到回复",
+  HELP_INFORMATION_5: "EMS-ESP 由志愿者开发。通过 Ko-fi 打赏可帮助项目持续发展",
   UPLOAD: "上传",
   DOWNLOAD: "下载",
   INSTALL: "安装",
@@ -493,6 +494,7 @@ const zh: Translation = {
   DOCUMENTATION: "文档",
   COMMUNITY_CHAT: "社区聊天",
   REPORT_ISSUE: "报告问题或请求新功能",
+  SUPPORT_PROJECT: "支持本项目",
   GET_HELP: "获取帮助",
   REPORT_PROBLEM: "报告问题",
   REPORT_STEP_1: "下载系统信息",
@@ -611,6 +613,7 @@ const zh: Translation = {
   SEARCH_SENSORS: "搜索名称、ID 或 GPIO",
   NO_SENSORS: "未找到传感器",
   NO_SENSORS_MATCH: "没有与搜索匹配的传感器",
+  SENSORS_HELP_1: "管理连接到此设备的温度探头和模拟传感器", // DeepL
   TEMP_SENSORS_HELP: "自动检测。单击传感器可重命名或设置偏移量",
   FREE_GPIOS: "可用 GPIO",
   SYSTEM_SENSOR: "系统传感器",

@@ -4,7 +4,6 @@ import { useRequest } from 'alova/client';
 import {
   Button,
   ConfirmDialog,
-  Icon,
   Loader,
   Section,
   SortHeader,
@@ -158,122 +157,131 @@ const Sensors = () => {
 
   return (
     <>
-      <Section title={LL.SENSORS()} icon="sensors">
-        {me.admin && data.analog_enabled && (
-          <p className="cap sns-desc">
-            {LL.FREE_GPIOS()}:{' '}
-            <span className="mono">
-              {data.available_gpios.join(', ') || LL.NONE()}
-            </span>
-          </p>
-        )}
-
-        <div className="sns-sub">
-          <Icon name="thermostat" className="lb" />
-          <h3 className="h6 grow">
-            {LL.TEMP_SENSORS()}
-            <span className="count primary">{data.ts.length}</span>
-          </h3>
-        </div>
-        {me.admin && <p className="sec-desc">{LL.TEMP_SENSORS_HELP()}</p>}
-        <div className="tbl-wrap">
-          <Table stack>
-            <thead>
-              <tr>
-                <SortHeader {...tempSort.header('name')}>{LL.NAME(0)}</SortHeader>
-                <th>ID</th>
-                <th className="r">{LL.OFFSET()}</th>
-                <SortHeader className="r" {...tempSort.header('value')}>
-                  {LL.VALUE()}
-                </SortHeader>
-              </tr>
-            </thead>
-            <tbody>
-              {temps.length === 0 && empty(4)}
-              {temps.map((ts) => (
-                <tr
-                  key={ts.id}
-                  {...(me.admin ? rowAction(() => setTemp(ts), ts.n) : {})}
-                >
-                  <td data-label={LL.NAME(0)}>
-                    <span>
-                      {ts.n}
-                      {ts.s && <Tag kind="sys">{LL.SYSTEM(0)}</Tag>}
-                    </span>
-                  </td>
-                  <td data-label="ID" className="mono muted">
-                    {ts.id}
-                  </td>
-                  <td
-                    data-label={LL.OFFSET()}
-                    className={ts.o ? 'r num lb' : 'r num muted'}
+      <Section className="sns" desc={`${LL.SENSORS_HELP_1()}.`}>
+        <Section
+          title={LL.TEMP_SENSORS()}
+          count={data.ts.length}
+          icon="thermostat"
+          desc={me.admin && LL.TEMP_SENSORS_HELP()}
+        >
+          <div className="tbl-wrap">
+            <Table stack>
+              <thead>
+                <tr>
+                  <SortHeader {...tempSort.header('name')}>{LL.NAME(0)}</SortHeader>
+                  <th>ID</th>
+                  <th className="r">{LL.OFFSET()}</th>
+                  <SortHeader className="r" {...tempSort.header('value')}>
+                    {LL.VALUE()}
+                  </SortHeader>
+                </tr>
+              </thead>
+              <tbody>
+                {temps.length === 0 && empty(4)}
+                {temps.map((ts) => (
+                  <tr
+                    key={ts.id}
+                    {...(me.admin ? rowAction(() => setTemp(ts), ts.n) : {})}
                   >
-                    {offsetText(ts)}
-                  </td>
-                  <td data-label={LL.VALUE()} className="r num">
-                    {formatValue(LL, ts.t, ts.u)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </div>
+                    <td data-label={LL.NAME(0)}>
+                      <span>
+                        {ts.n}
+                        {ts.s && <Tag kind="sys">{LL.SYSTEM(0)}</Tag>}
+                      </span>
+                    </td>
+                    <td data-label="ID" className="mono muted">
+                      {ts.id}
+                    </td>
+                    <td
+                      data-label={LL.OFFSET()}
+                      className={ts.o ? 'r num lb' : 'r num muted'}
+                    >
+                      {offsetText(ts)}
+                    </td>
+                    <td data-label={LL.VALUE()} className="r num">
+                      {formatValue(LL, ts.t, ts.u)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+        </Section>
 
-        <div className="sns-sub">
-          <Icon name="sensors" className="lb" />
-          <h3 className="h6 grow">
-            {LL.ANALOG_SENSORS()}
-            <span className="count primary">{data.as.length}</span>
-          </h3>
-          {me.admin && data.analog_enabled && (
-            <Button icon="add" onClick={addAnalogSensor}>
-              {LL.ADD(0)}
-            </Button>
-          )}
-        </div>
-        <div className="tbl-wrap">
-          <Table stack>
-            <thead>
-              <tr>
-                <SortHeader {...analogSort.header('name')}>{LL.NAME(0)}</SortHeader>
-                <SortHeader {...analogSort.header('gpio')}>GPIO</SortHeader>
-                <SortHeader {...analogSort.header('type')}>{LL.TYPE(0)}</SortHeader>
-                <SortHeader className="r" {...analogSort.header('value')}>
-                  {LL.VALUE()}
-                </SortHeader>
-              </tr>
-            </thead>
-            <tbody>
-              {analogs.length === 0 && empty(4)}
-              {analogs.map((as) => (
-                <tr
-                  key={as.id}
-                  {...(me.admin ? rowAction(() => editAnalogSensor(as), as.n) : {})}
-                >
-                  <td data-label={LL.NAME(0)}>
-                    <span>
-                      {as.n}
-                      {as.s && <Tag kind="sys">{LL.SYSTEM(0)}</Tag>}
-                    </span>
-                  </td>
-                  <td data-label="GPIO">
-                    <span className="sns-gpio">{as.g}</span>
-                  </td>
-                  <td data-label={LL.TYPE(0)}>
-                    <Tag kind="type">{AnalogTypeNames[as.t - 1]}</Tag>
-                  </td>
-                  <td data-label={LL.VALUE()} className="r num">
-                    {isOnOff(as)
-                      ? as.v
-                        ? LL.ON()
-                        : LL.OFF()
-                      : formatValue(LL, as.v, as.u)}
-                  </td>
+        <Section
+          title={LL.ANALOG_SENSORS()}
+          count={data.as.length}
+          icon="sensors"
+          desc={
+            me.admin &&
+            data.analog_enabled && (
+              <>
+                {LL.FREE_GPIOS()}:{' '}
+                <span className="mono">
+                  {data.available_gpios.join(', ') || LL.NONE()}
+                </span>
+              </>
+            )
+          }
+          actions={
+            me.admin &&
+            data.analog_enabled && (
+              <Button icon="add" onClick={addAnalogSensor}>
+                {LL.ADD(0)}
+              </Button>
+            )
+          }
+        >
+          <div className="tbl-wrap">
+            <Table stack>
+              <thead>
+                <tr>
+                  <SortHeader {...analogSort.header('name')}>
+                    {LL.NAME(0)}
+                  </SortHeader>
+                  <SortHeader {...analogSort.header('gpio')}>GPIO</SortHeader>
+                  <SortHeader {...analogSort.header('type')}>
+                    {LL.TYPE(0)}
+                  </SortHeader>
+                  <SortHeader className="r" {...analogSort.header('value')}>
+                    {LL.VALUE()}
+                  </SortHeader>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
-        </div>
+              </thead>
+              <tbody>
+                {analogs.length === 0 && empty(4)}
+                {analogs.map((as) => (
+                  <tr
+                    key={as.id}
+                    {...(me.admin
+                      ? rowAction(() => editAnalogSensor(as), as.n)
+                      : {})}
+                  >
+                    <td data-label={LL.NAME(0)}>
+                      <span>
+                        {as.n}
+                        {as.s && <Tag kind="sys">{LL.SYSTEM(0)}</Tag>}
+                      </span>
+                    </td>
+                    <td data-label="GPIO">
+                      <span className="sns-gpio">{as.g}</span>
+                    </td>
+                    <td data-label={LL.TYPE(0)}>
+                      <Tag kind="type">{AnalogTypeNames[as.t - 1]}</Tag>
+                    </td>
+                    <td data-label={LL.VALUE()} className="r num">
+                      {isOnOff(as)
+                        ? as.v
+                          ? LL.ON()
+                          : LL.OFF()
+                        : formatValue(LL, as.v, as.u)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+        </Section>
       </Section>
 
       {temp && (

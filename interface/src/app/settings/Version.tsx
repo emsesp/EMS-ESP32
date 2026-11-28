@@ -175,8 +175,15 @@ const Version = () => {
     uploading: uploadProgress,
     send: sendUpload,
     abort: cancelUpload
-  } = useRequest(SystemApi.uploadFile, { immediate: false }).onSuccess(
-    ({ data: response }) => {
+  } = useRequest(SystemApi.uploadFile, {
+    immediate: false,
+    // alova keeps the last progress after a finished request; reset so "Install anyway"
+    // doesn't reopen the bar at ~100% from the refused upload
+    middleware: async (context, next) => {
+      context.proxyStates.uploading.v = { loaded: 0, total: 0 };
+      return next();
+    }
+  }).onSuccess(({ data: response }) => {
       let payload: unknown = response;
       if (typeof payload === 'string' && payload.length > 0) {
         try {

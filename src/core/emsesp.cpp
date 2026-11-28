@@ -1589,8 +1589,12 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
             default_name = "Cascaded Controller";
             device_type  = DeviceType::CONTROLLER;
         } else {
-            LOG_WARNING("Unrecognized EMS device (deviceID 0x%02X, no productID). Please report on GitHub.", device_id);
-            return false;
+            // listed in UBADevices but never answers version. Register once, otherwise every scan
+            // requests 0x02 again and the failure is logged forever (#3486)
+            default_name = "unknown";
+            device_type  = DeviceType::GENERIC;
+            flags        = DeviceFlags::EMS_DEVICE_FLAG_NONE;
+            LOG_WARNING("Unrecognized EMS device (deviceID 0x%02X, no productID). Adding as unknown. Please report on GitHub.", device_id);
         }
     }
 
@@ -1851,7 +1855,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         }
 
         if (wait_km_) {
-            if (poll_id != 0x48 && (uuid::get_uptime_sec() - connect_time) < EMS_WAIT_KM_TIMEOUT) {
+            if (poll_id != EMSdevice::EMS_DEVICE_ID_MODEM && (uuid::get_uptime_sec() - connect_time) < EMS_WAIT_KM_TIMEOUT) {
                 return;
             }
 
@@ -2023,6 +2027,12 @@ void EMSESP::start() {
     // loads core system services settings (mqtt, ap, ntp etc)
     esp32React.begin();
 
+    webSettingsService.begin(); // load EMS-ESP application settings
+    esp32React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
+        system_.hostname(networkSettings.hostname.c_str());
+    });
+    system_.syslog_init(); // queue boot diagnostics until the network is ready
+
 // output filesystem folders and files for debugging
 #if defined(EMSESP_DEBUG)
     LOG_DEBUG("Listing root directory after:");
@@ -2074,8 +2084,6 @@ void EMSESP::start() {
 #else
     LOG_INFO("Last system reset reason Core0: %s, Core1: %s", system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
 #endif
-
-    webSettingsService.begin(); // load EMS-ESP Application settings
 
     LOG_DEBUG("System name: %s", system_.system_name().c_str());
     LOG_DEBUG("eFuse BBQKees Gateway Model: %s", system_.getBBQKeesGatewayDetails().isEmpty() ? "not set" : system_.getBBQKeesGatewayDetails().c_str());
@@ -2131,7 +2139,7 @@ void EMSESP::start() {
     }
 
     mqtt_.start();                                                           // mqtt init
-    system_.start();                                                         // starts commands, led, adc, button, network (sets hostname), syslog & uart
+    system_.start();                                                         // starts commands, LED, button, UART and Modbus
     shower_.start();                                                         // initialize shower timer and shower alert
     temperaturesensor_.start(factory_settings || force_temperature_sensors); // Temperature external sensors
     analogsensor_.start(factory_settings || force_analog_sensors);           // Analog external sensors

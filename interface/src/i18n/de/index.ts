@@ -161,6 +161,7 @@ const de: Translation = {
   HELP_INFORMATION_2: 'Für einen Live-Chat mit der Community treten Sie bitte unserem Discord-Server bei', // DeepL
   HELP_INFORMATION_3: 'Um eine Funktion anzufragen oder einen Fehler zu melden', // DeepL
   HELP_INFORMATION_4: 'Geben Sie bei der Meldung eines Problems Ihre Systeminformationen an, um eine schnellere Bearbeitung zu gewährleisten', // DeepL
+  HELP_INFORMATION_5: 'EMS-ESP wird von Freiwilligen entwickelt. Ein Tip über Ko-fi hilft, das Projekt am Leben zu halten',
   UPLOAD: 'Hochladen',
   DOWNLOAD: 'Herunterladen',
   INSTALL: 'Installieren',
@@ -493,6 +494,7 @@ const de: Translation = {
   DOCUMENTATION: 'Dokumentation',
   COMMUNITY_CHAT: 'Community-Chat',
   REPORT_ISSUE: 'Einen Fehler melden oder eine Funktion anfordern', // DeepL
+  SUPPORT_PROJECT: 'Projekt unterstützen',
   GET_HELP: 'Hilfe erhalten', // DeepL
   REPORT_PROBLEM: 'Ein Problem melden',
   REPORT_STEP_1: 'Systeminformationen herunterladen',
@@ -611,6 +613,7 @@ const de: Translation = {
   SEARCH_SENSORS: 'Suche nach Name, ID oder GPIO', // DeepL
   NO_SENSORS: 'Es wurden keine Sensoren gefunden', // DeepL
   NO_SENSORS_MATCH: 'Es wurden keine Sensoren gefunden, die Ihrer Suche entsprechen', // DeepL
+  SENSORS_HELP_1: 'Verwalten Sie Temperaturfühler und Analogsensoren, die an dieses Gerät angeschlossen sind', // DeepL
   TEMP_SENSORS_HELP: 'Automatisch erkannt. Klicken Sie auf einen Sensor, um ihn umzubenennen oder einen Offset festzulegen', // DeepL
   FREE_GPIOS: 'Freie GPIOs',
   SYSTEM_SENSOR: 'Systemsensor',

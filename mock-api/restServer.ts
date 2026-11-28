@@ -7,7 +7,7 @@ const DEMO = typeof (globalThis as any).Bun === 'undefined';
 const DEMO_MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 
 if (DEMO) {
-  console.log = () => { };
+  console.log = () => {};
 }
 
 // Minimal MessagePack encoder, the counterpart of interface/src/api/unpack.ts. Writes the same bytes as
@@ -149,7 +149,7 @@ let settings = {
   analog_enabled: true,
   pbutton_gpio: 34,
   solar_maxflow: 30,
-  board_profile: 'E32V2',
+  board_profile: 'E32V2_2',
   fahrenheit: false,
   bool_format: 1,
   bool_dashboard: 1,
@@ -275,7 +275,8 @@ let system_status = {
   ],
   // languages: ['en'], // 4MB flash boards
   model: 'BBQKees Electronics E32V2.2 rev.2.2/2024074',
-  board: 'E32V2_2',
+  board: 'E32V2_2', // from eFuse
+  board_profile: settings.board_profile, // active settings profile
   status: 0
   // status: 3
 };
@@ -294,8 +295,12 @@ interface MockData {
   recovery: string; // installed recovery app version, '' for not installed, 'noslot' for no factory partition
   recoveryLatest: string; // recovery app in the stable and dev releases online, '' for none
   recoveryOfficial: boolean; // the installed recovery app is an official or custom build
+  // .bin uploads return 412 until retried with custom=1 (shows the install-anyway warning)
+  refuseUnofficial: boolean;
   flash: string; // flash chip size: '4MB', '16MB' or '32MB'
   psram: boolean; // board has PSRAM
+  model: string; // BBQKees eFuse model string, '' when not a BBQKees gateway
+  board: string; // eFuse board ID (system status board), independent of settings.board_profile
 }
 
 const MOCK_DATA_PRESETS: { name: string; values: Partial<MockData> }[] = [
@@ -348,6 +353,10 @@ const MOCK_DATA_PRESETS: { name: string; values: Partial<MockData> }[] = [
     values: { recoveryOfficial: false }
   },
   {
+    name: 'firmware upload skips unofficial warning',
+    values: { refuseUnofficial: false }
+  },
+  {
     name: 'no factory partition (no recovery row)',
     values: { recovery: 'noslot' }
   },
@@ -366,6 +375,10 @@ const MOCK_DATA_PRESETS: { name: string; values: Partial<MockData> }[] = [
   {
     name: '32MB board with PSRAM',
     values: { flash: '32MB', psram: true }
+  },
+  {
+    name: 'no model set (generic board, not BBQKees)',
+    values: { model: '', board: '' }
   }
 ];
 
@@ -379,9 +392,32 @@ const MOCK_DATA_DEFAULT: MockData = {
   recovery: '1.1.0',
   recoveryLatest: '1.1.0',
   recoveryOfficial: true,
+  // local standalone: on so a .bin upload shows the install-anyway warning; off on the public demo
+  refuseUnofficial: !DEMO,
   flash: '16MB',
-  psram: true
+  psram: true,
+  model: 'BBQKees Electronics E32V2.2 rev.2.2/2024073',
+  board: 'E32V2_2'
 };
+
+// matches interface BOARD_PROFILES keys, plus CUSTOM
+const MOCK_BOARD_PROFILES = [
+  'S32',
+  'S32S3',
+  'E32',
+  'E32V2',
+  'E32V2_2',
+  'NODEMCU',
+  'MH-ET',
+  'LOLIN',
+  'OLIMEX',
+  'OLIMEXPOE',
+  'OLIMEXPOEW',
+  'C3MINI',
+  'S2MINI',
+  'S3MINI',
+  'CUSTOM'
+];
 
 // sizes in KB from the partitions/esp32_partition_*.csv files
 const MOCK_FLASH_LAYOUTS: Record<
@@ -453,13 +489,30 @@ function applyMockData() {
   }
   system_status.languages =
     layout.flash > 4096
-      ? ['en', 'de', 'nl', 'sv', 'pl', 'no', 'fr', 'tr', 'it', 'sk', 'cs', 'hu', 'zh']
+      ? [
+          'en',
+          'de',
+          'nl',
+          'sv',
+          'pl',
+          'no',
+          'fr',
+          'tr',
+          'it',
+          'sk',
+          'cs',
+          'hu',
+          'zh'
+        ]
       : ['en'];
 
   const psram_size = system_status.esp_platform === 'ESP32' ? 4096 : 8189;
   system_status.psram = v.psram;
   system_status.psram_size = v.psram ? psram_size : 0;
   system_status.free_psram = v.psram ? psram_size - 23 : 0;
+  system_status.model = v.model;
+  system_status.board = v.board; // eFuse only; board_profile comes from Application settings
+  system_status.board_profile = settings.board_profile;
 }
 
 // set the ESP platform - using ESP32 will disable OTA and automatic version downloading
@@ -474,10 +527,8 @@ switch (emulate_esp) {
     system_status.cpu_type = 'ESP32-D0WD-V3';
     system_status.arduino_version = 'Arduino v3.3.8';
     system_status.sdk_version = '5.5.4.260407';
-    system_status.model = 'BBQKees Electronics E32V2.2 rev.2.2/2024073';
-    system_status.board = 'E32V2_2';
-
-    settings.board_profile = 'E32V2_2';
+    mock_data.model = 'BBQKees Electronics E32V2.2 rev.2.2/2024073';
+    mock_data.board = 'E32V2_2';
     break;
 
   // ESP32 S3
@@ -487,10 +538,8 @@ switch (emulate_esp) {
     system_status.cpu_type = 'ESP32-S3';
     system_status.arduino_version = 'Arduino v3.3.8';
     system_status.sdk_version = '5.5.4.260407';
-    system_status.model = 'BBQKees Electronics S32';
-    system_status.board = 'S32S3';
-
-    settings.board_profile = 'S32S3';
+    mock_data.model = 'BBQKees Electronics S32';
+    mock_data.board = 'S32S3';
     break;
 }
 
@@ -602,10 +651,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-        old_custom_name +
-        ') with new (' +
-        new_custom_name +
-        ')'
+          old_custom_name +
+          ') with new (' +
+          new_custom_name +
+          ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -727,9 +776,9 @@ function upgradeImportantMessages(version: string) {
 
   console.log(
     'upgradeImportantMessageType: version=' +
-    version +
-    ' type=' +
-    upgradeImportantMessageType_n
+      version +
+      ' type=' +
+      upgradeImportantMessageType_n
   );
   return { upgradeImportantMessageType: upgradeImportantMessageType_n };
 }
@@ -805,20 +854,20 @@ function get_versions() {
 
   console.log(
     'getVersions: current=' +
-    v.current +
-    ' stable=' +
-    v.stable +
-    ' (upgradeable=' +
-    (stableUpgradeable ? 'YES' : 'NO') +
-    ') dev=' +
-    v.dev +
-    ' (upgradeable=' +
-    (devUpgradeable ? 'YES' : 'NO') +
-    ') recovery=' +
-    (v.recovery || 'not installed') +
-    ' recoveryLatest=' +
-    (v.recoveryLatest || 'not found') +
-    (v.offline ? ' [offline]' : '')
+      v.current +
+      ' stable=' +
+      v.stable +
+      ' (upgradeable=' +
+      (stableUpgradeable ? 'YES' : 'NO') +
+      ') dev=' +
+      v.dev +
+      ' (upgradeable=' +
+      (devUpgradeable ? 'YES' : 'NO') +
+      ') recovery=' +
+      (v.recovery || 'not installed') +
+      ' recoveryLatest=' +
+      (v.recoveryLatest || 'not found') +
+      (v.offline ? ' [offline]' : '')
   );
   return data;
 }
@@ -858,10 +907,12 @@ function mock_data_page(request: Request) {
     `<a href="?${key}=${encodeURIComponent(String(value))}">${escape(text)}</a>`;
   const toggle = (key: keyof MockData) =>
     `<li>${key}: <b>${escape(v[key])}</b> ${link(key, !v[key], 'toggle')}</li>`;
+  const empty = '<none>';
   const choices = (key: keyof MockData, options: string[]) =>
-    `<li>${key}: <b>${escape(v[key] || "''")}</b> ` +
-    options.map((o) => link(key, o, o || "''")).join(' | ') +
+    `<li>${key}: <b>${escape(v[key] || empty)}</b> ` +
+    options.map((o) => link(key, o, o || empty)).join(' | ') +
     '</li>';
+  const boardChoices = ['', ...MOCK_BOARD_PROFILES.filter((b) => b !== 'CUSTOM')];
 
   const html = `<!doctype html><html><head><title>Mock Data</title>
 <style>body{font-family:sans-serif;background:#1e1e1e;color:#ddd;padding:1em}a{color:lightblue}li{margin:4px 0}
@@ -886,12 +937,16 @@ ${toggle('debug')}
 ${choices('recovery', ['', '1.0.0', '1.1.0', 'noslot'])}
 ${choices('recoveryLatest', ['', '1.0.0', '1.1.0', '1.2.0'])}
 ${toggle('recoveryOfficial')}
+${toggle('refuseUnofficial')}
 </ul>
 <h3>Board</h3>
 <ul>
 ${choices('flash', Object.keys(MOCK_FLASH_LAYOUTS))}
 ${toggle('psram')}
+${choices('model', ['', 'BBQKees Electronics E32V2.2 rev.2.2/2024073', 'BBQKees Electronics S32'])}
+${choices('board', boardChoices)}
 </ul>
+<p>Board profile is set in Application settings (not here).</p>
 <h3>User</h3>
 <p>Signed in as: <b id="user">?</b> <a href="#" data-token="admin">admin</a> | <a href="#" data-token="guest">guest</a></p>
 <p id="origin" style="color:orange;display:none">The Web UI keeps its login per address, so open this page through the Web UI's address, e.g. http://localhost:3000/rest/mockData</p>
@@ -1681,7 +1736,8 @@ const emsesp_coredata_custom = {
   d: 1,
   p: 1,
   v: '',
-  e: 2
+  e: 2,
+  url: 'custom'
 };
 
 const emsesp_sensordata = {
@@ -4702,6 +4758,50 @@ const emsesp_devicedata_11 = {
       v: 53,
       u: 3,
       id: '00relative air humidity'
+    },
+    {
+      v: 2100,
+      u: 0,
+      id: '00exhaust fan speed'
+    },
+    {
+      v: 2900,
+      u: 0,
+      id: '00supply fan speed'
+    },
+    {
+      v: 5.3,
+      u: 23,
+      id: '00exhaust fan voltage'
+    },
+    {
+      v: 5.3,
+      u: 23,
+      id: '00supply fan voltage'
+    },
+    {
+      v: 100,
+      u: 3,
+      id: '00volume flow balance exhaust',
+      c: 'ventbalance'
+    },
+    {
+      v: 30,
+      u: 3,
+      id: '00level L1',
+      c: 'level1pct'
+    },
+    {
+      v: 70,
+      u: 3,
+      id: '00level L2',
+      c: 'level2pct'
+    },
+    {
+      v: 130,
+      u: 3,
+      id: '00level L4',
+      c: 'level4pct'
     }
   ]
 };
@@ -5380,15 +5480,28 @@ router
       return md5_ok ? { recovery: true, md5_ok } : { recovery: true };
     }
 
+    // like the firmware / recovery mock: refuse an unsigned build until the user agrees (custom=1)
+    // enabled by the refuseUnofficial mock-data preset, or by naming the file custom*.bin
+    const allowCustom =
+      new URL(request.url).searchParams.get('custom') === '1';
+    const treatAsCustom =
+      mock_data.refuseUnofficial || fileName.toLowerCase().startsWith('custom');
+    if (fileExtension === 'bin' && treatAsCustom && !allowCustom) {
+      console.log('Refusing unofficial firmware (412)');
+      return status(412);
+    }
+
     if (fileExtension === 'bin' && pendingFirmwareMd5) {
       pendingFirmwareMd5 = false;
       console.log('Firmware MD5 matches');
-      return { md5_ok: true };
+      return treatAsCustom
+        ? { official: false, md5_ok: true }
+        : { md5_ok: true };
     }
 
     pendingFirmwareMd5 = false;
     console.log('File uploaded successfully!');
-    return status(200);
+    return treatAsCustom ? { official: false } : status(200);
   })
   .get(ACTIVITY_ENDPOINT, () => activity)
   .get(MOCK_DATA_ENDPOINT, mock_data_page)
@@ -5586,6 +5699,7 @@ router
     system_status.developer_mode = settings.developer_mode;
     log_settings.developer_mode = settings.developer_mode;
     system_status.disable_reset = settings.disable_reset;
+    system_status.board_profile = settings.board_profile;
     return status(restart ? 205 : 200);
   })
 

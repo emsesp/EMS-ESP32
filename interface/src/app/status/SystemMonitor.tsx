@@ -79,9 +79,14 @@ const SystemMonitor = ({ onDone, onInstallCustom }: SystemMonitorProps) => {
       setErrorMessage(String(error.error?.message || LL.ERROR()));
     });
 
-  useInterval(() => {
-    void send();
-  }, 1000); // check every 1 second
+  useInterval(
+    () => {
+      void send();
+    },
+    1000,
+    false,
+    true
+  ); // check every 1 second
 
   const status = data?.status;
 
@@ -182,11 +187,7 @@ const SystemMonitor = ({ onDone, onInstallCustom }: SystemMonitorProps) => {
               <span className="cap">{progress}%</span>
             </div>
             <div className="sysmon-actions">
-              <Button
-                color="neutral"
-                icon="cancel"
-                onClick={() => void onCancel()}
-              >
+              <Button color="neutral" icon="cancel" onClick={() => void onCancel()}>
                 {LL.CANCEL()}
               </Button>
             </div>

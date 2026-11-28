@@ -1030,15 +1030,10 @@ void System::start() {
 #endif
 #endif
 
-    EMSESP::esp32React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
-        hostname(networkSettings.hostname.c_str()); // sets the hostname
-    });
-
     commands_init();     // console & api commands
     EMSESP::led_.init(); // init LED
     button_init();       // button
     uart_init();         // start UART
-    syslog_init();       // start syslog
     modbus_init();       // start modbus
 }
 
@@ -2005,7 +2000,7 @@ bool System::check_upgrade() {
         }
 #endif
 
-        // changes going to v3.9 from an 3.8.x or earlier
+        // changes going to v3.9+ from an 3.8.x or earlier
         if (settings_version.major() == 3 && settings_version.minor() < 9) {
 #ifndef EMSESP_STANDALONE
             // AP_MODE_ALWAYS has been removed
@@ -2015,7 +2010,6 @@ bool System::check_upgrade() {
                     LOG_INFO("Upgrade: setting AP provision mode to on disconnect");
                     return StateUpdateResult::CHANGED;
                 }
-
                 return StateUpdateResult::UNCHANGED;
             });
             // Scheduler name is now mandatory, update FS if name is empty
@@ -2028,10 +2022,20 @@ bool System::check_upgrade() {
                         schedule_changed = true;
                     }
                 }
-
                 return schedule_changed ? StateUpdateResult::CHANGED : StateUpdateResult::UNCHANGED;
             });
 #endif
+        }
+
+        // if the bus id is 0x48 set it to 0x0B - see https://github.com/emsesp/EMS-ESP32/discussions/3472#discussioncomment-19814550
+        if (settings_version.major() == 3 && settings_version.minor() < 10) {
+            EMSESP::webSettingsService.update([&](WebSettings & settings) {
+                if (settings.ems_bus_id == 0x48) {
+                    settings.ems_bus_id = 0x0B;
+                    return StateUpdateResult::CHANGED;
+                }
+                return StateUpdateResult::UNCHANGED;
+            });
         }
 
         // Core3 3.9.0-dev.12 implements the new Commands Service.

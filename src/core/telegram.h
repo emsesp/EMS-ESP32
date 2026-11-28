@@ -21,6 +21,7 @@
 
 #include <string>
 #include <deque>
+#include <mutex>
 #include <uuid/log.h>
 
 // UART drivers
@@ -330,9 +331,8 @@ class RxService : public EMSbus {
         }
     };
 
-    std::deque<QueuedRxTelegram, AllocatorPSRAM<QueuedRxTelegram>> queue() const {
-        return rx_telegrams_;
-    }
+    // copy under lock — UART task and loop() both mutate the queue
+    std::deque<QueuedRxTelegram, AllocatorPSRAM<QueuedRxTelegram>> queue() const;
 
   private:
     static constexpr uint8_t EMS_BUS_QUALITY_RX_THRESHOLD = 5; // % threshold before reporting quality issues
@@ -343,6 +343,7 @@ class RxService : public EMSbus {
     std::shared_ptr<const Telegram> rx_telegram;               // the incoming Rx telegram
 
     std::deque<QueuedRxTelegram, AllocatorPSRAM<QueuedRxTelegram>> rx_telegrams_; // the Rx Queue
+    mutable std::mutex                                             mutex_;       // guards rx_telegrams_ / rx_telegram_id_
 };
 
 class TxService : public EMSbus {
@@ -468,13 +469,10 @@ class TxService : public EMSbus {
         }
     };
 
-    std::deque<QueuedTxTelegram, AllocatorPSRAM<QueuedTxTelegram>> queue() const {
-        return tx_telegrams_;
-    }
+    // copy under lock — UART task and the main loop / API both mutate the queue
+    std::deque<QueuedTxTelegram, AllocatorPSRAM<QueuedTxTelegram>> queue() const;
 
-    bool tx_queue_empty() const {
-        return tx_telegrams_.empty();
-    }
+    bool tx_queue_empty() const;
 
     static constexpr uint8_t  MAXIMUM_TX_RETRIES = 3;
     static constexpr uint32_t POST_SEND_DELAY    = 2000;
@@ -484,6 +482,7 @@ class TxService : public EMSbus {
 
   private:
     std::deque<QueuedTxTelegram, AllocatorPSRAM<QueuedTxTelegram>> tx_telegrams_; // the Tx queue
+    mutable std::mutex                                             mutex_;       // guards tx_telegrams_ / tx_telegram_id_ / delayed_send_
 
     uint32_t telegram_read_count_       = 0; // # Tx successful reads
     uint32_t telegram_write_count_      = 0; // # Tx successful writes
@@ -497,7 +496,8 @@ class TxService : public EMSbus {
 
     uint8_t tx_telegram_id_ = 0; // queue counter
 
-    void send_telegram(const QueuedTxTelegram & tx_telegram);
+    void send_telegram(const std::shared_ptr<const Telegram> & telegram, const uint16_t id, const uint16_t validateid);
+    // caller must hold mutex_
     void queue_telegram(std::shared_ptr<Telegram> telegram, const bool retry, const uint16_t validateid, const bool front);
 };
 

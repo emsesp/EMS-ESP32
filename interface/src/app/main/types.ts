@@ -313,6 +313,9 @@ export const BOARD_PROFILES = {
 
 export type BoardProfileKey = keyof typeof BOARD_PROFILES;
 
+export const boardProfileName = (code?: string) =>
+  (code && BOARD_PROFILES[code as BoardProfileKey]) || code || '';
+
 export interface BoardProfile {
   board_profile: string;
   led_gpio: number;

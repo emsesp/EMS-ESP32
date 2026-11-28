@@ -236,9 +236,9 @@ export default function recoveryMock() {
             image_size: body.length,
             version: '',
             install_date: Math.floor(Date.now() / 1000),
-            ota_state: 'new'
+            ota_state: ''
           });
-          state.boot = target.label;
+          // leave boot alone: the user starts the new firmware from the UI when ready
           const md5_ok = !!state.md5;
           state.md5 = null;
           return send(res, 200, md5_ok ? { official, md5_ok } : { official });

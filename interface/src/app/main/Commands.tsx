@@ -97,8 +97,6 @@ const Commands = () => {
     <ListPage list={list}>
       <Section
         desc={`${LL.COMMANDS_HELP_1()}.`}
-        title={LL.COMMANDS()}
-        icon="playlist_play"
         actions={
           <Button icon="add" onClick={add}>
             {LL.ADD(0)}

@@ -4,7 +4,7 @@ import { API } from 'api/app';
 import { readSystemStatus } from 'api/system';
 
 import { useRequest } from 'alova/client';
-import type { APIcall } from 'app/main/types';
+import { type APIcall, boardProfileName } from 'app/main/types';
 import {
   Hero,
   IconButton,
@@ -93,7 +93,7 @@ const SystemStatus = () => {
         icon={system.state === 'ok' ? 'check_circle' : 'warning'}
         title={system.text}
         text={join(
-          data.model || data.board,
+          data.model || boardProfileName(data.board),
           `${LL.UPTIME()} ${formatDuration(data.uptime, LL)}`,
           !!data.reset_reason && `${LL.LAST_RESTART()}: ${data.reset_reason}`
         )}

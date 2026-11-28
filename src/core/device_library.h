@@ -73,6 +73,7 @@
 {194, DeviceType::CONTROLLER, "BC10", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {206, DeviceType::CONTROLLER, "Ecomline", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {207, DeviceType::CONTROLLER, "Sense II/CS200", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x10
+{233, DeviceType::CONTROLLER, "CV200", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x10
 {209, DeviceType::CONTROLLER, "ErP", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {224, DeviceType::CONTROLLER, "9000i", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {229, DeviceType::CONTROLLER, "8700i", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
@@ -186,7 +187,7 @@
 // EM10 error contact and analog flowtemp control- 0x12
 { 74, DeviceType::ALERT, "EM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
-// Gateways - 0x48
+// Gateways - 0x48, 0x4B, or 0x50 as wireless base
 {17, DeviceType::GATEWAY, "MX400", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x48, 0x4B, or 0x50 as wireless base
 {189, DeviceType::GATEWAY, "KM200, MB LAN 2", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x48
 {222, DeviceType::GATEWAY, "KM300", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x4A

@@ -1,6 +1,16 @@
-.sns-desc {
-  margin: 0;
+/* temperature and analog blocks sit inside the sensors card without their own borders */
+.sns > .section {
+  margin: 16px 0 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
 }
+/* only the page-level help is warning-colored; nested section hints stay muted */
+.sns > .section .sec-desc {
+  color: var(--text-3);
+}
+
 .sns-gpio {
   display: inline-block;
   min-width: 34px;
@@ -12,15 +22,4 @@
   font-family: var(--font-mono);
   font-size: 12px;
   text-align: center;
-}
-
-.sns-sub {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 0 6px;
-}
-.tbl-wrap + .sns-sub {
-  border-top: 1px solid var(--divider);
-  margin-top: 8px;
 }

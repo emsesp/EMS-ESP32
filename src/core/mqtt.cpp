@@ -19,6 +19,7 @@
 #include "mqtt.h"
 #include "emsesp.h"
 #include "emsdevice.h"
+#include "firmware_url.h"
 
 namespace emsesp {
 
@@ -574,11 +575,76 @@ void Mqtt::on_connect() {
 
     // send initial MQTT messages for some of our services
     EMSESP::system_.send_heartbeat(); // send heartbeat
+    publish_firmware_update();        // retained firmware versions for HA Update / MQTT consumers
     EMSESP::webCustomEntityService.publish(true);
     EMSESP::webCommandService.publish(true);
     EMSESP::webSchedulerService.publish(true);
     EMSESP::analogsensor_.publish_values(true);
     EMSESP::temperaturesensor_.publish_values(true);
+}
+
+// Home Assistant MQTT Update discovery (notify-only — no command_topic / Install action)
+// e.g. homeassistant/update/ems-esp/firmware/config
+bool Mqtt::publish_ha_firmware_update_config() {
+    if (!ha_enabled_ || discovery_type() != discoveryType::HOMEASSISTANT) {
+        return false;
+    }
+
+    char uniq[70];
+    if (entity_format() == entityFormat::MULTI_SHORT || entity_format() == entityFormat::MULTI_OLD) {
+        snprintf(uniq, sizeof(uniq), "%s_firmware", basename().c_str());
+    } else {
+        strcpy(uniq, "firmware");
+    }
+
+    JsonDocument doc(PSRAM_DOC);
+    doc["~"]          = base();
+    doc["uniq_id"]    = uniq;
+    doc["def_ent_id"] = (std::string) "update." + uniq;
+    doc["name"]       = "Firmware";
+    doc["stat_t"]     = "~/firmware";
+    doc["dev_cla"]    = "firmware";
+    doc["ent_cat"]    = "diagnostic";
+    doc["rel_u"]      = FirmwareURL::RELEASES;
+
+    JsonObject origin_json = doc["o"].to<JsonObject>();
+    origin_json["name"]    = "EMS-ESP";
+    origin_json["sw"]      = "v" + std::string(EMSESP_APP_VERSION);
+    origin_json["url"]     = "https://emsesp.org";
+
+    add_ha_dev_section(doc.as<JsonObject>()); // attach to the main EMS-ESP device
+    add_ha_avty_section(doc.as<JsonObject>());
+
+    char topic[MQTT_TOPIC_MAX_SIZE];
+    snprintf(topic, sizeof(topic), "update/%s/firmware/config", basename().c_str());
+    return queue_ha(topic, doc.as<JsonObject>());
+}
+
+// retained state for the firmware Update entity / MQTT consumers
+// HA shows an update when latest_version != installed_version; when the versions cache is empty
+// or there is no newer build we publish the same string for both so HA stays idle
+void Mqtt::publish_firmware_update() {
+    if (!connected()) {
+        return;
+    }
+
+    JsonDocument doc;
+    std::string  installed = EMSESP::webStatusService.get_current_version();
+    std::string  latest    = installed;
+
+    if (EMSESP::webStatusService.versions_cache_valid() && EMSESP::webStatusService.current_upgradeable()) {
+        std::string online = EMSESP::webStatusService.current_latest_version();
+        if (!online.empty()) {
+            latest = online;
+        }
+    }
+
+    doc["installed_version"] = installed;
+    doc["latest_version"]    = latest;
+    doc["title"]             = "EMS-ESP";
+    doc["release_url"]       = FirmwareURL::RELEASES;
+
+    queue_publish_retain("firmware", doc.as<JsonObject>());
 }
 
 // Home Assistant Discovery - the main master Device called EMS-ESP
@@ -656,6 +722,10 @@ void Mqtt::ha_status() {
                                     "Uptime",
                                     "bootTime",
                                     DeviceValueUOM::UPTIME); // called Uptime in HA and derives value from bootTime element in info topic
+
+    // notify-only Home Assistant Update entity (no Install button)
+    publish_ha_firmware_update_config();
+    publish_firmware_update();
 }
 
 // add sub or pub task to the queue.

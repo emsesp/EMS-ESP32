@@ -86,13 +86,15 @@ interface DashboardProps {
   onRestarting: (target: string) => void;
   onSignOut: () => void;
   onChanged: () => void;
+  onBusy: (busy: boolean) => void;
 }
 
 const Dashboard = ({
   status,
   onRestarting,
   onSignOut,
-  onChanged
+  onChanged,
+  onBusy
 }: DashboardProps) => {
   const [confirmBoot, setConfirmBoot] = useState<RecoveryPartition>();
   const [infoPartition, setInfoPartition] = useState<RecoveryPartition>();
@@ -101,6 +103,11 @@ const Dashboard = ({
   const [pickedTarget, setPickedTarget] = useState<string>();
   const [uploading, setUploading] = useState(false);
   const uploadTarget = pickedTarget ?? status.upload_target;
+
+  const setBusy = (busy: boolean) => {
+    setUploading(busy);
+    onBusy(busy);
+  };
 
   const handleError = (error: unknown) => {
     if (error instanceof HttpError && error.status === 401) {
@@ -197,12 +204,17 @@ const Dashboard = ({
           </p>
           <pre className="summary mono rc-dump">{status.coredump}</pre>
           <div className="rc-actions">
-            <Button icon="download" onClick={() => void doDownloadCoreDump()}>
+            <Button
+              icon="download"
+              disabled={uploading}
+              onClick={() => void doDownloadCoreDump()}
+            >
               Download crash dump
             </Button>
             <Button
               color="error"
               icon="delete"
+              disabled={uploading}
               onClick={() => setConfirmEraseCoreDump(true)}
             >
               Erase crash dump
@@ -264,6 +276,7 @@ const Dashboard = ({
                       <IconButton
                         icon="info"
                         label="Firmware version info"
+                        disabled={uploading}
                         onClick={() => setInfoPartition(p)}
                       />
                     )}
@@ -271,6 +284,7 @@ const Dashboard = ({
                       <Button
                         size="sm"
                         icon="play_arrow"
+                        disabled={uploading}
                         onClick={() => setConfirmBoot(p)}
                       >
                         Start
@@ -286,8 +300,8 @@ const Dashboard = ({
 
       <Section icon="upload_file" title="Upload Firmware">
         <p className="rc-p muted">
-          The firmware is started automatically after the upload. To enable the MD5
-          check, upload the matching .md5 file first.
+          After the upload, start the firmware from the list above when you are ready.
+          To enable the MD5 check, upload the matching .md5 file first.
         </p>
         <Select
           label="Write to"
@@ -307,9 +321,9 @@ const Dashboard = ({
         <FirmwareUpload
           target={uploadTarget}
           chip={status.chip}
-          onUploaded={() => void doRestart(uploadTarget)}
+          onUploaded={onChanged}
           onUnauthorized={onSignOut}
-          onBusy={setUploading}
+          onBusy={setBusy}
         />
       </Section>
 
@@ -352,6 +366,7 @@ const Dashboard = ({
           <Button
             color="warning"
             icon="restart_alt"
+            disabled={uploading}
             onClick={() => void doRestart(status.boot)}
           >
             Restart{status.boot !== status.running ? ` (boots ${status.boot})` : ''}
@@ -360,6 +375,7 @@ const Dashboard = ({
             <Button
               color="error"
               icon="delete_forever"
+              disabled={uploading}
               onClick={() => setConfirmFactoryReset(true)}
             >
               Factory Reset

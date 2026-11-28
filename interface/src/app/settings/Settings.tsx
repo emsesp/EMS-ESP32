@@ -3,6 +3,7 @@ import { useContext } from 'react';
 import { readSystemStatus } from 'api/system';
 
 import { useRequest } from 'alova/client';
+import { boardProfileName } from 'app/main/types';
 import { mqttInfo, networkInfo, ntpInfo } from 'app/status/status';
 import { LinkList, type LinkListItem, Section } from 'components/ui';
 import { AuthenticatedContext } from 'contexts/authentication';
@@ -98,7 +99,7 @@ const Settings = () => {
               color: '#134ba2',
               title: LL.APPLICATION(),
               text: LL.APPLICATION_DESC(),
-              value: data && (data.model || data.board)
+              value: data && (data.model || boardProfileName(data.board))
             },
             {
               to: 'ntp',

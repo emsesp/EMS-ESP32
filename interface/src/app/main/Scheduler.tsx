@@ -207,9 +207,7 @@ const Scheduler = () => {
   return (
     <ListPage list={list}>
       <Section
-        desc={LL.SCHEDULER_HELP_1()}
-        title={LL.SCHEDULER()}
-        icon="more_time"
+        desc={LL.SCHEDULER_HELP_1() + '.'}
         actions={
           <Button icon="add" onClick={add}>
             {LL.ADD(0)}

@@ -6,8 +6,8 @@
 //        [--skip-same]             skip entries identical to the English source
 //        [--limit N]               only the first N strings (for a quick test)
 //        [--out file.tsv]          also write a TSV report
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { resolve, dirname } from 'path';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { parseArgs } from 'util';
 import { transformWithOxc } from 'vite';
@@ -63,7 +63,9 @@ const BATCH = 50;
 
 const lang = (args.lang ?? '').toLowerCase();
 if (!lang) {
-  console.error('Usage: DEEPL_API_KEY=... node backtranslate-check.js --lang <code>');
+  console.error(
+    'Usage: DEEPL_API_KEY=... node backtranslate-check.js --lang <code>'
+  );
   process.exit(2);
 }
 if (args.source !== 'all' && args.source !== 'core' && args.source !== 'webui') {
@@ -71,11 +73,15 @@ if (args.source !== 'all' && args.source !== 'core' && args.source !== 'webui') 
   process.exit(2);
 }
 if (args.source !== 'webui' && !CORE_LANGS.includes(lang)) {
-  console.error(`Unknown core language "${lang}". Known: ${CORE_LANGS.filter((l) => l !== 'en').join(', ')}`);
+  console.error(
+    `Unknown core language "${lang}". Known: ${CORE_LANGS.filter((l) => l !== 'en').join(', ')}`
+  );
   process.exit(2);
 }
 if (args.source !== 'core' && !WEBUI_LANGS.includes(lang)) {
-  console.error(`Unknown web UI language "${lang}". Known: ${WEBUI_LANGS.join(', ')}`);
+  console.error(
+    `Unknown web UI language "${lang}". Known: ${WEBUI_LANGS.join(', ')}`
+  );
   process.exit(2);
 }
 if (lang === 'en') {
@@ -192,7 +198,9 @@ const loadWebui = async (code) => {
     console.error(`Missing web UI locale file: ${path}`);
     process.exit(2);
   }
-  const en = flatten(await evalLocale(readFileSync(i18nFile('en'), 'utf8'), i18nFile('en')));
+  const en = flatten(
+    await evalLocale(readFileSync(i18nFile('en'), 'utf8'), i18nFile('en'))
+  );
   const enMap = Object.fromEntries(en.map((r) => [r.key, r.text]));
   const cur = flatten(await evalLocale(readFileSync(path, 'utf8'), path));
   return cur.map((r) => ({
@@ -206,7 +214,8 @@ const loadWebui = async (code) => {
 // --- collect -------------------------------------------------------------------
 const rows = [];
 if (args.source === 'all' || args.source === 'core') rows.push(...loadCore(lang));
-if (args.source === 'all' || args.source === 'webui') rows.push(...(await loadWebui(lang)));
+if (args.source === 'all' || args.source === 'webui')
+  rows.push(...(await loadWebui(lang)));
 
 let todo = rows.filter((r) => r.text.trim());
 if (args['skip-same']) todo = todo.filter((r) => r.text !== r.en);
@@ -287,7 +296,9 @@ process.stderr.write('\n');
 const tsvEscape = (s) => `"${String(s).replace(/"/g, '""')}"`;
 const header = ['source', 'key', 'original', 'back_en', 'ref_en'];
 const lines = [header.join('\t')];
-console.log(`\n${'source'.padEnd(6)}  ${'key'.padEnd(28)}  back→EN  (original)  [ref EN]`);
+console.log(
+  `\n${'source'.padEnd(6)}  ${'key'.padEnd(28)}  back→EN  (original)  [ref EN]`
+);
 console.log('-'.repeat(100));
 todo.forEach((r, i) => {
   const enBack = back[i];
@@ -297,9 +308,7 @@ todo.forEach((r, i) => {
       `  back→EN:  ${enBack}\n` +
       `  ref EN:   ${r.en || '(none)'}`
   );
-  lines.push(
-    [r.source, r.key, r.text, enBack, r.en].map(tsvEscape).join('\t')
-  );
+  lines.push([r.source, r.key, r.text, enBack, r.en].map(tsvEscape).join('\t'));
 });
 
 if (args.out) {

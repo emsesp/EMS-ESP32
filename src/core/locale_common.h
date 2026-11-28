@@ -346,7 +346,7 @@ MAKE_ENUM(enum_heatingtype, FL_(off), FL_(radiator), FL_(convector), FL_(floor))
 MAKE_ENUM(enum_heatingtype1, FL_(off), FL_(curve), FL_(radiator), FL_(convector), FL_(floor))
 MAKE_ENUM(enum_heatingtype2, FL_(off), FL_(radiator), FL_(convector), FL_(floor), FL_(roomflow), FL_(roomload))
 MAKE_ENUM(enum_summermode, FL_(summer), FL_(auto), FL_(winter))
-MAKE_ENUM(enum_hpoperatingmode, FL_(off), FL_(auto), FL_(heating), FL_(cooling))
+MAKE_ENUM(enum_hpoperatingmode, FL_(off), FL_(auto), FL_(heating), FL_(cooling)) // RC300Summer3 0x470: off/auto/heating/cooling, #3230 #3470
 MAKE_ENUM(enum_summer, FL_(winter), FL_(summer))
 MAKE_ENUM(enum_operatingstate, FL_(heating), FL_(off), FL_(cooling))
 MAKE_ENUM(enum_hpmode, FL_(heating), FL_(cooling), FL_(heatandcool))
@@ -418,7 +418,8 @@ MAKE_ENUM(enum_bufConfig, FL_(off), FL_(monovalent), FL_(bivalent))
 MAKE_ENUM(enum_blockTerm, FL_(n_o), FL_(n_c))
 
 // Ventilation
-MAKE_ENUM(enum_ventMode, FL_(auto), FL_(off), FL_(L1), FL_(L2), FL_(L3), FL_(L4), FL_(demand), FL_(sleep), FL_(intense), FL_(bypass), FL_(partymode), FL_(fireplace))
+// autoL0..autodemand must stay at the end, see Ventilation::VENTMODE_AUTOL0
+MAKE_ENUM(enum_ventMode, FL_(auto), FL_(off), FL_(L1), FL_(L2), FL_(L3), FL_(L4), FL_(demand), FL_(sleep), FL_(intense), FL_(bypass), FL_(partymode), FL_(fireplace), FL_(autoL0), FL_(autoL1), FL_(autoL2), FL_(autoL3), FL_(autoL4), FL_(autodemand))
 
 // water
 MAKE_ENUM(enum_errorDisp, FL_(off), FL_(normal), FL_(inverted))

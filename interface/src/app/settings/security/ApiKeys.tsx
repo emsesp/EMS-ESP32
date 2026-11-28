@@ -166,11 +166,7 @@ const ApiKeys = () => {
         onSubmit={() => void create()}
         actions={
           <>
-            <Button
-              icon="cancel"
-              color="neutral"
-              onClick={() => setCreating(false)}
-            >
+            <Button icon="cancel" color="neutral" onClick={() => setCreating(false)}>
               {LL.CANCEL()}
             </Button>
             <Button type="submit" icon="add" disabled={!label.trim() || sending}>

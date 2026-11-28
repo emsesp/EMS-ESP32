@@ -330,12 +330,7 @@ const Devices = () => {
           .join(' · ');
 
   const renderDeviceList = () => (
-    <Section
-      title={LL.DEVICES()}
-      count={coreData.devices.length}
-      icon="category"
-      className="dv-list"
-    >
+    <Section className="dv-list">
       {coreData.devices.length === 0 ? (
         <p className="tbl-empty dv-empty">{LL.NO_DEVICES()}</p>
       ) : (
