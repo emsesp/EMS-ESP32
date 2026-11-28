@@ -690,6 +690,7 @@ const nl: Translation = {
   PULSE: 'Pulse', // DeepL
   SYS_HOME: 'Thuis', // draft, please review
   SYS_HOME_HELP: 'De belangrijkste dingen in één oogopslag. Al het andere vind je in het systeemmenu.', // draft, please review
+  SYS_SENSORS_HELP: 'De sensoren die op de gateway zijn aangesloten. Om ze te wijzigen, open Sensoren in het hoofdmenu.', // draft, please review
   SYS_MENU: 'Systeemmenu', // draft, please review
   SYS_MENU_HELP: 'Alle waarden en instellingen van je installatie, per onderwerp gesorteerd.', // draft, please review
   SYS_FAV_HELP: 'Je belangrijkste instellingen. Met de ster bij een waarde pas je deze lijst aan.', // draft, please review
@@ -700,6 +701,8 @@ const nl: Translation = {
   SYS_GROUP_OVERVIEW: 'Overzicht', // draft, please review
   SYS_LEVEL_MOVE_ALL: 'Alleen bij alle waarden tonen', // draft, please review
   SYS_LEVEL_MOVE_NORMAL: 'Tonen in de normale weergave', // draft, please review
+  SYS_LEVEL_NOW_ALL: 'Wordt nu alleen bij alle waarden getoond', // draft, please review
+  SYS_LEVEL_NOW_NORMAL: 'Wordt nu ook in de normale weergave getoond', // draft, please review
   SYS_HC: 'Verwarmingskring {0}', // draft, please review
   SYS_DHW: 'Warm water', // draft, please review
   SYS_AHS: 'Bijverwarming', // draft, please review

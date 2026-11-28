@@ -690,6 +690,7 @@ const pl: Translation = {
   PULSE: 'Pulse', // DeepL
   SYS_HOME: 'Dom', // draft, please review
   SYS_HOME_HELP: 'Najważniejsze rzeczy na pierwszy rzut oka. Wszystko inne znajdziesz w menu systemowym.', // draft, please review
+  SYS_SENSORS_HELP: 'Czujniki podłączone do bramy. Aby je zmienić, otwórz Czujniki w menu głównym.', // draft, please review
   SYS_MENU: 'Menu systemowe', // draft, please review
   SYS_MENU_HELP: 'Wszystkie wartości i ustawienia instalacji, uporządkowane tematycznie.', // draft, please review
   SYS_FAV_HELP: 'Twoje najważniejsze ustawienia. Gwiazdką przy wartości zmienisz tę listę.', // draft, please review
@@ -700,6 +701,8 @@ const pl: Translation = {
   SYS_GROUP_OVERVIEW: 'Przegląd', // draft, please review
   SYS_LEVEL_MOVE_ALL: 'Pokaż tylko we wszystkich wartościach', // draft, please review
   SYS_LEVEL_MOVE_NORMAL: 'Pokaż w widoku normalnym', // draft, please review
+  SYS_LEVEL_NOW_ALL: 'Teraz tylko we wszystkich wartościach', // draft, please review
+  SYS_LEVEL_NOW_NORMAL: 'Teraz także w widoku normalnym', // draft, please review
   SYS_HC: 'Obieg grzewczy {0}', // draft, please review
   SYS_DHW: 'Ciepła woda', // draft, please review
   SYS_AHS: 'Ogrzewanie dodatkowe', // draft, please review

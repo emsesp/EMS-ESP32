@@ -690,6 +690,7 @@ const it: Translation = {
   PULSE: 'Pulse', // DeepL
   SYS_HOME: 'Casa', // draft, please review
   SYS_HOME_HELP: 'Le cose più importanti a colpo d’occhio. Tutto il resto è nel menu Sistema.', // draft, please review
+  SYS_SENSORS_HELP: 'I sensori collegati al gateway. Per modificarli, apri Sensori nel menu principale.', // draft, please review
   SYS_MENU: 'Menu Sistema', // draft, please review
   SYS_MENU_HELP: 'Tutti i valori e le impostazioni del tuo impianto, ordinati per argomento.', // draft, please review
   SYS_FAV_HELP: 'Le tue impostazioni più importanti. Usa la stella accanto a un valore per modificare l’elenco.', // draft, please review
@@ -700,6 +701,8 @@ const it: Translation = {
   SYS_GROUP_OVERVIEW: 'Panoramica', // draft, please review
   SYS_LEVEL_MOVE_ALL: 'Mostra solo in tutti i valori', // draft, please review
   SYS_LEVEL_MOVE_NORMAL: 'Mostra nella vista normale', // draft, please review
+  SYS_LEVEL_NOW_ALL: 'Ora mostrato solo in tutti i valori', // draft, please review
+  SYS_LEVEL_NOW_NORMAL: 'Ora mostrato anche nella vista normale', // draft, please review
   SYS_HC: 'Circuito di riscaldamento {0}', // draft, please review
   SYS_DHW: 'Acqua calda', // draft, please review
   SYS_AHS: 'Riscaldatore ausiliario', // draft, please review

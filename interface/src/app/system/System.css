@@ -28,9 +28,11 @@
   font-size: 22px;
   font-weight: 500;
 }
+/* help texts have the warning color, like the help of the sections in the rest of the web UI */
 .sys-sub {
   margin: 2px 12px 12px;
-  color: var(--text-3);
+  font-size: 12px;
+  color: var(--warning);
 }
 
 /* ----- Home: tiles ----- */
@@ -39,7 +41,7 @@
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 12px;
   align-items: stretch;
-  margin: 0 12px;
+  margin: 0 0 12px;
 }
 .sys-tiles-one {
   grid-template-columns: minmax(280px, 420px);
@@ -53,10 +55,6 @@
   border-radius: var(--radius);
   padding: 14px;
 }
-.sys-tile-link {
-  margin-top: auto;
-  padding-top: 12px;
-}
 .sys-tile-head {
   display: flex;
   align-items: center;
@@ -64,8 +62,11 @@
   font-size: 15px;
   font-weight: 500;
 }
-.sys-tile-head .icon {
+.sys-tile-head > .icon {
   color: var(--primary);
+}
+.sys-tile-head .grow {
+  flex: 1;
 }
 .sys-tile-sub {
   display: flex;
@@ -203,18 +204,10 @@
   flex: 1;
   min-width: 0;
 }
-.sys-home-fav {
-  margin: 12px;
-}
-.sys-main .section,
-.sys-home-fav .section {
+.sys-main .section {
   margin: 0 0 12px;
   padding: 0;
   overflow: hidden;
-}
-.sys-main .sys-embed .section {
-  padding: 12px;
-  overflow: visible;
 }
 .sys-sec-head {
   display: flex;
@@ -334,7 +327,7 @@
 .sys-hint {
   margin: 0 0 12px;
   text-align: center;
-  color: var(--text-3);
+  color: var(--warning);
 }
 .sys-empty {
   padding: 24px;

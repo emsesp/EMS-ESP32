@@ -690,6 +690,7 @@ const fr: Translation = {
   PULSE: 'Pulse', // DeepL
   SYS_HOME: 'Accueil', // draft, please review
   SYS_HOME_HELP: 'L\'essentiel en un coup d\'œil. Tout le reste se trouve dans le menu Système.', // draft, please review
+  SYS_SENSORS_HELP: 'Les capteurs raccordés à la passerelle. Pour les modifier, ouvrez Capteurs dans le menu principal.', // draft, please review
   SYS_MENU: 'Menu Système', // draft, please review
   SYS_MENU_HELP: 'Toutes les valeurs et tous les réglages de votre installation, classés par thème.', // draft, please review
   SYS_FAV_HELP: 'Vos réglages les plus importants. Utilisez l’étoile à côté d’une valeur pour modifier cette liste.', // draft, please review
@@ -700,6 +701,8 @@ const fr: Translation = {
   SYS_GROUP_OVERVIEW: 'Aperçu', // draft, please review
   SYS_LEVEL_MOVE_ALL: 'Afficher seulement dans toutes les valeurs', // draft, please review
   SYS_LEVEL_MOVE_NORMAL: 'Afficher dans la vue normale', // draft, please review
+  SYS_LEVEL_NOW_ALL: 'Affiché désormais seulement dans toutes les valeurs', // draft, please review
+  SYS_LEVEL_NOW_NORMAL: 'Affiché désormais aussi dans la vue normale', // draft, please review
   SYS_HC: 'Circuit de chauffage {0}', // draft, please review
   SYS_DHW: 'Eau chaude', // draft, please review
   SYS_AHS: 'Chauffage d’appoint', // draft, please review

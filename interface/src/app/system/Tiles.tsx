@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
+import { Link } from 'react-router';
 
-import { ButtonLink, Icon, StatusDot } from 'components/ui';
+import { Icon, StatusDot } from 'components/ui';
 import type { IconName, StatusState } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 
@@ -30,15 +31,14 @@ const ON = new Set([
 const isOn = (item: SysItem | undefined): boolean =>
   !!item && ON.has(str(item.dv.v).trim().toLowerCase());
 
-// a tile; with `link` it ends with the button to the page of its topic (on the Dashboard overview), which
-// has the icon and the name of the menu entry
+// a tile; with `link` it has the icon at the top right that leads to the page of its topic (on Home), the same
+// icon the sections of the pages have for the Devices page
 interface TileLink {
   to: string;
-  icon: IconName;
   label: string;
 }
 
-const Tile = ({
+export const Tile = ({
   icon,
   title,
   sub,
@@ -54,18 +54,20 @@ const Tile = ({
   <section className="sys-tile">
     <div className="sys-tile-head">
       <Icon name={icon} />
-      {title}
+      <span className="grow">{title}</span>
+      {link && (
+        <Link
+          to={link.to}
+          className="sys-sec-link"
+          aria-label={link.label}
+          title={link.label}
+        >
+          <Icon name="open_in_new" size="xs" />
+        </Link>
+      )}
     </div>
     <div className="sys-tile-sub">{sub}</div>
     {children}
-    {link && (
-      <div className="sys-tile-link">
-        <ButtonLink to={link.to} color="neutral" icon={link.icon}>
-          {link.label}
-          <Icon name="open_in_new" size="sm" />
-        </ButtonLink>
-      </div>
-    )}
   </section>
 );
 
@@ -158,11 +160,7 @@ export const HcTile = ({ tag, items, edits, to }: TileProps & { tag: string }) =
   return (
     <Tile
       icon="device_thermostat"
-      link={
-        to
-          ? { to, icon: 'device_thermostat', label: LL.SYS_HC(tag.slice(2)) }
-          : undefined
-      }
+      link={to ? { to, label: LL.SYS_HC(tag.slice(2)) } : undefined}
       title={LL.SYS_HC(tag.slice(2))}
       sub={
         modeType && (
@@ -201,7 +199,7 @@ export const DhwTile = ({ items, edits, to }: TileProps) => {
   return (
     <Tile
       icon="water_drop"
-      link={to ? { to, icon: 'water_drop', label: LL.SYS_DHW() } : undefined}
+      link={to ? { to, label: LL.SYS_DHW() } : undefined}
       title={LL.SYS_DHW()}
       sub={
         isOn(f('boiler:tapwateractive')) ? (
@@ -247,7 +245,6 @@ export const BoilerTile = ({
         to
           ? {
               to,
-              icon: 'local_fire_department',
               label:
                 items.find((i) => i.menu === 'boiler')?.typeName ??
                 LL.SYS_GROUP_HEATING()
@@ -285,7 +282,7 @@ export const NotesTile = ({ items }: { items: readonly SysItem[] }) => {
       icon="build"
       title={LL.SYS_NOTES()}
       sub={LL.SYS_NOTES_SUB()}
-      link={{ to: '/dashboard/service', icon: 'build', label: LL.SYS_SERVICE() }}
+      link={{ to: '/dashboard/service', label: LL.SYS_SERVICE() }}
     >
       <div className="sys-kv">
         <Kv label={LL.SYS_LAST_FAULT()} item={f('boiler:lastcode')} />
@@ -296,6 +293,32 @@ export const NotesTile = ({ items }: { items: readonly SysItem[] }) => {
           <Kv key={i?.uid} label={i?.label ?? ''} item={i} />
         ))}
         <Kv label={LL.SYS_NEXT_MAINT()} item={f('boiler:maintenancedate')} />
+      </div>
+    </Tile>
+  );
+};
+
+// the custom entities the user added; they matter to the user, so they have a tile on Home
+export const CustomTile = ({
+  items,
+  to
+}: {
+  items: readonly SysItem[];
+  to?: string | undefined;
+}) => {
+  const { LL } = useI18nContext();
+  const rows = items.filter((i) => i.devType === 'custom').slice(0, 8);
+  if (rows.length === 0) return null;
+  return (
+    <Tile
+      icon="playlist_add"
+      title={LL.CUSTOM_ENTITIES(0)}
+      link={to ? { to, label: LL.CUSTOM_ENTITIES(0) } : undefined}
+    >
+      <div className="sys-kv">
+        {rows.map((i) => (
+          <Kv key={i.uid} label={i.label} item={i} />
+        ))}
       </div>
     </Tile>
   );
@@ -382,7 +405,7 @@ export const SummaryTile = ({
     <Tile
       icon={def.icon}
       title={title}
-      link={to ? { to, icon: def.icon, label: title } : undefined}
+      link={to ? { to, label: title } : undefined}
       sub={
         status && (
           <Status state={isOn(status) ? 'warn' : 'off'}>

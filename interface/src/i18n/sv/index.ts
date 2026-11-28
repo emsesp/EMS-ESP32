@@ -690,6 +690,7 @@ const sv: Translation = {
   PULSE: 'Pulse', // DeepL
   SYS_HOME: 'Hem', // draft, please review
   SYS_HOME_HELP: 'Det viktigaste i överblick. Allt annat finns i systemmenyn.', // draft, please review
+  SYS_SENSORS_HELP: 'Sensorerna som är anslutna till gatewayen. Öppna Sensorer i huvudmenyn för att ändra dem.', // draft, please review
   SYS_MENU: 'Systemmeny', // draft, please review
   SYS_MENU_HELP: 'Alla värden och inställningar för din anläggning, sorterade efter ämne.', // draft, please review
   SYS_FAV_HELP: 'Dina viktigaste inställningar. Använd stjärnan vid ett värde för att ändra listan.', // draft, please review
@@ -700,6 +701,8 @@ const sv: Translation = {
   SYS_GROUP_OVERVIEW: 'Översikt', // draft, please review
   SYS_LEVEL_MOVE_ALL: 'Visa bara under alla värden', // draft, please review
   SYS_LEVEL_MOVE_NORMAL: 'Visa i normalvyn', // draft, please review
+  SYS_LEVEL_NOW_ALL: 'Visas nu bara under alla värden', // draft, please review
+  SYS_LEVEL_NOW_NORMAL: 'Visas nu även i normalvyn', // draft, please review
   SYS_HC: 'Värmekrets {0}', // draft, please review
   SYS_DHW: 'Varmvatten', // draft, please review
   SYS_AHS: 'Tillsatsvärme', // draft, please review

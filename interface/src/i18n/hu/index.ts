@@ -690,6 +690,7 @@ const hu: Translation = {
   PULSE: 'Pulse', // DeepL
   SYS_HOME: 'Főoldal', // draft, please review
   SYS_HOME_HELP: 'A legfontosabb dolgok egy pillantással. Minden más a Rendszer menüben található.', // draft, please review
+  SYS_SENSORS_HELP: 'Az átjáróra csatlakoztatott érzékelők. Módosításukhoz nyisd meg az Érzékelők oldalt a főmenüben.', // draft, please review
   SYS_MENU: 'Rendszer menü', // draft, please review
   SYS_MENU_HELP: 'A rendszer összes értéke és beállítása, témák szerint rendezve.', // draft, please review
   SYS_FAV_HELP: 'A legfontosabb beállításaid. Az érték melletti csillaggal módosíthatod a listát.', // draft, please review
@@ -700,6 +701,8 @@ const hu: Translation = {
   SYS_GROUP_OVERVIEW: 'Áttekintés', // draft, please review
   SYS_LEVEL_MOVE_ALL: 'Csak az összes értéknél jelenjen meg', // draft, please review
   SYS_LEVEL_MOVE_NORMAL: 'Megjelenítés a normál nézetben', // draft, please review
+  SYS_LEVEL_NOW_ALL: 'Mostantól csak az összes értéknél jelenik meg', // draft, please review
+  SYS_LEVEL_NOW_NORMAL: 'Mostantól a normál nézetben is megjelenik', // draft, please review
   SYS_HC: 'Fűtési kör {0}', // draft, please review
   SYS_DHW: 'Melegvíz', // draft, please review
   SYS_AHS: 'Kiegészítő fűtés', // draft, please review

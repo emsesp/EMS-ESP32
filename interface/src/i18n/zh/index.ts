@@ -690,6 +690,7 @@ const zh: Translation = {
   PULSE: "脉冲",
   SYS_HOME: '主页', // draft, please review
   SYS_HOME_HELP: '最重要的内容一目了然,其他内容请见系统菜单。', // draft, please review
+  SYS_SENSORS_HELP: '连接到网关的传感器。如需更改，请在主菜单中打开“传感器”。', // draft, please review
   SYS_MENU: '系统菜单', // draft, please review
   SYS_MENU_HELP: '系统的所有数值和设置,按主题分类。', // draft, please review
   SYS_FAV_HELP: '您最重要的设置。点击数值旁的星标即可修改此列表。', // draft, please review
@@ -700,6 +701,8 @@ const zh: Translation = {
   SYS_GROUP_OVERVIEW: '概览', // draft, please review
   SYS_LEVEL_MOVE_ALL: '仅在“全部值”中显示', // draft, please review
   SYS_LEVEL_MOVE_NORMAL: '在“常规”视图中显示', // draft, please review
+  SYS_LEVEL_NOW_ALL: '现在仅在“全部值”中显示', // draft, please review
+  SYS_LEVEL_NOW_NORMAL: '现在也在“常规”视图中显示', // draft, please review
   SYS_HC: '供暖回路 {0}', // draft, please review
   SYS_DHW: '热水', // draft, please review
   SYS_AHS: '辅助加热', // draft, please review

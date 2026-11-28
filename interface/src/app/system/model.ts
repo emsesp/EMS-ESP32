@@ -21,7 +21,9 @@ export const TYPE_NAME: Readonly<Record<number, string>> = {
   [DeviceType.HEATSOURCE]: 'heatsource',
   [DeviceType.VENTILATION]: 'ventilation',
   [DeviceType.WATER]: 'water',
-  [DeviceType.POOL]: 'pool'
+  [DeviceType.POOL]: 'pool',
+  // the custom entities the user added; shown on Home and in Overview
+  [DeviceType.CUSTOM]: 'custom'
 };
 
 export interface SysItem {
@@ -79,6 +81,7 @@ export const menuOf = (devType: string, tag: string, section: SectionId): string
     case 'heatpump':
     case 'ventilation':
     case 'pool':
+    case 'custom':
       return devType;
     case 'controller':
       return 'thermostat';
@@ -138,7 +141,8 @@ export const buildItems = (
       label,
       dv,
       section,
-      level: cat ? cat.level : writable ? 2 : 1,
+      // what the user added themselves is important to them, so it is always in Normal
+      level: cat ? cat.level : writable && devType !== 'custom' ? 2 : 1,
       order: cat ? cat.order : 100000 + idx,
       known: !!cat,
       menu: menuOf(devType, tag, section)
@@ -168,7 +172,7 @@ const PLANT_ORDER = [
   'other'
 ];
 
-const OVERVIEW_ORDER = ['thermostat', 'service', 'energy'];
+const OVERVIEW_ORDER = ['thermostat', 'service', 'energy', 'custom'];
 
 export const buildMenus = (items: readonly SysItem[]): MenuDef[] => {
   const ids = [...new Set(items.map((i) => i.menu))];
@@ -177,7 +181,10 @@ export const buildMenus = (items: readonly SysItem[]): MenuDef[] => {
     group:
       /^hc\d$/.test(id) || id === 'dhw'
         ? 'heating'
-        : id === 'service' || id === 'energy' || id === 'thermostat'
+        : id === 'service' ||
+            id === 'energy' ||
+            id === 'thermostat' ||
+            id === 'custom'
           ? 'overview'
           : 'plant'
   }));

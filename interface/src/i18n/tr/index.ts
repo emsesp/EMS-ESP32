@@ -690,6 +690,7 @@ const tr: Translation = {
   PULSE: 'Pulse', // DeepL
   SYS_HOME: 'Ev', // draft, please review
   SYS_HOME_HELP: 'En önemli şeyler bir bakışta. Geri kalan her şey Sistem menüsünde.', // draft, please review
+  SYS_SENSORS_HELP: 'Ağ geçidine bağlı sensörler. Değiştirmek için ana menüdeki Sensörler sayfasını açın.', // draft, please review
   SYS_MENU: 'Sistem menüsü', // draft, please review
   SYS_MENU_HELP: 'Sisteminizin tüm değerleri ve ayarları, konulara göre sıralı.', // draft, please review
   SYS_FAV_HELP: 'En önemli ayarlarınız. Bu listeyi değiştirmek için değerin yanındaki yıldızı kullanın.', // draft, please review
@@ -700,6 +701,8 @@ const tr: Translation = {
   SYS_GROUP_OVERVIEW: 'Genel bakış', // draft, please review
   SYS_LEVEL_MOVE_ALL: 'Yalnızca tüm değerlerde göster', // draft, please review
   SYS_LEVEL_MOVE_NORMAL: 'Normal görünümde göster', // draft, please review
+  SYS_LEVEL_NOW_ALL: 'Artık yalnızca tüm değerlerde gösteriliyor', // draft, please review
+  SYS_LEVEL_NOW_NORMAL: 'Artık normal görünümde de gösteriliyor', // draft, please review
   SYS_HC: 'Isıtma devresi {0}', // draft, please review
   SYS_DHW: 'Sıcak su', // draft, please review
   SYS_AHS: 'Yardımcı ısıtıcı', // draft, please review

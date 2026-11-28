@@ -690,6 +690,7 @@ const sk: Translation = {
   PULSE: 'Pulse', // DeepL
   SYS_HOME: 'Domov', // draft, please review
   SYS_HOME_HELP: 'Najdôležitejšie veci na prvý pohľad. Všetko ostatné nájdete v systémovej ponuke.', // draft, please review
+  SYS_SENSORS_HELP: 'Senzory pripojené k bráne. Ak ich chcete zmeniť, otvorte Senzory v hlavnej ponuke.', // draft, please review
   SYS_MENU: 'Systémová ponuka', // draft, please review
   SYS_MENU_HELP: 'Všetky hodnoty a nastavenia vášho systému, zoradené podľa tém.', // draft, please review
   SYS_FAV_HELP: 'Vaše najdôležitejšie nastavenia. Hviezdičkou pri hodnote zmeníte tento zoznam.', // draft, please review
@@ -700,6 +701,8 @@ const sk: Translation = {
   SYS_GROUP_OVERVIEW: 'Prehľad', // draft, please review
   SYS_LEVEL_MOVE_ALL: 'Zobraziť len vo všetkých hodnotách', // draft, please review
   SYS_LEVEL_MOVE_NORMAL: 'Zobraziť v normálnom zobrazení', // draft, please review
+  SYS_LEVEL_NOW_ALL: 'Teraz sa zobrazuje len vo všetkých hodnotách', // draft, please review
+  SYS_LEVEL_NOW_NORMAL: 'Teraz sa zobrazuje aj v normálnom zobrazení', // draft, please review
   SYS_HC: 'Vykurovací okruh {0}', // draft, please review
   SYS_DHW: 'Teplá voda', // draft, please review
   SYS_AHS: 'Prídavné kúrenie', // draft, please review

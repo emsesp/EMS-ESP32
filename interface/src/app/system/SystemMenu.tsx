@@ -2,18 +2,15 @@ import { memo, useContext, useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 
-import { Icon, Loader, Message, Select, cx } from 'components/ui';
+import { Icon, Listbox, Loader, Message, cx } from 'components/ui';
 import type { IconName } from 'components/ui';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import { ChangesBar } from '../main/ChangesBar';
-import Commands from '../main/Commands';
-import CustomEntities from '../main/CustomEntities';
-import Scheduler from '../main/Scheduler';
-import Sensors from '../main/Sensors';
 import { FaultPanel } from './Faults';
 import Home from './Home';
+import SensorsOverview, { useSensors } from './SensorsOverview';
 import {
   BoilerTile,
   DhwTile,
@@ -27,31 +24,28 @@ import type { SectionId } from './catalog';
 import { buildMenus, groupItems } from './model';
 import type { SysItem } from './model';
 import { matchEntries, useModuleIndex } from './moduleSearch';
+import type { ModulePage } from './moduleSearch';
 import { useFavorites } from './useFavorites';
 import { useEdits, useSystemData } from './useSystemData';
 import { SystemBar, useSystemView } from './view';
 import { useViewLevels } from './viewLevels';
 
-// The pages of the other parts of the web interface, shown inside the menu
-const PAGES: { id: string; admin: boolean; icon: IconName }[] = [
-  { id: 'sensors', admin: false, icon: 'sensors' },
-  { id: 'scheduler', admin: true, icon: 'more_time' },
-  { id: 'customentities', admin: true, icon: 'playlist_add' },
-  { id: 'commands', admin: true, icon: 'playlist_play' }
-];
-
-const PAGE_VIEW: Record<string, () => ReactNode> = {
-  sensors: () => <Sensors />,
-  scheduler: () => <Scheduler />,
-  customentities: () => <CustomEntities />,
-  commands: () => <Commands />
+// The Dashboard is for looking, not for changing the system: the pages of the sensors, the scheduler, the custom
+// entities and the commands stay in the main menu. The search finds their entries and opens these pages.
+const MODULE_PAGES: Record<ModulePage, { path: string; icon: IconName }> = {
+  sensors: { path: '/sensors', icon: 'sensors' },
+  scheduler: { path: '/scheduler', icon: 'more_time' },
+  customentities: { path: '/customentities', icon: 'playlist_add' },
+  commands: { path: '/commands', icon: 'playlist_play' }
 };
 
 const menuIcon = (id: string): IconName => {
   if (/^hc\d$/.test(id)) return 'device_thermostat';
-  const page = PAGES.find((p) => p.id === id);
-  if (page) return page.icon;
   switch (id) {
+    case 'sensors':
+      return 'sensors';
+    case 'custom':
+      return 'playlist_add';
     case 'home':
       return 'assessment';
     case 'dhw':
@@ -93,6 +87,7 @@ const SystemMenu = memo(() => {
   const moduleIndex = useModuleIndex(q.trim() !== '', me.admin);
   const data = useSystemData();
   const edits = useEdits(data);
+  const sensors = useSensors();
   const navigate = useNavigate();
   const menu = useParams()['*'];
   const fav = useFavorites(data);
@@ -102,9 +97,8 @@ const SystemMenu = memo(() => {
   const leveled = lv.items;
 
   const menus = useMemo(() => buildMenus(data.items), [data.items]);
-  const pages = PAGES.filter((p) => !p.admin || me.admin);
   const current: string =
-    menu && (menu === 'fav' || pages.some((p) => p.id === menu))
+    menu && (menu === 'fav' || menu === 'sensors')
       ? menu
       : (menus.find((m) => m.id === menu)?.id ??
         // while the devices load there are no menus yet; keep the page of the address
@@ -139,12 +133,8 @@ const SystemMenu = memo(() => {
         return LL.SYS_HOME();
       case 'sensors':
         return LL.SENSORS();
-      case 'scheduler':
-        return LL.SCHEDULER();
-      case 'customentities':
+      case 'custom':
         return LL.CUSTOM_ENTITIES(0);
-      case 'commands':
-        return LL.COMMANDS();
       default:
         return (
           data.items.find((i) => i.menu === id && i.devType === id)?.typeName ??
@@ -175,10 +165,18 @@ const SystemMenu = memo(() => {
   // what else the search finds: the pages of the menu and the entries of the modules
   const needle = q.trim().toLowerCase();
   const pageHits = searching
-    ? [...menus.map((m) => m.id), ...pages.map((p) => p.id)].filter((id) =>
+    ? [...menus.map((m) => m.id), 'sensors'].filter((id) =>
         menuName(id).toLowerCase().includes(needle)
       )
     : [];
+  const moduleName = (page: ModulePage): string =>
+    page === 'sensors'
+      ? LL.SENSORS()
+      : page === 'scheduler'
+        ? LL.SCHEDULER()
+        : page === 'commands'
+          ? LL.COMMANDS()
+          : LL.CUSTOM_ENTITIES(0);
   const moduleHits = searching ? matchEntries(moduleIndex, needle) : [];
   let list: SysItem[];
   if (searching) {
@@ -220,14 +218,12 @@ const SystemMenu = memo(() => {
     </button>
   );
 
-  const groupTitle = (g: 'heating' | 'plant' | 'overview' | 'tools') =>
+  const groupTitle = (g: 'heating' | 'plant' | 'overview') =>
     g === 'heating'
       ? LL.SYS_GROUP_HEATING()
       : g === 'plant'
         ? LL.SYS_GROUP_PLANT()
-        : g === 'tools'
-          ? LL.MODULES()
-          : LL.SYS_GROUP_OVERVIEW();
+        : LL.SYS_GROUP_OVERVIEW();
 
   // the tile of the page (as on the Dashboard overview), above its values
   let tiles: ReactNode = null;
@@ -244,15 +240,12 @@ const SystemMenu = memo(() => {
   }
   if (tiles) tiles = <div className="sys-tiles sys-tiles-one">{tiles}</div>;
 
-  // pages that are not lists of values: Home and the pages of the other parts of the web interface
-  const pageView = PAGE_VIEW[current];
-  const embedded = !searching && pageView !== undefined;
-  const own = !searching && (current === 'home' || embedded);
+  // pages that are not lists of values: Home and the sensors
+  const own = !searching && (current === 'home' || current === 'sensors');
 
   let body: ReactNode;
-  if (embedded) {
-    // the pages of the other parts of the web interface keep their own cards, with their padding
-    body = <div className="sys-embed">{pageView()}</div>;
+  if (!searching && current === 'sensors') {
+    body = <SensorsOverview sensors={sensors} />;
   } else if (data.loading && data.items.length === 0) {
     body = <Loader />;
   } else if (data.items.length === 0) {
@@ -262,7 +255,7 @@ const SystemMenu = memo(() => {
       </Message>
     );
   } else if (!searching && current === 'home') {
-    body = <Home items={data.items} edits={edits} fav={fav} />;
+    body = <Home items={data.items} edits={edits} sensors={sensors} />;
   } else {
     body = (
       <>
@@ -291,14 +284,17 @@ const SystemMenu = memo(() => {
                 key={`${e.page}-${i}`}
                 type="button"
                 className="sys-row sys-hit"
-                onClick={() => go(e.page)}
+                onClick={() => {
+                  view.setQ('');
+                  void navigate(MODULE_PAGES[e.page].path);
+                }}
               >
                 <span className="sys-lab">
-                  <Icon name={menuIcon(e.page)} size="sm" />
+                  <Icon name={MODULE_PAGES[e.page].icon} size="sm" />
                   <span className="txt">
                     <b>{e.name}</b>
                     <small>
-                      {menuName(e.page)}
+                      {moduleName(e.page)}
                       {e.hint ? ` · ${e.hint}` : ''}
                     </small>
                   </span>
@@ -384,22 +380,22 @@ const SystemMenu = memo(() => {
         <nav className="sys-nav">
           {navItem('home')}
           {navItem('fav', favs.length)}
-          {(['heating', 'plant', 'overview', 'tools'] as const).map((g) => {
+          {(['heating', 'plant', 'overview'] as const).map((g) => {
             const ms = menus.filter((m) => m.group === g);
-            const more = g === 'tools' ? pages : [];
-            if (!ms.length && !more.length) return null;
+            if (!ms.length) return null;
             return (
               <div key={g}>
                 <div className="sys-nav-group">{groupTitle(g)}</div>
                 {ms.map((m) => navItem(m.id, visibleCount(m.id)))}
-                {more.map((p) => navItem(p.id))}
+                {g === 'overview' &&
+                  navItem('sensors', sensors.temps.length + sensors.analogs.length)}
               </div>
             );
           })}
         </nav>
         <div className="sys-main">
           <div className="sys-nav-select">
-            <Select
+            <Listbox
               hideLabel
               fullWidth
               label={LL.SYS_MENU()}
@@ -408,27 +404,25 @@ const SystemMenu = memo(() => {
                 { value: 'home', label: LL.SYS_HOME() },
                 { value: 'fav', label: LL.FAVORITES() },
                 ...menus.map((m) => ({ value: m.id, label: menuName(m.id) })),
-                ...pages.map((p) => ({ value: p.id, label: menuName(p.id) }))
+                { value: 'sensors', label: menuName('sensors') }
               ]}
-              onChange={(e) => go(e.target.value)}
+              onChange={go}
             />
           </div>
-          {!embedded && (
-            <>
-              <h1 className="sys-title" style={{ margin: '0 0 2px' }}>
-                {searching ? LL.SYS_SEARCH_RESULTS() : menuName(current)}
-              </h1>
-              <p className="sys-sub" style={{ margin: '0 0 12px' }}>
-                {searching
-                  ? LL.SYS_MENU_HELP()
-                  : current === 'fav'
-                    ? LL.SYS_FAV_HELP()
-                    : current === 'home'
-                      ? LL.SYS_HOME_HELP()
-                      : LL.SYS_MENU_HELP()}
-              </p>
-            </>
-          )}
+          <h1 className="sys-title" style={{ margin: '0 0 2px' }}>
+            {searching ? LL.SYS_SEARCH_RESULTS() : menuName(current)}
+          </h1>
+          <p className="sys-sub" style={{ margin: '0 0 12px' }}>
+            {searching
+              ? LL.SYS_MENU_HELP()
+              : current === 'fav'
+                ? LL.SYS_FAV_HELP()
+                : current === 'home'
+                  ? LL.SYS_HOME_HELP()
+                  : current === 'sensors'
+                    ? LL.SYS_SENSORS_HELP()
+                    : LL.SYS_MENU_HELP()}
+          </p>
           {body}
         </div>
       </div>

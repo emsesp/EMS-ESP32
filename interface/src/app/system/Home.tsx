@@ -1,7 +1,8 @@
-import { useI18nContext } from 'i18n/i18n-react';
-
+import { SensorsTile } from './SensorsOverview';
+import type { Sensors } from './SensorsOverview';
 import {
   BoilerTile,
+  CustomTile,
   DhwTile,
   HcTile,
   NotesTile,
@@ -10,23 +11,20 @@ import {
   summaryMenus,
   typeNameOf
 } from './Tiles';
-import { ValueRow } from './ValueRow';
 import type { SysItem } from './model';
-import type { useFavorites } from './useFavorites';
 import type { Edits } from './useSystemData';
 
-// Home, the first page of the Dashboard: the most important things as tiles, easy to operate, and the
-// favorites of all devices
+// Home, the first page of the Dashboard: the most important things as tiles, easy to operate. The favorites
+// have their own page in the menu.
 const Home = ({
   items,
   edits,
-  fav
+  sensors
 }: {
   items: readonly SysItem[];
   edits: Edits;
-  fav: ReturnType<typeof useFavorites>;
+  sensors: Sensors;
 }) => {
-  const { LL } = useI18nContext();
   return (
     <>
       <div className="sys-tiles">
@@ -50,25 +48,10 @@ const Home = ({
             to={`/dashboard/${menu}`}
           />
         ))}
+        <SensorsTile sensors={sensors} kind="temps" to="/dashboard/sensors" />
+        <SensorsTile sensors={sensors} kind="analogs" to="/dashboard/sensors" />
+        <CustomTile items={items} to="/dashboard/custom" />
         <NotesTile items={items} />
-      </div>
-
-      <div className="sys-home-fav">
-        <section className="section">
-          <div className="sys-sec-head">{LL.FAVORITES()}</div>
-          {fav.items.map((i) => (
-            <ValueRow
-              key={i.uid}
-              item={i}
-              edits={edits}
-              where={i.typeName}
-              {...(fav.canToggle(i) && fav.toggle ? { onFavorite: fav.toggle } : {})}
-            />
-          ))}
-          {fav.items.length === 0 && (
-            <div className="sys-empty">{LL.SYS_FAV_NONE()}</div>
-          )}
-        </section>
       </div>
     </>
   );

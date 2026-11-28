@@ -690,6 +690,7 @@ const en: BaseTranslation = {
   PULSE: 'Pulse',
   SYS_HOME: 'Home', // draft, please review
   SYS_HOME_HELP: 'The most important things at a glance. Everything else is in the menu.', // draft, please review
+  SYS_SENSORS_HELP: 'The sensors connected to the gateway. To change them, open Sensors in the main menu.', // draft, please review
   SYS_MENU: 'System menu', // draft, please review
   SYS_MENU_HELP: 'All values and settings of your system, sorted by topic.', // draft, please review
   SYS_FAV_HELP: 'Your most important settings. Use the star next to a value to change this list.', // draft, please review
@@ -700,6 +701,8 @@ const en: BaseTranslation = {
   SYS_GROUP_OVERVIEW: 'Overview', // draft, please review
   SYS_LEVEL_MOVE_ALL: 'Show in All values only', // draft, please review
   SYS_LEVEL_MOVE_NORMAL: 'Show in normal view', // draft, please review
+  SYS_LEVEL_NOW_ALL: 'Now shown in All values only', // draft, please review
+  SYS_LEVEL_NOW_NORMAL: 'Now shown in Normal too', // draft, please review
   SYS_HC: 'Heating circuit {0}', // draft, please review
   SYS_DHW: 'Hot water', // draft, please review
   SYS_AHS: 'Auxiliary heater', // draft, please review

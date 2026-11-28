@@ -690,6 +690,7 @@ const de: Translation = {
   PULSE: 'Pulse', // DeepL
   SYS_HOME: 'Zuhause', // draft, please review
   SYS_HOME_HELP: 'Das Wichtigste auf einen Blick. Alles andere findest du im Menü.', // draft, please review
+  SYS_SENSORS_HELP: 'Die am Gateway angeschlossenen Sensoren. Zum Ändern öffne Sensoren im Hauptmenü.', // draft, please review
   SYS_MENU: 'Systemmenü', // draft, please review
   SYS_MENU_HELP: 'Alle Werte und Einstellungen deiner Anlage, nach Themen geordnet.', // draft, please review
   SYS_FAV_HELP: 'Deine wichtigsten Einstellungen. Mit dem Stern bei einem Wert änderst du die Liste.', // draft, please review
@@ -700,6 +701,8 @@ const de: Translation = {
   SYS_GROUP_OVERVIEW: 'Überblick', // draft, please review
   SYS_LEVEL_MOVE_ALL: 'Nur unter Alle Werte anzeigen', // draft, please review
   SYS_LEVEL_MOVE_NORMAL: 'In der Ansicht Normal anzeigen', // draft, please review
+  SYS_LEVEL_NOW_ALL: 'Wird jetzt nur unter Alle Werte angezeigt', // draft, please review
+  SYS_LEVEL_NOW_NORMAL: 'Wird jetzt auch unter Normal angezeigt', // draft, please review
   SYS_HC: 'Heizkreis {0}', // draft, please review
   SYS_DHW: 'Warmwasser', // draft, please review
   SYS_AHS: 'Zusatzheizung', // draft, please review

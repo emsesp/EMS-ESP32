@@ -18,6 +18,8 @@ export interface SystemData {
   error: string | null;
   items: SysItem[];
   reload: () => Promise<void>;
+  // read the entity list of a device again on the next reload (after its masks changed)
+  refreshEntities: (devId: number) => void;
 }
 
 const POLL_MS = 15000;
@@ -101,7 +103,14 @@ export const useSystemData = (): SystemData => {
     if (!document.hidden) void reload();
   }, POLL_MS);
 
-  return useMemo(() => ({ ...state, reload }), [state, reload]);
+  const refreshEntities = useCallback((devId: number) => {
+    entities.current.delete(devId);
+  }, []);
+
+  return useMemo(
+    () => ({ ...state, reload, refreshEntities }),
+    [state, reload, refreshEntities]
+  );
 };
 
 export interface Edits {

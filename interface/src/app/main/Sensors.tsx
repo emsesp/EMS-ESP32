@@ -43,7 +43,7 @@ const num = (v: unknown) => {
 };
 
 // digital types show on/off; a Digital Out on a DAC pin has a 0-255 value
-const isOnOff = (as: AnalogSensor) =>
+export const isOnOff = (as: AnalogSensor) =>
   as.t === AnalogType.DIGITAL_IN ||
   as.t === AnalogType.PULSE ||
   (as.t === AnalogType.DIGITAL_OUT && as.g !== 25 && as.g !== 26);

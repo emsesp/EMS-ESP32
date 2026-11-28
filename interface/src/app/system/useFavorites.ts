@@ -40,6 +40,8 @@ export const useFavorites = (data: SystemData): Favorites => {
         id: i.devId,
         entity_ids: [createMaskedEntityId({ ...i.ent, m: mask })]
       });
+      // the entity list has the new mask and name now; the next star click needs it
+      data.refreshEntities(i.devId);
       await data.reload();
       // removing is not asked about; it can be undone for a while instead
       if (!on) {

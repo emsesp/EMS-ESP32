@@ -1,6 +1,6 @@
 import { memo } from 'react';
 
-import { Button, Icon, Segmented, Select, cx } from 'components/ui';
+import { Button, Icon, Listbox, Segmented, cx } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import { formatValue } from '../main/deviceValue';
@@ -77,12 +77,12 @@ export const ValueControl = ({
       );
     }
     return (
-      <Select
+      <Listbox
         hideLabel
         label={item.label}
         options={options}
         value={dv.l.includes(current) ? current : ''}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={onChange}
       />
     );
   }
