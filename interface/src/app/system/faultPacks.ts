@@ -13,7 +13,8 @@ import type { FaultPacksData } from '../../api/app';
 import type { FaultPack, Severity } from './faultLookup';
 
 // a page that lists the packs that can be downloaded
-export const FAULT_PACK_LIST_URL = 'https://github.com/beabel/EMS-ESP-faultcodes';
+export const FAULT_PACK_LIST_URL =
+  'https://github.com/beabel/EMS-ESP-faultcodes/tree/main/packs';
 
 const MAX_FILE_BYTES = 2_000_000; // uncompressed
 
