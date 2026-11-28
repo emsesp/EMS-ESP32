@@ -8330,6 +8330,12 @@ uint8
 
 ## Devices of type \_controller
 
+### CV200
+
+| shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
+|-|-|-|-|-|-|-|-|-|
+| datetime | date/time | string |   | true | DEVICE_DATA | 0 | 13 | 1 |
+
 ### Rego 3000
 
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -8477,6 +8483,12 @@ uint8
 | level2pct | level L2 | uint8 (&gt;=0&lt;=150) | % | true | DEVICE_DATA | 16 | 1 | 1 |
 uint8
 | level4pct | level L4 | uint8 (&gt;=0&lt;=150) | % | true | DEVICE_DATA | 17 | 1 | 1 |
+uint8
+| bypassminoutdoortemp | bypass minimum outdoor temperature | uint8 (&gt;=12&lt;=19) | C | true | DEVICE_DATA | 18 | 1 | 1 |
+uint8
+| bypassmaxsupplytemp | bypass maximum supply air temperature | uint8 (&gt;=21&lt;=30) | C | true | DEVICE_DATA | 19 | 1 | 1 |
+uint16
+| nominalairflow | nominal airflow (m³/h) | uint16 (&gt;=75&lt;=450) |   | true | DEVICE_DATA | 20 | 1 | 1 |
 
 ## Devices of type \_water
 

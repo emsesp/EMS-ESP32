@@ -654,6 +654,9 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(level1Pct), 15, 1), // level1pct
     REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(level2Pct), 16, 1), // level2pct
     REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(level4Pct), 17, 1), // level4pct
+    REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(bypassMinOutdoorTemp), 18, 1), // bypassminoutdoortemp
+    REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(bypassMaxSupplyTemp), 19, 1), // bypassmaxsupplytemp
+    REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(airflowNom), 20, 1), // nominalairflow
     REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(selRoomTemp), 0, 1), // seltemp
     REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwTemp), 1, 1), // temp
     REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwCurTemp2), 2, 1), // curtemp2
