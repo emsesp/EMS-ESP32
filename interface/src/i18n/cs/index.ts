@@ -401,6 +401,7 @@ const cs: Translation = {
   TLS_CHECK_FINGERPRINT: 'Otisk certifikátu (SHA-1)',
   TLS_CHECK_NONE: 'Nic, nezaškrtnuto', // DeepL
   TLS_NOT_CHECKED: 'Připojení je šifrované, ale zprostředkovatel není ověřován, takže se za něj může vydávat jiné zařízení v síti', // DeepL
+  TLS_CA_NEEDS_TIME: 'Kontrola data certifikátu vyžaduje správný čas zařízení — zapněte NTP, nebo nastavte čas ručně', // DeepL
   ON: 'Na', // DeepL
   OFF: 'Vypnuto',
   POLARITY: 'Polarita',

@@ -184,43 +184,42 @@ const Version = () => {
       return next();
     }
   }).onSuccess(({ data: response }) => {
-      let payload: unknown = response;
-      if (typeof payload === 'string' && payload.length > 0) {
-        try {
-          payload = JSON.parse(payload);
-        } catch {
-          payload = response;
-        }
-      }
-      const result =
-        payload && typeof payload === 'object'
-          ? (payload as {
-              official?: boolean;
-              md5?: string;
-              recovery?: boolean;
-              md5_ok?: boolean;
-            })
-          : {};
-      if (result.official) {
-        toast.success(LL.OFFICIAL_BUILD());
-      }
-      if (result.md5 !== undefined) {
-        setMd5(result.md5);
-        toast.success(LL.UPLOAD_MD5_RECEIVED());
-      } else if ('recovery' in result) {
-        // written to the factory partition, EMS-ESP keeps running
-        toast.success(LL.RECOVERY_INSTALLED());
-        setMd5(undefined);
-        void loadData();
-        void refreshVersions();
-      } else {
-        if ('md5_ok' in result) {
-          toast.success(LL.UPLOAD_MD5_MATCHED());
-        }
-        void doRestart();
+    let payload: unknown = response;
+    if (typeof payload === 'string' && payload.length > 0) {
+      try {
+        payload = JSON.parse(payload);
+      } catch {
+        payload = response;
       }
     }
-  );
+    const result =
+      payload && typeof payload === 'object'
+        ? (payload as {
+            official?: boolean;
+            md5?: string;
+            recovery?: boolean;
+            md5_ok?: boolean;
+          })
+        : {};
+    if (result.official) {
+      toast.success(LL.OFFICIAL_BUILD());
+    }
+    if (result.md5 !== undefined) {
+      setMd5(result.md5);
+      toast.success(LL.UPLOAD_MD5_RECEIVED());
+    } else if ('recovery' in result) {
+      // written to the factory partition, EMS-ESP keeps running
+      toast.success(LL.RECOVERY_INSTALLED());
+      setMd5(undefined);
+      void loadData();
+      void refreshVersions();
+    } else {
+      if ('md5_ok' in result) {
+        toast.success(LL.UPLOAD_MD5_MATCHED());
+      }
+      void doRestart();
+    }
+  });
 
   const doRestart = async () => {
     setConfirm(undefined);

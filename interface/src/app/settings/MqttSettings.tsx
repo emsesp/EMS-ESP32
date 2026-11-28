@@ -201,12 +201,17 @@ const MqttSettings = () => {
                       onChange={(v) => changeTlsCheck(v as TlsCheck)}
                     />
                     {tlsCheck === 'ca' && (
-                      <TextArea
-                        label={LL.CERT()}
-                        rows={6}
-                        placeholder="-----BEGIN CERTIFICATE-----"
-                        {...form.text('rootCA')}
-                      />
+                      <>
+                        <TextArea
+                          label={LL.CERT()}
+                          rows={6}
+                          placeholder="-----BEGIN CERTIFICATE-----"
+                          {...form.text('rootCA')}
+                        />
+                        <Message level="info" className="full">
+                          {LL.TLS_CA_NEEDS_TIME()}
+                        </Message>
+                      </>
                     )}
                     {tlsCheck === 'fingerprint' && (
                       <TextField

@@ -851,9 +851,9 @@ uint16_t TxService::post_send_query() {
     if (post_typeid) {
         uint8_t dest = (this->telegram_last_->dest & 0x7F);
         // when set a value with large offset before and validate on same type and offset, or complete telegram
-        uint8_t length           = (this->telegram_last_->type_id == post_typeid) ? this->telegram_last_->message_length : 0xFF;
-        uint8_t offset           = (this->telegram_last_->type_id == post_typeid) ? this->telegram_last_->offset : 0;
-        uint32_t delay_until     = (this->telegram_last_->type_id == post_typeid) ? 0 : (uuid::get_uptime() + POST_SEND_DELAY);
+        uint8_t  length      = (this->telegram_last_->type_id == post_typeid) ? this->telegram_last_->message_length : 0xFF;
+        uint8_t  offset      = (this->telegram_last_->type_id == post_typeid) ? this->telegram_last_->offset : 0;
+        uint32_t delay_until = (this->telegram_last_->type_id == post_typeid) ? 0 : (uuid::get_uptime() + POST_SEND_DELAY);
         this->add(Telegram::Operation::TX_READ, dest, post_typeid, offset, &length, 1, 0, true); // add to top/front of queue
         // read_request(telegram_last_post_send_query_, dest, 0); // no offset
         LOG_DEBUG("Sending post validate read, type ID 0x%02X to dest 0x%02X", post_typeid, dest);

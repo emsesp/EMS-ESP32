@@ -48,7 +48,7 @@
     "@types/react-dom": "^19.3.0",
     "concurrently": "^10.0.7",
     "eslint": "^10.15.0",
-    "eslint-config-prettier": "^10.1.8",
+    "eslint-config-prettier": "^10.1.9",
     "etag": "^1.8.1",
     "mime-types": "^3.0.2",
     "playwright-core": "^1.65.1",
@@ -57,7 +57,7 @@
     "terser": "^5.51.4",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.74.0",
-    "vite": "^8.3.8"
+    "vite": "^8.4.0"
   },
   "packageManager": "pnpm@12.22.0+sha512.894940a3d9a57dfa6fd373990fb4e41e09c2f2d76d982ed1d75275d39267f988fb4e2d40900cbe9921c68d97c67aa1a1096d276633db248f7b34927ac9ddb7a4"
 }

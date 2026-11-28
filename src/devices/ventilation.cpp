@@ -134,12 +134,12 @@ void Ventilation::process_AirflowMessage(const std::shared_ptr<const Telegram> &
 
 // message 0x0583
 void Ventilation::process_MonitorMessage(const std::shared_ptr<const Telegram> & telegram) {
-    has_update(telegram, outEx_, 0);       // Fortluft
-    has_update(telegram, ventOutRpm_, 2);  // Abluft rpm
-    has_update(telegram, inEx_, 7);        // Abluft
-    has_update(telegram, outFresh_, 13);   // Außenluft
-    has_update(telegram, inFresh_, 15);    // Zuluft
-    has_update(telegram, ventInRpm_, 17);  // Zuluft rpm
+    has_update(telegram, outEx_, 0);      // Fortluft
+    has_update(telegram, ventOutRpm_, 2); // Abluft rpm
+    has_update(telegram, inEx_, 7);       // Abluft
+    has_update(telegram, outFresh_, 13);  // Außenluft
+    has_update(telegram, inFresh_, 15);   // Zuluft
+    has_update(telegram, ventInRpm_, 17); // Zuluft rpm
 }
 
 // message 0x585, 26 bytes: offsets 0/1 are exhaust/supply fan percentages

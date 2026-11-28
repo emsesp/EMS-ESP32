@@ -1927,7 +1927,7 @@ void Boiler::process_HpInConfig(const std::shared_ptr<const Telegram> & telegram
         for (uint8_t j = 0; j < 12; j++) {
             uint8_t v = EMS_VALUE_UINT8_NOTSET;
             if (telegram->read_value(v, index[j] + i)) {
-                any      = true;
+                any       = true;
                 option[j] = (v == 1) ? '1' : '0';
             } else {
                 option[j] = (hpInput[i].option[j] == '1') ? '1' : '0';
@@ -1954,7 +1954,7 @@ void Boiler::process_HpInConfig(const std::shared_ptr<const Telegram> & telegram
     for (uint8_t j = 0; j < 9; j++) {
         uint8_t v = EMS_VALUE_UINT8_NOTSET;
         if (telegram->read_value(v, index4[j])) {
-            any4     = true;
+            any4      = true;
             option[j] = (v == 1) ? '1' : '0';
         } else {
             option[j] = (hpInput[3].option[j] == '1') ? '1' : '0';

@@ -200,10 +200,9 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
         return;
     }
 
-    emsesp::EMSESP::logger().info("Upload successful");
-
     // did we just complete uploading a json file?
     if (request->_tempFile) {
+        emsesp::EMSESP::logger().info("Settings upload successful");
         request->_tempFile.close(); // close the file handle as the upload is now done
         AsyncWebServerResponse * response = request->beginResponse(200);
         request->send(response);
@@ -216,6 +215,7 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
     // if no error, send the success response and request a restart
 #ifdef EMSESP_HAS_RECOVERY
     if (_is_recovery && !request->_tempObject) {
+        emsesp::EMSESP::logger().info("Recovery app upload successful");
         emsesp::EMSESP::system_.recovery_installed();
         auto *     response = new emsesp::PsramAsyncJsonResponse(false);
         JsonObject root     = response->getRoot();
@@ -237,6 +237,7 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
 #endif
 
     if ((_is_firmware || _is_filesystem) && !request->_tempObject) {
+        emsesp::EMSESP::logger().info(_is_firmware ? "App firmware upload successful" : "Filesystem upload successful");
         if (_is_firmware) {
             // set NVS to tell EMS-ESP this is a new fresh firmware on next restart
             emsesp::EMSESP::nvs_.putBool(emsesp::EMSESP_NVS_BOOT_NEW_FIRMWARE, true);

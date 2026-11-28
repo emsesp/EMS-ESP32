@@ -401,6 +401,7 @@ const nl: Translation = {
   TLS_CHECK_FINGERPRINT: 'Certificaatvingerafdruk (SHA-1)', // DeepL
   TLS_CHECK_NONE: 'Niets, niet aangevinkt', // DeepL
   TLS_NOT_CHECKED: 'De verbinding is versleuteld, maar de broker wordt niet gecontroleerd, dus een ander apparaat op het netwerk zou zich ervoor kunnen uitgeven', // DeepL
+  TLS_CA_NEEDS_TIME: 'Certificaatdatumcontroles hebben een correcte apparaattijd nodig — schakel NTP in, of stel de tijd handmatig in', // DeepL
   ON: 'Op', // DeepL
   OFF: 'Uit',
   POLARITY: 'Polariteit',

@@ -3108,10 +3108,12 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["cleanSession"]          = settings.cleanSession;
         node["entityFormat"]          = settings.entity_format;
         node["base"]                  = settings.base;
+        node["enableTLS"]             = settings.enableTLS;
         node["discoveryPrefix"]       = settings.discovery_prefix;
         node["discoveryType"]         = settings.discovery_type;
         node["nestedFormat"]          = settings.nested_format;
         node["haEnabled"]             = settings.ha_enabled;
+        node["haNumberMode"]          = settings.ha_number_mode;
         node["mqttQos"]               = settings.mqtt_qos;
         node["mqttRetain"]            = settings.mqtt_retain;
         node["publishTimeHeartbeat"]  = settings.publish_time_heartbeat;

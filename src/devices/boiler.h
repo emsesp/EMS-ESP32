@@ -147,19 +147,19 @@ class Boiler : public EMSdevice {
     int8_t   boilHystOff_;
     int8_t   boil2HystOn_;
     int8_t   boil2HystOff_;
-    uint8_t  curBurnPow_;        // Burner current power %
-    uint32_t burnStarts_;        // burner restarts
-    uint32_t heatStarts_;        // burner starts for heating
-    uint32_t burnWorkMin_;       // Total burner operating time
-    uint32_t burn2WorkMin_;      // burner stage 2 operating time
-    uint32_t heatWorkMin_;       // Total heat operating time
-    uint32_t UBAuptime_;         // Total UBA working hours
-    char     lastCode_[55];      // last error code
-    char     errorCode_[15];     // active error from 0xBF, e.g. " --(5141)"
-    char     serviceCode_[4];    // 3 character status/service code
-    uint16_t serviceCodeNumber_; // error/service code
-    uint32_t lastCodeDate_ = 0;  // last code date
-    uint16_t lastCodeNo_   = 0;  // code number of lastCode_
+    uint8_t  curBurnPow_;           // Burner current power %
+    uint32_t burnStarts_;           // burner restarts
+    uint32_t heatStarts_;           // burner starts for heating
+    uint32_t burnWorkMin_;          // Total burner operating time
+    uint32_t burn2WorkMin_;         // burner stage 2 operating time
+    uint32_t heatWorkMin_;          // Total heat operating time
+    uint32_t UBAuptime_;            // Total UBA working hours
+    char     lastCode_[55];         // last error code
+    char     errorCode_[15];        // active error from 0xBF, e.g. " --(5141)"
+    char     serviceCode_[4];       // 3 character status/service code
+    uint16_t serviceCodeNumber_;    // error/service code
+    uint32_t lastCodeDate_ = 0;     // last code date
+    uint16_t lastCodeNo_   = 0;     // code number of lastCode_
     bool     lastCodeOpen_ = false; // lastCode_ is an open (active) fault
     uint8_t  emergencyOps_;
     uint8_t  emergencyTemp_;

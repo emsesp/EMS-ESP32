@@ -51,6 +51,8 @@ const LEVEL_OPTIONS = [
   { value: '4', label: 'WARNING' },
   { value: '5', label: 'NOTICE' },
   { value: '6', label: 'INFO' },
+  { value: '7', label: 'DEBUG' },
+  { value: '8', label: 'TRACE' },
   { value: '9', label: 'ALL' }
 ];
 const BUFFER_OPTIONS = [25, 50, 75, 100, 500, 1000].map((n) => ({
