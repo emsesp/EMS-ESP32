@@ -8,10 +8,13 @@
 //        [--list] list what would be translated, no DeepL calls
 //        (default) translate and print, files are not changed
 //        [--write] translate and update src/i18n/<lang>/index.ts
+//        [--casing] rewrite short English labels to title case in src/i18n/en/index.ts
+//                   (no DeepL). Add --write to update the file.
 import { execFileSync } from 'child_process';
 import { readFileSync, writeFileSync } from 'fs';
 import { parseArgs } from 'util';
 import { transformWithOxc } from 'vite';
+import { applyEnglishCasing } from './english-casing.js';
 
 const { values: args } = parseArgs({
   options: {
@@ -20,9 +23,35 @@ const { values: args } = parseArgs({
     keys: { type: 'string' },
     all: { type: 'boolean', default: false },
     list: { type: 'boolean', default: false },
-    write: { type: 'boolean', default: false }
+    write: { type: 'boolean', default: false },
+    casing: { type: 'boolean', default: false }
   }
 });
+
+if (args.casing) {
+  if (args.lang || args.since || args.keys || args.all) {
+    console.error(
+      '--casing only rewrites English labels. Leave off --lang, --since, --keys and --all.'
+    );
+    process.exit(2);
+  }
+  const file = 'src/i18n/en/index.ts';
+  const { src, changes } = applyEnglishCasing(readFileSync(file, 'utf8'));
+  if (!changes.length) {
+    console.log('English casing: short labels already look OK');
+    process.exit(0);
+  }
+  for (const { key, from, to } of changes) console.log(`  ${key}: "${from}" → "${to}"`);
+  console.log(`\n${changes.length} English label(s).`);
+  if (!args.write) {
+    console.log('Nothing written; add --write to update src/i18n/en/index.ts.');
+    process.exit(0);
+  }
+  writeFileSync(file, src);
+  execFileSync('npx', ['prettier', '-w', file], { stdio: 'ignore' });
+  console.log(`Updated ${file}. Other languages were not changed.`);
+  process.exit(0);
+}
 
 const LANGS = [
   'cs',

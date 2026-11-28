@@ -1,6 +1,6 @@
 # Web UI translations
 
-How the web UI text is translated, how to add or change a string, and the two helper scripts: `pnpm translate` drafts translations with DeepL, and `pnpm check-layout` finds text that doesn't fit and English labels that break sentence case.
+How the web UI text is translated, how to add or change a string, and the two helper scripts: `pnpm translate` drafts translations with DeepL, and `pnpm check-layout` finds text that doesn't fit and English labels that break title case.
 
 The firmware has its own translations (entity names in `src/core/locale_translations.h`). They are not covered here — use the Entity Translation Editor linked below.
 
@@ -36,9 +36,9 @@ Overview and how to add a whole new language: [Adding Languages](https://docs.em
 
 Keep labels short. A menu item has about 130 px; long labels wrap to a second line and are cut off with "…" after that.
 
-**English casing (sentence case):** short UI labels in `en` (about 2–4 words, no `.!?`) capitalize the first word only. Later words stay lowercase unless they are an acronym (`MQTT`, `API`, `IP`, `Wi-Fi`, …) or a proper noun (`Home Assistant`, `Fahrenheit`, …). Examples: `File system`, `Board profile`, `Sign in`, `Free memory` — not `Free Memory` or `Sign In`.
+**English casing (title case):** short UI labels in `en` (about 2–4 words, no `.!?`) capitalize each main word. Small words stay lowercase (`and`, `of`, `the`, `in`, …). Acronyms (`MQTT`, `API`, `IP`, `Wi-Fi`, …) and proper nouns (`Home Assistant`, `Fahrenheit`, …) stay as written. Examples: `Custom Entities`, `File System`, `Free Memory`, `Sign in` — not `Custom entities` or `Free memory`.
 
-`pnpm check-layout` enforces this on `src/i18n/en/index.ts`. It does **not** check other languages, help/paragraph text, hard-coded strings outside the i18n files, or whether related labels use the same wording (only capitalization).
+`pnpm check-layout` enforces this on `src/i18n/en/index.ts`. Each alternative of a `{{a|b|c}}` plural is checked on its own. It does **not** check other languages, firmware names in `src/core/locale_translations.h`, help/paragraph text, hard-coded strings outside the i18n files, or whether related labels use the same wording (only capitalization).
 
 ## Drafting translations with DeepL: `pnpm translate`
 
@@ -58,9 +58,11 @@ Run from `interface/`:
 
 | Command                  | What it does                                                   |
 | ------------------------ | -------------------------------------------------------------- |
-| `pnpm translate --list`  | Lists what would be translated. No DeepL calls, no key needed. |
-| `pnpm translate`         | Translates and prints the results; files are not changed.      |
-| `pnpm translate --write` | Translates and updates `src/i18n/<lang>/index.ts`.             |
+| `pnpm translate --list`           | Lists what would be translated. No DeepL calls, no key needed.        |
+| `pnpm translate`                  | Translates and prints the results; files are not changed.             |
+| `pnpm translate --write`          | Translates and updates `src/i18n/<lang>/index.ts`.                     |
+| `pnpm translate --casing`         | Lists English short labels that are not title case. No DeepL, no key. |
+| `pnpm translate --casing --write` | Rewrites those labels in `src/i18n/en/index.ts`. Other languages stay. |
 
 Options (combine with any of the above):
 
@@ -70,6 +72,8 @@ Options (combine with any of the above):
 - `--all` retranslates every key. This replaces reviewed community translations, see [Updating all translations](#updating-all-translations).
 
 Without `--keys`, `--since` or `--all`, only keys a language doesn't have yet are translated.
+
+`--casing` does not call DeepL. It capitalizes each main word of a short English label (`Custom entities` → `Custom Entities`, including each alternative of a `{{a|b|c}}` plural) and, with `--write`, updates `src/i18n/en/index.ts`. Small words (`and`, `of`, `the`, `in`, …) stay lowercase. Other languages are not changed; do not follow it with `--since` unless you really want those keys retranslated.
 
 Typical flow after adding new English strings:
 
@@ -140,7 +144,7 @@ The whole English UI is about 16,000 characters, so translating everything into 
 
 `check-layout.js` does two things:
 
-1. **English casing** — scans `src/i18n/en/index.ts` for short labels that break sentence case (for example `Free Memory` → suggested `Free memory`). Runs first; does not need the mock server or Chromium. Other languages and long help strings are skipped.
+1. **English casing** — scans `src/i18n/en/index.ts`, including each `{{a|b|c}}` alternative, for short labels that break title case (for example `Custom entities` → suggested `Custom Entities`). Runs first; does not need the mock server or Chromium. Other languages, firmware names, and long help strings are skipped.
 2. **Layout** — opens every page, plus the "add" dialogs, in every language (including Polish case forms and Swedish plurals as the UI actually renders them) at desktop (1280 px), tablet (1000 px) and phone (390 px) width, and lists text that is cut off, truncated or pushed off screen. Prints progress per language/width; a full run takes several minutes. It does not walk unused plural indexes in the translation files.
 
 ```sh
