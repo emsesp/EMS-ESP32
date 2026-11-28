@@ -227,17 +227,17 @@ bool MqttSettingsService::configureMqtt() {
             const MqttTls::Check check = MqttTls::check(_state.rootCA.c_str());
             if (check == MqttTls::Check::NONE) {
 #if defined(EMSESP_DEBUG)
-                emsesp::EMSESP::logger().debug("Start insecure MQTT");
+                emsesp::EMSESP::logger().debug("Start insecure MQTT %s:%u", _state.host.c_str(), _state.port);
 #endif
                 static_cast<espMqttClientSecure *>(_mqttClient)->setInsecure();
             } else if (check == MqttTls::Check::FINGERPRINT) {
 #if defined(EMSESP_DEBUG)
-                emsesp::EMSESP::logger().debug("Start secure MQTT with certificate fingerprint");
+                emsesp::EMSESP::logger().debug("Start secure MQTT with certificate fingerprint %s:%u", _state.host.c_str(), _state.port);
 #endif
                 static_cast<espMqttClientSecure *>(_mqttClient)->setFingerprint(_state.rootCA.c_str());
             } else {
 #if defined(EMSESP_DEBUG)
-                emsesp::EMSESP::logger().debug("Start secure MQTT with rootCA");
+                emsesp::EMSESP::logger().debug("Start secure MQTT with rootCA %s:%u", _state.host.c_str(), _state.port);
 #endif
                 String certificate = "-----BEGIN CERTIFICATE-----\n" + _state.rootCA + "\n-----END CERTIFICATE-----\n";
                 static_cast<espMqttClientSecure *>(_mqttClient)->setCACert(certificate.c_str());
