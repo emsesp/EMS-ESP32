@@ -692,8 +692,9 @@ const tr: Translation = {
   SYS_HOME_HELP: 'En önemli şeyler bir bakışta. Geri kalan her şey Sistem menüsünde.', // draft, please review
   SYS_SENSORS_HELP: 'Ağ geçidine bağlı sensörler. Değiştirmek için ana menüdeki Sensörler sayfasını açın.', // draft, please review
   SYS_MENU: 'Sistem menüsü', // draft, please review
-  SYS_MENU_HELP: 'Sisteminizin tüm değerleri ve ayarları, konulara göre sıralı.', // draft, please review
-  SYS_FAV_HELP: 'En önemli ayarlarınız. Bu listeyi değiştirmek için değerin yanındaki yıldızı kullanın.', // draft, please review
+  SYS_MENU_HELP: 'Sisteminizdeki {name} için tüm değerler.', // draft, please review
+  SYS_SEARCH_HELP: 'Tüm cihazlardaki eşleşen değerler.', // draft, please review
+  SYS_FAV_HELP: 'En önemli cihaz varlıklarınız. Bu listeyi değiştirmek için değerin yanındaki yıldızı kullanın.', // draft, please review
   SYS_FAV_NONE: 'Henüz favori yok. Değerleri yıldızla işaretleyin.', // draft, please review
   SYS_FAV_REMOVED: 'Favorilerden kaldırıldı', // draft, please review
   SYS_GROUP_HEATING: 'Isıtma', // draft, please review

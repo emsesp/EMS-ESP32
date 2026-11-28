@@ -692,8 +692,9 @@ const sk: Translation = {
   SYS_HOME_HELP: 'Najdôležitejšie veci na prvý pohľad. Všetko ostatné nájdete v systémovej ponuke.', // draft, please review
   SYS_SENSORS_HELP: 'Senzory pripojené k bráne. Ak ich chcete zmeniť, otvorte Senzory v hlavnej ponuke.', // draft, please review
   SYS_MENU: 'Systémová ponuka', // draft, please review
-  SYS_MENU_HELP: 'Všetky hodnoty a nastavenia vášho systému, zoradené podľa tém.', // draft, please review
-  SYS_FAV_HELP: 'Vaše najdôležitejšie nastavenia. Hviezdičkou pri hodnote zmeníte tento zoznam.', // draft, please review
+  SYS_MENU_HELP: 'Všetky hodnoty {name} vo vašom systéme.', // draft, please review
+  SYS_SEARCH_HELP: 'Zodpovedajúce hodnoty všetkých zariadení.', // draft, please review
+  SYS_FAV_HELP: 'Vaše najdôležitejšie entity zariadení. Hviezdičkou pri hodnote zmeníte tento zoznam.', // draft, please review
   SYS_FAV_NONE: 'Zatiaľ žiadne obľúbené. Označte hodnoty hviezdičkou.', // draft, please review
   SYS_FAV_REMOVED: 'Odstránené z obľúbených', // draft, please review
   SYS_GROUP_HEATING: 'Kúrenie', // draft, please review

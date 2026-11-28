@@ -414,14 +414,14 @@ const SystemMenu = memo(() => {
           </h1>
           <p className="sys-sub" style={{ margin: '0 0 12px' }}>
             {searching
-              ? LL.SYS_MENU_HELP()
+              ? LL.SYS_SEARCH_HELP()
               : current === 'fav'
                 ? LL.SYS_FAV_HELP()
                 : current === 'home'
                   ? LL.SYS_HOME_HELP()
                   : current === 'sensors'
                     ? LL.SYS_SENSORS_HELP()
-                    : LL.SYS_MENU_HELP()}
+                    : LL.SYS_MENU_HELP({ name: menuName(current) })}
           </p>
           {body}
         </div>

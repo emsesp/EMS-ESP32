@@ -692,8 +692,9 @@ const nl: Translation = {
   SYS_HOME_HELP: 'De belangrijkste dingen in één oogopslag. Al het andere vind je in het systeemmenu.', // draft, please review
   SYS_SENSORS_HELP: 'De sensoren die op de gateway zijn aangesloten. Om ze te wijzigen, open Sensoren in het hoofdmenu.', // draft, please review
   SYS_MENU: 'Systeemmenu', // draft, please review
-  SYS_MENU_HELP: 'Alle waarden en instellingen van je installatie, per onderwerp gesorteerd.', // draft, please review
-  SYS_FAV_HELP: 'Je belangrijkste instellingen. Met de ster bij een waarde pas je deze lijst aan.', // draft, please review
+  SYS_MENU_HELP: 'Alle waarden van {name} in je installatie.', // draft, please review
+  SYS_SEARCH_HELP: 'Overeenkomende waarden van alle apparaten.', // draft, please review
+  SYS_FAV_HELP: 'Je belangrijkste apparaat-entiteiten. Met de ster bij een waarde pas je deze lijst aan.', // draft, please review
   SYS_FAV_NONE: 'Nog geen favorieten. Markeer waarden met de ster.', // draft, please review
   SYS_FAV_REMOVED: 'Verwijderd uit favorieten', // draft, please review
   SYS_GROUP_HEATING: 'Verwarming', // draft, please review

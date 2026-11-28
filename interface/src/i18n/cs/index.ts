@@ -692,8 +692,9 @@ const cs: Translation = {
   SYS_HOME_HELP: 'Nejdůležitější věci na první pohled. Vše ostatní najdete v systémové nabídce.', // draft, please review
   SYS_SENSORS_HELP: 'Senzory připojené k bráně. Chcete-li je změnit, otevřete Senzory v hlavní nabídce.', // draft, please review
   SYS_MENU: 'Systémová nabídka', // draft, please review
-  SYS_MENU_HELP: 'Všechny hodnoty a nastavení vašeho systému, seřazené podle témat.', // draft, please review
-  SYS_FAV_HELP: 'Vaše nejdůležitější nastavení. Hvězdičkou u hodnoty tento seznam změníte.', // draft, please review
+  SYS_MENU_HELP: 'Všechny hodnoty {name} ve vašem systému.', // draft, please review
+  SYS_SEARCH_HELP: 'Odpovídající hodnoty všech zařízení.', // draft, please review
+  SYS_FAV_HELP: 'Vaše nejdůležitější entity zařízení. Hvězdičkou u hodnoty tento seznam změníte.', // draft, please review
   SYS_FAV_NONE: 'Zatím žádné oblíbené. Označte hodnoty hvězdičkou.', // draft, please review
   SYS_FAV_REMOVED: 'Odebráno z oblíbených', // draft, please review
   SYS_GROUP_HEATING: 'Topení', // draft, please review

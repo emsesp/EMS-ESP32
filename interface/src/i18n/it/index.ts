@@ -692,8 +692,9 @@ const it: Translation = {
   SYS_HOME_HELP: 'Le cose più importanti a colpo d’occhio. Tutto il resto è nel menu Sistema.', // draft, please review
   SYS_SENSORS_HELP: 'I sensori collegati al gateway. Per modificarli, apri Sensori nel menu principale.', // draft, please review
   SYS_MENU: 'Menu Sistema', // draft, please review
-  SYS_MENU_HELP: 'Tutti i valori e le impostazioni del tuo impianto, ordinati per argomento.', // draft, please review
-  SYS_FAV_HELP: 'Le tue impostazioni più importanti. Usa la stella accanto a un valore per modificare l’elenco.', // draft, please review
+  SYS_MENU_HELP: 'Tutti i valori di {name} nel tuo impianto.', // draft, please review
+  SYS_SEARCH_HELP: 'Valori corrispondenti di tutti i dispositivi.', // draft, please review
+  SYS_FAV_HELP: 'Le tue entità dei dispositivi più importanti. Usa la stella accanto a un valore per modificare l’elenco.', // draft, please review
   SYS_FAV_NONE: 'Ancora nessun preferito. Contrassegna i valori con la stella.', // draft, please review
   SYS_FAV_REMOVED: 'Rimosso dai preferiti', // draft, please review
   SYS_GROUP_HEATING: 'Riscaldamento', // draft, please review

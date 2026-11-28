@@ -692,8 +692,9 @@ const sv: Translation = {
   SYS_HOME_HELP: 'Det viktigaste i överblick. Allt annat finns i systemmenyn.', // draft, please review
   SYS_SENSORS_HELP: 'Sensorerna som är anslutna till gatewayen. Öppna Sensorer i huvudmenyn för att ändra dem.', // draft, please review
   SYS_MENU: 'Systemmeny', // draft, please review
-  SYS_MENU_HELP: 'Alla värden och inställningar för din anläggning, sorterade efter ämne.', // draft, please review
-  SYS_FAV_HELP: 'Dina viktigaste inställningar. Använd stjärnan vid ett värde för att ändra listan.', // draft, please review
+  SYS_MENU_HELP: 'Alla värden för {name} i din anläggning.', // draft, please review
+  SYS_SEARCH_HELP: 'Matchande värden från alla enheter.', // draft, please review
+  SYS_FAV_HELP: 'Dina viktigaste enhetsentiteter. Använd stjärnan vid ett värde för att ändra listan.', // draft, please review
   SYS_FAV_NONE: 'Inga favoriter ännu. Markera värden med stjärnan.', // draft, please review
   SYS_FAV_REMOVED: 'Borttagen från favoriter', // draft, please review
   SYS_GROUP_HEATING: 'Värme', // draft, please review

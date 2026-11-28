@@ -692,8 +692,9 @@ const pl: Translation = {
   SYS_HOME_HELP: 'Najważniejsze rzeczy na pierwszy rzut oka. Wszystko inne znajdziesz w menu systemowym.', // draft, please review
   SYS_SENSORS_HELP: 'Czujniki podłączone do bramy. Aby je zmienić, otwórz Czujniki w menu głównym.', // draft, please review
   SYS_MENU: 'Menu systemowe', // draft, please review
-  SYS_MENU_HELP: 'Wszystkie wartości i ustawienia instalacji, uporządkowane tematycznie.', // draft, please review
-  SYS_FAV_HELP: 'Twoje najważniejsze ustawienia. Gwiazdką przy wartości zmienisz tę listę.', // draft, please review
+  SYS_MENU_HELP: 'Wszystkie wartości {name} w Twojej instalacji.', // draft, please review
+  SYS_SEARCH_HELP: 'Pasujące wartości ze wszystkich urządzeń.', // draft, please review
+  SYS_FAV_HELP: 'Twoje najważniejsze encje urządzeń. Gwiazdką przy wartości zmienisz tę listę.', // draft, please review
   SYS_FAV_NONE: 'Brak ulubionych. Oznacz wartości gwiazdką.', // draft, please review
   SYS_FAV_REMOVED: 'Usunięto z ulubionych', // draft, please review
   SYS_GROUP_HEATING: 'Ogrzewanie', // draft, please review

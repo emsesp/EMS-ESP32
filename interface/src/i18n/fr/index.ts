@@ -692,8 +692,9 @@ const fr: Translation = {
   SYS_HOME_HELP: 'L\'essentiel en un coup d\'œil. Tout le reste se trouve dans le menu Système.', // draft, please review
   SYS_SENSORS_HELP: 'Les capteurs raccordés à la passerelle. Pour les modifier, ouvrez Capteurs dans le menu principal.', // draft, please review
   SYS_MENU: 'Menu Système', // draft, please review
-  SYS_MENU_HELP: 'Toutes les valeurs et tous les réglages de votre installation, classés par thème.', // draft, please review
-  SYS_FAV_HELP: 'Vos réglages les plus importants. Utilisez l’étoile à côté d’une valeur pour modifier cette liste.', // draft, please review
+  SYS_MENU_HELP: 'Toutes les valeurs de {name} dans votre installation.', // draft, please review
+  SYS_SEARCH_HELP: 'Valeurs correspondantes de tous les appareils.', // draft, please review
+  SYS_FAV_HELP: 'Vos entités d’appareil les plus importantes. Utilisez l’étoile à côté d’une valeur pour modifier cette liste.', // draft, please review
   SYS_FAV_NONE: 'Aucun favori pour l’instant. Marquez des valeurs avec l’étoile.', // draft, please review
   SYS_FAV_REMOVED: 'Retiré des favoris', // draft, please review
   SYS_GROUP_HEATING: 'Chauffage', // draft, please review

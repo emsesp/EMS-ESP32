@@ -692,8 +692,9 @@ const zh: Translation = {
   SYS_HOME_HELP: '最重要的内容一目了然,其他内容请见系统菜单。', // draft, please review
   SYS_SENSORS_HELP: '连接到网关的传感器。如需更改，请在主菜单中打开“传感器”。', // draft, please review
   SYS_MENU: '系统菜单', // draft, please review
-  SYS_MENU_HELP: '系统的所有数值和设置,按主题分类。', // draft, please review
-  SYS_FAV_HELP: '您最重要的设置。点击数值旁的星标即可修改此列表。', // draft, please review
+  SYS_MENU_HELP: '系统中 {name} 的所有数值。', // draft, please review
+  SYS_SEARCH_HELP: '所有设备中匹配的数值。', // draft, please review
+  SYS_FAV_HELP: '您最重要的设备实体。点击数值旁的星标即可修改此列表。', // draft, please review
   SYS_FAV_NONE: '暂无收藏。用星标标记数值。', // draft, please review
   SYS_FAV_REMOVED: '已从收藏中移除', // draft, please review
   SYS_GROUP_HEATING: '供暖', // draft, please review

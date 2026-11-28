@@ -692,8 +692,9 @@ const de: Translation = {
   SYS_HOME_HELP: 'Das Wichtigste auf einen Blick. Alles andere findest du im Menü.', // draft, please review
   SYS_SENSORS_HELP: 'Die am Gateway angeschlossenen Sensoren. Zum Ändern öffne Sensoren im Hauptmenü.', // draft, please review
   SYS_MENU: 'Systemmenü', // draft, please review
-  SYS_MENU_HELP: 'Alle Werte und Einstellungen deiner Anlage, nach Themen geordnet.', // draft, please review
-  SYS_FAV_HELP: 'Deine wichtigsten Einstellungen. Mit dem Stern bei einem Wert änderst du die Liste.', // draft, please review
+  SYS_MENU_HELP: 'Alle Werte von {name} in deiner Anlage.', // draft, please review
+  SYS_SEARCH_HELP: 'Passende Werte aller Geräte.', // draft, please review
+  SYS_FAV_HELP: 'Deine wichtigsten Geräte-Entitäten. Mit dem Stern bei einem Wert änderst du die Liste.', // draft, please review
   SYS_FAV_NONE: 'Noch keine Favoriten. Markiere Werte mit dem Stern.', // draft, please review
   SYS_FAV_REMOVED: 'Aus den Favoriten entfernt', // draft, please review
   SYS_GROUP_HEATING: 'Heizung', // draft, please review
