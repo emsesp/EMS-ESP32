@@ -748,10 +748,35 @@ const tr: Translation = {
   SYS_FAULT_LAST: 'Son arıza / mesaj', // draft, please review
   SYS_FAULT_CTRL: 'Denetleyicinin son arızası', // draft, please review
   SYS_FAULT_SERVICE: 'Servis kodu', // draft, please review
+  SYS_FAULT_CAUSE: 'Olası neden', // draft, please review
+  SYS_FAULT_FIX: 'Çözüm', // draft, please review
+  SYS_FAULT_CLASS: 'Arıza sınıfı', // draft, please review
   SYS_FAULT_ADD: 'Ek kod {0}', // draft, please review
+  SYS_FAULT_UNKNOWN: 'Veritabanında yok', // draft, please review
+  SYS_FAULT_SCOPE: 'Yalnızca şunun için: {0}', // draft, please review
+  SYS_FAULT_MACHINE: 'Makine çevirisi, denetlenmedi.', // draft, please review
+  SYS_FAULT_FALLBACK: 'Henüz çevrilmedi: bu, özgün dildeki metindir.', // draft, please review
   SYS_FAULT_RAW_ONLY: 'Bu cihaz için açıklama yok.', // draft, please review
+  SYS_FAULT_SEARCH: 'Arıza kodu ara', // draft, please review
+  SYS_FAULT_SEARCH_HINT: 'Ekrandaki kodu ve ek kodu girin, örn. H08, 6A 227 veya 1018.', // draft, please review
+  SYS_FAULT_SOURCE: '{0} · {1} · sürüm {2} · {3} kayıt', // draft, please review
+  SYS_FAULT_PACK_MISSING: '{0} arıza kodları için yüklü açıklama yok. Paketi bir dosyadan yükleyin; ağ geçidinde saklanır ve her tarayıcıda kullanılabilir.', // draft, please review
+  SYS_FAULT_PACK_SHORT: 'Açıklama yüklü değil', // draft, please review
+  SYS_FAULT_PACK_REMOVE: 'Kaldır', // draft, please review
+  SYS_FAULT_PACK_ERROR: 'İndirme başarısız: {0}', // draft, please review
+  SYS_FAULT_PACK_DISCLAIMER: 'Açıklamalar paketten gelir ve doğruluk veya eksiksizlik konusunda hiçbir garanti verilmeden sunulur. Kullanım kendi sorumluluğunuzdadır; ürününüzün belgelerine uyun.', // draft, please review
+  SYS_FAULT_PACK_HELP: 'Üreticiniz ve diliniz için paketi indirin, ardından yukarıdaki dosyadan yükleyin.', // draft, please review
+  SYS_FAULT_PACK_DOWNLOAD: 'Paket listesi', // draft, please review
+  SYS_FAULT_PACK_FILE: 'Dosyadan yükle', // draft, please review
+  SYS_FAULT_PACK_TITLE: 'Arıza kodu paketleri', // draft, please review
+  SYS_FAULT_PACK_UNSUPPORTED: 'Bu ağ geçidi arıza kodu paketlerini saklayamaz. Daha yeni bir yazılım ve en az 16 MB flash gerekir.', // draft, please review
   SYS_FAULT_NONE: 'Kayıtlı arıza yok.', // draft, please review
   SYS_FAULT_UNTIL_NOW: 'şimdiye kadar', // draft, please review
+  SYS_SEV_INFO: 'Çalışma mesajı', // draft, please review
+  SYS_SEV_SERVICE: 'Servis / bakım', // draft, please review
+  SYS_SEV_WARN: 'Arıza (sınırlı çalışma)', // draft, please review
+  SYS_SEV_ERROR: 'Ciddi arıza', // draft, please review
+  SYS_SEV_UNKNOWN: 'Bilinmiyor', // draft, please review
   SYS_MAINTENANCE: 'Bakım', // draft, please review
 };
 

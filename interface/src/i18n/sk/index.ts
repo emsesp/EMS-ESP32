@@ -748,10 +748,35 @@ const sk: Translation = {
   SYS_FAULT_LAST: 'Posledná porucha / hlásenie', // draft, please review
   SYS_FAULT_CTRL: 'Posledná porucha regulátora', // draft, please review
   SYS_FAULT_SERVICE: 'Servisný kód', // draft, please review
+  SYS_FAULT_CAUSE: 'Možná príčina', // draft, please review
+  SYS_FAULT_FIX: 'Opatrenie', // draft, please review
+  SYS_FAULT_CLASS: 'Trieda poruchy', // draft, please review
   SYS_FAULT_ADD: 'Doplnkový kód {0}', // draft, please review
+  SYS_FAULT_UNKNOWN: 'Nie je v databáze', // draft, please review
+  SYS_FAULT_SCOPE: 'Iba pre: {0}', // draft, please review
+  SYS_FAULT_MACHINE: 'Strojový preklad, neoverený.', // draft, please review
+  SYS_FAULT_FALLBACK: 'Zatiaľ neprekladané: toto je text v pôvodnom jazyku.', // draft, please review
   SYS_FAULT_RAW_ONLY: 'Pre toto zariadenie nie je k dispozícii vysvetlenie.', // draft, please review
+  SYS_FAULT_SEARCH: 'Vyhľadať kód poruchy', // draft, please review
+  SYS_FAULT_SEARCH_HINT: 'Zadajte kód a doplnkový kód z displeja, napr. H08, 6A 227 alebo 1018.', // draft, please review
+  SYS_FAULT_SOURCE: '{0} · {1} · verzia {2} · {3} záznamov', // draft, please review
+  SYS_FAULT_PACK_MISSING: 'Pre chybové kódy {0} nie sú nainštalované žiadne vysvetlenia. Nainštalujte balíček zo súboru; uloží sa v bráne a bude dostupný v každom prehliadači.', // draft, please review
+  SYS_FAULT_PACK_SHORT: 'Vysvetlenie nie je nainštalované', // draft, please review
+  SYS_FAULT_PACK_REMOVE: 'Odstrániť', // draft, please review
+  SYS_FAULT_PACK_ERROR: 'Sťahovanie zlyhalo: {0}', // draft, please review
+  SYS_FAULT_PACK_DISCLAIMER: 'Vysvetlenia pochádzajú z balíčka a sú poskytované bez záruky správnosti a úplnosti. Použitie je na vlastné riziko; riaďte sa dokumentáciou svojho produktu.', // draft, please review
+  SYS_FAULT_PACK_HELP: 'Stiahnite balíček pre svojho výrobcu a jazyk a nainštalujte ho vyššie zo súboru.', // draft, please review
+  SYS_FAULT_PACK_DOWNLOAD: 'Zoznam balíčkov', // draft, please review
+  SYS_FAULT_PACK_FILE: 'Nainštalovať zo súboru', // draft, please review
+  SYS_FAULT_PACK_TITLE: 'Balíčky chybových kódov', // draft, please review
+  SYS_FAULT_PACK_UNSUPPORTED: 'Táto brána nemôže ukladať balíčky chybových kódov. Potrebuje novší firmware a flash aspoň 16 MB.', // draft, please review
   SYS_FAULT_NONE: 'Žiadna uložená porucha.', // draft, please review
   SYS_FAULT_UNTIL_NOW: 'do teraz', // draft, please review
+  SYS_SEV_INFO: 'Prevádzkové hlásenie', // draft, please review
+  SYS_SEV_SERVICE: 'Servis / údržba', // draft, please review
+  SYS_SEV_WARN: 'Porucha (obmedzená prevádzka)', // draft, please review
+  SYS_SEV_ERROR: 'Závažná porucha', // draft, please review
+  SYS_SEV_UNKNOWN: 'Neznáme', // draft, please review
   SYS_MAINTENANCE: 'Údržba', // draft, please review
 };
 

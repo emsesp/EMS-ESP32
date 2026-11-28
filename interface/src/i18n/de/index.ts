@@ -748,10 +748,35 @@ const de: Translation = {
   SYS_FAULT_LAST: 'Letzte Störung / Meldung', // draft, please review
   SYS_FAULT_CTRL: 'Letzter Reglerfehler', // draft, please review
   SYS_FAULT_SERVICE: 'Servicecode', // draft, please review
+  SYS_FAULT_CAUSE: 'Mögliche Ursache', // draft, please review
+  SYS_FAULT_FIX: 'Maßnahme', // draft, please review
+  SYS_FAULT_CLASS: 'Fehlerklasse', // draft, please review
   SYS_FAULT_ADD: 'Zusatzcode {0}', // draft, please review
+  SYS_FAULT_UNKNOWN: 'Nicht in der Datenbank', // draft, please review
+  SYS_FAULT_SCOPE: 'Nur für: {0}', // draft, please review
+  SYS_FAULT_MACHINE: 'Maschinell übersetzt, nicht geprüft.', // draft, please review
+  SYS_FAULT_FALLBACK: 'Noch nicht übersetzt: das ist der Text der Originalsprache.', // draft, please review
   SYS_FAULT_RAW_ONLY: 'Für dieses Gerät ist keine Erklärung verfügbar.', // draft, please review
+  SYS_FAULT_SEARCH: 'Fehlercode nachschlagen', // draft, please review
+  SYS_FAULT_SEARCH_HINT: 'Code und Zusatzcode vom Display eingeben, z. B. H08, 6A 227 oder 1018.', // draft, please review
+  SYS_FAULT_SOURCE: '{0} · {1} · Version {2} · {3} Einträge', // draft, please review
+  SYS_FAULT_PACK_MISSING: 'Keine Erklärungen für {0}-Fehlercodes installiert. Das Paket aus einer Datei installieren; es wird im Gateway gespeichert und steht in jedem Browser zur Verfügung.', // draft, please review
+  SYS_FAULT_PACK_SHORT: 'Erklärung nicht installiert', // draft, please review
+  SYS_FAULT_PACK_REMOVE: 'Entfernen', // draft, please review
+  SYS_FAULT_PACK_ERROR: 'Download fehlgeschlagen: {0}', // draft, please review
+  SYS_FAULT_PACK_DISCLAIMER: 'Die Erklärungen stammen aus dem Paket und werden ohne Gewähr auf Richtigkeit und Vollständigkeit bereitgestellt. Die Nutzung erfolgt auf eigene Verantwortung; beachte die Dokumentation deines Produkts.', // draft, please review
+  SYS_FAULT_PACK_HELP: 'Das Paket für deinen Hersteller und deine Sprache herunterladen und dann oben aus der Datei installieren.', // draft, please review
+  SYS_FAULT_PACK_DOWNLOAD: 'Liste der Pakete', // draft, please review
+  SYS_FAULT_PACK_FILE: 'Aus einer Datei installieren', // draft, please review
+  SYS_FAULT_PACK_TITLE: 'Fehlercode-Pakete', // draft, please review
+  SYS_FAULT_PACK_UNSUPPORTED: 'Dieses Gateway kann keine Fehlercode-Pakete speichern. Es braucht eine neuere Firmware und mindestens 16 MB Flash.', // draft, please review
   SYS_FAULT_NONE: 'Keine gespeicherte Störung.', // draft, please review
   SYS_FAULT_UNTIL_NOW: 'bis jetzt', // draft, please review
+  SYS_SEV_INFO: 'Betriebsmeldung', // draft, please review
+  SYS_SEV_SERVICE: 'Service / Wartung', // draft, please review
+  SYS_SEV_WARN: 'Störung (eingeschränkt)', // draft, please review
+  SYS_SEV_ERROR: 'Schwere Störung', // draft, please review
+  SYS_SEV_UNKNOWN: 'Unbekannt', // draft, please review
   SYS_MAINTENANCE: 'Wartung', // draft, please review
 };
 

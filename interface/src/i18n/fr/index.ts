@@ -748,10 +748,35 @@ const fr: Translation = {
   SYS_FAULT_LAST: 'Dernier défaut / message', // draft, please review
   SYS_FAULT_CTRL: 'Dernier défaut du régulateur', // draft, please review
   SYS_FAULT_SERVICE: 'Code de service', // draft, please review
+  SYS_FAULT_CAUSE: 'Cause possible', // draft, please review
+  SYS_FAULT_FIX: 'Remède', // draft, please review
+  SYS_FAULT_CLASS: 'Classe de défaut', // draft, please review
   SYS_FAULT_ADD: 'Code supplémentaire {0}', // draft, please review
+  SYS_FAULT_UNKNOWN: 'Absent de la base de données', // draft, please review
+  SYS_FAULT_SCOPE: 'Uniquement pour : {0}', // draft, please review
+  SYS_FAULT_MACHINE: 'Traduit automatiquement, non vérifié.', // draft, please review
+  SYS_FAULT_FALLBACK: 'Pas encore traduit : c’est le texte de la langue d’origine.', // draft, please review
   SYS_FAULT_RAW_ONLY: 'Aucune explication disponible pour cet appareil.', // draft, please review
+  SYS_FAULT_SEARCH: 'Rechercher un code de défaut', // draft, please review
+  SYS_FAULT_SEARCH_HINT: 'Saisissez le code et le code supplémentaire affichés, p. ex. H08, 6A 227 ou 1018.', // draft, please review
+  SYS_FAULT_SOURCE: '{0} · {1} · version {2} · {3} entrées', // draft, please review
+  SYS_FAULT_PACK_MISSING: 'Aucune explication installée pour les codes de défaut {0}. Installez le paquet depuis un fichier ; il est stocké sur la passerelle et disponible dans chaque navigateur.', // draft, please review
+  SYS_FAULT_PACK_SHORT: 'Explication non installée', // draft, please review
+  SYS_FAULT_PACK_REMOVE: 'Supprimer', // draft, please review
+  SYS_FAULT_PACK_ERROR: 'Échec du téléchargement : {0}', // draft, please review
+  SYS_FAULT_PACK_DISCLAIMER: 'Les explications proviennent du paquet et sont fournies sans aucune garantie d\'exactitude ou d\'exhaustivité. Utilisation à vos propres risques ; suivez la documentation de votre produit.', // draft, please review
+  SYS_FAULT_PACK_HELP: 'Téléchargez le paquet de votre fabricant et de votre langue, puis installez-le depuis le fichier ci-dessus.', // draft, please review
+  SYS_FAULT_PACK_DOWNLOAD: 'Liste des paquets', // draft, please review
+  SYS_FAULT_PACK_FILE: 'Installer depuis un fichier', // draft, please review
+  SYS_FAULT_PACK_TITLE: 'Paquets de codes de défaut', // draft, please review
+  SYS_FAULT_PACK_UNSUPPORTED: 'Cette passerelle ne peut pas stocker de paquets de codes de défaut. Il faut un firmware plus récent et une mémoire flash d\'au moins 16 Mo.', // draft, please review
   SYS_FAULT_NONE: 'Aucun défaut enregistré.', // draft, please review
   SYS_FAULT_UNTIL_NOW: 'jusqu’à maintenant', // draft, please review
+  SYS_SEV_INFO: 'Message de fonctionnement', // draft, please review
+  SYS_SEV_SERVICE: 'Service / maintenance', // draft, please review
+  SYS_SEV_WARN: 'Défaut (fonctionnement limité)', // draft, please review
+  SYS_SEV_ERROR: 'Défaut grave', // draft, please review
+  SYS_SEV_UNKNOWN: 'Inconnu', // draft, please review
   SYS_MAINTENANCE: 'Maintenance', // draft, please review
 };
 

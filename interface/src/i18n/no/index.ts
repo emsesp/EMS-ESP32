@@ -748,10 +748,35 @@ const no: Translation = {
   SYS_FAULT_LAST: 'Siste feil / melding', // draft, please review
   SYS_FAULT_CTRL: 'Siste regulatorfeil', // draft, please review
   SYS_FAULT_SERVICE: 'Servicekode', // draft, please review
+  SYS_FAULT_CAUSE: 'Mulig årsak', // draft, please review
+  SYS_FAULT_FIX: 'Tiltak', // draft, please review
+  SYS_FAULT_CLASS: 'Feilklasse', // draft, please review
   SYS_FAULT_ADD: 'Tilleggskode {0}', // draft, please review
+  SYS_FAULT_UNKNOWN: 'Ikke i databasen', // draft, please review
+  SYS_FAULT_SCOPE: 'Bare for: {0}', // draft, please review
+  SYS_FAULT_MACHINE: 'Maskinoversatt, ikke kontrollert.', // draft, please review
+  SYS_FAULT_FALLBACK: 'Ikke oversatt ennå: dette er teksten på originalspråket.', // draft, please review
   SYS_FAULT_RAW_ONLY: 'Ingen forklaring tilgjengelig for denne enheten.', // draft, please review
+  SYS_FAULT_SEARCH: 'Slå opp feilkode', // draft, please review
+  SYS_FAULT_SEARCH_HINT: 'Skriv inn koden og tilleggskoden fra displayet, f.eks. H08, 6A 227 eller 1018.', // draft, please review
+  SYS_FAULT_SOURCE: '{0} · {1} · versjon {2} · {3} oppføringer', // draft, please review
+  SYS_FAULT_PACK_MISSING: 'Ingen forklaringer er installert for {0}-feilkoder. Installer pakken fra en fil; den lagres på gatewayen og er tilgjengelig i alle nettlesere.', // draft, please review
+  SYS_FAULT_PACK_SHORT: 'Forklaring ikke installert', // draft, please review
+  SYS_FAULT_PACK_REMOVE: 'Fjern', // draft, please review
+  SYS_FAULT_PACK_ERROR: 'Nedlasting mislyktes: {0}', // draft, please review
+  SYS_FAULT_PACK_DISCLAIMER: 'Forklaringene kommer fra pakken og leveres uten garanti for at de er riktige eller fullstendige. Bruk skjer på eget ansvar; følg dokumentasjonen til produktet ditt.', // draft, please review
+  SYS_FAULT_PACK_HELP: 'Last ned pakken for din produsent og ditt språk, og installer den deretter fra filen ovenfor.', // draft, please review
+  SYS_FAULT_PACK_DOWNLOAD: 'Liste over pakker', // draft, please review
+  SYS_FAULT_PACK_FILE: 'Installer fra en fil', // draft, please review
+  SYS_FAULT_PACK_TITLE: 'Feilkodepakker', // draft, please review
+  SYS_FAULT_PACK_UNSUPPORTED: 'Denne gatewayen kan ikke lagre feilkodepakker. Den trenger nyere firmware og minst 16 MB flash.', // draft, please review
   SYS_FAULT_NONE: 'Ingen lagret feil.', // draft, please review
   SYS_FAULT_UNTIL_NOW: 'til nå', // draft, please review
+  SYS_SEV_INFO: 'Driftsmelding', // draft, please review
+  SYS_SEV_SERVICE: 'Service / vedlikehold', // draft, please review
+  SYS_SEV_WARN: 'Feil (begrenset drift)', // draft, please review
+  SYS_SEV_ERROR: 'Alvorlig feil', // draft, please review
+  SYS_SEV_UNKNOWN: 'Ukjent', // draft, please review
   SYS_MAINTENANCE: 'Vedlikehold', // draft, please review
 };
 

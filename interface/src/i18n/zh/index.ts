@@ -748,10 +748,35 @@ const zh: Translation = {
   SYS_FAULT_LAST: '最近故障/信息', // draft, please review
   SYS_FAULT_CTRL: '控制器最近故障', // draft, please review
   SYS_FAULT_SERVICE: '服务代码', // draft, please review
+  SYS_FAULT_CAUSE: '可能原因', // draft, please review
+  SYS_FAULT_FIX: '处理措施', // draft, please review
+  SYS_FAULT_CLASS: '故障等级', // draft, please review
   SYS_FAULT_ADD: '附加代码 {0}', // draft, please review
+  SYS_FAULT_UNKNOWN: '数据库中没有', // draft, please review
+  SYS_FAULT_SCOPE: '仅适用于:{0}', // draft, please review
+  SYS_FAULT_MACHINE: '机器翻译,未经审核。', // draft, please review
+  SYS_FAULT_FALLBACK: '尚未翻译:这是原语言的文本。', // draft, please review
   SYS_FAULT_RAW_ONLY: '此设备没有可用的说明。', // draft, please review
+  SYS_FAULT_SEARCH: '查询故障代码', // draft, please review
+  SYS_FAULT_SEARCH_HINT: '输入显示屏上的代码和附加代码,例如 H08、6A 227 或 1018。', // draft, please review
+  SYS_FAULT_SOURCE: '{0} · {1} · 版本 {2} · {3} 条', // draft, please review
+  SYS_FAULT_PACK_MISSING: '尚未安装 {0} 故障代码的说明。请从文件安装代码包；它保存在网关上，所有浏览器均可使用。', // draft, please review
+  SYS_FAULT_PACK_SHORT: '说明未安装', // draft, please review
+  SYS_FAULT_PACK_REMOVE: '移除', // draft, please review
+  SYS_FAULT_PACK_ERROR: '下载失败：{0}', // draft, please review
+  SYS_FAULT_PACK_DISCLAIMER: '说明来自代码包，不保证其准确或完整。使用风险自负，请遵循您产品的文档。', // draft, please review
+  SYS_FAULT_PACK_HELP: '下载适合您的制造商和语言的代码包，然后从上方的文件安装。', // draft, please review
+  SYS_FAULT_PACK_DOWNLOAD: '代码包列表', // draft, please review
+  SYS_FAULT_PACK_FILE: '从文件安装', // draft, please review
+  SYS_FAULT_PACK_TITLE: '故障代码包', // draft, please review
+  SYS_FAULT_PACK_UNSUPPORTED: '此网关无法存储故障代码包。需要更新的固件和至少 16 MB 的闪存。', // draft, please review
   SYS_FAULT_NONE: '没有已存储的故障。', // draft, please review
   SYS_FAULT_UNTIL_NOW: '至今', // draft, please review
+  SYS_SEV_INFO: '运行信息', // draft, please review
+  SYS_SEV_SERVICE: '服务/维护', // draft, please review
+  SYS_SEV_WARN: '故障(受限运行)', // draft, please review
+  SYS_SEV_ERROR: '严重故障', // draft, please review
+  SYS_SEV_UNKNOWN: '未知', // draft, please review
   SYS_MAINTENANCE: '维护', // draft, please review
 };
 

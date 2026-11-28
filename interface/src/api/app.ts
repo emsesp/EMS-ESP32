@@ -129,3 +129,38 @@ export const readViewLevels = () =>
   alovaInstance.Get<ViewLevels>('/rest/viewLevels');
 export const writeViewLevels = (data: ViewLevels) =>
   alovaInstance.Post('/rest/viewLevels', data);
+
+// Fault code packs stored on the gateway
+export interface FaultPackInfo {
+  brand: string;
+  lang: string;
+  version?: string;
+  entries?: number;
+  size: number;
+}
+export interface FaultPacksData {
+  packs: FaultPackInfo[];
+  fs_free: number; // bytes
+  max_size: number; // bytes, largest pack (compressed)
+}
+const FAULTPACK_UPLOAD_TIMEOUT = 60000;
+export const readFaultPacks = () =>
+  alovaInstance.Get<FaultPacksData>('/rest/faultPacks');
+export const readFaultPack = (brand: string, lang: string) =>
+  alovaInstance.Get<unknown>('/rest/faultPack', { params: { brand, lang } });
+export const uploadFaultPack = (
+  file: Blob,
+  brand: string,
+  lang: string,
+  version: string,
+  entries: number
+) => {
+  const formData = new FormData();
+  formData.append('file', file, `${brand}.${lang}.json.gz`);
+  return alovaInstance.Post('/rest/uploadFaultPack', formData, {
+    timeout: FAULTPACK_UPLOAD_TIMEOUT,
+    params: { brand, lang, version, entries }
+  });
+};
+export const deleteFaultPack = (data: { brand: string; lang: string }) =>
+  alovaInstance.Post('/rest/deleteFaultPack', data);

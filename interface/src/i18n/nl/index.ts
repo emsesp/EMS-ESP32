@@ -748,10 +748,35 @@ const nl: Translation = {
   SYS_FAULT_LAST: 'Laatste storing / melding', // draft, please review
   SYS_FAULT_CTRL: 'Laatste regelaarstoring', // draft, please review
   SYS_FAULT_SERVICE: 'Servicecode', // draft, please review
+  SYS_FAULT_CAUSE: 'Mogelijke oorzaak', // draft, please review
+  SYS_FAULT_FIX: 'Maatregel', // draft, please review
+  SYS_FAULT_CLASS: 'Storingsklasse', // draft, please review
   SYS_FAULT_ADD: 'Aanvullende code {0}', // draft, please review
+  SYS_FAULT_UNKNOWN: 'Niet in de database', // draft, please review
+  SYS_FAULT_SCOPE: 'Alleen voor: {0}', // draft, please review
+  SYS_FAULT_MACHINE: 'Machinaal vertaald, niet gecontroleerd.', // draft, please review
+  SYS_FAULT_FALLBACK: 'Nog niet vertaald: dit is de tekst in de oorspronkelijke taal.', // draft, please review
   SYS_FAULT_RAW_ONLY: 'Geen uitleg beschikbaar voor dit apparaat.', // draft, please review
+  SYS_FAULT_SEARCH: 'Storingscode opzoeken', // draft, please review
+  SYS_FAULT_SEARCH_HINT: 'Voer de code en aanvullende code van het display in, bijv. H08, 6A 227 of 1018.', // draft, please review
+  SYS_FAULT_SOURCE: '{0} · {1} · versie {2} · {3} items', // draft, please review
+  SYS_FAULT_PACK_MISSING: 'Geen uitleg geïnstalleerd voor {0}-storingscodes. Installeer het pakket uit een bestand; het wordt op de gateway opgeslagen en is in elke browser beschikbaar.', // draft, please review
+  SYS_FAULT_PACK_SHORT: 'Uitleg niet geïnstalleerd', // draft, please review
+  SYS_FAULT_PACK_REMOVE: 'Verwijderen', // draft, please review
+  SYS_FAULT_PACK_ERROR: 'Downloaden mislukt: {0}', // draft, please review
+  SYS_FAULT_PACK_DISCLAIMER: 'De uitleg komt uit het pakket en wordt zonder enige garantie op juistheid of volledigheid geleverd. Gebruik is op eigen risico; volg de documentatie van je product.', // draft, please review
+  SYS_FAULT_PACK_HELP: 'Download het pakket voor je fabrikant en taal en installeer het daarna hierboven vanuit het bestand.', // draft, please review
+  SYS_FAULT_PACK_DOWNLOAD: 'Lijst met pakketten', // draft, please review
+  SYS_FAULT_PACK_FILE: 'Installeren vanuit een bestand', // draft, please review
+  SYS_FAULT_PACK_TITLE: 'Storingscodepakketten', // draft, please review
+  SYS_FAULT_PACK_UNSUPPORTED: 'Deze gateway kan geen storingscodepakketten opslaan. Er is nieuwere firmware en minstens 16 MB flash nodig.', // draft, please review
   SYS_FAULT_NONE: 'Geen opgeslagen storing.', // draft, please review
   SYS_FAULT_UNTIL_NOW: 'tot nu', // draft, please review
+  SYS_SEV_INFO: 'Bedrijfsmelding', // draft, please review
+  SYS_SEV_SERVICE: 'Service / onderhoud', // draft, please review
+  SYS_SEV_WARN: 'Storing (beperkt bedrijf)', // draft, please review
+  SYS_SEV_ERROR: 'Ernstige storing', // draft, please review
+  SYS_SEV_UNKNOWN: 'Onbekend', // draft, please review
   SYS_MAINTENANCE: 'Onderhoud', // draft, please review
 };
 

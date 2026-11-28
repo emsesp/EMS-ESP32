@@ -31,6 +31,7 @@ export interface SysItem {
   devId: number; // unique id of the device (for writeDeviceValue)
   devType: string;
   devName: string;
+  prod: number; // product id of the device
   typeName: string; // translated device type, e.g. Boiler
   brand: string;
   key: string; // catalog key, e.g. thermostat:hc/seltemp
@@ -134,6 +135,7 @@ export const buildItems = (
       devId: device.id,
       devType,
       devName: device.n,
+      prod: device.p,
       typeName: device.tn,
       brand: device.b,
       key,
