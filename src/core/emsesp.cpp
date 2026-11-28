@@ -78,6 +78,7 @@ WebModulesService       EMSESP::webModulesService       = WebModulesService(&web
 
 WebActivityService EMSESP::webActivityService = WebActivityService(&webServer, EMSESP::esp32React.getSecurityManager());
 WebStatusService   EMSESP::webStatusService   = WebStatusService(&webServer, EMSESP::esp32React.getSecurityManager());
+WebFaultPackService EMSESP::webFaultPackService = WebFaultPackService(&webServer, EMSESP::esp32React.getSecurityManager());
 WebDataService     EMSESP::webDataService     = WebDataService(&webServer, EMSESP::esp32React.getSecurityManager());
 WebAPIService      EMSESP::webAPIService      = WebAPIService(&webServer, EMSESP::esp32React.getSecurityManager());
 WebLogService      EMSESP::webLogService      = WebLogService(&webServer, EMSESP::esp32React.getSecurityManager());

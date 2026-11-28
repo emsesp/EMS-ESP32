@@ -748,10 +748,35 @@ const hu: Translation = {
   SYS_FAULT_LAST: 'Utolsó hiba / üzenet', // draft, please review
   SYS_FAULT_CTRL: 'A szabályozó utolsó hibája', // draft, please review
   SYS_FAULT_SERVICE: 'Szervizkód', // draft, please review
+  SYS_FAULT_CAUSE: 'Lehetséges ok', // draft, please review
+  SYS_FAULT_FIX: 'Teendő', // draft, please review
+  SYS_FAULT_CLASS: 'Hibaosztály', // draft, please review
   SYS_FAULT_ADD: 'Kiegészítő kód {0}', // draft, please review
+  SYS_FAULT_UNKNOWN: 'Nincs az adatbázisban', // draft, please review
+  SYS_FAULT_SCOPE: 'Csak ehhez: {0}', // draft, please review
+  SYS_FAULT_MACHINE: 'Gépi fordítás, nem ellenőrzött.', // draft, please review
+  SYS_FAULT_FALLBACK: 'Még nincs lefordítva: ez az eredeti nyelvű szöveg.', // draft, please review
   SYS_FAULT_RAW_ONLY: 'Ehhez a készülékhez nincs elérhető magyarázat.', // draft, please review
+  SYS_FAULT_SEARCH: 'Hibakód keresése', // draft, please review
+  SYS_FAULT_SEARCH_HINT: 'Add meg a kijelzőn látható kódot és kiegészítő kódot, pl. H08, 6A 227 vagy 1018.', // draft, please review
+  SYS_FAULT_SOURCE: '{0} · {1} · verzió {2} · {3} bejegyzés', // draft, please review
+  SYS_FAULT_PACK_MISSING: 'A(z) {0} hibakódok magyarázatai nincsenek telepítve. Telepítse a csomagot fájlból; az átjárón tárolódik, és minden böngészőben elérhető.', // draft, please review
+  SYS_FAULT_PACK_SHORT: 'A magyarázat nincs telepítve', // draft, please review
+  SYS_FAULT_PACK_REMOVE: 'Eltávolítás', // draft, please review
+  SYS_FAULT_PACK_ERROR: 'A letöltés sikertelen: {0}', // draft, please review
+  SYS_FAULT_PACK_DISCLAIMER: 'A magyarázatok a csomagból származnak, és a helyességükre és teljességükre nincs garancia. A felhasználás saját felelősségre történik; kövesse a termék dokumentációját.', // draft, please review
+  SYS_FAULT_PACK_HELP: 'Töltse le a gyártójának és nyelvének megfelelő csomagot, majd telepítse fentről a fájlból.', // draft, please review
+  SYS_FAULT_PACK_DOWNLOAD: 'Csomagok listája', // draft, please review
+  SYS_FAULT_PACK_FILE: 'Telepítés fájlból', // draft, please review
+  SYS_FAULT_PACK_TITLE: 'Hibakód-csomagok', // draft, please review
+  SYS_FAULT_PACK_UNSUPPORTED: 'Ez az átjáró nem tud hibakód-csomagokat tárolni. Újabb firmware és legalább 16 MB flash szükséges.', // draft, please review
   SYS_FAULT_NONE: 'Nincs tárolt hiba.', // draft, please review
   SYS_FAULT_UNTIL_NOW: 'mostanáig', // draft, please review
+  SYS_SEV_INFO: 'Üzemi üzenet', // draft, please review
+  SYS_SEV_SERVICE: 'Szerviz / karbantartás', // draft, please review
+  SYS_SEV_WARN: 'Hiba (korlátozott működés)', // draft, please review
+  SYS_SEV_ERROR: 'Súlyos hiba', // draft, please review
+  SYS_SEV_UNKNOWN: 'Ismeretlen', // draft, please review
   SYS_MAINTENANCE: 'Karbantartás', // draft, please review
 };
 

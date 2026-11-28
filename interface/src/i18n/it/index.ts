@@ -748,10 +748,35 @@ const it: Translation = {
   SYS_FAULT_LAST: 'Ultimo guasto / messaggio', // draft, please review
   SYS_FAULT_CTRL: 'Ultimo guasto del regolatore', // draft, please review
   SYS_FAULT_SERVICE: 'Codice di servizio', // draft, please review
+  SYS_FAULT_CAUSE: 'Possibile causa', // draft, please review
+  SYS_FAULT_FIX: 'Rimedio', // draft, please review
+  SYS_FAULT_CLASS: 'Classe di guasto', // draft, please review
   SYS_FAULT_ADD: 'Codice aggiuntivo {0}', // draft, please review
+  SYS_FAULT_UNKNOWN: 'Non presente nel database', // draft, please review
+  SYS_FAULT_SCOPE: 'Solo per: {0}', // draft, please review
+  SYS_FAULT_MACHINE: 'Traduzione automatica, non verificata.', // draft, please review
+  SYS_FAULT_FALLBACK: 'Non ancora tradotto: è il testo della lingua originale.', // draft, please review
   SYS_FAULT_RAW_ONLY: 'Nessuna spiegazione disponibile per questo dispositivo.', // draft, please review
+  SYS_FAULT_SEARCH: 'Cerca un codice di guasto', // draft, please review
+  SYS_FAULT_SEARCH_HINT: 'Inserisci il codice e il codice aggiuntivo dal display, ad es. H08, 6A 227 o 1018.', // draft, please review
+  SYS_FAULT_SOURCE: '{0} · {1} · versione {2} · {3} voci', // draft, please review
+  SYS_FAULT_PACK_MISSING: 'Nessuna spiegazione installata per i codici di guasto {0}. Installa il pacchetto da un file; viene salvato sul gateway ed è disponibile in ogni browser.', // draft, please review
+  SYS_FAULT_PACK_SHORT: 'Spiegazione non installata', // draft, please review
+  SYS_FAULT_PACK_REMOVE: 'Rimuovi', // draft, please review
+  SYS_FAULT_PACK_ERROR: 'Download non riuscito: {0}', // draft, please review
+  SYS_FAULT_PACK_DISCLAIMER: 'Le spiegazioni provengono dal pacchetto e sono fornite senza alcuna garanzia di correttezza o completezza. L\'uso è a proprio rischio; segui la documentazione del tuo prodotto.', // draft, please review
+  SYS_FAULT_PACK_HELP: 'Scarica il pacchetto per il tuo produttore e la tua lingua, poi installalo dal file qui sopra.', // draft, please review
+  SYS_FAULT_PACK_DOWNLOAD: 'Elenco dei pacchetti', // draft, please review
+  SYS_FAULT_PACK_FILE: 'Installa da file', // draft, please review
+  SYS_FAULT_PACK_TITLE: 'Pacchetti dei codici di guasto', // draft, please review
+  SYS_FAULT_PACK_UNSUPPORTED: 'Questo gateway non può salvare pacchetti di codici di guasto. Servono un firmware più recente e una flash di almeno 16 MB.', // draft, please review
   SYS_FAULT_NONE: 'Nessun guasto memorizzato.', // draft, please review
   SYS_FAULT_UNTIL_NOW: 'fino ad ora', // draft, please review
+  SYS_SEV_INFO: 'Messaggio di funzionamento', // draft, please review
+  SYS_SEV_SERVICE: 'Assistenza / manutenzione', // draft, please review
+  SYS_SEV_WARN: 'Guasto (funzionamento limitato)', // draft, please review
+  SYS_SEV_ERROR: 'Guasto grave', // draft, please review
+  SYS_SEV_UNKNOWN: 'Sconosciuto', // draft, please review
   SYS_MAINTENANCE: 'Manutenzione', // draft, please review
 };
 

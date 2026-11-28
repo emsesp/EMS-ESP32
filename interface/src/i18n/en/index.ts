@@ -748,10 +748,35 @@ const en: BaseTranslation = {
   SYS_FAULT_LAST: 'Last fault / message', // draft, please review
   SYS_FAULT_CTRL: 'Last controller fault', // draft, please review
   SYS_FAULT_SERVICE: 'Service code', // draft, please review
+  SYS_FAULT_CAUSE: 'Possible cause', // draft, please review
+  SYS_FAULT_FIX: 'Remedy', // draft, please review
+  SYS_FAULT_CLASS: 'Fault class', // draft, please review
   SYS_FAULT_ADD: 'Additional code {0}', // draft, please review
+  SYS_FAULT_UNKNOWN: 'Not in the database', // draft, please review
+  SYS_FAULT_SCOPE: 'Only for: {0}', // draft, please review
+  SYS_FAULT_MACHINE: 'Machine translated, not reviewed.', // draft, please review
+  SYS_FAULT_FALLBACK: 'Not translated yet: this is the text of the original language.', // draft, please review
   SYS_FAULT_RAW_ONLY: 'No explanation available for this device.', // draft, please review
+  SYS_FAULT_SEARCH: 'Look up a fault code', // draft, please review
+  SYS_FAULT_SEARCH_HINT: 'Enter the code and additional code from the display, e.g. H08, 6A 227 or 1018.', // draft, please review
+  SYS_FAULT_SOURCE: '{0} · {1} · version {2} · {3} entries', // draft, please review
+  SYS_FAULT_PACK_MISSING: 'No explanations installed for {0} fault codes. Install the pack from a file; it is stored on the gateway and available in every browser.', // draft, please review
+  SYS_FAULT_PACK_SHORT: 'Explanation not installed', // draft, please review
+  SYS_FAULT_PACK_REMOVE: 'Remove', // draft, please review
+  SYS_FAULT_PACK_ERROR: 'Download failed: {0}', // draft, please review
+  SYS_FAULT_PACK_DISCLAIMER: 'The explanations come from the pack and are provided without any guarantee that they are correct or complete. Use them at your own risk and follow the documentation of your product.', // draft, please review
+  SYS_FAULT_PACK_HELP: 'Download the pack for your manufacturer and language, then install it from the file above.', // draft, please review
+  SYS_FAULT_PACK_DOWNLOAD: 'List of packs', // draft, please review
+  SYS_FAULT_PACK_FILE: 'Install from a file', // draft, please review
+  SYS_FAULT_PACK_TITLE: 'Fault code packs', // draft, please review
+  SYS_FAULT_PACK_UNSUPPORTED: 'This gateway can\'t store fault code packs. It needs a newer firmware and a flash of at least 16 MB.', // draft, please review
   SYS_FAULT_NONE: 'No stored fault.', // draft, please review
   SYS_FAULT_UNTIL_NOW: 'until now', // draft, please review
+  SYS_SEV_INFO: 'Operating message', // draft, please review
+  SYS_SEV_SERVICE: 'Service / maintenance', // draft, please review
+  SYS_SEV_WARN: 'Fault (limited operation)', // draft, please review
+  SYS_SEV_ERROR: 'Serious fault', // draft, please review
+  SYS_SEV_UNKNOWN: 'Unknown', // draft, please review
   SYS_MAINTENANCE: 'Maintenance', // draft, please review
 };
 

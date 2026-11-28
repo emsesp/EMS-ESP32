@@ -1283,6 +1283,22 @@ const EMSESP_VIEWLEVELS_ENDPOINT = REST_ENDPOINT_ROOT + 'viewLevels';
 // what the user moved between Normal and All values in the Dashboard menu, like /viewlevels.json on the gateway
 let viewLevels: Record<string, number> = {};
 
+const EMSESP_FAULTPACKS_ENDPOINT = REST_ENDPOINT_ROOT + 'faultPacks';
+const EMSESP_FAULTPACK_ENDPOINT = REST_ENDPOINT_ROOT + 'faultPack';
+const EMSESP_FAULTPACK_UPLOAD_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFaultPack';
+const EMSESP_FAULTPACK_DELETE_ENDPOINT = REST_ENDPOINT_ROOT + 'deleteFaultPack';
+
+// fault code packs installed on the mock gateway, like the files the firmware keeps in /faults.
+// The files are kept as they were uploaded (gzip)
+const FAULTPACK_MAX_SIZE = 256 * 1024;
+const FAULTPACK_FS_FREE = 1800 * 1024;
+const faultPacks = new Map<
+  string,
+  { brand: string; lang: string; version: string; entries: number; data: Uint8Array }
+>();
+const faultName = /^[a-z0-9-]{1,24}$/;
+const faultVersion = /^[A-Za-z0-9._-]{1,32}$/;
+
 // these are used in the API calls only
 const EMSESP_SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info';
 
@@ -6006,6 +6022,73 @@ router
   .post(EMSESP_VIEWLEVELS_ENDPOINT, async (request: any) => {
     viewLevels = await request.json();
     return status(200);
+  })
+
+  // Fault code packs
+  .get(EMSESP_FAULTPACKS_ENDPOINT, () => ({
+    packs: [...faultPacks.values()].map((p) => ({
+      brand: p.brand,
+      lang: p.lang,
+      version: p.version,
+      entries: p.entries,
+      size: p.data.length
+    })),
+    fs_free:
+      FAULTPACK_FS_FREE -
+      [...faultPacks.values()].reduce((sum, p) => sum + p.data.length, 0),
+    max_size: FAULTPACK_MAX_SIZE
+  }))
+  .get(EMSESP_FAULTPACK_ENDPOINT, (request: any) => {
+    const url = new URL(request.url);
+    const pack = faultPacks.get(
+      `${url.searchParams.get('brand')}.${url.searchParams.get('lang')}`
+    );
+    if (!pack) {
+      return status(404);
+    }
+    // sent as stored, compressed; the browser decompresses it
+    return new Response(pack.data as BodyInit, {
+      headers: {
+        'content-type': 'application/json',
+        'content-encoding': 'gzip'
+      }
+    });
+  })
+  .post(EMSESP_FAULTPACK_UPLOAD_ENDPOINT, async (request: any) => {
+    const url = new URL(request.url);
+    const brand = url.searchParams.get('brand') ?? '';
+    const lang = url.searchParams.get('lang') ?? '';
+    const version = url.searchParams.get('version') ?? '';
+    if (!faultName.test(brand) || !faultName.test(lang) || !faultVersion.test(version)) {
+      return status(400);
+    }
+    const formData = await request.formData();
+    const uploaded = formData.get('file');
+    if (!uploaded || typeof uploaded === 'string') {
+      return status(400);
+    }
+    const data = new Uint8Array(await uploaded.arrayBuffer());
+    if (data.length > FAULTPACK_MAX_SIZE) {
+      return status(413);
+    }
+    if (data.length < 2 || data[0] !== 0x1f || data[1] !== 0x8b) {
+      return status(415);
+    }
+    faultPacks.set(`${brand}.${lang}`, {
+      brand,
+      lang,
+      version,
+      entries: Number(url.searchParams.get('entries')) || 0,
+      data
+    });
+    console.log(`Fault code pack ${brand} (${lang}) installed, ${data.length} bytes`);
+    return status(200);
+  })
+  .post(EMSESP_FAULTPACK_DELETE_ENDPOINT, async (request: any) => {
+    const content = await request.json();
+    return faultPacks.delete(`${content.brand}.${content.lang}`)
+      ? status(200)
+      : status(404);
   })
 
   // Custom Entities

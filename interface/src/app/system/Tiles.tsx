@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 
-import { Icon, StatusDot } from 'components/ui';
+import { Icon, StatusDot, Tag } from 'components/ui';
 import type { IconName, StatusState } from 'components/ui';
 import { useI18nContext } from 'i18n/i18n-react';
 
+import { faultSummary, useFaultCards } from './Faults';
 import { ValueControl, useFormat } from './ValueRow';
 import { findItem, str } from './model';
 import type { SysItem } from './model';
@@ -273,10 +274,12 @@ export const BoilerTile = ({
 
 export const NotesTile = ({ items }: { items: readonly SysItem[] }) => {
   const { LL } = useI18nContext();
+  const { cards } = useFaultCards(items);
   const f = (key: string) => findItem(items, key);
   const maintenance = ['boiler:maintenance', 'boiler:maintenancetime'].map((k) =>
     f(k)
   );
+  const last = faultSummary(cards);
   return (
     <Tile
       icon="build"
@@ -284,6 +287,36 @@ export const NotesTile = ({ items }: { items: readonly SysItem[] }) => {
       sub={LL.SYS_NOTES_SUB()}
       link={{ to: '/dashboard/service', label: LL.SYS_SERVICE() }}
     >
+      {last && (
+        <div className="sys-note">
+          <strong>
+            {last.code}
+            {last.add ? `(${last.add})` : ''}
+          </strong>{' '}
+          {last.entry && (
+            <Tag kind={last.entry.severity === 'error' ? 'err' : 'warn'}>
+              {last.entry.severity === 'info'
+                ? LL.SYS_SEV_INFO()
+                : last.entry.severity === 'service'
+                  ? LL.SYS_SEV_SERVICE()
+                  : last.entry.severity === 'error'
+                    ? LL.SYS_SEV_ERROR()
+                    : last.entry.severity === 'warn'
+                      ? LL.SYS_SEV_WARN()
+                      : LL.SYS_SEV_UNKNOWN()}
+            </Tag>
+          )}
+          <div className="t">
+            {last.entry
+              ? last.entry.title
+              : last.state === 'unknown'
+                ? LL.SYS_FAULT_UNKNOWN()
+                : last.state === 'nopack'
+                  ? LL.SYS_FAULT_PACK_SHORT()
+                  : ''}
+          </div>
+        </div>
+      )}
       <div className="sys-kv">
         <Kv label={LL.SYS_LAST_FAULT()} item={f('boiler:lastcode')} />
         <Kv label={LL.SYS_FAULT_CTRL()} item={f('thermostat:lastcode')} />

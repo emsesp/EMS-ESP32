@@ -748,10 +748,35 @@ const sv: Translation = {
   SYS_FAULT_LAST: 'Senaste fel / meddelande', // draft, please review
   SYS_FAULT_CTRL: 'Senaste regulatorfel', // draft, please review
   SYS_FAULT_SERVICE: 'Servicekod', // draft, please review
+  SYS_FAULT_CAUSE: 'Möjlig orsak', // draft, please review
+  SYS_FAULT_FIX: 'Åtgärd', // draft, please review
+  SYS_FAULT_CLASS: 'Felklass', // draft, please review
   SYS_FAULT_ADD: 'Tilläggskod {0}', // draft, please review
+  SYS_FAULT_UNKNOWN: 'Finns inte i databasen', // draft, please review
+  SYS_FAULT_SCOPE: 'Endast för: {0}', // draft, please review
+  SYS_FAULT_MACHINE: 'Maskinöversatt, inte kontrollerad.', // draft, please review
+  SYS_FAULT_FALLBACK: 'Inte översatt ännu: det här är texten på originalspråket.', // draft, please review
   SYS_FAULT_RAW_ONLY: 'Ingen förklaring finns för den här enheten.', // draft, please review
+  SYS_FAULT_SEARCH: 'Slå upp felkod', // draft, please review
+  SYS_FAULT_SEARCH_HINT: 'Ange koden och tilläggskoden från displayen, t.ex. H08, 6A 227 eller 1018.', // draft, please review
+  SYS_FAULT_SOURCE: '{0} · {1} · version {2} · {3} poster', // draft, please review
+  SYS_FAULT_PACK_MISSING: 'Inga förklaringar är installerade för {0}-felkoder. Installera paketet från en fil; det sparas på gatewayen och är tillgängligt i varje webbläsare.', // draft, please review
+  SYS_FAULT_PACK_SHORT: 'Förklaring inte installerad', // draft, please review
+  SYS_FAULT_PACK_REMOVE: 'Ta bort', // draft, please review
+  SYS_FAULT_PACK_ERROR: 'Nedladdningen misslyckades: {0}', // draft, please review
+  SYS_FAULT_PACK_DISCLAIMER: 'Förklaringarna kommer från paketet och lämnas utan garanti för att de är korrekta eller fullständiga. Användning sker på egen risk; följ produktens dokumentation.', // draft, please review
+  SYS_FAULT_PACK_HELP: 'Ladda ner paketet för din tillverkare och ditt språk och installera det sedan från filen ovan.', // draft, please review
+  SYS_FAULT_PACK_DOWNLOAD: 'Lista över paket', // draft, please review
+  SYS_FAULT_PACK_FILE: 'Installera från en fil', // draft, please review
+  SYS_FAULT_PACK_TITLE: 'Felkodspaket', // draft, please review
+  SYS_FAULT_PACK_UNSUPPORTED: 'Den här gatewayen kan inte spara felkodspaket. Den behöver nyare firmware och minst 16 MB flash.', // draft, please review
   SYS_FAULT_NONE: 'Inget lagrat fel.', // draft, please review
   SYS_FAULT_UNTIL_NOW: 'tills nu', // draft, please review
+  SYS_SEV_INFO: 'Driftmeddelande', // draft, please review
+  SYS_SEV_SERVICE: 'Service / underhåll', // draft, please review
+  SYS_SEV_WARN: 'Fel (begränsad drift)', // draft, please review
+  SYS_SEV_ERROR: 'Allvarligt fel', // draft, please review
+  SYS_SEV_UNKNOWN: 'Okänd', // draft, please review
   SYS_MAINTENANCE: 'Underhåll', // draft, please review
 };
 

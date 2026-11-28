@@ -46,6 +46,7 @@
 #include <Preferences.h>
 
 #include "../web/WebStatusService.h"
+#include "../web/WebFaultPackService.h"
 #include "../web/WebActivityService.h"
 #include "../web/WebDataService.h"
 #include "../web/WebSettingsService.h"
@@ -285,6 +286,7 @@ class EMSESP {
     static ESP32React              esp32React;
     static WebSettingsService      webSettingsService;
     static WebStatusService        webStatusService;
+    static WebFaultPackService     webFaultPackService;
     static WebActivityService      webActivityService;
     static WebDataService          webDataService;
     static WebAPIService           webAPIService;
