@@ -418,7 +418,8 @@ MAKE_ENUM(enum_bufConfig, FL_(off), FL_(monovalent), FL_(bivalent))
 MAKE_ENUM(enum_blockTerm, FL_(n_o), FL_(n_c))
 
 // Ventilation
-MAKE_ENUM(enum_ventMode, FL_(auto), FL_(off), FL_(L1), FL_(L2), FL_(L3), FL_(L4), FL_(demand), FL_(sleep), FL_(intense), FL_(bypass), FL_(partymode), FL_(fireplace))
+// autoL0..autodemand must stay at the end, see Ventilation::VENTMODE_AUTOL0
+MAKE_ENUM(enum_ventMode, FL_(auto), FL_(off), FL_(L1), FL_(L2), FL_(L3), FL_(L4), FL_(demand), FL_(sleep), FL_(intense), FL_(bypass), FL_(partymode), FL_(fireplace), FL_(autoL0), FL_(autoL1), FL_(autoL2), FL_(autoL3), FL_(autoL4), FL_(autodemand))
 
 // water
 MAKE_ENUM(enum_errorDisp, FL_(off), FL_(normal), FL_(inverted))
